@@ -526,6 +526,10 @@ var jsxc = {
         } else {
             form.submit();
         }
+    },
+            
+    escapeHTML: function (text){
+        return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
 };
@@ -1332,8 +1336,10 @@ jsxc.gui.window = {
 
         if (chat.length > jsxc.options.numberOfMsg)
             chat.pop();
-        jsxc.debug(chat.length);
-        jsxc.debug(jsxc.options.numberOfMsg);
+        
+        //escape html
+        msg = jsxc.escapeHTML(msg);
+        
         //exceptions:
 
         if (direction === 'out' && data.msgstate === 2) {
@@ -1926,7 +1932,7 @@ jsxc.xmpp = {
         var from = $(message).attr('from');
         var jid = Strophe.getBareJidFromJid(from);
         var cid = jsxc.jidToCid(jid);
-        var body = $(message).find('body').text();
+        var body = $(message).find('body:first').text();
 
         if (!body)
             return true;
