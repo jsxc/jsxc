@@ -1158,6 +1158,10 @@ jsxc.gui.window = {
         win.find('.jsxc_close').click(function(ev) {
             jsxc.gui.window.close(cid);
         });
+        
+        win.find('.jsxc_clear').click(function(ev) {
+            jsxc.gui.window.clear(cid);
+        });
 
         win.find('.jsxc_textinput').keyup(function(ev) {
             var body = $(this).val();
@@ -1410,6 +1414,16 @@ jsxc.gui.window = {
             c = chat.pop();
             jsxc.gui.window._postMessage(cid, c.direction, c.msg, true);
         }
+    },
+    
+    /**
+     * Clear chat history
+     * @param {type} cid
+     * @returns {undefined}
+     */
+    clear: function(cid) {
+        jsxc.storage.setItem('chat_' + cid, []);
+        $('#jsxc_window_' + cid + ' .jsxc_textarea').empty();
     }
 };
 
@@ -1519,6 +1533,7 @@ jsxc.gui.template = {
                             <li class="jsxc_fingerprints">%%Fingerprints%%</li>\n\
                             <li class="jsxc_verification">%%Authentifikation%%</li>\n\
                             <li class="jsxc_transfer">%%start_private%%</li>\n\
+                            <li class="jsxc_clear">%%clear_history%%</li>\n\
                         </ul>\n\
                     </div>\n\
                     <div class="jsxc_transfer"/>\n\
@@ -2513,7 +2528,8 @@ jsxc.l10n = {
         Please_wait: 'Please wait',
         Login_failed: 'Login failed',
         Sorry_we_cant_authentikate_: 'Sorry, we can\'t authentikate you at our chat server. Maybe the password is wrong?',
-        Retry: 'Retry'
+        Retry: 'Retry',
+        clear_history: 'Clear history'
     },
     de: {
         please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -2583,6 +2599,7 @@ jsxc.l10n = {
         Please_wait: 'Bitte warten',
         Login_failed: 'Anmeldung fehlgeschlagen',
         Sorry_we_cant_authentikate_: 'Wir können dich leider nicht anmelden. Vielleicht ist dein Passwort falsch?',
-        Retry: 'Neuer Versuch'
+        Retry: 'Neuer Versuch',
+        clear_history: 'Lösche Verlauf'
     }
 };
