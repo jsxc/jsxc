@@ -1,0 +1,1 @@
+var flensed = {base_path: '/owncloud/apps/ojsxc/js/lib/'};
