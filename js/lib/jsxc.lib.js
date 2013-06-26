@@ -1621,16 +1621,7 @@ jsxc.xmpp = {
         var jid = jsxc.storage.getItem('jid');
         var url = jsxc.options.xmpp.url || jsxc.storage.getItem('boshUrl');
 
-        Strophe.Connection.rawInput = function(data) {
-            jsxc.debug('Input');
-            jsxc.debug(data);
-            //Log.show_traffic(data, 'input');
-        };
-        Strophe.Connection.rawOutput = function(data) {
-            jsxc.debug('Output');
-            jsxc.debug(data);
-            //Log.show_traffic(data, 'output');
-        };
+        
 
         //Register eventlistener
         $(document).bind('connected', jsxc.xmpp.connected);
@@ -1640,6 +1631,17 @@ jsxc.xmpp = {
 
         //Create new connection (no login)
         jsxc.xmpp.conn = new Strophe.Connection(url);
+
+        jsxc.xmpp.conn.xmlInput = function(data) {
+            jsxc.debug('Input');
+            jsxc.debug(data);
+            //Log.show_traffic(data, 'input');
+        };
+        jsxc.xmpp.conn.xmlOutput = function(data) {
+            jsxc.debug('Output');
+            jsxc.debug(data);
+            //Log.show_traffic(data, 'output');
+        };
 
         var callback = function(status, condition) {
 
@@ -1727,7 +1729,12 @@ jsxc.xmpp = {
         }
 
         //send presence stanza
-        jsxc.xmpp.conn.send($pres());
+        var pres = $pres();
+        
+        if(jsxc.xmpp.conn.caps)
+            pres.c('c', jsxc.xmpp.conn.caps.generateCapsAttrs())
+        
+        jsxc.xmpp.conn.send(pres);
     },
     /**
      * Triggered if connection is attached

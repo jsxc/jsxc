@@ -30,11 +30,22 @@ OCP\App::addNavigationEntry( array(
 	'name' => 'Chat'
 ));
 
+//############# Javascript #############
+OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/sha1' );
 OCP\Util::addScript ( 'ojsxc', 'flensed.config' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/jquery.slimscroll' );
 OCP\Util::addScript ( 'ojsxc', 'lib/strophe' );
+
+OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.disco' );
+OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.caps' );
+OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle' );
+OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle.session' );
+OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle.sdp' );
+OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle.adapter' );
+            
 //OCP\Util::addScript ( 'ojsxc', 'lib/flXHR' );
 //OCP\Util::addScript ( 'ojsxc', 'plugin/strophe.flxhr' );
+    
 OCP\Util::addScript ( 'ojsxc', 'lib/seedrandom' );
 OCP\Util::addScript ( 'ojsxc', 'lib/bigint' );
 OCP\Util::addScript ( 'ojsxc', 'lib/crypto' );
@@ -42,9 +53,12 @@ OCP\Util::addScript ( 'ojsxc', 'lib/eventemitter' );
 OCP\Util::addScript ( 'ojsxc', 'lib/otr' );
 OCP\Util::addScript ( 'ojsxc', 'lib/facebox' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib' );
+OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.webrtc' );
 OCP\Util::addScript ( 'ojsxc', 'log' );
+    
 OCP\Util::addScript ( 'ojsxc', 'jsxc' );
 
+//############# CSS #############
 OCP\Util::addStyle  ( 'ojsxc', 'facebox' );
 OCP\Util::addStyle  ( 'ojsxc', 'jquery.mCustomScrollbar' );
 OCP\Util::addStyle  ( 'ojsxc', 'main' );
