@@ -1727,6 +1727,12 @@ jsxc.xmpp = {
             window.location.reload();
             return;
         }
+        
+        //disco stuff
+        if (connection.disco) {
+            connection.disco.addIdentity('client', 'web');
+            connection.disco.addFeature(Strophe.NS.DISCO_INFO);
+        }
 
         //send presence stanza
         var pres = $pres();
