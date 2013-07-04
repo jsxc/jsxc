@@ -62,4 +62,5 @@ OCP\Util::addScript ( 'ojsxc', 'jsxc' );
 OCP\Util::addStyle  ( 'ojsxc', 'facebox' );
 OCP\Util::addStyle  ( 'ojsxc', 'jquery.mCustomScrollbar' );
 OCP\Util::addStyle  ( 'ojsxc', 'main' );
+OCP\Util::addStyle  ( 'ojsxc', 'webrtc' );
 //OCP\Util::addStyle  ( 'ojsxc', 'log' );

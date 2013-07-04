@@ -1,0 +1,45 @@
+.jsxc_videoContainer{
+    width:640px; 
+    height:480px;
+    position:relative;
+}
+.jsxc_remotevideo{
+    width: 640px; 
+    height: 480px;
+    position:absolute;
+    top:0px;
+    left:0px;
+    z-index:9000;
+    background-color:grey;
+}
+.jsxc_localvideo{
+    width: 160px; 
+    height: 120px;
+    position:absolute;
+    right:10px;
+    bottom: 10px;
+    z-index:9990;
+    background-color:black;
+    cursor: pointer;
+}
+.jsxc_webrtc .jsxc_status{
+    height:30px;
+    width:100%;
+    background-color:lightgrey;
+    color:black;
+}
+
+video.jsxc_fullscreen{
+    background-color:black;
+}
+
+video.jsxc_fullscreen.jsxc_localvideo{
+    border: 1px solid white;
+}
+
+.jsxc_picturebar{
+    width:100%;
+}
+.jsxc_picturebar img{
+    height:50px;
+}

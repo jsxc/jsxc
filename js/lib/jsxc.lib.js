@@ -19,6 +19,8 @@
  * - (status notification)
  * - (CSPRNG)
  * - (make window list scrollable)
+ * - add roster slide from ojsxc
+ * - user info
  */
 
 /**
@@ -910,6 +912,20 @@ jsxc.gui = {
         $('#jsxc_dialog .jsxc_cancel').click(function() {
             jsxc.submitLoginForm();
         });
+    },
+    /**
+     * Create and show a confirm dialog
+     * @param {String} msg Message
+     * @param {function} confirm 
+     * @param {function} dismiss
+     * @returns {undefined}
+     */
+    showConfirmDialog: function(msg, confirm, dismiss){
+        jsxc.gui.dialog.open(jsxc.gui.template.get('confirmDialog'));
+
+        $('#jsxc_dialog .creation').click(confirm);
+
+        $('#jsxc_dialog .jsxc_cancel').click(dismiss);
     }
 };
 
@@ -1089,15 +1105,31 @@ jsxc.gui.roster = {
 };
 
 jsxc.gui.dialog = {
-    open: function(data, opt) {
+    open: function(data, o) {
 
-        var options = {};
-        var opt = opt || {};
+        var options = {
+            onComplete: function(){
+                $(document).trigger('complete.dialog.jsxc');
+            },
+            onClosed: function(){
+                $(document).trigger('close.dialog.jsxc');
+            },
+            onCleanup: function(){
+                $(document).trigger('cleanup.dialog.jsxc');
+            }
+        };
+        var opt = o || {};
 
-        if (opt.noClose)
+        if (opt.noClose){
             options.modal = true;
+            delete opt.noClose;
+        }    
+           
+        $.extend(options, opt);
 
         $.fancybox('<div id="jsxc_dialog">' + data + '</div>', options);
+        
+        return $('#jsxc_dialog');
     },
     close: function() {
         jsxc.debug('close dialog');
@@ -1208,6 +1240,8 @@ jsxc.gui.window = {
         //create related otr object
         if (jsxc.chief && !jsxc.buddyList[cid])
             jsxc.otr.create(cid);
+
+        $(document).trigger('init.window.jsxc', [win]);
 
         return win;
     },
@@ -1435,8 +1469,8 @@ jsxc.gui.template = {
     /**
      * Return requested template and replace all placeholder
      * @param {type} name template name
-     * @param {type} [cid]
-     * @param {type} [msg]
+     * @param {type} cid
+     * @param {type} msg
      * @returns {String}
      */
     get: function(name, cid, msg) {
@@ -1453,7 +1487,8 @@ jsxc.gui.template = {
 
             $.extend(ph, {
                 cid_priv_fingerprint: data.fingerprint ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.no_available,
-                cid_jid: data.jid
+                cid_jid: data.jid,
+                cid_name: data.name
             });
         }
 
@@ -1468,7 +1503,7 @@ jsxc.gui.template = {
 
         if (typeof(ret) === 'string') {
             ret = ret.replace(/%%([a-zA-Z0-9_-}{]+)%%/g, function(s, key) {
-                return jsxc.l[key] || s;
+                return jsxc.l[key] || key.replace(/_/gi, ' ');
             });
             ret = ret.replace(/\{\{([a-zA-Z0-9_-]+)\}\}/g, function(s, key) {
                 return ph[key] || s;
@@ -1600,6 +1635,12 @@ jsxc.gui.template = {
         <p class="jsxc_right">\n\
             <button class="button jsxc_cancel" onclick="jsxc.gui.dialog.close()">%%Continue%%</button>\n\
             <button class="button creation">%%Retry%%</button>\n\
+        </p>',
+    confirmDialog:
+            '<p>%%msg%%</p>\n\
+        <p class="jsxc_right">\n\
+            <button class="button jsxc_cancel" onclick="jsxc.gui.dialog.close()">%%Dismiss%%</button>\n\
+            <button class="button creation">%%Confirm%%</button>\n\
         </p>'
 };
 
@@ -1906,11 +1947,12 @@ jsxc.xmpp = {
          * </presence>
          */
         var ptype = $(presence).attr('type');
-        var from = Strophe.getBareJidFromJid($(presence).attr('from'));
+        var jid = $(presence).attr('from');
+        var from = Strophe.getBareJidFromJid(jid);
         var to = Strophe.getBareJidFromJid($(presence).attr('to'));
         var cid = jsxc.jidToCid(from);
         var data = jsxc.storage.getItem('buddy_' + cid);
-
+console.log('=================== OnPresence ====================');
         if (from === to)
             return true;
 
@@ -1935,6 +1977,12 @@ jsxc.xmpp = {
             else
                 data.status = 1;
         }
+        
+        //If we know the full jid, we will use it
+        if(jsxc.el_exists('#jsxc_window_' + cid))
+            $('#jsxc_window_' + cid).data('jid', jid);
+        
+        data.jid = jid;
 
         jsxc.storage.setItem('buddy_' + cid, data);
 
