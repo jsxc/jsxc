@@ -21,7 +21,10 @@
  * - (make window list scrollable)
  * - add roster slide from ojsxc
  * - user info
- * - translate string
+ * - translate strings
+ * - multiuser storage
+ * - check roster loading on opera
+ * - resource-handling
  */
 
 /**
