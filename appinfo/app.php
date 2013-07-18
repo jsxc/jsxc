@@ -31,13 +31,14 @@ OCP\App::addNavigationEntry( array(
 ));
 
 //############# Javascript #############
-OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/sha1' );
+OCP\Util::addScript ( 'ojsxc', 'plugin/sha1' );
 OCP\Util::addScript ( 'ojsxc', 'flensed.config' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/jquery.slimscroll' );
+OCP\Util::addScript ( 'ojsxc', 'plugin/jquery.fullscreen' );
 OCP\Util::addScript ( 'ojsxc', 'lib/strophe' );
 
-OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.disco' );
-OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.caps' );
+OCP\Util::addScript ( 'ojsxc', 'plugin/strophe.disco' );
+OCP\Util::addScript ( 'ojsxc', 'plugin/strophe.caps' );
 OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle' );
 OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle.session' );
 OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle.sdp' );

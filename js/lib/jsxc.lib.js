@@ -21,6 +21,7 @@
  * - (make window list scrollable)
  * - add roster slide from ojsxc
  * - user info
+ * - translate string
  */
 
 /**
@@ -47,6 +48,7 @@ var jsxc = {
     //0: conform, 1: not conform, 2: not shure
     toSNC: null, //Timeout for storageNotConform test
     dialogOpen: false,
+    jids: new Array(),
     /**
      * Starts the action
      * 
@@ -88,6 +90,18 @@ var jsxc = {
 //            jsxc.debug("No BOSH url defined.");
 //            return;
 //        }
+
+        //Prepare notifications
+        var noti = jsxc.storage.getItem('notification') || 2;
+        if (jsxc.options.notification && noti > 0 && jsxc.notification.hasSupport()) {
+            if (jsxc.notification.hasPermission())
+                jsxc.notification.init();
+            else
+                jsxc.notification.prepareRequest();
+        } else {
+            //No support => disable
+            jsxc.options.notification = false;
+        }
 
         //Register eventlistener for the storage event
         window.addEventListener('storage', jsxc.onStorage, false);
@@ -307,7 +321,7 @@ var jsxc = {
 //                    jsxc.triggeredFromElement = true;
 //                }
                 jsxc.xmpp.logout();
-                
+
             }
             return;
         }
@@ -461,7 +475,11 @@ var jsxc = {
      * @returns {String} css compatible string
      */
     jidToCid: function(jid) {
-        return Strophe.getBareJidFromJid(jid).replace('@', '-').replace('.', '-');
+        var cid = Strophe.getBareJidFromJid(jid).replace('@', '-').replace('.', '-');
+
+        jsxc.jids[cid] = jid;
+
+        return cid;
     },
     /**
      * Send message to buddy and display this to the user
@@ -529,9 +547,32 @@ var jsxc = {
             form.submit();
         }
     },
-            
-    escapeHTML: function (text){
-        return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    escapeHTML: function(text) {
+        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    },
+    /**
+     * executes only one of the given events
+     * 
+     * @param {string} obj.key eventname
+     * @param {function} obj.value function to execute
+     * @returns {string} namespace of all events
+     */
+    switchEvents: function(obj) {
+        var ns = Math.random().toString(36).substr(2, 12);
+        var self = this;
+
+        $.each(obj, function(key, val) {
+            $(document).one(key + '.' + ns, function() {
+                $(document).off('.' + ns);
+
+                val.apply(self, arguments);
+            })
+        });
+
+        return ns;
+    },
+    isHidden: function() {
+        return document.hidden || document.webkitHidden || document.mozHidden || document.msHidden;
     }
 
 };
@@ -572,8 +613,10 @@ jsxc.options = {
     defaultLang: 'en', //Default language
     autoLang: true, //auto language detection
 
-    rosterAppend: 'body',    //Place for roster
-   
+    rosterAppend: 'body', //Place for roster
+
+    notification: true
+
 };
 
 /**
@@ -899,6 +942,14 @@ jsxc.gui = {
         });
     },
     /**
+     * Create and show a wait dialog
+     * @param {type} msg message to display to the user
+     * @returns {undefined}
+     */
+    showAlert: function(msg) {
+        jsxc.gui.dialog.open(jsxc.gui.template.get('alert', null, msg));
+    },
+    /**
      * Create and show a auth fail dialog
      * @returns {undefined}
      */
@@ -920,12 +971,14 @@ jsxc.gui = {
      * @param {function} dismiss
      * @returns {undefined}
      */
-    showConfirmDialog: function(msg, confirm, dismiss){
-        jsxc.gui.dialog.open(jsxc.gui.template.get('confirmDialog'));
+    showConfirmDialog: function(msg, confirm, dismiss) {
+        jsxc.gui.dialog.open(jsxc.gui.template.get('confirmDialog', null, msg));
 
-        $('#jsxc_dialog .creation').click(confirm);
+        if (confirm)
+            $('#jsxc_dialog .creation').click(confirm);
 
-        $('#jsxc_dialog .jsxc_cancel').click(dismiss);
+        if (dismiss)
+            $('#jsxc_dialog .jsxc_cancel').click(dismiss);
     }
 };
 
@@ -1108,27 +1161,27 @@ jsxc.gui.dialog = {
     open: function(data, o) {
 
         var options = {
-            onComplete: function(){
+            onComplete: function() {
                 $(document).trigger('complete.dialog.jsxc');
             },
-            onClosed: function(){
+            onClosed: function() {
                 $(document).trigger('close.dialog.jsxc');
             },
-            onCleanup: function(){
+            onCleanup: function() {
                 $(document).trigger('cleanup.dialog.jsxc');
             }
         };
         var opt = o || {};
 
-        if (opt.noClose){
+        if (opt.noClose) {
             options.modal = true;
             delete opt.noClose;
-        }    
-           
+        }
+
         $.extend(options, opt);
 
         $.fancybox('<div id="jsxc_dialog">' + data + '</div>', options);
-        
+
         return $('#jsxc_dialog');
     },
     close: function() {
@@ -1190,7 +1243,7 @@ jsxc.gui.window = {
         win.find('.jsxc_close').click(function(ev) {
             jsxc.gui.window.close(cid);
         });
-        
+
         win.find('.jsxc_clear').click(function(ev) {
             jsxc.gui.window.clear(cid);
         });
@@ -1374,10 +1427,10 @@ jsxc.gui.window = {
 
         if (chat.length > jsxc.options.numberOfMsg)
             chat.pop();
-        
+
         //escape html
         msg = jsxc.escapeHTML(msg);
-        
+
         //exceptions:
 
         if (direction === 'out' && data.msgstate === 2) {
@@ -1397,6 +1450,9 @@ jsxc.gui.window = {
 
         chat.unshift({direction: direction, msg: msg});
         jsxc.storage.setItem('chat_' + cid, chat);
+
+        if (direction === 'in')
+            $(document).trigger('postmessagein.jsxc', [jsxc.jids[cid], msg]);
 
         jsxc.gui.window._postMessage(cid, direction, msg);
     },
@@ -1449,7 +1505,6 @@ jsxc.gui.window = {
             jsxc.gui.window._postMessage(cid, c.direction, c.msg, true);
         }
     },
-    
     /**
      * Clear chat history
      * @param {type} cid
@@ -1629,6 +1684,10 @@ jsxc.gui.template = {
             '<h3>%%Please_wait%%</h3>\n\
         <p>{{msg}}</p>\n\
         <p class="jsxc_center"><img src="/owncloud/apps/ojsxc/img/loading.gif" alt="wait" /></p>',
+    alert:
+            '<h3>%%Alert%%</h3>\n\
+        <p>{{msg}}</p>\n\
+        <p class="jsxc_right"><a href="#" class="button jsxc_cancel" onclick="jsxc.gui.dialog.close()">%%Ok%%</a></p>',
     authFailDialog:
             '<h3>%%Login_failed%%</h3>\n\
         <p>%%Sorry_we_cant_authentikate_%%</p>\n\
@@ -1637,10 +1696,10 @@ jsxc.gui.template = {
             <button class="button creation">%%Retry%%</button>\n\
         </p>',
     confirmDialog:
-            '<p>%%msg%%</p>\n\
+            '<p>{{msg}}</p>\n\
         <p class="jsxc_right">\n\
             <button class="button jsxc_cancel" onclick="jsxc.gui.dialog.close()">%%Dismiss%%</button>\n\
-            <button class="button creation">%%Confirm%%</button>\n\
+            <button class="button creation" onclick="jsxc.gui.dialog.close()">%%Confirm%%</button>\n\
         </p>'
 };
 
@@ -1662,7 +1721,7 @@ jsxc.xmpp = {
         var jid = jsxc.storage.getItem('jid');
         var url = jsxc.options.xmpp.url || jsxc.storage.getItem('boshUrl');
 
-        
+
 
         //Register eventlistener
         $(document).bind('connected', jsxc.xmpp.connected);
@@ -1717,12 +1776,11 @@ jsxc.xmpp = {
             jsxc.xmpp.conn.connect(jsxc.options.xmpp.jid, jsxc.options.xmpp.password, callback);
         }
     },
-            
     logout: function() {
-    
+
         //instruct all tabs
         jsxc.storage.removeItem('sid');
-        
+
         if (!jsxc.chief) {
             $('#jsxc_roster').remove();
             $('#jsxc_windowlist').remove();
@@ -1768,20 +1826,8 @@ jsxc.xmpp = {
             window.location.reload();
             return;
         }
-        
-        //disco stuff
-        if (connection.disco) {
-            connection.disco.addIdentity('client', 'web');
-            connection.disco.addFeature(Strophe.NS.DISCO_INFO);
-        }
 
-        //send presence stanza
-        var pres = $pres();
-        
-        if(jsxc.xmpp.conn.caps)
-            pres.c('c', jsxc.xmpp.conn.caps.generateCapsAttrs())
-        
-        jsxc.xmpp.conn.send(pres);
+        jsxc.xmpp.connectionReady();
     },
     /**
      * Triggered if connection is attached
@@ -1799,8 +1845,28 @@ jsxc.xmpp = {
         jsxc.xmpp.conn.addHandler(jsxc.xmpp.onMessage, null, 'message', 'chat');
         jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
 
+        jsxc.xmpp.connectionReady();
+    },
+    /**Triggered if the connection is ready
+     * 
+     * @returns {undefined}
+     */
+    connectionReady: function(){
+        //disco stuff
+        if (jsxc.xmpp.conn.disco) {
+            jsxc.xmpp.conn.disco.addIdentity('client', 'web', 'JSXC');
+            jsxc.xmpp.conn.disco.addFeature(Strophe.NS.DISCO_INFO);
+        }
+
         //send presence stanza
-        jsxc.xmpp.conn.send($pres());
+        var pres = $pres();
+
+        if (jsxc.xmpp.conn.caps)
+            pres.c('c', jsxc.xmpp.conn.caps.generateCapsAttrs())
+
+        jsxc.xmpp.conn.send(pres);
+        
+        $(document).trigger('connectionReady.jsxc');
     },
     /**
      * Triggered if lost connection
@@ -1821,8 +1887,8 @@ jsxc.xmpp = {
 
         if (jsxc.triggeredFromElement) {
             $('#jsxc_roster').remove();
-            
-            if(jsxc.triggeredFromLogout)
+
+            if (jsxc.triggeredFromLogout)
                 window.location = jsxc.options.logoutElement.attr('href');
         } else {
             $('#jsxc_roster').append(
@@ -1952,7 +2018,7 @@ jsxc.xmpp = {
         var to = Strophe.getBareJidFromJid($(presence).attr('to'));
         var cid = jsxc.jidToCid(from);
         var data = jsxc.storage.getItem('buddy_' + cid);
-console.log('=================== OnPresence ====================');
+        console.log('=================== OnPresence ====================');
         if (from === to)
             return true;
 
@@ -1977,11 +2043,11 @@ console.log('=================== OnPresence ====================');
             else
                 data.status = 1;
         }
-        
+
         //If we know the full jid, we will use it
-        if(jsxc.el_exists('#jsxc_window_' + cid))
+        if (jsxc.el_exists('#jsxc_window_' + cid))
             $('#jsxc_window_' + cid).data('jid', jid);
-        
+
         data.jid = jid;
 
         jsxc.storage.setItem('buddy_' + cid, data);
@@ -2012,6 +2078,8 @@ console.log('=================== OnPresence ====================');
 
         if (!body)
             return true;
+
+        $(document).trigger('onmessage.jsxc', [from, body]);
 
         var win = jsxc.gui.window.init(cid);
 
@@ -2143,7 +2211,7 @@ jsxc.storage = {
 
         var value = localStorage.getItem(key);
         try {
-            return JSON.parse(value);
+            return JSON.parse(value); 
         } catch (e) {
             return value;
         }
@@ -2515,6 +2583,80 @@ jsxc.otr = {
         jsxc.storage.setItem('priv_fingerprint', jsxc.options.otr.priv.fingerprint());
     }
 };
+
+jsxc.notification = {
+    init: function() {
+        $(document).on('postmessagein.jsxc', function(event, jid, msg) {
+            jsxc.notification.notify('New message from ' + jid, msg);
+        });
+    },
+    notify: function(title, msg, d) {
+        if (!jsxc.options.notification && window.notifications.checkPermission() == 0)
+            return; //notifications disabled
+
+        //@TODO: watch multiple tabs
+        if (!jsxc.isHidden())
+            return; //Tab is visible
+
+        var popup = window.notifications.createNotification(null, title, msg);
+        popup.show();
+
+        duration = d || 6000;
+
+        if (duration > 0)
+            setTimeout(function() {
+                popup.cancel();
+            }, duration);
+    },
+    hasSupport: function() {
+        if (window.notifications) {
+            return true;
+        } else if (window.webkitNotifications) {
+            window.notifications = window.webkitNotifications;
+            return true;
+        } else if (window.mozNotifications) {
+            window.notifications = window.mozNotifications;
+            return true;
+        } else {
+            return false;
+        }
+    },
+    prepareRequest: function() {
+
+        $(document).one('onmessage.jsxc', function() {
+            jsxc.switchEvents({
+                'notificationready.jsxc': function() {
+                    jsxc.notification.init();
+                    jsxc.storage.setItem('notification', true);
+                },
+                'notificationfailure.jsxc': function() {
+                    jsxc.options.notification = false;
+                    jsxc.storage.setItem('notification', false);
+                }
+            });
+            setTimeout(function() {
+                jsxc.gui.showConfirmDialog("Should we notify you about new messages in the future?",
+                        function() {
+                            jsxc.notification.requestPermission();
+                        },
+                        function() {
+                            $(document).trigger('notificationfailure.jsxc');
+                        });
+            }, 2000);
+        });
+    },
+    requestPermission: function() {
+        window.notifications.requestPermission(function() {
+            if (jsxc.notification.hasPermission())
+                $(document).trigger('notificationready.jsxc');
+            else
+                $(document).trigger('notificationfailure.jsxc');
+        });
+    },
+    hasPermission: function() {
+        return window.notifications.checkPermission() === 0;
+    }
+}
 
 /**
  * Contains all available translations
