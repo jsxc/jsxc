@@ -99,7 +99,7 @@ jsxc.webrtc = {
             return;
         }
         var li = $('<li>Video</li>').addClass('jsxc_video')
-        var window = win.find('.jsxc_settings ul').append(li);
+        win.find('.jsxc_settings ul').append(li);
         if(self.conn.caps.hasFeatureByJid(win.data('jid'), self.reqVideoFeatures)){
             li.click(function() {
                 self.startCall(win.data('jid'));
@@ -148,6 +148,8 @@ jsxc.webrtc = {
         
         if(self.conn.caps.hasFeatureByJid(jid, self.reqVideoFeatures))
             $('#'+jsxc.jidToCid(jid)).addClass('jsxc_'+videoSuitable);
+        else
+            $('#'+jsxc.jidToCid(jid)).removeClass('jsxc_'+videoSuitable);
     },
     onMediaReady: function(event, stream) {
         jsxc.debug('media ready');
