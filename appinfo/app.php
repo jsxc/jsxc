@@ -22,13 +22,13 @@
 
 OCP\App::registerAdmin( 'ojsxc', 'settings' );
 
-OCP\App::addNavigationEntry( array( 
+/*OCP\App::addNavigationEntry( array( 
 	'id' => 'apptemplate',
 	'order' => 74,
 	'href' => OCP\Util::linkTo( 'ojsxc', 'index.php' ),
 	'icon' => OCP\Util::imagePath( 'ojsxc', 'example.png' ),
 	'name' => 'Chat'
-));
+));*/
 
 //############# Javascript #############
 OCP\Util::addScript ( 'ojsxc', 'plugin/sha1' );

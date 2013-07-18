@@ -65,7 +65,11 @@ jsxc.webrtc = {
         this.conn.jingle.PRANSWER = false;
         this.conn.jingle.AUTOACCEPT = false;
         this.conn.jingle.ice_config = {iceServers: [
-                {url: 'stun:stun.l.google.com:19302'}
+                {
+                url: 'turn:numb.viagenie.ca',
+                credential: 'muazkh',
+                username: 'webrtc@live.com'
+            }
             ]};
         this.conn.jingle.MULTIPARTY = false;
         this.conn.jingle.pc_constraints = RTC.pc_constraints;

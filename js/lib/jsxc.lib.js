@@ -1835,17 +1835,17 @@ jsxc.xmpp = {
      */
     attached: function() {
 
-        //Only load roaster if necessary
-        if (!jsxc.restore || !jsxc.storage.getItem('buddylist')) {
-            var iq = $iq({type: 'get'}).c('query', {xmlns: 'jabber:iq:roster'});
-            jsxc.xmpp.conn.sendIQ(iq, jsxc.xmpp.onRoster);
-        }
-
         jsxc.xmpp.conn.addHandler(jsxc.xmpp.onRosterChanged, 'jabber:iq:roster', 'iq', 'set');
         jsxc.xmpp.conn.addHandler(jsxc.xmpp.onMessage, null, 'message', 'chat');
         jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
 
         jsxc.xmpp.connectionReady();
+	
+        //Only load roaster if necessary
+        if (!jsxc.restore || !jsxc.storage.getItem('buddylist')) {
+            var iq = $iq({type: 'get'}).c('query', {xmlns: 'jabber:iq:roster'});
+            jsxc.xmpp.conn.sendIQ(iq, jsxc.xmpp.onRoster);
+        }
     },
     /**Triggered if the connection is ready
      * 

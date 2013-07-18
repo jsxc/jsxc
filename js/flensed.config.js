@@ -1,1 +1,1 @@
-var flensed = {base_path: '/owncloud/apps/ojsxc/js/lib/'};
+var flensed = {base_path: '/apps/ojsxc/js/lib/'};
