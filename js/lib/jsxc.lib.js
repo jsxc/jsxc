@@ -23,8 +23,9 @@
  * - user info
  * - translate strings
  * - multiuser storage
- * - check roster loading on opera
+ * - fix bosh with ejabberd
  * - resource-handling
+ * - key generation only if required
  */
 
 /**
