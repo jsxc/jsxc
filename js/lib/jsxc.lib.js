@@ -1807,7 +1807,10 @@ jsxc.xmpp = {
     /**
      * Triggered if connection is established
      */
-    connected: function() {
+    connected: function() { 
+        
+        jsxc.xmpp.conn.pause();
+        
         //Save sid and jid
         jsxc.storage.setItem('sid', jsxc.xmpp.conn.sid);
         jsxc.storage.setItem('jid', jsxc.xmpp.conn.jid);
@@ -1845,8 +1848,13 @@ jsxc.xmpp = {
 
         //Only load roaster if necessary
         if (!jsxc.restore || !jsxc.storage.getItem('buddylist')) {
+            //in order to not overide existing presence information, we send pres first after roster is ready
+            $(document).one('rosterready.jsxc', jsxc.xmpp.sendPres);
+            
             var iq = $iq({type: 'get'}).c('query', {xmlns: 'jabber:iq:roster'});
             jsxc.xmpp.conn.sendIQ(iq, jsxc.xmpp.onRoster);
+        }else{
+            jsxc.xmpp.sendPres();
         }
         
         jsxc.xmpp.connectionReady();
@@ -1856,6 +1864,10 @@ jsxc.xmpp = {
      * @returns {undefined}
      */
     connectionReady: function(){
+        
+        $(document).trigger('connectionReady.jsxc');
+    },
+    sendPres: function(){
         //disco stuff
         if (jsxc.xmpp.conn.disco) {
             jsxc.xmpp.conn.disco.addIdentity('client', 'web', 'JSXC');
@@ -1867,10 +1879,10 @@ jsxc.xmpp = {
 
         if (jsxc.xmpp.conn.caps)
             pres.c('c', jsxc.xmpp.conn.caps.generateCapsAttrs())
-
+//        setTimeout(function(){
+//            jsxc.xmpp.conn.send(pres);
+//        }, 1000);
         jsxc.xmpp.conn.send(pres);
-        
-        $(document).trigger('connectionReady.jsxc');
     },
     /**
      * Triggered if lost connection
@@ -1953,6 +1965,8 @@ jsxc.xmpp = {
         });
 
         jsxc.storage.setItem('buddylist', buddies);
+        
+        $(document).trigger('rosterready.jsxc');
 
         jsxc.debug('Roster ready');
     },
@@ -2022,7 +2036,7 @@ jsxc.xmpp = {
         var to = Strophe.getBareJidFromJid($(presence).attr('to'));
         var cid = jsxc.jidToCid(from);
         var data = jsxc.storage.getItem('buddy_' + cid);
-        console.log('=================== OnPresence ====================');
+       
         if (from === to)
             return true;
 
