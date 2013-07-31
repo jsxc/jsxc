@@ -3062,6 +3062,10 @@ Strophe.Connection.prototype = {
             req.abort = false;
             return;
         }
+        
+        if(req.xhr.readyState == 1){
+            $(document).trigger('ridChange', {rid: Number(req.rid)+1});
+        }
 
         // request complete
         var reqStatus;
@@ -3107,8 +3111,6 @@ Strophe.Connection.prototype = {
                      this._requests[0].age() > Math.floor(Strophe.SECONDARY_TIMEOUT * this.wait))) {
                     this._restartRequest(0);
                 }
-                
-                $(document).trigger('ridChange', {rid: Number(req.rid)+1});
                 
                 // call handler
                 func(req);
