@@ -12,5 +12,8 @@ OCP\JSON::callCheck();
 OCP\Config::setAppValue('ojsxc', 'boshUrl', $_POST['boshUrl'] );
 OCP\Config::setAppValue('ojsxc', 'xmppDomain', $_POST['xmppDomain'] );
 OCP\Config::setAppValue('ojsxc', 'xmppResource', $_POST['xmppResource'] );
+OCP\Config::setAppValue('ojsxc', 'iceUrl', $_POST['iceUrl'] );
+OCP\Config::setAppValue('ojsxc', 'iceUsername', $_POST['iceUsername'] );
+OCP\Config::setAppValue('ojsxc', 'iceCredential', $_POST['iceCredential'] );
 
 echo 'true';

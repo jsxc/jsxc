@@ -131,13 +131,14 @@
         hasFeatureByJid: function(jid, feature){
             if (this._jidVerIndex[jid]) {
                 var length = ($.isArray(feature))? feature.length: 1;
-                    
+                    console.log(length);
                 for(i = 0; i < length; i++){
-                    if(this._knownCapabilities[this._jidVerIndex[jid]]['features'].indexOf(feature) < 0)
+                    if(this._knownCapabilities[this._jidVerIndex[jid]]['features'].indexOf(feature[i]) < 0)
                         return false;
                 }
                 return true;
             }
+            console.log('not known jid');
             return false;
         },
 
@@ -152,7 +153,7 @@
 	 * Returns:
 	 *   (Boolean)
 	 */
-	_delegateCapabilities: function(stanza) { 
+	_delegateCapabilities: function(stanza) { console.log('_delegateCapabilities');
 		var from = stanza.getAttribute('from'),
 			c = stanza.querySelector('c'),
 			ver = c.getAttribute('ver'),

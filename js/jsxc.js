@@ -97,7 +97,16 @@ $(function() {
                 var domain = data.xmppDomain;
 
                 jsxc.storage.setItem('boshUrl', data.boshUrl);
-
+                
+                if(data.iceUrl && data.iceUsername && data.iceCredential){
+                    var iceConfig = {iceServers: [{
+                        url: data.iceUrl,
+                        credential: data.iceCredential,
+                        username: data.iceUsername
+                    }]};
+                    jsxc.storage.setItem('iceConfig', iceConfig);
+                }
+                
                 if (jid.match(/@(.*)$/))
                     return (jid.match(/\/(.*)$/)) ? jid : jid + resource;
                 else

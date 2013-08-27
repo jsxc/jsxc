@@ -53,6 +53,7 @@ var jsxc = {
     toSNC: null, //Timeout for storageNotConform test
     dialogOpen: false,
     jids: new Array(),
+    cid: null,
     /**
      * Starts the action
      * 
@@ -95,20 +96,8 @@ var jsxc = {
 //            return;
 //        }
 
-        //Prepare notifications
-        var noti = jsxc.storage.getItem('notification') || 2;
-        if (jsxc.options.notification && noti > 0 && jsxc.notification.hasSupport()) {
-            if (jsxc.notification.hasPermission())
-                jsxc.notification.init();
-            else
-                jsxc.notification.prepareRequest();
-        } else {
-            //No support => disable
-            jsxc.options.notification = false;
-        }
-
         //Register eventlistener for the storage event
-        window.addEventListener('storage', jsxc.onStorage, false);
+        window.addEventListener('storage', jsxc.storage.onStorage, false);
 
         var lastActivity = jsxc.storage.getItem('lastActivity') || 0;
 
@@ -117,11 +106,11 @@ var jsxc = {
 
         //Check if we have to establish a new connection
         if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
-            jsxc.debug('Looking for login form');
+            
             //Looking for a login form
             if (!jsxc.options.loginForm.form || !jsxc.el_exists(jsxc.options.loginForm.form))
                 return;
-            jsxc.debug('Form found');
+            
             //create jquery object
             jsxc.options.loginForm.form = $(jsxc.options.loginForm.form);
 
@@ -143,6 +132,8 @@ var jsxc = {
 
             return;
         }
+        
+        jsxc.cid = jsxc.jidToCid(jsxc.storage.getItem('jid'));
 
         jsxc.gui.init();
 
@@ -164,209 +155,6 @@ var jsxc = {
     hasFlash: function() {
         return (typeof (navigator.plugins) === "undefined" || navigator.plugins.length === 0) ?
                 !!(new ActiveXObject("ShockwaveFlash.ShockwaveFlash")) : navigator.plugins["Shockwave Flash"];
-    },
-    /** 
-     * Triggered if changes are recognized
-     * @function
-     * @param {event} e Storageevent
-     * @param {String} e.key Keyname which triggered event
-     * @param {Object} e.oldValue Old Value for key
-     * @param {Object} e.newValue New Value for key
-     * @param {String} e.url
-     */
-    onStorage: function(e) {
-
-        //skip
-        if (e.key == 'jsxc_rid' || e.key == 'jsxc_lastActivity')
-            return;
-
-        //Workaround for non-conform browser: Triggered event on every page (own)
-        if (jsxc.storageNotConform > 0 && jsxc.ls.length > 0) {
-
-            var val = e.newValue;
-            try {
-                val = JSON.parse(val);
-            } catch (e) {
-            }
-
-            var index = $.inArray(JSON.stringify({key: e.key, value: val}), jsxc.ls);
-
-            if (index >= 0) {
-
-                //confirm that the storage event is not fired regularly
-                if (jsxc.storageNotConform > 1) {
-                    window.clearTimeout(jsxc.toSNC);
-                    jsxc.storageNotConform = 1;
-                    jsxc.storage.setItem('storageNotConform', 1);
-                }
-
-                jsxc.ls.splice(index, 1);
-                return;
-            }
-        }
-
-        //Workaround for non-conform browser
-        if (e.oldValue == e.newValue) {
-            return;
-        }
-
-        var cid = e.key.replace(/^jsxc_[a-z]+_(.*)/i, '$1');
-
-        if (e.key.match(/^jsxc_chat_/)) {
-
-            data = JSON.parse(e.newValue)[0];
-
-            if (jsxc.chief && data.direction === 'out') {
-                jsxc.buddyList[cid].sendMsg(data.msg);
-            }
-
-            jsxc.gui.window._postMessage(cid, data.direction, data.msg);
-            return;
-        }
-
-        if (e.key.match(/^jsxc_window_/)) {
-
-            if (!e.newValue) {
-                jsxc.gui.window._close(cid);
-                return;
-            }
-
-            if (!e.oldValue) {
-                jsxc.gui.window.open(cid);
-                return;
-            }
-
-            n = JSON.parse(e.newValue);
-
-            if (n.minimize)
-                jsxc.gui.window._hide(cid);
-            else
-                jsxc.gui.window._show(cid);
-
-            jsxc.gui.window.setText(cid, n.text);
-
-            return;
-        }
-
-        if (e.key.match(/^jsxc_smp_/)) {
-
-            if (!e.newValue) {
-
-                jsxc.gui.dialog.close();
-
-                if (jsxc.chief)
-                    jsxc.buddyList[cid].sm.abort();
-
-                return;
-            }
-
-            n = JSON.parse(e.newValue);
-
-            if (typeof(n.data) != 'undefined') {
-
-                jsxc.otr.onSmpQuestion(cid, n.data);
-
-            } else if (jsxc.chief && n.sec) {
-                jsxc.gui.dialog.close();
-
-                jsxc.otr.sendSmpReq(cid, n.sec, n.quest);
-            }
-        }
-
-        if (!jsxc.chief && e.key.match(/^jsxc_buddy_/)) {
-
-            if (!e.newValue) {
-                jsxc.gui.roster.purge(cid);
-                return;
-            }
-            if (!e.oldValue) {
-                jsxc.gui.roster.add(cid);
-                return;
-            }
-
-            n = JSON.parse(e.newValue);
-            o = JSON.parse(e.oldValue);
-
-            jsxc.gui.update(cid);
-
-            if (o.status !== n.status || o.sub !== n.sub)
-                jsxc.gui.roster.reorder(cid);
-        }
-
-        if (jsxc.chief && e.key.match(/^jsxc_buddy_/)) {
-
-            if (!e.newValue) {
-                jsxc.xmpp.removeBuddy(o.jid);
-                return;
-            }
-
-            n = JSON.parse(e.newValue);
-            o = JSON.parse(e.oldValue);
-
-            if (o.transferReq !== n.transferReq) {
-                jsxc.storage.updateItem('buddy_' + cid, 'transferReq', -1);
-
-                if (n.transferReq === 0)
-                    jsxc.otr.goPlain(cid);
-                if (n.transferReq === 1)
-                    jsxc.otr.goEncrypt(cid);
-            }
-
-            if (o.name !== n.name) {
-                jsxc.gui.roster._rename(cid, n.name);
-            }
-        }
-
-        //logout
-        if (e.key == 'jsxc_sid') {
-            if (!e.newValue) {
-//                if (jsxc.chief && jsxc.xmpp.conn) {
-//                    jsxc.xmpp.conn.disconnect();
-//                    jsxc.triggeredFromElement = true;
-//                }
-                jsxc.xmpp.logout();
-
-            }
-            return;
-        }
-
-        //react if someone ask, if there is a chief
-        if (jsxc.chief && e.key === 'jsxc_alive') {
-            jsxc.storage.ink('alive');
-            return;
-        }
-
-        //chief alive
-        if (!jsxc.chief && (e.key == 'jsxc_alive' || e.key == 'jsxc_alive_busy') && !jsxc.triggeredFromElement) {
-
-            //reset timeout
-            window.clearTimeout(jsxc.to);
-            jsxc.to = window.setTimeout('jsxc.checkChief()', ((e.key == 'jsxc_alive') ? jsxc.options.timeout : jsxc.options.busyTimeout) + jsxc.random(60));
-
-            //only call the first time
-            if (!jsxc.role_allocation)
-                jsxc.onSidekick();
-
-            return;
-        }
-
-        if (e.key === 'jsxc_friendReq') {
-            n = JSON.parse(e.newValue);
-
-            if (n === null) {
-                jsxc.gui.dialog.close();
-            } else if (jsxc.chief && n.approve >= 0) {
-                jsxc.xmpp.resFriendReq(n.jid, n.approve);
-            } else if (!jsxc.chief && n.approve < 0) {
-                jsxc.gui.showApproveDialog(n.jid);
-            }
-        }
-
-        if (jsxc.chief && e.key.match(/^jsxc_add_/)) {
-            n = JSON.parse(e.newValue);
-
-            jsxc.xmpp.addBuddy(n.username, n.alias);
-        }
     },
     /**
      * Called if the script is a sidekick
@@ -393,8 +181,8 @@ var jsxc = {
         //Init local storage
         jsxc.storage.setItem('alive', 0);
         jsxc.storage.setItem('alive_busy', 0);
-        if (!jsxc.storage.getItem('windowlist'))
-            jsxc.storage.setItem('windowlist', new Array());
+        if (!jsxc.storage.getUserItem('windowlist'))
+            jsxc.storage.setUserItem('windowlist', new Array());
 
         //Sending keepalive signal
         jsxc.startKeepAlive();
@@ -404,7 +192,7 @@ var jsxc = {
 
         //create otr objects, if we lost the chief
         if (jsxc.role_allocation) {
-            $.each(jsxc.storage.getItem('windowlist'), function(index, val) {
+            $.each(jsxc.storage.getUserItem('windowlist'), function(index, val) {
                 jsxc.otr.create(val);
             });
         }
@@ -416,7 +204,21 @@ var jsxc = {
             jsxc.restoreWindows();
             jsxc.restoreCompleted = true;
         }
-
+        
+        //Prepare notifications
+        if (jsxc.restore){
+            var noti = jsxc.storage.getUserItem('notification') || 2;
+            if (jsxc.options.notification && noti > 0 && jsxc.notification.hasSupport()) {
+                if (jsxc.notification.hasPermission())
+                    jsxc.notification.init();
+                else
+                    jsxc.notification.prepareRequest();
+            } else {
+                //No support => disable
+                jsxc.options.notification = false;
+            }
+        }
+        
         jsxc.xmpp.login();
     },
     /**
@@ -501,7 +303,7 @@ var jsxc = {
      * Restore roster
      */
     restoreRoster: function() {
-        var buddies = jsxc.storage.getItem('buddylist');
+        var buddies = jsxc.storage.getUserItem('buddylist');
 
         if (buddies === null)
             return;
@@ -519,13 +321,13 @@ var jsxc = {
      * Restore all windows
      */
     restoreWindows: function() {
-        var windows = jsxc.storage.getItem('windowlist');
+        var windows = jsxc.storage.getUserItem('windowlist');
 
         if (windows === null)
             return;
 
         $.each(windows, function(index, cid) {
-            var window = jsxc.storage.getItem('window_' + cid);
+            var window = jsxc.storage.getUserItem('window_' + cid);
 
             if (!window) {
                 jsxc.debug('Associated window-element is missing: ' + cid);
@@ -619,8 +421,9 @@ jsxc.options = {
 
     rosterAppend: 'body', //Place for roster
 
-    notification: true
-
+    notification: true,
+            
+    userKeys: ['buddy_', 'key', 'priv_fingerprint', 'roster', 'windowlist', 'window_', 'otr_', 'chat_', 'buddylist']
 };
 
 /**
@@ -675,7 +478,7 @@ jsxc.gui = {
      * @param {String} cid CSS compatible jid
      */
     update: function(cid) {
-        var data = jsxc.storage.getItem('buddy_' + cid);
+        var data = jsxc.storage.getUserItem('buddy_' + cid);
 
         if (!data) {
             jsxc.debug('No data for ' + cid);
@@ -780,7 +583,7 @@ jsxc.gui = {
     showVerification: function(cid) {
 
         //verification only possible if the connection is encrypted
-        if (jsxc.storage.getItem('buddy_' + cid).msgstate !== 1) {
+        if (jsxc.storage.getUserItem('buddy_' + cid).msgstate !== 1) {
             jsxc.debug('Connection not encrypted');
             return;
         }
@@ -800,11 +603,11 @@ jsxc.gui = {
             if (jsxc.chief)
                 jsxc.buddyList[cid].trust = true;
 
-            jsxc.storage.updateItem('buddy_' + cid, 'trust', true);
+            jsxc.storage.updateUserItem('buddy_' + cid, 'trust', true);
 
             jsxc.gui.dialog.close();
 
-            jsxc.storage.updateItem('buddy_' + cid, 'trust', true)
+            jsxc.storage.updateUserItem('buddy_' + cid, 'trust', true)
             jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.conversation_is_now_verified);
             jsxc.gui.update(cid);
         });
@@ -827,7 +630,7 @@ jsxc.gui = {
             if (jsxc.chief)
                 jsxc.otr.sendSmpReq(cid, sec, quest);
             else
-                jsxc.storage.setItem('smp_' + cid, {sec: sec, quest: quest});
+                jsxc.storage.setUserItem('smp_' + cid, {sec: sec, quest: quest});
 
             jsxc.gui.dialog.close();
 
@@ -851,7 +654,7 @@ jsxc.gui = {
             if (jsxc.chief)
                 jsxc.otr.sendSmpReq(cid, sec);
             else
-                jsxc.storage.setItem('smp alert();_' + cid, {sec: sec, quest: null});
+                jsxc.storage.setUserItem('smp_' + cid, {sec: sec, quest: null});
 
             jsxc.gui.dialog.close();
 
@@ -872,7 +675,7 @@ jsxc.gui = {
         });
 
         $('#jsxc_dialog .jsxc_approve').click(function() {
-            var data = jsxc.storage.getItem('buddy_' + jsxc.jidToCid(from));
+            var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(from));
 
             jsxc.xmpp.resFriendReq(from, true);
 
@@ -922,7 +725,7 @@ jsxc.gui = {
 
         jsxc.gui.dialog.open(jsxc.gui.template.get('removeDialog', cid));
 
-        var data = jsxc.storage.getItem('buddy_' + cid);
+        var data = jsxc.storage.getUserItem('buddy_' + cid);
 
         $('#jsxc_dialog .creation').click(function() {
             if (jsxc.chief)
@@ -930,7 +733,7 @@ jsxc.gui = {
             else
                 jsxc.gui.roster.purge(cid);
 
-            jsxc.storage.removeItem('buddy_' + cid);
+            jsxc.storage.removeUserItem('buddy_' + cid);
 
             jsxc.gui.dialog.close();
         });
@@ -1052,7 +855,7 @@ jsxc.gui.roster = {
      */
     insert: function(cid, li) {
 
-        var data = jsxc.storage.getItem('buddy_' + cid);
+        var data = jsxc.storage.getUserItem('buddy_' + cid);
         var listElements = $('#jsxc_roster ul > li');
         var insert = false;
 
@@ -1098,13 +901,13 @@ jsxc.gui.roster = {
      */
     purge: function(cid) {
         if (jsxc.chief) {
-            jsxc.storage.removeItem('buddy_' + cid);
-            jsxc.storage.removeItem('otr_' + cid);
-            jsxc.storage.removeItem('otr_version_' + cid);
-            jsxc.storage.removeItem('chat_' + cid);
-            jsxc.storage.removeItem('window_' + cid);
-            jsxc.storage.removeElement('buddylist', cid);
-            jsxc.storage.removeElement('windowlist', cid);
+            jsxc.storage.removeUserItem('buddy_' + cid);
+            jsxc.storage.removeUserItem('otr_' + cid);
+            jsxc.storage.removeUserItem('otr_version_' + cid);
+            jsxc.storage.removeUserItem('chat_' + cid);
+            jsxc.storage.removeUserItem('window_' + cid);
+            jsxc.storage.removeUserElement('buddylist', cid);
+            jsxc.storage.removeUserElement('windowlist', cid);
         }
 
         jsxc.gui.window._close(cid);
@@ -1150,12 +953,12 @@ jsxc.gui.roster = {
      */
     _rename: function(cid, newname) {
         if (jsxc.chief) {
-            var d = jsxc.storage.getItem('buddy_' + cid);
+            var d = jsxc.storage.getUserItem('buddy_' + cid);
             var iq = $iq({type: 'set'}).c('query', {xmlns: 'jabber:iq:roster'}).c('item', {jid: d.jid, name: newname});
             jsxc.xmpp.conn.sendIQ(iq);
         }
 
-        jsxc.storage.updateItem('buddy_' + cid, 'name', newname);
+        jsxc.storage.updateUserItem('buddy_' + cid, 'name', newname);
         jsxc.gui.update(cid);
     }
 
@@ -1209,7 +1012,7 @@ jsxc.gui.window = {
             return jsxc.gui.getWindow(cid);
 
         var win = jsxc.gui.windowTemplate.clone().attr('id', 'jsxc_window_' + cid).hide().appendTo('#jsxc_windowList > ul').show('slow');
-        var data = jsxc.storage.getItem('buddy_' + cid);
+        var data = jsxc.storage.getUserItem('buddy_' + cid);
 
         //Attach jid to window
         win.data('jid', data.jid);
@@ -1258,7 +1061,7 @@ jsxc.gui.window = {
             if (ev.which === 13)
                 body = '';
 
-            jsxc.storage.updateItem('window_' + cid, 'text', body);
+            jsxc.storage.updateUserItem('window_' + cid, 'text', body);
         });
 
         win.find('.jsxc_textinput').keypress(function(ev) {
@@ -1279,15 +1082,15 @@ jsxc.gui.window = {
 
         win.find('.jsxc_name').disableSelection();
 
-        if ($.inArray(cid, jsxc.storage.getItem('windowlist')) < 0) {
+        if ($.inArray(cid, jsxc.storage.getUserItem('windowlist')) < 0) {
 
             //add window to windowlist
-            var wl = jsxc.storage.getItem('windowlist');
+            var wl = jsxc.storage.getUserItem('windowlist');
             wl.push(cid);
-            jsxc.storage.setItem('windowlist', wl);
+            jsxc.storage.setUserItem('windowlist', wl);
 
             //init window element in storage
-            jsxc.storage.setItem('window_' + cid, {minimize: true, text: ''});
+            jsxc.storage.setUserItem('window_' + cid, {minimize: true, text: ''});
         }
 
         jsxc.gui.window.restoreChat(cid);
@@ -1327,8 +1130,8 @@ jsxc.gui.window = {
             return;
         }
 
-        jsxc.storage.removeElement('windowlist', cid);
-        jsxc.storage.removeItem('window_' + cid);
+        jsxc.storage.removeUserElement('windowlist', cid);
+        jsxc.storage.removeUserItem('window_' + cid);
 
         jsxc.gui.window._close(cid);
     },
@@ -1360,7 +1163,7 @@ jsxc.gui.window = {
      */
     show: function(cid) {
 
-        jsxc.storage.updateItem('window_' + cid, 'minimize', false);
+        jsxc.storage.updateUserItem('window_' + cid, 'minimize', false);
 
         jsxc.gui.window._show(cid);
     },
@@ -1384,7 +1187,7 @@ jsxc.gui.window = {
      * @returns {undefined}
      */
     hide: function(cid) {
-        jsxc.storage.updateItem('window_' + cid, 'minimize', true);
+        jsxc.storage.updateUserItem('window_' + cid, 'minimize', true);
 
         jsxc.gui.window._hide(cid);
     },
@@ -1426,8 +1229,8 @@ jsxc.gui.window = {
      * @param {String} msg Message to display
      */
     postMessage: function(cid, direction, msg) {
-        var chat = jsxc.storage.getItem('chat_' + cid) || [];
-        var data = jsxc.storage.getItem('buddy_' + cid);
+        var chat = jsxc.storage.getUserItem('chat_' + cid) || [];
+        var data = jsxc.storage.getUserItem('buddy_' + cid);
 
         if (chat.length > jsxc.options.numberOfMsg)
             chat.pop();
@@ -1453,7 +1256,7 @@ jsxc.gui.window = {
         }
 
         chat.unshift({direction: direction, msg: msg});
-        jsxc.storage.setItem('chat_' + cid, chat);
+        jsxc.storage.setUserItem('chat_' + cid, chat);
 
         if (direction === 'in')
             $(document).trigger('postmessagein.jsxc', [jsxc.jids[cid], msg]);
@@ -1502,7 +1305,7 @@ jsxc.gui.window = {
      * @returns {undefined}
      */
     restoreChat: function(cid) {
-        var chat = jsxc.storage.getItem('chat_' + cid);
+        var chat = jsxc.storage.getUserItem('chat_' + cid);
 
         while (chat !== null && chat.length > 0) {
             c = chat.pop();
@@ -1515,7 +1318,7 @@ jsxc.gui.window = {
      * @returns {undefined}
      */
     clear: function(cid) {
-        jsxc.storage.setItem('chat_' + cid, []);
+        jsxc.storage.setUserItem('chat_' + cid, []);
         $('#jsxc_window_' + cid + ' .jsxc_textarea').empty();
     }
 };
@@ -1536,13 +1339,13 @@ jsxc.gui.template = {
 
         //common placeholder
         var ph = {
-            my_priv_fingerprint: jsxc.storage.getItem('priv_fingerprint') ? jsxc.storage.getItem('priv_fingerprint').replace(/(.{8})/g, '$1 ') : jsxc.l.no_available,
+            my_priv_fingerprint: jsxc.storage.getUserItem('priv_fingerprint') ? jsxc.storage.getUserItem('priv_fingerprint').replace(/(.{8})/g, '$1 ') : jsxc.l.no_available,
             my_jid: jsxc.storage.getItem('jid')
         };
 
         //placeholder depending on cid
         if (cid) {
-            var data = jsxc.storage.getItem('buddy_' + cid);
+            var data = jsxc.storage.getUserItem('buddy_' + cid);
 
             $.extend(ph, {
                 cid_priv_fingerprint: data.fingerprint ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.no_available,
@@ -1819,7 +1622,7 @@ jsxc.xmpp = {
         jsxc.storage.setItem('lastActivity', (new Date()).getTime());
 
         //make shure roster will be reloaded
-        jsxc.storage.removeItem('buddylist');
+        jsxc.storage.removeUserItem('buddylist');
 
         //submit login form
         if (jsxc.triggeredFromForm) {
@@ -1847,7 +1650,7 @@ jsxc.xmpp = {
         jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
 
         //Only load roaster if necessary
-        if (!jsxc.restore || !jsxc.storage.getItem('buddylist')) {
+        if (!jsxc.restore || !jsxc.storage.getUserItem('buddylist')) {
             //in order to not overide existing presence information, we send pres first after roster is ready
             $(document).one('rosterready.jsxc', jsxc.xmpp.sendPres);
             
@@ -1894,6 +1697,7 @@ jsxc.xmpp = {
 
         jsxc.storage.removeItem('sid');
         jsxc.storage.removeItem('rid');
+        jsxc.storage.removeItem('lastActivity');
 
         jsxc.xmpp.conn = null;
 
@@ -1956,15 +1760,15 @@ jsxc.xmpp = {
 
             buddies.push(cid);
 
-            if (jsxc.storage.getItem('buddy_' + cid))
-                jsxc.storage.updateItem('buddy_' + cid, {name: name, status: 0, sub: sub});
+            if (jsxc.storage.getUserItem('buddy_' + cid))
+                jsxc.storage.updateUserItem('buddy_' + cid, {name: name, status: 0, sub: sub});
             else
-                jsxc.storage.setItem('buddy_' + cid, {'jid': jid, 'name': name, 'status': 0, sub: sub, 'msgstate': 0, 'transferReq': -1, 'trust': false, 'fingerprint': null});
+                jsxc.storage.setUserItem('buddy_' + cid, {'jid': jid, 'name': name, 'status': 0, sub: sub, 'msgstate': 0, 'transferReq': -1, 'trust': false, 'fingerprint': null});
 
             jsxc.gui.roster.add(cid);
         });
 
-        jsxc.storage.setItem('buddylist', buddies);
+        jsxc.storage.setUserItem('buddylist', buddies);
         
         $(document).trigger('rosterready.jsxc');
 
@@ -1994,14 +1798,14 @@ jsxc.xmpp = {
             if (sub === 'remove') {
                 jsxc.gui.roster.purge(cid);
             } else if (jsxc.el_exists('#' + cid) && sub !== 'none') {
-                jsxc.storage.updateItem('buddy_' + cid, {jid: jid, name: name, sub: sub});
+                jsxc.storage.updateUserItem('buddy_' + cid, {jid: jid, name: name, sub: sub});
                 jsxc.gui.update(cid);
                 jsxc.gui.roster.reorder(cid);
             } else if ((!ask && sub !== 'none') || (ask === 'subscribe')) {
-                var bl = jsxc.storage.getItem('buddylist');
+                var bl = jsxc.storage.getUserItem('buddylist');
                 bl.push(cid);       //(INFO) push returns the new length
-                jsxc.storage.setItem('buddylist', bl);
-                jsxc.storage.setItem('buddy_' + cid, {'jid': jid, 'name': name, 'status': 0, sub: sub, 'msgstate': 0, 'transferReq': -1, 'trust': false, 'fingerprint': null});
+                jsxc.storage.setUserItem('buddylist', bl);
+                jsxc.storage.setUserItem('buddy_' + cid, {'jid': jid, 'name': name, 'status': 0, sub: sub, 'msgstate': 0, 'transferReq': -1, 'trust': false, 'fingerprint': null});
                 jsxc.gui.roster.add(cid);
             }
         });
@@ -2035,7 +1839,7 @@ jsxc.xmpp = {
         var from = Strophe.getBareJidFromJid(jid);
         var to = Strophe.getBareJidFromJid($(presence).attr('to'));
         var cid = jsxc.jidToCid(from);
-        var data = jsxc.storage.getItem('buddy_' + cid);
+        var data = jsxc.storage.getUserItem('buddy_' + cid);
        
         if (from === to)
             return true;
@@ -2047,7 +1851,7 @@ jsxc.xmpp = {
 
         //incoming friendship request
         if (ptype === 'subscribe') {
-            jsxc.storage.setItem('friendReq', {jid: from, approve: -1});
+            jsxc.storage.setUserItem('friendReq', {jid: from, approve: -1});
             jsxc.gui.showApproveDialog(from);
 
             return true;
@@ -2068,7 +1872,7 @@ jsxc.xmpp = {
 
         data.jid = jid;
 
-        jsxc.storage.setItem('buddy_' + cid, data);
+        jsxc.storage.setUserItem('buddy_' + cid, data);
 
         jsxc.gui.update(cid);
         jsxc.gui.roster.reorder(cid);
@@ -2134,11 +1938,11 @@ jsxc.xmpp = {
                 type: (approve) ? 'subscribed' : 'unsubscribed'
             }));
 
-            jsxc.storage.removeItem('friendReq');
+            jsxc.storage.removeUserItem('friendReq');
             jsxc.gui.dialog.close();
 
         } else {
-            jsxc.storage.updateItem('friendReq', 'approve', approve);
+            jsxc.storage.updateUserItem('friendReq', 'approve', approve);
         }
     },
     /**
@@ -2158,9 +1962,9 @@ jsxc.xmpp = {
             //send subscription request to buddy
             jsxc.xmpp.conn.send($pres({to: username, type: 'subscribe'}));
 
-            jsxc.storage.removeItem('add_' + cid);
+            jsxc.storage.removeUserItem('add_' + cid);
         } else {
-            jsxc.storage.setItem('add_' + cid, {username: username, alias: alias || null});
+            jsxc.storage.setUserItem('add_' + cid, {username: username, alias: alias || null});
         }
     },
     /**
@@ -2190,19 +1994,22 @@ jsxc.storage = {
      * 
      * @privat
      */
-    prefix: 'jsxc_',
+    prefix: 'jsxc.',
+    getPrefix: function(uk){
+        return jsxc.storage.prefix + ((uk && jsxc.cid)?jsxc.cid + '.':'');
+    },
     /**
      * Save item to storage
      * 
      * @function
      * @param {String} key variablename
      * @param {Object} value value
+     * @param {String} uk Userkey? Should we add the cid as prefix?
      */
-    setItem: function(key, value) {
-        key = jsxc.storage.prefix + key;
+    setItem: function(key, value, uk) {
 
         //Workaround for non-conform browser
-        if (jsxc.storageNotConform > 0 && key != 'jsxc_rid' && key != 'jsxc_lastActivity') {
+        if (jsxc.storageNotConform > 0 && key != 'rid' && key != 'lastActivity') {
             if (jsxc.storageNotConform > 1) {
                 jsxc.toSNC = window.setTimeout(function() {
                     jsxc.storageNotConform = 0;
@@ -2216,16 +2023,20 @@ jsxc.storage = {
         if (typeof(value) === 'object')
             value = JSON.stringify(value);
 
-        localStorage.setItem(key, value);
+        localStorage.setItem(jsxc.storage.getPrefix(uk) + key, value);
+    },
+    setUserItem: function(key, value){
+        return jsxc.storage.setItem(key, value, true);
     },
     /**
      * Load item from storage
      * 
      * @function
      * @param {String} key variablename
+     * @param {String} uk Userkey? Should we add the cid as prefix?
      */
-    getItem: function(key) {
-        key = jsxc.storage.prefix + key;
+    getItem: function(key, uk) {
+        key = jsxc.storage.getPrefix(uk) + key;
 
         var value = localStorage.getItem(key);
         try {
@@ -2234,20 +2045,26 @@ jsxc.storage = {
             return value;
         }
     },
+    getUserItem: function(key) {
+        return jsxc.storage.getItem(key, true);
+    },
     /**
      * Remove item from storage
      * 
      * @function
      * @param {String} key variablename
      */
-    removeItem: function(key) {
+    removeItem: function(key, uk) {
 
         //Workaround for non-conform browser
         if (jsxc.storageNotConform && key != 'rid' && key != 'lastActivity') {
             jsxc.ls.push(JSON.stringify({key: jsxc.storage.prefix + key, value: ''}));
         }
 
-        localStorage.removeItem(jsxc.storage.prefix + key);
+        localStorage.removeItem(jsxc.storage.getPrefix(uk) + key);
+    },
+    removeUserItem: function(key){
+        return jsxc.storage.removeItem(key, true);
     },
     /**
      * Updates value of a variable in a saved object.
@@ -2257,9 +2074,9 @@ jsxc.storage = {
      * @param {String|object} variable variablename in object or object with variable/key pairs
      * @param {Object} [value] value
      */
-    updateItem: function(key, variable, value) {
+    updateItem: function(key, variable, value, uk) {
 
-        var data = jsxc.storage.getItem(key);
+        var data = jsxc.storage.getItem(key, uk);
 
         if (typeof(variable) === 'object') {
 
@@ -2271,6 +2088,8 @@ jsxc.storage = {
 
                 data[key] = val;
             });
+            
+            uk = value;
         } else {
             if (typeof (data[variable]) === 'undefined') {
                 jsxc.debug('Variable %s doesn\'t exist.', variable);
@@ -2280,7 +2099,10 @@ jsxc.storage = {
             data[variable] = value;
         }
 
-        jsxc.storage.setItem(key, data);
+        jsxc.storage.setItem(key, data, uk);
+    },
+    updateUserItem: function(key, variable, value){
+        return jsxc.storage.updateItem(key, variable, value, true);
     },
     /**
      * Inkrements value
@@ -2288,9 +2110,9 @@ jsxc.storage = {
      * @function
      * @param {String} key variablename
      */
-    ink: function(key) {
+    ink: function(key, uk) {
 
-        jsxc.storage.setItem(key, Number(jsxc.storage.getItem(key)) + 1);
+        jsxc.storage.setItem(key, Number(jsxc.storage.getItem(key, uk)) + 1, uk);
     },
     /**
      * Remove element from array or object
@@ -2298,8 +2120,8 @@ jsxc.storage = {
      * @param {string} name name of element in array or object
      * @returns {undefined}
      */
-    removeElement: function(key, name) {
-        var item = jsxc.storage.getItem(key);
+    removeElement: function(key, name, uk) {
+        var item = jsxc.storage.getItem(key, uk);
 
         if ($.isArray(item)) {
             item = $.grep(item, function(e) {
@@ -2310,7 +2132,215 @@ jsxc.storage = {
             delete item[name];
         }
 
-        jsxc.storage.setItem(key, item);
+        jsxc.storage.setItem(key, item, uk);
+    },
+    removeUserElement: function(key, name){
+        return jsxc.storage.removeElement(key, name, true);
+    },
+    /** 
+     * Triggered if changes are recognized
+     * @function
+     * @param {event} e Storageevent
+     * @param {String} e.key Keyname which triggered event
+     * @param {Object} e.oldValue Old Value for key
+     * @param {Object} e.newValue New Value for key
+     * @param {String} e.url
+     */
+    onStorage: function(e) {
+
+        //skip
+        if (e.key == jsxc.storage.prefix+'rid' || e.key == jsxc.storage.prefix+'lastActivity')
+            return;
+        
+        var key = e.key.replace(/^jsxc\.(?:[\w-]+-[\w-]+\.)?(.*)/i, '$1');
+
+        //Workaround for non-conform browser: Triggered event on every page (own)
+        if (jsxc.storageNotConform > 0 && jsxc.ls.length > 0) {
+
+            var val = e.newValue;
+            try {
+                val = JSON.parse(val);
+            } catch (e) {
+            }
+
+            var index = $.inArray(JSON.stringify({key: key, value: val}), jsxc.ls);
+
+            if (index >= 0) {
+
+                //confirm that the storage event is not fired regularly
+                if (jsxc.storageNotConform > 1) {
+                    window.clearTimeout(jsxc.toSNC);
+                    jsxc.storageNotConform = 1;
+                    jsxc.storage.setItem('storageNotConform', 1);
+                }
+
+                jsxc.ls.splice(index, 1);
+                return;
+            }
+        }
+
+        //Workaround for non-conform browser
+        if (e.oldValue == e.newValue) {
+            return;
+        }
+
+        var cid = key.replace(/^[a-z]+_(.*)/i, '$1');
+
+        if (key.match(/^chat_/)) {
+
+            data = JSON.parse(e.newValue)[0];
+
+            if (jsxc.chief && data.direction === 'out') {
+                jsxc.buddyList[cid].sendMsg(data.msg);
+            }
+
+            jsxc.gui.window._postMessage(cid, data.direction, data.msg);
+            return;
+        }
+
+        if (key.match(/^window_/)) {
+
+            if (!e.newValue) {
+                jsxc.gui.window._close(cid);
+                return;
+            }
+
+            if (!e.oldValue) {
+                jsxc.gui.window.open(cid);
+                return;
+            }
+
+            n = JSON.parse(e.newValue);
+
+            if (n.minimize)
+                jsxc.gui.window._hide(cid);
+            else
+                jsxc.gui.window._show(cid);
+
+            jsxc.gui.window.setText(cid, n.text);
+
+            return;
+        }
+
+        if (key.match(/^smp_/)) {
+
+            if (!e.newValue) {
+
+                jsxc.gui.dialog.close();
+
+                if (jsxc.chief)
+                    jsxc.buddyList[cid].sm.abort();
+
+                return;
+            }
+
+            n = JSON.parse(e.newValue);
+
+            if (typeof(n.data) != 'undefined') {
+
+                jsxc.otr.onSmpQuestion(cid, n.data);
+
+            } else if (jsxc.chief && n.sec) {
+                jsxc.gui.dialog.close();
+
+                jsxc.otr.sendSmpReq(cid, n.sec, n.quest);
+            }
+        }
+
+        if (!jsxc.chief && key.match(/^buddy_/)) {
+
+            if (!e.newValue) {
+                jsxc.gui.roster.purge(cid);
+                return;
+            }
+            if (!e.oldValue) {
+                jsxc.gui.roster.add(cid);
+                return;
+            }
+
+            n = JSON.parse(e.newValue);
+            o = JSON.parse(e.oldValue);
+
+            jsxc.gui.update(cid);
+
+            if (o.status !== n.status || o.sub !== n.sub)
+                jsxc.gui.roster.reorder(cid);
+        }
+
+        if (jsxc.chief && key.match(/^buddy_/)) {
+
+            if (!e.newValue) {
+                jsxc.xmpp.removeBuddy(o.jid);
+                return;
+            }
+
+            n = JSON.parse(e.newValue);
+            o = JSON.parse(e.oldValue);
+
+            if (o.transferReq !== n.transferReq) {
+                jsxc.storage.updateItem('buddy_' + cid, 'transferReq', -1);
+
+                if (n.transferReq === 0)
+                    jsxc.otr.goPlain(cid);
+                if (n.transferReq === 1)
+                    jsxc.otr.goEncrypt(cid);
+            }
+
+            if (o.name !== n.name) {
+                jsxc.gui.roster._rename(cid, n.name);
+            }
+        }
+
+        //logout
+        if (key == 'sid') {
+            if (!e.newValue) {
+//                if (jsxc.chief && jsxc.xmpp.conn) {
+//                    jsxc.xmpp.conn.disconnect();
+//                    jsxc.triggeredFromElement = true;
+//                }
+                jsxc.xmpp.logout();
+
+            }
+            return;
+        }
+
+        //react if someone ask, if there is a chief
+        if (jsxc.chief && key === 'alive') {
+            jsxc.storage.ink('alive');
+            return;
+        }
+
+        //chief alive
+        if (!jsxc.chief && (key == 'alive' || key == 'alive_busy') && !jsxc.triggeredFromElement) {
+
+            //reset timeout
+            window.clearTimeout(jsxc.to);
+            jsxc.to = window.setTimeout('jsxc.checkChief()', ((key == 'alive') ? jsxc.options.timeout : jsxc.options.busyTimeout) + jsxc.random(60));
+
+            //only call the first time
+            if (!jsxc.role_allocation)
+                jsxc.onSidekick();
+
+            return;
+        }
+
+        if (key === 'friendReq') {
+            n = JSON.parse(e.newValue);
+
+            if (n === null) {
+                jsxc.gui.dialog.close();
+            } else if (jsxc.chief && n.approve >= 0) {
+                jsxc.xmpp.resFriendReq(n.jid, n.approve);
+            } else if (!jsxc.chief && n.approve < 0) {
+                jsxc.gui.showApproveDialog(n.jid);
+            }
+        }
+
+        if (jsxc.chief && key.match(/^add_/)) {
+            n = JSON.parse(e.newValue);
+
+            jsxc.xmpp.addBuddy(n.username, n.alias);
+        }
     }
 };
 
@@ -2362,21 +2392,21 @@ jsxc.otr = {
                     jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.trying_to_start_private_conversation);
                     break;
                 case OTR.CONST.STATUS_AKE_SUCCESS:
-                    jsxc.storage.updateItem('buddy_' + cid, 'fingerprint', jsxc.buddyList[cid].their_priv_pk.fingerprint());
-                    jsxc.storage.updateItem('buddy_' + cid, 'msgstate', 1);
+                    jsxc.storage.updateUserItem('buddy_' + cid, 'fingerprint', jsxc.buddyList[cid].their_priv_pk.fingerprint());
+                    jsxc.storage.updateUserItem('buddy_' + cid, 'msgstate', 1);
                     jsxc.gui.window.postMessage(cid, 'sys', (jsxc.buddyList[cid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started);
                     break;
                 case OTR.CONST.STATUS_END_OTR:
-                    jsxc.storage.updateItem('buddy_' + cid, 'fingerprint', null);
+                    jsxc.storage.updateUserItem('buddy_' + cid, 'fingerprint', null);
 
                     if (jsxc.buddyList[cid].msgstate === 0) {   //we abort the private conversation
 
-                        jsxc.storage.updateItem('buddy_' + cid, 'msgstate', 0);
+                        jsxc.storage.updateUserItem('buddy_' + cid, 'msgstate', 0);
                         jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.private_conversation_aborted);
 
                     } else {   //the buddy abort the private conversation     
 
-                        jsxc.storage.updateItem('buddy_' + cid, 'msgstate', 2);
+                        jsxc.storage.updateUserItem('buddy_' + cid, 'msgstate', 2);
                         jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.your_buddy_closed_the_private_conversation_you_should_do_the_same);
                     }
                     break;
@@ -2393,18 +2423,18 @@ jsxc.otr = {
             switch (type) {
                 case 'question':    //verification request received
                     jsxc.otr.onSmpQuestion(cid, data);
-                    jsxc.storage.setItem('smp_' + cid, {data: data || null});
+                    jsxc.storage.setUserItem('smp_' + cid, {data: data || null});
                     break;
                 case 'trust':       //verification completed
                     if (jsxc.buddyList[cid].trust) {
                         jsxc.otr.backup(cid);
-                        jsxc.storage.updateItem('buddy_' + cid, 'trust', true);
+                        jsxc.storage.updateUserItem('buddy_' + cid, 'trust', true);
                         jsxc.gui.update(cid);
                         jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.conversation_is_now_verified);
                     } else {
                         jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.verification_fails);
                     }
-                    jsxc.storage.removeItem('smp_' + cid);
+                    jsxc.storage.removeUserItem('smp_' + cid);
                     jsxc.gui.dialog.close();
                     break;
                 default:
@@ -2449,7 +2479,7 @@ jsxc.otr = {
         }
 
         $('#jsxc_facebox a[rel=close]').click(function() {
-            jsxc.storage.removeItem('smp_' + cid);
+            jsxc.storage.removeUserItem('smp_' + cid);
 
             if (jsxc.chief)
                 jsxc.buddyList[cid].sm.abort();
@@ -2472,7 +2502,7 @@ jsxc.otr = {
      * @returns {undefined}
      */
     toggleTransfer: function(cid) {
-        if (jsxc.storage.getItem('buddy_' + cid).msgstate === 0) {
+        if (jsxc.storage.getUserItem('buddy_' + cid).msgstate === 0) {
             jsxc.otr.goEncrypt(cid);
         } else {
             jsxc.otr.goPlain(cid);
@@ -2487,7 +2517,7 @@ jsxc.otr = {
         if (jsxc.chief) {
             jsxc.buddyList[cid].sendQueryMsg();
         } else {
-            jsxc.storage.updateItem('buddy_' + cid, 'transferReq', 1);
+            jsxc.storage.updateUserItem('buddy_' + cid, 'transferReq', 1);
         }
     },
     /**
@@ -2502,7 +2532,7 @@ jsxc.otr = {
 
             jsxc.otr.backup(cid);
         } else {
-            jsxc.storage.updateItem('buddy_' + cid, 'transferReq', 0);
+            jsxc.storage.updateUserItem('buddy_' + cid, 'transferReq', 0);
         }
     },
     /**
@@ -2531,7 +2561,7 @@ jsxc.otr = {
         if (o.ake.otr_version && o.ake.otr_version !== '')
             r['otr_version'] = JSON.stringify(o.ake.otr_version);
 
-        jsxc.storage.setItem('otr_' + cid, r);
+        jsxc.storage.setUserItem('otr_' + cid, r);
     },
     /**
      * Restore old otr session
@@ -2539,7 +2569,7 @@ jsxc.otr = {
      */
     restore: function(cid) {
         var o = jsxc.buddyList[cid];
-        var d = jsxc.storage.getItem('otr_' + cid);
+        var d = jsxc.storage.getUserItem('otr_' + cid);
 
         if (o === null || d === null)
             return;
@@ -2567,7 +2597,7 @@ jsxc.otr = {
         if (jsxc.options.otr.priv)
             return;
 
-        if (jsxc.storage.getItem('key') === null) {
+        if (jsxc.storage.getUserItem('key') === null) {
 
             //Create own box, because buildin isn't fast enough
             var bg = $('<div/>').attr('id', 'jsxc_overlay');
@@ -2590,15 +2620,15 @@ jsxc.otr = {
             $('#jsxc_overlay').remove();
             $('#jsxc_waitAlert').remove();
 
-            jsxc.storage.setItem('key', dsa.packPrivate());
+            jsxc.storage.setUserItem('key', dsa.packPrivate());
             jsxc.options.otr.priv = dsa;
 
         } else {
             jsxc.debug('DSA key loaded');
-            jsxc.options.otr.priv = DSA.parsePrivate(jsxc.storage.getItem('key'));
+            jsxc.options.otr.priv = DSA.parsePrivate(jsxc.storage.getUserItem('key'));
         }
 
-        jsxc.storage.setItem('priv_fingerprint', jsxc.options.otr.priv.fingerprint());
+        jsxc.storage.setUserItem('priv_fingerprint', jsxc.options.otr.priv.fingerprint());
     }
 };
 
@@ -2645,11 +2675,11 @@ jsxc.notification = {
             jsxc.switchEvents({
                 'notificationready.jsxc': function() {
                     jsxc.notification.init();
-                    jsxc.storage.setItem('notification', true);
+                    jsxc.storage.setUserItem('notification', true);
                 },
                 'notificationfailure.jsxc': function() {
                     jsxc.options.notification = false;
-                    jsxc.storage.setItem('notification', false);
+                    jsxc.storage.setUserItem('notification', false);
                 }
             });
             setTimeout(function() {

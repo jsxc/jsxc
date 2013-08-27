@@ -14,6 +14,18 @@
         <input type="text" name="xmppResource" id="xmppResource" value="<?php p($_['xmppResource']); ?>" />
         <br />
         
+        <label for="iceUrl">ICE Url</label> 
+        <input type="text" name="iceUrl" id="iceUrl" value="<?php p($_['iceUrl']); ?>" />
+        <br />
+        
+        <label for="iceUsername">ICE Username</label> 
+        <input type="text" name="iceUsername" id="iceUrl" value="<?php p($_['iceUsername']); ?>" />
+        <br />
+        
+        <label for="iceCredential">ICE Credential</label> 
+        <input type="text" name="iceCredential" id="iceCredential" value="<?php p($_['iceCredential']); ?>" />
+        <br />
+        
         <span class="msg"></span>
         <br />
         

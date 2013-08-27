@@ -61,16 +61,15 @@ jsxc.webrtc = {
             console.error('No jingle plugin found!');
             return;
         }
+        
+        if(!jsxc.storage.getItem('iceConfig')){
+            console.warn('No ICE config found!');
+            return;
+        }
 
         this.conn.jingle.PRANSWER = false;
         this.conn.jingle.AUTOACCEPT = false;
-        this.conn.jingle.ice_config = {iceServers: [
-                {
-                url: 'turn:numb.viagenie.ca',
-                credential: 'muazkh',
-                username: 'webrtc@live.com'
-            }
-            ]};
+        this.conn.jingle.ice_config = jsxc.storage.getItem('iceConfig');
         this.conn.jingle.MULTIPARTY = false;
         this.conn.jingle.pc_constraints = RTC.pc_constraints;
 
