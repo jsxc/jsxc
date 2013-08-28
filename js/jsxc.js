@@ -85,7 +85,7 @@ $(function() {
             pass: '#password',
             preJid: function(jid) {
                 var data;
-
+                
                 $.ajax(OC.filePath('ojsxc', 'ajax', 'getsettings.php'), {
                     async: false,
                     success: function(d) {
@@ -97,15 +97,6 @@ $(function() {
                 var domain = data.xmppDomain;
 
                 jsxc.storage.setItem('boshUrl', data.boshUrl);
-                
-                if(data.iceUrl && data.iceUsername && data.iceCredential){
-                    var iceConfig = {iceServers: [{
-                        url: data.iceUrl,
-                        credential: data.iceCredential,
-                        username: data.iceUsername
-                    }]};
-                    jsxc.storage.setItem('iceConfig', iceConfig);
-                }
                 
                 if (jid.match(/@(.*)$/))
                     return (jid.match(/\/(.*)$/)) ? jid : jid + resource;
@@ -119,7 +110,8 @@ $(function() {
             console.log(msg);
         },
         rosterAppend: 'body',
-        root: oc_appswebroots.ojsxc
+        root: oc_appswebroots.ojsxc,
+        turnCredentialsPath: OC.filePath('ojsxc', 'ajax', 'getturncredentials.php'),
     });
 
 
