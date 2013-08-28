@@ -118,7 +118,8 @@ $(function() {
         debug: function(msg) {
             console.log(msg);
         },
-        rosterAppend: 'body'
+        rosterAppend: 'body',
+        root: oc_appswebroots.ojsxc
     });
 
 

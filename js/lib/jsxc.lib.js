@@ -423,7 +423,7 @@ jsxc.options = {
 
     notification: true,
             
-    userKeys: ['buddy_', 'key', 'priv_fingerprint', 'roster', 'windowlist', 'window_', 'otr_', 'chat_', 'buddylist']
+    root: '', //Root of jsxc
 };
 
 /**
@@ -1277,7 +1277,7 @@ jsxc.gui.window = {
             jsxc.gui.window.highlight(cid);
 
         $.each(jsxc.gui.emotions, function(i, val) {
-            msg = msg.replace(val[2], '<img alt="$1" title="$1" src="/owncloud/apps/ojsxc/img/emotions/' + val[1] + '"/>')
+            msg = msg.replace(val[2], '<img alt="$1" title="$1" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/>')
         });
 
         $('#jsxc_window_' + cid + ' .jsxc_textarea').append(
@@ -1340,7 +1340,8 @@ jsxc.gui.template = {
         //common placeholder
         var ph = {
             my_priv_fingerprint: jsxc.storage.getUserItem('priv_fingerprint') ? jsxc.storage.getUserItem('priv_fingerprint').replace(/(.{8})/g, '$1 ') : jsxc.l.no_available,
-            my_jid: jsxc.storage.getItem('jid')
+            my_jid: jsxc.storage.getItem('jid'),
+            root: jsxc.options.root
         };
 
         //placeholder depending on cid
@@ -1490,7 +1491,7 @@ jsxc.gui.template = {
     waitAlert:
             '<h3>%%Please_wait%%</h3>\n\
         <p>{{msg}}</p>\n\
-        <p class="jsxc_center"><img src="/owncloud/apps/ojsxc/img/loading.gif" alt="wait" /></p>',
+        <p class="jsxc_center"><img src="{{root}}/img/loading.gif" alt="wait" /></p>',
     alert:
             '<h3>%%Alert%%</h3>\n\
         <p>{{msg}}</p>\n\
