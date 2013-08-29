@@ -16,16 +16,11 @@
 
 /*
  * TODO:
- * - (status notification)
  * - (CSPRNG)
  * - (make window list scrollable)
  * - add roster slide from ojsxc
  * - user info
  * - translate strings
- * - multiuser storage
- * - fix bosh with ejabberd
- * - resource-handling
- * - key generation only if required
  * - save unread message notification
  */
 
@@ -716,6 +711,8 @@ jsxc.gui = {
 
             jsxc.gui.dialog.close();
         });
+        
+        $('#jsxc_dialog .jsxc_close').click(jsxc.gui.dialog.close);
     },
     /**
      * Create and show dialog to remove a buddy
@@ -738,6 +735,8 @@ jsxc.gui = {
 
             jsxc.gui.dialog.close();
         });
+        
+        $('#jsxc_dialog .jsxc_close').click(jsxc.gui.dialog.close);
     },
     /**
      * Create and show a wait dialog
@@ -756,6 +755,8 @@ jsxc.gui = {
      */
     showAlert: function(msg) {
         jsxc.gui.dialog.open(jsxc.gui.template.get('alert', null, msg));
+        
+        $('#jsxc_dialog .jsxc_close').click(jsxc.gui.dialog.close);
     },
     /**
      * Create and show a auth fail dialog
@@ -1091,7 +1092,11 @@ jsxc.gui.window = {
             jsxc.storage.setUserItem('windowlist', wl);
 
             //init window element in storage
-            jsxc.storage.setUserItem('window_' + cid, {minimize: true, text: ''});
+            jsxc.storage.setUserItem('window_' + cid, {minimize: true, text: '', unread: false});
+        } else {
+            
+            if(jsxc.storage.getUserItem('window_'+cid).unread)
+                win.addClass('jsxc_unreadMsg');
         }
 
         jsxc.gui.window.restoreChat(cid);
@@ -1178,6 +1183,7 @@ jsxc.gui.window = {
 
         //remove unread flag
         jsxc.gui.getWindow(cid).removeClass('jsxc_unreadMsg');
+        jsxc.storage.updateUserItem('window_' + cid, 'unread', false);
 
         //If the area is hidden, the scrolldown function doesn't work. So we call it here.
         jsxc.gui.window.scrollDown(cid);
@@ -1288,8 +1294,10 @@ jsxc.gui.window = {
         jsxc.gui.window.scrollDown(cid);
 
         //if window is hidden set unread flag
-        if (win.find('.jsxc_window').is(':hidden') && jsxc.restoreCompleted && !restore)
+        if (win.find('.jsxc_window').is(':hidden') && jsxc.restoreCompleted && !restore){
             win.addClass('jsxc_unreadMsg');
+            jsxc.storage.updateUserItem('window_' + cid, 'unread', true);
+        }
     },
     /**
      * Set text into input area
@@ -1417,7 +1425,7 @@ jsxc.gui.template = {
           <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\n\
           <p><strong>%%Buddy_fingerprint%%</strong><br />\n\
           <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\n\
-          <p class="jsxc_right"><a href="#" class="button">%%Close%%</a></p>\n\
+          <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a></p>\n\
         </div>',
     chatWindow:
             '<li>\n\
@@ -1467,7 +1475,7 @@ jsxc.gui.template = {
             <p><label for="jsxc_password">%%Password%%:</label>\n\
                <input type="password" name="password" required="required" id="jsxc_password" /></p>\n\
             <div class="bottom_submit_section">\n\
-                <input type="reset" class="button" name="clear" value="%%Cancel%%"/>\n\
+                <input type="reset" class="button jsxc_close" name="clear" value="%%Cancel%%"/>\n\
                 <input type="submit" class="button creation" name="commit" value="%%Connect%%"/>\n\
             </div>\n\
         </form>',
@@ -1479,7 +1487,7 @@ jsxc.gui.template = {
          <p><label for="jsxc_alias">%%Alias%%:</label>\n\
             <input type="text" name="alias" id="jsxc_alias" /></p>\n\
          <p class="jsxc_right">\n\
-            <a href="#" class="button">%%Close%%</a> <a href="#" class="button creation">%%Add%%</a>\n\
+            <a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Add%%</a>\n\
          </p>',
     approveDialog:
             '<h3>%%Subscription_request%%</h3>\n\
@@ -1488,7 +1496,7 @@ jsxc.gui.template = {
     removeDialog:
             '<h3>Remove Buddy</h3>\n\
         <p>%%You_are_about_to_remove_%%</p>\n\
-        <p class="jsxc_right"><a href="#" class="button jsxc_cancel">%%Cancel%%</a> <a href="#" class="button creation">%%Continue%%</a></p>',
+        <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close">%%Cancel%%</a> <a href="#" class="button creation">%%Continue%%</a></p>',
     waitAlert:
             '<h3>%%Please_wait%%</h3>\n\
         <p>{{msg}}</p>\n\
@@ -1496,7 +1504,7 @@ jsxc.gui.template = {
     alert:
             '<h3>%%Alert%%</h3>\n\
         <p>{{msg}}</p>\n\
-        <p class="jsxc_right"><a href="#" class="button jsxc_cancel">%%Ok%%</a></p>',
+        <p class="jsxc_right"><a href="#" class="button jsxc_close jsxc_cancel">%%Ok%%</a></p>',
     authFailDialog:
             '<h3>%%Login_failed%%</h3>\n\
         <p>%%Sorry_we_cant_authentikate_%%</p>\n\
@@ -1507,7 +1515,7 @@ jsxc.gui.template = {
     confirmDialog:
             '<p>{{msg}}</p>\n\
         <p class="jsxc_right">\n\
-            <button class="button jsxc_cancel">%%Dismiss%%</button>\n\
+            <button class="button jsxc_cancel jsxc_close">%%Dismiss%%</button>\n\
             <button class="button creation">%%Confirm%%</button>\n\
         </p>'
 };
