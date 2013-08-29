@@ -569,8 +569,9 @@ jsxc.gui = {
      * @param {String} cid
      */
     showFingerprints: function(cid) {
-
         jsxc.gui.dialog.open(jsxc.gui.template.get('fingerprintsDialog', cid));
+        
+        $('#jsxc_dialog .jsxc_close').click(jsxc.gui.dialog.close);
     },
     /**
      * Creates and show the verification dialog
@@ -2283,13 +2284,13 @@ jsxc.storage = {
 
         if (jsxc.chief && key.match(/^buddy_/)) {
 
+            n = JSON.parse(e.newValue);
+            o = JSON.parse(e.oldValue);
+
             if (!e.newValue) {
                 jsxc.xmpp.removeBuddy(o.jid);
                 return;
             }
-
-            n = JSON.parse(e.newValue);
-            o = JSON.parse(e.oldValue);
 
             if (o.transferReq !== n.transferReq) {
                 jsxc.storage.updateItem('buddy_' + cid, 'transferReq', -1);

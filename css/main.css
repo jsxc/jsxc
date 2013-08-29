@@ -327,7 +327,7 @@ div.jsxc_chatmessage img{
     margin:0px;
     line-height:16px; 
 }
-.jsxc_close{
+.jsxc_window .jsxc_close{
     text-transform: uppercase;
     color: #939393;
     font-family:Arial;
@@ -337,7 +337,7 @@ div.jsxc_chatmessage img{
     float:right;
     padding:3px;
 }
-.jsxc_close:hover{
+.jsxc_window .jsxc_close:hover{
     color: #FAFAFA;
 }
 
