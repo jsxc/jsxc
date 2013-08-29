@@ -26,6 +26,7 @@
  * - fix bosh with ejabberd
  * - resource-handling
  * - key generation only if required
+ * - save unread message notification
  */
 
 /**
@@ -1376,7 +1377,7 @@ jsxc.gui.template = {
             jsxc.debug('Template not available: ' + name);
             return name;
         }
-    },
+    },//@TODO add onclick to close links
     authenticationDialog:
             '<div id="jsxc_facebox">\n\
             <h3>Verification</h3>\n\
@@ -1396,18 +1397,18 @@ jsxc.gui.template = {
               <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\n\
               <p><strong>%%Buddy_fingerprint%%</strong><br />\n\
               <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\n\
-              <p class="jsxc_right"><a href="#" onclick="jsxc.gui.dialog.close()">%%Close%%</a> <a href="#" class="button creation">%%Compared%%</a></p>\n\
+              <p class="jsxc_right"><a href="#">%%Close%%</a> <a href="#" class="button creation">%%Compared%%</a></p>\n\
             </div>\n\
             <div>\n\
               <p class=".jsxc_explanation">%%To_authenticate_using_a_question_%%</p>\n\
               <p><label for="jsxc_quest">%%Question%%:</label><input type="text" name="quest" id="jsxc_quest" /></p>\n\
               <p><label for="jsxc_secret2">%%Secret%%:</label><input type="text" name="secret2" id="jsxc_secret2" /></p>\n\
-              <p class="jsxc_right"><a href="#" class="button" onclick="jsxc.gui.dialog.close()">%%Close%%</a> <a href="#" class="button creation">%%Ask%%</a></p>\n\
+              <p class="jsxc_right"><a href="#" class="button">%%Close%%</a> <a href="#" class="button creation">%%Ask%%</a></p>\n\
             </div>\n\
             <div>\n\
               <p class=".jsxc_explanation">%%To_authenticate_pick_a_secret_%%</p>\n\
               <p><label for="jsxc_secret">%%Secret%%:</label><input type="text" name="secret" id="jsxc_secret" /></p>\n\
-              <p class="jsxc_right"><a href="#" class="button" onclick="jsxc.gui.dialog.close()">%%Close%%</a> <a href="#" class="button creation">%%Compare%%</a></p>\n\
+              <p class="jsxc_right"><a href="#" class="button">%%Close%%</a> <a href="#" class="button creation">%%Compare%%</a></p>\n\
             </div>\n\
         </div>',
     fingerprintsDialog:
@@ -1416,7 +1417,7 @@ jsxc.gui.template = {
           <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\n\
           <p><strong>%%Buddy_fingerprint%%</strong><br />\n\
           <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\n\
-          <p class="jsxc_right"><a href="#" class="button" onclick="jsxc.gui.dialog.close()">%%Close%%</a></p>\n\
+          <p class="jsxc_right"><a href="#" class="button">%%Close%%</a></p>\n\
         </div>',
     chatWindow:
             '<li>\n\
@@ -1466,7 +1467,7 @@ jsxc.gui.template = {
             <p><label for="jsxc_password">%%Password%%:</label>\n\
                <input type="password" name="password" required="required" id="jsxc_password" /></p>\n\
             <div class="bottom_submit_section">\n\
-                <input type="reset" class="button" name="clear" onclick="jsxc.gui.dialog.close()" value="%%Cancel%%"/>\n\
+                <input type="reset" class="button" name="clear" value="%%Cancel%%"/>\n\
                 <input type="submit" class="button creation" name="commit" value="%%Connect%%"/>\n\
             </div>\n\
         </form>',
@@ -1478,7 +1479,7 @@ jsxc.gui.template = {
          <p><label for="jsxc_alias">%%Alias%%:</label>\n\
             <input type="text" name="alias" id="jsxc_alias" /></p>\n\
          <p class="jsxc_right">\n\
-            <a href="#" class="button" onclick="jsxc.gui.dialog.close()">%%Close%%</a> <a href="#" class="button creation">%%Add%%</a>\n\
+            <a href="#" class="button">%%Close%%</a> <a href="#" class="button creation">%%Add%%</a>\n\
          </p>',
     approveDialog:
             '<h3>%%Subscription_request%%</h3>\n\
@@ -1487,7 +1488,7 @@ jsxc.gui.template = {
     removeDialog:
             '<h3>Remove Buddy</h3>\n\
         <p>%%You_are_about_to_remove_%%</p>\n\
-        <p class="jsxc_right"><a href="#" class="button jsxc_cancel" onclick="jsxc.gui.dialog.close()">%%Cancel%%</a> <a href="#" class="button creation">%%Continue%%</a></p>',
+        <p class="jsxc_right"><a href="#" class="button jsxc_cancel">%%Cancel%%</a> <a href="#" class="button creation">%%Continue%%</a></p>',
     waitAlert:
             '<h3>%%Please_wait%%</h3>\n\
         <p>{{msg}}</p>\n\
@@ -1495,19 +1496,19 @@ jsxc.gui.template = {
     alert:
             '<h3>%%Alert%%</h3>\n\
         <p>{{msg}}</p>\n\
-        <p class="jsxc_right"><a href="#" class="button jsxc_cancel" onclick="jsxc.gui.dialog.close()">%%Ok%%</a></p>',
+        <p class="jsxc_right"><a href="#" class="button jsxc_cancel">%%Ok%%</a></p>',
     authFailDialog:
             '<h3>%%Login_failed%%</h3>\n\
         <p>%%Sorry_we_cant_authentikate_%%</p>\n\
         <p class="jsxc_right">\n\
-            <button class="button jsxc_cancel" onclick="jsxc.gui.dialog.close()">%%Continue%%</button>\n\
+            <button class="button jsxc_cancel">%%Continue%%</button>\n\
             <button class="button creation">%%Retry%%</button>\n\
         </p>',
     confirmDialog:
             '<p>{{msg}}</p>\n\
         <p class="jsxc_right">\n\
-            <button class="button jsxc_cancel" onclick="jsxc.gui.dialog.close()">%%Dismiss%%</button>\n\
-            <button class="button creation" onclick="jsxc.gui.dialog.close()">%%Confirm%%</button>\n\
+            <button class="button jsxc_cancel">%%Dismiss%%</button>\n\
+            <button class="button creation">%%Confirm%%</button>\n\
         </p>'
 };
 
@@ -1762,7 +1763,7 @@ jsxc.xmpp = {
             buddies.push(cid);
 
             if (jsxc.storage.getUserItem('buddy_' + cid))
-                jsxc.storage.updateUserItem('buddy_' + cid, {name: name, status: 0, sub: sub});
+                jsxc.storage.updateUserItem('buddy_' + cid, {jid: jid, name: name, status: 0, sub: sub});
             else
                 jsxc.storage.setUserItem('buddy_' + cid, {'jid': jid, 'name': name, 'status': 0, sub: sub, 'msgstate': 0, 'transferReq': -1, 'trust': false, 'fingerprint': null});
 
@@ -1836,13 +1837,13 @@ jsxc.xmpp = {
          * </presence>
          */
         var ptype = $(presence).attr('type');
-        var jid = $(presence).attr('from');
-        var from = Strophe.getBareJidFromJid(jid);
+        var from = $(presence).attr('from');
+        var jid = Strophe.getBareJidFromJid(from);
         var to = Strophe.getBareJidFromJid($(presence).attr('to'));
-        var cid = jsxc.jidToCid(from);
+        var cid = jsxc.jidToCid(jid);
         var data = jsxc.storage.getUserItem('buddy_' + cid);
        
-        if (from === to)
+        if (jid === to)
             return true;
 
         if (ptype === 'error') {
@@ -1852,8 +1853,8 @@ jsxc.xmpp = {
 
         //incoming friendship request
         if (ptype === 'subscribe') {
-            jsxc.storage.setUserItem('friendReq', {jid: from, approve: -1});
-            jsxc.gui.showApproveDialog(from);
+            jsxc.storage.setUserItem('friendReq', {jid: jid, approve: -1});
+            jsxc.gui.showApproveDialog(jid);
 
             return true;
         }
@@ -1866,12 +1867,13 @@ jsxc.xmpp = {
             else
                 data.status = 1;
         }
-        jsxc.debug(from + ' <> ' + data.status  + ' <> ' +  jsxc.status[data.status]);
-        //If we know the full jid, we will use it
-//        if (jsxc.el_exists('#jsxc_window_' + cid))
-//            $('#jsxc_window_' + cid).data('jid', jid);
+        
+        jsxc.debug(jid + ' <> ' + data.status  + ' <> ' +  jsxc.status[data.status]);
 
         data.jid = jid;
+        
+        if(jsxc.el_exists('#jsxc_window_' + cid))
+            jsxc.gui.getWindow(cid).data('jid', jid);  
 
         jsxc.storage.setUserItem('buddy_' + cid, data);
 
@@ -1905,8 +1907,13 @@ jsxc.xmpp = {
         $(document).trigger('onmessage.jsxc', [from, body]);
 
         var win = jsxc.gui.window.init(cid);
-
-        win.data('jid', from);  //If we now the full jid, we use it
+        
+        //If we now the full jid, we use it
+        win.data('jid', from);  
+        jsxc.storage.updateUserItem('buddy_' + cid, {jid: from});
+        
+        console.log(from);
+        console.log(jsxc.storage.getUserItem('buddy_'+cid));
 
         //create related otr object
         if (jsxc.chief && !jsxc.buddyList[cid])
@@ -2086,11 +2093,9 @@ jsxc.storage = {
                     jsxc.debug('Variable %s doesn\'t exist in %s.', key, variable);
                     return true;
                 }
-
+                
                 data[key] = val;
             });
-            
-            uk = value;
         } else {
             if (typeof (data[variable]) === 'undefined') {
                 jsxc.debug('Variable %s doesn\'t exist.', variable);
@@ -2099,7 +2104,7 @@ jsxc.storage = {
 
             data[variable] = value;
         }
-
+        
         jsxc.storage.setItem(key, data, uk);
     },
     updateUserItem: function(key, variable, value){
@@ -2675,10 +2680,12 @@ jsxc.notification = {
         $(document).one('onmessage.jsxc', function() {
             jsxc.switchEvents({
                 'notificationready.jsxc': function() {
+                    jsxc.gui.dialog.close();
                     jsxc.notification.init();
                     jsxc.storage.setUserItem('notification', true);
                 },
                 'notificationfailure.jsxc': function() {
+                    jsxc.gui.dialog.close();
                     jsxc.options.notification = false;
                     jsxc.storage.setUserItem('notification', false);
                 }
