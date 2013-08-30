@@ -16,10 +16,8 @@
 
 /*
  * TODO:
- * - (make window list scrollable)
  * - add roster slide from ojsxc
  * - user info
- * - translate strings
  */
 
 /**
@@ -373,8 +371,12 @@ var jsxc = {
     },
     isHidden: function() {
         return document.hidden || document.webkitHidden || document.mozHidden || document.msHidden;
+    },
+    translate: function(text){
+        return text.replace(/%%([a-zA-Z0-9_-}{]+)%%/g, function(s, key) {
+                return jsxc.l[key.replace(/ /gi, '_')] || key.replace(/_/gi, ' ');
+            });
     }
-
 };
 
 /**
@@ -807,6 +809,10 @@ jsxc.gui.roster = {
         $('#jsxc_roster .jsxc_addBuddy').click(function() {
             jsxc.gui.showContactDialog();
         });
+        
+        $('#jsxc_toggleRoster').click(function(){
+            jsxc.gui.roster.toggle();
+        })
 
         $('#jsxc_roster ul').slimScroll({
             distance: '3px',
@@ -815,6 +821,11 @@ jsxc.gui.roster = {
             color: '#fff',
             opacity: '0.5'
         });
+        
+        if (jsxc.storage.getUserItem('roster') == 'hidden') {
+            $('#jsxc_roster').css('right', '-200px');
+            $('#jsxc_windowList > ul').css('paddingRight', '10px');
+        }
 
         $(document).trigger('ready.roster.jsxc');
     },
@@ -961,6 +972,24 @@ jsxc.gui.roster = {
 
         jsxc.storage.updateUserItem('buddy_' + cid, 'name', newname);
         jsxc.gui.update(cid);
+    },
+    
+    toggle: function(d) {
+        var roster = $('#jsxc_roster');
+        var wl = $('#jsxc_windowList > ul');
+
+        var duration = d || 500;
+
+        var roster_width = roster.innerWidth();
+        var roster_right = parseFloat($('#jsxc_roster').css('right'));
+        var state = (roster_right < 0)? 'shown' : 'hidden';
+
+        jsxc.storage.setUserItem('roster', state);
+
+        roster.animate({right: ((roster_width + roster_right) * -1) + 'px'}, duration);
+        wl.animate({paddingRight: (10 - roster_right) + 'px'}, duration);
+
+        $(document).trigger('toggle.roster.jsxc', [state, duration]);
     }
 
 };
@@ -1373,12 +1402,12 @@ jsxc.gui.template = {
         var ret = jsxc.gui.template[name];
 
         if (typeof(ret) === 'string') {
-            ret = ret.replace(/%%([a-zA-Z0-9_-}{]+)%%/g, function(s, key) {
-                return jsxc.l[key] || key.replace(/_/gi, ' ');
-            });
             ret = ret.replace(/\{\{([a-zA-Z0-9_-]+)\}\}/g, function(s, key) {
                 return ph[key] || s;
             });
+            
+            ret = jsxc.translate(ret);
+            
             return ret;
         } else {
             jsxc.debug('Template not available: ' + name);
@@ -1386,136 +1415,137 @@ jsxc.gui.template = {
         }
     },//@TODO add onclick to close links
     authenticationDialog:
-            '<div id="jsxc_facebox">\n\
-            <h3>Verification</h3>\n\
-            <p>%%Authenticating_a_buddy_helps_%%</p>\n\
-            <div>\n\
-              <p style="margin:0px;">%%How_do_you_want_to_authenticate_your_buddy%%</p>\n\
-              <select size="1">\n\
-                <option>%%Select_method%%</option>\n\
-                <option>%%Manual%%</option>\n\
-                <option>%%Question%%</option>\n\
-                <option>%%Secret%%</option>\n\
-              </select>\n\
-            </div>\n\
-            <div>\n\
-              <p class=".jsxc_explanation">%%To_verify_the_fingerprint_%%</p>\n\
-              <p><strong>%%Your_fingerprint%%</strong><br />\n\
-              <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\n\
-              <p><strong>%%Buddy_fingerprint%%</strong><br />\n\
-              <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\n\
-              <p class="jsxc_right"><a href="#">%%Close%%</a> <a href="#" class="button creation">%%Compared%%</a></p>\n\
-            </div>\n\
-            <div>\n\
-              <p class=".jsxc_explanation">%%To_authenticate_using_a_question_%%</p>\n\
-              <p><label for="jsxc_quest">%%Question%%:</label><input type="text" name="quest" id="jsxc_quest" /></p>\n\
-              <p><label for="jsxc_secret2">%%Secret%%:</label><input type="text" name="secret2" id="jsxc_secret2" /></p>\n\
-              <p class="jsxc_right"><a href="#" class="button">%%Close%%</a> <a href="#" class="button creation">%%Ask%%</a></p>\n\
-            </div>\n\
-            <div>\n\
-              <p class=".jsxc_explanation">%%To_authenticate_pick_a_secret_%%</p>\n\
-              <p><label for="jsxc_secret">%%Secret%%:</label><input type="text" name="secret" id="jsxc_secret" /></p>\n\
-              <p class="jsxc_right"><a href="#" class="button">%%Close%%</a> <a href="#" class="button creation">%%Compare%%</a></p>\n\
-            </div>\n\
+            '<div id="jsxc_facebox">\
+            <h3>Verification</h3>\
+            <p>%%Authenticating_a_buddy_helps_%%</p>\
+            <div>\
+              <p style="margin:0px;">%%How_do_you_want_to_authenticate_your_buddy%%</p>\
+              <select size="1">\
+                <option>%%Select_method%%</option>\
+                <option>%%Manual%%</option>\
+                <option>%%Question%%</option>\
+                <option>%%Secret%%</option>\
+              </select>\
+            </div>\
+            <div>\
+              <p class=".jsxc_explanation">%%To_verify_the_fingerprint_%%</p>\
+              <p><strong>%%Your_fingerprint%%</strong><br />\
+              <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
+              <p><strong>%%Buddy_fingerprint%%</strong><br />\
+              <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\
+              <p class="jsxc_right"><a href="#">%%Close%%</a> <a href="#" class="button creation">%%Compared%%</a></p>\
+            </div>\
+            <div>\
+              <p class=".jsxc_explanation">%%To_authenticate_using_a_question_%%</p>\
+              <p><label for="jsxc_quest">%%Question%%:</label><input type="text" name="quest" id="jsxc_quest" /></p>\
+              <p><label for="jsxc_secret2">%%Secret%%:</label><input type="text" name="secret2" id="jsxc_secret2" /></p>\
+              <p class="jsxc_right"><a href="#" class="button">%%Close%%</a> <a href="#" class="button creation">%%Ask%%</a></p>\
+            </div>\
+            <div>\
+              <p class=".jsxc_explanation">%%To_authenticate_pick_a_secret_%%</p>\
+              <p><label for="jsxc_secret">%%Secret%%:</label><input type="text" name="secret" id="jsxc_secret" /></p>\
+              <p class="jsxc_right"><a href="#" class="button">%%Close%%</a> <a href="#" class="button creation">%%Compare%%</a></p>\
+            </div>\
         </div>',
     fingerprintsDialog:
-            '<div>\n\
-          <p><strong>%%Your_fingerprint%%</strong><br />\n\
-          <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\n\
-          <p><strong>%%Buddy_fingerprint%%</strong><br />\n\
-          <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\n\
-          <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a></p>\n\
+            '<div>\
+          <p><strong>%%Your_fingerprint%%</strong><br />\
+          <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
+          <p><strong>%%Buddy_fingerprint%%</strong><br />\
+          <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\
+          <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a></p>\
         </div>',
     chatWindow:
-            '<li>\n\
-            <div class="jsxc_bar">\n\
-                <div class="jsxc_name"/>\n\
-                <div class="jsxc_cycle"/>\n\
-            </div>\n\
-            <div class="jsxc_window">\n\
-                <div class="jsxc_tools">\n\
-                    <div class="jsxc_settings">\n\
-                        <ul>\n\
-                            <li class="jsxc_fingerprints">%%Fingerprints%%</li>\n\
-                            <li class="jsxc_verification">%%Authentifikation%%</li>\n\
-                            <li class="jsxc_transfer">%%start_private%%</li>\n\
-                            <li class="jsxc_clear">%%clear_history%%</li>\n\
-                        </ul>\n\
-                    </div>\n\
-                    <div class="jsxc_transfer"/>\n\
-                    <span class="jsxc_close">X</span>\n\
-                </div>\n\
-                <div class="jsxc_textarea"/>\n\
-                <input type="text" class="jsxc_textinput jsxc_chatmessage jsxc_out" placeholder="...%%Message%%"/>\n\
-            </div>\n\
+            '<li>\
+            <div class="jsxc_bar">\
+                <div class="jsxc_name"/>\
+                <div class="jsxc_cycle"/>\
+            </div>\
+            <div class="jsxc_window">\
+                <div class="jsxc_tools">\
+                    <div class="jsxc_settings">\
+                        <ul>\
+                            <li class="jsxc_fingerprints">%%Fingerprints%%</li>\
+                            <li class="jsxc_verification">%%Authentifikation%%</li>\
+                            <li class="jsxc_transfer">%%start_private%%</li>\
+                            <li class="jsxc_clear">%%clear_history%%</li>\
+                        </ul>\
+                    </div>\
+                    <div class="jsxc_transfer"/>\
+                    <span class="jsxc_close">X</span>\
+                </div>\
+                <div class="jsxc_textarea"/>\
+                <input type="text" class="jsxc_textinput jsxc_chatmessage jsxc_out" placeholder="...%%Message%%"/>\
+            </div>\
         </li>',
     roster:
-            '<div id="jsxc_roster">\n\
-            <ul></ul>\n\
-            <div class="jsxc_addBuddy">+ %%Add_buddy%%</div>\n\
+            '<div id="jsxc_roster">\
+            <ul></ul>\
+            <div class="jsxc_addBuddy">+ %%Add_buddy%%</div>\
+            <div id="jsxc_toggleRoster"></div>\
         </div>',
     windowList:
-            '<div id="jsxc_windowList">\n\
-            <ul></ul>\n\
+            '<div id="jsxc_windowList">\
+            <ul></ul>\
         </div>',
     rosterBuddy:
-            '<li>\n\
-            <div class="jsxc_name"/>\n\
-            <div class="jsxc_options">\n\
-                <div class="jsxc_rename" title="%%rename_buddy%%"></div>\n\
-                <div class="jsxc_delete" title="%%delete_buddy%%">X</div>\n\
-            </div>\n\
+            '<li>\
+            <div class="jsxc_name"/>\
+            <div class="jsxc_options">\
+                <div class="jsxc_rename" title="%%rename_buddy%%"></div>\
+                <div class="jsxc_delete" title="%%delete_buddy%%">X</div>\
+            </div>\
         </li>',
     loginBox:
-            '<h3>%%Login%%</h3>\n\
-        <form method="get">\n\
-            <p><label for="jsxc_username">%%Username%%:</label>\n\
-               <input type="text" name="username" id="jsxc_username" required="required" value="{{my_jid}}"/></p>\n\
-            <p><label for="jsxc_password">%%Password%%:</label>\n\
-               <input type="password" name="password" required="required" id="jsxc_password" /></p>\n\
-            <div class="bottom_submit_section">\n\
-                <input type="reset" class="button jsxc_close" name="clear" value="%%Cancel%%"/>\n\
-                <input type="submit" class="button creation" name="commit" value="%%Connect%%"/>\n\
-            </div>\n\
+            '<h3>%%Login%%</h3>\
+        <form method="get">\
+            <p><label for="jsxc_username">%%Username%%:</label>\
+               <input type="text" name="username" id="jsxc_username" required="required" value="{{my_jid}}"/></p>\
+            <p><label for="jsxc_password">%%Password%%:</label>\
+               <input type="password" name="password" required="required" id="jsxc_password" /></p>\
+            <div class="bottom_submit_section">\
+                <input type="reset" class="button jsxc_close" name="clear" value="%%Cancel%%"/>\
+                <input type="submit" class="button creation" name="commit" value="%%Connect%%"/>\
+            </div>\
         </form>',
     contactDialog:
-            '<h3>%%Add_buddy%%</h3>\n\
-         <p class=".jsxc_explanation">%%Type_in_the_full_username_%%</p>\n\
-         <p><label for="jsxc_username">%%Username%%:</label>\n\
-            <input type="text" name="username" id="jsxc_username" required="required" /></p>\n\
-         <p><label for="jsxc_alias">%%Alias%%:</label>\n\
-            <input type="text" name="alias" id="jsxc_alias" /></p>\n\
-         <p class="jsxc_right">\n\
-            <a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Add%%</a>\n\
+            '<h3>%%Add_buddy%%</h3>\
+         <p class=".jsxc_explanation">%%Type_in_the_full_username_%%</p>\
+         <p><label for="jsxc_username">%%Username%%:</label>\
+            <input type="text" name="username" id="jsxc_username" required="required" /></p>\
+         <p><label for="jsxc_alias">%%Alias%%:</label>\
+            <input type="text" name="alias" id="jsxc_alias" /></p>\
+         <p class="jsxc_right">\
+            <a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Add%%</a>\
          </p>',
     approveDialog:
-            '<h3>%%Subscription_request%%</h3>\n\
-        <p>%%You_have_a_request_from%% <b class="jsxc_their_jid"></b>.</p>\n\
+            '<h3>%%Subscription_request%%</h3>\
+        <p>%%You_have_a_request_from%% <b class="jsxc_their_jid"></b>.</p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_deny">%%Deny%%</a> <a href="#" class="button creation jsxc_approve">%%Approve%%</a></p>',
     removeDialog:
-            '<h3>Remove Buddy</h3>\n\
-        <p>%%You_are_about_to_remove_%%</p>\n\
+            '<h3>Remove Buddy</h3>\
+        <p>%%You_are_about_to_remove_%%</p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close">%%Cancel%%</a> <a href="#" class="button creation">%%Continue%%</a></p>',
     waitAlert:
-            '<h3>%%Please_wait%%</h3>\n\
-        <p>{{msg}}</p>\n\
+            '<h3>%%Please_wait%%</h3>\
+        <p>{{msg}}</p>\
         <p class="jsxc_center"><img src="{{root}}/img/loading.gif" alt="wait" /></p>',
     alert:
-            '<h3>%%Alert%%</h3>\n\
-        <p>{{msg}}</p>\n\
+            '<h3>%%Alert%%</h3>\
+        <p>{{msg}}</p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_close jsxc_cancel">%%Ok%%</a></p>',
     authFailDialog:
-            '<h3>%%Login_failed%%</h3>\n\
-        <p>%%Sorry_we_cant_authentikate_%%</p>\n\
-        <p class="jsxc_right">\n\
-            <button class="button jsxc_cancel">%%Continue%%</button>\n\
-            <button class="button creation">%%Retry%%</button>\n\
+            '<h3>%%Login_failed%%</h3>\
+        <p>%%Sorry_we_cant_authentikate_%%</p>\
+        <p class="jsxc_right">\
+            <button class="button jsxc_cancel">%%Continue%%</button>\
+            <button class="button creation">%%Retry%%</button>\
         </p>',
     confirmDialog:
-            '<p>{{msg}}</p>\n\
-        <p class="jsxc_right">\n\
-            <button class="button jsxc_cancel jsxc_close">%%Dismiss%%</button>\n\
-            <button class="button creation">%%Confirm%%</button>\n\
+            '<p>{{msg}}</p>\
+        <p class="jsxc_right">\
+            <button class="button jsxc_cancel jsxc_close">%%Dismiss%%</button>\
+            <button class="button creation">%%Confirm%%</button>\
         </p>'
 };
 
@@ -2354,6 +2384,10 @@ jsxc.storage = {
 
             jsxc.xmpp.addBuddy(n.username, n.alias);
         }
+        
+        if (e.key === 'jsxc_roster'){
+            jsxc.gui.roster.toggle();
+        }
     }
 };
 
@@ -2648,7 +2682,7 @@ jsxc.otr = {
 jsxc.notification = {
     init: function() {
         $(document).on('postmessagein.jsxc', function(event, jid, msg) {
-            jsxc.notification.notify('New message from ' + jid, msg);
+            jsxc.notification.notify(jsxc.translate('%%New message from%% ') + jid, msg);
         });
     },
     notify: function(title, msg, d) {
@@ -2698,7 +2732,7 @@ jsxc.notification = {
                 }
             });
             setTimeout(function() {
-                jsxc.gui.showConfirmDialog("Should we notify you about new messages in the future?",
+                jsxc.gui.showConfirmDialog(jsxc.translate("%%Should we notify you_%%"),
                         function() {
                             jsxc.notification.requestPermission();
                         },
@@ -2795,7 +2829,9 @@ jsxc.l10n = {
         Login_failed: 'Login failed',
         Sorry_we_cant_authentikate_: 'Sorry, we can\'t authentikate you at our chat server. Maybe the password is wrong?',
         Retry: 'Retry',
-        clear_history: 'Clear history'
+        clear_history: 'Clear history',
+        New_message_from: 'New message from',
+        Should_we_notify_you_: 'Should we notify you about new messages in the future?',
     },
     de: {
         please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -2866,6 +2902,8 @@ jsxc.l10n = {
         Login_failed: 'Anmeldung fehlgeschlagen',
         Sorry_we_cant_authentikate_: 'Wir können dich leider nicht anmelden. Vielleicht ist dein Passwort falsch?',
         Retry: 'Neuer Versuch',
-        clear_history: 'Lösche Verlauf'
+        clear_history: 'Lösche Verlauf',
+        New_message_from: 'Neue Nachricht von',
+        Should_we_notify_you_: 'Should we notify you about new messages in the future?',
     }
 };

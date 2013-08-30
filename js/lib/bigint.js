@@ -1660,7 +1660,10 @@
       buf = new Uint8Array(40)
       crypto.getRandomValues(buf)
     } else {
-      throw new Error('Keys should not be generated without CSPRNG.')
+      //throw new Error('Keys should not be generated without CSPRNG.')
+      var n = 1024;
+      for (buf = []; n > 0; n--)
+        buf.push(Math.floor(Math.random() * 256))
     }
     return Array.prototype.slice.call(buf, 0)
   }

@@ -198,6 +198,20 @@ div#jsxc_roster .jsxc_delete{
     vertical-align: middle;
     font-size:17px;
 }
+div#jsxc_toggleRoster{
+    width: 14px;
+    height: 100%;
+    position: absolute;
+    left: -14px !important;
+    top: 0px;
+    z-index: 110;
+    background-color: transparent;
+    cursor: pointer;
+}
+#jsxc_toggleRoster:hover{
+    background-color: #a4a4a4;
+    opacity: 0.5;
+}
 div#jsxc_windowList{
     position:fixed;
     bottom:0px;
