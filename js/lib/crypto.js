@@ -1,7 +1,19 @@
+;(function (root, factory) {
+
+  if (typeof define === "function" && define.amd) {
+    define(factory)
+  } else if (typeof module !== 'undefined' && module.exports) {
+    module.exports = factory()
+  } else {
+    root.CryptoJS = factory()
+  }
+
+}(this, function () {
+
 /*
-CryptoJS v3.0.2
+CryptoJS v3.1.2
 code.google.com/p/crypto-js
-(c) 2009-2012 by Jeff Mott. All rights reserved.
+(c) 2009-2013 by Jeff Mott. All rights reserved.
 code.google.com/p/crypto-js/wiki/License
 */
 /**
@@ -52,6 +64,16 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
                 if (overrides) {
                     subtype.mixIn(overrides);
                 }
+
+                // Create default initializer
+                if (!subtype.hasOwnProperty('init')) {
+                    subtype.init = function () {
+                        subtype.$super.init.apply(this, arguments);
+                    };
+                }
+
+                // Initializer's prototype is the subtype object
+                subtype.init.prototype = subtype;
 
                 // Reference supertype
                 subtype.$super = this;
@@ -112,9 +134,6 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
                 }
 
                 // IE won't copy toString using the loop above
-                // Other non-enumerable properties are:
-                //   hasOwnProperty, isPrototypeOf, propertyIsEnumerable,
-                //   toLocaleString, valueOf
                 if (properties.hasOwnProperty('toString')) {
                     this.toString = properties.toString;
                 }
@@ -130,7 +149,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
              *     var clone = instance.clone();
              */
             clone: function () {
-                return this.$super.extend(this);
+                return this.init.prototype.extend(this);
             }
         };
     }());
@@ -276,7 +295,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
                 words.push((Math.random() * 0x100000000) | 0);
             }
 
-            return WordArray.create(words, nBytes);
+            return new WordArray.init(words, nBytes);
         }
     });
 
@@ -341,7 +360,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
                 words[i >>> 3] |= parseInt(hexStr.substr(i, 2), 16) << (24 - (i % 8) * 4);
             }
 
-            return WordArray.create(words, hexStrLength / 2);
+            return new WordArray.init(words, hexStrLength / 2);
         }
     };
 
@@ -400,7 +419,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
                 words[i >>> 2] |= (latin1Str.charCodeAt(i) & 0xff) << (24 - (i % 4) * 8);
             }
 
-            return WordArray.create(words, latin1StrLength);
+            return new WordArray.init(words, latin1StrLength);
         }
     };
 
@@ -449,6 +468,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
 
     /**
      * Abstract buffered block algorithm template.
+     *
      * The property blockSize must be implemented in a concrete subtype.
      *
      * @property {number} _minBufferSize The number of blocks that should be kept unprocessed in the buffer. Default: 0
@@ -463,7 +483,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
          */
         reset: function () {
             // Initial values
-            this._data = WordArray.create();
+            this._data = new WordArray.init();
             this._nDataBytes = 0;
         },
 
@@ -490,18 +510,19 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
 
         /**
          * Processes available data blocks.
-         * This method invokes _doProcessBlock(dataWords, offset), which must be implemented by a concrete subtype.
          *
-         * @param {boolean} flush Whether all blocks and partial blocks should be processed.
+         * This method invokes _doProcessBlock(offset), which must be implemented by a concrete subtype.
          *
-         * @return {WordArray} The data after processing.
+         * @param {boolean} doFlush Whether all blocks and partial blocks should be processed.
+         *
+         * @return {WordArray} The processed data.
          *
          * @example
          *
          *     var processedData = bufferedBlockAlgorithm._process();
          *     var processedData = bufferedBlockAlgorithm._process(!!'flush');
          */
-        _process: function (flush) {
+        _process: function (doFlush) {
             // Shortcuts
             var data = this._data;
             var dataWords = data.words;
@@ -511,7 +532,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
 
             // Count blocks ready
             var nBlocksReady = dataSigBytes / blockSizeBytes;
-            if (flush) {
+            if (doFlush) {
                 // Round up to include partial blocks
                 nBlocksReady = Math.ceil(nBlocksReady);
             } else {
@@ -539,7 +560,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
             }
 
             // Return processed words
-            return WordArray.create(processedWords, nBytesReady);
+            return new WordArray.init(processedWords, nBytesReady);
         },
 
         /**
@@ -570,7 +591,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
         /**
          * Configuration options.
          */
-        // cfg: Base.extend(),
+        cfg: Base.extend(),
 
         /**
          * Initializes a newly created hasher.
@@ -583,7 +604,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
          */
         init: function (cfg) {
             // Apply config defaults
-            // this.cfg = this.cfg.extend(cfg);
+            this.cfg = this.cfg.extend(cfg);
 
             // Set initial values
             this.reset();
@@ -648,25 +669,9 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
             }
 
             // Perform concrete-hasher logic
-            this._doFinalize();
+            var hash = this._doFinalize();
 
-            return this._hash;
-        },
-
-        /**
-         * Creates a copy of this object.
-         *
-         * @return {Object} The clone.
-         *
-         * @example
-         *
-         *     var clone = hasher.clone();
-         */
-        clone: function () {
-            var clone = BufferedBlockAlgorithm.clone.call(this);
-            clone._hash = this._hash.clone();
-
-            return clone;
+            return hash;
         },
 
         blockSize: 512/32,
@@ -686,7 +691,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
          */
         _createHelper: function (hasher) {
             return function (message, cfg) {
-                return hasher.create(cfg).finalize(message);
+                return new hasher.init(cfg).finalize(message);
             };
         },
 
@@ -705,7 +710,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
          */
         _createHmacHelper: function (hasher) {
             return function (message, key) {
-                return C_algo.HMAC.create(hasher, key).finalize(message);
+                return new C_algo.HMAC.init(hasher, key).finalize(message);
             };
         }
     });
@@ -719,9 +724,9 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
 }(Math));
 
 /*
-CryptoJS v3.0.2
+CryptoJS v3.1.2
 code.google.com/p/crypto-js
-(c) 2009-2012 by Jeff Mott. All rights reserved.
+(c) 2009-2013 by Jeff Mott. All rights reserved.
 code.google.com/p/crypto-js/wiki/License
 */
 (function () {
@@ -796,9 +801,6 @@ code.google.com/p/crypto-js/wiki/License
          *     var wordArray = CryptoJS.enc.Base64.parse(base64String);
          */
         parse: function (base64Str) {
-            // Ignore whitespaces
-            base64Str = base64Str.replace(/\s/g, '');
-
             // Shortcuts
             var base64StrLength = base64Str.length;
             var map = this._map;
@@ -817,9 +819,9 @@ code.google.com/p/crypto-js/wiki/License
             var nBytes = 0;
             for (var i = 0; i < base64StrLength; i++) {
                 if (i % 4) {
-                    var bitsHigh = map.indexOf(base64Str.charAt(i - 1)) << ((i % 4) * 2);
-                    var bitsLow  = map.indexOf(base64Str.charAt(i)) >>> (6 - (i % 4) * 2);
-                    words[nBytes >>> 2] |= (bitsHigh | bitsLow) << (24 - (nBytes % 4) * 8);
+                    var bits1 = map.indexOf(base64Str.charAt(i - 1)) << ((i % 4) * 2);
+                    var bits2 = map.indexOf(base64Str.charAt(i)) >>> (6 - (i % 4) * 2);
+                    words[nBytes >>> 2] |= (bits1 | bits2) << (24 - (nBytes % 4) * 8);
                     nBytes++;
                 }
             }
@@ -832,9 +834,9 @@ code.google.com/p/crypto-js/wiki/License
 }());
 
 /*
-CryptoJS v3.0.2
+CryptoJS v3.1.2
 code.google.com/p/crypto-js
-(c) 2009-2012 by Jeff Mott. All rights reserved.
+(c) 2009-2013 by Jeff Mott. All rights reserved.
 code.google.com/p/crypto-js/wiki/License
 */
 /**
@@ -1188,7 +1190,7 @@ CryptoJS.lib.Cipher || (function (undefined) {
                 var block = this._prevBlock;
             }
 
-            // XOR block
+            // XOR blocks
             for (var i = 0; i < blockSize; i++) {
                 words[offset + i] ^= block[i];
             }
@@ -1268,8 +1270,8 @@ CryptoJS.lib.Cipher || (function (undefined) {
         /**
          * Configuration options.
          *
-         * @property {Mode} mode The block mode to use. Default: CryptoJS.mode.CBC
-         * @property {Padding} padding The padding strategy to use. Default: CryptoJS.pad.Pkcs7
+         * @property {Mode} mode The block mode to use. Default: CBC
+         * @property {Padding} padding The padding strategy to use. Default: Pkcs7
          */
         cfg: Cipher.cfg.extend({
             mode: CBC,
@@ -1416,12 +1418,8 @@ CryptoJS.lib.Cipher || (function (undefined) {
             } else {
                 var wordArray = ciphertext;
             }
-            var openSSLStr = wordArray.toString(Base64);
 
-            // Limit lines to 64 characters
-            openSSLStr = openSSLStr.replace(/(.{64})/g, '$1\n');
-
-            return openSSLStr;
+            return wordArray.toString(Base64);
         },
 
         /**
@@ -1465,8 +1463,7 @@ CryptoJS.lib.Cipher || (function (undefined) {
         /**
          * Configuration options.
          *
-         * @property {Formatter} format The formatting strategy to convert cipher param objects to and from a string.
-         *   Default: CryptoJS.format.OpenSSL
+         * @property {Formatter} format The formatting strategy to convert cipher param objects to and from a string. Default: OpenSSL
          */
         cfg: Base.extend({
             format: OpenSSLFormatter
@@ -1546,7 +1543,7 @@ CryptoJS.lib.Cipher || (function (undefined) {
 
         /**
          * Converts serialized ciphertext to CipherParams,
-         * else assumes CipherParams already and returns ciphertext unchanged.
+         * else assumed CipherParams already and returns ciphertext unchanged.
          *
          * @param {CipherParams|string} ciphertext The ciphertext.
          * @param {Formatter} format The formatting strategy to use to parse serialized ciphertext.
@@ -1561,7 +1558,7 @@ CryptoJS.lib.Cipher || (function (undefined) {
          */
         _parse: function (ciphertext, format) {
             if (typeof ciphertext == 'string') {
-                return format.parse(ciphertext);
+                return format.parse(ciphertext, this);
             } else {
                 return ciphertext;
             }
@@ -1591,10 +1588,10 @@ CryptoJS.lib.Cipher || (function (undefined) {
          *
          * @example
          *
-         *     var derivedParams = CryptoJS.kdf.OpenSSL.compute('Password', 256/32, 128/32);
-         *     var derivedParams = CryptoJS.kdf.OpenSSL.compute('Password', 256/32, 128/32, 'saltsalt');
+         *     var derivedParams = CryptoJS.kdf.OpenSSL.execute('Password', 256/32, 128/32);
+         *     var derivedParams = CryptoJS.kdf.OpenSSL.execute('Password', 256/32, 128/32, 'saltsalt');
          */
-        compute: function (password, keySize, ivSize, salt) {
+        execute: function (password, keySize, ivSize, salt) {
             // Generate random salt
             if (!salt) {
                 salt = WordArray.random(64/8);
@@ -1620,8 +1617,7 @@ CryptoJS.lib.Cipher || (function (undefined) {
         /**
          * Configuration options.
          *
-         * @property {KDF} kdf The key derivation function to use to generate a key and IV from a password.
-         *   Default: CryptoJS.kdf.OpenSSL
+         * @property {KDF} kdf The key derivation function to use to generate a key and IV from a password. Default: OpenSSL
          */
         cfg: SerializableCipher.cfg.extend({
             kdf: OpenSSLKdf
@@ -1649,7 +1645,7 @@ CryptoJS.lib.Cipher || (function (undefined) {
             cfg = this.cfg.extend(cfg);
 
             // Derive key and other params
-            var derivedParams = cfg.kdf.compute(password, cipher.keySize, cipher.ivSize);
+            var derivedParams = cfg.kdf.execute(password, cipher.keySize, cipher.ivSize);
 
             // Add IV to config
             cfg.iv = derivedParams.iv;
@@ -1688,7 +1684,7 @@ CryptoJS.lib.Cipher || (function (undefined) {
             ciphertext = this._parse(ciphertext, cfg.format);
 
             // Derive key and other params
-            var derivedParams = cfg.kdf.compute(password, cipher.keySize, cipher.ivSize, ciphertext.salt);
+            var derivedParams = cfg.kdf.execute(password, cipher.keySize, cipher.ivSize, ciphertext.salt);
 
             // Add IV to config
             cfg.iv = derivedParams.iv;
@@ -1702,9 +1698,9 @@ CryptoJS.lib.Cipher || (function (undefined) {
 }());
 
 /*
-CryptoJS v3.0.2
+CryptoJS v3.1.2
 code.google.com/p/crypto-js
-(c) 2009-2012 by Jeff Mott. All rights reserved.
+(c) 2009-2013 by Jeff Mott. All rights reserved.
 code.google.com/p/crypto-js/wiki/License
 */
 (function () {
@@ -1916,9 +1912,9 @@ code.google.com/p/crypto-js/wiki/License
 }());
 
 /*
-CryptoJS v3.0.2
+CryptoJS v3.1.2
 code.google.com/p/crypto-js
-(c) 2009-2012 by Jeff Mott. All rights reserved.
+(c) 2009-2013 by Jeff Mott. All rights reserved.
 code.google.com/p/crypto-js/wiki/License
 */
 (function () {
@@ -1937,7 +1933,11 @@ code.google.com/p/crypto-js/wiki/License
      */
     var SHA1 = C_algo.SHA1 = Hasher.extend({
         _doReset: function () {
-            this._hash = WordArray.create([0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0]);
+            this._hash = new WordArray.init([
+                0x67452301, 0xefcdab89,
+                0x98badcfe, 0x10325476,
+                0xc3d2e1f0
+            ]);
         },
 
         _doProcessBlock: function (M, offset) {
@@ -1996,11 +1996,22 @@ code.google.com/p/crypto-js/wiki/License
 
             // Add padding
             dataWords[nBitsLeft >>> 5] |= 0x80 << (24 - nBitsLeft % 32);
+            dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 14] = Math.floor(nBitsTotal / 0x100000000);
             dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 15] = nBitsTotal;
             data.sigBytes = dataWords.length * 4;
 
             // Hash final blocks
             this._process();
+
+            // Return final computed hash
+            return this._hash;
+        },
+
+        clone: function () {
+            var clone = Hasher.clone.call(this);
+            clone._hash = this._hash.clone();
+
+            return clone;
         }
     });
 
@@ -2038,9 +2049,9 @@ code.google.com/p/crypto-js/wiki/License
 }());
 
 /*
-CryptoJS v3.0.2
+CryptoJS v3.1.2
 code.google.com/p/crypto-js
-(c) 2009-2012 by Jeff Mott. All rights reserved.
+(c) 2009-2013 by Jeff Mott. All rights reserved.
 code.google.com/p/crypto-js/wiki/License
 */
 (function (Math) {
@@ -2096,7 +2107,7 @@ code.google.com/p/crypto-js/wiki/License
      */
     var SHA256 = C_algo.SHA256 = Hasher.extend({
         _doReset: function () {
-            this._hash = WordArray.create(H.slice(0));
+            this._hash = new WordArray.init(H.slice(0));
         },
 
         _doProcessBlock: function (M, offset) {
@@ -2171,11 +2182,22 @@ code.google.com/p/crypto-js/wiki/License
 
             // Add padding
             dataWords[nBitsLeft >>> 5] |= 0x80 << (24 - nBitsLeft % 32);
+            dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 14] = Math.floor(nBitsTotal / 0x100000000);
             dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 15] = nBitsTotal;
             data.sigBytes = dataWords.length * 4;
 
             // Hash final blocks
             this._process();
+
+            // Return final computed hash
+            return this._hash;
+        },
+
+        clone: function () {
+            var clone = Hasher.clone.call(this);
+            clone._hash = this._hash.clone();
+
+            return clone;
         }
     });
 
@@ -2213,9 +2235,9 @@ code.google.com/p/crypto-js/wiki/License
 }(Math));
 
 /*
-CryptoJS v3.0.2
+CryptoJS v3.1.2
 code.google.com/p/crypto-js
-(c) 2009-2012 by Jeff Mott. All rights reserved.
+(c) 2009-2013 by Jeff Mott. All rights reserved.
 code.google.com/p/crypto-js/wiki/License
 */
 (function () {
@@ -2243,7 +2265,7 @@ code.google.com/p/crypto-js/wiki/License
          */
         init: function (hasher, key) {
             // Init hasher
-            hasher = this._hasher = hasher.create();
+            hasher = this._hasher = new hasher.init();
 
             // Convert string to WordArray, else assume WordArray already
             if (typeof key == 'string') {
@@ -2258,6 +2280,9 @@ code.google.com/p/crypto-js/wiki/License
             if (key.sigBytes > hasherBlockSizeBytes) {
                 key = hasher.finalize(key);
             }
+
+            // Clamp excess bits
+            key.clamp();
 
             // Clone key for inner and outer pads
             var oKey = this._oKey = key.clone();
@@ -2342,9 +2367,9 @@ code.google.com/p/crypto-js/wiki/License
 }());
 
 /*
-CryptoJS v3.0.2
+CryptoJS v3.1.2
 code.google.com/p/crypto-js
-(c) 2009-2012 by Jeff Mott. All rights reserved.
+(c) 2009-2013 by Jeff Mott. All rights reserved.
 code.google.com/p/crypto-js/wiki/License
 */
 /**
@@ -2359,9 +2384,9 @@ CryptoJS.pad.NoPadding = {
 };
 
 /*
-CryptoJS v3.0.2
+CryptoJS v3.1.2
 code.google.com/p/crypto-js
-(c) 2009-2012 by Jeff Mott. All rights reserved.
+(c) 2009-2013 by Jeff Mott. All rights reserved.
 code.google.com/p/crypto-js/wiki/License
 */
 /**
@@ -2402,3 +2427,8 @@ CryptoJS.mode.CTR = (function () {
 
     return CTR;
 }());
+
+
+  return CryptoJS
+
+}))

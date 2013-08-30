@@ -47,7 +47,7 @@ OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle.adapter' );
 //OCP\Util::addScript ( 'ojsxc', 'lib/flXHR' );
 //OCP\Util::addScript ( 'ojsxc', 'plugin/strophe.flxhr' );
     
-OCP\Util::addScript ( 'ojsxc', 'lib/seedrandom' );
+OCP\Util::addScript ( 'ojsxc', 'lib/salsa20' );
 OCP\Util::addScript ( 'ojsxc', 'lib/bigint' );
 OCP\Util::addScript ( 'ojsxc', 'lib/crypto' );
 OCP\Util::addScript ( 'ojsxc', 'lib/eventemitter' );

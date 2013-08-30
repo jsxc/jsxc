@@ -1,85 +1,28 @@
-;(function () {
+;(function (root, factory) {
 
-  var root = this
-
-  var bpe = 0  // bits stored per array element
-  for (bpe = 0; (1 << (bpe + 1)) > (1 << bpe); bpe++) ;  // bpe = number of bits in the mantissa on this platform
-  bpe >>= 1  // bpe = number of bits in one element of the array representing the bigInt
-
-  var BigInt = {
-      str2bigInt    : str2bigInt
-    , bigInt2str    : bigInt2str
-    , int2bigInt    : int2bigInt
-    , multMod       : multMod
-    , powMod        : powMod
-    , inverseMod    : inverseMod
-    , randBigInt    : randBigInt
-    , equals        : equals
-    , sub           : sub
-    , mod           : mod
-    , mod_          : mod_
-    , modInt        : modInt
-    , mult          : mult
-    , divInt_       : divInt_
-    , rightShift_   : rightShift_
-    , leftShift_    : leftShift_
-    , dup           : dup
-    , greater       : greater
-    , add           : add
-    , addInt        : addInt
-    , addInt_       : addInt_
-    , isZero        : isZero
-    , bitSize       : bitSize
-    , randTruePrime : randTruePrime
-    , millerRabin   : millerRabin
-    , divide_       : divide_
-    , trim          : trim
-    , expand        : expand
-    , bpe           : bpe
-  }
-
-  var SeedRandom = root.SeedRandom
-    , crypto = root.crypto
-
-  var buf
-  if (typeof require !== 'undefined' && typeof module !== 'undefined') {
-    module.exports = BigInt
-    SeedRandom || (SeedRandom = require('./seedrandom.js'))
+  var Salsa20, crypto
+  if (typeof define === 'function' && define.amd) {
+    define(['./salsa20'], factory.bind(root, root.crypto))
+  } else if (typeof module !== 'undefined' && module.exports) {
+    Salsa20 = require('./salsa20.js')
     crypto = require('crypto')
-    try {
-      buf = crypto.randomBytes(1024)
-    } catch (e) { throw e }
+    module.exports = factory(crypto, Salsa20)
   } else {
-    root.BigInt = BigInt
-    if ( (typeof crypto !== 'undefined') &&
-         (typeof crypto.getRandomValues === 'function')
-    ) {
-      buf = new Uint8Array(1024)
-      crypto.getRandomValues(buf)
-    } else {
-      //throw new Error('Keys should not be generated without CSPRNG.')
-      var n = 1024;
-      for (buf = []; n > 0; n--)
-        buf.push(Math.floor(Math.random() * 256))
-    }
+    root.BigInt = factory(root.crypto, root.Salsa20)
   }
 
-  var i, len, seed = ''
-  for (i = 0, len = buf.length; i < len; i++) {
-    seed += String.fromCharCode(buf[i])
-  }
-
-  SeedRandom(Math)
-  Math.seedrandom(seed)
-  seed = null
+}(this, function (crypto, Salsa20) {
 
   ////////////////////////////////////////////////////////////////////////////////////////
-  // Big Integer Library v. 5.4
-  // Created 2000, last modified 2009
+  // Big Integer Library v. 5.5
+  // Created 2000, last modified 2013
   // Leemon Baird
   // www.leemon.com
   //
   // Version history:
+  // v 5.5  17 Mar 2013
+  //   - two lines of a form like "if (x<0) x+=n" had the "if" changed to "while" to
+  //     handle the case when x<-n. (Thanks to James Ansell for finding that bug)
   // v 5.4  3 Oct 2009
   //   - added "var i" to greaterShift() so i is not global. (Thanks to Péter Szabó for finding that bug)
   //
@@ -252,6 +195,7 @@
   ////////////////////////////////////////////////////////////////////////////////////////
 
   //globals
+  var bpe = 0        // bits stored per array element
   var mask=0;        //AND this with an array element to chop it down to bpe bits
   var radix=mask+1;  //equals 2^bpe.  A single 1 bit to the left of the last bit of mask.
 
@@ -259,6 +203,8 @@
   var digitsStr='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_=!@#$%^&*()[]{}|;:,.<>/?`~ \\\'\"+-';
 
   //initialize the global variables
+  for (bpe = 0; (1<<(bpe+1)) > (1<<bpe); bpe++);  // bpe = number of bits in the mantissa on this platform
+  bpe>>=1;                   // bpe = number of bits in one element of the array representing the bigInt
   mask=(1<<bpe)-1;           //AND the mask with an integer to get its bpe least significant bits
   radix=mask+1;              //2^bpe.  a single 1 bit to the left of the first bit of mask
   var one=int2bigInt(1,1,1);     //constant used in powMod_()
@@ -566,7 +512,7 @@
       copyInt_(ans,0);
       for (dd=1;dd;) {
         dd=0;
-        ans[0]= 1 | (1<<(k-1)) | Math.floor(Math.random()*(1<<k));  //random, k-bit, odd integer, with msb 1
+        ans[0]= 1 | (1<<(k-1)) | randomBitInt(k);  //random, k-bit, odd integer, with msb 1
         for (j=1;(j<primes.length) && ((primes[j]&pm)==primes[j]);j++) { //trial division by all primes 3...sqrt(2^k)
           if (0==(ans[0]%primes[j])) {
             dd=1;
@@ -581,7 +527,7 @@
     B=c*k*k;    //try small primes up to B (or all the primes[] array if the largest is less than B).
     if (k>2*m)  //generate this k-bit number by first recursively generating a number that has between k/2 and k-m bits
       for (r=1; k-k*r<=m; )
-        r=pows[Math.floor(Math.random()*512)];   //r=Math.pow(2,Math.random()-1);
+        r=pows[randomBitInt(9)];   //r=Math.pow(2,Math.random()-1);
     else
       r=0.5;
 
@@ -674,7 +620,7 @@
       b[i]=0;
     a=Math.floor((n-1)/bpe)+1; //# array elements to hold the BigInt
     for (i=0;i<a;i++) {
-      b[i]=Math.floor(Math.random()*(1<<(bpe-1)));
+      b[i]=randomBitInt(bpe);
     }
     b[a-1] &= (2<<((n-1)%bpe))-1;
     if (s==1)
@@ -800,9 +746,9 @@
         sub_(eg_C,eg_A);
         sub_(eg_D,eg_B);
       }
-    
+
       if (equalsInt(eg_u,0)) {
-        if (negative(eg_C)) //make sure answer is nonnegative
+        while (negative(eg_C)) //make sure answer is nonnegative
           add_(eg_C,n);
         copy_(x,eg_C);
 
@@ -894,7 +840,7 @@
         sub_(eg_D,eg_B);
       }
       if (equalsInt(eg_u,0)) {
-        if (negative(eg_C)) {   //make sure a (C)is nonnegative
+        while (negative(eg_C)) {   //make sure a (C) is nonnegative
           add_(eg_C,y);
           sub_(eg_D,x);
         }
@@ -1085,7 +1031,17 @@
       return x;
     }
 
-    x=int2bigInt(0,base*k,0);
+    // log2(base)*k
+    var bb = base, p = 0;
+    var b = base == 1 ? k : 0;
+    while (bb > 1) {
+      if (bb & 1) p = 1;
+      b += k;
+      bb >>= 1;
+    }
+    b += p*k;
+
+    x=int2bigInt(0,b,0);
     for (i=0;i<k;i++) {
       d=digitsStr.indexOf(s.substring(i,i+1),0);
       if (base<=36 && d>=36)  //convert lowercase to uppercase if base<=36
@@ -1584,4 +1540,141 @@
     copy_(x,sa);
   }
 
-}).call(this)
+
+  // otr.js stuff
+
+  var BigInt = {
+      str2bigInt    : str2bigInt
+    , bigInt2str    : bigInt2str
+    , int2bigInt    : int2bigInt
+    , multMod       : multMod
+    , powMod        : powMod
+    , inverseMod    : inverseMod
+    , randBigInt    : randBigInt
+    , randBigInt_   : randBigInt_
+    , equals        : equals
+    , equalsInt     : equalsInt
+    , sub           : sub
+    , mod           : mod
+    , mod_          : mod_
+    , modInt        : modInt
+    , mult          : mult
+    , divInt_       : divInt_
+    , rightShift_   : rightShift_
+    , leftShift_    : leftShift_
+    , dup           : dup
+    , greater       : greater
+    , add           : add
+    , addInt        : addInt
+    , addInt_       : addInt_
+    , isZero        : isZero
+    , bitSize       : bitSize
+    , randTruePrime : randTruePrime
+    , millerRabin   : millerRabin
+    , divide_       : divide_
+    , trim          : trim
+    , expand        : expand
+    , bpe           : bpe
+    , primes        : primes
+    , findPrimes    : findPrimes
+    , getSeed       : getSeed
+  }
+
+  // from http://davidbau.com/encode/seedrandom.js
+
+  var randomBitInt
+
+  function seedRand(buf) {
+
+    var state = new Salsa20([
+      buf[ 0], buf[ 1], buf[ 2], buf[ 3], buf[ 4], buf[ 5], buf[ 6], buf[ 7],
+      buf[ 8], buf[ 9], buf[10], buf[11], buf[12], buf[13], buf[14], buf[15],
+      buf[16], buf[17], buf[18], buf[19], buf[20], buf[21], buf[22], buf[23],
+      buf[24], buf[25], buf[26], buf[27], buf[28], buf[29], buf[30], buf[31]
+    ],[
+      buf[32], buf[33], buf[34], buf[35], buf[36], buf[37], buf[38], buf[39]
+    ])
+
+    var width = 256
+      , chunks = 6
+      , significance = Math.pow(2, 52)
+      , overflow = significance * 2
+
+    function numerator() {
+      var bytes = state.getBytes(chunks)
+      var i = 0, r = 0
+      for (; i < chunks; i++) {
+        r = r * width + bytes[i]
+      }
+      return r
+    }
+
+    function randomByte() {
+      return state.getBytes(1)[0]
+    }
+
+    randomBitInt = function (k) {
+      if (k > 31) throw new Error("Too many bits.")
+      var i = 0, r = 0
+      var b = Math.floor(k / 8)
+      var mask = (1 << (k % 8)) - 1
+      if (mask) r = randomByte() & mask
+      for (; i < b; i++)
+        r = (256 * r) + randomByte()
+      return r
+    }
+
+    // This function returns a random double in [0, 1) that contains
+    // randomness in every bit of the mantissa of the IEEE 754 value.
+
+    return function () {               // Closure to return a random double:
+      var n = numerator()              // Start with a numerator n < 2 ^ 48
+        , d = Math.pow(width, chunks)  //   and denominator d = 2 ^ 48.
+        , x = 0                        //   and no 'extra last byte'.
+      while (n < significance) {       // Fill up all significant digits by
+        n = (n + x) * width            //   shifting numerator and
+        d *= width                     //   denominator and generating a
+        x = randomByte()               //   new least-significant-byte.
+      }
+      while (n >= overflow) {          // To avoid rounding up, before adding
+        n /= 2                         //   last byte, shift everything
+        d /= 2                         //   right using integer math until
+        x >>>= 1                       //   we have exactly the desired bits.
+      }
+      return (n + x) / d               // Form the number within [0, 1).
+    }
+
+  }
+
+  function getSeed() {
+    var buf
+    if ( (typeof crypto !== 'undefined') &&
+         (typeof crypto.randomBytes === 'function')
+    ) {
+      try {
+        buf = crypto.randomBytes(40)
+      } catch (e) { throw e }
+    } else if ( (typeof crypto !== 'undefined') &&
+                (typeof crypto.getRandomValues === 'function')
+    ) {
+      buf = new Uint8Array(40)
+      crypto.getRandomValues(buf)
+    } else {
+      throw new Error('Keys should not be generated without CSPRNG.')
+    }
+    return Array.prototype.slice.call(buf, 0)
+  }
+
+  ;(function seed() {
+
+    Math.random = seedRand(getSeed())
+
+    // reseed every 5 mins (not in ww)
+    if ( typeof setTimeout === 'function' && typeof document !== 'undefined' )
+      setTimeout(seed, 5 * 60 * 1000)
+
+  }())
+
+  return BigInt
+
+}))

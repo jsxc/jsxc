@@ -16,12 +16,10 @@
 
 /*
  * TODO:
- * - (CSPRNG)
  * - (make window list scrollable)
  * - add roster slide from ojsxc
  * - user info
  * - translate strings
- * - save unread message notification
  */
 
 /**

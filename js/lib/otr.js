@@ -1,6 +1,6 @@
 /*!
 
-  otr.js v0.0.13-next - 2013-02-25
+  otr.js v0.2.5 - 2013-08-20
   (c) 2013 - Arlo Breault <arlolra@gmail.com>
   Freely distributed under the MPL v2.0 license.
 
@@ -9,10 +9,33 @@
 
 */
 
-var OTR = {}, DSA = {}
+;(function (root, factory) {
+
+  if (typeof define === 'function' && define.amd) {
+    define([
+        "./dep/bigint"
+      , "./dep/crypto"
+      , "./dep/eventemitter"
+    ], function (BigInt, CryptoJS, EventEmitter) {
+      var root = {
+          BigInt: BigInt
+        , CryptoJS: CryptoJS
+        , EventEmitter: EventEmitter
+        , OTR: {}
+        , DSA: {}
+      }
+      return factory.call(root)
+    })
+  } else {
+    root.OTR = {}
+    root.DSA = {}
+    factory.call(root)
+  }
+
+}(this, function () {
 
 ;(function () {
-  "use strict"
+  "use strict";
 
   var root = this
 
@@ -55,16 +78,11 @@ var OTR = {}, DSA = {}
     , STATUS_SEND_QUERY  : 0
     , STATUS_AKE_INIT    : 1
     , STATUS_AKE_SUCCESS : 2
-    , STATUS_SMP_INIT    : 3
-    , STATUS_SMP_SECRET  : 4
-    , STATUS_SMP_ANSWER  : 5
-    , STATUS_END_OTR     : 6
-    , STATUS_SMP_START   : 7
-    , STATUS_SMP_HANDLE  : 8
+    , STATUS_END_OTR     : 3
 
   }
 
-  if (typeof exports !== 'undefined') {
+  if (typeof module !== 'undefined' && module.exports) {
     module.exports = CONST
   } else {
     root.OTR.CONST = CONST
@@ -72,17 +90,16 @@ var OTR = {}, DSA = {}
 
 }).call(this)
 ;(function () {
-  "use strict"
+  "use strict";
 
   var root = this
 
-  var HLP, CryptoJS, BigInt
-  if (typeof exports !== 'undefined') {
-    HLP = exports
+  var HLP = {}, CryptoJS, BigInt
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = HLP = {}
     CryptoJS = require('../vendor/crypto.js')
     BigInt = require('../vendor/bigint.js')
   } else {
-    HLP = {}
     if (root.OTR) root.OTR.HLP = HLP
     if (root.DSA) root.DSA.HLP = HLP
     CryptoJS = root.CryptoJS
@@ -116,10 +133,20 @@ var OTR = {}, DSA = {}
       if (Object.hasOwnProperty.call(parent, key))
         child[key] = parent[key]
     }
-    function ctor() { this.constructor = child }
-    ctor.prototype = parent.prototype
-    child.prototype = new ctor()
+    function Ctor() { this.constructor = child }
+    Ctor.prototype = parent.prototype
+    child.prototype = new Ctor()
     child.__super__ = parent.prototype
+  }
+
+  // constant-time string comparison
+  HLP.compare = function (str1, str2) {
+    if (str1.length !== str2.length)
+      return false
+    var i = 0, result = 0
+    for (; i < str1.length; i++)
+      result |= str1[i].charCodeAt(0) ^ str2[i].charCodeAt(0)
+    return result === 0
   }
 
   HLP.divMod = function (num, den, n) {
@@ -135,10 +162,6 @@ var OTR = {}, DSA = {}
 
   HLP.randomExponent = function () {
     return BigInt.randBigInt(1536)
-  }
-
-  HLP.randomValue = function () {
-    return BigInt.randBigInt(128)
   }
 
   HLP.smpHash = function (version, fmpi, smpi) {
@@ -259,10 +282,12 @@ var OTR = {}, DSA = {}
   }
 
   HLP.packBytes = function (val, bytes) {
-    var res = ''  // big-endian, unsigned long
-    for (bytes -= 1; bytes > -1; bytes--) {
-      res = _toString(val & 0xff) + res
-      val >>= 8
+    val = val.toString(16)
+    var nex, res = ''  // big-endian, unsigned long
+    for (; bytes > 0; bytes--) {
+      nex = val.length ? val.substr(-2, 2) : '0'
+      val = val.substr(0, val.length - 2)
+      res = _toString(parseInt(nex, 16)) + res
     }
     return res
   }
@@ -409,7 +434,7 @@ var OTR = {}, DSA = {}
   HLP.splitype = function splitype(arr, msg) {
     var data = []
     arr.forEach(function (a) {
-      var len, str
+      var str
       switch (a) {
         case 'PUBKEY':
           str = splitype(['SHORT', 'MPI', 'MPI', 'MPI', 'MPI'], msg).join('')
@@ -424,7 +449,6 @@ var OTR = {}, DSA = {}
       data.push(str)
       msg = msg.substring(str.length)
     })
-
     return data
   }
 
@@ -432,7 +456,6 @@ var OTR = {}, DSA = {}
 
   var _bin2num = {}
     , _num2bin = {}
-    , _b642bin = {}
     , _toString = String.fromCharCode
 
   var i = 0, v
@@ -471,16 +494,13 @@ var OTR = {}, DSA = {}
   }
 
 }).call(this)
-// DSA
-// http://www.itl.nist.gov/fipspubs/fip186.htm
-
 ;(function () {
-  "use strict"
+  "use strict";
 
   var root = this
 
   var CryptoJS, BigInt, HLP
-  if (typeof exports !== 'undefined') {
+  if (typeof module !== 'undefined' && module.exports) {
     module.exports = DSA
     CryptoJS = require('../vendor/crypto.js')
     BigInt = require('../vendor/bigint.js')
@@ -518,195 +538,46 @@ var OTR = {}, DSA = {}
     return c
   }
 
-  // http://www-cs-students.stanford.edu/~tjw/jsbn/jsbn2.js
+  // altered BigInt.randProbPrime()
+  // n rounds of Miller Rabin (after trial division with small primes)
+  var rpprb = []
+  function isProbPrime(k, n) {
+    var i, B = 30000, l = BigInt.bitSize(k)
+    var primes = BigInt.primes
 
-  var lowprimes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997]
-  var lplim = (1 << 26) / lowprimes[lowprimes.length - 1]
+    if (primes.length === 0)
+      primes = BigInt.findPrimes(B)
 
-  function isProbablePrime(x, repeat) {
-    var t = x.length - 1
-    for (; t >= 0 && x[t] === 0; t--) ;
+    if (rpprb.length != k.length)
+      rpprb = BigInt.dup(k)
 
-    var i
-    if(t == 1 && x[0] <= lowprimes[lowprimes.length - 1]) {
-      for (i = 0; i < lowprimes.length; ++i)
-        if (x[0] == lowprimes[i]) return true
-      return false
+    // check ans for divisibility by small primes up to B
+    for (i = 0; (i < primes.length) && (primes[i] <= B); i++)
+      if (BigInt.modInt(k, primes[i]) === 0 && !BigInt.equalsInt(k, primes[i]))
+        return 0
+
+    // do n rounds of Miller Rabin, with random bases less than k
+    for (i = 0; i < n; i++) {
+      BigInt.randBigInt_(rpprb, l, 0)
+      while(!BigInt.greater(k, rpprb))  // pick a random rpprb that's < k
+        BigInt.randBigInt_(rpprb, l, 0)
+      if (!BigInt.millerRabin(k, rpprb))
+        return 0
     }
 
-    // even
-    if ((x[0] % 2) === 0) return false
-
-    i = 1
-    var m, j
-    while (i < lowprimes.length) {
-      m = lowprimes[i]
-      j = i + 1
-      while(j < lowprimes.length && m < lplim) m *= lowprimes[j++];
-      m = BigInt.modInt(x, m)
-      while (i < j) if (m % lowprimes[i++] === 0) return false
-    }
-
-    return millerRabin(x, repeat)
-  }
-
-  function lbit(x) {
-    if (x === 0) return -1
-    var k = 0
-    while ((x & 1) === 0) x >>= 1, k++
-    return k
-  }
-
-  function lowestSetBit(x) {
-    var t = x.length - 1
-    for (; t >= 0 && x[t] === 0; t--) ;
-    var i = 0
-    for (; i < t; i++)
-      if (x[i] !== 0) return (i * BigInt.bpe) + lbit(x[i])
-    return -1
-  }
-
-  function millerRabin(x, repeat) {
-    var n1 = BigInt.sub(x, ONE)
-
-    var k = lowestSetBit(n1)
-    if (k <= 0) return false
-
-    var r = BigInt.dup(n1)
-    BigInt.rightShift_(r, k)
-
-    repeat = (repeat + 1) >> 1
-    if (repeat > lowprimes.length) repeat = lowprimes.length;
-
-    var a, i, y, j
-    for (i = 0; i < repeat; i++) {
-
-      // Pick bases at random, instead of starting at 2
-      a = lowprimes[Math.floor(Math.random() * lowprimes.length)]
-      a = BigInt.int2bigInt(a, 0)
-
-      y = BigInt.powMod(a, r, x)
-
-      if (!BigInt.equals(y, ONE) && !BigInt.equals(y, n1)) {
-        j = 1
-        while (j++ < k && !BigInt.equals(y, n1)) {
-          y = BigInt.powMod(y, TWO, x)
-          if (BigInt.equals(y, ONE)) return false
-        }
-        if (!BigInt.equals(y, n1)) return false
-      }
-
-    }
-
-    return true
+    return 1
   }
 
   var bit_lengths = {
       '1024': { N: 160, repeat: 40 }  // 40x should give 2^-80 confidence
     , '2048': { N: 224, repeat: 56 }
-    , '3072': { N: 256, repeat: 64 }
   }
 
   var primes = {}
 
-  function SHAbigInt(bi) {
-    bi = CryptoJS.enc.Latin1.parse(HLP.bigInt2bits(bi))
-    bi = CryptoJS.SHA1(bi)
-    return HLP.bits2bigInt(bi.toString(CryptoJS.enc.Latin1))
-  }
-
-  function inc_(bi, TN) {
-    BigInt.addInt_(bi, 1)
-    BigInt.mod_(bi, TN)
-  }
-
-  function generatePrimesFIPS(bit_length) {
-
-    var t = timer()  // for debugging
-
-    // number of MR tests to perform
-    var repeat = bit_lengths[bit_length].repeat
-
-    var N = bit_lengths[bit_length].N
-    var TN = HLP.twotothe(N)
-
-    var n = Math.floor((bit_length - 1) / N)
-    var b = (bit_length - 1) % N
-
-    var bl4 = 4 * bit_length
-    var brk = false
-
-    var q, p, seed, u, tmp, counter, offset, k, cspo, V, W, X, LM1, c
-    for (;;) {
-
-      seed = BigInt.randBigInt(N)
-
-      tmp = BigInt.dup(seed)
-      inc_(tmp, TN)
-      tmp = SHAbigInt(tmp)
-
-      u = SHAbigInt(seed)
-      u = HLP.bigBitWise('XOR', u, tmp)
-
-      q = HLP.bigBitWise('OR', u, HLP.twotothe(N - 1))
-      q[0] |= 1
-
-      if (!isProbablePrime(q, repeat)) continue
-
-      t('q')
-      offset = BigInt.dup(seed)
-      inc_(offset, TN)
-
-      for (counter = 0; counter < bl4; counter++) {
-        W = ZERO
-        cspo = BigInt.addInt(seed, offset)
-
-        for (k = 0; k < (n + 1); k ++) {
-          inc_(offset, TN)
-          V = SHAbigInt(offset)
-          if (k === n) V = BigInt.mod(V, HLP.twotothe(b))
-          V = BigInt.mult(V, HLP.twotothe(N * k))
-          W = BigInt.add(W, V)
-        }
-
-        LM1 = HLP.twotothe(bit_length - 1)
-        X = BigInt.add(W, LM1)
-
-        c = BigInt.mod(X, BigInt.mult(q, TWO))
-        p = BigInt.sub(X, BigInt.sub(c, ONE))
-
-        if (BigInt.greater(LM1, p)) continue
-        if (!isProbablePrime(p, repeat)) continue
-
-        t('p')
-        primes[bit_length] = { p: p, q: q }
-        brk = true
-        break
-      }
-
-      if (brk) break
-    }
-
-    var h = BigInt.dup(TWO)
-    var pm1 = BigInt.sub(p, ONE)
-    var e = BigInt.multMod(pm1, BigInt.inverseMod(q, p), p)
-
-    var g
-    for (;;) {
-      g = BigInt.powMod(h, e, p)
-      if (BigInt.equals(g, ONE)) {
-        h = BigInt.add(h, ONE)
-        continue
-      }
-      primes[bit_length].g = g
-      t('g')
-      return
-    }
-
-    throw new Error('Unreachable!')
-  }
-
-  function generatePrimesGO(bit_length) {
+  // follows go lang http://golang.org/src/pkg/crypto/dsa/dsa.go
+  // fips version was removed in 0c99af0df3e7
+  function generatePrimes(bit_length) {
 
     var t = timer()  // for debugging
 
@@ -719,15 +590,13 @@ var OTR = {}, DSA = {}
     var bl4 = 4 * bit_length
     var brk = false
 
-    // go lang http://golang.org/src/pkg/crypto/dsa/dsa.go
-
     var q, p, rem, counter
     for (;;) {
 
       q = BigInt.randBigInt(N, 1)
       q[0] |= 1
 
-      if (!isProbablePrime(q, repeat)) continue
+      if (!isProbPrime(q, repeat)) continue
       t('q')
 
       for (counter = 0; counter < bl4; counter++) {
@@ -739,7 +608,7 @@ var OTR = {}, DSA = {}
         p = BigInt.sub(p, rem)
 
         if (BigInt.greater(LM1, p)) continue
-        if (!isProbablePrime(p, repeat)) continue
+        if (!isProbPrime(p, repeat)) continue
 
         t('p')
         primes[bit_length] = { p: p, q: q }
@@ -792,10 +661,8 @@ var OTR = {}, DSA = {}
       throw new Error('Unsupported bit length.')
 
     // set primes
-    if (!primes[bit_length]) {
-      if (opts.fips) generatePrimesFIPS(bit_length)
-      else generatePrimesGO(bit_length)
-    }
+    if (!primes[bit_length])
+      generatePrimes(bit_length)
 
     this.p = primes[bit_length].p
     this.q = primes[bit_length].q
@@ -809,6 +676,9 @@ var OTR = {}, DSA = {}
 
     // public keys (p, q, g, y)
     this.y = BigInt.powMod(this.g, this.x, this.p)
+
+    // nocache?
+    if (opts.nocache) primes[bit_length] = null
   }
 
   DSA.prototype = {
@@ -830,16 +700,33 @@ var OTR = {}, DSA = {}
       return str.toString(CryptoJS.enc.Base64)
     },
 
+    // http://www.imperialviolet.org/2013/06/15/suddendeathentropy.html
+    generateNonce: function (m) {
+      var priv = HLP.bigInt2bits(BigInt.trim(this.x, 0))
+      var rand = HLP.bigInt2bits(BigInt.randBigInt(256))
+
+      var sha256 = CryptoJS.algo.SHA256.create()
+      sha256.update(CryptoJS.enc.Latin1.parse(priv))
+      sha256.update(m)
+      sha256.update(CryptoJS.enc.Latin1.parse(rand))
+
+      var hash = sha256.finalize()
+      hash = HLP.bits2bigInt(hash.toString(CryptoJS.enc.Latin1))
+      BigInt.rightShift_(hash, 256 - BigInt.bitSize(this.q))
+
+      return HLP.between(hash, ZERO, this.q) ? hash : this.generateNonce(m)
+    },
+
     sign: function (m) {
-      m = CryptoJS.enc.Latin1.parse(m)  // CryptoJS.SHA1(m)
-      m = BigInt.str2bigInt(m.toString(CryptoJS.enc.Hex), 16)
+      m = CryptoJS.enc.Latin1.parse(m)
+      var b = BigInt.str2bigInt(m.toString(CryptoJS.enc.Hex), 16)
       var k, r = ZERO, s = ZERO
       while (BigInt.isZero(s) || BigInt.isZero(r)) {
-        k = makeRandom(ZERO, this.q)
+        k = this.generateNonce(m)
         r = BigInt.mod(BigInt.powMod(this.g, k, this.p), this.q)
         if (BigInt.isZero(r)) continue
         s = BigInt.inverseMod(k, this.q)
-        s = BigInt.mult(s, BigInt.add(m, BigInt.mult(this.x, r)))
+        s = BigInt.mult(s, BigInt.add(b, BigInt.mult(this.x, r)))
         s = BigInt.mod(s, this.q)
       }
       return [r, s]
@@ -869,10 +756,87 @@ var OTR = {}, DSA = {}
     return new DSA(obj)
   }
 
-  DSA.parsePrivate = function (str) {
-    str = CryptoJS.enc.Base64.parse(str)
-    str = str.toString(CryptoJS.enc.Latin1)
-    return DSA.parsePublic(str, true)
+  function tokenizeStr(str) {
+    var start, end
+
+    start = str.indexOf("(")
+    end = str.lastIndexOf(")")
+
+    if (start < 0 || end < 0)
+      throw new Error("Malformed S-Expression")
+
+    str = str.substring(start + 1, end)
+
+    var splt = str.search(/\s/)
+    var obj = {
+        type: str.substring(0, splt)
+      , val: []
+    }
+
+    str = str.substring(splt + 1, end)
+    start = str.indexOf("(")
+
+    if (start < 0) obj.val.push(str)
+    else {
+
+      var i, len, ss, es
+      while (start > -1) {
+        i = start + 1
+        len = str.length
+        for (ss = 1, es = 0; i < len && es < ss; i++) {
+          if (str[i] === "(") ss++
+          if (str[i] === ")") es++
+        }
+        obj.val.push(tokenizeStr(str.substring(start, ++i)))
+        str = str.substring(++i)
+        start = str.indexOf("(")
+      }
+
+    }
+    return obj
+  }
+
+  function parseLibotr(obj) {
+    if (!obj.type) throw new Error("Parse error.")
+
+    var o, val
+    if (obj.type === "privkeys") {
+      o = []
+      obj.val.forEach(function (i) {
+        o.push(parseLibotr(i))
+      })
+      return o
+    }
+
+    o = {}
+    obj.val.forEach(function (i) {
+
+      val = i.val[0]
+      if (typeof val === "string") {
+
+        if (val.indexOf("#") === 0) {
+          val = val.substring(1, val.lastIndexOf("#"))
+          val = BigInt.str2bigInt(val, 16)
+        }
+
+      } else {
+        val = parseLibotr(i)
+      }
+
+      o[i.type] = val
+    })
+
+    return o
+  }
+
+  DSA.parsePrivate = function (str, libotr) {
+    if (!libotr) {
+      str = CryptoJS.enc.Base64.parse(str)
+      str = str.toString(CryptoJS.enc.Latin1)
+      return DSA.parsePublic(str, true)
+    }
+    // only returning the first key found
+    return parseLibotr(tokenizeStr(str))[0]["private-key"].dsa
   }
 
   DSA.verify = function (key, m, r, s) {
@@ -894,30 +858,29 @@ var OTR = {}, DSA = {}
     return BigInt.equals(v, r)
   }
 
-  DSA.inherit = function (key) {
-    key.__proto__ = DSA.prototype
-    key.constructor = DSA
-    key.type = KEY_TYPE
-  }
-
 }).call(this)
 ;(function () {
-  "use strict"
+  "use strict";
 
   var root = this
 
-  var Parse, CryptoJS, CONST, HLP
-  if (typeof exports !== 'undefined') {
-    Parse = exports
+  var Parse = {}, CryptoJS, CONST, HLP
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = Parse
     CryptoJS = require('../vendor/crypto.js')
     CONST = require('./const.js')
     HLP = require('./helpers.js')
   } else {
-    Parse = root.OTR.Parse = {}
+    root.OTR.Parse = Parse
     CryptoJS = root.CryptoJS
     CONST = root.OTR.CONST
     HLP = root.OTR.HLP
   }
+
+  // whitespace tags
+  var tags = {}
+  tags[CONST.WHITESPACE_TAG_V2] = CONST.OTR_VERSION_2
+  tags[CONST.WHITESPACE_TAG_V3] = CONST.OTR_VERSION_3
 
   Parse.parseMsg = function (otr, msg) {
 
@@ -937,10 +900,6 @@ var OTR = {}, DSA = {}
 
         msg = msg.split('')
         msg.splice(ind, 16)
-
-        var tags = {}
-        tags[CONST.WHITESPACE_TAG_V2] = CONST.OTR_VERSION_2
-        tags[CONST.WHITESPACE_TAG_V3] = CONST.OTR_VERSION_3
 
         var tag, len = msg.length
         for (; ind < len;) {
@@ -1107,12 +1066,12 @@ var OTR = {}, DSA = {}
 
 }).call(this)
 ;(function () {
-  "use strict"
+  "use strict";
 
   var root = this
 
   var CryptoJS, BigInt, CONST, HLP, DSA
-  if (typeof exports !== 'undefined') {
+  if (typeof module !== 'undefined' && module.exports) {
     module.exports = AKE
     CryptoJS = require('../vendor/crypto.js')
     BigInt = require('../vendor/bigint.js')
@@ -1128,9 +1087,8 @@ var OTR = {}, DSA = {}
     DSA = root.DSA
   }
 
-  // diffie-hellman modulus and generator
+  // diffie-hellman modulus
   // see group 5, RFC 3526
-  var G = BigInt.str2bigInt(CONST.G, 10)
   var N = BigInt.str2bigInt(CONST.N, 16)
 
   function hMac(gx, gy, pk, kid, m) {
@@ -1192,7 +1150,8 @@ var OTR = {}, DSA = {}
     verifySignMac: function (mac, aesctr, m2, c, their_y, our_dh_pk, m1, ctr) {
       // verify mac
       var vmac = HLP.makeMac(aesctr, m2)
-      if (mac !== vmac) return ['MACs do not match.']
+      if (!HLP.compare(mac, vmac))
+        return ['MACs do not match.']
 
       // decrypt x
       var x = HLP.decryptAes(aesctr.substring(4), c, ctr)
@@ -1243,11 +1202,11 @@ var OTR = {}, DSA = {}
         this.otr.their_priv_pk = this.their_priv_pk
 
         // rotate keys
-        this.otr.sessKeys[0] = [ new this.otr.dhSession(
+        this.otr.sessKeys[0] = [ new this.otr.DHSession(
             this.otr.our_dh
           , this.otr.their_y
         ), null ]
-        this.otr.sessKeys[1] = [ new this.otr.dhSession(
+        this.otr.sessKeys[1] = [ new this.otr.DHSession(
             this.otr.our_old_dh
           , this.otr.their_y
         ), null ]
@@ -1257,12 +1216,18 @@ var OTR = {}, DSA = {}
       // ake info
       this.otr.ssid = this.ssid
       this.otr.transmittedRS = this.transmittedRS
-      this.otr._smInit()
       this.otr_version = version
 
       // go encrypted
       this.otr.authstate = CONST.AUTHSTATE_NONE
       this.otr.msgstate = CONST.MSGSTATE_ENCRYPTED
+
+      // null out values
+      this.r = null
+      this.myhashed = null
+      this.dhcommit = null
+      this.encrypted = null
+      this.hashed = null
 
       this.otr.trigger('status', [CONST.STATUS_AKE_SUCCESS])
 
@@ -1334,6 +1299,10 @@ var OTR = {}, DSA = {}
           type = '\x11'
           send = HLP.packMPI(this.r)
           send += this.makeM(this.their_y, this.m1, this.c, this.m2)
+
+          this.m1 = null
+          this.m2 = null
+          this.c = null
           break
 
         case '\x11':
@@ -1358,7 +1327,7 @@ var OTR = {}, DSA = {}
           // verify hash
           var hash = CryptoJS.SHA256(CryptoJS.enc.Latin1.parse(gxmpi))
 
-          if (this.hashed !== hash.toString(CryptoJS.enc.Latin1))
+          if (!HLP.compare(this.hashed, hash.toString(CryptoJS.enc.Latin1)))
             return this.otr.error('Hashed g^x does not match.', true)
 
           // verify gx is legal 2 <= g^x <= N-2
@@ -1390,9 +1359,14 @@ var OTR = {}, DSA = {}
             , this.m2_prime
           )
 
-          // send before success cause of sync?
-          this.sendMsg(version, '\x12', send)
+          this.m1 = null
+          this.m2 = null
+          this.m1_prime = null
+          this.m2_prime = null
+          this.c = null
+          this.c_prime = null
 
+          this.sendMsg(version, '\x12', send)
           this.akeSuccess(version)
           return
 
@@ -1419,6 +1393,10 @@ var OTR = {}, DSA = {}
           // store their key
           this.their_keyid = vsm[1]
           this.their_priv_pk = vsm[2]
+
+          this.m1_prime = null
+          this.m2_prime = null
+          this.c_prime = null
 
           this.transmittedRS = true
           this.akeSuccess(version)
@@ -1468,7 +1446,7 @@ var OTR = {}, DSA = {}
       var gxmpi = HLP.packMPI(this.our_dh.publicKey)
       gxmpi = CryptoJS.enc.Latin1.parse(gxmpi)
 
-      this.r = HLP.randomValue()
+      this.r = BigInt.randBigInt(128)
       var key = CryptoJS.enc.Hex.parse(BigInt.bigInt2str(this.r, 16))
       key = CryptoJS.enc.Latin1.stringify(key)
 
@@ -1485,25 +1463,25 @@ var OTR = {}, DSA = {}
 
 }).call(this)
 ;(function () {
-  "use strict"
+  "use strict";
 
   var root = this
 
-  var CryptoJS, BigInt, CONST, HLP, DSA
-  if (typeof exports !== 'undefined') {
+  var CryptoJS, BigInt,  EventEmitter, CONST, HLP
+  if (typeof module !== 'undefined' && module.exports) {
     module.exports = SM
     CryptoJS = require('../vendor/crypto.js')
     BigInt = require('../vendor/bigint.js')
+    EventEmitter = require('../vendor/eventemitter.js')
     CONST = require('./const.js')
     HLP = require('./helpers.js')
-    DSA = require('./dsa.js')
   } else {
     root.OTR.SM = SM
     CryptoJS = root.CryptoJS
     BigInt = root.BigInt
+    EventEmitter = root.EventEmitter
     CONST = root.OTR.CONST
     HLP = root.OTR.HLP
-    DSA = root.DSA
   }
 
   // diffie-hellman modulus and generator
@@ -1515,441 +1493,431 @@ var OTR = {}, DSA = {}
   var Q = BigInt.sub(N, BigInt.str2bigInt('1', 10))
   BigInt.divInt_(Q, 2)  // meh
 
-  function SM(otr) {
-    if (!(this instanceof SM)) return new SM(otr)
+  function SM(reqs) {
+    if (!(this instanceof SM)) return new SM(reqs)
 
-    this.otr = otr
-    this.version = '1'
-    this.our_fp = otr.priv.fingerprint()
-    this.their_fp = otr.their_priv_pk.fingerprint()
+    this.version = 1
+
+    this.our_fp = reqs.our_fp
+    this.their_fp = reqs.their_fp
+    this.ssid = reqs.ssid
+
+    this.debug = !!reqs.debug
 
     // initial state
     this.init()
   }
 
-  SM.prototype = {
-
-    // set the constructor
-    // because the prototype is being replaced
-    constructor: SM,
-
-    // set the initial values
-    // also used when aborting
-    init: function () {
-      this.smpstate = CONST.SMPSTATE_EXPECT1
-      this.secret = null
-    },
-
-    makeSecret: function (our, secret) {
-      var sha256 = CryptoJS.algo.SHA256.create()
-      sha256.update(CryptoJS.enc.Latin1.parse(HLP.packBytes(this.version, 1)))
-      sha256.update(CryptoJS.enc.Hex.parse(our ? this.our_fp : this.their_fp))
-      sha256.update(CryptoJS.enc.Hex.parse(our ? this.their_fp : this.our_fp))
-      sha256.update(CryptoJS.enc.Latin1.parse(this.otr.ssid))
-      sha256.update(CryptoJS.enc.Latin1.parse(secret))  // utf8?
-      var hash = sha256.finalize()
-      this.secret = HLP.bits2bigInt(hash.toString(CryptoJS.enc.Latin1))
-    },
-
-    makeG2s: function () {
-      this.a2 = HLP.randomExponent()
-      this.a3 = HLP.randomExponent()
-      this.g2a = BigInt.powMod(G, this.a2, N)
-      this.g3a = BigInt.powMod(G, this.a3, N)
-      if ( !HLP.checkGroup(this.g2a, N) ||
-           !HLP.checkGroup(this.g3a, N)
-      ) this.makeG2s()
-    },
-
-    computeGs: function (g2a, g3a) {
-      this.g2 = BigInt.powMod(g2a, this.a2, N)
-      this.g3 = BigInt.powMod(g3a, this.a3, N)
-    },
-
-    computePQ: function (r) {
-      this.p = BigInt.powMod(this.g3, r, N)
-      this.q = HLP.multPowMod(G, r, this.g2, this.secret, N)
-    },
-
-    computeR: function () {
-      this.r = BigInt.powMod(this.QoQ, this.a3, N)
-    },
-
-    computeRab: function (r) {
-      return BigInt.powMod(r, this.a3, N)
-    },
-
-    computeC: function (v, r) {
-      return HLP.smpHash(v, BigInt.powMod(G, r, N))
-    },
-
-    computeD: function (r, a, c) {
-      return HLP.subMod(r, BigInt.multMod(a, c, Q), Q)
-    },
-
-    // the bulk of the work
-    handleSM: function (msg) {
-      var send, r2, r3, r7, t1, t2, t3, t4, rab, tmp2, cR, d7, ms
-
-      var expectStates = {
-          2: CONST.SMPSTATE_EXPECT1
-        , 3: CONST.SMPSTATE_EXPECT2
-        , 4: CONST.SMPSTATE_EXPECT3
-        , 5: CONST.SMPSTATE_EXPECT4
-        , 7: CONST.SMPSTATE_EXPECT1
-      }
-
-      if (msg.type === 6) {
-        this.otr.trust = false
-        this.init()
-        this.otr.trigger('smp', ['trust', this.otr.trust])
-        return
-      }
-
-      // abort! there was an error
-      if ( this.smpstate !== expectStates[msg.type] ||
-           this.otr.msgstate !== CONST.MSGSTATE_ENCRYPTED
-      ) return this.abort()
-
-      this.otr.trigger('status', [CONST.STATUS_SMP_HANDLE])
-
-      switch (this.smpstate) {
-
-        case CONST.SMPSTATE_EXPECT1:
-          HLP.debug.call(this.otr, 'smp tlv 2')
-          
-          // user specified question
-          var ind, question
-          if (msg.type === 7) {
-            ind = msg.msg.indexOf('\x00')
-            question = msg.msg.substring(0, ind)
-            msg.msg = msg.msg.substring(ind + 1)
-          }
-
-          this.otr.trigger('status', [CONST.STATUS_SMP_START])
-
-          // 0:g2a, 1:c2, 2:d2, 3:g3a, 4:c3, 5:d3
-          ms = HLP.readLen(msg.msg.substr(0, 4))
-          if (ms !== 6) return this.abort()
-          msg = HLP.unpackMPIs(6, msg.msg.substring(4))
-
-          if ( !HLP.checkGroup(msg[0], N) ||
-               !HLP.checkGroup(msg[3], N)
-          ) return this.abort()
-
-          // verify znp's
-          if (!HLP.ZKP(1, msg[1], HLP.multPowMod(G, msg[2], msg[0], msg[1], N)))
-            return this.abort()
-
-          if (!HLP.ZKP(2, msg[4], HLP.multPowMod(G, msg[5], msg[3], msg[4], N)))
-            return this.abort()
-
-          this.g3ao = msg[3]  // save for later
-
-          this.makeG2s()
-
-          // zero-knowledge proof that the exponents
-          // associated with g2a & g3a are known
-          r2 = HLP.randomExponent()
-          r3 = HLP.randomExponent()
-          this.c2 = this.computeC(3, r2)
-          this.c3 = this.computeC(4, r3)
-          this.d2 = this.computeD(r2, this.a2, this.c2)
-          this.d3 = this.computeD(r3, this.a3, this.c3)
-
-          this.computeGs(msg[0], msg[3])
-
-          this.smpstate = CONST.SMPSTATE_EXPECT0
-
-          // invoke question
-          this.otr.trigger('smp', ['question', question])
-          return
-
-        case CONST.SMPSTATE_EXPECT2:
-          HLP.debug.call(this.otr, 'smp tlv 3')
-
-          // 0:g2a, 1:c2, 2:d2, 3:g3a, 4:c3, 5:d3, 6:p, 7:q, 8:cP, 9:d5, 10:d6
-          ms = HLP.readLen(msg.msg.substr(0, 4))
-          if (ms !== 11) return this.abort()
-          msg = HLP.unpackMPIs(11, msg.msg.substring(4))
-
-          if ( !HLP.checkGroup(msg[0], N) ||
-               !HLP.checkGroup(msg[3], N) ||
-               !HLP.checkGroup(msg[6], N) ||
-               !HLP.checkGroup(msg[7], N)
-          ) return this.abort()
-
-          // verify znp of c3 / c3
-          if (!HLP.ZKP(3, msg[1], HLP.multPowMod(G, msg[2], msg[0], msg[1], N)))
-            return this.abort()
-
-          if (!HLP.ZKP(4, msg[4], HLP.multPowMod(G, msg[5], msg[3], msg[4], N)))
-            return this.abort()
-
-          this.g3ao = msg[3]  // save for later
-
-          this.computeGs(msg[0], msg[3])
-
-          // verify znp of cP
-          t1 = HLP.multPowMod(this.g3, msg[9], msg[6], msg[8], N)
-          t2 = HLP.multPowMod(G, msg[9], this.g2, msg[10], N)
-          t2 = BigInt.multMod(t2, BigInt.powMod(msg[7], msg[8], N), N)
-
-          if (!HLP.ZKP(5, msg[8], t1, t2))
-            return this.abort()
-
-          var r4 = HLP.randomExponent()
-          this.computePQ(r4)
-
-          // zero-knowledge proof that P & Q
-          // were generated according to the protocol
-          var r5 = HLP.randomExponent()
-          var r6 = HLP.randomExponent()
-          var tmp = HLP.multPowMod(G, r5, this.g2, r6, N)
-          var cP = HLP.smpHash(6, BigInt.powMod(this.g3, r5, N), tmp)
-          var d5 = this.computeD(r5, r4, cP)
-          var d6 = this.computeD(r6, this.secret, cP)
-
-          // store these
-          this.QoQ = HLP.divMod(this.q, msg[7], N)
-          this.PoP = HLP.divMod(this.p, msg[6], N)
-
-          this.computeR()
-
-          // zero-knowledge proof that R
-          // was generated according to the protocol
-          r7 = HLP.randomExponent()
-          tmp2 = BigInt.powMod(this.QoQ, r7, N)
-          cR = HLP.smpHash(7, BigInt.powMod(G, r7, N), tmp2)
-          d7 = this.computeD(r7, this.a3, cR)
-
-          this.smpstate = CONST.SMPSTATE_EXPECT4
-
-          send = HLP.packINT(8) + HLP.packMPIs([
-              this.p
-            , this.q
-            , cP
-            , d5
-            , d6
-            , this.r
-            , cR
-            , d7
-          ])
-
-          // TLV
-          send = HLP.packTLV(4, send)
-          break
-
-        case CONST.SMPSTATE_EXPECT3:
-          HLP.debug.call(this.otr, 'smp tlv 4')
-
-          // 0:p, 1:q, 2:cP, 3:d5, 4:d6, 5:r, 6:cR, 7:d7
-          ms = HLP.readLen(msg.msg.substr(0, 4))
-          if (ms !== 8) return this.abort()
-          msg = HLP.unpackMPIs(8, msg.msg.substring(4))
-
-          if ( !HLP.checkGroup(msg[0], N) ||
-               !HLP.checkGroup(msg[1], N) ||
-               !HLP.checkGroup(msg[5], N)
-          ) return this.abort()
-
-          // verify znp of cP
-          t1 = HLP.multPowMod(this.g3, msg[3], msg[0], msg[2], N)
-          t2 = HLP.multPowMod(G, msg[3], this.g2, msg[4], N)
-          t2 = BigInt.multMod(t2, BigInt.powMod(msg[1], msg[2], N), N)
-
-          if (!HLP.ZKP(6, msg[2], t1, t2))
-            return this.abort()
-
-          // verify znp of cR
-          t3 = HLP.multPowMod(G, msg[7], this.g3ao, msg[6], N)
-          this.QoQ = HLP.divMod(msg[1], this.q, N)  // save Q over Q
-          t4 = HLP.multPowMod(this.QoQ, msg[7], msg[5], msg[6], N)
-
-          if (!HLP.ZKP(7, msg[6], t3, t4))
-            return this.abort()
-
-          this.computeR()
-
-          // zero-knowledge proof that R
-          // was generated according to the protocol
-          r7 = HLP.randomExponent()
-          tmp2 = BigInt.powMod(this.QoQ, r7, N)
-          cR = HLP.smpHash(8, BigInt.powMod(G, r7, N), tmp2)
-          d7 = this.computeD(r7, this.a3, cR)
-
-          rab = this.computeRab(msg[5])
-
-          if (!BigInt.equals(rab, HLP.divMod(msg[0], this.p, N)))
-            return this.abort()
-
-          send = HLP.packINT(3) + HLP.packMPIs([ this.r, cR, d7 ])
-
-          // TLV
-          send = HLP.packTLV(5, send)
-
-          this.otr.trust = true
-          this.init()
-          this.otr.trigger('smp', ['trust', this.otr.trust])
-          break
-
-        case CONST.SMPSTATE_EXPECT4:
-          HLP.debug.call(this.otr, 'smp tlv 5')
-
-          // 0:r, 1:cR, 2:d7
-          ms = HLP.readLen(msg.msg.substr(0, 4))
-          if (ms !== 3) return this.abort()
-          msg = HLP.unpackMPIs(3, msg.msg.substring(4))
-
-          if (!HLP.checkGroup(msg[0], N)) return this.abort()
-
-          // verify znp of cR
-          t3 = HLP.multPowMod(G, msg[2], this.g3ao, msg[1], N)
-          t4 = HLP.multPowMod(this.QoQ, msg[2], msg[0], msg[1], N)
-          if (!HLP.ZKP(8, msg[1], t3, t4))
-            return this.abort()
-
-          rab = this.computeRab(msg[0])
-
-          if (!BigInt.equals(rab, this.PoP))
-            return this.abort()
-
-          this.otr.trust = true
-          this.init()
-          this.otr.trigger('smp', ['trust', this.otr.trust])
-          return
-
-      }
-
-      this.sendMsg(send)
-    },
-
-    // send a message
-    sendMsg: function (send) {
-      this.otr._sendMsg('\x00' + send)
-    },
-
-    rcvSecret: function (secret, question) {
-      HLP.debug.call(this.otr, 'receive secret')
-
-      if (this.otr.msgstate !== CONST.MSGSTATE_ENCRYPTED)
-        return this.otr.error('Not ready to send encrypted messages.')
-
-      var fn, our = false
-      if (this.smpstate === CONST.SMPSTATE_EXPECT0) {
-        fn = this.answer
-      } else {
-        fn = this.initiate
-        our = true
-      }
-
-      this.makeSecret(our, secret)
-      fn.call(this, question)
-    },
-
-    answer: function () {
-      HLP.debug.call(this.otr, 'smp answer')
-
-      var r4 = HLP.randomExponent()
-      this.computePQ(r4)
-
-      // zero-knowledge proof that P & Q
-      // were generated according to the protocol
-      var r5 = HLP.randomExponent()
-      var r6 = HLP.randomExponent()
-      var tmp = HLP.multPowMod(G, r5, this.g2, r6, N)
-      var cP = HLP.smpHash(5, BigInt.powMod(this.g3, r5, N), tmp)
-      var d5 = this.computeD(r5, r4, cP)
-      var d6 = this.computeD(r6, this.secret, cP)
-
-      this.smpstate = CONST.SMPSTATE_EXPECT3
-
-      var send = HLP.packINT(11) + HLP.packMPIs([
-          this.g2a
-        , this.c2
-        , this.d2
-        , this.g3a
-        , this.c3
-        , this.d3
-        , this.p
-        , this.q
-        , cP
-        , d5
-        , d6
-      ])
-
-      this.sendMsg(HLP.packTLV(3, send))
-    },
-
-    initiate: function (question) {
-      HLP.debug.call(this.otr, 'smp initiate')
-      this.otr.trigger('status', [CONST.STATUS_SMP_INIT])
-
-      if (this.smpstate !== CONST.SMPSTATE_EXPECT1)
-        this.abort()  // abort + restart
-
-      this.makeG2s()
-
-      // zero-knowledge proof that the exponents
-      // associated with g2a & g3a are known
-      var r2 = HLP.randomValue()
-      var r3 = HLP.randomValue()
-      this.c2 = this.computeC(1, r2)
-      this.c3 = this.computeC(2, r3)
-      this.d2 = this.computeD(r2, this.a2, this.c2)
-      this.d3 = this.computeD(r3, this.a3, this.c3)
-
-      // set the next expected state
-      this.smpstate = CONST.SMPSTATE_EXPECT2
-
-      var send = ''
-      var type = 2
-
-      if (question) {
-        send += question
-        send += '\x00'
-        type = 7
-      }
-
-      send += HLP.packINT(6) + HLP.packMPIs([
-          this.g2a
-        , this.c2
-        , this.d2
-        , this.g3a
-        , this.c3
-        , this.d3
-      ])
-
-      this.sendMsg(HLP.packTLV(type, send))
-    },
-
-    abort: function () {
-      this.otr.trust = false
-      this.init()
-      this.sendMsg(HLP.packTLV(6, ''))
-      this.otr.trigger('smp', ['trust', this.otr.trust])
+  // inherit from EE
+  HLP.extend(SM, EventEmitter)
+
+  // set the initial values
+  // also used when aborting
+  SM.prototype.init = function () {
+    this.smpstate = CONST.SMPSTATE_EXPECT1
+    this.secret = null
+  }
+
+  SM.prototype.makeSecret = function (our, secret) {
+    var sha256 = CryptoJS.algo.SHA256.create()
+    sha256.update(CryptoJS.enc.Latin1.parse(HLP.packBytes(this.version, 1)))
+    sha256.update(CryptoJS.enc.Hex.parse(our ? this.our_fp : this.their_fp))
+    sha256.update(CryptoJS.enc.Hex.parse(our ? this.their_fp : this.our_fp))
+    sha256.update(CryptoJS.enc.Latin1.parse(this.ssid))
+    sha256.update(CryptoJS.enc.Latin1.parse(secret))  // utf8?
+    var hash = sha256.finalize()
+    this.secret = HLP.bits2bigInt(hash.toString(CryptoJS.enc.Latin1))
+  }
+
+  SM.prototype.makeG2s = function () {
+    this.a2 = HLP.randomExponent()
+    this.a3 = HLP.randomExponent()
+    this.g2a = BigInt.powMod(G, this.a2, N)
+    this.g3a = BigInt.powMod(G, this.a3, N)
+    if ( !HLP.checkGroup(this.g2a, N) ||
+         !HLP.checkGroup(this.g3a, N)
+    ) this.makeG2s()
+  }
+
+  SM.prototype.computeGs = function (g2a, g3a) {
+    this.g2 = BigInt.powMod(g2a, this.a2, N)
+    this.g3 = BigInt.powMod(g3a, this.a3, N)
+  }
+
+  SM.prototype.computePQ = function (r) {
+    this.p = BigInt.powMod(this.g3, r, N)
+    this.q = HLP.multPowMod(G, r, this.g2, this.secret, N)
+  }
+
+  SM.prototype.computeR = function () {
+    this.r = BigInt.powMod(this.QoQ, this.a3, N)
+  }
+
+  SM.prototype.computeRab = function (r) {
+    return BigInt.powMod(r, this.a3, N)
+  }
+
+  SM.prototype.computeC = function (v, r) {
+    return HLP.smpHash(v, BigInt.powMod(G, r, N))
+  }
+
+  SM.prototype.computeD = function (r, a, c) {
+    return HLP.subMod(r, BigInt.multMod(a, c, Q), Q)
+  }
+
+  // the bulk of the work
+  SM.prototype.handleSM = function (msg) {
+    var send, r2, r3, r7, t1, t2, t3, t4, rab, tmp2, cR, d7, ms
+
+    var expectStates = {
+        2: CONST.SMPSTATE_EXPECT1
+      , 3: CONST.SMPSTATE_EXPECT2
+      , 4: CONST.SMPSTATE_EXPECT3
+      , 5: CONST.SMPSTATE_EXPECT4
+      , 7: CONST.SMPSTATE_EXPECT1
     }
 
+    if (msg.type === 6) {
+      this.init()
+      this.trigger('trust', [false])
+      return
+    }
+
+    // abort! there was an error
+    if (this.smpstate !== expectStates[msg.type])
+      return this.abort()
+
+    switch (this.smpstate) {
+
+      case CONST.SMPSTATE_EXPECT1:
+        HLP.debug.call(this, 'smp tlv 2')
+
+        // user specified question
+        var ind, question
+        if (msg.type === 7) {
+          ind = msg.msg.indexOf('\x00')
+          question = msg.msg.substring(0, ind)
+          msg.msg = msg.msg.substring(ind + 1)
+        }
+
+        // 0:g2a, 1:c2, 2:d2, 3:g3a, 4:c3, 5:d3
+        ms = HLP.readLen(msg.msg.substr(0, 4))
+        if (ms !== 6) return this.abort()
+        msg = HLP.unpackMPIs(6, msg.msg.substring(4))
+
+        if ( !HLP.checkGroup(msg[0], N) ||
+             !HLP.checkGroup(msg[3], N)
+        ) return this.abort()
+
+        // verify znp's
+        if (!HLP.ZKP(1, msg[1], HLP.multPowMod(G, msg[2], msg[0], msg[1], N)))
+          return this.abort()
+
+        if (!HLP.ZKP(2, msg[4], HLP.multPowMod(G, msg[5], msg[3], msg[4], N)))
+          return this.abort()
+
+        this.g3ao = msg[3]  // save for later
+
+        this.makeG2s()
+
+        // zero-knowledge proof that the exponents
+        // associated with g2a & g3a are known
+        r2 = HLP.randomExponent()
+        r3 = HLP.randomExponent()
+        this.c2 = this.computeC(3, r2)
+        this.c3 = this.computeC(4, r3)
+        this.d2 = this.computeD(r2, this.a2, this.c2)
+        this.d3 = this.computeD(r3, this.a3, this.c3)
+
+        this.computeGs(msg[0], msg[3])
+
+        this.smpstate = CONST.SMPSTATE_EXPECT0
+
+        // invoke question
+        this.trigger('question', [question])
+        return
+
+      case CONST.SMPSTATE_EXPECT2:
+        HLP.debug.call(this, 'smp tlv 3')
+
+        // 0:g2a, 1:c2, 2:d2, 3:g3a, 4:c3, 5:d3, 6:p, 7:q, 8:cP, 9:d5, 10:d6
+        ms = HLP.readLen(msg.msg.substr(0, 4))
+        if (ms !== 11) return this.abort()
+        msg = HLP.unpackMPIs(11, msg.msg.substring(4))
+
+        if ( !HLP.checkGroup(msg[0], N) ||
+             !HLP.checkGroup(msg[3], N) ||
+             !HLP.checkGroup(msg[6], N) ||
+             !HLP.checkGroup(msg[7], N)
+        ) return this.abort()
+
+        // verify znp of c3 / c3
+        if (!HLP.ZKP(3, msg[1], HLP.multPowMod(G, msg[2], msg[0], msg[1], N)))
+          return this.abort()
+
+        if (!HLP.ZKP(4, msg[4], HLP.multPowMod(G, msg[5], msg[3], msg[4], N)))
+          return this.abort()
+
+        this.g3ao = msg[3]  // save for later
+
+        this.computeGs(msg[0], msg[3])
+
+        // verify znp of cP
+        t1 = HLP.multPowMod(this.g3, msg[9], msg[6], msg[8], N)
+        t2 = HLP.multPowMod(G, msg[9], this.g2, msg[10], N)
+        t2 = BigInt.multMod(t2, BigInt.powMod(msg[7], msg[8], N), N)
+
+        if (!HLP.ZKP(5, msg[8], t1, t2))
+          return this.abort()
+
+        var r4 = HLP.randomExponent()
+        this.computePQ(r4)
+
+        // zero-knowledge proof that P & Q
+        // were generated according to the protocol
+        var r5 = HLP.randomExponent()
+        var r6 = HLP.randomExponent()
+        var tmp = HLP.multPowMod(G, r5, this.g2, r6, N)
+        var cP = HLP.smpHash(6, BigInt.powMod(this.g3, r5, N), tmp)
+        var d5 = this.computeD(r5, r4, cP)
+        var d6 = this.computeD(r6, this.secret, cP)
+
+        // store these
+        this.QoQ = HLP.divMod(this.q, msg[7], N)
+        this.PoP = HLP.divMod(this.p, msg[6], N)
+
+        this.computeR()
+
+        // zero-knowledge proof that R
+        // was generated according to the protocol
+        r7 = HLP.randomExponent()
+        tmp2 = BigInt.powMod(this.QoQ, r7, N)
+        cR = HLP.smpHash(7, BigInt.powMod(G, r7, N), tmp2)
+        d7 = this.computeD(r7, this.a3, cR)
+
+        this.smpstate = CONST.SMPSTATE_EXPECT4
+
+        send = HLP.packINT(8) + HLP.packMPIs([
+            this.p
+          , this.q
+          , cP
+          , d5
+          , d6
+          , this.r
+          , cR
+          , d7
+        ])
+
+        // TLV
+        send = HLP.packTLV(4, send)
+        break
+
+      case CONST.SMPSTATE_EXPECT3:
+        HLP.debug.call(this, 'smp tlv 4')
+
+        // 0:p, 1:q, 2:cP, 3:d5, 4:d6, 5:r, 6:cR, 7:d7
+        ms = HLP.readLen(msg.msg.substr(0, 4))
+        if (ms !== 8) return this.abort()
+        msg = HLP.unpackMPIs(8, msg.msg.substring(4))
+
+        if ( !HLP.checkGroup(msg[0], N) ||
+             !HLP.checkGroup(msg[1], N) ||
+             !HLP.checkGroup(msg[5], N)
+        ) return this.abort()
+
+        // verify znp of cP
+        t1 = HLP.multPowMod(this.g3, msg[3], msg[0], msg[2], N)
+        t2 = HLP.multPowMod(G, msg[3], this.g2, msg[4], N)
+        t2 = BigInt.multMod(t2, BigInt.powMod(msg[1], msg[2], N), N)
+
+        if (!HLP.ZKP(6, msg[2], t1, t2))
+          return this.abort()
+
+        // verify znp of cR
+        t3 = HLP.multPowMod(G, msg[7], this.g3ao, msg[6], N)
+        this.QoQ = HLP.divMod(msg[1], this.q, N)  // save Q over Q
+        t4 = HLP.multPowMod(this.QoQ, msg[7], msg[5], msg[6], N)
+
+        if (!HLP.ZKP(7, msg[6], t3, t4))
+          return this.abort()
+
+        this.computeR()
+
+        // zero-knowledge proof that R
+        // was generated according to the protocol
+        r7 = HLP.randomExponent()
+        tmp2 = BigInt.powMod(this.QoQ, r7, N)
+        cR = HLP.smpHash(8, BigInt.powMod(G, r7, N), tmp2)
+        d7 = this.computeD(r7, this.a3, cR)
+
+        rab = this.computeRab(msg[5])
+
+        if (!BigInt.equals(rab, HLP.divMod(msg[0], this.p, N)))
+          return this.abort()
+
+        send = HLP.packINT(3) + HLP.packMPIs([ this.r, cR, d7 ])
+
+        // TLV
+        send = HLP.packTLV(5, send)
+
+        this.init()
+        this.trigger('trust', [true])
+        break
+
+      case CONST.SMPSTATE_EXPECT4:
+        HLP.debug.call(this, 'smp tlv 5')
+
+        // 0:r, 1:cR, 2:d7
+        ms = HLP.readLen(msg.msg.substr(0, 4))
+        if (ms !== 3) return this.abort()
+        msg = HLP.unpackMPIs(3, msg.msg.substring(4))
+
+        if (!HLP.checkGroup(msg[0], N)) return this.abort()
+
+        // verify znp of cR
+        t3 = HLP.multPowMod(G, msg[2], this.g3ao, msg[1], N)
+        t4 = HLP.multPowMod(this.QoQ, msg[2], msg[0], msg[1], N)
+        if (!HLP.ZKP(8, msg[1], t3, t4))
+          return this.abort()
+
+        rab = this.computeRab(msg[0])
+
+        if (!BigInt.equals(rab, this.PoP))
+          return this.abort()
+
+        this.init()
+        this.trigger('trust', [true])
+        return
+
+    }
+
+    this.sendMsg(send)
+  }
+
+  // send a message
+  SM.prototype.sendMsg = function (send) {
+    this.trigger('send', [this.ssid, '\x00' + send])
+  }
+
+  SM.prototype.rcvSecret = function (secret, question) {
+    HLP.debug.call(this, 'receive secret')
+
+    var fn, our = false
+    if (this.smpstate === CONST.SMPSTATE_EXPECT0) {
+      fn = this.answer
+    } else {
+      fn = this.initiate
+      our = true
+    }
+
+    this.makeSecret(our, secret)
+    fn.call(this, question)
+  }
+
+  SM.prototype.answer = function () {
+    HLP.debug.call(this, 'smp answer')
+
+    var r4 = HLP.randomExponent()
+    this.computePQ(r4)
+
+    // zero-knowledge proof that P & Q
+    // were generated according to the protocol
+    var r5 = HLP.randomExponent()
+    var r6 = HLP.randomExponent()
+    var tmp = HLP.multPowMod(G, r5, this.g2, r6, N)
+    var cP = HLP.smpHash(5, BigInt.powMod(this.g3, r5, N), tmp)
+    var d5 = this.computeD(r5, r4, cP)
+    var d6 = this.computeD(r6, this.secret, cP)
+
+    this.smpstate = CONST.SMPSTATE_EXPECT3
+
+    var send = HLP.packINT(11) + HLP.packMPIs([
+        this.g2a
+      , this.c2
+      , this.d2
+      , this.g3a
+      , this.c3
+      , this.d3
+      , this.p
+      , this.q
+      , cP
+      , d5
+      , d6
+    ])
+
+    this.sendMsg(HLP.packTLV(3, send))
+  }
+
+  SM.prototype.initiate = function (question) {
+    HLP.debug.call(this, 'smp initiate')
+
+    if (this.smpstate !== CONST.SMPSTATE_EXPECT1)
+      this.abort()  // abort + restart
+
+    this.makeG2s()
+
+    // zero-knowledge proof that the exponents
+    // associated with g2a & g3a are known
+    var r2 = HLP.randomExponent()
+    var r3 = HLP.randomExponent()
+    this.c2 = this.computeC(1, r2)
+    this.c3 = this.computeC(2, r3)
+    this.d2 = this.computeD(r2, this.a2, this.c2)
+    this.d3 = this.computeD(r3, this.a3, this.c3)
+
+    // set the next expected state
+    this.smpstate = CONST.SMPSTATE_EXPECT2
+
+    var send = ''
+    var type = 2
+
+    if (question) {
+      send += question
+      send += '\x00'
+      type = 7
+    }
+
+    send += HLP.packINT(6) + HLP.packMPIs([
+        this.g2a
+      , this.c2
+      , this.d2
+      , this.g3a
+      , this.c3
+      , this.d3
+    ])
+
+    this.sendMsg(HLP.packTLV(type, send))
+  }
+
+  SM.prototype.abort = function () {
+    this.init()
+    this.sendMsg(HLP.packTLV(6, ''))
+    this.trigger('trust', [false])
   }
 
 }).call(this)
 ;(function () {
-  "use strict"
+  "use strict";
 
   var root = this
 
-  var CryptoJS, BigInt, EventEmitter, CONST, HLP, Parse, AKE, SM, DSA
-  if (typeof exports !== 'undefined') {
+  var CryptoJS, BigInt, EventEmitter, Worker, SMWPath
+    , CONST, HLP, Parse, AKE, SM, DSA
+  if (typeof module !== 'undefined' && module.exports) {
     module.exports = OTR
     CryptoJS = require('../vendor/crypto.js')
     BigInt = require('../vendor/bigint.js')
-    EventEmitter = require('../vendor/eventemitter.js').EventEmitter
+    EventEmitter = require('../vendor/eventemitter.js')
+    Worker = require('webworker-threads').Worker
+    SMWPath = require('path').join(__dirname, '/sm-webworker.js')
     CONST = require('./const.js')
     HLP = require('./helpers.js')
     Parse = require('./parse.js')
     AKE = require('./ake.js')
     SM = require('./sm.js')
     DSA = require('./dsa.js')
+    // expose CONST for consistency with docs
+    OTR.CONST = CONST
   } else {
     // copy over and expose internals
     Object.keys(root.OTR).forEach(function (k) {
@@ -1959,6 +1927,8 @@ var OTR = {}, DSA = {}
     CryptoJS = root.CryptoJS
     BigInt = root.BigInt
     EventEmitter = root.EventEmitter
+    Worker = root.Worker
+    SMWPath = 'sm-webworker.js'
     CONST = OTR.CONST
     HLP = OTR.HLP
     Parse = OTR.Parse
@@ -1971,6 +1941,10 @@ var OTR = {}, DSA = {}
   // see group 5, RFC 3526
   var G = BigInt.str2bigInt(CONST.G, 10)
   var N = BigInt.str2bigInt(CONST.N, 16)
+
+  // JavaScript integers
+  var MAX_INT = Math.pow(2, 53) - 1  // doubles
+  var MAX_UINT = Math.pow(2, 31) - 1  // bitwise operators
 
   // OTR contructor
   function OTR(options) {
@@ -1986,11 +1960,11 @@ var OTR = {}, DSA = {}
     this.priv = options.priv ? options.priv : new DSA()
 
     this.fragment_size = options.fragment_size || 0
-    if (!(this.fragment_size >= 0))
+    if (this.fragment_size < 0)
       throw new Error('Fragment size must be a positive integer.')
 
     this.send_interval = options.send_interval || 0
-    if (!(this.send_interval >= 0))
+    if (this.send_interval < 0)
       throw new Error('Send interval must be a positive integer.')
 
     this.outgoing = []
@@ -2000,6 +1974,10 @@ var OTR = {}, DSA = {}
 
     // debug
     this.debug = !!options.debug
+
+    // smp in webworker options
+    // this is still experimental and undocumented
+    this.smw = options.smw
 
     // init vals
     this.init()
@@ -2071,8 +2049,74 @@ var OTR = {}, DSA = {}
     this.ssid = null
   }
 
+  // smp over webworker
+  OTR.prototype._SMW = function (otr, reqs) {
+    this.otr = otr
+    var opts = {
+        path: SMWPath
+      , seed: BigInt.getSeed
+    }
+    if (typeof otr.smw === 'object')
+      Object.keys(otr.smw).forEach(function (k) {
+        opts[k] = otr.smw[k]
+      })
+    this.worker = new Worker(opts.path)
+    var self = this
+    this.worker.onmessage = function (e) {
+      var d = e.data
+      if (!d) return
+      self.trigger(d.method, d.args)
+    }
+    this.worker.postMessage({
+        type: 'seed'
+      , seed: opts.seed()
+      , imports: opts.imports
+    })
+    this.worker.postMessage({
+        type: 'init'
+      , reqs: reqs
+    })
+  }
+
+  // inherit from EE
+  HLP.extend(OTR.prototype._SMW, EventEmitter)
+
+  // shim sm methods
+  ;['handleSM', 'rcvSecret', 'abort'].forEach(function (m) {
+    OTR.prototype._SMW.prototype[m] = function () {
+      this.worker.postMessage({
+          type: 'method'
+        , method: m
+        , args: Array.prototype.slice.call(arguments, 0)
+      })
+    }
+  })
+
   OTR.prototype._smInit = function () {
-    this.sm = new SM(this)
+    var reqs = {
+        ssid: this.ssid
+      , our_fp: this.priv.fingerprint()
+      , their_fp: this.their_priv_pk.fingerprint()
+      , debug: this.debug
+    }
+    if (this.smw) {
+      if (this.sm) this.sm.worker.terminate()  // destroy prev webworker
+      this.sm = new this._SMW(this, reqs)
+    } else {
+      this.sm = new SM(reqs)
+    }
+    var self = this
+    this.sm.on('trust', function (trust) {
+      self.trust = trust
+      self.trigger('smp', ['trust', trust])
+    })
+    this.sm.on('question', function (question) {
+      self.trigger('smp', ['question', question])
+    })
+    this.sm.on('send', function (ssid, send) {
+      if (self.ssid === ssid)
+        self._sendMsg(send)
+    })
   }
 
   OTR.prototype.io = function (msg) {
@@ -2087,7 +2131,7 @@ var OTR = {}, DSA = {}
         var msg = self.outgoing.shift()
         self.trigger('io', [msg])
       }
-      setTimeout(send, self.send_interval)
+      setTimeout(send, first ? 0 : self.send_interval)
     }(true))
 
   }
@@ -2099,8 +2143,8 @@ var OTR = {}, DSA = {}
   }
 
   // session constructor
-  OTR.prototype.dhSession = function dhSession(our_dh, their_y) {
-    if (!(this instanceof dhSession)) return new dhSession(our_dh, their_y)
+  OTR.prototype.DHSession = function DHSession(our_dh, their_y) {
+    if (!(this instanceof DHSession)) return new DHSession(our_dh, their_y)
 
     // shared secret
     var s = BigInt.powMod(their_y, our_dh.privateKey, N)
@@ -2150,9 +2194,9 @@ var OTR = {}, DSA = {}
     this.sessKeys[1][1] = this.sessKeys[0][1]
     this.sessKeys[0] = [
         this.their_y ?
-            new this.dhSession(this.our_dh, this.their_y) : null
+            new this.DHSession(this.our_dh, this.their_y) : null
       , this.their_old_y ?
-            new this.dhSession(this.our_dh, this.their_old_y) : null
+            new this.DHSession(this.our_dh, this.their_old_y) : null
     ]
 
   }
@@ -2176,16 +2220,20 @@ var OTR = {}, DSA = {}
 
     // new keys / sessions
     this.their_y = their_y
-    this.sessKeys[0][0] = new this.dhSession(this.our_dh, this.their_y)
-    this.sessKeys[1][0] = new this.dhSession(this.our_old_dh, this.their_y)
+    this.sessKeys[0][0] = new this.DHSession(this.our_dh, this.their_y)
+    this.sessKeys[1][0] = new this.DHSession(this.our_old_dh, this.their_y)
 
   }
 
-  OTR.prototype.prepareMsg = function (msg) {
+  OTR.prototype.prepareMsg = function (msg, esk) {
     if (this.msgstate !== CONST.MSGSTATE_ENCRYPTED || this.their_keyid === 0)
       return this.error('Not ready to encrypt.')
 
     var sessKeys = this.sessKeys[1][0]
+
+    if (sessKeys.send_counter >= MAX_INT)
+      return this.error('Should have rekeyed by now.')
+
     sessKeys.send_counter += 1
 
     var ctr = HLP.packCtr(sessKeys.send_counter)
@@ -2199,12 +2247,14 @@ var OTR = {}, DSA = {}
     }
 
     send += '\x00'  // flag
-    
     send += HLP.packINT(this.our_keyid - 1)
     send += HLP.packINT(this.their_keyid)
     send += HLP.packMPI(this.our_dh.publicKey)
     send += ctr.substring(0, 8)
-    
+
+    if (Math.ceil(msg.length / 8) >= MAX_UINT)  // * 16 / 128
+      return this.error('Message is too long.')
+
     var aes = HLP.encryptAes(
         CryptoJS.enc.Latin1.parse(msg)
       , sessKeys.sendenc
@@ -2225,6 +2275,10 @@ var OTR = {}, DSA = {}
       , this.their_instance_tag
     )
     if (send[0]) return this.error(send[0])
+
+    // emit extra symmetric key
+    if (esk) this.trigger('file', ['send', sessKeys.extra_symkey, esk])
+
     return send[1]
   }
 
@@ -2253,8 +2307,6 @@ var OTR = {}, DSA = {}
       return
     }
 
-    var our_dh =  our_keyid ? this.our_old_dh : this.our_dh
-
     if (their_keyid < 0 || their_keyid > 1) {
       if (!ign) this.error('Not of your latest keys.', true)
       return
@@ -2280,7 +2332,7 @@ var OTR = {}, DSA = {}
     vt += msg.slice(0, 6).join('')
     var vmac = HLP.make1Mac(vt, sessKeys.rcvmac)
 
-    if (msg[6] !== vmac) {
+    if (!HLP.compare(msg[6], vmac)) {
       if (!ign) this.error('MACs do not match.')
       return
     }
@@ -2327,11 +2379,21 @@ var OTR = {}, DSA = {}
         case 2: case 3: case 4:
         case 5: case 6: case 7:
           // SMP
+          if (this.msgstate !== CONST.MSGSTATE_ENCRYPTED) {
+            if (this.sm) this.sm.abort()
+            return
+          }
+          if (!this.sm) this._smInit()
           this.sm.handleSM({ msg: msg, type: type })
           break
         case 8:
+          // utf8 filenames
+          msg = msg.substring(4) // remove 4-byte indication
+          msg = CryptoJS.enc.Latin1.parse(msg)
+          msg = msg.toString(CryptoJS.enc.Utf8)
+
           // Extra Symkey
-          // sessKeys.extra_symkey
+          this.trigger('file', ['receive', sessKeys.extra_symkey, msg])
           break
       }
 
@@ -2346,6 +2408,7 @@ var OTR = {}, DSA = {}
     if (typeof secret !== 'string' || secret.length < 1)
       return this.error('Secret is required.')
 
+    if (!this.sm) this._smInit()
     this.sm.rcvSecret(secret, question)
   }
 
@@ -2432,6 +2495,7 @@ var OTR = {}, DSA = {}
           this.checkInstanceTags(msg.instance_tags)
         ) return  // ignore
         msg.msg = this.handleDataMsg(msg)
+        msg.encrypted = true
         break
       case 'query':
         if (this.msgstate === CONST.MSGSTATE_ENCRYPTED) this._akeInit()
@@ -2448,10 +2512,11 @@ var OTR = {}, DSA = {}
         this.receivedPlaintext = true
 
         // received a whitespace tag
-        if (this.WHITESPACE_START_AKE) this.doAKE(msg)
+        if (this.WHITESPACE_START_AKE && msg.ver.length > 0)
+          this.doAKE(msg)
     }
 
-    if (msg.msg) this.trigger('ui', [msg.msg])
+    if (msg.msg) this.trigger('ui', [msg.msg, msg.encrypted])
   }
 
   OTR.prototype.checkInstanceTags = function (it) {
@@ -2498,10 +2563,38 @@ var OTR = {}, DSA = {}
     })
   }
 
+  OTR.prototype.sendFile = function (filename) {
+    if (this.msgstate !== CONST.MSGSTATE_ENCRYPTED)
+      return this.error('Not ready to encrypt.')
+
+    if (this.ake.otr_version !== CONST.OTR_VERSION_3)
+      return this.error('Protocol v3 required.')
+
+    if (!filename) return this.error('Please specify a filename.')
+
+    // utf8 filenames
+    var l1name = CryptoJS.enc.Utf8.parse(filename)
+    l1name = l1name.toString(CryptoJS.enc.Latin1)
+
+    if (l1name.length >= 65532) return this.error('filename is too long.')
+
+    var msg = '\x00'  // null byte
+    msg += '\x00\x08'  // type 8 tlv
+    msg += HLP.packSHORT(4 + l1name.length)  // length of value
+    msg += '\x00\x00\x00\x01'  // four bytes indicating file
+    msg += l1name
+
+    msg = this.prepareMsg(msg, filename)
+    if (msg) this._sendMsg(msg, true)
+  }
+
   OTR.prototype.endOtr = function () {
     if (this.msgstate === CONST.MSGSTATE_ENCRYPTED) {
       this.sendMsg('\x00\x00\x01\x00\x00')
-      this.sm = null
+      if (this.sm) {
+        if (this.smw) this.sm.worker.terminate()  // destroy webworker
+        this.sm = null
+      }
     }
     this.msgstate = CONST.MSGSTATE_PLAINTEXT
     this.receivedPlaintext = false
@@ -2517,4 +2610,11 @@ var OTR = {}, DSA = {}
     return HLP.packINT(parseInt(BigInt.bigInt2str(num, 10), 10))
   }
 
-}).call(this);
+}).call(this)
+
+  return {
+      OTR: this.OTR
+    , DSA: this.DSA
+  }
+
+}))
