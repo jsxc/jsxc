@@ -1877,8 +1877,11 @@ jsxc.xmpp = {
         var from = $(presence).attr('from');
         var jid = Strophe.getBareJidFromJid(from);
         var to = Strophe.getBareJidFromJid($(presence).attr('to'));
+        var r = Strophe.getResourceFromJid(from);
         var cid = jsxc.jidToCid(jid);
         var data = jsxc.storage.getUserItem('buddy_' + cid);
+        var res = jsxc.storage.getUserItem('res_' + cid) || {};
+        var status = null;
        
         if (jid === to)
             return true;
@@ -1896,23 +1899,42 @@ jsxc.xmpp = {
             return true;
         }
         else if (ptype === 'unavailable') {
-            data.status = 0;
+            status = 0;
         } else {
             var show = $(presence).find('show').text();
             if (show === '' || show === 'chat')
-                data.status = 2;
+                status = 2;
             else
-                data.status = 1;
+                status = 1;
         }
         
-        jsxc.debug(jid + ' <> ' + data.status  + ' <> ' +  jsxc.status[data.status]);
-
+        if(status == 0){
+            delete res[r];
+        }else{
+            res[r] = status;
+        }
+        
+        var maxVal = new Array();
+        var max = 0;
+        for(var prop in res){
+            if(max <= res[prop]){
+                if(max != res[prop]){
+                    maxVal = new Array();
+                    max = res[prop];
+                }
+                maxVal.push(prop)
+            }
+        }
+        
+        data.status = max;
+        data.res = maxVal;
         data.jid = jid;
         
         if(jsxc.el_exists('#jsxc_window_' + cid))
             jsxc.gui.getWindow(cid).data('jid', jid);  
 
         jsxc.storage.setUserItem('buddy_' + cid, data);
+        jsxc.storage.setUserItem('res_' + cid, res);
 
         jsxc.gui.update(cid);
         jsxc.gui.roster.reorder(cid);

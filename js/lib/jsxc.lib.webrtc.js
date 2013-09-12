@@ -135,6 +135,7 @@ jsxc.webrtc = {
         }
         var li = $('<li>Video</li>').addClass('jsxc_video')
         win.find('.jsxc_settings ul').append(li);
+        
         if (self.conn.caps.hasFeatureByJid(win.data('jid'), self.reqVideoFeatures)) {
             li.click(function() {
                 self.startCall(win.data('jid'));
@@ -338,10 +339,10 @@ jsxc.webrtc = {
     startCall: function(jid) {
         var self = this;
 
-        if (!jid.match(/.+@.+\/.+/)) {
-            console.log('We need a full jid');
-            return;
-        }
+//        if (!jid.match(/.+@.+\/.+/)) {
+//            console.log('We need a full jid');
+//            return;
+//        }
 
         self.last_caller = jid;
 
