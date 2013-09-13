@@ -48,6 +48,7 @@ jsxc.webrtc = {
         'urn:xmpp:jingle:apps:rtp:audio',
         'urn:xmpp:jingle:transports:ice-udp:1'
     ],
+    chatJids: {},
     init: function() {
 
         //shortcut
@@ -72,6 +73,8 @@ jsxc.webrtc = {
         this.conn.jingle.ice_config = jsxc.storage.getUserItem('iceConfig');
         this.conn.jingle.MULTIPARTY = false;
         this.conn.jingle.pc_constraints = RTC.pc_constraints;
+        
+        $(document).on('message.jsxc', $.proxy(this.onMessage, this))
 
         $(document).on('mediaready.jingle', $.proxy(this.onMediaReady, this));
         $(document).on('mediafailure.jingle', $.proxy(this.onMediaFailure, this));
@@ -136,14 +139,42 @@ jsxc.webrtc = {
         var li = $('<li>Video</li>').addClass('jsxc_video')
         win.find('.jsxc_settings ul').append(li);
         
-        if (self.conn.caps.hasFeatureByJid(win.data('jid'), self.reqVideoFeatures)) {
+        self.updateWindow(win);
+    },
+    updateWindow: function(win){ console.log('update Window')
+        if(win.length == 0)
+            return;
+        
+        var self = jsxc.webrtc;
+        var jid = win.data('jid');
+        var li = win.find('.jsxc_video');
+        
+        if (Strophe.getResourceFromJid(jid) == null){
+            var cid = jsxc.jidToCid(jid);
+            var res = jsxc.storage.getUserItem('buddy_' + cid).res;
+
+            if(Array.isArray(res) && res.length == 1)
+                jid += '/' + res[0];
+        }
+      
+        if (self.conn.caps.hasFeatureByJid(jid, self.reqVideoFeatures)) {
             li.click(function() {
-                self.startCall(win.data('jid'));
+                self.startCall(jid);
             });
+            li.removeClass('jsxc_disabled');
         } else {
             li.addClass('jsxc_disabled');
+            li.off('click');
         }
-
+    },
+    onMessage: function(e, from){ 
+        var self = jsxc.webrtc;
+        var bJid = Strophe.getBareJidFromJid(from);
+    
+        if(self.chatJids[bJid] != from){
+            self.updateWindow(jsxc.gui.getWindow(jsxc.jidToCid(bJid)));
+            self.chatJids[bJid] = from;
+        }
     },
     setStatus: function(txt, d) {
         var status = $('.jsxc_webrtc .jsxc_status');
@@ -181,11 +212,10 @@ jsxc.webrtc = {
     },
     onCaps: function(event, jid) {
         var self = jsxc.webrtc;
-
-        if (self.conn.caps.hasFeatureByJid(jid, self.reqVideoFeatures))
-            $('#' + jsxc.jidToCid(jid)).addClass('jsxc_videoSuitable');
-        else
-            $('#' + jsxc.jidToCid(jid)).removeClass('jsxc_videoSuitable');
+        var win = jsxc.gui.getWindow(jsxc.jidToCid(jid));
+        
+        if(win.length > 0)
+            self.updateWindow(win);
     },
     onMediaReady: function(event, stream) {
         jsxc.debug('media ready');
@@ -339,10 +369,10 @@ jsxc.webrtc = {
     startCall: function(jid) {
         var self = this;
 
-//        if (!jid.match(/.+@.+\/.+/)) {
-//            console.log('We need a full jid');
-//            return;
-//        }
+        if (Strophe.getResourceFromJid(jid) == null) {
+            jsxc.debug('We need a full jid');
+            return;
+        }
 
         self.last_caller = jid;
 

@@ -1207,14 +1207,17 @@ jsxc.gui.window = {
      * @returns {undefined}
      */
     _show: function(cid) {
+        var win = jsxc.gui.getWindow(cid);
         $('#jsxc_window_' + cid + ' .jsxc_window').slideDown();
 
         //remove unread flag
-        jsxc.gui.getWindow(cid).removeClass('jsxc_unreadMsg');
+        win.removeClass('jsxc_unreadMsg');
         jsxc.storage.updateUserItem('window_' + cid, 'unread', false);
 
         //If the area is hidden, the scrolldown function doesn't work. So we call it here.
         jsxc.gui.window.scrollDown(cid);
+        
+        win.find('.jsxc_textinput').focus();
     },
     /**
      * Minimize text area and save
@@ -1626,6 +1629,10 @@ jsxc.xmpp = {
 
         //instruct all tabs
         jsxc.storage.removeItem('sid');
+        
+        //clean up
+        jsxc.storage.removeUserItem('buddylist');
+        jsxc.storage.removeUserItem('windowlist');
 
         if (!jsxc.chief) {
             $('#jsxc_roster').remove();
@@ -1657,11 +1664,15 @@ jsxc.xmpp = {
         jsxc.storage.setItem('sid', jsxc.xmpp.conn.sid);
         jsxc.storage.setItem('jid', jsxc.xmpp.conn.jid);
         jsxc.debug('SID: ' + jsxc.xmpp.conn.sid);
+        
+        jsxc.cid = jsxc.jidToCid(jsxc.xmpp.conn.jid)
 
         jsxc.storage.setItem('lastActivity', (new Date()).getTime());
 
         //make shure roster will be reloaded
         jsxc.storage.removeUserItem('buddylist');
+        
+        jsxc.storage.removeUserItem('windowlist');
 
         //submit login form
         if (jsxc.triggeredFromForm) {
@@ -1799,11 +1810,13 @@ jsxc.xmpp = {
 
             buddies.push(cid);
 
-            if (jsxc.storage.getUserItem('buddy_' + cid))
-                jsxc.storage.updateUserItem('buddy_' + cid, {jid: jid, name: name, status: 0, sub: sub});
-            else
-                jsxc.storage.setUserItem('buddy_' + cid, {'jid': jid, 'name': name, 'status': 0, sub: sub, 'msgstate': 0, 'transferReq': -1, 'trust': false, 'fingerprint': null});
-
+            if (jsxc.storage.getUserItem('buddy_' + cid)){
+                jsxc.storage.updateUserItem('buddy_' + cid, {jid: jid, name: name, status: 0, sub: sub, res: []});
+                jsxc.storage.removeUserItem('res_' + cid);
+            }else{
+                jsxc.storage.setUserItem('buddy_' + cid, {'jid': jid, 'name': name, 'status': 0, sub: sub, 'msgstate': 0, 'transferReq': -1, 'trust': false, 'fingerprint': null, res: []});
+            }
+            
             jsxc.gui.roster.add(cid);
         });
 
@@ -1930,6 +1943,7 @@ jsxc.xmpp = {
         data.res = maxVal;
         data.jid = jid;
         
+        //Reset jid
         if(jsxc.el_exists('#jsxc_window_' + cid))
             jsxc.gui.getWindow(cid).data('jid', jid);  
 
@@ -1938,6 +1952,8 @@ jsxc.xmpp = {
 
         jsxc.gui.update(cid);
         jsxc.gui.roster.reorder(cid);
+        
+        $(document).trigger('presence.jsxc', [from, data.status]);
 
         //preserve handler
         return true;
@@ -1963,16 +1979,13 @@ jsxc.xmpp = {
         if (!body)
             return true;
 
-        $(document).trigger('onmessage.jsxc', [from, body]);
+        $(document).trigger('message.jsxc', [from, body]);
 
         var win = jsxc.gui.window.init(cid);
         
         //If we now the full jid, we use it
         win.data('jid', from);  
         jsxc.storage.updateUserItem('buddy_' + cid, {jid: from});
-        
-        console.log(from);
-        console.log(jsxc.storage.getUserItem('buddy_'+cid));
 
         //create related otr object
         if (jsxc.chief && !jsxc.buddyList[cid])
@@ -2149,7 +2162,7 @@ jsxc.storage = {
 
             $.each(variable, function(key, val) {
                 if (typeof (data[key]) === 'undefined') {
-                    jsxc.debug('Variable %s doesn\'t exist in %s.', key, variable);
+                    jsxc.debug('Variable '+key+' doesn\'t exist in '+variable+'.');
                     return true;
                 }
                 
@@ -2157,7 +2170,7 @@ jsxc.storage = {
             });
         } else {
             if (typeof (data[variable]) === 'undefined') {
-                jsxc.debug('Variable %s doesn\'t exist.', variable);
+                jsxc.debug('Variable '+variable+' doesn\'t exist.');
                 return;
             }
 
@@ -2740,7 +2753,7 @@ jsxc.notification = {
     },
     prepareRequest: function() {
 
-        $(document).one('onmessage.jsxc', function() {
+        $(document).one('message.jsxc', function() {
             jsxc.switchEvents({
                 'notificationready.jsxc': function() {
                     jsxc.gui.dialog.close();
