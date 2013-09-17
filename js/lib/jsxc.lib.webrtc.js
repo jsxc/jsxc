@@ -270,7 +270,7 @@ jsxc.webrtc = {
             }, 500);
         });
 
-        this.conn.jingle.initiate(jid, this.conn.jid);
+        this.conn.jingle.initiate(jid, this.conn.jid.toLowerCase());
     },
     onCallIncoming: function(event, sid) {
         jsxc.debug('incoming call' + sid);

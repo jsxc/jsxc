@@ -1661,10 +1661,9 @@ jsxc.xmpp = {
         
         //Save sid and jid
         jsxc.storage.setItem('sid', jsxc.xmpp.conn.sid);
-        jsxc.storage.setItem('jid', jsxc.xmpp.conn.jid);
-        jsxc.debug('SID: ' + jsxc.xmpp.conn.sid);
+        jsxc.storage.setItem('jid', jsxc.xmpp.conn.jid.toLowerCase());
         
-        jsxc.cid = jsxc.jidToCid(jsxc.xmpp.conn.jid)
+        jsxc.cid = jsxc.jidToCid(jsxc.xmpp.conn.jid.toLowerCase())
 
         jsxc.storage.setItem('lastActivity', (new Date()).getTime());
 
