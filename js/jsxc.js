@@ -55,7 +55,10 @@ $(function() {
         logoutElement: $('#logout'),
         checkFlash: false,
         debug: function(msg, data) {
-            console.log(msg, data);
+            if(data)
+                console.log(msg, data);
+            else
+                console.log(msg);
         },
         rosterAppend: 'body',
         root: oc_appswebroots.ojsxc,

@@ -5,7 +5,7 @@
  */
 
 var RTC = null,
-        RTCPeerconnection = null;
+    RTCPeerconnection = null;
 
 jsxc.gui.template.incomingCall =
         '<h3>%%Incoming_call%%</h3>\n\
