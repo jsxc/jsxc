@@ -1,7 +1,7 @@
 /**
  * @file Mainscript of the javascript xmpp client
  * @author Klaus Herberth
- * @version 0.1b
+ * @version 0.2
  * 
  * Libraries:
  * [1] Strophe.js, https://github.com/metajack/strophejs
@@ -16,7 +16,6 @@
 
 /*
  * TODO:
- * - add roster slide from ojsxc
  * - user info
  */
 

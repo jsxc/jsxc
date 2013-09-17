@@ -1,3 +1,9 @@
+/**
+ * @file WebRTC Plugin for the javascript xmpp client
+ * @author Klaus Herberth
+ * @version 0.1
+ */
+
 var RTC = null,
         RTCPeerconnection = null;
 
