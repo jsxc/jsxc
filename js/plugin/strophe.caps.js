@@ -131,14 +131,12 @@
         hasFeatureByJid: function(jid, feature){
             if (this._jidVerIndex[jid]) {
                 var length = ($.isArray(feature))? feature.length: 1;
-                    console.log(length);
                 for(i = 0; i < length; i++){
                     if(this._knownCapabilities[this._jidVerIndex[jid]]['features'].indexOf(feature[i]) < 0)
                         return false;
                 }
                 return true;
             }
-            console.log('not known jid');
             return false;
         },
 
@@ -153,7 +151,7 @@
 	 * Returns:
 	 *   (Boolean)
 	 */
-	_delegateCapabilities: function(stanza) { console.log('_delegateCapabilities');
+	_delegateCapabilities: function(stanza) { 
 		var from = stanza.getAttribute('from'),
 			c = stanza.querySelector('c'),
 			ver = c.getAttribute('ver'),
@@ -205,7 +203,7 @@
 	 * Returns:
 	 *   (Boolean) - false, to automatically remove the handler.
 	 */
-	_handleDiscoInfoReply: function(stanza) { console.log(1);
+	_handleDiscoInfoReply: function(stanza) {
 		var query = stanza.querySelector('query'),
 			node = query.getAttribute('node').split('#'),
 			ver = node[1],
@@ -236,7 +234,7 @@
 			this._jidVerIndex[from] = ver;
 		}
 
-                localStorage.setItem('strophe.caps._jidVerIndex', JSON.stringify(this._jidVerIndex));console.log(6);
+                localStorage.setItem('strophe.caps._jidVerIndex', JSON.stringify(this._jidVerIndex));
                 localStorage.setItem('strophe.caps._knownCapabilities', JSON.stringify(this._knownCapabilities));
                 $(document).trigger('caps.strophe', [from]);
                 

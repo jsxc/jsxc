@@ -54,8 +54,8 @@ $(function() {
         },
         logoutElement: $('#logout'),
         checkFlash: false,
-        debug: function(msg) {
-            console.log(msg);
+        debug: function(msg, data) {
+            console.log(msg, data);
         },
         rosterAppend: 'body',
         root: oc_appswebroots.ojsxc,

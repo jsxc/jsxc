@@ -405,7 +405,7 @@ jsxc.options = {
     },
     logoutElement: null, //jquery object from logout element
 
-    debug: function(msg) {
+    debug: function(msg, data) {
     }, //Debug function
 
     checkFlash: true, //If false, the application may crash, if the user didn't install flash
@@ -1949,6 +1949,8 @@ jsxc.xmpp = {
 
         jsxc.storage.setUserItem('buddy_' + cid, data);
         jsxc.storage.setUserItem('res_' + cid, res);
+        
+        jsxc.debug('Presence (' + from + '): ' + status);
 
         jsxc.gui.update(cid);
         jsxc.gui.roster.reorder(cid);
@@ -2682,8 +2684,14 @@ jsxc.otr = {
         if (jsxc.storage.getUserItem('key') === null) {
 
             //Create own box, because buildin isn't fast enough
-            var bg = $('<div/>').attr('id', 'jsxc_overlay');
-            bg.appendTo('body');
+//            var bg = $('<div/>').attr('id', 'jsxc_overlay');
+//            bg.appendTo('body');
+            
+            var bg = document.createElement('div');
+            var bg_id = document.createAttribute('id');
+            bg_id.nodeValue = 'jsxc_overlay';
+            bg.setAttributeNode(bg_id);
+            document.getElementsByTagName('body')[0].appendChild(bg);
 
             var msg = jsxc.l.now_we_will_create_your_private_key_;
             var inner = '<div id="jsxc_dialog">' + jsxc.gui.template.get('waitAlert', null, msg) + '</div>';

@@ -141,7 +141,7 @@ jsxc.webrtc = {
         
         self.updateWindow(win);
     },
-    updateWindow: function(win){ console.log('update Window')
+    updateWindow: function(win){
         if(win.length == 0)
             return;
         
@@ -328,7 +328,7 @@ jsxc.webrtc = {
     },
     onRemoteStreamAdded: function(event, data, sid) {
         this.setStatus('Remote stream for session ' + sid + ' added.');
-        console.log('Stream data', data);
+        jsxc.debug('Stream data', data);
 
         stream = data.stream;
         this.remoteStream = stream;
@@ -350,8 +350,8 @@ jsxc.webrtc = {
         this.setStatus('Remote stream for session ' + sid + ' removed.');
     },
     onIceConnectionStateChanged: function(event, sid, sess) {
-        console.log('ice state for', sid, sess.peerconnection.iceConnectionState);
-        console.log('sig state for', sid, sess.peerconnection.signalingState);
+        jsxc.debug('ice state for ' + sid, sess.peerconnection.iceConnectionState);
+        jsxc.debug('sig state for ' + sid, sess.peerconnection.signalingState);
 
         // works like charm, unfortunately only in chrome and FF nightly, not FF22 beta
         /*
@@ -363,8 +363,7 @@ jsxc.webrtc = {
          */
     },
     noStunCandidates: function(event) {
-//    setStatus('webrtc did not encounter stun candidates, NAT traversal will not work');
-        console.warn('webrtc did not encounter stun candidates, NAT traversal will not work');
+
     },
     startCall: function(jid) {
         var self = this;
