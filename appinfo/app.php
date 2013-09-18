@@ -37,6 +37,7 @@ OCP\Util::addScript ( 'ojsxc', 'plugin/jquery.slimscroll' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/jquery.fullscreen' );
 OCP\Util::addScript ( 'ojsxc', 'lib/strophe' );
 
+OCP\Util::addScript ( 'ojsxc', 'plugin/strophe.muc' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/strophe.disco' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/strophe.caps' );
 OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle' );

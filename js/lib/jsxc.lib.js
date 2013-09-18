@@ -1315,8 +1315,17 @@ jsxc.gui.window = {
 
         $.each(jsxc.gui.emotions, function(i, val) {
             msg = msg.replace(val[2], '<img alt="$1" title="$1" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/>')
-        });
+        }); 
+        
+        var reg = new RegExp(/((?:https?:\/\/|www\.|([\w-]+\.[a-zA-Z]{2,3})(?=\b))(?:(?:[-A-Za-z0-9+&@#/%?=~_|!:,.;]*\([-A-Za-z0-9+&@#/%?=~_|!:,.;]*\)([-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|])?)|(?:[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]))?)/gi);
 
+        msg = msg.replace(reg, function(url){
+            
+            var href = (url.match(/^https?:\/\//i))? url: 'http://' + url;
+            
+            return '<a href="'+href+'" target="_blank">'+url+'</a>';
+        });
+       
         $('#jsxc_window_' + cid + ' .jsxc_textarea').append(
                 "<div class='jsxc_chatmessage jsxc_" + direction + "'>" + msg + "</div>"
                 );

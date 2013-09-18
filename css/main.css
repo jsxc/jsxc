@@ -314,6 +314,10 @@ div.jsxc_chatmessage, input.jsxc_chatmessage{
     word-wrap: break-word;
     background-color:#fff;
 }
+div.jsxc_chatmessage a{
+    color: blue;
+    text-decoration:underline;
+}
 div.jsxc_in, input.jsxc_in{
     text-align: left;
     margin-right:30px;
