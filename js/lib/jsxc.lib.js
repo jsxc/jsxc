@@ -372,13 +372,8 @@ var jsxc = {
         return document.hidden || document.webkitHidden || document.mozHidden || document.msHidden;
     },
     translate: function(text){
-        return text.replace(/%%([a-zA-Z0-9_-}{ ]+)%%/g, function(s, key) {
-                var k = key.replace(/ /gi, '_');
-                
-                if(!jsxc.l[k])
-                    jsxc.debug('[WARN] No translation for: ' + k);
-                
-                return jsxc.l[k] || key.replace(/_/gi, ' ');
+        return text.replace(/%%([a-zA-Z0-9_-}{]+)%%/g, function(s, key) {
+                return jsxc.l[key.replace(/ /gi, '_')] || key.replace(/_/gi, ' ');
             });
     }
 };
@@ -543,19 +538,6 @@ jsxc.gui = {
      */
     getWindow: function(cid) {
         return $('#jsxc_window_' + cid);
-    },
-    toggleList: function(){
-        $(this).click(function() {
-            $(this).find('ul').slideToggle();
-            window.clearTimeout($(this).find('ul').data('timer'));
-        }).mouseleave(function() {
-            var ul = $(this).find('ul');
-            ul.data('timer', window.setTimeout(function() {
-                ul.slideUp();
-            }, 2000));
-        }).mouseenter(function() {
-            window.clearTimeout($(this).find('ul').data('timer'));
-        });
     },
     /**
      * Creates and show loginbox
@@ -831,18 +813,13 @@ jsxc.gui.roster = {
             jsxc.gui.roster.toggle();
         })
 
-        $('#jsxc_buddylist').slimScroll({
+        $('#jsxc_roster ul').slimScroll({
             distance: '3px',
             height: ($('#jsxc_roster').height() - 70) + 'px',
-            width: $('#jsxc_buddylist').width() + 'px',
+            width: $('#jsxc_roster ul').width() + 'px',
             color: '#fff',
             opacity: '0.5'
         });
-        
-        jsxc.gui.toggleList.call($('#jsxc_menu'));
-//        $('#jsxc_menu').click(function(){
-//            $(this).find('> ul').slideToggle();
-//        });
         
         if (jsxc.storage.getUserItem('roster') == 'hidden') {
             $('#jsxc_roster').css('right', '-200px');
@@ -856,8 +833,7 @@ jsxc.gui.roster = {
      * @param {String} cid CSS compatible jid
      */
     add: function(cid) {
-        var data = jsxc.storage.getUserItem('buddy_' + cid);
-        var bud = jsxc.gui.buddyTemplate.clone().attr('id', cid).attr('data-type', data.type || 'chat');
+        var bud = jsxc.gui.buddyTemplate.clone().attr('id', cid);
 
         jsxc.gui.roster.insert(cid, bud);
 
@@ -878,7 +854,7 @@ jsxc.gui.roster = {
         jsxc.gui.update(cid);
 
         //update scrollbar
-        $('#jsxc_buddylist').slimScroll({
+        $('#jsxc_roster ul').slimScroll({
             scrollTo: '0px'
         });
     },
@@ -891,7 +867,7 @@ jsxc.gui.roster = {
     insert: function(cid, li) {
 
         var data = jsxc.storage.getUserItem('buddy_' + cid);
-        var listElements = $('#jsxc_buddylist > li');
+        var listElements = $('#jsxc_roster ul > li');
         var insert = false;
 
         //Insert buddy with no mutual friendship to the end
@@ -912,7 +888,7 @@ jsxc.gui.roster = {
         });
 
         if (!insert)
-            li.appendTo('#jsxc_buddylist');
+            li.appendTo('#jsxc_roster ul');
     },
     /**
      * Initiate reorder of roster item
@@ -1072,7 +1048,17 @@ jsxc.gui.window = {
 
         //Add handler
 
-        jsxc.gui.toggleList.call(win.find('.jsxc_settings'));
+        win.find('.jsxc_settings').click(function() {
+            $(this).find('ul').slideToggle();
+            window.clearTimeout($(this).find('ul').data('timer'));
+        }).mouseleave(function() {
+            var ul = $(this).find('ul');
+            ul.data('timer', window.setTimeout(function() {
+                ul.slideUp();
+            }, 2000));
+        }).mouseenter(function() {
+            window.clearTimeout($(this).find('ul').data('timer'));
+        });
 
         win.find('.jsxc_verification').click(function() {
             jsxc.gui.showVerification(cid);
@@ -1231,8 +1217,6 @@ jsxc.gui.window = {
         jsxc.gui.window.scrollDown(cid);
         
         win.find('.jsxc_textinput').focus();
-        
-        win.trigger('show');
     },
     /**
      * Minimize text area and save
@@ -1251,7 +1235,6 @@ jsxc.gui.window = {
      */
     _hide: function(cid) {
         $('#jsxc_window_' + cid + ' .jsxc_window').slideUp();
-        jsxc.gui.getWindow(cid).trigger('hide');
     },
     /**
      * Highlight window
@@ -1508,13 +1491,8 @@ jsxc.gui.template = {
         </li>',
     roster:
             '<div id="jsxc_roster">\
-            <ul id="jsxc_buddylist"></ul>\
-            <div id="jsxc_menu">\
-            %%Menu%%\
-            <ul>\
-                <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
-            </ul>\
-            </div>\
+            <ul></ul>\
+            <div class="jsxc_addBuddy">+ %%Add_buddy%%</div>\
             <div id="jsxc_toggleRoster"></div>\
         </div>',
     windowList:
@@ -1628,7 +1606,6 @@ jsxc.xmpp = {
 
             switch (status) {
                 case Strophe.Status.CONNECTED:
-                    jsxc.cid = jsxc.jidToCid(jsxc.xmpp.conn.jid.toLowerCase());
                     $(document).trigger('connected');
                     break;
                 case Strophe.Status.ATTACHED:
@@ -1694,6 +1671,8 @@ jsxc.xmpp = {
         //Save sid and jid
         jsxc.storage.setItem('sid', jsxc.xmpp.conn.sid);
         jsxc.storage.setItem('jid', jsxc.xmpp.conn.jid.toLowerCase());
+        
+        jsxc.cid = jsxc.jidToCid(jsxc.xmpp.conn.jid.toLowerCase())
 
         jsxc.storage.setItem('lastActivity', (new Date()).getTime());
 
@@ -1701,7 +1680,6 @@ jsxc.xmpp = {
         jsxc.storage.removeUserItem('buddylist');
         
         jsxc.storage.removeUserItem('windowlist');
-        jsxc.storage.removeUserItem('own');
 
         //submit login form
         if (jsxc.triggeredFromForm) {
@@ -1886,7 +1864,7 @@ jsxc.xmpp = {
                 var bl = jsxc.storage.getUserItem('buddylist');
                 bl.push(cid);       //(INFO) push returns the new length
                 jsxc.storage.setUserItem('buddylist', bl);
-                jsxc.storage.setUserItem('buddy_' + cid, {'jid': jid, 'name': name, 'status': 0, sub: sub, 'msgstate': 0, 'transferReq': -1, 'trust': false, 'fingerprint': null, type: 'chat'});
+                jsxc.storage.setUserItem('buddy_' + cid, {'jid': jid, 'name': name, 'status': 0, sub: sub, 'msgstate': 0, 'transferReq': -1, 'trust': false, 'fingerprint': null});
                 jsxc.gui.roster.add(cid);
             }
         });
@@ -1968,7 +1946,7 @@ jsxc.xmpp = {
             }
         }
         
-        data.status = max; 
+        data.status = max;
         data.res = maxVal;
         data.jid = jid;
         
@@ -1984,7 +1962,7 @@ jsxc.xmpp = {
         jsxc.gui.update(cid);
         jsxc.gui.roster.reorder(cid);
         
-        $(document).trigger('presence.jsxc', [from, status, presence]);
+        $(document).trigger('presence.jsxc', [from, data.status]);
 
         //preserve handler
         return true;
@@ -2002,14 +1980,12 @@ jsxc.xmpp = {
          * </message>
          */
 
-        var type = $(message).attr('type');
         var from = $(message).attr('from');
         var jid = Strophe.getBareJidFromJid(from);
         var cid = jsxc.jidToCid(jid);
         var body = $(message).find('body:first').text();
-        var own = jsxc.storage.getUserItem('own') || [];
 
-        if (!body || own.indexOf(from) >= 0)
+        if (!body)
             return true;
 
         $(document).trigger('message.jsxc', [from, body]);
@@ -2017,11 +1993,9 @@ jsxc.xmpp = {
         var win = jsxc.gui.window.init(cid);
         
         //If we now the full jid, we use it
-        if(type == 'chat'){
-            win.data('jid', from);  
-            jsxc.storage.updateUserItem('buddy_' + cid, {jid: from});
-        }
-        
+        win.data('jid', from);  
+        jsxc.storage.updateUserItem('buddy_' + cid, {jid: from});
+
         //create related otr object
         if (jsxc.chief && !jsxc.buddyList[cid])
             jsxc.otr.create(cid);
@@ -2197,14 +2171,16 @@ jsxc.storage = {
 
             $.each(variable, function(key, val) {
                 if (typeof (data[key]) === 'undefined') {
-                    jsxc.debug('Variable '+key+' doesn\'t exist in '+variable+'. It was created.');
+                    jsxc.debug('Variable '+key+' doesn\'t exist in '+variable+'.');
+                    return true;
                 }
                 
                 data[key] = val;
             });
         } else {
             if (typeof (data[variable]) === 'undefined') {
-                jsxc.debug('Variable '+variable+' doesn\'t exist. It was created.');
+                jsxc.debug('Variable '+variable+' doesn\'t exist.');
+                return;
             }
 
             data[variable] = value;
@@ -2485,11 +2461,9 @@ jsxc.otr = {
         if (jsxc.buddyList[jsxc.jidToCid(jid)].msgstate !== 0)
             jsxc.otr.backup(jsxc.jidToCid(jid));
 
-        var type = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(jid)).type || 'chat';
-
         jsxc.xmpp.conn.send($msg({
             to: jid,
-            type: type
+            type: 'chat'
         }).c('body').t(msg));
     },
     /**
@@ -2883,7 +2857,7 @@ jsxc.l10n = {
         Fingerprints: 'Fingerprints',
         Authentifikation: 'Authentifikation',
         Message: 'Message',
-        Add_buddy: 'Add buddy',
+        Add_buddy: 'Add_buddy',
         rename_buddy: 'rename buddy',
         delete_buddy: 'delete buddy',
         Login: 'Login',

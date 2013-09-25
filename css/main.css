@@ -111,16 +111,16 @@ div#jsxc_roster{
     background: url("%webroot%/core/img/noise.png") #383C43;
     box-shadow: 0px 0px 7px #000000;
 }
-div#jsxc_roster .slimScrollDiv{
+div#jsxc_roster > div{
     left: -4px;
 }
-ul#jsxc_buddylist{
+div#jsxc_roster ul{
     list-style:none;
     padding: 0px;
     margin:0px;
     width:204px;
 }
-ul#jsxc_buddylist li{
+div#jsxc_roster li{
     padding: 0px;
     margin:0px;
     height:30px;
@@ -134,13 +134,13 @@ ul#jsxc_buddylist li{
     padding-left:3px;
     z-index:85;
 }
-ul#jsxc_buddylist li:hover{
+div#jsxc_roster li:hover{
     color:#FAFAFA;
 }
-ul#jsxc_buddylist li.jsxc_oneway{
+div#jsxc_roster li.jsxc_oneway{
     opacity: 0.7;
 }
-ul#jsxc_buddylist li .jsxc_name{
+div#jsxc_roster li .jsxc_name{
     width: 160px;
     overflow: hidden;
     height:30px;
@@ -149,55 +149,29 @@ ul#jsxc_buddylist li .jsxc_name{
 div#jsxc_roster p{
     color: #939393;
 }
-div#jsxc_menu{
+div#jsxc_roster .jsxc_addBuddy{
     position:absolute;
     left:0px;
     bottom:70px;
     height:30px;
-    width: 190px;
-    border-top:1px solid #939393;
-    padding-left:10px;
     background-color:#282323;
     color: #939393;
     cursor: pointer;
+    width: 190px;
     line-height: 30px;
+    border-top:1px solid #939393;
+    padding-left:10px;
 }
-div#jsxc_menu:hover{
+div#jsxc_roster .jsxc_addBuddy:hover{
     color:#FAFAFA;
 }
-div#jsxc_menu ul{
-    width: 190px;
-    position:absolute;
-    bottom: 30px;
-    left: 0px;
-    display: none;
-    border-top:1px solid #939393;
-    padding-left:10px;
-    background-color:#282323;
-}
-div#jsxc_menu li{
-    height:30px;
-    background-color:#282323;
-    color: #939393;
-    cursor: pointer;
-    width: 180px;
-    padding-left:10px;
-    line-height: 30px;
-}
-div#jsxc_menu li:hover{
-    color:#fff;
-    background-color:#3F8FBA;
-}
-div#jsxc_menu ul li:last-child{
-    border-bottom:1px solid #939393;
-}
-ul#jsxc_buddylist .jsxc_options{
+div#jsxc_roster .jsxc_options{
     position: absolute;
     right: 0px;
     top: 0px;
     height:30px;
 }
-ul#jsxc_buddylist .jsxc_options div{
+div#jsxc_roster .jsxc_options div{
     line-height: 30px;
     height:30px;
     width:20px;
@@ -206,19 +180,19 @@ ul#jsxc_buddylist .jsxc_options div{
     float: left;
     display: none
 }
-ul#jsxc_buddylist li[data-type="chat"]:hover .jsxc_options div{
+div#jsxc_roster li:hover .jsxc_options div{
     display:block;
 }
-ul#jsxc_buddylist .jsxc_options div:hover{
+div#jsxc_roster .jsxc_options div:hover{
     opacity: 1.0;
 }
-ul#jsxc_buddylist .jsxc_rename{
+div#jsxc_roster .jsxc_rename{
     background-image: url('%appswebroot%/ojsxc/img/edit.png');
     background-repeat: no-repeat;
     background-position: center center;
     background-size:15px 15px;
 }
-ul#jsxc_buddylist .jsxc_delete{
+div#jsxc_roster .jsxc_delete{
     text-transform: lowercase;
     font-weight: bold;
     vertical-align: middle;
@@ -305,10 +279,9 @@ div.jsxc_window{
     height:255px;
     position:absolute;
     bottom:30px;
-    right:0px;
+    left:0px;
     background-color:#A4A4A4;
     box-shadow: 0px 0px 5px #000;
-    z-index: 80;
 }
 div.jsxc_window .jsxc_tools{
     position: absolute;

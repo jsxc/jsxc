@@ -15,7 +15,7 @@ Strophe.addConnectionPlugin('muc', {
   _connection: null,
   rooms: {},
   roomNames: [],
-  /*Function 
+  /*Function
   Initialize the MUC plugin. Sets the correct connection object and
   extends the namesace.
   */

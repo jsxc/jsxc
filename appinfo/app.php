@@ -56,7 +56,6 @@ OCP\Util::addScript ( 'ojsxc', 'lib/otr' );
 OCP\Util::addScript ( 'ojsxc', 'lib/facebox' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.webrtc' );
-OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.muc' );
 OCP\Util::addScript ( 'ojsxc', 'log' );
     
 OCP\Util::addScript ( 'ojsxc', 'jsxc' );
@@ -66,5 +65,4 @@ OCP\Util::addStyle  ( 'ojsxc', 'facebox' );
 OCP\Util::addStyle  ( 'ojsxc', 'jquery.mCustomScrollbar' );
 OCP\Util::addStyle  ( 'ojsxc', 'main' );
 OCP\Util::addStyle  ( 'ojsxc', 'webrtc' );
-OCP\Util::addStyle  ( 'ojsxc', 'muc' );
 //OCP\Util::addStyle  ( 'ojsxc', 'log' );
