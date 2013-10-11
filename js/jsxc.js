@@ -64,6 +64,7 @@ $(function() {
         root: oc_appswebroots.ojsxc,
         //@TODO: don't include get turn credentials routine into jsxc
         turnCredentialsPath: OC.filePath('ojsxc', 'ajax', 'getturncredentials.php'),
+        autoReply: true,
     });
 
 

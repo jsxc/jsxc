@@ -17,7 +17,6 @@
 /*
  * TODO:
  * - user info
- * - add symbol to menu
  */
 
 /**
@@ -424,6 +423,8 @@ jsxc.options = {
     notification: true,
             
     root: '', //Root of jsxc
+    
+    autoReply: false,   //Send auto-reply
 };
 
 /**
@@ -1284,6 +1285,7 @@ jsxc.gui.window = {
     postMessage: function(cid, direction, msg) {
         var chat = jsxc.storage.getUserItem('chat_' + cid) || [];
         var data = jsxc.storage.getUserItem('buddy_' + cid);
+        var html_msg = msg;
 
         if (chat.length > jsxc.options.numberOfMsg)
             chat.pop();
@@ -1312,7 +1314,7 @@ jsxc.gui.window = {
         jsxc.storage.setUserItem('chat_' + cid, chat);
 
         if (direction === 'in')
-            $(document).trigger('postmessagein.jsxc', [jsxc.jids[cid], msg]);
+            $(document).trigger('postmessagein.jsxc', [jsxc.jids[cid], html_msg]);
 
         jsxc.gui.window._postMessage(cid, direction, msg);
     },
@@ -1745,6 +1747,17 @@ jsxc.xmpp = {
      * @returns {undefined}
      */
     connectionReady: function(){
+        
+        if(jsxc.options.autoReply){ 
+            $(document).on('message.jsxc', function(e, from, msg){
+                if(msg.match(/^>>/))
+                    return;
+                
+                setTimeout(function(){
+                    jsxc.sendMessage(jsxc.jidToCid(from), '>> ' + msg);
+                }, 3000);
+            });
+        }
         
         $(document).trigger('connectionReady.jsxc');
     },
