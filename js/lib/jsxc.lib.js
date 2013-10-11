@@ -17,6 +17,7 @@
 /*
  * TODO:
  * - user info
+ * - add symbol to menu
  */
 
 /**
@@ -271,7 +272,7 @@ var jsxc = {
      * @returns {String} css compatible string
      */
     jidToCid: function(jid) {
-        var cid = Strophe.getBareJidFromJid(jid).replace('@', '-').replace('.', '-');
+        var cid = Strophe.getBareJidFromJid(jid).replace('@', '-').replace('.', '-').toLowerCase();
 
         jsxc.jids[cid] = jid;
 
@@ -694,7 +695,6 @@ jsxc.gui = {
 
             //If friendship is not mutual show contact dialog
             if (!data || data.sub === 'from')
-                //@TODO: replace with gui.dialog
                 $(document).one('afterClose.facebox', function() {
                     jsxc.gui.showContactDialog(from);
                 });
@@ -1440,7 +1440,7 @@ jsxc.gui.template = {
             jsxc.debug('Template not available: ' + name);
             return name;
         }
-    },//@TODO add onclick to close links
+    },
     authenticationDialog:
             '<div id="jsxc_facebox">\
             <h3>Verification</h3>\
@@ -1898,11 +1898,11 @@ jsxc.xmpp = {
      * @param {dom} presence
      * @returns {Boolean}
      */
-    onPresence: function(presence) {
+    onPresence: function(presence) { //@TODO: fix scattered instances of presence failure
         /*
          * <presence xmlns='jabber:client' type='unavailable' from='' to=''/>
          * 
-         * <presence xmlns='jabber:client' from='lisa@tower/Tower' to=''>
+         * <presence xmlns='jabber:client' from='' to=''>
          *  <priority>5</priority>
          *  <c xmlns='http://jabber.org/protocol/caps' node='http://psi-im.org/caps' ver='caps-b75d8d2b25' ext='ca cs ep-notify-2 html'/>
          * </presence>
@@ -1916,14 +1916,14 @@ jsxc.xmpp = {
          */
         var ptype = $(presence).attr('type');
         var from = $(presence).attr('from');
-        var jid = Strophe.getBareJidFromJid(from);
-        var to = Strophe.getBareJidFromJid($(presence).attr('to'));
+        var jid = Strophe.getBareJidFromJid(from).toLowerCase();
+        var to = Strophe.getBareJidFromJid($(presence).attr('to')).toLowerCase();
         var r = Strophe.getResourceFromJid(from);
         var cid = jsxc.jidToCid(jid);
         var data = jsxc.storage.getUserItem('buddy_' + cid);
         var res = jsxc.storage.getUserItem('res_' + cid) || {};
         var status = null;
-       
+      
         if (jid === to)
             return true;
 
@@ -1948,13 +1948,13 @@ jsxc.xmpp = {
             else
                 status = 1;
         }
-        
+      
         if(status == 0){
             delete res[r];
         }else{
             res[r] = status;
         }
-        
+    
         var maxVal = new Array();
         var max = 0;
         for(var prop in res){
@@ -1966,7 +1966,7 @@ jsxc.xmpp = {
                 maxVal.push(prop)
             }
         }
-        
+      
         data.status = max; 
         data.res = maxVal;
         data.jid = jid;
@@ -1982,7 +1982,7 @@ jsxc.xmpp = {
 
         jsxc.gui.update(cid);
         jsxc.gui.roster.reorder(cid);
-        
+
         $(document).trigger('presence.jsxc', [from, status, presence]);
 
         //preserve handler
@@ -2469,7 +2469,7 @@ jsxc.otr = {
      * @param {string} msg received message
      */
     receiveMessage: function(cid, msg) {
-//@TODO: Delete backup if conversation is unencrypted
+
         if (jsxc.buddyList[cid].msgstate !== 0)
             jsxc.otr.backup(cid);
 
@@ -2569,7 +2569,8 @@ jsxc.otr = {
         });
 
         jsxc.buddyList[cid].on('error', function(err) {
-            jsxc.gui.window.postMessage(cid, 'sys', '[OTR] ' + err);
+            jsxc.debug('[OTR] ' + err);
+            //jsxc.gui.window.postMessage(cid, 'sys', '[OTR] ' + err);
         });
 
         jsxc.otr.restore(cid);
@@ -2714,21 +2715,17 @@ jsxc.otr = {
             return;
 
         if (jsxc.storage.getUserItem('key') === null) {
-            
-            var bg = document.createElement('div');
-            var bg_id = document.createAttribute('id');
-            bg_id.nodeValue = 'jsxc_overlay';
-            bg.setAttributeNode(bg_id);
-            document.getElementsByTagName('body')[0].appendChild(bg);
 
             var msg = jsxc.l.now_we_will_create_your_private_key_;
-            var inner = '<div id="jsxc_dialog">' + jsxc.gui.template.get('waitAlert', null, msg) + '</div>';
-            var box = $('<div>' + inner + '</div>').attr('id', 'jsxc_waitAlert');
-            box.appendTo('body');
+            jsxc.gui.dialog.open(
+                    jsxc.gui.template.get('waitAlert', null, msg),
+                    {noClose: true}
+                );
    
             if(window.URL && Blob && Worker){
+                //create DSA key in background
                 
-                var worker = new Worker('https://localhost/owncloud/apps/ojsxc/js/lib/dsa-ww.js')
+                var worker = new Worker(jsxc.options.root + '/js/lib/dsa-ww.js')
                 
                 worker.onmessage = function(e) {
                     var type = e.data.type;
@@ -2736,10 +2733,12 @@ jsxc.otr = {
                     
                     if(type == 'debug'){
                         jsxc.debug(data);
-                    }else{
+                    }else if(type == 'data'){
                         jsxc.otr.DSAready(DSA.parsePrivate(data.key));
                     }
                 };
+                
+                //start worker
                 worker.postMessage({imports: [
                     jsxc.options.root + '/js/lib/salsa20.js', 
                     jsxc.options.root + '/js/lib/bigint.js',
@@ -2749,18 +2748,23 @@ jsxc.otr = {
                     jsxc.options.root + '/js/lib/helpers.js',
                     jsxc.options.root + '/js/lib/dsa.js',
                 ]});
-                return;
+            
             }else{
+                //fallback
                 jsxc.debug('DSA key creation started.');
-                var dsa = new DSA();
-                jsxc.otr.DSAready(dsa);
+                
+                //wait until the wait alert is opened
+                setTimeout(function(){
+                    var dsa = new DSA();
+                    jsxc.otr.DSAready(dsa);
+                }, 500);
             }
         }else {
             jsxc.debug('DSA key loaded');
             jsxc.options.otr.priv = DSA.parsePrivate(jsxc.storage.getUserItem('key'));
+            
+            jsxc.otr._createDSA();
         }
-        
-        jsxc.otr._createDSA();
     },
     _createDSA: function(){     
 
@@ -2770,8 +2774,7 @@ jsxc.otr = {
     },
     DSAready: function(dsa){
         //close wait alert
-        $('#jsxc_overlay').remove();
-        $('#jsxc_waitAlert').remove();
+        jsxc.gui.dialog.close();
 
         jsxc.storage.setUserItem('key', dsa.packPrivate());
         jsxc.options.otr.priv = dsa;

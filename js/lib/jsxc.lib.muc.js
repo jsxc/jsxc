@@ -170,6 +170,7 @@ jsxc.muc = {
         
         jsxc.storage.setUserItem('member_' + cid, member);
       
+        return true;
     },
     insertMember: function(cid, nickname, jid, status){ 
         var win = jsxc.gui.getWindow(cid);
@@ -193,13 +194,19 @@ jsxc.muc = {
             m.remove();
         }
     },
-    onMessage: function(message){
+    onGroupchatMessage: function(message){
         var from = $(message).attr('from');
         var body = $(message).find('body:first').text();
         body = Strophe.getResourceFromJid(from) + ': ' + body;
         $(message).find('body:first').text(body);
         
         jsxc.xmpp.onMessage($(message)[0]);
+        
+        return true;
+    },
+    onNormalMessage: function(message){
+
+        return true;
     }
 };
 var test;
@@ -207,7 +214,8 @@ $(document).one('ready.roster.jsxc', jsxc.muc.initMenu);
 $(document).one('attached', function(){
     var self = jsxc.muc;
     self.conn = jsxc.xmpp.conn;
-    self.conn.addHandler(self.onMessage, null, 'message', 'groupchat');
+    self.conn.addHandler(self.onGroupchatMessage, null, 'message', 'groupchat');
+    self.conn.addHandler(self.onNormalMessage, null, 'message', 'normal');
     self.conn.muc.roomNames = jsxc.storage.getUserItem('roomNames') || [];
 });
 $(document).one('connected', function(){
