@@ -798,7 +798,7 @@ jsxc.gui = {
      * @returns {undefined}
      */
     showConfirmDialog: function(msg, confirm, dismiss) {
-        jsxc.gui.dialog.open(jsxc.gui.template.get('confirmDialog', null, msg));
+        jsxc.gui.dialog.open(jsxc.gui.template.get('confirmDialog', null, msg), {noClose:true});
 
         if (confirm)
             $('#jsxc_dialog .creation').click(confirm);

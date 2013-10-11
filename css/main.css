@@ -160,7 +160,7 @@ div#jsxc_menu{
     background-color:#282323;
     color: #939393;
     cursor: pointer;
-    line-height: 30px;
+    line-height: 30px; 
 }
 div#jsxc_menu:hover{
     color:#FAFAFA;
