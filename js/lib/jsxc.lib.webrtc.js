@@ -175,6 +175,7 @@ jsxc.webrtc = {
                 console.log(e);
                 self.startCall(jid);
                 
+                //prevent bouncing
                 setTimeout(function(){
                     li.one('click', liClick);
                 }, 1000);
@@ -389,6 +390,11 @@ jsxc.webrtc = {
 
         if (Strophe.getResourceFromJid(jid) == null) {
             jsxc.debug('We need a full jid');
+            return;
+        }
+
+        if (self.conn.jingle.jid2session[jid]){
+            jsxc.debug('With user ' + jid + ' we have already a active session.');
             return;
         }
 

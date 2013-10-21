@@ -17,7 +17,6 @@
 /*
  * TODO:
  * - user info
- * - rename bug
  */
 
 /**
@@ -990,7 +989,7 @@ jsxc.gui.roster = {
     _rename: function(cid, newname) {
         if (jsxc.chief) {
             var d = jsxc.storage.getUserItem('buddy_' + cid);
-            var iq = $iq({type: 'set'}).c('query', {xmlns: 'jabber:iq:roster'}).c('item', {jid: d.jid, name: newname});
+            var iq = $iq({type: 'set'}).c('query', {xmlns: 'jabber:iq:roster'}).c('item', {jid: Strophe.getBareJidFromJid(d.jid), name: newname});
             jsxc.xmpp.conn.sendIQ(iq);
         }
 
