@@ -17,6 +17,7 @@
 /*
  * TODO:
  * - user info
+ * - rename bug
  */
 
 /**
@@ -423,8 +424,6 @@ jsxc.options = {
     notification: true,
             
     root: '', //Root of jsxc
-    
-    autoReply: false,   //Send auto-reply
 };
 
 /**
@@ -606,6 +605,8 @@ jsxc.gui = {
         jsxc.gui.dialog.open(jsxc.gui.template.get('authenticationDialog', cid), {'noClose': true});
 
         //Add handler
+
+        $('#jsxc_dialog .jsxc_close').click(jsxc.gui.dialog.close);
 
         $('#jsxc_facebox > div:gt(0)').hide();
         $('#jsxc_facebox select').change(function(ev) {
@@ -1331,10 +1332,6 @@ jsxc.gui.window = {
         if (win.find('.jsxc_textinput').is(':not(:focus)') && jsxc.restoreCompleted && direction === 'in' && !restore)
             jsxc.gui.window.highlight(cid);
 
-        $.each(jsxc.gui.emotions, function(i, val) {
-            msg = msg.replace(val[2], '<img alt="$1" title="$1" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/>')
-        }); 
-        
         var reg = new RegExp(/((?:https?:\/\/|www\.|([\w-]+\.[a-zA-Z]{2,3})(?=\b))(?:(?:[-A-Za-z0-9+&@#/%?=~_|!:,.;]*\([-A-Za-z0-9+&@#/%?=~_|!:,.;]*\)([-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|])?)|(?:[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]))?)/gi);
 
         msg = msg.replace(reg, function(url){
@@ -1343,6 +1340,10 @@ jsxc.gui.window = {
             
             return '<a href="'+href+'" target="_blank">'+url+'</a>';
         });
+
+        $.each(jsxc.gui.emotions, function(i, val) {
+            msg = msg.replace(val[2], '<img alt="$1" title="$1" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/>')
+        }); 
        
         $('#jsxc_window_' + cid + ' .jsxc_textarea').append(
                 "<div class='jsxc_chatmessage jsxc_" + direction + "'>" + msg + "</div>"
@@ -1462,18 +1463,18 @@ jsxc.gui.template = {
               <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
               <p><strong>%%Buddy_fingerprint%%</strong><br />\
               <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\
-              <p class="jsxc_right"><a href="#">%%Close%%</a> <a href="#" class="button creation">%%Compared%%</a></p>\
+              <p class="jsxc_right"><a href="#" class="jsxc_close button">%%Close%%</a> <a href="#" class="button creation">%%Compared%%</a></p>\
             </div>\
             <div>\
               <p class=".jsxc_explanation">%%To_authenticate_using_a_question_%%</p>\
               <p><label for="jsxc_quest">%%Question%%:</label><input type="text" name="quest" id="jsxc_quest" /></p>\
               <p><label for="jsxc_secret2">%%Secret%%:</label><input type="text" name="secret2" id="jsxc_secret2" /></p>\
-              <p class="jsxc_right"><a href="#" class="button">%%Close%%</a> <a href="#" class="button creation">%%Ask%%</a></p>\
+              <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Ask%%</a></p>\
             </div>\
             <div>\
               <p class=".jsxc_explanation">%%To_authenticate_pick_a_secret_%%</p>\
               <p><label for="jsxc_secret">%%Secret%%:</label><input type="text" name="secret" id="jsxc_secret" /></p>\
-              <p class="jsxc_right"><a href="#" class="button">%%Close%%</a> <a href="#" class="button creation">%%Compare%%</a></p>\
+              <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Compare%%</a></p>\
             </div>\
         </div>',
     fingerprintsDialog:
@@ -1747,17 +1748,6 @@ jsxc.xmpp = {
      * @returns {undefined}
      */
     connectionReady: function(){
-        
-        if(jsxc.options.autoReply){ 
-            $(document).on('message.jsxc', function(e, from, msg){
-                if(msg.match(/^>>/))
-                    return;
-                
-                setTimeout(function(){
-                    jsxc.sendMessage(jsxc.jidToCid(from), '>> ' + msg);
-                }, 3000);
-            });
-        }
         
         $(document).trigger('connectionReady.jsxc');
     },

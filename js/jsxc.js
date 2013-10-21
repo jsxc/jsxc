@@ -64,14 +64,13 @@ $(function() {
         root: oc_appswebroots.ojsxc,
         //@TODO: don't include get turn credentials routine into jsxc
         turnCredentialsPath: OC.filePath('ojsxc', 'ajax', 'getturncredentials.php'),
-        autoReply: true,
     });
 
 
     //Add submit link without chat functionality
     if (jsxc.el_exists($('#body-login form'))) {
 
-        var link = $('<a/>').text('Log in without chat').click(function() {
+        var link = $('<a/>').text('Log in without chat').attr('href', '#').click(function() {
             jsxc.submitLoginForm();
         });
         

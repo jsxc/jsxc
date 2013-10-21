@@ -4,6 +4,12 @@
  * @version 0.1
  */
 
+/**
+ * @TODO:
+ * 
+ * - multiple sessions bug
+ */
+
 var RTC = null,
     RTCPeerconnection = null;
 
@@ -164,9 +170,16 @@ jsxc.webrtc = {
         }
       
         if (self.conn.caps.hasFeatureByJid(jid, self.reqVideoFeatures)) {
-            li.click(function() {
+            var liClick = function(e) {
+                console.log('CLICK BUTTON'); 
+                console.log(e);
                 self.startCall(jid);
-            });
+                
+                setTimeout(function(){
+                    li.one('click', liClick);
+                }, 1000);
+            }
+            li.one('click', liClick);
             li.removeClass('jsxc_disabled');
         } else {
             li.addClass('jsxc_disabled');
@@ -257,7 +270,7 @@ jsxc.webrtc = {
         sess.sendAnswer();
         sess.accept();
     },
-    initiateCall: function(jid) {
+    initiateCall: function(jid) { 
         this.setStatus('Initiate call');
 
         $(document).one('error.jingle', function(e, sid, error) {
@@ -383,6 +396,7 @@ jsxc.webrtc = {
 
         jsxc.switchEvents({
             'finish.mediaready.jsxc': function() {
+                console.log('finish.mediaready.jsxc');
                 self.initiateCall(jid);
             },
             'mediafailure.jingle': function() {
