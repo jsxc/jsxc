@@ -28,6 +28,7 @@ var jsxc = {
     role_allocation: false, //True if the role allocation is finished
     to: null, //Timeout for keepalive
     toBusy: null, //Timeout after normal keepalive starts
+    toNotification: null, //Timeout for notification
     keepalive: null, //Interval for keepalive
     buddyList: new Array(), //list of otr objects
     restore: false, //True if last activity was 10 min ago
@@ -368,7 +369,15 @@ var jsxc = {
         return ns;
     },
     isHidden: function() {
-        return document.hidden || document.webkitHidden || document.mozHidden || document.msHidden;
+        var hidden = document.hidden || document.webkitHidden || document.mozHidden || document.msHidden
+        
+        if(hidden && jsxc.chief){
+            jsxc.storage.ink('hidden', 0);
+        }else if(!hidden && !jsxc.chief){
+            jsxc.storage.ink('hidden');
+        }
+        
+        return hidden;
     },
     translate: function(text){
         return text.replace(/%%([a-zA-Z0-9_-}{ ]+)%%/g, function(s, key) {
@@ -423,6 +432,8 @@ jsxc.options = {
     notification: true,
             
     root: '', //Root of jsxc
+    
+    popupDuration: 6000, //duration for notification
 };
 
 /**
@@ -1778,6 +1789,7 @@ jsxc.xmpp = {
         jsxc.storage.removeItem('sid');
         jsxc.storage.removeItem('rid');
         jsxc.storage.removeItem('lastActivity');
+        jsxc.storage.removeItem('hidden');
 
         jsxc.xmpp.conn = null;
 
@@ -2298,6 +2310,14 @@ jsxc.storage = {
 
         var cid = key.replace(/^[a-z]+_(.*)/i, '$1');
 
+        if (key.match(/^hidden/)){ 
+            if(jsxc.chief){
+                clearTimeout(jsxc.toNotification);
+            }else {
+                jsxc.isHidden();
+            }
+        }
+
         if (key.match(/^chat_/)) {
 
             data = JSON.parse(e.newValue)[0];
@@ -2788,26 +2808,30 @@ jsxc.otr = {
 jsxc.notification = {
     init: function() {
         $(document).on('postmessagein.jsxc', function(event, jid, msg) {
-            jsxc.notification.notify(jsxc.translate('%%New message from%% ') + jid, msg);
+            var msg = (msg.match(/^\?OTR/))? jsxc.translate('%%Encrypted message%%'): msg;
+            var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(jid));
+            
+            jsxc.notification.notify(jsxc.translate('%%New message from%% ') + data.name, msg);
         });
     },
     notify: function(title, msg, d) {
         if (!jsxc.options.notification && window.notifications.checkPermission() == 0)
             return; //notifications disabled
 
-        //@TODO: watch multiple tabs
         if (!jsxc.isHidden())
             return; //Tab is visible
+        
+        jsxc.toNotification = setTimeout(function(){
+            var popup = window.notifications.createNotification(null, title, msg);
+            popup.show();
 
-        var popup = window.notifications.createNotification(null, title, msg);
-        popup.show();
+            duration = d || jsxc.options.popupDuration;
 
-        duration = d || 6000;
-
-        if (duration > 0)
-            setTimeout(function() {
-                popup.cancel();
-            }, duration);
+            if (duration > 0)
+                setTimeout(function() {
+                    popup.cancel();
+                }, duration);
+        }, 500);
     },
     hasSupport: function() {
         if (window.notifications) {
