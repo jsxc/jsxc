@@ -2092,7 +2092,7 @@ jsxc.xmpp = {
         var cid = jsxc.jidToCid(jid);
 
         //Shortcut to remove buddy from roster and cancle all subscriptions
-        var iq = $iq({type: 'set'}).c('query', {xmlns: 'jabber:iq:roster'}).c('item', {jid: jid, subscription: 'remove'});
+        var iq = $iq({type: 'set'}).c('query', {xmlns: 'jabber:iq:roster'}).c('item', {jid: Strophe.getBareJidFromJid(jid), subscription: 'remove'});
         jsxc.xmpp.conn.sendIQ(iq);
 
         jsxc.gui.roster.purge(cid);
