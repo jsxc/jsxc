@@ -14,8 +14,9 @@ jsxc.gui.template.joinChat =
             <input type="text" name="password" id="jsxc_password" /></p>\
          <p class="jsxc_right">\
             <a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation jsxc_join">%%Join%%</a>\
-         </p>'
+         </p>';
 
+(function($){
 jsxc.muc = {
     conn: null,
             
@@ -227,3 +228,4 @@ $(document).on('presence.jsxc', jsxc.muc.onPresence);
 $(function(){
     
 });
+})(jQuery);

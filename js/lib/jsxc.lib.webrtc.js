@@ -49,6 +49,7 @@ jsxc.gui.template.videoWindow =
             </div>\n\
         </div>';
 
+(function($){
 jsxc.webrtc = {
     conn: null,
     localStream: null,
@@ -660,5 +661,4 @@ $(document).ready(function() {
 
 
 });
-
-var mytest;
+})(jQuery);
