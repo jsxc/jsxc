@@ -169,8 +169,6 @@ jsxc.webrtc = {
       
         if (self.conn.caps.hasFeatureByJid(jid, self.reqVideoFeatures)) {
             var liClick = function(e) {
-                console.log('CLICK BUTTON'); 
-                console.log(e);
                 self.startCall(jid);
                 
                 //prevent bouncing
@@ -400,7 +398,6 @@ jsxc.webrtc = {
 
         jsxc.switchEvents({
             'finish.mediaready.jsxc': function() {
-                console.log('finish.mediaready.jsxc');
                 self.initiateCall(jid);
             },
             'mediafailure.jingle': function() {

@@ -122,11 +122,11 @@ jsxc.muc = {
         else
             setTimeout(function(){self.showMemberList(win, 200)}, 500);
         
-        win.on('show', function(){ console.log('SHOW');
+        win.on('show', function(){ 
             ml.slideDown();
             ml.css('display', 'block');
         });
-        win.on('hide', function(){ console.log('HIDE');
+        win.on('hide', function(){ 
             ml.slideUp();
         });
         
@@ -154,7 +154,7 @@ jsxc.muc = {
             jsxc.muc.showMemberList(win, originalWidth);
         });
     },
-    onPresence: function(event, from, status, presence){ console.log('onPresence', from, status, presence);
+    onPresence: function(event, from, status, presence){ 
         var self = jsxc.muc; 
         var room = Strophe.getBareJidFromJid(from); 
         var cid = jsxc.jidToCid(room);
