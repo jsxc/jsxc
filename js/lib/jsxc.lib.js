@@ -4,7 +4,7 @@
  * 
  * @file Mainscript of the javascript xmpp client
  * @author Klaus Herberth
- * @version 0.2
+ * @version 0.3
  * 
  * https://github.com/sualko/ojsxc/
  * 

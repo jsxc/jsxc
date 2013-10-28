@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2013 Klaus Herberth <klaus@jsxc.org>
+ * Released under the MIT license
+ * 
+ * v0.3
+ */
 
 function onRosterToggle(event, state, duration){
     var wrapper = $('#content-wrapper');

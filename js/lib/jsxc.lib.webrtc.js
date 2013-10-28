@@ -4,7 +4,7 @@
  * 
  * @file WebRTC Plugin for the javascript xmpp client
  * @author Klaus Herberth
- * @version 0.2
+ * @version 0.3
  */
 
 var RTC = null,

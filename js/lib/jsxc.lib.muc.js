@@ -4,7 +4,7 @@
  * 
  * @file MUC Plugin for the javascript xmpp client
  * @author Klaus Herberth
- * @version 0.2
+ * @version 0.3
  */
 
 jsxc.l10n.en.Join_chat = 'Join chat';
