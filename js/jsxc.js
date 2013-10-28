@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2013 Klaus Herberth <klaus@jsxc.org>
+ * Released under the MIT license
+ * 
+ * v0.3
+ */
 
 function onRosterToggle(event, state, duration){
     var wrapper = $('#content-wrapper');
@@ -69,7 +75,7 @@ $(function() {
     //Add submit link without chat functionality
     if (jsxc.el_exists($('#body-login form'))) {
 
-        var link = $('<a/>').text('Log in without chat').click(function() {
+        var link = $('<a/>').text('Log in without chat').attr('href', '#').click(function() {
             jsxc.submitLoginForm();
         });
         

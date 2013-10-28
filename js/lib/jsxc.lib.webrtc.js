@@ -1,7 +1,10 @@
 /**
+ * Copyright (c) 2013 Klaus Herberth <klaus@jsxc.org>
+ * Released under the MIT license
+ * 
  * @file WebRTC Plugin for the javascript xmpp client
  * @author Klaus Herberth
- * @version 0.1
+ * @version 0.3
  */
 
 var RTC = null,
@@ -43,6 +46,7 @@ jsxc.gui.template.videoWindow =
             </div>\n\
         </div>';
 
+(function($){
 jsxc.webrtc = {
     conn: null,
     localStream: null,
@@ -164,9 +168,15 @@ jsxc.webrtc = {
         }
       
         if (self.conn.caps.hasFeatureByJid(jid, self.reqVideoFeatures)) {
-            li.click(function() {
+            var liClick = function(e) {
                 self.startCall(jid);
-            });
+                
+                //prevent bouncing
+                setTimeout(function(){
+                    li.one('click', liClick);
+                }, 1000);
+            }
+            li.one('click', liClick);
             li.removeClass('jsxc_disabled');
         } else {
             li.addClass('jsxc_disabled');
@@ -257,7 +267,7 @@ jsxc.webrtc = {
         sess.sendAnswer();
         sess.accept();
     },
-    initiateCall: function(jid) {
+    initiateCall: function(jid) { 
         this.setStatus('Initiate call');
 
         $(document).one('error.jingle', function(e, sid, error) {
@@ -379,6 +389,11 @@ jsxc.webrtc = {
             return;
         }
 
+        if (self.conn.jingle.jid2session[jid]){
+            jsxc.debug('With user ' + jid + ' we have already a active session.');
+            return;
+        }
+
         self.last_caller = jid;
 
         jsxc.switchEvents({
@@ -440,7 +455,7 @@ jsxc.webrtc = {
 };
 
 jsxc.gui.showVideoWindow = function(jid) {
-    jsxc.gui.dialog.open(jsxc.gui.template.get('videoWindow'));
+    jsxc.gui.dialog.open(jsxc.gui.template.get('videoWindow'), {noClose: true});
 
     var self = jsxc.webrtc;
 
@@ -640,5 +655,4 @@ $(document).ready(function() {
 
 
 });
-
-var mytest;
+})(jQuery);

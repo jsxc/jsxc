@@ -22,16 +22,7 @@
 
 OCP\App::registerAdmin( 'ojsxc', 'settings' );
 
-/*OCP\App::addNavigationEntry( array( 
-	'id' => 'apptemplate',
-	'order' => 74,
-	'href' => OCP\Util::linkTo( 'ojsxc', 'index.php' ),
-	'icon' => OCP\Util::imagePath( 'ojsxc', 'example.png' ),
-	'name' => 'Chat'
-));*/
-
 //############# Javascript #############
-OCP\Util::addScript ( 'ojsxc', 'plugin/sha1' );
 OCP\Util::addScript ( 'ojsxc', 'flensed.config' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/jquery.slimscroll' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/jquery.fullscreen' );
@@ -44,19 +35,16 @@ OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle' );
 OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle.session' );
 OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle.sdp' );
 OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle.adapter' );
-            
-//OCP\Util::addScript ( 'ojsxc', 'lib/flXHR' );
-//OCP\Util::addScript ( 'ojsxc', 'plugin/strophe.flxhr' );
     
-OCP\Util::addScript ( 'ojsxc', 'lib/salsa20' );
-OCP\Util::addScript ( 'ojsxc', 'lib/bigint' );
-OCP\Util::addScript ( 'ojsxc', 'lib/crypto' );
-OCP\Util::addScript ( 'ojsxc', 'lib/eventemitter' );
-OCP\Util::addScript ( 'ojsxc', 'lib/otr' );
+OCP\Util::addScript ( 'ojsxc', 'otr/build/dep/salsa20' );
+OCP\Util::addScript ( 'ojsxc', 'otr/build/dep/bigint' );
+OCP\Util::addScript ( 'ojsxc', 'otr/build/dep/crypto' );
+OCP\Util::addScript ( 'ojsxc', 'otr/build/dep/eventemitter' );
+OCP\Util::addScript ( 'ojsxc', 'otr/build/otr' );
 OCP\Util::addScript ( 'ojsxc', 'lib/facebox' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.webrtc' );
-OCP\Util::addScript ( 'ojsxc', 'log' );
+OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.muc' );
     
 OCP\Util::addScript ( 'ojsxc', 'jsxc' );
 

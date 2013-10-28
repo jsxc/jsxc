@@ -157,6 +157,12 @@ div#jsxc_roster .jsxc_addBuddy{
     background-color:#282323;
     color: #939393;
     cursor: pointer;
+    line-height: 30px; 
+}
+div#jsxc_menu:hover{
+    color:#FAFAFA;
+}
+div#jsxc_menu ul{
     width: 190px;
     line-height: 30px;
     border-top:1px solid #939393;
@@ -450,6 +456,7 @@ div.jsxc_transfer.jsxc_enc.jsxc_trust{
     margin:10px;
     opacity:0.5;
     font-style:italic;
+    padding-top:5px;
 }
 #jsxc_alt:hover{
     opacity: 0.8;
