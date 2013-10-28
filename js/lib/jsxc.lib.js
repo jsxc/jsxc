@@ -2745,26 +2745,8 @@ var jsxc;
                         {noClose: true}
                 );
 
-                if (window.URL && Blob && Worker) {
+                if (Worker) {
                     //create DSA key in background
-
-                    var buf;
-                    if ((typeof crypto !== 'undefined') &&
-                            (typeof crypto.randomBytes === 'function')
-                            ) {
-                        try {
-                            buf = crypto.randomBytes(40)
-                        } catch (e) {
-                            throw e
-                        }
-                    } else if ((typeof crypto !== 'undefined') &&
-                            (typeof crypto.getRandomValues === 'function')
-                            ) {
-                        buf = new Uint8Array(40)
-                        crypto.getRandomValues(buf)
-                    } else {
-                        throw new Error('Keys should not be generated without CSPRNG.')
-                    }
 
                     var worker = new Worker(jsxc.options.root + '/js/lib/dsa-ww.js')
 
@@ -2788,7 +2770,7 @@ var jsxc;
                             jsxc.options.root + '/js/otr/lib/const.js',
                             jsxc.options.root + '/js/otr/lib/helpers.js',
                             jsxc.options.root + '/js/otr/lib/dsa.js',
-                        ], buf: buf});
+                        ], buf: BigInt.getSeed()});
 
                 } else {
                     //fallback
