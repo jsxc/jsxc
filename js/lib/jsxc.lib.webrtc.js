@@ -1,13 +1,10 @@
 /**
+ * Copyright (c) 2013 Klaus Herberth <klaus@jsxc.org>
+ * Released under the MIT license
+ * 
  * @file WebRTC Plugin for the javascript xmpp client
  * @author Klaus Herberth
- * @version 0.1
- */
-
-/**
- * @TODO:
- * 
- * - multiple sessions bug
+ * @version 0.2
  */
 
 var RTC = null,
@@ -461,7 +458,7 @@ jsxc.webrtc = {
 };
 
 jsxc.gui.showVideoWindow = function(jid) {
-    jsxc.gui.dialog.open(jsxc.gui.template.get('videoWindow'));
+    jsxc.gui.dialog.open(jsxc.gui.template.get('videoWindow'), {noClose: true});
 
     var self = jsxc.webrtc;
 

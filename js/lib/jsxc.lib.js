@@ -1,13 +1,17 @@
 /**
+ * Copyright (c) 2013 Klaus Herberth <klaus@jsxc.org>
+ * Released under the MIT license
+ * 
  * @file Mainscript of the javascript xmpp client
  * @author Klaus Herberth
  * @version 0.2
+ * 
+ * https://github.com/sualko/ojsxc/
  * 
  * Libraries:
  * [1] Strophe.js, https://github.com/metajack/strophejs
  * need modified version: https://github.com/sualko/strophejs/
  * [2] OTR MP in JS, https://github.com/arlolra/otr/
- * need modified version: https://github.com/sualko/otr
  * 
  * Specs:
  * XMPP: IM and Presence, http://xmpp.org/rfcs/rfc3921.html
@@ -2770,7 +2774,7 @@ var jsxc;
                             jsxc.options.root + '/js/otr/lib/const.js',
                             jsxc.options.root + '/js/otr/lib/helpers.js',
                             jsxc.options.root + '/js/otr/lib/dsa.js',
-                        ], buf: BigInt.getSeed()});
+                        ], seed: BigInt.getSeed()});
 
                 } else {
                     //fallback
