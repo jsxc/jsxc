@@ -37,6 +37,7 @@ jsxc.gui.template.videoWindow =
                 <button type="button" class="jsxc_pause_local">%%pause_my_video%%</button> --> \n\
                 <button type="button" class="jsxc_chat">%%chat%%</button>\n\
                 <button type="button" class="jsxc_fullscreen">%%fullscreen%%</button>\n\
+                <button type="button" class="jsxc_info">%%Info%%</button>\n\
             </div>\n\
             <div class="jsxc_snapshotbar">\n\
                 <p>No pictures yet!</p>\n\
@@ -44,6 +45,7 @@ jsxc.gui.template.videoWindow =
             <div class="jsxc_chatarea">\n\
                 <ul></ul>\n\
             </div>\n\
+            <div class="jsxc_infobar"></div>\n\
         </div>';
 
 (function($){
@@ -97,10 +99,6 @@ jsxc.webrtc = {
         $(document).on('remotestreamremoved.jingle', $.proxy(this.onRemoteStreamRemoved, this));
         $(document).on('iceconnectionstatechange.jingle', $.proxy(this.onIceConnectionStateChanged, this));
         $(document).on('nostuncandidates.jingle', $.proxy(this.noStunCandidates, this));
-
-        $(document).on('callincoming.jingle', function() {
-            jsxc.notification.notify('Incoming videocall', 'ring ring ring...');
-        });
 
         if (this.conn.caps)
             $(document).on('caps.strophe', $.proxy(this.onCaps, this));
@@ -167,20 +165,15 @@ jsxc.webrtc = {
                 jid += '/' + res[0];
         }
       
+        li.off('click');
+        
         if (self.conn.caps.hasFeatureByJid(jid, self.reqVideoFeatures)) {
-            var liClick = function(e) {
+            li.one('click', function(){
                 self.startCall(jid);
-                
-                //prevent bouncing
-                setTimeout(function(){
-                    li.one('click', liClick);
-                }, 1000);
-            }
-            li.one('click', liClick);
+            });
             li.removeClass('jsxc_disabled');
         } else {
             li.addClass('jsxc_disabled');
-            li.off('click');
         }
     },
     onMessage: function(e, from){ 
@@ -268,12 +261,15 @@ jsxc.webrtc = {
         sess.accept();
     },
     initiateCall: function(jid) { 
+        var self = jsxc.webrtc;
         this.setStatus('Initiate call');
 
         $(document).one('error.jingle', function(e, sid, error) {
             if (error.source != 'offer')
                 return;
 
+            self.conn.jingle.terminate(null, 'init fail');
+            
             $(document).off('cleanup.dialog.jsxc');
             setTimeout(function() {
                 jsxc.gui.showAlert("Sorry, we couldn't establish a connection. Maybe your buddy is offline.");
@@ -286,11 +282,13 @@ jsxc.webrtc = {
         jsxc.debug('incoming call' + sid);
 
         var self = this;
+        var sess = this.conn.jingle.sessions[sid];
+        var jid = jsxc.jidToCid(sess.peerjid);
+  
+        jsxc.notification.notify(jsxc.translate('%%Incoming call%%'), jsxc.translate('%%from%% ' + jid));
 
         //signal to partner
-        this.conn.jingle.sessions[sid].sendRinging();
-
-        sess = this.conn.jingle.sessions[sid];
+        sess.sendRinging();
 
         jsxc.webrtc.last_caller = sess.peerjid;
 
@@ -309,7 +307,7 @@ jsxc.webrtc = {
             return;
         }
 
-        var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', jsxc.jidToCid(sess.peerjid)));
+        var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', jid));
 
         dialog.find('.jsxc_accept').click(function() {
             self.reqUserMedia();
@@ -353,6 +351,19 @@ jsxc.webrtc = {
             video: stream.getVideoTracks().length > 0,
             audio: stream.getAudioTracks().length > 0
         };
+        
+        var sess = this.conn.jingle.sessions[sid];
+        
+        sess.local_fp = SDPUtil.parse_fingerprint(SDPUtil.find_line(sess.localSDP.raw, 'a=fingerprint:')).fingerprint;
+        sess.remote_fp = SDPUtil.parse_fingerprint(SDPUtil.find_line(sess.remoteSDP.raw, 'a=fingerprint:')).fingerprint;
+
+        sess.remote_ip = sess.peerconnection.remoteDescription.sdp.match(/(\d{1,3}\.\d{1,3}.\d{1,3}\.\d{1,3}) \d+ typ host/)[1];
+        sess.local_ip = sess.peerconnection.localDescription.sdp.match(/(\d{1,3}\.\d{1,3}.\d{1,3}\.\d{1,3}) \d+ typ host/)[1];
+
+        $('.jsxc_info').attr('title', jsxc.translate('%%Local IP%%: ') + sess.local_ip + '\n' +
+            jsxc.translate('%%Remote IP%%: ') + sess.remote_ip + '\n' +
+            jsxc.translate('%%Local Fingerprint%%: ') + sess.local_fp + '\n' +
+            jsxc.translate('%%Remote Fingerprint%%: ') + sess.remote_fp);
 
         this.setStatus((stream.getVideoTracks().length > 0) ? 'Use remote video device.' : 'No remote video device');
         this.setStatus((stream.getAudioTracks().length > 0) ? 'Use remote audio device.' : 'No remote audio device');
@@ -389,10 +400,10 @@ jsxc.webrtc = {
             return;
         }
 
-        if (self.conn.jingle.jid2session[jid]){
-            jsxc.debug('With user ' + jid + ' we have already a active session.');
-            return;
-        }
+//        if (self.conn.jingle.jid2session[jid]){
+//            jsxc.debug('With user ' + jid + ' we have already a active session.');
+//            return;
+//        }
 
         self.last_caller = jid;
 
