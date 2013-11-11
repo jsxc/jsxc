@@ -1047,22 +1047,28 @@ var jsxc;
                     $(document).trigger('cleanup.dialog.jsxc');
                 }
             };
-            var opt = o || {};
+            var opt = o || {
+                opacity: 0.5
+            };
 
             if (opt.noClose) {
-                options.modal = true;
+                options.overlayClose = false;
+                options.escKey = false;
+                options.closeButton = false;
                 delete opt.noClose;
             }
 
             $.extend(options, opt);
 
-            $.fancybox('<div id="jsxc_dialog">' + data + '</div>', options);
+            options.html = '<div id="jsxc_dialog">' + data + '</div>';
+            
+            $.colorbox(options);
 
             return $('#jsxc_dialog');
         },
         close: function() {
             jsxc.debug('close dialog');
-            $.fancybox.close();
+            $.colorbox.close();
         }
     };
 
