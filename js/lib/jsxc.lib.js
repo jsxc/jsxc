@@ -2767,10 +2767,10 @@ var jsxc;
 
                     //start worker
                     worker.postMessage({imports: [
-                            jsxc.options.root + '/js/otr/build/dep/salsa20.js',
-                            jsxc.options.root + '/js/otr/build/dep/bigint.js',
-                            jsxc.options.root + '/js/otr/build/dep/crypto.js',
-                            jsxc.options.root + '/js/otr/build/dep/eventemitter.js',
+                            jsxc.options.root + '/js/otr/vendor/salsa20.js',
+                            jsxc.options.root + '/js/otr/vendor/bigint.js',
+                            jsxc.options.root + '/js/otr/vendor/crypto.js',
+                            jsxc.options.root + '/js/otr/vendor/eventemitter.js',
                             jsxc.options.root + '/js/otr/lib/const.js',
                             jsxc.options.root + '/js/otr/lib/helpers.js',
                             jsxc.options.root + '/js/otr/lib/dsa.js',

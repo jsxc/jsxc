@@ -41,7 +41,6 @@ OCP\Util::addScript ( 'ojsxc', 'otr/build/dep/bigint' );
 OCP\Util::addScript ( 'ojsxc', 'otr/build/dep/crypto' );
 OCP\Util::addScript ( 'ojsxc', 'otr/build/dep/eventemitter' );
 OCP\Util::addScript ( 'ojsxc', 'otr/build/otr' );
-OCP\Util::addScript ( 'ojsxc', 'lib/facebox' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.webrtc' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.muc' );
@@ -49,7 +48,6 @@ OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.muc' );
 OCP\Util::addScript ( 'ojsxc', 'jsxc' );
 
 //############# CSS #############
-OCP\Util::addStyle  ( 'ojsxc', 'facebox' );
 OCP\Util::addStyle  ( 'ojsxc', 'jquery.mCustomScrollbar' );
 OCP\Util::addStyle  ( 'ojsxc', 'main' );
 OCP\Util::addStyle  ( 'ojsxc', 'webrtc' );

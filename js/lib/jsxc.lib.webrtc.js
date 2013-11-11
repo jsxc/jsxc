@@ -347,28 +347,15 @@ jsxc.webrtc = {
         stream = data.stream;
         this.remoteStream = stream;
 
-        this.conn.jingle.sessions[sid].remoteDevices = {
+        var sess = this.conn.jingle.sessions[sid];
+
+        sess.remoteDevices = {
             video: stream.getVideoTracks().length > 0,
             audio: stream.getAudioTracks().length > 0
         };
-        
-        var sess = this.conn.jingle.sessions[sid];
-        
-        sess.local_fp = SDPUtil.parse_fingerprint(SDPUtil.find_line(sess.localSDP.raw, 'a=fingerprint:')).fingerprint;
-        sess.remote_fp = SDPUtil.parse_fingerprint(SDPUtil.find_line(sess.remoteSDP.raw, 'a=fingerprint:')).fingerprint;
-
-        sess.remote_ip = sess.peerconnection.remoteDescription.sdp.match(/(\d{1,3}\.\d{1,3}.\d{1,3}\.\d{1,3}) \d+ typ host/)[1];
-        sess.local_ip = sess.peerconnection.localDescription.sdp.match(/(\d{1,3}\.\d{1,3}.\d{1,3}\.\d{1,3}) \d+ typ host/)[1];
-
-        $('.jsxc_info').attr('title', jsxc.translate('%%Local IP%%: ') + sess.local_ip + '\n' +
-            jsxc.translate('%%Remote IP%%: ') + sess.remote_ip + '\n' +
-            jsxc.translate('%%Local Fingerprint%%: ') + sess.local_fp + '\n' +
-            jsxc.translate('%%Remote Fingerprint%%: ') + sess.remote_fp);
 
         this.setStatus((stream.getVideoTracks().length > 0) ? 'Use remote video device.' : 'No remote video device');
         this.setStatus((stream.getAudioTracks().length > 0) ? 'Use remote audio device.' : 'No remote audio device');
-
-//        var src = window.URL.createObjectURL(data.stream);
 
         if ($('.jsxc_remotevideo').length)
             RTC.attachMediaStream($('.jsxc_remotevideo'), stream);
@@ -377,17 +364,37 @@ jsxc.webrtc = {
         this.setStatus('Remote stream for session ' + sid + ' removed.');
     },
     onIceConnectionStateChanged: function(event, sid, sess) {
-        jsxc.debug('ice state for ' + sid, sess.peerconnection.iceConnectionState);
-        jsxc.debug('sig state for ' + sid, sess.peerconnection.signalingState);
+        var sigState = sess.peerconnection.signalingState;
+        var iceCon = sess.peerconnection.iceConnectionState;
+        
+        jsxc.debug('iceGat state for ' + sid, sess.peerconnection.iceGatheringState);
+        jsxc.debug('iceCon state for ' + sid, iceCon);
+        jsxc.debug('sig state for ' + sid, sigState);
 
-        // works like charm, unfortunately only in chrome and FF nightly, not FF22 beta
-        /*
-         if (sess.peerconnection.signalingState == 'stable' && sess.peerconnection.iceConnectionState == 'connected') {
-         var el = $("<video autoplay='autoplay' style='display:none'/>").attr('id', 'largevideo_' + sid);
-         $(document).trigger('callactive', [el, sid]);
-         RTC.attachMediaStream(el, sess.remoteStream); // moving this before the trigger doesn't work in FF?!
-         }
-         */
+        if(sigState === 'stable' && iceCon === 'connected'){
+            var localSDP = sess.peerconnection.localDescription.sdp;
+            var remoteSDP = sess.peerconnection.remoteDescription.sdp;
+
+            sess.local_fp = SDPUtil.parse_fingerprint(SDPUtil.find_line(localSDP, 'a=fingerprint:')).fingerprint;
+            sess.remote_fp = SDPUtil.parse_fingerprint(SDPUtil.find_line(remoteSDP, 'a=fingerprint:')).fingerprint;
+
+            var ip_regex = "(\\d{1,3}\\.\\d{1,3}.\\d{1,3}\\.\\d{1,3}) \\d+ typ host";
+
+            sess.remote_ip = remoteSDP.match(new RegExp(ip_regex))[1];
+            sess.local_ip = localSDP.match(new RegExp(ip_regex))[1];
+            
+            while (match = (new RegExp(ip_regex, 'g')).exec(remoteSDP)) {
+                if(match[1] !== sess.remote_ip){
+                    alert('!!! WARNING !!!\n\nPossible Man-in-the-middle attack detected!\n\nYou should close the connection.');
+                    return;
+                }
+            }
+
+            $('.jsxc_info').attr('title', jsxc.translate('%%Local IP%%: ') + sess.local_ip + '\n' +
+                jsxc.translate('%%Remote IP%%: ') + sess.remote_ip + '\n' +
+                jsxc.translate('%%Local Fingerprint%%: ') + sess.local_fp + '\n' +
+                jsxc.translate('%%Remote Fingerprint%%: ') + sess.remote_fp);
+        }
     },
     noStunCandidates: function(event) {
 
