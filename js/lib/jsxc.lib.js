@@ -53,6 +53,13 @@ var jsxc;
         dialogOpen: false,
         jids: new Array(),
         cid: null,
+        
+        CONST: {
+            NOTIFICATION_DEFAULT: 'default',
+            NOTIFICATION_GRANTED: 'granted',
+            NOTIFICATION_DENIED: 'denied'
+        },
+        
         /**
          * Starts the action
          * 
@@ -577,6 +584,10 @@ var jsxc;
          * Creates and show loginbox
          */
         showLoginBox: function() {
+            $(document).on("complete.dialog.jsxc", function(){
+                $('#jsxc_password').focus();
+            });
+            
             jsxc.gui.dialog.open(jsxc.gui.template.get('loginBox'));
 
             $('#jsxc_dialog').find('form').submit(function() {
@@ -1036,6 +1047,7 @@ var jsxc;
     jsxc.gui.dialog = {
         open: function(data, o) {
 
+            //default options
             var options = {
                 onComplete: function() {
                     $(document).trigger('complete.dialog.jsxc');
@@ -1045,11 +1057,11 @@ var jsxc;
                 },
                 onCleanup: function() {
                     $(document).trigger('cleanup.dialog.jsxc');
-                }
-            };
-            var opt = o || {
+                },
                 opacity: 0.5
             };
+            
+            var opt = o || {};
 
             if (opt.noClose) {
                 options.overlayClose = false;
@@ -1585,7 +1597,7 @@ var jsxc;
         waitAlert:
                 '<h3>%%Please_wait%%</h3>\
         <p>{{msg}}</p>\
-        <p class="jsxc_center"><img src="{{root}}/img/loading.gif" alt="wait" /></p>',
+        <p class="jsxc_center"><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /></p>',
         alert:
                 '<h3>%%Alert%%</h3>\
         <p>{{msg}}</p>\
@@ -2603,7 +2615,7 @@ var jsxc;
 
             jsxc.buddyList[cid].on('error', function(err) {
                 jsxc.debug('[OTR] ' + err);
-                //jsxc.gui.window.postMessage(cid, 'sys', '[OTR] ' + err);
+                jsxc.gui.window.postMessage(cid, 'sys', '[OTR] ' + err);
             });
 
             jsxc.otr.restore(cid);
@@ -2826,32 +2838,45 @@ var jsxc;
             });
         },
         notify: function(title, msg, d) {
-            if (!jsxc.options.notification && window.notifications.checkPermission() == 0)
+            if (!jsxc.options.notification || !jsxc.notification.hasPermission())
                 return; //notifications disabled
 
             if (!jsxc.isHidden())
                 return; //Tab is visible
 
-            jsxc.toNotification = setTimeout(function() {
-                var popup = window.notifications.createNotification(null, title, msg);
-                popup.show();
+            jsxc.toNotification=  setTimeout(function() {
+                
+                var popup = window.Notification(title, {body: msg});
 
                 duration = d || jsxc.options.popupDuration;
 
                 if (duration > 0)
                     setTimeout(function() {
-                        popup.cancel();
+                        popup.close();
                     }, duration);
             }, 500);
         },
         hasSupport: function() {
-            if (window.notifications) {
+            if (window.webkitNotifications) {
+                window.Notification = function(title, opt){
+                    var popup = window.webkitNotifications.createNotification(null, title, opt.body);
+                    popup.show();
+                    
+                    return popup;
+                }
+                
+                var permission;
+                switch(window.webkitNotifications.checkPermission()){
+                    case 0: permission = jsxc.CONST.NOTIFICATION_GRANTED;
+                        break;
+                    case 1: permission = jsxc.CONST.NOTIFICATION_DEFAULT;
+                        break;
+                    case 2: permission = jsxc.CONST.NOTIFICATION_DENIED;
+                }
+                window.Notification.permission = permission;
+                
                 return true;
-            } else if (window.webkitNotifications) {
-                window.notifications = window.webkitNotifications;
-                return true;
-            } else if (window.mozNotifications) {
-                window.notifications = window.mozNotifications;
+            } else if (Notification) {
                 return true;
             } else {
                 return false;
@@ -2884,15 +2909,19 @@ var jsxc;
             });
         },
         requestPermission: function() {
-            window.notifications.requestPermission(function() {
-                if (jsxc.notification.hasPermission())
+            window.Notification.requestPermission(function (status) {
+                if (window.Notification.permission !== status) {
+                  window.Notification.permission = status;
+                }
+            
+                if (jsxc.Notification.hasPermission())
                     $(document).trigger('notificationready.jsxc');
                 else
                     $(document).trigger('notificationfailure.jsxc');
             });
         },
         hasPermission: function() {
-            return window.notifications.checkPermission() === 0;
+            return window.Notification.permission === jsxc.CONST.NOTIFICATION_GRANTED;
         }
     }
 

@@ -382,8 +382,10 @@ jsxc.webrtc = {
 
             sess.remote_ip = remoteSDP.match(new RegExp(ip_regex))[1];
             sess.local_ip = localSDP.match(new RegExp(ip_regex))[1];
+            console.log("TEST")
             
-            while (match = (new RegExp(ip_regex, 'g')).exec(remoteSDP)) {
+            var regex = new RegExp(ip_regex, 'g');
+            while ( (match = regex.exec(remoteSDP)) !== null) {
                 if(match[1] !== sess.remote_ip){
                     alert('!!! WARNING !!!\n\nPossible Man-in-the-middle attack detected!\n\nYou should close the connection.');
                     return;
