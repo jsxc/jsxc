@@ -1,6 +1,6 @@
 /**
- * Copyright (c) 2013 Klaus Herberth <klaus@jsxc.org> Released under the MIT
- * license
+ * Copyright (c) 2013 Klaus Herberth <klaus@jsxc.org> <br>
+ * Released under the MIT license
  * 
  * @author Klaus Herberth
  * @version 0.3
@@ -76,8 +76,8 @@ $(function() {
 
             if (jid.match(/@(.*)$/)) {
                return (jid.match(/\/(.*)$/)) ? jid : jid + resource;
-            } 
-            
+            }
+
             return jid + '@' + domain + resource;
          }
       },

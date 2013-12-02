@@ -45,7 +45,7 @@ OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.webrtc' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.muc' );
     
-OCP\Util::addScript ( 'ojsxc', 'jsxc' );
+OCP\Util::addScript ( 'ojsxc', 'ojsxc' );
 
 //############# CSS #############
 OCP\Util::addStyle  ( 'ojsxc', 'jquery.mCustomScrollbar' );

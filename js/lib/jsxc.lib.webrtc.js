@@ -1,29 +1,25 @@
 /**
- * Copyright (c) 2013 Klaus Herberth <klaus@jsxc.org>
+ * Copyright (c) 2013 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
- *
+ * 
  * @file WebRTC Plugin for the javascript xmpp client
  * @author Klaus Herberth
  * @version 0.3
  */
 
-/*global jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery*/
+/* jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery */
 
-var RTC = null,
-        RTCPeerconnection = null;
+var RTC = null, RTCPeerconnection = null;
 
-jsxc.gui.template.incomingCall =
-        '<h3>%%Incoming_call%%</h3>\n\
+jsxc.gui.template.incomingCall = '<h3>%%Incoming_call%%</h3>\n\
         <p>%%Do_you_want_to_accept_the_call_from%% %%cid_name%%?</p>\n\
         <p class="jsxc_right">\n\
             <a href="#" class="button jsxc_reject">%%Reject%%</a> <a href="#" class="button creation jsxc_accept">%%Accept%%</a>\n\
          </p>';
 
-jsxc.gui.template.allowAccess =
-        '<p>%%Please_allow_access_to_microphone_and_camera%%</p>';
+jsxc.gui.template.allowAccess = '<p>%%Please_allow_access_to_microphone_and_camera%%</p>';
 
-jsxc.gui.template.videoWindow =
-        '<div class="jsxc_webrtc">\n\
+jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
             <div class="jsxc_videoContainer">\n\
                 <video class="jsxc_localvideo" autoplay></video>\n\
                 <video class="jsxc_remotevideo" autoplay></video>\n\
@@ -50,24 +46,44 @@ jsxc.gui.template.videoWindow =
             <div class="jsxc_infobar"></div>\n\
         </div>';
 
-(function ($) {
+(function($) {
    "use strict";
-   jsxc.webrtc = {
-      conn: null,
-      localStream: null,
-      remoteStream: null,
-      last_caller: null,
-      AUTO_ACCEPT: true,
-      reqVideoFeatures: [
-         'urn:xmpp:jingle:apps:rtp:video',
-         'urn:xmpp:jingle:apps:rtp:audio',
-         'urn:xmpp:jingle:transports:ice-udp:1'
-      ],
-      chatJids: {
-      },
-      init: function () {
 
-         //shortcut
+   /**
+    * WebRTC namespace for jsxc.
+    * 
+    * @namespace jsxc.webrtc
+    */
+   jsxc.webrtc = {
+      /** strophe connection */
+      conn: null,
+
+      /** local video stream */
+      localStream: null,
+
+      /** remote video stream */
+      remoteStream: null,
+
+      /** jid of the last caller */
+      last_caller: null,
+
+      /** should we auto accept incoming calls? */
+      AUTO_ACCEPT: true,
+
+      /** required disco features */
+      reqVideoFeatures: [ 'urn:xmpp:jingle:apps:rtp:video', 'urn:xmpp:jingle:apps:rtp:audio', 'urn:xmpp:jingle:transports:ice-udp:1' ],
+
+      /** bare jid to current jid mapping */
+      chatJids: {},
+
+      /**
+       * Initialize webrtc plugin.
+       * 
+       * @memberOf jsxc.webrtc
+       */
+      init: function() {
+
+         // shortcut
          this.conn = jsxc.xmpp.conn;
 
          if (RTC.browser === 'firefox') {
@@ -79,11 +95,7 @@ jsxc.gui.template.videoWindow =
             return;
          }
 
-//        if (!jsxc.storage.getItem('iceConfig')) {
-//            console.warn('No ICE config found!');
-//            return;
-//        }
-
+         // jingle configuration
          this.conn.jingle.PRANSWER = false;
          this.conn.jingle.AUTOACCEPT = false;
          this.conn.jingle.ice_config = jsxc.storage.getUserItem('iceConfig');
@@ -95,7 +107,6 @@ jsxc.gui.template.videoWindow =
          $(document).on('mediaready.jingle', $.proxy(this.onMediaReady, this));
          $(document).on('mediafailure.jingle', $.proxy(this.onMediaFailure, this));
          $(document).on('callincoming.jingle', $.proxy(this.onCallIncoming, this));
-         //$(document).on('callactive.jingle', this.onCallActive);
          $(document).on('callterminated.jingle', $.proxy(this.onCallTerminated, this));
          $(document).on('ringing.jingle', $.proxy(this.onCallRinging, this));
 
@@ -110,7 +121,13 @@ jsxc.gui.template.videoWindow =
 
          this.getTurnCrendentials();
       },
-      getTurnCrendentials: function () {
+
+      /**
+       * Checks if cached configuration is valid and if necessary update it.
+       * 
+       * @memberOf jsxc.webrtc
+       */
+      getTurnCrendentials: function() {
 
          if (!jsxc.options.turnCredentialsPath) {
             jsxc.warn('No path for TURN credentials defined!');
@@ -119,7 +136,7 @@ jsxc.gui.template.videoWindow =
 
          var ttl = (jsxc.storage.getUserItem('iceValidity') || 0) - (new Date()).getTime();
          if (ttl > 0) {
-            //credentials valid
+            // credentials valid
 
             window.setTimeout(jsxc.webrtc.getTurnCrendentials, ttl + 500);
             return;
@@ -127,13 +144,13 @@ jsxc.gui.template.videoWindow =
 
          $.ajax(jsxc.options.turnCredentialsPath, {
             async: true,
-            success: function (data) {
+            success: function(data) {
                var iceConfig = {
-                  iceServers: [{
-                        url: 'turn:' + data.url,
-                        credential: data.credential,
-                        username: data.username
-                     }]
+                  iceServers: [ {
+                     url: 'turn:' + data.url,
+                     credential: data.credential,
+                     username: data.username
+                  } ]
                };
 
                jsxc.webrtc.conn.jingle.ice_config = iceConfig;
@@ -142,22 +159,38 @@ jsxc.gui.template.videoWindow =
             }
          });
       },
-      initWindow: function (event, win) {
+
+      /**
+       * Add "video" button to window menu.
+       * 
+       * @memberOf jsxc.webrtc
+       * @param event
+       * @param win jQuery window object
+       */
+      initWindow: function(event, win) {
          var self = jsxc.webrtc;
 
          if (!self.conn) {
-            $(document).one('connectionReady.jsxc', function () {
+            $(document).one('connectionReady.jsxc', function() {
                self.initWindow(null, win);
             });
             return;
          }
+
          var li = $('<li>Video</li>').addClass('jsxc_video');
          win.find('.jsxc_settings ul').append(li);
 
          self.updateWindow(win);
       },
-      updateWindow: function (win) {
-         if (win.length === 0) {
+
+      /**
+       * Enable or disable "video" button and assign full jid.
+       * 
+       * @memberOf jsxc.webrtc
+       * @param win jQuery window object
+       */
+      updateWindow: function(win) {
+         if (!win || win.length === 0) {
             return;
          }
 
@@ -165,6 +198,7 @@ jsxc.gui.template.videoWindow =
          var jid = win.data('jid');
          var li = win.find('.jsxc_video');
 
+         // only start video call to a full jid
          if (Strophe.getResourceFromJid(jid) === null) {
             var cid = jsxc.jidToCid(jid);
             var res = jsxc.storage.getUserItem('buddy_' + cid).res;
@@ -177,7 +211,7 @@ jsxc.gui.template.videoWindow =
          li.off('click');
 
          if (self.conn.caps.hasFeatureByJid(jid, self.reqVideoFeatures)) {
-            li.one('click', function () {
+            li.click(function() {
                self.startCall(jid);
             });
             li.removeClass('jsxc_disabled');
@@ -185,7 +219,15 @@ jsxc.gui.template.videoWindow =
             li.addClass('jsxc_disabled');
          }
       },
-      onMessage: function (e, from) {
+
+      /**
+       * Check if full jid changed.
+       * 
+       * @memberOf jsxc.webrtc
+       * @param e
+       * @param from full jid
+       */
+      onMessage: function(e, from) {
          var self = jsxc.webrtc;
          var bJid = Strophe.getBareJidFromJid(from);
 
@@ -194,11 +236,20 @@ jsxc.gui.template.videoWindow =
             self.chatJids[bJid] = from;
          }
       },
-      setStatus: function (txt, d) {
+
+      /**
+       * Display status message to user.
+       * 
+       * @memberOf jsxc.webrtc
+       * @param txt message
+       * @param d duration in ms
+       */
+      setStatus: function(txt, d) {
          var status = $('.jsxc_webrtc .jsxc_status');
          var duration = d || 4000;
 
          if (status.html()) {
+            // attach old messages
             txt = status.html() + '<br />' + txt;
          }
 
@@ -220,18 +271,26 @@ jsxc.gui.template.videoWindow =
             return;
          }
 
-         var to = setTimeout(function () {
+         var to = setTimeout(function() {
             status.stop().animate({
                opacity: 0
-            },
-            function () {
+            }, function() {
                status.html('');
             });
          }, duration);
 
          status.data('timeout', to);
       },
-      onCaps: function (event, jid) {
+
+      /**
+       * Update "video" button if we receive cap information.
+       * 
+       * @private
+       * @memberOf jsxc.webrtc
+       * @param event
+       * @param jid
+       */
+      onCaps: function(event, jid) {
          var self = jsxc.webrtc;
          var win = jsxc.gui.getWindow(jsxc.jidToCid(jid));
 
@@ -239,7 +298,16 @@ jsxc.gui.template.videoWindow =
             self.updateWindow(win);
          }
       },
-      onMediaReady: function (event, stream) {
+
+      /**
+       * Called if video/audio is ready. Open window and display some messages.
+       * 
+       * @private
+       * @memberOf jsxc.webrtc
+       * @param event
+       * @param stream
+       */
+      onMediaReady: function(event, stream) {
          jsxc.debug('media ready');
 
          var self = jsxc.webrtc;
@@ -264,38 +332,18 @@ jsxc.gui.template.videoWindow =
          $(document).one('cleanup.dialog.jsxc', $.proxy(self.hangUp, self));
          $(document).trigger('finish.mediaready.jsxc');
       },
-      onMediaFailure: function () {
+
+      /**
+       * Called if media failes.
+       * 
+       * @private
+       * @memberOf jsxc.webrtc
+       */
+      onMediaFailure: function() {
          this.setStatus('media failure');
       },
-      acceptCall: function (sess, stream) {
-         this.setStatus('Accept call');
 
-         sess.localStream = stream;
-         sess.peerconnection.addStream(stream);
-
-         sess.sendAnswer();
-         sess.accept();
-      },
-      initiateCall: function (jid) {
-         var self = jsxc.webrtc;
-         this.setStatus('Initiate call');
-
-         $(document).one('error.jingle', function (e, sid, error) {
-            if (error.source !== 'offer') {
-               return;
-            }
-
-            self.conn.jingle.terminate(null, 'init fail');
-
-            $(document).off('cleanup.dialog.jsxc');
-            setTimeout(function () {
-               jsxc.gui.showAlert("Sorry, we couldn't establish a connection. Maybe your buddy is offline.");
-            }, 500);
-         });
-
-         this.conn.jingle.initiate(jid, this.conn.jid.toLowerCase());
-      },
-      onCallIncoming: function (event, sid) {
+      onCallIncoming: function(event, sid) {
          jsxc.debug('incoming call' + sid);
 
          var self = this;
@@ -304,16 +352,22 @@ jsxc.gui.template.videoWindow =
 
          jsxc.notification.notify(jsxc.translate('%%Incoming call%%'), jsxc.translate('%%from%% ' + jid));
 
-         //signal to partner
+         // send signal to partner
          sess.sendRinging();
 
          jsxc.webrtc.last_caller = sess.peerjid;
 
          jsxc.switchEvents({
-            'mediaready.jingle': function (event, stream) {
-               self.acceptCall(sess, stream);
+            'mediaready.jingle': function(event, stream) {
+               this.setStatus('Accept call');
+
+               sess.localStream = stream;
+               sess.peerconnection.addStream(stream);
+
+               sess.sendAnswer();
+               sess.accept();
             },
-            'mediafailure.jingle': function () {
+            'mediafailure.jingle': function() {
                sess.sendTerminate('decline');
                sess.terminate();
             }
@@ -326,18 +380,18 @@ jsxc.gui.template.videoWindow =
 
          var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', jid));
 
-         dialog.find('.jsxc_accept').click(function () {
+         dialog.find('.jsxc_accept').click(function() {
             self.reqUserMedia();
          });
 
-         dialog.find('.jsxc_reject').click(function () {
+         dialog.find('.jsxc_reject').click(function() {
             jsxc.gui.dialog.close();
 
             sess.sendTerminate('decline');
             sess.terminate();
          });
       },
-      onCallTerminated: function (event, sid, reason, text) {
+      onCallTerminated: function(event, sid, reason, text) {
          this.setStatus('call terminated ' + sid + (reason ? (': ' + reason + ' ' + text) : ''));
 
          if (this.localStream) {
@@ -355,10 +409,10 @@ jsxc.gui.template.videoWindow =
          $(document).off('error.jingle');
          jsxc.gui.dialog.close();
       },
-      onCallRinging: function () {
+      onCallRinging: function() {
          this.setStatus('ringing...', 0);
       },
-      onRemoteStreamAdded: function (event, data, sid) {
+      onRemoteStreamAdded: function(event, data, sid) {
          this.setStatus('Remote stream for session ' + sid + ' added.');
          jsxc.debug('Stream data', data);
 
@@ -379,10 +433,10 @@ jsxc.gui.template.videoWindow =
             RTC.attachMediaStream($('.jsxc_remotevideo'), stream);
          }
       },
-      onRemoteStreamRemoved: function (event, data, sid) {
+      onRemoteStreamRemoved: function(event, data, sid) {
          this.setStatus('Remote stream for session ' + sid + ' removed.');
       },
-      onIceConnectionStateChanged: function (event, sid, sess) {
+      onIceConnectionStateChanged: function(event, sid, sess) {
          var sigState = sess.peerconnection.signalingState;
          var iceCon = sess.peerconnection.iceConnectionState;
 
@@ -411,16 +465,13 @@ jsxc.gui.template.videoWindow =
                }
             }
 
-            $('.jsxc_info').attr('title', jsxc.translate('%%Local IP%%: ') + sess.local_ip + '\n' +
-                    jsxc.translate('%%Remote IP%%: ') + sess.remote_ip + '\n' +
-                    jsxc.translate('%%Local Fingerprint%%: ') + sess.local_fp + '\n' +
-                    jsxc.translate('%%Remote Fingerprint%%: ') + sess.remote_fp);
+            $('.jsxc_info').attr('title', jsxc.translate('%%Local IP%%: ') + sess.local_ip + '\n' + jsxc.translate('%%Remote IP%%: ') + sess.remote_ip + '\n' + jsxc.translate('%%Local Fingerprint%%: ') + sess.local_fp + '\n' + jsxc.translate('%%Remote Fingerprint%%: ') + sess.remote_fp);
          }
       },
-      noStunCandidates: function () {
+      noStunCandidates: function() {
 
       },
-      startCall: function (jid) {
+      startCall: function(jid) {
          var self = this;
 
          if (Strophe.getResourceFromJid(jid) === null) {
@@ -428,58 +479,64 @@ jsxc.gui.template.videoWindow =
             return;
          }
 
-//        if (self.conn.jingle.jid2session[jid]){
-//            jsxc.debug('With user ' + jid + ' we have already a active session.');
-//            return;
-//        }
-
          self.last_caller = jid;
 
          jsxc.switchEvents({
-            'finish.mediaready.jsxc': function () {
-               self.initiateCall(jid);
+            'finish.mediaready.jsxc': function() {
+               this.setStatus('Initiate call');
+
+               $(document).one('error.jingle', function(e, sid, error) {
+                  if (error.source !== 'offer') {
+                     return;
+                  }
+
+                  self.conn.jingle.terminate(null, 'init fail');
+
+                  $(document).off('cleanup.dialog.jsxc');
+                  setTimeout(function() {
+                     jsxc.gui.showAlert("Sorry, we couldn't establish a connection. Maybe your buddy is offline.");
+                  }, 500);
+               });
+
+               this.conn.jingle.initiate(jid, this.conn.jid.toLowerCase());
             },
-            'mediafailure.jingle': function () {
+            'mediafailure.jingle': function() {
 
             }
          });
 
          this.reqUserMedia();
       },
-      hangUp: function () {
+      hangUp: function() {
          $(document).off('cleanup.dialog.jsxc');
 
          this.conn.jingle.terminate();
          $(document).trigger('callterminated.jingle');
       },
-      reqUserMedia: function () {
+      reqUserMedia: function() {
          if (this.localStream) {
-            $(document).trigger('mediaready.jingle', [this.localStream]);
+            $(document).trigger('mediaready.jingle', [ this.localStream ]);
             return;
          }
 
-         //jsxc.gui.dialog.open(jsxc.gui.template.get('allowAccess'));
+         // jsxc.gui.dialog.open(jsxc.gui.template.get('allowAccess'));
          this.setStatus('please allow access to microphone and camera');
-         getUserMediaWithConstraints(['video', 'audio']);
+         getUserMediaWithConstraints([ 'video', 'audio' ]);
       },
-      snapshot: function (video) {
+      snapshot: function(video) {
          if (!video) {
             jsxc.debug('Missing video element');
          }
 
          $('.jsxc_snapshotbar p').remove();
 
-         var canvas = $('<canvas/>')
-                 .css('display', 'none')
-                 .appendTo('body')
-                 .attr({
+         var canvas = $('<canvas/>').css('display', 'none').appendTo('body').attr({
             width: video.width(),
             height: video.height()
-         })
-                 .get(0);
+         }).get(0);
          var ctx = canvas.getContext('2d');
 
-         ctx.drawImage(video[0], 0, 0); //, video.width(), video.height()
+         ctx.drawImage(video[0], 0, 0); // , video.width(), video.height()
          var img = $('<img/>');
          var url = canvas.toDataURL('image/jpeg');
          img[0].src = url;
@@ -494,16 +551,16 @@ jsxc.gui.template.videoWindow =
       }
    };
 
-   jsxc.gui.showVideoWindow = function (jid) {
+   jsxc.gui.showVideoWindow = function(jid) {
       jsxc.gui.dialog.open(jsxc.gui.template.get('videoWindow'), {
          noClose: true
       });
 
       var self = jsxc.webrtc;
 
-      $(document).one('complete.dialog.jsxc', function () {
+      $(document).one('complete.dialog.jsxc', function() {
 
-         //mute own video element to avoid echoes
+         // mute own video element to avoid echoes
          $('#jsxc_dialog .jsxc_localvideo')[0].muted = true;
          $('#jsxc_dialog .jsxc_localvideo')[0].volume = 0;
 
@@ -519,7 +576,7 @@ jsxc.gui.template.videoWindow =
          var w_dialog = $('#jsxc_dialog').width();
          var w_remote = rv.width();
 
-         //fit in video
+         // fit in video
          if (w_remote > w_dialog) {
             var scale = w_dialog / w_remote;
             var new_h = rv.height() * scale;
@@ -543,57 +600,57 @@ jsxc.gui.template.videoWindow =
          var win = jsxc.gui.window.open(jsxc.jidToCid(jid));
          $('#jsxc_dialog .jsxc_chatarea ul').append(win.detach());
 
-         $(document).one('cleanup.dialog.jsxc', function () {
+         $(document).one('cleanup.dialog.jsxc', function() {
             $('#jsxc_windowList > ul').prepend(win.detach());
          });
 
-         $('#jsxc_dialog .jsxc_hangUp').click(function () {
+         $('#jsxc_dialog .jsxc_hangUp').click(function() {
             jsxc.webrtc.hangUp();
          });
 
-         $('#jsxc_dialog .jsxc_snapshot').click(function () {
+         $('#jsxc_dialog .jsxc_snapshot').click(function() {
             jsxc.webrtc.snapshot(rv);
             $('#jsxc_dialog .jsxc_snapshots').click();
          });
 
-         $('#jsxc_dialog .jsxc_snapshots').click(function () {
+         $('#jsxc_dialog .jsxc_snapshots').click(function() {
             $('#jsxc_dialog .jsxc_chatarea').slideUp();
             $('#jsxc_dialog .jsxc_snapshotbar').slideToggle();
          });
 
-//        $('#jsxc_dialog .jsxc_mute_local').click(function(){
-//
-//        });
+         // $('#jsxc_dialog .jsxc_mute_local').click(function(){
+         //
+         // });
 
-//        $('#jsxc_dialog .jsxc_pause_local').click(function(){console.log(self.localStream.getVideoTracks(0));
-//            if(lv[0].paused){
-//                self.localStream.play();
-//                //self.localStream.getVideoTracks(0).enabled = true;
-//                $(this).text('pause my video');
-//            }else{
-//                self.localStream.stop();
-//                //self.localStream.getVideoTracks(0).enabled = false;
-//                $(this).text('resume my video');
-//            }
-//        });
+         // $('#jsxc_dialog
+         // .jsxc_pause_local').click(function(){console.log(self.localStream.getVideoTracks(0));
+         // if(lv[0].paused){
+         // self.localStream.play();
+         // //self.localStream.getVideoTracks(0).enabled = true;
+         // $(this).text('pause my video');
+         // }else{
+         // self.localStream.stop();
+         // //self.localStream.getVideoTracks(0).enabled = false;
+         // $(this).text('resume my video');
+         // }
+         // });
 
-         $('#jsxc_dialog .jsxc_chat').click(function () {
+         $('#jsxc_dialog .jsxc_chat').click(function() {
             $('#jsxc_dialog .jsxc_snapshotbar').slideUp();
             $('#jsxc_dialog .jsxc_chatarea').slideToggle();
          });
 
-         $('#jsxc_dialog .jsxc_fullscreen').click(function () {
-
+         $('#jsxc_dialog .jsxc_fullscreen').click(function() {
 
             if ($.support.fullscreen) {
-               //Reset position of localvideo
-               $(document).one('disabled.fullscreen', function () {
+               // Reset position of localvideo
+               $(document).one('disabled.fullscreen', function() {
                   lv.removeAttr('style');
                });
 
                $('#jsxc_dialog .jsxc_videoContainer').fullscreen();
             } else {
-               //Fallback:
+               // Fallback:
 
                rv.data('old_height', rv.height());
                rv.data('old_width', rv.width());
@@ -607,23 +664,23 @@ jsxc.gui.template.videoWindow =
                rv.addClass('jsxc_fullscreen');
                lv.addClass('jsxc_fullscreen');
 
-               //need to resume video after detach
+               // need to resume video after detach
                lv[0].play();
                rv[0].play();
 
-               //fancybox specific stuff:
-               //remove ESC event handler and save for later
+               // fancybox specific stuff:
+               // remove ESC event handler and save for later
                var old_event_handler;
-               $.each($(document).data('events').keydown, function (index, value) {
+               $.each($(document).data('events').keydown, function(index, value) {
                   if (value.namespace === 'fb') {
                      old_event_handler = value.handler;
                      $(document).off('keydown.fb');
 
-                     return false; //abort loop
+                     return false; // abort loop
                   }
                });
 
-               $(document).one('keydown.jsxc', function (e) {
+               $(document).one('keydown.jsxc', function(e) {
                   if (e.keyCode === jsxc.CONST.KEYCODE_ESC) {
                      $('.jsxc_videoContainer').append(rv.detach());
                      $('.jsxc_videoContainer').append(lv.detach());
@@ -641,14 +698,13 @@ jsxc.gui.template.videoWindow =
 
                      $(window).off('resize.fullscreen.jsxc');
 
-                     //fancybox specific stuff:
-                     //readd ESC event handler
+                     // fancybox specific stuff:
+                     // readd ESC event handler
                      $(document).on('keydown.fb', old_event_handler);
                   }
                });
 
-               $(window).on('resize.fullscreen.jsxc', function () {
-
+               $(window).on('resize.fullscreen.jsxc', function() {
 
                   if (rv.length) {
                      rv.height($('body').height());
@@ -660,22 +716,21 @@ jsxc.gui.template.videoWindow =
             }
          });
 
-         $('#jsxc_dialog .jsxc_volume').change(function () {
+         $('#jsxc_dialog .jsxc_volume').change(function() {
             rv[0].volume = $(this).val();
          });
-         $('#jsxc_dialog .jsxc_volume').dblclick(function () {
+         $('#jsxc_dialog .jsxc_volume').dblclick(function() {
             $(this).val(0.5);
          });
       });
    };
-
 
    $.extend(jsxc.CONST, {
       KEYCODE_ENTER: 13,
       KEYCODE_ESC: 27
    });
 
-   $(document).ready(function () {
+   $(document).ready(function() {
       RTC = setupRTC();
 
       if (RTC !== null) {
@@ -683,7 +738,7 @@ jsxc.gui.template.videoWindow =
 
          $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
 
-         var init = function () {
+         var init = function() {
             jsxc.webrtc.init();
          };
 
@@ -693,11 +748,8 @@ jsxc.gui.template.videoWindow =
          });
       }
 
-
-
-//    localvid = document.getElementById('localvideo');
-//    remotevid = document.getElementById('remotevideo');
-
+      // localvid = document.getElementById('localvideo');
+      // remotevid = document.getElementById('remotevideo');
 
    });
 }(jQuery));
