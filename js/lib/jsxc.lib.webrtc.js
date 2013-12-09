@@ -68,7 +68,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
       last_caller: null,
 
       /** should we auto accept incoming calls? */
-      AUTO_ACCEPT: true,
+      AUTO_ACCEPT: false,
 
       /** required disco features */
       reqVideoFeatures: [ 'urn:xmpp:jingle:apps:rtp:video', 'urn:xmpp:jingle:apps:rtp:audio', 'urn:xmpp:jingle:transports:ice-udp:1' ],
@@ -79,6 +79,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
       /**
        * Initialize webrtc plugin.
        * 
+       * @private
        * @memberOf jsxc.webrtc
        */
       init: function() {
@@ -163,6 +164,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
       /**
        * Add "video" button to window menu.
        * 
+       * @private
        * @memberOf jsxc.webrtc
        * @param event
        * @param win jQuery window object
@@ -223,6 +225,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
       /**
        * Check if full jid changed.
        * 
+       * @private
        * @memberOf jsxc.webrtc
        * @param e
        * @param from full jid
@@ -343,6 +346,14 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
          this.setStatus('media failure');
       },
 
+      /**
+       * Called on incoming call.
+       * 
+       * @private
+       * @memberOf jsxc.webrtc
+       * @param event
+       * @param sid Session id
+       */
       onCallIncoming: function(event, sid) {
          jsxc.debug('incoming call' + sid);
 
@@ -350,6 +361,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
          var sess = this.conn.jingle.sessions[sid];
          var jid = jsxc.jidToCid(sess.peerjid);
 
+         // display notification
          jsxc.notification.notify(jsxc.translate('%%Incoming call%%'), jsxc.translate('%%from%% ' + jid));
 
          // send signal to partner
@@ -391,6 +403,17 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
             sess.terminate();
          });
       },
+
+      /**
+       * Called if call is terminated.
+       * 
+       * @private
+       * @memberOf jsxc.webrtc
+       * @param event
+       * @param sid Session id
+       * @param reason Reason for termination
+       * @param [text] Optional explanation
+       */
       onCallTerminated: function(event, sid, reason, text) {
          this.setStatus('call terminated ' + sid + (reason ? (': ' + reason + ' ' + text) : ''));
 
@@ -409,9 +432,26 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
          $(document).off('error.jingle');
          jsxc.gui.dialog.close();
       },
+
+      /**
+       * Remote station is ringing.
+       * 
+       * @private
+       * @memberOf jsxc.webrtc
+       */
       onCallRinging: function() {
          this.setStatus('ringing...', 0);
       },
+
+      /**
+       * Called if we receive a remote stream.
+       * 
+       * @private
+       * @memberOf jsxc.webrtc
+       * @param event
+       * @param data
+       * @param sid Session id
+       */
       onRemoteStreamAdded: function(event, data, sid) {
          this.setStatus('Remote stream for session ' + sid + ' added.');
          jsxc.debug('Stream data', data);
@@ -421,21 +461,44 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
 
          var sess = this.conn.jingle.sessions[sid];
 
+         var isVideoDevice = stream.getVideoTracks().length > 0;
+         var isAudioDevice = stream.getAudioTracks().length > 0;
+
          sess.remoteDevices = {
-            video: stream.getVideoTracks().length > 0,
-            audio: stream.getAudioTracks().length > 0
+            video: isVideoDevice,
+            audio: isAudioDevice
          };
 
-         this.setStatus((stream.getVideoTracks().length > 0) ? 'Use remote video device.' : 'No remote video device');
-         this.setStatus((stream.getAudioTracks().length > 0) ? 'Use remote audio device.' : 'No remote audio device');
+         this.setStatus(isVideoDevice ? 'Use remote video device.' : 'No remote video device');
+         this.setStatus(isAudioDevice ? 'Use remote audio device.' : 'No remote audio device');
 
          if ($('.jsxc_remotevideo').length) {
             RTC.attachMediaStream($('.jsxc_remotevideo'), stream);
          }
       },
+
+      /**
+       * Called if the remote stream was removed.
+       * 
+       * @private
+       * @meberOf jsxc.webrtc
+       * @param event
+       * @param data
+       * @param sid Session id
+       */
       onRemoteStreamRemoved: function(event, data, sid) {
          this.setStatus('Remote stream for session ' + sid + ' removed.');
       },
+
+      /**
+       * Extracts local and remote ip and display it to the user.
+       * 
+       * @private
+       * @memberOf jsxc.webrtc
+       * @param event
+       * @param sid session id
+       * @param sess
+       */
       onIceConnectionStateChanged: function(event, sid, sess) {
          var sigState = sess.peerconnection.signalingState;
          var iceCon = sess.peerconnection.iceConnectionState;
@@ -468,9 +531,23 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
             $('.jsxc_info').attr('title', jsxc.translate('%%Local IP%%: ') + sess.local_ip + '\n' + jsxc.translate('%%Remote IP%%: ') + sess.remote_ip + '\n' + jsxc.translate('%%Local Fingerprint%%: ') + sess.local_fp + '\n' + jsxc.translate('%%Remote Fingerprint%%: ') + sess.remote_fp);
          }
       },
+
+      /**
+       * No STUN candidates found
+       * 
+       * @private
+       * @memberOf jsxc.webrtc
+       */
       noStunCandidates: function() {
 
       },
+
+      /**
+       * Start a call to the specified jid.
+       * 
+       * @memberOf jsxc.webrtc
+       * @param jid full jid
+       */
       startCall: function(jid) {
          var self = this;
 
@@ -507,22 +584,42 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
 
          this.reqUserMedia();
       },
+      
+      /**
+       * Hang up the current call.
+       * 
+       * @memberOf jsxc.webrtc
+       */
       hangUp: function() {
          $(document).off('cleanup.dialog.jsxc');
 
          this.conn.jingle.terminate();
          $(document).trigger('callterminated.jingle');
       },
+      
+      /**
+       * Request video and audio from local user.
+       * 
+       * @memberOf jsxc.webrtc
+       */
       reqUserMedia: function() {
          if (this.localStream) {
             $(document).trigger('mediaready.jingle', [ this.localStream ]);
             return;
          }
-
-         // jsxc.gui.dialog.open(jsxc.gui.template.get('allowAccess'));
+         
+         jsxc.gui.dialog.open(jsxc.gui.template.get('allowAccess'));
          this.setStatus('please allow access to microphone and camera');
+         
          getUserMediaWithConstraints([ 'video', 'audio' ]);
       },
+      
+      /**
+       * Make a snapshot from a video stream and display it.
+       * 
+       * @memberOf 
+       * @param video Video stream
+       */
       snapshot: function(video) {
          if (!video) {
             jsxc.debug('Missing video element');
@@ -536,7 +633,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
          }).get(0);
          var ctx = canvas.getContext('2d');
 
-         ctx.drawImage(video[0], 0, 0); // , video.width(), video.height()
+         ctx.drawImage(video[0], 0, 0);
          var img = $('<img/>');
          var url = canvas.toDataURL('image/jpeg');
          img[0].src = url;
@@ -551,11 +648,12 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
       }
    };
 
+   /**
+    * Display window for video call.
+    * 
+    * @memberOf jsxc.gui
+    */
    jsxc.gui.showVideoWindow = function(jid) {
-      jsxc.gui.dialog.open(jsxc.gui.template.get('videoWindow'), {
-         noClose: true
-      });
-
       var self = jsxc.webrtc;
 
       $(document).one('complete.dialog.jsxc', function() {
@@ -618,23 +716,6 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
             $('#jsxc_dialog .jsxc_snapshotbar').slideToggle();
          });
 
-         // $('#jsxc_dialog .jsxc_mute_local').click(function(){
-         //
-         // });
-
-         // $('#jsxc_dialog
-         // .jsxc_pause_local').click(function(){console.log(self.localStream.getVideoTracks(0));
-         // if(lv[0].paused){
-         // self.localStream.play();
-         // //self.localStream.getVideoTracks(0).enabled = true;
-         // $(this).text('pause my video');
-         // }else{
-         // self.localStream.stop();
-         // //self.localStream.getVideoTracks(0).enabled = false;
-         // $(this).text('resume my video');
-         // }
-         // });
-
          $('#jsxc_dialog .jsxc_chat').click(function() {
             $('#jsxc_dialog .jsxc_snapshotbar').slideUp();
             $('#jsxc_dialog .jsxc_chatarea').slideToggle();
@@ -649,79 +730,20 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
                });
 
                $('#jsxc_dialog .jsxc_videoContainer').fullscreen();
-            } else {
-               // Fallback:
-
-               rv.data('old_height', rv.height());
-               rv.data('old_width', rv.width());
-
-               $('body').append(rv.detach());
-               $('body').append(lv.detach());
-
-               rv.height($('body').height());
-               rv.width($('body').width());
-
-               rv.addClass('jsxc_fullscreen');
-               lv.addClass('jsxc_fullscreen');
-
-               // need to resume video after detach
-               lv[0].play();
-               rv[0].play();
-
-               // fancybox specific stuff:
-               // remove ESC event handler and save for later
-               var old_event_handler;
-               $.each($(document).data('events').keydown, function(index, value) {
-                  if (value.namespace === 'fb') {
-                     old_event_handler = value.handler;
-                     $(document).off('keydown.fb');
-
-                     return false; // abort loop
-                  }
-               });
-
-               $(document).one('keydown.jsxc', function(e) {
-                  if (e.keyCode === jsxc.CONST.KEYCODE_ESC) {
-                     $('.jsxc_videoContainer').append(rv.detach());
-                     $('.jsxc_videoContainer').append(lv.detach());
-
-                     rv.height(rv.data('old_height'));
-                     rv.width(rv.data('old_width'));
-
-                     rv.removeClass('jsxc_fullscreen');
-                     lv.removeClass('jsxc_fullscreen');
-
-                     lv[0].play();
-                     rv[0].play();
-
-                     lv.removeAttr('style');
-
-                     $(window).off('resize.fullscreen.jsxc');
-
-                     // fancybox specific stuff:
-                     // readd ESC event handler
-                     $(document).on('keydown.fb', old_event_handler);
-                  }
-               });
-
-               $(window).on('resize.fullscreen.jsxc', function() {
-
-                  if (rv.length) {
-                     rv.height($('body').height());
-                     rv.width($('body').width());
-
-                     rv[0].play();
-                  }
-               });
-            }
+            } 
          });
 
          $('#jsxc_dialog .jsxc_volume').change(function() {
             rv[0].volume = $(this).val();
          });
+         
          $('#jsxc_dialog .jsxc_volume').dblclick(function() {
             $(this).val(0.5);
          });
+      });
+      
+      jsxc.gui.dialog.open(jsxc.gui.template.get('videoWindow'), {
+         noClose: true
       });
    };
 
@@ -747,9 +769,5 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
             'attached': init
          });
       }
-
-      // localvid = document.getElementById('localvideo');
-      // remotevid = document.getElementById('remotevideo');
-
    });
 }(jQuery));
