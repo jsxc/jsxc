@@ -1,0 +1,30 @@
+{
+   curly: true,
+   eqeqeq: true,
+   immed: true,
+   latedef: true,
+   newcap: true,
+   noarg: true,
+   sub: true,
+   undef: true,
+   unused: true,
+   boss: true,
+   eqnull: true,
+   browser: true,
+   multistr: true,
+   devel: true,
+   globals: {
+      OTR:true, 
+      DSA:true, 
+      Worker:true, 
+      BigInt:true, 
+      Notification:true, 
+      jQuery:true, 
+      Strophe:true, 
+      localStorage:true, 
+      ActiveXObject:true, 
+      $iq:true, 
+      $pres:true, 
+      $msg: true
+   }
+}

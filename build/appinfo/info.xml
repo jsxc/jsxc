@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<info>
+	<id>ojsxc</id>
+	<name>JavaScript XMPP Chat</name>
+	<description>XMPP Chat with OTR</description>
+	<version>0.1</version>
+	<licence>AGPL</licence>
+	<author>Klaus Herberth</author>
+	<require>4</require>
+</info>

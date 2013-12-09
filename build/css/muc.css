@@ -1,0 +1,39 @@
+.jsxc_members{
+    padding: 3px;
+    width: 17px;
+    height: 17px;
+    cursor: pointer;
+    float: left;
+    text-transform: uppercase;
+    color: #939393;
+    font-family:Arial;
+    font-weight:bold;
+    line-height: 17px;
+}
+.jsxc_memberlist{
+    display:none;
+    position:absolute;
+    bottom: 30px;
+    left:0px;
+    width: 200px;
+    height: 255px;
+/*    background-color: #a9a9a9;*/
+    background: url("%webroot%/core/img/noise.png") #383C43;
+    z-index: 70;
+    box-shadow: 0px 0px 5px #000;
+}
+.jsxc_memberlist li{
+    border-bottom:1px solid #939393;
+    color: #939393;
+    font-family:Arial;
+    line-height: 30px;
+    padding-left:3px;
+    cursor: auto !important;
+}
+.jsxc_memberlist li.online:before{
+    content: "• ";
+    color: green;
+}
+.jsxc_groupchat .jsxc_transfer, .jsxc_groupchat .jsxc_verification{
+    display:none;
+}
