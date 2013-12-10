@@ -16,7 +16,7 @@ module.exports = function(grunt) {
          main: {
             files: [ {
                expand: true,
-               src: [ 'js/plugin/*.js', 'js/strophe.jingle/*.js', 'js/otr/build/**', 'js/otr/lib/dsa-webworker.js', 'js/otr/lib/sm-webworker.js', 'js/ojsxc.js', 'js/admin.js', 'js/lib/*', 'css/*', 'appinfo/*', 'ajax/*', 'img/*', 'settings.php', 'LICENSE' ],
+               src: [ 'js/plugin/*.js', 'js/strophe.jingle/*.js', 'js/otr/build/**', 'js/otr/lib/dsa-webworker.js', 'js/otr/lib/sm-webworker.js', 'js/otr/lib/const.js', 'js/otr/lib/helpers.js', 'js/otr/lib/dsa.js', 'js/otr/vendor/*.js', 'js/ojsxc.js', 'js/admin.js', 'js/lib/*', 'css/*', 'appinfo/*', 'ajax/*', 'img/*', 'templates/*', 'settings.php', 'LICENSE' ],
                dest: 'build/'
             } ]
          }

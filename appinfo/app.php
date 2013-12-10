@@ -12,7 +12,6 @@
 OCP\App::registerAdmin ( 'ojsxc', 'settings' );
 
 // ############# Javascript #############
-OCP\Util::addScript ( 'ojsxc', 'flensed.config' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/jquery.slimscroll' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/jquery.fullscreen' );
 OCP\Util::addScript ( 'ojsxc', 'lib/strophe' );
@@ -32,7 +31,7 @@ OCP\Util::addScript ( 'ojsxc', 'otr/build/dep/eventemitter' );
 OCP\Util::addScript ( 'ojsxc', 'otr/build/otr' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.webrtc' );
-OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.muc' );
+// OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.muc' );
 
 OCP\Util::addScript ( 'ojsxc', 'ojsxc' );
 

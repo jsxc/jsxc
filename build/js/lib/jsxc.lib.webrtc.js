@@ -560,7 +560,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
 
          jsxc.switchEvents({
             'finish.mediaready.jsxc': function() {
-               this.setStatus('Initiate call');
+               self.setStatus('Initiate call');
 
                $(document).one('error.jingle', function(e, sid, error) {
                   if (error.source !== 'offer') {
@@ -575,7 +575,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
                   }, 500);
                });
 
-               this.conn.jingle.initiate(jid, this.conn.jid.toLowerCase());
+               self.conn.jingle.initiate(jid, self.conn.jid.toLowerCase());
             },
             'mediafailure.jingle': function() {
 

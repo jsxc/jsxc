@@ -12,12 +12,12 @@
 var RTC = null, RTCPeerconnection = null;
 
 jsxc.gui.template.incomingCall = '<h3>%%Incoming_call%%</h3>\n\
-        <p>%%Do_you_want_to_accept_the_call_from%% %%cid_name%%?</p>\n\
+        <p>%%Do_you_want_to_accept_the_call_from%% {{cid_name}}?</p>\n\
         <p class="jsxc_right">\n\
             <a href="#" class="button jsxc_reject">%%Reject%%</a> <a href="#" class="button creation jsxc_accept">%%Accept%%</a>\n\
          </p>';
 
-jsxc.gui.template.allowAccess = '<p>%%Please_allow_access_to_microphone_and_camera%%</p>';
+jsxc.gui.template.allowMediaAccess = '<p>%%Please_allow_access_to_microphone_and_camera%%</p>';
 
 jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
             <div class="jsxc_videoContainer">\n\
@@ -249,7 +249,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
        */
       setStatus: function(txt, d) {
          var status = $('.jsxc_webrtc .jsxc_status');
-         var duration = d || 4000;
+         var duration = (typeof d === 'undefined' || d === null)? 4000: d;
 
          if (status.html()) {
             // attach old messages
@@ -270,7 +270,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
 
          clearTimeout(status.data('timeout'));
 
-         if (duration === 0) {
+         if (duration === 0) { console.log('return');
             return;
          }
 
@@ -322,12 +322,12 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
 
          var i;
          for (i = 0; i < stream.getAudioTracks().length; i++) {
-            this.setStatus((stream.getAudioTracks().length > 0) ? 'Use remote audio device.' : 'No remote audio device');
+            self.setStatus((stream.getAudioTracks().length > 0) ? 'Use local audio device.' : 'No local audio device.');
 
             jsxc.debug('using audio device "' + stream.getAudioTracks()[i].label + '"');
          }
          for (i = 0; i < stream.getVideoTracks().length; i++) {
-            this.setStatus((stream.getVideoTracks().length > 0) ? 'Use remote video device.' : 'No remote video device');
+            self.setStatus((stream.getVideoTracks().length > 0) ? 'Use local video device.' : 'No local video device.');
 
             jsxc.debug('using video device "' + stream.getVideoTracks()[i].label + '"');
          }
@@ -371,7 +371,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
 
          jsxc.switchEvents({
             'mediaready.jingle': function(event, stream) {
-               this.setStatus('Accept call');
+               self.setStatus('Accept call');
 
                sess.localStream = stream;
                sess.peerconnection.addStream(stream);
@@ -390,7 +390,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
             return;
          }
 
-         var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', jid));
+         var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', jsxc.jidToCid(jid)));
 
          dialog.find('.jsxc_accept').click(function() {
             self.reqUserMedia();
@@ -560,7 +560,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
 
          jsxc.switchEvents({
             'finish.mediaready.jsxc': function() {
-               this.setStatus('Initiate call');
+               self.setStatus('Initiate call');
 
                $(document).one('error.jingle', function(e, sid, error) {
                   if (error.source !== 'offer') {
@@ -575,7 +575,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
                   }, 500);
                });
 
-               this.conn.jingle.initiate(jid, this.conn.jid.toLowerCase());
+               self.conn.jingle.initiate(jid, self.conn.jid.toLowerCase());
             },
             'mediafailure.jingle': function() {
 
@@ -593,7 +593,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
       hangUp: function() {
          $(document).off('cleanup.dialog.jsxc');
 
-         this.conn.jingle.terminate();
+         jsxc.webrtc.conn.jingle.terminate(null);
          $(document).trigger('callterminated.jingle');
       },
       
@@ -608,7 +608,9 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
             return;
          }
          
-         jsxc.gui.dialog.open(jsxc.gui.template.get('allowAccess'));
+         jsxc.gui.dialog.open(jsxc.gui.template.get('allowMediaAccess'), {
+            noClose: true
+         });
          this.setStatus('please allow access to microphone and camera');
          
          getUserMediaWithConstraints([ 'video', 'audio' ]);
