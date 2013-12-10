@@ -31,7 +31,7 @@ OCP\Util::addScript ( 'ojsxc', 'otr/build/dep/eventemitter' );
 OCP\Util::addScript ( 'ojsxc', 'otr/build/otr' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib' );
 OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.webrtc' );
-OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.muc' );
+// OCP\Util::addScript ( 'ojsxc', 'lib/jsxc.lib.muc' );
 
 OCP\Util::addScript ( 'ojsxc', 'ojsxc' );
 

@@ -3,7 +3,7 @@
  * Released under the MIT license
  * 
  * @author Klaus Herberth
- * @version 0.3
+ * @version 0.4
  */
 
 /* global jsxc, oc_appswebroots, OC, $ */
@@ -96,6 +96,10 @@ $(function() {
       turnCredentialsPath: OC.filePath('ojsxc', 'ajax', 'getturncredentials.php'),
       displayRosterMinimized: function() {
          return OC.currentUser != null;
+      },
+      otr: {
+         SEND_WHITESPACE_TAG: true,
+         WHITESPACE_START_AKE: true
       }
    });
 

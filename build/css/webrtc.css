@@ -73,6 +73,9 @@ div:fullscreen.jsxc_localvideo{
     border: 1px solid white;
 }
 
+.jsxc_multi > div{
+	display:none;
+}
 .jsxc_snapshotbar{
     width:100%;
     display:none;

@@ -4,46 +4,48 @@
  * 
  * @file WebRTC Plugin for the javascript xmpp client
  * @author Klaus Herberth
- * @version 0.3
+ * @version 0.4
  */
 
 /* jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery */
 
 var RTC = null, RTCPeerconnection = null;
 
-jsxc.gui.template.incomingCall = '<h3>%%Incoming_call%%</h3>\n\
-        <p>%%Do_you_want_to_accept_the_call_from%% {{cid_name}}?</p>\n\
-        <p class="jsxc_right">\n\
-            <a href="#" class="button jsxc_reject">%%Reject%%</a> <a href="#" class="button creation jsxc_accept">%%Accept%%</a>\n\
+jsxc.gui.template.incomingCall = '<h3>%%Incoming_call%%</h3>\
+        <p>%%Do_you_want_to_accept_the_call_from%% {{cid_name}}?</p>\
+        <p class="jsxc_right">\
+            <a href="#" class="button jsxc_reject">%%Reject%%</a> <a href="#" class="button creation jsxc_accept">%%Accept%%</a>\
          </p>';
 
 jsxc.gui.template.allowMediaAccess = '<p>%%Please_allow_access_to_microphone_and_camera%%</p>';
 
-jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
-            <div class="jsxc_videoContainer">\n\
-                <video class="jsxc_localvideo" autoplay></video>\n\
-                <video class="jsxc_remotevideo" autoplay></video>\n\
-                <div class="jsxc_status"></div>\n\
-            </div>\n\
-            <div class="jsxc_controlbar">\n\
-                <button type="button" class="jsxc_hangUp">%%hang_up%%</button>\n\
-                <input type="range" class="jsxc_volume" min="0.0" max="1.0" step="0.05" value="0.5" />\n\
-                <div class="jsxc_buttongroup">\n\
-                    <button type="button" class="jsxc_snapshot">%%snapshot%%</button><button type="button" class="jsxc_snapshots">&#9660;</button>\n\
-                </div>\n\
-                <!-- <button type="button" class="jsxc_mute_local">%%mute_my_audio%%</button>\n\
-                <button type="button" class="jsxc_pause_local">%%pause_my_video%%</button> --> \n\
-                <button type="button" class="jsxc_chat">%%chat%%</button>\n\
-                <button type="button" class="jsxc_fullscreen">%%fullscreen%%</button>\n\
-                <button type="button" class="jsxc_info">%%Info%%</button>\n\
-            </div>\n\
-            <div class="jsxc_snapshotbar">\n\
-                <p>No pictures yet!</p>\n\
-            </div>\n\
-            <div class="jsxc_chatarea">\n\
-                <ul></ul>\n\
-            </div>\n\
-            <div class="jsxc_infobar"></div>\n\
+jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
+            <div class="jsxc_videoContainer">\
+                <video class="jsxc_localvideo" autoplay></video>\
+                <video class="jsxc_remotevideo" autoplay></video>\
+                <div class="jsxc_status"></div>\
+            </div>\
+            <div class="jsxc_controlbar">\
+                <button type="button" class="jsxc_hangUp">%%hang_up%%</button>\
+                <input type="range" class="jsxc_volume" min="0.0" max="1.0" step="0.05" value="0.5" />\
+                <div class="jsxc_buttongroup">\
+                    <button type="button" class="jsxc_snapshot">%%snapshot%%</button><button type="button" class="jsxc_snapshots">&#9660;</button>\
+                </div>\
+                <!-- <button type="button" class="jsxc_mute_local">%%mute_my_audio%%</button>\
+                <button type="button" class="jsxc_pause_local">%%pause_my_video%%</button> --> \
+                <button type="button" class="jsxc_chat">%%chat%%</button>\
+                <button type="button" class="jsxc_fullscreen">%%fullscreen%%</button>\
+                <button type="button" class="jsxc_info">%%Info%%</button>\
+            </div>\
+            <div class="jsxc_multi">\
+               <div class="jsxc_snapshotbar">\
+                   <p>No pictures yet!</p>\
+               </div>\n\
+               <div class="jsxc_chatarea">\
+                   <ul></ul>\
+               </div>\
+               <div class="jsxc_infobar"></div>\
+            </div>\
         </div>';
 
 (function($) {
@@ -249,7 +251,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
        */
       setStatus: function(txt, d) {
          var status = $('.jsxc_webrtc .jsxc_status');
-         var duration = (typeof d === 'undefined' || d === null)? 4000: d;
+         var duration = (typeof d === 'undefined' || d === null) ? 4000 : d;
 
          if (status.html()) {
             // attach old messages
@@ -270,7 +272,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
 
          clearTimeout(status.data('timeout'));
 
-         if (duration === 0) { console.log('return');
+         if (duration === 0) {
+            console.log('return');
             return;
          }
 
@@ -528,7 +531,14 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
                }
             }
 
-            $('.jsxc_info').attr('title', jsxc.translate('%%Local IP%%: ') + sess.local_ip + '\n' + jsxc.translate('%%Remote IP%%: ') + sess.remote_ip + '\n' + jsxc.translate('%%Local Fingerprint%%: ') + sess.local_fp + '\n' + jsxc.translate('%%Remote Fingerprint%%: ') + sess.remote_fp);
+            var text = '<p>';
+            text += '<b>' + jsxc.translate('%%Local IP%%: ') + '</b>' + sess.local_ip + '<br />';
+            text += '<b>' + jsxc.translate('%%Remote IP%%: ') + '</b>' + sess.remote_ip + '<br />';
+            text += '<b>' + jsxc.translate('%%Local Fingerprint%%: ') + '</b>' + sess.local_fp + '<br />';
+            text += '<b>' + jsxc.translate('%%Remote Fingerprint%%: ') + '</b>' + sess.remote_fp;
+            text += '</p>';
+
+            $('#jsxc_dialog .jsxc_infobar').html(text);
          }
       },
 
@@ -584,7 +594,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
 
          this.reqUserMedia();
       },
-      
+
       /**
        * Hang up the current call.
        * 
@@ -596,7 +606,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
          jsxc.webrtc.conn.jingle.terminate(null);
          $(document).trigger('callterminated.jingle');
       },
-      
+
       /**
        * Request video and audio from local user.
        * 
@@ -607,19 +617,19 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
             $(document).trigger('mediaready.jingle', [ this.localStream ]);
             return;
          }
-         
+
          jsxc.gui.dialog.open(jsxc.gui.template.get('allowMediaAccess'), {
             noClose: true
          });
          this.setStatus('please allow access to microphone and camera');
-         
+
          getUserMediaWithConstraints([ 'video', 'audio' ]);
       },
-      
+
       /**
        * Make a snapshot from a video stream and display it.
        * 
-       * @memberOf 
+       * @memberOf
        * @param video Video stream
        */
       snapshot: function(video) {
@@ -697,30 +707,44 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
             RTC.attachMediaStream(rv, self.remoteStream);
          }
 
+         var toggleMulti = function(elem, open) {
+            $('#jsxc_dialog .jsxc_multi > div').not(elem).slideUp();
+            
+            var opt = {
+                  complete: jsxc.gui.dialog.resize
+            };
+            
+            if (open) {
+               elem.slideDown(opt);
+            } else {
+               elem.slideToggle(opt);
+            }
+         };
+
          var win = jsxc.gui.window.open(jsxc.jidToCid(jid));
+         var winId = win.attr('id');
          $('#jsxc_dialog .jsxc_chatarea ul').append(win.detach());
 
-         $(document).one('cleanup.dialog.jsxc', function() {
-            $('#jsxc_windowList > ul').prepend(win.detach());
-         });
-
          $('#jsxc_dialog .jsxc_hangUp').click(function() {
+            $('#jsxc_windowList > ul').prepend($('#' + winId).detach());
             jsxc.webrtc.hangUp();
          });
 
          $('#jsxc_dialog .jsxc_snapshot').click(function() {
             jsxc.webrtc.snapshot(rv);
-            $('#jsxc_dialog .jsxc_snapshots').click();
+            toggleMulti($('#jsxc_dialog .jsxc_snapshotbar'), true);
          });
 
          $('#jsxc_dialog .jsxc_snapshots').click(function() {
-            $('#jsxc_dialog .jsxc_chatarea').slideUp();
-            $('#jsxc_dialog .jsxc_snapshotbar').slideToggle();
+            toggleMulti($('#jsxc_dialog .jsxc_snapshotbar'));
          });
 
          $('#jsxc_dialog .jsxc_chat').click(function() {
-            $('#jsxc_dialog .jsxc_snapshotbar').slideUp();
-            $('#jsxc_dialog .jsxc_chatarea').slideToggle();
+            toggleMulti($('#jsxc_dialog .jsxc_chatarea'));
+         });
+
+         $('#jsxc_dialog .jsxc_info').click(function() {
+            toggleMulti($('#jsxc_dialog .jsxc_infobar'));
          });
 
          $('#jsxc_dialog .jsxc_fullscreen').click(function() {
@@ -732,18 +756,18 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\n\
                });
 
                $('#jsxc_dialog .jsxc_videoContainer').fullscreen();
-            } 
+            }
          });
 
          $('#jsxc_dialog .jsxc_volume').change(function() {
             rv[0].volume = $(this).val();
          });
-         
+
          $('#jsxc_dialog .jsxc_volume').dblclick(function() {
             $(this).val(0.5);
          });
       });
-      
+
       jsxc.gui.dialog.open(jsxc.gui.template.get('videoWindow'), {
          noClose: true
       });
