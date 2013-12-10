@@ -3406,7 +3406,7 @@ var jsxc;
        */
       prepareRequest: function() {
 
-         $(document).one('message.jsxc', function() {
+         $(document).one('postmessagein.jsxc', function() {
             jsxc.switchEvents({
                'notificationready.jsxc': function() {
                   jsxc.gui.dialog.close();
