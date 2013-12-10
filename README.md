@@ -1,6 +1,6 @@
 # Owncloud JavaScript Xmpp Client
 
-__Beware! This is a beta software.__
+__Beware! This is beta software.__
 
 ## General
 
@@ -10,12 +10,12 @@ _TODO insert short description_
 - integration into existing ui
 - one-to-one conversation (XMPP)
 - encrypted one-to-one conversation (OTR)
-⋅⋅- use of whitespace tags to start a OTR session
+  - use of whitespace tags to start a OTR session
 - user verification (SMP)
 - encrypted one-to-one video call (WebRTC)
-⋅⋅- [TURN REST API](http://tools.ietf.org/html/draft-uberti-behave-turn-rest-00)
-⋅⋅- fullscreen mode
-⋅⋅- snapshots
+  - [TURN REST API](http://tools.ietf.org/html/draft-uberti-behave-turn-rest-00)
+  - fullscreen mode
+  - snapshots
 - auto link-detection
 - emotions
 - roster management 
