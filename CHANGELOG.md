@@ -1,3 +1,7 @@
+v0.4.2 / 2013-12-11
+===
+- include colorbox (independent of firstrunwizard)
+
 v0.4.1 / 2013-12-11
 ===
 - fix eof bug

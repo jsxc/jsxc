@@ -12,6 +12,7 @@
 OCP\App::registerAdmin ( 'ojsxc', 'settings' );
 
 // ############# Javascript #############
+OCP\Util::addScript ( 'ojsxc', 'plugin/jquery.colorbox-min' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/jquery.slimscroll' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/jquery.fullscreen' );
 OCP\Util::addScript ( 'ojsxc', 'lib/strophe' );
@@ -38,6 +39,7 @@ OCP\Util::addScript ( 'ojsxc', 'ojsxc' );
 
 // ############# CSS #############
 OCP\Util::addStyle ( 'ojsxc', 'jquery.mCustomScrollbar' );
+OCP\Util::addStyle ( 'ojsxc', 'jquery.colorbox' );
 OCP\Util::addStyle ( 'ojsxc', 'main' );
 OCP\Util::addStyle ( 'ojsxc', 'webrtc' );
 OCP\Util::addStyle ( 'ojsxc', 'muc' );
