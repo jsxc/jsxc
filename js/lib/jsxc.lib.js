@@ -2409,7 +2409,7 @@ var jsxc;
          if (jsxc.chief && !jsxc.buddyList[cid]) {
             jsxc.otr.create(cid);
          }
-
+         
          jsxc.buddyList[cid].receiveMsg(body);
 
          // preserve handler
@@ -2986,9 +2986,15 @@ var jsxc;
          if (jsxc.buddyList.hasOwnProperty(cid)) {
             return;
          }
-
+         console.log(jsxc.options.otr);
          jsxc.buddyList[cid] = new OTR(jsxc.options.otr);
 
+         if(jsxc.options.otr.SEND_WHITESPACE_TAG)
+            jsxc.buddyList[cid].SEND_WHITESPACE_TAG = true;
+         
+         if(jsxc.options.otr.WHITESPACE_START_AKE)
+            jsxc.buddyList[cid].WHITESPACE_START_AKE = true;
+         
          jsxc.buddyList[cid].on('status', function(status) {
             switch (status) {
                case OTR.CONST.STATUS_SEND_QUERY:
