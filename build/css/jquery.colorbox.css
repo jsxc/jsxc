@@ -1,5 +1,5 @@
 /* Remove close button from firstrunwizard */
-#closeWizard {display:none;}
+#closeWizard {display:none !important;}
 
 /*
     Colorbox Core Style:
@@ -35,9 +35,8 @@
         #cboxPrevious:hover{background-position:bottom left;}
         #cboxNext:hover{background-position:bottom right;}
         #cboxLoadingOverlay{background:#fff;}
-        #cboxLoadingGraphic{background:url(%appswebroot%/ojsxc/img/colorbox/loading.gif) no-repeat center center;}
-        #cboxClose{position:absolute; top:5px; right:5px; display:block; background:url(%webroot%/core/img/actions/close.svg) no-repeat right center; opacity:0.5; width:19px; height:19px; border:0px; text-indent:-9999px;}
-        #cboxClose:hover{background-position: right center; opacity:1.0;}
+        #cboxClose{position:absolute; top:5px; right:5px; display:block; background:url(%webroot%/core/img/actions/close.svg) no-repeat right center !important; opacity:0.5; width:19px  !important; height:19px; border:0px; text-indent:-9999px;}
+        #cboxClose:hover{background-position: right center !important; opacity:1.0;}
 
 /*
   The following fixes a problem where IE7 and IE8 replace a PNG's alpha transparency with a black fill

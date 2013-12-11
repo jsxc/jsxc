@@ -6,7 +6,7 @@
  * 
  * @file Mainscript of the javascript xmpp client
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.4.2
+ * @version 0.4.3
  * @requires [1] {@link https://github.com/sualko/strophejs/|Strophe.js}
  * @requires [2] {@link https://github.com/arlolra/otr/|OTR}
  */
@@ -1930,16 +1930,20 @@ var jsxc;
          // Create new connection (no login)
          jsxc.xmpp.conn = new Strophe.Connection(url);
 
-         jsxc.xmpp.conn.xmlInput = function(data) {
-            jsxc.debug('Input');
-            jsxc.debug(data);
-            // Log.show_traffic(data, 'input');
-         };
-         jsxc.xmpp.conn.xmlOutput = function(data) {
-            jsxc.debug('Output');
-            jsxc.debug(data);
-            // Log.show_traffic(data, 'output');
-         };
+         // Strophe.Connection.xmlInput = function(data) {
+         // jsxc.debug('Input');
+         // jsxc.debug(data);
+         // // Log.show_traffic(data, 'input');
+         // };
+         // Strophe.Connection.xmlOutput = function(data) {
+         // jsxc.debug('Output');
+         // jsxc.debug(data);
+         // // Log.show_traffic(data, 'output');
+         // };
+         //         
+         // Strophe.log = function (level, msg) {
+         // jsxc.debug(level + " " + msg);
+         // };
 
          var callback = function(status, condition) {
 
@@ -2982,8 +2986,16 @@ var jsxc;
          if (jsxc.buddyList.hasOwnProperty(cid)) {
             return;
          }
-
+         console.log(jsxc.options.otr);
          jsxc.buddyList[cid] = new OTR(jsxc.options.otr);
+
+         if (jsxc.options.otr.SEND_WHITESPACE_TAG) {
+            jsxc.buddyList[cid].SEND_WHITESPACE_TAG = true;
+         }
+
+         if (jsxc.options.otr.WHITESPACE_START_AKE) {
+            jsxc.buddyList[cid].WHITESPACE_START_AKE = true;
+         }
 
          jsxc.buddyList[cid].on('status', function(status) {
             switch (status) {

@@ -1,3 +1,9 @@
+v0.4.3 / 2013-12-11
+===
+- fix mac-chrome-reload bug
+- fix design issue
+- fix OTR whitespaces
+
 v0.4.2 / 2013-12-11
 ===
 - include colorbox (independent of firstrunwizard)
