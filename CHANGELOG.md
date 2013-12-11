@@ -1,3 +1,8 @@
+v0.4.1 / 2013-12-11
+===
+- fix eof bug
+- rebuild
+
 v0.4 / 2013-12-10
 ===
 - display notification request only for incoming messages
