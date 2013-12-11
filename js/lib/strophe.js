@@ -3063,7 +3063,7 @@ Strophe.Connection.prototype = {
             return;
         }
         
-        if(req.xhr.readyState == 1){
+        if(req.xhr.readyState == 2){
             $(document).trigger('ridChange', {rid: Number(req.rid)+1});
         }
 

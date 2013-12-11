@@ -1930,16 +1930,20 @@ var jsxc;
          // Create new connection (no login)
          jsxc.xmpp.conn = new Strophe.Connection(url);
 
-         jsxc.xmpp.conn.xmlInput = function(data) {
-            jsxc.debug('Input');
-            jsxc.debug(data);
-            // Log.show_traffic(data, 'input');
-         };
-         jsxc.xmpp.conn.xmlOutput = function(data) {
-            jsxc.debug('Output');
-            jsxc.debug(data);
-            // Log.show_traffic(data, 'output');
-         };
+//         Strophe.Connection.xmlInput = function(data) {
+//            jsxc.debug('Input');
+//            jsxc.debug(data);
+//            // Log.show_traffic(data, 'input');
+//         };
+//         Strophe.Connection.xmlOutput = function(data) {
+//            jsxc.debug('Output');
+//            jsxc.debug(data);
+//            // Log.show_traffic(data, 'output');
+//         };
+//         
+//         Strophe.log = function (level, msg) {
+//            jsxc.debug(level + " " + msg);
+//         };
 
          var callback = function(status, condition) {
 
