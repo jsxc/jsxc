@@ -6,7 +6,7 @@
  * 
  * @file Mainscript of the javascript xmpp client
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.4
+ * @version 0.4.1
  * @requires [1] {@link https://github.com/sualko/strophejs/|Strophe.js}
  * @requires [2] {@link https://github.com/arlolra/otr/|OTR}
  */

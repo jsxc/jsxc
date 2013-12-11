@@ -4,7 +4,7 @@
  * 
  * @file WebRTC Plugin for the javascript xmpp client
  * @author Klaus Herberth
- * @version 0.4
+ * @version 0.4.1
  */
 
 /* jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery */

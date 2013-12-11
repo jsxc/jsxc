@@ -48,7 +48,7 @@ Please download the latest version from https://github.com/sualko/ojsxc/releases
 
 ### Configuration
 
-You can oJSXC in the admin panel of owncloud.
+You can configure oJSXC in the admin panel of owncloud.
 
 <dl>
 	<dt>BOSH url</dt>
