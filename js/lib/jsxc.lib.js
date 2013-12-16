@@ -1036,7 +1036,7 @@ var jsxc;
 
          $('#jsxc_buddylist').slimScroll({
             distance: '3px',
-            height: ($('#jsxc_roster').height() - 70) + 'px',
+            height: ($('#jsxc_roster').height() - 107) + 'px',
             width: $('#jsxc_buddylist').width() + 'px',
             color: '#fff',
             opacity: '0.5'
