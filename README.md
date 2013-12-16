@@ -2,9 +2,7 @@
 
 __Beware! This is beta software.__
 
-## General
-
-_TODO insert short description_
+Real-time chat app for OwnCloud. This app requires external XMPP server (openfire, ejabberd etc.).
 
 ### Features
 - integration into existing ui
@@ -52,7 +50,9 @@ You can configure oJSXC in the admin panel of owncloud.
 
 <dl>
 	<dt>BOSH url</dt>
-	<dd>The url to your bosh server. Please beware of the SOP. Use the Apache ProxyRequest or modify the CSP.</dd>
+	<dd>The url to your bosh server. Please beware of the SOP. If your XMPP server doesn't reside on the same host as your OwnCloud, use the Apache ProxyRequest or modify the CSP by defining 'custom_csp_policy' in OwnCloud's config.php(.</dd>
+	<dd>Example:</dd>
+	<dd>'custom_csp_policy' => 'default-src https://your.xmpp.server.com:* \'self\'; script-src \'self\' \'unsafe-eval\'; style-src \'self\' \'unsafe-inline\'; frame-src *; img-src *; font-src \'self\' data:; media-src *',</dd>
 
 	<dt>XMPP domain</dt>
 	<dd>The domain of your Jabber ID.</dd>
