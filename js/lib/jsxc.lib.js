@@ -355,7 +355,7 @@ var jsxc;
        * @returns {String} css Compatible string
        */
       jidToCid: function(jid) {
-         var cid = Strophe.getBareJidFromJid(jid).replace('@', '-').replace('.', '-').toLowerCase();
+         var cid = Strophe.getBareJidFromJid(jid).replace('@', '-').replace(/\./g, '-').toLowerCase();
 
          jsxc.jids[cid] = jid;
 
@@ -2174,7 +2174,7 @@ var jsxc;
           */
 
          jsxc.debug('Load roster');
-
+         console.log(iq);
          var buddies = [];
 
          $(iq).find('item').each(function() {
@@ -2184,7 +2184,7 @@ var jsxc;
             var sub = $(this).attr('subscription');
 
             buddies.push(cid);
-
+console.log(this);
             if (jsxc.storage.getUserItem('buddy_' + cid)) {
                jsxc.storage.updateUserItem('buddy_' + cid, {
                   jid: jid,
@@ -2208,7 +2208,7 @@ var jsxc;
                });
             }
 
-            jsxc.gui.roster.add(cid);
+            jsxc.gui.roster.add(cid); console.log('add');
          });
 
          jsxc.storage.setUserItem('buddylist', buddies);
