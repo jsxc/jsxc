@@ -1279,18 +1279,18 @@ var jsxc;
       open: function(data, o) {
 
          var opt = o || {};
-         
+
          // default options
          var options = {};
          options = {
-            onComplete: function() { 
+            onComplete: function() {
                $('#jsxc_dialog .jsxc_close').click(jsxc.gui.dialog.close);
-               
-               //workaround for old colorbox version (used by firstrunwizard)
-               if(!options.closeButton){ 
+
+               // workaround for old colorbox version (used by firstrunwizard)
+               if (!options.closeButton) {
                   $('#cboxClose').hide();
                }
-               
+
                $(document).trigger('complete.dialog.jsxc');
             },
             onClosed: function() {
@@ -1928,9 +1928,9 @@ var jsxc;
          var url = jsxc.options.xmpp.url || jsxc.storage.getItem('boshUrl');
 
          // Register eventlistener
-         $(document).bind('connected', jsxc.xmpp.connected);
-         $(document).bind('attached', jsxc.xmpp.attached);
-         $(document).bind('disconnected', jsxc.xmpp.disconnected);
+         $(document).on('connected.jsxc', jsxc.xmpp.connected);
+         $(document).on('attached.jsxc', jsxc.xmpp.attached);
+         $(document).on('disconnected.jsxc', jsxc.xmpp.disconnected);
          $(document).on('ridChange', jsxc.xmpp.onRidChange);
 
          // Create new connection (no login)
@@ -1958,13 +1958,13 @@ var jsxc;
             switch (status) {
                case Strophe.Status.CONNECTED:
                   jsxc.cid = jsxc.jidToCid(jsxc.xmpp.conn.jid.toLowerCase());
-                  $(document).trigger('connected');
+                  $(document).trigger('connected.jsxc');
                   break;
                case Strophe.Status.ATTACHED:
-                  $(document).trigger('attached');
+                  $(document).trigger('attached.jsxc');
                   break;
                case Strophe.Status.DISCONNECTED:
-                  $(document).trigger('disconnected');
+                  $(document).trigger('disconnected.jsxc');
                   break;
                case Strophe.Status.CONNFAIL:
                   jsxc.xmpp.onConnfail(condition);
