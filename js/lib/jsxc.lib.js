@@ -1278,11 +1278,19 @@ var jsxc;
        */
       open: function(data, o) {
 
+         var opt = o || {};
+         
          // default options
-         var options = {
-            onComplete: function() {
+         var options = {};
+         options = {
+            onComplete: function() { 
                $('#jsxc_dialog .jsxc_close').click(jsxc.gui.dialog.close);
-
+               
+               //workaround for old colorbox version (used by firstrunwizard)
+               if(!options.closeButton){ 
+                  $('#cboxClose').hide();
+               }
+               
                $(document).trigger('complete.dialog.jsxc');
             },
             onClosed: function() {
@@ -1293,8 +1301,6 @@ var jsxc;
             },
             opacity: 0.5
          };
-
-         var opt = o || {};
 
          if (opt.noClose) {
             options.overlayClose = false;
