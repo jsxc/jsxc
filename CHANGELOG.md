@@ -1,3 +1,10 @@
+v0.4.4 / 2013-12-20
+===
+- fix dialog height
+- add BOSH connection test
+- fix css id (cid) generation
+- fix close button
+
 v0.4.3 / 2013-12-11
 ===
 - fix mac-chrome-reload bug

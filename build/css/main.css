@@ -33,6 +33,7 @@ p.jsxc_center{
 
 #jsxc_dialog{
     padding:10px;
+    min-width: 180px;
 }
 
 #jsxc_dialog h3{
@@ -481,4 +482,28 @@ div.jsxc_transfer.jsxc_enc.jsxc_trust{
 }
 #jsxc_alt:hover{
     opacity: 0.8;
+}
+.jsxc_success,.jsxc_fail{
+	border: 1px solid #fff;
+   border-radius:3px;
+   padding:3px;
+   padding-left:22px;
+/*    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3); */
+   background-position: 3px center;
+   background-repeat: no-repeat;
+   margin:3px;
+   width: -moz-fit-content;
+   width: -webkit-fit-content;
+}
+.jsxc_success{
+	background-color: #A1F6BB;
+	background-image:  url('%appswebroot%/ojsxc/img/pass-icon.png');
+	color: #003300;
+	border-color: #003300;
+}
+.jsxc_fail{
+   background-color: #FF9999;
+   background-image: url('%appswebroot%/ojsxc/img/fail-icon.png');
+   color: #800000;
+   border-color: #800000;
 }

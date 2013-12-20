@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2013 Klaus Herberth <klaus@jsxc.org> <br>
+ * Released under the MIT license
+ * 
+ * @file WebRTC Plugin for the javascript xmpp client
+ * @author Klaus Herberth
+ * @version 0.4.4
+ */
+
 $(document).ready(function() {
    $('#ojsxc').submit(function(event) {
       event.preventDefault();

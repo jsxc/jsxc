@@ -6,7 +6,7 @@
  * 
  * @file Mainscript of the javascript xmpp client
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.4.3
+ * @version 0.4.4
  * @requires [1] {@link https://github.com/sualko/strophejs/|Strophe.js}
  * @requires [2] {@link https://github.com/arlolra/otr/|OTR}
  */
@@ -355,7 +355,7 @@ var jsxc;
        * @returns {String} css Compatible string
        */
       jidToCid: function(jid) {
-         var cid = Strophe.getBareJidFromJid(jid).replace('@', '-').replace('.', '-').toLowerCase();
+         var cid = Strophe.getBareJidFromJid(jid).replace('@', '-').replace(/\./g, '-').toLowerCase();
 
          jsxc.jids[cid] = jid;
 
@@ -1036,7 +1036,7 @@ var jsxc;
 
          $('#jsxc_buddylist').slimScroll({
             distance: '3px',
-            height: ($('#jsxc_roster').height() - 70) + 'px',
+            height: ($('#jsxc_roster').height() - 107) + 'px',
             width: $('#jsxc_buddylist').width() + 'px',
             color: '#fff',
             opacity: '0.5'
@@ -1278,10 +1278,18 @@ var jsxc;
        */
       open: function(data, o) {
 
+         var opt = o || {};
+
          // default options
-         var options = {
+         var options = {};
+         options = {
             onComplete: function() {
                $('#jsxc_dialog .jsxc_close').click(jsxc.gui.dialog.close);
+
+               // workaround for old colorbox version (used by firstrunwizard)
+               if (!options.closeButton) {
+                  $('#cboxClose').hide();
+               }
 
                $(document).trigger('complete.dialog.jsxc');
             },
@@ -1293,8 +1301,6 @@ var jsxc;
             },
             opacity: 0.5
          };
-
-         var opt = o || {};
 
          if (opt.noClose) {
             options.overlayClose = false;
@@ -1922,9 +1928,9 @@ var jsxc;
          var url = jsxc.options.xmpp.url || jsxc.storage.getItem('boshUrl');
 
          // Register eventlistener
-         $(document).bind('connected', jsxc.xmpp.connected);
-         $(document).bind('attached', jsxc.xmpp.attached);
-         $(document).bind('disconnected', jsxc.xmpp.disconnected);
+         $(document).on('connected.jsxc', jsxc.xmpp.connected);
+         $(document).on('attached.jsxc', jsxc.xmpp.attached);
+         $(document).on('disconnected.jsxc', jsxc.xmpp.disconnected);
          $(document).on('ridChange', jsxc.xmpp.onRidChange);
 
          // Create new connection (no login)
@@ -1952,13 +1958,13 @@ var jsxc;
             switch (status) {
                case Strophe.Status.CONNECTED:
                   jsxc.cid = jsxc.jidToCid(jsxc.xmpp.conn.jid.toLowerCase());
-                  $(document).trigger('connected');
+                  $(document).trigger('connected.jsxc');
                   break;
                case Strophe.Status.ATTACHED:
-                  $(document).trigger('attached');
+                  $(document).trigger('attached.jsxc');
                   break;
                case Strophe.Status.DISCONNECTED:
-                  $(document).trigger('disconnected');
+                  $(document).trigger('disconnected.jsxc');
                   break;
                case Strophe.Status.CONNFAIL:
                   jsxc.xmpp.onConnfail(condition);
@@ -2168,7 +2174,7 @@ var jsxc;
           */
 
          jsxc.debug('Load roster');
-
+         console.log(iq);
          var buddies = [];
 
          $(iq).find('item').each(function() {
@@ -2178,7 +2184,7 @@ var jsxc;
             var sub = $(this).attr('subscription');
 
             buddies.push(cid);
-
+console.log(this);
             if (jsxc.storage.getUserItem('buddy_' + cid)) {
                jsxc.storage.updateUserItem('buddy_' + cid, {
                   jid: jid,
@@ -2202,7 +2208,7 @@ var jsxc;
                });
             }
 
-            jsxc.gui.roster.add(cid);
+            jsxc.gui.roster.add(cid); console.log('add');
          });
 
          jsxc.storage.setUserItem('buddylist', buddies);
