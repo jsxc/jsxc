@@ -33,6 +33,7 @@ p.jsxc_center{
 
 #jsxc_dialog{
     padding:10px;
+    min-width: 180px;
 }
 
 #jsxc_dialog h3{
