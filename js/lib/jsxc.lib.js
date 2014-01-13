@@ -127,7 +127,7 @@ var jsxc;
          } else {
             lang = jsxc.options.defaultLang;
          }
-         lang = 'de';
+      
          // set language
          jsxc.l = jsxc.l10n.en;
          $.extend(jsxc.l, jsxc.l10n[lang]);
