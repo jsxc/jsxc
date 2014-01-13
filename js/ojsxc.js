@@ -8,6 +8,7 @@
 
 /* global jsxc, oc_appswebroots, OC, $ */
 
+
 /**
  * Make room for the roster inside the owncloud template.
  * 
@@ -54,6 +55,8 @@ $(function() {
    $(document).on('ready.roster.jsxc', onRosterReady);
    $(document).on('toggle.roster.jsxc', onRosterToggle);
 
+   jsxc.log = "";
+   jsxc.tmp = null;
    jsxc.init({
       loginForm: {
          form: '#body-login form',
@@ -85,9 +88,11 @@ $(function() {
       checkFlash: false,
       debug: function(msg, data) {
          if (data) {
-            console.log(msg, data);
+            console.log(msg, data); 
+            jsxc.log = jsxc.log + msg + ' >> ' + $("<span>").prepend(data).html() + '\n';
          } else {
             console.log(msg);
+            jsxc.log = jsxc.log + msg + '\n';
          }
       },
       rosterAppend: 'body',

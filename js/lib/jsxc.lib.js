@@ -127,7 +127,7 @@ var jsxc;
          } else {
             lang = jsxc.options.defaultLang;
          }
-      
+
          // set language
          jsxc.l = jsxc.l10n.en;
          $.extend(jsxc.l, jsxc.l10n[lang]);
@@ -644,7 +644,7 @@ var jsxc;
        */
       update: function(cid) {
          var data = jsxc.storage.getUserItem('buddy_' + cid);
-
+     
          if (!data) {
             jsxc.debug('No data for ' + cid);
             return;
@@ -710,7 +710,7 @@ var jsxc;
             } else {
                jsxc.xmpp.conn.vcard.get(function(stanza) {
                   jsxc.debug('vCard', stanza);
-                  
+
                   var vCard = $(stanza).find("vCard");
                   var img = vCard.find('BINVAL').text();
                   var type = vCard.find('TYPE').text();
@@ -1257,11 +1257,11 @@ var jsxc;
             if (ev.which !== 13) {
                return;
             }
-
+            
             input.replaceWith(name);
             jsxc.gui.roster._rename(cid, $(this).val());
 
-            $(document).off('click');
+            $('html').off('click');
          });
 
          // Disable html click event, if click on input
@@ -2029,16 +2029,12 @@ var jsxc;
          // Create new connection (no login)
          jsxc.xmpp.conn = new Strophe.Connection(url);
 
-         // Strophe.Connection.xmlInput = function(data) {
-         // jsxc.debug('Input');
-         // jsxc.debug(data);
-         // // Log.show_traffic(data, 'input');
-         // };
-         // Strophe.Connection.xmlOutput = function(data) {
-         // jsxc.debug('Output');
-         // jsxc.debug(data);
-         // // Log.show_traffic(data, 'output');
-         // };
+//         jsxc.xmpp.conn.xmlInput = function(data) {
+//            jsxc.debug('<', data);
+//         };
+//         jsxc.xmpp.conn.xmlOutput = function(data) {
+//            jsxc.debug('>', data);
+//         };
          //         
          // Strophe.log = function (level, msg) {
          // jsxc.debug(level + " " + msg);
@@ -2324,6 +2320,8 @@ var jsxc;
           * jid='' name='' subscription='' /> </query> </iq>
           */
 
+         jsxc.debug('onRosterChanged', iq);
+
          $(iq).find('item').each(function() {
             var jid = $(this).attr('jid');
             var name = $(this).attr('name') || jid;
@@ -2452,7 +2450,7 @@ var jsxc;
          data.res = maxVal;
          data.jid = jid;
 
-         //Looking for avatar
+         // Looking for avatar
          if (xVCard.length > 0) {
             var photo = xVCard.find('photo');
 
