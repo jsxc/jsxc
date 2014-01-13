@@ -22,6 +22,9 @@ var jsxc;
     * @namespace jsxc
     */
    jsxc = {
+      /** Version of jsxc */
+      version: '0.4.4',
+      
       /** True if i'm the chief */
       chief: false,
 
@@ -124,7 +127,7 @@ var jsxc;
          } else {
             lang = jsxc.options.defaultLang;
          }
-
+         lang = 'de';
          // set language
          jsxc.l = jsxc.l10n.en;
          $.extend(jsxc.l, jsxc.l10n[lang]);
@@ -1026,6 +1029,14 @@ var jsxc;
          if (dismiss) {
             $('#jsxc_dialog .jsxc_cancel').click(dismiss);
          }
+      },
+      
+      /**
+       * Show about dialog.
+       * @memberOf jsxc.gui
+       */
+      showAboutDialog: function(){
+         jsxc.gui.dialog.open(jsxc.gui.template.get('aboutDialog'));
       }
    };
 
@@ -1066,6 +1077,10 @@ var jsxc;
 
          $('#jsxc_roster .jsxc_addBuddy').click(function() {
             jsxc.gui.showContactDialog();
+         });
+         
+         $('#jsxc_roster .jsxc_about').click(function(){
+            jsxc.gui.showAboutDialog();
          });
 
          $('#jsxc_toggleRoster').click(function() {
@@ -1888,6 +1903,7 @@ var jsxc;
             <ul>\
                 <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
                 <li class="jsxc_hideOffline">%%Hide offline%%</li>\
+                <li class="jsxc_about">%%About%%</li>\
             </ul>\
             </div>\
             <div id="jsxc_toggleRoster"></div>\
@@ -1945,7 +1961,14 @@ var jsxc;
             <button class="button jsxc_cancel jsxc_close">%%Dismiss%%</button>\
             <button class="button creation">%%Confirm%%</button>\
         </p>',
-      pleaseAccept: '<p>%%Please_accept_%%</p>'
+      pleaseAccept: '<p>%%Please_accept_%%</p>',
+      aboutDialog: '<h3>JavaScript XMPP Chat</h3>\
+         <p><b>Version: </b>' + jsxc.version + '<br />\
+         <a href="http://jsxc.org/" target="_blank">www.jsxc.org</a><br />\
+         <br />\
+         Real-time chat app for OwnCloud. This app requires external<br /> XMPP server (openfire, ejabberd etc.).<br />\
+         <br />\
+         <i>Released under the MIT license</i></p>'
    };
 
    /**
@@ -3667,7 +3690,12 @@ var jsxc;
          Retry: 'Neuer Versuch',
          clear_history: 'Lösche Verlauf',
          New_message_from: 'Neue Nachricht von',
-         Should_we_notify_you_: 'Should we notify you about new messages in the future?'
+         Should_we_notify_you_: 'Sollen wir dich in Zukunft über eingehende Nachrichten informieren, auch wenn dieser Tab nicht im Vordergrund ist?',
+         Please_accept_: 'Bitte klick auf den "Zulassen" Button oben.',
+         Menu: 'Menü',
+         Hide_offline: 'Offline ausblenden',
+         Show_offline: 'Offline einblenden',
+         About: 'Über'
       }
    };
 }(jQuery));
