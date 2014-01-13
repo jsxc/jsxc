@@ -4,7 +4,7 @@
  * 
  * @file WebRTC Plugin for the javascript xmpp client
  * @author Klaus Herberth
- * @version 0.4.4
+ * @version 0.5.0
  */
 
 $(document).ready(function() {
@@ -20,11 +20,26 @@ $(document).ready(function() {
       var statusBosh = status.clone().html(status.html() + " Testing BOSH Server...");
       $('#ojsxc .msg').append(statusBosh);
       
-      $.post($('#boshUrl').val(), "<body rid='1234567' xmlns='http://jabber.org/protocol/httpbind' to='localhost' xml:lang='en' wait='60' hold='1' content='text/xml; charset=utf-8' ver='1.6' xmpp:version='1.0' xmlns:xmpp='urn:xmpp:xbosh'/>").done(function() {
-         statusBosh.addClass('jsxc_success').text('BOSH Server reachable.');
-      }).fail(function() {
+      var rid = jsxc.storage.getItem('rid') || '123456';
+      var xmppDomain = $('#xmppDomain').val();
+      var fail = function() {
          statusBosh.addClass('jsxc_fail').text('BOSH server NOT reachable. Please beware of the SOP. If your XMPP server doesn\'t reside on the same host as your OwnCloud, use the Apache ProxyRequest or modify the CSP by defining "custom_csp_policy" in OwnCloud\'s config.php.');
-      });
+      };
+      
+      $.post($('#boshUrl').val(), "<body rid='"+rid+"' xmlns='http://jabber.org/protocol/httpbind' to='"+xmppDomain+"' xml:lang='en' wait='60' hold='1' content='text/xml; charset=utf-8' ver='1.6' xmpp:version='1.0' xmlns:xmpp='urn:xmpp:xbosh'/>").done(function(stanza) {
+         var body = $(stanza).find('body[xmlns="http://jabber.org/protocol/httpbind"]');
+         var condition = (body)? body.attr('condition'): null;
+         
+         if(body.length > 0 && condition != 'internal-server-error'){
+            statusBosh.addClass('jsxc_success').text('BOSH Server reachable.');
+         } else {
+            fail();
+            if(condition == 'internal-server-error'){
+               statusBosh.html(statusBosh.text() + ' <br /><br /><b>Error: </b>'+body.text());
+            }
+         }
+         
+      }).fail(fail);
 
       var statusSet = status.clone().html(status.html() + " Saving...");
       $('#ojsxc .msg').append(statusSet);

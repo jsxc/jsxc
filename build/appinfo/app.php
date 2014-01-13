@@ -20,6 +20,7 @@ OCP\Util::addScript ( 'ojsxc', 'lib/strophe' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/strophe.muc' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/strophe.disco' );
 OCP\Util::addScript ( 'ojsxc', 'plugin/strophe.caps' );
+OCP\Util::addScript ( 'ojsxc', 'plugin/strophe.vcard' );
 OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle' );
 OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle.session' );
 OCP\Util::addScript ( 'ojsxc', 'strophe.jingle/strophe.jingle.sdp' );

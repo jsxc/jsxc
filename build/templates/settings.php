@@ -4,13 +4,13 @@
 
 		<table style="width: auto">
 			<tr>
-				<td><label for="boshUrl">BOSH url</label></td>
+				<td><label for="boshUrl">* BOSH url</label></td>
 				<td><input type="text" name="boshUrl" id="boshUrl"
 					value="<?php p($_['boshUrl']); ?>" /></td>
 				<td></td>
 			</tr>
 			<tr>
-				<td><label for="xmppDomain">XMPP domain</label></td>
+				<td><label for="xmppDomain">* XMPP domain</label></td>
 				<td><input type="text" name="xmppDomain" id="xmppDomain"
 					value="<?php p($_['xmppDomain']); ?>" /></td>
 				<td></td>

@@ -6,7 +6,7 @@
  * 
  * @file Mainscript of the javascript xmpp client
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.4.4
+ * @version 0.5.0
  * @requires [1] {@link https://github.com/sualko/strophejs/|Strophe.js}
  * @requires [2] {@link https://github.com/arlolra/otr/|OTR}
  */
@@ -22,6 +22,9 @@ var jsxc;
     * @namespace jsxc
     */
    jsxc = {
+      /** Version of jsxc */
+      version: '0.5.0',
+
       /** True if i'm the chief */
       chief: false,
 
@@ -101,6 +104,16 @@ var jsxc;
          if (options) {
             $.extend(jsxc.options, options);
          }
+
+         jsxc.options.get = function(key) {
+            var local = jsxc.storage.getUserItem('options') || {};
+
+            return local[key] || options[key];
+         };
+
+         jsxc.options.set = function(key, value) {
+            jsxc.storage.updateUserItem('options', key, value);
+         };
 
          // Shortcut
          jsxc.debug = jsxc.options.debug;
@@ -587,7 +600,10 @@ var jsxc;
        */
       displayRosterMinimized: function() {
          return false;
-      }
+      },
+
+      /** Set to true if you want to hide offline buddies. */
+      hideOffline: false
    };
 
    /**
@@ -628,7 +644,7 @@ var jsxc;
        */
       update: function(cid) {
          var data = jsxc.storage.getUserItem('buddy_' + cid);
-
+     
          if (!data) {
             jsxc.debug('No data for ' + cid);
             return;
@@ -678,6 +694,34 @@ var jsxc;
             ri.addClass('jsxc_oneway').find('.jsxc_name').attr('title', jsxc.l.you_have_only_a_subscription_in_one_way);
          } else {
             ri.removeClass('jsxc_oneway');
+         }
+
+         if (data.avatar && data.avatar.length > 0) {
+            var avatarSrc = jsxc.storage.getUserItem('avatar_' + data.avatar);
+
+            var setAvatar = function(src) {
+               ue.find('.jsxc_avatar img').remove();
+               var img = $('<img/>').attr('alt', 'Avatar').attr('src', src);
+               ue.find('.jsxc_avatar').prepend(img);
+            };
+
+            if (avatarSrc !== null) {
+               setAvatar(avatarSrc);
+            } else {
+               jsxc.xmpp.conn.vcard.get(function(stanza) {
+                  jsxc.debug('vCard', stanza);
+
+                  var vCard = $(stanza).find("vCard");
+                  var img = vCard.find('BINVAL').text();
+                  var type = vCard.find('TYPE').text();
+                  var src = 'data:' + type + ';base64,' + img;
+
+                  jsxc.storage.setUserItem('avatar_' + data.avatar, src);
+                  setAvatar(src);
+               }, Strophe.getBareJidFromJid(data.jid), function(msg) {
+                  jsxc.debug('Error', msg);
+               });
+            }
          }
       },
 
@@ -902,6 +946,10 @@ var jsxc;
             var username = $('#jsxc_username').val();
             var alias = $('#jsxc_alias').val();
 
+            if (!username.match(/@(.*)$/)) {
+               username += '@' + Strophe.getDomainFromJid(jsxc.storage.getItem('jid'));
+            }
+
             // Check if the username is valid
             if (!username || !username.match(/^[\w-_.]+@[\w-_.]+$/g)) {
                // Add notification
@@ -1007,6 +1055,15 @@ var jsxc;
          if (dismiss) {
             $('#jsxc_dialog .jsxc_cancel').click(dismiss);
          }
+      },
+
+      /**
+       * Show about dialog.
+       * 
+       * @memberOf jsxc.gui
+       */
+      showAboutDialog: function() {
+         jsxc.gui.dialog.open(jsxc.gui.template.get('aboutDialog'));
       }
    };
 
@@ -1026,8 +1083,31 @@ var jsxc;
       init: function() {
          $(jsxc.options.rosterAppend + ':first').append($(jsxc.gui.template.get('roster')));
 
+         if (jsxc.options.get('hideOffline')) {
+            $('#jsxc_menu .jsxc_hideOffline').text(jsxc.translate('%%Show offline%%'));
+            $('#jsxc_buddylist').addClass('jsxc_hideOffline');
+         }
+
+         $('#jsxc_menu .jsxc_hideOffline').click(function() {
+            var hideOffline = !jsxc.options.get('hideOffline');
+
+            if (hideOffline) {
+               $('#jsxc_buddylist').addClass('jsxc_hideOffline');
+            } else {
+               $('#jsxc_buddylist').removeClass('jsxc_hideOffline');
+            }
+
+            $(this).text(hideOffline ? jsxc.translate('%%Show offline%%') : jsxc.translate('%%Hide offline%%'));
+
+            jsxc.options.set('hideOffline', hideOffline);
+         });
+
          $('#jsxc_roster .jsxc_addBuddy').click(function() {
             jsxc.gui.showContactDialog();
+         });
+
+         $('#jsxc_roster .jsxc_about').click(function() {
+            jsxc.gui.showAboutDialog();
          });
 
          $('#jsxc_toggleRoster').click(function() {
@@ -1177,11 +1257,11 @@ var jsxc;
             if (ev.which !== 13) {
                return;
             }
-
+            
             input.replaceWith(name);
             jsxc.gui.roster._rename(cid, $(this).val());
 
-            $(document).off('click');
+            $('html').off('click');
          });
 
          // Disable html click event, if click on input
@@ -1287,9 +1367,11 @@ var jsxc;
                $('#jsxc_dialog .jsxc_close').click(jsxc.gui.dialog.close);
 
                // workaround for old colorbox version (used by firstrunwizard)
-               if (!options.closeButton) {
+               if (options.closeButton === false) {
                   $('#cboxClose').hide();
                }
+
+               $.colorbox.resize();
 
                $(document).trigger('complete.dialog.jsxc');
             },
@@ -1768,11 +1850,11 @@ var jsxc;
          var ret = jsxc.gui.template[name];
 
          if (typeof (ret) === 'string') {
+            ret = jsxc.translate(ret);
+
             ret = ret.replace(/\{\{([a-zA-Z0-9_\-]+)\}\}/g, function(s, key) {
                return ph[key] || s;
             });
-
-            ret = jsxc.translate(ret);
 
             return ret;
          }
@@ -1821,6 +1903,7 @@ var jsxc;
         </div>',
       chatWindow: '<li>\
             <div class="jsxc_bar">\
+                <div class="jsxc_avatar">☺</div>\
                 <div class="jsxc_name"/>\
                 <div class="jsxc_cycle"/>\
             </div>\
@@ -1847,6 +1930,8 @@ var jsxc;
             %%Menu%%\
             <ul>\
                 <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
+                <li class="jsxc_hideOffline">%%Hide offline%%</li>\
+                <li class="jsxc_about">%%About%%</li>\
             </ul>\
             </div>\
             <div id="jsxc_toggleRoster"></div>\
@@ -1855,6 +1940,7 @@ var jsxc;
             <ul></ul>\
         </div>',
       rosterBuddy: '<li>\
+            <div class="jsxc_avatar">☺</div>\
             <div class="jsxc_name"/>\
             <div class="jsxc_options">\
                 <div class="jsxc_rename" title="%%rename_buddy%%"></div>\
@@ -1874,7 +1960,7 @@ var jsxc;
         </form>',
       contactDialog: '<h3>%%Add_buddy%%</h3>\
          <p class=".jsxc_explanation">%%Type_in_the_full_username_%%</p>\
-         <p><label for="jsxc_username">%%Username%%:</label>\
+         <p><label for="jsxc_username">* %%Username%%:</label>\
             <input type="text" name="username" id="jsxc_username" required="required" /></p>\
          <p><label for="jsxc_alias">%%Alias%%:</label>\
             <input type="text" name="alias" id="jsxc_alias" /></p>\
@@ -1904,7 +1990,14 @@ var jsxc;
             <button class="button jsxc_cancel jsxc_close">%%Dismiss%%</button>\
             <button class="button creation">%%Confirm%%</button>\
         </p>',
-      pleaseAccept: '<p>%%Please_accept_%%</p>'
+      pleaseAccept: '<p>%%Please_accept_%%</p>',
+      aboutDialog: '<h3>JavaScript XMPP Chat</h3>\
+         <p><b>Version: </b>' + jsxc.version + '<br />\
+         <a href="http://jsxc.org/" target="_blank">www.jsxc.org</a><br />\
+         <br />\
+         Real-time chat app for OwnCloud. This app requires external<br /> XMPP server (openfire, ejabberd etc.).<br />\
+         <br />\
+         <i>Released under the MIT license</i></p>'
    };
 
    /**
@@ -1936,16 +2029,12 @@ var jsxc;
          // Create new connection (no login)
          jsxc.xmpp.conn = new Strophe.Connection(url);
 
-         // Strophe.Connection.xmlInput = function(data) {
-         // jsxc.debug('Input');
-         // jsxc.debug(data);
-         // // Log.show_traffic(data, 'input');
-         // };
-         // Strophe.Connection.xmlOutput = function(data) {
-         // jsxc.debug('Output');
-         // jsxc.debug(data);
-         // // Log.show_traffic(data, 'output');
-         // };
+//         jsxc.xmpp.conn.xmlInput = function(data) {
+//            jsxc.debug('<', data);
+//         };
+//         jsxc.xmpp.conn.xmlOutput = function(data) {
+//            jsxc.debug('>', data);
+//         };
          //         
          // Strophe.log = function (level, msg) {
          // jsxc.debug(level + " " + msg);
@@ -2173,8 +2262,8 @@ var jsxc;
           * jid='' name='' subscription='' /> ... </query> </iq>
           */
 
-         jsxc.debug('Load roster');
-         console.log(iq);
+         jsxc.debug('Load roster', iq);
+
          var buddies = [];
 
          $(iq).find('item').each(function() {
@@ -2184,7 +2273,7 @@ var jsxc;
             var sub = $(this).attr('subscription');
 
             buddies.push(cid);
-console.log(this);
+
             if (jsxc.storage.getUserItem('buddy_' + cid)) {
                jsxc.storage.updateUserItem('buddy_' + cid, {
                   jid: jid,
@@ -2208,7 +2297,7 @@ console.log(this);
                });
             }
 
-            jsxc.gui.roster.add(cid); console.log('add');
+            jsxc.gui.roster.add(cid);
          });
 
          jsxc.storage.setUserItem('buddylist', buddies);
@@ -2231,16 +2320,20 @@ console.log(this);
           * jid='' name='' subscription='' /> </query> </iq>
           */
 
+         jsxc.debug('onRosterChanged', iq);
+
          $(iq).find('item').each(function() {
             var jid = $(this).attr('jid');
             var name = $(this).attr('name') || jid;
             var cid = jsxc.jidToCid(jid);
             var sub = $(this).attr('subscription');
-            var ask = $(this).attr('ask');
+            // var ask = $(this).attr('ask');
+
+            var bl = jsxc.storage.getUserItem('buddylist');
 
             if (sub === 'remove') {
                jsxc.gui.roster.purge(cid);
-            } else if (jsxc.el_exists('#' + cid) && sub !== 'none') {
+            } else if (bl.indexOf(cid) >= 0) {
                jsxc.storage.updateUserItem('buddy_' + cid, {
                   jid: jid,
                   name: name,
@@ -2248,19 +2341,18 @@ console.log(this);
                });
                jsxc.gui.update(cid);
                jsxc.gui.roster.reorder(cid);
-            } else if ((!ask && sub !== 'none') || (ask === 'subscribe')) {
-               var bl = jsxc.storage.getUserItem('buddylist');
+            } else {
                bl.push(cid); // (INFO) push returns the new length
                jsxc.storage.setUserItem('buddylist', bl);
                jsxc.storage.setUserItem('buddy_' + cid, {
-                  'jid': jid,
-                  'name': name,
-                  'status': 0,
+                  jid: jid,
+                  name: name,
+                  status: 0,
                   sub: sub,
-                  'msgstate': 0,
-                  'transferReq': -1,
-                  'trust': false,
-                  'fingerprint': null,
+                  msgstate: 0,
+                  transferReq: -1,
+                  trust: false,
+                  fingerprint: null,
                   type: 'chat'
                });
                jsxc.gui.roster.add(cid);
@@ -2301,6 +2393,9 @@ console.log(this);
          var data = jsxc.storage.getUserItem('buddy_' + cid);
          var res = jsxc.storage.getUserItem('res_' + cid) || {};
          var status = null;
+         var xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
+
+         jsxc.debug('onPresence', presence);
 
          if (jid === to) {
             return true;
@@ -2354,6 +2449,16 @@ console.log(this);
          data.status = max;
          data.res = maxVal;
          data.jid = jid;
+
+         // Looking for avatar
+         if (xVCard.length > 0) {
+            var photo = xVCard.find('photo');
+
+            if (photo.length > 0 && photo.text() !== data.avatar) {
+               jsxc.storage.removeUserItem('avatar_' + data.avatar);
+               data.avatar = photo.text();
+            }
+         }
 
          // Reset jid
          if (jsxc.el_exists('#jsxc_window_' + cid)) {
@@ -2475,7 +2580,7 @@ console.log(this);
             });
             jsxc.xmpp.conn.sendIQ(iq);
 
-            // send subscription request to buddy
+            // send subscription request to buddy (trigger onRosterChanged)
             jsxc.xmpp.conn.send($pres({
                to: username,
                type: 'subscribe'
@@ -2640,7 +2745,7 @@ console.log(this);
        */
       updateItem: function(key, variable, value, uk) {
 
-         var data = jsxc.storage.getItem(key, uk);
+         var data = jsxc.storage.getItem(key, uk) || {};
 
          if (typeof (variable) === 'object') {
 
@@ -2992,7 +3097,7 @@ console.log(this);
          if (jsxc.buddyList.hasOwnProperty(cid)) {
             return;
          }
-         console.log(jsxc.options.otr);
+
          jsxc.buddyList[cid] = new OTR(jsxc.options.otr);
 
          if (jsxc.options.otr.SEND_WHITESPACE_TAG) {
@@ -3037,8 +3142,7 @@ console.log(this);
             jsxc.gui.update(cid);
          });
 
-         jsxc.buddyList[cid].on('smp', function(type, data, data2) {
-            console.log(type, data, data2);
+         jsxc.buddyList[cid].on('smp', function(type, data) {
             switch (type) {
                case 'question': // verification request received
                   jsxc.otr.onSmpQuestion(cid, data);
@@ -3096,8 +3200,6 @@ console.log(this);
          $('#jsxc_facebox select').prop('selectedIndex', (data ? 2 : 3)).change();
          $('#jsxc_facebox > div:eq(0)').hide();
 
-         console.log(data);
-
          if (data) {
             $('#jsxc_facebox > div:eq(2)').find('#jsxc_quest').val(data).prop('disabled', true);
             $('#jsxc_facebox > div:eq(2)').find('.creation').text('Answer');
@@ -3125,7 +3227,7 @@ console.log(this);
        */
       sendSmpReq: function(cid, sec, quest) {
          jsxc.keepBusyAlive();
-         console.log("Sec: ", sec);
+
          jsxc.buddyList[cid].smpSecret(sec, quest);
       },
 
@@ -3583,7 +3685,7 @@ console.log(this);
          to_authenticate_to_your_buddy: 'Um dich gegenüber deinem Freund zu verifizieren ',
          enter_the_answer_and_click_answer: 'gib die Antwort ein und klick auf Antworten.',
          enter_the_secret: 'gib das Geheimnis ein.',
-         now_we_will_create_your_private_key_: 'Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in anspruch nehmen.',
+         now_we_will_create_your_private_key_: 'Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.',
          Authenticating_a_buddy_helps_: 'Einen Freund zu authentifizieren hilft sicher zustellen, dass die Person mit der du sprichst auch die ist die sie sagt.',
          How_do_you_want_to_authenticate_your_buddy: 'Wie willst du deinen Freund authentifizieren?',
          Select_method: 'Wähle...',
@@ -3626,7 +3728,12 @@ console.log(this);
          Retry: 'Neuer Versuch',
          clear_history: 'Lösche Verlauf',
          New_message_from: 'Neue Nachricht von',
-         Should_we_notify_you_: 'Should we notify you about new messages in the future?'
+         Should_we_notify_you_: 'Sollen wir dich in Zukunft über eingehende Nachrichten informieren, auch wenn dieser Tab nicht im Vordergrund ist?',
+         Please_accept_: 'Bitte klick auf den "Zulassen" Button oben.',
+         Menu: 'Menü',
+         Hide_offline: 'Offline ausblenden',
+         Show_offline: 'Offline einblenden',
+         About: 'Über'
       }
    };
 }(jQuery));
