@@ -1328,6 +1328,8 @@ var jsxc;
                if (!options.closeButton) {
                   $('#cboxClose').hide();
                }
+               
+               $.colorbox.resize()
 
                $(document).trigger('complete.dialog.jsxc');
             },

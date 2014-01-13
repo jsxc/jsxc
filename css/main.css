@@ -33,7 +33,7 @@ p.jsxc_center{
 
 #jsxc_dialog{
     padding:10px;
-    min-width: 180px;
+    min-width: 300px;
 }
 
 #jsxc_dialog h3{
@@ -53,6 +53,10 @@ p.jsxc_center{
     width:30%;
     float:left;
     padding:6px 0px;
+}
+
+#jsxc_dialog .jsxc_right {
+	padding-top:10px;
 }
 
 #status{
