@@ -1,96 +1,105 @@
-body{
-    font-family: Arial;
-    font-size:0.8em;
-}
-.jsxc_online{    
-    border-left:4px solid #00BFFF;
-}
-.jsxc_away{
-    border-left: 4px solid orange;
-}
-.jsxc_offline{
-    border-left:4px solid #A4A4A4;
-}
-.jsxc_hidden{
-    display:none;
-}
-.chief{
-    background-color: blue;
-}
-.sidekick{
-    background-color:orange;
-}
-.jsxc_invalid{
-    border:2px solid red !important;
+body {
+	font-family: Arial;
+	font-size: 0.8em;
 }
 
-p.jsxc_right{
-    text-align: right;
-}
-p.jsxc_center{
-    text-align:center;
+.jsxc_online {
+	border-left: 4px solid #00BFFF;
 }
 
-#jsxc_dialog{
-    padding:10px;
-    min-width: 300px;
+.jsxc_away {
+	border-left: 4px solid orange;
 }
 
-#jsxc_dialog h3{
-    font-size: 120%;
-    font-weight:bold;
-    margin-bottom: 10px;
-    margin-top:20px;
+.jsxc_offline {
+	border-left: 4px solid #A4A4A4;
 }
 
-#jsxc_dialog p input{
-    margin-bottom:5px;
-    width:60%;
+.jsxc_hidden {
+	display: none;
 }
 
-#jsxc_dialog p label{
-    display:block;
-    width:30%;
-    float:left;
-    padding:6px 0px;
+.chief {
+	background-color: blue;
+}
+
+.sidekick {
+	background-color: orange;
+}
+
+.jsxc_invalid {
+	border: 2px solid red !important;
+}
+
+p.jsxc_right {
+	text-align: right;
+}
+
+p.jsxc_center {
+	text-align: center;
+}
+
+#jsxc_dialog {
+	padding: 10px;
+	min-width: 300px;
+}
+
+#jsxc_dialog h3 {
+	font-size: 120%;
+	font-weight: bold;
+	margin-bottom: 10px;
+	margin-top: 20px;
+}
+
+#jsxc_dialog p input {
+	margin-bottom: 5px;
+	width: 60%;
+}
+
+#jsxc_dialog p label {
+	display: block;
+	width: 30%;
+	float: left;
+	padding: 6px 0px;
 }
 
 #jsxc_dialog .jsxc_right {
-	padding-top:10px;
+	padding-top: 10px;
 }
 
-#status{
-    position:fixed;
-    bottom:10px;
-    left:10px;
-    z-index:1000;
-    width:20px;
-    height:20px;
-    border-radius:10px;
+#status {
+	position: fixed;
+	bottom: 10px;
+	left: 10px;
+	z-index: 1000;
+	width: 20px;
+	height: 20px;
+	border-radius: 10px;
 }
 
-#jsxc_waitAlert{
-    position: fixed;
-    width: 300px;
-    left: 50%;
-    top: 20%;
-    margin-left: -150px;
-    background-color: #fff;
-    z-index: 1200;
-}
-#jsxc_overlay{
-    position: fixed;
-    height: 100%;
-    width: 100%;
-    left: 0px;
-    top: 0px;
-    opacity: 0.7;
-    background-color: #777;
-    z-index: 1100;
+#jsxc_waitAlert {
+	position: fixed;
+	width: 300px;
+	left: 50%;
+	top: 20%;
+	margin-left: -150px;
+	background-color: #fff;
+	z-index: 1200;
 }
 
-div#jsxc_roster{
-    /*position:fixed;
+#jsxc_overlay {
+	position: fixed;
+	height: 100%;
+	width: 100%;
+	left: 0px;
+	top: 0px;
+	opacity: 0.7;
+	background-color: #777;
+	z-index: 1100;
+}
+
+div#jsxc_roster {
+	/*position:fixed;
     top:0px;
     right:0px;
     width:200px;
@@ -102,204 +111,271 @@ div#jsxc_roster{
     padding-bottom: 30px;
     background: url("http://localhost/owncloud/core/img/noise.png") #383C43;
     box-shadow: 0px 0px 7px #000000;*/
-    position:fixed;
-    top:0px;
-    right:0px;
-    width:200px;
-    overflow:visible;
-    height:100%;
-    border-left:4px solid #A4A4A4;
-    z-index:80;
-    margin-left:10px;
-    padding-top: 40px;
-    padding-bottom: 30px;
-    background: url("%webroot%/core/img/noise.png") #383C43;
-    box-shadow: 0px 0px 7px #000000;
+	position: fixed;
+	top: 0px;
+	right: 0px;
+	width: 200px;
+	overflow: visible;
+	height: 100%;
+	border-left: 4px solid #A4A4A4;
+	z-index: 80;
+	margin-left: 10px;
+	padding-top: 45px;
+	padding-bottom: 30px;
+	background: url("%webroot%/core/img/noise.png") #383C43;
+	box-shadow: 0px 0px 7px #000000;
 }
-div#jsxc_roster .slimScrollDiv{
-    left: -4px;
+
+div#jsxc_roster .slimScrollDiv {
+	left: -4px;
 }
-ul#jsxc_buddylist{
-    list-style:none;
-    padding: 0px;
-    margin:0px;
-    width:204px;
+
+ul#jsxc_buddylist {
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+	width: 204px;
 }
-ul#jsxc_buddylist li{
-    padding: 0px;
-    margin:0px;
-    height:30px;
-    border-bottom:1px solid #939393;
-    cursor: pointer;
-    width: 200px;
-    position: relative;
-    color: #939393;
-    font-family:Arial;
-    line-height: 30px;
-    padding-left:3px;
-    z-index:85;
+
+ul#jsxc_buddylist li {
+	padding: 0px;
+	margin: 0px;
+	height: 30px;
+	border-bottom: 1px solid #939393;
+	cursor: pointer;
+	width: 200px;
+	position: relative;
+	color: #939393;
+	font-family: Arial;
+	line-height: 30px;
+	padding-left: 3px;
+	z-index: 85;
 }
-ul#jsxc_buddylist li:hover{
-    color:#FAFAFA;
+
+ul#jsxc_buddylist li:hover {
+	color: #FAFAFA;
 }
-ul#jsxc_buddylist li.jsxc_oneway{
-    opacity: 0.7;
+
+ul#jsxc_buddylist li.jsxc_oneway {
+	opacity: 0.7;
 }
-ul#jsxc_buddylist li .jsxc_name{
-    width: 160px;
-    overflow: hidden;
-    height:30px;
-    cursor: pointer;
+
+ul#jsxc_buddylist li .jsxc_name {
+	width: 160px;
+	overflow: hidden;
+	height: 30px;
+	cursor: pointer;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
-ul#jsxc_buddylist.jsxc_hideOffline .jsxc_offline{
-	display:none;
+
+ul#jsxc_buddylist li:hover .jsxc_name {
+	width: 130px;
 }
-div#jsxc_roster p{
-    color: #939393;
+
+ul#jsxc_buddylist.jsxc_hideOffline .jsxc_offline {
+	display: none;
 }
-div#jsxc_menu{
-    position:absolute;
-    left:0px;
-    bottom:70px;
-    height:30px;
-    width: 190px;
-    border-top:1px solid #939393;
-    padding-left:10px;
-    background-color:#282323;
-    color: #939393;
-    cursor: pointer;
-    line-height: 30px; 
+
+.jsxc_avatar,ul#jsxc_buddylist li:hover .jsxc_avatar{
+	width: 25px;
+	height: 25px;
+	line-height: 25px;
+	margin-top: 2px;
+	margin-right: 2px;
+	background-color: #a3a3a3;
+	border-radius: 2px;
+	float: left;
+	text-align: center;
+	font-weight: bold;
+	font-size: 30px;
+	color: #b1b1b1;
+	overflow: hidden;
+	position: relative;
 }
-div#jsxc_menu:hover{
-    color:#FAFAFA;
+
+.jsxc_avatar img {
+	display: block;
+	width: 25px;
+	height: 25px;
+	position: absolute;
+	top: 0px;
+	left: 0px;
 }
-div#jsxc_menu ul{
-    width: 190px;
-    position:absolute;
-    bottom: 30px;
-    left: 0px;
-    display: none;
-    border-top:1px solid #939393;
-    padding-left:10px;
-    background-color:#282323;
+
+div#jsxc_roster p {
+	color: #939393;
 }
-div#jsxc_menu li{
-    height:30px;
-    background-color:#282323;
-    color: #939393;
-    cursor: pointer;
-    width: 180px;
-    padding-left:10px;
-    line-height: 30px;
+
+div#jsxc_menu {
+	position: absolute;
+	left: 0px;
+	bottom: 75px;
+	height: 30px;
+	width: 190px;
+	border-top: 1px solid #939393;
+	padding-left: 10px;
+	background-color: #282323;
+	color: #939393;
+	cursor: pointer;
+	line-height: 30px;
 }
-div#jsxc_menu li:hover{
-    color:#fff;
-    background-color:#3F8FBA;
+
+div#jsxc_menu:hover {
+	color: #FAFAFA;
 }
-div#jsxc_menu ul li:last-child{
-    border-bottom:1px solid #939393;
+
+div#jsxc_menu ul {
+	width: 190px;
+	position: absolute;
+	bottom: 30px;
+	left: 0px;
+	display: none;
+	border-top: 1px solid #939393;
+	padding-left: 10px;
+	background-color: #282323;
 }
-ul#jsxc_buddylist .jsxc_options{
-    position: absolute;
-    right: 0px;
-    top: 0px;
-    height:30px;
+
+div#jsxc_menu li {
+	height: 30px;
+	background-color: #282323;
+	color: #939393;
+	cursor: pointer;
+	width: 180px;
+	padding-left: 10px;
+	line-height: 30px;
 }
-ul#jsxc_buddylist .jsxc_options div{
-    line-height: 30px;
-    height:30px;
-    width:20px;
-    cursor: pointer;
-    opacity: 0.7;
-    float: left;
-    display: none
+
+div#jsxc_menu li:hover {
+	color: #fff;
+	background-color: #3F8FBA;
 }
-ul#jsxc_buddylist li[data-type="chat"]:hover .jsxc_options div{
-    display:block;
+
+div#jsxc_menu ul li:last-child {
+	border-bottom: 1px solid #939393;
 }
-ul#jsxc_buddylist .jsxc_options div:hover{
-    opacity: 1.0;
+
+ul#jsxc_buddylist .jsxc_options {
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	height: 30px;
 }
-ul#jsxc_buddylist .jsxc_rename{
-    background-image: url('%appswebroot%/ojsxc/img/edit.png');
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size:15px 15px;
+
+ul#jsxc_buddylist .jsxc_options div {
+	line-height: 30px;
+	height: 30px;
+	width: 20px;
+	cursor: pointer;
+	opacity: 0.7;
+	float: left;
+	display: none
 }
-ul#jsxc_buddylist .jsxc_delete{
-    text-transform: lowercase;
-    font-weight: bold;
-    vertical-align: middle;
-    font-size:17px;
+
+ul#jsxc_buddylist li[data-type="chat"]:hover .jsxc_options div {
+	display: block;
 }
-div#jsxc_toggleRoster{
-    width: 14px;
-    height: 100%;
-    position: absolute;
-    left: -14px !important;
-    top: 0px;
-    z-index: 110;
-    background-color: transparent;
-    cursor: pointer;
+
+ul#jsxc_buddylist .jsxc_options div:hover {
+	opacity: 1.0;
 }
-#jsxc_toggleRoster:hover{
-    background-color: #a4a4a4;
-    opacity: 0.5;
+
+ul#jsxc_buddylist .jsxc_rename {
+	background-image: url('%appswebroot%/ojsxc/img/edit.png');
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-size: 15px 15px;
 }
-div#jsxc_windowList{
-    position:fixed;
-    bottom:0px;
-    right: 0px;
-    width:100%;
+
+ul#jsxc_buddylist .jsxc_delete {
+	text-transform: lowercase;
+	font-weight: bold;
+	vertical-align: middle;
+	font-size: 17px;
 }
-div#jsxc_windowList > ul{
-    list-style:none;
-    padding: 0px;
-    margin:0px;
-    padding-right:210px;
-    height: 30px;
-    overflow:visible;
+
+div#jsxc_toggleRoster {
+	width: 14px;
+	height: 100%;
+	position: absolute;
+	left: -14px !important;
+	top: 0px;
+	z-index: 110;
+	background-color: transparent;
+	cursor: pointer;
 }
-div#jsxc_windowList > ul > li{
-    padding: 0px;
-    margin:0px;
-    display:block;
-    float:right;
-    width:200px;
-    background-color:#282323;
-    height:30px;
-    position:relative;
-    overflow:visible;
-    margin-right: 5px;
-    box-shadow: 0px 0px 5px #000;
-    cursor: pointer;
+
+#jsxc_toggleRoster:hover {
+	background-color: #a4a4a4;
+	opacity: 0.5;
 }
-div#jsxc_windowList > ul > li .jsxc_name{
-    cursor:pointer;
+
+div#jsxc_windowList {
+	position: fixed;
+	bottom: 0px;
+	right: 0px;
+	width: 100%;
 }
-div#jsxc_windowList > ul > li.jsxc_unreadMsg .jsxc_name{
-    font-style: italic;
+
+div#jsxc_windowList>ul {
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+	padding-right: 210px;
+	height: 30px;
+	overflow: visible;
 }
-div#jsxc_windowList > ul > li.jsxc_unreadMsg .jsxc_cycle{
-    background-color: orange;
+
+div#jsxc_windowList>ul>li {
+	padding: 0px;
+	margin: 0px;
+	display: block;
+	float: right;
+	width: 200px;
+	background-color: #282323;
+	height: 30px;
+	position: relative;
+	overflow: visible;
+	margin-right: 5px;
+	box-shadow: 0px 0px 5px #000;
+	cursor: pointer;
 }
-div.jsxc_cycle{
-    position:absolute;
-    bottom:9px;
-    right:5px;
-    height:12px;
-    width:12px;
-    border-radius: 6px;
+
+div#jsxc_windowList>ul>li .jsxc_name {
+	cursor: pointer;
+	overflow:hidden;
+	text-overflow: ellipsis;
+   white-space: nowrap;
+   width: 150px;
 }
-div.jsxc_bar{
-    cursor: pointer;
-    height:30px;
-    line-height: 30px;
-    margin-left:10px;
-    color: #939393;
+
+div#jsxc_windowList>ul>li.jsxc_unreadMsg .jsxc_name {
+	font-style: italic;
 }
-div.jsxc_bar:hover{
-    color:#FAFAFA;
+
+div#jsxc_windowList>ul>li.jsxc_unreadMsg .jsxc_cycle {
+	background-color: orange;
+}
+
+div.jsxc_cycle {
+	position: absolute;
+	bottom: 9px;
+	right: 5px;
+	height: 12px;
+	width: 12px;
+	border-radius: 6px;
+}
+
+div.jsxc_bar {
+	cursor: pointer;
+	height: 30px;
+	line-height: 30px;
+	margin-left:2px;
+	color: #939393;
+}
+
+div.jsxc_bar:hover {
+	color: #FAFAFA;
 }
 /*.jsxc_online .jsxc_window{
     border-left:4px solid #00BFFF;
@@ -307,210 +383,236 @@ div.jsxc_bar:hover{
 .jsxc_offline .jsxc_window{
     border-left:4px solid #A4A4A4;
 }*/
-div.jsxc_window{
-    display:none;
-    width:200px;
-    height:255px;
-    position:absolute;
-    bottom:30px;
-    right:0px;
-    background-color:#A4A4A4;
-    box-shadow: 0px 0px 5px #000;
-    z-index: 80;
-}
-div.jsxc_window .jsxc_tools{
-    position: absolute;
-    top:0px;
-    left:0px;
-    width: 200px;
-    height: 23px;
-    background-color:#282323;
-    box-shadow: 0px 5px 5px -5px #000;
-    z-index:100;
+div.jsxc_window {
+	display: none;
+	width: 200px;
+	height: 255px;
+	position: absolute;
+	bottom: 30px;
+	right: 0px;
+	background-color: #A4A4A4;
+	box-shadow: 0px 0px 5px #000;
+	z-index: 80;
 }
 
-div.jsxc_window .jsxc_textarea{
-
-    width:200px;
-    height:200px;
-    background-color:#A4A4A4;
-    overflow:hidden;
-}
-div.jsxc_window .slimScrollDiv{
-    position: absolute;
-    top:22px;
-    left:0px;
-}
-div.jsxc_chatmessage, input.jsxc_chatmessage{
-    margin:5px;
-    border-radius:5px !important;
-    padding:3px;
-    width: 157px;
-    word-wrap: break-word;
-    background-color:#fff;
-}
-div.jsxc_chatmessage a{
-    color: blue;
-    text-decoration:underline;
-}
-div.jsxc_in, input.jsxc_in{
-    text-align: left;
-    margin-right:30px;
-    border:1px solid blue;
-}
-div.jsxc_out, input.jsxc_out{
-    text-align: right;
-    margin-left:30px;
-    border:1px solid green !important;
-}
-div.jsxc_sys{
-    width:182px;
-    border: 1px solid black;
-}
-div.jsxc_chatmessage img{
-    width: 19px;
-    height: 19px;
-}
-.jsxc_window input.jsxc_textinput{
-    position:absolute;
-    top:226px;
-    left: 30px;
-    width:157px;
-    height:16px;
-    margin:0px;
-    line-height:16px; 
-}
-.jsxc_window .jsxc_close{
-    text-transform: uppercase;
-    color: #939393;
-    font-family:Arial;
-    font-weight:bold;
-    line-height: 17px;
-    cursor: pointer;
-    float:right;
-    padding:3px;
-}
-.jsxc_window .jsxc_close:hover{
-    color: #FAFAFA;
+div.jsxc_window .jsxc_tools {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 200px;
+	height: 23px;
+	background-color: #282323;
+	box-shadow: 0px 5px 5px -5px #000;
+	z-index: 100;
 }
 
-div.jsxc_settings{
-    color: #939393;
-    font-family:Arial;
-    line-height: 17px;
-    cursor: pointer;
-    background-image: url('%appswebroot%/ojsxc/img/gear.png');
-    background-repeat: no-repeat;
-    background-position: center center;
-    width: 17px;
-    height: 17px;
-    display:block;
-    float: left;
-    overflow: visible;
-    padding:3px;
-}
-div.jsxc_settings:hover, div.jsxc_settings.hover{
-    background-image: url('%appswebroot%/ojsxc/img/gear_hover.png');
-}
-div.jsxc_settings ul{
-    list-style: none;
-    padding:0px;
-    margin:0px;
-    position: absolute;
-    top: 23px;
-    left: 0px;
-    box-shadow: 0px 5px 5px -5px #000;
-    z-index:90;
-    overflow: visible;
-    background-color: #282323;
-    display: none;
-}
-div.jsxc_settings li{
-    width: 170px;
-    margin-left: 20px;
-    padding-left:10px;
-    height: 30px;
-    line-height:30px;
-}
-div.jsxc_settings li:first-child{
-    border-top: 1px solid #ccc;
-}
-div.jsxc_settings li:hover:not(.jsxc_disabled){
-    color: #fff;
-    background-color: #3F8FBA;
-}
-div.jsxc_settings li.jsxc_disabled{
-    color: #595959;
-    cursor: default;
-}
-div.jsxc_transfer{
-    padding: 3px;
-    width: 17px;
-    height: 17px;
-    background-image: url('%appswebroot%/ojsxc/img/padlock_open.png');
-    background-repeat: no-repeat;
-    background-position: center center;
-    cursor: pointer;
-    float:left;
-}
-div.jsxc_transfer.jsxc_fin{
-    background-image: url('%appswebroot%/ojsxc/img/padlock_close_grey.png');
-}
-div.jsxc_transfer.jsxc_enc{
-    background-image: url('%appswebroot%/ojsxc/img/padlock_close_orange.png');
-}
-div.jsxc_transfer.jsxc_enc.jsxc_trust{
-    background-image: url('%appswebroot%/ojsxc/img/padlock_close_green.png');
+div.jsxc_window .jsxc_textarea {
+	width: 200px;
+	height: 200px;
+	background-color: #A4A4A4;
+	overflow: hidden;
 }
 
-#jsxc{
-    padding:20px;
+div.jsxc_window .slimScrollDiv {
+	position: absolute;
+	top: 22px;
+	left: 0px;
 }
 
-#jsxc h1{
-    margin: 15px 0px 5px 0px;
-    font-size: 1.5em;
+div.jsxc_chatmessage,input.jsxc_chatmessage {
+	margin: 5px;
+	border-radius: 5px !important;
+	padding: 3px;
+	width: 157px;
+	word-wrap: break-word;
+	background-color: #fff;
 }
 
-#jsxc a{
-    color:blue;
-    text-decoration: underline;
-}
-#jsxc a:hover{
-    text-decoration: none;
+div.jsxc_chatmessage a {
+	color: blue;
+	text-decoration: underline;
 }
 
-#jsxc_alt{
-    text-align:right;
-    margin:15px;
-    opacity:0.5;
-    font-style:italic;
-    padding-top:5px;
+div.jsxc_in,input.jsxc_in {
+	text-align: left;
+	margin-right: 30px;
+	border: 1px solid blue;
 }
-#jsxc_alt:hover{
-    opacity: 0.8;
+
+div.jsxc_out,input.jsxc_out {
+	text-align: right;
+	margin-left: 30px;
+	border: 1px solid green !important;
 }
-.jsxc_success,.jsxc_fail{
+
+div.jsxc_sys {
+	width: 182px;
+	border: 1px solid black;
+}
+
+div.jsxc_chatmessage img {
+	width: 19px;
+	height: 19px;
+}
+
+.jsxc_window input.jsxc_textinput {
+	position: absolute;
+	top: 226px;
+	left: 30px;
+	width: 157px;
+	height: 16px;
+	margin: 0px;
+	line-height: 16px;
+}
+
+.jsxc_window .jsxc_close {
+	text-transform: uppercase;
+	color: #939393;
+	font-family: Arial;
+	font-weight: bold;
+	line-height: 17px;
+	cursor: pointer;
+	float: right;
+	padding: 3px;
+}
+
+.jsxc_window .jsxc_close:hover {
+	color: #FAFAFA;
+}
+
+div.jsxc_settings {
+	color: #939393;
+	font-family: Arial;
+	line-height: 17px;
+	cursor: pointer;
+	background-image: url('%appswebroot%/ojsxc/img/gear.png');
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 17px;
+	height: 17px;
+	display: block;
+	float: left;
+	overflow: visible;
+	padding: 3px;
+}
+
+div.jsxc_settings:hover,div.jsxc_settings.hover {
+	background-image: url('%appswebroot%/ojsxc/img/gear_hover.png');
+}
+
+div.jsxc_settings ul {
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+	position: absolute;
+	top: 23px;
+	left: 0px;
+	box-shadow: 0px 5px 5px -5px #000;
+	z-index: 90;
+	overflow: visible;
+	background-color: #282323;
+	display: none;
+}
+
+div.jsxc_settings li {
+	width: 170px;
+	margin-left: 20px;
+	padding-left: 10px;
+	height: 30px;
+	line-height: 30px;
+}
+
+div.jsxc_settings li:first-child {
+	border-top: 1px solid #ccc;
+}
+
+div.jsxc_settings li:hover:not (.jsxc_disabled ){
+	color: #fff;
+	background-color: #3F8FBA;
+}
+
+div.jsxc_settings li.jsxc_disabled {
+	color: #595959;
+	cursor: default;
+}
+
+div.jsxc_transfer {
+	padding: 3px;
+	width: 17px;
+	height: 17px;
+	background-image: url('%appswebroot%/ojsxc/img/padlock_open.png');
+	background-repeat: no-repeat;
+	background-position: center center;
+	cursor: pointer;
+	float: left;
+}
+
+div.jsxc_transfer.jsxc_fin {
+	background-image: url('%appswebroot%/ojsxc/img/padlock_close_grey.png');
+}
+
+div.jsxc_transfer.jsxc_enc {
+	background-image:
+		url('%appswebroot%/ojsxc/img/padlock_close_orange.png');
+}
+
+div.jsxc_transfer.jsxc_enc.jsxc_trust {
+	background-image: url('%appswebroot%/ojsxc/img/padlock_close_green.png');
+}
+
+#jsxc {
+	padding: 20px;
+}
+
+#jsxc h1 {
+	margin: 15px 0px 5px 0px;
+	font-size: 1.5em;
+}
+
+#jsxc a {
+	color: blue;
+	text-decoration: underline;
+}
+
+#jsxc a:hover {
+	text-decoration: none;
+}
+
+#jsxc_alt {
+	text-align: right;
+	margin: 15px;
+	opacity: 0.5;
+	font-style: italic;
+	padding-top: 5px;
+}
+
+#jsxc_alt:hover {
+	opacity: 0.8;
+}
+
+.jsxc_success,.jsxc_fail {
 	border: 1px solid #fff;
-   border-radius:3px;
-   padding:3px;
-   padding-left:22px;
-/*    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3); */
-   background-position: 3px center;
-   background-repeat: no-repeat;
-   margin:3px;
-   width: -moz-fit-content;
-   width: -webkit-fit-content;
+	border-radius: 3px;
+	padding: 3px;
+	padding-left: 22px;
+	/*    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3); */
+	background-position: 3px center;
+	background-repeat: no-repeat;
+	margin: 3px;
+	width: -moz-fit-content;
+	width: -webkit-fit-content;
 }
-.jsxc_success{
+
+.jsxc_success {
 	background-color: #A1F6BB;
-	background-image:  url('%appswebroot%/ojsxc/img/pass-icon.png');
+	background-image: url('%appswebroot%/ojsxc/img/pass-icon.png');
 	color: #003300;
 	border-color: #003300;
 }
-.jsxc_fail{
-   background-color: #FF9999;
-   background-image: url('%appswebroot%/ojsxc/img/fail-icon.png');
-   color: #800000;
-   border-color: #800000;
+
+.jsxc_fail {
+	background-color: #FF9999;
+	background-image: url('%appswebroot%/ojsxc/img/fail-icon.png');
+	color: #800000;
+	border-color: #800000;
 }

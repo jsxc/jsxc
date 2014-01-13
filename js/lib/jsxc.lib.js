@@ -24,7 +24,7 @@ var jsxc;
    jsxc = {
       /** Version of jsxc */
       version: '0.4.4',
-      
+
       /** True if i'm the chief */
       chief: false,
 
@@ -696,7 +696,33 @@ var jsxc;
             ri.removeClass('jsxc_oneway');
          }
 
-         $(document)
+         if (data.avatar && data.avatar.length > 0) {
+            var avatarSrc = jsxc.storage.getUserItem('avatar_' + data.avatar);
+
+            var setAvatar = function(src) {
+               ue.find('.jsxc_avatar img').remove();
+               var img = $('<img/>').attr('alt', 'Avatar').attr('src', src);
+               ue.find('.jsxc_avatar').prepend(img);
+            };
+
+            if (avatarSrc !== null) {
+               setAvatar(avatarSrc);
+            } else {
+               jsxc.xmpp.conn.vcard.get(function(stanza) {
+                  jsxc.debug('vCard', stanza);
+                  
+                  var vCard = $(stanza).find("vCard");
+                  var img = vCard.find('BINVAL').text();
+                  var type = vCard.find('TYPE').text();
+                  var src = 'data:' + type + ';base64,' + img;
+
+                  jsxc.storage.setUserItem('avatar_' + data.avatar, src);
+                  setAvatar(src);
+               }, Strophe.getBareJidFromJid(data.jid), function(msg) {
+                  jsxc.debug('Error', msg);
+               });
+            }
+         }
       },
 
       /**
@@ -1030,12 +1056,13 @@ var jsxc;
             $('#jsxc_dialog .jsxc_cancel').click(dismiss);
          }
       },
-      
+
       /**
        * Show about dialog.
+       * 
        * @memberOf jsxc.gui
        */
-      showAboutDialog: function(){
+      showAboutDialog: function() {
          jsxc.gui.dialog.open(jsxc.gui.template.get('aboutDialog'));
       }
    };
@@ -1078,8 +1105,8 @@ var jsxc;
          $('#jsxc_roster .jsxc_addBuddy').click(function() {
             jsxc.gui.showContactDialog();
          });
-         
-         $('#jsxc_roster .jsxc_about').click(function(){
+
+         $('#jsxc_roster .jsxc_about').click(function() {
             jsxc.gui.showAboutDialog();
          });
 
@@ -1343,7 +1370,7 @@ var jsxc;
                if (!options.closeButton) {
                   $('#cboxClose').hide();
                }
-               
+
                $.colorbox.resize()
 
                $(document).trigger('complete.dialog.jsxc');
@@ -1801,7 +1828,7 @@ var jsxc;
             my_jid: jsxc.storage.getItem('jid'),
             root: jsxc.options.root
          };
-         
+
          // placeholder depending on cid
          if (cid) {
             var data = jsxc.storage.getUserItem('buddy_' + cid);
@@ -1812,7 +1839,7 @@ var jsxc;
                cid_name: data.name
             });
          }
-     
+
          // placeholder depending on msg
          if (msg) {
             $.extend(ph, {
@@ -1876,6 +1903,7 @@ var jsxc;
         </div>',
       chatWindow: '<li>\
             <div class="jsxc_bar">\
+                <div class="jsxc_avatar">☺</div>\
                 <div class="jsxc_name"/>\
                 <div class="jsxc_cycle"/>\
             </div>\
@@ -1912,6 +1940,7 @@ var jsxc;
             <ul></ul>\
         </div>',
       rosterBuddy: '<li>\
+            <div class="jsxc_avatar">☺</div>\
             <div class="jsxc_name"/>\
             <div class="jsxc_options">\
                 <div class="jsxc_rename" title="%%rename_buddy%%"></div>\
@@ -2366,6 +2395,7 @@ var jsxc;
          var data = jsxc.storage.getUserItem('buddy_' + cid);
          var res = jsxc.storage.getUserItem('res_' + cid) || {};
          var status = null;
+         var xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
 
          jsxc.debug('onPresence', presence);
 
@@ -2421,6 +2451,16 @@ var jsxc;
          data.status = max;
          data.res = maxVal;
          data.jid = jid;
+
+         //Looking for avatar
+         if (xVCard.length > 0) {
+            var photo = xVCard.find('photo');
+
+            if (photo.length > 0 && photo.text() != data.avatar) {
+               jsxc.storage.removeUserItem('avatar_' + data.avatar);
+               data.avatar = photo.text();
+            }
+         }
 
          // Reset jid
          if (jsxc.el_exists('#jsxc_window_' + cid)) {
