@@ -916,7 +916,11 @@ var jsxc;
          $('#jsxc_dialog .creation').click(function() {
             var username = $('#jsxc_username').val();
             var alias = $('#jsxc_alias').val();
-
+            
+            if (!username.match(/@(.*)$/)){
+               username += '@' + Strophe.getDomainFromJid(jsxc.storage.getItem('jid'));
+            }
+            
             // Check if the username is valid
             if (!username || !username.match(/^[\w-_.]+@[\w-_.]+$/g)) {
                // Add notification
@@ -1091,7 +1095,7 @@ var jsxc;
        * 
        * @param {String} cid CSS compatible jid
        */
-      add: function(cid) {
+      add: function(cid) { 
          var data = jsxc.storage.getUserItem('buddy_' + cid);
          var bud = jsxc.gui.buddyTemplate.clone().attr('id', cid).attr('data-type', data.type || 'chat');
 
@@ -1909,7 +1913,7 @@ var jsxc;
         </form>',
       contactDialog: '<h3>%%Add_buddy%%</h3>\
          <p class=".jsxc_explanation">%%Type_in_the_full_username_%%</p>\
-         <p><label for="jsxc_username">%%Username%%:</label>\
+         <p><label for="jsxc_username">* %%Username%%:</label>\
             <input type="text" name="username" id="jsxc_username" required="required" /></p>\
          <p><label for="jsxc_alias">%%Alias%%:</label>\
             <input type="text" name="alias" id="jsxc_alias" /></p>\
@@ -2208,8 +2212,8 @@ var jsxc;
           * jid='' name='' subscription='' /> ... </query> </iq>
           */
 
-         jsxc.debug('Load roster');
-         console.log(iq);
+         jsxc.debug('Load roster', iq);
+
          var buddies = [];
 
          $(iq).find('item').each(function() {
@@ -2219,7 +2223,7 @@ var jsxc;
             var sub = $(this).attr('subscription');
 
             buddies.push(cid);
-            console.log(this);
+
             if (jsxc.storage.getUserItem('buddy_' + cid)) {
                jsxc.storage.updateUserItem('buddy_' + cid, {
                   jid: jid,
@@ -2244,7 +2248,6 @@ var jsxc;
             }
 
             jsxc.gui.roster.add(cid);
-            console.log('add');
          });
 
          jsxc.storage.setUserItem('buddylist', buddies);
@@ -2274,9 +2277,11 @@ var jsxc;
             var sub = $(this).attr('subscription');
             var ask = $(this).attr('ask');
 
+            var bl = jsxc.storage.getUserItem('buddylist');
+            
             if (sub === 'remove') {
                jsxc.gui.roster.purge(cid);
-            } else if (jsxc.el_exists('#' + cid) && sub !== 'none') {
+            } else if (bl.indexOf(cid) >= 0) {
                jsxc.storage.updateUserItem('buddy_' + cid, {
                   jid: jid,
                   name: name,
@@ -2284,19 +2289,18 @@ var jsxc;
                });
                jsxc.gui.update(cid);
                jsxc.gui.roster.reorder(cid);
-            } else if ((!ask && sub !== 'none') || (ask === 'subscribe')) {
-               var bl = jsxc.storage.getUserItem('buddylist');
+            } else {
                bl.push(cid); // (INFO) push returns the new length
                jsxc.storage.setUserItem('buddylist', bl);
                jsxc.storage.setUserItem('buddy_' + cid, {
-                  'jid': jid,
-                  'name': name,
-                  'status': 0,
+                  jid: jid,
+                  name: name,
+                  status: 0,
                   sub: sub,
-                  'msgstate': 0,
-                  'transferReq': -1,
-                  'trust': false,
-                  'fingerprint': null,
+                  msgstate: 0,
+                  transferReq: -1,
+                  trust: false,
+                  fingerprint: null,
                   type: 'chat'
                });
                jsxc.gui.roster.add(cid);
@@ -2338,6 +2342,8 @@ var jsxc;
          var res = jsxc.storage.getUserItem('res_' + cid) || {};
          var status = null;
 
+         jsxc.debug('onPresence', presence);
+         
          if (jid === to) {
             return true;
          }
@@ -2498,7 +2504,7 @@ var jsxc;
        */
       addBuddy: function(username, alias) {
          var cid = jsxc.jidToCid(username);
-
+         
          if (jsxc.chief) {
             // add buddy to roster (trigger onRosterChanged)
             var iq = $iq({
@@ -2511,7 +2517,7 @@ var jsxc;
             });
             jsxc.xmpp.conn.sendIQ(iq);
 
-            // send subscription request to buddy
+            // send subscription request to buddy (trigger onRosterChanged)
             jsxc.xmpp.conn.send($pres({
                to: username,
                type: 'subscribe'
@@ -3028,7 +3034,7 @@ var jsxc;
          if (jsxc.buddyList.hasOwnProperty(cid)) {
             return;
          }
-         console.log(jsxc.options.otr);
+
          jsxc.buddyList[cid] = new OTR(jsxc.options.otr);
 
          if (jsxc.options.otr.SEND_WHITESPACE_TAG) {
@@ -3074,7 +3080,6 @@ var jsxc;
          });
 
          jsxc.buddyList[cid].on('smp', function(type, data, data2) {
-            console.log(type, data, data2);
             switch (type) {
                case 'question': // verification request received
                   jsxc.otr.onSmpQuestion(cid, data);
@@ -3132,8 +3137,6 @@ var jsxc;
          $('#jsxc_facebox select').prop('selectedIndex', (data ? 2 : 3)).change();
          $('#jsxc_facebox > div:eq(0)').hide();
 
-         console.log(data);
-
          if (data) {
             $('#jsxc_facebox > div:eq(2)').find('#jsxc_quest').val(data).prop('disabled', true);
             $('#jsxc_facebox > div:eq(2)').find('.creation').text('Answer');
@@ -3161,7 +3164,7 @@ var jsxc;
        */
       sendSmpReq: function(cid, sec, quest) {
          jsxc.keepBusyAlive();
-         console.log("Sec: ", sec);
+
          jsxc.buddyList[cid].smpSecret(sec, quest);
       },
 
