@@ -916,11 +916,11 @@ var jsxc;
          $('#jsxc_dialog .creation').click(function() {
             var username = $('#jsxc_username').val();
             var alias = $('#jsxc_alias').val();
-            
-            if (!username.match(/@(.*)$/)){
+
+            if (!username.match(/@(.*)$/)) {
                username += '@' + Strophe.getDomainFromJid(jsxc.storage.getItem('jid'));
             }
-            
+
             // Check if the username is valid
             if (!username || !username.match(/^[\w-_.]+@[\w-_.]+$/g)) {
                // Add notification
@@ -1044,12 +1044,12 @@ var jsxc;
        */
       init: function() {
          $(jsxc.options.rosterAppend + ':first').append($(jsxc.gui.template.get('roster')));
-         
-         if(jsxc.options.get('hideOffline')){
+
+         if (jsxc.options.get('hideOffline')) {
             $('#jsxc_menu .jsxc_hideOffline').text(jsxc.translate('%%Show offline%%'));
             $('#jsxc_buddylist').addClass('jsxc_hideOffline');
          }
-         
+
          $('#jsxc_menu .jsxc_hideOffline').click(function() {
             var hideOffline = !jsxc.options.get('hideOffline');
 
@@ -1095,7 +1095,7 @@ var jsxc;
        * 
        * @param {String} cid CSS compatible jid
        */
-      add: function(cid) { 
+      add: function(cid) {
          var data = jsxc.storage.getUserItem('buddy_' + cid);
          var bud = jsxc.gui.buddyTemplate.clone().attr('id', cid).attr('data-type', data.type || 'chat');
 
@@ -1784,7 +1784,7 @@ var jsxc;
             my_jid: jsxc.storage.getItem('jid'),
             root: jsxc.options.root
          };
-
+         
          // placeholder depending on cid
          if (cid) {
             var data = jsxc.storage.getUserItem('buddy_' + cid);
@@ -1795,7 +1795,7 @@ var jsxc;
                cid_name: data.name
             });
          }
-
+     
          // placeholder depending on msg
          if (msg) {
             $.extend(ph, {
@@ -1806,11 +1806,11 @@ var jsxc;
          var ret = jsxc.gui.template[name];
 
          if (typeof (ret) === 'string') {
+            ret = jsxc.translate(ret);
+
             ret = ret.replace(/\{\{([a-zA-Z0-9_\-]+)\}\}/g, function(s, key) {
                return ph[key] || s;
             });
-
-            ret = jsxc.translate(ret);
 
             return ret;
          }
@@ -2278,7 +2278,7 @@ var jsxc;
             var ask = $(this).attr('ask');
 
             var bl = jsxc.storage.getUserItem('buddylist');
-            
+
             if (sub === 'remove') {
                jsxc.gui.roster.purge(cid);
             } else if (bl.indexOf(cid) >= 0) {
@@ -2343,7 +2343,7 @@ var jsxc;
          var status = null;
 
          jsxc.debug('onPresence', presence);
-         
+
          if (jid === to) {
             return true;
          }
@@ -2504,7 +2504,7 @@ var jsxc;
        */
       addBuddy: function(username, alias) {
          var cid = jsxc.jidToCid(username);
-         
+
          if (jsxc.chief) {
             // add buddy to roster (trigger onRosterChanged)
             var iq = $iq({
@@ -3622,7 +3622,7 @@ var jsxc;
          to_authenticate_to_your_buddy: 'Um dich gegenüber deinem Freund zu verifizieren ',
          enter_the_answer_and_click_answer: 'gib die Antwort ein und klick auf Antworten.',
          enter_the_secret: 'gib das Geheimnis ein.',
-         now_we_will_create_your_private_key_: 'Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in anspruch nehmen.',
+         now_we_will_create_your_private_key_: 'Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.',
          Authenticating_a_buddy_helps_: 'Einen Freund zu authentifizieren hilft sicher zustellen, dass die Person mit der du sprichst auch die ist die sie sagt.',
          How_do_you_want_to_authenticate_your_buddy: 'Wie willst du deinen Freund authentifizieren?',
          Select_method: 'Wähle...',
