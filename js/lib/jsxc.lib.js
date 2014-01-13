@@ -102,6 +102,16 @@ var jsxc;
             $.extend(jsxc.options, options);
          }
 
+         jsxc.options.get = function(key) {
+            var local = jsxc.storage.getUserItem('options') || {};
+
+            return local[key] || options[key];
+         };
+
+         jsxc.options.set = function(key, value) {
+            jsxc.storage.updateUserItem('options', key, value);
+         };
+
          // Shortcut
          jsxc.debug = jsxc.options.debug;
 
@@ -587,7 +597,10 @@ var jsxc;
        */
       displayRosterMinimized: function() {
          return false;
-      }
+      },
+
+      /** Set to true if you want to hide offline buddies. */
+      hideOffline: false
    };
 
    /**
@@ -679,6 +692,8 @@ var jsxc;
          } else {
             ri.removeClass('jsxc_oneway');
          }
+
+         $(document)
       },
 
       /**
@@ -1025,6 +1040,25 @@ var jsxc;
        */
       init: function() {
          $(jsxc.options.rosterAppend + ':first').append($(jsxc.gui.template.get('roster')));
+         
+         if(jsxc.options.get('hideOffline')){
+            $('#jsxc_menu .jsxc_hideOffline').text(jsxc.translate('%%Show offline%%'));
+            $('#jsxc_buddylist').addClass('jsxc_hideOffline');
+         }
+         
+         $('#jsxc_menu .jsxc_hideOffline').click(function() {
+            var hideOffline = !jsxc.options.get('hideOffline');
+
+            if (hideOffline) {
+               $('#jsxc_buddylist').addClass('jsxc_hideOffline');
+            } else {
+               $('#jsxc_buddylist').removeClass('jsxc_hideOffline');
+            }
+
+            $(this).text(hideOffline ? jsxc.translate('%%Show offline%%') : jsxc.translate('%%Hide offline%%'));
+
+            jsxc.options.set('hideOffline', hideOffline);
+         });
 
          $('#jsxc_roster .jsxc_addBuddy').click(function() {
             jsxc.gui.showContactDialog();
@@ -1847,6 +1881,7 @@ var jsxc;
             %%Menu%%\
             <ul>\
                 <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
+                <li class="jsxc_hideOffline">%%Hide offline%%</li>\
             </ul>\
             </div>\
             <div id="jsxc_toggleRoster"></div>\
@@ -2184,7 +2219,7 @@ var jsxc;
             var sub = $(this).attr('subscription');
 
             buddies.push(cid);
-console.log(this);
+            console.log(this);
             if (jsxc.storage.getUserItem('buddy_' + cid)) {
                jsxc.storage.updateUserItem('buddy_' + cid, {
                   jid: jid,
@@ -2208,7 +2243,8 @@ console.log(this);
                });
             }
 
-            jsxc.gui.roster.add(cid); console.log('add');
+            jsxc.gui.roster.add(cid);
+            console.log('add');
          });
 
          jsxc.storage.setUserItem('buddylist', buddies);
@@ -2640,7 +2676,7 @@ console.log(this);
        */
       updateItem: function(key, variable, value, uk) {
 
-         var data = jsxc.storage.getItem(key, uk);
+         var data = jsxc.storage.getItem(key, uk) || {};
 
          if (typeof (variable) === 'object') {
 

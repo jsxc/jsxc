@@ -147,6 +147,9 @@ ul#jsxc_buddylist li .jsxc_name{
     height:30px;
     cursor: pointer;
 }
+ul#jsxc_buddylist.jsxc_hideOffline .jsxc_offline{
+	display:none;
+}
 div#jsxc_roster p{
     color: #939393;
 }
