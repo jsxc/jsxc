@@ -54,8 +54,8 @@ module.exports = function(grunt) {
             src: ['build/jsxc.lib.js'],
             overwrite: true,           
             replacements: [{ 
-              from: '<%= app.version %>',
-              to: '<%= app.version %>'
+              from: '< $ app.version $ >',
+              to: "<%= app.version %>"
             }]
           }
         }

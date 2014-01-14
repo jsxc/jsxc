@@ -10,7 +10,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '0.5.0',
+      version: '< $ app.version $ >',
 
       /** True if i'm the chief */
       chief: false,
