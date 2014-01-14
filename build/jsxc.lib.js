@@ -4,25 +4,12 @@
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
  * 
- * Please see https://github.com/sualko/jsxc
+ * Please see http://jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
  * @version 0.5.0
  */
 
-
-/**
- * Copyright (c) 2013 Klaus Herberth <klaus@jsxc.org> <br>
- * Released under the MIT license
- * 
- * Please see: https://github.com/sualko/ojsxc/
- * 
- * @file Mainscript of the javascript xmpp client
- * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.5.0
- * @requires [1] {@link https://github.com/sualko/strophejs/|Strophe.js}
- * @requires [2] {@link https://github.com/arlolra/otr/|OTR}
- */
 
 var jsxc;
 
@@ -3367,10 +3354,11 @@ var jsxc;
          }
 
          if (jsxc.storage.getUserItem('key') === null) {
+            var msg = jsxc.l.now_we_will_create_your_private_key_; 
+            
             if (Worker) {
                // create DSA key in background
-
-               var msg = jsxc.l.now_we_will_create_your_private_key_;            
+           
                var waitDiv = $('<div>').addClass('jsxc_wait').html(jsxc.gui.template.get('waitAlert', null, msg));
                $('#jsxc_roster').append(waitDiv);
                
@@ -3395,7 +3383,7 @@ var jsxc;
 
             } else {
                // fallback
-               var msg = jsxc.l.now_we_will_create_your_private_key_;
+
                jsxc.gui.dialog.open(jsxc.gui.template.get('waitAlert', null, msg), {
                   noClose: true
                });

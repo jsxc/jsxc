@@ -3341,10 +3341,11 @@ var jsxc;
          }
 
          if (jsxc.storage.getUserItem('key') === null) {
+            var msg = jsxc.l.now_we_will_create_your_private_key_; 
+            
             if (Worker) {
                // create DSA key in background
-
-               var msg = jsxc.l.now_we_will_create_your_private_key_;            
+           
                var waitDiv = $('<div>').addClass('jsxc_wait').html(jsxc.gui.template.get('waitAlert', null, msg));
                $('#jsxc_roster').append(waitDiv);
                
@@ -3369,7 +3370,7 @@ var jsxc;
 
             } else {
                // fallback
-               var msg = jsxc.l.now_we_will_create_your_private_key_;
+
                jsxc.gui.dialog.open(jsxc.gui.template.get('waitAlert', null, msg), {
                   noClose: true
                });

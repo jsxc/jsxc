@@ -32,7 +32,7 @@ module.exports = function(grunt) {
                expand: true,
                src: [ 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 
                       'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 
-                      'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', '*.*.js', 'LICENSE' ],
+                      'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'jsxc.lib.js', 'jsxc.lib.webrtc.js', 'LICENSE' ],
                dest: 'build/'
             } ]
          }
@@ -45,7 +45,7 @@ module.exports = function(grunt) {
              banner: '<%= meta.banner %>'
            },
            files: {
-             src: [ 'build/*.lib.js' ]
+             src: [ 'build/*.js' ]
            }
          }
        },
