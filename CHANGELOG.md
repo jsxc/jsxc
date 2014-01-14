@@ -1,3 +1,16 @@
+v0.5.0 / 2014-01-13
+===
+- add hide offline buddy function
+- add about dialog
+- add vCard avatars
+- fix double entry
+- fix text replacement
+- fix dialog size
+- fix translation
+- fix display of long names
+- fix bosh test
+- fix rename bug
+
 v0.4.4 / 2013-12-20
 ===
 - fix dialog height

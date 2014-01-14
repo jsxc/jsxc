@@ -6,7 +6,7 @@
  * 
  * @file Mainscript of the javascript xmpp client
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.4.4
+ * @version 0.5.0
  * @requires [1] {@link https://github.com/sualko/strophejs/|Strophe.js}
  * @requires [2] {@link https://github.com/arlolra/otr/|OTR}
  */
@@ -23,7 +23,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '0.4.4',
+      version: '0.5.0',
 
       /** True if i'm the chief */
       chief: false,
@@ -1367,11 +1367,11 @@ var jsxc;
                $('#jsxc_dialog .jsxc_close').click(jsxc.gui.dialog.close);
 
                // workaround for old colorbox version (used by firstrunwizard)
-               if (!options.closeButton) {
+               if (options.closeButton === false) {
                   $('#cboxClose').hide();
                }
 
-               $.colorbox.resize()
+               $.colorbox.resize();
 
                $(document).trigger('complete.dialog.jsxc');
             },
@@ -2327,7 +2327,7 @@ var jsxc;
             var name = $(this).attr('name') || jid;
             var cid = jsxc.jidToCid(jid);
             var sub = $(this).attr('subscription');
-            var ask = $(this).attr('ask');
+            // var ask = $(this).attr('ask');
 
             var bl = jsxc.storage.getUserItem('buddylist');
 
@@ -2454,7 +2454,7 @@ var jsxc;
          if (xVCard.length > 0) {
             var photo = xVCard.find('photo');
 
-            if (photo.length > 0 && photo.text() != data.avatar) {
+            if (photo.length > 0 && photo.text() !== data.avatar) {
                jsxc.storage.removeUserItem('avatar_' + data.avatar);
                data.avatar = photo.text();
             }
@@ -3142,7 +3142,7 @@ var jsxc;
             jsxc.gui.update(cid);
          });
 
-         jsxc.buddyList[cid].on('smp', function(type, data, data2) {
+         jsxc.buddyList[cid].on('smp', function(type, data) {
             switch (type) {
                case 'question': // verification request received
                   jsxc.otr.onSmpQuestion(cid, data);
@@ -3354,15 +3354,13 @@ var jsxc;
          }
 
          if (jsxc.storage.getUserItem('key') === null) {
-
-            var msg = jsxc.l.now_we_will_create_your_private_key_;
-            jsxc.gui.dialog.open(jsxc.gui.template.get('waitAlert', null, msg), {
-               noClose: true
-            });
-
             if (Worker) {
                // create DSA key in background
 
+               var msg = jsxc.l.now_we_will_create_your_private_key_;            
+               var waitDiv = $('<div>').addClass('jsxc_wait').html(jsxc.gui.template.get('waitAlert', null, msg));
+               $('#jsxc_roster').append(waitDiv);
+               
                var worker = new Worker(jsxc.options.root + '/js/lib/dsa-ww.js');
 
                worker.onmessage = function(e) {
@@ -3384,6 +3382,11 @@ var jsxc;
 
             } else {
                // fallback
+               var msg = jsxc.l.now_we_will_create_your_private_key_;
+               jsxc.gui.dialog.open(jsxc.gui.template.get('waitAlert', null, msg), {
+                  noClose: true
+               });
+               
                jsxc.debug('DSA key creation started.');
 
                // wait until the wait alert is opened
@@ -3415,10 +3418,11 @@ var jsxc;
        * 
        * @param {DSA} dsa DSA object
        */
-      DSAready: function(dsa) {
+      DSAready: function(dsa) { 
          // close wait alert
          jsxc.gui.dialog.close();
-
+         $('#jsxc_roster .jsxc_wait').remove();
+         
          jsxc.storage.setUserItem('key', dsa.packPrivate());
          jsxc.options.otr.priv = dsa;
 

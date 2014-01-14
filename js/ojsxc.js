@@ -3,7 +3,7 @@
  * Released under the MIT license
  * 
  * @author Klaus Herberth
- * @version 0.4.4
+ * @version 0.5.0
  */
 
 /* global jsxc, oc_appswebroots, OC, $ */
