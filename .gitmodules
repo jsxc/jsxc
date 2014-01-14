@@ -1,0 +1,6 @@
+[submodule "lib/strophe.jingle"]
+	path = lib/strophe.jingle
+	url = https://github.com/ESTOS/strophe.jingle.git
+[submodule "lib/otr"]
+	path = lib/otr
+	url = https://github.com/arlolra/otr.git
