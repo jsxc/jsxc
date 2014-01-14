@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2013 Klaus Herberth <klaus@jsxc.org> <br>
+ * Released under the MIT license
+ * 
+ * @file MUC Plugin for the javascript xmpp client
+ * @author Klaus Herberth
+ * @version 0.3
+ */
+
 /* global jsxc, Strophe, jQuery */
 
 jsxc.l10n.en.Join_chat = 'Join chat';
