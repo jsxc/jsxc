@@ -3,22 +3,12 @@ module.exports = function(grunt) {
 
    // Project configuration.
    grunt.initConfig({
-      app: grunt.file.readJSON( 'app.json' ),
+      app: grunt.file.readJSON('app.json'),
       meta: {
-         banner:  '/**\n' +
-                  ' * <%= app.name %> v<%= app.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
-                  ' * \n' +
-                  ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= app.author %> <br>\n' +
-                  ' * Released under the <%= app.license %> license\n' +
-                  ' * \n' +
-                  ' * Please see <%= app.homepage %>\n' +
-                  ' * \n' +
-                  ' * @author <%= app.author %>\n' +
-                  ' * @version <%= app.version %>\n' + 
-                  ' */\n\n'
+         banner: grunt.file.read('banner.js')
       },
       jshint: {
-         options: { 
+         options: {
             jshintrc: '.jshintrc'
          },
          gruntfile: {
@@ -30,9 +20,7 @@ module.exports = function(grunt) {
          main: {
             files: [ {
                expand: true,
-               src: [ 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 
-                      'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 
-                      'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'jsxc.lib.js', 'jsxc.lib.webrtc.js', 'LICENSE' ],
+               src: [ 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'jsxc.lib.js', 'jsxc.lib.webrtc.js', 'LICENSE' ],
                dest: 'build/'
             } ]
          }
@@ -40,25 +28,25 @@ module.exports = function(grunt) {
       clean: [ 'build/' ],
       usebanner: {
          dist: {
-           options: {
-             position: 'top',
-             banner: '<%= meta.banner %>'
-           },
-           files: {
-             src: [ 'build/*.js' ]
-           }
+            options: {
+               position: 'top',
+               banner: '<%= meta.banner %>'
+            },
+            files: {
+               src: [ 'build/*.js' ]
+            }
          }
-       },
-       replace: {
-          version: {
-            src: ['build/jsxc.lib.js'],
-            overwrite: true,           
-            replacements: [{ 
-              from: '< $ app.version $ >',
-              to: "<%= app.version %>"
-            }]
-          }
-        }
+      },
+      replace: {
+         version: {
+            src: [ 'build/jsxc.lib.js' ],
+            overwrite: true,
+            replacements: [ {
+               from: '< $ app.version $ >',
+               to: "<%= app.version %>"
+            } ]
+         }
+      }
    });
 
    // These plugins provide necessary tasks.

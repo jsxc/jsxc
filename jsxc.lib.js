@@ -3349,23 +3349,30 @@ var jsxc;
                var waitDiv = $('<div>').addClass('jsxc_wait').html(jsxc.gui.template.get('waitAlert', null, msg));
                $('#jsxc_roster').append(waitDiv);
                
-               var worker = new Worker(jsxc.options.root + '/js/lib/dsa-ww.js');
+               var worker = new Worker(jsxc.options.root + '/js/jsxc/lib/otr/build/dsa-webworker.js');
 
-               worker.onmessage = function(e) {
+               worker.onmessage = function(e) { console.log(e);
                   var type = e.data.type;
-                  var data = e.data.data;
+                  var val = e.data.val;
 
-                  if (type === 'debug') {
-                     jsxc.debug(data);
+                  if (type === 'val') {
+                     jsxc.debug(val);
                   } else if (type === 'data') {
-                     jsxc.otr.DSAready(DSA.parsePrivate(data.key));
+                     jsxc.otr.DSAready(DSA.parsePrivate(val));
                   }
                };
 
                // start worker
                worker.postMessage({
-                  imports: [ jsxc.options.root + '/js/otr/vendor/salsa20.js', jsxc.options.root + '/js/otr/vendor/bigint.js', jsxc.options.root + '/js/otr/vendor/crypto.js', jsxc.options.root + '/js/otr/vendor/eventemitter.js', jsxc.options.root + '/js/otr/lib/const.js', jsxc.options.root + '/js/otr/lib/helpers.js', jsxc.options.root + '/js/otr/lib/dsa.js' ],
-                  seed: BigInt.getSeed()
+                  imports: [ jsxc.options.root + '/js/jsxc/lib/otr/vendor/salsa20.js', 
+                             jsxc.options.root + '/js/jsxc/lib/otr/vendor/bigint.js', 
+                             jsxc.options.root + '/js/jsxc/lib/otr/vendor/crypto.js', 
+                             jsxc.options.root + '/js/jsxc/lib/otr/vendor/eventemitter.js', 
+                             jsxc.options.root + '/js/jsxc/lib/otr/lib/const.js', 
+                             jsxc.options.root + '/js/jsxc/lib/otr/lib/helpers.js', 
+                             jsxc.options.root + '/js/jsxc/lib/otr/lib/dsa.js' ],
+                  seed: BigInt.getSeed(),
+                  debug: true
                });
 
             } else {
