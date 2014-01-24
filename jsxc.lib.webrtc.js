@@ -782,8 +782,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          };
 
          jsxc.switchEvents({
-            'connected': init,
-            'attached': init
+            'connected.jsxc': init,
+            'attached.jsxc': init
          });
       }
    });
