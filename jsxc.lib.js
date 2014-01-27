@@ -156,12 +156,26 @@ var jsxc;
                return;
             }
 
+            if (typeof jsxc.options.formFound === 'function') {
+               jsxc.options.formFound.call();
+            }
+
             // create jquery object
-            jsxc.options.loginForm.form = $(jsxc.options.loginForm.form);
-            $('#jsxc_roster .slimScrollDiv').remove();
+            var form = jsxc.options.loginForm.form = $(jsxc.options.loginForm.form);
+            var events = form.data('events') || {};
+            var submits = [];
+
+            // save attached submit events and remove them. Will be reattached
+            // in jsxc.submitLoginForm
+            $.each(events.submit, function(index, val) {
+               submits.push(val.handler);
+            });
+            
+            form.data('submits', submits);
+            form.off('submit');
 
             // Add jsxc login action to form
-            jsxc.options.loginForm.form.submit(function() {
+            form.submit(function() {
 
                jsxc.gui.showWaitAlert(jsxc.l.please_wait_until_we_logged_you_in);
 
@@ -429,6 +443,12 @@ var jsxc;
       submitLoginForm: function() {
          var form = jsxc.options.loginForm.form.off('submit');
 
+         //Attach original events
+         var submits = form.data('submits') || [];
+         $.each(submits, function(index, val) {
+            form.submit(val);
+         });        
+         
          if (form.find('#submit')) {
             form.find('#submit').click();
          } else {
@@ -631,7 +651,7 @@ var jsxc;
        */
       update: function(cid) {
          var data = jsxc.storage.getUserItem('buddy_' + cid);
-     
+
          if (!data) {
             jsxc.debug('No data for ' + cid);
             return;
@@ -639,7 +659,7 @@ var jsxc;
 
          var ri = $('#' + cid); // roster item from user
          var we = jsxc.gui.getWindow(cid); // window element from user
-         var ue = $('#' + cid + ', #jsxc_window_' + cid); // both
+         var ue = $('#' + cid + ', #jsxc_window_' + cid + ', .jsxc_buddy_' + cid); // both
 
          // Attach data to corresponding roster item
          ri.data(data);
@@ -1124,7 +1144,7 @@ var jsxc;
        * 
        * @param {String} cid CSS compatible jid
        */
-      add: function(cid) {
+      add: function(cid) { 
          var data = jsxc.storage.getUserItem('buddy_' + cid);
          var bud = jsxc.gui.buddyTemplate.clone().attr('id', cid).attr('data-type', data.type || 'chat');
 
@@ -1235,8 +1255,10 @@ var jsxc;
        */
       rename: function(cid) {
          var name = $('#' + cid + ' .jsxc_name');
+         var options = $('#' + cid + ' .jsxc_options');
          var input = $('<input type="text" name="name"/>');
 
+         options.hide();
          name = name.replaceWith(input);
 
          input.val(name.text());
@@ -1244,7 +1266,8 @@ var jsxc;
             if (ev.which !== 13) {
                return;
             }
-            
+
+            options.show();
             input.replaceWith(name);
             jsxc.gui.roster._rename(cid, $(this).val());
 
@@ -1257,6 +1280,7 @@ var jsxc;
          });
 
          $('html').one('click', function() {
+            options.show();
             input.replaceWith(name);
             jsxc.gui.roster._rename(cid, input.val());
          });
@@ -1541,7 +1565,7 @@ var jsxc;
        * @param {String} cid CSS compatible jid
        */
       close: function(cid) {
-
+         
          if (!jsxc.el_exists('#jsxc_window_' + cid)) {
             jsxc.debug('[Warning] Want to close a window, that is not open.');
             return;
@@ -1570,7 +1594,6 @@ var jsxc;
        * @param {String} cid CSS compatible jid
        */
       toggle: function(cid) {
-
          if (jsxc.gui.getWindow(cid).find('.jsxc_window').is(':hidden')) {
             jsxc.gui.window.show(cid);
          } else {
@@ -1618,7 +1641,7 @@ var jsxc;
        * 
        * @param {String} cid
        */
-      hide: function(cid) {
+      hide: function(cid) { 
          jsxc.storage.updateUserItem('window_' + cid, 'minimize', true);
 
          jsxc.gui.window._hide(cid);
@@ -1629,9 +1652,9 @@ var jsxc;
        * 
        * @param {String} cid
        */
-      _hide: function(cid) {
+      _hide: function(cid) { 
          $('#jsxc_window_' + cid + ' .jsxc_window').slideUp();
-         jsxc.gui.getWindow(cid).trigger('hide.window.jsxc');
+         jsxc.gui.getWindow(cid).trigger('hidden.window.jsxc');
       },
 
       /**
@@ -1928,11 +1951,11 @@ var jsxc;
         </div>',
       rosterBuddy: '<li>\
             <div class="jsxc_avatar">☺</div>\
-            <div class="jsxc_name"/>\
             <div class="jsxc_options">\
-                <div class="jsxc_rename" title="%%rename_buddy%%"></div>\
-                <div class="jsxc_delete" title="%%delete_buddy%%">X</div>\
+                <div class="jsxc_rename" title="%%rename_buddy%%">✎</div>\
+                <div class="jsxc_delete" title="%%delete_buddy%%">✘</div>\
             </div>\
+            <div class="jsxc_name"/>\
         </li>',
       loginBox: '<h3>%%Login%%</h3>\
         <form method="get">\
@@ -1969,13 +1992,13 @@ var jsxc;
       authFailDialog: '<h3>%%Login_failed%%</h3>\
         <p>%%Sorry_we_cant_authentikate_%%</p>\
         <p class="jsxc_right">\
-            <button class="button jsxc_cancel">%%Continue%%</button>\
-            <button class="button creation">%%Retry%%</button>\
+            <a class="button jsxc_cancel">%%Continue%%</a>\
+            <a class="button creation">%%Retry%%</a>\
         </p>',
       confirmDialog: '<p>{{msg}}</p>\
         <p class="jsxc_right">\
-            <button class="button jsxc_cancel jsxc_close">%%Dismiss%%</button>\
-            <button class="button creation">%%Confirm%%</button>\
+            <a class="button jsxc_cancel jsxc_close">%%Dismiss%%</a>\
+            <a class="button creation">%%Confirm%%</a>\
         </p>',
       pleaseAccept: '<p>%%Please_accept_%%</p>',
       aboutDialog: '<h3>JavaScript XMPP Chat</h3>\
@@ -2016,12 +2039,12 @@ var jsxc;
          // Create new connection (no login)
          jsxc.xmpp.conn = new Strophe.Connection(url);
 
-//         jsxc.xmpp.conn.xmlInput = function(data) {
-//            jsxc.debug('<', data);
-//         };
-//         jsxc.xmpp.conn.xmlOutput = function(data) {
-//            jsxc.debug('>', data);
-//         };
+         // jsxc.xmpp.conn.xmlInput = function(data) {
+         // jsxc.debug('<', data);
+         // };
+         // jsxc.xmpp.conn.xmlOutput = function(data) {
+         // jsxc.debug('>', data);
+         // };
          //         
          // Strophe.log = function (level, msg) {
          // jsxc.debug(level + " " + msg);
@@ -2036,7 +2059,7 @@ var jsxc;
                   jsxc.cid = jsxc.jidToCid(jsxc.xmpp.conn.jid.toLowerCase());
                   $(document).trigger('connected.jsxc');
                   break;
-               case Strophe.Status.ATTACHED:
+               case Strophe.Status.ATTACHED: 
                   $(document).trigger('attached.jsxc');
                   break;
                case Strophe.Status.DISCONNECTED:
@@ -2156,6 +2179,8 @@ var jsxc;
             }).c('query', {
                xmlns: 'jabber:iq:roster'
             });
+            
+            jsxc.debug('Request roster.')
             jsxc.xmpp.conn.sendIQ(iq, jsxc.xmpp.onRoster);
          } else {
             jsxc.xmpp.sendPres();
@@ -2479,6 +2504,8 @@ var jsxc;
           * <body>...</body> <active
           * xmlns='http://jabber.org/protocol/chatstates'/> </message>
           */
+         
+         jsxc.debug('Incoming message', message);
 
          var type = $(message).attr('type');
          var from = $(message).attr('from');
@@ -3341,17 +3368,17 @@ var jsxc;
          }
 
          if (jsxc.storage.getUserItem('key') === null) {
-            var msg = jsxc.l.now_we_will_create_your_private_key_; 
-            
+            var msg = jsxc.l.now_we_will_create_your_private_key_;
+
             if (Worker) {
                // create DSA key in background
-           
+
                var waitDiv = $('<div>').addClass('jsxc_wait').html(jsxc.gui.template.get('waitAlert', null, msg));
                $('#jsxc_roster').append(waitDiv);
-               
+
                var worker = new Worker(jsxc.options.root + '/js/jsxc/lib/otr/build/dsa-webworker.js');
 
-               worker.onmessage = function(e) { console.log(e);
+               worker.onmessage = function(e) {
                   var type = e.data.type;
                   var val = e.data.val;
 
@@ -3364,13 +3391,7 @@ var jsxc;
 
                // start worker
                worker.postMessage({
-                  imports: [ jsxc.options.root + '/js/jsxc/lib/otr/vendor/salsa20.js', 
-                             jsxc.options.root + '/js/jsxc/lib/otr/vendor/bigint.js', 
-                             jsxc.options.root + '/js/jsxc/lib/otr/vendor/crypto.js', 
-                             jsxc.options.root + '/js/jsxc/lib/otr/vendor/eventemitter.js', 
-                             jsxc.options.root + '/js/jsxc/lib/otr/lib/const.js', 
-                             jsxc.options.root + '/js/jsxc/lib/otr/lib/helpers.js', 
-                             jsxc.options.root + '/js/jsxc/lib/otr/lib/dsa.js' ],
+                  imports: [ jsxc.options.root + '/js/jsxc/lib/otr/vendor/salsa20.js', jsxc.options.root + '/js/jsxc/lib/otr/vendor/bigint.js', jsxc.options.root + '/js/jsxc/lib/otr/vendor/crypto.js', jsxc.options.root + '/js/jsxc/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/js/jsxc/lib/otr/lib/const.js', jsxc.options.root + '/js/jsxc/lib/otr/lib/helpers.js', jsxc.options.root + '/js/jsxc/lib/otr/lib/dsa.js' ],
                   seed: BigInt.getSeed(),
                   debug: true
                });
@@ -3381,7 +3402,7 @@ var jsxc;
                jsxc.gui.dialog.open(jsxc.gui.template.get('waitAlert', null, msg), {
                   noClose: true
                });
-               
+
                jsxc.debug('DSA key creation started.');
 
                // wait until the wait alert is opened
@@ -3413,11 +3434,11 @@ var jsxc;
        * 
        * @param {DSA} dsa DSA object
        */
-      DSAready: function(dsa) { 
+      DSAready: function(dsa) {
          // close wait alert
          jsxc.gui.dialog.close();
          $('#jsxc_roster .jsxc_wait').remove();
-         
+
          jsxc.storage.setUserItem('key', dsa.packPrivate());
          jsxc.options.otr.priv = dsa;
 

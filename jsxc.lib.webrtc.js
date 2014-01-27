@@ -113,7 +113,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             $(document).on('caps.strophe', $.proxy(this.onCaps, this));
          }
 
-         this.getTurnCrendentials();
+         jsxc.webrtc.getTurnCrendentials();
       },
 
       /**
@@ -124,7 +124,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       getTurnCrendentials: function() {
 
          if (!jsxc.options.turnCredentialsPath) {
-            jsxc.warn('No path for TURN credentials defined!');
+            jsxc.debug('No path for TURN credentials defined!');
             return;
          }
 
