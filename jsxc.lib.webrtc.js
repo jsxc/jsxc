@@ -265,7 +265,6 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          clearTimeout(status.data('timeout'));
 
          if (duration === 0) {
-            console.log('return');
             return;
          }
 
@@ -409,7 +408,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        * @param reason Reason for termination
        * @param [text] Optional explanation
        */
-      onCallTerminated: function(event, sid, reason, text) {
+      onCallTerminated: function(event, sid, reason, text) { 
          this.setStatus('call terminated ' + sid + (reason ? (': ' + reason + ' ' + text) : ''));
 
          if (this.localStream) {
@@ -422,6 +421,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          this.conn.jingle.localStream = null;
          this.localStream = null;
          this.remoteStream = null;
+         
+         $('#jsxc_windowList > ul').prepend($('#jsxc_dialog .jsxc_chatarea > ul > li').detach());
 
          $(document).off('cleanup.dialog.jsxc');
          $(document).off('error.jingle');
@@ -716,9 +717,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var win = jsxc.gui.window.open(jsxc.jidToCid(jid));
          var winId = win.attr('id');
          $('#jsxc_dialog .jsxc_chatarea ul').append(win.detach());
-
+         
          $('#jsxc_dialog .jsxc_hangUp').click(function() {
-            $('#jsxc_windowList > ul').prepend($('#' + winId).detach());
             jsxc.webrtc.hangUp();
          });
 
