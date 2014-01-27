@@ -776,15 +776,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          RTCPeerconnection = RTC.peerconnection;
 
          $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
-
-         var init = function() {
-            jsxc.webrtc.init();
-         };
-
-         jsxc.switchEvents({
-            'connected.jsxc': init,
-            'attached.jsxc': init
-         });
+         $(document).on('attached.jsxc', jsxc.webrtc.init);
       }
    });
 }(jQuery));
