@@ -2180,7 +2180,6 @@ var jsxc;
                xmlns: 'jabber:iq:roster'
             });
             
-            jsxc.debug('Request roster.')
             jsxc.xmpp.conn.sendIQ(iq, jsxc.xmpp.onRoster);
          } else {
             jsxc.xmpp.sendPres();

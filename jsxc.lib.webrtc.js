@@ -715,7 +715,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          };
 
          var win = jsxc.gui.window.open(jsxc.jidToCid(jid));
-         var winId = win.attr('id');
+         
          $('#jsxc_dialog .jsxc_chatarea ul').append(win.detach());
          
          $('#jsxc_dialog .jsxc_hangUp').click(function() {

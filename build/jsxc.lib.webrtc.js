@@ -1,5 +1,5 @@
 /**
- * jsxc v0.5.0 - 2014-01-20
+ * jsxc v0.5.1 - 2014-01-27
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.5.0
+ * @version 0.5.1
  */
 
 /* jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery */
@@ -88,44 +88,45 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        * @memberOf jsxc.webrtc
        */
       init: function() {
-
+         var self = jsxc.webrtc;
+         
          // shortcut
-         this.conn = jsxc.xmpp.conn;
+         self.conn = jsxc.xmpp.conn;
 
          if (RTC.browser === 'firefox') {
-            this.conn.jingle.media_constraints.mandatory.MozDontOfferDataChannel = true;
+            self.conn.jingle.media_constraints.mandatory.MozDontOfferDataChannel = true;
          }
 
-         if (!this.conn.jingle) {
+         if (!self.conn.jingle) {
             jsxc.error('No jingle plugin found!');
             return;
          }
 
          // jingle configuration
-         this.conn.jingle.PRANSWER = false;
-         this.conn.jingle.AUTOACCEPT = false;
-         this.conn.jingle.ice_config = jsxc.storage.getUserItem('iceConfig');
-         this.conn.jingle.MULTIPARTY = false;
-         this.conn.jingle.pc_constraints = RTC.pc_constraints;
+         self.conn.jingle.PRANSWER = false;
+         self.conn.jingle.AUTOACCEPT = false;
+         self.conn.jingle.ice_config = jsxc.storage.getUserItem('iceConfig');
+         self.conn.jingle.MULTIPARTY = false;
+         self.conn.jingle.pc_constraints = RTC.pc_constraints;
 
-         $(document).on('message.jsxc', $.proxy(this.onMessage, this));
+         $(document).on('message.jsxc', $.proxy(self.onMessage, self));
 
-         $(document).on('mediaready.jingle', $.proxy(this.onMediaReady, this));
-         $(document).on('mediafailure.jingle', $.proxy(this.onMediaFailure, this));
-         $(document).on('callincoming.jingle', $.proxy(this.onCallIncoming, this));
-         $(document).on('callterminated.jingle', $.proxy(this.onCallTerminated, this));
-         $(document).on('ringing.jingle', $.proxy(this.onCallRinging, this));
+         $(document).on('mediaready.jingle', $.proxy(self.onMediaReady, self));
+         $(document).on('mediafailure.jingle', $.proxy(self.onMediaFailure, self));
+         $(document).on('callincoming.jingle', $.proxy(self.onCallIncoming, self));
+         $(document).on('callterminated.jingle', $.proxy(self.onCallTerminated, self));
+         $(document).on('ringing.jingle', $.proxy(self.onCallRinging, self));
 
-         $(document).on('remotestreamadded.jingle', $.proxy(this.onRemoteStreamAdded, this));
-         $(document).on('remotestreamremoved.jingle', $.proxy(this.onRemoteStreamRemoved, this));
-         $(document).on('iceconnectionstatechange.jingle', $.proxy(this.onIceConnectionStateChanged, this));
-         $(document).on('nostuncandidates.jingle', $.proxy(this.noStunCandidates, this));
+         $(document).on('remotestreamadded.jingle', $.proxy(self.onRemoteStreamAdded, self));
+         $(document).on('remotestreamremoved.jingle', $.proxy(self.onRemoteStreamRemoved, self));
+         $(document).on('iceconnectionstatechange.jingle', $.proxy(self.onIceConnectionStateChanged, self));
+         $(document).on('nostuncandidates.jingle', $.proxy(self.noStunCandidates, self));
 
-         if (this.conn.caps) {
-            $(document).on('caps.strophe', $.proxy(this.onCaps, this));
+         if (self.conn.caps) {
+            $(document).on('caps.strophe', $.proxy(self.onCaps, self));
          }
 
-         this.getTurnCrendentials();
+         self.getTurnCrendentials();
       },
 
       /**
@@ -136,7 +137,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       getTurnCrendentials: function() {
 
          if (!jsxc.options.turnCredentialsPath) {
-            jsxc.warn('No path for TURN credentials defined!');
+            jsxc.debug('No path for TURN credentials defined!');
             return;
          }
 
@@ -276,7 +277,6 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          clearTimeout(status.data('timeout'));
 
          if (duration === 0) {
-            console.log('return');
             return;
          }
 
@@ -420,7 +420,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        * @param reason Reason for termination
        * @param [text] Optional explanation
        */
-      onCallTerminated: function(event, sid, reason, text) {
+      onCallTerminated: function(event, sid, reason, text) { 
          this.setStatus('call terminated ' + sid + (reason ? (': ' + reason + ' ' + text) : ''));
 
          if (this.localStream) {
@@ -433,6 +433,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          this.conn.jingle.localStream = null;
          this.localStream = null;
          this.remoteStream = null;
+         
+         $('#jsxc_windowList > ul').prepend($('#jsxc_dialog .jsxc_chatarea > ul > li').detach());
 
          $(document).off('cleanup.dialog.jsxc');
          $(document).off('error.jingle');
@@ -725,11 +727,10 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          };
 
          var win = jsxc.gui.window.open(jsxc.jidToCid(jid));
-         var winId = win.attr('id');
+         
          $('#jsxc_dialog .jsxc_chatarea ul').append(win.detach());
-
+         
          $('#jsxc_dialog .jsxc_hangUp').click(function() {
-            $('#jsxc_windowList > ul').prepend($('#' + winId).detach());
             jsxc.webrtc.hangUp();
          });
 
@@ -788,15 +789,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          RTCPeerconnection = RTC.peerconnection;
 
          $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
-
-         var init = function() {
-            jsxc.webrtc.init();
-         };
-
-         jsxc.switchEvents({
-            'connected': init,
-            'attached': init
-         });
+         $(document).on('attached.jsxc', jsxc.webrtc.init);
       }
    });
 }(jQuery));
