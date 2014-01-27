@@ -162,7 +162,7 @@ var jsxc;
 
             // create jquery object
             var form = jsxc.options.loginForm.form = $(jsxc.options.loginForm.form);
-            var events = form.data('events') || {};
+            var events = form.data('events') || {submit: []};
             var submits = [];
 
             // save attached submit events and remove them. Will be reattached
