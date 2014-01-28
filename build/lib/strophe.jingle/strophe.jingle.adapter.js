@@ -1,6 +1,8 @@
 /* jshint -W117 */
+var setupRTC, getUserMediaWithConstraints, TraceablePeerConnection;
+
 (function($){
-function TraceablePeerConnection(ice_config, constraints) {
+TraceablePeerConnection = function(ice_config, constraints) {
     var self = this;
     var RTCPeerconnection = navigator.mozGetUserMedia ? mozRTCPeerConnection : webkitRTCPeerConnection;
     this.peerconnection = new RTCPeerconnection(ice_config, constraints);
@@ -177,7 +179,7 @@ TraceablePeerConnection.prototype.getStats = function(callback) {
 
 
 // mozilla chrome compat layer -- very similar to adapter.js
-function setupRTC() {
+setupRTC = function (){
     var RTC = null;
     if (navigator.mozGetUserMedia) {
         console.log('This appears to be Firefox');
@@ -230,9 +232,9 @@ function setupRTC() {
         try { console.log('Browser does not appear to be WebRTC-capable'); } catch (e) { }
     }
     return RTC;
-}
+};
 
-function getUserMediaWithConstraints(um, resolution, bandwidth, fps) {
+getUserMediaWithConstraints = function(um, resolution, bandwidth, fps) {
     var constraints = {audio: false, video: false};
 
     if (um.indexOf('video') >= 0) {

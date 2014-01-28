@@ -1,7 +1,9 @@
 /* jshint -W117 */
+var SDP;
+
 (function($){
 // SDP STUFF
-function SDP(sdp) {
+SDP = function(sdp) {
     this.media = sdp.split('\r\nm=');
     for (var i = 1; i < this.media.length; i++) {
         this.media[i] = 'm=' + this.media[i];
