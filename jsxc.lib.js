@@ -69,9 +69,6 @@ var jsxc;
       /** My css id */
       cid: null,
 
-      /** Shortcut for jsxc.options.debug */
-      debug: null,
-
       /** Some constants */
       CONST: {
          NOTIFICATION_DEFAULT: 'default',
@@ -79,6 +76,53 @@ var jsxc;
          NOTIFICATION_DENIED: 'denied',
          STATUS: [ 'offline', 'away', 'online' ]
       },
+      
+      /** 
+       * Write debug message to console and to log. 
+       * 
+       * @memberOf jsxc
+       * @param {String} msg Debug message
+       * @param {Object} data
+       * @param {String} Could be warn|error|null
+       */
+      debug: function(msg, data, level){
+         if(level){
+            msg = '[' + level + '] ' + msg;
+         }
+         
+         if (data) {
+            console.log(msg, data); 
+            jsxc.log = jsxc.log + msg + ': ' + $("<span>").prepend(data).html() + '\n';
+         } else {
+            console.log(msg);
+            jsxc.log = jsxc.log + msg + '\n';
+         }
+      },
+      
+      /**
+       * Write warn message.
+       * 
+       * @memberOf jsxc
+       * @param {String} msg Warn message
+       * @param {Object} data
+       */
+      warn: function(msg, data){
+         jsxc.debug(msg, data, 'WARN');
+      },
+      
+      /**
+       * Write error message.
+       * 
+       * @memberOf jsxc
+       * @param {String} msg Error message
+       * @param {Object} data
+       */
+      error: function(msg, data){
+         jsxc.debug(msg, data, 'ERROR');
+      },
+      
+      /** debug log */
+      log: '',
 
       /**
        * Starts the action
@@ -101,9 +145,6 @@ var jsxc;
          jsxc.options.set = function(key, value) {
             jsxc.storage.updateUserItem('options', key, value);
          };
-
-         // Shortcut
-         jsxc.debug = jsxc.options.debug;
 
          jsxc.storageNotConform = jsxc.storage.getItem('storageNotConform') || 2;
 
@@ -514,7 +555,7 @@ var jsxc;
             var k = key.replace(/ /gi, '_');
 
             if (!jsxc.l[k]) {
-               jsxc.debug('[WARN] No translation for: ' + k);
+               jsxc.warn('No translation for: ' + k);
             }
 
             return jsxc.l[k] || key.replace(/_/gi, ' ');
@@ -660,7 +701,8 @@ var jsxc;
          var ri = $('#' + cid); // roster item from user
          var we = jsxc.gui.getWindow(cid); // window element from user
          var ue = $('#' + cid + ', #jsxc_window_' + cid + ', .jsxc_buddy_' + cid); // both
-
+         var bullet = $('.jsxc_buddy_' + cid);
+         
          // Attach data to corresponding roster item
          ri.data(data);
 
@@ -669,7 +711,8 @@ var jsxc;
 
          // Change name and add title
          ue.find('.jsxc_name').text(data.name).attr('title', 'is ' + jsxc.CONST.STATUS[data.status]);
-
+         bullet.attr('title', 'is ' + jsxc.CONST.STATUS[data.status]);
+         
          // Update gui according to encryption state
          switch (data.msgstate) {
             case 0:
@@ -726,7 +769,7 @@ var jsxc;
                   jsxc.storage.setUserItem('avatar_' + data.avatar, src);
                   setAvatar(src);
                }, Strophe.getBareJidFromJid(data.jid), function(msg) {
-                  jsxc.debug('Error', msg);
+                  jsxc.error('Could not load vcard.', msg);
                });
             }
          }
@@ -1071,6 +1114,10 @@ var jsxc;
        */
       showAboutDialog: function() {
          jsxc.gui.dialog.open(jsxc.gui.template.get('aboutDialog'));
+         
+         $('#jsxc_dialog .jsxc_debuglog').click(function(){
+            jsxc.gui.dialog.open('<div class="jsxc_log"><pre>' + jsxc.escapeHTML(jsxc.log) + '</pre></div>');
+         });
       }
    };
 
@@ -1567,7 +1614,7 @@ var jsxc;
       close: function(cid) {
          
          if (!jsxc.el_exists('#jsxc_window_' + cid)) {
-            jsxc.debug('[Warning] Want to close a window, that is not open.');
+            jsxc.warn('Want to close a window, that is not open.');
             return;
          }
 
@@ -2007,7 +2054,8 @@ var jsxc;
          <br />\
          Real-time chat app for OwnCloud. This app requires external<br /> XMPP server (openfire, ejabberd etc.).<br />\
          <br />\
-         <i>Released under the MIT license</i></p>'
+         <i>Released under the MIT license</i></p>\
+         <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>'
    };
 
    /**
@@ -2413,7 +2461,7 @@ var jsxc;
          }
 
          if (ptype === 'error') {
-            jsxc.debug('[XMPP ERROR] ' + $(presence).attr('code'));
+            jsxc.error('[XMPP] ' + $(presence).attr('code'));
             return true;
          }
 
@@ -3193,7 +3241,7 @@ var jsxc;
          });
 
          jsxc.buddyList[cid].on('error', function(err) {
-            jsxc.debug('[OTR] ' + err);
+            jsxc.error('[OTR] ', err);
             jsxc.gui.window.postMessage(cid, 'sys', '[OTR] ' + err);
          });
 
