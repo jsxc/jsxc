@@ -1,4 +1,5 @@
 /* jshint -W117 */
+(function($){
 function TraceablePeerConnection(ice_config, constraints) {
     var self = this;
     var RTCPeerconnection = navigator.mozGetUserMedia ? mozRTCPeerConnection : webkitRTCPeerConnection;
@@ -324,3 +325,4 @@ function getUserMediaWithConstraints(um, resolution, bandwidth, fps) {
         $(document).trigger('mediafailure.jingle');
     }
 }
+}(jQuery));

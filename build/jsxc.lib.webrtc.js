@@ -1,5 +1,5 @@
 /**
- * jsxc v0.5.1 - 2014-01-27
+ * jsxc v0.5.2 - 2014-01-28
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.5.1
+ * @version 0.5.2
  */
 
 /* jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery */

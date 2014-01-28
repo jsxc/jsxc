@@ -1,4 +1,5 @@
 /* jshint -W117 */
+(function($){
 // SDP STUFF
 function SDP(sdp) {
     this.media = sdp.split('\r\nm=');
@@ -807,3 +808,4 @@ SDPUtil = {
         return line + '\r\n';
     }
 };
+}(jQuery));
