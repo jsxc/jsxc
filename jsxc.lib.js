@@ -76,29 +76,29 @@ var jsxc;
          NOTIFICATION_DENIED: 'denied',
          STATUS: [ 'offline', 'away', 'online' ]
       },
-      
-      /** 
-       * Write debug message to console and to log. 
+
+      /**
+       * Write debug message to console and to log.
        * 
        * @memberOf jsxc
        * @param {String} msg Debug message
        * @param {Object} data
        * @param {String} Could be warn|error|null
        */
-      debug: function(msg, data, level){
-         if(level){
+      debug: function(msg, data, level) {
+         if (level) {
             msg = '[' + level + '] ' + msg;
          }
-         
+
          if (data) {
-            console.log(msg, data); 
-            jsxc.log = jsxc.log + msg + ': ' + $("<span>").prepend(data).html() + '\n';
+            console.log(msg, data);
+            jsxc.log = jsxc.log + msg + ': ' + $("<span>").prepend($(data).clone()).html() + '\n';
          } else {
             console.log(msg);
             jsxc.log = jsxc.log + msg + '\n';
          }
       },
-      
+
       /**
        * Write warn message.
        * 
@@ -106,10 +106,10 @@ var jsxc;
        * @param {String} msg Warn message
        * @param {Object} data
        */
-      warn: function(msg, data){
+      warn: function(msg, data) {
          jsxc.debug(msg, data, 'WARN');
       },
-      
+
       /**
        * Write error message.
        * 
@@ -117,10 +117,10 @@ var jsxc;
        * @param {String} msg Error message
        * @param {Object} data
        */
-      error: function(msg, data){
+      error: function(msg, data) {
          jsxc.debug(msg, data, 'ERROR');
       },
-      
+
       /** debug log */
       log: '',
 
@@ -203,7 +203,9 @@ var jsxc;
 
             // create jquery object
             var form = jsxc.options.loginForm.form = $(jsxc.options.loginForm.form);
-            var events = form.data('events') || {submit: []};
+            var events = form.data('events') || {
+               submit: []
+            };
             var submits = [];
 
             // save attached submit events and remove them. Will be reattached
@@ -211,7 +213,7 @@ var jsxc;
             $.each(events.submit, function(index, val) {
                submits.push(val.handler);
             });
-            
+
             form.data('submits', submits);
             form.off('submit');
 
@@ -484,12 +486,12 @@ var jsxc;
       submitLoginForm: function() {
          var form = jsxc.options.loginForm.form.off('submit');
 
-         //Attach original events
+         // Attach original events
          var submits = form.data('submits') || [];
          $.each(submits, function(index, val) {
             form.submit(val);
-         });        
-         
+         });
+
          if (form.find('#submit')) {
             form.find('#submit').click();
          } else {
@@ -702,7 +704,7 @@ var jsxc;
          var we = jsxc.gui.getWindow(cid); // window element from user
          var ue = $('#' + cid + ', #jsxc_window_' + cid + ', .jsxc_buddy_' + cid); // both
          var bullet = $('.jsxc_buddy_' + cid);
-         
+
          // Attach data to corresponding roster item
          ri.data(data);
 
@@ -712,7 +714,7 @@ var jsxc;
          // Change name and add title
          ue.find('.jsxc_name').text(data.name).attr('title', 'is ' + jsxc.CONST.STATUS[data.status]);
          bullet.attr('title', 'is ' + jsxc.CONST.STATUS[data.status]);
-         
+
          // Update gui according to encryption state
          switch (data.msgstate) {
             case 0:
@@ -1114,10 +1116,37 @@ var jsxc;
        */
       showAboutDialog: function() {
          jsxc.gui.dialog.open(jsxc.gui.template.get('aboutDialog'));
-         
-         $('#jsxc_dialog .jsxc_debuglog').click(function(){
-            jsxc.gui.dialog.open('<div class="jsxc_log"><pre>' + jsxc.escapeHTML(jsxc.log) + '</pre></div>');
+
+         $('#jsxc_dialog .jsxc_debuglog').click(function() {
+            jsxc.gui.showDebugLog();
          });
+      },
+
+      /**
+       * Show debug log.
+       * 
+       * @memberOf jsxc.gui
+       */
+      showDebugLog: function() {
+         var userInfo = '<h3>User information</h3>';
+
+         if (navigator) {
+            var key;
+            for (key in navigator) {
+               if (navigator.hasOwnProperty(key) && typeof navigator[key] === 'string') {
+                  userInfo += '<b>' + key + ':</b> ' + navigator[key] + '<br />';
+               }
+            }
+         }
+         
+         if (window.screen) {
+            userInfo += '<b>Height:</b> ' + window.screen.height + '<br />';
+            userInfo += '<b>Width:</b> ' + window.screen.width + '<br />';
+         }
+         
+         userInfo += '<b>jsxc version:</b> ' + jsxc.version + '<br />';
+         
+         jsxc.gui.dialog.open('<div class="jsxc_log">'+userInfo+'<h3>Log</h3><pre>' + jsxc.escapeHTML(jsxc.log) + '</pre></div>');
       }
    };
 
@@ -1191,7 +1220,7 @@ var jsxc;
        * 
        * @param {String} cid CSS compatible jid
        */
-      add: function(cid) { 
+      add: function(cid) {
          var data = jsxc.storage.getUserItem('buddy_' + cid);
          var bud = jsxc.gui.buddyTemplate.clone().attr('id', cid).attr('data-type', data.type || 'chat');
 
@@ -1612,7 +1641,7 @@ var jsxc;
        * @param {String} cid CSS compatible jid
        */
       close: function(cid) {
-         
+
          if (!jsxc.el_exists('#jsxc_window_' + cid)) {
             jsxc.warn('Want to close a window, that is not open.');
             return;
@@ -1688,7 +1717,7 @@ var jsxc;
        * 
        * @param {String} cid
        */
-      hide: function(cid) { 
+      hide: function(cid) {
          jsxc.storage.updateUserItem('window_' + cid, 'minimize', true);
 
          jsxc.gui.window._hide(cid);
@@ -1699,7 +1728,7 @@ var jsxc;
        * 
        * @param {String} cid
        */
-      _hide: function(cid) { 
+      _hide: function(cid) {
          $('#jsxc_window_' + cid + ' .jsxc_window').slideUp();
          jsxc.gui.getWindow(cid).trigger('hidden.window.jsxc');
       },
@@ -2087,16 +2116,16 @@ var jsxc;
          // Create new connection (no login)
          jsxc.xmpp.conn = new Strophe.Connection(url);
 
-         // jsxc.xmpp.conn.xmlInput = function(data) {
-         // jsxc.debug('<', data);
-         // };
-         // jsxc.xmpp.conn.xmlOutput = function(data) {
-         // jsxc.debug('>', data);
-         // };
-         //         
-         // Strophe.log = function (level, msg) {
-         // jsxc.debug(level + " " + msg);
-         // };
+//          jsxc.xmpp.conn.xmlInput = function(data) {
+//          console.log('<', data);
+//          };
+//          jsxc.xmpp.conn.xmlOutput = function(data) {
+//          console.log('>', data);
+//          };
+                  
+//          Strophe.log = function (level, msg) {
+//          console.log(level + " " + msg);
+//          };
 
          var callback = function(status, condition) {
 
@@ -2107,7 +2136,7 @@ var jsxc;
                   jsxc.cid = jsxc.jidToCid(jsxc.xmpp.conn.jid.toLowerCase());
                   $(document).trigger('connected.jsxc');
                   break;
-               case Strophe.Status.ATTACHED: 
+               case Strophe.Status.ATTACHED:
                   $(document).trigger('attached.jsxc');
                   break;
                case Strophe.Status.DISCONNECTED:
@@ -2178,7 +2207,7 @@ var jsxc;
          jsxc.xmpp.conn.pause();
 
          // Save sid and jid
-         jsxc.storage.setItem('sid', jsxc.xmpp.conn.sid);
+         jsxc.storage.setItem('sid', jsxc.xmpp.conn._proto.sid);
          jsxc.storage.setItem('jid', jsxc.xmpp.conn.jid.toLowerCase());
 
          jsxc.storage.setItem('lastActivity', (new Date()).getTime());
@@ -2227,7 +2256,7 @@ var jsxc;
             }).c('query', {
                xmlns: 'jabber:iq:roster'
             });
-            
+
             jsxc.xmpp.conn.sendIQ(iq, jsxc.xmpp.onRoster);
          } else {
             jsxc.xmpp.sendPres();
@@ -2262,6 +2291,7 @@ var jsxc;
             pres.c('c', jsxc.xmpp.conn.caps.generateCapsAttrs());
          }
 
+         jsxc.debug('Send presence', pres.toString());
          jsxc.xmpp.conn.send(pres);
       },
 
@@ -2428,7 +2458,7 @@ var jsxc;
        * @param {dom} presence
        * @private
        */
-      onPresence: function(presence) {
+      onPresence: function(presence) { 
          /*
           * <presence xmlns='jabber:client' type='unavailable' from='' to=''/>
           * 
@@ -2443,6 +2473,8 @@ var jsxc;
           * node='http://psi-im.org/caps' ver='caps-b75d8d2b25' ext='ca cs
           * ep-notify-2 html'/> </presence>
           */
+         jsxc.debug('onPresence', presence);
+         
          var ptype = $(presence).attr('type');
          var from = $(presence).attr('from');
          var jid = Strophe.getBareJidFromJid(from).toLowerCase();
@@ -2453,8 +2485,6 @@ var jsxc;
          var res = jsxc.storage.getUserItem('res_' + cid) || {};
          var status = null;
          var xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
-
-         jsxc.debug('onPresence', presence);
 
          if (jid === to) {
             return true;
@@ -2492,7 +2522,7 @@ var jsxc;
          }
 
          var maxVal = [];
-         var max = 0, prop;
+         var max = 0, prop = null;
          for (prop in res) {
             if (res.hasOwnProperty(prop)) {
                if (max <= res[prop]) {
@@ -2551,7 +2581,7 @@ var jsxc;
           * <body>...</body> <active
           * xmlns='http://jabber.org/protocol/chatstates'/> </message>
           */
-         
+
          jsxc.debug('Incoming message', message);
 
          var type = $(message).attr('type');
