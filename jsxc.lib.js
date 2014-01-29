@@ -793,15 +793,27 @@ var jsxc;
        * @memberof jsxc.gui
        */
       toggleList: function() {
+         $(this).disableSelection();
+
          var ul = $(this).find('ul');
+         var slideUp = null;
+
+         slideUp = function() {
+            ul.slideUp();
+            $('body').off('click', null, slideUp);
+         };
 
          $(this).click(function() {
             ul.slideToggle();
             window.clearTimeout(ul.data('timer'));
+
+            // first hide other lists
+            $('body').click();
+            $('body').one('click', slideUp);
+
+            return false;
          }).mouseleave(function() {
-            ul.data('timer', window.setTimeout(function() {
-               ul.slideUp();
-            }, 2000));
+            ul.data('timer', window.setTimeout(slideUp, 2000));
          }).mouseenter(function() {
             window.clearTimeout(ul.data('timer'));
          });
@@ -853,9 +865,17 @@ var jsxc;
        */
       showVerification: function(cid) {
 
+         // Check if there is a open dialog
+         if($('#jsxc_dialog').length > 0) {
+            setTimeout(function(){
+               jsxc.gui.showVerification(cid);
+            }, 3000);
+            return;
+         }
+         
          // verification only possible if the connection is encrypted
          if (jsxc.storage.getUserItem('buddy_' + cid).msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED) {
-            jsxc.debug('Connection not encrypted');
+            jsxc.warn('Connection not encrypted');
             return;
          }
 
@@ -1138,15 +1158,15 @@ var jsxc;
                }
             }
          }
-         
+
          if (window.screen) {
             userInfo += '<b>Height:</b> ' + window.screen.height + '<br />';
             userInfo += '<b>Width:</b> ' + window.screen.width + '<br />';
          }
-         
+
          userInfo += '<b>jsxc version:</b> ' + jsxc.version + '<br />';
-         
-         jsxc.gui.dialog.open('<div class="jsxc_log">'+userInfo+'<h3>Log</h3><pre>' + jsxc.escapeHTML(jsxc.log) + '</pre></div>');
+
+         jsxc.gui.dialog.open('<div class="jsxc_log">' + userInfo + '<h3>Log</h3><pre>' + jsxc.escapeHTML(jsxc.log) + '</pre></div>');
       }
    };
 
@@ -1205,12 +1225,16 @@ var jsxc;
             opacity: '0.5'
          });
 
-         jsxc.gui.toggleList.call($('#jsxc_menu'));
+         $('#jsxc_roster > .jsxc_bottom > div').each(function() {
+            jsxc.gui.toggleList.call($(this));
+         });
 
          if (jsxc.storage.getUserItem('roster') === 'hidden') {
             $('#jsxc_roster').css('right', '-200px');
             $('#jsxc_windowList > ul').css('paddingRight', '10px');
          }
+         
+         jsxc.notice.load();
 
          $(document).trigger('ready.roster.jsxc');
       },
@@ -1921,7 +1945,7 @@ var jsxc;
 
             $.extend(ph, {
                cid_priv_fingerprint: data.fingerprint ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.no_available,
-               cid_jid: data.jid,
+               cid_jid: Strophe.getBareJidFromJid(data.jid),
                cid_name: data.name
             });
          }
@@ -1948,8 +1972,7 @@ var jsxc;
          jsxc.debug('Template not available: ' + name);
          return name;
       },
-      authenticationDialog: '<div id="jsxc_facebox">\
-            <h3>Verification</h3>\
+      authenticationDialog: '<h3>Verification</h3>\
             <p>%%Authenticating_a_buddy_helps_%%</p>\
             <div>\
               <p style="margin:0px;">%%How_do_you_want_to_authenticate_your_buddy%%</p>\
@@ -1978,8 +2001,7 @@ var jsxc;
               <p class=".jsxc_explanation">%%To_authenticate_pick_a_secret_%%</p>\
               <p><label for="jsxc_secret">%%Secret%%:</label><input type="text" name="secret" id="jsxc_secret" /></p>\
               <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Compare%%</a></p>\
-            </div>\
-        </div>',
+            </div>',
       fingerprintsDialog: '<div>\
           <p><strong>%%Your_fingerprint%%</strong><br />\
           <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
@@ -2011,17 +2033,34 @@ var jsxc;
             </div>\
         </li>',
       roster: '<div id="jsxc_roster">\
-            <ul id="jsxc_buddylist"></ul>\
-            <div id="jsxc_menu">\
-            %%Menu%%\
-            <ul>\
-                <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
-                <li class="jsxc_hideOffline">%%Hide offline%%</li>\
-                <li class="jsxc_about">%%About%%</li>\
-            </ul>\
-            </div>\
-            <div id="jsxc_toggleRoster"></div>\
-        </div>',
+           <ul id="jsxc_buddylist"></ul>\
+           <div class="jsxc_bottom">\
+              <div id="jsxc_avatar">\
+                 <div class="jsxc_avatar">☺</div>\
+              </div>\
+              <div id="jsxc_menu">\
+                 <span>⚙</span>\
+                 <ul>\
+                     <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
+                     <li class="jsxc_hideOffline">%%Hide offline%%</li>\
+                     <li class="jsxc_about">%%About%%</li>\
+                 </ul>\
+              </div>\
+              <div id="jsxc_notice">\
+                 <span></span>\
+                 <ul></ul>\
+              </div>\
+              <div id="jsxc_presence">\
+                 <span>%%Online%%</span>\
+                 <ul>\
+                     <li class="jsxc_addBuddy">%%Online%%</li>\
+                     <li class="jsxc_hideOffline">%%Away%%</li>\
+                     <li class="jsxc_about">%%Offline%%</li>\
+                 </ul>\
+              </div>\
+           </div>\
+           <div id="jsxc_toggleRoster"></div>\
+       </div>',
       windowList: '<div id="jsxc_windowList">\
             <ul></ul>\
         </div>',
@@ -2116,16 +2155,16 @@ var jsxc;
          // Create new connection (no login)
          jsxc.xmpp.conn = new Strophe.Connection(url);
 
-//          jsxc.xmpp.conn.xmlInput = function(data) {
-//          console.log('<', data);
-//          };
-//          jsxc.xmpp.conn.xmlOutput = function(data) {
-//          console.log('>', data);
-//          };
-                  
-//          Strophe.log = function (level, msg) {
-//          console.log(level + " " + msg);
-//          };
+         // jsxc.xmpp.conn.xmlInput = function(data) {
+         // console.log('<', data);
+         // };
+         // jsxc.xmpp.conn.xmlOutput = function(data) {
+         // console.log('>', data);
+         // };
+
+         // Strophe.log = function (level, msg) {
+         // console.log(level + " " + msg);
+         // };
 
          var callback = function(status, condition) {
 
@@ -2391,9 +2430,8 @@ var jsxc;
 
          jsxc.storage.setUserItem('buddylist', buddies);
 
-         $(document).trigger('rosterready.jsxc');
-
          jsxc.debug('Roster ready');
+         $(document).trigger('rosterready.jsxc');
       },
 
       /**
@@ -2458,7 +2496,7 @@ var jsxc;
        * @param {dom} presence
        * @private
        */
-      onPresence: function(presence) { 
+      onPresence: function(presence) {
          /*
           * <presence xmlns='jabber:client' type='unavailable' from='' to=''/>
           * 
@@ -2474,7 +2512,7 @@ var jsxc;
           * ep-notify-2 html'/> </presence>
           */
          jsxc.debug('onPresence', presence);
-         
+
          var ptype = $(presence).attr('type');
          var from = $(presence).attr('from');
          var jid = Strophe.getBareJidFromJid(from).toLowerCase();
@@ -2501,7 +2539,7 @@ var jsxc;
                jid: jid,
                approve: -1
             });
-            jsxc.gui.showApproveDialog(jid);
+            jsxc.notice.add('Friendship request', 'from ' + jid, 'gui.showApproveDialog', [jid]);
 
             return true;
          } else if (ptype === 'unavailable') {
@@ -3550,12 +3588,12 @@ var jsxc;
        * @param msg
        * @param d
        */
-      notify: function(title, msg, d) {
+      notify: function(title, msg, d, force) {
          if (!jsxc.options.notification || !jsxc.notification.hasPermission()) {
             return; // notifications disabled
          }
 
-         if (!jsxc.isHidden()) {
+         if (!jsxc.isHidden() && !force) {
             return; // Tab is visible
          }
 
@@ -3675,9 +3713,88 @@ var jsxc;
    };
 
    /**
+    * This namespace handle the notice system.
+    * 
+    * @namspace jsxc.notice
+    * @memberOf jsxc
+    */
+   jsxc.notice = {
+      /** Number of notices. */
+      _num: 0,
+
+      /**
+       * Loads the saved notices.
+       * 
+       * @memberOf jsxc.notice
+       */
+      load: function() {
+         var saved = jsxc.storage.getUserItem('notices') || [];
+         var key = null;
+         
+         for(key in saved){
+            if(saved.hasOwnProperty(key)){
+               var val = saved[key];
+               
+               jsxc.notice.add(val.msg, val.description, val.fnName, val.fnParams, key);
+            }
+         }
+      },
+
+      /**
+       * Add a new notice to the stack;
+       * 
+       * @memberOf jsxc.notice
+       * @param msg
+       * @param handler
+       */
+      add: function(msg, description, fnName, fnParams, id) {
+         var nid = id || Date.now();
+         var list = $('#jsxc_notice ul');
+         var notice = $('<li/>');
+
+         notice.click(function() {
+            $(this).remove();
+            $('#jsxc_notice > span').text(--jsxc.notice._num || '');
+           
+            var s = jsxc.storage.getUserItem('notices');
+            delete s[nid];
+            jsxc.storage.setUserItem('notices', s);
+            
+            var fn = jsxc[fnName];
+            
+            if(typeof fn === 'function'){
+               fn.apply(null, fnParams);
+            }
+            
+            return false;
+         });
+
+         notice.text(msg);
+         notice.attr('title', description || '');
+         list.append(notice);
+
+         $('#jsxc_notice > span').text(++jsxc.notice._num);
+
+         if (!id) {
+            var saved = jsxc.storage.getUserItem('notices') || {};
+            saved[nid] = {
+               msg: msg,
+               description: description,
+               fnName: fnName,
+               fnParams: fnParams
+            };
+            jsxc.storage.setUserItem('notices', saved);
+            
+            jsxc.notification.notify(msg, description || '', null, true);
+         }
+      }
+   };
+
+   /**
     * Contains all available translations
     * 
     * @namespace jsxc.l10n
+    * @memberOf jsxc
     */
    jsxc.l10n = {
       en: {
@@ -3710,7 +3827,7 @@ var jsxc;
          enter_the_secret: 'enter the secret.',
          now_we_will_create_your_private_key_: 'Now we will create your private key. This can take some time.',
          Authenticating_a_buddy_helps_: 'Authenticating a buddy helps ensure that the person you are talking to is who he or she is saying.',
-         How_do_you_want_to_authenticate_your_buddy: 'How do you want to authenticate your buddy?',
+         How_do_you_want_to_authenticate_your_buddy: 'How do you want to authenticate {{cid_name}} (<b>{{cid_jid}}</b>)?',
          Select_method: 'Select method...',
          Manual: 'Manual',
          Question: 'Question',
@@ -3784,7 +3901,7 @@ var jsxc;
          enter_the_secret: 'gib das Geheimnis ein.',
          now_we_will_create_your_private_key_: 'Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.',
          Authenticating_a_buddy_helps_: 'Einen Freund zu authentifizieren hilft sicher zustellen, dass die Person mit der du sprichst auch die ist die sie sagt.',
-         How_do_you_want_to_authenticate_your_buddy: 'Wie willst du deinen Freund authentifizieren?',
+         How_do_you_want_to_authenticate_your_buddy: 'Wie willst du {{cid_name}} (<b>{{cid_jid}}</b>) authentifizieren?',
          Select_method: 'Wähle...',
          Manual: 'Manual',
          Question: 'Frage',
