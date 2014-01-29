@@ -74,7 +74,7 @@ var jsxc;
          NOTIFICATION_DEFAULT: 'default',
          NOTIFICATION_GRANTED: 'granted',
          NOTIFICATION_DENIED: 'denied',
-         STATUS: [ 'offline', 'away', 'online' ]
+         STATUS: [ 'offline', 'dnd', 'xa', 'away', 'chat', 'online' ]
       },
 
       /**
@@ -2053,9 +2053,12 @@ var jsxc;
               <div id="jsxc_presence">\
                  <span>%%Online%%</span>\
                  <ul>\
-                     <li class="jsxc_addBuddy">%%Online%%</li>\
-                     <li class="jsxc_hideOffline">%%Away%%</li>\
-                     <li class="jsxc_about">%%Offline%%</li>\
+                     <li class="jsxc_online">%%Online%%</li>\
+                     <li class="jsxc_chat">%%Chatty%%</li>\
+                     <li class="jsxc_away">%%Away%%</li>\
+                     <li class="jsxc_xa">%%Extended away%%</li>\
+                     <li class="jsxc_dnd">%%dnd%%</li>\
+                     <li class="jsxc_offline">%%Offline%%</li>\
                  </ul>\
               </div>\
            </div>\
@@ -2543,13 +2546,13 @@ var jsxc;
 
             return true;
          } else if (ptype === 'unavailable') {
-            status = 0;
+            status = jsxc.CONST.STATUS.indexOf('offline');
          } else {
             var show = $(presence).find('show').text();
-            if (show === '' || show === 'chat') {
-               status = 2;
+            if (show === '') {
+               status = jsxc.CONST.STATUS.indexOf('online');
             } else {
-               status = 1;
+               status = jsxc.CONST.STATUS.indexOf(show);
             }
          }
 
