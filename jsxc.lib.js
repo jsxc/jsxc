@@ -2175,7 +2175,7 @@ var jsxc;
          <br />\
          Real-time chat app for OwnCloud. This app requires external<br /> XMPP server (openfire, ejabberd etc.).<br />\
          <br />\
-       /a  <i>Released under the MIT license</i></p>\
+         <i>Released under the MIT license</i></p>\
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>'
    };
 
