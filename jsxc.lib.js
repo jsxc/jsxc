@@ -2175,7 +2175,7 @@ var jsxc;
          <br />\
          Real-time chat app for OwnCloud. This app requires external<br /> XMPP server (openfire, ejabberd etc.).<br />\
          <br />\
-         <i>Released under the MIT license</i></p>\
+       /a  <i>Released under the MIT license</i></p>\
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>'
    };
 
@@ -2579,7 +2579,8 @@ var jsxc;
          var ptype = $(presence).attr('type');
          var from = $(presence).attr('from');
          var jid = Strophe.getBareJidFromJid(from).toLowerCase();
-         var to = Strophe.getBareJidFromJid($(presence).attr('to')).toLowerCase();
+         var to = $(presence).attr('to');
+         to = (to)? Strophe.getBareJidFromJid(to).toLowerCase(): jid;
          var r = Strophe.getResourceFromJid(from);
          var cid = jsxc.jidToCid(jid);
          var data = jsxc.storage.getUserItem('buddy_' + cid);
