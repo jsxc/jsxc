@@ -345,8 +345,8 @@ var jsxc;
        * Checks if there is a chief
        */
       checkChief: function() {
-         jsxc.debug('checkChief');
-         jsxc.to = window.setTimeout(jsxc.onChief, 500);
+         jsxc.debug('check chief');
+         jsxc.to = window.setTimeout(jsxc.onChief, jsxc.options.timeout);
          jsxc.storage.ink('alive');
       },
 
@@ -3202,6 +3202,8 @@ var jsxc;
 
          // react if someone ask, if there is a chief
          if (jsxc.chief && key === 'alive') {
+            jsxc.debug('Master request.');
+            
             jsxc.storage.ink('alive');
             return;
          }
