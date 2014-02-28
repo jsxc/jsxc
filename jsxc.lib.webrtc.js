@@ -24,7 +24,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
                 </div>\
                 <!-- <button type="button" class="jsxc_mute_local">%%mute_my_audio%%</button>\
                 <button type="button" class="jsxc_pause_local">%%pause_my_video%%</button> --> \
-                <button type="button" class="jsxc_chat">%%chat%%</button>\
+                <button type="button" class="jsxc_showchat">%%chat%%</button>\
                 <button type="button" class="jsxc_fullscreen">%%fullscreen%%</button>\
                 <button type="button" class="jsxc_info">%%Info%%</button>\
             </div>\
@@ -450,7 +450,6 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        */
       onRemoteStreamAdded: function(event, data, sid) {
          this.setStatus('Remote stream for session ' + sid + ' added.');
-         jsxc.debug('Stream data', data);
 
          var stream = data.stream;
          this.remoteStream = stream;
@@ -731,7 +730,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             toggleMulti($('#jsxc_dialog .jsxc_snapshotbar'));
          });
 
-         $('#jsxc_dialog .jsxc_chat').click(function() {
+         $('#jsxc_dialog .jsxc_showchat').click(function() {
             toggleMulti($('#jsxc_dialog .jsxc_chatarea'));
          });
 
