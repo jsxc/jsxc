@@ -804,12 +804,18 @@ var jsxc;
          };
 
          $(this).click(function() {
-            ul.slideToggle();
-            window.clearTimeout(ul.data('timer'));
 
-            // first hide other lists
-            $('body').click();
-            $('body').one('click', slideUp);
+            ul.slideToggle({
+               done: function(){
+                  if(ul.is(":hidden")){
+                     // hide other lists
+                     $('body').click();
+                     $('body').one('click', slideUp);
+                  }
+               }
+            });
+            
+            window.clearTimeout(ul.data('timer'));
 
             return false;
          }).mouseleave(function() {
@@ -1167,6 +1173,40 @@ var jsxc;
          userInfo += '<b>jsxc version:</b> ' + jsxc.version + '<br />';
 
          jsxc.gui.dialog.open('<div class="jsxc_log">' + userInfo + '<h3>Log</h3><pre>' + jsxc.escapeHTML(jsxc.log) + '</pre></div>');
+      },
+
+      /**
+       * Change presence to pres.
+       * 
+       * @memberOf jsxc.gui
+       * @param pres {CONST.STATUS} New presence state
+       * @param external {boolean} True if triggered from other tab.
+       */
+      changePresence: function(pres, external){
+         
+         if(external !== true){
+            jsxc.storage.setUserItem('presence', pres);
+         }
+         
+         if(jsxc.chief){
+            jsxc.xmpp.sendPres();
+         }
+         
+         $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
+         
+         jsxc.gui.updatePresence('own', pres);
+      },
+      
+      /**
+       * Update all presence objects for given user.
+       * 
+       * @memberOf jsxc.gui
+       * @param cid CSS id of user.
+       * @param {CONST.STATUS} pres New presence state.
+       */
+      updatePresence: function(cid, pres) {
+         
+         $('.jsxc_presence_' + cid).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
       }
    };
 
@@ -1216,6 +1256,12 @@ var jsxc;
          $('#jsxc_toggleRoster').click(function() {
             jsxc.gui.roster.toggle();
          });
+         
+         $('#jsxc_presence > ul > li').click(function(){
+            var self = $(this);
+            
+            jsxc.gui.changePresence(self.data('pres'));
+         });
 
          $('#jsxc_buddylist').slimScroll({
             distance: '3px',
@@ -1233,6 +1279,10 @@ var jsxc;
             $('#jsxc_roster').css('right', '-200px');
             $('#jsxc_windowList > ul').css('paddingRight', '10px');
          }
+         
+         var pres = jsxc.storage.getUserItem('presence') || 'online';
+         $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
+         jsxc.gui.updatePresence('own', pres);
          
          jsxc.notice.load();
 
@@ -2034,7 +2084,7 @@ var jsxc;
         </li>',
       roster: '<div id="jsxc_roster">\
            <ul id="jsxc_buddylist"></ul>\
-           <div class="jsxc_bottom">\
+           <div class="jsxc_bottom jsxc_presence_own">\
               <div id="jsxc_avatar">\
                  <div class="jsxc_avatar">☺</div>\
               </div>\
@@ -2053,12 +2103,12 @@ var jsxc;
               <div id="jsxc_presence">\
                  <span>%%Online%%</span>\
                  <ul>\
-                     <li class="jsxc_online">%%Online%%</li>\
-                     <li class="jsxc_chat">%%Chatty%%</li>\
-                     <li class="jsxc_away">%%Away%%</li>\
-                     <li class="jsxc_xa">%%Extended away%%</li>\
-                     <li class="jsxc_dnd">%%dnd%%</li>\
-                     <li class="jsxc_offline">%%Offline%%</li>\
+                     <li data-pres="online" class="jsxc_online">%%Online%%</li>\
+                     <li data-pres="chat" class="jsxc_chat">%%Chatty%%</li>\
+                     <li data-pres="away" class="jsxc_away">%%Away%%</li>\
+                     <li data-pres="xa" class="jsxc_xa">%%Extended away%%</li>\
+                     <li data-pres="dnd" class="jsxc_dnd">%%dnd%%</li>\
+                     <!-- <li data-pres="offline" class="jsxc_offline">%%Offline%%</li> -->\
                  </ul>\
               </div>\
            </div>\
@@ -2325,12 +2375,22 @@ var jsxc;
             jsxc.xmpp.conn.disco.addFeature(Strophe.NS.DISCO_INFO);
          }
 
-         // send presence stanza
+         // create presence stanza
          var pres = $pres();
 
          if (jsxc.xmpp.conn.caps) {
             // attach caps
-            pres.c('c', jsxc.xmpp.conn.caps.generateCapsAttrs());
+            pres.c('c', jsxc.xmpp.conn.caps.generateCapsAttrs()).up();
+         }
+         
+         var presState = jsxc.storage.getUserItem('presence') || 'online';
+         if(presState !== 'online'){
+            pres.c('show').t(presState).up();
+         }
+         
+         var priority = jsxc.storage.getUserItem('priority');
+         if(priority !== null){
+            pres.c('priority').t(priority[presState]).up();
          }
 
          jsxc.debug('Send presence', pres.toString());
@@ -3003,6 +3063,10 @@ var jsxc;
 
          var cid = key.replace(/^[a-z]+_(.*)/i, '$1');
 
+         if (key.match(/^presence/)) {
+            jsxc.gui.changePresence(e.newValue, true);
+         }
+         
          if (key.match(/^hidden/)) {
             if (jsxc.chief) {
                clearTimeout(jsxc.toNotification);
@@ -3872,7 +3936,8 @@ var jsxc;
          clear_history: 'Clear history',
          New_message_from: 'New message from',
          Should_we_notify_you_: 'Should we notify you about new messages in the future?',
-         Please_accept_: 'Please click the "Allow" button at the top.'
+         Please_accept_: 'Please click the "Allow" button at the top.',
+         dnd: 'Do Not Disturb'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -3950,7 +4015,8 @@ var jsxc;
          Menu: 'Menü',
          Hide_offline: 'Offline ausblenden',
          Show_offline: 'Offline einblenden',
-         About: 'Über'
+         About: 'Über',
+         dd: 'Beschäftigt'
       }
    };
 }(jQuery));
