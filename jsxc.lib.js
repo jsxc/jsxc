@@ -2851,7 +2851,7 @@ var jsxc;
                   jsxc.storage.setItem('storageNotConform', 0);
                }, 1000);
             }
-            jsxc.debug('setItem: ' + key);
+            
             jsxc.ls.push(JSON.stringify({
                key: key,
                value: value
@@ -3064,6 +3064,10 @@ var jsxc;
 
          var cid = key.replace(/^[a-z]+_(.*)/i, '$1');
 
+         if (key.match(/^notices/)) {
+            jsxc.notice.load();
+         }
+         
          if (key.match(/^presence/)) {
             jsxc.gui.changePresence(e.newValue, true);
          }
@@ -3696,6 +3700,10 @@ var jsxc;
             window.Notification = function(title, opt) {
                var popup = window.webkitNotifications.createNotification(null, title, opt.body);
                popup.show();
+               
+               popup.close = function() {
+                  popup.cancel();
+               };
 
                return popup;
             };
@@ -3797,7 +3805,12 @@ var jsxc;
        * 
        * @memberOf jsxc.notice
        */
-      load: function() {
+      load: function() { 
+         //reset list
+         $('#jsxc_notice ul li').remove();
+         $('#jsxc_notice > span').text('');
+         jsxc.notice._num = 0;
+         
          var saved = jsxc.storage.getUserItem('notices') || [];
          var key = null;
          
@@ -3814,8 +3827,11 @@ var jsxc;
        * Add a new notice to the stack;
        * 
        * @memberOf jsxc.notice
-       * @param msg
-       * @param handler
+       * @param msg Header message
+       * @param description Notice description 
+       * @param fnName Function name to be called if you open the notice
+       * @param fnParams Array of params for function
+       * @param id Notice id
        */
       add: function(msg, description, fnName, fnParams, id) {
          var nid = id || Date.now();
