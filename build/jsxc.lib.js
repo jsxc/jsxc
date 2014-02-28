@@ -1,5 +1,5 @@
 /**
- * jsxc v0.5.2 - 2014-01-28
+ * jsxc v0.6.0 - 2014-02-28
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.5.2
+ * @version 0.6.0
  */
 
 var jsxc;
@@ -22,7 +22,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '0.5.2',
+      version: '0.6.0',
 
       /** True if i'm the chief */
       chief: false,
@@ -86,7 +86,7 @@ var jsxc;
          NOTIFICATION_DEFAULT: 'default',
          NOTIFICATION_GRANTED: 'granted',
          NOTIFICATION_DENIED: 'denied',
-         STATUS: [ 'offline', 'away', 'online' ]
+         STATUS: [ 'offline', 'dnd', 'xa', 'away', 'chat', 'online' ]
       },
 
       /**
@@ -357,8 +357,8 @@ var jsxc;
        * Checks if there is a chief
        */
       checkChief: function() {
-         jsxc.debug('checkChief');
-         jsxc.to = window.setTimeout(jsxc.onChief, 500);
+         jsxc.debug('check chief');
+         jsxc.to = window.setTimeout(jsxc.onChief, jsxc.options.timeout);
          jsxc.storage.ink('alive');
       },
 
@@ -429,21 +429,6 @@ var jsxc;
          jsxc.jids[cid] = jid;
 
          return cid;
-      },
-
-      /**
-       * Send message to buddy and display this to the user
-       * 
-       * @param {String} cid
-       * @param {String} msg message to be send
-       */
-      sendMessage: function(cid, msg) {
-
-         if (jsxc.chief) {
-            jsxc.buddyList[cid].sendMsg(msg);
-         }
-
-         jsxc.gui.window.postMessage(cid, 'out', msg);
       },
 
       /**
@@ -761,31 +746,46 @@ var jsxc;
          }
 
          if (data.avatar && data.avatar.length > 0) {
-            var avatarSrc = jsxc.storage.getUserItem('avatar_' + data.avatar);
+            jsxc.gui.updateAvatar(ue, data.jid, data.avatar);
+         }
+      },
+      
+      updateAvatar: function(el, jid, aid) { 
+         var avatarSrc = jsxc.storage.getUserItem('avatar_' + aid);
 
-            var setAvatar = function(src) {
-               ue.find('.jsxc_avatar img').remove();
-               var img = $('<img/>').attr('alt', 'Avatar').attr('src', src);
-               ue.find('.jsxc_avatar').prepend(img);
-            };
+         var setAvatar = function(src) {
+            if(src === 0) {
+               return;
+            }
+            
+            el.find('.jsxc_avatar img').remove();
+            var img = $('<img/>').attr('alt', 'Avatar').attr('src', src);
+            el.find('.jsxc_avatar').prepend(img);
+         };
 
-            if (avatarSrc !== null) {
-               setAvatar(avatarSrc);
-            } else {
-               jsxc.xmpp.conn.vcard.get(function(stanza) {
-                  jsxc.debug('vCard', stanza);
+         if (avatarSrc !== null) {
+            setAvatar(avatarSrc);
+         } else {
+            jsxc.xmpp.conn.vcard.get(function(stanza) {
+               jsxc.debug('vCard', stanza);
 
-                  var vCard = $(stanza).find("vCard");
+               var vCard = $(stanza).find("vCard > PHOTO");
+               var src;
+               
+               if(vCard.length === 0){
+                  jsxc.debug('No photo provided');
+                  src = 0;
+               } else {
                   var img = vCard.find('BINVAL').text();
                   var type = vCard.find('TYPE').text();
-                  var src = 'data:' + type + ';base64,' + img;
-
-                  jsxc.storage.setUserItem('avatar_' + data.avatar, src);
-                  setAvatar(src);
-               }, Strophe.getBareJidFromJid(data.jid), function(msg) {
-                  jsxc.error('Could not load vcard.', msg);
-               });
-            }
+                  src = 'data:' + type + ';base64,' + img;
+               }
+               
+               jsxc.storage.setUserItem('avatar_' + aid, src);
+               setAvatar(src);
+            }, Strophe.getBareJidFromJid(jid), function(msg) {
+               jsxc.error('Could not load vcard.', msg);
+            });
          }
       },
 
@@ -805,15 +805,33 @@ var jsxc;
        * @memberof jsxc.gui
        */
       toggleList: function() {
+         $(this).disableSelection();
+
          var ul = $(this).find('ul');
+         var slideUp = null;
+
+         slideUp = function() {
+            ul.slideUp();
+            $('body').off('click', null, slideUp);
+         };
 
          $(this).click(function() {
+            
+            if(ul.is(":hidden")){
+               // hide other lists
+               $('body').click();
+               $('body').one('click', slideUp);
+            } else {
+               $('body').off('click', null, slideUp);
+            }
+            
             ul.slideToggle();
+            
             window.clearTimeout(ul.data('timer'));
+
+            return false;
          }).mouseleave(function() {
-            ul.data('timer', window.setTimeout(function() {
-               ul.slideUp();
-            }, 2000));
+            ul.data('timer', window.setTimeout(slideUp, 2000));
          }).mouseenter(function() {
             window.clearTimeout(ul.data('timer'));
          });
@@ -865,9 +883,17 @@ var jsxc;
        */
       showVerification: function(cid) {
 
+         // Check if there is a open dialog
+         if($('#jsxc_dialog').length > 0) {
+            setTimeout(function(){
+               jsxc.gui.showVerification(cid);
+            }, 3000);
+            return;
+         }
+         
          // verification only possible if the connection is encrypted
          if (jsxc.storage.getUserItem('buddy_' + cid).msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED) {
-            jsxc.debug('Connection not encrypted');
+            jsxc.warn('Connection not encrypted');
             return;
          }
 
@@ -1150,15 +1176,49 @@ var jsxc;
                }
             }
          }
-         
+
          if (window.screen) {
             userInfo += '<b>Height:</b> ' + window.screen.height + '<br />';
             userInfo += '<b>Width:</b> ' + window.screen.width + '<br />';
          }
-         
+
          userInfo += '<b>jsxc version:</b> ' + jsxc.version + '<br />';
+
+         jsxc.gui.dialog.open('<div class="jsxc_log">' + userInfo + '<h3>Log</h3><pre>' + jsxc.escapeHTML(jsxc.log) + '</pre></div>');
+      },
+
+      /**
+       * Change presence to pres.
+       * 
+       * @memberOf jsxc.gui
+       * @param pres {CONST.STATUS} New presence state
+       * @param external {boolean} True if triggered from other tab.
+       */
+      changePresence: function(pres, external){
          
-         jsxc.gui.dialog.open('<div class="jsxc_log">'+userInfo+'<h3>Log</h3><pre>' + jsxc.escapeHTML(jsxc.log) + '</pre></div>');
+         if(external !== true){
+            jsxc.storage.setUserItem('presence', pres);
+         }
+         
+         if(jsxc.chief){
+            jsxc.xmpp.sendPres();
+         }
+         
+         $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
+         
+         jsxc.gui.updatePresence('own', pres);
+      },
+      
+      /**
+       * Update all presence objects for given user.
+       * 
+       * @memberOf jsxc.gui
+       * @param cid CSS id of user.
+       * @param {CONST.STATUS} pres New presence state.
+       */
+      updatePresence: function(cid, pres) {
+         
+         $('.jsxc_presence_' + cid).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
       }
    };
 
@@ -1208,6 +1268,12 @@ var jsxc;
          $('#jsxc_toggleRoster').click(function() {
             jsxc.gui.roster.toggle();
          });
+         
+         $('#jsxc_presence > ul > li').click(function(){
+            var self = $(this);
+            
+            jsxc.gui.changePresence(self.data('pres'));
+         });
 
          $('#jsxc_buddylist').slimScroll({
             distance: '3px',
@@ -1217,12 +1283,20 @@ var jsxc;
             opacity: '0.5'
          });
 
-         jsxc.gui.toggleList.call($('#jsxc_menu'));
+         $('#jsxc_roster > .jsxc_bottom > div').each(function() {
+            jsxc.gui.toggleList.call($(this));
+         });
 
          if (jsxc.storage.getUserItem('roster') === 'hidden') {
             $('#jsxc_roster').css('right', '-200px');
             $('#jsxc_windowList > ul').css('paddingRight', '10px');
          }
+         
+         var pres = jsxc.storage.getUserItem('presence') || 'online';
+         $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
+         jsxc.gui.updatePresence('own', pres);
+         
+         jsxc.notice.load();
 
          $(document).trigger('ready.roster.jsxc');
       },
@@ -1581,8 +1655,8 @@ var jsxc;
             if (ev.which !== 13 || !$(this).val()) {
                return;
             }
-
-            jsxc.sendMessage(cid, $(this).val());
+            
+            jsxc.gui.window.postMessage(cid, 'out', $(this).val());
 
             $(this).val('');
          });
@@ -1820,6 +1894,10 @@ var jsxc;
          if (direction === 'in') {
             $(document).trigger('postmessagein.jsxc', [ jsxc.jids[cid], html_msg ]);
          }
+         
+         if (direction === 'out' && jsxc.chief) {
+            jsxc.buddyList[cid].sendMsg(msg);
+         }
 
          jsxc.gui.window._postMessage(cid, direction, msg);
       },
@@ -1933,7 +2011,7 @@ var jsxc;
 
             $.extend(ph, {
                cid_priv_fingerprint: data.fingerprint ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.no_available,
-               cid_jid: data.jid,
+               cid_jid: Strophe.getBareJidFromJid(data.jid),
                cid_name: data.name
             });
          }
@@ -1960,8 +2038,7 @@ var jsxc;
          jsxc.debug('Template not available: ' + name);
          return name;
       },
-      authenticationDialog: '<div id="jsxc_facebox">\
-            <h3>Verification</h3>\
+      authenticationDialog: '<h3>Verification</h3>\
             <p>%%Authenticating_a_buddy_helps_%%</p>\
             <div>\
               <p style="margin:0px;">%%How_do_you_want_to_authenticate_your_buddy%%</p>\
@@ -1990,8 +2067,7 @@ var jsxc;
               <p class=".jsxc_explanation">%%To_authenticate_pick_a_secret_%%</p>\
               <p><label for="jsxc_secret">%%Secret%%:</label><input type="text" name="secret" id="jsxc_secret" /></p>\
               <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Compare%%</a></p>\
-            </div>\
-        </div>',
+            </div>',
       fingerprintsDialog: '<div>\
           <p><strong>%%Your_fingerprint%%</strong><br />\
           <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
@@ -2023,17 +2099,37 @@ var jsxc;
             </div>\
         </li>',
       roster: '<div id="jsxc_roster">\
-            <ul id="jsxc_buddylist"></ul>\
-            <div id="jsxc_menu">\
-            %%Menu%%\
-            <ul>\
-                <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
-                <li class="jsxc_hideOffline">%%Hide offline%%</li>\
-                <li class="jsxc_about">%%About%%</li>\
-            </ul>\
-            </div>\
-            <div id="jsxc_toggleRoster"></div>\
-        </div>',
+           <ul id="jsxc_buddylist"></ul>\
+           <div class="jsxc_bottom jsxc_presence_own">\
+              <div id="jsxc_avatar">\
+                 <div class="jsxc_avatar">☺</div>\
+              </div>\
+              <div id="jsxc_menu">\
+                 <span>⚙</span>\
+                 <ul>\
+                     <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
+                     <li class="jsxc_hideOffline">%%Hide offline%%</li>\
+                     <li class="jsxc_about">%%About%%</li>\
+                 </ul>\
+              </div>\
+              <div id="jsxc_notice">\
+                 <span></span>\
+                 <ul></ul>\
+              </div>\
+              <div id="jsxc_presence">\
+                 <span>%%Online%%</span>\
+                 <ul>\
+                     <li data-pres="online" class="jsxc_online">%%Online%%</li>\
+                     <li data-pres="chat" class="jsxc_chat">%%Chatty%%</li>\
+                     <li data-pres="away" class="jsxc_away">%%Away%%</li>\
+                     <li data-pres="xa" class="jsxc_xa">%%Extended away%%</li>\
+                     <li data-pres="dnd" class="jsxc_dnd">%%dnd%%</li>\
+                     <!-- <li data-pres="offline" class="jsxc_offline">%%Offline%%</li> -->\
+                 </ul>\
+              </div>\
+           </div>\
+           <div id="jsxc_toggleRoster"></div>\
+       </div>',
       windowList: '<div id="jsxc_windowList">\
             <ul></ul>\
         </div>',
@@ -2128,16 +2224,16 @@ var jsxc;
          // Create new connection (no login)
          jsxc.xmpp.conn = new Strophe.Connection(url);
 
-//          jsxc.xmpp.conn.xmlInput = function(data) {
-//          console.log('<', data);
-//          };
-//          jsxc.xmpp.conn.xmlOutput = function(data) {
-//          console.log('>', data);
-//          };
-                  
-//          Strophe.log = function (level, msg) {
-//          console.log(level + " " + msg);
-//          };
+         // jsxc.xmpp.conn.xmlInput = function(data) {
+         // console.log('<', data);
+         // };
+         // jsxc.xmpp.conn.xmlOutput = function(data) {
+         // console.log('>', data);
+         // };
+
+         // Strophe.log = function (level, msg) {
+         // console.log(level + " " + msg);
+         // };
 
          var callback = function(status, condition) {
 
@@ -2229,6 +2325,7 @@ var jsxc;
 
          jsxc.storage.removeUserItem('windowlist');
          jsxc.storage.removeUserItem('own');
+         jsxc.storage.removeUserItem('avatar_own');
 
          // submit login form
          if (jsxc.triggeredFromForm) {
@@ -2273,6 +2370,8 @@ var jsxc;
          } else {
             jsxc.xmpp.sendPres();
          }
+         
+         jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
 
          jsxc.xmpp.connectionReady();
       },
@@ -2295,12 +2394,22 @@ var jsxc;
             jsxc.xmpp.conn.disco.addFeature(Strophe.NS.DISCO_INFO);
          }
 
-         // send presence stanza
+         // create presence stanza
          var pres = $pres();
 
          if (jsxc.xmpp.conn.caps) {
             // attach caps
-            pres.c('c', jsxc.xmpp.conn.caps.generateCapsAttrs());
+            pres.c('c', jsxc.xmpp.conn.caps.generateCapsAttrs()).up();
+         }
+         
+         var presState = jsxc.storage.getUserItem('presence') || 'online';
+         if(presState !== 'online'){
+            pres.c('show').t(presState).up();
+         }
+         
+         var priority = jsxc.storage.getUserItem('priority');
+         if(priority !== null){
+            pres.c('priority').t(priority[presState]).up();
          }
 
          jsxc.debug('Send presence', pres.toString());
@@ -2319,6 +2428,7 @@ var jsxc;
          jsxc.storage.removeItem('rid');
          jsxc.storage.removeItem('lastActivity');
          jsxc.storage.removeItem('hidden');
+         jsxc.storage.removeUserItem('avatar_own');
 
          jsxc.xmpp.conn = null;
 
@@ -2403,9 +2513,8 @@ var jsxc;
 
          jsxc.storage.setUserItem('buddylist', buddies);
 
-         $(document).trigger('rosterready.jsxc');
-
          jsxc.debug('Roster ready');
+         $(document).trigger('rosterready.jsxc');
       },
 
       /**
@@ -2470,7 +2579,7 @@ var jsxc;
        * @param {dom} presence
        * @private
        */
-      onPresence: function(presence) { 
+      onPresence: function(presence) {
          /*
           * <presence xmlns='jabber:client' type='unavailable' from='' to=''/>
           * 
@@ -2486,11 +2595,12 @@ var jsxc;
           * ep-notify-2 html'/> </presence>
           */
          jsxc.debug('onPresence', presence);
-         
+
          var ptype = $(presence).attr('type');
          var from = $(presence).attr('from');
          var jid = Strophe.getBareJidFromJid(from).toLowerCase();
-         var to = Strophe.getBareJidFromJid($(presence).attr('to')).toLowerCase();
+         var to = $(presence).attr('to');
+         to = (to)? Strophe.getBareJidFromJid(to).toLowerCase(): jid;
          var r = Strophe.getResourceFromJid(from);
          var cid = jsxc.jidToCid(jid);
          var data = jsxc.storage.getUserItem('buddy_' + cid);
@@ -2513,17 +2623,17 @@ var jsxc;
                jid: jid,
                approve: -1
             });
-            jsxc.gui.showApproveDialog(jid);
+            jsxc.notice.add('Friendship request', 'from ' + jid, 'gui.showApproveDialog', [jid]);
 
             return true;
          } else if (ptype === 'unavailable') {
-            status = 0;
+            status = jsxc.CONST.STATUS.indexOf('offline');
          } else {
             var show = $(presence).find('show').text();
-            if (show === '' || show === 'chat') {
-               status = 2;
+            if (show === '') {
+               status = jsxc.CONST.STATUS.indexOf('online');
             } else {
-               status = 1;
+               status = jsxc.CONST.STATUS.indexOf(show);
             }
          }
 
@@ -2761,7 +2871,7 @@ var jsxc;
                   jsxc.storage.setItem('storageNotConform', 0);
                }, 1000);
             }
-            jsxc.debug('setItem: ' + key);
+            
             jsxc.ls.push(JSON.stringify({
                key: key,
                value: value
@@ -2974,6 +3084,14 @@ var jsxc;
 
          var cid = key.replace(/^[a-z]+_(.*)/i, '$1');
 
+         if (key.match(/^notices/)) {
+            jsxc.notice.load();
+         }
+         
+         if (key.match(/^presence/)) {
+            jsxc.gui.changePresence(e.newValue, true);
+         }
+         
          if (key.match(/^hidden/)) {
             if (jsxc.chief) {
                clearTimeout(jsxc.toNotification);
@@ -3108,6 +3226,8 @@ var jsxc;
 
          // react if someone ask, if there is a chief
          if (jsxc.chief && key === 'alive') {
+            jsxc.debug('Master request.');
+            
             jsxc.storage.ink('alive');
             return;
          }
@@ -3283,8 +3403,7 @@ var jsxc;
          });
 
          jsxc.buddyList[cid].on('error', function(err) {
-            jsxc.error('[OTR] ', err);
-            jsxc.gui.window.postMessage(cid, 'sys', '[OTR] ' + err);
+            jsxc.error('[OTR] ' + err);
          });
 
          jsxc.otr.restore(cid);
@@ -3562,12 +3681,12 @@ var jsxc;
        * @param msg
        * @param d
        */
-      notify: function(title, msg, d) {
+      notify: function(title, msg, d, force) {
          if (!jsxc.options.notification || !jsxc.notification.hasPermission()) {
             return; // notifications disabled
          }
 
-         if (!jsxc.isHidden()) {
+         if (!jsxc.isHidden() && !force) {
             return; // Tab is visible
          }
 
@@ -3600,6 +3719,10 @@ var jsxc;
             window.Notification = function(title, opt) {
                var popup = window.webkitNotifications.createNotification(null, title, opt.body);
                popup.show();
+               
+               popup.close = function() {
+                  popup.cancel();
+               };
 
                return popup;
             };
@@ -3687,9 +3810,96 @@ var jsxc;
    };
 
    /**
+    * This namespace handle the notice system.
+    * 
+    * @namspace jsxc.notice
+    * @memberOf jsxc
+    */
+   jsxc.notice = {
+      /** Number of notices. */
+      _num: 0,
+
+      /**
+       * Loads the saved notices.
+       * 
+       * @memberOf jsxc.notice
+       */
+      load: function() { 
+         //reset list
+         $('#jsxc_notice ul li').remove();
+         $('#jsxc_notice > span').text('');
+         jsxc.notice._num = 0;
+         
+         var saved = jsxc.storage.getUserItem('notices') || [];
+         var key = null;
+         
+         for(key in saved){
+            if(saved.hasOwnProperty(key)){
+               var val = saved[key];
+               
+               jsxc.notice.add(val.msg, val.description, val.fnName, val.fnParams, key);
+            }
+         }
+      },
+
+      /**
+       * Add a new notice to the stack;
+       * 
+       * @memberOf jsxc.notice
+       * @param msg Header message
+       * @param description Notice description 
+       * @param fnName Function name to be called if you open the notice
+       * @param fnParams Array of params for function
+       * @param id Notice id
+       */
+      add: function(msg, description, fnName, fnParams, id) {
+         var nid = id || Date.now();
+         var list = $('#jsxc_notice ul');
+         var notice = $('<li/>');
+
+         notice.click(function() {
+            $(this).remove();
+            $('#jsxc_notice > span').text(--jsxc.notice._num || '');
+           
+            var s = jsxc.storage.getUserItem('notices');
+            delete s[nid];
+            jsxc.storage.setUserItem('notices', s);
+            
+            var fn = jsxc[fnName];
+            
+            if(typeof fn === 'function'){
+               fn.apply(null, fnParams);
+            }
+            
+            return false;
+         });
+
+         notice.text(msg);
+         notice.attr('title', description || '');
+         list.append(notice);
+
+         $('#jsxc_notice > span').text(++jsxc.notice._num);
+
+         if (!id) {
+            var saved = jsxc.storage.getUserItem('notices') || {};
+            saved[nid] = {
+               msg: msg,
+               description: description,
+               fnName: fnName,
+               fnParams: fnParams
+            };
+            jsxc.storage.setUserItem('notices', saved);
+            
+            jsxc.notification.notify(msg, description || '', null, true);
+         }
+      }
+   };
+
+   /**
     * Contains all available translations
     * 
     * @namespace jsxc.l10n
+    * @memberOf jsxc
     */
    jsxc.l10n = {
       en: {
@@ -3722,7 +3932,7 @@ var jsxc;
          enter_the_secret: 'enter the secret.',
          now_we_will_create_your_private_key_: 'Now we will create your private key. This can take some time.',
          Authenticating_a_buddy_helps_: 'Authenticating a buddy helps ensure that the person you are talking to is who he or she is saying.',
-         How_do_you_want_to_authenticate_your_buddy: 'How do you want to authenticate your buddy?',
+         How_do_you_want_to_authenticate_your_buddy: 'How do you want to authenticate {{cid_name}} (<b>{{cid_jid}}</b>)?',
          Select_method: 'Select method...',
          Manual: 'Manual',
          Question: 'Question',
@@ -3764,7 +3974,8 @@ var jsxc;
          clear_history: 'Clear history',
          New_message_from: 'New message from',
          Should_we_notify_you_: 'Should we notify you about new messages in the future?',
-         Please_accept_: 'Please click the "Allow" button at the top.'
+         Please_accept_: 'Please click the "Allow" button at the top.',
+         dnd: 'Do Not Disturb'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -3796,7 +4007,7 @@ var jsxc;
          enter_the_secret: 'gib das Geheimnis ein.',
          now_we_will_create_your_private_key_: 'Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.',
          Authenticating_a_buddy_helps_: 'Einen Freund zu authentifizieren hilft sicher zustellen, dass die Person mit der du sprichst auch die ist die sie sagt.',
-         How_do_you_want_to_authenticate_your_buddy: 'Wie willst du deinen Freund authentifizieren?',
+         How_do_you_want_to_authenticate_your_buddy: 'Wie willst du {{cid_name}} (<b>{{cid_jid}}</b>) authentifizieren?',
          Select_method: 'Wähle...',
          Manual: 'Manual',
          Question: 'Frage',
@@ -3842,7 +4053,8 @@ var jsxc;
          Menu: 'Menü',
          Hide_offline: 'Offline ausblenden',
          Show_offline: 'Offline einblenden',
-         About: 'Über'
+         About: 'Über',
+         dd: 'Beschäftigt'
       }
    };
 }(jQuery));
