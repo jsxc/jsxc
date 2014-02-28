@@ -420,21 +420,6 @@ var jsxc;
       },
 
       /**
-       * Send message to buddy and display this to the user
-       * 
-       * @param {String} cid
-       * @param {String} msg message to be send
-       */
-      sendMessage: function(cid, msg) {
-
-         if (jsxc.chief) {
-            jsxc.buddyList[cid].sendMsg(msg);
-         }
-
-         jsxc.gui.window.postMessage(cid, 'out', msg);
-      },
-
-      /**
        * Restore roster
        */
       restoreRoster: function() {
@@ -1658,8 +1643,8 @@ var jsxc;
             if (ev.which !== 13 || !$(this).val()) {
                return;
             }
-
-            jsxc.sendMessage(cid, $(this).val());
+            
+            jsxc.gui.window.postMessage(cid, 'out', $(this).val());
 
             $(this).val('');
          });
@@ -1896,6 +1881,10 @@ var jsxc;
 
          if (direction === 'in') {
             $(document).trigger('postmessagein.jsxc', [ jsxc.jids[cid], html_msg ]);
+         }
+         
+         if (direction === 'out' && jsxc.chief) {
+            jsxc.buddyList[cid].sendMsg(msg);
          }
 
          jsxc.gui.window._postMessage(cid, direction, msg);
@@ -3402,8 +3391,7 @@ var jsxc;
          });
 
          jsxc.buddyList[cid].on('error', function(err) {
-            jsxc.error('[OTR] ', err);
-            jsxc.gui.window.postMessage(cid, 'sys', '[OTR] ' + err);
+            jsxc.error('[OTR] ' + err);
          });
 
          jsxc.otr.restore(cid);
