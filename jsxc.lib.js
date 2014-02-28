@@ -804,16 +804,16 @@ var jsxc;
          };
 
          $(this).click(function() {
-
-            ul.slideToggle({
-               done: function(){
-                  if(ul.is(":hidden")){
-                     // hide other lists
-                     $('body').click();
-                     $('body').one('click', slideUp);
-                  }
-               }
-            });
+            
+            if(ul.is(":hidden")){
+               // hide other lists
+               $('body').click();
+               $('body').one('click', slideUp);
+            } else {
+               $('body').off('click', null, slideUp);
+            }
+            
+            ul.slideToggle();
             
             window.clearTimeout(ul.data('timer'));
 
