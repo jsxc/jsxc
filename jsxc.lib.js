@@ -749,31 +749,46 @@ var jsxc;
          }
 
          if (data.avatar && data.avatar.length > 0) {
-            var avatarSrc = jsxc.storage.getUserItem('avatar_' + data.avatar);
+            jsxc.gui.updateAvatar(ue, data.jid, data.avatar);
+         }
+      },
+      
+      updateAvatar: function(el, jid, aid) { 
+         var avatarSrc = jsxc.storage.getUserItem('avatar_' + aid);
 
-            var setAvatar = function(src) {
-               ue.find('.jsxc_avatar img').remove();
-               var img = $('<img/>').attr('alt', 'Avatar').attr('src', src);
-               ue.find('.jsxc_avatar').prepend(img);
-            };
+         var setAvatar = function(src) {
+            if(src === 0) {
+               return;
+            }
+            
+            el.find('.jsxc_avatar img').remove();
+            var img = $('<img/>').attr('alt', 'Avatar').attr('src', src);
+            el.find('.jsxc_avatar').prepend(img);
+         };
 
-            if (avatarSrc !== null) {
-               setAvatar(avatarSrc);
-            } else {
-               jsxc.xmpp.conn.vcard.get(function(stanza) {
-                  jsxc.debug('vCard', stanza);
+         if (avatarSrc !== null) {
+            setAvatar(avatarSrc);
+         } else {
+            jsxc.xmpp.conn.vcard.get(function(stanza) {
+               jsxc.debug('vCard', stanza);
 
-                  var vCard = $(stanza).find("vCard");
+               var vCard = $(stanza).find("vCard > PHOTO");
+               var src;
+               
+               if(vCard.length === 0){
+                  jsxc.debug('No photo provided');
+                  src = 0;
+               } else {
                   var img = vCard.find('BINVAL').text();
                   var type = vCard.find('TYPE').text();
-                  var src = 'data:' + type + ';base64,' + img;
-
-                  jsxc.storage.setUserItem('avatar_' + data.avatar, src);
-                  setAvatar(src);
-               }, Strophe.getBareJidFromJid(data.jid), function(msg) {
-                  jsxc.error('Could not load vcard.', msg);
-               });
-            }
+                  src = 'data:' + type + ';base64,' + img;
+               }
+               
+               jsxc.storage.setUserItem('avatar_' + aid, src);
+               setAvatar(src);
+            }, Strophe.getBareJidFromJid(jid), function(msg) {
+               jsxc.error('Could not load vcard.', msg);
+            });
          }
       },
 
@@ -2309,6 +2324,7 @@ var jsxc;
 
          jsxc.storage.removeUserItem('windowlist');
          jsxc.storage.removeUserItem('own');
+         jsxc.storage.removeUserItem('avatar_own');
 
          // submit login form
          if (jsxc.triggeredFromForm) {
@@ -2353,6 +2369,8 @@ var jsxc;
          } else {
             jsxc.xmpp.sendPres();
          }
+         
+         jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
 
          jsxc.xmpp.connectionReady();
       },
@@ -2409,6 +2427,7 @@ var jsxc;
          jsxc.storage.removeItem('rid');
          jsxc.storage.removeItem('lastActivity');
          jsxc.storage.removeItem('hidden');
+         jsxc.storage.removeUserItem('avatar_own');
 
          jsxc.xmpp.conn = null;
 
