@@ -3853,7 +3853,12 @@ var jsxc;
             delete s[nid];
             jsxc.storage.setUserItem('notices', s);
             
-            var fn = jsxc[fnName];
+            var fnList = fnName.split('.');
+            var fn = jsxc[fnList[0]];
+            var i;
+            for(i = 1; i < fnList.length; i++){
+               fn = fn[fnList[i]];
+            }
             
             if(typeof fn === 'function'){
                fn.apply(null, fnParams);
