@@ -1191,7 +1191,7 @@ var jsxc;
       },
 
       /**
-       * Change presence to pres.
+       * Change own presence to pres.
        * 
        * @memberOf jsxc.gui
        * @param pres {CONST.STATUS} New presence state
@@ -1220,6 +1220,19 @@ var jsxc;
        * @param {CONST.STATUS} pres New presence state.
        */
       updatePresence: function(cid, pres) {
+
+         if (cid === 'own') {
+            if (pres === 'dnd') {
+               $('#jsxc_menu .jsxc_muteNotification').addClass('jsxc_disabled');
+               jsxc.notification.muteSound(true);
+            } else {
+               $('#jsxc_menu .jsxc_muteNotification').removeClass('jsxc_disabled');
+               
+               if (!jsxc.options.get('muteNotification')) {
+                  jsxc.notification.unmuteSound(true);
+               }
+            }
+         }
 
          $('.jsxc_presence_' + cid).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
       }
@@ -1258,6 +1271,26 @@ var jsxc;
             $(this).text(hideOffline ? jsxc.translate('%%Show offline%%') : jsxc.translate('%%Hide offline%%'));
 
             jsxc.options.set('hideOffline', hideOffline);
+         });
+
+         if (jsxc.options.get('muteNotification')) {
+            jsxc.notification.muteSound();
+         }
+
+         $('#jsxc_menu .jsxc_muteNotification').click(function() {
+            
+            if(jsxc.storage.getUserItem('presence') === 'dnd'){
+               return;
+            }
+            
+            // invert current choice
+            var mute = !jsxc.options.get('muteNotification');
+
+            if (mute) {
+               jsxc.notification.muteSound();
+            } else {
+               jsxc.notification.unmuteSound();
+            }
          });
 
          $('#jsxc_roster .jsxc_addBuddy').click(function() {
@@ -2118,6 +2151,7 @@ var jsxc;
               <div id="jsxc_menu">\
                  <span>⚙</span>\
                  <ul>\
+                     <li class="jsxc_muteNotification">%%Mute%%</li>\
                      <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
                      <li class="jsxc_hideOffline">%%Hide offline%%</li>\
                      <li class="jsxc_about">%%About%%</li>\
@@ -2878,7 +2912,7 @@ var jsxc;
 
          // Workaround for non-conform browser
          if (jsxc.storageNotConform > 0 && key !== 'rid' && key !== 'lastActivity') {
-            if (jsxc.storageNotConform > 1) {
+            if (jsxc.storageNotConform > 1 && jsxc.toSNC === null) {
                jsxc.toSNC = window.setTimeout(function() {
                   jsxc.storageNotConform = 0;
                   jsxc.storage.setItem('storageNotConform', 0);
@@ -3058,7 +3092,7 @@ var jsxc;
          if (e.key === jsxc.storage.prefix + 'rid' || e.key === jsxc.storage.prefix + 'lastActivity') {
             return;
          }
-
+         
          var key = e.key.replace(/^jsxc\.(?:[\w\-]+-[\w\-]+\.)?(.*)/i, '$1');
 
          // Workaround for non-conform browser: Triggered event on every page
@@ -3103,6 +3137,16 @@ var jsxc;
 
          if (key.match(/^presence/)) {
             jsxc.gui.changePresence(e.newValue, true);
+         }
+
+         if (key.match(/^options/) && e.newValue) {
+            n = JSON.parse(e.newValue);
+            
+            if (typeof n.muteNotification !== 'undefined' && n.muteNotification) {
+               jsxc.notification.muteSound(true);
+            } else {
+               jsxc.notification.unmuteSound(true);
+            }
          }
 
          if (key.match(/^hidden/)) {
@@ -3688,12 +3732,12 @@ var jsxc;
             jsxc.notification.playSound(jsxc.CONST.SOUNDS.MSG);
             jsxc.notification.notify(jsxc.translate('%%New message from%% ') + data.name, msg);
          });
-         
-         $(document).on('callincoming.jingle', function(){
+
+         $(document).on('callincoming.jingle', function() {
             jsxc.notification.playSound(jsxc.CONST.SOUNDS.CALL, true, true);
          });
-         
-         $(document).on('accept.call.jsxc reject.call.jsxc', function(){
+
+         $(document).on('accept.call.jsxc reject.call.jsxc', function() {
             jsxc.notification.stopSound();
          });
       },
@@ -3833,10 +3877,21 @@ var jsxc;
       },
 
       playSound: function(soundFile, loop, force) {
-         if (!jsxc.isHidden() && !force) {
-            return; // Tab is visible
+         if (!jsxc.chief) {
+            // only master plays sound
+            return;
          }
-         console.log('play sound', soundFile);
+
+         if (jsxc.options.get('muteNotification') || jsxc.storage.getUserItem('presence') === 'dnd') {
+            // sound mute or own presence is dnd
+            return;
+         }
+
+         if (!jsxc.isHidden() && !force) {
+            // tab is visible
+            return;
+         }
+
          var audio = jsxc.notification.audio;
          if (audio) {
             // stop current audio file
@@ -3846,16 +3901,32 @@ var jsxc;
          audio = new Audio(jsxc.options.root + '/sound/' + soundFile);
          audio.loop = loop || false;
          audio.play();
-         
+
          jsxc.notification.audio = audio;
       },
-      
-      stopSound: function(){
+
+      stopSound: function() {
          var audio = jsxc.notification.audio;
-         
+
          audio.pause();
          audio.currentTime = 0;
          jsxc.notification.audio = null;
+      },
+
+      muteSound: function(external) {
+         $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Unmute%%'));
+
+         if (external !== true) {
+            jsxc.options.set('muteNotification', true);
+         }
+      },
+
+      unmuteSound: function(external) {
+         $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Mute%%'));
+
+         if (external !== true) {
+            jsxc.options.set('muteNotification', false);
+         }
       }
    };
 
@@ -4030,7 +4101,16 @@ var jsxc;
          New_message_from: 'New message from',
          Should_we_notify_you_: 'Should we notify you about new messages in the future?',
          Please_accept_: 'Please click the "Allow" button at the top.',
-         dnd: 'Do Not Disturb'
+         dnd: 'Do Not Disturb',
+         Mute: 'Mute',
+         Unmute: 'Unmute',
+         Subscription: 'Subscription',
+         both: 'both',
+         Status: 'Status',
+         online: 'online',
+         chat: 'chat',
+         away: 'away',
+         xa: 'extended away'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4109,7 +4189,16 @@ var jsxc;
          Hide_offline: 'Offline ausblenden',
          Show_offline: 'Offline einblenden',
          About: 'Über',
-         dd: 'Beschäftigt'
+         dd: 'Beschäftigt',
+         Mute: 'Ton aus',
+         Unmute: 'Ton an',
+         Subscription: 'Subscription',
+         both: 'both',
+         Status: 'Status',
+         online: 'online',
+         chat: 'chat',
+         away: 'abwesend',
+         xa: 'mehr abwesend'
       }
    };
 }(jQuery));
