@@ -387,11 +387,14 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', jsxc.jidToCid(jid)));
 
          dialog.find('.jsxc_accept').click(function() {
+            $(document).trigger('accept.call.jsxc');
+            
             self.reqUserMedia();
          });
 
          dialog.find('.jsxc_reject').click(function() {
             jsxc.gui.dialog.close();
+            $(document).trigger('reject.call.jsxc');
 
             sess.sendTerminate('decline');
             sess.terminate();
