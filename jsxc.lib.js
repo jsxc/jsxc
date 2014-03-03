@@ -3129,6 +3129,7 @@ var jsxc;
             return;
          }
 
+         var n, o;
          var cid = key.replace(/^[a-z]+_(.*)/i, '$1');
 
          if (key.match(/^notices/)) {
@@ -3168,7 +3169,6 @@ var jsxc;
             jsxc.gui.window._postMessage(cid, data.direction, data.msg);
             return;
          }
-         var n, o;
 
          if (key.match(/^window_/)) {
 

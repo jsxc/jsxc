@@ -1,5 +1,5 @@
 /**
- * jsxc v0.6.0 - 2014-02-28
+ * jsxc v0.6.1-alpha - 2014-03-03
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.6.0
+ * @version 0.6.1-alpha
  */
 
 /* jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery */
@@ -399,11 +399,14 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', jsxc.jidToCid(jid)));
 
          dialog.find('.jsxc_accept').click(function() {
+            $(document).trigger('accept.call.jsxc');
+            
             self.reqUserMedia();
          });
 
          dialog.find('.jsxc_reject').click(function() {
             jsxc.gui.dialog.close();
+            $(document).trigger('reject.call.jsxc');
 
             sess.sendTerminate('decline');
             sess.terminate();

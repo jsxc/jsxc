@@ -1,5 +1,5 @@
 /**
- * jsxc v0.6.0 - 2014-02-28
+ * jsxc v0.6.1-alpha - 2014-03-03
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.6.0
+ * @version 0.6.1-alpha
  */
 
 var jsxc;
@@ -22,7 +22,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '0.6.0',
+      version: '0.6.1-alpha',
 
       /** True if i'm the chief */
       chief: false,
@@ -86,7 +86,11 @@ var jsxc;
          NOTIFICATION_DEFAULT: 'default',
          NOTIFICATION_GRANTED: 'granted',
          NOTIFICATION_DENIED: 'denied',
-         STATUS: [ 'offline', 'dnd', 'xa', 'away', 'chat', 'online' ]
+         STATUS: [ 'offline', 'dnd', 'xa', 'away', 'chat', 'online' ],
+         SOUNDS: {
+            MSG: 'incomingMessage.wav',
+            CALL: 'Rotary-Phone6.mp3'
+         }
       },
 
       /**
@@ -740,24 +744,30 @@ var jsxc;
 
          // update gui according to subscription state
          if (data.sub && data.sub !== 'both') {
-            ri.addClass('jsxc_oneway').find('.jsxc_name').attr('title', jsxc.l.you_have_only_a_subscription_in_one_way);
+            ri.addClass('jsxc_oneway');
          } else {
             ri.removeClass('jsxc_oneway');
          }
+
+         var info = '<b>' + Strophe.getBareJidFromJid(data.jid) + '</b>\n';
+         info += jsxc.translate('%%Subscription%%: %%' + data.sub + '%%\n');
+         info += jsxc.translate('%%Status%%: %%' + jsxc.CONST.STATUS[data.status] + '%%');
+
+         ri.find('.jsxc_name').attr('title', info);
 
          if (data.avatar && data.avatar.length > 0) {
             jsxc.gui.updateAvatar(ue, data.jid, data.avatar);
          }
       },
-      
-      updateAvatar: function(el, jid, aid) { 
+
+      updateAvatar: function(el, jid, aid) {
          var avatarSrc = jsxc.storage.getUserItem('avatar_' + aid);
 
          var setAvatar = function(src) {
-            if(src === 0) {
+            if (src === 0) {
                return;
             }
-            
+
             el.find('.jsxc_avatar img').remove();
             var img = $('<img/>').attr('alt', 'Avatar').attr('src', src);
             el.find('.jsxc_avatar').prepend(img);
@@ -771,8 +781,8 @@ var jsxc;
 
                var vCard = $(stanza).find("vCard > PHOTO");
                var src;
-               
-               if(vCard.length === 0){
+
+               if (vCard.length === 0) {
                   jsxc.debug('No photo provided');
                   src = 0;
                } else {
@@ -780,7 +790,7 @@ var jsxc;
                   var type = vCard.find('TYPE').text();
                   src = 'data:' + type + ';base64,' + img;
                }
-               
+
                jsxc.storage.setUserItem('avatar_' + aid, src);
                setAvatar(src);
             }, Strophe.getBareJidFromJid(jid), function(msg) {
@@ -816,17 +826,17 @@ var jsxc;
          };
 
          $(this).click(function() {
-            
-            if(ul.is(":hidden")){
+
+            if (ul.is(":hidden")) {
                // hide other lists
                $('body').click();
                $('body').one('click', slideUp);
             } else {
                $('body').off('click', null, slideUp);
             }
-            
+
             ul.slideToggle();
-            
+
             window.clearTimeout(ul.data('timer'));
 
             return false;
@@ -884,13 +894,13 @@ var jsxc;
       showVerification: function(cid) {
 
          // Check if there is a open dialog
-         if($('#jsxc_dialog').length > 0) {
-            setTimeout(function(){
+         if ($('#jsxc_dialog').length > 0) {
+            setTimeout(function() {
                jsxc.gui.showVerification(cid);
             }, 3000);
             return;
          }
-         
+
          // verification only possible if the connection is encrypted
          if (jsxc.storage.getUserItem('buddy_' + cid).msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED) {
             jsxc.warn('Connection not encrypted');
@@ -1002,6 +1012,8 @@ var jsxc;
 
          $('#jsxc_dialog .jsxc_deny').click(function() {
             jsxc.xmpp.resFriendReq(from, false);
+
+            jsxc.gui.dialog.close();
          });
 
          $('#jsxc_dialog .jsxc_approve').click(function() {
@@ -1011,10 +1023,12 @@ var jsxc;
 
             // If friendship is not mutual show contact dialog
             if (!data || data.sub === 'from') {
-               $(document).one('afterClose.facebox', function() {
+               $(document).one('close.dialog.jsxc', function() {
                   jsxc.gui.showContactDialog(from);
                });
             }
+
+            jsxc.gui.dialog.close();
          });
       },
 
@@ -1072,10 +1086,11 @@ var jsxc;
             if (jsxc.chief) {
                jsxc.xmpp.removeBuddy(data.jid);
             } else {
-               jsxc.gui.roster.purge(cid);
+               // inform master
+               jsxc.storage.setUserItem('deletebuddy_' + cid, {
+                  jid: data.jid
+               });
             }
-
-            jsxc.storage.removeUserItem('buddy_' + cid);
 
             jsxc.gui.dialog.close();
          });
@@ -1188,27 +1203,27 @@ var jsxc;
       },
 
       /**
-       * Change presence to pres.
+       * Change own presence to pres.
        * 
        * @memberOf jsxc.gui
        * @param pres {CONST.STATUS} New presence state
        * @param external {boolean} True if triggered from other tab.
        */
-      changePresence: function(pres, external){
-         
-         if(external !== true){
+      changePresence: function(pres, external) {
+
+         if (external !== true) {
             jsxc.storage.setUserItem('presence', pres);
          }
-         
-         if(jsxc.chief){
+
+         if (jsxc.chief) {
             jsxc.xmpp.sendPres();
          }
-         
+
          $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
-         
+
          jsxc.gui.updatePresence('own', pres);
       },
-      
+
       /**
        * Update all presence objects for given user.
        * 
@@ -1217,7 +1232,20 @@ var jsxc;
        * @param {CONST.STATUS} pres New presence state.
        */
       updatePresence: function(cid, pres) {
-         
+
+         if (cid === 'own') {
+            if (pres === 'dnd') {
+               $('#jsxc_menu .jsxc_muteNotification').addClass('jsxc_disabled');
+               jsxc.notification.muteSound(true);
+            } else {
+               $('#jsxc_menu .jsxc_muteNotification').removeClass('jsxc_disabled');
+               
+               if (!jsxc.options.get('muteNotification')) {
+                  jsxc.notification.unmuteSound(true);
+               }
+            }
+         }
+
          $('.jsxc_presence_' + cid).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
       }
    };
@@ -1257,6 +1285,26 @@ var jsxc;
             jsxc.options.set('hideOffline', hideOffline);
          });
 
+         if (jsxc.options.get('muteNotification')) {
+            jsxc.notification.muteSound();
+         }
+
+         $('#jsxc_menu .jsxc_muteNotification').click(function() {
+            
+            if(jsxc.storage.getUserItem('presence') === 'dnd'){
+               return;
+            }
+            
+            // invert current choice
+            var mute = !jsxc.options.get('muteNotification');
+
+            if (mute) {
+               jsxc.notification.muteSound();
+            } else {
+               jsxc.notification.unmuteSound();
+            }
+         });
+
          $('#jsxc_roster .jsxc_addBuddy').click(function() {
             jsxc.gui.showContactDialog();
          });
@@ -1268,10 +1316,10 @@ var jsxc;
          $('#jsxc_toggleRoster').click(function() {
             jsxc.gui.roster.toggle();
          });
-         
-         $('#jsxc_presence > ul > li').click(function(){
+
+         $('#jsxc_presence > ul > li').click(function() {
             var self = $(this);
-            
+
             jsxc.gui.changePresence(self.data('pres'));
          });
 
@@ -1291,11 +1339,20 @@ var jsxc;
             $('#jsxc_roster').css('right', '-200px');
             $('#jsxc_windowList > ul').css('paddingRight', '10px');
          }
-         
+
          var pres = jsxc.storage.getUserItem('presence') || 'online';
          $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
          jsxc.gui.updatePresence('own', pres);
-         
+
+         $('#jsxc_roster').tooltip({
+            show: {
+               delay: 1000
+            },
+            content: function() {
+               return $(this).attr('title').replace(/\n/g, '<br />');
+            }
+         });
+
          jsxc.notice.load();
 
          $(document).trigger('ready.roster.jsxc');
@@ -1505,13 +1562,12 @@ var jsxc;
        */
       noConnection: function() {
          $('#jsxc_roster .slimScrollDiv').remove();
-         $('#jsxc_menu').remove();
+         $('#jsxc_roster > .jsxc_bottom').remove();
 
          $('#jsxc_roster').append($(document.createElement('p')).text(jsxc.l.no_connection).append($(document.createElement('a')).attr('href', '#').text(jsxc.l.relogin).click(function() {
             jsxc.gui.showLoginBox();
          })));
       }
-
    };
 
    /**
@@ -1655,7 +1711,7 @@ var jsxc;
             if (ev.which !== 13 || !$(this).val()) {
                return;
             }
-            
+
             jsxc.gui.window.postMessage(cid, 'out', $(this).val());
 
             $(this).val('');
@@ -1894,7 +1950,7 @@ var jsxc;
          if (direction === 'in') {
             $(document).trigger('postmessagein.jsxc', [ jsxc.jids[cid], html_msg ]);
          }
-         
+
          if (direction === 'out' && jsxc.chief) {
             jsxc.buddyList[cid].sendMsg(msg);
          }
@@ -2107,6 +2163,7 @@ var jsxc;
               <div id="jsxc_menu">\
                  <span>⚙</span>\
                  <ul>\
+                     <li class="jsxc_muteNotification">%%Mute%%</li>\
                      <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
                      <li class="jsxc_hideOffline">%%Hide offline%%</li>\
                      <li class="jsxc_about">%%About%%</li>\
@@ -2189,9 +2246,11 @@ var jsxc;
          <p><b>Version: </b>' + jsxc.version + '<br />\
          <a href="http://jsxc.org/" target="_blank">www.jsxc.org</a><br />\
          <br />\
+         <i>Released under the MIT license</i><br />\
+         <br />\
          Real-time chat app for OwnCloud. This app requires external<br /> XMPP server (openfire, ejabberd etc.).<br />\
          <br />\
-         <i>Released under the MIT license</i></p>\
+         <b>Credential: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">Ringtone</a></p>\
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>'
    };
 
@@ -2370,7 +2429,7 @@ var jsxc;
          } else {
             jsxc.xmpp.sendPres();
          }
-         
+
          jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
 
          jsxc.xmpp.connectionReady();
@@ -2401,14 +2460,14 @@ var jsxc;
             // attach caps
             pres.c('c', jsxc.xmpp.conn.caps.generateCapsAttrs()).up();
          }
-         
+
          var presState = jsxc.storage.getUserItem('presence') || 'online';
-         if(presState !== 'online'){
+         if (presState !== 'online') {
             pres.c('show').t(presState).up();
          }
-         
+
          var priority = jsxc.storage.getUserItem('priority');
-         if(priority !== null){
+         if (priority !== null) {
             pres.c('priority').t(priority[presState]).up();
          }
 
@@ -2600,7 +2659,7 @@ var jsxc;
          var from = $(presence).attr('from');
          var jid = Strophe.getBareJidFromJid(from).toLowerCase();
          var to = $(presence).attr('to');
-         to = (to)? Strophe.getBareJidFromJid(to).toLowerCase(): jid;
+         to = (to) ? Strophe.getBareJidFromJid(to).toLowerCase() : jid;
          var r = Strophe.getResourceFromJid(from);
          var cid = jsxc.jidToCid(jid);
          var data = jsxc.storage.getUserItem('buddy_' + cid);
@@ -2623,10 +2682,10 @@ var jsxc;
                jid: jid,
                approve: -1
             });
-            jsxc.notice.add('Friendship request', 'from ' + jid, 'gui.showApproveDialog', [jid]);
+            jsxc.notice.add('Friendship request', 'from ' + jid, 'gui.showApproveDialog', [ jid ]);
 
             return true;
-         } else if (ptype === 'unavailable') {
+         } else if (ptype === 'unavailable' || ptype === 'unsubscribed') {
             status = jsxc.CONST.STATUS.indexOf('offline');
          } else {
             var show = $(presence).find('show').text();
@@ -2865,13 +2924,13 @@ var jsxc;
 
          // Workaround for non-conform browser
          if (jsxc.storageNotConform > 0 && key !== 'rid' && key !== 'lastActivity') {
-            if (jsxc.storageNotConform > 1) {
+            if (jsxc.storageNotConform > 1 && jsxc.toSNC === null) {
                jsxc.toSNC = window.setTimeout(function() {
                   jsxc.storageNotConform = 0;
                   jsxc.storage.setItem('storageNotConform', 0);
                }, 1000);
             }
-            
+
             jsxc.ls.push(JSON.stringify({
                key: key,
                value: value
@@ -3045,7 +3104,7 @@ var jsxc;
          if (e.key === jsxc.storage.prefix + 'rid' || e.key === jsxc.storage.prefix + 'lastActivity') {
             return;
          }
-
+         
          var key = e.key.replace(/^jsxc\.(?:[\w\-]+-[\w\-]+\.)?(.*)/i, '$1');
 
          // Workaround for non-conform browser: Triggered event on every page
@@ -3082,16 +3141,27 @@ var jsxc;
             return;
          }
 
+         var n, o;
          var cid = key.replace(/^[a-z]+_(.*)/i, '$1');
 
          if (key.match(/^notices/)) {
             jsxc.notice.load();
          }
-         
+
          if (key.match(/^presence/)) {
             jsxc.gui.changePresence(e.newValue, true);
          }
-         
+
+         if (key.match(/^options/) && e.newValue) {
+            n = JSON.parse(e.newValue);
+            
+            if (typeof n.muteNotification !== 'undefined' && n.muteNotification) {
+               jsxc.notification.muteSound(true);
+            } else {
+               jsxc.notification.unmuteSound(true);
+            }
+         }
+
          if (key.match(/^hidden/)) {
             if (jsxc.chief) {
                clearTimeout(jsxc.toNotification);
@@ -3111,7 +3181,6 @@ var jsxc;
             jsxc.gui.window._postMessage(cid, data.direction, data.msg);
             return;
          }
-         var n, o;
 
          if (key.match(/^window_/)) {
 
@@ -3185,15 +3254,17 @@ var jsxc;
             }
          }
 
+         if (jsxc.chief && key.match(/^deletebuddy_/) && e.newValue) {
+            n = JSON.parse(e.newValue);
+
+            jsxc.xmpp.removeBuddy(n.jid);
+            jsxc.storage.removeUserItem(key);
+         }
+
          if (jsxc.chief && key.match(/^buddy_/)) {
 
             n = JSON.parse(e.newValue);
             o = JSON.parse(e.oldValue);
-
-            if (!e.newValue) {
-               jsxc.xmpp.removeBuddy(o.jid);
-               return;
-            }
 
             if (o.transferReq !== n.transferReq) {
                jsxc.storage.updateItem('buddy_' + cid, 'transferReq', -1);
@@ -3227,7 +3298,7 @@ var jsxc;
          // react if someone ask, if there is a chief
          if (jsxc.chief && key === 'alive') {
             jsxc.debug('Master request.');
-            
+
             jsxc.storage.ink('alive');
             return;
          }
@@ -3250,12 +3321,8 @@ var jsxc;
          if (key === 'friendReq') {
             n = JSON.parse(e.newValue);
 
-            if (n === null) {
-               jsxc.gui.dialog.close();
-            } else if (jsxc.chief && n.approve >= 0) {
+            if (jsxc.chief && n.approve >= 0) {
                jsxc.xmpp.resFriendReq(n.jid, n.approve);
-            } else if (!jsxc.chief && n.approve < 0) {
-               jsxc.gui.showApproveDialog(n.jid);
             }
          }
 
@@ -3660,6 +3727,10 @@ var jsxc;
     * @namespace jsxc.notification
     */
    jsxc.notification = {
+
+      /** Current audio file. */
+      audio: null,
+
       /**
        * Register notification on incoming messages.
        * 
@@ -3670,7 +3741,16 @@ var jsxc;
             msg = (msg.match(/^\?OTR/)) ? jsxc.translate('%%Encrypted message%%') : msg;
             var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(jid));
 
+            jsxc.notification.playSound(jsxc.CONST.SOUNDS.MSG);
             jsxc.notification.notify(jsxc.translate('%%New message from%% ') + data.name, msg);
+         });
+
+         $(document).on('callincoming.jingle', function() {
+            jsxc.notification.playSound(jsxc.CONST.SOUNDS.CALL, true, true);
+         });
+
+         $(document).on('accept.call.jsxc reject.call.jsxc', function() {
+            jsxc.notification.stopSound();
          });
       },
 
@@ -3719,7 +3799,7 @@ var jsxc;
             window.Notification = function(title, opt) {
                var popup = window.webkitNotifications.createNotification(null, title, opt.body);
                popup.show();
-               
+
                popup.close = function() {
                   popup.cancel();
                };
@@ -3806,6 +3886,59 @@ var jsxc;
        */
       hasPermission: function() {
          return window.Notification.permission === jsxc.CONST.NOTIFICATION_GRANTED;
+      },
+
+      playSound: function(soundFile, loop, force) {
+         if (!jsxc.chief) {
+            // only master plays sound
+            return;
+         }
+
+         if (jsxc.options.get('muteNotification') || jsxc.storage.getUserItem('presence') === 'dnd') {
+            // sound mute or own presence is dnd
+            return;
+         }
+
+         if (!jsxc.isHidden() && !force) {
+            // tab is visible
+            return;
+         }
+
+         var audio = jsxc.notification.audio;
+         if (audio) {
+            // stop current audio file
+            jsxc.notification.stopSound();
+         }
+
+         audio = new Audio(jsxc.options.root + '/sound/' + soundFile);
+         audio.loop = loop || false;
+         audio.play();
+
+         jsxc.notification.audio = audio;
+      },
+
+      stopSound: function() {
+         var audio = jsxc.notification.audio;
+
+         audio.pause();
+         audio.currentTime = 0;
+         jsxc.notification.audio = null;
+      },
+
+      muteSound: function(external) {
+         $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Unmute%%'));
+
+         if (external !== true) {
+            jsxc.options.set('muteNotification', true);
+         }
+      },
+
+      unmuteSound: function(external) {
+         $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Mute%%'));
+
+         if (external !== true) {
+            jsxc.options.set('muteNotification', false);
+         }
       }
    };
 
@@ -3824,19 +3957,19 @@ var jsxc;
        * 
        * @memberOf jsxc.notice
        */
-      load: function() { 
-         //reset list
+      load: function() {
+         // reset list
          $('#jsxc_notice ul li').remove();
          $('#jsxc_notice > span').text('');
          jsxc.notice._num = 0;
-         
+
          var saved = jsxc.storage.getUserItem('notices') || [];
          var key = null;
-         
-         for(key in saved){
-            if(saved.hasOwnProperty(key)){
+
+         for (key in saved) {
+            if (saved.hasOwnProperty(key)) {
                var val = saved[key];
-               
+
                jsxc.notice.add(val.msg, val.description, val.fnName, val.fnParams, key);
             }
          }
@@ -3847,7 +3980,7 @@ var jsxc;
        * 
        * @memberOf jsxc.notice
        * @param msg Header message
-       * @param description Notice description 
+       * @param description Notice description
        * @param fnName Function name to be called if you open the notice
        * @param fnParams Array of params for function
        * @param id Notice id
@@ -3860,17 +3993,22 @@ var jsxc;
          notice.click(function() {
             $(this).remove();
             $('#jsxc_notice > span').text(--jsxc.notice._num || '');
-           
+
             var s = jsxc.storage.getUserItem('notices');
             delete s[nid];
             jsxc.storage.setUserItem('notices', s);
-            
-            var fn = jsxc[fnName];
-            
-            if(typeof fn === 'function'){
+
+            var fnList = fnName.split('.');
+            var fn = jsxc[fnList[0]];
+            var i;
+            for (i = 1; i < fnList.length; i++) {
+               fn = fn[fnList[i]];
+            }
+
+            if (typeof fn === 'function') {
                fn.apply(null, fnParams);
             }
-            
+
             return false;
          });
 
@@ -3889,7 +4027,7 @@ var jsxc;
                fnParams: fnParams
             };
             jsxc.storage.setUserItem('notices', saved);
-            
+
             jsxc.notification.notify(msg, description || '', null, true);
          }
       }
@@ -3975,7 +4113,16 @@ var jsxc;
          New_message_from: 'New message from',
          Should_we_notify_you_: 'Should we notify you about new messages in the future?',
          Please_accept_: 'Please click the "Allow" button at the top.',
-         dnd: 'Do Not Disturb'
+         dnd: 'Do Not Disturb',
+         Mute: 'Mute',
+         Unmute: 'Unmute',
+         Subscription: 'Subscription',
+         both: 'both',
+         Status: 'Status',
+         online: 'online',
+         chat: 'chat',
+         away: 'away',
+         xa: 'extended away'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4054,7 +4201,16 @@ var jsxc;
          Hide_offline: 'Offline ausblenden',
          Show_offline: 'Offline einblenden',
          About: 'Über',
-         dd: 'Beschäftigt'
+         dd: 'Beschäftigt',
+         Mute: 'Ton aus',
+         Unmute: 'Ton an',
+         Subscription: 'Subscription',
+         both: 'both',
+         Status: 'Status',
+         online: 'online',
+         chat: 'chat',
+         away: 'abwesend',
+         xa: 'mehr abwesend'
       }
    };
 }(jQuery));
