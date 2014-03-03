@@ -74,7 +74,11 @@ var jsxc;
          NOTIFICATION_DEFAULT: 'default',
          NOTIFICATION_GRANTED: 'granted',
          NOTIFICATION_DENIED: 'denied',
-         STATUS: [ 'offline', 'dnd', 'xa', 'away', 'chat', 'online' ]
+         STATUS: [ 'offline', 'dnd', 'xa', 'away', 'chat', 'online' ],
+         SOUNDS: {
+            MSG: 'incomingMessage.wav',
+            CALL: 'Rotary-Phone6.mp3'
+         }
       },
 
       /**
@@ -996,7 +1000,7 @@ var jsxc;
 
          $('#jsxc_dialog .jsxc_deny').click(function() {
             jsxc.xmpp.resFriendReq(from, false);
-            
+
             jsxc.gui.dialog.close();
          });
 
@@ -1071,7 +1075,9 @@ var jsxc;
                jsxc.xmpp.removeBuddy(data.jid);
             } else {
                // inform master
-               jsxc.storage.setUserItem('deletebuddy_' + cid, {jid: data.jid});
+               jsxc.storage.setUserItem('deletebuddy_' + cid, {
+                  jid: data.jid
+               });
             }
 
             jsxc.gui.dialog.close();
@@ -1292,12 +1298,12 @@ var jsxc;
          var pres = jsxc.storage.getUserItem('presence') || 'online';
          $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
          jsxc.gui.updatePresence('own', pres);
-         
+
          $('#jsxc_roster').tooltip({
             show: {
                delay: 1000
-            }, 
-            content: function(){
+            },
+            content: function() {
                return $(this).attr('title').replace(/\n/g, '<br />');
             }
          });
@@ -2194,9 +2200,11 @@ var jsxc;
          <p><b>Version: </b>' + jsxc.version + '<br />\
          <a href="http://jsxc.org/" target="_blank">www.jsxc.org</a><br />\
          <br />\
+         <i>Released under the MIT license</i><br />\
+         <br />\
          Real-time chat app for OwnCloud. This app requires external<br /> XMPP server (openfire, ejabberd etc.).<br />\
          <br />\
-         <i>Released under the MIT license</i></p>\
+         <b>Credential: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">Ringtone</a></p>\
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>'
    };
 
@@ -3663,6 +3671,10 @@ var jsxc;
     * @namespace jsxc.notification
     */
    jsxc.notification = {
+
+      /** Current audio file. */
+      audio: null,
+
       /**
        * Register notification on incoming messages.
        * 
@@ -3673,7 +3685,16 @@ var jsxc;
             msg = (msg.match(/^\?OTR/)) ? jsxc.translate('%%Encrypted message%%') : msg;
             var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(jid));
 
+            jsxc.notification.playSound(jsxc.CONST.SOUNDS.MSG);
             jsxc.notification.notify(jsxc.translate('%%New message from%% ') + data.name, msg);
+         });
+         
+         $(document).on('callincoming.jingle', function(){
+            jsxc.notification.playSound(jsxc.CONST.SOUNDS.CALL, true, true);
+         });
+         
+         $(document).on('accept.call.jsxc reject.call.jsxc', function(){
+            jsxc.notification.stopSound();
          });
       },
 
@@ -3809,6 +3830,32 @@ var jsxc;
        */
       hasPermission: function() {
          return window.Notification.permission === jsxc.CONST.NOTIFICATION_GRANTED;
+      },
+
+      playSound: function(soundFile, loop, force) {
+         if (!jsxc.isHidden() && !force) {
+            return; // Tab is visible
+         }
+         console.log('play sound', soundFile);
+         var audio = jsxc.notification.audio;
+         if (audio) {
+            // stop current audio file
+            jsxc.notification.stopSound();
+         }
+
+         audio = new Audio(jsxc.options.root + '/sound/' + soundFile);
+         audio.loop = loop || false;
+         audio.play();
+         
+         jsxc.notification.audio = audio;
+      },
+      
+      stopSound: function(){
+         var audio = jsxc.notification.audio;
+         
+         audio.pause();
+         audio.currentTime = 0;
+         jsxc.notification.audio = null;
       }
    };
 
