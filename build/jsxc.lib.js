@@ -1,5 +1,5 @@
 /**
- * jsxc v0.6.1-alpha - 2014-03-03
+ * jsxc v0.6.1-alpha2 - 2014-03-04
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.6.1-alpha
+ * @version 0.6.1-alpha2
  */
 
 var jsxc;
@@ -22,7 +22,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '0.6.1-alpha',
+      version: '0.6.1-alpha2',
 
       /** True if i'm the chief */
       chief: false,
@@ -89,7 +89,8 @@ var jsxc;
          STATUS: [ 'offline', 'dnd', 'xa', 'away', 'chat', 'online' ],
          SOUNDS: {
             MSG: 'incomingMessage.wav',
-            CALL: 'Rotary-Phone6.mp3'
+            CALL: 'Rotary-Phone6.mp3',
+            NOTICE: 'Ping1.mp3'
          }
       },
 
@@ -108,7 +109,21 @@ var jsxc;
 
          if (data) {
             console.log(msg, data);
-            jsxc.log = jsxc.log + msg + ': ' + $("<span>").prepend($(data).clone()).html() + '\n';
+            
+            //try to convert data to string
+            var d;
+            try{
+               //clone html snippet
+               d = $("<span>").prepend($(data).clone()).html();
+            }catch(err){
+               try{ 
+                  d = JSON.stringify(data);
+               }catch(err2){ 
+                  d = 'see js console';
+               }
+            }
+            
+            jsxc.log = jsxc.log + msg + ': ' + d + '\n';
          } else {
             console.log(msg);
             jsxc.log = jsxc.log + msg + '\n';
@@ -654,7 +669,17 @@ var jsxc;
       },
 
       /** Set to true if you want to hide offline buddies. */
-      hideOffline: false
+      hideOffline: false,
+      
+      /**
+       * If no avatar is found, this function is called.
+       *
+       * @param jid Jid of that user.
+       * @this {jQuery} Elements to update with probable .jsxc_avatar elements
+       */
+      defaultAvatar: function() {
+
+      }
    };
 
    /**
@@ -757,9 +782,19 @@ var jsxc;
 
          if (data.avatar && data.avatar.length > 0) {
             jsxc.gui.updateAvatar(ue, data.jid, data.avatar);
+         } else {
+            jsxc.options.defaultAvatar.call(ue, data.jid);
          }
       },
 
+      /**
+       * Update avatar on all given elements.
+       * 
+       * @memberOf jsxc.gui
+       * @param {jQuery} el Elements with subelement .jsxc_avatar
+       * @param {string} jid Jid
+       * @param {string} aid Avatar id (sha1 hash of image)
+       */
       updateAvatar: function(el, jid, aid) {
          var avatarSrc = jsxc.storage.getUserItem('avatar_' + aid);
 
@@ -768,6 +803,7 @@ var jsxc;
                return;
             }
 
+            el.find('.jsxc_avatar').removeAttr('style');
             el.find('.jsxc_avatar img').remove();
             var img = $('<img/>').attr('alt', 'Avatar').attr('src', src);
             el.find('.jsxc_avatar').prepend(img);
@@ -1239,7 +1275,7 @@ var jsxc;
                jsxc.notification.muteSound(true);
             } else {
                $('#jsxc_menu .jsxc_muteNotification').removeClass('jsxc_disabled');
-               
+
                if (!jsxc.options.get('muteNotification')) {
                   jsxc.notification.unmuteSound(true);
                }
@@ -1290,11 +1326,11 @@ var jsxc;
          }
 
          $('#jsxc_menu .jsxc_muteNotification').click(function() {
-            
-            if(jsxc.storage.getUserItem('presence') === 'dnd'){
+
+            if (jsxc.storage.getUserItem('presence') === 'dnd') {
                return;
             }
-            
+
             // invert current choice
             var mute = !jsxc.options.get('muteNotification');
 
@@ -2250,7 +2286,8 @@ var jsxc;
          <br />\
          Real-time chat app for OwnCloud. This app requires external<br /> XMPP server (openfire, ejabberd etc.).<br />\
          <br />\
-         <b>Credential: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">Ringtone</a></p>\
+         <b>Credential: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
+         <a href="https://soundcloud.com/freefilmandgamemusic/ping-1?in=freefilmandgamemusic/sets/free-notification-sounds-and" target="_blank">CameronMusic (Ping)</a></p>\
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>'
    };
 
@@ -3104,7 +3141,7 @@ var jsxc;
          if (e.key === jsxc.storage.prefix + 'rid' || e.key === jsxc.storage.prefix + 'lastActivity') {
             return;
          }
-         
+
          var key = e.key.replace(/^jsxc\.(?:[\w\-]+-[\w\-]+\.)?(.*)/i, '$1');
 
          // Workaround for non-conform browser: Triggered event on every page
@@ -3154,7 +3191,7 @@ var jsxc;
 
          if (key.match(/^options/) && e.newValue) {
             n = JSON.parse(e.newValue);
-            
+
             if (typeof n.muteNotification !== 'undefined' && n.muteNotification) {
                jsxc.notification.muteSound(true);
             } else {
@@ -3888,6 +3925,14 @@ var jsxc;
          return window.Notification.permission === jsxc.CONST.NOTIFICATION_GRANTED;
       },
 
+      /**
+       * Plays the given file.
+       * 
+       * @memberOf jsxc.notification
+       * @param {string} soundFile File relative to the sound directory
+       * @param {boolean} loop True for loop
+       * @param {boolean} force Play even if a tab is visible. Default: false.
+       */
       playSound: function(soundFile, loop, force) {
          if (!jsxc.chief) {
             // only master plays sound
@@ -3904,27 +3949,36 @@ var jsxc;
             return;
          }
 
-         var audio = jsxc.notification.audio;
-         if (audio) {
-            // stop current audio file
-            jsxc.notification.stopSound();
-         }
+         // stop current audio file
+         jsxc.notification.stopSound();
 
-         audio = new Audio(jsxc.options.root + '/sound/' + soundFile);
+         var audio = new Audio(jsxc.options.root + '/sound/' + soundFile);
          audio.loop = loop || false;
          audio.play();
 
          jsxc.notification.audio = audio;
       },
 
+      /**
+       * Stop/remove current sound.
+       * 
+       * @memberOf jsxc.notification
+       */
       stopSound: function() {
          var audio = jsxc.notification.audio;
 
-         audio.pause();
-         audio.currentTime = 0;
-         jsxc.notification.audio = null;
+         if (typeof audio !== 'undefined' && audio !== null) {
+            audio.pause();
+            jsxc.notification.audio = null;
+         }
       },
 
+      /**
+       * Mute sound.
+       * 
+       * @memberOf jsxc.notification
+       * @param {boolean} external True if triggered from external tab. Default: false.
+       */
       muteSound: function(external) {
          $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Unmute%%'));
 
@@ -3933,6 +3987,12 @@ var jsxc;
          }
       },
 
+      /**
+       * Unmute sound.
+       * 
+       * @memberOf jsxc.notification
+       * @param {boolean} external True if triggered from external tab. Default: false.
+       */
       unmuteSound: function(external) {
          $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Mute%%'));
 
@@ -4029,6 +4089,7 @@ var jsxc;
             jsxc.storage.setUserItem('notices', saved);
 
             jsxc.notification.notify(msg, description || '', null, true);
+            jsxc.notification.playSound(jsxc.CONST.SOUNDS.NOTICE, false, true);
          }
       }
    };

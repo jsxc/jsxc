@@ -103,10 +103,10 @@ var jsxc;
             try{
                //clone html snippet
                d = $("<span>").prepend($(data).clone()).html();
-            }catch(e){
+            }catch(err){
                try{ 
                   d = JSON.stringify(data);
-               }catch(e){ 
+               }catch(err2){ 
                   d = 'see js console';
                }
             }
@@ -665,7 +665,7 @@ var jsxc;
        * @param jid Jid of that user.
        * @this {jQuery} Elements to update with probable .jsxc_avatar elements
        */
-      defaultAvatar: function(jid) {
+      defaultAvatar: function() {
 
       }
    };
