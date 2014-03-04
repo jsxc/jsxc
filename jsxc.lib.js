@@ -657,7 +657,17 @@ var jsxc;
       },
 
       /** Set to true if you want to hide offline buddies. */
-      hideOffline: false
+      hideOffline: false,
+      
+      /**
+       * If no avatar is found, this function is called.
+       *
+       * @param jid Jid of that user.
+       * @this {jQuery} Elements to update with probable .jsxc_avatar elements
+       */
+      defaultAvatar: function(jid) {
+
+      }
    };
 
    /**
@@ -760,9 +770,19 @@ var jsxc;
 
          if (data.avatar && data.avatar.length > 0) {
             jsxc.gui.updateAvatar(ue, data.jid, data.avatar);
+         } else {
+            jsxc.options.defaultAvatar.call(ue, data.jid);
          }
       },
 
+      /**
+       * Update avatar on all given elements.
+       * 
+       * @memberOf jsxc.gui
+       * @param {jQuery} el Elements with subelement .jsxc_avatar
+       * @param {string} jid Jid
+       * @param {string} aid Avatar id (sha1 hash of image)
+       */
       updateAvatar: function(el, jid, aid) {
          var avatarSrc = jsxc.storage.getUserItem('avatar_' + aid);
 
@@ -771,6 +791,7 @@ var jsxc;
                return;
             }
 
+            el.find('.jsxc_avatar').removeAttr('style');
             el.find('.jsxc_avatar img').remove();
             var img = $('<img/>').attr('alt', 'Avatar').attr('src', src);
             el.find('.jsxc_avatar').prepend(img);
