@@ -578,8 +578,6 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
                      return;
                   }
 
-                  self.conn.jingle.terminate(null, 'init fail');
-
                   $(document).off('cleanup.dialog.jsxc');
                   setTimeout(function() {
                      jsxc.gui.showAlert("Sorry, we couldn't establish a connection. Maybe your buddy is offline.");
