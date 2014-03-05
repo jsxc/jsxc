@@ -788,6 +788,7 @@ var jsxc;
 
          var setAvatar = function(src) {
             if (src === 0) {
+               jsxc.options.defaultAvatar.call(el, jid);
                return;
             }
 
@@ -4187,7 +4188,8 @@ var jsxc;
          offline: 'offline',
          none: 'none',
          Unknown_instance_tag: 'Unknown instance tag.',
-         Not_of_our_latest_keys: 'Not of our latest key.'
+         Not_of_our_latest_keys: 'Not of our latest key.',
+         Received_an_unreadable_encrypted_message: 'Received an unreadable encrypted message.'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4279,7 +4281,8 @@ var jsxc;
          offline: 'offline',
          none: 'keine',
          Unknown_instance_tag: 'Unbekannter instance tag.',
-         Not_of_our_latest_keys: 'Nicht einer unserer letzten Schlüssel.'
+         Not_of_our_latest_keys: 'Nicht einer unserer letzten Schlüssel.',
+         Received_an_unreadable_encrypted_message: 'Eine unlesbare verschlüsselte Nachricht erhalten.'
       }
    };
 }(jQuery));
