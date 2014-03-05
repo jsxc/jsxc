@@ -97,20 +97,20 @@ var jsxc;
 
          if (data) {
             console.log(msg, data);
-            
-            //try to convert data to string
+
+            // try to convert data to string
             var d;
-            try{
-               //clone html snippet
+            try {
+               // clone html snippet
                d = $("<span>").prepend($(data).clone()).html();
-            }catch(err){
-               try{ 
+            } catch (err) {
+               try {
                   d = JSON.stringify(data);
-               }catch(err2){ 
+               } catch (err2) {
                   d = 'see js console';
                }
             }
-            
+
             jsxc.log = jsxc.log + msg + ': ' + d + '\n';
          } else {
             console.log(msg);
@@ -557,8 +557,8 @@ var jsxc;
        * @returns {String} Translated string
        */
       translate: function(text) {
-         return text.replace(/%%([a-zA-Z0-9_-}{ ]+)%%/g, function(s, key) {
-            var k = key.replace(/ /gi, '_');
+         return text.replace(/%%([a-zA-Z0-9_-}{ .!,?]+)%%/g, function(s, key) {
+            var k = key.replace(/ /gi, '_').replace(/[.!,?]/g, '');
 
             if (!jsxc.l[k]) {
                jsxc.warn('No translation for: ' + k);
@@ -658,10 +658,10 @@ var jsxc;
 
       /** Set to true if you want to hide offline buddies. */
       hideOffline: false,
-      
+
       /**
        * If no avatar is found, this function is called.
-       *
+       * 
        * @param jid Jid of that user.
        * @this {jQuery} Elements to update with probable .jsxc_avatar elements
        */
@@ -3373,14 +3373,19 @@ var jsxc;
        * @memberOf jsxc.otr
        * @param {string} cid
        * @param {string} msg received message
+       * @param {string} encrypted True, if msg was encrypted.
        */
-      receiveMessage: function(cid, msg) {
+      receiveMessage: function(cid, msg, encrypted) {
 
-         if (jsxc.buddyList[cid].msgstate !== 0) {
+         if (jsxc.buddyList[cid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT) {
             jsxc.otr.backup(cid);
          }
 
-         jsxc.gui.window.postMessage(cid, 'in', msg);
+         if (jsxc.buddyList[cid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
+            jsxc.gui.window.postMessage(cid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']');
+         } else {
+            jsxc.gui.window.postMessage(cid, 'in', msg);
+         }
       },
 
       /**
@@ -3485,8 +3490,8 @@ var jsxc;
          });
 
          // Receive message
-         jsxc.buddyList[cid].on('ui', function(msg) {
-            jsxc.otr.receiveMessage(cid, msg);
+         jsxc.buddyList[cid].on('ui', function(msg, encrypted) {
+            jsxc.otr.receiveMessage(cid, msg, encrypted === true);
          });
 
          // Send message
@@ -3495,6 +3500,11 @@ var jsxc;
          });
 
          jsxc.buddyList[cid].on('error', function(err) {
+            // Handle this case in jsxc.otr.receiveMessage
+            if (err !== 'Received an unencrypted message.') {
+               jsxc.gui.window.postMessage(cid, 'sys', '[OTR] ' + jsxc.translate('%%' + err + '%%'));
+            }
+            
             jsxc.error('[OTR] ' + err);
          });
 
@@ -3965,7 +3975,8 @@ var jsxc;
        * Mute sound.
        * 
        * @memberOf jsxc.notification
-       * @param {boolean} external True if triggered from external tab. Default: false.
+       * @param {boolean} external True if triggered from external tab. Default:
+       *        false.
        */
       muteSound: function(external) {
          $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Unmute%%'));
@@ -3979,7 +3990,8 @@ var jsxc;
        * Unmute sound.
        * 
        * @memberOf jsxc.notification
-       * @param {boolean} external True if triggered from external tab. Default: false.
+       * @param {boolean} external True if triggered from external tab. Default:
+       *        false.
        */
       unmuteSound: function(external) {
          $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Mute%%'));
@@ -4171,7 +4183,11 @@ var jsxc;
          online: 'online',
          chat: 'chat',
          away: 'away',
-         xa: 'extended away'
+         xa: 'extended away',
+         offline: 'offline',
+         none: 'none',
+         Unknown_instance_tag: 'Unknown instance tag.',
+         Not_of_our_latest_keys: 'Not of our latest key.'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4253,13 +4269,17 @@ var jsxc;
          dd: 'Beschäftigt',
          Mute: 'Ton aus',
          Unmute: 'Ton an',
-         Subscription: 'Subscription',
-         both: 'both',
+         Subscription: 'Bezug',
+         both: 'beidseitig',
          Status: 'Status',
          online: 'online',
          chat: 'chat',
          away: 'abwesend',
-         xa: 'mehr abwesend'
+         xa: 'mehr abwesend',
+         offline: 'offline',
+         none: 'keine',
+         Unknown_instance_tag: 'Unbekannter instance tag.',
+         Not_of_our_latest_keys: 'Nicht einer unserer letzten Schlüssel.'
       }
    };
 }(jQuery));
