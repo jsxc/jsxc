@@ -110,6 +110,10 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          $(document).on('iceconnectionstatechange.jingle', $.proxy(self.onIceConnectionStateChanged, self));
          $(document).on('nostuncandidates.jingle', $.proxy(self.noStunCandidates, self));
 
+         $(document).on('error.jingle', function(ev, sid, error) {
+            jsxc.error('[JINGLE]', error);
+         });
+         
          if (self.conn.caps) {
             $(document).on('caps.strophe', $.proxy(self.onCaps, self));
          }
@@ -245,6 +249,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var status = $('.jsxc_webrtc .jsxc_status');
          var duration = (typeof d === 'undefined' || d === null) ? 4000 : d;
 
+         jsxc.debug('[Webrtc]', txt);
+         
          if (status.html()) {
             // attach old messages
             txt = status.html() + '<br />' + txt;
