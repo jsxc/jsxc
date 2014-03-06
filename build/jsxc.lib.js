@@ -1,5 +1,5 @@
 /**
- * jsxc v0.6.1-alpha2 - 2014-03-04
+ * jsxc v0.6.1-alpha3 - 2014-03-06
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.6.1-alpha2
+ * @version 0.6.1-alpha3
  */
 
 var jsxc;
@@ -22,10 +22,10 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '0.6.1-alpha2',
+      version: '0.6.1-alpha3',
 
-      /** True if i'm the chief */
-      chief: false,
+      /** True if i'm the master */
+      master: false,
 
       /** True if the role allocation is finished */
       role_allocation: false,
@@ -109,20 +109,20 @@ var jsxc;
 
          if (data) {
             console.log(msg, data);
-            
-            //try to convert data to string
+
+            // try to convert data to string
             var d;
-            try{
-               //clone html snippet
+            try {
+               // clone html snippet
                d = $("<span>").prepend($(data).clone()).html();
-            }catch(err){
-               try{ 
+            } catch (err) {
+               try {
                   d = JSON.stringify(data);
-               }catch(err2){ 
+               } catch (err2) {
                   d = 'see js console';
                }
             }
-            
+
             jsxc.log = jsxc.log + msg + ': ' + d + '\n';
          } else {
             console.log(msg);
@@ -177,7 +177,10 @@ var jsxc;
             jsxc.storage.updateUserItem('options', key, value);
          };
 
-         jsxc.storageNotConform = jsxc.storage.getItem('storageNotConform') || 2;
+         jsxc.storageNotConform = jsxc.storage.getItem('storageNotConform');
+         if (jsxc.storageNotConform === null) {
+            jsxc.storageNotConform = 2;
+         }
 
          // detect language
          var lang;
@@ -282,9 +285,9 @@ var jsxc;
             }
 
             if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
-               jsxc.onChief();
+               jsxc.onMaster();
             } else {
-               jsxc.checkChief();
+               jsxc.checkMaster();
             }
          }
       },
@@ -300,10 +303,10 @@ var jsxc;
       },
 
       /**
-       * Called if the script is a sidekick
+       * Called if the script is a slave
        */
-      onSidekick: function() {
-         jsxc.debug('I am the sidekick.');
+      onSlave: function() {
+         jsxc.debug('I am the slave.');
 
          jsxc.role_allocation = true;
 
@@ -313,12 +316,12 @@ var jsxc;
       },
 
       /**
-       * Called if the script is the chief
+       * Called if the script is the master
        */
-      onChief: function() {
-         jsxc.debug('I am chief.');
+      onMaster: function() {
+         jsxc.debug('I am master.');
 
-         jsxc.chief = true;
+         jsxc.master = true;
 
          // Init local storage
          jsxc.storage.setItem('alive', 0);
@@ -335,11 +338,11 @@ var jsxc;
       },
 
       /**
-       * Second half of the onChief routine
+       * Second half of the onMaster routine
        */
-      _onChief: function() {
+      _onMaster: function() {
 
-         // create otr objects, if we lost the chief
+         // create otr objects, if we lost the master
          if (jsxc.role_allocation) {
             $.each(jsxc.storage.getUserItem('windowlist'), function(index, val) {
                jsxc.otr.create(val);
@@ -373,11 +376,11 @@ var jsxc;
       },
 
       /**
-       * Checks if there is a chief
+       * Checks if there is a master
        */
-      checkChief: function() {
-         jsxc.debug('check chief');
-         jsxc.to = window.setTimeout(jsxc.onChief, jsxc.options.timeout);
+      checkMaster: function() {
+         jsxc.debug('check master');
+         jsxc.to = window.setTimeout(jsxc.onMaster, 1000);
          jsxc.storage.ink('alive');
       },
 
@@ -464,6 +467,8 @@ var jsxc;
          $.each(buddies, function(index, value) {
             jsxc.gui.roster.add(value);
          });
+
+         $(document).trigger('loaded.roster.jsxc');
       },
 
       /**
@@ -553,9 +558,9 @@ var jsxc;
          var hidden = document.hidden || document.webkitHidden || document.mozHidden || document.msHidden;
 
          // handle multiple tabs
-         if (hidden && jsxc.chief) {
+         if (hidden && jsxc.master) {
             jsxc.storage.ink('hidden', 0);
-         } else if (!hidden && !jsxc.chief) {
+         } else if (!hidden && !jsxc.master) {
             jsxc.storage.ink('hidden');
          }
 
@@ -569,14 +574,14 @@ var jsxc;
        * @returns {String} Translated string
        */
       translate: function(text) {
-         return text.replace(/%%([a-zA-Z0-9_-}{ ]+)%%/g, function(s, key) {
-            var k = key.replace(/ /gi, '_');
+         return text.replace(/%%([a-zA-Z0-9_-}{ .!,?/'@]+)%%/g, function(s, key) {
+            var k = key.replace(/ /gi, '_').replace(/[.!,?/'@]/g, '');
 
             if (!jsxc.l[k]) {
                jsxc.warn('No translation for: ' + k);
             }
 
-            return jsxc.l[k] || key.replace(/_/gi, ' ');
+            return jsxc.l[k] || key;
          });
       }
    };
@@ -588,7 +593,7 @@ var jsxc;
       /** Timeout for the keepalive signal */
       timeout: 3000,
 
-      /** Timeout for the keepalive signal if the chief is busy */
+      /** Timeout for the keepalive signal if the master is busy */
       busyTimeout: 15000,
 
       /** OTR options (see [2]) */
@@ -670,10 +675,10 @@ var jsxc;
 
       /** Set to true if you want to hide offline buddies. */
       hideOffline: false,
-      
+
       /**
        * If no avatar is found, this function is called.
-       *
+       * 
        * @param jid Jid of that user.
        * @this {jQuery} Elements to update with probable .jsxc_avatar elements
        */
@@ -800,6 +805,7 @@ var jsxc;
 
          var setAvatar = function(src) {
             if (src === 0) {
+               jsxc.options.defaultAvatar.call(el, jid);
                return;
             }
 
@@ -961,7 +967,7 @@ var jsxc;
 
          // Manual
          $('#jsxc_facebox > div:eq(1) a.creation').click(function() {
-            if (jsxc.chief) {
+            if (jsxc.master) {
                jsxc.buddyList[cid].trust = true;
             }
 
@@ -990,7 +996,7 @@ var jsxc;
                return;
             }
 
-            if (jsxc.chief) {
+            if (jsxc.master) {
                jsxc.otr.sendSmpReq(cid, sec, quest);
             } else {
                jsxc.storage.setUserItem('smp_' + cid, {
@@ -1019,7 +1025,7 @@ var jsxc;
                return;
             }
 
-            if (jsxc.chief) {
+            if (jsxc.master) {
                jsxc.otr.sendSmpReq(cid, sec);
             } else {
                jsxc.storage.setUserItem('smp_' + cid, {
@@ -1071,7 +1077,7 @@ var jsxc;
       /**
        * Create and show dialog to add a buddy
        * 
-       * @param {type} [username]
+       * @param {string} [username] jabber id
        */
       showContactDialog: function(username) {
          jsxc.gui.dialog.open(jsxc.gui.template.get('contactDialog'));
@@ -1081,6 +1087,12 @@ var jsxc;
          if (username) {
             $('#jsxc_username').val(username);
          }
+
+         $('#jsxc_dialog input').keypress(function(ev) {
+            if (ev.which === 13) {
+               $('#jsxc_dialog .creation').click();
+            }
+         });
 
          $('#jsxc_dialog .creation').click(function() {
             var username = $('#jsxc_username').val();
@@ -1119,7 +1131,7 @@ var jsxc;
          var data = jsxc.storage.getUserItem('buddy_' + cid);
 
          $('#jsxc_dialog .creation').click(function() {
-            if (jsxc.chief) {
+            if (jsxc.master) {
                jsxc.xmpp.removeBuddy(data.jid);
             } else {
                // inform master
@@ -1251,7 +1263,7 @@ var jsxc;
             jsxc.storage.setUserItem('presence', pres);
          }
 
-         if (jsxc.chief) {
+         if (jsxc.master) {
             jsxc.xmpp.sendPres();
          }
 
@@ -1380,6 +1392,10 @@ var jsxc;
          $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
          jsxc.gui.updatePresence('own', pres);
 
+         $(document).on('loaded.roster.jsxc', function() {
+            jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
+         });
+
          $('#jsxc_roster').tooltip({
             show: {
                delay: 1000
@@ -1488,7 +1504,7 @@ var jsxc;
        * @param {String} cid CSS compatible jid
        */
       purge: function(cid) {
-         if (jsxc.chief) {
+         if (jsxc.master) {
             jsxc.storage.removeUserItem('buddy_' + cid);
             jsxc.storage.removeUserItem('otr_' + cid);
             jsxc.storage.removeUserItem('otr_version_' + cid);
@@ -1549,7 +1565,7 @@ var jsxc;
        * @returns {undefined}
        */
       _rename: function(cid, newname) {
-         if (jsxc.chief) {
+         if (jsxc.master) {
             var d = jsxc.storage.getUserItem('buddy_' + cid);
             var iq = $iq({
                type: 'set'
@@ -1787,7 +1803,7 @@ var jsxc;
          jsxc.gui.update(cid);
 
          // create related otr object
-         if (jsxc.chief && !jsxc.buddyList[cid]) {
+         if (jsxc.master && !jsxc.buddyList[cid]) {
             jsxc.otr.create(cid);
          }
 
@@ -1952,6 +1968,7 @@ var jsxc;
          var chat = jsxc.storage.getUserItem('chat_' + cid) || [];
          var data = jsxc.storage.getUserItem('buddy_' + cid);
          var html_msg = msg;
+         var uid = jsxc.xmpp.conn.getUniqueId('msg');
 
          if (chat.length > jsxc.options.numberOfMsg) {
             chat.pop();
@@ -1977,35 +1994,44 @@ var jsxc;
             msg = jsxc.l.your_message_wasnt_send_because_you_have_no_valid_subscription;
          }
 
-         chat.unshift({
+         var post = {
             direction: direction,
-            msg: msg
-         });
+            msg: msg,
+            uid: uid.replace(/:/, '-'),
+            received: false
+         };
+         chat.unshift(post);
          jsxc.storage.setUserItem('chat_' + cid, chat);
 
          if (direction === 'in') {
             $(document).trigger('postmessagein.jsxc', [ jsxc.jids[cid], html_msg ]);
          }
 
-         if (direction === 'out' && jsxc.chief) {
-            jsxc.buddyList[cid].sendMsg(msg);
+         if (direction === 'out' && jsxc.master) {
+            jsxc.buddyList[cid].sendMsg(msg, uid);
          }
 
-         jsxc.gui.window._postMessage(cid, direction, msg);
+         jsxc.gui.window._postMessage(cid, post);
+
+         if (direction === 'out' && msg === '?') {
+            jsxc.gui.window.postMessage(cid, 'sys', '42');
+         }
       },
 
       /**
        * Write Message to chat area
        * 
        * @param {String} cid CSS compatible jid
-       * @param {String} direction 'in' message is received or 'out' message is
-       *        send
-       * @param {String} msg Message to display
+       * @param {Object} post Post object with direction, msg, uid, received
        * @param {Bool} restore If true no highlights are used and so unread flag
        *        set
        */
-      _postMessage: function(cid, direction, msg, restore) {
+      _postMessage: function(cid, post, restore) {
          var win = jsxc.gui.getWindow(cid);
+         var msg = post.msg;
+         var direction = post.direction;
+         var uid = post.uid;
+         var received = post.received || false;
 
          if (win.find('.jsxc_textinput').is(':not(:focus)') && jsxc.restoreCompleted && direction === 'in' && !restore) {
             jsxc.gui.window.highlight(cid);
@@ -2024,7 +2050,16 @@ var jsxc;
             msg = msg.replace(val[2], '<img alt="$1" title="$1" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/>');
          });
 
-         $('#jsxc_window_' + cid + ' .jsxc_textarea').append("<div class='jsxc_chatmessage jsxc_" + direction + "'>" + msg + "</div>");
+         var msgDiv = $("<div>");
+         msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
+         msgDiv.attr('id', uid);
+         msgDiv.text(msg);
+
+         if (received) {
+            msgDiv.addClass('jsxc_received');
+         }
+
+         $('#jsxc_window_' + cid + ' .jsxc_textarea').append(msgDiv);
 
          jsxc.gui.window.scrollDown(cid);
 
@@ -2057,7 +2092,7 @@ var jsxc;
 
          while (chat !== null && chat.length > 0) {
             var c = chat.pop();
-            jsxc.gui.window._postMessage(cid, c.direction, c.msg, true);
+            jsxc.gui.window._postMessage(cid, c, true);
          }
       },
 
@@ -2317,17 +2352,28 @@ var jsxc;
          $(document).on('disconnected.jsxc', jsxc.xmpp.disconnected);
          $(document).on('ridChange', jsxc.xmpp.onRidChange);
 
+         Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
+
          // Create new connection (no login)
          jsxc.xmpp.conn = new Strophe.Connection(url);
 
-         // jsxc.xmpp.conn.xmlInput = function(data) {
-         // console.log('<', data);
-         // };
-         // jsxc.xmpp.conn.xmlOutput = function(data) {
-         // console.log('>', data);
-         // };
+         // Override default function to preserve unique id
+         var stropheGetUniqueId = jsxc.xmpp.conn.getUniqueId;
+         jsxc.xmpp.conn.getUniqueId = function(suffix) {
+            var uid = stropheGetUniqueId.call(jsxc.xmpp.conn, suffix);
+            jsxc.storage.setItem('_uniqueId', jsxc.xmpp.conn._uniqueId);
 
-         // Strophe.log = function (level, msg) {
+            return uid;
+         };
+
+//         jsxc.xmpp.conn.xmlInput = function(data) {
+//            console.log('<', data);
+//         };
+//         jsxc.xmpp.conn.xmlOutput = function(data) {
+//            console.log('>', data);
+//         };
+
+         // Strophe.log = function(level, msg) {
          // console.log(level + " " + msg);
          // };
 
@@ -2379,8 +2425,9 @@ var jsxc;
          // clean up
          jsxc.storage.removeUserItem('buddylist');
          jsxc.storage.removeUserItem('windowlist');
+         jsxc.storage.removeItem('_uniqueId');
 
-         if (!jsxc.chief) {
+         if (!jsxc.master) {
             $('#jsxc_roster').remove();
             $('#jsxc_windowlist').remove();
             return true;
@@ -2448,13 +2495,14 @@ var jsxc;
 
          jsxc.xmpp.conn.addHandler(jsxc.xmpp.onRosterChanged, 'jabber:iq:roster', 'iq', 'set');
          jsxc.xmpp.conn.addHandler(jsxc.xmpp.onMessage, null, 'message', 'chat');
+         jsxc.xmpp.conn.addHandler(jsxc.xmpp.onReceived, null, 'message');
          jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
 
          // Only load roaster if necessary
          if (!jsxc.restore || !jsxc.storage.getUserItem('buddylist')) {
             // in order to not overide existing presence information, we send
             // pres first after roster is ready
-            $(document).one('rosterready.jsxc', jsxc.xmpp.sendPres);
+            $(document).one('loaded.roster.jsxc', jsxc.xmpp.sendPres);
 
             var iq = $iq({
                type: 'get'
@@ -2467,8 +2515,6 @@ var jsxc;
             jsxc.xmpp.sendPres();
          }
 
-         jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
-
          jsxc.xmpp.connectionReady();
       },
 
@@ -2476,6 +2522,9 @@ var jsxc;
        * Triggered if the connection is ready
        */
       connectionReady: function() {
+
+         // Load saved unique id
+         jsxc.xmpp.conn._uniqueId = jsxc.storage.getItem('_uniqueId') || new Date().getTime();
 
          $(document).trigger('connectionReady.jsxc');
       },
@@ -2488,6 +2537,7 @@ var jsxc;
          if (jsxc.xmpp.conn.disco) {
             jsxc.xmpp.conn.disco.addIdentity('client', 'web', 'JSXC');
             jsxc.xmpp.conn.disco.addFeature(Strophe.NS.DISCO_INFO);
+            jsxc.xmpp.conn.disco.addFeature(Strophe.NS.RECEIPTS);
          }
 
          // create presence stanza
@@ -2609,8 +2659,8 @@ var jsxc;
 
          jsxc.storage.setUserItem('buddylist', buddies);
 
-         jsxc.debug('Roster ready');
-         $(document).trigger('rosterready.jsxc');
+         jsxc.debug('Roster loaded');
+         $(document).trigger('loaded.roster.jsxc');
       },
 
       /**
@@ -2804,9 +2854,12 @@ var jsxc;
 
          var type = $(message).attr('type');
          var from = $(message).attr('from');
+         var mid = $(message).attr('id');
          var jid = Strophe.getBareJidFromJid(from);
          var cid = jsxc.jidToCid(jid);
+         var data = jsxc.storage.getUserItem('buddy_' + cid);
          var body = $(message).find('body:first').text();
+         var request = $(message).find("request[xmlns='urn:xmpp:receipts']");
          var own = jsxc.storage.getUserItem('own') || [];
 
          if (!body || own.indexOf(from) >= 0) {
@@ -2826,8 +2879,18 @@ var jsxc;
          }
 
          // create related otr object
-         if (jsxc.chief && !jsxc.buddyList[cid]) {
+         if (jsxc.master && !jsxc.buddyList[cid]) {
             jsxc.otr.create(cid);
+         }
+
+         if (mid !== null && request.length && data !== null && (data.sub === 'both' || data.sub === 'from') && type === 'chat') {
+            // Send received according to XEP-0184
+            jsxc.xmpp.conn.send($msg({
+               to: from
+            }).c('received', {
+               xmlns: 'urn:xmpp:receipts',
+               id: mid
+            }));
          }
 
          jsxc.buddyList[cid].receiveMsg(body);
@@ -2854,7 +2917,7 @@ var jsxc;
        * @param {boolean} approve
        */
       resFriendReq: function(from, approve) {
-         if (jsxc.chief) {
+         if (jsxc.master) {
             jsxc.xmpp.conn.send($pres({
                to: from,
                type: (approve) ? 'subscribed' : 'unsubscribed'
@@ -2871,13 +2934,13 @@ var jsxc;
       /**
        * Add buddy to my friends
        * 
-       * @param {string} username
+       * @param {string} username jid
        * @param {string} alias
        */
       addBuddy: function(username, alias) {
          var cid = jsxc.jidToCid(username);
 
-         if (jsxc.chief) {
+         if (jsxc.master) {
             // add buddy to roster (trigger onRosterChanged)
             var iq = $iq({
                type: 'set'
@@ -2924,6 +2987,32 @@ var jsxc;
          jsxc.xmpp.conn.sendIQ(iq);
 
          jsxc.gui.roster.purge(cid);
+      },
+
+      onReceived: function(message) {
+         var from = $(message).attr('from');
+         var jid = Strophe.getBareJidFromJid(from);
+         var cid = jsxc.jidToCid(jid);
+         var received = $(message).find("received[xmlns='urn:xmpp:receipts']");
+
+         if (received.length) {
+            var receivedId = received.attr('id').replace(/:/, '-');
+            var chat = jsxc.storage.getUserItem('chat_' + cid);
+            var i;
+
+            for (i = chat.length - 1; i >= 0; i--) {
+               if (chat[i].uid === receivedId) {
+                  chat[i].received = true;
+                  
+                  $('#' + receivedId).addClass('jsxc_received');
+                  
+                  jsxc.storage.setUserItem('chat_' + cid, chat);
+                  break;
+               }
+            }
+         }
+         
+         return true;
       }
    };
 
@@ -3181,6 +3270,29 @@ var jsxc;
          var n, o;
          var cid = key.replace(/^[a-z]+_(.*)/i, '$1');
 
+         // react if someone ask, if there is a master
+         if (jsxc.master && key === 'alive') {
+            jsxc.debug('Master request.');
+
+            jsxc.storage.ink('alive');
+            return;
+         }
+
+         // master alive
+         if (!jsxc.master && (key === 'alive' || key === 'alive_busy') && !jsxc.triggeredFromElement) {
+
+            // reset timeout
+            window.clearTimeout(jsxc.to);
+            jsxc.to = window.setTimeout(jsxc.checkMaster, ((key === 'alive') ? jsxc.options.timeout : jsxc.options.busyTimeout) + jsxc.random(60));
+
+            // only call the first time
+            if (!jsxc.role_allocation) {
+               jsxc.onSlave();
+            }
+
+            return;
+         }
+
          if (key.match(/^notices/)) {
             jsxc.notice.load();
          }
@@ -3200,7 +3312,7 @@ var jsxc;
          }
 
          if (key.match(/^hidden/)) {
-            if (jsxc.chief) {
+            if (jsxc.master) {
                clearTimeout(jsxc.toNotification);
             } else {
                jsxc.isHidden();
@@ -3209,13 +3321,23 @@ var jsxc;
 
          if (key.match(/^chat_/)) {
 
-            var data = JSON.parse(e.newValue)[0];
+            var posts = JSON.parse(e.newValue);
+            var data, el;
 
-            if (jsxc.chief && data.direction === 'out') {
-               jsxc.buddyList[cid].sendMsg(data.msg);
+            while (posts.length > 0) {
+               data = posts.pop();
+               el = $('#' + data.uid);
+
+               if (el.length === 0) {
+                  if (jsxc.master && data.direction === 'out') {
+                     jsxc.buddyList[cid].sendMsg(data.msg, data.uid);
+                  }
+
+                  jsxc.gui.window._postMessage(cid, data);
+               } else if (data.received) {
+                  el.addClass('jsxc_received');
+               }
             }
-
-            jsxc.gui.window._postMessage(cid, data.direction, data.msg);
             return;
          }
 
@@ -3250,7 +3372,7 @@ var jsxc;
 
                jsxc.gui.dialog.close();
 
-               if (jsxc.chief) {
+               if (jsxc.master) {
                   jsxc.buddyList[cid].sm.abort();
                }
 
@@ -3263,14 +3385,14 @@ var jsxc;
 
                jsxc.otr.onSmpQuestion(cid, n.data);
 
-            } else if (jsxc.chief && n.sec) {
+            } else if (jsxc.master && n.sec) {
                jsxc.gui.dialog.close();
 
                jsxc.otr.sendSmpReq(cid, n.sec, n.quest);
             }
          }
 
-         if (!jsxc.chief && key.match(/^buddy_/)) {
+         if (!jsxc.master && key.match(/^buddy_/)) {
 
             if (!e.newValue) {
                jsxc.gui.roster.purge(cid);
@@ -3291,14 +3413,14 @@ var jsxc;
             }
          }
 
-         if (jsxc.chief && key.match(/^deletebuddy_/) && e.newValue) {
+         if (jsxc.master && key.match(/^deletebuddy_/) && e.newValue) {
             n = JSON.parse(e.newValue);
 
             jsxc.xmpp.removeBuddy(n.jid);
             jsxc.storage.removeUserItem(key);
          }
 
-         if (jsxc.chief && key.match(/^buddy_/)) {
+         if (jsxc.master && key.match(/^buddy_/)) {
 
             n = JSON.parse(e.newValue);
             o = JSON.parse(e.oldValue);
@@ -3322,7 +3444,7 @@ var jsxc;
          // logout
          if (key === 'sid') {
             if (!e.newValue) {
-               // if (jsxc.chief && jsxc.xmpp.conn) {
+               // if (jsxc.master && jsxc.xmpp.conn) {
                // jsxc.xmpp.conn.disconnect();
                // jsxc.triggeredFromElement = true;
                // }
@@ -3332,38 +3454,15 @@ var jsxc;
             return;
          }
 
-         // react if someone ask, if there is a chief
-         if (jsxc.chief && key === 'alive') {
-            jsxc.debug('Master request.');
-
-            jsxc.storage.ink('alive');
-            return;
-         }
-
-         // chief alive
-         if (!jsxc.chief && (key === 'alive' || key === 'alive_busy') && !jsxc.triggeredFromElement) {
-
-            // reset timeout
-            window.clearTimeout(jsxc.to);
-            jsxc.to = window.setTimeout(jsxc.checkChief, ((key === 'alive') ? jsxc.options.timeout : jsxc.options.busyTimeout) + jsxc.random(60));
-
-            // only call the first time
-            if (!jsxc.role_allocation) {
-               jsxc.onSidekick();
-            }
-
-            return;
-         }
-
          if (key === 'friendReq') {
             n = JSON.parse(e.newValue);
 
-            if (jsxc.chief && n.approve >= 0) {
+            if (jsxc.master && n.approve >= 0) {
                jsxc.xmpp.resFriendReq(n.jid, n.approve);
             }
          }
 
-         if (jsxc.chief && key.match(/^add_/)) {
+         if (jsxc.master && key.match(/^add_/)) {
             n = JSON.parse(e.newValue);
 
             jsxc.xmpp.addBuddy(n.username, n.alias);
@@ -3385,14 +3484,19 @@ var jsxc;
        * @memberOf jsxc.otr
        * @param {string} cid
        * @param {string} msg received message
+       * @param {string} encrypted True, if msg was encrypted.
        */
-      receiveMessage: function(cid, msg) {
+      receiveMessage: function(cid, msg, encrypted) {
 
-         if (jsxc.buddyList[cid].msgstate !== 0) {
+         if (jsxc.buddyList[cid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT) {
             jsxc.otr.backup(cid);
          }
 
-         jsxc.gui.window.postMessage(cid, 'in', msg);
+         if (jsxc.buddyList[cid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
+            jsxc.gui.window.postMessage(cid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']');
+         } else {
+            jsxc.gui.window.postMessage(cid, 'in', msg);
+         }
       },
 
       /**
@@ -3401,17 +3505,28 @@ var jsxc;
        * @param {string} jid
        * @param {string} msg message to be send
        */
-      sendMessage: function(jid, msg) {
+      sendMessage: function(jid, msg, uid) {
          if (jsxc.buddyList[jsxc.jidToCid(jid)].msgstate !== 0) {
             jsxc.otr.backup(jsxc.jidToCid(jid));
          }
 
-         var type = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(jid)).type || 'chat';
-
-         jsxc.xmpp.conn.send($msg({
+         var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(jid));
+         var isBar = (Strophe.getBareJidFromJid(jid) === jid);
+         var type = data.type || 'chat';
+         var xmlMsg = $msg({
             to: jid,
-            type: type
-         }).c('body').t(msg));
+            type: type,
+            id: uid
+         }).c('body').t(msg);
+
+         if (type === 'chat' && (isBar || jsxc.xmpp.conn.caps.hasFeatureByJid(jid, Strophe.NS.RECEIPTS))) {
+            // Add request according to XEP-0184
+            xmlMsg.up().c('request', {
+               xmlns: 'urn:xmpp:receipts'
+            });
+         }
+
+         jsxc.xmpp.conn.send(xmlMsg);
       },
 
       /**
@@ -3436,27 +3551,32 @@ var jsxc;
          }
 
          jsxc.buddyList[cid].on('status', function(status) {
+            var data = jsxc.storage.getUserItem('buddy_' + cid);
+
             switch (status) {
                case OTR.CONST.STATUS_SEND_QUERY:
                   jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.trying_to_start_private_conversation);
                   break;
                case OTR.CONST.STATUS_AKE_SUCCESS:
-                  jsxc.storage.updateUserItem('buddy_' + cid, 'fingerprint', jsxc.buddyList[cid].their_priv_pk.fingerprint());
-                  jsxc.storage.updateUserItem('buddy_' + cid, 'msgstate', 1);
-                  jsxc.gui.window.postMessage(cid, 'sys', (jsxc.buddyList[cid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started);
+                  data.fingerprint = jsxc.buddyList[cid].their_priv_pk.fingerprint();
+                  data.msgstate = OTR.CONST.MSGSTATE_ENCRYPTED;
+
+                  var msg = (jsxc.buddyList[cid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started + data.jid;
+                  jsxc.gui.window.postMessage(cid, 'sys', msg);
                   break;
                case OTR.CONST.STATUS_END_OTR:
-                  jsxc.storage.updateUserItem('buddy_' + cid, 'fingerprint', null);
+                  data.fingerprint = null;
 
-                  if (jsxc.buddyList[cid].msgstate === 0) { // we
-                     // abort the private conversation
+                  if (jsxc.buddyList[cid].msgstate === OTR.CONST.MSGSTATE_PLAINTEXT) {
+                     // we abort the private conversation
 
-                     jsxc.storage.updateUserItem('buddy_' + cid, 'msgstate', 0);
+                     data.msgstate = OTR.CONST.MSGSTATE_PLAINTEXT;
                      jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.private_conversation_aborted);
 
-                  } else { // the buddy abort the private conversation
+                  } else {
+                     // the buddy abort the private conversation
 
-                     jsxc.storage.updateUserItem('buddy_' + cid, 'msgstate', 2);
+                     data.msgstate = OTR.CONST.MSGSTATE_FINISHED;
                      jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.your_buddy_closed_the_private_conversation_you_should_do_the_same);
                   }
                   break;
@@ -3464,6 +3584,8 @@ var jsxc;
                   jsxc.keepBusyAlive();
                   break;
             }
+
+            jsxc.storage.setUserItem('buddy_' + cid, data);
 
             // for encryption and verification state
             jsxc.gui.update(cid);
@@ -3497,16 +3619,21 @@ var jsxc;
          });
 
          // Receive message
-         jsxc.buddyList[cid].on('ui', function(msg) {
-            jsxc.otr.receiveMessage(cid, msg);
+         jsxc.buddyList[cid].on('ui', function(msg, encrypted) {
+            jsxc.otr.receiveMessage(cid, msg, encrypted === true);
          });
 
          // Send message
-         jsxc.buddyList[cid].on('io', function(msg) {
-            jsxc.otr.sendMessage($('#jsxc_window_' + cid).data('jid'), msg);
+         jsxc.buddyList[cid].on('io', function(msg, uid) {
+            jsxc.otr.sendMessage($('#jsxc_window_' + cid).data('jid'), msg, uid);
          });
 
          jsxc.buddyList[cid].on('error', function(err) {
+            // Handle this case in jsxc.otr.receiveMessage
+            if (err !== 'Received an unencrypted message.') {
+               jsxc.gui.window.postMessage(cid, 'sys', '[OTR] ' + jsxc.translate('%%' + err + '%%'));
+            }
+
             jsxc.error('[OTR] ' + err);
          });
 
@@ -3537,7 +3664,7 @@ var jsxc;
          $('#jsxc_facebox a[rel=close]').click(function() {
             jsxc.storage.removeUserItem('smp_' + cid);
 
-            if (jsxc.chief) {
+            if (jsxc.master) {
                jsxc.buddyList[cid].sm.abort();
             }
          });
@@ -3578,7 +3705,7 @@ var jsxc;
        * @returns {undefined}
        */
       goEncrypt: function(cid) {
-         if (jsxc.chief) {
+         if (jsxc.master) {
             jsxc.buddyList[cid].sendQueryMsg();
          } else {
             jsxc.storage.updateUserItem('buddy_' + cid, 'transferReq', 1);
@@ -3592,7 +3719,7 @@ var jsxc;
        * @returns {undefined}
        */
       goPlain: function(cid) {
-         if (jsxc.chief) {
+         if (jsxc.master) {
             jsxc.buddyList[cid].endOtr.call(jsxc.buddyList[cid]);
             jsxc.buddyList[cid].init.call(jsxc.buddyList[cid]);
 
@@ -3738,7 +3865,7 @@ var jsxc;
 
          jsxc.storage.setUserItem('priv_fingerprint', jsxc.options.otr.priv.fingerprint());
 
-         jsxc._onChief();
+         jsxc._onMaster();
       },
 
       /**
@@ -3934,7 +4061,7 @@ var jsxc;
        * @param {boolean} force Play even if a tab is visible. Default: false.
        */
       playSound: function(soundFile, loop, force) {
-         if (!jsxc.chief) {
+         if (!jsxc.master) {
             // only master plays sound
             return;
          }
@@ -3977,7 +4104,8 @@ var jsxc;
        * Mute sound.
        * 
        * @memberOf jsxc.notification
-       * @param {boolean} external True if triggered from external tab. Default: false.
+       * @param {boolean} external True if triggered from external tab. Default:
+       *        false.
        */
       muteSound: function(external) {
          $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Unmute%%'));
@@ -3991,7 +4119,8 @@ var jsxc;
        * Unmute sound.
        * 
        * @memberOf jsxc.notification
-       * @param {boolean} external True if triggered from external tab. Default: false.
+       * @param {boolean} external True if triggered from external tab. Default:
+       *        false.
        */
       unmuteSound: function(external) {
          $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Mute%%'));
@@ -4120,7 +4249,7 @@ var jsxc;
          trying_to_start_private_conversation: 'Trying to start private conversation!',
          Verified: 'Verified',
          Unverified: 'Unverified',
-         private_conversation_started: 'private conversation started.',
+         private_conversation_started: 'private conversation started with ',
          private_conversation_aborted: 'Private conversation aborted!',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Your buddy closed the private conversation! You should do the same.',
          conversation_is_now_verified: 'Conversation is now verified.',
@@ -4183,7 +4312,12 @@ var jsxc;
          online: 'online',
          chat: 'chat',
          away: 'away',
-         xa: 'extended away'
+         xa: 'extended away',
+         offline: 'offline',
+         none: 'none',
+         Unknown_instance_tag: 'Unknown instance tag.',
+         Not_of_our_latest_keys: 'Not of our latest key.',
+         Received_an_unreadable_encrypted_message: 'Received an unreadable encrypted message.'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4204,7 +4338,7 @@ var jsxc;
          trying_to_start_private_conversation: 'Versuche private Konversation zu starten.',
          Verified: 'Verifiziert',
          Unverified: 'Unverifiziert',
-         private_conversation_started: 'Private Konversation gestartet.',
+         private_conversation_started: 'Private Konversation gestartet mit ',
          private_conversation_aborted: 'Private Konversation abgebrochen.',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Dein Freund hat die private Konversation beendet. Das solltest du auch tun!',
          conversation_is_now_verified: 'Konversation ist jetzt verifiziert',
@@ -4265,13 +4399,18 @@ var jsxc;
          dd: 'Beschäftigt',
          Mute: 'Ton aus',
          Unmute: 'Ton an',
-         Subscription: 'Subscription',
-         both: 'both',
+         Subscription: 'Bezug',
+         both: 'beidseitig',
          Status: 'Status',
          online: 'online',
          chat: 'chat',
          away: 'abwesend',
-         xa: 'mehr abwesend'
+         xa: 'mehr abwesend',
+         offline: 'offline',
+         none: 'keine',
+         Unknown_instance_tag: 'Unbekannter instance tag.',
+         Not_of_our_latest_keys: 'Nicht einer unserer letzten Schlüssel.',
+         Received_an_unreadable_encrypted_message: 'Eine unlesbare verschlüsselte Nachricht erhalten.'
       }
    };
 }(jQuery));

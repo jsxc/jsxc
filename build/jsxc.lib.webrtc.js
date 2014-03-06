@@ -1,5 +1,5 @@
 /**
- * jsxc v0.6.1-alpha2 - 2014-03-04
+ * jsxc v0.6.1-alpha3 - 2014-03-06
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.6.1-alpha2
+ * @version 0.6.1-alpha3
  */
 
 /* jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery */
@@ -122,6 +122,10 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          $(document).on('iceconnectionstatechange.jingle', $.proxy(self.onIceConnectionStateChanged, self));
          $(document).on('nostuncandidates.jingle', $.proxy(self.noStunCandidates, self));
 
+         $(document).on('error.jingle', function(ev, sid, error) {
+            jsxc.error('[JINGLE]', error);
+         });
+         
          if (self.conn.caps) {
             $(document).on('caps.strophe', $.proxy(self.onCaps, self));
          }
@@ -257,6 +261,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var status = $('.jsxc_webrtc .jsxc_status');
          var duration = (typeof d === 'undefined' || d === null) ? 4000 : d;
 
+         jsxc.debug('[Webrtc]', txt);
+         
          if (status.html()) {
             // attach old messages
             txt = status.html() + '<br />' + txt;
@@ -583,8 +589,6 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
                   if (error.source !== 'offer') {
                      return;
                   }
-
-                  self.conn.jingle.terminate(null, 'init fail');
 
                   $(document).off('cleanup.dialog.jsxc');
                   setTimeout(function() {

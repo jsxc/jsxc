@@ -2513,7 +2513,6 @@ var jsxc;
 
          // Load saved unique id
          jsxc.xmpp.conn._uniqueId = jsxc.storage.getItem('_uniqueId') || new Date().getTime();
-         ;
 
          $(document).trigger('connectionReady.jsxc');
       },

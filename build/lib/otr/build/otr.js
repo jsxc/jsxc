@@ -2089,7 +2089,7 @@
     })
   }
 
-  OTR.prototype.io = function (msg) {
+  OTR.prototype.io = function (msg, uid) {
 
     // buffer
     this.outgoing = this.outgoing.concat(msg)
@@ -2099,7 +2099,7 @@
       if (!first) {
         if (!self.outgoing.length) return
         var msg = self.outgoing.shift()
-        self.trigger('io', [msg])
+        self.trigger('io', [msg, uid])
       }
       setTimeout(send, first ? 0 : self.send_interval)
     }(true))
@@ -2405,17 +2405,17 @@
     this.trigger('status', [CONST.STATUS_SEND_QUERY])
   }
 
-  OTR.prototype.sendMsg = function (msg) {
+  OTR.prototype.sendMsg = function (msg, uid) {
     if ( this.REQUIRE_ENCRYPTION ||
          this.msgstate !== CONST.MSGSTATE_PLAINTEXT
     ) {
       msg = CryptoJS.enc.Utf8.parse(msg)
       msg = msg.toString(CryptoJS.enc.Latin1)
     }
-    this._sendMsg(msg)
+    this._sendMsg(msg, null, uid)
   }
 
-  OTR.prototype._sendMsg = function (msg, internal) {
+  OTR.prototype._sendMsg = function (msg, internal, uid) {
     if (!internal) {  // a user or sm msg
 
       switch (this.msgstate) {
@@ -2440,7 +2440,7 @@
       }
 
     }
-    if (msg) this.io(msg)
+    if (msg) this.io(msg, uid)
   }
 
   OTR.prototype.receiveMsg = function (msg) {
@@ -2463,7 +2463,10 @@
       case 'data':
         if ( msg.version === CONST.OTR_VERSION_3 &&
           this.checkInstanceTags(msg.instance_tags)
-        ) return  // ignore
+        ) {
+           this.error('Unknown instance tag.')
+           return  // ignore
+        }
         msg.msg = this.handleDataMsg(msg)
         msg.encrypted = true
         break
