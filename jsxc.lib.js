@@ -165,7 +165,10 @@ var jsxc;
             jsxc.storage.updateUserItem('options', key, value);
          };
 
-         jsxc.storageNotConform = jsxc.storage.getItem('storageNotConform') || 2;
+         jsxc.storageNotConform = jsxc.storage.getItem('storageNotConform');
+         if(jsxc.storageNotConform === null){
+            jsxc.storageNotConform = 2; 
+         }
 
          // detect language
          var lang;
@@ -365,7 +368,7 @@ var jsxc;
        */
       checkMaster: function() {
          jsxc.debug('check master');
-         jsxc.to = window.setTimeout(jsxc.onMaster, 500);
+         jsxc.to = window.setTimeout(jsxc.onMaster, 1000);
          jsxc.storage.ink('alive');
       },
 
@@ -3179,7 +3182,30 @@ var jsxc;
 
          var n, o;
          var cid = key.replace(/^[a-z]+_(.*)/i, '$1');
+         
+         // react if someone ask, if there is a master
+         if (jsxc.master && key === 'alive') {
+            jsxc.debug('Master request.');
 
+            jsxc.storage.ink('alive');
+            return;
+         }
+         
+         // master alive
+         if (!jsxc.master && (key === 'alive' || key === 'alive_busy') && !jsxc.triggeredFromElement) {
+            
+            // reset timeout
+            window.clearTimeout(jsxc.to);
+            jsxc.to = window.setTimeout(jsxc.checkMaster, ((key === 'alive') ? jsxc.options.timeout : jsxc.options.busyTimeout) + jsxc.random(60));
+
+            // only call the first time
+            if (!jsxc.role_allocation) {
+               jsxc.onSlave();
+            }
+
+            return;
+         }
+         
          if (key.match(/^notices/)) {
             jsxc.notice.load();
          }
@@ -3328,29 +3354,6 @@ var jsxc;
                jsxc.xmpp.logout();
 
             }
-            return;
-         }
-
-         // react if someone ask, if there is a master
-         if (jsxc.master && key === 'alive') {
-            jsxc.debug('Master request.');
-
-            jsxc.storage.ink('alive');
-            return;
-         }
-
-         // master alive
-         if (!jsxc.master && (key === 'alive' || key === 'alive_busy') && !jsxc.triggeredFromElement) {
-
-            // reset timeout
-            window.clearTimeout(jsxc.to);
-            jsxc.to = window.setTimeout(jsxc.checkMaster, ((key === 'alive') ? jsxc.options.timeout : jsxc.options.busyTimeout) + jsxc.random(60));
-
-            // only call the first time
-            if (!jsxc.role_allocation) {
-               jsxc.onSlave();
-            }
-
             return;
          }
 
