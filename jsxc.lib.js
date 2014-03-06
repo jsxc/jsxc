@@ -365,7 +365,7 @@ var jsxc;
        */
       checkMaster: function() {
          jsxc.debug('check master');
-         jsxc.to = window.setTimeout(jsxc.onMaster, jsxc.options.timeout);
+         jsxc.to = window.setTimeout(jsxc.onMaster, 500);
          jsxc.storage.ink('alive');
       },
 
