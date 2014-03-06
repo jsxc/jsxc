@@ -557,14 +557,14 @@ var jsxc;
        * @returns {String} Translated string
        */
       translate: function(text) {
-         return text.replace(/%%([a-zA-Z0-9_-}{ .!,?]+)%%/g, function(s, key) {
-            var k = key.replace(/ /gi, '_').replace(/[.!,?]/g, '');
+         return text.replace(/%%([a-zA-Z0-9_-}{ .!,?/'@]+)%%/g, function(s, key) {
+            var k = key.replace(/ /gi, '_').replace(/[.!,?/'@]/g, '');
 
             if (!jsxc.l[k]) {
                jsxc.warn('No translation for: ' + k);
             }
 
-            return jsxc.l[k] || key.replace(/_/gi, ' ');
+            return jsxc.l[k] || key;
          });
       }
    };
@@ -3430,27 +3430,32 @@ var jsxc;
          }
 
          jsxc.buddyList[cid].on('status', function(status) {
+            var data = jsxc.storage.getUserItem('buddy_' + cid);
+            
             switch (status) {
                case OTR.CONST.STATUS_SEND_QUERY:
                   jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.trying_to_start_private_conversation);
                   break;
                case OTR.CONST.STATUS_AKE_SUCCESS:
-                  jsxc.storage.updateUserItem('buddy_' + cid, 'fingerprint', jsxc.buddyList[cid].their_priv_pk.fingerprint());
-                  jsxc.storage.updateUserItem('buddy_' + cid, 'msgstate', 1);
-                  jsxc.gui.window.postMessage(cid, 'sys', (jsxc.buddyList[cid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started);
+                  data.fingerprint = jsxc.buddyList[cid].their_priv_pk.fingerprint();
+                  data.msgstate = OTR.CONST.MSGSTATE_ENCRYPTED;
+                  
+                  var msg = (jsxc.buddyList[cid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started + data.jid;
+                  jsxc.gui.window.postMessage(cid, 'sys', msg);
                   break;
                case OTR.CONST.STATUS_END_OTR:
-                  jsxc.storage.updateUserItem('buddy_' + cid, 'fingerprint', null);
+                  data.fingerprint = null;
 
-                  if (jsxc.buddyList[cid].msgstate === 0) { // we
-                     // abort the private conversation
+                  if (jsxc.buddyList[cid].msgstate === OTR.CONST.MSGSTATE_PLAINTEXT) {
+                     // we abort the private conversation
 
-                     jsxc.storage.updateUserItem('buddy_' + cid, 'msgstate', 0);
+                     data.msgstate = OTR.CONST.MSGSTATE_PLAINTEXT;
                      jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.private_conversation_aborted);
 
-                  } else { // the buddy abort the private conversation
+                  } else { 
+                     // the buddy abort the private conversation
 
-                     jsxc.storage.updateUserItem('buddy_' + cid, 'msgstate', 2);
+                     data.msgstate = OTR.CONST.MSGSTATE_FINISHED;
                      jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.your_buddy_closed_the_private_conversation_you_should_do_the_same);
                   }
                   break;
@@ -3458,6 +3463,8 @@ var jsxc;
                   jsxc.keepBusyAlive();
                   break;
             }
+            
+            jsxc.storage.setUserItem('buddy_' + cid, data);
 
             // for encryption and verification state
             jsxc.gui.update(cid);
@@ -4121,7 +4128,7 @@ var jsxc;
          trying_to_start_private_conversation: 'Trying to start private conversation!',
          Verified: 'Verified',
          Unverified: 'Unverified',
-         private_conversation_started: 'private conversation started.',
+         private_conversation_started: 'private conversation started with ',
          private_conversation_aborted: 'Private conversation aborted!',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Your buddy closed the private conversation! You should do the same.',
          conversation_is_now_verified: 'Conversation is now verified.',
@@ -4210,7 +4217,7 @@ var jsxc;
          trying_to_start_private_conversation: 'Versuche private Konversation zu starten.',
          Verified: 'Verifiziert',
          Unverified: 'Unverifiziert',
-         private_conversation_started: 'Private Konversation gestartet.',
+         private_conversation_started: 'Private Konversation gestartet mit ',
          private_conversation_aborted: 'Private Konversation abgebrochen.',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Dein Freund hat die private Konversation beendet. Das solltest du auch tun!',
          conversation_is_now_verified: 'Konversation ist jetzt verifiziert',
