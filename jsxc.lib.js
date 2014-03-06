@@ -12,8 +12,8 @@ var jsxc;
       /** Version of jsxc */
       version: '< $ app.version $ >',
 
-      /** True if i'm the chief */
-      chief: false,
+      /** True if i'm the master */
+      master: false,
 
       /** True if the role allocation is finished */
       role_allocation: false,
@@ -270,9 +270,9 @@ var jsxc;
             }
 
             if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
-               jsxc.onChief();
+               jsxc.onMaster();
             } else {
-               jsxc.checkChief();
+               jsxc.checkMaster();
             }
          }
       },
@@ -288,10 +288,10 @@ var jsxc;
       },
 
       /**
-       * Called if the script is a sidekick
+       * Called if the script is a slave
        */
-      onSidekick: function() {
-         jsxc.debug('I am the sidekick.');
+      onSlave: function() {
+         jsxc.debug('I am the slave.');
 
          jsxc.role_allocation = true;
 
@@ -301,12 +301,12 @@ var jsxc;
       },
 
       /**
-       * Called if the script is the chief
+       * Called if the script is the master
        */
-      onChief: function() {
-         jsxc.debug('I am chief.');
+      onMaster: function() {
+         jsxc.debug('I am master.');
 
-         jsxc.chief = true;
+         jsxc.master = true;
 
          // Init local storage
          jsxc.storage.setItem('alive', 0);
@@ -323,11 +323,11 @@ var jsxc;
       },
 
       /**
-       * Second half of the onChief routine
+       * Second half of the onMaster routine
        */
-      _onChief: function() {
+      _onMaster: function() {
 
-         // create otr objects, if we lost the chief
+         // create otr objects, if we lost the master
          if (jsxc.role_allocation) {
             $.each(jsxc.storage.getUserItem('windowlist'), function(index, val) {
                jsxc.otr.create(val);
@@ -361,11 +361,11 @@ var jsxc;
       },
 
       /**
-       * Checks if there is a chief
+       * Checks if there is a master
        */
-      checkChief: function() {
-         jsxc.debug('check chief');
-         jsxc.to = window.setTimeout(jsxc.onChief, jsxc.options.timeout);
+      checkMaster: function() {
+         jsxc.debug('check master');
+         jsxc.to = window.setTimeout(jsxc.onMaster, jsxc.options.timeout);
          jsxc.storage.ink('alive');
       },
 
@@ -541,9 +541,9 @@ var jsxc;
          var hidden = document.hidden || document.webkitHidden || document.mozHidden || document.msHidden;
 
          // handle multiple tabs
-         if (hidden && jsxc.chief) {
+         if (hidden && jsxc.master) {
             jsxc.storage.ink('hidden', 0);
-         } else if (!hidden && !jsxc.chief) {
+         } else if (!hidden && !jsxc.master) {
             jsxc.storage.ink('hidden');
          }
 
@@ -576,7 +576,7 @@ var jsxc;
       /** Timeout for the keepalive signal */
       timeout: 3000,
 
-      /** Timeout for the keepalive signal if the chief is busy */
+      /** Timeout for the keepalive signal if the master is busy */
       busyTimeout: 15000,
 
       /** OTR options (see [2]) */
@@ -950,7 +950,7 @@ var jsxc;
 
          // Manual
          $('#jsxc_facebox > div:eq(1) a.creation').click(function() {
-            if (jsxc.chief) {
+            if (jsxc.master) {
                jsxc.buddyList[cid].trust = true;
             }
 
@@ -979,7 +979,7 @@ var jsxc;
                return;
             }
 
-            if (jsxc.chief) {
+            if (jsxc.master) {
                jsxc.otr.sendSmpReq(cid, sec, quest);
             } else {
                jsxc.storage.setUserItem('smp_' + cid, {
@@ -1008,7 +1008,7 @@ var jsxc;
                return;
             }
 
-            if (jsxc.chief) {
+            if (jsxc.master) {
                jsxc.otr.sendSmpReq(cid, sec);
             } else {
                jsxc.storage.setUserItem('smp_' + cid, {
@@ -1108,7 +1108,7 @@ var jsxc;
          var data = jsxc.storage.getUserItem('buddy_' + cid);
 
          $('#jsxc_dialog .creation').click(function() {
-            if (jsxc.chief) {
+            if (jsxc.master) {
                jsxc.xmpp.removeBuddy(data.jid);
             } else {
                // inform master
@@ -1240,7 +1240,7 @@ var jsxc;
             jsxc.storage.setUserItem('presence', pres);
          }
 
-         if (jsxc.chief) {
+         if (jsxc.master) {
             jsxc.xmpp.sendPres();
          }
 
@@ -1477,7 +1477,7 @@ var jsxc;
        * @param {String} cid CSS compatible jid
        */
       purge: function(cid) {
-         if (jsxc.chief) {
+         if (jsxc.master) {
             jsxc.storage.removeUserItem('buddy_' + cid);
             jsxc.storage.removeUserItem('otr_' + cid);
             jsxc.storage.removeUserItem('otr_version_' + cid);
@@ -1538,7 +1538,7 @@ var jsxc;
        * @returns {undefined}
        */
       _rename: function(cid, newname) {
-         if (jsxc.chief) {
+         if (jsxc.master) {
             var d = jsxc.storage.getUserItem('buddy_' + cid);
             var iq = $iq({
                type: 'set'
@@ -1776,7 +1776,7 @@ var jsxc;
          jsxc.gui.update(cid);
 
          // create related otr object
-         if (jsxc.chief && !jsxc.buddyList[cid]) {
+         if (jsxc.master && !jsxc.buddyList[cid]) {
             jsxc.otr.create(cid);
          }
 
@@ -1976,7 +1976,7 @@ var jsxc;
             $(document).trigger('postmessagein.jsxc', [ jsxc.jids[cid], html_msg ]);
          }
 
-         if (direction === 'out' && jsxc.chief) {
+         if (direction === 'out' && jsxc.master) {
             jsxc.buddyList[cid].sendMsg(msg);
          }
 
@@ -2369,7 +2369,7 @@ var jsxc;
          jsxc.storage.removeUserItem('buddylist');
          jsxc.storage.removeUserItem('windowlist');
 
-         if (!jsxc.chief) {
+         if (!jsxc.master) {
             $('#jsxc_roster').remove();
             $('#jsxc_windowlist').remove();
             return true;
@@ -2815,7 +2815,7 @@ var jsxc;
          }
 
          // create related otr object
-         if (jsxc.chief && !jsxc.buddyList[cid]) {
+         if (jsxc.master && !jsxc.buddyList[cid]) {
             jsxc.otr.create(cid);
          }
 
@@ -2843,7 +2843,7 @@ var jsxc;
        * @param {boolean} approve
        */
       resFriendReq: function(from, approve) {
-         if (jsxc.chief) {
+         if (jsxc.master) {
             jsxc.xmpp.conn.send($pres({
                to: from,
                type: (approve) ? 'subscribed' : 'unsubscribed'
@@ -2866,7 +2866,7 @@ var jsxc;
       addBuddy: function(username, alias) {
          var cid = jsxc.jidToCid(username);
 
-         if (jsxc.chief) {
+         if (jsxc.master) {
             // add buddy to roster (trigger onRosterChanged)
             var iq = $iq({
                type: 'set'
@@ -3189,7 +3189,7 @@ var jsxc;
          }
 
          if (key.match(/^hidden/)) {
-            if (jsxc.chief) {
+            if (jsxc.master) {
                clearTimeout(jsxc.toNotification);
             } else {
                jsxc.isHidden();
@@ -3200,7 +3200,7 @@ var jsxc;
 
             var data = JSON.parse(e.newValue)[0];
 
-            if (jsxc.chief && data.direction === 'out') {
+            if (jsxc.master && data.direction === 'out') {
                jsxc.buddyList[cid].sendMsg(data.msg);
             }
 
@@ -3239,7 +3239,7 @@ var jsxc;
 
                jsxc.gui.dialog.close();
 
-               if (jsxc.chief) {
+               if (jsxc.master) {
                   jsxc.buddyList[cid].sm.abort();
                }
 
@@ -3252,14 +3252,14 @@ var jsxc;
 
                jsxc.otr.onSmpQuestion(cid, n.data);
 
-            } else if (jsxc.chief && n.sec) {
+            } else if (jsxc.master && n.sec) {
                jsxc.gui.dialog.close();
 
                jsxc.otr.sendSmpReq(cid, n.sec, n.quest);
             }
          }
 
-         if (!jsxc.chief && key.match(/^buddy_/)) {
+         if (!jsxc.master && key.match(/^buddy_/)) {
 
             if (!e.newValue) {
                jsxc.gui.roster.purge(cid);
@@ -3280,14 +3280,14 @@ var jsxc;
             }
          }
 
-         if (jsxc.chief && key.match(/^deletebuddy_/) && e.newValue) {
+         if (jsxc.master && key.match(/^deletebuddy_/) && e.newValue) {
             n = JSON.parse(e.newValue);
 
             jsxc.xmpp.removeBuddy(n.jid);
             jsxc.storage.removeUserItem(key);
          }
 
-         if (jsxc.chief && key.match(/^buddy_/)) {
+         if (jsxc.master && key.match(/^buddy_/)) {
 
             n = JSON.parse(e.newValue);
             o = JSON.parse(e.oldValue);
@@ -3311,7 +3311,7 @@ var jsxc;
          // logout
          if (key === 'sid') {
             if (!e.newValue) {
-               // if (jsxc.chief && jsxc.xmpp.conn) {
+               // if (jsxc.master && jsxc.xmpp.conn) {
                // jsxc.xmpp.conn.disconnect();
                // jsxc.triggeredFromElement = true;
                // }
@@ -3321,24 +3321,24 @@ var jsxc;
             return;
          }
 
-         // react if someone ask, if there is a chief
-         if (jsxc.chief && key === 'alive') {
+         // react if someone ask, if there is a master
+         if (jsxc.master && key === 'alive') {
             jsxc.debug('Master request.');
 
             jsxc.storage.ink('alive');
             return;
          }
 
-         // chief alive
-         if (!jsxc.chief && (key === 'alive' || key === 'alive_busy') && !jsxc.triggeredFromElement) {
+         // master alive
+         if (!jsxc.master && (key === 'alive' || key === 'alive_busy') && !jsxc.triggeredFromElement) {
 
             // reset timeout
             window.clearTimeout(jsxc.to);
-            jsxc.to = window.setTimeout(jsxc.checkChief, ((key === 'alive') ? jsxc.options.timeout : jsxc.options.busyTimeout) + jsxc.random(60));
+            jsxc.to = window.setTimeout(jsxc.checkMaster, ((key === 'alive') ? jsxc.options.timeout : jsxc.options.busyTimeout) + jsxc.random(60));
 
             // only call the first time
             if (!jsxc.role_allocation) {
-               jsxc.onSidekick();
+               jsxc.onSlave();
             }
 
             return;
@@ -3347,12 +3347,12 @@ var jsxc;
          if (key === 'friendReq') {
             n = JSON.parse(e.newValue);
 
-            if (jsxc.chief && n.approve >= 0) {
+            if (jsxc.master && n.approve >= 0) {
                jsxc.xmpp.resFriendReq(n.jid, n.approve);
             }
          }
 
-         if (jsxc.chief && key.match(/^add_/)) {
+         if (jsxc.master && key.match(/^add_/)) {
             n = JSON.parse(e.newValue);
 
             jsxc.xmpp.addBuddy(n.username, n.alias);
@@ -3543,7 +3543,7 @@ var jsxc;
          $('#jsxc_facebox a[rel=close]').click(function() {
             jsxc.storage.removeUserItem('smp_' + cid);
 
-            if (jsxc.chief) {
+            if (jsxc.master) {
                jsxc.buddyList[cid].sm.abort();
             }
          });
@@ -3584,7 +3584,7 @@ var jsxc;
        * @returns {undefined}
        */
       goEncrypt: function(cid) {
-         if (jsxc.chief) {
+         if (jsxc.master) {
             jsxc.buddyList[cid].sendQueryMsg();
          } else {
             jsxc.storage.updateUserItem('buddy_' + cid, 'transferReq', 1);
@@ -3598,7 +3598,7 @@ var jsxc;
        * @returns {undefined}
        */
       goPlain: function(cid) {
-         if (jsxc.chief) {
+         if (jsxc.master) {
             jsxc.buddyList[cid].endOtr.call(jsxc.buddyList[cid]);
             jsxc.buddyList[cid].init.call(jsxc.buddyList[cid]);
 
@@ -3744,7 +3744,7 @@ var jsxc;
 
          jsxc.storage.setUserItem('priv_fingerprint', jsxc.options.otr.priv.fingerprint());
 
-         jsxc._onChief();
+         jsxc._onMaster();
       },
 
       /**
@@ -3940,7 +3940,7 @@ var jsxc;
        * @param {boolean} force Play even if a tab is visible. Default: false.
        */
       playSound: function(soundFile, loop, force) {
-         if (!jsxc.chief) {
+         if (!jsxc.master) {
             // only master plays sound
             return;
          }
