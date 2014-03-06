@@ -452,6 +452,8 @@ var jsxc;
          $.each(buddies, function(index, value) {
             jsxc.gui.roster.add(value);
          });
+         
+         $(document).trigger('loaded.roster.jsxc');
       },
 
       /**
@@ -1060,7 +1062,7 @@ var jsxc;
       /**
        * Create and show dialog to add a buddy
        * 
-       * @param {type} [username]
+       * @param {string} [username] jabber id
        */
       showContactDialog: function(username) {
          jsxc.gui.dialog.open(jsxc.gui.template.get('contactDialog'));
@@ -1070,6 +1072,12 @@ var jsxc;
          if (username) {
             $('#jsxc_username').val(username);
          }
+
+         $('#jsxc_dialog input').keypress(function(ev) {
+            if (ev.which === 13) {
+               $('#jsxc_dialog .creation').click();
+            }
+         });
 
          $('#jsxc_dialog .creation').click(function() {
             var username = $('#jsxc_username').val();
@@ -1369,7 +1377,9 @@ var jsxc;
          $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
          jsxc.gui.updatePresence('own', pres);
 
-         jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
+         $(document).on('loaded.roster.jsxc', function(){
+            jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
+         });
          
          $('#jsxc_roster').tooltip({
             show: {
@@ -2445,7 +2455,7 @@ var jsxc;
          if (!jsxc.restore || !jsxc.storage.getUserItem('buddylist')) {
             // in order to not overide existing presence information, we send
             // pres first after roster is ready
-            $(document).one('rosterready.jsxc', jsxc.xmpp.sendPres);
+            $(document).one('loaded.roster.jsxc', jsxc.xmpp.sendPres);
 
             var iq = $iq({
                type: 'get'
@@ -2598,8 +2608,8 @@ var jsxc;
 
          jsxc.storage.setUserItem('buddylist', buddies);
 
-         jsxc.debug('Roster ready');
-         $(document).trigger('rosterready.jsxc');
+         jsxc.debug('Roster loaded');
+         $(document).trigger('loaded.roster.jsxc');
       },
 
       /**
@@ -2860,7 +2870,7 @@ var jsxc;
       /**
        * Add buddy to my friends
        * 
-       * @param {string} username
+       * @param {string} username jid
        * @param {string} alias
        */
       addBuddy: function(username, alias) {
@@ -3431,7 +3441,7 @@ var jsxc;
 
          jsxc.buddyList[cid].on('status', function(status) {
             var data = jsxc.storage.getUserItem('buddy_' + cid);
-            
+
             switch (status) {
                case OTR.CONST.STATUS_SEND_QUERY:
                   jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.trying_to_start_private_conversation);
@@ -3439,7 +3449,7 @@ var jsxc;
                case OTR.CONST.STATUS_AKE_SUCCESS:
                   data.fingerprint = jsxc.buddyList[cid].their_priv_pk.fingerprint();
                   data.msgstate = OTR.CONST.MSGSTATE_ENCRYPTED;
-                  
+
                   var msg = (jsxc.buddyList[cid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started + data.jid;
                   jsxc.gui.window.postMessage(cid, 'sys', msg);
                   break;
@@ -3452,7 +3462,7 @@ var jsxc;
                      data.msgstate = OTR.CONST.MSGSTATE_PLAINTEXT;
                      jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.private_conversation_aborted);
 
-                  } else { 
+                  } else {
                      // the buddy abort the private conversation
 
                      data.msgstate = OTR.CONST.MSGSTATE_FINISHED;
@@ -3463,7 +3473,7 @@ var jsxc;
                   jsxc.keepBusyAlive();
                   break;
             }
-            
+
             jsxc.storage.setUserItem('buddy_' + cid, data);
 
             // for encryption and verification state
@@ -3512,7 +3522,7 @@ var jsxc;
             if (err !== 'Received an unencrypted message.') {
                jsxc.gui.window.postMessage(cid, 'sys', '[OTR] ' + jsxc.translate('%%' + err + '%%'));
             }
-            
+
             jsxc.error('[OTR] ' + err);
          });
 
