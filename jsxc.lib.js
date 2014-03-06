@@ -1369,6 +1369,8 @@ var jsxc;
          $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
          jsxc.gui.updatePresence('own', pres);
 
+         jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
+         
          $('#jsxc_roster').tooltip({
             show: {
                delay: 1000
@@ -2455,8 +2457,6 @@ var jsxc;
          } else {
             jsxc.xmpp.sendPres();
          }
-
-         jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
 
          jsxc.xmpp.connectionReady();
       },
