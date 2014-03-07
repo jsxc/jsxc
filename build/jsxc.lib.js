@@ -1,5 +1,5 @@
 /**
- * jsxc v0.6.1-alpha3 - 2014-03-06
+ * jsxc v0.7.0 - 2014-03-07
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.6.1-alpha3
+ * @version 0.7.0
  */
 
 var jsxc;
@@ -22,7 +22,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '0.6.1-alpha3',
+      version: '0.7.0',
 
       /** True if i'm the master */
       master: false,
@@ -164,15 +164,28 @@ var jsxc;
       init: function(options) {
 
          if (options) {
+            // override default options
             $.extend(jsxc.options, options);
          }
 
+         /**
+          * Getter method for options. Saved options will override default one.
+          * 
+          * @param {string} key option key
+          * @returns default or saved option value
+          */
          jsxc.options.get = function(key) {
             var local = jsxc.storage.getUserItem('options') || {};
 
             return local[key] || options[key];
          };
 
+         /**
+          * Setter method for options. Will write into localstorage.
+          * 
+          * @param {string} key option key
+          * @param {object} value option value
+          */
          jsxc.options.set = function(key, value) {
             jsxc.storage.updateUserItem('options', key, value);
          };
@@ -184,7 +197,9 @@ var jsxc;
 
          // detect language
          var lang;
-         if (jsxc.options.autoLang && navigator.language) {
+         if (jsxc.storage.getItem('lang') !== null){
+            lang = jsxc.storage.getItem('lang');
+         } else if(jsxc.options.autoLang && navigator.language) {
             lang = navigator.language.substr(0, 2);
          } else {
             lang = jsxc.options.defaultLang;
@@ -333,7 +348,7 @@ var jsxc;
          // Sending keepalive signal
          jsxc.startKeepAlive();
 
-         // create or load DSA key
+         // create or load DSA key and call _onMaster
          jsxc.otr.createDSA();
       },
 
@@ -392,7 +407,7 @@ var jsxc;
       },
 
       /**
-       * Sends the keep-alive signal
+       * Sends the keep-alive signal to signal that the master is still there.
        */
       keepAlive: function() {
          jsxc.storage.ink('alive');
@@ -581,7 +596,7 @@ var jsxc;
                jsxc.warn('No translation for: ' + k);
             }
 
-            return jsxc.l[k] || key;
+            return jsxc.l[k] || key.replace(/_/g, ' ');
          });
       }
    };
@@ -629,7 +644,7 @@ var jsxc;
       logoutElement: null,
 
       /**
-       * Debug function: Expects to parameter (msg, debug)
+       * Debug function: Expects two parameter (msg, debug)
        * 
        * @memberOf jsxc.options
        * @param {String} msg Message
@@ -2366,12 +2381,12 @@ var jsxc;
             return uid;
          };
 
-//         jsxc.xmpp.conn.xmlInput = function(data) {
-//            console.log('<', data);
-//         };
-//         jsxc.xmpp.conn.xmlOutput = function(data) {
-//            console.log('>', data);
-//         };
+         // jsxc.xmpp.conn.xmlInput = function(data) {
+         // console.log('<', data);
+         // };
+         // jsxc.xmpp.conn.xmlOutput = function(data) {
+         // console.log('>', data);
+         // };
 
          // Strophe.log = function(level, msg) {
          // console.log(level + " " + msg);
@@ -3003,15 +3018,15 @@ var jsxc;
             for (i = chat.length - 1; i >= 0; i--) {
                if (chat[i].uid === receivedId) {
                   chat[i].received = true;
-                  
+
                   $('#' + receivedId).addClass('jsxc_received');
-                  
+
                   jsxc.storage.setUserItem('chat_' + cid, chat);
                   break;
                }
             }
          }
-         
+
          return true;
       }
    };
@@ -4317,7 +4332,12 @@ var jsxc;
          none: 'none',
          Unknown_instance_tag: 'Unknown instance tag.',
          Not_of_our_latest_keys: 'Not of our latest key.',
-         Received_an_unreadable_encrypted_message: 'Received an unreadable encrypted message.'
+         Received_an_unreadable_encrypted_message: 'Received an unreadable encrypted message.',
+         Online: 'Online',
+         Chatty: 'Chatty',
+         Away: 'Away',
+         Extended_away: 'Extended away',
+         Offline: 'Offline'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4396,7 +4416,7 @@ var jsxc;
          Hide_offline: 'Offline ausblenden',
          Show_offline: 'Offline einblenden',
          About: 'Über',
-         dd: 'Beschäftigt',
+         dnd: 'Beschäftigt',
          Mute: 'Ton aus',
          Unmute: 'Ton an',
          Subscription: 'Bezug',
@@ -4405,12 +4425,17 @@ var jsxc;
          online: 'online',
          chat: 'chat',
          away: 'abwesend',
-         xa: 'mehr abwesend',
+         xa: 'länger abwesend',
          offline: 'offline',
          none: 'keine',
          Unknown_instance_tag: 'Unbekannter instance tag.',
          Not_of_our_latest_keys: 'Nicht einer unserer letzten Schlüssel.',
-         Received_an_unreadable_encrypted_message: 'Eine unlesbare verschlüsselte Nachricht erhalten.'
+         Received_an_unreadable_encrypted_message: 'Eine unlesbare verschlüsselte Nachricht erhalten.',
+         Online: 'Online',
+         Chatty: 'Gesprächig',
+         Away: 'Abwesend',
+         Extended_away: 'Länger abwesend',
+         Offline: 'Offline'
       }
    };
 }(jQuery));

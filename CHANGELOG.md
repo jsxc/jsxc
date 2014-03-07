@@ -1,4 +1,23 @@
-v0.6.0 / 2014-01-28
+v0.7.0 / 2014-03-07
+===
+- add sound notifications
+- add support for custom default avatars
+- add support for XEP-0184 (Message Delivery Receipts)
+- update & extend hover info
+- handle presence of type unsubscribed
+- remove roster footer if offline
+- enhance otr error handling
+- enhance translations
+- reduce initial timeout
+- fix notices
+- fix friendship response dialog
+- fix shared roster item removel
+- fix debug function
+- fix webrtc bug
+- fix storage check
+- fix firefox fullscreen
+
+v0.6.0 / 2014-02-28
 ===
 - add notice stack (for e.g. friendship requests)
 - add option to change presence

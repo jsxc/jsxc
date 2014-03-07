@@ -39,44 +39,6 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             </div>\
         </div>';
 
-$.extend(jsxc.l10n.en, {
-   Please_allow_access_to_microphone_and_camera: 'Please allow access to microphone and camera.',
-   Incoming_call: 'Incoming call',
-   from: 'from',
-   Do_you_want_to_accept_the_call_from: 'Do you want to accept the call from',
-   Reject: 'Reject',
-   Accept: 'Accept',
-   hang_up: 'hang up',
-   snapshot: 'snapshot',
-   mute_my_audio: 'mute my audio',
-   pause_my_video: 'pause my video',
-   fullscreen: 'fullscreen',
-   Info: 'Info',
-   Local_IP: 'Local IP',
-   Remote_IP: 'Remote IP',
-   Local_Fingerprint: 'Local fingerprint',
-   Remote_Fingerprint: 'Remote fingerprint',
-});
-
-$.extend(jsxc.l10n.de, {
-   Please_allow_access_to_microphone_and_camera: 'Bitte erlaube den Zugriff auf Kamera und Mikrofon.',
-   Incoming_call: 'Eingehender Anruf',
-   from: 'von',
-   Do_you_want_to_accept_the_call_from: 'Möchtest Du den Anruf annehmen von',
-   Reject: 'Ablehnen',
-   Accept: 'Annehmen',
-   hang_up: 'Auflegen',
-   snapshot: 'Schnappschuss',
-   mute_my_audio: 'Mein Ton aus',
-   pause_my_video: 'Mein Video pausieren',
-   fullscreen: 'Vollbild',
-   Info: 'Info',
-   Local_IP: 'Lokale IP',
-   Remote_IP: 'Remote IP',
-   Local_Fingerprint: 'Lokaler Fingerprint',
-   Remote_Fingerprint: 'Remote Fingerprint',
-});
-
 (function($) {
    "use strict";
 
@@ -823,5 +785,43 @@ $.extend(jsxc.l10n.de, {
          $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
          $(document).on('attached.jsxc', jsxc.webrtc.init);
       }
+   });
+   
+   $.extend(jsxc.l10n.en, {
+      Please_allow_access_to_microphone_and_camera: 'Please allow access to microphone and camera.',
+      Incoming_call: 'Incoming call',
+      from: 'from',
+      Do_you_want_to_accept_the_call_from: 'Do you want to accept the call from',
+      Reject: 'Reject',
+      Accept: 'Accept',
+      hang_up: 'hang up',
+      snapshot: 'snapshot',
+      mute_my_audio: 'mute my audio',
+      pause_my_video: 'pause my video',
+      fullscreen: 'fullscreen',
+      Info: 'Info',
+      Local_IP: 'Local IP',
+      Remote_IP: 'Remote IP',
+      Local_Fingerprint: 'Local fingerprint',
+      Remote_Fingerprint: 'Remote fingerprint',
+   });
+
+   $.extend(jsxc.l10n.de, {
+      Please_allow_access_to_microphone_and_camera: 'Bitte erlaube den Zugriff auf Kamera und Mikrofon.',
+      Incoming_call: 'Eingehender Anruf',
+      from: 'von',
+      Do_you_want_to_accept_the_call_from: 'Möchtest Du den Anruf annehmen von',
+      Reject: 'Ablehnen',
+      Accept: 'Annehmen',
+      hang_up: 'Auflegen',
+      snapshot: 'Schnappschuss',
+      mute_my_audio: 'Mein Ton aus',
+      pause_my_video: 'Mein Video pausieren',
+      fullscreen: 'Vollbild',
+      Info: 'Info',
+      Local_IP: 'Lokale IP',
+      Remote_IP: 'Remote IP',
+      Local_Fingerprint: 'Lokaler Fingerprint',
+      Remote_Fingerprint: 'Remote Fingerprint',
    });
 }(jQuery));

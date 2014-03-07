@@ -14,15 +14,15 @@
         var doc = document.documentElement;
 
         return ('requestFullscreen' in doc) ||
-                ('mozRequestFullscreen' in doc && document.mozFullscreenEnabled) ||
+                ('mozRequestFullScreen' in doc && document.mozFullScreenEnabled) ||
                 ('webkitRequestFullscreen' in doc);
     }
 
     function requestFullscreen(elem) {
         if (elem.requestFullscreen) {
             elem.requestFullscreen();
-        } else if (elem.mozRequestFullscreen) {
-            elem.mozRequestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+            elem.mozRequestFullScreen();
         } else if (elem.webkitRequestFullscreen) {
             elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
         }
@@ -38,7 +38,7 @@
     function cancelFullscreen() {
         if (document.exitFullscreen) {
             document.exitFullscreen();
-        } else if (document.mozCancelFullscreen) {
+        } else if (document.mozCancelFullScreen) {
             document.mozCancelFullScreen();
         } else if (document.webkitCancelFullScreen) {
             document.webkitCancelFullScreen();
@@ -61,16 +61,17 @@
         
         var self = this;
 
-        $(self).on('fullscreenerror mozfullscreenerror webkitfullscreenerror msfullscreenerror', function() {
+        // Chrome trigger event on self, Firefox on document
+        $(self).add(document).on('fullscreenerror mozfullscreenerror webkitfullscreenerror msfullscreenerror', function() {
             $(document).trigger('error.fullscreen');
         });
 
-        $(self).on('fullscreenchange mozfullscreenchange webkitfullscreenchange msfullscreenchange', function() {
-            if (fullscreenStatus()){
+        $(self).add(document).on('fullscreenchange mozfullscreenchange webkitfullscreenchange msfullscreenchange', function() {
+            if (fullscreenStatus()){ 
                 $(document).trigger('enabled.fullscreen');
             }else{
                 $(document).trigger('disabled.fullscreen');
-                $(self).off('fullscreenchange mozfullscreenchange webkitfullscreenchange msfullscreenchange');
+                $(self).add(document).off('fullscreenchange mozfullscreenchange webkitfullscreenchange msfullscreenchange');
             }
         });
 

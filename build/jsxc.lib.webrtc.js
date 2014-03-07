@@ -1,5 +1,5 @@
 /**
- * jsxc v0.6.1-alpha3 - 2014-03-06
+ * jsxc v0.7.0 - 2014-03-07
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.6.1-alpha3
+ * @version 0.7.0
  */
 
 /* jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery */
@@ -89,7 +89,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        */
       init: function() {
          var self = jsxc.webrtc;
-         
+
          // shortcut
          self.conn = jsxc.xmpp.conn;
 
@@ -125,7 +125,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          $(document).on('error.jingle', function(ev, sid, error) {
             jsxc.error('[JINGLE]', error);
          });
-         
+
          if (self.conn.caps) {
             $(document).on('caps.strophe', $.proxy(self.onCaps, self));
          }
@@ -262,7 +262,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var duration = (typeof d === 'undefined' || d === null) ? 4000 : d;
 
          jsxc.debug('[Webrtc]', txt);
-         
+
          if (status.html()) {
             // attach old messages
             txt = status.html() + '<br />' + txt;
@@ -406,7 +406,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
 
          dialog.find('.jsxc_accept').click(function() {
             $(document).trigger('accept.call.jsxc');
-            
+
             self.reqUserMedia();
          });
 
@@ -429,7 +429,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        * @param reason Reason for termination
        * @param [text] Optional explanation
        */
-      onCallTerminated: function(event, sid, reason, text) { 
+      onCallTerminated: function(event, sid, reason, text) {
          this.setStatus('call terminated ' + sid + (reason ? (': ' + reason + ' ' + text) : ''));
 
          if (this.localStream) {
@@ -442,7 +442,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          this.conn.jingle.localStream = null;
          this.localStream = null;
          this.remoteStream = null;
-         
+
          $('#jsxc_windowList > ul').prepend($('#jsxc_dialog .jsxc_chatarea > ul > li').detach());
 
          $(document).off('cleanup.dialog.jsxc');
@@ -599,7 +599,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
                self.conn.jingle.initiate(jid, self.conn.jid.toLowerCase());
             },
             'mediafailure.jingle': function() {
-
+               jsxc.gui.dialog.close();
             }
          });
 
@@ -720,11 +720,11 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
 
          var toggleMulti = function(elem, open) {
             $('#jsxc_dialog .jsxc_multi > div').not(elem).slideUp();
-            
+
             var opt = {
-                  complete: jsxc.gui.dialog.resize
+               complete: jsxc.gui.dialog.resize
             };
-            
+
             if (open) {
                elem.slideDown(opt);
             } else {
@@ -733,9 +733,9 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          };
 
          var win = jsxc.gui.window.open(jsxc.jidToCid(jid));
-         
+
          $('#jsxc_dialog .jsxc_chatarea ul').append(win.detach());
-         
+
          $('#jsxc_dialog .jsxc_hangUp').click(function() {
             jsxc.webrtc.hangUp();
          });
@@ -797,5 +797,43 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
          $(document).on('attached.jsxc', jsxc.webrtc.init);
       }
+   });
+   
+   $.extend(jsxc.l10n.en, {
+      Please_allow_access_to_microphone_and_camera: 'Please allow access to microphone and camera.',
+      Incoming_call: 'Incoming call',
+      from: 'from',
+      Do_you_want_to_accept_the_call_from: 'Do you want to accept the call from',
+      Reject: 'Reject',
+      Accept: 'Accept',
+      hang_up: 'hang up',
+      snapshot: 'snapshot',
+      mute_my_audio: 'mute my audio',
+      pause_my_video: 'pause my video',
+      fullscreen: 'fullscreen',
+      Info: 'Info',
+      Local_IP: 'Local IP',
+      Remote_IP: 'Remote IP',
+      Local_Fingerprint: 'Local fingerprint',
+      Remote_Fingerprint: 'Remote fingerprint',
+   });
+
+   $.extend(jsxc.l10n.de, {
+      Please_allow_access_to_microphone_and_camera: 'Bitte erlaube den Zugriff auf Kamera und Mikrofon.',
+      Incoming_call: 'Eingehender Anruf',
+      from: 'von',
+      Do_you_want_to_accept_the_call_from: 'Möchtest Du den Anruf annehmen von',
+      Reject: 'Ablehnen',
+      Accept: 'Annehmen',
+      hang_up: 'Auflegen',
+      snapshot: 'Schnappschuss',
+      mute_my_audio: 'Mein Ton aus',
+      pause_my_video: 'Mein Video pausieren',
+      fullscreen: 'Vollbild',
+      Info: 'Info',
+      Local_IP: 'Lokale IP',
+      Remote_IP: 'Remote IP',
+      Local_Fingerprint: 'Lokaler Fingerprint',
+      Remote_Fingerprint: 'Remote Fingerprint',
    });
 }(jQuery));
