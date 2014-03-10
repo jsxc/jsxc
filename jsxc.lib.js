@@ -2056,7 +2056,7 @@ var jsxc;
          var msgDiv = $("<div>");
          msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
          msgDiv.attr('id', uid);
-         msgDiv.text(msg);
+         msgDiv.html(msg);
 
          if (received) {
             msgDiv.addClass('jsxc_received');
