@@ -1,9 +1,6 @@
 /* jshint -W117 */
-var SDP;
-
-(function($){
 // SDP STUFF
-SDP = function(sdp) {
+function SDP(sdp) {
     this.media = sdp.split('\r\nm=');
     for (var i = 1; i < this.media.length; i++) {
         this.media[i] = 'm=' + this.media[i];
@@ -810,4 +807,3 @@ SDPUtil = {
         return line + '\r\n';
     }
 };
-}(jQuery));
