@@ -1971,7 +1971,7 @@ var jsxc;
          var chat = jsxc.storage.getUserItem('chat_' + cid) || [];
          var data = jsxc.storage.getUserItem('buddy_' + cid);
          var html_msg = msg;
-         var uid = jsxc.xmpp.conn.getUniqueId('msg');
+         var uid = new Date().getTime() + ':msg';
 
          if (chat.length > jsxc.options.numberOfMsg) {
             chat.pop();
@@ -2235,7 +2235,7 @@ var jsxc;
                  <div class="jsxc_avatar">☺</div>\
               </div>\
               <div id="jsxc_menu">\
-                 <span>⚙</span>\
+                 <span></span>\
                  <ul>\
                      <li class="jsxc_muteNotification">%%Mute%%</li>\
                      <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
