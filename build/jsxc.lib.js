@@ -1,5 +1,5 @@
 /**
- * jsxc v0.7.0 - 2014-03-07
+ * jsxc v0.7.1 - 2014-03-18
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.7.0
+ * @version 0.7.1
  */
 
 var jsxc;
@@ -22,7 +22,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '0.7.0',
+      version: '0.7.1',
 
       /** True if i'm the master */
       master: false,
@@ -1983,7 +1983,7 @@ var jsxc;
          var chat = jsxc.storage.getUserItem('chat_' + cid) || [];
          var data = jsxc.storage.getUserItem('buddy_' + cid);
          var html_msg = msg;
-         var uid = jsxc.xmpp.conn.getUniqueId('msg');
+         var uid = new Date().getTime() + ':msg';
 
          if (chat.length > jsxc.options.numberOfMsg) {
             chat.pop();
@@ -2068,7 +2068,7 @@ var jsxc;
          var msgDiv = $("<div>");
          msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
          msgDiv.attr('id', uid);
-         msgDiv.text(msg);
+         msgDiv.html(msg);
 
          if (received) {
             msgDiv.addClass('jsxc_received');
@@ -2247,7 +2247,7 @@ var jsxc;
                  <div class="jsxc_avatar">☺</div>\
               </div>\
               <div id="jsxc_menu">\
-                 <span>⚙</span>\
+                 <span></span>\
                  <ul>\
                      <li class="jsxc_muteNotification">%%Mute%%</li>\
                      <li class="jsxc_addBuddy">%%Add_buddy%%</li>\

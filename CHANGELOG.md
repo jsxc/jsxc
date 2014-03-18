@@ -1,3 +1,8 @@
+v0.7.1 / 2014-03-18
+===
+- fix emoticons
+- fix unique message id
+
 v0.7.0 / 2014-03-07
 ===
 - add sound notifications
