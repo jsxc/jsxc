@@ -177,8 +177,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             return;
          }
 
-         var li = $('<li>Video</li>').addClass('jsxc_video');
-         win.find('.jsxc_settings ul').append(li);
+         var div = $('<div>Video</div>').addClass('jsxc_video');
+         win.find('.jsxc_transfer:eq(1)').after(div);
 
          self.updateWindow(win);
       },
@@ -215,8 +215,12 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
                self.startCall(jid);
             });
             li.removeClass('jsxc_disabled');
+            
+            li.attr('title', jsxc.translate('%%Start video call%%'));
          } else {
             li.addClass('jsxc_disabled');
+            
+            li.attr('title', jsxc.translate('%%Video call not possible.%%'));
          }
       },
 
