@@ -564,7 +564,7 @@ div.jsxc_settings {
 	font-family: Arial;
 	line-height: 17px;
 	cursor: pointer;
-	background-image: url('img/gear.png');
+	background-image: url('img/gear_grey.svg');
 	background-size: 15px 15px;
 	background-repeat: no-repeat;
 	background-position: center center;
@@ -577,7 +577,7 @@ div.jsxc_settings {
 }
 
 div.jsxc_settings:hover,div.jsxc_settings.hover {
-	background-image: url('img/gear_hover.png');
+	background-image: url('img/gear_white.svg');
 }
 
 div.jsxc_settings ul {
@@ -620,7 +620,7 @@ div.jsxc_transfer {
 	padding: 3px;
 	width: 17px;
 	height: 17px;
-	background-image: url('img/padlock_open.png');
+	background-image: url('img/padlock_open_grey.svg');
 	background-repeat: no-repeat;
 	background-position: center center;
 	background-size: 15px 15px;
@@ -629,13 +629,13 @@ div.jsxc_transfer {
 }
 
 div.jsxc_transfer.jsxc_fin {
-	background-image: url('img/padlock_close_grey.png');
+	background-image: url('img/padlock_close_grey.svg');
 }
 
 div.jsxc_transfer.jsxc_enc {
-	background-image: url('img/padlock_close_orange.png');
+	background-image: url('img/padlock_close_orange.svg');
 }
 
 div.jsxc_transfer.jsxc_enc.jsxc_trust {
-	background-image: url('img/padlock_close_green.png');
+	background-image: url('img/padlock_close_green.svg');
 }
