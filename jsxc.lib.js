@@ -3837,7 +3837,7 @@ var jsxc;
                   var type = e.data.type;
                   var val = e.data.val;
 
-                  if (type === 'val') {
+                  if (type === 'debug') {
                      jsxc.debug(val);
                   } else if (type === 'data') {
                      jsxc.otr.DSAready(DSA.parsePrivate(val));

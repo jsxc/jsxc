@@ -155,7 +155,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
                jsxc.webrtc.conn.jingle.ice_config = iceConfig;
                jsxc.storage.setUserItem('iceConfig', iceConfig);
                jsxc.storage.setUserItem('iceValidity', (new Date()).getTime() + 1000 * data.ttl);
-            }
+            },
+            dataType: 'json'
          });
       },
 
@@ -215,11 +216,11 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
                self.startCall(jid);
             });
             li.removeClass('jsxc_disabled');
-            
+
             li.attr('title', jsxc.translate('%%Start video call%%'));
          } else {
             li.addClass('jsxc_disabled');
-            
+
             li.attr('title', jsxc.translate('%%Video call not possible.%%'));
          }
       },
@@ -790,7 +791,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          $(document).on('attached.jsxc', jsxc.webrtc.init);
       }
    });
-   
+
    $.extend(jsxc.l10n.en, {
       Please_allow_access_to_microphone_and_camera: 'Please allow access to microphone and camera.',
       Incoming_call: 'Incoming call',
