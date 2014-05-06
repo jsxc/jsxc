@@ -3819,12 +3819,12 @@ var jsxc;
                $('#jsxc_roster').append(waitDiv);
 
                var worker = new Worker(jsxc.options.root + '/js/jsxc/lib/otr/build/dsa-webworker.js');
-
+               worker.onerror = function(e){ console.log('WW Error:', e); };
                worker.onmessage = function(e) {
                   var type = e.data.type;
                   var val = e.data.val;
 
-                  if (type === 'val') {
+                  if (type === 'debug') {
                      jsxc.debug(val);
                   } else if (type === 'data') {
                      jsxc.otr.DSAready(DSA.parsePrivate(val));
@@ -3992,7 +3992,7 @@ var jsxc;
             };
 
             return true;
-         } else if (Notification) {
+         } else if (window.Notification) {
             return true;
          } else {
             return false;
