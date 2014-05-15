@@ -958,10 +958,10 @@ var jsxc;
 
          // Add handler
 
-         $('#jsxc_facebox > div:gt(0)').hide();
-         $('#jsxc_facebox select').change(function() {
-            $('#jsxc_facebox > div:gt(0)').hide();
-            $('#jsxc_facebox > div:eq(' + $(this).prop('selectedIndex') + ')').slideDown({
+         $('#jsxc_dialog > div:gt(0)').hide();
+         $('#jsxc_dialog select').change(function() {
+            $('#jsxc_dialog > div:gt(0)').hide();
+            $('#jsxc_dialog > div:eq(' + $(this).prop('selectedIndex') + ')').slideDown({
                complete: function() {
                   jsxc.gui.dialog.resize();
                }
@@ -969,7 +969,7 @@ var jsxc;
          });
 
          // Manual
-         $('#jsxc_facebox > div:eq(1) a.creation').click(function() {
+         $('#jsxc_dialog > div:eq(1) a.creation').click(function() {
             if (jsxc.master) {
                jsxc.buddyList[cid].trust = true;
             }
