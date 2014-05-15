@@ -105,7 +105,7 @@ li .jsxc_name {
 div#jsxc_roster {
 	position: fixed;
 	top: 0px;
-	bottom: 20px;
+	bottom: 0px;
 	right: 0px;
 	width: 200px;
 	overflow: visible;
@@ -249,7 +249,7 @@ div#jsxc_roster>.jsxc_bottom ul li:last-child {
 	display: block;
 	width: 25px;
 	height: 30px;
-	background-image: url('img/gear.svg');
+	background-image: url('img/gear_white.svg');
 	background-size: 18px 18px;
 	background-repeat: no-repeat;
 	background-position: center center;

@@ -178,7 +178,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             return;
          }
 
-         var div = $('<div>Video</div>').addClass('jsxc_video');
+         var div = $('<div>').addClass('jsxc_video');
          win.find('.jsxc_transfer:eq(1)').after(div);
 
          self.updateWindow(win);
