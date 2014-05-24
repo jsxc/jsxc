@@ -1,5 +1,5 @@
 /**
- * jsxc v0.7.1 - 2014-03-18
+ * jsxc v0.7.2a - 2014-05-24
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.7.1
+ * @version 0.7.2a
  */
 
 var jsxc;
@@ -22,7 +22,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '0.7.1',
+      version: '0.7.2a',
 
       /** True if i'm the master */
       master: false,
@@ -197,9 +197,9 @@ var jsxc;
 
          // detect language
          var lang;
-         if (jsxc.storage.getItem('lang') !== null){
+         if (jsxc.storage.getItem('lang') !== null) {
             lang = jsxc.storage.getItem('lang');
-         } else if(jsxc.options.autoLang && navigator.language) {
+         } else if (jsxc.options.autoLang && navigator.language) {
             lang = navigator.language.substr(0, 2);
          } else {
             lang = jsxc.options.defaultLang;
@@ -483,7 +483,7 @@ var jsxc;
             jsxc.gui.roster.add(value);
          });
 
-         $(document).trigger('loaded.roster.jsxc');
+         $(document).trigger('cloaded.roster.jsxc');
       },
 
       /**
@@ -970,10 +970,10 @@ var jsxc;
 
          // Add handler
 
-         $('#jsxc_facebox > div:gt(0)').hide();
-         $('#jsxc_facebox select').change(function() {
-            $('#jsxc_facebox > div:gt(0)').hide();
-            $('#jsxc_facebox > div:eq(' + $(this).prop('selectedIndex') + ')').slideDown({
+         $('#jsxc_dialog > div:gt(0)').hide();
+         $('#jsxc_dialog select').change(function() {
+            $('#jsxc_dialog > div:gt(0)').hide();
+            $('#jsxc_dialog > div:eq(' + $(this).prop('selectedIndex') + ')').slideDown({
                complete: function() {
                   jsxc.gui.dialog.resize();
                }
@@ -981,7 +981,7 @@ var jsxc;
          });
 
          // Manual
-         $('#jsxc_facebox > div:eq(1) a.creation').click(function() {
+         $('#jsxc_dialog > div:eq(1) a.creation').click(function() {
             if (jsxc.master) {
                jsxc.buddyList[cid].trust = true;
             }
@@ -996,8 +996,8 @@ var jsxc;
          });
 
          // Question
-         $('#jsxc_facebox > div:eq(2) a.creation').click(function() {
-            var div = $('#jsxc_facebox > div:eq(2)');
+         $('#jsxc_dialog > div:eq(2) a.creation').click(function() {
+            var div = $('#jsxc_dialog > div:eq(2)');
             var sec = div.find('#jsxc_secret2').val();
             var quest = div.find('#jsxc_quest').val();
 
@@ -1026,8 +1026,8 @@ var jsxc;
          });
 
          // Secret
-         $('#jsxc_facebox > div:eq(3) .creation').click(function() {
-            var div = $('#jsxc_facebox > div:eq(3)');
+         $('#jsxc_dialog > div:eq(3) .creation').click(function() {
+            var div = $('#jsxc_dialog > div:eq(3)');
             var sec = div.find('#jsxc_secret').val();
 
             if (sec === '') {
@@ -1388,7 +1388,7 @@ var jsxc;
 
          $('#jsxc_buddylist').slimScroll({
             distance: '3px',
-            height: ($('#jsxc_roster').height() - 107) + 'px',
+            height: ($('#jsxc_roster').height() - 31) + 'px',
             width: $('#jsxc_buddylist').width() + 'px',
             color: '#fff',
             opacity: '0.5'
@@ -1407,7 +1407,7 @@ var jsxc;
          $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
          jsxc.gui.updatePresence('own', pres);
 
-         $(document).on('loaded.roster.jsxc', function() {
+         $(document).on('cloaded.roster.jsxc', function() {
             jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
          });
 
@@ -2015,6 +2015,7 @@ var jsxc;
             uid: uid.replace(/:/, '-'),
             received: false
          };
+
          chat.unshift(post);
          jsxc.storage.setUserItem('chat_' + cid, chat);
 
@@ -2234,7 +2235,7 @@ var jsxc;
                         </ul>\
                     </div>\
                     <div class="jsxc_transfer"/>\
-                    <span class="jsxc_close">X</span>\
+                    <div class="jsxc_close">X</div>\
                 </div>\
                 <div class="jsxc_textarea"/>\
                 <input type="text" class="jsxc_textinput jsxc_chatmessage jsxc_out" placeholder="...%%Message%%"/>\
@@ -2380,13 +2381,15 @@ var jsxc;
 
             return uid;
          };
-
-         // jsxc.xmpp.conn.xmlInput = function(data) {
-         // console.log('<', data);
-         // };
-         // jsxc.xmpp.conn.xmlOutput = function(data) {
-         // console.log('>', data);
-         // };
+         
+         if(jsxc.storage.getItem('debug') === true){
+            jsxc.xmpp.conn.xmlInput = function(data) {
+               console.log('<', data);
+            };
+            jsxc.xmpp.conn.xmlOutput = function(data) {
+               console.log('>', data);
+            };
+         }
 
          // Strophe.log = function(level, msg) {
          // console.log(level + " " + msg);
@@ -2517,7 +2520,7 @@ var jsxc;
          if (!jsxc.restore || !jsxc.storage.getUserItem('buddylist')) {
             // in order to not overide existing presence information, we send
             // pres first after roster is ready
-            $(document).one('loaded.roster.jsxc', jsxc.xmpp.sendPres);
+            $(document).one('cloaded.roster.jsxc', jsxc.xmpp.sendPres);
 
             var iq = $iq({
                type: 'get'
@@ -2675,7 +2678,7 @@ var jsxc;
          jsxc.storage.setUserItem('buddylist', buddies);
 
          jsxc.debug('Roster loaded');
-         $(document).trigger('loaded.roster.jsxc');
+         $(document).trigger('cloaded.roster.jsxc');
       },
 
       /**
@@ -3665,18 +3668,18 @@ var jsxc;
       onSmpQuestion: function(cid, data) {
          jsxc.gui.showVerification(cid);
 
-         $('#jsxc_facebox select').prop('selectedIndex', (data ? 2 : 3)).change();
-         $('#jsxc_facebox > div:eq(0)').hide();
+         $('#jsxc_dialog select').prop('selectedIndex', (data ? 2 : 3)).change();
+         $('#jsxc_dialog > div:eq(0)').hide();
 
          if (data) {
-            $('#jsxc_facebox > div:eq(2)').find('#jsxc_quest').val(data).prop('disabled', true);
-            $('#jsxc_facebox > div:eq(2)').find('.creation').text('Answer');
-            $('#jsxc_facebox > div:eq(2)').find('.jsxc_explanation').text(jsxc.l.your_buddy_is_attempting_to_determine_ + ' ' + jsxc.l.to_authenticate_to_your_buddy + jsxc.l.enter_the_answer_and_click_answer);
+            $('#jsxc_dialog > div:eq(2)').find('#jsxc_quest').val(data).prop('disabled', true);
+            $('#jsxc_dialog > div:eq(2)').find('.creation').text('Answer');
+            $('#jsxc_dialog > div:eq(2)').find('.jsxc_explanation').text(jsxc.l.your_buddy_is_attempting_to_determine_ + ' ' + jsxc.l.to_authenticate_to_your_buddy + jsxc.l.enter_the_answer_and_click_answer);
          } else {
-            $('#jsxc_facebox > div:eq(3)').find('.jsxc_explanation').text(jsxc.l.your_buddy_is_attempting_to_determine_ + ' ' + jsxc.l.to_authenticate_to_your_buddy + jsxc.l.enter_the_secret);
+            $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text(jsxc.l.your_buddy_is_attempting_to_determine_ + ' ' + jsxc.l.to_authenticate_to_your_buddy + jsxc.l.enter_the_secret);
          }
 
-         $('#jsxc_facebox a[rel=close]').click(function() {
+         $('#jsxc_dialog a[rel=close]').click(function() {
             jsxc.storage.removeUserItem('smp_' + cid);
 
             if (jsxc.master) {
@@ -3823,20 +3826,30 @@ var jsxc;
 
          if (jsxc.storage.getUserItem('key') === null) {
             var msg = jsxc.l.now_we_will_create_your_private_key_;
+            var worker = null;
 
             if (Worker) {
+               // try to create web-worker
+
+               try {
+                  worker = new Worker(jsxc.options.root + '/js/jsxc/lib/otr/build/dsa-webworker.js');
+               } catch (err) {
+                  jsxc.warn('Couldn\'t create web-worker.', err);
+               }
+            }
+
+            if (worker !== null) {
                // create DSA key in background
 
+               // add wait overlay on roster
                var waitDiv = $('<div>').addClass('jsxc_wait').html(jsxc.gui.template.get('waitAlert', null, msg));
                $('#jsxc_roster').append(waitDiv);
-
-               var worker = new Worker(jsxc.options.root + '/js/jsxc/lib/otr/build/dsa-webworker.js');
 
                worker.onmessage = function(e) {
                   var type = e.data.type;
                   var val = e.data.val;
 
-                  if (type === 'val') {
+                  if (type === 'debug') {
                      jsxc.debug(val);
                   } else if (type === 'data') {
                      jsxc.otr.DSAready(DSA.parsePrivate(val));
@@ -4004,7 +4017,7 @@ var jsxc;
             };
 
             return true;
-         } else if (Notification) {
+         } else if (window.Notification) {
             return true;
          } else {
             return false;

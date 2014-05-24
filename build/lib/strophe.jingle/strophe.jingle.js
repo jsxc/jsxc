@@ -1,5 +1,4 @@
 /* jshint -W117 */
-(function($){
 Strophe.addConnectionPlugin('jingle', {
     connection: null,
     sessions: {},
@@ -258,4 +257,3 @@ Strophe.addConnectionPlugin('jingle', {
         // implement push?
     }
 });
-}(jQuery));
