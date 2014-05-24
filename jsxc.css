@@ -48,6 +48,7 @@ p.jsxc_center {
 #jsxc_dialog p input {
 	margin-bottom: 5px;
 	width: 60%;
+    outline: none;
 }
 
 #jsxc_dialog p label {
@@ -156,6 +157,7 @@ div#jsxc_roster .jsxc_wait h3 {
 	-moz-box-shadow: inset 0 0 5px #888;
 	-webkit-box-shadow: inset 0 0 5px #888;
 	box-shadow: inner 0 0 5px #888;
+    outline: none;
 }
 
 div#jsxc_roster p {
@@ -455,6 +457,7 @@ div.jsxc_window {
 	background-color: #A4A4A4;
 	box-shadow: 0px 0px 5px #000;
 	z-index: 80;
+    cursor: default;
 }
 
 div.jsxc_window .jsxc_tools {
@@ -488,6 +491,7 @@ div.jsxc_chatmessage,input.jsxc_chatmessage {
 	word-wrap: break-word;
 	background-color: #fff;
 	position: relative;
+    outline: none;
 }
 
 div.jsxc_chatmessage.jsxc_received {
@@ -542,6 +546,7 @@ div.jsxc_sys {
 	height: 16px;
 	margin: 0px;
 	line-height: 16px;
+    outline:none;
 }
 
 .jsxc_window .jsxc_close {
@@ -638,4 +643,8 @@ div.jsxc_transfer.jsxc_enc {
 
 div.jsxc_transfer.jsxc_enc.jsxc_trust {
 	background-image: url('img/padlock_close_green.svg');
+}
+
+#colorbox, #cboxWrapper {
+    outline: none;
 }
