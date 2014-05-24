@@ -471,7 +471,7 @@ var jsxc;
             jsxc.gui.roster.add(value);
          });
 
-         $(document).trigger('loaded.roster.jsxc');
+         $(document).trigger('cloaded.roster.jsxc');
       },
 
       /**
@@ -1395,7 +1395,7 @@ var jsxc;
          $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
          jsxc.gui.updatePresence('own', pres);
 
-         $(document).on('loaded.roster.jsxc', function() {
+         $(document).on('cloaded.roster.jsxc', function() {
             jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
          });
 
@@ -2508,7 +2508,7 @@ var jsxc;
          if (!jsxc.restore || !jsxc.storage.getUserItem('buddylist')) {
             // in order to not overide existing presence information, we send
             // pres first after roster is ready
-            $(document).one('loaded.roster.jsxc', jsxc.xmpp.sendPres);
+            $(document).one('cloaded.roster.jsxc', jsxc.xmpp.sendPres);
 
             var iq = $iq({
                type: 'get'
@@ -2666,7 +2666,7 @@ var jsxc;
          jsxc.storage.setUserItem('buddylist', buddies);
 
          jsxc.debug('Roster loaded');
-         $(document).trigger('loaded.roster.jsxc');
+         $(document).trigger('cloaded.roster.jsxc');
       },
 
       /**
