@@ -1,11 +1,11 @@
-# JavaScript Xmpp Client
+# JavaScript XMPP Client
 
 __Beware! This is beta software.__
 
-Real-time chat app. This app requires external XMPP server (openfire, ejabberd etc.).
+Real-time chat app. This app requires an external XMPP server (openfire, ejabberd etc.).
 
 ### Features
-- integration into existing ui
+- integration into existing UI
 - one-to-one conversation (XMPP)
 - encrypted one-to-one conversation (OTR)
   - use of whitespace tags to start a OTR session
@@ -14,11 +14,11 @@ Real-time chat app. This app requires external XMPP server (openfire, ejabberd e
   - [TURN REST API](http://tools.ietf.org/html/draft-uberti-behave-turn-rest-00)
   - fullscreen mode
   - snapshots
-- auto link-detection
+- automatic link-detection
 - emotions
 - roster management 
 - multi-language support (de, en)
-- multi tab support
+- multi-tab support
 
 ### Supported protocols
 - XMPP Core (RFC6120)
@@ -32,8 +32,8 @@ Real-time chat app. This app requires external XMPP server (openfire, ejabberd e
 
 ### Supported browsers
 - Full support for __Chrome__ and __Firefox__.
-- __IE__ doesn't support multi tabs, WebRTC and Notifications.
-- __Safari__ doesn't support WebRTC and Notifications.
+- __IE__ doesn't support multiple tabs, WebRTC, and Notifications.
+- __Safari__ doesn't support WebRTC and (before Safari 7) Notifications.
 
 ### Planned features
 - multi user chat
@@ -42,7 +42,7 @@ Real-time chat app. This app requires external XMPP server (openfire, ejabberd e
 
 ## Developer notes
 
-Please execude the following commands to get a copy of the code:
+Please execute the following commands to get a copy of the code:
 
 ```
 git clone https://github.com/sualko/jsxc/
