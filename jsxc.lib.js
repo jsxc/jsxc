@@ -839,7 +839,10 @@ var jsxc;
                jsxc.storage.setUserItem('avatar_' + aid, src);
                setAvatar(src);
             }, Strophe.getBareJidFromJid(jid), function(msg) {
-               jsxc.error('Could not load vcard.', msg);
+               jsxc.warn('Could not load vcard.', msg);
+               
+               jsxc.storage.setUserItem('avatar_' + aid, 0);
+               setAvatar(0);
             });
          }
       },
