@@ -3955,7 +3955,7 @@ var jsxc;
 
          jsxc.toNotification = setTimeout(function() {
 
-            var popup = window.Notification(title, {
+            var popup = new Notification(title, {
                body: msg
             });
 
