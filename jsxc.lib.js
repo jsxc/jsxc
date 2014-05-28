@@ -1404,7 +1404,7 @@ var jsxc;
 
          $('#jsxc_roster').tooltip({
             show: {
-               delay: 1000
+               delay: 600
             },
             content: function() {
                return $(this).attr('title').replace(/\n/g, '<br />');
@@ -2778,7 +2778,7 @@ var jsxc;
                jid: jid,
                approve: -1
             });
-            jsxc.notice.add('Friendship request', 'from ' + jid, 'gui.showApproveDialog', [ jid ]);
+            jsxc.notice.add('%%Friendship request%%', '%%from%% ' + jid, 'gui.showApproveDialog', [ jid ]);
 
             return true;
          } else if (ptype === 'unavailable' || ptype === 'unsubscribed') {
@@ -4220,8 +4220,8 @@ var jsxc;
             return false;
          });
 
-         notice.text(msg);
-         notice.attr('title', description || '');
+         notice.text(jsxc.translate(msg));
+         notice.attr('title', jsxc.translate(description) || '');
          list.append(notice);
 
          $('#jsxc_notice > span').text(++jsxc.notice._num);
@@ -4341,7 +4341,10 @@ var jsxc;
          Chatty: 'Chatty',
          Away: 'Away',
          Extended_away: 'Extended away',
-         Offline: 'Offline'
+         Offline: 'Offline',
+         Friendship_request: 'Friendship request',
+         Confirm: 'Confirm',
+         Dismiss: 'Dismiss'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4439,7 +4442,10 @@ var jsxc;
          Chatty: 'Gesprächig',
          Away: 'Abwesend',
          Extended_away: 'Länger abwesend',
-         Offline: 'Offline'
+         Offline: 'Offline',
+         Friendship_request: 'Freundschaftsanfrage',
+         Confirm: 'Bestätigen',
+         Dismiss: 'Ablehnen'
       }
    };
 }(jQuery));
