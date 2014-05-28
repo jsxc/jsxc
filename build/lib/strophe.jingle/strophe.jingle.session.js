@@ -1,6 +1,9 @@
 /* jshint -W117 */
 // Jingle stuff
-function JingleSession(me, sid, connection) {
+var JingleSession;
+
+(function($){
+JingleSession = function(me, sid, connection) {
     this.me = me;
     this.sid = sid;
     this.connection = connection;
@@ -853,3 +856,4 @@ JingleSession.prototype.getStats = function (interval) {
     return this.statsinterval;
 };
 
+}(jQuery));

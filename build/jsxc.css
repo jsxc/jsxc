@@ -59,7 +59,11 @@ p.jsxc_center {
 }
 
 #jsxc_dialog .jsxc_right {
-	padding-top: 10px;
+	margin-top: 20px;
+}
+
+#jsxc_dialog p.jsxc_maxWidth {
+   max-width: 500px;
 }
 
 /*############################ 
@@ -124,12 +128,13 @@ div#jsxc_roster .slimScrollDiv {
 
 div#jsxc_roster .jsxc_wait {
 	position: absolute;
-	top: 45px;
+	top: 0px;
 	left: 0px;
+	bottom: 0px;
 	width: 160px;
-	height: 100%;
 	padding: 20px;
 	background-color: #fff;
+	z-index: 60;
 }
 
 div#jsxc_roster .jsxc_wait img {

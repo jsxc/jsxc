@@ -1680,25 +1680,18 @@
     , equalsInt     : equalsInt
     , sub           : sub
     , mod           : mod
-    , mod_          : mod_
     , modInt        : modInt
     , mult          : mult
     , divInt_       : divInt_
     , rightShift_   : rightShift_
-    , leftShift_    : leftShift_
     , dup           : dup
     , greater       : greater
     , add           : add
-    , addInt        : addInt
-    , addInt_       : addInt_
     , isZero        : isZero
     , bitSize       : bitSize
-    , randTruePrime : randTruePrime
     , millerRabin   : millerRabin
     , divide_       : divide_
     , trim          : trim
-    , expand        : expand
-    , bpe           : bpe
     , primes        : primes
     , findPrimes    : findPrimes
     , getSeed       : getSeed

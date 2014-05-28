@@ -1,8 +1,8 @@
 {
    "name": "jsxc",
-   "version": "0.7.2a",
+   "version": "0.7.2",
    "description": "Real-time chat app",
-   "homepage": "http://jsxc.org/",
+   "homepage": "http://www.jsxc.org/",
    "bugs": "https://github.com/sualko/jsxc/issues",
    "license": "MIT",
    "author": "Klaus Herberth <klaus@jsxc.org>",

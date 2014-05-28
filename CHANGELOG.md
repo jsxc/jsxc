@@ -1,3 +1,24 @@
+v0.7.2 / 2014-05-28
+===
+- fix login issue
+- fix different dialogs
+- fix safari mobile bug
+- fix webworker debugging
+- fix issue with prosody
+- fix submodule state
+- add debug flag
+- add icon for video calls
+- add general stylesheet + vector images
+- add multiple translations
+- add link to online help
+- handle webworker security error
+- remove outline glow
+- reduce tooltip delay
+- remove already confirmed friendship request from notice stack
+- minor style fixes
+- move complete to new notification api
+
+
 v0.7.1 / 2014-03-18
 ===
 - fix emoticons
