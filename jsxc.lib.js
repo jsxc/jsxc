@@ -1363,6 +1363,10 @@ var jsxc;
             jsxc.gui.showContactDialog();
          });
 
+         $('#jsxc_roster .jsxc_onlineHelp').click(function() {
+            window.open("http://www.jsxc.org/manual.html", "onlineHelp");
+         });
+
          $('#jsxc_roster .jsxc_about').click(function() {
             jsxc.gui.showAboutDialog();
          });
@@ -2244,6 +2248,7 @@ var jsxc;
                      <li class="jsxc_muteNotification">%%Mute%%</li>\
                      <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
                      <li class="jsxc_hideOffline">%%Hide offline%%</li>\
+                     <li class="jsxc_onlineHelp">%%Online help%%</li>\
                      <li class="jsxc_about">%%About%%</li>\
                  </ul>\
               </div>\
@@ -2733,7 +2738,7 @@ var jsxc;
 
                   if (notice.fnName === 'gui.showApproveDialog' && notice.fnParams[0] === jid) {
                      jsxc.debug('Remove notice with key ' + noticeKey);
-                     
+
                      jsxc.notice.remove(noticeKey);
                   }
                }
@@ -4252,16 +4257,16 @@ var jsxc;
             jsxc.notification.playSound(jsxc.CONST.SOUNDS.NOTICE, false, true);
          }
       },
-      
+
       /**
        * Removes notice from stack
        * 
        * @memberOf jsxc.notice
        * @param nid The notice id
        */
-      remove: function(nid){
+      remove: function(nid) {
          var el = $('#jsxc_notice li[data-nid=' + nid + ']');
-         
+
          el.remove();
          $('#jsxc_notice > span').text(--jsxc.notice._num || '');
 
@@ -4374,7 +4379,8 @@ var jsxc;
          Friendship_request: 'Friendship request',
          Confirm: 'Confirm',
          Dismiss: 'Dismiss',
-         Remove: 'Remove'
+         Remove: 'Remove',
+         Online_help: 'Online help'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4476,7 +4482,8 @@ var jsxc;
          Friendship_request: 'Freundschaftsanfrage',
          Confirm: 'Bestätigen',
          Dismiss: 'Ablehnen',
-         Remove: 'Löschen'
+         Remove: 'Löschen',
+         Online_help: 'Online Hilfe'
       }
    };
 }(jQuery));
