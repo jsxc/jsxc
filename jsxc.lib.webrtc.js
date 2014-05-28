@@ -809,6 +809,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       Remote_IP: 'Remote IP',
       Local_Fingerprint: 'Local fingerprint',
       Remote_Fingerprint: 'Remote fingerprint',
+      Video_call_not_possible: 'Video call not possible',
+      Start_video_call: 'Start video call'
    });
 
    $.extend(jsxc.l10n.de, {
@@ -828,5 +830,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       Remote_IP: 'Remote IP',
       Local_Fingerprint: 'Lokaler Fingerprint',
       Remote_Fingerprint: 'Remote Fingerprint',
+      Video_call_not_possible: 'Videoanruf nicht verfügbar',
+      Start_video_call: 'Starte Videoanruf'
    });
 }(jQuery));

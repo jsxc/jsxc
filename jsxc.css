@@ -59,7 +59,11 @@ p.jsxc_center {
 }
 
 #jsxc_dialog .jsxc_right {
-	padding-top: 10px;
+	margin-top: 20px;
+}
+
+#jsxc_dialog p.jsxc_maxWidth {
+   max-width: 500px;
 }
 
 /*############################ 

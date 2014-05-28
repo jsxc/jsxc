@@ -2299,9 +2299,9 @@ var jsxc;
       approveDialog: '<h3>%%Subscription_request%%</h3>\
         <p>%%You_have_a_request_from%% <b class="jsxc_their_jid"></b>.</p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_deny">%%Deny%%</a> <a href="#" class="button creation jsxc_approve">%%Approve%%</a></p>',
-      removeDialog: '<h3>Remove Buddy</h3>\
-        <p>%%You_are_about_to_remove_%%</p>\
-        <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close">%%Cancel%%</a> <a href="#" class="button creation">%%Continue%%</a></p>',
+      removeDialog: '<h3>%%Remove buddy%%</h3>\
+        <p class="jsxc_maxWidth">%%You_are_about_to_remove_%%</p>\
+        <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close">%%Cancel%%</a> <a href="#" class="button creation">%%Remove%%</a></p>',
       waitAlert: '<h3>%%Please_wait%%</h3>\
         <p>{{msg}}</p>\
         <p class="jsxc_center"><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /></p>',
@@ -4312,7 +4312,7 @@ var jsxc;
          Deny: 'Deny',
          Approve: 'Approve',
          Remove_buddy: 'Remove buddy',
-         You_are_about_to_remove_: 'You are about to remove {{cid_jid}} from your buddy list. All related chats will be closed.  Do you want to continue?',
+         You_are_about_to_remove_: 'You are about to remove {{cid_name}} (<b>{{cid_jid}}</b>) from your buddy list. All related chats will be closed.',
          Continue: 'Continue',
          Please_wait: 'Please wait',
          Login_failed: 'Login failed',
@@ -4344,7 +4344,8 @@ var jsxc;
          Offline: 'Offline',
          Friendship_request: 'Friendship request',
          Confirm: 'Confirm',
-         Dismiss: 'Dismiss'
+         Dismiss: 'Dismiss',
+         Remove: 'Remove'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4409,7 +4410,7 @@ var jsxc;
          Deny: 'Ablehnen',
          Approve: 'Bestätigen',
          Remove_buddy: 'Freund entfernen',
-         You_are_about_to_remove_: 'Du bist gerade dabei {{cid_jid}} von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen. Willst du fortfahren?',
+         You_are_about_to_remove_: 'Du bist gerade dabei {{cid_name}} (<b>{{cid_jid}}</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.',
          Continue: 'Weiter',
          Please_wait: 'Bitte warten',
          Login_failed: 'Anmeldung fehlgeschlagen',
@@ -4445,7 +4446,8 @@ var jsxc;
          Offline: 'Offline',
          Friendship_request: 'Freundschaftsanfrage',
          Confirm: 'Bestätigen',
-         Dismiss: 'Ablehnen'
+         Dismiss: 'Ablehnen',
+         Remove: 'Löschen'
       }
    };
 }(jQuery));
