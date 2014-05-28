@@ -840,7 +840,7 @@ var jsxc;
                setAvatar(src);
             }, Strophe.getBareJidFromJid(jid), function(msg) {
                jsxc.warn('Could not load vcard.', msg);
-               
+
                jsxc.storage.setUserItem('avatar_' + aid, 0);
                setAvatar(0);
             });
@@ -2372,8 +2372,8 @@ var jsxc;
 
             return uid;
          };
-         
-         if(jsxc.storage.getItem('debug') === true){
+
+         if (jsxc.storage.getItem('debug') === true) {
             jsxc.xmpp.conn.xmlInput = function(data) {
                console.log('<', data);
             };
@@ -2721,6 +2721,22 @@ var jsxc;
                   type: 'chat'
                });
                jsxc.gui.roster.add(cid);
+            }
+
+            // Remove pending friendship request from notice list
+            if (sub === 'from' || sub === 'both') {
+               var notices = jsxc.storage.getUserItem('notices');
+               var noticeKey = null, notice;
+
+               for (noticeKey in notices) {
+                  notice = notices[noticeKey];
+
+                  if (notice.fnName === 'gui.showApproveDialog' && notice.fnParams[0] === jid) {
+                     jsxc.debug('Remove notice with key ' + noticeKey);
+                     
+                     jsxc.notice.remove(noticeKey);
+                  }
+               }
             }
          });
 
@@ -3955,8 +3971,8 @@ var jsxc;
 
          jsxc.toNotification = setTimeout(function() {
 
-            var popup = new Notification(title, {
-               body: msg
+            var popup = new Notification(jsxc.translate(title), {
+               body: jsxc.translate(msg)
             });
 
             var duration = d || jsxc.options.popupDuration;
@@ -4199,12 +4215,7 @@ var jsxc;
          var notice = $('<li/>');
 
          notice.click(function() {
-            $(this).remove();
-            $('#jsxc_notice > span').text(--jsxc.notice._num || '');
-
-            var s = jsxc.storage.getUserItem('notices');
-            delete s[nid];
-            jsxc.storage.setUserItem('notices', s);
+            jsxc.notice.remove(nid);
 
             var fnList = fnName.split('.');
             var fn = jsxc[fnList[0]];
@@ -4222,6 +4233,7 @@ var jsxc;
 
          notice.text(jsxc.translate(msg));
          notice.attr('title', jsxc.translate(description) || '');
+         notice.attr('data-nid', nid);
          list.append(notice);
 
          $('#jsxc_notice > span').text(++jsxc.notice._num);
@@ -4239,6 +4251,23 @@ var jsxc;
             jsxc.notification.notify(msg, description || '', null, true);
             jsxc.notification.playSound(jsxc.CONST.SOUNDS.NOTICE, false, true);
          }
+      },
+      
+      /**
+       * Removes notice from stack
+       * 
+       * @memberOf jsxc.notice
+       * @param nid The notice id
+       */
+      remove: function(nid){
+         var el = $('#jsxc_notice li[data-nid=' + nid + ']');
+         
+         el.remove();
+         $('#jsxc_notice > span').text(--jsxc.notice._num || '');
+
+         var s = jsxc.storage.getUserItem('notices');
+         delete s[nid];
+         jsxc.storage.setUserItem('notices', s);
       }
    };
 
