@@ -833,4 +833,25 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       Video_call_not_possible: 'Videoanruf nicht verfügbar',
       Start_video_call: 'Starte Videoanruf'
    });
+
+   $.extend(jsxc.l10n.es, {
+      Please_allow_access_to_microphone_and_camera: 'Por favor, permitir el acceso al micrófono y la cámara.',
+      Incoming_call: 'Llamada entrante',
+      from: 'de',
+      Do_you_want_to_accept_the_call_from: 'Desea aceptar la llamada de',
+      Reject: 'Rechazar',
+      Accept: 'Aceptar',
+      hang_up: 'colgar',
+      snapshot: 'instantánea',
+      mute_my_audio: 'silenciar mi audio',
+      pause_my_video: 'pausar mi vídeo',
+      fullscreen: 'pantalla completa',
+      Info: 'Info',
+      Local_IP: 'IP local',
+      Remote_IP: 'IP remota',
+      Local_Fingerprint: 'Firma digital local',
+      Remote_Fingerprint: 'Firma digital remota',
+      Video_call_not_possible: 'Llamada de vídeo no es posible',
+      Start_video_call: 'Iniciar llamada de vídeo'
+   });
 }(jQuery));
