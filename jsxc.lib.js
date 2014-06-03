@@ -1780,7 +1780,7 @@ var jsxc;
          });
 
          win.find('.jsxc_textarea').slimScroll({
-            height: '200px',
+            height: '240px',
             distance: '3px'
          });
 
@@ -2233,7 +2233,7 @@ var jsxc;
                     <div class="jsxc_close">X</div>\
                 </div>\
                 <div class="jsxc_textarea"/>\
-                <input type="text" class="jsxc_textinput jsxc_chatmessage jsxc_out" placeholder="...%%Message%%"/>\
+                <input type="text" class="jsxc_textinput jsxc_chatmessage jsxc_out"/>\
             </div>\
         </li>',
       roster: '<div id="jsxc_roster">\
