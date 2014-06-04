@@ -1257,6 +1257,88 @@ var jsxc;
       },
 
       /**
+       * Show vCard of user with the given bar jid.
+       * 
+       * @memberOf jsxc.gui
+       * @param {String} bjid Bar jid
+       */
+      showVcard: function(bjid) {
+         jsxc.gui.dialog.open(jsxc.gui.template.get('vCard', jsxc.jidToCid(bjid)));
+
+         var printProp = function(el, depth) {
+            var content = '';
+
+            el.each(function() {
+               var item = $(this);
+               var children = $(this).children();
+
+               content += '<li>';
+
+               var prop = jsxc.translate('%%' + item[0].tagName + '%%');
+
+               if (prop !== ' ') {
+                  content += '<strong>' + prop + ':</strong> ';
+               }
+
+               if (item[0].tagName === 'PHOTO') {
+
+               } else if (children.length > 0) {
+                  content += '<ul>';
+                  content += printProp(children, depth + 1);
+                  content += '</ul>';
+               } else if (item.text() !== '') {
+                  content += jsxc.escapeHTML(item.text());
+               }
+
+               content += '</li>';
+
+               if (depth === 0 && $('#jsxc_dialog ul.jsxc_vCard').length > 0) {
+                  $('#jsxc_dialog ul.jsxc_vCard').append(content);
+                  content = '';
+               }
+            });
+
+            if (depth > 0) {
+               return content;
+            }
+         };
+
+         jsxc.xmpp.conn.vcard.get(function(stanza) {
+
+            if ($('#jsxc_dialog ul.jsxc_vCard').length === 0) {
+               return;
+            }
+
+            $('#jsxc_dialog p').remove();
+
+            var photo = $(stanza).find("vCard > PHOTO");
+
+            if (photo.length > 0) {
+               var img = photo.find('BINVAL').text();
+               var type = photo.find('TYPE').text();
+               var src = 'data:' + type + ';base64,' + img;
+
+               $('#jsxc_dialog h3').prepend('<img class="jsxc_vCard" src="' + src + '" alt="avatar" />');
+            }
+
+            printProp($(stanza).find('vcard > *'), 0);
+
+         }, bjid, function() {
+            if ($('#jsxc_dialog ul.jsxc_vCard').length === 0) {
+               return;
+            }
+
+            $('#jsxc_dialog p').remove();
+
+            var content = '<p>';
+            content += jsxc.translate('%%Sorry, we couldn\'t load any vCard.%%');
+            content += '</p>';
+
+            $('#jsxc_dialog').append(content);
+         });
+      },
+
+      /**
        * Change own presence to pres.
        * 
        * @memberOf jsxc.gui
@@ -2335,7 +2417,10 @@ var jsxc;
          <br />\
          <b>Credential: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
          <a href="https://soundcloud.com/freefilmandgamemusic/ping-1?in=freefilmandgamemusic/sets/free-notification-sounds-and" target="_blank">CameronMusic (Ping)</a></p>\
-         <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>'
+         <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>',
+      vCard: '<h3>vCard %%from%% {{cid_name}}</h3>\
+         <ul class="jsxc_vCard"></ul>\
+         <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...</p>'
    };
 
    /**
@@ -4380,7 +4465,32 @@ var jsxc;
          Confirm: 'Confirm',
          Dismiss: 'Dismiss',
          Remove: 'Remove',
-         Online_help: 'Online help'
+         Online_help: 'Online help',
+         FN: 'Full Name',
+         N: ' ',
+         FAMILY: 'Family Name',
+         GIVEN: 'Given Name',
+         NICKNAME: 'Nickname',
+         URL: 'URL',
+         ADR: 'Address',
+         STREET: 'Street Address',
+         EXTADD: 'Extended Address',
+         LOCALITY: 'Locality',
+         REGION: 'Region',
+         PCODE: 'Postal Code',
+         CTRY: 'Country',
+         TEL: 'Telephone',
+         NUMBER: 'Number',
+         EMAIL: 'Email',
+         USERID: ' ',
+         ORG: 'Organization',
+         ORGNAME: 'Name',
+         ORGUNIT: 'Unit',
+         TITLE: 'Job Title',
+         ROLE: 'Role',
+         BDAY: 'Birthday',
+         DESC: 'Description',
+         PHOTO: ' '
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',

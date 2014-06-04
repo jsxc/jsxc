@@ -653,3 +653,29 @@ div.jsxc_transfer.jsxc_enc.jsxc_trust {
 #colorbox, #cboxWrapper {
     outline: none;
 }
+
+/*############################ 
+ *######### Other ############ 
+ *############################*/
+ 
+ul.jsxc_vCard{
+	min-width: 400px;
+}
+
+ul.jsxc_vCard ul{
+   margin-left: 20px;
+}
+
+ul.jsxc_vCard li{
+   cursor: default !important;
+}
+
+ul.jsxc_vCard strong{
+   
+}
+
+img.jsxc_vCard {
+	float:right;
+	max-width: 200px;
+	max-height: 200px;
+}
