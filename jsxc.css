@@ -409,13 +409,12 @@ div#jsxc_windowList>ul>li {
 	margin: 0px;
 	display: block;
 	float: right;
-	width: 200px;
+	width: 250px;
 	background-color: #282323;
 	height: 30px;
 	position: relative;
 	overflow: visible;
 	margin-right: 5px;
-	box-shadow: 0px 0px 5px #000;
 	cursor: pointer;
 }
 
@@ -454,25 +453,25 @@ div#jsxc_windowList>ul>li.jsxc_unreadMsg .jsxc_cycle {
 /** Contains text area */
 div.jsxc_window {
 	display: none;
-	width: 200px;
-	height: 255px;
+	width: 250px;
+	height: 300px;
 	position: absolute;
 	bottom: 30px;
 	right: 0px;
 	background-color: #A4A4A4;
-	box-shadow: 0px 0px 5px #000;
+	border-radius: 3px 3px 0 0;
 	z-index: 80;
-    cursor: default;
+  cursor: default;
 }
 
 div.jsxc_window .jsxc_tools {
 	position: absolute;
 	top: 0px;
 	left: 0px;
-	width: 200px;
+	width: 250px;
 	height: 23px;
 	background-color: #282323;
-	box-shadow: 0px 5px 5px -5px #000;
+	border-radius: 3px 3px 0 0;
 	z-index: 100;
 }
 
@@ -488,9 +487,19 @@ div.jsxc_window .slimScrollDiv {
 	left: 0px;
 }
 
-div.jsxc_chatmessage,input.jsxc_chatmessage {
+div.jsxc_chatmessage {
+	margin: 6px;
+	padding: 4px;
+	width: 157px;
+	word-wrap: break-word;
+	background-color: #fff;
+	position: relative;
+    outline: none;
+}
+
+input.jsxc_chatmessage {
 	margin: 5px;
-	border-radius: 5px !important;
+	border-radius: 0px !important;
 	padding: 3px;
 	width: 157px;
 	word-wrap: break-word;
@@ -507,9 +516,9 @@ div.jsxc_chatmessage.jsxc_received:before {
 	content: '✓';
 	position: absolute;
 	bottom: 2px;
-	left: 4px;
-	font-size: 10px;
-	line-height: 10px;
+	right: 4px;
+	font-size: 12px;
+	line-height: 12px;
 	color: green;
 }
 
@@ -524,17 +533,64 @@ div.jsxc_chatmessage img {
 }
 
 /** incoming message */
-div.jsxc_in,input.jsxc_in {
+div.jsxc_in {
+  position: relative;
+  width: 195px;
+  margin-left: 10px;
+  background: #f1f7fd;
+  border: solid 1px #a6b8c9;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+
+div.jsxc_in:after {
+  content: '';
+  position: absolute;
+  border-style: solid;
+  border-width: 5px 6px 5px 0;
+  border-color: transparent #f1f7fd;
+  display: block;
+  width: 0;
+  z-index: 1;
+  left: -6px;
+  bottom: 10px;
+}
+
+input.jsxc_in {
 	text-align: left;
 	margin-right: 30px;
 	border: 1px solid blue;
 }
 
 /** outgoing message */
-div.jsxc_out,input.jsxc_out {
-	text-align: right;
+div.jsxc_out {
+  position: relative;
+  width: 195px;
+  margin-left:35px;
+  background: #e6ffd1;
+  border: solid 1px #b4d89f;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+
+div.jsxc_out:after {
+  content: '';
+  position: absolute;
+  border-style: solid;
+  border-width: 5px 0 5px 6px;
+  border-color: transparent #e6ffd1;
+  display: block;
+  width: 0;
+  z-index: 1;
+  right: -6px;
+  bottom: 10px;
+}
+
+input.jsxc_out {
 	margin-left: 30px;
-	border: 1px solid green !important;
+	border: 1px solid #888a85 !important;
 }
 
 /** system message */
@@ -545,13 +601,12 @@ div.jsxc_sys {
 
 .jsxc_window input.jsxc_textinput {
 	position: absolute;
-	top: 226px;
-	left: 30px;
-	width: 157px;
+	bottom: 0px;
+	width: 235px;
 	height: 16px;
 	margin: 0px;
 	line-height: 16px;
-    outline:none;
+  outline:none;
 }
 
 .jsxc_window .jsxc_close {
