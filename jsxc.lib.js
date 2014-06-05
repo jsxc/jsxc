@@ -1841,6 +1841,10 @@ var jsxc;
             jsxc.gui.window.clear(cid);
          });
 
+         win.find('.jsxc_tools').click(function() {
+            return false;
+         });
+
          win.find('.jsxc_textinput').keyup(function(ev) {
             var body = $(this).val();
 
@@ -1862,11 +1866,11 @@ var jsxc;
          });
 
          win.find('.jsxc_textarea').slimScroll({
-            height: '240px',
+            height: '234px',
             distance: '3px'
          });
 
-         win.find('.jsxc_window').hide();
+         win.find('.jsxc_fade').hide();
 
          win.find('.jsxc_name').disableSelection();
 
@@ -1889,6 +1893,18 @@ var jsxc;
                win.addClass('jsxc_unreadMsg');
             }
          }
+
+         $.each(jsxc.gui.emotions, function(i, val) {
+            var ins = val[0].split(' ')[0];
+            var li = $('<li><img alt="' + ins + '" title="' + ins + '" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/></li>');
+            li.click(function() {
+               win.find('input').val(win.find('input').val() + ins);
+               win.find('input').focus();
+            });
+            win.find('.jsxc_emoticons ul').append(li);
+         });
+
+         jsxc.gui.toggleList.call(win.find('.jsxc_emoticons'));
 
          jsxc.gui.window.restoreChat(cid);
 
@@ -1956,7 +1972,7 @@ var jsxc;
        * @param {String} cid CSS compatible jid
        */
       toggle: function(cid) {
-         if (jsxc.gui.getWindow(cid).find('.jsxc_window').is(':hidden')) {
+         if (jsxc.gui.getWindow(cid).find('.jsxc_fade').is(':hidden')) {
             jsxc.gui.window.show(cid);
          } else {
             jsxc.gui.window.hide(cid);
@@ -1983,7 +1999,8 @@ var jsxc;
        */
       _show: function(cid) {
          var win = jsxc.gui.getWindow(cid);
-         $('#jsxc_window_' + cid + ' .jsxc_window').slideDown();
+         $('#jsxc_window_' + cid + ' .jsxc_fade').slideDown();
+         win.removeClass('jsxc_min');
 
          // remove unread flag
          win.removeClass('jsxc_unreadMsg');
@@ -2015,7 +2032,9 @@ var jsxc;
        * @param {String} cid
        */
       _hide: function(cid) {
-         $('#jsxc_window_' + cid + ' .jsxc_window').slideUp();
+         $('#jsxc_window_' + cid + ' .jsxc_fade').slideUp();
+         $('#jsxc_window_' + cid).addClass('jsxc_min');
+
          jsxc.gui.getWindow(cid).trigger('hidden.window.jsxc');
       },
 
@@ -2296,26 +2315,30 @@ var jsxc;
           <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a></p>\
         </div>',
       chatWindow: '<li>\
-            <div class="jsxc_bar">\
-                <div class="jsxc_avatar">☺</div>\
-                <div class="jsxc_name"/>\
-                <div class="jsxc_cycle"/>\
-            </div>\
             <div class="jsxc_window">\
-                <div class="jsxc_tools">\
-                    <div class="jsxc_settings">\
-                        <ul>\
-                            <li class="jsxc_fingerprints">%%Fingerprints%%</li>\
-                            <li class="jsxc_verification">%%Authentifikation%%</li>\
-                            <li class="jsxc_transfer">%%start_private%%</li>\
-                            <li class="jsxc_clear">%%clear_history%%</li>\
-                        </ul>\
-                    </div>\
-                    <div class="jsxc_transfer"/>\
-                    <div class="jsxc_close">X</div>\
+                <div class="jsxc_bar">\
+                     <div class="jsxc_avatar">☺</div>\
+                     <div class="jsxc_tools">\
+                           <div class="jsxc_settings">\
+                               <ul>\
+                                   <li class="jsxc_fingerprints">%%Fingerprints%%</li>\
+                                   <li class="jsxc_verification">%%Authentifikation%%</li>\
+                                   <li class="jsxc_transfer">%%start_private%%</li>\
+                                   <li class="jsxc_clear">%%clear_history%%</li>\
+                               </ul>\
+                           </div>\
+                           <div class="jsxc_transfer"/>\
+                           <div class="jsxc_close">x</div>\
+                     </div>\
+                     <div class="jsxc_name"/>\
+                     <div class="jsxc_cycle"/>\
                 </div>\
-                <div class="jsxc_textarea"/>\
-                <input type="text" class="jsxc_textinput jsxc_chatmessage jsxc_out"/>\
+                <div class="jsxc_fade">\
+                   <div class="jsxc_gradient"/>\
+                   <div class="jsxc_textarea"/>\
+                   <div class="jsxc_emoticons"><ul/></div>\
+                   <input type="text" class="jsxc_textinput" placeholder="...%%Message%%" />\
+                </div>\
             </div>\
         </li>',
       roster: '<div id="jsxc_roster">\
@@ -3676,7 +3699,7 @@ var jsxc;
                   data.fingerprint = jsxc.buddyList[cid].their_priv_pk.fingerprint();
                   data.msgstate = OTR.CONST.MSGSTATE_ENCRYPTED;
 
-                  var msg = (jsxc.buddyList[cid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started + data.jid;
+                  var msg = (jsxc.buddyList[cid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started;
                   jsxc.gui.window.postMessage(cid, 'sys', msg);
                   break;
                case OTR.CONST.STATUS_END_OTR:
@@ -4387,7 +4410,7 @@ var jsxc;
          trying_to_start_private_conversation: 'Trying to start private conversation!',
          Verified: 'Verified',
          Unverified: 'Unverified',
-         private_conversation_started: 'private conversation started with ',
+         private_conversation_started: 'private conversation started.',
          private_conversation_aborted: 'Private conversation aborted!',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Your buddy closed the private conversation! You should do the same.',
          conversation_is_now_verified: 'Conversation is now verified.',
@@ -4511,7 +4534,7 @@ var jsxc;
          trying_to_start_private_conversation: 'Versuche private Konversation zu starten.',
          Verified: 'Verifiziert',
          Unverified: 'Unverifiziert',
-         private_conversation_started: 'Private Konversation gestartet mit ',
+         private_conversation_started: 'Private Konversation gestartet.',
          private_conversation_aborted: 'Private Konversation abgebrochen.',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Dein Freund hat die private Konversation beendet. Das solltest du auch tun!',
          conversation_is_now_verified: 'Konversation ist jetzt verifiziert',
@@ -4614,7 +4637,7 @@ var jsxc;
          trying_to_start_private_conversation: 'Intentando iniciar una conversación privada!',
          Verified: 'Verificado',
          Unverified: 'No verificado',
-         private_conversation_started: 'se inició una conversación privada con ',
+         private_conversation_started: 'se inició una conversación privada.',
          private_conversation_aborted: 'Conversación privada abortada!',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Su amigo cerró la conversación privada! Usted debería hacer lo mismo.',
          conversation_is_now_verified: 'La conversación es ahora verificada.',

@@ -418,18 +418,26 @@ div#jsxc_windowList>ul>li {
 	cursor: pointer;
 }
 
+div#jsxc_windowList>ul>li.jsxc_min {
+	width: 200px;
+}
+
 /*############################ 
  *######### Window ########### 
  *############################*/
 div.jsxc_bar {
+	background-color: #282323;
 	cursor: pointer;
 	height: 30px;
-	line-height: 30px;
-	margin-left: 2px;
+	line-height: 26px;
+	padding: 2px;
 	color: #939393;
+	width: 100%;
+	box-sizing: border-box;
+	overflow: hidden;
 }
 
-div.jsxc_bar:hover {
+div.jsxc_name:hover {
 	color: #FAFAFA;
 }
 
@@ -452,60 +460,125 @@ div#jsxc_windowList>ul>li.jsxc_unreadMsg .jsxc_cycle {
 
 /** Contains text area */
 div.jsxc_window {
-	display: none;
-	width: 250px;
-	height: 300px;
 	position: absolute;
-	bottom: 30px;
+	bottom: 0px;
+	left: 0px;
 	right: 0px;
+	height: auto;
 	background-color: #A4A4A4;
-	border-radius: 3px 3px 0 0;
 	z-index: 80;
-  cursor: default;
+   cursor: default;
 }
 
 div.jsxc_window .jsxc_tools {
+	height: 30px;
+   float:right;
+}
+
+.jsxc_min .jsxc_tools {
+	display:none;
+}
+
+div.jsxc_window .jsxc_emoticons {
+	height: 30px;
+	width: 30px;
+	position:absolute;
+	top:240px;
+	right: 0px;
+}
+div.jsxc_window .jsxc_emoticons:after {
+	content: '☺';
+	height: 30px;
+   width: 30px;
+   line-height: 30px;
+   text-align:center;
+   font-size:25px;
+   opacity: 0.15;
+   position:absolute;
+   top:0px;
+   left: 0px;
+}
+div.jsxc_window .jsxc_emoticons:hover:before{
+	opacity: 0.5;
+}
+
+div.jsxc_window .jsxc_emoticons ul{
+	display:none;
+	position: absolute;
+	bottom:33px;
+	right: 3px;
+	width: 210px;
+	background-color:rgba(40, 35, 35, 0.8);
+	padding:3px;
+	border-radius: 3px;
+	z-index:200;
+}
+
+div.jsxc_window .jsxc_emoticons ul:after {
+  content: '';
+  position: absolute;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid rgba(40, 35, 35, 0.8);
+  display: block;
+  width: 0;
+  z-index: 1;
+  right: 6px;
+  bottom: -6px;
+}
+
+div.jsxc_window .jsxc_emoticons li{
+	float:right;
+	cursor: pointer;
+}
+div.jsxc_window .jsxc_emoticons img{
+   cursor: pointer;
+}
+
+.jsxc_window .jsxc_fade {
+	position: relative;
+}
+.jsxc_window .jsxc_gradient{
 	position: absolute;
 	top: 0px;
 	left: 0px;
-	width: 250px;
-	height: 23px;
-	background-color: #282323;
-	border-radius: 3px 3px 0 0;
+	right: 0px;
+	height: 15px;
 	z-index: 100;
+	background: -moz-linear-gradient(top, rgba(164,164,164,1) 0%, rgba(40,35,35,0) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(164,164,164,1)), color-stop(100%,rgba(40,35,35,0))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, rgba(164,164,164,1) 0%,rgba(40,35,35,0) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, rgba(164,164,164,1) 0%,rgba(40,35,35,0) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, rgba(164,164,164,1) 0%,rgba(40,35,35,0) 100%); /* IE10+ */
+	background: linear-gradient(to bottom, #a4a4a4 0%,rgba(40,35,35,0) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a4a4a4', endColorstr='#00282323',GradientType=0 ); /* IE6-9 */
+}
+
+div.jsxc_window .jsxc_avatar {
+   margin-top: 1px;
 }
 
 div.jsxc_window .jsxc_textarea {
-	width: 200px;
-	height: 200px;
+	width: 100%;
+	height: 100%;
 	overflow: hidden;
+	padding:3px;
 }
 
 div.jsxc_window .slimScrollDiv {
-	position: absolute;
-	top: 22px;
-	left: 0px;
+	margin:0px 0px 6px 0px;
 }
 
 div.jsxc_chatmessage {
-	margin: 6px;
+	margin: 3px;
 	padding: 4px;
-	width: 157px;
+	padding-right:10px;
+	max-width: 76%;
 	word-wrap: break-word;
 	background-color: #fff;
 	position: relative;
     outline: none;
-}
-
-input.jsxc_chatmessage {
-	margin: 5px;
-	border-radius: 0px !important;
-	padding: 3px;
-	width: 157px;
-	word-wrap: break-word;
-	background-color: #fff;
-	position: relative;
-    outline: none;
+    clear:both;
 }
 
 div.jsxc_chatmessage.jsxc_received {
@@ -534,8 +607,8 @@ div.jsxc_chatmessage img {
 
 /** incoming message */
 div.jsxc_in {
+	float:left;
   position: relative;
-  width: 195px;
   margin-left: 10px;
   background: #f1f7fd;
   border: solid 1px #a6b8c9;
@@ -557,17 +630,11 @@ div.jsxc_in:after {
   bottom: 10px;
 }
 
-input.jsxc_in {
-	text-align: left;
-	margin-right: 30px;
-	border: 1px solid blue;
-}
-
 /** outgoing message */
 div.jsxc_out {
+	float:right;
   position: relative;
-  width: 195px;
-  margin-left:35px;
+  margin-right:10px;
   background: #e6ffd1;
   border: solid 1px #b4d89f;
   -webkit-border-radius: 3px;
@@ -588,26 +655,33 @@ div.jsxc_out:after {
   bottom: 10px;
 }
 
-input.jsxc_out {
-	margin-left: 30px;
-	border: 1px solid #888a85 !important;
-}
-
 /** system message */
 div.jsxc_sys {
-	width: 182px;
-	border: 1px solid black;
+	width: auto;
+	max-width: none;
+	padding-right: 4px;
+	box-sizing: border-box;
+	margin-right:3px;
+	border-radius:3px;
 }
 
 .jsxc_window input.jsxc_textinput {
-	position: absolute;
-	bottom: 0px;
-	width: 235px;
-	height: 16px;
-	margin: 0px;
-	line-height: 16px;
-  outline:none;
+	width: 100%;
+	height: 30px;
+   margin: 0px;
+   padding:3px;
+   padding-right: 40px;
+
+   outline:none;
+   border-radius:0px;
+   box-sizing:border-box;
+   text-align: right;
 }
+
+.jsxc_window ::-webkit-input-placeholder { color:#000; opacity:0.2;}
+.jsxc_window ::-moz-placeholder { color:#000; opacity:0.2;} /* firefox 19+ */
+.jsxc_window :-ms-input-placeholder { color:#000; opacity:0.2; } /* ie */
+.jsxc_window input:-moz-placeholder { color:#000; opacity:0.2; }
 
 .jsxc_window .jsxc_close {
 	text-transform: uppercase;
@@ -650,10 +724,10 @@ div.jsxc_settings ul {
 	padding: 0px;
 	margin: 0px;
 	position: absolute;
-	top: 23px;
+	top: 30px;
 	left: 0px;
 	box-shadow: 0px 5px 5px -5px #000;
-	z-index: 90;
+	z-index: 110;
 	overflow: visible;
 	background-color: #282323;
 	display: none;
