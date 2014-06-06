@@ -485,20 +485,21 @@ div.jsxc_window .jsxc_emoticons {
 	position:absolute;
 	top:240px;
 	right: 0px;
+	cursor: pointer;
 }
 div.jsxc_window .jsxc_emoticons:after {
-	content: '☺';
+	content: ' ';
+	background-image: url('img/smiley.png');
+	background-position: center center;
+	background-repeat: no-repeat;
 	height: 30px;
    width: 30px;
-   line-height: 30px;
-   text-align:center;
-   font-size:25px;
-   opacity: 0.15;
+   opacity: 0.3;
    position:absolute;
    top:0px;
    left: 0px;
 }
-div.jsxc_window .jsxc_emoticons:hover:before{
+div.jsxc_window .jsxc_emoticons:hover:after{
 	opacity: 0.5;
 }
 
@@ -533,6 +534,10 @@ div.jsxc_window .jsxc_emoticons li{
 }
 div.jsxc_window .jsxc_emoticons img{
    cursor: pointer;
+   border-radius:3px;
+}
+div.jsxc_window .jsxc_emoticons img:hover{
+   background-color: rgba(255,255,255, 0.8);
 }
 
 .jsxc_window .jsxc_fade {
@@ -678,10 +683,10 @@ div.jsxc_sys {
    text-align: right;
 }
 
-.jsxc_window ::-webkit-input-placeholder { color:#000; opacity:0.2;}
-.jsxc_window ::-moz-placeholder { color:#000; opacity:0.2;} /* firefox 19+ */
-.jsxc_window :-ms-input-placeholder { color:#000; opacity:0.2; } /* ie */
-.jsxc_window input:-moz-placeholder { color:#000; opacity:0.2; }
+.jsxc_window ::-webkit-input-placeholder { color:#000; opacity:0.3;}
+.jsxc_window ::-moz-placeholder { color:#000; opacity:0.3;} /* firefox 19+ */
+.jsxc_window :-ms-input-placeholder { color:#000; opacity:0.3; } /* ie */
+.jsxc_window input:-moz-placeholder { color:#000; opacity:0.3; }
 
 .jsxc_window .jsxc_close {
 	text-transform: uppercase;

@@ -2188,7 +2188,7 @@ var jsxc;
          jsxc.gui.window.scrollDown(cid);
 
          // if window is hidden set unread flag
-         if (win.find('.jsxc_window').is(':hidden') && jsxc.restoreCompleted && !restore) {
+         if (win.find('.jsxc_fade').is(':hidden') && jsxc.restoreCompleted && !restore) {
             win.addClass('jsxc_unreadMsg');
             jsxc.storage.updateUserItem('window_' + cid, 'unread', true);
          }
@@ -2326,7 +2326,7 @@ var jsxc;
           <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\
           <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a></p>\
         </div>',
-      chatWindow: '<li>\
+      chatWindow: '<li class="jsxc_min">\
             <div class="jsxc_window">\
                 <div class="jsxc_bar">\
                      <div class="jsxc_avatar">☺</div>\
