@@ -527,6 +527,7 @@ var jsxc;
        * Escapes some characters to HTML character
        */
       escapeHTML: function(text) {
+         text = text.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
          return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       },
 
@@ -697,7 +698,7 @@ var jsxc;
     */
    jsxc.gui = {
       /** Smilie token to file mapping */
-      emotions: [ [ ':-) :)', 'smile.png' ], [ ':-D :D', 'grin.png' ], [ ':-( :(', 'sad.png' ], [ ';-) ;)', 'wink.png' ], [ ':-P :P', 'tonguesmile.png' ], [ '=-O', 'surprised.png' ], [ ':kiss: :-*', 'kiss.png' ], [ '8-) :cool:', 'sunglassess.png' ], [ ':\'-(', 'crysad.png' ], [ ':-/', 'doubt.png' ], [ 'O:-) O:)', 'angel.png' ], [ ':-X :X', 'zip.png' ], [ '>:o', 'angry.png' ], [ ':yes:', 'thumbsup.png' ], [ ':beer:', 'beer.png' ], [ ':devil:', 'devil.png' ], [ ':kissing:', 'kissing.png' ], [ ':love:', 'love.png' ], [ ':zzz:', 'tired.png' ] ],
+      emotions: [ [ 'O:-) O:)', 'angel.png' ], [ '>:-( >:( &gt;:-( &gt;:(', 'angry.png' ], [ ':-) :)', 'smile.png' ], [ ':-D :D', 'grin.png' ], [ ':-( :(', 'sad.png' ], [ ';-) ;)', 'wink.png' ], [ ':-P :P', 'tonguesmile.png' ], [ '=-O', 'surprised.png' ], [ ':kiss: :-*', 'kiss.png' ], [ '8-) :cool:', 'sunglassess.png' ], [ ':\'-( :\'( :&amp;apos;-(', 'crysad.png' ], [ ':-/', 'doubt.png' ], [ ':-X :X', 'zip.png' ], [ ':yes:', 'thumbsup.png' ], [ ':no:', 'thumbsdown.png' ], [ ':beer:', 'beer.png' ], [ ':devil:', 'devil.png' ], [ ':kiss: :kissing:', 'kissing.png' ], [ '@->-- :rose: @-&gt;--', 'rose.png' ], [ ':music:', 'music.png' ], [ ':love:', 'love.png' ], [ ':zzz:', 'tired.png' ] ],
 
       /**
        * Creates application skeleton.
@@ -711,8 +712,9 @@ var jsxc;
 
          // prepare regexp for emotions
          $.each(jsxc.gui.emotions, function(i, val) {
+            // escape characters
             var reg = val[0].replace(/(\/|\||\*|\.|\+|\?|\^|\$|\(|\)|\[|\]|\{|\})/g, '\\$1');
-            reg = '(' + reg.split(' ').join(')|(') + ')';
+            reg = '(' + reg.split(' ').join('|') + ')';
             jsxc.gui.emotions[i][2] = new RegExp(reg, 'g');
          });
 
@@ -2120,7 +2122,7 @@ var jsxc;
          }
 
          if (direction === 'out' && jsxc.master) {
-            jsxc.buddyList[cid].sendMsg(msg, uid);
+            jsxc.buddyList[cid].sendMsg(html_msg, uid);
          }
 
          jsxc.gui.window._postMessage(cid, post);
@@ -2159,7 +2161,17 @@ var jsxc;
          });
 
          $.each(jsxc.gui.emotions, function(i, val) {
-            msg = msg.replace(val[2], '<img alt="$1" title="$1" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/>');
+            msg = msg.replace(val[2], function(match, p1) {
+
+               // escape value for alt and title, this prevents double
+               // replacement
+               var esc = '', i;
+               for (i = 0; i < p1.length; i++) {
+                  esc += '&#' + p1.charCodeAt(i) + ';';
+               }
+
+               return '<img alt="' + esc + '" title="' + esc + '" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/>';
+            });
          });
 
          var msgDiv = $("<div>");
