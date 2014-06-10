@@ -471,7 +471,8 @@ div.jsxc_window {
 }
 
 div.jsxc_window .jsxc_tools {
-	height: 30px;
+	height: 24px;
+    padding-top:1px;
    float:right;
 }
 
@@ -586,20 +587,6 @@ div.jsxc_chatmessage {
     clear:both;
 }
 
-div.jsxc_chatmessage.jsxc_received {
-	
-}
-
-div.jsxc_chatmessage.jsxc_received:before {
-	content: '✓';
-	position: absolute;
-	bottom: 2px;
-	right: 4px;
-	font-size: 12px;
-	line-height: 12px;
-	color: green;
-}
-
 div.jsxc_chatmessage a {
 	color: blue;
 	text-decoration: underline;
@@ -633,6 +620,16 @@ div.jsxc_in:after {
   z-index: 1;
   left: -6px;
   bottom: 10px;
+}
+
+div.jsxc_out.jsxc_received:before {
+   content: '✓';
+   position: absolute;
+   bottom: 2px;
+   right: 2px;
+   font-size: 12px;
+   line-height: 12px;
+   color: green;
 }
 
 /** outgoing message */
@@ -687,21 +684,6 @@ div.jsxc_sys {
 .jsxc_window ::-moz-placeholder { color:#000; opacity:0.3;} /* firefox 19+ */
 .jsxc_window :-ms-input-placeholder { color:#000; opacity:0.3; } /* ie */
 .jsxc_window input:-moz-placeholder { color:#000; opacity:0.3; }
-
-.jsxc_window .jsxc_close {
-	text-transform: uppercase;
-	color: #939393;
-	font-family: Arial;
-	font-weight: bold;
-	line-height: 17px;
-	cursor: pointer;
-	float: right;
-	padding: 3px;
-}
-
-.jsxc_window .jsxc_close:hover {
-	color: #FAFAFA;
-}
 
 div.jsxc_settings {
 	color: #939393;
@@ -767,9 +749,13 @@ div.jsxc_transfer {
 	background-image: url('img/padlock_open_grey.svg');
 	background-repeat: no-repeat;
 	background-position: center center;
-	background-size: 15px 15px;
+	background-size: 12px 12px;
 	cursor: pointer;
 	float: left;
+}
+
+div.jsxc_transfer:hover {
+    background-image: url('img/padlock_open_white.svg');
 }
 
 div.jsxc_transfer.jsxc_fin {
@@ -782,6 +768,21 @@ div.jsxc_transfer.jsxc_enc {
 
 div.jsxc_transfer.jsxc_enc.jsxc_trust {
 	background-image: url('img/padlock_close_green.svg');
+}
+
+.jsxc_window .jsxc_close {
+   color: #939393;
+   font-family: Arial;
+   line-height: 17px;
+   height: 17px;
+   font-size:20px;
+   cursor: pointer;
+   float: right;
+   padding: 3px;
+}
+
+.jsxc_window .jsxc_close:hover {
+   color: #FAFAFA;
 }
 
 #colorbox, #cboxWrapper {

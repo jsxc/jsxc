@@ -164,6 +164,10 @@ div.jsxc_video {
    float: left;
 }
 
+div.jsxc_video:not(.jsxc_disabled):hover {
+    background-image: url('img/camera_icon_white.svg');
+}
+
 div.jsxc_video.jsxc_disabled {
 	opacity: 0.5;
 	cursor: default;

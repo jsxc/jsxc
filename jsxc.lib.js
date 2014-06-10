@@ -708,6 +708,8 @@ var jsxc;
       init: function() {
          $('body').append($(jsxc.gui.template.get('windowList')));
 
+         jsxc.gui.tooltip('#jsxc_windowList');
+
          jsxc.gui.roster.init();
 
          // prepare regexp for emotions
@@ -721,6 +723,23 @@ var jsxc;
          // We need this often, so we creates some template jquery objects
          jsxc.gui.windowTemplate = $(jsxc.gui.template.get('chatWindow'));
          jsxc.gui.buddyTemplate = $(jsxc.gui.template.get('rosterBuddy'));
+      },
+
+      /**
+       * Init tooltip plugin for given jQuery selector.
+       * 
+       * @param {String} selector jQuery selector
+       * @memberOf jsxc.gui
+       */
+      tooltip: function(selector) {
+          $(selector).tooltip({
+              show: {
+                delay: 600
+              },
+              content: function() {
+                  return $(this).attr('title').replace(/\n/g, '<br />');
+              }
+          });
       },
 
       /**
@@ -754,7 +773,7 @@ var jsxc;
          // Update gui according to encryption state
          switch (data.msgstate) {
             case 0:
-               we.find('.jsxc_transfer').removeClass('jsxc_enc jsxc_fin').attr('title', jsxc.l.your_connection_is_unencrypted);
+               we.find('.jsxc_transfer').removeClass('jsxc_enc jsxc_fin').attr('title', jsxc.l.your_connection_is_unencrypted); 
                we.find('.jsxc_settings .jsxc_verification').addClass('jsxc_disabled');
                we.find('.jsxc_settings .jsxc_transfer').text(jsxc.l.start_private);
                break;
@@ -774,7 +793,7 @@ var jsxc;
          if (data.trust) {
             we.find('.jsxc_transfer').addClass('jsxc_trust').attr('title', jsxc.l.your_buddy_is_verificated);
          } else {
-            we.find('.jsxc_transfer').removeClass('jsxc_trust').attr('title', '');
+            we.find('.jsxc_transfer').removeClass('jsxc_trust');
          }
 
          // update gui according to subscription state
@@ -1490,14 +1509,7 @@ var jsxc;
             jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
          });
 
-         $('#jsxc_roster').tooltip({
-            show: {
-               delay: 600
-            },
-            content: function() {
-               return $(this).attr('title').replace(/\n/g, '<br />');
-            }
-         });
+         jsxc.gui.tooltip('#jsxc_roster');
 
          jsxc.notice.load();
 
@@ -2344,7 +2356,7 @@ var jsxc;
                                </ul>\
                            </div>\
                            <div class="jsxc_transfer"/>\
-                           <div class="jsxc_close">x</div>\
+                           <div class="jsxc_close">×</div>\
                      </div>\
                      <div class="jsxc_name"/>\
                      <div class="jsxc_cycle"/>\
