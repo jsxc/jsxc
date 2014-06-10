@@ -2182,6 +2182,10 @@ var jsxc;
          if (received) {
             msgDiv.addClass('jsxc_received');
          }
+         
+         if(direction === 'sys') {
+            $('#jsxc_window_' + cid + ' .jsxc_textarea').append('<div style="clear:both"/>');
+         }
 
          $('#jsxc_window_' + cid + ' .jsxc_textarea').append(msgDiv);
 
