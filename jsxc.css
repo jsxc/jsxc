@@ -682,7 +682,7 @@ div.jsxc_sys {
 
 .jsxc_window ::-webkit-input-placeholder { color:#000; opacity:0.3;}
 .jsxc_window ::-moz-placeholder { color:#000; opacity:0.3;} /* firefox 19+ */
-.jsxc_window :-ms-input-placeholder { color:#000; opacity:0.3; } /* ie */
+.jsxc_window :-ms-input-placeholder { color:rgba(0,0,0,0.4); } /* ie */
 .jsxc_window input:-moz-placeholder { color:#000; opacity:0.3; }
 
 div.jsxc_settings {
