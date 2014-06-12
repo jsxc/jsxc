@@ -470,16 +470,6 @@ div.jsxc_window {
    cursor: default;
 }
 
-div.jsxc_window .jsxc_tools {
-	height: 24px;
-    padding-top:1px;
-   float:right;
-}
-
-.jsxc_min .jsxc_tools {
-	display:none;
-}
-
 div.jsxc_window .jsxc_emoticons {
 	height: 30px;
 	width: 30px;
@@ -541,6 +531,7 @@ div.jsxc_window .jsxc_emoticons img:hover{
    background-color: rgba(255,255,255, 0.8);
 }
 
+/** groups elements, which will be hidden, if the window is minimized. */
 .jsxc_window .jsxc_fade {
 	position: relative;
 }
@@ -673,7 +664,6 @@ div.jsxc_sys {
    margin: 0px;
    padding:3px;
    padding-right: 40px;
-
    outline:none;
    border-radius:0px;
    box-sizing:border-box;
@@ -684,6 +674,16 @@ div.jsxc_sys {
 .jsxc_window ::-moz-placeholder { color:#000; opacity:0.3;} /* firefox 19+ */
 .jsxc_window :-ms-input-placeholder { color:rgba(0,0,0,0.4); } /* ie */
 .jsxc_window input:-moz-placeholder { color:#000; opacity:0.3; }
+
+div.jsxc_window .jsxc_tools {
+   height: 24px;
+   padding-top:1px;
+   float:right;
+}
+
+.jsxc_min .jsxc_tools {
+   display:none;
+}
 
 div.jsxc_settings {
 	color: #939393;
