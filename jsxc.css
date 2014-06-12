@@ -315,10 +315,44 @@ ul#jsxc_buddylist li {
 	line-height: 30px;
 	padding-left: 3px;
 	z-index: 85;
+	overflow: hidden;
 }
 
 ul#jsxc_buddylist li.jsxc_expand {
-	height: 60px;
+	height: 54px;
+}
+
+ul#jsxc_buddylist li.jsxc_expand .jsxc_avatar, ul#jsxc_buddylist li.jsxc_expand .jsxc_avatar img {
+	width: 48px;
+	height: 48px;
+}
+
+#jsxc_buddylist .jsxc_extra {
+    height: 20px;
+    float: left;
+    border-radius:2px;
+    background-color: rgba(150, 150, 150, 0.5);
+}
+#jsxc_buddylist .jsxc_extra > div {
+    height: 20px;
+    width: 20px;
+    float: left;
+    margin-right:0px 1px;
+    background-repeat: no-repeat;
+    background-position: center center;
+    opacity: 0.6;
+    cursor: pointer;
+}
+#jsxc_buddylist .jsxc_extra > div:hover {
+	opacity: 1;
+}
+#jsxc_buddylist .jsxc_chaticon {	
+	background-image: url('img/speech_balloon_white.svg');
+	background-size: 15px 15px;
+}
+#jsxc_buddylist .jsxc_videoicon { 
+   background-image: url('img/camera_icon_white.svg');
+   background-size: 13px 13px;
 }
 
 ul#jsxc_buddylist li:hover {
@@ -330,34 +364,20 @@ ul#jsxc_buddylist li.jsxc_oneway {
 }
 
 ul#jsxc_buddylist .jsxc_options {
-	height: 30px;
 	float: right;
-	overflow: hidden;
-	transition: width 2s;
-	width: 0px;
-	-webkit-transition: width .5s; /* Safari */
-	white-space: nowrap;
-}
-
-ul#jsxc_buddylist li:hover .jsxc_options {
-   color: #FAFAFA;
+	margin-right: 6px;
 }
 
 ul#jsxc_buddylist .jsxc_options div {
-	line-height: 30px;
-	height: 30px;
-	width: 20px;
-	cursor: pointer;
-	opacity: 0.7;
-	display: inline-block;
 	font-weight: bold;
 	text-align: center;
-	font-size: 17px;
-	overflow: hidden;
+	font-size: 13px;
+	line-height: 20px;
+	color: #fff;
 }
 
-ul#jsxc_buddylist li[data-type="chat"]:hover .jsxc_options {
-	width: 50px;
+ul#jsxc_buddylist li[data-type!="chat"] .jsxc_options {
+	display: none;
 }
 
 ul#jsxc_buddylist .jsxc_options div:hover {

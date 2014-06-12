@@ -732,14 +732,14 @@ var jsxc;
        * @memberOf jsxc.gui
        */
       tooltip: function(selector) {
-          $(selector).tooltip({
-              show: {
-                delay: 600
-              },
-              content: function() {
-                  return $(this).attr('title').replace(/\n/g, '<br />');
-              }
-          });
+         $(selector).tooltip({
+            show: {
+               delay: 600
+            },
+            content: function() {
+               return $(this).attr('title').replace(/\n/g, '<br />');
+            }
+         });
       },
 
       /**
@@ -773,7 +773,7 @@ var jsxc;
          // Update gui according to encryption state
          switch (data.msgstate) {
             case 0:
-               we.find('.jsxc_transfer').removeClass('jsxc_enc jsxc_fin').attr('title', jsxc.l.your_connection_is_unencrypted); 
+               we.find('.jsxc_transfer').removeClass('jsxc_enc jsxc_fin').attr('title', jsxc.l.your_connection_is_unencrypted);
                we.find('.jsxc_settings .jsxc_verification').addClass('jsxc_disabled');
                we.find('.jsxc_settings .jsxc_transfer').text(jsxc.l.start_private);
                break;
@@ -1540,7 +1540,7 @@ var jsxc;
             jsxc.gui.showRemoveDialog(cid);
             return false;
          });
-         
+
          bud.find('.jsxc_avatar').click(function() {
             bud.toggleClass('jsxc_expand');
             return false;
@@ -2199,8 +2199,8 @@ var jsxc;
          if (received) {
             msgDiv.addClass('jsxc_received');
          }
-         
-         if(direction === 'sys') {
+
+         if (direction === 'sys') {
             $('#jsxc_window_' + cid + ' .jsxc_textarea').append('<div style="clear:both"/>');
          }
 
@@ -2413,11 +2413,15 @@ var jsxc;
         </div>',
       rosterBuddy: '<li>\
             <div class="jsxc_avatar">☺</div>\
-            <div class="jsxc_options">\
+            <div class="jsxc_name"/>\
+            <div class="jsxc_options jsxc_extra">\
                 <div class="jsxc_rename" title="%%rename_buddy%%">✎</div>\
                 <div class="jsxc_delete" title="%%delete_buddy%%">✘</div>\
             </div>\
-            <div class="jsxc_name"/>\
+            <div class="jsxc_extra">\
+                <div class="jsxc_chaticon"/>\
+                <div class="jsxc_videoicon"/>\
+            </div>\
         </li>',
       loginBox: '<h3>%%Login%%</h3>\
         <form method="get">\
