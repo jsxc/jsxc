@@ -48,7 +48,7 @@ p.jsxc_center {
 #jsxc_dialog p input {
 	margin-bottom: 5px;
 	width: 60%;
-    outline: none;
+	outline: none;
 }
 
 #jsxc_dialog p label {
@@ -63,7 +63,7 @@ p.jsxc_center {
 }
 
 #jsxc_dialog p.jsxc_maxWidth {
-   max-width: 500px;
+	max-width: 500px;
 }
 
 /*############################ 
@@ -76,8 +76,11 @@ li .jsxc_name {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+li .jsxc_name:hover {
+   color: #FAFAFA;
+}
 
-.jsxc_avatar, ul#jsxc_buddylist li:hover .jsxc_avatar {
+.jsxc_avatar,ul#jsxc_buddylist li:hover .jsxc_avatar {
 	width: 25px;
 	height: 25px;
 	line-height: 25px;
@@ -162,7 +165,7 @@ div#jsxc_roster .jsxc_wait h3 {
 	-moz-box-shadow: inset 0 0 5px #888;
 	-webkit-box-shadow: inset 0 0 5px #888;
 	box-shadow: inner 0 0 5px #888;
-    outline: none;
+	outline: none;
 }
 
 div#jsxc_roster p {
@@ -219,7 +222,7 @@ div#jsxc_roster>.jsxc_bottom li {
 	white-space: nowrap;
 }
 
-div#jsxc_roster>.jsxc_bottom li:hover:not(.jsxc_disabled) {
+div#jsxc_roster>.jsxc_bottom li:hover:not(.jsxc_disabled ) {
 	color: #fff;
 	background-color: #3F8FBA;
 }
@@ -238,6 +241,7 @@ div#jsxc_roster>.jsxc_bottom ul li:last-child {
 	width: 30px;
 }
 
+/** own avatar */
 #jsxc_avatar {
 	float: left;
 	margin: 0px 2px;
@@ -313,8 +317,12 @@ ul#jsxc_buddylist li {
 	z-index: 85;
 }
 
+ul#jsxc_buddylist li.jsxc_expand {
+	height: 60px;
+}
+
 ul#jsxc_buddylist li:hover {
-	color: #FAFAFA;
+	
 }
 
 ul#jsxc_buddylist li.jsxc_oneway {
@@ -329,6 +337,10 @@ ul#jsxc_buddylist .jsxc_options {
 	width: 0px;
 	-webkit-transition: width .5s; /* Safari */
 	white-space: nowrap;
+}
+
+ul#jsxc_buddylist li:hover .jsxc_options {
+   color: #FAFAFA;
 }
 
 ul#jsxc_buddylist .jsxc_options div {
@@ -366,6 +378,38 @@ ul#jsxc_buddylist .jsxc_delete {
 	/*    vertical-align: middle; */
 	/*    font-size: 17px; */
 	
+}
+
+#jsxc_roster .jsxc_avatar {
+   position: relative;
+   cursor: pointer;
+}
+#jsxc_roster .jsxc_avatar img {
+   cursor: pointer;
+}
+
+#jsxc_roster .jsxc_avatar:after {
+   content: '▼';
+   display: block;
+   text-align: center;
+   width: 10px;
+   height: 10px;
+   line-height: 10px;
+   font-size: 8px;
+   position: absolute;
+   bottom: 0px;
+   right: 0px;
+   border-radius: 2px;
+   color:#000;
+   background-color: #fff;
+   opacity: 0;
+}
+
+#jsxc_roster .jsxc_avatar:hover:after {
+   opacity: 1.0 !important;
+}
+#jsxc_roster li:hover .jsxc_avatar:after {
+   opacity: 0.6;
 }
 
 div#jsxc_toggleRoster {
@@ -437,10 +481,6 @@ div.jsxc_bar {
 	overflow: hidden;
 }
 
-div.jsxc_name:hover {
-	color: #FAFAFA;
-}
-
 div.jsxc_cycle {
 	position: absolute;
 	bottom: 9px;
@@ -467,115 +507,128 @@ div.jsxc_window {
 	height: auto;
 	background-color: #A4A4A4;
 	z-index: 80;
-   cursor: default;
+	cursor: default;
 }
 
 div.jsxc_window .jsxc_emoticons {
 	height: 30px;
 	width: 30px;
-	position:absolute;
-	top:240px;
+	position: absolute;
+	top: 240px;
 	right: 0px;
 	cursor: pointer;
 }
+
 div.jsxc_window .jsxc_emoticons:after {
 	content: ' ';
 	background-image: url('img/smiley.png');
 	background-position: center center;
 	background-repeat: no-repeat;
 	height: 30px;
-   width: 30px;
-   opacity: 0.3;
-   position:absolute;
-   top:0px;
-   left: 0px;
+	width: 30px;
+	opacity: 0.3;
+	position: absolute;
+	top: 0px;
+	left: 0px;
 }
-div.jsxc_window .jsxc_emoticons:hover:after{
+
+div.jsxc_window .jsxc_emoticons:hover:after {
 	opacity: 0.5;
 }
 
-div.jsxc_window .jsxc_emoticons ul{
-	display:none;
+div.jsxc_window .jsxc_emoticons ul {
+	display: none;
 	position: absolute;
-	bottom:33px;
+	bottom: 33px;
 	right: 3px;
 	width: 210px;
-	background-color:rgba(40, 35, 35, 0.8);
-	padding:3px;
+	background-color: rgba(40, 35, 35, 0.8);
+	padding: 3px;
 	border-radius: 3px;
-	z-index:200;
+	z-index: 200;
 }
 
 div.jsxc_window .jsxc_emoticons ul:after {
-  content: '';
-  position: absolute;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 6px solid rgba(40, 35, 35, 0.8);
-  display: block;
-  width: 0;
-  z-index: 1;
-  right: 6px;
-  bottom: -6px;
+	content: '';
+	position: absolute;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-top: 6px solid rgba(40, 35, 35, 0.8);
+	display: block;
+	width: 0;
+	z-index: 1;
+	right: 6px;
+	bottom: -6px;
 }
 
-div.jsxc_window .jsxc_emoticons li{
-	float:right;
+div.jsxc_window .jsxc_emoticons li {
+	float: right;
 	cursor: pointer;
 }
-div.jsxc_window .jsxc_emoticons img{
-   cursor: pointer;
-   border-radius:3px;
+
+div.jsxc_window .jsxc_emoticons img {
+	cursor: pointer;
+	border-radius: 3px;
 }
-div.jsxc_window .jsxc_emoticons img:hover{
-   background-color: rgba(255,255,255, 0.8);
+
+div.jsxc_window .jsxc_emoticons img:hover {
+	background-color: rgba(255, 255, 255, 0.8);
 }
 
 /** groups elements, which will be hidden, if the window is minimized. */
 .jsxc_window .jsxc_fade {
 	position: relative;
 }
-.jsxc_window .jsxc_gradient{
+
+.jsxc_window .jsxc_gradient {
 	position: absolute;
 	top: 0px;
 	left: 0px;
 	right: 0px;
 	height: 15px;
 	z-index: 100;
-	background: -moz-linear-gradient(top, rgba(164,164,164,1) 0%, rgba(40,35,35,0) 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(164,164,164,1)), color-stop(100%,rgba(40,35,35,0))); /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(top, rgba(164,164,164,1) 0%,rgba(40,35,35,0) 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, rgba(164,164,164,1) 0%,rgba(40,35,35,0) 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(top, rgba(164,164,164,1) 0%,rgba(40,35,35,0) 100%); /* IE10+ */
-	background: linear-gradient(to bottom, #a4a4a4 0%,rgba(40,35,35,0) 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a4a4a4', endColorstr='#00282323',GradientType=0 ); /* IE6-9 */
+	background: -moz-linear-gradient(top, rgba(164, 164, 164, 1) 0%,
+		rgba(40, 35, 35, 0) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(164,
+		164, 164, 1)), color-stop(100%, rgba(40, 35, 35, 0)));
+	/* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, rgba(164, 164, 164, 1) 0%,
+		rgba(40, 35, 35, 0) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, rgba(164, 164, 164, 1) 0%,
+		rgba(40, 35, 35, 0) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, rgba(164, 164, 164, 1) 0%,
+		rgba(40, 35, 35, 0) 100%); /* IE10+ */
+	background: linear-gradient(to bottom, #a4a4a4 0%, rgba(40, 35, 35, 0)
+		100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a4a4a4',
+		endColorstr='#00282323', GradientType=0); /* IE6-9 */
 }
 
 div.jsxc_window .jsxc_avatar {
-   margin-top: 1px;
+	margin-top: 1px;
 }
 
 div.jsxc_window .jsxc_textarea {
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
-	padding:3px;
+	padding: 3px;
 }
 
 div.jsxc_window .slimScrollDiv {
-	margin:0px 0px 6px 0px;
+	margin: 0px 0px 6px 0px;
 }
 
 div.jsxc_chatmessage {
 	margin: 3px;
 	padding: 4px;
-	padding-right:10px;
+	padding-right: 10px;
 	max-width: 76%;
 	word-wrap: break-word;
 	background-color: #fff;
 	position: relative;
-    outline: none;
-    clear:both;
+	outline: none;
+	clear: both;
 }
 
 div.jsxc_chatmessage a {
@@ -590,62 +643,62 @@ div.jsxc_chatmessage img {
 
 /** incoming message */
 div.jsxc_in {
-	float:left;
-  position: relative;
-  margin-left: 10px;
-  background: #f1f7fd;
-  border: solid 1px #a6b8c9;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 3px;
+	float: left;
+	position: relative;
+	margin-left: 10px;
+	background: #f1f7fd;
+	border: solid 1px #a6b8c9;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
 }
 
 div.jsxc_in:after {
-  content: '';
-  position: absolute;
-  border-style: solid;
-  border-width: 5px 6px 5px 0;
-  border-color: transparent #f1f7fd;
-  display: block;
-  width: 0;
-  z-index: 1;
-  left: -6px;
-  bottom: 10px;
+	content: '';
+	position: absolute;
+	border-style: solid;
+	border-width: 5px 6px 5px 0;
+	border-color: transparent #f1f7fd;
+	display: block;
+	width: 0;
+	z-index: 1;
+	left: -6px;
+	bottom: 10px;
 }
 
 div.jsxc_out.jsxc_received:before {
-   content: '✓';
-   position: absolute;
-   bottom: 2px;
-   right: 2px;
-   font-size: 12px;
-   line-height: 12px;
-   color: green;
+	content: '✓';
+	position: absolute;
+	bottom: 2px;
+	right: 2px;
+	font-size: 12px;
+	line-height: 12px;
+	color: green;
 }
 
 /** outgoing message */
 div.jsxc_out {
-	float:right;
-  position: relative;
-  margin-right:10px;
-  background: #e6ffd1;
-  border: solid 1px #b4d89f;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 3px;
+	float: right;
+	position: relative;
+	margin-right: 10px;
+	background: #e6ffd1;
+	border: solid 1px #b4d89f;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
 }
 
 div.jsxc_out:after {
-  content: '';
-  position: absolute;
-  border-style: solid;
-  border-width: 5px 0 5px 6px;
-  border-color: transparent #e6ffd1;
-  display: block;
-  width: 0;
-  z-index: 1;
-  right: -6px;
-  bottom: 10px;
+	content: '';
+	position: absolute;
+	border-style: solid;
+	border-width: 5px 0 5px 6px;
+	border-color: transparent #e6ffd1;
+	display: block;
+	width: 0;
+	z-index: 1;
+	right: -6px;
+	bottom: 10px;
 }
 
 /** system message */
@@ -654,35 +707,47 @@ div.jsxc_sys {
 	max-width: none;
 	padding-right: 4px;
 	box-sizing: border-box;
-	margin-right:3px;
-	border-radius:3px;
+	margin-right: 3px;
+	border-radius: 3px;
 }
 
 .jsxc_window input.jsxc_textinput {
 	width: 100%;
 	height: 30px;
-   margin: 0px;
-   padding:3px;
-   padding-right: 40px;
-   outline:none;
-   border-radius:0px;
-   box-sizing:border-box;
-   text-align: right;
+	margin: 0px;
+	padding: 3px;
+	padding-right: 40px;
+	outline: none;
+	border-radius: 0px;
+	box-sizing: border-box;
+	text-align: right;
 }
 
-.jsxc_window ::-webkit-input-placeholder { color:#000; opacity:0.3;}
-.jsxc_window ::-moz-placeholder { color:#000; opacity:0.3;} /* firefox 19+ */
-.jsxc_window :-ms-input-placeholder { color:rgba(0,0,0,0.4); } /* ie */
-.jsxc_window input:-moz-placeholder { color:#000; opacity:0.3; }
+.jsxc_window ::-webkit-input-placeholder {
+	color: #000;
+	opacity: 0.3;
+}
+
+.jsxc_window ::-moz-placeholder {
+	color: #000;
+	opacity: 0.3;
+} /* firefox 19+ */
+.jsxc_window :-ms-input-placeholder {
+	color: rgba(0, 0, 0, 0.4);
+} /* ie */
+.jsxc_window input:-moz-placeholder {
+	color: #000;
+	opacity: 0.3;
+}
 
 div.jsxc_window .jsxc_tools {
-   height: 24px;
-   padding-top:1px;
-   float:right;
+	height: 24px;
+	padding-top: 1px;
+	float: right;
 }
 
 .jsxc_min .jsxc_tools {
-   display:none;
+	display: none;
 }
 
 div.jsxc_settings {
@@ -732,7 +797,7 @@ div.jsxc_settings li:first-child {
 	border-top: 1px solid #ccc;
 }
 
-div.jsxc_settings li:hover:not(.jsxc_disabled){
+div.jsxc_settings li:hover:not(.jsxc_disabled ){
 	color: #fff;
 	background-color: #3F8FBA;
 }
@@ -755,7 +820,7 @@ div.jsxc_transfer {
 }
 
 div.jsxc_transfer:hover {
-    background-image: url('img/padlock_open_white.svg');
+	background-image: url('img/padlock_open_white.svg');
 }
 
 div.jsxc_transfer.jsxc_fin {
@@ -771,46 +836,45 @@ div.jsxc_transfer.jsxc_enc.jsxc_trust {
 }
 
 .jsxc_window .jsxc_close {
-   color: #939393;
-   font-family: Arial;
-   line-height: 17px;
-   height: 17px;
-   font-size:20px;
-   cursor: pointer;
-   float: right;
-   padding: 3px;
+	color: #939393;
+	font-family: Arial;
+	line-height: 17px;
+	height: 17px;
+	font-size: 20px;
+	cursor: pointer;
+	float: right;
+	padding: 3px;
 }
 
 .jsxc_window .jsxc_close:hover {
-   color: #FAFAFA;
+	color: #FAFAFA;
 }
 
-#colorbox, #cboxWrapper {
-    outline: none;
+#colorbox,#cboxWrapper {
+	outline: none;
 }
 
 /*############################ 
  *######### Other ############ 
  *############################*/
- 
-ul.jsxc_vCard{
+ul.jsxc_vCard {
 	min-width: 400px;
 }
 
-ul.jsxc_vCard ul{
-   margin-left: 20px;
+ul.jsxc_vCard ul {
+	margin-left: 20px;
 }
 
-ul.jsxc_vCard li{
-   cursor: default !important;
+ul.jsxc_vCard li {
+	cursor: default !important;
 }
 
-ul.jsxc_vCard strong{
-   
+ul.jsxc_vCard strong {
+	
 }
 
 img.jsxc_vCard {
-	float:right;
+	float: right;
 	max-width: 200px;
 	max-height: 200px;
 }

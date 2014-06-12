@@ -1540,6 +1540,11 @@ var jsxc;
             jsxc.gui.showRemoveDialog(cid);
             return false;
          });
+         
+         bud.find('.jsxc_avatar').click(function() {
+            bud.toggleClass('jsxc_expand');
+            return false;
+         });
 
          jsxc.gui.update(cid);
 
