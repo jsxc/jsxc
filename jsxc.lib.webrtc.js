@@ -161,6 +161,32 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       },
 
       /**
+       * Add "video" button to roster
+       * 
+       * @private
+       * @memberOf jsxc.webrtc
+       * @param event
+       * @param cid cid of roster item
+       * @param data data wich belongs to cid
+       * @param el the roster item
+       */
+      onAddRosterItem: function(event, cid, data, el) {
+         var self = jsxc.webrtc;
+         var videoIcon = $('<div class="jsxc_video jsxc_disabled" title="' + jsxc.l.Start_video_call + '"></div>');
+
+         videoIcon.click(function() {
+            self.startCall(jid);
+            return false;
+         });
+
+         el.find('.jsxc_options.jsxc_left').append(videoIcon);
+
+         el.on('extra.jsxc', function() {
+            self.updateIcon(cid);
+         });
+      },
+
+      /**
        * Add "video" button to window menu.
        * 
        * @private
@@ -181,27 +207,26 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var div = $('<div>').addClass('jsxc_video');
          win.find('.jsxc_transfer:eq(1)').after(div);
 
-         self.updateWindow(win);
+         self.updateIcon(jsxc.jidToCid(win.data('jid')));
       },
 
       /**
-       * Enable or disable "video" button and assign full jid.
+       * Enable or disable "video" icon and assign full jid.
        * 
        * @memberOf jsxc.webrtc
-       * @param win jQuery window object
+       * @param cid CSS conform jid
        */
-      updateWindow: function(win) {
-         if (!win || win.length === 0) {
-            return;
-         }
+      updateIcon: function(cid) {
 
          var self = jsxc.webrtc;
-         var jid = win.data('jid');
-         var li = win.find('.jsxc_video');
+         var win = jsxc.gui.getWindow(cid);
+         var jid = win.data('jid') || jsxc.storage.getUserItem('buddy_' + cid).jid;
+
+         var el = win.find('.jsxc_video').add('#' + cid + ' .jsxc_video');
 
          // only start video call to a full jid
          if (Strophe.getResourceFromJid(jid) === null) {
-            var cid = jsxc.jidToCid(jid);
+
             var res = jsxc.storage.getUserItem('buddy_' + cid).res;
 
             if (Array.isArray(res) && res.length === 1) {
@@ -209,19 +234,19 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             }
          }
 
-         li.off('click');
+         el.off('click');
 
          if (self.conn.caps.hasFeatureByJid(jid, self.reqVideoFeatures)) {
-            li.click(function() {
+            el.click(function() {
                self.startCall(jid);
             });
-            li.removeClass('jsxc_disabled');
+            el.removeClass('jsxc_disabled');
 
-            li.attr('title', jsxc.translate('%%Start video call%%'));
+            el.attr('title', jsxc.translate('%%Start video call%%'));
          } else {
-            li.addClass('jsxc_disabled');
+            el.addClass('jsxc_disabled');
 
-            li.attr('title', jsxc.translate('%%Video call not possible.%%'));
+            el.attr('title', jsxc.translate('%%Video call not possible.%%'));
          }
       },
 
@@ -238,7 +263,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var bJid = Strophe.getBareJidFromJid(from);
 
          if (self.chatJids[bJid] !== from) {
-            self.updateWindow(jsxc.gui.getWindow(jsxc.jidToCid(bJid)));
+            self.updateIcon(jsxc.jidToCid(bJid));
             self.chatJids[bJid] = from;
          }
       },
@@ -300,11 +325,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        */
       onCaps: function(event, jid) {
          var self = jsxc.webrtc;
-         var win = jsxc.gui.getWindow(jsxc.jidToCid(jid));
 
-         if (win.length > 0) {
-            self.updateWindow(win);
-         }
+         self.updateIcon(jsxc.jidToCid(jid));
       },
 
       /**
@@ -787,6 +809,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       if (RTC !== null) {
          RTCPeerconnection = RTC.peerconnection;
 
+         $(document).on('add.roster.jsxc', jsxc.webrtc.onAddRosterItem);
          $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
          $(document).on('attached.jsxc', jsxc.webrtc.init);
       }

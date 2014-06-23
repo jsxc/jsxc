@@ -327,13 +327,13 @@ ul#jsxc_buddylist li.jsxc_expand .jsxc_avatar, ul#jsxc_buddylist li.jsxc_expand 
 	height: 48px;
 }
 
-#jsxc_buddylist .jsxc_extra {
+#jsxc_buddylist .jsxc_options {
     height: 20px;
     float: left;
     border-radius:2px;
     background-color: rgba(150, 150, 150, 0.5);
 }
-#jsxc_buddylist .jsxc_extra > div {
+#jsxc_buddylist .jsxc_options > div {
     height: 20px;
     width: 20px;
     float: left;
@@ -343,7 +343,7 @@ ul#jsxc_buddylist li.jsxc_expand .jsxc_avatar, ul#jsxc_buddylist li.jsxc_expand 
     opacity: 0.6;
     cursor: pointer;
 }
-#jsxc_buddylist .jsxc_extra > div:hover {
+#jsxc_buddylist .jsxc_options > div:hover {
 	opacity: 1;
 }
 #jsxc_buddylist .jsxc_chaticon {	
@@ -354,6 +354,14 @@ ul#jsxc_buddylist li.jsxc_expand .jsxc_avatar, ul#jsxc_buddylist li.jsxc_expand 
    background-image: url('img/camera_icon_white.svg');
    background-size: 13px 13px;
 }
+#jsxc_buddylist .jsxc_vcardicon {
+    font-size: 15px;
+    line-height: 20px;
+    text-align: center;
+    color: #fff;
+    font-weight: bold;
+    font-family: serif;
+}
 
 ul#jsxc_buddylist li:hover {
 	
@@ -362,13 +370,15 @@ ul#jsxc_buddylist li:hover {
 ul#jsxc_buddylist li.jsxc_oneway {
 	opacity: 0.7;
 }
-
-ul#jsxc_buddylist .jsxc_options {
+ul#jsxc_buddylist .jsxc_right {
+	float:left;
+}
+ul#jsxc_buddylist .jsxc_right {
 	float: right;
 	margin-right: 6px;
 }
 
-ul#jsxc_buddylist .jsxc_options div {
+ul#jsxc_buddylist .jsxc_right div {
 	font-weight: bold;
 	text-align: center;
 	font-size: 13px;
@@ -376,28 +386,20 @@ ul#jsxc_buddylist .jsxc_options div {
 	color: #fff;
 }
 
-ul#jsxc_buddylist li[data-type!="chat"] .jsxc_options {
+ul#jsxc_buddylist li[data-type!="chat"] .jsxc_right {
 	display: none;
 }
 
-ul#jsxc_buddylist .jsxc_options div:hover {
+ul#jsxc_buddylist .jsxc_right div:hover {
 	opacity: 1.0;
 }
 
 ul#jsxc_buddylist .jsxc_rename {
-	/*    background-image: url('../img/edit.png'); */
-	/*    background-repeat: no-repeat; */
-	/*    background-position: center center; */
-	/*    background-size: 15px 15px; */
-	transform: scaleX(-1);
+
 }
 
 ul#jsxc_buddylist .jsxc_delete {
-	/*    text-transform: lowercase; */
-	/*    font-weight: bold; */
-	/*    vertical-align: middle; */
-	/*    font-size: 17px; */
-	
+
 }
 
 #jsxc_roster .jsxc_avatar {
@@ -761,8 +763,7 @@ div.jsxc_sys {
 }
 
 div.jsxc_window .jsxc_tools {
-	height: 24px;
-	padding-top: 1px;
+	height: 26px;
 	float: right;
 }
 
@@ -770,21 +771,24 @@ div.jsxc_window .jsxc_tools {
 	display: none;
 }
 
+div.jsxc_window .jsxc_tools > div {
+	width: 17px;
+   height: 26px;
+   display: block;
+   float: left;
+   color: #939393;
+   font-family: Arial;
+   line-height: 26px;
+   cursor: pointer;
+   text-align: center;
+}
+
 div.jsxc_settings {
-	color: #939393;
-	font-family: Arial;
-	line-height: 17px;
-	cursor: pointer;
 	background-image: url('img/gear_grey.svg');
 	background-size: 15px 15px;
 	background-repeat: no-repeat;
 	background-position: center center;
-	width: 17px;
-	height: 17px;
-	display: block;
-	float: left;
 	overflow: visible;
-	padding: 3px;
 }
 
 div.jsxc_settings:hover,div.jsxc_settings.hover {
@@ -828,15 +832,10 @@ div.jsxc_settings li.jsxc_disabled {
 }
 
 div.jsxc_transfer {
-	padding: 3px;
-	width: 17px;
-	height: 17px;
 	background-image: url('img/padlock_open_grey.svg');
 	background-repeat: no-repeat;
 	background-position: center center;
 	background-size: 12px 12px;
-	cursor: pointer;
-	float: left;
 }
 
 div.jsxc_transfer:hover {
@@ -856,14 +855,7 @@ div.jsxc_transfer.jsxc_enc.jsxc_trust {
 }
 
 .jsxc_window .jsxc_close {
-	color: #939393;
-	font-family: Arial;
-	line-height: 17px;
-	height: 17px;
 	font-size: 20px;
-	cursor: pointer;
-	float: right;
-	padding: 3px;
 }
 
 .jsxc_window .jsxc_close:hover {

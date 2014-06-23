@@ -153,22 +153,21 @@ div:fullscreen.jsxc_localvideo {
 }
 
 div.jsxc_video {
-   padding: 3px;
-   width: 17px;
-   height: 17px;
    background-image: url('img/camera_icon_grey.svg');
    background-repeat: no-repeat;
    background-position: center center;
    background-size: 15px 15px;
-   cursor: pointer;
-   float: left;
 }
 
-div.jsxc_video:not(.jsxc_disabled):hover {
+div.jsxc_video:not(.jsxc_disabled):hover, #jsxc_buddylist .jsxc_options .jsxc_video {
     background-image: url('img/camera_icon_white.svg');
 }
 
 div.jsxc_video.jsxc_disabled {
 	opacity: 0.5;
-	cursor: default;
+	cursor: default !important;
+}
+
+#jsxc_buddylist .jsxc_options .jsxc_video.jsxc_disabled {
+	opacity: 0.2;
 }
