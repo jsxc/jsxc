@@ -1324,9 +1324,28 @@ var jsxc;
             }
          };
 
+         var failedToLoad = function() {
+            if ($('#jsxc_dialog ul.jsxc_vCard').length === 0) {
+               return;
+            }
+
+            $('#jsxc_dialog p').remove();
+
+            var content = '<p>';
+            content += jsxc.translate('%%Sorry, we couldn\'t load any vCard.%%');
+            content += '</p>';
+
+            $('#jsxc_dialog').append(content);
+         };
+
          jsxc.xmpp.conn.vcard.get(function(stanza) {
 
             if ($('#jsxc_dialog ul.jsxc_vCard').length === 0) {
+               return;
+            }
+
+            if ($(stanza).find('vCard').length === 0) {
+               failedToLoad();
                return;
             }
 
@@ -1344,19 +1363,7 @@ var jsxc;
 
             printProp($(stanza).find('vcard > *'), 0);
 
-         }, bjid, function() {
-            if ($('#jsxc_dialog ul.jsxc_vCard').length === 0) {
-               return;
-            }
-
-            $('#jsxc_dialog p').remove();
-
-            var content = '<p>';
-            content += jsxc.translate('%%Sorry, we couldn\'t load any vCard.%%');
-            content += '</p>';
-
-            $('#jsxc_dialog').append(content);
-         });
+         }, bjid, failedToLoad);
       },
 
       /**
