@@ -373,8 +373,15 @@ ul#jsxc_buddylist li:hover {
 	
 }
 
-ul#jsxc_buddylist li.jsxc_oneway {
+ul#jsxc_buddylist .jsxc_oneway {
 	opacity: 0.7;
+}
+.jsxc_oneway .jsxc_avatar {
+	-webkit-filter: grayscale(100%);
+   -moz-filter: grayscale(100%);
+   -ms-filter: grayscale(100%);
+   -o-filter: grayscale(100%);
+   filter: grayscale(100%);
 }
 ul#jsxc_buddylist .jsxc_right {
 	float:left;

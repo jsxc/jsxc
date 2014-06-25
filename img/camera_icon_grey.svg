@@ -1,72 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="535.00458"
-   height="510.4368"
-   id="svg3896"
    version="1.1"
-   inkscape:version="0.48+devel r"
-   sodipodi:docname="camera_icon_grey.svg">
-  <defs
-     id="defs3898" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="353.91934"
-     inkscape:cy="233.8456"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     fit-margin-top="0"
-     fit-margin-left="0"
-     fit-margin-right="0"
-     fit-margin-bottom="0"
-     inkscape:window-width="1855"
-     inkscape:window-height="1056"
-     inkscape:window-x="65"
-     inkscape:window-y="24"
-     inkscape:window-maximized="1" />
+   id="svg2"
+   width="20"
+   height="20">
   <metadata
-     id="metadata3901">
+     id="metadata10">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
+  <defs
+     id="defs8" />
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-5.7142771,-72.362177)">
-    <rect
-       style="fill:#808080;stroke:none;stroke-width:1.6172694;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="rect3904"
-       width="378.37268"
-       height="302.65582"
-       x="10.911922"
-       y="182.40634" />
+     transform="matrix(0.03788594,0,0,0.03788594,-0.41340793,-2.6310716)">
     <path
-       style="fill:#808080;stroke:none"
-       d="m 361.65148,313.51768 177.16074,-131.78516 0,302.22999 -179.83884,-133.77734 z"
        id="path3906"
-       inkscape:connector-curvature="0" />
+       style="fill:#808080;stroke:none"
+       d="m 361.65148,313.51768 177.16074,-131.78516 0,302.22999 L 358.97338,350.18517 Z M 10.911922,182.40634 l 378.372678,0 0,302.65582 -378.372678,0 z" />
   </g>
 </svg>

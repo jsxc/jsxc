@@ -798,9 +798,9 @@ var jsxc;
 
          // update gui according to subscription state
          if (data.sub && data.sub !== 'both') {
-            ri.addClass('jsxc_oneway');
+            ue.addClass('jsxc_oneway');
          } else {
-            ri.removeClass('jsxc_oneway');
+            ue.removeClass('jsxc_oneway');
          }
 
          var info = '<b>' + Strophe.getBareJidFromJid(data.jid) + '</b>\n';
