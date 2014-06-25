@@ -732,14 +732,14 @@ var jsxc;
        * @memberOf jsxc.gui
        */
       tooltip: function(selector) {
-          $(selector).tooltip({
-              show: {
-                delay: 600
-              },
-              content: function() {
-                  return $(this).attr('title').replace(/\n/g, '<br />');
-              }
-          });
+         $(selector).tooltip({
+            show: {
+               delay: 600
+            },
+            content: function() {
+               return $(this).attr('title').replace(/\n/g, '<br />');
+            }
+         });
       },
 
       /**
@@ -773,7 +773,7 @@ var jsxc;
          // Update gui according to encryption state
          switch (data.msgstate) {
             case 0:
-               we.find('.jsxc_transfer').removeClass('jsxc_enc jsxc_fin').attr('title', jsxc.l.your_connection_is_unencrypted); 
+               we.find('.jsxc_transfer').removeClass('jsxc_enc jsxc_fin').attr('title', jsxc.l.your_connection_is_unencrypted);
                we.find('.jsxc_settings .jsxc_verification').addClass('jsxc_disabled');
                we.find('.jsxc_settings .jsxc_transfer').text(jsxc.l.start_private);
                break;
@@ -1531,6 +1531,10 @@ var jsxc;
             jsxc.gui.window.open(cid);
          });
 
+         bud.find('.jsxc_chaticon').click(function() {
+            jsxc.gui.window.open(cid);
+         });
+
          bud.find('.jsxc_rename').click(function() {
             jsxc.gui.roster.rename(cid);
             return false;
@@ -1541,12 +1545,28 @@ var jsxc;
             return false;
          });
 
+         bud.find('.jsxc_avatar').click(function() {
+            bud.trigger('extra.jsxc');
+
+            bud.toggleClass('jsxc_expand');
+
+            jsxc.gui.updateAvatar(bud, data.jid, data.avatar);
+            return false;
+         });
+
+         bud.find('.jsxc_vcardicon').click(function() {
+            jsxc.gui.showVcard(data.jid);
+            return false;
+         });
+
          jsxc.gui.update(cid);
 
          // update scrollbar
          $('#jsxc_buddylist').slimScroll({
             scrollTo: '0px'
          });
+
+         $(document).trigger('add.roster.jsxc', [ cid, data, bud ]);
       },
 
       /**
@@ -2058,9 +2078,13 @@ var jsxc;
        * @param {type} cid
        */
       highlight: function(cid) {
-         $('#jsxc_window_' + cid + ' ').effect('highlight', {
-            color: 'orange'
-         }, 2000);
+         var el = $('#jsxc_window_' + cid + ' .jsxc_bar');
+
+         if (!el.is(':animated')) {
+            el.effect('highlight', {
+               color: 'orange'
+            }, 2000);
+         }
       },
 
       /**
@@ -2194,8 +2218,8 @@ var jsxc;
          if (received) {
             msgDiv.addClass('jsxc_received');
          }
-         
-         if(direction === 'sys') {
+
+         if (direction === 'sys') {
             $('#jsxc_window_' + cid + ' .jsxc_textarea').append('<div style="clear:both"/>');
          }
 
@@ -2408,11 +2432,15 @@ var jsxc;
         </div>',
       rosterBuddy: '<li>\
             <div class="jsxc_avatar">☺</div>\
-            <div class="jsxc_options">\
+            <div class="jsxc_name"/>\
+            <div class="jsxc_options jsxc_right">\
                 <div class="jsxc_rename" title="%%rename_buddy%%">✎</div>\
                 <div class="jsxc_delete" title="%%delete_buddy%%">✘</div>\
             </div>\
-            <div class="jsxc_name"/>\
+            <div class="jsxc_options jsxc_left">\
+                <div class="jsxc_chaticon" title="%%send_message%%"/>\
+                <div class="jsxc_vcardicon" title="%%get_info%%">i</div>\
+            </div>\
         </li>',
       loginBox: '<h3>%%Login%%</h3>\
         <form method="get">\
@@ -4541,7 +4569,9 @@ var jsxc;
          ROLE: 'Role',
          BDAY: 'Birthday',
          DESC: 'Description',
-         PHOTO: ' '
+         PHOTO: ' ',
+         send_message: 'send message',
+         get_info: 'get info'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
