@@ -115,17 +115,17 @@ div:fullscreen.jsxc_localvideo {
 
 .jsxc_chatarea {
 	position: relative;
-	height: 255px;
+	height: 270px;
 	display: none;
 	background-color: #A4A4A4;
 }
 
-.jsxc_chatarea ul {
+.jsxc_chatarea > ul {
 	position: absolute;
 	left: 50%;
 	top: 0px;
-	width: 200px;
-	height: 255px;
+	width: 250px;
+	height: 270px;
 	list-style: none;
 	padding: 0px;
 	margin: 0px 0px 0px -100px;
