@@ -861,6 +861,7 @@ div.jsxc_settings li {
 	padding-left: 10px;
 	height: 30px;
 	line-height: 30px;
+	text-align: left;
 }
 
 div.jsxc_settings li:first-child {

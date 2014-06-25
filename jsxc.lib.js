@@ -976,9 +976,7 @@ var jsxc;
             return;
          }
 
-         jsxc.gui.dialog.open(jsxc.gui.template.get('authenticationDialog', cid), {
-            'noClose': true
-         });
+         jsxc.gui.dialog.open(jsxc.gui.template.get('authenticationDialog', cid));
 
          // Add handler
 
