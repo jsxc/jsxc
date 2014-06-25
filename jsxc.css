@@ -66,6 +66,39 @@ p.jsxc_center {
 	max-width: 500px;
 }
 
+#jsxc_dialog fieldset {
+	border: 2px solid #ccc;
+}
+
+#jsxc_dialog legend {
+	padding: 0px 10px;
+	font-weight: bold;
+}
+
+#jsxc_dialog input {
+	outline: none;
+}
+
+#jsxc_dialog input:invalid {
+	border:1px solid red;
+}
+
+#jsxc_dialog .jsxc_fieldsetPriority {
+	width: 200px;
+	padding: 10px;
+	border-radius: 3px;
+}
+
+#jsxc_dialog .jsxc_fieldsetPriority label {
+	display: inline-block;
+	width: 100px;
+}
+
+#jsxc_dialog .jsxc_fieldsetPriority input[type="Number"] {
+   display: inline-block;
+   width: 50px;
+}
+
 /*############################ 
  *########## Overall ######### 
  *############################*/

@@ -1366,6 +1366,57 @@ var jsxc;
          }, bjid, failedToLoad);
       },
 
+      showSettings: function() {
+         jsxc.gui.dialog.open(jsxc.gui.template.get('settings'));
+
+         $('#jsxc_dialog form').each(function() {
+            var self = $(this);
+
+            self.find('input[type!="submit"]').each(function() {
+               var id = this.id.split("-");
+               var prop = id[0];
+               var key = id[1];
+
+               var data = jsxc.options.get(prop);
+
+               if (data && data[key]) {
+                  $(this).val(data[key]);
+               }
+            });
+         });
+
+         $('#jsxc_dialog form').submit(function(e) {
+
+            var self = $(this);
+            var data = {};
+
+            self.find('input[type!="submit"]').each(function() {
+               var id = this.id.split("-");
+               var prop = id[0];
+               var key = id[1];
+               var val = $(this).val();
+
+               if (!data[prop]) {
+                  data[prop] = {};
+               }
+
+               data[prop][key] = val;
+            });
+
+            $.each(data, function(key, val) {
+               jsxc.options.set(key, val);
+            });
+
+            setTimeout(function() {
+               self.find('input[type="submit"]').effect('highlight', {
+                  color: 'green'
+               }, 4000);
+            }, 200);
+
+            return false;
+         });
+      },
+
       /**
        * Change own presence to pres.
        * 
@@ -1434,6 +1485,10 @@ var jsxc;
             $('#jsxc_menu .jsxc_hideOffline').text(jsxc.translate('%%Show offline%%'));
             $('#jsxc_buddylist').addClass('jsxc_hideOffline');
          }
+
+         $('#jsxc_menu .jsxc_settings').click(function() {
+            jsxc.gui.showSettings();
+         });
 
          $('#jsxc_menu .jsxc_hideOffline').click(function() {
             var hideOffline = !jsxc.options.get('hideOffline');
@@ -2409,6 +2464,7 @@ var jsxc;
               <div id="jsxc_menu">\
                  <span></span>\
                  <ul>\
+                     <li class="jsxc_settings">%%Settings%%</li>\
                      <li class="jsxc_muteNotification">%%Mute%%</li>\
                      <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
                      <li class="jsxc_hideOffline">%%Hide offline%%</li>\
@@ -2506,7 +2562,20 @@ var jsxc;
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>',
       vCard: '<h3>vCard %%from%% {{cid_name}}</h3>\
          <ul class="jsxc_vCard"></ul>\
-         <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...</p>'
+         <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...</p>',
+      settings: '<h3>%%User_settings%%</h3>\
+         <p></p>\
+         <form>\
+            <fieldset class="jsxc_fieldsetPriority">\
+               <legend>%%Priority%%</legend>\
+               <label for="priority-online">%%Online%%</label><input type="number" value="0" id="priority-online" min="-128" max="127" step="1" required="required"/>\
+               <label for="priority-chat">%%Chatty%%</label><input type="number" value="0" id="priority-chat" min="-128" max="127" step="1" required="required"/>\
+               <label for="priority-away">%%Away%%</label><input type="number" value="0" id="priority-away" min="-128" max="127" step="1" required="required"/>\
+               <label for="priority-xa">%%Extended_away%%</label><input type="number" value="0" id="priority-xa" min="-128" max="127" step="1" required="required"/>\
+               <label for="priority-dnd">%%dnd%%</label><input type="number" value="0" id="priority-dnd" min="-128" max="127" step="1" required="required"/>\
+               <input type="submit" value="%%Save%%"/>\
+            </fieldset>\
+         </form>'
    };
 
    /**
@@ -2738,8 +2807,8 @@ var jsxc;
             pres.c('show').t(presState).up();
          }
 
-         var priority = jsxc.storage.getUserItem('priority');
-         if (priority !== null) {
+         var priority = jsxc.options.get('priority');
+         if (priority !== null && typeof priority[presState] !== 'undefined' && parseInt(priority[presState]) !== 0) {
             pres.c('priority').t(priority[presState]).up();
          }
 
@@ -4527,6 +4596,9 @@ var jsxc;
          New_message_from: 'New message from',
          Should_we_notify_you_: 'Should we notify you about new messages in the future?',
          Please_accept_: 'Please click the "Allow" button at the top.',
+         Hide_offline: 'Hide offline',
+         Show_offline: 'Show offline',
+         About: 'About',
          dnd: 'Do Not Disturb',
          Mute: 'Mute',
          Unmute: 'Unmute',
@@ -4578,7 +4650,11 @@ var jsxc;
          DESC: 'Description',
          PHOTO: ' ',
          send_message: 'send message',
-         get_info: 'get info'
+         get_info: 'get info',
+         Settings: 'Settings',
+         Priority: 'Priority',
+         Save: 'Save',
+         User_settings: 'User settings'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4681,7 +4757,11 @@ var jsxc;
          Confirm: 'Bestätigen',
          Dismiss: 'Ablehnen',
          Remove: 'Löschen',
-         Online_help: 'Online Hilfe'
+         Online_help: 'Online Hilfe',
+         Settings: 'Einstellungen',
+         Priority: 'Priorität',
+         Save: 'Speichern',
+         User_settings: 'Benutzereinstellungen'
       },
       es: {
          please_wait_until_we_logged_you_in: 'Por favor, espere...',
@@ -4780,7 +4860,11 @@ var jsxc;
          Confirm: 'Confirmar',
          Dismiss: 'Rechazar',
          Remove: 'Eliminar',
-         Online_help: 'Ayuda en línea'
+         Online_help: 'Ayuda en línea',
+         Settings: 'Ajustes',
+         Priority: 'Prioridad',
+         Save: 'Guardar',
+         User_settings: 'Configuración de usuario'
       }
    };
 }(jQuery));
