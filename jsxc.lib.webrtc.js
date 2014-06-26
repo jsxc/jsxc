@@ -816,7 +816,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
    });
 
    $.extend(jsxc.l10n.en, {
-      Please_allow_access_to_microphone_and_camera: 'Please allow access to microphone and camera.',
+      Please_allow_access_to_microphone_and_camera: 'Please click the "Allow" button at the top, to allow access to microphone and camera.',
       Incoming_call: 'Incoming call',
       from: 'from',
       Do_you_want_to_accept_the_call_from: 'Do you want to accept the call from',
@@ -837,7 +837,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
    });
 
    $.extend(jsxc.l10n.de, {
-      Please_allow_access_to_microphone_and_camera: 'Bitte erlaube den Zugriff auf Kamera und Mikrofon.',
+      Please_allow_access_to_microphone_and_camera: 'Bitte klick auf den "Zulassen" Button oben, um den Zugriff auf Kamera und Mikrofon zu erlauben.',
       Incoming_call: 'Eingehender Anruf',
       from: 'von',
       Do_you_want_to_accept_the_call_from: 'Möchtest Du den Anruf annehmen von',
