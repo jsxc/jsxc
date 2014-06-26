@@ -213,6 +213,12 @@ div#jsxc_roster .jsxc_wait h3 {
 
 div#jsxc_roster p {
 	color: #939393;
+	padding: 10px;
+}
+
+div#jsxc_roster p a {
+	color: #b1b1b1;
+	text-decoration: underline;
 }
 
 div#jsxc_roster>.jsxc_bottom {

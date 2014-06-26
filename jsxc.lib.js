@@ -462,8 +462,11 @@ var jsxc;
       restoreRoster: function() {
          var buddies = jsxc.storage.getUserItem('buddylist');
 
-         if (!buddies) {
+         if (!buddies || buddies.length === 0) {
             jsxc.debug('No saved buddylist.');
+            
+            jsxc.gui.roster.empty();
+
             return;
          }
 
@@ -1802,9 +1805,27 @@ var jsxc;
          $('#jsxc_roster .slimScrollDiv').remove();
          $('#jsxc_roster > .jsxc_bottom').remove();
 
-         $('#jsxc_roster').append($(document.createElement('p')).text(jsxc.l.no_connection).append($(document.createElement('a')).attr('href', '#').text(jsxc.l.relogin).click(function() {
+         $('#jsxc_roster').append($('<p>' + jsxc.l.no_connection + '</p>').append(' <a>' + jsxc.l.relogin + '</a>').click(function() {
             jsxc.gui.showLoginBox();
-         })));
+         }));
+      },
+      
+      /**
+       * Shows a text with link to add a new buddy.
+       * 
+       * @memberOf jsxc.gui.roster
+       */
+      empty: function() { console.trace(); 
+         var text = $('<p>' + jsxc.l.Your_roster_is_empty_add_a + '</p>');
+         var link = $('<a>' + jsxc.l.new_buddy + '</a>');
+
+         link.click(function() {
+            jsxc.gui.showContactDialog();
+         });
+         text.append(link);
+         text.append('.');
+
+         $('#jsxc_roster').prepend(text);
       }
    };
 
@@ -2518,7 +2539,7 @@ var jsxc;
       contactDialog: '<h3>%%Add_buddy%%</h3>\
          <p class=".jsxc_explanation">%%Type_in_the_full_username_%%</p>\
          <p><label for="jsxc_username">* %%Username%%:</label>\
-            <input type="text" name="username" id="jsxc_username" required="required" /></p>\
+            <input type="email" name="username" id="jsxc_username" required="required" /></p>\
          <p><label for="jsxc_alias">%%Alias%%:</label>\
             <input type="text" name="alias" id="jsxc_alias" /></p>\
          <p class="jsxc_right">\
@@ -2757,6 +2778,8 @@ var jsxc;
             // pres first after roster is ready
             $(document).one('cloaded.roster.jsxc', jsxc.xmpp.sendPres);
 
+            $('#jsxc_roster > p:first').remove();
+            
             var iq = $iq({
                type: 'get'
             }).c('query', {
@@ -2910,6 +2933,10 @@ var jsxc;
             jsxc.gui.roster.add(cid);
          });
 
+         if(buddies.length === 0) {
+            jsxc.gui.roster.empty();
+         }
+         
          jsxc.storage.setUserItem('buddylist', buddies);
 
          jsxc.debug('Roster loaded');
@@ -2983,6 +3010,12 @@ var jsxc;
                }
             }
          });
+         
+         if (!jsxc.storage.getUserItem('buddylist') || jsxc.storage.getUserItem('buddylist').length === 0) {
+            jsxc.gui.roster.empty();
+         } else {
+            $('#jsxc_roster > p:first').remove();
+         }
 
          // preserve handler
          return true;
@@ -4654,7 +4687,9 @@ var jsxc;
          Priority: 'Priority',
          Save: 'Save',
          User_settings: 'User settings',
-         A_fingerprint_: 'A fingerprint is used to make sure that the person you are talking to is who he or she is saying.'
+         A_fingerprint_: 'A fingerprint is used to make sure that the person you are talking to is who he or she is saying.',
+         Your_roster_is_empty_add_a: 'Your roster is empty, add a ',
+         new_buddy: 'new buddy'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
