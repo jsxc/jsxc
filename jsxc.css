@@ -55,6 +55,10 @@ p.jsxc_center {
 	outline: none;
 }
 
+#jsxc_dialog p input[type="submit"] {
+	width: auto;
+}
+
 #jsxc_dialog p label {
 	display: block;
 	width: 30%;

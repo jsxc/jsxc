@@ -1122,7 +1122,7 @@ var jsxc;
             }
          });
 
-         $('#jsxc_dialog .creation').click(function() {
+         $('#jsxc_dialog form').submit(function() {
             var username = $('#jsxc_username').val();
             var alias = $('#jsxc_alias').val();
 
@@ -1143,6 +1143,8 @@ var jsxc;
             jsxc.xmpp.addBuddy(username, alias);
 
             jsxc.gui.dialog.close();
+            
+            return false;
          });
       },
 
@@ -2538,13 +2540,15 @@ var jsxc;
         </form>',
       contactDialog: '<h3>%%Add_buddy%%</h3>\
          <p class=".jsxc_explanation">%%Type_in_the_full_username_%%</p>\
+         <form>\
          <p><label for="jsxc_username">* %%Username%%:</label>\
             <input type="email" name="username" id="jsxc_username" required="required" /></p>\
          <p><label for="jsxc_alias">%%Alias%%:</label>\
             <input type="text" name="alias" id="jsxc_alias" /></p>\
          <p class="jsxc_right">\
-            <a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Add%%</a>\
-         </p>',
+            <input class="button" type="submit" value="%%Add%%" />\
+         </p>\
+         <form>',
       approveDialog: '<h3>%%Subscription_request%%</h3>\
         <p>%%You_have_a_request_from%% <b class="jsxc_their_jid"></b>.</p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_deny">%%Deny%%</a> <a href="#" class="button creation jsxc_approve">%%Approve%%</a></p>',
