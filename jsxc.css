@@ -38,6 +38,10 @@ p.jsxc_center {
 	min-width: 300px;
 }
 
+#jsxc_dialog p {
+	margin-bottom: 1em;
+}
+
 #jsxc_dialog h3 {
 	font-size: 120%;
 	font-weight: bold;

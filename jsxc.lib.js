@@ -2420,6 +2420,7 @@ var jsxc;
               <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Compare%%</a></p>\
             </div>',
       fingerprintsDialog: '<div>\
+          <p class="jsxc_maxWidth">%%A_fingerprint_%%</p>\
           <p><strong>%%Your_fingerprint%%</strong><br />\
           <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
           <p><strong>%%Buddy_fingerprint%%</strong><br />\
@@ -4652,7 +4653,8 @@ var jsxc;
          Settings: 'Settings',
          Priority: 'Priority',
          Save: 'Save',
-         User_settings: 'User settings'
+         User_settings: 'User settings',
+         A_fingerprint_: 'A fingerprint is used to make sure that the person you are talking to is who he or she is saying.'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4759,7 +4761,8 @@ var jsxc;
          Settings: 'Einstellungen',
          Priority: 'Priorität',
          Save: 'Speichern',
-         User_settings: 'Benutzereinstellungen'
+         User_settings: 'Benutzereinstellungen',
+         A_fingerprint_: 'Ein Fingerabdruck wird dazu benutzt deinen Gesprächspartner zu identifizieren.'
       },
       es: {
          please_wait_until_we_logged_you_in: 'Por favor, espere...',
