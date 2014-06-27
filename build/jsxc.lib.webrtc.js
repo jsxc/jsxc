@@ -1,5 +1,5 @@
 /**
- * jsxc v0.7.2 - 2014-05-28
+ * jsxc v0.8.0-beta - 2014-06-27
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.7.2
+ * @version 0.8.0-beta
  */
 
 /* jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery */
@@ -173,6 +173,32 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       },
 
       /**
+       * Add "video" button to roster
+       * 
+       * @private
+       * @memberOf jsxc.webrtc
+       * @param event
+       * @param cid cid of roster item
+       * @param data data wich belongs to cid
+       * @param el the roster item
+       */
+      onAddRosterItem: function(event, cid, data, el) {
+         var self = jsxc.webrtc;
+         var videoIcon = $('<div class="jsxc_video jsxc_disabled" title="' + jsxc.l.Start_video_call + '"></div>');
+console.log(data);
+         videoIcon.click(function() {
+            self.startCall(data.jid);
+            return false;
+         });
+
+         el.find('.jsxc_options.jsxc_left').append(videoIcon);
+
+         el.on('extra.jsxc', function() {
+            self.updateIcon(cid);
+         });
+      },
+
+      /**
        * Add "video" button to window menu.
        * 
        * @private
@@ -193,27 +219,26 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var div = $('<div>').addClass('jsxc_video');
          win.find('.jsxc_transfer:eq(1)').after(div);
 
-         self.updateWindow(win);
+         self.updateIcon(jsxc.jidToCid(win.data('jid')));
       },
 
       /**
-       * Enable or disable "video" button and assign full jid.
+       * Enable or disable "video" icon and assign full jid.
        * 
        * @memberOf jsxc.webrtc
-       * @param win jQuery window object
+       * @param cid CSS conform jid
        */
-      updateWindow: function(win) {
-         if (!win || win.length === 0) {
-            return;
-         }
+      updateIcon: function(cid) {
 
          var self = jsxc.webrtc;
-         var jid = win.data('jid');
-         var li = win.find('.jsxc_video');
+         var win = jsxc.gui.getWindow(cid);
+         var jid = win.data('jid') || jsxc.storage.getUserItem('buddy_' + cid).jid;
+
+         var el = win.find('.jsxc_video').add('#' + cid + ' .jsxc_video');
 
          // only start video call to a full jid
          if (Strophe.getResourceFromJid(jid) === null) {
-            var cid = jsxc.jidToCid(jid);
+
             var res = jsxc.storage.getUserItem('buddy_' + cid).res;
 
             if (Array.isArray(res) && res.length === 1) {
@@ -221,19 +246,19 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             }
          }
 
-         li.off('click');
+         el.off('click');
 
          if (self.conn.caps.hasFeatureByJid(jid, self.reqVideoFeatures)) {
-            li.click(function() {
+            el.click(function() {
                self.startCall(jid);
             });
-            li.removeClass('jsxc_disabled');
+            el.removeClass('jsxc_disabled');
 
-            li.attr('title', jsxc.translate('%%Start video call%%'));
+            el.attr('title', jsxc.translate('%%Start video call%%'));
          } else {
-            li.addClass('jsxc_disabled');
+            el.addClass('jsxc_disabled');
 
-            li.attr('title', jsxc.translate('%%Video call not possible.%%'));
+            el.attr('title', jsxc.translate('%%Video call not possible.%%'));
          }
       },
 
@@ -250,7 +275,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var bJid = Strophe.getBareJidFromJid(from);
 
          if (self.chatJids[bJid] !== from) {
-            self.updateWindow(jsxc.gui.getWindow(jsxc.jidToCid(bJid)));
+            self.updateIcon(jsxc.jidToCid(bJid));
             self.chatJids[bJid] = from;
          }
       },
@@ -312,11 +337,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        */
       onCaps: function(event, jid) {
          var self = jsxc.webrtc;
-         var win = jsxc.gui.getWindow(jsxc.jidToCid(jid));
 
-         if (win.length > 0) {
-            self.updateWindow(win);
-         }
+         self.updateIcon(jsxc.jidToCid(jid));
       },
 
       /**
@@ -799,13 +821,14 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       if (RTC !== null) {
          RTCPeerconnection = RTC.peerconnection;
 
+         $(document).on('add.roster.jsxc', jsxc.webrtc.onAddRosterItem);
          $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
          $(document).on('attached.jsxc', jsxc.webrtc.init);
       }
    });
 
    $.extend(jsxc.l10n.en, {
-      Please_allow_access_to_microphone_and_camera: 'Please allow access to microphone and camera.',
+      Please_allow_access_to_microphone_and_camera: 'Please click the "Allow" button at the top, to allow access to microphone and camera.',
       Incoming_call: 'Incoming call',
       from: 'from',
       Do_you_want_to_accept_the_call_from: 'Do you want to accept the call from',
@@ -826,7 +849,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
    });
 
    $.extend(jsxc.l10n.de, {
-      Please_allow_access_to_microphone_and_camera: 'Bitte erlaube den Zugriff auf Kamera und Mikrofon.',
+      Please_allow_access_to_microphone_and_camera: 'Bitte klick auf den "Zulassen" Button oben, um den Zugriff auf Kamera und Mikrofon zu erlauben.',
       Incoming_call: 'Eingehender Anruf',
       from: 'von',
       Do_you_want_to_accept_the_call_from: 'Möchtest Du den Anruf annehmen von',
@@ -844,5 +867,26 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       Remote_Fingerprint: 'Remote Fingerprint',
       Video_call_not_possible: 'Videoanruf nicht verfügbar',
       Start_video_call: 'Starte Videoanruf'
+   });
+
+   $.extend(jsxc.l10n.es, {
+      Please_allow_access_to_microphone_and_camera: 'Por favor, permitir el acceso al micrófono y la cámara.',
+      Incoming_call: 'Llamada entrante',
+      from: 'de',
+      Do_you_want_to_accept_the_call_from: 'Desea aceptar la llamada de',
+      Reject: 'Rechazar',
+      Accept: 'Aceptar',
+      hang_up: 'colgar',
+      snapshot: 'instantánea',
+      mute_my_audio: 'silenciar mi audio',
+      pause_my_video: 'pausar mi vídeo',
+      fullscreen: 'pantalla completa',
+      Info: 'Info',
+      Local_IP: 'IP local',
+      Remote_IP: 'IP remota',
+      Local_Fingerprint: 'Firma digital local',
+      Remote_Fingerprint: 'Firma digital remota',
+      Video_call_not_possible: 'Llamada de vídeo no es posible',
+      Start_video_call: 'Iniciar llamada de vídeo'
    });
 }(jQuery));

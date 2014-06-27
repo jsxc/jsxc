@@ -1388,7 +1388,7 @@ var jsxc;
             });
          });
 
-         $('#jsxc_dialog form').submit(function(e) {
+         $('#jsxc_dialog form').submit(function() {
 
             var self = $(this);
             var data = {};

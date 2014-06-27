@@ -173,9 +173,9 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       onAddRosterItem: function(event, cid, data, el) {
          var self = jsxc.webrtc;
          var videoIcon = $('<div class="jsxc_video jsxc_disabled" title="' + jsxc.l.Start_video_call + '"></div>');
-
+console.log(data);
          videoIcon.click(function() {
-            self.startCall(jid);
+            self.startCall(data.jid);
             return false;
          });
 

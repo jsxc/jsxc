@@ -1,5 +1,5 @@
 /**
- * jsxc v0.7.2 - 2014-05-28
+ * jsxc v0.8.0-beta - 2014-06-27
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.7.2
+ * @version 0.8.0-beta
  */
 
 var jsxc;
@@ -22,7 +22,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '0.7.2',
+      version: '0.8.0-beta',
 
       /** True if i'm the master */
       master: false,
@@ -234,7 +234,7 @@ var jsxc;
          if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
 
             // Looking for a login form
-            if (!jsxc.options.loginForm.form || !jsxc.el_exists(jsxc.options.loginForm.form)) {
+            if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
 
                if (jsxc.options.displayRosterMinimized()) {
                   // Show minimized roster
@@ -474,8 +474,11 @@ var jsxc;
       restoreRoster: function() {
          var buddies = jsxc.storage.getUserItem('buddylist');
 
-         if (!buddies) {
+         if (!buddies || buddies.length === 0) {
             jsxc.debug('No saved buddylist.');
+            
+            jsxc.gui.roster.empty();
+
             return;
          }
 
@@ -539,6 +542,7 @@ var jsxc;
        * Escapes some characters to HTML character
        */
       escapeHTML: function(text) {
+         text = text.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
          return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       },
 
@@ -709,7 +713,7 @@ var jsxc;
     */
    jsxc.gui = {
       /** Smilie token to file mapping */
-      emotions: [ [ ':-) :)', 'smile.png' ], [ ':-D :D', 'grin.png' ], [ ':-( :(', 'sad.png' ], [ ';-) ;)', 'wink.png' ], [ ':-P :P', 'tonguesmile.png' ], [ '=-O', 'surprised.png' ], [ ':kiss: :-*', 'kiss.png' ], [ '8-) :cool:', 'sunglassess.png' ], [ ':\'-(', 'crysad.png' ], [ ':-/', 'doubt.png' ], [ 'O:-) O:)', 'angel.png' ], [ ':-X :X', 'zip.png' ], [ '>:o', 'angry.png' ], [ ':yes:', 'thumbsup.png' ], [ ':beer:', 'beer.png' ], [ ':devil:', 'devil.png' ], [ ':kissing:', 'kissing.png' ], [ ':love:', 'love.png' ], [ ':zzz:', 'tired.png' ] ],
+      emotions: [ [ 'O:-) O:)', 'angel.png' ], [ '>:-( >:( &gt;:-( &gt;:(', 'angry.png' ], [ ':-) :)', 'smile.png' ], [ ':-D :D', 'grin.png' ], [ ':-( :(', 'sad.png' ], [ ';-) ;)', 'wink.png' ], [ ':-P :P', 'tonguesmile.png' ], [ '=-O', 'surprised.png' ], [ ':kiss: :-*', 'kiss.png' ], [ '8-) :cool:', 'sunglassess.png' ], [ ':\'-( :\'( :&amp;apos;-(', 'crysad.png' ], [ ':-/', 'doubt.png' ], [ ':-X :X', 'zip.png' ], [ ':yes:', 'thumbsup.png' ], [ ':no:', 'thumbsdown.png' ], [ ':beer:', 'beer.png' ], [ ':devil:', 'devil.png' ], [ ':kiss: :kissing:', 'kissing.png' ], [ '@->-- :rose: @-&gt;--', 'rose.png' ], [ ':music:', 'music.png' ], [ ':love:', 'love.png' ], [ ':zzz:', 'tired.png' ] ],
 
       /**
        * Creates application skeleton.
@@ -719,18 +723,38 @@ var jsxc;
       init: function() {
          $('body').append($(jsxc.gui.template.get('windowList')));
 
+         jsxc.gui.tooltip('#jsxc_windowList');
+
          jsxc.gui.roster.init();
 
          // prepare regexp for emotions
          $.each(jsxc.gui.emotions, function(i, val) {
+            // escape characters
             var reg = val[0].replace(/(\/|\||\*|\.|\+|\?|\^|\$|\(|\)|\[|\]|\{|\})/g, '\\$1');
-            reg = '(' + reg.split(' ').join(')|(') + ')';
+            reg = '(' + reg.split(' ').join('|') + ')';
             jsxc.gui.emotions[i][2] = new RegExp(reg, 'g');
          });
 
          // We need this often, so we creates some template jquery objects
          jsxc.gui.windowTemplate = $(jsxc.gui.template.get('chatWindow'));
          jsxc.gui.buddyTemplate = $(jsxc.gui.template.get('rosterBuddy'));
+      },
+
+      /**
+       * Init tooltip plugin for given jQuery selector.
+       * 
+       * @param {String} selector jQuery selector
+       * @memberOf jsxc.gui
+       */
+      tooltip: function(selector) {
+         $(selector).tooltip({
+            show: {
+               delay: 600
+            },
+            content: function() {
+               return $(this).attr('title').replace(/\n/g, '<br />');
+            }
+         });
       },
 
       /**
@@ -784,14 +808,14 @@ var jsxc;
          if (data.trust) {
             we.find('.jsxc_transfer').addClass('jsxc_trust').attr('title', jsxc.l.your_buddy_is_verificated);
          } else {
-            we.find('.jsxc_transfer').removeClass('jsxc_trust').attr('title', '');
+            we.find('.jsxc_transfer').removeClass('jsxc_trust');
          }
 
          // update gui according to subscription state
          if (data.sub && data.sub !== 'both') {
-            ri.addClass('jsxc_oneway');
+            ue.addClass('jsxc_oneway');
          } else {
-            ri.removeClass('jsxc_oneway');
+            ue.removeClass('jsxc_oneway');
          }
 
          var info = '<b>' + Strophe.getBareJidFromJid(data.jid) + '</b>\n';
@@ -967,9 +991,7 @@ var jsxc;
             return;
          }
 
-         jsxc.gui.dialog.open(jsxc.gui.template.get('authenticationDialog', cid), {
-            'noClose': true
-         });
+         jsxc.gui.dialog.open(jsxc.gui.template.get('authenticationDialog', cid));
 
          // Add handler
 
@@ -1112,7 +1134,7 @@ var jsxc;
             }
          });
 
-         $('#jsxc_dialog .creation').click(function() {
+         $('#jsxc_dialog form').submit(function() {
             var username = $('#jsxc_username').val();
             var alias = $('#jsxc_alias').val();
 
@@ -1133,6 +1155,8 @@ var jsxc;
             jsxc.xmpp.addBuddy(username, alias);
 
             jsxc.gui.dialog.close();
+            
+            return false;
          });
       },
 
@@ -1269,6 +1293,146 @@ var jsxc;
       },
 
       /**
+       * Show vCard of user with the given bar jid.
+       * 
+       * @memberOf jsxc.gui
+       * @param {String} bjid Bar jid
+       */
+      showVcard: function(bjid) {
+         jsxc.gui.dialog.open(jsxc.gui.template.get('vCard', jsxc.jidToCid(bjid)));
+
+         var printProp = function(el, depth) {
+            var content = '';
+
+            el.each(function() {
+               var item = $(this);
+               var children = $(this).children();
+
+               content += '<li>';
+
+               var prop = jsxc.translate('%%' + item[0].tagName + '%%');
+
+               if (prop !== ' ') {
+                  content += '<strong>' + prop + ':</strong> ';
+               }
+
+               if (item[0].tagName === 'PHOTO') {
+
+               } else if (children.length > 0) {
+                  content += '<ul>';
+                  content += printProp(children, depth + 1);
+                  content += '</ul>';
+               } else if (item.text() !== '') {
+                  content += jsxc.escapeHTML(item.text());
+               }
+
+               content += '</li>';
+
+               if (depth === 0 && $('#jsxc_dialog ul.jsxc_vCard').length > 0) {
+                  $('#jsxc_dialog ul.jsxc_vCard').append(content);
+                  content = '';
+               }
+            });
+
+            if (depth > 0) {
+               return content;
+            }
+         };
+
+         var failedToLoad = function() {
+            if ($('#jsxc_dialog ul.jsxc_vCard').length === 0) {
+               return;
+            }
+
+            $('#jsxc_dialog p').remove();
+
+            var content = '<p>';
+            content += jsxc.translate('%%Sorry, we couldn\'t load any vCard.%%');
+            content += '</p>';
+
+            $('#jsxc_dialog').append(content);
+         };
+
+         jsxc.xmpp.conn.vcard.get(function(stanza) {
+
+            if ($('#jsxc_dialog ul.jsxc_vCard').length === 0) {
+               return;
+            }
+
+            if ($(stanza).find('vCard').length === 0) {
+               failedToLoad();
+               return;
+            }
+
+            $('#jsxc_dialog p').remove();
+
+            var photo = $(stanza).find("vCard > PHOTO");
+
+            if (photo.length > 0) {
+               var img = photo.find('BINVAL').text();
+               var type = photo.find('TYPE').text();
+               var src = 'data:' + type + ';base64,' + img;
+
+               $('#jsxc_dialog h3').prepend('<img class="jsxc_vCard" src="' + src + '" alt="avatar" />');
+            }
+
+            printProp($(stanza).find('vcard > *'), 0);
+
+         }, bjid, failedToLoad);
+      },
+
+      showSettings: function() {
+         jsxc.gui.dialog.open(jsxc.gui.template.get('settings'));
+
+         $('#jsxc_dialog form').each(function() {
+            var self = $(this);
+
+            self.find('input[type!="submit"]').each(function() {
+               var id = this.id.split("-");
+               var prop = id[0];
+               var key = id[1];
+
+               var data = jsxc.options.get(prop);
+
+               if (data && data[key]) {
+                  $(this).val(data[key]);
+               }
+            });
+         });
+
+         $('#jsxc_dialog form').submit(function() {
+
+            var self = $(this);
+            var data = {};
+
+            self.find('input[type!="submit"]').each(function() {
+               var id = this.id.split("-");
+               var prop = id[0];
+               var key = id[1];
+               var val = $(this).val();
+
+               if (!data[prop]) {
+                  data[prop] = {};
+               }
+
+               data[prop][key] = val;
+            });
+
+            $.each(data, function(key, val) {
+               jsxc.options.set(key, val);
+            });
+
+            setTimeout(function() {
+               self.find('input[type="submit"]').effect('highlight', {
+                  color: 'green'
+               }, 4000);
+            }, 200);
+
+            return false;
+         });
+      },
+
+      /**
        * Change own presence to pres.
        * 
        * @memberOf jsxc.gui
@@ -1336,6 +1500,10 @@ var jsxc;
             $('#jsxc_menu .jsxc_hideOffline').text(jsxc.translate('%%Show offline%%'));
             $('#jsxc_buddylist').addClass('jsxc_hideOffline');
          }
+
+         $('#jsxc_menu .jsxc_settings').click(function() {
+            jsxc.gui.showSettings();
+         });
 
          $('#jsxc_menu .jsxc_hideOffline').click(function() {
             var hideOffline = !jsxc.options.get('hideOffline');
@@ -1418,14 +1586,7 @@ var jsxc;
             jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
          });
 
-         $('#jsxc_roster').tooltip({
-            show: {
-               delay: 600
-            },
-            content: function() {
-               return $(this).attr('title').replace(/\n/g, '<br />');
-            }
-         });
+         jsxc.gui.tooltip('#jsxc_roster');
 
          jsxc.notice.load();
 
@@ -1447,6 +1608,10 @@ var jsxc;
             jsxc.gui.window.open(cid);
          });
 
+         bud.find('.jsxc_chaticon').click(function() {
+            jsxc.gui.window.open(cid);
+         });
+
          bud.find('.jsxc_rename').click(function() {
             jsxc.gui.roster.rename(cid);
             return false;
@@ -1457,12 +1622,28 @@ var jsxc;
             return false;
          });
 
+         bud.find('.jsxc_avatar').click(function() {
+            bud.trigger('extra.jsxc');
+
+            bud.toggleClass('jsxc_expand');
+
+            jsxc.gui.updateAvatar(bud, data.jid, data.avatar);
+            return false;
+         });
+
+         bud.find('.jsxc_vcardicon').click(function() {
+            jsxc.gui.showVcard(data.jid);
+            return false;
+         });
+
          jsxc.gui.update(cid);
 
          // update scrollbar
          $('#jsxc_buddylist').slimScroll({
             scrollTo: '0px'
          });
+
+         $(document).trigger('add.roster.jsxc', [ cid, data, bud ]);
       },
 
       /**
@@ -1638,9 +1819,27 @@ var jsxc;
          $('#jsxc_roster .slimScrollDiv').remove();
          $('#jsxc_roster > .jsxc_bottom').remove();
 
-         $('#jsxc_roster').append($(document.createElement('p')).text(jsxc.l.no_connection).append($(document.createElement('a')).attr('href', '#').text(jsxc.l.relogin).click(function() {
+         $('#jsxc_roster').append($('<p>' + jsxc.l.no_connection + '</p>').append(' <a>' + jsxc.l.relogin + '</a>').click(function() {
             jsxc.gui.showLoginBox();
-         })));
+         }));
+      },
+      
+      /**
+       * Shows a text with link to add a new buddy.
+       * 
+       * @memberOf jsxc.gui.roster
+       */
+      empty: function() { console.trace(); 
+         var text = $('<p>' + jsxc.l.Your_roster_is_empty_add_a + '</p>');
+         var link = $('<a>' + jsxc.l.new_buddy + '</a>');
+
+         link.click(function() {
+            jsxc.gui.showContactDialog();
+         });
+         text.append(link);
+         text.append('.');
+
+         $('#jsxc_roster').prepend(text);
       }
    };
 
@@ -1771,6 +1970,10 @@ var jsxc;
             jsxc.gui.window.clear(cid);
          });
 
+         win.find('.jsxc_tools').click(function() {
+            return false;
+         });
+
          win.find('.jsxc_textinput').keyup(function(ev) {
             var body = $(this).val();
 
@@ -1792,11 +1995,11 @@ var jsxc;
          });
 
          win.find('.jsxc_textarea').slimScroll({
-            height: '200px',
+            height: '234px',
             distance: '3px'
          });
 
-         win.find('.jsxc_window').hide();
+         win.find('.jsxc_fade').hide();
 
          win.find('.jsxc_name').disableSelection();
 
@@ -1819,6 +2022,18 @@ var jsxc;
                win.addClass('jsxc_unreadMsg');
             }
          }
+
+         $.each(jsxc.gui.emotions, function(i, val) {
+            var ins = val[0].split(' ')[0];
+            var li = $('<li><img alt="' + ins + '" title="' + ins + '" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/></li>');
+            li.click(function() {
+               win.find('input').val(win.find('input').val() + ins);
+               win.find('input').focus();
+            });
+            win.find('.jsxc_emoticons ul').append(li);
+         });
+
+         jsxc.gui.toggleList.call(win.find('.jsxc_emoticons'));
 
          jsxc.gui.window.restoreChat(cid);
 
@@ -1886,7 +2101,7 @@ var jsxc;
        * @param {String} cid CSS compatible jid
        */
       toggle: function(cid) {
-         if (jsxc.gui.getWindow(cid).find('.jsxc_window').is(':hidden')) {
+         if (jsxc.gui.getWindow(cid).find('.jsxc_fade').is(':hidden')) {
             jsxc.gui.window.show(cid);
          } else {
             jsxc.gui.window.hide(cid);
@@ -1913,7 +2128,8 @@ var jsxc;
        */
       _show: function(cid) {
          var win = jsxc.gui.getWindow(cid);
-         $('#jsxc_window_' + cid + ' .jsxc_window').slideDown();
+         $('#jsxc_window_' + cid + ' .jsxc_fade').slideDown();
+         win.removeClass('jsxc_min');
 
          // remove unread flag
          win.removeClass('jsxc_unreadMsg');
@@ -1945,7 +2161,9 @@ var jsxc;
        * @param {String} cid
        */
       _hide: function(cid) {
-         $('#jsxc_window_' + cid + ' .jsxc_window').slideUp();
+         $('#jsxc_window_' + cid + ' .jsxc_fade').slideUp();
+         $('#jsxc_window_' + cid).addClass('jsxc_min');
+
          jsxc.gui.getWindow(cid).trigger('hidden.window.jsxc');
       },
 
@@ -1955,9 +2173,13 @@ var jsxc;
        * @param {type} cid
        */
       highlight: function(cid) {
-         $('#jsxc_window_' + cid + ' ').effect('highlight', {
-            color: 'orange'
-         }, 2000);
+         var el = $('#jsxc_window_' + cid + ' .jsxc_bar');
+
+         if (!el.is(':animated')) {
+            el.effect('highlight', {
+               color: 'orange'
+            }, 2000);
+         }
       },
 
       /**
@@ -2031,7 +2253,7 @@ var jsxc;
          }
 
          if (direction === 'out' && jsxc.master) {
-            jsxc.buddyList[cid].sendMsg(msg, uid);
+            jsxc.buddyList[cid].sendMsg(html_msg, uid);
          }
 
          jsxc.gui.window._postMessage(cid, post);
@@ -2070,7 +2292,17 @@ var jsxc;
          });
 
          $.each(jsxc.gui.emotions, function(i, val) {
-            msg = msg.replace(val[2], '<img alt="$1" title="$1" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/>');
+            msg = msg.replace(val[2], function(match, p1) {
+
+               // escape value for alt and title, this prevents double
+               // replacement
+               var esc = '', i;
+               for (i = 0; i < p1.length; i++) {
+                  esc += '&#' + p1.charCodeAt(i) + ';';
+               }
+
+               return '<img alt="' + esc + '" title="' + esc + '" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/>';
+            });
          });
 
          var msgDiv = $("<div>");
@@ -2082,12 +2314,16 @@ var jsxc;
             msgDiv.addClass('jsxc_received');
          }
 
+         if (direction === 'sys') {
+            $('#jsxc_window_' + cid + ' .jsxc_textarea').append('<div style="clear:both"/>');
+         }
+
          $('#jsxc_window_' + cid + ' .jsxc_textarea').append(msgDiv);
 
          jsxc.gui.window.scrollDown(cid);
 
          // if window is hidden set unread flag
-         if (win.find('.jsxc_window').is(':hidden') && jsxc.restoreCompleted && !restore) {
+         if (win.find('.jsxc_fade').is(':hidden') && jsxc.restoreCompleted && !restore) {
             win.addClass('jsxc_unreadMsg');
             jsxc.storage.updateUserItem('window_' + cid, 'unread', true);
          }
@@ -2219,33 +2455,38 @@ var jsxc;
               <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Compare%%</a></p>\
             </div>',
       fingerprintsDialog: '<div>\
+          <p class="jsxc_maxWidth">%%A_fingerprint_%%</p>\
           <p><strong>%%Your_fingerprint%%</strong><br />\
           <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
           <p><strong>%%Buddy_fingerprint%%</strong><br />\
           <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\
           <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a></p>\
         </div>',
-      chatWindow: '<li>\
-            <div class="jsxc_bar">\
-                <div class="jsxc_avatar">☺</div>\
-                <div class="jsxc_name"/>\
-                <div class="jsxc_cycle"/>\
-            </div>\
+      chatWindow: '<li class="jsxc_min">\
             <div class="jsxc_window">\
-                <div class="jsxc_tools">\
-                    <div class="jsxc_settings">\
-                        <ul>\
-                            <li class="jsxc_fingerprints">%%Fingerprints%%</li>\
-                            <li class="jsxc_verification">%%Authentifikation%%</li>\
-                            <li class="jsxc_transfer">%%start_private%%</li>\
-                            <li class="jsxc_clear">%%clear_history%%</li>\
-                        </ul>\
-                    </div>\
-                    <div class="jsxc_transfer"/>\
-                    <div class="jsxc_close">X</div>\
+                <div class="jsxc_bar">\
+                     <div class="jsxc_avatar">☺</div>\
+                     <div class="jsxc_tools">\
+                           <div class="jsxc_settings">\
+                               <ul>\
+                                   <li class="jsxc_fingerprints">%%Fingerprints%%</li>\
+                                   <li class="jsxc_verification">%%Authentifikation%%</li>\
+                                   <li class="jsxc_transfer">%%start_private%%</li>\
+                                   <li class="jsxc_clear">%%clear_history%%</li>\
+                               </ul>\
+                           </div>\
+                           <div class="jsxc_transfer"/>\
+                           <div class="jsxc_close">×</div>\
+                     </div>\
+                     <div class="jsxc_name"/>\
+                     <div class="jsxc_cycle"/>\
                 </div>\
-                <div class="jsxc_textarea"/>\
-                <input type="text" class="jsxc_textinput jsxc_chatmessage jsxc_out" placeholder="...%%Message%%"/>\
+                <div class="jsxc_fade">\
+                   <div class="jsxc_gradient"/>\
+                   <div class="jsxc_textarea"/>\
+                   <div class="jsxc_emoticons"><ul/></div>\
+                   <input type="text" class="jsxc_textinput" placeholder="...%%Message%%" />\
+                </div>\
             </div>\
         </li>',
       roster: '<div id="jsxc_roster">\
@@ -2257,6 +2498,7 @@ var jsxc;
               <div id="jsxc_menu">\
                  <span></span>\
                  <ul>\
+                     <li class="jsxc_settings">%%Settings%%</li>\
                      <li class="jsxc_muteNotification">%%Mute%%</li>\
                      <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
                      <li class="jsxc_hideOffline">%%Hide offline%%</li>\
@@ -2287,11 +2529,15 @@ var jsxc;
         </div>',
       rosterBuddy: '<li>\
             <div class="jsxc_avatar">☺</div>\
-            <div class="jsxc_options">\
+            <div class="jsxc_name"/>\
+            <div class="jsxc_options jsxc_right">\
                 <div class="jsxc_rename" title="%%rename_buddy%%">✎</div>\
                 <div class="jsxc_delete" title="%%delete_buddy%%">✘</div>\
             </div>\
-            <div class="jsxc_name"/>\
+            <div class="jsxc_options jsxc_left">\
+                <div class="jsxc_chaticon" title="%%send_message%%"/>\
+                <div class="jsxc_vcardicon" title="%%get_info%%">i</div>\
+            </div>\
         </li>',
       loginBox: '<h3>%%Login%%</h3>\
         <form method="get">\
@@ -2306,13 +2552,15 @@ var jsxc;
         </form>',
       contactDialog: '<h3>%%Add_buddy%%</h3>\
          <p class=".jsxc_explanation">%%Type_in_the_full_username_%%</p>\
+         <form>\
          <p><label for="jsxc_username">* %%Username%%:</label>\
-            <input type="text" name="username" id="jsxc_username" required="required" /></p>\
+            <input type="email" name="username" id="jsxc_username" required="required" /></p>\
          <p><label for="jsxc_alias">%%Alias%%:</label>\
             <input type="text" name="alias" id="jsxc_alias" /></p>\
          <p class="jsxc_right">\
-            <a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Add%%</a>\
-         </p>',
+            <input class="button" type="submit" value="%%Add%%" />\
+         </p>\
+         <form>',
       approveDialog: '<h3>%%Subscription_request%%</h3>\
         <p>%%You_have_a_request_from%% <b class="jsxc_their_jid"></b>.</p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_deny">%%Deny%%</a> <a href="#" class="button creation jsxc_approve">%%Approve%%</a></p>',
@@ -2347,7 +2595,23 @@ var jsxc;
          <br />\
          <b>Credential: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
          <a href="https://soundcloud.com/freefilmandgamemusic/ping-1?in=freefilmandgamemusic/sets/free-notification-sounds-and" target="_blank">CameronMusic (Ping)</a></p>\
-         <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>'
+         <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>',
+      vCard: '<h3>vCard %%from%% {{cid_name}}</h3>\
+         <ul class="jsxc_vCard"></ul>\
+         <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...</p>',
+      settings: '<h3>%%User_settings%%</h3>\
+         <p></p>\
+         <form>\
+            <fieldset class="jsxc_fieldsetPriority">\
+               <legend>%%Priority%%</legend>\
+               <label for="priority-online">%%Online%%</label><input type="number" value="0" id="priority-online" min="-128" max="127" step="1" required="required"/>\
+               <label for="priority-chat">%%Chatty%%</label><input type="number" value="0" id="priority-chat" min="-128" max="127" step="1" required="required"/>\
+               <label for="priority-away">%%Away%%</label><input type="number" value="0" id="priority-away" min="-128" max="127" step="1" required="required"/>\
+               <label for="priority-xa">%%Extended_away%%</label><input type="number" value="0" id="priority-xa" min="-128" max="127" step="1" required="required"/>\
+               <label for="priority-dnd">%%dnd%%</label><input type="number" value="0" id="priority-dnd" min="-128" max="127" step="1" required="required"/>\
+               <input type="submit" value="%%Save%%"/>\
+            </fieldset>\
+         </form>'
    };
 
    /**
@@ -2530,6 +2794,8 @@ var jsxc;
             // pres first after roster is ready
             $(document).one('cloaded.roster.jsxc', jsxc.xmpp.sendPres);
 
+            $('#jsxc_roster > p:first').remove();
+            
             var iq = $iq({
                type: 'get'
             }).c('query', {
@@ -2579,8 +2845,8 @@ var jsxc;
             pres.c('show').t(presState).up();
          }
 
-         var priority = jsxc.storage.getUserItem('priority');
-         if (priority !== null) {
+         var priority = jsxc.options.get('priority');
+         if (priority && typeof priority[presState] !== 'undefined' && parseInt(priority[presState]) !== 0) {
             pres.c('priority').t(priority[presState]).up();
          }
 
@@ -2683,6 +2949,10 @@ var jsxc;
             jsxc.gui.roster.add(cid);
          });
 
+         if(buddies.length === 0) {
+            jsxc.gui.roster.empty();
+         }
+         
          jsxc.storage.setUserItem('buddylist', buddies);
 
          jsxc.debug('Roster loaded');
@@ -2756,6 +3026,12 @@ var jsxc;
                }
             }
          });
+         
+         if (!jsxc.storage.getUserItem('buddylist') || jsxc.storage.getUserItem('buddylist').length === 0) {
+            jsxc.gui.roster.empty();
+         } else {
+            $('#jsxc_roster > p:first').remove();
+         }
 
          // preserve handler
          return true;
@@ -3603,7 +3879,7 @@ var jsxc;
                   data.fingerprint = jsxc.buddyList[cid].their_priv_pk.fingerprint();
                   data.msgstate = OTR.CONST.MSGSTATE_ENCRYPTED;
 
-                  var msg = (jsxc.buddyList[cid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started + data.jid;
+                  var msg = (jsxc.buddyList[cid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started;
                   jsxc.gui.window.postMessage(cid, 'sys', msg);
                   break;
                case OTR.CONST.STATUS_END_OTR:
@@ -3856,7 +4132,7 @@ var jsxc;
                // try to create web-worker
 
                try {
-                  worker = new Worker(jsxc.options.root + '/js/jsxc/lib/otr/build/dsa-webworker.js');
+                  worker = new Worker(jsxc.options.root + '/lib/otr/build/dsa-webworker.js');
                } catch (err) {
                   jsxc.warn('Couldn\'t create web-worker.', err);
                }
@@ -3882,7 +4158,7 @@ var jsxc;
 
                // start worker
                worker.postMessage({
-                  imports: [ jsxc.options.root + '/js/jsxc/lib/otr/vendor/salsa20.js', jsxc.options.root + '/js/jsxc/lib/otr/vendor/bigint.js', jsxc.options.root + '/js/jsxc/lib/otr/vendor/crypto.js', jsxc.options.root + '/js/jsxc/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/js/jsxc/lib/otr/lib/const.js', jsxc.options.root + '/js/jsxc/lib/otr/lib/helpers.js', jsxc.options.root + '/js/jsxc/lib/otr/lib/dsa.js' ],
+                  imports: [ jsxc.options.root + '/lib/otr/vendor/salsa20.js', jsxc.options.root + '/lib/otr/vendor/bigint.js', jsxc.options.root + '/lib/otr/vendor/crypto.js', jsxc.options.root + '/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/lib/otr/lib/const.js', jsxc.options.root + '/lib/otr/lib/helpers.js', jsxc.options.root + '/lib/otr/lib/dsa.js' ],
                   seed: BigInt.getSeed(),
                   debug: true
                });
@@ -4314,7 +4590,7 @@ var jsxc;
          trying_to_start_private_conversation: 'Trying to start private conversation!',
          Verified: 'Verified',
          Unverified: 'Unverified',
-         private_conversation_started: 'private conversation started with ',
+         private_conversation_started: 'private conversation started.',
          private_conversation_aborted: 'Private conversation aborted!',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Your buddy closed the private conversation! You should do the same.',
          conversation_is_now_verified: 'Conversation is now verified.',
@@ -4368,6 +4644,9 @@ var jsxc;
          New_message_from: 'New message from',
          Should_we_notify_you_: 'Should we notify you about new messages in the future?',
          Please_accept_: 'Please click the "Allow" button at the top.',
+         Hide_offline: 'Hide offline',
+         Show_offline: 'Show offline',
+         About: 'About',
          dnd: 'Do Not Disturb',
          Mute: 'Mute',
          Unmute: 'Unmute',
@@ -4392,7 +4671,41 @@ var jsxc;
          Confirm: 'Confirm',
          Dismiss: 'Dismiss',
          Remove: 'Remove',
-         Online_help: 'Online help'
+         Online_help: 'Online help',
+         FN: 'Full Name',
+         N: ' ',
+         FAMILY: 'Family Name',
+         GIVEN: 'Given Name',
+         NICKNAME: 'Nickname',
+         URL: 'URL',
+         ADR: 'Address',
+         STREET: 'Street Address',
+         EXTADD: 'Extended Address',
+         LOCALITY: 'Locality',
+         REGION: 'Region',
+         PCODE: 'Postal Code',
+         CTRY: 'Country',
+         TEL: 'Telephone',
+         NUMBER: 'Number',
+         EMAIL: 'Email',
+         USERID: ' ',
+         ORG: 'Organization',
+         ORGNAME: 'Name',
+         ORGUNIT: 'Unit',
+         TITLE: 'Job Title',
+         ROLE: 'Role',
+         BDAY: 'Birthday',
+         DESC: 'Description',
+         PHOTO: ' ',
+         send_message: 'send message',
+         get_info: 'get info',
+         Settings: 'Settings',
+         Priority: 'Priority',
+         Save: 'Save',
+         User_settings: 'User settings',
+         A_fingerprint_: 'A fingerprint is used to make sure that the person you are talking to is who he or she is saying.',
+         Your_roster_is_empty_add_a: 'Your roster is empty, add a ',
+         new_buddy: 'new buddy'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4413,7 +4726,7 @@ var jsxc;
          trying_to_start_private_conversation: 'Versuche private Konversation zu starten.',
          Verified: 'Verifiziert',
          Unverified: 'Unverifiziert',
-         private_conversation_started: 'Private Konversation gestartet mit ',
+         private_conversation_started: 'Private Konversation gestartet.',
          private_conversation_aborted: 'Private Konversation abgebrochen.',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Dein Freund hat die private Konversation beendet. Das solltest du auch tun!',
          conversation_is_now_verified: 'Konversation ist jetzt verifiziert',
@@ -4495,7 +4808,115 @@ var jsxc;
          Confirm: 'Bestätigen',
          Dismiss: 'Ablehnen',
          Remove: 'Löschen',
-         Online_help: 'Online Hilfe'
+         Online_help: 'Online Hilfe',
+         Settings: 'Einstellungen',
+         Priority: 'Priorität',
+         Save: 'Speichern',
+         User_settings: 'Benutzereinstellungen',
+         A_fingerprint_: 'Ein Fingerabdruck wird dazu benutzt deinen Gesprächspartner zu identifizieren.'
+      },
+      es: {
+         please_wait_until_we_logged_you_in: 'Por favor, espere...',
+         your_connection_is_unencrypted: 'Su conexión no está cifrada.',
+         your_connection_is_encrypted: 'Su conexión está cifrada.',
+         your_buddy_closed_the_private_connection: 'Su amigo ha cerrado la conexión privada.',
+         start_private: 'Iniciar privado',
+         close_private: 'Cerrar privado',
+         your_buddy_is_verificated: 'Tu amigo está verificado.',
+         you_have_only_a_subscription_in_one_way: 'Sólo tienes una suscripción de un modo.',
+         verification_query_sent: 'Consulta de verificación enviada.',
+         your_message_wasnt_send_please_end_your_private_conversation: 'Su mensaje no fue enviado. Por favor, termine su conversación privada.',
+         unencrypted_message_received: 'Mensaje no cifrado recibido:',
+         your_message_wasnt_send_because_you_have_no_valid_subscription: 'Su mensaje no se ha enviado, porque usted no tiene suscripción válida.',
+         no_available: 'No disponible',
+         no_connection: 'Sin conexión!',
+         relogin: 'iniciar sesión nuevamente',
+         trying_to_start_private_conversation: 'Intentando iniciar una conversación privada!',
+         Verified: 'Verificado',
+         Unverified: 'No verificado',
+         private_conversation_started: 'se inició una conversación privada.',
+         private_conversation_aborted: 'Conversación privada abortada!',
+         your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Su amigo cerró la conversación privada! Usted debería hacer lo mismo.',
+         conversation_is_now_verified: 'La conversación es ahora verificada.',
+         verification_fails: 'Fallo la verificación.',
+         your_buddy_is_attempting_to_determine_: 'Tu amigo está tratando de determinar si él o ella está realmente hablando con usted.',
+         to_authenticate_to_your_buddy: 'Para autenticar a su amigo, ',
+         enter_the_answer_and_click_answer: 'introduce la respuesta y haga clic en Contestar.',
+         enter_the_secret: 'especifique el secreto.',
+         now_we_will_create_your_private_key_: 'Ahora vamos a crear su clave privada. Esto puede tomar algún tiempo.',
+         Authenticating_a_buddy_helps_: 'Autenticación de un amigo ayuda a garantizar que la persona que está hablando es quien él o ella está diciendo.',
+         How_do_you_want_to_authenticate_your_buddy: '¿Cómo desea autenticar {{cid_name}} (<b>{{cid_jid}}</b>)?',
+         Select_method: 'Escoja un método...',
+         Manual: 'Manual',
+         Question: 'Pregunta',
+         Secret: 'Secreto',
+         To_verify_the_fingerprint_: 'Para verificar la firma digital, póngase en contacto con su amigo a través de algún otro canal autenticado, como el teléfono.',
+         Your_fingerprint: 'Tu firma digital',
+         Buddy_fingerprint: 'firma digital de tu amigo',
+         Close: 'Cerrar',
+         Compared: 'Comparado',
+         To_authenticate_using_a_question_: 'Para autenticar mediante una pregunta, elegir una pregunta cuya respuesta se conoce sólo usted y su amigo.',
+         Ask: 'Preguntar',
+         To_authenticate_pick_a_secret_: 'Para autenticar, elija un secreto conocido sólo por usted y su amigo.',
+         Compare: 'Comparar',
+         Fingerprints: 'Firmas digitales',
+         Authentifikation: 'Autenticación',
+         Message: 'Mensaje',
+         Add_buddy: 'Añadir amigo',
+         rename_buddy: 'renombrar amigo',
+         delete_buddy: 'eliminar amigo',
+         Login: 'Iniciar Sesión',
+         Username: 'Usuario',
+         Password: 'Contraseña',
+         Cancel: 'Cancelar',
+         Connect: 'Conectar',
+         Type_in_the_full_username_: 'Escriba el usuario completo y un alias opcional.',
+         Alias: 'Alias',
+         Add: 'Añadir',
+         Subscription_request: 'Solicitud de suscripción',
+         You_have_a_request_from: 'Tienes una petición de',
+         Deny: 'Rechazar',
+         Approve: 'Aprobar',
+         Remove_buddy: 'Eliminar amigo',
+         You_are_about_to_remove_: 'Vas a eliminar a {{cid_name}} (<b>{{cid_jid}}</b>) de tu lista de amigos. Todas las conversaciones relacionadas serán cerradas.',
+         Continue: 'Continuar',
+         Please_wait: 'Espere por favor',
+         Login_failed: 'Fallo el inicio de sesión',
+         Sorry_we_cant_authentikate_: 'Lo sentimos, no podemos autentificarlo en nuestro servidor de chat. ¿Tal vez la contraseña es incorrecta?',
+         Retry: 'Reintentar',
+         clear_history: 'Borrar el historial',
+         New_message_from: 'Nuevo mensaje de',
+         Should_we_notify_you_: '¿Debemos notificarle sobre nuevos mensajes en el futuro?',
+         Please_accept_: 'Por favor, haga clic en el botón "Permitir" en la parte superior.',
+         dnd: 'No Molestar',
+         Mute: 'Desactivar sonido',
+         Unmute: 'Activar sonido',
+         Subscription: 'Suscripción',
+         both: 'ambos',
+         Status: 'Estado',
+         online: 'en línea',
+         chat: 'chat',
+         away: 'ausente',
+         xa: 'mas ausente',
+         offline: 'desconectado',
+         none: 'nadie',
+         Unknown_instance_tag: 'Etiqueta de instancia desconocida.',
+         Not_of_our_latest_keys: 'No de nuestra ultima tecla.',
+         Received_an_unreadable_encrypted_message: 'Se recibió un mensaje cifrado ilegible.',
+         Online: 'En linea',
+         Chatty: 'Hablador',
+         Away: 'Ausente',
+         Extended_away: 'Mas ausente',
+         Offline: 'Desconectado',
+         Friendship_request: 'Solicitud de amistad',
+         Confirm: 'Confirmar',
+         Dismiss: 'Rechazar',
+         Remove: 'Eliminar',
+         Online_help: 'Ayuda en línea',
+         Settings: 'Ajustes',
+         Priority: 'Prioridad',
+         Save: 'Guardar',
+         User_settings: 'Configuración de usuario'
       }
    };
 }(jQuery));

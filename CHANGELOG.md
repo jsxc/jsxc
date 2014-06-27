@@ -1,3 +1,18 @@
+v0.8.0 / 2014-??-??
+===
+- add spanish translation
+- add vCard view
+- add more emoticons
+- add grayscale to buddies without subscription
+- add settings for priorities
+- add hint if roster is empty
+- add sound files
+- new chat window design
+- enhanced roster design
+- fix emoticon replacement (XEP-0038)
+- fix some ui issues (explanations,...)
+- fix issue with password only field
+
 v0.7.2 / 2014-05-28
 ===
 - fix login issue
