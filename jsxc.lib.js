@@ -2834,7 +2834,7 @@ var jsxc;
          }
 
          var priority = jsxc.options.get('priority');
-         if (priority !== null && typeof priority[presState] !== 'undefined' && parseInt(priority[presState]) !== 0) {
+         if (priority && typeof priority[presState] !== 'undefined' && parseInt(priority[presState]) !== 0) {
             pres.c('priority').t(priority[presState]).up();
          }
 
