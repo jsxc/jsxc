@@ -4120,7 +4120,7 @@ var jsxc;
                // try to create web-worker
 
                try {
-                  worker = new Worker(jsxc.options.root + '/js/jsxc/lib/otr/build/dsa-webworker.js');
+                  worker = new Worker(jsxc.options.root + '/lib/otr/build/dsa-webworker.js');
                } catch (err) {
                   jsxc.warn('Couldn\'t create web-worker.', err);
                }
@@ -4146,7 +4146,7 @@ var jsxc;
 
                // start worker
                worker.postMessage({
-                  imports: [ jsxc.options.root + '/js/jsxc/lib/otr/vendor/salsa20.js', jsxc.options.root + '/js/jsxc/lib/otr/vendor/bigint.js', jsxc.options.root + '/js/jsxc/lib/otr/vendor/crypto.js', jsxc.options.root + '/js/jsxc/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/js/jsxc/lib/otr/lib/const.js', jsxc.options.root + '/js/jsxc/lib/otr/lib/helpers.js', jsxc.options.root + '/js/jsxc/lib/otr/lib/dsa.js' ],
+                  imports: [ jsxc.options.root + '/lib/otr/vendor/salsa20.js', jsxc.options.root + '/lib/otr/vendor/bigint.js', jsxc.options.root + '/lib/otr/vendor/crypto.js', jsxc.options.root + '/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/lib/otr/lib/const.js', jsxc.options.root + '/lib/otr/lib/helpers.js', jsxc.options.root + '/lib/otr/lib/dsa.js' ],
                   seed: BigInt.getSeed(),
                   debug: true
                });
