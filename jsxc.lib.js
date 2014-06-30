@@ -4904,7 +4904,10 @@ var jsxc;
          Settings: 'Ajustes',
          Priority: 'Prioridad',
          Save: 'Guardar',
-         User_settings: 'Configuración de usuario'
+         User_settings: 'Configuración de usuario',
+         A_fingerprint_: 'La huella digital se utiliza para que puedas estar seguro que la persona con la que estas hablando es quien realmente dice ser',
+         Your_roster_is_empty_add_a: 'Tu lista de amigos esta vacia',
+         new_buddy: 'Nuevo amigo'
       }
    };
 }(jQuery));
