@@ -1,5 +1,5 @@
 /**
- * jsxc v0.8.0-beta - 2014-06-27
+ * jsxc v0.8.0 - 2014-07-02
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.8.0-beta
+ * @version 0.8.0
  */
 
 var jsxc;
@@ -22,7 +22,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '0.8.0-beta',
+      version: '0.8.0',
 
       /** True if i'm the master */
       master: false,
@@ -782,8 +782,8 @@ var jsxc;
          ue.removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
 
          // Change name and add title
-         ue.find('.jsxc_name').text(data.name).attr('title', 'is ' + jsxc.CONST.STATUS[data.status]);
-         bullet.attr('title', 'is ' + jsxc.CONST.STATUS[data.status]);
+         ue.find('.jsxc_name').text(data.name).attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
+         bullet.attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
 
          // Update gui according to encryption state
          switch (data.msgstate) {
@@ -1622,14 +1622,17 @@ var jsxc;
             return false;
          });
 
-         bud.find('.jsxc_avatar').click(function() {
+         var expandClick = function() {
             bud.trigger('extra.jsxc');
 
             bud.toggleClass('jsxc_expand');
 
             jsxc.gui.updateAvatar(bud, data.jid, data.avatar);
             return false;
-         });
+         };
+         
+         bud.find('.jsxc_control').click(expandClick);
+         bud.dblclick(expandClick);
 
          bud.find('.jsxc_vcardicon').click(function() {
             jsxc.gui.showVcard(data.jid);
@@ -1729,7 +1732,7 @@ var jsxc;
        */
       rename: function(cid) {
          var name = $('#' + cid + ' .jsxc_name');
-         var options = $('#' + cid + ' .jsxc_options');
+         var options = $('#' + cid).find('.jsxc_options, .jsxc_control');
          var input = $('<input type="text" name="name"/>');
 
          options.hide();
@@ -2529,6 +2532,7 @@ var jsxc;
         </div>',
       rosterBuddy: '<li>\
             <div class="jsxc_avatar">☺</div>\
+            <div class="jsxc_control"></div>\
             <div class="jsxc_name"/>\
             <div class="jsxc_options jsxc_right">\
                 <div class="jsxc_rename" title="%%rename_buddy%%">✎</div>\
@@ -4705,7 +4709,8 @@ var jsxc;
          User_settings: 'User settings',
          A_fingerprint_: 'A fingerprint is used to make sure that the person you are talking to is who he or she is saying.',
          Your_roster_is_empty_add_a: 'Your roster is empty, add a ',
-         new_buddy: 'new buddy'
+         new_buddy: 'new buddy',
+         is: 'is'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4809,11 +4814,39 @@ var jsxc;
          Dismiss: 'Ablehnen',
          Remove: 'Löschen',
          Online_help: 'Online Hilfe',
+         FN: 'Name',
+         N: ' ',
+         FAMILY: 'Familienname',
+         GIVEN: 'Vorname',
+         NICKNAME: 'Spitzname',
+         URL: 'URL',
+         ADR: 'Adresse',
+         STREET: 'Straße',
+         EXTADD: 'Zusätzliche Adresse',
+         LOCALITY: 'Ortschaft',
+         REGION: 'Region',
+         PCODE: 'Postleitzahl',
+         CTRY: 'Land',
+         TEL: 'Telefon',
+         NUMBER: 'Nummer',
+         EMAIL: 'E-Mail',
+         USERID: ' ',
+         ORG: 'Organisation',
+         ORGNAME: 'Name',
+         ORGUNIT: 'Abteilung',
+         TITLE: 'Titel',
+         ROLE: 'Rolle',
+         BDAY: 'Geburtstag',
+         DESC: 'Beschreibung',
+         PHOTO: ' ',
+         send_message: 'Sende Nachricht',
+         get_info: 'Benutzerinformationen',
          Settings: 'Einstellungen',
          Priority: 'Priorität',
          Save: 'Speichern',
          User_settings: 'Benutzereinstellungen',
-         A_fingerprint_: 'Ein Fingerabdruck wird dazu benutzt deinen Gesprächspartner zu identifizieren.'
+         A_fingerprint_: 'Ein Fingerabdruck wird dazu benutzt deinen Gesprächspartner zu identifizieren.',
+         is: 'ist'
       },
       es: {
          please_wait_until_we_logged_you_in: 'Por favor, espere...',
@@ -4912,11 +4945,42 @@ var jsxc;
          Confirm: 'Confirmar',
          Dismiss: 'Rechazar',
          Remove: 'Eliminar',
-         Online_help: 'Ayuda en línea',
+         Online_help: 'Ayuda en línea', 
+         FN: 'Nombre completo ',
+         N: ' ',
+         FAMILY: 'Apellido',
+         GIVEN: 'Nombre',
+         NICKNAME: 'Apodar',
+         URL: 'URL',
+         ADR: 'Dirección',
+         STREET: 'Calle',
+         EXTADD: 'Extendido dirección',
+         LOCALITY: 'Población',
+         REGION: 'Región',
+         PCODE: 'Código postal',
+         CTRY: 'País',
+         TEL: 'Teléfono',
+         NUMBER: 'Número',
+         EMAIL: 'Emilio',
+         USERID: ' ',
+         ORG: 'Organización',
+         ORGNAME: 'Nombre',
+         ORGUNIT: 'Departamento',
+         TITLE: 'Título',
+         ROLE: 'Rol',
+         BDAY: 'Cumpleaños',
+         DESC: 'Descripción',
+         PHOTO: ' ',
+         send_message: 'mandar un texto',
+         get_info: 'obtener información', 
          Settings: 'Ajustes',
          Priority: 'Prioridad',
          Save: 'Guardar',
-         User_settings: 'Configuración de usuario'
+         User_settings: 'Configuración de usuario',
+         A_fingerprint_: 'La huella digital se utiliza para que puedas estar seguro que la persona con la que estas hablando es quien realmente dice ser',
+         Your_roster_is_empty_add_a: 'Tu lista de amigos esta vacia',
+         new_buddy: 'Nuevo amigo',
+         is: 'es'
       }
    };
 }(jQuery));
