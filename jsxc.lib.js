@@ -1610,14 +1610,17 @@ var jsxc;
             return false;
          });
 
-         bud.find('.jsxc_avatar').click(function() {
+         var expandClick = function() {
             bud.trigger('extra.jsxc');
 
             bud.toggleClass('jsxc_expand');
 
             jsxc.gui.updateAvatar(bud, data.jid, data.avatar);
             return false;
-         });
+         };
+         
+         bud.find('.jsxc_control').click(expandClick);
+         bud.dblclick(expandClick);
 
          bud.find('.jsxc_vcardicon').click(function() {
             jsxc.gui.showVcard(data.jid);
@@ -1717,7 +1720,7 @@ var jsxc;
        */
       rename: function(cid) {
          var name = $('#' + cid + ' .jsxc_name');
-         var options = $('#' + cid + ' .jsxc_options');
+         var options = $('#' + cid).find('.jsxc_options, .jsxc_control');
          var input = $('<input type="text" name="name"/>');
 
          options.hide();
@@ -2517,6 +2520,7 @@ var jsxc;
         </div>',
       rosterBuddy: '<li>\
             <div class="jsxc_avatar">☺</div>\
+            <div class="jsxc_control"></div>\
             <div class="jsxc_name"/>\
             <div class="jsxc_options jsxc_right">\
                 <div class="jsxc_rename" title="%%rename_buddy%%">✎</div>\
