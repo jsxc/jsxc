@@ -162,6 +162,7 @@ div#jsxc_roster {
 	z-index: 80;
 	margin-left: 10px;
 	box-shadow: 0px 0px 7px #000000;
+	background-color: #383C43;
 }
 
 div#jsxc_roster .slimScrollDiv {

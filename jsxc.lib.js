@@ -510,7 +510,7 @@ var jsxc;
       /**
        * This method submits the specified login form.
        */
-      submitLoginForm: function() {
+      submitLoginForm: function() { console.log('submitLoginForm');
          var form = jsxc.options.loginForm.form.off('submit');
 
          // Attach original events
@@ -519,9 +519,9 @@ var jsxc;
             form.submit(val);
          });
 
-         if (form.find('#submit')) {
+         if (form.find('#submit').length > 0) { console.log('link submit');
             form.find('#submit').click();
-         } else {
+         } else { console.log('Normal submit');
             form.submit();
          }
       },
