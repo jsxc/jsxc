@@ -1820,7 +1820,7 @@ var jsxc;
        * 
        * @memberOf jsxc.gui.roster
        */
-      empty: function() { console.trace(); 
+      empty: function() { 
          var text = $('<p>' + jsxc.l.Your_roster_is_empty_add_a + '</p>');
          var link = $('<a>' + jsxc.l.new_buddy + '</a>');
 
