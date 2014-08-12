@@ -1,3 +1,8 @@
+v0.8.1 / 2014-08-12
+===
+- add user-defined xmpp options
+- fix login form without id submit
+
 v0.8.0 / 2014-07-02
 ===
 - add spanish translation

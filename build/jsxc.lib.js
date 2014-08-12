@@ -1,5 +1,5 @@
 /**
- * jsxc v0.8.0 - 2014-07-02
+ * jsxc v0.8.1 - 2014-08-12
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.8.0
+ * @version 0.8.1
  */
 
 var jsxc;
@@ -22,7 +22,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '0.8.0',
+      version: '0.8.1',
 
       /** True if i'm the master */
       master: false,
@@ -271,15 +271,57 @@ var jsxc;
 
                jsxc.gui.showWaitAlert(jsxc.l.please_wait_until_we_logged_you_in);
 
-               jsxc.options.xmpp.jid = jsxc.options.loginForm.preJid($(jsxc.options.loginForm.jid).val());
-               jsxc.options.xmpp.password = $(jsxc.options.loginForm.pass).val();
+               var username = $(jsxc.options.loginForm.jid).val();
+               var password = $(jsxc.options.loginForm.pass).val();
 
-               jsxc.triggeredFromForm = true;
+               if (typeof jsxc.options.loadSettings !== 'function') {
+                  jsxc.error('No loadSettings function given. Abort.');
+                  return;
+               }
 
-               jsxc.xmpp.login();
+               var settings = jsxc.options.loadSettings.call(this, username, password);
 
-               // Trigger submit in jsxc.xmpp.connected()
-               return false;
+               if (settings === null || typeof settings === 'undefined') {
+                  return true;
+               }
+
+               var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
+               var domain = settings.xmpp.domain;
+               var jid;
+
+               if (username.match(/@(.*)$/)) {
+                  jid = (username.match(/\/(.*)$/)) ? username : username + resource;
+               } else {
+                  jid = username + '@' + domain + resource;
+               }
+
+               if (typeof jsxc.options.loginForm.preJid === 'function') {
+                  jid = jsxc.options.loginForm.preJid(jid);
+               }
+
+               jsxc.cid = jsxc.jidToCid(jid);
+
+               settings.xmpp.username = jid.split('@')[0];
+               settings.xmpp.domain = jid.split('@')[1].split('/')[0];
+               settings.xmpp.resource = jid.split('@')[1].split('/')[1] || "";
+
+               $.each(settings, function(key, val) {
+                  jsxc.options.set(key, val);
+               });
+
+               jsxc.options.xmpp.jid = jid;
+               jsxc.options.xmpp.password = password;
+
+               if (settings.xmpp.onlogin === "true") {
+                  jsxc.triggeredFromForm = true;
+
+                  jsxc.xmpp.login();
+
+                  // Trigger submit in jsxc.xmpp.connected()
+                  return false;
+               }
+
+               return true;
             });
 
          } else {
@@ -476,7 +518,7 @@ var jsxc;
 
          if (!buddies || buddies.length === 0) {
             jsxc.debug('No saved buddylist.');
-            
+
             jsxc.gui.roster.empty();
 
             return;
@@ -531,7 +573,7 @@ var jsxc;
             form.submit(val);
          });
 
-         if (form.find('#submit')) {
+         if (form.find('#submit').length > 0) {
             form.find('#submit').click();
          } else {
             form.submit();
@@ -624,7 +666,9 @@ var jsxc;
       xmpp: {
          url: null,
          jid: null,
-         password: null
+         password: null,
+         overwrite: false,
+         onlogin: true
       },
 
       /** If all 3 properties are set, the login form is used */
@@ -702,6 +746,27 @@ var jsxc;
        * @this {jQuery} Elements to update with probable .jsxc_avatar elements
        */
       defaultAvatar: function() {
+
+      },
+
+      /**
+       * Returns permanent saved settings.
+       * 
+       * @memberOf jsxc.options
+       * @param username String username
+       * @param password String password
+       */
+      loadSettings: function() {
+
+      },
+
+      /**
+       * Call this function to save user settings permanent.
+       * 
+       * @memberOf jsxc.options
+       * @param data Holds all data as {key: value}
+       */
+      saveSettinsPermanent: function() {
 
       }
    };
@@ -952,6 +1017,8 @@ var jsxc;
             jsxc.options.xmpp.jid = $(this).find('#jsxc_username').val();
             jsxc.options.xmpp.password = $(this).find('#jsxc_password').val();
 
+            jsxc.cid = jsxc.jidToCid(jsxc.options.xmpp.jid);
+
             jsxc.triggeredFromBox = true;
             jsxc.options.loginForm.form = $(this);
 
@@ -1155,7 +1222,7 @@ var jsxc;
             jsxc.xmpp.addBuddy(username, alias);
 
             jsxc.gui.dialog.close();
-            
+
             return false;
          });
       },
@@ -1384,6 +1451,10 @@ var jsxc;
       showSettings: function() {
          jsxc.gui.dialog.open(jsxc.gui.template.get('settings'));
 
+         if (jsxc.options.get('xmpp').overwrite === 'false') {
+            $('.jsxc_fieldsetXmpp').hide();
+         }
+
          $('#jsxc_dialog form').each(function() {
             var self = $(this);
 
@@ -1391,11 +1462,18 @@ var jsxc;
                var id = this.id.split("-");
                var prop = id[0];
                var key = id[1];
+               var type = this.type;
 
                var data = jsxc.options.get(prop);
 
-               if (data && data[key]) {
-                  $(this).val(data[key]);
+               if (data && typeof data[key] !== 'undefined') {
+                  if (type === 'checkbox') {
+                     if (data[key] !== 'false' && data[key] !== false) {
+                        this.checked = 'checked';
+                     }
+                  } else {
+                     $(this).val(data[key]);
+                  }
                }
             });
          });
@@ -1409,7 +1487,14 @@ var jsxc;
                var id = this.id.split("-");
                var prop = id[0];
                var key = id[1];
-               var val = $(this).val();
+               var val;
+               var type = this.type;
+
+               if (type === 'checkbox') {
+                  val = this.checked;
+               } else {
+                  val = $(this).val();
+               }
 
                if (!data[prop]) {
                   data[prop] = {};
@@ -1422,9 +1507,11 @@ var jsxc;
                jsxc.options.set(key, val);
             });
 
+            var err = jsxc.options.saveSettinsPermanent.call(this, data);
+
             setTimeout(function() {
                self.find('input[type="submit"]').effect('highlight', {
-                  color: 'green'
+                  color: (err) ? 'green' : 'red'
                }, 4000);
             }, 200);
 
@@ -1630,7 +1717,7 @@ var jsxc;
             jsxc.gui.updateAvatar(bud, data.jid, data.avatar);
             return false;
          };
-         
+
          bud.find('.jsxc_control').click(expandClick);
          bud.dblclick(expandClick);
 
@@ -1826,13 +1913,13 @@ var jsxc;
             jsxc.gui.showLoginBox();
          }));
       },
-      
+
       /**
        * Shows a text with link to add a new buddy.
        * 
        * @memberOf jsxc.gui.roster
        */
-      empty: function() { console.trace(); 
+      empty: function() {
          var text = $('<p>' + jsxc.l.Your_roster_is_empty_add_a + '</p>');
          var link = $('<a>' + jsxc.l.new_buddy + '</a>');
 
@@ -2544,9 +2631,9 @@ var jsxc;
             </div>\
         </li>',
       loginBox: '<h3>%%Login%%</h3>\
-        <form method="get">\
+        <form>\
             <p><label for="jsxc_username">%%Username%%:</label>\
-               <input type="text" name="username" id="jsxc_username" required="required" value="{{my_jid}}"/></p>\
+               <input type="text" name="username" id="jsxc_username" required="required" pattern="[^@]+@[^@]+(/.+)?" value="{{my_jid}}"/></p>\
             <p><label for="jsxc_password">%%Password%%:</label>\
                <input type="password" name="password" required="required" id="jsxc_password" /></p>\
             <div class="bottom_submit_section">\
@@ -2606,13 +2693,25 @@ var jsxc;
       settings: '<h3>%%User_settings%%</h3>\
          <p></p>\
          <form>\
-            <fieldset class="jsxc_fieldsetPriority">\
+            <fieldset class="jsxc_fieldsetXmpp jsxc_fieldset">\
+               <legend>%%Login options%%</legend>\
+               <label for="xmpp-url">%%BOSH url%%</label><input type="text" id="xmpp-url" readonly="readonly"/><br />\
+               <label for="xmpp-username">%%Username%%</label><input type="text" id="xmpp-username"/><br />\
+               <label for="xmpp-domain">%%Domain%%</label><input type="text" id="xmpp-domain"/><br />\
+               <label for="xmpp-resource">%%Resource%%</label><input type="text" id="xmpp-resource"/><br />\
+               <label for="xmpp-onlogin">%%On login%%</label><input type="checkbox" id="xmpp-onlogin" /><br />\
+               <input type="submit" value="%%Save%%"/>\
+            </fieldset>\
+         </form>\
+         <p></p>\
+         <form>\
+            <fieldset class="jsxc_fieldsetPriority jsxc_fieldset">\
                <legend>%%Priority%%</legend>\
-               <label for="priority-online">%%Online%%</label><input type="number" value="0" id="priority-online" min="-128" max="127" step="1" required="required"/>\
-               <label for="priority-chat">%%Chatty%%</label><input type="number" value="0" id="priority-chat" min="-128" max="127" step="1" required="required"/>\
-               <label for="priority-away">%%Away%%</label><input type="number" value="0" id="priority-away" min="-128" max="127" step="1" required="required"/>\
-               <label for="priority-xa">%%Extended_away%%</label><input type="number" value="0" id="priority-xa" min="-128" max="127" step="1" required="required"/>\
-               <label for="priority-dnd">%%dnd%%</label><input type="number" value="0" id="priority-dnd" min="-128" max="127" step="1" required="required"/>\
+               <label for="priority-online">%%Online%%</label><input type="number" value="0" id="priority-online" min="-128" max="127" step="1" required="required"/><br />\
+               <label for="priority-chat">%%Chatty%%</label><input type="number" value="0" id="priority-chat" min="-128" max="127" step="1" required="required"/><br />\
+               <label for="priority-away">%%Away%%</label><input type="number" value="0" id="priority-away" min="-128" max="127" step="1" required="required"/><br />\
+               <label for="priority-xa">%%Extended_away%%</label><input type="number" value="0" id="priority-xa" min="-128" max="127" step="1" required="required"/><br />\
+               <label for="priority-dnd">%%dnd%%</label><input type="number" value="0" id="priority-dnd" min="-128" max="127" step="1" required="required"/><br />\
                <input type="submit" value="%%Save%%"/>\
             </fieldset>\
          </form>'
@@ -2636,7 +2735,7 @@ var jsxc;
          var sid = jsxc.storage.getItem('sid');
          var rid = jsxc.storage.getItem('rid');
          var jid = jsxc.storage.getItem('jid');
-         var url = jsxc.options.xmpp.url || jsxc.storage.getItem('boshUrl');
+         var url = jsxc.options.get('xmpp').url;
 
          // Register eventlistener
          $(document).on('connected.jsxc', jsxc.xmpp.connected);
@@ -2799,7 +2898,7 @@ var jsxc;
             $(document).one('cloaded.roster.jsxc', jsxc.xmpp.sendPres);
 
             $('#jsxc_roster > p:first').remove();
-            
+
             var iq = $iq({
                type: 'get'
             }).c('query', {
@@ -2953,10 +3052,10 @@ var jsxc;
             jsxc.gui.roster.add(cid);
          });
 
-         if(buddies.length === 0) {
+         if (buddies.length === 0) {
             jsxc.gui.roster.empty();
          }
-         
+
          jsxc.storage.setUserItem('buddylist', buddies);
 
          jsxc.debug('Roster loaded');
@@ -3030,7 +3129,7 @@ var jsxc;
                }
             }
          });
-         
+
          if (!jsxc.storage.getUserItem('buddylist') || jsxc.storage.getUserItem('buddylist').length === 0) {
             jsxc.gui.roster.empty();
          } else {
@@ -4945,7 +5044,7 @@ var jsxc;
          Confirm: 'Confirmar',
          Dismiss: 'Rechazar',
          Remove: 'Eliminar',
-         Online_help: 'Ayuda en línea', 
+         Online_help: 'Ayuda en línea',
          FN: 'Nombre completo ',
          N: ' ',
          FAMILY: 'Apellido',
@@ -4972,7 +5071,7 @@ var jsxc;
          DESC: 'Descripción',
          PHOTO: ' ',
          send_message: 'mandar un texto',
-         get_info: 'obtener información', 
+         get_info: 'obtener información',
          Settings: 'Ajustes',
          Priority: 'Prioridad',
          Save: 'Guardar',

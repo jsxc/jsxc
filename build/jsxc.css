@@ -91,20 +91,24 @@ p.jsxc_center {
 	border:1px solid red;
 }
 
-#jsxc_dialog .jsxc_fieldsetPriority {
-	width: 200px;
+#jsxc_dialog .jsxc_fieldset {
+	width: 280px;
 	padding: 10px;
 	border-radius: 3px;
 }
 
-#jsxc_dialog .jsxc_fieldsetPriority label {
+#jsxc_dialog .jsxc_fieldset label {
 	display: inline-block;
 	width: 100px;
 }
 
-#jsxc_dialog .jsxc_fieldsetPriority input[type="Number"] {
+#jsxc_dialog .jsxc_fieldset input[type="Number"] {
    display: inline-block;
    width: 50px;
+}
+
+#jsxc_dialog input[readonly] {
+	background-color: #efefef;
 }
 
 /*############################ 
@@ -162,6 +166,7 @@ div#jsxc_roster {
 	z-index: 80;
 	margin-left: 10px;
 	box-shadow: 0px 0px 7px #000000;
+	background-color: #383C43;
 }
 
 div#jsxc_roster .slimScrollDiv {
