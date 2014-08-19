@@ -96,7 +96,9 @@ var jsxc;
          }
 
          if (data) {
-            console.log(msg, data);
+            if (jsxc.storage.getItem('debug') === true) {
+               console.log(msg, data);
+            }
 
             // try to convert data to string
             var d;
@@ -2757,10 +2759,6 @@ var jsxc;
                console.log('>', data);
             };
          }
-
-         // Strophe.log = function(level, msg) {
-         // console.log(level + " " + msg);
-         // };
 
          var callback = function(status, condition) {
 
