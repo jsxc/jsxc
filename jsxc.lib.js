@@ -273,6 +273,10 @@ var jsxc;
                   return true;
                }
 
+               if (typeof settings.xmpp.username === 'string') {
+                  username = settings.xmpp.username;
+               }
+
                var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
                var domain = settings.xmpp.domain;
                var jid;
