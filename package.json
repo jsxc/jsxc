@@ -1,22 +1,23 @@
 {
-   "name": "jsxc",
-   "version": "0.8.1",
-   "description": "Real-time chat app",
-   "homepage": "http://www.jsxc.org/",
-   "bugs": "https://github.com/sualko/jsxc/issues",
-   "license": "MIT",
-   "author": "Klaus Herberth <klaus@jsxc.org>",
-   "repository": {
-       "type": "git",
-       "url": "https://github.com/sualko/jsxc"
-   },
-   "devDependencies": {
-       "grunt": "~0.4.4",
-       "grunt-cli": "~0.1.13",
-       "grunt-contrib-clean": "~0.5.0",
-       "grunt-contrib-jshint": "~0.9.2",
-       "grunt-contrib-copy": "~0.5.0",
-       "grunt-banner": "~0.2.2",
-       "grunt-text-replace": "~0.3.11"
-   }
+  "name": "jsxc",
+  "version": "0.8.1",
+  "description": "Real-time chat app",
+  "homepage": "http://www.jsxc.org/",
+  "bugs": "https://github.com/sualko/jsxc/issues",
+  "license": "MIT",
+  "author": "Klaus Herberth <klaus@jsxc.org>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sualko/jsxc"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.4",
+    "grunt-banner": "~0.2.2",
+    "grunt-cli": "~0.1.13",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-jshint": "~0.9.2",
+    "grunt-search": "^0.1.6",
+    "grunt-text-replace": "~0.3.11"
+  }
 }

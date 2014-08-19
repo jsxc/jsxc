@@ -46,6 +46,32 @@ module.exports = function(grunt) {
                to: "<%= app.version %>"
             } ]
          }
+      },
+      search: {
+         console: {
+            files: {
+               src: ['*.js']
+            },
+            options: {
+               searchString: /console\.log\((?!'[<>]|msg)/g,
+               logFormat: 'console',
+               failOnMatch: true
+            }
+         },
+         changelog: {
+            files: {
+               src: ['CHANGELOG.md']
+            },
+            options: {
+               searchString: "<%= app.version %>",
+               logFormat: 'console',
+               onComplete: function(m) {
+                  if(m.numMatches === 0) {
+                     grunt.fail.fatal("No entry in README.md for current version found.");
+                  }
+               }
+            }
+         }
       }
    });
 
@@ -55,8 +81,9 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-contrib-clean');
    grunt.loadNpmTasks('grunt-banner');
    grunt.loadNpmTasks('grunt-text-replace');
+   grunt.loadNpmTasks('grunt-search');
 
    // Default task.
-   grunt.registerTask('default', [ 'jshint', 'clean', 'copy', 'usebanner', 'replace' ]);
+   grunt.registerTask('default', [ 'jshint', 'search', 'clean', 'copy', 'usebanner', 'replace' ]);
 
 };
