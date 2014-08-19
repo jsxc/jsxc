@@ -306,7 +306,7 @@ var jsxc;
                jsxc.options.xmpp.jid = jid;
                jsxc.options.xmpp.password = password;
 
-               if (settings.xmpp.onlogin === "true") {
+               if (settings.xmpp.onlogin === "true" || settings.xmpp.onlogin === true) {
                   jsxc.triggeredFromForm = true;
 
                   jsxc.xmpp.login();
@@ -1445,7 +1445,7 @@ var jsxc;
       showSettings: function() {
          jsxc.gui.dialog.open(jsxc.gui.template.get('settings'));
 
-         if (jsxc.options.get('xmpp').overwrite === 'false') {
+         if (jsxc.options.get('xmpp').overwrite === 'false' || jsxc.options.get('xmpp').overwrite === false) {
             $('.jsxc_fieldsetXmpp').hide();
          }
 
