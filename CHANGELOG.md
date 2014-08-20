@@ -1,3 +1,10 @@
+v0.8.2 / 2014-08-20
+===
+- fix use of custom username
+- write to console only if debug flag is set
+- allow string|boolean as config param
+- add translations
+
 v0.8.1 / 2014-08-12
 ===
 - add user-defined xmpp options

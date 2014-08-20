@@ -1,5 +1,5 @@
 /**
- * jsxc v0.8.1 - 2014-08-12
+ * jsxc v0.8.2 - 2014-08-20
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.8.1
+ * @version 0.8.2
  */
 
 /* jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery */
@@ -185,7 +185,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       onAddRosterItem: function(event, cid, data, el) {
          var self = jsxc.webrtc;
          var videoIcon = $('<div class="jsxc_video jsxc_disabled" title="' + jsxc.l.Start_video_call + '"></div>');
-console.log(data);
+
          videoIcon.click(function() {
             self.startCall(data.jid);
             return false;

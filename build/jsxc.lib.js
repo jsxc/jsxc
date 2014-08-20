@@ -1,5 +1,5 @@
 /**
- * jsxc v0.8.1 - 2014-08-12
+ * jsxc v0.8.2 - 2014-08-20
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.8.1
+ * @version 0.8.2
  */
 
 var jsxc;
@@ -22,7 +22,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '0.8.1',
+      version: '0.8.2',
 
       /** True if i'm the master */
       master: false,
@@ -108,7 +108,9 @@ var jsxc;
          }
 
          if (data) {
-            console.log(msg, data);
+            if (jsxc.storage.getItem('debug') === true) {
+               console.log(msg, data);
+            }
 
             // try to convert data to string
             var d;
@@ -285,6 +287,10 @@ var jsxc;
                   return true;
                }
 
+               if (typeof settings.xmpp.username === 'string') {
+                  username = settings.xmpp.username;
+               }
+
                var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
                var domain = settings.xmpp.domain;
                var jid;
@@ -312,7 +318,7 @@ var jsxc;
                jsxc.options.xmpp.jid = jid;
                jsxc.options.xmpp.password = password;
 
-               if (settings.xmpp.onlogin === "true") {
+               if (settings.xmpp.onlogin === "true" || settings.xmpp.onlogin === true) {
                   jsxc.triggeredFromForm = true;
 
                   jsxc.xmpp.login();
@@ -1451,7 +1457,7 @@ var jsxc;
       showSettings: function() {
          jsxc.gui.dialog.open(jsxc.gui.template.get('settings'));
 
-         if (jsxc.options.get('xmpp').overwrite === 'false') {
+         if (jsxc.options.get('xmpp').overwrite === 'false' || jsxc.options.get('xmpp').overwrite === false) {
             $('.jsxc_fieldsetXmpp').hide();
          }
 
@@ -2765,10 +2771,6 @@ var jsxc;
                console.log('>', data);
             };
          }
-
-         // Strophe.log = function(level, msg) {
-         // console.log(level + " " + msg);
-         // };
 
          var callback = function(status, condition) {
 
@@ -4809,7 +4811,12 @@ var jsxc;
          A_fingerprint_: 'A fingerprint is used to make sure that the person you are talking to is who he or she is saying.',
          Your_roster_is_empty_add_a: 'Your roster is empty, add a ',
          new_buddy: 'new buddy',
-         is: 'is'
+         is: 'is',
+         Login_options: 'Login options',
+         BOSH_url: 'BOSH url',
+         Domain: 'Domain',
+         Resource: 'Resource',
+         On_login: 'On login'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4945,7 +4952,14 @@ var jsxc;
          Save: 'Speichern',
          User_settings: 'Benutzereinstellungen',
          A_fingerprint_: 'Ein Fingerabdruck wird dazu benutzt deinen Gesprächspartner zu identifizieren.',
-         is: 'ist'
+         Your_roster_is_empty_add_a: 'Deine Freundesliste ist leer, füge einen neuen Freund ',
+         new_buddy: 'hinzu',
+         is: 'ist',
+         Login_options: 'Anmeldeoptionen',
+         BOSH_url: 'BOSH url',
+         Domain: 'Domain',
+         Resource: 'Ressource',
+         On_login: 'Beim Anmelden'
       },
       es: {
          please_wait_until_we_logged_you_in: 'Por favor, espere...',
@@ -5079,7 +5093,12 @@ var jsxc;
          A_fingerprint_: 'La huella digital se utiliza para que puedas estar seguro que la persona con la que estas hablando es quien realmente dice ser',
          Your_roster_is_empty_add_a: 'Tu lista de amigos esta vacia',
          new_buddy: 'Nuevo amigo',
-         is: 'es'
+         is: 'es',
+         Login_options: 'Opciones de login',
+         BOSH_url: 'BOSH url',
+         Domain: 'Dominio',
+         Resource: 'Recurso',
+         On_login: 'Iniciar sesión'
       }
    };
 }(jQuery));
