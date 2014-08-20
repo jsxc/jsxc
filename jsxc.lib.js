@@ -4799,7 +4799,12 @@ var jsxc;
          A_fingerprint_: 'A fingerprint is used to make sure that the person you are talking to is who he or she is saying.',
          Your_roster_is_empty_add_a: 'Your roster is empty, add a ',
          new_buddy: 'new buddy',
-         is: 'is'
+         is: 'is',
+         Login_options: 'Login options',
+         BOSH_url: 'BOSH url',
+         Domain: 'Domain',
+         Resource: 'Resource',
+         On_login: 'On login'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4935,7 +4940,14 @@ var jsxc;
          Save: 'Speichern',
          User_settings: 'Benutzereinstellungen',
          A_fingerprint_: 'Ein Fingerabdruck wird dazu benutzt deinen Gesprächspartner zu identifizieren.',
-         is: 'ist'
+         Your_roster_is_empty_add_a: 'Deine Freundesliste ist leer, füge einen neuen Freund ',
+         new_buddy: 'hinzu',
+         is: 'ist',
+         Login_options: 'Anmeldeoptionen',
+         BOSH_url: 'BOSH url',
+         Domain: 'Domain',
+         Resource: 'Ressource',
+         On_login: 'Beim Anmelden'
       },
       es: {
          please_wait_until_we_logged_you_in: 'Por favor, espere...',
@@ -5069,7 +5081,12 @@ var jsxc;
          A_fingerprint_: 'La huella digital se utiliza para que puedas estar seguro que la persona con la que estas hablando es quien realmente dice ser',
          Your_roster_is_empty_add_a: 'Tu lista de amigos esta vacia',
          new_buddy: 'Nuevo amigo',
-         is: 'es'
+         is: 'es',
+         Login_options: 'Opciones de login',
+         BOSH_url: 'BOSH url',
+         Domain: 'Dominio',
+         Resource: 'Recurso',
+         On_login: 'Iniciar sesión'
       }
    };
 }(jQuery));
