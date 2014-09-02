@@ -2119,6 +2119,19 @@ var jsxc;
          win.find('.jsxc_fade').hide();
 
          win.find('.jsxc_name').disableSelection();
+         
+         win.find('.slimScrollDiv').resizable({
+            handles: 'w, nw, n',
+            minHeight: 234,
+            minWidth: 250,
+            resize: function(event, ui) {
+               win.width(ui.size.width);
+               win.find('.jsxc_textarea').slimScroll({
+                  height: ui.size.height
+               });
+               win.find('.jsxc_emoticons').css('top', (ui.size.height + 6) + 'px');
+            }
+         });
 
          if ($.inArray(cid, jsxc.storage.getUserItem('windowlist')) < 0) {
 
