@@ -30,6 +30,10 @@ p.jsxc_center {
 	text-align: center;
 }
 
+li.jsxc_sep {
+	border-bottom: 1px solid black;
+}
+
 /*############################ 
  *########## Dialog ########## 
  *############################*/
@@ -975,4 +979,6 @@ img.jsxc_vCard {
 	float: right;
 	max-width: 200px;
 	max-height: 200px;
+	border: 5px solid white;
+	border-radius: 2px;
 }

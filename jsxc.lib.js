@@ -1362,6 +1362,39 @@ var jsxc;
       showVcard: function(bjid) {
          jsxc.gui.dialog.open(jsxc.gui.template.get('vCard', jsxc.jidToCid(bjid)));
 
+         var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(bjid));
+
+         // Display resources and corresponding information
+         var i, j, res, identities, identity = null, cap, client;
+         for (i = 0; i < data.res.length; i++) {
+            res = data.res[i];
+
+            identities = [];
+            cap = jsxc.xmpp.conn.caps.getCapabilitiesByJid(bjid + '/' + res);
+
+            if (cap !== null && cap.identities !== null) {
+               identities = cap.identities;
+            }
+
+            client = '';
+            for (j = 0; j < identities.length; j++) {
+               identity = identities[j];
+               if (identity.category === 'client') {
+                  if (client !== '') {
+                     client += ',\n';
+                  }
+
+                  client += identity.name + ' (' + identity.type + ')';
+               }
+            }
+
+            var status = jsxc.storage.getUserItem('res_' + jsxc.jidToCid(bjid))[res];
+
+            $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Resource%%') + ':</strong> ' + res + '</li>');
+            $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Client%%') + ':</strong> ' + client + '</li>');
+            $('#jsxc_dialog ul.jsxc_vCard').append('<li class="jsxc_sep">' + jsxc.translate('<strong>%%Status%%:</strong> %%' + jsxc.CONST.STATUS[status] + '%%') + '</li>');
+         }
+
          var printProp = function(el, depth) {
             var content = '';
 
@@ -1408,7 +1441,7 @@ var jsxc;
             $('#jsxc_dialog p').remove();
 
             var content = '<p>';
-            content += jsxc.translate('%%Sorry, we couldn\'t load any vCard.%%');
+            content += jsxc.translate('%%Sorry, your buddy doesn\'t provide any information.%%');
             content += '</p>';
 
             $('#jsxc_dialog').append(content);
@@ -1417,11 +1450,6 @@ var jsxc;
          jsxc.xmpp.conn.vcard.get(function(stanza) {
 
             if ($('#jsxc_dialog ul.jsxc_vCard').length === 0) {
-               return;
-            }
-
-            if ($(stanza).find('vCard').length === 0) {
-               failedToLoad();
                return;
             }
 
@@ -1434,7 +1462,12 @@ var jsxc;
                var type = photo.find('TYPE').text();
                var src = 'data:' + type + ';base64,' + img;
 
-               $('#jsxc_dialog h3').prepend('<img class="jsxc_vCard" src="' + src + '" alt="avatar" />');
+               $('#jsxc_dialog h3').before('<img class="jsxc_vCard" src="' + src + '" alt="avatar" />');
+            }
+
+            if ($(stanza).find('vCard').length === 0 || ($(stanza).find('vcard > *').length === 1 && photo.length === 1)) {
+               failedToLoad();
+               return;
             }
 
             printProp($(stanza).find('vcard > *'), 0);
@@ -4805,7 +4838,8 @@ var jsxc;
          Domain: 'Domain',
          Resource: 'Resource',
          On_login: 'On login',
-         Received_an_unencrypted_message: 'Received an unencrypted message'
+         Received_an_unencrypted_message: 'Received an unencrypted message',
+         Sorry_your_buddy_doesnt_provide_any_information: 'Sorry, your buddy doesn\'t provide any information.'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4949,7 +4983,8 @@ var jsxc;
          Domain: 'Domain',
          Resource: 'Ressource',
          On_login: 'Beim Anmelden',
-         Received_an_unencrypted_message: 'Unverschlüsselte Nachricht empfangen'
+         Received_an_unencrypted_message: 'Unverschlüsselte Nachricht empfangen',
+         Sorry_your_buddy_doesnt_provide_any_information: 'Dein Freund stellt leider keine Informationen bereit.'
       },
       es: {
          please_wait_until_we_logged_you_in: 'Por favor, espere...',
