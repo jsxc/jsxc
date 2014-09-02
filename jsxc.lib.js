@@ -2817,6 +2817,10 @@ var jsxc;
             }
          };
 
+         if (jsxc.xmpp.conn.caps) {
+            jsxc.xmpp.conn.caps.node = 'http://jsxc.org/';
+         }
+
          if (jsxc.restore && sid && rid) {
             jsxc.debug('Try to attach');
             jsxc.debug('SID: ' + sid);
