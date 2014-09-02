@@ -388,6 +388,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var sess = this.conn.jingle.sessions[sid];
          var jid = jsxc.jidToCid(sess.peerjid);
 
+         jsxc.gui.window.postMessage(jid, 'sys', jsxc.translate('%%Incoming call.%%'));
+
          // display notification
          jsxc.notification.notify(jsxc.translate('%%Incoming call%%'), jsxc.translate('%%from%% ' + jid));
 
@@ -417,7 +419,9 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             return;
          }
 
-         var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', jsxc.jidToCid(jid)));
+         var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', jsxc.jidToCid(jid)), {
+            noClose: true
+         });
 
          dialog.find('.jsxc_accept').click(function() {
             $(document).trigger('accept.call.jsxc');
@@ -447,12 +451,16 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       onCallTerminated: function(event, sid, reason, text) {
          this.setStatus('call terminated ' + sid + (reason ? (': ' + reason + ' ' + text) : ''));
 
+         var cid = jsxc.jidToCid(jsxc.webrtc.last_caller);
+
          if (this.localStream) {
             this.localStream.stop();
          }
 
-         $('.jsxc_remotevideo')[0].src = "";
-         $('.jsxc_localvideo')[0].src = "";
+         if ($('.jsxc_videoContainer').length) {
+            $('.jsxc_remotevideo')[0].src = "";
+            $('.jsxc_localvideo')[0].src = "";
+         }
 
          this.conn.jingle.localStream = null;
          this.localStream = null;
@@ -463,6 +471,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          $(document).off('cleanup.dialog.jsxc');
          $(document).off('error.jingle');
          jsxc.gui.dialog.close();
+
+         jsxc.gui.window.postMessage(cid, 'sys', jsxc.translate('%%Call terminated%%' + (reason ? (': %%' + reason + '%%') : '') + '.'));
       },
 
       /**
@@ -599,6 +609,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          jsxc.switchEvents({
             'finish.mediaready.jsxc': function() {
                self.setStatus('Initiate call');
+
+               jsxc.gui.window.postMessage(jsxc.jidToCid(jid), 'sys', jsxc.translate('%%Call started.%%'));
 
                $(document).one('error.jingle', function(e, sid, error) {
                   if (error.source !== 'offer') {
