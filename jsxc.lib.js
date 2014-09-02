@@ -4804,7 +4804,8 @@ var jsxc;
          BOSH_url: 'BOSH url',
          Domain: 'Domain',
          Resource: 'Resource',
-         On_login: 'On login'
+         On_login: 'On login',
+         Received_an_unencrypted_message: 'Received an unencrypted message'
       },
       de: {
          please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
@@ -4947,7 +4948,8 @@ var jsxc;
          BOSH_url: 'BOSH url',
          Domain: 'Domain',
          Resource: 'Ressource',
-         On_login: 'Beim Anmelden'
+         On_login: 'Beim Anmelden',
+         Received_an_unencrypted_message: 'Unverschlüsselte Nachricht empfangen'
       },
       es: {
          please_wait_until_we_logged_you_in: 'Por favor, espere...',
@@ -5086,7 +5088,8 @@ var jsxc;
          BOSH_url: 'BOSH url',
          Domain: 'Dominio',
          Resource: 'Recurso',
-         On_login: 'Iniciar sesión'
+         On_login: 'Iniciar sesión',
+         Received_an_unencrypted_message: 'Recibe un mensaje no cifrado'
       }
    };
 }(jQuery));
