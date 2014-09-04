@@ -899,6 +899,14 @@ var jsxc;
        * @param {string} aid Avatar id (sha1 hash of image)
        */
       updateAvatar: function(el, jid, aid) {
+
+         if (typeof aid === 'undefined') {
+            if (typeof jsxc.options.defaultAvatar === 'function') {
+               jsxc.options.defaultAvatar.call(el, jid);
+            }
+            return;
+         }
+
          var avatarSrc = jsxc.storage.getUserItem('avatar_' + aid);
 
          var setAvatar = function(src) {
@@ -2119,7 +2127,7 @@ var jsxc;
          win.find('.jsxc_fade').hide();
 
          win.find('.jsxc_name').disableSelection();
-         
+
          win.find('.slimScrollDiv').resizable({
             handles: 'w, nw, n',
             minHeight: 234,
