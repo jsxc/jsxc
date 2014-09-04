@@ -924,7 +924,12 @@ div.jsxc_settings li.jsxc_disabled {
 	cursor: default;
 }
 
-div.jsxc_transfer {
+.jsxc_tools > div.jsxc_disabled {
+   opacity: 0.5;
+   cursor: default !important;
+}
+
+div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
 	background-image: url('img/padlock_open_grey.svg');
 	background-repeat: no-repeat;
 	background-position: center center;
