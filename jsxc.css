@@ -545,25 +545,30 @@ div#jsxc_toggleRoster {
 div#jsxc_windowList {
 	position: fixed;
 	bottom: 0px;
-	right: 0px;
-	width: 100%;
+	right: 210px;
+	left: 0px;
 	z-index: 50;
+	clip: rect(-10000px, 10000px, 30px, 30px);
 }
 
 div#jsxc_windowList>ul {
 	list-style: none;
 	padding: 0px;
 	margin: 0px;
-	padding-right: 210px;
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
 	height: 30px;
 	overflow: visible;
+	white-space: nowrap;
+	-webkit-transition: right 0.5s;
+	transition: right 0.5s;
 }
 
 div#jsxc_windowList>ul>li {
 	padding: 0px;
 	margin: 0px;
-	display: block;
-	float: right;
+	display: inline-block;
 	width: 250px;
 	background-color: #282323;
 	height: 30px;
@@ -571,10 +576,44 @@ div#jsxc_windowList>ul>li {
 	overflow: visible;
 	margin-right: 5px;
 	cursor: pointer;
+	white-space: normal;
 }
 
 div#jsxc_windowList>ul>li.jsxc_min {
 	width: 200px !important;
+}
+
+#jsxc_windowListSB {
+	position: fixed;
+	left: 0px;
+	bottom: 0px;
+	width: 30px;
+	height: 30px;
+}
+#jsxc_windowListSB > div {
+	box-sizing: border-box;
+	width: 14px;
+	height: 100%;
+	background-color: #D3D3D3;
+	color: #999;
+	text-align: center;
+	line-height: 30px;
+	float: left;
+	cursor: pointer;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+#jsxc_windowListSB > div:hover {
+	background-color: #c3c3c3;
+}
+#jsxc_windowListSB > div.jsxc_disabled {
+	background-color: #f1f1f1 !important;
+	color: #d1d1d1;
+	cursor: default !important;
 }
 
 /*############################ 

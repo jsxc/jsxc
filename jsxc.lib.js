@@ -779,6 +779,40 @@ var jsxc;
       init: function() {
          $('body').append($(jsxc.gui.template.get('windowList')));
 
+         var scrollBy = function(offset) {
+            var scrollWidth = $('#jsxc_windowList>ul').width();
+            var width = $('#jsxc_windowList').width();
+            var el = $('#jsxc_windowList>ul');
+            var right = parseInt(el.css('right')) - offset;
+
+            if (scrollWidth < width) {
+               return;
+            }
+
+            if (right > 0) {
+               right = 0;
+            }
+
+            if (right < width - scrollWidth - 30) {
+               right = width - scrollWidth - 30;
+            }
+
+            el.css('right', right + 'px');
+         };
+
+         $(window).resize(jsxc.gui.updateWindowListSB);
+         $('#jsxc_windowList').resize(jsxc.gui.updateWindowListSB);
+
+         $('#jsxc_windowListSB .jsxc_scrollLeft').click(function() {
+            scrollBy(-200);
+         });
+         $('#jsxc_windowListSB .jsxc_scrollRight').click(function() {
+            scrollBy(200);
+         });
+         $('#jsxc_windowList').on('wheel', function(ev) {
+            scrollBy((ev.originalEvent.wheelDelta > 0) ? 200 : -200);
+         });
+
          jsxc.gui.tooltip('#jsxc_windowList');
 
          jsxc.gui.roster.init();
@@ -944,6 +978,21 @@ var jsxc;
                jsxc.storage.setUserItem('avatar_' + aid, 0);
                setAvatar(0);
             });
+         }
+      },
+
+      /**
+       * Updates scrollbar handlers.
+       * 
+       * @memberOf jsxc.gui
+       */
+      updateWindowListSB: function() {
+
+         if ($('#jsxc_windowList>ul').width() > $('#jsxc_windowList').width()) {
+            $('#jsxc_windowListSB > div').removeClass('jsxc_disabled');
+         } else {
+            $('#jsxc_windowListSB > div').addClass('jsxc_disabled');
+            $('#jsxc_windowList>ul').css('right', '0px');
          }
       },
 
@@ -1916,7 +1965,7 @@ var jsxc;
          var duration = d || 500;
 
          var roster = $('#jsxc_roster');
-         var wl = $('#jsxc_windowList > ul');
+         var wl = $('#jsxc_windowList');
 
          var roster_width = roster.innerWidth();
          var roster_right = parseFloat($('#jsxc_roster').css('right'));
@@ -1928,7 +1977,7 @@ var jsxc;
             right: ((roster_width + roster_right) * -1) + 'px'
          }, duration);
          wl.animate({
-            paddingRight: (10 - roster_right) + 'px'
+            right: (10 - roster_right) + 'px'
          }, duration);
 
          $(document).trigger('toggle.roster.jsxc', [ state, duration ]);
@@ -2174,6 +2223,8 @@ var jsxc;
 
          jsxc.gui.update(cid);
 
+         jsxc.gui.updateWindowListSB();
+
          // create related otr object
          if (jsxc.master && !jsxc.otr.objects[cid]) {
             jsxc.otr.create(cid);
@@ -2241,6 +2292,8 @@ var jsxc;
          } else {
             jsxc.gui.window.hide(cid);
          }
+
+         jsxc.gui.updateWindowListSB();
       },
 
       /**
@@ -2660,8 +2713,12 @@ var jsxc;
            <div id="jsxc_toggleRoster"></div>\
        </div>',
       windowList: '<div id="jsxc_windowList">\
-            <ul></ul>\
-        </div>',
+               <ul></ul>\
+            </div>\
+            <div id="jsxc_windowListSB">\
+               <div class="jsxc_scrollLeft jsxc_disabled">&lt;</div>\
+               <div class="jsxc_scrollRight jsxc_disabled">&gt;</div>\
+            </div>',
       rosterBuddy: '<li>\
             <div class="jsxc_avatar">☺</div>\
             <div class="jsxc_control"></div>\
