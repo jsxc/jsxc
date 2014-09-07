@@ -607,7 +607,17 @@ var jsxc;
        * @returns {boolean} True if tab is hidden
        */
       isHidden: function() {
-         var hidden = document.hidden || document.webkitHidden || document.mozHidden || document.msHidden;
+         var hidden = false;
+	 
+         if (typeof document.hidden !== 'undefined') {
+            hidden = document.hidden;
+         } else if (typeof  document.webkitHidden !== 'undefined') {
+            hidden = document.webkitHidden;
+         } else if (typeof document.mozHidden !== 'undefined') {
+            hidden = document.mozHidden;
+         } else if (typeof document.msHidden !== 'undefined') {
+            hidden = document.msHidden;
+         }
 
          // handle multiple tabs
          if (hidden && jsxc.master) {
