@@ -2288,6 +2288,8 @@ var jsxc;
       _close: function(cid) {
          $('#jsxc_window_' + cid).hide('slow', function() {
             $(this).remove();
+            
+            jsxc.gui.updateWindowListSB();
          });
       },
 

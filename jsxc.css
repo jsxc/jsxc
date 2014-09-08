@@ -614,6 +614,7 @@ div#jsxc_windowList>ul>li.jsxc_min {
 	background-color: #f1f1f1 !important;
 	color: #d1d1d1;
 	cursor: default !important;
+	display: none;
 }
 
 /*############################ 
