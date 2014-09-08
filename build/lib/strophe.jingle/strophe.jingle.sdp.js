@@ -75,15 +75,7 @@ SDP.prototype.toJingle = function (elem, thecreator) {
         for (i = 0; i < lines.length; i++) {
             tmp = lines[i].split(' ');
             var semantics = tmp.shift().substr(8);
-            // new plan
-            elem.c('group', {xmlns: 'urn:xmpp:jingle:apps:grouping:0', type: semantics, semantics:semantics});
-            for (j = 0; j < tmp.length; j++) {
-                elem.c('content', {name: tmp[j]}).up();
-            }
-            elem.up();
-
-            // temporary plan, to be removed
-            elem.c('group', {xmlns: 'urn:ietf:rfc:5888', type: semantics});
+            elem.c('group', {xmlns: 'urn:xmpp:jingle:apps:grouping:0', semantics:semantics});
             for (j = 0; j < tmp.length; j++) {
                 elem.c('content', {name: tmp[j]}).up();
             }
@@ -620,6 +612,9 @@ SDPUtil = {
             case 'generation':
                 candidate.generation = elems[i + 1];
                 break;
+            case 'tcptype':
+                candidate.tcptype = elems[i + 1];
+                break;
             default: // TODO
                 console.log('parse_icecandidate not translating "' + elems[i] + '" = "' + elems[i + 1] + '"');
             }
@@ -646,6 +641,12 @@ SDPUtil = {
                 line += ' ';
             }
             break;
+        }
+        if (cand.hasOwnAttribute('tcptype')) {
+            line += 'tcptype';
+            line += ' ';
+            line += cand.tcptype;
+            line += ' ';
         }
         line += 'generation';
         line += ' ';
@@ -729,8 +730,10 @@ SDPUtil = {
     candidateToJingle: function (line) {
         // a=candidate:2979166662 1 udp 2113937151 192.168.2.100 57698 typ host generation 0
         //      <candidate component=... foundation=... generation=... id=... ip=... network=... port=... priority=... protocol=... type=.../>
-        if (line.substring(0, 12) != 'a=candidate:') {
-            console.log('parseCandidate called with a line that is not a candidate line');
+        if (line.indexOf('candidate:') === 0) {
+            line = 'a=' + line;
+        } else if (line.substring(0, 12) != 'a=candidate:') {            
+			console.log('parseCandidate called with a line that is not a candidate line');
             console.log(line);
             return null;
         }
@@ -752,6 +755,9 @@ SDPUtil = {
         candidate.port = elems[5];
         // elems[6] => "typ"
         candidate.type = elems[7];
+
+        candidate.generation = '0'; // fippo from jitsi-meet: default, may be overwritten below
+
         for (i = 8; i < elems.length; i += 2) {
             switch (elems[i]) {
             case 'raddr':
@@ -762,6 +768,9 @@ SDPUtil = {
                 break;
             case 'generation':
                 candidate.generation = elems[i + 1];
+                break;
+            case 'tcptype':
+                candidate.tcptype = elems[i + 1];
                 break;
             default: // TODO
                 console.log('not translating "' + elems[i] + '" = "' + elems[i + 1] + '"');

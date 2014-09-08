@@ -30,12 +30,25 @@ p.jsxc_center {
 	text-align: center;
 }
 
+li.jsxc_sep {
+	border-bottom: 1px solid black;
+}
+
 /*############################ 
  *########## Dialog ########## 
  *############################*/
 #jsxc_dialog {
 	padding: 10px;
 	min-width: 300px;
+}
+
+#jsxc_dialog ul {
+    list-style: none;
+}
+
+#jsxc_dialog ul, #jsxc_dialog li {
+    margin: 0px;
+    padding: 0px;
 }
 
 #jsxc_dialog p {
@@ -344,7 +357,63 @@ div#jsxc_roster>.jsxc_bottom ul li:last-child {
 	color: black;
 	font-size: 80%;
 	padding: 2px;
+	position: relative;
+	-webkit-animation: bounce 2s 1s infinite;
+	animation: bounce 2s 1s infinite;
 }
+
+@-webkit-keyframes bounce {
+   0% {
+      bottom: 0;
+      -webkit-animation-timing-function: ease-in;
+   }
+   12% {
+      bottom: 5px; 
+      -webkit-animation-timing-function: ease-out;
+   }
+   25% {
+      bottom: 0px;
+      -webkit-animation-timing-function: ease-in;
+   }
+   37% {
+      bottom: 5px;
+      -webkit-animation-timing-function: ease-out;
+   }
+   50% {
+      bottom: 0px;
+      -webkit-animation-timing-function: ease-in;
+   }
+   100% {
+      bottom: 0px;
+   }
+}
+
+@keyframes bounce {
+   0% {
+      bottom: 0;
+      animation-timing-function: ease-in;
+   }
+   12% {
+      bottom: 5px; 
+      animation-timing-function: ease-out;
+   }
+   25% {
+      bottom: 0px;
+      animation-timing-function: ease-in;
+   }
+   37% {
+      bottom: 5px;
+      animation-timing-function: ease-out;
+   }
+   50% {
+      bottom: 0px;
+      animation-timing-function: ease-in;
+   }
+   100% {
+      bottom: 0px;
+   }
+}
+
 
 #jsxc_presence {
 	cursor: pointer;
@@ -541,25 +610,30 @@ div#jsxc_toggleRoster {
 div#jsxc_windowList {
 	position: fixed;
 	bottom: 0px;
-	right: 0px;
-	width: 100%;
+	right: 210px;
+	left: 0px;
 	z-index: 50;
+	clip: rect(-10000px, 10000px, 30px, 30px);
 }
 
 div#jsxc_windowList>ul {
 	list-style: none;
 	padding: 0px;
 	margin: 0px;
-	padding-right: 210px;
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
 	height: 30px;
 	overflow: visible;
+	white-space: nowrap;
+	-webkit-transition: right 0.5s;
+	transition: right 0.5s;
 }
 
 div#jsxc_windowList>ul>li {
 	padding: 0px;
 	margin: 0px;
-	display: block;
-	float: right;
+	display: inline-block;
 	width: 250px;
 	background-color: #282323;
 	height: 30px;
@@ -567,10 +641,45 @@ div#jsxc_windowList>ul>li {
 	overflow: visible;
 	margin-right: 5px;
 	cursor: pointer;
+	white-space: normal;
 }
 
 div#jsxc_windowList>ul>li.jsxc_min {
-	width: 200px;
+	width: 200px !important;
+}
+
+#jsxc_windowListSB {
+	position: fixed;
+	left: 0px;
+	bottom: 0px;
+	width: 30px;
+	height: 30px;
+}
+#jsxc_windowListSB > div {
+	box-sizing: border-box;
+	width: 14px;
+	height: 100%;
+	background-color: #D3D3D3;
+	color: #999;
+	text-align: center;
+	line-height: 30px;
+	float: left;
+	cursor: pointer;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+#jsxc_windowListSB > div:hover {
+	background-color: #c3c3c3;
+}
+#jsxc_windowListSB > div.jsxc_disabled {
+	background-color: #f1f1f1 !important;
+	color: #d1d1d1;
+	cursor: default !important;
+	display: none;
 }
 
 /*############################ 
@@ -622,6 +731,7 @@ div.jsxc_window .jsxc_emoticons {
 	width: 30px;
 	position: absolute;
 	top: 240px;
+	/*bottom: 0px;*/
 	right: 0px;
 	cursor: pointer;
 }
@@ -687,7 +797,8 @@ div.jsxc_window .jsxc_emoticons img:hover {
 	position: relative;
 }
 
-.jsxc_window .jsxc_gradient {
+.jsxc_window .jsxc_gradient { 
+	display:none;
 	position: absolute;
 	top: 0px;
 	left: 0px;
@@ -717,13 +828,14 @@ div.jsxc_window .jsxc_avatar {
 
 div.jsxc_window .jsxc_textarea {
 	width: 100%;
-	height: 100%;
 	overflow: hidden;
 	padding: 3px;
 }
 
 div.jsxc_window .slimScrollDiv {
 	margin: 0px 0px 6px 0px;
+	left: auto !important;
+   top: auto !important;
 }
 
 div.jsxc_chatmessage {
@@ -917,7 +1029,12 @@ div.jsxc_settings li.jsxc_disabled {
 	cursor: default;
 }
 
-div.jsxc_transfer {
+.jsxc_tools > div.jsxc_disabled {
+   opacity: 0.5;
+   cursor: default !important;
+}
+
+div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
 	background-image: url('img/padlock_open_grey.svg');
 	background-repeat: no-repeat;
 	background-position: center center;
@@ -975,4 +1092,42 @@ img.jsxc_vCard {
 	float: right;
 	max-width: 200px;
 	max-height: 200px;
+	border: 5px solid white;
+	border-radius: 2px;
+}
+
+.jsxc_window .ui-resizable-w {
+	left: 0px;
+}
+
+.jsxc_window .ui-resizable-nw {
+   top: 0px;
+   left: 0px;
+   width: 15px;
+   height: 15px;
+   z-index: 95 !important;
+}
+
+.jsxc_window .ui-resizable-n {
+   position: absolute;
+   top: 0px;
+   left: 0px;
+   right: 0px;
+   height: 15px;
+   z-index: 100;
+   background: -moz-linear-gradient(top, rgba(164, 164, 164, 1) 0%,
+      rgba(40, 35, 35, 0) 100%); /* FF3.6+ */
+   background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(164,
+      164, 164, 1)), color-stop(100%, rgba(40, 35, 35, 0)));
+   /* Chrome,Safari4+ */
+   background: -webkit-linear-gradient(top, rgba(164, 164, 164, 1) 0%,
+      rgba(40, 35, 35, 0) 100%); /* Chrome10+,Safari5.1+ */
+   background: -o-linear-gradient(top, rgba(164, 164, 164, 1) 0%,
+      rgba(40, 35, 35, 0) 100%); /* Opera 11.10+ */
+   background: -ms-linear-gradient(top, rgba(164, 164, 164, 1) 0%,
+      rgba(40, 35, 35, 0) 100%); /* IE10+ */
+   background: linear-gradient(to bottom, #a4a4a4 0%, rgba(40, 35, 35, 0)
+      100%); /* W3C */
+   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a4a4a4',
+      endColorstr='#00282323', GradientType=0); /* IE6-9 */
 }

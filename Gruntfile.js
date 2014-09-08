@@ -72,6 +72,24 @@ module.exports = function(grunt) {
                }
             }
          }
+      },
+      compress: {
+         main: {
+            options: {
+               archive: "jsxc-<%= app.version %>.zip"
+            },
+            files: [ {
+               src: [ '**' ],
+               expand: true,
+               dest: 'jsxc/',
+               cwd: 'build/'
+            } ]
+         }
+      },
+      shell: {
+         hooks: {
+            command: 'cp pre-commit .git/hooks/'
+         }
       }
    });
 
@@ -82,8 +100,18 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-banner');
    grunt.loadNpmTasks('grunt-text-replace');
    grunt.loadNpmTasks('grunt-search');
+   grunt.loadNpmTasks('grunt-contrib-compress');
+   grunt.loadNpmTasks('grunt-shell');
 
    // Default task.
    grunt.registerTask('default', [ 'jshint', 'search', 'clean', 'copy', 'usebanner', 'replace' ]);
 
+   // Create alpha/beta build
+   grunt.registerTask('pre', ['jshint', 'search:console', 'clean', 'copy', 'usebanner', 'replace', 'compress' ]);
+
+   // before commit
+   grunt.registerTask('commit', [ 'jshint', 'search:console' ]);
+   
+   // prepare pre-commit hook
+   grunt.registerTask('hookmeup', ['shell:hooks']);
 };

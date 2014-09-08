@@ -91,8 +91,12 @@ Strophe.addConnectionPlugin('jingle', {
             sess.ice_config = this.ice_config;
 
             sess.initiate($(iq).attr('from'), false);
-            // FIXME: setRemoteDescription should only be done when this call is to be accepted
             sess.setRemoteDescription($(iq).find('>jingle'), 'offer');
+
+            if ($(iq).find('>jingle>muted[xmlns="http://jitsi.org/protocol/meet#startmuted"]').length) {
+                console.log('got a request to start muted');
+                sess.startmuted = true;
+            }
 
             this.sessions[sess.sid] = sess;
             this.jid2session[sess.peerjid] = sess;
@@ -209,6 +213,7 @@ Strophe.addConnectionPlugin('jingle', {
         // validity have to be fetched before creating the peerconnection
         // TODO: implement refresh via updateIce as described in
         //      https://code.google.com/p/webrtc/issues/detail?id=1650
+        var self = this;
         this.connection.sendIQ(
             $iq({type: 'get', to: this.connection.domain})
                 .c('services', {xmlns: 'urn:xmpp:extdisco:1'}).c('service', {host: 'turn.' + this.connection.domain}),
@@ -248,7 +253,7 @@ Strophe.addConnectionPlugin('jingle', {
                         break;
                     }
                 });
-                this.ice_config.iceServers = iceservers;
+                self.ice_config.iceServers = iceservers;
             },
             function (err) {
                 console.warn('getting turn credentials failed', err);

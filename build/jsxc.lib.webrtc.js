@@ -1,5 +1,5 @@
 /**
- * jsxc v0.8.2 - 2014-08-20
+ * jsxc v1.0.0-alpha1 - 2014-09-08
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 0.8.2
+ * @version 1.0.0-alpha1
  */
 
 /* jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery */
@@ -236,7 +236,6 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
 
          var el = win.find('.jsxc_video').add('#' + cid + ' .jsxc_video');
 
-         // only start video call to a full jid
          if (Strophe.getResourceFromJid(jid) === null) {
 
             var res = jsxc.storage.getUserItem('buddy_' + cid).res;
@@ -400,6 +399,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var sess = this.conn.jingle.sessions[sid];
          var jid = jsxc.jidToCid(sess.peerjid);
 
+         jsxc.gui.window.postMessage(jid, 'sys', jsxc.translate('%%Incoming call.%%'));
+
          // display notification
          jsxc.notification.notify(jsxc.translate('%%Incoming call%%'), jsxc.translate('%%from%% ' + jid));
 
@@ -429,7 +430,9 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             return;
          }
 
-         var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', jsxc.jidToCid(jid)));
+         var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', jsxc.jidToCid(jid)), {
+            noClose: true
+         });
 
          dialog.find('.jsxc_accept').click(function() {
             $(document).trigger('accept.call.jsxc');
@@ -459,12 +462,16 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       onCallTerminated: function(event, sid, reason, text) {
          this.setStatus('call terminated ' + sid + (reason ? (': ' + reason + ' ' + text) : ''));
 
+         var cid = jsxc.jidToCid(jsxc.webrtc.last_caller);
+
          if (this.localStream) {
             this.localStream.stop();
          }
 
-         $('.jsxc_remotevideo')[0].src = "";
-         $('.jsxc_localvideo')[0].src = "";
+         if ($('.jsxc_videoContainer').length) {
+            $('.jsxc_remotevideo')[0].src = "";
+            $('.jsxc_localvideo')[0].src = "";
+         }
 
          this.conn.jingle.localStream = null;
          this.localStream = null;
@@ -475,6 +482,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          $(document).off('cleanup.dialog.jsxc');
          $(document).off('error.jingle');
          jsxc.gui.dialog.close();
+
+         jsxc.gui.window.postMessage(cid, 'sys', jsxc.translate('%%Call terminated%%' + (reason ? (': %%' + reason + '%%') : '') + '.'));
       },
 
       /**
@@ -612,6 +621,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             'finish.mediaready.jsxc': function() {
                self.setStatus('Initiate call');
 
+               jsxc.gui.window.postMessage(jsxc.jidToCid(jid), 'sys', jsxc.translate('%%Call started.%%'));
+
                $(document).one('error.jingle', function(e, sid, error) {
                   if (error.source !== 'offer') {
                      return;
@@ -685,7 +696,15 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
 
          ctx.drawImage(video[0], 0, 0);
          var img = $('<img/>');
-         var url = canvas.toDataURL('image/jpeg');
+         var url = null;
+
+         try {
+            url = canvas.toDataURL('image/jpeg');
+         } catch (err) {
+            console.warn('Error', err);
+            return;
+         }
+
          img[0].src = url;
          var link = $('<a/>').attr({
             target: '_blank',

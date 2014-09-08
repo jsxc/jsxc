@@ -50,6 +50,17 @@
     child.__super__ = parent.prototype
   }
 
+  // assumes 32-bit
+  function intCompare(x, y) {
+    var z = ~(x ^ y)
+    z &= z >> 16
+    z &= z >> 8
+    z &= z >> 4
+    z &= z >> 2
+    z &= z >> 1
+    return z & 1
+  }
+
   // constant-time string comparison
   HLP.compare = function (str1, str2) {
     if (str1.length !== str2.length)
@@ -57,7 +68,7 @@
     var i = 0, result = 0
     for (; i < str1.length; i++)
       result |= str1[i].charCodeAt(0) ^ str2[i].charCodeAt(0)
-    return result === 0
+    return intCompare(result, 0)
   }
 
   HLP.randomExponent = function () {
