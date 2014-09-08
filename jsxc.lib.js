@@ -608,10 +608,10 @@ var jsxc;
        */
       isHidden: function() {
          var hidden = false;
-	 
+
          if (typeof document.hidden !== 'undefined') {
             hidden = document.hidden;
-         } else if (typeof  document.webkitHidden !== 'undefined') {
+         } else if (typeof document.webkitHidden !== 'undefined') {
             hidden = document.webkitHidden;
          } else if (typeof document.mozHidden !== 'undefined') {
             hidden = document.mozHidden;
@@ -660,7 +660,7 @@ var jsxc;
 
       /** OTR options (see [2]) */
       otr: {
-         debug: true
+         ERROR_START_AKE: true
       },
 
       /** xmpp options (see [1]) */
@@ -2288,7 +2288,7 @@ var jsxc;
       _close: function(cid) {
          $('#jsxc_window_' + cid).hide('slow', function() {
             $(this).remove();
-            
+
             jsxc.gui.updateWindowListSB();
          });
       },
