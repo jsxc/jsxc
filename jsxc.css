@@ -348,7 +348,63 @@ div#jsxc_roster>.jsxc_bottom ul li:last-child {
 	color: black;
 	font-size: 80%;
 	padding: 2px;
+	position: relative;
+	-webkit-animation: bounce 2s 1s infinite;
+	animation: bounce 2s 1s infinite;
 }
+
+@-webkit-keyframes bounce {
+   0% {
+      bottom: 0;
+      -webkit-animation-timing-function: ease-in;
+   }
+   12% {
+      bottom: 5px; 
+      -webkit-animation-timing-function: ease-out;
+   }
+   25% {
+      bottom: 0px;
+      -webkit-animation-timing-function: ease-in;
+   }
+   37% {
+      bottom: 5px;
+      -webkit-animation-timing-function: ease-out;
+   }
+   50% {
+      bottom: 0px;
+      -webkit-animation-timing-function: ease-in;
+   }
+   100% {
+      bottom: 0px;
+   }
+}
+
+@keyframes bounce {
+   0% {
+      bottom: 0;
+      animation-timing-function: ease-in;
+   }
+   12% {
+      bottom: 5px; 
+      animation-timing-function: ease-out;
+   }
+   25% {
+      bottom: 0px;
+      animation-timing-function: ease-in;
+   }
+   37% {
+      bottom: 5px;
+      animation-timing-function: ease-out;
+   }
+   50% {
+      bottom: 0px;
+      animation-timing-function: ease-in;
+   }
+   100% {
+      bottom: 0px;
+   }
+}
+
 
 #jsxc_presence {
 	cursor: pointer;
