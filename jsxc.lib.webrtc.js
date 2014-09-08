@@ -224,7 +224,6 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
 
          var el = win.find('.jsxc_video').add('#' + cid + ' .jsxc_video');
 
-         // only start video call to a full jid
          if (Strophe.getResourceFromJid(jid) === null) {
 
             var res = jsxc.storage.getUserItem('buddy_' + cid).res;
@@ -685,7 +684,15 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
 
          ctx.drawImage(video[0], 0, 0);
          var img = $('<img/>');
-         var url = canvas.toDataURL('image/jpeg');
+         var url = null;
+
+         try {
+            url = canvas.toDataURL('image/jpeg');
+         } catch (err) {
+            console.warn('Error', err);
+            return;
+         }
+
          img[0].src = url;
          var link = $('<a/>').attr({
             target: '_blank',
