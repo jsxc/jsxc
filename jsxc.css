@@ -42,6 +42,15 @@ li.jsxc_sep {
 	min-width: 300px;
 }
 
+#jsxc_dialog ul {
+    list-style: none;
+}
+
+#jsxc_dialog ul, #jsxc_dialog li {
+    margin: 0px;
+    padding: 0px;
+}
+
 #jsxc_dialog p {
 	margin-bottom: 1em;
 }
