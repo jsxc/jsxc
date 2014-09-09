@@ -283,7 +283,11 @@ var jsxc;
                if (username.match(/@(.*)$/)) {
                   jid = (username.match(/\/(.*)$/)) ? username : username + resource;
                } else {
-                  jid = username + '@' + domain + resource;
+                  if (typeof settings.xmpp.mkjid == 'function') {
+                     jid = settings.xmpp.mkjid(username, domain, resource);
+                  } else {
+                     jid = username + '@' + domain + resource;
+                  }
                }
 
                if (typeof jsxc.options.loginForm.preJid === 'function') {
