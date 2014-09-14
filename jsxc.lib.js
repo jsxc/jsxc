@@ -2772,8 +2772,8 @@ var jsxc;
       removeDialog: '<h3>%%Remove buddy%%</h3>\
         <p class="jsxc_maxWidth">%%You_are_about_to_remove_%%</p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close">%%Cancel%%</a> <a href="#" class="button creation">%%Remove%%</a></p>',
-      waitAlert: '<h3>%%Please_wait%%</h3>\
-        <p>{{msg}}</p>\
+      waitAlert: '<h3>{{msg}}</h3>\
+        <p>%%Please_wait%%</p>\
         <p class="jsxc_center"><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /></p>',
       alert: '<h3>%%Alert%%</h3>\
         <p>{{msg}}</p>\
@@ -2796,12 +2796,14 @@ var jsxc;
          <br />\
          <i>Released under the MIT license</i><br />\
          <br />\
-         Real-time chat app for OwnCloud. This app requires external<br /> XMPP server (openfire, ejabberd etc.).<br />\
+         Real-time chat app for '
+         + (typeof jsxc.xmpp.config == 'undefined' ? 'web applications' : jsxc.xmpp.config.app_name + ' and more') +
+         '.<br /> Requires an external <a href="https://xmpp.org/xmpp-software/servers/" target="_blank">XMPP server</a>.<br />\
          <br />\
-         <b>Credential: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
+         <b>Credits: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
          <a href="https://soundcloud.com/freefilmandgamemusic/ping-1?in=freefilmandgamemusic/sets/free-notification-sounds-and" target="_blank">CameronMusic (Ping)</a></p>\
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>',
-      vCard: '<h3>vCard %%from%% {{cid_name}}</h3>\
+      vCard: '<h3>vCard %%of%% {{cid_name}}</h3>\
          <ul class="jsxc_vCard"></ul>\
          <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...</p>',
       settings: '<h3>%%User_settings%%</h3>\
@@ -4839,41 +4841,41 @@ var jsxc;
     */
    jsxc.l10n = {
       en: {
-         please_wait_until_we_logged_you_in: 'Please wait until we logged you in...',
+         please_wait_until_we_logged_you_in: 'Logging in…',
          your_connection_is_unencrypted: 'Your connection is unencrypted.',
          your_connection_is_encrypted: 'Your connection is encrypted.',
          your_buddy_closed_the_private_connection: 'Your buddy closed the private connection.',
          start_private: 'Start private',
          close_private: 'Close private',
-         your_buddy_is_verificated: 'Your buddy is verificated.',
-         you_have_only_a_subscription_in_one_way: 'You have only a subscription in one way.',
+         your_buddy_is_verificated: 'Your buddy is verified.',
+         you_have_only_a_subscription_in_one_way: 'You only have a one-way subscription.',
          verification_query_sent: 'Verification query sent.',
-         your_message_wasnt_send_please_end_your_private_conversation: 'Your message wasn\'t send. Please end your private conversation.',
+         your_message_wasnt_send_please_end_your_private_conversation: 'Your message was not sent. Please end your private conversation.',
          unencrypted_message_received: 'Unencrypted message received:',
-         your_message_wasnt_send_because_you_have_no_valid_subscription: 'Your message was\'nt send, because you have no valid subscription.',
-         no_available: 'No available',
+         your_message_wasnt_send_because_you_have_no_valid_subscription: 'Your message was not sent because you have no valid subscription.',
+         no_available: 'Not available',
          no_connection: 'No connection!',
          relogin: 'relogin',
          trying_to_start_private_conversation: 'Trying to start private conversation!',
          Verified: 'Verified',
          Unverified: 'Unverified',
-         private_conversation_started: 'private conversation started.',
+         private_conversation_started: 'Private conversation started.',
          private_conversation_aborted: 'Private conversation aborted!',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Your buddy closed the private conversation! You should do the same.',
          conversation_is_now_verified: 'Conversation is now verified.',
-         verification_fails: 'Verification fails.',
+         verification_fails: 'Verification failed.',
          your_buddy_is_attempting_to_determine_: 'You buddy is attempting to determine if he or she is really talking to you.',
          to_authenticate_to_your_buddy: 'To authenticate to your buddy, ',
          enter_the_answer_and_click_answer: 'enter the answer and click Answer.',
          enter_the_secret: 'enter the secret.',
-         now_we_will_create_your_private_key_: 'Now we will create your private key. This can take some time.',
-         Authenticating_a_buddy_helps_: 'Authenticating a buddy helps ensure that the person you are talking to is who he or she is saying.',
+         now_we_will_create_your_private_key_: 'Creating your private key; this may take a while.',
+         Authenticating_a_buddy_helps_: 'Authenticating a buddy helps ensure that the person you are talking to is really the one he or she claims to be.',
          How_do_you_want_to_authenticate_your_buddy: 'How do you want to authenticate {{cid_name}} (<b>{{cid_jid}}</b>)?',
          Select_method: 'Select method...',
          Manual: 'Manual',
          Question: 'Question',
          Secret: 'Secret',
-         To_verify_the_fingerprint_: 'To verify the fingerprint, contact your buddy via some other authenticated channel, such as the telephone.',
+         To_verify_the_fingerprint_: 'To verify the fingerprint, contact your buddy via some other trustworthy channel, such as the telephone.',
          Your_fingerprint: 'Your fingerprint',
          Buddy_fingerprint: 'Buddy fingerprint',
          Close: 'Close',
@@ -4883,7 +4885,7 @@ var jsxc;
          To_authenticate_pick_a_secret_: 'To authenticate, pick a secret known only to you and your buddy.',
          Compare: 'Compare',
          Fingerprints: 'Fingerprints',
-         Authentifikation: 'Authentifikation',
+         Authentifikation: 'Authentication',
          Message: 'Message',
          Add_buddy: 'Add buddy',
          rename_buddy: 'rename buddy',
@@ -4893,7 +4895,7 @@ var jsxc;
          Password: 'Password',
          Cancel: 'Cancel',
          Connect: 'Connect',
-         Type_in_the_full_username_: 'Type in the full username and optional an alias.',
+         Type_in_the_full_username_: 'Type in the full username and an optional alias.',
          Alias: 'Alias',
          Add: 'Add',
          Subscription_request: 'Subscription request',
@@ -4902,17 +4904,17 @@ var jsxc;
          Approve: 'Approve',
          Remove_buddy: 'Remove buddy',
          You_are_about_to_remove_: 'You are about to remove {{cid_name}} (<b>{{cid_jid}}</b>) from your buddy list. All related chats will be closed.',
-         Continue: 'Continue',
+         Continue: 'Continue without chat',
          Please_wait: 'Please wait',
-         Login_failed: 'Login failed',
-         Sorry_we_cant_authentikate_: 'Sorry, we can\'t authentikate you at our chat server. Maybe the password is wrong?',
-         Retry: 'Retry',
+         Login_failed: 'Chat login failed',
+         Sorry_we_cant_authentikate_: 'Authentication failed with the chat server. Maybe the password is wrong?',
+         Retry: 'Back',
          clear_history: 'Clear history',
          New_message_from: 'New message from',
          Should_we_notify_you_: 'Should we notify you about new messages in the future?',
          Please_accept_: 'Please click the "Allow" button at the top.',
-         Hide_offline: 'Hide offline',
-         Show_offline: 'Show offline',
+         Hide_offline: 'Hide offline contacts',
+         Show_offline: 'Show offline contacts',
          About: 'About',
          dnd: 'Do Not Disturb',
          Mute: 'Mute',
@@ -4927,7 +4929,7 @@ var jsxc;
          offline: 'offline',
          none: 'none',
          Unknown_instance_tag: 'Unknown instance tag.',
-         Not_of_our_latest_keys: 'Not of our latest key.',
+         Not_of_our_latest_keys: 'Not one of our latest keys.',
          Received_an_unreadable_encrypted_message: 'Received an unreadable encrypted message.',
          Online: 'Online',
          Chatty: 'Chatty',
@@ -4939,10 +4941,10 @@ var jsxc;
          Dismiss: 'Dismiss',
          Remove: 'Remove',
          Online_help: 'Online help',
-         FN: 'Full Name',
+         FN: 'Full name',
          N: ' ',
-         FAMILY: 'Family Name',
-         GIVEN: 'Given Name',
+         FAMILY: 'Family name',
+         GIVEN: 'Given name',
          NICKNAME: 'Nickname',
          URL: 'URL',
          ADR: 'Address',
@@ -4959,13 +4961,13 @@ var jsxc;
          ORG: 'Organization',
          ORGNAME: 'Name',
          ORGUNIT: 'Unit',
-         TITLE: 'Job Title',
+         TITLE: 'Job title',
          ROLE: 'Role',
          BDAY: 'Birthday',
          DESC: 'Description',
          PHOTO: ' ',
-         send_message: 'send message',
-         get_info: 'get info',
+         send_message: 'Send message',
+         get_info: 'Show information',
          Settings: 'Settings',
          Priority: 'Priority',
          Save: 'Save',
@@ -4975,15 +4977,15 @@ var jsxc;
          new_buddy: 'new buddy',
          is: 'is',
          Login_options: 'Login options',
-         BOSH_url: 'BOSH url',
+         BOSH_url: 'BOSH URL',
          Domain: 'Domain',
          Resource: 'Resource',
          On_login: 'On login',
          Received_an_unencrypted_message: 'Received an unencrypted message',
-         Sorry_your_buddy_doesnt_provide_any_information: 'Sorry, your buddy doesn\'t provide any information.'
+         Sorry_your_buddy_doesnt_provide_any_information: 'Sorry, your buddy does not provide any information.'
       },
       de: {
-         please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
+         please_wait_until_we_logged_you_in: 'Login läuft…',
          your_connection_is_unencrypted: 'Deine Verbindung ist UNverschlüsselt.',
          your_connection_is_encrypted: 'Deine Verbindung ist verschlüsselt.',
          your_buddy_closed_the_private_connection: 'Dein Freund hat die private Verbindung getrennt.',
@@ -5046,11 +5048,11 @@ var jsxc;
          Approve: 'Bestätigen',
          Remove_buddy: 'Freund entfernen',
          You_are_about_to_remove_: 'Du bist gerade dabei {{cid_name}} (<b>{{cid_jid}}</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.',
-         Continue: 'Weiter',
+         Continue: 'Weiter ohne Chat',
          Please_wait: 'Bitte warten',
-         Login_failed: 'Anmeldung fehlgeschlagen',
-         Sorry_we_cant_authentikate_: 'Wir können dich leider nicht anmelden. Vielleicht ist dein Passwort falsch?',
-         Retry: 'Neuer Versuch',
+         Login_failed: 'Chat-Anmeldung fehlgeschlagen',
+         Sorry_we_cant_authentikate_: 'Der Chatserver hat die Anmeldung abgelehnt. Falsches Passwort?',
+         Retry: 'Zurück',
          clear_history: 'Lösche Verlauf',
          New_message_from: 'Neue Nachricht von',
          Should_we_notify_you_: 'Sollen wir dich in Zukunft über eingehende Nachrichten informieren, auch wenn dieser Tab nicht im Vordergrund ist?',
