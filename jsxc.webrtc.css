@@ -1,3 +1,7 @@
+.jsxc_webrtc {
+	width: 900px;
+}
+
 .jsxc_videoContainer {
 	width: 640px;
 	height: 480px;
@@ -38,6 +42,10 @@
 	padding: 15px;
 	font-weight: bold;
 	text-align: center;
+}
+
+.jsxc_webrtc .slimScrollDiv {
+	opacity: 1 !important;
 }
 
 div:-moz-full-screen {
@@ -115,32 +123,29 @@ div:fullscreen.jsxc_localvideo {
 
 .jsxc_chatarea {
 	position: relative;
-	height: 270px;
-	display: none;
+	float:right;
+	height: 480px;
+	width: 250px;
 	background-color: #A4A4A4;
 }
 
 .jsxc_chatarea > ul {
-	position: absolute;
-	left: 50%;
-	top: 0px;
 	width: 250px;
-	height: 270px;
+	height: 480px;
 	list-style: none;
 	padding: 0px;
-	margin: 0px 0px 0px -100px;
 }
 
 .jsxc_chatarea .jsxc_settings {
-	display: none;
+	display: none !important;
 }
 
 .jsxc_chatarea .jsxc_close {
-	display: none;
+	display: none !important;
 }
 
 .jsxc_chatarea .jsxc_bar {
-	display: none;
+
 }
 
 .jsxc_chatarea .jsxc_window {
