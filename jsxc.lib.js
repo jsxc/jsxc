@@ -289,6 +289,9 @@ var jsxc;
                if (typeof jsxc.options.loginForm.preJid === 'function') {
                   jid = jsxc.options.loginForm.preJid(jid);
                }
+               if (typeof settings.xmpp.tuneJid === 'function') {
+                  jid = settings.xmpp.tuneJid(jid);
+               }
 
                jsxc.cid = jsxc.jidToCid(jid);
 
