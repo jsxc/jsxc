@@ -2964,9 +2964,11 @@ var jsxc;
 
          jsxc.xmpp.conn.pause();
 
+         var nomJid = Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid).toLowerCase() + '/' + Strophe.getResourceFromJid(jsxc.xmpp.conn.jid);
+
          // Save sid and jid
          jsxc.storage.setItem('sid', jsxc.xmpp.conn._proto.sid);
-         jsxc.storage.setItem('jid', jsxc.xmpp.conn.jid.toLowerCase());
+         jsxc.storage.setItem('jid', nomJid);
 
          jsxc.storage.setItem('lastActivity', (new Date()).getTime());
 
