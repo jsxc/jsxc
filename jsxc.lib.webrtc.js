@@ -64,7 +64,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       AUTO_ACCEPT: false,
 
       /** required disco features */
-      reqVideoFeatures: [ 'urn:xmpp:jingle:apps:rtp:video', 'urn:xmpp:jingle:apps:rtp:audio', 'urn:xmpp:jingle:transports:ice-udp:1' ],
+      reqVideoFeatures: [ 'urn:xmpp:jingle:apps:rtp:video', 'urn:xmpp:jingle:apps:rtp:audio', 'urn:xmpp:jingle:transports:ice-udp:1', 'urn:xmpp:jingle:apps:dtls:0' ],
 
       /** bare jid to current jid mapping */
       chatJids: {},
@@ -114,6 +114,10 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             jsxc.error('[JINGLE]', error);
          });
 
+         if (self.conn.disco) {
+            self.conn.disco.addFeature('urn:xmpp:jingle:apps:dtls:0');
+         }
+         
          if (self.conn.caps) {
             $(document).on('caps.strophe', $.proxy(self.onCaps, self));
          }
