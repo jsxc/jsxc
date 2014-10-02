@@ -220,8 +220,20 @@ var jsxc;
          // Check if we have to establish a new connection
          if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
 
-            if (jsxc.options.xmpp.jid && jsxc.options.xmpp.password) {
-               return this.initLoginProcess(jsxc.options.xmpp.jid, jsxc.options.xmpp.password)
+           // login without form prompting
+           var username = jsxc.options.xmpp.jid;
+           var password = jsxc.options.xmpp.password;
+            if (username && password) {
+               this.initLoginProcess(username, password)
+               jsxc.gui.init();
+
+               if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
+                 jsxc.onMaster();
+               } else {
+                 jsxc.checkMaster();
+               }
+               $("#jsxc_dialog").dialog("close"); // we have to close directly if we have no redirect/submit
+               return;
             }
 
             // Looking for a login form
@@ -1327,7 +1339,7 @@ var jsxc;
        */
       showWaitAlert: function(msg) {
          jsxc.gui.dialog.open(jsxc.gui.template.get('waitAlert', null, msg), {
-            'noClose': true
+            'noClose': false // we should be able to close it if we skip form login
          });
       },
 
