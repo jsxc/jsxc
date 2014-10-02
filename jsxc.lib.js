@@ -503,7 +503,7 @@ var jsxc;
       },
 
       /**
-       * Initialize login process through from or directly
+       * Initialize login process through form or directly
        */
       initLoginProcess: function(username, password) {
         jsxc.gui.showWaitAlert(jsxc.l.Logging_in);
@@ -643,11 +643,11 @@ var jsxc;
          return text.replace(/%%([a-zA-Z0-9_-}{ .!,?/'@]+)%%/g, function(s, key) {
             var k = key.replace(/ /gi, '_').replace(/[.!,?/'@]/g, '');
 
-            if (!jsxc.l[k]) {
-               jsxc.warn('No translation for: ' + k);
+            if (!jsxc.l && !jsxc.l[k]) {
+              jsxc.warn('No translation for: ' + k);
+              return key.replace(/_/g, ' ');
             }
-
-            return jsxc.l[k] || key.replace(/_/g, ' ');
+            return jsxc.l[k];
          });
       },
    };
