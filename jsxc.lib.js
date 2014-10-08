@@ -253,52 +253,7 @@ var jsxc;
             // Add jsxc login action to form
             form.submit(function() {
 
-               jsxc.gui.showWaitAlert(jsxc.l.Logging_in);
-
-               var username = $(jsxc.options.loginForm.jid).val();
-               var password = $(jsxc.options.loginForm.pass).val();
-
-               if (typeof jsxc.options.loadSettings !== 'function') {
-                  jsxc.error('No loadSettings function given. Abort.');
-                  return;
-               }
-
-               var settings = jsxc.options.loadSettings.call(this, username, password);
-
-               if (settings === null || typeof settings === 'undefined') {
-                  return true;
-               }
-
-               if (typeof settings.xmpp.username === 'string') {
-                  username = settings.xmpp.username;
-               }
-
-               var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
-               var domain = settings.xmpp.domain;
-               var jid;
-
-               if (username.match(/@(.*)$/)) {
-                  jid = (username.match(/\/(.*)$/)) ? username : username + resource;
-               } else {
-                  jid = username + '@' + domain + resource;
-               }
-
-               if (typeof jsxc.options.loginForm.preJid === 'function') {
-                  jid = jsxc.options.loginForm.preJid(jid);
-               }
-
-               jsxc.bid = jsxc.jidToBid(jid);
-
-               settings.xmpp.username = jid.split('@')[0];
-               settings.xmpp.domain = jid.split('@')[1].split('/')[0];
-               settings.xmpp.resource = jid.split('@')[1].split('/')[1] || "";
-
-               $.each(settings, function(key, val) {
-                  jsxc.options.set(key, val);
-               });
-
-               jsxc.options.xmpp.jid = jid;
-               jsxc.options.xmpp.password = password;
+               var settings = jsxc.prepareLogin();
 
                if (settings.xmpp.onlogin === "true" || settings.xmpp.onlogin === true) {
                   jsxc.triggeredFromForm = true;
@@ -335,6 +290,63 @@ var jsxc;
                jsxc.checkMaster();
             }
          }
+      },
+
+      /**
+       * Load settings and prepare jid.
+       * 
+       * @memberOf jsxc
+       * @returns Loaded settings
+       */
+      prepareLogin: function() {
+         jsxc.gui.showWaitAlert(jsxc.l.Logging_in);
+
+         var username = $(jsxc.options.loginForm.jid).val();
+         var password = $(jsxc.options.loginForm.pass).val();
+
+         if (typeof jsxc.options.loadSettings !== 'function') {
+            jsxc.error('No loadSettings function given. Abort.');
+            return;
+         }
+
+         var settings = jsxc.options.loadSettings.call(this, username, password);
+
+         if (settings === null || typeof settings === 'undefined') {
+            return true;
+         }
+
+         if (typeof settings.xmpp.username === 'string') {
+            username = settings.xmpp.username;
+         }
+
+         var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
+         var domain = settings.xmpp.domain;
+         var jid;
+
+         if (username.match(/@(.*)$/)) {
+            jid = (username.match(/\/(.*)$/)) ? username : username + resource;
+         } else {
+            jid = username + '@' + domain + resource;
+         }
+
+         if (typeof jsxc.options.loginForm.preJid === 'function') {
+            jid = jsxc.options.loginForm.preJid(jid);
+         }
+
+         jsxc.bid = jsxc.jidToBid(jid);
+
+         settings.xmpp.username = jid.split('@')[0];
+         settings.xmpp.domain = jid.split('@')[1].split('/')[0];
+         settings.xmpp.resource = jid.split('@')[1].split('/')[1] || "";
+
+         $.each(settings, function(key, val) {
+            jsxc.options.set(key, val);
+         });
+
+         jsxc.options.xmpp.jid = jid;
+         jsxc.options.xmpp.password = password;
+
+         return settings;
       },
 
       /**
@@ -1082,18 +1094,15 @@ var jsxc;
 
          $('#jsxc_dialog').find('form').submit(function() {
 
-            jsxc.gui.dialog.close();
-            jsxc.gui.showWaitAlert(jsxc.l.Logging_in);
-
             $(this).find('input[type=submit]').prop('disabled', true);
 
-            jsxc.options.xmpp.jid = $(this).find('#jsxc_username').val();
-            jsxc.options.xmpp.password = $(this).find('#jsxc_password').val();
+            jsxc.options.loginForm.form = $(this);
+            jsxc.options.loginForm.jid = $(this).find('#jsxc_username');
+            jsxc.options.loginForm.pass = $(this).find('#jsxc_password');
 
-            jsxc.bid = jsxc.jidToBid(jsxc.options.xmpp.jid);
+            jsxc.prepareLogin();
 
             jsxc.triggeredFromBox = true;
-            jsxc.options.loginForm.form = $(this);
 
             jsxc.xmpp.login();
 
@@ -2616,7 +2625,8 @@ var jsxc;
          // common placeholder
          var ph = {
             my_priv_fingerprint: jsxc.storage.getUserItem('priv_fingerprint') ? jsxc.storage.getUserItem('priv_fingerprint').replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
-            my_jid: jsxc.storage.getItem('jid'),
+            my_jid: jsxc.storage.getItem('jid') || '',
+            my_node: Strophe.getNodeFromJid(jsxc.storage.getItem('jid') || '') || '',
             root: jsxc.options.root,
             app_name: jsxc.options.app_name
          };
@@ -2645,7 +2655,7 @@ var jsxc;
             ret = jsxc.translate(ret);
 
             ret = ret.replace(/\{\{([a-zA-Z0-9_\-]+)\}\}/g, function(s, key) {
-               return ph[key] || s;
+               return (typeof ph[key] === 'string') ? ph[key] : s;
             });
 
             return ret;
@@ -2777,7 +2787,7 @@ var jsxc;
       loginBox: '<h3>%%Login%%</h3>\
         <form>\
             <p><label for="jsxc_username">%%Username%%:</label>\
-               <input type="text" name="username" id="jsxc_username" required="required" pattern="[^@]+@[^@]+(/.+)?" value="{{my_jid}}"/></p>\
+               <input type="text" name="username" id="jsxc_username" required="required" value="{{my_node}}"/></p>\
             <p><label for="jsxc_password">%%Password%%:</label>\
                <input type="password" name="password" required="required" id="jsxc_password" /></p>\
             <div class="bottom_submit_section">\
