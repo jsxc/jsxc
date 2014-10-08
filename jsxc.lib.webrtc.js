@@ -3,7 +3,7 @@
 var RTC = null, RTCPeerconnection = null;
 
 jsxc.gui.template.incomingCall = '<h3>%%Incoming_call%%</h3>\
-        <p>%%Do_you_want_to_accept_the_call_from%% {{cid_name}}?</p>\
+        <p>%%Do_you_want_to_accept_the_call_from%% {{bid_name}}?</p>\
         <p class="jsxc_right">\
             <a href="#" class="button jsxc_reject">%%Reject%%</a> <a href="#" class="button creation jsxc_accept">%%Accept%%</a>\
          </p>';
@@ -117,7 +117,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          if (self.conn.disco) {
             self.conn.disco.addFeature('urn:xmpp:jingle:apps:dtls:0');
          }
-         
+
          if (self.conn.caps) {
             $(document).on('caps.strophe', $.proxy(self.onCaps, self));
          }
@@ -170,11 +170,11 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        * @private
        * @memberOf jsxc.webrtc
        * @param event
-       * @param cid cid of roster item
-       * @param data data wich belongs to cid
+       * @param bid bid of roster item
+       * @param data data wich belongs to bid
        * @param el the roster item
        */
-      onAddRosterItem: function(event, cid, data, el) {
+      onAddRosterItem: function(event, bid, data, el) {
          var self = jsxc.webrtc;
          var videoIcon = $('<div class="jsxc_video jsxc_disabled" title="' + jsxc.l.Start_video_call + '"></div>');
 
@@ -186,7 +186,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          el.find('.jsxc_options.jsxc_left').append(videoIcon);
 
          el.on('extra.jsxc', function() {
-            self.updateIcon(cid);
+            self.updateIcon(bid);
          });
       },
 
@@ -211,26 +211,26 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var div = $('<div>').addClass('jsxc_video');
          win.find('.jsxc_transfer:eq(1)').after(div);
 
-         self.updateIcon(jsxc.jidToCid(win.data('jid')));
+         self.updateIcon(jsxc.jidToBid(win.data('jid')));
       },
 
       /**
        * Enable or disable "video" icon and assign full jid.
        * 
        * @memberOf jsxc.webrtc
-       * @param cid CSS conform jid
+       * @param bid CSS conform jid
        */
-      updateIcon: function(cid) {
+      updateIcon: function(bid) {
 
          var self = jsxc.webrtc;
-         var win = jsxc.gui.getWindow(cid);
-         var jid = win.data('jid') || jsxc.storage.getUserItem('buddy_' + cid).jid;
+         var win = jsxc.gui.window.get(bid);
+         var jid = win.data('jid') || jsxc.storage.getUserItem('buddy', bid).jid;
 
-         var el = win.find('.jsxc_video').add('#' + cid + ' .jsxc_video');
+         var el = win.find('.jsxc_video').add(jsxc.gui.roster.getItem(bid).find('.jsxc_video'));
 
          if (Strophe.getResourceFromJid(jid) === null) {
 
-            var res = jsxc.storage.getUserItem('buddy_' + cid).res;
+            var res = jsxc.storage.getUserItem('buddy', bid).res;
 
             if (Array.isArray(res) && res.length === 1) {
                jid += '/' + res[0];
@@ -263,11 +263,11 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        */
       onMessage: function(e, from) {
          var self = jsxc.webrtc;
-         var bJid = Strophe.getBareJidFromJid(from);
+         var bid = jsxc.jidToBid(from);
 
-         if (self.chatJids[bJid] !== from) {
-            self.updateIcon(jsxc.jidToCid(bJid));
-            self.chatJids[bJid] = from;
+         if (self.chatJids[bid] !== from) {
+            self.updateIcon(bid);
+            self.chatJids[bid] = from;
          }
       },
 
@@ -329,7 +329,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       onCaps: function(event, jid) {
          var self = jsxc.webrtc;
 
-         self.updateIcon(jsxc.jidToCid(jid));
+         self.updateIcon(jsxc.jidToBid(jid));
       },
 
       /**
@@ -389,12 +389,12 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
 
          var self = this;
          var sess = this.conn.jingle.sessions[sid];
-         var jid = jsxc.jidToCid(sess.peerjid);
+         var bid = jsxc.jidToBid(sess.peerjid);
 
-         jsxc.gui.window.postMessage(jid, 'sys', jsxc.translate('%%Incoming call.%%'));
+         jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Incoming call.%%'));
 
          // display notification
-         jsxc.notification.notify(jsxc.translate('%%Incoming call%%'), jsxc.translate('%%from%% ' + jid));
+         jsxc.notification.notify(jsxc.translate('%%Incoming call%%'), jsxc.translate('%%from%% ' + bid));
 
          // send signal to partner
          sess.sendRinging();
@@ -422,7 +422,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             return;
          }
 
-         var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', jsxc.jidToCid(jid)), {
+         var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', bid), {
             noClose: true
          });
 
@@ -454,7 +454,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       onCallTerminated: function(event, sid, reason, text) {
          this.setStatus('call terminated ' + sid + (reason ? (': ' + reason + ' ' + text) : ''));
 
-         var cid = jsxc.jidToCid(jsxc.webrtc.last_caller);
+         var bid = jsxc.jidToBid(jsxc.webrtc.last_caller);
 
          if (this.localStream) {
             this.localStream.stop();
@@ -475,7 +475,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          $(document).off('error.jingle');
          jsxc.gui.dialog.close();
 
-         jsxc.gui.window.postMessage(cid, 'sys', jsxc.translate('%%Call terminated%%' + (reason ? (': %%' + reason + '%%') : '') + '.'));
+         jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Call terminated%%' + (reason ? (': %%' + reason + '%%') : '') + '.'));
       },
 
       /**
@@ -613,7 +613,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             'finish.mediaready.jsxc': function() {
                self.setStatus('Initiate call');
 
-               jsxc.gui.window.postMessage(jsxc.jidToCid(jid), 'sys', jsxc.translate('%%Call started.%%'));
+               jsxc.gui.window.postMessage(jsxc.jidToBid(jid), 'sys', jsxc.translate('%%Call started.%%'));
 
                $(document).one('error.jingle', function(e, sid, error) {
                   if (error.source !== 'offer') {
@@ -770,7 +770,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             }
          };
 
-         var win = jsxc.gui.window.open(jsxc.jidToCid(jid));
+         var win = jsxc.gui.window.open(jsxc.jidToBid(jid));
 
          $('#jsxc_dialog .jsxc_chatarea ul').append(win.detach());
 

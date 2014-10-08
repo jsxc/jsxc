@@ -60,11 +60,8 @@ var jsxc;
       /** Timeout for storageNotConform test */
       toSNC: null,
 
-      /** css id to jid list */
-      jids: [],
-
-      /** My css id */
-      cid: null,
+      /** My bar id */
+      bid: null,
 
       /** Some constants */
       CONST: {
@@ -174,7 +171,7 @@ var jsxc;
           * @param {object} value option value
           */
          jsxc.options.set = function(key, value) {
-            jsxc.storage.updateUserItem('options', key, value);
+            jsxc.storage.updateItem('options', key, value, true);
          };
 
          jsxc.storageNotConform = jsxc.storage.getItem('storageNotConform');
@@ -290,7 +287,7 @@ var jsxc;
                   jid = jsxc.options.loginForm.preJid(jid);
                }
 
-               jsxc.cid = jsxc.jidToCid(jid);
+               jsxc.bid = jsxc.jidToBid(jid);
 
                settings.xmpp.username = jid.split('@')[0];
                settings.xmpp.domain = jid.split('@')[1].split('/')[0];
@@ -319,7 +316,7 @@ var jsxc;
 
             // Restore old connection
 
-            jsxc.cid = jsxc.jidToCid(jsxc.storage.getItem('jid'));
+            jsxc.bid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
 
             jsxc.gui.init();
 
@@ -428,6 +425,7 @@ var jsxc;
        */
       checkMaster: function() {
          jsxc.debug('check master');
+
          jsxc.to = window.setTimeout(jsxc.onMaster, 1000);
          jsxc.storage.ink('alive');
       },
@@ -494,11 +492,22 @@ var jsxc;
        * @returns {String} css Compatible string
        */
       jidToCid: function(jid) {
+         jsxc.warn('jsxc.jidToCid is deprecated!');
+
          var cid = Strophe.getBareJidFromJid(jid).replace('@', '-').replace(/\./g, '-').toLowerCase();
 
-         jsxc.jids[cid] = jid;
-
          return cid;
+      },
+
+      /**
+       * Create comparable bar jid.
+       * 
+       * @memberOf jsxc
+       * @param jid
+       * @returns comparable bar jid
+       */
+      jidToBid: function(jid) {
+         return Strophe.getBareJidFromJid(jid).toLowerCase();
       },
 
       /**
@@ -532,23 +541,23 @@ var jsxc;
             return;
          }
 
-         $.each(windows, function(index, cid) {
-            var window = jsxc.storage.getUserItem('window_' + cid);
+         $.each(windows, function(index, bid) {
+            var window = jsxc.storage.getUserItem('window', bid);
 
             if (!window) {
-               jsxc.debug('Associated window-element is missing: ' + cid);
+               jsxc.debug('Associated window-element is missing: ' + bid);
                return true;
             }
 
-            jsxc.gui.window.init(cid);
+            jsxc.gui.window.init(bid);
 
             if (!window.minimize) {
-               jsxc.gui.window.show(cid);
+               jsxc.gui.window.show(bid);
             } else {
-               jsxc.gui.window.hide(cid);
+               jsxc.gui.window.hide(bid);
             }
 
-            jsxc.gui.window.setText(cid, window.text);
+            jsxc.gui.window.setText(bid, window.text);
          });
       },
 
@@ -864,20 +873,20 @@ var jsxc;
       /**
        * Updates Information in roster and chatbar
        * 
-       * @param {String} cid CSS compatible jid
+       * @param {String} bid bar jid
        */
-      update: function(cid) {
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
+      update: function(bid) {
+         var data = jsxc.storage.getUserItem('buddy', bid);
 
          if (!data) {
-            jsxc.debug('No data for ' + cid);
+            jsxc.debug('No data for ' + bid);
             return;
          }
 
-         var ri = $('#' + cid); // roster item from user
-         var we = jsxc.gui.getWindow(cid); // window element from user
-         var ue = $('#' + cid + ', #jsxc_window_' + cid + ', .jsxc_buddy_' + cid); // both
-         var bullet = $('.jsxc_buddy_' + cid);
+         var ri = jsxc.gui.roster.getItem(bid); // roster item from user
+         var we = jsxc.gui.window.get(bid); // window element from user
+         var ue = ri.add(we); // both
+         var bullet = $('.jsxc_bullet[data-bid="' + bid + '"]');
 
          // Attach data to corresponding roster item
          ri.data(data);
@@ -952,7 +961,7 @@ var jsxc;
             return;
          }
 
-         var avatarSrc = jsxc.storage.getUserItem('avatar_' + aid);
+         var avatarSrc = jsxc.storage.getUserItem('avatar', aid);
 
          var setAvatar = function(src) {
             if (src === 0) {
@@ -984,12 +993,12 @@ var jsxc;
                   src = 'data:' + type + ';base64,' + img;
                }
 
-               jsxc.storage.setUserItem('avatar_' + aid, src);
+               jsxc.storage.setUserItem('avatar', aid, src);
                setAvatar(src);
             }, Strophe.getBareJidFromJid(jid), function(msg) {
                jsxc.warn('Could not load vcard.', msg);
 
-               jsxc.storage.setUserItem('avatar_' + aid, 0);
+               jsxc.storage.setUserItem('avatar', aid, 0);
                setAvatar(0);
             });
          }
@@ -1013,11 +1022,13 @@ var jsxc;
       /**
        * Returns the window element
        * 
-       * @param {String} cid
+       * @param {String} bid
        * @returns {jquery} jQuery object of the window element
        */
-      getWindow: function(cid) {
-         return $('#jsxc_window_' + cid);
+      getWindow: function(bid) {
+         jsxc.warn('jsxc.gui.getWindow is deprecated!');
+
+         return jsxc.gui.window.get(bid);
       },
 
       /**
@@ -1079,7 +1090,7 @@ var jsxc;
             jsxc.options.xmpp.jid = $(this).find('#jsxc_username').val();
             jsxc.options.xmpp.password = $(this).find('#jsxc_password').val();
 
-            jsxc.cid = jsxc.jidToCid(jsxc.options.xmpp.jid);
+            jsxc.bid = jsxc.jidToBid(jsxc.options.xmpp.jid);
 
             jsxc.triggeredFromBox = true;
             jsxc.options.loginForm.form = $(this);
@@ -1093,34 +1104,34 @@ var jsxc;
       /**
        * Creates and show the fingerprint dialog
        * 
-       * @param {String} cid
+       * @param {String} bid
        */
-      showFingerprints: function(cid) {
-         jsxc.gui.dialog.open(jsxc.gui.template.get('fingerprintsDialog', cid));
+      showFingerprints: function(bid) {
+         jsxc.gui.dialog.open(jsxc.gui.template.get('fingerprintsDialog', bid));
       },
 
       /**
        * Creates and show the verification dialog
        * 
-       * @param {String} cid
+       * @param {String} bid
        */
-      showVerification: function(cid) {
+      showVerification: function(bid) {
 
          // Check if there is a open dialog
          if ($('#jsxc_dialog').length > 0) {
             setTimeout(function() {
-               jsxc.gui.showVerification(cid);
+               jsxc.gui.showVerification(bid);
             }, 3000);
             return;
          }
 
          // verification only possible if the connection is encrypted
-         if (jsxc.storage.getUserItem('buddy_' + cid).msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED) {
+         if (jsxc.storage.getUserItem('buddy', bid).msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED) {
             jsxc.warn('Connection not encrypted');
             return;
          }
 
-         jsxc.gui.dialog.open(jsxc.gui.template.get('authenticationDialog', cid));
+         jsxc.gui.dialog.open(jsxc.gui.template.get('authenticationDialog', bid));
 
          // Add handler
 
@@ -1137,16 +1148,16 @@ var jsxc;
          // Manual
          $('#jsxc_dialog > div:eq(1) a.creation').click(function() {
             if (jsxc.master) {
-               jsxc.otr.objects[cid].trust = true;
+               jsxc.otr.objects[bid].trust = true;
             }
 
-            jsxc.storage.updateUserItem('buddy_' + cid, 'trust', true);
+            jsxc.storage.updateUserItem('buddy', bid, 'trust', true);
 
             jsxc.gui.dialog.close();
 
-            jsxc.storage.updateUserItem('buddy_' + cid, 'trust', true);
-            jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.conversation_is_now_verified);
-            jsxc.gui.update(cid);
+            jsxc.storage.updateUserItem('buddy', bid, 'trust', true);
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.conversation_is_now_verified);
+            jsxc.gui.update(bid);
          });
 
          // Question
@@ -1166,9 +1177,9 @@ var jsxc;
             }
 
             if (jsxc.master) {
-               jsxc.otr.sendSmpReq(cid, sec, quest);
+               jsxc.otr.sendSmpReq(bid, sec, quest);
             } else {
-               jsxc.storage.setUserItem('smp_' + cid, {
+               jsxc.storage.setUserItem('smp_' + bid, {
                   sec: sec,
                   quest: quest
                });
@@ -1176,7 +1187,7 @@ var jsxc;
 
             jsxc.gui.dialog.close();
 
-            jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.verification_query_sent);
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.verification_query_sent);
          });
 
          // Secret
@@ -1195,9 +1206,9 @@ var jsxc;
             }
 
             if (jsxc.master) {
-               jsxc.otr.sendSmpReq(cid, sec);
+               jsxc.otr.sendSmpReq(bid, sec);
             } else {
-               jsxc.storage.setUserItem('smp_' + cid, {
+               jsxc.storage.setUserItem('smp_' + bid, {
                   sec: sec,
                   quest: null
                });
@@ -1205,7 +1216,7 @@ var jsxc;
 
             jsxc.gui.dialog.close();
 
-            jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.verification_query_sent);
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.verification_query_sent);
          });
       },
 
@@ -1228,7 +1239,7 @@ var jsxc;
          });
 
          $('#jsxc_dialog .jsxc_approve').click(function() {
-            var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(from));
+            var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
 
             jsxc.xmpp.resFriendReq(from, true);
 
@@ -1272,10 +1283,10 @@ var jsxc;
             }
 
             // Check if the username is valid
-            if (!username || !username.match(/^[\w-_.]+@[\w-_.]+$/g)) {
+            if (!username || !username.match(/^[^"&'\/:<>@\s]+@[\w-_.]+$/g)) {
                // Add notification
                $('#jsxc_username').addClass('jsxc_invalid').keyup(function() {
-                  if ($(this).val().match(/^[\w-_.]+@[\w-_.]+$/g)) {
+                  if ($(this).val().match(/^[^"&'\/:<>@\s]+@[\w-_.]+$/g)) {
                      $(this).removeClass('jsxc_invalid');
                   }
                });
@@ -1292,21 +1303,21 @@ var jsxc;
       /**
        * Create and show dialog to remove a buddy
        * 
-       * @param {type} cid
+       * @param {type} bid
        * @returns {undefined}
        */
-      showRemoveDialog: function(cid) {
+      showRemoveDialog: function(bid) {
 
-         jsxc.gui.dialog.open(jsxc.gui.template.get('removeDialog', cid));
+         jsxc.gui.dialog.open(jsxc.gui.template.get('removeDialog', bid));
 
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
+         var data = jsxc.storage.getUserItem('buddy', bid);
 
          $('#jsxc_dialog .creation').click(function() {
             if (jsxc.master) {
                jsxc.xmpp.removeBuddy(data.jid);
             } else {
                // inform master
-               jsxc.storage.setUserItem('deletebuddy_' + cid, {
+               jsxc.storage.setUserItem('deletebuddy', bid, {
                   jid: data.jid
                });
             }
@@ -1428,9 +1439,9 @@ var jsxc;
        * @param {String} bjid Bar jid
        */
       showVcard: function(bjid) {
-         jsxc.gui.dialog.open(jsxc.gui.template.get('vCard', jsxc.jidToCid(bjid)));
+         jsxc.gui.dialog.open(jsxc.gui.template.get('vCard', jsxc.jidToBid(bjid)));
 
-         var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(bjid));
+         var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(bjid));
 
          // Display resources and corresponding information
          var i, j, res, identities, identity = null, cap, client;
@@ -1456,7 +1467,7 @@ var jsxc;
                }
             }
 
-            var status = jsxc.storage.getUserItem('res_' + jsxc.jidToCid(bjid))[res];
+            var status = jsxc.storage.getUserItem('res', bjid)[res];
 
             $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Resource%%') + ':</strong> ' + res + '</li>');
             $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Client%%') + ':</strong> ' + client + '</li>');
@@ -1640,12 +1651,12 @@ var jsxc;
        * Update all presence objects for given user.
        * 
        * @memberOf jsxc.gui
-       * @param cid CSS id of user.
+       * @param bid bar jid of user.
        * @param {CONST.STATUS} pres New presence state.
        */
-      updatePresence: function(cid, pres) {
+      updatePresence: function(bid, pres) {
 
-         if (cid === 'own') {
+         if (bid === 'own') {
             if (pres === 'dnd') {
                $('#jsxc_menu .jsxc_muteNotification').addClass('jsxc_disabled');
                jsxc.notification.muteSound(true);
@@ -1658,7 +1669,7 @@ var jsxc;
             }
          }
 
-         $('.jsxc_presence_' + cid).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
+         $('.jsxc_presence[data-bid="' + bid + '"]').removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
       }
    };
 
@@ -1778,29 +1789,29 @@ var jsxc;
       /**
        * Create roster item and add it to the roster
        * 
-       * @param {String} cid CSS compatible jid
+       * @param {String} bid bar jid
        */
-      add: function(cid) {
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
-         var bud = jsxc.gui.buddyTemplate.clone().attr('id', cid).attr('data-type', data.type || 'chat');
+      add: function(bid) {
+         var data = jsxc.storage.getUserItem('buddy', bid);
+         var bud = jsxc.gui.buddyTemplate.clone().attr('data-bid', bid).attr('data-type', data.type || 'chat');
 
-         jsxc.gui.roster.insert(cid, bud);
+         jsxc.gui.roster.insert(bid, bud);
 
          bud.click(function() {
-            jsxc.gui.window.open(cid);
+            jsxc.gui.window.open(bid);
          });
 
          bud.find('.jsxc_chaticon').click(function() {
-            jsxc.gui.window.open(cid);
+            jsxc.gui.window.open(bid);
          });
 
          bud.find('.jsxc_rename').click(function() {
-            jsxc.gui.roster.rename(cid);
+            jsxc.gui.roster.rename(bid);
             return false;
          });
 
          bud.find('.jsxc_delete').click(function() {
-            jsxc.gui.showRemoveDialog(cid);
+            jsxc.gui.showRemoveDialog(bid);
             return false;
          });
 
@@ -1821,27 +1832,31 @@ var jsxc;
             return false;
          });
 
-         jsxc.gui.update(cid);
+         jsxc.gui.update(bid);
 
          // update scrollbar
          $('#jsxc_buddylist').slimScroll({
             scrollTo: '0px'
          });
 
-         $(document).trigger('add.roster.jsxc', [ cid, data, bud ]);
+         $(document).trigger('add.roster.jsxc', [ bid, data, bud ]);
+      },
+
+      getItem: function(bid) {
+         return $("#jsxc_buddylist > li[data-bid='" + bid + "']");
       },
 
       /**
        * Insert roster item. First order: online > away > offline. Second order:
        * alphabetical of the name
        * 
-       * @param {type} cid
+       * @param {type} bid
        * @param {jquery} li roster item which should be insert
        * @returns {undefined}
        */
-      insert: function(cid, li) {
+      insert: function(bid, li) {
 
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
+         var data = jsxc.storage.getUserItem('buddy', bid);
          var listElements = $('#jsxc_buddylist > li');
          var insert = false;
 
@@ -1869,52 +1884,52 @@ var jsxc;
       /**
        * Initiate reorder of roster item
        * 
-       * @param {type} cid
+       * @param {type} bid
        * @returns {undefined}
        */
-      reorder: function(cid) {
-         jsxc.gui.roster.insert(cid, jsxc.gui.roster.remove(cid));
+      reorder: function(bid) {
+         jsxc.gui.roster.insert(bid, jsxc.gui.roster.remove(bid));
       },
 
       /**
        * Removes buddy from roster
        * 
-       * @param {String} cid CSS compatible jid
+       * @param {String} bid bar jid
        * @return {JQueryObject} Roster list element
        */
-      remove: function(cid) {
-         return $('#' + cid).detach();
+      remove: function(bid) {
+         return jsxc.gui.roster.getItem(bid).detach();
       },
 
       /**
        * Removes buddy from roster and clean up
        * 
-       * @param {String} cid CSS compatible jid
+       * @param {String} bid bar compatible jid
        */
-      purge: function(cid) {
+      purge: function(bid) {
          if (jsxc.master) {
-            jsxc.storage.removeUserItem('buddy_' + cid);
-            jsxc.storage.removeUserItem('otr_' + cid);
-            jsxc.storage.removeUserItem('otr_version_' + cid);
-            jsxc.storage.removeUserItem('chat_' + cid);
-            jsxc.storage.removeUserItem('window_' + cid);
-            jsxc.storage.removeUserElement('buddylist', cid);
-            jsxc.storage.removeUserElement('windowlist', cid);
+            jsxc.storage.removeUserItem('buddy', bid);
+            jsxc.storage.removeUserItem('otr', bid);
+            jsxc.storage.removeUserItem('otr_version_' + bid);
+            jsxc.storage.removeUserItem('chat', bid);
+            jsxc.storage.removeUserItem('window', bid);
+            jsxc.storage.removeUserElement('buddylist', bid);
+            jsxc.storage.removeUserElement('windowlist', bid);
          }
 
-         jsxc.gui.window._close(cid);
-         jsxc.gui.roster.remove(cid);
+         jsxc.gui.window._close(bid);
+         jsxc.gui.roster.remove(bid);
       },
 
       /**
        * Create input element for rename action
        * 
-       * @param {type} cid
+       * @param {type} bid
        * @returns {undefined}
        */
-      rename: function(cid) {
-         var name = $('#' + cid + ' .jsxc_name');
-         var options = $('#' + cid).find('.jsxc_options, .jsxc_control');
+      rename: function(bid) {
+         var name = jsxc.gui.roster.getItem(bid).find('.jsxc_name');
+         var options = jsxc.gui.roster.getItem(bid).find('.jsxc_options, .jsxc_control');
          var input = $('<input type="text" name="name"/>');
 
          options.hide();
@@ -1928,7 +1943,7 @@ var jsxc;
 
             options.show();
             input.replaceWith(name);
-            jsxc.gui.roster._rename(cid, $(this).val());
+            jsxc.gui.roster._rename(bid, $(this).val());
 
             $('html').off('click');
          });
@@ -1941,20 +1956,20 @@ var jsxc;
          $('html').one('click', function() {
             options.show();
             input.replaceWith(name);
-            jsxc.gui.roster._rename(cid, input.val());
+            jsxc.gui.roster._rename(bid, input.val());
          });
       },
 
       /**
        * Rename buddy
        * 
-       * @param {type} cid
+       * @param {type} bid
        * @param {type} newname new name of buddy
        * @returns {undefined}
        */
-      _rename: function(cid, newname) {
+      _rename: function(bid, newname) {
          if (jsxc.master) {
-            var d = jsxc.storage.getUserItem('buddy_' + cid);
+            var d = jsxc.storage.getUserItem('buddy', bid);
             var iq = $iq({
                type: 'set'
             }).c('query', {
@@ -1966,8 +1981,8 @@ var jsxc;
             jsxc.xmpp.conn.sendIQ(iq);
          }
 
-         jsxc.storage.updateUserItem('buddy_' + cid, 'name', newname);
-         jsxc.gui.update(cid);
+         jsxc.storage.updateUserItem('buddy', bid, 'name', newname);
+         jsxc.gui.update(bid);
       },
 
       /**
@@ -2113,16 +2128,16 @@ var jsxc;
        * Init a window skeleton
        * 
        * @memberOf jsxc.gui.window
-       * @param {String} cid
+       * @param {String} bid
        * @returns {jQuery} Window object
        */
-      init: function(cid) {
-         if (jsxc.el_exists('#jsxc_window_' + cid)) {
-            return jsxc.gui.getWindow(cid);
+      init: function(bid) {
+         if (jsxc.gui.window.get(bid).length > 0) {
+            return jsxc.gui.window.get(bid);
          }
 
-         var win = jsxc.gui.windowTemplate.clone().attr('id', 'jsxc_window_' + cid).hide().appendTo('#jsxc_windowList > ul').show('slow');
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
+         var win = jsxc.gui.windowTemplate.clone().attr('data-bid', bid).hide().appendTo('#jsxc_windowList > ul').show('slow');
+         var data = jsxc.storage.getUserItem('buddy', bid);
 
          // Attach jid to window
          win.data('jid', data.jid);
@@ -2132,27 +2147,27 @@ var jsxc;
          jsxc.gui.toggleList.call(win.find('.jsxc_settings'));
 
          win.find('.jsxc_verification').click(function() {
-            jsxc.gui.showVerification(cid);
+            jsxc.gui.showVerification(bid);
          });
 
          win.find('.jsxc_fingerprints').click(function() {
-            jsxc.gui.showFingerprints(cid);
+            jsxc.gui.showFingerprints(bid);
          });
 
          win.find('.jsxc_transfer').click(function() {
-            jsxc.otr.toggleTransfer(cid);
+            jsxc.otr.toggleTransfer(bid);
          });
 
          win.find('.jsxc_bar').click(function() {
-            jsxc.gui.window.toggle(cid);
+            jsxc.gui.window.toggle(bid);
          });
 
          win.find('.jsxc_close').click(function() {
-            jsxc.gui.window.close(cid);
+            jsxc.gui.window.close(bid);
          });
 
          win.find('.jsxc_clear').click(function() {
-            jsxc.gui.window.clear(cid);
+            jsxc.gui.window.clear(bid);
          });
 
          win.find('.jsxc_tools').click(function() {
@@ -2166,7 +2181,7 @@ var jsxc;
                body = '';
             }
 
-            jsxc.storage.updateUserItem('window_' + cid, 'text', body);
+            jsxc.storage.updateUserItem('window', bid, 'text', body);
          });
 
          win.find('.jsxc_textinput').keypress(function(ev) {
@@ -2174,7 +2189,7 @@ var jsxc;
                return;
             }
 
-            jsxc.gui.window.postMessage(cid, 'out', $(this).val());
+            jsxc.gui.window.postMessage(bid, 'out', $(this).val());
 
             $(this).val('');
          });
@@ -2201,22 +2216,22 @@ var jsxc;
             }
          });
 
-         if ($.inArray(cid, jsxc.storage.getUserItem('windowlist')) < 0) {
+         if ($.inArray(bid, jsxc.storage.getUserItem('windowlist')) < 0) {
 
             // add window to windowlist
             var wl = jsxc.storage.getUserItem('windowlist');
-            wl.push(cid);
+            wl.push(bid);
             jsxc.storage.setUserItem('windowlist', wl);
 
             // init window element in storage
-            jsxc.storage.setUserItem('window_' + cid, {
+            jsxc.storage.setUserItem('window', bid, {
                minimize: true,
                text: '',
                unread: false
             });
          } else {
 
-            if (jsxc.storage.getUserItem('window_' + cid).unread) {
+            if (jsxc.storage.getUserItem('window', bid).unread) {
                win.addClass('jsxc_unreadMsg');
             }
          }
@@ -2233,15 +2248,15 @@ var jsxc;
 
          jsxc.gui.toggleList.call(win.find('.jsxc_emoticons'));
 
-         jsxc.gui.window.restoreChat(cid);
+         jsxc.gui.window.restoreChat(bid);
 
-         jsxc.gui.update(cid);
+         jsxc.gui.update(bid);
 
          jsxc.gui.updateWindowListSB();
 
          // create related otr object
-         if (jsxc.master && !jsxc.otr.objects[cid]) {
-            jsxc.otr.create(cid);
+         if (jsxc.master && !jsxc.otr.objects[bid]) {
+            jsxc.otr.create(bid);
          }
 
          $(document).trigger('init.window.jsxc', [ win ]);
@@ -2250,16 +2265,26 @@ var jsxc;
       },
 
       /**
-       * Open a window, related to the cid. If the window doesn't exist, it will
+       * Returns the window element
+       * 
+       * @param {String} bid
+       * @returns {jquery} jQuery object of the window element
+       */
+      get: function(id) {
+         return $("#jsxc_windowList > ul > li[data-bid='" + jsxc.jidToBid(id) + "']");
+      },
+
+      /**
+       * Open a window, related to the bid. If the window doesn't exist, it will
        * be created.
        * 
-       * @param {String} cid
+       * @param {String} bid
        * @returns {jQuery} Window object
        */
-      open: function(cid) {
-         var win = jsxc.gui.window.init(cid);
-         jsxc.gui.window.show(cid);
-         jsxc.gui.window.highlight(cid);
+      open: function(bid) {
+         var win = jsxc.gui.window.init(bid);
+         jsxc.gui.window.show(bid);
+         jsxc.gui.window.highlight(bid);
 
          win.find('.jsxc_textinput').focus();
 
@@ -2269,28 +2294,28 @@ var jsxc;
       /**
        * Close chatwindow and clean up
        * 
-       * @param {String} cid CSS compatible jid
+       * @param {String} bid bar jid
        */
-      close: function(cid) {
+      close: function(bid) {
 
-         if (!jsxc.el_exists('#jsxc_window_' + cid)) {
+         if (jsxc.gui.window.get(bid).length === 0) {
             jsxc.warn('Want to close a window, that is not open.');
             return;
          }
 
-         jsxc.storage.removeUserElement('windowlist', cid);
-         jsxc.storage.removeUserItem('window_' + cid);
+         jsxc.storage.removeUserElement('windowlist', bid);
+         jsxc.storage.removeUserItem('window', bid);
 
-         jsxc.gui.window._close(cid);
+         jsxc.gui.window._close(bid);
       },
 
       /**
        * Close chatwindow
        * 
-       * @param {String} cid
+       * @param {String} bid
        */
-      _close: function(cid) {
-         $('#jsxc_window_' + cid).hide('slow', function() {
+      _close: function(bid) {
+         jsxc.gui.window.get(bid).hide('slow', function() {
             $(this).remove();
 
             jsxc.gui.updateWindowListSB();
@@ -2300,13 +2325,13 @@ var jsxc;
       /**
        * Toggle between minimize and maximize of the text area
        * 
-       * @param {String} cid CSS compatible jid
+       * @param {String} bid bar jid
        */
-      toggle: function(cid) {
-         if (jsxc.gui.getWindow(cid).find('.jsxc_fade').is(':hidden')) {
-            jsxc.gui.window.show(cid);
+      toggle: function(bid) {
+         if (jsxc.gui.window.get(bid).find('.jsxc_fade').is(':hidden')) {
+            jsxc.gui.window.show(bid);
          } else {
-            jsxc.gui.window.hide(cid);
+            jsxc.gui.window.hide(bid);
          }
 
          jsxc.gui.updateWindowListSB();
@@ -2315,33 +2340,33 @@ var jsxc;
       /**
        * Maximize text area and save
        * 
-       * @param {String} cid
+       * @param {String} bid
        */
-      show: function(cid) {
+      show: function(bid) {
 
-         jsxc.storage.updateUserItem('window_' + cid, 'minimize', false);
+         jsxc.storage.updateUserItem('window', bid, 'minimize', false);
 
-         jsxc.gui.window._show(cid);
+         jsxc.gui.window._show(bid);
       },
 
       /**
        * Maximize text area
        * 
-       * @param {String} cid
+       * @param {String} bid
        * @returns {undefined}
        */
-      _show: function(cid) {
-         var win = jsxc.gui.getWindow(cid);
-         $('#jsxc_window_' + cid + ' .jsxc_fade').slideDown();
+      _show: function(bid) {
+         var win = jsxc.gui.window.get(bid);
+         jsxc.gui.window.get(bid).find('.jsxc_fade').slideDown();
          win.removeClass('jsxc_min');
 
          // remove unread flag
          win.removeClass('jsxc_unreadMsg');
-         jsxc.storage.updateUserItem('window_' + cid, 'unread', false);
+         jsxc.storage.updateUserItem('window', bid, 'unread', false);
 
          // If the area is hidden, the scrolldown function doesn't work. So we
          // call it here.
-         jsxc.gui.window.scrollDown(cid);
+         jsxc.gui.window.scrollDown(bid);
 
          win.find('.jsxc_textinput').focus();
 
@@ -2351,33 +2376,32 @@ var jsxc;
       /**
        * Minimize text area and save
        * 
-       * @param {String} cid
+       * @param {String} bid
        */
-      hide: function(cid) {
-         jsxc.storage.updateUserItem('window_' + cid, 'minimize', true);
+      hide: function(bid) {
+         jsxc.storage.updateUserItem('window', bid, 'minimize', true);
 
-         jsxc.gui.window._hide(cid);
+         jsxc.gui.window._hide(bid);
       },
 
       /**
        * Minimize text area
        * 
-       * @param {String} cid
+       * @param {String} bid
        */
-      _hide: function(cid) {
-         $('#jsxc_window_' + cid + ' .jsxc_fade').slideUp();
-         $('#jsxc_window_' + cid).addClass('jsxc_min');
+      _hide: function(bid) {
+         jsxc.gui.window.get(bid).addClass('jsxc_min').find(' .jsxc_fade').slideUp();
 
-         jsxc.gui.getWindow(cid).trigger('hidden.window.jsxc');
+         jsxc.gui.window.get(bid).trigger('hidden.window.jsxc');
       },
 
       /**
        * Highlight window
        * 
-       * @param {type} cid
+       * @param {type} bid
        */
-      highlight: function(cid) {
-         var el = $('#jsxc_window_' + cid + ' .jsxc_bar');
+      highlight: function(bid) {
+         var el = jsxc.gui.window.get(bid).find(' .jsxc_bar');
 
          if (!el.is(':animated')) {
             el.effect('highlight', {
@@ -2389,10 +2413,10 @@ var jsxc;
       /**
        * Scroll chat area to the bottom
        * 
-       * @param {String} cid CSS compatible jid
+       * @param {String} bid bar jid
        */
-      scrollDown: function(cid) {
-         var chat = $('#jsxc_window_' + cid + ' .jsxc_textarea');
+      scrollDown: function(bid) {
+         var chat = jsxc.gui.window.get(bid).find('.jsxc_textarea');
 
          // check if chat exist
          if (chat.length === 0) {
@@ -2407,14 +2431,14 @@ var jsxc;
       /**
        * Write Message to chat area and save
        * 
-       * @param {String} cid CSS compatible jid
+       * @param {String} bid bar jid
        * @param {String} direction 'in' message is received or 'out' message is
        *        send
        * @param {String} msg Message to display
        */
-      postMessage: function(cid, direction, msg) {
-         var chat = jsxc.storage.getUserItem('chat_' + cid) || [];
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
+      postMessage: function(bid, direction, msg) {
+         var chat = jsxc.storage.getUserItem('chat', bid) || [];
+         var data = jsxc.storage.getUserItem('buddy', bid);
          var html_msg = msg;
          var uid = new Date().getTime() + ':msg';
 
@@ -2450,40 +2474,40 @@ var jsxc;
          };
 
          chat.unshift(post);
-         jsxc.storage.setUserItem('chat_' + cid, chat);
+         jsxc.storage.setUserItem('chat', bid, chat);
 
          if (direction === 'in') {
-            $(document).trigger('postmessagein.jsxc', [ jsxc.jids[cid], html_msg ]);
+            $(document).trigger('postmessagein.jsxc', [ bid, html_msg ]);
          }
 
          if (direction === 'out' && jsxc.master) {
-            jsxc.xmpp.sendMessage(cid, html_msg, uid);
+            jsxc.xmpp.sendMessage(bid, html_msg, uid);
          }
 
-         jsxc.gui.window._postMessage(cid, post);
+         jsxc.gui.window._postMessage(bid, post);
 
          if (direction === 'out' && msg === '?') {
-            jsxc.gui.window.postMessage(cid, 'sys', '42');
+            jsxc.gui.window.postMessage(bid, 'sys', '42');
          }
       },
 
       /**
        * Write Message to chat area
        * 
-       * @param {String} cid CSS compatible jid
+       * @param {String} bid bar jid
        * @param {Object} post Post object with direction, msg, uid, received
        * @param {Bool} restore If true no highlights are used and so unread flag
        *        set
        */
-      _postMessage: function(cid, post, restore) {
-         var win = jsxc.gui.getWindow(cid);
+      _postMessage: function(bid, post, restore) {
+         var win = jsxc.gui.window.get(bid);
          var msg = post.msg;
          var direction = post.direction;
          var uid = post.uid;
          var received = post.received || false;
 
          if (win.find('.jsxc_textinput').is(':not(:focus)') && jsxc.restoreCompleted && direction === 'in' && !restore) {
-            jsxc.gui.window.highlight(cid);
+            jsxc.gui.window.highlight(bid);
          }
 
          var reg = new RegExp(/((?:https?:\/\/|www\.|([\w\-]+\.[a-zA-Z]{2,3})(?=\b))(?:(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\)([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|])?)|(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|]))?)/gi);
@@ -2519,55 +2543,55 @@ var jsxc;
          }
 
          if (direction === 'sys') {
-            $('#jsxc_window_' + cid + ' .jsxc_textarea').append('<div style="clear:both"/>');
+            jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div style="clear:both"/>');
          }
 
-         $('#jsxc_window_' + cid + ' .jsxc_textarea').append(msgDiv);
+         jsxc.gui.window.get(bid).find('.jsxc_textarea').append(msgDiv);
 
-         jsxc.gui.window.scrollDown(cid);
+         jsxc.gui.window.scrollDown(bid);
 
          // if window is hidden set unread flag
          if (win.find('.jsxc_fade').is(':hidden') && jsxc.restoreCompleted && !restore) {
             win.addClass('jsxc_unreadMsg');
-            jsxc.storage.updateUserItem('window_' + cid, 'unread', true);
+            jsxc.storage.updateUserItem('window', bid, 'unread', true);
          }
       },
 
       /**
        * Set text into input area
        * 
-       * @param {type} cid
+       * @param {type} bid
        * @param {type} text
        * @returns {undefined}
        */
-      setText: function(cid, text) {
-         $('#jsxc_window_' + cid + ' .jsxc_textinput').val(text);
+      setText: function(bid, text) {
+         jsxc.gui.window.get(bid).find('.jsxc_textinput').val(text);
       },
 
       /**
        * Load old log into chat area
        * 
-       * @param {type} cid
+       * @param {type} bid
        * @returns {undefined}
        */
-      restoreChat: function(cid) {
-         var chat = jsxc.storage.getUserItem('chat_' + cid);
+      restoreChat: function(bid) {
+         var chat = jsxc.storage.getUserItem('chat', bid);
 
          while (chat !== null && chat.length > 0) {
             var c = chat.pop();
-            jsxc.gui.window._postMessage(cid, c, true);
+            jsxc.gui.window._postMessage(bid, c, true);
          }
       },
 
       /**
        * Clear chat history
        * 
-       * @param {type} cid
+       * @param {type} bid
        * @returns {undefined}
        */
-      clear: function(cid) {
-         jsxc.storage.setUserItem('chat_' + cid, []);
-         $('#jsxc_window_' + cid + ' .jsxc_textarea').empty();
+      clear: function(bid) {
+         jsxc.storage.setUserItem('chat', bid, []);
+         jsxc.gui.window.get(bid).find('.jsxc_textarea').empty();
       }
    };
 
@@ -2582,11 +2606,11 @@ var jsxc;
        * 
        * @memberOf jsxc.gui.template;
        * @param {type} name template name
-       * @param {type} cid
+       * @param {type} bid
        * @param {type} msg
        * @returns {String} HTML Template
        */
-      get: function(name, cid, msg) {
+      get: function(name, bid, msg) {
 
          // common placeholder
          var ph = {
@@ -2596,14 +2620,14 @@ var jsxc;
             app_name: jsxc.options.app_name
          };
 
-         // placeholder depending on cid
-         if (cid) {
-            var data = jsxc.storage.getUserItem('buddy_' + cid);
+         // placeholder depending on bid
+         if (bid) {
+            var data = jsxc.storage.getUserItem('buddy', bid);
 
             $.extend(ph, {
-               cid_priv_fingerprint: data.fingerprint ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
-               cid_jid: Strophe.getBareJidFromJid(data.jid),
-               cid_name: data.name
+               bid_priv_fingerprint: data.fingerprint ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
+               bid_jid: Strophe.getBareJidFromJid(data.jid),
+               bid_name: data.name
             });
          }
 
@@ -2645,7 +2669,7 @@ var jsxc;
               <p><strong>%%Your_fingerprint%%</strong><br />\
               <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
               <p><strong>%%Buddy_fingerprint%%</strong><br />\
-              <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\
+              <span style="text-transform:uppercase">{{bid_priv_fingerprint}}</span></p><br />\
               <p class="jsxc_right"><a href="#" class="jsxc_close button">%%Close%%</a> <a href="#" class="button creation">%%Compared%%</a></p>\
             </div>\
             <div style="display:none">\
@@ -2664,7 +2688,7 @@ var jsxc;
           <p><strong>%%Your_fingerprint%%</strong><br />\
           <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
           <p><strong>%%Buddy_fingerprint%%</strong><br />\
-          <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\
+          <span style="text-transform:uppercase">{{bid_priv_fingerprint}}</span></p><br />\
           <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a></p>\
         </div>',
       chatWindow: '<li class="jsxc_min">\
@@ -2807,7 +2831,7 @@ var jsxc;
          <b>Credits: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
          <a href="https://soundcloud.com/freefilmandgamemusic/ping-1?in=freefilmandgamemusic/sets/free-notification-sounds-and" target="_blank">CameronMusic (Ping)</a></p>\
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>',
-      vCard: '<h3>vCard %%of%% {{cid_name}}</h3>\
+      vCard: '<h3>vCard %%of%% {{bid_name}}</h3>\
          <ul class="jsxc_vCard"></ul>\
          <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...</p>',
       settings: '<h3>%%User_settings%%</h3>\
@@ -2892,7 +2916,7 @@ var jsxc;
 
             switch (status) {
                case Strophe.Status.CONNECTED:
-                  jsxc.cid = jsxc.jidToCid(jsxc.xmpp.conn.jid.toLowerCase());
+                  jsxc.bid = jsxc.jidToBid(jsxc.xmpp.conn.jid.toLowerCase());
                   $(document).trigger('connected.jsxc');
                   break;
                case Strophe.Status.ATTACHED:
@@ -2983,7 +3007,7 @@ var jsxc;
 
          jsxc.storage.removeUserItem('windowlist');
          jsxc.storage.removeUserItem('own');
-         jsxc.storage.removeUserItem('avatar_own');
+         jsxc.storage.removeUserItem('avatar', 'own');
 
          // submit login form
          if (jsxc.triggeredFromForm) {
@@ -3091,7 +3115,7 @@ var jsxc;
          jsxc.storage.removeItem('rid');
          jsxc.storage.removeItem('lastActivity');
          jsxc.storage.removeItem('hidden');
-         jsxc.storage.removeUserItem('avatar_own');
+         jsxc.storage.removeUserItem('avatar', 'own');
 
          jsxc.xmpp.conn = null;
 
@@ -3143,22 +3167,22 @@ var jsxc;
          $(iq).find('item').each(function() {
             var jid = $(this).attr('jid');
             var name = $(this).attr('name') || jid;
-            var cid = jsxc.jidToCid(jid);
+            var bid = jsxc.jidToBid(jid);
             var sub = $(this).attr('subscription');
 
-            buddies.push(cid);
+            buddies.push(bid);
 
-            if (jsxc.storage.getUserItem('buddy_' + cid)) {
-               jsxc.storage.updateUserItem('buddy_' + cid, {
+            if (jsxc.storage.getUserItem('buddy', bid)) {
+               jsxc.storage.updateUserItem('buddy', bid, {
                   jid: jid,
                   name: name,
                   status: 0,
                   sub: sub,
                   res: []
                });
-               jsxc.storage.removeUserItem('res_' + cid);
+               jsxc.storage.removeUserItem('res', bid);
             } else {
-               jsxc.storage.setUserItem('buddy_' + cid, {
+               jsxc.storage.setUserItem('buddy', bid, {
                   'jid': jid,
                   'name': name,
                   'status': 0,
@@ -3171,7 +3195,7 @@ var jsxc;
                });
             }
 
-            jsxc.gui.roster.add(cid);
+            jsxc.gui.roster.add(bid);
          });
 
          if (buddies.length === 0) {
@@ -3202,26 +3226,26 @@ var jsxc;
          $(iq).find('item').each(function() {
             var jid = $(this).attr('jid');
             var name = $(this).attr('name') || jid;
-            var cid = jsxc.jidToCid(jid);
+            var bid = jsxc.jidToBid(jid);
             var sub = $(this).attr('subscription');
             // var ask = $(this).attr('ask');
 
             var bl = jsxc.storage.getUserItem('buddylist');
 
             if (sub === 'remove') {
-               jsxc.gui.roster.purge(cid);
-            } else if (bl.indexOf(cid) >= 0) {
-               jsxc.storage.updateUserItem('buddy_' + cid, {
+               jsxc.gui.roster.purge(bid);
+            } else if (bl.indexOf(bid) >= 0) {
+               jsxc.storage.updateUserItem('buddy', bid, {
                   jid: jid,
                   name: name,
                   sub: sub
                });
-               jsxc.gui.update(cid);
-               jsxc.gui.roster.reorder(cid);
+               jsxc.gui.update(bid);
+               jsxc.gui.roster.reorder(bid);
             } else {
-               bl.push(cid); // (INFO) push returns the new length
+               bl.push(bid); // (INFO) push returns the new length
                jsxc.storage.setUserItem('buddylist', bl);
-               jsxc.storage.setUserItem('buddy_' + cid, {
+               jsxc.storage.setUserItem('buddy', bid, {
                   jid: jid,
                   name: name,
                   status: 0,
@@ -3232,7 +3256,7 @@ var jsxc;
                   fingerprint: null,
                   type: 'chat'
                });
-               jsxc.gui.roster.add(cid);
+               jsxc.gui.roster.add(bid);
             }
 
             // Remove pending friendship request from notice list
@@ -3291,9 +3315,9 @@ var jsxc;
          var to = $(presence).attr('to');
          to = (to) ? Strophe.getBareJidFromJid(to).toLowerCase() : jid;
          var r = Strophe.getResourceFromJid(from);
-         var cid = jsxc.jidToCid(jid);
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
-         var res = jsxc.storage.getUserItem('res_' + cid) || {};
+         var bid = jsxc.jidToBid(jid);
+         var data = jsxc.storage.getUserItem('buddy', bid);
+         var res = jsxc.storage.getUserItem('res', bid) || {};
          var status = null;
          var xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
 
@@ -3355,23 +3379,23 @@ var jsxc;
             var photo = xVCard.find('photo');
 
             if (photo.length > 0 && photo.text() !== data.avatar) {
-               jsxc.storage.removeUserItem('avatar_' + data.avatar);
+               jsxc.storage.removeUserItem('avatar', data.avatar);
                data.avatar = photo.text();
             }
          }
 
          // Reset jid
-         if (jsxc.el_exists('#jsxc_window_' + cid)) {
-            jsxc.gui.getWindow(cid).data('jid', jid);
+         if (jsxc.gui.window.get(bid).length > 0) {
+            jsxc.gui.window.get(bid).data('jid', jid);
          }
 
-         jsxc.storage.setUserItem('buddy_' + cid, data);
-         jsxc.storage.setUserItem('res_' + cid, res);
+         jsxc.storage.setUserItem('buddy', bid, data);
+         jsxc.storage.setUserItem('res', bid, res);
 
          jsxc.debug('Presence (' + from + '): ' + status);
 
-         jsxc.gui.update(cid);
-         jsxc.gui.roster.reorder(cid);
+         jsxc.gui.update(bid);
+         jsxc.gui.roster.reorder(bid);
 
          $(document).trigger('presence.jsxc', [ from, status, presence ]);
 
@@ -3399,8 +3423,8 @@ var jsxc;
          var from = $(message).attr('from');
          var mid = $(message).attr('id');
          var jid = Strophe.getBareJidFromJid(from);
-         var cid = jsxc.jidToCid(jid);
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
+         var bid = jsxc.jidToBid(jid);
+         var data = jsxc.storage.getUserItem('buddy', bid);
          var body = $(message).find('body:first').text();
          var request = $(message).find("request[xmlns='urn:xmpp:receipts']");
          var own = jsxc.storage.getUserItem('own') || [];
@@ -3411,19 +3435,19 @@ var jsxc;
 
          $(document).trigger('message.jsxc', [ from, body ]);
 
-         var win = jsxc.gui.window.init(cid);
+         var win = jsxc.gui.window.init(bid);
 
          // If we now the full jid, we use it
          if (type === 'chat') {
             win.data('jid', from);
-            jsxc.storage.updateUserItem('buddy_' + cid, {
+            jsxc.storage.updateUserItem('buddy', bid, {
                jid: from
             });
          }
 
          // create related otr object
-         if (jsxc.master && !jsxc.otr.objects[cid]) {
-            jsxc.otr.create(cid);
+         if (jsxc.master && !jsxc.otr.objects[bid]) {
+            jsxc.otr.create(bid);
          }
 
          if (mid !== null && request.length && data !== null && (data.sub === 'both' || data.sub === 'from') && type === 'chat') {
@@ -3436,10 +3460,10 @@ var jsxc;
             }));
          }
 
-         if (jsxc.otr.objects.hasOwnProperty(cid)) {
-            jsxc.otr.objects[cid].receiveMsg(body);
+         if (jsxc.otr.objects.hasOwnProperty(bid)) {
+            jsxc.otr.objects[bid].receiveMsg(body);
          } else {
-            jsxc.gui.window.postMessage(cid, 'in', body);
+            jsxc.gui.window.postMessage(bid, 'in', body);
          }
 
          // preserve handler
@@ -3485,7 +3509,7 @@ var jsxc;
        * @param {string} alias
        */
       addBuddy: function(username, alias) {
-         var cid = jsxc.jidToCid(username);
+         var bid = jsxc.jidToBid(username);
 
          if (jsxc.master) {
             // add buddy to roster (trigger onRosterChanged)
@@ -3505,9 +3529,9 @@ var jsxc;
                type: 'subscribe'
             }));
 
-            jsxc.storage.removeUserItem('add_' + cid);
+            jsxc.storage.removeUserItem('add_' + bid);
          } else {
-            jsxc.storage.setUserItem('add_' + cid, {
+            jsxc.storage.setUserItem('add_' + bid, {
                username: username,
                alias: alias || null
             });
@@ -3520,7 +3544,7 @@ var jsxc;
        * @param {type} jid
        */
       removeBuddy: function(jid) {
-         var cid = jsxc.jidToCid(jid);
+         var bid = jsxc.jidToBid(jid);
 
          // Shortcut to remove buddy from roster and cancle all subscriptions
          var iq = $iq({
@@ -3533,18 +3557,18 @@ var jsxc;
          });
          jsxc.xmpp.conn.sendIQ(iq);
 
-         jsxc.gui.roster.purge(cid);
+         jsxc.gui.roster.purge(bid);
       },
 
       onReceived: function(message) {
          var from = $(message).attr('from');
          var jid = Strophe.getBareJidFromJid(from);
-         var cid = jsxc.jidToCid(jid);
+         var bid = jsxc.jidToBid(jid);
          var received = $(message).find("received[xmlns='urn:xmpp:receipts']");
 
          if (received.length) {
             var receivedId = received.attr('id').replace(/:/, '-');
-            var chat = jsxc.storage.getUserItem('chat_' + cid);
+            var chat = jsxc.storage.getUserItem('chat', bid);
             var i;
 
             for (i = chat.length - 1; i >= 0; i--) {
@@ -3553,7 +3577,7 @@ var jsxc;
 
                   $('#' + receivedId).addClass('jsxc_received');
 
-                  jsxc.storage.setUserItem('chat_' + cid, chat);
+                  jsxc.storage.setUserItem('chat', bid, chat);
                   break;
                }
             }
@@ -3566,15 +3590,15 @@ var jsxc;
        * Public function to send message.
        * 
        * @memberOf jsxc.xmpp
-       * @param cid css jid of user
+       * @param bid css jid of user
        * @param msg message
        * @param uid unique id
        */
-      sendMessage: function(cid, msg, uid) {
-         if (jsxc.otr.objects.hasOwnProperty(cid)) {
-            jsxc.otr.objects[cid].sendMsg(msg, uid);
+      sendMessage: function(bid, msg, uid) {
+         if (jsxc.otr.objects.hasOwnProperty(bid)) {
+            jsxc.otr.objects[bid].sendMsg(msg, uid);
          } else {
-            jsxc.xmpp._sendMessage($('#jsxc_window_' + cid).data('jid'), msg, uid);
+            jsxc.xmpp._sendMessage(jsxc.gui.window.get(bid).data('jid'), msg, uid);
          }
       },
 
@@ -3588,7 +3612,7 @@ var jsxc;
        * @private
        */
       _sendMessage: function(jid, msg, uid) {
-         var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(jid));
+         var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(jid));
          var isBar = (Strophe.getBareJidFromJid(jid) === jid);
          var type = data.type || 'chat';
 
@@ -3620,7 +3644,9 @@ var jsxc;
        * 
        * @privat
        */
-      prefix: 'jsxc.',
+      PREFIX: 'jsxc',
+
+      SEP: ':',
 
       /**
        * @param {type} uk Should we generate a user prefix?
@@ -3628,7 +3654,9 @@ var jsxc;
        * @memberOf jsxc.storage
        */
       getPrefix: function(uk) {
-         return jsxc.storage.prefix + ((uk && jsxc.cid) ? jsxc.cid + '.' : '');
+         var self = jsxc.storage;
+
+         return self.PREFIX + self.SEP + ((uk && jsxc.bid) ? jsxc.bid + self.SEP : '');
       },
 
       /**
@@ -3637,7 +3665,7 @@ var jsxc;
        * @function
        * @param {String} key variablename
        * @param {Object} value value
-       * @param {String} uk Userkey? Should we add the cid as prefix?
+       * @param {String} uk Userkey? Should we add the bid as prefix?
        */
       setItem: function(key, value, uk) {
 
@@ -3662,7 +3690,18 @@ var jsxc;
 
          localStorage.setItem(jsxc.storage.getPrefix(uk) + key, value);
       },
-      setUserItem: function(key, value) {
+
+      setUserItem: function(type, key, value) {
+         var self = jsxc.storage;
+
+         if (arguments.length === 2) {
+            value = key;
+            key = type;
+            type = '';
+         } else if (arguments.length === 3) {
+            key = type + self.SEP + key;
+         }
+
          return jsxc.storage.setItem(key, value, true);
       },
 
@@ -3671,7 +3710,7 @@ var jsxc;
        * 
        * @function
        * @param {String} key variablename
-       * @param {String} uk Userkey? Should we add the cid as prefix?
+       * @param {String} uk Userkey? Should we add the bid as prefix?
        */
       getItem: function(key, uk) {
          key = jsxc.storage.getPrefix(uk) + key;
@@ -3690,7 +3729,15 @@ var jsxc;
        * @param key
        * @returns
        */
-      getUserItem: function(key) {
+      getUserItem: function(type, key) {
+         var self = jsxc.storage;
+
+         if (arguments.length === 1) {
+            key = type;
+         } else if (arguments.length === 2) {
+            key = type + self.SEP + key;
+         }
+
          return jsxc.storage.getItem(key, true);
       },
 
@@ -3699,7 +3746,7 @@ var jsxc;
        * 
        * @function
        * @param {String} key variablename
-       * @param {String} uk Userkey? Should we add the cid as prefix?
+       * @param {String} uk Userkey? Should we add the bid as prefix?
        */
       removeItem: function(key, uk) {
 
@@ -3720,7 +3767,15 @@ var jsxc;
        * @param key
        * @returns
        */
-      removeUserItem: function(key) {
+      removeUserItem: function(type, key) {
+         var self = jsxc.storage;
+
+         if (arguments.length === 1) {
+            key = type;
+         } else if (arguments.length === 2) {
+            key = type + self.SEP + key;
+         }
+
          return jsxc.storage.removeItem(key, true);
       },
 
@@ -3732,7 +3787,7 @@ var jsxc;
        * @param {String|object} variable variablename in object or object with
        *        variable/key pairs
        * @param {Object} [value] value
-       * @param {String} uk Userkey? Should we add the cid as prefix?
+       * @param {String} uk Userkey? Should we add the bid as prefix?
        */
       updateItem: function(key, variable, value, uk) {
 
@@ -3766,7 +3821,17 @@ var jsxc;
        *        variable/key pairs
        * @param {Object} [value] value
        */
-      updateUserItem: function(key, variable, value) {
+      updateUserItem: function(type, key, variable, value) {
+         var self = jsxc.storage;
+
+         if (arguments.length === 4 || (arguments.length === 3 && typeof variable === 'object')) {
+            key = type + self.SEP + key;
+         } else {
+            value = variable;
+            variable = key;
+            key = type;
+         }
+
          return jsxc.storage.updateItem(key, variable, value, true);
       },
 
@@ -3775,7 +3840,7 @@ var jsxc;
        * 
        * @function
        * @param {String} key variablename
-       * @param {String} uk Userkey? Should we add the cid as prefix?
+       * @param {String} uk Userkey? Should we add the bid as prefix?
        */
       ink: function(key, uk) {
 
@@ -3787,7 +3852,7 @@ var jsxc;
        * 
        * @param {string} key name of array or object
        * @param {string} name name of element in array or object
-       * @param {String} uk Userkey? Should we add the cid as prefix?
+       * @param {String} uk Userkey? Should we add the bid as prefix?
        * @returns {undefined}
        */
       removeElement: function(key, name, uk) {
@@ -3803,7 +3868,17 @@ var jsxc;
 
          jsxc.storage.setItem(key, item, uk);
       },
-      removeUserElement: function(key, name) {
+
+      removeUserElement: function(type, key, name) {
+         var self = jsxc.storage;
+
+         if (arguments.length === 2) {
+            name = key;
+            key = type;
+         } else if (arguments.length === 3) {
+            key = type + self.SEP + key;
+         }
+
          return jsxc.storage.removeElement(key, name, true);
       },
 
@@ -3824,7 +3899,8 @@ var jsxc;
             return;
          }
 
-         var key = e.key.replace(/^jsxc\.(?:[\w\-]+-[\w\-]+\.)?(.*)/i, '$1');
+         var re = new RegExp('^' + jsxc.storage.PREFIX + jsxc.storage.SEP + '(?:[^' + jsxc.storage.SEP + ']+@[^' + jsxc.storage.SEP + ']+' + jsxc.storage.SEP + ')?(.*)', 'i');
+         var key = e.key.replace(re, '$1');
 
          // Workaround for non-conform browser: Triggered event on every page
          // (own)
@@ -3861,7 +3937,7 @@ var jsxc;
          }
 
          var n, o;
-         var cid = key.replace(/^[a-z]+_(.*)/i, '$1');
+         var bid = key.replace(new RegExp('[^' + jsxc.storage.SEP + ']+' + jsxc.storage.SEP + '(.*)', 'i'), '$1');
 
          // react if someone ask, if there is a master
          if (jsxc.master && key === 'alive') {
@@ -3912,7 +3988,7 @@ var jsxc;
             }
          }
 
-         if (key.match(/^chat_/)) {
+         if (key.match(new RegExp('^chat' + jsxc.storage.SEP))) {
 
             var posts = JSON.parse(e.newValue);
             var data, el;
@@ -3923,10 +3999,10 @@ var jsxc;
 
                if (el.length === 0) {
                   if (jsxc.master && data.direction === 'out') {
-                     jsxc.xmpp.sendMessage(cid, data.msg, data.uid);
+                     jsxc.xmpp.sendMessage(bid, data.msg, data.uid);
                   }
 
-                  jsxc.gui.window._postMessage(cid, data);
+                  jsxc.gui.window._postMessage(bid, data);
                } else if (data.received) {
                   el.addClass('jsxc_received');
                }
@@ -3934,39 +4010,39 @@ var jsxc;
             return;
          }
 
-         if (key.match(/^window_/)) {
+         if (key.match(new RegExp('^window' + jsxc.storage.SEP))) {
 
             if (!e.newValue) {
-               jsxc.gui.window._close(cid);
+               jsxc.gui.window._close(bid);
                return;
             }
 
             if (!e.oldValue) {
-               jsxc.gui.window.open(cid);
+               jsxc.gui.window.open(bid);
                return;
             }
 
             n = JSON.parse(e.newValue);
 
             if (n.minimize) {
-               jsxc.gui.window._hide(cid);
+               jsxc.gui.window._hide(bid);
             } else {
-               jsxc.gui.window._show(cid);
+               jsxc.gui.window._show(bid);
             }
 
-            jsxc.gui.window.setText(cid, n.text);
+            jsxc.gui.window.setText(bid, n.text);
 
             return;
          }
 
-         if (key.match(/^smp_/)) {
+         if (key.match(new RegExp('^smp' + jsxc.storage.SEP))) {
 
             if (!e.newValue) {
 
                jsxc.gui.dialog.close();
 
                if (jsxc.master) {
-                  jsxc.otr.objects[cid].sm.abort();
+                  jsxc.otr.objects[bid].sm.abort();
                }
 
                return;
@@ -3976,61 +4052,61 @@ var jsxc;
 
             if (typeof (n.data) !== 'undefined') {
 
-               jsxc.otr.onSmpQuestion(cid, n.data);
+               jsxc.otr.onSmpQuestion(bid, n.data);
 
             } else if (jsxc.master && n.sec) {
                jsxc.gui.dialog.close();
 
-               jsxc.otr.sendSmpReq(cid, n.sec, n.quest);
+               jsxc.otr.sendSmpReq(bid, n.sec, n.quest);
             }
          }
 
-         if (!jsxc.master && key.match(/^buddy_/)) {
+         if (!jsxc.master && key.match(new RegExp('^buddy' + jsxc.storage.SEP))) {
 
             if (!e.newValue) {
-               jsxc.gui.roster.purge(cid);
+               jsxc.gui.roster.purge(bid);
                return;
             }
             if (!e.oldValue) {
-               jsxc.gui.roster.add(cid);
+               jsxc.gui.roster.add(bid);
                return;
             }
 
             n = JSON.parse(e.newValue);
             o = JSON.parse(e.oldValue);
 
-            jsxc.gui.update(cid);
+            jsxc.gui.update(bid);
 
             if (o.status !== n.status || o.sub !== n.sub) {
-               jsxc.gui.roster.reorder(cid);
+               jsxc.gui.roster.reorder(bid);
             }
          }
 
-         if (jsxc.master && key.match(/^deletebuddy_/) && e.newValue) {
+         if (jsxc.master && key.match(new RegExp('^deletebuddy' + jsxc.storage.SEP)) && e.newValue) {
             n = JSON.parse(e.newValue);
 
             jsxc.xmpp.removeBuddy(n.jid);
             jsxc.storage.removeUserItem(key);
          }
 
-         if (jsxc.master && key.match(/^buddy_/)) {
+         if (jsxc.master && key.match(new RegExp('^buddy' + jsxc.storage.SEP))) {
 
             n = JSON.parse(e.newValue);
             o = JSON.parse(e.oldValue);
 
             if (o.transferReq !== n.transferReq) {
-               jsxc.storage.updateItem('buddy_' + cid, 'transferReq', -1);
+               jsxc.storage.updateUserItem('buddy', bid, 'transferReq', -1);
 
                if (n.transferReq === 0) {
-                  jsxc.otr.goPlain(cid);
+                  jsxc.otr.goPlain(bid);
                }
                if (n.transferReq === 1) {
-                  jsxc.otr.goEncrypt(cid);
+                  jsxc.otr.goEncrypt(bid);
                }
             }
 
             if (o.name !== n.name) {
-               jsxc.gui.roster._rename(cid, n.name);
+               jsxc.gui.roster._rename(bid, n.name);
             }
          }
 
@@ -4055,7 +4131,7 @@ var jsxc;
             }
          }
 
-         if (jsxc.master && key.match(/^add_/)) {
+         if (jsxc.master && key.match(new RegExp('^add' + jsxc.storage.SEP))) {
             n = JSON.parse(e.newValue);
 
             jsxc.xmpp.addBuddy(n.username, n.alias);
@@ -4079,20 +4155,20 @@ var jsxc;
        * Handler for otr receive event
        * 
        * @memberOf jsxc.otr
-       * @param {string} cid
+       * @param {string} bid
        * @param {string} msg received message
        * @param {string} encrypted True, if msg was encrypted.
        */
-      receiveMessage: function(cid, msg, encrypted) {
+      receiveMessage: function(bid, msg, encrypted) {
 
-         if (jsxc.otr.objects[cid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT) {
-            jsxc.otr.backup(cid);
+         if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT) {
+            jsxc.otr.backup(bid);
          }
 
-         if (jsxc.otr.objects[cid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
-            jsxc.gui.window.postMessage(cid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']');
+         if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']');
          } else {
-            jsxc.gui.window.postMessage(cid, 'in', msg);
+            jsxc.gui.window.postMessage(bid, 'in', msg);
          }
       },
 
@@ -4103,8 +4179,8 @@ var jsxc;
        * @param {string} msg message to be send
        */
       sendMessage: function(jid, msg, uid) {
-         if (jsxc.otr.objects[jsxc.jidToCid(jid)].msgstate !== 0) {
-            jsxc.otr.backup(jsxc.jidToCid(jid));
+         if (jsxc.otr.objects[jsxc.jidToBid(jid)].msgstate !== 0) {
+            jsxc.otr.backup(jsxc.jidToBid(jid));
          }
 
          jsxc.xmpp._sendMessage(jid, msg, uid);
@@ -4113,12 +4189,12 @@ var jsxc;
       /**
        * Create new otr instance
        * 
-       * @param {type} cid
+       * @param {type} bid
        * @returns {undefined}
        */
-      create: function(cid) {
+      create: function(bid) {
 
-         if (jsxc.otr.objects.hasOwnProperty(cid)) {
+         if (jsxc.otr.objects.hasOwnProperty(bid)) {
             return;
          }
 
@@ -4126,44 +4202,44 @@ var jsxc;
             return;
          }
 
-         jsxc.otr.objects[cid] = new OTR(jsxc.options.otr);
+         jsxc.otr.objects[bid] = new OTR(jsxc.options.otr);
 
          if (jsxc.options.otr.SEND_WHITESPACE_TAG) {
-            jsxc.otr.objects[cid].SEND_WHITESPACE_TAG = true;
+            jsxc.otr.objects[bid].SEND_WHITESPACE_TAG = true;
          }
 
          if (jsxc.options.otr.WHITESPACE_START_AKE) {
-            jsxc.otr.objects[cid].WHITESPACE_START_AKE = true;
+            jsxc.otr.objects[bid].WHITESPACE_START_AKE = true;
          }
 
-         jsxc.otr.objects[cid].on('status', function(status) {
-            var data = jsxc.storage.getUserItem('buddy_' + cid);
+         jsxc.otr.objects[bid].on('status', function(status) {
+            var data = jsxc.storage.getUserItem('buddy', bid);
 
             switch (status) {
                case OTR.CONST.STATUS_SEND_QUERY:
-                  jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.trying_to_start_private_conversation);
+                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.trying_to_start_private_conversation);
                   break;
                case OTR.CONST.STATUS_AKE_SUCCESS:
-                  data.fingerprint = jsxc.otr.objects[cid].their_priv_pk.fingerprint();
+                  data.fingerprint = jsxc.otr.objects[bid].their_priv_pk.fingerprint();
                   data.msgstate = OTR.CONST.MSGSTATE_ENCRYPTED;
 
-                  var msg = (jsxc.otr.objects[cid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started;
-                  jsxc.gui.window.postMessage(cid, 'sys', msg);
+                  var msg = (jsxc.otr.objects[bid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started;
+                  jsxc.gui.window.postMessage(bid, 'sys', msg);
                   break;
                case OTR.CONST.STATUS_END_OTR:
                   data.fingerprint = null;
 
-                  if (jsxc.otr.objects[cid].msgstate === OTR.CONST.MSGSTATE_PLAINTEXT) {
+                  if (jsxc.otr.objects[bid].msgstate === OTR.CONST.MSGSTATE_PLAINTEXT) {
                      // we abort the private conversation
 
                      data.msgstate = OTR.CONST.MSGSTATE_PLAINTEXT;
-                     jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.private_conversation_aborted);
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.private_conversation_aborted);
 
                   } else {
                      // the buddy abort the private conversation
 
                      data.msgstate = OTR.CONST.MSGSTATE_FINISHED;
-                     jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.your_buddy_closed_the_private_conversation_you_should_do_the_same);
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.your_buddy_closed_the_private_conversation_you_should_do_the_same);
                   }
                   break;
                case OTR.CONST.STATUS_SMP_HANDLE:
@@ -4171,32 +4247,32 @@ var jsxc;
                   break;
             }
 
-            jsxc.storage.setUserItem('buddy_' + cid, data);
+            jsxc.storage.setUserItem('buddy', bid, data);
 
             // for encryption and verification state
-            jsxc.gui.update(cid);
+            jsxc.gui.update(bid);
          });
 
-         jsxc.otr.objects[cid].on('smp', function(type, data) {
+         jsxc.otr.objects[bid].on('smp', function(type, data) {
             switch (type) {
                case 'question': // verification request received
-                  jsxc.otr.onSmpQuestion(cid, data);
-                  jsxc.storage.setUserItem('smp_' + cid, {
+                  jsxc.otr.onSmpQuestion(bid, data);
+                  jsxc.storage.setUserItem('smp_' + bid, {
                      data: data || null
                   });
                   break;
                case 'trust': // verification completed
-                  jsxc.otr.objects[cid].trust = data;
-                  jsxc.storage.updateUserItem('buddy_' + cid, 'trust', data);
-                  jsxc.otr.backup(cid);
-                  jsxc.gui.update(cid);
+                  jsxc.otr.objects[bid].trust = data;
+                  jsxc.storage.updateUserItem('buddy', bid, 'trust', data);
+                  jsxc.otr.backup(bid);
+                  jsxc.gui.update(bid);
 
                   if (data) {
-                     jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.conversation_is_now_verified);
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.conversation_is_now_verified);
                   } else {
-                     jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.verification_failed);
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.verification_failed);
                   }
-                  jsxc.storage.removeUserItem('smp_' + cid);
+                  jsxc.storage.removeUserItem('smp_' + bid);
                   jsxc.gui.dialog.close();
                   break;
                default:
@@ -4205,36 +4281,36 @@ var jsxc;
          });
 
          // Receive message
-         jsxc.otr.objects[cid].on('ui', function(msg, encrypted) {
-            jsxc.otr.receiveMessage(cid, msg, encrypted === true);
+         jsxc.otr.objects[bid].on('ui', function(msg, encrypted) {
+            jsxc.otr.receiveMessage(bid, msg, encrypted === true);
          });
 
          // Send message
-         jsxc.otr.objects[cid].on('io', function(msg, uid) {
-            jsxc.otr.sendMessage($('#jsxc_window_' + cid).data('jid'), msg, uid);
+         jsxc.otr.objects[bid].on('io', function(msg, uid) {
+            jsxc.otr.sendMessage(jsxc.gui.window.get(bid).data('jid'), msg, uid);
          });
 
-         jsxc.otr.objects[cid].on('error', function(err) {
+         jsxc.otr.objects[bid].on('error', function(err) {
             // Handle this case in jsxc.otr.receiveMessage
             if (err !== 'Received an unencrypted message.') {
-               jsxc.gui.window.postMessage(cid, 'sys', '[OTR] ' + jsxc.translate('%%' + err + '%%'));
+               jsxc.gui.window.postMessage(bid, 'sys', '[OTR] ' + jsxc.translate('%%' + err + '%%'));
             }
 
             jsxc.error('[OTR] ' + err);
          });
 
-         jsxc.otr.restore(cid);
+         jsxc.otr.restore(bid);
       },
 
       /**
        * show verification dialog with related part (secret or question)
        * 
-       * @param {type} cid
+       * @param {type} bid
        * @param {string} [data]
        * @returns {undefined}
        */
-      onSmpQuestion: function(cid, data) {
-         jsxc.gui.showVerification(cid);
+      onSmpQuestion: function(bid, data) {
+         jsxc.gui.showVerification(bid);
 
          $('#jsxc_dialog select').prop('selectedIndex', (data ? 2 : 3)).change();
          $('#jsxc_dialog > div:eq(0)').hide();
@@ -4248,10 +4324,10 @@ var jsxc;
          }
 
          $('#jsxc_dialog a[rel=close]').click(function() {
-            jsxc.storage.removeUserItem('smp_' + cid);
+            jsxc.storage.removeUserItem('smp_' + bid);
 
             if (jsxc.master) {
-               jsxc.otr.objects[cid].sm.abort();
+               jsxc.otr.objects[bid].sm.abort();
             }
          });
       },
@@ -4259,69 +4335,69 @@ var jsxc;
       /**
        * Send verification request to buddy
        * 
-       * @param {string} cid
+       * @param {string} bid
        * @param {string} sec secret
        * @param {string} [quest] question
        * @returns {undefined}
        */
-      sendSmpReq: function(cid, sec, quest) {
+      sendSmpReq: function(bid, sec, quest) {
          jsxc.keepBusyAlive();
 
-         jsxc.otr.objects[cid].smpSecret(sec, quest);
+         jsxc.otr.objects[bid].smpSecret(sec, quest);
       },
 
       /**
        * Toggle encryption state
        * 
-       * @param {type} cid
+       * @param {type} bid
        * @returns {undefined}
        */
-      toggleTransfer: function(cid) {
-         if (jsxc.storage.getUserItem('buddy_' + cid).msgstate === 0) {
-            jsxc.otr.goEncrypt(cid);
+      toggleTransfer: function(bid) {
+         if (jsxc.storage.getUserItem('buddy', bid).msgstate === 0) {
+            jsxc.otr.goEncrypt(bid);
          } else {
-            jsxc.otr.goPlain(cid);
+            jsxc.otr.goPlain(bid);
          }
       },
 
       /**
        * Send request to encrypt the session
        * 
-       * @param {type} cid
+       * @param {type} bid
        * @returns {undefined}
        */
-      goEncrypt: function(cid) {
+      goEncrypt: function(bid) {
          if (jsxc.master) {
-            jsxc.otr.objects[cid].sendQueryMsg();
+            jsxc.otr.objects[bid].sendQueryMsg();
          } else {
-            jsxc.storage.updateUserItem('buddy_' + cid, 'transferReq', 1);
+            jsxc.storage.updateUserItem('buddy', bid, 'transferReq', 1);
          }
       },
 
       /**
        * Abort encryptet session
        * 
-       * @param {type} cid
+       * @param {type} bid
        * @returns {undefined}
        */
-      goPlain: function(cid) {
+      goPlain: function(bid) {
          if (jsxc.master) {
-            jsxc.otr.objects[cid].endOtr.call(jsxc.otr.objects[cid]);
-            jsxc.otr.objects[cid].init.call(jsxc.otr.objects[cid]);
+            jsxc.otr.objects[bid].endOtr.call(jsxc.otr.objects[bid]);
+            jsxc.otr.objects[bid].init.call(jsxc.otr.objects[bid]);
 
-            jsxc.otr.backup(cid);
+            jsxc.otr.backup(bid);
          } else {
-            jsxc.storage.updateUserItem('buddy_' + cid, 'transferReq', 0);
+            jsxc.storage.updateUserItem('buddy', bid, 'transferReq', 0);
          }
       },
 
       /**
        * Backups otr session
        * 
-       * @param {string} cid
+       * @param {string} bid
        */
-      backup: function(cid) {
-         var o = jsxc.otr.objects[cid]; // otr object
+      backup: function(bid) {
+         var o = jsxc.otr.objects[bid]; // otr object
          var r = {}; // return value
 
          if (o === null) {
@@ -4344,17 +4420,17 @@ var jsxc;
             r.otr_version = JSON.stringify(o.ake.otr_version);
          }
 
-         jsxc.storage.setUserItem('otr_' + cid, r);
+         jsxc.storage.setUserItem('otr', bid, r);
       },
 
       /**
        * Restore old otr session
        * 
-       * @param {string} cid
+       * @param {string} bid
        */
-      restore: function(cid) {
-         var o = jsxc.otr.objects[cid];
-         var d = jsxc.storage.getUserItem('otr_' + cid);
+      restore: function(bid) {
+         var o = jsxc.otr.objects[bid];
+         var d = jsxc.storage.getUserItem('otr', bid);
 
          if (o !== null || d !== null) {
             var key;
@@ -4372,14 +4448,14 @@ var jsxc;
                }
             }
 
-            jsxc.otr.objects[cid] = o;
+            jsxc.otr.objects[bid] = o;
 
             if (o.msgstate === 1 && o.their_priv_pk !== null) {
-               o._smInit.call(jsxc.otr.objects[cid]);
+               o._smInit.call(jsxc.otr.objects[bid]);
             }
          }
 
-         $('#jsxc_window_' + cid).find('.jsxc_otr').removeClass('jsxc_disabled');
+         jsxc.gui.window.get(bid).find('.jsxc_otr').removeClass('jsxc_disabled');
       },
 
       /**
@@ -4504,9 +4580,9 @@ var jsxc;
        * @memberOf jsxc.notification
        */
       init: function() {
-         $(document).on('postmessagein.jsxc', function(event, jid, msg) {
+         $(document).on('postmessagein.jsxc', function(event, bid, msg) {
             msg = (msg.match(/^\?OTR/)) ? jsxc.translate('%%Encrypted message%%') : msg;
-            var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(jid));
+            var data = jsxc.storage.getUserItem('buddy', bid);
 
             jsxc.notification.playSound(jsxc.CONST.SOUNDS.MSG);
             jsxc.notification.notify(jsxc.translate('%%New message from%% ') + data.name, msg);
@@ -4876,7 +4952,7 @@ var jsxc;
          enter_the_secret: 'enter the secret.',
          Creating_your_private_key_: 'Creating your private key; this may take a while.',
          Authenticating_a_buddy_helps_: 'Authenticating a buddy helps ensure that the person you are talking to is really the one he or she claims to be.',
-         How_do_you_want_to_authenticate_your_buddy: 'How do you want to authenticate {{cid_name}} (<b>{{cid_jid}}</b>)?',
+         How_do_you_want_to_authenticate_your_buddy: 'How do you want to authenticate {{bid_name}} (<b>{{bid_jid}}</b>)?',
          Select_method: 'Select method...',
          Manual: 'Manual',
          Question: 'Question',
@@ -4909,7 +4985,7 @@ var jsxc;
          Deny: 'Deny',
          Approve: 'Approve',
          Remove_buddy: 'Remove buddy',
-         You_are_about_to_remove_: 'You are about to remove {{cid_name}} (<b>{{cid_jid}}</b>) from your buddy list. All related chats will be closed.',
+         You_are_about_to_remove_: 'You are about to remove {{bid_name}} (<b>{{bid_jid}}</b>) from your buddy list. All related chats will be closed.',
          Continue_without_chat: 'Continue without chat',
          Please_wait: 'Please wait',
          Login_failed: 'Chat login failed',
@@ -5020,7 +5096,7 @@ var jsxc;
          enter_the_secret: 'gib das Geheimnis ein.',
          Creating_your_private_key_: 'Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.',
          Authenticating_a_buddy_helps_: 'Einen Freund zu authentifizieren hilft sicher zustellen, dass die Person mit der du sprichst auch die ist die sie sagt.',
-         How_do_you_want_to_authenticate_your_buddy: 'Wie willst du {{cid_name}} (<b>{{cid_jid}}</b>) authentifizieren?',
+         How_do_you_want_to_authenticate_your_buddy: 'Wie willst du {{bid_name}} (<b>{{bid_jid}}</b>) authentifizieren?',
          Select_method: 'Wähle...',
          Manual: 'Manual',
          Question: 'Frage',
@@ -5053,7 +5129,7 @@ var jsxc;
          Deny: 'Ablehnen',
          Approve: 'Bestätigen',
          Remove_buddy: 'Freund entfernen',
-         You_are_about_to_remove_: 'Du bist gerade dabei {{cid_name}} (<b>{{cid_jid}}</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.',
+         You_are_about_to_remove_: 'Du bist gerade dabei {{bid_name}} (<b>{{bid_jid}}</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.',
          Continue_without_chat: 'Weiter ohne Chat',
          Please_wait: 'Bitte warten',
          Login_failed: 'Chat-Anmeldung fehlgeschlagen',
@@ -5165,7 +5241,7 @@ var jsxc;
          enter_the_secret: 'especifique el secreto.',
          Creating_your_private_key_: 'Ahora vamos a crear su clave privada. Esto puede tomar algún tiempo.',
          Authenticating_a_buddy_helps_: 'Autenticación de un amigo ayuda a garantizar que la persona que está hablando es quien él o ella está diciendo.',
-         How_do_you_want_to_authenticate_your_buddy: '¿Cómo desea autenticar {{cid_name}} (<b>{{cid_jid}}</b>)?',
+         How_do_you_want_to_authenticate_your_buddy: '¿Cómo desea autenticar {{bid_name}} (<b>{{bid_jid}}</b>)?',
          Select_method: 'Escoja un método...',
          Manual: 'Manual',
          Question: 'Pregunta',
@@ -5198,7 +5274,7 @@ var jsxc;
          Deny: 'Rechazar',
          Approve: 'Aprobar',
          Remove_buddy: 'Eliminar amigo',
-         You_are_about_to_remove_: 'Vas a eliminar a {{cid_name}} (<b>{{cid_jid}}</b>) de tu lista de amigos. Todas las conversaciones relacionadas serán cerradas.',
+         You_are_about_to_remove_: 'Vas a eliminar a {{bid_name}} (<b>{{bid_jid}}</b>) de tu lista de amigos. Todas las conversaciones relacionadas serán cerradas.',
          Continue_without_chat: 'Continuar',
          Please_wait: 'Espere por favor',
          Login_failed: 'Fallo el inicio de sesión',
