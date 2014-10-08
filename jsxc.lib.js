@@ -982,9 +982,11 @@ var jsxc;
             }
 
             el.find('.jsxc_avatar').removeAttr('style');
-            el.find('.jsxc_avatar img').remove();
-            var img = $('<img/>').attr('alt', 'Avatar').attr('src', src);
-            el.find('.jsxc_avatar').prepend(img);
+
+            el.find('.jsxc_avatar').css({
+               'background-image': 'url(' + src + ')',
+               'text-indent': '999px'
+            });
          };
 
          if (avatarSrc !== null) {

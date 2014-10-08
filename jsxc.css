@@ -154,6 +154,8 @@ li .jsxc_name:hover {
 	overflow: hidden;
 	position: relative;
 	font-family: Arial;
+	background-size: cover;
+	background-position: center center;
 }
 
 .jsxc_avatar img {
