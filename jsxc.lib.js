@@ -1436,12 +1436,13 @@ var jsxc;
        * Show vCard of user with the given bar jid.
        * 
        * @memberOf jsxc.gui
-       * @param {String} bjid Bar jid
+       * @param {String} jid
        */
-      showVcard: function(bjid) {
-         jsxc.gui.dialog.open(jsxc.gui.template.get('vCard', jsxc.jidToBid(bjid)));
+      showVcard: function(jid) {
+         var bid = jsxc.jidToBid(jid);
+         jsxc.gui.dialog.open(jsxc.gui.template.get('vCard', bid));
 
-         var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(bjid));
+         var data = jsxc.storage.getUserItem('buddy', bid);
 
          // Display resources and corresponding information
          var i, j, res, identities, identity = null, cap, client;
@@ -1449,7 +1450,7 @@ var jsxc;
             res = data.res[i];
 
             identities = [];
-            cap = jsxc.xmpp.conn.caps.getCapabilitiesByJid(bjid + '/' + res);
+            cap = jsxc.xmpp.conn.caps.getCapabilitiesByJid(bid + '/' + res);
 
             if (cap !== null && cap.identities !== null) {
                identities = cap.identities;
@@ -1467,11 +1468,11 @@ var jsxc;
                }
             }
 
-            var status = jsxc.storage.getUserItem('res', bjid)[res];
+            var status = jsxc.storage.getUserItem('res', bid)[res];
 
-            $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Resource%%') + ':</strong> ' + res + '</li>');
+            $('#jsxc_dialog ul.jsxc_vCard').append('<li class="jsxc_sep"><strong>' + jsxc.translate('%%Resource%%') + ':</strong> ' + res + '</li>');
             $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Client%%') + ':</strong> ' + client + '</li>');
-            $('#jsxc_dialog ul.jsxc_vCard').append('<li class="jsxc_sep">' + jsxc.translate('<strong>%%Status%%:</strong> %%' + jsxc.CONST.STATUS[status] + '%%') + '</li>');
+            $('#jsxc_dialog ul.jsxc_vCard').append('<li>' + jsxc.translate('<strong>%%Status%%:</strong> %%' + jsxc.CONST.STATUS[status] + '%%') + '</li>');
          }
 
          var printProp = function(el, depth) {
@@ -1502,7 +1503,7 @@ var jsxc;
                content += '</li>';
 
                if (depth === 0 && $('#jsxc_dialog ul.jsxc_vCard').length > 0) {
-                  $('#jsxc_dialog ul.jsxc_vCard').append(content);
+                  $('#jsxc_dialog ul.jsxc_vCard li.jsxc_sep:first').before(content);
                   content = '';
                }
             });
@@ -1551,7 +1552,7 @@ var jsxc;
 
             printProp($(stanza).find('vcard > *'), 0);
 
-         }, bjid, failedToLoad);
+         }, bid, failedToLoad);
       },
 
       showSettings: function() {
@@ -2831,7 +2832,7 @@ var jsxc;
          <b>Credits: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
          <a href="https://soundcloud.com/freefilmandgamemusic/ping-1?in=freefilmandgamemusic/sets/free-notification-sounds-and" target="_blank">CameronMusic (Ping)</a></p>\
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>',
-      vCard: '<h3>vCard %%of%% {{bid_name}}</h3>\
+      vCard: '<h3>%%Info_about%% {{bid_name}}</h3>\
          <ul class="jsxc_vCard"></ul>\
          <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...</p>',
       settings: '<h3>%%User_settings%%</h3>\
@@ -5064,7 +5065,8 @@ var jsxc;
          Resource: 'Resource',
          On_login: 'On login',
          Received_an_unencrypted_message: 'Received an unencrypted message',
-         Sorry_your_buddy_doesnt_provide_any_information: 'Sorry, your buddy does not provide any information.'
+         Sorry_your_buddy_doesnt_provide_any_information: 'Sorry, your buddy does not provide any information.',
+         Info_about: 'Info about'
       },
       de: {
          Logging_in: 'Login läuft…',
@@ -5209,7 +5211,8 @@ var jsxc;
          Resource: 'Ressource',
          On_login: 'Beim Anmelden',
          Received_an_unencrypted_message: 'Unverschlüsselte Nachricht empfangen',
-         Sorry_your_buddy_doesnt_provide_any_information: 'Dein Freund stellt leider keine Informationen bereit.'
+         Sorry_your_buddy_doesnt_provide_any_information: 'Dein Freund stellt leider keine Informationen bereit.',
+         Info_about: 'Info über'
       },
       es: {
          Logging_in: 'Por favor, espere...',
