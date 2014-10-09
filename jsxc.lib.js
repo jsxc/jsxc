@@ -1638,6 +1638,19 @@ var jsxc;
       },
 
       /**
+       * Show prompt for notification permission.
+       * 
+       * @memberOf jsxc.gui
+       */
+      showRequestNotification: function() {
+         jsxc.gui.showConfirmDialog(jsxc.translate("%%Should we notify you_%%"), function() {
+            jsxc.notification.requestPermission();
+         }, function() {
+            $(document).trigger('notificationfailure.jsxc');
+         });
+      },
+
+      /**
        * Change own presence to pres.
        * 
        * @memberOf jsxc.gui
@@ -4711,12 +4724,8 @@ var jsxc;
             });
 
             setTimeout(function() {
-               jsxc.gui.showConfirmDialog(jsxc.translate("%%Should we notify you_%%"), function() {
-                  jsxc.notification.requestPermission();
-               }, function() {
-                  $(document).trigger('notificationfailure.jsxc');
-               });
-            }, 2000);
+               jsxc.notice.add('%%Notifications%%?', '%%Should_we_notify_you_%%', 'gui.showRequestNotification');
+            }, 1000);
          });
       },
 
