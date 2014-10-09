@@ -11,6 +11,9 @@ jsxc.gui.template.incomingCall = '<h3>%%Incoming_call%%</h3>\
 jsxc.gui.template.allowMediaAccess = '<p>%%Please_allow_access_to_microphone_and_camera%%</p>';
 
 jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
+            <div class="jsxc_chatarea">\
+	        <ul></ul>\
+            </div>\
             <div class="jsxc_videoContainer">\
                 <video class="jsxc_localvideo" autoplay></video>\
                 <video class="jsxc_remotevideo" autoplay></video>\
@@ -32,9 +35,9 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
                <div class="jsxc_snapshotbar">\
                    <p>No pictures yet!</p>\
                </div>\n\
-               <div class="jsxc_chatarea">\
+               <!--<div class="jsxc_chatarea">\
                    <ul></ul>\
-               </div>\
+               </div>-->\
                <div class="jsxc_infobar"></div>\
             </div>\
         </div>';
@@ -771,6 +774,10 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          };
 
          var win = jsxc.gui.window.open(jsxc.jidToBid(jid));
+
+	 win.find('.slimScrollDiv').resizable('disable');
+	 win.find('.jsxc_textarea').slimScroll({height: 413});
+	 win.find('.jsxc_emoticons').css('top', (413 + 6) + 'px');
 
          $('#jsxc_dialog .jsxc_chatarea ul').append(win.detach());
 
