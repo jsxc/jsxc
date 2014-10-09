@@ -2124,9 +2124,11 @@ var jsxc;
 
       /**
        * Resizes current dialog.
+       * 
+       * @param {Object} options e.g. width and height
        */
-      resize: function() {
-         $.colorbox.resize();
+      resize: function(options) {
+         $.colorbox.resize(options);
       }
    };
 
@@ -2283,7 +2285,7 @@ var jsxc;
        * @returns {jquery} jQuery object of the window element
        */
       get: function(id) {
-         return $("#jsxc_windowList > ul > li[data-bid='" + jsxc.jidToBid(id) + "']");
+         return $("li.jsxc_windowItem[data-bid='" + jsxc.jidToBid(id) + "']");
       },
 
       /**
@@ -2704,7 +2706,7 @@ var jsxc;
           <span style="text-transform:uppercase">{{bid_priv_fingerprint}}</span></p><br />\
           <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a></p>\
         </div>',
-      chatWindow: '<li class="jsxc_min">\
+      chatWindow: '<li class="jsxc_min jsxc_windowItem">\
             <div class="jsxc_window">\
                 <div class="jsxc_bar">\
                      <div class="jsxc_avatar">☺</div>\
