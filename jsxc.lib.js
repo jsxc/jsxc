@@ -2221,6 +2221,10 @@ var jsxc;
             $(this).val('');
          });
 
+         win.find('.jsxc_textarea').click(function() {
+            win.find('.jsxc_textinput').focus();
+         });
+
          win.find('.jsxc_textarea').slimScroll({
             height: '234px',
             distance: '3px'
