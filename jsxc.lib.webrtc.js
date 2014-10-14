@@ -184,6 +184,27 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       },
 
       /**
+       * Return list of video capable resources.
+       * 
+       * @memberOf jsxc.webrtc
+       * @param bid
+       * @returns {Array}
+       */
+      getCapableRes: function(bid) {
+         var self = jsxc.webrtc;
+         var res = jsxc.storage.getUserItem('res', bid) || [];
+
+         var available = [];
+         $.each(res, function(r) {
+            if (self.conn.caps.hasFeatureByJid(bid + '/' + r, self.reqVideoFeatures)) {
+               available.push(r);
+            }
+         });
+
+         return available;
+      },
+
+      /**
        * Add "video" button to roster
        * 
        * @private
@@ -250,21 +271,25 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
 
          var el = win.find('.jsxc_video').add(jsxc.gui.roster.getItem(bid).find('.jsxc_video'));
 
-         if (Strophe.getResourceFromJid(jid) === null) {
+         var capableRes = self.getCapableRes(jid);
+         var targetRes = Strophe.getResourceFromJid(jid);
 
-            var res = jsxc.storage.getUserItem('buddy', bid).res;
-
-            if (Array.isArray(res) && res.length === 1) {
-               jid += '/' + res[0];
-            }
+         if (targetRes === null) {
+            $.each(jsxc.storage.getUserItem('buddy', bid).res, function(index, val) {
+               if (capableRes.indexOf(val) > -1) {
+                  targetRes = val;
+                  return false;
+               }
+            });
          }
 
          el.off('click');
 
-         if (self.conn.caps.hasFeatureByJid(jid, self.reqVideoFeatures)) {
+         if (capableRes.indexOf(targetRes) > -1) {
             el.click(function() {
-               self.startCall(jid);
+               self.startCall(jid + '/' + targetRes);
             });
+
             el.removeClass('jsxc_disabled');
 
             el.attr('title', jsxc.translate('%%Start video call%%'));
@@ -659,6 +684,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        * 
        * @memberOf jsxc.webrtc
        * @param jid full jid
+       * @param um requested user media
        */
       startCall: function(jid, um) {
          var self = this;
@@ -955,7 +981,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       Remote_IP: 'Remote IP',
       Local_Fingerprint: 'Local fingerprint',
       Remote_Fingerprint: 'Remote fingerprint',
-      Video_call_not_possible: 'Video call not possible',
+      Video_call_not_possible: 'Video call not possible. Your buddy does not support video calls.',
       Start_video_call: 'Start video call'
    });
 
@@ -976,7 +1002,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       Remote_IP: 'Remote IP',
       Local_Fingerprint: 'Lokaler Fingerprint',
       Remote_Fingerprint: 'Remote Fingerprint',
-      Video_call_not_possible: 'Videoanruf nicht verfügbar',
+      Video_call_not_possible: 'Videoanruf nicht verfügbar. Dein Gesprächspartner unterstützt keine Videotelefonie.',
       Start_video_call: 'Starte Videoanruf'
    });
 
