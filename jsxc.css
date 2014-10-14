@@ -765,6 +765,7 @@ div.jsxc_window .jsxc_emoticons ul {
 	padding: 3px;
 	border-radius: 3px;
 	z-index: 200;
+	list-style-type: none;
 }
 
 div.jsxc_window .jsxc_emoticons ul:after {
@@ -785,12 +786,15 @@ div.jsxc_window .jsxc_emoticons li {
 	cursor: pointer;
 }
 
-div.jsxc_window .jsxc_emoticons img {
+div.jsxc_window .jsxc_emoticons div {
 	cursor: pointer;
 	border-radius: 3px;
+	background-size: 19px 19px;
+	width: 19px;
+	height: 19px;
 }
 
-div.jsxc_window .jsxc_emoticons img:hover {
+div.jsxc_window .jsxc_emoticons div:hover {
 	background-color: rgba(255, 255, 255, 0.8);
 }
 
@@ -860,6 +864,7 @@ div.jsxc_chatmessage a {
 div.jsxc_chatmessage img {
 	width: 19px;
 	height: 19px;
+	background-size: 19px 19px;
 }
 
 /** incoming message */
@@ -1133,3 +1138,54 @@ img.jsxc_vCard {
    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a4a4a4',
       endColorstr='#00282323', GradientType=0); /* IE6-9 */
 }
+
+.emoticons {
+  width: 19px;
+  height: 19px;
+  background-size: 19px 19px !important;
+  border: 0px;
+}
+
+.angel { background: url('img/emotions/angel.png') }
+
+.angry { background: url('img/emotions/angry.png') }
+
+.smile { background: url('img/emotions/smile.png') }
+
+.grin { background: url('img/emotions/grin.png') }
+
+.sad { background: url('img/emotions/sad.png') }
+
+.wink { background: url('img/emotions/wink.png') }
+
+.tonguesmile { background: url('img/emotions/tonguesmile.png') }
+
+.surprised { background: url('img/emotions/surprised.png') }
+
+.kiss { background: url('img/emotions/kiss.png') }
+
+.sunglassess { background: url('img/emotions/sunglassess.png') }
+
+.crysad { background: url('img/emotions/crysad.png') }
+
+.doubt { background: url('img/emotions/doubt.png') }
+
+.zip { background: url('img/emotions/zip.png') }
+
+.thumbsup { background: url('img/emotions/thumbsup.png') }
+
+.thumbsdown { background: url('img/emotions/thumbsdown.png') }
+
+.beer { background: url('img/emotions/beer.png') }
+
+.devil { background: url('img/emotions/devil.png') }
+
+.kissing { background: url('img/emotions/kissing.png') }
+
+.rose { background: url('img/emotions/rose.png') }
+
+.music { background: url('img/emotions/music.png') }
+
+.love { background: url('img/emotions/love.png') }
+
+.tired { background: url('img/emotions/tired.png') }
