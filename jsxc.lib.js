@@ -2359,7 +2359,14 @@ var jsxc;
        * @param {String} bid bar jid
        */
       toggle: function(bid) {
-         if (jsxc.gui.window.get(bid).find('.jsxc_fade').is(':hidden')) {
+         
+         var win = jsxc.gui.window.get(bid);
+         
+         if (win.parents("#jsxc_windowList").length === 0) {
+            return;
+         }
+         
+         if (win.find('.jsxc_fade').is(':hidden')) {
             jsxc.gui.window.show(bid);
          } else {
             jsxc.gui.window.hide(bid);

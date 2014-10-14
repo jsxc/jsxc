@@ -2,6 +2,14 @@
 	width: 900px;
 }
 
+.jsxc_webrtc li .jsxc_name {
+	cursor: auto;
+}
+
+.jsxc_webrtc li .jsxc_name:hover {
+	color: #939393;
+}
+
 .jsxc_videoContainer {
 	width: 640px;
 	height: 480px;
