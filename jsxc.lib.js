@@ -2209,6 +2209,10 @@ var jsxc;
             }
 
             jsxc.storage.updateUserItem('window', bid, 'text', body);
+            
+            if (ev.which === 27) {
+               jsxc.gui.window.close(bid);
+            }
          });
 
          win.find('.jsxc_textinput').keypress(function(ev) {
