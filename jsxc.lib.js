@@ -1198,7 +1198,7 @@ var jsxc;
 
             jsxc.gui.dialog.close();
 
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.verification_query_sent);
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_query_sent);
          });
 
          // Secret
@@ -1227,7 +1227,7 @@ var jsxc;
 
             jsxc.gui.dialog.close();
 
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.verification_query_sent);
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_query_sent);
          });
       },
 
@@ -2209,7 +2209,7 @@ var jsxc;
             }
 
             jsxc.storage.updateUserItem('window', bid, 'text', body);
-            
+
             if (ev.which === 27) {
                jsxc.gui.window.close(bid);
             }
@@ -2363,13 +2363,13 @@ var jsxc;
        * @param {String} bid bar jid
        */
       toggle: function(bid) {
-         
+
          var win = jsxc.gui.window.get(bid);
-         
+
          if (win.parents("#jsxc_windowList").length === 0) {
             return;
          }
-         
+
          if (win.find('.jsxc_fade').is(':hidden')) {
             jsxc.gui.window.show(bid);
          } else {
@@ -4299,10 +4299,18 @@ var jsxc;
          jsxc.otr.objects[bid].on('smp', function(type, data) {
             switch (type) {
                case 'question': // verification request received
+                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.Authentication_request_received);
+
+                  if ($('#jsxc_dialog').length > 0) {
+                     jsxc.otr.objects[bid].sm.abort();
+                     break;
+                  }
+
                   jsxc.otr.onSmpQuestion(bid, data);
                   jsxc.storage.setUserItem('smp_' + bid, {
                      data: data || null
                   });
+
                   break;
                case 'trust': // verification completed
                   jsxc.otr.objects[bid].trust = data;
@@ -4313,10 +4321,13 @@ var jsxc;
                   if (data) {
                      jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.conversation_is_now_verified);
                   } else {
-                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.verification_failed);
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_failed);
                   }
                   jsxc.storage.removeUserItem('smp_' + bid);
                   jsxc.gui.dialog.close();
+                  break;
+               case 'abort':
+                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.Authentication_aborted);
                   break;
                default:
                   jsxc.debug('[OTR] sm callback: Unknown type: ' + type);
@@ -4366,7 +4377,7 @@ var jsxc;
             $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text(jsxc.l.your_buddy_is_attempting_to_determine_ + ' ' + jsxc.l.to_authenticate_to_your_buddy + jsxc.l.enter_the_secret);
          }
 
-         $('#jsxc_dialog a[rel=close]').click(function() {
+         $('#jsxc_dialog .jsxc_close').click(function() {
             jsxc.storage.removeUserItem('smp_' + bid);
 
             if (jsxc.master) {
@@ -4386,7 +4397,7 @@ var jsxc;
       sendSmpReq: function(bid, sec, quest) {
          jsxc.keepBusyAlive();
 
-         jsxc.otr.objects[bid].smpSecret(sec, quest);
+         jsxc.otr.objects[bid].smpSecret(sec, quest || '');
       },
 
       /**
@@ -4970,7 +4981,7 @@ var jsxc;
          close_private: 'Close private',
          your_buddy_is_verificated: 'Your buddy is verified.',
          you_have_only_a_subscription_in_one_way: 'You only have a one-way subscription.',
-         verification_query_sent: 'Verification query sent.',
+         authentication_query_sent: 'Authentication query sent.',
          your_message_wasnt_send_please_end_your_private_conversation: 'Your message was not sent. Please end your private conversation.',
          unencrypted_message_received: 'Unencrypted message received:',
          your_message_wasnt_send_because_you_have_no_valid_subscription: 'Your message was not sent because you have no valid subscription.',
@@ -4984,7 +4995,7 @@ var jsxc;
          private_conversation_aborted: 'Private conversation aborted!',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Your buddy closed the private conversation! You should do the same.',
          conversation_is_now_verified: 'Conversation is now verified.',
-         verification_failed: 'Verification failed.',
+         authentication_failed: 'Authentication failed.',
          your_buddy_is_attempting_to_determine_: 'You buddy is attempting to determine if he or she is really talking to you.',
          to_authenticate_to_your_buddy: 'To authenticate to your buddy, ',
          enter_the_answer_and_click_answer: 'enter the answer and click Answer.',
@@ -5104,7 +5115,9 @@ var jsxc;
          On_login: 'On login',
          Received_an_unencrypted_message: 'Received an unencrypted message',
          Sorry_your_buddy_doesnt_provide_any_information: 'Sorry, your buddy does not provide any information.',
-         Info_about: 'Info about'
+         Info_about: 'Info about',
+         Authentication_aborted: 'Authentication aborted.',
+         Authentication_request_received: 'Authentication request received.'
       },
       de: {
          Logging_in: 'Login läuft…',
@@ -5115,7 +5128,7 @@ var jsxc;
          close_private: 'Privat abbrechen',
          your_buddy_is_verificated: 'Dein Freund ist verifiziert.',
          you_have_only_a_subscription_in_one_way: 'Die Freundschaft ist nur einseitig.',
-         verification_query_sent: 'Verifizierungsanfrage gesendet.',
+         authentication_query_sent: 'Authentifizierungsanfrage gesendet.',
          your_message_wasnt_send_please_end_your_private_conversation: 'Deine Nachricht wurde nicht gesendet. Bitte beende die private Konversation.',
          unencrypted_message_received: 'Unverschlüsselte Nachricht erhalten.',
          your_message_wasnt_send_because_you_have_no_valid_subscription: 'Deine Nachricht wurde nicht gesandt, da die Freundschaft einseitig ist.',
@@ -5129,7 +5142,7 @@ var jsxc;
          private_conversation_aborted: 'Private Konversation abgebrochen.',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Dein Freund hat die private Konversation beendet. Das solltest du auch tun!',
          conversation_is_now_verified: 'Konversation ist jetzt verifiziert',
-         verification_failed: 'Verifizierung fehlgeschlagen.',
+         authentication_failed: 'Authentifizierung fehlgeschlagen.',
          your_buddy_is_attempting_to_determine_: 'Dein Freund versucht herauszufinden ob er wirklich mit dir redet.',
          to_authenticate_to_your_buddy: 'Um dich gegenüber deinem Freund zu verifizieren ',
          enter_the_answer_and_click_answer: 'gib die Antwort ein und klick auf Antworten.',
@@ -5250,7 +5263,9 @@ var jsxc;
          On_login: 'Beim Anmelden',
          Received_an_unencrypted_message: 'Unverschlüsselte Nachricht empfangen',
          Sorry_your_buddy_doesnt_provide_any_information: 'Dein Freund stellt leider keine Informationen bereit.',
-         Info_about: 'Info über'
+         Info_about: 'Info über',
+         Authentication_aborted: 'Authentifizierung abgebrochen.',
+         Authentication_request_received: 'Authentifizierunganfrage empfangen.'
       },
       es: {
          Logging_in: 'Por favor, espere...',
@@ -5261,7 +5276,7 @@ var jsxc;
          close_private: 'Cerrar privado',
          your_buddy_is_verificated: 'Tu amigo está verificado.',
          you_have_only_a_subscription_in_one_way: 'Sólo tienes una suscripción de un modo.',
-         verification_query_sent: 'Consulta de verificación enviada.',
+         authentication_query_sent: 'Consulta de verificación enviada.',
          your_message_wasnt_send_please_end_your_private_conversation: 'Su mensaje no fue enviado. Por favor, termine su conversación privada.',
          unencrypted_message_received: 'Mensaje no cifrado recibido:',
          your_message_wasnt_send_because_you_have_no_valid_subscription: 'Su mensaje no se ha enviado, porque usted no tiene suscripción válida.',
@@ -5275,7 +5290,7 @@ var jsxc;
          private_conversation_aborted: 'Conversación privada abortada!',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Su amigo cerró la conversación privada! Usted debería hacer lo mismo.',
          conversation_is_now_verified: 'La conversación es ahora verificada.',
-         verification_failed: 'Fallo la verificación.',
+         authentication_failed: 'Fallo la verificación.',
          your_buddy_is_attempting_to_determine_: 'Tu amigo está tratando de determinar si él o ella está realmente hablando con usted.',
          to_authenticate_to_your_buddy: 'Para autenticar a su amigo, ',
          enter_the_answer_and_click_answer: 'introduce la respuesta y haga clic en Contestar.',
