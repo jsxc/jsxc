@@ -255,7 +255,7 @@ var jsxc;
 
                var settings = jsxc.prepareLogin();
 
-               if (settings.xmpp.onlogin === "true" || settings.xmpp.onlogin === true) {
+               if (settings !== false && (settings.xmpp.onlogin === "true" || settings.xmpp.onlogin === true)) {
                   jsxc.triggeredFromForm = true;
 
                   jsxc.xmpp.login();
@@ -299,8 +299,6 @@ var jsxc;
        * @returns Loaded settings
        */
       prepareLogin: function() {
-         jsxc.gui.showWaitAlert(jsxc.l.Logging_in);
-
          var username = $(jsxc.options.loginForm.jid).val();
          var password = $(jsxc.options.loginForm.pass).val();
 
@@ -309,10 +307,14 @@ var jsxc;
             return;
          }
 
+         jsxc.gui.showWaitAlert(jsxc.l.Logging_in);
+
          var settings = jsxc.options.loadSettings.call(this, username, password);
 
-         if (settings === null || typeof settings === 'undefined') {
-            return true;
+         if (settings === false || settings === null || typeof settings === 'undefined') {
+            jsxc.warn('No settings provided');
+
+            return false;
          }
 
          if (typeof settings.xmpp.username === 'string') {
@@ -1102,11 +1104,16 @@ var jsxc;
             jsxc.options.loginForm.jid = $(this).find('#jsxc_username');
             jsxc.options.loginForm.pass = $(this).find('#jsxc_password');
 
-            jsxc.prepareLogin();
+            var settings = jsxc.prepareLogin();
 
             jsxc.triggeredFromBox = true;
+            jsxc.triggeredFromForm = false;
 
-            jsxc.xmpp.login();
+            if (settings === false) {
+               jsxc.gui.showAuthFail();
+            } else {
+               jsxc.xmpp.login();
+            }
 
             return false;
          });
@@ -1360,6 +1367,10 @@ var jsxc;
        */
       showAuthFail: function() {
          jsxc.gui.dialog.open(jsxc.gui.template.get('authFailDialog'));
+
+         if (jsxc.triggeredFromBox) {
+            $('#jsxc_dialog .jsxc_cancel').hide();
+         }
 
          $('#jsxc_dialog .creation').click(function() {
             jsxc.gui.dialog.close();
