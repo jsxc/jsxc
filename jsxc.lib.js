@@ -3027,7 +3027,37 @@ var jsxc;
 
          jsxc.triggeredFromElement = true;
 
-         jsxc.xmpp.conn.disconnect();
+         // restore all otr objects
+         $.each(jsxc.storage.getUserItem('otrlist'), function(i, val) {
+            jsxc.otr.create(val);
+         });
+
+         var numOtr = Object.keys(jsxc.otr.objects).length + 1;
+         var disReady = function() {
+            if (--numOtr <= 0) {
+               jsxc.xmpp.conn.flush();
+
+               setTimeout(function() {
+                  jsxc.xmpp.conn.disconnect();
+               }, 600);
+            }
+         };
+
+         // end all private conversations
+         $.each(jsxc.otr.objects, function(key, obj) {
+            if (obj.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED) {
+               obj.endOtr.call(obj, function() {
+                  obj.init.call(obj);
+                  jsxc.otr.backup(key);
+
+                  disReady();
+               });
+            } else {
+               disReady();
+            }
+         });
+
+         disReady();
 
          // Trigger real logout in jsxc.xmpp.disconnected()
          return false;
@@ -3164,6 +3194,7 @@ var jsxc;
          jsxc.storage.removeItem('lastActivity');
          jsxc.storage.removeItem('hidden');
          jsxc.storage.removeUserItem('avatar', 'own');
+         jsxc.storage.removeUserItem('otrlist');
 
          jsxc.xmpp.conn = null;
 
@@ -4250,6 +4281,13 @@ var jsxc;
             return;
          }
 
+         // save list of otr objects
+         var ol = jsxc.storage.getUserItem('otrlist') || [];
+         if (ol.indexOf(bid) < 0) {
+            ol.push(bid);
+            jsxc.storage.setUserItem('otrlist', ol);
+         }
+
          jsxc.otr.objects[bid] = new OTR(jsxc.options.otr);
 
          if (jsxc.options.otr.SEND_WHITESPACE_TAG) {
@@ -4346,7 +4384,11 @@ var jsxc;
 
          // Send message
          jsxc.otr.objects[bid].on('io', function(msg, uid) {
-            jsxc.otr.sendMessage(jsxc.gui.window.get(bid).data('jid'), msg, uid);
+            var jid = jsxc.gui.window.get(bid).data('jid') || jsxc.otr.objects[bid].jid;
+
+            jsxc.otr.objects[bid].jid = jid;
+
+            jsxc.otr.sendMessage(jid, msg, uid);
          });
 
          jsxc.otr.objects[bid].on('error', function(err) {
@@ -4437,11 +4479,12 @@ var jsxc;
        * Abort encryptet session
        * 
        * @param {type} bid
+       * @param cb callback
        * @returns {undefined}
        */
-      goPlain: function(bid) {
+      goPlain: function(bid, cb) {
          if (jsxc.master) {
-            jsxc.otr.objects[bid].endOtr.call(jsxc.otr.objects[bid]);
+            jsxc.otr.objects[bid].endOtr.call(jsxc.otr.objects[bid], cb);
             jsxc.otr.objects[bid].init.call(jsxc.otr.objects[bid]);
 
             jsxc.otr.backup(bid);
@@ -4464,7 +4507,7 @@ var jsxc;
          }
 
          // all variables which should be saved
-         var savekey = [ 'our_instance_tag', 'msgstate', 'authstate', 'fragment', 'their_y', 'their_old_y', 'their_keyid', 'their_instance_tag', 'our_dh', 'our_old_dh', 'our_keyid', 'sessKeys', 'storedMgs', 'oldMacKeys', 'trust', 'transmittedRS', 'ssid', 'receivedPlaintext', 'authstate', 'send_interval' ];
+         var savekey = [ 'jid', 'our_instance_tag', 'msgstate', 'authstate', 'fragment', 'their_y', 'their_old_y', 'their_keyid', 'their_instance_tag', 'our_dh', 'our_old_dh', 'our_keyid', 'sessKeys', 'storedMgs', 'oldMacKeys', 'trust', 'transmittedRS', 'ssid', 'receivedPlaintext', 'authstate', 'send_interval' ];
 
          var i;
          for (i = 0; i < savekey.length; i++) {
