@@ -1279,12 +1279,6 @@ var jsxc;
             $('#jsxc_username').val(username);
          }
 
-         $('#jsxc_dialog input').keypress(function(ev) {
-            if (ev.which === 13) {
-               $('#jsxc_dialog .creation').click();
-            }
-         });
-
          $('#jsxc_dialog form').submit(function() {
             var username = $('#jsxc_username').val();
             var alias = $('#jsxc_alias').val();
@@ -2831,7 +2825,7 @@ var jsxc;
          <p class=".jsxc_explanation">%%Type_in_the_full_username_%%</p>\
          <form>\
          <p><label for="jsxc_username">* %%Username%%:</label>\
-            <input type="email" name="username" id="jsxc_username" required="required" /></p>\
+            <input type="text" name="username" id="jsxc_username" pattern="^[^\\x22&\'\\/:<>@\\s]+(@[.\\-_\\w]+)?" required="required" /></p>\
          <p><label for="jsxc_alias">%%Alias%%:</label>\
             <input type="text" name="alias" id="jsxc_alias" /></p>\
          <p class="jsxc_right">\
