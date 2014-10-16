@@ -267,29 +267,29 @@ var jsxc;
                return true;
             });
 
-         } else {
+         } else jsxc.restoreOldConnection();
+      },
 
-            // Restore old connection
+      restoreOldConnection: function() {
+        // Restore old connection
+        var jid = jsxc.storage.getItem('jid') || jsxc.options.xmpp.jid;
+        jsxc.bid = jsxc.jidToBid(jid);
+        jsxc.gui.init();
 
-            jsxc.bid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
+        // Looking for logout element
+        if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+          jsxc.options.logoutElement.one('click', function() {
+            jsxc.options.logoutElement = $(this);
+            jsxc.triggeredFromLogout = true;
+            return jsxc.xmpp.logout();
+          });
+        }
 
-            jsxc.gui.init();
-
-            // Looking for logout element
-            if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
-               jsxc.options.logoutElement.one('click', function() {
-                  jsxc.options.logoutElement = $(this);
-                  jsxc.triggeredFromLogout = true;
-                  return jsxc.xmpp.logout();
-               });
-            }
-
-            if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
-               jsxc.onMaster();
-            } else {
-               jsxc.checkMaster();
-            }
-         }
+        if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
+          jsxc.onMaster();
+        } else {
+          jsxc.checkMaster();
+        }
       },
 
       /**
