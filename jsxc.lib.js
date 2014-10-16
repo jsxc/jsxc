@@ -804,7 +804,7 @@ var jsxc;
     */
    jsxc.gui = {
       /** Smilie token to file mapping */
-      emotions: [ [ 'O:-) O:)', 'angel.png' ], [ '>:-( >:( &gt;:-( &gt;:(', 'angry.png' ], [ ':-) :)', 'smile.png' ], [ ':-D :D', 'grin.png' ], [ ':-( :(', 'sad.png' ], [ ';-) ;)', 'wink.png' ], [ ':-P :P', 'tonguesmile.png' ], [ '=-O', 'surprised.png' ], [ ':kiss: :-*', 'kiss.png' ], [ '8-) :cool:', 'sunglassess.png' ], [ ':\'-( :\'( :&amp;apos;-(', 'crysad.png' ], [ ':-/', 'doubt.png' ], [ ':-X :X', 'zip.png' ], [ ':yes:', 'thumbsup.png' ], [ ':no:', 'thumbsdown.png' ], [ ':beer:', 'beer.png' ], [ ':devil:', 'devil.png' ], [ ':kiss: :kissing:', 'kissing.png' ], [ '@->-- :rose: @-&gt;--', 'rose.png' ], [ ':music:', 'music.png' ], [ ':love:', 'love.png' ], [ ':zzz:', 'tired.png' ] ],
+      emotions: [ [ 'O:-) O:)', 'angel' ], [ '>:-( >:( &gt;:-( &gt;:(', 'angry' ], [ ':-) :)', 'smile' ], [ ':-D :D', 'grin' ], [ ':-( :(', 'sad' ], [ ';-) ;)', 'wink' ], [ ':-P :P', 'tonguesmile' ], [ '=-O', 'surprised' ], [ ':kiss: :-*', 'kiss' ], [ '8-) :cool:', 'sunglassess' ], [ ':\'-( :\'( :&amp;apos;-(', 'crysad' ], [ ':-/', 'doubt' ], [ ':-X :X', 'zip' ], [ ':yes:', 'thumbsup' ], [ ':no:', 'thumbsdown' ], [ ':beer:', 'beer' ], [ ':devil:', 'devil' ], [ ':kiss: :kissing:', 'kissing' ], [ '@->-- :rose: @-&gt;--', 'rose' ], [ ':music:', 'music' ], [ ':love:', 'love' ], [ ':zzz:', 'tired' ] ],
 
       /**
        * Creates application skeleton.
@@ -2269,7 +2269,7 @@ var jsxc;
 
          $.each(jsxc.gui.emotions, function(i, val) {
             var ins = val[0].split(' ')[0];
-            var li = $('<li><img alt="' + ins + '" title="' + ins + '" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/></li>');
+            var li = $('<li><div title="' + ins + '" class="jsxc_' + val[1] + '"/></li>');
             li.click(function() {
                win.find('input').val(win.find('input').val() + ins);
                win.find('input').focus();
@@ -2567,7 +2567,7 @@ var jsxc;
                   esc += '&#' + p1.charCodeAt(i) + ';';
                }
 
-               return '<img alt="' + esc + '" title="' + esc + '" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/>';
+               return '<div title="' + esc + '" class="jsxc_emoticon jsxc_' + val[1] + '"/>';
             });
          });
 
