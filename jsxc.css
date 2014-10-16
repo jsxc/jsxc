@@ -566,9 +566,11 @@ ul#jsxc_buddylist .jsxc_right div {
 	color: #fff;
 }
 
-ul#jsxc_buddylist li[data-type!="chat"] .jsxc_right {
-	display: none;
-}
+/** Sass::SyntaxError: Invalid CSS 'data-type!="chat"'
+ * ul#jsxc_buddylist li[data-type!="chat"] .jsxc_right {
+ *	display: none;
+ * }
+ */
 
 ul#jsxc_buddylist .jsxc_right div:hover {
 	opacity: 1.0;
