@@ -1,0 +1,49 @@
+{
+  "name": "diaspora-jsxc",
+  "version": "0.0.19",
+  "homepage": "https://github.com/diaspora/jsxc",
+  "description": "XMPP javascript client for diaspora",
+  "main": [
+    "lib/strophe.js",
+    "lib/strophe.disco.js",
+    "lib/strophe.caps.js",
+    "lib/strophe.muc.js",
+    "lib/strophe.vcard.js",
+    "lib/jquery-ui.min.css",
+    "lib/jquery.mCustomScrollbar.css",
+    "lib/jquery.colorbox.css",
+    "jsxc.css",
+    "jsxc.lib.js"
+  ],
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "xmpp",
+    "chat",
+    "client",
+    "diaspora"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "build",
+    "example",
+    "lib/jquery*.js",
+    "lib/strophe.jingle",
+    "lib/**/*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~1.11.1",
+    "jquery-ui": "~1.10.4",
+    "jquery-colorbox": "~1.5.14",
+    "jquery.slimscroll": "~1.3.3",
+    "jquery-fullscreen": "~1.1.4",
+    "strophejs-jingle": "~0.0.1",
+    "otr": "~0.2.13"
+  }
+}
