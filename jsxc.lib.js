@@ -816,38 +816,19 @@ var jsxc;
       init: function() {
          $('body').append($(jsxc.gui.template.get('windowList')));
 
-         var scrollBy = function(offset) {
-            var scrollWidth = $('#jsxc_windowList>ul').width();
-            var width = $('#jsxc_windowList').width();
-            var el = $('#jsxc_windowList>ul');
-            var right = parseInt(el.css('right')) - offset;
-
-            if (scrollWidth < width) {
-               return;
-            }
-
-            if (right > 0) {
-               right = 0;
-            }
-
-            if (right < width - scrollWidth - 30) {
-               right = width - scrollWidth - 30;
-            }
-
-            el.css('right', right + 'px');
-         };
-
          $(window).resize(jsxc.gui.updateWindowListSB);
          $('#jsxc_windowList').resize(jsxc.gui.updateWindowListSB);
 
          $('#jsxc_windowListSB .jsxc_scrollLeft').click(function() {
-            scrollBy(-200);
+            jsxc.gui.scrollWindowListBy(-200);
          });
          $('#jsxc_windowListSB .jsxc_scrollRight').click(function() {
-            scrollBy(200);
+            jsxc.gui.scrollWindowListBy(200);
          });
          $('#jsxc_windowList').on('wheel', function(ev) {
-            scrollBy((ev.originalEvent.wheelDelta > 0) ? 200 : -200);
+            if ($('#jsxc_windowList').data('isOver')) {
+               jsxc.gui.scrollWindowListBy((ev.originalEvent.wheelDelta > 0) ? 200 : -200);
+            }
          });
 
          jsxc.gui.tooltip('#jsxc_windowList');
@@ -1033,6 +1014,35 @@ var jsxc;
             $('#jsxc_windowListSB > div').addClass('jsxc_disabled');
             $('#jsxc_windowList>ul').css('right', '0px');
          }
+      },
+
+      /**
+       * Scroll window list by offset.
+       * 
+       * @memberOf jsxc.gui
+       * @param offset
+       */
+      scrollWindowListBy: function(offset) {
+
+         var scrollWidth = $('#jsxc_windowList>ul').width();
+         var width = $('#jsxc_windowList').width();
+         var el = $('#jsxc_windowList>ul');
+         var right = parseInt(el.css('right')) - offset;
+         var padding = $("#jsxc_windowListSB").width();
+
+         if (scrollWidth < width) {
+            return;
+         }
+
+         if (right > 0) {
+            right = 0;
+         }
+
+         if (right < width - scrollWidth - padding) {
+            right = width - scrollWidth - padding;
+         }
+
+         el.css('right', right + 'px');
       },
 
       /**
@@ -1700,6 +1710,22 @@ var jsxc;
          }
 
          $('.jsxc_presence[data-bid="' + bid + '"]').removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
+      },
+
+      unreadMsg: function(bid) {
+         var win = jsxc.gui.window.get(bid);
+
+         jsxc.gui.roster.getItem(bid).add(win).addClass('jsxc_unreadMsg');
+         jsxc.storage.updateUserItem('window', bid, 'unread', true);
+      },
+
+      readMsg: function(bid) {
+         var win = jsxc.gui.window.get(bid);
+
+         if (win.hasClass('jsxc_unreadMsg')) {
+            jsxc.gui.roster.getItem(bid).add(win).removeClass('jsxc_unreadMsg');
+            jsxc.storage.updateUserItem('window', bid, 'unread', false);
+         }
       }
    };
 
@@ -2218,9 +2244,7 @@ var jsxc;
             if (ev.which === 27) {
                jsxc.gui.window.close(bid);
             }
-         });
-
-         win.find('.jsxc_textinput').keypress(function(ev) {
+         }).keypress(function(ev) {
             if (ev.which !== 13 || !$(this).val()) {
                return;
             }
@@ -2228,6 +2252,13 @@ var jsxc;
             jsxc.gui.window.postMessage(bid, 'out', $(this).val());
 
             $(this).val('');
+         }).focus(function() {
+            // remove unread flag
+            jsxc.gui.readMsg(bid);
+         }).mouseenter(function() {
+            $('#jsxc_windowList').data('isOver', true);
+         }).mouseleave(function() {
+            $('#jsxc_windowList').data('isOver', false);
          });
 
          win.find('.jsxc_textarea').click(function() {
@@ -2272,7 +2303,7 @@ var jsxc;
          } else {
 
             if (jsxc.storage.getUserItem('window', bid).unread) {
-               win.addClass('jsxc_unreadMsg');
+               jsxc.gui.unreadMsg(bid);
             }
          }
 
@@ -2326,7 +2357,25 @@ var jsxc;
          jsxc.gui.window.show(bid);
          jsxc.gui.window.highlight(bid);
 
-         win.find('.jsxc_textinput').focus();
+         var padding = $("#jsxc_windowListSB").width();
+         var innerWidth = $('#jsxc_windowList>ul').width();
+         var outerWidth = $('#jsxc_windowList').width() - padding;
+
+         if (innerWidth > outerWidth) {
+            var offset = parseInt($('#jsxc_windowList>ul').css('right'));
+            var width = win.outerWidth(true);
+
+            var right = innerWidth - win.position().left - width + offset;
+            var left = outerWidth - (innerWidth - win.position().left) - offset;
+
+            if (left < 0) {
+               jsxc.gui.scrollWindowListBy(left * -1);
+            }
+
+            if (right < 0) {
+               jsxc.gui.scrollWindowListBy(right);
+            }
+         }
 
          return win;
       },
@@ -2407,15 +2456,13 @@ var jsxc;
          jsxc.gui.window.get(bid).find('.jsxc_fade').slideDown();
          win.removeClass('jsxc_min');
 
-         // remove unread flag
-         win.removeClass('jsxc_unreadMsg');
-         jsxc.storage.updateUserItem('window', bid, 'unread', false);
-
          // If the area is hidden, the scrolldown function doesn't work. So we
          // call it here.
          jsxc.gui.window.scrollDown(bid);
 
-         win.find('.jsxc_textinput').focus();
+         if (jsxc.restoreCompleted) {
+            win.find('.jsxc_textinput').focus();
+         }
 
          win.trigger('show.window.jsxc');
       },
@@ -2597,10 +2644,9 @@ var jsxc;
 
          jsxc.gui.window.scrollDown(bid);
 
-         // if window is hidden set unread flag
-         if (win.find('.jsxc_fade').is(':hidden') && jsxc.restoreCompleted && !restore) {
-            win.addClass('jsxc_unreadMsg');
-            jsxc.storage.updateUserItem('window', bid, 'unread', true);
+         // if window has no focus set unread flag
+         if (!win.find('.jsxc_textinput').is(':focus') && jsxc.restoreCompleted && !restore) {
+            jsxc.gui.unreadMsg(bid);
          }
       },
 
