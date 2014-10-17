@@ -267,29 +267,37 @@ var jsxc;
                return true;
             });
 
-         } else {
+         } else jsxc.restoreOldConnection();
+      },
 
-            // Restore old connection
+      login: function() {
+        if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid')) {
+          jsxc.restore = true;
+          jsxc.xmpp.login();
+          jsxc.restoreOldConnection();
+        }
+      },
 
-            jsxc.bid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
+      restoreOldConnection: function() {
+        // Restore old connection
+        var jid = jsxc.storage.getItem('jid') || jsxc.options.xmpp.jid;
+        jsxc.bid = jsxc.jidToBid(jid);
+        jsxc.gui.init();
 
-            jsxc.gui.init();
+        // Looking for logout element
+        if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+          jsxc.options.logoutElement.one('click', function() {
+            jsxc.options.logoutElement = $(this);
+            jsxc.triggeredFromLogout = true;
+            return jsxc.xmpp.logout();
+          });
+        }
 
-            // Looking for logout element
-            if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
-               jsxc.options.logoutElement.one('click', function() {
-                  jsxc.options.logoutElement = $(this);
-                  jsxc.triggeredFromLogout = true;
-                  return jsxc.xmpp.logout();
-               });
-            }
-
-            if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
-               jsxc.onMaster();
-            } else {
-               jsxc.checkMaster();
-            }
-         }
+        if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
+          jsxc.onMaster();
+        } else {
+          jsxc.checkMaster();
+        }
       },
 
       /**
@@ -4515,7 +4523,7 @@ var jsxc;
                // try to create web-worker
 
                try {
-                  worker = new Worker(jsxc.options.root + '/lib/otr/build/dsa-webworker.js');
+                  worker = new Worker('/assets/otr/dsa-webworker.js');
                } catch (err) {
                   jsxc.warn('Couldn\'t create web-worker.', err);
                }
@@ -4541,7 +4549,15 @@ var jsxc;
 
                // start worker
                worker.postMessage({
-                  imports: [ jsxc.options.root + '/lib/otr/vendor/salsa20.js', jsxc.options.root + '/lib/otr/vendor/bigint.js', jsxc.options.root + '/lib/otr/vendor/crypto.js', jsxc.options.root + '/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/lib/otr/lib/const.js', jsxc.options.root + '/lib/otr/lib/helpers.js', jsxc.options.root + '/lib/otr/lib/dsa.js' ],
+                  imports: [
+                    '/assets/otr/dep/salsa20.js',
+                    '/assets/otr/dep/bigint.js',
+                    '/assets/otr/dep/crypto.js',
+                    '/assets/otr/dep/eventemitter.js',
+                    '/assets/otr-dep/const.js',
+                    '/assets/otr-dep/helpers.js',
+                    '/assets/otr-dep/dsa.js'
+                  ],
                   seed: BigInt.getSeed(),
                   debug: true
                });
