@@ -270,6 +270,14 @@ var jsxc;
          } else jsxc.restoreOldConnection();
       },
 
+      login: function() {
+        if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid')) {
+          jsxc.restore = true;
+          jsxc.xmpp.login();
+          jsxc.restoreOldConnection();
+        }
+      },
+
       restoreOldConnection: function() {
         // Restore old connection
         var jid = jsxc.storage.getItem('jid') || jsxc.options.xmpp.jid;
