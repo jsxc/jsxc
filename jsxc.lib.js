@@ -73,6 +73,9 @@ var jsxc;
             MSG: 'incomingMessage.wav',
             CALL: 'Rotary-Phone6.mp3',
             NOTICE: 'Ping1.mp3'
+         },
+         REGEX: {
+            JID: new RegExp('^[^"&\'\\/:<>@\\s]+@[\\w-_.]+$', 'ig')
          }
       },
 
@@ -1305,10 +1308,10 @@ var jsxc;
             }
 
             // Check if the username is valid
-            if (!username || !username.match(/^[^"&'\/:<>@\s]+@[\w-_.]+$/g)) {
+            if (!username || !username.match(jsxc.CONST.REGEX.JID)) {
                // Add notification
                $('#jsxc_username').addClass('jsxc_invalid').keyup(function() {
-                  if ($(this).val().match(/^[^"&'\/:<>@\s]+@[\w-_.]+$/g)) {
+                  if ($(this).val().match(jsxc.CONST.REGEX.JID)) {
                      $(this).removeClass('jsxc_invalid');
                   }
                });
@@ -2611,6 +2614,11 @@ var jsxc;
             var href = (url.match(/^https?:\/\//i)) ? url : 'http://' + url;
 
             return '<a href="' + href + '" target="_blank">' + url + '</a>';
+         });
+
+         msg = msg.replace(jsxc.CONST.REGEX.JID, function(email) {
+
+            return '<a href="mailto:' + email + '" target="_blank">' + email + '</a>';
          });
 
          $.each(jsxc.gui.emotions, function(i, val) {
