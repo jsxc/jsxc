@@ -109,7 +109,6 @@ var jsxc;
 
             jsxc.log = jsxc.log + msg + ': ' + d + '\n';
          } else {
-            console.log(msg);
             jsxc.log = jsxc.log + msg + '\n';
          }
       },
