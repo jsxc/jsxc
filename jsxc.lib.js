@@ -3169,10 +3169,6 @@ var jsxc;
 
          if (jsxc.triggeredFromElement) {
             $('#jsxc_roster').remove();
-
-            if (jsxc.triggeredFromLogout) {
-               window.location = jsxc.options.logoutElement.attr('href');
-            }
          } else {
             jsxc.gui.roster.noConnection();
          }
