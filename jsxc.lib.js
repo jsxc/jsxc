@@ -811,6 +811,10 @@ var jsxc;
       /** Smilie token to file mapping */
       emotions: [ [ 'O:-) O:)', 'angel.png' ], [ '>:-( >:( &gt;:-( &gt;:(', 'angry.png' ], [ ':-) :)', 'smile.png' ], [ ':-D :D', 'grin.png' ], [ ':-( :(', 'sad.png' ], [ ';-) ;)', 'wink.png' ], [ ':-P :P', 'tonguesmile.png' ], [ '=-O', 'surprised.png' ], [ ':kiss: :-*', 'kiss.png' ], [ '8-) :cool:', 'sunglassess.png' ], [ ':\'-( :\'( :&amp;apos;-(', 'crysad.png' ], [ ':-/', 'doubt.png' ], [ ':-X :X', 'zip.png' ], [ ':yes:', 'thumbsup.png' ], [ ':no:', 'thumbsdown.png' ], [ ':beer:', 'beer.png' ], [ ':devil:', 'devil.png' ], [ ':kiss: :kissing:', 'kissing.png' ], [ '@->-- :rose: @-&gt;--', 'rose.png' ], [ ':music:', 'music.png' ], [ ':love:', 'love.png' ], [ ':zzz:', 'tired.png' ] ],
 
+      queryActions: {
+         message: null
+      },
+
       /**
        * Creates application skeleton.
        * 
@@ -1715,6 +1719,12 @@ var jsxc;
          $('.jsxc_presence[data-bid="' + bid + '"]').removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
       },
 
+      /**
+       * Switch read state to UNread.
+       * 
+       * @memberOf jsxc.gui
+       * @param bid
+       */
       unreadMsg: function(bid) {
          var win = jsxc.gui.window.get(bid);
 
@@ -1722,6 +1732,12 @@ var jsxc;
          jsxc.storage.updateUserItem('window', bid, 'unread', true);
       },
 
+      /**
+       * Switch read state to read.
+       * 
+       * @memberOf jsxc.gui
+       * @param bid
+       */
       readMsg: function(bid) {
          var win = jsxc.gui.window.get(bid);
 
@@ -1729,6 +1745,49 @@ var jsxc;
             jsxc.gui.roster.getItem(bid).add(win).removeClass('jsxc_unreadMsg');
             jsxc.storage.updateUserItem('window', bid, 'unread', false);
          }
+      },
+
+      /**
+       * This function searches for URI scheme according to XEP-0147.
+       * 
+       * @memberOf jsxc.gui
+       * @param container In which element should we search?
+       */
+      detectUriScheme: function(container) {
+         container = (container) ? $(container) : $('body');
+
+         container.find("a[href^='xmpp:']").each(function() {
+
+            var element = $(this);
+            var href = element.attr('href').replace(/^xmpp:/, '');
+            var jid = href.split('?')[0];
+            var action, params = {};
+
+            if (href.indexOf('?') < 0) {
+               action = 'message';
+            } else {
+               var pairs = href.substring(href.indexOf('?') + 1).split(';');
+               action = pairs[0];
+
+               var i, key, value;
+               for (i = 1; i < pairs.length; i++) {
+                  key = pairs[i].split('=')[0];
+                  value = (pairs[i].indexOf('=') > 0) ? pairs[i].substring(pairs[i].indexOf('=') + 1) : null;
+
+                  params[decodeURIComponent(key)] = decodeURIComponent(value);
+               }
+            }
+
+            if (typeof jsxc.gui.queryActions[action] === 'function') {
+               element.addClass('jsxc_uriScheme jsxc_uriScheme_' + action);
+
+               element.click(function(ev) {
+                  ev.stopPropagation();
+
+                  jsxc.gui.queryActions[action].call(jsxc, jid, params);
+               });
+            }
+         });
       }
    };
 
