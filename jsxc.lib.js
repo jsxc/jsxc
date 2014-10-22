@@ -1070,14 +1070,18 @@ var jsxc;
        * @memberof jsxc.gui
        */
       toggleList: function() {
-         $(this).disableSelection();
+         var self = $(this);
 
-         var ul = $(this).find('ul');
+         self.disableSelection();
+
+         var ul = self.find('ul');
          var slideUp = null;
 
          slideUp = function() {
             ul.slideUp();
             $('body').off('click', null, slideUp);
+            
+            self.removeClass('jsxc_opened');
          };
 
          $(this).click(function() {
@@ -1093,6 +1097,8 @@ var jsxc;
             ul.slideToggle();
 
             window.clearTimeout(ul.data('timer'));
+
+            self.toggleClass('jsxc_opened');
 
             return false;
          }).mouseleave(function() {
