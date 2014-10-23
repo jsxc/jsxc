@@ -1078,10 +1078,13 @@ var jsxc;
          var slideUp = null;
 
          slideUp = function() {
-            ul.slideUp();
-            $('body').off('click', null, slideUp);
+            ul.slideUp({
+                complete: function(){
+                    self.removeClass('jsxc_opened');
+                }
+            });
             
-            self.removeClass('jsxc_opened');
+            $('body').off('click', null, slideUp);
          };
 
          $(this).click(function() {
