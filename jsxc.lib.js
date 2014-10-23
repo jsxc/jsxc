@@ -811,8 +811,35 @@ var jsxc;
       /** Smilie token to file mapping */
       emotions: [ [ 'O:-) O:)', 'angel.png' ], [ '>:-( >:( &gt;:-( &gt;:(', 'angry.png' ], [ ':-) :)', 'smile.png' ], [ ':-D :D', 'grin.png' ], [ ':-( :(', 'sad.png' ], [ ';-) ;)', 'wink.png' ], [ ':-P :P', 'tonguesmile.png' ], [ '=-O', 'surprised.png' ], [ ':kiss: :-*', 'kiss.png' ], [ '8-) :cool:', 'sunglassess.png' ], [ ':\'-( :\'( :&amp;apos;-(', 'crysad.png' ], [ ':-/', 'doubt.png' ], [ ':-X :X', 'zip.png' ], [ ':yes:', 'thumbsup.png' ], [ ':no:', 'thumbsdown.png' ], [ ':beer:', 'beer.png' ], [ ':devil:', 'devil.png' ], [ ':kiss: :kissing:', 'kissing.png' ], [ '@->-- :rose: @-&gt;--', 'rose.png' ], [ ':music:', 'music.png' ], [ ':love:', 'love.png' ], [ ':zzz:', 'tired.png' ] ],
 
+      /** Different uri query actions as defined in XEP-0147. */
       queryActions: {
-         message: null
+         /** xmpp:JID?message[;body=TEXT] */
+         message: function(jid, params) {
+            var win = jsxc.gui.window.open(jsxc.jidToBid(jid));
+
+            if (params && typeof params.body === 'string') {
+               win.find('.jsxc_textinput').val(params.body);
+            }
+         },
+
+         /** xmpp:JID?remove */
+         remove: function(jid) {
+            jsxc.gui.showRemoveDialog(jsxc.jidToBid(jid));
+         },
+
+         /** xmpp:JID?subscribe[;name=NAME] */
+         subscribe: function(jid, params) {
+            jsxc.gui.showContactDialog(jid);
+
+            if (params && typeof params.name) {
+               $('#jsxc_alias').val(params.name);
+            }
+         },
+
+         /** xmpp:JID?vcard */
+         vcard: function(jid) {
+            jsxc.gui.showVcard(jid);
+         }
       },
 
       /**
@@ -1079,11 +1106,11 @@ var jsxc;
 
          slideUp = function() {
             ul.slideUp({
-                complete: function(){
-                    self.removeClass('jsxc_opened');
-                }
+               complete: function() {
+                  self.removeClass('jsxc_opened');
+               }
             });
-            
+
             $('body').off('click', null, slideUp);
          };
 
@@ -1790,10 +1817,12 @@ var jsxc;
             if (typeof jsxc.gui.queryActions[action] === 'function') {
                element.addClass('jsxc_uriScheme jsxc_uriScheme_' + action);
 
-               element.click(function(ev) {
+               element.off('click').click(function(ev) {
                   ev.stopPropagation();
 
                   jsxc.gui.queryActions[action].call(jsxc, jid, params);
+
+                  return false;
                });
             }
          });
