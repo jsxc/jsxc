@@ -2713,8 +2713,12 @@ var jsxc;
             return '<a href="' + href + '" target="_blank">' + url + '</a>';
          });
 
-         msg = msg.replace(new RegExp('(xmpp:)?(' + jsxc.CONST.REGEX.JID.source + ')', 'i'), function(match, protocol, jid) {
+         msg = msg.replace(new RegExp('(xmpp:)?(' + jsxc.CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i'), function(match, protocol, jid, action) {
             if (protocol === 'xmpp:') {
+               if (typeof action === 'string') {
+                  jid += action;
+               }
+
                return '<a href="xmpp:' + jid + '">' + jid + '</a>';
             }
 
@@ -2748,7 +2752,9 @@ var jsxc;
             jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div style="clear:both"/>');
          }
 
-         jsxc.gui.window.get(bid).find('.jsxc_textarea').append(msgDiv);
+         win.find('.jsxc_textarea').append(msgDiv);
+
+         jsxc.gui.detectUriScheme(win);
 
          jsxc.gui.window.scrollDown(bid);
 
