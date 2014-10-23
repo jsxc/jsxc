@@ -4523,7 +4523,7 @@ var jsxc;
                // try to create web-worker
 
                try {
-                  worker = new Worker('/assets/otr/dsa-webworker.js');
+                  worker = new Worker('/javascripts/dsa-webworker.js');
                } catch (err) {
                   jsxc.warn('Couldn\'t create web-worker.', err);
                }
