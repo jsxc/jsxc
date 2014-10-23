@@ -184,6 +184,10 @@ div#jsxc_roster {
 	background-color: #383C43;
 }
 
+div#jsxc_roster a{
+	cursor: pointer;
+}
+
 div#jsxc_roster .slimScrollDiv {
 	left: -4px;
 	margin-bottom: 30px;
@@ -610,9 +614,9 @@ div#jsxc_toggleRoster {
 }
 
 #jsxc_toggleRoster_text{
-	display: table-cell;
-  	vertical-align: middle;
-  	padding-left: 14px;
+      display: table-cell;
+      vertical-align: middle;
+      padding-left: 14px;
 }
 
 /*############################
