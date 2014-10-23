@@ -1263,11 +1263,11 @@ var jsxc;
             jsxc.xmpp.resFriendReq(from, true);
 
             // If friendship is not mutual show contact dialog
-            if (!data || data.sub === 'from') {
+            /*if (!data || data.sub === 'from') {
                $(document).one('close.dialog.jsxc', function() {
                   jsxc.gui.showContactDialog(from);
                });
-            }
+            }*/
 
             jsxc.gui.dialog.close();
          });
@@ -1765,9 +1765,9 @@ var jsxc;
             }
          });
 
-         $('#jsxc_roster .jsxc_addBuddy').click(function() {
+         /*$('#jsxc_roster .jsxc_addBuddy').click(function() {
             jsxc.gui.showContactDialog();
-         });
+         });*/
 
          $('#jsxc_roster .jsxc_onlineHelp').click(function() {
             window.open("http://www.jsxc.org/manual.html", "onlineHelp");
@@ -2053,7 +2053,7 @@ var jsxc;
          $('#jsxc_roster > .jsxc_bottom').remove();
 
          $('#jsxc_roster').append($('<p>' + jsxc.l.no_connection + '</p>').append(' <a>' + jsxc.l.relogin + '</a>').click(function() {
-            jsxc.gui.showLoginBox();
+            jsxc.login();
          }));
       },
 
@@ -2064,11 +2064,11 @@ var jsxc;
        */
       empty: function() {
          var text = $('<p>' + jsxc.l.Your_roster_is_empty_add_a + '</p>');
-         var link = $('<a>' + jsxc.l.new_buddy + '</a>');
+         var link = $('<a href="/help">' + jsxc.l.new_buddy + '</a>');
 
-         link.click(function() {
-            jsxc.gui.showContactDialog();
-         });
+         //link.click(function() {
+         //   jsxc.gui.showContactDialog();
+         //});
          text.append(link);
          text.append('.');
 
@@ -4178,11 +4178,11 @@ var jsxc;
             }
          }
 
-         if (jsxc.master && key.match(new RegExp('^add' + jsxc.storage.SEP))) {
+         /*if (jsxc.master && key.match(new RegExp('^add' + jsxc.storage.SEP))) {
             n = JSON.parse(e.newValue);
 
             jsxc.xmpp.addBuddy(n.username, n.alias);
-         }
+         }*/
 
          if (e.key === 'jsxc_roster') {
             jsxc.gui.roster.toggle();
