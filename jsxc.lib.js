@@ -75,7 +75,8 @@ var jsxc;
             NOTICE: 'Ping1.mp3'
          },
          REGEX: {
-            JID: new RegExp('^[^"&\'\\/:<>@\\s]+@[\\w-_.]+$', 'ig')
+            JID: new RegExp('\\b[^"&\'\\/:<>@\\s]+@[\\w-_.]+\\b', 'ig'),
+            URL: new RegExp(/((?:https?:\/\/|www\.|([\w\-]+\.[a-zA-Z]{2,3})(?=\b))(?:(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\)([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|])?)|(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|]))?)/gi)
          }
       },
 
@@ -2640,7 +2641,8 @@ var jsxc;
             chat.pop();
          }
 
-         // escape html
+         // remove html tags and reencode html tags
+         msg = $('<span>').html(msg).text();
          msg = jsxc.escapeHTML(msg);
 
          // exceptions:
@@ -2704,18 +2706,19 @@ var jsxc;
             jsxc.gui.window.highlight(bid);
          }
 
-         var reg = new RegExp(/((?:https?:\/\/|www\.|([\w\-]+\.[a-zA-Z]{2,3})(?=\b))(?:(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\)([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|])?)|(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|]))?)/gi);
-
-         msg = msg.replace(reg, function(url) {
+         msg = msg.replace(jsxc.CONST.REGEX.URL, function(url) {
 
             var href = (url.match(/^https?:\/\//i)) ? url : 'http://' + url;
 
             return '<a href="' + href + '" target="_blank">' + url + '</a>';
          });
 
-         msg = msg.replace(jsxc.CONST.REGEX.JID, function(email) {
+         msg = msg.replace(new RegExp('(xmpp:)?(' + jsxc.CONST.REGEX.JID.source + ')', 'i'), function(match, protocol, jid) {
+            if (protocol === 'xmpp:') {
+               return '<a href="xmpp:' + jid + '">' + jid + '</a>';
+            }
 
-            return '<a href="mailto:' + email + '" target="_blank">' + email + '</a>';
+            return '<a href="mailto:' + jid + '" target="_blank">' + jid + '</a>';
          });
 
          $.each(jsxc.gui.emotions, function(i, val) {
