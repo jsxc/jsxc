@@ -167,6 +167,35 @@ li .jsxc_name:hover {
 	left: 0px;
 }
 
+.jsxc_spot {
+	display: inline-block;
+   width: 10px;
+   height: 10px;
+   background-color: #fff;
+   border-radius: 5px;
+   text-indent: -99999em;
+   margin-top: 3px;
+   margin-right: 5px;
+   border: 1px solid #000 !important;
+   line-height: 100%;
+}
+
+.jsxc_spot.jsxc_online, .jsxc_spot.jsxc_chat {
+   background-color: #00BFFF;
+}
+
+.jsxc_spot.jsxc_away, .jsxc_spot.jsxc_xa {
+   background-color: orange;
+}
+
+.jsxc_spot.jsxc_dnd {
+   background-color: red;
+}
+
+.jsxc_spot.jsxc_offline {
+   background-color: #A4A4A4;
+}
+
 /*############################ 
  *########## Roster ########## 
  *############################*/

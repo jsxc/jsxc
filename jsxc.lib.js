@@ -930,17 +930,16 @@ var jsxc;
          var ri = jsxc.gui.roster.getItem(bid); // roster item from user
          var we = jsxc.gui.window.get(bid); // window element from user
          var ue = ri.add(we); // both
-         var bullet = $('.jsxc_bullet[data-bid="' + bid + '"]');
+         var spot = $('.jsxc_spot[data-bid="' + bid + '"]');
 
          // Attach data to corresponding roster item
          ri.data(data);
 
          // Add online status
-         ue.removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
+         ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
 
          // Change name and add title
-         ue.find('.jsxc_name').text(data.name).attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
-         bullet.attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
+         ue.find('.jsxc_name').add(spot).text(data.name).attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
 
          // Update gui according to encryption state
          switch (data.msgstate) {
@@ -1859,6 +1858,44 @@ var jsxc;
 
                   return false;
                });
+            }
+         });
+      },
+
+      detectEmail: function(container) {
+         container = (container) ? $(container) : $('body');
+
+         container.find('a[href^="mailto:"]').each(function() {
+            var spot = $("<span>X</span>").addClass("jsxc_spot");
+            var href = $(this).attr("href").replace(/^ *mailto:/, "").trim();
+
+            if (href !== '' && href !== Strophe.getBareJidFromJid(jsxc.storage.getItem("jid"))) {
+               var bid = jsxc.jidToBid(href);
+               var self = $(this);
+               var s = self.prev();
+
+               if (!s.hasClass('jsxc_spot')) {
+                  s = spot.clone().attr('data-bid', bid);
+
+                  self.before(s);
+               }
+
+               s.off('click');
+
+               if (jsxc.storage.getUserItem('buddy', bid)) {
+                  jsxc.gui.update(bid);
+                  s.click(function() {
+                     jsxc.gui.window.open(bid);
+
+                     return false;
+                  });
+               } else {
+                  s.click(function() {
+                     jsxc.gui.showContactDialog(href);
+
+                     return false;
+                  });
+               }
             }
          });
       }
