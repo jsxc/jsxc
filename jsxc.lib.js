@@ -3612,6 +3612,11 @@ var jsxc;
             }
          }
 
+         if (data.status === 0 && max > 0) {
+            // buddy has come online
+            jsxc.notification.notify(data.name, jsxc.translate('%%has come online%%.'));
+         }
+
          data.status = max;
          data.res = maxVal;
          data.jid = jid;
