@@ -27,6 +27,9 @@ var jsxc;
       /** Timeout for notification */
       toNotification: null,
 
+      /** Timeout delay for notification */
+      toNotificationDelay: 500,
+
       /** Interval for keep-alive */
       keepalive: null,
 
@@ -4846,8 +4849,7 @@ var jsxc;
             msg = (msg.match(/^\?OTR/)) ? jsxc.translate('%%Encrypted message%%') : msg;
             var data = jsxc.storage.getUserItem('buddy', bid);
 
-            jsxc.notification.playSound(jsxc.CONST.SOUNDS.MSG);
-            jsxc.notification.notify(jsxc.translate('%%New message from%% ') + data.name, msg);
+            jsxc.notification.notify(jsxc.translate('%%New message from%% ') + data.name, msg, undefined, undefined, jsxc.CONST.SOUNDS.MSG);
          });
 
          $(document).on('callincoming.jingle', function() {
@@ -4860,13 +4862,16 @@ var jsxc;
       },
 
       /**
-       * Shows a pop up notification.
+       * Shows a pop up notification and optional play sound.
        * 
-       * @param title
-       * @param msg
-       * @param d
+       * @param title Title
+       * @param msg Message
+       * @param d Duration
+       * @param force Should message also shown, if tab is visible?
+       * @param soundFile Playing given sound file
+       * @param loop Loop sound file?
        */
-      notify: function(title, msg, d, force) {
+      notify: function(title, msg, d, force, soundFile, loop) {
          if (!jsxc.options.notification || !jsxc.notification.hasPermission()) {
             return; // notifications disabled
          }
@@ -4877,8 +4882,13 @@ var jsxc;
 
          jsxc.toNotification = setTimeout(function() {
 
+            if (typeof soundFile === 'string') {
+               jsxc.notification.playSound(soundFile, loop, force);
+            }
+
             var popup = new Notification(jsxc.translate(title), {
-               body: jsxc.translate(msg)
+               body: jsxc.translate(msg),
+               icon: jsxc.options.root + '/img/XMPP_logo.png'
             });
 
             var duration = d || jsxc.options.popupDuration;
@@ -4888,7 +4898,7 @@ var jsxc;
                   popup.close();
                }, duration);
             }
-         }, 500);
+         }, jsxc.toNotificationDelay);
       },
 
       /**
@@ -5150,8 +5160,7 @@ var jsxc;
             };
             jsxc.storage.setUserItem('notices', saved);
 
-            jsxc.notification.notify(msg, description || '', null, true);
-            jsxc.notification.playSound(jsxc.CONST.SOUNDS.NOTICE, false, true);
+            jsxc.notification.notify(msg, description || '', null, true, jsxc.CONST.SOUNDS.NOTICE);
          }
       },
 
