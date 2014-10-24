@@ -610,6 +610,17 @@ var jsxc;
       },
 
       /**
+       * Removes all html tags.
+       * 
+       * @memberOf jsxc
+       * @param text
+       * @returns stripped text
+       */
+      removeHTML: function(text) {
+         return $('<span>').html(text).text();
+      },
+
+      /**
        * Executes only one of the given events
        * 
        * @param {string} obj.key event name
@@ -1452,12 +1463,7 @@ var jsxc;
          });
 
          if (confirm) {
-            $('#jsxc_dialog .creation').click(function() {
-               confirm.call();
-               jsxc.gui.dialog.open(jsxc.gui.template.get('pleaseAccept'), {
-                  noClose: true
-               });
-            });
+            $('#jsxc_dialog .creation').click(confirm);
          }
 
          if (dismiss) {
@@ -1706,9 +1712,34 @@ var jsxc;
        */
       showRequestNotification: function() {
          jsxc.gui.showConfirmDialog(jsxc.translate("%%Should we notify you_%%"), function() {
+            jsxc.gui.dialog.open(jsxc.gui.template.get('pleaseAccept'), {
+               noClose: true
+            });
+
             jsxc.notification.requestPermission();
          }, function() {
             $(document).trigger('notificationfailure.jsxc');
+         });
+      },
+
+      showUnknownSender: function(bid) {
+         jsxc.gui.showConfirmDialog(jsxc.translate('%%You_received_a_message_from_an_unknown_sender%% (' + bid + '). %%Do_you_want_to_display_them%%'), function() {
+
+            jsxc.gui.dialog.close();
+
+            jsxc.storage.saveBuddy(bid, {
+               jid: bid,
+               name: bid,
+               status: 0,
+               sub: 'none',
+               res: []
+            });
+
+            jsxc.gui.window.open(bid);
+
+         }, function() {
+            // reset state
+            jsxc.storage.removeUserItem('chat', bid);
          });
       },
 
@@ -2499,6 +2530,13 @@ var jsxc;
          jsxc.storage.removeUserElement('windowlist', bid);
          jsxc.storage.removeUserItem('window', bid);
 
+         if (jsxc.storage.getUserItem('buddylist').indexOf(bid) < 0) {
+            // delete data from unknown sender
+
+            jsxc.storage.removeUserItem('buddy', bid);
+            jsxc.storage.removeUserItem('chat', bid);
+         }
+
          jsxc.gui.window._close(bid);
       },
 
@@ -2635,17 +2673,11 @@ var jsxc;
        * @param {String} msg Message to display
        */
       postMessage: function(bid, direction, msg) {
-         var chat = jsxc.storage.getUserItem('chat', bid) || [];
          var data = jsxc.storage.getUserItem('buddy', bid);
          var html_msg = msg;
-         var uid = new Date().getTime() + ':msg';
-
-         if (chat.length > jsxc.options.numberOfMsg) {
-            chat.pop();
-         }
 
          // remove html tags and reencode html tags
-         msg = $('<span>').html(msg).text();
+         msg = jsxc.removeHTML(msg);
          msg = jsxc.escapeHTML(msg);
 
          // exceptions:
@@ -2665,22 +2697,14 @@ var jsxc;
             msg = jsxc.l.your_message_wasnt_send_because_you_have_no_valid_subscription;
          }
 
-         var post = {
-            direction: direction,
-            msg: msg,
-            uid: uid.replace(/:/, '-'),
-            received: false
-         };
-
-         chat.unshift(post);
-         jsxc.storage.setUserItem('chat', bid, chat);
+         var post = jsxc.storage.saveMessage(bid, direction, msg);
 
          if (direction === 'in') {
             $(document).trigger('postmessagein.jsxc', [ bid, html_msg ]);
          }
 
          if (direction === 'out' && jsxc.master) {
-            jsxc.xmpp.sendMessage(bid, html_msg, uid);
+            jsxc.xmpp.sendMessage(bid, html_msg, post.uid);
          }
 
          jsxc.gui.window._postMessage(bid, post);
@@ -3414,28 +3438,15 @@ var jsxc;
 
             buddies.push(bid);
 
-            if (jsxc.storage.getUserItem('buddy', bid)) {
-               jsxc.storage.updateUserItem('buddy', bid, {
-                  jid: jid,
-                  name: name,
-                  status: 0,
-                  sub: sub,
-                  res: []
-               });
-               jsxc.storage.removeUserItem('res', bid);
-            } else {
-               jsxc.storage.setUserItem('buddy', bid, {
-                  'jid': jid,
-                  'name': name,
-                  'status': 0,
-                  sub: sub,
-                  'msgstate': 0,
-                  'transferReq': -1,
-                  'trust': false,
-                  'fingerprint': null,
-                  res: []
-               });
-            }
+            jsxc.storage.removeUserItem('res', bid);
+
+            jsxc.storage.saveBuddy(bid, {
+               jid: jid,
+               name: name,
+               status: 0,
+               sub: sub,
+               res: []
+            });
 
             jsxc.gui.roster.add(bid);
          });
@@ -3472,33 +3483,29 @@ var jsxc;
             var sub = $(this).attr('subscription');
             // var ask = $(this).attr('ask');
 
-            var bl = jsxc.storage.getUserItem('buddylist');
-
             if (sub === 'remove') {
                jsxc.gui.roster.purge(bid);
-            } else if (bl.indexOf(bid) >= 0) {
-               jsxc.storage.updateUserItem('buddy', bid, {
+            } else {
+               var bl = jsxc.storage.getUserItem('buddylist');
+
+               if (bl.indexOf(bid) >= 0) {
+                  bl.push(bid); // (INFO) push returns the new length
+                  jsxc.storage.setUserItem('buddylist', bl);
+               }
+
+               var temp = jsxc.storage.saveBuddy(bid, {
                   jid: jid,
                   name: name,
                   sub: sub
                });
-               jsxc.gui.update(bid);
-               jsxc.gui.roster.reorder(bid);
-            } else {
-               bl.push(bid); // (INFO) push returns the new length
-               jsxc.storage.setUserItem('buddylist', bl);
-               jsxc.storage.setUserItem('buddy', bid, {
-                  jid: jid,
-                  name: name,
-                  status: 0,
-                  sub: sub,
-                  msgstate: 0,
-                  transferReq: -1,
-                  trust: false,
-                  fingerprint: null,
-                  type: 'chat'
-               });
-               jsxc.gui.roster.add(bid);
+
+               if (temp === 'updated') {
+
+                  jsxc.gui.update(bid);
+                  jsxc.gui.roster.reorder(bid);
+               } else {
+                  jsxc.gui.roster.add(bid);
+               }
             }
 
             // Remove pending friendship request from notice list
@@ -3674,9 +3681,25 @@ var jsxc;
          var data = jsxc.storage.getUserItem('buddy', bid);
          var body = $(message).find('body:first').text();
          var request = $(message).find("request[xmlns='urn:xmpp:receipts']");
-         var own = jsxc.storage.getUserItem('own') || [];
 
-         if (!body || own.indexOf(from) >= 0) {
+         if (!body) {
+            return true;
+         }
+
+         if (data === null) {
+            // jid not in roster
+
+            var chat = jsxc.storage.getUserItem('chat', bid) || [];
+
+            if (chat.length === 0) {
+               jsxc.notice.add('%%Unknown sender%%', '%%You received a message from an unknown sender%% (' + bid + ').', 'gui.showUnknownSender', [ bid ]);
+            }
+
+            var msg = jsxc.removeHTML(body);
+            msg = jsxc.escapeHTML(msg);
+
+            jsxc.storage.saveMessage(bid, 'in', msg);
+
             return true;
          }
 
@@ -4387,6 +4410,69 @@ var jsxc;
          if (e.key === 'jsxc_roster') {
             jsxc.gui.roster.toggle();
          }
+      },
+
+      /**
+       * Save message to storage.
+       * 
+       * @memberOf jsxc.storage
+       * @param bid
+       * @param direction
+       * @param msg
+       * @return post
+       */
+      saveMessage: function(bid, direction, msg) {
+         var chat = jsxc.storage.getUserItem('chat', bid) || [];
+
+         var uid = new Date().getTime() + ':msg';
+
+         if (chat.length > jsxc.options.numberOfMsg) {
+            chat.pop();
+         }
+
+         var post = {
+            direction: direction,
+            msg: msg,
+            uid: uid.replace(/:/, '-'),
+            received: false
+         };
+
+         chat.unshift(post);
+         jsxc.storage.setUserItem('chat', bid, chat);
+
+         return post;
+      },
+
+      /**
+       * Save or update buddy data.
+       * 
+       * @memberOf jsxc.storage
+       * @param bid
+       * @param data
+       * @returns {String} Updated or created
+       */
+      saveBuddy: function(bid, data) {
+
+         if (jsxc.storage.getUserItem('buddy', bid)) {
+            jsxc.storage.updateUserItem('buddy', bid, data);
+
+            return 'updated';
+         }
+
+         jsxc.storage.setUserItem('buddy', bid, $.extend({
+            jid: '',
+            name: '',
+            status: 0,
+            sub: 'none',
+            msgstate: 0,
+            transferReq: -1,
+            trust: false,
+            fingerprint: null,
+            res: [],
+            type: 'chat'
+         }, data));
+
+         return 'created';
       }
    };
 
@@ -5339,7 +5425,9 @@ var jsxc;
          Sorry_your_buddy_doesnt_provide_any_information: 'Sorry, your buddy does not provide any information.',
          Info_about: 'Info about',
          Authentication_aborted: 'Authentication aborted.',
-         Authentication_request_received: 'Authentication request received.'
+         Authentication_request_received: 'Authentication request received.',
+         You_received_a_message_from_an_unknown_: 'You received a message from an unknown sender',
+         Do_you_want_to_display_them: 'Do you want to display them?'
       },
       de: {
          Logging_in: 'Login läuft…',
