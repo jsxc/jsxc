@@ -73,6 +73,10 @@ var jsxc;
             MSG: 'incomingMessage.wav',
             CALL: 'Rotary-Phone6.mp3',
             NOTICE: 'Ping1.mp3'
+         },
+         REGEX: {
+            JID: new RegExp('\\b[^"&\'\\/:<>@\\s]+@[\\w-_.]+\\b', 'ig'),
+            URL: new RegExp(/((?:https?:\/\/|www\.|([\w\-]+\.[a-zA-Z]{2,3})(?=\b))(?:(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\)([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|])?)|(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|]))?)/gi)
          }
       },
 
@@ -254,7 +258,7 @@ var jsxc;
 
                var settings = jsxc.prepareLogin();
 
-               if (settings.xmpp.onlogin === "true" || settings.xmpp.onlogin === true) {
+               if (settings !== false && (settings.xmpp.onlogin === "true" || settings.xmpp.onlogin === true)) {
                   jsxc.triggeredFromForm = true;
 
                   jsxc.xmpp.login();
@@ -306,8 +310,6 @@ var jsxc;
        * @returns Loaded settings
        */
       prepareLogin: function() {
-         jsxc.gui.showWaitAlert(jsxc.l.Logging_in);
-
          var username = $(jsxc.options.loginForm.jid).val();
          var password = $(jsxc.options.loginForm.pass).val();
 
@@ -316,10 +318,14 @@ var jsxc;
             return;
          }
 
+         jsxc.gui.showWaitAlert(jsxc.l.Logging_in);
+
          var settings = jsxc.options.loadSettings.call(this, username, password);
 
-         if (settings === null || typeof settings === 'undefined') {
-            return true;
+         if (settings === false || settings === null || typeof settings === 'undefined') {
+            jsxc.warn('No settings provided');
+
+            return false;
          }
 
          if (typeof settings.xmpp.username === 'string') {
@@ -813,6 +819,37 @@ var jsxc;
       /** Smilie token to file mapping */
       emotions: [ [ 'O:-) O:)', 'angel' ], [ '>:-( >:( &gt;:-( &gt;:(', 'angry' ], [ ':-) :)', 'smile' ], [ ':-D :D', 'grin' ], [ ':-( :(', 'sad' ], [ ';-) ;)', 'wink' ], [ ':-P :P', 'tonguesmile' ], [ '=-O', 'surprised' ], [ ':kiss: :-*', 'kiss' ], [ '8-) :cool:', 'sunglassess' ], [ ':\'-( :\'( :&amp;apos;-(', 'crysad' ], [ ':-/', 'doubt' ], [ ':-X :X', 'zip' ], [ ':yes:', 'thumbsup' ], [ ':no:', 'thumbsdown' ], [ ':beer:', 'beer' ], [ ':devil:', 'devil' ], [ ':kiss: :kissing:', 'kissing' ], [ '@->-- :rose: @-&gt;--', 'rose' ], [ ':music:', 'music' ], [ ':love:', 'love' ], [ ':zzz:', 'tired' ] ],
 
+      /** Different uri query actions as defined in XEP-0147. */
+      queryActions: {
+         /** xmpp:JID?message[;body=TEXT] */
+         message: function(jid, params) {
+            var win = jsxc.gui.window.open(jsxc.jidToBid(jid));
+
+            if (params && typeof params.body === 'string') {
+               win.find('.jsxc_textinput').val(params.body);
+            }
+         },
+
+         /** xmpp:JID?remove */
+         remove: function(jid) {
+            jsxc.gui.showRemoveDialog(jsxc.jidToBid(jid));
+         },
+
+         /** xmpp:JID?subscribe[;name=NAME] */
+         subscribe: function(jid, params) {
+            jsxc.gui.showContactDialog(jid);
+
+            if (params && typeof params.name) {
+               $('#jsxc_alias').val(params.name);
+            }
+         },
+
+         /** xmpp:JID?vcard */
+         vcard: function(jid) {
+            jsxc.gui.showVcard(jid);
+         }
+      },
+
       /**
        * Creates application skeleton.
        *
@@ -821,38 +858,19 @@ var jsxc;
       init: function() {
          $('body').append($(jsxc.gui.template.get('windowList')));
 
-         var scrollBy = function(offset) {
-            var scrollWidth = $('#jsxc_windowList>ul').width();
-            var width = $('#jsxc_windowList').width();
-            var el = $('#jsxc_windowList>ul');
-            var right = parseInt(el.css('right')) - offset;
-
-            if (scrollWidth < width) {
-               return;
-            }
-
-            if (right > 0) {
-               right = 0;
-            }
-
-            if (right < width - scrollWidth - 30) {
-               right = width - scrollWidth - 30;
-            }
-
-            el.css('right', right + 'px');
-         };
-
          $(window).resize(jsxc.gui.updateWindowListSB);
          $('#jsxc_windowList').resize(jsxc.gui.updateWindowListSB);
 
          $('#jsxc_windowListSB .jsxc_scrollLeft').click(function() {
-            scrollBy(-200);
+            jsxc.gui.scrollWindowListBy(-200);
          });
          $('#jsxc_windowListSB .jsxc_scrollRight').click(function() {
-            scrollBy(200);
+            jsxc.gui.scrollWindowListBy(200);
          });
          $('#jsxc_windowList').on('wheel', function(ev) {
-            scrollBy((ev.originalEvent.wheelDelta > 0) ? 200 : -200);
+            if ($('#jsxc_windowList').data('isOver')) {
+               jsxc.gui.scrollWindowListBy((ev.originalEvent.wheelDelta > 0) ? 200 : -200);
+            }
          });
 
          jsxc.gui.tooltip('#jsxc_windowList');
@@ -1041,6 +1059,35 @@ var jsxc;
       },
 
       /**
+       * Scroll window list by offset.
+       * 
+       * @memberOf jsxc.gui
+       * @param offset
+       */
+      scrollWindowListBy: function(offset) {
+
+         var scrollWidth = $('#jsxc_windowList>ul').width();
+         var width = $('#jsxc_windowList').width();
+         var el = $('#jsxc_windowList>ul');
+         var right = parseInt(el.css('right')) - offset;
+         var padding = $("#jsxc_windowListSB").width();
+
+         if (scrollWidth < width) {
+            return;
+         }
+
+         if (right > 0) {
+            right = 0;
+         }
+
+         if (right < width - scrollWidth - padding) {
+            right = width - scrollWidth - padding;
+         }
+
+         el.css('right', right + 'px');
+      },
+
+      /**
        * Returns the window element
        *
        * @param {String} bid
@@ -1058,13 +1105,20 @@ var jsxc;
        * @memberof jsxc.gui
        */
       toggleList: function() {
-         $(this).disableSelection();
+         var self = $(this);
 
-         var ul = $(this).find('ul');
+         self.disableSelection();
+
+         var ul = self.find('ul');
          var slideUp = null;
 
          slideUp = function() {
-            ul.slideUp();
+            ul.slideUp({
+               complete: function() {
+                  self.removeClass('jsxc_opened');
+               }
+            });
+
             $('body').off('click', null, slideUp);
          };
 
@@ -1081,6 +1135,8 @@ var jsxc;
             ul.slideToggle();
 
             window.clearTimeout(ul.data('timer'));
+
+            self.toggleClass('jsxc_opened');
 
             return false;
          }).mouseleave(function() {
@@ -1109,11 +1165,16 @@ var jsxc;
             jsxc.options.loginForm.jid = $(this).find('#jsxc_username');
             jsxc.options.loginForm.pass = $(this).find('#jsxc_password');
 
-            jsxc.prepareLogin();
+            var settings = jsxc.prepareLogin();
 
             jsxc.triggeredFromBox = true;
+            jsxc.triggeredFromForm = false;
 
-            jsxc.xmpp.login();
+            if (settings === false) {
+               jsxc.gui.showAuthFail();
+            } else {
+               jsxc.xmpp.login();
+            }
 
             return false;
          });
@@ -1205,7 +1266,7 @@ var jsxc;
 
             jsxc.gui.dialog.close();
 
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.verification_query_sent);
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_query_sent);
          });
 
          // Secret
@@ -1234,7 +1295,7 @@ var jsxc;
 
             jsxc.gui.dialog.close();
 
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.verification_query_sent);
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_query_sent);
          });
       },
 
@@ -1286,12 +1347,6 @@ var jsxc;
             $('#jsxc_username').val(username);
          }
 
-         $('#jsxc_dialog input').keypress(function(ev) {
-            if (ev.which === 13) {
-               $('#jsxc_dialog .creation').click();
-            }
-         });
-
          $('#jsxc_dialog form').submit(function() {
             var username = $('#jsxc_username').val();
             var alias = $('#jsxc_alias').val();
@@ -1301,10 +1356,10 @@ var jsxc;
             }
 
             // Check if the username is valid
-            if (!username || !username.match(/^[^"&'\/:<>@\s]+@[\w-_.]+$/g)) {
+            if (!username || !username.match(jsxc.CONST.REGEX.JID)) {
                // Add notification
                $('#jsxc_username').addClass('jsxc_invalid').keyup(function() {
-                  if ($(this).val().match(/^[^"&'\/:<>@\s]+@[\w-_.]+$/g)) {
+                  if ($(this).val().match(jsxc.CONST.REGEX.JID)) {
                      $(this).removeClass('jsxc_invalid');
                   }
                });
@@ -1373,6 +1428,10 @@ var jsxc;
        */
       showAuthFail: function() {
          jsxc.gui.dialog.open(jsxc.gui.template.get('authFailDialog'));
+
+         if (jsxc.triggeredFromBox) {
+            $('#jsxc_dialog .jsxc_cancel').hide();
+         }
 
          $('#jsxc_dialog .creation').click(function() {
             jsxc.gui.dialog.close();
@@ -1702,6 +1761,79 @@ var jsxc;
          }
 
          $('.jsxc_presence[data-bid="' + bid + '"]').removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
+      },
+
+      /**
+       * Switch read state to UNread.
+       * 
+       * @memberOf jsxc.gui
+       * @param bid
+       */
+      unreadMsg: function(bid) {
+         var win = jsxc.gui.window.get(bid);
+
+         jsxc.gui.roster.getItem(bid).add(win).addClass('jsxc_unreadMsg');
+         jsxc.storage.updateUserItem('window', bid, 'unread', true);
+      },
+
+      /**
+       * Switch read state to read.
+       * 
+       * @memberOf jsxc.gui
+       * @param bid
+       */
+      readMsg: function(bid) {
+         var win = jsxc.gui.window.get(bid);
+
+         if (win.hasClass('jsxc_unreadMsg')) {
+            jsxc.gui.roster.getItem(bid).add(win).removeClass('jsxc_unreadMsg');
+            jsxc.storage.updateUserItem('window', bid, 'unread', false);
+         }
+      },
+
+      /**
+       * This function searches for URI scheme according to XEP-0147.
+       * 
+       * @memberOf jsxc.gui
+       * @param container In which element should we search?
+       */
+      detectUriScheme: function(container) {
+         container = (container) ? $(container) : $('body');
+
+         container.find("a[href^='xmpp:']").each(function() {
+
+            var element = $(this);
+            var href = element.attr('href').replace(/^xmpp:/, '');
+            var jid = href.split('?')[0];
+            var action, params = {};
+
+            if (href.indexOf('?') < 0) {
+               action = 'message';
+            } else {
+               var pairs = href.substring(href.indexOf('?') + 1).split(';');
+               action = pairs[0];
+
+               var i, key, value;
+               for (i = 1; i < pairs.length; i++) {
+                  key = pairs[i].split('=')[0];
+                  value = (pairs[i].indexOf('=') > 0) ? pairs[i].substring(pairs[i].indexOf('=') + 1) : null;
+
+                  params[decodeURIComponent(key)] = decodeURIComponent(value);
+               }
+            }
+
+            if (typeof jsxc.gui.queryActions[action] === 'function') {
+               element.addClass('jsxc_uriScheme jsxc_uriScheme_' + action);
+
+               element.off('click').click(function(ev) {
+                  ev.stopPropagation();
+
+                  jsxc.gui.queryActions[action].call(jsxc, jid, params);
+
+                  return false;
+               });
+            }
+         });
       }
    };
 
@@ -2218,9 +2350,11 @@ var jsxc;
             }
 
             jsxc.storage.updateUserItem('window', bid, 'text', body);
-         });
 
-         win.find('.jsxc_textinput').keypress(function(ev) {
+            if (ev.which === 27) {
+               jsxc.gui.window.close(bid);
+            }
+         }).keypress(function(ev) {
             if (ev.which !== 13 || !$(this).val()) {
                return;
             }
@@ -2228,6 +2362,13 @@ var jsxc;
             jsxc.gui.window.postMessage(bid, 'out', $(this).val());
 
             $(this).val('');
+         }).focus(function() {
+            // remove unread flag
+            jsxc.gui.readMsg(bid);
+         }).mouseenter(function() {
+            $('#jsxc_windowList').data('isOver', true);
+         }).mouseleave(function() {
+            $('#jsxc_windowList').data('isOver', false);
          });
 
          win.find('.jsxc_textarea').click(function() {
@@ -2272,7 +2413,7 @@ var jsxc;
          } else {
 
             if (jsxc.storage.getUserItem('window', bid).unread) {
-               win.addClass('jsxc_unreadMsg');
+               jsxc.gui.unreadMsg(bid);
             }
          }
 
@@ -2326,7 +2467,25 @@ var jsxc;
          jsxc.gui.window.show(bid);
          jsxc.gui.window.highlight(bid);
 
-         win.find('.jsxc_textinput').focus();
+         var padding = $("#jsxc_windowListSB").width();
+         var innerWidth = $('#jsxc_windowList>ul').width();
+         var outerWidth = $('#jsxc_windowList').width() - padding;
+
+         if (innerWidth > outerWidth) {
+            var offset = parseInt($('#jsxc_windowList>ul').css('right'));
+            var width = win.outerWidth(true);
+
+            var right = innerWidth - win.position().left - width + offset;
+            var left = outerWidth - (innerWidth - win.position().left) - offset;
+
+            if (left < 0) {
+               jsxc.gui.scrollWindowListBy(left * -1);
+            }
+
+            if (right < 0) {
+               jsxc.gui.scrollWindowListBy(right);
+            }
+         }
 
          return win;
       },
@@ -2407,15 +2566,13 @@ var jsxc;
          jsxc.gui.window.get(bid).find('.jsxc_fade').slideDown();
          win.removeClass('jsxc_min');
 
-         // remove unread flag
-         win.removeClass('jsxc_unreadMsg');
-         jsxc.storage.updateUserItem('window', bid, 'unread', false);
-
          // If the area is hidden, the scrolldown function doesn't work. So we
          // call it here.
          jsxc.gui.window.scrollDown(bid);
 
-         win.find('.jsxc_textinput').focus();
+         if (jsxc.restoreCompleted) {
+            win.find('.jsxc_textinput').focus();
+         }
 
          win.trigger('show.window.jsxc');
       },
@@ -2493,7 +2650,8 @@ var jsxc;
             chat.pop();
          }
 
-         // escape html
+         // remove html tags and reencode html tags
+         msg = $('<span>').html(msg).text();
          msg = jsxc.escapeHTML(msg);
 
          // exceptions:
@@ -2557,13 +2715,23 @@ var jsxc;
             jsxc.gui.window.highlight(bid);
          }
 
-         var reg = new RegExp(/((?:https?:\/\/|www\.|([\w\-]+\.[a-zA-Z]{2,3})(?=\b))(?:(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\)([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|])?)|(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|]))?)/gi);
-
-         msg = msg.replace(reg, function(url) {
+         msg = msg.replace(jsxc.CONST.REGEX.URL, function(url) {
 
             var href = (url.match(/^https?:\/\//i)) ? url : 'http://' + url;
 
             return '<a href="' + href + '" target="_blank">' + url + '</a>';
+         });
+
+         msg = msg.replace(new RegExp('(xmpp:)?(' + jsxc.CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i'), function(match, protocol, jid, action) {
+            if (protocol === 'xmpp:') {
+               if (typeof action === 'string') {
+                  jid += action;
+               }
+
+               return '<a href="xmpp:' + jid + '">' + jid + '</a>';
+            }
+
+            return '<a href="mailto:' + jid + '" target="_blank">' + jid + '</a>';
          });
 
          $.each(jsxc.gui.emotions, function(i, val) {
@@ -2593,14 +2761,15 @@ var jsxc;
             jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div style="clear:both"/>');
          }
 
-         jsxc.gui.window.get(bid).find('.jsxc_textarea').append(msgDiv);
+         win.find('.jsxc_textarea').append(msgDiv);
+
+         jsxc.gui.detectUriScheme(win);
 
          jsxc.gui.window.scrollDown(bid);
 
-         // if window is hidden set unread flag
-         if (win.find('.jsxc_fade').is(':hidden') && jsxc.restoreCompleted && !restore) {
-            win.addClass('jsxc_unreadMsg');
-            jsxc.storage.updateUserItem('window', bid, 'unread', true);
+         // if window has no focus set unread flag
+         if (!win.find('.jsxc_textinput').is(':focus') && jsxc.restoreCompleted && !restore) {
+            jsxc.gui.unreadMsg(bid);
          }
       },
 
@@ -2838,7 +3007,7 @@ var jsxc;
          <p class=".jsxc_explanation">%%Type_in_the_full_username_%%</p>\
          <form>\
          <p><label for="jsxc_username">* %%Username%%:</label>\
-            <input type="email" name="username" id="jsxc_username" required="required" /></p>\
+            <input type="text" name="username" id="jsxc_username" pattern="^[^\\x22&\'\\/:<>@\\s]+(@[.\\-_\\w]+)?" required="required" /></p>\
          <p><label for="jsxc_alias">%%Alias%%:</label>\
             <input type="text" name="alias" id="jsxc_alias" /></p>\
          <p class="jsxc_right">\
@@ -3029,7 +3198,37 @@ var jsxc;
 
          jsxc.triggeredFromElement = true;
 
-         jsxc.xmpp.conn.disconnect();
+         // restore all otr objects
+         $.each(jsxc.storage.getUserItem('otrlist'), function(i, val) {
+            jsxc.otr.create(val);
+         });
+
+         var numOtr = Object.keys(jsxc.otr.objects).length + 1;
+         var disReady = function() {
+            if (--numOtr <= 0) {
+               jsxc.xmpp.conn.flush();
+
+               setTimeout(function() {
+                  jsxc.xmpp.conn.disconnect();
+               }, 600);
+            }
+         };
+
+         // end all private conversations
+         $.each(jsxc.otr.objects, function(key, obj) {
+            if (obj.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED) {
+               obj.endOtr.call(obj, function() {
+                  obj.init.call(obj);
+                  jsxc.otr.backup(key);
+
+                  disReady();
+               });
+            } else {
+               disReady();
+            }
+         });
+
+         disReady();
 
          // Trigger real logout in jsxc.xmpp.disconnected()
          return false;
@@ -3166,6 +3365,7 @@ var jsxc;
          jsxc.storage.removeItem('lastActivity');
          jsxc.storage.removeItem('hidden');
          jsxc.storage.removeUserItem('avatar', 'own');
+         jsxc.storage.removeUserItem('otrlist');
 
          jsxc.xmpp.conn = null;
 
@@ -4248,6 +4448,13 @@ var jsxc;
             return;
          }
 
+         // save list of otr objects
+         var ol = jsxc.storage.getUserItem('otrlist') || [];
+         if (ol.indexOf(bid) < 0) {
+            ol.push(bid);
+            jsxc.storage.setUserItem('otrlist', ol);
+         }
+
          jsxc.otr.objects[bid] = new OTR(jsxc.options.otr);
 
          if (jsxc.options.otr.SEND_WHITESPACE_TAG) {
@@ -4302,10 +4509,18 @@ var jsxc;
          jsxc.otr.objects[bid].on('smp', function(type, data) {
             switch (type) {
                case 'question': // verification request received
+                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.Authentication_request_received);
+
+                  if ($('#jsxc_dialog').length > 0) {
+                     jsxc.otr.objects[bid].sm.abort();
+                     break;
+                  }
+
                   jsxc.otr.onSmpQuestion(bid, data);
                   jsxc.storage.setUserItem('smp_' + bid, {
                      data: data || null
                   });
+
                   break;
                case 'trust': // verification completed
                   jsxc.otr.objects[bid].trust = data;
@@ -4316,10 +4531,13 @@ var jsxc;
                   if (data) {
                      jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.conversation_is_now_verified);
                   } else {
-                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.verification_failed);
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_failed);
                   }
                   jsxc.storage.removeUserItem('smp_' + bid);
                   jsxc.gui.dialog.close();
+                  break;
+               case 'abort':
+                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.Authentication_aborted);
                   break;
                default:
                   jsxc.debug('[OTR] sm callback: Unknown type: ' + type);
@@ -4333,7 +4551,11 @@ var jsxc;
 
          // Send message
          jsxc.otr.objects[bid].on('io', function(msg, uid) {
-            jsxc.otr.sendMessage(jsxc.gui.window.get(bid).data('jid'), msg, uid);
+            var jid = jsxc.gui.window.get(bid).data('jid') || jsxc.otr.objects[bid].jid;
+
+            jsxc.otr.objects[bid].jid = jid;
+
+            jsxc.otr.sendMessage(jid, msg, uid);
          });
 
          jsxc.otr.objects[bid].on('error', function(err) {
@@ -4369,7 +4591,7 @@ var jsxc;
             $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text(jsxc.l.your_buddy_is_attempting_to_determine_ + ' ' + jsxc.l.to_authenticate_to_your_buddy + jsxc.l.enter_the_secret);
          }
 
-         $('#jsxc_dialog a[rel=close]').click(function() {
+         $('#jsxc_dialog .jsxc_close').click(function() {
             jsxc.storage.removeUserItem('smp_' + bid);
 
             if (jsxc.master) {
@@ -4389,7 +4611,7 @@ var jsxc;
       sendSmpReq: function(bid, sec, quest) {
          jsxc.keepBusyAlive();
 
-         jsxc.otr.objects[bid].smpSecret(sec, quest);
+         jsxc.otr.objects[bid].smpSecret(sec, quest || '');
       },
 
       /**
@@ -4424,11 +4646,12 @@ var jsxc;
        * Abort encryptet session
        *
        * @param {type} bid
+       * @param cb callback
        * @returns {undefined}
        */
-      goPlain: function(bid) {
+      goPlain: function(bid, cb) {
          if (jsxc.master) {
-            jsxc.otr.objects[bid].endOtr.call(jsxc.otr.objects[bid]);
+            jsxc.otr.objects[bid].endOtr.call(jsxc.otr.objects[bid], cb);
             jsxc.otr.objects[bid].init.call(jsxc.otr.objects[bid]);
 
             jsxc.otr.backup(bid);
@@ -4451,7 +4674,7 @@ var jsxc;
          }
 
          // all variables which should be saved
-         var savekey = [ 'our_instance_tag', 'msgstate', 'authstate', 'fragment', 'their_y', 'their_old_y', 'their_keyid', 'their_instance_tag', 'our_dh', 'our_old_dh', 'our_keyid', 'sessKeys', 'storedMgs', 'oldMacKeys', 'trust', 'transmittedRS', 'ssid', 'receivedPlaintext', 'authstate', 'send_interval' ];
+         var savekey = [ 'jid', 'our_instance_tag', 'msgstate', 'authstate', 'fragment', 'their_y', 'their_old_y', 'their_keyid', 'their_instance_tag', 'our_dh', 'our_old_dh', 'our_keyid', 'sessKeys', 'storedMgs', 'oldMacKeys', 'trust', 'transmittedRS', 'ssid', 'receivedPlaintext', 'authstate', 'send_interval' ];
 
          var i;
          for (i = 0; i < savekey.length; i++) {
@@ -4981,7 +5204,7 @@ var jsxc;
          close_private: 'Close private',
          your_buddy_is_verificated: 'Your buddy is verified.',
          you_have_only_a_subscription_in_one_way: 'You only have a one-way subscription.',
-         verification_query_sent: 'Verification query sent.',
+         authentication_query_sent: 'Authentication query sent.',
          your_message_wasnt_send_please_end_your_private_conversation: 'Your message was not sent. Please end your private conversation.',
          unencrypted_message_received: 'Unencrypted message received:',
          your_message_wasnt_send_because_you_have_no_valid_subscription: 'Your message was not sent because you have no valid subscription.',
@@ -4995,7 +5218,7 @@ var jsxc;
          private_conversation_aborted: 'Private conversation aborted!',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Your buddy closed the private conversation! You should do the same.',
          conversation_is_now_verified: 'Conversation is now verified.',
-         verification_failed: 'Verification failed.',
+         authentication_failed: 'Authentication failed.',
          your_buddy_is_attempting_to_determine_: 'You buddy is attempting to determine if he or she is really talking to you.',
          to_authenticate_to_your_buddy: 'To authenticate to your buddy, ',
          enter_the_answer_and_click_answer: 'enter the answer and click Answer.',
@@ -5115,7 +5338,9 @@ var jsxc;
          On_login: 'On login',
          Received_an_unencrypted_message: 'Received an unencrypted message',
          Sorry_your_buddy_doesnt_provide_any_information: 'Sorry, your buddy does not provide any information.',
-         Info_about: 'Info about'
+         Info_about: 'Info about',
+         Authentication_aborted: 'Authentication aborted.',
+         Authentication_request_received: 'Authentication request received.'
       },
       de: {
          Logging_in: 'Login läuft…',
@@ -5126,7 +5351,7 @@ var jsxc;
          close_private: 'Privat abbrechen',
          your_buddy_is_verificated: 'Dein Freund ist verifiziert.',
          you_have_only_a_subscription_in_one_way: 'Die Freundschaft ist nur einseitig.',
-         verification_query_sent: 'Verifizierungsanfrage gesendet.',
+         authentication_query_sent: 'Authentifizierungsanfrage gesendet.',
          your_message_wasnt_send_please_end_your_private_conversation: 'Deine Nachricht wurde nicht gesendet. Bitte beende die private Konversation.',
          unencrypted_message_received: 'Unverschlüsselte Nachricht erhalten.',
          your_message_wasnt_send_because_you_have_no_valid_subscription: 'Deine Nachricht wurde nicht gesandt, da die Freundschaft einseitig ist.',
@@ -5140,7 +5365,7 @@ var jsxc;
          private_conversation_aborted: 'Private Konversation abgebrochen.',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Dein Freund hat die private Konversation beendet. Das solltest du auch tun!',
          conversation_is_now_verified: 'Konversation ist jetzt verifiziert',
-         verification_failed: 'Verifizierung fehlgeschlagen.',
+         authentication_failed: 'Authentifizierung fehlgeschlagen.',
          your_buddy_is_attempting_to_determine_: 'Dein Freund versucht herauszufinden ob er wirklich mit dir redet.',
          to_authenticate_to_your_buddy: 'Um dich gegenüber deinem Freund zu verifizieren ',
          enter_the_answer_and_click_answer: 'gib die Antwort ein und klick auf Antworten.',
@@ -5261,7 +5486,9 @@ var jsxc;
          On_login: 'Beim Anmelden',
          Received_an_unencrypted_message: 'Unverschlüsselte Nachricht empfangen',
          Sorry_your_buddy_doesnt_provide_any_information: 'Dein Freund stellt leider keine Informationen bereit.',
-         Info_about: 'Info über'
+         Info_about: 'Info über',
+         Authentication_aborted: 'Authentifizierung abgebrochen.',
+         Authentication_request_received: 'Authentifizierunganfrage empfangen.'
       },
       es: {
          Logging_in: 'Por favor, espere...',
@@ -5272,7 +5499,7 @@ var jsxc;
          close_private: 'Cerrar privado',
          your_buddy_is_verificated: 'Tu amigo está verificado.',
          you_have_only_a_subscription_in_one_way: 'Sólo tienes una suscripción de un modo.',
-         verification_query_sent: 'Consulta de verificación enviada.',
+         authentication_query_sent: 'Consulta de verificación enviada.',
          your_message_wasnt_send_please_end_your_private_conversation: 'Su mensaje no fue enviado. Por favor, termine su conversación privada.',
          unencrypted_message_received: 'Mensaje no cifrado recibido:',
          your_message_wasnt_send_because_you_have_no_valid_subscription: 'Su mensaje no se ha enviado, porque usted no tiene suscripción válida.',
@@ -5286,7 +5513,7 @@ var jsxc;
          private_conversation_aborted: 'Conversación privada abortada!',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Su amigo cerró la conversación privada! Usted debería hacer lo mismo.',
          conversation_is_now_verified: 'La conversación es ahora verificada.',
-         verification_failed: 'Fallo la verificación.',
+         authentication_failed: 'Fallo la verificación.',
          your_buddy_is_attempting_to_determine_: 'Tu amigo está tratando de determinar si él o ella está realmente hablando con usted.',
          to_authenticate_to_your_buddy: 'Para autenticar a su amigo, ',
          enter_the_answer_and_click_answer: 'introduce la respuesta y haga clic en Contestar.',

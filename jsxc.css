@@ -455,6 +455,27 @@ ul#jsxc_buddylist .jsxc_name {
 	padding-right: 30px;
 }
 
+ul#jsxc_buddylist li .jsxc_name:before {
+	content: ' ';
+	width: 0px;
+	height: 0px;
+	display: inline-block;
+	opacity: 0.0;
+	-webkit-transition: width 0.5s, opacity 0.5s;
+   transition: width 0.5s, opacity 0.5s;
+}
+
+ul#jsxc_buddylist li.jsxc_unreadMsg .jsxc_name:before {
+   width: 12px;
+   height: 12px;
+   border-radius: 6px;
+   background-color: orange;
+   margin-right: 3px;
+   opacity: 1.0;
+   -webkit-transition: width 0.5s, opacity 0.5s;
+   transition: width 0.5s, opacity 0.5s;
+}
+
 ul#jsxc_buddylist li.jsxc_expand {
 	height: 54px;
 }
