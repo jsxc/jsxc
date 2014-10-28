@@ -2500,6 +2500,8 @@ var jsxc;
          // create related otr object
          if (jsxc.master && !jsxc.otr.objects[bid]) {
             jsxc.otr.create(bid);
+         } else {
+            jsxc.otr.enable(bid);
          }
 
          $(document).trigger('init.window.jsxc', [ win ]);
@@ -4849,7 +4851,7 @@ var jsxc;
             }
          }
 
-         jsxc.gui.window.get(bid).find('.jsxc_otr').removeClass('jsxc_disabled');
+         jsxc.otr.enable(bid);
       },
 
       /**
@@ -4955,6 +4957,10 @@ var jsxc;
          }
 
          jsxc.otr._createDSA();
+      },
+
+      enable: function(bid) {
+         jsxc.gui.window.get(bid).find('.jsxc_otr').removeClass('jsxc_disabled');
       }
    };
 
