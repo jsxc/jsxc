@@ -216,6 +216,14 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        */
       onAddRosterItem: function(event, bid, data, el) {
          var self = jsxc.webrtc;
+
+         if (!self.conn) {
+            $(document).one('connectionReady.jsxc', function() {
+               self.onAddRosterItem(null, bid, data, el);
+            });
+            return;
+         }
+
          var videoIcon = $('<div class="jsxc_video jsxc_disabled" title="' + jsxc.l.Start_video_call + '"></div>');
 
          videoIcon.click(function() {
@@ -797,7 +805,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          try {
             url = canvas.toDataURL('image/jpeg');
          } catch (err) {
-            console.warn('Error', err);
+            jsxc.warn('Error', err);
             return;
          }
 
