@@ -2819,6 +2819,7 @@ var jsxc;
          win.find('.jsxc_textarea').append(msgDiv);
 
          jsxc.gui.detectUriScheme(win);
+         jsxc.gui.detectEmail(win);
 
          jsxc.gui.window.scrollDown(bid);
 
@@ -5463,8 +5464,11 @@ var jsxc;
          Info_about: 'Info about',
          Authentication_aborted: 'Authentication aborted.',
          Authentication_request_received: 'Authentication request received.',
-         You_received_a_message_from_an_unknown_: 'You received a message from an unknown sender',
-         Do_you_want_to_display_them: 'Do you want to display them?'
+         Do_you_want_to_display_them: 'Do you want to display them?',
+         Log_in_without_chat: 'Log in without chat',
+         has_come_online: 'has come online',
+         Unknown_sender: 'Unknown sender',
+         You_received_a_message_from_an_unknown_sender: 'You received a message from an unknown sender'
       },
       de: {
          Logging_in: 'Login läuft…',
@@ -5612,7 +5616,12 @@ var jsxc;
          Sorry_your_buddy_doesnt_provide_any_information: 'Dein Freund stellt leider keine Informationen bereit.',
          Info_about: 'Info über',
          Authentication_aborted: 'Authentifizierung abgebrochen.',
-         Authentication_request_received: 'Authentifizierunganfrage empfangen.'
+         Authentication_request_received: 'Authentifizierunganfrage empfangen.',
+         Log_in_without_chat: 'Anmelden ohne Chat',
+         Do_you_want_to_display_them: 'Möchtest du sie sehen?',
+         has_come_online: 'ist online gekommen',
+         Unknown_sender: 'Unbekannter Sender',
+         You_received_a_message_from_an_unknown_sender: 'Du hast eine Nachricht von einem unbekannten Sender erhalten'
       },
       es: {
          Logging_in: 'Por favor, espere...',
