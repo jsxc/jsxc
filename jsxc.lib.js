@@ -1528,7 +1528,7 @@ var jsxc;
             res = data.res[i];
 
             identities = [];
-            cap = jsxc.xmpp.conn.caps.getCapabilitiesByJid(bid + '/' + res);
+            cap = jsxc.xmpp.getCapabilitiesByJid(bid + '/' + res);
 
             if (cap !== null && cap.identities !== null) {
                identities = cap.identities;
@@ -1605,7 +1605,7 @@ var jsxc;
             $('#jsxc_dialog').append(content);
          };
 
-         jsxc.xmpp.conn.vcard.get(function(stanza) {
+         jsxc.xmpp.loadVcard(bid, function(stanza) {
 
             if ($('#jsxc_dialog ul.jsxc_vCard').length === 0) {
                return;
@@ -1630,7 +1630,7 @@ var jsxc;
 
             printProp($(stanza).find('vcard > *'), 0);
 
-         }, bid, failedToLoad);
+         }, failedToLoad);
       },
 
       showSettings: function() {
@@ -3940,6 +3940,52 @@ var jsxc;
          }
 
          jsxc.xmpp.conn.send(xmlMsg);
+      },
+
+      /**
+       * This function loads a vcard.
+       * 
+       * @memberOf jsxc.xmpp
+       * @param bid
+       * @param cb
+       * @param error_cb
+       */
+      loadVcard: function(bid, cb, error_cb) {
+         if (jsxc.master) {
+            jsxc.xmpp.conn.vcard.get(cb, bid, error_cb);
+         } else {
+            jsxc.storage.setUserItem('vcard', bid, 'request:' + (new Date()).getTime());
+
+            $(document).one('loaded.vcard.jsxc', function(ev, result) {
+               if (result && result.state === 'success') {
+                  cb($(result.data).get(0));
+               } else {
+                  error_cb();
+               }
+            });
+         }
+      },
+
+      /**
+       * Retrieves capabilities.
+       * 
+       * @memberOf jsxc.xmpp
+       * @param jid
+       * @returns List of known capabilities
+       */
+      getCapabilitiesByJid: function(jid) {
+         if (jsxc.xmpp.conn) {
+            return jsxc.xmpp.conn.caps.getCapabilitiesByJid(jid);
+         }
+
+         var jidVerIndex = JSON.parse(localStorage.getItem('strophe.caps._jidVerIndex')) || {};
+         var knownCapabilities = JSON.parse(localStorage.getItem('strophe.caps._knownCapabilities')) || {};
+
+         if (jidVerIndex[jid]) {
+            return knownCapabilities[jidVerIndex[jid]];
+         }
+
+         return null;
       }
    };
 
@@ -4205,7 +4251,7 @@ var jsxc;
       onStorage: function(e) {
 
          // skip
-         if (e.key === jsxc.storage.prefix + 'rid' || e.key === jsxc.storage.prefix + 'lastActivity') {
+         if (e.key === jsxc.storage.PREFIX + jsxc.storage.SEP + 'rid' || e.key === jsxc.storage.PREFIX + jsxc.storage.SEP + 'lastActivity') {
             return;
          }
 
@@ -4447,8 +4493,32 @@ var jsxc;
             jsxc.xmpp.addBuddy(n.username, n.alias);
          }
 
-         if (e.key === 'jsxc_roster') {
+         if (key === 'roster') {
             jsxc.gui.roster.toggle();
+         }
+
+         if (jsxc.master && key.match(new RegExp('^vcard' + jsxc.storage.SEP)) && e.newValue !== null && e.newValue.match(/^request:/)) {
+
+            jsxc.xmpp.loadVcard(bid, function(stanza) {
+               jsxc.storage.setUserItem('vcard', bid, {
+                  state: 'success',
+                  data: $('<div>').append(stanza).html()
+               });
+            }, function() {
+               jsxc.storage.setUserItem('vcard', bid, {
+                  state: 'error'
+               });
+            });
+         }
+
+         if (!jsxc.master && key.match(new RegExp('^vcard' + jsxc.storage.SEP)) && e.newValue !== null && !e.newValue.match(/^request:/)) {
+            n = JSON.parse(e.newValue);
+
+            if (typeof n.state !== 'undefined') {
+               $(document).trigger('loaded.vcard.jsxc', n);
+            }
+
+            jsxc.storage.removeUserItem('vcard', bid);
          }
       },
 
