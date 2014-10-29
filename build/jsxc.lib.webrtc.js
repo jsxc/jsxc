@@ -1,5 +1,5 @@
-/**
- * jsxc v1.0.0-alpha1 - 2014-09-08
+/*!
+ * jsxc v1.0.0-beta1 - 2014-10-29
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,15 +7,16 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 1.0.0-alpha1
+ * @version 1.0.0-beta1
+ * @license MIT
  */
 
-/* jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery */
+/* global jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery, MediaStreamTrack */
 
 var RTC = null, RTCPeerconnection = null;
 
 jsxc.gui.template.incomingCall = '<h3>%%Incoming_call%%</h3>\
-        <p>%%Do_you_want_to_accept_the_call_from%% {{cid_name}}?</p>\
+        <p>%%Do_you_want_to_accept_the_call_from%% {{bid_name}}?</p>\
         <p class="jsxc_right">\
             <a href="#" class="button jsxc_reject">%%Reject%%</a> <a href="#" class="button creation jsxc_accept">%%Accept%%</a>\
          </p>';
@@ -23,10 +24,28 @@ jsxc.gui.template.incomingCall = '<h3>%%Incoming_call%%</h3>\
 jsxc.gui.template.allowMediaAccess = '<p>%%Please_allow_access_to_microphone_and_camera%%</p>';
 
 jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
+            <div class="jsxc_chatarea">\
+                <ul></ul>\
+            </div>\
             <div class="jsxc_videoContainer">\
                 <video class="jsxc_localvideo" autoplay></video>\
                 <video class="jsxc_remotevideo" autoplay></video>\
                 <div class="jsxc_status"></div>\
+               <div class="bubblingG">\
+                  <span id="bubblingG_1">\
+                  </span>\
+                  <span id="bubblingG_2">\
+                  </span>\
+                  <span id="bubblingG_3">\
+                  </span>\
+               </div>\
+                <div class="jsxc_noRemoteVideo">\
+                   <div>\
+                     <div></div>\
+                     <p>%%No_video_signal%%</p>\
+                     <div></div>\
+                   </div>\
+                </div>\
             </div>\
             <div class="jsxc_controlbar">\
                 <button type="button" class="jsxc_hangUp">%%hang_up%%</button>\
@@ -44,9 +63,9 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
                <div class="jsxc_snapshotbar">\
                    <p>No pictures yet!</p>\
                </div>\n\
-               <div class="jsxc_chatarea">\
+               <!--<div class="jsxc_chatarea">\
                    <ul></ul>\
-               </div>\
+               </div>-->\
                <div class="jsxc_infobar"></div>\
             </div>\
         </div>';
@@ -76,7 +95,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       AUTO_ACCEPT: false,
 
       /** required disco features */
-      reqVideoFeatures: [ 'urn:xmpp:jingle:apps:rtp:video', 'urn:xmpp:jingle:apps:rtp:audio', 'urn:xmpp:jingle:transports:ice-udp:1' ],
+      reqVideoFeatures: [ 'urn:xmpp:jingle:apps:rtp:video', 'urn:xmpp:jingle:apps:rtp:audio', 'urn:xmpp:jingle:transports:ice-udp:1', 'urn:xmpp:jingle:apps:dtls:0' ],
 
       /** bare jid to current jid mapping */
       chatJids: {},
@@ -110,6 +129,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          self.conn.jingle.pc_constraints = RTC.pc_constraints;
 
          $(document).on('message.jsxc', $.proxy(self.onMessage, self));
+         $(document).on('presence.jsxc', $.proxy(self.onPresence, self));
 
          $(document).on('mediaready.jingle', $.proxy(self.onMediaReady, self));
          $(document).on('mediafailure.jingle', $.proxy(self.onMediaFailure, self));
@@ -125,6 +145,10 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          $(document).on('error.jingle', function(ev, sid, error) {
             jsxc.error('[JINGLE]', error);
          });
+
+         if (self.conn.disco) {
+            self.conn.disco.addFeature('urn:xmpp:jingle:apps:dtls:0');
+         }
 
          if (self.conn.caps) {
             $(document).on('caps.strophe', $.proxy(self.onCaps, self));
@@ -173,17 +197,46 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       },
 
       /**
+       * Return list of video capable resources.
+       * 
+       * @memberOf jsxc.webrtc
+       * @param bid
+       * @returns {Array}
+       */
+      getCapableRes: function(bid) {
+         var self = jsxc.webrtc;
+         var res = jsxc.storage.getUserItem('res', bid) || [];
+
+         var available = [];
+         $.each(res, function(r) {
+            if (self.conn.caps.hasFeatureByJid(bid + '/' + r, self.reqVideoFeatures)) {
+               available.push(r);
+            }
+         });
+
+         return available;
+      },
+
+      /**
        * Add "video" button to roster
        * 
        * @private
        * @memberOf jsxc.webrtc
        * @param event
-       * @param cid cid of roster item
-       * @param data data wich belongs to cid
+       * @param bid bid of roster item
+       * @param data data wich belongs to bid
        * @param el the roster item
        */
-      onAddRosterItem: function(event, cid, data, el) {
+      onAddRosterItem: function(event, bid, data, el) {
          var self = jsxc.webrtc;
+
+         if (!self.conn) {
+            $(document).one('connectionReady.jsxc', function() {
+               self.onAddRosterItem(null, bid, data, el);
+            });
+            return;
+         }
+
          var videoIcon = $('<div class="jsxc_video jsxc_disabled" title="' + jsxc.l.Start_video_call + '"></div>');
 
          videoIcon.click(function() {
@@ -194,7 +247,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          el.find('.jsxc_options.jsxc_left').append(videoIcon);
 
          el.on('extra.jsxc', function() {
-            self.updateIcon(cid);
+            self.updateIcon(bid);
          });
       },
 
@@ -209,6 +262,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       initWindow: function(event, win) {
          var self = jsxc.webrtc;
 
+         jsxc.debug('webrtc.initWindow');
+
          if (!self.conn) {
             $(document).one('connectionReady.jsxc', function() {
                self.initWindow(null, win);
@@ -219,38 +274,43 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var div = $('<div>').addClass('jsxc_video');
          win.find('.jsxc_transfer:eq(1)').after(div);
 
-         self.updateIcon(jsxc.jidToCid(win.data('jid')));
+         self.updateIcon(jsxc.jidToBid(win.data('jid')));
       },
 
       /**
        * Enable or disable "video" icon and assign full jid.
        * 
        * @memberOf jsxc.webrtc
-       * @param cid CSS conform jid
+       * @param bid CSS conform jid
        */
-      updateIcon: function(cid) {
+      updateIcon: function(bid) {
+         jsxc.debug('Update icon', bid);
 
          var self = jsxc.webrtc;
-         var win = jsxc.gui.getWindow(cid);
-         var jid = win.data('jid') || jsxc.storage.getUserItem('buddy_' + cid).jid;
+         var win = jsxc.gui.window.get(bid);
+         var jid = win.data('jid') || jsxc.storage.getUserItem('buddy', bid).jid;
 
-         var el = win.find('.jsxc_video').add('#' + cid + ' .jsxc_video');
+         var el = win.find('.jsxc_video').add(jsxc.gui.roster.getItem(bid).find('.jsxc_video'));
 
-         if (Strophe.getResourceFromJid(jid) === null) {
+         var capableRes = self.getCapableRes(jid);
+         var targetRes = Strophe.getResourceFromJid(jid);
 
-            var res = jsxc.storage.getUserItem('buddy_' + cid).res;
-
-            if (Array.isArray(res) && res.length === 1) {
-               jid += '/' + res[0];
-            }
+         if (targetRes === null) {
+            $.each(jsxc.storage.getUserItem('buddy', bid).res, function(index, val) {
+               if (capableRes.indexOf(val) > -1) {
+                  targetRes = val;
+                  return false;
+               }
+            });
          }
 
          el.off('click');
 
-         if (self.conn.caps.hasFeatureByJid(jid, self.reqVideoFeatures)) {
+         if (capableRes.indexOf(targetRes) > -1) {
             el.click(function() {
-               self.startCall(jid);
+               self.startCall(jid + '/' + targetRes);
             });
+
             el.removeClass('jsxc_disabled');
 
             el.attr('title', jsxc.translate('%%Start video call%%'));
@@ -271,12 +331,30 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        */
       onMessage: function(e, from) {
          var self = jsxc.webrtc;
-         var bJid = Strophe.getBareJidFromJid(from);
+         var bid = jsxc.jidToBid(from);
 
-         if (self.chatJids[bJid] !== from) {
-            self.updateIcon(jsxc.jidToCid(bJid));
-            self.chatJids[bJid] = from;
+         jsxc.debug('webrtc.onmessage', from);
+
+         if (self.chatJids[bid] !== from) {
+            self.updateIcon(bid);
+            self.chatJids[bid] = from;
          }
+      },
+
+      /**
+       * Update icon on presence.
+       * 
+       * @memberOf
+       * @param ev
+       * @param status
+       * @private
+       */
+      onPresence: function(ev, jid) {
+         var self = jsxc.webrtc;
+
+         jsxc.debug('webrtc.onpresence', jid);
+
+         self.updateIcon(jsxc.jidToBid(jid));
       },
 
       /**
@@ -337,7 +415,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       onCaps: function(event, jid) {
          var self = jsxc.webrtc;
 
-         self.updateIcon(jsxc.jidToCid(jid));
+         self.updateIcon(jsxc.jidToBid(jid));
       },
 
       /**
@@ -368,6 +446,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             self.setStatus((stream.getVideoTracks().length > 0) ? 'Use local video device.' : 'No local video device.');
 
             jsxc.debug('using video device "' + stream.getVideoTracks()[i].label + '"');
+            $('#jsxc_dialog .jsxc_localvideo').show();
          }
 
          $(document).one('cleanup.dialog.jsxc', $.proxy(self.hangUp, self));
@@ -380,8 +459,11 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        * @private
        * @memberOf jsxc.webrtc
        */
-      onMediaFailure: function() {
+      onMediaFailure: function(ev, err) {
          this.setStatus('media failure');
+
+         jsxc.gui.window.postMessage(jsxc.jidToBid(jsxc.webrtc.last_caller), 'sys', jsxc.translate('%%Media failure%%: ') + err.name);
+         jsxc.debug('media failure: ' + err.name);
       },
 
       /**
@@ -397,12 +479,12 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
 
          var self = this;
          var sess = this.conn.jingle.sessions[sid];
-         var jid = jsxc.jidToCid(sess.peerjid);
+         var bid = jsxc.jidToBid(sess.peerjid);
 
-         jsxc.gui.window.postMessage(jid, 'sys', jsxc.translate('%%Incoming call.%%'));
+         jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Incoming call.%%'));
 
          // display notification
-         jsxc.notification.notify(jsxc.translate('%%Incoming call%%'), jsxc.translate('%%from%% ' + jid));
+         jsxc.notification.notify(jsxc.translate('%%Incoming call%%'), jsxc.translate('%%from%% ' + bid));
 
          // send signal to partner
          sess.sendRinging();
@@ -430,7 +512,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             return;
          }
 
-         var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', jsxc.jidToCid(jid)), {
+         var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', bid), {
             noClose: true
          });
 
@@ -462,7 +544,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       onCallTerminated: function(event, sid, reason, text) {
          this.setStatus('call terminated ' + sid + (reason ? (': ' + reason + ' ' + text) : ''));
 
-         var cid = jsxc.jidToCid(jsxc.webrtc.last_caller);
+         var bid = jsxc.jidToBid(jsxc.webrtc.last_caller);
 
          if (this.localStream) {
             this.localStream.stop();
@@ -477,13 +559,15 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          this.localStream = null;
          this.remoteStream = null;
 
-         $('#jsxc_windowList > ul').prepend($('#jsxc_dialog .jsxc_chatarea > ul > li').detach());
+         var win = $('#jsxc_dialog .jsxc_chatarea > ul > li');
+         $('#jsxc_windowList > ul').prepend(win.detach());
+         win.find('.slimScrollDiv').resizable('enable');
 
          $(document).off('cleanup.dialog.jsxc');
          $(document).off('error.jingle');
          jsxc.gui.dialog.close();
 
-         jsxc.gui.window.postMessage(cid, 'sys', jsxc.translate('%%Call terminated%%' + (reason ? (': %%' + reason + '%%') : '') + '.'));
+         jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Call terminated%%' + (reason ? (': %%' + reason + '%%') : '') + '.'));
       },
 
       /**
@@ -525,7 +609,9 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          this.setStatus(isAudioDevice ? 'Use remote audio device.' : 'No remote audio device');
 
          if ($('.jsxc_remotevideo').length) {
-            RTC.attachMediaStream($('.jsxc_remotevideo'), stream);
+            RTC.attachMediaStream($('#jsxc_dialog .jsxc_remotevideo'), stream);
+
+            $('#jsxc_dialog .jsxc_' + (isVideoDevice ? 'remotevideo' : 'noRemoteVideo')).addClass('jsxc_deviceAvailable');
          }
       },
 
@@ -559,7 +645,11 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          jsxc.debug('iceCon state for ' + sid, iceCon);
          jsxc.debug('sig state for ' + sid, sigState);
 
-         if (sigState === 'stable' && iceCon === 'connected') {
+         if (sigState === 'stable' && (iceCon === 'connected' || iceCon === 'completed')) {
+
+            $('#jsxc_dialog .jsxc_deviceAvailable').show();
+            $('#jsxc_dialog .bubblingG').hide();
+
             var localSDP = sess.peerconnection.localDescription.sdp;
             var remoteSDP = sess.peerconnection.remoteDescription.sdp;
 
@@ -588,6 +678,15 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             text += '</p>';
 
             $('#jsxc_dialog .jsxc_infobar').html(text);
+         } else if (iceCon === 'failed') {
+            jsxc.gui.window.postMessage(jsxc.jidToBid(sess.peerjid), 'sys', jsxc.translate('%%ICE connection failure%%.'));
+
+            $(document).off('cleanup.dialog.jsxc');
+
+            sess.sendTerminate('failed-transport');
+            sess.terminate();
+
+            $(document).trigger('callterminated.jingle');
          }
       },
 
@@ -606,8 +705,9 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        * 
        * @memberOf jsxc.webrtc
        * @param jid full jid
+       * @param um requested user media
        */
-      startCall: function(jid) {
+      startCall: function(jid, um) {
          var self = this;
 
          if (Strophe.getResourceFromJid(jid) === null) {
@@ -621,7 +721,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             'finish.mediaready.jsxc': function() {
                self.setStatus('Initiate call');
 
-               jsxc.gui.window.postMessage(jsxc.jidToCid(jid), 'sys', jsxc.translate('%%Call started.%%'));
+               jsxc.gui.window.postMessage(jsxc.jidToBid(jid), 'sys', jsxc.translate('%%Call started.%%'));
 
                $(document).one('error.jingle', function(e, sid, error) {
                   if (error.source !== 'offer') {
@@ -641,7 +741,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             }
          });
 
-         this.reqUserMedia();
+         self.reqUserMedia(um);
       },
 
       /**
@@ -649,10 +749,10 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        * 
        * @memberOf jsxc.webrtc
        */
-      hangUp: function() {
+      hangUp: function(reason, text) {
          $(document).off('cleanup.dialog.jsxc');
 
-         jsxc.webrtc.conn.jingle.terminate(null);
+         jsxc.webrtc.conn.jingle.terminate(null, reason, text);
          $(document).trigger('callterminated.jingle');
       },
 
@@ -661,18 +761,35 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        * 
        * @memberOf jsxc.webrtc
        */
-      reqUserMedia: function() {
+      reqUserMedia: function(um) {
          if (this.localStream) {
             $(document).trigger('mediaready.jingle', [ this.localStream ]);
             return;
          }
+
+         um = um || [ 'video', 'audio' ];
 
          jsxc.gui.dialog.open(jsxc.gui.template.get('allowMediaAccess'), {
             noClose: true
          });
          this.setStatus('please allow access to microphone and camera');
 
-         getUserMediaWithConstraints([ 'video', 'audio' ]);
+         if (typeof MediaStreamTrack !== 'undefined' && typeof MediaStreamTrack.getSources !== 'undefined') {
+            MediaStreamTrack.getSources(function(sourceInfo) {
+               var availableDevices = sourceInfo.map(function(el) {
+
+                  return el.kind;
+               });
+
+               um = um.filter(function(el) {
+                  return availableDevices.indexOf(el) !== -1;
+               });
+
+               getUserMediaWithConstraints(um);
+            });
+         } else {
+            getUserMediaWithConstraints(um);
+         }
       },
 
       /**
@@ -701,7 +818,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          try {
             url = canvas.toDataURL('image/jpeg');
          } catch (err) {
-            console.warn('Error', err);
+            jsxc.warn('Error', err);
             return;
          }
 
@@ -762,6 +879,8 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
 
          if (self.remoteStream) {
             RTC.attachMediaStream(rv, self.remoteStream);
+
+            $('#jsxc_dialog .jsxc_' + (self.remoteStream.getVideoTracks().length > 0 ? 'remotevideo' : 'noRemoteVideo')).addClass('jsxc_deviceAvailable');
          }
 
          var toggleMulti = function(elem, open) {
@@ -778,7 +897,13 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             }
          };
 
-         var win = jsxc.gui.window.open(jsxc.jidToCid(jid));
+         var win = jsxc.gui.window.open(jsxc.jidToBid(jid));
+
+         win.find('.slimScrollDiv').resizable('disable');
+         win.find('.jsxc_textarea').slimScroll({
+            height: 413
+         });
+         win.find('.jsxc_emoticons').css('top', (413 + 6) + 'px');
 
          $('#jsxc_dialog .jsxc_chatarea ul').append(win.detach());
 
@@ -796,7 +921,21 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          });
 
          $('#jsxc_dialog .jsxc_showchat').click(function() {
-            toggleMulti($('#jsxc_dialog .jsxc_chatarea'));
+            var chatarea = $('#jsxc_dialog .jsxc_chatarea');
+
+            if (chatarea.is(':hidden')) {
+               chatarea.show();
+               $('#jsxc_dialog .jsxc_webrtc').width('900');
+               jsxc.gui.dialog.resize({
+                  width: '920px'
+               });
+            } else {
+               chatarea.hide();
+               $('#jsxc_dialog .jsxc_webrtc').width('650');
+               jsxc.gui.dialog.resize({
+                  width: '660px'
+               });
+            }
          });
 
          $('#jsxc_dialog .jsxc_info').click(function() {
@@ -863,7 +1002,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       Remote_IP: 'Remote IP',
       Local_Fingerprint: 'Local fingerprint',
       Remote_Fingerprint: 'Remote fingerprint',
-      Video_call_not_possible: 'Video call not possible',
+      Video_call_not_possible: 'Video call not possible. Your buddy does not support video calls.',
       Start_video_call: 'Start video call'
    });
 
@@ -884,7 +1023,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       Remote_IP: 'Remote IP',
       Local_Fingerprint: 'Lokaler Fingerprint',
       Remote_Fingerprint: 'Remote Fingerprint',
-      Video_call_not_possible: 'Videoanruf nicht verfügbar',
+      Video_call_not_possible: 'Videoanruf nicht verfügbar. Dein Gesprächspartner unterstützt keine Videotelefonie.',
       Start_video_call: 'Starte Videoanruf'
    });
 

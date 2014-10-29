@@ -3,9 +3,10 @@
  * Klaus Herberth, 2014
  */
 
-// This code was written by Tyler Akins and has been placed in the
-// public domain.  It would be nice if you left this header intact.
-// Base64 code from Tyler Akins -- http://rumkin.com
+/*! This code was written by Tyler Akins and has been placed in the
+   public domain.  It would be nice if you left this header intact.
+   Base64 code from Tyler Akins -- http://rumkin.com
+*/
 
 var Base64 = (function () {
     var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
@@ -84,7 +85,7 @@ var Base64 = (function () {
     return obj;
 })();
 
-/*
+/*!
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
  * in FIPS PUB 180-1
  * Version 2.1a Copyright Paul Johnston 2000 - 2002.
@@ -261,7 +262,7 @@ function binb2b64(binarray)
   return str;
 }
 
-/*
+/*!
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
  * Digest Algorithm, as defined in RFC 1321.
  * Version 2.1 Copyright (C) Paul Johnston 1999 - 2002.
@@ -469,7 +470,7 @@ var MD5 = (function () {
     return obj;
 })();
 
-/*
+/*!
     This program is distributed under the terms of the MIT license.
     Please see the LICENSE file for details.
 
