@@ -815,6 +815,7 @@ div.jsxc_window .jsxc_emoticons ul {
 	padding: 3px;
 	border-radius: 3px;
 	z-index: 200;
+	list-style-type: none;
 }
 
 div.jsxc_window .jsxc_emoticons ul:after {
@@ -835,12 +836,15 @@ div.jsxc_window .jsxc_emoticons li {
 	cursor: pointer;
 }
 
-div.jsxc_window .jsxc_emoticons img {
+div.jsxc_window .jsxc_emoticons div {
 	cursor: pointer;
 	border-radius: 3px;
+	background-size: 19px 19px;
+	width: 19px;
+	height: 19px;
 }
 
-div.jsxc_window .jsxc_emoticons img:hover {
+div.jsxc_window .jsxc_emoticons div:hover {
 	background-color: rgba(255, 255, 255, 0.8);
 }
 
@@ -910,6 +914,7 @@ div.jsxc_chatmessage a {
 div.jsxc_chatmessage img {
 	width: 19px;
 	height: 19px;
+	background-size: 19px 19px;
 }
 
 /** incoming message */
@@ -1183,3 +1188,54 @@ img.jsxc_vCard {
    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a4a4a4',
       endColorstr='#00282323', GradientType=0); /* IE6-9 */
 }
+
+.jsxc_emoticon {
+  width: 19px;
+  height: 19px;
+  background-size: 19px 19px !important;
+  border: 0px;
+}
+
+.jsxc_angel { background: url('img/emotions/angel.png') }
+
+.jsxc_angry { background: url('img/emotions/angry.png') }
+
+.jsxc_smile { background: url('img/emotions/smile.png') }
+
+.jsxc_grin { background: url('img/emotions/grin.png') }
+
+.jsxc_sad { background: url('img/emotions/sad.png') }
+
+.jsxc_wink { background: url('img/emotions/wink.png') }
+
+.jsxc_tonguesmile { background: url('img/emotions/tonguesmile.png') }
+
+.jsxc_surprised { background: url('img/emotions/surprised.png') }
+
+.jsxc_kiss { background: url('img/emotions/kiss.png') }
+
+.jsxc_sunglassess { background: url('img/emotions/sunglassess.png') }
+
+.jsxc_crysad { background: url('img/emotions/crysad.png') }
+
+.jsxc_doubt { background: url('img/emotions/doubt.png') }
+
+.jsxc_zip { background: url('img/emotions/zip.png') }
+
+.jsxc_thumbsup { background: url('img/emotions/thumbsup.png') }
+
+.jsxc_thumbsdown { background: url('img/emotions/thumbsdown.png') }
+
+.jsxc_beer { background: url('img/emotions/beer.png') }
+
+.jsxc_devil { background: url('img/emotions/devil.png') }
+
+.jsxc_kissing { background: url('img/emotions/kissing.png') }
+
+.jsxc_rose { background: url('img/emotions/rose.png') }
+
+.jsxc_music { background: url('img/emotions/music.png') }
+
+.jsxc_love { background: url('img/emotions/love.png') }
+
+.jsxc_tired { background: url('img/emotions/tired.png') }
