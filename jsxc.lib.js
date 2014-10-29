@@ -1522,35 +1522,37 @@ var jsxc;
 
          var data = jsxc.storage.getUserItem('buddy', bid);
 
-         // Display resources and corresponding information
-         var i, j, res, identities, identity = null, cap, client;
-         for (i = 0; i < data.res.length; i++) {
-            res = data.res[i];
+         if (data) {
+            // Display resources and corresponding information
+            var i, j, res, identities, identity = null, cap, client;
+            for (i = 0; i < data.res.length; i++) {
+               res = data.res[i];
 
-            identities = [];
-            cap = jsxc.xmpp.getCapabilitiesByJid(bid + '/' + res);
+               identities = [];
+               cap = jsxc.xmpp.getCapabilitiesByJid(bid + '/' + res);
 
-            if (cap !== null && cap.identities !== null) {
-               identities = cap.identities;
-            }
-
-            client = '';
-            for (j = 0; j < identities.length; j++) {
-               identity = identities[j];
-               if (identity.category === 'client') {
-                  if (client !== '') {
-                     client += ',\n';
-                  }
-
-                  client += identity.name + ' (' + identity.type + ')';
+               if (cap !== null && cap.identities !== null) {
+                  identities = cap.identities;
                }
+
+               client = '';
+               for (j = 0; j < identities.length; j++) {
+                  identity = identities[j];
+                  if (identity.category === 'client') {
+                     if (client !== '') {
+                        client += ',\n';
+                     }
+
+                     client += identity.name + ' (' + identity.type + ')';
+                  }
+               }
+
+               var status = jsxc.storage.getUserItem('res', bid)[res];
+
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li class="jsxc_sep"><strong>' + jsxc.translate('%%Resource%%') + ':</strong> ' + res + '</li>');
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Client%%') + ':</strong> ' + client + '</li>');
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li>' + jsxc.translate('<strong>%%Status%%:</strong> %%' + jsxc.CONST.STATUS[status] + '%%') + '</li>');
             }
-
-            var status = jsxc.storage.getUserItem('res', bid)[res];
-
-            $('#jsxc_dialog ul.jsxc_vCard').append('<li class="jsxc_sep"><strong>' + jsxc.translate('%%Resource%%') + ':</strong> ' + res + '</li>');
-            $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Client%%') + ':</strong> ' + client + '</li>');
-            $('#jsxc_dialog ul.jsxc_vCard').append('<li>' + jsxc.translate('<strong>%%Status%%:</strong> %%' + jsxc.CONST.STATUS[status] + '%%') + '</li>');
          }
 
          var printProp = function(el, depth) {
@@ -1581,7 +1583,11 @@ var jsxc;
                content += '</li>';
 
                if (depth === 0 && $('#jsxc_dialog ul.jsxc_vCard').length > 0) {
-                  $('#jsxc_dialog ul.jsxc_vCard li.jsxc_sep:first').before(content);
+                  if ($('#jsxc_dialog ul.jsxc_vCard li.jsxc_sep:first').length > 0) {
+                     $('#jsxc_dialog ul.jsxc_vCard li.jsxc_sep:first').before(content);
+                  } else {
+                     $('#jsxc_dialog ul.jsxc_vCard').append(content);
+                  }
                   content = '';
                }
             });
@@ -2900,9 +2906,9 @@ var jsxc;
             var data = jsxc.storage.getUserItem('buddy', bid);
 
             $.extend(ph, {
-               bid_priv_fingerprint: data.fingerprint ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
-               bid_jid: Strophe.getBareJidFromJid(data.jid),
-               bid_name: data.name
+               bid_priv_fingerprint: (data && data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
+               bid_jid: bid,
+               bid_name: (data && data.name) ? data.name : bid
             });
          }
 
