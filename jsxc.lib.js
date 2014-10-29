@@ -379,6 +379,8 @@ var jsxc;
          jsxc.restoreRoster();
          jsxc.restoreWindows();
          jsxc.restoreCompleted = true;
+
+         $(document).trigger('restoreCompleted.jsxc');
       },
 
       /**
@@ -421,6 +423,8 @@ var jsxc;
             jsxc.restoreRoster();
             jsxc.restoreWindows();
             jsxc.restoreCompleted = true;
+
+            $(document).trigger('restoreCompleted.jsxc');
          }
 
          // Prepare notifications
@@ -4670,6 +4674,10 @@ var jsxc;
 
          jsxc.otr.objects[bid].on('status', function(status) {
             var data = jsxc.storage.getUserItem('buddy', bid);
+
+            if (data === null) {
+               return;
+            }
 
             switch (status) {
                case OTR.CONST.STATUS_SEND_QUERY:
