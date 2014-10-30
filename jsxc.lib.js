@@ -4963,7 +4963,7 @@ var jsxc;
                // try to create web-worker
 
                try {
-                  worker = new Worker('/javascripts/dsa-webworker.js');
+                  worker = new Worker('/javascripts/otr/dsa-webworker.js');
                } catch (err) {
                   jsxc.warn('Couldn\'t create web-worker.', err);
                }
@@ -4990,13 +4990,13 @@ var jsxc;
                // start worker
                worker.postMessage({
                   imports: [
-                    '/assets/otr/dep/salsa20.js',
-                    '/assets/otr/dep/bigint.js',
-                    '/assets/otr/dep/crypto.js',
-                    '/assets/otr/dep/eventemitter.js',
-                    '/assets/otr-dep/const.js',
-                    '/assets/otr-dep/helpers.js',
-                    '/assets/otr-dep/dsa.js'
+                    '/javascripts/otr/salsa20.js',
+                    '/javascripts/otr/bigint.js',
+                    '/javascripts/otr/crypto.js',
+                    '/javascripts/otr/eventemitter.js',
+                    '/javascripts/otr/const.js',
+                    '/javascripts/otr/helpers.js',
+                    '/javascripts/otr/dsa.js'
                   ],
                   seed: BigInt.getSeed(),
                   debug: true
