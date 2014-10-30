@@ -12,8 +12,10 @@
     "lib/jquery-ui.min.css",
     "lib/jquery.mCustomScrollbar.css",
     "lib/jquery.colorbox.css",
-    "jsxc.css",
-    "jsxc.lib.js"
+    "build/jsxc.css",
+    "build/jsxc.webrtc.css",
+    "build/jsxc.dep.min.js",
+    "build/jsxc.min.js"
   ],
   "moduleType": [
     "globals"
@@ -43,8 +45,6 @@
     "jquery-colorbox": "~1.5.14",
     "jquery.slimscroll": "~1.3.3",
     "jquery-fullscreen": "~1.1.4",
-    "strophejs-jingle": "~0.0.1",
-    "otr-dep": "~0.0.1",
-    "otr": "~0.2.13"
+    "strophejs-jingle": "~0.0.1"
   }
 }
