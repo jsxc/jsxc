@@ -34,8 +34,8 @@ li.jsxc_sep {
 	border-top: 1px solid black;
 }
 
-/*############################ 
- *########## Dialog ########## 
+/*############################
+ *########## Dialog ##########
  *############################*/
 #jsxc_dialog {
 	padding: 10px;
@@ -124,8 +124,8 @@ li.jsxc_sep {
 	background-color: #efefef;
 }
 
-/*############################ 
- *########## Overall ######### 
+/*############################
+ *########## Overall #########
  *############################*/
 li .jsxc_name {
 	overflow: hidden;
@@ -201,16 +201,20 @@ li .jsxc_name:hover {
  *############################*/
 div#jsxc_roster {
 	position: fixed;
-	top: 0px;
+	top: 40px;
 	bottom: 0px;
 	right: 0px;
 	width: 200px;
 	overflow: visible;
-	border-left: 4px solid #A4A4A4;
+	border-left: 24px solid #A4A4A4;
 	z-index: 80;
 	margin-left: 10px;
 	box-shadow: 0px 0px 7px #000000;
 	background-color: #383C43;
+}
+
+div#jsxc_roster a{
+	cursor: pointer;
 }
 
 div#jsxc_roster .slimScrollDiv {
@@ -399,7 +403,7 @@ div#jsxc_roster>.jsxc_bottom ul li:last-child {
       -webkit-animation-timing-function: ease-in;
    }
    12% {
-      bottom: 5px; 
+      bottom: 5px;
       -webkit-animation-timing-function: ease-out;
    }
    25% {
@@ -425,7 +429,7 @@ div#jsxc_roster>.jsxc_bottom ul li:last-child {
       animation-timing-function: ease-in;
    }
    12% {
-      bottom: 5px; 
+      bottom: 5px;
       animation-timing-function: ease-out;
    }
    25% {
@@ -569,11 +573,11 @@ ul#jsxc_buddylist li.jsxc_expand .jsxc_avatar, ul#jsxc_buddylist li.jsxc_expand 
 #jsxc_buddylist .jsxc_options > div:hover {
 	opacity: 1;
 }
-#jsxc_buddylist .jsxc_chaticon {	
+#jsxc_buddylist .jsxc_chaticon {
 	background-image: url('img/speech_balloon_white.svg');
 	background-size: 15px 15px;
 }
-#jsxc_buddylist .jsxc_videoicon { 
+#jsxc_buddylist .jsxc_videoicon {
    background-image: url('img/camera_icon_white.svg');
    background-size: 13px 13px;
 }
@@ -587,7 +591,7 @@ ul#jsxc_buddylist li.jsxc_expand .jsxc_avatar, ul#jsxc_buddylist li.jsxc_expand 
 }
 
 ul#jsxc_buddylist li:hover {
-	
+
 }
 
 ul#jsxc_buddylist .jsxc_oneway {
@@ -616,9 +620,11 @@ ul#jsxc_buddylist .jsxc_right div {
 	color: #fff;
 }
 
-ul#jsxc_buddylist li[data-type!="chat"] .jsxc_right {
-	display: none;
-}
+/** Sass::SyntaxError: Invalid CSS 'data-type!="chat"'
+ * ul#jsxc_buddylist li[data-type!="chat"] .jsxc_right {
+ *	display: none;
+ * }
+ */
 
 ul#jsxc_buddylist .jsxc_right div:hover {
 	opacity: 1.0;
@@ -641,14 +647,15 @@ ul#jsxc_buddylist .jsxc_delete {
 }
 
 div#jsxc_toggleRoster {
-	width: 14px;
+	width: 34px;
 	height: 100%;
 	position: absolute;
-	left: -14px !important;
+	left: -34px !important;
 	top: 0px;
 	z-index: 110;
 	background-color: transparent;
 	cursor: pointer;
+	display: table;
 }
 
 #jsxc_toggleRoster:hover {
@@ -656,8 +663,14 @@ div#jsxc_toggleRoster {
 	opacity: 0.5;
 }
 
-/*############################ 
- *###### Window List ######### 
+#jsxc_toggleRoster_text{
+      display: table-cell;
+      vertical-align: middle;
+      padding-left: 14px;
+}
+
+/*############################
+ *###### Window List #########
  *############################*/
 div#jsxc_windowList {
 	position: fixed;
@@ -734,8 +747,8 @@ div#jsxc_windowList>ul>li.jsxc_min {
 	display: none;
 }
 
-/*############################ 
- *######### Window ########### 
+/*############################
+ *######### Window ###########
  *############################*/
 div.jsxc_bar {
 	background-color: #282323;
@@ -853,7 +866,7 @@ div.jsxc_window .jsxc_emoticons div:hover {
 	position: relative;
 }
 
-.jsxc_window .jsxc_gradient { 
+.jsxc_window .jsxc_gradient {
 	display:none;
 	position: absolute;
 	top: 0px;
@@ -1126,8 +1139,8 @@ div.jsxc_transfer.jsxc_enc.jsxc_trust {
 	outline: none;
 }
 
-/*############################ 
- *######### Other ############ 
+/*############################
+ *######### Other ############
  *############################*/
 ul.jsxc_vCard {
 	min-width: 400px;
@@ -1142,7 +1155,7 @@ ul.jsxc_vCard li {
 }
 
 ul.jsxc_vCard strong {
-	
+
 }
 
 img.jsxc_vCard {
