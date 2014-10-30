@@ -1,6 +1,11 @@
 /* global module:false */
 module.exports = function(grunt) {
-
+   
+   var dep = grunt.file.readJSON('dep.json');
+   var dep_files = dep.map(function(el) {
+      return el.file;
+   });
+   
    // Project configuration.
    grunt.initConfig({
       app: grunt.file.readJSON('package.json'),
@@ -47,10 +52,54 @@ module.exports = function(grunt) {
             } ]
          }
       },
+      concat: {
+         dep: {
+            options: {
+               banner: '/*!' +
+                  ' * <%= app.name %> v<%= app.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
+                  ' * \n' +
+                  ' * This file concatenates all dependencies of <%= app.name %>.\n' +
+                  ' * \n' +
+                  ' * For the list of concatenated files and there licenses please see <%= app.homepage %> @github.\n' +
+                  ' */\n\n',
+               process: function(src, filepath) {
+                  if (filepath === 'build/lib/otr/build/dep/crypto.js') { 
+                     src += ';';
+                  }
+                  
+                  var data = dep[dep_files.indexOf(filepath)];
+                  
+                  return '/*!\n * Source: ' + filepath + ', license: ' + data.license + ', url: ' + data.url + ' */\n' + src;
+               }
+            },
+            src: dep_files,
+            dest: 'build/jsxc.dep.js'
+         },
+         jsxc: {
+            options: {
+               banner: '/*! This file is concatenated for the browser. */\n\n'
+            },
+            src: ['build/jsxc.lib.js', 'build/jsxc.lib.webrtc.js'],
+            dest: 'build/jsxc.js'
+         }
+      },
+      uglify: {
+         jsxc: {
+            options: {
+               mangle: false,
+               sourceMap: true,
+               preserveComments: 'some'
+            },
+            files: {
+               'build/jsxc.dep.min.js': ['build/jsxc.dep.js'],
+               'build/jsxc.min.js': ['build/jsxc.js']
+            }
+         }
+      },
       search: {
          console: {
             files: {
-               src: ['*.js']
+               src: [ '*.js' ]
             },
             options: {
                searchString: /console\.log\((?!'[<>]|msg)/g,
@@ -60,13 +109,13 @@ module.exports = function(grunt) {
          },
          changelog: {
             files: {
-               src: ['CHANGELOG.md']
+               src: [ 'CHANGELOG.md' ]
             },
             options: {
                searchString: "<%= app.version %>",
                logFormat: 'console',
                onComplete: function(m) {
-                  if(m.numMatches === 0) {
+                  if (m.numMatches === 0) {
                      grunt.fail.fatal("No entry in README.md for current version found.");
                   }
                }
@@ -97,6 +146,8 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-contrib-jshint');
    grunt.loadNpmTasks('grunt-contrib-copy');
    grunt.loadNpmTasks('grunt-contrib-clean');
+   grunt.loadNpmTasks('grunt-contrib-concat');
+   grunt.loadNpmTasks('grunt-contrib-uglify');
    grunt.loadNpmTasks('grunt-banner');
    grunt.loadNpmTasks('grunt-text-replace');
    grunt.loadNpmTasks('grunt-search');
@@ -104,14 +155,14 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-shell');
 
    // Default task.
-   grunt.registerTask('default', [ 'jshint', 'search', 'clean', 'copy', 'usebanner', 'replace' ]);
+   grunt.registerTask('default', [ 'jshint', 'search', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // Create alpha/beta build
-   grunt.registerTask('pre', ['jshint', 'search:console', 'clean', 'copy', 'usebanner', 'replace', 'compress' ]);
+   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // before commit
    grunt.registerTask('commit', [ 'jshint', 'search:console' ]);
-   
+
    // prepare pre-commit hook
-   grunt.registerTask('hookmeup', ['shell:hooks']);
+   grunt.registerTask('hookmeup', [ 'shell:hooks' ]);
 };

@@ -376,7 +376,7 @@ getUserMediaWithConstraints = function(um, resolution, bandwidth, fps) {
                 },
                 function (error) {
                     console.warn('Failed to get access to local media. Error ', error);
-                    $(document).trigger('mediafailure.jingle');
+                    $(document).trigger('mediafailure.jingle', [error]);
                 });
     } catch (e) {
         console.error('GUM failed: ', e);

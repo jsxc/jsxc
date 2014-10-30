@@ -27,6 +27,9 @@ var jsxc;
       /** Timeout for notification */
       toNotification: null,
 
+      /** Timeout delay for notification */
+      toNotificationDelay: 500,
+
       /** Interval for keep-alive */
       keepalive: null,
 
@@ -383,6 +386,8 @@ var jsxc;
          jsxc.restoreRoster();
          jsxc.restoreWindows();
          jsxc.restoreCompleted = true;
+
+         $(document).trigger('restoreCompleted.jsxc');
       },
 
       /**
@@ -425,6 +430,8 @@ var jsxc;
             jsxc.restoreRoster();
             jsxc.restoreWindows();
             jsxc.restoreCompleted = true;
+
+            $(document).trigger('restoreCompleted.jsxc');
          }
 
          // Prepare notifications
@@ -611,6 +618,17 @@ var jsxc;
       escapeHTML: function(text) {
          text = text.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
          return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      },
+
+      /**
+       * Removes all html tags.
+       * 
+       * @memberOf jsxc
+       * @param text
+       * @returns stripped text
+       */
+      removeHTML: function(text) {
+         return $('<span>').html(text).text();
       },
 
       /**
@@ -923,17 +941,16 @@ var jsxc;
          var ri = jsxc.gui.roster.getItem(bid); // roster item from user
          var we = jsxc.gui.window.get(bid); // window element from user
          var ue = ri.add(we); // both
-         var bullet = $('.jsxc_bullet[data-bid="' + bid + '"]');
+         var spot = $('.jsxc_spot[data-bid="' + bid + '"]');
 
          // Attach data to corresponding roster item
          ri.data(data);
 
          // Add online status
-         ue.removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
+         ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
 
          // Change name and add title
-         ue.find('.jsxc_name').text(data.name).attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
-         bullet.attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
+         ue.find('.jsxc_name').add(spot).text(data.name).attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
 
          // Update gui according to encryption state
          switch (data.msgstate) {
@@ -1456,12 +1473,7 @@ var jsxc;
          });
 
          if (confirm) {
-            $('#jsxc_dialog .creation').click(function() {
-               confirm.call();
-               jsxc.gui.dialog.open(jsxc.gui.template.get('pleaseAccept'), {
-                  noClose: true
-               });
-            });
+            $('#jsxc_dialog .creation').click(confirm);
          }
 
          if (dismiss) {
@@ -1521,35 +1533,37 @@ var jsxc;
 
          var data = jsxc.storage.getUserItem('buddy', bid);
 
-         // Display resources and corresponding information
-         var i, j, res, identities, identity = null, cap, client;
-         for (i = 0; i < data.res.length; i++) {
-            res = data.res[i];
+         if (data) {
+            // Display resources and corresponding information
+            var i, j, res, identities, identity = null, cap, client;
+            for (i = 0; i < data.res.length; i++) {
+               res = data.res[i];
 
-            identities = [];
-            cap = jsxc.xmpp.conn.caps.getCapabilitiesByJid(bid + '/' + res);
+               identities = [];
+               cap = jsxc.xmpp.getCapabilitiesByJid(bid + '/' + res);
 
-            if (cap !== null && cap.identities !== null) {
-               identities = cap.identities;
-            }
-
-            client = '';
-            for (j = 0; j < identities.length; j++) {
-               identity = identities[j];
-               if (identity.category === 'client') {
-                  if (client !== '') {
-                     client += ',\n';
-                  }
-
-                  client += identity.name + ' (' + identity.type + ')';
+               if (cap !== null && cap.identities !== null) {
+                  identities = cap.identities;
                }
+
+               client = '';
+               for (j = 0; j < identities.length; j++) {
+                  identity = identities[j];
+                  if (identity.category === 'client') {
+                     if (client !== '') {
+                        client += ',\n';
+                     }
+
+                     client += identity.name + ' (' + identity.type + ')';
+                  }
+               }
+
+               var status = jsxc.storage.getUserItem('res', bid)[res];
+
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li class="jsxc_sep"><strong>' + jsxc.translate('%%Resource%%') + ':</strong> ' + res + '</li>');
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Client%%') + ':</strong> ' + client + '</li>');
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li>' + jsxc.translate('<strong>%%Status%%:</strong> %%' + jsxc.CONST.STATUS[status] + '%%') + '</li>');
             }
-
-            var status = jsxc.storage.getUserItem('res', bid)[res];
-
-            $('#jsxc_dialog ul.jsxc_vCard').append('<li class="jsxc_sep"><strong>' + jsxc.translate('%%Resource%%') + ':</strong> ' + res + '</li>');
-            $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Client%%') + ':</strong> ' + client + '</li>');
-            $('#jsxc_dialog ul.jsxc_vCard').append('<li>' + jsxc.translate('<strong>%%Status%%:</strong> %%' + jsxc.CONST.STATUS[status] + '%%') + '</li>');
          }
 
          var printProp = function(el, depth) {
@@ -1580,7 +1594,11 @@ var jsxc;
                content += '</li>';
 
                if (depth === 0 && $('#jsxc_dialog ul.jsxc_vCard').length > 0) {
-                  $('#jsxc_dialog ul.jsxc_vCard li.jsxc_sep:first').before(content);
+                  if ($('#jsxc_dialog ul.jsxc_vCard li.jsxc_sep:first').length > 0) {
+                     $('#jsxc_dialog ul.jsxc_vCard li.jsxc_sep:first').before(content);
+                  } else {
+                     $('#jsxc_dialog ul.jsxc_vCard').append(content);
+                  }
                   content = '';
                }
             });
@@ -1604,7 +1622,7 @@ var jsxc;
             $('#jsxc_dialog').append(content);
          };
 
-         jsxc.xmpp.conn.vcard.get(function(stanza) {
+         jsxc.xmpp.loadVcard(bid, function(stanza) {
 
             if ($('#jsxc_dialog ul.jsxc_vCard').length === 0) {
                return;
@@ -1629,7 +1647,7 @@ var jsxc;
 
             printProp($(stanza).find('vcard > *'), 0);
 
-         }, bid, failedToLoad);
+         }, failedToLoad);
       },
 
       showSettings: function() {
@@ -1710,9 +1728,34 @@ var jsxc;
        */
       showRequestNotification: function() {
          jsxc.gui.showConfirmDialog(jsxc.translate("%%Should we notify you_%%"), function() {
+            jsxc.gui.dialog.open(jsxc.gui.template.get('pleaseAccept'), {
+               noClose: true
+            });
+
             jsxc.notification.requestPermission();
          }, function() {
             $(document).trigger('notificationfailure.jsxc');
+         });
+      },
+
+      showUnknownSender: function(bid) {
+         jsxc.gui.showConfirmDialog(jsxc.translate('%%You_received_a_message_from_an_unknown_sender%% (' + bid + '). %%Do_you_want_to_display_them%%'), function() {
+
+            jsxc.gui.dialog.close();
+
+            jsxc.storage.saveBuddy(bid, {
+               jid: bid,
+               name: bid,
+               status: 0,
+               sub: 'none',
+               res: []
+            });
+
+            jsxc.gui.window.open(bid);
+
+         }, function() {
+            // reset state
+            jsxc.storage.removeUserItem('chat', bid);
          });
       },
 
@@ -1832,6 +1875,44 @@ var jsxc;
 
                   return false;
                });
+            }
+         });
+      },
+
+      detectEmail: function(container) {
+         container = (container) ? $(container) : $('body');
+
+         container.find('a[href^="mailto:"]').each(function() {
+            var spot = $("<span>X</span>").addClass("jsxc_spot");
+            var href = $(this).attr("href").replace(/^ *mailto:/, "").trim();
+
+            if (href !== '' && href !== Strophe.getBareJidFromJid(jsxc.storage.getItem("jid"))) {
+               var bid = jsxc.jidToBid(href);
+               var self = $(this);
+               var s = self.prev();
+
+               if (!s.hasClass('jsxc_spot')) {
+                  s = spot.clone().attr('data-bid', bid);
+
+                  self.before(s);
+               }
+
+               s.off('click');
+
+               if (jsxc.storage.getUserItem('buddy', bid)) {
+                  jsxc.gui.update(bid);
+                  s.click(function() {
+                     jsxc.gui.window.open(bid);
+
+                     return false;
+                  });
+               } else {
+                  s.click(function() {
+                     jsxc.gui.showContactDialog(href);
+
+                     return false;
+                  });
+               }
             }
          });
       }
@@ -2438,6 +2519,8 @@ var jsxc;
          // create related otr object
          if (jsxc.master && !jsxc.otr.objects[bid]) {
             jsxc.otr.create(bid);
+         } else {
+            jsxc.otr.enable(bid);
          }
 
          $(document).trigger('init.window.jsxc', [ win ]);
@@ -2504,6 +2587,13 @@ var jsxc;
 
          jsxc.storage.removeUserElement('windowlist', bid);
          jsxc.storage.removeUserItem('window', bid);
+
+         if (jsxc.storage.getUserItem('buddylist').indexOf(bid) < 0) {
+            // delete data from unknown sender
+
+            jsxc.storage.removeUserItem('buddy', bid);
+            jsxc.storage.removeUserItem('chat', bid);
+         }
 
          jsxc.gui.window._close(bid);
       },
@@ -2641,17 +2731,11 @@ var jsxc;
        * @param {String} msg Message to display
        */
       postMessage: function(bid, direction, msg) {
-         var chat = jsxc.storage.getUserItem('chat', bid) || [];
          var data = jsxc.storage.getUserItem('buddy', bid);
          var html_msg = msg;
-         var uid = new Date().getTime() + ':msg';
-
-         if (chat.length > jsxc.options.numberOfMsg) {
-            chat.pop();
-         }
 
          // remove html tags and reencode html tags
-         msg = $('<span>').html(msg).text();
+         msg = jsxc.removeHTML(msg);
          msg = jsxc.escapeHTML(msg);
 
          // exceptions:
@@ -2671,22 +2755,14 @@ var jsxc;
             msg = jsxc.l.your_message_wasnt_send_because_you_have_no_valid_subscription;
          }
 
-         var post = {
-            direction: direction,
-            msg: msg,
-            uid: uid.replace(/:/, '-'),
-            received: false
-         };
-
-         chat.unshift(post);
-         jsxc.storage.setUserItem('chat', bid, chat);
+         var post = jsxc.storage.saveMessage(bid, direction, msg);
 
          if (direction === 'in') {
             $(document).trigger('postmessagein.jsxc', [ bid, html_msg ]);
          }
 
          if (direction === 'out' && jsxc.master) {
-            jsxc.xmpp.sendMessage(bid, html_msg, uid);
+            jsxc.xmpp.sendMessage(bid, html_msg, post.uid);
          }
 
          jsxc.gui.window._postMessage(bid, post);
@@ -2764,6 +2840,7 @@ var jsxc;
          win.find('.jsxc_textarea').append(msgDiv);
 
          jsxc.gui.detectUriScheme(win);
+         jsxc.gui.detectEmail(win);
 
          jsxc.gui.window.scrollDown(bid);
 
@@ -2842,9 +2919,9 @@ var jsxc;
             var data = jsxc.storage.getUserItem('buddy', bid);
 
             $.extend(ph, {
-               bid_priv_fingerprint: data.fingerprint ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
-               bid_jid: Strophe.getBareJidFromJid(data.jid),
-               bid_name: data.name
+               bid_priv_fingerprint: (data && data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
+               bid_jid: bid,
+               bid_name: (data && data.name) ? data.name : bid
             });
          }
 
@@ -3418,28 +3495,15 @@ var jsxc;
 
             buddies.push(bid);
 
-            if (jsxc.storage.getUserItem('buddy', bid)) {
-               jsxc.storage.updateUserItem('buddy', bid, {
-                  jid: jid,
-                  name: name,
-                  status: 0,
-                  sub: sub,
-                  res: []
-               });
-               jsxc.storage.removeUserItem('res', bid);
-            } else {
-               jsxc.storage.setUserItem('buddy', bid, {
-                  'jid': jid,
-                  'name': name,
-                  'status': 0,
-                  sub: sub,
-                  'msgstate': 0,
-                  'transferReq': -1,
-                  'trust': false,
-                  'fingerprint': null,
-                  res: []
-               });
-            }
+            jsxc.storage.removeUserItem('res', bid);
+
+            jsxc.storage.saveBuddy(bid, {
+               jid: jid,
+               name: name,
+               status: 0,
+               sub: sub,
+               res: []
+            });
 
             jsxc.gui.roster.add(bid);
          });
@@ -3476,33 +3540,29 @@ var jsxc;
             var sub = $(this).attr('subscription');
             // var ask = $(this).attr('ask');
 
-            var bl = jsxc.storage.getUserItem('buddylist');
-
             if (sub === 'remove') {
                jsxc.gui.roster.purge(bid);
-            } else if (bl.indexOf(bid) >= 0) {
-               jsxc.storage.updateUserItem('buddy', bid, {
+            } else {
+               var bl = jsxc.storage.getUserItem('buddylist');
+
+               if (bl.indexOf(bid) >= 0) {
+                  bl.push(bid); // (INFO) push returns the new length
+                  jsxc.storage.setUserItem('buddylist', bl);
+               }
+
+               var temp = jsxc.storage.saveBuddy(bid, {
                   jid: jid,
                   name: name,
                   sub: sub
                });
-               jsxc.gui.update(bid);
-               jsxc.gui.roster.reorder(bid);
-            } else {
-               bl.push(bid); // (INFO) push returns the new length
-               jsxc.storage.setUserItem('buddylist', bl);
-               jsxc.storage.setUserItem('buddy', bid, {
-                  jid: jid,
-                  name: name,
-                  status: 0,
-                  sub: sub,
-                  msgstate: 0,
-                  transferReq: -1,
-                  trust: false,
-                  fingerprint: null,
-                  type: 'chat'
-               });
-               jsxc.gui.roster.add(bid);
+
+               if (temp === 'updated') {
+
+                  jsxc.gui.update(bid);
+                  jsxc.gui.roster.reorder(bid);
+               } else {
+                  jsxc.gui.roster.add(bid);
+               }
             }
 
             // Remove pending friendship request from notice list
@@ -3616,6 +3676,11 @@ var jsxc;
             }
          }
 
+         if (data.status === 0 && max > 0) {
+            // buddy has come online
+            jsxc.notification.notify(data.name, jsxc.translate('%%has come online%%.'));
+         }
+
          data.status = max;
          data.res = maxVal;
          data.jid = jid;
@@ -3673,9 +3738,25 @@ var jsxc;
          var data = jsxc.storage.getUserItem('buddy', bid);
          var body = $(message).find('body:first').text();
          var request = $(message).find("request[xmlns='urn:xmpp:receipts']");
-         var own = jsxc.storage.getUserItem('own') || [];
 
-         if (!body || own.indexOf(from) >= 0) {
+         if (!body) {
+            return true;
+         }
+
+         if (data === null) {
+            // jid not in roster
+
+            var chat = jsxc.storage.getUserItem('chat', bid) || [];
+
+            if (chat.length === 0) {
+               jsxc.notice.add('%%Unknown sender%%', '%%You received a message from an unknown sender%% (' + bid + ').', 'gui.showUnknownSender', [ bid ]);
+            }
+
+            var msg = jsxc.removeHTML(body);
+            msg = jsxc.escapeHTML(msg);
+
+            jsxc.storage.saveMessage(bid, 'in', msg);
+
             return true;
          }
 
@@ -3876,6 +3957,52 @@ var jsxc;
          }
 
          jsxc.xmpp.conn.send(xmlMsg);
+      },
+
+      /**
+       * This function loads a vcard.
+       * 
+       * @memberOf jsxc.xmpp
+       * @param bid
+       * @param cb
+       * @param error_cb
+       */
+      loadVcard: function(bid, cb, error_cb) {
+         if (jsxc.master) {
+            jsxc.xmpp.conn.vcard.get(cb, bid, error_cb);
+         } else {
+            jsxc.storage.setUserItem('vcard', bid, 'request:' + (new Date()).getTime());
+
+            $(document).one('loaded.vcard.jsxc', function(ev, result) {
+               if (result && result.state === 'success') {
+                  cb($(result.data).get(0));
+               } else {
+                  error_cb();
+               }
+            });
+         }
+      },
+
+      /**
+       * Retrieves capabilities.
+       * 
+       * @memberOf jsxc.xmpp
+       * @param jid
+       * @returns List of known capabilities
+       */
+      getCapabilitiesByJid: function(jid) {
+         if (jsxc.xmpp.conn) {
+            return jsxc.xmpp.conn.caps.getCapabilitiesByJid(jid);
+         }
+
+         var jidVerIndex = JSON.parse(localStorage.getItem('strophe.caps._jidVerIndex')) || {};
+         var knownCapabilities = JSON.parse(localStorage.getItem('strophe.caps._knownCapabilities')) || {};
+
+         if (jidVerIndex[jid]) {
+            return knownCapabilities[jidVerIndex[jid]];
+         }
+
+         return null;
       }
    };
 
@@ -4141,7 +4268,7 @@ var jsxc;
       onStorage: function(e) {
 
          // skip
-         if (e.key === jsxc.storage.prefix + 'rid' || e.key === jsxc.storage.prefix + 'lastActivity') {
+         if (e.key === jsxc.storage.PREFIX + jsxc.storage.SEP + 'rid' || e.key === jsxc.storage.PREFIX + jsxc.storage.SEP + 'lastActivity') {
             return;
          }
 
@@ -4383,9 +4510,96 @@ var jsxc;
             jsxc.xmpp.addBuddy(n.username, n.alias);
          }*/
 
-         if (e.key === 'jsxc_roster') {
+         if (key === 'roster') {
             jsxc.gui.roster.toggle();
          }
+
+         if (jsxc.master && key.match(new RegExp('^vcard' + jsxc.storage.SEP)) && e.newValue !== null && e.newValue.match(/^request:/)) {
+
+            jsxc.xmpp.loadVcard(bid, function(stanza) {
+               jsxc.storage.setUserItem('vcard', bid, {
+                  state: 'success',
+                  data: $('<div>').append(stanza).html()
+               });
+            }, function() {
+               jsxc.storage.setUserItem('vcard', bid, {
+                  state: 'error'
+               });
+            });
+         }
+
+         if (!jsxc.master && key.match(new RegExp('^vcard' + jsxc.storage.SEP)) && e.newValue !== null && !e.newValue.match(/^request:/)) {
+            n = JSON.parse(e.newValue);
+
+            if (typeof n.state !== 'undefined') {
+               $(document).trigger('loaded.vcard.jsxc', n);
+            }
+
+            jsxc.storage.removeUserItem('vcard', bid);
+         }
+      },
+
+      /**
+       * Save message to storage.
+       * 
+       * @memberOf jsxc.storage
+       * @param bid
+       * @param direction
+       * @param msg
+       * @return post
+       */
+      saveMessage: function(bid, direction, msg) {
+         var chat = jsxc.storage.getUserItem('chat', bid) || [];
+
+         var uid = new Date().getTime() + ':msg';
+
+         if (chat.length > jsxc.options.numberOfMsg) {
+            chat.pop();
+         }
+
+         var post = {
+            direction: direction,
+            msg: msg,
+            uid: uid.replace(/:/, '-'),
+            received: false
+         };
+
+         chat.unshift(post);
+         jsxc.storage.setUserItem('chat', bid, chat);
+
+         return post;
+      },
+
+      /**
+       * Save or update buddy data.
+       * 
+       * @memberOf jsxc.storage
+       * @param bid
+       * @param data
+       * @returns {String} Updated or created
+       */
+      saveBuddy: function(bid, data) {
+
+         if (jsxc.storage.getUserItem('buddy', bid)) {
+            jsxc.storage.updateUserItem('buddy', bid, data);
+
+            return 'updated';
+         }
+
+         jsxc.storage.setUserItem('buddy', bid, $.extend({
+            jid: '',
+            name: '',
+            status: 0,
+            sub: 'none',
+            msgstate: 0,
+            transferReq: -1,
+            trust: false,
+            fingerprint: null,
+            res: [],
+            type: 'chat'
+         }, data));
+
+         return 'created';
       }
    };
 
@@ -4467,6 +4681,10 @@ var jsxc;
 
          jsxc.otr.objects[bid].on('status', function(status) {
             var data = jsxc.storage.getUserItem('buddy', bid);
+
+            if (data === null) {
+               return;
+            }
 
             switch (status) {
                case OTR.CONST.STATUS_SEND_QUERY:
@@ -4724,7 +4942,7 @@ var jsxc;
             }
          }
 
-         jsxc.gui.window.get(bid).find('.jsxc_otr').removeClass('jsxc_disabled');
+         jsxc.otr.enable(bid);
       },
 
       /**
@@ -4838,6 +5056,10 @@ var jsxc;
          }
 
          jsxc.otr._createDSA();
+      },
+
+      enable: function(bid) {
+         jsxc.gui.window.get(bid).find('.jsxc_otr').removeClass('jsxc_disabled');
       }
    };
 
@@ -4861,8 +5083,7 @@ var jsxc;
             msg = (msg.match(/^\?OTR/)) ? jsxc.translate('%%Encrypted message%%') : msg;
             var data = jsxc.storage.getUserItem('buddy', bid);
 
-            jsxc.notification.playSound(jsxc.CONST.SOUNDS.MSG);
-            jsxc.notification.notify(jsxc.translate('%%New message from%% ') + data.name, msg);
+            jsxc.notification.notify(jsxc.translate('%%New message from%% ') + data.name, msg, undefined, undefined, jsxc.CONST.SOUNDS.MSG);
          });
 
          $(document).on('callincoming.jingle', function() {
@@ -4875,13 +5096,16 @@ var jsxc;
       },
 
       /**
-       * Shows a pop up notification.
-       *
-       * @param title
-       * @param msg
-       * @param d
+       * Shows a pop up notification and optional play sound.
+       * 
+       * @param title Title
+       * @param msg Message
+       * @param d Duration
+       * @param force Should message also shown, if tab is visible?
+       * @param soundFile Playing given sound file
+       * @param loop Loop sound file?
        */
-      notify: function(title, msg, d, force) {
+      notify: function(title, msg, d, force, soundFile, loop) {
          if (!jsxc.options.notification || !jsxc.notification.hasPermission()) {
             return; // notifications disabled
          }
@@ -4892,8 +5116,13 @@ var jsxc;
 
          jsxc.toNotification = setTimeout(function() {
 
+            if (typeof soundFile === 'string') {
+               jsxc.notification.playSound(soundFile, loop, force);
+            }
+
             var popup = new Notification(jsxc.translate(title), {
-               body: jsxc.translate(msg)
+               body: jsxc.translate(msg),
+               icon: jsxc.options.root + '/img/XMPP_logo.png'
             });
 
             var duration = d || jsxc.options.popupDuration;
@@ -4903,7 +5132,7 @@ var jsxc;
                   popup.close();
                }, duration);
             }
-         }, 500);
+         }, jsxc.toNotificationDelay);
       },
 
       /**
@@ -5165,8 +5394,7 @@ var jsxc;
             };
             jsxc.storage.setUserItem('notices', saved);
 
-            jsxc.notification.notify(msg, description || '', null, true);
-            jsxc.notification.playSound(jsxc.CONST.SOUNDS.NOTICE, false, true);
+            jsxc.notification.notify(msg, description || '', null, true, jsxc.CONST.SOUNDS.NOTICE);
          }
       },
 
@@ -5340,7 +5568,12 @@ var jsxc;
          Sorry_your_buddy_doesnt_provide_any_information: 'Sorry, your buddy does not provide any information.',
          Info_about: 'Info about',
          Authentication_aborted: 'Authentication aborted.',
-         Authentication_request_received: 'Authentication request received.'
+         Authentication_request_received: 'Authentication request received.',
+         Do_you_want_to_display_them: 'Do you want to display them?',
+         Log_in_without_chat: 'Log in without chat',
+         has_come_online: 'has come online',
+         Unknown_sender: 'Unknown sender',
+         You_received_a_message_from_an_unknown_sender: 'You received a message from an unknown sender'
       },
       de: {
          Logging_in: 'Login läuft…',
@@ -5488,7 +5721,12 @@ var jsxc;
          Sorry_your_buddy_doesnt_provide_any_information: 'Dein Freund stellt leider keine Informationen bereit.',
          Info_about: 'Info über',
          Authentication_aborted: 'Authentifizierung abgebrochen.',
-         Authentication_request_received: 'Authentifizierunganfrage empfangen.'
+         Authentication_request_received: 'Authentifizierunganfrage empfangen.',
+         Log_in_without_chat: 'Anmelden ohne Chat',
+         Do_you_want_to_display_them: 'Möchtest du sie sehen?',
+         has_come_online: 'ist online gekommen',
+         Unknown_sender: 'Unbekannter Sender',
+         You_received_a_message_from_an_unknown_sender: 'Du hast eine Nachricht von einem unbekannten Sender erhalten'
       },
       es: {
          Logging_in: 'Por favor, espere...',

@@ -1,4 +1,4 @@
-/**
+/*!
  * <%= app.name %> v<%= app.version %> - <%= grunt.template.today("yyyy-mm-dd") %>
  * 
  * Copyright (c) <%= grunt.template.today("yyyy") %> <%= app.author %> <br>
@@ -8,4 +8,5 @@
  * 
  * @author <%= app.author %>
  * @version <%= app.version %>
+ * @license MIT
  */

@@ -1,6 +1,6 @@
 {
   "name": "jsxc",
-  "version": "1.0.0-alpha1",
+  "version": "1.0.0-beta1",
   "description": "Real-time chat app",
   "homepage": "http://www.jsxc.org/",
   "bugs": "https://github.com/sualko/jsxc/issues",
@@ -16,8 +16,10 @@
     "grunt-cli": "~0.1.13",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-compress": "^0.10.0",
+    "grunt-contrib-concat": "^0.5.0",
     "grunt-contrib-copy": "~0.5.0",
     "grunt-contrib-jshint": "~0.9.2",
+    "grunt-contrib-uglify": "^0.6.0",
     "grunt-search": "^0.1.6",
     "grunt-shell": "^1.1.1",
     "grunt-text-replace": "~0.3.11"
