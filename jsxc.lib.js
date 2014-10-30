@@ -160,6 +160,19 @@ var jsxc;
          }
 
          /**
+          * Reset local browser storage after given seconds
+          */
+         var now = new Date().getTime();
+         var lastActivity = jsxc.storage.getItem('last_activity');
+         if (lastActivity) {
+            if (parseInt(((now - lastActivity)/1000)) > jsxc.options.timeout) {
+               jsxc.debug('Local storage timed out. Purging it..');
+               localStorage.clear();
+            }
+         }
+         jsxc.storage.setItem('last_activity', now);
+
+         /**
           * Getter method for options. Saved options will override default one.
           * 
           * @param {string} key option key
@@ -701,7 +714,7 @@ var jsxc;
       /** name of container application (e.g. owncloud or SOGo) */
       app_name: 'web applications',
 
-      /** Timeout for the keepalive signal */
+      /** Timeout for the keepalive signal and browser storage */
       timeout: 3000,
 
       /** Timeout for the keepalive signal if the master is busy */
