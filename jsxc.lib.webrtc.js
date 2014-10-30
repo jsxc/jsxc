@@ -187,11 +187,12 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        * Return list of video capable resources.
        * 
        * @memberOf jsxc.webrtc
-       * @param bid
+       * @param jid
        * @returns {Array}
        */
-      getCapableRes: function(bid) {
+      getCapableRes: function(jid) {
          var self = jsxc.webrtc;
+         var bid = jsxc.jidToBid(jid);
          var res = jsxc.storage.getUserItem('res', bid) || [];
 
          var available = [];
