@@ -1,5 +1,5 @@
-/**
- * jsxc v1.0.0-alpha1 - 2014-09-08
+/*!
+ * jsxc v1.0.0-beta1 - 2014-10-30
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,8 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 1.0.0-alpha1
+ * @version 1.0.0-beta1
+ * @license MIT
  */
 
 var jsxc;
@@ -17,12 +18,12 @@ var jsxc;
 
    /**
     * JavaScript Xmpp Chat namespace
-    * 
+    *
     * @namespace jsxc
     */
    jsxc = {
       /** Version of jsxc */
-      version: '1.0.0-alpha1',
+      version: '1.0.0-beta1',
 
       /** True if i'm the master */
       master: false,
@@ -38,6 +39,9 @@ var jsxc;
 
       /** Timeout for notification */
       toNotification: null,
+
+      /** Timeout delay for notification */
+      toNotificationDelay: 500,
 
       /** Interval for keep-alive */
       keepalive: null,
@@ -72,11 +76,8 @@ var jsxc;
       /** Timeout for storageNotConform test */
       toSNC: null,
 
-      /** css id to jid list */
-      jids: [],
-
-      /** My css id */
-      cid: null,
+      /** My bar id */
+      bid: null,
 
       /** Some constants */
       CONST: {
@@ -88,12 +89,16 @@ var jsxc;
             MSG: 'incomingMessage.wav',
             CALL: 'Rotary-Phone6.mp3',
             NOTICE: 'Ping1.mp3'
+         },
+         REGEX: {
+            JID: new RegExp('\\b[^"&\'\\/:<>@\\s]+@[\\w-_.]+\\b', 'ig'),
+            URL: new RegExp(/((?:https?:\/\/|www\.|([\w\-]+\.[a-zA-Z]{2,3})(?=\b))(?:(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\)([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|])?)|(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|]))?)/gi)
          }
       },
 
       /**
        * Write debug message to console and to log.
-       * 
+       *
        * @memberOf jsxc
        * @param {String} msg Debug message
        * @param {Object} data
@@ -124,14 +129,13 @@ var jsxc;
 
             jsxc.log = jsxc.log + msg + ': ' + d + '\n';
          } else {
-            console.log(msg);
             jsxc.log = jsxc.log + msg + '\n';
          }
       },
 
       /**
        * Write warn message.
-       * 
+       *
        * @memberOf jsxc
        * @param {String} msg Warn message
        * @param {Object} data
@@ -142,7 +146,7 @@ var jsxc;
 
       /**
        * Write error message.
-       * 
+       *
        * @memberOf jsxc
        * @param {String} msg Error message
        * @param {Object} data
@@ -156,7 +160,7 @@ var jsxc;
 
       /**
        * Starts the action
-       * 
+       *
        * @memberOf jsxc
        * @param {object} options
        */
@@ -169,7 +173,7 @@ var jsxc;
 
          /**
           * Getter method for options. Saved options will override default one.
-          * 
+          *
           * @param {string} key option key
           * @returns default or saved option value
           */
@@ -181,12 +185,12 @@ var jsxc;
 
          /**
           * Setter method for options. Will write into localstorage.
-          * 
+          *
           * @param {string} key option key
           * @param {object} value option value
           */
          jsxc.options.set = function(key, value) {
-            jsxc.storage.updateUserItem('options', key, value);
+            jsxc.storage.updateItem('options', key, value, true);
          };
 
          jsxc.storageNotConform = jsxc.storage.getItem('storageNotConform');
@@ -268,54 +272,9 @@ var jsxc;
             // Add jsxc login action to form
             form.submit(function() {
 
-               jsxc.gui.showWaitAlert(jsxc.l.please_wait_until_we_logged_you_in);
+               var settings = jsxc.prepareLogin();
 
-               var username = $(jsxc.options.loginForm.jid).val();
-               var password = $(jsxc.options.loginForm.pass).val();
-
-               if (typeof jsxc.options.loadSettings !== 'function') {
-                  jsxc.error('No loadSettings function given. Abort.');
-                  return;
-               }
-
-               var settings = jsxc.options.loadSettings.call(this, username, password);
-
-               if (settings === null || typeof settings === 'undefined') {
-                  return true;
-               }
-
-               if (typeof settings.xmpp.username === 'string') {
-                  username = settings.xmpp.username;
-               }
-
-               var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
-               var domain = settings.xmpp.domain;
-               var jid;
-
-               if (username.match(/@(.*)$/)) {
-                  jid = (username.match(/\/(.*)$/)) ? username : username + resource;
-               } else {
-                  jid = username + '@' + domain + resource;
-               }
-
-               if (typeof jsxc.options.loginForm.preJid === 'function') {
-                  jid = jsxc.options.loginForm.preJid(jid);
-               }
-
-               jsxc.cid = jsxc.jidToCid(jid);
-
-               settings.xmpp.username = jid.split('@')[0];
-               settings.xmpp.domain = jid.split('@')[1].split('/')[0];
-               settings.xmpp.resource = jid.split('@')[1].split('/')[1] || "";
-
-               $.each(settings, function(key, val) {
-                  jsxc.options.set(key, val);
-               });
-
-               jsxc.options.xmpp.jid = jid;
-               jsxc.options.xmpp.password = password;
-
-               if (settings.xmpp.onlogin === "true" || settings.xmpp.onlogin === true) {
+               if (settings !== false && (settings.xmpp.onlogin === "true" || settings.xmpp.onlogin === true)) {
                   jsxc.triggeredFromForm = true;
 
                   jsxc.xmpp.login();
@@ -327,34 +286,101 @@ var jsxc;
                return true;
             });
 
-         } else {
+         } else jsxc.restoreOldConnection();
+      },
 
-            // Restore old connection
+      login: function() {
+        if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid')) {
+          jsxc.restore = true;
+          jsxc.xmpp.login();
+          jsxc.restoreOldConnection();
+        }
+      },
 
-            jsxc.cid = jsxc.jidToCid(jsxc.storage.getItem('jid'));
+      restoreOldConnection: function() {
+        // Restore old connection
+        var jid = jsxc.storage.getItem('jid') || jsxc.options.xmpp.jid;
+        jsxc.bid = jsxc.jidToBid(jid);
+        jsxc.gui.init();
 
-            jsxc.gui.init();
+        // Looking for logout element
+        if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+          jsxc.options.logoutElement.one('click', function() {
+            jsxc.options.logoutElement = $(this);
+            jsxc.triggeredFromLogout = true;
+            return jsxc.xmpp.logout();
+          });
+        }
 
-            // Looking for logout element
-            if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
-               jsxc.options.logoutElement.one('click', function() {
-                  jsxc.options.logoutElement = $(this);
-                  jsxc.triggeredFromLogout = true;
-                  return jsxc.xmpp.logout();
-               });
-            }
+        if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
+          jsxc.onMaster();
+        } else {
+          jsxc.checkMaster();
+        }
+      },
 
-            if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
-               jsxc.onMaster();
-            } else {
-               jsxc.checkMaster();
-            }
+      /**
+       * Load settings and prepare jid.
+       *
+       * @memberOf jsxc
+       * @returns Loaded settings
+       */
+      prepareLogin: function() {
+         var username = $(jsxc.options.loginForm.jid).val();
+         var password = $(jsxc.options.loginForm.pass).val();
+
+         if (typeof jsxc.options.loadSettings !== 'function') {
+            jsxc.error('No loadSettings function given. Abort.');
+            return;
          }
+
+         jsxc.gui.showWaitAlert(jsxc.l.Logging_in);
+
+         var settings = jsxc.options.loadSettings.call(this, username, password);
+
+         if (settings === false || settings === null || typeof settings === 'undefined') {
+            jsxc.warn('No settings provided');
+
+            return false;
+         }
+
+         if (typeof settings.xmpp.username === 'string') {
+            username = settings.xmpp.username;
+         }
+
+         var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
+         var domain = settings.xmpp.domain;
+         var jid;
+
+         if (username.match(/@(.*)$/)) {
+            jid = (username.match(/\/(.*)$/)) ? username : username + resource;
+         } else {
+            jid = username + '@' + domain + resource;
+         }
+
+         if (typeof jsxc.options.loginForm.preJid === 'function') {
+            jid = jsxc.options.loginForm.preJid(jid);
+         }
+
+         jsxc.bid = jsxc.jidToBid(jid);
+
+         settings.xmpp.username = jid.split('@')[0];
+         settings.xmpp.domain = jid.split('@')[1].split('/')[0];
+         settings.xmpp.resource = jid.split('@')[1].split('/')[1] || "";
+
+         $.each(settings, function(key, val) {
+            jsxc.options.set(key, val);
+         });
+
+         jsxc.options.xmpp.jid = jid;
+         jsxc.options.xmpp.password = password;
+
+         return settings;
       },
 
       /**
        * Checks if flash is available
-       * 
+       *
        * @memberOf jsxc
        * @return {boolean} True if flash is available
        */
@@ -373,6 +399,8 @@ var jsxc;
          jsxc.restoreRoster();
          jsxc.restoreWindows();
          jsxc.restoreCompleted = true;
+
+         $(document).trigger('restoreCompleted.jsxc');
       },
 
       /**
@@ -415,6 +443,8 @@ var jsxc;
             jsxc.restoreRoster();
             jsxc.restoreWindows();
             jsxc.restoreCompleted = true;
+
+            $(document).trigger('restoreCompleted.jsxc');
          }
 
          // Prepare notifications
@@ -440,6 +470,7 @@ var jsxc;
        */
       checkMaster: function() {
          jsxc.debug('check master');
+
          jsxc.to = window.setTimeout(jsxc.onMaster, 1000);
          jsxc.storage.ink('alive');
       },
@@ -481,7 +512,7 @@ var jsxc;
 
       /**
        * Generates a random integer number between 0 and max
-       * 
+       *
        * @param {Integer} max
        * @return {Integer} random integer between 0 and max
        */
@@ -491,7 +522,7 @@ var jsxc;
 
       /**
        * Checks if there is a element with the given selector
-       * 
+       *
        * @param {String} selector jQuery selector
        * @return {Boolean}
        */
@@ -501,16 +532,27 @@ var jsxc;
 
       /**
        * Creates a CSS compatible string from a JID
-       * 
+       *
        * @param {type} jid Valid Jabber ID
        * @returns {String} css Compatible string
        */
       jidToCid: function(jid) {
+         jsxc.warn('jsxc.jidToCid is deprecated!');
+
          var cid = Strophe.getBareJidFromJid(jid).replace('@', '-').replace(/\./g, '-').toLowerCase();
 
-         jsxc.jids[cid] = jid;
-
          return cid;
+      },
+
+      /**
+       * Create comparable bar jid.
+       *
+       * @memberOf jsxc
+       * @param jid
+       * @returns comparable bar jid
+       */
+      jidToBid: function(jid) {
+         return Strophe.getBareJidFromJid(jid).toLowerCase();
       },
 
       /**
@@ -544,23 +586,23 @@ var jsxc;
             return;
          }
 
-         $.each(windows, function(index, cid) {
-            var window = jsxc.storage.getUserItem('window_' + cid);
+         $.each(windows, function(index, bid) {
+            var window = jsxc.storage.getUserItem('window', bid);
 
             if (!window) {
-               jsxc.debug('Associated window-element is missing: ' + cid);
+               jsxc.debug('Associated window-element is missing: ' + bid);
                return true;
             }
 
-            jsxc.gui.window.init(cid);
+            jsxc.gui.window.init(bid);
 
             if (!window.minimize) {
-               jsxc.gui.window.show(cid);
+               jsxc.gui.window.show(bid);
             } else {
-               jsxc.gui.window.hide(cid);
+               jsxc.gui.window.hide(bid);
             }
 
-            jsxc.gui.window.setText(cid, window.text);
+            jsxc.gui.window.setText(bid, window.text);
          });
       },
 
@@ -592,8 +634,19 @@ var jsxc;
       },
 
       /**
-       * Executes only one of the given events
+       * Removes all html tags.
        * 
+       * @memberOf jsxc
+       * @param text
+       * @returns stripped text
+       */
+      removeHTML: function(text) {
+         return $('<span>').html(text).text();
+      },
+
+      /**
+       * Executes only one of the given events
+       *
        * @param {string} obj.key event name
        * @param {function} obj.value function to execute
        * @returns {string} namespace of all events
@@ -615,7 +668,7 @@ var jsxc;
 
       /**
        * Checks if tab is hidden.
-       * 
+       *
        * @returns {boolean} True if tab is hidden
        */
       isHidden: function() {
@@ -643,7 +696,7 @@ var jsxc;
 
       /**
        * Replace %%tokens%% with correct translation.
-       * 
+       *
        * @param {String} text Given text
        * @returns {String} Translated string
        */
@@ -664,6 +717,10 @@ var jsxc;
     * Set some options for the chat
     */
    jsxc.options = {
+
+      /** name of container application (e.g. owncloud or SOGo) */
+      app_name: 'web applications',
+
       /** Timeout for the keepalive signal */
       timeout: 3000,
 
@@ -706,7 +763,7 @@ var jsxc;
 
       /**
        * Debug function: Expects two parameter (msg, debug)
-       * 
+       *
        * @memberOf jsxc.options
        * @param {String} msg Message
        * @param {Object} debug Object
@@ -754,7 +811,7 @@ var jsxc;
 
       /**
        * If no avatar is found, this function is called.
-       * 
+       *
        * @param jid Jid of that user.
        * @this {jQuery} Elements to update with probable .jsxc_avatar elements
        */
@@ -764,7 +821,7 @@ var jsxc;
 
       /**
        * Returns permanent saved settings.
-       * 
+       *
        * @memberOf jsxc.options
        * @param username String username
        * @param password String password
@@ -775,7 +832,7 @@ var jsxc;
 
       /**
        * Call this function to save user settings permanent.
-       * 
+       *
        * @memberOf jsxc.options
        * @param data Holds all data as {key: value}
        */
@@ -786,53 +843,65 @@ var jsxc;
 
    /**
     * Handle functions for chat window's and buddylist
-    * 
+    *
     * @namespace jsxc.gui
     */
    jsxc.gui = {
       /** Smilie token to file mapping */
-      emotions: [ [ 'O:-) O:)', 'angel.png' ], [ '>:-( >:( &gt;:-( &gt;:(', 'angry.png' ], [ ':-) :)', 'smile.png' ], [ ':-D :D', 'grin.png' ], [ ':-( :(', 'sad.png' ], [ ';-) ;)', 'wink.png' ], [ ':-P :P', 'tonguesmile.png' ], [ '=-O', 'surprised.png' ], [ ':kiss: :-*', 'kiss.png' ], [ '8-) :cool:', 'sunglassess.png' ], [ ':\'-( :\'( :&amp;apos;-(', 'crysad.png' ], [ ':-/', 'doubt.png' ], [ ':-X :X', 'zip.png' ], [ ':yes:', 'thumbsup.png' ], [ ':no:', 'thumbsdown.png' ], [ ':beer:', 'beer.png' ], [ ':devil:', 'devil.png' ], [ ':kiss: :kissing:', 'kissing.png' ], [ '@->-- :rose: @-&gt;--', 'rose.png' ], [ ':music:', 'music.png' ], [ ':love:', 'love.png' ], [ ':zzz:', 'tired.png' ] ],
+      emotions: [ [ 'O:-) O:)', 'angel' ], [ '>:-( >:( &gt;:-( &gt;:(', 'angry' ], [ ':-) :)', 'smile' ], [ ':-D :D', 'grin' ], [ ':-( :(', 'sad' ], [ ';-) ;)', 'wink' ], [ ':-P :P', 'tonguesmile' ], [ '=-O', 'surprised' ], [ ':kiss: :-*', 'kiss' ], [ '8-) :cool:', 'sunglassess' ], [ ':\'-( :\'( :&amp;apos;-(', 'crysad' ], [ ':-/', 'doubt' ], [ ':-X :X', 'zip' ], [ ':yes:', 'thumbsup' ], [ ':no:', 'thumbsdown' ], [ ':beer:', 'beer' ], [ ':devil:', 'devil' ], [ ':kiss: :kissing:', 'kissing' ], [ '@->-- :rose: @-&gt;--', 'rose' ], [ ':music:', 'music' ], [ ':love:', 'love' ], [ ':zzz:', 'tired' ] ],
+
+      /** Different uri query actions as defined in XEP-0147. */
+      queryActions: {
+         /** xmpp:JID?message[;body=TEXT] */
+         message: function(jid, params) {
+            var win = jsxc.gui.window.open(jsxc.jidToBid(jid));
+
+            if (params && typeof params.body === 'string') {
+               win.find('.jsxc_textinput').val(params.body);
+            }
+         },
+
+         /** xmpp:JID?remove */
+         remove: function(jid) {
+            jsxc.gui.showRemoveDialog(jsxc.jidToBid(jid));
+         },
+
+         /** xmpp:JID?subscribe[;name=NAME] */
+         subscribe: function(jid, params) {
+            jsxc.gui.showContactDialog(jid);
+
+            if (params && typeof params.name) {
+               $('#jsxc_alias').val(params.name);
+            }
+         },
+
+         /** xmpp:JID?vcard */
+         vcard: function(jid) {
+            jsxc.gui.showVcard(jid);
+         }
+      },
 
       /**
        * Creates application skeleton.
-       * 
+       *
        * @memberOf jsxc.gui
        */
       init: function() {
          $('body').append($(jsxc.gui.template.get('windowList')));
 
-         var scrollBy = function(offset) {
-            var scrollWidth = $('#jsxc_windowList>ul').width();
-            var width = $('#jsxc_windowList').width();
-            var el = $('#jsxc_windowList>ul');
-            var right = parseInt(el.css('right')) - offset;
-
-            if (scrollWidth < width) {
-               return;
-            }
-
-            if (right > 0) {
-               right = 0;
-            }
-
-            if (right < width - scrollWidth - 30) {
-               right = width - scrollWidth - 30;
-            }
-
-            el.css('right', right + 'px');
-         };
-
          $(window).resize(jsxc.gui.updateWindowListSB);
          $('#jsxc_windowList').resize(jsxc.gui.updateWindowListSB);
 
          $('#jsxc_windowListSB .jsxc_scrollLeft').click(function() {
-            scrollBy(-200);
+            jsxc.gui.scrollWindowListBy(-200);
          });
          $('#jsxc_windowListSB .jsxc_scrollRight').click(function() {
-            scrollBy(200);
+            jsxc.gui.scrollWindowListBy(200);
          });
          $('#jsxc_windowList').on('wheel', function(ev) {
-            scrollBy((ev.originalEvent.wheelDelta > 0) ? 200 : -200);
+            if ($('#jsxc_windowList').data('isOver')) {
+               jsxc.gui.scrollWindowListBy((ev.originalEvent.wheelDelta > 0) ? 200 : -200);
+            }
          });
 
          jsxc.gui.tooltip('#jsxc_windowList');
@@ -854,7 +923,7 @@ var jsxc;
 
       /**
        * Init tooltip plugin for given jQuery selector.
-       * 
+       *
        * @param {String} selector jQuery selector
        * @memberOf jsxc.gui
        */
@@ -871,31 +940,30 @@ var jsxc;
 
       /**
        * Updates Information in roster and chatbar
-       * 
-       * @param {String} cid CSS compatible jid
+       *
+       * @param {String} bid bar jid
        */
-      update: function(cid) {
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
+      update: function(bid) {
+         var data = jsxc.storage.getUserItem('buddy', bid);
 
          if (!data) {
-            jsxc.debug('No data for ' + cid);
+            jsxc.debug('No data for ' + bid);
             return;
          }
 
-         var ri = $('#' + cid); // roster item from user
-         var we = jsxc.gui.getWindow(cid); // window element from user
-         var ue = $('#' + cid + ', #jsxc_window_' + cid + ', .jsxc_buddy_' + cid); // both
-         var bullet = $('.jsxc_buddy_' + cid);
+         var ri = jsxc.gui.roster.getItem(bid); // roster item from user
+         var we = jsxc.gui.window.get(bid); // window element from user
+         var ue = ri.add(we); // both
+         var spot = $('.jsxc_spot[data-bid="' + bid + '"]');
 
          // Attach data to corresponding roster item
          ri.data(data);
 
          // Add online status
-         ue.removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
+         ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
 
          // Change name and add title
-         ue.find('.jsxc_name').text(data.name).attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
-         bullet.attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
+         ue.find('.jsxc_name').add(spot).text(data.name).attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
 
          // Update gui according to encryption state
          switch (data.msgstate) {
@@ -945,7 +1013,7 @@ var jsxc;
 
       /**
        * Update avatar on all given elements.
-       * 
+       *
        * @memberOf jsxc.gui
        * @param {jQuery} el Elements with subelement .jsxc_avatar
        * @param {string} jid Jid
@@ -960,7 +1028,7 @@ var jsxc;
             return;
          }
 
-         var avatarSrc = jsxc.storage.getUserItem('avatar_' + aid);
+         var avatarSrc = jsxc.storage.getUserItem('avatar', aid);
 
          var setAvatar = function(src) {
             if (src === 0) {
@@ -969,9 +1037,11 @@ var jsxc;
             }
 
             el.find('.jsxc_avatar').removeAttr('style');
-            el.find('.jsxc_avatar img').remove();
-            var img = $('<img/>').attr('alt', 'Avatar').attr('src', src);
-            el.find('.jsxc_avatar').prepend(img);
+
+            el.find('.jsxc_avatar').css({
+               'background-image': 'url(' + src + ')',
+               'text-indent': '999px'
+            });
          };
 
          if (avatarSrc !== null) {
@@ -992,12 +1062,12 @@ var jsxc;
                   src = 'data:' + type + ';base64,' + img;
                }
 
-               jsxc.storage.setUserItem('avatar_' + aid, src);
+               jsxc.storage.setUserItem('avatar', aid, src);
                setAvatar(src);
             }, Strophe.getBareJidFromJid(jid), function(msg) {
                jsxc.warn('Could not load vcard.', msg);
 
-               jsxc.storage.setUserItem('avatar_' + aid, 0);
+               jsxc.storage.setUserItem('avatar', aid, 0);
                setAvatar(0);
             });
          }
@@ -1005,7 +1075,7 @@ var jsxc;
 
       /**
        * Updates scrollbar handlers.
-       * 
+       *
        * @memberOf jsxc.gui
        */
       updateWindowListSB: function() {
@@ -1019,28 +1089,66 @@ var jsxc;
       },
 
       /**
-       * Returns the window element
+       * Scroll window list by offset.
        * 
-       * @param {String} cid
+       * @memberOf jsxc.gui
+       * @param offset
+       */
+      scrollWindowListBy: function(offset) {
+
+         var scrollWidth = $('#jsxc_windowList>ul').width();
+         var width = $('#jsxc_windowList').width();
+         var el = $('#jsxc_windowList>ul');
+         var right = parseInt(el.css('right')) - offset;
+         var padding = $("#jsxc_windowListSB").width();
+
+         if (scrollWidth < width) {
+            return;
+         }
+
+         if (right > 0) {
+            right = 0;
+         }
+
+         if (right < width - scrollWidth - padding) {
+            right = width - scrollWidth - padding;
+         }
+
+         el.css('right', right + 'px');
+      },
+
+      /**
+       * Returns the window element
+       *
+       * @param {String} bid
        * @returns {jquery} jQuery object of the window element
        */
-      getWindow: function(cid) {
-         return $('#jsxc_window_' + cid);
+      getWindow: function(bid) {
+         jsxc.warn('jsxc.gui.getWindow is deprecated!');
+
+         return jsxc.gui.window.get(bid);
       },
 
       /**
        * Toggle list with timeout, like menu or settings
-       * 
+       *
        * @memberof jsxc.gui
        */
       toggleList: function() {
-         $(this).disableSelection();
+         var self = $(this);
 
-         var ul = $(this).find('ul');
+         self.disableSelection();
+
+         var ul = self.find('ul');
          var slideUp = null;
 
          slideUp = function() {
-            ul.slideUp();
+            ul.slideUp({
+               complete: function() {
+                  self.removeClass('jsxc_opened');
+               }
+            });
+
             $('body').off('click', null, slideUp);
          };
 
@@ -1057,6 +1165,8 @@ var jsxc;
             ul.slideToggle();
 
             window.clearTimeout(ul.data('timer'));
+
+            self.toggleClass('jsxc_opened');
 
             return false;
          }).mouseleave(function() {
@@ -1079,20 +1189,22 @@ var jsxc;
 
          $('#jsxc_dialog').find('form').submit(function() {
 
-            jsxc.gui.dialog.close();
-            jsxc.gui.showWaitAlert(jsxc.l.please_wait_until_we_logged_you_in);
-
             $(this).find('input[type=submit]').prop('disabled', true);
 
-            jsxc.options.xmpp.jid = $(this).find('#jsxc_username').val();
-            jsxc.options.xmpp.password = $(this).find('#jsxc_password').val();
+            jsxc.options.loginForm.form = $(this);
+            jsxc.options.loginForm.jid = $(this).find('#jsxc_username');
+            jsxc.options.loginForm.pass = $(this).find('#jsxc_password');
 
-            jsxc.cid = jsxc.jidToCid(jsxc.options.xmpp.jid);
+            var settings = jsxc.prepareLogin();
 
             jsxc.triggeredFromBox = true;
-            jsxc.options.loginForm.form = $(this);
+            jsxc.triggeredFromForm = false;
 
-            jsxc.xmpp.login();
+            if (settings === false) {
+               jsxc.gui.showAuthFail();
+            } else {
+               jsxc.xmpp.login();
+            }
 
             return false;
          });
@@ -1100,35 +1212,35 @@ var jsxc;
 
       /**
        * Creates and show the fingerprint dialog
-       * 
-       * @param {String} cid
+       *
+       * @param {String} bid
        */
-      showFingerprints: function(cid) {
-         jsxc.gui.dialog.open(jsxc.gui.template.get('fingerprintsDialog', cid));
+      showFingerprints: function(bid) {
+         jsxc.gui.dialog.open(jsxc.gui.template.get('fingerprintsDialog', bid));
       },
 
       /**
        * Creates and show the verification dialog
-       * 
-       * @param {String} cid
+       *
+       * @param {String} bid
        */
-      showVerification: function(cid) {
+      showVerification: function(bid) {
 
          // Check if there is a open dialog
          if ($('#jsxc_dialog').length > 0) {
             setTimeout(function() {
-               jsxc.gui.showVerification(cid);
+               jsxc.gui.showVerification(bid);
             }, 3000);
             return;
          }
 
          // verification only possible if the connection is encrypted
-         if (jsxc.storage.getUserItem('buddy_' + cid).msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED) {
+         if (jsxc.storage.getUserItem('buddy', bid).msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED) {
             jsxc.warn('Connection not encrypted');
             return;
          }
 
-         jsxc.gui.dialog.open(jsxc.gui.template.get('authenticationDialog', cid));
+         jsxc.gui.dialog.open(jsxc.gui.template.get('authenticationDialog', bid));
 
          // Add handler
 
@@ -1145,16 +1257,16 @@ var jsxc;
          // Manual
          $('#jsxc_dialog > div:eq(1) a.creation').click(function() {
             if (jsxc.master) {
-               jsxc.otr.objects[cid].trust = true;
+               jsxc.otr.objects[bid].trust = true;
             }
 
-            jsxc.storage.updateUserItem('buddy_' + cid, 'trust', true);
+            jsxc.storage.updateUserItem('buddy', bid, 'trust', true);
 
             jsxc.gui.dialog.close();
 
-            jsxc.storage.updateUserItem('buddy_' + cid, 'trust', true);
-            jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.conversation_is_now_verified);
-            jsxc.gui.update(cid);
+            jsxc.storage.updateUserItem('buddy', bid, 'trust', true);
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.conversation_is_now_verified);
+            jsxc.gui.update(bid);
          });
 
          // Question
@@ -1174,9 +1286,9 @@ var jsxc;
             }
 
             if (jsxc.master) {
-               jsxc.otr.sendSmpReq(cid, sec, quest);
+               jsxc.otr.sendSmpReq(bid, sec, quest);
             } else {
-               jsxc.storage.setUserItem('smp_' + cid, {
+               jsxc.storage.setUserItem('smp_' + bid, {
                   sec: sec,
                   quest: quest
                });
@@ -1184,7 +1296,7 @@ var jsxc;
 
             jsxc.gui.dialog.close();
 
-            jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.verification_query_sent);
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_query_sent);
          });
 
          // Secret
@@ -1203,9 +1315,9 @@ var jsxc;
             }
 
             if (jsxc.master) {
-               jsxc.otr.sendSmpReq(cid, sec);
+               jsxc.otr.sendSmpReq(bid, sec);
             } else {
-               jsxc.storage.setUserItem('smp_' + cid, {
+               jsxc.storage.setUserItem('smp_' + bid, {
                   sec: sec,
                   quest: null
                });
@@ -1213,13 +1325,13 @@ var jsxc;
 
             jsxc.gui.dialog.close();
 
-            jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.verification_query_sent);
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_query_sent);
          });
       },
 
       /**
        * Create and show approve dialog
-       * 
+       *
        * @param {type} from valid jid
        */
       showApproveDialog: function(from) {
@@ -1236,16 +1348,16 @@ var jsxc;
          });
 
          $('#jsxc_dialog .jsxc_approve').click(function() {
-            var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(from));
+            var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
 
             jsxc.xmpp.resFriendReq(from, true);
 
             // If friendship is not mutual show contact dialog
-            if (!data || data.sub === 'from') {
+            /*if (!data || data.sub === 'from') {
                $(document).one('close.dialog.jsxc', function() {
                   jsxc.gui.showContactDialog(from);
                });
-            }
+            }*/
 
             jsxc.gui.dialog.close();
          });
@@ -1253,7 +1365,7 @@ var jsxc;
 
       /**
        * Create and show dialog to add a buddy
-       * 
+       *
        * @param {string} [username] jabber id
        */
       showContactDialog: function(username) {
@@ -1265,12 +1377,6 @@ var jsxc;
             $('#jsxc_username').val(username);
          }
 
-         $('#jsxc_dialog input').keypress(function(ev) {
-            if (ev.which === 13) {
-               $('#jsxc_dialog .creation').click();
-            }
-         });
-
          $('#jsxc_dialog form').submit(function() {
             var username = $('#jsxc_username').val();
             var alias = $('#jsxc_alias').val();
@@ -1280,10 +1386,10 @@ var jsxc;
             }
 
             // Check if the username is valid
-            if (!username || !username.match(/^[\w-_.]+@[\w-_.]+$/g)) {
+            if (!username || !username.match(jsxc.CONST.REGEX.JID)) {
                // Add notification
                $('#jsxc_username').addClass('jsxc_invalid').keyup(function() {
-                  if ($(this).val().match(/^[\w-_.]+@[\w-_.]+$/g)) {
+                  if ($(this).val().match(jsxc.CONST.REGEX.JID)) {
                      $(this).removeClass('jsxc_invalid');
                   }
                });
@@ -1299,22 +1405,22 @@ var jsxc;
 
       /**
        * Create and show dialog to remove a buddy
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
        * @returns {undefined}
        */
-      showRemoveDialog: function(cid) {
+      showRemoveDialog: function(bid) {
 
-         jsxc.gui.dialog.open(jsxc.gui.template.get('removeDialog', cid));
+         jsxc.gui.dialog.open(jsxc.gui.template.get('removeDialog', bid));
 
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
+         var data = jsxc.storage.getUserItem('buddy', bid);
 
          $('#jsxc_dialog .creation').click(function() {
             if (jsxc.master) {
                jsxc.xmpp.removeBuddy(data.jid);
             } else {
                // inform master
-               jsxc.storage.setUserItem('deletebuddy_' + cid, {
+               jsxc.storage.setUserItem('deletebuddy', bid, {
                   jid: data.jid
                });
             }
@@ -1325,7 +1431,7 @@ var jsxc;
 
       /**
        * Create and show a wait dialog
-       * 
+       *
        * @param {type} msg message to display to the user
        * @returns {undefined}
        */
@@ -1337,7 +1443,7 @@ var jsxc;
 
       /**
        * Create and show a wait dialog
-       * 
+       *
        * @param {type} msg message to display to the user
        * @returns {undefined}
        */
@@ -1347,11 +1453,15 @@ var jsxc;
 
       /**
        * Create and show a auth fail dialog
-       * 
+       *
        * @returns {undefined}
        */
       showAuthFail: function() {
          jsxc.gui.dialog.open(jsxc.gui.template.get('authFailDialog'));
+
+         if (jsxc.triggeredFromBox) {
+            $('#jsxc_dialog .jsxc_cancel').hide();
+         }
 
          $('#jsxc_dialog .creation').click(function() {
             jsxc.gui.dialog.close();
@@ -1364,7 +1474,7 @@ var jsxc;
 
       /**
        * Create and show a confirm dialog
-       * 
+       *
        * @param {String} msg Message
        * @param {function} confirm
        * @param {function} dismiss
@@ -1376,12 +1486,7 @@ var jsxc;
          });
 
          if (confirm) {
-            $('#jsxc_dialog .creation').click(function() {
-               confirm.call();
-               jsxc.gui.dialog.open(jsxc.gui.template.get('pleaseAccept'), {
-                  noClose: true
-               });
-            });
+            $('#jsxc_dialog .creation').click(confirm);
          }
 
          if (dismiss) {
@@ -1391,7 +1496,7 @@ var jsxc;
 
       /**
        * Show about dialog.
-       * 
+       *
        * @memberOf jsxc.gui
        */
       showAboutDialog: function() {
@@ -1404,7 +1509,7 @@ var jsxc;
 
       /**
        * Show debug log.
-       * 
+       *
        * @memberOf jsxc.gui
        */
       showDebugLog: function() {
@@ -1431,44 +1536,47 @@ var jsxc;
 
       /**
        * Show vCard of user with the given bar jid.
-       * 
+       *
        * @memberOf jsxc.gui
-       * @param {String} bjid Bar jid
+       * @param {String} jid
        */
-      showVcard: function(bjid) {
-         jsxc.gui.dialog.open(jsxc.gui.template.get('vCard', jsxc.jidToCid(bjid)));
+      showVcard: function(jid) {
+         var bid = jsxc.jidToBid(jid);
+         jsxc.gui.dialog.open(jsxc.gui.template.get('vCard', bid));
 
-         var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(bjid));
+         var data = jsxc.storage.getUserItem('buddy', bid);
 
-         // Display resources and corresponding information
-         var i, j, res, identities, identity = null, cap, client;
-         for (i = 0; i < data.res.length; i++) {
-            res = data.res[i];
+         if (data) {
+            // Display resources and corresponding information
+            var i, j, res, identities, identity = null, cap, client;
+            for (i = 0; i < data.res.length; i++) {
+               res = data.res[i];
 
-            identities = [];
-            cap = jsxc.xmpp.conn.caps.getCapabilitiesByJid(bjid + '/' + res);
+               identities = [];
+               cap = jsxc.xmpp.getCapabilitiesByJid(bid + '/' + res);
 
-            if (cap !== null && cap.identities !== null) {
-               identities = cap.identities;
-            }
-
-            client = '';
-            for (j = 0; j < identities.length; j++) {
-               identity = identities[j];
-               if (identity.category === 'client') {
-                  if (client !== '') {
-                     client += ',\n';
-                  }
-
-                  client += identity.name + ' (' + identity.type + ')';
+               if (cap !== null && cap.identities !== null) {
+                  identities = cap.identities;
                }
+
+               client = '';
+               for (j = 0; j < identities.length; j++) {
+                  identity = identities[j];
+                  if (identity.category === 'client') {
+                     if (client !== '') {
+                        client += ',\n';
+                     }
+
+                     client += identity.name + ' (' + identity.type + ')';
+                  }
+               }
+
+               var status = jsxc.storage.getUserItem('res', bid)[res];
+
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li class="jsxc_sep"><strong>' + jsxc.translate('%%Resource%%') + ':</strong> ' + res + '</li>');
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Client%%') + ':</strong> ' + client + '</li>');
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li>' + jsxc.translate('<strong>%%Status%%:</strong> %%' + jsxc.CONST.STATUS[status] + '%%') + '</li>');
             }
-
-            var status = jsxc.storage.getUserItem('res_' + jsxc.jidToCid(bjid))[res];
-
-            $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Resource%%') + ':</strong> ' + res + '</li>');
-            $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Client%%') + ':</strong> ' + client + '</li>');
-            $('#jsxc_dialog ul.jsxc_vCard').append('<li class="jsxc_sep">' + jsxc.translate('<strong>%%Status%%:</strong> %%' + jsxc.CONST.STATUS[status] + '%%') + '</li>');
          }
 
          var printProp = function(el, depth) {
@@ -1499,7 +1607,11 @@ var jsxc;
                content += '</li>';
 
                if (depth === 0 && $('#jsxc_dialog ul.jsxc_vCard').length > 0) {
-                  $('#jsxc_dialog ul.jsxc_vCard').append(content);
+                  if ($('#jsxc_dialog ul.jsxc_vCard li.jsxc_sep:first').length > 0) {
+                     $('#jsxc_dialog ul.jsxc_vCard li.jsxc_sep:first').before(content);
+                  } else {
+                     $('#jsxc_dialog ul.jsxc_vCard').append(content);
+                  }
                   content = '';
                }
             });
@@ -1523,7 +1635,7 @@ var jsxc;
             $('#jsxc_dialog').append(content);
          };
 
-         jsxc.xmpp.conn.vcard.get(function(stanza) {
+         jsxc.xmpp.loadVcard(bid, function(stanza) {
 
             if ($('#jsxc_dialog ul.jsxc_vCard').length === 0) {
                return;
@@ -1548,7 +1660,7 @@ var jsxc;
 
             printProp($(stanza).find('vcard > *'), 0);
 
-         }, bjid, failedToLoad);
+         }, failedToLoad);
       },
 
       showSettings: function() {
@@ -1623,8 +1735,46 @@ var jsxc;
       },
 
       /**
+       * Show prompt for notification permission.
+       *
+       * @memberOf jsxc.gui
+       */
+      showRequestNotification: function() {
+         jsxc.gui.showConfirmDialog(jsxc.translate("%%Should we notify you_%%"), function() {
+            jsxc.gui.dialog.open(jsxc.gui.template.get('pleaseAccept'), {
+               noClose: true
+            });
+
+            jsxc.notification.requestPermission();
+         }, function() {
+            $(document).trigger('notificationfailure.jsxc');
+         });
+      },
+
+      showUnknownSender: function(bid) {
+         jsxc.gui.showConfirmDialog(jsxc.translate('%%You_received_a_message_from_an_unknown_sender%% (' + bid + '). %%Do_you_want_to_display_them%%'), function() {
+
+            jsxc.gui.dialog.close();
+
+            jsxc.storage.saveBuddy(bid, {
+               jid: bid,
+               name: bid,
+               status: 0,
+               sub: 'none',
+               res: []
+            });
+
+            jsxc.gui.window.open(bid);
+
+         }, function() {
+            // reset state
+            jsxc.storage.removeUserItem('chat', bid);
+         });
+      },
+
+      /**
        * Change own presence to pres.
-       * 
+       *
        * @memberOf jsxc.gui
        * @param pres {CONST.STATUS} New presence state
        * @param external {boolean} True if triggered from other tab.
@@ -1646,14 +1796,14 @@ var jsxc;
 
       /**
        * Update all presence objects for given user.
-       * 
+       *
        * @memberOf jsxc.gui
-       * @param cid CSS id of user.
+       * @param bid bar jid of user.
        * @param {CONST.STATUS} pres New presence state.
        */
-      updatePresence: function(cid, pres) {
+      updatePresence: function(bid, pres) {
 
-         if (cid === 'own') {
+         if (bid === 'own') {
             if (pres === 'dnd') {
                $('#jsxc_menu .jsxc_muteNotification').addClass('jsxc_disabled');
                jsxc.notification.muteSound(true);
@@ -1666,20 +1816,131 @@ var jsxc;
             }
          }
 
-         $('.jsxc_presence_' + cid).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
+         $('.jsxc_presence[data-bid="' + bid + '"]').removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
+      },
+
+      /**
+       * Switch read state to UNread.
+       * 
+       * @memberOf jsxc.gui
+       * @param bid
+       */
+      unreadMsg: function(bid) {
+         var win = jsxc.gui.window.get(bid);
+
+         jsxc.gui.roster.getItem(bid).add(win).addClass('jsxc_unreadMsg');
+         jsxc.storage.updateUserItem('window', bid, 'unread', true);
+      },
+
+      /**
+       * Switch read state to read.
+       * 
+       * @memberOf jsxc.gui
+       * @param bid
+       */
+      readMsg: function(bid) {
+         var win = jsxc.gui.window.get(bid);
+
+         if (win.hasClass('jsxc_unreadMsg')) {
+            jsxc.gui.roster.getItem(bid).add(win).removeClass('jsxc_unreadMsg');
+            jsxc.storage.updateUserItem('window', bid, 'unread', false);
+         }
+      },
+
+      /**
+       * This function searches for URI scheme according to XEP-0147.
+       * 
+       * @memberOf jsxc.gui
+       * @param container In which element should we search?
+       */
+      detectUriScheme: function(container) {
+         container = (container) ? $(container) : $('body');
+
+         container.find("a[href^='xmpp:']").each(function() {
+
+            var element = $(this);
+            var href = element.attr('href').replace(/^xmpp:/, '');
+            var jid = href.split('?')[0];
+            var action, params = {};
+
+            if (href.indexOf('?') < 0) {
+               action = 'message';
+            } else {
+               var pairs = href.substring(href.indexOf('?') + 1).split(';');
+               action = pairs[0];
+
+               var i, key, value;
+               for (i = 1; i < pairs.length; i++) {
+                  key = pairs[i].split('=')[0];
+                  value = (pairs[i].indexOf('=') > 0) ? pairs[i].substring(pairs[i].indexOf('=') + 1) : null;
+
+                  params[decodeURIComponent(key)] = decodeURIComponent(value);
+               }
+            }
+
+            if (typeof jsxc.gui.queryActions[action] === 'function') {
+               element.addClass('jsxc_uriScheme jsxc_uriScheme_' + action);
+
+               element.off('click').click(function(ev) {
+                  ev.stopPropagation();
+
+                  jsxc.gui.queryActions[action].call(jsxc, jid, params);
+
+                  return false;
+               });
+            }
+         });
+      },
+
+      detectEmail: function(container) {
+         container = (container) ? $(container) : $('body');
+
+         container.find('a[href^="mailto:"]').each(function() {
+            var spot = $("<span>X</span>").addClass("jsxc_spot");
+            var href = $(this).attr("href").replace(/^ *mailto:/, "").trim();
+
+            if (href !== '' && href !== Strophe.getBareJidFromJid(jsxc.storage.getItem("jid"))) {
+               var bid = jsxc.jidToBid(href);
+               var self = $(this);
+               var s = self.prev();
+
+               if (!s.hasClass('jsxc_spot')) {
+                  s = spot.clone().attr('data-bid', bid);
+
+                  self.before(s);
+               }
+
+               s.off('click');
+
+               if (jsxc.storage.getUserItem('buddy', bid)) {
+                  jsxc.gui.update(bid);
+                  s.click(function() {
+                     jsxc.gui.window.open(bid);
+
+                     return false;
+                  });
+               } else {
+                  s.click(function() {
+                     jsxc.gui.showContactDialog(href);
+
+                     return false;
+                  });
+               }
+            }
+         });
       }
    };
 
    /**
     * Handle functions related to the gui of the roster
-    * 
+    *
     * @namespace jsxc.gui.roster
     */
    jsxc.gui.roster = {
 
       /**
        * Init the roster skeleton
-       * 
+       *
        * @memberOf jsxc.gui.roster
        * @returns {undefined}
        */
@@ -1729,9 +1990,9 @@ var jsxc;
             }
          });
 
-         $('#jsxc_roster .jsxc_addBuddy').click(function() {
+         /*$('#jsxc_roster .jsxc_addBuddy').click(function() {
             jsxc.gui.showContactDialog();
-         });
+         });*/
 
          $('#jsxc_roster .jsxc_onlineHelp').click(function() {
             window.open("http://www.jsxc.org/manual.html", "onlineHelp");
@@ -1785,30 +2046,30 @@ var jsxc;
 
       /**
        * Create roster item and add it to the roster
-       * 
-       * @param {String} cid CSS compatible jid
+       *
+       * @param {String} bid bar jid
        */
-      add: function(cid) {
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
-         var bud = jsxc.gui.buddyTemplate.clone().attr('id', cid).attr('data-type', data.type || 'chat');
+      add: function(bid) {
+         var data = jsxc.storage.getUserItem('buddy', bid);
+         var bud = jsxc.gui.buddyTemplate.clone().attr('data-bid', bid).attr('data-type', data.type || 'chat');
 
-         jsxc.gui.roster.insert(cid, bud);
+         jsxc.gui.roster.insert(bid, bud);
 
          bud.click(function() {
-            jsxc.gui.window.open(cid);
+            jsxc.gui.window.open(bid);
          });
 
          bud.find('.jsxc_chaticon').click(function() {
-            jsxc.gui.window.open(cid);
+            jsxc.gui.window.open(bid);
          });
 
          bud.find('.jsxc_rename').click(function() {
-            jsxc.gui.roster.rename(cid);
+            jsxc.gui.roster.rename(bid);
             return false;
          });
 
          bud.find('.jsxc_delete').click(function() {
-            jsxc.gui.showRemoveDialog(cid);
+            jsxc.gui.showRemoveDialog(bid);
             return false;
          });
 
@@ -1829,27 +2090,31 @@ var jsxc;
             return false;
          });
 
-         jsxc.gui.update(cid);
+         jsxc.gui.update(bid);
 
          // update scrollbar
          $('#jsxc_buddylist').slimScroll({
             scrollTo: '0px'
          });
 
-         $(document).trigger('add.roster.jsxc', [ cid, data, bud ]);
+         $(document).trigger('add.roster.jsxc', [ bid, data, bud ]);
+      },
+
+      getItem: function(bid) {
+         return $("#jsxc_buddylist > li[data-bid='" + bid + "']");
       },
 
       /**
        * Insert roster item. First order: online > away > offline. Second order:
        * alphabetical of the name
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
        * @param {jquery} li roster item which should be insert
        * @returns {undefined}
        */
-      insert: function(cid, li) {
+      insert: function(bid, li) {
 
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
+         var data = jsxc.storage.getUserItem('buddy', bid);
          var listElements = $('#jsxc_buddylist > li');
          var insert = false;
 
@@ -1876,53 +2141,53 @@ var jsxc;
 
       /**
        * Initiate reorder of roster item
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
        * @returns {undefined}
        */
-      reorder: function(cid) {
-         jsxc.gui.roster.insert(cid, jsxc.gui.roster.remove(cid));
+      reorder: function(bid) {
+         jsxc.gui.roster.insert(bid, jsxc.gui.roster.remove(bid));
       },
 
       /**
        * Removes buddy from roster
-       * 
-       * @param {String} cid CSS compatible jid
+       *
+       * @param {String} bid bar jid
        * @return {JQueryObject} Roster list element
        */
-      remove: function(cid) {
-         return $('#' + cid).detach();
+      remove: function(bid) {
+         return jsxc.gui.roster.getItem(bid).detach();
       },
 
       /**
        * Removes buddy from roster and clean up
-       * 
-       * @param {String} cid CSS compatible jid
+       *
+       * @param {String} bid bar compatible jid
        */
-      purge: function(cid) {
+      purge: function(bid) {
          if (jsxc.master) {
-            jsxc.storage.removeUserItem('buddy_' + cid);
-            jsxc.storage.removeUserItem('otr_' + cid);
-            jsxc.storage.removeUserItem('otr_version_' + cid);
-            jsxc.storage.removeUserItem('chat_' + cid);
-            jsxc.storage.removeUserItem('window_' + cid);
-            jsxc.storage.removeUserElement('buddylist', cid);
-            jsxc.storage.removeUserElement('windowlist', cid);
+            jsxc.storage.removeUserItem('buddy', bid);
+            jsxc.storage.removeUserItem('otr', bid);
+            jsxc.storage.removeUserItem('otr_version_' + bid);
+            jsxc.storage.removeUserItem('chat', bid);
+            jsxc.storage.removeUserItem('window', bid);
+            jsxc.storage.removeUserElement('buddylist', bid);
+            jsxc.storage.removeUserElement('windowlist', bid);
          }
 
-         jsxc.gui.window._close(cid);
-         jsxc.gui.roster.remove(cid);
+         jsxc.gui.window._close(bid);
+         jsxc.gui.roster.remove(bid);
       },
 
       /**
        * Create input element for rename action
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
        * @returns {undefined}
        */
-      rename: function(cid) {
-         var name = $('#' + cid + ' .jsxc_name');
-         var options = $('#' + cid).find('.jsxc_options, .jsxc_control');
+      rename: function(bid) {
+         var name = jsxc.gui.roster.getItem(bid).find('.jsxc_name');
+         var options = jsxc.gui.roster.getItem(bid).find('.jsxc_options, .jsxc_control');
          var input = $('<input type="text" name="name"/>');
 
          options.hide();
@@ -1936,7 +2201,7 @@ var jsxc;
 
             options.show();
             input.replaceWith(name);
-            jsxc.gui.roster._rename(cid, $(this).val());
+            jsxc.gui.roster._rename(bid, $(this).val());
 
             $('html').off('click');
          });
@@ -1949,20 +2214,20 @@ var jsxc;
          $('html').one('click', function() {
             options.show();
             input.replaceWith(name);
-            jsxc.gui.roster._rename(cid, input.val());
+            jsxc.gui.roster._rename(bid, input.val());
          });
       },
 
       /**
        * Rename buddy
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
        * @param {type} newname new name of buddy
        * @returns {undefined}
        */
-      _rename: function(cid, newname) {
+      _rename: function(bid, newname) {
          if (jsxc.master) {
-            var d = jsxc.storage.getUserItem('buddy_' + cid);
+            var d = jsxc.storage.getUserItem('buddy', bid);
             var iq = $iq({
                type: 'set'
             }).c('query', {
@@ -1974,13 +2239,13 @@ var jsxc;
             jsxc.xmpp.conn.sendIQ(iq);
          }
 
-         jsxc.storage.updateUserItem('buddy_' + cid, 'name', newname);
-         jsxc.gui.update(cid);
+         jsxc.storage.updateUserItem('buddy', bid, 'name', newname);
+         jsxc.gui.update(bid);
       },
 
       /**
        * Toogle complete roster
-       * 
+       *
        * @param {Integer} d Duration in ms
        */
       toggle: function(d) {
@@ -1992,6 +2257,7 @@ var jsxc;
          var roster_width = roster.innerWidth();
          var roster_right = parseFloat($('#jsxc_roster').css('right'));
          var state = (roster_right < 0) ? 'shown' : 'hidden';
+         var  textToDisplay = (roster_right < 0) ? '>>' : '<<';
 
          jsxc.storage.setUserItem('roster', state);
 
@@ -2003,6 +2269,7 @@ var jsxc;
          }, duration);
 
          $(document).trigger('toggle.roster.jsxc', [ state, duration ]);
+         $('#jsxc_toggleRoster_text b').text(textToDisplay);
       },
 
       /**
@@ -2013,22 +2280,22 @@ var jsxc;
          $('#jsxc_roster > .jsxc_bottom').remove();
 
          $('#jsxc_roster').append($('<p>' + jsxc.l.no_connection + '</p>').append(' <a>' + jsxc.l.relogin + '</a>').click(function() {
-            jsxc.gui.showLoginBox();
+            jsxc.login();
          }));
       },
 
       /**
        * Shows a text with link to add a new buddy.
-       * 
+       *
        * @memberOf jsxc.gui.roster
        */
       empty: function() {
          var text = $('<p>' + jsxc.l.Your_roster_is_empty_add_a + '</p>');
-         var link = $('<a>' + jsxc.l.new_buddy + '</a>');
+         var link = $('<a href="/help">' + jsxc.l.new_buddy + '</a>');
 
-         link.click(function() {
-            jsxc.gui.showContactDialog();
-         });
+         //link.click(function() {
+         //   jsxc.gui.showContactDialog();
+         //});
          text.append(link);
          text.append('.');
 
@@ -2038,13 +2305,13 @@ var jsxc;
 
    /**
     * Wrapper for dialog
-    * 
+    *
     * @namespace jsxc.gui.dialog
     */
    jsxc.gui.dialog = {
       /**
        * Open a Dialog.
-       * 
+       *
        * @memberOf jsxc.gui.dialog
        * @param {String} data Data of the dialog
        * @param {Object} [o] Options for the dialog
@@ -2105,32 +2372,34 @@ var jsxc;
 
       /**
        * Resizes current dialog.
+       *
+       * @param {Object} options e.g. width and height
        */
-      resize: function() {
-         $.colorbox.resize();
+      resize: function(options) {
+         $.colorbox.resize(options);
       }
    };
 
    /**
     * Handle functions related to the gui of the window
-    * 
+    *
     * @namespace jsxc.gui.window
     */
    jsxc.gui.window = {
       /**
        * Init a window skeleton
-       * 
+       *
        * @memberOf jsxc.gui.window
-       * @param {String} cid
+       * @param {String} bid
        * @returns {jQuery} Window object
        */
-      init: function(cid) {
-         if (jsxc.el_exists('#jsxc_window_' + cid)) {
-            return jsxc.gui.getWindow(cid);
+      init: function(bid) {
+         if (jsxc.gui.window.get(bid).length > 0) {
+            return jsxc.gui.window.get(bid);
          }
 
-         var win = jsxc.gui.windowTemplate.clone().attr('id', 'jsxc_window_' + cid).hide().appendTo('#jsxc_windowList > ul').show('slow');
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
+         var win = jsxc.gui.windowTemplate.clone().attr('data-bid', bid).hide().appendTo('#jsxc_windowList > ul').show('slow');
+         var data = jsxc.storage.getUserItem('buddy', bid);
 
          // Attach jid to window
          win.data('jid', data.jid);
@@ -2140,27 +2409,27 @@ var jsxc;
          jsxc.gui.toggleList.call(win.find('.jsxc_settings'));
 
          win.find('.jsxc_verification').click(function() {
-            jsxc.gui.showVerification(cid);
+            jsxc.gui.showVerification(bid);
          });
 
          win.find('.jsxc_fingerprints').click(function() {
-            jsxc.gui.showFingerprints(cid);
+            jsxc.gui.showFingerprints(bid);
          });
 
          win.find('.jsxc_transfer').click(function() {
-            jsxc.otr.toggleTransfer(cid);
+            jsxc.otr.toggleTransfer(bid);
          });
 
          win.find('.jsxc_bar').click(function() {
-            jsxc.gui.window.toggle(cid);
+            jsxc.gui.window.toggle(bid);
          });
 
          win.find('.jsxc_close').click(function() {
-            jsxc.gui.window.close(cid);
+            jsxc.gui.window.close(bid);
          });
 
          win.find('.jsxc_clear').click(function() {
-            jsxc.gui.window.clear(cid);
+            jsxc.gui.window.clear(bid);
          });
 
          win.find('.jsxc_tools').click(function() {
@@ -2174,17 +2443,30 @@ var jsxc;
                body = '';
             }
 
-            jsxc.storage.updateUserItem('window_' + cid, 'text', body);
-         });
+            jsxc.storage.updateUserItem('window', bid, 'text', body);
 
-         win.find('.jsxc_textinput').keypress(function(ev) {
+            if (ev.which === 27) {
+               jsxc.gui.window.close(bid);
+            }
+         }).keypress(function(ev) {
             if (ev.which !== 13 || !$(this).val()) {
                return;
             }
 
-            jsxc.gui.window.postMessage(cid, 'out', $(this).val());
+            jsxc.gui.window.postMessage(bid, 'out', $(this).val());
 
             $(this).val('');
+         }).focus(function() {
+            // remove unread flag
+            jsxc.gui.readMsg(bid);
+         }).mouseenter(function() {
+            $('#jsxc_windowList').data('isOver', true);
+         }).mouseleave(function() {
+            $('#jsxc_windowList').data('isOver', false);
+         });
+
+         win.find('.jsxc_textarea').click(function() {
+            win.find('.jsxc_textinput').focus();
          });
 
          win.find('.jsxc_textarea').slimScroll({
@@ -2209,29 +2491,29 @@ var jsxc;
             }
          });
 
-         if ($.inArray(cid, jsxc.storage.getUserItem('windowlist')) < 0) {
+         if ($.inArray(bid, jsxc.storage.getUserItem('windowlist')) < 0) {
 
             // add window to windowlist
             var wl = jsxc.storage.getUserItem('windowlist');
-            wl.push(cid);
+            wl.push(bid);
             jsxc.storage.setUserItem('windowlist', wl);
 
             // init window element in storage
-            jsxc.storage.setUserItem('window_' + cid, {
+            jsxc.storage.setUserItem('window', bid, {
                minimize: true,
                text: '',
                unread: false
             });
          } else {
 
-            if (jsxc.storage.getUserItem('window_' + cid).unread) {
-               win.addClass('jsxc_unreadMsg');
+            if (jsxc.storage.getUserItem('window', bid).unread) {
+               jsxc.gui.unreadMsg(bid);
             }
          }
 
          $.each(jsxc.gui.emotions, function(i, val) {
             var ins = val[0].split(' ')[0];
-            var li = $('<li><img alt="' + ins + '" title="' + ins + '" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/></li>');
+            var li = $('<li><div title="' + ins + '" class="jsxc_' + val[1] + '"/></li>');
             li.click(function() {
                win.find('input').val(win.find('input').val() + ins);
                win.find('input').focus();
@@ -2241,15 +2523,17 @@ var jsxc;
 
          jsxc.gui.toggleList.call(win.find('.jsxc_emoticons'));
 
-         jsxc.gui.window.restoreChat(cid);
+         jsxc.gui.window.restoreChat(bid);
 
-         jsxc.gui.update(cid);
+         jsxc.gui.update(bid);
 
          jsxc.gui.updateWindowListSB();
 
          // create related otr object
-         if (jsxc.master && !jsxc.otr.objects[cid]) {
-            jsxc.otr.create(cid);
+         if (jsxc.master && !jsxc.otr.objects[bid]) {
+            jsxc.otr.create(bid);
+         } else {
+            jsxc.otr.enable(bid);
          }
 
          $(document).trigger('init.window.jsxc', [ win ]);
@@ -2258,47 +2542,82 @@ var jsxc;
       },
 
       /**
-       * Open a window, related to the cid. If the window doesn't exist, it will
+       * Returns the window element
+       *
+       * @param {String} bid
+       * @returns {jquery} jQuery object of the window element
+       */
+      get: function(id) {
+         return $("li.jsxc_windowItem[data-bid='" + jsxc.jidToBid(id) + "']");
+      },
+
+      /**
+       * Open a window, related to the bid. If the window doesn't exist, it will
        * be created.
-       * 
-       * @param {String} cid
+       *
+       * @param {String} bid
        * @returns {jQuery} Window object
        */
-      open: function(cid) {
-         var win = jsxc.gui.window.init(cid);
-         jsxc.gui.window.show(cid);
-         jsxc.gui.window.highlight(cid);
+      open: function(bid) {
+         var win = jsxc.gui.window.init(bid);
+         jsxc.gui.window.show(bid);
+         jsxc.gui.window.highlight(bid);
 
-         win.find('.jsxc_textinput').focus();
+         var padding = $("#jsxc_windowListSB").width();
+         var innerWidth = $('#jsxc_windowList>ul').width();
+         var outerWidth = $('#jsxc_windowList').width() - padding;
+
+         if (innerWidth > outerWidth) {
+            var offset = parseInt($('#jsxc_windowList>ul').css('right'));
+            var width = win.outerWidth(true);
+
+            var right = innerWidth - win.position().left - width + offset;
+            var left = outerWidth - (innerWidth - win.position().left) - offset;
+
+            if (left < 0) {
+               jsxc.gui.scrollWindowListBy(left * -1);
+            }
+
+            if (right < 0) {
+               jsxc.gui.scrollWindowListBy(right);
+            }
+         }
 
          return win;
       },
 
       /**
        * Close chatwindow and clean up
-       * 
-       * @param {String} cid CSS compatible jid
+       *
+       * @param {String} bid bar jid
        */
-      close: function(cid) {
+      close: function(bid) {
 
-         if (!jsxc.el_exists('#jsxc_window_' + cid)) {
+         if (jsxc.gui.window.get(bid).length === 0) {
             jsxc.warn('Want to close a window, that is not open.');
             return;
          }
 
-         jsxc.storage.removeUserElement('windowlist', cid);
-         jsxc.storage.removeUserItem('window_' + cid);
+         jsxc.storage.removeUserElement('windowlist', bid);
+         jsxc.storage.removeUserItem('window', bid);
 
-         jsxc.gui.window._close(cid);
+         if (jsxc.storage.getUserItem('buddylist').indexOf(bid) < 0) {
+            // delete data from unknown sender
+
+            jsxc.storage.removeUserItem('buddy', bid);
+            jsxc.storage.removeUserItem('chat', bid);
+         }
+
+         jsxc.gui.window._close(bid);
       },
 
       /**
        * Close chatwindow
-       * 
-       * @param {String} cid
+       *
+       * @param {String} bid
        */
-      _close: function(cid) {
-         $('#jsxc_window_' + cid).hide('slow', function() {
+      _close: function(bid) {
+         jsxc.gui.window.get(bid).hide('slow', function() {
             $(this).remove();
 
             jsxc.gui.updateWindowListSB();
@@ -2307,14 +2626,21 @@ var jsxc;
 
       /**
        * Toggle between minimize and maximize of the text area
-       * 
-       * @param {String} cid CSS compatible jid
+       *
+       * @param {String} bid bar jid
        */
-      toggle: function(cid) {
-         if (jsxc.gui.getWindow(cid).find('.jsxc_fade').is(':hidden')) {
-            jsxc.gui.window.show(cid);
+      toggle: function(bid) {
+
+         var win = jsxc.gui.window.get(bid);
+
+         if (win.parents("#jsxc_windowList").length === 0) {
+            return;
+         }
+
+         if (win.find('.jsxc_fade').is(':hidden')) {
+            jsxc.gui.window.show(bid);
          } else {
-            jsxc.gui.window.hide(cid);
+            jsxc.gui.window.hide(bid);
          }
 
          jsxc.gui.updateWindowListSB();
@@ -2322,70 +2648,67 @@ var jsxc;
 
       /**
        * Maximize text area and save
-       * 
-       * @param {String} cid
+       *
+       * @param {String} bid
        */
-      show: function(cid) {
+      show: function(bid) {
 
-         jsxc.storage.updateUserItem('window_' + cid, 'minimize', false);
+         jsxc.storage.updateUserItem('window', bid, 'minimize', false);
 
-         jsxc.gui.window._show(cid);
+         jsxc.gui.window._show(bid);
       },
 
       /**
        * Maximize text area
-       * 
-       * @param {String} cid
+       *
+       * @param {String} bid
        * @returns {undefined}
        */
-      _show: function(cid) {
-         var win = jsxc.gui.getWindow(cid);
-         $('#jsxc_window_' + cid + ' .jsxc_fade').slideDown();
+      _show: function(bid) {
+         var win = jsxc.gui.window.get(bid);
+         jsxc.gui.window.get(bid).find('.jsxc_fade').slideDown();
          win.removeClass('jsxc_min');
-
-         // remove unread flag
-         win.removeClass('jsxc_unreadMsg');
-         jsxc.storage.updateUserItem('window_' + cid, 'unread', false);
 
          // If the area is hidden, the scrolldown function doesn't work. So we
          // call it here.
-         jsxc.gui.window.scrollDown(cid);
+         jsxc.gui.window.scrollDown(bid);
 
-         win.find('.jsxc_textinput').focus();
+         if (jsxc.restoreCompleted) {
+            win.find('.jsxc_textinput').focus();
+         }
 
          win.trigger('show.window.jsxc');
       },
 
       /**
        * Minimize text area and save
-       * 
-       * @param {String} cid
+       *
+       * @param {String} bid
        */
-      hide: function(cid) {
-         jsxc.storage.updateUserItem('window_' + cid, 'minimize', true);
+      hide: function(bid) {
+         jsxc.storage.updateUserItem('window', bid, 'minimize', true);
 
-         jsxc.gui.window._hide(cid);
+         jsxc.gui.window._hide(bid);
       },
 
       /**
        * Minimize text area
-       * 
-       * @param {String} cid
+       *
+       * @param {String} bid
        */
-      _hide: function(cid) {
-         $('#jsxc_window_' + cid + ' .jsxc_fade').slideUp();
-         $('#jsxc_window_' + cid).addClass('jsxc_min');
+      _hide: function(bid) {
+         jsxc.gui.window.get(bid).addClass('jsxc_min').find(' .jsxc_fade').slideUp();
 
-         jsxc.gui.getWindow(cid).trigger('hidden.window.jsxc');
+         jsxc.gui.window.get(bid).trigger('hidden.window.jsxc');
       },
 
       /**
        * Highlight window
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
        */
-      highlight: function(cid) {
-         var el = $('#jsxc_window_' + cid + ' .jsxc_bar');
+      highlight: function(bid) {
+         var el = jsxc.gui.window.get(bid).find(' .jsxc_bar');
 
          if (!el.is(':animated')) {
             el.effect('highlight', {
@@ -2396,11 +2719,11 @@ var jsxc;
 
       /**
        * Scroll chat area to the bottom
-       * 
-       * @param {String} cid CSS compatible jid
+       *
+       * @param {String} bid bar jid
        */
-      scrollDown: function(cid) {
-         var chat = $('#jsxc_window_' + cid + ' .jsxc_textarea');
+      scrollDown: function(bid) {
+         var chat = jsxc.gui.window.get(bid).find('.jsxc_textarea');
 
          // check if chat exist
          if (chat.length === 0) {
@@ -2414,23 +2737,18 @@ var jsxc;
 
       /**
        * Write Message to chat area and save
-       * 
-       * @param {String} cid CSS compatible jid
+       *
+       * @param {String} bid bar jid
        * @param {String} direction 'in' message is received or 'out' message is
        *        send
        * @param {String} msg Message to display
        */
-      postMessage: function(cid, direction, msg) {
-         var chat = jsxc.storage.getUserItem('chat_' + cid) || [];
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
+      postMessage: function(bid, direction, msg) {
+         var data = jsxc.storage.getUserItem('buddy', bid);
          var html_msg = msg;
-         var uid = new Date().getTime() + ':msg';
 
-         if (chat.length > jsxc.options.numberOfMsg) {
-            chat.pop();
-         }
-
-         // escape html
+         // remove html tags and reencode html tags
+         msg = jsxc.removeHTML(msg);
          msg = jsxc.escapeHTML(msg);
 
          // exceptions:
@@ -2450,57 +2768,59 @@ var jsxc;
             msg = jsxc.l.your_message_wasnt_send_because_you_have_no_valid_subscription;
          }
 
-         var post = {
-            direction: direction,
-            msg: msg,
-            uid: uid.replace(/:/, '-'),
-            received: false
-         };
-
-         chat.unshift(post);
-         jsxc.storage.setUserItem('chat_' + cid, chat);
+         var post = jsxc.storage.saveMessage(bid, direction, msg);
 
          if (direction === 'in') {
-            $(document).trigger('postmessagein.jsxc', [ jsxc.jids[cid], html_msg ]);
+            $(document).trigger('postmessagein.jsxc', [ bid, html_msg ]);
          }
 
          if (direction === 'out' && jsxc.master) {
-            jsxc.xmpp.sendMessage(cid, html_msg, uid);
+            jsxc.xmpp.sendMessage(bid, html_msg, post.uid);
          }
 
-         jsxc.gui.window._postMessage(cid, post);
+         jsxc.gui.window._postMessage(bid, post);
 
          if (direction === 'out' && msg === '?') {
-            jsxc.gui.window.postMessage(cid, 'sys', '42');
+            jsxc.gui.window.postMessage(bid, 'sys', '42');
          }
       },
 
       /**
        * Write Message to chat area
-       * 
-       * @param {String} cid CSS compatible jid
+       *
+       * @param {String} bid bar jid
        * @param {Object} post Post object with direction, msg, uid, received
        * @param {Bool} restore If true no highlights are used and so unread flag
        *        set
        */
-      _postMessage: function(cid, post, restore) {
-         var win = jsxc.gui.getWindow(cid);
+      _postMessage: function(bid, post, restore) {
+         var win = jsxc.gui.window.get(bid);
          var msg = post.msg;
          var direction = post.direction;
          var uid = post.uid;
          var received = post.received || false;
 
          if (win.find('.jsxc_textinput').is(':not(:focus)') && jsxc.restoreCompleted && direction === 'in' && !restore) {
-            jsxc.gui.window.highlight(cid);
+            jsxc.gui.window.highlight(bid);
          }
 
-         var reg = new RegExp(/((?:https?:\/\/|www\.|([\w\-]+\.[a-zA-Z]{2,3})(?=\b))(?:(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\)([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|])?)|(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|]))?)/gi);
-
-         msg = msg.replace(reg, function(url) {
+         msg = msg.replace(jsxc.CONST.REGEX.URL, function(url) {
 
             var href = (url.match(/^https?:\/\//i)) ? url : 'http://' + url;
 
             return '<a href="' + href + '" target="_blank">' + url + '</a>';
+         });
+
+         msg = msg.replace(new RegExp('(xmpp:)?(' + jsxc.CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i'), function(match, protocol, jid, action) {
+            if (protocol === 'xmpp:') {
+               if (typeof action === 'string') {
+                  jid += action;
+               }
+
+               return '<a href="xmpp:' + jid + '">' + jid + '</a>';
+            }
+
+            return '<a href="mailto:' + jid + '" target="_blank">' + jid + '</a>';
          });
 
          $.each(jsxc.gui.emotions, function(i, val) {
@@ -2513,7 +2833,7 @@ var jsxc;
                   esc += '&#' + p1.charCodeAt(i) + ';';
                }
 
-               return '<img alt="' + esc + '" title="' + esc + '" src="' + jsxc.options.root + '/img/emotions/' + val[1] + '"/>';
+               return '<div title="' + esc + '" class="jsxc_emoticon jsxc_' + val[1] + '"/>';
             });
          });
 
@@ -2527,90 +2847,94 @@ var jsxc;
          }
 
          if (direction === 'sys') {
-            $('#jsxc_window_' + cid + ' .jsxc_textarea').append('<div style="clear:both"/>');
+            jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div style="clear:both"/>');
          }
 
-         $('#jsxc_window_' + cid + ' .jsxc_textarea').append(msgDiv);
+         win.find('.jsxc_textarea').append(msgDiv);
 
-         jsxc.gui.window.scrollDown(cid);
+         jsxc.gui.detectUriScheme(win);
+         jsxc.gui.detectEmail(win);
 
-         // if window is hidden set unread flag
-         if (win.find('.jsxc_fade').is(':hidden') && jsxc.restoreCompleted && !restore) {
-            win.addClass('jsxc_unreadMsg');
-            jsxc.storage.updateUserItem('window_' + cid, 'unread', true);
+         jsxc.gui.window.scrollDown(bid);
+
+         // if window has no focus set unread flag
+         if (!win.find('.jsxc_textinput').is(':focus') && jsxc.restoreCompleted && !restore) {
+            jsxc.gui.unreadMsg(bid);
          }
       },
 
       /**
        * Set text into input area
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
        * @param {type} text
        * @returns {undefined}
        */
-      setText: function(cid, text) {
-         $('#jsxc_window_' + cid + ' .jsxc_textinput').val(text);
+      setText: function(bid, text) {
+         jsxc.gui.window.get(bid).find('.jsxc_textinput').val(text);
       },
 
       /**
        * Load old log into chat area
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
        * @returns {undefined}
        */
-      restoreChat: function(cid) {
-         var chat = jsxc.storage.getUserItem('chat_' + cid);
+      restoreChat: function(bid) {
+         var chat = jsxc.storage.getUserItem('chat', bid);
 
          while (chat !== null && chat.length > 0) {
             var c = chat.pop();
-            jsxc.gui.window._postMessage(cid, c, true);
+            jsxc.gui.window._postMessage(bid, c, true);
          }
       },
 
       /**
        * Clear chat history
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
        * @returns {undefined}
        */
-      clear: function(cid) {
-         jsxc.storage.setUserItem('chat_' + cid, []);
-         $('#jsxc_window_' + cid + ' .jsxc_textarea').empty();
+      clear: function(bid) {
+         jsxc.storage.setUserItem('chat', bid, []);
+         jsxc.gui.window.get(bid).find('.jsxc_textarea').empty();
       }
    };
 
    /**
     * Hold all HTML templates.
-    * 
+    *
     * @namespace jsxc.gui.template
     */
    jsxc.gui.template = {
       /**
        * Return requested template and replace all placeholder
-       * 
+       *
        * @memberOf jsxc.gui.template;
        * @param {type} name template name
-       * @param {type} cid
+       * @param {type} bid
        * @param {type} msg
        * @returns {String} HTML Template
        */
-      get: function(name, cid, msg) {
+      get: function(name, bid, msg) {
 
          // common placeholder
          var ph = {
-            my_priv_fingerprint: jsxc.storage.getUserItem('priv_fingerprint') ? jsxc.storage.getUserItem('priv_fingerprint').replace(/(.{8})/g, '$1 ') : jsxc.l.no_available,
-            my_jid: jsxc.storage.getItem('jid'),
-            root: jsxc.options.root
+            my_priv_fingerprint: jsxc.storage.getUserItem('priv_fingerprint') ? jsxc.storage.getUserItem('priv_fingerprint').replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
+            my_jid: jsxc.storage.getItem('jid') || '',
+            my_node: Strophe.getNodeFromJid(jsxc.storage.getItem('jid') || '') || '',
+            root: jsxc.options.root,
+            app_name: jsxc.options.app_name
          };
 
-         // placeholder depending on cid
-         if (cid) {
-            var data = jsxc.storage.getUserItem('buddy_' + cid);
+         // placeholder depending on bid
+         if (bid) {
+            var data = jsxc.storage.getUserItem('buddy', bid);
 
             $.extend(ph, {
-               cid_priv_fingerprint: data.fingerprint ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.no_available,
-               cid_jid: Strophe.getBareJidFromJid(data.jid),
-               cid_name: data.name
+               bid_priv_fingerprint: (data && data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
+               bid_jid: bid,
+               bid_name: (data && data.name) ? data.name : bid
             });
          }
 
@@ -2627,7 +2951,7 @@ var jsxc;
             ret = jsxc.translate(ret);
 
             ret = ret.replace(/\{\{([a-zA-Z0-9_\-]+)\}\}/g, function(s, key) {
-               return ph[key] || s;
+               return (typeof ph[key] === 'string') ? ph[key] : s;
             });
 
             return ret;
@@ -2652,7 +2976,7 @@ var jsxc;
               <p><strong>%%Your_fingerprint%%</strong><br />\
               <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
               <p><strong>%%Buddy_fingerprint%%</strong><br />\
-              <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\
+              <span style="text-transform:uppercase">{{bid_priv_fingerprint}}</span></p><br />\
               <p class="jsxc_right"><a href="#" class="jsxc_close button">%%Close%%</a> <a href="#" class="button creation">%%Compared%%</a></p>\
             </div>\
             <div style="display:none">\
@@ -2671,10 +2995,10 @@ var jsxc;
           <p><strong>%%Your_fingerprint%%</strong><br />\
           <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
           <p><strong>%%Buddy_fingerprint%%</strong><br />\
-          <span style="text-transform:uppercase">{{cid_priv_fingerprint}}</span></p><br />\
+          <span style="text-transform:uppercase">{{bid_priv_fingerprint}}</span></p><br />\
           <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a></p>\
         </div>',
-      chatWindow: '<li class="jsxc_min">\
+      chatWindow: '<li class="jsxc_min jsxc_windowItem">\
             <div class="jsxc_window">\
                 <div class="jsxc_bar">\
                      <div class="jsxc_avatar">☺</div>\
@@ -2682,7 +3006,7 @@ var jsxc;
                            <div class="jsxc_settings">\
                                <ul>\
                                    <li class="jsxc_fingerprints jsxc_otr jsxc_disabled">%%Fingerprints%%</li>\
-                                   <li class="jsxc_verification">%%Authentifikation%%</li>\
+                                   <li class="jsxc_verification">%%Authentication%%</li>\
                                    <li class="jsxc_transfer jsxc_otr jsxc_disabled">%%start_private%%</li>\
                                    <li class="jsxc_clear">%%clear_history%%</li>\
                                </ul>\
@@ -2734,7 +3058,9 @@ var jsxc;
                  </ul>\
               </div>\
            </div>\
-           <div id="jsxc_toggleRoster"></div>\
+           <div id="jsxc_toggleRoster">\
+              <span id="jsxc_toggleRoster_text"><b>>></b></span>\
+           </div>\
        </div>',
       windowList: '<div id="jsxc_windowList">\
                <ul></ul>\
@@ -2759,7 +3085,7 @@ var jsxc;
       loginBox: '<h3>%%Login%%</h3>\
         <form>\
             <p><label for="jsxc_username">%%Username%%:</label>\
-               <input type="text" name="username" id="jsxc_username" required="required" pattern="[^@]+@[^@]+(/.+)?" value="{{my_jid}}"/></p>\
+               <input type="text" name="username" id="jsxc_username" required="required" value="{{my_node}}"/></p>\
             <p><label for="jsxc_password">%%Password%%:</label>\
                <input type="password" name="password" required="required" id="jsxc_password" /></p>\
             <div class="bottom_submit_section">\
@@ -2771,7 +3097,7 @@ var jsxc;
          <p class=".jsxc_explanation">%%Type_in_the_full_username_%%</p>\
          <form>\
          <p><label for="jsxc_username">* %%Username%%:</label>\
-            <input type="email" name="username" id="jsxc_username" required="required" /></p>\
+            <input type="text" name="username" id="jsxc_username" pattern="^[^\\x22&\'\\/:<>@\\s]+(@[.\\-_\\w]+)?" required="required" /></p>\
          <p><label for="jsxc_alias">%%Alias%%:</label>\
             <input type="text" name="alias" id="jsxc_alias" /></p>\
          <p class="jsxc_right">\
@@ -2784,8 +3110,8 @@ var jsxc;
       removeDialog: '<h3>%%Remove buddy%%</h3>\
         <p class="jsxc_maxWidth">%%You_are_about_to_remove_%%</p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close">%%Cancel%%</a> <a href="#" class="button creation">%%Remove%%</a></p>',
-      waitAlert: '<h3>%%Please_wait%%</h3>\
-        <p>{{msg}}</p>\
+      waitAlert: '<h3>{{msg}}</h3>\
+        <p>%%Please_wait%%</p>\
         <p class="jsxc_center"><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /></p>',
       alert: '<h3>%%Alert%%</h3>\
         <p>{{msg}}</p>\
@@ -2793,7 +3119,7 @@ var jsxc;
       authFailDialog: '<h3>%%Login_failed%%</h3>\
         <p>%%Sorry_we_cant_authentikate_%%</p>\
         <p class="jsxc_right">\
-            <a class="button jsxc_cancel">%%Continue%%</a>\
+            <a class="button jsxc_cancel">%%Continue_without_chat%%</a>\
             <a class="button creation">%%Retry%%</a>\
         </p>',
       confirmDialog: '<p>{{msg}}</p>\
@@ -2808,12 +3134,13 @@ var jsxc;
          <br />\
          <i>Released under the MIT license</i><br />\
          <br />\
-         Real-time chat app for OwnCloud. This app requires external<br /> XMPP server (openfire, ejabberd etc.).<br />\
+         Real-time chat app for {{app_name}} and more.<br />\
+         Requires an external <a href="https://xmpp.org/xmpp-software/servers/" target="_blank">XMPP server</a>.<br />\
          <br />\
-         <b>Credential: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
+         <b>Credits: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
          <a href="https://soundcloud.com/freefilmandgamemusic/ping-1?in=freefilmandgamemusic/sets/free-notification-sounds-and" target="_blank">CameronMusic (Ping)</a></p>\
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>',
-      vCard: '<h3>vCard %%from%% {{cid_name}}</h3>\
+      vCard: '<h3>%%Info_about%% {{bid_name}}</h3>\
          <ul class="jsxc_vCard"></ul>\
          <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...</p>',
       settings: '<h3>%%User_settings%%</h3>\
@@ -2845,7 +3172,7 @@ var jsxc;
 
    /**
     * Handle XMPP stuff.
-    * 
+    *
     * @namespace jsxc.xmpp
     */
    jsxc.xmpp = {
@@ -2853,7 +3180,7 @@ var jsxc;
 
       /**
        * Create new connection or attach to old
-       * 
+       *
        * @memberOf jsxc.xmpp
        */
       login: function() {
@@ -2898,7 +3225,7 @@ var jsxc;
 
             switch (status) {
                case Strophe.Status.CONNECTED:
-                  jsxc.cid = jsxc.jidToCid(jsxc.xmpp.conn.jid.toLowerCase());
+                  jsxc.bid = jsxc.jidToBid(jsxc.xmpp.conn.jid.toLowerCase());
                   $(document).trigger('connected.jsxc');
                   break;
                case Strophe.Status.ATTACHED:
@@ -2933,7 +3260,7 @@ var jsxc;
 
       /**
        * Logs user out of his xmpp session and does some clean up.
-       * 
+       *
        * @returns {Boolean}
        */
       logout: function() {
@@ -2961,7 +3288,37 @@ var jsxc;
 
          jsxc.triggeredFromElement = true;
 
-         jsxc.xmpp.conn.disconnect();
+         // restore all otr objects
+         $.each(jsxc.storage.getUserItem('otrlist'), function(i, val) {
+            jsxc.otr.create(val);
+         });
+
+         var numOtr = Object.keys(jsxc.otr.objects).length + 1;
+         var disReady = function() {
+            if (--numOtr <= 0) {
+               jsxc.xmpp.conn.flush();
+
+               setTimeout(function() {
+                  jsxc.xmpp.conn.disconnect();
+               }, 600);
+            }
+         };
+
+         // end all private conversations
+         $.each(jsxc.otr.objects, function(key, obj) {
+            if (obj.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED) {
+               obj.endOtr.call(obj, function() {
+                  obj.init.call(obj);
+                  jsxc.otr.backup(key);
+
+                  disReady();
+               });
+            } else {
+               disReady();
+            }
+         });
+
+         disReady();
 
          // Trigger real logout in jsxc.xmpp.disconnected()
          return false;
@@ -2969,16 +3326,18 @@ var jsxc;
 
       /**
        * Triggered if connection is established
-       * 
+       *
        * @private
        */
       connected: function() {
 
          jsxc.xmpp.conn.pause();
 
+         var nomJid = Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid).toLowerCase() + '/' + Strophe.getResourceFromJid(jsxc.xmpp.conn.jid);
+
          // Save sid and jid
          jsxc.storage.setItem('sid', jsxc.xmpp.conn._proto.sid);
-         jsxc.storage.setItem('jid', jsxc.xmpp.conn.jid.toLowerCase());
+         jsxc.storage.setItem('jid', nomJid);
 
          jsxc.storage.setItem('lastActivity', (new Date()).getTime());
 
@@ -2987,7 +3346,7 @@ var jsxc;
 
          jsxc.storage.removeUserItem('windowlist');
          jsxc.storage.removeUserItem('own');
-         jsxc.storage.removeUserItem('avatar_own');
+         jsxc.storage.removeUserItem('avatar', 'own');
 
          // submit login form
          if (jsxc.triggeredFromForm) {
@@ -3007,7 +3366,7 @@ var jsxc;
 
       /**
        * Triggered if connection is attached
-       * 
+       *
        * @private
        */
       attached: function() {
@@ -3085,7 +3444,7 @@ var jsxc;
 
       /**
        * Triggered if lost connection
-       * 
+       *
        * @private
        */
       disconnected: function() {
@@ -3095,7 +3454,8 @@ var jsxc;
          jsxc.storage.removeItem('rid');
          jsxc.storage.removeItem('lastActivity');
          jsxc.storage.removeItem('hidden');
-         jsxc.storage.removeUserItem('avatar_own');
+         jsxc.storage.removeUserItem('avatar', 'own');
+         jsxc.storage.removeUserItem('otrlist');
 
          jsxc.xmpp.conn = null;
 
@@ -3103,10 +3463,6 @@ var jsxc;
 
          if (jsxc.triggeredFromElement) {
             $('#jsxc_roster').remove();
-
-            if (jsxc.triggeredFromLogout) {
-               window.location = jsxc.options.logoutElement.attr('href');
-            }
          } else {
             jsxc.gui.roster.noConnection();
          }
@@ -3116,7 +3472,7 @@ var jsxc;
 
       /**
        * Triggered on connection fault
-       * 
+       *
        * @param {String} condition information why we lost the connection
        * @private
        */
@@ -3130,7 +3486,7 @@ var jsxc;
 
       /**
        * Triggered on initial roster load
-       * 
+       *
        * @param {dom} iq
        * @private
        */
@@ -3147,35 +3503,22 @@ var jsxc;
          $(iq).find('item').each(function() {
             var jid = $(this).attr('jid');
             var name = $(this).attr('name') || jid;
-            var cid = jsxc.jidToCid(jid);
+            var bid = jsxc.jidToBid(jid);
             var sub = $(this).attr('subscription');
 
-            buddies.push(cid);
+            buddies.push(bid);
 
-            if (jsxc.storage.getUserItem('buddy_' + cid)) {
-               jsxc.storage.updateUserItem('buddy_' + cid, {
-                  jid: jid,
-                  name: name,
-                  status: 0,
-                  sub: sub,
-                  res: []
-               });
-               jsxc.storage.removeUserItem('res_' + cid);
-            } else {
-               jsxc.storage.setUserItem('buddy_' + cid, {
-                  'jid': jid,
-                  'name': name,
-                  'status': 0,
-                  sub: sub,
-                  'msgstate': 0,
-                  'transferReq': -1,
-                  'trust': false,
-                  'fingerprint': null,
-                  res: []
-               });
-            }
+            jsxc.storage.removeUserItem('res', bid);
 
-            jsxc.gui.roster.add(cid);
+            jsxc.storage.saveBuddy(bid, {
+               jid: jid,
+               name: name,
+               status: 0,
+               sub: sub,
+               res: []
+            });
+
+            jsxc.gui.roster.add(bid);
          });
 
          if (buddies.length === 0) {
@@ -3190,7 +3533,7 @@ var jsxc;
 
       /**
        * Triggerd on roster changes
-       * 
+       *
        * @param {dom} iq
        * @returns {Boolean} True to preserve handler
        * @private
@@ -3206,37 +3549,33 @@ var jsxc;
          $(iq).find('item').each(function() {
             var jid = $(this).attr('jid');
             var name = $(this).attr('name') || jid;
-            var cid = jsxc.jidToCid(jid);
+            var bid = jsxc.jidToBid(jid);
             var sub = $(this).attr('subscription');
             // var ask = $(this).attr('ask');
 
-            var bl = jsxc.storage.getUserItem('buddylist');
-
             if (sub === 'remove') {
-               jsxc.gui.roster.purge(cid);
-            } else if (bl.indexOf(cid) >= 0) {
-               jsxc.storage.updateUserItem('buddy_' + cid, {
+               jsxc.gui.roster.purge(bid);
+            } else {
+               var bl = jsxc.storage.getUserItem('buddylist');
+
+               if (bl.indexOf(bid) >= 0) {
+                  bl.push(bid); // (INFO) push returns the new length
+                  jsxc.storage.setUserItem('buddylist', bl);
+               }
+
+               var temp = jsxc.storage.saveBuddy(bid, {
                   jid: jid,
                   name: name,
                   sub: sub
                });
-               jsxc.gui.update(cid);
-               jsxc.gui.roster.reorder(cid);
-            } else {
-               bl.push(cid); // (INFO) push returns the new length
-               jsxc.storage.setUserItem('buddylist', bl);
-               jsxc.storage.setUserItem('buddy_' + cid, {
-                  jid: jid,
-                  name: name,
-                  status: 0,
-                  sub: sub,
-                  msgstate: 0,
-                  transferReq: -1,
-                  trust: false,
-                  fingerprint: null,
-                  type: 'chat'
-               });
-               jsxc.gui.roster.add(cid);
+
+               if (temp === 'updated') {
+
+                  jsxc.gui.update(bid);
+                  jsxc.gui.roster.reorder(bid);
+               } else {
+                  jsxc.gui.roster.add(bid);
+               }
             }
 
             // Remove pending friendship request from notice list
@@ -3268,19 +3607,19 @@ var jsxc;
 
       /**
        * Triggered on incoming presence stanzas
-       * 
+       *
        * @param {dom} presence
        * @private
        */
       onPresence: function(presence) {
          /*
           * <presence xmlns='jabber:client' type='unavailable' from='' to=''/>
-          * 
+          *
           * <presence xmlns='jabber:client' from='' to=''> <priority>5</priority>
           * <c xmlns='http://jabber.org/protocol/caps'
           * node='http://psi-im.org/caps' ver='caps-b75d8d2b25' ext='ca cs
           * ep-notify-2 html'/> </presence>
-          * 
+          *
           * <presence xmlns='jabber:client' from='' to=''> <show>chat</show>
           * <status></status> <priority>5</priority> <c
           * xmlns='http://jabber.org/protocol/caps'
@@ -3295,9 +3634,9 @@ var jsxc;
          var to = $(presence).attr('to');
          to = (to) ? Strophe.getBareJidFromJid(to).toLowerCase() : jid;
          var r = Strophe.getResourceFromJid(from);
-         var cid = jsxc.jidToCid(jid);
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
-         var res = jsxc.storage.getUserItem('res_' + cid) || {};
+         var bid = jsxc.jidToBid(jid);
+         var data = jsxc.storage.getUserItem('buddy', bid);
+         var res = jsxc.storage.getUserItem('res', bid) || {};
          var status = null;
          var xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
 
@@ -3350,6 +3689,11 @@ var jsxc;
             }
          }
 
+         if (data.status === 0 && max > 0) {
+            // buddy has come online
+            jsxc.notification.notify(data.name, jsxc.translate('%%has come online%%.'));
+         }
+
          data.status = max;
          data.res = maxVal;
          data.jid = jid;
@@ -3359,23 +3703,23 @@ var jsxc;
             var photo = xVCard.find('photo');
 
             if (photo.length > 0 && photo.text() !== data.avatar) {
-               jsxc.storage.removeUserItem('avatar_' + data.avatar);
+               jsxc.storage.removeUserItem('avatar', data.avatar);
                data.avatar = photo.text();
             }
          }
 
          // Reset jid
-         if (jsxc.el_exists('#jsxc_window_' + cid)) {
-            jsxc.gui.getWindow(cid).data('jid', jid);
+         if (jsxc.gui.window.get(bid).length > 0) {
+            jsxc.gui.window.get(bid).data('jid', jid);
          }
 
-         jsxc.storage.setUserItem('buddy_' + cid, data);
-         jsxc.storage.setUserItem('res_' + cid, res);
+         jsxc.storage.setUserItem('buddy', bid, data);
+         jsxc.storage.setUserItem('res', bid, res);
 
          jsxc.debug('Presence (' + from + '): ' + status);
 
-         jsxc.gui.update(cid);
-         jsxc.gui.roster.reorder(cid);
+         jsxc.gui.update(bid);
+         jsxc.gui.roster.reorder(bid);
 
          $(document).trigger('presence.jsxc', [ from, status, presence ]);
 
@@ -3385,7 +3729,7 @@ var jsxc;
 
       /**
        * Triggered on incoming message stanzas
-       * 
+       *
        * @param {dom} presence
        * @returns {Boolean}
        * @private
@@ -3403,31 +3747,47 @@ var jsxc;
          var from = $(message).attr('from');
          var mid = $(message).attr('id');
          var jid = Strophe.getBareJidFromJid(from);
-         var cid = jsxc.jidToCid(jid);
-         var data = jsxc.storage.getUserItem('buddy_' + cid);
+         var bid = jsxc.jidToBid(jid);
+         var data = jsxc.storage.getUserItem('buddy', bid);
          var body = $(message).find('body:first').text();
          var request = $(message).find("request[xmlns='urn:xmpp:receipts']");
-         var own = jsxc.storage.getUserItem('own') || [];
 
-         if (!body || own.indexOf(from) >= 0) {
+         if (!body) {
+            return true;
+         }
+
+         if (data === null) {
+            // jid not in roster
+
+            var chat = jsxc.storage.getUserItem('chat', bid) || [];
+
+            if (chat.length === 0) {
+               jsxc.notice.add('%%Unknown sender%%', '%%You received a message from an unknown sender%% (' + bid + ').', 'gui.showUnknownSender', [ bid ]);
+            }
+
+            var msg = jsxc.removeHTML(body);
+            msg = jsxc.escapeHTML(msg);
+
+            jsxc.storage.saveMessage(bid, 'in', msg);
+
             return true;
          }
 
          $(document).trigger('message.jsxc', [ from, body ]);
 
-         var win = jsxc.gui.window.init(cid);
+         var win = jsxc.gui.window.init(bid);
 
          // If we now the full jid, we use it
          if (type === 'chat') {
             win.data('jid', from);
-            jsxc.storage.updateUserItem('buddy_' + cid, {
+            jsxc.storage.updateUserItem('buddy', bid, {
                jid: from
             });
          }
 
          // create related otr object
-         if (jsxc.master && !jsxc.otr.objects[cid]) {
-            jsxc.otr.create(cid);
+         if (jsxc.master && !jsxc.otr.objects[bid]) {
+            jsxc.otr.create(bid);
          }
 
          if (mid !== null && request.length && data !== null && (data.sub === 'both' || data.sub === 'from') && type === 'chat') {
@@ -3440,10 +3800,10 @@ var jsxc;
             }));
          }
 
-         if (jsxc.otr.objects.hasOwnProperty(cid)) {
-            jsxc.otr.objects[cid].receiveMsg(body);
+         if (jsxc.otr.objects.hasOwnProperty(bid)) {
+            jsxc.otr.objects[bid].receiveMsg(body);
          } else {
-            jsxc.gui.window.postMessage(cid, 'in', body);
+            jsxc.gui.window.postMessage(bid, 'in', body);
          }
 
          // preserve handler
@@ -3452,7 +3812,7 @@ var jsxc;
 
       /**
        * Triggerd if the rid changed
-       * 
+       *
        * @param {event} ev
        * @param {obejct} data
        * @private
@@ -3463,7 +3823,7 @@ var jsxc;
 
       /**
        * response to friendship request
-       * 
+       *
        * @param {string} from jid from original friendship req
        * @param {boolean} approve
        */
@@ -3484,12 +3844,12 @@ var jsxc;
 
       /**
        * Add buddy to my friends
-       * 
+       *
        * @param {string} username jid
        * @param {string} alias
        */
       addBuddy: function(username, alias) {
-         var cid = jsxc.jidToCid(username);
+         var bid = jsxc.jidToBid(username);
 
          if (jsxc.master) {
             // add buddy to roster (trigger onRosterChanged)
@@ -3509,9 +3869,9 @@ var jsxc;
                type: 'subscribe'
             }));
 
-            jsxc.storage.removeUserItem('add_' + cid);
+            jsxc.storage.removeUserItem('add_' + bid);
          } else {
-            jsxc.storage.setUserItem('add_' + cid, {
+            jsxc.storage.setUserItem('add_' + bid, {
                username: username,
                alias: alias || null
             });
@@ -3520,11 +3880,11 @@ var jsxc;
 
       /**
        * Remove buddy from my friends
-       * 
+       *
        * @param {type} jid
        */
       removeBuddy: function(jid) {
-         var cid = jsxc.jidToCid(jid);
+         var bid = jsxc.jidToBid(jid);
 
          // Shortcut to remove buddy from roster and cancle all subscriptions
          var iq = $iq({
@@ -3537,18 +3897,18 @@ var jsxc;
          });
          jsxc.xmpp.conn.sendIQ(iq);
 
-         jsxc.gui.roster.purge(cid);
+         jsxc.gui.roster.purge(bid);
       },
 
       onReceived: function(message) {
          var from = $(message).attr('from');
          var jid = Strophe.getBareJidFromJid(from);
-         var cid = jsxc.jidToCid(jid);
+         var bid = jsxc.jidToBid(jid);
          var received = $(message).find("received[xmlns='urn:xmpp:receipts']");
 
          if (received.length) {
             var receivedId = received.attr('id').replace(/:/, '-');
-            var chat = jsxc.storage.getUserItem('chat_' + cid);
+            var chat = jsxc.storage.getUserItem('chat', bid);
             var i;
 
             for (i = chat.length - 1; i >= 0; i--) {
@@ -3557,7 +3917,7 @@ var jsxc;
 
                   $('#' + receivedId).addClass('jsxc_received');
 
-                  jsxc.storage.setUserItem('chat_' + cid, chat);
+                  jsxc.storage.setUserItem('chat', bid, chat);
                   break;
                }
             }
@@ -3568,23 +3928,23 @@ var jsxc;
 
       /**
        * Public function to send message.
-       * 
+       *
        * @memberOf jsxc.xmpp
-       * @param cid css jid of user
+       * @param bid css jid of user
        * @param msg message
        * @param uid unique id
        */
-      sendMessage: function(cid, msg, uid) {
-         if (jsxc.otr.objects.hasOwnProperty(cid)) {
-            jsxc.otr.objects[cid].sendMsg(msg, uid);
+      sendMessage: function(bid, msg, uid) {
+         if (jsxc.otr.objects.hasOwnProperty(bid)) {
+            jsxc.otr.objects[bid].sendMsg(msg, uid);
          } else {
-            jsxc.xmpp._sendMessage($('#jsxc_window_' + cid).data('jid'), msg, uid);
+            jsxc.xmpp._sendMessage(jsxc.gui.window.get(bid).data('jid'), msg, uid);
          }
       },
 
       /**
        * Create message stanza and send it.
-       * 
+       *
        * @memberOf jsxc.xmpp
        * @param jid Jabber id
        * @param msg Message
@@ -3592,7 +3952,7 @@ var jsxc;
        * @private
        */
       _sendMessage: function(jid, msg, uid) {
-         var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(jid));
+         var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(jid));
          var isBar = (Strophe.getBareJidFromJid(jid) === jid);
          var type = data.type || 'chat';
 
@@ -3610,21 +3970,69 @@ var jsxc;
          }
 
          jsxc.xmpp.conn.send(xmlMsg);
+      },
+
+      /**
+       * This function loads a vcard.
+       * 
+       * @memberOf jsxc.xmpp
+       * @param bid
+       * @param cb
+       * @param error_cb
+       */
+      loadVcard: function(bid, cb, error_cb) {
+         if (jsxc.master) {
+            jsxc.xmpp.conn.vcard.get(cb, bid, error_cb);
+         } else {
+            jsxc.storage.setUserItem('vcard', bid, 'request:' + (new Date()).getTime());
+
+            $(document).one('loaded.vcard.jsxc', function(ev, result) {
+               if (result && result.state === 'success') {
+                  cb($(result.data).get(0));
+               } else {
+                  error_cb();
+               }
+            });
+         }
+      },
+
+      /**
+       * Retrieves capabilities.
+       * 
+       * @memberOf jsxc.xmpp
+       * @param jid
+       * @returns List of known capabilities
+       */
+      getCapabilitiesByJid: function(jid) {
+         if (jsxc.xmpp.conn) {
+            return jsxc.xmpp.conn.caps.getCapabilitiesByJid(jid);
+         }
+
+         var jidVerIndex = JSON.parse(localStorage.getItem('strophe.caps._jidVerIndex')) || {};
+         var knownCapabilities = JSON.parse(localStorage.getItem('strophe.caps._knownCapabilities')) || {};
+
+         if (jidVerIndex[jid]) {
+            return knownCapabilities[jidVerIndex[jid]];
+         }
+
+         return null;
       }
    };
 
    /**
     * Handle long-live data
-    * 
+    *
     * @namespace jsxc.storage
     */
    jsxc.storage = {
       /**
        * Prefix for localstorage
-       * 
+       *
        * @privat
        */
-      prefix: 'jsxc.',
+      PREFIX: 'jsxc',
+
+      SEP: ':',
 
       /**
        * @param {type} uk Should we generate a user prefix?
@@ -3632,16 +4040,18 @@ var jsxc;
        * @memberOf jsxc.storage
        */
       getPrefix: function(uk) {
-         return jsxc.storage.prefix + ((uk && jsxc.cid) ? jsxc.cid + '.' : '');
+         var self = jsxc.storage;
+
+         return self.PREFIX + self.SEP + ((uk && jsxc.bid) ? jsxc.bid + self.SEP : '');
       },
 
       /**
        * Save item to storage
-       * 
+       *
        * @function
        * @param {String} key variablename
        * @param {Object} value value
-       * @param {String} uk Userkey? Should we add the cid as prefix?
+       * @param {String} uk Userkey? Should we add the bid as prefix?
        */
       setItem: function(key, value, uk) {
 
@@ -3666,16 +4076,27 @@ var jsxc;
 
          localStorage.setItem(jsxc.storage.getPrefix(uk) + key, value);
       },
-      setUserItem: function(key, value) {
+
+      setUserItem: function(type, key, value) {
+         var self = jsxc.storage;
+
+         if (arguments.length === 2) {
+            value = key;
+            key = type;
+            type = '';
+         } else if (arguments.length === 3) {
+            key = type + self.SEP + key;
+         }
+
          return jsxc.storage.setItem(key, value, true);
       },
 
       /**
        * Load item from storage
-       * 
+       *
        * @function
        * @param {String} key variablename
-       * @param {String} uk Userkey? Should we add the cid as prefix?
+       * @param {String} uk Userkey? Should we add the bid as prefix?
        */
       getItem: function(key, uk) {
          key = jsxc.storage.getPrefix(uk) + key;
@@ -3690,20 +4111,28 @@ var jsxc;
 
       /**
        * Get a user item from storage.
-       * 
+       *
        * @param key
        * @returns
        */
-      getUserItem: function(key) {
+      getUserItem: function(type, key) {
+         var self = jsxc.storage;
+
+         if (arguments.length === 1) {
+            key = type;
+         } else if (arguments.length === 2) {
+            key = type + self.SEP + key;
+         }
+
          return jsxc.storage.getItem(key, true);
       },
 
       /**
        * Remove item from storage
-       * 
+       *
        * @function
        * @param {String} key variablename
-       * @param {String} uk Userkey? Should we add the cid as prefix?
+       * @param {String} uk Userkey? Should we add the bid as prefix?
        */
       removeItem: function(key, uk) {
 
@@ -3720,23 +4149,31 @@ var jsxc;
 
       /**
        * Remove user item from storage.
-       * 
+       *
        * @param key
        * @returns
        */
-      removeUserItem: function(key) {
+      removeUserItem: function(type, key) {
+         var self = jsxc.storage;
+
+         if (arguments.length === 1) {
+            key = type;
+         } else if (arguments.length === 2) {
+            key = type + self.SEP + key;
+         }
+
          return jsxc.storage.removeItem(key, true);
       },
 
       /**
        * Updates value of a variable in a saved object.
-       * 
+       *
        * @function
        * @param {String} key variablename
        * @param {String|object} variable variablename in object or object with
        *        variable/key pairs
        * @param {Object} [value] value
-       * @param {String} uk Userkey? Should we add the cid as prefix?
+       * @param {String} uk Userkey? Should we add the bid as prefix?
        */
       updateItem: function(key, variable, value, uk) {
 
@@ -3764,22 +4201,32 @@ var jsxc;
 
       /**
        * Updates value of a variable in a saved user object.
-       * 
+       *
        * @param {String} key variablename
        * @param {String|object} variable variablename in object or object with
        *        variable/key pairs
        * @param {Object} [value] value
        */
-      updateUserItem: function(key, variable, value) {
+      updateUserItem: function(type, key, variable, value) {
+         var self = jsxc.storage;
+
+         if (arguments.length === 4 || (arguments.length === 3 && typeof variable === 'object')) {
+            key = type + self.SEP + key;
+         } else {
+            value = variable;
+            variable = key;
+            key = type;
+         }
+
          return jsxc.storage.updateItem(key, variable, value, true);
       },
 
       /**
        * Inkrements value
-       * 
+       *
        * @function
        * @param {String} key variablename
-       * @param {String} uk Userkey? Should we add the cid as prefix?
+       * @param {String} uk Userkey? Should we add the bid as prefix?
        */
       ink: function(key, uk) {
 
@@ -3788,10 +4235,10 @@ var jsxc;
 
       /**
        * Remove element from array or object
-       * 
+       *
        * @param {string} key name of array or object
        * @param {string} name name of element in array or object
-       * @param {String} uk Userkey? Should we add the cid as prefix?
+       * @param {String} uk Userkey? Should we add the bid as prefix?
        * @returns {undefined}
        */
       removeElement: function(key, name, uk) {
@@ -3807,13 +4254,23 @@ var jsxc;
 
          jsxc.storage.setItem(key, item, uk);
       },
-      removeUserElement: function(key, name) {
+
+      removeUserElement: function(type, key, name) {
+         var self = jsxc.storage;
+
+         if (arguments.length === 2) {
+            name = key;
+            key = type;
+         } else if (arguments.length === 3) {
+            key = type + self.SEP + key;
+         }
+
          return jsxc.storage.removeElement(key, name, true);
       },
 
       /**
        * Triggered if changes are recognized
-       * 
+       *
        * @function
        * @param {event} e Storageevent
        * @param {String} e.key Keyname which triggered event
@@ -3824,11 +4281,12 @@ var jsxc;
       onStorage: function(e) {
 
          // skip
-         if (e.key === jsxc.storage.prefix + 'rid' || e.key === jsxc.storage.prefix + 'lastActivity') {
+         if (e.key === jsxc.storage.PREFIX + jsxc.storage.SEP + 'rid' || e.key === jsxc.storage.PREFIX + jsxc.storage.SEP + 'lastActivity') {
             return;
          }
 
-         var key = e.key.replace(/^jsxc\.(?:[\w\-]+-[\w\-]+\.)?(.*)/i, '$1');
+         var re = new RegExp('^' + jsxc.storage.PREFIX + jsxc.storage.SEP + '(?:[^' + jsxc.storage.SEP + ']+@[^' + jsxc.storage.SEP + ']+' + jsxc.storage.SEP + ')?(.*)', 'i');
+         var key = e.key.replace(re, '$1');
 
          // Workaround for non-conform browser: Triggered event on every page
          // (own)
@@ -3865,7 +4323,7 @@ var jsxc;
          }
 
          var n, o;
-         var cid = key.replace(/^[a-z]+_(.*)/i, '$1');
+         var bid = key.replace(new RegExp('[^' + jsxc.storage.SEP + ']+' + jsxc.storage.SEP + '(.*)', 'i'), '$1');
 
          // react if someone ask, if there is a master
          if (jsxc.master && key === 'alive') {
@@ -3916,7 +4374,7 @@ var jsxc;
             }
          }
 
-         if (key.match(/^chat_/)) {
+         if (key.match(new RegExp('^chat' + jsxc.storage.SEP))) {
 
             var posts = JSON.parse(e.newValue);
             var data, el;
@@ -3927,10 +4385,10 @@ var jsxc;
 
                if (el.length === 0) {
                   if (jsxc.master && data.direction === 'out') {
-                     jsxc.xmpp.sendMessage(cid, data.msg, data.uid);
+                     jsxc.xmpp.sendMessage(bid, data.msg, data.uid);
                   }
 
-                  jsxc.gui.window._postMessage(cid, data);
+                  jsxc.gui.window._postMessage(bid, data);
                } else if (data.received) {
                   el.addClass('jsxc_received');
                }
@@ -3938,39 +4396,39 @@ var jsxc;
             return;
          }
 
-         if (key.match(/^window_/)) {
+         if (key.match(new RegExp('^window' + jsxc.storage.SEP))) {
 
             if (!e.newValue) {
-               jsxc.gui.window._close(cid);
+               jsxc.gui.window._close(bid);
                return;
             }
 
             if (!e.oldValue) {
-               jsxc.gui.window.open(cid);
+               jsxc.gui.window.open(bid);
                return;
             }
 
             n = JSON.parse(e.newValue);
 
             if (n.minimize) {
-               jsxc.gui.window._hide(cid);
+               jsxc.gui.window._hide(bid);
             } else {
-               jsxc.gui.window._show(cid);
+               jsxc.gui.window._show(bid);
             }
 
-            jsxc.gui.window.setText(cid, n.text);
+            jsxc.gui.window.setText(bid, n.text);
 
             return;
          }
 
-         if (key.match(/^smp_/)) {
+         if (key.match(new RegExp('^smp' + jsxc.storage.SEP))) {
 
             if (!e.newValue) {
 
                jsxc.gui.dialog.close();
 
                if (jsxc.master) {
-                  jsxc.otr.objects[cid].sm.abort();
+                  jsxc.otr.objects[bid].sm.abort();
                }
 
                return;
@@ -3980,61 +4438,61 @@ var jsxc;
 
             if (typeof (n.data) !== 'undefined') {
 
-               jsxc.otr.onSmpQuestion(cid, n.data);
+               jsxc.otr.onSmpQuestion(bid, n.data);
 
             } else if (jsxc.master && n.sec) {
                jsxc.gui.dialog.close();
 
-               jsxc.otr.sendSmpReq(cid, n.sec, n.quest);
+               jsxc.otr.sendSmpReq(bid, n.sec, n.quest);
             }
          }
 
-         if (!jsxc.master && key.match(/^buddy_/)) {
+         if (!jsxc.master && key.match(new RegExp('^buddy' + jsxc.storage.SEP))) {
 
             if (!e.newValue) {
-               jsxc.gui.roster.purge(cid);
+               jsxc.gui.roster.purge(bid);
                return;
             }
             if (!e.oldValue) {
-               jsxc.gui.roster.add(cid);
+               jsxc.gui.roster.add(bid);
                return;
             }
 
             n = JSON.parse(e.newValue);
             o = JSON.parse(e.oldValue);
 
-            jsxc.gui.update(cid);
+            jsxc.gui.update(bid);
 
             if (o.status !== n.status || o.sub !== n.sub) {
-               jsxc.gui.roster.reorder(cid);
+               jsxc.gui.roster.reorder(bid);
             }
          }
 
-         if (jsxc.master && key.match(/^deletebuddy_/) && e.newValue) {
+         if (jsxc.master && key.match(new RegExp('^deletebuddy' + jsxc.storage.SEP)) && e.newValue) {
             n = JSON.parse(e.newValue);
 
             jsxc.xmpp.removeBuddy(n.jid);
             jsxc.storage.removeUserItem(key);
          }
 
-         if (jsxc.master && key.match(/^buddy_/)) {
+         if (jsxc.master && key.match(new RegExp('^buddy' + jsxc.storage.SEP))) {
 
             n = JSON.parse(e.newValue);
             o = JSON.parse(e.oldValue);
 
             if (o.transferReq !== n.transferReq) {
-               jsxc.storage.updateItem('buddy_' + cid, 'transferReq', -1);
+               jsxc.storage.updateUserItem('buddy', bid, 'transferReq', -1);
 
                if (n.transferReq === 0) {
-                  jsxc.otr.goPlain(cid);
+                  jsxc.otr.goPlain(bid);
                }
                if (n.transferReq === 1) {
-                  jsxc.otr.goEncrypt(cid);
+                  jsxc.otr.goEncrypt(bid);
                }
             }
 
             if (o.name !== n.name) {
-               jsxc.gui.roster._rename(cid, n.name);
+               jsxc.gui.roster._rename(bid, n.name);
             }
          }
 
@@ -4059,15 +4517,102 @@ var jsxc;
             }
          }
 
-         if (jsxc.master && key.match(/^add_/)) {
+         /*if (jsxc.master && key.match(new RegExp('^add' + jsxc.storage.SEP))) {
             n = JSON.parse(e.newValue);
 
             jsxc.xmpp.addBuddy(n.username, n.alias);
-         }
+         }*/
 
-         if (e.key === 'jsxc_roster') {
+         if (key === 'roster') {
             jsxc.gui.roster.toggle();
          }
+
+         if (jsxc.master && key.match(new RegExp('^vcard' + jsxc.storage.SEP)) && e.newValue !== null && e.newValue.match(/^request:/)) {
+
+            jsxc.xmpp.loadVcard(bid, function(stanza) {
+               jsxc.storage.setUserItem('vcard', bid, {
+                  state: 'success',
+                  data: $('<div>').append(stanza).html()
+               });
+            }, function() {
+               jsxc.storage.setUserItem('vcard', bid, {
+                  state: 'error'
+               });
+            });
+         }
+
+         if (!jsxc.master && key.match(new RegExp('^vcard' + jsxc.storage.SEP)) && e.newValue !== null && !e.newValue.match(/^request:/)) {
+            n = JSON.parse(e.newValue);
+
+            if (typeof n.state !== 'undefined') {
+               $(document).trigger('loaded.vcard.jsxc', n);
+            }
+
+            jsxc.storage.removeUserItem('vcard', bid);
+         }
+      },
+
+      /**
+       * Save message to storage.
+       * 
+       * @memberOf jsxc.storage
+       * @param bid
+       * @param direction
+       * @param msg
+       * @return post
+       */
+      saveMessage: function(bid, direction, msg) {
+         var chat = jsxc.storage.getUserItem('chat', bid) || [];
+
+         var uid = new Date().getTime() + ':msg';
+
+         if (chat.length > jsxc.options.numberOfMsg) {
+            chat.pop();
+         }
+
+         var post = {
+            direction: direction,
+            msg: msg,
+            uid: uid.replace(/:/, '-'),
+            received: false
+         };
+
+         chat.unshift(post);
+         jsxc.storage.setUserItem('chat', bid, chat);
+
+         return post;
+      },
+
+      /**
+       * Save or update buddy data.
+       * 
+       * @memberOf jsxc.storage
+       * @param bid
+       * @param data
+       * @returns {String} Updated or created
+       */
+      saveBuddy: function(bid, data) {
+
+         if (jsxc.storage.getUserItem('buddy', bid)) {
+            jsxc.storage.updateUserItem('buddy', bid, data);
+
+            return 'updated';
+         }
+
+         jsxc.storage.setUserItem('buddy', bid, $.extend({
+            jid: '',
+            name: '',
+            status: 0,
+            sub: 'none',
+            msgstate: 0,
+            transferReq: -1,
+            trust: false,
+            fingerprint: null,
+            res: [],
+            type: 'chat'
+         }, data));
+
+         return 'created';
       }
    };
 
@@ -4081,34 +4626,34 @@ var jsxc;
       dsaFallback: null,
       /**
        * Handler for otr receive event
-       * 
+       *
        * @memberOf jsxc.otr
-       * @param {string} cid
+       * @param {string} bid
        * @param {string} msg received message
        * @param {string} encrypted True, if msg was encrypted.
        */
-      receiveMessage: function(cid, msg, encrypted) {
+      receiveMessage: function(bid, msg, encrypted) {
 
-         if (jsxc.otr.objects[cid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT) {
-            jsxc.otr.backup(cid);
+         if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT) {
+            jsxc.otr.backup(bid);
          }
 
-         if (jsxc.otr.objects[cid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
-            jsxc.gui.window.postMessage(cid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']');
+         if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']');
          } else {
-            jsxc.gui.window.postMessage(cid, 'in', msg);
+            jsxc.gui.window.postMessage(bid, 'in', msg);
          }
       },
 
       /**
        * Handler for otr send event
-       * 
+       *
        * @param {string} jid
        * @param {string} msg message to be send
        */
       sendMessage: function(jid, msg, uid) {
-         if (jsxc.otr.objects[jsxc.jidToCid(jid)].msgstate !== 0) {
-            jsxc.otr.backup(jsxc.jidToCid(jid));
+         if (jsxc.otr.objects[jsxc.jidToBid(jid)].msgstate !== 0) {
+            jsxc.otr.backup(jsxc.jidToBid(jid));
          }
 
          jsxc.xmpp._sendMessage(jid, msg, uid);
@@ -4116,13 +4661,13 @@ var jsxc;
 
       /**
        * Create new otr instance
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
        * @returns {undefined}
        */
-      create: function(cid) {
+      create: function(bid) {
 
-         if (jsxc.otr.objects.hasOwnProperty(cid)) {
+         if (jsxc.otr.objects.hasOwnProperty(bid)) {
             return;
          }
 
@@ -4130,44 +4675,55 @@ var jsxc;
             return;
          }
 
-         jsxc.otr.objects[cid] = new OTR(jsxc.options.otr);
+         // save list of otr objects
+         var ol = jsxc.storage.getUserItem('otrlist') || [];
+         if (ol.indexOf(bid) < 0) {
+            ol.push(bid);
+            jsxc.storage.setUserItem('otrlist', ol);
+         }
+
+         jsxc.otr.objects[bid] = new OTR(jsxc.options.otr);
 
          if (jsxc.options.otr.SEND_WHITESPACE_TAG) {
-            jsxc.otr.objects[cid].SEND_WHITESPACE_TAG = true;
+            jsxc.otr.objects[bid].SEND_WHITESPACE_TAG = true;
          }
 
          if (jsxc.options.otr.WHITESPACE_START_AKE) {
-            jsxc.otr.objects[cid].WHITESPACE_START_AKE = true;
+            jsxc.otr.objects[bid].WHITESPACE_START_AKE = true;
          }
 
-         jsxc.otr.objects[cid].on('status', function(status) {
-            var data = jsxc.storage.getUserItem('buddy_' + cid);
+         jsxc.otr.objects[bid].on('status', function(status) {
+            var data = jsxc.storage.getUserItem('buddy', bid);
+
+            if (data === null) {
+               return;
+            }
 
             switch (status) {
                case OTR.CONST.STATUS_SEND_QUERY:
-                  jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.trying_to_start_private_conversation);
+                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.trying_to_start_private_conversation);
                   break;
                case OTR.CONST.STATUS_AKE_SUCCESS:
-                  data.fingerprint = jsxc.otr.objects[cid].their_priv_pk.fingerprint();
+                  data.fingerprint = jsxc.otr.objects[bid].their_priv_pk.fingerprint();
                   data.msgstate = OTR.CONST.MSGSTATE_ENCRYPTED;
 
-                  var msg = (jsxc.otr.objects[cid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started;
-                  jsxc.gui.window.postMessage(cid, 'sys', msg);
+                  var msg = (jsxc.otr.objects[bid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started;
+                  jsxc.gui.window.postMessage(bid, 'sys', msg);
                   break;
                case OTR.CONST.STATUS_END_OTR:
                   data.fingerprint = null;
 
-                  if (jsxc.otr.objects[cid].msgstate === OTR.CONST.MSGSTATE_PLAINTEXT) {
+                  if (jsxc.otr.objects[bid].msgstate === OTR.CONST.MSGSTATE_PLAINTEXT) {
                      // we abort the private conversation
 
                      data.msgstate = OTR.CONST.MSGSTATE_PLAINTEXT;
-                     jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.private_conversation_aborted);
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.private_conversation_aborted);
 
                   } else {
                      // the buddy abort the private conversation
 
                      data.msgstate = OTR.CONST.MSGSTATE_FINISHED;
-                     jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.your_buddy_closed_the_private_conversation_you_should_do_the_same);
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.your_buddy_closed_the_private_conversation_you_should_do_the_same);
                   }
                   break;
                case OTR.CONST.STATUS_SMP_HANDLE:
@@ -4175,33 +4731,44 @@ var jsxc;
                   break;
             }
 
-            jsxc.storage.setUserItem('buddy_' + cid, data);
+            jsxc.storage.setUserItem('buddy', bid, data);
 
             // for encryption and verification state
-            jsxc.gui.update(cid);
+            jsxc.gui.update(bid);
          });
 
-         jsxc.otr.objects[cid].on('smp', function(type, data) {
+         jsxc.otr.objects[bid].on('smp', function(type, data) {
             switch (type) {
                case 'question': // verification request received
-                  jsxc.otr.onSmpQuestion(cid, data);
-                  jsxc.storage.setUserItem('smp_' + cid, {
+                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.Authentication_request_received);
+
+                  if ($('#jsxc_dialog').length > 0) {
+                     jsxc.otr.objects[bid].sm.abort();
+                     break;
+                  }
+
+                  jsxc.otr.onSmpQuestion(bid, data);
+                  jsxc.storage.setUserItem('smp_' + bid, {
                      data: data || null
                   });
+
                   break;
                case 'trust': // verification completed
-                  jsxc.otr.objects[cid].trust = data;
-                  jsxc.storage.updateUserItem('buddy_' + cid, 'trust', data);
-                  jsxc.otr.backup(cid);
-                  jsxc.gui.update(cid);
+                  jsxc.otr.objects[bid].trust = data;
+                  jsxc.storage.updateUserItem('buddy', bid, 'trust', data);
+                  jsxc.otr.backup(bid);
+                  jsxc.gui.update(bid);
 
                   if (data) {
-                     jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.conversation_is_now_verified);
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.conversation_is_now_verified);
                   } else {
-                     jsxc.gui.window.postMessage(cid, 'sys', jsxc.l.verification_fails);
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_failed);
                   }
-                  jsxc.storage.removeUserItem('smp_' + cid);
+                  jsxc.storage.removeUserItem('smp_' + bid);
                   jsxc.gui.dialog.close();
+                  break;
+               case 'abort':
+                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.Authentication_aborted);
                   break;
                default:
                   jsxc.debug('[OTR] sm callback: Unknown type: ' + type);
@@ -4209,36 +4776,40 @@ var jsxc;
          });
 
          // Receive message
-         jsxc.otr.objects[cid].on('ui', function(msg, encrypted) {
-            jsxc.otr.receiveMessage(cid, msg, encrypted === true);
+         jsxc.otr.objects[bid].on('ui', function(msg, encrypted) {
+            jsxc.otr.receiveMessage(bid, msg, encrypted === true);
          });
 
          // Send message
-         jsxc.otr.objects[cid].on('io', function(msg, uid) {
-            jsxc.otr.sendMessage($('#jsxc_window_' + cid).data('jid'), msg, uid);
+         jsxc.otr.objects[bid].on('io', function(msg, uid) {
+            var jid = jsxc.gui.window.get(bid).data('jid') || jsxc.otr.objects[bid].jid;
+
+            jsxc.otr.objects[bid].jid = jid;
+
+            jsxc.otr.sendMessage(jid, msg, uid);
          });
 
-         jsxc.otr.objects[cid].on('error', function(err) {
+         jsxc.otr.objects[bid].on('error', function(err) {
             // Handle this case in jsxc.otr.receiveMessage
             if (err !== 'Received an unencrypted message.') {
-               jsxc.gui.window.postMessage(cid, 'sys', '[OTR] ' + jsxc.translate('%%' + err + '%%'));
+               jsxc.gui.window.postMessage(bid, 'sys', '[OTR] ' + jsxc.translate('%%' + err + '%%'));
             }
 
             jsxc.error('[OTR] ' + err);
          });
 
-         jsxc.otr.restore(cid);
+         jsxc.otr.restore(bid);
       },
 
       /**
        * show verification dialog with related part (secret or question)
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
        * @param {string} [data]
        * @returns {undefined}
        */
-      onSmpQuestion: function(cid, data) {
-         jsxc.gui.showVerification(cid);
+      onSmpQuestion: function(bid, data) {
+         jsxc.gui.showVerification(bid);
 
          $('#jsxc_dialog select').prop('selectedIndex', (data ? 2 : 3)).change();
          $('#jsxc_dialog > div:eq(0)').hide();
@@ -4251,81 +4822,82 @@ var jsxc;
             $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text(jsxc.l.your_buddy_is_attempting_to_determine_ + ' ' + jsxc.l.to_authenticate_to_your_buddy + jsxc.l.enter_the_secret);
          }
 
-         $('#jsxc_dialog a[rel=close]').click(function() {
-            jsxc.storage.removeUserItem('smp_' + cid);
+         $('#jsxc_dialog .jsxc_close').click(function() {
+            jsxc.storage.removeUserItem('smp_' + bid);
 
             if (jsxc.master) {
-               jsxc.otr.objects[cid].sm.abort();
+               jsxc.otr.objects[bid].sm.abort();
             }
          });
       },
 
       /**
        * Send verification request to buddy
-       * 
-       * @param {string} cid
+       *
+       * @param {string} bid
        * @param {string} sec secret
        * @param {string} [quest] question
        * @returns {undefined}
        */
-      sendSmpReq: function(cid, sec, quest) {
+      sendSmpReq: function(bid, sec, quest) {
          jsxc.keepBusyAlive();
 
-         jsxc.otr.objects[cid].smpSecret(sec, quest);
+         jsxc.otr.objects[bid].smpSecret(sec, quest || '');
       },
 
       /**
        * Toggle encryption state
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
        * @returns {undefined}
        */
-      toggleTransfer: function(cid) {
-         if (jsxc.storage.getUserItem('buddy_' + cid).msgstate === 0) {
-            jsxc.otr.goEncrypt(cid);
+      toggleTransfer: function(bid) {
+         if (jsxc.storage.getUserItem('buddy', bid).msgstate === 0) {
+            jsxc.otr.goEncrypt(bid);
          } else {
-            jsxc.otr.goPlain(cid);
+            jsxc.otr.goPlain(bid);
          }
       },
 
       /**
        * Send request to encrypt the session
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
        * @returns {undefined}
        */
-      goEncrypt: function(cid) {
+      goEncrypt: function(bid) {
          if (jsxc.master) {
-            jsxc.otr.objects[cid].sendQueryMsg();
+            jsxc.otr.objects[bid].sendQueryMsg();
          } else {
-            jsxc.storage.updateUserItem('buddy_' + cid, 'transferReq', 1);
+            jsxc.storage.updateUserItem('buddy', bid, 'transferReq', 1);
          }
       },
 
       /**
        * Abort encryptet session
-       * 
-       * @param {type} cid
+       *
+       * @param {type} bid
+       * @param cb callback
        * @returns {undefined}
        */
-      goPlain: function(cid) {
+      goPlain: function(bid, cb) {
          if (jsxc.master) {
-            jsxc.otr.objects[cid].endOtr.call(jsxc.otr.objects[cid]);
-            jsxc.otr.objects[cid].init.call(jsxc.otr.objects[cid]);
+            jsxc.otr.objects[bid].endOtr.call(jsxc.otr.objects[bid], cb);
+            jsxc.otr.objects[bid].init.call(jsxc.otr.objects[bid]);
 
-            jsxc.otr.backup(cid);
+            jsxc.otr.backup(bid);
          } else {
-            jsxc.storage.updateUserItem('buddy_' + cid, 'transferReq', 0);
+            jsxc.storage.updateUserItem('buddy', bid, 'transferReq', 0);
          }
       },
 
       /**
        * Backups otr session
-       * 
-       * @param {string} cid
+       *
+       * @param {string} bid
        */
-      backup: function(cid) {
-         var o = jsxc.otr.objects[cid]; // otr object
+      backup: function(bid) {
+         var o = jsxc.otr.objects[bid]; // otr object
          var r = {}; // return value
 
          if (o === null) {
@@ -4333,7 +4905,7 @@ var jsxc;
          }
 
          // all variables which should be saved
-         var savekey = [ 'our_instance_tag', 'msgstate', 'authstate', 'fragment', 'their_y', 'their_old_y', 'their_keyid', 'their_instance_tag', 'our_dh', 'our_old_dh', 'our_keyid', 'sessKeys', 'storedMgs', 'oldMacKeys', 'trust', 'transmittedRS', 'ssid', 'receivedPlaintext', 'authstate', 'send_interval' ];
+         var savekey = [ 'jid', 'our_instance_tag', 'msgstate', 'authstate', 'fragment', 'their_y', 'their_old_y', 'their_keyid', 'their_instance_tag', 'our_dh', 'our_old_dh', 'our_keyid', 'sessKeys', 'storedMgs', 'oldMacKeys', 'trust', 'transmittedRS', 'ssid', 'receivedPlaintext', 'authstate', 'send_interval' ];
 
          var i;
          for (i = 0; i < savekey.length; i++) {
@@ -4348,17 +4920,17 @@ var jsxc;
             r.otr_version = JSON.stringify(o.ake.otr_version);
          }
 
-         jsxc.storage.setUserItem('otr_' + cid, r);
+         jsxc.storage.setUserItem('otr', bid, r);
       },
 
       /**
        * Restore old otr session
-       * 
-       * @param {string} cid
+       *
+       * @param {string} bid
        */
-      restore: function(cid) {
-         var o = jsxc.otr.objects[cid];
-         var d = jsxc.storage.getUserItem('otr_' + cid);
+      restore: function(bid) {
+         var o = jsxc.otr.objects[bid];
+         var d = jsxc.storage.getUserItem('otr', bid);
 
          if (o !== null || d !== null) {
             var key;
@@ -4376,19 +4948,19 @@ var jsxc;
                }
             }
 
-            jsxc.otr.objects[cid] = o;
+            jsxc.otr.objects[bid] = o;
 
             if (o.msgstate === 1 && o.their_priv_pk !== null) {
-               o._smInit.call(jsxc.otr.objects[cid]);
+               o._smInit.call(jsxc.otr.objects[bid]);
             }
          }
 
-         $('#jsxc_window_' + cid).find('.jsxc_otr').removeClass('jsxc_disabled');
+         jsxc.otr.enable(bid);
       },
 
       /**
        * Create or load DSA key
-       * 
+       *
        * @returns {unresolved}
        */
       createDSA: function() {
@@ -4397,14 +4969,14 @@ var jsxc;
          }
 
          if (jsxc.storage.getUserItem('key') === null) {
-            var msg = jsxc.l.now_we_will_create_your_private_key_;
+            var msg = jsxc.l.Creating_your_private_key_;
             var worker = null;
 
             if (Worker) {
                // try to create web-worker
 
                try {
-                  worker = new Worker(jsxc.options.root + '/lib/otr/build/dsa-webworker.js');
+                  worker = new Worker('/javascripts/dsa-webworker.js');
                } catch (err) {
                   jsxc.warn('Couldn\'t create web-worker.', err);
                }
@@ -4430,7 +5002,15 @@ var jsxc;
 
                // start worker
                worker.postMessage({
-                  imports: [ jsxc.options.root + '/lib/otr/vendor/salsa20.js', jsxc.options.root + '/lib/otr/vendor/bigint.js', jsxc.options.root + '/lib/otr/vendor/crypto.js', jsxc.options.root + '/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/lib/otr/lib/const.js', jsxc.options.root + '/lib/otr/lib/helpers.js', jsxc.options.root + '/lib/otr/lib/dsa.js' ],
+                  imports: [
+                    '/assets/otr/dep/salsa20.js',
+                    '/assets/otr/dep/bigint.js',
+                    '/assets/otr/dep/crypto.js',
+                    '/assets/otr/dep/eventemitter.js',
+                    '/assets/otr-dep/const.js',
+                    '/assets/otr-dep/helpers.js',
+                    '/assets/otr-dep/dsa.js'
+                  ],
                   seed: BigInt.getSeed(),
                   debug: true
                });
@@ -4472,7 +5052,7 @@ var jsxc;
 
       /**
        * Ending of DSA key generation.
-       * 
+       *
        * @param {DSA} dsa DSA object
        */
       DSAready: function(dsa) {
@@ -4489,12 +5069,16 @@ var jsxc;
          }
 
          jsxc.otr._createDSA();
+      },
+
+      enable: function(bid) {
+         jsxc.gui.window.get(bid).find('.jsxc_otr').removeClass('jsxc_disabled');
       }
    };
 
    /**
     * This namespace handles the Notification API.
-    * 
+    *
     * @namespace jsxc.notification
     */
    jsxc.notification = {
@@ -4504,16 +5088,15 @@ var jsxc;
 
       /**
        * Register notification on incoming messages.
-       * 
+       *
        * @memberOf jsxc.notification
        */
       init: function() {
-         $(document).on('postmessagein.jsxc', function(event, jid, msg) {
+         $(document).on('postmessagein.jsxc', function(event, bid, msg) {
             msg = (msg.match(/^\?OTR/)) ? jsxc.translate('%%Encrypted message%%') : msg;
-            var data = jsxc.storage.getUserItem('buddy_' + jsxc.jidToCid(jid));
+            var data = jsxc.storage.getUserItem('buddy', bid);
 
-            jsxc.notification.playSound(jsxc.CONST.SOUNDS.MSG);
-            jsxc.notification.notify(jsxc.translate('%%New message from%% ') + data.name, msg);
+            jsxc.notification.notify(jsxc.translate('%%New message from%% ') + data.name, msg, undefined, undefined, jsxc.CONST.SOUNDS.MSG);
          });
 
          $(document).on('callincoming.jingle', function() {
@@ -4526,13 +5109,16 @@ var jsxc;
       },
 
       /**
-       * Shows a pop up notification.
+       * Shows a pop up notification and optional play sound.
        * 
-       * @param title
-       * @param msg
-       * @param d
+       * @param title Title
+       * @param msg Message
+       * @param d Duration
+       * @param force Should message also shown, if tab is visible?
+       * @param soundFile Playing given sound file
+       * @param loop Loop sound file?
        */
-      notify: function(title, msg, d, force) {
+      notify: function(title, msg, d, force, soundFile, loop) {
          if (!jsxc.options.notification || !jsxc.notification.hasPermission()) {
             return; // notifications disabled
          }
@@ -4543,8 +5129,13 @@ var jsxc;
 
          jsxc.toNotification = setTimeout(function() {
 
+            if (typeof soundFile === 'string') {
+               jsxc.notification.playSound(soundFile, loop, force);
+            }
+
             var popup = new Notification(jsxc.translate(title), {
-               body: jsxc.translate(msg)
+               body: jsxc.translate(msg),
+               icon: jsxc.options.root + '/img/XMPP_logo.png'
             });
 
             var duration = d || jsxc.options.popupDuration;
@@ -4554,13 +5145,13 @@ var jsxc;
                   popup.close();
                }, duration);
             }
-         }, 500);
+         }, jsxc.toNotificationDelay);
       },
 
       /**
        * Checks if browser has support for notifications and add on chrome to
        * the default api.
-       * 
+       *
        * @returns {Boolean} True if the browser has support.
        */
       hasSupport: function() {
@@ -4624,12 +5215,8 @@ var jsxc;
             });
 
             setTimeout(function() {
-               jsxc.gui.showConfirmDialog(jsxc.translate("%%Should we notify you_%%"), function() {
-                  jsxc.notification.requestPermission();
-               }, function() {
-                  $(document).trigger('notificationfailure.jsxc');
-               });
-            }, 2000);
+               jsxc.notice.add('%%Notifications%%?', '%%Should_we_notify_you_%%', 'gui.showRequestNotification');
+            }, 1000);
          });
       },
 
@@ -4652,7 +5239,7 @@ var jsxc;
 
       /**
        * Check permission.
-       * 
+       *
        * @returns {Boolean} True if we have the permission
        */
       hasPermission: function() {
@@ -4661,7 +5248,7 @@ var jsxc;
 
       /**
        * Plays the given file.
-       * 
+       *
        * @memberOf jsxc.notification
        * @param {string} soundFile File relative to the sound directory
        * @param {boolean} loop True for loop
@@ -4695,7 +5282,7 @@ var jsxc;
 
       /**
        * Stop/remove current sound.
-       * 
+       *
        * @memberOf jsxc.notification
        */
       stopSound: function() {
@@ -4709,7 +5296,7 @@ var jsxc;
 
       /**
        * Mute sound.
-       * 
+       *
        * @memberOf jsxc.notification
        * @param {boolean} external True if triggered from external tab. Default:
        *        false.
@@ -4724,7 +5311,7 @@ var jsxc;
 
       /**
        * Unmute sound.
-       * 
+       *
        * @memberOf jsxc.notification
        * @param {boolean} external True if triggered from external tab. Default:
        *        false.
@@ -4740,7 +5327,7 @@ var jsxc;
 
    /**
     * This namespace handle the notice system.
-    * 
+    *
     * @namspace jsxc.notice
     * @memberOf jsxc
     */
@@ -4750,7 +5337,7 @@ var jsxc;
 
       /**
        * Loads the saved notices.
-       * 
+       *
        * @memberOf jsxc.notice
        */
       load: function() {
@@ -4773,7 +5360,7 @@ var jsxc;
 
       /**
        * Add a new notice to the stack;
-       * 
+       *
        * @memberOf jsxc.notice
        * @param msg Header message
        * @param description Notice description
@@ -4820,14 +5407,13 @@ var jsxc;
             };
             jsxc.storage.setUserItem('notices', saved);
 
-            jsxc.notification.notify(msg, description || '', null, true);
-            jsxc.notification.playSound(jsxc.CONST.SOUNDS.NOTICE, false, true);
+            jsxc.notification.notify(msg, description || '', null, true, jsxc.CONST.SOUNDS.NOTICE);
          }
       },
 
       /**
        * Removes notice from stack
-       * 
+       *
        * @memberOf jsxc.notice
        * @param nid The notice id
        */
@@ -4845,47 +5431,47 @@ var jsxc;
 
    /**
     * Contains all available translations
-    * 
+    *
     * @namespace jsxc.l10n
     * @memberOf jsxc
     */
    jsxc.l10n = {
       en: {
-         please_wait_until_we_logged_you_in: 'Please wait until we logged you in...',
+         Logging_in: 'Logging in…',
          your_connection_is_unencrypted: 'Your connection is unencrypted.',
          your_connection_is_encrypted: 'Your connection is encrypted.',
          your_buddy_closed_the_private_connection: 'Your buddy closed the private connection.',
          start_private: 'Start private',
          close_private: 'Close private',
-         your_buddy_is_verificated: 'Your buddy is verificated.',
-         you_have_only_a_subscription_in_one_way: 'You have only a subscription in one way.',
-         verification_query_sent: 'Verification query sent.',
-         your_message_wasnt_send_please_end_your_private_conversation: 'Your message wasn\'t send. Please end your private conversation.',
+         your_buddy_is_verificated: 'Your buddy is verified.',
+         you_have_only_a_subscription_in_one_way: 'You only have a one-way subscription.',
+         authentication_query_sent: 'Authentication query sent.',
+         your_message_wasnt_send_please_end_your_private_conversation: 'Your message was not sent. Please end your private conversation.',
          unencrypted_message_received: 'Unencrypted message received:',
-         your_message_wasnt_send_because_you_have_no_valid_subscription: 'Your message was\'nt send, because you have no valid subscription.',
-         no_available: 'No available',
+         your_message_wasnt_send_because_you_have_no_valid_subscription: 'Your message was not sent because you have no valid subscription.',
+         not_available: 'Not available',
          no_connection: 'No connection!',
          relogin: 'relogin',
          trying_to_start_private_conversation: 'Trying to start private conversation!',
          Verified: 'Verified',
          Unverified: 'Unverified',
-         private_conversation_started: 'private conversation started.',
+         private_conversation_started: 'Private conversation started.',
          private_conversation_aborted: 'Private conversation aborted!',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Your buddy closed the private conversation! You should do the same.',
          conversation_is_now_verified: 'Conversation is now verified.',
-         verification_fails: 'Verification fails.',
+         authentication_failed: 'Authentication failed.',
          your_buddy_is_attempting_to_determine_: 'You buddy is attempting to determine if he or she is really talking to you.',
          to_authenticate_to_your_buddy: 'To authenticate to your buddy, ',
          enter_the_answer_and_click_answer: 'enter the answer and click Answer.',
          enter_the_secret: 'enter the secret.',
-         now_we_will_create_your_private_key_: 'Now we will create your private key. This can take some time.',
-         Authenticating_a_buddy_helps_: 'Authenticating a buddy helps ensure that the person you are talking to is who he or she is saying.',
-         How_do_you_want_to_authenticate_your_buddy: 'How do you want to authenticate {{cid_name}} (<b>{{cid_jid}}</b>)?',
+         Creating_your_private_key_: 'Creating your private key; this may take a while.',
+         Authenticating_a_buddy_helps_: 'Authenticating a buddy helps ensure that the person you are talking to is really the one he or she claims to be.',
+         How_do_you_want_to_authenticate_your_buddy: 'How do you want to authenticate {{bid_name}} (<b>{{bid_jid}}</b>)?',
          Select_method: 'Select method...',
          Manual: 'Manual',
          Question: 'Question',
          Secret: 'Secret',
-         To_verify_the_fingerprint_: 'To verify the fingerprint, contact your buddy via some other authenticated channel, such as the telephone.',
+         To_verify_the_fingerprint_: 'To verify the fingerprint, contact your buddy via some other trustworthy channel, such as the telephone.',
          Your_fingerprint: 'Your fingerprint',
          Buddy_fingerprint: 'Buddy fingerprint',
          Close: 'Close',
@@ -4895,7 +5481,7 @@ var jsxc;
          To_authenticate_pick_a_secret_: 'To authenticate, pick a secret known only to you and your buddy.',
          Compare: 'Compare',
          Fingerprints: 'Fingerprints',
-         Authentifikation: 'Authentifikation',
+         Authentication: 'Authentication',
          Message: 'Message',
          Add_buddy: 'Add buddy',
          rename_buddy: 'rename buddy',
@@ -4905,7 +5491,7 @@ var jsxc;
          Password: 'Password',
          Cancel: 'Cancel',
          Connect: 'Connect',
-         Type_in_the_full_username_: 'Type in the full username and optional an alias.',
+         Type_in_the_full_username_: 'Type in the full username and an optional alias.',
          Alias: 'Alias',
          Add: 'Add',
          Subscription_request: 'Subscription request',
@@ -4913,18 +5499,18 @@ var jsxc;
          Deny: 'Deny',
          Approve: 'Approve',
          Remove_buddy: 'Remove buddy',
-         You_are_about_to_remove_: 'You are about to remove {{cid_name}} (<b>{{cid_jid}}</b>) from your buddy list. All related chats will be closed.',
-         Continue: 'Continue',
+         You_are_about_to_remove_: 'You are about to remove {{bid_name}} (<b>{{bid_jid}}</b>) from your buddy list. All related chats will be closed.',
+         Continue_without_chat: 'Continue without chat',
          Please_wait: 'Please wait',
-         Login_failed: 'Login failed',
-         Sorry_we_cant_authentikate_: 'Sorry, we can\'t authentikate you at our chat server. Maybe the password is wrong?',
-         Retry: 'Retry',
+         Login_failed: 'Chat login failed',
+         Sorry_we_cant_authentikate_: 'Authentication failed with the chat server. Maybe the password is wrong?',
+         Retry: 'Back',
          clear_history: 'Clear history',
          New_message_from: 'New message from',
          Should_we_notify_you_: 'Should we notify you about new messages in the future?',
          Please_accept_: 'Please click the "Allow" button at the top.',
-         Hide_offline: 'Hide offline',
-         Show_offline: 'Show offline',
+         Hide_offline: 'Hide offline contacts',
+         Show_offline: 'Show offline contacts',
          About: 'About',
          dnd: 'Do Not Disturb',
          Mute: 'Mute',
@@ -4939,7 +5525,7 @@ var jsxc;
          offline: 'offline',
          none: 'none',
          Unknown_instance_tag: 'Unknown instance tag.',
-         Not_of_our_latest_keys: 'Not of our latest key.',
+         Not_one_of_our_latest_keys: 'Not one of our latest keys.',
          Received_an_unreadable_encrypted_message: 'Received an unreadable encrypted message.',
          Online: 'Online',
          Chatty: 'Chatty',
@@ -4951,10 +5537,10 @@ var jsxc;
          Dismiss: 'Dismiss',
          Remove: 'Remove',
          Online_help: 'Online help',
-         FN: 'Full Name',
+         FN: 'Full name',
          N: ' ',
-         FAMILY: 'Family Name',
-         GIVEN: 'Given Name',
+         FAMILY: 'Family name',
+         GIVEN: 'Given name',
          NICKNAME: 'Nickname',
          URL: 'URL',
          ADR: 'Address',
@@ -4971,13 +5557,13 @@ var jsxc;
          ORG: 'Organization',
          ORGNAME: 'Name',
          ORGUNIT: 'Unit',
-         TITLE: 'Job Title',
+         TITLE: 'Job title',
          ROLE: 'Role',
          BDAY: 'Birthday',
          DESC: 'Description',
          PHOTO: ' ',
-         send_message: 'send message',
-         get_info: 'get info',
+         send_message: 'Send message',
+         get_info: 'Show information',
          Settings: 'Settings',
          Priority: 'Priority',
          Save: 'Save',
@@ -4987,15 +5573,23 @@ var jsxc;
          new_buddy: 'new buddy',
          is: 'is',
          Login_options: 'Login options',
-         BOSH_url: 'BOSH url',
+         BOSH_url: 'BOSH URL',
          Domain: 'Domain',
          Resource: 'Resource',
          On_login: 'On login',
          Received_an_unencrypted_message: 'Received an unencrypted message',
-         Sorry_your_buddy_doesnt_provide_any_information: 'Sorry, your buddy doesn\'t provide any information.'
+         Sorry_your_buddy_doesnt_provide_any_information: 'Sorry, your buddy does not provide any information.',
+         Info_about: 'Info about',
+         Authentication_aborted: 'Authentication aborted.',
+         Authentication_request_received: 'Authentication request received.',
+         Do_you_want_to_display_them: 'Do you want to display them?',
+         Log_in_without_chat: 'Log in without chat',
+         has_come_online: 'has come online',
+         Unknown_sender: 'Unknown sender',
+         You_received_a_message_from_an_unknown_sender: 'You received a message from an unknown sender'
       },
       de: {
-         please_wait_until_we_logged_you_in: 'Bitte warte bis wir dich eingeloggt haben.',
+         Logging_in: 'Login läuft…',
          your_connection_is_unencrypted: 'Deine Verbindung ist UNverschlüsselt.',
          your_connection_is_encrypted: 'Deine Verbindung ist verschlüsselt.',
          your_buddy_closed_the_private_connection: 'Dein Freund hat die private Verbindung getrennt.',
@@ -5003,11 +5597,11 @@ var jsxc;
          close_private: 'Privat abbrechen',
          your_buddy_is_verificated: 'Dein Freund ist verifiziert.',
          you_have_only_a_subscription_in_one_way: 'Die Freundschaft ist nur einseitig.',
-         verification_query_sent: 'Verifizierungsanfrage gesendet.',
+         authentication_query_sent: 'Authentifizierungsanfrage gesendet.',
          your_message_wasnt_send_please_end_your_private_conversation: 'Deine Nachricht wurde nicht gesendet. Bitte beende die private Konversation.',
          unencrypted_message_received: 'Unverschlüsselte Nachricht erhalten.',
          your_message_wasnt_send_because_you_have_no_valid_subscription: 'Deine Nachricht wurde nicht gesandt, da die Freundschaft einseitig ist.',
-         no_available: 'Nicht verfügbar.',
+         not_available: 'Nicht verfügbar.',
          no_connection: 'Keine Verbindung.',
          relogin: 'Neu anmelden.',
          trying_to_start_private_conversation: 'Versuche private Konversation zu starten.',
@@ -5017,14 +5611,14 @@ var jsxc;
          private_conversation_aborted: 'Private Konversation abgebrochen.',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Dein Freund hat die private Konversation beendet. Das solltest du auch tun!',
          conversation_is_now_verified: 'Konversation ist jetzt verifiziert',
-         verification_fails: 'Verifizierung fehlgeschlagen.',
+         authentication_failed: 'Authentifizierung fehlgeschlagen.',
          your_buddy_is_attempting_to_determine_: 'Dein Freund versucht herauszufinden ob er wirklich mit dir redet.',
          to_authenticate_to_your_buddy: 'Um dich gegenüber deinem Freund zu verifizieren ',
          enter_the_answer_and_click_answer: 'gib die Antwort ein und klick auf Antworten.',
          enter_the_secret: 'gib das Geheimnis ein.',
-         now_we_will_create_your_private_key_: 'Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.',
+         Creating_your_private_key_: 'Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.',
          Authenticating_a_buddy_helps_: 'Einen Freund zu authentifizieren hilft sicher zustellen, dass die Person mit der du sprichst auch die ist die sie sagt.',
-         How_do_you_want_to_authenticate_your_buddy: 'Wie willst du {{cid_name}} (<b>{{cid_jid}}</b>) authentifizieren?',
+         How_do_you_want_to_authenticate_your_buddy: 'Wie willst du {{bid_name}} (<b>{{bid_jid}}</b>) authentifizieren?',
          Select_method: 'Wähle...',
          Manual: 'Manual',
          Question: 'Frage',
@@ -5039,7 +5633,7 @@ var jsxc;
          To_authenticate_pick_a_secret_: 'Um deinen Freund zu authentifizieren, wähle ein Geheimnis welches nur deinem Freund und dir bekannt ist.',
          Compare: 'Vergleiche',
          Fingerprints: 'Fingerprints',
-         Authentifikation: 'Authentifizierung',
+         Authentication: 'Authentifizierung',
          Message: 'Nachricht',
          Add_buddy: 'Freund hinzufügen',
          rename_buddy: 'Freund umbenennen',
@@ -5057,12 +5651,12 @@ var jsxc;
          Deny: 'Ablehnen',
          Approve: 'Bestätigen',
          Remove_buddy: 'Freund entfernen',
-         You_are_about_to_remove_: 'Du bist gerade dabei {{cid_name}} (<b>{{cid_jid}}</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.',
-         Continue: 'Weiter',
+         You_are_about_to_remove_: 'Du bist gerade dabei {{bid_name}} (<b>{{bid_jid}}</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.',
+         Continue_without_chat: 'Weiter ohne Chat',
          Please_wait: 'Bitte warten',
-         Login_failed: 'Anmeldung fehlgeschlagen',
-         Sorry_we_cant_authentikate_: 'Wir können dich leider nicht anmelden. Vielleicht ist dein Passwort falsch?',
-         Retry: 'Neuer Versuch',
+         Login_failed: 'Chat-Anmeldung fehlgeschlagen',
+         Sorry_we_cant_authentikate_: 'Der Chatserver hat die Anmeldung abgelehnt. Falsches Passwort?',
+         Retry: 'Zurück',
          clear_history: 'Lösche Verlauf',
          New_message_from: 'Neue Nachricht von',
          Should_we_notify_you_: 'Sollen wir dich in Zukunft über eingehende Nachrichten informieren, auch wenn dieser Tab nicht im Vordergrund ist?',
@@ -5084,7 +5678,7 @@ var jsxc;
          offline: 'offline',
          none: 'keine',
          Unknown_instance_tag: 'Unbekannter instance tag.',
-         Not_of_our_latest_keys: 'Nicht einer unserer letzten Schlüssel.',
+         Not_one_of_our_latest_keys: 'Nicht einer unserer letzten Schlüssel.',
          Received_an_unreadable_encrypted_message: 'Eine unlesbare verschlüsselte Nachricht erhalten.',
          Online: 'Online',
          Chatty: 'Gesprächig',
@@ -5137,10 +5731,18 @@ var jsxc;
          Resource: 'Ressource',
          On_login: 'Beim Anmelden',
          Received_an_unencrypted_message: 'Unverschlüsselte Nachricht empfangen',
-         Sorry_your_buddy_doesnt_provide_any_information: 'Dein Freund stellt leider keine Informationen bereit.'
+         Sorry_your_buddy_doesnt_provide_any_information: 'Dein Freund stellt leider keine Informationen bereit.',
+         Info_about: 'Info über',
+         Authentication_aborted: 'Authentifizierung abgebrochen.',
+         Authentication_request_received: 'Authentifizierunganfrage empfangen.',
+         Log_in_without_chat: 'Anmelden ohne Chat',
+         Do_you_want_to_display_them: 'Möchtest du sie sehen?',
+         has_come_online: 'ist online gekommen',
+         Unknown_sender: 'Unbekannter Sender',
+         You_received_a_message_from_an_unknown_sender: 'Du hast eine Nachricht von einem unbekannten Sender erhalten'
       },
       es: {
-         please_wait_until_we_logged_you_in: 'Por favor, espere...',
+         Logging_in: 'Por favor, espere...',
          your_connection_is_unencrypted: 'Su conexión no está cifrada.',
          your_connection_is_encrypted: 'Su conexión está cifrada.',
          your_buddy_closed_the_private_connection: 'Su amigo ha cerrado la conexión privada.',
@@ -5148,11 +5750,11 @@ var jsxc;
          close_private: 'Cerrar privado',
          your_buddy_is_verificated: 'Tu amigo está verificado.',
          you_have_only_a_subscription_in_one_way: 'Sólo tienes una suscripción de un modo.',
-         verification_query_sent: 'Consulta de verificación enviada.',
+         authentication_query_sent: 'Consulta de verificación enviada.',
          your_message_wasnt_send_please_end_your_private_conversation: 'Su mensaje no fue enviado. Por favor, termine su conversación privada.',
          unencrypted_message_received: 'Mensaje no cifrado recibido:',
          your_message_wasnt_send_because_you_have_no_valid_subscription: 'Su mensaje no se ha enviado, porque usted no tiene suscripción válida.',
-         no_available: 'No disponible',
+         not_available: 'No disponible',
          no_connection: 'Sin conexión!',
          relogin: 'iniciar sesión nuevamente',
          trying_to_start_private_conversation: 'Intentando iniciar una conversación privada!',
@@ -5162,14 +5764,14 @@ var jsxc;
          private_conversation_aborted: 'Conversación privada abortada!',
          your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Su amigo cerró la conversación privada! Usted debería hacer lo mismo.',
          conversation_is_now_verified: 'La conversación es ahora verificada.',
-         verification_fails: 'Fallo la verificación.',
+         authentication_failed: 'Fallo la verificación.',
          your_buddy_is_attempting_to_determine_: 'Tu amigo está tratando de determinar si él o ella está realmente hablando con usted.',
          to_authenticate_to_your_buddy: 'Para autenticar a su amigo, ',
          enter_the_answer_and_click_answer: 'introduce la respuesta y haga clic en Contestar.',
          enter_the_secret: 'especifique el secreto.',
-         now_we_will_create_your_private_key_: 'Ahora vamos a crear su clave privada. Esto puede tomar algún tiempo.',
+         Creating_your_private_key_: 'Ahora vamos a crear su clave privada. Esto puede tomar algún tiempo.',
          Authenticating_a_buddy_helps_: 'Autenticación de un amigo ayuda a garantizar que la persona que está hablando es quien él o ella está diciendo.',
-         How_do_you_want_to_authenticate_your_buddy: '¿Cómo desea autenticar {{cid_name}} (<b>{{cid_jid}}</b>)?',
+         How_do_you_want_to_authenticate_your_buddy: '¿Cómo desea autenticar {{bid_name}} (<b>{{bid_jid}}</b>)?',
          Select_method: 'Escoja un método...',
          Manual: 'Manual',
          Question: 'Pregunta',
@@ -5184,7 +5786,7 @@ var jsxc;
          To_authenticate_pick_a_secret_: 'Para autenticar, elija un secreto conocido sólo por usted y su amigo.',
          Compare: 'Comparar',
          Fingerprints: 'Firmas digitales',
-         Authentifikation: 'Autenticación',
+         Authentication: 'Autenticación',
          Message: 'Mensaje',
          Add_buddy: 'Añadir amigo',
          rename_buddy: 'renombrar amigo',
@@ -5202,8 +5804,8 @@ var jsxc;
          Deny: 'Rechazar',
          Approve: 'Aprobar',
          Remove_buddy: 'Eliminar amigo',
-         You_are_about_to_remove_: 'Vas a eliminar a {{cid_name}} (<b>{{cid_jid}}</b>) de tu lista de amigos. Todas las conversaciones relacionadas serán cerradas.',
-         Continue: 'Continuar',
+         You_are_about_to_remove_: 'Vas a eliminar a {{bid_name}} (<b>{{bid_jid}}</b>) de tu lista de amigos. Todas las conversaciones relacionadas serán cerradas.',
+         Continue_without_chat: 'Continuar',
          Please_wait: 'Espere por favor',
          Login_failed: 'Fallo el inicio de sesión',
          Sorry_we_cant_authentikate_: 'Lo sentimos, no podemos autentificarlo en nuestro servidor de chat. ¿Tal vez la contraseña es incorrecta?',
@@ -5225,7 +5827,7 @@ var jsxc;
          offline: 'desconectado',
          none: 'nadie',
          Unknown_instance_tag: 'Etiqueta de instancia desconocida.',
-         Not_of_our_latest_keys: 'No de nuestra ultima tecla.',
+         Not_one_of_our_latest_keys: 'No de nuestra ultima tecla.',
          Received_an_unreadable_encrypted_message: 'Se recibió un mensaje cifrado ilegible.',
          Online: 'En linea',
          Chatty: 'Hablador',

@@ -31,11 +31,11 @@ p.jsxc_center {
 }
 
 li.jsxc_sep {
-	border-bottom: 1px solid black;
+	border-top: 1px solid black;
 }
 
-/*############################ 
- *########## Dialog ########## 
+/*############################
+ *########## Dialog ##########
  *############################*/
 #jsxc_dialog {
 	padding: 10px;
@@ -124,8 +124,8 @@ li.jsxc_sep {
 	background-color: #efefef;
 }
 
-/*############################ 
- *########## Overall ######### 
+/*############################
+ *########## Overall #########
  *############################*/
 li .jsxc_name {
 	overflow: hidden;
@@ -154,6 +154,8 @@ li .jsxc_name:hover {
 	overflow: hidden;
 	position: relative;
 	font-family: Arial;
+	background-size: cover;
+	background-position: center center;
 }
 
 .jsxc_avatar img {
@@ -165,21 +167,54 @@ li .jsxc_name:hover {
 	left: 0px;
 }
 
+.jsxc_spot {
+	display: inline-block;
+   width: 10px;
+   height: 10px;
+   background-color: #fff;
+   border-radius: 5px;
+   text-indent: -99999em;
+   margin-top: 3px;
+   margin-right: 5px;
+   border: 1px solid #000 !important;
+   line-height: 100%;
+}
+
+.jsxc_spot.jsxc_online, .jsxc_spot.jsxc_chat {
+   background-color: #00BFFF;
+}
+
+.jsxc_spot.jsxc_away, .jsxc_spot.jsxc_xa {
+   background-color: orange;
+}
+
+.jsxc_spot.jsxc_dnd {
+   background-color: red;
+}
+
+.jsxc_spot.jsxc_offline {
+   background-color: #A4A4A4;
+}
+
 /*############################ 
  *########## Roster ########## 
  *############################*/
 div#jsxc_roster {
 	position: fixed;
-	top: 0px;
+	top: 40px;
 	bottom: 0px;
 	right: 0px;
 	width: 200px;
 	overflow: visible;
-	border-left: 4px solid #A4A4A4;
+	border-left: 24px solid #A4A4A4;
 	z-index: 80;
 	margin-left: 10px;
 	box-shadow: 0px 0px 7px #000000;
 	background-color: #383C43;
+}
+
+div#jsxc_roster a{
+	cursor: pointer;
 }
 
 div#jsxc_roster .slimScrollDiv {
@@ -368,7 +403,7 @@ div#jsxc_roster>.jsxc_bottom ul li:last-child {
       -webkit-animation-timing-function: ease-in;
    }
    12% {
-      bottom: 5px; 
+      bottom: 5px;
       -webkit-animation-timing-function: ease-out;
    }
    25% {
@@ -394,7 +429,7 @@ div#jsxc_roster>.jsxc_bottom ul li:last-child {
       animation-timing-function: ease-in;
    }
    12% {
-      bottom: 5px; 
+      bottom: 5px;
       animation-timing-function: ease-out;
    }
    25% {
@@ -447,6 +482,27 @@ ul#jsxc_buddylist li {
 
 ul#jsxc_buddylist .jsxc_name {
 	padding-right: 30px;
+}
+
+ul#jsxc_buddylist li .jsxc_name:before {
+	content: ' ';
+	width: 0px;
+	height: 0px;
+	display: inline-block;
+	opacity: 0.0;
+	-webkit-transition: width 0.5s, opacity 0.5s;
+   transition: width 0.5s, opacity 0.5s;
+}
+
+ul#jsxc_buddylist li.jsxc_unreadMsg .jsxc_name:before {
+   width: 12px;
+   height: 12px;
+   border-radius: 6px;
+   background-color: orange;
+   margin-right: 3px;
+   opacity: 1.0;
+   -webkit-transition: width 0.5s, opacity 0.5s;
+   transition: width 0.5s, opacity 0.5s;
 }
 
 ul#jsxc_buddylist li.jsxc_expand {
@@ -517,11 +573,11 @@ ul#jsxc_buddylist li.jsxc_expand .jsxc_avatar, ul#jsxc_buddylist li.jsxc_expand 
 #jsxc_buddylist .jsxc_options > div:hover {
 	opacity: 1;
 }
-#jsxc_buddylist .jsxc_chaticon {	
+#jsxc_buddylist .jsxc_chaticon {
 	background-image: url('img/speech_balloon_white.svg');
 	background-size: 15px 15px;
 }
-#jsxc_buddylist .jsxc_videoicon { 
+#jsxc_buddylist .jsxc_videoicon {
    background-image: url('img/camera_icon_white.svg');
    background-size: 13px 13px;
 }
@@ -535,7 +591,7 @@ ul#jsxc_buddylist li.jsxc_expand .jsxc_avatar, ul#jsxc_buddylist li.jsxc_expand 
 }
 
 ul#jsxc_buddylist li:hover {
-	
+
 }
 
 ul#jsxc_buddylist .jsxc_oneway {
@@ -564,9 +620,11 @@ ul#jsxc_buddylist .jsxc_right div {
 	color: #fff;
 }
 
-ul#jsxc_buddylist li[data-type!="chat"] .jsxc_right {
-	display: none;
-}
+/** Sass::SyntaxError: Invalid CSS 'data-type!="chat"'
+ * ul#jsxc_buddylist li[data-type!="chat"] .jsxc_right {
+ *	display: none;
+ * }
+ */
 
 ul#jsxc_buddylist .jsxc_right div:hover {
 	opacity: 1.0;
@@ -589,14 +647,15 @@ ul#jsxc_buddylist .jsxc_delete {
 }
 
 div#jsxc_toggleRoster {
-	width: 14px;
+	width: 34px;
 	height: 100%;
 	position: absolute;
-	left: -14px !important;
+	left: -34px !important;
 	top: 0px;
 	z-index: 110;
 	background-color: transparent;
 	cursor: pointer;
+	display: table;
 }
 
 #jsxc_toggleRoster:hover {
@@ -604,8 +663,14 @@ div#jsxc_toggleRoster {
 	opacity: 0.5;
 }
 
-/*############################ 
- *###### Window List ######### 
+#jsxc_toggleRoster_text{
+      display: table-cell;
+      vertical-align: middle;
+      padding-left: 14px;
+}
+
+/*############################
+ *###### Window List #########
  *############################*/
 div#jsxc_windowList {
 	position: fixed;
@@ -682,8 +747,8 @@ div#jsxc_windowList>ul>li.jsxc_min {
 	display: none;
 }
 
-/*############################ 
- *######### Window ########### 
+/*############################
+ *######### Window ###########
  *############################*/
 div.jsxc_bar {
 	background-color: #282323;
@@ -763,6 +828,7 @@ div.jsxc_window .jsxc_emoticons ul {
 	padding: 3px;
 	border-radius: 3px;
 	z-index: 200;
+	list-style-type: none;
 }
 
 div.jsxc_window .jsxc_emoticons ul:after {
@@ -783,12 +849,15 @@ div.jsxc_window .jsxc_emoticons li {
 	cursor: pointer;
 }
 
-div.jsxc_window .jsxc_emoticons img {
+div.jsxc_window .jsxc_emoticons div {
 	cursor: pointer;
 	border-radius: 3px;
+	background-size: 30px 30px;
+	width: 30px;
+	height: 30px;
 }
 
-div.jsxc_window .jsxc_emoticons img:hover {
+div.jsxc_window .jsxc_emoticons div:hover {
 	background-color: rgba(255, 255, 255, 0.8);
 }
 
@@ -797,7 +866,7 @@ div.jsxc_window .jsxc_emoticons img:hover {
 	position: relative;
 }
 
-.jsxc_window .jsxc_gradient { 
+.jsxc_window .jsxc_gradient {
 	display:none;
 	position: absolute;
 	top: 0px;
@@ -858,6 +927,7 @@ div.jsxc_chatmessage a {
 div.jsxc_chatmessage img {
 	width: 19px;
 	height: 19px;
+	background-size: 19px 19px;
 }
 
 /** incoming message */
@@ -1069,8 +1139,8 @@ div.jsxc_transfer.jsxc_enc.jsxc_trust {
 	outline: none;
 }
 
-/*############################ 
- *######### Other ############ 
+/*############################
+ *######### Other ############
  *############################*/
 ul.jsxc_vCard {
 	min-width: 400px;
@@ -1085,7 +1155,7 @@ ul.jsxc_vCard li {
 }
 
 ul.jsxc_vCard strong {
-	
+
 }
 
 img.jsxc_vCard {
@@ -1131,3 +1201,54 @@ img.jsxc_vCard {
    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a4a4a4',
       endColorstr='#00282323', GradientType=0); /* IE6-9 */
 }
+
+.jsxc_emoticon {
+  width: 19px;
+  height: 19px;
+  background-size: 19px 19px !important;
+  border: 0px;
+}
+
+.jsxc_angel { background: url('img/emotions/angel.png') }
+
+.jsxc_angry { background: url('img/emotions/angry.png') }
+
+.jsxc_smile { background: url('img/emotions/smile.png') }
+
+.jsxc_grin { background: url('img/emotions/grin.png') }
+
+.jsxc_sad { background: url('img/emotions/sad.png') }
+
+.jsxc_wink { background: url('img/emotions/wink.png') }
+
+.jsxc_tonguesmile { background: url('img/emotions/tonguesmile.png') }
+
+.jsxc_surprised { background: url('img/emotions/surprised.png') }
+
+.jsxc_kiss { background: url('img/emotions/kiss.png') }
+
+.jsxc_sunglassess { background: url('img/emotions/sunglassess.png') }
+
+.jsxc_crysad { background: url('img/emotions/crysad.png') }
+
+.jsxc_doubt { background: url('img/emotions/doubt.png') }
+
+.jsxc_zip { background: url('img/emotions/zip.png') }
+
+.jsxc_thumbsup { background: url('img/emotions/thumbsup.png') }
+
+.jsxc_thumbsdown { background: url('img/emotions/thumbsdown.png') }
+
+.jsxc_beer { background: url('img/emotions/beer.png') }
+
+.jsxc_devil { background: url('img/emotions/devil.png') }
+
+.jsxc_kissing { background: url('img/emotions/kissing.png') }
+
+.jsxc_rose { background: url('img/emotions/rose.png') }
+
+.jsxc_music { background: url('img/emotions/music.png') }
+
+.jsxc_love { background: url('img/emotions/love.png') }
+
+.jsxc_tired { background: url('img/emotions/tired.png') }

@@ -1,0 +1,72 @@
+[
+  {
+     "file": "build/lib/strophe.js",
+     "license": "multiple",
+     "url": "http://strophe.im/strophejs/"
+  },
+  {
+     "file": "build/lib/strophe.muc.js",
+     "license": "MIT",
+     "url": "https://github.com/strophe/strophejs-plugins"
+  },
+  {
+     "file": "build/lib/strophe.disco.js",
+     "license": "MIT",
+     "url": "https://github.com/strophe/strophejs-plugins"
+  },
+  {
+     "file": "build/lib/strophe.caps.js",
+     "license": "MIT",
+     "url": "https://github.com/strophe/strophejs-plugins"
+  },
+  {
+     "file": "build/lib/strophe.vcard.js",
+     "license": "MIT",
+     "url": "https://github.com/strophe/strophejs-plugins"
+  },
+  {
+     "file": "build/lib/strophe.jingle/strophe.jingle.js",
+     "license": "MIT",
+     "url": "https://github.com/ESTOS/strophe.jingle"
+  },
+  {
+     "file": "build/lib/strophe.jingle/strophe.jingle.session.js",
+     "license": "MIT",
+     "url": "https://github.com/ESTOS/strophe.jingle"
+  },
+  {
+     "file": "build/lib/strophe.jingle/strophe.jingle.sdp.js",
+     "license": "MIT",
+     "url": "https://github.com/ESTOS/strophe.jingle"
+  },
+  {
+     "file": "build/lib/strophe.jingle/strophe.jingle.adapter.js",
+     "license": "MIT",
+     "url": "https://github.com/ESTOS/strophe.jingle"
+  },
+  {
+     "file": "build/lib/otr/build/dep/salsa20.js",
+     "license": "GPLv3",
+     "url": "https://github.com/neoatlantis/node-salsa20"
+  },
+  {
+     "file": "build/lib/otr/build/dep/bigint.js",
+     "license": "public domain",
+     "url": "www.leemon.com"
+  },
+  {
+     "file": "build/lib/otr/build/dep/crypto.js",
+     "license": "code.google.com/p/crypto-js/wiki/license",
+     "url": "code.google.com/p/crypto-js"
+  },
+  {
+     "file": "build/lib/otr/build/dep/eventemitter.js",
+     "license": "MIT",
+     "url": "http://git.io/ee"
+  },
+  {
+     "file": "build/lib/otr/build/otr.js",
+     "license": "MPL v2.0",
+     "url": "https://arlolra.github.io/otr/"
+  }
+ ]
