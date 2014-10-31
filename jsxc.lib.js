@@ -3771,8 +3771,6 @@ var jsxc;
             return true;
          }
 
-         $(document).trigger('message.jsxc', [ from, body ]);
-
          var win = jsxc.gui.window.init(bid);
 
          // If we now the full jid, we use it
@@ -3782,6 +3780,8 @@ var jsxc;
                jid: from
             });
          }
+
+         $(document).trigger('message.jsxc', [ from, body ]);
 
          // create related otr object
          if (jsxc.master && !jsxc.otr.objects[bid]) {
