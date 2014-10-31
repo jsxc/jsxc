@@ -55,12 +55,11 @@ module.exports = function(grunt) {
       concat: {
          dep: {
             options: {
-               banner: '/*!' +
+               banner: '/*!\n' +
                   ' * <%= app.name %> v<%= app.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
                   ' * \n' +
                   ' * This file concatenates all dependencies of <%= app.name %>.\n' +
                   ' * \n' +
-                  ' * For the list of concatenated files and there licenses please see <%= app.homepage %> @github.\n' +
                   ' */\n\n',
                process: function(src, filepath) {
                   if (filepath === 'build/lib/otr/build/dep/crypto.js') { 
@@ -73,7 +72,7 @@ module.exports = function(grunt) {
                }
             },
             src: dep_files,
-            dest: 'build/jsxc.dep.js'
+            dest: 'build/lib/jsxc.dep.js'
          },
          jsxc: {
             options: {
@@ -91,7 +90,7 @@ module.exports = function(grunt) {
                preserveComments: 'some'
             },
             files: {
-               'build/jsxc.dep.min.js': ['build/jsxc.dep.js'],
+               'build/lib/jsxc.dep.min.js': ['build/lib/jsxc.dep.js'],
                'build/jsxc.min.js': ['build/jsxc.js']
             }
          }
@@ -162,7 +161,4 @@ module.exports = function(grunt) {
 
    // before commit
    grunt.registerTask('commit', [ 'jshint', 'search:console' ]);
-
-   // prepare pre-commit hook
-   grunt.registerTask('hookmeup', [ 'shell:hooks' ]);
 };

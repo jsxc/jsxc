@@ -178,6 +178,7 @@ li .jsxc_name:hover {
    margin-right: 5px;
    border: 1px solid #000 !important;
    line-height: 100%;
+   cursor: pointer;
 }
 
 .jsxc_spot.jsxc_online, .jsxc_spot.jsxc_chat {
@@ -1070,6 +1071,7 @@ div.jsxc_settings li {
 	height: 30px;
 	line-height: 30px;
 	text-align: left;
+	cursor: pointer;
 }
 
 div.jsxc_settings li:first-child {
