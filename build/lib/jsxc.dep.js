@@ -1,8 +1,8 @@
-/*! * jsxc v1.0.0-beta1 - 2014-11-21
+/*!
+ * jsxc v1.0.0-beta2 - 2014-10-31
  * 
  * This file concatenates all dependencies of jsxc.
  * 
- * For the list of concatenated files and there licenses please see http://www.jsxc.org/ @github.
  */
 
 /*!
@@ -9153,7 +9153,7 @@ getUserMediaWithConstraints = function(um, resolution, bandwidth, fps) {
 }(jQuery));
 
 /*!
- * Source: build/lib/otr/build/dep/salsa20.js, license: GPLv3, url: https://github.com/neoatlantis/node-salsa20 */
+ * Source: build/lib/otr/build/dep/salsa20.js, license: AGPL3, url: https://github.com/neoatlantis/node-salsa20 */
 // Salsa20 implementation
 // Contributed to Cryptocat by Dmitry Chestnykh
 // 21-01-2013

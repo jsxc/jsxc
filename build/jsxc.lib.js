@@ -1,5 +1,5 @@
 /*!
- * jsxc v1.0.0-beta1 - 2014-11-21
+ * jsxc v1.0.0-beta2 - 2014-10-31
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 1.0.0-beta1
+ * @version 1.0.0-beta2
  * @license MIT
  */
 
@@ -23,7 +23,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '1.0.0-beta1',
+      version: '1.0.0-beta2',
 
       /** True if i'm the master */
       master: false,
@@ -2329,7 +2329,11 @@ var jsxc;
          var options = {};
          options = {
             onComplete: function() {
-               $('#jsxc_dialog .jsxc_close').click(jsxc.gui.dialog.close);
+               $('#jsxc_dialog .jsxc_close').click(function(ev) {
+                  ev.preventDefault();
+
+                  jsxc.gui.dialog.close();
+               });
 
                // workaround for old colorbox version (used by firstrunwizard)
                if (options.closeButton === false) {
@@ -3353,6 +3357,7 @@ var jsxc;
          jsxc.storage.removeUserItem('windowlist');
          jsxc.storage.removeUserItem('own');
          jsxc.storage.removeUserItem('avatar', 'own');
+         jsxc.storage.removeUserItem('otrlist');
 
          // submit login form
          if (jsxc.triggeredFromForm) {
@@ -3779,8 +3784,6 @@ var jsxc;
             return true;
          }
 
-         $(document).trigger('message.jsxc', [ from, body ]);
-
          var win = jsxc.gui.window.init(bid);
 
          // If we now the full jid, we use it
@@ -3790,6 +3793,8 @@ var jsxc;
                jid: from
             });
          }
+
+         $(document).trigger('message.jsxc', [ from, body ]);
 
          // create related otr object
          if (jsxc.master && !jsxc.otr.objects[bid]) {
@@ -3958,7 +3963,7 @@ var jsxc;
        * @private
        */
       _sendMessage: function(jid, msg, uid) {
-         var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(jid));
+         var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(jid)) || {};
          var isBar = (Strophe.getBareJidFromJid(jid) === jid);
          var type = data.type || 'chat';
 
