@@ -1,6 +1,6 @@
 {
   "name": "diaspora_jsxc",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "homepage": "https://github.com/diaspora/jsxc",
   "description": "XMPP javascript client for diaspora",
   "main": [
@@ -29,7 +29,8 @@
   "license": "MIT",
   "ignore": [
     "**/.*",
-    "build",
+    "jsxc.*",
+    "build/**/*",
     "example",
     "lib/jquery*.js",
     "lib/strophe.jingle",
