@@ -2316,7 +2316,11 @@ var jsxc;
          var options = {};
          options = {
             onComplete: function() {
-               $('#jsxc_dialog .jsxc_close').click(jsxc.gui.dialog.close);
+               $('#jsxc_dialog .jsxc_close').click(function(ev) {
+                  ev.preventDefault();
+
+                  jsxc.gui.dialog.close();
+               });
 
                // workaround for old colorbox version (used by firstrunwizard)
                if (options.closeButton === false) {
@@ -3340,6 +3344,7 @@ var jsxc;
          jsxc.storage.removeUserItem('windowlist');
          jsxc.storage.removeUserItem('own');
          jsxc.storage.removeUserItem('avatar', 'own');
+         jsxc.storage.removeUserItem('otrlist');
 
          // submit login form
          if (jsxc.triggeredFromForm) {
@@ -3945,7 +3950,7 @@ var jsxc;
        * @private
        */
       _sendMessage: function(jid, msg, uid) {
-         var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(jid));
+         var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(jid)) || {};
          var isBar = (Strophe.getBareJidFromJid(jid) === jid);
          var type = data.type || 'chat';
 
