@@ -714,6 +714,15 @@ var jsxc;
          onlogin: true
       },
 
+      /** default xmpp priorities */
+      priority: {
+         online: 0,
+         chat: 0,
+         away: 0,
+         xa: 0,
+         dnd: 0
+      },
+
       /** If all 3 properties are set, the login form is used */
       loginForm: {
          /** jquery object from form */
@@ -771,7 +780,7 @@ var jsxc;
 
       /** Mute notification sound? */
       muteNotification: false,
-      
+
       /**
        * If no avatar is found, this function is called.
        *
@@ -814,7 +823,7 @@ var jsxc;
       /** Smilie token to file mapping */
       emotions: [ [ 'O:-) O:)', 'angel' ], [ '>:-( >:( &gt;:-( &gt;:(', 'angry' ], [ ':-) :)', 'smile' ], [ ':-D :D', 'grin' ], [ ':-( :(', 'sad' ], [ ';-) ;)', 'wink' ], [ ':-P :P', 'tonguesmile' ], [ '=-O', 'surprised' ], [ ':kiss: :-*', 'kiss' ], [ '8-) :cool:', 'sunglassess' ], [ ':\'-( :\'( :&amp;apos;-(', 'crysad' ], [ ':-/', 'doubt' ], [ ':-X :X', 'zip' ], [ ':yes:', 'thumbsup' ], [ ':no:', 'thumbsdown' ], [ ':beer:', 'beer' ], [ ':devil:', 'devil' ], [ ':kiss: :kissing:', 'kissing' ], [ '@->-- :rose: @-&gt;--', 'rose' ], [ ':music:', 'music' ], [ ':love:', 'love' ], [ ':zzz:', 'tired' ] ],
 
-      /** 
+      /**
        * Different uri query actions as defined in XEP-0147.
        * 
        * @namespace jsxc.gui.queryActions
