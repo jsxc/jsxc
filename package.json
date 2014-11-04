@@ -20,6 +20,7 @@
     "grunt-contrib-copy": "~0.5.0",
     "grunt-contrib-jshint": "~0.9.2",
     "grunt-contrib-uglify": "^0.6.0",
+    "grunt-jsdoc": "^0.5.7",
     "grunt-search": "^0.1.6",
     "grunt-shell": "^1.1.1",
     "grunt-text-replace": "~0.3.11"
