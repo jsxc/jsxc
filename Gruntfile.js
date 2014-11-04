@@ -134,10 +134,11 @@ module.exports = function(grunt) {
             } ]
          }
       },
-      shell: {
-         hooks: {
-            command: 'cp pre-commit .git/hooks/'
-         }
+      jsdoc: {
+          dist: {
+              src: ['jsxc.lib.js', 'jsxc.lib.webrtc.js'],
+              dest: 'doc'
+          }
       }
    });
 
@@ -151,10 +152,10 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-text-replace');
    grunt.loadNpmTasks('grunt-search');
    grunt.loadNpmTasks('grunt-contrib-compress');
-   grunt.loadNpmTasks('grunt-shell');
+   grunt.loadNpmTasks('grunt-jsdoc');
 
    // Default task.
-   grunt.registerTask('default', [ 'jshint', 'search', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
+   grunt.registerTask('default', [ 'jshint', 'search', 'jsdoc', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // Create alpha/beta build
    grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
