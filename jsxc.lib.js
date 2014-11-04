@@ -3015,7 +3015,7 @@ var jsxc;
         </li>',
       roster: '<div id="jsxc_roster">\
            <ul id="jsxc_buddylist"></ul>\
-           <div class="jsxc_bottom jsxc_presence_own">\
+           <div class="jsxc_bottom jsxc_presence" data-bid="own">\
               <div id="jsxc_avatar">\
                  <div class="jsxc_avatar">☺</div>\
               </div>\
