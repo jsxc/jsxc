@@ -206,12 +206,6 @@ var jsxc;
             return;
          }
 
-         // Check flash
-         if (jsxc.options.checkFlash && !jsxc.hasFlash()) {
-            jsxc.debug("No flash plugin for cross-domain requests.");
-            return;
-         }
-
          // Register event listener for the storage event
          window.addEventListener('storage', jsxc.storage.onStorage, false);
 
@@ -356,16 +350,6 @@ var jsxc;
          jsxc.options.xmpp.password = password;
 
          return settings;
-      },
-
-      /**
-       * Checks if flash is available
-       * 
-       * @memberOf jsxc
-       * @return {boolean} True if flash is available
-       */
-      hasFlash: function() {
-         return (typeof (navigator.plugins) === "undefined" || navigator.plugins.length === 0) ? !!(new ActiveXObject("ShockwaveFlash.ShockwaveFlash")) : navigator.plugins["Shockwave Flash"];
       },
 
       /**
@@ -750,9 +734,6 @@ var jsxc;
        */
       debug: function() {
       },
-
-      /** If false, the application may crash, if the user didn't install flash */
-      checkFlash: true,
 
       /** How many messages should be logged? */
       numberOfMsg: 10,
