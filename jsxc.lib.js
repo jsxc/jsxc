@@ -167,7 +167,7 @@ var jsxc;
          jsxc.options.get = function(key) {
             var local = jsxc.storage.getUserItem('options') || {};
 
-            return local[key] || options[key];
+            return local[key] || jsxc.options[key];
          };
 
          /**
@@ -4545,7 +4545,7 @@ var jsxc;
 
          var uid = new Date().getTime() + ':msg';
 
-         if (chat.length > jsxc.options.numberOfMsg) {
+         if (chat.length > jsxc.options.get('numberOfMsg')) {
             chat.pop();
          }
 
