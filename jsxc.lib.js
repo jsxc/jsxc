@@ -3553,7 +3553,7 @@ var jsxc;
             } else {
                var bl = jsxc.storage.getUserItem('buddylist');
 
-               if (bl.indexOf(bid) >= 0) {
+               if (bl.indexOf(bid) < 0) {
                   bl.push(bid); // (INFO) push returns the new length
                   jsxc.storage.setUserItem('buddylist', bl);
                }
