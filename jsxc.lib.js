@@ -1312,13 +1312,17 @@ var jsxc;
 
          $('#jsxc_dialog .jsxc_their_jid').text(Strophe.getBareJidFromJid(from));
 
-         $('#jsxc_dialog .jsxc_deny').click(function() {
+         $('#jsxc_dialog .jsxc_deny').click(function(ev) {
+            ev.stopPropagation();
+
             jsxc.xmpp.resFriendReq(from, false);
 
             jsxc.gui.dialog.close();
          });
 
-         $('#jsxc_dialog .jsxc_approve').click(function() {
+         $('#jsxc_dialog .jsxc_approve').click(function(ev) {
+            ev.stopPropagation();
+
             var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
 
             jsxc.xmpp.resFriendReq(from, true);
@@ -1386,7 +1390,9 @@ var jsxc;
 
          var data = jsxc.storage.getUserItem('buddy', bid);
 
-         $('#jsxc_dialog .creation').click(function() {
+         $('#jsxc_dialog .creation').click(function(ev) {
+            ev.stopPropagation();
+
             if (jsxc.master) {
                jsxc.xmpp.removeBuddy(data.jid);
             } else {
