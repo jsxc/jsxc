@@ -1,5 +1,5 @@
 /*!
- * jsxc v1.0.0-beta2 - 2014-10-31
+ * jsxc v1.0.0 - 2014-11-06
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 1.0.0-beta2
+ * @version 1.0.0
  * @license MIT
  */
 
@@ -23,7 +23,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '1.0.0-beta2',
+      version: '1.0.0',
 
       /** True if i'm the master */
       master: false,
@@ -181,7 +181,7 @@ var jsxc;
          jsxc.options.get = function(key) {
             var local = jsxc.storage.getUserItem('options') || {};
 
-            return local[key] || options[key];
+            return local[key] || jsxc.options[key];
          };
 
          /**
@@ -216,12 +216,6 @@ var jsxc;
          // Check localStorage
          if (typeof (localStorage) === 'undefined') {
             jsxc.debug("Browser doesn't support localStorage.");
-            return;
-         }
-
-         // Check flash
-         if (jsxc.options.checkFlash && !jsxc.hasFlash()) {
-            jsxc.debug("No flash plugin for cross-domain requests.");
             return;
          }
 
@@ -369,16 +363,6 @@ var jsxc;
          jsxc.options.xmpp.password = password;
 
          return settings;
-      },
-
-      /**
-       * Checks if flash is available
-       * 
-       * @memberOf jsxc
-       * @return {boolean} True if flash is available
-       */
-      hasFlash: function() {
-         return (typeof (navigator.plugins) === "undefined" || navigator.plugins.length === 0) ? !!(new ActiveXObject("ShockwaveFlash.ShockwaveFlash")) : navigator.plugins["Shockwave Flash"];
       },
 
       /**
@@ -707,7 +691,9 @@ var jsxc;
    };
 
    /**
-    * Set some options for the chat
+    * Set some options for the chat.
+    * 
+    * @namespace jsxc.options
     */
    jsxc.options = {
 
@@ -720,18 +706,28 @@ var jsxc;
       /** Timeout for the keepalive signal if the master is busy */
       busyTimeout: 15000,
 
-      /** OTR options (see [2]) */
+      /** OTR options */
       otr: {
          ERROR_START_AKE: true
       },
 
-      /** xmpp options (see [1]) */
+      /** xmpp options */
       xmpp: {
          url: null,
          jid: null,
+         domain: null,
          password: null,
          overwrite: false,
          onlogin: true
+      },
+
+      /** default xmpp priorities */
+      priority: {
+         online: 0,
+         chat: 0,
+         away: 0,
+         xa: 0,
+         dnd: 0
       },
 
       /** If all 3 properties are set, the login form is used */
@@ -754,19 +750,6 @@ var jsxc;
       /** jquery object from logout element */
       logoutElement: null,
 
-      /**
-       * Debug function: Expects two parameter (msg, debug)
-       * 
-       * @memberOf jsxc.options
-       * @param {String} msg Message
-       * @param {Object} debug Object
-       */
-      debug: function() {
-      },
-
-      /** If false, the application may crash, if the user didn't install flash */
-      checkFlash: true,
-
       /** How many messages should be logged? */
       numberOfMsg: 10,
 
@@ -785,7 +768,7 @@ var jsxc;
       /** duration for notification */
       popupDuration: 6000,
 
-      /** Path root of JSXC installation */
+      /** Absolute path root of JSXC installation */
       root: '',
 
       /** Timeout for restore in ms */
@@ -802,6 +785,9 @@ var jsxc;
       /** Set to true if you want to hide offline buddies. */
       hideOffline: false,
 
+      /** Mute notification sound? */
+      muteNotification: false,
+
       /**
        * If no avatar is found, this function is called.
        * 
@@ -813,11 +799,12 @@ var jsxc;
       },
 
       /**
-       * Returns permanent saved settings.
+       * Returns permanent saved settings and overwrite default jsxc.options.
        * 
        * @memberOf jsxc.options
        * @param username String username
        * @param password String password
+       * @returns {object} at least xmpp.url
        */
       loadSettings: function() {
 
@@ -827,7 +814,7 @@ var jsxc;
        * Call this function to save user settings permanent.
        * 
        * @memberOf jsxc.options
-       * @param data Holds all data as {key: value}
+       * @param data Holds all data as key/value
        */
       saveSettinsPermanent: function() {
 
@@ -843,7 +830,11 @@ var jsxc;
       /** Smilie token to file mapping */
       emotions: [ [ 'O:-) O:)', 'angel' ], [ '>:-( >:( &gt;:-( &gt;:(', 'angry' ], [ ':-) :)', 'smile' ], [ ':-D :D', 'grin' ], [ ':-( :(', 'sad' ], [ ';-) ;)', 'wink' ], [ ':-P :P', 'tonguesmile' ], [ '=-O', 'surprised' ], [ ':kiss: :-*', 'kiss' ], [ '8-) :cool:', 'sunglassess' ], [ ':\'-( :\'( :&amp;apos;-(', 'crysad' ], [ ':-/', 'doubt' ], [ ':-X :X', 'zip' ], [ ':yes:', 'thumbsup' ], [ ':no:', 'thumbsdown' ], [ ':beer:', 'beer' ], [ ':devil:', 'devil' ], [ ':kiss: :kissing:', 'kissing' ], [ '@->-- :rose: @-&gt;--', 'rose' ], [ ':music:', 'music' ], [ ':love:', 'love' ], [ ':zzz:', 'tired' ] ],
 
-      /** Different uri query actions as defined in XEP-0147. */
+      /**
+       * Different uri query actions as defined in XEP-0147.
+       * 
+       * @namespace jsxc.gui.queryActions
+       */
       queryActions: {
          /** xmpp:JID?message[;body=TEXT] */
          message: function(jid, params) {
@@ -1334,13 +1325,17 @@ var jsxc;
 
          $('#jsxc_dialog .jsxc_their_jid').text(Strophe.getBareJidFromJid(from));
 
-         $('#jsxc_dialog .jsxc_deny').click(function() {
+         $('#jsxc_dialog .jsxc_deny').click(function(ev) {
+            ev.stopPropagation();
+
             jsxc.xmpp.resFriendReq(from, false);
 
             jsxc.gui.dialog.close();
          });
 
-         $('#jsxc_dialog .jsxc_approve').click(function() {
+         $('#jsxc_dialog .jsxc_approve').click(function(ev) {
+            ev.stopPropagation();
+
             var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
 
             jsxc.xmpp.resFriendReq(from, true);
@@ -1408,7 +1403,9 @@ var jsxc;
 
          var data = jsxc.storage.getUserItem('buddy', bid);
 
-         $('#jsxc_dialog .creation').click(function() {
+         $('#jsxc_dialog .creation').click(function(ev) {
+            ev.stopPropagation();
+
             if (jsxc.master) {
                jsxc.xmpp.removeBuddy(data.jid);
             } else {
@@ -3022,7 +3019,7 @@ var jsxc;
         </li>',
       roster: '<div id="jsxc_roster">\
            <ul id="jsxc_buddylist"></ul>\
-           <div class="jsxc_bottom jsxc_presence_own">\
+           <div class="jsxc_bottom jsxc_presence" data-bid="own">\
               <div id="jsxc_avatar">\
                  <div class="jsxc_avatar">☺</div>\
               </div>\
@@ -3556,7 +3553,7 @@ var jsxc;
             } else {
                var bl = jsxc.storage.getUserItem('buddylist');
 
-               if (bl.indexOf(bid) >= 0) {
+               if (bl.indexOf(bid) < 0) {
                   bl.push(bid); // (INFO) push returns the new length
                   jsxc.storage.setUserItem('buddylist', bl);
                }
@@ -4111,7 +4108,7 @@ var jsxc;
        * Get a user item from storage.
        * 
        * @param key
-       * @returns
+       * @returns user item
        */
       getUserItem: function(type, key) {
          var self = jsxc.storage;
@@ -4149,7 +4146,6 @@ var jsxc;
        * Remove user item from storage.
        * 
        * @param key
-       * @returns
        */
       removeUserItem: function(type, key) {
          var self = jsxc.storage;
@@ -4160,7 +4156,7 @@ var jsxc;
             key = type + self.SEP + key;
          }
 
-         return jsxc.storage.removeItem(key, true);
+         jsxc.storage.removeItem(key, true);
       },
 
       /**
@@ -4564,7 +4560,7 @@ var jsxc;
 
          var uid = new Date().getTime() + ':msg';
 
-         if (chat.length > jsxc.options.numberOfMsg) {
+         if (chat.length > jsxc.options.get('numberOfMsg')) {
             chat.pop();
          }
 

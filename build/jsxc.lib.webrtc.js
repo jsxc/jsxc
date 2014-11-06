@@ -1,5 +1,5 @@
 /*!
- * jsxc v1.0.0-beta2 - 2014-10-31
+ * jsxc v1.0.0 - 2014-11-06
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 1.0.0-beta2
+ * @version 1.0.0
  * @license MIT
  */
 
@@ -345,7 +345,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       /**
        * Update icon on presence.
        * 
-       * @memberOf
+       * @memberOf jsxc.webrtc
        * @param ev
        * @param status
        * @private
@@ -796,7 +796,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       /**
        * Make a snapshot from a video stream and display it.
        * 
-       * @memberOf
+       * @memberOf jsxc.webrtc
        * @param video Video stream
        */
       snapshot: function(video) {
