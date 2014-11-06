@@ -1,3 +1,48 @@
+v1.0.0 / 2014-11-06
+===
+- add unread flag to roster and scroll to target window
+- add XEP-0147 URI Scheme Query support
+- add has-come-online notification
+- add silent notification request
+- add more information in vCard view
+- add resizable function to chat window
+- add vertical scrollbar to window list
+- add call information to chat window
+- add concatinated and uglified files
+- add translations
+- minor video call improvements
+- minor style improvements
+- generate dsa key complete in background
+- update caps node property to jsxc.org
+- update strophe.jingle
+- update otr
+- fix wrong avatars
+- fix minor message delivery errors 
+- fix ff snapshot security error
+- fix case sensitive resource handling
+- fix non-square avatars
+- fix several video issues
+- fix messages from unknown (not in roster) jid
+- fix vcard retrieval from unknown (not in roster) jid
+- fix vcard in second tab
+- fix jids with non-word characters (replace user identifier)
+- improve video window design
+- improve user info
+- improve login box
+- improve smp user interaction
+- improve notifications (sync sound/message, icon)
+- minor chat window improvements
+- detect email in message
+- detect uri scheme in message
+- end all private conversations on logout
+- remove email pattern from contact dialog
+- disable video on second tab
+- add/require disco dtls feature for webrtc
+- move emoticons to css
+- handle loadSettings failure
+- change cursor for some elements
+- prevent event bubbling for dialog
+
 v0.8.2 / 2014-08-20
 ===
 - fix use of custom username
