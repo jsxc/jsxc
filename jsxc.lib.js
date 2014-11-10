@@ -1124,7 +1124,8 @@ var jsxc;
       toggleList: function() {
          var self = $(this);
 
-         self.disableSelection();
+         // NOTE: disableSelection is deprecated
+         //self.disableSelection();
 
          var ul = self.find('ul');
          var slideUp = null;
@@ -2463,7 +2464,8 @@ var jsxc;
 
          win.find('.jsxc_fade').hide();
 
-         win.find('.jsxc_name').disableSelection();
+         // NOTE: disableSelection is deprecated
+         //win.find('.jsxc_name').disableSelection();
 
          win.find('.slimScrollDiv').resizable({
             handles: 'w, nw, n',
