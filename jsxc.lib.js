@@ -1027,7 +1027,7 @@ var jsxc;
                if (vCard.length === 0) {
                   jsxc.debug('No photo provided');
                   src = 0;
-               } if(vCard.find('EXTVAL').length > 0){
+               } else if(vCard.find('EXTVAL').length > 0){
                   src = vCard.find('EXTVAL').text();
                } else {
                   var img = vCard.find('BINVAL').text();
