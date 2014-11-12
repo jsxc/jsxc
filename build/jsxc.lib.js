@@ -1,5 +1,5 @@
 /*!
- * jsxc v1.0.0-beta1 - 2014-10-30
+ * jsxc v1.0.0-beta1 - 2014-11-10
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -1137,7 +1137,8 @@ var jsxc;
       toggleList: function() {
          var self = $(this);
 
-         self.disableSelection();
+         // NOTE: disableSelection is deprecated
+         //self.disableSelection();
 
          var ul = self.find('ul');
          var slideUp = null;
@@ -2476,7 +2477,8 @@ var jsxc;
 
          win.find('.jsxc_fade').hide();
 
-         win.find('.jsxc_name').disableSelection();
+         // NOTE: disableSelection is deprecated
+         //win.find('.jsxc_name').disableSelection();
 
          win.find('.slimScrollDiv').resizable({
             handles: 'w, nw, n',
@@ -4976,7 +4978,7 @@ var jsxc;
                // try to create web-worker
 
                try {
-                  worker = new Worker('/javascripts/dsa-webworker.js');
+                  worker = new Worker('/javascripts/otr/dsa-webworker.js');
                } catch (err) {
                   jsxc.warn('Couldn\'t create web-worker.', err);
                }
@@ -5003,13 +5005,13 @@ var jsxc;
                // start worker
                worker.postMessage({
                   imports: [
-                    '/assets/otr/dep/salsa20.js',
-                    '/assets/otr/dep/bigint.js',
-                    '/assets/otr/dep/crypto.js',
-                    '/assets/otr/dep/eventemitter.js',
-                    '/assets/otr-dep/const.js',
-                    '/assets/otr-dep/helpers.js',
-                    '/assets/otr-dep/dsa.js'
+                    '/javascripts/otr/salsa20.js',
+                    '/javascripts/otr/bigint.js',
+                    '/javascripts/otr/crypto.js',
+                    '/javascripts/otr/eventemitter.js',
+                    '/javascripts/otr/const.js',
+                    '/javascripts/otr/helpers.js',
+                    '/javascripts/otr/dsa.js'
                   ],
                   seed: BigInt.getSeed(),
                   debug: true
