@@ -1,4 +1,4 @@
-/*! * jsxc v1.0.0-beta1 - 2014-11-10
+/*! * jsxc v1.0.0-beta1 - 2014-11-12
  * 
  * This file concatenates all dependencies of jsxc.
  * 

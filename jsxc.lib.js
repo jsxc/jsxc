@@ -1712,11 +1712,12 @@ var jsxc;
 
             var err = jsxc.options.saveSettinsPermanent.call(this, data);
 
-            setTimeout(function() {
-               self.find('input[type="submit"]').effect('highlight', {
-                  color: (err) ? 'green' : 'red'
-               }, 4000);
-            }, 200);
+            // TODO find replacement or enable jquery ui again
+            //setTimeout(function() {
+            //   self.find('input[type="submit"]').effect('highlight', {
+            //      color: (err) ? 'green' : 'red'
+            //   }, 4000);
+            //}, 200);
 
             return false;
          });
@@ -2700,9 +2701,10 @@ var jsxc;
          var el = jsxc.gui.window.get(bid).find(' .jsxc_bar');
 
          if (!el.is(':animated')) {
-            el.effect('highlight', {
-               color: 'orange'
-            }, 2000);
+            // TODO find replacement or enable jquery ui again
+            //el.effect('highlight', {
+            //   color: 'orange'
+            //}, 2000);
          }
       },
 
