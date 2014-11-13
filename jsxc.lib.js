@@ -1027,7 +1027,7 @@ var jsxc;
                if (vCard.length === 0) {
                   jsxc.debug('No photo provided');
                   src = 0;
-               } else if(vCard.find('EXTVAL').length > 0){
+               } else if (vCard.find('EXTVAL').length > 0) {
                   src = vCard.find('EXTVAL').text();
                } else {
                   var img = vCard.find('BINVAL').text();
@@ -1625,7 +1625,7 @@ var jsxc;
             var photo = $(stanza).find("vCard > PHOTO");
 
             if (photo.length > 0) {
-               if(photo.find('EXTVAL').length > 0){
+               if (photo.find('EXTVAL').length > 0) {
                   src = photo.find('EXTVAL').text();
                } else {
                   var img = photo.find('BINVAL').text();
@@ -3619,8 +3619,6 @@ var jsxc;
          var ptype = $(presence).attr('type');
          var from = $(presence).attr('from');
          var jid = Strophe.getBareJidFromJid(from).toLowerCase();
-         var to = $(presence).attr('to');
-         to = (to) ? Strophe.getBareJidFromJid(to).toLowerCase() : jid;
          var r = Strophe.getResourceFromJid(from);
          var bid = jsxc.jidToBid(jid);
          var data = jsxc.storage.getUserItem('buddy', bid);
@@ -3628,7 +3626,7 @@ var jsxc;
          var status = null;
          var xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
 
-         if (jid === to) {
+         if (jid === Strophe.getBareJidFromJid(jsxc.storage.getItem("jid"))) {
             return true;
          }
 
