@@ -80,6 +80,10 @@ var jsxc;
          REGEX: {
             JID: new RegExp('\\b[^"&\'\\/:<>@\\s]+@[\\w-_.]+\\b', 'ig'),
             URL: new RegExp(/((?:https?:\/\/|www\.|([\w\-]+\.[a-zA-Z]{2,3})(?=\b))(?:(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\)([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|])?)|(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|]))?)/gi)
+         },
+         NS: {
+            CARBONS: 'urn:xmpp:carbons:2',
+            FORWARD: 'urn:xmpp:forward:0'
          }
       },
 
@@ -2727,8 +2731,9 @@ var jsxc;
        * @param {String} direction 'in' message is received or 'out' message is
        *        send
        * @param {String} msg Message to display
+       * @param {boolean} send Should we send outgoing messages? Default: true
        */
-      postMessage: function(bid, direction, msg) {
+      postMessage: function(bid, direction, msg, send) {
          var data = jsxc.storage.getUserItem('buddy', bid);
          var html_msg = msg;
 
@@ -2759,7 +2764,7 @@ var jsxc;
             $(document).trigger('postmessagein.jsxc', [ bid, html_msg ]);
          }
 
-         if (direction === 'out' && jsxc.master) {
+         if (direction === 'out' && jsxc.master && send !== false) {
             jsxc.xmpp.sendMessage(bid, html_msg, post.uid);
          }
 
@@ -3237,6 +3242,22 @@ var jsxc;
          } else {
             jsxc.debug('New connection');
 
+            if (jsxc.xmpp.conn.caps) {
+               // Add system handler, because user handler isn't called before
+               // we are authenticated
+               jsxc.xmpp.conn._addSysHandler(function(stanza) {
+                  var from = jsxc.xmpp.conn.domain, c = stanza.querySelector('c'), ver = c.getAttribute('ver'), node = c.getAttribute('node');
+
+                  var _jidNodeIndex = JSON.parse(localStorage.getItem('strophe.caps._jidNodeIndex')) || {};
+
+                  jsxc.xmpp.conn.caps._jidVerIndex[from] = ver;
+                  _jidNodeIndex[from] = node;
+
+                  localStorage.setItem('strophe.caps._jidVerIndex', JSON.stringify(jsxc.xmpp.conn.caps._jidVerIndex));
+                  localStorage.setItem('strophe.caps._jidNodeIndex', JSON.stringify(_jidNodeIndex));
+               }, Strophe.NS.CAPS);
+            }
+
             jsxc.xmpp.conn.connect(jsxc.options.xmpp.jid, jsxc.options.xmpp.password, callback);
          }
       },
@@ -3359,6 +3380,36 @@ var jsxc;
          jsxc.xmpp.conn.addHandler(jsxc.xmpp.onMessage, null, 'message', 'chat');
          jsxc.xmpp.conn.addHandler(jsxc.xmpp.onReceived, null, 'message');
          jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
+
+         var caps = jsxc.xmpp.conn.caps;
+         var domain = jsxc.xmpp.conn.domain;
+
+         if (caps) {
+            var conditionalEnable = function() {
+               if (jsxc.xmpp.conn.caps.hasFeatureByJid(domain, jsxc.CONST.NS.CARBONS)) {
+                  jsxc.xmpp.carbons.enable();
+               }
+            };
+            
+            if (typeof caps._knownCapabilities[caps._jidVerIndex[domain]] === 'undefined') { console.log('No known server caps.');
+               var _jidNodeIndex = JSON.parse(localStorage.getItem('strophe.caps._jidNodeIndex')) || {};
+
+               $(document).on('caps.strophe', function onCaps(ev, from) { console.log('receive caps', from, domain)
+                  if(from !== domain) {
+                     return;
+                  }
+                  
+                  conditionalEnable();
+                  
+                  $(document).off('caps.strophe', onCaps);
+               });
+               
+               caps._requestCapabilities(jsxc.xmpp.conn.domain, _jidNodeIndex[domain], caps._jidVerIndex[domain]);
+            } else {
+               console.log('We know server caps.')
+               conditionalEnable();
+            }
+         }
 
          // Only load roaster if necessary
          if (!jsxc.restore || !jsxc.storage.getUserItem('buddylist')) {
@@ -3720,27 +3771,58 @@ var jsxc;
        * @returns {Boolean}
        * @private
        */
-      onMessage: function(message) {
-         /*
-          * <message xmlns='jabber:client' type='chat' to='' id='' from=''>
-          * <body>...</body> <active
-          * xmlns='http://jabber.org/protocol/chatstates'/> </message>
-          */
+      onMessage: function(stanza) {
+         
+         var forwarded = $(stanza).find('forwarded[xmlns="' + jsxc.CONST.NS.FORWARD + '"]');
+         var message, carbon;
+         
+         if (forwarded.length > 0) {
+            message = forwarded.find('> message');
+            forwarded = true;
+            carbon = $(stanza).find('> [xmlns="' + jsxc.CONST.NS.CARBONS + '"]');
+            
+            if (carbon.length === 0) {
+               carbon = false;
+            }
 
-         jsxc.debug('Incoming message', message);
+            jsxc.debug('Incoming forwarded message', message);
+         } else {
+            message = stanza;
+            forwarded = false;
+            carbon = false;
+            
+            jsxc.debug('Incoming message', message);
+         }
 
          var type = $(message).attr('type');
          var from = $(message).attr('from');
          var mid = $(message).attr('id');
-         var jid = Strophe.getBareJidFromJid(from);
-         var bid = jsxc.jidToBid(jid);
-         var data = jsxc.storage.getUserItem('buddy', bid);
          var body = $(message).find('body:first').text();
-         var request = $(message).find("request[xmlns='urn:xmpp:receipts']");
-
+         
          if (!body) {
             return true;
          }
+         
+         if (carbon) {
+            var direction = (carbon.prop("tagName") == 'sent')? 'out' : 'in';
+            var bid = jsxc.jidToBid((direction === 'out')? $(message).attr('to') : from);
+            
+            jsxc.gui.window.postMessage(bid, direction, body, false);
+            
+            return true;
+             
+         } else if (forwarded) {
+            // Someone forwarded a message to us
+            
+            body = from + jsxc.translate(' %%to%% ') + $(stanza).attr('to') + '"' + body + '"';
+            
+            from = $(stanza).attr('from');
+         }
+         
+         var jid = Strophe.getBareJidFromJid(from);
+         var bid = jsxc.jidToBid(jid);
+         var data = jsxc.storage.getUserItem('buddy', bid);
+         var request = $(message).find("request[xmlns='urn:xmpp:receipts']");
 
          if (data === null) {
             // jid not in roster
@@ -3776,7 +3858,7 @@ var jsxc;
             jsxc.otr.create(bid);
          }
 
-         if (mid !== null && request.length && data !== null && (data.sub === 'both' || data.sub === 'from') && type === 'chat') {
+         if (!forwarded && mid !== null && request.length && data !== null && (data.sub === 'both' || data.sub === 'from') && type === 'chat') {
             // Send received according to XEP-0184
             jsxc.xmpp.conn.send($msg({
                to: from
@@ -3948,6 +4030,12 @@ var jsxc;
             id: uid
          }).c('body').t(msg);
 
+         if (msg.match(/^\?OTR/)) {
+            xmlMsg.up().c("private", {
+               xmlns: jsxc.CONST.NS.CARBONS
+            });
+         }
+
          if (type === 'chat' && (isBar || jsxc.xmpp.conn.caps.hasFeatureByJid(jid, Strophe.NS.RECEIPTS))) {
             // Add request according to XEP-0184
             xmlMsg.up().c('request', {
@@ -4004,6 +4092,67 @@ var jsxc;
          return null;
       }
    };
+
+   /**
+    * Handle carbons (XEP-0280);
+    * 
+    * @namespace jsxc.xmpp.carbons
+    */
+   jsxc.xmpp.carbons = {
+      enabled: false,
+
+      /**
+       * Enable carbons.
+       * 
+       * @memberOf jsxc.xmpp.carbons
+       * @param cb callback
+       */
+      enable: function(cb) {
+         var iq = $iq({
+            type: 'set'
+         }).c('enable', {
+            xmlns: jsxc.CONST.NS.CARBONS
+         });
+
+         jsxc.xmpp.conn.sendIQ(iq, function() {
+            jsxc.xmpp.carbons.enabled = true;
+
+            jsxc.debug('Carbons enabled');
+            
+            if (cb) {
+               cb.call(this);
+            }
+         }, function(stanza) {
+            jsxc.warn('Could not enable carbons', stanza);
+         });
+      },
+
+      /**
+       * Disable carbons.
+       * 
+       * @memberOf jsxc.xmpp.carbons
+       * @param cb callback
+       */
+      disable: function(cb) {
+         var iq = $iq({
+            type: 'set'
+         }).c('disable', {
+            xmlns: jsxc.CONST.NS.CARBONS
+         });
+
+         jsxc.xmpp.conn.sendIQ(iq, function() {
+            jsxc.xmpp.carbons.enabled = false;
+
+            jsxc.debug('Carbons disabled');
+            
+            if (cb) {
+               cb.call(this);
+            }
+         }, function(stanza) {
+            jsxc.warn('Could not disable carbons', stanza);
+         });
+      }
+   }
 
    /**
     * Handle long-live data
