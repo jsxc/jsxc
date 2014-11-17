@@ -1,7 +1,7 @@
 /*! This file is concatenated for the browser. */
 
 /*!
- * jsxc v1.0.0-beta1 - 2014-11-12
+ * jsxc v1.0.0-beta1 - 2014-11-17
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -288,15 +288,14 @@ var jsxc;
                return true;
             });
 
-         } else jsxc.restoreOldConnection();
+         } else { jsxc.restoreOldConnection(); }
       },
 
       login: function() {
         if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid')) {
-          jsxc.restore = true;
+          jsxc.xmpp.login();
+          jsxc.restoreOldConnection();
         }
-        jsxc.xmpp.login();
-        jsxc.restoreOldConnection();
       },
 
       restoreOldConnection: function() {
@@ -1086,7 +1085,7 @@ var jsxc;
             $('#jsxc_windowListSB > div').removeClass('jsxc_disabled');
          } else {
             $('#jsxc_windowListSB > div').addClass('jsxc_disabled');
-            $('#jsxc_windowList>ul').css('right', '0px');
+            $('#jsxc_windowList>ul').css('right', '12px');
          }
       },
 
@@ -1351,7 +1350,7 @@ var jsxc;
          });
 
          $('#jsxc_dialog .jsxc_approve').click(function() {
-            var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
+            //var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
 
             jsxc.xmpp.resFriendReq(from, true);
 
@@ -1725,7 +1724,7 @@ var jsxc;
                jsxc.options.set(key, val);
             });
 
-            var err = jsxc.options.saveSettinsPermanent.call(this, data);
+            jsxc.options.saveSettinsPermanent.call(this, data);
 
             // TODO find replacement or enable jquery ui again
             //setTimeout(function() {
@@ -2030,7 +2029,7 @@ var jsxc;
 
          if (jsxc.storage.getUserItem('roster') === 'hidden') {
             $('#jsxc_roster').css('right', '-200px');
-            $('#jsxc_windowList > ul').css('paddingRight', '10px');
+            $('#jsxc_windowList > ul').css('paddingRight', '22px');
          }
 
          var pres = jsxc.storage.getUserItem('presence') || 'online';
@@ -2261,7 +2260,7 @@ var jsxc;
          var roster_width = roster.innerWidth();
          var roster_right = parseFloat($('#jsxc_roster').css('right'));
          var state = (roster_right < 0) ? 'shown' : 'hidden';
-         var  textToDisplay = (roster_right < 0) ? '>>' : '<<';
+         var iconToDisplay = (roster_right < 0) ? 'right' : 'left';
 
          jsxc.storage.setUserItem('roster', state);
 
@@ -2273,7 +2272,7 @@ var jsxc;
          }, duration);
 
          $(document).trigger('toggle.roster.jsxc', [ state, duration ]);
-         $('#jsxc_toggleRoster_text b').text(textToDisplay);
+         $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-' + iconToDisplay);
       },
 
       /**
@@ -2285,6 +2284,8 @@ var jsxc;
 
          $('#jsxc_roster').append($('<p>' + jsxc.l.no_connection + '</p>').append(' <a>' + jsxc.l.relogin + '</a>').click(function() {
             jsxc.login();
+            // reload after login
+            window.location.reload();
          }));
       },
 
@@ -3065,7 +3066,7 @@ var jsxc;
               </div>\
            </div>\
            <div id="jsxc_toggleRoster">\
-              <span id="jsxc_toggleRoster_text"><b>>></b></span>\
+              <span id="jsxc_toggleRoster_text"></span>\
            </div>\
        </div>',
       windowList: '<div id="jsxc_windowList">\
@@ -5891,7 +5892,7 @@ var jsxc;
 }(jQuery));
 
 /*!
- * jsxc v1.0.0-beta1 - 2014-11-12
+ * jsxc v1.0.0-beta1 - 2014-11-17
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
