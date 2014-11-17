@@ -12,4 +12,4 @@ before_install: npm install -g grunt-cli
 
 install: npm install
 
-script: "grunt default"
+script: grunt jshint
