@@ -273,7 +273,7 @@ var jsxc;
                return true;
             });
 
-         } else jsxc.restoreOldConnection();
+         } else { jsxc.restoreOldConnection(); }
       },
 
       login: function() {
@@ -1336,7 +1336,7 @@ var jsxc;
          });
 
          $('#jsxc_dialog .jsxc_approve').click(function() {
-            var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
+            //var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
 
             jsxc.xmpp.resFriendReq(from, true);
 
@@ -1710,7 +1710,7 @@ var jsxc;
                jsxc.options.set(key, val);
             });
 
-            var err = jsxc.options.saveSettinsPermanent.call(this, data);
+            jsxc.options.saveSettinsPermanent.call(this, data);
 
             // TODO find replacement or enable jquery ui again
             //setTimeout(function() {
