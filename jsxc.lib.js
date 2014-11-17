@@ -1632,12 +1632,12 @@ var jsxc;
             var photo = $(stanza).find("vCard > PHOTO");
 
             if (photo.length > 0) {
+               var img = photo.find('BINVAL').text();
+               var type = photo.find('TYPE').text();
+               var src = 'data:' + type + ';base64,' + img;
+
                if (photo.find('EXTVAL').length > 0) {
                   src = photo.find('EXTVAL').text();
-               } else {
-                  var img = photo.find('BINVAL').text();
-                  var type = photo.find('TYPE').text();
-                  var src = 'data:' + type + ';base64,' + img;
                }
 
                $('#jsxc_dialog h3').before('<img class="jsxc_vCard" src="' + src + '" alt="avatar" />');
