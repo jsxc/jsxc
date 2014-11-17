@@ -1071,7 +1071,7 @@ var jsxc;
             $('#jsxc_windowListSB > div').removeClass('jsxc_disabled');
          } else {
             $('#jsxc_windowListSB > div').addClass('jsxc_disabled');
-            $('#jsxc_windowList>ul').css('right', '0px');
+            $('#jsxc_windowList>ul').css('right', '12px');
          }
       },
 
@@ -2015,7 +2015,7 @@ var jsxc;
 
          if (jsxc.storage.getUserItem('roster') === 'hidden') {
             $('#jsxc_roster').css('right', '-200px');
-            $('#jsxc_windowList > ul').css('paddingRight', '10px');
+            $('#jsxc_windowList > ul').css('paddingRight', '22px');
          }
 
          var pres = jsxc.storage.getUserItem('presence') || 'online';
@@ -2246,7 +2246,7 @@ var jsxc;
          var roster_width = roster.innerWidth();
          var roster_right = parseFloat($('#jsxc_roster').css('right'));
          var state = (roster_right < 0) ? 'shown' : 'hidden';
-         var  textToDisplay = (roster_right < 0) ? '>>' : '<<';
+         var iconToDisplay = (roster_right < 0) ? 'right' : 'left';
 
          jsxc.storage.setUserItem('roster', state);
 
@@ -2258,7 +2258,7 @@ var jsxc;
          }, duration);
 
          $(document).trigger('toggle.roster.jsxc', [ state, duration ]);
-         $('#jsxc_toggleRoster_text b').text(textToDisplay);
+         $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-' + iconToDisplay);
       },
 
       /**
@@ -3050,7 +3050,7 @@ var jsxc;
               </div>\
            </div>\
            <div id="jsxc_toggleRoster">\
-              <span id="jsxc_toggleRoster_text"><b>>></b></span>\
+              <span id="jsxc_toggleRoster_text"></span>\
            </div>\
        </div>',
       windowList: '<div id="jsxc_windowList">\
