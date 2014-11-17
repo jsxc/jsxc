@@ -278,10 +278,9 @@ var jsxc;
 
       login: function() {
         if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid')) {
-          jsxc.restore = true;
+          jsxc.xmpp.login();
+          jsxc.restoreOldConnection();
         }
-        jsxc.xmpp.login();
-        jsxc.restoreOldConnection();
       },
 
       restoreOldConnection: function() {
@@ -2270,6 +2269,8 @@ var jsxc;
 
          $('#jsxc_roster').append($('<p>' + jsxc.l.no_connection + '</p>').append(' <a>' + jsxc.l.relogin + '</a>').click(function() {
             jsxc.login();
+            // reload after login
+            window.location.reload();
          }));
       },
 
