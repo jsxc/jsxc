@@ -2269,6 +2269,8 @@ var jsxc;
 
          $('#jsxc_roster').append($('<p>' + jsxc.l.no_connection + '</p>').append(' <a>' + jsxc.l.relogin + '</a>').click(function() {
             jsxc.login();
+            // reload after login
+            window.location.reload();
          }));
       },
 
