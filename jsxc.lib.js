@@ -278,10 +278,9 @@ var jsxc;
 
       login: function() {
         if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid')) {
-          jsxc.restore = true;
+          jsxc.xmpp.login();
+          jsxc.restoreOldConnection();
         }
-        jsxc.xmpp.login();
-        jsxc.restoreOldConnection();
       },
 
       restoreOldConnection: function() {
