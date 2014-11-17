@@ -32,7 +32,7 @@
 
    /**
     * JavaScript Xmpp Chat namespace
-    * 
+    *
     * @namespace jsxc
     */
    jsxc = {
@@ -112,7 +112,7 @@
 
       /**
        * Write debug message to console and to log.
-       * 
+       *
        * @memberOf jsxc
        * @param {String} msg Debug message
        * @param {Object} data
@@ -143,14 +143,13 @@
 
             jsxc.log = jsxc.log + msg + ': ' + d + '\n';
          } else {
-            console.log(msg);
             jsxc.log = jsxc.log + msg + '\n';
          }
       },
 
       /**
        * Write warn message.
-       * 
+       *
        * @memberOf jsxc
        * @param {String} msg Warn message
        * @param {Object} data
@@ -161,7 +160,7 @@
 
       /**
        * Write error message.
-       * 
+       *
        * @memberOf jsxc
        * @param {String} msg Error message
        * @param {Object} data
@@ -175,7 +174,7 @@
 
       /**
        * Starts the action
-       * 
+       *
        * @memberOf jsxc
        * @param {object} options
        */
@@ -188,7 +187,7 @@
 
          /**
           * Getter method for options. Saved options will override default one.
-          * 
+          *
           * @param {string} key option key
           * @returns default or saved option value
           */
@@ -200,7 +199,7 @@
 
          /**
           * Setter method for options. Will write into localstorage.
-          * 
+          *
           * @param {string} key option key
           * @param {object} value option value
           */
@@ -295,34 +294,41 @@
                return true;
             });
 
-         } else {
+         } else { jsxc.restoreOldConnection(); }
+      },
 
-            // Restore old connection
+      login: function() {
+        if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid')) {
+          jsxc.xmpp.login();
+          jsxc.restoreOldConnection();
+        }
+      },
 
-            jsxc.bid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
+      restoreOldConnection: function() {
+        // Restore old connection
+        var jid = jsxc.storage.getItem('jid') || jsxc.options.xmpp.jid;
+        jsxc.bid = jsxc.jidToBid(jid);
+        jsxc.gui.init();
 
-            jsxc.gui.init();
+        // Looking for logout element
+        if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+          jsxc.options.logoutElement.one('click', function() {
+            jsxc.options.logoutElement = $(this);
+            jsxc.triggeredFromLogout = true;
+            return jsxc.xmpp.logout();
+          });
+        }
 
-            // Looking for logout element
-            if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
-               jsxc.options.logoutElement.one('click', function() {
-                  jsxc.options.logoutElement = $(this);
-                  jsxc.triggeredFromLogout = true;
-                  return jsxc.xmpp.logout();
-               });
-            }
-
-            if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
-               jsxc.onMaster();
-            } else {
-               jsxc.checkMaster();
-            }
-         }
+        if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
+          jsxc.onMaster();
+        } else {
+          jsxc.checkMaster();
+        }
       },
 
       /**
        * Load settings and prepare jid.
-       * 
+       *
        * @memberOf jsxc
        * @returns Loaded settings
        */
@@ -503,7 +509,7 @@
 
       /**
        * Generates a random integer number between 0 and max
-       * 
+       *
        * @param {Integer} max
        * @return {Integer} random integer between 0 and max
        */
@@ -513,7 +519,7 @@
 
       /**
        * Checks if there is a element with the given selector
-       * 
+       *
        * @param {String} selector jQuery selector
        * @return {Boolean}
        */
@@ -523,7 +529,7 @@
 
       /**
        * Creates a CSS compatible string from a JID
-       * 
+       *
        * @param {type} jid Valid Jabber ID
        * @returns {String} css Compatible string
        */
@@ -537,7 +543,7 @@
 
       /**
        * Create comparable bar jid.
-       * 
+       *
        * @memberOf jsxc
        * @param jid
        * @returns comparable bar jid
@@ -637,7 +643,7 @@
 
       /**
        * Executes only one of the given events
-       * 
+       *
        * @param {string} obj.key event name
        * @param {function} obj.value function to execute
        * @returns {string} namespace of all events
@@ -659,7 +665,7 @@
 
       /**
        * Checks if tab is hidden.
-       * 
+       *
        * @returns {boolean} True if tab is hidden
        */
       isHidden: function() {
@@ -687,7 +693,7 @@
 
       /**
        * Replace %%tokens%% with correct translation.
-       * 
+       *
        * @param {String} text Given text
        * @returns {String} Translated string
        */
@@ -804,7 +810,7 @@
 
       /**
        * If no avatar is found, this function is called.
-       * 
+       *
        * @param jid Jid of that user.
        * @this {jQuery} Elements to update with probable .jsxc_avatar elements
        */
@@ -826,7 +832,7 @@
 
       /**
        * Call this function to save user settings permanent.
-       * 
+       *
        * @memberOf jsxc.options
        * @param data Holds all data as key/value
        */
@@ -837,7 +843,7 @@
 
    /**
     * Handle functions for chat window's and buddylist
-    * 
+    *
     * @namespace jsxc.gui
     */
    jsxc.gui = {
@@ -881,7 +887,7 @@
 
       /**
        * Creates application skeleton.
-       * 
+       *
        * @memberOf jsxc.gui
        */
       init: function() {
@@ -921,7 +927,7 @@
 
       /**
        * Init tooltip plugin for given jQuery selector.
-       * 
+       *
        * @param {String} selector jQuery selector
        * @memberOf jsxc.gui
        */
@@ -938,7 +944,7 @@
 
       /**
        * Updates Information in roster and chatbar
-       * 
+       *
        * @param {String} bid bar jid
        */
       update: function(bid) {
@@ -1011,7 +1017,7 @@
 
       /**
        * Update avatar on all given elements.
-       * 
+       *
        * @memberOf jsxc.gui
        * @param {jQuery} el Elements with subelement .jsxc_avatar
        * @param {string} jid Jid
@@ -1054,6 +1060,8 @@
                if (vCard.length === 0) {
                   jsxc.debug('No photo provided');
                   src = 0;
+               } else if (vCard.find('EXTVAL').length > 0) {
+                  src = vCard.find('EXTVAL').text();
                } else {
                   var img = vCard.find('BINVAL').text();
                   var type = vCard.find('TYPE').text();
@@ -1073,7 +1081,7 @@
 
       /**
        * Updates scrollbar handlers.
-       * 
+       *
        * @memberOf jsxc.gui
        */
       updateWindowListSB: function() {
@@ -1082,7 +1090,7 @@
             $('#jsxc_windowListSB > div').removeClass('jsxc_disabled');
          } else {
             $('#jsxc_windowListSB > div').addClass('jsxc_disabled');
-            $('#jsxc_windowList>ul').css('right', '0px');
+            $('#jsxc_windowList>ul').css('right', '12px');
          }
       },
 
@@ -1117,7 +1125,7 @@
 
       /**
        * Returns the window element
-       * 
+       *
        * @param {String} bid
        * @returns {jquery} jQuery object of the window element
        */
@@ -1129,13 +1137,14 @@
 
       /**
        * Toggle list with timeout, like menu or settings
-       * 
+       *
        * @memberof jsxc.gui
        */
       toggleList: function() {
          var self = $(this);
 
-         self.disableSelection();
+         // NOTE: disableSelection is deprecated
+         //self.disableSelection();
 
          var ul = self.find('ul');
          var slideUp = null;
@@ -1210,7 +1219,7 @@
 
       /**
        * Creates and show the fingerprint dialog
-       * 
+       *
        * @param {String} bid
        */
       showFingerprints: function(bid) {
@@ -1219,7 +1228,7 @@
 
       /**
        * Creates and show the verification dialog
-       * 
+       *
        * @param {String} bid
        */
       showVerification: function(bid) {
@@ -1329,7 +1338,7 @@
 
       /**
        * Create and show approve dialog
-       * 
+       *
        * @param {type} from valid jid
        */
       showApproveDialog: function(from) {
@@ -1350,16 +1359,16 @@
          $('#jsxc_dialog .jsxc_approve').click(function(ev) {
             ev.stopPropagation();
 
-            var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
+            //var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
 
             jsxc.xmpp.resFriendReq(from, true);
 
             // If friendship is not mutual show contact dialog
-            if (!data || data.sub === 'from') {
+            /*if (!data || data.sub === 'from') {
                $(document).one('close.dialog.jsxc', function() {
                   jsxc.gui.showContactDialog(from);
                });
-            }
+            }*/
 
             jsxc.gui.dialog.close();
          });
@@ -1367,7 +1376,7 @@
 
       /**
        * Create and show dialog to add a buddy
-       * 
+       *
        * @param {string} [username] jabber id
        */
       showContactDialog: function(username) {
@@ -1407,7 +1416,7 @@
 
       /**
        * Create and show dialog to remove a buddy
-       * 
+       *
        * @param {type} bid
        * @returns {undefined}
        */
@@ -1435,7 +1444,7 @@
 
       /**
        * Create and show a wait dialog
-       * 
+       *
        * @param {type} msg message to display to the user
        * @returns {undefined}
        */
@@ -1447,7 +1456,7 @@
 
       /**
        * Create and show a wait dialog
-       * 
+       *
        * @param {type} msg message to display to the user
        * @returns {undefined}
        */
@@ -1457,7 +1466,7 @@
 
       /**
        * Create and show a auth fail dialog
-       * 
+       *
        * @returns {undefined}
        */
       showAuthFail: function() {
@@ -1478,7 +1487,7 @@
 
       /**
        * Create and show a confirm dialog
-       * 
+       *
        * @param {String} msg Message
        * @param {function} confirm
        * @param {function} dismiss
@@ -1500,7 +1509,7 @@
 
       /**
        * Show about dialog.
-       * 
+       *
        * @memberOf jsxc.gui
        */
       showAboutDialog: function() {
@@ -1513,7 +1522,7 @@
 
       /**
        * Show debug log.
-       * 
+       *
        * @memberOf jsxc.gui
        */
       showDebugLog: function() {
@@ -1540,7 +1549,7 @@
 
       /**
        * Show vCard of user with the given bar jid.
-       * 
+       *
        * @memberOf jsxc.gui
        * @param {String} jid
        */
@@ -1654,6 +1663,10 @@
                var type = photo.find('TYPE').text();
                var src = 'data:' + type + ';base64,' + img;
 
+               if (photo.find('EXTVAL').length > 0) {
+                  src = photo.find('EXTVAL').text();
+               }
+
                $('#jsxc_dialog h3').before('&lt;img class="jsxc_vCard" src="' + src + '" alt="avatar" />');
             }
 
@@ -1726,13 +1739,14 @@
                jsxc.options.set(key, val);
             });
 
-            var err = jsxc.options.saveSettinsPermanent.call(this, data);
+            jsxc.options.saveSettinsPermanent.call(this, data);
 
-            setTimeout(function() {
-               self.find('input[type="submit"]').effect('highlight', {
-                  color: (err) ? 'green' : 'red'
-               }, 4000);
-            }, 200);
+            // TODO find replacement or enable jquery ui again
+            //setTimeout(function() {
+            //   self.find('input[type="submit"]').effect('highlight', {
+            //      color: (err) ? 'green' : 'red'
+            //   }, 4000);
+            //}, 200);
 
             return false;
          });
@@ -1740,7 +1754,7 @@
 
       /**
        * Show prompt for notification permission.
-       * 
+       *
        * @memberOf jsxc.gui
        */
       showRequestNotification: function() {
@@ -1778,7 +1792,7 @@
 
       /**
        * Change own presence to pres.
-       * 
+       *
        * @memberOf jsxc.gui
        * @param pres {CONST.STATUS} New presence state
        * @param external {boolean} True if triggered from other tab.
@@ -1800,7 +1814,7 @@
 
       /**
        * Update all presence objects for given user.
-       * 
+       *
        * @memberOf jsxc.gui
        * @param bid bar jid of user.
        * @param {CONST.STATUS} pres New presence state.
@@ -1937,14 +1951,14 @@
 
    /**
     * Handle functions related to the gui of the roster
-    * 
+    *
     * @namespace jsxc.gui.roster
     */
    jsxc.gui.roster = {
 
       /**
        * Init the roster skeleton
-       * 
+       *
        * @memberOf jsxc.gui.roster
        * @returns {undefined}
        */
@@ -1994,9 +2008,9 @@
             }
          });
 
-         $('#jsxc_roster .jsxc_addBuddy').click(function() {
+         /*$('#jsxc_roster .jsxc_addBuddy').click(function() {
             jsxc.gui.showContactDialog();
-         });
+         });*/
 
          $('#jsxc_roster .jsxc_onlineHelp').click(function() {
             window.open("http://www.jsxc.org/manual.html", "onlineHelp");
@@ -2030,7 +2044,7 @@
 
          if (jsxc.storage.getUserItem('roster') === 'hidden') {
             $('#jsxc_roster').css('right', '-200px');
-            $('#jsxc_windowList > ul').css('paddingRight', '10px');
+            $('#jsxc_windowList > ul').css('paddingRight', '22px');
          }
 
          var pres = jsxc.storage.getUserItem('presence') || 'online';
@@ -2050,7 +2064,7 @@
 
       /**
        * Create roster item and add it to the roster
-       * 
+       *
        * @param {String} bid bar jid
        */
       add: function(bid) {
@@ -2111,7 +2125,7 @@
       /**
        * Insert roster item. First order: online > away > offline. Second order:
        * alphabetical of the name
-       * 
+       *
        * @param {type} bid
        * @param {jquery} li roster item which should be insert
        * @returns {undefined}
@@ -2145,7 +2159,7 @@
 
       /**
        * Initiate reorder of roster item
-       * 
+       *
        * @param {type} bid
        * @returns {undefined}
        */
@@ -2155,7 +2169,7 @@
 
       /**
        * Removes buddy from roster
-       * 
+       *
        * @param {String} bid bar jid
        * @return {JQueryObject} Roster list element
        */
@@ -2165,7 +2179,7 @@
 
       /**
        * Removes buddy from roster and clean up
-       * 
+       *
        * @param {String} bid bar compatible jid
        */
       purge: function(bid) {
@@ -2185,7 +2199,7 @@
 
       /**
        * Create input element for rename action
-       * 
+       *
        * @param {type} bid
        * @returns {undefined}
        */
@@ -2224,7 +2238,7 @@
 
       /**
        * Rename buddy
-       * 
+       *
        * @param {type} bid
        * @param {type} newname new name of buddy
        * @returns {undefined}
@@ -2249,7 +2263,7 @@
 
       /**
        * Toogle complete roster
-       * 
+       *
        * @param {Integer} d Duration in ms
        */
       toggle: function(d) {
@@ -2261,6 +2275,7 @@
          var roster_width = roster.innerWidth();
          var roster_right = parseFloat($('#jsxc_roster').css('right'));
          var state = (roster_right &lt; 0) ? 'shown' : 'hidden';
+         var iconToDisplay = (roster_right &lt; 0) ? 'right' : 'left';
 
          jsxc.storage.setUserItem('roster', state);
 
@@ -2272,6 +2287,7 @@
          }, duration);
 
          $(document).trigger('toggle.roster.jsxc', [ state, duration ]);
+         $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-' + iconToDisplay);
       },
 
       /**
@@ -2282,22 +2298,24 @@
          $('#jsxc_roster > .jsxc_bottom').remove();
 
          $('#jsxc_roster').append($('&lt;p>' + jsxc.l.no_connection + '&lt;/p>').append(' &lt;a>' + jsxc.l.relogin + '&lt;/a>').click(function() {
-            jsxc.gui.showLoginBox();
+            jsxc.login();
+            // reload after login
+            window.location.reload();
          }));
       },
 
       /**
        * Shows a text with link to add a new buddy.
-       * 
+       *
        * @memberOf jsxc.gui.roster
        */
       empty: function() {
          var text = $('&lt;p>' + jsxc.l.Your_roster_is_empty_add_a + '&lt;/p>');
-         var link = $('&lt;a>' + jsxc.l.new_buddy + '&lt;/a>');
+         var link = $('&lt;a href="/help">' + jsxc.l.new_buddy + '&lt;/a>');
 
-         link.click(function() {
-            jsxc.gui.showContactDialog();
-         });
+         //link.click(function() {
+         //   jsxc.gui.showContactDialog();
+         //});
          text.append(link);
          text.append('.');
 
@@ -2307,13 +2325,13 @@
 
    /**
     * Wrapper for dialog
-    * 
+    *
     * @namespace jsxc.gui.dialog
     */
    jsxc.gui.dialog = {
       /**
        * Open a Dialog.
-       * 
+       *
        * @memberOf jsxc.gui.dialog
        * @param {String} data Data of the dialog
        * @param {Object} [o] Options for the dialog
@@ -2378,7 +2396,7 @@
 
       /**
        * Resizes current dialog.
-       * 
+       *
        * @param {Object} options e.g. width and height
        */
       resize: function(options) {
@@ -2388,13 +2406,13 @@
 
    /**
     * Handle functions related to the gui of the window
-    * 
+    *
     * @namespace jsxc.gui.window
     */
    jsxc.gui.window = {
       /**
        * Init a window skeleton
-       * 
+       *
        * @memberOf jsxc.gui.window
        * @param {String} bid
        * @returns {jQuery} Window object
@@ -2482,7 +2500,8 @@
 
          win.find('.jsxc_fade').hide();
 
-         win.find('.jsxc_name').disableSelection();
+         // NOTE: disableSelection is deprecated
+         //win.find('.jsxc_name').disableSelection();
 
          win.find('.slimScrollDiv').resizable({
             handles: 'w, nw, n',
@@ -2549,7 +2568,7 @@
 
       /**
        * Returns the window element
-       * 
+       *
        * @param {String} bid
        * @returns {jquery} jQuery object of the window element
        */
@@ -2560,7 +2579,7 @@
       /**
        * Open a window, related to the bid. If the window doesn't exist, it will
        * be created.
-       * 
+       *
        * @param {String} bid
        * @returns {jQuery} Window object
        */
@@ -2594,7 +2613,7 @@
 
       /**
        * Close chatwindow and clean up
-       * 
+       *
        * @param {String} bid bar jid
        */
       close: function(bid) {
@@ -2619,7 +2638,7 @@
 
       /**
        * Close chatwindow
-       * 
+       *
        * @param {String} bid
        */
       _close: function(bid) {
@@ -2632,7 +2651,7 @@
 
       /**
        * Toggle between minimize and maximize of the text area
-       * 
+       *
        * @param {String} bid bar jid
        */
       toggle: function(bid) {
@@ -2654,7 +2673,7 @@
 
       /**
        * Maximize text area and save
-       * 
+       *
        * @param {String} bid
        */
       show: function(bid) {
@@ -2666,7 +2685,7 @@
 
       /**
        * Maximize text area
-       * 
+       *
        * @param {String} bid
        * @returns {undefined}
        */
@@ -2688,7 +2707,7 @@
 
       /**
        * Minimize text area and save
-       * 
+       *
        * @param {String} bid
        */
       hide: function(bid) {
@@ -2699,7 +2718,7 @@
 
       /**
        * Minimize text area
-       * 
+       *
        * @param {String} bid
        */
       _hide: function(bid) {
@@ -2710,22 +2729,23 @@
 
       /**
        * Highlight window
-       * 
+       *
        * @param {type} bid
        */
       highlight: function(bid) {
          var el = jsxc.gui.window.get(bid).find(' .jsxc_bar');
 
          if (!el.is(':animated')) {
-            el.effect('highlight', {
-               color: 'orange'
-            }, 2000);
+            // TODO find replacement or enable jquery ui again
+            //el.effect('highlight', {
+            //   color: 'orange'
+            //}, 2000);
          }
       },
 
       /**
        * Scroll chat area to the bottom
-       * 
+       *
        * @param {String} bid bar jid
        */
       scrollDown: function(bid) {
@@ -2743,7 +2763,7 @@
 
       /**
        * Write Message to chat area and save
-       * 
+       *
        * @param {String} bid bar jid
        * @param {String} direction 'in' message is received or 'out' message is
        *        send
@@ -2793,7 +2813,7 @@
 
       /**
        * Write Message to chat area
-       * 
+       *
        * @param {String} bid bar jid
        * @param {Object} post Post object with direction, msg, uid, received
        * @param {Bool} restore If true no highlights are used and so unread flag
@@ -2871,7 +2891,7 @@
 
       /**
        * Set text into input area
-       * 
+       *
        * @param {type} bid
        * @param {type} text
        * @returns {undefined}
@@ -2882,7 +2902,7 @@
 
       /**
        * Load old log into chat area
-       * 
+       *
        * @param {type} bid
        * @returns {undefined}
        */
@@ -2897,7 +2917,7 @@
 
       /**
        * Clear chat history
-       * 
+       *
        * @param {type} bid
        * @returns {undefined}
        */
@@ -2909,13 +2929,13 @@
 
    /**
     * Hold all HTML templates.
-    * 
+    *
     * @namespace jsxc.gui.template
     */
    jsxc.gui.template = {
       /**
        * Return requested template and replace all placeholder
-       * 
+       *
        * @memberOf jsxc.gui.template;
        * @param {type} name template name
        * @param {type} bid
@@ -3064,7 +3084,9 @@
                  &lt;/ul>\
               &lt;/div>\
            &lt;/div>\
-           &lt;div id="jsxc_toggleRoster">&lt;/div>\
+           &lt;div id="jsxc_toggleRoster">\
+              &lt;span id="jsxc_toggleRoster_text">&lt;/span>\
+           &lt;/div>\
        &lt;/div>',
       windowList: '&lt;div id="jsxc_windowList">\
                &lt;ul>&lt;/ul>\
@@ -3176,7 +3198,7 @@
 
    /**
     * Handle XMPP stuff.
-    * 
+    *
     * @namespace jsxc.xmpp
     */
    jsxc.xmpp = {
@@ -3184,7 +3206,7 @@
 
       /**
        * Create new connection or attach to old
-       * 
+       *
        * @memberOf jsxc.xmpp
        */
       login: function() {
@@ -3264,7 +3286,7 @@
 
       /**
        * Logs user out of his xmpp session and does some clean up.
-       * 
+       *
        * @returns {Boolean}
        */
       logout: function() {
@@ -3330,7 +3352,7 @@
 
       /**
        * Triggered if connection is established
-       * 
+       *
        * @private
        */
       connected: function() {
@@ -3371,7 +3393,7 @@
 
       /**
        * Triggered if connection is attached
-       * 
+       *
        * @private
        */
       attached: function() {
@@ -3449,7 +3471,7 @@
 
       /**
        * Triggered if lost connection
-       * 
+       *
        * @private
        */
       disconnected: function() {
@@ -3468,10 +3490,6 @@
 
          if (jsxc.triggeredFromElement) {
             $('#jsxc_roster').remove();
-
-            if (jsxc.triggeredFromLogout) {
-               window.location = jsxc.options.logoutElement.attr('href');
-            }
          } else {
             jsxc.gui.roster.noConnection();
          }
@@ -3481,7 +3499,7 @@
 
       /**
        * Triggered on connection fault
-       * 
+       *
        * @param {String} condition information why we lost the connection
        * @private
        */
@@ -3495,7 +3513,7 @@
 
       /**
        * Triggered on initial roster load
-       * 
+       *
        * @param {dom} iq
        * @private
        */
@@ -3542,7 +3560,7 @@
 
       /**
        * Triggerd on roster changes
-       * 
+       *
        * @param {dom} iq
        * @returns {Boolean} True to preserve handler
        * @private
@@ -3616,19 +3634,19 @@
 
       /**
        * Triggered on incoming presence stanzas
-       * 
+       *
        * @param {dom} presence
        * @private
        */
       onPresence: function(presence) {
          /*
           * &lt;presence xmlns='jabber:client' type='unavailable' from='' to=''/>
-          * 
+          *
           * &lt;presence xmlns='jabber:client' from='' to=''> &lt;priority>5&lt;/priority>
           * &lt;c xmlns='http://jabber.org/protocol/caps'
           * node='http://psi-im.org/caps' ver='caps-b75d8d2b25' ext='ca cs
           * ep-notify-2 html'/> &lt;/presence>
-          * 
+          *
           * &lt;presence xmlns='jabber:client' from='' to=''> &lt;show>chat&lt;/show>
           * &lt;status>&lt;/status> &lt;priority>5&lt;/priority> &lt;c
           * xmlns='http://jabber.org/protocol/caps'
@@ -3640,8 +3658,6 @@
          var ptype = $(presence).attr('type');
          var from = $(presence).attr('from');
          var jid = Strophe.getBareJidFromJid(from).toLowerCase();
-         var to = $(presence).attr('to');
-         to = (to) ? Strophe.getBareJidFromJid(to).toLowerCase() : jid;
          var r = Strophe.getResourceFromJid(from);
          var bid = jsxc.jidToBid(jid);
          var data = jsxc.storage.getUserItem('buddy', bid);
@@ -3649,7 +3665,7 @@
          var status = null;
          var xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
 
-         if (jid === to) {
+         if (jid === Strophe.getBareJidFromJid(jsxc.storage.getItem("jid"))) {
             return true;
          }
 
@@ -3738,7 +3754,7 @@
 
       /**
        * Triggered on incoming message stanzas
-       * 
+       *
        * @param {dom} presence
        * @returns {Boolean}
        * @private
@@ -3821,7 +3837,7 @@
 
       /**
        * Triggerd if the rid changed
-       * 
+       *
        * @param {event} ev
        * @param {obejct} data
        * @private
@@ -3832,7 +3848,7 @@
 
       /**
        * response to friendship request
-       * 
+       *
        * @param {string} from jid from original friendship req
        * @param {boolean} approve
        */
@@ -3853,7 +3869,7 @@
 
       /**
        * Add buddy to my friends
-       * 
+       *
        * @param {string} username jid
        * @param {string} alias
        */
@@ -3889,7 +3905,7 @@
 
       /**
        * Remove buddy from my friends
-       * 
+       *
        * @param {type} jid
        */
       removeBuddy: function(jid) {
@@ -3937,7 +3953,7 @@
 
       /**
        * Public function to send message.
-       * 
+       *
        * @memberOf jsxc.xmpp
        * @param bid css jid of user
        * @param msg message
@@ -3953,7 +3969,7 @@
 
       /**
        * Create message stanza and send it.
-       * 
+       *
        * @memberOf jsxc.xmpp
        * @param jid Jabber id
        * @param msg Message
@@ -4030,13 +4046,13 @@
 
    /**
     * Handle long-live data
-    * 
+    *
     * @namespace jsxc.storage
     */
    jsxc.storage = {
       /**
        * Prefix for localstorage
-       * 
+       *
        * @privat
        */
       PREFIX: 'jsxc',
@@ -4056,7 +4072,7 @@
 
       /**
        * Save item to storage
-       * 
+       *
        * @function
        * @param {String} key variablename
        * @param {Object} value value
@@ -4102,7 +4118,7 @@
 
       /**
        * Load item from storage
-       * 
+       *
        * @function
        * @param {String} key variablename
        * @param {String} uk Userkey? Should we add the bid as prefix?
@@ -4120,7 +4136,7 @@
 
       /**
        * Get a user item from storage.
-       * 
+       *
        * @param key
        * @returns user item
        */
@@ -4138,7 +4154,7 @@
 
       /**
        * Remove item from storage
-       * 
+       *
        * @function
        * @param {String} key variablename
        * @param {String} uk Userkey? Should we add the bid as prefix?
@@ -4158,7 +4174,7 @@
 
       /**
        * Remove user item from storage.
-       * 
+       *
        * @param key
        */
       removeUserItem: function(type, key) {
@@ -4175,7 +4191,7 @@
 
       /**
        * Updates value of a variable in a saved object.
-       * 
+       *
        * @function
        * @param {String} key variablename
        * @param {String|object} variable variablename in object or object with
@@ -4209,7 +4225,7 @@
 
       /**
        * Updates value of a variable in a saved user object.
-       * 
+       *
        * @param {String} key variablename
        * @param {String|object} variable variablename in object or object with
        *        variable/key pairs
@@ -4231,7 +4247,7 @@
 
       /**
        * Inkrements value
-       * 
+       *
        * @function
        * @param {String} key variablename
        * @param {String} uk Userkey? Should we add the bid as prefix?
@@ -4243,7 +4259,7 @@
 
       /**
        * Remove element from array or object
-       * 
+       *
        * @param {string} key name of array or object
        * @param {string} name name of element in array or object
        * @param {String} uk Userkey? Should we add the bid as prefix?
@@ -4278,7 +4294,7 @@
 
       /**
        * Triggered if changes are recognized
-       * 
+       *
        * @function
        * @param {event} e Storageevent
        * @param {String} e.key Keyname which triggered event
@@ -4525,11 +4541,11 @@
             }
          }
 
-         if (jsxc.master && key.match(new RegExp('^add' + jsxc.storage.SEP))) {
+         /*if (jsxc.master && key.match(new RegExp('^add' + jsxc.storage.SEP))) {
             n = JSON.parse(e.newValue);
 
             jsxc.xmpp.addBuddy(n.username, n.alias);
-         }
+         }*/
 
          if (key === 'roster') {
             jsxc.gui.roster.toggle();
@@ -4634,7 +4650,7 @@
       dsaFallback: null,
       /**
        * Handler for otr receive event
-       * 
+       *
        * @memberOf jsxc.otr
        * @param {string} bid
        * @param {string} msg received message
@@ -4655,7 +4671,7 @@
 
       /**
        * Handler for otr send event
-       * 
+       *
        * @param {string} jid
        * @param {string} msg message to be send
        */
@@ -4669,7 +4685,7 @@
 
       /**
        * Create new otr instance
-       * 
+       *
        * @param {type} bid
        * @returns {undefined}
        */
@@ -4811,7 +4827,7 @@
 
       /**
        * show verification dialog with related part (secret or question)
-       * 
+       *
        * @param {type} bid
        * @param {string} [data]
        * @returns {undefined}
@@ -4841,7 +4857,7 @@
 
       /**
        * Send verification request to buddy
-       * 
+       *
        * @param {string} bid
        * @param {string} sec secret
        * @param {string} [quest] question
@@ -4855,7 +4871,7 @@
 
       /**
        * Toggle encryption state
-       * 
+       *
        * @param {type} bid
        * @returns {undefined}
        */
@@ -4869,7 +4885,7 @@
 
       /**
        * Send request to encrypt the session
-       * 
+       *
        * @param {type} bid
        * @returns {undefined}
        */
@@ -4883,7 +4899,7 @@
 
       /**
        * Abort encryptet session
-       * 
+       *
        * @param {type} bid
        * @param cb callback
        * @returns {undefined}
@@ -4901,7 +4917,7 @@
 
       /**
        * Backups otr session
-       * 
+       *
        * @param {string} bid
        */
       backup: function(bid) {
@@ -4933,7 +4949,7 @@
 
       /**
        * Restore old otr session
-       * 
+       *
        * @param {string} bid
        */
       restore: function(bid) {
@@ -4968,7 +4984,7 @@
 
       /**
        * Create or load DSA key
-       * 
+       *
        * @returns {unresolved}
        */
       createDSA: function() {
@@ -4984,7 +5000,7 @@
                // try to create web-worker
 
                try {
-                  worker = new Worker(jsxc.options.root + '/lib/otr/build/dsa-webworker.js');
+                  worker = new Worker('/javascripts/otr/dsa-webworker.js');
                } catch (err) {
                   jsxc.warn('Couldn\'t create web-worker.', err);
                }
@@ -5010,7 +5026,15 @@
 
                // start worker
                worker.postMessage({
-                  imports: [ jsxc.options.root + '/lib/otr/vendor/salsa20.js', jsxc.options.root + '/lib/otr/vendor/bigint.js', jsxc.options.root + '/lib/otr/vendor/crypto.js', jsxc.options.root + '/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/lib/otr/lib/const.js', jsxc.options.root + '/lib/otr/lib/helpers.js', jsxc.options.root + '/lib/otr/lib/dsa.js' ],
+                  imports: [
+                    '/javascripts/otr/salsa20.js',
+                    '/javascripts/otr/bigint.js',
+                    '/javascripts/otr/crypto.js',
+                    '/javascripts/otr/eventemitter.js',
+                    '/javascripts/otr/const.js',
+                    '/javascripts/otr/helpers.js',
+                    '/javascripts/otr/dsa.js'
+                  ],
                   seed: BigInt.getSeed(),
                   debug: true
                });
@@ -5052,7 +5076,7 @@
 
       /**
        * Ending of DSA key generation.
-       * 
+       *
        * @param {DSA} dsa DSA object
        */
       DSAready: function(dsa) {
@@ -5078,7 +5102,7 @@
 
    /**
     * This namespace handles the Notification API.
-    * 
+    *
     * @namespace jsxc.notification
     */
    jsxc.notification = {
@@ -5088,7 +5112,7 @@
 
       /**
        * Register notification on incoming messages.
-       * 
+       *
        * @memberOf jsxc.notification
        */
       init: function() {
@@ -5151,7 +5175,7 @@
       /**
        * Checks if browser has support for notifications and add on chrome to
        * the default api.
-       * 
+       *
        * @returns {Boolean} True if the browser has support.
        */
       hasSupport: function() {
@@ -5239,7 +5263,7 @@
 
       /**
        * Check permission.
-       * 
+       *
        * @returns {Boolean} True if we have the permission
        */
       hasPermission: function() {
@@ -5248,7 +5272,7 @@
 
       /**
        * Plays the given file.
-       * 
+       *
        * @memberOf jsxc.notification
        * @param {string} soundFile File relative to the sound directory
        * @param {boolean} loop True for loop
@@ -5282,7 +5306,7 @@
 
       /**
        * Stop/remove current sound.
-       * 
+       *
        * @memberOf jsxc.notification
        */
       stopSound: function() {
@@ -5296,7 +5320,7 @@
 
       /**
        * Mute sound.
-       * 
+       *
        * @memberOf jsxc.notification
        * @param {boolean} external True if triggered from external tab. Default:
        *        false.
@@ -5311,7 +5335,7 @@
 
       /**
        * Unmute sound.
-       * 
+       *
        * @memberOf jsxc.notification
        * @param {boolean} external True if triggered from external tab. Default:
        *        false.
@@ -5327,7 +5351,7 @@
 
    /**
     * This namespace handle the notice system.
-    * 
+    *
     * @namspace jsxc.notice
     * @memberOf jsxc
     */
@@ -5337,7 +5361,7 @@
 
       /**
        * Loads the saved notices.
-       * 
+       *
        * @memberOf jsxc.notice
        */
       load: function() {
@@ -5360,7 +5384,7 @@
 
       /**
        * Add a new notice to the stack;
-       * 
+       *
        * @memberOf jsxc.notice
        * @param msg Header message
        * @param description Notice description
@@ -5413,7 +5437,7 @@
 
       /**
        * Removes notice from stack
-       * 
+       *
        * @memberOf jsxc.notice
        * @param nid The notice id
        */
@@ -5431,7 +5455,7 @@
 
    /**
     * Contains all available translations
-    * 
+    *
     * @namespace jsxc.l10n
     * @memberOf jsxc
     */
@@ -5899,7 +5923,7 @@
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Thu Nov 06 2014 13:24:26 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Mon Nov 17 2014 23:36:46 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>

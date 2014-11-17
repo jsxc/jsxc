@@ -1,7 +1,7 @@
 /*! This file is concatenated for the browser. */
 
 /*!
- * jsxc v1.0.0 - 2014-11-06
+ * jsxc v1.0.0 - 2014-11-17
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -1048,6 +1048,8 @@ var jsxc;
                if (vCard.length === 0) {
                   jsxc.debug('No photo provided');
                   src = 0;
+               } else if (vCard.find('EXTVAL').length > 0) {
+                  src = vCard.find('EXTVAL').text();
                } else {
                   var img = vCard.find('BINVAL').text();
                   var type = vCard.find('TYPE').text();
@@ -1648,6 +1650,10 @@ var jsxc;
                var img = photo.find('BINVAL').text();
                var type = photo.find('TYPE').text();
                var src = 'data:' + type + ';base64,' + img;
+
+               if (photo.find('EXTVAL').length > 0) {
+                  src = photo.find('EXTVAL').text();
+               }
 
                $('#jsxc_dialog h3').before('<img class="jsxc_vCard" src="' + src + '" alt="avatar" />');
             }
@@ -3641,8 +3647,6 @@ var jsxc;
          var ptype = $(presence).attr('type');
          var from = $(presence).attr('from');
          var jid = Strophe.getBareJidFromJid(from).toLowerCase();
-         var to = $(presence).attr('to');
-         to = (to) ? Strophe.getBareJidFromJid(to).toLowerCase() : jid;
          var r = Strophe.getResourceFromJid(from);
          var bid = jsxc.jidToBid(jid);
          var data = jsxc.storage.getUserItem('buddy', bid);
@@ -3650,7 +3654,7 @@ var jsxc;
          var status = null;
          var xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
 
-         if (jid === to) {
+         if (jid === Strophe.getBareJidFromJid(jsxc.storage.getItem("jid"))) {
             return true;
          }
 
@@ -5887,7 +5891,7 @@ var jsxc;
 }(jQuery));
 
 /*!
- * jsxc v1.0.0 - 2014-11-06
+ * jsxc v1.0.0 - 2014-11-17
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
