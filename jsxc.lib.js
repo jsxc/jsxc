@@ -809,7 +809,10 @@ var jsxc;
        */
       saveSettinsPermanent: function() {
 
-      }
+      },
+
+      /** Enable carbons? */
+      carbons: true
    };
 
    /**
@@ -3384,26 +3387,27 @@ var jsxc;
          var caps = jsxc.xmpp.conn.caps;
          var domain = jsxc.xmpp.conn.domain;
 
-         if (caps) {
+         if (caps && jsxc.options.get('carbons')) {
             var conditionalEnable = function() {
                if (jsxc.xmpp.conn.caps.hasFeatureByJid(domain, jsxc.CONST.NS.CARBONS)) {
                   jsxc.xmpp.carbons.enable();
                }
             };
-            
-            if (typeof caps._knownCapabilities[caps._jidVerIndex[domain]] === 'undefined') { console.log('No known server caps.');
+
+            if (typeof caps._knownCapabilities[caps._jidVerIndex[domain]] === 'undefined') {
                var _jidNodeIndex = JSON.parse(localStorage.getItem('strophe.caps._jidNodeIndex')) || {};
 
-               $(document).on('caps.strophe', function onCaps(ev, from) { console.log('receive caps', from, domain)
-                  if(from !== domain) {
+               $(document).on('caps.strophe', function onCaps(ev, from) {
+
+                  if (from !== domain) {
                      return;
                   }
-                  
+
                   conditionalEnable();
-                  
+
                   $(document).off('caps.strophe', onCaps);
                });
-               
+
                caps._requestCapabilities(jsxc.xmpp.conn.domain, _jidNodeIndex[domain], caps._jidVerIndex[domain]);
             } else {
                console.log('We know server caps.')
@@ -3772,15 +3776,15 @@ var jsxc;
        * @private
        */
       onMessage: function(stanza) {
-         
+
          var forwarded = $(stanza).find('forwarded[xmlns="' + jsxc.CONST.NS.FORWARD + '"]');
          var message, carbon;
-         
+
          if (forwarded.length > 0) {
             message = forwarded.find('> message');
             forwarded = true;
             carbon = $(stanza).find('> [xmlns="' + jsxc.CONST.NS.CARBONS + '"]');
-            
+
             if (carbon.length === 0) {
                carbon = false;
             }
@@ -3790,7 +3794,7 @@ var jsxc;
             message = stanza;
             forwarded = false;
             carbon = false;
-            
+
             jsxc.debug('Incoming message', message);
          }
 
@@ -3798,27 +3802,27 @@ var jsxc;
          var from = $(message).attr('from');
          var mid = $(message).attr('id');
          var body = $(message).find('body:first').text();
-         
+
          if (!body) {
             return true;
          }
-         
+
          if (carbon) {
-            var direction = (carbon.prop("tagName") == 'sent')? 'out' : 'in';
-            var bid = jsxc.jidToBid((direction === 'out')? $(message).attr('to') : from);
-            
+            var direction = (carbon.prop("tagName") == 'sent') ? 'out' : 'in';
+            var bid = jsxc.jidToBid((direction === 'out') ? $(message).attr('to') : from);
+
             jsxc.gui.window.postMessage(bid, direction, body, false);
-            
+
             return true;
-             
+
          } else if (forwarded) {
             // Someone forwarded a message to us
-            
+
             body = from + jsxc.translate(' %%to%% ') + $(stanza).attr('to') + '"' + body + '"';
-            
+
             from = $(stanza).attr('from');
          }
-         
+
          var jid = Strophe.getBareJidFromJid(from);
          var bid = jsxc.jidToBid(jid);
          var data = jsxc.storage.getUserItem('buddy', bid);
@@ -4030,7 +4034,7 @@ var jsxc;
             id: uid
          }).c('body').t(msg);
 
-         if (msg.match(/^\?OTR/)) {
+         if (jsxc.xmpp.carbons.enabled && msg.match(/^\?OTR/)) {
             xmlMsg.up().c("private", {
                xmlns: jsxc.CONST.NS.CARBONS
             });
@@ -4118,7 +4122,7 @@ var jsxc;
             jsxc.xmpp.carbons.enabled = true;
 
             jsxc.debug('Carbons enabled');
-            
+
             if (cb) {
                cb.call(this);
             }
@@ -4144,7 +4148,7 @@ var jsxc;
             jsxc.xmpp.carbons.enabled = false;
 
             jsxc.debug('Carbons disabled');
-            
+
             if (cb) {
                cb.call(this);
             }
