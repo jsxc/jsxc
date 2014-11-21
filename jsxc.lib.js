@@ -2017,6 +2017,11 @@ var jsxc;
          if (jsxc.storage.getUserItem('roster') === 'hidden') {
             $('#jsxc_roster').css('right', '-200px');
             $('#jsxc_windowList > ul').css('paddingRight', '22px');
+            $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-left');
+            $('body > .container').addClass('chat-roster-hidden');
+         } else {
+            $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-right');
+            $('body > .container').addClass('chat-roster-shown');
          }
 
          var pres = jsxc.storage.getUserItem('presence') || 'online';
@@ -2251,6 +2256,11 @@ var jsxc;
 
          jsxc.storage.setUserItem('roster', state);
 
+         // remove toggle icon
+         $('#jsxc_toggleRoster_text').removeClass('entypo chevron-thin-left chevron-thin-right');
+         // set class of the diaspora* container
+         $('body > .container').removeClass('chat-roster-shown chat-roster-hidden')
+                               .addClass('chat-roster-'+state);
          roster.animate({
             right: ((roster_width + roster_right) * -1) + 'px'
          }, duration);
