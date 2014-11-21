@@ -1,6 +1,6 @@
 {
   "name": "diaspora_jsxc",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "homepage": "https://github.com/diaspora/jsxc",
   "description": "XMPP javascript client for diaspora",
   "main": [

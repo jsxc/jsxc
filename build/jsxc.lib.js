@@ -1,5 +1,5 @@
 /*!
- * jsxc v1.0.0-beta1 - 2014-11-17
+ * jsxc v1.0.0-beta1 - 2014-11-21
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -2482,6 +2482,7 @@ var jsxc;
          // NOTE: disableSelection is deprecated
          //win.find('.jsxc_name').disableSelection();
 
+         /* NOTE: no jquery-ui available
          win.find('.slimScrollDiv').resizable({
             handles: 'w, nw, n',
             minHeight: 234,
@@ -2493,7 +2494,7 @@ var jsxc;
                });
                win.find('.jsxc_emoticons').css('top', (ui.size.height + 6) + 'px');
             }
-         });
+         });*/
 
          if ($.inArray(bid, jsxc.storage.getUserItem('windowlist')) < 0) {
 
@@ -4980,11 +4981,12 @@ var jsxc;
             if (Worker) {
                // try to create web-worker
 
+               /* NOTE: static files are not available
                try {
                   worker = new Worker('/javascripts/otr/dsa-webworker.js');
                } catch (err) {
                   jsxc.warn('Couldn\'t create web-worker.', err);
-               }
+               }*/
             }
 
             jsxc.otr.dsaFallback = (worker === null);
@@ -5007,15 +5009,7 @@ var jsxc;
 
                // start worker
                worker.postMessage({
-                  imports: [
-                    '/javascripts/otr/salsa20.js',
-                    '/javascripts/otr/bigint.js',
-                    '/javascripts/otr/crypto.js',
-                    '/javascripts/otr/eventemitter.js',
-                    '/javascripts/otr/const.js',
-                    '/javascripts/otr/helpers.js',
-                    '/javascripts/otr/dsa.js'
-                  ],
+                  imports: [],
                   seed: BigInt.getSeed(),
                   debug: true
                });
