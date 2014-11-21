@@ -46,7 +46,7 @@
   },
   {
      "file": "build/lib/otr/build/dep/salsa20.js",
-     "license": "GPLv3",
+     "license": "AGPL3",
      "url": "https://github.com/neoatlantis/node-salsa20"
   },
   {

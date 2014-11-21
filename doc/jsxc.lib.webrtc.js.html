@@ -1,61 +1,88 @@
-/* global jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery, MediaStreamTrack */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: jsxc.lib.webrtc.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: jsxc.lib.webrtc.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source"><code>/* global jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery, MediaStreamTrack */
 
 var RTC = null, RTCPeerconnection = null;
 
-jsxc.gui.template.incomingCall = '<h3>%%Incoming_call%%</h3>\
-        <p>%%Do_you_want_to_accept_the_call_from%% {{bid_name}}?</p>\
-        <p class="jsxc_right">\
-            <a href="#" class="button jsxc_reject">%%Reject%%</a> <a href="#" class="button creation jsxc_accept">%%Accept%%</a>\
-         </p>';
+jsxc.gui.template.incomingCall = '&lt;h3>%%Incoming_call%%&lt;/h3>\
+        &lt;p>%%Do_you_want_to_accept_the_call_from%% {{bid_name}}?&lt;/p>\
+        &lt;p class="jsxc_right">\
+            &lt;a href="#" class="button jsxc_reject">%%Reject%%&lt;/a> &lt;a href="#" class="button creation jsxc_accept">%%Accept%%&lt;/a>\
+         &lt;/p>';
 
-jsxc.gui.template.allowMediaAccess = '<p>%%Please_allow_access_to_microphone_and_camera%%</p>';
+jsxc.gui.template.allowMediaAccess = '&lt;p>%%Please_allow_access_to_microphone_and_camera%%&lt;/p>';
 
-jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
-            <div class="jsxc_chatarea">\
-                <ul></ul>\
-            </div>\
-            <div class="jsxc_videoContainer">\
-                <video class="jsxc_localvideo" autoplay></video>\
-                <video class="jsxc_remotevideo" autoplay></video>\
-                <div class="jsxc_status"></div>\
-               <div class="bubblingG">\
-                  <span id="bubblingG_1">\
-                  </span>\
-                  <span id="bubblingG_2">\
-                  </span>\
-                  <span id="bubblingG_3">\
-                  </span>\
-               </div>\
-                <div class="jsxc_noRemoteVideo">\
-                   <div>\
-                     <div></div>\
-                     <p>%%No_video_signal%%</p>\
-                     <div></div>\
-                   </div>\
-                </div>\
-            </div>\
-            <div class="jsxc_controlbar">\
-                <button type="button" class="jsxc_hangUp">%%hang_up%%</button>\
-                <input type="range" class="jsxc_volume" min="0.0" max="1.0" step="0.05" value="0.5" />\
-                <div class="jsxc_buttongroup">\
-                    <button type="button" class="jsxc_snapshot">%%snapshot%%</button><button type="button" class="jsxc_snapshots">&#9660;</button>\
-                </div>\
-                <!-- <button type="button" class="jsxc_mute_local">%%mute_my_audio%%</button>\
-                <button type="button" class="jsxc_pause_local">%%pause_my_video%%</button> --> \
-                <button type="button" class="jsxc_showchat">%%chat%%</button>\
-                <button type="button" class="jsxc_fullscreen">%%fullscreen%%</button>\
-                <button type="button" class="jsxc_info">%%Info%%</button>\
-            </div>\
-            <div class="jsxc_multi">\
-               <div class="jsxc_snapshotbar">\
-                   <p>No pictures yet!</p>\
-               </div>\n\
-               <!--<div class="jsxc_chatarea">\
-                   <ul></ul>\
-               </div>-->\
-               <div class="jsxc_infobar"></div>\
-            </div>\
-        </div>';
+jsxc.gui.template.videoWindow = '&lt;div class="jsxc_webrtc">\
+            &lt;div class="jsxc_chatarea">\
+                &lt;ul>&lt;/ul>\
+            &lt;/div>\
+            &lt;div class="jsxc_videoContainer">\
+                &lt;video class="jsxc_localvideo" autoplay>&lt;/video>\
+                &lt;video class="jsxc_remotevideo" autoplay>&lt;/video>\
+                &lt;div class="jsxc_status">&lt;/div>\
+               &lt;div class="bubblingG">\
+                  &lt;span id="bubblingG_1">\
+                  &lt;/span>\
+                  &lt;span id="bubblingG_2">\
+                  &lt;/span>\
+                  &lt;span id="bubblingG_3">\
+                  &lt;/span>\
+               &lt;/div>\
+                &lt;div class="jsxc_noRemoteVideo">\
+                   &lt;div>\
+                     &lt;div>&lt;/div>\
+                     &lt;p>%%No_video_signal%%&lt;/p>\
+                     &lt;div>&lt;/div>\
+                   &lt;/div>\
+                &lt;/div>\
+            &lt;/div>\
+            &lt;div class="jsxc_controlbar">\
+                &lt;button type="button" class="jsxc_hangUp">%%hang_up%%&lt;/button>\
+                &lt;input type="range" class="jsxc_volume" min="0.0" max="1.0" step="0.05" value="0.5" />\
+                &lt;div class="jsxc_buttongroup">\
+                    &lt;button type="button" class="jsxc_snapshot">%%snapshot%%&lt;/button>&lt;button type="button" class="jsxc_snapshots">&#9660;&lt;/button>\
+                &lt;/div>\
+                &lt;!-- &lt;button type="button" class="jsxc_mute_local">%%mute_my_audio%%&lt;/button>\
+                &lt;button type="button" class="jsxc_pause_local">%%pause_my_video%%&lt;/button> --> \
+                &lt;button type="button" class="jsxc_showchat">%%chat%%&lt;/button>\
+                &lt;button type="button" class="jsxc_fullscreen">%%fullscreen%%&lt;/button>\
+                &lt;button type="button" class="jsxc_info">%%Info%%&lt;/button>\
+            &lt;/div>\
+            &lt;div class="jsxc_multi">\
+               &lt;div class="jsxc_snapshotbar">\
+                   &lt;p>No pictures yet!&lt;/p>\
+               &lt;/div>\n\
+               &lt;!--&lt;div class="jsxc_chatarea">\
+                   &lt;ul>&lt;/ul>\
+               &lt;/div>-->\
+               &lt;div class="jsxc_infobar">&lt;/div>\
+            &lt;/div>\
+        &lt;/div>';
 
 (function($) {
    "use strict";
@@ -225,7 +252,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             return;
          }
 
-         var videoIcon = $('<div class="jsxc_video jsxc_disabled" title="' + jsxc.l.Start_video_call + '"></div>');
+         var videoIcon = $('&lt;div class="jsxc_video jsxc_disabled" title="' + jsxc.l.Start_video_call + '">&lt;/div>');
 
          videoIcon.click(function() {
             self.startCall(data.jid);
@@ -259,7 +286,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             return;
          }
 
-         var div = $('<div>').addClass('jsxc_video');
+         var div = $('&lt;div>').addClass('jsxc_video');
          win.find('.jsxc_transfer:eq(1)').after(div);
 
          self.updateIcon(jsxc.jidToBid(win.data('jid')));
@@ -360,7 +387,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
 
          if (status.html()) {
             // attach old messages
-            txt = status.html() + '<br />' + txt;
+            txt = status.html() + '&lt;br />' + txt;
          }
 
          status.html(txt);
@@ -425,12 +452,12 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          jsxc.gui.showVideoWindow(self.last_caller);
 
          var i;
-         for (i = 0; i < stream.getAudioTracks().length; i++) {
+         for (i = 0; i &lt; stream.getAudioTracks().length; i++) {
             self.setStatus((stream.getAudioTracks().length > 0) ? 'Use local audio device.' : 'No local audio device.');
 
             jsxc.debug('using audio device "' + stream.getAudioTracks()[i].label + '"');
          }
-         for (i = 0; i < stream.getVideoTracks().length; i++) {
+         for (i = 0; i &lt; stream.getVideoTracks().length; i++) {
             self.setStatus((stream.getVideoTracks().length > 0) ? 'Use local video device.' : 'No local video device.');
 
             jsxc.debug('using video device "' + stream.getVideoTracks()[i].label + '"');
@@ -658,12 +685,12 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
                }
             }
 
-            var text = '<p>';
-            text += '<b>' + jsxc.translate('%%Local IP%%: ') + '</b>' + sess.local_ip + '<br />';
-            text += '<b>' + jsxc.translate('%%Remote IP%%: ') + '</b>' + sess.remote_ip + '<br />';
-            text += '<b>' + jsxc.translate('%%Local Fingerprint%%: ') + '</b>' + sess.local_fp + '<br />';
-            text += '<b>' + jsxc.translate('%%Remote Fingerprint%%: ') + '</b>' + sess.remote_fp;
-            text += '</p>';
+            var text = '&lt;p>';
+            text += '&lt;b>' + jsxc.translate('%%Local IP%%: ') + '&lt;/b>' + sess.local_ip + '&lt;br />';
+            text += '&lt;b>' + jsxc.translate('%%Remote IP%%: ') + '&lt;/b>' + sess.remote_ip + '&lt;br />';
+            text += '&lt;b>' + jsxc.translate('%%Local Fingerprint%%: ') + '&lt;/b>' + sess.local_fp + '&lt;br />';
+            text += '&lt;b>' + jsxc.translate('%%Remote Fingerprint%%: ') + '&lt;/b>' + sess.remote_fp;
+            text += '&lt;/p>';
 
             $('#jsxc_dialog .jsxc_infobar').html(text);
          } else if (iceCon === 'failed') {
@@ -793,14 +820,14 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
 
          $('.jsxc_snapshotbar p').remove();
 
-         var canvas = $('<canvas/>').css('display', 'none').appendTo('body').attr({
+         var canvas = $('&lt;canvas/>').css('display', 'none').appendTo('body').attr({
             width: video.width(),
             height: video.height()
          }).get(0);
          var ctx = canvas.getContext('2d');
 
          ctx.drawImage(video[0], 0, 0);
-         var img = $('<img/>');
+         var img = $('&lt;img/>');
          var url = null;
 
          try {
@@ -811,7 +838,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          }
 
          img[0].src = url;
-         var link = $('<a/>').attr({
+         var link = $('&lt;a/>').attr({
             target: '_blank',
             href: url
          });
@@ -1036,3 +1063,26 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       Start_video_call: 'Iniciar llamada de vídeo'
    });
 }(jQuery));
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.template.html">template</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.l10n.html">l10n</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Mon Nov 17 2014 23:36:46 GMT+0100 (CET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

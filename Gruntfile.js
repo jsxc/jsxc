@@ -55,12 +55,11 @@ module.exports = function(grunt) {
       concat: {
          dep: {
             options: {
-               banner: '/*!' +
+               banner: '/*!\n' +
                   ' * <%= app.name %> v<%= app.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
                   ' * \n' +
                   ' * This file concatenates all dependencies of <%= app.name %>.\n' +
                   ' * \n' +
-                  ' * For the list of concatenated files and there licenses please see <%= app.homepage %> @github.\n' +
                   ' */\n\n',
                process: function(src, filepath) {
                   if (filepath === 'build/lib/otr/build/dep/crypto.js') { 
@@ -73,7 +72,7 @@ module.exports = function(grunt) {
                }
             },
             src: dep_files,
-            dest: 'build/jsxc.dep.js'
+            dest: 'build/lib/jsxc.dep.js'
          },
          jsxc: {
             options: {
@@ -91,7 +90,7 @@ module.exports = function(grunt) {
                preserveComments: 'some'
             },
             files: {
-               'build/jsxc.dep.min.js': ['build/jsxc.dep.js'],
+               'build/lib/jsxc.dep.min.js': ['build/lib/jsxc.dep.js'],
                'build/jsxc.min.js': ['build/jsxc.js']
             }
          }
@@ -135,10 +134,11 @@ module.exports = function(grunt) {
             } ]
          }
       },
-      shell: {
-         hooks: {
-            command: 'cp pre-commit .git/hooks/'
-         }
+      jsdoc: {
+          dist: {
+              src: ['jsxc.lib.js', 'jsxc.lib.webrtc.js'],
+              dest: 'doc'
+          }
       }
    });
 
@@ -152,17 +152,14 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-text-replace');
    grunt.loadNpmTasks('grunt-search');
    grunt.loadNpmTasks('grunt-contrib-compress');
-   grunt.loadNpmTasks('grunt-shell');
+   grunt.loadNpmTasks('grunt-jsdoc');
 
    // Default task.
-   grunt.registerTask('default', [ 'jshint', 'search', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
+   grunt.registerTask('default', [ 'jshint', 'search', 'jsdoc', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // Create alpha/beta build
    grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // before commit
    grunt.registerTask('commit', [ 'jshint', 'search:console' ]);
-
-   // prepare pre-commit hook
-   grunt.registerTask('hookmeup', [ 'shell:hooks' ]);
 };

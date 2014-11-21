@@ -192,12 +192,14 @@
        */
       _handleDiscoInfoReply: function(stanza) {
          var query = stanza.querySelector('query'), node = query.getAttribute('node').split('#'), ver = node[1], from = stanza.getAttribute('from');
+
          if (!this._knownCapabilities[ver]) {
             var childNodes = query.childNodes, childNodesLen = childNodes.length;
             this._knownCapabilities[ver] = {
                features: [],
                identities: []
             };
+
             for (var i = 0; i < childNodesLen; i++) {
                var node = childNodes[i];
                if (node.nodeName == 'feature') {
@@ -205,8 +207,8 @@
                } else if (node.nodeName == 'identity') {
                   this._knownCapabilities[ver]['identities'].push(this._attributesToJsObject(node.attributes));
                } else {
-                  if (_knownCapabilities[ver][node.nodeName])
-                     _knownCapabilities[ver][node.nodeName] = [];
+                  if (typeof this._knownCapabilities[ver][node.nodeName] === 'undefined')
+                     this._knownCapabilities[ver][node.nodeName] = [];
                   this._knownCapabilities[ver][node.nodeName].push(this._attributesToJsObject(node.attributes));
                }
             }
