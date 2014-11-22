@@ -1006,7 +1006,7 @@ div.jsxc_sys {
 	height: 30px;
 	margin: 0px;
 	padding: 3px;
-	padding-right: 40px;
+	padding-right: 30px !important;
 	outline: none;
 	border-radius: 0px;
 	box-sizing: border-box;
