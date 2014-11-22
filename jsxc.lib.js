@@ -3121,7 +3121,7 @@ var jsxc;
         <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close">%%Cancel%%</a> <a href="#" class="button creation">%%Remove%%</a></p>',
       waitAlert: '<h3>{{msg}}</h3>\
         <p>%%Please_wait%%</p>\
-        <p class="jsxc_center"><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /></p>',
+        <div class="jsxc_loading" />',
       alert: '<h3>%%Alert%%</h3>\
         <p>{{msg}}</p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_close jsxc_cancel">%%Ok%%</a></p>',
@@ -3151,7 +3151,7 @@ var jsxc;
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>',
       vCard: '<h3>%%Info_about%% {{bid_name}}</h3>\
          <ul class="jsxc_vCard"></ul>\
-         <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...</p>',
+         <div class="jsxc_loading" /> %%Please_wait%%...</p>',
       settings: '<h3>%%User_settings%%</h3>\
          <p></p>\
          <form>\

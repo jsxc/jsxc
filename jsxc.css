@@ -1204,6 +1204,15 @@ img.jsxc_vCard {
       endColorstr='#00282323', GradientType=0); /* IE6-9 */
 }
 
+.jsxc_loading {
+  margin: 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 0px;
+  background-size: 32px 32px !important;
+  background: url('img/loading.gif');
+}
+
 .jsxc_emoticon {
   width: 19px;
   height: 19px;
