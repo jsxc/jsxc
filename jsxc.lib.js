@@ -270,11 +270,7 @@ var jsxc;
          } else { jsxc.restoreOldConnection(); }
       },
 
-      login: function() {
-        if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid')) {
-          jsxc.xmpp.login();
-        }
-      },
+      login: function() { /* TODO deprecated function */ },
 
       restoreOldConnection: function() {
         // Restore old connection
