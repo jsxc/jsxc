@@ -145,6 +145,24 @@ module.exports = function(grunt) {
           }
         }
       },
+      qunit: {
+        all: {
+          options: {
+            timeout: 10000,
+            urls: [
+              'http://localhost:3000/test/bower/bower_spec.html'
+            ]
+          }
+        }
+      },
+      connect: {
+        server: {
+          options: {
+            port: 3000,
+            base: '.'
+          }
+        }
+      },
       jsdoc: {
           dist: {
               src: ['jsxc.lib.js', 'jsxc.lib.webrtc.js'],
@@ -165,6 +183,8 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-contrib-compress');
    grunt.loadNpmTasks('grunt-jsdoc');
    grunt.loadNpmTasks('grunt-data-uri');
+   grunt.loadNpmTasks('grunt-contrib-qunit');
+   grunt.loadNpmTasks('grunt-contrib-connect');
 
    // Default task.
    grunt.registerTask('default', [ 'jshint', 'search', 'jsdoc', 'clean', 'copy', 'dataUri', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
