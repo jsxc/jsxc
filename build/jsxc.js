@@ -1,7 +1,7 @@
 /*! This file is concatenated for the browser. */
 
 /*!
- * jsxc v1.0.0 - 2014-11-17
+ * jsxc v1.0.0 - 2014-11-24
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -233,7 +233,7 @@ var jsxc;
          if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
 
             // Looking for a login form
-            if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
+            //if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
 
                if (jsxc.options.displayRosterMinimized()) {
                   // Show minimized roster
@@ -242,8 +242,8 @@ var jsxc;
                   jsxc.gui.roster.noConnection();
                }
 
-               return;
-            }
+               //return;
+            //}
 
             if (typeof jsxc.options.formFound === 'function') {
                jsxc.options.formFound.call();
@@ -285,12 +285,7 @@ var jsxc;
          } else { jsxc.restoreOldConnection(); }
       },
 
-      login: function() {
-        if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid')) {
-          jsxc.xmpp.login();
-          jsxc.restoreOldConnection();
-        }
-      },
+      login: function() { /* TODO deprecated function */ },
 
       restoreOldConnection: function() {
         // Restore old connection
@@ -341,6 +336,10 @@ var jsxc;
 
          if (typeof settings.xmpp.username === 'string') {
             username = settings.xmpp.username;
+         }
+
+         if (typeof settings.xmpp.password === 'string') {
+            password = settings.xmpp.password;
          }
 
          var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
@@ -2033,6 +2032,11 @@ var jsxc;
          if (jsxc.storage.getUserItem('roster') === 'hidden') {
             $('#jsxc_roster').css('right', '-200px');
             $('#jsxc_windowList > ul').css('paddingRight', '22px');
+            $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-left');
+            $('body > .container').addClass('chat-roster-hidden');
+         } else {
+            $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-right');
+            $('body > .container').addClass('chat-roster-shown');
          }
 
          var pres = jsxc.storage.getUserItem('presence') || 'online';
@@ -2267,6 +2271,11 @@ var jsxc;
 
          jsxc.storage.setUserItem('roster', state);
 
+         // remove toggle icon
+         $('#jsxc_toggleRoster_text').removeClass('entypo chevron-thin-left chevron-thin-right');
+         // set class of the diaspora* container
+         $('body > .container').removeClass('chat-roster-shown chat-roster-hidden')
+                               .addClass('chat-roster-'+state);
          roster.animate({
             right: ((roster_width + roster_right) * -1) + 'px'
          }, duration);
@@ -2285,11 +2294,7 @@ var jsxc;
          $('#jsxc_roster .slimScrollDiv').remove();
          $('#jsxc_roster > .jsxc_bottom').remove();
 
-         $('#jsxc_roster').append($('<p>' + jsxc.l.no_connection + '</p>').append(' <a>' + jsxc.l.relogin + '</a>').click(function() {
-            jsxc.login();
-            // reload after login
-            window.location.reload();
-         }));
+         $('#jsxc_roster').append($(jsxc.gui.template.get('loginForm')));
       },
 
       /**
@@ -2975,6 +2980,9 @@ var jsxc;
          jsxc.debug('Template not available: ' + name);
          return name;
       },
+      loginForm: '<form id="jsxc_loginForm">\
+        <input type="submit" value="%%Login%%"/>\
+        </form>',
       authenticationDialog: '<h3>Verification</h3>\
             <p>%%Authenticating_a_buddy_helps_%%</p>\
             <div>\
@@ -3127,7 +3135,7 @@ var jsxc;
         <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close">%%Cancel%%</a> <a href="#" class="button creation">%%Remove%%</a></p>',
       waitAlert: '<h3>{{msg}}</h3>\
         <p>%%Please_wait%%</p>\
-        <p class="jsxc_center"><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /></p>',
+        <div class="jsxc_loading" />',
       alert: '<h3>%%Alert%%</h3>\
         <p>{{msg}}</p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_close jsxc_cancel">%%Ok%%</a></p>',
@@ -3157,7 +3165,7 @@ var jsxc;
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>',
       vCard: '<h3>%%Info_about%% {{bid_name}}</h3>\
          <ul class="jsxc_vCard"></ul>\
-         <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...</p>',
+         <div class="jsxc_loading" /> %%Please_wait%%...</p>',
       settings: '<h3>%%User_settings%%</h3>\
          <p></p>\
          <form>\
@@ -5891,7 +5899,7 @@ var jsxc;
 }(jQuery));
 
 /*!
- * jsxc v1.0.0 - 2014-11-17
+ * jsxc v1.0.0 - 2014-11-24
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license

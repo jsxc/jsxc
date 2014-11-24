@@ -245,7 +245,7 @@
          if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
 
             // Looking for a login form
-            if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
+            //if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
 
                if (jsxc.options.displayRosterMinimized()) {
                   // Show minimized roster
@@ -254,8 +254,8 @@
                   jsxc.gui.roster.noConnection();
                }
 
-               return;
-            }
+               //return;
+            //}
 
             if (typeof jsxc.options.formFound === 'function') {
                jsxc.options.formFound.call();
@@ -297,12 +297,7 @@
          } else { jsxc.restoreOldConnection(); }
       },
 
-      login: function() {
-        if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid')) {
-          jsxc.xmpp.login();
-          jsxc.restoreOldConnection();
-        }
-      },
+      login: function() { /* TODO deprecated function */ },
 
       restoreOldConnection: function() {
         // Restore old connection
@@ -353,6 +348,10 @@
 
          if (typeof settings.xmpp.username === 'string') {
             username = settings.xmpp.username;
+         }
+
+         if (typeof settings.xmpp.password === 'string') {
+            password = settings.xmpp.password;
          }
 
          var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
@@ -2045,6 +2044,11 @@
          if (jsxc.storage.getUserItem('roster') === 'hidden') {
             $('#jsxc_roster').css('right', '-200px');
             $('#jsxc_windowList > ul').css('paddingRight', '22px');
+            $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-left');
+            $('body > .container').addClass('chat-roster-hidden');
+         } else {
+            $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-right');
+            $('body > .container').addClass('chat-roster-shown');
          }
 
          var pres = jsxc.storage.getUserItem('presence') || 'online';
@@ -2279,6 +2283,11 @@
 
          jsxc.storage.setUserItem('roster', state);
 
+         // remove toggle icon
+         $('#jsxc_toggleRoster_text').removeClass('entypo chevron-thin-left chevron-thin-right');
+         // set class of the diaspora* container
+         $('body > .container').removeClass('chat-roster-shown chat-roster-hidden')
+                               .addClass('chat-roster-'+state);
          roster.animate({
             right: ((roster_width + roster_right) * -1) + 'px'
          }, duration);
@@ -2297,11 +2306,7 @@
          $('#jsxc_roster .slimScrollDiv').remove();
          $('#jsxc_roster > .jsxc_bottom').remove();
 
-         $('#jsxc_roster').append($('&lt;p>' + jsxc.l.no_connection + '&lt;/p>').append(' &lt;a>' + jsxc.l.relogin + '&lt;/a>').click(function() {
-            jsxc.login();
-            // reload after login
-            window.location.reload();
-         }));
+         $('#jsxc_roster').append($(jsxc.gui.template.get('loginForm')));
       },
 
       /**
@@ -2503,6 +2508,7 @@
          // NOTE: disableSelection is deprecated
          //win.find('.jsxc_name').disableSelection();
 
+         /* NOTE: no jquery-ui available
          win.find('.slimScrollDiv').resizable({
             handles: 'w, nw, n',
             minHeight: 234,
@@ -2514,7 +2520,7 @@
                });
                win.find('.jsxc_emoticons').css('top', (ui.size.height + 6) + 'px');
             }
-         });
+         });*/
 
          if ($.inArray(bid, jsxc.storage.getUserItem('windowlist')) &lt; 0) {
 
@@ -2986,6 +2992,9 @@
          jsxc.debug('Template not available: ' + name);
          return name;
       },
+      loginForm: '&lt;form id="jsxc_loginForm">\
+        &lt;input type="submit" value="%%Login%%"/>\
+        &lt;/form>',
       authenticationDialog: '&lt;h3>Verification&lt;/h3>\
             &lt;p>%%Authenticating_a_buddy_helps_%%&lt;/p>\
             &lt;div>\
@@ -3138,7 +3147,7 @@
         &lt;p class="jsxc_right">&lt;a href="#" class="button jsxc_cancel jsxc_close">%%Cancel%%&lt;/a> &lt;a href="#" class="button creation">%%Remove%%&lt;/a>&lt;/p>',
       waitAlert: '&lt;h3>{{msg}}&lt;/h3>\
         &lt;p>%%Please_wait%%&lt;/p>\
-        &lt;p class="jsxc_center">&lt;img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" />&lt;/p>',
+        &lt;div class="jsxc_loading" />',
       alert: '&lt;h3>%%Alert%%&lt;/h3>\
         &lt;p>{{msg}}&lt;/p>\
         &lt;p class="jsxc_right">&lt;a href="#" class="button jsxc_close jsxc_cancel">%%Ok%%&lt;/a>&lt;/p>',
@@ -3168,7 +3177,7 @@
          &lt;p class="jsxc_right">&lt;a class="button jsxc_debuglog" href="#">Show debug log&lt;/a>&lt;/p>',
       vCard: '&lt;h3>%%Info_about%% {{bid_name}}&lt;/h3>\
          &lt;ul class="jsxc_vCard">&lt;/ul>\
-         &lt;p>&lt;img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...&lt;/p>',
+         &lt;div class="jsxc_loading" /> %%Please_wait%%...&lt;/p>',
       settings: '&lt;h3>%%User_settings%%&lt;/h3>\
          &lt;p>&lt;/p>\
          &lt;form>\
@@ -4999,11 +5008,12 @@
             if (Worker) {
                // try to create web-worker
 
+               /* NOTE: static files are not available
                try {
                   worker = new Worker('/javascripts/otr/dsa-webworker.js');
                } catch (err) {
                   jsxc.warn('Couldn\'t create web-worker.', err);
-               }
+               }*/
             }
 
             jsxc.otr.dsaFallback = (worker === null);
@@ -5026,15 +5036,7 @@
 
                // start worker
                worker.postMessage({
-                  imports: [
-                    '/javascripts/otr/salsa20.js',
-                    '/javascripts/otr/bigint.js',
-                    '/javascripts/otr/crypto.js',
-                    '/javascripts/otr/eventemitter.js',
-                    '/javascripts/otr/const.js',
-                    '/javascripts/otr/helpers.js',
-                    '/javascripts/otr/dsa.js'
-                  ],
+                  imports: [],
                   seed: BigInt.getSeed(),
                   debug: true
                });
@@ -5923,7 +5925,7 @@
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Mon Nov 17 2014 23:36:46 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Mon Nov 24 2014 18:15:55 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>
