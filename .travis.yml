@@ -12,4 +12,4 @@ before_install: npm install -g grunt-cli@0.1.13
 
 install: npm install
 
-script: grunt default
+script: grunt test

@@ -189,6 +189,9 @@ module.exports = function(grunt) {
    // Default task.
    grunt.registerTask('default', [ 'jshint', 'search', 'jsdoc', 'clean', 'copy', 'dataUri', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
 
+   // Default task plus unit testing
+   grunt.registerTask('test', [ 'jshint', 'search', 'connect', 'qunit' ]);
+
    // Create alpha/beta build
    grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'copy', 'dataUri', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
 
