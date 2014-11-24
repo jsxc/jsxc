@@ -17,7 +17,7 @@
     "lib/jquery.fullscreen.js",
     "build/jsxc.css",
     "build/jsxc.webrtc.css",
-    "build/jsxc.dep.min.js",
+    "build/lib/jsxc.dep.min.js",
     "build/jsxc.min.js"
   ],
   "moduleType": [
