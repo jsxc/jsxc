@@ -2279,11 +2279,7 @@ var jsxc;
          $('#jsxc_roster .slimScrollDiv').remove();
          $('#jsxc_roster > .jsxc_bottom').remove();
 
-         $('#jsxc_roster').append($('<p>' + jsxc.l.no_connection + '</p>').append(' <a>' + jsxc.l.relogin + '</a>').click(function() {
-            jsxc.login();
-            // reload after login
-            window.location.reload();
-         }));
+         $('#jsxc_roster').append($(jsxc.gui.template.get('loginForm')));
       },
 
       /**
@@ -2969,6 +2965,9 @@ var jsxc;
          jsxc.debug('Template not available: ' + name);
          return name;
       },
+      loginForm: '<form id="jsxc_loginForm">\
+        <input type="submit" value="%%Login%%"/>\
+        </form>',
       authenticationDialog: '<h3>Verification</h3>\
             <p>%%Authenticating_a_buddy_helps_%%</p>\
             <div>\
