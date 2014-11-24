@@ -1006,7 +1006,7 @@ div.jsxc_sys {
 	height: 30px;
 	margin: 0px;
 	padding: 3px;
-	padding-right: 40px;
+	padding-right: 30px !important;
 	outline: none;
 	border-radius: 0px;
 	box-sizing: border-box;
@@ -1202,6 +1202,15 @@ img.jsxc_vCard {
       100%); /* W3C */
    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a4a4a4',
       endColorstr='#00282323', GradientType=0); /* IE6-9 */
+}
+
+.jsxc_loading {
+  margin: 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 0px;
+  background-size: 32px 32px !important;
+  background: url('img/loading.gif');
 }
 
 .jsxc_emoticon {

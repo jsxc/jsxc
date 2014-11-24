@@ -25,7 +25,7 @@ module.exports = function(grunt) {
          main: {
             files: [ {
                expand: true,
-               src: [ 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'jsxc.lib.js', 'jsxc.lib.webrtc.js', '*.css', 'LICENSE', 'img/**', 'sound/**' ],
+               src: [ 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'jsxc.lib.js', 'jsxc.lib.webrtc.js', 'LICENSE', 'sound/**' ],
                dest: 'build/'
             } ]
          }
@@ -134,6 +134,17 @@ module.exports = function(grunt) {
             } ]
          }
       },
+      dataUri: {
+        dist: {
+          src: ['jsxc.css', 'jsxc.webrtc.css'],
+          dest: 'build/',
+          options: {
+            target: ['img/*.*', 'img/**/*.*'],
+            fixDirLevel: true,
+            baseDir: './'
+          }
+        }
+      },
       jsdoc: {
           dist: {
               src: ['jsxc.lib.js', 'jsxc.lib.webrtc.js'],
@@ -153,12 +164,13 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-search');
    grunt.loadNpmTasks('grunt-contrib-compress');
    grunt.loadNpmTasks('grunt-jsdoc');
+   grunt.loadNpmTasks('grunt-data-uri');
 
    // Default task.
-   grunt.registerTask('default', [ 'jshint', 'search', 'jsdoc', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
+   grunt.registerTask('default', [ 'jshint', 'search', 'jsdoc', 'clean', 'copy', 'dataUri', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // Create alpha/beta build
-   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
+   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'copy', 'dataUri', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // before commit
    grunt.registerTask('commit', [ 'jshint', 'search:console' ]);

@@ -23,6 +23,7 @@
     "grunt-jsdoc": "^0.5.7",
     "grunt-search": "^0.1.6",
     "grunt-shell": "^1.1.1",
-    "grunt-text-replace": "~0.3.11"
+    "grunt-text-replace": "~0.3.11",
+    "grunt-data-uri": "~0.2.0"
   }
 }
