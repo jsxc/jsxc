@@ -323,6 +323,10 @@ var jsxc;
             username = settings.xmpp.username;
          }
 
+         if (typeof settings.xmpp.password === 'string') {
+            password = settings.xmpp.password;
+         }
+
          var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
          var domain = settings.xmpp.domain;
          var jid;
