@@ -218,7 +218,7 @@ var jsxc;
          if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
 
             // Looking for a login form
-            if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
+            //if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
 
                if (jsxc.options.displayRosterMinimized()) {
                   // Show minimized roster
@@ -227,8 +227,8 @@ var jsxc;
                   jsxc.gui.roster.noConnection();
                }
 
-               return;
-            }
+               //return;
+            //}
 
             if (typeof jsxc.options.formFound === 'function') {
                jsxc.options.formFound.call();
@@ -270,11 +270,7 @@ var jsxc;
          } else { jsxc.restoreOldConnection(); }
       },
 
-      login: function() {
-        if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid')) {
-          jsxc.xmpp.login();
-        }
-      },
+      login: function() { /* TODO deprecated function */ },
 
       restoreOldConnection: function() {
         // Restore old connection
@@ -325,6 +321,10 @@ var jsxc;
 
          if (typeof settings.xmpp.username === 'string') {
             username = settings.xmpp.username;
+         }
+
+         if (typeof settings.xmpp.password === 'string') {
+            password = settings.xmpp.password;
          }
 
          var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
@@ -2279,11 +2279,7 @@ var jsxc;
          $('#jsxc_roster .slimScrollDiv').remove();
          $('#jsxc_roster > .jsxc_bottom').remove();
 
-         $('#jsxc_roster').append($('<p>' + jsxc.l.no_connection + '</p>').append(' <a>' + jsxc.l.relogin + '</a>').click(function() {
-            jsxc.login();
-            // reload after login
-            window.location.reload();
-         }));
+         $('#jsxc_roster').append($(jsxc.gui.template.get('loginForm')));
       },
 
       /**
@@ -2969,6 +2965,9 @@ var jsxc;
          jsxc.debug('Template not available: ' + name);
          return name;
       },
+      loginForm: '<form id="jsxc_loginForm">\
+        <input type="submit" value="%%Login%%"/>\
+        </form>',
       authenticationDialog: '<h3>Verification</h3>\
             <p>%%Authenticating_a_buddy_helps_%%</p>\
             <div>\
