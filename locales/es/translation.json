@@ -61,16 +61,16 @@
   "Deny": "Rechazar",
   "Approve": "Aprobar",
   "Remove_buddy": "Eliminar amigo",
-  "You_are_about_to_remove_": "Vas a eliminar a {{bid_name}} (<b>{{bid_jid}}</b>) de tu lista de amigos. Todas las conversaciones 
+  "You_are_about_to_remove_": "Vas a eliminar a {{bid_name}} (<b>{{bid_jid}}</b>) de tu lista de amigos. Todas las conversaciones relacionadas serán cerradas.",
   "Continue_without_chat": "Continuar",
   "Please_wait": "Espere por favor",
   "Login_failed": "Fallo el inicio de sesión",
-  "Sorry_we_cant_authentikate_": "Lo sentimos, no podemos autentificarlo en nuestro servidor de chat. ¿Tal vez la contraseña es in
+  "Sorry_we_cant_authentikate_": "Lo sentimos, no podemos autentificarlo en nuestro servidor de chat. ¿Tal vez la contraseña es incorrecta?",
   "Retry": "Reintentar",
   "clear_history": "Borrar el historial",
   "New_message_from": "Nuevo mensaje de",
   "Should_we_notify_you_": "¿Debemos notificarle sobre nuevos mensajes en el futuro?",
-  "Please_accept_": "Por favor, haga clic en el botón "Permitir" en la parte superior.",
+  "Please_accept_": "Por favor, haga clic en el botón \"Permitir\" en la parte superior.",
   "dnd": "No Molestar",
   "Mute": "Desactivar sonido",
   "Unmute": "Activar sonido",
@@ -127,7 +127,7 @@
   "Priority": "Prioridad",
   "Save": "Guardar",
   "User_settings": "Configuración de usuario",
-  "A_fingerprint_": "La huella digital se utiliza para que puedas estar seguro que la persona con la que estas hablando es quien r
+  "A_fingerprint_": "La huella digital se utiliza para que puedas estar seguro que la persona con la que estas hablando es quien realmente dice ser",
   "Your_roster_is_empty_add_a": "Tu lista de amigos esta vacia",
   "new_buddy": "Nuevo amigo",
   "is": "es",
