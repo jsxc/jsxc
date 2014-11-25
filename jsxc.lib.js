@@ -339,7 +339,7 @@ var jsxc;
             return;
          }
 
-         jsxc.gui.showWaitAlert(jsxc.l.Logging_in);
+         jsxc.gui.showWaitAlert($.t("Logging_in"));
 
          var settings = jsxc.options.loadSettings.call(this, username, password);
 
@@ -706,12 +706,7 @@ var jsxc;
       translate: function(text) {
          return text.replace(/%%([a-zA-Z0-9_-}{ .!,?/'@]+)%%/g, function(s, key) {
             var k = key.replace(/ /gi, '_').replace(/[.!,?/'@]/g, '');
-
-            if (!jsxc.l[k]) {
-               jsxc.warn('No translation for: ' + k);
-            }
-
-            return jsxc.l[k] || key.replace(/_/g, ' ');
+            return $.t(k) || key.replace(/_/g, ' ');
          });
       },
 
@@ -1023,30 +1018,30 @@ var jsxc;
          ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
 
          // Change name and add title
-         ue.find('.jsxc_name').add(spot).text(data.name).attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
+         ue.find('.jsxc_name').add(spot).text(data.name).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
 
          // Update gui according to encryption state
          switch (data.msgstate) {
             case 0:
-               we.find('.jsxc_transfer').removeClass('jsxc_enc jsxc_fin').attr('title', jsxc.l.your_connection_is_unencrypted);
+               we.find('.jsxc_transfer').removeClass('jsxc_enc jsxc_fin').attr('title', $.t("your_connection_is_unencrypted"));
                we.find('.jsxc_settings .jsxc_verification').addClass('jsxc_disabled');
-               we.find('.jsxc_settings .jsxc_transfer').text(jsxc.l.start_private);
+               we.find('.jsxc_settings .jsxc_transfer').text($.t("start_private"));
                break;
             case 1:
-               we.find('.jsxc_transfer').addClass('jsxc_enc').attr('title', jsxc.l.your_connection_is_encrypted);
+               we.find('.jsxc_transfer').addClass('jsxc_enc').attr('title', $.t("your_connection_is_encrypted"));
                we.find('.jsxc_settings .jsxc_verification').removeClass('jsxc_disabled');
-               we.find('.jsxc_settings .jsxc_transfer').text(jsxc.l.close_private);
+               we.find('.jsxc_settings .jsxc_transfer').text($.t("close_private"));
                break;
             case 2:
                we.find('.jsxc_settings .jsxc_verification').addClass('jsxc_disabled');
-               we.find('.jsxc_transfer').removeClass('jsxc_enc').addClass('jsxc_fin').attr('title', jsxc.l.your_buddy_closed_the_private_connection);
-               we.find('.jsxc_settings .jsxc_transfer').text(jsxc.l.close_private);
+               we.find('.jsxc_transfer').removeClass('jsxc_enc').addClass('jsxc_fin').attr('title', $.t("your_buddy_closed_the_private_connection"));
+               we.find('.jsxc_settings .jsxc_transfer').text($.t("close_private"));
                break;
          }
 
          // update gui according to verification state
          if (data.trust) {
-            we.find('.jsxc_transfer').addClass('jsxc_trust').attr('title', jsxc.l.your_buddy_is_verificated);
+            we.find('.jsxc_transfer').addClass('jsxc_trust').attr('title', $.t("your_buddy_is_verificated"));
          } else {
             we.find('.jsxc_transfer').removeClass('jsxc_trust');
          }
@@ -1330,7 +1325,7 @@ var jsxc;
             jsxc.gui.dialog.close();
 
             jsxc.storage.updateUserItem('buddy', bid, 'trust', true);
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.conversation_is_now_verified);
+            jsxc.gui.window.postMessage(bid, 'sys', $.t("conversation_is_now_verified"));
             jsxc.gui.update(bid);
          });
 
@@ -1361,7 +1356,7 @@ var jsxc;
 
             jsxc.gui.dialog.close();
 
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_query_sent);
+            jsxc.gui.window.postMessage(bid, 'sys', $.t("authentication_query_sent"));
          });
 
          // Secret
@@ -1390,7 +1385,7 @@ var jsxc;
 
             jsxc.gui.dialog.close();
 
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_query_sent);
+            jsxc.gui.window.postMessage(bid, 'sys', $.t("authentication_query_sent"));
          });
       },
 
@@ -2368,8 +2363,8 @@ var jsxc;
        * @memberOf jsxc.gui.roster
        */
       empty: function() {
-         var text = $('<p>' + jsxc.l.Your_roster_is_empty_add_a + '</p>');
-         var link = $('<a>' + jsxc.l.new_buddy + '</a>');
+         var text = $('<p>' + $.t("Your_roster_is_empty_add_a") + '</p>');
+         var link = $('<a>' + $.t("new_buddy") + '</a>');
 
          link.click(function() {
             jsxc.gui.showContactDialog();
@@ -2840,17 +2835,17 @@ var jsxc;
 
          if (direction === 'out' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED && forwarded !== true) {
             direction = 'sys';
-            msg = jsxc.l.your_message_wasnt_send_please_end_your_private_conversation;
+            msg = $.t("your_message_wasnt_send_please_end_your_private_conversation");
          }
 
          if (direction === 'in' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED) {
             direction = 'sys';
-            msg = jsxc.l.unencrypted_message_received + ' ' + msg;
+            msg = $.t("unencrypted_message_received") + ' ' + msg;
          }
 
          if (direction === 'out' && data.sub === 'from') {
             direction = 'sys';
-            msg = jsxc.l.your_message_wasnt_send_because_you_have_no_valid_subscription;
+            msg = $.t("your_message_wasnt_send_because_you_have_no_valid_subscription");
          }
 
          encrypted = encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
@@ -3017,7 +3012,7 @@ var jsxc;
 
          // common placeholder
          var ph = {
-            my_priv_fingerprint: jsxc.storage.getUserItem('priv_fingerprint') ? jsxc.storage.getUserItem('priv_fingerprint').replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
+            my_priv_fingerprint: jsxc.storage.getUserItem('priv_fingerprint') ? jsxc.storage.getUserItem('priv_fingerprint').replace(/(.{8})/g, '$1 ') : $.t("not_available"),
             my_jid: jsxc.storage.getItem('jid') || '',
             my_node: Strophe.getNodeFromJid(jsxc.storage.getItem('jid') || '') || '',
             root: jsxc.options.root,
@@ -3029,7 +3024,7 @@ var jsxc;
             var data = jsxc.storage.getUserItem('buddy', bid);
 
             $.extend(ph, {
-               bid_priv_fingerprint: (data && data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
+               bid_priv_fingerprint: (data && data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : $.t("not_available"),
                bid_jid: bid,
                bid_name: (data && data.name) ? data.name : bid
             });
@@ -5057,13 +5052,13 @@ var jsxc;
 
             switch (status) {
                case OTR.CONST.STATUS_SEND_QUERY:
-                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.trying_to_start_private_conversation);
+                  jsxc.gui.window.postMessage(bid, 'sys', $.t("trying_to_start_private_conversation"));
                   break;
                case OTR.CONST.STATUS_AKE_SUCCESS:
                   data.fingerprint = jsxc.otr.objects[bid].their_priv_pk.fingerprint();
                   data.msgstate = OTR.CONST.MSGSTATE_ENCRYPTED;
 
-                  var msg = (jsxc.otr.objects[bid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started;
+                  var msg = (jsxc.otr.objects[bid].trust ? $.t("Verified") : $.t("Unverified")) + ' ' + $.t("private_conversation_started");
                   jsxc.gui.window.postMessage(bid, 'sys', msg);
                   break;
                case OTR.CONST.STATUS_END_OTR:
@@ -5073,13 +5068,13 @@ var jsxc;
                      // we abort the private conversation
 
                      data.msgstate = OTR.CONST.MSGSTATE_PLAINTEXT;
-                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.private_conversation_aborted);
+                     jsxc.gui.window.postMessage(bid, 'sys', $.t("private_conversation_aborted"));
 
                   } else {
                      // the buddy abort the private conversation
 
                      data.msgstate = OTR.CONST.MSGSTATE_FINISHED;
-                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.your_buddy_closed_the_private_conversation_you_should_do_the_same);
+                     jsxc.gui.window.postMessage(bid, 'sys', $.t("your_buddy_closed_the_private_conversation_you_should_do_the_same"));
                   }
                   break;
                case OTR.CONST.STATUS_SMP_HANDLE:
@@ -5096,7 +5091,7 @@ var jsxc;
          jsxc.otr.objects[bid].on('smp', function(type, data) {
             switch (type) {
                case 'question': // verification request received
-                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.Authentication_request_received);
+                  jsxc.gui.window.postMessage(bid, 'sys', $.t("Authentication_request_received"));
 
                   if ($('#jsxc_dialog').length > 0) {
                      jsxc.otr.objects[bid].sm.abort();
@@ -5116,15 +5111,15 @@ var jsxc;
                   jsxc.gui.update(bid);
 
                   if (data) {
-                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.conversation_is_now_verified);
+                     jsxc.gui.window.postMessage(bid, 'sys', $.t("conversation_is_now_verified"));
                   } else {
-                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_failed);
+                     jsxc.gui.window.postMessage(bid, 'sys', $.t("authentication_failed"));
                   }
                   jsxc.storage.removeUserItem('smp_' + bid);
                   jsxc.gui.dialog.close();
                   break;
                case 'abort':
-                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.Authentication_aborted);
+                  jsxc.gui.window.postMessage(bid, 'sys', $.t("Authentication_aborted"));
                   break;
                default:
                   jsxc.debug('[OTR] sm callback: Unknown type: ' + type);
@@ -5179,9 +5174,9 @@ var jsxc;
          if (data) {
             $('#jsxc_dialog > div:eq(2)').find('#jsxc_quest').val(data).prop('disabled', true);
             $('#jsxc_dialog > div:eq(2)').find('.creation').text('Answer');
-            $('#jsxc_dialog > div:eq(2)').find('.jsxc_explanation').text(jsxc.l.your_buddy_is_attempting_to_determine_ + ' ' + jsxc.l.to_authenticate_to_your_buddy + jsxc.l.enter_the_answer_and_click_answer);
+            $('#jsxc_dialog > div:eq(2)').find('.jsxc_explanation').text($.t("your_buddy_is_attempting_to_determine_") + ' ' + $.t("to_authenticate_to_your_buddy") + $.t("enter_the_answer_and_click_answer"));
          } else {
-            $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text(jsxc.l.your_buddy_is_attempting_to_determine_ + ' ' + jsxc.l.to_authenticate_to_your_buddy + jsxc.l.enter_the_secret);
+            $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text($.t("your_buddy_is_attempting_to_determine_") + ' ' + $.t("to_authenticate_to_your_buddy") + $.t("enter_the_secret"));
          }
 
          $('#jsxc_dialog .jsxc_close').click(function() {
@@ -5331,7 +5326,7 @@ var jsxc;
          }
 
          if (jsxc.storage.getUserItem('key') === null) {
-            var msg = jsxc.l.Creating_your_private_key_;
+            var msg = $.t("Creating_your_private_key_");
             var worker = null;
 
             if (Worker) {
