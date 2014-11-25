@@ -224,8 +224,8 @@ var jsxc;
          }
 
          // set language
-         jsxc.l = jsxc.l10n.en;
-         $.extend(jsxc.l, jsxc.l10n[lang]);
+         var lng = Diaspora.I18n.language || 'en';
+         i18n.init({ lng: lng, fallbackLng: 'en' });
 
          // Check localStorage
          if (typeof (localStorage) === 'undefined') {
