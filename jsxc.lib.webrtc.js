@@ -225,7 +225,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             return;
          }
 
-         var videoIcon = $('<div class="jsxc_video jsxc_disabled" title="' + jsxc.l.Start_video_call + '"></div>');
+         var videoIcon = $('<div class="jsxc_video jsxc_disabled" title="' + $.t("Start_video_call") + '"></div>');
 
          videoIcon.click(function() {
             self.startCall(data.jid);
