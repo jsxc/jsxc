@@ -1,5 +1,5 @@
 /*!
- * jsxc v1.0.0 - 2014-11-24
+ * jsxc v1.0.0 - 2014-11-26
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -238,7 +238,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             return;
          }
 
-         var videoIcon = $('<div class="jsxc_video jsxc_disabled" title="' + jsxc.l.Start_video_call + '"></div>');
+         var videoIcon = $('<div class="jsxc_video jsxc_disabled" title="' + $.t("Start_video_call") + '"></div>');
 
          videoIcon.click(function() {
             self.startCall(data.jid);
@@ -984,68 +984,5 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
          $(document).on('attached.jsxc', jsxc.webrtc.init);
       }
-   });
-
-   $.extend(jsxc.l10n.en, {
-      Please_allow_access_to_microphone_and_camera: 'Please click the "Allow" button at the top, to allow access to microphone and camera.',
-      Incoming_call: 'Incoming call',
-      from: 'from',
-      Do_you_want_to_accept_the_call_from: 'Do you want to accept the call from',
-      Reject: 'Reject',
-      Accept: 'Accept',
-      hang_up: 'hang up',
-      snapshot: 'snapshot',
-      mute_my_audio: 'mute my audio',
-      pause_my_video: 'pause my video',
-      fullscreen: 'fullscreen',
-      Info: 'Info',
-      Local_IP: 'Local IP',
-      Remote_IP: 'Remote IP',
-      Local_Fingerprint: 'Local fingerprint',
-      Remote_Fingerprint: 'Remote fingerprint',
-      Video_call_not_possible: 'Video call not possible. Your buddy does not support video calls.',
-      Start_video_call: 'Start video call'
-   });
-
-   $.extend(jsxc.l10n.de, {
-      Please_allow_access_to_microphone_and_camera: 'Bitte klick auf den "Zulassen" Button oben, um den Zugriff auf Kamera und Mikrofon zu erlauben.',
-      Incoming_call: 'Eingehender Anruf',
-      from: 'von',
-      Do_you_want_to_accept_the_call_from: 'Möchtest Du den Anruf annehmen von',
-      Reject: 'Ablehnen',
-      Accept: 'Annehmen',
-      hang_up: 'Auflegen',
-      snapshot: 'Schnappschuss',
-      mute_my_audio: 'Mein Ton aus',
-      pause_my_video: 'Mein Video pausieren',
-      fullscreen: 'Vollbild',
-      Info: 'Info',
-      Local_IP: 'Lokale IP',
-      Remote_IP: 'Remote IP',
-      Local_Fingerprint: 'Lokaler Fingerprint',
-      Remote_Fingerprint: 'Remote Fingerprint',
-      Video_call_not_possible: 'Videoanruf nicht verfügbar. Dein Gesprächspartner unterstützt keine Videotelefonie.',
-      Start_video_call: 'Starte Videoanruf'
-   });
-
-   $.extend(jsxc.l10n.es, {
-      Please_allow_access_to_microphone_and_camera: 'Por favor, permitir el acceso al micrófono y la cámara.',
-      Incoming_call: 'Llamada entrante',
-      from: 'de',
-      Do_you_want_to_accept_the_call_from: 'Desea aceptar la llamada de',
-      Reject: 'Rechazar',
-      Accept: 'Aceptar',
-      hang_up: 'colgar',
-      snapshot: 'instantánea',
-      mute_my_audio: 'silenciar mi audio',
-      pause_my_video: 'pausar mi vídeo',
-      fullscreen: 'pantalla completa',
-      Info: 'Info',
-      Local_IP: 'IP local',
-      Remote_IP: 'IP remota',
-      Local_Fingerprint: 'Firma digital local',
-      Remote_Fingerprint: 'Firma digital remota',
-      Video_call_not_possible: 'Llamada de vídeo no es posible',
-      Start_video_call: 'Iniciar llamada de vídeo'
    });
 }(jQuery));
