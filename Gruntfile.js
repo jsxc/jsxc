@@ -44,13 +44,29 @@ module.exports = function(grunt) {
       },
       replace: {
          version: {
-            src: [ 'build/jsxc.lib.js' ],
+            src: [ 'build/jsxc.lib.js', 'build/lib/translation.json' ],
             overwrite: true,
-            replacements: [ {
-               from: '< $ app.version $ >',
-               to: "<%= app.version %>"
-            } ]
+            replacements: [
+              {
+                from: '< $ app.version $ >',
+                to: "<%= app.version %>"
+              },
+              {
+                from: '{"de"',
+                to: 'var I18next = {"de"'
+              },
+              {
+                from: '}}}',
+                to: '}}};'
+              }
+            ]
          }
+      },
+      merge_data: {
+        target: {
+          src: ['locales/*.{json,y{,a}ml}'],
+          dest: 'build/lib/translation.json'
+        }
       },
       concat: {
          dep: {
