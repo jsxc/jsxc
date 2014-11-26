@@ -1,4 +1,4 @@
-{
+{"translation": {
   "Logging_in": "Logging in…",
   "your_connection_is_unencrypted": "Your connection is unencrypted.",
   "your_connection_is_encrypted": "Your connection is encrypted.",
@@ -148,5 +148,23 @@
   "Log_in_without_chat": "Log in without chat",
   "has_come_online": "has come online",
   "Unknown_sender": "Unknown sender",
-  "You_received_a_message_from_an_unknown_sender": "You received a message from an unknown sender"
-}
+  "You_received_a_message_from_an_unknown_sender": "You received a message from an unknown sender",
+  "Please_allow_access_to_microphone_and_camera": "Please click the \"Allow\" button at the top, to allow access to microphone and camera.",
+  "Incoming_call": "Incoming call",
+  "from": "from",
+  "Do_you_want_to_accept_the_call_from": "Do you want to accept the call from",
+  "Reject": "Reject",
+  "Accept": "Accept",
+  "hang_up": "hang up",
+  "snapshot": "snapshot",
+  "mute_my_audio": "mute my audio",
+  "pause_my_video": "pause my video",
+  "fullscreen": "fullscreen",
+  "Info": "Info",
+  "Local_IP": "Local IP",
+  "Remote_IP": "Remote IP",
+  "Local_Fingerprint": "Local fingerprint",
+  "Remote_Fingerprint": "Remote fingerprint",
+  "Video_call_not_possible": "Video call not possible. Your buddy does not support video calls.",
+  "Start_video_call": "Start video call"
+}}

@@ -1,4 +1,4 @@
-{
+{"translation": {
   "Logging_in": "Login läuft…",
   "your_connection_is_unencrypted": "Deine Verbindung ist UNverschlüsselt.",
   "your_connection_is_encrypted": "Deine Verbindung ist verschlüsselt.",
@@ -149,5 +149,23 @@
   "Do_you_want_to_display_them": "Möchtest du sie sehen?",
   "has_come_online": "ist online gekommen",
   "Unknown_sender": "Unbekannter Sender",
-  "You_received_a_message_from_an_unknown_sender": "Du hast eine Nachricht von einem unbekannten Sender erhalten"
-}
+  "You_received_a_message_from_an_unknown_sender": "Du hast eine Nachricht von einem unbekannten Sender erhalten",
+  "Please_allow_access_to_microphone_and_camera": "Bitte klick auf den \"Zulassen\" Button oben, um den Zugriff auf Kamera und Mikrofon zu erlauben.",
+  "Incoming_call": "Eingehender Anruf",
+  "from": "von",
+  "Do_you_want_to_accept_the_call_from": "Möchtest Du den Anruf annehmen von",
+  "Reject": "Ablehnen",
+  "Accept": "Annehmen",
+  "hang_up": "Auflegen",
+  "snapshot": "Schnappschuss",
+  "mute_my_audio": "Mein Ton aus",
+  "pause_my_video": "Mein Video pausieren",
+  "fullscreen": "Vollbild",
+  "Info": "Info",
+  "Local_IP": "Lokale IP",
+  "Remote_IP": "Remote IP",
+  "Local_Fingerprint": "Lokaler Fingerprint",
+  "Remote_Fingerprint": "Remote Fingerprint",
+  "Video_call_not_possible": "Videoanruf nicht verfügbar. Dein Gesprächspartner unterstützt keine Videotelefonie.",
+  "Start_video_call": "Starte Videoanruf"
+}}
