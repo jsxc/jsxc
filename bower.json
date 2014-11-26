@@ -33,7 +33,7 @@
   "ignore": [
     "**/.*",
     "jsxc.*",
-    "locales/"
+    "locales/",
     "build/lib/otr/",
     "build/lib/strophe.jingle/",
     "example/",
