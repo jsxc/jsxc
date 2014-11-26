@@ -16,6 +16,7 @@
    "globals": {
       "t":true,
       "i18n":true,
+      "I18next":true,
       "Diaspora":true,
       "OTR":true, 
       "DSA":true, 
