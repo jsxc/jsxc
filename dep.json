@@ -73,5 +73,10 @@
      "file": "build/lib/i18next/release/i18next-latest.min.js",
      "license": "MIT",
      "url": "http://i18next.com/"
+  },
+  {
+    "file": "build/lib/translation.json",
+    "license": "MIT",
+    "url": "https://webtranslateit.com/en/projects/10365-JSXC"
   }
  ]

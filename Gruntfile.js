@@ -44,13 +44,29 @@ module.exports = function(grunt) {
       },
       replace: {
          version: {
-            src: [ 'build/jsxc.lib.js' ],
+            src: [ 'build/jsxc.lib.js', 'build/lib/translation.json' ],
             overwrite: true,
-            replacements: [ {
-               from: '< $ app.version $ >',
-               to: "<%= app.version %>"
-            } ]
+            replacements: [
+              {
+                from: '< $ app.version $ >',
+                to: "<%= app.version %>"
+              },
+              {
+                from: '{"de"',
+                to: 'var I18next = {"de"'
+              },
+              {
+                from: '}}}',
+                to: '}}};'
+              }
+            ]
          }
+      },
+      merge_data: {
+        target: {
+          src: ['locales/*.{json,y{,a}ml}'],
+          dest: 'build/lib/translation.json'
+        }
       },
       concat: {
          dep: {
@@ -150,7 +166,8 @@ module.exports = function(grunt) {
           options: {
             timeout: 10000,
             urls: [
-              'http://localhost:3000/test/bower/bower_spec.html'
+              'http://localhost:3000/test/bower/bower_spec.html',
+              'http://localhost:3000/test/jsxc/jsxc_spec.html'
             ]
           }
         }
@@ -185,9 +202,10 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-data-uri');
    grunt.loadNpmTasks('grunt-contrib-qunit');
    grunt.loadNpmTasks('grunt-contrib-connect');
+   grunt.loadNpmTasks('grunt-merge-data');
 
    // Default task.
-   grunt.registerTask('default', [ 'jshint', 'search', 'jsdoc', 'clean', 'copy', 'dataUri', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
+   grunt.registerTask('default', [ 'jshint', 'search', 'jsdoc', 'clean', 'copy', 'dataUri', 'usebanner', 'merge_data', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // Create alpha/beta build
    grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'copy', 'dataUri', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
