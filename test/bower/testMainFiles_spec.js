@@ -1,22 +1,12 @@
 function fileExists(path) {
-  var exists = false;
-  jQuery.ajax({
-    url: path,
-    success: function() { exists = true },
-    async: false
-  });
-  return exists;
+  var res = jQuery.ajax({url: path, async: false});
+  return (res.status == 200)? true : false
 }
 
 QUnit.test( "Parse bower.json and check if main files exist", function( assert ) {
   var baseDir = '../../'
   var bowerFile = baseDir + 'bower.json';
-  var result = null;
-  jQuery.ajax({
-    url: bowerFile,
-    success: function(data) { result = data },
-    async: false
-  });
+  var result = JSON.parse(jQuery.ajax({url: bowerFile, async: false}).responseText);
 
   assert.ok(result != null, "bower.json exists");
 

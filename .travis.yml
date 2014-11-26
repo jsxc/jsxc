@@ -8,8 +8,10 @@ language: node_js
 node_js:
   - "0.10"
 
-before_install: npm install -g grunt-cli@0.1.13
+before_install:
+  - npm install -g grunt-cli@0.1.13
+  - git submodule update --init
 
 install: npm install
 
-script: grunt test
+script: grunt default connect qunit
