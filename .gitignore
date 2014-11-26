@@ -4,3 +4,6 @@ node_modules
 bower_components
 archives/
 css/
+build/lib/i18next/
+build/lib/otr/
+build/lib/strophe.jingle/
