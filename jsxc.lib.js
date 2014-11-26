@@ -223,9 +223,15 @@ var jsxc;
             lang = jsxc.options.defaultLang;
          }
 
-         // set language
-         var lng = Diaspora.I18n.language || 'en';
-         i18n.init({ lng: lng, fallbackLng: 'en' });
+         I18next.language = (typeof Diaspora !== 'undefined' ? Diaspora.I18n.language : 'en');
+         // initialize i18n translator
+         $.i18n.init({
+           lng: I18next.language,
+           resStore: I18next,
+           // use localStorage and set expiration to a day
+           useLocalStorage: true,
+           localStorageExpirationTime: 60 * 60 * 24 * 1000,
+         });
 
          // Check localStorage
          if (typeof (localStorage) === 'undefined') {
