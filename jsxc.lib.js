@@ -2059,15 +2059,17 @@ var jsxc;
             jsxc.gui.window.open(bid);
          });
 
-         bud.find('.jsxc_rename').click(function() {
-            jsxc.gui.roster.rename(bid);
-            return false;
-         });
+         if (!data.from_diaspora) {
+           bud.find('.jsxc_rename').click(function() {
+             jsxc.gui.roster.rename(bid);
+             return false;
+           });
 
-         bud.find('.jsxc_delete').click(function() {
-            jsxc.gui.showRemoveDialog(bid);
-            return false;
-         });
+           bud.find('.jsxc_delete').click(function() {
+             jsxc.gui.showRemoveDialog(bid);
+             return false;
+           });
+         } else { bud.find('.jsxc_right').remove(); }
 
          var expandClick = function() {
             bud.trigger('extra.jsxc');
@@ -3515,6 +3517,7 @@ var jsxc;
             var name = $(this).attr('name') || jid;
             var bid = jsxc.jidToBid(jid);
             var sub = $(this).attr('subscription');
+            var diaspora = $(this).attr('from_diaspora') || false;
 
             buddies.push(bid);
 
@@ -3525,6 +3528,7 @@ var jsxc;
                name: name,
                status: 0,
                sub: sub,
+               from_diaspora: diaspora,
                res: []
             });
 
