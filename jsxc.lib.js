@@ -679,6 +679,27 @@ var jsxc;
             return jsxc.l[k] || key.replace(/_/g, ' ');
          });
       },
+
+      /**
+       * Executes the given function in jsxc namespace.
+       * 
+       * @memberOf jsxc
+       * @param {string} fnName Function name
+       * @param {array} fnParams Function parameters
+       * @returns Function return value
+       */
+      exec: function(fnName, fnParams) {
+         var fnList = fnName.split('.');
+         var fn = jsxc[fnList[0]];
+         var i;
+         for (i = 1; i < fnList.length; i++) {
+            fn = fn[fnList[i]];
+         }
+
+         if (typeof fn === 'function') {
+            return fn.apply(null, fnParams);
+         }
+      }
    };
 
    /**
@@ -806,6 +827,7 @@ var jsxc;
        * 
        * @memberOf jsxc.options
        * @param data Holds all data as key/value
+       * @returns {boolean} false if function failes
        */
       saveSettinsPermanent: function() {
 
@@ -1713,6 +1735,10 @@ var jsxc;
             });
 
             var err = jsxc.options.saveSettinsPermanent.call(this, data);
+
+            if (typeof self.attr('data-onsubmit') === 'string') {
+               jsxc.exec(self.attr('data-onsubmit'), [ err ]);
+            }
 
             setTimeout(function() {
                self.find('input[type="submit"]').effect('highlight', {
@@ -3158,6 +3184,14 @@ var jsxc;
                <label for="priority-dnd">%%dnd%%</label><input type="number" value="0" id="priority-dnd" min="-128" max="127" step="1" required="required"/><br />\
                <input type="submit" value="%%Save%%"/>\
             </fieldset>\
+         </form>\
+         <p></p>\
+         <form data-onsubmit="xmpp.carbons.refresh">\
+            <fieldset class="jsxc_fieldsetCarbons jsxc_fieldset">\
+               <legend>%%Carbon copy%%</legend>\
+               <label for="carbons-enabled">%%Enable%%</label><input type="checkbox" id="carbons-enabled" /><br />\
+               <input type="submit" value="%%Save%%"/>\
+            </fieldset>\
          </form>'
    };
 
@@ -3387,7 +3421,7 @@ var jsxc;
          var caps = jsxc.xmpp.conn.caps;
          var domain = jsxc.xmpp.conn.domain;
 
-         if (caps && jsxc.options.get('carbons')) {
+         if (caps && jsxc.options.get('carbons').enabled) {
             var conditionalEnable = function() {
                if (jsxc.xmpp.conn.caps.hasFeatureByJid(domain, jsxc.CONST.NS.CARBONS)) {
                   jsxc.xmpp.carbons.enable();
@@ -3410,7 +3444,7 @@ var jsxc;
 
                caps._requestCapabilities(jsxc.xmpp.conn.domain, _jidNodeIndex[domain], caps._jidVerIndex[domain]);
             } else {
-               console.log('We know server caps.')
+               // We know server caps
                conditionalEnable();
             }
          }
@@ -4155,8 +4189,26 @@ var jsxc;
          }, function(stanza) {
             jsxc.warn('Could not disable carbons', stanza);
          });
+      },
+
+      /**
+       * Enable/Disable carbons depending on options key.
+       * 
+       * @memberOf jsxc.xmpp.carbons
+       * @param err error message
+       */
+      refresh: function(err) {
+         if (err === false) {
+            return;
+         }
+
+         if (jsxc.options.get('carbons').enabled) {
+            return jsxc.xmpp.carbons.enable();
+         }
+
+         return jsxc.xmpp.carbons.disable();
       }
-   }
+   };
 
    /**
     * Handle long-live data
@@ -5506,16 +5558,7 @@ var jsxc;
          notice.click(function() {
             jsxc.notice.remove(nid);
 
-            var fnList = fnName.split('.');
-            var fn = jsxc[fnList[0]];
-            var i;
-            for (i = 1; i < fnList.length; i++) {
-               fn = fn[fnList[i]];
-            }
-
-            if (typeof fn === 'function') {
-               fn.apply(null, fnParams);
-            }
+            jsxc.exec(fnName, fnParams);
 
             return false;
          });
