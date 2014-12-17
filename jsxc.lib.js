@@ -393,8 +393,12 @@ var jsxc;
          // Sending keepalive signal
          jsxc.startKeepAlive();
 
-         // create or load DSA key and call _onMaster
-         jsxc.otr.createDSA();
+         if (jsxc.options.get('otr').enable) {
+            // create or load DSA key and call _onMaster
+            jsxc.otr.createDSA();
+         } else {
+            jsxc._onMaster();
+         }
       },
 
       /**
@@ -724,6 +728,7 @@ var jsxc;
 
       /** OTR options */
       otr: {
+         enable: true,
          ERROR_START_AKE: false,
          debug: false,
          SEND_WHITESPACE_TAG: true,
