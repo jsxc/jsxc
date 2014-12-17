@@ -210,6 +210,10 @@ var jsxc;
             return;
          }
 
+         if (jsxc.storage.getItem('debug') === true) {
+            jsxc.options.otr.debug = true;
+         }
+
          // Register event listener for the storage event
          window.addEventListener('storage', jsxc.storage.onStorage, false);
 
@@ -720,7 +724,10 @@ var jsxc;
 
       /** OTR options */
       otr: {
-         ERROR_START_AKE: true
+         ERROR_START_AKE: false,
+         debug: false,
+         SEND_WHITESPACE_TAG: true,
+         WHITESPACE_START_AKE: true
       },
 
       /** xmpp options */
@@ -833,8 +840,10 @@ var jsxc;
 
       },
 
-      /** Enable carbons? */
-      carbons: true
+      carbons: {
+         /** Enable carbon copies? */
+         enable: false
+      }
    };
 
    /**
@@ -2760,9 +2769,10 @@ var jsxc;
        * @param {String} direction 'in' message is received or 'out' message is
        *        send
        * @param {String} msg Message to display
-       * @param {boolean} send Should we send outgoing messages? Default: true
+       * @param {boolean} encrypted Was this message encrypted? Default: false
+       * @param {boolean} forwarded Was this message forwarded? Default: false
        */
-      postMessage: function(bid, direction, msg, send) {
+      postMessage: function(bid, direction, msg, encrypted, forwarded) {
          var data = jsxc.storage.getUserItem('buddy', bid);
          var html_msg = msg;
 
@@ -2772,12 +2782,12 @@ var jsxc;
 
          // exceptions:
 
-         if (direction === 'out' && data.msgstate === 2) {
+         if (direction === 'out' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED && forwarded !== true) {
             direction = 'sys';
             msg = jsxc.l.your_message_wasnt_send_please_end_your_private_conversation;
          }
 
-         if (direction === 'in' && data.msgstate === 2) {
+         if (direction === 'in' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED) {
             direction = 'sys';
             msg = jsxc.l.unencrypted_message_received + ' ' + msg;
          }
@@ -2787,13 +2797,14 @@ var jsxc;
             msg = jsxc.l.your_message_wasnt_send_because_you_have_no_valid_subscription;
          }
 
-         var post = jsxc.storage.saveMessage(bid, direction, msg);
+         encrypted = encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
+         var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded);
 
          if (direction === 'in') {
             $(document).trigger('postmessagein.jsxc', [ bid, html_msg ]);
          }
 
-         if (direction === 'out' && jsxc.master && send !== false) {
+         if (direction === 'out' && jsxc.master && forwarded !== true) {
             jsxc.xmpp.sendMessage(bid, html_msg, post.uid);
          }
 
@@ -2817,7 +2828,6 @@ var jsxc;
          var msg = post.msg;
          var direction = post.direction;
          var uid = post.uid;
-         var received = post.received || false;
 
          if (win.find('.jsxc_textinput').is(':not(:focus)') && jsxc.restoreCompleted && direction === 'in' && !restore) {
             jsxc.gui.window.highlight(bid);
@@ -2861,8 +2871,16 @@ var jsxc;
          msgDiv.attr('id', uid);
          msgDiv.html(msg);
 
-         if (received) {
+         if (post.received || false) {
             msgDiv.addClass('jsxc_received');
+         }
+
+         if (post.forwarded) {
+            msgDiv.addClass('jsxc_forwarded');
+         }
+
+         if (post.encrypted) {
+            msgDiv.addClass('jsxc_encrypted');
          }
 
          if (direction === 'sys') {
@@ -3189,7 +3207,7 @@ var jsxc;
          <form data-onsubmit="xmpp.carbons.refresh">\
             <fieldset class="jsxc_fieldsetCarbons jsxc_fieldset">\
                <legend>%%Carbon copy%%</legend>\
-               <label for="carbons-enabled">%%Enable%%</label><input type="checkbox" id="carbons-enabled" /><br />\
+               <label for="carbons-enable">%%Enable%%</label><input type="checkbox" id="carbons-enable" /><br />\
                <input type="submit" value="%%Save%%"/>\
             </fieldset>\
          </form>'
@@ -3421,7 +3439,7 @@ var jsxc;
          var caps = jsxc.xmpp.conn.caps;
          var domain = jsxc.xmpp.conn.domain;
 
-         if (caps && jsxc.options.get('carbons').enabled) {
+         if (caps && jsxc.options.get('carbons').enable) {
             var conditionalEnable = function() {
                if (jsxc.xmpp.conn.caps.hasFeatureByJid(domain, jsxc.CONST.NS.CARBONS)) {
                   jsxc.xmpp.carbons.enable();
@@ -3836,16 +3854,17 @@ var jsxc;
          var from = $(message).attr('from');
          var mid = $(message).attr('id');
          var body = $(message).find('body:first').text();
+         var bid;
 
-         if (!body) {
+         if (!body || (body.match(/\?OTR/i) && forwarded)) {
             return true;
          }
 
          if (carbon) {
-            var direction = (carbon.prop("tagName") == 'sent') ? 'out' : 'in';
-            var bid = jsxc.jidToBid((direction === 'out') ? $(message).attr('to') : from);
+            var direction = (carbon.prop("tagName") === 'sent') ? 'out' : 'in';
+            bid = jsxc.jidToBid((direction === 'out') ? $(message).attr('to') : from);
 
-            jsxc.gui.window.postMessage(bid, direction, body, false);
+            jsxc.gui.window.postMessage(bid, direction, body, false, forwarded);
 
             return true;
 
@@ -3858,7 +3877,7 @@ var jsxc;
          }
 
          var jid = Strophe.getBareJidFromJid(from);
-         var bid = jsxc.jidToBid(jid);
+         bid = jsxc.jidToBid(jid);
          var data = jsxc.storage.getUserItem('buddy', bid);
          var request = $(message).find("request[xmlns='urn:xmpp:receipts']");
 
@@ -3874,7 +3893,7 @@ var jsxc;
             var msg = jsxc.removeHTML(body);
             msg = jsxc.escapeHTML(msg);
 
-            jsxc.storage.saveMessage(bid, 'in', msg);
+            jsxc.storage.saveMessage(bid, 'in', msg, forwarded);
 
             return true;
          }
@@ -3909,7 +3928,7 @@ var jsxc;
          if (jsxc.otr.objects.hasOwnProperty(bid)) {
             jsxc.otr.objects[bid].receiveMsg(body);
          } else {
-            jsxc.gui.window.postMessage(bid, 'in', body);
+            jsxc.gui.window.postMessage(bid, 'in', body, false, forwarded);
          }
 
          // preserve handler
@@ -4202,7 +4221,7 @@ var jsxc;
             return;
          }
 
-         if (jsxc.options.get('carbons').enabled) {
+         if (jsxc.options.get('carbons').enable) {
             return jsxc.xmpp.carbons.enable();
          }
 
@@ -4749,9 +4768,11 @@ var jsxc;
        * @param bid
        * @param direction
        * @param msg
+       * @param encrypted
+       * @param forwarded
        * @return post
        */
-      saveMessage: function(bid, direction, msg) {
+      saveMessage: function(bid, direction, msg, encrypted, forwarded) {
          var chat = jsxc.storage.getUserItem('chat', bid) || [];
 
          var uid = new Date().getTime() + ':msg';
@@ -4764,7 +4785,9 @@ var jsxc;
             direction: direction,
             msg: msg,
             uid: uid.replace(/:/, '-'),
-            received: false
+            received: false,
+            encrypted: encrypted || false,
+            forwarded: forwarded || false
          };
 
          chat.unshift(post);
@@ -4829,9 +4852,9 @@ var jsxc;
          }
 
          if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']');
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']', encrypted);
          } else {
-            jsxc.gui.window.postMessage(bid, 'in', msg);
+            jsxc.gui.window.postMessage(bid, 'in', msg, encrypted);
          }
       },
 
