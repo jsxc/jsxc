@@ -1053,7 +1053,7 @@ var jsxc;
             el.find('.jsxc_avatar').removeAttr('style');
 
             el.find('.jsxc_avatar').css({
-               'background-image': 'url(' + src + ')',
+               'background-image': 'url(' + src.replace(/[\n|\r|\t]/gi,'') + ')',
                'text-indent': '999px'
             });
          };
