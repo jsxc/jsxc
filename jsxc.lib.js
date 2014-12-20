@@ -1053,7 +1053,7 @@ var jsxc;
             el.find('.jsxc_avatar').removeAttr('style');
 
             el.find('.jsxc_avatar').css({
-               'background-image': 'url(' + src.replace(/[\n|\r|\t]/gi,'') + ')',
+               'background-image': 'url(' + src.replace(/[\t\r\n\f]/gi,'') + ')',
                'text-indent': '999px'
             });
          };
@@ -1676,7 +1676,13 @@ var jsxc;
                   src = photo.find('EXTVAL').text();
                }
 
-               $('#jsxc_dialog h3').before('<img class="jsxc_vCard" src="' + src.replace(/[\n|\r|\t]/gi,'') + '" alt="avatar" />');
+               src = src.replace(/[\t\r\n\f]/g,"");
+               $('#jsxc_dialog h3').before('<img class="jsxc_vCard" src="' + src + '" alt="avatar" />');
+               /* Update all avatar of user */
+               $('li[data-bid="'+bid+'"] .jsxc_avatar').css({
+                  'background-image': 'url(' + src + ')',
+                  'text-indent': '999px'
+               });
             }
 
             if ($(stanza).find('vCard').length === 0 || ($(stanza).find('vcard > *').length === 1 && photo.length === 1)) {
