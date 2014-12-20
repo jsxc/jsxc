@@ -1676,7 +1676,7 @@ var jsxc;
                   src = photo.find('EXTVAL').text();
                }
 
-               $('#jsxc_dialog h3').before('<img class="jsxc_vCard" src="' + src + '" alt="avatar" />');
+               $('#jsxc_dialog h3').before('<img class="jsxc_vCard" src="' + src.replace(/[\n|\r|\t]/gi,'') + '" alt="avatar" />');
             }
 
             if ($(stanza).find('vCard').length === 0 || ($(stanza).find('vcard > *').length === 1 && photo.length === 1)) {
