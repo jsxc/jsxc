@@ -1,11 +1,11 @@
 /* global module:false */
 module.exports = function(grunt) {
-   
+
    var dep = grunt.file.readJSON('dep.json');
    var dep_files = dep.map(function(el) {
       return el.file;
    });
-   
+
    // Project configuration.
    grunt.initConfig({
       app: grunt.file.readJSON('package.json'),
@@ -62,12 +62,12 @@ module.exports = function(grunt) {
                   ' * \n' +
                   ' */\n\n',
                process: function(src, filepath) {
-                  if (filepath === 'build/lib/otr/build/dep/crypto.js') { 
+                  if (filepath === 'build/lib/otr/build/dep/crypto.js') {
                      src += ';';
                   }
-                  
+
                   var data = dep[dep_files.indexOf(filepath)];
-                  
+
                   return '/*!\n * Source: ' + filepath + ', license: ' + data.license + ', url: ' + data.url + ' */\n' + src;
                }
             },
@@ -134,12 +134,63 @@ module.exports = function(grunt) {
             } ]
          }
       },
+      dataUri: {
+        dist: {
+          src: 'css/*.css',
+          dest: 'build/',
+          options: {
+            target: ['img/*.*', 'img/**/*.*'],
+            fixDirLevel: true,
+            baseDir: './'
+          }
+        }
+      },
+      qunit: {
+        all: {
+          options: {
+            timeout: 10000,
+            urls: [
+              'http://localhost:3000/test/bower/bower_spec.html',
+              'http://localhost:3000/test/jsxc/jsxc_spec.html'
+            ]
+          }
+        }
+      },
+      connect: {
+        server: {
+          options: {
+            port: 3000,
+            base: '.'
+          }
+        }
+      },
       jsdoc: {
           dist: {
               src: ['jsxc.lib.js', 'jsxc.lib.webrtc.js'],
               dest: 'doc'
           }
-      }
+      },
+      autoprefixer: {
+            no_dest: {
+                src: 'css/*.css'
+            }
+      },
+      csslint: {
+        strict: {
+            options: {
+            import: 2
+            },
+            src: ['css/*.css']
+        },
+      },
+      sass: {
+        dist: {
+            files: {
+            'css/jsxc.css': 'scss/jsxc.scss',
+            'css/jsxc.webrtc.css': 'scss/jsxc.webrtc.scss'
+            }
+        }
+      },
    });
 
    // These plugins provide necessary tasks.
@@ -153,9 +204,17 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-search');
    grunt.loadNpmTasks('grunt-contrib-compress');
    grunt.loadNpmTasks('grunt-jsdoc');
+   grunt.loadNpmTasks('grunt-data-uri');
+   grunt.loadNpmTasks('grunt-contrib-qunit');
+   grunt.loadNpmTasks('grunt-contrib-connect');
+   grunt.loadNpmTasks('grunt-merge-data');
+   grunt.loadNpmTasks('grunt-contrib-csslint');
+   grunt.loadNpmTasks('grunt-sass');
+   grunt.loadNpmTasks('grunt-autoprefixer');
 
    // Default task.
-   grunt.registerTask('default', [ 'jshint', 'search', 'jsdoc', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
+   grunt.registerTask('default', [ 'jshint', 'search', 'jsdoc', 'clean', 'copy', 'sass', 'autoprefixer',
+                                    'dataUri', 'usebanner', 'merge_data', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // Create alpha/beta build
    grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
