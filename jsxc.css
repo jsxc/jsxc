@@ -235,11 +235,11 @@ div#jsxc_roster .jsxc_wait {
 	z-index: 60;
 }
 
-div#jsxc_roster .jsxc_wait img {
+#jsxc_roster .jsxc_wait img {
 	padding: 5px;
 }
 
-div#jsxc_roster .jsxc_wait h3 {
+#jsxc_roster .jsxc_wait h3 {
 	margin-bottom: 5px;
 	font-size: 1.13em;
 	font-weight: bold;
