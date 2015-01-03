@@ -197,34 +197,60 @@ li .jsxc_name:hover {
    background-color: #A4A4A4;
 }
 
-/*############################ 
- *########## Roster ########## 
+/*############################
+ *########## Roster ##########
  *############################*/
-div#jsxc_roster {
-	position: fixed;
-	top: 40px;
-	bottom: 0px;
-	right: 0px;
-	width: 200px;
-	overflow: visible;
-	border-left: 24px solid #A4A4A4;
-	z-index: 80;
-	margin-left: 10px;
-	box-shadow: 0px 0px 7px #000000;
-	background-color: #383C43;
+#jsxc_roster {
+    position: fixed;
+    top: 40px;
+    bottom: 0px;
+    right: 0px;
+    width: 200px;
+    overflow: visible;
+    border-left: 24px solid #A4A4A4;
+    z-index: 80;
+    margin-left: 10px;
+    background-color: #383C43;
+    transition: transform 0.3s;
+    transform: translate3d(200px, 0, 0);
 }
 
-div#jsxc_roster a{
+/* slide the roster drawer when checking the box
+ * the label for this checkbox can be placed anywhere, and on click on it it will
+ * trigger the drawer
+ */
+#jsxc_toggleRoster_text:checked ~ #jsxc_roster {
+    transform: translate3d(0, 0, 0);
+}
+
+/* add the chevron icon
+ */
+#jsxc_toggleRoster_text:checked ~ #jsxc_roster .entypo::before {
+    content: '\e75e';
+}
+
+#jsxc_toggleRoster ~ .entypo::before {
+    content: '\e75d';
+}
+
+#jsxc_toggleRoster ~ .entypo {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    left: -16px;
+}
+
+#jsxc_roster a{
 	cursor: pointer;
 }
 
-div#jsxc_roster .slimScrollDiv {
+#jsxc_roster .slimScrollDiv {
 	left: -4px;
 	margin-bottom: 30px;
 	z-index: 40;
 }
 
-div#jsxc_roster .jsxc_wait {
+#jsxc_roster .jsxc_wait {
 	position: absolute;
 	top: 0px;
 	left: 0px;
@@ -269,17 +295,17 @@ div#jsxc_roster .jsxc_wait {
    width: 137px;
 }
 
-div#jsxc_roster p {
+#jsxc_roster p {
 	color: #939393;
 	padding: 10px;
 }
 
-div#jsxc_roster p a {
+#jsxc_roster p a {
 	color: #b1b1b1;
 	text-decoration: underline;
 }
 
-div#jsxc_roster>.jsxc_bottom {
+#jsxc_roster>.jsxc_bottom {
 	position: absolute;
 	left: -4px;
 	bottom: 0px;
@@ -295,15 +321,15 @@ div#jsxc_roster>.jsxc_bottom {
 	z-index: 50;
 }
 
-div#jsxc_roster>.jsxc_bottom>div:hover {
+#jsxc_roster>.jsxc_bottom>div:hover {
 	color: #FAFAFA;
 }
 
-div#jsxc_roster>.jsxc_bottom>div>span {
+#jsxc_roster>.jsxc_bottom>div>span {
 	cursor: pointer;
 }
 
-div#jsxc_roster>.jsxc_bottom ul {
+#jsxc_roster>.jsxc_bottom ul {
 	width: 190px;
 	position: absolute;
 	bottom: 30px;
@@ -315,7 +341,7 @@ div#jsxc_roster>.jsxc_bottom ul {
 	margin: 0;
 }
 
-div#jsxc_roster>.jsxc_bottom li {
+#jsxc_roster>.jsxc_bottom li {
 	height: 30px;
 	background-color: #282323;
 	color: #939393;
@@ -329,17 +355,17 @@ div#jsxc_roster>.jsxc_bottom li {
 	white-space: nowrap;
 }
 
-div#jsxc_roster>.jsxc_bottom li:hover:not(.jsxc_disabled ) {
+#jsxc_roster>.jsxc_bottom li:hover:not(.jsxc_disabled ) {
 	color: #fff;
 	background-color: #3F8FBA;
 }
 
-div#jsxc_roster>.jsxc_bottom li.jsxc_disabled {
+#jsxc_roster>.jsxc_bottom li.jsxc_disabled {
 	color: #595959;
 	cursor: default;
 }
 
-div#jsxc_roster>.jsxc_bottom ul li:last-child {
+#jsxc_roster>.jsxc_bottom ul li:last-child {
 	border-bottom: 1px solid #939393;
 }
 
@@ -671,42 +697,40 @@ ul#jsxc_buddylist .jsxc_delete {
    cursor: pointer;
 }
 
-div#jsxc_toggleRoster {
-	width: 34px;
-	height: 100%;
-	position: absolute;
-	left: -34px !important;
-	top: 0px;
-	z-index: 110;
-	background-color: transparent;
-	cursor: pointer;
-	display: table;
+#jsxc_toggleRoster {
+    width: 34px;
+    height: 100%;
+    position: absolute;
+    left: -34px !important;
+    top: 0px;
+    z-index: 110;
+    background-color: transparent;
+    cursor: pointer;
+    display: table;
 }
 
 #jsxc_toggleRoster:hover {
-	background-color: #a4a4a4;
-	opacity: 0.5;
+    background-color: #a4a4a4;
+    opacity: 0.5;
 }
 
 #jsxc_toggleRoster_text{
-      display: table-cell;
-      vertical-align: middle;
-      padding-left: 14px;
+      display: none;
 }
 
 /*############################
  *###### Window List #########
  *############################*/
-div#jsxc_windowList {
-	position: fixed;
-	bottom: 0px;
-	right: 210px;
-	left: 0px;
-	z-index: 50;
-	clip: rect(-10000px, 10000px, 30px, 30px);
+#jsxc_windowList {
+    position: fixed;
+    bottom: 0px;
+    right: 210px;
+    left: 0px;
+    z-index: 50;
+    clip: rect(-10000px, 10000px, 30px, 30px);
 }
 
-div#jsxc_windowList>ul {
+#jsxc_windowList>ul {
 	list-style: none;
 	padding: 0px;
 	margin: 0px;
@@ -720,7 +744,7 @@ div#jsxc_windowList>ul {
 	transition: right 0.5s;
 }
 
-div#jsxc_windowList>ul>li {
+#jsxc_windowList>ul>li {
 	padding: 0px;
 	margin: 0px;
 	display: inline-block;
@@ -734,7 +758,7 @@ div#jsxc_windowList>ul>li {
 	white-space: normal;
 }
 
-div#jsxc_windowList>ul>li.jsxc_min {
+#jsxc_windowList>ul>li.jsxc_min {
 	width: 200px !important;
 }
 
@@ -765,7 +789,7 @@ div#jsxc_windowList>ul>li.jsxc_min {
 #jsxc_windowListSB > div:hover {
 	background-color: #c3c3c3;
 }
-#jsxc_windowListSB > div.jsxc_disabled {
+#jsxc_windowListSB > .jsxc_disabled {
 	background-color: #f1f1f1 !important;
 	color: #d1d1d1;
 	cursor: default !important;
@@ -775,7 +799,7 @@ div#jsxc_windowList>ul>li.jsxc_min {
 /*############################
  *######### Window ###########
  *############################*/
-div.jsxc_bar {
+.jsxc_bar {
 	background-color: #282323;
 	cursor: pointer;
 	height: 30px;
@@ -787,7 +811,7 @@ div.jsxc_bar {
 	overflow: hidden;
 }
 
-div.jsxc_cycle {
+.jsxc_cycle {
 	position: absolute;
 	bottom: 9px;
 	right: 5px;
@@ -796,16 +820,16 @@ div.jsxc_cycle {
 	border-radius: 6px;
 }
 
-div#jsxc_windowList>ul>li.jsxc_unreadMsg .jsxc_name {
+#jsxc_windowList>ul>li.jsxc_unreadMsg .jsxc_name {
 	font-style: italic;
 }
 
-div#jsxc_windowList>ul>li.jsxc_unreadMsg .jsxc_cycle {
+#jsxc_windowList>ul>li.jsxc_unreadMsg .jsxc_cycle {
 	background-color: orange;
 }
 
 /** Contains text area */
-div.jsxc_window {
+.jsxc_window {
 	position: absolute;
 	bottom: 0px;
 	left: 0px;
@@ -816,7 +840,7 @@ div.jsxc_window {
 	cursor: default;
 }
 
-div.jsxc_window .jsxc_emoticons {
+.jsxc_window .jsxc_emoticons {
 	height: 30px;
 	width: 30px;
 	position: absolute;
@@ -826,7 +850,7 @@ div.jsxc_window .jsxc_emoticons {
 	cursor: pointer;
 }
 
-div.jsxc_window .jsxc_emoticons:after {
+.jsxc_window .jsxc_emoticons:after {
 	content: ' ';
 	background-image: url('img/smiley.png');
 	background-position: center center;
@@ -839,11 +863,11 @@ div.jsxc_window .jsxc_emoticons:after {
 	left: 0px;
 }
 
-div.jsxc_window .jsxc_emoticons:hover:after {
+.jsxc_window .jsxc_emoticons:hover:after {
 	opacity: 0.5;
 }
 
-div.jsxc_window .jsxc_emoticons ul {
+.jsxc_window .jsxc_emoticons ul {
 	display: none;
 	position: absolute;
 	bottom: 33px;
@@ -856,7 +880,7 @@ div.jsxc_window .jsxc_emoticons ul {
 	list-style-type: none;
 }
 
-div.jsxc_window .jsxc_emoticons ul:after {
+.jsxc_window .jsxc_emoticons ul:after {
 	content: '';
 	position: absolute;
 	border-left: 5px solid transparent;
@@ -869,12 +893,12 @@ div.jsxc_window .jsxc_emoticons ul:after {
 	bottom: -6px;
 }
 
-div.jsxc_window .jsxc_emoticons li {
+.jsxc_window .jsxc_emoticons li {
 	float: right;
 	cursor: pointer;
 }
 
-div.jsxc_window .jsxc_emoticons div {
+.jsxc_window .jsxc_emoticons div {
 	cursor: pointer;
 	border-radius: 3px;
 	background-size: 30px 30px;
@@ -882,7 +906,7 @@ div.jsxc_window .jsxc_emoticons div {
 	height: 30px;
 }
 
-div.jsxc_window .jsxc_emoticons div:hover {
+.jsxc_window .jsxc_emoticons div:hover {
 	background-color: rgba(255, 255, 255, 0.8);
 }
 
@@ -916,23 +940,23 @@ div.jsxc_window .jsxc_emoticons div:hover {
 		endColorstr='#00282323', GradientType=0); /* IE6-9 */
 }
 
-div.jsxc_window .jsxc_avatar {
+.jsxc_window .jsxc_avatar {
 	margin-top: 1px;
 }
 
-div.jsxc_window .jsxc_textarea {
+.jsxc_window .jsxc_textarea {
 	width: 100%;
 	overflow: hidden;
 	padding: 3px;
 }
 
-div.jsxc_window .slimScrollDiv {
+.jsxc_window .slimScrollDiv {
 	margin: 0px 0px 6px 0px;
 	left: auto !important;
    top: auto !important;
 }
 
-div.jsxc_chatmessage {
+.jsxc_chatmessage {
 	margin: 3px;
 	padding: 4px;
 	padding-right: 10px;
@@ -944,19 +968,19 @@ div.jsxc_chatmessage {
 	clear: both;
 }
 
-div.jsxc_chatmessage a {
+.jsxc_chatmessage a {
 	color: blue;
 	text-decoration: underline;
 }
 
-div.jsxc_chatmessage img {
+.jsxc_chatmessage img {
 	width: 19px;
 	height: 19px;
 	background-size: 19px 19px;
 }
 
 /** incoming message */
-div.jsxc_in {
+.jsxc_in {
 	float: left;
 	position: relative;
 	margin-left: 10px;
@@ -967,7 +991,7 @@ div.jsxc_in {
 	border-radius: 3px;
 }
 
-div.jsxc_in:after {
+.jsxc_in:after {
 	content: '';
 	position: absolute;
 	border-style: solid;
@@ -980,7 +1004,7 @@ div.jsxc_in:after {
 	bottom: 10px;
 }
 
-div.jsxc_out.jsxc_received:before {
+.jsxc_out.jsxc_received:before {
 	content: '✓';
 	position: absolute;
 	bottom: 2px;
@@ -991,7 +1015,7 @@ div.jsxc_out.jsxc_received:before {
 }
 
 /** outgoing message */
-div.jsxc_out {
+.jsxc_out {
 	float: right;
 	position: relative;
 	margin-right: 10px;
@@ -1002,7 +1026,7 @@ div.jsxc_out {
 	border-radius: 3px;
 }
 
-div.jsxc_out:after {
+.jsxc_out:after {
 	content: '';
 	position: absolute;
 	border-style: solid;
@@ -1016,7 +1040,7 @@ div.jsxc_out:after {
 }
 
 /** system message */
-div.jsxc_sys {
+.jsxc_sys {
 	width: auto;
 	max-width: none;
 	padding-right: 4px;
@@ -1054,7 +1078,7 @@ div.jsxc_sys {
 	opacity: 0.3;
 }
 
-div.jsxc_window .jsxc_tools {
+.jsxc_window .jsxc_tools {
 	height: 26px;
 	float: right;
 }
@@ -1063,7 +1087,7 @@ div.jsxc_window .jsxc_tools {
 	display: none;
 }
 
-div.jsxc_window .jsxc_tools > div {
+.jsxc_window .jsxc_tools > div {
 	width: 17px;
    height: 26px;
    display: block;
@@ -1075,7 +1099,7 @@ div.jsxc_window .jsxc_tools > div {
    text-align: center;
 }
 
-div.jsxc_settings {
+.jsxc_settings {
 	background-image: url('img/gear_grey.svg');
 	background-size: 15px 15px;
 	background-repeat: no-repeat;
@@ -1083,11 +1107,11 @@ div.jsxc_settings {
 	overflow: visible;
 }
 
-div.jsxc_settings:hover,div.jsxc_settings.hover {
+.jsxc_settings:hover, .jsxc_settings.hover {
 	background-image: url('img/gear_white.svg');
 }
 
-div.jsxc_settings ul {
+.jsxc_settings ul {
 	list-style: none;
 	padding: 0px;
 	margin: 0px;
@@ -1101,7 +1125,7 @@ div.jsxc_settings ul {
 	display: none;
 }
 
-div.jsxc_settings li {
+.jsxc_settings li {
 	width: 170px;
 	margin-left: 20px;
 	padding-left: 10px;
@@ -1111,45 +1135,45 @@ div.jsxc_settings li {
 	cursor: pointer;
 }
 
-div.jsxc_settings li:first-child {
+.jsxc_settings li:first-child {
 	border-top: 1px solid #ccc;
 }
 
-div.jsxc_settings li:hover:not(.jsxc_disabled ){
+.jsxc_settings li:hover:not(.jsxc_disabled ){
 	color: #fff;
 	background-color: #3F8FBA;
 }
 
-div.jsxc_settings li.jsxc_disabled {
+.jsxc_settings li.jsxc_disabled {
 	color: #595959;
 	cursor: default;
 }
 
-.jsxc_tools > div.jsxc_disabled {
+.jsxc_tools > .jsxc_disabled {
    opacity: 0.5;
    cursor: default !important;
 }
 
-div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
+.jsxc_transfer, .jsxc_transfer.jsxc_disabled:hover {
 	background-image: url('img/padlock_open_grey.svg');
 	background-repeat: no-repeat;
 	background-position: center center;
 	background-size: 12px 12px;
 }
 
-div.jsxc_transfer:hover {
+.jsxc_transfer:hover {
 	background-image: url('img/padlock_open_white.svg');
 }
 
-div.jsxc_transfer.jsxc_fin {
+.jsxc_transfer.jsxc_fin {
 	background-image: url('img/padlock_close_grey.svg');
 }
 
-div.jsxc_transfer.jsxc_enc {
+.jsxc_transfer.jsxc_enc {
 	background-image: url('img/padlock_close_orange.svg');
 }
 
-div.jsxc_transfer.jsxc_enc.jsxc_trust {
+.jsxc_transfer.jsxc_enc.jsxc_trust {
 	background-image: url('img/padlock_close_green.svg');
 }
 
