@@ -1,0 +1,142 @@
+@import 'modules';
+
+#jsxc_buddylist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 204px;
+    li {
+        padding: 0;
+        margin: 0;
+        height: 30px;
+        border-bottom: 1px solid $color_mountain_mist_approx;
+        cursor: pointer;
+        width: 200px;
+        position: relative;
+        color: $color_mountain_mist_approx;
+        font-family: $font_sans;
+        line-height: 30px;
+        padding-left: 3px;
+        z-index: 85;
+        overflow: hidden;
+        &.jsxc_expand {
+            height: 54px;
+            .jsxc_avatar {
+                width: 48px;
+                height: 48px;
+                img {
+                    width: 48px;
+                    height: 48px;
+                }
+            }
+        }
+        &:hover .jsxc_avatar {
+            @extend %avatar-icon;
+        }
+        .jsxc_name:before {
+            content: ' ';
+            width: 0;
+            height: 0;
+            display: inline-block;
+            opacity: 0.0;
+            transition: width 0.5s, opacity 0.5s;
+        }
+        &.jsxc_unreadMsg .jsxc_name:before {
+            width: 12px;
+            height: 12px;
+            border-radius: 6px;
+            background-color: $web_orange;
+            margin-right: 3px;
+            opacity: 1.0;
+            transition: width 0.5s, opacity 0.5s;
+        }
+    }
+    .jsxc_name {
+        padding-right: 30px;
+    }
+    .jsxc_oneway {
+        opacity: 0.7;
+    }
+    .jsxc_right {
+        float: right;
+        margin-right: 6px;
+        div {
+            font-weight: bold;
+            text-align: center;
+            font-size: 13px;
+            line-height: 20px;
+            color: $white;
+            &:hover {
+                opacity: 1.0;
+            }
+        }
+    }
+
+    .jsxc_control {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        top: 0;
+        right: 0;
+        cursor: pointer;
+        &:after {
+            content: '▾';
+            position: absolute;
+            left: 50%;
+            top: 15px;
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
+            text-align: center;
+            margin-left: -8px;
+            margin-top: -8px;
+            border-radius: 8px;
+            color: $color_silver_approx;
+            background-color: $color_mountain_mist_50_approx;
+            opacity: 0.6;
+            transition: transform 0.5s;
+        }
+        &:hover:after {
+            color: $white;
+            opacity: 1.0;
+        }
+    }
+    .jsxc_options {
+        height: 20px;
+        float: left;
+        border-radius: 2px;
+        background-color: $color_mountain_mist_50_approx;
+        > div {
+            height: 20px;
+            width: 20px;
+            float: left;
+            margin-right: 0 1px;
+            background-repeat: no-repeat;
+            background-position: center center;
+            opacity: 0.6;
+            cursor: pointer;
+            &:hover {
+                opacity: 1;
+            }
+        }
+    }
+    .jsxc_chaticon {
+        background-image: url('img/speech_balloon_white.svg');
+        background-size: 15px 15px;
+    }
+    .jsxc_videoicon {
+        background-image: url('img/camera_icon_white.svg');
+        background-size: 13px 13px;
+    }
+    .jsxc_vcardicon {
+        font-size: 15px;
+        line-height: 20px;
+        text-align: center;
+        color: $white;
+        font-weight: bold;
+        font-family: $font_serif;
+    }
+    li.jsxc_expand .jsxc_control:after {
+        transform: rotate(180deg);
+    }
+}
