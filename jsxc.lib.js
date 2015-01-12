@@ -195,10 +195,10 @@ var jsxc;
             lang = jsxc.options.defaultLang;
          }
 
-         I18next.language = (typeof Diaspora !== 'undefined' ? Diaspora.I18n.language : 'en');
          // initialize i18n translator
          $.i18n.init({
-           lng: I18next.language,
+           lng: Diaspora.I18n.language,
+           fallbackLng: 'en',
            resStore: I18next,
            // use localStorage and set expiration to a day
            useLocalStorage: true,
