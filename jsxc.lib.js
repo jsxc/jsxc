@@ -975,7 +975,7 @@ var jsxc;
             ue.removeClass('jsxc_oneway');
          }
 
-         var info = '<b>' + Strophe.getBareJidFromJid(data.jid) + '</b>\n';
+         var info = Strophe.getBareJidFromJid(data.jid) + '\n';
          info += jsxc.translate('%%Subscription%%: %%' + data.sub + '%%\n');
          info += jsxc.translate('%%Status%%: %%' + jsxc.CONST.STATUS[data.status] + '%%');
 
