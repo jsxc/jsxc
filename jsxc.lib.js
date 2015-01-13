@@ -80,6 +80,10 @@ var jsxc;
          REGEX: {
             JID: new RegExp('\\b[^"&\'\\/:<>@\\s]+@[\\w-_.]+\\b', 'ig'),
             URL: new RegExp(/((?:https?:\/\/|www\.|([\w\-]+\.[a-zA-Z]{2,3})(?=\b))(?:(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*\)([\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|])?)|(?:[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|]))?)/gi)
+         },
+         NS: {
+            CARBONS: 'urn:xmpp:carbons:2',
+            FORWARD: 'urn:xmpp:forward:0'
          }
       },
 
@@ -209,6 +213,10 @@ var jsxc;
          if (typeof (localStorage) === 'undefined') {
             jsxc.debug("Browser doesn't support localStorage.");
             return;
+         }
+
+         if (jsxc.storage.getItem('debug') === true) {
+            jsxc.options.otr.debug = true;
          }
 
          // Register event listener for the storage event
@@ -396,8 +404,12 @@ var jsxc;
          // Sending keepalive signal
          jsxc.startKeepAlive();
 
-         // create or load DSA key and call _onMaster
-         jsxc.otr.createDSA();
+         if (jsxc.options.get('otr').enable) {
+            // create or load DSA key and call _onMaster
+            jsxc.otr.createDSA();
+         } else {
+            jsxc._onMaster();
+         }
       },
 
       /**
@@ -681,6 +693,27 @@ var jsxc;
             return $.t(k) || key.replace(/_/g, ' ');
          });
       },
+
+      /**
+       * Executes the given function in jsxc namespace.
+       * 
+       * @memberOf jsxc
+       * @param {string} fnName Function name
+       * @param {array} fnParams Function parameters
+       * @returns Function return value
+       */
+      exec: function(fnName, fnParams) {
+         var fnList = fnName.split('.');
+         var fn = jsxc[fnList[0]];
+         var i;
+         for (i = 1; i < fnList.length; i++) {
+            fn = fn[fnList[i]];
+         }
+
+         if (typeof fn === 'function') {
+            return fn.apply(null, fnParams);
+         }
+      }
    };
 
    /**
@@ -701,7 +734,11 @@ var jsxc;
 
       /** OTR options */
       otr: {
-         ERROR_START_AKE: true
+         enable: true,
+         ERROR_START_AKE: false,
+         debug: false,
+         SEND_WHITESPACE_TAG: true,
+         WHITESPACE_START_AKE: true
       },
 
       /** xmpp options */
@@ -808,9 +845,15 @@ var jsxc;
        *
        * @memberOf jsxc.options
        * @param data Holds all data as key/value
+       * @returns {boolean} false if function failes
        */
       saveSettinsPermanent: function() {
 
+      },
+
+      carbons: {
+         /** Enable carbon copies? */
+         enable: false
       }
    };
 
@@ -1712,9 +1755,12 @@ var jsxc;
                jsxc.options.set(key, val);
             });
 
-            jsxc.options.saveSettinsPermanent.call(this, data);
+            var err = jsxc.options.saveSettinsPermanent.call(this, data);
 
-            // TODO find replacement or enable jquery ui again
+            if (typeof self.attr('data-onsubmit') === 'string') {
+               jsxc.exec(self.attr('data-onsubmit'), [ err ]);
+            }
+
             //setTimeout(function() {
             //   self.find('input[type="submit"]').effect('highlight', {
             //      color: (err) ? 'green' : 'red'
@@ -2707,8 +2753,10 @@ var jsxc;
        * @param {String} direction 'in' message is received or 'out' message is
        *        send
        * @param {String} msg Message to display
+       * @param {boolean} encrypted Was this message encrypted? Default: false
+       * @param {boolean} forwarded Was this message forwarded? Default: false
        */
-      postMessage: function(bid, direction, msg) {
+      postMessage: function(bid, direction, msg, encrypted, forwarded) {
          var data = jsxc.storage.getUserItem('buddy', bid);
          var html_msg = msg;
 
@@ -2718,12 +2766,12 @@ var jsxc;
 
          // exceptions:
 
-         if (direction === 'out' && data.msgstate === 2) {
+         if (direction === 'out' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED && forwarded !== true) {
             direction = 'sys';
             msg = $.t("your_message_wasnt_send_please_end_your_private_conversation");
          }
 
-         if (direction === 'in' && data.msgstate === 2) {
+         if (direction === 'in' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED) {
             direction = 'sys';
             msg = $.t("unencrypted_message_received") + ' ' + msg;
          }
@@ -2733,13 +2781,14 @@ var jsxc;
             msg = $.t("your_message_wasnt_send_because_you_have_no_valid_subscription");
          }
 
-         var post = jsxc.storage.saveMessage(bid, direction, msg);
+         encrypted = encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
+         var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded);
 
          if (direction === 'in') {
             $(document).trigger('postmessagein.jsxc', [ bid, html_msg ]);
          }
 
-         if (direction === 'out' && jsxc.master) {
+         if (direction === 'out' && jsxc.master && forwarded !== true) {
             jsxc.xmpp.sendMessage(bid, html_msg, post.uid);
          }
 
@@ -2763,7 +2812,6 @@ var jsxc;
          var msg = post.msg;
          var direction = post.direction;
          var uid = post.uid;
-         var received = post.received || false;
 
          if (win.find('.jsxc_textinput').is(':not(:focus)') && jsxc.restoreCompleted && direction === 'in' && !restore) {
             jsxc.gui.window.highlight(bid);
@@ -2807,8 +2855,16 @@ var jsxc;
          msgDiv.attr('id', uid);
          msgDiv.html(msg);
 
-         if (received) {
+         if (post.received || false) {
             msgDiv.addClass('jsxc_received');
+         }
+
+         if (post.forwarded) {
+            msgDiv.addClass('jsxc_forwarded');
+         }
+
+         if (post.encrypted) {
+            msgDiv.addClass('jsxc_encrypted');
          }
 
          if (direction === 'sys') {
@@ -3135,6 +3191,14 @@ var jsxc;
                <label for="priority-dnd">%%dnd%%</label><input type="number" value="0" id="priority-dnd" min="-128" max="127" step="1" required="required"/><br />\
                <input type="submit" value="%%Save%%"/>\
             </fieldset>\
+         </form>\
+         <p></p>\
+         <form data-onsubmit="xmpp.carbons.refresh">\
+            <fieldset class="jsxc_fieldsetCarbons jsxc_fieldset">\
+               <legend>%%Carbon copy%%</legend>\
+               <label for="carbons-enable">%%Enable%%</label><input type="checkbox" id="carbons-enable" /><br />\
+               <input type="submit" value="%%Save%%"/>\
+            </fieldset>\
          </form>'
    };
 
@@ -3221,6 +3285,22 @@ var jsxc;
             jsxc.xmpp.conn.attach(jid, sid, rid, callback);
          } else {
             jsxc.debug('New connection');
+
+            if (jsxc.xmpp.conn.caps) {
+               // Add system handler, because user handler isn't called before
+               // we are authenticated
+               jsxc.xmpp.conn._addSysHandler(function(stanza) {
+                  var from = jsxc.xmpp.conn.domain, c = stanza.querySelector('c'), ver = c.getAttribute('ver'), node = c.getAttribute('node');
+
+                  var _jidNodeIndex = JSON.parse(localStorage.getItem('strophe.caps._jidNodeIndex')) || {};
+
+                  jsxc.xmpp.conn.caps._jidVerIndex[from] = ver;
+                  _jidNodeIndex[from] = node;
+
+                  localStorage.setItem('strophe.caps._jidVerIndex', JSON.stringify(jsxc.xmpp.conn.caps._jidVerIndex));
+                  localStorage.setItem('strophe.caps._jidNodeIndex', JSON.stringify(_jidNodeIndex));
+               }, Strophe.NS.CAPS);
+            }
 
             jsxc.xmpp.conn.connect(jsxc.options.xmpp.jid, jsxc.options.xmpp.password, callback);
          }
@@ -3344,6 +3424,37 @@ var jsxc;
          jsxc.xmpp.conn.addHandler(jsxc.xmpp.onMessage, null, 'message', 'chat');
          jsxc.xmpp.conn.addHandler(jsxc.xmpp.onReceived, null, 'message');
          jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
+
+         var caps = jsxc.xmpp.conn.caps;
+         var domain = jsxc.xmpp.conn.domain;
+
+         if (caps && jsxc.options.get('carbons').enable) {
+            var conditionalEnable = function() {
+               if (jsxc.xmpp.conn.caps.hasFeatureByJid(domain, jsxc.CONST.NS.CARBONS)) {
+                  jsxc.xmpp.carbons.enable();
+               }
+            };
+
+            if (typeof caps._knownCapabilities[caps._jidVerIndex[domain]] === 'undefined') {
+               var _jidNodeIndex = JSON.parse(localStorage.getItem('strophe.caps._jidNodeIndex')) || {};
+
+               $(document).on('caps.strophe', function onCaps(ev, from) {
+
+                  if (from !== domain) {
+                     return;
+                  }
+
+                  conditionalEnable();
+
+                  $(document).off('caps.strophe', onCaps);
+               });
+
+               caps._requestCapabilities(jsxc.xmpp.conn.domain, _jidNodeIndex[domain], caps._jidVerIndex[domain]);
+            } else {
+               // We know server caps
+               conditionalEnable();
+            }
+         }
 
          // Only load roaster if necessary
          if (!jsxc.restore || !jsxc.storage.getUserItem('buddylist')) {
@@ -3703,27 +3814,59 @@ var jsxc;
        * @returns {Boolean}
        * @private
        */
-      onMessage: function(message) {
-         /*
-          * <message xmlns='jabber:client' type='chat' to='' id='' from=''>
-          * <body>...</body> <active
-          * xmlns='http://jabber.org/protocol/chatstates'/> </message>
-          */
+      onMessage: function(stanza) {
 
-         jsxc.debug('Incoming message', message);
+         var forwarded = $(stanza).find('forwarded[xmlns="' + jsxc.CONST.NS.FORWARD + '"]');
+         var message, carbon;
+
+         if (forwarded.length > 0) {
+            message = forwarded.find('> message');
+            forwarded = true;
+            carbon = $(stanza).find('> [xmlns="' + jsxc.CONST.NS.CARBONS + '"]');
+
+            if (carbon.length === 0) {
+               carbon = false;
+            }
+
+            jsxc.debug('Incoming forwarded message', message);
+         } else {
+            message = stanza;
+            forwarded = false;
+            carbon = false;
+
+            jsxc.debug('Incoming message', message);
+         }
 
          var type = $(message).attr('type');
          var from = $(message).attr('from');
          var mid = $(message).attr('id');
-         var jid = Strophe.getBareJidFromJid(from);
-         var bid = jsxc.jidToBid(jid);
-         var data = jsxc.storage.getUserItem('buddy', bid);
          var body = $(message).find('body:first').text();
-         var request = $(message).find("request[xmlns='urn:xmpp:receipts']");
+         var bid;
 
-         if (!body) {
+         if (!body || (body.match(/\?OTR/i) && forwarded)) {
             return true;
          }
+
+         if (carbon) {
+            var direction = (carbon.prop("tagName") === 'sent') ? 'out' : 'in';
+            bid = jsxc.jidToBid((direction === 'out') ? $(message).attr('to') : from);
+
+            jsxc.gui.window.postMessage(bid, direction, body, false, forwarded);
+
+            return true;
+
+         } else if (forwarded) {
+            // Someone forwarded a message to us
+
+            body = from + jsxc.translate(' %%to%% ') + $(stanza).attr('to') + '"' + body + '"';
+
+            from = $(stanza).attr('from');
+         }
+
+         var jid = Strophe.getBareJidFromJid(from);
+         bid = jsxc.jidToBid(jid);
+         var data = jsxc.storage.getUserItem('buddy', bid);
+         var request = $(message).find("request[xmlns='urn:xmpp:receipts']");
 
          if (data === null) {
             // jid not in roster
@@ -3737,7 +3880,7 @@ var jsxc;
             var msg = jsxc.removeHTML(body);
             msg = jsxc.escapeHTML(msg);
 
-            jsxc.storage.saveMessage(bid, 'in', msg);
+            jsxc.storage.saveMessage(bid, 'in', msg, forwarded);
 
             return true;
          }
@@ -3759,7 +3902,7 @@ var jsxc;
             jsxc.otr.create(bid);
          }
 
-         if (mid !== null && request.length && data !== null && (data.sub === 'both' || data.sub === 'from') && type === 'chat') {
+         if (!forwarded && mid !== null && request.length && data !== null && (data.sub === 'both' || data.sub === 'from') && type === 'chat') {
             // Send received according to XEP-0184
             jsxc.xmpp.conn.send($msg({
                to: from
@@ -3772,7 +3915,7 @@ var jsxc;
          if (jsxc.otr.objects.hasOwnProperty(bid)) {
             jsxc.otr.objects[bid].receiveMsg(body);
          } else {
-            jsxc.gui.window.postMessage(bid, 'in', body);
+            jsxc.gui.window.postMessage(bid, 'in', body, false, forwarded);
          }
 
          // preserve handler
@@ -3931,6 +4074,12 @@ var jsxc;
             id: uid
          }).c('body').t(msg);
 
+         if (jsxc.xmpp.carbons.enabled && msg.match(/^\?OTR/)) {
+            xmlMsg.up().c("private", {
+               xmlns: jsxc.CONST.NS.CARBONS
+            });
+         }
+
          if (type === 'chat' && (isBar || jsxc.xmpp.conn.caps.hasFeatureByJid(jid, Strophe.NS.RECEIPTS))) {
             // Add request according to XEP-0184
             xmlMsg.up().c('request', {
@@ -3985,6 +4134,85 @@ var jsxc;
          }
 
          return null;
+      }
+   };
+
+   /**
+    * Handle carbons (XEP-0280);
+    * 
+    * @namespace jsxc.xmpp.carbons
+    */
+   jsxc.xmpp.carbons = {
+      enabled: false,
+
+      /**
+       * Enable carbons.
+       * 
+       * @memberOf jsxc.xmpp.carbons
+       * @param cb callback
+       */
+      enable: function(cb) {
+         var iq = $iq({
+            type: 'set'
+         }).c('enable', {
+            xmlns: jsxc.CONST.NS.CARBONS
+         });
+
+         jsxc.xmpp.conn.sendIQ(iq, function() {
+            jsxc.xmpp.carbons.enabled = true;
+
+            jsxc.debug('Carbons enabled');
+
+            if (cb) {
+               cb.call(this);
+            }
+         }, function(stanza) {
+            jsxc.warn('Could not enable carbons', stanza);
+         });
+      },
+
+      /**
+       * Disable carbons.
+       * 
+       * @memberOf jsxc.xmpp.carbons
+       * @param cb callback
+       */
+      disable: function(cb) {
+         var iq = $iq({
+            type: 'set'
+         }).c('disable', {
+            xmlns: jsxc.CONST.NS.CARBONS
+         });
+
+         jsxc.xmpp.conn.sendIQ(iq, function() {
+            jsxc.xmpp.carbons.enabled = false;
+
+            jsxc.debug('Carbons disabled');
+
+            if (cb) {
+               cb.call(this);
+            }
+         }, function(stanza) {
+            jsxc.warn('Could not disable carbons', stanza);
+         });
+      },
+
+      /**
+       * Enable/Disable carbons depending on options key.
+       * 
+       * @memberOf jsxc.xmpp.carbons
+       * @param err error message
+       */
+      refresh: function(err) {
+         if (err === false) {
+            return;
+         }
+
+         if (jsxc.options.get('carbons').enable) {
+            return jsxc.xmpp.carbons.enable();
+         }
+
+         return jsxc.xmpp.carbons.disable();
       }
    };
 
@@ -4523,9 +4751,11 @@ var jsxc;
        * @param bid
        * @param direction
        * @param msg
+       * @param encrypted
+       * @param forwarded
        * @return post
        */
-      saveMessage: function(bid, direction, msg) {
+      saveMessage: function(bid, direction, msg, encrypted, forwarded) {
          var chat = jsxc.storage.getUserItem('chat', bid) || [];
 
          var uid = new Date().getTime() + ':msg';
@@ -4538,7 +4768,9 @@ var jsxc;
             direction: direction,
             msg: msg,
             uid: uid.replace(/:/, '-'),
-            received: false
+            received: false,
+            encrypted: encrypted || false,
+            forwarded: forwarded || false
          };
 
          chat.unshift(post);
@@ -4603,9 +4835,9 @@ var jsxc;
          }
 
          if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']');
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']', encrypted);
          } else {
-            jsxc.gui.window.postMessage(bid, 'in', msg);
+            jsxc.gui.window.postMessage(bid, 'in', msg, encrypted);
          }
       },
 
@@ -5333,16 +5565,7 @@ var jsxc;
          notice.click(function() {
             jsxc.notice.remove(nid);
 
-            var fnList = fnName.split('.');
-            var fn = jsxc[fnList[0]];
-            var i;
-            for (i = 1; i < fnList.length; i++) {
-               fn = fn[fnList[i]];
-            }
-
-            if (typeof fn === 'function') {
-               fn.apply(null, fnParams);
-            }
+            jsxc.exec(fnName, fnParams);
 
             return false;
          });

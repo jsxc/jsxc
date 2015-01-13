@@ -32,7 +32,11 @@
 
    /**
     * JavaScript Xmpp Chat namespace
+<<<<<<< HEAD
     *
+=======
+    * 
+>>>>>>> upstream
     * @namespace jsxc
     */
    jsxc = {
@@ -112,7 +116,11 @@
 
       /**
        * Write debug message to console and to log.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc
        * @param {String} msg Debug message
        * @param {Object} data
@@ -143,13 +151,21 @@
 
             jsxc.log = jsxc.log + msg + ': ' + d + '\n';
          } else {
+<<<<<<< HEAD
+=======
+            console.log(msg);
+>>>>>>> upstream
             jsxc.log = jsxc.log + msg + '\n';
          }
       },
 
       /**
        * Write warn message.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc
        * @param {String} msg Warn message
        * @param {Object} data
@@ -160,7 +176,11 @@
 
       /**
        * Write error message.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc
        * @param {String} msg Error message
        * @param {Object} data
@@ -174,7 +194,11 @@
 
       /**
        * Starts the action
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc
        * @param {object} options
        */
@@ -187,7 +211,11 @@
 
          /**
           * Getter method for options. Saved options will override default one.
+<<<<<<< HEAD
           *
+=======
+          * 
+>>>>>>> upstream
           * @param {string} key option key
           * @returns default or saved option value
           */
@@ -199,7 +227,11 @@
 
          /**
           * Setter method for options. Will write into localstorage.
+<<<<<<< HEAD
           *
+=======
+          * 
+>>>>>>> upstream
           * @param {string} key option key
           * @param {object} value option value
           */
@@ -222,6 +254,7 @@
             lang = jsxc.options.defaultLang;
          }
 
+<<<<<<< HEAD
          I18next.language = (typeof Diaspora !== 'undefined' ? Diaspora.I18n.language : 'en');
          // initialize i18n translator
          $.i18n.init({
@@ -231,6 +264,11 @@
            useLocalStorage: true,
            localStorageExpirationTime: 60 * 60 * 24 * 1000,
          });
+=======
+         // set language
+         jsxc.l = jsxc.l10n.en;
+         $.extend(jsxc.l, jsxc.l10n[lang]);
+>>>>>>> upstream
 
          // Check localStorage
          if (typeof (localStorage) === 'undefined') {
@@ -251,7 +289,11 @@
          if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
 
             // Looking for a login form
+<<<<<<< HEAD
             //if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
+=======
+            if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
+>>>>>>> upstream
 
                if (jsxc.options.displayRosterMinimized()) {
                   // Show minimized roster
@@ -260,8 +302,13 @@
                   jsxc.gui.roster.noConnection();
                }
 
+<<<<<<< HEAD
                //return;
             //}
+=======
+               return;
+            }
+>>>>>>> upstream
 
             if (typeof jsxc.options.formFound === 'function') {
                jsxc.options.formFound.call();
@@ -300,6 +347,7 @@
                return true;
             });
 
+<<<<<<< HEAD
          } else { jsxc.restoreOldConnection(); }
       },
 
@@ -325,11 +373,40 @@
         } else {
           jsxc.checkMaster();
         }
+=======
+         } else {
+
+            // Restore old connection
+
+            jsxc.bid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
+
+            jsxc.gui.init();
+
+            // Looking for logout element
+            if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+               jsxc.options.logoutElement.one('click', function() {
+                  jsxc.options.logoutElement = $(this);
+                  jsxc.triggeredFromLogout = true;
+                  return jsxc.xmpp.logout();
+               });
+            }
+
+            if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
+               jsxc.onMaster();
+            } else {
+               jsxc.checkMaster();
+            }
+         }
+>>>>>>> upstream
       },
 
       /**
        * Load settings and prepare jid.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc
        * @returns Loaded settings
        */
@@ -342,7 +419,11 @@
             return;
          }
 
+<<<<<<< HEAD
          jsxc.gui.showWaitAlert($.t("Logging_in"));
+=======
+         jsxc.gui.showWaitAlert(jsxc.l.Logging_in);
+>>>>>>> upstream
 
          var settings = jsxc.options.loadSettings.call(this, username, password);
 
@@ -356,10 +437,13 @@
             username = settings.xmpp.username;
          }
 
+<<<<<<< HEAD
          if (typeof settings.xmpp.password === 'string') {
             password = settings.xmpp.password;
          }
 
+=======
+>>>>>>> upstream
          var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
          var domain = settings.xmpp.domain;
          var jid;
@@ -514,7 +598,11 @@
 
       /**
        * Generates a random integer number between 0 and max
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {Integer} max
        * @return {Integer} random integer between 0 and max
        */
@@ -524,7 +612,11 @@
 
       /**
        * Checks if there is a element with the given selector
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} selector jQuery selector
        * @return {Boolean}
        */
@@ -534,7 +626,11 @@
 
       /**
        * Creates a CSS compatible string from a JID
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} jid Valid Jabber ID
        * @returns {String} css Compatible string
        */
@@ -548,7 +644,11 @@
 
       /**
        * Create comparable bar jid.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc
        * @param jid
        * @returns comparable bar jid
@@ -648,7 +748,11 @@
 
       /**
        * Executes only one of the given events
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {string} obj.key event name
        * @param {function} obj.value function to execute
        * @returns {string} namespace of all events
@@ -670,7 +774,11 @@
 
       /**
        * Checks if tab is hidden.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @returns {boolean} True if tab is hidden
        */
       isHidden: function() {
@@ -698,14 +806,27 @@
 
       /**
        * Replace %%tokens%% with correct translation.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} text Given text
        * @returns {String} Translated string
        */
       translate: function(text) {
          return text.replace(/%%([a-zA-Z0-9_-}{ .!,?/'@]+)%%/g, function(s, key) {
             var k = key.replace(/ /gi, '_').replace(/[.!,?/'@]/g, '');
+<<<<<<< HEAD
             return $.t(k) || key.replace(/_/g, ' ');
+=======
+
+            if (!jsxc.l[k]) {
+               jsxc.warn('No translation for: ' + k);
+            }
+
+            return jsxc.l[k] || key.replace(/_/g, ' ');
+>>>>>>> upstream
          });
       },
    };
@@ -810,7 +931,11 @@
 
       /**
        * If no avatar is found, this function is called.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param jid Jid of that user.
        * @this {jQuery} Elements to update with probable .jsxc_avatar elements
        */
@@ -832,7 +957,11 @@
 
       /**
        * Call this function to save user settings permanent.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.options
        * @param data Holds all data as key/value
        */
@@ -843,7 +972,11 @@
 
    /**
     * Handle functions for chat window's and buddylist
+<<<<<<< HEAD
     *
+=======
+    * 
+>>>>>>> upstream
     * @namespace jsxc.gui
     */
    jsxc.gui = {
@@ -887,7 +1020,11 @@
 
       /**
        * Creates application skeleton.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.gui
        */
       init: function() {
@@ -927,7 +1064,11 @@
 
       /**
        * Init tooltip plugin for given jQuery selector.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} selector jQuery selector
        * @memberOf jsxc.gui
        */
@@ -944,7 +1085,11 @@
 
       /**
        * Updates Information in roster and chatbar
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid bar jid
        */
       update: function(bid) {
@@ -967,11 +1112,16 @@
          ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
 
          // Change name and add title
+<<<<<<< HEAD
          ue.find('.jsxc_name').add(spot).text(data.name).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
+=======
+         ue.find('.jsxc_name').add(spot).text(data.name).attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
+>>>>>>> upstream
 
          // Update gui according to encryption state
          switch (data.msgstate) {
             case 0:
+<<<<<<< HEAD
                we.find('.jsxc_transfer').removeClass('jsxc_enc jsxc_fin').attr('title', $.t("your_connection_is_unencrypted"));
                we.find('.jsxc_settings .jsxc_verification').addClass('jsxc_disabled');
                we.find('.jsxc_settings .jsxc_transfer').text($.t("start_private"));
@@ -985,12 +1135,31 @@
                we.find('.jsxc_settings .jsxc_verification').addClass('jsxc_disabled');
                we.find('.jsxc_transfer').removeClass('jsxc_enc').addClass('jsxc_fin').attr('title', $.t("your_buddy_closed_the_private_connection"));
                we.find('.jsxc_settings .jsxc_transfer').text($.t("close_private"));
+=======
+               we.find('.jsxc_transfer').removeClass('jsxc_enc jsxc_fin').attr('title', jsxc.l.your_connection_is_unencrypted);
+               we.find('.jsxc_settings .jsxc_verification').addClass('jsxc_disabled');
+               we.find('.jsxc_settings .jsxc_transfer').text(jsxc.l.start_private);
+               break;
+            case 1:
+               we.find('.jsxc_transfer').addClass('jsxc_enc').attr('title', jsxc.l.your_connection_is_encrypted);
+               we.find('.jsxc_settings .jsxc_verification').removeClass('jsxc_disabled');
+               we.find('.jsxc_settings .jsxc_transfer').text(jsxc.l.close_private);
+               break;
+            case 2:
+               we.find('.jsxc_settings .jsxc_verification').addClass('jsxc_disabled');
+               we.find('.jsxc_transfer').removeClass('jsxc_enc').addClass('jsxc_fin').attr('title', jsxc.l.your_buddy_closed_the_private_connection);
+               we.find('.jsxc_settings .jsxc_transfer').text(jsxc.l.close_private);
+>>>>>>> upstream
                break;
          }
 
          // update gui according to verification state
          if (data.trust) {
+<<<<<<< HEAD
             we.find('.jsxc_transfer').addClass('jsxc_trust').attr('title', $.t("your_buddy_is_verificated"));
+=======
+            we.find('.jsxc_transfer').addClass('jsxc_trust').attr('title', jsxc.l.your_buddy_is_verificated);
+>>>>>>> upstream
          } else {
             we.find('.jsxc_transfer').removeClass('jsxc_trust');
          }
@@ -1017,7 +1186,11 @@
 
       /**
        * Update avatar on all given elements.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.gui
        * @param {jQuery} el Elements with subelement .jsxc_avatar
        * @param {string} jid Jid
@@ -1060,8 +1233,11 @@
                if (vCard.length === 0) {
                   jsxc.debug('No photo provided');
                   src = 0;
+<<<<<<< HEAD
                } else if (vCard.find('EXTVAL').length > 0) {
                   src = vCard.find('EXTVAL').text();
+=======
+>>>>>>> upstream
                } else {
                   var img = vCard.find('BINVAL').text();
                   var type = vCard.find('TYPE').text();
@@ -1081,7 +1257,11 @@
 
       /**
        * Updates scrollbar handlers.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.gui
        */
       updateWindowListSB: function() {
@@ -1090,7 +1270,11 @@
             $('#jsxc_windowListSB > div').removeClass('jsxc_disabled');
          } else {
             $('#jsxc_windowListSB > div').addClass('jsxc_disabled');
+<<<<<<< HEAD
             $('#jsxc_windowList>ul').css('right', '12px');
+=======
+            $('#jsxc_windowList>ul').css('right', '0px');
+>>>>>>> upstream
          }
       },
 
@@ -1125,7 +1309,11 @@
 
       /**
        * Returns the window element
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid
        * @returns {jquery} jQuery object of the window element
        */
@@ -1137,14 +1325,22 @@
 
       /**
        * Toggle list with timeout, like menu or settings
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberof jsxc.gui
        */
       toggleList: function() {
          var self = $(this);
 
+<<<<<<< HEAD
          // NOTE: disableSelection is deprecated
          //self.disableSelection();
+=======
+         self.disableSelection();
+>>>>>>> upstream
 
          var ul = self.find('ul');
          var slideUp = null;
@@ -1219,7 +1415,11 @@
 
       /**
        * Creates and show the fingerprint dialog
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid
        */
       showFingerprints: function(bid) {
@@ -1228,7 +1428,11 @@
 
       /**
        * Creates and show the verification dialog
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid
        */
       showVerification: function(bid) {
@@ -1272,7 +1476,11 @@
             jsxc.gui.dialog.close();
 
             jsxc.storage.updateUserItem('buddy', bid, 'trust', true);
+<<<<<<< HEAD
             jsxc.gui.window.postMessage(bid, 'sys', $.t("conversation_is_now_verified"));
+=======
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.conversation_is_now_verified);
+>>>>>>> upstream
             jsxc.gui.update(bid);
          });
 
@@ -1303,7 +1511,11 @@
 
             jsxc.gui.dialog.close();
 
+<<<<<<< HEAD
             jsxc.gui.window.postMessage(bid, 'sys', $.t("authentication_query_sent"));
+=======
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_query_sent);
+>>>>>>> upstream
          });
 
          // Secret
@@ -1332,13 +1544,21 @@
 
             jsxc.gui.dialog.close();
 
+<<<<<<< HEAD
             jsxc.gui.window.postMessage(bid, 'sys', $.t("authentication_query_sent"));
+=======
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_query_sent);
+>>>>>>> upstream
          });
       },
 
       /**
        * Create and show approve dialog
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} from valid jid
        */
       showApproveDialog: function(from) {
@@ -1359,16 +1579,28 @@
          $('#jsxc_dialog .jsxc_approve').click(function(ev) {
             ev.stopPropagation();
 
+<<<<<<< HEAD
             //var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
+=======
+            var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
+>>>>>>> upstream
 
             jsxc.xmpp.resFriendReq(from, true);
 
             // If friendship is not mutual show contact dialog
+<<<<<<< HEAD
             /*if (!data || data.sub === 'from') {
                $(document).one('close.dialog.jsxc', function() {
                   jsxc.gui.showContactDialog(from);
                });
             }*/
+=======
+            if (!data || data.sub === 'from') {
+               $(document).one('close.dialog.jsxc', function() {
+                  jsxc.gui.showContactDialog(from);
+               });
+            }
+>>>>>>> upstream
 
             jsxc.gui.dialog.close();
          });
@@ -1376,7 +1608,11 @@
 
       /**
        * Create and show dialog to add a buddy
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {string} [username] jabber id
        */
       showContactDialog: function(username) {
@@ -1416,7 +1652,11 @@
 
       /**
        * Create and show dialog to remove a buddy
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        * @returns {undefined}
        */
@@ -1444,7 +1684,11 @@
 
       /**
        * Create and show a wait dialog
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} msg message to display to the user
        * @returns {undefined}
        */
@@ -1456,7 +1700,11 @@
 
       /**
        * Create and show a wait dialog
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} msg message to display to the user
        * @returns {undefined}
        */
@@ -1466,7 +1714,11 @@
 
       /**
        * Create and show a auth fail dialog
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @returns {undefined}
        */
       showAuthFail: function() {
@@ -1487,7 +1739,11 @@
 
       /**
        * Create and show a confirm dialog
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} msg Message
        * @param {function} confirm
        * @param {function} dismiss
@@ -1509,7 +1765,11 @@
 
       /**
        * Show about dialog.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.gui
        */
       showAboutDialog: function() {
@@ -1522,7 +1782,11 @@
 
       /**
        * Show debug log.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.gui
        */
       showDebugLog: function() {
@@ -1549,7 +1813,11 @@
 
       /**
        * Show vCard of user with the given bar jid.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.gui
        * @param {String} jid
        */
@@ -1663,10 +1931,13 @@
                var type = photo.find('TYPE').text();
                var src = 'data:' + type + ';base64,' + img;
 
+<<<<<<< HEAD
                if (photo.find('EXTVAL').length > 0) {
                   src = photo.find('EXTVAL').text();
                }
 
+=======
+>>>>>>> upstream
                $('#jsxc_dialog h3').before('&lt;img class="jsxc_vCard" src="' + src + '" alt="avatar" />');
             }
 
@@ -1739,6 +2010,7 @@
                jsxc.options.set(key, val);
             });
 
+<<<<<<< HEAD
             jsxc.options.saveSettinsPermanent.call(this, data);
 
             // TODO find replacement or enable jquery ui again
@@ -1747,6 +2019,15 @@
             //      color: (err) ? 'green' : 'red'
             //   }, 4000);
             //}, 200);
+=======
+            var err = jsxc.options.saveSettinsPermanent.call(this, data);
+
+            setTimeout(function() {
+               self.find('input[type="submit"]').effect('highlight', {
+                  color: (err) ? 'green' : 'red'
+               }, 4000);
+            }, 200);
+>>>>>>> upstream
 
             return false;
          });
@@ -1754,7 +2035,11 @@
 
       /**
        * Show prompt for notification permission.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.gui
        */
       showRequestNotification: function() {
@@ -1792,7 +2077,11 @@
 
       /**
        * Change own presence to pres.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.gui
        * @param pres {CONST.STATUS} New presence state
        * @param external {boolean} True if triggered from other tab.
@@ -1814,7 +2103,11 @@
 
       /**
        * Update all presence objects for given user.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.gui
        * @param bid bar jid of user.
        * @param {CONST.STATUS} pres New presence state.
@@ -1951,14 +2244,22 @@
 
    /**
     * Handle functions related to the gui of the roster
+<<<<<<< HEAD
     *
+=======
+    * 
+>>>>>>> upstream
     * @namespace jsxc.gui.roster
     */
    jsxc.gui.roster = {
 
       /**
        * Init the roster skeleton
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.gui.roster
        * @returns {undefined}
        */
@@ -2008,9 +2309,15 @@
             }
          });
 
+<<<<<<< HEAD
          /*$('#jsxc_roster .jsxc_addBuddy').click(function() {
             jsxc.gui.showContactDialog();
          });*/
+=======
+         $('#jsxc_roster .jsxc_addBuddy').click(function() {
+            jsxc.gui.showContactDialog();
+         });
+>>>>>>> upstream
 
          $('#jsxc_roster .jsxc_onlineHelp').click(function() {
             window.open("http://www.jsxc.org/manual.html", "onlineHelp");
@@ -2044,12 +2351,16 @@
 
          if (jsxc.storage.getUserItem('roster') === 'hidden') {
             $('#jsxc_roster').css('right', '-200px');
+<<<<<<< HEAD
             $('#jsxc_windowList > ul').css('paddingRight', '22px');
             $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-left');
             $('body > .container').addClass('chat-roster-hidden');
          } else {
             $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-right');
             $('body > .container').addClass('chat-roster-shown');
+=======
+            $('#jsxc_windowList > ul').css('paddingRight', '10px');
+>>>>>>> upstream
          }
 
          var pres = jsxc.storage.getUserItem('presence') || 'online';
@@ -2069,7 +2380,11 @@
 
       /**
        * Create roster item and add it to the roster
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid bar jid
        */
       add: function(bid) {
@@ -2130,7 +2445,11 @@
       /**
        * Insert roster item. First order: online > away > offline. Second order:
        * alphabetical of the name
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        * @param {jquery} li roster item which should be insert
        * @returns {undefined}
@@ -2164,7 +2483,11 @@
 
       /**
        * Initiate reorder of roster item
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        * @returns {undefined}
        */
@@ -2174,7 +2497,11 @@
 
       /**
        * Removes buddy from roster
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid bar jid
        * @return {JQueryObject} Roster list element
        */
@@ -2184,7 +2511,11 @@
 
       /**
        * Removes buddy from roster and clean up
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid bar compatible jid
        */
       purge: function(bid) {
@@ -2204,7 +2535,11 @@
 
       /**
        * Create input element for rename action
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        * @returns {undefined}
        */
@@ -2243,7 +2578,11 @@
 
       /**
        * Rename buddy
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        * @param {type} newname new name of buddy
        * @returns {undefined}
@@ -2268,7 +2607,11 @@
 
       /**
        * Toogle complete roster
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {Integer} d Duration in ms
        */
       toggle: function(d) {
@@ -2280,6 +2623,7 @@
          var roster_width = roster.innerWidth();
          var roster_right = parseFloat($('#jsxc_roster').css('right'));
          var state = (roster_right &lt; 0) ? 'shown' : 'hidden';
+<<<<<<< HEAD
          var iconToDisplay = (roster_right &lt; 0) ? 'right' : 'left';
 
          jsxc.storage.setUserItem('roster', state);
@@ -2289,6 +2633,11 @@
          // set class of the diaspora* container
          $('body > .container').removeClass('chat-roster-shown chat-roster-hidden')
                                .addClass('chat-roster-'+state);
+=======
+
+         jsxc.storage.setUserItem('roster', state);
+
+>>>>>>> upstream
          roster.animate({
             right: ((roster_width + roster_right) * -1) + 'px'
          }, duration);
@@ -2297,7 +2646,10 @@
          }, duration);
 
          $(document).trigger('toggle.roster.jsxc', [ state, duration ]);
+<<<<<<< HEAD
          $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-' + iconToDisplay);
+=======
+>>>>>>> upstream
       },
 
       /**
@@ -2307,11 +2659,18 @@
          $('#jsxc_roster .slimScrollDiv').remove();
          $('#jsxc_roster > .jsxc_bottom').remove();
 
+<<<<<<< HEAD
          $('#jsxc_roster').append($(jsxc.gui.template.get('loginForm')));
+=======
+         $('#jsxc_roster').append($('&lt;p>' + jsxc.l.no_connection + '&lt;/p>').append(' &lt;a>' + jsxc.l.relogin + '&lt;/a>').click(function() {
+            jsxc.gui.showLoginBox();
+         }));
+>>>>>>> upstream
       },
 
       /**
        * Shows a text with link to add a new buddy.
+<<<<<<< HEAD
        *
        * @memberOf jsxc.gui.roster
        */
@@ -2322,6 +2681,18 @@
          //link.click(function() {
          //   jsxc.gui.showContactDialog();
          //});
+=======
+       * 
+       * @memberOf jsxc.gui.roster
+       */
+      empty: function() {
+         var text = $('&lt;p>' + jsxc.l.Your_roster_is_empty_add_a + '&lt;/p>');
+         var link = $('&lt;a>' + jsxc.l.new_buddy + '&lt;/a>');
+
+         link.click(function() {
+            jsxc.gui.showContactDialog();
+         });
+>>>>>>> upstream
          text.append(link);
          text.append('.');
 
@@ -2331,13 +2702,21 @@
 
    /**
     * Wrapper for dialog
+<<<<<<< HEAD
     *
+=======
+    * 
+>>>>>>> upstream
     * @namespace jsxc.gui.dialog
     */
    jsxc.gui.dialog = {
       /**
        * Open a Dialog.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.gui.dialog
        * @param {String} data Data of the dialog
        * @param {Object} [o] Options for the dialog
@@ -2402,7 +2781,11 @@
 
       /**
        * Resizes current dialog.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {Object} options e.g. width and height
        */
       resize: function(options) {
@@ -2412,13 +2795,21 @@
 
    /**
     * Handle functions related to the gui of the window
+<<<<<<< HEAD
     *
+=======
+    * 
+>>>>>>> upstream
     * @namespace jsxc.gui.window
     */
    jsxc.gui.window = {
       /**
        * Init a window skeleton
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.gui.window
        * @param {String} bid
        * @returns {jQuery} Window object
@@ -2506,10 +2897,15 @@
 
          win.find('.jsxc_fade').hide();
 
+<<<<<<< HEAD
          // NOTE: disableSelection is deprecated
          //win.find('.jsxc_name').disableSelection();
 
          /* NOTE: no jquery-ui available
+=======
+         win.find('.jsxc_name').disableSelection();
+
+>>>>>>> upstream
          win.find('.slimScrollDiv').resizable({
             handles: 'w, nw, n',
             minHeight: 234,
@@ -2521,7 +2917,11 @@
                });
                win.find('.jsxc_emoticons').css('top', (ui.size.height + 6) + 'px');
             }
+<<<<<<< HEAD
          });*/
+=======
+         });
+>>>>>>> upstream
 
          if ($.inArray(bid, jsxc.storage.getUserItem('windowlist')) &lt; 0) {
 
@@ -2575,7 +2975,11 @@
 
       /**
        * Returns the window element
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid
        * @returns {jquery} jQuery object of the window element
        */
@@ -2586,7 +2990,11 @@
       /**
        * Open a window, related to the bid. If the window doesn't exist, it will
        * be created.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid
        * @returns {jQuery} Window object
        */
@@ -2620,7 +3028,11 @@
 
       /**
        * Close chatwindow and clean up
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid bar jid
        */
       close: function(bid) {
@@ -2645,7 +3057,11 @@
 
       /**
        * Close chatwindow
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid
        */
       _close: function(bid) {
@@ -2658,7 +3074,11 @@
 
       /**
        * Toggle between minimize and maximize of the text area
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid bar jid
        */
       toggle: function(bid) {
@@ -2680,7 +3100,11 @@
 
       /**
        * Maximize text area and save
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid
        */
       show: function(bid) {
@@ -2692,7 +3116,11 @@
 
       /**
        * Maximize text area
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid
        * @returns {undefined}
        */
@@ -2714,7 +3142,11 @@
 
       /**
        * Minimize text area and save
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid
        */
       hide: function(bid) {
@@ -2725,7 +3157,11 @@
 
       /**
        * Minimize text area
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid
        */
       _hide: function(bid) {
@@ -2736,23 +3172,37 @@
 
       /**
        * Highlight window
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        */
       highlight: function(bid) {
          var el = jsxc.gui.window.get(bid).find(' .jsxc_bar');
 
          if (!el.is(':animated')) {
+<<<<<<< HEAD
             // TODO find replacement or enable jquery ui again
             //el.effect('highlight', {
             //   color: 'orange'
             //}, 2000);
+=======
+            el.effect('highlight', {
+               color: 'orange'
+            }, 2000);
+>>>>>>> upstream
          }
       },
 
       /**
        * Scroll chat area to the bottom
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid bar jid
        */
       scrollDown: function(bid) {
@@ -2770,7 +3220,11 @@
 
       /**
        * Write Message to chat area and save
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid bar jid
        * @param {String} direction 'in' message is received or 'out' message is
        *        send
@@ -2788,17 +3242,29 @@
 
          if (direction === 'out' && data.msgstate === 2) {
             direction = 'sys';
+<<<<<<< HEAD
             msg = $.t("your_message_wasnt_send_please_end_your_private_conversation");
+=======
+            msg = jsxc.l.your_message_wasnt_send_please_end_your_private_conversation;
+>>>>>>> upstream
          }
 
          if (direction === 'in' && data.msgstate === 2) {
             direction = 'sys';
+<<<<<<< HEAD
             msg = $.t("unencrypted_message_received") + ' ' + msg;
+=======
+            msg = jsxc.l.unencrypted_message_received + ' ' + msg;
+>>>>>>> upstream
          }
 
          if (direction === 'out' && data.sub === 'from') {
             direction = 'sys';
+<<<<<<< HEAD
             msg = $.t("your_message_wasnt_send_because_you_have_no_valid_subscription");
+=======
+            msg = jsxc.l.your_message_wasnt_send_because_you_have_no_valid_subscription;
+>>>>>>> upstream
          }
 
          var post = jsxc.storage.saveMessage(bid, direction, msg);
@@ -2820,7 +3286,11 @@
 
       /**
        * Write Message to chat area
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} bid bar jid
        * @param {Object} post Post object with direction, msg, uid, received
        * @param {Bool} restore If true no highlights are used and so unread flag
@@ -2898,7 +3368,11 @@
 
       /**
        * Set text into input area
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        * @param {type} text
        * @returns {undefined}
@@ -2909,7 +3383,11 @@
 
       /**
        * Load old log into chat area
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        * @returns {undefined}
        */
@@ -2924,7 +3402,11 @@
 
       /**
        * Clear chat history
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        * @returns {undefined}
        */
@@ -2936,13 +3418,21 @@
 
    /**
     * Hold all HTML templates.
+<<<<<<< HEAD
     *
+=======
+    * 
+>>>>>>> upstream
     * @namespace jsxc.gui.template
     */
    jsxc.gui.template = {
       /**
        * Return requested template and replace all placeholder
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.gui.template;
        * @param {type} name template name
        * @param {type} bid
@@ -2953,7 +3443,11 @@
 
          // common placeholder
          var ph = {
+<<<<<<< HEAD
             my_priv_fingerprint: jsxc.storage.getUserItem('priv_fingerprint') ? jsxc.storage.getUserItem('priv_fingerprint').replace(/(.{8})/g, '$1 ') : $.t("not_available"),
+=======
+            my_priv_fingerprint: jsxc.storage.getUserItem('priv_fingerprint') ? jsxc.storage.getUserItem('priv_fingerprint').replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
+>>>>>>> upstream
             my_jid: jsxc.storage.getItem('jid') || '',
             my_node: Strophe.getNodeFromJid(jsxc.storage.getItem('jid') || '') || '',
             root: jsxc.options.root,
@@ -2965,7 +3459,11 @@
             var data = jsxc.storage.getUserItem('buddy', bid);
 
             $.extend(ph, {
+<<<<<<< HEAD
                bid_priv_fingerprint: (data && data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : $.t("not_available"),
+=======
+               bid_priv_fingerprint: (data && data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
+>>>>>>> upstream
                bid_jid: bid,
                bid_name: (data && data.name) ? data.name : bid
             });
@@ -2993,9 +3491,12 @@
          jsxc.debug('Template not available: ' + name);
          return name;
       },
+<<<<<<< HEAD
       loginForm: '&lt;form id="jsxc_loginForm">\
         &lt;input type="submit" value="%%Login%%"/>\
         &lt;/form>',
+=======
+>>>>>>> upstream
       authenticationDialog: '&lt;h3>Verification&lt;/h3>\
             &lt;p>%%Authenticating_a_buddy_helps_%%&lt;/p>\
             &lt;div>\
@@ -3094,9 +3595,13 @@
                  &lt;/ul>\
               &lt;/div>\
            &lt;/div>\
+<<<<<<< HEAD
            &lt;div id="jsxc_toggleRoster">\
               &lt;span id="jsxc_toggleRoster_text">&lt;/span>\
            &lt;/div>\
+=======
+           &lt;div id="jsxc_toggleRoster">&lt;/div>\
+>>>>>>> upstream
        &lt;/div>',
       windowList: '&lt;div id="jsxc_windowList">\
                &lt;ul>&lt;/ul>\
@@ -3148,7 +3653,11 @@
         &lt;p class="jsxc_right">&lt;a href="#" class="button jsxc_cancel jsxc_close">%%Cancel%%&lt;/a> &lt;a href="#" class="button creation">%%Remove%%&lt;/a>&lt;/p>',
       waitAlert: '&lt;h3>{{msg}}&lt;/h3>\
         &lt;p>%%Please_wait%%&lt;/p>\
+<<<<<<< HEAD
         &lt;div class="jsxc_loading" />',
+=======
+        &lt;p class="jsxc_center">&lt;img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" />&lt;/p>',
+>>>>>>> upstream
       alert: '&lt;h3>%%Alert%%&lt;/h3>\
         &lt;p>{{msg}}&lt;/p>\
         &lt;p class="jsxc_right">&lt;a href="#" class="button jsxc_close jsxc_cancel">%%Ok%%&lt;/a>&lt;/p>',
@@ -3178,7 +3687,11 @@
          &lt;p class="jsxc_right">&lt;a class="button jsxc_debuglog" href="#">Show debug log&lt;/a>&lt;/p>',
       vCard: '&lt;h3>%%Info_about%% {{bid_name}}&lt;/h3>\
          &lt;ul class="jsxc_vCard">&lt;/ul>\
+<<<<<<< HEAD
          &lt;div class="jsxc_loading" /> %%Please_wait%%...&lt;/p>',
+=======
+         &lt;p>&lt;img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...&lt;/p>',
+>>>>>>> upstream
       settings: '&lt;h3>%%User_settings%%&lt;/h3>\
          &lt;p>&lt;/p>\
          &lt;form>\
@@ -3208,7 +3721,11 @@
 
    /**
     * Handle XMPP stuff.
+<<<<<<< HEAD
     *
+=======
+    * 
+>>>>>>> upstream
     * @namespace jsxc.xmpp
     */
    jsxc.xmpp = {
@@ -3216,7 +3733,11 @@
 
       /**
        * Create new connection or attach to old
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.xmpp
        */
       login: function() {
@@ -3296,7 +3817,11 @@
 
       /**
        * Logs user out of his xmpp session and does some clean up.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @returns {Boolean}
        */
       logout: function() {
@@ -3362,7 +3887,11 @@
 
       /**
        * Triggered if connection is established
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @private
        */
       connected: function() {
@@ -3403,7 +3932,11 @@
 
       /**
        * Triggered if connection is attached
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @private
        */
       attached: function() {
@@ -3481,7 +4014,11 @@
 
       /**
        * Triggered if lost connection
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @private
        */
       disconnected: function() {
@@ -3500,6 +4037,13 @@
 
          if (jsxc.triggeredFromElement) {
             $('#jsxc_roster').remove();
+<<<<<<< HEAD
+=======
+
+            if (jsxc.triggeredFromLogout) {
+               window.location = jsxc.options.logoutElement.attr('href');
+            }
+>>>>>>> upstream
          } else {
             jsxc.gui.roster.noConnection();
          }
@@ -3509,7 +4053,11 @@
 
       /**
        * Triggered on connection fault
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} condition information why we lost the connection
        * @private
        */
@@ -3523,7 +4071,11 @@
 
       /**
        * Triggered on initial roster load
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {dom} iq
        * @private
        */
@@ -3570,7 +4122,11 @@
 
       /**
        * Triggerd on roster changes
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {dom} iq
        * @returns {Boolean} True to preserve handler
        * @private
@@ -3644,19 +4200,31 @@
 
       /**
        * Triggered on incoming presence stanzas
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {dom} presence
        * @private
        */
       onPresence: function(presence) {
          /*
           * &lt;presence xmlns='jabber:client' type='unavailable' from='' to=''/>
+<<<<<<< HEAD
           *
+=======
+          * 
+>>>>>>> upstream
           * &lt;presence xmlns='jabber:client' from='' to=''> &lt;priority>5&lt;/priority>
           * &lt;c xmlns='http://jabber.org/protocol/caps'
           * node='http://psi-im.org/caps' ver='caps-b75d8d2b25' ext='ca cs
           * ep-notify-2 html'/> &lt;/presence>
+<<<<<<< HEAD
           *
+=======
+          * 
+>>>>>>> upstream
           * &lt;presence xmlns='jabber:client' from='' to=''> &lt;show>chat&lt;/show>
           * &lt;status>&lt;/status> &lt;priority>5&lt;/priority> &lt;c
           * xmlns='http://jabber.org/protocol/caps'
@@ -3668,6 +4236,11 @@
          var ptype = $(presence).attr('type');
          var from = $(presence).attr('from');
          var jid = Strophe.getBareJidFromJid(from).toLowerCase();
+<<<<<<< HEAD
+=======
+         var to = $(presence).attr('to');
+         to = (to) ? Strophe.getBareJidFromJid(to).toLowerCase() : jid;
+>>>>>>> upstream
          var r = Strophe.getResourceFromJid(from);
          var bid = jsxc.jidToBid(jid);
          var data = jsxc.storage.getUserItem('buddy', bid);
@@ -3675,7 +4248,11 @@
          var status = null;
          var xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
 
+<<<<<<< HEAD
          if (jid === Strophe.getBareJidFromJid(jsxc.storage.getItem("jid"))) {
+=======
+         if (jid === to) {
+>>>>>>> upstream
             return true;
          }
 
@@ -3764,7 +4341,11 @@
 
       /**
        * Triggered on incoming message stanzas
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {dom} presence
        * @returns {Boolean}
        * @private
@@ -3847,7 +4428,11 @@
 
       /**
        * Triggerd if the rid changed
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {event} ev
        * @param {obejct} data
        * @private
@@ -3858,7 +4443,11 @@
 
       /**
        * response to friendship request
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {string} from jid from original friendship req
        * @param {boolean} approve
        */
@@ -3879,7 +4468,11 @@
 
       /**
        * Add buddy to my friends
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {string} username jid
        * @param {string} alias
        */
@@ -3915,7 +4508,11 @@
 
       /**
        * Remove buddy from my friends
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} jid
        */
       removeBuddy: function(jid) {
@@ -3963,7 +4560,11 @@
 
       /**
        * Public function to send message.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.xmpp
        * @param bid css jid of user
        * @param msg message
@@ -3979,7 +4580,11 @@
 
       /**
        * Create message stanza and send it.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.xmpp
        * @param jid Jabber id
        * @param msg Message
@@ -4056,13 +4661,21 @@
 
    /**
     * Handle long-live data
+<<<<<<< HEAD
     *
+=======
+    * 
+>>>>>>> upstream
     * @namespace jsxc.storage
     */
    jsxc.storage = {
       /**
        * Prefix for localstorage
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @privat
        */
       PREFIX: 'jsxc',
@@ -4082,7 +4695,11 @@
 
       /**
        * Save item to storage
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @function
        * @param {String} key variablename
        * @param {Object} value value
@@ -4128,7 +4745,11 @@
 
       /**
        * Load item from storage
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @function
        * @param {String} key variablename
        * @param {String} uk Userkey? Should we add the bid as prefix?
@@ -4146,7 +4767,11 @@
 
       /**
        * Get a user item from storage.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param key
        * @returns user item
        */
@@ -4164,7 +4789,11 @@
 
       /**
        * Remove item from storage
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @function
        * @param {String} key variablename
        * @param {String} uk Userkey? Should we add the bid as prefix?
@@ -4184,7 +4813,11 @@
 
       /**
        * Remove user item from storage.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param key
        */
       removeUserItem: function(type, key) {
@@ -4201,7 +4834,11 @@
 
       /**
        * Updates value of a variable in a saved object.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @function
        * @param {String} key variablename
        * @param {String|object} variable variablename in object or object with
@@ -4235,7 +4872,11 @@
 
       /**
        * Updates value of a variable in a saved user object.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {String} key variablename
        * @param {String|object} variable variablename in object or object with
        *        variable/key pairs
@@ -4257,7 +4898,11 @@
 
       /**
        * Inkrements value
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @function
        * @param {String} key variablename
        * @param {String} uk Userkey? Should we add the bid as prefix?
@@ -4269,7 +4914,11 @@
 
       /**
        * Remove element from array or object
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {string} key name of array or object
        * @param {string} name name of element in array or object
        * @param {String} uk Userkey? Should we add the bid as prefix?
@@ -4304,7 +4953,11 @@
 
       /**
        * Triggered if changes are recognized
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @function
        * @param {event} e Storageevent
        * @param {String} e.key Keyname which triggered event
@@ -4551,11 +5204,19 @@
             }
          }
 
+<<<<<<< HEAD
          /*if (jsxc.master && key.match(new RegExp('^add' + jsxc.storage.SEP))) {
             n = JSON.parse(e.newValue);
 
             jsxc.xmpp.addBuddy(n.username, n.alias);
          }*/
+=======
+         if (jsxc.master && key.match(new RegExp('^add' + jsxc.storage.SEP))) {
+            n = JSON.parse(e.newValue);
+
+            jsxc.xmpp.addBuddy(n.username, n.alias);
+         }
+>>>>>>> upstream
 
          if (key === 'roster') {
             jsxc.gui.roster.toggle();
@@ -4660,7 +5321,11 @@
       dsaFallback: null,
       /**
        * Handler for otr receive event
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.otr
        * @param {string} bid
        * @param {string} msg received message
@@ -4681,7 +5346,11 @@
 
       /**
        * Handler for otr send event
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {string} jid
        * @param {string} msg message to be send
        */
@@ -4695,7 +5364,11 @@
 
       /**
        * Create new otr instance
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        * @returns {undefined}
        */
@@ -4735,13 +5408,21 @@
 
             switch (status) {
                case OTR.CONST.STATUS_SEND_QUERY:
+<<<<<<< HEAD
                   jsxc.gui.window.postMessage(bid, 'sys', $.t("trying_to_start_private_conversation"));
+=======
+                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.trying_to_start_private_conversation);
+>>>>>>> upstream
                   break;
                case OTR.CONST.STATUS_AKE_SUCCESS:
                   data.fingerprint = jsxc.otr.objects[bid].their_priv_pk.fingerprint();
                   data.msgstate = OTR.CONST.MSGSTATE_ENCRYPTED;
 
+<<<<<<< HEAD
                   var msg = (jsxc.otr.objects[bid].trust ? $.t("Verified") : $.t("Unverified")) + ' ' + $.t("private_conversation_started");
+=======
+                  var msg = (jsxc.otr.objects[bid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started;
+>>>>>>> upstream
                   jsxc.gui.window.postMessage(bid, 'sys', msg);
                   break;
                case OTR.CONST.STATUS_END_OTR:
@@ -4751,13 +5432,21 @@
                      // we abort the private conversation
 
                      data.msgstate = OTR.CONST.MSGSTATE_PLAINTEXT;
+<<<<<<< HEAD
                      jsxc.gui.window.postMessage(bid, 'sys', $.t("private_conversation_aborted"));
+=======
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.private_conversation_aborted);
+>>>>>>> upstream
 
                   } else {
                      // the buddy abort the private conversation
 
                      data.msgstate = OTR.CONST.MSGSTATE_FINISHED;
+<<<<<<< HEAD
                      jsxc.gui.window.postMessage(bid, 'sys', $.t("your_buddy_closed_the_private_conversation_you_should_do_the_same"));
+=======
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.your_buddy_closed_the_private_conversation_you_should_do_the_same);
+>>>>>>> upstream
                   }
                   break;
                case OTR.CONST.STATUS_SMP_HANDLE:
@@ -4774,7 +5463,11 @@
          jsxc.otr.objects[bid].on('smp', function(type, data) {
             switch (type) {
                case 'question': // verification request received
+<<<<<<< HEAD
                   jsxc.gui.window.postMessage(bid, 'sys', $.t("Authentication_request_received"));
+=======
+                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.Authentication_request_received);
+>>>>>>> upstream
 
                   if ($('#jsxc_dialog').length > 0) {
                      jsxc.otr.objects[bid].sm.abort();
@@ -4794,15 +5487,25 @@
                   jsxc.gui.update(bid);
 
                   if (data) {
+<<<<<<< HEAD
                      jsxc.gui.window.postMessage(bid, 'sys', $.t("conversation_is_now_verified"));
                   } else {
                      jsxc.gui.window.postMessage(bid, 'sys', $.t("authentication_failed"));
+=======
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.conversation_is_now_verified);
+                  } else {
+                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_failed);
+>>>>>>> upstream
                   }
                   jsxc.storage.removeUserItem('smp_' + bid);
                   jsxc.gui.dialog.close();
                   break;
                case 'abort':
+<<<<<<< HEAD
                   jsxc.gui.window.postMessage(bid, 'sys', $.t("Authentication_aborted"));
+=======
+                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.Authentication_aborted);
+>>>>>>> upstream
                   break;
                default:
                   jsxc.debug('[OTR] sm callback: Unknown type: ' + type);
@@ -4837,7 +5540,11 @@
 
       /**
        * show verification dialog with related part (secret or question)
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        * @param {string} [data]
        * @returns {undefined}
@@ -4851,9 +5558,15 @@
          if (data) {
             $('#jsxc_dialog > div:eq(2)').find('#jsxc_quest').val(data).prop('disabled', true);
             $('#jsxc_dialog > div:eq(2)').find('.creation').text('Answer');
+<<<<<<< HEAD
             $('#jsxc_dialog > div:eq(2)').find('.jsxc_explanation').text($.t("your_buddy_is_attempting_to_determine_") + ' ' + $.t("to_authenticate_to_your_buddy") + $.t("enter_the_answer_and_click_answer"));
          } else {
             $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text($.t("your_buddy_is_attempting_to_determine_") + ' ' + $.t("to_authenticate_to_your_buddy") + $.t("enter_the_secret"));
+=======
+            $('#jsxc_dialog > div:eq(2)').find('.jsxc_explanation').text(jsxc.l.your_buddy_is_attempting_to_determine_ + ' ' + jsxc.l.to_authenticate_to_your_buddy + jsxc.l.enter_the_answer_and_click_answer);
+         } else {
+            $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text(jsxc.l.your_buddy_is_attempting_to_determine_ + ' ' + jsxc.l.to_authenticate_to_your_buddy + jsxc.l.enter_the_secret);
+>>>>>>> upstream
          }
 
          $('#jsxc_dialog .jsxc_close').click(function() {
@@ -4867,7 +5580,11 @@
 
       /**
        * Send verification request to buddy
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {string} bid
        * @param {string} sec secret
        * @param {string} [quest] question
@@ -4881,7 +5598,11 @@
 
       /**
        * Toggle encryption state
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        * @returns {undefined}
        */
@@ -4895,7 +5616,11 @@
 
       /**
        * Send request to encrypt the session
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        * @returns {undefined}
        */
@@ -4909,7 +5634,11 @@
 
       /**
        * Abort encryptet session
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {type} bid
        * @param cb callback
        * @returns {undefined}
@@ -4927,7 +5656,11 @@
 
       /**
        * Backups otr session
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {string} bid
        */
       backup: function(bid) {
@@ -4959,7 +5692,11 @@
 
       /**
        * Restore old otr session
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {string} bid
        */
       restore: function(bid) {
@@ -4994,7 +5731,11 @@
 
       /**
        * Create or load DSA key
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @returns {unresolved}
        */
       createDSA: function() {
@@ -5003,18 +5744,30 @@
          }
 
          if (jsxc.storage.getUserItem('key') === null) {
+<<<<<<< HEAD
             var msg = $.t("Creating_your_private_key_");
+=======
+            var msg = jsxc.l.Creating_your_private_key_;
+>>>>>>> upstream
             var worker = null;
 
             if (Worker) {
                // try to create web-worker
 
+<<<<<<< HEAD
                /* NOTE: static files are not available
                try {
                   worker = new Worker('/javascripts/otr/dsa-webworker.js');
                } catch (err) {
                   jsxc.warn('Couldn\'t create web-worker.', err);
                }*/
+=======
+               try {
+                  worker = new Worker(jsxc.options.root + '/lib/otr/build/dsa-webworker.js');
+               } catch (err) {
+                  jsxc.warn('Couldn\'t create web-worker.', err);
+               }
+>>>>>>> upstream
             }
 
             jsxc.otr.dsaFallback = (worker === null);
@@ -5037,7 +5790,11 @@
 
                // start worker
                worker.postMessage({
+<<<<<<< HEAD
                   imports: [],
+=======
+                  imports: [ jsxc.options.root + '/lib/otr/vendor/salsa20.js', jsxc.options.root + '/lib/otr/vendor/bigint.js', jsxc.options.root + '/lib/otr/vendor/crypto.js', jsxc.options.root + '/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/lib/otr/lib/const.js', jsxc.options.root + '/lib/otr/lib/helpers.js', jsxc.options.root + '/lib/otr/lib/dsa.js' ],
+>>>>>>> upstream
                   seed: BigInt.getSeed(),
                   debug: true
                });
@@ -5079,7 +5836,11 @@
 
       /**
        * Ending of DSA key generation.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @param {DSA} dsa DSA object
        */
       DSAready: function(dsa) {
@@ -5105,7 +5866,11 @@
 
    /**
     * This namespace handles the Notification API.
+<<<<<<< HEAD
     *
+=======
+    * 
+>>>>>>> upstream
     * @namespace jsxc.notification
     */
    jsxc.notification = {
@@ -5115,7 +5880,11 @@
 
       /**
        * Register notification on incoming messages.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.notification
        */
       init: function() {
@@ -5178,7 +5947,11 @@
       /**
        * Checks if browser has support for notifications and add on chrome to
        * the default api.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @returns {Boolean} True if the browser has support.
        */
       hasSupport: function() {
@@ -5266,7 +6039,11 @@
 
       /**
        * Check permission.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @returns {Boolean} True if we have the permission
        */
       hasPermission: function() {
@@ -5275,7 +6052,11 @@
 
       /**
        * Plays the given file.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.notification
        * @param {string} soundFile File relative to the sound directory
        * @param {boolean} loop True for loop
@@ -5309,7 +6090,11 @@
 
       /**
        * Stop/remove current sound.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.notification
        */
       stopSound: function() {
@@ -5323,7 +6108,11 @@
 
       /**
        * Mute sound.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.notification
        * @param {boolean} external True if triggered from external tab. Default:
        *        false.
@@ -5338,7 +6127,11 @@
 
       /**
        * Unmute sound.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.notification
        * @param {boolean} external True if triggered from external tab. Default:
        *        false.
@@ -5354,7 +6147,11 @@
 
    /**
     * This namespace handle the notice system.
+<<<<<<< HEAD
     *
+=======
+    * 
+>>>>>>> upstream
     * @namspace jsxc.notice
     * @memberOf jsxc
     */
@@ -5364,7 +6161,11 @@
 
       /**
        * Loads the saved notices.
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.notice
        */
       load: function() {
@@ -5387,7 +6188,11 @@
 
       /**
        * Add a new notice to the stack;
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.notice
        * @param msg Header message
        * @param description Notice description
@@ -5440,7 +6245,11 @@
 
       /**
        * Removes notice from stack
+<<<<<<< HEAD
        *
+=======
+       * 
+>>>>>>> upstream
        * @memberOf jsxc.notice
        * @param nid The notice id
        */
@@ -5455,6 +6264,463 @@
          jsxc.storage.setUserItem('notices', s);
       }
    };
+<<<<<<< HEAD
+=======
+
+   /**
+    * Contains all available translations
+    * 
+    * @namespace jsxc.l10n
+    * @memberOf jsxc
+    */
+   jsxc.l10n = {
+      en: {
+         Logging_in: 'Logging in…',
+         your_connection_is_unencrypted: 'Your connection is unencrypted.',
+         your_connection_is_encrypted: 'Your connection is encrypted.',
+         your_buddy_closed_the_private_connection: 'Your buddy closed the private connection.',
+         start_private: 'Start private',
+         close_private: 'Close private',
+         your_buddy_is_verificated: 'Your buddy is verified.',
+         you_have_only_a_subscription_in_one_way: 'You only have a one-way subscription.',
+         authentication_query_sent: 'Authentication query sent.',
+         your_message_wasnt_send_please_end_your_private_conversation: 'Your message was not sent. Please end your private conversation.',
+         unencrypted_message_received: 'Unencrypted message received:',
+         your_message_wasnt_send_because_you_have_no_valid_subscription: 'Your message was not sent because you have no valid subscription.',
+         not_available: 'Not available',
+         no_connection: 'No connection!',
+         relogin: 'relogin',
+         trying_to_start_private_conversation: 'Trying to start private conversation!',
+         Verified: 'Verified',
+         Unverified: 'Unverified',
+         private_conversation_started: 'Private conversation started.',
+         private_conversation_aborted: 'Private conversation aborted!',
+         your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Your buddy closed the private conversation! You should do the same.',
+         conversation_is_now_verified: 'Conversation is now verified.',
+         authentication_failed: 'Authentication failed.',
+         your_buddy_is_attempting_to_determine_: 'You buddy is attempting to determine if he or she is really talking to you.',
+         to_authenticate_to_your_buddy: 'To authenticate to your buddy, ',
+         enter_the_answer_and_click_answer: 'enter the answer and click Answer.',
+         enter_the_secret: 'enter the secret.',
+         Creating_your_private_key_: 'Creating your private key; this may take a while.',
+         Authenticating_a_buddy_helps_: 'Authenticating a buddy helps ensure that the person you are talking to is really the one he or she claims to be.',
+         How_do_you_want_to_authenticate_your_buddy: 'How do you want to authenticate {{bid_name}} (&lt;b>{{bid_jid}}&lt;/b>)?',
+         Select_method: 'Select method...',
+         Manual: 'Manual',
+         Question: 'Question',
+         Secret: 'Secret',
+         To_verify_the_fingerprint_: 'To verify the fingerprint, contact your buddy via some other trustworthy channel, such as the telephone.',
+         Your_fingerprint: 'Your fingerprint',
+         Buddy_fingerprint: 'Buddy fingerprint',
+         Close: 'Close',
+         Compared: 'Compared',
+         To_authenticate_using_a_question_: 'To authenticate using a question, pick a question whose answer is known only you and your buddy.',
+         Ask: 'Ask',
+         To_authenticate_pick_a_secret_: 'To authenticate, pick a secret known only to you and your buddy.',
+         Compare: 'Compare',
+         Fingerprints: 'Fingerprints',
+         Authentication: 'Authentication',
+         Message: 'Message',
+         Add_buddy: 'Add buddy',
+         rename_buddy: 'rename buddy',
+         delete_buddy: 'delete buddy',
+         Login: 'Login',
+         Username: 'Username',
+         Password: 'Password',
+         Cancel: 'Cancel',
+         Connect: 'Connect',
+         Type_in_the_full_username_: 'Type in the full username and an optional alias.',
+         Alias: 'Alias',
+         Add: 'Add',
+         Subscription_request: 'Subscription request',
+         You_have_a_request_from: 'You have a request from',
+         Deny: 'Deny',
+         Approve: 'Approve',
+         Remove_buddy: 'Remove buddy',
+         You_are_about_to_remove_: 'You are about to remove {{bid_name}} (&lt;b>{{bid_jid}}&lt;/b>) from your buddy list. All related chats will be closed.',
+         Continue_without_chat: 'Continue without chat',
+         Please_wait: 'Please wait',
+         Login_failed: 'Chat login failed',
+         Sorry_we_cant_authentikate_: 'Authentication failed with the chat server. Maybe the password is wrong?',
+         Retry: 'Back',
+         clear_history: 'Clear history',
+         New_message_from: 'New message from',
+         Should_we_notify_you_: 'Should we notify you about new messages in the future?',
+         Please_accept_: 'Please click the "Allow" button at the top.',
+         Hide_offline: 'Hide offline contacts',
+         Show_offline: 'Show offline contacts',
+         About: 'About',
+         dnd: 'Do Not Disturb',
+         Mute: 'Mute',
+         Unmute: 'Unmute',
+         Subscription: 'Subscription',
+         both: 'both',
+         Status: 'Status',
+         online: 'online',
+         chat: 'chat',
+         away: 'away',
+         xa: 'extended away',
+         offline: 'offline',
+         none: 'none',
+         Unknown_instance_tag: 'Unknown instance tag.',
+         Not_one_of_our_latest_keys: 'Not one of our latest keys.',
+         Received_an_unreadable_encrypted_message: 'Received an unreadable encrypted message.',
+         Online: 'Online',
+         Chatty: 'Chatty',
+         Away: 'Away',
+         Extended_away: 'Extended away',
+         Offline: 'Offline',
+         Friendship_request: 'Friendship request',
+         Confirm: 'Confirm',
+         Dismiss: 'Dismiss',
+         Remove: 'Remove',
+         Online_help: 'Online help',
+         FN: 'Full name',
+         N: ' ',
+         FAMILY: 'Family name',
+         GIVEN: 'Given name',
+         NICKNAME: 'Nickname',
+         URL: 'URL',
+         ADR: 'Address',
+         STREET: 'Street Address',
+         EXTADD: 'Extended Address',
+         LOCALITY: 'Locality',
+         REGION: 'Region',
+         PCODE: 'Postal Code',
+         CTRY: 'Country',
+         TEL: 'Telephone',
+         NUMBER: 'Number',
+         EMAIL: 'Email',
+         USERID: ' ',
+         ORG: 'Organization',
+         ORGNAME: 'Name',
+         ORGUNIT: 'Unit',
+         TITLE: 'Job title',
+         ROLE: 'Role',
+         BDAY: 'Birthday',
+         DESC: 'Description',
+         PHOTO: ' ',
+         send_message: 'Send message',
+         get_info: 'Show information',
+         Settings: 'Settings',
+         Priority: 'Priority',
+         Save: 'Save',
+         User_settings: 'User settings',
+         A_fingerprint_: 'A fingerprint is used to make sure that the person you are talking to is who he or she is saying.',
+         Your_roster_is_empty_add_a: 'Your roster is empty, add a ',
+         new_buddy: 'new buddy',
+         is: 'is',
+         Login_options: 'Login options',
+         BOSH_url: 'BOSH URL',
+         Domain: 'Domain',
+         Resource: 'Resource',
+         On_login: 'On login',
+         Received_an_unencrypted_message: 'Received an unencrypted message',
+         Sorry_your_buddy_doesnt_provide_any_information: 'Sorry, your buddy does not provide any information.',
+         Info_about: 'Info about',
+         Authentication_aborted: 'Authentication aborted.',
+         Authentication_request_received: 'Authentication request received.',
+         Do_you_want_to_display_them: 'Do you want to display them?',
+         Log_in_without_chat: 'Log in without chat',
+         has_come_online: 'has come online',
+         Unknown_sender: 'Unknown sender',
+         You_received_a_message_from_an_unknown_sender: 'You received a message from an unknown sender'
+      },
+      de: {
+         Logging_in: 'Login läuft…',
+         your_connection_is_unencrypted: 'Deine Verbindung ist UNverschlüsselt.',
+         your_connection_is_encrypted: 'Deine Verbindung ist verschlüsselt.',
+         your_buddy_closed_the_private_connection: 'Dein Freund hat die private Verbindung getrennt.',
+         start_private: 'Privat starten',
+         close_private: 'Privat abbrechen',
+         your_buddy_is_verificated: 'Dein Freund ist verifiziert.',
+         you_have_only_a_subscription_in_one_way: 'Die Freundschaft ist nur einseitig.',
+         authentication_query_sent: 'Authentifizierungsanfrage gesendet.',
+         your_message_wasnt_send_please_end_your_private_conversation: 'Deine Nachricht wurde nicht gesendet. Bitte beende die private Konversation.',
+         unencrypted_message_received: 'Unverschlüsselte Nachricht erhalten.',
+         your_message_wasnt_send_because_you_have_no_valid_subscription: 'Deine Nachricht wurde nicht gesandt, da die Freundschaft einseitig ist.',
+         not_available: 'Nicht verfügbar.',
+         no_connection: 'Keine Verbindung.',
+         relogin: 'Neu anmelden.',
+         trying_to_start_private_conversation: 'Versuche private Konversation zu starten.',
+         Verified: 'Verifiziert',
+         Unverified: 'Unverifiziert',
+         private_conversation_started: 'Private Konversation gestartet.',
+         private_conversation_aborted: 'Private Konversation abgebrochen.',
+         your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Dein Freund hat die private Konversation beendet. Das solltest du auch tun!',
+         conversation_is_now_verified: 'Konversation ist jetzt verifiziert',
+         authentication_failed: 'Authentifizierung fehlgeschlagen.',
+         your_buddy_is_attempting_to_determine_: 'Dein Freund versucht herauszufinden ob er wirklich mit dir redet.',
+         to_authenticate_to_your_buddy: 'Um dich gegenüber deinem Freund zu verifizieren ',
+         enter_the_answer_and_click_answer: 'gib die Antwort ein und klick auf Antworten.',
+         enter_the_secret: 'gib das Geheimnis ein.',
+         Creating_your_private_key_: 'Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.',
+         Authenticating_a_buddy_helps_: 'Einen Freund zu authentifizieren hilft sicher zustellen, dass die Person mit der du sprichst auch die ist die sie sagt.',
+         How_do_you_want_to_authenticate_your_buddy: 'Wie willst du {{bid_name}} (&lt;b>{{bid_jid}}&lt;/b>) authentifizieren?',
+         Select_method: 'Wähle...',
+         Manual: 'Manual',
+         Question: 'Frage',
+         Secret: 'Geheimnis',
+         To_verify_the_fingerprint_: 'Um den Fingerprint zu verifizieren kontaktiere dein Freund über einen anderen Kommunikationsweg. Zum Beispiel per Telefonanruf.',
+         Your_fingerprint: 'Dein Fingerprint',
+         Buddy_fingerprint: 'Sein/Ihr Fingerprint',
+         Close: 'Schließen',
+         Compared: 'Verglichen',
+         To_authenticate_using_a_question_: 'Um die Authentifizierung per Frage durchzuführen, wähle eine Frage bei welcher nur dein Freund die Antwort weiß.',
+         Ask: 'Frage',
+         To_authenticate_pick_a_secret_: 'Um deinen Freund zu authentifizieren, wähle ein Geheimnis welches nur deinem Freund und dir bekannt ist.',
+         Compare: 'Vergleiche',
+         Fingerprints: 'Fingerprints',
+         Authentication: 'Authentifizierung',
+         Message: 'Nachricht',
+         Add_buddy: 'Freund hinzufügen',
+         rename_buddy: 'Freund umbenennen',
+         delete_buddy: 'Freund löschen',
+         Login: 'Anmeldung',
+         Username: 'Benutzername',
+         Password: 'Passwort',
+         Cancel: 'Abbrechen',
+         Connect: 'Verbinden',
+         Type_in_the_full_username_: 'Gib bitte den vollen Benutzernamen und optional ein Alias an.',
+         Alias: 'Alias',
+         Add: 'Hinzufügen',
+         Subscription_request: 'Freundschaftsanfrage',
+         You_have_a_request_from: 'Du hast eine Anfrage von',
+         Deny: 'Ablehnen',
+         Approve: 'Bestätigen',
+         Remove_buddy: 'Freund entfernen',
+         You_are_about_to_remove_: 'Du bist gerade dabei {{bid_name}} (&lt;b>{{bid_jid}}&lt;/b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.',
+         Continue_without_chat: 'Weiter ohne Chat',
+         Please_wait: 'Bitte warten',
+         Login_failed: 'Chat-Anmeldung fehlgeschlagen',
+         Sorry_we_cant_authentikate_: 'Der Chatserver hat die Anmeldung abgelehnt. Falsches Passwort?',
+         Retry: 'Zurück',
+         clear_history: 'Lösche Verlauf',
+         New_message_from: 'Neue Nachricht von',
+         Should_we_notify_you_: 'Sollen wir dich in Zukunft über eingehende Nachrichten informieren, auch wenn dieser Tab nicht im Vordergrund ist?',
+         Please_accept_: 'Bitte klick auf den "Zulassen" Button oben.',
+         Menu: 'Menü',
+         Hide_offline: 'Offline ausblenden',
+         Show_offline: 'Offline einblenden',
+         About: 'Über',
+         dnd: 'Beschäftigt',
+         Mute: 'Ton aus',
+         Unmute: 'Ton an',
+         Subscription: 'Bezug',
+         both: 'beidseitig',
+         Status: 'Status',
+         online: 'online',
+         chat: 'chat',
+         away: 'abwesend',
+         xa: 'länger abwesend',
+         offline: 'offline',
+         none: 'keine',
+         Unknown_instance_tag: 'Unbekannter instance tag.',
+         Not_one_of_our_latest_keys: 'Nicht einer unserer letzten Schlüssel.',
+         Received_an_unreadable_encrypted_message: 'Eine unlesbare verschlüsselte Nachricht erhalten.',
+         Online: 'Online',
+         Chatty: 'Gesprächig',
+         Away: 'Abwesend',
+         Extended_away: 'Länger abwesend',
+         Offline: 'Offline',
+         Friendship_request: 'Freundschaftsanfrage',
+         Confirm: 'Bestätigen',
+         Dismiss: 'Ablehnen',
+         Remove: 'Löschen',
+         Online_help: 'Online Hilfe',
+         FN: 'Name',
+         N: ' ',
+         FAMILY: 'Familienname',
+         GIVEN: 'Vorname',
+         NICKNAME: 'Spitzname',
+         URL: 'URL',
+         ADR: 'Adresse',
+         STREET: 'Straße',
+         EXTADD: 'Zusätzliche Adresse',
+         LOCALITY: 'Ortschaft',
+         REGION: 'Region',
+         PCODE: 'Postleitzahl',
+         CTRY: 'Land',
+         TEL: 'Telefon',
+         NUMBER: 'Nummer',
+         EMAIL: 'E-Mail',
+         USERID: ' ',
+         ORG: 'Organisation',
+         ORGNAME: 'Name',
+         ORGUNIT: 'Abteilung',
+         TITLE: 'Titel',
+         ROLE: 'Rolle',
+         BDAY: 'Geburtstag',
+         DESC: 'Beschreibung',
+         PHOTO: ' ',
+         send_message: 'Sende Nachricht',
+         get_info: 'Benutzerinformationen',
+         Settings: 'Einstellungen',
+         Priority: 'Priorität',
+         Save: 'Speichern',
+         User_settings: 'Benutzereinstellungen',
+         A_fingerprint_: 'Ein Fingerabdruck wird dazu benutzt deinen Gesprächspartner zu identifizieren.',
+         Your_roster_is_empty_add_a: 'Deine Freundesliste ist leer, füge einen neuen Freund ',
+         new_buddy: 'hinzu',
+         is: 'ist',
+         Login_options: 'Anmeldeoptionen',
+         BOSH_url: 'BOSH url',
+         Domain: 'Domain',
+         Resource: 'Ressource',
+         On_login: 'Beim Anmelden',
+         Received_an_unencrypted_message: 'Unverschlüsselte Nachricht empfangen',
+         Sorry_your_buddy_doesnt_provide_any_information: 'Dein Freund stellt leider keine Informationen bereit.',
+         Info_about: 'Info über',
+         Authentication_aborted: 'Authentifizierung abgebrochen.',
+         Authentication_request_received: 'Authentifizierunganfrage empfangen.',
+         Log_in_without_chat: 'Anmelden ohne Chat',
+         Do_you_want_to_display_them: 'Möchtest du sie sehen?',
+         has_come_online: 'ist online gekommen',
+         Unknown_sender: 'Unbekannter Sender',
+         You_received_a_message_from_an_unknown_sender: 'Du hast eine Nachricht von einem unbekannten Sender erhalten'
+      },
+      es: {
+         Logging_in: 'Por favor, espere...',
+         your_connection_is_unencrypted: 'Su conexión no está cifrada.',
+         your_connection_is_encrypted: 'Su conexión está cifrada.',
+         your_buddy_closed_the_private_connection: 'Su amigo ha cerrado la conexión privada.',
+         start_private: 'Iniciar privado',
+         close_private: 'Cerrar privado',
+         your_buddy_is_verificated: 'Tu amigo está verificado.',
+         you_have_only_a_subscription_in_one_way: 'Sólo tienes una suscripción de un modo.',
+         authentication_query_sent: 'Consulta de verificación enviada.',
+         your_message_wasnt_send_please_end_your_private_conversation: 'Su mensaje no fue enviado. Por favor, termine su conversación privada.',
+         unencrypted_message_received: 'Mensaje no cifrado recibido:',
+         your_message_wasnt_send_because_you_have_no_valid_subscription: 'Su mensaje no se ha enviado, porque usted no tiene suscripción válida.',
+         not_available: 'No disponible',
+         no_connection: 'Sin conexión!',
+         relogin: 'iniciar sesión nuevamente',
+         trying_to_start_private_conversation: 'Intentando iniciar una conversación privada!',
+         Verified: 'Verificado',
+         Unverified: 'No verificado',
+         private_conversation_started: 'se inició una conversación privada.',
+         private_conversation_aborted: 'Conversación privada abortada!',
+         your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Su amigo cerró la conversación privada! Usted debería hacer lo mismo.',
+         conversation_is_now_verified: 'La conversación es ahora verificada.',
+         authentication_failed: 'Fallo la verificación.',
+         your_buddy_is_attempting_to_determine_: 'Tu amigo está tratando de determinar si él o ella está realmente hablando con usted.',
+         to_authenticate_to_your_buddy: 'Para autenticar a su amigo, ',
+         enter_the_answer_and_click_answer: 'introduce la respuesta y haga clic en Contestar.',
+         enter_the_secret: 'especifique el secreto.',
+         Creating_your_private_key_: 'Ahora vamos a crear su clave privada. Esto puede tomar algún tiempo.',
+         Authenticating_a_buddy_helps_: 'Autenticación de un amigo ayuda a garantizar que la persona que está hablando es quien él o ella está diciendo.',
+         How_do_you_want_to_authenticate_your_buddy: '¿Cómo desea autenticar {{bid_name}} (&lt;b>{{bid_jid}}&lt;/b>)?',
+         Select_method: 'Escoja un método...',
+         Manual: 'Manual',
+         Question: 'Pregunta',
+         Secret: 'Secreto',
+         To_verify_the_fingerprint_: 'Para verificar la firma digital, póngase en contacto con su amigo a través de algún otro canal autenticado, como el teléfono.',
+         Your_fingerprint: 'Tu firma digital',
+         Buddy_fingerprint: 'firma digital de tu amigo',
+         Close: 'Cerrar',
+         Compared: 'Comparado',
+         To_authenticate_using_a_question_: 'Para autenticar mediante una pregunta, elegir una pregunta cuya respuesta se conoce sólo usted y su amigo.',
+         Ask: 'Preguntar',
+         To_authenticate_pick_a_secret_: 'Para autenticar, elija un secreto conocido sólo por usted y su amigo.',
+         Compare: 'Comparar',
+         Fingerprints: 'Firmas digitales',
+         Authentication: 'Autenticación',
+         Message: 'Mensaje',
+         Add_buddy: 'Añadir amigo',
+         rename_buddy: 'renombrar amigo',
+         delete_buddy: 'eliminar amigo',
+         Login: 'Iniciar Sesión',
+         Username: 'Usuario',
+         Password: 'Contraseña',
+         Cancel: 'Cancelar',
+         Connect: 'Conectar',
+         Type_in_the_full_username_: 'Escriba el usuario completo y un alias opcional.',
+         Alias: 'Alias',
+         Add: 'Añadir',
+         Subscription_request: 'Solicitud de suscripción',
+         You_have_a_request_from: 'Tienes una petición de',
+         Deny: 'Rechazar',
+         Approve: 'Aprobar',
+         Remove_buddy: 'Eliminar amigo',
+         You_are_about_to_remove_: 'Vas a eliminar a {{bid_name}} (&lt;b>{{bid_jid}}&lt;/b>) de tu lista de amigos. Todas las conversaciones relacionadas serán cerradas.',
+         Continue_without_chat: 'Continuar',
+         Please_wait: 'Espere por favor',
+         Login_failed: 'Fallo el inicio de sesión',
+         Sorry_we_cant_authentikate_: 'Lo sentimos, no podemos autentificarlo en nuestro servidor de chat. ¿Tal vez la contraseña es incorrecta?',
+         Retry: 'Reintentar',
+         clear_history: 'Borrar el historial',
+         New_message_from: 'Nuevo mensaje de',
+         Should_we_notify_you_: '¿Debemos notificarle sobre nuevos mensajes en el futuro?',
+         Please_accept_: 'Por favor, haga clic en el botón "Permitir" en la parte superior.',
+         dnd: 'No Molestar',
+         Mute: 'Desactivar sonido',
+         Unmute: 'Activar sonido',
+         Subscription: 'Suscripción',
+         both: 'ambos',
+         Status: 'Estado',
+         online: 'en línea',
+         chat: 'chat',
+         away: 'ausente',
+         xa: 'mas ausente',
+         offline: 'desconectado',
+         none: 'nadie',
+         Unknown_instance_tag: 'Etiqueta de instancia desconocida.',
+         Not_one_of_our_latest_keys: 'No de nuestra ultima tecla.',
+         Received_an_unreadable_encrypted_message: 'Se recibió un mensaje cifrado ilegible.',
+         Online: 'En linea',
+         Chatty: 'Hablador',
+         Away: 'Ausente',
+         Extended_away: 'Mas ausente',
+         Offline: 'Desconectado',
+         Friendship_request: 'Solicitud de amistad',
+         Confirm: 'Confirmar',
+         Dismiss: 'Rechazar',
+         Remove: 'Eliminar',
+         Online_help: 'Ayuda en línea',
+         FN: 'Nombre completo ',
+         N: ' ',
+         FAMILY: 'Apellido',
+         GIVEN: 'Nombre',
+         NICKNAME: 'Apodar',
+         URL: 'URL',
+         ADR: 'Dirección',
+         STREET: 'Calle',
+         EXTADD: 'Extendido dirección',
+         LOCALITY: 'Población',
+         REGION: 'Región',
+         PCODE: 'Código postal',
+         CTRY: 'País',
+         TEL: 'Teléfono',
+         NUMBER: 'Número',
+         EMAIL: 'Emilio',
+         USERID: ' ',
+         ORG: 'Organización',
+         ORGNAME: 'Nombre',
+         ORGUNIT: 'Departamento',
+         TITLE: 'Título',
+         ROLE: 'Rol',
+         BDAY: 'Cumpleaños',
+         DESC: 'Descripción',
+         PHOTO: ' ',
+         send_message: 'mandar un texto',
+         get_info: 'obtener información',
+         Settings: 'Ajustes',
+         Priority: 'Prioridad',
+         Save: 'Guardar',
+         User_settings: 'Configuración de usuario',
+         A_fingerprint_: 'La huella digital se utiliza para que puedas estar seguro que la persona con la que estas hablando es quien realmente dice ser',
+         Your_roster_is_empty_add_a: 'Tu lista de amigos esta vacia',
+         new_buddy: 'Nuevo amigo',
+         is: 'es',
+         Login_options: 'Opciones de login',
+         BOSH_url: 'BOSH url',
+         Domain: 'Dominio',
+         Resource: 'Recurso',
+         On_login: 'Iniciar sesión',
+         Received_an_unencrypted_message: 'Recibe un mensaje no cifrado'
+      }
+   };
+>>>>>>> upstream
 }(jQuery));
 </code></pre>
         </article>
@@ -5466,13 +6732,21 @@
 </div>
 
 <nav>
+<<<<<<< HEAD
     <h2><a href="index.html">Index</a></h2><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.template.html">template</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li></ul>
+=======
+    <h2><a href="index.html">Index</a></h2><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.template.html">template</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.l10n.html">l10n</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li></ul>
+>>>>>>> upstream
 </nav>
 
 <br clear="both">
 
 <footer>
+<<<<<<< HEAD
     Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Wed Nov 26 2014 19:00:40 GMT+0100 (CET)
+=======
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Thu Nov 06 2014 13:24:26 GMT+0100 (CET)
+>>>>>>> upstream
 </footer>
 
 <script> prettyPrint(); </script>

@@ -1,5 +1,9 @@
 /*!
+<<<<<<< HEAD
  * jsxc v1.0.0 - 2014-11-26
+=======
+ * jsxc v1.0.0 - 2014-11-06
+>>>>>>> upstream
  * 
  * Copyright (c) 2014 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -1345,7 +1349,11 @@ var jsxc;
          $('#jsxc_dialog .jsxc_approve').click(function(ev) {
             ev.stopPropagation();
 
+<<<<<<< HEAD
             //var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
+=======
+            var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from));
+>>>>>>> upstream
 
             jsxc.xmpp.resFriendReq(from, true);
 
