@@ -932,10 +932,8 @@ div.jsxc_in {
 
 .jsxc_timestamp_in {
   float: left;
-  position: relative;
-  margin-left: 10px;
-  font-size: 9px;
-  background-color: #A4A4A4;
+  font-size: 8px;
+  color: #A4A4A4;
 }
 
 div.jsxc_in:after {
@@ -975,10 +973,8 @@ div.jsxc_out {
 
 .jsxc_timestamp_out {
   float: right;
-  position: relative;
-  margin-right: 10px;
-  font-size: 9px;
-  background-color: #A4A4A4;
+  font-size: 8px;
+  color: #A4A4A4;
 }
 
 div.jsxc_out:after {
