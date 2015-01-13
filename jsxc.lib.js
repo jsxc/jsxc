@@ -2802,10 +2802,19 @@ var jsxc;
             });
          });
 
+         var msgDate = new Date(parseInt(uid.replace(/-msg$/, '')));
+         var msgFormatTimestamp = msgDate.getDate() + '.' +
+           (msgDate.getMonth() + 1) + '.' + msgDate.getFullYear() +
+           ' ' + msgDate.getHours() + ':' + msgDate.getMinutes();
+
          var msgDiv = $("<div>");
          msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
          msgDiv.attr('id', uid);
          msgDiv.html(msg);
+
+         var msgTSDiv = $("<div>");
+         msgTSDiv.addClass('jsxc_timestamp_' + direction);
+         msgTSDiv.html(msgFormatTimestamp);
 
          if (received) {
             msgDiv.addClass('jsxc_received');
@@ -2815,7 +2824,9 @@ var jsxc;
             jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div style="clear:both"/>');
          }
 
-         win.find('.jsxc_textarea').append(msgDiv);
+         win.find('.jsxc_textarea')
+           .append(msgDiv)
+           .append(msgTSDiv);
 
          jsxc.gui.detectUriScheme(win);
          jsxc.gui.detectEmail(win);

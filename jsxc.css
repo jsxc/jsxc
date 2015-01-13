@@ -991,6 +991,14 @@ ul#jsxc_buddylist .jsxc_delete {
 	border-radius: 3px;
 }
 
+.jsxc_timestamp_in {
+  float: left;
+  position: relative;
+  margin-left: 10px;
+  font-size: 9px;
+  background-color: #A4A4A4;
+}
+
 .jsxc_in:after {
 	content: '';
 	position: absolute;
@@ -1024,6 +1032,14 @@ ul#jsxc_buddylist .jsxc_delete {
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
+}
+
+.jsxc_timestamp_out {
+  float: right;
+  position: relative;
+  margin-right: 10px;
+  font-size: 9px;
+  background-color: #A4A4A4;
 }
 
 .jsxc_out:after {
