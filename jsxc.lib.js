@@ -2802,19 +2802,21 @@ var jsxc;
             });
          });
 
-         var msgDate = new Date(parseInt(uid.replace(/-msg$/, '')));
-         var msgFormatTimestamp = msgDate.getDate() + '.' +
-           (msgDate.getMonth() + 1) + '.' + msgDate.getFullYear() +
-           ' ' + msgDate.getHours() + ':' + msgDate.getMinutes();
+         var msgDate = new Date(parseInt(uid.replace(/-msg$/, ''))),
+         date = ('0' + msgDate.getDate()).slice(-2),
+         month = ('0' + (msgDate.getMonth() + 1)).slice(-2),
+         year = msgDate.getFullYear(),
+         hours = ('0' + msgDate.getHours()).slice(-2),
+         minutes = ('0' + msgDate.getMinutes()).slice(-2),
+         msgFormatTimestamp = date + '.' + month + '.' + year + ' ' + hours + ':' + minutes;
 
-         var msgDiv = $("<div>");
+         var msgDiv = $("<div>"),
+         msgTsDiv = $("<div>");
          msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
          msgDiv.attr('id', uid);
-         msgDiv.html(msg);
-
-         var msgTSDiv = $("<div>");
-         msgTSDiv.addClass('jsxc_timestamp_' + direction);
-         msgTSDiv.html(msgFormatTimestamp);
+         msgDiv.html('<div>' + msg + '</div>');
+         msgTsDiv.addClass('jsxc_timestamp_' + direction);
+         msgTsDiv.html(msgFormatTimestamp);
 
          if (received) {
             msgDiv.addClass('jsxc_received');
@@ -2822,11 +2824,11 @@ var jsxc;
 
          if (direction === 'sys') {
             jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div style="clear:both"/>');
+         } else {
+            msgDiv.append(msgTsDiv);
          }
 
-         win.find('.jsxc_textarea')
-           .append(msgDiv)
-           .append(msgTSDiv);
+         win.find('.jsxc_textarea').append(msgDiv);
 
          jsxc.gui.detectUriScheme(win);
          jsxc.gui.detectEmail(win);
