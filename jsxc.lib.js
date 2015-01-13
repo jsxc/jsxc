@@ -2059,17 +2059,19 @@ var jsxc;
             jsxc.gui.window.open(bid);
          });
 
-         if (!data.from_diaspora) {
-           bud.find('.jsxc_rename').click(function() {
-             jsxc.gui.roster.rename(bid);
-             return false;
-           });
+         bud.find('.jsxc_rename').click(function() {
+            jsxc.gui.roster.rename(bid);
+            return false;
+         });
 
-           bud.find('.jsxc_delete').click(function() {
-             jsxc.gui.showRemoveDialog(bid);
-             return false;
-           });
-         } else { bud.find('.jsxc_right').remove(); }
+         bud.find('.jsxc_delete').click(function() {
+            jsxc.gui.showRemoveDialog(bid);
+            return false;
+         });
+
+         if (data.from_diaspora === "true") {
+            bud.find('.jsxc_right').remove();
+         }
 
          var expandClick = function() {
             bud.trigger('extra.jsxc');
