@@ -930,6 +930,14 @@ div.jsxc_in {
 	border-radius: 3px;
 }
 
+.jsxc_timestamp_in {
+  float: left;
+  position: relative;
+  margin-left: 10px;
+  font-size: 9px;
+  background-color: #A4A4A4;
+}
+
 div.jsxc_in:after {
 	content: '';
 	position: absolute;
@@ -963,6 +971,14 @@ div.jsxc_out {
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
+}
+
+.jsxc_timestamp_out {
+  float: right;
+  position: relative;
+  margin-right: 10px;
+  font-size: 9px;
+  background-color: #A4A4A4;
 }
 
 div.jsxc_out:after {
