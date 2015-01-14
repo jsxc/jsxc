@@ -98,16 +98,16 @@ var jsxc;
             hours = ('0' + msgDate.getHours()).slice(-2),
             minutes = ('0' + msgDate.getMinutes()).slice(-2);
         var dateNow = new Date(),
-            msgFormatTimestamp = hours + ':' + minutes;
+            time = hours + ':' + minutes;
 
         // compare dates only
         dateNow.setHours(0, 0, 0, 0);
         msgDate.setHours(0, 0, 0, 0);
 
         if (dateNow.getTime() !== msgDate.getTime()) {
-           msgFormatTimestamp += date + '.' + month + '.' + year + ' ';
+           return date + '.' + month + '.' + year + ' ' + time;
         }
-        return msgFormatTimestamp;
+        return time;
       },
 
       /**
