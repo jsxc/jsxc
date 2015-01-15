@@ -191,7 +191,10 @@
        * Returns: (Boolean) - false, to automatically remove the handler.
        */
       _handleDiscoInfoReply: function(stanza) {
-         var query = stanza.querySelector('query'), node = query.getAttribute('node').split('#'), ver = node[1], from = stanza.getAttribute('from');
+         var query = stanza.querySelector('query');
+         var from = stanza.getAttribute('from');
+         var node = query.getAttribute('node');
+         var ver = (node)? node.split('#')[1] : this._jidVerIndex[from]; //fix open prosody issue
 
          if (!this._knownCapabilities[ver]) {
             var childNodes = query.childNodes, childNodesLen = childNodes.length;
@@ -211,6 +214,7 @@
                      this._knownCapabilities[ver][node.nodeName] = [];
                   this._knownCapabilities[ver][node.nodeName].push(this._attributesToJsObject(node.attributes));
                }
+
             }
             this._jidVerIndex[from] = ver;
          } else if (!this._jidVerIndex[from] || !this._jidVerIndex[from] !== ver) {
