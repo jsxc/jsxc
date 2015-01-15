@@ -1017,6 +1017,7 @@ var jsxc;
          var we = jsxc.gui.window.get(bid); // window element from user
          var ue = ri.add(we); // both
          var spot = $('.jsxc_spot[data-bid="' + bid + '"]');
+         var data_name = "<a href='/contacts'>" + data.name + "</a>";
 
          // Attach data to corresponding roster item
          ri.data(data);
@@ -1025,7 +1026,8 @@ var jsxc;
          ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
 
          // Change name and add title
-         ue.find('.jsxc_name').add(spot).text(data.name).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
+         ue.find('.jsxc_name').add(spot).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
+         ue.find('.jsxc_name').append(data_name);
 
          // Update gui according to encryption state
          switch (data.msgstate) {
