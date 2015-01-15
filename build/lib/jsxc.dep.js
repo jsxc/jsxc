@@ -1,5 +1,9 @@
 /*!
+<<<<<<< HEAD:build/lib/jsxc.dep.js
  * jsxc v1.0.0 - 2014-11-26
+=======
+ * jsxc v1.0.0 - 2014-11-06
+>>>>>>> upstream:build/lib/jsxc.dep.js
  * 
  * This file concatenates all dependencies of jsxc.
  * 
