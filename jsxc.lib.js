@@ -2812,8 +2812,9 @@ var jsxc;
        * @param {String} msg Message to display
        * @param {boolean} encrypted Was this message encrypted? Default: false
        * @param {boolean} forwarded Was this message forwarded? Default: false
+       * @param {integer} stamp Timestamp
        */
-      postMessage: function(bid, direction, msg, encrypted, forwarded) {
+      postMessage: function(bid, direction, msg, encrypted, forwarded, stamp) {
          var data = jsxc.storage.getUserItem('buddy', bid);
          var html_msg = msg;
 
@@ -2839,7 +2840,7 @@ var jsxc;
          }
 
          encrypted = encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
-         var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded);
+         var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded, stamp);
 
          if (direction === 'in') {
             $(document).trigger('postmessagein.jsxc', [ bid, html_msg ]);
@@ -2913,7 +2914,7 @@ var jsxc;
          msgDiv.attr('id', uid);
          msgDiv.html('<div>' + msg + '</div>');
          msgTsDiv.addClass('jsxc_timestamp_' + direction);
-         msgTsDiv.html(jsxc.getFormattedTime(uid.replace(/-msg$/, '')));
+         msgTsDiv.html(jsxc.getFormattedTime(post.stamp));
 
          if (post.received || false) {
             msgDiv.addClass('jsxc_received');
@@ -3896,21 +3897,27 @@ var jsxc;
             jsxc.debug('Incoming message', message);
          }
 
-         var type = $(message).attr('type');
-         var from = $(message).attr('from');
-         var mid = $(message).attr('id');
          var body = $(message).find('body:first').text();
-         var bid;
 
          if (!body || (body.match(/\?OTR/i) && forwarded)) {
             return true;
          }
+         
+         var type = $(message).attr('type');
+         var from = $(message).attr('from');
+         var mid = $(message).attr('id');
+         var bid;
+         
+         var delay = $(message).find('delay[xmlns="urn:xmpp:delay"]');
+
+         var stamp = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
+         stamp = stamp.getTime();
 
          if (carbon) {
             var direction = (carbon.prop("tagName") === 'sent') ? 'out' : 'in';
             bid = jsxc.jidToBid((direction === 'out') ? $(message).attr('to') : from);
 
-            jsxc.gui.window.postMessage(bid, direction, body, false, forwarded);
+            jsxc.gui.window.postMessage(bid, direction, body, false, forwarded, stamp);
 
             return true;
 
@@ -3939,7 +3946,7 @@ var jsxc;
             var msg = jsxc.removeHTML(body);
             msg = jsxc.escapeHTML(msg);
 
-            jsxc.storage.saveMessage(bid, 'in', msg, forwarded);
+            jsxc.storage.saveMessage(bid, 'in', msg, false, forwarded, stamp);
 
             return true;
          }
@@ -3972,9 +3979,9 @@ var jsxc;
          }
 
          if (jsxc.otr.objects.hasOwnProperty(bid)) {
-            jsxc.otr.objects[bid].receiveMsg(body);
+            jsxc.otr.objects[bid].receiveMsg(body, stamp);
          } else {
-            jsxc.gui.window.postMessage(bid, 'in', body, false, forwarded);
+            jsxc.gui.window.postMessage(bid, 'in', body, false, forwarded, stamp);
          }
 
          // preserve handler
@@ -4818,7 +4825,7 @@ var jsxc;
        * @param forwarded
        * @return post
        */
-      saveMessage: function(bid, direction, msg, encrypted, forwarded) {
+      saveMessage: function(bid, direction, msg, encrypted, forwarded, stamp) {
          var chat = jsxc.storage.getUserItem('chat', bid) || [];
 
          var uid = new Date().getTime() + ':msg';
@@ -4833,7 +4840,8 @@ var jsxc;
             uid: uid.replace(/:/, '-'),
             received: false,
             encrypted: encrypted || false,
-            forwarded: forwarded || false
+            forwarded: forwarded || false,
+            stamp: stamp || new Date().getTime()
          };
 
          chat.unshift(post);
@@ -4891,16 +4899,16 @@ var jsxc;
        * @param {string} msg received message
        * @param {string} encrypted True, if msg was encrypted.
        */
-      receiveMessage: function(bid, msg, encrypted) {
+      receiveMessage: function(bid, msg, encrypted, stamp) {
 
          if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT) {
             jsxc.otr.backup(bid);
          }
 
          if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']', encrypted);
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']', encrypted, stamp);
          } else {
-            jsxc.gui.window.postMessage(bid, 'in', msg, encrypted);
+            jsxc.gui.window.postMessage(bid, 'in', msg, encrypted, stamp);
          }
       },
 
@@ -5035,8 +5043,8 @@ var jsxc;
          });
 
          // Receive message
-         jsxc.otr.objects[bid].on('ui', function(msg, encrypted) {
-            jsxc.otr.receiveMessage(bid, msg, encrypted === true);
+         jsxc.otr.objects[bid].on('ui', function(msg, encrypted, stamp) {
+            jsxc.otr.receiveMessage(bid, msg, encrypted === true, stamp);
          });
 
          // Send message
