@@ -88,6 +88,33 @@ var jsxc;
       },
 
       /**
+       * Parse a unix timestamp and return a formatted time string
+       *
+       * @memberOf jsxc
+       * @param {Object} unixtime
+       * @returns time of day and/or date
+       */
+      getFormattedTime: function(unixtime) {
+        var msgDate = new Date(parseInt(unixtime)),
+            date = ('0' + msgDate.getDate()).slice(-2),
+            month = ('0' + (msgDate.getMonth() + 1)).slice(-2),
+            year = msgDate.getFullYear(),
+            hours = ('0' + msgDate.getHours()).slice(-2),
+            minutes = ('0' + msgDate.getMinutes()).slice(-2);
+        var dateNow = new Date(),
+            time = hours + ':' + minutes;
+
+        // compare dates only
+        dateNow.setHours(0, 0, 0, 0);
+        msgDate.setHours(0, 0, 0, 0);
+
+        if (dateNow.getTime() !== msgDate.getTime()) {
+           return date + '.' + month + '.' + year + ' ' + time;
+        }
+        return time;
+      },
+
+      /**
        * Write debug message to console and to log.
        * 
        * @memberOf jsxc
@@ -2880,10 +2907,13 @@ var jsxc;
             });
          });
 
-         var msgDiv = $("<div>");
+         var msgDiv = $("<div>"),
+         msgTsDiv = $("<div>");
          msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
          msgDiv.attr('id', uid);
-         msgDiv.html(msg);
+         msgDiv.html('<div>' + msg + '</div>');
+         msgTsDiv.addClass('jsxc_timestamp_' + direction);
+         msgTsDiv.html(jsxc.getFormattedTime(uid.replace(/-msg$/, '')));
 
          if (post.received || false) {
             msgDiv.addClass('jsxc_received');
@@ -2899,6 +2929,8 @@ var jsxc;
 
          if (direction === 'sys') {
             jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div style="clear:both"/>');
+         } else {
+            msgDiv.append(msgTsDiv);
          }
 
          win.find('.jsxc_textarea').append(msgDiv);
