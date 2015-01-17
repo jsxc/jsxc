@@ -918,6 +918,12 @@ div.jsxc_chatmessage img {
 	background-size: 19px 19px;
 }
 
+div.jsxc_timestamp {
+	font-size: 8px;
+    color: #A4A4A4;
+    line-height: 8px;
+}
+
 /** incoming message */
 div.jsxc_in {
 	float: left;
@@ -930,10 +936,8 @@ div.jsxc_in {
 	border-radius: 3px;
 }
 
-.jsxc_timestamp_in {
+div.jsxc_in .jsxc_timestamp {
   float: left;
-  font-size: 8px;
-  color: #A4A4A4;
 }
 
 div.jsxc_in:after {
@@ -971,10 +975,12 @@ div.jsxc_out {
 	border-radius: 3px;
 }
 
-.jsxc_timestamp_out {
+div.jsxc_out .jsxc_timestamp {
   float: right;
-  font-size: 8px;
-  color: #A4A4A4;
+}
+
+div.jsxc_out.jsxc_received .jsxc_timestamp {
+	margin-right: 4px;
 }
 
 div.jsxc_out:after {

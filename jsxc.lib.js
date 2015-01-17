@@ -2913,7 +2913,7 @@ var jsxc;
          msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
          msgDiv.attr('id', uid);
          msgDiv.html('<div>' + msg + '</div>');
-         msgTsDiv.addClass('jsxc_timestamp_' + direction);
+         msgTsDiv.addClass('jsxc_timestamp');
          msgTsDiv.html(jsxc.getFormattedTime(post.stamp));
 
          if (post.received || false) {
