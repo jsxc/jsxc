@@ -1017,7 +1017,8 @@ var jsxc;
          var we = jsxc.gui.window.get(bid); // window element from user
          var ue = ri.add(we); // both
          var spot = $('.jsxc_spot[data-bid="' + bid + '"]');
-         var data_name = "<a href='/contacts'>" + data.name + "</a>";
+         data.name = jsxc.escapeHTML(data.name) ;
+         var data_name = $('<a href="/u/' + data.jid + '"></a>').text(data.name);
 
          // Attach data to corresponding roster item
          ri.data(data);
@@ -1026,8 +1027,9 @@ var jsxc;
          ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
 
          // Change name and add title
-         ue.find('.jsxc_name').add(spot).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
-         ue.find('.jsxc_name').append(data_name);
+         ue.find('.jsxc_name').add(spot).text(data.name).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
+         ue.find('#jsxc_window_name').add(spot).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
+         ue.find('#jsxc_window_name').empty().append(data_name);
 
          // Update gui according to encryption state
          switch (data.msgstate) {
@@ -2468,8 +2470,14 @@ var jsxc;
             jsxc.otr.toggleTransfer(bid);
          });
 
-         win.find('.jsxc_bar').click(function() {
+         win.find('.jsxc_reduce').click(function() {
             jsxc.gui.window.toggle(bid);
+            win.find('.jsxc_cycle').css('display', 'none');
+         });
+
+         win.find('.jsxc_restore').click(function() {
+            jsxc.gui.window.toggle(bid);
+            win.find('.jsxc_cycle').css('display', '');
          });
 
          win.find('.jsxc_close').click(function() {
@@ -3081,9 +3089,11 @@ var jsxc;
                                </ul>\
                            </div>\
                            <div class="jsxc_transfer jsxc_otr jsxc_disabled"/>\
+                           <div class="jsxc_reduce">–</div>\
                            <div class="jsxc_close">×</div>\
                      </div>\
-                     <div class="jsxc_name"/>\
+                     <div class="jsxc_restore">■</div>\
+                     <div id="jsxc_window_name" nameclass="jsxc_name"/>\
                      <div class="jsxc_cycle"/>\
                 </div>\
                 <div class="jsxc_fade">\

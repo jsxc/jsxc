@@ -801,7 +801,6 @@ ul#jsxc_buddylist .jsxc_delete {
  *############################*/
 .jsxc_bar {
 	background-color: #282323;
-	cursor: pointer;
 	height: 30px;
 	line-height: 26px;
 	padding: 2px;
@@ -1099,6 +1098,22 @@ ul#jsxc_buddylist .jsxc_delete {
 	display: none;
 }
 
+.jsxc_min .jsxc_restore{
+    width: 26px;
+    height: 26px;
+    display: inline;
+    float: right;
+    color: #939393;
+    font-family: Arial;
+    line-height: 26px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.jsxc_reduce{
+    padding-left: 5px;
+}
+
 .jsxc_window .jsxc_tools > div {
 	width: 17px;
    height: 26px;
@@ -1109,6 +1124,10 @@ ul#jsxc_buddylist .jsxc_delete {
    line-height: 26px;
    cursor: pointer;
    text-align: center;
+}
+
+.jsxc_restore{
+    display: none;
 }
 
 .jsxc_settings {
