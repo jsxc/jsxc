@@ -465,6 +465,10 @@ var jsxc;
             }
          }
 
+         $(document).on('connectionReady.jsxc', function() {
+             jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
+         });
+
          jsxc.xmpp.login();
       },
 
@@ -1072,7 +1076,7 @@ var jsxc;
          var avatarSrc = jsxc.storage.getUserItem('avatar', aid);
 
          var setAvatar = function(src) {
-            if (src === 0) {
+            if (src === 0 || src === '0') {
                jsxc.options.defaultAvatar.call(el, jid);
                return;
             }
@@ -1096,7 +1100,7 @@ var jsxc;
 
                if (vCard.length === 0) {
                   jsxc.debug('No photo provided');
-                  src = 0;
+                  src = '0';
                } else if (vCard.find('EXTVAL').length > 0) {
                   src = vCard.find('EXTVAL').text();
                } else {
@@ -2098,10 +2102,6 @@ var jsxc;
          var pres = jsxc.storage.getUserItem('presence') || 'online';
          $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
          jsxc.gui.updatePresence('own', pres);
-
-         $(document).on('cloaded.roster.jsxc', function() {
-            jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
-         });
 
          jsxc.gui.tooltip('#jsxc_roster');
 
