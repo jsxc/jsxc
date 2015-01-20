@@ -1,8 +1,8 @@
 .jsxc_online {
-    border-left: 4px solid #00BFFF !important;
+    border-left: 4px solid $color_cerulean_approx !important;
 }
 .jsxc_chat {
-    border-left: 4px solid #00BFFF !important;
+    border-left: 4px solid $color_cerulean_approx !important;
 }
 .jsxc_away {
     border-left: 4px solid $web_orange !important;
@@ -14,7 +14,7 @@
     border-left: 4px solid $red !important;
 }
 .jsxc_offline {
-    border-left: 4px solid #A4A4A4 !important;
+    border-left: 4px solid $color_delta_approx !important;
 }
 .jsxc_hidden {
     display: none;

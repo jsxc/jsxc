@@ -119,13 +119,13 @@ div {
         }
     }
     &.jsxc_video {
-        background-image: url('img/camera_icon_grey.svg');
+        background-image: url('../img/camera_icon_grey.svg');
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 15px 15px;
         &:not(.jsxc_disabled) {
             &:hover {
-                background-image: url('img/camera_icon_white.svg');
+                background-image: url('../img/camera_icon_white.svg');
             }
         }
     }
@@ -238,7 +238,7 @@ div {
     font-style: italic;
 }
 #jsxc_buddylist .jsxc_options .jsxc_video {
-    background-image: url('img/camera_icon_white.svg');
+    background-image: url('../img/camera_icon_white.svg');
     &.jsxc_disabled {
         opacity: 0.2;
     }

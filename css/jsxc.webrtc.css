@@ -89,37 +89,19 @@ div:full-screen {
   background-color: #000; }
   div:full-screen.jsxc_localvideo {
     border: 1px solid #fff; }
-div:-webkit-full-screen {
-  width: 100%;
-  height: 100%;
-  background-color: #000; }
-div:-moz-full-screen {
-  width: 100%;
-  height: 100%;
-  background-color: #000; }
-div:-ms-fullscreen {
-  width: 100%;
-  height: 100%;
-  background-color: #000; }
 div:fullscreen {
   width: 100%;
   height: 100%;
   background-color: #000; }
-  div:-webkit-full-screen.jsxc_localvideo {
-  border: 1px solid #fff; }
-  div:-moz-full-screen.jsxc_localvideo {
-  border: 1px solid #fff; }
-  div:-ms-fullscreen.jsxc_localvideo {
-  border: 1px solid #fff; }
   div:fullscreen.jsxc_localvideo {
     border: 1px solid #fff; }
 div.jsxc_video {
-  background-image: url('img/camera_icon_grey.svg');
+  background-image: url('../img/camera_icon_grey.svg');
   background-repeat: no-repeat;
   background-position: center center;
   background-size: 15px 15px; }
   div.jsxc_video:not(.jsxc_disabled):hover {
-    background-image: url('img/camera_icon_white.svg'); }
+    background-image: url('../img/camera_icon_white.svg'); }
 
 .jsxc_controlbar {
   width: 640px; }
@@ -183,49 +165,29 @@ div.jsxc_video {
     margin: 40px auto;
     background: #000;
     border-radius: 81px;
-    -webkit-animation: bubblingG 1.3s infinite alternate;
-            animation: bubblingG 1.3s infinite alternate; }
+    animation: bubblingG 1.3s infinite alternate; }
 
 #bubblingG_1 {
-  -webkit-animation-delay: 0s;
-          animation-delay: 0s; }
+  animation-delay: 0s; }
 
 #bubblingG_2 {
-  -webkit-animation-delay: 0.39s;
-          animation-delay: 0.39s; }
+  animation-delay: 0.39s; }
 
 #bubblingG_3 {
-  -webkit-animation-delay: 0.78s;
-          animation-delay: 0.78s; }
-
-@-webkit-keyframes bubblingG {
-  0% {
-    width: 16px;
-    height: 16px;
-    background-color: #000;
-    -webkit-transform: translateY(0);
-            transform: translateY(0); }
-  100% {
-    width: 39px;
-    height: 39px;
-    background-color: #FFFFFF;
-    -webkit-transform: translateY(-34px);
-            transform: translateY(-34px); } }
+  animation-delay: 0.78s; }
 
 @keyframes bubblingG {
   0% {
     width: 16px;
     height: 16px;
     background-color: #000;
-    -webkit-transform: translateY(0);
-            transform: translateY(0); }
+    transform: translateY(0); }
 
   100% {
     width: 39px;
     height: 39px;
     background-color: #FFFFFF;
-    -webkit-transform: translateY(-34px);
-            transform: translateY(-34px); } }
+    transform: translateY(-34px); } }
 
 .jsxc_fullscreen.jsxc_localvideo {
   border: 1px solid #fff; }
@@ -234,6 +196,6 @@ div.jsxc_video {
   font-style: italic; }
 
 #jsxc_buddylist .jsxc_options .jsxc_video {
-  background-image: url('img/camera_icon_white.svg'); }
+  background-image: url('../img/camera_icon_white.svg'); }
   #jsxc_buddylist .jsxc_options .jsxc_video.jsxc_disabled {
     opacity: 0.2; }

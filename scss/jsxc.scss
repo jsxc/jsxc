@@ -27,7 +27,7 @@ $font_serif: serif;
     text-overflow: ellipsis;
     white-space: nowrap;
     &:hover {
-        color: #FAFAFA;
+        color: $alabaster;
     }
 }
 
@@ -141,10 +141,10 @@ $font_serif: serif;
     line-height: 100%;
     cursor: pointer;
     &.jsxc_online {
-        background-color: #00BFFF;
+        background-color: $color_cerulean_approx;
     }
     &.jsxc_chat {
-        background-color: #00BFFF;
+        background-color: $color_cerulean_approx;
     }
     &.jsxc_away {
         background-color: $web_orange;
@@ -156,7 +156,7 @@ $font_serif: serif;
         background-color: $red;
     }
     &.jsxc_offline {
-        background-color: #A4A4A4;
+        background-color: $color_delta_approx;
     }
 }
 
@@ -197,7 +197,7 @@ $font_serif: serif;
     display: block;
     width: 25px;
     height: 30px;
-    background-image: url('img/gear_white.svg');
+    background-image: url('../img/gear_white.svg');
     background-size: 18px 18px;
     background-repeat: no-repeat;
     background-position: center center;
@@ -289,7 +289,7 @@ $font_serif: serif;
             box-sizing: border-box;
             width: 14px;
             height: 100%;
-            background-color: #D3D3D3;
+            background-color: $color_quill_gray_approx;
             color: $color_mountain_mist_approx;
             text-align: center;
             line-height: 30px;
@@ -334,7 +334,7 @@ $font_serif: serif;
     left: 0;
     right: 0;
     height: auto;
-    background-color: #A4A4A4;
+    background-color: $color_delta_approx;
     z-index: 80;
     cursor: default;
     .jsxc_emoticons {
@@ -346,7 +346,7 @@ $font_serif: serif;
         cursor: pointer;
         &:after {
             content: ' ';
-            background-image: url('img/smiley.png');
+            background-image: url('../img/smiley.png');
             background-position: center center;
             background-repeat: no-repeat;
             height: 30px;
@@ -410,7 +410,7 @@ $font_serif: serif;
         height: 15px;
         z-index: 100;
         background: linear-gradient(to bottom, $color_delta_approx 0, rgba(40, 35, 35, 0) 100%);
-        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#a4a4a4', endColorstr='#00282323', GradientType=0);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$color_delta_approx', endColorstr='#00282323', GradientType=0);
     }
     .jsxc_avatar {
         margin-top: 1px;
@@ -431,7 +431,7 @@ $font_serif: serif;
             height: 30px;
             margin: 0;
             padding: 3px;
-            padding-right: 30px !important;
+            padding-right: 40px;
             outline: none;
             border-radius: 0;
             box-sizing: border-box;
@@ -460,7 +460,7 @@ $font_serif: serif;
     .jsxc_close {
         font-size: 20px;
         &:hover {
-            color: #FAFAFA;
+            color: $alabaster;
         }
     }
     .ui-resizable-w {
@@ -481,7 +481,7 @@ $font_serif: serif;
         height: 15px;
         z-index: 100;
         background: linear-gradient(to bottom, $color_delta_approx 0, rgba(40, 35, 35, 0) 100%);
-        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#a4a4a4', endColorstr='#00282323', GradientType=0);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$color_delta_approx', endColorstr='#00282323', GradientType=0);
     }
 }
 .jsxc_chatmessage {
@@ -504,6 +504,11 @@ $font_serif: serif;
         background-size: 19px 19px;
     }
 }
+.jsxc_timestamp {
+    font-size: 8px;
+    color: $color_delta_approx;
+    line-height: 8px;
+}
 .jsxc_in {
     float: left;
     position: relative;
@@ -522,6 +527,9 @@ $font_serif: serif;
         z-index: 1;
         left: -6px;
         bottom: 10px;
+    }
+    .jsxc_timestamp {
+        float: left;
     }
 }
 .jsxc_out {
@@ -551,6 +559,12 @@ $font_serif: serif;
         font-size: 12px;
         line-height: 12px;
         color: $color_japanese_laurel_approx;
+        .jsxc_timestamp {
+            margin-right: 4px;
+        }
+    }
+    .jsxc_timestamp {
+        float: right;
     }
 }
 .jsxc_sys {
@@ -561,14 +575,14 @@ $font_serif: serif;
     margin-right: 3px;
     border-radius: 3px;
 }
-.jsxc_settings {
-    background-image: url('img/gear_grey.svg');
+div.jsxc_settings {
+    background-image: url('../img/gear_grey.svg');
     background-size: 15px 15px;
     background-repeat: no-repeat;
     background-position: center center;
     overflow: visible;
     &:hover, .hover {
-        background-image: url('img/gear_white.svg');
+        background-image: url('../img/gear_white.svg');
     }
     ul {
         list-style: none;
@@ -600,22 +614,22 @@ $font_serif: serif;
         }
         &:hover:not(.jsxc_disabled ) {
             color: $white;
-            background-color: #3F8FBA;
+            background-color: $color_boston_blue_approx;
         }
     }
 }
-.jsxc_transfer {
+div.jsxc_transfer {
     @extend %padlock-icon;
     &:hover {
-        background-image: url('img/padlock_open_white.svg');
+        background-image: url('../img/padlock_open_white.svg');
     }
     &.jsxc_fin {
-        background-image: url('img/padlock_close_grey.svg');
+        background-image: url('../img/padlock_close_grey.svg');
     }
     &.jsxc_enc {
-        background-image: url('img/padlock_close_orange.svg');
+        background-image: url('../img/padlock_close_orange.svg');
         &.jsxc_trust {
-            background-image: url('img/padlock_close_green.svg');
+            background-image: url('../img/padlock_close_green.svg');
         }
     }
     &.jsxc_disabled:hover {
@@ -634,9 +648,9 @@ $font_serif: serif;
     height: 32px;
     border: 0;
     background-size: 32px 32px !important;
-    background: url('img/loading.gif');
+    background: url('../img/loading.gif');
 }
-
+/* @TODO: check */
 #jsxc_loginForm input[type="submit"] {
     height: 34px;
     display: inline-block;

@@ -145,25 +145,6 @@ module.exports = function(grunt) {
           }
         }
       },
-      qunit: {
-        all: {
-          options: {
-            timeout: 10000,
-            urls: [
-              'http://localhost:3000/test/bower/bower_spec.html',
-              'http://localhost:3000/test/jsxc/jsxc_spec.html'
-            ]
-          }
-        }
-      },
-      connect: {
-        server: {
-          options: {
-            port: 3000,
-            base: '.'
-          }
-        }
-      },
       jsdoc: {
           dist: {
               src: ['jsxc.lib.js', 'jsxc.lib.webrtc.js'],
@@ -205,16 +186,13 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-contrib-compress');
    grunt.loadNpmTasks('grunt-jsdoc');
    grunt.loadNpmTasks('grunt-data-uri');
-   grunt.loadNpmTasks('grunt-contrib-qunit');
-   grunt.loadNpmTasks('grunt-contrib-connect');
-   grunt.loadNpmTasks('grunt-merge-data');
    grunt.loadNpmTasks('grunt-contrib-csslint');
    grunt.loadNpmTasks('grunt-sass');
    grunt.loadNpmTasks('grunt-autoprefixer');
 
    // Default task.
    grunt.registerTask('default', [ 'jshint', 'search', 'jsdoc', 'clean', 'copy', 'sass', 'autoprefixer',
-                                    'dataUri', 'usebanner', 'merge_data', 'replace', 'concat', 'uglify', 'compress' ]);
+                                    'dataUri', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // Create alpha/beta build
    grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
