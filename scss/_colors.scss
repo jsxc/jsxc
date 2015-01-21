@@ -1,43 +1,136 @@
-$white: #fff;
-$white_80: rgba(255, 255, 255, 0.8);
-$gallery: #efefef;
-$alabaster: #fafafa;
-$seashell: #f1f1f1;
-$color_alice_blue_approx: #f1f7fd;
-
-$color_casablanca_approx: #fbc14c;
-$web_orange: #ffa500;
-
-/* Fifty shades of gray */
-$gray: #808080;
-$color_delta_approx: #a4a4a4;
-$color_nobel_approx: #b1b1b1;
-$color_pale_slate_approx: #c3c3c3;
-$color_celeste_approx: #ccc;
-$color_silver_approx: #c1c1c1;
-$color_quill_gray_approx: #d3d3d3;
-$color_mountain_mist_50_approx: rgba(150, 150, 150, 0.5);
-$color_suva_gray_approx: #888;
-$color_chicago_approx: #595959;
-$color_mountain_mist_approx: #939393;
-$color_dove_gray_approx: #717171;
-$color_ship_gray_approx: #383c43;
-$color_log_cabin_approx: #282323;
-$color_log_cabin_80_approx: rgba(40, 35, 35, 0.8);
-
-$color_blue_approx: #00f;
-$color_cerulean_approx: #00bfff;
-$color_boston_blue_approx: #3f8fba;
-$color_cadet_blue_approx: #a6b8c9;
-
-$color_japanese_laurel_approx: #008000;
-$color_fern_approx: #5cb85c;
-$color_apple_approx: #4cae4c;
-$color_snow_flurry_approx: #e6ffd1;
-$color_moss_green_approx: #b4d89f;
-
 $black: #000;
-$black_40: rgba(0, 0, 0, 0.4);
-$black_50: rgba(0, 0, 0, 0.5);
-
+$white: #fff;
+$orange: #ffa500;
 $red: #f00;
+$blue: #00f;
+
+
+
+$color_0: $black;
+$color_1: lighten($black, 10%);
+$color_2: lighten($black, 20%);
+$color_3: lighten($black, 30%);
+$color_4: lighten($black, 40%);
+$color_5: lighten($black, 50%);
+$color_6: lighten($black, 60%);
+$color_7: lighten($black, 70%);
+$color_8: lighten($black, 80%);
+$color_9: lighten($black, 90%);
+$color_10: lighten($black, 100%);
+
+$color_11: $orange;
+$color_12: $red;
+
+$color_13: #f1f7fd;
+$color_14: #a6b8c9;
+$color_15: #3f8fba;
+$color_16: #00bfff;
+$color_17: $blue;
+$color_18: #e6ffd1;
+
+$color_19: #b4d89f;
+$color_20: #5cb85c;
+$color_21: #4cae4c;
+$color_22: #008000;
+
+
+
+$shadow: $black;
+$separator: $black;
+$invalid_border: $color_12;
+$name_hover: $color_10;
+$dialog_fieldset_border: $color_8;
+$dialog_input_invalid: $color_12;
+$dialog_input_readonly_bg: $color_9;
+$spot_bg: $color_10;
+$spot_border: $black;
+$state_online: $color_16;
+$state_chat: $color_16;
+$state_away: $color_11;
+$state_xa: $color_11;
+$state_dnd: $color_12;
+$state_offline: $color_6;
+$notice_bg: $color_11;
+$notice_color: $black;
+$window_unread_cycle: $color_11;
+$window_bar_bg: $color_1;
+$window_bar_color: $color_5;
+$window_bg: $color_6;
+$window_gradient: $color_6;
+$window_placeholder: $black;
+
+$tools_color: $color_5;
+$window_close_hover: $color_10;
+
+$chatmessage_bg: $color_10;
+$chatmessage_a: $color_17;
+$chatmessage_timestamp: $color_6;
+$chatmessage_in_bg: $color_13;
+$chatmessage_in_border: $color_14;
+$chatmessage_out_bg: $color_18;
+$chatmessage_out_border: $color_19;
+$chatmessage_received: $color_22;
+
+$window_settings_bg: $color_1;
+$window_settings_border_top: $color_8;
+$window_settings_disabled: $color_3;
+$window_settings_bg_hover: $color_15;
+$window_settings_color_hover: $color_10;
+
+$windowListSB_bg: $color_8;
+$windowListSB_color: $color_5;
+$windowListSB_bg_hover: $color_7;
+$windowListSB_bg_disabled: $color_9;
+$windowListSB_color_disabled: $color_8;
+
+$emoticon_selection_bg: rgba($color_1, 0.8);
+$emoticon_selection_hover: rgba($color_10, 0.8);
+
+$roster_bg: $color_2;
+$roster_input_bg: $color_10;
+$roster_input_shadow: $color_4;
+$roster_color: $color_5;
+$roster_a: $color_7;
+$roster_unread_bg: $color_11;
+$roster_icon_bg: rgba($color_4, 0.5);
+$roster_icon_color: $color_7;
+
+$roster_toggle_hover: rgba($color_6, 0.5);
+
+$roster_border_left: $color_6;
+$roster_bottom_border_top: $color_5;
+$roster_bottom_bg: $color_1;
+$roster_bottom_color: $color_5;
+$roster_bottom_disabled: $color_2;
+$roster_bottom_bg_hover: $color_15;
+$roster_bottom_color_hover: $color_10;
+
+$fullscreen_bg: $color_6;
+$video_status_bg: rgba($color_0, 0.5);
+$video_status_color: $color_10;
+$video_bg: $color_6;
+
+$novideo_color: $color_10;
+$novideo_bg: $color_3;
+
+$bubbling_bg: $black;
+$bubbling_start_bg: $black;
+$bubbling_end_bg: $color_10;
+
+$avatar_bg: $color_6;
+$avatar_color: $color_7;
+
+$loginForm_bg: $color_20;
+$loginForm_border: $color_21;
+
+
+
+
+
+
+
+
+
+
+
+

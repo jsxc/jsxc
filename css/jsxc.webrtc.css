@@ -1,4 +1,3 @@
-/* Fifty shades of gray */
 .jsxc_remotevideo, .jsxc_noRemoteVideo {
   width: 100%;
   height: 100%;
@@ -6,7 +5,7 @@
   top: 0;
   left: 0;
   z-index: 9000;
-  background-color: #a4a4a4; }
+  background-color: #999999; }
 
 .jsxc_webrtc {
   width: 900px; }
@@ -18,7 +17,7 @@
     top: 30px;
     left: 50%;
     background-color: rgba(0, 0, 0, 0.5);
-    color: #fff;
+    color: white;
     padding: 15px;
     font-weight: bold;
     text-align: center; }
@@ -27,13 +26,13 @@
   .jsxc_webrtc li .jsxc_name {
     cursor: auto; }
     .jsxc_webrtc li .jsxc_name:hover {
-      color: #939393; }
+      color: gray; }
 
 .jsxc_videoContainer {
   width: 640px;
   height: 480px;
   position: relative;
-  background-color: #a4a4a4; }
+  background-color: #999999; }
   .jsxc_videoContainer video {
     display: none; }
   .jsxc_videoContainer .jsxc_noRemoteVideo {
@@ -44,7 +43,7 @@
   bottom: 0;
   left: 0;
   text-align: center;
-  color: #fff;
+  color: white;
   width: 100%;
   z-index: 100; }
 .jsxc_noRemoteVideo > div {
@@ -57,7 +56,7 @@
   left: 50%;
   margin-left: -100px; }
   .jsxc_noRemoteVideo > div > div {
-    background-color: #717171; }
+    background-color: #4d4d4d; }
     .jsxc_noRemoteVideo > div > div:first-child {
       width: 50%;
       height: 50%;
@@ -96,12 +95,12 @@ div:fullscreen {
   div:fullscreen.jsxc_localvideo {
     border: 1px solid #fff; }
 div.jsxc_video {
-  background-image: url('../img/camera_icon_grey.svg');
+  background-image: url("../img/camera_icon_grey.svg");
   background-repeat: no-repeat;
   background-position: center center;
   background-size: 15px 15px; }
   div.jsxc_video:not(.jsxc_disabled):hover {
-    background-image: url('../img/camera_icon_white.svg'); }
+    background-image: url("../img/camera_icon_white.svg"); }
 
 .jsxc_controlbar {
   width: 640px; }
@@ -133,7 +132,7 @@ div.jsxc_video {
   float: right;
   height: 480px;
   width: 250px;
-  background-color: #A4A4A4; }
+  background-color: #999999; }
   .jsxc_chatarea .jsxc_settings {
     display: none !important; }
   .jsxc_chatarea .jsxc_close {
@@ -186,7 +185,7 @@ div.jsxc_video {
   100% {
     width: 39px;
     height: 39px;
-    background-color: #FFFFFF;
+    background-color: #fff;
     transform: translateY(-34px); } }
 
 .jsxc_fullscreen.jsxc_localvideo {
@@ -196,6 +195,6 @@ div.jsxc_video {
   font-style: italic; }
 
 #jsxc_buddylist .jsxc_options .jsxc_video {
-  background-image: url('../img/camera_icon_white.svg'); }
+  background-image: url("../img/camera_icon_white.svg"); }
   #jsxc_buddylist .jsxc_options .jsxc_video.jsxc_disabled {
     opacity: 0.2; }

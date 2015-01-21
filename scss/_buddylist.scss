@@ -9,11 +9,11 @@
         padding: 0;
         margin: 0;
         height: 30px;
-        border-bottom: 1px solid $color_mountain_mist_approx;
+        border-bottom: 1px solid $roster_bottom_border_top;
         cursor: pointer;
         width: 200px;
         position: relative;
-        color: $color_mountain_mist_approx;
+        color: $roster_color;
         font-family: $font_sans;
         line-height: 30px;
         padding-left: 3px;
@@ -45,7 +45,7 @@
             width: 12px;
             height: 12px;
             border-radius: 6px;
-            background-color: $web_orange;
+            background-color: $roster_unread_bg;
             margin-right: 3px;
             opacity: 1.0;
             transition: width 0.5s, opacity 0.5s;
@@ -91,8 +91,8 @@
             margin-left: -8px;
             margin-top: -8px;
             border-radius: 8px;
-            color: $color_silver_approx;
-            background-color: $color_mountain_mist_50_approx;
+            color: $roster_icon_color;
+            background-color: $roster_icon_bg;
             opacity: 0.6;
             transition: transform 0.5s;
         }
@@ -105,7 +105,7 @@
         height: 20px;
         float: left;
         border-radius: 2px;
-        background-color: $color_mountain_mist_50_approx;
+        background-color: $roster_icon_bg;
         > div {
             height: 20px;
             width: 20px;
@@ -121,11 +121,11 @@
         }
     }
     .jsxc_chaticon {
-        background-image: url('../img/speech_balloon_white.svg');
+        background-image: image-url('speech_balloon_white.svg');
         background-size: 15px 15px;
     }
     .jsxc_videoicon {
-        background-image: url('../img/camera_icon_white.svg');
+        background-image: image-url('camera_icon_white.svg');
         background-size: 13px 13px;
     }
     .jsxc_vcardicon {

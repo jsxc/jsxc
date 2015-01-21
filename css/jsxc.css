@@ -1,17 +1,16 @@
-/* Fifty shades of gray */
 #jsxc_buddylist li:hover .jsxc_avatar, .jsxc_avatar {
   width: 25px;
   height: 25px;
   line-height: 25px;
   margin-top: 2px;
   margin-right: 4px;
-  background-color: #a4a4a4;
+  background-color: #999999;
   border-radius: 2px;
   float: left;
   text-align: center;
   font-weight: bold;
   font-size: 30px;
-  color: #b1b1b1;
+  color: #b3b3b3;
   overflow: hidden;
   position: relative;
   font-family: Arial, sans-serif;
@@ -19,7 +18,7 @@
   background-position: center center; }
 
 div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
-  background-image: url('../img/padlock_open_grey.svg');
+  background-image: url("../img/padlock_open_grey.svg");
   background-repeat: no-repeat;
   background-position: center center;
   background-size: 12px 12px; }
@@ -30,13 +29,13 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   line-height: 25px;
   margin-top: 2px;
   margin-right: 4px;
-  background-color: #a4a4a4;
+  background-color: #999999;
   border-radius: 2px;
   float: left;
   text-align: center;
   font-weight: bold;
   font-size: 30px;
-  color: #b1b1b1;
+  color: #b3b3b3;
   overflow: hidden;
   position: relative;
   font-family: Arial, sans-serif;
@@ -44,7 +43,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   background-position: center center; }
 
 div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
-  background-image: url('../img/padlock_open_grey.svg');
+  background-image: url("../img/padlock_open_grey.svg");
   background-repeat: no-repeat;
   background-position: center center;
   background-size: 12px 12px; }
@@ -58,11 +57,11 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
     padding: 0;
     margin: 0;
     height: 30px;
-    border-bottom: 1px solid #939393;
+    border-bottom: 1px solid gray;
     cursor: pointer;
     width: 200px;
     position: relative;
-    color: #939393;
+    color: gray;
     font-family: Arial, sans-serif;
     line-height: 30px;
     padding-left: 3px;
@@ -125,8 +124,8 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
       margin-left: -8px;
       margin-top: -8px;
       border-radius: 8px;
-      color: #c1c1c1;
-      background-color: rgba(150, 150, 150, 0.5);
+      color: #b3b3b3;
+      background-color: rgba(102, 102, 102, 0.5);
       opacity: 0.6;
       transition: transform 0.5s; }
     #jsxc_buddylist .jsxc_control:hover:after {
@@ -136,7 +135,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
     height: 20px;
     float: left;
     border-radius: 2px;
-    background-color: rgba(150, 150, 150, 0.5); }
+    background-color: rgba(102, 102, 102, 0.5); }
     #jsxc_buddylist .jsxc_options > div {
       height: 20px;
       width: 20px;
@@ -149,10 +148,10 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
       #jsxc_buddylist .jsxc_options > div:hover {
         opacity: 1; }
   #jsxc_buddylist .jsxc_chaticon {
-    background-image: url('../img/speech_balloon_white.svg');
+    background-image: url("../img/speech_balloon_white.svg");
     background-size: 15px 15px; }
   #jsxc_buddylist .jsxc_videoicon {
-    background-image: url('../img/camera_icon_white.svg');
+    background-image: url("../img/camera_icon_white.svg");
     background-size: 13px 13px; }
   #jsxc_buddylist .jsxc_vcardicon {
     font-size: 15px;
@@ -180,7 +179,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   border-left: 4px solid #f00 !important; }
 
 .jsxc_offline {
-  border-left: 4px solid #a4a4a4 !important; }
+  border-left: 4px solid #999999 !important; }
 
 .jsxc_hidden {
   display: none; }
@@ -195,70 +194,70 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   border: 0; }
 
 .jsxc_angel {
-  background: url('img/emotions/angel.png'); }
+  background: url("../img/emotions/angel.png"); }
 
 .jsxc_angry {
-  background: url('img/emotions/angry.png'); }
+  background: url("../img/emotions/angry.png"); }
 
 .jsxc_smile {
-  background: url('img/emotions/smile.png'); }
+  background: url("../img/emotions/smile.png"); }
 
 .jsxc_grin {
-  background: url('img/emotions/grin.png'); }
+  background: url("../img//emotions/grin.png"); }
 
 .jsxc_sad {
-  background: url('img/emotions/sad.png'); }
+  background: url("../img/emotions/sad.png"); }
 
 .jsxc_wink {
-  background: url('img/emotions/wink.png'); }
+  background: url("../img/emotions/wink.png"); }
 
 .jsxc_tonguesmile {
-  background: url('img/emotions/tonguesmile.png'); }
+  background: url("../img/emotions/tonguesmile.png"); }
 
 .jsxc_surprised {
-  background: url('img/emotions/surprised.png'); }
+  background: url("../img/emotions/surprised.png"); }
 
 .jsxc_kiss {
-  background: url('img/emotions/kiss.png'); }
+  background: url("../img/emotions/kiss.png"); }
 
 .jsxc_sunglassess {
-  background: url('img/emotions/sunglassess.png'); }
+  background: url("../img/emotions/sunglassess.png"); }
 
 .jsxc_crysad {
-  background: url('img/emotions/crysad.png'); }
+  background: url("../img/emotions/crysad.png"); }
 
 .jsxc_doubt {
-  background: url('img/emotions/doubt.png'); }
+  background: url("../img/emotions/doubt.png"); }
 
 .jsxc_zip {
-  background: url('img/emotions/zip.png'); }
+  background: url("../img/emotions/zip.png"); }
 
 .jsxc_thumbsup {
-  background: url('img/emotions/thumbsup.png'); }
+  background: url("../img/emotions/thumbsup.png"); }
 
 .jsxc_thumbsdown {
-  background: url('img/emotions/thumbsdown.png'); }
+  background: url("../img/emotions/thumbsdown.png"); }
 
 .jsxc_beer {
-  background: url('img/emotions/beer.png'); }
+  background: url("../img/emotions/beer.png"); }
 
 .jsxc_devil {
-  background: url('img/emotions/devil.png'); }
+  background: url("../img/emotions/devil.png"); }
 
 .jsxc_kissing {
-  background: url('img/emotions/kissing.png'); }
+  background: url("../img/emotions/kissing.png"); }
 
 .jsxc_rose {
-  background: url('img/emotions/rose.png'); }
+  background: url("../img/emotions/rose.png"); }
 
 .jsxc_music {
-  background: url('img/emotions/music.png'); }
+  background: url("../img/emotions/music.png"); }
 
 .jsxc_love {
-  background: url('img/emotions/love.png'); }
+  background: url("../img/emotions/love.png"); }
 
 .jsxc_tired {
-  background: url('img/emotions/tired.png'); }
+  background: url("../img/emotions/tired.png"); }
 
 #jsxc_roster {
   position: fixed;
@@ -267,11 +266,11 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   right: 0;
   width: 200px;
   overflow: visible;
-  border-left: 4px solid #A4A4A4;
+  border-left: 4px solid #999999;
   z-index: 80;
   margin-left: 10px;
-  box-shadow: 0px 0px 7px #000000;
-  background-color: #383C43; }
+  box-shadow: 0px 0px 7px #000;
+  background-color: #333333; }
   #jsxc_roster a {
     cursor: pointer; }
   #jsxc_roster .slimScrollDiv {
@@ -303,15 +302,15 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
     padding: 2px;
     border: 0;
     background-image: none;
-    background-color: #fff;
+    background-color: white;
     border-radius: 3px;
-    box-shadow: inner 0 0 5px #888;
+    box-shadow: inner 0 0 5px #666666;
     outline: none; }
   #jsxc_roster p {
-    color: #939393;
+    color: gray;
     padding: 10px; }
     #jsxc_roster p a {
-      color: #b1b1b1;
+      color: #b3b3b3;
       text-decoration: underline; }
   #jsxc_roster .jsxc_avatar {
     position: relative;
@@ -332,8 +331,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   background-color: transparent;
   cursor: pointer; }
   #jsxc_toggleRoster:hover {
-    background-color: #a4a4a4;
-    opacity: 0.5; }
+    background-color: rgba(153, 153, 153, 0.5); }
 
 #jsxc_roster > .jsxc_bottom {
   position: absolute;
@@ -341,11 +339,11 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   bottom: 0;
   height: 30px;
   width: 200px;
-  border-left: 4px solid #A4A4A4;
-  border-top: 1px solid #939393;
+  border-left: 4px solid #999999;
+  border-top: 1px solid gray;
   padding-left: 0;
-  background-color: #282323;
-  color: #939393;
+  background-color: #1a1a1a;
+  color: gray;
   cursor: pointer;
   line-height: 30px;
   z-index: 50; }
@@ -355,16 +353,16 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
     bottom: 30px;
     left: 0;
     display: none;
-    border-top: 1px solid #939393;
+    border-top: 1px solid gray;
     padding-left: 10px;
-    background-color: #282323;
+    background-color: #1a1a1a;
     margin: 0; }
     #jsxc_roster > .jsxc_bottom ul li:last-child {
-      border-bottom: 1px solid #939393; }
+      border-bottom: 1px solid gray; }
   #jsxc_roster > .jsxc_bottom li {
     height: 30px;
-    background-color: #282323;
-    color: #939393;
+    background-color: #1a1a1a;
+    color: gray;
     cursor: pointer;
     width: 180px;
     padding-left: 10px;
@@ -374,15 +372,15 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
     text-overflow: ellipsis;
     white-space: nowrap; }
     #jsxc_roster > .jsxc_bottom li.jsxc_disabled {
-      color: #595959;
+      color: #333333;
       cursor: default; }
     #jsxc_roster > .jsxc_bottom li:hover:not(.jsxc_disabled) {
-      color: #fff;
-      background-color: #3F8FBA; }
+      color: white;
+      background-color: #3f8fba; }
 #jsxc_roster > .jsxc_bottom > div > span {
   cursor: pointer; }
 #jsxc_roster > .jsxc_bottom > div:hover {
-  color: #FAFAFA; }
+  color: white; }
 
 .jsxc_right {
   text-align: right; }
@@ -400,7 +398,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   text-overflow: ellipsis;
   white-space: nowrap; }
   .jsxc_name:hover {
-    color: #fafafa; }
+    color: white; }
 
 .jsxc_maxWidth {
   max-width: 500px; }
@@ -436,7 +434,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   #jsxc_dialog .jsxc_right {
     margin-top: 20px; }
   #jsxc_dialog fieldset {
-    border: 2px solid #ccc; }
+    border: 2px solid #cccccc; }
   #jsxc_dialog legend {
     padding: 0 10px;
     font-weight: bold; }
@@ -455,7 +453,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
       display: inline-block;
       width: 50px; }
   #jsxc_dialog input[readonly] {
-    background-color: #efefef; }
+    background-color: #e6e6e6; }
 
 .jsxc_avatar img {
   display: block;
@@ -465,11 +463,11 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   top: 0;
   left: 0; }
 
-.jsxc_vCard {
+ul.jsxc_vCard {
   min-width: 400px; }
-  .jsxc_vCard ul {
+  ul.jsxc_vCard ul {
     margin-left: 20px; }
-  .jsxc_vCard li {
+  ul.jsxc_vCard li {
     cursor: default !important; }
 
 .jsxc_spot {
@@ -495,7 +493,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   .jsxc_spot.jsxc_dnd {
     background-color: #f00; }
   .jsxc_spot.jsxc_offline {
-    background-color: #a4a4a4; }
+    background-color: #999999; }
 
 #jsxc_menu {
   height: 30px;
@@ -519,7 +517,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   text-align: center;
   line-height: 30px; }
   #jsxc_notice span {
-    background-color: #fbc14c;
+    background-color: #ffa500;
     border-radius: 11px;
     color: #000;
     font-size: 80%;
@@ -532,7 +530,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   display: block;
   width: 25px;
   height: 30px;
-  background-image: url('../img/gear_white.svg');
+  background-image: url("../img/gear_white.svg");
   background-size: 18px 18px;
   background-repeat: no-repeat;
   background-position: center center; }
@@ -589,7 +587,6 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
       margin: 0;
       display: inline-block;
       width: 250px;
-      background-color: #282323;
       height: 30px;
       position: relative;
       overflow: visible;
@@ -613,28 +610,28 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
     box-sizing: border-box;
     width: 14px;
     height: 100%;
-    background-color: #d3d3d3;
-    color: #939393;
+    background-color: #cccccc;
+    color: gray;
     text-align: center;
     line-height: 30px;
     float: left;
     cursor: pointer;
     user-select: none; }
     #jsxc_windowListSB > div:hover {
-      background-color: #c3c3c3; }
+      background-color: #b3b3b3; }
   #jsxc_windowListSB > .jsxc_disabled {
-    background-color: #f1f1f1 !important;
-    color: #ccc;
+    background-color: #e6e6e6 !important;
+    color: #cccccc;
     cursor: default !important;
     display: none; }
 
 .jsxc_bar {
-  background-color: #282323;
+  background-color: #1a1a1a;
   cursor: pointer;
   height: 30px;
   line-height: 26px;
   padding: 2px;
-  color: #939393;
+  color: gray;
   width: 100%;
   box-sizing: border-box;
   overflow: hidden; }
@@ -653,7 +650,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   left: 0;
   right: 0;
   height: auto;
-  background-color: #a4a4a4;
+  background-color: #999999;
   z-index: 80;
   cursor: default; }
   .jsxc_window .jsxc_emoticons {
@@ -665,7 +662,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
     cursor: pointer; }
     .jsxc_window .jsxc_emoticons:after {
       content: ' ';
-      background-image: url('../img/smiley.png');
+      background-image: url("../img/smiley.png");
       background-position: center center;
       background-repeat: no-repeat;
       height: 30px;
@@ -680,7 +677,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
       bottom: 33px;
       right: 3px;
       width: 210px;
-      background-color: rgba(40, 35, 35, 0.8);
+      background-color: rgba(26, 26, 26, 0.8);
       padding: 3px;
       border-radius: 3px;
       z-index: 200;
@@ -690,7 +687,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
         position: absolute;
         border-left: 5px solid transparent;
         border-right: 5px solid transparent;
-        border-top: 6px solid rgba(40, 35, 35, 0.8);
+        border-top: 6px solid rgba(26, 26, 26, 0.8);
         display: block;
         width: 0;
         z-index: 1;
@@ -719,8 +716,8 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
     right: 0;
     height: 15px;
     z-index: 100;
-    background: linear-gradient(to bottom, #a4a4a4 0, rgba(40, 35, 35, 0) 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$color_delta_approx', endColorstr='#00282323', GradientType=0); }
+    background: linear-gradient(to bottom, #999999 0, rgba(0, 0, 0, 0) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$window_gradient', endColorstr='#00282323', GradientType=0); }
   .jsxc_window .jsxc_avatar {
     margin-top: 1px; }
   .jsxc_window .jsxc_textarea {
@@ -752,7 +749,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
       height: 26px;
       display: block;
       float: left;
-      color: #939393;
+      color: gray;
       font-family: Arial, sans-serif;
       line-height: 26px;
       cursor: pointer;
@@ -760,7 +757,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   .jsxc_window .jsxc_close {
     font-size: 20px; }
     .jsxc_window .jsxc_close:hover {
-      color: #fafafa; }
+      color: white; }
   .jsxc_window .ui-resizable-w {
     left: 0; }
   .jsxc_window .ui-resizable-nw {
@@ -776,8 +773,8 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
     right: 0;
     height: 15px;
     z-index: 100;
-    background: linear-gradient(to bottom, #a4a4a4 0, rgba(40, 35, 35, 0) 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$color_delta_approx', endColorstr='#00282323', GradientType=0); }
+    background: linear-gradient(to bottom, #999999 0, rgba(40, 35, 35, 0) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$window_gradient', endColorstr='#00282323', GradientType=0); }
 
 .jsxc_chatmessage {
   margin: 3px;
@@ -785,7 +782,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   padding-right: 10px;
   max-width: 76%;
   word-wrap: break-word;
-  background-color: #fff;
+  background-color: white;
   position: relative;
   outline: none;
   clear: both; }
@@ -799,7 +796,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
 
 .jsxc_timestamp {
   font-size: 8px;
-  color: #a4a4a4;
+  color: #999999;
   line-height: 8px; }
 
 .jsxc_in {
@@ -863,13 +860,13 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   border-radius: 3px; }
 
 div.jsxc_settings {
-  background-image: url('../img/gear_grey.svg');
+  background-image: url("../img/gear_grey.svg");
   background-size: 15px 15px;
   background-repeat: no-repeat;
   background-position: center center;
   overflow: visible; }
   div.jsxc_settings:hover, div.jsxc_settings .hover {
-    background-image: url('../img/gear_white.svg'); }
+    background-image: url("../img/gear_white.svg"); }
   div.jsxc_settings ul {
     list-style: none;
     padding: 0;
@@ -880,7 +877,7 @@ div.jsxc_settings {
     box-shadow: 0 5px 5px -5px #000;
     z-index: 110;
     overflow: visible;
-    background-color: #282323;
+    background-color: #1a1a1a;
     display: none; }
   div.jsxc_settings li {
     width: 170px;
@@ -891,22 +888,22 @@ div.jsxc_settings {
     text-align: left;
     cursor: pointer; }
     div.jsxc_settings li:first-child {
-      border-top: 1px solid #ccc; }
+      border-top: 1px solid #cccccc; }
     div.jsxc_settings li.jsxc_disabled {
-      color: #595959;
+      color: #4d4d4d;
       cursor: default; }
     div.jsxc_settings li:hover:not(.jsxc_disabled) {
-      color: #fff;
+      color: white;
       background-color: #3f8fba; }
 
 div.jsxc_transfer:hover {
-  background-image: url('../img/padlock_open_white.svg'); }
+  background-image: url("../img/padlock_open_white.svg"); }
 div.jsxc_transfer.jsxc_fin {
-  background-image: url('../img/padlock_close_grey.svg'); }
+  background-image: url("../img/padlock_close_grey.svg"); }
 div.jsxc_transfer.jsxc_enc {
-  background-image: url('../img/padlock_close_orange.svg'); }
+  background-image: url("../img/padlock_close_orange.svg"); }
   div.jsxc_transfer.jsxc_enc.jsxc_trust {
-    background-image: url('../img/padlock_close_green.svg'); }
+    background-image: url("../img/padlock_close_green.svg"); }
 
 #colorbox {
   outline: none; }
@@ -920,7 +917,7 @@ div.jsxc_transfer.jsxc_enc {
   height: 32px;
   border: 0;
   background-size: 32px 32px !important;
-  background: url('../img/loading.gif'); }
+  background: url("../img/loading.gif"); }
 
 /* @TODO: check */
 #jsxc_loginForm input[type="submit"] {

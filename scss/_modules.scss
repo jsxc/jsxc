@@ -4,13 +4,13 @@
     line-height: 25px;
     margin-top: 2px;
     margin-right: 4px;
-    background-color: $color_delta_approx;
+    background-color: $avatar_bg;
     border-radius: 2px;
     float: left;
     text-align: center;
     font-weight: bold;
     font-size: 30px;
-    color: $color_nobel_approx;
+    color: $avatar_color;
     overflow: hidden;
     position: relative;
     font-family: $font_sans;
@@ -19,7 +19,7 @@
 }
 
 %padlock-icon {
-    background-image: url('../img/padlock_open_grey.svg');
+    background-image: image-url('padlock_open_grey.svg');
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 12px 12px;

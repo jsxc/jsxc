@@ -5,11 +5,11 @@
     right: 0;
     width: 200px;
     overflow: visible;
-    border-left: 4px solid #A4A4A4;
+    border-left: 4px solid $roster_border_left;
     z-index: 80;
     margin-left: 10px;
-    box-shadow: 0px 0px 7px #000000;
-    background-color: #383C43;
+    box-shadow: 0px 0px 7px $shadow;
+    background-color: $roster_bg;
     a {
         cursor: pointer;
     }
@@ -46,16 +46,16 @@
         padding: 2px;
         border: 0;
         background-image: none;
-        background-color: $white;
+        background-color: $roster_input_bg;
         border-radius: 3px;
-        box-shadow: inner 0 0 5px $color_suva_gray_approx;
+        box-shadow: inner 0 0 5px $roster_input_shadow;
         outline: none;
     }
     p {
-        color: $color_mountain_mist_approx;
+        color: $roster_color;
         padding: 10px;
         a {
-            color: $color_nobel_approx;
+            color: $roster_a;
             text-decoration: underline;
         }
     }
@@ -82,8 +82,7 @@
     background-color: transparent;
     cursor: pointer;
     &:hover {
-        background-color: $color_delta_approx;
-        opacity: 0.5;
+        background-color: $roster_toggle_hover;
     }
 }
 #jsxc_roster> {
@@ -93,11 +92,11 @@
         bottom: 0;
         height: 30px;
         width: 200px;
-        border-left: 4px solid #A4A4A4;
-        border-top: 1px solid $color_mountain_mist_approx;
+        border-left: 4px solid $roster_border_left;
+        border-top: 1px solid $roster_bottom_border_top;
         padding-left: 0;
-        background-color: $color_log_cabin_approx;
-        color: $color_mountain_mist_approx;
+        background-color: $roster_bottom_bg;
+        color: $roster_color;
         cursor: pointer;
         line-height: 30px;
         z-index: 50;
@@ -107,18 +106,18 @@
             bottom: 30px;
             left: 0;
             display: none;
-            border-top: 1px solid $color_mountain_mist_approx;
+            border-top: 1px solid $roster_bottom_border_top;
             padding-left: 10px;
-            background-color: $color_log_cabin_approx;
+            background-color: $roster_bottom_bg;
             margin: 0;
             li:last-child {
-                border-bottom: 1px solid $color_mountain_mist_approx;
+                border-bottom: 1px solid $roster_bottom_border_top;
             }
         }
         li {
             height: 30px;
-            background-color: $color_log_cabin_approx;
-            color: $color_mountain_mist_approx;
+            background-color: $roster_bottom_bg;
+            color: $roster_bottom_color;
             cursor: pointer;
             width: 180px;
             padding-left: 10px;
@@ -128,12 +127,12 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             &.jsxc_disabled {
-                color: $color_chicago_approx;
+                color: $roster_bottom_disabled;
                 cursor: default;
             }
             &:hover:not(.jsxc_disabled) {
-                color: $white;
-                background-color: #3F8FBA;
+                color: $roster_bottom_color_hover;
+                background-color: $roster_bottom_bg_hover;
             }
         }
     }
@@ -141,7 +140,7 @@
         cursor: pointer;
     }
     &.jsxc_bottom>div:hover {
-        color: #FAFAFA;
+        color: $roster_bottom_color_hover;
     }
 }
 

@@ -165,6 +165,9 @@ module.exports = function(grunt) {
         },
       },
       sass: {
+        options: {
+           imagePath: '../img'
+        },
         dist: {
             files: {
             'css/jsxc.css': 'scss/jsxc.scss',
