@@ -7,16 +7,16 @@ $blue: #00f;
 
 
 $color_0: $black;
-$color_1: lighten($black, 10%);
-$color_2: lighten($black, 20%);
-$color_3: lighten($black, 30%);
-$color_4: lighten($black, 40%);
-$color_5: lighten($black, 50%);
-$color_6: lighten($black, 60%);
-$color_7: lighten($black, 70%);
-$color_8: lighten($black, 80%);
-$color_9: lighten($black, 90%);
-$color_10: lighten($black, 100%);
+$color_1: lighten($color_0, 10%);
+$color_2: lighten($color_0, 20%);
+$color_3: lighten($color_0, 30%);
+$color_4: lighten($color_0, 40%);
+$color_5: lighten($color_0, 50%);
+$color_6: lighten($color_0, 60%);
+$color_7: lighten($color_0, 70%);
+$color_8: lighten($color_0, 80%);
+$color_9: lighten($color_0, 90%);
+$color_10: lighten($color_0, 100%);
 
 $color_11: $orange;
 $color_12: $red;
