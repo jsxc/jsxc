@@ -302,7 +302,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
     padding: 2px;
     border: 0;
     background-image: none;
-    background-color: white;
+    background-color: #fff;
     border-radius: 3px;
     box-shadow: inner 0 0 5px #666666;
     outline: none; }
@@ -375,12 +375,12 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
       color: #333333;
       cursor: default; }
     #jsxc_roster > .jsxc_bottom li:hover:not(.jsxc_disabled) {
-      color: white;
+      color: #fff;
       background-color: #3f8fba; }
 #jsxc_roster > .jsxc_bottom > div > span {
   cursor: pointer; }
 #jsxc_roster > .jsxc_bottom > div:hover {
-  color: white; }
+  color: #fff; }
 
 .jsxc_right {
   text-align: right; }
@@ -398,7 +398,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   text-overflow: ellipsis;
   white-space: nowrap; }
   .jsxc_name:hover {
-    color: white; }
+    color: #fff; }
 
 .jsxc_maxWidth {
   max-width: 500px; }
@@ -677,7 +677,7 @@ ul.jsxc_vCard {
       bottom: 33px;
       right: 3px;
       width: 210px;
-      background-color: rgba(26, 26, 26, 0.8);
+      background-color: rgba(51, 51, 51, 0.8);
       padding: 3px;
       border-radius: 3px;
       z-index: 200;
@@ -687,7 +687,7 @@ ul.jsxc_vCard {
         position: absolute;
         border-left: 5px solid transparent;
         border-right: 5px solid transparent;
-        border-top: 6px solid rgba(26, 26, 26, 0.8);
+        border-top: 6px solid rgba(51, 51, 51, 0.8);
         display: block;
         width: 0;
         z-index: 1;
@@ -757,7 +757,7 @@ ul.jsxc_vCard {
   .jsxc_window .jsxc_close {
     font-size: 20px; }
     .jsxc_window .jsxc_close:hover {
-      color: white; }
+      color: #fff; }
   .jsxc_window .ui-resizable-w {
     left: 0; }
   .jsxc_window .ui-resizable-nw {
@@ -782,7 +782,7 @@ ul.jsxc_vCard {
   padding-right: 10px;
   max-width: 76%;
   word-wrap: break-word;
-  background-color: white;
+  background-color: #fff;
   position: relative;
   outline: none;
   clear: both; }
@@ -893,7 +893,7 @@ div.jsxc_settings {
       color: #4d4d4d;
       cursor: default; }
     div.jsxc_settings li:hover:not(.jsxc_disabled) {
-      color: white;
+      color: #fff;
       background-color: #3f8fba; }
 
 div.jsxc_transfer:hover {
