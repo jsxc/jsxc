@@ -327,6 +327,10 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
   #jsxc_roster .jsxc_expand input {
     left: 51px;
     width: 137px; }
+  #jsxc_roster.jsxc_noConnection .slimScrollDiv {
+    display: none; }
+  #jsxc_roster.jsxc_noConnection > .jsxc_bottom {
+    display: none; }
 
 #jsxc_toggleRoster {
   width: 14px;

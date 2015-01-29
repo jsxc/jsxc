@@ -39,9 +39,6 @@ var jsxc;
       /** True if restore is complete */
       restoreCompleted: false,
 
-      /** True if login through form */
-      triggeredFromForm: false,
-
       /** True if login through box */
       triggeredFromBox: false,
 
@@ -89,29 +86,28 @@ var jsxc;
 
       /**
        * Parse a unix timestamp and return a formatted time string
-       *
+       * 
        * @memberOf jsxc
        * @param {Object} unixtime
        * @returns time of day and/or date
        */
       getFormattedTime: function(unixtime) {
-        var msgDate = new Date(parseInt(unixtime)),
-            date = ('0' + msgDate.getDate()).slice(-2),
-            month = ('0' + (msgDate.getMonth() + 1)).slice(-2),
-            year = msgDate.getFullYear(),
-            hours = ('0' + msgDate.getHours()).slice(-2),
-            minutes = ('0' + msgDate.getMinutes()).slice(-2);
-        var dateNow = new Date(),
-            time = hours + ':' + minutes;
+         var msgDate = new Date(parseInt(unixtime));
+         var date = ('0' + msgDate.getDate()).slice(-2);
+         var month = ('0' + (msgDate.getMonth() + 1)).slice(-2);
+         var year = msgDate.getFullYear();
+         var hours = ('0' + msgDate.getHours()).slice(-2);
+         var minutes = ('0' + msgDate.getMinutes()).slice(-2);
+         var dateNow = new Date(), time = hours + ':' + minutes;
 
-        // compare dates only
-        dateNow.setHours(0, 0, 0, 0);
-        msgDate.setHours(0, 0, 0, 0);
+         // compare dates only
+         dateNow.setHours(0, 0, 0, 0);
+         msgDate.setHours(0, 0, 0, 0);
 
-        if (dateNow.getTime() !== msgDate.getTime()) {
-           return date + '.' + month + '.' + year + ' ' + time;
-        }
-        return time;
+         if (dateNow.getTime() !== msgDate.getTime()) {
+            return date + '.' + month + '.' + year + ' ' + time;
+         }
+         return time;
       },
 
       /**
@@ -292,7 +288,7 @@ var jsxc;
                var settings = jsxc.prepareLogin();
 
                if (settings !== false && (settings.xmpp.onlogin === "true" || settings.xmpp.onlogin === true)) {
-                  jsxc.triggeredFromForm = true;
+                  jsxc.options.loginForm.triggered = true;
 
                   jsxc.xmpp.login();
 
@@ -466,7 +462,7 @@ var jsxc;
          }
 
          $(document).on('connectionReady.jsxc', function() {
-             jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
+            jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
          });
 
          jsxc.xmpp.login();
@@ -799,7 +795,19 @@ var jsxc;
          /** manipulate JID from input element */
          preJid: function(jid) {
             return jid;
-         }
+         },
+
+         /**
+          * Action after connected: submit [String] Submit form, false [boolean]
+          * Do nothing, continue [String] Start chat
+          */
+         onConnected: 'submit',
+
+         /**
+          * Action after auth fail: submit [String] Submit form, false [boolean]
+          * Do nothing, ask [String] Show auth fail dialog
+          */
+         onAuthFail: 'submit'
       },
 
       /** jquery object from logout element */
@@ -951,7 +959,9 @@ var jsxc;
 
          jsxc.gui.tooltip('#jsxc_windowList');
 
-         jsxc.gui.roster.init();
+         if (!jsxc.el_exists('#jsxc_roster')) {
+            jsxc.gui.roster.init();
+         }
 
          // prepare regexp for emotions
          $.each(jsxc.gui.emotions, function(i, val) {
@@ -1248,7 +1258,7 @@ var jsxc;
             var settings = jsxc.prepareLogin();
 
             jsxc.triggeredFromBox = true;
-            jsxc.triggeredFromForm = false;
+            jsxc.options.loginForm.triggered = false;
 
             if (settings === false) {
                jsxc.gui.showAuthFail();
@@ -1515,7 +1525,7 @@ var jsxc;
       showAuthFail: function() {
          jsxc.gui.dialog.open(jsxc.gui.template.get('authFailDialog'));
 
-         if (jsxc.triggeredFromBox) {
+         if (jsxc.options.loginForm.triggered !== false) {
             $('#jsxc_dialog .jsxc_cancel').hide();
          }
 
@@ -2340,8 +2350,7 @@ var jsxc;
        * Shows a text with link to a login box that no connection exists.
        */
       noConnection: function() {
-         $('#jsxc_roster .slimScrollDiv').remove();
-         $('#jsxc_roster > .jsxc_bottom').remove();
+         $('#jsxc_roster').addClass('jsxc_noConnection');
 
          $('#jsxc_roster').append($('<p>' + jsxc.l.no_connection + '</p>').append(' <a>' + jsxc.l.relogin + '</a>').click(function() {
             jsxc.gui.showLoginBox();
@@ -2908,8 +2917,7 @@ var jsxc;
             });
          });
 
-         var msgDiv = $("<div>"),
-         msgTsDiv = $("<div>");
+         var msgDiv = $("<div>"), msgTsDiv = $("<div>");
          msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
          msgDiv.attr('id', uid);
          msgDiv.html('<div>' + msg + '</div>');
@@ -2930,7 +2938,7 @@ var jsxc;
 
          if (direction === 'sys') {
             jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div style="clear:both"/>');
-         } else if(typeof post.stamp !== 'undefined'){
+         } else if (typeof post.stamp !== 'undefined') {
             msgDiv.append(msgTsDiv);
          }
 
@@ -3271,13 +3279,50 @@ var jsxc;
       /**
        * Create new connection or attach to old
        * 
+       * @name login
+       * @memberOf jsxc.xmpp
+       */
+      /**
+       * Create new connection with given parameters.
+       * 
+       * @name login^2
+       * @param {string} jid
+       * @param {string} password
+       * @memberOf jsxc.xmpp
+       */
+      /**
+       * Attach connection with given parameters.
+       * 
+       * @name login^3
+       * @param {string} jid
+       * @param {string} sid
+       * @param {string} rid
        * @memberOf jsxc.xmpp
        */
       login: function() {
 
-         var sid = jsxc.storage.getItem('sid');
-         var rid = jsxc.storage.getItem('rid');
-         var jid = jsxc.storage.getItem('jid');
+         if (jsxc.xmpp.conn && jsxc.xmpp.conn.connected) {
+            return;
+         }
+
+         var jid = null, password = null, sid = null, rid = null;
+
+         switch (arguments.length) {
+            case 2:
+               jid = arguments[0];
+               password = arguments[1];
+               break;
+            case 3:
+               jid = arguments[0];
+               sid = arguments[1];
+               rid = arguments[2];
+               break;
+            default:
+               jid = jsxc.storage.getItem('jid');
+               sid = jsxc.storage.getItem('sid');
+               rid = jsxc.storage.getItem('rid'); 
+         }
+
          var url = jsxc.options.get('xmpp').url;
 
          // Register eventlistener
@@ -3285,6 +3330,8 @@ var jsxc;
          $(document).on('attached.jsxc', jsxc.xmpp.attached);
          $(document).on('disconnected.jsxc', jsxc.xmpp.disconnected);
          $(document).on('ridChange', jsxc.xmpp.onRidChange);
+         $(document).on('connfail.jsxc', jsxc.xmpp.onConnfail);
+         $(document).on('authfail.jsxc', jsxc.xmpp.onAuthFail);
 
          Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
 
@@ -3325,10 +3372,10 @@ var jsxc;
                   $(document).trigger('disconnected.jsxc');
                   break;
                case Strophe.Status.CONNFAIL:
-                  jsxc.xmpp.onConnfail(condition);
+                  $(document).trigger('connfail.jsxc');
                   break;
                case Strophe.Status.AUTHFAIL:
-                  jsxc.gui.showAuthFail();
+                  $(document).trigger('authfail.jsxc');
                   break;
             }
          };
@@ -3360,7 +3407,7 @@ var jsxc;
                }, Strophe.NS.CAPS);
             }
 
-            jsxc.xmpp.conn.connect(jsxc.options.xmpp.jid, jsxc.options.xmpp.password, callback);
+            jsxc.xmpp.conn.connect(jid || jsxc.options.xmpp.jid, password || jsxc.options.xmpp.password, callback);
          }
       },
 
@@ -3395,11 +3442,11 @@ var jsxc;
          jsxc.triggeredFromElement = true;
 
          // restore all otr objects
-         $.each(jsxc.storage.getUserItem('otrlist'), function(i, val) {
+         $.each(jsxc.storage.getUserItem('otrlist') || {}, function(i, val) {
             jsxc.otr.create(val);
          });
 
-         var numOtr = Object.keys(jsxc.otr.objects).length + 1;
+         var numOtr = Object.keys(jsxc.otr.objects || {}).length + 1;
          var disReady = function() {
             if (--numOtr <= 0) {
                jsxc.xmpp.conn.flush();
@@ -3411,7 +3458,7 @@ var jsxc;
          };
 
          // end all private conversations
-         $.each(jsxc.otr.objects, function(key, obj) {
+         $.each(jsxc.otr.objects || {}, function(key, obj) {
             if (obj.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED) {
                obj.endOtr.call(obj, function() {
                   obj.init.call(obj);
@@ -3455,20 +3502,25 @@ var jsxc;
          jsxc.storage.removeUserItem('avatar', 'own');
          jsxc.storage.removeUserItem('otrlist');
 
-         // submit login form
-         if (jsxc.triggeredFromForm) {
-            // Trigger normal submit
-            jsxc.submitLoginForm();
-            return;
+         if (jsxc.options.loginForm.triggered) {
+            switch (jsxc.options.loginForm.onConnected || 'submit') {
+               case 'submit':
+                  jsxc.submitLoginForm();
+                  /* falls through */
+               case false:
+                  jsxc.xmpp.connectionReady();
+                  return;
+            }
          }
 
-         // reload page after login from login box
-         if (jsxc.triggeredFromBox) {
-            window.location.reload();
-            return;
-         }
+         // start chat
 
-         jsxc.xmpp.connectionReady();
+         jsxc.gui.init();
+         $('#jsxc_roster').removeClass('jsxc_noConnection');
+         jsxc.onMaster();
+         jsxc.xmpp.conn.resume();
+         jsxc.gui.dialog.close();
+         $(document).trigger('attached.jsxc');
       },
 
       /**
@@ -3618,11 +3670,29 @@ var jsxc;
        * @param {String} condition information why we lost the connection
        * @private
        */
-      onConnfail: function(condition) {
+      onConnfail: function(ev, condition) {
          jsxc.debug('XMPP connection failed: ' + condition);
 
-         if (jsxc.triggeredFromForm) {
+         if (jsxc.options.loginForm.triggered) {
             jsxc.submitLoginForm();
+         }
+      },
+
+      /**
+       * Triggered on auth fail.
+       * 
+       * @private
+       */
+      onAuthFail: function() {
+         if(jsxc.options.loginForm.triggered) {
+            switch (jsxc.options.loginForm.onAuthFail || 'ask') {
+               case 'ask':
+                  jsxc.gui.showAuthFail();
+                  break;
+               case 'submit':
+                  jsxc.submitLoginForm();
+                  break;
+            }
          }
       },
 
@@ -3902,12 +3972,12 @@ var jsxc;
          if (!body || (body.match(/\?OTR/i) && forwarded)) {
             return true;
          }
-         
+
          var type = $(message).attr('type');
          var from = $(message).attr('from');
          var mid = $(message).attr('id');
          var bid;
-         
+
          var delay = $(message).find('delay[xmlns="urn:xmpp:delay"]');
 
          var stamp = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
