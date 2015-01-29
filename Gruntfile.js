@@ -25,7 +25,7 @@ module.exports = function(grunt) {
          main: {
             files: [ {
                expand: true,
-               src: [ 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'jsxc.lib.js', 'jsxc.lib.webrtc.js', '*.css', 'LICENSE', 'img/**', 'sound/**' ],
+               src: [ 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'jsxc.lib.js', 'jsxc.lib.webrtc.js', 'LICENSE', 'img/**', 'sound/**' ],
                dest: 'build/'
             } ]
          }
@@ -137,7 +137,7 @@ module.exports = function(grunt) {
       dataUri: {
         dist: {
           src: 'css/*.css',
-          dest: 'build/',
+          dest: 'build/css/',
           options: {
             target: ['img/*.*', 'img/**/*.*'],
             fixDirLevel: true,
@@ -193,15 +193,17 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-sass');
    grunt.loadNpmTasks('grunt-autoprefixer');
 
-   // Default task.
-   grunt.registerTask('default', [ 'jshint', 'search', 'jsdoc', 'clean', 'copy', 'sass', 'autoprefixer',
-                                    'dataUri', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
+   //Default task
+   grunt.registerTask('default', [ 'css' ]);
+
+   // Create new build
+   grunt.registerTask('build', [ 'search:changelog', 'pre', 'jsdoc' ]);
 
    // Create alpha/beta build
-   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
+   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'css', 'dataUri', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // before commit
    grunt.registerTask('commit', [ 'jshint', 'search:console' ]);
 
-   grunt.registerTask('css', [ 'sass', 'autoprefixer', 'csslint' ]);
+   grunt.registerTask('css', [ 'sass', 'autoprefixer' ]);
 };
