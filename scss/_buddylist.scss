@@ -139,4 +139,9 @@
     li.jsxc_expand .jsxc_control:after {
         transform: rotate(180deg);
     }
+    &.jsxc_hideOffline {
+        .jsxc_offline {
+             display: none;
+        }
+    }
 }

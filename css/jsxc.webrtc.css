@@ -88,10 +88,28 @@ div:full-screen {
   background-color: #000; }
   div:full-screen.jsxc_localvideo {
     border: 1px solid #fff; }
+div:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+  background-color: #000; }
+div:-moz-full-screen {
+  width: 100%;
+  height: 100%;
+  background-color: #000; }
+div:-ms-fullscreen {
+  width: 100%;
+  height: 100%;
+  background-color: #000; }
 div:fullscreen {
   width: 100%;
   height: 100%;
   background-color: #000; }
+  div:-webkit-full-screen.jsxc_localvideo {
+  border: 1px solid #fff; }
+  div:-moz-full-screen.jsxc_localvideo {
+  border: 1px solid #fff; }
+  div:-ms-fullscreen.jsxc_localvideo {
+  border: 1px solid #fff; }
   div:fullscreen.jsxc_localvideo {
     border: 1px solid #fff; }
 div.jsxc_video {
@@ -164,29 +182,51 @@ div.jsxc_video {
     margin: 40px auto;
     background: #000;
     border-radius: 81px;
-    animation: bubblingG 1.3s infinite alternate; }
+    -webkit-animation: bubblingG 1.3s infinite alternate;
+            animation: bubblingG 1.3s infinite alternate; }
 
 #bubblingG_1 {
-  animation-delay: 0s; }
+  -webkit-animation-delay: 0s;
+          animation-delay: 0s; }
 
 #bubblingG_2 {
-  animation-delay: 0.39s; }
+  -webkit-animation-delay: 0.39s;
+          animation-delay: 0.39s; }
 
 #bubblingG_3 {
-  animation-delay: 0.78s; }
+  -webkit-animation-delay: 0.78s;
+          animation-delay: 0.78s; }
+
+@-webkit-keyframes bubblingG {
+
+  0% {
+    width: 16px;
+    height: 16px;
+    background-color: #000;
+    -webkit-transform: translateY(0);
+            transform: translateY(0); }
+
+  100% {
+    width: 39px;
+    height: 39px;
+    background-color: #fff;
+    -webkit-transform: translateY(-34px);
+            transform: translateY(-34px); } }
 
 @keyframes bubblingG {
   0% {
     width: 16px;
     height: 16px;
     background-color: #000;
-    transform: translateY(0); }
+    -webkit-transform: translateY(0);
+            transform: translateY(0); }
 
   100% {
     width: 39px;
     height: 39px;
     background-color: #fff;
-    transform: translateY(-34px); } }
+    -webkit-transform: translateY(-34px);
+            transform: translateY(-34px); } }
 
 .jsxc_fullscreen.jsxc_localvideo {
   border: 1px solid #fff; }

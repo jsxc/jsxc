@@ -81,7 +81,8 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
       height: 0;
       display: inline-block;
       opacity: 0;
-      transition: width 0.5s, opacity 0.5s; }
+      -webkit-transition: width 0.5s, opacity 0.5s;
+              transition: width 0.5s, opacity 0.5s; }
     #jsxc_buddylist li.jsxc_unreadMsg .jsxc_name:before {
       width: 12px;
       height: 12px;
@@ -89,7 +90,8 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
       background-color: #ffa500;
       margin-right: 3px;
       opacity: 1;
-      transition: width 0.5s, opacity 0.5s; }
+      -webkit-transition: width 0.5s, opacity 0.5s;
+              transition: width 0.5s, opacity 0.5s; }
   #jsxc_buddylist .jsxc_name {
     padding-right: 30px; }
   #jsxc_buddylist .jsxc_oneway {
@@ -127,7 +129,8 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
       color: #b3b3b3;
       background-color: rgba(102, 102, 102, 0.5);
       opacity: 0.6;
-      transition: transform 0.5s; }
+      -webkit-transition: -webkit-transform 0.5s;
+              transition: transform 0.5s; }
     #jsxc_buddylist .jsxc_control:hover:after {
       color: #fff;
       opacity: 1; }
@@ -161,7 +164,11 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
     font-weight: bold;
     font-family: serif; }
   #jsxc_buddylist li.jsxc_expand .jsxc_control:after {
-    transform: rotate(180deg); }
+    -webkit-transform: rotate(180deg);
+        -ms-transform: rotate(180deg);
+            transform: rotate(180deg); }
+  #jsxc_buddylist.jsxc_hideOffline .jsxc_offline {
+    display: none; }
 
 .jsxc_online {
   border-left: 4px solid #00bfff !important; }
@@ -523,7 +530,8 @@ ul.jsxc_vCard {
     font-size: 80%;
     padding: 2px;
     position: relative;
-    animation: bounce 2s 1s infinite; }
+    -webkit-animation: bounce 2s 1s infinite;
+            animation: bounce 2s 1s infinite; }
 
 #jsxc_menu > span {
   opacity: 0.5;
@@ -535,26 +543,61 @@ ul.jsxc_vCard {
   background-repeat: no-repeat;
   background-position: center center; }
 
-@keyframes bounce {
+@-webkit-keyframes bounce {
+
   0% {
     bottom: 0;
-    animation-timing-function: ease-in; }
+    -webkit-animation-timing-function: ease-in;
+            animation-timing-function: ease-in; }
 
   12% {
     bottom: 5px;
-    animation-timing-function: ease-out; }
+    -webkit-animation-timing-function: ease-out;
+            animation-timing-function: ease-out; }
 
   25% {
     bottom: 0;
-    animation-timing-function: ease-in; }
+    -webkit-animation-timing-function: ease-in;
+            animation-timing-function: ease-in; }
 
   37% {
     bottom: 5px;
-    animation-timing-function: ease-out; }
+    -webkit-animation-timing-function: ease-out;
+            animation-timing-function: ease-out; }
 
   50% {
     bottom: 0;
-    animation-timing-function: ease-in; }
+    -webkit-animation-timing-function: ease-in;
+            animation-timing-function: ease-in; }
+
+  100% {
+    bottom: 0; } }
+
+@keyframes bounce {
+  0% {
+    bottom: 0;
+    -webkit-animation-timing-function: ease-in;
+            animation-timing-function: ease-in; }
+
+  12% {
+    bottom: 5px;
+    -webkit-animation-timing-function: ease-out;
+            animation-timing-function: ease-out; }
+
+  25% {
+    bottom: 0;
+    -webkit-animation-timing-function: ease-in;
+            animation-timing-function: ease-in; }
+
+  37% {
+    bottom: 5px;
+    -webkit-animation-timing-function: ease-out;
+            animation-timing-function: ease-out; }
+
+  50% {
+    bottom: 0;
+    -webkit-animation-timing-function: ease-in;
+            animation-timing-function: ease-in; }
 
   100% {
     bottom: 0; } }
@@ -581,7 +624,8 @@ ul.jsxc_vCard {
     height: 30px;
     overflow: visible;
     white-space: nowrap;
-    transition: right 0.5s; }
+    -webkit-transition: right 0.5s;
+            transition: right 0.5s; }
     #jsxc_windowList > ul > li {
       padding: 0;
       margin: 0;
@@ -616,7 +660,10 @@ ul.jsxc_vCard {
     line-height: 30px;
     float: left;
     cursor: pointer;
-    user-select: none; }
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
     #jsxc_windowListSB > div:hover {
       background-color: #b3b3b3; }
   #jsxc_windowListSB > .jsxc_disabled {
@@ -716,6 +763,7 @@ ul.jsxc_vCard {
     right: 0;
     height: 15px;
     z-index: 100;
+    background: -webkit-linear-gradient(top, #999999 0, rgba(0, 0, 0, 0) 100%);
     background: linear-gradient(to bottom, #999999 0, rgba(0, 0, 0, 0) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$window_gradient', endColorstr='#00282323', GradientType=0); }
   .jsxc_window .jsxc_avatar {
@@ -738,6 +786,15 @@ ul.jsxc_vCard {
     border-radius: 0;
     box-sizing: border-box;
     text-align: right; }
+  .jsxc_window input::-webkit-input-placeholder {
+  color: #000;
+  opacity: 0.3; }
+  .jsxc_window input::-moz-placeholder {
+  color: #000;
+  opacity: 0.3; }
+  .jsxc_window input:-ms-input-placeholder {
+  color: #000;
+  opacity: 0.3; }
   .jsxc_window input::placeholder {
     color: #000;
     opacity: 0.3; }
@@ -773,6 +830,7 @@ ul.jsxc_vCard {
     right: 0;
     height: 15px;
     z-index: 100;
+    background: -webkit-linear-gradient(top, #999999 0, rgba(40, 35, 35, 0) 100%);
     background: linear-gradient(to bottom, #999999 0, rgba(40, 35, 35, 0) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$window_gradient', endColorstr='#00282323', GradientType=0); }
 
@@ -934,7 +992,10 @@ div.jsxc_transfer.jsxc_enc {
   cursor: pointer;
   border: 1px solid transparent;
   border-radius: 4px;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
   color: #fff;
   background-color: #5cb85c;
   border-color: #4cae4c; }
@@ -943,7 +1004,8 @@ div.jsxc_transfer.jsxc_enc {
   display: none; }
 
 .jsxc_oneway .jsxc_avatar {
-  filter: grayscale(100%); }
+  -webkit-filter: grayscale(100%);
+          filter: grayscale(100%); }
 
 .jsxc_min .jsxc_tools {
   display: none; }
