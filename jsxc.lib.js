@@ -3320,7 +3320,7 @@ var jsxc;
             default:
                jid = jsxc.storage.getItem('jid');
                sid = jsxc.storage.getItem('sid');
-               rid = jsxc.storage.getItem('rid'); 
+               rid = jsxc.storage.getItem('rid');
          }
 
          var url = jsxc.options.get('xmpp').url;
@@ -3647,6 +3647,13 @@ var jsxc;
          jsxc.storage.removeUserItem('avatar', 'own');
          jsxc.storage.removeUserItem('otrlist');
 
+         $(document).off('connected.jsxc', jsxc.xmpp.connected);
+         $(document).off('attached.jsxc', jsxc.xmpp.attached);
+         $(document).off('disconnected.jsxc', jsxc.xmpp.disconnected);
+         $(document).off('ridChange', jsxc.xmpp.onRidChange);
+         $(document).off('connfail.jsxc', jsxc.xmpp.onConnfail);
+         $(document).off('authfail.jsxc', jsxc.xmpp.onAuthFail);
+
          jsxc.xmpp.conn = null;
 
          $('#jsxc_windowList').remove();
@@ -3684,7 +3691,7 @@ var jsxc;
        * @private
        */
       onAuthFail: function() {
-         if(jsxc.options.loginForm.triggered) {
+         if (jsxc.options.loginForm.triggered) {
             switch (jsxc.options.loginForm.onAuthFail || 'ask') {
                case 'ask':
                   jsxc.gui.showAuthFail();
