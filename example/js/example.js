@@ -30,14 +30,15 @@ $(function() {
       },
       loadSettings: function(username, password) {
          return settings;
+      },
+      xmpp: {
+         url: settings.xmpp.url
       }
    });
 
    $('#form2').submit(function(ev) {
       ev.preventDefault();
 
-      jsxc.options.xmpp.url = settings.xmpp.url;
-      
       $(document).on('connectionReady.jsxc', function() {
          $('#form2 input').prop('disabled', true);
          
