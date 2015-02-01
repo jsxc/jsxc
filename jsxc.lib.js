@@ -183,7 +183,7 @@ var jsxc;
 
          if (options) {
             // override default options
-            $.extend(jsxc.options, options);
+            $.extend(true, jsxc.options, options);
          }
 
          /**
