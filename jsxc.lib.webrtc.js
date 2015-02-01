@@ -275,6 +275,11 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          jsxc.debug('Update icon', bid);
 
          var self = jsxc.webrtc;
+
+         if (bid === jsxc.jidToBid(self.conn.jid)) {
+            return;
+         }
+
          var win = jsxc.gui.window.get(bid);
          var jid = win.data('jid') || jsxc.storage.getUserItem('buddy', bid).jid;
 
