@@ -124,7 +124,7 @@ module.exports = function(grunt) {
       compress: {
          main: {
             options: {
-               archive: "jsxc-<%= app.version %>.zip"
+               archive: "archives/jsxc-<%= app.version %>.zip"
             },
             files: [ {
                src: [ '**' ],
