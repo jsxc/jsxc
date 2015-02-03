@@ -908,8 +908,8 @@ ul.jsxc_vCard {
     font-size: 12px;
     line-height: 12px;
     color: #008000; }
-    .jsxc_out.jsxc_received:before .jsxc_timestamp {
-      margin-right: 4px; }
+  .jsxc_out.jsxc_received .jsxc_timestamp {
+    margin-right: 4px; }
   .jsxc_out .jsxc_timestamp {
     float: right; }
 

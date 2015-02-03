@@ -538,14 +538,16 @@ ul.jsxc_vCard {
         right: -6px;
         bottom: 10px;
     }
-    &.jsxc_received:before {
-        content: '✓';
-        position: absolute;
-        bottom: 2px;
-        right: 2px;
-        font-size: 12px;
-        line-height: 12px;
-        color: $chatmessage_received;
+    &.jsxc_received{
+        &:before {
+           content: '✓';
+           position: absolute;
+           bottom: 2px;
+           right: 2px;
+           font-size: 12px;
+           line-height: 12px;
+           color: $chatmessage_received;
+        }
         .jsxc_timestamp {
             margin-right: 4px;
         }
