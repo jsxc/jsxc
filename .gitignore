@@ -6,4 +6,5 @@ build/lib/i18next/
 build/lib/otr/
 build/lib/strophe.jingle/
 bower_components
-
+bower_components
+archives/

@@ -39,9 +39,6 @@ var jsxc;
       /** True if restore is complete */
       restoreCompleted: false,
 
-      /** True if login through form */
-      triggeredFromForm: false,
-
       /** True if login through box */
       triggeredFromBox: false,
 
@@ -89,29 +86,28 @@ var jsxc;
 
       /**
        * Parse a unix timestamp and return a formatted time string
-       *
+       * 
        * @memberOf jsxc
        * @param {Object} unixtime
        * @returns time of day and/or date
        */
       getFormattedTime: function(unixtime) {
-        var msgDate = new Date(parseInt(unixtime)),
-            date = ('0' + msgDate.getDate()).slice(-2),
-            month = ('0' + (msgDate.getMonth() + 1)).slice(-2),
-            year = msgDate.getFullYear(),
-            hours = ('0' + msgDate.getHours()).slice(-2),
-            minutes = ('0' + msgDate.getMinutes()).slice(-2);
-        var dateNow = new Date(),
-            time = hours + ':' + minutes;
+         var msgDate = new Date(parseInt(unixtime));
+         var date = ('0' + msgDate.getDate()).slice(-2);
+         var month = ('0' + (msgDate.getMonth() + 1)).slice(-2);
+         var year = msgDate.getFullYear();
+         var hours = ('0' + msgDate.getHours()).slice(-2);
+         var minutes = ('0' + msgDate.getMinutes()).slice(-2);
+         var dateNow = new Date(), time = hours + ':' + minutes;
 
-        // compare dates only
-        dateNow.setHours(0, 0, 0, 0);
-        msgDate.setHours(0, 0, 0, 0);
+         // compare dates only
+         dateNow.setHours(0, 0, 0, 0);
+         msgDate.setHours(0, 0, 0, 0);
 
-        if (dateNow.getTime() !== msgDate.getTime()) {
-           return date + '.' + month + '.' + year + ' ' + time;
-        }
-        return time;
+         if (dateNow.getTime() !== msgDate.getTime()) {
+            return date + '.' + month + '.' + year + ' ' + time;
+         }
+         return time;
       },
 
       /**
@@ -186,7 +182,7 @@ var jsxc;
 
          if (options) {
             // override default options
-            $.extend(jsxc.options, options);
+            $.extend(true, jsxc.options, options);
          }
 
          /**
@@ -297,7 +293,7 @@ var jsxc;
                var settings = jsxc.prepareLogin();
 
                if (settings !== false && (settings.xmpp.onlogin === "true" || settings.xmpp.onlogin === true)) {
-                  jsxc.triggeredFromForm = true;
+                  jsxc.options.loginForm.triggered = true;
 
                   jsxc.xmpp.login();
 
@@ -475,6 +471,10 @@ var jsxc;
                jsxc.options.notification = false;
             }
          }
+
+         $(document).on('connectionReady.jsxc', function() {
+            jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
+         });
 
          jsxc.xmpp.login();
       },
@@ -801,7 +801,19 @@ var jsxc;
          /** manipulate JID from input element */
          preJid: function(jid) {
             return jid;
-         }
+         },
+
+         /**
+          * Action after connected: submit [String] Submit form, false [boolean]
+          * Do nothing, continue [String] Start chat
+          */
+         onConnected: 'submit',
+
+         /**
+          * Action after auth fail: submit [String] Submit form, false [boolean]
+          * Do nothing, ask [String] Show auth fail dialog
+          */
+         onAuthFail: 'submit'
       },
 
       /** jquery object from logout element */
@@ -953,7 +965,9 @@ var jsxc;
 
          jsxc.gui.tooltip('#jsxc_windowList');
 
-         jsxc.gui.roster.init();
+         if (!jsxc.el_exists('#jsxc_roster')) {
+            jsxc.gui.roster.init();
+         }
 
          // prepare regexp for emotions
          $.each(jsxc.gui.emotions, function(i, val) {
@@ -1078,7 +1092,7 @@ var jsxc;
          var avatarSrc = jsxc.storage.getUserItem('avatar', aid);
 
          var setAvatar = function(src) {
-            if (src === 0) {
+            if (src === 0 || src === '0') {
                jsxc.options.defaultAvatar.call(el, jid);
                return;
             }
@@ -1102,7 +1116,7 @@ var jsxc;
 
                if (vCard.length === 0) {
                   jsxc.debug('No photo provided');
-                  src = 0;
+                  src = '0';
                } else if (vCard.find('EXTVAL').length > 0) {
                   src = vCard.find('EXTVAL').text();
                } else {
@@ -1110,6 +1124,9 @@ var jsxc;
                   var type = vCard.find('TYPE').text();
                   src = 'data:' + type + ';base64,' + img;
                }
+
+               // concat chunks
+               src = src.replace(/[\t\r\n\f]/gi, '');
 
                jsxc.storage.setUserItem('avatar', aid, src);
                setAvatar(src);
@@ -1248,7 +1265,7 @@ var jsxc;
             var settings = jsxc.prepareLogin();
 
             jsxc.triggeredFromBox = true;
-            jsxc.triggeredFromForm = false;
+            jsxc.options.loginForm.triggered = false;
 
             if (settings === false) {
                jsxc.gui.showAuthFail();
@@ -1515,7 +1532,7 @@ var jsxc;
       showAuthFail: function() {
          jsxc.gui.dialog.open(jsxc.gui.template.get('authFailDialog'));
 
-         if (jsxc.triggeredFromBox) {
+         if (jsxc.options.loginForm.triggered !== false) {
             $('#jsxc_dialog .jsxc_cancel').hide();
          }
 
@@ -1710,7 +1727,13 @@ var jsxc;
                   src = photo.find('EXTVAL').text();
                }
 
-               $('#jsxc_dialog h3').before('<img class="jsxc_vCard" src="' + src + '" alt="avatar" />');
+               // concat chunks
+               src = src.replace(/[\t\r\n\f]/gi, '');
+
+               var img_el = $('<img class="jsxc_vCard" alt="avatar" />');
+               img_el.attr('src', src);
+
+               $('#jsxc_dialog h3').before(img_el);
             }
 
             if ($(stanza).find('vCard').length === 0 || ($(stanza).find('vcard > *').length === 1 && photo.length === 1)) {
@@ -2088,10 +2111,6 @@ var jsxc;
          $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
          jsxc.gui.updatePresence('own', pres);
 
-         $(document).on('cloaded.roster.jsxc', function() {
-            jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
-         });
-
          jsxc.gui.tooltip('#jsxc_roster');
 
          jsxc.notice.load();
@@ -2305,8 +2324,7 @@ var jsxc;
        * Shows a text with link to a login box that no connection exists.
        */
       noConnection: function() {
-         $('#jsxc_roster .slimScrollDiv').remove();
-         $('#jsxc_roster > .jsxc_bottom').remove();
+         $('#jsxc_roster').addClass('jsxc_noConnection');
 
          $('#jsxc_roster').append($(jsxc.gui.template.get('loginForm')));
       },
@@ -2778,8 +2796,9 @@ var jsxc;
        * @param {String} msg Message to display
        * @param {boolean} encrypted Was this message encrypted? Default: false
        * @param {boolean} forwarded Was this message forwarded? Default: false
+       * @param {integer} stamp Timestamp
        */
-      postMessage: function(bid, direction, msg, encrypted, forwarded) {
+      postMessage: function(bid, direction, msg, encrypted, forwarded, stamp) {
          var data = jsxc.storage.getUserItem('buddy', bid);
          var html_msg = msg;
 
@@ -2805,7 +2824,7 @@ var jsxc;
          }
 
          encrypted = encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
-         var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded);
+         var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded, stamp);
 
          if (direction === 'in') {
             $(document).trigger('postmessagein.jsxc', [ bid, html_msg ]);
@@ -2873,13 +2892,12 @@ var jsxc;
             });
          });
 
-         var msgDiv = $("<div>"),
-         msgTsDiv = $("<div>");
+         var msgDiv = $("<div>"), msgTsDiv = $("<div>");
          msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
          msgDiv.attr('id', uid);
          msgDiv.html('<div>' + msg + '</div>');
-         msgTsDiv.addClass('jsxc_timestamp_' + direction);
-         msgTsDiv.html(jsxc.getFormattedTime(uid.replace(/-msg$/, '')));
+         msgTsDiv.addClass('jsxc_timestamp');
+         msgTsDiv.html(jsxc.getFormattedTime(post.stamp));
 
          if (post.received || false) {
             msgDiv.addClass('jsxc_received');
@@ -2895,7 +2913,7 @@ var jsxc;
 
          if (direction === 'sys') {
             jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div style="clear:both"/>');
-         } else {
+         } else if (typeof post.stamp !== 'undefined') {
             msgDiv.append(msgTsDiv);
          }
 
@@ -3240,14 +3258,51 @@ var jsxc;
 
       /**
        * Create new connection or attach to old
-       *
+       * 
+       * @name login
+       * @memberOf jsxc.xmpp
+       */
+      /**
+       * Create new connection with given parameters.
+       * 
+       * @name login^2
+       * @param {string} jid
+       * @param {string} password
+       * @memberOf jsxc.xmpp
+       */
+      /**
+       * Attach connection with given parameters.
+       * 
+       * @name login^3
+       * @param {string} jid
+       * @param {string} sid
+       * @param {string} rid
        * @memberOf jsxc.xmpp
        */
       login: function() {
 
-         var sid = jsxc.storage.getItem('sid');
-         var rid = jsxc.storage.getItem('rid');
-         var jid = jsxc.storage.getItem('jid');
+         if (jsxc.xmpp.conn && jsxc.xmpp.conn.connected) {
+            return;
+         }
+
+         var jid = null, password = null, sid = null, rid = null;
+
+         switch (arguments.length) {
+            case 2:
+               jid = arguments[0];
+               password = arguments[1];
+               break;
+            case 3:
+               jid = arguments[0];
+               sid = arguments[1];
+               rid = arguments[2];
+               break;
+            default:
+               jid = jsxc.storage.getItem('jid');
+               sid = jsxc.storage.getItem('sid');
+               rid = jsxc.storage.getItem('rid');
+         }
+
          var url = jsxc.options.get('xmpp').url;
 
          // Register eventlistener
@@ -3255,6 +3310,8 @@ var jsxc;
          $(document).on('attached.jsxc', jsxc.xmpp.attached);
          $(document).on('disconnected.jsxc', jsxc.xmpp.disconnected);
          $(document).on('ridChange', jsxc.xmpp.onRidChange);
+         $(document).on('connfail.jsxc', jsxc.xmpp.onConnfail);
+         $(document).on('authfail.jsxc', jsxc.xmpp.onAuthFail);
 
          Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
 
@@ -3295,10 +3352,10 @@ var jsxc;
                   $(document).trigger('disconnected.jsxc');
                   break;
                case Strophe.Status.CONNFAIL:
-                  jsxc.xmpp.onConnfail(condition);
+                  $(document).trigger('connfail.jsxc');
                   break;
                case Strophe.Status.AUTHFAIL:
-                  jsxc.gui.showAuthFail();
+                  $(document).trigger('authfail.jsxc');
                   break;
             }
          };
@@ -3330,7 +3387,7 @@ var jsxc;
                }, Strophe.NS.CAPS);
             }
 
-            jsxc.xmpp.conn.connect(jsxc.options.xmpp.jid, jsxc.options.xmpp.password, callback);
+            jsxc.xmpp.conn.connect(jid || jsxc.options.xmpp.jid, password || jsxc.options.xmpp.password, callback);
          }
       },
 
@@ -3365,11 +3422,11 @@ var jsxc;
          jsxc.triggeredFromElement = true;
 
          // restore all otr objects
-         $.each(jsxc.storage.getUserItem('otrlist'), function(i, val) {
+         $.each(jsxc.storage.getUserItem('otrlist') || {}, function(i, val) {
             jsxc.otr.create(val);
          });
 
-         var numOtr = Object.keys(jsxc.otr.objects).length + 1;
+         var numOtr = Object.keys(jsxc.otr.objects || {}).length + 1;
          var disReady = function() {
             if (--numOtr <= 0) {
                jsxc.xmpp.conn.flush();
@@ -3381,7 +3438,7 @@ var jsxc;
          };
 
          // end all private conversations
-         $.each(jsxc.otr.objects, function(key, obj) {
+         $.each(jsxc.otr.objects || {}, function(key, obj) {
             if (obj.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED) {
                obj.endOtr.call(obj, function() {
                   obj.init.call(obj);
@@ -3425,20 +3482,25 @@ var jsxc;
          jsxc.storage.removeUserItem('avatar', 'own');
          jsxc.storage.removeUserItem('otrlist');
 
-         // submit login form
-         if (jsxc.triggeredFromForm) {
-            // Trigger normal submit
-            jsxc.submitLoginForm();
-            return;
+         if (jsxc.options.loginForm.triggered) {
+            switch (jsxc.options.loginForm.onConnected || 'submit') {
+               case 'submit':
+                  jsxc.submitLoginForm();
+                  /* falls through */
+               case false:
+                  jsxc.xmpp.connectionReady();
+                  return;
+            }
          }
 
-         // reload page after login from login box
-         if (jsxc.triggeredFromBox) {
-            window.location.reload();
-            return;
-         }
+         // start chat
 
-         jsxc.xmpp.connectionReady();
+         jsxc.gui.init();
+         $('#jsxc_roster').removeClass('jsxc_noConnection');
+         jsxc.onMaster();
+         jsxc.xmpp.conn.resume();
+         jsxc.gui.dialog.close();
+         $(document).trigger('attached.jsxc');
       },
 
       /**
@@ -3565,6 +3627,13 @@ var jsxc;
          jsxc.storage.removeUserItem('avatar', 'own');
          jsxc.storage.removeUserItem('otrlist');
 
+         $(document).off('connected.jsxc', jsxc.xmpp.connected);
+         $(document).off('attached.jsxc', jsxc.xmpp.attached);
+         $(document).off('disconnected.jsxc', jsxc.xmpp.disconnected);
+         $(document).off('ridChange', jsxc.xmpp.onRidChange);
+         $(document).off('connfail.jsxc', jsxc.xmpp.onConnfail);
+         $(document).off('authfail.jsxc', jsxc.xmpp.onAuthFail);
+
          jsxc.xmpp.conn = null;
 
          $('#jsxc_windowList').remove();
@@ -3584,11 +3653,29 @@ var jsxc;
        * @param {String} condition information why we lost the connection
        * @private
        */
-      onConnfail: function(condition) {
+      onConnfail: function(ev, condition) {
          jsxc.debug('XMPP connection failed: ' + condition);
 
-         if (jsxc.triggeredFromForm) {
+         if (jsxc.options.loginForm.triggered) {
             jsxc.submitLoginForm();
+         }
+      },
+
+      /**
+       * Triggered on auth fail.
+       * 
+       * @private
+       */
+      onAuthFail: function() {
+         if (jsxc.options.loginForm.triggered) {
+            switch (jsxc.options.loginForm.onAuthFail || 'ask') {
+               case 'ask':
+                  jsxc.gui.showAuthFail();
+                  break;
+               case 'submit':
+                  jsxc.submitLoginForm();
+                  break;
+            }
          }
       },
 
@@ -3865,21 +3952,27 @@ var jsxc;
             jsxc.debug('Incoming message', message);
          }
 
-         var type = $(message).attr('type');
-         var from = $(message).attr('from');
-         var mid = $(message).attr('id');
          var body = $(message).find('body:first').text();
-         var bid;
 
          if (!body || (body.match(/\?OTR/i) && forwarded)) {
             return true;
          }
 
+         var type = $(message).attr('type');
+         var from = $(message).attr('from');
+         var mid = $(message).attr('id');
+         var bid;
+
+         var delay = $(message).find('delay[xmlns="urn:xmpp:delay"]');
+
+         var stamp = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
+         stamp = stamp.getTime();
+
          if (carbon) {
             var direction = (carbon.prop("tagName") === 'sent') ? 'out' : 'in';
             bid = jsxc.jidToBid((direction === 'out') ? $(message).attr('to') : from);
 
-            jsxc.gui.window.postMessage(bid, direction, body, false, forwarded);
+            jsxc.gui.window.postMessage(bid, direction, body, false, forwarded, stamp);
 
             return true;
 
@@ -3908,7 +4001,7 @@ var jsxc;
             var msg = jsxc.removeHTML(body);
             msg = jsxc.escapeHTML(msg);
 
-            jsxc.storage.saveMessage(bid, 'in', msg, forwarded);
+            jsxc.storage.saveMessage(bid, 'in', msg, false, forwarded, stamp);
 
             return true;
          }
@@ -3941,9 +4034,9 @@ var jsxc;
          }
 
          if (jsxc.otr.objects.hasOwnProperty(bid)) {
-            jsxc.otr.objects[bid].receiveMsg(body);
+            jsxc.otr.objects[bid].receiveMsg(body, stamp);
          } else {
-            jsxc.gui.window.postMessage(bid, 'in', body, false, forwarded);
+            jsxc.gui.window.postMessage(bid, 'in', body, false, forwarded, stamp);
          }
 
          // preserve handler
@@ -4783,7 +4876,7 @@ var jsxc;
        * @param forwarded
        * @return post
        */
-      saveMessage: function(bid, direction, msg, encrypted, forwarded) {
+      saveMessage: function(bid, direction, msg, encrypted, forwarded, stamp) {
          var chat = jsxc.storage.getUserItem('chat', bid) || [];
 
          var uid = new Date().getTime() + ':msg';
@@ -4798,7 +4891,8 @@ var jsxc;
             uid: uid.replace(/:/, '-'),
             received: false,
             encrypted: encrypted || false,
-            forwarded: forwarded || false
+            forwarded: forwarded || false,
+            stamp: stamp || new Date().getTime()
          };
 
          chat.unshift(post);
@@ -4856,16 +4950,16 @@ var jsxc;
        * @param {string} msg received message
        * @param {string} encrypted True, if msg was encrypted.
        */
-      receiveMessage: function(bid, msg, encrypted) {
+      receiveMessage: function(bid, msg, encrypted, stamp) {
 
          if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT) {
             jsxc.otr.backup(bid);
          }
 
          if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']', encrypted);
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']', encrypted, stamp);
          } else {
-            jsxc.gui.window.postMessage(bid, 'in', msg, encrypted);
+            jsxc.gui.window.postMessage(bid, 'in', msg, encrypted, stamp);
          }
       },
 
@@ -5000,8 +5094,8 @@ var jsxc;
          });
 
          // Receive message
-         jsxc.otr.objects[bid].on('ui', function(msg, encrypted) {
-            jsxc.otr.receiveMessage(bid, msg, encrypted === true);
+         jsxc.otr.objects[bid].on('ui', function(msg, encrypted, stamp) {
+            jsxc.otr.receiveMessage(bid, msg, encrypted === true, stamp);
          });
 
          // Send message

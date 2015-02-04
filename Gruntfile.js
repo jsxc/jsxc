@@ -1,11 +1,11 @@
 /* global module:false */
 module.exports = function(grunt) {
-   
+
    var dep = grunt.file.readJSON('dep.json');
    var dep_files = dep.map(function(el) {
       return el.file;
    });
-   
+
    // Project configuration.
    grunt.initConfig({
       app: grunt.file.readJSON('package.json'),
@@ -25,7 +25,7 @@ module.exports = function(grunt) {
          main: {
             files: [ {
                expand: true,
-               src: [ 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'jsxc.lib.js', 'jsxc.lib.webrtc.js', 'LICENSE', 'sound/**' ],
+               src: [ 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'jsxc.lib.js', 'jsxc.lib.webrtc.js', 'LICENSE', 'img/**', 'sound/**' ],
                dest: 'build/'
             } ]
          },
@@ -89,12 +89,12 @@ module.exports = function(grunt) {
                   ' * \n' +
                   ' */\n\n',
                process: function(src, filepath) {
-                  if (filepath === 'build/lib/otr/build/dep/crypto.js') { 
+                  if (filepath === 'build/lib/otr/build/dep/crypto.js') {
                      src += ';';
                   }
-                  
+
                   var data = dep[dep_files.indexOf(filepath)];
-                  
+
                   return '/*!\n * Source: ' + filepath + ', license: ' + data.license + ', url: ' + data.url + ' */\n' + src;
                }
             },
@@ -151,7 +151,7 @@ module.exports = function(grunt) {
       compress: {
          main: {
             options: {
-               archive: "jsxc-<%= app.version %>.zip"
+               archive: "archives/jsxc-<%= app.version %>.zip"
             },
             files: [ {
                src: [ '**' ],
@@ -163,8 +163,8 @@ module.exports = function(grunt) {
       },
       dataUri: {
         dist: {
-          src: ['jsxc.css', 'jsxc.webrtc.css'],
-          dest: 'build/',
+          src: 'css/*.css',
+          dest: 'build/css/',
           options: {
             target: ['img/*.*', 'img/**/*.*'],
             fixDirLevel: true,
@@ -196,7 +196,31 @@ module.exports = function(grunt) {
               src: ['jsxc.lib.js', 'jsxc.lib.webrtc.js'],
               dest: 'doc'
           }
-      }
+      },
+      autoprefixer: {
+            no_dest: {
+                src: 'css/*.css'
+            }
+      },
+      csslint: {
+        strict: {
+            options: {
+            import: 2
+            },
+            src: ['css/*.css']
+        },
+      },
+      sass: {
+        options: {
+           imagePath: '../img'
+        },
+        dist: {
+            files: {
+            'css/jsxc.css': 'scss/jsxc.scss',
+            'css/jsxc.webrtc.css': 'scss/jsxc.webrtc.scss'
+            }
+        }
+      },
    });
 
    // These plugins provide necessary tasks.
@@ -214,13 +238,21 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-contrib-qunit');
    grunt.loadNpmTasks('grunt-contrib-connect');
    grunt.loadNpmTasks('grunt-merge-data');
+   grunt.loadNpmTasks('grunt-contrib-csslint');
+   grunt.loadNpmTasks('grunt-sass');
+   grunt.loadNpmTasks('grunt-autoprefixer');
 
-   // Default task.
-   grunt.registerTask('default', [ 'jshint', 'search', 'jsdoc', 'clean', 'copy', 'dataUri', 'usebanner', 'merge_data', 'replace', 'concat', 'uglify', 'compress' ]);
+   //Default task
+   grunt.registerTask('default', [ 'css' ]);
+
+   // Create new build
+   grunt.registerTask('build', [ 'search:changelog', 'pre', 'jsdoc' ]);
 
    // Create alpha/beta build
-   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'copy', 'dataUri', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
+   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'css', 'dataUri', 'copy', 'usebanner', 'merge_data', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // before commit
    grunt.registerTask('commit', [ 'jshint', 'search:console' ]);
+
+   grunt.registerTask('css', [ 'sass', 'autoprefixer' ]);
 };

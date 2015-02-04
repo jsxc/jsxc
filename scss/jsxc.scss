@@ -1,0 +1,13 @@
+@import 'colors';
+
+//fonts
+$font_sans: Arial, sans-serif;
+$font_serif: serif;
+
+@import 'modules',
+        'buddylist',
+        'state',
+        'emoticons',
+        'roster';
+        
+@import 'jsxc';
