@@ -940,6 +940,11 @@ var jsxc;
        * @memberOf jsxc.gui
        */
       init: function() {
+         //Prevent duplicate windowList
+         if ($('#jsxc_windowList').length > 0) {
+            return;
+         }
+
          $('body').append($(jsxc.gui.template.get('windowList')));
 
          $(window).resize(jsxc.gui.updateWindowListSB);
