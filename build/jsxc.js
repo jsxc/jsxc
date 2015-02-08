@@ -1,7 +1,7 @@
 /*! This file is concatenated for the browser. */
 
 /*!
- * jsxc v1.1.0-beta - 2015-02-03
+ * jsxc v1.1.0 - 2015-02-08
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -9,7 +9,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 1.1.0-beta
+ * @version 1.1.0
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc;
     */
    jsxc = {
       /** Version of jsxc */
-      version: '1.1.0-beta',
+      version: '1.1.0',
 
       /** True if i'm the master */
       master: false,
@@ -955,6 +955,11 @@ var jsxc;
        * @memberOf jsxc.gui
        */
       init: function() {
+         //Prevent duplicate windowList
+         if ($('#jsxc_windowList').length > 0) {
+            return;
+         }
+
          $('body').append($(jsxc.gui.template.get('windowList')));
 
          $(window).resize(jsxc.gui.updateWindowListSB);
@@ -4071,7 +4076,10 @@ var jsxc;
          }
 
          if (jsxc.otr.objects.hasOwnProperty(bid)) {
-            jsxc.otr.objects[bid].receiveMsg(body, stamp);
+            jsxc.otr.objects[bid].receiveMsg(body, {
+               stamp: stamp,
+               forwarded: forwarded
+            });
          } else {
             jsxc.gui.window.postMessage(bid, 'in', body, false, forwarded, stamp);
          }
@@ -4987,20 +4995,24 @@ var jsxc;
        * Handler for otr receive event
        * 
        * @memberOf jsxc.otr
-       * @param {string} bid
-       * @param {string} msg received message
-       * @param {string} encrypted True, if msg was encrypted.
+       * @param {Object} d
+       * @param {string} d.bid
+       * @param {string} d.msg received message
+       * @param {boolean} d.encrypted True, if msg was encrypted.
+       * @param {boolean} d.forwarded
+       * @param {string} d.stamp timestamp
        */
-      receiveMessage: function(bid, msg, encrypted, stamp) {
+      receiveMessage: function(d) {
+         var bid = d.bid;
 
          if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT) {
             jsxc.otr.backup(bid);
          }
 
-         if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + msg + ']', encrypted, stamp);
+         if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !d.encrypted) {
+            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + d.msg + ']', d.encrypted, d.forwarded, d.stamp);
          } else {
-            jsxc.gui.window.postMessage(bid, 'in', msg, encrypted, stamp);
+            jsxc.gui.window.postMessage(bid, 'in', d.msg, d.encrypted, d.forwarded, d.stamp);
          }
       },
 
@@ -5135,8 +5147,14 @@ var jsxc;
          });
 
          // Receive message
-         jsxc.otr.objects[bid].on('ui', function(msg, encrypted, stamp) {
-            jsxc.otr.receiveMessage(bid, msg, encrypted === true, stamp);
+         jsxc.otr.objects[bid].on('ui', function(msg, encrypted, meta) {
+            jsxc.otr.receiveMessage({
+               bid: bid,
+               msg: msg,
+               encrypted: encrypted === true,
+               stamp: meta.stamp,
+               forwarded: meta.forwarded
+            });
          });
 
          // Send message
@@ -6227,7 +6245,7 @@ var jsxc;
 }(jQuery));
 
 /*!
- * jsxc v1.1.0-beta - 2015-02-03
+ * jsxc v1.1.0 - 2015-02-08
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -6235,7 +6253,7 @@ var jsxc;
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 1.1.0-beta
+ * @version 1.1.0
  * @license MIT
  */
 

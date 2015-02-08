@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: queryActions</title>
+    <title>JSDoc: Namespace: carbons</title>
     
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">Namespace: queryActions</h1>
+    <h1 class="page-title">Namespace: carbons</h1>
     
     
 
@@ -27,9 +27,9 @@
     
 <header>
     <h2>
-        <span class="ancestors"><a href="jsxc.html">jsxc</a><a href="jsxc.gui.html">.gui</a>.</span>
+        <span class="ancestors"><a href="jsxc.html">jsxc</a><a href="jsxc.xmpp.html">.xmpp</a>.</span>
     
-    queryActions
+    carbons
     </h2>
     
 </header>  
@@ -40,7 +40,7 @@
     
     
         
-            <div class="description">Different uri query actions as defined in XEP-0147.</div>
+            <div class="description">Handle carbons (XEP-0280);</div>
         
         
         
@@ -66,7 +66,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line902">line 902</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line4291">line 4291</a>
     </li></ul></dd>
     
     
@@ -100,7 +100,7 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="message"><span class="type-signature">&lt;static> </span>message<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="disable"><span class="type-signature">&lt;static> </span>disable<span class="signature">(cb)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -108,7 +108,7 @@
     
     
     <div class="description">
-        xmpp:JID?message[;body=TEXT]
+        Disable carbons.
     </div>
     
 
@@ -116,6 +116,49 @@
     
     
     
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">callback</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -141,7 +184,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line909">line 909</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line4331">line 4331</a>
     </li></ul></dd>
     
     
@@ -169,7 +212,7 @@
         
             
 <dt>
-    <h4 class="name" id="remove"><span class="type-signature">&lt;static> </span>remove<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="enable"><span class="type-signature">&lt;static> </span>enable<span class="signature">(cb)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -177,7 +220,7 @@
     
     
     <div class="description">
-        xmpp:JID?remove
+        Enable carbons.
     </div>
     
 
@@ -185,6 +228,49 @@
     
     
     
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">callback</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -210,7 +296,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line918">line 918</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line4305">line 4305</a>
     </li></ul></dd>
     
     
@@ -238,7 +324,7 @@
         
             
 <dt>
-    <h4 class="name" id="subscribe"><span class="type-signature">&lt;static> </span>subscribe<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="refresh"><span class="type-signature">&lt;static> </span>refresh<span class="signature">(err)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -246,7 +332,7 @@
     
     
     <div class="description">
-        xmpp:JID?subscribe[;name=NAME]
+        Enable/Disable carbons depending on options key.
     </div>
     
 
@@ -255,74 +341,48 @@
     
     
     
-    
-    
-<dl class="details">
-    
+        <h5>Parameters:</h5>
         
-    
-    
-    
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line923">line 923</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
             
-<dt>
-    <h4 class="name" id="vcard"><span class="type-signature">&lt;static> </span>vcard<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        xmpp:JID?vcard
-    </div>
-    
-
-    
-    
-    
-    
+                <td class="name"><code>err</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">error message</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -348,7 +408,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line932">line 932</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line4357">line 4357</a>
     </li></ul></dd>
     
     
@@ -395,7 +455,7 @@
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Sun Feb 08 2015 20:03:14 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Sun Feb 08 2015 20:03:16 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>
