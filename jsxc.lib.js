@@ -42,6 +42,9 @@ var jsxc;
       /** True if login through box */
       triggeredFromBox: false,
 
+      /** True if logout through presence box */
+      triggeredFromPresence: false,
+
       /** True if logout through element click */
       triggeredFromElement: false,
 
@@ -185,6 +188,13 @@ var jsxc;
             $.extend(true, jsxc.options, options);
          }
 
+         // In respect of being able to login via presence
+         // we have to set the bid early otherwise the jsxc
+         // storage function will not be able to retrieve presence
+         // information
+         if (options.xmpp.jid) {
+           jsxc.bid = jsxc.jidToBid(options.xmpp.jid);
+         }
          /**
           * Getter method for options. Saved options will override default one.
           *
@@ -470,7 +480,10 @@ var jsxc;
             jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
          });
 
-         jsxc.xmpp.login();
+         var presence = jsxc.storage.getUserItem('presence') || 'online';
+         if (presence !== 'offline') {
+           jsxc.xmpp.login();
+         }
       },
 
       /**
@@ -1894,6 +1907,15 @@ var jsxc;
                $('#jsxc_menu .jsxc_muteNotification').addClass('jsxc_disabled');
                jsxc.notification.muteSound(true);
             } else {
+               if (pres === 'offline') {
+                  jsxc.triggeredFromPresence = true;
+                  jsxc.xmpp.logout();
+               } else {
+                  // otherwise try to login
+                  // will return if already logged in
+                  jsxc.xmpp.login(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
+               }
+
                $('#jsxc_menu .jsxc_muteNotification').removeClass('jsxc_disabled');
 
                if (!jsxc.options.get('muteNotification')) {
@@ -3126,7 +3148,7 @@ var jsxc;
                      <li data-pres="away" class="jsxc_away">%%Away%%</li>\
                      <li data-pres="xa" class="jsxc_xa">%%Extended away%%</li>\
                      <li data-pres="dnd" class="jsxc_dnd">%%dnd%%</li>\
-                     <!-- <li data-pres="offline" class="jsxc_offline">%%Offline%%</li> -->\
+                     <li data-pres="offline" class="jsxc_offline">%%Offline%%</li>\
                  </ul>\
               </div>\
             </div>\
@@ -3582,6 +3604,8 @@ var jsxc;
        * Sends presence stanza to server.
        */
       sendPres: function() {
+        if (!jsxc.xmpp.conn) { return; }
+
          // disco stuff
          if (jsxc.xmpp.conn.disco) {
             jsxc.xmpp.conn.disco.addIdentity('client', 'web', 'JSXC');
@@ -3637,7 +3661,7 @@ var jsxc;
 
          $('#jsxc_windowList').remove();
 
-         if (jsxc.triggeredFromElement) {
+         if (jsxc.triggeredFromElement && !jsxc.triggeredFromPresence) {
             $('#jsxc_roster').remove();
          } else {
             jsxc.gui.roster.noConnection();
