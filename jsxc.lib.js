@@ -3424,7 +3424,7 @@ var jsxc;
 
          if (!jsxc.master) {
             $('#jsxc_roster').remove();
-            $('#jsxc_windowlist').remove();
+            $('#jsxc_windowList').remove();
             return true;
          }
 
