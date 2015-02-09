@@ -142,7 +142,7 @@ module.exports = function(grunt) {
                logFormat: 'console',
                onComplete: function(m) {
                   if (m.numMatches === 0) {
-                     grunt.fail.fatal("No entry in README.md for current version found.");
+                     grunt.fail.fatal("No entry in CHANGELOG.md for current version found.");
                   }
                }
             }
