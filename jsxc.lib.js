@@ -2345,9 +2345,7 @@ var jsxc;
        * Shows a text with link to a login box that no connection exists.
        */
       noConnection: function() {
-         $('#jsxc_roster').addClass('jsxc_noConnection');
-
-         $('#jsxc_roster').append($(jsxc.gui.template.get('loginForm')));
+         $('#jsxc_buddylist').empty();
       },
 
       /**
@@ -3048,9 +3046,6 @@ var jsxc;
          jsxc.debug('Template not available: ' + name);
          return name;
       },
-      loginForm: '<form id="jsxc_loginForm">\
-        <input type="submit" value="%%Login%%"/>\
-        </form>',
       authenticationDialog: '<h3>Verification</h3>\
             <p>%%Authenticating_a_buddy_helps_%%</p>\
             <div>\
@@ -3517,7 +3512,6 @@ var jsxc;
          // start chat
 
          jsxc.gui.init();
-         $('#jsxc_roster').removeClass('jsxc_noConnection');
          jsxc.onMaster();
          jsxc.xmpp.conn.resume();
          jsxc.gui.dialog.close();
