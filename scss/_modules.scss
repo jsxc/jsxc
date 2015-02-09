@@ -1,0 +1,28 @@
+%avatar-icon {
+    width: 25px;
+    height: 25px;
+    line-height: 25px;
+    margin-top: 2px;
+    margin-right: 4px;
+    background-color: $avatar_bg;
+    border-radius: 2px;
+    float: left;
+    text-align: center;
+    font-weight: bold;
+    font-size: 30px;
+    color: $avatar_color;
+    overflow: hidden;
+    position: relative;
+    font-family: $font_sans;
+    background-size: cover;
+    background-position: center center;
+}
+
+%padlock-icon {
+    background-image: image-url('padlock_open_grey.svg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 12px 12px;
+}
+
+
