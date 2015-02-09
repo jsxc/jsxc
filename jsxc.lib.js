@@ -255,7 +255,7 @@ var jsxc;
          if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
 
             // Looking for a login form
-            //if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
+            if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
 
                if (jsxc.options.displayRosterMinimized()) {
                   // Show minimized roster
@@ -264,8 +264,8 @@ var jsxc;
                   jsxc.gui.roster.noConnection();
                }
 
-               //return;
-            //}
+               return;
+            }
 
             if (typeof jsxc.options.formFound === 'function') {
                jsxc.options.formFound.call();
@@ -304,31 +304,29 @@ var jsxc;
                return true;
             });
 
-         } else { jsxc.restoreOldConnection(); }
-      },
+         } else {
 
-      login: function() { /* TODO deprecated function */ },
+            // Restore old connection
 
-      restoreOldConnection: function() {
-        // Restore old connection
-        var jid = jsxc.storage.getItem('jid') || jsxc.options.xmpp.jid;
-        jsxc.bid = jsxc.jidToBid(jid);
-        jsxc.gui.init();
+            jsxc.bid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
 
-        // Looking for logout element
-        if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
-          jsxc.options.logoutElement.one('click', function() {
-            jsxc.options.logoutElement = $(this);
-            jsxc.triggeredFromLogout = true;
-            return jsxc.xmpp.logout();
-          });
-        }
+            jsxc.gui.init();
 
-        if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
-          jsxc.onMaster();
-        } else {
-          jsxc.checkMaster();
-        }
+            // Looking for logout element
+            if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+               jsxc.options.logoutElement.one('click', function() {
+                  jsxc.options.logoutElement = $(this);
+                  jsxc.triggeredFromLogout = true;
+                  return jsxc.xmpp.logout();
+               });
+            }
+
+            if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
+               jsxc.onMaster();
+            } else {
+               jsxc.checkMaster();
+            }
+         }
       },
 
       /**
@@ -358,10 +356,6 @@ var jsxc;
 
          if (typeof settings.xmpp.username === 'string') {
             username = settings.xmpp.username;
-         }
-
-         if (typeof settings.xmpp.password === 'string') {
-            password = settings.xmpp.password;
          }
 
          var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
