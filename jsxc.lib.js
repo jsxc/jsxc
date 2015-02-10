@@ -792,7 +792,8 @@ var jsxc;
          chat: 0,
          away: 0,
          xa: 0,
-         dnd: 0
+         dnd: 0,
+         offline: 0
       },
 
       /** If all 3 properties are set, the login form is used */
@@ -3124,12 +3125,12 @@ var jsxc;
               <div id="jsxc_menu">\
                  <span></span>\
                  <ul>\
-                     <li class="jsxc_settings">%%Settings%%</li>\
+                     <!--<li class="jsxc_settings">%%Settings%%</li>-->\
                      <li class="jsxc_muteNotification">%%Mute%%</li>\
-                     <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
+                     <!--<li class="jsxc_addBuddy">%%Add_buddy%%</li>-->\
                      <li class="jsxc_hideOffline">%%Hide offline%%</li>\
-                     <li class="jsxc_onlineHelp">%%Online help%%</li>\
-                     <li class="jsxc_about">%%About%%</li>\
+                     <!--<li class="jsxc_onlineHelp">%%Online help%%</li>\
+                     <li class="jsxc_about">%%About%%</li>-->\
                  </ul>\
               </div>\
               <div id="jsxc_notice">\
@@ -3599,7 +3600,7 @@ var jsxc;
        * Sends presence stanza to server.
        */
       sendPres: function() {
-        if (!jsxc.xmpp.conn) { return; }
+         if (!jsxc.xmpp.conn) { return; }
 
          // disco stuff
          if (jsxc.xmpp.conn.disco) {
