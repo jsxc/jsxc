@@ -225,7 +225,7 @@ var jsxc;
 
          // initialize i18n translator
          $.i18n.init({
-           lng: Diaspora.I18n.language,
+           lng: lang,
            fallbackLng: 'en',
            resStore: I18next,
            // use localStorage and set expiration to a day
