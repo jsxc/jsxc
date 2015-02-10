@@ -28,6 +28,8 @@ var jsxc_options = {
 
 QUnit.test( "Check if we provide the correct locales", function( assert ) {
   Diaspora.I18n.language = 'invalidLanguage';
+  // check locales in offline mode
+  jsxc.storage.setUserItem('presence', 'offline');
   jsxc.init(jsxc_options);
   assert.ok(I18next != null);
   // should match fallback language 'en'
