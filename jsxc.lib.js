@@ -195,6 +195,7 @@ var jsxc;
          if (options.xmpp.jid) {
            jsxc.bid = jsxc.jidToBid(options.xmpp.jid);
          }
+
          /**
           * Getter method for options. Saved options will override default one.
           *
@@ -1907,10 +1908,10 @@ var jsxc;
                $('#jsxc_menu .jsxc_muteNotification').addClass('jsxc_disabled');
                jsxc.notification.muteSound(true);
             } else {
-               if (pres === 'offline') {
+               if (pres === 'offline' && jsxc.xmpp.conn) {
                   jsxc.triggeredFromPresence = true;
                   jsxc.xmpp.logout();
-               } else {
+               } else if (pres !== 'offline') {
                   // otherwise try to login
                   // will return if already logged in
                   jsxc.xmpp.login(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
