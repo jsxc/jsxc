@@ -5,16 +5,16 @@ jsxc.l10n.de.Join_chat = 'Chat beitreten';
 jsxc.l10n.en.Join = 'Join';
 jsxc.l10n.de.Join = 'Beitreten';
 
-jsxc.gui.template.joinChat = '<h3>%%Join_chat%%</h3>\
+jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          <p class=".jsxc_explanation">Blub</p>\
-         <p><label for="jsxc_room">%%Room%%:</label>\
+         <p><label for="jsxc_room" data-i18n="Room"></label>\
             <input type="text" name="room" id="jsxc_room" required="required" /></p>\
-         <p><label for="jsxc_nickname">%%Nickname%%:</label>\
+         <p><label for="jsxc_nickname" data-i18n="Nickname"></label>\
             <input type="text" name="nickname" id="jsxc_nickname" /></p>\
-         <p><label for="jsxc_password">%%Password%%:</label>\
+         <p><label for="jsxc_password" data-i18n="Password"></label>\
             <input type="text" name="password" id="jsxc_password" /></p>\
          <p class="jsxc_right">\
-            <a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation jsxc_join">%%Join%%</a>\
+            <a href="#" class="button jsxc_close" data-i18n="Close"></a> <a href="#" class="button creation jsxc_join" data-i18n="Join"></a>\
          </p>';
 
 (function($) {
@@ -23,7 +23,7 @@ jsxc.gui.template.joinChat = '<h3>%%Join_chat%%</h3>\
    jsxc.muc = {
       conn: null,
       initMenu: function() {
-         var li = $('<li>').attr('class', 'jsxc_joinChat').text(jsxc.translate('%%Join_chat%%'));
+         var li = $('<li>').attr('class', 'jsxc_joinChat').text($.t('Join_chat'));
          li.click(jsxc.muc.showJoinChat);
          $('#jsxc_menu ul').append(li);
 

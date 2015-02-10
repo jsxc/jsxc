@@ -704,19 +704,6 @@ var jsxc;
       },
 
       /**
-       * Replace %%tokens%% with correct translation.
-       * 
-       * @param {String} text Given text
-       * @returns {String} Translated string
-       */
-      translate: function(text) {
-         return text.replace(/%%([a-zA-Z0-9_-}{ .!,?/'@]+)%%/g, function(s, key) {
-            var k = key.replace(/ /gi, '_').replace(/[.!,?/'@]/g, '');
-            return $.t(k) || key.replace(/_/g, ' ');
-         });
-      },
-
-      /**
        * Executes the given function in jsxc namespace.
        * 
        * @memberOf jsxc
@@ -1060,8 +1047,8 @@ var jsxc;
          }
 
          var info = '<b>' + Strophe.getBareJidFromJid(data.jid) + '</b>\n';
-         info += jsxc.translate('%%Subscription%%: %%' + data.sub + '%%\n');
-         info += jsxc.translate('%%Status%%: %%' + jsxc.CONST.STATUS[data.status] + '%%');
+         info += $.t('Subscription') + ': ' + $.t(data.sub) + '\n';
+         info += $.t('Status') + ': ' + $.t(jsxc.CONST.STATUS[data.status]);
 
          ri.find('.jsxc_name').attr('title', info);
 
@@ -1645,9 +1632,9 @@ var jsxc;
 
                var status = jsxc.storage.getUserItem('res', bid)[res];
 
-               $('#jsxc_dialog ul.jsxc_vCard').append('<li class="jsxc_sep"><strong>' + jsxc.translate('%%Resource%%') + ':</strong> ' + res + '</li>');
-               $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Client%%') + ':</strong> ' + client + '</li>');
-               $('#jsxc_dialog ul.jsxc_vCard').append('<li>' + jsxc.translate('<strong>%%Status%%:</strong> %%' + jsxc.CONST.STATUS[status] + '%%') + '</li>');
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li class="jsxc_sep"><strong>' + $.t('Resource') + ':</strong> ' + res + '</li>');
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + $.t('Client') + ':</strong> ' + client + '</li>');
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + $.t('Status') + ':</strong> ' + $.t(jsxc.CONST.STATUS[status]) + '</li>');
             }
          }
 
@@ -1660,7 +1647,7 @@ var jsxc;
 
                content += '<li>';
 
-               var prop = jsxc.translate('%%' + item[0].tagName + '%%');
+               var prop = $.t(item[0].tagName);
 
                if (prop !== ' ') {
                   content += '<strong>' + prop + ':</strong> ';
@@ -1701,7 +1688,7 @@ var jsxc;
             $('#jsxc_dialog p').remove();
 
             var content = '<p>';
-            content += jsxc.translate('%%Sorry, your buddy doesn\'t provide any information.%%');
+            content += $.t('Sorry_your_buddy_doesnt_provide_any_information');
             content += '</p>';
 
             $('#jsxc_dialog').append(content);
@@ -1826,7 +1813,7 @@ var jsxc;
        * @memberOf jsxc.gui
        */
       showRequestNotification: function() {
-         jsxc.gui.showConfirmDialog(jsxc.translate("%%Should we notify you_%%"), function() {
+         jsxc.gui.showConfirmDialog($.t("Should_we_notify_you_"), function() {
             jsxc.gui.dialog.open(jsxc.gui.template.get('pleaseAccept'), {
                noClose: true
             });
@@ -1838,7 +1825,9 @@ var jsxc;
       },
 
       showUnknownSender: function(bid) {
-         jsxc.gui.showConfirmDialog(jsxc.translate('%%You_received_a_message_from_an_unknown_sender%% (' + bid + '). %%Do_you_want_to_display_them%%'), function() {
+         var confirmationText = $.t('You_received_a_message_from_an_unknown_sender') +
+           ' ('+bid+'). ' + $.t('Do_you_want_to_display_them');
+         jsxc.gui.showConfirmDialog(confirmationText, function() {
 
             jsxc.gui.dialog.close();
 
@@ -2034,7 +2023,7 @@ var jsxc;
          $(jsxc.options.rosterAppend + ':first').append($(jsxc.gui.template.get('roster')));
 
          if (jsxc.options.get('hideOffline')) {
-            $('#jsxc_menu .jsxc_hideOffline').text(jsxc.translate('%%Show offline%%'));
+            $('#jsxc_menu .jsxc_hideOffline').text($.t('Show_offline'));
             $('#jsxc_buddylist').addClass('jsxc_hideOffline');
          }
 
@@ -2051,7 +2040,7 @@ var jsxc;
                $('#jsxc_buddylist').removeClass('jsxc_hideOffline');
             }
 
-            $(this).text(hideOffline ? jsxc.translate('%%Show offline%%') : jsxc.translate('%%Hide offline%%'));
+            $(this).text(hideOffline ? $.t('Show_offline') : $.t('Hide_offline'));
 
             jsxc.options.set('hideOffline', hideOffline);
          });
@@ -2358,7 +2347,7 @@ var jsxc;
       noConnection: function() {
          $('#jsxc_roster').addClass('jsxc_noConnection');
 
-         $('#jsxc_roster').append($('<p>' + jsxc.l.no_connection + '</p>').append(' <a>' + jsxc.l.relogin + '</a>').click(function() {
+         $('#jsxc_roster').append($('<p>' + $.t('no_connection') + '</p>').append(' <a>' + $.t('relogin') + '</a>').click(function() {
             jsxc.gui.showLoginBox();
          }));
       },
@@ -3046,55 +3035,53 @@ var jsxc;
          var ret = jsxc.gui.template[name];
 
          if (typeof (ret) === 'string') {
-            ret = jsxc.translate(ret);
-
             ret = ret.replace(/\{\{([a-zA-Z0-9_\-]+)\}\}/g, function(s, key) {
                return (typeof ph[key] === 'string') ? ph[key] : s;
             });
 
-            return ret;
+            return $(ret).i18n().text();
          }
 
          jsxc.debug('Template not available: ' + name);
          return name;
       },
       authenticationDialog: '<h3>Verification</h3>\
-            <p>%%Authenticating_a_buddy_helps_%%</p>\
+            <p data-i18n="Authenticating_a_buddy_helps_"></p>\
             <div>\
-              <p style="margin:0px;">%%How_do_you_want_to_authenticate_your_buddy%%</p>\
+              <p data-i18n="How_do_you_want_to_authenticate_your_buddy" style="margin:0px;"></p>\
               <select size="1">\
-                <option>%%Select_method%%</option>\
-                <option>%%Manual%%</option>\
-                <option>%%Question%%</option>\
-                <option>%%Secret%%</option>\
+                <option data-i18n="Select_method"></option>\
+                <option data-i18n="Manual"></option>\
+                <option data-i18n="Question"></option>\
+                <option data-i18n="Secret"></option>\
               </select>\
             </div>\
             <div style="display:none">\
-              <p class=".jsxc_explanation">%%To_verify_the_fingerprint_%%</p>\
-              <p><strong>%%Your_fingerprint%%</strong><br />\
+              <p data-i18n="To_verify_the_fingerprint_" class=".jsxc_explanation"></p>\
+              <p><strong data-i18n="Your_fingerprint"></strong><br />\
               <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
-              <p><strong>%%Buddy_fingerprint%%</strong><br />\
+              <p><strong data-i18n="Buddy_fingerprint"></strong><br />\
               <span style="text-transform:uppercase">{{bid_priv_fingerprint}}</span></p><br />\
-              <p class="jsxc_right"><a href="#" class="jsxc_close button">%%Close%%</a> <a href="#" class="button creation">%%Compared%%</a></p>\
+              <p class="jsxc_right"><a href="#" data-i18n="Close" class="jsxc_close button"></a> <a href="#" data-i18n="Compared" class="button creation"></a></p>\
             </div>\
             <div style="display:none">\
-              <p class=".jsxc_explanation">%%To_authenticate_using_a_question_%%</p>\
-              <p><label for="jsxc_quest">%%Question%%:</label><input type="text" name="quest" id="jsxc_quest" /></p>\
-              <p><label for="jsxc_secret2">%%Secret%%:</label><input type="text" name="secret2" id="jsxc_secret2" /></p>\
-              <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Ask%%</a></p>\
+              <p data-i18n="To_authenticate_using_a_question_" class=".jsxc_explanation"></p>\
+              <p><label for="jsxc_quest" data-i18n="Question"></label><input type="text" name="quest" id="jsxc_quest" /></p>\
+              <p><label for="jsxc_secret2" data-i18n="Secret"></label><input type="text" name="secret2" id="jsxc_secret2" /></p>\
+              <p class="jsxc_right"><a href="#" class="button jsxc_close" data-i18n="Close"></a> <a href="#" class="button creation" data-i18n="Ask"></a></p>\
             </div>\
             <div style="display:none">\
-              <p class=".jsxc_explanation">%%To_authenticate_pick_a_secret_%%</p>\
-              <p><label for="jsxc_secret">%%Secret%%:</label><input type="text" name="secret" id="jsxc_secret" /></p>\
-              <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Compare%%</a></p>\
+              <p class=".jsxc_explanation" data-i18n="To_authenticate_pick_a_secret_"></p>\
+              <p><label for="jsxc_secret" data-i18n="Secret"></label><input type="text" name="secret" id="jsxc_secret" /></p>\
+              <p class="jsxc_right"><a href="#" class="button jsxc_close" data-i18n="Close"></a> <a href="#" class="button creation" data-i18n="Compare"></a></p>\
             </div>',
       fingerprintsDialog: '<div>\
-          <p class="jsxc_maxWidth">%%A_fingerprint_%%</p>\
-          <p><strong>%%Your_fingerprint%%</strong><br />\
+          <p class="jsxc_maxWidth" data-i18n="A_fingerprint_"></p>\
+          <p><strong data-i18n="Your_fingerprint"></strong><br />\
           <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
-          <p><strong>%%Buddy_fingerprint%%</strong><br />\
+          <p><strong data-i18n="Buddy_fingerprint"></strong><br />\
           <span style="text-transform:uppercase">{{bid_priv_fingerprint}}</span></p><br />\
-          <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a></p>\
+          <p class="jsxc_right"><a href="#" class="button jsxc_close" data-i18n="Close"></a></p>\
         </div>',
       chatWindow: '<li class="jsxc_min jsxc_windowItem">\
             <div class="jsxc_window">\
@@ -3103,10 +3090,10 @@ var jsxc;
                      <div class="jsxc_tools">\
                            <div class="jsxc_settings">\
                                <ul>\
-                                   <li class="jsxc_fingerprints jsxc_otr jsxc_disabled">%%Fingerprints%%</li>\
-                                   <li class="jsxc_verification">%%Authentication%%</li>\
-                                   <li class="jsxc_transfer jsxc_otr jsxc_disabled">%%start_private%%</li>\
-                                   <li class="jsxc_clear">%%clear_history%%</li>\
+                                   <li class="jsxc_fingerprints jsxc_otr jsxc_disabled" data-i18n="Fingerprints"></li>\
+                                   <li class="jsxc_verification" data-i18n="Authentication"></li>\
+                                   <li class="jsxc_transfer jsxc_otr jsxc_disabled" data-i18n="start_private"></li>\
+                                   <li class="jsxc_clear" data-i18n="clear_history"></li>\
                                </ul>\
                            </div>\
                            <div class="jsxc_transfer jsxc_otr jsxc_disabled"/>\
@@ -3119,7 +3106,7 @@ var jsxc;
                    <div class="jsxc_gradient"/>\
                    <div class="jsxc_textarea"/>\
                    <div class="jsxc_emoticons"><ul/></div>\
-                   <input type="text" class="jsxc_textinput" placeholder="...%%Message%%" />\
+                   <input type="text" class="jsxc_textinput" data-i18n="[placeholder]Message"/>\
                 </div>\
             </div>\
         </li>',
@@ -3132,12 +3119,12 @@ var jsxc;
               <div id="jsxc_menu">\
                  <span></span>\
                  <ul>\
-                     <li class="jsxc_settings">%%Settings%%</li>\
-                     <li class="jsxc_muteNotification">%%Mute%%</li>\
-                     <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
-                     <li class="jsxc_hideOffline">%%Hide offline%%</li>\
-                     <li class="jsxc_onlineHelp">%%Online help%%</li>\
-                     <li class="jsxc_about">%%About%%</li>\
+                     <li class="jsxc_settings" data-i18n="Settings"></li>\
+                     <li class="jsxc_muteNotification" data-i18n="Mute"></li>\
+                     <li class="jsxc_addBuddy" data-i18n="Add_buddy"></li>\
+                     <li class="jsxc_hideOffline" data-i18n="Hide_offline"></li>\
+                     <li class="jsxc_onlineHelp" data-i18n="Online_help"></li>\
+                     <li class="jsxc_about" data-i18n="About"></li>\
                  </ul>\
               </div>\
               <div id="jsxc_notice">\
@@ -3145,14 +3132,14 @@ var jsxc;
                  <ul></ul>\
               </div>\
               <div id="jsxc_presence">\
-                 <span>%%Online%%</span>\
+                 <span data-i18n="Online"></span>\
                  <ul>\
-                     <li data-pres="online" class="jsxc_online">%%Online%%</li>\
-                     <li data-pres="chat" class="jsxc_chat">%%Chatty%%</li>\
-                     <li data-pres="away" class="jsxc_away">%%Away%%</li>\
-                     <li data-pres="xa" class="jsxc_xa">%%Extended away%%</li>\
-                     <li data-pres="dnd" class="jsxc_dnd">%%dnd%%</li>\
-                     <!-- <li data-pres="offline" class="jsxc_offline">%%Offline%%</li> -->\
+                     <li data-pres="online" class="jsxc_online" data-i18n="Online"></li>\
+                     <li data-pres="chat" class="jsxc_chat" data-i18n="Chatty"></li>\
+                     <li data-pres="away" class="jsxc_away" data-i18n="Away"></li>\
+                     <li data-pres="xa" class="jsxc_xa" data-i18n="Extended_away"></li>\
+                     <li data-pres="dnd" class="jsxc_dnd" data-i18n="dnd"></li>\
+                     <!-- <li data-pres="offline" class="jsxc_offline" data-i18n="Offline"></li> -->\
                  </ul>\
               </div>\
            </div>\
@@ -3170,60 +3157,60 @@ var jsxc;
             <div class="jsxc_control"></div>\
             <div class="jsxc_name"/>\
             <div class="jsxc_options jsxc_right">\
-                <div class="jsxc_rename" title="%%rename_buddy%%">✎</div>\
-                <div class="jsxc_delete" title="%%delete_buddy%%">✘</div>\
+                <div class="jsxc_rename" data-i18n="[title]rename_buddy">✎</div>\
+                <div class="jsxc_delete" data-i18n="[title]delete_buddy">✘</div>\
             </div>\
             <div class="jsxc_options jsxc_left">\
-                <div class="jsxc_chaticon" title="%%send_message%%"/>\
-                <div class="jsxc_vcardicon" title="%%get_info%%">i</div>\
+                <div class="jsxc_chaticon" data-i18n="[title]send_message"/>\
+                <div class="jsxc_vcardicon" data-i18n="[title]get_info">i</div>\
             </div>\
         </li>',
-      loginBox: '<h3>%%Login%%</h3>\
+      loginBox: '<h3 data-i18n="Login"></h3>\
         <form>\
-            <p><label for="jsxc_username">%%Username%%:</label>\
+            <p><label for="jsxc_username" data-i18n="Username"></label>\
                <input type="text" name="username" id="jsxc_username" required="required" value="{{my_node}}"/></p>\
-            <p><label for="jsxc_password">%%Password%%:</label>\
+            <p><label for="jsxc_password" data-i18n="Password"></label>\
                <input type="password" name="password" required="required" id="jsxc_password" /></p>\
             <div class="bottom_submit_section">\
-                <input type="reset" class="button jsxc_close" name="clear" value="%%Cancel%%"/>\
-                <input type="submit" class="button creation" name="commit" value="%%Connect%%"/>\
+                <input type="reset" class="button jsxc_close" name="clear" data-i18n="[value]Cancel"/>\
+                <input type="submit" class="button creation" name="commit" data-i18n="[value]Connect"/>\
             </div>\
         </form>',
-      contactDialog: '<h3>%%Add_buddy%%</h3>\
-         <p class=".jsxc_explanation">%%Type_in_the_full_username_%%</p>\
+      contactDialog: '<h3 data-i18n="Add_buddy"></h3>\
+         <p class=".jsxc_explanation" data-i18n="Type_in_the_full_username_"></p>\
          <form>\
-         <p><label for="jsxc_username">* %%Username%%:</label>\
+         <p><label for="jsxc_username" data-i18n="Username"></label>\
             <input type="text" name="username" id="jsxc_username" pattern="^[^\\x22&\'\\/:<>@\\s]+(@[.\\-_\\w]+)?" required="required" /></p>\
-         <p><label for="jsxc_alias">%%Alias%%:</label>\
+         <p><label for="jsxc_alias" data-i18n="Alias"></label>\
             <input type="text" name="alias" id="jsxc_alias" /></p>\
          <p class="jsxc_right">\
-            <input class="button" type="submit" value="%%Add%%" />\
+            <input class="button" type="submit" data-i18n="[value]Add" />\
          </p>\
          <form>',
-      approveDialog: '<h3>%%Subscription_request%%</h3>\
-        <p>%%You_have_a_request_from%% <b class="jsxc_their_jid"></b>.</p>\
-        <p class="jsxc_right"><a href="#" class="button jsxc_deny">%%Deny%%</a> <a href="#" class="button creation jsxc_approve">%%Approve%%</a></p>',
-      removeDialog: '<h3>%%Remove buddy%%</h3>\
-        <p class="jsxc_maxWidth">%%You_are_about_to_remove_%%</p>\
-        <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close">%%Cancel%%</a> <a href="#" class="button creation">%%Remove%%</a></p>',
+      approveDialog: '<h3 data-i18n="Subscription_request"></h3>\
+        <p><span data-i18n="You_have_a_request_from"></span><b class="jsxc_their_jid"></b>.</p>\
+        <p class="jsxc_right"><a href="#" class="button jsxc_deny" data-i18n="Deny"></a> <a href="#" class="button creation jsxc_approve" data-i18n="Approve"></a></p>',
+      removeDialog: '<h3 data-i18n="Remove_buddy"></h3>\
+        <p class="jsxc_maxWidth" data-i18n="You_are_about_to_remove_"></p>\
+        <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close" data-i18n="Cancel"></a> <a href="#" class="button creation" data-i18n="Remove"></a></p>',
       waitAlert: '<h3>{{msg}}</h3>\
-        <p>%%Please_wait%%</p>\
+        <p data-i18n="Please_wait"></p>\
         <p class="jsxc_center"><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /></p>',
-      alert: '<h3>%%Alert%%</h3>\
+      alert: '<h3 data-i18n="Alert"></h3>\
         <p>{{msg}}</p>\
-        <p class="jsxc_right"><a href="#" class="button jsxc_close jsxc_cancel">%%Ok%%</a></p>',
-      authFailDialog: '<h3>%%Login_failed%%</h3>\
-        <p>%%Sorry_we_cant_authentikate_%%</p>\
+        <p class="jsxc_right"><a href="#" data-i18n="Ok" class="button jsxc_close jsxc_cancel"></a></p>',
+      authFailDialog: '<h3 data-i18n="Login_failed"></h3>\
+        <p data-i18n="Sorry_we_cant_authentikate_"></p>\
         <p class="jsxc_right">\
-            <a class="button jsxc_cancel">%%Continue_without_chat%%</a>\
-            <a class="button creation">%%Retry%%</a>\
+            <a class="button jsxc_cancel" data-i18n="Continue_without_chat"></a>\
+            <a class="button creation" data-i18n="Retry"></a>\
         </p>',
       confirmDialog: '<p>{{msg}}</p>\
         <p class="jsxc_right">\
-            <a class="button jsxc_cancel jsxc_close">%%Dismiss%%</a>\
-            <a class="button creation">%%Confirm%%</a>\
+            <a class="button jsxc_cancel jsxc_close" data-i18n="Dismiss"></a>\
+            <a class="button creation" data-i18n="Confirm"></a>\
         </p>',
-      pleaseAccept: '<p>%%Please_accept_%%</p>',
+      pleaseAccept: '<p data-i18n="Please_accept_"></p>',
       aboutDialog: '<h3>JavaScript XMPP Chat</h3>\
          <p><b>Version: </b>' + jsxc.version + '<br />\
          <a href="http://jsxc.org/" target="_blank">www.jsxc.org</a><br />\
@@ -3236,40 +3223,40 @@ var jsxc;
          <b>Credits: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
          <a href="https://soundcloud.com/freefilmandgamemusic/ping-1?in=freefilmandgamemusic/sets/free-notification-sounds-and" target="_blank">CameronMusic (Ping)</a></p>\
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>',
-      vCard: '<h3>%%Info_about%% {{bid_name}}</h3>\
+      vCard: '<h3><span data-i18n="Info_about"></span> <span>{{bid_name}}</span></h3>\
          <ul class="jsxc_vCard"></ul>\
-         <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...</p>',
-      settings: '<h3>%%User_settings%%</h3>\
+         <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> <span data-i18n="Please_wait"></span>...</p>',
+      settings: '<h3 data-i18n="User_settings"></h3>\
          <p></p>\
          <form>\
             <fieldset class="jsxc_fieldsetXmpp jsxc_fieldset">\
-               <legend>%%Login options%%</legend>\
-               <label for="xmpp-url">%%BOSH url%%</label><input type="text" id="xmpp-url" readonly="readonly"/><br />\
-               <label for="xmpp-username">%%Username%%</label><input type="text" id="xmpp-username"/><br />\
-               <label for="xmpp-domain">%%Domain%%</label><input type="text" id="xmpp-domain"/><br />\
-               <label for="xmpp-resource">%%Resource%%</label><input type="text" id="xmpp-resource"/><br />\
-               <label for="xmpp-onlogin">%%On login%%</label><input type="checkbox" id="xmpp-onlogin" /><br />\
-               <input type="submit" value="%%Save%%"/>\
+               <legend data-i18n="Login_options"></legend>\
+               <label for="xmpp-url" data-i18n="BOSH_url"></label><input type="text" id="xmpp-url" readonly="readonly"/><br />\
+               <label for="xmpp-username" data-i18n="Username"></label><input type="text" id="xmpp-username"/><br />\
+               <label for="xmpp-domain" data-i18n="Domain"></label><input type="text" id="xmpp-domain"/><br />\
+               <label for="xmpp-resource" data-i18n="Resource"></label><input type="text" id="xmpp-resource"/><br />\
+               <label for="xmpp-onlogin" data-i18n="On_login"></label><input type="checkbox" id="xmpp-onlogin" /><br />\
+               <input type="submit" data-i18n="[value]Save"/>\
             </fieldset>\
          </form>\
          <p></p>\
          <form>\
             <fieldset class="jsxc_fieldsetPriority jsxc_fieldset">\
-               <legend>%%Priority%%</legend>\
-               <label for="priority-online">%%Online%%</label><input type="number" value="0" id="priority-online" min="-128" max="127" step="1" required="required"/><br />\
-               <label for="priority-chat">%%Chatty%%</label><input type="number" value="0" id="priority-chat" min="-128" max="127" step="1" required="required"/><br />\
-               <label for="priority-away">%%Away%%</label><input type="number" value="0" id="priority-away" min="-128" max="127" step="1" required="required"/><br />\
-               <label for="priority-xa">%%Extended_away%%</label><input type="number" value="0" id="priority-xa" min="-128" max="127" step="1" required="required"/><br />\
-               <label for="priority-dnd">%%dnd%%</label><input type="number" value="0" id="priority-dnd" min="-128" max="127" step="1" required="required"/><br />\
-               <input type="submit" value="%%Save%%"/>\
+               <legend data-i18n="Priority"></legend>\
+               <label for="priority-online" data-i18n="Online"></label><input type="number" value="0" id="priority-online" min="-128" max="127" step="1" required="required"/><br />\
+               <label for="priority-chat" data-i18n="Chatty"></label><input type="number" value="0" id="priority-chat" min="-128" max="127" step="1" required="required"/><br />\
+               <label for="priority-away" data-i18n="Away"></label><input type="number" value="0" id="priority-away" min="-128" max="127" step="1" required="required"/><br />\
+               <label for="priority-xa" data-i18n="Extended_away"></label><input type="number" value="0" id="priority-xa" min="-128" max="127" step="1" required="required"/><br />\
+               <label for="priority-dnd" data-i18n="dnd"></label><input type="number" value="0" id="priority-dnd" min="-128" max="127" step="1" required="required"/><br />\
+               <input type="submit" data-i18n="[value]Save"/>\
             </fieldset>\
          </form>\
          <p></p>\
          <form data-onsubmit="xmpp.carbons.refresh">\
             <fieldset class="jsxc_fieldsetCarbons jsxc_fieldset">\
-               <legend>%%Carbon copy%%</legend>\
-               <label for="carbons-enable">%%Enable%%</label><input type="checkbox" id="carbons-enable" /><br />\
-               <input type="submit" value="%%Save%%"/>\
+               <legend data-i18n="Carbon_copy"></legend>\
+               <label for="carbons-enable" data-i18n="Enable"></label><input type="checkbox" id="carbons-enable" /><br />\
+               <input type="submit" data-i18n="[value]Save"/>\
             </fieldset>\
          </form>'
    };
@@ -3914,7 +3901,7 @@ var jsxc;
 
          if (data.status === 0 && max > 0) {
             // buddy has come online
-            jsxc.notification.notify(data.name, jsxc.translate('%%has come online%%.'));
+            jsxc.notification.notify(data.name, $.t('has_come_online'));
          }
 
          data.status = max;
@@ -4007,7 +3994,7 @@ var jsxc;
          } else if (forwarded) {
             // Someone forwarded a message to us
 
-            body = from + jsxc.translate(' %%to%% ') + $(stanza).attr('to') + '"' + body + '"';
+            body = from + ' ' + $.t('to') + ' ' + $(stanza).attr('to') + '"' + body + '"';
 
             from = $(stanza).attr('from');
          }
@@ -4996,7 +4983,7 @@ var jsxc;
          }
 
          if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !d.encrypted) {
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + d.msg + ']', d.encrypted, d.forwarded, d.stamp);
+            jsxc.gui.window.postMessage(bid, 'sys', $.t('Received_an_unencrypted_message') + '. [' + d.msg + ']', d.encrypted, d.forwarded, d.stamp);
          } else {
             jsxc.gui.window.postMessage(bid, 'in', d.msg, d.encrypted, d.forwarded, d.stamp);
          }
@@ -5155,7 +5142,7 @@ var jsxc;
          jsxc.otr.objects[bid].on('error', function(err) {
             // Handle this case in jsxc.otr.receiveMessage
             if (err !== 'Received an unencrypted message.') {
-               jsxc.gui.window.postMessage(bid, 'sys', '[OTR] ' + jsxc.translate('%%' + err + '%%'));
+               jsxc.gui.window.postMessage(bid, 'sys', '[OTR] ' + $.t(err));
             }
 
             jsxc.error('[OTR] ' + err);
@@ -5448,10 +5435,10 @@ var jsxc;
        */
       init: function() {
          $(document).on('postmessagein.jsxc', function(event, bid, msg) {
-            msg = (msg.match(/^\?OTR/)) ? jsxc.translate('%%Encrypted message%%') : msg;
+            msg = (msg.match(/^\?OTR/)) ? $.t('Encrypted_message') : msg;
             var data = jsxc.storage.getUserItem('buddy', bid);
 
-            jsxc.notification.notify(jsxc.translate('%%New message from%% ') + data.name, msg, undefined, undefined, jsxc.CONST.SOUNDS.MSG);
+            jsxc.notification.notify($.t('New_message_from') + ' ' + data.name, msg, undefined, undefined, jsxc.CONST.SOUNDS.MSG);
          });
 
          $(document).on('callincoming.jingle', function() {
@@ -5488,8 +5475,8 @@ var jsxc;
                jsxc.notification.playSound(soundFile, loop, force);
             }
 
-            var popup = new Notification(jsxc.translate(title), {
-               body: jsxc.translate(msg),
+            var popup = new Notification($.t(title), {
+               body: $.t(msg),
                icon: jsxc.options.root + '/img/XMPP_logo.png'
             });
 
@@ -5657,7 +5644,7 @@ var jsxc;
        *        false.
        */
       muteSound: function(external) {
-         $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Unmute%%'));
+         $('#jsxc_menu .jsxc_muteNotification').text($.t('Unmute'));
 
          if (external !== true) {
             jsxc.options.set('muteNotification', true);
@@ -5672,7 +5659,7 @@ var jsxc;
        *        false.
        */
       unmuteSound: function(external) {
-         $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Mute%%'));
+         $('#jsxc_menu .jsxc_muteNotification').text($.t('Mute'));
 
          if (external !== true) {
             jsxc.options.set('muteNotification', false);
@@ -5736,8 +5723,8 @@ var jsxc;
             return false;
          });
 
-         notice.text(jsxc.translate(msg));
-         notice.attr('title', jsxc.translate(description) || '');
+         notice.text($.t(msg));
+         notice.attr('title', $.t(description) || '');
          notice.attr('data-nid', nid);
          list.append(notice);
 
