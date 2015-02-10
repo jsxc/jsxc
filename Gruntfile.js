@@ -54,7 +54,7 @@ module.exports = function(grunt) {
             ]
          },
          locales: {
-           src: [ 'build/lib/translation.json' ],
+           src: [ 'build/lib/translation.js' ],
            overwrite: true,
            replacements: [
              {
@@ -71,7 +71,7 @@ module.exports = function(grunt) {
       merge_data: {
         target: {
           src: ['locales/*.{json,y{,a}ml}'],
-          dest: 'build/lib/translation.json'
+          dest: 'build/lib/translation.js'
         }
       },
       concat: {
@@ -211,6 +211,7 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-contrib-compress');
    grunt.loadNpmTasks('grunt-jsdoc');
    grunt.loadNpmTasks('grunt-data-uri');
+   grunt.loadNpmTasks('grunt-merge-data');
    grunt.loadNpmTasks('grunt-contrib-csslint');
    grunt.loadNpmTasks('grunt-sass');
    grunt.loadNpmTasks('grunt-autoprefixer');
@@ -222,7 +223,7 @@ module.exports = function(grunt) {
    grunt.registerTask('build', [ 'search:changelog', 'pre', 'jsdoc' ]);
 
    // Create alpha/beta build
-   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'css', 'dataUri', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
+   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'css', 'dataUri', 'copy', 'usebanner', 'merge_data', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // before commit
    grunt.registerTask('commit', [ 'jshint', 'search:console' ]);

@@ -75,7 +75,7 @@
      "url": "http://i18next.com/"
   },
   {
-    "file": "build/lib/translation.json",
+    "file": "build/lib/translation.js",
     "license": "MIT",
     "url": "https://webtranslateit.com/en/projects/10365-JSXC"
   }
