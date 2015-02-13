@@ -11,7 +11,7 @@
 }
 
 .jsxc_offline{
-	border-left: 4px solid transparent !important;
+	border-left: 4px solid #808080 !important;
 }
 
 .jsxc_badge_online {
@@ -19,15 +19,15 @@
 }
 
 .jsxc_badge_away{
-    color: orange !important;
+    background-color: orange !important;
 }
 
 .jsxc_badge_dnd {
-    color: red !important;
+    background-color: red !important;
 }
 
 .jsxc_badge_offline{
-    color: transparent !important;
+    background-color: #808080 !important;
 }
 
 .jsxc_hidden {
@@ -1113,7 +1113,6 @@ ul#jsxc_buddylist .jsxc_delete {
 .jsxc_min .jsxc_tools {
 	display: none;
 }
-
 .jsxc_min .jsxc_restore{
     width: 26px;
     height: 26px;
@@ -1127,11 +1126,11 @@ ul#jsxc_buddylist .jsxc_delete {
 }
 
 .jsxc_reduce{
-    padding-left: 5px;
-}
+     padding-left: 5px;
+ }
 
 .jsxc_window .jsxc_tools > div {
-	width: 17px;
+   width: 17px;
    height: 26px;
    display: block;
    float: left;
@@ -1144,6 +1143,13 @@ ul#jsxc_buddylist .jsxc_delete {
 
 .jsxc_restore{
     display: none;
+}
+
+.jsxc_window .jsxc_tools > .jsxc_presence_badge{
+    height: 14px;
+    width: 14px;
+    border-radius: 8px;
+    margin: 6px;
 }
 
 .jsxc_settings {
