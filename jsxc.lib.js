@@ -42,6 +42,9 @@ var jsxc;
       /** True if login through box */
       triggeredFromBox: false,
 
+      /** True if logout through presence box */
+      triggeredFromPresence: false,
+
       /** True if logout through element click */
       triggeredFromElement: false,
 
@@ -185,6 +188,14 @@ var jsxc;
             $.extend(true, jsxc.options, options);
          }
 
+         // In respect of being able to login via presence
+         // we have to set the bid early otherwise the jsxc
+         // storage function will not be able to retrieve presence
+         // information
+         if (options.xmpp.jid) {
+           jsxc.bid = jsxc.jidToBid(options.xmpp.jid);
+         }
+
          /**
           * Getter method for options. Saved options will override default one.
           *
@@ -255,7 +266,7 @@ var jsxc;
          if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
 
             // Looking for a login form
-            //if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
+            if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
 
                if (jsxc.options.displayRosterMinimized()) {
                   // Show minimized roster
@@ -264,8 +275,8 @@ var jsxc;
                   jsxc.gui.roster.noConnection();
                }
 
-               //return;
-            //}
+               return;
+            }
 
             if (typeof jsxc.options.formFound === 'function') {
                jsxc.options.formFound.call();
@@ -304,31 +315,29 @@ var jsxc;
                return true;
             });
 
-         } else { jsxc.restoreOldConnection(); }
-      },
+         } else {
 
-      login: function() { /* TODO deprecated function */ },
+            // Restore old connection
 
-      restoreOldConnection: function() {
-        // Restore old connection
-        var jid = jsxc.storage.getItem('jid') || jsxc.options.xmpp.jid;
-        jsxc.bid = jsxc.jidToBid(jid);
-        jsxc.gui.init();
+            jsxc.bid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
 
-        // Looking for logout element
-        if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
-          jsxc.options.logoutElement.one('click', function() {
-            jsxc.options.logoutElement = $(this);
-            jsxc.triggeredFromLogout = true;
-            return jsxc.xmpp.logout();
-          });
-        }
+            jsxc.gui.init();
 
-        if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
-          jsxc.onMaster();
-        } else {
-          jsxc.checkMaster();
-        }
+            // Looking for logout element
+            if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+               jsxc.options.logoutElement.one('click', function() {
+                  jsxc.options.logoutElement = $(this);
+                  jsxc.triggeredFromLogout = true;
+                  return jsxc.xmpp.logout();
+               });
+            }
+
+            if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
+               jsxc.onMaster();
+            } else {
+               jsxc.checkMaster();
+            }
+         }
       },
 
       /**
@@ -358,10 +367,6 @@ var jsxc;
 
          if (typeof settings.xmpp.username === 'string') {
             username = settings.xmpp.username;
-         }
-
-         if (typeof settings.xmpp.password === 'string') {
-            password = settings.xmpp.password;
          }
 
          var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
@@ -476,7 +481,10 @@ var jsxc;
             jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
          });
 
-         jsxc.xmpp.login();
+         var presence = jsxc.storage.getUserItem('presence') || 'online';
+         if (presence !== 'offline') {
+           jsxc.xmpp.login();
+         }
       },
 
       /**
@@ -784,7 +792,8 @@ var jsxc;
          chat: 0,
          away: 0,
          xa: 0,
-         dnd: 0
+         dnd: 0,
+         offline: 0
       },
 
       /** If all 3 properties are set, the login form is used */
@@ -1900,6 +1909,15 @@ var jsxc;
                $('#jsxc_menu .jsxc_muteNotification').addClass('jsxc_disabled');
                jsxc.notification.muteSound(true);
             } else {
+               if (pres === 'offline' && jsxc.xmpp.conn) {
+                  jsxc.triggeredFromPresence = true;
+                  jsxc.xmpp.logout();
+               } else if (pres !== 'offline') {
+                  // otherwise try to login
+                  // will return if already logged in
+                  jsxc.xmpp.login(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
+               }
+
                $('#jsxc_menu .jsxc_muteNotification').removeClass('jsxc_disabled');
 
                if (!jsxc.options.get('muteNotification')) {
@@ -2329,9 +2347,7 @@ var jsxc;
        * Shows a text with link to a login box that no connection exists.
        */
       noConnection: function() {
-         $('#jsxc_roster').addClass('jsxc_noConnection');
-
-         $('#jsxc_roster').append($(jsxc.gui.template.get('loginForm')));
+         $('#jsxc_buddylist').empty();
       },
 
       /**
@@ -3032,9 +3048,6 @@ var jsxc;
          jsxc.debug('Template not available: ' + name);
          return name;
       },
-      loginForm: '<form id="jsxc_loginForm">\
-        <input type="submit" value="%%Login%%"/>\
-        </form>',
       authenticationDialog: '<h3>Verification</h3>\
             <p>%%Authenticating_a_buddy_helps_%%</p>\
             <div>\
@@ -3112,12 +3125,12 @@ var jsxc;
               <div id="jsxc_menu">\
                  <span></span>\
                  <ul>\
-                     <li class="jsxc_settings">%%Settings%%</li>\
+                     <!--<li class="jsxc_settings">%%Settings%%</li>-->\
                      <li class="jsxc_muteNotification">%%Mute%%</li>\
-                     <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
+                     <!--<li class="jsxc_addBuddy">%%Add_buddy%%</li>-->\
                      <li class="jsxc_hideOffline">%%Hide offline%%</li>\
-                     <li class="jsxc_onlineHelp">%%Online help%%</li>\
-                     <li class="jsxc_about">%%About%%</li>\
+                     <!--<li class="jsxc_onlineHelp">%%Online help%%</li>\
+                     <li class="jsxc_about">%%About%%</li>-->\
                  </ul>\
               </div>\
               <div id="jsxc_notice">\
@@ -3132,7 +3145,7 @@ var jsxc;
                      <li data-pres="away" class="jsxc_away">%%Away%%</li>\
                      <li data-pres="xa" class="jsxc_xa">%%Extended away%%</li>\
                      <li data-pres="dnd" class="jsxc_dnd">%%dnd%%</li>\
-                     <!-- <li data-pres="offline" class="jsxc_offline">%%Offline%%</li> -->\
+                     <li data-pres="offline" class="jsxc_offline">%%Offline%%</li>\
                  </ul>\
               </div>\
             </div>\
@@ -3413,7 +3426,7 @@ var jsxc;
 
          if (!jsxc.master) {
             $('#jsxc_roster').remove();
-            $('#jsxc_windowlist').remove();
+            $('#jsxc_windowList').remove();
             return true;
          }
 
@@ -3501,7 +3514,6 @@ var jsxc;
          // start chat
 
          jsxc.gui.init();
-         $('#jsxc_roster').removeClass('jsxc_noConnection');
          jsxc.onMaster();
          jsxc.xmpp.conn.resume();
          jsxc.gui.dialog.close();
@@ -3588,6 +3600,8 @@ var jsxc;
        * Sends presence stanza to server.
        */
       sendPres: function() {
+         if (!jsxc.xmpp.conn) { return; }
+
          // disco stuff
          if (jsxc.xmpp.conn.disco) {
             jsxc.xmpp.conn.disco.addIdentity('client', 'web', 'JSXC');
@@ -3643,7 +3657,7 @@ var jsxc;
 
          $('#jsxc_windowList').remove();
 
-         if (jsxc.triggeredFromElement) {
+         if (jsxc.triggeredFromElement && !jsxc.triggeredFromPresence) {
             $('#jsxc_roster').remove();
          } else {
             jsxc.gui.roster.noConnection();
