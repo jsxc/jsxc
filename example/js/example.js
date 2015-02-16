@@ -18,7 +18,7 @@ $(function() {
       logoutElement: $('#logout'),
       checkFlash: false,
       rosterAppend: 'body',
-      root: '/owncloud/apps/ojsxc/js/jsxc/',
+      root: '/jsxc/',
       turnCredentialsPath: 'ajax/getturncredentials.json',
       displayRosterMinimized: function() {
          return true;
