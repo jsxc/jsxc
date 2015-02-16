@@ -8,4 +8,4 @@ build/lib/strophe.jingle/
 bower_components
 archives/
 css/
-.idea
+.idea**

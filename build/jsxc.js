@@ -1024,10 +1024,13 @@ var jsxc;
          ri.data(data);
 
          // Add online status
-         ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
+         ri.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
+         we.find('.jsxc_presence_badge')
+             .removeClass().addClass('jsxc_presence_badge jsxc_badge_' + jsxc.CONST.STATUS[data.status])
+             .attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
 
          // Change name and add title
-         ue.find('.jsxc_name').add(spot).text(data.name).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
+         ue.find('.jsxc_name').add(spot).text(data.name);
          ue.find('#jsxc_window_name').add(spot).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
          ue.find('#jsxc_window_name').empty().append(data_name);
 
@@ -3080,6 +3083,7 @@ var jsxc;
                 <div class="jsxc_bar">\
                      <div class="jsxc_avatar">☺</div>\
                      <div class="jsxc_tools">\
+                           <div class="jsxc_presence_badge"></div>\
                            <div class="jsxc_settings">\
                                <ul>\
                                    <li class="jsxc_fingerprints jsxc_otr jsxc_disabled">%%Fingerprints%%</li>\
