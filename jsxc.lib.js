@@ -3721,6 +3721,13 @@ var jsxc;
             var sub = $(this).attr('subscription');
             var diaspora = $(this).attr('from_diaspora') || false;
 
+            // Since jsxc is not using groups to categorize
+            // on the front-end. We should remove double
+            // contacts to avoid misunderstandings
+            if ($.inArray(bid, buddies) != -1) {
+              return true;
+            }
+
             buddies.push(bid);
 
             jsxc.storage.removeUserItem('res', bid);
