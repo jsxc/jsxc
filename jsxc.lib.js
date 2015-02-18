@@ -2112,6 +2112,10 @@ var jsxc;
             jsxc.gui.showAboutDialog();
          });
 
+         $('#jsxc_toggleRoster').click(function() {
+            jsxc.gui.roster.toggle();
+         });
+
          $('#jsxc_presence > ul > li').click(function() {
             var self = $(this);
 
