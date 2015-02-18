@@ -105,11 +105,11 @@ div:fullscreen {
   height: 100%;
   background-color: #000; }
   div:-webkit-full-screen.jsxc_localvideo {
-  border: 1px solid #fff; }
+    border: 1px solid #fff; }
   div:-moz-full-screen.jsxc_localvideo {
-  border: 1px solid #fff; }
+    border: 1px solid #fff; }
   div:-ms-fullscreen.jsxc_localvideo {
-  border: 1px solid #fff; }
+    border: 1px solid #fff; }
   div:fullscreen.jsxc_localvideo {
     border: 1px solid #fff; }
 div.jsxc_video {
@@ -198,7 +198,6 @@ div.jsxc_video {
           animation-delay: 0.78s; }
 
 @-webkit-keyframes bubblingG {
-
   0% {
     width: 16px;
     height: 16px;

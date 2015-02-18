@@ -1,6 +1,6 @@
 {
   "name": "diaspora_jsxc",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "homepage": "https://github.com/diaspora/jsxc",
   "description": "XMPP javascript client for diaspora",
   "main": [
@@ -15,8 +15,8 @@
     "build/lib/jquery.colorbox-min.js",
     "build/lib/jquery.slimscroll.js",
     "build/lib/jquery.fullscreen.js",
-    "build/jsxc.css",
-    "build/jsxc.webrtc.css",
+    "build/css/jsxc.css",
+    "build/css/jsxc.webrtc.css",
     "build/lib/jsxc.dep.min.js",
     "build/jsxc.min.js"
   ],

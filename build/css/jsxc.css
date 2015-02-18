@@ -81,8 +81,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
       height: 0;
       display: inline-block;
       opacity: 0;
-      -webkit-transition: width 0.5s, opacity 0.5s;
-              transition: width 0.5s, opacity 0.5s; }
+      transition: width 0.5s, opacity 0.5s; }
     #jsxc_buddylist li.jsxc_unreadMsg .jsxc_name:before {
       width: 12px;
       height: 12px;
@@ -90,8 +89,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
       background-color: #ffa500;
       margin-right: 3px;
       opacity: 1;
-      -webkit-transition: width 0.5s, opacity 0.5s;
-              transition: width 0.5s, opacity 0.5s; }
+      transition: width 0.5s, opacity 0.5s; }
   #jsxc_buddylist .jsxc_name {
     padding-right: 30px; }
   #jsxc_buddylist .jsxc_oneway {
@@ -129,8 +127,8 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
       color: #b3b3b3;
       background-color: rgba(102, 102, 102, 0.5);
       opacity: 0.6;
-      -webkit-transition: -webkit-transform 0.5s;
-              transition: transform 0.5s; }
+      transition: -webkit-transform 0.5s;
+      transition: transform 0.5s; }
     #jsxc_buddylist .jsxc_control:hover:after {
       color: #fff;
       opacity: 1; }
@@ -548,7 +546,6 @@ ul.jsxc_vCard {
   background-position: center center; }
 
 @-webkit-keyframes bounce {
-
   0% {
     bottom: 0;
     -webkit-animation-timing-function: ease-in;
@@ -628,8 +625,7 @@ ul.jsxc_vCard {
     height: 30px;
     overflow: visible;
     white-space: nowrap;
-    -webkit-transition: right 0.5s;
-            transition: right 0.5s; }
+    transition: right 0.5s; }
     #jsxc_windowList > ul > li {
       padding: 0;
       margin: 0;
@@ -767,7 +763,6 @@ ul.jsxc_vCard {
     right: 0;
     height: 15px;
     z-index: 100;
-    background: -webkit-linear-gradient(top, #999999 0, rgba(0, 0, 0, 0) 100%);
     background: linear-gradient(to bottom, #999999 0, rgba(0, 0, 0, 0) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$window_gradient', endColorstr='#00282323', GradientType=0); }
   .jsxc_window .jsxc_avatar {
@@ -791,14 +786,14 @@ ul.jsxc_vCard {
     box-sizing: border-box;
     text-align: right; }
   .jsxc_window input::-webkit-input-placeholder {
-  color: #000;
-  opacity: 0.3; }
+    color: #000;
+    opacity: 0.3; }
   .jsxc_window input::-moz-placeholder {
-  color: #000;
-  opacity: 0.3; }
+    color: #000;
+    opacity: 0.3; }
   .jsxc_window input:-ms-input-placeholder {
-  color: #000;
-  opacity: 0.3; }
+    color: #000;
+    opacity: 0.3; }
   .jsxc_window input::placeholder {
     color: #000;
     opacity: 0.3; }
@@ -834,7 +829,6 @@ ul.jsxc_vCard {
     right: 0;
     height: 15px;
     z-index: 100;
-    background: -webkit-linear-gradient(top, #999999 0, rgba(40, 35, 35, 0) 100%);
     background: linear-gradient(to bottom, #999999 0, rgba(40, 35, 35, 0) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$window_gradient', endColorstr='#00282323', GradientType=0); }
 

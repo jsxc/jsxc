@@ -1,5 +1,5 @@
 /*!
- * jsxc v1.0.0 - 2015-01-15
+ * jsxc v1.1.0 - 2015-02-18
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 1.0.0
+ * @version 1.1.0
  * @license MIT
  */
 
@@ -288,6 +288,11 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          jsxc.debug('Update icon', bid);
 
          var self = jsxc.webrtc;
+
+         if (bid === jsxc.jidToBid(self.conn.jid)) {
+            return;
+         }
+
          var win = jsxc.gui.window.get(bid);
          var jid = win.data('jid') || jsxc.storage.getUserItem('buddy', bid).jid;
 
