@@ -3724,7 +3724,7 @@ var jsxc;
             // Since jsxc is not using groups to categorize
             // on the front-end. We should remove double
             // contacts to avoid misunderstandings
-            if ($.inArray(bid, buddies) != -1) {
+            if ($.inArray(bid, buddies) !== -1) {
               return true;
             }
 
