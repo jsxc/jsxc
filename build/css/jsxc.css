@@ -266,7 +266,7 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
 
 #jsxc_roster {
   position: fixed;
-  top: 0px;
+  top: 40px;
   bottom: 0;
   right: 0;
   width: 200px;
