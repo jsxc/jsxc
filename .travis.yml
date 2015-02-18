@@ -14,4 +14,4 @@ before_install:
 
 install: npm install
 
-script: grunt default connect qunit
+script: grunt build connect qunit
