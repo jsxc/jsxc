@@ -10,7 +10,7 @@
     "you_have_only_a_subscription_in_one_way": "Vous ne pouvez souscrire qu'une fois.",
     "authentication_query_sent": "Requête d’authentification envoyée.",
     "your_message_wasnt_send_please_end_your_private_conversation": "Votre message n'a pas été envoyé. Veuillez terminer votre conversation privée.",
-    "unencrypted_message_received": "Reçu message non chiffré",
+    "unencrypted_message_received": "Message non chiffré reçu",
     "your_message_wasnt_send_because_you_have_no_valid_subscription": "Votre message n'a pas été envoyé car votre abonnement n'est pas valide.",
     "not_available": "Pas disponible",
     "no_connection": "Pas de connexion !",
