@@ -140,8 +140,8 @@ module.exports = function(grunt) {
           dest: 'build/css/',
           options: {
             target: ['img/*.*', 'img/**/*.*'],
-            fixDirLevel: true,
-            baseDir: './'
+            fixDirLevel: false,
+            maxBytes: 2048
           }
         }
       },
