@@ -1,3 +1,7 @@
+v1.1.0a / 2015-02-25
+===
+- fix css url path
+
 v1.1.0 / 2015-01-08
 ===
 - move from plain css to sass

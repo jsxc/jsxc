@@ -113,12 +113,12 @@ div:fullscreen {
   div:fullscreen.jsxc_localvideo {
     border: 1px solid #fff; }
 div.jsxc_video {
-  background-image: url("../../../img/camera_icon_grey.svg");
+  background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcKICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIgogICB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiCiAgIHhtbG5zOnN2Zz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgdmVyc2lvbj0iMS4xIgogICBpZD0ic3ZnMiIKICAgd2lkdGg9IjIwIgogICBoZWlnaHQ9IjIwIj4KICA8bWV0YWRhdGEKICAgICBpZD0ibWV0YWRhdGExMCI+CiAgICA8cmRmOlJERj4KICAgICAgPGNjOldvcmsKICAgICAgICAgcmRmOmFib3V0PSIiPgogICAgICAgIDxkYzpmb3JtYXQ+aW1hZ2Uvc3ZnK3htbDwvZGM6Zm9ybWF0PgogICAgICAgIDxkYzp0eXBlCiAgICAgICAgICAgcmRmOnJlc291cmNlPSJodHRwOi8vcHVybC5vcmcvZGMvZGNtaXR5cGUvU3RpbGxJbWFnZSIgLz4KICAgICAgICA8ZGM6dGl0bGU+PC9kYzp0aXRsZT4KICAgICAgPC9jYzpXb3JrPgogICAgPC9yZGY6UkRGPgogIDwvbWV0YWRhdGE+CiAgPGRlZnMKICAgICBpZD0iZGVmczgiIC8+CiAgPGcKICAgICBpZD0ibGF5ZXIxIgogICAgIHRyYW5zZm9ybT0ibWF0cml4KDAuMDM3ODg1OTQsMCwwLDAuMDM3ODg1OTQsLTAuNDEzNDA3OTMsLTIuNjMxMDcxNikiPgogICAgPHBhdGgKICAgICAgIGlkPSJwYXRoMzkwNiIKICAgICAgIHN0eWxlPSJmaWxsOiM4MDgwODA7c3Ryb2tlOm5vbmUiCiAgICAgICBkPSJtIDM2MS42NTE0OCwzMTMuNTE3NjggMTc3LjE2MDc0LC0xMzEuNzg1MTYgMCwzMDIuMjI5OTkgTCAzNTguOTczMzgsMzUwLjE4NTE3IFogTSAxMC45MTE5MjIsMTgyLjQwNjM0IGwgMzc4LjM3MjY3OCwwIDAsMzAyLjY1NTgyIC0zNzguMzcyNjc4LDAgeiIgLz4KICA8L2c+Cjwvc3ZnPgo=");
   background-repeat: no-repeat;
   background-position: center center;
   background-size: 15px 15px; }
   div.jsxc_video:not(.jsxc_disabled):hover {
-    background-image: url("../../../img/camera_icon_white.svg"); }
+    background-image: url("../img/camera_icon_white.svg"); }
 
 .jsxc_controlbar {
   width: 640px; }
@@ -235,6 +235,6 @@ div.jsxc_video {
   font-style: italic; }
 
 #jsxc_buddylist .jsxc_options .jsxc_video {
-  background-image: url("../../../img/camera_icon_white.svg"); }
+  background-image: url("../img/camera_icon_white.svg"); }
   #jsxc_buddylist .jsxc_options .jsxc_video.jsxc_disabled {
     opacity: 0.2; }
