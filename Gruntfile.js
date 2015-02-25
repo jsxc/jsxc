@@ -25,7 +25,7 @@ module.exports = function(grunt) {
          main: {
             files: [ {
                expand: true,
-               src: [ 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'jsxc.lib.js', 'jsxc.lib.webrtc.js', 'LICENSE', 'img/**', 'sound/**' ],
+               src: [ 'lib/i18next/release/i18next-latest.min.js', 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'jsxc.lib.js', 'jsxc.lib.webrtc.js', 'LICENSE', 'img/**', 'sound/**' ],
                dest: 'build/'
             } ]
          }
@@ -46,11 +46,33 @@ module.exports = function(grunt) {
          version: {
             src: [ 'build/jsxc.lib.js' ],
             overwrite: true,
-            replacements: [ {
-               from: '< $ app.version $ >',
-               to: "<%= app.version %>"
-            } ]
+            replacements: [
+              {
+                from: '< $ app.version $ >',
+                to: "<%= app.version %>"
+              }
+            ]
+         },
+         locales: {
+           src: [ 'build/lib/translation.js' ],
+           overwrite: true,
+           replacements: [
+             {
+               from: /^{/g,
+               to: 'var I18next = {'
+             },
+             {
+               from: /}$/g,
+               to: '};'
+             }
+           ]
          }
+      },
+      merge_data: {
+        target: {
+          src: ['locales/*.{json,y{,a}ml}'],
+          dest: 'build/lib/translation.js'
+        }
       },
       concat: {
          dep: {
@@ -189,6 +211,7 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-contrib-compress');
    grunt.loadNpmTasks('grunt-jsdoc');
    grunt.loadNpmTasks('grunt-data-uri');
+   grunt.loadNpmTasks('grunt-merge-data');
    grunt.loadNpmTasks('grunt-contrib-csslint');
    grunt.loadNpmTasks('grunt-sass');
    grunt.loadNpmTasks('grunt-autoprefixer');
@@ -200,7 +223,7 @@ module.exports = function(grunt) {
    grunt.registerTask('build', [ 'search:changelog', 'pre', 'jsdoc' ]);
 
    // Create alpha/beta build
-   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'css', 'dataUri', 'copy', 'usebanner', 'replace', 'concat', 'uglify', 'compress' ]);
+   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'css', 'dataUri', 'copy', 'usebanner', 'merge_data', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // before commit
    grunt.registerTask('commit', [ 'jshint', 'search:console' ]);

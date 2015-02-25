@@ -14,6 +14,9 @@
    "multistr": true,
    "devel": true,
    "globals": {
+      "t":true,
+      "i18n":true,
+      "I18next":true,
       "OTR":true, 
       "DSA":true, 
       "Worker":true, 
