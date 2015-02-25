@@ -223,9 +223,15 @@ var jsxc;
             lang = jsxc.options.defaultLang;
          }
 
-         // set language
-         jsxc.l = jsxc.l10n.en;
-         $.extend(jsxc.l, jsxc.l10n[lang]);
+         // initialize i18n translator
+         $.i18n.init({
+           lng: lang,
+           fallbackLng: 'en',
+           resStore: I18next,
+           // use localStorage and set expiration to a day
+           useLocalStorage: true,
+           localStorageExpirationTime: 60 * 60 * 24 * 1000,
+         });
 
          // Check localStorage
          if (typeof (localStorage) === 'undefined') {
@@ -339,7 +345,7 @@ var jsxc;
             return;
          }
 
-         jsxc.gui.showWaitAlert(jsxc.l.Logging_in);
+         jsxc.gui.showWaitAlert($.t("Logging_in"));
 
          var settings = jsxc.options.loadSettings.call(this, username, password);
 
@@ -698,24 +704,6 @@ var jsxc;
       },
 
       /**
-       * Replace %%tokens%% with correct translation.
-       * 
-       * @param {String} text Given text
-       * @returns {String} Translated string
-       */
-      translate: function(text) {
-         return text.replace(/%%([a-zA-Z0-9_-}{ .!,?/'@]+)%%/g, function(s, key) {
-            var k = key.replace(/ /gi, '_').replace(/[.!,?/'@]/g, '');
-
-            if (!jsxc.l[k]) {
-               jsxc.warn('No translation for: ' + k);
-            }
-
-            return jsxc.l[k] || key.replace(/_/g, ' ');
-         });
-      },
-
-      /**
        * Executes the given function in jsxc namespace.
        * 
        * @memberOf jsxc
@@ -1023,30 +1011,30 @@ var jsxc;
          ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
 
          // Change name and add title
-         ue.find('.jsxc_name').add(spot).text(data.name).attr('title', jsxc.l.is + ' ' + jsxc.CONST.STATUS[data.status]);
+         ue.find('.jsxc_name').add(spot).text(data.name).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
 
          // Update gui according to encryption state
          switch (data.msgstate) {
             case 0:
-               we.find('.jsxc_transfer').removeClass('jsxc_enc jsxc_fin').attr('title', jsxc.l.your_connection_is_unencrypted);
+               we.find('.jsxc_transfer').removeClass('jsxc_enc jsxc_fin').attr('title', $.t("your_connection_is_unencrypted"));
                we.find('.jsxc_settings .jsxc_verification').addClass('jsxc_disabled');
-               we.find('.jsxc_settings .jsxc_transfer').text(jsxc.l.start_private);
+               we.find('.jsxc_settings .jsxc_transfer').text($.t("start_private"));
                break;
             case 1:
-               we.find('.jsxc_transfer').addClass('jsxc_enc').attr('title', jsxc.l.your_connection_is_encrypted);
+               we.find('.jsxc_transfer').addClass('jsxc_enc').attr('title', $.t("your_connection_is_encrypted"));
                we.find('.jsxc_settings .jsxc_verification').removeClass('jsxc_disabled');
-               we.find('.jsxc_settings .jsxc_transfer').text(jsxc.l.close_private);
+               we.find('.jsxc_settings .jsxc_transfer').text($.t("close_private"));
                break;
             case 2:
                we.find('.jsxc_settings .jsxc_verification').addClass('jsxc_disabled');
-               we.find('.jsxc_transfer').removeClass('jsxc_enc').addClass('jsxc_fin').attr('title', jsxc.l.your_buddy_closed_the_private_connection);
-               we.find('.jsxc_settings .jsxc_transfer').text(jsxc.l.close_private);
+               we.find('.jsxc_transfer').removeClass('jsxc_enc').addClass('jsxc_fin').attr('title', $.t("your_buddy_closed_the_private_connection"));
+               we.find('.jsxc_settings .jsxc_transfer').text($.t("close_private"));
                break;
          }
 
          // update gui according to verification state
          if (data.trust) {
-            we.find('.jsxc_transfer').addClass('jsxc_trust').attr('title', jsxc.l.your_buddy_is_verificated);
+            we.find('.jsxc_transfer').addClass('jsxc_trust').attr('title', $.t("your_buddy_is_verificated"));
          } else {
             we.find('.jsxc_transfer').removeClass('jsxc_trust');
          }
@@ -1059,8 +1047,8 @@ var jsxc;
          }
 
          var info = '<b>' + Strophe.getBareJidFromJid(data.jid) + '</b>\n';
-         info += jsxc.translate('%%Subscription%%: %%' + data.sub + '%%\n');
-         info += jsxc.translate('%%Status%%: %%' + jsxc.CONST.STATUS[data.status] + '%%');
+         info += $.t('Subscription') + ': ' + $.t(data.sub) + '\n';
+         info += $.t('Status') + ': ' + $.t(jsxc.CONST.STATUS[data.status]);
 
          ri.find('.jsxc_name').attr('title', info);
 
@@ -1330,7 +1318,7 @@ var jsxc;
             jsxc.gui.dialog.close();
 
             jsxc.storage.updateUserItem('buddy', bid, 'trust', true);
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.conversation_is_now_verified);
+            jsxc.gui.window.postMessage(bid, 'sys', $.t("conversation_is_now_verified"));
             jsxc.gui.update(bid);
          });
 
@@ -1361,7 +1349,7 @@ var jsxc;
 
             jsxc.gui.dialog.close();
 
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_query_sent);
+            jsxc.gui.window.postMessage(bid, 'sys', $.t("authentication_query_sent"));
          });
 
          // Secret
@@ -1390,7 +1378,7 @@ var jsxc;
 
             jsxc.gui.dialog.close();
 
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_query_sent);
+            jsxc.gui.window.postMessage(bid, 'sys', $.t("authentication_query_sent"));
          });
       },
 
@@ -1644,9 +1632,9 @@ var jsxc;
 
                var status = jsxc.storage.getUserItem('res', bid)[res];
 
-               $('#jsxc_dialog ul.jsxc_vCard').append('<li class="jsxc_sep"><strong>' + jsxc.translate('%%Resource%%') + ':</strong> ' + res + '</li>');
-               $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + jsxc.translate('%%Client%%') + ':</strong> ' + client + '</li>');
-               $('#jsxc_dialog ul.jsxc_vCard').append('<li>' + jsxc.translate('<strong>%%Status%%:</strong> %%' + jsxc.CONST.STATUS[status] + '%%') + '</li>');
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li class="jsxc_sep"><strong>' + $.t('Resource') + ':</strong> ' + res + '</li>');
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + $.t('Client') + ':</strong> ' + client + '</li>');
+               $('#jsxc_dialog ul.jsxc_vCard').append('<li><strong>' + $.t('Status') + ':</strong> ' + $.t(jsxc.CONST.STATUS[status]) + '</li>');
             }
          }
 
@@ -1659,7 +1647,7 @@ var jsxc;
 
                content += '<li>';
 
-               var prop = jsxc.translate('%%' + item[0].tagName + '%%');
+               var prop = $.t(item[0].tagName);
 
                if (prop !== ' ') {
                   content += '<strong>' + prop + ':</strong> ';
@@ -1700,7 +1688,7 @@ var jsxc;
             $('#jsxc_dialog p').remove();
 
             var content = '<p>';
-            content += jsxc.translate('%%Sorry, your buddy doesn\'t provide any information.%%');
+            content += $.t('Sorry_your_buddy_doesnt_provide_any_information');
             content += '</p>';
 
             $('#jsxc_dialog').append(content);
@@ -1825,7 +1813,7 @@ var jsxc;
        * @memberOf jsxc.gui
        */
       showRequestNotification: function() {
-         jsxc.gui.showConfirmDialog(jsxc.translate("%%Should we notify you_%%"), function() {
+         jsxc.gui.showConfirmDialog($.t("Should_we_notify_you_"), function() {
             jsxc.gui.dialog.open(jsxc.gui.template.get('pleaseAccept'), {
                noClose: true
             });
@@ -1837,7 +1825,9 @@ var jsxc;
       },
 
       showUnknownSender: function(bid) {
-         jsxc.gui.showConfirmDialog(jsxc.translate('%%You_received_a_message_from_an_unknown_sender%% (' + bid + '). %%Do_you_want_to_display_them%%'), function() {
+         var confirmationText = $.t('You_received_a_message_from_an_unknown_sender') +
+           ' ('+bid+'). ' + $.t('Do_you_want_to_display_them');
+         jsxc.gui.showConfirmDialog(confirmationText, function() {
 
             jsxc.gui.dialog.close();
 
@@ -2033,7 +2023,7 @@ var jsxc;
          $(jsxc.options.rosterAppend + ':first').append($(jsxc.gui.template.get('roster')));
 
          if (jsxc.options.get('hideOffline')) {
-            $('#jsxc_menu .jsxc_hideOffline').text(jsxc.translate('%%Show offline%%'));
+            $('#jsxc_menu .jsxc_hideOffline').text($.t('Show_offline'));
             $('#jsxc_buddylist').addClass('jsxc_hideOffline');
          }
 
@@ -2050,7 +2040,7 @@ var jsxc;
                $('#jsxc_buddylist').removeClass('jsxc_hideOffline');
             }
 
-            $(this).text(hideOffline ? jsxc.translate('%%Show offline%%') : jsxc.translate('%%Hide offline%%'));
+            $(this).text(hideOffline ? $.t('Show_offline') : $.t('Hide_offline'));
 
             jsxc.options.set('hideOffline', hideOffline);
          });
@@ -2357,7 +2347,7 @@ var jsxc;
       noConnection: function() {
          $('#jsxc_roster').addClass('jsxc_noConnection');
 
-         $('#jsxc_roster').append($('<p>' + jsxc.l.no_connection + '</p>').append(' <a>' + jsxc.l.relogin + '</a>').click(function() {
+         $('#jsxc_roster').append($('<p>' + $.t('no_connection') + '</p>').append(' <a>' + $.t('relogin') + '</a>').click(function() {
             jsxc.gui.showLoginBox();
          }));
       },
@@ -2368,8 +2358,8 @@ var jsxc;
        * @memberOf jsxc.gui.roster
        */
       empty: function() {
-         var text = $('<p>' + jsxc.l.Your_roster_is_empty_add_a + '</p>');
-         var link = $('<a>' + jsxc.l.new_buddy + '</a>');
+         var text = $('<p>' + $.t("Your_roster_is_empty_add_a") + '</p>');
+         var link = $('<a>' + $.t("new_buddy") + '</a>');
 
          link.click(function() {
             jsxc.gui.showContactDialog();
@@ -2840,17 +2830,17 @@ var jsxc;
 
          if (direction === 'out' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED && forwarded !== true) {
             direction = 'sys';
-            msg = jsxc.l.your_message_wasnt_send_please_end_your_private_conversation;
+            msg = $.t("your_message_wasnt_send_please_end_your_private_conversation");
          }
 
          if (direction === 'in' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED) {
             direction = 'sys';
-            msg = jsxc.l.unencrypted_message_received + ' ' + msg;
+            msg = $.t("unencrypted_message_received") + ' ' + msg;
          }
 
          if (direction === 'out' && data.sub === 'from') {
             direction = 'sys';
-            msg = jsxc.l.your_message_wasnt_send_because_you_have_no_valid_subscription;
+            msg = $.t("your_message_wasnt_send_because_you_have_no_valid_subscription");
          }
 
          encrypted = encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
@@ -3017,7 +3007,7 @@ var jsxc;
 
          // common placeholder
          var ph = {
-            my_priv_fingerprint: jsxc.storage.getUserItem('priv_fingerprint') ? jsxc.storage.getUserItem('priv_fingerprint').replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
+            my_priv_fingerprint: jsxc.storage.getUserItem('priv_fingerprint') ? jsxc.storage.getUserItem('priv_fingerprint').replace(/(.{8})/g, '$1 ') : $.t("not_available"),
             my_jid: jsxc.storage.getItem('jid') || '',
             my_node: Strophe.getNodeFromJid(jsxc.storage.getItem('jid') || '') || '',
             root: jsxc.options.root,
@@ -3029,7 +3019,7 @@ var jsxc;
             var data = jsxc.storage.getUserItem('buddy', bid);
 
             $.extend(ph, {
-               bid_priv_fingerprint: (data && data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : jsxc.l.not_available,
+               bid_priv_fingerprint: (data && data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : $.t("not_available"),
                bid_jid: bid,
                bid_name: (data && data.name) ? data.name : bid
             });
@@ -3045,55 +3035,53 @@ var jsxc;
          var ret = jsxc.gui.template[name];
 
          if (typeof (ret) === 'string') {
-            ret = jsxc.translate(ret);
-
             ret = ret.replace(/\{\{([a-zA-Z0-9_\-]+)\}\}/g, function(s, key) {
                return (typeof ph[key] === 'string') ? ph[key] : s;
             });
 
-            return ret;
+            return $(ret).i18n().text();
          }
 
          jsxc.debug('Template not available: ' + name);
          return name;
       },
       authenticationDialog: '<h3>Verification</h3>\
-            <p>%%Authenticating_a_buddy_helps_%%</p>\
+            <p data-i18n="Authenticating_a_buddy_helps_"></p>\
             <div>\
-              <p style="margin:0px;">%%How_do_you_want_to_authenticate_your_buddy%%</p>\
+              <p data-i18n="How_do_you_want_to_authenticate_your_buddy" style="margin:0px;"></p>\
               <select size="1">\
-                <option>%%Select_method%%</option>\
-                <option>%%Manual%%</option>\
-                <option>%%Question%%</option>\
-                <option>%%Secret%%</option>\
+                <option data-i18n="Select_method"></option>\
+                <option data-i18n="Manual"></option>\
+                <option data-i18n="Question"></option>\
+                <option data-i18n="Secret"></option>\
               </select>\
             </div>\
             <div style="display:none">\
-              <p class=".jsxc_explanation">%%To_verify_the_fingerprint_%%</p>\
-              <p><strong>%%Your_fingerprint%%</strong><br />\
+              <p data-i18n="To_verify_the_fingerprint_" class=".jsxc_explanation"></p>\
+              <p><strong data-i18n="Your_fingerprint"></strong><br />\
               <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
-              <p><strong>%%Buddy_fingerprint%%</strong><br />\
+              <p><strong data-i18n="Buddy_fingerprint"></strong><br />\
               <span style="text-transform:uppercase">{{bid_priv_fingerprint}}</span></p><br />\
-              <p class="jsxc_right"><a href="#" class="jsxc_close button">%%Close%%</a> <a href="#" class="button creation">%%Compared%%</a></p>\
+              <p class="jsxc_right"><a href="#" data-i18n="Close" class="jsxc_close button"></a> <a href="#" data-i18n="Compared" class="button creation"></a></p>\
             </div>\
             <div style="display:none">\
-              <p class=".jsxc_explanation">%%To_authenticate_using_a_question_%%</p>\
-              <p><label for="jsxc_quest">%%Question%%:</label><input type="text" name="quest" id="jsxc_quest" /></p>\
-              <p><label for="jsxc_secret2">%%Secret%%:</label><input type="text" name="secret2" id="jsxc_secret2" /></p>\
-              <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Ask%%</a></p>\
+              <p data-i18n="To_authenticate_using_a_question_" class=".jsxc_explanation"></p>\
+              <p><label for="jsxc_quest" data-i18n="Question"></label><input type="text" name="quest" id="jsxc_quest" /></p>\
+              <p><label for="jsxc_secret2" data-i18n="Secret"></label><input type="text" name="secret2" id="jsxc_secret2" /></p>\
+              <p class="jsxc_right"><a href="#" class="button jsxc_close" data-i18n="Close"></a> <a href="#" class="button creation" data-i18n="Ask"></a></p>\
             </div>\
             <div style="display:none">\
-              <p class=".jsxc_explanation">%%To_authenticate_pick_a_secret_%%</p>\
-              <p><label for="jsxc_secret">%%Secret%%:</label><input type="text" name="secret" id="jsxc_secret" /></p>\
-              <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation">%%Compare%%</a></p>\
+              <p class=".jsxc_explanation" data-i18n="To_authenticate_pick_a_secret_"></p>\
+              <p><label for="jsxc_secret" data-i18n="Secret"></label><input type="text" name="secret" id="jsxc_secret" /></p>\
+              <p class="jsxc_right"><a href="#" class="button jsxc_close" data-i18n="Close"></a> <a href="#" class="button creation" data-i18n="Compare"></a></p>\
             </div>',
       fingerprintsDialog: '<div>\
-          <p class="jsxc_maxWidth">%%A_fingerprint_%%</p>\
-          <p><strong>%%Your_fingerprint%%</strong><br />\
+          <p class="jsxc_maxWidth" data-i18n="A_fingerprint_"></p>\
+          <p><strong data-i18n="Your_fingerprint"></strong><br />\
           <span style="text-transform:uppercase">{{my_priv_fingerprint}}</span></p>\
-          <p><strong>%%Buddy_fingerprint%%</strong><br />\
+          <p><strong data-i18n="Buddy_fingerprint"></strong><br />\
           <span style="text-transform:uppercase">{{bid_priv_fingerprint}}</span></p><br />\
-          <p class="jsxc_right"><a href="#" class="button jsxc_close">%%Close%%</a></p>\
+          <p class="jsxc_right"><a href="#" class="button jsxc_close" data-i18n="Close"></a></p>\
         </div>',
       chatWindow: '<li class="jsxc_min jsxc_windowItem">\
             <div class="jsxc_window">\
@@ -3102,10 +3090,10 @@ var jsxc;
                      <div class="jsxc_tools">\
                            <div class="jsxc_settings">\
                                <ul>\
-                                   <li class="jsxc_fingerprints jsxc_otr jsxc_disabled">%%Fingerprints%%</li>\
-                                   <li class="jsxc_verification">%%Authentication%%</li>\
-                                   <li class="jsxc_transfer jsxc_otr jsxc_disabled">%%start_private%%</li>\
-                                   <li class="jsxc_clear">%%clear_history%%</li>\
+                                   <li class="jsxc_fingerprints jsxc_otr jsxc_disabled" data-i18n="Fingerprints"></li>\
+                                   <li class="jsxc_verification" data-i18n="Authentication"></li>\
+                                   <li class="jsxc_transfer jsxc_otr jsxc_disabled" data-i18n="start_private"></li>\
+                                   <li class="jsxc_clear" data-i18n="clear_history"></li>\
                                </ul>\
                            </div>\
                            <div class="jsxc_transfer jsxc_otr jsxc_disabled"/>\
@@ -3118,7 +3106,7 @@ var jsxc;
                    <div class="jsxc_gradient"/>\
                    <div class="jsxc_textarea"/>\
                    <div class="jsxc_emoticons"><ul/></div>\
-                   <input type="text" class="jsxc_textinput" placeholder="...%%Message%%" />\
+                   <input type="text" class="jsxc_textinput" data-i18n="[placeholder]Message"/>\
                 </div>\
             </div>\
         </li>',
@@ -3131,12 +3119,12 @@ var jsxc;
               <div id="jsxc_menu">\
                  <span></span>\
                  <ul>\
-                     <li class="jsxc_settings">%%Settings%%</li>\
-                     <li class="jsxc_muteNotification">%%Mute%%</li>\
-                     <li class="jsxc_addBuddy">%%Add_buddy%%</li>\
-                     <li class="jsxc_hideOffline">%%Hide offline%%</li>\
-                     <li class="jsxc_onlineHelp">%%Online help%%</li>\
-                     <li class="jsxc_about">%%About%%</li>\
+                     <li class="jsxc_settings" data-i18n="Settings"></li>\
+                     <li class="jsxc_muteNotification" data-i18n="Mute"></li>\
+                     <li class="jsxc_addBuddy" data-i18n="Add_buddy"></li>\
+                     <li class="jsxc_hideOffline" data-i18n="Hide_offline"></li>\
+                     <li class="jsxc_onlineHelp" data-i18n="Online_help"></li>\
+                     <li class="jsxc_about" data-i18n="About"></li>\
                  </ul>\
               </div>\
               <div id="jsxc_notice">\
@@ -3144,14 +3132,14 @@ var jsxc;
                  <ul></ul>\
               </div>\
               <div id="jsxc_presence">\
-                 <span>%%Online%%</span>\
+                 <span data-i18n="Online"></span>\
                  <ul>\
-                     <li data-pres="online" class="jsxc_online">%%Online%%</li>\
-                     <li data-pres="chat" class="jsxc_chat">%%Chatty%%</li>\
-                     <li data-pres="away" class="jsxc_away">%%Away%%</li>\
-                     <li data-pres="xa" class="jsxc_xa">%%Extended away%%</li>\
-                     <li data-pres="dnd" class="jsxc_dnd">%%dnd%%</li>\
-                     <!-- <li data-pres="offline" class="jsxc_offline">%%Offline%%</li> -->\
+                     <li data-pres="online" class="jsxc_online" data-i18n="Online"></li>\
+                     <li data-pres="chat" class="jsxc_chat" data-i18n="Chatty"></li>\
+                     <li data-pres="away" class="jsxc_away" data-i18n="Away"></li>\
+                     <li data-pres="xa" class="jsxc_xa" data-i18n="Extended_away"></li>\
+                     <li data-pres="dnd" class="jsxc_dnd" data-i18n="dnd"></li>\
+                     <!-- <li data-pres="offline" class="jsxc_offline" data-i18n="Offline"></li> -->\
                  </ul>\
               </div>\
            </div>\
@@ -3169,60 +3157,60 @@ var jsxc;
             <div class="jsxc_control"></div>\
             <div class="jsxc_name"/>\
             <div class="jsxc_options jsxc_right">\
-                <div class="jsxc_rename" title="%%rename_buddy%%">✎</div>\
-                <div class="jsxc_delete" title="%%delete_buddy%%">✘</div>\
+                <div class="jsxc_rename" data-i18n="[title]rename_buddy">✎</div>\
+                <div class="jsxc_delete" data-i18n="[title]delete_buddy">✘</div>\
             </div>\
             <div class="jsxc_options jsxc_left">\
-                <div class="jsxc_chaticon" title="%%send_message%%"/>\
-                <div class="jsxc_vcardicon" title="%%get_info%%">i</div>\
+                <div class="jsxc_chaticon" data-i18n="[title]send_message"/>\
+                <div class="jsxc_vcardicon" data-i18n="[title]get_info">i</div>\
             </div>\
         </li>',
-      loginBox: '<h3>%%Login%%</h3>\
+      loginBox: '<h3 data-i18n="Login"></h3>\
         <form>\
-            <p><label for="jsxc_username">%%Username%%:</label>\
+            <p><label for="jsxc_username" data-i18n="Username"></label>\
                <input type="text" name="username" id="jsxc_username" required="required" value="{{my_node}}"/></p>\
-            <p><label for="jsxc_password">%%Password%%:</label>\
+            <p><label for="jsxc_password" data-i18n="Password"></label>\
                <input type="password" name="password" required="required" id="jsxc_password" /></p>\
             <div class="bottom_submit_section">\
-                <input type="reset" class="button jsxc_close" name="clear" value="%%Cancel%%"/>\
-                <input type="submit" class="button creation" name="commit" value="%%Connect%%"/>\
+                <input type="reset" class="button jsxc_close" name="clear" data-i18n="[value]Cancel"/>\
+                <input type="submit" class="button creation" name="commit" data-i18n="[value]Connect"/>\
             </div>\
         </form>',
-      contactDialog: '<h3>%%Add_buddy%%</h3>\
-         <p class=".jsxc_explanation">%%Type_in_the_full_username_%%</p>\
+      contactDialog: '<h3 data-i18n="Add_buddy"></h3>\
+         <p class=".jsxc_explanation" data-i18n="Type_in_the_full_username_"></p>\
          <form>\
-         <p><label for="jsxc_username">* %%Username%%:</label>\
+         <p><label for="jsxc_username" data-i18n="Username"></label>\
             <input type="text" name="username" id="jsxc_username" pattern="^[^\\x22&\'\\/:<>@\\s]+(@[.\\-_\\w]+)?" required="required" /></p>\
-         <p><label for="jsxc_alias">%%Alias%%:</label>\
+         <p><label for="jsxc_alias" data-i18n="Alias"></label>\
             <input type="text" name="alias" id="jsxc_alias" /></p>\
          <p class="jsxc_right">\
-            <input class="button" type="submit" value="%%Add%%" />\
+            <input class="button" type="submit" data-i18n="[value]Add" />\
          </p>\
          <form>',
-      approveDialog: '<h3>%%Subscription_request%%</h3>\
-        <p>%%You_have_a_request_from%% <b class="jsxc_their_jid"></b>.</p>\
-        <p class="jsxc_right"><a href="#" class="button jsxc_deny">%%Deny%%</a> <a href="#" class="button creation jsxc_approve">%%Approve%%</a></p>',
-      removeDialog: '<h3>%%Remove buddy%%</h3>\
-        <p class="jsxc_maxWidth">%%You_are_about_to_remove_%%</p>\
-        <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close">%%Cancel%%</a> <a href="#" class="button creation">%%Remove%%</a></p>',
+      approveDialog: '<h3 data-i18n="Subscription_request"></h3>\
+        <p><span data-i18n="You_have_a_request_from"></span><b class="jsxc_their_jid"></b>.</p>\
+        <p class="jsxc_right"><a href="#" class="button jsxc_deny" data-i18n="Deny"></a> <a href="#" class="button creation jsxc_approve" data-i18n="Approve"></a></p>',
+      removeDialog: '<h3 data-i18n="Remove_buddy"></h3>\
+        <p class="jsxc_maxWidth" data-i18n="You_are_about_to_remove_"></p>\
+        <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close" data-i18n="Cancel"></a> <a href="#" class="button creation" data-i18n="Remove"></a></p>',
       waitAlert: '<h3>{{msg}}</h3>\
-        <p>%%Please_wait%%</p>\
+        <p data-i18n="Please_wait"></p>\
         <p class="jsxc_center"><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /></p>',
-      alert: '<h3>%%Alert%%</h3>\
+      alert: '<h3 data-i18n="Alert"></h3>\
         <p>{{msg}}</p>\
-        <p class="jsxc_right"><a href="#" class="button jsxc_close jsxc_cancel">%%Ok%%</a></p>',
-      authFailDialog: '<h3>%%Login_failed%%</h3>\
-        <p>%%Sorry_we_cant_authentikate_%%</p>\
+        <p class="jsxc_right"><a href="#" data-i18n="Ok" class="button jsxc_close jsxc_cancel"></a></p>',
+      authFailDialog: '<h3 data-i18n="Login_failed"></h3>\
+        <p data-i18n="Sorry_we_cant_authentikate_"></p>\
         <p class="jsxc_right">\
-            <a class="button jsxc_cancel">%%Continue_without_chat%%</a>\
-            <a class="button creation">%%Retry%%</a>\
+            <a class="button jsxc_cancel" data-i18n="Continue_without_chat"></a>\
+            <a class="button creation" data-i18n="Retry"></a>\
         </p>',
       confirmDialog: '<p>{{msg}}</p>\
         <p class="jsxc_right">\
-            <a class="button jsxc_cancel jsxc_close">%%Dismiss%%</a>\
-            <a class="button creation">%%Confirm%%</a>\
+            <a class="button jsxc_cancel jsxc_close" data-i18n="Dismiss"></a>\
+            <a class="button creation" data-i18n="Confirm"></a>\
         </p>',
-      pleaseAccept: '<p>%%Please_accept_%%</p>',
+      pleaseAccept: '<p data-i18n="Please_accept_"></p>',
       aboutDialog: '<h3>JavaScript XMPP Chat</h3>\
          <p><b>Version: </b>' + jsxc.version + '<br />\
          <a href="http://jsxc.org/" target="_blank">www.jsxc.org</a><br />\
@@ -3235,40 +3223,40 @@ var jsxc;
          <b>Credits: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
          <a href="https://soundcloud.com/freefilmandgamemusic/ping-1?in=freefilmandgamemusic/sets/free-notification-sounds-and" target="_blank">CameronMusic (Ping)</a></p>\
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>',
-      vCard: '<h3>%%Info_about%% {{bid_name}}</h3>\
+      vCard: '<h3><span data-i18n="Info_about"></span> <span>{{bid_name}}</span></h3>\
          <ul class="jsxc_vCard"></ul>\
-         <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> %%Please_wait%%...</p>',
-      settings: '<h3>%%User_settings%%</h3>\
+         <p><img src="{{root}}/img/loading.gif" alt="wait" width="32px" height="32px" /> <span data-i18n="Please_wait"></span>...</p>',
+      settings: '<h3 data-i18n="User_settings"></h3>\
          <p></p>\
          <form>\
             <fieldset class="jsxc_fieldsetXmpp jsxc_fieldset">\
-               <legend>%%Login options%%</legend>\
-               <label for="xmpp-url">%%BOSH url%%</label><input type="text" id="xmpp-url" readonly="readonly"/><br />\
-               <label for="xmpp-username">%%Username%%</label><input type="text" id="xmpp-username"/><br />\
-               <label for="xmpp-domain">%%Domain%%</label><input type="text" id="xmpp-domain"/><br />\
-               <label for="xmpp-resource">%%Resource%%</label><input type="text" id="xmpp-resource"/><br />\
-               <label for="xmpp-onlogin">%%On login%%</label><input type="checkbox" id="xmpp-onlogin" /><br />\
-               <input type="submit" value="%%Save%%"/>\
+               <legend data-i18n="Login_options"></legend>\
+               <label for="xmpp-url" data-i18n="BOSH_url"></label><input type="text" id="xmpp-url" readonly="readonly"/><br />\
+               <label for="xmpp-username" data-i18n="Username"></label><input type="text" id="xmpp-username"/><br />\
+               <label for="xmpp-domain" data-i18n="Domain"></label><input type="text" id="xmpp-domain"/><br />\
+               <label for="xmpp-resource" data-i18n="Resource"></label><input type="text" id="xmpp-resource"/><br />\
+               <label for="xmpp-onlogin" data-i18n="On_login"></label><input type="checkbox" id="xmpp-onlogin" /><br />\
+               <input type="submit" data-i18n="[value]Save"/>\
             </fieldset>\
          </form>\
          <p></p>\
          <form>\
             <fieldset class="jsxc_fieldsetPriority jsxc_fieldset">\
-               <legend>%%Priority%%</legend>\
-               <label for="priority-online">%%Online%%</label><input type="number" value="0" id="priority-online" min="-128" max="127" step="1" required="required"/><br />\
-               <label for="priority-chat">%%Chatty%%</label><input type="number" value="0" id="priority-chat" min="-128" max="127" step="1" required="required"/><br />\
-               <label for="priority-away">%%Away%%</label><input type="number" value="0" id="priority-away" min="-128" max="127" step="1" required="required"/><br />\
-               <label for="priority-xa">%%Extended_away%%</label><input type="number" value="0" id="priority-xa" min="-128" max="127" step="1" required="required"/><br />\
-               <label for="priority-dnd">%%dnd%%</label><input type="number" value="0" id="priority-dnd" min="-128" max="127" step="1" required="required"/><br />\
-               <input type="submit" value="%%Save%%"/>\
+               <legend data-i18n="Priority"></legend>\
+               <label for="priority-online" data-i18n="Online"></label><input type="number" value="0" id="priority-online" min="-128" max="127" step="1" required="required"/><br />\
+               <label for="priority-chat" data-i18n="Chatty"></label><input type="number" value="0" id="priority-chat" min="-128" max="127" step="1" required="required"/><br />\
+               <label for="priority-away" data-i18n="Away"></label><input type="number" value="0" id="priority-away" min="-128" max="127" step="1" required="required"/><br />\
+               <label for="priority-xa" data-i18n="Extended_away"></label><input type="number" value="0" id="priority-xa" min="-128" max="127" step="1" required="required"/><br />\
+               <label for="priority-dnd" data-i18n="dnd"></label><input type="number" value="0" id="priority-dnd" min="-128" max="127" step="1" required="required"/><br />\
+               <input type="submit" data-i18n="[value]Save"/>\
             </fieldset>\
          </form>\
          <p></p>\
          <form data-onsubmit="xmpp.carbons.refresh">\
             <fieldset class="jsxc_fieldsetCarbons jsxc_fieldset">\
-               <legend>%%Carbon copy%%</legend>\
-               <label for="carbons-enable">%%Enable%%</label><input type="checkbox" id="carbons-enable" /><br />\
-               <input type="submit" value="%%Save%%"/>\
+               <legend data-i18n="Carbon_copy"></legend>\
+               <label for="carbons-enable" data-i18n="Enable"></label><input type="checkbox" id="carbons-enable" /><br />\
+               <input type="submit" data-i18n="[value]Save"/>\
             </fieldset>\
          </form>'
    };
@@ -3913,7 +3901,7 @@ var jsxc;
 
          if (data.status === 0 && max > 0) {
             // buddy has come online
-            jsxc.notification.notify(data.name, jsxc.translate('%%has come online%%.'));
+            jsxc.notification.notify(data.name, $.t('has_come_online'));
          }
 
          data.status = max;
@@ -4006,7 +3994,7 @@ var jsxc;
          } else if (forwarded) {
             // Someone forwarded a message to us
 
-            body = from + jsxc.translate(' %%to%% ') + $(stanza).attr('to') + '"' + body + '"';
+            body = from + ' ' + $.t('to') + ' ' + $(stanza).attr('to') + '"' + body + '"';
 
             from = $(stanza).attr('from');
          }
@@ -4995,7 +4983,7 @@ var jsxc;
          }
 
          if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !d.encrypted) {
-            jsxc.gui.window.postMessage(bid, 'sys', jsxc.translate('%%Received an unencrypted message.%% [') + d.msg + ']', d.encrypted, d.forwarded, d.stamp);
+            jsxc.gui.window.postMessage(bid, 'sys', $.t('Received_an_unencrypted_message') + '. [' + d.msg + ']', d.encrypted, d.forwarded, d.stamp);
          } else {
             jsxc.gui.window.postMessage(bid, 'in', d.msg, d.encrypted, d.forwarded, d.stamp);
          }
@@ -5057,13 +5045,13 @@ var jsxc;
 
             switch (status) {
                case OTR.CONST.STATUS_SEND_QUERY:
-                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.trying_to_start_private_conversation);
+                  jsxc.gui.window.postMessage(bid, 'sys', $.t("trying_to_start_private_conversation"));
                   break;
                case OTR.CONST.STATUS_AKE_SUCCESS:
                   data.fingerprint = jsxc.otr.objects[bid].their_priv_pk.fingerprint();
                   data.msgstate = OTR.CONST.MSGSTATE_ENCRYPTED;
 
-                  var msg = (jsxc.otr.objects[bid].trust ? jsxc.l.Verified : jsxc.l.Unverified) + ' ' + jsxc.l.private_conversation_started;
+                  var msg = (jsxc.otr.objects[bid].trust ? $.t("Verified") : $.t("Unverified")) + ' ' + $.t("private_conversation_started");
                   jsxc.gui.window.postMessage(bid, 'sys', msg);
                   break;
                case OTR.CONST.STATUS_END_OTR:
@@ -5073,13 +5061,13 @@ var jsxc;
                      // we abort the private conversation
 
                      data.msgstate = OTR.CONST.MSGSTATE_PLAINTEXT;
-                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.private_conversation_aborted);
+                     jsxc.gui.window.postMessage(bid, 'sys', $.t("private_conversation_aborted"));
 
                   } else {
                      // the buddy abort the private conversation
 
                      data.msgstate = OTR.CONST.MSGSTATE_FINISHED;
-                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.your_buddy_closed_the_private_conversation_you_should_do_the_same);
+                     jsxc.gui.window.postMessage(bid, 'sys', $.t("your_buddy_closed_the_private_conversation_you_should_do_the_same"));
                   }
                   break;
                case OTR.CONST.STATUS_SMP_HANDLE:
@@ -5096,7 +5084,7 @@ var jsxc;
          jsxc.otr.objects[bid].on('smp', function(type, data) {
             switch (type) {
                case 'question': // verification request received
-                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.Authentication_request_received);
+                  jsxc.gui.window.postMessage(bid, 'sys', $.t("Authentication_request_received"));
 
                   if ($('#jsxc_dialog').length > 0) {
                      jsxc.otr.objects[bid].sm.abort();
@@ -5116,15 +5104,15 @@ var jsxc;
                   jsxc.gui.update(bid);
 
                   if (data) {
-                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.conversation_is_now_verified);
+                     jsxc.gui.window.postMessage(bid, 'sys', $.t("conversation_is_now_verified"));
                   } else {
-                     jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.authentication_failed);
+                     jsxc.gui.window.postMessage(bid, 'sys', $.t("authentication_failed"));
                   }
                   jsxc.storage.removeUserItem('smp_' + bid);
                   jsxc.gui.dialog.close();
                   break;
                case 'abort':
-                  jsxc.gui.window.postMessage(bid, 'sys', jsxc.l.Authentication_aborted);
+                  jsxc.gui.window.postMessage(bid, 'sys', $.t("Authentication_aborted"));
                   break;
                default:
                   jsxc.debug('[OTR] sm callback: Unknown type: ' + type);
@@ -5154,7 +5142,7 @@ var jsxc;
          jsxc.otr.objects[bid].on('error', function(err) {
             // Handle this case in jsxc.otr.receiveMessage
             if (err !== 'Received an unencrypted message.') {
-               jsxc.gui.window.postMessage(bid, 'sys', '[OTR] ' + jsxc.translate('%%' + err + '%%'));
+               jsxc.gui.window.postMessage(bid, 'sys', '[OTR] ' + $.t(err));
             }
 
             jsxc.error('[OTR] ' + err);
@@ -5179,9 +5167,9 @@ var jsxc;
          if (data) {
             $('#jsxc_dialog > div:eq(2)').find('#jsxc_quest').val(data).prop('disabled', true);
             $('#jsxc_dialog > div:eq(2)').find('.creation').text('Answer');
-            $('#jsxc_dialog > div:eq(2)').find('.jsxc_explanation').text(jsxc.l.your_buddy_is_attempting_to_determine_ + ' ' + jsxc.l.to_authenticate_to_your_buddy + jsxc.l.enter_the_answer_and_click_answer);
+            $('#jsxc_dialog > div:eq(2)').find('.jsxc_explanation').text($.t("your_buddy_is_attempting_to_determine_") + ' ' + $.t("to_authenticate_to_your_buddy") + $.t("enter_the_answer_and_click_answer"));
          } else {
-            $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text(jsxc.l.your_buddy_is_attempting_to_determine_ + ' ' + jsxc.l.to_authenticate_to_your_buddy + jsxc.l.enter_the_secret);
+            $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text($.t("your_buddy_is_attempting_to_determine_") + ' ' + $.t("to_authenticate_to_your_buddy") + $.t("enter_the_secret"));
          }
 
          $('#jsxc_dialog .jsxc_close').click(function() {
@@ -5331,7 +5319,7 @@ var jsxc;
          }
 
          if (jsxc.storage.getUserItem('key') === null) {
-            var msg = jsxc.l.Creating_your_private_key_;
+            var msg = $.t("Creating_your_private_key_");
             var worker = null;
 
             if (Worker) {
@@ -5447,10 +5435,10 @@ var jsxc;
        */
       init: function() {
          $(document).on('postmessagein.jsxc', function(event, bid, msg) {
-            msg = (msg.match(/^\?OTR/)) ? jsxc.translate('%%Encrypted message%%') : msg;
+            msg = (msg.match(/^\?OTR/)) ? $.t('Encrypted_message') : msg;
             var data = jsxc.storage.getUserItem('buddy', bid);
 
-            jsxc.notification.notify(jsxc.translate('%%New message from%% ') + data.name, msg, undefined, undefined, jsxc.CONST.SOUNDS.MSG);
+            jsxc.notification.notify($.t('New_message_from') + ' ' + data.name, msg, undefined, undefined, jsxc.CONST.SOUNDS.MSG);
          });
 
          $(document).on('callincoming.jingle', function() {
@@ -5487,8 +5475,8 @@ var jsxc;
                jsxc.notification.playSound(soundFile, loop, force);
             }
 
-            var popup = new Notification(jsxc.translate(title), {
-               body: jsxc.translate(msg),
+            var popup = new Notification($.t(title), {
+               body: $.t(msg),
                icon: jsxc.options.root + '/img/XMPP_logo.png'
             });
 
@@ -5656,7 +5644,7 @@ var jsxc;
        *        false.
        */
       muteSound: function(external) {
-         $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Unmute%%'));
+         $('#jsxc_menu .jsxc_muteNotification').text($.t('Unmute'));
 
          if (external !== true) {
             jsxc.options.set('muteNotification', true);
@@ -5671,7 +5659,7 @@ var jsxc;
        *        false.
        */
       unmuteSound: function(external) {
-         $('#jsxc_menu .jsxc_muteNotification').text(jsxc.translate('%%Mute%%'));
+         $('#jsxc_menu .jsxc_muteNotification').text($.t('Mute'));
 
          if (external !== true) {
             jsxc.options.set('muteNotification', false);
@@ -5735,8 +5723,8 @@ var jsxc;
             return false;
          });
 
-         notice.text(jsxc.translate(msg));
-         notice.attr('title', jsxc.translate(description) || '');
+         notice.text($.t(msg));
+         notice.attr('title', $.t(description) || '');
          notice.attr('data-nid', nid);
          list.append(notice);
 
@@ -5771,460 +5759,6 @@ var jsxc;
          var s = jsxc.storage.getUserItem('notices');
          delete s[nid];
          jsxc.storage.setUserItem('notices', s);
-      }
-   };
-
-   /**
-    * Contains all available translations
-    * 
-    * @namespace jsxc.l10n
-    * @memberOf jsxc
-    */
-   jsxc.l10n = {
-      en: {
-         Logging_in: 'Logging in…',
-         your_connection_is_unencrypted: 'Your connection is unencrypted.',
-         your_connection_is_encrypted: 'Your connection is encrypted.',
-         your_buddy_closed_the_private_connection: 'Your buddy closed the private connection.',
-         start_private: 'Start private',
-         close_private: 'Close private',
-         your_buddy_is_verificated: 'Your buddy is verified.',
-         you_have_only_a_subscription_in_one_way: 'You only have a one-way subscription.',
-         authentication_query_sent: 'Authentication query sent.',
-         your_message_wasnt_send_please_end_your_private_conversation: 'Your message was not sent. Please end your private conversation.',
-         unencrypted_message_received: 'Unencrypted message received:',
-         your_message_wasnt_send_because_you_have_no_valid_subscription: 'Your message was not sent because you have no valid subscription.',
-         not_available: 'Not available',
-         no_connection: 'No connection!',
-         relogin: 'relogin',
-         trying_to_start_private_conversation: 'Trying to start private conversation!',
-         Verified: 'Verified',
-         Unverified: 'Unverified',
-         private_conversation_started: 'Private conversation started.',
-         private_conversation_aborted: 'Private conversation aborted!',
-         your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Your buddy closed the private conversation! You should do the same.',
-         conversation_is_now_verified: 'Conversation is now verified.',
-         authentication_failed: 'Authentication failed.',
-         your_buddy_is_attempting_to_determine_: 'You buddy is attempting to determine if he or she is really talking to you.',
-         to_authenticate_to_your_buddy: 'To authenticate to your buddy, ',
-         enter_the_answer_and_click_answer: 'enter the answer and click Answer.',
-         enter_the_secret: 'enter the secret.',
-         Creating_your_private_key_: 'Creating your private key; this may take a while.',
-         Authenticating_a_buddy_helps_: 'Authenticating a buddy helps ensure that the person you are talking to is really the one he or she claims to be.',
-         How_do_you_want_to_authenticate_your_buddy: 'How do you want to authenticate {{bid_name}} (<b>{{bid_jid}}</b>)?',
-         Select_method: 'Select method...',
-         Manual: 'Manual',
-         Question: 'Question',
-         Secret: 'Secret',
-         To_verify_the_fingerprint_: 'To verify the fingerprint, contact your buddy via some other trustworthy channel, such as the telephone.',
-         Your_fingerprint: 'Your fingerprint',
-         Buddy_fingerprint: 'Buddy fingerprint',
-         Close: 'Close',
-         Compared: 'Compared',
-         To_authenticate_using_a_question_: 'To authenticate using a question, pick a question whose answer is known only you and your buddy.',
-         Ask: 'Ask',
-         To_authenticate_pick_a_secret_: 'To authenticate, pick a secret known only to you and your buddy.',
-         Compare: 'Compare',
-         Fingerprints: 'Fingerprints',
-         Authentication: 'Authentication',
-         Message: 'Message',
-         Add_buddy: 'Add buddy',
-         rename_buddy: 'rename buddy',
-         delete_buddy: 'delete buddy',
-         Login: 'Login',
-         Username: 'Username',
-         Password: 'Password',
-         Cancel: 'Cancel',
-         Connect: 'Connect',
-         Type_in_the_full_username_: 'Type in the full username and an optional alias.',
-         Alias: 'Alias',
-         Add: 'Add',
-         Subscription_request: 'Subscription request',
-         You_have_a_request_from: 'You have a request from',
-         Deny: 'Deny',
-         Approve: 'Approve',
-         Remove_buddy: 'Remove buddy',
-         You_are_about_to_remove_: 'You are about to remove {{bid_name}} (<b>{{bid_jid}}</b>) from your buddy list. All related chats will be closed.',
-         Continue_without_chat: 'Continue without chat',
-         Please_wait: 'Please wait',
-         Login_failed: 'Chat login failed',
-         Sorry_we_cant_authentikate_: 'Authentication failed with the chat server. Maybe the password is wrong?',
-         Retry: 'Back',
-         clear_history: 'Clear history',
-         New_message_from: 'New message from',
-         Should_we_notify_you_: 'Should we notify you about new messages in the future?',
-         Please_accept_: 'Please click the "Allow" button at the top.',
-         Hide_offline: 'Hide offline contacts',
-         Show_offline: 'Show offline contacts',
-         About: 'About',
-         dnd: 'Do Not Disturb',
-         Mute: 'Mute',
-         Unmute: 'Unmute',
-         Subscription: 'Subscription',
-         both: 'both',
-         Status: 'Status',
-         online: 'online',
-         chat: 'chat',
-         away: 'away',
-         xa: 'extended away',
-         offline: 'offline',
-         none: 'none',
-         Unknown_instance_tag: 'Unknown instance tag.',
-         Not_one_of_our_latest_keys: 'Not one of our latest keys.',
-         Received_an_unreadable_encrypted_message: 'Received an unreadable encrypted message.',
-         Online: 'Online',
-         Chatty: 'Chatty',
-         Away: 'Away',
-         Extended_away: 'Extended away',
-         Offline: 'Offline',
-         Friendship_request: 'Friendship request',
-         Confirm: 'Confirm',
-         Dismiss: 'Dismiss',
-         Remove: 'Remove',
-         Online_help: 'Online help',
-         FN: 'Full name',
-         N: ' ',
-         FAMILY: 'Family name',
-         GIVEN: 'Given name',
-         NICKNAME: 'Nickname',
-         URL: 'URL',
-         ADR: 'Address',
-         STREET: 'Street Address',
-         EXTADD: 'Extended Address',
-         LOCALITY: 'Locality',
-         REGION: 'Region',
-         PCODE: 'Postal Code',
-         CTRY: 'Country',
-         TEL: 'Telephone',
-         NUMBER: 'Number',
-         EMAIL: 'Email',
-         USERID: ' ',
-         ORG: 'Organization',
-         ORGNAME: 'Name',
-         ORGUNIT: 'Unit',
-         TITLE: 'Job title',
-         ROLE: 'Role',
-         BDAY: 'Birthday',
-         DESC: 'Description',
-         PHOTO: ' ',
-         send_message: 'Send message',
-         get_info: 'Show information',
-         Settings: 'Settings',
-         Priority: 'Priority',
-         Save: 'Save',
-         User_settings: 'User settings',
-         A_fingerprint_: 'A fingerprint is used to make sure that the person you are talking to is who he or she is saying.',
-         Your_roster_is_empty_add_a: 'Your roster is empty, add a ',
-         new_buddy: 'new buddy',
-         is: 'is',
-         Login_options: 'Login options',
-         BOSH_url: 'BOSH URL',
-         Domain: 'Domain',
-         Resource: 'Resource',
-         On_login: 'On login',
-         Received_an_unencrypted_message: 'Received an unencrypted message',
-         Sorry_your_buddy_doesnt_provide_any_information: 'Sorry, your buddy does not provide any information.',
-         Info_about: 'Info about',
-         Authentication_aborted: 'Authentication aborted.',
-         Authentication_request_received: 'Authentication request received.',
-         Do_you_want_to_display_them: 'Do you want to display them?',
-         Log_in_without_chat: 'Log in without chat',
-         has_come_online: 'has come online',
-         Unknown_sender: 'Unknown sender',
-         You_received_a_message_from_an_unknown_sender: 'You received a message from an unknown sender'
-      },
-      de: {
-         Logging_in: 'Login läuft…',
-         your_connection_is_unencrypted: 'Deine Verbindung ist UNverschlüsselt.',
-         your_connection_is_encrypted: 'Deine Verbindung ist verschlüsselt.',
-         your_buddy_closed_the_private_connection: 'Dein Freund hat die private Verbindung getrennt.',
-         start_private: 'Privat starten',
-         close_private: 'Privat abbrechen',
-         your_buddy_is_verificated: 'Dein Freund ist verifiziert.',
-         you_have_only_a_subscription_in_one_way: 'Die Freundschaft ist nur einseitig.',
-         authentication_query_sent: 'Authentifizierungsanfrage gesendet.',
-         your_message_wasnt_send_please_end_your_private_conversation: 'Deine Nachricht wurde nicht gesendet. Bitte beende die private Konversation.',
-         unencrypted_message_received: 'Unverschlüsselte Nachricht erhalten.',
-         your_message_wasnt_send_because_you_have_no_valid_subscription: 'Deine Nachricht wurde nicht gesandt, da die Freundschaft einseitig ist.',
-         not_available: 'Nicht verfügbar.',
-         no_connection: 'Keine Verbindung.',
-         relogin: 'Neu anmelden.',
-         trying_to_start_private_conversation: 'Versuche private Konversation zu starten.',
-         Verified: 'Verifiziert',
-         Unverified: 'Unverifiziert',
-         private_conversation_started: 'Private Konversation gestartet.',
-         private_conversation_aborted: 'Private Konversation abgebrochen.',
-         your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Dein Freund hat die private Konversation beendet. Das solltest du auch tun!',
-         conversation_is_now_verified: 'Konversation ist jetzt verifiziert',
-         authentication_failed: 'Authentifizierung fehlgeschlagen.',
-         your_buddy_is_attempting_to_determine_: 'Dein Freund versucht herauszufinden ob er wirklich mit dir redet.',
-         to_authenticate_to_your_buddy: 'Um dich gegenüber deinem Freund zu verifizieren ',
-         enter_the_answer_and_click_answer: 'gib die Antwort ein und klick auf Antworten.',
-         enter_the_secret: 'gib das Geheimnis ein.',
-         Creating_your_private_key_: 'Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.',
-         Authenticating_a_buddy_helps_: 'Einen Freund zu authentifizieren hilft sicher zustellen, dass die Person mit der du sprichst auch die ist die sie sagt.',
-         How_do_you_want_to_authenticate_your_buddy: 'Wie willst du {{bid_name}} (<b>{{bid_jid}}</b>) authentifizieren?',
-         Select_method: 'Wähle...',
-         Manual: 'Manual',
-         Question: 'Frage',
-         Secret: 'Geheimnis',
-         To_verify_the_fingerprint_: 'Um den Fingerprint zu verifizieren kontaktiere dein Freund über einen anderen Kommunikationsweg. Zum Beispiel per Telefonanruf.',
-         Your_fingerprint: 'Dein Fingerprint',
-         Buddy_fingerprint: 'Sein/Ihr Fingerprint',
-         Close: 'Schließen',
-         Compared: 'Verglichen',
-         To_authenticate_using_a_question_: 'Um die Authentifizierung per Frage durchzuführen, wähle eine Frage bei welcher nur dein Freund die Antwort weiß.',
-         Ask: 'Frage',
-         To_authenticate_pick_a_secret_: 'Um deinen Freund zu authentifizieren, wähle ein Geheimnis welches nur deinem Freund und dir bekannt ist.',
-         Compare: 'Vergleiche',
-         Fingerprints: 'Fingerprints',
-         Authentication: 'Authentifizierung',
-         Message: 'Nachricht',
-         Add_buddy: 'Freund hinzufügen',
-         rename_buddy: 'Freund umbenennen',
-         delete_buddy: 'Freund löschen',
-         Login: 'Anmeldung',
-         Username: 'Benutzername',
-         Password: 'Passwort',
-         Cancel: 'Abbrechen',
-         Connect: 'Verbinden',
-         Type_in_the_full_username_: 'Gib bitte den vollen Benutzernamen und optional ein Alias an.',
-         Alias: 'Alias',
-         Add: 'Hinzufügen',
-         Subscription_request: 'Freundschaftsanfrage',
-         You_have_a_request_from: 'Du hast eine Anfrage von',
-         Deny: 'Ablehnen',
-         Approve: 'Bestätigen',
-         Remove_buddy: 'Freund entfernen',
-         You_are_about_to_remove_: 'Du bist gerade dabei {{bid_name}} (<b>{{bid_jid}}</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.',
-         Continue_without_chat: 'Weiter ohne Chat',
-         Please_wait: 'Bitte warten',
-         Login_failed: 'Chat-Anmeldung fehlgeschlagen',
-         Sorry_we_cant_authentikate_: 'Der Chatserver hat die Anmeldung abgelehnt. Falsches Passwort?',
-         Retry: 'Zurück',
-         clear_history: 'Lösche Verlauf',
-         New_message_from: 'Neue Nachricht von',
-         Should_we_notify_you_: 'Sollen wir dich in Zukunft über eingehende Nachrichten informieren, auch wenn dieser Tab nicht im Vordergrund ist?',
-         Please_accept_: 'Bitte klick auf den "Zulassen" Button oben.',
-         Menu: 'Menü',
-         Hide_offline: 'Offline ausblenden',
-         Show_offline: 'Offline einblenden',
-         About: 'Über',
-         dnd: 'Beschäftigt',
-         Mute: 'Ton aus',
-         Unmute: 'Ton an',
-         Subscription: 'Bezug',
-         both: 'beidseitig',
-         Status: 'Status',
-         online: 'online',
-         chat: 'chat',
-         away: 'abwesend',
-         xa: 'länger abwesend',
-         offline: 'offline',
-         none: 'keine',
-         Unknown_instance_tag: 'Unbekannter instance tag.',
-         Not_one_of_our_latest_keys: 'Nicht einer unserer letzten Schlüssel.',
-         Received_an_unreadable_encrypted_message: 'Eine unlesbare verschlüsselte Nachricht erhalten.',
-         Online: 'Online',
-         Chatty: 'Gesprächig',
-         Away: 'Abwesend',
-         Extended_away: 'Länger abwesend',
-         Offline: 'Offline',
-         Friendship_request: 'Freundschaftsanfrage',
-         Confirm: 'Bestätigen',
-         Dismiss: 'Ablehnen',
-         Remove: 'Löschen',
-         Online_help: 'Online Hilfe',
-         FN: 'Name',
-         N: ' ',
-         FAMILY: 'Familienname',
-         GIVEN: 'Vorname',
-         NICKNAME: 'Spitzname',
-         URL: 'URL',
-         ADR: 'Adresse',
-         STREET: 'Straße',
-         EXTADD: 'Zusätzliche Adresse',
-         LOCALITY: 'Ortschaft',
-         REGION: 'Region',
-         PCODE: 'Postleitzahl',
-         CTRY: 'Land',
-         TEL: 'Telefon',
-         NUMBER: 'Nummer',
-         EMAIL: 'E-Mail',
-         USERID: ' ',
-         ORG: 'Organisation',
-         ORGNAME: 'Name',
-         ORGUNIT: 'Abteilung',
-         TITLE: 'Titel',
-         ROLE: 'Rolle',
-         BDAY: 'Geburtstag',
-         DESC: 'Beschreibung',
-         PHOTO: ' ',
-         send_message: 'Sende Nachricht',
-         get_info: 'Benutzerinformationen',
-         Settings: 'Einstellungen',
-         Priority: 'Priorität',
-         Save: 'Speichern',
-         User_settings: 'Benutzereinstellungen',
-         A_fingerprint_: 'Ein Fingerabdruck wird dazu benutzt deinen Gesprächspartner zu identifizieren.',
-         Your_roster_is_empty_add_a: 'Deine Freundesliste ist leer, füge einen neuen Freund ',
-         new_buddy: 'hinzu',
-         is: 'ist',
-         Login_options: 'Anmeldeoptionen',
-         BOSH_url: 'BOSH url',
-         Domain: 'Domain',
-         Resource: 'Ressource',
-         On_login: 'Beim Anmelden',
-         Received_an_unencrypted_message: 'Unverschlüsselte Nachricht empfangen',
-         Sorry_your_buddy_doesnt_provide_any_information: 'Dein Freund stellt leider keine Informationen bereit.',
-         Info_about: 'Info über',
-         Authentication_aborted: 'Authentifizierung abgebrochen.',
-         Authentication_request_received: 'Authentifizierunganfrage empfangen.',
-         Log_in_without_chat: 'Anmelden ohne Chat',
-         Do_you_want_to_display_them: 'Möchtest du sie sehen?',
-         has_come_online: 'ist online gekommen',
-         Unknown_sender: 'Unbekannter Sender',
-         You_received_a_message_from_an_unknown_sender: 'Du hast eine Nachricht von einem unbekannten Sender erhalten'
-      },
-      es: {
-         Logging_in: 'Por favor, espere...',
-         your_connection_is_unencrypted: 'Su conexión no está cifrada.',
-         your_connection_is_encrypted: 'Su conexión está cifrada.',
-         your_buddy_closed_the_private_connection: 'Su amigo ha cerrado la conexión privada.',
-         start_private: 'Iniciar privado',
-         close_private: 'Cerrar privado',
-         your_buddy_is_verificated: 'Tu amigo está verificado.',
-         you_have_only_a_subscription_in_one_way: 'Sólo tienes una suscripción de un modo.',
-         authentication_query_sent: 'Consulta de verificación enviada.',
-         your_message_wasnt_send_please_end_your_private_conversation: 'Su mensaje no fue enviado. Por favor, termine su conversación privada.',
-         unencrypted_message_received: 'Mensaje no cifrado recibido:',
-         your_message_wasnt_send_because_you_have_no_valid_subscription: 'Su mensaje no se ha enviado, porque usted no tiene suscripción válida.',
-         not_available: 'No disponible',
-         no_connection: 'Sin conexión!',
-         relogin: 'iniciar sesión nuevamente',
-         trying_to_start_private_conversation: 'Intentando iniciar una conversación privada!',
-         Verified: 'Verificado',
-         Unverified: 'No verificado',
-         private_conversation_started: 'se inició una conversación privada.',
-         private_conversation_aborted: 'Conversación privada abortada!',
-         your_buddy_closed_the_private_conversation_you_should_do_the_same: 'Su amigo cerró la conversación privada! Usted debería hacer lo mismo.',
-         conversation_is_now_verified: 'La conversación es ahora verificada.',
-         authentication_failed: 'Fallo la verificación.',
-         your_buddy_is_attempting_to_determine_: 'Tu amigo está tratando de determinar si él o ella está realmente hablando con usted.',
-         to_authenticate_to_your_buddy: 'Para autenticar a su amigo, ',
-         enter_the_answer_and_click_answer: 'introduce la respuesta y haga clic en Contestar.',
-         enter_the_secret: 'especifique el secreto.',
-         Creating_your_private_key_: 'Ahora vamos a crear su clave privada. Esto puede tomar algún tiempo.',
-         Authenticating_a_buddy_helps_: 'Autenticación de un amigo ayuda a garantizar que la persona que está hablando es quien él o ella está diciendo.',
-         How_do_you_want_to_authenticate_your_buddy: '¿Cómo desea autenticar {{bid_name}} (<b>{{bid_jid}}</b>)?',
-         Select_method: 'Escoja un método...',
-         Manual: 'Manual',
-         Question: 'Pregunta',
-         Secret: 'Secreto',
-         To_verify_the_fingerprint_: 'Para verificar la firma digital, póngase en contacto con su amigo a través de algún otro canal autenticado, como el teléfono.',
-         Your_fingerprint: 'Tu firma digital',
-         Buddy_fingerprint: 'firma digital de tu amigo',
-         Close: 'Cerrar',
-         Compared: 'Comparado',
-         To_authenticate_using_a_question_: 'Para autenticar mediante una pregunta, elegir una pregunta cuya respuesta se conoce sólo usted y su amigo.',
-         Ask: 'Preguntar',
-         To_authenticate_pick_a_secret_: 'Para autenticar, elija un secreto conocido sólo por usted y su amigo.',
-         Compare: 'Comparar',
-         Fingerprints: 'Firmas digitales',
-         Authentication: 'Autenticación',
-         Message: 'Mensaje',
-         Add_buddy: 'Añadir amigo',
-         rename_buddy: 'renombrar amigo',
-         delete_buddy: 'eliminar amigo',
-         Login: 'Iniciar Sesión',
-         Username: 'Usuario',
-         Password: 'Contraseña',
-         Cancel: 'Cancelar',
-         Connect: 'Conectar',
-         Type_in_the_full_username_: 'Escriba el usuario completo y un alias opcional.',
-         Alias: 'Alias',
-         Add: 'Añadir',
-         Subscription_request: 'Solicitud de suscripción',
-         You_have_a_request_from: 'Tienes una petición de',
-         Deny: 'Rechazar',
-         Approve: 'Aprobar',
-         Remove_buddy: 'Eliminar amigo',
-         You_are_about_to_remove_: 'Vas a eliminar a {{bid_name}} (<b>{{bid_jid}}</b>) de tu lista de amigos. Todas las conversaciones relacionadas serán cerradas.',
-         Continue_without_chat: 'Continuar',
-         Please_wait: 'Espere por favor',
-         Login_failed: 'Fallo el inicio de sesión',
-         Sorry_we_cant_authentikate_: 'Lo sentimos, no podemos autentificarlo en nuestro servidor de chat. ¿Tal vez la contraseña es incorrecta?',
-         Retry: 'Reintentar',
-         clear_history: 'Borrar el historial',
-         New_message_from: 'Nuevo mensaje de',
-         Should_we_notify_you_: '¿Debemos notificarle sobre nuevos mensajes en el futuro?',
-         Please_accept_: 'Por favor, haga clic en el botón "Permitir" en la parte superior.',
-         dnd: 'No Molestar',
-         Mute: 'Desactivar sonido',
-         Unmute: 'Activar sonido',
-         Subscription: 'Suscripción',
-         both: 'ambos',
-         Status: 'Estado',
-         online: 'en línea',
-         chat: 'chat',
-         away: 'ausente',
-         xa: 'mas ausente',
-         offline: 'desconectado',
-         none: 'nadie',
-         Unknown_instance_tag: 'Etiqueta de instancia desconocida.',
-         Not_one_of_our_latest_keys: 'No de nuestra ultima tecla.',
-         Received_an_unreadable_encrypted_message: 'Se recibió un mensaje cifrado ilegible.',
-         Online: 'En linea',
-         Chatty: 'Hablador',
-         Away: 'Ausente',
-         Extended_away: 'Mas ausente',
-         Offline: 'Desconectado',
-         Friendship_request: 'Solicitud de amistad',
-         Confirm: 'Confirmar',
-         Dismiss: 'Rechazar',
-         Remove: 'Eliminar',
-         Online_help: 'Ayuda en línea',
-         FN: 'Nombre completo ',
-         N: ' ',
-         FAMILY: 'Apellido',
-         GIVEN: 'Nombre',
-         NICKNAME: 'Apodar',
-         URL: 'URL',
-         ADR: 'Dirección',
-         STREET: 'Calle',
-         EXTADD: 'Extendido dirección',
-         LOCALITY: 'Población',
-         REGION: 'Región',
-         PCODE: 'Código postal',
-         CTRY: 'País',
-         TEL: 'Teléfono',
-         NUMBER: 'Número',
-         EMAIL: 'Emilio',
-         USERID: ' ',
-         ORG: 'Organización',
-         ORGNAME: 'Nombre',
-         ORGUNIT: 'Departamento',
-         TITLE: 'Título',
-         ROLE: 'Rol',
-         BDAY: 'Cumpleaños',
-         DESC: 'Descripción',
-         PHOTO: ' ',
-         send_message: 'mandar un texto',
-         get_info: 'obtener información',
-         Settings: 'Ajustes',
-         Priority: 'Prioridad',
-         Save: 'Guardar',
-         User_settings: 'Configuración de usuario',
-         A_fingerprint_: 'La huella digital se utiliza para que puedas estar seguro que la persona con la que estas hablando es quien realmente dice ser',
-         Your_roster_is_empty_add_a: 'Tu lista de amigos esta vacia',
-         new_buddy: 'Nuevo amigo',
-         is: 'es',
-         Login_options: 'Opciones de login',
-         BOSH_url: 'BOSH url',
-         Domain: 'Dominio',
-         Resource: 'Recurso',
-         On_login: 'Iniciar sesión',
-         Received_an_unencrypted_message: 'Recibe un mensaje no cifrado'
       }
    };
 }(jQuery));
