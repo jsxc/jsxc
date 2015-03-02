@@ -3039,7 +3039,7 @@ var jsxc;
                return (typeof ph[key] === 'string') ? ph[key] : s;
             });
 
-            return $(ret).i18n().text();
+            return $('<div>').append($(ret).i18n()).html();
          }
 
          jsxc.debug('Template not available: ' + name);
