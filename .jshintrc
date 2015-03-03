@@ -22,6 +22,7 @@
       "Worker":true, 
       "BigInt":true, 
       "Notification":true, 
+      "$": true,
       "jQuery":true, 
       "Strophe":true, 
       "localStorage":true, 
