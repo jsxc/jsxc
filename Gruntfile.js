@@ -20,7 +20,7 @@ module.exports = function(grunt) {
          gruntfile: {
             src: 'Gruntfile.js'
          },
-         files: [ 'jsxc.lib.webrtc.js', 'jsxc.lib.js' ]
+         files: [ 'src/jsxc.lib.*' ]
       },
       copy: {
          main: {
@@ -106,7 +106,7 @@ module.exports = function(grunt) {
             options: {
                banner: '/*! This file is concatenated for the browser. */\n\n'
             },
-            src: ['jsxc.intro.js', 'jsxc.lib.js', 'jsxc.lib.*.js', 'jsxc.outro.js'],
+            src: ['src/jsxc.intro.js', 'src/jsxc.lib.js', 'src/jsxc.lib.*.js', 'src/jsxc.outro.js'],
             dest: '<%= target %>/jsxc.js'
          }
       },
@@ -126,7 +126,7 @@ module.exports = function(grunt) {
       search: {
          console: {
             files: {
-               src: [ '*.js' ]
+               src: [ 'src/*.js' ]
             },
             options: {
                searchString: /console\.log\((?!'[<>]|msg)/g,
@@ -175,7 +175,7 @@ module.exports = function(grunt) {
       },
       jsdoc: {
           dist: {
-              src: ['jsxc.lib.*'],
+              src: ['src/jsxc.lib.*'],
               dest: 'doc'
           }
       },
@@ -213,7 +213,7 @@ module.exports = function(grunt) {
             tasks: ['sass', 'autoprefixer']
          },
          js: {
-            files: ['jsxc.lib.*'],
+            files: ['src/jsxc.lib.*'],
             tasks: ['concat:jsxc']
          }
       }
