@@ -137,7 +137,7 @@ jsxc.notification = {
          });
 
          setTimeout(function() {
-            jsxc.notice.add('%%Notifications%%?', '%%Should_we_notify_you_%%', 'gui.showRequestNotification');
+            jsxc.notice.add($.t('Notifications') + '?', $.t('Should_we_notify_you_'), 'gui.showRequestNotification');
          }, 1000);
       });
    },

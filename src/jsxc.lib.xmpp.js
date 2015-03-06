@@ -601,7 +601,7 @@ jsxc.xmpp = {
             jid: jid,
             approve: -1
          });
-         jsxc.notice.add('%%Friendship request%%', '%%from%% ' + jid, 'gui.showApproveDialog', [ jid ]);
+         jsxc.notice.add($.t('Friendship_request'), $.t('from') + ' ' + jid, 'gui.showApproveDialog', [ jid ]);
 
          return true;
       } else if (ptype === 'unavailable' || ptype === 'unsubscribed') {
@@ -746,7 +746,7 @@ jsxc.xmpp = {
          var chat = jsxc.storage.getUserItem('chat', bid) || [];
 
          if (chat.length === 0) {
-            jsxc.notice.add('%%Unknown sender%%', '%%You received a message from an unknown sender%% (' + bid + ').', 'gui.showUnknownSender', [ bid ]);
+            jsxc.notice.add($.t('Unknown_sender'), $.t('You_received_a_message_from_an_unknown_sender') + ' (' + bid + ').', 'gui.showUnknownSender', [ bid ]);
          }
 
          var msg = jsxc.removeHTML(body);

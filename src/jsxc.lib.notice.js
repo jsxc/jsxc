@@ -54,8 +54,8 @@ jsxc.notice = {
          return false;
       });
 
-      notice.text($.t(msg));
-      notice.attr('title', $.t(description) || '');
+      notice.text(msg);
+      notice.attr('title', description || '');
       notice.attr('data-nid', nid);
       list.append(notice);
 
