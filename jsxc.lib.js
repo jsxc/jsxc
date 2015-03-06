@@ -1020,6 +1020,7 @@ var jsxc;
        */
       update: function(bid) {
          var data = jsxc.storage.getUserItem('buddy', bid);
+         data.name = jsxc.escapeHTML(data.name);
 
          if (!data) {
             jsxc.debug('No data for ' + bid);
