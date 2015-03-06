@@ -1,4 +1,4 @@
-/* global jsxc, Strophe, SDPUtil, getUserMediaWithConstraints, setupRTC, jQuery, MediaStreamTrack */
+/* global SDPUtil, getUserMediaWithConstraints, setupRTC, MediaStreamTrack */
 
 var RTC = null, RTCPeerconnection = null;
 
@@ -56,9 +56,6 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
                <div class="jsxc_infobar"></div>\
             </div>\
         </div>';
-
-(function($) {
-   "use strict";
 
    /**
     * WebRTC namespace for jsxc.
@@ -977,4 +974,4 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          $(document).on('attached.jsxc', jsxc.webrtc.init);
       }
    });
-}(jQuery));
+

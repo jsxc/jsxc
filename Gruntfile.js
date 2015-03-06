@@ -12,6 +12,7 @@ module.exports = function(grunt) {
       meta: {
          banner: grunt.file.read('banner.js')
       },
+      target: 'dev',
       jshint: {
          options: {
             jshintrc: '.jshintrc'
@@ -19,18 +20,23 @@ module.exports = function(grunt) {
          gruntfile: {
             src: 'Gruntfile.js'
          },
-         files: [ 'jsxc.lib.webrtc.js', 'jsxc.lib.js' ]
+         files: [ 'src/jsxc.lib.*' ]
       },
       copy: {
          main: {
             files: [ {
                expand: true,
-               src: [ 'lib/i18next/release/i18next-latest.min.js', 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'jsxc.lib.js', 'jsxc.lib.webrtc.js', 'LICENSE', 'img/**', 'sound/**' ],
-               dest: 'build/'
+               src: [ 'lib/i18next/release/i18next-latest.min.js', 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'LICENSE', 'img/**', 'sound/**' ],
+               dest: '<%= target %>/'
+            }, {
+               expand: true,
+               cwd: 'lib/',
+               src: ['*.css'],
+               dest: '<%= target %>/css/'
             } ]
          }
       },
-      clean: [ 'build/' ],
+      clean: [ '<%= target %>/' ],
       usebanner: {
          dist: {
             options: {
@@ -38,13 +44,13 @@ module.exports = function(grunt) {
                banner: '<%= meta.banner %>'
             },
             files: {
-               src: [ 'build/*.js' ]
+               src: [ '<%= target %>/*.js' ]
             }
          }
       },
       replace: {
          version: {
-            src: [ 'build/jsxc.lib.js' ],
+            src: [ '<%= target %>/jsxc.lib.js' ],
             overwrite: true,
             replacements: [
               {
@@ -54,7 +60,7 @@ module.exports = function(grunt) {
             ]
          },
          locales: {
-           src: [ 'build/lib/translation.js' ],
+           src: [ '<%= target %>/lib/translation.js' ],
            overwrite: true,
            replacements: [
              {
@@ -71,7 +77,7 @@ module.exports = function(grunt) {
       merge_data: {
         target: {
           src: ['locales/*.{json,y{,a}ml}'],
-          dest: 'build/lib/translation.js'
+          dest: '<%= target %>/lib/translation.js'
         }
       },
       concat: {
@@ -94,14 +100,14 @@ module.exports = function(grunt) {
                }
             },
             src: dep_files,
-            dest: 'build/lib/jsxc.dep.js'
+            dest: '<%= target %>/lib/jsxc.dep.js'
          },
          jsxc: {
             options: {
                banner: '/*! This file is concatenated for the browser. */\n\n'
             },
-            src: ['build/jsxc.lib.js', 'build/jsxc.lib.webrtc.js'],
-            dest: 'build/jsxc.js'
+            src: ['src/jsxc.intro.js', 'src/jsxc.lib.js', 'src/jsxc.lib.*.js', 'src/jsxc.outro.js'],
+            dest: '<%= target %>/jsxc.js'
          }
       },
       uglify: {
@@ -112,15 +118,15 @@ module.exports = function(grunt) {
                preserveComments: 'some'
             },
             files: {
-               'build/lib/jsxc.dep.min.js': ['build/lib/jsxc.dep.js'],
-               'build/jsxc.min.js': ['build/jsxc.js']
+               '<%= target %>/lib/jsxc.dep.min.js': ['<%= target %>/lib/jsxc.dep.js'],
+               '<%= target %>/jsxc.min.js': ['<%= target %>/jsxc.js']
             }
          }
       },
       search: {
          console: {
             files: {
-               src: [ '*.js' ]
+               src: [ 'src/*.js' ]
             },
             options: {
                searchString: /console\.log\((?!'[<>]|msg)/g,
@@ -158,8 +164,8 @@ module.exports = function(grunt) {
       },
       dataUri: {
         dist: {
-          src: 'css/*.css',
-          dest: 'build/css/',
+          src: '<%= target %>/css/*.css',
+         dest: '<%= target %>/css/',
           options: {
             target: ['img/*.*', 'img/**/*.*'],
             fixDirLevel: false,
@@ -169,13 +175,13 @@ module.exports = function(grunt) {
       },
       jsdoc: {
           dist: {
-              src: ['jsxc.lib.js', 'jsxc.lib.webrtc.js'],
+              src: ['src/jsxc.lib.*'],
               dest: 'doc'
           }
       },
       autoprefixer: {
             no_dest: {
-                src: 'css/*.css'
+                src: '<%= target %>/css/*.css'
             }
       },
       csslint: {
@@ -183,7 +189,7 @@ module.exports = function(grunt) {
             options: {
             import: 2
             },
-            src: ['css/*.css']
+            src: ['<%= target %>/css/*.css']
         },
       },
       sass: {
@@ -192,11 +198,25 @@ module.exports = function(grunt) {
         },
         dist: {
             files: {
-            'css/jsxc.css': 'scss/jsxc.scss',
-            'css/jsxc.webrtc.css': 'scss/jsxc.webrtc.scss'
+            '<%= target %>/css/jsxc.css': 'scss/jsxc.scss',
+            '<%= target %>/css/jsxc.webrtc.css': 'scss/jsxc.webrtc.scss'
             }
         }
       },
+      watch: {
+         locales: {
+            files: ['locales/*'],
+            tasks: ['merge_data', 'replace:locales', 'concat:dep']
+         },
+         css: {
+            files: ['scss/*'],
+            tasks: ['sass', 'autoprefixer']
+         },
+         js: {
+            files: ['src/jsxc.lib.*'],
+            tasks: ['concat:jsxc']
+         }
+      }
    });
 
    // These plugins provide necessary tasks.
@@ -215,18 +235,28 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-contrib-csslint');
    grunt.loadNpmTasks('grunt-sass');
    grunt.loadNpmTasks('grunt-autoprefixer');
+   grunt.loadNpmTasks('grunt-contrib-watch');
 
    //Default task
-   grunt.registerTask('default', [ 'css' ]);
+   grunt.registerTask('default', [ 'build', 'watch' ]);
 
-   // Create new build
-   grunt.registerTask('build', [ 'search:changelog', 'pre', 'jsdoc' ]);
+   grunt.registerTask('build', ['jshint', 'clean', 'sass', 'autoprefixer', 'copy', 'merge_data', 'replace:locales', 'concat']);
+   
+   grunt.registerTask('build:prerelease', 'Build a new pre-release', function(){
+      grunt.config.set('target', 'build/');
 
-   // Create alpha/beta build
-   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'css', 'dataUri', 'copy', 'usebanner', 'merge_data', 'replace', 'concat', 'uglify', 'compress' ]);
+      grunt.task.run([ 'search:console', 'build', 'dataUri',  'usebanner', 'replace:version', 'uglify', 'compress' ]);
+   });
+   
+   grunt.registerTask('build:release', 'Build a new release', function(){
+      grunt.config.set('target', 'build/');
 
+      grunt.task.run([ 'search:changelog', 'build:prerelease', 'jsdoc' ]);
+   });
+   
+   // Create alpha/beta build @deprecated
+   grunt.registerTask('pre', [ 'build:prerelease' ]);
+   
    // before commit
    grunt.registerTask('commit', [ 'jshint', 'search:console' ]);
-
-   grunt.registerTask('css', [ 'sass', 'autoprefixer' ]);
 };
