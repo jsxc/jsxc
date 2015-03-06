@@ -17,6 +17,7 @@
     &:hover {
         color: $name_hover;
     }
+    a{ cursor: pointer; }
 }
 
 .jsxc_maxWidth {
@@ -185,6 +186,7 @@ ul.jsxc_vCard {
     display: block;
     width: 25px;
     height: 30px;
+    margin-right: 4px;
     background-image: image-url('gear_white.svg');
     background-size: 18px 18px;
     background-repeat: no-repeat;
@@ -297,7 +299,6 @@ ul.jsxc_vCard {
 }
 .jsxc_bar {
     background-color: $window_bar_bg;
-    cursor: pointer;
     height: 30px;
     line-height: 26px;
     padding: 2px;
@@ -305,6 +306,8 @@ ul.jsxc_vCard {
     width: 100%;
     box-sizing: border-box;
     overflow: hidden;
+
+    #jsxc_window_name > a{ target-new: tab; }
 }
 .jsxc_cycle {
     position: absolute;
@@ -443,12 +446,36 @@ ul.jsxc_vCard {
             cursor: pointer;
             text-align: center;
         }
+       .jsxc_presence_badge{
+            height: 14px;
+            width: 14px;
+            border-radius: 8px;
+            margin: 6px;
+        }
+        .jsxc_badge_online {
+            background-color: $state_online;
+        }
+        .jsxc_badge_away {
+            background-color: $state_away;
+        }
+        .jsxc_badge_dnd {
+            background-color: $state_dnd;
+        }
+        .jsxc_badge_offline {
+            background-color: $state_offline;
+        }
     }
     .jsxc_close {
         font-size: 20px;
         &:hover {
             color: $window_close_hover;
         }
+    }
+    .jsxc_reduce{
+        padding-left: 5px;
+    }
+    .jsxc_restore{
+        display: none;
     }
     .ui-resizable-w {
         left: 0;
@@ -665,9 +692,22 @@ div.jsxc_transfer {
 .jsxc_oneway .jsxc_avatar {
     filter: grayscale(100%);
 }
-.jsxc_min .jsxc_tools {
-    display: none;
+.jsxc_min {
+  .jsxc_tools { display: none; }
+
+  .jsxc_restore{
+    width: 26px;
+    height: 26px;
+    display: inline;
+    float: right;
+    color: #939393;
+    font-family: Arial;
+    line-height: 26px;
+    cursor: pointer;
+    text-align: center;
+  }
 }
+
 .jsxc_tools > .jsxc_disabled {
     opacity: 0.5;
     cursor: default !important;

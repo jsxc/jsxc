@@ -7,7 +7,7 @@
     width: 204px;
     li {
         padding: 0;
-        margin: 0;
+        margin: 0 4px;
         height: 30px;
         border-bottom: 1px solid $roster_bottom_border_top;
         cursor: pointer;
@@ -79,6 +79,7 @@
         top: 0;
         right: 0;
         cursor: pointer;
+        margin-right: 14px;
         &:after {
             content: '▾';
             position: absolute;

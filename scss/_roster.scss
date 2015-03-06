@@ -5,7 +5,7 @@
     right: 0;
     width: 200px;
     overflow: visible;
-    border-left: 4px solid $roster_border_left;
+    border-left: 24px solid $roster_border_left;
     z-index: 80;
     margin-left: 10px;
     box-shadow: 0px 0px 7px $shadow;
@@ -81,22 +81,29 @@
 }
 
 #jsxc_toggleRoster {
-    width: 14px;
+    width: 34px;
     height: 100%;
     position: absolute;
-    left: -14px !important;
+    left: -34px !important;
     top: 0;
     z-index: 110;
     background-color: transparent;
     cursor: pointer;
+    display: table;
     &:hover {
         background-color: $roster_toggle_hover;
     }
+
+    #jsxc_toggleRoster_text{
+        display: table-cell;
+        vertical-align: middle;
+        padding-left: 14px;
+    }
 }
+
 #jsxc_roster> {
     &.jsxc_bottom {
         position: absolute;
-        left: -4px;
         bottom: 0;
         height: 30px;
         width: 200px;

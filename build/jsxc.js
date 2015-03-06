@@ -1035,6 +1035,7 @@ var jsxc;
        */
       update: function(bid) {
          var data = jsxc.storage.getUserItem('buddy', bid);
+         data.name = jsxc.escapeHTML(data.name);
 
          if (!data) {
             jsxc.debug('No data for ' + bid);
@@ -1045,15 +1046,21 @@ var jsxc;
          var we = jsxc.gui.window.get(bid); // window element from user
          var ue = ri.add(we); // both
          var spot = $('.jsxc_spot[data-bid="' + bid + '"]');
+         var data_name = $('<a href="/u/' + data.jid + '" target="_blank"></a>').text(data.name);
 
-         // Attach data to corresponding roster item
+        // Attach data to corresponding roster item
          ri.data(data);
 
          // Add online status
-         ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
+         ri.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
+         we.find('.jsxc_presence_badge')
+            .removeClass().addClass('jsxc_presence_badge jsxc_badge_' + jsxc.CONST.STATUS[data.status])
+            .attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
 
          // Change name and add title
-         ue.find('.jsxc_name').add(spot).text(data.name).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
+         ue.find('.jsxc_name').add(spot).text(data.name);
+         ue.find('#jsxc_window_name').add(spot).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
+         ue.find('#jsxc_window_name').empty().append(data_name);
 
          // Update gui according to encryption state
          switch (data.msgstate) {
@@ -2554,8 +2561,14 @@ var jsxc;
             jsxc.otr.toggleTransfer(bid);
          });
 
-         win.find('.jsxc_bar').click(function() {
+         win.find('.jsxc_reduce').click(function() {
             jsxc.gui.window.toggle(bid);
+            win.find('.jsxc_cycle').css('display', 'none');
+         });
+
+         win.find('.jsxc_restore').click(function() {
+            jsxc.gui.window.toggle(bid);
+            win.find('.jsxc_cycle').css('display', '');
          });
 
          win.find('.jsxc_close').click(function() {
@@ -3155,6 +3168,7 @@ var jsxc;
                 <div class="jsxc_bar">\
                      <div class="jsxc_avatar">☺</div>\
                      <div class="jsxc_tools">\
+                           <div class="jsxc_presence_badge"></div>\
                            <div class="jsxc_settings">\
                                <ul>\
                                    <li class="jsxc_fingerprints jsxc_otr jsxc_disabled">%%Fingerprints%%</li>\
@@ -3164,9 +3178,11 @@ var jsxc;
                                </ul>\
                            </div>\
                            <div class="jsxc_transfer jsxc_otr jsxc_disabled"/>\
+                           <div class="jsxc_reduce">–</div>\
                            <div class="jsxc_close">×</div>\
                      </div>\
-                     <div class="jsxc_name"/>\
+                     <div class="jsxc_restore">■</div>\
+                     <div id="jsxc_window_name" nameclass="jsxc_name"/>\
                      <div class="jsxc_cycle"/>\
                 </div>\
                 <div class="jsxc_fade">\
