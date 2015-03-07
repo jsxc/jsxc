@@ -292,13 +292,15 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
                   return false;
                }
             });
+
+            jid = jid + '/' + targetRes;
          }
 
          el.off('click');
 
          if (capableRes.indexOf(targetRes) > -1) {
             el.click(function() {
-               self.startCall(jid + '/' + targetRes);
+               self.startCall(jid);
             });
 
             el.removeClass('jsxc_disabled');
