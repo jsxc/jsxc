@@ -1466,6 +1466,8 @@ jsxc.gui.roster = {
    noConnection: function() {
       $('#jsxc_roster').addClass('jsxc_noConnection');
 
+      $('#jsxc_buddylist').empty();
+
       $('#jsxc_roster').append($('<p>' + $.t('no_connection') + '</p>').append(' <a>' + $.t('relogin') + '</a>').click(function() {
          jsxc.gui.showLoginBox();
       }));
