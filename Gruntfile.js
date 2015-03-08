@@ -168,7 +168,7 @@ module.exports = function(grunt) {
           options: {
             target: ['img/*.*', 'img/**/*.*'],
             fixDirLevel: true,
-            baseDir: './'
+            baseDir: './build'
           }
         }
       },
@@ -249,7 +249,7 @@ module.exports = function(grunt) {
    grunt.registerTask('build', [ 'search:changelog', 'pre', 'jsdoc' ]);
 
    // Create alpha/beta build
-   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'css', 'dataUri', 'copy', 'usebanner', 'merge_data', 'replace', 'concat', 'uglify', 'compress' ]);
+   grunt.registerTask('pre', [ 'jshint', 'search:console', 'clean', 'css', 'copy', 'dataUri', 'usebanner', 'merge_data', 'replace', 'concat', 'uglify', 'compress' ]);
 
    // before commit
    grunt.registerTask('commit', [ 'jshint', 'search:console' ]);
