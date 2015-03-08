@@ -1,7 +1,7 @@
 /*! This file is concatenated for the browser. */
 
 /*!
- * jsxc v1.1.0 - 2015-02-18
+ * jsxc v1.1.0 - 2015-03-08
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -370,7 +370,8 @@ var jsxc;
             return;
          }
 
-         jsxc.gui.showWaitAlert($.t("Logging_in"));
+         //NOTE too flashy modal
+         //jsxc.gui.showWaitAlert($.t("Logging_in"));
 
          var settings = jsxc.options.loadSettings.call(this, username, password);
 
@@ -1046,21 +1047,15 @@ var jsxc;
          var we = jsxc.gui.window.get(bid); // window element from user
          var ue = ri.add(we); // both
          var spot = $('.jsxc_spot[data-bid="' + bid + '"]');
-         var data_name = $('<a href="/u/' + data.jid + '" target="_blank"></a>').text(data.name);
 
-        // Attach data to corresponding roster item
+         // Attach data to corresponding roster item
          ri.data(data);
 
          // Add online status
-         ri.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
-         we.find('.jsxc_presence_badge')
-            .removeClass().addClass('jsxc_presence_badge jsxc_badge_' + jsxc.CONST.STATUS[data.status])
-            .attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
+         ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
 
          // Change name and add title
-         ue.find('.jsxc_name').add(spot).text(data.name);
-         ue.find('#jsxc_window_name').add(spot).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
-         ue.find('#jsxc_window_name').empty().append(data_name);
+         ue.find('.jsxc_name').add(spot).text(data.name).attr('title', $.t("is") + ' ' + jsxc.CONST.STATUS[data.status]);
 
          // Update gui according to encryption state
          switch (data.msgstate) {
@@ -2160,10 +2155,10 @@ var jsxc;
             $('#jsxc_roster').css('right', '-200px');
             $('#jsxc_windowList > ul').css('paddingRight', '22px');
             $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-left');
-            $('body > .container').addClass('chat-roster-hidden');
+            $('body > .container-fluid').addClass('chat-roster-hidden');
          } else {
             $('#jsxc_toggleRoster_text').addClass('entypo chevron-thin-right');
-            $('body > .container').addClass('chat-roster-shown');
+            $('body > .container-fluid').addClass('chat-roster-shown');
          }
 
          var pres = jsxc.storage.getUserItem('presence') || 'online';
@@ -2401,7 +2396,7 @@ var jsxc;
          // remove toggle icon
          $('#jsxc_toggleRoster_text').removeClass('entypo chevron-thin-left chevron-thin-right');
          // set class of the diaspora* container
-         $('body > .container').removeClass('chat-roster-shown chat-roster-hidden')
+         $('body > .container-fluid').removeClass('chat-roster-shown chat-roster-hidden')
                                .addClass('chat-roster-'+state);
          roster.animate({
             right: ((roster_width + roster_right) * -1) + 'px'
@@ -2561,14 +2556,8 @@ var jsxc;
             jsxc.otr.toggleTransfer(bid);
          });
 
-         win.find('.jsxc_reduce').click(function() {
+         win.find('.jsxc_bar').click(function() {
             jsxc.gui.window.toggle(bid);
-            win.find('.jsxc_cycle').css('display', 'none');
-         });
-
-         win.find('.jsxc_restore').click(function() {
-            jsxc.gui.window.toggle(bid);
-            win.find('.jsxc_cycle').css('display', '');
          });
 
          win.find('.jsxc_close').click(function() {
@@ -3168,7 +3157,6 @@ var jsxc;
                 <div class="jsxc_bar">\
                      <div class="jsxc_avatar">☺</div>\
                      <div class="jsxc_tools">\
-                           <div class="jsxc_presence_badge"></div>\
                            <div class="jsxc_settings">\
                                <ul>\
                                    <li class="jsxc_fingerprints jsxc_otr jsxc_disabled">%%Fingerprints%%</li>\
@@ -3178,11 +3166,9 @@ var jsxc;
                                </ul>\
                            </div>\
                            <div class="jsxc_transfer jsxc_otr jsxc_disabled"/>\
-                           <div class="jsxc_reduce">–</div>\
                            <div class="jsxc_close">×</div>\
                      </div>\
-                     <div class="jsxc_restore">■</div>\
-                     <div id="jsxc_window_name" nameclass="jsxc_name"/>\
+                     <div class="jsxc_name"/>\
                      <div class="jsxc_cycle"/>\
                 </div>\
                 <div class="jsxc_fade">\
@@ -5856,7 +5842,7 @@ var jsxc;
 }(jQuery));
 
 /*!
- * jsxc v1.1.0 - 2015-02-18
+ * jsxc v1.1.0 - 2015-03-08
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license

@@ -1,5 +1,5 @@
 /*!
- * jsxc v1.1.0 - 2015-02-18
+ * jsxc v1.1.0 - 2015-03-08
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
