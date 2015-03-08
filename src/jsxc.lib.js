@@ -699,6 +699,27 @@ jsxc = {
    },
 
    /**
+    * Checks if tab has focus.
+    *
+    * @returns {boolean} True if tabs has focus
+    */
+   hasFocus: function() {
+      var focus = true;
+
+      if (typeof document.hasFocus === 'function') {
+         focus = document.hasFocus();
+      }
+
+      if (!focus && jsxc.master) {
+         jsxc.storage.ink('focus', 0);
+      } else if (focus && !jsxc.master) {
+         jsxc.storage.ink('focus');
+      }
+
+      return focus;
+   },
+
+   /**
     * Executes the given function in jsxc namespace.
     * 
     * @memberOf jsxc

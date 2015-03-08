@@ -354,6 +354,14 @@
             }
          }
 
+         if (key.match(/^focus/)) {
+            if (jsxc.master) {
+               clearTimeout(jsxc.toNotification);
+            } else {
+               jsxc.hasFocus();
+            }
+         }
+
          if (key.match(new RegExp('^chat' + jsxc.storage.SEP))) {
 
             var posts = JSON.parse(e.newValue);

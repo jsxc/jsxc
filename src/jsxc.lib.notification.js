@@ -67,7 +67,7 @@ jsxc.notification = {
          };
       }
 
-      if (!jsxc.isHidden() && !o.force) {
+      if (jsxc.hasFocus() && !o.force) {
          return; // Tab is visible
       }
 
@@ -220,7 +220,7 @@ jsxc.notification = {
          return;
       }
 
-      if (!jsxc.isHidden() && !force) {
+      if (jsxc.hasFocus() && !force) {
          // tab is visible
          return;
       }
