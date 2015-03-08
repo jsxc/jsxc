@@ -355,7 +355,8 @@ var jsxc;
             return;
          }
 
-         jsxc.gui.showWaitAlert($.t("Logging_in"));
+         //NOTE too flashy modal
+         //jsxc.gui.showWaitAlert($.t("Logging_in"));
 
          var settings = jsxc.options.loadSettings.call(this, username, password);
 
