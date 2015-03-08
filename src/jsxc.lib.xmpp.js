@@ -637,7 +637,11 @@ jsxc.xmpp = {
 
       if (data.status === 0 && max > 0) {
          // buddy has come online
-         jsxc.notification.notify(data.name, $.t('has_come_online'));
+         jsxc.notification.notify({
+            title: data.name,
+            msg: $.t('has_come_online'),
+            source: bid
+         });
       }
 
       data.status = max;

@@ -18,7 +18,12 @@ jsxc.notification = {
          msg = (msg.match(/^\?OTR/)) ? $.t('Encrypted_message') : msg;
          var data = jsxc.storage.getUserItem('buddy', bid);
 
-         jsxc.notification.notify($.t('New_message_from') + ' ' + data.name, msg, undefined, undefined, jsxc.CONST.SOUNDS.MSG);
+         jsxc.notification.notify({
+            title: $.t('New_message_from') + ' ' + data.name,
+            msg: msg,
+            soundFile: jsxc.CONST.SOUNDS.MSG,
+            source: bid
+         });
       });
 
       $(document).on('callincoming.jingle', function() {
@@ -39,28 +44,56 @@ jsxc.notification = {
     * @param force Should message also shown, if tab is visible?
     * @param soundFile Playing given sound file
     * @param loop Loop sound file?
+    * @param source Bid which triggered this notification
     */
-   notify: function(title, msg, d, force, soundFile, loop) {
+   notify: function(title, msg, d, force, soundFile, loop, source) {
       if (!jsxc.options.notification || !jsxc.notification.hasPermission()) {
          return; // notifications disabled
       }
 
-      if (!jsxc.isHidden() && !force) {
+      var o;
+
+      if (title !== null && typeof title === 'object') {
+         o = title;
+      } else {
+         o = {
+            title: title,
+            msg: msg,
+            duration: d,
+            force: force,
+            soundFile: soundFile,
+            loop: loop,
+            source: source
+         };
+      }
+
+      if (!jsxc.isHidden() && !o.force) {
          return; // Tab is visible
+      }
+
+      var icon = o.icon || jsxc.options.root + '/img/XMPP_logo.png';
+
+      if (typeof o.source === 'string') {
+         var data = jsxc.storage.getUserItem('buddy', o.source);
+         var src = jsxc.storage.getUserItem('avatar', data.avatar);
+
+         if (typeof src === 'string' && src !== '0') {
+            icon = src;
+         }
       }
 
       jsxc.toNotification = setTimeout(function() {
 
-         if (typeof soundFile === 'string') {
-            jsxc.notification.playSound(soundFile, loop, force);
+         if (typeof o.soundFile === 'string') {
+            jsxc.notification.playSound(o.soundFile, o.loop, o.force);
          }
 
-         var popup = new Notification($.t(title), {
-            body: $.t(msg),
-            icon: jsxc.options.root + '/img/XMPP_logo.png'
+         var popup = new Notification($.t(o.title), {
+            body: $.t(o.msg),
+            icon: icon
          });
 
-         var duration = d || jsxc.options.popupDuration;
+         var duration = o.duration || jsxc.options.popupDuration;
 
          if (duration > 0) {
             setTimeout(function() {
