@@ -48,9 +48,16 @@ jsxc.xmpp = {
             rid = arguments[2];
             break;
          default:
-            jid = jsxc.storage.getItem('jid');
             sid = jsxc.storage.getItem('sid');
             rid = jsxc.storage.getItem('rid');
+
+            if (sid !== null && rid !== null) {
+               jid = jsxc.storage.getItem('jid');
+            } else {
+               sid = null;
+               rid = null;
+               jid = jsxc.options.xmpp.jid;
+            }
       }
 
       var url = jsxc.options.get('xmpp').url;
@@ -430,6 +437,10 @@ jsxc.xmpp = {
                jsxc.submitLoginForm();
                break;
          }
+      }
+
+      if (jsxc.triggeredFromBox) {
+         jsxc.gui.showAuthFail();
       }
    },
 
