@@ -1,6 +1,5 @@
-/* global SDPUtil, getUserMediaWithConstraints, setupRTC, MediaStreamTrack */
-
-var RTC = null, RTCPeerconnection = null;
+/* global SDPUtil, getUserMediaWithConstraints, setupRTC, MediaStreamTrack, RTC, RTCPeerconnection */
+/* jshint -W020 */
 
 jsxc.gui.template.incomingCall = '<h3 data-i18n="Incoming_call"></h3>\
         <p><span data-i18n="Do_you_want_to_accept_the_call_from"></span> {{bid_name}}?</p>\
