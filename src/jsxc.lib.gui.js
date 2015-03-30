@@ -1659,7 +1659,10 @@ jsxc.gui.window = {
       });
 
       win.find('.jsxc_textarea').click(function() {
-         win.find('.jsxc_textinput').focus();
+         // check if user clicks element or selects text
+         if (typeof getSelection === 'function' && !getSelection().toString()) {
+            win.find('.jsxc_textinput').focus();
+         }
       });
 
       win.find('.jsxc_textarea').slimScroll({
