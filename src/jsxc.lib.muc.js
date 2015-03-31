@@ -1,24 +1,14 @@
-/* global jsxc, Strophe, jQuery */
-
-jsxc.l10n.en.Join_chat = 'Join chat';
-jsxc.l10n.de.Join_chat = 'Chat beitreten';
-jsxc.l10n.en.Join = 'Join';
-jsxc.l10n.de.Join = 'Beitreten';
-
-jsxc.gui.template.joinChat = '<h3>%%Join_chat%%</h3>\
+jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          <p class=".jsxc_explanation">Blub</p>\
-         <p><label for="jsxc_room">%%Room%%:</label>\
+         <p><label for="jsxc_room" data-i18n="Room"></label>\
             <input type="text" name="room" id="jsxc_room" required="required" /></p>\
-         <p><label for="jsxc_nickname">%%Nickname%%:</label>\
+         <p><label for="jsxc_nickname" data-i18n="Nickname"></label>\
             <input type="text" name="nickname" id="jsxc_nickname" /></p>\
-         <p><label for="jsxc_password">%%Password%%:</label>\
+         <p><label for="jsxc_password" data-i18n="Password"></label>\
             <input type="text" name="password" id="jsxc_password" /></p>\
          <p class="jsxc_right">\
-            <a href="#" class="button jsxc_close">%%Close%%</a> <a href="#" class="button creation jsxc_join">%%Join%%</a>\
+            <a href="#" class="button jsxc_close" data-i18n="Close"></a> <a href="#" class="button creation jsxc_join" data-i18n="Join"></a>\
          </p>';
-
-(function($) {
-   "use strict";
 
    jsxc.muc = {
       conn: null,
@@ -32,7 +22,7 @@ jsxc.gui.template.joinChat = '<h3>%%Join_chat%%</h3>\
       },
 
       initMenu: function() {
-         var li = $('<li>').attr('class', 'jsxc_joinChat').text(jsxc.translate('%%Join_chat%%'));
+         var li = $('<li>').attr('class', 'jsxc_joinChat').text($.t('Join_chat'));
 
          li.click(jsxc.muc.showJoinChat);
 
@@ -43,7 +33,7 @@ jsxc.gui.template.joinChat = '<h3>%%Join_chat%%</h3>\
          var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('joinChat'));
 
          dialog.find('.jsxc_join').click(function() {
-            var room = $('#jsxc_room').val() || null;
+            var room = $('#jsxc_room').val().toLowerCase() || null;
             var nickname = $('#jsxc_nickname').val() || Strophe.getNodeFromJid(jsxc.xmpp.conn.jid);
             var password = $('#jsxc_password').val() || null;
 
@@ -96,7 +86,7 @@ jsxc.gui.template.joinChat = '<h3>%%Join_chat%%</h3>\
             dialog.find('.jsxc_join').click();
          });
       },
-      initWindow: function(event, win) {
+      initWindow: function(event, win) { 
          var self = jsxc.muc;
          var data = win.data();
          var bid = jsxc.jidToBid(data.jid);
@@ -116,12 +106,16 @@ jsxc.gui.template.joinChat = '<h3>%%Join_chat%%</h3>\
          win.addClass('jsxc_groupchat');
          win.find('.jsxc_tools > .jsxc_transfer').after('<div class="jsxc_members">M</div>');
          var ml = $('<div class="jsxc_memberlist"><ul></ul></div>');
-         win.find('.jsxc_fade').append(ml);
+         win.find('.jsxc_fade').prepend(ml);
+         
+         // update emoticon button
+         var top = win.find('.jsxc_emoticons').position().top + win.find('.slimScrollDiv').position().top;
+         win.find('.jsxc_emoticons').css('top', top + 'px');
 
-         ml.find('ul').slimScroll({
+         /*ml.find('ul').slimScroll({
             height: '234px',
             distance: '3px'
-         });
+         });*/
 
          var member = jsxc.storage.getUserItem('member', bid) || {};
 
@@ -132,7 +126,7 @@ jsxc.gui.template.joinChat = '<h3>%%Join_chat%%</h3>\
          if (sdata.minimize_ml || sdata.minimize_ml === null) {
             self.hideMemberList(win, 200, true);
          } else {
-            win.find('.jsxc_fade > .slimScrollDiv').css('margin-left', '200px');
+
             setTimeout(function() {
                self.showMemberList(win, 200);
             }, 500);
@@ -146,10 +140,11 @@ jsxc.gui.template.joinChat = '<h3>%%Join_chat%%</h3>\
             ml.slideUp();
          });
 
-         win.trigger((sdata.minimize) ? 'hide' : 'show');
+         //win.trigger((sdata.minimize) ? 'hide' : 'show');
       },
-      showMemberList: function(win, originalWidth, noani) {
-         if (!noani) {
+      showMemberList: function() { 
+         //win, originalWidth, noani
+         /*if (!noani) {
             win.animate({
                width: (originalWidth + 200) + 'px'
             }).css('overflow', 'visible');
@@ -159,10 +154,11 @@ jsxc.gui.template.joinChat = '<h3>%%Join_chat%%</h3>\
 
          win.find('.jsxc_members').off('click').one('click', function() {
             jsxc.muc.hideMemberList(win, originalWidth);
-         });
+         });*/
       },
-      hideMemberList: function(win, originalWidth, noani) {
-         if (!noani) {
+      hideMemberList: function() {
+         //win, originalWidth, noani
+         /*if (!noani) {
             win.animate({
                width: originalWidth + 'px'
             }).css('overflow', 'visible');
@@ -172,7 +168,7 @@ jsxc.gui.template.joinChat = '<h3>%%Join_chat%%</h3>\
 
          win.find('.jsxc_members').off('click').one('click', function() {
             jsxc.muc.showMemberList(win, originalWidth);
-         });
+         });*/
       },
       onPresence: function(event, from, status, presence) {
          var self = jsxc.muc;
@@ -212,20 +208,25 @@ jsxc.gui.template.joinChat = '<h3>%%Join_chat%%</h3>\
 
          return true;
       },
-      insertMember: function(bid, nickname, jid, status) {
-
+      insertMember: function(bid, nickname, jid) {
+         
+         var data = jsxc.storage.getUserItem('buddy', bid);
          var win = jsxc.gui.window.get(bid);
          var m = win.find('.jsxc_memberlist li[data-nickname="' + nickname + '"]');
 
          if (m.length === 0) {
-            m = $('<li title="' + jid + '">' + nickname + '</li>');
+            m = $('<li><div class="jsxc_avatar"></div></li>');
+            m.attr('title', nickname);
             m.attr('data-nickname', nickname);
+            m.attr('data-bid', bid);
             win.find('.jsxc_memberlist ul').append(m);
+
+            jsxc.gui.updateAvatar(m, jid, data.avatar);
          }
 
-         if (status !== null) {
+         /*if (status !== null) {
             m.removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[status]);
-         }
+         }*/
       },
       removeMember: function(bid, nickname) {
          var win = jsxc.gui.window.get(bid);
@@ -262,8 +263,4 @@ jsxc.gui.template.joinChat = '<h3>%%Join_chat%%</h3>\
 
    $(document).on('init.window.jsxc', jsxc.muc.initWindow);
    $(document).on('presence.jsxc', jsxc.muc.onPresence);
-
-   $(function() {
-
-   });
-}(jQuery));
+   

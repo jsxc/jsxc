@@ -1,0 +1,15 @@
+.jsxc_windowItem {
+   &.jsxc_groupchat {
+      .jsxc_video {
+         display: none;
+      }
+   }
+   .jsxc_memberlist {
+      padding: 0px 2px;
+      height: 30px;
+      background-color: $window_bar_bg;
+      .jsxc_avatar {
+         margin-right: 2px;
+      }
+   }
+}

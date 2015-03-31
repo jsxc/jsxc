@@ -246,6 +246,10 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       initWindow: function(event, win) {
          var self = jsxc.webrtc;
 
+         if (win.hasClass('jsxc_groupchat')) {
+            return;
+         }
+
          jsxc.debug('webrtc.initWindow');
 
          if (!self.conn) {

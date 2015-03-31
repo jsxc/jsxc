@@ -172,11 +172,7 @@ jsxc.gui = {
 
       ri.find('.jsxc_name').attr('title', info);
 
-      if (data.avatar && data.avatar.length > 0) {
-         jsxc.gui.updateAvatar(ue, data.jid, data.avatar);
-      } else {
-         jsxc.options.defaultAvatar.call(ue, data.jid);
-      }
+      jsxc.gui.updateAvatar(ri.add(we.find('.jsxc_bar')), data.jid, data.avatar);
    },
 
    /**
@@ -1526,7 +1522,7 @@ jsxc.gui.dialog = {
                $('#cboxClose').hide();
             }
 
-            $.colorbox.resize();
+            jsxc.gui.dialog.resize();
 
             $(document).trigger('complete.dialog.jsxc');
          },
@@ -1683,7 +1679,8 @@ jsxc.gui.window = {
             win.find('.jsxc_textarea').slimScroll({
                height: ui.size.height
             });
-            win.find('.jsxc_emoticons').css('top', (ui.size.height + 6) + 'px');
+            var offset = win.find('.slimScrollDiv').position().top;
+            win.find('.jsxc_emoticons').css('top', (ui.size.height + offset + 6) + 'px');
          }
       });
 

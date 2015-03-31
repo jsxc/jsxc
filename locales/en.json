@@ -167,6 +167,10 @@
     "Local_Fingerprint": "Local fingerprint",
     "Remote_Fingerprint": "Remote fingerprint",
     "Video_call_not_possible": "Video call not possible. Your buddy does not support video calls.",
-    "Start_video_call": "Start video call"
+    "Start_video_call": "Start video call",
+    "Join_chat": "Join chat",
+    "Join": "Join",
+    "Room": "Room",
+    "Nickname": "Nickname"
   }
 }
