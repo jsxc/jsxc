@@ -3,7 +3,7 @@ module.exports = function(grunt) {
 
    var dep = grunt.file.readJSON('dep.json');
    var dep_files = dep.map(function(el) {
-      return el.file;
+      return '<%= target %>/' + el.file;
    });
 
    // Project configuration.
@@ -90,13 +90,19 @@ module.exports = function(grunt) {
                   ' * \n' +
                   ' */\n\n',
                process: function(src, filepath) {
-                  if (filepath === 'build/lib/otr/build/dep/crypto.js') {
+                  filepath = filepath.replace(/^[a-z]+\//i, '');
+
+                  if (filepath === 'lib/otr/build/dep/crypto.js') {
                      src += ';';
                   }
 
                   var data = dep[dep_files.indexOf(filepath)];
 
-                  return '/*!\n * Source: ' + filepath + ', license: ' + data.license + ', url: ' + data.url + ' */\n' + src;
+                  if (data) {
+                    return '/*!\n * Source: ' + filepath + ', license: ' + data.license + ', url: ' + data.url + ' */\n' + src;
+                  } else {
+                    return src;
+                  }
                }
             },
             src: dep_files,

@@ -1,81 +1,81 @@
 [
   {
-     "file": "build/lib/strophe.js",
+     "file": "lib/strophe.js",
      "license": "multiple",
      "url": "http://strophe.im/strophejs/"
   },
   {
-     "file": "build/lib/strophe.muc.js",
+     "file": "lib/strophe.muc.js",
      "license": "MIT",
      "url": "https://github.com/strophe/strophejs-plugins"
   },
   {
-     "file": "build/lib/strophe.disco.js",
+     "file": "lib/strophe.disco.js",
      "license": "MIT",
      "url": "https://github.com/strophe/strophejs-plugins"
   },
   {
-     "file": "build/lib/strophe.caps.js",
+     "file": "lib/strophe.caps.js",
      "license": "MIT",
      "url": "https://github.com/strophe/strophejs-plugins"
   },
   {
-     "file": "build/lib/strophe.vcard.js",
+     "file": "lib/strophe.vcard.js",
      "license": "MIT",
      "url": "https://github.com/strophe/strophejs-plugins"
   },
   {
-     "file": "build/lib/strophe.jingle/strophe.jingle.js",
+     "file": "lib/strophe.jingle/strophe.jingle.js",
      "license": "MIT",
      "url": "https://github.com/ESTOS/strophe.jingle"
   },
   {
-     "file": "build/lib/strophe.jingle/strophe.jingle.session.js",
+     "file": "lib/strophe.jingle/strophe.jingle.session.js",
      "license": "MIT",
      "url": "https://github.com/ESTOS/strophe.jingle"
   },
   {
-     "file": "build/lib/strophe.jingle/strophe.jingle.sdp.js",
+     "file": "lib/strophe.jingle/strophe.jingle.sdp.js",
      "license": "MIT",
      "url": "https://github.com/ESTOS/strophe.jingle"
   },
   {
-     "file": "build/lib/strophe.jingle/strophe.jingle.adapter.js",
+     "file": "lib/strophe.jingle/strophe.jingle.adapter.js",
      "license": "MIT",
      "url": "https://github.com/ESTOS/strophe.jingle"
   },
   {
-     "file": "build/lib/otr/build/dep/salsa20.js",
+     "file": "lib/otr/build/dep/salsa20.js",
      "license": "AGPL3",
      "url": "https://github.com/neoatlantis/node-salsa20"
   },
   {
-     "file": "build/lib/otr/build/dep/bigint.js",
+     "file": "lib/otr/build/dep/bigint.js",
      "license": "public domain",
      "url": "www.leemon.com"
   },
   {
-     "file": "build/lib/otr/build/dep/crypto.js",
+     "file": "lib/otr/build/dep/crypto.js",
      "license": "code.google.com/p/crypto-js/wiki/license",
      "url": "code.google.com/p/crypto-js"
   },
   {
-     "file": "build/lib/otr/build/dep/eventemitter.js",
+     "file": "lib/otr/build/dep/eventemitter.js",
      "license": "MIT",
      "url": "http://git.io/ee"
   },
   {
-     "file": "build/lib/otr/build/otr.js",
+     "file": "lib/otr/build/otr.js",
      "license": "MPL v2.0",
      "url": "https://arlolra.github.io/otr/"
   },
   {
-     "file": "build/lib/i18next/release/i18next-latest.min.js",
+     "file": "lib/i18next/release/i18next-latest.min.js",
      "license": "MIT",
      "url": "http://i18next.com/"
   },
   {
-    "file": "build/lib/translation.js",
+    "file": "lib/translation.js",
     "license": "MIT",
     "url": "https://webtranslateit.com/en/projects/10365-JSXC"
   }
