@@ -68,5 +68,15 @@
      "file": "build/lib/otr/build/otr.js",
      "license": "MPL v2.0",
      "url": "https://arlolra.github.io/otr/"
+  },
+  {
+     "file": "build/lib/i18next/release/i18next-latest.min.js",
+     "license": "MIT",
+     "url": "http://i18next.com/"
+  },
+  {
+    "file": "build/lib/translation.js",
+    "license": "MIT",
+    "url": "https://webtranslateit.com/en/projects/10365-JSXC"
   }
  ]

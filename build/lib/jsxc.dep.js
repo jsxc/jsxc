@@ -1,5 +1,5 @@
 /*!
- * jsxc v1.0.0 - 2014-11-06
+ * jsxc v1.1.0a - 2015-02-25
  * 
  * This file concatenates all dependencies of jsxc.
  * 
@@ -6613,13 +6613,18 @@ Strophe.addConnectionPlugin('disco',
        * Returns: (Boolean) - false, to automatically remove the handler.
        */
       _handleDiscoInfoReply: function(stanza) {
-         var query = stanza.querySelector('query'), node = query.getAttribute('node').split('#'), ver = node[1], from = stanza.getAttribute('from');
+         var query = stanza.querySelector('query');
+         var from = stanza.getAttribute('from');
+         var node = query.getAttribute('node');
+         var ver = (node)? node.split('#')[1] : this._jidVerIndex[from]; //fix open prosody issue
+
          if (!this._knownCapabilities[ver]) {
             var childNodes = query.childNodes, childNodesLen = childNodes.length;
             this._knownCapabilities[ver] = {
                features: [],
                identities: []
             };
+
             for (var i = 0; i < childNodesLen; i++) {
                var node = childNodes[i];
                if (node.nodeName == 'feature') {
@@ -6627,10 +6632,11 @@ Strophe.addConnectionPlugin('disco',
                } else if (node.nodeName == 'identity') {
                   this._knownCapabilities[ver]['identities'].push(this._attributesToJsObject(node.attributes));
                } else {
-                  if (_knownCapabilities[ver][node.nodeName])
-                     _knownCapabilities[ver][node.nodeName] = [];
+                  if (typeof this._knownCapabilities[ver][node.nodeName] === 'undefined')
+                     this._knownCapabilities[ver][node.nodeName] = [];
                   this._knownCapabilities[ver][node.nodeName].push(this._attributesToJsObject(node.attributes));
                }
+
             }
             this._jidVerIndex[from] = ver;
          } else if (!this._jidVerIndex[from] || !this._jidVerIndex[from] !== ver) {
@@ -14013,8 +14019,8 @@ CryptoJS.mode.CTR = (function () {
  * Source: build/lib/otr/build/otr.js, license: MPL v2.0, url: https://arlolra.github.io/otr/ */
 /*!
 
-  otr.js v0.2.13 - 2014-09-07
-  (c) 2014 - Arlo Breault <arlolra@gmail.com>
+  otr.js v0.2.14 - 2015-01-16
+  (c) 2015 - Arlo Breault <arlolra@gmail.com>
   Freely distributed under the MPL v2.0 license.
 
   This file is concatenated for the browser.
@@ -15633,10 +15639,12 @@ CryptoJS.mode.CTR = (function () {
 
         this.smpstate = CONST.SMPSTATE_EXPECT0
 
-        // assume utf8 question
-        question = CryptoJS.enc.Latin1
-          .parse(question)
-          .toString(CryptoJS.enc.Utf8)
+        if (question) {
+          // assume utf8 question
+          question = CryptoJS.enc.Latin1
+            .parse(question)
+            .toString(CryptoJS.enc.Utf8)
+        }
 
         // invoke question
         this.trigger('question', [question])
@@ -16423,7 +16431,8 @@ CryptoJS.mode.CTR = (function () {
 
     // utf8 inputs
     secret = CryptoJS.enc.Utf8.parse(secret).toString(CryptoJS.enc.Latin1)
-    question = CryptoJS.enc.Utf8.parse(question).toString(CryptoJS.enc.Latin1)
+    if (question)
+      question = CryptoJS.enc.Utf8.parse(question).toString(CryptoJS.enc.Latin1)
 
     this.sm.rcvSecret(secret, question)
   }
@@ -16486,7 +16495,7 @@ CryptoJS.mode.CTR = (function () {
     if (msg) this.io(msg, meta)
   }
 
-  OTR.prototype.receiveMsg = function (msg) {
+  OTR.prototype.receiveMsg = function (msg, meta) {
 
     // parse type
     msg = Parse.parseMsg(this, msg)
@@ -16537,7 +16546,7 @@ CryptoJS.mode.CTR = (function () {
           this.doAKE(msg)
     }
 
-    if (msg.msg) this.trigger('ui', [msg.msg, !!msg.encrypted])
+    if (msg.msg) this.trigger('ui', [msg.msg, !!msg.encrypted, meta])
   }
 
   OTR.prototype.checkInstanceTags = function (it) {

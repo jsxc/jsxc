@@ -1,7 +1,7 @@
 /*!
 
-  otr.js v0.2.13 - 2014-09-07
-  (c) 2014 - Arlo Breault <arlolra@gmail.com>
+  otr.js v0.2.14 - 2015-01-16
+  (c) 2015 - Arlo Breault <arlolra@gmail.com>
   Freely distributed under the MPL v2.0 license.
 
   This file is concatenated for the browser.
@@ -1620,10 +1620,12 @@
 
         this.smpstate = CONST.SMPSTATE_EXPECT0
 
-        // assume utf8 question
-        question = CryptoJS.enc.Latin1
-          .parse(question)
-          .toString(CryptoJS.enc.Utf8)
+        if (question) {
+          // assume utf8 question
+          question = CryptoJS.enc.Latin1
+            .parse(question)
+            .toString(CryptoJS.enc.Utf8)
+        }
 
         // invoke question
         this.trigger('question', [question])
@@ -2410,7 +2412,8 @@
 
     // utf8 inputs
     secret = CryptoJS.enc.Utf8.parse(secret).toString(CryptoJS.enc.Latin1)
-    question = CryptoJS.enc.Utf8.parse(question).toString(CryptoJS.enc.Latin1)
+    if (question)
+      question = CryptoJS.enc.Utf8.parse(question).toString(CryptoJS.enc.Latin1)
 
     this.sm.rcvSecret(secret, question)
   }
@@ -2473,7 +2476,7 @@
     if (msg) this.io(msg, meta)
   }
 
-  OTR.prototype.receiveMsg = function (msg) {
+  OTR.prototype.receiveMsg = function (msg, meta) {
 
     // parse type
     msg = Parse.parseMsg(this, msg)
@@ -2524,7 +2527,7 @@
           this.doAKE(msg)
     }
 
-    if (msg.msg) this.trigger('ui', [msg.msg, !!msg.encrypted])
+    if (msg.msg) this.trigger('ui', [msg.msg, !!msg.encrypted, meta])
   }
 
   OTR.prototype.checkInstanceTags = function (it) {

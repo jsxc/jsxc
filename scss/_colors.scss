@@ -1,0 +1,115 @@
+$black: #000;
+$gray10: lighten($black, 10%);
+$gray20: lighten($black, 20%);
+$gray30: lighten($black, 30%);
+$gray40: lighten($black, 40%);
+$gray50: lighten($black, 50%);
+$gray60: lighten($black, 60%);
+$gray70: lighten($black, 70%);
+$gray80: lighten($black, 80%);
+$gray90: lighten($black, 90%);
+$white: #fff;
+$orange: #ffa500;
+$red: #f00;
+$blue: #00f;
+
+
+$shadow: $black;
+$separator: $black;
+$invalid_border: $red;
+$name_hover: $white;
+$dialog_fieldset_border: $gray80;
+$dialog_input_invalid: $red;
+$dialog_input_readonly_bg: $gray90;
+$spot_bg: $white;
+$spot_border: $black;
+$state_online: #00bfff;
+$state_chat: #00bfff;
+$state_away: $orange;
+$state_xa: $orange;
+$state_dnd: $red;
+$state_offline: $gray60;
+$notice_bg: $orange;
+$notice_color: $black;
+$window_unread_cycle: $orange;
+$window_bar_bg: $gray10;
+$window_bar_color: $gray50;
+$window_bg: $gray60;
+$window_gradient: $gray60;
+$window_placeholder: $black;
+
+$tools_color: $gray50;
+$window_close_hover: $white;
+
+$chatmessage_bg: $white;
+$chatmessage_a: $blue;
+$chatmessage_timestamp: $gray60;
+$chatmessage_in_bg: #f1f7fd;
+$chatmessage_in_border: #a6b8c9;
+$chatmessage_out_bg: #e6ffd1;
+$chatmessage_out_border: #b4d89f;
+$chatmessage_received: #008000;
+
+$window_settings_bg: $gray10;
+$window_settings_border_top: $gray80;
+$window_settings_disabled: $gray30;
+$window_settings_bg_hover: #3f8fba;
+$window_settings_color_hover: $white;
+
+$windowListSB_bg: $gray80;
+$windowListSB_color: $gray50;
+$windowListSB_bg_hover: $gray70;
+$windowListSB_bg_disabled: $gray90;
+$windowListSB_color_disabled: $gray80;
+
+$emoticon_selection_bg: rgba($gray20, 0.8);
+$emoticon_selection_hover: rgba($white, 0.8);
+
+$roster_bg: $gray20;
+$roster_input_bg: $white;
+$roster_input_shadow: $gray40;
+$roster_color: $gray50;
+$roster_a: $gray70;
+$roster_unread_bg: $orange;
+$roster_icon_bg: rgba($gray40, 0.5);
+$roster_icon_color: $gray70;
+
+$roster_toggle_hover: rgba($gray60, 0.5);
+
+$roster_border_left: $gray60;
+$roster_bottom_border_top: $gray50;
+$roster_bottom_bg: $gray10;
+$roster_bottom_color: $gray50;
+$roster_bottom_disabled: $gray20;
+$roster_bottom_bg_hover: #3f8fba;
+$roster_bottom_color_hover: $white;
+
+$fullscreen_bg: $gray60;
+$video_status_bg: rgba($black, 0.5);
+$video_status_color: $white;
+$video_bg: $gray60;
+
+$novideo_color: $white;
+$novideo_bg: $gray30;
+
+$bubbling_bg: $black;
+$bubbling_start_bg: $black;
+$bubbling_end_bg: $white;
+
+$avatar_bg: $gray60;
+$avatar_color: $gray70;
+
+$loginForm_bg: #5cb85c;
+$loginForm_border: #4cae4c;
+
+
+
+
+
+
+
+
+
+
+
+

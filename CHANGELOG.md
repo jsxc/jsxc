@@ -1,3 +1,21 @@
+v1.1.0a / 2015-02-25
+===
+- fix css url path
+
+v1.1.0 / 2015-01-08
+===
+- move from plain css to sass
+- show avatar also by EXTVAL (url), not only by BINVAL
+- add XEP-0280 (Message Carbons)
+- add XEP-0297 (Stanza Forwarding)
+- add option to disable otr
+- add timestamp to messages
+- add ajax/prebind login
+- fix offline subscription request
+- fix hide offline contacts
+- fix error with multiple own resources
+- fix avatars with newlines
+
 v1.0.0 / 2014-11-06
 ===
 - add unread flag to roster and scroll to target window
