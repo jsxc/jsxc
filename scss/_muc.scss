@@ -3,11 +3,21 @@
       .jsxc_video {
          display: none;
       }
+      .jsxc_transfer {
+         display: none;
+      }
    }
    .jsxc_memberlist {
       padding: 0px 2px;
       height: 30px;
       background-color: $window_bar_bg;
+      &>ul {
+         white-space: nowrap;
+         &>li {
+            display: inline-block;
+            white-space: normal;
+         }
+      }
       .jsxc_avatar {
          margin-right: 2px;
       }

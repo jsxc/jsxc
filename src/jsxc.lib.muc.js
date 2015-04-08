@@ -1,7 +1,10 @@
 jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          <p class=".jsxc_explanation">Blub</p>\
          <p><label for="jsxc_room" data-i18n="Room"></label>\
-            <input type="text" name="room" id="jsxc_room" required="required" /></p>\
+            <input type="text" name="room" id="jsxc_room" autocomplete="off" list="jsxc_roomlist" required="required" /></p>\
+         <datalist id="jsxc_roomlist">\
+            <p><label for="jsxc_roomlist_select"></label><select id="jsxc_roomlist_select"><option></option><option>workaround</option></select></p>\
+         </datalist>\
          <p><label for="jsxc_nickname" data-i18n="Nickname"></label>\
             <input type="text" name="nickname" id="jsxc_nickname" /></p>\
          <p><label for="jsxc_password" data-i18n="Password"></label>\
@@ -30,7 +33,31 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
 
       },
       showJoinChat: function() {
+         var self = jsxc.muc;
          var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('joinChat'));
+
+         // @TODO add spinning wheel
+         self.conn.muc.listRooms('conference.localhost', function(stanza){ //@TODO: replace
+            // workaround: chrome does not display dropdown arrow for dynamically filled datalists
+            $('#jsxc_roomlist option:last').remove();
+
+            $(stanza).find('item').each(function(){
+               var r = $('<option>');
+               var rjid = $(this).attr('jid').toLowerCase();
+               var rnode = Strophe.getNodeFromJid(rjid);
+               var rname = $(this).attr('name') || rnode;
+
+               r.text(rname);
+               r.attr('data-jid', rjid);
+               r.attr('value', rnode);
+
+               $('#jsxc_roomlist select').append(r);
+            });
+            //@TODO handle <set> element, http://xmpp.org/extensions/xep-0045.html#disco-rooms
+         }, function(){
+            jsxc.warn('Could not load rooms');
+            //@TODO: handle
+         });
 
          dialog.find('.jsxc_join').click(function() {
             var room = $('#jsxc_room').val().toLowerCase() || null;
@@ -54,6 +81,10 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
 
             if (jsxc.xmpp.conn.muc.roomNames.indexOf(room) < 0) {
                jsxc.xmpp.conn.muc.join(room, nickname, null, null, null, password);
+
+               // @TODO create instant or reserved room 
+               // (prosody supports instant room only in latest version)
+               // http://xmpp.org/extensions/xep-0045.html#createroom
 
                jsxc.storage.setUserItem('roomNames', jsxc.xmpp.conn.muc.roomNames);
 
@@ -209,7 +240,7 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          return true;
       },
       insertMember: function(bid, nickname, jid) {
-         
+         //@TODO rename bid to room
          var data = jsxc.storage.getUserItem('buddy', bid);
          var win = jsxc.gui.window.get(bid);
          var m = win.find('.jsxc_memberlist li[data-nickname="' + nickname + '"]');
