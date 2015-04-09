@@ -549,9 +549,10 @@
        * @param msg
        * @param encrypted
        * @param forwarded
+       * @param sender
        * @return post
        */
-      saveMessage: function(bid, direction, msg, encrypted, forwarded, stamp) {
+      saveMessage: function(bid, direction, msg, encrypted, forwarded, stamp, sender) {
          var chat = jsxc.storage.getUserItem('chat', bid) || [];
 
          var uid = new Date().getTime() + ':msg';
@@ -567,7 +568,8 @@
             received: false,
             encrypted: encrypted || false,
             forwarded: forwarded || false,
-            stamp: stamp || new Date().getTime()
+            stamp: stamp || new Date().getTime(),
+            sender: sender
          };
 
          chat.unshift(post);

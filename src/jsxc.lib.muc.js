@@ -60,7 +60,7 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          });
 
          dialog.find('.jsxc_join').click(function() {
-            var room = $('#jsxc_room').val().toLowerCase() || null;
+            var room = ($('#jsxc_room').val())? jsxc.jidToBid($('#jsxc_room').val()) : null;
             var nickname = $('#jsxc_nickname').val() || Strophe.getNodeFromJid(jsxc.xmpp.conn.jid);
             var password = $('#jsxc_password').val() || null;
 
@@ -88,13 +88,14 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
 
                jsxc.storage.setUserItem('roomNames', jsxc.xmpp.conn.muc.roomNames);
 
-               var own = jsxc.storage.getUserItem('own') || [];
-               own.push(jsxc.xmpp.conn.muc.test_append_nick(room, nickname));
-               jsxc.storage.setUserItem('own', own);
+               var own = jsxc.storage.getUserItem('ownNicknames') || {};
+               own[room] = nickname;
+               jsxc.storage.setUserItem('ownNicknames', own);
 
                jsxc.storage.setUserItem('buddy', bid, {
                   jid: room,
                   name: room,
+                  sub: 'both',
                   type: 'groupchat'
                });
 
@@ -115,6 +116,21 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
             }
 
             dialog.find('.jsxc_join').click();
+         });
+      },
+      leave: function(bid) {
+         var self = jsxc.muc;
+         var own = jsxc.storage.getUserItem('ownNicknames') || {};
+         
+         self.conn.muc.leave(bid, own[bid], function(){
+            jsxc.storage.setUserItem('roomNames', self.conn.muc.roomNames);
+            
+            delete own[bid];
+            jsxc.storage.setUserItem('ownNicknames', own);
+            jsxc.storage.removeUserItem('member', bid);
+            
+            jsxc.gui.window.close(bid);
+            jsxc.gui.roster.purge(bid);
          });
       },
       initWindow: function(event, win) { 
@@ -171,6 +187,15 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
             ml.slideUp();
          });
 
+         var leave = $('<li>');
+         leave.text($.t('Leave'));
+         leave.addClass('jsxc_leave');
+         leave.click(function(){
+            self.leave(bid);
+         });
+         
+         win.find('.jsxc_settings ul').append(leave);
+
          //win.trigger((sdata.minimize) ? 'hide' : 'show');
       },
       showMemberList: function() { 
@@ -203,27 +228,26 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
       },
       onPresence: function(event, from, status, presence) {
          var self = jsxc.muc;
-         var room = Strophe.getBareJidFromJid(from);
-         var bid = jsxc.jidToBid(room);
-         var nickname = Strophe.getResourceFromJid(from);
+         var room = jsxc.jidToBid(from);
+         var nickname = Strophe.unescapeNode(Strophe.getResourceFromJid(from));
          var xdata = $(presence).find('x[xmlns^="' + Strophe.NS.MUC + '"]');
 
          if (self.conn.muc.roomNames.indexOf(room) < 0 || xdata.length === 0) {
-            return;
+            return true;
          }
 
-         var jid = xdata.find('item').attr('jid');
+         var jid = xdata.find('item').attr('jid') || null;
 
-         var member = jsxc.storage.getUserItem('member', bid) || {};
+         var member = jsxc.storage.getUserItem('member', room) || {};
 
          if (status === 0) {
             delete member[nickname];
 
-            self.removeMember(bid, nickname);
-            jsxc.gui.window.postMessage(bid, 'sys', nickname + ' left the building.');
+            self.removeMember(room, nickname);
+            jsxc.gui.window.postMessage(room, 'sys', nickname + ' left the building.');
          } else {
             if (!member[nickname]) {
-               jsxc.gui.window.postMessage(bid, 'sys', nickname + ' entered the room.');
+               jsxc.gui.window.postMessage(room, 'sys', nickname + ' entered the room.');
             }
 
             member[nickname] = {
@@ -232,35 +256,47 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
                roomJid: from
             };
 
-            self.insertMember(bid, nickname, jid, status);
+            self.insertMember(room, nickname, jid, status);
          }
 
-         jsxc.storage.setUserItem('member', bid, member);
+         jsxc.storage.setUserItem('member', room, member);
 
          return true;
       },
-      insertMember: function(bid, nickname, jid) {
-         //@TODO rename bid to room
-         var data = jsxc.storage.getUserItem('buddy', bid);
-         var win = jsxc.gui.window.get(bid);
+      insertMember: function(room, nickname, jid) {
+         var self = jsxc.muc;
+         var win = jsxc.gui.window.get(room);
          var m = win.find('.jsxc_memberlist li[data-nickname="' + nickname + '"]');
 
          if (m.length === 0) {
+            var title = nickname;
+            
             m = $('<li><div class="jsxc_avatar"></div></li>');
-            m.attr('title', nickname);
             m.attr('data-nickname', nickname);
-            m.attr('data-bid', bid);
+
             win.find('.jsxc_memberlist ul').append(m);
 
-            jsxc.gui.updateAvatar(m, jid, data.avatar);
+            if (typeof jid === 'string') {
+               m.attr('data-bid', jsxc.jidToBid(jid));
+               title = title + '\n' + jsxc.jidToBid(jid);
+ 
+               var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(jid));
+               if (data !== null && typeof data === 'object') {
+                  jsxc.gui.updateAvatar(m, jid, data.avatar);
+               } else if (jsxc.jidToBid(jid) === jsxc.jidToBid(self.conn.jid)) {
+                  jsxc.gui.updateAvatar(m, jid, 'own');
+               }
+            }
+            
+            m.attr('title', title);
          }
 
          /*if (status !== null) {
             m.removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[status]);
          }*/
       },
-      removeMember: function(bid, nickname) {
-         var win = jsxc.gui.window.get(bid);
+      removeMember: function(room, nickname) {
+         var win = jsxc.gui.window.get(room);
          var m = win.find('.jsxc_memberlist li[data-nickname="' + nickname + '"]');
 
          if (m.length > 0) {
@@ -268,19 +304,46 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          }
       },
       onGroupchatMessage: function(message) {
-         var from = $(message).attr('from');
-         var body = $(message).find('body:first').text();
          var id = $(message).attr('id');
 
-         if (!jsxc.el_exists($('#' + id))) {
-            body = Strophe.getResourceFromJid(from) + ': ' + body;
+         if (jsxc.el_exists($('#' + id))) {
+            // ignore own incoming messages
+            return true;
+         }
+         
+         var from = $(message).attr('from');
+         var body = $(message).find('body:first').text();
+         var room = jsxc.jidToBid(from);
+         var nickname = Strophe.unescapeNode(Strophe.getResourceFromJid(from));
+         var delay = $(message).find('delay[xmlns="urn:xmpp:delay"]');
 
-            $(message).find('body:first').text(body);
-
-            jsxc.xmpp.onMessage($(message)[0]);
+         var stamp = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
+         stamp = stamp.getTime();
+         
+         var member = jsxc.storage.getUserItem('member', room) || {};
+         
+         var sender = {};
+         sender.name = nickname;
+         
+         if (member[nickname] && typeof member[nickname].jid === 'string') {
+            sender.jid = member[nickname].jid;
          }
 
+         jsxc.gui.window.postMessage(room, 'in', body, false, false, stamp, sender);
+
          return true;
+      },
+      onAddRoster: function(event, bid, data, bud) {
+         var self = jsxc.muc;
+         
+         if (data.type !== 'groupchat') {
+            return;
+         }
+         
+         bud.find('.jsxc_delete').off('click').click(function() {
+            self.leave(bid);
+            return false;
+         });
       }
    };
 
@@ -290,8 +353,10 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
 
    $(document).one('connected.jsxc', function() {
       jsxc.storage.removeUserItem('roomNames');
+      //@TODO clean up
    });
 
    $(document).on('init.window.jsxc', jsxc.muc.initWindow);
    $(document).on('presence.jsxc', jsxc.muc.onPresence);
+   $(document).on('add.roster.jsxc', jsxc.muc.onAddRoster);
    

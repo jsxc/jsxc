@@ -1,3 +1,10 @@
+%muc-avatar-icon {
+   text-indent: 999px;
+   background-image: image-url('group_white.svg');
+   background-size: 70% 70%;
+   background-repeat: no-repeat;
+}
+
 .jsxc_windowItem {
    &.jsxc_groupchat {
       .jsxc_video {
@@ -5,6 +12,21 @@
       }
       .jsxc_transfer {
          display: none;
+      }
+      .jsxc_chatmessage.jsxc_in {
+         margin-left: 40px;
+         .jsxc_avatar {
+            display: block;
+            position:absolute;
+            bottom: 0px;
+            left: -37px;
+            background-color: #777;
+         }
+      }
+      .jsxc_bar {
+         .jsxc_avatar {
+            @extend %muc-avatar-icon;
+         }
       }
    }
    .jsxc_memberlist {
@@ -21,5 +43,10 @@
       .jsxc_avatar {
          margin-right: 2px;
       }
+   }
+}
+li[data-type="groupchat"] {
+   .jsxc_avatar {
+      @extend %muc-avatar-icon;
    }
 }

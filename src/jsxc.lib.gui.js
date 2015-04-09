@@ -1414,15 +1414,18 @@ jsxc.gui.roster = {
    _rename: function(bid, newname) {
       if (jsxc.master) {
          var d = jsxc.storage.getUserItem('buddy', bid);
-         var iq = $iq({
-            type: 'set'
-         }).c('query', {
-            xmlns: 'jabber:iq:roster'
-         }).c('item', {
-            jid: Strophe.getBareJidFromJid(d.jid),
-            name: newname
-         });
-         jsxc.xmpp.conn.sendIQ(iq);
+         
+         if (d.type === 'chat') {
+             var iq = $iq({
+                type: 'set'
+             }).c('query', {
+                xmlns: 'jabber:iq:roster'
+             }).c('item', {
+                jid: Strophe.getBareJidFromJid(d.jid),
+                name: newname
+             });
+             jsxc.xmpp.conn.sendIQ(iq);
+         }
       }
 
       jsxc.storage.updateUserItem('buddy', bid, 'name', newname);
@@ -1938,8 +1941,11 @@ jsxc.gui.window = {
     * @param {boolean} encrypted Was this message encrypted? Default: false
     * @param {boolean} forwarded Was this message forwarded? Default: false
     * @param {integer} stamp Timestamp
+    * @param {object} sender Information about sender
+    * @property {string} sender.jid Sender Jid
+    * @property {string} sender.name Sender name or nickname
     */
-   postMessage: function(bid, direction, msg, encrypted, forwarded, stamp) {
+   postMessage: function(bid, direction, msg, encrypted, forwarded, stamp, sender) {
       var data = jsxc.storage.getUserItem('buddy', bid);
       var html_msg = msg;
 
@@ -1965,7 +1971,7 @@ jsxc.gui.window = {
       }
 
       encrypted = encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
-      var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded, stamp);
+      var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded, stamp, sender);
 
       if (direction === 'in') {
          $(document).trigger('postmessagein.jsxc', [ bid, html_msg ]);
@@ -2038,7 +2044,7 @@ jsxc.gui.window = {
       msgDiv.attr('id', uid);
       msgDiv.html('<div>' + msg + '</div>');
       msgTsDiv.addClass('jsxc_timestamp');
-      msgTsDiv.html(jsxc.getFormattedTime(post.stamp));
+      msgTsDiv.text(jsxc.getFormattedTime(post.stamp));
 
       if (post.received || false) {
          msgDiv.addClass('jsxc_received');
@@ -2057,8 +2063,39 @@ jsxc.gui.window = {
       } else if (typeof post.stamp !== 'undefined') {
          msgDiv.append(msgTsDiv);
       }
-
+      
       win.find('.jsxc_textarea').append(msgDiv);
+      
+      if (typeof post.sender === 'object' && post.sender !== null) {
+         var title = '';
+         var avatarDiv = $('<div>');
+         avatarDiv.addClass('jsxc_avatar').prependTo(msgDiv);
+         
+         if (typeof post.sender.jid === 'string') {
+            msgDiv.attr('data-bid', jsxc.jidToBid(post.sender.jid));
+            
+            var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(post.sender.jid));
+            if (data) {
+                jsxc.gui.updateAvatar(msgDiv, post.sender.jid, data.avatar);
+            }
+            
+            title = jsxc.jidToBid(post.sender.jid);
+         }
+         
+         if (typeof post.sender.name === 'string') {
+            msgDiv.attr('data-name', post.sender.name);
+            
+            if (title !== '') {
+                title = '\n' + title;
+            }
+            
+            title = post.sender.name + title;
+            
+            msgTsDiv.text(msgTsDiv.text() + ' ' + post.sender.name);
+         }
+         
+         avatarDiv.attr('title', title);
+      }
 
       jsxc.gui.detectUriScheme(win);
       jsxc.gui.detectEmail(win);
