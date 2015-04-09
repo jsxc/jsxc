@@ -229,13 +229,14 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
       onPresence: function(event, from, status, presence) {
          var self = jsxc.muc;
          var room = jsxc.jidToBid(from);
-         var nickname = Strophe.unescapeNode(Strophe.getResourceFromJid(from));
+         var res = Strophe.getResourceFromJid(from) || '';
+         var nickname = Strophe.unescapeNode(res);
          var xdata = $(presence).find('x[xmlns^="' + Strophe.NS.MUC + '"]');
-
+         
          if (self.conn.muc.roomNames.indexOf(room) < 0 || xdata.length === 0) {
             return true;
          }
-
+         
          var jid = xdata.find('item').attr('jid') || null;
 
          var member = jsxc.storage.getUserItem('member', room) || {};
