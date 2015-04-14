@@ -289,7 +289,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          var targetRes = Strophe.getResourceFromJid(jid);
 
          if (targetRes === null) {
-            $.each(jsxc.storage.getUserItem('buddy', bid).res, function(index, val) {
+            $.each(jsxc.storage.getUserItem('buddy', bid).res || [], function(index, val) {
                if (capableRes.indexOf(val) > -1) {
                   targetRes = val;
                   return false;

@@ -10,7 +10,7 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          <p><label for="jsxc_password" data-i18n="Password"></label>\
             <input type="text" name="password" id="jsxc_password" /></p>\
          <p class="jsxc_right">\
-            <a href="#" class="button jsxc_close" data-i18n="Close"></a> <a href="#" class="button creation jsxc_join" data-i18n="Join"></a>\
+            <span class="jsxc_warning"></span> <a href="#" class="button jsxc_close" data-i18n="Close"></a> <a href="#" class="button creation jsxc_join" data-i18n="Join"></a>\
          </p>';
 
    jsxc.muc = {
@@ -36,6 +36,51 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          var self = jsxc.muc;
          var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('joinChat'));
 
+         var error_handler = function(event, condition) {
+            var msg;
+            
+            switch(condition) {
+               case 'not-authorized': 
+                  // password-protected room
+                  msg = $.t('A_password_is_required');
+                  break;
+               case 'registration-required':
+                  // members-only room
+                  msg = $.t('You_are_not_on_the_member_list');
+                  break;
+               case 'forbidden':
+                  // banned users
+                  msg = $.t('You_are_banned_from_this_room');
+                  break;
+               case 'conflict':
+                  // nickname conflict
+                  msg = $.t('Your_desired_nickname_');
+                  break;
+               case 'service-unavailable':
+                  // max users
+                  msg = $.t('The_maximum_number_');
+                  break;
+               case 'item-not-found':
+                  // locked or non-existing room
+                  msg = $.t('This_room_is_locked_');
+                  break;
+               case 'not-allowed':
+                  // room creation is restricted
+                  msg = $.t('You_are_not_allowed_to_create_');
+                  break;
+               default:
+                  jsxc.warn('Unknown muc error condition: ' + condition); 
+                  msg = $.t('Error') + ': ' + condition;
+            }
+
+            dialog.find('.jsxc_warning').text(msg);
+         };
+         $(document).on('error.muc.jsxc', error_handler);
+         
+         $(document).on('close.dialog.jsxc', function(){
+            $(document).off('error.muc.jsxc', error_handler);
+         });
+         
          // @TODO add spinning wheel
          self.conn.muc.listRooms('conference.localhost', function(stanza){ //@TODO: replace
             // workaround: chrome does not display dropdown arrow for dynamically filled datalists
@@ -77,37 +122,23 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
                room += '@' + 'conference.localhost'; // @TODO: replace
             }
 
-            var bid = jsxc.jidToBid(room);
-
             if (jsxc.xmpp.conn.muc.roomNames.indexOf(room) < 0) {
-               jsxc.xmpp.conn.muc.join(room, nickname, null, null, null, password);
 
-               // @TODO create instant or reserved room 
-               // (prosody supports instant room only in latest version)
-               // http://xmpp.org/extensions/xep-0045.html#createroom
-
-               jsxc.storage.setUserItem('roomNames', jsxc.xmpp.conn.muc.roomNames);
-
-               var own = jsxc.storage.getUserItem('ownNicknames') || {};
-               own[room] = nickname;
-               jsxc.storage.setUserItem('ownNicknames', own);
-
-               jsxc.storage.setUserItem('buddy', bid, {
+               jsxc.storage.setUserItem('buddy', room, {
                   jid: room,
                   name: room,
                   sub: 'both',
                   type: 'groupchat'
                });
+               
+               jsxc.xmpp.conn.muc.join(room, nickname, null, null, null, password);
 
-               var bl = jsxc.storage.getUserItem('buddylist');
-               bl.push(bid);
-               jsxc.storage.setUserItem('buddylist', bl);
-
-               jsxc.gui.roster.add(bid);
+               // @TODO create instant or reserved room 
+               // (prosody supports instant room only in latest version)
+               // http://xmpp.org/extensions/xep-0045.html#createroom
+            } else {
+               dialog.find('.jsxc_warning').text($.t('You_already_joined_this_room'));
             }
-
-            jsxc.gui.window.open(bid);
-            jsxc.gui.dialog.close();
          });
 
          dialog.find('input').keydown(function(ev) {
@@ -229,14 +260,30 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
       onPresence: function(event, from, status, presence) {
          var self = jsxc.muc;
          var room = jsxc.jidToBid(from);
-         var res = Strophe.getResourceFromJid(from) || '';
-         var nickname = Strophe.unescapeNode(res);
          var xdata = $(presence).find('x[xmlns^="' + Strophe.NS.MUC + '"]');
          
          if (self.conn.muc.roomNames.indexOf(room) < 0 || xdata.length === 0) {
             return true;
          }
          
+         var res = Strophe.getResourceFromJid(from) || '';
+         var nickname = Strophe.unescapeNode(res);
+         var own = jsxc.storage.getUserItem('ownNicknames') || {};
+
+         if (jsxc.gui.roster.getItem(room).length === 0) {
+            // successfully joined
+            jsxc.storage.setUserItem('roomNames', jsxc.xmpp.conn.muc.roomNames);
+
+            var bl = jsxc.storage.getUserItem('buddylist');
+            bl.push(room);
+            jsxc.storage.setUserItem('buddylist', bl);
+
+            jsxc.gui.roster.add(room);
+
+            jsxc.gui.window.open(room);
+            jsxc.gui.dialog.close();
+         }
+
          var jid = xdata.find('item').attr('jid') || null;
 
          var member = jsxc.storage.getUserItem('member', room) || {};
@@ -247,14 +294,16 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
             self.removeMember(room, nickname);
             jsxc.gui.window.postMessage(room, 'sys', nickname + ' left the building.');
          } else {
-            if (!member[nickname]) {
+            if (!member[nickname] && own[room]) {
                jsxc.gui.window.postMessage(room, 'sys', nickname + ' entered the room.');
             }
 
             member[nickname] = {
                jid: jid,
                status: status,
-               roomJid: from
+               roomJid: from,
+               affiliation: xdata.find('item').attr('affiliation'),
+               role: xdata.find('item').attr('role')
             };
 
             self.insertMember(room, nickname, jid, status);
@@ -262,7 +311,39 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
 
          jsxc.storage.setUserItem('member', room, member);
 
+         xdata.find('status').each(function() {
+            var code = $(this).attr('code');
+            
+            jsxc.debug('[muc][code]', code);
+            
+            if (code === '110') {
+               // self-presence
+
+               own[room] = nickname;
+               jsxc.storage.setUserItem('ownNicknames', own);
+            } else if (code === '170') {
+               // room logging
+               //@TODO warn the user that the discussions are logged
+            }
+         });
+         
          return true;
+      },
+      onPresenceError: function(event, from, presence) {
+         var self = jsxc.muc;   
+         var xdata = $(presence).find('x[xmlns="' + Strophe.NS.MUC + '"]');
+         var room = jsxc.jidToBid(from);
+
+         if (xdata.length === 0 || self.conn.muc.roomNames.indexOf(room) < 0) {
+            return true;
+         }
+
+         var error = $(presence).find('error');
+         var condition = error.children()[0].tagName;
+         
+         jsxc.debug('[muc][error]', condition);
+         
+         $(document).trigger('error.muc.jsxc', [condition]);
       },
       insertMember: function(room, nickname, jid) {
          var self = jsxc.muc;
@@ -287,6 +368,8 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
                } else if (jsxc.jidToBid(jid) === jsxc.jidToBid(self.conn.jid)) {
                   jsxc.gui.updateAvatar(m, jid, 'own');
                }
+            } else {
+               //@TODO display default avatar
             }
             
             m.attr('title', title);
@@ -354,10 +437,12 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
 
    $(document).one('connected.jsxc', function() {
       jsxc.storage.removeUserItem('roomNames');
+      jsxc.storage.removeUserItem('ownNicknames');
       //@TODO clean up
    });
 
    $(document).on('init.window.jsxc', jsxc.muc.initWindow);
    $(document).on('presence.jsxc', jsxc.muc.onPresence);
+   $(document).on('error.presence.jsxc', jsxc.muc.onPresenceError);
    $(document).on('add.roster.jsxc', jsxc.muc.onAddRoster);
    

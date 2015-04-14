@@ -602,6 +602,8 @@ jsxc.xmpp = {
       }
 
       if (ptype === 'error') {
+         $(document).trigger('error.presence.jsxc', [ from, presence ]);
+
          jsxc.error('[XMPP] ' + $(presence).attr('code'));
          return true;
       }
