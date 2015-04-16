@@ -1128,6 +1128,9 @@ jsxc.gui = {
  */
 jsxc.gui.roster = {
 
+   /** True if roster is initialised */ 
+   ready: false,
+
    /**
     * Init the roster skeleton
     * 
@@ -1227,6 +1230,7 @@ jsxc.gui.roster = {
 
       jsxc.notice.load();
 
+      jsxc.gui.roster.ready = true;
       $(document).trigger('ready.roster.jsxc');
    },
 

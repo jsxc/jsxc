@@ -16,10 +16,54 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
    jsxc.muc = {
       conn: null,
 
-      init: function() {
+      init: function(o) {
          var self = jsxc.muc;
-
          self.conn = jsxc.xmpp.conn;
+         
+         var options = o || jsxc.options.get('muc');
+         
+         if (!options || typeof options.server !== 'string') {
+            jsxc.debug('Discover muc service');
+            
+            // prosody does not response, if we send query before initial presence was send
+            setTimeout(function() {
+               self.conn.disco.items(Strophe.getDomainFromJid(self.conn.jid), null, function(items) {
+                  $(items).find('item').each(function(){
+                     var jid = $(this).attr('jid');
+                     var discovered = false;
+                     
+                     self.conn.disco.info(jid, null, function(info) {
+                        if ($(info).find('feature[var="' + Strophe.NS.MUC + '"]').length > 0) {
+                           jsxc.debug('muc service found', jid);
+                           
+                           jsxc.options.set('muc', {
+                              server: jid,
+                              name: $(info).find('identity').attr('name')
+                           });
+                           
+                           discovered = true;
+                           
+                           self.init();
+                        }
+                     });
+                     
+                     return !discovered;
+                  });
+               });
+            }, 1000);
+            
+            return;
+         }
+
+         if (jsxc.gui.roster.ready) {
+            self.initMenu();
+         } else {
+            $(document).one('ready.roster.jsxc', jsxc.muc.initMenu);
+         }
+         
+         $(document).on('presence.jsxc', jsxc.muc.onPresence);
+         $(document).on('error.presence.jsxc', jsxc.muc.onPresenceError);
+
          self.conn.addHandler(self.onGroupchatMessage, null, 'message', 'groupchat');
          self.conn.muc.roomNames = jsxc.storage.getUserItem('roomNames') || [];
       },
@@ -82,7 +126,7 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          });
          
          // @TODO add spinning wheel
-         self.conn.muc.listRooms('conference.localhost', function(stanza){ //@TODO: replace
+         self.conn.muc.listRooms(jsxc.options.get('muc').server, function(stanza){
             // workaround: chrome does not display dropdown arrow for dynamically filled datalists
             $('#jsxc_roomlist option:last').remove();
 
@@ -119,7 +163,7 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
             }
 
             if (!room.match(/@(.*)$/)) {
-               room += '@' + 'conference.localhost'; // @TODO: replace
+               room += '@' + jsxc.options.get('muc').server;
             }
 
             if (jsxc.xmpp.conn.muc.roomNames.indexOf(room) < 0) {
@@ -132,10 +176,6 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
                });
                
                jsxc.xmpp.conn.muc.join(room, nickname, null, null, null, password);
-
-               // @TODO create instant or reserved room 
-               // (prosody supports instant room only in latest version)
-               // http://xmpp.org/extensions/xep-0045.html#createroom
             } else {
                dialog.find('.jsxc_warning').text($.t('You_already_joined_this_room'));
             }
@@ -316,15 +356,11 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
             
             jsxc.debug('[muc][code]', code);
             
-            if (code === '110') {
-               // self-presence
-
-               own[room] = nickname;
-               jsxc.storage.setUserItem('ownNicknames', own);
-            } else if (code === '170') {
-               // room logging
-               //@TODO warn the user that the discussions are logged
+            if (typeof self.onStatus[code] === 'function') {
+               self.onStatus[code].call(this, room, nickname);
             }
+            
+            $(document).trigger('status.muc.jsxc', [code, room, nickname, presence]);
          });
          
          return true;
@@ -344,6 +380,25 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          jsxc.debug('[muc][error]', condition);
          
          $(document).trigger('error.muc.jsxc', [condition]);
+      },
+      onStatus: {
+         /** Inform user that presence refers to itself */
+         110: function(room, nickname) {
+            var own = jsxc.storage.getUserItem('ownNicknames') || {};
+            
+            own[room] = nickname;
+            jsxc.storage.setUserItem('ownNicknames', own);
+         },
+         /** Inform occupants that room logging is now enabled */
+         170: function() {
+            //@TODO warn the user that the discussions are logged
+         },
+         /** Inform user that a new room has been created */
+         201: function(room) {
+            //@TODO let user choose between instant and reserved room
+            
+            jsxc.muc.conn.muc.createInstantRoom(room);
+         }
       },
       insertMember: function(room, nickname, jid) {
          var self = jsxc.muc;
@@ -431,18 +486,15 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
       }
    };
 
-   $(document).one('ready.roster.jsxc', jsxc.muc.initMenu);
-
-   $(document).one('attached.jsxc', jsxc.muc.init);
+   $(document).on('init.window.jsxc', jsxc.muc.initWindow);
+   $(document).on('add.roster.jsxc', jsxc.muc.onAddRoster);
+   
+   $(document).one('attached.jsxc', function() {
+      jsxc.muc.init();
+   });
 
    $(document).one('connected.jsxc', function() {
       jsxc.storage.removeUserItem('roomNames');
       jsxc.storage.removeUserItem('ownNicknames');
       //@TODO clean up
    });
-
-   $(document).on('init.window.jsxc', jsxc.muc.initWindow);
-   $(document).on('presence.jsxc', jsxc.muc.onPresence);
-   $(document).on('error.presence.jsxc', jsxc.muc.onPresenceError);
-   $(document).on('add.roster.jsxc', jsxc.muc.onAddRoster);
-   
