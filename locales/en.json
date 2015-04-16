@@ -171,6 +171,8 @@
     "Join_chat": "Join chat",
     "Join": "Join",
     "Room": "Room",
-    "Nickname": "Nickname"
+    "Nickname": "Nickname",
+    "left_the_building": "__nickname__ left the building",
+    "entered_the_room": "__nickname__ entered the room"
   }
 }
