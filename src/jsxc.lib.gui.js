@@ -1688,6 +1688,8 @@ jsxc.gui.window = {
             });
             var offset = win.find('.slimScrollDiv').position().top;
             win.find('.jsxc_emoticons').css('top', (ui.size.height + offset + 6) + 'px');
+
+            $(document).trigger('resize.window.jsxc', [ win, bid, ui.size ]);
          }
       });
 

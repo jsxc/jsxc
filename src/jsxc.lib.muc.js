@@ -277,13 +277,74 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          var ownNickname = own[bid];
 
          win.addClass('jsxc_groupchat');
-         win.find('.jsxc_tools > .jsxc_transfer').after('<div class="jsxc_members">M</div>');
+         var mlIcon = $('<div class="jsxc_members">M</div>');
+               
+         win.find('.jsxc_tools > .jsxc_transfer').after(mlIcon);
+         
          var ml = $('<div class="jsxc_memberlist"><ul></ul></div>');
          win.find('.jsxc_fade').prepend(ml);
          
+         ml.on('wheel', function(ev) {
+            jsxc.muc.scrollMemberListBy(bid, (ev.originalEvent.wheelDelta > 0) ? 50 : -50);
+         });
+         
+         var toggleMl = function(ev) {
+            ev.preventDefault();
+            
+            var slimOptions = {};
+            var ul = ml.find('ul:first');
+            var slimHeight = null;
+            
+            if (ml.hasClass('jsxc_expand')) {
+               slimOptions = {
+                     destroy: true
+               };
+               
+               ul.attr('style', '');
+               ml.css('height', '');
+               
+               $('body').off('click', null, toggleMl);
+               ul.off('mouseleave mouseenter');
+            } else {
+               $('body').click();
+               $('body').one('click', toggleMl);
+               
+               ul.mouseleave(function() {
+                  ul.data('timer', window.setTimeout(toggleMl, 2000));
+               }).mouseenter(function() {
+                  window.clearTimeout(ul.data('timer'));
+               }).css('left', '0px');
+               
+               slimHeight = win.find(".jsxc_textarea").height() * 0.8;
+               
+               slimOptions = {
+                     distance: '3px',
+                     height: slimHeight + 'px',
+                     width: '100%',
+                     color: '#fff',
+                     opacity: '0.5'
+               };
+               
+               ml.css('height', slimHeight + 'px');
+            }
+
+            ml.toggleClass('jsxc_expand');
+            ul.slimscroll(slimOptions);
+            
+            return false;
+         };
+         
+         mlIcon.click(toggleMl);
+         
+         win.on('resize', function() {
+            jsxc.muc.scrollMemberListBy(bid, 0);
+         });
+         
          // update emoticon button
-         var top = win.find('.jsxc_emoticons').position().top + win.find('.slimScrollDiv').position().top;
-         win.find('.jsxc_emoticons').css('top', top + 'px');
+         setTimeout(function() {
+            var top = win.find('.jsxc_emoticons').position().top + win.find('.slimScrollDiv').position().top;
+            win.find('.jsxc_emoticons').css('top', top + 'px');
+         }, 400);
 
          /*ml.find('ul').slimScroll({
             height: '234px',
@@ -547,6 +608,28 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          if (m.length > 0) {
             m.remove();
          }
+      },
+      scrollMemberListBy: function(room, offset) {
+         var win = jsxc.gui.window.get(room);
+         
+         if (win.find('.jsxc_memberlist').hasClass('jsxc_expand')) {
+            return;
+         }
+         
+         var el = win.find('.jsxc_memberlist ul:first');
+         var scrollWidth = el.width();
+         var width = win.find('.jsxc_memberlist').width();
+         var left = parseInt(el.css('left'));
+         
+         left = (isNaN(left))? 0 - offset : left - offset;
+         
+         if (scrollWidth < width || left > 0) {
+            left = 0;
+         } else if (left < width - scrollWidth) {
+            left = width - scrollWidth;
+         }
+
+         el.css('left', left + 'px');
       },
       emptyMembers: function(room) {
          var win = jsxc.gui.window.get(room);
