@@ -463,7 +463,7 @@ jsxc = {
       }
 
       $(document).on('connectionReady.jsxc', function() {
-         jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
+         jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
       });
 
       jsxc.xmpp.login();
@@ -738,5 +738,27 @@ jsxc = {
       if (typeof fn === 'function') {
          return fn.apply(null, fnParams);
       }
+   },
+   
+   /**
+    * Hash string into 32-bit signed integer.
+    * 
+    * @memberOf jsxc
+    * @param {string} str input string
+    * @returns {integer} 32-bit signed integer
+    */
+   hashStr: function(str) {
+      var hash = 0, i;
+
+      if (str.length === 0) {
+         return hash;
+      }
+      
+      for (i = 0; i < str.length; i++) {
+         hash  = ((hash << 5) - hash) + str.charCodeAt(i);
+         hash |= 0; // Convert to 32bit integer
+      }
+
+      return hash;
    }
 };

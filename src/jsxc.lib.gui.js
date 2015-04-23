@@ -185,18 +185,13 @@ jsxc.gui = {
     */
    updateAvatar: function(el, jid, aid) {
 
-      if (typeof aid === 'undefined') {
-         if (typeof jsxc.options.defaultAvatar === 'function') {
-            jsxc.options.defaultAvatar.call(el, jid);
-         }
-         return;
-      }
-
-      var avatarSrc = jsxc.storage.getUserItem('avatar', aid);
-
       var setAvatar = function(src) {
          if (src === 0 || src === '0') {
-            jsxc.options.defaultAvatar.call(el, jid);
+            if (typeof jsxc.options.defaultAvatar === 'function') {
+                jsxc.options.defaultAvatar.call(el, jid);
+                return;
+            }
+            jsxc.gui.avatarPlaceholder(el.find('.jsxc_avatar'), jid);
             return;
          }
 
@@ -207,6 +202,13 @@ jsxc.gui = {
             'text-indent': '999px'
          });
       };
+      
+      if (typeof aid === 'undefined') {
+         setAvatar(0);
+         return;
+      }
+      
+      var avatarSrc = jsxc.storage.getUserItem('avatar', aid);
 
       if (avatarSrc !== null) {
          setAvatar(avatarSrc);
@@ -1118,6 +1120,30 @@ jsxc.gui = {
             }
          }
       });
+   },
+   
+   avatarPlaceholder: function(el, seed, text) {
+      text = text || seed;
+      
+      var options = jsxc.options.get('avatarplaceholder') || {};
+      var hash = jsxc.hashStr(seed);
+
+      var hue = Math.abs(hash) % 360;
+      var saturation = options.saturation || 90;
+      var lightness = options.lightness || 65;
+
+      el.css({
+        'background-color': 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)',
+        'color': '#fff',
+        'font-weight': 'bold',
+        'text-align': 'center',
+        'line-height': el.height() + 'px',
+        'font-size': el.height() * 0.6 + 'px'
+      });
+      
+      if (typeof text === 'string' && text.length > 0) {
+        el.text(text[0].toUpperCase());
+      }
    }
 };
 
@@ -2076,20 +2102,22 @@ jsxc.gui.window = {
          var title = '';
          var avatarDiv = $('<div>');
          avatarDiv.addClass('jsxc_avatar').prependTo(msgDiv);
-         
+
          if (typeof post.sender.jid === 'string') {
             msgDiv.attr('data-bid', jsxc.jidToBid(post.sender.jid));
             
-            var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(post.sender.jid));
-            if (data) {
-                jsxc.gui.updateAvatar(msgDiv, post.sender.jid, data.avatar);
-            }
-            
+            var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(post.sender.jid)) || {};
+            jsxc.gui.updateAvatar(msgDiv, jsxc.jidToBid(post.sender.jid), data.avatar);
+
             title = jsxc.jidToBid(post.sender.jid);
          }
          
          if (typeof post.sender.name === 'string') {
             msgDiv.attr('data-name', post.sender.name);
+            
+            if (typeof post.sender.jid !== 'string') {
+                jsxc.gui.avatarPlaceholder(avatarDiv, post.sender.name);
+            }
             
             if (title !== '') {
                 title = '\n' + title;

@@ -260,7 +260,6 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          var self = jsxc.muc;
          var data = win.data();
          var bid = jsxc.jidToBid(data.jid);
-         var sdata = jsxc.storage.getUserItem('window', bid);
 
          if (!jsxc.xmpp.conn) {
             $(document).one('connectionReady.jsxc', function() {
@@ -289,7 +288,9 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          });
          
          var toggleMl = function(ev) {
-            ev.preventDefault();
+            if (ev) {
+               ev.preventDefault();
+            }
             
             var slimOptions = {};
             var ul = ml.find('ul:first');
@@ -345,11 +346,6 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
             var top = win.find('.jsxc_emoticons').position().top + win.find('.slimScrollDiv').position().top;
             win.find('.jsxc_emoticons').css('top', top + 'px');
          }, 400);
-
-         /*ml.find('ul').slimScroll({
-            height: '234px',
-            distance: '3px'
-         });*/
          
          var destroy = $('<li>');
          destroy.text($.t('Destroy'));
@@ -371,23 +367,6 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
             }
          });
 
-         if (sdata.minimize_ml || sdata.minimize_ml === null) {
-            self.hideMemberList(win, 200, true);
-         } else {
-
-            setTimeout(function() {
-               self.showMemberList(win, 200);
-            }, 500);
-         }
-
-         win.on('show', function() {
-            ml.slideDown();
-            ml.css('display', 'block');
-         });
-         win.on('hide', function() {
-            ml.slideUp();
-         });
-
          var leave = $('<li>');
          leave.text($.t('Leave'));
          leave.addClass('jsxc_leave');
@@ -398,34 +377,6 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          win.find('.jsxc_settings ul').append(leave);
 
          //win.trigger((sdata.minimize) ? 'hide' : 'show');
-      },
-      showMemberList: function() { 
-         //win, originalWidth, noani
-         /*if (!noani) {
-            win.animate({
-               width: (originalWidth + 200) + 'px'
-            }).css('overflow', 'visible');
-         }
-
-         jsxc.storage.updateUserItem('window', jsxc.jidToBid(win.data().jid), 'minimize_ml', false);
-
-         win.find('.jsxc_members').off('click').one('click', function() {
-            jsxc.muc.hideMemberList(win, originalWidth);
-         });*/
-      },
-      hideMemberList: function() {
-         //win, originalWidth, noani
-         /*if (!noani) {
-            win.animate({
-               width: originalWidth + 'px'
-            }).css('overflow', 'visible');
-         }
-
-         jsxc.storage.updateUserItem('window', jsxc.jidToBid(win.data().jid), 'minimize_ml', true);
-
-         win.find('.jsxc_members').off('click').one('click', function() {
-            jsxc.muc.showMemberList(win, originalWidth);
-         });*/
       },
       onPresence: function(event, from, status, presence) {
          var self = jsxc.muc;
@@ -575,23 +526,26 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          if (m.length === 0) {
             var title = nickname;
             
-            m = $('<li><div class="jsxc_avatar"></div></li>');
+            m = $('<li><div class="jsxc_avatar"></div><div class="jsxc_name"/></li>');
             m.attr('data-nickname', nickname);
 
             win.find('.jsxc_memberlist ul').append(m);
 
             if (typeof jid === 'string') {
+               m.find('.jsxc_name').text(jsxc.jidToBid(jid));
                m.attr('data-bid', jsxc.jidToBid(jid));
                title = title + '\n' + jsxc.jidToBid(jid);
  
                var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(jid));
                if (data !== null && typeof data === 'object') {
-                  jsxc.gui.updateAvatar(m, jid, data.avatar);
+                  jsxc.gui.updateAvatar(m, jsxc.jidToBid(jid), data.avatar);
                } else if (jsxc.jidToBid(jid) === jsxc.jidToBid(self.conn.jid)) {
-                  jsxc.gui.updateAvatar(m, jid, 'own');
+                  jsxc.gui.updateAvatar(m, jsxc.jidToBid(jid), 'own');
                }
             } else {
-               //@TODO display default avatar
+               m.find('.jsxc_name').text(nickname);
+               
+               jsxc.gui.avatarPlaceholder(m.find('.jsxc_avatar'), nickname);
             }
             
             m.attr('title', title);
