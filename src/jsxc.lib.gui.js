@@ -1598,6 +1598,13 @@ jsxc.gui.dialog = {
     * @param {Object} options e.g. width and height
     */
    resize: function(options) {
+      options = $.extend({
+        innerWidth: $('#jsxc_dialog').outerWidth(),
+        innerHeight: $('#jsxc_dialog').outerHeight()
+      }, options || {});
+      
+      $('#cboxLoadedContent').css('overflow', 'hidden');
+      
       $.colorbox.resize(options);
    }
 };
@@ -2128,7 +2135,7 @@ jsxc.gui.window = {
             msgTsDiv.text(msgTsDiv.text() + ' ' + post.sender.name);
          }
          
-         avatarDiv.attr('title', title);
+         avatarDiv.attr('title', jsxc.escapeHTML(title));
       }
 
       jsxc.gui.detectUriScheme(win);

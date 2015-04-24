@@ -9,8 +9,9 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
             <input type="text" name="nickname" id="jsxc_nickname" /></p>\
          <p><label for="jsxc_password" data-i18n="Password"></label>\
             <input type="text" name="password" id="jsxc_password" /></p>\
+         <div class="jsxc_msg"></div>\
          <p class="jsxc_right">\
-            <span class="jsxc_warning"></span> <a href="#" class="button jsxc_close" data-i18n="Close"></a> <a href="#" class="button creation jsxc_join" data-i18n="Join"></a>\
+            <span class="jsxc_warning"></span> <a href="#" class="button jsxc_close" data-i18n="Close"></a> <a href="#" class="button jsxc_continue" data-i18n="Continue"> <a href="#" class="button jsxc_join" data-i18n="Join"></a>\
          </p>';
 
    jsxc.muc = {
@@ -104,7 +105,9 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          var self = jsxc.muc;
          var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('joinChat'));
 
-         var error_handler = function(event, condition) {
+         dialog.find('.jsxc_continue').hide();
+         
+         var error_handler = function(event, condition, room) {
             var msg;
             
             switch(condition) {
@@ -140,6 +143,13 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
                   jsxc.warn('Unknown muc error condition: ' + condition); 
                   msg = $.t('Error') + ': ' + condition;
             }
+            
+            var roomIndex = self.conn.muc.roomNames.indexOf(room);
+            
+            if (roomIndex > -1) {
+               self.conn.muc.roomNames.splice(roomIndex, 1);
+               delete self.conn.muc.rooms[room];
+            }
 
             dialog.find('.jsxc_warning').text(msg);
          };
@@ -171,10 +181,14 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
             jsxc.warn('Could not load rooms');
             //@TODO: handle
          });
+         
+         dialog.find('#jsxc_nickname').attr('placeholder', Strophe.getNodeFromJid(self.conn.jid));
 
-         dialog.find('.jsxc_join').click(function() {
+         dialog.find('.jsxc_join').click(function(ev) {
+            ev.preventDefault();
+            
             var room = ($('#jsxc_room').val())? jsxc.jidToBid($('#jsxc_room').val()) : null;
-            var nickname = $('#jsxc_nickname').val() || Strophe.getNodeFromJid(jsxc.xmpp.conn.jid);
+            var nickname = $('#jsxc_nickname').val() || Strophe.getNodeFromJid(self.conn.jid);
             var password = $('#jsxc_password').val() || null;
 
             if (!room) {
@@ -191,27 +205,88 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
             }
 
             if (jsxc.xmpp.conn.muc.roomNames.indexOf(room) < 0) {
-
-               jsxc.storage.setUserItem('buddy', room, {
-                  jid: room,
-                  name: room,
-                  sub: 'both',
-                  type: 'groupchat',
-                  state: self.CONST.ROOMSTATE.INIT
-               });
                
-               jsxc.xmpp.conn.muc.join(room, nickname, null, null, null, password);
+               var discoReceived = function(roomName) {
+                  jsxc.gui.dialog.resize();
+                  
+                  dialog.find('.jsxc_join').hide();
+                  
+                  dialog.find('.jsxc_continue').show();
+                  dialog.find('.jsxc_continue').effect('highlight', {
+                     color: 'green'
+                  }, 4000);
+                  
+                  dialog.find('.jsxc_continue').click(function(ev) {
+                     ev.preventDefault();
+                     
+                     jsxc.storage.setUserItem('buddy', room, {
+                        jid: room,
+                        name: roomName || room,
+                        sub: 'both',
+                        type: 'groupchat',
+                        state: self.CONST.ROOMSTATE.INIT
+                     });
+
+                     jsxc.xmpp.conn.muc.join(room, nickname, null, null, null, password);
+                     
+                     return false;
+                  });
+               };
+               
+               //@TODO spinning wheel
+               
+               self.conn.disco.info(room, null, function(stanza) {
+                  dialog.find('.jsxc_msg').html('<p>' + $.t('This_room_is') + '</p>');
+                  
+                  var table = $('<table>');
+                  
+                  $(stanza).find('feature').each(function() {
+                     var feature = $(this).attr('var');
+                     
+                     if (feature !== '' && i18n.exists(feature)) {
+                        var tr = $('<tr>');
+                        $('<td>').text($.t(feature + '.keyword')).appendTo(tr);
+                        $('<td>').text($.t(feature + '.description')).appendTo(tr);
+                        tr.appendTo(table);
+                     }
+                  });
+                  
+                  dialog.find('.jsxc_msg').append(table);
+                  
+                  var roomName = $(stanza).find('identity').attr('name');
+                  
+                  discoReceived(roomName);
+               }, function() {
+                  $('<p>').text($.t('Room_not_found_')).appendTo(dialog.find('.jsxc_msg'));
+                  
+                  discoReceived();
+               });
             } else {
                dialog.find('.jsxc_warning').text($.t('You_already_joined_this_room'));
             }
+            
+            return false;
          });
 
          dialog.find('input').keydown(function(ev) {
+            
             if (ev.which !== 13) {
+               if (dialog.find('.jsxc_join').is(":hidden")) {
+                  dialog.find('.jsxc_join').show();
+                  dialog.find('.jsxc_continue').hide().off('click');
+                  dialog.find('.jsxc_msg').empty();
+                  dialog.find('.jsxc_warning').empty();
+                  jsxc.gui.dialog.resize();
+               }
+               
                return;
             }
 
-            dialog.find('.jsxc_join').click();
+            if (!dialog.find('.jsxc_join').is(":hidden")) {
+               dialog.find('.jsxc_join').click();
+            } else {
+               dialog.find('.jsxc_continue').click();
+            } 
          });
       },
       leave: function(room) {
@@ -260,6 +335,7 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          var self = jsxc.muc;
          var data = win.data();
          var bid = jsxc.jidToBid(data.jid);
+         var roomdata = jsxc.storage.getUserItem('buddy', bid);
 
          if (!jsxc.xmpp.conn) {
             $(document).one('connectionReady.jsxc', function() {
@@ -296,17 +372,9 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
             var ul = ml.find('ul:first');
             var slimHeight = null;
             
-            if (ml.hasClass('jsxc_expand')) {
-               slimOptions = {
-                     destroy: true
-               };
-               
-               ul.attr('style', '');
-               ml.css('height', '');
-               
-               $('body').off('click', null, toggleMl);
-               ul.off('mouseleave mouseenter');
-            } else {
+            ml.toggleClass('jsxc_expand');
+            
+            if (ml.hasClass('jsxc_expand')){
                $('body').click();
                $('body').one('click', toggleMl);
                
@@ -316,7 +384,9 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
                   window.clearTimeout(ul.data('timer'));
                }).css('left', '0px');
                
-               slimHeight = win.find(".jsxc_textarea").height() * 0.8;
+               var maxHeight = win.find(".jsxc_textarea").height() * 0.8;
+               var innerHeight = ml.find('ul').height() + 3;
+               slimHeight = (innerHeight > maxHeight)? maxHeight : innerHeight;
                
                slimOptions = {
                      distance: '3px',
@@ -327,9 +397,18 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
                };
                
                ml.css('height', slimHeight + 'px');
-            }
-
-            ml.toggleClass('jsxc_expand');
+            } else {
+               slimOptions = {
+                     destroy: true
+               };
+               
+               ul.attr('style', '');
+               ml.css('height', '');
+               
+               $('body').off('click', null, toggleMl);
+               ul.off('mouseleave mouseenter');
+            } 
+            
             ul.slimscroll(slimOptions);
             
             return false;
@@ -357,15 +436,17 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          
          win.find('.jsxc_settings ul').append(destroy);
 
-         var member = jsxc.storage.getUserItem('member', bid) || {};
-
-         $.each(member, function(nickname, val) {
-            self.insertMember(bid, nickname, val);
-
-            if (nickname === ownNickname && val.affiliation === self.CONST.AFFILIATION.OWNER) {
-               destroy.show();
-            }
-         });
+         if (roomdata.state > self.CONST.ROOMSTATE.INIT) {
+            var member = jsxc.storage.getUserItem('member', bid) || {};
+   
+            $.each(member, function(nickname, val) {
+               self.insertMember(bid, nickname, val);
+   
+               if (nickname === ownNickname && val.affiliation === self.CONST.AFFILIATION.OWNER) {
+                  destroy.show();
+               }
+            });
+         }
 
          var leave = $('<li>');
          leave.text($.t('Leave'));
@@ -375,8 +456,6 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          });
          
          win.find('.jsxc_settings ul').append(leave);
-
-         //win.trigger((sdata.minimize) ? 'hide' : 'show');
       },
       onPresence: function(event, from, status, presence) {
          var self = jsxc.muc;
@@ -392,6 +471,15 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          var own = jsxc.storage.getUserItem('ownNicknames') || {};
          var member = jsxc.storage.getUserItem('member', room) || {};
          var data = jsxc.storage.getUserItem('buddy', room) || {};
+         var codes = [];
+         
+         xdata.find('status').each(function() {
+            var code = $(this).attr('code');
+            
+            jsxc.debug('[muc][code]', code);
+            
+            codes.push(code);
+         });
 
          if (jsxc.gui.roster.getItem(room).length === 0) {
             // successfully joined
@@ -403,7 +491,7 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
             var bl = jsxc.storage.getUserItem('buddylist');
             bl.push(room);
             jsxc.storage.setUserItem('buddylist', bl);
-
+            
             jsxc.gui.roster.add(room);
 
             jsxc.gui.window.open(room);
@@ -433,12 +521,23 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
             } else {
                delete member[nickname];
    
-               self.removeMember(room, nickname); 
-               jsxc.gui.window.postMessage(room, 'sys', $.t('left_the_building', {nickname: nickname}));
+               self.removeMember(room, nickname);
+               
+               var newNickname = xdata.find('item').attr('nick');
+
+               if (codes.indexOf('303') > -1 && newNickname) {
+                  newNickname = Strophe.unescapeNode(newNickname);
+                  
+                  member[newNickname] = {};
+
+                  jsxc.gui.window.postMessage(room, 'sys', $.t('is_now_known_as', {oldNickname: nickname, newNickname: newNickname, escapeInterpolation: true}));
+               } else {
+                  jsxc.gui.window.postMessage(room, 'sys', $.t('left_the_building', {nickname: nickname, escapeInterpolation: true}));
+               }
             }
          } else {
             if (!member[nickname] && own[room]) {
-               jsxc.gui.window.postMessage(room, 'sys', $.t('entered_the_room', {nickname: nickname}));
+               jsxc.gui.window.postMessage(room, 'sys', $.t('entered_the_room', {nickname: nickname, escapeInterpolation: true}));
             }
 
             member[nickname] = {
@@ -454,18 +553,15 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
 
          jsxc.storage.setUserItem('member', room, member);
 
-         xdata.find('status').each(function() {
-            var code = $(this).attr('code');
-            
-            jsxc.debug('[muc][code]', code);
-            
+         $.each(codes, function(index, code) {
+
             if (typeof self.onStatus[code] === 'function') {
-               self.onStatus[code].call(this, room, nickname, member[nickname]);
+               self.onStatus[code].call(this, room, nickname, member[nickname] || {});
             }
-            
+
             $(document).trigger('status.muc.jsxc', [code, room, nickname, member[nickname], presence]);
          });
-         
+
          return true;
       },
       onPresenceError: function(event, from, presence) {
@@ -482,7 +578,9 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          
          jsxc.debug('[muc][error]', condition);
          
-         $(document).trigger('error.muc.jsxc', [condition]);
+         $(document).trigger('error.muc.jsxc', [condition, room]);
+
+         return true;
       },
       onStatus: {
          /** Inform user that presence refers to itself */
@@ -524,7 +622,7 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          var m = win.find('.jsxc_memberlist li[data-nickname="' + nickname + '"]');
 
          if (m.length === 0) {
-            var title = nickname;
+            var title = jsxc.escapeHTML(nickname);
             
             m = $('<li><div class="jsxc_avatar"></div><div class="jsxc_name"/></li>');
             m.attr('data-nickname', nickname);

@@ -16,6 +16,9 @@
       .jsxc_transfer {
          display: none;
       }
+      .jsxc_fingerprints, jsxc_verification, jsxc_transfer {
+         display: none;
+      }
       .jsxc_chatmessage.jsxc_in {
          margin-left: 40px;
          .jsxc_avatar {
@@ -40,7 +43,7 @@
       position: absolute;
       top: 0px;
       transition: height 400ms;
-      z-index: 110;
+      z-index: 100;
       ul {
          white-space: nowrap;
          position: absolute;

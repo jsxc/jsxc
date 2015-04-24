@@ -173,6 +173,57 @@
     "Room": "Room",
     "Nickname": "Nickname",
     "left_the_building": "__nickname__ left the building",
-    "entered_the_room": "__nickname__ entered the room"
+    "entered_the_room": "__nickname__ entered the room",
+    "is_now_known_as": "__oldNickname__ is now known as __newNickname__",
+    "This_room_is": "This room is",
+    "muc_hidden": {
+        "keyword": "hidden",
+        "description": "can not be found through search"
+    },
+    "muc_membersonly": {
+        "keyword": "members-only",
+        "description": "you need to be on the member list"
+    },
+    "muc_moderated": {
+        "keyword": "moderated",
+        "description": "only persons with \"voice\" are allowed to send messages"
+    },
+    "muc_nonanonymous": {
+        "keyword": "non-anonymous",
+        "description": "your jabber id is exposed to all other occupants"
+    },
+    "muc_open": {
+        "keyword": "open",
+        "description": "everyone is allowed to join"
+    },
+    "muc_passwordprotected": {
+        "keyword": "password-protected",
+        "description": "you need to provide the correct password"
+    },
+    "muc_persistent": {
+        "keyword": "persistent",
+        "description": "will not be destroyed if the last occupant left"
+    },
+    "muc_public": {
+        "keyword": "public",
+        "description": "can be found through search"
+    },
+    "muc_semianonymous": {
+        "keyword": "semi-anonymous",
+        "description": "your jabber id is only exposed to room admins"
+    },
+    "muc_temporary": {
+        "keyword": "temporary",
+        "description": "will be destroyed if the last occupant left"
+    },
+    "muc_unmoderated": {
+        "keyword": "unmoderated",
+        "description": "everyone is allowed to send messages"
+    },
+    "muc_unsecured": {
+        "keyword": "unsecured",
+        "description": "you need no password to enter"
+    },
+    "Continue": "Continue"
   }
 }
