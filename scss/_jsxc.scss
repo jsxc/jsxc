@@ -91,6 +91,22 @@
     input[readonly] {
         background-color: $dialog_input_readonly_bg;
     }
+    .jsxc_inputinfo {
+        padding-left: 30%;
+        font-style: italic;
+        margin-top: -1em;
+    }
+    .jsxc_waiting {
+        &:before {
+            content: " ";
+            width: 1em;
+            height: 1em;
+            display: inline-block;
+            background-size: 100%;
+            margin: 0 3px 0 0;
+            background-image: image-url('loading.gif');
+       }
+     }
 }
 .jsxc_avatar {
     @extend %avatar-icon;

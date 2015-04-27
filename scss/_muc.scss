@@ -19,6 +19,15 @@
       .jsxc_fingerprints, jsxc_verification, jsxc_transfer {
          display: none;
       }
+      .jsxc_members {
+         background-image: image-url('group_grey.svg');
+         background-size: 90%;
+         background-repeat: no-repeat;
+         background-position: center;
+         &:hover {
+            background-image: image-url('group_white.svg');
+         }
+      }
       .jsxc_chatmessage.jsxc_in {
          margin-left: 40px;
          .jsxc_avatar {
@@ -93,5 +102,8 @@
 li[data-type="groupchat"] {
    .jsxc_avatar {
       @extend %muc-avatar-icon;
+   }
+   .jsxc_video {
+      display: none;
    }
 }
