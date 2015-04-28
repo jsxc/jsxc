@@ -14,11 +14,15 @@
    "multistr": true,
    "devel": true,
    "globals": {
+      "t":true,
+      "i18n":true,
+      "I18next":true,
       "OTR":true, 
       "DSA":true, 
       "Worker":true, 
       "BigInt":true, 
       "Notification":true, 
+      "$": true,
       "jQuery":true, 
       "Strophe":true, 
       "localStorage":true, 
@@ -29,6 +33,7 @@
       "jsxc":true,
       "getUserMediaWithConstraints":true,
       "setupRTC":true,
-      "SDPUtil":true
+      "SDPUtil":true,
+      "getSelection":true
    }
 }
