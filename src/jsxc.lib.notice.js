@@ -90,5 +90,27 @@ jsxc.notice = {
       var s = jsxc.storage.getUserItem('notices');
       delete s[nid];
       jsxc.storage.setUserItem('notices', s);
+   },
+
+   /**
+    * Check if there is already a notice for the given function name.
+    * 
+    * @memberOf jsxc.notice
+    * @param {string} fnName Function name
+    * @returns {boolean} True if there is >0 functions with the given name
+    */
+   has: function(fnName) {
+      var saved = jsxc.storage.getUserItem('notices') || [];
+      var has = false;
+
+      $.each(saved, function(index, val){
+         if (val.fnName === fnName) {
+            has = true;
+
+            return false;
+         }
+      });
+
+      return has;
    }
 };

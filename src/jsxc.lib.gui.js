@@ -966,6 +966,20 @@ jsxc.gui = {
     * @memberOf jsxc.gui
     */
    showRequestNotification: function() {
+
+      jsxc.switchEvents({
+         'notificationready.jsxc': function() {
+            jsxc.gui.dialog.close();
+            jsxc.notification.init();
+            jsxc.storage.setUserItem('notification', 1);
+         },
+         'notificationfailure.jsxc': function() {
+            jsxc.gui.dialog.close();
+            jsxc.options.notification = false;
+            jsxc.storage.setUserItem('notification', 0);
+         }
+      });
+
       jsxc.gui.showConfirmDialog($.t('Should_we_notify_you_'), function() {
          jsxc.gui.dialog.open(jsxc.gui.template.get('pleaseAccept'), {
             noClose: true
