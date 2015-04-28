@@ -1235,8 +1235,13 @@ jsxc.gui.roster = {
 
       $('#jsxc_presence > ul > li').click(function() {
          var self = $(this);
+         var pres = self.data('pres');
 
-         jsxc.gui.changePresence(self.data('pres'));
+         if (pres === 'offline') {
+            jsxc.xmpp.logout();
+         } else {
+            jsxc.gui.changePresence(pres);
+         }
       });
 
       $('#jsxc_buddylist').slimScroll({
@@ -2296,7 +2301,7 @@ jsxc.gui.template = {
                      <li data-pres="away" class="jsxc_away" data-i18n="Away"></li>\
                      <li data-pres="xa" class="jsxc_xa" data-i18n="Extended_away"></li>\
                      <li data-pres="dnd" class="jsxc_dnd" data-i18n="dnd"></li>\
-                     <!-- <li data-pres="offline" class="jsxc_offline" data-i18n="Offline"></li> -->\
+                     <li data-pres="offline" class="jsxc_offline" data-i18n="Offline"></li>\
                  </ul>\
               </div>\
            </div>\

@@ -395,7 +395,8 @@ jsxc.xmpp = {
 
       $('#jsxc_windowList').remove();
 
-      if (jsxc.triggeredFromElement) {
+      if (jsxc.triggeredFromElement && typeof jsxc.options.displayRosterMinimized === 'function' && !jsxc.options.displayRosterMinimized()) {
+         $(document).trigger('toggle.roster.jsxc', [ 'hidden', 0 ]);
          $('#jsxc_roster').remove();
 
          if (jsxc.triggeredFromLogout) {
