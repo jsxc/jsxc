@@ -554,6 +554,39 @@ jsxc.gui = {
          $('#jsxc_username').val(username);
       }
 
+      $('#jsxc_username').keyup(function() {
+         if (typeof jsxc.options.getUsers === 'function') {
+            var val = $(this).val();
+            $('#jsxc_userlist').empty();
+
+            if (val !== '') {
+                jsxc.options.getUsers.call(this, val, function(list) {
+                    $.each(list || {}, function(uid, displayname) {
+                        var option = $('<option>');
+                        option.attr('data-username', uid);
+                        option.attr('data-alias', displayname);
+
+                        option.attr('value', uid).appendTo('#jsxc_userlist');
+
+                        if (uid !== displayname) {
+                            option.clone().attr('value', displayname).appendTo('#jsxc_userlist');
+                        }
+                    });
+                });
+            }
+         }
+      });
+
+      $('#jsxc_username').on('input', function() {
+         var val = $(this).val();
+         var option = $('#jsxc_userlist').find('option[data-username="' + val + '"], option[data-alias="' + val + '"]');
+
+         if (option.length > 0) {
+            $('#jsxc_username').val(option.attr('data-username'));
+            $('#jsxc_alias').val(option.attr('data-alias'));
+         }
+      });
+
       $('#jsxc_dialog form').submit(function() {
          var username = $('#jsxc_username').val();
          var alias = $('#jsxc_alias').val();
@@ -2304,7 +2337,8 @@ jsxc.gui.template = {
          <p class=".jsxc_explanation" data-i18n="Type_in_the_full_username_"></p>\
          <form>\
          <p><label for="jsxc_username" data-i18n="Username"></label>\
-            <input type="text" name="username" id="jsxc_username" pattern="^[^\\x22&\'\\/:<>@\\s]+(@[.\\-_\\w]+)?" required="required" /></p>\
+            <input type="text" name="username" id="jsxc_username" list="jsxc_userlist" pattern="^[^\\x22&\'\\/:<>@\\s]+(@[.\\-_\\w]+)?" required="required" /></p>\
+         <datalist id="jsxc_userlist"></datalist>\
          <p><label for="jsxc_alias" data-i18n="Alias"></label>\
             <input type="text" name="alias" id="jsxc_alias" /></p>\
          <p class="jsxc_right">\

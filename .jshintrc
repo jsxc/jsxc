@@ -33,6 +33,7 @@
       "jsxc":true,
       "getUserMediaWithConstraints":true,
       "setupRTC":true,
-      "SDPUtil":true
+      "SDPUtil":true,
+      "getSelection":true
    }
 }
