@@ -449,7 +449,8 @@ jsxc = {
 
       // Prepare notifications
       if (jsxc.restore) {
-         var noti = jsxc.storage.getUserItem('notification') || 2;
+         var noti = jsxc.storage.getUserItem('notification');
+         noti = (typeof noti === 'number')? noti : 2;
          if (jsxc.options.notification && noti > 0 && jsxc.notification.hasSupport()) {
             if (jsxc.notification.hasPermission()) {
                jsxc.notification.init();

@@ -148,5 +148,22 @@ jsxc.options = {
    carbons: {
       /** Enable carbon copies? */
       enable: false
-   }
+   },
+
+   /**
+    * Processes user list.
+    * 
+    * @callback getUsers-cb
+    * @param {object} list List of users, key: username, value: alias
+    */
+
+   /**
+    * Returns a list of usernames and aliases
+    * 
+    * @function getUsers
+    * @memberOf jsxc.options
+    * @param {string} search Search token (start with)
+    * @param {getUsers-cb} cb Called with list of users
+    */
+   getUsers: null
 };

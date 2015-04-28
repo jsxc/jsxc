@@ -155,20 +155,11 @@ jsxc.notification = {
     */
    prepareRequest: function() {
 
-      $(document).one('postmessagein.jsxc', function() {
-         jsxc.switchEvents({
-            'notificationready.jsxc': function() {
-               jsxc.gui.dialog.close();
-               jsxc.notification.init();
-               jsxc.storage.setUserItem('notification', true);
-            },
-            'notificationfailure.jsxc': function() {
-               jsxc.gui.dialog.close();
-               jsxc.options.notification = false;
-               jsxc.storage.setUserItem('notification', false);
-            }
-         });
+      if (jsxc.notice.has('gui.showRequestNotification')) {
+         return;
+      }
 
+      $(document).one('postmessagein.jsxc', function() {
          setTimeout(function() {
             jsxc.notice.add($.t('Notifications') + '?', $.t('Should_we_notify_you_'), 'gui.showRequestNotification');
          }, 1000);
