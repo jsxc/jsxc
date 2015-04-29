@@ -1277,7 +1277,7 @@ jsxc.gui.roster = {
          var pres = self.data('pres');
 
          if (pres === 'offline') {
-            jsxc.xmpp.logout();
+            jsxc.xmpp.logout(false);
          } else {
             jsxc.gui.changePresence(pres);
          }

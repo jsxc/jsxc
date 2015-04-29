@@ -247,6 +247,19 @@ jsxc = {
          jsxc.restore = true;
       }
 
+      $(document).on('connectionReady.jsxc', function() {
+         // Looking for logout element
+          if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+             var logout = function() {
+                jsxc.options.logoutElement = $(this);
+                jsxc.triggeredFromLogout = true;
+                return jsxc.xmpp.logout();
+             };
+
+             jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
+          }
+      });
+
       // Check if we have to establish a new connection
       if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
 
@@ -307,15 +320,6 @@ jsxc = {
          jsxc.bid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
 
          jsxc.gui.init();
-
-         // Looking for logout element
-         if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
-            jsxc.options.logoutElement.one('click', function() {
-               jsxc.options.logoutElement = $(this);
-               jsxc.triggeredFromLogout = true;
-               return jsxc.xmpp.logout();
-            });
-         }
 
          if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
             jsxc.onMaster();
