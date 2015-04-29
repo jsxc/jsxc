@@ -74,7 +74,10 @@ jsxc.muc = {
                   var discovered = false;
 
                   self.conn.disco.info(jid, null, function(info) {
-                     if ($(info).find('feature[var="' + Strophe.NS.MUC + '"]').length > 0) {
+                     var mucFeature = $(info).find('feature[var="' + Strophe.NS.MUC + '"]');
+                     var mucIdentity = $(info).find('identity[category="conference"][type="text"]');
+
+                     if (mucFeature.length > 0 && mucIdentity.length > 0) {
                         jsxc.debug('muc service found', jid);
 
                         jsxc.options.set('muc', {
