@@ -565,7 +565,6 @@ ul.jsxc_vCard {
   background-position: center center; }
 
 @-webkit-keyframes bounce {
-
   0% {
     bottom: 0;
     -webkit-animation-timing-function: ease-in;
@@ -808,14 +807,14 @@ ul.jsxc_vCard {
     box-sizing: border-box;
     text-align: right; }
   .jsxc_window input::-webkit-input-placeholder {
-  color: #000;
-  opacity: 0.3; }
+    color: #000;
+    opacity: 0.3; }
   .jsxc_window input::-moz-placeholder {
-  color: #000;
-  opacity: 0.3; }
+    color: #000;
+    opacity: 0.3; }
   .jsxc_window input:-ms-input-placeholder {
-  color: #000;
-  opacity: 0.3; }
+    color: #000;
+    opacity: 0.3; }
   .jsxc_window input::placeholder {
     color: #000;
     opacity: 0.3; }

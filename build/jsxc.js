@@ -1,5 +1,5 @@
 /*!
- * jsxc v2.0.0-beta1 - 2015-04-29
+ * jsxc v2.0.0-beta2 - 2015-04-29
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 2.0.0-beta1
+ * @version 2.0.0-beta2
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '2.0.0-beta1',
+   version: '2.0.0-beta2',
 
    /** True if i'm the master */
    master: false,
@@ -3379,7 +3379,10 @@ jsxc.muc = {
                   var discovered = false;
 
                   self.conn.disco.info(jid, null, function(info) {
-                     if ($(info).find('feature[var="' + Strophe.NS.MUC + '"]').length > 0) {
+                     var mucFeature = $(info).find('feature[var="' + Strophe.NS.MUC + '"]');
+                     var mucIdentity = $(info).find('identity[category="conference"][type="text"]');
+
+                     if (mucFeature.length > 0 && mucIdentity.length > 0) {
                         jsxc.debug('muc service found', jid);
 
                         jsxc.options.set('muc', {
