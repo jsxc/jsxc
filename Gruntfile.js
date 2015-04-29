@@ -50,7 +50,7 @@ module.exports = function(grunt) {
       },
       replace: {
          version: {
-            src: [ '<%= target %>/jsxc.lib.js' ],
+            src: [ '<%= target %>/jsxc.js' ],
             overwrite: true,
             replacements: [
               {
@@ -173,7 +173,7 @@ module.exports = function(grunt) {
           src: '<%= target %>/css/*.css',
          dest: '<%= target %>/css/',
           options: {
-            target: ['img/*.*', 'img/**/*.*'],
+            target: ['<%= target %>/img/*.*', '<%= target %>/img/**/*.*'],
             fixDirLevel: false,
             maxBytes: 2048
           }
