@@ -131,7 +131,7 @@ jsxc.gui = {
       ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
 
       // Change name and add title
-      ue.find('.jsxc_name').add(spot).text(data.name).attr('title', $.t('is') + ' ' + jsxc.CONST.STATUS[data.status]);
+      ue.find('.jsxc_name:first').add(spot).text(data.name).attr('title', $.t('is') + ' ' + jsxc.CONST.STATUS[data.status]);
 
       // Update gui according to encryption state
       switch (data.msgstate) {

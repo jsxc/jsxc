@@ -3,7 +3,7 @@ jsxc.gui.template.joinChat = '<h3 data-i18n="Join_chat"></h3>\
          <p><label for="jsxc_server" data-i18n="Server"></label>\
             <input type="text" name="server" id="jsxc_server" required="required" readonly="readonly" /></p>\
          <p><label for="jsxc_room" data-i18n="Room"></label>\
-            <input type="text" name="room" id="jsxc_room" autocomplete="off" list="jsxc_roomlist" required="required" /></p>\
+            <input type="text" name="room" id="jsxc_room" autocomplete="off" list="jsxc_roomlist" required="required" pattern="^[^\\x22&\'\\/:<>@\\s]+" /></p>\
          <p class="jsxc_inputinfo jsxc_waiting jsxc_room" data-i18n="Rooms_are_loaded"></p>\
          <datalist id="jsxc_roomlist">\
             <p><label for="jsxc_roomlist_select"></label><select id="jsxc_roomlist_select"><option></option><option>workaround</option></select></p>\
@@ -238,7 +238,7 @@ jsxc.muc = {
          var nickname = $('#jsxc_nickname').val() || Strophe.getNodeFromJid(self.conn.jid);
          var password = $('#jsxc_password').val() || null;
 
-         if (!room) {
+         if (!room || !room.match(/^[^"&\'\/:<>@\s]+$/i)) {
             $('#jsxc_room').addClass('jsxc_invalid').keyup(function() {
                if ($(this).val()) {
                   $(this).removeClass('jsxc_invalid');
