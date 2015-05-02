@@ -39,6 +39,8 @@ $(function() {
    $('#form2').submit(function(ev) {
       ev.preventDefault();
 
+      jsxc.gui.showWaitAlert('Logging in…');
+
       $(document).on('connectionReady.jsxc', function() {
          $('#form2 input').prop('disabled', true);
          
