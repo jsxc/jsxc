@@ -247,6 +247,19 @@ jsxc = {
          jsxc.restore = true;
       }
 
+      $(document).on('connectionReady.jsxc', function() {
+         // Looking for logout element
+          if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+             var logout = function() {
+                jsxc.options.logoutElement = $(this);
+                jsxc.triggeredFromLogout = true;
+                return jsxc.xmpp.logout();
+             };
+
+             jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
+          }
+      });
+
       // Check if we have to establish a new connection
       if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
 
@@ -307,15 +320,6 @@ jsxc = {
          jsxc.bid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
 
          jsxc.gui.init();
-
-         // Looking for logout element
-         if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
-            jsxc.options.logoutElement.one('click', function() {
-               jsxc.options.logoutElement = $(this);
-               jsxc.triggeredFromLogout = true;
-               return jsxc.xmpp.logout();
-            });
-         }
 
          if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
             jsxc.onMaster();
@@ -464,7 +468,7 @@ jsxc = {
       }
 
       $(document).on('connectionReady.jsxc', function() {
-         jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.storage.getItem('jid'), 'own');
+         jsxc.gui.updateAvatar($('#jsxc_avatar'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
       });
 
       jsxc.xmpp.login();
@@ -739,5 +743,27 @@ jsxc = {
       if (typeof fn === 'function') {
          return fn.apply(null, fnParams);
       }
+   },
+   
+   /**
+    * Hash string into 32-bit signed integer.
+    * 
+    * @memberOf jsxc
+    * @param {string} str input string
+    * @returns {integer} 32-bit signed integer
+    */
+   hashStr: function(str) {
+      var hash = 0, i;
+
+      if (str.length === 0) {
+         return hash;
+      }
+      
+      for (i = 0; i < str.length; i++) {
+         hash  = ((hash << 5) - hash) + str.charCodeAt(i);
+         hash |= 0; // Convert to 32bit integer
+      }
+
+      return hash;
    }
 };

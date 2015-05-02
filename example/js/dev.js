@@ -39,6 +39,8 @@ $(function() {
    $('#form2').submit(function(ev) {
       ev.preventDefault();
 
+      jsxc.gui.showWaitAlert('Logging in…');
+
       $(document).on('connectionReady.jsxc', function() {
          $('#form2 input').prop('disabled', true);
          
@@ -46,5 +48,10 @@ $(function() {
       });
 
       jsxc.xmpp.login($('#username2').val() + '@' + settings.xmpp.domain, $('#password2').val());
+
+      // A hack to clear/enable both input fields and submit button after logout
+      $('#logout2').click(function() {
+         location.reload(true);
+      });
    });
 });

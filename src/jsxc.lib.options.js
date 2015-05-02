@@ -118,8 +118,8 @@ jsxc.options = {
     * @param jid Jid of that user.
     * @this {jQuery} Elements to update with probable .jsxc_avatar elements
     */
-   defaultAvatar: function() {
-
+   defaultAvatar: function(jid) {
+      jsxc.gui.avatarPlaceholder($(this).find('.jsxc_avatar'), jid);
    },
 
    /**

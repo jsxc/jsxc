@@ -131,7 +131,7 @@ jsxc.gui = {
       ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
 
       // Change name and add title
-      ue.find('.jsxc_name').add(spot).text(data.name).attr('title', $.t('is') + ' ' + jsxc.CONST.STATUS[data.status]);
+      ue.find('.jsxc_name:first').add(spot).text(data.name).attr('title', $.t('is') + ' ' + jsxc.CONST.STATUS[data.status]);
 
       // Update gui according to encryption state
       switch (data.msgstate) {
@@ -172,11 +172,7 @@ jsxc.gui = {
 
       ri.find('.jsxc_name').attr('title', info);
 
-      if (data.avatar && data.avatar.length > 0) {
-         jsxc.gui.updateAvatar(ue, data.jid, data.avatar);
-      } else {
-         jsxc.options.defaultAvatar.call(ue, data.jid);
-      }
+      jsxc.gui.updateAvatar(ri.add(we.find('.jsxc_bar')), data.jid, data.avatar);
    },
 
    /**
@@ -189,18 +185,13 @@ jsxc.gui = {
     */
    updateAvatar: function(el, jid, aid) {
 
-      if (typeof aid === 'undefined') {
-         if (typeof jsxc.options.defaultAvatar === 'function') {
-            jsxc.options.defaultAvatar.call(el, jid);
-         }
-         return;
-      }
-
-      var avatarSrc = jsxc.storage.getUserItem('avatar', aid);
-
       var setAvatar = function(src) {
          if (src === 0 || src === '0') {
-            jsxc.options.defaultAvatar.call(el, jid);
+            if (typeof jsxc.options.defaultAvatar === 'function') {
+                jsxc.options.defaultAvatar.call(el, jid);
+                return;
+            }
+            jsxc.gui.avatarPlaceholder(el.find('.jsxc_avatar'), jid);
             return;
          }
 
@@ -211,6 +202,13 @@ jsxc.gui = {
             'text-indent': '999px'
          });
       };
+      
+      if (typeof aid === 'undefined') {
+         setAvatar(0);
+         return;
+      }
+      
+      var avatarSrc = jsxc.storage.getUserItem('avatar', aid);
 
       if (avatarSrc !== null) {
          setAvatar(avatarSrc);
@@ -1169,6 +1167,30 @@ jsxc.gui = {
             }
          }
       });
+   },
+   
+   avatarPlaceholder: function(el, seed, text) {
+      text = text || seed;
+      
+      var options = jsxc.options.get('avatarplaceholder') || {};
+      var hash = jsxc.hashStr(seed);
+
+      var hue = Math.abs(hash) % 360;
+      var saturation = options.saturation || 90;
+      var lightness = options.lightness || 65;
+
+      el.css({
+        'background-color': 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)',
+        'color': '#fff',
+        'font-weight': 'bold',
+        'text-align': 'center',
+        'line-height': el.height() + 'px',
+        'font-size': el.height() * 0.6 + 'px'
+      });
+      
+      if (typeof text === 'string' && text.length > 0) {
+        el.text(text[0].toUpperCase());
+      }
    }
 };
 
@@ -1178,6 +1200,9 @@ jsxc.gui = {
  * @namespace jsxc.gui.roster
  */
 jsxc.gui.roster = {
+
+   /** True if roster is initialised */ 
+   ready: false,
 
    /**
     * Init the roster skeleton
@@ -1252,7 +1277,7 @@ jsxc.gui.roster = {
          var pres = self.data('pres');
 
          if (pres === 'offline') {
-            jsxc.xmpp.logout();
+            jsxc.xmpp.logout(false);
          } else {
             jsxc.gui.changePresence(pres);
          }
@@ -1283,6 +1308,7 @@ jsxc.gui.roster = {
 
       jsxc.notice.load();
 
+      jsxc.gui.roster.ready = true;
       $(document).trigger('ready.roster.jsxc');
    },
 
@@ -1470,15 +1496,18 @@ jsxc.gui.roster = {
    _rename: function(bid, newname) {
       if (jsxc.master) {
          var d = jsxc.storage.getUserItem('buddy', bid);
-         var iq = $iq({
-            type: 'set'
-         }).c('query', {
-            xmlns: 'jabber:iq:roster'
-         }).c('item', {
-            jid: Strophe.getBareJidFromJid(d.jid),
-            name: newname
-         });
-         jsxc.xmpp.conn.sendIQ(iq);
+         
+         if (d.type === 'chat') {
+             var iq = $iq({
+                type: 'set'
+             }).c('query', {
+                xmlns: 'jabber:iq:roster'
+             }).c('item', {
+                jid: Strophe.getBareJidFromJid(d.jid),
+                name: newname
+             });
+             jsxc.xmpp.conn.sendIQ(iq);
+         }
       }
 
       jsxc.storage.updateUserItem('buddy', bid, 'name', newname);
@@ -1578,7 +1607,7 @@ jsxc.gui.dialog = {
                $('#cboxClose').hide();
             }
 
-            $.colorbox.resize();
+            jsxc.gui.dialog.resize();
 
             $(document).trigger('complete.dialog.jsxc');
          },
@@ -1621,6 +1650,13 @@ jsxc.gui.dialog = {
     * @param {Object} options e.g. width and height
     */
    resize: function(options) {
+      options = $.extend({
+        innerWidth: $('#jsxc_dialog').outerWidth(),
+        innerHeight: $('#jsxc_dialog').outerHeight()
+      }, options || {});
+      
+      $('#cboxLoadedContent').css('overflow', 'hidden');
+      
       $.colorbox.resize(options);
    }
 };
@@ -1735,7 +1771,10 @@ jsxc.gui.window = {
             win.find('.jsxc_textarea').slimScroll({
                height: ui.size.height
             });
-            win.find('.jsxc_emoticons').css('top', (ui.size.height + 6) + 'px');
+            var offset = win.find('.slimScrollDiv').position().top;
+            win.find('.jsxc_emoticons').css('top', (ui.size.height + offset + 6) + 'px');
+
+            $(document).trigger('resize.window.jsxc', [ win, bid, ui.size ]);
          }
       });
 
@@ -1993,8 +2032,11 @@ jsxc.gui.window = {
     * @param {boolean} encrypted Was this message encrypted? Default: false
     * @param {boolean} forwarded Was this message forwarded? Default: false
     * @param {integer} stamp Timestamp
+    * @param {object} sender Information about sender
+    * @property {string} sender.jid Sender Jid
+    * @property {string} sender.name Sender name or nickname
     */
-   postMessage: function(bid, direction, msg, encrypted, forwarded, stamp) {
+   postMessage: function(bid, direction, msg, encrypted, forwarded, stamp, sender) {
       var data = jsxc.storage.getUserItem('buddy', bid);
       var html_msg = msg;
 
@@ -2020,7 +2062,7 @@ jsxc.gui.window = {
       }
 
       encrypted = encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
-      var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded, stamp);
+      var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded, stamp, sender);
 
       if (direction === 'in') {
          $(document).trigger('postmessagein.jsxc', [ bid, html_msg ]);
@@ -2093,7 +2135,7 @@ jsxc.gui.window = {
       msgDiv.attr('id', uid);
       msgDiv.html('<div>' + msg + '</div>');
       msgTsDiv.addClass('jsxc_timestamp');
-      msgTsDiv.html(jsxc.getFormattedTime(post.stamp));
+      msgTsDiv.text(jsxc.getFormattedTime(post.stamp));
 
       if (post.received || false) {
          msgDiv.addClass('jsxc_received');
@@ -2112,8 +2154,41 @@ jsxc.gui.window = {
       } else if (typeof post.stamp !== 'undefined') {
          msgDiv.append(msgTsDiv);
       }
-
+      
       win.find('.jsxc_textarea').append(msgDiv);
+      
+      if (typeof post.sender === 'object' && post.sender !== null) {
+         var title = '';
+         var avatarDiv = $('<div>');
+         avatarDiv.addClass('jsxc_avatar').prependTo(msgDiv);
+
+         if (typeof post.sender.jid === 'string') {
+            msgDiv.attr('data-bid', jsxc.jidToBid(post.sender.jid));
+            
+            var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(post.sender.jid)) || {};
+            jsxc.gui.updateAvatar(msgDiv, jsxc.jidToBid(post.sender.jid), data.avatar);
+
+            title = jsxc.jidToBid(post.sender.jid);
+         }
+         
+         if (typeof post.sender.name === 'string') {
+            msgDiv.attr('data-name', post.sender.name);
+            
+            if (typeof post.sender.jid !== 'string') {
+                jsxc.gui.avatarPlaceholder(avatarDiv, post.sender.name);
+            }
+            
+            if (title !== '') {
+                title = '\n' + title;
+            }
+            
+            title = post.sender.name + title;
+            
+            msgTsDiv.text(msgTsDiv.text() + ' ' + post.sender.name);
+         }
+         
+         avatarDiv.attr('title', jsxc.escapeHTML(title));
+      }
 
       jsxc.gui.detectUriScheme(win);
       jsxc.gui.detectEmail(win);

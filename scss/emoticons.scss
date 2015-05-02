@@ -8,7 +8,7 @@
 
 $emoticons: angel, angry, smile, grin, sad, wink, tonguesmile, surpised, kiss,
             sunglassess, crysad, doubt, zip, thumbsup, thumbsdown, beer, devil,
-            kissing, rose, music, love, tired;
+            kissing, rose, music, love, tired, surprised;
 
 @each $emoticon in $emoticons {
     .jsxc_#{$emoticon} { background: image-url('emotions/#{$emoticon}.png'); }

@@ -151,9 +151,10 @@ jsxc.xmpp = {
    /**
     * Logs user out of his xmpp session and does some clean up.
     * 
+    * @param {boolean} complete If set to false, roster will not be removed
     * @returns {Boolean}
     */
-   logout: function() {
+   logout: function(complete) {
 
       // instruct all tabs
       jsxc.storage.removeItem('sid');
@@ -176,7 +177,7 @@ jsxc.xmpp = {
       // Hide dropdown menu
       $('body').click();
 
-      jsxc.triggeredFromElement = true;
+      jsxc.triggeredFromElement = (typeof complete === 'boolean')? complete : true;
 
       // restore all otr objects
       $.each(jsxc.storage.getUserItem('otrlist') || {}, function(i, val) {
@@ -395,7 +396,7 @@ jsxc.xmpp = {
 
       $('#jsxc_windowList').remove();
 
-      if (jsxc.triggeredFromElement && typeof jsxc.options.displayRosterMinimized === 'function' && !jsxc.options.displayRosterMinimized()) {
+      if (jsxc.triggeredFromElement) {
          $(document).trigger('toggle.roster.jsxc', [ 'hidden', 0 ]);
          $('#jsxc_roster').remove();
 
@@ -603,6 +604,8 @@ jsxc.xmpp = {
       }
 
       if (ptype === 'error') {
+         $(document).trigger('error.presence.jsxc', [ from, presence ]);
+
          jsxc.error('[XMPP] ' + $(presence).attr('code'));
          return true;
       }

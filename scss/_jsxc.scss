@@ -26,6 +26,7 @@
 #jsxc_dialog {
     padding: 10px;
     min-width: 300px;
+    display: inline-block;
     ul {
         list-style: none;
         margin: 0;
@@ -90,6 +91,22 @@
     input[readonly] {
         background-color: $dialog_input_readonly_bg;
     }
+    .jsxc_inputinfo {
+        padding-left: 30%;
+        font-style: italic;
+        margin-top: -1em;
+    }
+    .jsxc_waiting {
+        &:before {
+            content: " ";
+            width: 1em;
+            height: 1em;
+            display: inline-block;
+            background-size: 100%;
+            margin: 0 3px 0 0;
+            background-image: image-url('loading.gif');
+       }
+     }
 }
 .jsxc_avatar {
     @extend %avatar-icon;
@@ -491,11 +508,18 @@ ul.jsxc_vCard {
         height: 19px;
         background-size: 19px 19px;
     }
+    .jsxc_avatar {
+      display: none;
+    }
 }
 .jsxc_timestamp {
     font-size: 8px;
     color: $chatmessage_timestamp;
     line-height: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 100%;
+    text-overflow: ellipsis;
 }
 .jsxc_in {
     float: left;
