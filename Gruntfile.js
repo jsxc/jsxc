@@ -222,6 +222,17 @@ module.exports = function(grunt) {
             files: ['src/jsxc.lib.*'],
             tasks: ['concat:jsxc']
          }
+      },
+      jsbeautifier: {
+         noIndentLevel: {
+            src: ['src/jsxc.lib.*'],
+            options: {
+                js: {
+                    indentSize: 3,
+                    endWithNewline: true
+                }
+            }
+         }
       }
    });
 
@@ -242,6 +253,7 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-sass');
    grunt.loadNpmTasks('grunt-autoprefixer');
    grunt.loadNpmTasks('grunt-contrib-watch');
+   grunt.loadNpmTasks('grunt-jsbeautifier');
 
    //Default task
    grunt.registerTask('default', [ 'build', 'watch' ]);
