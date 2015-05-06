@@ -276,5 +276,5 @@ module.exports = function(grunt) {
    grunt.registerTask('pre', [ 'build:prerelease' ]);
    
    // before commit
-   grunt.registerTask('commit', [ 'jshint', 'search:console' ]);
+   grunt.registerTask('commit', [ 'search:console', 'jsbeautifier', 'jshint' ]);
 };
