@@ -46,5 +46,10 @@ $(function() {
       });
 
       jsxc.xmpp.login($('#username2').val() + '@' + settings.xmpp.domain, $('#password2').val());
+
+      // A hack to clear/enable both input fields and submit button after logout
+      $('#logout2').click(function() {
+         location.reload(true);
+      });
    });
 });
