@@ -258,6 +258,7 @@
     "Your_desired_nickname_": "Your desired nickname is already in use. Please choose another",
     "The_maximum_number_": "The maximum number of user is reached in this room",
     "This_room_is_locked_": "This room is locked",
-    "You_are_not_allowed_to_create_": "You are not allowed to create a room"
+    "You_are_not_allowed_to_create_": "You are not allowed to create a room",
+    "Carbon_copy": "Carbon copy"
   }
 }
