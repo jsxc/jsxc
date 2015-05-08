@@ -16,7 +16,7 @@
       .jsxc_transfer {
          display: none;
       }
-      .jsxc_fingerprints, jsxc_verification, jsxc_transfer {
+      .jsxc_fingerprints, .jsxc_verification, .jsxc_transfer {
          display: none;
       }
       .jsxc_members {
@@ -60,6 +60,7 @@
          color: $window_bar_color;
          overflow: hidden;
          transition: left 400ms;
+         padding: 0px;
          &>li {
             display: inline-block;
             white-space: normal;
