@@ -2286,11 +2286,13 @@ jsxc.gui.template = {
       var ret = jsxc.gui.template[name];
 
       if (typeof (ret) === 'string') {
+         ret = $('<div>').append($(ret).i18n()).html();
+
          ret = ret.replace(/\{\{([a-zA-Z0-9_\-]+)\}\}/g, function(s, key) {
             return (typeof ph[key] === 'string') ? ph[key] : s;
          });
 
-         return $('<div>').append($(ret).i18n()).html();
+         return ret;
       }
 
       jsxc.debug('Template not available: ' + name);
@@ -2299,7 +2301,7 @@ jsxc.gui.template = {
    authenticationDialog: '<h3>Verification</h3>\
             <p data-i18n="Authenticating_a_buddy_helps_"></p>\
             <div>\
-              <p data-i18n="How_do_you_want_to_authenticate_your_buddy" style="margin:0px;"></p>\
+              <p data-i18n="[html]How_do_you_want_to_authenticate_your_buddy" style="margin:0px;"></p>\
               <select size="1">\
                 <option data-i18n="Select_method"></option>\
                 <option data-i18n="Manual"></option>\
@@ -2443,7 +2445,7 @@ jsxc.gui.template = {
         <p><span data-i18n="You_have_a_request_from"></span><b class="jsxc_their_jid"></b>.</p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_deny" data-i18n="Deny"></a> <a href="#" class="button creation jsxc_approve" data-i18n="Approve"></a></p>',
    removeDialog: '<h3 data-i18n="Remove_buddy"></h3>\
-        <p class="jsxc_maxWidth" data-i18n="You_are_about_to_remove_"></p>\
+        <p class="jsxc_maxWidth" data-i18n="[html]You_are_about_to_remove_"></p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close" data-i18n="Cancel"></a> <a href="#" class="button creation" data-i18n="Remove"></a></p>',
    waitAlert: '<h3>{{msg}}</h3>\
         <p data-i18n="Please_wait"></p>\
