@@ -397,6 +397,82 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
 #jsxc_roster > .jsxc_bottom > div:hover {
   color: #fff; }
 
+.jsxc_windowItem.jsxc_groupchat .jsxc_bar .jsxc_avatar, li[data-type="groupchat"] .jsxc_avatar {
+  text-indent: 999px;
+  background-image: url("../img/group_white.svg");
+  background-size: 70% 70% !important;
+  background-repeat: no-repeat; }
+
+.jsxc_windowItem.jsxc_groupchat .jsxc_fade {
+  padding-top: 30px; }
+.jsxc_windowItem.jsxc_groupchat .jsxc_video {
+  display: none; }
+.jsxc_windowItem.jsxc_groupchat .jsxc_transfer {
+  display: none; }
+.jsxc_windowItem.jsxc_groupchat .jsxc_fingerprints, .jsxc_windowItem.jsxc_groupchat .jsxc_verification, .jsxc_windowItem.jsxc_groupchat .jsxc_transfer {
+  display: none; }
+.jsxc_windowItem.jsxc_groupchat .jsxc_members {
+  background-image: url("../img/group_grey.svg");
+  background-size: 90%;
+  background-repeat: no-repeat;
+  background-position: center; }
+  .jsxc_windowItem.jsxc_groupchat .jsxc_members:hover {
+    background-image: url("../img/group_white.svg"); }
+.jsxc_windowItem.jsxc_groupchat .jsxc_chatmessage.jsxc_in {
+  margin-left: 40px; }
+  .jsxc_windowItem.jsxc_groupchat .jsxc_chatmessage.jsxc_in .jsxc_avatar {
+    display: block;
+    position: absolute;
+    bottom: 0px;
+    left: -37px;
+    background-color: #777; }
+.jsxc_windowItem .jsxc_memberlist {
+  height: 30px;
+  width: 100%;
+  background-color: #1a1a1a;
+  overflow: hidden;
+  position: absolute;
+  top: 0px;
+  -webkit-transition: height 400ms;
+          transition: height 400ms;
+  z-index: 100; }
+  .jsxc_windowItem .jsxc_memberlist ul {
+    white-space: nowrap;
+    position: absolute;
+    background-color: #1a1a1a;
+    color: gray;
+    overflow: hidden;
+    -webkit-transition: left 400ms;
+            transition: left 400ms;
+    padding: 0px; }
+    .jsxc_windowItem .jsxc_memberlist ul > li {
+      display: inline-block;
+      white-space: normal; }
+      .jsxc_windowItem .jsxc_memberlist ul > li:last-child {
+        margin-right: 2px; }
+      .jsxc_windowItem .jsxc_memberlist ul > li .jsxc_name {
+        display: none; }
+      .jsxc_windowItem .jsxc_memberlist ul > li .jsxc_avatar {
+        margin-left: 2px;
+        margin-right: 0px; }
+  .jsxc_windowItem .jsxc_memberlist.jsxc_expand ul {
+    white-space: normal; }
+    .jsxc_windowItem .jsxc_memberlist.jsxc_expand ul > li {
+      display: block;
+      width: 100%;
+      height: 27px;
+      line-height: 27px; }
+      .jsxc_windowItem .jsxc_memberlist.jsxc_expand ul > li .jsxc_name {
+        display: block;
+        cursor: default; }
+        .jsxc_windowItem .jsxc_memberlist.jsxc_expand ul > li .jsxc_name:hover {
+          color: inherit; }
+      .jsxc_windowItem .jsxc_memberlist.jsxc_expand ul > li .jsxc_avatar {
+        margin-right: 4px; }
+
+li[data-type="groupchat"] .jsxc_video {
+  display: none; }
+
 .jsxc_right {
   text-align: right; }
 
@@ -482,6 +558,8 @@ div.jsxc_transfer, div.jsxc_transfer.jsxc_disabled:hover {
     background-size: 100%;
     margin: 0 3px 0 0;
     background-image: url("../img/loading.gif"); }
+  #jsxc_dialog .jsxc_libraries {
+    max-width: 300px; }
 
 .jsxc_avatar img {
   display: block;
@@ -565,6 +643,7 @@ ul.jsxc_vCard {
   background-position: center center; }
 
 @-webkit-keyframes bounce {
+
   0% {
     bottom: 0;
     -webkit-animation-timing-function: ease-in;
@@ -807,14 +886,14 @@ ul.jsxc_vCard {
     box-sizing: border-box;
     text-align: right; }
   .jsxc_window input::-webkit-input-placeholder {
-    color: #000;
-    opacity: 0.3; }
+  color: #000;
+  opacity: 0.3; }
   .jsxc_window input::-moz-placeholder {
-    color: #000;
-    opacity: 0.3; }
+  color: #000;
+  opacity: 0.3; }
   .jsxc_window input:-ms-input-placeholder {
-    color: #000;
-    opacity: 0.3; }
+  color: #000;
+  opacity: 0.3; }
   .jsxc_window input::placeholder {
     color: #000;
     opacity: 0.3; }

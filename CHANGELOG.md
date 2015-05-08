@@ -1,3 +1,23 @@
+v2.0.0 / 2015-05-08
+===
+- add multi-user chat (XEP-0045)
+- add window resize handle
+- add username autocomplete
+- add offline state
+- add Italian, French, Polish, Portuguese/Brazil
+- use user avatar as notification icon
+- show notifications if tabs has no focus
+- split files into namespaces
+- sass improvements
+- replace own translation engine with i18next
+- fix login from login box
+- fix selection of chat messages
+- fix video calls
+- fix emoticons
+- fix duplicated roster items
+- fix notification request
+- fix logout
+
 v1.1.0a / 2015-02-25
 ===
 - fix css url path

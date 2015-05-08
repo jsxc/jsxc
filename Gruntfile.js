@@ -268,13 +268,13 @@ module.exports = function(grunt) {
    grunt.registerTask('build', ['jshint', 'clean', 'sass', 'autoprefixer', 'copy', 'merge_data', 'replace:locales', 'concat']);
    
    grunt.registerTask('build:prerelease', 'Build a new pre-release', function(){
-      grunt.config.set('target', 'build/');
+      grunt.config.set('target', 'build');
 
       grunt.task.run([ 'search:console', 'build', 'dataUri',  'usebanner', 'replace:version', 'replace:libraries', 'uglify', 'compress' ]);
    });
    
    grunt.registerTask('build:release', 'Build a new release', function(){
-      grunt.config.set('target', 'build/');
+      grunt.config.set('target', 'build');
 
       grunt.task.run([ 'search:changelog', 'build:prerelease', 'jsdoc' ]);
    });

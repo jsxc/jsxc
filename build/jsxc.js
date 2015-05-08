@@ -1,5 +1,5 @@
 /*!
- * jsxc v2.0.0-beta2 - 2015-04-29
+ * jsxc v2.0.0 - 2015-05-08
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 2.0.0-beta2
+ * @version 2.0.0
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '2.0.0-beta2',
+   version: '2.0.0',
 
    /** True if i'm the master */
    master: false,
@@ -3076,11 +3076,13 @@ jsxc.gui.template = {
       var ret = jsxc.gui.template[name];
 
       if (typeof (ret) === 'string') {
+         ret = $('<div>').append($(ret).i18n()).html();
+
          ret = ret.replace(/\{\{([a-zA-Z0-9_\-]+)\}\}/g, function(s, key) {
             return (typeof ph[key] === 'string') ? ph[key] : s;
          });
 
-         return $('<div>').append($(ret).i18n()).html();
+         return ret;
       }
 
       jsxc.debug('Template not available: ' + name);
@@ -3089,7 +3091,7 @@ jsxc.gui.template = {
    authenticationDialog: '<h3>Verification</h3>\
             <p data-i18n="Authenticating_a_buddy_helps_"></p>\
             <div>\
-              <p data-i18n="How_do_you_want_to_authenticate_your_buddy" style="margin:0px;"></p>\
+              <p data-i18n="[html]How_do_you_want_to_authenticate_your_buddy" style="margin:0px;"></p>\
               <select size="1">\
                 <option data-i18n="Select_method"></option>\
                 <option data-i18n="Manual"></option>\
@@ -3233,7 +3235,7 @@ jsxc.gui.template = {
         <p><span data-i18n="You_have_a_request_from"></span><b class="jsxc_their_jid"></b>.</p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_deny" data-i18n="Deny"></a> <a href="#" class="button creation jsxc_approve" data-i18n="Approve"></a></p>',
    removeDialog: '<h3 data-i18n="Remove_buddy"></h3>\
-        <p class="jsxc_maxWidth" data-i18n="You_are_about_to_remove_"></p>\
+        <p class="jsxc_maxWidth" data-i18n="[html]You_are_about_to_remove_"></p>\
         <p class="jsxc_right"><a href="#" class="button jsxc_cancel jsxc_close" data-i18n="Cancel"></a> <a href="#" class="button creation" data-i18n="Remove"></a></p>',
    waitAlert: '<h3>{{msg}}</h3>\
         <p data-i18n="Please_wait"></p>\
@@ -3255,15 +3257,13 @@ jsxc.gui.template = {
    pleaseAccept: '<p data-i18n="Please_accept_"></p>',
    aboutDialog: '<h3>JavaScript XMPP Chat</h3>\
          <p><b>Version: </b>' + jsxc.version + '<br />\
-         <a href="http://jsxc.org/" target="_blank">www.jsxc.org</a><br />\
-         <br />\
-         <i>Released under the MIT license</i><br />\
-         <br />\
-         Real-time chat app for {{app_name}} and more.<br />\
-         Requires an external <a href="https://xmpp.org/xmpp-software/servers/" target="_blank">XMPP server</a>.<br />\
-         <br />\
-         <b>Credits: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
+         <a href="http://jsxc.org/" target="_blank">www.jsxc.org</a></p>\
+         <p><i>Released under the MIT license</i></p>\
+         <p>Real-time chat app for {{app_name}} and more.<br />\
+         Requires an external <a href="https://xmpp.org/xmpp-software/servers/" target="_blank">XMPP server</a>.</p>\
+         <p><b>Credits: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
          <a href="https://soundcloud.com/freefilmandgamemusic/ping-1?in=freefilmandgamemusic/sets/free-notification-sounds-and" target="_blank">CameronMusic (Ping)</a></p>\
+         <p class="jsxc_libraries"><b>Libraries: </b><a href="http://strophe.im/strophejs/">strophe.js</a> (multiple), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/muc</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/disco</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/caps</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/vcard</a> (MIT), <a href="https://github.com/ESTOS/strophe.jingle">strophe.jingle</a> (MIT), <a href="https://github.com/neoatlantis/node-salsa20">Salsa20</a> (AGPL3), <a href="www.leemon.com">bigint</a> (public domain), <a href="code.google.com/p/crypto-js">cryptojs</a> (code.google.com/p/crypto-js/wiki/license), <a href="http://git.io/ee">eventemitter</a> (MIT), <a href="https://arlolra.github.io/otr/">otr.js</a> (MPL v2.0), <a href="http://i18next.com/">i18next</a> (MIT)</p>\
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>',
    vCard: '<h3><span data-i18n="Info_about"></span> <span>{{bid_name}}</span></h3>\
          <ul class="jsxc_vCard"></ul>\
