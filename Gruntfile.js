@@ -96,10 +96,10 @@ module.exports = function(grunt) {
                      src += ';';
                   }
 
-                  var data = dep[dep_files.indexOf(filepath)];
+                  var data = dep[dep_files.indexOf('<%= target %>/' + filepath)];
 
                   if (data) {
-                    return '/*!\n * Source: ' + filepath + ', license: ' + data.license + ', url: ' + data.url + ' */\n' + src;
+                    return '\n/*!\n * Source: ' + filepath + ', license: ' + data.license + ', url: ' + data.url + '\n */\n' + src;
                   } else {
                     return src;
                   }
