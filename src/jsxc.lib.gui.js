@@ -2465,15 +2465,13 @@ jsxc.gui.template = {
    pleaseAccept: '<p data-i18n="Please_accept_"></p>',
    aboutDialog: '<h3>JavaScript XMPP Chat</h3>\
          <p><b>Version: </b>' + jsxc.version + '<br />\
-         <a href="http://jsxc.org/" target="_blank">www.jsxc.org</a><br />\
-         <br />\
-         <i>Released under the MIT license</i><br />\
-         <br />\
-         Real-time chat app for {{app_name}} and more.<br />\
-         Requires an external <a href="https://xmpp.org/xmpp-software/servers/" target="_blank">XMPP server</a>.<br />\
-         <br />\
-         <b>Credits: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
+         <a href="http://jsxc.org/" target="_blank">www.jsxc.org</a></p>\
+         <p><i>Released under the MIT license</i></p>\
+         <p>Real-time chat app for {{app_name}} and more.<br />\
+         Requires an external <a href="https://xmpp.org/xmpp-software/servers/" target="_blank">XMPP server</a>.</p>\
+         <p><b>Credits: </b> <a href="http://www.beepzoid.com/old-phones/" target="_blank">David English (Ringtone)</a>,\
          <a href="https://soundcloud.com/freefilmandgamemusic/ping-1?in=freefilmandgamemusic/sets/free-notification-sounds-and" target="_blank">CameronMusic (Ping)</a></p>\
+         <p class="jsxc_libraries"><b>Libraries: </b>< $ dep.libraries $ ></p>\
          <p class="jsxc_right"><a class="button jsxc_debuglog" href="#">Show debug log</a></p>',
    vCard: '<h3><span data-i18n="Info_about"></span> <span>{{bid_name}}</span></h3>\
          <ul class="jsxc_vCard"></ul>\

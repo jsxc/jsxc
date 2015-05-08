@@ -59,6 +59,25 @@ module.exports = function(grunt) {
               }
             ]
          },
+         libraries: {
+            src: ['<%= target %>/jsxc.js'],
+            overwrite: true,
+            replacements: [{
+               from: '< $ dep.libraries $ >',
+               to: function() {
+                  var i, d, libraries = '';
+
+                  for(i = 0; i < dep.length; i++) {
+                     d = dep[i];
+                     if (typeof d.name === 'string') {
+                        libraries += '<a href="' + d.url + '">' + d.name + '</a> (' + d.license + '), ';
+                     }
+                  }
+
+                  return libraries.replace(/, $/, '');
+               }
+            }]
+         },
          locales: {
            src: [ '<%= target %>/lib/translation.js' ],
            overwrite: true,
@@ -251,7 +270,7 @@ module.exports = function(grunt) {
    grunt.registerTask('build:prerelease', 'Build a new pre-release', function(){
       grunt.config.set('target', 'build/');
 
-      grunt.task.run([ 'search:console', 'build', 'dataUri',  'usebanner', 'replace:version', 'uglify', 'compress' ]);
+      grunt.task.run([ 'search:console', 'build', 'dataUri',  'usebanner', 'replace:version', 'replace:libraries', 'uglify', 'compress' ]);
    });
    
    grunt.registerTask('build:release', 'Build a new release', function(){

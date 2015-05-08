@@ -1,82 +1,98 @@
 [
   {
+     "name": "strophe.js",
      "file": "lib/strophe.js",
      "license": "multiple",
      "url": "http://strophe.im/strophejs/"
   },
   {
+     "name": "strophe.js/muc",
      "file": "lib/strophe.muc.js",
      "license": "MIT",
      "url": "https://github.com/strophe/strophejs-plugins"
   },
   {
+     "name": "strophe.js/disco",
      "file": "lib/strophe.disco.js",
      "license": "MIT",
      "url": "https://github.com/strophe/strophejs-plugins"
   },
   {
+     "name": "strophe.js/caps",
      "file": "lib/strophe.caps.js",
      "license": "MIT",
      "url": "https://github.com/strophe/strophejs-plugins"
   },
   {
+     "name": "strophe.js/vcard",
      "file": "lib/strophe.vcard.js",
      "license": "MIT",
      "url": "https://github.com/strophe/strophejs-plugins"
   },
   {
+     "name": "strophe.jingle",
      "file": "lib/strophe.jingle/strophe.jingle.js",
      "license": "MIT",
      "url": "https://github.com/ESTOS/strophe.jingle"
   },
   {
+     "name": null,
      "file": "lib/strophe.jingle/strophe.jingle.session.js",
      "license": "MIT",
      "url": "https://github.com/ESTOS/strophe.jingle"
   },
   {
+     "name": null,
      "file": "lib/strophe.jingle/strophe.jingle.sdp.js",
      "license": "MIT",
      "url": "https://github.com/ESTOS/strophe.jingle"
   },
   {
+     "name": null,
      "file": "lib/strophe.jingle/strophe.jingle.adapter.js",
      "license": "MIT",
      "url": "https://github.com/ESTOS/strophe.jingle"
   },
   {
+     "name": "Salsa20",
      "file": "lib/otr/build/dep/salsa20.js",
      "license": "AGPL3",
      "url": "https://github.com/neoatlantis/node-salsa20"
   },
   {
+     "name": "bigint",
      "file": "lib/otr/build/dep/bigint.js",
      "license": "public domain",
      "url": "www.leemon.com"
   },
   {
+     "name": "cryptojs",
      "file": "lib/otr/build/dep/crypto.js",
      "license": "code.google.com/p/crypto-js/wiki/license",
      "url": "code.google.com/p/crypto-js"
   },
   {
+     "name": "eventemitter",
      "file": "lib/otr/build/dep/eventemitter.js",
      "license": "MIT",
      "url": "http://git.io/ee"
   },
   {
+     "name": "otr.js",
      "file": "lib/otr/build/otr.js",
      "license": "MPL v2.0",
      "url": "https://arlolra.github.io/otr/"
   },
   {
+     "name": "i18next",
      "file": "lib/i18next/release/i18next-latest.min.js",
      "license": "MIT",
      "url": "http://i18next.com/"
   },
   {
-    "file": "lib/translation.js",
-    "license": "MIT",
-    "url": "https://webtranslateit.com/en/projects/10365-JSXC"
+     "name": null,
+     "file": "lib/translation.js",
+     "license": "MIT",
+     "url": "https://webtranslateit.com/en/projects/10365-JSXC"
   }
  ]

@@ -107,6 +107,9 @@
             background-image: image-url('loading.gif');
        }
      }
+     .jsxc_libraries {
+       max-width: 300px;
+     }
 }
 .jsxc_avatar {
     @extend %avatar-icon;
