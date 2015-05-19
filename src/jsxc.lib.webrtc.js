@@ -656,15 +656,6 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             sess.remote_ip = remoteSDP.match(new RegExp(ip_regex))[1];
             sess.local_ip = localSDP.match(new RegExp(ip_regex))[1];
 
-            var regex = new RegExp(ip_regex, 'g');
-            var match;
-            while ((match = regex.exec(remoteSDP)) !== null) {
-               if (match[1] !== sess.remote_ip) {
-                  alert('!!! WARNING !!!\n\nPossible Man-in-the-middle attack detected!\n\nYou should close the connection.');
-                  return;
-               }
-            }
-
             var text = '<p>';
             text += '<b>' + $.t('Local_IP') + ': </b>' + sess.local_ip + '<br />';
             text += '<b>' + $.t('Remote_IP') + ': </b>' + sess.remote_ip + '<br />';
