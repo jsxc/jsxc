@@ -5,30 +5,7 @@
  */
 jsxc.gui = {
    /** Smilie token to file mapping */
-   emotions: [
-      ['O:-) O:)', 'angel'],
-      ['>:-( >:( &gt;:-( &gt;:(', 'angry'],
-      [':-) :)', 'smile'],
-      [':-D :D', 'grin'],
-      [':-( :(', 'sad'],
-      [';-) ;)', 'wink'],
-      [':-P :P', 'tonguesmile'],
-      ['=-O', 'surprised'],
-      [':kiss: :-*', 'kiss'],
-      ['8-) :cool:', 'sunglassess'],
-      [':\'-( :\'( :&amp;apos;-(', 'crysad'],
-      [':-/', 'doubt'],
-      [':-X :X', 'zip'],
-      [':yes:', 'thumbsup'],
-      [':no:', 'thumbsdown'],
-      [':beer:', 'beer'],
-      [':devil:', 'devil'],
-      [':kiss: :kissing:', 'kissing'],
-      ['@->-- :rose: @-&gt;--', 'rose'],
-      [':music:', 'music'],
-      [':love:', 'love'],
-      [':zzz:', 'tired']
-   ],
+   emotions: [ [ 'O:-) O:)', 'angel' ], [ '>:-( >:( &gt;:-( &gt;:(', 'angry' ], [ ':-) :)', 'smile' ], [ ':-D :D', 'grin' ], [ ':-( :(', 'sad' ], [ ';-) ;)', 'wink' ], [ ':-P :P', 'tonguesmile' ], [ '=-O', 'surprised' ], [ ':kiss: :-*', 'kiss' ], [ '8-) :cool:', 'sunglassess' ], [ ':\'-( :\'( :&amp;apos;-(', 'crysad' ], [ ':-/', 'doubt' ], [ ':-X :X', 'zip' ], [ ':yes:', 'thumbsup' ], [ ':no:', 'thumbsdown' ], [ ':beer:', 'beer' ], [ ':devil:', 'devil' ], [ ':kiss: :kissing:', 'kissing' ], [ '@->-- :rose: @-&gt;--', 'rose' ], [ ':music:', 'music' ], [ ':love:', 'love' ], [ ':zzz:', 'tired' ] ],
 
    /**
     * Different uri query actions as defined in XEP-0147.
@@ -211,8 +188,8 @@ jsxc.gui = {
       var setAvatar = function(src) {
          if (src === 0 || src === '0') {
             if (typeof jsxc.options.defaultAvatar === 'function') {
-               jsxc.options.defaultAvatar.call(el, jid);
-               return;
+                jsxc.options.defaultAvatar.call(el, jid);
+                return;
             }
             jsxc.gui.avatarPlaceholder(el.find('.jsxc_avatar'), jid);
             return;
@@ -225,12 +202,12 @@ jsxc.gui = {
             'text-indent': '999px'
          });
       };
-
+      
       if (typeof aid === 'undefined') {
          setAvatar(0);
          return;
       }
-
+      
       var avatarSrc = jsxc.storage.getUserItem('avatar', aid);
 
       if (avatarSrc !== null) {
@@ -581,19 +558,19 @@ jsxc.gui = {
             $('#jsxc_userlist').empty();
 
             if (val !== '') {
-               jsxc.options.getUsers.call(this, val, function(list) {
-                  $.each(list || {}, function(uid, displayname) {
-                     var option = $('<option>');
-                     option.attr('data-username', uid);
-                     option.attr('data-alias', displayname);
+                jsxc.options.getUsers.call(this, val, function(list) {
+                    $.each(list || {}, function(uid, displayname) {
+                        var option = $('<option>');
+                        option.attr('data-username', uid);
+                        option.attr('data-alias', displayname);
 
-                     option.attr('value', uid).appendTo('#jsxc_userlist');
+                        option.attr('value', uid).appendTo('#jsxc_userlist');
 
-                     if (uid !== displayname) {
-                        option.clone().attr('value', displayname).appendTo('#jsxc_userlist');
-                     }
-                  });
-               });
+                        if (uid !== displayname) {
+                            option.clone().attr('value', displayname).appendTo('#jsxc_userlist');
+                        }
+                    });
+                });
             }
          }
       });
@@ -781,8 +758,7 @@ jsxc.gui = {
 
       if (data) {
          // Display resources and corresponding information
-         var i, j, res, identities, identity = null,
-            cap, client;
+         var i, j, res, identities, identity = null, cap, client;
          for (i = 0; i < data.res.length; i++) {
             res = data.res[i];
 
@@ -969,7 +945,7 @@ jsxc.gui = {
          var err = jsxc.options.saveSettinsPermanent.call(this, data);
 
          if (typeof self.attr('data-onsubmit') === 'string') {
-            jsxc.exec(self.attr('data-onsubmit'), [err]);
+            jsxc.exec(self.attr('data-onsubmit'), [ err ]);
          }
 
          setTimeout(function() {
@@ -1192,10 +1168,10 @@ jsxc.gui = {
          }
       });
    },
-
+   
    avatarPlaceholder: function(el, seed, text) {
       text = text || seed;
-
+      
       var options = jsxc.options.get('avatarplaceholder') || {};
       var hash = jsxc.hashStr(seed);
 
@@ -1204,16 +1180,16 @@ jsxc.gui = {
       var lightness = options.lightness || 65;
 
       el.css({
-         'background-color': 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)',
-         'color': '#fff',
-         'font-weight': 'bold',
-         'text-align': 'center',
-         'line-height': el.height() + 'px',
-         'font-size': el.height() * 0.6 + 'px'
+        'background-color': 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)',
+        'color': '#fff',
+        'font-weight': 'bold',
+        'text-align': 'center',
+        'line-height': el.height() + 'px',
+        'font-size': el.height() * 0.6 + 'px'
       });
-
+      
       if (typeof text === 'string' && text.length > 0) {
-         el.text(text[0].toUpperCase());
+        el.text(text[0].toUpperCase());
       }
    }
 };
@@ -1225,7 +1201,7 @@ jsxc.gui = {
  */
 jsxc.gui.roster = {
 
-   /** True if roster is initialised */
+   /** True if roster is initialised */ 
    ready: false,
 
    /**
@@ -1389,7 +1365,7 @@ jsxc.gui.roster = {
          scrollTo: '0px'
       });
 
-      $(document).trigger('add.roster.jsxc', [bid, data, bud]);
+      $(document).trigger('add.roster.jsxc', [ bid, data, bud ]);
    },
 
    getItem: function(bid) {
@@ -1520,17 +1496,17 @@ jsxc.gui.roster = {
    _rename: function(bid, newname) {
       if (jsxc.master) {
          var d = jsxc.storage.getUserItem('buddy', bid);
-
+         
          if (d.type === 'chat') {
-            var iq = $iq({
-               type: 'set'
-            }).c('query', {
-               xmlns: 'jabber:iq:roster'
-            }).c('item', {
-               jid: Strophe.getBareJidFromJid(d.jid),
-               name: newname
-            });
-            jsxc.xmpp.conn.sendIQ(iq);
+             var iq = $iq({
+                type: 'set'
+             }).c('query', {
+                xmlns: 'jabber:iq:roster'
+             }).c('item', {
+                jid: Strophe.getBareJidFromJid(d.jid),
+                name: newname
+             });
+             jsxc.xmpp.conn.sendIQ(iq);
          }
       }
 
@@ -1562,7 +1538,7 @@ jsxc.gui.roster = {
          right: (10 - roster_right) + 'px'
       }, duration);
 
-      $(document).trigger('toggle.roster.jsxc', [state, duration]);
+      $(document).trigger('toggle.roster.jsxc', [ state, duration ]);
    },
 
    /**
@@ -1675,12 +1651,12 @@ jsxc.gui.dialog = {
     */
    resize: function(options) {
       options = $.extend({
-         innerWidth: $('#jsxc_dialog').outerWidth(),
-         innerHeight: $('#jsxc_dialog').outerHeight()
+        innerWidth: $('#jsxc_dialog').outerWidth(),
+        innerHeight: $('#jsxc_dialog').outerHeight()
       }, options || {});
-
+      
       $('#cboxLoadedContent').css('overflow', 'hidden');
-
+      
       $.colorbox.resize(options);
    }
 };
@@ -1798,7 +1774,7 @@ jsxc.gui.window = {
             var offset = win.find('.slimScrollDiv').position().top;
             win.find('.jsxc_emoticons').css('top', (ui.size.height + offset + 6) + 'px');
 
-            $(document).trigger('resize.window.jsxc', [win, bid, ui.size]);
+            $(document).trigger('resize.window.jsxc', [ win, bid, ui.size ]);
          }
       });
 
@@ -1847,7 +1823,7 @@ jsxc.gui.window = {
          jsxc.otr.enable(bid);
       }
 
-      $(document).trigger('init.window.jsxc', [win]);
+      $(document).trigger('init.window.jsxc', [ win ]);
 
       return win;
    },
@@ -2089,7 +2065,7 @@ jsxc.gui.window = {
       var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded, stamp, sender);
 
       if (direction === 'in') {
-         $(document).trigger('postmessagein.jsxc', [bid, html_msg]);
+         $(document).trigger('postmessagein.jsxc', [ bid, html_msg ]);
       }
 
       if (direction === 'out' && jsxc.master && forwarded !== true) {
@@ -2145,8 +2121,7 @@ jsxc.gui.window = {
 
             // escape value for alt and title, this prevents double
             // replacement
-            var esc = '',
-               i;
+            var esc = '', i;
             for (i = 0; i < p1.length; i++) {
                esc += '&#' + p1.charCodeAt(i) + ';';
             }
@@ -2155,8 +2130,7 @@ jsxc.gui.window = {
          });
       });
 
-      var msgDiv = $("<div>"),
-         msgTsDiv = $("<div>");
+      var msgDiv = $("<div>"), msgTsDiv = $("<div>");
       msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
       msgDiv.attr('id', uid);
       msgDiv.html('<div>' + msg + '</div>');
@@ -2180,9 +2154,9 @@ jsxc.gui.window = {
       } else if (typeof post.stamp !== 'undefined') {
          msgDiv.append(msgTsDiv);
       }
-
+      
       win.find('.jsxc_textarea').append(msgDiv);
-
+      
       if (typeof post.sender === 'object' && post.sender !== null) {
          var title = '';
          var avatarDiv = $('<div>');
@@ -2190,29 +2164,29 @@ jsxc.gui.window = {
 
          if (typeof post.sender.jid === 'string') {
             msgDiv.attr('data-bid', jsxc.jidToBid(post.sender.jid));
-
+            
             var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(post.sender.jid)) || {};
             jsxc.gui.updateAvatar(msgDiv, jsxc.jidToBid(post.sender.jid), data.avatar);
 
             title = jsxc.jidToBid(post.sender.jid);
          }
-
+         
          if (typeof post.sender.name === 'string') {
             msgDiv.attr('data-name', post.sender.name);
-
+            
             if (typeof post.sender.jid !== 'string') {
-               jsxc.gui.avatarPlaceholder(avatarDiv, post.sender.name);
+                jsxc.gui.avatarPlaceholder(avatarDiv, post.sender.name);
             }
-
+            
             if (title !== '') {
-               title = '\n' + title;
+                title = '\n' + title;
             }
-
+            
             title = post.sender.name + title;
-
+            
             msgTsDiv.text(msgTsDiv.text() + ' ' + post.sender.name);
          }
-
+         
          avatarDiv.attr('title', jsxc.escapeHTML(title));
       }
 
@@ -2311,7 +2285,7 @@ jsxc.gui.template = {
 
       var ret = jsxc.gui.template[name];
 
-      if (typeof(ret) === 'string') {
+      if (typeof (ret) === 'string') {
          ret = ret.replace(/\{\{([a-zA-Z0-9_\-]+)\}\}/g, function(s, key) {
             return (typeof ph[key] === 'string') ? ph[key] : s;
          });

@@ -103,7 +103,7 @@ jsxc.notice = {
       var saved = jsxc.storage.getUserItem('notices') || [];
       var has = false;
 
-      $.each(saved, function(index, val) {
+      $.each(saved, function(index, val){
          if (val.fnName === fnName) {
             has = true;
 
