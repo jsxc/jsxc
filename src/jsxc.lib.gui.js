@@ -358,27 +358,44 @@ jsxc.gui = {
 
       jsxc.gui.dialog.open(jsxc.gui.template.get('loginBox'));
 
-      $('#jsxc_dialog').find('form').submit(function() {
+      var alert = $('#jsxc_dialog').find('.jsxc_alert');
+      alert.hide();
 
-         $(this).find('input[type=submit]').prop('disabled', true);
+      $('#jsxc_dialog').find('form').submit(function(ev) {
+
+         ev.preventDefault();
+
+         $(this).find('button[data-jsxc-loading-text]').trigger('btnloading.jsxc');
 
          jsxc.options.loginForm.form = $(this);
          jsxc.options.loginForm.jid = $(this).find('#jsxc_username');
          jsxc.options.loginForm.pass = $(this).find('#jsxc_password');
 
-         var settings = jsxc.prepareLogin();
-
          jsxc.triggeredFromBox = true;
          jsxc.options.loginForm.triggered = false;
 
+         var settings = jsxc.prepareLogin();
+
          if (settings === false) {
-            jsxc.gui.showAuthFail();
+            onAuthFail();
          } else {
+            $(document).on('authfail.jsxc', onAuthFail);
+
             jsxc.xmpp.login();
          }
-
-         return false;
       });
+
+      function onAuthFail() {
+        alert.show();
+        jsxc.gui.dialog.resize();
+
+        $('#jsxc_dialog').find('button').trigger('btnfinished.jsxc');
+
+        $('#jsxc_dialog').find('input').one('keypress', function() {
+            alert.hide();
+            jsxc.gui.dialog.resize();
+        });
+      }
    },
 
    /**
@@ -1607,6 +1624,32 @@ jsxc.gui.dialog = {
                $('#cboxClose').hide();
             }
 
+            $('#jsxc_dialog form').each(function() {
+                var form = $(this);
+
+                form.find('button[data-jsxc-loading-text]').each(function(){
+                    var btn = $(this);
+
+                    btn.on('btnloading.jsxc', function(){
+                        if(!btn.prop('disabled')) {
+                            btn.prop('disabled', true);
+
+                            btn.data('jsxc_value', btn.text());
+
+                            btn.text(btn.attr('data-jsxc-loading-text'));
+                        }
+                    });
+
+                    btn.on('btnfinished.jsxc', function() {
+                        if(btn.prop('disabled')) {
+                            btn.prop('disabled', false);
+
+                            btn.text(btn.data('jsxc_value'));
+                        }
+                    });
+                });
+            });
+
             jsxc.gui.dialog.resize();
 
             $(document).trigger('complete.dialog.jsxc');
@@ -2424,9 +2467,10 @@ jsxc.gui.template = {
                <input type="text" name="username" id="jsxc_username" required="required" value="{{my_node}}"/></p>\
             <p><label for="jsxc_password" data-i18n="Password"></label>\
                <input type="password" name="password" required="required" id="jsxc_password" /></p>\
+            <div class="jsxc_alert jsxc_alert-warning" data-i18n="Sorry_we_cant_authentikate_"></div>\
             <div class="bottom_submit_section">\
-                <input type="reset" class="button jsxc_close" name="clear" data-i18n="[value]Cancel"/>\
-                <input type="submit" class="button creation" name="commit" data-i18n="[value]Connect"/>\
+                <button type="reset" class="jsxc_btn jsxc_close" name="clear" data-i18n="Cancel"/>\
+                <button type="submit" class="jsxc_btn jsxc_btn-primary" name="commit" data-i18n="[data-jsxc-loading-text]Connecting...;Connect"/>\
             </div>\
         </form>',
    contactDialog: '<h3 data-i18n="Add_buddy"></h3>\
