@@ -344,7 +344,7 @@ jsxc = {
          return;
       }
 
-      if (!jsxc.triggeredFromBox) {
+      if (!jsxc.triggeredFromBox && (jsxc.options.loginForm.onConnecting === 'dialog' || typeof jsxc.options.loginForm.onConnecting === 'undefined')) {
         jsxc.gui.showWaitAlert($.t('Logging_in'));
       }
 

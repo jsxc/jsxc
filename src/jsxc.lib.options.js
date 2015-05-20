@@ -59,13 +59,19 @@ jsxc.options = {
       },
 
       /**
+       * Action after login was called: dialog [String] Show wait dialog, false [boolean] | 
+       * quiet [String] Do nothing
+       */
+      onConnecting: 'dialog',
+
+      /**
        * Action after connected: submit [String] Submit form, false [boolean] Do
        * nothing, continue [String] Start chat
        */
       onConnected: 'submit',
 
       /**
-       * Action after auth fail: submit [String] Submit form, false [boolean] Do
+       * Action after auth fail: submit [String] Submit form, false [boolean] | quiet [String] Do
        * nothing, ask [String] Show auth fail dialog
        */
       onAuthFail: 'submit'

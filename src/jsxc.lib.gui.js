@@ -2329,8 +2329,13 @@ jsxc.gui.template = {
       var ret = jsxc.gui.template[name];
 
       if (typeof (ret) === 'string') {
+         // prevent 404
+         ret = ret.replace(/\{\{root\}\}/g, ph.root);
+
+         // convert to string
          ret = $('<div>').append($(ret).i18n()).html();
 
+         // replace placeholders
          ret = ret.replace(/\{\{([a-zA-Z0-9_\-]+)\}\}/g, function(s, key) {
             return (typeof ph[key] === 'string') ? ph[key] : s;
          });

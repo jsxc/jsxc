@@ -98,6 +98,9 @@ jsxc.xmpp = {
          jsxc.debug(Object.getOwnPropertyNames(Strophe.Status)[status] + ': ' + condition);
 
          switch (status) {
+            case Strophe.Status.CONNECTING:
+               $(document).trigger('connecting.jsxc');
+               break;
             case Strophe.Status.CONNECTED:
                jsxc.bid = jsxc.jidToBid(jsxc.xmpp.conn.jid.toLowerCase());
                $(document).trigger('connected.jsxc');
@@ -438,6 +441,9 @@ jsxc.xmpp = {
             case 'submit':
                jsxc.submitLoginForm();
                break;
+            case 'quiet':
+            case false:
+               return;
          }
       }
 
