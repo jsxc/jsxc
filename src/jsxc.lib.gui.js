@@ -1221,6 +1221,9 @@ jsxc.gui.roster = {
    /** True if roster is initialised */ 
    ready: false,
 
+   /** True if all items are loaded */
+   loaded: false,
+
    /**
     * Init the roster skeleton
     * 

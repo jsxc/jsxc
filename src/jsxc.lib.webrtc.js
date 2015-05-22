@@ -281,7 +281,17 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          }
 
          var win = jsxc.gui.window.get(bid);
-         var jid = win.data('jid') || jsxc.storage.getUserItem('buddy', bid).jid;
+         var jid = win.data('jid');
+         var ls = jsxc.storage.getUserItem('buddy', bid);
+
+         if (typeof jid !== 'string') {
+            if (ls && typeof ls.jid === 'string') {
+               jid = ls.jid;
+            } else {
+               jsxc.debug('[webrtc] Could not update icon, because could not find jid for ' + bid);
+               return;
+            }
+         }
 
          var el = win.find('.jsxc_video').add(jsxc.gui.roster.getItem(bid).find('.jsxc_video'));
 
@@ -344,12 +354,14 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        * @param status
        * @private
        */
-      onPresence: function(ev, jid) {
+      onPresence: function(ev, jid, status, presence) {
          var self = jsxc.webrtc;
 
-         jsxc.debug('webrtc.onpresence', jid);
+         if ($(presence).find('c[xmlns="' + Strophe.NS.CAPS + '"]').length === 0) {
+            jsxc.debug('webrtc.onpresence', jid);
 
-         self.updateIcon(jsxc.jidToBid(jid));
+            self.updateIcon(jsxc.jidToBid(jid));
+         }
       },
 
       /**
@@ -410,7 +422,13 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       onCaps: function(event, jid) {
          var self = jsxc.webrtc;
 
-         self.updateIcon(jsxc.jidToBid(jid));
+         if (jsxc.gui.roster.loaded) {
+            self.updateIcon(jsxc.jidToBid(jid));
+         } else {
+            $(document).on('cloaded.roster.jsxc', function() {
+               self.updateIcon(jsxc.jidToBid(jid));
+            });
+         }
       },
 
       /**
@@ -651,14 +669,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             sess.local_fp = SDPUtil.parse_fingerprint(SDPUtil.find_line(localSDP, 'a=fingerprint:')).fingerprint;
             sess.remote_fp = SDPUtil.parse_fingerprint(SDPUtil.find_line(remoteSDP, 'a=fingerprint:')).fingerprint;
 
-            var ip_regex = "(\\d{1,3}\\.\\d{1,3}.\\d{1,3}\\.\\d{1,3}) \\d+ typ host";
-
-            sess.remote_ip = remoteSDP.match(new RegExp(ip_regex))[1];
-            sess.local_ip = localSDP.match(new RegExp(ip_regex))[1];
-
             var text = '<p>';
-            text += '<b>' + $.t('Local_IP') + ': </b>' + sess.local_ip + '<br />';
-            text += '<b>' + $.t('Remote_IP') + ': </b>' + sess.remote_ip + '<br />';
             text += '<b>' + $.t('Local_Fingerprint') + ': </b>' + sess.local_fp + '<br />';
             text += '<b>' + $.t('Remote_Fingerprint') + ': </b>' + sess.remote_fp;
             text += '</p>';

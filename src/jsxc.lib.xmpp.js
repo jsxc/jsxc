@@ -494,6 +494,7 @@ jsxc.xmpp = {
 
       jsxc.storage.setUserItem('buddylist', buddies);
 
+      jsxc.gui.roster.loaded = true;
       jsxc.debug('Roster loaded');
       $(document).trigger('cloaded.roster.jsxc');
    },

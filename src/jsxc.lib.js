@@ -587,6 +587,7 @@ jsxc = {
          jsxc.gui.roster.add(value);
       });
 
+      jsxc.gui.roster.loaded = true;
       $(document).trigger('cloaded.roster.jsxc');
    },
 
