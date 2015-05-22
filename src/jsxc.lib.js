@@ -181,6 +181,12 @@ jsxc = {
          $.extend(true, jsxc.options, options);
       }
 
+      // Check localStorage
+      if (typeof (localStorage) === 'undefined') {
+         jsxc.warn("Browser doesn't support localStorage.");
+         return;
+      }
+
       /**
        * Getter method for options. Saved options will override default one.
        * 
@@ -227,12 +233,6 @@ jsxc = {
          useLocalStorage: true,
          localStorageExpirationTime: 60 * 60 * 24 * 1000,
       });
-
-      // Check localStorage
-      if (typeof (localStorage) === 'undefined') {
-         jsxc.debug("Browser doesn't support localStorage.");
-         return;
-      }
 
       if (jsxc.storage.getItem('debug') === true) {
          jsxc.options.otr.debug = true;
@@ -349,13 +349,15 @@ jsxc = {
       }
 
       var settings = jsxc.options.loadSettings.call(this, username, password);
-      settings = $.extend(true, {}, settings); // prevents to modify the original object
 
       if (settings === false || settings === null || typeof settings === 'undefined') {
          jsxc.warn('No settings provided');
 
          return false;
       }
+
+      // prevent to modify the original object
+      settings = $.extend(true, {}, settings);
 
       if (typeof settings.xmpp.username === 'string') {
          username = settings.xmpp.username;

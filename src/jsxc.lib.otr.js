@@ -245,6 +245,10 @@ jsxc.otr = {
     * @returns {undefined}
     */
    toggleTransfer: function(bid) {
+      if (typeof OTR !== 'function') {
+         return;
+      }
+
       if (jsxc.storage.getUserItem('buddy', bid).msgstate === 0) {
          jsxc.otr.goEncrypt(bid);
       } else {
@@ -260,7 +264,9 @@ jsxc.otr = {
     */
    goEncrypt: function(bid) {
       if (jsxc.master) {
-         jsxc.otr.objects[bid].sendQueryMsg();
+         if (jsxc.otr.objects.hasOwnProperty(bid)) {
+            jsxc.otr.objects[bid].sendQueryMsg();
+         }
       } else {
          jsxc.storage.updateUserItem('buddy', bid, 'transferReq', 1);
       }
@@ -275,10 +281,12 @@ jsxc.otr = {
     */
    goPlain: function(bid, cb) {
       if (jsxc.master) {
-         jsxc.otr.objects[bid].endOtr.call(jsxc.otr.objects[bid], cb);
-         jsxc.otr.objects[bid].init.call(jsxc.otr.objects[bid]);
+         if (jsxc.otr.objects.hasOwnProperty(bid)) {
+            jsxc.otr.objects[bid].endOtr.call(jsxc.otr.objects[bid], cb);
+            jsxc.otr.objects[bid].init.call(jsxc.otr.objects[bid]);
 
-         jsxc.otr.backup(bid);
+            jsxc.otr.backup(bid);
+         }
       } else {
          jsxc.storage.updateUserItem('buddy', bid, 'transferReq', 0);
       }
@@ -358,6 +366,21 @@ jsxc.otr = {
     */
    createDSA: function() {
       if (jsxc.options.otr.priv) {
+         return;
+      }
+
+      if (typeof OTR !== 'function') {
+         jsxc.warn('OTR support disabled');
+
+         OTR = {};
+         OTR.CONST = {
+            MSGSTATE_PLAINTEXT : 0,
+            MSGSTATE_ENCRYPTED : 1,
+            MSGSTATE_FINISHED  : 2
+         };
+
+         jsxc._onMaster();
+
          return;
       }
 
