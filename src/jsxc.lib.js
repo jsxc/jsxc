@@ -349,6 +349,7 @@ jsxc = {
       }
 
       var settings = jsxc.options.loadSettings.call(this, username, password);
+      settings = $.extend(true, {}, settings); // prevents to modify the original object
 
       if (settings === false || settings === null || typeof settings === 'undefined') {
          jsxc.warn('No settings provided');

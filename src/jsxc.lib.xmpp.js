@@ -31,7 +31,7 @@ jsxc.xmpp = {
     */
    login: function() {
 
-      if (jsxc.xmpp.conn && jsxc.xmpp.conn.connected) {
+      if (jsxc.xmpp.conn && jsxc.xmpp.conn.authenticated) {
          return;
       }
 
@@ -62,15 +62,17 @@ jsxc.xmpp = {
 
       var url = jsxc.options.get('xmpp').url;
 
-      // Register eventlistener
-      $(document).on('connected.jsxc', jsxc.xmpp.connected);
-      $(document).on('attached.jsxc', jsxc.xmpp.attached);
-      $(document).on('disconnected.jsxc', jsxc.xmpp.disconnected);
-      $(document).on('ridChange', jsxc.xmpp.onRidChange);
-      $(document).on('connfail.jsxc', jsxc.xmpp.onConnfail);
-      $(document).on('authfail.jsxc', jsxc.xmpp.onAuthFail);
+      if (!(jsxc.xmpp.conn && jsxc.xmpp.conn.connected)) {
+        // Register eventlistener
+        $(document).on('connected.jsxc', jsxc.xmpp.connected);
+        $(document).on('attached.jsxc', jsxc.xmpp.attached);
+        $(document).on('disconnected.jsxc', jsxc.xmpp.disconnected);
+        $(document).on('ridChange', jsxc.xmpp.onRidChange);
+        $(document).on('connfail.jsxc', jsxc.xmpp.onConnfail);
+        $(document).on('authfail.jsxc', jsxc.xmpp.onAuthFail);
 
-      Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
+        Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
+      }
 
       // Create new connection (no login)
       jsxc.xmpp.conn = new Strophe.Connection(url);
@@ -433,6 +435,7 @@ jsxc.xmpp = {
     * @private
     */
    onAuthFail: function() {
+
       if (jsxc.options.loginForm.triggered) {
          switch (jsxc.options.loginForm.onAuthFail || 'ask') {
             case 'ask':
@@ -445,10 +448,6 @@ jsxc.xmpp = {
             case false:
                return;
          }
-      }
-
-      if (jsxc.triggeredFromBox) {
-         jsxc.gui.showAuthFail();
       }
    },
 
