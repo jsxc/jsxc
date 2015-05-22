@@ -417,7 +417,6 @@ ul.jsxc_vCard {
         height: 15px;
         z-index: 100;
         background: linear-gradient(to bottom, $window_gradient 0, rgba(0, 0, 0, 0) 100%);
-        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$window_gradient', endColorstr='#00282323', GradientType=0);
     }
     .jsxc_avatar {
         margin-top: 1px;
@@ -489,7 +488,6 @@ ul.jsxc_vCard {
         height: 15px;
         z-index: 100;
         background: linear-gradient(to bottom, $window_gradient 0, rgba(40, 35, 35, 0) 100%);
-        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$window_gradient', endColorstr='#00282323', GradientType=0);
     }
 }
 .jsxc_chatmessage {
