@@ -263,6 +263,10 @@ jsxc = {
       // Check if we have to establish a new connection
       if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
 
+         // clean up rid and sid
+         jsxc.storage.removeItem('rid');
+         jsxc.storage.removeItem('sid');
+
          // Looking for a login form
          if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
 
