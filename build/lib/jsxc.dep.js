@@ -1,5 +1,5 @@
 /*!
- * jsxc v2.0.0 - 2015-05-08
+ * jsxc v2.0.1 - 2015-05-23
  * 
  * This file concatenates all dependencies of jsxc.
  * 
@@ -6699,6 +6699,7 @@ Strophe.addConnectionPlugin('disco',
    });
 }(jQuery));
 
+
 /*!
  * Source: lib/strophe.vcard.js, license: MIT, url: https://github.com/strophe/strophejs-plugins
  */
@@ -6818,7 +6819,6 @@ Strophe.addConnectionPlugin('jingle', {
               to: iq.getAttribute('from'),
               id: iq.getAttribute('id')
         });
-        console.log('on jingle ' + action);
         var sess = this.sessions[sid];
         if ('session-initiate' != action) {
             if (sess === null) {
@@ -6867,11 +6867,6 @@ Strophe.addConnectionPlugin('jingle', {
             sess.initiate($(iq).attr('from'), false);
             sess.setRemoteDescription($(iq).find('>jingle'), 'offer');
 
-            if ($(iq).find('>jingle>muted[xmlns="http://jitsi.org/protocol/meet#startmuted"]').length) {
-                console.log('got a request to start muted');
-                sess.startmuted = true;
-            }
-
             this.sessions[sess.sid] = sess;
             this.jid2session[sess.peerjid] = sess;
 
@@ -6886,7 +6881,6 @@ Strophe.addConnectionPlugin('jingle', {
             $(document).trigger('callaccepted.jingle', [sess.sid]);
             break;
         case 'session-terminate':
-            console.log('terminating...');
             sess.terminate();
             this.terminate(sess.sid);
             if ($(iq).find('>jingle>reason').length) {
@@ -6968,7 +6962,6 @@ Strophe.addConnectionPlugin('jingle', {
             var sess = this.jid2session[jid];
             if (sess) {
                 sess.terminate();
-                console.log('peer went away silently', jid);
                 delete this.sessions[sess.sid];
                 delete this.jid2session[jid];
                 $(document).trigger('callterminated.jingle', [sess.sid, 'gone']);
@@ -7006,12 +6999,8 @@ Strophe.addConnectionPlugin('jingle', {
                         break;
                     case 'turn':
                         dict.url = 'turn:';
-                        if (el.attr('username')) { // https://code.google.com/p/webrtc/issues/detail?id=1508
-                            if (navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./) && parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2], 10) < 28) {
-                                dict.url += el.attr('username') + '@';
-                            } else {
-                                dict.username = el.attr('username'); // only works in M28
-                            }
+                        if (el.attr('username')) {
+                            dict.username = el.attr('username');
                         }
                         dict.url += el.attr('host');
                         if (el.attr('port') && el.attr('port') != '3478') {
@@ -7267,11 +7256,11 @@ JingleSession.prototype.sendIceCandidate = function (candidate) {
                         }, 20);
 
                     }
-                    this.drip_container.push(event.candidate);
+                    this.drip_container.push(candidate);
                     return;
                 } else {
                     console.log('sending single candidate');
-                    self.sendIceCandidates([event.candidate]);
+                    self.sendIceCandidates([candidate]);
                 }
             }
         }
@@ -7285,7 +7274,7 @@ JingleSession.prototype.sendIceCandidate = function (candidate) {
                    action: this.peerconnection.localDescription.type == 'offer' ? 'session-initiate' : 'session-accept',
                    initiator: this.initiator,
                    sid: this.sid});
-            if (this.nickname != null) {
+            if (this.nickname !== null) {
                 init.c('nick', {xmlns:'http://jabber.org/protocol/nick'}).t(this.nickname).up();
             }
             if (this.startmuted) {
@@ -7333,11 +7322,12 @@ JingleSession.prototype.sendIceCandidates = function (candidates) {
            sid: this.sid});
     for (var mid = 0; mid < this.localSDP.media.length; mid++) {
         var cands = candidates.filter(function (el) { return el.sdpMLineIndex == mid; });
+        var mline = SDPUtil.parse_mline(this.localSDP.media[mid].split('\r\n')[0]);
         if (cands.length > 0) {
             var ice = SDPUtil.iceparams(this.localSDP.media[mid], this.localSDP.session);
             ice.xmlns = 'urn:xmpp:jingle:transports:ice-udp:1';
             cand.c('content', {creator: this.initiator == this.me ? 'initiator' : 'responder',
-                   name: cands[0].sdpMid
+                name: (cands[0].sdpMid? cands[0].sdpMid : mline.media)
             }).c('transport', ice);
             for (var i = 0; i < cands.length; i++) {
                 cand.c('candidate', SDPUtil.candidateToJingle(cands[i].candidate)).up();
@@ -7402,7 +7392,7 @@ JingleSession.prototype.createdOffer = function (sdp) {
                action: 'session-initiate',
                initiator: this.initiator,
                sid: this.sid});
-        if (this.nickname != null) {
+        if (this.nickname !== null) {
             init.c('nick', {xmlns:'http://jabber.org/protocol/nick'}).t(this.nickname).up();
         }
         if (this.startmuted) {
@@ -8016,7 +8006,8 @@ SDP.prototype.removeSessionLines = function(prefix) {
     });
     this.raw = this.session + this.media.join('');
     return lines;
-}
+};
+
 // remove lines matching prefix from a media section specified by mediaindex
 // TODO: non-numeric mediaindex could match mid
 SDP.prototype.removeMediaLines = function(mediaindex, prefix) {
@@ -8027,7 +8018,7 @@ SDP.prototype.removeMediaLines = function(mediaindex, prefix) {
     });
     this.raw = this.session + this.media.join('');
     return lines;
-}
+};
 
 // add content's to a jingle element
 SDP.prototype.toJingle = function (elem, thecreator) {
@@ -8068,12 +8059,6 @@ SDP.prototype.toJingle = function (elem, thecreator) {
             // prefer identifier from a=mid if present
             var mid = SDPUtil.parse_mid(SDPUtil.find_line(this.media[i], 'a=mid:'));
             elem.attrs({ name: mid });
-
-            // old BUNDLE plan, to be removed
-            if (bundle.indexOf(mid) != -1) {
-                elem.c('bundle', {xmlns: 'http://estos.de/ns/bundle'}).up();
-                bundle.splice(bundle.indexOf(mid), 1);
-            }
         }
         if (SDPUtil.find_line(this.media[i], 'a=rtpmap:').length) {
             elem.c('description',
@@ -8129,12 +8114,6 @@ SDP.prototype.toJingle = function (elem, thecreator) {
                     elem.up();
                 });
                 elem.up();
-
-                // old proprietary mapping, to be removed at some point
-                tmp = SDPUtil.parse_ssrc(this.media[i]);
-                tmp.xmlns = 'http://estos.de/ns/ssrc';
-                tmp.ssrc = ssrc;
-                elem.c('ssrc', tmp).up(); // ssrc is part of description
             }
 
             if (SDPUtil.find_line(this.media[i], 'a=rtcp-mux')) {
@@ -8231,7 +8210,7 @@ SDP.prototype.TransportToJingle = function (mediaindex, elem) {
         }
     }
     elem.up(); // end of transport
-}
+};
 
 SDP.prototype.RtcpFbToJingle = function (mediaindex, elem, payloadtype) { // XEP-0293
     var lines = SDPUtil.find_lines(this.media[mediaindex], 'a=rtcp-fb:' + payloadtype);
@@ -8304,7 +8283,6 @@ SDP.prototype.fromJingle = function (jingle) {
         // for backward compability, to be removed soon
         // assume all contents are in the same bundle group, can be improved upon later
         var bundle = $(jingle).find('>content').filter(function (idx, content) {
-            //elem.c('bundle', {xmlns:'http://estos.de/ns/bundle'});
             return $(content).find('>bundle').length > 0;
         }).map(function (idx, content) {
             return content.getAttribute('name');
@@ -8440,17 +8418,6 @@ SDP.prototype.jingle2media = function (content) {
             media += '\r\n';
         });
     });
-
-    if (tmp.length === 0) {
-        // fallback to proprietary mapping of a=ssrc lines
-        tmp = content.find('description>ssrc[xmlns="http://estos.de/ns/ssrc"]');
-        if (tmp.length) {
-            media += 'a=ssrc:' + ssrc + ' cname:' + tmp.attr('cname') + '\r\n';
-            media += 'a=ssrc:' + ssrc + ' msid:' + tmp.attr('msid') + '\r\n';
-            media += 'a=ssrc:' + ssrc + ' mslabel:' + tmp.attr('mslabel') + '\r\n';
-            media += 'a=ssrc:' + ssrc + ' label:' + tmp.attr('label') + '\r\n';
-        }
-    }
     return media;
 };
 
@@ -8692,8 +8659,6 @@ SDPUtil = {
         return needles;
     },
     candidateToJingle: function (line) {
-        // a=candidate:2979166662 1 udp 2113937151 192.168.2.100 57698 typ host generation 0
-        //      <candidate component=... foundation=... generation=... id=... ip=... network=... port=... priority=... protocol=... type=.../>
         if (line.indexOf('candidate:') === 0) {
             line = 'a=' + line;
         } else if (line.substring(0, 12) != 'a=candidate:') {            
@@ -8719,8 +8684,7 @@ SDPUtil = {
         candidate.port = elems[5];
         // elems[6] => "typ"
         candidate.type = elems[7];
-
-        candidate.generation = '0'; // fippo from jitsi-meet: default, may be overwritten below
+        candidate.generation = '0';
 
         for (i = 8; i < elems.length; i += 2) {
             switch (elems[i]) {
@@ -8745,42 +8709,31 @@ SDPUtil = {
         return candidate;
     },
     candidateFromJingle: function (cand) {
-        var line = 'a=candidate:';
-        line += cand.getAttribute('foundation');
-        line += ' ';
-        line += cand.getAttribute('component');
-        line += ' ';
-        line += cand.getAttribute('protocol'); //.toUpperCase(); // chrome M23 doesn't like this
-        line += ' ';
-        line += cand.getAttribute('priority');
-        line += ' ';
-        line += cand.getAttribute('ip');
-        line += ' ';
-        line += cand.getAttribute('port');
-        line += ' ';
-        line += 'typ';
-        line += ' ' + cand.getAttribute('type');
-        line += ' ';
+        var parts = [
+            'a=candidate:' + cand.getAttribute('foundation'),
+            cand.getAttribute('component'),
+            cand.getAttribute('protocol'),
+            cand.getAttribute('priority'),
+            cand.getAttribute('ip'),
+            cand.getAttribute('port'),
+            'typ',
+            cand.getAttribute('type')
+        ];
         switch (cand.getAttribute('type')) {
         case 'srflx':
         case 'prflx':
         case 'relay':
             if (cand.getAttribute('rel-addr') && cand.getAttribute('rel-port')) {
-                line += 'raddr';
-                line += ' ';
-                line += cand.getAttribute('rel-addr');
-                line += ' ';
-                line += 'rport';
-                line += ' ';
-                line += cand.getAttribute('rel-port');
-                line += ' ';
+                parts.push('raddr');
+                parts.push(cand.getAttribute('rel-addr'));
+                parts.push('rport');
+                parts.push(cand.getAttribute('rel-port'));
             }
             break;
         }
-        line += 'generation';
-        line += ' ';
-        line += cand.getAttribute('generation') || '0';
-        return line + '\r\n';
+        parts.push('generation');
+        parts.push(cand.getAttribute('generation') || '0');
+        return parts.join(' ') + '\r\n';
     }
 };
 }(jQuery));
@@ -8859,7 +8812,7 @@ TraceablePeerConnection = function(ice_config, constraints) {
         if (self.ondatachannel !== null) {
             self.ondatachannel(event);
         }
-    }
+    };
     if (!navigator.mozGetUserMedia) {
         this.statsinterval = window.setInterval(function() {
             self.peerconnection.getStats(function(stats) {
@@ -8890,18 +8843,19 @@ TraceablePeerConnection = function(ice_config, constraints) {
 
         }, 1000);
     }
-};
+}
 
 dumpSDP = function(description) {
     return 'type: ' + description.type + '\r\n' + description.sdp;
-}
+};
 
-if (TraceablePeerConnection.prototype.__defineGetter__ !== undefined) {
-    TraceablePeerConnection.prototype.__defineGetter__('signalingState', function() { return this.peerconnection.signalingState; });
-    TraceablePeerConnection.prototype.__defineGetter__('iceConnectionState', function() { return this.peerconnection.iceConnectionState; });
-    TraceablePeerConnection.prototype.__defineGetter__('localDescription', function() { return this.peerconnection.localDescription; });
-    TraceablePeerConnection.prototype.__defineGetter__('remoteDescription', function() { return this.peerconnection.remoteDescription; });
-}
+['signalingState', 'iceConnectionState', 'localDescription', 'remoteDescription'].forEach(function (prop) {
+    Object.defineProperty(TraceablePeerConnection.prototype, prop, {
+        get: function () {
+            return this.peerconnection[prop]
+        }
+    });
+});
 
 TraceablePeerConnection.prototype.addStream = function (stream) {
     this.trace('addStream', stream.id);
@@ -8916,7 +8870,7 @@ TraceablePeerConnection.prototype.removeStream = function (stream) {
 TraceablePeerConnection.prototype.createDataChannel = function (label, opts) {
     this.trace('createDataChannel', label, opts);
     this.peerconnection.createDataChannel(label, opts);
-}
+};
 
 TraceablePeerConnection.prototype.setLocalDescription = function (description, successCallback, failureCallback) {
     var self = this;
@@ -9003,21 +8957,19 @@ TraceablePeerConnection.prototype.addIceCandidate = function (candidate, success
     var self = this;
     this.trace('addIceCandidate', JSON.stringify(candidate, null, ' '));
     this.peerconnection.addIceCandidate(candidate);
-    /* maybe later
     this.peerconnection.addIceCandidate(candidate, 
         function () {                                
             self.trace('addIceCandidateOnSuccess');
-            successCallback();
+            if (successCallback) successCallback();
         },
         function (err) {
             self.trace('addIceCandidateOnFailure', err);
-            failureCallback(err);
+            if (failureCallback) failureCallback(err);
         }
     );
-    */
 };
 
-TraceablePeerConnection.prototype.getStats = function(callback, errback) {
+TraceablePeerConnection.prototype.getStats = function(callback) {
     if (navigator.mozGetUserMedia) {
         // ignore for now...
     } else {
@@ -9028,9 +8980,9 @@ TraceablePeerConnection.prototype.getStats = function(callback, errback) {
 // mozilla chrome compat layer -- very similar to adapter.js
 setupRTC = function (){
     var RTC = null;
-    if (navigator.mozGetUserMedia) {
+    if (navigator.mozGetUserMedia && mozRTCPeerConnection) {
         console.log('This appears to be Firefox');
-        var version = parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
+        var version = navigator.userAgent.match(/Firefox/) ? parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10) : 0;
         if (version >= 22) {
             RTC = {
                 peerconnection: mozRTCPeerConnection,
@@ -9042,10 +8994,6 @@ setupRTC = function (){
                 },
                 pc_constraints: {}
             };
-            if (!MediaStream.prototype.getVideoTracks)
-                MediaStream.prototype.getVideoTracks = function () { return []; };
-            if (!MediaStream.prototype.getAudioTracks)
-                MediaStream.prototype.getAudioTracks = function () { return []; };
             RTCSessionDescription = mozRTCSessionDescription;
             RTCIceCandidate = mozRTCIceCandidate;
         }
@@ -9061,19 +9009,6 @@ setupRTC = function (){
             // DTLS should now be enabled by default but..
             pc_constraints: {'optional': [{'DtlsSrtpKeyAgreement': 'true'}]} 
         };
-        if (navigator.userAgent.indexOf('Android') != -1) {
-            RTC.pc_constraints = {}; // disable DTLS on Android
-        }
-        if (!webkitMediaStream.prototype.getVideoTracks) {
-            webkitMediaStream.prototype.getVideoTracks = function () {
-                return this.videoTracks;
-            };
-        }
-        if (!webkitMediaStream.prototype.getAudioTracks) {
-            webkitMediaStream.prototype.getAudioTracks = function () {
-                return this.audioTracks;
-            };
-        }
     }
     if (RTC === null) {
         try { console.log('Browser does not appear to be WebRTC-capable'); } catch (e) { }
@@ -9108,23 +9043,19 @@ getUserMediaWithConstraints = function(um, resolution, bandwidth, fps) {
     case 'fullhd':
         constraints.video.mandatory.minWidth = 1920;
         constraints.video.mandatory.minHeight = 1080;
-        constraints.video.mandatory.minAspectRatio = 1.77;
         break;
     case '720':
     case 'hd':
         constraints.video.mandatory.minWidth = 1280;
         constraints.video.mandatory.minHeight = 720;
-        constraints.video.mandatory.minAspectRatio = 1.77;
         break;
     case '360':
         constraints.video.mandatory.minWidth = 640;
         constraints.video.mandatory.minHeight = 360;
-        constraints.video.mandatory.minAspectRatio = 1.77;
         break;
     case '180':
         constraints.video.mandatory.minWidth = 320;
         constraints.video.mandatory.minHeight = 180;
-        constraints.video.mandatory.minAspectRatio = 1.77;
         break;
         // 4:3
     case '960':
@@ -9148,6 +9079,10 @@ getUserMediaWithConstraints = function(um, resolution, bandwidth, fps) {
         }
         break;
     }
+
+    // take what is configured and try not to be more intelligent
+    if (constraints.video.minWidth) constraints.video.maxWidth = constraints.video.minWidth;
+    if (constraints.video.minHeight) constraints.video.maxHeight = constraints.video.minHeight;
 
     if (bandwidth) { // doesn't work currently, see webrtc issue 1846
         if (!constraints.video) constraints.video = {mandatory: {}};//same behaviour as true
@@ -9445,7 +9380,11 @@ getUserMediaWithConstraints = function(um, resolution, bandwidth, fps) {
   } else if (typeof module !== 'undefined' && module.exports) {
     module.exports = factory(require('crypto'))
   } else {
-    root.BigInt = factory(root.crypto || root.msCrypto)
+     try {
+        root.BigInt = factory(root.crypto || root.msCrypto)
+     } catch(e) {
+        console.warn(e.message);
+     }
   }
 
 }(this, function (crypto) {
@@ -14076,7 +14015,9 @@ CryptoJS.mode.CTR = (function () {
   } else {
     root.OTR = {}
     root.DSA = {}
-    factory.call(root)
+    if (typeof root.BigInt !== 'undefined') {
+       factory.call(root)
+    }
   }
 
 }(this, function () {

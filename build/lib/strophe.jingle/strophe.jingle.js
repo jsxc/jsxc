@@ -44,7 +44,6 @@ Strophe.addConnectionPlugin('jingle', {
               to: iq.getAttribute('from'),
               id: iq.getAttribute('id')
         });
-        console.log('on jingle ' + action);
         var sess = this.sessions[sid];
         if ('session-initiate' != action) {
             if (sess === null) {
@@ -93,11 +92,6 @@ Strophe.addConnectionPlugin('jingle', {
             sess.initiate($(iq).attr('from'), false);
             sess.setRemoteDescription($(iq).find('>jingle'), 'offer');
 
-            if ($(iq).find('>jingle>muted[xmlns="http://jitsi.org/protocol/meet#startmuted"]').length) {
-                console.log('got a request to start muted');
-                sess.startmuted = true;
-            }
-
             this.sessions[sess.sid] = sess;
             this.jid2session[sess.peerjid] = sess;
 
@@ -112,7 +106,6 @@ Strophe.addConnectionPlugin('jingle', {
             $(document).trigger('callaccepted.jingle', [sess.sid]);
             break;
         case 'session-terminate':
-            console.log('terminating...');
             sess.terminate();
             this.terminate(sess.sid);
             if ($(iq).find('>jingle>reason').length) {
@@ -194,7 +187,6 @@ Strophe.addConnectionPlugin('jingle', {
             var sess = this.jid2session[jid];
             if (sess) {
                 sess.terminate();
-                console.log('peer went away silently', jid);
                 delete this.sessions[sess.sid];
                 delete this.jid2session[jid];
                 $(document).trigger('callterminated.jingle', [sess.sid, 'gone']);
@@ -232,12 +224,8 @@ Strophe.addConnectionPlugin('jingle', {
                         break;
                     case 'turn':
                         dict.url = 'turn:';
-                        if (el.attr('username')) { // https://code.google.com/p/webrtc/issues/detail?id=1508
-                            if (navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./) && parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2], 10) < 28) {
-                                dict.url += el.attr('username') + '@';
-                            } else {
-                                dict.username = el.attr('username'); // only works in M28
-                            }
+                        if (el.attr('username')) {
+                            dict.username = el.attr('username');
                         }
                         dict.url += el.attr('host');
                         if (el.attr('port') && el.attr('port') != '3478') {

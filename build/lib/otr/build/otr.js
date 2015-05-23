@@ -29,7 +29,9 @@
   } else {
     root.OTR = {}
     root.DSA = {}
-    factory.call(root)
+    if (typeof root.BigInt !== 'undefined') {
+       factory.call(root)
+    }
   }
 
 }(this, function () {

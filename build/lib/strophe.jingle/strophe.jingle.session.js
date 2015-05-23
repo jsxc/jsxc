@@ -222,11 +222,11 @@ JingleSession.prototype.sendIceCandidate = function (candidate) {
                         }, 20);
 
                     }
-                    this.drip_container.push(event.candidate);
+                    this.drip_container.push(candidate);
                     return;
                 } else {
                     console.log('sending single candidate');
-                    self.sendIceCandidates([event.candidate]);
+                    self.sendIceCandidates([candidate]);
                 }
             }
         }
@@ -240,7 +240,7 @@ JingleSession.prototype.sendIceCandidate = function (candidate) {
                    action: this.peerconnection.localDescription.type == 'offer' ? 'session-initiate' : 'session-accept',
                    initiator: this.initiator,
                    sid: this.sid});
-            if (this.nickname != null) {
+            if (this.nickname !== null) {
                 init.c('nick', {xmlns:'http://jabber.org/protocol/nick'}).t(this.nickname).up();
             }
             if (this.startmuted) {
@@ -288,11 +288,12 @@ JingleSession.prototype.sendIceCandidates = function (candidates) {
            sid: this.sid});
     for (var mid = 0; mid < this.localSDP.media.length; mid++) {
         var cands = candidates.filter(function (el) { return el.sdpMLineIndex == mid; });
+        var mline = SDPUtil.parse_mline(this.localSDP.media[mid].split('\r\n')[0]);
         if (cands.length > 0) {
             var ice = SDPUtil.iceparams(this.localSDP.media[mid], this.localSDP.session);
             ice.xmlns = 'urn:xmpp:jingle:transports:ice-udp:1';
             cand.c('content', {creator: this.initiator == this.me ? 'initiator' : 'responder',
-                   name: cands[0].sdpMid
+                name: (cands[0].sdpMid? cands[0].sdpMid : mline.media)
             }).c('transport', ice);
             for (var i = 0; i < cands.length; i++) {
                 cand.c('candidate', SDPUtil.candidateToJingle(cands[i].candidate)).up();
@@ -357,7 +358,7 @@ JingleSession.prototype.createdOffer = function (sdp) {
                action: 'session-initiate',
                initiator: this.initiator,
                sid: this.sid});
-        if (this.nickname != null) {
+        if (this.nickname !== null) {
             init.c('nick', {xmlns:'http://jabber.org/protocol/nick'}).t(this.nickname).up();
         }
         if (this.startmuted) {

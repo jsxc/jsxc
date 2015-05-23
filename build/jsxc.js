@@ -1,5 +1,5 @@
 /*!
- * jsxc v2.0.0 - 2015-05-08
+ * jsxc v2.0.1 - 2015-05-23
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 2.0.0
+ * @version 2.0.1
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '2.0.0',
+   version: '2.0.1',
 
    /** True if i'm the master */
    master: false,
@@ -201,6 +201,12 @@ jsxc = {
          $.extend(true, jsxc.options, options);
       }
 
+      // Check localStorage
+      if (typeof (localStorage) === 'undefined') {
+         jsxc.warn("Browser doesn't support localStorage.");
+         return;
+      }
+
       /**
        * Getter method for options. Saved options will override default one.
        * 
@@ -248,12 +254,6 @@ jsxc = {
          localStorageExpirationTime: 60 * 60 * 24 * 1000,
       });
 
-      // Check localStorage
-      if (typeof (localStorage) === 'undefined') {
-         jsxc.debug("Browser doesn't support localStorage.");
-         return;
-      }
-
       if (jsxc.storage.getItem('debug') === true) {
          jsxc.options.otr.debug = true;
       }
@@ -282,6 +282,10 @@ jsxc = {
 
       // Check if we have to establish a new connection
       if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
+
+         // clean up rid and sid
+         jsxc.storage.removeItem('rid');
+         jsxc.storage.removeItem('sid');
 
          // Looking for a login form
          if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
@@ -364,7 +368,9 @@ jsxc = {
          return;
       }
 
-      jsxc.gui.showWaitAlert($.t('Logging_in'));
+      if (!jsxc.triggeredFromBox && (jsxc.options.loginForm.onConnecting === 'dialog' || typeof jsxc.options.loginForm.onConnecting === 'undefined')) {
+        jsxc.gui.showWaitAlert($.t('Logging_in'));
+      }
 
       var settings = jsxc.options.loadSettings.call(this, username, password);
 
@@ -373,6 +379,9 @@ jsxc = {
 
          return false;
       }
+
+      // prevent to modify the original object
+      settings = $.extend(true, {}, settings);
 
       if (typeof settings.xmpp.username === 'string') {
          username = settings.xmpp.username;
@@ -602,6 +611,7 @@ jsxc = {
          jsxc.gui.roster.add(value);
       });
 
+      jsxc.gui.roster.loaded = true;
       $(document).trigger('cloaded.roster.jsxc');
    },
 
@@ -1148,27 +1158,44 @@ jsxc.gui = {
 
       jsxc.gui.dialog.open(jsxc.gui.template.get('loginBox'));
 
-      $('#jsxc_dialog').find('form').submit(function() {
+      var alert = $('#jsxc_dialog').find('.jsxc_alert');
+      alert.hide();
 
-         $(this).find('input[type=submit]').prop('disabled', true);
+      $('#jsxc_dialog').find('form').submit(function(ev) {
+
+         ev.preventDefault();
+
+         $(this).find('button[data-jsxc-loading-text]').trigger('btnloading.jsxc');
 
          jsxc.options.loginForm.form = $(this);
          jsxc.options.loginForm.jid = $(this).find('#jsxc_username');
          jsxc.options.loginForm.pass = $(this).find('#jsxc_password');
 
-         var settings = jsxc.prepareLogin();
-
          jsxc.triggeredFromBox = true;
          jsxc.options.loginForm.triggered = false;
 
+         var settings = jsxc.prepareLogin();
+
          if (settings === false) {
-            jsxc.gui.showAuthFail();
+            onAuthFail();
          } else {
+            $(document).on('authfail.jsxc', onAuthFail);
+
             jsxc.xmpp.login();
          }
-
-         return false;
       });
+
+      function onAuthFail() {
+        alert.show();
+        jsxc.gui.dialog.resize();
+
+        $('#jsxc_dialog').find('button').trigger('btnfinished.jsxc');
+
+        $('#jsxc_dialog').find('input').one('keypress', function() {
+            alert.hide();
+            jsxc.gui.dialog.resize();
+        });
+      }
    },
 
    /**
@@ -1994,6 +2021,9 @@ jsxc.gui.roster = {
    /** True if roster is initialised */ 
    ready: false,
 
+   /** True if all items are loaded */
+   loaded: false,
+
    /**
     * Init the roster skeleton
     * 
@@ -2396,6 +2426,32 @@ jsxc.gui.dialog = {
             if (options.closeButton === false) {
                $('#cboxClose').hide();
             }
+
+            $('#jsxc_dialog form').each(function() {
+                var form = $(this);
+
+                form.find('button[data-jsxc-loading-text]').each(function(){
+                    var btn = $(this);
+
+                    btn.on('btnloading.jsxc', function(){
+                        if(!btn.prop('disabled')) {
+                            btn.prop('disabled', true);
+
+                            btn.data('jsxc_value', btn.text());
+
+                            btn.text(btn.attr('data-jsxc-loading-text'));
+                        }
+                    });
+
+                    btn.on('btnfinished.jsxc', function() {
+                        if(btn.prop('disabled')) {
+                            btn.prop('disabled', false);
+
+                            btn.text(btn.data('jsxc_value'));
+                        }
+                    });
+                });
+            });
 
             jsxc.gui.dialog.resize();
 
@@ -3076,8 +3132,13 @@ jsxc.gui.template = {
       var ret = jsxc.gui.template[name];
 
       if (typeof (ret) === 'string') {
+         // prevent 404
+         ret = ret.replace(/\{\{root\}\}/g, ph.root);
+
+         // convert to string
          ret = $('<div>').append($(ret).i18n()).html();
 
+         // replace placeholders
          ret = ret.replace(/\{\{([a-zA-Z0-9_\-]+)\}\}/g, function(s, key) {
             return (typeof ph[key] === 'string') ? ph[key] : s;
          });
@@ -3214,9 +3275,10 @@ jsxc.gui.template = {
                <input type="text" name="username" id="jsxc_username" required="required" value="{{my_node}}"/></p>\
             <p><label for="jsxc_password" data-i18n="Password"></label>\
                <input type="password" name="password" required="required" id="jsxc_password" /></p>\
+            <div class="jsxc_alert jsxc_alert-warning" data-i18n="Sorry_we_cant_authentikate_"></div>\
             <div class="bottom_submit_section">\
-                <input type="reset" class="button jsxc_close" name="clear" data-i18n="[value]Cancel"/>\
-                <input type="submit" class="button creation" name="commit" data-i18n="[value]Connect"/>\
+                <button type="reset" class="jsxc_btn jsxc_close" name="clear" data-i18n="Cancel"/>\
+                <button type="submit" class="jsxc_btn jsxc_btn-primary" name="commit" data-i18n="[data-jsxc-loading-text]Connecting...;Connect"/>\
             </div>\
         </form>',
    contactDialog: '<h3 data-i18n="Add_buddy"></h3>\
@@ -4871,13 +4933,19 @@ jsxc.options = {
       },
 
       /**
+       * Action after login was called: dialog [String] Show wait dialog, false [boolean] | 
+       * quiet [String] Do nothing
+       */
+      onConnecting: 'dialog',
+
+      /**
        * Action after connected: submit [String] Submit form, false [boolean] Do
        * nothing, continue [String] Start chat
        */
       onConnected: 'submit',
 
       /**
-       * Action after auth fail: submit [String] Submit form, false [boolean] Do
+       * Action after auth fail: submit [String] Submit form, false [boolean] | quiet [String] Do
        * nothing, ask [String] Show auth fail dialog
        */
       onAuthFail: 'submit'
@@ -5226,6 +5294,10 @@ jsxc.otr = {
     * @returns {undefined}
     */
    toggleTransfer: function(bid) {
+      if (typeof OTR !== 'function') {
+         return;
+      }
+
       if (jsxc.storage.getUserItem('buddy', bid).msgstate === 0) {
          jsxc.otr.goEncrypt(bid);
       } else {
@@ -5241,7 +5313,9 @@ jsxc.otr = {
     */
    goEncrypt: function(bid) {
       if (jsxc.master) {
-         jsxc.otr.objects[bid].sendQueryMsg();
+         if (jsxc.otr.objects.hasOwnProperty(bid)) {
+            jsxc.otr.objects[bid].sendQueryMsg();
+         }
       } else {
          jsxc.storage.updateUserItem('buddy', bid, 'transferReq', 1);
       }
@@ -5256,10 +5330,12 @@ jsxc.otr = {
     */
    goPlain: function(bid, cb) {
       if (jsxc.master) {
-         jsxc.otr.objects[bid].endOtr.call(jsxc.otr.objects[bid], cb);
-         jsxc.otr.objects[bid].init.call(jsxc.otr.objects[bid]);
+         if (jsxc.otr.objects.hasOwnProperty(bid)) {
+            jsxc.otr.objects[bid].endOtr.call(jsxc.otr.objects[bid], cb);
+            jsxc.otr.objects[bid].init.call(jsxc.otr.objects[bid]);
 
-         jsxc.otr.backup(bid);
+            jsxc.otr.backup(bid);
+         }
       } else {
          jsxc.storage.updateUserItem('buddy', bid, 'transferReq', 0);
       }
@@ -5339,6 +5415,21 @@ jsxc.otr = {
     */
    createDSA: function() {
       if (jsxc.options.otr.priv) {
+         return;
+      }
+
+      if (typeof OTR !== 'function') {
+         jsxc.warn('OTR support disabled');
+
+         OTR = {};
+         OTR.CONST = {
+            MSGSTATE_PLAINTEXT : 0,
+            MSGSTATE_ENCRYPTED : 1,
+            MSGSTATE_FINISHED  : 2
+         };
+
+         jsxc._onMaster();
+
          return;
       }
 
@@ -6338,7 +6429,17 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
          }
 
          var win = jsxc.gui.window.get(bid);
-         var jid = win.data('jid') || jsxc.storage.getUserItem('buddy', bid).jid;
+         var jid = win.data('jid');
+         var ls = jsxc.storage.getUserItem('buddy', bid);
+
+         if (typeof jid !== 'string') {
+            if (ls && typeof ls.jid === 'string') {
+               jid = ls.jid;
+            } else {
+               jsxc.debug('[webrtc] Could not update icon, because could not find jid for ' + bid);
+               return;
+            }
+         }
 
          var el = win.find('.jsxc_video').add(jsxc.gui.roster.getItem(bid).find('.jsxc_video'));
 
@@ -6401,12 +6502,14 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
        * @param status
        * @private
        */
-      onPresence: function(ev, jid) {
+      onPresence: function(ev, jid, status, presence) {
          var self = jsxc.webrtc;
 
-         jsxc.debug('webrtc.onpresence', jid);
+         if ($(presence).find('c[xmlns="' + Strophe.NS.CAPS + '"]').length === 0) {
+            jsxc.debug('webrtc.onpresence', jid);
 
-         self.updateIcon(jsxc.jidToBid(jid));
+            self.updateIcon(jsxc.jidToBid(jid));
+         }
       },
 
       /**
@@ -6467,7 +6570,13 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
       onCaps: function(event, jid) {
          var self = jsxc.webrtc;
 
-         self.updateIcon(jsxc.jidToBid(jid));
+         if (jsxc.gui.roster.loaded) {
+            self.updateIcon(jsxc.jidToBid(jid));
+         } else {
+            $(document).on('cloaded.roster.jsxc', function() {
+               self.updateIcon(jsxc.jidToBid(jid));
+            });
+         }
       },
 
       /**
@@ -6708,23 +6817,7 @@ jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
             sess.local_fp = SDPUtil.parse_fingerprint(SDPUtil.find_line(localSDP, 'a=fingerprint:')).fingerprint;
             sess.remote_fp = SDPUtil.parse_fingerprint(SDPUtil.find_line(remoteSDP, 'a=fingerprint:')).fingerprint;
 
-            var ip_regex = "(\\d{1,3}\\.\\d{1,3}.\\d{1,3}\\.\\d{1,3}) \\d+ typ host";
-
-            sess.remote_ip = remoteSDP.match(new RegExp(ip_regex))[1];
-            sess.local_ip = localSDP.match(new RegExp(ip_regex))[1];
-
-            var regex = new RegExp(ip_regex, 'g');
-            var match;
-            while ((match = regex.exec(remoteSDP)) !== null) {
-               if (match[1] !== sess.remote_ip) {
-                  alert('!!! WARNING !!!\n\nPossible Man-in-the-middle attack detected!\n\nYou should close the connection.');
-                  return;
-               }
-            }
-
             var text = '<p>';
-            text += '<b>' + $.t('Local_IP') + ': </b>' + sess.local_ip + '<br />';
-            text += '<b>' + $.t('Remote_IP') + ': </b>' + sess.remote_ip + '<br />';
             text += '<b>' + $.t('Local_Fingerprint') + ': </b>' + sess.local_fp + '<br />';
             text += '<b>' + $.t('Remote_Fingerprint') + ': </b>' + sess.remote_fp;
             text += '</p>';
@@ -7071,7 +7164,7 @@ jsxc.xmpp = {
     */
    login: function() {
 
-      if (jsxc.xmpp.conn && jsxc.xmpp.conn.connected) {
+      if (jsxc.xmpp.conn && jsxc.xmpp.conn.authenticated) {
          return;
       }
 
@@ -7102,15 +7195,17 @@ jsxc.xmpp = {
 
       var url = jsxc.options.get('xmpp').url;
 
-      // Register eventlistener
-      $(document).on('connected.jsxc', jsxc.xmpp.connected);
-      $(document).on('attached.jsxc', jsxc.xmpp.attached);
-      $(document).on('disconnected.jsxc', jsxc.xmpp.disconnected);
-      $(document).on('ridChange', jsxc.xmpp.onRidChange);
-      $(document).on('connfail.jsxc', jsxc.xmpp.onConnfail);
-      $(document).on('authfail.jsxc', jsxc.xmpp.onAuthFail);
+      if (!(jsxc.xmpp.conn && jsxc.xmpp.conn.connected)) {
+        // Register eventlistener
+        $(document).on('connected.jsxc', jsxc.xmpp.connected);
+        $(document).on('attached.jsxc', jsxc.xmpp.attached);
+        $(document).on('disconnected.jsxc', jsxc.xmpp.disconnected);
+        $(document).on('ridChange', jsxc.xmpp.onRidChange);
+        $(document).on('connfail.jsxc', jsxc.xmpp.onConnfail);
+        $(document).on('authfail.jsxc', jsxc.xmpp.onAuthFail);
 
-      Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
+        Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
+      }
 
       // Create new connection (no login)
       jsxc.xmpp.conn = new Strophe.Connection(url);
@@ -7138,6 +7233,9 @@ jsxc.xmpp = {
          jsxc.debug(Object.getOwnPropertyNames(Strophe.Status)[status] + ': ' + condition);
 
          switch (status) {
+            case Strophe.Status.CONNECTING:
+               $(document).trigger('connecting.jsxc');
+               break;
             case Strophe.Status.CONNECTED:
                jsxc.bid = jsxc.jidToBid(jsxc.xmpp.conn.jid.toLowerCase());
                $(document).trigger('connected.jsxc');
@@ -7470,6 +7568,7 @@ jsxc.xmpp = {
     * @private
     */
    onAuthFail: function() {
+
       if (jsxc.options.loginForm.triggered) {
          switch (jsxc.options.loginForm.onAuthFail || 'ask') {
             case 'ask':
@@ -7478,11 +7577,10 @@ jsxc.xmpp = {
             case 'submit':
                jsxc.submitLoginForm();
                break;
+            case 'quiet':
+            case false:
+               return;
          }
-      }
-
-      if (jsxc.triggeredFromBox) {
-         jsxc.gui.showAuthFail();
       }
    },
 
@@ -7529,6 +7627,7 @@ jsxc.xmpp = {
 
       jsxc.storage.setUserItem('buddylist', buddies);
 
+      jsxc.gui.roster.loaded = true;
       jsxc.debug('Roster loaded');
       $(document).trigger('cloaded.roster.jsxc');
    },

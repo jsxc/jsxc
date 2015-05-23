@@ -68,7 +68,7 @@ TraceablePeerConnection = function(ice_config, constraints) {
         if (self.ondatachannel !== null) {
             self.ondatachannel(event);
         }
-    }
+    };
     if (!navigator.mozGetUserMedia) {
         this.statsinterval = window.setInterval(function() {
             self.peerconnection.getStats(function(stats) {
@@ -99,18 +99,19 @@ TraceablePeerConnection = function(ice_config, constraints) {
 
         }, 1000);
     }
-};
+}
 
 dumpSDP = function(description) {
     return 'type: ' + description.type + '\r\n' + description.sdp;
-}
+};
 
-if (TraceablePeerConnection.prototype.__defineGetter__ !== undefined) {
-    TraceablePeerConnection.prototype.__defineGetter__('signalingState', function() { return this.peerconnection.signalingState; });
-    TraceablePeerConnection.prototype.__defineGetter__('iceConnectionState', function() { return this.peerconnection.iceConnectionState; });
-    TraceablePeerConnection.prototype.__defineGetter__('localDescription', function() { return this.peerconnection.localDescription; });
-    TraceablePeerConnection.prototype.__defineGetter__('remoteDescription', function() { return this.peerconnection.remoteDescription; });
-}
+['signalingState', 'iceConnectionState', 'localDescription', 'remoteDescription'].forEach(function (prop) {
+    Object.defineProperty(TraceablePeerConnection.prototype, prop, {
+        get: function () {
+            return this.peerconnection[prop]
+        }
+    });
+});
 
 TraceablePeerConnection.prototype.addStream = function (stream) {
     this.trace('addStream', stream.id);
@@ -125,7 +126,7 @@ TraceablePeerConnection.prototype.removeStream = function (stream) {
 TraceablePeerConnection.prototype.createDataChannel = function (label, opts) {
     this.trace('createDataChannel', label, opts);
     this.peerconnection.createDataChannel(label, opts);
-}
+};
 
 TraceablePeerConnection.prototype.setLocalDescription = function (description, successCallback, failureCallback) {
     var self = this;
@@ -212,21 +213,19 @@ TraceablePeerConnection.prototype.addIceCandidate = function (candidate, success
     var self = this;
     this.trace('addIceCandidate', JSON.stringify(candidate, null, ' '));
     this.peerconnection.addIceCandidate(candidate);
-    /* maybe later
     this.peerconnection.addIceCandidate(candidate, 
         function () {                                
             self.trace('addIceCandidateOnSuccess');
-            successCallback();
+            if (successCallback) successCallback();
         },
         function (err) {
             self.trace('addIceCandidateOnFailure', err);
-            failureCallback(err);
+            if (failureCallback) failureCallback(err);
         }
     );
-    */
 };
 
-TraceablePeerConnection.prototype.getStats = function(callback, errback) {
+TraceablePeerConnection.prototype.getStats = function(callback) {
     if (navigator.mozGetUserMedia) {
         // ignore for now...
     } else {
@@ -237,9 +236,9 @@ TraceablePeerConnection.prototype.getStats = function(callback, errback) {
 // mozilla chrome compat layer -- very similar to adapter.js
 setupRTC = function (){
     var RTC = null;
-    if (navigator.mozGetUserMedia) {
+    if (navigator.mozGetUserMedia && mozRTCPeerConnection) {
         console.log('This appears to be Firefox');
-        var version = parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
+        var version = navigator.userAgent.match(/Firefox/) ? parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10) : 0;
         if (version >= 22) {
             RTC = {
                 peerconnection: mozRTCPeerConnection,
@@ -251,10 +250,6 @@ setupRTC = function (){
                 },
                 pc_constraints: {}
             };
-            if (!MediaStream.prototype.getVideoTracks)
-                MediaStream.prototype.getVideoTracks = function () { return []; };
-            if (!MediaStream.prototype.getAudioTracks)
-                MediaStream.prototype.getAudioTracks = function () { return []; };
             RTCSessionDescription = mozRTCSessionDescription;
             RTCIceCandidate = mozRTCIceCandidate;
         }
@@ -270,19 +265,6 @@ setupRTC = function (){
             // DTLS should now be enabled by default but..
             pc_constraints: {'optional': [{'DtlsSrtpKeyAgreement': 'true'}]} 
         };
-        if (navigator.userAgent.indexOf('Android') != -1) {
-            RTC.pc_constraints = {}; // disable DTLS on Android
-        }
-        if (!webkitMediaStream.prototype.getVideoTracks) {
-            webkitMediaStream.prototype.getVideoTracks = function () {
-                return this.videoTracks;
-            };
-        }
-        if (!webkitMediaStream.prototype.getAudioTracks) {
-            webkitMediaStream.prototype.getAudioTracks = function () {
-                return this.audioTracks;
-            };
-        }
     }
     if (RTC === null) {
         try { console.log('Browser does not appear to be WebRTC-capable'); } catch (e) { }
@@ -317,23 +299,19 @@ getUserMediaWithConstraints = function(um, resolution, bandwidth, fps) {
     case 'fullhd':
         constraints.video.mandatory.minWidth = 1920;
         constraints.video.mandatory.minHeight = 1080;
-        constraints.video.mandatory.minAspectRatio = 1.77;
         break;
     case '720':
     case 'hd':
         constraints.video.mandatory.minWidth = 1280;
         constraints.video.mandatory.minHeight = 720;
-        constraints.video.mandatory.minAspectRatio = 1.77;
         break;
     case '360':
         constraints.video.mandatory.minWidth = 640;
         constraints.video.mandatory.minHeight = 360;
-        constraints.video.mandatory.minAspectRatio = 1.77;
         break;
     case '180':
         constraints.video.mandatory.minWidth = 320;
         constraints.video.mandatory.minHeight = 180;
-        constraints.video.mandatory.minAspectRatio = 1.77;
         break;
         // 4:3
     case '960':
@@ -357,6 +335,10 @@ getUserMediaWithConstraints = function(um, resolution, bandwidth, fps) {
         }
         break;
     }
+
+    // take what is configured and try not to be more intelligent
+    if (constraints.video.minWidth) constraints.video.maxWidth = constraints.video.minWidth;
+    if (constraints.video.minHeight) constraints.video.maxHeight = constraints.video.minHeight;
 
     if (bandwidth) { // doesn't work currently, see webrtc issue 1846
         if (!constraints.video) constraints.video = {mandatory: {}};//same behaviour as true

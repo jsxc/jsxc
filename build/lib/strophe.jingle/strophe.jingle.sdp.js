@@ -52,7 +52,8 @@ SDP.prototype.removeSessionLines = function(prefix) {
     });
     this.raw = this.session + this.media.join('');
     return lines;
-}
+};
+
 // remove lines matching prefix from a media section specified by mediaindex
 // TODO: non-numeric mediaindex could match mid
 SDP.prototype.removeMediaLines = function(mediaindex, prefix) {
@@ -63,7 +64,7 @@ SDP.prototype.removeMediaLines = function(mediaindex, prefix) {
     });
     this.raw = this.session + this.media.join('');
     return lines;
-}
+};
 
 // add content's to a jingle element
 SDP.prototype.toJingle = function (elem, thecreator) {
@@ -104,12 +105,6 @@ SDP.prototype.toJingle = function (elem, thecreator) {
             // prefer identifier from a=mid if present
             var mid = SDPUtil.parse_mid(SDPUtil.find_line(this.media[i], 'a=mid:'));
             elem.attrs({ name: mid });
-
-            // old BUNDLE plan, to be removed
-            if (bundle.indexOf(mid) != -1) {
-                elem.c('bundle', {xmlns: 'http://estos.de/ns/bundle'}).up();
-                bundle.splice(bundle.indexOf(mid), 1);
-            }
         }
         if (SDPUtil.find_line(this.media[i], 'a=rtpmap:').length) {
             elem.c('description',
@@ -165,12 +160,6 @@ SDP.prototype.toJingle = function (elem, thecreator) {
                     elem.up();
                 });
                 elem.up();
-
-                // old proprietary mapping, to be removed at some point
-                tmp = SDPUtil.parse_ssrc(this.media[i]);
-                tmp.xmlns = 'http://estos.de/ns/ssrc';
-                tmp.ssrc = ssrc;
-                elem.c('ssrc', tmp).up(); // ssrc is part of description
             }
 
             if (SDPUtil.find_line(this.media[i], 'a=rtcp-mux')) {
@@ -267,7 +256,7 @@ SDP.prototype.TransportToJingle = function (mediaindex, elem) {
         }
     }
     elem.up(); // end of transport
-}
+};
 
 SDP.prototype.RtcpFbToJingle = function (mediaindex, elem, payloadtype) { // XEP-0293
     var lines = SDPUtil.find_lines(this.media[mediaindex], 'a=rtcp-fb:' + payloadtype);
@@ -340,7 +329,6 @@ SDP.prototype.fromJingle = function (jingle) {
         // for backward compability, to be removed soon
         // assume all contents are in the same bundle group, can be improved upon later
         var bundle = $(jingle).find('>content').filter(function (idx, content) {
-            //elem.c('bundle', {xmlns:'http://estos.de/ns/bundle'});
             return $(content).find('>bundle').length > 0;
         }).map(function (idx, content) {
             return content.getAttribute('name');
@@ -476,17 +464,6 @@ SDP.prototype.jingle2media = function (content) {
             media += '\r\n';
         });
     });
-
-    if (tmp.length === 0) {
-        // fallback to proprietary mapping of a=ssrc lines
-        tmp = content.find('description>ssrc[xmlns="http://estos.de/ns/ssrc"]');
-        if (tmp.length) {
-            media += 'a=ssrc:' + ssrc + ' cname:' + tmp.attr('cname') + '\r\n';
-            media += 'a=ssrc:' + ssrc + ' msid:' + tmp.attr('msid') + '\r\n';
-            media += 'a=ssrc:' + ssrc + ' mslabel:' + tmp.attr('mslabel') + '\r\n';
-            media += 'a=ssrc:' + ssrc + ' label:' + tmp.attr('label') + '\r\n';
-        }
-    }
     return media;
 };
 
@@ -728,8 +705,6 @@ SDPUtil = {
         return needles;
     },
     candidateToJingle: function (line) {
-        // a=candidate:2979166662 1 udp 2113937151 192.168.2.100 57698 typ host generation 0
-        //      <candidate component=... foundation=... generation=... id=... ip=... network=... port=... priority=... protocol=... type=.../>
         if (line.indexOf('candidate:') === 0) {
             line = 'a=' + line;
         } else if (line.substring(0, 12) != 'a=candidate:') {            
@@ -755,8 +730,7 @@ SDPUtil = {
         candidate.port = elems[5];
         // elems[6] => "typ"
         candidate.type = elems[7];
-
-        candidate.generation = '0'; // fippo from jitsi-meet: default, may be overwritten below
+        candidate.generation = '0';
 
         for (i = 8; i < elems.length; i += 2) {
             switch (elems[i]) {
@@ -781,42 +755,31 @@ SDPUtil = {
         return candidate;
     },
     candidateFromJingle: function (cand) {
-        var line = 'a=candidate:';
-        line += cand.getAttribute('foundation');
-        line += ' ';
-        line += cand.getAttribute('component');
-        line += ' ';
-        line += cand.getAttribute('protocol'); //.toUpperCase(); // chrome M23 doesn't like this
-        line += ' ';
-        line += cand.getAttribute('priority');
-        line += ' ';
-        line += cand.getAttribute('ip');
-        line += ' ';
-        line += cand.getAttribute('port');
-        line += ' ';
-        line += 'typ';
-        line += ' ' + cand.getAttribute('type');
-        line += ' ';
+        var parts = [
+            'a=candidate:' + cand.getAttribute('foundation'),
+            cand.getAttribute('component'),
+            cand.getAttribute('protocol'),
+            cand.getAttribute('priority'),
+            cand.getAttribute('ip'),
+            cand.getAttribute('port'),
+            'typ',
+            cand.getAttribute('type')
+        ];
         switch (cand.getAttribute('type')) {
         case 'srflx':
         case 'prflx':
         case 'relay':
             if (cand.getAttribute('rel-addr') && cand.getAttribute('rel-port')) {
-                line += 'raddr';
-                line += ' ';
-                line += cand.getAttribute('rel-addr');
-                line += ' ';
-                line += 'rport';
-                line += ' ';
-                line += cand.getAttribute('rel-port');
-                line += ' ';
+                parts.push('raddr');
+                parts.push(cand.getAttribute('rel-addr'));
+                parts.push('rport');
+                parts.push(cand.getAttribute('rel-port'));
             }
             break;
         }
-        line += 'generation';
-        line += ' ';
-        line += cand.getAttribute('generation') || '0';
-        return line + '\r\n';
+        parts.push('generation');
+        parts.push(cand.getAttribute('generation') || '0');
+        return parts.join(' ') + '\r\n';
     }
 };
 }(jQuery));

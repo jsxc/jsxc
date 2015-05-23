@@ -1,3 +1,16 @@
+v2.0.1 / 2015-05-23
+===
+- improve login box
+- fix browsers without CSPRNG generator
+- fix ajax login after credential failure
+- fix some webrtc issues
+- fix login with different username after dirty logout
+- remove ie (<11) gradient
+- remove broken mitm detection
+- fix temporary template 404
+- fix login option
+- add connecting event
+
 v2.0.0 / 2015-05-08
 ===
 - add multi-user chat (XEP-0045)

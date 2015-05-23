@@ -863,8 +863,7 @@ ul.jsxc_vCard {
     height: 15px;
     z-index: 100;
     background: -webkit-linear-gradient(top, #999999 0, rgba(0, 0, 0, 0) 100%);
-    background: linear-gradient(to bottom, #999999 0, rgba(0, 0, 0, 0) 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$window_gradient', endColorstr='#00282323', GradientType=0); }
+    background: linear-gradient(to bottom, #999999 0, rgba(0, 0, 0, 0) 100%); }
   .jsxc_window .jsxc_avatar {
     margin-top: 1px; }
   .jsxc_window .jsxc_textarea {
@@ -931,8 +930,7 @@ ul.jsxc_vCard {
     height: 15px;
     z-index: 100;
     background: -webkit-linear-gradient(top, #999999 0, rgba(40, 35, 35, 0) 100%);
-    background: linear-gradient(to bottom, #999999 0, rgba(40, 35, 35, 0) 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$window_gradient', endColorstr='#00282323', GradientType=0); }
+    background: linear-gradient(to bottom, #999999 0, rgba(40, 35, 35, 0) 100%); }
 
 .jsxc_chatmessage {
   margin: 3px;
@@ -1126,3 +1124,33 @@ img.jsxc_vCard {
   max-height: 200px;
   border: 5px solid #fff;
   border-radius: 2px; }
+
+.jsxc_alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px; }
+  .jsxc_alert.jsxc_alert-warning {
+    color: #8a6d3b;
+    background-color: #fcf8e3;
+    border-color: #faebcc; }
+
+.jsxc_btn {
+  width: auto;
+  min-width: 25px;
+  padding: 5px;
+  background-color: rgba(240, 240, 240, 0.9);
+  font-weight: bold;
+  color: #555;
+  border: 1px solid rgba(190, 190, 190, 0.9);
+  cursor: pointer; }
+  .jsxc_btn.jsxc_btn-primary {
+    color: #fff;
+    background-color: #337ab7;
+    border-color: #2e6da4; }
+  .jsxc_btn[disabled], .jsxc_btn[disabled]:hover {
+    opacity: 0.65;
+    cursor: not-allowed;
+    color: #fff;
+    background-color: #337ab7;
+    border-color: #2e6da4; }
