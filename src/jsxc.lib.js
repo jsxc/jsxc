@@ -63,7 +63,7 @@ jsxc = {
       NOTIFICATION_DEFAULT: 'default',
       NOTIFICATION_GRANTED: 'granted',
       NOTIFICATION_DENIED: 'denied',
-      STATUS: [ 'offline', 'dnd', 'xa', 'away', 'chat', 'online' ],
+      STATUS: ['offline', 'dnd', 'xa', 'away', 'chat', 'online'],
       SOUNDS: {
          MSG: 'incomingMessage.wav',
          CALL: 'Rotary-Phone6.mp3',
@@ -93,7 +93,8 @@ jsxc = {
       var year = msgDate.getFullYear();
       var hours = ('0' + msgDate.getHours()).slice(-2);
       var minutes = ('0' + msgDate.getMinutes()).slice(-2);
-      var dateNow = new Date(), time = hours + ':' + minutes;
+      var dateNow = new Date(),
+         time = hours + ':' + minutes;
 
       // compare dates only
       dateNow.setHours(0, 0, 0, 0);
@@ -182,7 +183,7 @@ jsxc = {
       }
 
       // Check localStorage
-      if (typeof (localStorage) === 'undefined') {
+      if (typeof(localStorage) === 'undefined') {
          jsxc.warn("Browser doesn't support localStorage.");
          return;
       }
@@ -249,15 +250,15 @@ jsxc = {
 
       $(document).on('connectionReady.jsxc', function() {
          // Looking for logout element
-          if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
-             var logout = function() {
-                jsxc.options.logoutElement = $(this);
-                jsxc.triggeredFromLogout = true;
-                return jsxc.xmpp.logout();
-             };
+         if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+            var logout = function() {
+               jsxc.options.logoutElement = $(this);
+               jsxc.triggeredFromLogout = true;
+               return jsxc.xmpp.logout();
+            };
 
-             jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
-          }
+            jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
+         }
       });
 
       // Check if we have to establish a new connection
@@ -325,7 +326,7 @@ jsxc = {
 
          jsxc.gui.init();
 
-         if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
+         if (typeof(jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
             jsxc.onMaster();
          } else {
             jsxc.checkMaster();
@@ -349,7 +350,7 @@ jsxc = {
       }
 
       if (!jsxc.triggeredFromBox && (jsxc.options.loginForm.onConnecting === 'dialog' || typeof jsxc.options.loginForm.onConnecting === 'undefined')) {
-        jsxc.gui.showWaitAlert($.t('Logging_in'));
+         jsxc.gui.showWaitAlert($.t('Logging_in'));
       }
 
       var settings = jsxc.options.loadSettings.call(this, username, password);
@@ -463,7 +464,7 @@ jsxc = {
       // Prepare notifications
       if (jsxc.restore) {
          var noti = jsxc.storage.getUserItem('notification');
-         noti = (typeof noti === 'number')? noti : 2;
+         noti = (typeof noti === 'number') ? noti : 2;
          if (jsxc.options.notification && noti > 0 && jsxc.notification.hasSupport()) {
             if (jsxc.notification.hasPermission()) {
                jsxc.notification.init();
@@ -754,7 +755,7 @@ jsxc = {
          return fn.apply(null, fnParams);
       }
    },
-   
+
    /**
     * Hash string into 32-bit signed integer.
     * 
@@ -763,14 +764,15 @@ jsxc = {
     * @returns {integer} 32-bit signed integer
     */
    hashStr: function(str) {
-      var hash = 0, i;
+      var hash = 0,
+         i;
 
       if (str.length === 0) {
          return hash;
       }
-      
+
       for (i = 0; i < str.length; i++) {
-         hash  = ((hash << 5) - hash) + str.charCodeAt(i);
+         hash = ((hash << 5) - hash) + str.charCodeAt(i);
          hash |= 0; // Convert to 32bit integer
       }
 

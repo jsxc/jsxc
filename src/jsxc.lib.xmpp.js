@@ -35,7 +35,10 @@ jsxc.xmpp = {
          return;
       }
 
-      var jid = null, password = null, sid = null, rid = null;
+      var jid = null,
+         password = null,
+         sid = null,
+         rid = null;
 
       switch (arguments.length) {
          case 2:
@@ -63,15 +66,15 @@ jsxc.xmpp = {
       var url = jsxc.options.get('xmpp').url;
 
       if (!(jsxc.xmpp.conn && jsxc.xmpp.conn.connected)) {
-        // Register eventlistener
-        $(document).on('connected.jsxc', jsxc.xmpp.connected);
-        $(document).on('attached.jsxc', jsxc.xmpp.attached);
-        $(document).on('disconnected.jsxc', jsxc.xmpp.disconnected);
-        $(document).on('ridChange', jsxc.xmpp.onRidChange);
-        $(document).on('connfail.jsxc', jsxc.xmpp.onConnfail);
-        $(document).on('authfail.jsxc', jsxc.xmpp.onAuthFail);
+         // Register eventlistener
+         $(document).on('connected.jsxc', jsxc.xmpp.connected);
+         $(document).on('attached.jsxc', jsxc.xmpp.attached);
+         $(document).on('disconnected.jsxc', jsxc.xmpp.disconnected);
+         $(document).on('ridChange', jsxc.xmpp.onRidChange);
+         $(document).on('connfail.jsxc', jsxc.xmpp.onConnfail);
+         $(document).on('authfail.jsxc', jsxc.xmpp.onAuthFail);
 
-        Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
+         Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
       }
 
       // Create new connection (no login)
@@ -137,7 +140,10 @@ jsxc.xmpp = {
             // Add system handler, because user handler isn't called before
             // we are authenticated
             jsxc.xmpp.conn._addSysHandler(function(stanza) {
-               var from = jsxc.xmpp.conn.domain, c = stanza.querySelector('c'), ver = c.getAttribute('ver'), node = c.getAttribute('node');
+               var from = jsxc.xmpp.conn.domain,
+                  c = stanza.querySelector('c'),
+                  ver = c.getAttribute('ver'),
+                  node = c.getAttribute('node');
 
                var _jidNodeIndex = JSON.parse(localStorage.getItem('strophe.caps._jidNodeIndex')) || {};
 
@@ -182,7 +188,7 @@ jsxc.xmpp = {
       // Hide dropdown menu
       $('body').click();
 
-      jsxc.triggeredFromElement = (typeof complete === 'boolean')? complete : true;
+      jsxc.triggeredFromElement = (typeof complete === 'boolean') ? complete : true;
 
       // restore all otr objects
       $.each(jsxc.storage.getUserItem('otrlist') || {}, function(i, val) {
@@ -402,7 +408,7 @@ jsxc.xmpp = {
       $('#jsxc_windowList').remove();
 
       if (jsxc.triggeredFromElement) {
-         $(document).trigger('toggle.roster.jsxc', [ 'hidden', 0 ]);
+         $(document).trigger('toggle.roster.jsxc', ['hidden', 0]);
          $('#jsxc_roster').remove();
 
          if (jsxc.triggeredFromLogout) {
@@ -549,7 +555,8 @@ jsxc.xmpp = {
          // Remove pending friendship request from notice list
          if (sub === 'from' || sub === 'both') {
             var notices = jsxc.storage.getUserItem('notices');
-            var noticeKey = null, notice;
+            var noticeKey = null,
+               notice;
 
             for (noticeKey in notices) {
                notice = notices[noticeKey];
@@ -610,7 +617,7 @@ jsxc.xmpp = {
       }
 
       if (ptype === 'error') {
-         $(document).trigger('error.presence.jsxc', [ from, presence ]);
+         $(document).trigger('error.presence.jsxc', [from, presence]);
 
          jsxc.error('[XMPP] ' + $(presence).attr('code'));
          return true;
@@ -622,7 +629,7 @@ jsxc.xmpp = {
             jid: jid,
             approve: -1
          });
-         jsxc.notice.add($.t('Friendship_request'), $.t('from') + ' ' + jid, 'gui.showApproveDialog', [ jid ]);
+         jsxc.notice.add($.t('Friendship_request'), $.t('from') + ' ' + jid, 'gui.showApproveDialog', [jid]);
 
          return true;
       } else if (ptype === 'unavailable' || ptype === 'unsubscribed') {
@@ -643,7 +650,8 @@ jsxc.xmpp = {
       }
 
       var maxVal = [];
-      var max = 0, prop = null;
+      var max = 0,
+         prop = null;
       for (prop in res) {
          if (res.hasOwnProperty(prop)) {
             if (max <= res[prop]) {
@@ -692,7 +700,7 @@ jsxc.xmpp = {
       jsxc.gui.update(bid);
       jsxc.gui.roster.reorder(bid);
 
-      $(document).trigger('presence.jsxc', [ from, status, presence ]);
+      $(document).trigger('presence.jsxc', [from, status, presence]);
 
       // preserve handler
       return true;
@@ -771,7 +779,7 @@ jsxc.xmpp = {
          var chat = jsxc.storage.getUserItem('chat', bid) || [];
 
          if (chat.length === 0) {
-            jsxc.notice.add($.t('Unknown_sender'), $.t('You_received_a_message_from_an_unknown_sender') + ' (' + bid + ').', 'gui.showUnknownSender', [ bid ]);
+            jsxc.notice.add($.t('Unknown_sender'), $.t('You_received_a_message_from_an_unknown_sender') + ' (' + bid + ').', 'gui.showUnknownSender', [bid]);
          }
 
          var msg = jsxc.removeHTML(body);
@@ -792,7 +800,7 @@ jsxc.xmpp = {
          });
       }
 
-      $(document).trigger('message.jsxc', [ from, body ]);
+      $(document).trigger('message.jsxc', [from, body]);
 
       // create related otr object
       if (jsxc.master && !jsxc.otr.objects[bid]) {
