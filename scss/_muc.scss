@@ -1,110 +1,110 @@
 %muc-avatar-icon {
-   text-indent: 999px;
-   background-image: image-url('group_white.svg');
-   background-size: 70% 70% !important;
-   background-repeat: no-repeat;
+    text-indent: 999px;
+    background-image: image-url("group_white.svg");
+    background-size: 70% 70% !important;
+    background-repeat: no-repeat;
 }
 
 .jsxc_windowItem {
-   &.jsxc_groupchat {
-      .jsxc_fade {
-         padding-top: 30px;
-      }
-      .jsxc_video {
-         display: none;
-      }
-      .jsxc_transfer {
-         display: none;
-      }
-      .jsxc_fingerprints, .jsxc_verification, .jsxc_transfer {
-         display: none;
-      }
-      .jsxc_members {
-         background-image: image-url('group_grey.svg');
-         background-size: 90%;
-         background-repeat: no-repeat;
-         background-position: center;
-         &:hover {
-            background-image: image-url('group_white.svg');
-         }
-      }
-      .jsxc_chatmessage.jsxc_in {
-         margin-left: 40px;
-         .jsxc_avatar {
-            display: block;
-            position:absolute;
-            bottom: 0px;
-            left: -37px;
-            background-color: #777;
-         }
-      }
-      .jsxc_bar {
-         .jsxc_avatar {
-            @extend %muc-avatar-icon;
-         }
-      }
-   }
-   .jsxc_memberlist {
-      height: 30px;
-      width: 100%;
-      background-color: $window_bar_bg;
-      overflow: hidden;
-      position: absolute;
-      top: 0px;
-      transition: height 400ms;
-      z-index: 100;
-      ul {
-         white-space: nowrap;
-         position: absolute;
-         background-color: $window_bar_bg;
-         color: $window_bar_color;
-         overflow: hidden;
-         transition: left 400ms;
-         padding: 0px;
-         &>li {
-            display: inline-block;
-            white-space: normal;
-            &:last-child {
-               margin-right: 2px;
+    &.jsxc_groupchat {
+        .jsxc_fade {
+            padding-top: 30px;
+        }
+        .jsxc_video {
+            display: none;
+        }
+        .jsxc_transfer {
+            display: none;
+        }
+        .jsxc_fingerprints, .jsxc_verification, .jsxc_transfer {
+            display: none;
+        }
+        .jsxc_members {
+            background-image: image-url("group_grey.svg");
+            background-size: 90%;
+            background-repeat: no-repeat;
+            background-position: center;
+            &:hover {
+                background-image: image-url("group_white.svg");
             }
-            .jsxc_name {
-               display: none;
-            }
+        }
+        .jsxc_chatmessage.jsxc_in {
+            margin-left: 40px;
             .jsxc_avatar {
-               margin-left: 2px;
-               margin-right: 0px;
+                display: block;
+                position: absolute;
+                bottom: 0px;
+                left: -37px;
+                background-color: #777;
             }
-         }
-      }
-      &.jsxc_expand {
-         ul {
-            white-space: normal;
-            &>li {
-               display: block;
-               width: 100%;
-               height: 27px;
-               line-height: 27px;
-               .jsxc_name {
-                  display: block;
-                  cursor: default;
-                  &:hover {
-                     color: inherit;
-                  }
-               }
-               .jsxc_avatar {
-                  margin-right: 4px;
-               }
+        }
+        .jsxc_bar {
+            .jsxc_avatar {
+                @extend %muc-avatar-icon;
             }
-         }
-      }
-      
-   }
+        }
+    }
+    .jsxc_memberlist {
+        height: 30px;
+        width: 100%;
+        background-color: $window_bar_bg;
+        overflow: hidden;
+        position: absolute;
+        top: 0px;
+        transition: height 400ms;
+        z-index: 100;
+        ul {
+            white-space: nowrap;
+            position: absolute;
+            background-color: $window_bar_bg;
+            color: $window_bar_color;
+            overflow: hidden;
+            transition: left 400ms;
+            padding: 0px;
+            & > li {
+                display: inline-block;
+                white-space: normal;
+                &:last-child {
+                    margin-right: 2px;
+                }
+                .jsxc_name {
+                    display: none;
+                }
+                .jsxc_avatar {
+                    margin-left: 2px;
+                    margin-right: 0px;
+                }
+            }
+        }
+        &.jsxc_expand {
+            ul {
+                white-space: normal;
+                & > li {
+                    display: block;
+                    width: 100%;
+                    height: 27px;
+                    line-height: 27px;
+                    .jsxc_name {
+                        display: block;
+                        cursor: default;
+                        &:hover {
+                            color: inherit;
+                        }
+                    }
+                    .jsxc_avatar {
+                        margin-right: 4px;
+                    }
+                }
+            }
+        }
+    }
 }
+
 li[data-type="groupchat"] {
-   .jsxc_avatar {
-      @extend %muc-avatar-icon;
-   }
-   .jsxc_video {
-      display: none;
-   }
+    .jsxc_avatar {
+        @extend %muc-avatar-icon;
+    }
+    .jsxc_video {
+        display: none;
+    }
 }

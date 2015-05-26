@@ -71,12 +71,12 @@
         width: 137px;
     }
     &.jsxc_noConnection {
-    	.slimScrollDiv {
-    		display: none;
-    	}
-    	> .jsxc_bottom {
-    		display: none;
-    	}
+        .slimScrollDiv {
+            display: none;
+        }
+        > .jsxc_bottom {
+            display: none;
+        }
     }
 }
 
@@ -93,7 +93,8 @@
         background-color: $roster_toggle_hover;
     }
 }
-#jsxc_roster> {
+
+#jsxc_roster > {
     &.jsxc_bottom {
         position: absolute;
         left: -4px;
@@ -144,11 +145,10 @@
             }
         }
     }
-    &.jsxc_bottom>div>span {
+    &.jsxc_bottom > div > span {
         cursor: pointer;
     }
-    &.jsxc_bottom>div:hover {
+    &.jsxc_bottom > div:hover {
         color: $roster_bottom_color_hover;
     }
 }
-

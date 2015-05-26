@@ -1,15 +1,15 @@
 .jsxc_emoticon {
-	display: inline-block;
+    display: inline-block;
     width: 19px;
     height: 19px;
     background-size: 19px 19px !important;
     border: 0;
 }
 
-$emoticons: angel, angry, smile, grin, sad, wink, tonguesmile, surpised, kiss,
-            sunglassess, crysad, doubt, zip, thumbsup, thumbsdown, beer, devil,
-            kissing, rose, music, love, tired, surprised;
+$emoticons: angel, angry, smile, grin, sad, wink, tonguesmile, surpised, kiss, sunglassess, crysad, doubt, zip, thumbsup, thumbsdown, beer, devil, kissing, rose, music, love, tired, surprised;
 
 @each $emoticon in $emoticons {
-    .jsxc_#{$emoticon} { background: image-url('emotions/#{$emoticon}.png'); }
+    .jsxc_#{$emoticon} {
+        background: image-url("emotions/#{$emoticon}.png");
+    }
 }

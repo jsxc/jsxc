@@ -247,6 +247,15 @@ module.exports = function(grunt) {
                }
             }
          }
+      },
+      prettysass: {
+         options: {
+            alphabetize: false,
+            indent: 4
+         },
+         jsxc: {
+            src: ['scss/*.scss']
+         }
       }
    });
 
@@ -268,6 +277,7 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-autoprefixer');
    grunt.loadNpmTasks('grunt-contrib-watch');
    grunt.loadNpmTasks('grunt-jsbeautifier');
+   grunt.loadNpmTasks('grunt-prettysass');
 
    //Default task
    grunt.registerTask('default', ['build', 'watch']);
@@ -290,5 +300,5 @@ module.exports = function(grunt) {
    grunt.registerTask('pre', ['build:prerelease']);
 
    // before commit
-   grunt.registerTask('commit', ['search:console', 'jsbeautifier', 'jshint']);
+   grunt.registerTask('commit', ['search:console', 'jsbeautifier', 'prettysass', 'jshint']);
 };

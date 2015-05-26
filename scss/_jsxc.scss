@@ -1,6 +1,7 @@
 .jsxc_right {
     text-align: right;
 }
+
 .jsxc_center {
     text-align: center;
 }
@@ -8,6 +9,7 @@
 .jsxc_sep {
     border-top: 1px solid $separator;
 }
+
 .jsxc_name {
     overflow: hidden;
     height: 30px;
@@ -104,13 +106,14 @@
             display: inline-block;
             background-size: 100%;
             margin: 0 3px 0 0;
-            background-image: image-url('loading.gif');
-       }
-     }
-     .jsxc_libraries {
-       max-width: 300px;
-     }
+            background-image: image-url("loading.gif");
+        }
+    }
+    .jsxc_libraries {
+        max-width: 300px;
+    }
 }
+
 .jsxc_avatar {
     @extend %avatar-icon;
     img {
@@ -123,7 +126,6 @@
     }
 }
 
-
 ul.jsxc_vCard {
     min-width: 400px;
     ul {
@@ -132,8 +134,7 @@ ul.jsxc_vCard {
     li {
         cursor: default !important;
     }
-    strong {
-    }
+    strong {}
 }
 
 .jsxc_spot {
@@ -174,16 +175,18 @@ ul.jsxc_vCard {
     cursor: pointer;
     float: right;
     text-align: center;
-    &:hover>span {
+    &:hover > span {
         opacity: 1;
     }
 }
+
 #jsxc_avatar {
     height: 30px;
     width: 30px;
     float: left;
     margin: 0 2px;
 }
+
 #jsxc_notice {
     height: 30px;
     width: 30px;
@@ -200,16 +203,18 @@ ul.jsxc_vCard {
         animation: bounce 2s 1s infinite;
     }
 }
-#jsxc_menu>span {
+
+#jsxc_menu > span {
     opacity: 0.5;
     display: block;
     width: 25px;
     height: 30px;
-    background-image: image-url('gear_white.svg');
+    background-image: image-url("gear_white.svg");
     background-size: 18px 18px;
     background-repeat: no-repeat;
     background-position: center center;
 }
+
 @keyframes bounce {
     0% {
         bottom: 0;
@@ -235,11 +240,14 @@ ul.jsxc_vCard {
         bottom: 0;
     }
 }
+
+
 #jsxc_presence {
     cursor: pointer;
     padding-left: 2px;
     overflow: hidden;
 }
+
 #jsxc_windowList {
     position: fixed;
     bottom: 0;
@@ -247,7 +255,7 @@ ul.jsxc_vCard {
     left: 0;
     z-index: 50;
     clip: rect(-10000px, 10000px, 30px, 30px);
-    &>ul {
+    & > ul {
         list-style: none;
         padding: 0;
         margin: 0;
@@ -258,8 +266,7 @@ ul.jsxc_vCard {
         overflow: visible;
         white-space: nowrap;
         transition: right 0.5s;
-
-        &>li {
+        & > li {
             padding: 0;
             margin: 0;
             display: inline-block;
@@ -315,6 +322,7 @@ ul.jsxc_vCard {
         }
     }
 }
+
 .jsxc_bar {
     background-color: $window_bar_bg;
     cursor: pointer;
@@ -326,6 +334,7 @@ ul.jsxc_vCard {
     box-sizing: border-box;
     overflow: hidden;
 }
+
 .jsxc_cycle {
     position: absolute;
     bottom: 9px;
@@ -353,7 +362,7 @@ ul.jsxc_vCard {
         cursor: pointer;
         &:after {
             content: ' ';
-            background-image: image-url('smiley.png');
+            background-image: image-url("smiley.png");
             background-position: center center;
             background-repeat: no-repeat;
             height: 30px;
@@ -478,7 +487,7 @@ ul.jsxc_vCard {
         width: 15px;
         height: 15px;
         z-index: 95 !important;
-        background-image: image-url('resize_gray.svg');
+        background-image: image-url("resize_gray.svg");
     }
     .ui-resizable-n {
         position: absolute;
@@ -490,6 +499,7 @@ ul.jsxc_vCard {
         background: linear-gradient(to bottom, $window_gradient 0, rgba(40, 35, 35, 0) 100%);
     }
 }
+
 .jsxc_chatmessage {
     margin: 3px;
     padding: 4px;
@@ -510,9 +520,10 @@ ul.jsxc_vCard {
         background-size: 19px 19px;
     }
     .jsxc_avatar {
-      display: none;
+        display: none;
     }
 }
+
 .jsxc_timestamp {
     font-size: 8px;
     color: $chatmessage_timestamp;
@@ -522,6 +533,7 @@ ul.jsxc_vCard {
     max-width: 100%;
     text-overflow: ellipsis;
 }
+
 .jsxc_in {
     float: left;
     position: relative;
@@ -545,6 +557,7 @@ ul.jsxc_vCard {
         float: left;
     }
 }
+
 .jsxc_out {
     float: right;
     position: relative;
@@ -564,15 +577,15 @@ ul.jsxc_vCard {
         right: -6px;
         bottom: 10px;
     }
-    &.jsxc_received{
+    &.jsxc_received {
         &:before {
-           content: '✓';
-           position: absolute;
-           bottom: 2px;
-           right: 2px;
-           font-size: 12px;
-           line-height: 12px;
-           color: $chatmessage_received;
+            content: '✓';
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 12px;
+            line-height: 12px;
+            color: $chatmessage_received;
         }
         .jsxc_timestamp {
             margin-right: 4px;
@@ -582,6 +595,7 @@ ul.jsxc_vCard {
         float: right;
     }
 }
+
 .jsxc_sys {
     width: auto;
     max-width: none;
@@ -590,14 +604,15 @@ ul.jsxc_vCard {
     margin-right: 3px;
     border-radius: 3px;
 }
+
 div.jsxc_settings {
-    background-image: image-url('gear_grey.svg');
+    background-image: image-url("gear_grey.svg");
     background-size: 15px 15px;
     background-repeat: no-repeat;
     background-position: center center;
     overflow: visible;
     &:hover, .hover {
-        background-image: image-url('gear_white.svg');
+        background-image: image-url("gear_white.svg");
     }
     ul {
         list-style: none;
@@ -627,44 +642,49 @@ div.jsxc_settings {
             color: $window_settings_disabled;
             cursor: default;
         }
-        &:hover:not(.jsxc_disabled ) {
+        &:hover:not(.jsxc_disabled) {
             color: $window_settings_color_hover;
             background-color: $window_settings_bg_hover;
         }
     }
 }
+
 div.jsxc_transfer {
     @extend %padlock-icon;
     &:hover {
-        background-image: image-url('padlock_open_white.svg');
+        background-image: image-url("padlock_open_white.svg");
     }
     &.jsxc_fin {
-        background-image: image-url('padlock_close_grey.svg');
+        background-image: image-url("padlock_close_grey.svg");
     }
     &.jsxc_enc {
-        background-image: image-url('padlock_close_orange.svg');
+        background-image: image-url("padlock_close_orange.svg");
         &.jsxc_trust {
-            background-image: image-url('padlock_close_green.svg');
+            background-image: image-url("padlock_close_green.svg");
         }
     }
     &.jsxc_disabled:hover {
         @extend %padlock-icon;
     }
 }
+
 #colorbox {
     outline: none;
 }
+
 #cboxWrapper {
     outline: none;
 }
+
 .jsxc_loading {
     margin: 0 auto;
     width: 32px;
     height: 32px;
     border: 0;
     background-size: 32px 32px !important;
-    background: image-url('loading.gif');
+    background: image-url("loading.gif");
 }
+
 /* @TODO: check */
 #jsxc_loginForm input[type="submit"] {
     height: 34px;
@@ -685,19 +705,24 @@ div.jsxc_transfer {
     background-color: $loginForm_bg;
     border-color: $loginForm_border;
 }
-#jsxc_notice>span:empty {
+
+#jsxc_notice > span:empty {
     display: none;
 }
+
 .jsxc_oneway .jsxc_avatar {
     filter: grayscale(100%);
 }
+
 .jsxc_min .jsxc_tools {
     display: none;
 }
+
 .jsxc_tools > .jsxc_disabled {
     opacity: 0.5;
     cursor: default !important;
 }
+
 img.jsxc_vCard {
     float: right;
     max-width: 200px;
@@ -707,36 +732,36 @@ img.jsxc_vCard {
 }
 
 .jsxc_alert {
-   padding: 15px;
-   margin-bottom: 20px;
-   border: 1px solid transparent;
-   border-radius: 4px;
-   &.jsxc_alert-warning {
-     color: #8a6d3b;
-     background-color: #fcf8e3;
-     border-color: #faebcc;
-   }
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    &.jsxc_alert-warning {
+        color: #8a6d3b;
+        background-color: #fcf8e3;
+        border-color: #faebcc;
+    }
 }
 
 .jsxc_btn {
-  width: auto;
-  min-width: 25px;
-  padding: 5px;
-  background-color: rgba(240,240,240,.9);
-  font-weight: bold;
-  color: #555;
-  border: 1px solid rgba(190,190,190,.9);
-  cursor: pointer;
-  &.jsxc_btn-primary {
-     color: #fff;
-     background-color: #337ab7;
-     border-color: #2e6da4;
-  }
-  &[disabled], &[disabled]:hover {
-     opacity: 0.65;
-     cursor: not-allowed;
-     color: #fff;
-     background-color: #337ab7;
-     border-color: #2e6da4;
-  }
+    width: auto;
+    min-width: 25px;
+    padding: 5px;
+    background-color: rgba(240, 240, 240, 0.9);
+    font-weight: bold;
+    color: #555;
+    border: 1px solid rgba(190, 190, 190, 0.9);
+    cursor: pointer;
+    &.jsxc_btn-primary {
+        color: #fff;
+        background-color: #337ab7;
+        border-color: #2e6da4;
+    }
+    &[disabled], &[disabled]:hover {
+        opacity: 0.65;
+        cursor: not-allowed;
+        color: #fff;
+        background-color: #337ab7;
+        border-color: #2e6da4;
+    }
 }

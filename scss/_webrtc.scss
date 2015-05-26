@@ -1,4 +1,4 @@
-@import 'colors';
+@import "colors";
 
 %fullscreen {
     width: 100%;
@@ -35,6 +35,7 @@
         }
     }
 }
+
 .jsxc_videoContainer {
     width: 640px;
     height: 480px;
@@ -47,9 +48,11 @@
         display: none;
     }
 }
+
 .jsxc_remotevideo {
     @extend %fullscreen;
 }
+
 .jsxc_noRemoteVideo {
     @extend %fullscreen;
     p {
@@ -91,6 +94,7 @@
         }
     }
 }
+
 .jsxc_localvideo {
     width: 160px;
     height: 120px;
@@ -101,6 +105,7 @@
     background-color: $black;
     cursor: pointer;
 }
+
 div {
     &:full-screen {
         width: 100%;
@@ -119,26 +124,29 @@ div {
         }
     }
     &.jsxc_video {
-        background-image: image-url('camera_icon_grey.svg');
+        background-image: image-url("camera_icon_grey.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 15px 15px;
         &:not(.jsxc_disabled) {
             &:hover {
-                background-image: image-url('camera_icon_white.svg');
+                background-image: image-url("camera_icon_white.svg");
             }
         }
     }
 }
+
 .jsxc_controlbar {
     width: 640px;
     .jsxc_showchat {
         float: right;
     }
 }
-.jsxc_multi>div {
+
+.jsxc_multi > div {
     display: none;
 }
+
 .jsxc_snapshotbar {
     width: 100%;
     display: none;
@@ -146,6 +154,7 @@ div {
         height: 50px;
     }
 }
+
 .jsxc_buttongroup {
     display: inline;
     button {
@@ -161,6 +170,7 @@ div {
         }
     }
 }
+
 .jsxc_chatarea {
     position: relative;
     float: right;
@@ -176,8 +186,7 @@ div {
     .jsxc_video {
         display: none !important;
     }
-    .jsxc_bar {
-    }
+    .jsxc_bar {}
     .jsxc_window {
         bottom: 0;
         box-shadow: none;
@@ -189,6 +198,7 @@ div {
         padding: 0;
     }
 }
+
 .bubblingG {
     text-align: center;
     width: 129px;
@@ -208,15 +218,19 @@ div {
         animation: bubblingG 1.3s infinite alternate;
     }
 }
+
 #bubblingG_1 {
     animation-delay: 0s;
 }
+
 #bubblingG_2 {
     animation-delay: 0.39s;
 }
+
 #bubblingG_3 {
     animation-delay: 0.78s;
 }
+
 @keyframes bubblingG {
     0% {
         width: 16px;
@@ -231,14 +245,18 @@ div {
         transform: translateY(-34px);
     }
 }
+
+
 .jsxc_fullscreen.jsxc_localvideo {
     border: 1px solid $white;
 }
+
 .jsxc_videoSuitable .jsxc_name {
     font-style: italic;
 }
+
 #jsxc_buddylist .jsxc_options .jsxc_video {
-    background-image: image-url('camera_icon_white.svg');
+    background-image: image-url("camera_icon_white.svg");
     &.jsxc_disabled {
         opacity: 0.2;
     }

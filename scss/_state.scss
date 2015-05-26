@@ -1,25 +1,31 @@
 .jsxc_online {
     border-left: 4px solid $state_online !important;
 }
+
 .jsxc_chat {
     border-left: 4px solid $state_chat !important;
 }
+
 .jsxc_away {
     border-left: 4px solid $state_away !important;
 }
+
 .jsxc_xa {
     border-left: 4px solid $state_xa !important;
 }
+
 .jsxc_dnd {
     border-left: 4px solid $state_dnd !important;
 }
+
 .jsxc_offline {
     border-left: 4px solid $state_offline !important;
 }
+
 .jsxc_hidden {
     display: none;
 }
+
 .jsxc_invalid {
     border: 2px solid $invalid_border !important;
 }
-

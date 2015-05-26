@@ -1,4 +1,4 @@
-@import 'modules';
+@import "modules";
 
 #jsxc_buddylist {
     list-style: none;
@@ -71,7 +71,6 @@
             }
         }
     }
-
     .jsxc_control {
         position: absolute;
         width: 30px;
@@ -121,11 +120,11 @@
         }
     }
     .jsxc_chaticon {
-        background-image: image-url('speech_balloon_white.svg');
+        background-image: image-url("speech_balloon_white.svg");
         background-size: 15px 15px;
     }
     .jsxc_videoicon {
-        background-image: image-url('camera_icon_white.svg');
+        background-image: image-url("camera_icon_white.svg");
         background-size: 13px 13px;
     }
     .jsxc_vcardicon {
@@ -141,7 +140,7 @@
     }
     &.jsxc_hideOffline {
         .jsxc_offline {
-             display: none;
+            display: none;
         }
     }
 }
