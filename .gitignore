@@ -3,6 +3,6 @@ node_modules
 *.zip.sig
 bower_components
 archives/
-css/
+/css/
 dev/
 .wti
