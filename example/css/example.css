@@ -1,0 +1,28 @@
+body {
+   margin-top: 30px;
+}
+
+.logout {
+   display: none;
+}
+
+#content form .alert {
+   display: none;
+}
+
+#content h3 {
+   border-bottom: 1px solid #e5e5e5;
+   margin-bottom: 20px;
+}
+
+#content .form {
+   min-height: 180px;
+}
+
+#content .row:first-child {
+   margin-bottom: 30px;
+}
+
+#content .col-md-4 > p {
+   margin-bottom: 30px;
+}

@@ -41,7 +41,7 @@ $(function() {
 
       $(document).on('connectionReady.jsxc', function() {
          $('#form2 input').prop('disabled', true);
-         
+
          $('#logout2').show().click(jsxc.xmpp.logout);
       });
 

@@ -36,15 +36,41 @@ $(function() {
       }
    });
 
+   var source = '#form';
+
    $('#form2').submit(function(ev) {
       ev.preventDefault();
 
-      $(document).on('connectionReady.jsxc', function() {
-         $('#form2 input').prop('disabled', true);
-         
-         $('#logout2').show().click(jsxc.xmpp.logout);
-      });
+      source = $(this);
+      $('#submit2').button('loading');
 
       jsxc.xmpp.login($('#username2').val() + '@' + settings.xmpp.domain, $('#password2').val());
+   });
+
+   $('#form3 .submit').click(jsxc.gui.showLoginBox);
+
+   $(document).on('connecting.jsxc', function() {
+      $('#form2 input, #form input').prop('disabled', true);
+   });
+
+   $(document).on('authfail.jsxc', function() {
+      $('#form2 input, #form input').prop('disabled', false);
+      $(source).find('.alert').show();
+      $(source).find('.submit').button('reset');
+   });
+
+   $(document).on('connectionReady.jsxc', function() {
+      $('#form2 input, #form input').prop('disabled', true);
+      $('.submit').hide();
+      $('form .alert').hide();
+
+      $('.logout').show().click(jsxc.xmpp.logout);
+   });
+
+   $(document).on('disconnected.jsxc', function() {
+      $(source).find('button').button('reset');
+      $('#form2 input, #form input').prop('disabled', false);
+      $('.submit').show();
+      $('.logout').hide().off('click');
    });
 });

@@ -238,12 +238,30 @@ module.exports = function(grunt) {
          }
       },
       jsbeautifier: {
-         noIndentLevel: {
+         jsxc: {
             src: ['Gruntfile.js', 'src/jsxc.lib.*'],
             options: {
                js: {
                   indentSize: 3,
                   endWithNewline: true
+               },
+               html: {
+                  indentSize: 3
+               }
+            }
+         },
+         example: {
+            src: ['example/*.html', 'example/js/dev.js', 'example/js/example.js', 'example/css/example.css'],
+            options: {
+               js: {
+                  indentSize: 3,
+                  endWithNewline: true
+               },
+               html: {
+                  indentSize: 3
+               },
+               css: {
+                  indentSize: 3
                }
             }
          }
@@ -300,5 +318,5 @@ module.exports = function(grunt) {
    grunt.registerTask('pre', ['build:prerelease']);
 
    // before commit
-   grunt.registerTask('commit', ['search:console', 'jsbeautifier', 'prettysass', 'jshint']);
+   grunt.registerTask('commit', ['search:console', 'jsbeautifier:jsxc', 'prettysass', 'jshint']);
 };

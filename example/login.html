@@ -1,36 +1,69 @@
 <!DOCTYPE HTML>
 <html>
-   <head>
-     <title>JSXC example application</title>
-     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-     
-     <link href="../lib/jquery-ui.min.css" media="all" rel="stylesheet" type="text/css" />
-     <link href="../lib/jquery.mCustomScrollbar.css" media="all" rel="stylesheet" type="text/css" />
-     <link href="../lib/jquery.colorbox.css" media="all" rel="stylesheet" type="text/css" />
-     <link href="../build/css/jsxc.css" media="all" rel="stylesheet" type="text/css" />
-     <link href="../build/css/jsxc.webrtc.css" media="all" rel="stylesheet" type="text/css" />
-     
-     <style type="text/css">
-     body, * {font-size: 13px; font-family: "Helvetica Neue",Helvetica,Arial,FreeSans,sans-serif;}
-     fieldset {float: left;}
-     </style>
-     
-     <script src="../build/lib/jquery.min.js"></script>
-	 <script src="../build/lib/jquery.ui.min.js"></script>
-	 <script src="../build/lib/jquery.colorbox-min.js"></script>
-	 <script src="../build/lib/jquery.slimscroll.js"></script>
-	 <script src="../build/lib/jquery.fullscreen.js"></script>
-	 
-	 <script src="../build/lib/jsxc.dep.js"></script>
-	 <script src="../build/jsxc.min.js"></script>
-     
-     <script src="js/example.js"></script>
 
-   </head>
-   
-   <body>
-     <h1>You are logged in :-).</h1>
-     
-     <a href="index.html" id="logout">Log out</a>
-   </body>
+<head>
+   <title>JSXC example application</title>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+   <link href="css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css" />
+
+   <link href="../build/css/jquery-ui.min.css" media="all" rel="stylesheet" type="text/css" />
+   <link href="../build/css/jquery.mCustomScrollbar.css" media="all" rel="stylesheet" type="text/css" />
+   <link href="../build/css/jquery.colorbox.css" media="all" rel="stylesheet" type="text/css" />
+   <link href="../build/css/jsxc.css" media="all" rel="stylesheet" type="text/css" />
+   <link href="../build/css/jsxc.webrtc.css" media="all" rel="stylesheet" type="text/css" />
+
+   <script src="../build/lib/jquery.min.js"></script>
+   <script src="../build/lib/jquery.ui.min.js"></script>
+   <script src="../build/lib/jquery.colorbox-min.js"></script>
+   <script src="../build/lib/jquery.slimscroll.js"></script>
+   <script src="../build/lib/jquery.fullscreen.js"></script>
+
+   <script src="../build/lib/jsxc.dep.js"></script>
+   <script src="../build/jsxc.min.js"></script>
+
+   <script src="js/example.js"></script>
+
+</head>
+
+<body>
+   <div class="container">
+      <h1 class="page-header">Restricted Area <small>simulated</small></h1>
+
+      <p>This page simulates your protected area or your login target.</p>
+
+      <div class="alert alert-info col-xs-6">
+         <p>Checking status...</p>
+      </div>
+
+      <div class="alert alert-warning col-xs-6" style="display: none;">
+         <p>You are not logged in! Maybe your password was wrong. <a href="index.html">Back</a></p>
+      </div>
+
+      <div class="alert alert-success col-xs-6" style="display: none;">
+         <p>The following link has the <code>id</code> which was passed to jsxc as <code>logoutElement</code>:</p>
+
+         <p><a href="index.html" id="logout" class="btn btn-default">Log out</a> and redirect to <code>index.html</code></p>
+      </div>
+   </div>
+
+   <script>
+      $(function() {
+         var to = setTimeout(function() {
+            $('.alert-warning').show('slow');
+            $('.alert-info').hide();
+         }, 1000);
+
+         $(document).on('attached.jsxc', function() {
+            clearTimeout(to);
+
+            $('.alert-warning').hide();
+            $('.alert-info').hide();
+            $('.alert-success').show('slow');
+         });
+      });
+   </script>
+</body>
+
 </html>
