@@ -28,7 +28,7 @@ jsxc = {
    /** Interval for keep-alive */
    keepalive: null,
 
-   /** True if last activity was 10 min ago */
+   /** True if last activity was up to 10 min ago */
    restore: false,
 
    /** True if restore is complete */
