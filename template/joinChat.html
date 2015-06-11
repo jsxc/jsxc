@@ -1,0 +1,35 @@
+<h3 data-i18n="Join_chat"></h3>
+<p class=".jsxc_explanation" data-i18n="muc_explanation"></p>
+<p>
+   <label for="jsxc_server" data-i18n="Server"></label>
+   <input type="text" name="server" id="jsxc_server" required="required" readonly="readonly" />
+</p>
+<p>
+   <label for="jsxc_room" data-i18n="Room"></label>
+   <input type="text" name="room" id="jsxc_room" autocomplete="off" list="jsxc_roomlist" required="required" pattern="^[^\x22&'\/:<>@\s]+" />
+</p>
+<p class="jsxc_inputinfo jsxc_waiting jsxc_room" data-i18n="Rooms_are_loaded"></p>
+<datalist id="jsxc_roomlist">
+   <p>
+      <label for="jsxc_roomlist_select"></label>
+      <select id="jsxc_roomlist_select">
+         <option></option>
+         <option>workaround</option>
+      </select>
+   </p>
+</datalist>
+<p>
+   <label for="jsxc_nickname" data-i18n="Nickname"></label>
+   <input type="text" name="nickname" id="jsxc_nickname" />
+</p>
+<p>
+   <label for="jsxc_password" data-i18n="Password"></label>
+   <input type="text" name="password" id="jsxc_password" />
+</p>
+<div class="jsxc_msg"></div>
+<p class="jsxc_right">
+   <span class="jsxc_warning"></span>
+   <a href="#" class="button jsxc_close" data-i18n="Close"></a>
+   <a href="#" class="button jsxc_continue" data-i18n="Continue">
+      <a href="#" class="button jsxc_join" data-i18n="Join"></a>
+</p>

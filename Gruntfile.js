@@ -86,6 +86,14 @@ module.exports = function(grunt) {
                from: /}$/g,
                to: '};'
             }]
+         },
+         template: {
+            src: ['tmp/template.js'],
+            overwrite: true,
+            replacements: [{
+               from: 'var jsxc.gui.template = {};',
+               to: ''
+            }]
          }
       },
       merge_data: {
@@ -126,7 +134,7 @@ module.exports = function(grunt) {
             options: {
                banner: '/*! This file is concatenated for the browser. */\n\n'
             },
-            src: ['src/jsxc.intro.js', 'src/jsxc.lib.js', 'src/jsxc.lib.*.js', 'src/jsxc.outro.js'],
+            src: ['src/jsxc.intro.js', 'src/jsxc.lib.js', 'src/jsxc.lib.*.js', 'tmp/template.js', 'src/jsxc.outro.js'],
             dest: '<%= target %>/jsxc.js'
          }
       },
@@ -235,11 +243,15 @@ module.exports = function(grunt) {
          js: {
             files: ['src/jsxc.lib.*'],
             tasks: ['concat:jsxc']
+         },
+         template: {
+            files: ['template/*.html'],
+            tasks: ['htmlConvert', 'replace:template', 'concat:jsxc']
          }
       },
       jsbeautifier: {
          jsxc: {
-            src: ['Gruntfile.js', 'src/jsxc.lib.*'],
+            src: ['Gruntfile.js', 'src/jsxc.lib.*', 'template/*.html'],
             options: {
                js: {
                   indentSize: 3,
@@ -274,6 +286,21 @@ module.exports = function(grunt) {
          jsxc: {
             src: ['scss/*.scss']
          }
+      },
+      htmlConvert: {
+         options: {
+            target: 'js',
+            rename: function(name) {
+               return name.match(/([-_0-9a-z]+)\.html$/i)[1];
+            },
+            quoteChar: '\'',
+            indentString: '',
+            indentGlobal: ''
+         },
+         'jsxc.gui.template': {
+            src: 'template/*.html',
+            dest: 'tmp/template.js'
+         }
       }
    });
 
@@ -296,11 +323,12 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-contrib-watch');
    grunt.loadNpmTasks('grunt-jsbeautifier');
    grunt.loadNpmTasks('grunt-prettysass');
+   grunt.loadNpmTasks('grunt-html-convert');
 
    //Default task
    grunt.registerTask('default', ['build', 'watch']);
 
-   grunt.registerTask('build', ['jshint', 'clean', 'sass', 'autoprefixer', 'copy', 'merge_data', 'replace:locales', 'concat']);
+   grunt.registerTask('build', ['jshint', 'clean', 'sass', 'autoprefixer', 'copy', 'merge_data', 'replace:locales', 'htmlConvert', 'replace:template', 'concat']);
 
    grunt.registerTask('build:prerelease', 'Build a new pre-release', function() {
       grunt.config.set('target', 'build');

@@ -1,0 +1,53 @@
+<h3>Verification</h3>
+<p data-i18n="Authenticating_a_buddy_helps_"></p>
+<div>
+   <p data-i18n="[html]How_do_you_want_to_authenticate_your_buddy" style="margin: 0px;"></p>
+   <select size="1">
+      <option data-i18n="Select_method"></option>
+      <option data-i18n="Manual"></option>
+      <option data-i18n="Question"></option>
+      <option data-i18n="Secret"></option>
+   </select>
+</div>
+<div style="display: none">
+   <p data-i18n="To_verify_the_fingerprint_" class=".jsxc_explanation"></p>
+   <p>
+      <strong data-i18n="Your_fingerprint"></strong>
+      <br /> <span style="text-transform: uppercase">{{my_priv_fingerprint}}</span>
+   </p>
+   <p>
+      <strong data-i18n="Buddy_fingerprint"></strong>
+      <br /> <span style="text-transform: uppercase">{{bid_priv_fingerprint}}</span>
+   </p>
+   <br />
+   <p class="jsxc_right">
+      <a href="#" data-i18n="Close" class="jsxc_close button"></a>
+      <a href="#" data-i18n="Compared" class="button creation"></a>
+   </p>
+</div>
+<div style="display: none">
+   <p data-i18n="To_authenticate_using_a_question_" class=".jsxc_explanation"></p>
+   <p>
+      <label for="jsxc_quest" data-i18n="Question"></label>
+      <input type="text" name="quest" id="jsxc_quest" />
+   </p>
+   <p>
+      <label for="jsxc_secret2" data-i18n="Secret"></label>
+      <input type="text" name="secret2" id="jsxc_secret2" />
+   </p>
+   <p class="jsxc_right">
+      <a href="#" class="button jsxc_close" data-i18n="Close"></a>
+      <a href="#" class="button creation" data-i18n="Ask"></a>
+   </p>
+</div>
+<div style="display: none">
+   <p class=".jsxc_explanation" data-i18n="To_authenticate_pick_a_secret_"></p>
+   <p>
+      <label for="jsxc_secret" data-i18n="Secret"></label>
+      <input type="text" name="secret" id="jsxc_secret" />
+   </p>
+   <p class="jsxc_right">
+      <a href="#" class="button jsxc_close" data-i18n="Close"></a>
+      <a href="#" class="button creation" data-i18n="Compare"></a>
+   </p>
+</div>

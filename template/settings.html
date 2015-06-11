@@ -1,0 +1,55 @@
+<h3 data-i18n="User_settings"></h3>
+<p></p>
+<form>
+   <fieldset class="jsxc_fieldsetXmpp jsxc_fieldset">
+      <legend data-i18n="Login_options"></legend>
+      <label for="xmpp-url" data-i18n="BOSH_url"></label>
+      <input type="text" id="xmpp-url" readonly="readonly" />
+      <br />
+      <label for="xmpp-username" data-i18n="Username"></label>
+      <input type="text" id="xmpp-username" />
+      <br />
+      <label for="xmpp-domain" data-i18n="Domain"></label>
+      <input type="text" id="xmpp-domain" />
+      <br />
+      <label for="xmpp-resource" data-i18n="Resource"></label>
+      <input type="text" id="xmpp-resource" />
+      <br />
+      <label for="xmpp-onlogin" data-i18n="On_login"></label>
+      <input type="checkbox" id="xmpp-onlogin" />
+      <br />
+      <input type="submit" data-i18n="[value]Save" />
+   </fieldset>
+</form>
+<p></p>
+<form>
+   <fieldset class="jsxc_fieldsetPriority jsxc_fieldset">
+      <legend data-i18n="Priority"></legend>
+      <label for="priority-online" data-i18n="Online"></label>
+      <input type="number" value="0" id="priority-online" min="-128" max="127" step="1" required="required" />
+      <br />
+      <label for="priority-chat" data-i18n="Chatty"></label>
+      <input type="number" value="0" id="priority-chat" min="-128" max="127" step="1" required="required" />
+      <br />
+      <label for="priority-away" data-i18n="Away"></label>
+      <input type="number" value="0" id="priority-away" min="-128" max="127" step="1" required="required" />
+      <br />
+      <label for="priority-xa" data-i18n="Extended_away"></label>
+      <input type="number" value="0" id="priority-xa" min="-128" max="127" step="1" required="required" />
+      <br />
+      <label for="priority-dnd" data-i18n="dnd"></label>
+      <input type="number" value="0" id="priority-dnd" min="-128" max="127" step="1" required="required" />
+      <br />
+      <input type="submit" data-i18n="[value]Save" />
+   </fieldset>
+</form>
+<p></p>
+<form data-onsubmit="xmpp.carbons.refresh">
+   <fieldset class="jsxc_fieldsetCarbons jsxc_fieldset">
+      <legend data-i18n="Carbon_copy"></legend>
+      <label for="carbons-enable" data-i18n="Enable"></label>
+      <input type="checkbox" id="carbons-enable" />
+      <br />
+      <input type="submit" data-i18n="[value]Save" />
+   </fieldset>
+</form>
