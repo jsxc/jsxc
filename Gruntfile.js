@@ -238,11 +238,11 @@ module.exports = function(grunt) {
          },
          css: {
             files: ['scss/*'],
-            tasks: ['sass', 'autoprefixer']
+            tasks: ['prettysass', 'sass', 'autoprefixer']
          },
          js: {
             files: ['src/jsxc.lib.*'],
-            tasks: ['concat:jsxc']
+            tasks: ['jsbeautifier:jsxc', 'concat:jsxc']
          },
          template: {
             files: ['template/*.html'],
@@ -346,5 +346,5 @@ module.exports = function(grunt) {
    grunt.registerTask('pre', ['build:prerelease']);
 
    // before commit
-   grunt.registerTask('commit', ['search:console', 'jsbeautifier:jsxc', 'prettysass', 'jshint']);
+   grunt.registerTask('commit', ['search:console', 'jshint']);
 };
