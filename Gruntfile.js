@@ -6,6 +6,8 @@ module.exports = function(grunt) {
       return '<%= target %>/' + el.file;
    });
 
+   var git_cached = [];
+
    // Project configuration.
    grunt.initConfig({
       app: grunt.file.readJSON('package.json'),
@@ -238,11 +240,11 @@ module.exports = function(grunt) {
          },
          css: {
             files: ['scss/*'],
-            tasks: ['prettysass', 'sass', 'autoprefixer']
+            tasks: ['sass', 'autoprefixer']
          },
          js: {
             files: ['src/jsxc.lib.*'],
-            tasks: ['jsbeautifier:jsxc', 'concat:jsxc']
+            tasks: ['concat:jsxc']
          },
          template: {
             files: ['template/*.html'],
@@ -301,6 +303,46 @@ module.exports = function(grunt) {
             src: 'template/*.html',
             dest: 'tmp/template.js'
          }
+      },
+      shell: {
+         'precommit-before': {
+            command: 'git diff --cached --name-only',
+            options: {
+               callback: function(err, stdout, stderr, cb) {
+                  git_cached = stdout.trim().split(/\n/);
+
+                  cb();
+               }
+            }
+         },
+         'precommit-after': {
+            command: 'git diff --name-only',
+            options: {
+               callback: function(err, stdout, stderr, cb) {
+                  var git_diff = stdout.trim().split(/\n/);
+                  var intersection = [];
+                  var i;
+
+                  for (i = 0; i < git_diff.length; i++) {
+                     if (git_cached.indexOf(git_diff[i]) >= 0) {
+                        intersection.push(git_diff[i]);
+                     }
+                  }
+
+                  if (intersection.length > 0) {
+                     grunt.log.writeln();
+
+                     for (i = 0; i < intersection.length; i++) {
+                        grunt.log.writeln('> ' + intersection[i]);
+                     }
+
+                     grunt.fail.warn('Some files changed during pre-commit hook!');
+                  }
+
+                  cb();
+               }
+            }
+         }
       }
    });
 
@@ -324,6 +366,7 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-jsbeautifier');
    grunt.loadNpmTasks('grunt-prettysass');
    grunt.loadNpmTasks('grunt-html-convert');
+   grunt.loadNpmTasks('grunt-shell');
 
    //Default task
    grunt.registerTask('default', ['build', 'watch']);
@@ -346,5 +389,5 @@ module.exports = function(grunt) {
    grunt.registerTask('pre', ['build:prerelease']);
 
    // before commit
-   grunt.registerTask('commit', ['search:console', 'jshint']);
+   grunt.registerTask('commit', ['shell:precommit-before', 'search:console', 'jsbeautifier', 'prettysass', 'jshint', 'shell:precommit-after']);
 };

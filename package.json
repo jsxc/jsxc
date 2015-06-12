@@ -33,7 +33,7 @@
     "grunt-prettysass": "^0.2.3",
     "grunt-sass": "^0.17.0",
     "grunt-search": "^0.1.6",
-    "grunt-shell": "^1.1.1",
+    "grunt-shell": "^1.1.2",
     "grunt-text-replace": "~0.4.0"
   }
 }
