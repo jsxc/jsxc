@@ -25,10 +25,74 @@
     max-width: 500px;
 }
 
+@import "../lib/bootstrap/assets/stylesheets/bootstrap/variables";
+@import "../lib/bootstrap/assets/stylesheets/bootstrap/mixins";
+
+// WebKit
+@-webkit-keyframes progress-bar-stripes {
+    from {
+        background-position: 40px 0;
+    }
+    to {
+        background-position: 0 0;
+    }
+}
+
+
+// Spec and IE10+
+@keyframes progress-bar-stripes {
+    from {
+        background-position: 40px 0;
+    }
+    to {
+        background-position: 0 0;
+    }
+}
+
+
 #jsxc_dialog {
-    padding: 10px;
-    min-width: 300px;
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/utilities";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/code";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/grid";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/buttons";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/button-groups";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/forms";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/progress-bars";
+    .progress {
+        margin-bottom: 0px;
+    }
+}
+
+.mfp-bg {
+    z-index: 9000;
+}
+
+.mfp-wrap {
+    z-index: 9010;
+}
+
+.mfp-content {
+    text-align: center;
+}
+
+#jsxc_dialog {
+    .mfp-close {
+        font-size: 23px;
+    }
+}
+
+#jsxc_dialog {
+    padding: 20px;
+    min-width: 320px;
     display: inline-block;
+    text-align: left;
+    position: relative;
+    background: #FFF;
+    width: auto;
+    border-radius: 5px;
+    * {
+        box-sizing: border-box;
+    }
     ul {
         list-style: none;
         margin: 0;
@@ -54,6 +118,12 @@
             float: left;
             padding: 6px 0;
         }
+    }
+    hr {
+        border: 0;
+        border-top: 1px solid #eee;
+        margin-top: 20px;
+        margin-bottom: 20px;
     }
     h3 {
         font-size: 120%;

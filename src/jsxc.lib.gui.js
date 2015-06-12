@@ -456,17 +456,18 @@ jsxc.gui = {
       // Add handler
 
       $('#jsxc_dialog > div:gt(0)').hide();
-      $('#jsxc_dialog select').change(function() {
+      $('#jsxc_dialog > div:eq(0) button').click(function() {
+
+         $(this).siblings().removeClass('active');
+         $(this).addClass('active');
+         $(this).get(0).blur();
+
          $('#jsxc_dialog > div:gt(0)').hide();
-         $('#jsxc_dialog > div:eq(' + $(this).prop('selectedIndex') + ')').slideDown({
-            complete: function() {
-               jsxc.gui.dialog.resize();
-            }
-         });
+         $('#jsxc_dialog > div:eq(' + ($(this).index() + 1) + ')').show().find('input:first').focus();
       });
 
       // Manual
-      $('#jsxc_dialog > div:eq(1) a.creation').click(function() {
+      $('#jsxc_dialog > div:eq(1) .jsxc_submit').click(function() {
          if (jsxc.master) {
             jsxc.otr.objects[bid].trust = true;
          }
@@ -481,7 +482,7 @@ jsxc.gui = {
       });
 
       // Question
-      $('#jsxc_dialog > div:eq(2) a.creation').click(function() {
+      $('#jsxc_dialog > div:eq(2) .jsxc_submit').click(function() {
          var div = $('#jsxc_dialog > div:eq(2)');
          var sec = div.find('#jsxc_secret2').val();
          var quest = div.find('#jsxc_quest').val();
@@ -511,7 +512,7 @@ jsxc.gui = {
       });
 
       // Secret
-      $('#jsxc_dialog > div:eq(3) .creation').click(function() {
+      $('#jsxc_dialog > div:eq(3) .jsxc_submit').click(function() {
          var div = $('#jsxc_dialog > div:eq(3)');
          var sec = div.find('#jsxc_secret').val();
 
@@ -625,7 +626,9 @@ jsxc.gui = {
          }
       });
 
-      $('#jsxc_dialog form').submit(function() {
+      $('#jsxc_dialog form').submit(function(ev) {
+         ev.preventDefault();
+
          var username = $('#jsxc_username').val();
          var alias = $('#jsxc_alias').val();
 
@@ -1636,72 +1639,58 @@ jsxc.gui.dialog = {
 
       var opt = o || {};
 
-      // default options
-      var options = {};
-      options = {
-         onComplete: function() {
-            $('#jsxc_dialog .jsxc_close').click(function(ev) {
-               ev.preventDefault();
+      $.magnificPopup.open({
+         items: {
+            src: '<div id="jsxc_dialog">' + data + '</div>'
+         },
+         type: 'inline',
+         modal: opt.noClose,
+         callbacks: {
+            beforeClose: function() {
+               $(document).trigger('cleanup.dialog.jsxc');
+            },
+            afterClose: function() {
+               $(document).trigger('close.dialog.jsxc');
+            },
+            open: function() {
+               $('#jsxc_dialog .jsxc_close').click(function(ev) {
+                  ev.preventDefault();
 
-               jsxc.gui.dialog.close();
-            });
+                  jsxc.gui.dialog.close();
+               });
 
-            // workaround for old colorbox version (used by firstrunwizard)
-            if (options.closeButton === false) {
-               $('#cboxClose').hide();
-            }
+               $('#jsxc_dialog form').each(function() {
+                  var form = $(this);
 
-            $('#jsxc_dialog form').each(function() {
-               var form = $(this);
+                  form.find('button[data-jsxc-loading-text]').each(function() {
+                     var btn = $(this);
 
-               form.find('button[data-jsxc-loading-text]').each(function() {
-                  var btn = $(this);
+                     btn.on('btnloading.jsxc', function() {
+                        if (!btn.prop('disabled')) {
+                           btn.prop('disabled', true);
 
-                  btn.on('btnloading.jsxc', function() {
-                     if (!btn.prop('disabled')) {
-                        btn.prop('disabled', true);
+                           btn.data('jsxc_value', btn.text());
 
-                        btn.data('jsxc_value', btn.text());
+                           btn.text(btn.attr('data-jsxc-loading-text'));
+                        }
+                     });
 
-                        btn.text(btn.attr('data-jsxc-loading-text'));
-                     }
-                  });
+                     btn.on('btnfinished.jsxc', function() {
+                        if (btn.prop('disabled')) {
+                           btn.prop('disabled', false);
 
-                  btn.on('btnfinished.jsxc', function() {
-                     if (btn.prop('disabled')) {
-                        btn.prop('disabled', false);
-
-                        btn.text(btn.data('jsxc_value'));
-                     }
+                           btn.text(btn.data('jsxc_value'));
+                        }
+                     });
                   });
                });
-            });
 
-            jsxc.gui.dialog.resize();
+               jsxc.gui.dialog.resize();
 
-            $(document).trigger('complete.dialog.jsxc');
-         },
-         onClosed: function() {
-            $(document).trigger('close.dialog.jsxc');
-         },
-         onCleanup: function() {
-            $(document).trigger('cleanup.dialog.jsxc');
-         },
-         opacity: 0.5
-      };
-
-      if (opt.noClose) {
-         options.overlayClose = false;
-         options.escKey = false;
-         options.closeButton = false;
-         delete opt.noClose;
-      }
-
-      $.extend(options, opt);
-
-      options.html = '<div id="jsxc_dialog">' + data + '</div>';
-
-      $.colorbox(options);
+               $(document).trigger('complete.dialog.jsxc');
+            }
+         }
+      });
 
       return $('#jsxc_dialog');
    },
@@ -1711,7 +1700,8 @@ jsxc.gui.dialog = {
     */
    close: function() {
       jsxc.debug('close dialog');
-      $.colorbox.close();
+
+      $.magnificPopup.close();
    },
 
    /**
@@ -1719,15 +1709,8 @@ jsxc.gui.dialog = {
     * 
     * @param {Object} options e.g. width and height
     */
-   resize: function(options) {
-      options = $.extend({
-         innerWidth: $('#jsxc_dialog').outerWidth(),
-         innerHeight: $('#jsxc_dialog').outerHeight()
-      }, options || {});
+   resize: function() {
 
-      $('#cboxLoadedContent').css('overflow', 'hidden');
-
-      $.colorbox.resize(options);
    }
 };
 
@@ -2330,7 +2313,8 @@ jsxc.gui.template.get = function(name, bid, msg) {
       my_jid: jsxc.storage.getItem('jid') || '',
       my_node: Strophe.getNodeFromJid(jsxc.storage.getItem('jid') || '') || '',
       root: jsxc.options.root,
-      app_name: jsxc.options.app_name
+      app_name: jsxc.options.app_name,
+      version: jsxc.version
    };
 
    // placeholder depending on bid

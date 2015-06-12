@@ -28,11 +28,16 @@ module.exports = function(grunt) {
          main: {
             files: [{
                expand: true,
-               src: ['lib/i18next/release/i18next-latest.min.js', 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'LICENSE', 'img/**', 'sound/**'],
+               src: ['lib/i18next/release/i18next-latest.min.js', 'lib/magnific-popup/dist/*.js', 'lib/strophe.jingle/*.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'LICENSE', 'img/**', 'sound/**'],
                dest: '<%= target %>/'
             }, {
                expand: true,
                cwd: 'lib/',
+               src: ['*.css'],
+               dest: '<%= target %>/css/'
+            }, {
+               expand: true,
+               cwd: 'lib/magnific-popup/dist/',
                src: ['*.css'],
                dest: '<%= target %>/css/'
             }]
