@@ -666,7 +666,7 @@ jsxc.gui = {
 
       var data = jsxc.storage.getUserItem('buddy', bid);
 
-      $('#jsxc_dialog .creation').click(function(ev) {
+      $('#jsxc_dialog .jsxc_remove').click(function(ev) {
          ev.stopPropagation();
 
          if (jsxc.master) {
@@ -716,7 +716,7 @@ jsxc.gui = {
          $('#jsxc_dialog .jsxc_cancel').hide();
       }
 
-      $('#jsxc_dialog .creation').click(function() {
+      $('#jsxc_dialog .jsxc_retry').click(function() {
          jsxc.gui.dialog.close();
       });
 
@@ -739,11 +739,11 @@ jsxc.gui = {
       });
 
       if (confirm) {
-         $('#jsxc_dialog .creation').click(confirm);
+         $('#jsxc_dialog .jsxc_confirm').click(confirm);
       }
 
       if (dismiss) {
-         $('#jsxc_dialog .jsxc_cancel').click(dismiss);
+         $('#jsxc_dialog .jsxc_dismiss').click(dismiss);
       }
    },
 
@@ -931,7 +931,7 @@ jsxc.gui = {
       jsxc.gui.dialog.open(jsxc.gui.template.get('settings'));
 
       if (jsxc.options.get('xmpp').overwrite === 'false' || jsxc.options.get('xmpp').overwrite === false) {
-         $('.jsxc_fieldsetXmpp').hide();
+         $('.jsxc_fieldsetXmpp').parent().hide();
       }
 
       $('#jsxc_dialog form').each(function() {
@@ -986,16 +986,21 @@ jsxc.gui = {
             jsxc.options.set(key, val);
          });
 
-         var err = jsxc.options.saveSettinsPermanent.call(this, data);
+         var success = jsxc.options.saveSettinsPermanent.call(this, data);
 
          if (typeof self.attr('data-onsubmit') === 'string') {
-            jsxc.exec(self.attr('data-onsubmit'), [err]);
+            jsxc.exec(self.attr('data-onsubmit'), [success]);
          }
 
          setTimeout(function() {
-            self.find('input[type="submit"]').effect('highlight', {
-               color: (err) ? 'green' : 'red'
-            }, 4000);
+            if (success) {
+               self.find('button[type="submit"]').switchClass('btn-primary', 'btn-success');
+            } else {
+               self.find('button[type="submit"]').switchClass('btn-primary', 'btn-danger');
+            }
+            setTimeout(function() {
+               self.find('button[type="submit"]').switchClass('btn-danger btn-success', 'btn-primary');
+            }, 2000);
          }, 200);
 
          return false;

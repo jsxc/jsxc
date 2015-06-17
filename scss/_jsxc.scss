@@ -54,6 +54,7 @@
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/utilities";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/code";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/grid";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/alerts";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/buttons";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/button-groups";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/forms";
@@ -112,12 +113,6 @@
         input[type="submit"] {
             width: auto;
         }
-        label {
-            display: block;
-            width: 30%;
-            float: left;
-            padding: 6px 0;
-        }
     }
     hr {
         border: 0;
@@ -134,12 +129,17 @@
     .jsxc_right {
         margin-top: 20px;
     }
+    form {
+        fieldset {
+            margin-bottom: 30px;
+        }
+    }
     fieldset {
-        border: 2px solid $dialog_fieldset_border;
+        border-bottom: 1px solid #eee;
     }
     legend {
-        padding: 0 10px;
-        font-weight: bold;
+        border: 0;
+        font-size: 20px;
     }
     input {
         outline: none;
@@ -147,19 +147,15 @@
             border: 1px solid $dialog_input_invalid;
         }
     }
-    .jsxc_fieldset {
-        width: 280px;
-        padding: 10px;
-        border-radius: 3px;
-        label {
-            display: inline-block;
-            width: 100px;
-        }
-        input[type="Number"] {
-            display: inline-block;
-            width: 50px;
-        }
+    .btn-group button {
+        margin-right: 0;
     }
+    input[type="range"] {
+        display: inline;
+        height: 34px;
+        vertical-align: bottom;
+    }
+    .jsxc_fieldset {}
     input[readonly] {
         background-color: $dialog_input_readonly_bg;
     }
