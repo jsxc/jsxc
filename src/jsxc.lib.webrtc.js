@@ -1,4 +1,4 @@
-/* global SDPUtil, getUserMediaWithConstraints, setupRTC, MediaStreamTrack, RTC, RTCPeerconnection */
+/* global MediaStreamTrack */
 /* jshint -W020 */
 
 jsxc.gui.template.incomingCall = '<h3 data-i18n="Incoming_call"></h3>\
@@ -95,38 +95,32 @@ jsxc.webrtc = {
       // shortcut
       self.conn = jsxc.xmpp.conn;
 
-      if (RTC.browser === 'firefox') {
-         self.conn.jingle.media_constraints.mandatory.MozDontOfferDataChannel = true;
-      }
-
       if (!self.conn.jingle) {
          jsxc.error('No jingle plugin found!');
          return;
       }
 
       // jingle configuration
-      self.conn.jingle.PRANSWER = false;
-      self.conn.jingle.AUTOACCEPT = false;
-      self.conn.jingle.ice_config = jsxc.storage.getUserItem('iceConfig');
-      self.conn.jingle.MULTIPARTY = false;
-      self.conn.jingle.pc_constraints = RTC.pc_constraints;
+      //@TODO remove iceServers from localStorage
+      //self.conn.jingle.setICEServers(jsxc.storage.getUserItem('iceConfig').iceServers);
+
+      var manager = self.conn.jingle.manager;
 
       $(document).on('message.jsxc', $.proxy(self.onMessage, self));
       $(document).on('presence.jsxc', $.proxy(self.onPresence, self));
 
       $(document).on('mediaready.jingle', $.proxy(self.onMediaReady, self));
       $(document).on('mediafailure.jingle', $.proxy(self.onMediaFailure, self));
-      $(document).on('callincoming.jingle', $.proxy(self.onCallIncoming, self));
-      $(document).on('callterminated.jingle', $.proxy(self.onCallTerminated, self));
-      $(document).on('ringing.jingle', $.proxy(self.onCallRinging, self));
 
-      $(document).on('remotestreamadded.jingle', $.proxy(self.onRemoteStreamAdded, self));
-      $(document).on('remotestreamremoved.jingle', $.proxy(self.onRemoteStreamRemoved, self));
-      $(document).on('iceconnectionstatechange.jingle', $.proxy(self.onIceConnectionStateChanged, self));
-      $(document).on('nostuncandidates.jingle', $.proxy(self.noStunCandidates, self));
+      manager.on('incoming', $.proxy(self.onCallIncoming, self));
+      manager.on('terminated', $.proxy(self.onCallTerminated, self));
+      manager.on('ringing', $.proxy(self.onCallRinging, self));
 
-      $(document).on('error.jingle', function(ev, sid, error) {
-         jsxc.error('[JINGLE]', error);
+      manager.on('peerStreamAdded', $.proxy(self.onRemoteStreamAdded, self));
+      manager.on('peerStreamRemoved', $.proxy(self.onRemoteStreamRemoved, self));
+
+      manager.on('log:*', function(level, msg) {
+         jsxc.debug('[JINGLE][' + level + ']', msg);
       });
 
       if (self.conn.disco) {
@@ -165,7 +159,7 @@ jsxc.webrtc = {
          success: function(data) {
             var iceConfig = {
                iceServers: [{
-                  url: 'turn:' + data.url,
+                  urls: ['turn:' + data.url],
                   credential: data.credential,
                   username: data.username
                }]
@@ -447,19 +441,24 @@ jsxc.webrtc = {
       self.localStream = stream;
       self.conn.jingle.localStream = stream;
 
-      jsxc.gui.showVideoWindow(self.last_caller);
+      var dialog = jsxc.gui.showVideoWindow(self.last_caller);
 
+      var audioTracks = stream.getAudioTracks();
+      var videoTracks = stream.getVideoTracks();
       var i;
-      for (i = 0; i < stream.getAudioTracks().length; i++) {
-         self.setStatus((stream.getAudioTracks().length > 0) ? 'Use local audio device.' : 'No local audio device.');
 
-         jsxc.debug('using audio device "' + stream.getAudioTracks()[i].label + '"');
+      for (i = 0; i < audioTracks.length; i++) {
+         self.setStatus((audioTracks.length > 0) ? $.t('Use_local_audio_device') : $.t('No_local_audio_device'));
+
+         jsxc.debug('using audio device "' + audioTracks[i].label + '"');
       }
-      for (i = 0; i < stream.getVideoTracks().length; i++) {
-         self.setStatus((stream.getVideoTracks().length > 0) ? 'Use local video device.' : 'No local video device.');
 
-         jsxc.debug('using video device "' + stream.getVideoTracks()[i].label + '"');
-         $('#jsxc_dialog .jsxc_localvideo').show();
+      for (i = 0; i < videoTracks.length; i++) {
+         self.setStatus((videoTracks.length > 0) ? $.t('Use_local_video_device') : $.t('No_local_video_device'));
+
+         jsxc.debug('using video device "' + videoTracks[i].label + '"');
+
+         dialog.find('.jsxc_localvideo').show();
       }
 
       $(document).one('cleanup.dialog.jsxc', $.proxy(self.hangUp, self));
@@ -475,7 +474,7 @@ jsxc.webrtc = {
    onMediaFailure: function(ev, err) {
       this.setStatus('media failure');
 
-      jsxc.gui.window.postMessage(jsxc.jidToBid(jsxc.webrtc.last_caller), 'sys', $.t('Media_failure') + err.name);
+      jsxc.gui.window.postMessage(jsxc.jidToBid(jsxc.webrtc.last_caller), 'sys', $.t('Media_failure') + ': ' + $.t(err.name) + ' (' + err.name + ').');
       jsxc.debug('media failure: ' + err.name);
    },
 
@@ -487,12 +486,13 @@ jsxc.webrtc = {
     * @param event
     * @param sid Session id
     */
-   onCallIncoming: function(event, sid) {
-      jsxc.debug('incoming call' + sid);
+   onCallIncoming: function(session) {
+      jsxc.debug('incoming call from ' + session.peerID);
 
       var self = this;
-      var sess = this.conn.jingle.sessions[sid];
-      var bid = jsxc.jidToBid(sess.peerjid);
+      var bid = jsxc.jidToBid(session.peerID);
+
+      session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
 
       jsxc.gui.window.postMessage(bid, 'sys', $.t('Incoming_call'));
 
@@ -500,23 +500,20 @@ jsxc.webrtc = {
       jsxc.notification.notify($.t('Incoming_call'), $.t('from') + ' ' + bid);
 
       // send signal to partner
-      sess.sendRinging();
+      session.ring();
 
-      jsxc.webrtc.last_caller = sess.peerjid;
+      jsxc.webrtc.last_caller = session.peerID;
 
       jsxc.switchEvents({
          'mediaready.jingle': function(event, stream) {
             self.setStatus('Accept call');
 
-            sess.localStream = stream;
-            sess.peerconnection.addStream(stream);
+            session.addStream(stream);
 
-            sess.sendAnswer();
-            sess.accept();
+            session.accept();
          },
          'mediafailure.jingle': function() {
-            sess.sendTerminate('decline');
-            sess.terminate();
+            session.decline();
          }
       });
 
@@ -539,8 +536,7 @@ jsxc.webrtc = {
          jsxc.gui.dialog.close();
          $(document).trigger('reject.call.jsxc');
 
-         sess.sendTerminate('decline');
-         sess.terminate();
+         session.decline();
       });
    },
 
@@ -554,10 +550,10 @@ jsxc.webrtc = {
     * @param reason Reason for termination
     * @param [text] Optional explanation
     */
-   onCallTerminated: function(event, sid, reason, text) {
-      this.setStatus('call terminated ' + sid + (reason ? (': ' + reason + ' ' + text) : ''));
+   onCallTerminated: function(session, reason) {
+      this.setStatus('call terminated ' + session.peer + (reason ? reason.condition : ''));
 
-      var bid = jsxc.jidToBid(jsxc.webrtc.last_caller);
+      var bid = jsxc.jidToBid(session.peer);
 
       if (this.localStream) {
          this.localStream.stop();
@@ -580,7 +576,7 @@ jsxc.webrtc = {
       $(document).off('error.jingle');
       jsxc.gui.dialog.close();
 
-      jsxc.gui.window.postMessage(bid, 'sys', ($.t('Call_terminated') + (reason ? (': ' + $.t(reason)) : '') + '.'));
+      jsxc.gui.window.postMessage(bid, 'sys', ($.t('Call_terminated') + (reason ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.'));
    },
 
    /**
@@ -602,30 +598,35 @@ jsxc.webrtc = {
     * @param data
     * @param sid Session id
     */
-   onRemoteStreamAdded: function(event, data, sid) {
-      this.setStatus('Remote stream for session ' + sid + ' added.');
+   onRemoteStreamAdded: function(session, stream) {
+      this.setStatus('Remote stream for session ' + session.sid + ' added.');
 
-      var stream = data.stream;
       this.remoteStream = stream;
-
-      var sess = this.conn.jingle.sessions[sid];
 
       var isVideoDevice = stream.getVideoTracks().length > 0;
       var isAudioDevice = stream.getAudioTracks().length > 0;
-
-      sess.remoteDevices = {
-         video: isVideoDevice,
-         audio: isAudioDevice
-      };
 
       this.setStatus(isVideoDevice ? 'Use remote video device.' : 'No remote video device');
       this.setStatus(isAudioDevice ? 'Use remote audio device.' : 'No remote audio device');
 
       if ($('.jsxc_remotevideo').length) {
-         RTC.attachMediaStream($('#jsxc_dialog .jsxc_remotevideo'), stream);
+         this.attachMediaStream($('#jsxc_dialog .jsxc_remotevideo'), stream);
 
          $('#jsxc_dialog .jsxc_' + (isVideoDevice ? 'remotevideo' : 'noRemoteVideo')).addClass('jsxc_deviceAvailable');
       }
+   },
+
+   /**
+    * Attach media stream to element.
+    * 
+    * @memberOf jsxc.webrtc
+    * @param element {Element|jQuery}
+    * @param stream {mediastream}
+    */
+   attachMediaStream: function(element, stream) {
+      var self = jsxc.webrtc;
+
+      self.conn.jingle.RTC.attachMediaStream((element instanceof jQuery) ? element.get(0) : element, stream);
    },
 
    /**
@@ -637,8 +638,10 @@ jsxc.webrtc = {
     * @param data
     * @param sid Session id
     */
-   onRemoteStreamRemoved: function(event, data, sid) {
-      this.setStatus('Remote stream for session ' + sid + ' removed.');
+   onRemoteStreamRemoved: function(session) {
+      this.setStatus('Remote stream for ' + session.jid + ' removed.');
+
+      //@TODO clean up
    },
 
    /**
@@ -650,51 +653,27 @@ jsxc.webrtc = {
     * @param sid session id
     * @param sess
     */
-   onIceConnectionStateChanged: function(event, sid, sess) {
-      var sigState = sess.peerconnection.signalingState;
-      var iceCon = sess.peerconnection.iceConnectionState;
+   onIceConnectionStateChanged: function(session, state) {
+      var self = jsxc.webrtc;
 
-      jsxc.debug('iceGat state for ' + sid, sess.peerconnection.iceGatheringState);
-      jsxc.debug('iceCon state for ' + sid, iceCon);
-      jsxc.debug('sig state for ' + sid, sigState);
+      jsxc.debug('connection state for ' + session.sid, state);
 
-      if (sigState === 'stable' && (iceCon === 'connected' || iceCon === 'completed')) {
+      if (state === 'connected') {
 
          $('#jsxc_dialog .jsxc_deviceAvailable').show();
          $('#jsxc_dialog .bubblingG').hide();
 
-         var localSDP = sess.peerconnection.localDescription.sdp;
-         var remoteSDP = sess.peerconnection.remoteDescription.sdp;
-
-         sess.local_fp = SDPUtil.parse_fingerprint(SDPUtil.find_line(localSDP, 'a=fingerprint:')).fingerprint;
-         sess.remote_fp = SDPUtil.parse_fingerprint(SDPUtil.find_line(remoteSDP, 'a=fingerprint:')).fingerprint;
-
-         var text = '<p>';
-         text += '<b>' + $.t('Local_Fingerprint') + ': </b>' + sess.local_fp + '<br />';
-         text += '<b>' + $.t('Remote_Fingerprint') + ': </b>' + sess.remote_fp;
-         text += '</p>';
-
-         $('#jsxc_dialog .jsxc_infobar').html(text);
-      } else if (iceCon === 'failed') {
-         jsxc.gui.window.postMessage(jsxc.jidToBid(sess.peerjid), 'sys', $.t('ICE_connection_failure'));
+      } else if (state === 'failed') {
+         jsxc.gui.window.postMessage(jsxc.jidToBid(session.peerID), 'sys', $.t('ICE_connection_failure'));
 
          $(document).off('cleanup.dialog.jsxc');
 
-         sess.sendTerminate('failed-transport');
-         sess.terminate();
+         session.end('failed-transport');
 
          $(document).trigger('callterminated.jingle');
+      } else if (state === 'interrupted') {
+         self.setStatus($.t('Connection_interrupted'));
       }
-   },
-
-   /**
-    * No STUN candidates found
-    * 
-    * @private
-    * @memberOf jsxc.webrtc
-    */
-   noStunCandidates: function() {
-
    },
 
    /**
@@ -731,7 +710,9 @@ jsxc.webrtc = {
                }, 500);
             });
 
-            self.conn.jingle.initiate(jid, self.conn.jid.toLowerCase());
+            var session = self.conn.jingle.initiate(jid);
+
+            session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
          },
          'mediafailure.jingle': function() {
             jsxc.gui.dialog.close();
@@ -782,10 +763,38 @@ jsxc.webrtc = {
                return availableDevices.indexOf(el) !== -1;
             });
 
-            getUserMediaWithConstraints(um);
+            jsxc.webrtc.getUserMedia(um);
          });
       } else {
-         getUserMediaWithConstraints(um);
+         jsxc.webrtc.getUserMedia(um);
+      }
+   },
+
+   getUserMedia: function(um) {
+      var self = jsxc.webrtc;
+      var constraints = {};
+
+      if (um.indexOf('video') > -1) {
+         constraints.video = true;
+      }
+
+      if (um.indexOf('audio') > -1) {
+         constraints.audio = true;
+      }
+
+      try {
+         self.conn.jingle.RTC.getUserMedia(constraints,
+            function(stream) {
+               jsxc.debug('onUserMediaSuccess');
+               $(document).trigger('mediaready.jingle', [stream]);
+            },
+            function(error) {
+               jsxc.warn('Failed to get access to local media. Error ', error);
+               $(document).trigger('mediafailure.jingle', [error]);
+            });
+      } catch (e) {
+         jsxc.error('GUM failed: ', e);
+         $(document).trigger('mediafailure.jingle');
       }
    },
 
@@ -852,7 +861,7 @@ jsxc.gui.showVideoWindow = function(jid) {
          containment: "parent"
       });
 
-      RTC.attachMediaStream(lv, self.localStream);
+      self.attachMediaStream(lv, self.localStream);
 
       var w_dialog = $('#jsxc_dialog').width();
       var w_remote = rv.width();
@@ -875,7 +884,7 @@ jsxc.gui.showVideoWindow = function(jid) {
       }
 
       if (self.remoteStream) {
-         RTC.attachMediaStream(rv, self.remoteStream);
+         self.attachMediaStream(rv, self.remoteStream);
 
          $('#jsxc_dialog .jsxc_' + (self.remoteStream.getVideoTracks().length > 0 ? 'remotevideo' : 'noRemoteVideo')).addClass('jsxc_deviceAvailable');
       }
@@ -905,7 +914,7 @@ jsxc.gui.showVideoWindow = function(jid) {
       $('#jsxc_dialog .jsxc_chatarea ul').append(win.detach());
 
       $('#jsxc_dialog .jsxc_hangUp').click(function() {
-         jsxc.webrtc.hangUp();
+         jsxc.webrtc.hangUp('success');
       });
 
       $('#jsxc_dialog .jsxc_snapshot').click(function() {
@@ -935,10 +944,6 @@ jsxc.gui.showVideoWindow = function(jid) {
          }
       });
 
-      $('#jsxc_dialog .jsxc_info').click(function() {
-         toggleMulti($('#jsxc_dialog .jsxc_infobar'));
-      });
-
       $('#jsxc_dialog .jsxc_fullscreen').click(function() {
 
          if ($.support.fullscreen) {
@@ -960,7 +965,7 @@ jsxc.gui.showVideoWindow = function(jid) {
       });
    });
 
-   jsxc.gui.dialog.open(jsxc.gui.template.get('videoWindow'), {
+   return jsxc.gui.dialog.open(jsxc.gui.template.get('videoWindow'), {
       noClose: true
    });
 };
@@ -971,13 +976,7 @@ $.extend(jsxc.CONST, {
 });
 
 $(document).ready(function() {
-   RTC = setupRTC();
-
-   if (RTC !== null) {
-      RTCPeerconnection = RTC.peerconnection;
-
-      $(document).on('add.roster.jsxc', jsxc.webrtc.onAddRosterItem);
-      $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
-      $(document).on('attached.jsxc', jsxc.webrtc.init);
-   }
+   $(document).on('add.roster.jsxc', jsxc.webrtc.onAddRosterItem);
+   $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
+   $(document).on('attached.jsxc', jsxc.webrtc.init);
 });

@@ -1,9 +1,9 @@
-[submodule "lib/strophe.jingle"]
-	path = lib/strophe.jingle
-	url = https://github.com/sualko/strophe.jingle.git
 [submodule "lib/otr"]
 	path = lib/otr
 	url = https://github.com/sualko/otr.git
 [submodule "lib/i18next"]
 	path = lib/i18next
 	url = https://github.com/i18next/i18next.git
+[submodule "lib/strophe.jinglejs"]
+	path = lib/strophe.jinglejs
+	url = https://github.com/sualko/strophe.jinglejs
