@@ -30,28 +30,10 @@
      "url": "https://github.com/strophe/strophejs-plugins"
   },
   {
-     "name": "strophe.jingle",
-     "file": "lib/strophe.jingle/strophe.jingle.js",
+     "name": "strophe.jinglejs",
+     "file": "lib/strophe.jinglejs/strophe.jinglejs-bundle.js",
      "license": "MIT",
-     "url": "https://github.com/ESTOS/strophe.jingle"
-  },
-  {
-     "name": null,
-     "file": "lib/strophe.jingle/strophe.jingle.session.js",
-     "license": "MIT",
-     "url": "https://github.com/ESTOS/strophe.jingle"
-  },
-  {
-     "name": null,
-     "file": "lib/strophe.jingle/strophe.jingle.sdp.js",
-     "license": "MIT",
-     "url": "https://github.com/ESTOS/strophe.jingle"
-  },
-  {
-     "name": null,
-     "file": "lib/strophe.jingle/strophe.jingle.adapter.js",
-     "license": "MIT",
-     "url": "https://github.com/ESTOS/strophe.jingle"
+     "url": "https://github.com/sualko/strophe.jinglejs"
   },
   {
      "name": "Salsa20",
