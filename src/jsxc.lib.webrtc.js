@@ -107,7 +107,7 @@ jsxc.webrtc = {
             var ttl = data.ttl || 3600;
             var iceServers = data.iceServers;
 
-            if (iceServers && iceServers.urls && iceServers.urls.length > 0) {
+            if (iceServers && iceServers.length > 0 && iceServers[0].urls && iceServers[0].urls.length > 0) {
                jsxc.debug('ice servers received');
 
                self.conn.jingle.setICEServers(iceServers);
@@ -910,6 +910,9 @@ jsxc.gui.showVideoWindow = function(jid) {
          $(this).val(0.5);
       });
    });
+
+   // needed to trigger complete.dialog.jsxc
+   jsxc.gui.dialog.close();
 
    return jsxc.gui.dialog.open(jsxc.gui.template.get('videoWindow'), {
       noClose: true

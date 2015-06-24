@@ -6,6 +6,8 @@ module.exports = function(grunt) {
       return '<%= target %>/' + el.file;
    });
 
+   var git_cached = [];
+
    // Project configuration.
    grunt.initConfig({
       app: grunt.file.readJSON('package.json'),
