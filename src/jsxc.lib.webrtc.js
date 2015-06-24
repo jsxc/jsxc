@@ -47,11 +47,11 @@ jsxc.webrtc = {
 
       var manager = self.conn.jingle.manager;
 
-      $(document).on('message.jsxc', $.proxy(self.onMessage, self));
-      $(document).on('presence.jsxc', $.proxy(self.onPresence, self));
+      $(document).on('message.jsxc', self.onMessage);
+      $(document).on('presence.jsxc', self.onPresence);
 
-      $(document).on('mediaready.jingle', $.proxy(self.onMediaReady, self));
-      $(document).on('mediafailure.jingle', $.proxy(self.onMediaFailure, self));
+      $(document).on('mediaready.jingle', self.onMediaReady);
+      $(document).on('mediafailure.jingle', self.onMediaFailure);
 
       manager.on('incoming', $.proxy(self.onCallIncoming, self));
       manager.on('terminated', $.proxy(self.onCallTerminated, self));
@@ -65,10 +65,22 @@ jsxc.webrtc = {
       });
 
       if (self.conn.caps) {
-         $(document).on('caps.strophe', $.proxy(self.onCaps, self));
+         $(document).on('caps.strophe', self.onCaps);
       }
 
       self.getTurnCrendentials();
+   },
+
+   onDisconnected: function() {
+      var self = jsxc.webrtc;
+
+      $(document).off('message.jsxc', self.onMessage);
+      $(document).off('presence.jsxc', self.onPresence);
+
+      $(document).off('mediaready.jingle', self.onMediaReady);
+      $(document).off('mediafailure.jingle', self.onMediaFailure);
+
+      $(document).off('caps.strophe', self.onCaps);
    },
 
    /**
@@ -450,19 +462,6 @@ jsxc.webrtc = {
 
       jsxc.webrtc.last_caller = session.peerID;
 
-      jsxc.switchEvents({
-         'mediaready.jingle': function(event, stream) {
-            self.setStatus('Accept call');
-
-            session.addStream(stream);
-
-            session.accept();
-         },
-         'mediafailure.jingle': function() {
-            session.decline();
-         }
-      });
-
       if (jsxc.webrtc.AUTO_ACCEPT) {
          self.reqUserMedia();
          return;
@@ -474,6 +473,19 @@ jsxc.webrtc = {
 
       dialog.find('.jsxc_accept').click(function() {
          $(document).trigger('accept.call.jsxc');
+
+         jsxc.switchEvents({
+            'mediaready.jingle': function(event, stream) {
+               self.setStatus('Accept call');
+
+               session.addStream(stream);
+
+               session.accept();
+            },
+            'mediafailure.jingle': function() {
+               session.decline();
+            }
+         });
 
          self.reqUserMedia();
       });
@@ -928,4 +940,5 @@ $(document).ready(function() {
    $(document).on('add.roster.jsxc', jsxc.webrtc.onAddRosterItem);
    $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
    $(document).on('attached.jsxc', jsxc.webrtc.init);
+   $(document).on('disconnected.jsxc', jsxc.webrtc.onDisconnected);
 });
