@@ -391,7 +391,7 @@ jsxc.otr = {
             // try to create web-worker
 
             try {
-               worker = new Worker(jsxc.options.root + '/lib/otr/build/dsa-webworker.js');
+               worker = new Worker(jsxc.options.root + '/lib/otr/lib/dsa-webworker.js');
             } catch (err) {
                jsxc.warn('Couldn\'t create web-worker.', err);
             }
