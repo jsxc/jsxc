@@ -26,11 +26,16 @@ module.exports = function(grunt) {
          main: {
             files: [{
                expand: true,
-               src: ['lib/i18next/release/i18next-latest.min.js', 'lib/strophe.jinglejs/*-bundle.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'LICENSE', 'img/**', 'sound/**'],
+               src: ['lib/i18next/release/i18next-latest.min.js', 'lib/magnific-popup/dist/*.js', 'lib/strophe.jinglejs/*-bundle.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'LICENSE', 'img/**', 'sound/**'],
                dest: '<%= target %>/'
             }, {
                expand: true,
                cwd: 'lib/',
+               src: ['*.css'],
+               dest: '<%= target %>/css/'
+            }, {
+               expand: true,
+               cwd: 'lib/magnific-popup/dist/',
                src: ['*.css'],
                dest: '<%= target %>/css/'
             }]
@@ -86,6 +91,14 @@ module.exports = function(grunt) {
                from: /}$/g,
                to: '};'
             }]
+         },
+         template: {
+            src: ['tmp/template.js'],
+            overwrite: true,
+            replacements: [{
+               from: 'var jsxc.gui.template = {};',
+               to: ''
+            }]
          }
       },
       merge_data: {
@@ -126,7 +139,7 @@ module.exports = function(grunt) {
             options: {
                banner: '/*! This file is concatenated for the browser. */\n\n'
             },
-            src: ['src/jsxc.intro.js', 'src/jsxc.lib.js', 'src/jsxc.lib.*.js', 'src/jsxc.outro.js'],
+            src: ['src/jsxc.intro.js', 'src/jsxc.lib.js', 'src/jsxc.lib.*.js', 'tmp/template.js', 'src/jsxc.outro.js'],
             dest: '<%= target %>/jsxc.js'
          }
       },
@@ -235,11 +248,15 @@ module.exports = function(grunt) {
          js: {
             files: ['src/jsxc.lib.*'],
             tasks: ['concat:jsxc']
+         },
+         template: {
+            files: ['template/*.html'],
+            tasks: ['htmlConvert', 'replace:template', 'concat:jsxc']
          }
       },
       jsbeautifier: {
          jsxc: {
-            src: ['Gruntfile.js', 'src/jsxc.lib.*'],
+            src: ['Gruntfile.js', 'src/jsxc.lib.*', 'template/*.html'],
             options: {
                js: {
                   indentSize: 3,
@@ -274,6 +291,61 @@ module.exports = function(grunt) {
          jsxc: {
             src: ['scss/*.scss']
          }
+      },
+      htmlConvert: {
+         options: {
+            target: 'js',
+            rename: function(name) {
+               return name.match(/([-_0-9a-z]+)\.html$/i)[1];
+            },
+            quoteChar: '\'',
+            indentString: '',
+            indentGlobal: ''
+         },
+         'jsxc.gui.template': {
+            src: 'template/*.html',
+            dest: 'tmp/template.js'
+         }
+      },
+      shell: {
+         'precommit-before': {
+            command: 'git diff --cached --name-only',
+            options: {
+               callback: function(err, stdout, stderr, cb) {
+                  git_cached = stdout.trim().split(/\n/);
+
+                  cb();
+               }
+            }
+         },
+         'precommit-after': {
+            command: 'git diff --name-only',
+            options: {
+               callback: function(err, stdout, stderr, cb) {
+                  var git_diff = stdout.trim().split(/\n/);
+                  var intersection = [];
+                  var i;
+
+                  for (i = 0; i < git_diff.length; i++) {
+                     if (git_cached.indexOf(git_diff[i]) >= 0) {
+                        intersection.push(git_diff[i]);
+                     }
+                  }
+
+                  if (intersection.length > 0) {
+                     grunt.log.writeln();
+
+                     for (i = 0; i < intersection.length; i++) {
+                        grunt.log.writeln('> ' + intersection[i]);
+                     }
+
+                     grunt.fail.warn('Some files changed during pre-commit hook!');
+                  }
+
+                  cb();
+               }
+            }
+         }
       }
    });
 
@@ -296,11 +368,13 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-contrib-watch');
    grunt.loadNpmTasks('grunt-jsbeautifier');
    grunt.loadNpmTasks('grunt-prettysass');
+   grunt.loadNpmTasks('grunt-html-convert');
+   grunt.loadNpmTasks('grunt-shell');
 
    //Default task
    grunt.registerTask('default', ['build', 'watch']);
 
-   grunt.registerTask('build', ['jshint', 'clean', 'sass', 'autoprefixer', 'copy', 'merge_data', 'replace:locales', 'concat']);
+   grunt.registerTask('build', ['jshint', 'clean', 'sass', 'autoprefixer', 'copy', 'merge_data', 'replace:locales', 'htmlConvert', 'replace:template', 'concat']);
 
    grunt.registerTask('build:prerelease', 'Build a new pre-release', function() {
       grunt.config.set('target', 'build');
@@ -318,5 +392,5 @@ module.exports = function(grunt) {
    grunt.registerTask('pre', ['build:prerelease']);
 
    // before commit
-   grunt.registerTask('commit', ['search:console', 'jsbeautifier:jsxc', 'prettysass', 'jshint']);
+   grunt.registerTask('commit', ['shell:precommit-before', 'search:console', 'jsbeautifier', 'prettysass', 'jshint', 'shell:precommit-after']);
 };

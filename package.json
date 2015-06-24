@@ -25,6 +25,7 @@
     "grunt-contrib-uglify": "^0.6.0",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-data-uri": "^0.2.0",
+    "grunt-html-convert": "0.0.2",
     "grunt-jsbeautifier": "^0.2.10",
     "grunt-jsdoc": "^0.5.7",
     "grunt-merge-data": "^0.4.3",
@@ -32,7 +33,7 @@
     "grunt-prettysass": "^0.2.3",
     "grunt-sass": "^0.17.0",
     "grunt-search": "^0.1.6",
-    "grunt-shell": "^1.1.1",
+    "grunt-shell": "^1.1.2",
     "grunt-text-replace": "~0.4.0"
   }
 }

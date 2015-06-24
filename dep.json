@@ -72,6 +72,12 @@
      "url": "http://i18next.com/"
   },
   {
+     "name": "Magnific Popup",
+     "file": "lib/magnific-popup/dist/jquery.magnific-popup.min.js",
+     "license": "MIT",
+     "url": "http://dimsemenov.com/plugins/magnific-popup/"
+  },
+  {
      "name": null,
      "file": "lib/translation.js",
      "license": "MIT",

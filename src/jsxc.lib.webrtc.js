@@ -1,61 +1,6 @@
 /* global MediaStreamTrack */
 /* jshint -W020 */
 
-jsxc.gui.template.incomingCall = '<h3 data-i18n="Incoming_call"></h3>\
-        <p><span data-i18n="Do_you_want_to_accept_the_call_from"></span> {{bid_name}}?</p>\
-        <p class="jsxc_right">\
-            <a href="#" class="button jsxc_reject" data-i18n="Reject"></a> <a href="#" class="button creation jsxc_accept" data-i18n="Accept"></a>\
-         </p>';
-
-jsxc.gui.template.allowMediaAccess = '<p data-i18n="Please_allow_access_to_microphone_and_camera"></p>';
-
-jsxc.gui.template.videoWindow = '<div class="jsxc_webrtc">\
-            <div class="jsxc_chatarea">\
-                <ul></ul>\
-            </div>\
-            <div class="jsxc_videoContainer">\
-                <video class="jsxc_localvideo" autoplay></video>\
-                <video class="jsxc_remotevideo" autoplay></video>\
-                <div class="jsxc_status"></div>\
-               <div class="bubblingG">\
-                  <span id="bubblingG_1">\
-                  </span>\
-                  <span id="bubblingG_2">\
-                  </span>\
-                  <span id="bubblingG_3">\
-                  </span>\
-               </div>\
-                <div class="jsxc_noRemoteVideo">\
-                   <div>\
-                     <div></div>\
-                     <p data-i18n="No_video_signal"></p>\
-                     <div></div>\
-                   </div>\
-                </div>\
-            </div>\
-            <div class="jsxc_controlbar">\
-                <button type="button" class="jsxc_hangUp" data-i18n="hang_up"></button>\
-                <input type="range" class="jsxc_volume" min="0.0" max="1.0" step="0.05" value="0.5" />\
-                <div class="jsxc_buttongroup">\
-                    <button type="button" class="jsxc_snapshot" data-i18n="snapshot"></button><button type="button" class="jsxc_snapshots">&#9660;</button>\
-                </div>\
-                <!-- <button type="button" class="jsxc_mute_local" data-i18n="mute_my_audio"></button>\
-                <button type="button" class="jsxc_pause_local" data-i18n="pause_my_video"></button> --> \
-                <button type="button" class="jsxc_showchat" data-i18n="chat"></button>\
-                <button type="button" class="jsxc_fullscreen" data-i18n="fullscreen"></button>\
-                <button type="button" class="jsxc_info" data-i18n="Info"></button>\
-            </div>\
-            <div class="jsxc_multi">\
-               <div class="jsxc_snapshotbar">\
-                   <p>No pictures yet!</p>\
-               </div>\n\
-               <!--<div class="jsxc_chatarea">\
-                   <ul></ul>\
-               </div>-->\
-               <div class="jsxc_infobar"></div>\
-            </div>\
-        </div>';
-
 /**
  * WebRTC namespace for jsxc.
  * 
