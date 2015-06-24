@@ -259,7 +259,20 @@
     "The_maximum_number_": null,
     "This_room_is_locked_": null,
     "You_are_not_allowed_to_create_": null,
+    "Alert": null,
+    "Call_started": null,
+    "Call_terminated": null,
     "Carbon_copy": null,
-    "Enable": "Activar"
+    "Enable": "Activar",
+    "jingle_reason_busy": null,
+    "jingle_reason_decline": null,
+    "jingle_reason_success": null,
+    "Media_failure": null,
+    "No_local_audio_device": null,
+    "No_local_video_device": null,
+    "Ok": null,
+    "PermissionDeniedError": null,
+    "Use_local_audio_device": null,
+    "Use_local_video_device": null
   }
 }

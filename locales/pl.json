@@ -259,7 +259,20 @@
     "The_maximum_number_": "Została osiągnięta maksymalna liczba użytkowników w tym pokoju",
     "This_room_is_locked_": "Ten pokój jest zablokowany",
     "You_are_not_allowed_to_create_": "Nie masz uprawnień do tworzenia pokoju",
+    "Alert": "Alarm",
+    "Call_started": null,
+    "Call_terminated": null,
     "Carbon_copy": "Do wiadomości",
-    "Enable": null
+    "Enable": "Włączone",
+    "jingle_reason_busy": null,
+    "jingle_reason_decline": null,
+    "jingle_reason_success": null,
+    "Media_failure": null,
+    "No_local_audio_device": null,
+    "No_local_video_device": null,
+    "Ok": "Ok",
+    "PermissionDeniedError": null,
+    "Use_local_audio_device": null,
+    "Use_local_video_device": null
   }
 }

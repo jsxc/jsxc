@@ -259,7 +259,20 @@
     "The_maximum_number_": "Die maximale Anzahl der Mitglieder wurde erreicht.",
     "This_room_is_locked_": "Diese Gruppe ist gesperrt",
     "You_are_not_allowed_to_create_": "Du darfst keine neue Gruppe erstellen",
+    "Alert": "Alarm",
+    "Call_started": "Anruf gestarted",
+    "Call_terminated": "Anruf beendet",
     "Carbon_copy": null,
-    "Enable": "Aktivieren"
+    "Enable": "Aktivieren",
+    "jingle_reason_busy": "beschäftigt",
+    "jingle_reason_decline": "abgelehnt",
+    "jingle_reason_success": "aufgelegt",
+    "Media_failure": "Gerätefehler",
+    "No_local_audio_device": "Kein eigenes Audio Gerät",
+    "No_local_video_device": "Keine eigene Webcam",
+    "Ok": "Ok",
+    "PermissionDeniedError": "Du oder dein Browser haben die Audio/Video Berechtigung verweigert",
+    "Use_local_audio_device": "Nutze eigenes Audio Gerät",
+    "Use_local_video_device": "Benutze eigene Webcam"
   }
 }

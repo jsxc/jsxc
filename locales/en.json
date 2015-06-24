@@ -259,7 +259,20 @@
     "The_maximum_number_": "The maximum number of user is reached in this room",
     "This_room_is_locked_": "This room is locked",
     "You_are_not_allowed_to_create_": "You are not allowed to create a room",
+    "Alert": "Alert",
+    "Call_started": "Call started",
+    "Call_terminated": "Call terminated",
     "Carbon_copy": "Carbon copy",
-    "Enable": "Enable"
+    "Enable": "Enable",
+    "jingle_reason_busy": "busy",
+    "jingle_reason_decline": "decline",
+    "jingle_reason_success": "hung up",
+    "Media_failure": "Media failure",
+    "No_local_audio_device": "No local audio device.",
+    "No_local_video_device": "No local video device.",
+    "Ok": "Ok",
+    "PermissionDeniedError": "You or your browser denied audio/video permission",
+    "Use_local_audio_device": "Use local audio device.",
+    "Use_local_video_device": "Use local video device."
   }
 }
