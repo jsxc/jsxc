@@ -100,10 +100,6 @@ jsxc.webrtc = {
          return;
       }
 
-      // jingle configuration
-      //@TODO remove iceServers from localStorage
-      //self.conn.jingle.setICEServers(jsxc.storage.getUserItem('iceConfig').iceServers);
-
       var manager = self.conn.jingle.manager;
 
       $(document).on('message.jsxc', $.proxy(self.onMessage, self));
@@ -123,10 +119,6 @@ jsxc.webrtc = {
          jsxc.debug('[JINGLE][' + level + ']', msg);
       });
 
-      if (self.conn.disco) {
-         self.conn.disco.addFeature('urn:xmpp:jingle:apps:dtls:0');
-      }
-
       if (self.conn.caps) {
          $(document).on('caps.strophe', $.proxy(self.onCaps, self));
       }
@@ -140,15 +132,25 @@ jsxc.webrtc = {
     * @memberOf jsxc.webrtc
     */
    getTurnCrendentials: function() {
+      var self = jsxc.webrtc;
 
       if (!jsxc.options.turnCredentialsPath) {
-         jsxc.debug('No path for TURN credentials defined!');
+         jsxc.warn('No path for TURN credentials defined!');
          return;
       }
 
       var ttl = (jsxc.storage.getUserItem('iceValidity') || 0) - (new Date()).getTime();
+
+      // validity from jsxc < 2.1.0 is invalid
+      if (jsxc.storage.getUserItem('iceConfig')) {
+         jsxc.storage.removeUserItem('iceConfig');
+         ttl = -1;
+      }
+
       if (ttl > 0) {
          // credentials valid
+
+         self.conn.jingle.setICEServers(jsxc.storage.getUserItem('iceServers'));
 
          window.setTimeout(jsxc.webrtc.getTurnCrendentials, ttl + 500);
          return;
@@ -157,17 +159,16 @@ jsxc.webrtc = {
       $.ajax(jsxc.options.turnCredentialsPath, {
          async: true,
          success: function(data) {
-            var iceConfig = {
-               iceServers: [{
-                  urls: ['turn:' + data.url],
-                  credential: data.credential,
-                  username: data.username
-               }]
-            };
+            var ttl = data.ttl || 3600;
+            var iceServers = data.iceServers;
 
-            jsxc.webrtc.conn.jingle.ice_config = iceConfig;
-            jsxc.storage.setUserItem('iceConfig', iceConfig);
-            jsxc.storage.setUserItem('iceValidity', (new Date()).getTime() + 1000 * data.ttl);
+            if (iceServers && iceServers.urls && iceServers.urls.length > 0) {
+               jsxc.debug('ice servers received');
+
+               self.conn.jingle.setICEServers(iceServers);
+               jsxc.storage.setUserItem('iceServers', iceServers);
+               jsxc.storage.setUserItem('iceValidity', (new Date()).getTime() + 1000 * ttl);
+            }
          },
          dataType: 'json'
       });

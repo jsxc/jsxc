@@ -31,9 +31,9 @@
   },
   {
      "name": "strophe.jinglejs",
-     "file": "lib/strophe.jinglejs/build/strophe.jinglejs-bundle.js",
+     "file": "lib/strophe.jinglejs/strophe.jinglejs-bundle.js",
      "license": "MIT",
-     "url": ""
+     "url": "https://github.com/sualko/strophe.jinglejs"
   },
   {
      "name": "Salsa20",
