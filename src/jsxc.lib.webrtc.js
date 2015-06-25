@@ -455,7 +455,9 @@ jsxc.webrtc = {
       jsxc.gui.window.postMessage(bid, 'sys', $.t('Incoming_call'));
 
       // display notification
-      jsxc.notification.notify($.t('Incoming_call'), $.t('from') + ' ' + bid);
+      jsxc.notification.notify($.t('Incoming_call'), $.t('from_sender', {
+         sender: bid
+      }));
 
       // send signal to partner
       session.ring();

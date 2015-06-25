@@ -19,7 +19,9 @@ jsxc.notification = {
          var data = jsxc.storage.getUserItem('buddy', bid);
 
          jsxc.notification.notify({
-            title: $.t('New_message_from') + ' ' + data.name,
+            title: $.t('New_message_from', {
+               name: data.name
+            }),
             msg: msg,
             soundFile: jsxc.CONST.SOUNDS.MSG,
             source: bid

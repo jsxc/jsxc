@@ -154,7 +154,9 @@ jsxc.gui = {
       ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
 
       // Change name and add title
-      ue.find('.jsxc_name:first').add(spot).text(data.name).attr('title', $.t('is') + ' ' + jsxc.CONST.STATUS[data.status]);
+      ue.find('.jsxc_name:first').add(spot).text(data.name).attr('title', $.t('is_', {
+         status: $.t(jsxc.CONST.STATUS[data.status])
+      }));
 
       // Update gui according to encryption state
       switch (data.msgstate) {
@@ -1039,7 +1041,9 @@ jsxc.gui = {
    },
 
    showUnknownSender: function(bid) {
-      var confirmationText = $.t('You_received_a_message_from_an_unknown_sender') + ' (' + bid + '). ' + $.t('Do_you_want_to_display_them');
+      var confirmationText = $.t('You_received_a_message_from_an_unknown_sender_', {
+         sender: bid
+      });
       jsxc.gui.showConfirmDialog(confirmationText, function() {
 
          jsxc.gui.dialog.close();
@@ -1612,8 +1616,8 @@ jsxc.gui.roster = {
     * @memberOf jsxc.gui.roster
     */
    empty: function() {
-      var text = $('<p>' + $.t('Your_roster_is_empty_add_a') + '</p>');
-      var link = $('<a>' + $.t('new_buddy') + '</a>');
+      var text = $('<p>' + $.t('Your_roster_is_empty_add_') + '</p>');
+      var link = text.find('a');
 
       link.click(function() {
          jsxc.gui.showContactDialog();

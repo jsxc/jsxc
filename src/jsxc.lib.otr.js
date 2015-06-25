@@ -93,7 +93,9 @@ jsxc.otr = {
                data.fingerprint = jsxc.otr.objects[bid].their_priv_pk.fingerprint();
                data.msgstate = OTR.CONST.MSGSTATE_ENCRYPTED;
 
-               var msg = (jsxc.otr.objects[bid].trust ? $.t('Verified') : $.t('Unverified')) + ' ' + $.t('private_conversation_started');
+               var msg_state = jsxc.otr.objects[bid].trust ? 'Verified' : 'Unverified';
+               var msg = $.t(msg_state + '_private_conversation_started');
+
                jsxc.gui.window.postMessage(bid, 'sys', msg);
                break;
             case OTR.CONST.STATUS_END_OTR:
@@ -208,10 +210,10 @@ jsxc.otr = {
 
       if (data) {
          $('#jsxc_dialog > div:eq(2)').find('#jsxc_quest').val(data).prop('disabled', true);
-         $('#jsxc_dialog > div:eq(2)').find('.creation').text('Answer');
-         $('#jsxc_dialog > div:eq(2)').find('.jsxc_explanation').text($.t('your_buddy_is_attempting_to_determine_') + ' ' + $.t('to_authenticate_to_your_buddy') + $.t('enter_the_answer_and_click_answer'));
+         $('#jsxc_dialog > div:eq(2)').find('.jsxc_submit').text($('Answer'));
+         $('#jsxc_dialog > div:eq(2)').find('.jsxc_explanation').text($.t('onsmp_explanation_question'));
       } else {
-         $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text($.t('your_buddy_is_attempting_to_determine_') + ' ' + $.t('to_authenticate_to_your_buddy') + $.t('enter_the_secret'));
+         $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text($.t('onsmp_explanation_secret'));
       }
 
       $('#jsxc_dialog .jsxc_close').click(function() {
