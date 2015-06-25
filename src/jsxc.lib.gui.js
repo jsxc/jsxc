@@ -1351,9 +1351,13 @@ jsxc.gui.roster = {
          jsxc.gui.toggleList.call($(this));
       });
 
-      if (jsxc.storage.getUserItem('roster') === 'hidden') {
-         $('#jsxc_roster').css('right', '-200px');
-         $('#jsxc_windowList > ul').css('paddingRight', '10px');
+      var rosterState = jsxc.storage.getUserItem('roster');
+
+      $('#jsxc_roster').addClass('jsxc_state_' + rosterState);
+
+      if (rosterState === 'hidden') {
+         $('#jsxc_roster').css('right', -1 * $('#jsxc_roster').innerWidth() + 'px');
+         $('#jsxc_windowList').css('right', '10px');
       }
 
       var pres = jsxc.storage.getUserItem('presence') || 'online';
@@ -1586,6 +1590,8 @@ jsxc.gui.roster = {
       var state = (roster_right < 0) ? 'shown' : 'hidden';
 
       jsxc.storage.setUserItem('roster', state);
+
+      roster.removeClass('jsxc_state_hidden jsxc_state_shown').addClass('jsxc_state_' + state);
 
       roster.animate({
          right: ((roster_width + roster_right) * -1) + 'px'

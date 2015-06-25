@@ -78,6 +78,13 @@
             display: none;
         }
     }
+    &.jsxc_state_hidden {
+        #jsxc_toggleRoster {
+            &:before {
+                transform: rotate(0deg);
+            }
+        }
+    }
 }
 
 #jsxc_toggleRoster {
@@ -91,6 +98,18 @@
     cursor: pointer;
     &:hover {
         background-color: $roster_toggle_hover;
+    }
+    &:before {
+        content: '';
+        position: absolute;
+        display: block;
+        width: 0;
+        top: 50%;
+        right: 0px;
+        border-style: solid;
+        border-width: 6px 4px 6px 0;
+        border-color: transparent $roster_bg;
+        transform: rotate(180deg);
     }
 }
 
