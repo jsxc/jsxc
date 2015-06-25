@@ -74,7 +74,10 @@ jsxc.options = {
        * Action after auth fail: submit [String] Submit form, false [boolean] | quiet [String] Do
        * nothing, ask [String] Show auth fail dialog
        */
-      onAuthFail: 'submit'
+      onAuthFail: 'submit',
+
+      /** True: Attach connection even is login form was found */
+      attachIfFound: true
    },
 
    /** jquery object from logout element */

@@ -269,7 +269,7 @@ jsxc = {
          jsxc.storage.removeItem('sid');
 
          // Looking for a login form
-         if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
+         if (!jsxc.isLoginForm()) {
 
             if (jsxc.options.displayRosterMinimized()) {
                // Show minimized roster
@@ -318,7 +318,7 @@ jsxc = {
             return true;
          });
 
-      } else {
+      } else if (!jsxc.isLoginForm() || (jsxc.options.loginForm && jsxc.options.loginForm.attachIfFound)) {
 
          // Restore old connection
 
@@ -332,6 +332,16 @@ jsxc = {
             jsxc.checkMaster();
          }
       }
+   },
+
+   /**
+    * Returns true if login form is found.
+    *
+    * @memberOf jsxc
+    * @returns {boolean} True if login form was found.
+    */
+   isLoginForm: function() {
+      return jsxc.options.loginForm.form && jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass);
    },
 
    /**
