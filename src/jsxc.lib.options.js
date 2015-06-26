@@ -25,12 +25,20 @@ jsxc.options = {
 
    /** xmpp options */
    xmpp: {
+      /** BOSH url */
       url: null,
+
+      /** XMPP JID*/
       jid: null,
+
+      /** XMPP domain */
       domain: null,
+
+      /** XMPP password */
       password: null,
-      overwrite: false,
-      onlogin: true
+
+      /** True: Allow user to overwrite xmpp settings */
+      overwrite: false
    },
 
    /** default xmpp priorities */
@@ -42,8 +50,11 @@ jsxc.options = {
       dnd: 0
    },
 
-   /** If all 3 properties are set, the login form is used */
+   /** If all 3 properties are set and enable is true, the login form is used */
    loginForm: {
+      /** False, disables login through login form */
+      enable: true,
+
       /** jquery object from form */
       form: null,
 
@@ -77,7 +88,13 @@ jsxc.options = {
       onAuthFail: 'submit',
 
       /** True: Attach connection even is login form was found */
-      attachIfFound: true
+      attachIfFound: true,
+
+      /**
+       * True: Display roster minimized after first login. Afterwards the last 
+       * roster state will be used. 
+       */
+      startMinimized: true
    },
 
    /** jquery object from logout element */

@@ -306,13 +306,19 @@ jsxc = {
 
             var settings = jsxc.prepareLogin();
 
-            if (settings !== false && (settings.xmpp.onlogin === "true" || settings.xmpp.onlogin === true)) {
-               jsxc.options.loginForm.triggered = true;
+            if (settings !== false) {
+               // settings.xmpp.onlogin is deprecated since v2.1.0
+               var enabled = (settings.loginForm && settings.loginForm.enable) || (settings.xmpp && settings.xmpp.onlogin);
+               enabled = enabled === "true" || enabled === true;
 
-               jsxc.xmpp.login();
+               if (enabled) {
+                  jsxc.options.loginForm.triggered = true;
 
-               // Trigger submit in jsxc.xmpp.connected()
-               return false;
+                  jsxc.xmpp.login();
+
+                  // Trigger submit in jsxc.xmpp.connected()
+                  return false;
+               }
             }
 
             return true;
@@ -399,6 +405,9 @@ jsxc = {
       settings.xmpp.resource = jid.split('@')[1].split('/')[1] || "";
 
       $.each(settings, function(key, val) {
+         var old = jsxc.options.get(key);
+         val = $.extend(true, old, val);
+
          jsxc.options.set(key, val);
       });
 

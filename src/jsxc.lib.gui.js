@@ -1351,7 +1351,7 @@ jsxc.gui.roster = {
          jsxc.gui.toggleList.call($(this));
       });
 
-      var rosterState = jsxc.storage.getUserItem('roster');
+      var rosterState = jsxc.storage.getUserItem('roster') || (jsxc.options.get('loginForm').startMinimized ? 'hidden' : 'shown');
 
       $('#jsxc_roster').addClass('jsxc_state_' + rosterState);
 
