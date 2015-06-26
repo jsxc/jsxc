@@ -2124,11 +2124,6 @@ jsxc.gui.window = {
          msg = $.t('unencrypted_message_received') + ' ' + msg;
       }
 
-      if (direction === 'out' && data.sub === 'from') {
-         direction = 'sys';
-         msg = $.t('your_message_wasnt_send_because_you_have_no_valid_subscription');
-      }
-
       encrypted = encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
       var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded, stamp, sender);
 
