@@ -123,6 +123,7 @@ jsxc.webrtc = {
                jsxc.debug('ice servers received');
 
                self.conn.jingle.setICEServers(iceServers);
+
                jsxc.storage.setUserItem('iceServers', iceServers);
                jsxc.storage.setUserItem('iceValidity', (new Date()).getTime() + 1000 * ttl);
             }
@@ -430,7 +431,9 @@ jsxc.webrtc = {
     * @memberOf jsxc.webrtc
     */
    onMediaFailure: function(ev, err) {
-      this.setStatus('media failure');
+      var self = jsxc.webrtc;
+
+      self.setStatus('media failure');
 
       jsxc.gui.window.postMessage(jsxc.jidToBid(jsxc.webrtc.last_caller), 'sys', $.t('Media_failure') + ': ' + $.t(err.name) + ' (' + err.name + ').');
       jsxc.debug('media failure: ' + err.name);
