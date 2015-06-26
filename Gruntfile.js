@@ -257,32 +257,9 @@ module.exports = function(grunt) {
          }
       },
       jsbeautifier: {
-         jsxc: {
-            src: ['Gruntfile.js', 'src/jsxc.lib.*', 'template/*.html'],
-            options: {
-               js: {
-                  indentSize: 3,
-                  endWithNewline: true
-               },
-               html: {
-                  indentSize: 3
-               }
-            }
-         },
-         example: {
-            src: ['example/*.html', 'example/js/dev.js', 'example/js/example.js', 'example/css/example.css'],
-            options: {
-               js: {
-                  indentSize: 3,
-                  endWithNewline: true
-               },
-               html: {
-                  indentSize: 3
-               },
-               css: {
-                  indentSize: 3
-               }
-            }
+         files: ['Gruntfile.js', 'src/jsxc.lib.*', 'template/*.html', 'example/*.html', 'example/js/dev.js', 'example/js/example.js', 'example/css/example.css'],
+         options: {
+            config: '.jsbeautifyrc'
          }
       },
       prettysass: {
