@@ -273,6 +273,7 @@ jsxc.xmpp = {
       jsxc.onMaster();
       jsxc.xmpp.conn.resume();
       jsxc.gui.dialog.close();
+      jsxc.restoreCompleted = true;
       $(document).trigger('attached.jsxc');
    },
 

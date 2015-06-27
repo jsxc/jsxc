@@ -394,16 +394,31 @@ jsxc.storage = {
          }
 
          n = JSON.parse(e.newValue);
+         o = JSON.parse(e.oldValue);
 
-         if (n.minimize) {
-            jsxc.gui.window._hide(bid);
-         } else {
-            jsxc.gui.window._show(bid);
+         if (n.minimize !== o.minimize) {
+            if (n.minimize) {
+               jsxc.gui.window._hide(bid);
+            } else {
+               jsxc.gui.window._show(bid);
+            }
          }
 
          jsxc.gui.window.setText(bid, n.text);
 
+         if (n.unread !== o.unread) {
+            if (n.unread === 0) {
+               jsxc.gui.readMsg(bid);
+            } else {
+               jsxc.gui._unreadMsg(bid, n.unread);
+            }
+         }
+
          return;
+      }
+
+      if (key.match(/^unreadMsg/) && jsxc.gui.favicon) {
+         jsxc.gui.favicon.badge(parseInt(e.newValue) || 0);
       }
 
       if (key.match(new RegExp('^smp' + jsxc.storage.SEP))) {

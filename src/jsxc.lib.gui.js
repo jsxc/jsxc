@@ -1162,7 +1162,7 @@ jsxc.gui = {
    _unreadMsg: function(bid, count) {
       var win = jsxc.gui.window.get(bid);
 
-      if (!count) {
+      if (typeof count !== 'number') {
          // get counter after page reload
          var winData = jsxc.storage.getUserItem('window', bid);
          count = (winData && winData.unread) || 1;
@@ -1187,10 +1187,12 @@ jsxc.gui = {
       var count = (winData && winData.unread) || 0;
       count = (count === true) ? 0 : count; //unread was boolean (<2.1.0)
 
-      if (count > 0) {
-         var el = jsxc.gui.roster.getItem(bid).add(win);
-         el.removeClass('jsxc_unreadMsg');
+      var el = jsxc.gui.roster.getItem(bid).add(win);
+      el.removeClass('jsxc_unreadMsg');
+      el.find('.jsxc_unread').text(0);
 
+      // update counters if not called from other tab
+      if (count > 0) {
          // update counter of total unread messages
          var total = jsxc.storage.getUserItem('unreadMsg') || 0;
          total -= count;
@@ -1200,7 +1202,6 @@ jsxc.gui = {
             jsxc.gui.favicon.badge(total);
          }
 
-         el.find('.jsxc_unread').text(0);
          jsxc.storage.updateUserItem('window', bid, 'unread', 0);
       }
    },
@@ -1923,7 +1924,7 @@ jsxc.gui.window = {
          jsxc.storage.setUserItem('window', bid, {
             minimize: true,
             text: '',
-            unread: false
+            unread: 0
          });
       } else {
 
@@ -2194,6 +2195,8 @@ jsxc.gui.window = {
       var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded, stamp, sender);
 
       if (direction === 'in') {
+         jsxc.gui.unreadMsg(bid);
+
          $(document).trigger('postmessagein.jsxc', [bid, html_msg]);
       }
 
@@ -2213,8 +2216,7 @@ jsxc.gui.window = {
     * 
     * @param {String} bid bar jid
     * @param {Object} post Post object with direction, msg, uid, received
-    * @param {Bool} restore If true no highlights are used and so unread flag
-    *        set
+    * @param {Bool} restore If true no highlights are used
     */
    _postMessage: function(bid, post, restore) {
       var win = jsxc.gui.window.get(bid);
@@ -2222,7 +2224,7 @@ jsxc.gui.window = {
       var direction = post.direction;
       var uid = post.uid;
 
-      if (win.find('.jsxc_textinput').is(':not(:focus)') && jsxc.restoreCompleted && direction === 'in' && !restore) {
+      if (win.find('.jsxc_textinput').is(':not(:focus)') && direction === 'in' && !restore) {
          jsxc.gui.window.highlight(bid);
       }
 
@@ -2325,11 +2327,6 @@ jsxc.gui.window = {
       jsxc.gui.detectEmail(win);
 
       jsxc.gui.window.scrollDown(bid);
-
-      // if window has no focus set unread flag
-      if (!win.find('.jsxc_textinput').is(':focus') && jsxc.restoreCompleted && !restore) {
-         jsxc.gui.unreadMsg(bid);
-      }
    },
 
    /**
