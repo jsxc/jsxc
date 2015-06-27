@@ -33,26 +33,14 @@
         &:hover .jsxc_avatar {
             @extend %avatar-icon;
         }
-        .jsxc_name:before {
-            content: ' ';
-            width: 0;
-            height: 0;
-            display: inline-block;
-            opacity: 0.0;
-            transition: width 0.5s, opacity 0.5s;
-        }
-        &.jsxc_unreadMsg .jsxc_name:before {
-            width: 12px;
-            height: 12px;
-            border-radius: 6px;
-            background-color: $roster_unread_bg;
-            margin-right: 3px;
-            opacity: 1.0;
-            transition: width 0.5s, opacity 0.5s;
-        }
     }
     .jsxc_name {
         padding-right: 30px;
+    }
+    .jsxc_unreadMsg {
+        .jsxc_name {
+            padding-right: 0px;
+        }
     }
     .jsxc_oneway {
         opacity: 0.7;
@@ -70,6 +58,10 @@
                 opacity: 1.0;
             }
         }
+    }
+    .jsxc_unread {
+        margin-right: 30px;
+        margin-top: 6px;
     }
     .jsxc_control {
         position: absolute;

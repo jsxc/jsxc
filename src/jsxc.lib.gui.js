@@ -1112,16 +1112,48 @@ jsxc.gui = {
    },
 
    /**
-    * Switch read state to UNread.
+    * Switch read state to UNread and increase counter.
     * 
     * @memberOf jsxc.gui
     * @param bid
     */
    unreadMsg: function(bid) {
+      var winData = jsxc.storage.getUserItem('window', bid);
+      var count = (winData && winData.unread) || 0;
+      count = (count === true) ? 1 : count + 1; //unread was boolean (<2.1.0)
+
+      // update user counter
+      winData.unread = count;
+      jsxc.storage.setUserItem('window', bid, winData);
+
+      // update counter of total unread messages
+      var total = jsxc.storage.getUserItem('unreadMsg') || 0;
+      jsxc.storage.setUserItem('unreadMsg', total + 1);
+
+      jsxc.gui._unreadMsg(bid, count);
+   },
+
+   /**
+    * Switch read state to UNread.
+    * 
+    * @memberOf jsxc.gui
+    * @param bid
+    * @param count
+    */
+   _unreadMsg: function(bid, count) {
       var win = jsxc.gui.window.get(bid);
 
-      jsxc.gui.roster.getItem(bid).add(win).addClass('jsxc_unreadMsg');
-      jsxc.storage.updateUserItem('window', bid, 'unread', true);
+      if (!count) {
+         // get counter after page reload
+         var winData = jsxc.storage.getUserItem('window', bid);
+         count = (winData && winData.unread) || 1;
+         count = (count === true) ? 1 : count; //unread was boolean (<2.1.0)
+      }
+
+      var el = jsxc.gui.roster.getItem(bid).add(win);
+
+      el.addClass('jsxc_unreadMsg');
+      el.find('.jsxc_unread').text(count);
    },
 
    /**
@@ -1132,10 +1164,21 @@ jsxc.gui = {
     */
    readMsg: function(bid) {
       var win = jsxc.gui.window.get(bid);
+      var winData = jsxc.storage.getUserItem('window', bid);
+      var count = (winData && winData.unread) || 0;
+      count = (count === true) ? 0 : count; //unread was boolean (<2.1.0)
 
-      if (win.hasClass('jsxc_unreadMsg')) {
-         jsxc.gui.roster.getItem(bid).add(win).removeClass('jsxc_unreadMsg');
-         jsxc.storage.updateUserItem('window', bid, 'unread', false);
+      if (count > 0) {
+         var el = jsxc.gui.roster.getItem(bid).add(win);
+         el.removeClass('jsxc_unreadMsg');
+
+         // update counter of total unread messages
+         var total = jsxc.storage.getUserItem('unreadMsg') || 0;
+         total -= count;
+         jsxc.storage.setUserItem('unreadMsg', total);
+
+         el.find('.jsxc_unread').text(0);
+         jsxc.storage.updateUserItem('window', bid, 'unread', 0);
       }
    },
 
@@ -1515,7 +1558,7 @@ jsxc.gui.roster = {
     */
    rename: function(bid) {
       var name = jsxc.gui.roster.getItem(bid).find('.jsxc_name');
-      var options = jsxc.gui.roster.getItem(bid).find('.jsxc_options, .jsxc_control');
+      var options = jsxc.gui.roster.getItem(bid).find('.jsxc_options, .jsxc_control, .jsxc_unread');
       var input = $('<input type="text" name="name"/>');
 
       options.hide();
@@ -1527,7 +1570,7 @@ jsxc.gui.roster = {
             return;
          }
 
-         options.show();
+         options.css('display', '');
          input.replaceWith(name);
          jsxc.gui.roster._rename(bid, $(this).val());
 
@@ -1540,7 +1583,7 @@ jsxc.gui.roster = {
       });
 
       $('html').one('click', function() {
-         options.show();
+         options.css('display', '');
          input.replaceWith(name);
          jsxc.gui.roster._rename(bid, input.val());
       });
@@ -1862,7 +1905,7 @@ jsxc.gui.window = {
       } else {
 
          if (jsxc.storage.getUserItem('window', bid).unread) {
-            jsxc.gui.unreadMsg(bid);
+            jsxc.gui._unreadMsg(bid);
          }
       }
 

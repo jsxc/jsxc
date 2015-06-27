@@ -235,6 +235,28 @@ ul.jsxc_vCard {
     }
 }
 
+.jsxc_unread {
+    display: none;
+}
+
+.jsxc_unreadMsg {
+    .jsxc_name {
+        font-style: italic;
+    }
+    .jsxc_unread {
+        display: block;
+        background-color: $unread_bg;
+        border-radius: 11px;
+        color: $unread_color;
+        font-size: 80%;
+        padding: 2px;
+        line-height: 15px;
+        float: right;
+        margin-right: 3px;
+        margin-top: 4px;
+    }
+}
+
 #jsxc_menu {
     height: 30px;
     width: 30px;
@@ -346,14 +368,6 @@ ul.jsxc_vCard {
             &.jsxc_min {
                 width: 200px !important;
             }
-            &.jsxc_unreadMsg {
-                .jsxc_name {
-                    font-style: italic;
-                }
-                .jsxc_cycle {
-                    background-color: $window_unread_cycle;
-                }
-            }
         }
     }
 }
@@ -399,15 +413,6 @@ ul.jsxc_vCard {
     width: 100%;
     box-sizing: border-box;
     overflow: hidden;
-}
-
-.jsxc_cycle {
-    position: absolute;
-    bottom: 9px;
-    right: 5px;
-    height: 12px;
-    width: 12px;
-    border-radius: 6px;
 }
 
 .jsxc_window {
