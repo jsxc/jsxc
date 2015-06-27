@@ -19,7 +19,6 @@ $(function() {
       checkFlash: false,
       rosterAppend: 'body',
       root: window.location.pathname.replace(/\/[^/]+$/, "/") + '../dev',
-      turnCredentialsPath: 'ajax/getturncredentials.json',
       displayRosterMinimized: function() {
          return true;
       },

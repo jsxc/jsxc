@@ -250,6 +250,10 @@ jsxc.xmpp = {
       jsxc.storage.removeUserItem('own');
       jsxc.storage.removeUserItem('avatar', 'own');
       jsxc.storage.removeUserItem('otrlist');
+      jsxc.storage.removeUserItem('unreadMsg');
+
+      // reset user options
+      jsxc.storage.removeUserElement('options', 'RTCPeerConfig');
 
       if (jsxc.options.loginForm.triggered) {
          switch (jsxc.options.loginForm.onConnected || 'submit') {

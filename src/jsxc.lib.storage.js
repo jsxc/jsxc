@@ -226,7 +226,7 @@ jsxc.storage = {
          item = $.grep(item, function(e) {
             return e !== name;
          });
-      } else if (typeof(item) === 'object') {
+      } else if (typeof(item) === 'object' && item !== null) {
          delete item[name];
       }
 

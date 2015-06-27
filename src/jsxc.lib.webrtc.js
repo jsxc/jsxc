@@ -68,7 +68,23 @@ jsxc.webrtc = {
          $(document).on('caps.strophe', self.onCaps);
       }
 
-      self.getTurnCrendentials();
+      var url = jsxc.options.get('RTCPeerConfig').url || jsxc.options.turnCredentialsPath;
+      var peerConfig = jsxc.options.get('RTCPeerConfig');
+
+      if (typeof url === 'string' && url.length > 0) {
+         self.getTurnCrendentials(url);
+      } else {
+         if (jsxc.storage.getUserItem('iceValidity')) {
+            // old ice validity found. Clean up.
+            jsxc.storage.removeUserItem('iceValidity');
+
+            // Replace saved servers with the once passed to jsxc
+            peerConfig.iceServers = jsxc.options.RTCPeerConfig.iceServers;
+            jsxc.options.set('RTCPeerConfig', peerConfig);
+         }
+
+         self.conn.jingle.setICEServers(peerConfig.iceServers);
+      }
    },
 
    onDisconnected: function() {
@@ -87,15 +103,12 @@ jsxc.webrtc = {
     * Checks if cached configuration is valid and if necessary update it.
     * 
     * @memberOf jsxc.webrtc
+    * @param {string} [url]
     */
-   getTurnCrendentials: function() {
+   getTurnCrendentials: function(url) {
       var self = jsxc.webrtc;
 
-      if (!jsxc.options.turnCredentialsPath) {
-         jsxc.warn('No path for TURN credentials defined!');
-         return;
-      }
-
+      url = url || jsxc.options.get('RTCPeerConfig').url || jsxc.options.turnCredentialsPath;
       var ttl = (jsxc.storage.getUserItem('iceValidity') || 0) - (new Date()).getTime();
 
       // validity from jsxc < 2.1.0 is invalid
@@ -107,25 +120,53 @@ jsxc.webrtc = {
       if (ttl > 0) {
          // credentials valid
 
-         self.conn.jingle.setICEServers(jsxc.storage.getUserItem('iceServers'));
+         self.conn.jingle.setICEServers(jsxc.options.get('RTCPeerConfig').iceServers);
 
          window.setTimeout(jsxc.webrtc.getTurnCrendentials, ttl + 500);
          return;
       }
 
-      $.ajax(jsxc.options.turnCredentialsPath, {
+      $.ajax(url, {
          async: true,
          success: function(data) {
             var ttl = data.ttl || 3600;
             var iceServers = data.iceServers;
 
-            if (iceServers && iceServers.length > 0 && iceServers[0].urls && iceServers[0].urls.length > 0) {
-               jsxc.debug('ice servers received');
+            if (!iceServers && data.url) {
+               // parse deprecated (v2.1.0) syntax
+               jsxc.warn('Received RTCPeer configuration is deprecated. Use now RTCPeerConfig.url.');
 
-               self.conn.jingle.setICEServers(iceServers);
+               iceServers = [{
+                  urls: data.url
+               }];
 
-               jsxc.storage.setUserItem('iceServers', iceServers);
-               jsxc.storage.setUserItem('iceValidity', (new Date()).getTime() + 1000 * ttl);
+               if (data.username) {
+                  iceServers[0].username = data.username;
+               }
+
+               if (data.credential) {
+                  iceServers[0].credential = data.credential;
+               }
+            }
+
+            if (iceServers && iceServers.length > 0) {
+               // url as parameter is deprecated
+               var url = iceServers[0].url && iceServers[0].url.length > 0;
+               var urls = iceServers[0].urls && iceServers[0].urls.length > 0;
+
+               if (urls || url) {
+                  jsxc.debug('ice servers received');
+
+                  var peerConfig = jsxc.options.get('RTCPeerConfig');
+                  peerConfig.iceServers = iceServers;
+                  jsxc.options.set('RTCPeerConfig', peerConfig);
+
+                  self.conn.jingle.setICEServers(iceServers);
+
+                  jsxc.storage.setUserItem('iceValidity', (new Date()).getTime() + 1000 * ttl);
+               } else {
+                  jsxc.warn('No valid url found in first ice object.');
+               }
             }
          },
          dataType: 'json'

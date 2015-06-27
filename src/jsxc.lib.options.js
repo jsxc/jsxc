@@ -38,7 +38,10 @@ jsxc.options = {
       password: null,
 
       /** True: Allow user to overwrite xmpp settings */
-      overwrite: false
+      overwrite: false,
+
+      /** @deprecated since v2.1.0. Use now loginForm.enable. */
+      onlogin: null
    },
 
    /** default xmpp priorities */
@@ -207,5 +210,22 @@ jsxc.options = {
 
       /** Favicon info text color */
       textColor: '#fff'
+   },
+
+   /** @deprecated since v2.1.0. Use now RTCPeerConfig.url. */
+   turnCredentialsPath: null,
+
+   /** RTCPeerConfiguration used for audio/video calls. */
+   RTCPeerConfig: {
+      /** Time-to-live for config from url */
+      ttl: 3600,
+
+      /** [optional] If set, jsxc requests and uses RTCPeerConfig from this url */
+      url: null,
+
+      /** ICE servers like defined in http://www.w3.org/TR/webrtc/#idl-def-RTCIceServer */
+      iceServers: [{
+         urls: 'stun:stun.stunprotocol.org'
+      }]
    }
 };
