@@ -1,0 +1,50 @@
+@import "../lib/jquery.mCustomScrollbar";
+@import "../lib/magnific-popup/src/css/main";
+
+/* BEGIN: bootstrap */
+@import "../lib/bootstrap/assets/stylesheets/bootstrap/variables";
+@import "../lib/bootstrap/assets/stylesheets/bootstrap/mixins";
+
+// Spec and IE10+
+@keyframes progress-bar-stripes {
+    from {
+        background-position: 40px 0;
+    }
+    to {
+        background-position: 0 0;
+    }
+}
+
+
+#jsxc_dialog {
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/utilities";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/code";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/grid";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/alerts";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/buttons";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/button-groups";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/forms";
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/progress-bars";
+    .progress {
+        margin-bottom: 0px;
+    }
+}
+
+.mfp-bg {
+    z-index: 9000;
+}
+
+.mfp-wrap {
+    z-index: 9010;
+}
+
+.mfp-content {
+    text-align: center;
+}
+
+#jsxc_dialog {
+    .mfp-close {
+        font-size: 23px;
+    }
+}
+/* END: bootstrap */
