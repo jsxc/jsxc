@@ -29,7 +29,7 @@ $(function() {
          WHITESPACE_START_AKE: true
       },
       loadSettings: function(username, password) {
-         return settings;
+         cb(settings);
       },
       xmpp: {
          url: settings.xmpp.url

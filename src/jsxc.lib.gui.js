@@ -413,15 +413,15 @@ jsxc.gui = {
          jsxc.triggeredFromBox = true;
          jsxc.options.loginForm.triggered = false;
 
-         var settings = jsxc.prepareLogin();
+         jsxc.prepareLogin(function(settings) {
+            if (settings === false) {
+               onAuthFail();
+            } else {
+               $(document).on('authfail.jsxc', onAuthFail);
 
-         if (settings === false) {
-            onAuthFail();
-         } else {
-            $(document).on('authfail.jsxc', onAuthFail);
-
-            jsxc.xmpp.login();
-         }
+               jsxc.xmpp.login();
+            }
+         });
       });
 
       function onAuthFail() {

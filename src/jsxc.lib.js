@@ -303,25 +303,26 @@ jsxc = {
 
          // Add jsxc login action to form
          form.submit(function() {
+            var form = this;
 
-            var settings = jsxc.prepareLogin();
+            jsxc.prepareLogin(function(settings) {
+               if (settings !== false) {
+                  // settings.xmpp.onlogin is deprecated since v2.1.0
+                  var enabled = (settings.loginForm && settings.loginForm.enable) || (settings.xmpp && settings.xmpp.onlogin);
+                  enabled = enabled === "true" || enabled === true;
 
-            if (settings !== false) {
-               // settings.xmpp.onlogin is deprecated since v2.1.0
-               var enabled = (settings.loginForm && settings.loginForm.enable) || (settings.xmpp && settings.xmpp.onlogin);
-               enabled = enabled === "true" || enabled === true;
+                  if (enabled) {
+                     jsxc.options.loginForm.triggered = true;
 
-               if (enabled) {
-                  jsxc.options.loginForm.triggered = true;
-
-                  jsxc.xmpp.login();
-
-                  // Trigger submit in jsxc.xmpp.connected()
-                  return false;
+                     jsxc.xmpp.login();
+                  }
+               } else {
+                  form.submit();
                }
-            }
+            });
 
-            return true;
+            // Trigger submit in jsxc.xmpp.connected()
+            return false;
          });
 
       } else if (!jsxc.isLoginForm() || (jsxc.options.loginForm && jsxc.options.loginForm.attachIfFound)) {
@@ -354,31 +355,64 @@ jsxc = {
     * Load settings and prepare jid.
     * 
     * @memberOf jsxc
-    * @returns Loaded settings
+    * @param {string} username
+    * @param {string} password
+    * @param {function} cb Called after login is prepared with result as param
     */
-   prepareLogin: function() {
-      var username = $(jsxc.options.loginForm.jid).val();
-      var password = $(jsxc.options.loginForm.pass).val();
-
-      if (typeof jsxc.options.loadSettings !== 'function') {
-         jsxc.error('No loadSettings function given. Abort.');
-         return;
+   prepareLogin: function(username, password, cb) {
+      if (typeof username === 'function') {
+         cb = username;
+         username = null;
       }
+      username = username || $(jsxc.options.loginForm.jid).val();
+      password = password || $(jsxc.options.loginForm.pass).val();
 
       if (!jsxc.triggeredFromBox && (jsxc.options.loginForm.onConnecting === 'dialog' || typeof jsxc.options.loginForm.onConnecting === 'undefined')) {
          jsxc.gui.showWaitAlert($.t('Logging_in'));
       }
 
-      var settings = jsxc.options.loadSettings.call(this, username, password);
+      var settings;
 
-      if (settings === false || settings === null || typeof settings === 'undefined') {
+      if (typeof jsxc.options.loadSettings === 'function') {
+         settings = jsxc.options.loadSettings.call(this, username, password, function(s) {
+            jsxc._prepareLogin(username, password, cb, s);
+         });
+
+         if (typeof settings !== 'undefined') {
+            jsxc._prepareLogin(username, password, cb, settings);
+         }
+      } else {
+         jsxc._prepareLogin(username, password, cb);
+      }
+   },
+
+   /**
+    * Process xmpp settings and save loaded settings.
+    * 
+    * @private
+    * @memberOf jsxc
+    * @param {string} username
+    * @param {string} password
+    * @param {function} cb Called after login is prepared with result as param
+    * @param {object} [loadedSettings] additonal options
+    */
+   _prepareLogin: function(username, password, cb, loadedSettings) {
+      if (loadedSettings === false) {
          jsxc.warn('No settings provided');
 
-         return false;
+         cb(false);
+         return;
       }
 
       // prevent to modify the original object
-      settings = $.extend(true, {}, settings);
+      var settings = $.extend(true, {}, jsxc.options);
+
+      if (loadedSettings) {
+         // overwrite current options with loaded settings;
+         settings = $.extend(true, settings, loadedSettings);
+      } else {
+         loadedSettings = {};
+      }
 
       if (typeof settings.xmpp.username === 'string') {
          username = settings.xmpp.username;
@@ -404,8 +438,15 @@ jsxc = {
       settings.xmpp.domain = jid.split('@')[1].split('/')[0];
       settings.xmpp.resource = jid.split('@')[1].split('/')[1] || "";
 
-      $.each(settings, function(key, val) {
+      if (!loadedSettings.xmpp) {
+         // force xmpp settings to be saved to storage
+         loadedSettings.xmpp = {};
+      }
+
+      // save loaded settings to storage
+      $.each(loadedSettings, function(key) {
          var old = jsxc.options.get(key);
+         var val = settings[key];
          val = $.extend(true, old, val);
 
          jsxc.options.set(key, val);
@@ -414,7 +455,7 @@ jsxc = {
       jsxc.options.xmpp.jid = jid;
       jsxc.options.xmpp.password = password;
 
-      return settings;
+      cb(settings);
    },
 
    /**

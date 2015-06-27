@@ -149,16 +149,21 @@ jsxc.options = {
    },
 
    /**
+    * This callback processes all settings.
+    * @callback loadSettingsCallback
+    * @param settings {object} could be every jsxc option
+    */
+
+   /**
     * Returns permanent saved settings and overwrite default jsxc.options.
     * 
     * @memberOf jsxc.options
-    * @param username String username
-    * @param password String password
-    * @returns {object} at least xmpp.url
+    * @function
+    * @param username {string} username
+    * @param password {string} password
+    * @param cb {loadSettingsCallback} Callback that handles the result
     */
-   loadSettings: function() {
-
-   },
+   loadSettings: null,
 
    /**
     * Call this function to save user settings permanent.
