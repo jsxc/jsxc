@@ -1,0 +1,30 @@
+{
+  "name": "jsxc",
+  "version": "2.0.1",
+  "homepage": "https://www.jsxc.org",
+  "authors": [
+    "sualko <klaus@jsxc.org>"
+  ],
+  "description": "Real-time chat app",
+  "keywords": [
+    "javascript",
+    "xmpp",
+    "webrtc",
+    "otr",
+    "chat",
+    "realtime"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "lib/",
+    "test",
+    "tests"
+  ],
+  "private": true,
+  "dependencies": {
+    "favico.js": "~0.3.7"
+  }
+}

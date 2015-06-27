@@ -191,5 +191,16 @@ jsxc.options = {
     * @param {string} search Search token (start with)
     * @param {getUsers-cb} cb Called with list of users
     */
-   getUsers: null
+   getUsers: null,
+
+   /** Options for info in favicon */
+   favicon: {
+      enable: true,
+
+      /** Favicon info background color */
+      bgColor: '#E59400',
+
+      /** Favicon info text color */
+      textColor: '#fff'
+   }
 };

@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "autoprefixer-core": "^4.0.2",
+    "bower": "^1.4.1",
     "grunt": "^0.4.5",
     "grunt-autoprefixer": "^2.1.0",
     "grunt-banner": "~0.2.2",

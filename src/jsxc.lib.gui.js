@@ -1,3 +1,4 @@
+/* global Favico*/
 /**
  * Handle functions for chat window's and buddylist
  * 
@@ -29,6 +30,8 @@ jsxc.gui = {
       [':love:', 'love'],
       [':zzz:', 'tired']
    ],
+
+   favicon: null,
 
    /**
     * Different uri query actions as defined in XEP-0147.
@@ -94,6 +97,17 @@ jsxc.gui = {
       });
 
       jsxc.gui.tooltip('#jsxc_windowList');
+
+      var fo = jsxc.options.get('favicon');
+      if (fo && fo.enable) {
+         jsxc.gui.favicon = new Favico({
+            animation: 'pop',
+            bgColor: fo.bgColor,
+            textColor: fo.textColor
+         });
+
+         jsxc.gui.favicon.badge(jsxc.storage.getUserItem('unreadMsg') || 0);
+      }
 
       if (!jsxc.el_exists('#jsxc_roster')) {
          jsxc.gui.roster.init();
@@ -1128,7 +1142,12 @@ jsxc.gui = {
 
       // update counter of total unread messages
       var total = jsxc.storage.getUserItem('unreadMsg') || 0;
-      jsxc.storage.setUserItem('unreadMsg', total + 1);
+      total++;
+      jsxc.storage.setUserItem('unreadMsg', total);
+
+      if (jsxc.gui.favicon) {
+         jsxc.gui.favicon.badge(total);
+      }
 
       jsxc.gui._unreadMsg(bid, count);
    },
@@ -1176,6 +1195,10 @@ jsxc.gui = {
          var total = jsxc.storage.getUserItem('unreadMsg') || 0;
          total -= count;
          jsxc.storage.setUserItem('unreadMsg', total);
+
+         if (jsxc.gui.favicon) {
+            jsxc.gui.favicon.badge(total);
+         }
 
          el.find('.jsxc_unread').text(0);
          jsxc.storage.updateUserItem('window', bid, 'unread', 0);
