@@ -624,7 +624,10 @@ jsxc.xmpp = {
       if (ptype === 'error') {
          $(document).trigger('error.presence.jsxc', [from, presence]);
 
-         jsxc.error('[XMPP] ' + $(presence).attr('code'));
+         var error = $(presence).find('error');
+
+         //@TODO display error message
+         jsxc.error('[XMPP] ' + error.attr('code') + ' ' + error.find(">:first-child").prop('tagName'));
          return true;
       }
 
