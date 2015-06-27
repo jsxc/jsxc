@@ -94,7 +94,7 @@ jsxc.options = {
        * True: Display roster minimized after first login. Afterwards the last 
        * roster state will be used. 
        */
-      startMinimized: true
+      startMinimized: false
    },
 
    /** jquery object from logout element */
