@@ -1,16 +1,22 @@
 <h3 data-i18n="Login"></h3>
-<form>
-   <p>
-      <label for="jsxc_username" data-i18n="Username"></label>
-      <input type="text" name="username" id="jsxc_username" required="required" value="{{my_node}}" />
-   </p>
-   <p>
-      <label for="jsxc_password" data-i18n="Password"></label>
-      <input type="password" name="password" required="required" id="jsxc_password" />
-   </p>
+<form class="form-horizontal">
+   <div class="form-group">
+      <label class="col-sm-4 control-label" for="jsxc_username" data-i18n="Username"></label>
+      <div class="col-sm-8">
+         <input type="text" name="username" id="jsxc_username" class="form-control" required="required" value="{{my_node}}" />
+      </div>
+   </div>
+   <div class="form-group">
+      <label class="col-sm-4 control-label" for="jsxc_password" data-i18n="Password"></label>
+      <div class="col-sm-8">
+         <input type="password" name="password" required="required" class="form-control" id="jsxc_password" />
+      </div>
+   </div>
    <div class="jsxc_alert jsxc_alert-warning" data-i18n="Sorry_we_cant_authentikate_"></div>
-   <div class="bottom_submit_section">
-      <button type="reset" class="jsxc_btn jsxc_close" name="clear" data-i18n="Cancel" />
-      <button type="submit" class="jsxc_btn jsxc_btn-primary" name="commit" data-i18n="[data-jsxc-loading-text]Connecting...;Connect" />
+   <div class="form-group">
+      <div class="col-sm-offset-4 col-sm-9">
+         <button type="reset" class="btn btn-default jsxc_close" name="clear" data-i18n="Cancel" />
+         <button type="submit" class="btn btn-primary" name="commit" data-i18n="[data-jsxc-loading-text]Connecting...;Connect" />
+      </div>
    </div>
 </form>
