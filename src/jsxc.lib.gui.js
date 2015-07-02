@@ -1463,10 +1463,12 @@ jsxc.gui.roster = {
          return false;
       });
 
-      bud.find('.jsxc_delete').click(function() {
-         jsxc.gui.showRemoveDialog(bid);
-         return false;
-      });
+      if (data.type !== 'groupchat') {
+         bud.find('.jsxc_delete').click(function() {
+            jsxc.gui.showRemoveDialog(bid);
+            return false;
+         });
+      }
 
       var expandClick = function() {
          bud.trigger('extra.jsxc');

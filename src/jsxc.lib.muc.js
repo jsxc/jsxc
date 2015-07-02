@@ -387,7 +387,10 @@ jsxc.muc = {
       jsxc.storage.removeUserItem('chat', room);
 
       jsxc.gui.window.close(room);
-      jsxc.gui.roster.purge(room);
+
+      if (!jsxc.storage.getUserItem('buddy', room).bookmarked) {
+         jsxc.gui.roster.purge(room);
+      }
    },
 
    /**
@@ -1077,7 +1080,7 @@ jsxc.muc = {
          return;
       }
 
-      bud.find('.jsxc_delete').off('click').click(function() {
+      bud.find('.jsxc_delete').click(function() {
          self.leave(room);
          return false;
       });

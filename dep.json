@@ -30,6 +30,12 @@
      "url": "https://github.com/strophe/strophejs-plugins"
   },
   {
+     "name": "strophe.js/bookmarks",
+     "file": "lib/strophe.bookmarks/index.js",
+     "license": "MIT",
+     "url": "s"
+  },
+  {
      "name": "strophe.jinglejs",
      "file": "lib/strophe.jinglejs/strophe.jinglejs-bundle.js",
      "license": "MIT",

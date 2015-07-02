@@ -335,6 +335,8 @@ jsxc.xmpp = {
          });
 
          jsxc.xmpp.conn.sendIQ(iq, jsxc.xmpp.onRoster);
+
+         jsxc.xmpp.bookmarks.load();
       } else {
          jsxc.xmpp.sendPres();
       }
