@@ -586,12 +586,8 @@ jsxc.gui = {
 
          // If friendship is not mutual show contact dialog
          if (!data || data.sub === 'from') {
-            $(document).one('close.dialog.jsxc', function() {
-               jsxc.gui.showContactDialog(from);
-            });
+            jsxc.gui.showContactDialog(from);
          }
-
-         jsxc.gui.dialog.close();
       });
    },
 
