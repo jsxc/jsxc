@@ -1111,6 +1111,23 @@ jsxc.muc = {
          return;
       }
 
+      var bo = $('<div>');
+      bo.text('+');
+      bo.addClass('jsxc_bookmarkOptions');
+      bo.click(function(ev) {
+         ev.preventDefault();
+
+         jsxc.xmpp.bookmarks.showDialog(room);
+
+         return false;
+      });
+
+      bud.find('.jsxc_rename').before(bo);
+
+      if (data.bookmarked) {
+         bud.addClass('jsxc_bookmarked');
+      }
+
       bud.off('click').click(function() {
          var data = jsxc.storage.getUserItem('buddy', room);
 

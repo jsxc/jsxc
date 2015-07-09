@@ -33,6 +33,24 @@
         &:hover .jsxc_avatar {
             @extend %avatar-icon;
         }
+        &.jsxc_bookmarked {
+            .jsxc_avatar:after {
+                content: " ";
+                width: 20%;
+                height: 30%;
+                position: absolute;
+                top: 0;
+                right: 2px;
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-image: image-url("bookmark_red.svg");
+            }
+            .jsxc_bookmarkOptions {
+                text-indent: 9999px;
+                background-image: image-url("gear_white.svg");
+                background-size: 15px 15px;
+            }
+        }
     }
     .jsxc_name {
         padding-right: 30px;
