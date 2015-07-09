@@ -1624,7 +1624,7 @@ jsxc.gui.roster = {
     */
    _rename: function(bid, newname) {
       if (jsxc.master) {
-         var d = jsxc.storage.getUserItem('buddy', bid);
+         var d = jsxc.storage.getUserItem('buddy', bid) || {};
 
          if (d.type === 'chat') {
             var iq = $iq({
@@ -1636,6 +1636,8 @@ jsxc.gui.roster = {
                name: newname
             });
             jsxc.xmpp.conn.sendIQ(iq);
+         } else if (d.type === 'groupchat') {
+            jsxc.xmpp.bookmarks.add(bid, newname, d.nickname, d.autojoin);
          }
       }
 

@@ -11,7 +11,6 @@
     "authentication_query_sent": "Domanda d'autenticità inviata.",
     "your_message_wasnt_send_please_end_your_private_conversation": "Il tuo messaggio non è stato inviato. Si prega di finire la sua conversazione privata.",
     "unencrypted_message_received": "Messaggio non cifrato ricevuto",
-    "your_message_wasnt_send_because_you_have_no_valid_subscription": "Il tuo messaggio non è stato inviato perché non hai una sottoscrizione valida.",
     "not_available": "non disponibile",
     "no_connection": "nessun collegamento!",
     "relogin": "nuovo login",

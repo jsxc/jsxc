@@ -614,7 +614,7 @@ jsxc.xmpp = {
       var jid = Strophe.getBareJidFromJid(from).toLowerCase();
       var r = Strophe.getResourceFromJid(from);
       var bid = jsxc.jidToBid(jid);
-      var data = jsxc.storage.getUserItem('buddy', bid);
+      var data = jsxc.storage.getUserItem('buddy', bid) || {};
       var res = jsxc.storage.getUserItem('res', bid) || {};
       var status = null;
       var xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
@@ -683,12 +683,17 @@ jsxc.xmpp = {
          });
       }
 
-      data.status = max;
+      if (data.type === 'groupchat') {
+         data.status = status;
+      } else {
+         data.status = max;
+      }
+
       data.res = maxVal;
       data.jid = jid;
 
       // Looking for avatar
-      if (xVCard.length > 0) {
+      if (xVCard.length > 0 && data.type !== 'groupchat') {
          var photo = xVCard.find('photo');
 
          if (photo.length > 0 && photo.text() !== data.avatar) {

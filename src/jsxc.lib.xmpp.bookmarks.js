@@ -26,6 +26,12 @@ jsxc.xmpp.bookmarks.load = function() {
          var nickname = conference.find('nick').text();
          nickname = (nickname.length > 0) ? nickname : Strophe.getNodeFromJid(jsxc.xmpp.conn.jid);
 
+         if (autojoin === 'true') {
+            autojoin = true;
+         } else if (autojoin === 'false') {
+            autojoin = false;
+         }
+
          jsxc.storage.setUserItem('buddy', room, {
             jid: room,
             name: roomName,
@@ -42,7 +48,7 @@ jsxc.xmpp.bookmarks.load = function() {
          bl.push(room);
          jsxc.gui.roster.add(room);
 
-         if (autojoin === 'true') {
+         if (autojoin) {
             jsxc.debug('auto join ' + room);
             jsxc.xmpp.conn.muc.join(room, nickname);
          }
@@ -83,9 +89,6 @@ jsxc.xmpp.bookmarks.parseErr = function(stanza) {
    };
 };
 
-//@TODO add function
-//@TODO sync rename
-
 /**
  * Deletes the bookmark for the given room and removes it from the roster.
  * 
@@ -106,26 +109,22 @@ jsxc.xmpp.bookmarks.delete = function(room) {
 };
 
 /**
- * This function adds the delete handler to the delete button in the roster.
+ * Adds or overwrites bookmark for given room.
  * 
- * @param event
- * @param {jid} room - room jid
- * @param {buddyData} data - room data
- * @param {jQuery} bud - Roster item
+ * @param  {string} room - room jid
+ * @param  {string} alias - room alias
+ * @param  {string} nick - preferred user nickname
+ * @param  {boolean} autojoin - should we join this room after login?
  */
-jsxc.xmpp.bookmarks.onAddRoster = function(event, room, data, bud) {
+jsxc.xmpp.bookmarks.add = function(room, alias, nick, autojoin) {
+   var bookmarks = jsxc.xmpp.conn.bookmarks;
 
-   if (data.type !== 'groupchat') {
-      return;
-   }
+   var success = function() {
+      jsxc.debug('New bookmark created', room);
+   };
+   var error = function() {
+      jsxc.warn('Could not create bookmark', room);
+   };
 
-   bud.find('.jsxc_delete').click(function() {
-      if (data.bookmarked) {
-         jsxc.xmpp.bookmarks.delete(room);
-      }
-
-      return false;
-   });
+   bookmarks.add(room, alias, nick, autojoin, success, error);
 };
-
-$(document).on('add.roster.jsxc', jsxc.xmpp.bookmarks.onAddRoster);

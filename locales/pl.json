@@ -11,7 +11,6 @@
     "authentication_query_sent": "Wysłano proźbę o autentykację.",
     "your_message_wasnt_send_please_end_your_private_conversation": "Twoja wiadomość nie została wysłana. Proszę, zamknij rozmowę.",
     "unencrypted_message_received": "Zwrotna niezaszyfrowana wiadomość.",
-    "your_message_wasnt_send_because_you_have_no_valid_subscription": "Wiadomość nie została wysłana ponieważ nie posiadasz subskrybcji u rozmówcy.",
     "not_available": "Niedostępny.",
     "no_connection": "Brak połączenia!",
     "relogin": "Połącz ponownie",
