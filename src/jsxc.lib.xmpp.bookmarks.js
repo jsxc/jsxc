@@ -6,14 +6,78 @@
 jsxc.xmpp.bookmarks = {};
 
 /**
+ * Determines if server is able to store bookmarks.
+ * 
+ * @return {boolean} True: Server supports bookmark storage
+ */
+jsxc.xmpp.bookmarks.remote = function() {
+   return jsxc.xmpp.conn.caps && jsxc.xmpp.conn.caps.hasFeatureByJid(jsxc.xmpp.conn.domain, Strophe.NS.PUBSUB + "#publish");
+};
+
+/**
  * Load bookmarks from pubsub.
  *
  * @memberOf jsxc.xmpp.bookmarks
  */
 jsxc.xmpp.bookmarks.load = function() {
-   var bookmarks = jsxc.xmpp.conn.bookmarks;
+   var caps = jsxc.xmpp.conn.caps;
+   var ver = caps._jidVerIndex[jsxc.xmpp.conn.domain];
 
-   //@TODO check server support
+   if (!ver || !caps._knownCapabilities[ver]) {
+      // wait until we know server capabilities
+      $(document).on('caps.strophe', function(ev, from) {
+
+         if (from !== jsxc.xmpp.conn.domain) {
+            return;
+         }
+
+         jsxc.xmpp.bookmarks.load();
+      });
+   }
+
+   if (jsxc.xmpp.bookmarks.remote()) {
+      jsxc.xmpp.bookmarks.loadFromRemote();
+   } else {
+      jsxc.xmpp.bookmarks.loadFromLocal();
+   }
+};
+
+/**
+ * Load bookmarks from local storage.
+ *
+ * @private
+ */
+jsxc.xmpp.bookmarks.loadFromLocal = function() {
+   jsxc.debug('Load bookmarks from local storage');
+
+   var bookmarks = jsxc.storage.getUserItem('bookmarks') || [];
+   var bl = jsxc.storage.getUserItem('buddylist') || [];
+
+   $.each(bookmarks, function() {
+      var room = this;
+      var roomdata = jsxc.storage.getUserItem('buddy', room) || {};
+
+      bl.push(room);
+      jsxc.gui.roster.add(room);
+
+      if (roomdata.autojoin) {
+         jsxc.debug('auto join ' + room);
+         jsxc.xmpp.conn.muc.join(room, roomdata.nickname);
+      }
+   });
+
+   jsxc.storage.setUserItem('buddylist', bl);
+};
+
+/**
+ * Load bookmarks from remote storage.
+ * 
+ * @private
+ */
+jsxc.xmpp.bookmarks.loadFromRemote = function() {
+   jsxc.debug('Load bookmarks from pubsub');
+
+   var bookmarks = jsxc.xmpp.conn.bookmarks;
 
    bookmarks.get(function(stanza) {
       var bl = jsxc.storage.getUserItem('buddylist');
@@ -70,7 +134,7 @@ jsxc.xmpp.bookmarks.load = function() {
 
 /**
  * Parse received error.
- * 
+ *
  * @param  {string} stanza
  * @return {object} err - The parsed error
  * @return {string} err.type - XMPP error type
@@ -91,16 +155,32 @@ jsxc.xmpp.bookmarks.parseErr = function(stanza) {
 
 /**
  * Deletes the bookmark for the given room and removes it from the roster if soft is false.
- * 
+ *
  * @param  {string} room - room jid
  * @param  {boolean} [soft=false] - True: leave room in roster
  */
 jsxc.xmpp.bookmarks.delete = function(room, soft) {
-   var bookmarks = jsxc.xmpp.conn.bookmarks;
 
    if (!soft) {
       jsxc.gui.roster.purge(room);
    }
+
+   if (jsxc.xmpp.bookmarks.remote()) {
+      jsxc.xmpp.bookmarks.deleteFromRemote(room, soft);
+   } else {
+      jsxc.xmpp.bookmarks.deleteFromLocal(room, soft);
+   }
+};
+
+/**
+ * Delete bookmark from remote storage.
+ *
+ * @private
+ * @param  {string} room - room jid
+ * @param  {boolean} [soft=false] - True: leave room in roster
+ */
+jsxc.xmpp.bookmarks.deleteFromRemote = function(room, soft) {
+   var bookmarks = jsxc.xmpp.conn.bookmarks;
 
    bookmarks.delete(room, function() {
       jsxc.debug('Bookmark deleted ' + room);
@@ -118,14 +198,55 @@ jsxc.xmpp.bookmarks.delete = function(room, soft) {
 };
 
 /**
+ * Delete bookmark from local storage.
+ *
+ * @private
+ * @param  {string} room - room jid
+ * @param  {boolean} [soft=false] - True: leave room in roster
+ */
+jsxc.xmpp.bookmarks.deleteFromLocal = function(room, soft) {
+   var bookmarks = jsxc.storage.getUserItem('bookmarks');
+   var index = bookmarks.indexOf(room);
+
+   if (index > -1) {
+      bookmarks.splice(index, 1);
+   }
+
+   jsxc.storage.setUserItem('bookmarks', bookmarks);
+
+   if (soft) {
+      jsxc.gui.roster.getItem(room).removeClass('jsxc_bookmarked');
+      jsxc.storage.updateUserItem('buddy', room, 'bookmarked', false);
+      jsxc.storage.updateUserItem('buddy', room, 'autojoin', false);
+   }
+};
+
+/**
  * Adds or overwrites bookmark for given room.
- * 
+ *
  * @param  {string} room - room jid
  * @param  {string} alias - room alias
  * @param  {string} nick - preferred user nickname
  * @param  {boolean} autojoin - should we join this room after login?
  */
 jsxc.xmpp.bookmarks.add = function(room, alias, nick, autojoin) {
+   if (jsxc.xmpp.bookmarks.remote()) {
+      jsxc.xmpp.bookmarks.addToRemote(room, alias, nick, autojoin);
+   } else {
+      jsxc.xmpp.bookmarks.addToLocal(room, alias, nick, autojoin);
+   }
+};
+
+/**
+ * Adds or overwrites bookmark for given room in remote storage.
+ *
+ * @private
+ * @param  {string} room - room jid
+ * @param  {string} alias - room alias
+ * @param  {string} nick - preferred user nickname
+ * @param  {boolean} autojoin - should we join this room after login?
+ */
+jsxc.xmpp.bookmarks.addToRemote = function(room, alias, nick, autojoin) {
    var bookmarks = jsxc.xmpp.conn.bookmarks;
 
    var success = function() {
@@ -144,8 +265,32 @@ jsxc.xmpp.bookmarks.add = function(room, alias, nick, autojoin) {
 };
 
 /**
+ * Adds or overwrites bookmark for given room in local storage.
+ *
+ * @private
+ * @param  {string} room - room jid
+ * @param  {string} alias - room alias
+ * @param  {string} nick - preferred user nickname
+ * @param  {boolean} autojoin - should we join this room after login?
+ */
+jsxc.xmpp.bookmarks.addToLocal = function(room, alias, nick, autojoin) {
+   jsxc.gui.roster.getItem(room).addClass('jsxc_bookmarked');
+   jsxc.storage.updateUserItem('buddy', room, 'bookmarked', true);
+   jsxc.storage.updateUserItem('buddy', room, 'autojoin', autojoin);
+   jsxc.storage.updateUserItem('buddy', room, 'nickname', nick);
+
+   var bookmarks = jsxc.storage.getUserItem('bookmarks') || [];
+
+   if (bookmarks.indexOf(room) < 0) {
+      bookmarks.push(room);
+
+      jsxc.storage.setUserItem('bookmarks', bookmarks);
+   }
+};
+
+/**
  * Show dialog to edit bookmark.
- * 
+ *
  * @param  {string} room - room jid
  */
 jsxc.xmpp.bookmarks.showDialog = function(room) {

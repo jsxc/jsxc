@@ -292,15 +292,15 @@ jsxc.xmpp = {
       var caps = jsxc.xmpp.conn.caps;
       var domain = jsxc.xmpp.conn.domain;
 
-      if (caps && jsxc.options.get('carbons').enable) {
-         var conditionalEnable = function() {
-            if (jsxc.xmpp.conn.caps.hasFeatureByJid(domain, jsxc.CONST.NS.CARBONS)) {
-               jsxc.xmpp.carbons.enable();
-            }
-         };
+      if (caps) {
+         var conditionalEnable = function() {};
 
-         if (typeof caps._knownCapabilities[caps._jidVerIndex[domain]] === 'undefined') {
-            var _jidNodeIndex = JSON.parse(localStorage.getItem('strophe.caps._jidNodeIndex')) || {};
+         if (jsxc.options.get('carbons').enable) {
+            conditionalEnable = function() {
+               if (jsxc.xmpp.conn.caps.hasFeatureByJid(domain, jsxc.CONST.NS.CARBONS)) {
+                  jsxc.xmpp.carbons.enable();
+               }
+            };
 
             $(document).on('caps.strophe', function onCaps(ev, from) {
 
@@ -312,6 +312,12 @@ jsxc.xmpp = {
 
                $(document).off('caps.strophe', onCaps);
             });
+         }
+
+         if (typeof caps._knownCapabilities[caps._jidVerIndex[domain]] === 'undefined') {
+            var _jidNodeIndex = JSON.parse(localStorage.getItem('strophe.caps._jidNodeIndex')) || {};
+
+            jsxc.debug('Request server capabilities');
 
             caps._requestCapabilities(jsxc.xmpp.conn.domain, _jidNodeIndex[domain], caps._jidVerIndex[domain]);
          } else {
@@ -335,8 +341,6 @@ jsxc.xmpp = {
          });
 
          jsxc.xmpp.conn.sendIQ(iq, jsxc.xmpp.onRoster);
-
-         jsxc.xmpp.bookmarks.load();
       } else {
          jsxc.xmpp.sendPres();
       }
@@ -506,6 +510,9 @@ jsxc.xmpp = {
       }
 
       jsxc.storage.setUserItem('buddylist', buddies);
+
+      // load bookmarks
+      jsxc.xmpp.bookmarks.load();
 
       jsxc.gui.roster.loaded = true;
       jsxc.debug('Roster loaded');
