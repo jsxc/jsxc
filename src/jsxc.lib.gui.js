@@ -1074,6 +1074,59 @@ jsxc.gui = {
       });
    },
 
+   showSelectionDialog: function(header, msg, primary, option, primaryLabel, optionLabel) {
+      var opt;
+
+      if (arguments.length === 1 && typeof header === 'object' && header !== null) {
+         opt = header;
+      } else {
+         opt = {
+            header: header,
+            msg: msg,
+            primary: {
+               label: primaryLabel,
+               cb: primary
+            },
+            option: {
+               label: optionLabel,
+               cb: option
+            }
+         };
+      }
+
+      var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('selectionDialog'), {
+         noClose: true
+      });
+
+      if (opt.header) {
+         dialog.find('h3').text(opt.header);
+      } else {
+         dialog.find('h3').hide();
+      }
+
+      if (opt.msg) {
+         dialog.find('p').text(opt.msg);
+      } else {
+         dialog.find('p').hide();
+      }
+
+      if (opt.primary && opt.primary.label) {
+         dialog.find('.btn-primary').text(opt.primary.label);
+      }
+
+      if (opt.primary && opt.option.label) {
+         dialog.find('.btn-default').text(opt.option.label);
+      }
+
+      if (opt.primary && opt.primary.cb) {
+         dialog.find('.btn-primary').click(opt.primary.cb);
+      }
+
+      if (opt.primary && opt.option.cb) {
+         dialog.find('.btn-primary').click(opt.option.cb);
+      }
+   },
+
    /**
     * Change own presence to pres.
     * 

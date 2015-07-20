@@ -336,6 +336,83 @@ jsxc.muc = {
       });
    },
 
+   /** 
+    * Request and show room configuration.
+    *
+    * @memberOf jsxc.muc
+    * @param  {string} room - room jid
+    */
+   showRoomConfiguration: function(room) {
+      var self = jsxc.muc;
+
+      self.conn.muc.configure(room, function(stanza) {
+
+         var form = Strophe.x.Form.fromXML(stanza);
+
+         window.f = form;
+         self._showRoomConfiguration(room, form);
+      }, function() {
+         jsxc.debug('Could not load room configuration');
+
+         //@TODO show error
+      });
+   },
+
+   /**
+    * Show room configuration.
+    *
+    * @private
+    * @memberOf jsxc.muc
+    * @param  {string} room - room jid
+    * @param  {Strophe.x.Form} config - current room config as Form object
+    */
+   _showRoomConfiguration: function(room, config) {
+      var self = jsxc.muc;
+      var dialog = jsxc.gui.dialog.open(jsxc.muc.helper.formToHTML(config));
+      var form = dialog.find('form');
+
+      var submit = $('<button>');
+      submit.addClass('btn btn-primary');
+      submit.attr('type', 'submit');
+      submit.text($.t('Join'));
+
+      var cancel = $('<button>');
+      cancel.addClass('btn btn-default');
+      cancel.attr('type', 'button');
+      cancel.text($.t('Cancel'));
+
+      var formGroup = $('<div>');
+      formGroup.addClass('form-group');
+      $('<div>').addClass('col-sm-offset-6 col-sm-6').appendTo(formGroup);
+      formGroup.find('>div').append(cancel);
+      formGroup.find('>div').append(submit);
+
+      form.append(formGroup);
+
+      form.submit(function(ev) {
+         ev.preventDefault();
+
+         var config = Strophe.x.Form.fromHTML(form.get(0));
+         self.conn.muc.saveConfiguration(room, config, function() {
+            jsxc.debug('Room configuration saved.');
+         }, function() {
+            jsxc.warn('Could not save room configuration.');
+
+            //@TODO display error
+         });
+
+         jsxc.gui.dialog.close();
+
+         return false;
+      });
+
+      cancel.click(function() {
+         self.conn.muc.cancelConfigure(room);
+
+         jsxc.gui.dialog.close();
+      });
+   },
+
    /**
     * Join the given room.
     * 
@@ -800,12 +877,38 @@ jsxc.muc = {
       170: function(room) {
          jsxc.gui.window.postMessage(room, 'sys', $.t('Room_logging_is_enabled'));
       },
+      /** Inform occupants that room logging is now disabled */
+      171: function(room) {
+         jsxc.gui.window.postMessage(room, 'sys', $.t('Room_logging_is_disabled'));
+      },
+      /** Inform occupants that the room is now non-anonymous */
+      172: function(room) {
+         jsxc.gui.window.postMessage(room, 'sys', $.t('Room_is_now_non-anoymous'));
+      },
+      /** Inform occupants that the room is now semi-anonymous */
+      173: function(room) {
+         jsxc.gui.window.postMessage(room, 'sys', $.t('Room_is_now_semi-anonymous'));
+      },
       /** Inform user that a new room has been created */
       201: function(room) {
          var self = jsxc.muc;
-         //@TODO let user choose between instant and reserved room
 
-         self.conn.muc.createInstantRoom(room);
+         jsxc.gui.showSelectionDialog({
+            header: $.t('Room_creation'),
+            msg: $.t('Do_you_want_to_change_the_default_room_configuration'),
+            primary: {
+               label: $.t('Default'),
+               cb: function() {
+                  self.conn.muc.createInstantRoom(room);
+               }
+            },
+            option: {
+               label: $.t('Change'),
+               cb: function() {
+                  self.showRoomConfiguration(room);
+               }
+            }
+         });
       },
       /** Inform user that he or she has been banned */
       301: function(room, nickname, data, xdata) {
@@ -1152,6 +1255,172 @@ jsxc.muc = {
          self.leave(room);
          return false;
       });
+   },
+
+   /**
+    * Some helper functions.
+    * 
+    * @type {Object}
+    */
+   helper: {
+      /**
+       * Convert x:data form to html.
+       * 
+       * @param  {Strophe.x.Form} form - x:data form
+       * @return {jQuery} jQuery representation of x:data field
+       */
+      formToHTML: function(form) {
+         if (!(form instanceof Strophe.x.Form)) {
+            return;
+         }
+
+         var html = $('<form>');
+
+         html.attr('data-type', form.type);
+         html.addClass('form-horizontal');
+
+         if (form.title) {
+            html.append("<h3>" + form.title + "</h3>");
+         }
+
+         if (form.instructions) {
+            html.append("<p>" + form.instructions + "</p>");
+         }
+
+         if (form.fields.length > 0) {
+            var i;
+            for (i = 0; i < form.fields.length; i++) {
+               html.append(jsxc.muc.helper.fieldToHtml(form.fields[i]));
+            }
+         }
+
+         return $('<div>').append(html).html();
+      },
+
+      /**
+       * Convert x:data field to html.
+       * 
+       * @param  {Strophe.x.Field} field - x:data field
+       * @return {html} html representation of x:data field
+       */
+      fieldToHtml: function(field) {
+         var self = field || this;
+         field = null;
+         var el, val, opt, i, o, j, k, txt, line, _ref2;
+
+         var id = "Strophe.x.Field-" + self['type'] + "-" + self['var'];
+         var html = $('<div>');
+         html.addClass('form-group');
+
+         if (self.label) {
+            var label = $('<label>');
+            label.attr('for', id);
+            label.addClass('col-sm-6 control-label');
+            label.text(self.label);
+            label.appendTo(html);
+         }
+
+         switch (self.type.toLowerCase()) {
+            case 'list-single':
+            case 'list-multi':
+               el = $('<select>');
+               if (self.type === 'list-multi') {
+                  el.attr('multiple', 'multiple');
+               }
+
+               for (i = 0; i < self.options.length; i++) {
+                  opt = self.options[i];
+                  if (!opt) {
+                     continue;
+                  }
+                  o = $(opt.toHTML());
+
+                  for (j = 0; j < self.values; j++) {
+                     k = self.values[j];
+                     if (k.toString() === opt.value.toString()) {
+                        o.attr('selected', 'selected');
+                     }
+                  }
+                  o.appendTo(el);
+               }
+
+               break;
+            case 'text-multi':
+            case 'jid-multi':
+               el = $("<textarea>");
+               txt = ((function() {
+                  var i, _results;
+                  _results = [];
+                  for (i = 0; i < self.values.length; i++) {
+                     line = self.values[i];
+                     _results.push(line);
+                  }
+                  return _results;
+               }).call(this)).join('\n');
+               if (txt) {
+                  el.text(txt);
+               }
+               break;
+            case 'text-single':
+            case 'boolean':
+            case 'text-private':
+            case 'hidden':
+            case 'fixed':
+            case 'jid-single':
+               el = $("<input>");
+
+               if (self.values) {
+                  el.attr('value', self.values[0]);
+               }
+               switch (self.type.toLowerCase()) {
+                  case 'text-single':
+                     el.attr('type', 'text');
+                     el.attr('placeholder', self.desc);
+                     el.addClass('form-control');
+                     break;
+                  case 'boolean':
+                     el.attr('type', 'checkbox');
+                     val = (_ref2 = self.values[0]) != null ? typeof _ref2.toString === "function" ? _ref2.toString() : void 0 : void 0;
+                     if (val && (val === "true" || val === "1")) {
+                        el.attr('checked', 'checked');
+                     }
+                     break;
+                  case 'text-private':
+                     el.attr('type', 'password');
+                     el.addClass('form-control');
+                     break;
+                  case 'hidden':
+                     el.attr('type', 'hidden');
+                     break;
+                  case 'fixed':
+                     el.attr('type', 'text').attr('readonly', 'readonly');
+                     el.addClass('form-control');
+                     break;
+                  case 'jid-single':
+                     el.attr('type', 'email');
+                     el.addClass('form-control');
+               }
+               break;
+            default:
+               el = $("<input type='text'>");
+         }
+
+         el.attr('id', id);
+         el.attr('name', self["var"]);
+
+         if (self.required) {
+            el.attr('required', self.required);
+         }
+
+         var inner = el;
+         el = $('<div>');
+         el.addClass('col-sm-6');
+         el.append(inner);
+
+         html.append(el);
+
+         return html.get(0);
+      }
    }
 };
 

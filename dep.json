@@ -33,7 +33,13 @@
      "name": "strophe.js/bookmarks",
      "file": "lib/strophe.bookmarks/index.js",
      "license": "MIT",
-     "url": "s"
+     "url": "https://github.com/strophe/strophejs-plugins/tree/master/bookmarks"
+  },
+  {
+     "name": "strophe.js/x",
+     "file": "lib/strophe.x/index.js",
+     "license": "MIT",
+     "url": "https://github.com/strophe/strophejs-plugins/tree/master/dataforms"
   },
   {
      "name": "strophe.jinglejs",

@@ -274,6 +274,12 @@
     "Unverified_private_conversation_started": "Unverified Private conversation started.",
     "Bookmark": "Bookmark",
     "Auto-join": "Auto-join",
-    "Edit_bookmark": "Edit bookmark"
+    "Edit_bookmark": "Edit bookmark",
+    "Room_logging_is_disabled": "Room logging is disabled",
+    "Room_is_now_non-anoymous": "Room is now non-anonymous",
+    "Room_is_now_semi-anonymous": "Room is now semi-anonymous",
+    "Do_you_want_to_change_the_default_room_configuration": "Do you want to change the default room configuration?",
+    "Default": "Default",
+    "Change": "Change"
   }
 }
