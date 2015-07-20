@@ -292,15 +292,15 @@ jsxc.xmpp = {
       var caps = jsxc.xmpp.conn.caps;
       var domain = jsxc.xmpp.conn.domain;
 
-      if (caps && jsxc.options.get('carbons').enable) {
-         var conditionalEnable = function() {
-            if (jsxc.xmpp.conn.caps.hasFeatureByJid(domain, jsxc.CONST.NS.CARBONS)) {
-               jsxc.xmpp.carbons.enable();
-            }
-         };
+      if (caps) {
+         var conditionalEnable = function() {};
 
-         if (typeof caps._knownCapabilities[caps._jidVerIndex[domain]] === 'undefined') {
-            var _jidNodeIndex = JSON.parse(localStorage.getItem('strophe.caps._jidNodeIndex')) || {};
+         if (jsxc.options.get('carbons').enable) {
+            conditionalEnable = function() {
+               if (jsxc.xmpp.conn.caps.hasFeatureByJid(domain, jsxc.CONST.NS.CARBONS)) {
+                  jsxc.xmpp.carbons.enable();
+               }
+            };
 
             $(document).on('caps.strophe', function onCaps(ev, from) {
 
@@ -312,6 +312,12 @@ jsxc.xmpp = {
 
                $(document).off('caps.strophe', onCaps);
             });
+         }
+
+         if (typeof caps._knownCapabilities[caps._jidVerIndex[domain]] === 'undefined') {
+            var _jidNodeIndex = JSON.parse(localStorage.getItem('strophe.caps._jidNodeIndex')) || {};
+
+            jsxc.debug('Request server capabilities');
 
             caps._requestCapabilities(jsxc.xmpp.conn.domain, _jidNodeIndex[domain], caps._jidVerIndex[domain]);
          } else {
@@ -505,6 +511,9 @@ jsxc.xmpp = {
 
       jsxc.storage.setUserItem('buddylist', buddies);
 
+      // load bookmarks
+      jsxc.xmpp.bookmarks.load();
+
       jsxc.gui.roster.loaded = true;
       jsxc.debug('Roster loaded');
       $(document).trigger('cloaded.roster.jsxc');
@@ -612,7 +621,7 @@ jsxc.xmpp = {
       var jid = Strophe.getBareJidFromJid(from).toLowerCase();
       var r = Strophe.getResourceFromJid(from);
       var bid = jsxc.jidToBid(jid);
-      var data = jsxc.storage.getUserItem('buddy', bid);
+      var data = jsxc.storage.getUserItem('buddy', bid) || {};
       var res = jsxc.storage.getUserItem('res', bid) || {};
       var status = null;
       var xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
@@ -681,12 +690,17 @@ jsxc.xmpp = {
          });
       }
 
-      data.status = max;
+      if (data.type === 'groupchat') {
+         data.status = status;
+      } else {
+         data.status = max;
+      }
+
       data.res = maxVal;
       data.jid = jid;
 
       // Looking for avatar
-      if (xVCard.length > 0) {
+      if (xVCard.length > 0 && data.type !== 'groupchat') {
          var photo = xVCard.find('photo');
 
          if (photo.length > 0 && photo.text() !== data.avatar) {

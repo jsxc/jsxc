@@ -25,6 +25,7 @@
   ],
   "private": true,
   "dependencies": {
-    "favico.js": "~0.3.7"
+    "favico.js": "~0.3.7",
+    "strophe.bookmarks": "https://raw.githubusercontent.com/sualko/strophejs-plugins/bookmarks/bookmarks/strophe.bookmarks.js"
   }
 }
