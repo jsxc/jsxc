@@ -11,7 +11,6 @@
     "authentication_query_sent": "Authentifizierungsanfrage gesendet.",
     "your_message_wasnt_send_please_end_your_private_conversation": "Deine Nachricht wurde nicht gesendet. Bitte beende die private Konversation.",
     "unencrypted_message_received": "Unverschlüsselte Nachricht erhalten.",
-    "your_message_wasnt_send_because_you_have_no_valid_subscription": "Deine Nachricht wurde nicht gesandt, da der Kontaktstatus einseitig ist.",
     "not_available": "Nicht verfügbar.",
     "no_connection": "Keine Verbindung.",
     "relogin": "Neu anmelden.",

@@ -11,7 +11,6 @@
     "authentication_query_sent": "Pergunta de autenticação enviada",
     "your_message_wasnt_send_please_end_your_private_conversation": "Sua mensagem não foi enviada. Por favor finalize sua conversa privada",
     "unencrypted_message_received": "Mensagem não encriptada recebida",
-    "your_message_wasnt_send_because_you_have_no_valid_subscription": "Sua mensagem não foi enviada porque sua inscrição não é válida",
     "not_available": "Indisponível",
     "no_connection": "Sem conexão!",
     "relogin": "reentrar",

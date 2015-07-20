@@ -11,7 +11,6 @@
     "authentication_query_sent": "Authentication query sent.",
     "your_message_wasnt_send_please_end_your_private_conversation": "Your message was not sent. Please end your private conversation.",
     "unencrypted_message_received": "Unencrypted message received",
-    "your_message_wasnt_send_because_you_have_no_valid_subscription": "Your message was not sent because you have no valid subscription.",
     "not_available": "Not available",
     "no_connection": "No connection!",
     "relogin": "relogin",
@@ -272,6 +271,9 @@
     "onsmp_explanation_secret": "You contact is attempting to determine if they are really talking to you. To authenticate to your contact,  enter the secret.",
     "from_sender": "from __sender__",
     "Verified_private_conversation_started": "Verified Private conversation started.",
-    "Unverified_private_conversation_started": "Unverified Private conversation started."
+    "Unverified_private_conversation_started": "Unverified Private conversation started.",
+    "Bookmark": "Bookmark",
+    "Auto-join": "Auto-join",
+    "Edit_bookmark": "Edit bookmark"
   }
 }

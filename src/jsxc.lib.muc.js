@@ -215,6 +215,16 @@ jsxc.muc = {
 
       dialog.find('#jsxc_nickname').attr('placeholder', Strophe.getNodeFromJid(self.conn.jid));
 
+      dialog.find('#jsxc_bookmark').change(function() {
+         if ($(this).prop('checked')) {
+            $('#jsxc_autojoin').prop('disabled', false);
+            $('#jsxc_autojoin').parent('.checkbox').removeClass('disabled');
+         } else {
+            $('#jsxc_autojoin').prop('disabled', true).prop('checked', false);
+            $('#jsxc_autojoin').parent('.checkbox').addClass('disabled');
+         }
+      });
+
       dialog.find('.jsxc_continue').click(function(ev) {
          ev.preventDefault();
 
@@ -252,7 +262,10 @@ jsxc.muc = {
                dialog.find('.jsxc_join').click(function(ev) {
                   ev.preventDefault();
 
-                  self.join(room, nickname, password, roomName, subject);
+                  var bookmark = $("#jsxc_bookmark").prop("checked");
+                  var autojoin = $('#jsxc_autojoin').prop('checked');
+
+                  self.join(room, nickname, password, roomName, subject, bookmark, autojoin);
 
                   return false;
                });
@@ -333,7 +346,7 @@ jsxc.muc = {
     * @param {string} [roomName] Room alias
     * @param {string} [subject] Current subject
     */
-   join: function(room, nickname, password, roomName, subject) {
+   join: function(room, nickname, password, roomName, subject, bookmark, autojoin) {
       var self = jsxc.muc;
 
       jsxc.storage.setUserItem('buddy', room, {
@@ -342,10 +355,17 @@ jsxc.muc = {
          sub: 'both',
          type: 'groupchat',
          state: self.CONST.ROOMSTATE.INIT,
-         subject: subject
+         subject: subject,
+         bookmarked: bookmark || false,
+         autojoin: autojoin || false,
+         nickname: nickname
       });
 
       jsxc.xmpp.conn.muc.join(room, nickname, null, null, null, password);
+
+      if (bookmark) {
+         jsxc.xmpp.bookmarks.add(room, roomName, nickname, autojoin);
+      }
    },
 
    /**
@@ -378,6 +398,7 @@ jsxc.muc = {
    onExited: function(room) {
       var self = jsxc.muc;
       var own = jsxc.storage.getUserItem('ownNicknames') || {};
+      var roomdata = jsxc.storage.getUserItem('buddy', room) || {};
 
       jsxc.storage.setUserItem('roomNames', self.conn.muc.roomNames);
 
@@ -387,7 +408,12 @@ jsxc.muc = {
       jsxc.storage.removeUserItem('chat', room);
 
       jsxc.gui.window.close(room);
-      jsxc.gui.roster.purge(room);
+
+      jsxc.storage.updateUserItem('buddy', room, 'state', self.CONST.ROOMSTATE.EXITED);
+
+      if (!roomdata.bookmarked) {
+         jsxc.gui.roster.purge(room);
+      }
    },
 
    /**
@@ -400,6 +426,7 @@ jsxc.muc = {
     */
    destroy: function(room, handler_cb, error_cb) {
       var self = jsxc.muc;
+      var roomdata = jsxc.storage.getUserItem('buddy', room);
 
       jsxc.storage.updateUserItem('buddy', room, 'state', self.CONST.ROOMSTATE.AWAIT_DESTRUCTION);
       jsxc.gui.window.postMessage(room, 'sys', $.t('This_room_will_be_closed'));
@@ -412,6 +439,10 @@ jsxc.muc = {
       }).c("destroy");
 
       jsxc.muc.conn.sendIQ(iq.tree(), handler_cb, error_cb);
+
+      if (roomdata.bookmarked) {
+         jsxc.xmpp.bookmarks.delete(room);
+      }
    },
 
    /**
@@ -465,7 +496,7 @@ jsxc.muc = {
          return;
       }
 
-      if (self.conn.muc.roomNames.indexOf(data.jid) < 0) {
+      if (roomdata.type !== 'groupchat') {
          return;
       }
 
@@ -595,6 +626,7 @@ jsxc.muc = {
    onPresence: function(event, from, status, presence) {
       var self = jsxc.muc;
       var room = jsxc.jidToBid(from);
+      var roomdata = jsxc.storage.getUserItem('buddy', room);
       var xdata = $(presence).find('x[xmlns^="' + Strophe.NS.MUC + '"]');
 
       if (self.conn.muc.roomNames.indexOf(room) < 0 || xdata.length === 0) {
@@ -615,7 +647,7 @@ jsxc.muc = {
          codes.push(code);
       });
 
-      if (jsxc.gui.roster.getItem(room).length === 0) {
+      if (roomdata.state === self.CONST.ROOMSTATE.INIT) {
          // successfully joined
 
          jsxc.storage.setUserItem('roomNames', jsxc.xmpp.conn.muc.roomNames);
@@ -624,11 +656,13 @@ jsxc.muc = {
          jsxc.storage.removeUserItem('chat', room);
          member = {};
 
-         var bl = jsxc.storage.getUserItem('buddylist');
-         bl.push(room);
-         jsxc.storage.setUserItem('buddylist', bl);
+         if (jsxc.gui.roster.getItem(room).length === 0) {
+            var bl = jsxc.storage.getUserItem('buddylist');
+            bl.push(room);
+            jsxc.storage.setUserItem('buddylist', bl);
 
-         jsxc.gui.roster.add(room);
+            jsxc.gui.roster.add(room);
+         }
 
          jsxc.gui.window.open(room);
          jsxc.gui.dialog.close();
@@ -1077,7 +1111,44 @@ jsxc.muc = {
          return;
       }
 
-      bud.find('.jsxc_delete').off('click').click(function() {
+      var bo = $('<div>');
+      bo.text('+');
+      bo.addClass('jsxc_bookmarkOptions');
+      bo.click(function(ev) {
+         ev.preventDefault();
+
+         jsxc.xmpp.bookmarks.showDialog(room);
+
+         return false;
+      });
+
+      bud.find('.jsxc_rename').before(bo);
+
+      if (data.bookmarked) {
+         bud.addClass('jsxc_bookmarked');
+      }
+
+      bud.off('click').click(function() {
+         var data = jsxc.storage.getUserItem('buddy', room);
+
+         if (data.state === self.CONST.ROOMSTATE.INIT || data.state === self.CONST.ROOMSTATE.EXITED) {
+            self.showJoinChat();
+
+            $('#jsxc_room').val(Strophe.getNodeFromJid(data.jid));
+            $('#jsxc_nickname').val(data.nickname);
+            $('#jsxc_bookmark').prop('checked', data.bookmarked);
+            $('#jsxc_autojoin').prop('checked', data.autojoin);
+            $('#jsxc_dialog .jsxc_bookmark').hide();
+         } else {
+            jsxc.gui.window.open(room);
+         }
+      });
+
+      bud.find('.jsxc_delete').click(function() {
+         if (data.bookmarked) {
+            jsxc.xmpp.bookmarks.delete(room);
+         }
+
          self.leave(room);
          return false;
       });

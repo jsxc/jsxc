@@ -11,7 +11,6 @@
     "authentication_query_sent": null,
     "your_message_wasnt_send_please_end_your_private_conversation": "Сообщение не отправлено. Завершите зашифрованный чат, пожалуйста.",
     "unencrypted_message_received": "Получено незашифрованное сообщение",
-    "your_message_wasnt_send_because_you_have_no_valid_subscription": "Сообщение не было отправлено, т.к. у Вас нет утвержденной подписки.",
     "not_available": "Не доступен",
     "no_connection": "Нет соединения!",
     "relogin": "переподключиться",

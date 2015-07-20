@@ -11,7 +11,6 @@
     "authentication_query_sent": "Consulta de verificación enviada.",
     "your_message_wasnt_send_please_end_your_private_conversation": "Su mensaje no fue enviado. Por favor, termine su conversación privada.",
     "unencrypted_message_received": "Mensaje no cifrado recibido:",
-    "your_message_wasnt_send_because_you_have_no_valid_subscription": "Su mensaje no se ha enviado, porque usted no tiene suscripción válida.",
     "not_available": "No disponible",
     "no_connection": "Sin conexión!",
     "relogin": "iniciar sesión nuevamente",

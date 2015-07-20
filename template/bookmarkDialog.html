@@ -1,0 +1,39 @@
+<h3 data-i18n="Edit_bookmark"></h3>
+<form class="form-horizontal">
+   <div class="form-group">
+      <label class="col-sm-4 control-label" for="jsxc_room" data-i18n="Room"></label>
+      <div class="col-sm-8">
+         <input type="text" id="jsxc_room" class="form-control" required="required" readonly="readonly" />
+      </div>
+   </div>
+   <div class="form-group">
+      <label class="col-sm-4 control-label" for="jsxc_nickname" data-i18n="Nickname"></label>
+      <div class="col-sm-8">
+         <input type="text" disabled="disabled" required="required" name="nickname" id="jsxc_nickname" class="form-control" />
+      </div>
+   </div>
+   <div class="form-group">
+      <div class="col-sm-offset-4 col-sm-8">
+         <div class="checkbox">
+            <label>
+               <input id="jsxc_bookmark" type="checkbox"><span data-i18n="Bookmark"></span>
+            </label>
+         </div>
+      </div>
+   </div>
+   <div class="form-group">
+      <div class="col-sm-offset-4 col-sm-8">
+         <div class="checkbox disabled">
+            <label>
+               <input disabled="disabled" id="jsxc_autojoin" type="checkbox"><span data-i18n="Auto-join"></span>
+            </label>
+         </div>
+      </div>
+   </div>
+   <div class="form-group">
+      <div class="col-sm-offset-4 col-sm-8">
+         <button type="button" class="btn btn-default jsxc_close" data-i18n="Close"></button>
+         <button type="submit" class="btn btn-primary jsxc_submit" data-i18n="Save"></button>
+      </div>
+   </div>
+</form>

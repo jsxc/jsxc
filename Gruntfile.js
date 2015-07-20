@@ -28,7 +28,7 @@ module.exports = function(grunt) {
          main: {
             files: [{
                expand: true,
-               src: ['lib/i18next/release/i18next-latest.min.js', 'lib/magnific-popup/dist/*.js', 'lib/favico.js/favico.js', 'lib/strophe.jinglejs/*-bundle.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'LICENSE', 'img/**', 'sound/**'],
+               src: ['lib/i18next/release/i18next-latest.min.js', 'lib/magnific-popup/dist/*.js', 'lib/favico.js/favico.js', 'lib/strophe.bookmarks/*.js', 'lib/strophe.jinglejs/*-bundle.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'LICENSE', 'img/**', 'sound/**'],
                dest: '<%= target %>/'
             }, {
                expand: true,
@@ -141,7 +141,7 @@ module.exports = function(grunt) {
             options: {
                banner: '/*! This file is concatenated for the browser. */\n\n'
             },
-            src: ['src/jsxc.intro.js', 'src/jsxc.lib.js', 'src/jsxc.lib.*.js', 'tmp/template.js', 'src/jsxc.outro.js'],
+            src: ['src/jsxc.intro.js', 'src/jsxc.lib.js', 'src/jsxc.lib.xmpp.js', 'src/jsxc.lib.*.js', 'tmp/template.js', 'src/jsxc.outro.js'],
             dest: '<%= target %>/jsxc.js'
          }
       },
