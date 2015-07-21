@@ -353,7 +353,7 @@ Strophe.addConnectionPlugin('muc', {
     }).c("query", {
       xmlns: Strophe.NS.MUC_OWNER
     });
-    if (config instanceof Form) {
+    if (Strophe.x && config instanceof Strophe.x.Form) {
       config.type = "submit";
       iq.cnode(config.toXML());
     } else {

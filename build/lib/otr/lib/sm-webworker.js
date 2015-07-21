@@ -2,11 +2,16 @@
   "use strict";
 
   root.OTR = {}
-  root.crypto = {
-    randomBytes: function () {
-      throw new Error("Haven't seeded yet.")
+
+  var hasCrypto = false
+  if (root.crypto)
+    hasCrypto = true
+  else
+    root.crypto = {
+      randomBytes: function () {
+        throw new Error("Haven't seeded yet.")
+      }
     }
-  }
 
   // default imports
   var imports = [
@@ -36,7 +41,10 @@
         if (data.imports) imports = data.imports
         importScripts.apply(root, imports)
 
-        // use salsa20 since there's no prng in webworkers
+        if (hasCrypto)
+          break
+
+        // use salsa20 when there's no prng in webworkers
         var state = new root.Salsa20(
           data.seed.slice(0, 32),
           data.seed.slice(32)

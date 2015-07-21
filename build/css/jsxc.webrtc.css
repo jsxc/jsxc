@@ -121,7 +121,8 @@ div.jsxc_video {
     background-image: url("../img/camera_icon_white.svg"); }
 
 .jsxc_controlbar {
-  width: 640px; }
+  width: 640px;
+  margin-top: 10px; }
   .jsxc_controlbar .jsxc_showchat {
     float: right; }
 
