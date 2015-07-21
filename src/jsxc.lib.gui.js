@@ -65,6 +65,13 @@ jsxc.gui = {
       /** xmpp:JID?vcard */
       vcard: function(jid) {
          jsxc.gui.showVcard(jid);
+      },
+
+      /** xmpp:JID?join[;password=TEXT] */
+      join: function(jid, params) {
+         var password = (params && params.password) ? params.password : null;
+
+         jsxc.muc.showJoinChat(jid, password);
       }
    },
 

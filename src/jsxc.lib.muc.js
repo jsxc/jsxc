@@ -111,13 +111,25 @@ jsxc.muc = {
     * Open join dialog.
     * 
     * @memberOf jsxc.muc
+    * @param {string} [r] - room jid
+    * @param {string} [p] - room password
     */
-   showJoinChat: function() {
+   showJoinChat: function(r, p) {
       var self = jsxc.muc;
       var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('joinChat'));
 
       // hide second step button
       dialog.find('.jsxc_join').hide();
+
+      // prepopulate room jid
+      if (typeof r === 'string') {
+         dialog.find('#jsxc_room').val(r);
+      }
+
+      // prepopulate room password
+      if (typeof p === 'string') {
+         dialog.find('#jsxc_password').val(p);
+      }
 
       // display conference server
       dialog.find('#jsxc_server').val(jsxc.options.get('muc').server);
