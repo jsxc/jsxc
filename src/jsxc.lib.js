@@ -303,8 +303,6 @@ jsxc = {
 
          // Add jsxc login action to form
          form.submit(function() {
-            var form = this;
-
             jsxc.prepareLogin(function(settings) {
                if (settings !== false) {
                   // settings.xmpp.onlogin is deprecated since v2.1.0
@@ -317,7 +315,7 @@ jsxc = {
                      jsxc.xmpp.login();
                   }
                } else {
-                  form.submit();
+                  jsxc.submitLoginForm();
                }
             });
 
