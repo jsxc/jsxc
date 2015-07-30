@@ -96,7 +96,9 @@ jsxc.xmpp.bookmarks.loadFromRemote = function() {
             autojoin = false;
          }
 
-         jsxc.storage.setUserItem('buddy', room, {
+         var data = jsxc.storage.getUserItem('buddy', room) || {};
+
+         data = $.extend(data, {
             jid: room,
             name: roomName,
             sub: 'both',
@@ -108,6 +110,8 @@ jsxc.xmpp.bookmarks.loadFromRemote = function() {
             autojoin: autojoin,
             nickname: nickname
          });
+
+         jsxc.storage.setUserItem('buddy', room, data);
 
          bl.push(room);
          jsxc.gui.roster.add(room);

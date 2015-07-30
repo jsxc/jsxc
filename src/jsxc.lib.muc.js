@@ -28,6 +28,9 @@ jsxc.muc = {
          EXITED: 2,
          AWAIT_DESTRUCTION: 3,
          DESTROYED: 4
+      },
+      ROOMCONFIG: {
+         INSTANT: 'instant'
       }
    },
 
@@ -406,6 +409,8 @@ jsxc.muc = {
 
          var config = Strophe.x.Form.fromHTML(form.get(0));
          self.conn.muc.saveConfiguration(room, config, function() {
+            jsxc.storage.updateUserItem('buddy', room, 'config', config);
+
             jsxc.debug('Room configuration saved.');
          }, function() {
             jsxc.warn('Could not save room configuration.');
@@ -447,7 +452,8 @@ jsxc.muc = {
          subject: subject,
          bookmarked: bookmark || false,
          autojoin: autojoin || false,
-         nickname: nickname
+         nickname: nickname,
+         config: null
       });
 
       jsxc.xmpp.conn.muc.join(room, nickname, null, null, null, password);
@@ -904,23 +910,40 @@ jsxc.muc = {
       /** Inform user that a new room has been created */
       201: function(room) {
          var self = jsxc.muc;
+         var roomdata = jsxc.storage.getUserItem('buddy', room) || {};
 
-         jsxc.gui.showSelectionDialog({
-            header: $.t('Room_creation'),
-            msg: $.t('Do_you_want_to_change_the_default_room_configuration'),
-            primary: {
-               label: $.t('Default'),
-               cb: function() {
-                  self.conn.muc.createInstantRoom(room);
+         if (roomdata.autojoin && roomdata.config === self.CONST.ROOMCONFIG.INSTANT) {
+            self.conn.muc.createInstantRoom(room);
+         } else if (roomdata.autojoin && typeof roomdata.config !== 'undefined' && roomdata.config !== null) {
+            self.conn.muc.saveConfiguration(room, roomdata.config, function() {
+               jsxc.debug('Cached room configuration saved.');
+            }, function() {
+               jsxc.warn('Could not save cached room configuration.');
+
+               //@TODO display error
+            });
+         } else {
+            jsxc.gui.showSelectionDialog({
+               header: $.t('Room_creation'),
+               msg: $.t('Do_you_want_to_change_the_default_room_configuration'),
+               primary: {
+                  label: $.t('Default'),
+                  cb: function() {
+                     jsxc.gui.dialog.close();
+
+                     self.conn.muc.createInstantRoom(room);
+
+                     jsxc.storage.updateUserItem('buddy', room, 'config', self.CONST.ROOMCONFIG.INSTANT);
+                  }
+               },
+               option: {
+                  label: $.t('Change'),
+                  cb: function() {
+                     self.showRoomConfiguration(room);
+                  }
                }
-            },
-            option: {
-               label: $.t('Change'),
-               cb: function() {
-                  self.showRoomConfiguration(room);
-               }
-            }
-         });
+            });
+         }
       },
       /** Inform user that he or she has been banned */
       301: function(room, nickname, data, xdata) {
