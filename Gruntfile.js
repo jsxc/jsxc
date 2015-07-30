@@ -203,8 +203,7 @@ module.exports = function(grunt) {
             dest: '<%= target %>/css/',
             options: {
                target: ['<%= target %>/img/*.*', '<%= target %>/img/**/*.*'],
-               fixDirLevel: false,
-               maxBytes: 2048
+               fixDirLevel: false
             }
          }
       },
