@@ -1,3 +1,31 @@
+v2.1.0 / 2015-07-31
+===
+- add bookmark feature for rooms (XEP-0048)
+- add reserved room feature for muc (XEP-0045#10.1.3)
+- add counter of unread messages to roster, window and favicon
+- add join as URI query type
+- add ru language
+- add roster resize hint
+- make dialog responsive
+- allow messages to persons without valid friendship
+- replace video library for more stable connection
+- fix dsa key generation in chrome > 42
+- fix minor roster ui issues
+ 
+- add jsbeautifier and prettysass
+- improve example
+- extract templates to single files
+- replace colorbox with magnific popup
+- use parts of bootstrap
+- replace strophe.jingle with strophe.jinglejs (jingle.js)
+- concatenate strings for better translatability
+- add new option attach if login form was found
+- add new option loginForm.startMinimized
+- add new option loginForm.enable (deprecates xmpp.onlogin)
+- add new option RTCPeerConfig.url (deprecates turnCredentialsPath)
+- ICE servers can now be passed as init option
+- loadSettings option is no longer required and supports now async requests
+
 v2.0.1 / 2015-05-23
 ===
 - improve login box

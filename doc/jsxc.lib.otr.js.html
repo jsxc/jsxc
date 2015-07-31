@@ -25,8 +25,7 @@
     
     <section>
         <article>
-            <pre class="prettyprint source"><code>
-/**
+            <pre class="prettyprint source"><code>/**
  * @namespace jsxc.otr
  */
 jsxc.otr = {
@@ -121,7 +120,9 @@ jsxc.otr = {
                data.fingerprint = jsxc.otr.objects[bid].their_priv_pk.fingerprint();
                data.msgstate = OTR.CONST.MSGSTATE_ENCRYPTED;
 
-               var msg = (jsxc.otr.objects[bid].trust ? $.t('Verified') : $.t('Unverified')) + ' ' + $.t('private_conversation_started');
+               var msg_state = jsxc.otr.objects[bid].trust ? 'Verified' : 'Unverified';
+               var msg = $.t(msg_state + '_private_conversation_started');
+
                jsxc.gui.window.postMessage(bid, 'sys', msg);
                break;
             case OTR.CONST.STATUS_END_OTR:
@@ -236,10 +237,10 @@ jsxc.otr = {
 
       if (data) {
          $('#jsxc_dialog > div:eq(2)').find('#jsxc_quest').val(data).prop('disabled', true);
-         $('#jsxc_dialog > div:eq(2)').find('.creation').text('Answer');
-         $('#jsxc_dialog > div:eq(2)').find('.jsxc_explanation').text($.t('your_buddy_is_attempting_to_determine_') + ' ' + $.t('to_authenticate_to_your_buddy') + $.t('enter_the_answer_and_click_answer'));
+         $('#jsxc_dialog > div:eq(2)').find('.jsxc_submit').text($('Answer'));
+         $('#jsxc_dialog > div:eq(2)').find('.jsxc_explanation').text($.t('onsmp_explanation_question'));
       } else {
-         $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text($.t('your_buddy_is_attempting_to_determine_') + ' ' + $.t('to_authenticate_to_your_buddy') + $.t('enter_the_secret'));
+         $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text($.t('onsmp_explanation_secret'));
       }
 
       $('#jsxc_dialog .jsxc_close').click(function() {
@@ -333,7 +334,7 @@ jsxc.otr = {
       }
 
       // all variables which should be saved
-      var savekey = [ 'jid', 'our_instance_tag', 'msgstate', 'authstate', 'fragment', 'their_y', 'their_old_y', 'their_keyid', 'their_instance_tag', 'our_dh', 'our_old_dh', 'our_keyid', 'sessKeys', 'storedMgs', 'oldMacKeys', 'trust', 'transmittedRS', 'ssid', 'receivedPlaintext', 'authstate', 'send_interval' ];
+      var savekey = ['jid', 'our_instance_tag', 'msgstate', 'authstate', 'fragment', 'their_y', 'their_old_y', 'their_keyid', 'their_instance_tag', 'our_dh', 'our_old_dh', 'our_keyid', 'sessKeys', 'storedMgs', 'oldMacKeys', 'trust', 'transmittedRS', 'ssid', 'receivedPlaintext', 'authstate', 'send_interval'];
 
       var i;
       for (i = 0; i &lt; savekey.length; i++) {
@@ -401,9 +402,9 @@ jsxc.otr = {
 
          OTR = {};
          OTR.CONST = {
-            MSGSTATE_PLAINTEXT : 0,
-            MSGSTATE_ENCRYPTED : 1,
-            MSGSTATE_FINISHED  : 2
+            MSGSTATE_PLAINTEXT: 0,
+            MSGSTATE_ENCRYPTED: 1,
+            MSGSTATE_FINISHED: 2
          };
 
          jsxc._onMaster();
@@ -419,7 +420,7 @@ jsxc.otr = {
             // try to create web-worker
 
             try {
-               worker = new Worker(jsxc.options.root + '/lib/otr/build/dsa-webworker.js');
+               worker = new Worker(jsxc.options.root + '/lib/otr/lib/dsa-webworker.js');
             } catch (err) {
                jsxc.warn('Couldn\'t create web-worker.', err);
             }
@@ -445,7 +446,7 @@ jsxc.otr = {
 
             // start worker
             worker.postMessage({
-               imports: [ jsxc.options.root + '/lib/otr/vendor/salsa20.js', jsxc.options.root + '/lib/otr/vendor/bigint.js', jsxc.options.root + '/lib/otr/vendor/crypto.js', jsxc.options.root + '/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/lib/otr/lib/const.js', jsxc.options.root + '/lib/otr/lib/helpers.js', jsxc.options.root + '/lib/otr/lib/dsa.js' ],
+               imports: [jsxc.options.root + '/lib/otr/vendor/salsa20.js', jsxc.options.root + '/lib/otr/vendor/bigint.js', jsxc.options.root + '/lib/otr/vendor/crypto.js', jsxc.options.root + '/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/lib/otr/lib/const.js', jsxc.options.root + '/lib/otr/lib/helpers.js', jsxc.options.root + '/lib/otr/lib/dsa.js'],
                seed: BigInt.getSeed(),
                debug: true
             });
@@ -520,13 +521,13 @@ jsxc.otr = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.template.html">template</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Index</a></h2><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Sat May 23 2015 16:03:18 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Fri Jul 31 2015 11:10:43 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

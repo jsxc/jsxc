@@ -55,7 +55,7 @@ jsxc = {
    /** Interval for keep-alive */
    keepalive: null,
 
-   /** True if last activity was 10 min ago */
+   /** True if last activity was up to 10 min ago */
    restore: false,
 
    /** True if restore is complete */
@@ -90,7 +90,7 @@ jsxc = {
       NOTIFICATION_DEFAULT: 'default',
       NOTIFICATION_GRANTED: 'granted',
       NOTIFICATION_DENIED: 'denied',
-      STATUS: [ 'offline', 'dnd', 'xa', 'away', 'chat', 'online' ],
+      STATUS: ['offline', 'dnd', 'xa', 'away', 'chat', 'online'],
       SOUNDS: {
          MSG: 'incomingMessage.wav',
          CALL: 'Rotary-Phone6.mp3',
@@ -120,7 +120,8 @@ jsxc = {
       var year = msgDate.getFullYear();
       var hours = ('0' + msgDate.getHours()).slice(-2);
       var minutes = ('0' + msgDate.getMinutes()).slice(-2);
-      var dateNow = new Date(), time = hours + ':' + minutes;
+      var dateNow = new Date(),
+         time = hours + ':' + minutes;
 
       // compare dates only
       dateNow.setHours(0, 0, 0, 0);
@@ -209,7 +210,7 @@ jsxc = {
       }
 
       // Check localStorage
-      if (typeof (localStorage) === 'undefined') {
+      if (typeof(localStorage) === 'undefined') {
          jsxc.warn("Browser doesn't support localStorage.");
          return;
       }
@@ -276,15 +277,15 @@ jsxc = {
 
       $(document).on('connectionReady.jsxc', function() {
          // Looking for logout element
-          if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
-             var logout = function() {
-                jsxc.options.logoutElement = $(this);
-                jsxc.triggeredFromLogout = true;
-                return jsxc.xmpp.logout();
-             };
+         if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+            var logout = function() {
+               jsxc.options.logoutElement = $(this);
+               jsxc.triggeredFromLogout = true;
+               return jsxc.xmpp.logout();
+            };
 
-             jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
-          }
+            jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
+         }
       });
 
       // Check if we have to establish a new connection
@@ -295,7 +296,7 @@ jsxc = {
          jsxc.storage.removeItem('sid');
 
          // Looking for a login form
-         if (!jsxc.options.loginForm.form || !(jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass))) {
+         if (!jsxc.isLoginForm()) {
 
             if (jsxc.options.displayRosterMinimized()) {
                // Show minimized roster
@@ -329,22 +330,27 @@ jsxc = {
 
          // Add jsxc login action to form
          form.submit(function() {
+            jsxc.prepareLogin(function(settings) {
+               if (settings !== false) {
+                  // settings.xmpp.onlogin is deprecated since v2.1.0
+                  var enabled = (settings.loginForm && settings.loginForm.enable) || (settings.xmpp && settings.xmpp.onlogin);
+                  enabled = enabled === "true" || enabled === true;
 
-            var settings = jsxc.prepareLogin();
+                  if (enabled) {
+                     jsxc.options.loginForm.triggered = true;
 
-            if (settings !== false && (settings.xmpp.onlogin === "true" || settings.xmpp.onlogin === true)) {
-               jsxc.options.loginForm.triggered = true;
+                     jsxc.xmpp.login();
+                  }
+               } else {
+                  jsxc.submitLoginForm();
+               }
+            });
 
-               jsxc.xmpp.login();
-
-               // Trigger submit in jsxc.xmpp.connected()
-               return false;
-            }
-
-            return true;
+            // Trigger submit in jsxc.xmpp.connected()
+            return false;
          });
 
-      } else {
+      } else if (!jsxc.isLoginForm() || (jsxc.options.loginForm && jsxc.options.loginForm.attachIfFound)) {
 
          // Restore old connection
 
@@ -352,7 +358,7 @@ jsxc = {
 
          jsxc.gui.init();
 
-         if (typeof (jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
+         if (typeof(jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
             jsxc.onMaster();
          } else {
             jsxc.checkMaster();
@@ -361,34 +367,77 @@ jsxc = {
    },
 
    /**
+    * Returns true if login form is found.
+    *
+    * @memberOf jsxc
+    * @returns {boolean} True if login form was found.
+    */
+   isLoginForm: function() {
+      return jsxc.options.loginForm.form && jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass);
+   },
+
+   /**
     * Load settings and prepare jid.
     * 
     * @memberOf jsxc
-    * @returns Loaded settings
+    * @param {string} username
+    * @param {string} password
+    * @param {function} cb Called after login is prepared with result as param
     */
-   prepareLogin: function() {
-      var username = $(jsxc.options.loginForm.jid).val();
-      var password = $(jsxc.options.loginForm.pass).val();
+   prepareLogin: function(username, password, cb) {
+      if (typeof username === 'function') {
+         cb = username;
+         username = null;
+      }
+      username = username || $(jsxc.options.loginForm.jid).val();
+      password = password || $(jsxc.options.loginForm.pass).val();
 
-      if (typeof jsxc.options.loadSettings !== 'function') {
-         jsxc.error('No loadSettings function given. Abort.');
+      if (!jsxc.triggeredFromBox && (jsxc.options.loginForm.onConnecting === 'dialog' || typeof jsxc.options.loginForm.onConnecting === 'undefined')) {
+         jsxc.gui.showWaitAlert($.t('Logging_in'));
+      }
+
+      var settings;
+
+      if (typeof jsxc.options.loadSettings === 'function') {
+         settings = jsxc.options.loadSettings.call(this, username, password, function(s) {
+            jsxc._prepareLogin(username, password, cb, s);
+         });
+
+         if (typeof settings !== 'undefined') {
+            jsxc._prepareLogin(username, password, cb, settings);
+         }
+      } else {
+         jsxc._prepareLogin(username, password, cb);
+      }
+   },
+
+   /**
+    * Process xmpp settings and save loaded settings.
+    * 
+    * @private
+    * @memberOf jsxc
+    * @param {string} username
+    * @param {string} password
+    * @param {function} cb Called after login is prepared with result as param
+    * @param {object} [loadedSettings] additonal options
+    */
+   _prepareLogin: function(username, password, cb, loadedSettings) {
+      if (loadedSettings === false) {
+         jsxc.warn('No settings provided');
+
+         cb(false);
          return;
       }
 
-      if (!jsxc.triggeredFromBox && (jsxc.options.loginForm.onConnecting === 'dialog' || typeof jsxc.options.loginForm.onConnecting === 'undefined')) {
-        jsxc.gui.showWaitAlert($.t('Logging_in'));
-      }
-
-      var settings = jsxc.options.loadSettings.call(this, username, password);
-
-      if (settings === false || settings === null || typeof settings === 'undefined') {
-         jsxc.warn('No settings provided');
-
-         return false;
-      }
-
       // prevent to modify the original object
-      settings = $.extend(true, {}, settings);
+      var settings = $.extend(true, {}, jsxc.options);
+
+      if (loadedSettings) {
+         // overwrite current options with loaded settings;
+         settings = $.extend(true, settings, loadedSettings);
+      } else {
+         loadedSettings = {};
+      }
 
       if (typeof settings.xmpp.username === 'string') {
          username = settings.xmpp.username;
@@ -414,14 +463,24 @@ jsxc = {
       settings.xmpp.domain = jid.split('@')[1].split('/')[0];
       settings.xmpp.resource = jid.split('@')[1].split('/')[1] || "";
 
-      $.each(settings, function(key, val) {
+      if (!loadedSettings.xmpp) {
+         // force xmpp settings to be saved to storage
+         loadedSettings.xmpp = {};
+      }
+
+      // save loaded settings to storage
+      $.each(loadedSettings, function(key) {
+         var old = jsxc.options.get(key);
+         var val = settings[key];
+         val = $.extend(true, old, val);
+
          jsxc.options.set(key, val);
       });
 
       jsxc.options.xmpp.jid = jid;
       jsxc.options.xmpp.password = password;
 
-      return settings;
+      cb(settings);
    },
 
    /**
@@ -490,7 +549,7 @@ jsxc = {
       // Prepare notifications
       if (jsxc.restore) {
          var noti = jsxc.storage.getUserItem('notification');
-         noti = (typeof noti === 'number')? noti : 2;
+         noti = (typeof noti === 'number') ? noti : 2;
          if (jsxc.options.notification && noti > 0 && jsxc.notification.hasSupport()) {
             if (jsxc.notification.hasPermission()) {
                jsxc.notification.init();
@@ -781,7 +840,7 @@ jsxc = {
          return fn.apply(null, fnParams);
       }
    },
-   
+
    /**
     * Hash string into 32-bit signed integer.
     * 
@@ -790,14 +849,15 @@ jsxc = {
     * @returns {integer} 32-bit signed integer
     */
    hashStr: function(str) {
-      var hash = 0, i;
+      var hash = 0,
+         i;
 
       if (str.length === 0) {
          return hash;
       }
-      
+
       for (i = 0; i &lt; str.length; i++) {
-         hash  = ((hash &lt;&lt; 5) - hash) + str.charCodeAt(i);
+         hash = ((hash &lt;&lt; 5) - hash) + str.charCodeAt(i);
          hash |= 0; // Convert to 32bit integer
       }
 
@@ -814,13 +874,13 @@ jsxc = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.template.html">template</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Index</a></h2><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Sat May 23 2015 16:03:18 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Fri Jul 31 2015 11:10:43 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>
