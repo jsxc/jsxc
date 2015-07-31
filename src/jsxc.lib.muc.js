@@ -759,8 +759,11 @@ jsxc.muc = {
             jsxc.gui.roster.add(room);
          }
 
-         jsxc.gui.window.open(room);
-         jsxc.gui.dialog.close();
+         if ($('#jsxc_dialog').length > 0) {
+            // User joined the room manually 
+            jsxc.gui.window.open(room);
+            jsxc.gui.dialog.close();
+         }
       }
 
       var jid = xdata.find('item').attr('jid') || null;
