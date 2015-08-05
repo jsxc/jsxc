@@ -473,6 +473,9 @@ jsxc.webrtc = {
     */
    onMediaFailure: function(ev, err) {
       var self = jsxc.webrtc;
+      err = err || {
+         name: 'Undefined'
+      };
 
       self.setStatus('media failure');
 
