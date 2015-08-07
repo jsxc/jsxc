@@ -629,7 +629,7 @@ jsxc = {
     * @returns comparable bar jid
     */
    jidToBid: function(jid) {
-      return Strophe.getBareJidFromJid(jid).toLowerCase();
+      return Strophe.unescapeNode(Strophe.getBareJidFromJid(jid).toLowerCase());
    },
 
    /**
