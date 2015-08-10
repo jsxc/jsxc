@@ -68,7 +68,7 @@ module.exports = function(grunt) {
             src: ['<%= target %>/jsxc.js'],
             overwrite: true,
             replacements: [{
-               from: '< $ dep.libraries $ >',
+               from: '<$ dep.libraries $>',
                to: function() {
                   var i, d, libraries = '';
 
