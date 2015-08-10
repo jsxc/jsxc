@@ -1,3 +1,16 @@
+/*!
+ * strophe.jinglejs v0.1.1 - 2015-08-05
+ * 
+ * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
+ * Released under the MIT license
+ * 
+ * Please see https://github.com/sualko/strophe.jinglejs/
+ * 
+ * @author Klaus Herberth <klaus@jsxc.org>
+ * @version 0.1.1
+ * @license MIT
+ */
+
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 },{}],2:[function(require,module,exports){
@@ -5370,1134 +5383,7 @@ SessionManager.prototype.process = function (req) {
 
 module.exports = SessionManager;
 
-},{"intersect":28,"jingle-filetransfer-session":29,"jingle-media-session":78,"jingle-session":109,"util":24,"webrtcsupport":112,"wildemitter":113}],26:[function(require,module,exports){
-(function (process){
-/*!
- * async
- * https://github.com/caolan/async
- *
- * Copyright 2010-2014 Caolan McMahon
- * Released under the MIT license
- */
-/*jshint onevar: false, indent:4 */
-/*global setImmediate: false, setTimeout: false, console: false */
-(function () {
-
-    var async = {};
-
-    // global on the server, window in the browser
-    var root, previous_async;
-
-    root = this;
-    if (root != null) {
-      previous_async = root.async;
-    }
-
-    async.noConflict = function () {
-        root.async = previous_async;
-        return async;
-    };
-
-    function only_once(fn) {
-        var called = false;
-        return function() {
-            if (called) throw new Error("Callback was already called.");
-            called = true;
-            fn.apply(root, arguments);
-        }
-    }
-
-    //// cross-browser compatiblity functions ////
-
-    var _toString = Object.prototype.toString;
-
-    var _isArray = Array.isArray || function (obj) {
-        return _toString.call(obj) === '[object Array]';
-    };
-
-    var _each = function (arr, iterator) {
-        for (var i = 0; i < arr.length; i += 1) {
-            iterator(arr[i], i, arr);
-        }
-    };
-
-    var _map = function (arr, iterator) {
-        if (arr.map) {
-            return arr.map(iterator);
-        }
-        var results = [];
-        _each(arr, function (x, i, a) {
-            results.push(iterator(x, i, a));
-        });
-        return results;
-    };
-
-    var _reduce = function (arr, iterator, memo) {
-        if (arr.reduce) {
-            return arr.reduce(iterator, memo);
-        }
-        _each(arr, function (x, i, a) {
-            memo = iterator(memo, x, i, a);
-        });
-        return memo;
-    };
-
-    var _keys = function (obj) {
-        if (Object.keys) {
-            return Object.keys(obj);
-        }
-        var keys = [];
-        for (var k in obj) {
-            if (obj.hasOwnProperty(k)) {
-                keys.push(k);
-            }
-        }
-        return keys;
-    };
-
-    //// exported async module functions ////
-
-    //// nextTick implementation with browser-compatible fallback ////
-    if (typeof process === 'undefined' || !(process.nextTick)) {
-        if (typeof setImmediate === 'function') {
-            async.nextTick = function (fn) {
-                // not a direct alias for IE10 compatibility
-                setImmediate(fn);
-            };
-            async.setImmediate = async.nextTick;
-        }
-        else {
-            async.nextTick = function (fn) {
-                setTimeout(fn, 0);
-            };
-            async.setImmediate = async.nextTick;
-        }
-    }
-    else {
-        async.nextTick = process.nextTick;
-        if (typeof setImmediate !== 'undefined') {
-            async.setImmediate = function (fn) {
-              // not a direct alias for IE10 compatibility
-              setImmediate(fn);
-            };
-        }
-        else {
-            async.setImmediate = async.nextTick;
-        }
-    }
-
-    async.each = function (arr, iterator, callback) {
-        callback = callback || function () {};
-        if (!arr.length) {
-            return callback();
-        }
-        var completed = 0;
-        _each(arr, function (x) {
-            iterator(x, only_once(done) );
-        });
-        function done(err) {
-          if (err) {
-              callback(err);
-              callback = function () {};
-          }
-          else {
-              completed += 1;
-              if (completed >= arr.length) {
-                  callback();
-              }
-          }
-        }
-    };
-    async.forEach = async.each;
-
-    async.eachSeries = function (arr, iterator, callback) {
-        callback = callback || function () {};
-        if (!arr.length) {
-            return callback();
-        }
-        var completed = 0;
-        var iterate = function () {
-            iterator(arr[completed], function (err) {
-                if (err) {
-                    callback(err);
-                    callback = function () {};
-                }
-                else {
-                    completed += 1;
-                    if (completed >= arr.length) {
-                        callback();
-                    }
-                    else {
-                        iterate();
-                    }
-                }
-            });
-        };
-        iterate();
-    };
-    async.forEachSeries = async.eachSeries;
-
-    async.eachLimit = function (arr, limit, iterator, callback) {
-        var fn = _eachLimit(limit);
-        fn.apply(null, [arr, iterator, callback]);
-    };
-    async.forEachLimit = async.eachLimit;
-
-    var _eachLimit = function (limit) {
-
-        return function (arr, iterator, callback) {
-            callback = callback || function () {};
-            if (!arr.length || limit <= 0) {
-                return callback();
-            }
-            var completed = 0;
-            var started = 0;
-            var running = 0;
-
-            (function replenish () {
-                if (completed >= arr.length) {
-                    return callback();
-                }
-
-                while (running < limit && started < arr.length) {
-                    started += 1;
-                    running += 1;
-                    iterator(arr[started - 1], function (err) {
-                        if (err) {
-                            callback(err);
-                            callback = function () {};
-                        }
-                        else {
-                            completed += 1;
-                            running -= 1;
-                            if (completed >= arr.length) {
-                                callback();
-                            }
-                            else {
-                                replenish();
-                            }
-                        }
-                    });
-                }
-            })();
-        };
-    };
-
-
-    var doParallel = function (fn) {
-        return function () {
-            var args = Array.prototype.slice.call(arguments);
-            return fn.apply(null, [async.each].concat(args));
-        };
-    };
-    var doParallelLimit = function(limit, fn) {
-        return function () {
-            var args = Array.prototype.slice.call(arguments);
-            return fn.apply(null, [_eachLimit(limit)].concat(args));
-        };
-    };
-    var doSeries = function (fn) {
-        return function () {
-            var args = Array.prototype.slice.call(arguments);
-            return fn.apply(null, [async.eachSeries].concat(args));
-        };
-    };
-
-
-    var _asyncMap = function (eachfn, arr, iterator, callback) {
-        arr = _map(arr, function (x, i) {
-            return {index: i, value: x};
-        });
-        if (!callback) {
-            eachfn(arr, function (x, callback) {
-                iterator(x.value, function (err) {
-                    callback(err);
-                });
-            });
-        } else {
-            var results = [];
-            eachfn(arr, function (x, callback) {
-                iterator(x.value, function (err, v) {
-                    results[x.index] = v;
-                    callback(err);
-                });
-            }, function (err) {
-                callback(err, results);
-            });
-        }
-    };
-    async.map = doParallel(_asyncMap);
-    async.mapSeries = doSeries(_asyncMap);
-    async.mapLimit = function (arr, limit, iterator, callback) {
-        return _mapLimit(limit)(arr, iterator, callback);
-    };
-
-    var _mapLimit = function(limit) {
-        return doParallelLimit(limit, _asyncMap);
-    };
-
-    // reduce only has a series version, as doing reduce in parallel won't
-    // work in many situations.
-    async.reduce = function (arr, memo, iterator, callback) {
-        async.eachSeries(arr, function (x, callback) {
-            iterator(memo, x, function (err, v) {
-                memo = v;
-                callback(err);
-            });
-        }, function (err) {
-            callback(err, memo);
-        });
-    };
-    // inject alias
-    async.inject = async.reduce;
-    // foldl alias
-    async.foldl = async.reduce;
-
-    async.reduceRight = function (arr, memo, iterator, callback) {
-        var reversed = _map(arr, function (x) {
-            return x;
-        }).reverse();
-        async.reduce(reversed, memo, iterator, callback);
-    };
-    // foldr alias
-    async.foldr = async.reduceRight;
-
-    var _filter = function (eachfn, arr, iterator, callback) {
-        var results = [];
-        arr = _map(arr, function (x, i) {
-            return {index: i, value: x};
-        });
-        eachfn(arr, function (x, callback) {
-            iterator(x.value, function (v) {
-                if (v) {
-                    results.push(x);
-                }
-                callback();
-            });
-        }, function (err) {
-            callback(_map(results.sort(function (a, b) {
-                return a.index - b.index;
-            }), function (x) {
-                return x.value;
-            }));
-        });
-    };
-    async.filter = doParallel(_filter);
-    async.filterSeries = doSeries(_filter);
-    // select alias
-    async.select = async.filter;
-    async.selectSeries = async.filterSeries;
-
-    var _reject = function (eachfn, arr, iterator, callback) {
-        var results = [];
-        arr = _map(arr, function (x, i) {
-            return {index: i, value: x};
-        });
-        eachfn(arr, function (x, callback) {
-            iterator(x.value, function (v) {
-                if (!v) {
-                    results.push(x);
-                }
-                callback();
-            });
-        }, function (err) {
-            callback(_map(results.sort(function (a, b) {
-                return a.index - b.index;
-            }), function (x) {
-                return x.value;
-            }));
-        });
-    };
-    async.reject = doParallel(_reject);
-    async.rejectSeries = doSeries(_reject);
-
-    var _detect = function (eachfn, arr, iterator, main_callback) {
-        eachfn(arr, function (x, callback) {
-            iterator(x, function (result) {
-                if (result) {
-                    main_callback(x);
-                    main_callback = function () {};
-                }
-                else {
-                    callback();
-                }
-            });
-        }, function (err) {
-            main_callback();
-        });
-    };
-    async.detect = doParallel(_detect);
-    async.detectSeries = doSeries(_detect);
-
-    async.some = function (arr, iterator, main_callback) {
-        async.each(arr, function (x, callback) {
-            iterator(x, function (v) {
-                if (v) {
-                    main_callback(true);
-                    main_callback = function () {};
-                }
-                callback();
-            });
-        }, function (err) {
-            main_callback(false);
-        });
-    };
-    // any alias
-    async.any = async.some;
-
-    async.every = function (arr, iterator, main_callback) {
-        async.each(arr, function (x, callback) {
-            iterator(x, function (v) {
-                if (!v) {
-                    main_callback(false);
-                    main_callback = function () {};
-                }
-                callback();
-            });
-        }, function (err) {
-            main_callback(true);
-        });
-    };
-    // all alias
-    async.all = async.every;
-
-    async.sortBy = function (arr, iterator, callback) {
-        async.map(arr, function (x, callback) {
-            iterator(x, function (err, criteria) {
-                if (err) {
-                    callback(err);
-                }
-                else {
-                    callback(null, {value: x, criteria: criteria});
-                }
-            });
-        }, function (err, results) {
-            if (err) {
-                return callback(err);
-            }
-            else {
-                var fn = function (left, right) {
-                    var a = left.criteria, b = right.criteria;
-                    return a < b ? -1 : a > b ? 1 : 0;
-                };
-                callback(null, _map(results.sort(fn), function (x) {
-                    return x.value;
-                }));
-            }
-        });
-    };
-
-    async.auto = function (tasks, callback) {
-        callback = callback || function () {};
-        var keys = _keys(tasks);
-        var remainingTasks = keys.length
-        if (!remainingTasks) {
-            return callback();
-        }
-
-        var results = {};
-
-        var listeners = [];
-        var addListener = function (fn) {
-            listeners.unshift(fn);
-        };
-        var removeListener = function (fn) {
-            for (var i = 0; i < listeners.length; i += 1) {
-                if (listeners[i] === fn) {
-                    listeners.splice(i, 1);
-                    return;
-                }
-            }
-        };
-        var taskComplete = function () {
-            remainingTasks--
-            _each(listeners.slice(0), function (fn) {
-                fn();
-            });
-        };
-
-        addListener(function () {
-            if (!remainingTasks) {
-                var theCallback = callback;
-                // prevent final callback from calling itself if it errors
-                callback = function () {};
-
-                theCallback(null, results);
-            }
-        });
-
-        _each(keys, function (k) {
-            var task = _isArray(tasks[k]) ? tasks[k]: [tasks[k]];
-            var taskCallback = function (err) {
-                var args = Array.prototype.slice.call(arguments, 1);
-                if (args.length <= 1) {
-                    args = args[0];
-                }
-                if (err) {
-                    var safeResults = {};
-                    _each(_keys(results), function(rkey) {
-                        safeResults[rkey] = results[rkey];
-                    });
-                    safeResults[k] = args;
-                    callback(err, safeResults);
-                    // stop subsequent errors hitting callback multiple times
-                    callback = function () {};
-                }
-                else {
-                    results[k] = args;
-                    async.setImmediate(taskComplete);
-                }
-            };
-            var requires = task.slice(0, Math.abs(task.length - 1)) || [];
-            var ready = function () {
-                return _reduce(requires, function (a, x) {
-                    return (a && results.hasOwnProperty(x));
-                }, true) && !results.hasOwnProperty(k);
-            };
-            if (ready()) {
-                task[task.length - 1](taskCallback, results);
-            }
-            else {
-                var listener = function () {
-                    if (ready()) {
-                        removeListener(listener);
-                        task[task.length - 1](taskCallback, results);
-                    }
-                };
-                addListener(listener);
-            }
-        });
-    };
-
-    async.retry = function(times, task, callback) {
-        var DEFAULT_TIMES = 5;
-        var attempts = [];
-        // Use defaults if times not passed
-        if (typeof times === 'function') {
-            callback = task;
-            task = times;
-            times = DEFAULT_TIMES;
-        }
-        // Make sure times is a number
-        times = parseInt(times, 10) || DEFAULT_TIMES;
-        var wrappedTask = function(wrappedCallback, wrappedResults) {
-            var retryAttempt = function(task, finalAttempt) {
-                return function(seriesCallback) {
-                    task(function(err, result){
-                        seriesCallback(!err || finalAttempt, {err: err, result: result});
-                    }, wrappedResults);
-                };
-            };
-            while (times) {
-                attempts.push(retryAttempt(task, !(times-=1)));
-            }
-            async.series(attempts, function(done, data){
-                data = data[data.length - 1];
-                (wrappedCallback || callback)(data.err, data.result);
-            });
-        }
-        // If a callback is passed, run this as a controll flow
-        return callback ? wrappedTask() : wrappedTask
-    };
-
-    async.waterfall = function (tasks, callback) {
-        callback = callback || function () {};
-        if (!_isArray(tasks)) {
-          var err = new Error('First argument to waterfall must be an array of functions');
-          return callback(err);
-        }
-        if (!tasks.length) {
-            return callback();
-        }
-        var wrapIterator = function (iterator) {
-            return function (err) {
-                if (err) {
-                    callback.apply(null, arguments);
-                    callback = function () {};
-                }
-                else {
-                    var args = Array.prototype.slice.call(arguments, 1);
-                    var next = iterator.next();
-                    if (next) {
-                        args.push(wrapIterator(next));
-                    }
-                    else {
-                        args.push(callback);
-                    }
-                    async.setImmediate(function () {
-                        iterator.apply(null, args);
-                    });
-                }
-            };
-        };
-        wrapIterator(async.iterator(tasks))();
-    };
-
-    var _parallel = function(eachfn, tasks, callback) {
-        callback = callback || function () {};
-        if (_isArray(tasks)) {
-            eachfn.map(tasks, function (fn, callback) {
-                if (fn) {
-                    fn(function (err) {
-                        var args = Array.prototype.slice.call(arguments, 1);
-                        if (args.length <= 1) {
-                            args = args[0];
-                        }
-                        callback.call(null, err, args);
-                    });
-                }
-            }, callback);
-        }
-        else {
-            var results = {};
-            eachfn.each(_keys(tasks), function (k, callback) {
-                tasks[k](function (err) {
-                    var args = Array.prototype.slice.call(arguments, 1);
-                    if (args.length <= 1) {
-                        args = args[0];
-                    }
-                    results[k] = args;
-                    callback(err);
-                });
-            }, function (err) {
-                callback(err, results);
-            });
-        }
-    };
-
-    async.parallel = function (tasks, callback) {
-        _parallel({ map: async.map, each: async.each }, tasks, callback);
-    };
-
-    async.parallelLimit = function(tasks, limit, callback) {
-        _parallel({ map: _mapLimit(limit), each: _eachLimit(limit) }, tasks, callback);
-    };
-
-    async.series = function (tasks, callback) {
-        callback = callback || function () {};
-        if (_isArray(tasks)) {
-            async.mapSeries(tasks, function (fn, callback) {
-                if (fn) {
-                    fn(function (err) {
-                        var args = Array.prototype.slice.call(arguments, 1);
-                        if (args.length <= 1) {
-                            args = args[0];
-                        }
-                        callback.call(null, err, args);
-                    });
-                }
-            }, callback);
-        }
-        else {
-            var results = {};
-            async.eachSeries(_keys(tasks), function (k, callback) {
-                tasks[k](function (err) {
-                    var args = Array.prototype.slice.call(arguments, 1);
-                    if (args.length <= 1) {
-                        args = args[0];
-                    }
-                    results[k] = args;
-                    callback(err);
-                });
-            }, function (err) {
-                callback(err, results);
-            });
-        }
-    };
-
-    async.iterator = function (tasks) {
-        var makeCallback = function (index) {
-            var fn = function () {
-                if (tasks.length) {
-                    tasks[index].apply(null, arguments);
-                }
-                return fn.next();
-            };
-            fn.next = function () {
-                return (index < tasks.length - 1) ? makeCallback(index + 1): null;
-            };
-            return fn;
-        };
-        return makeCallback(0);
-    };
-
-    async.apply = function (fn) {
-        var args = Array.prototype.slice.call(arguments, 1);
-        return function () {
-            return fn.apply(
-                null, args.concat(Array.prototype.slice.call(arguments))
-            );
-        };
-    };
-
-    var _concat = function (eachfn, arr, fn, callback) {
-        var r = [];
-        eachfn(arr, function (x, cb) {
-            fn(x, function (err, y) {
-                r = r.concat(y || []);
-                cb(err);
-            });
-        }, function (err) {
-            callback(err, r);
-        });
-    };
-    async.concat = doParallel(_concat);
-    async.concatSeries = doSeries(_concat);
-
-    async.whilst = function (test, iterator, callback) {
-        if (test()) {
-            iterator(function (err) {
-                if (err) {
-                    return callback(err);
-                }
-                async.whilst(test, iterator, callback);
-            });
-        }
-        else {
-            callback();
-        }
-    };
-
-    async.doWhilst = function (iterator, test, callback) {
-        iterator(function (err) {
-            if (err) {
-                return callback(err);
-            }
-            var args = Array.prototype.slice.call(arguments, 1);
-            if (test.apply(null, args)) {
-                async.doWhilst(iterator, test, callback);
-            }
-            else {
-                callback();
-            }
-        });
-    };
-
-    async.until = function (test, iterator, callback) {
-        if (!test()) {
-            iterator(function (err) {
-                if (err) {
-                    return callback(err);
-                }
-                async.until(test, iterator, callback);
-            });
-        }
-        else {
-            callback();
-        }
-    };
-
-    async.doUntil = function (iterator, test, callback) {
-        iterator(function (err) {
-            if (err) {
-                return callback(err);
-            }
-            var args = Array.prototype.slice.call(arguments, 1);
-            if (!test.apply(null, args)) {
-                async.doUntil(iterator, test, callback);
-            }
-            else {
-                callback();
-            }
-        });
-    };
-
-    async.queue = function (worker, concurrency) {
-        if (concurrency === undefined) {
-            concurrency = 1;
-        }
-        function _insert(q, data, pos, callback) {
-          if (!q.started){
-            q.started = true;
-          }
-          if (!_isArray(data)) {
-              data = [data];
-          }
-          if(data.length == 0) {
-             // call drain immediately if there are no tasks
-             return async.setImmediate(function() {
-                 if (q.drain) {
-                     q.drain();
-                 }
-             });
-          }
-          _each(data, function(task) {
-              var item = {
-                  data: task,
-                  callback: typeof callback === 'function' ? callback : null
-              };
-
-              if (pos) {
-                q.tasks.unshift(item);
-              } else {
-                q.tasks.push(item);
-              }
-
-              if (q.saturated && q.tasks.length === q.concurrency) {
-                  q.saturated();
-              }
-              async.setImmediate(q.process);
-          });
-        }
-
-        var workers = 0;
-        var q = {
-            tasks: [],
-            concurrency: concurrency,
-            saturated: null,
-            empty: null,
-            drain: null,
-            started: false,
-            paused: false,
-            push: function (data, callback) {
-              _insert(q, data, false, callback);
-            },
-            kill: function () {
-              q.drain = null;
-              q.tasks = [];
-            },
-            unshift: function (data, callback) {
-              _insert(q, data, true, callback);
-            },
-            process: function () {
-                if (!q.paused && workers < q.concurrency && q.tasks.length) {
-                    var task = q.tasks.shift();
-                    if (q.empty && q.tasks.length === 0) {
-                        q.empty();
-                    }
-                    workers += 1;
-                    var next = function () {
-                        workers -= 1;
-                        if (task.callback) {
-                            task.callback.apply(task, arguments);
-                        }
-                        if (q.drain && q.tasks.length + workers === 0) {
-                            q.drain();
-                        }
-                        q.process();
-                    };
-                    var cb = only_once(next);
-                    worker(task.data, cb);
-                }
-            },
-            length: function () {
-                return q.tasks.length;
-            },
-            running: function () {
-                return workers;
-            },
-            idle: function() {
-                return q.tasks.length + workers === 0;
-            },
-            pause: function () {
-                if (q.paused === true) { return; }
-                q.paused = true;
-            },
-            resume: function () {
-                if (q.paused === false) { return; }
-                q.paused = false;
-                // Need to call q.process once per concurrent
-                // worker to preserve full concurrency after pause
-                for (var w = 1; w <= q.concurrency; w++) {
-                    async.setImmediate(q.process);
-                }
-            }
-        };
-        return q;
-    };
-
-    async.priorityQueue = function (worker, concurrency) {
-
-        function _compareTasks(a, b){
-          return a.priority - b.priority;
-        };
-
-        function _binarySearch(sequence, item, compare) {
-          var beg = -1,
-              end = sequence.length - 1;
-          while (beg < end) {
-            var mid = beg + ((end - beg + 1) >>> 1);
-            if (compare(item, sequence[mid]) >= 0) {
-              beg = mid;
-            } else {
-              end = mid - 1;
-            }
-          }
-          return beg;
-        }
-
-        function _insert(q, data, priority, callback) {
-          if (!q.started){
-            q.started = true;
-          }
-          if (!_isArray(data)) {
-              data = [data];
-          }
-          if(data.length == 0) {
-             // call drain immediately if there are no tasks
-             return async.setImmediate(function() {
-                 if (q.drain) {
-                     q.drain();
-                 }
-             });
-          }
-          _each(data, function(task) {
-              var item = {
-                  data: task,
-                  priority: priority,
-                  callback: typeof callback === 'function' ? callback : null
-              };
-
-              q.tasks.splice(_binarySearch(q.tasks, item, _compareTasks) + 1, 0, item);
-
-              if (q.saturated && q.tasks.length === q.concurrency) {
-                  q.saturated();
-              }
-              async.setImmediate(q.process);
-          });
-        }
-
-        // Start with a normal queue
-        var q = async.queue(worker, concurrency);
-
-        // Override push to accept second parameter representing priority
-        q.push = function (data, priority, callback) {
-          _insert(q, data, priority, callback);
-        };
-
-        // Remove unshift function
-        delete q.unshift;
-
-        return q;
-    };
-
-    async.cargo = function (worker, payload) {
-        var working     = false,
-            tasks       = [];
-
-        var cargo = {
-            tasks: tasks,
-            payload: payload,
-            saturated: null,
-            empty: null,
-            drain: null,
-            drained: true,
-            push: function (data, callback) {
-                if (!_isArray(data)) {
-                    data = [data];
-                }
-                _each(data, function(task) {
-                    tasks.push({
-                        data: task,
-                        callback: typeof callback === 'function' ? callback : null
-                    });
-                    cargo.drained = false;
-                    if (cargo.saturated && tasks.length === payload) {
-                        cargo.saturated();
-                    }
-                });
-                async.setImmediate(cargo.process);
-            },
-            process: function process() {
-                if (working) return;
-                if (tasks.length === 0) {
-                    if(cargo.drain && !cargo.drained) cargo.drain();
-                    cargo.drained = true;
-                    return;
-                }
-
-                var ts = typeof payload === 'number'
-                            ? tasks.splice(0, payload)
-                            : tasks.splice(0, tasks.length);
-
-                var ds = _map(ts, function (task) {
-                    return task.data;
-                });
-
-                if(cargo.empty) cargo.empty();
-                working = true;
-                worker(ds, function () {
-                    working = false;
-
-                    var args = arguments;
-                    _each(ts, function (data) {
-                        if (data.callback) {
-                            data.callback.apply(null, args);
-                        }
-                    });
-
-                    process();
-                });
-            },
-            length: function () {
-                return tasks.length;
-            },
-            running: function () {
-                return working;
-            }
-        };
-        return cargo;
-    };
-
-    var _console_fn = function (name) {
-        return function (fn) {
-            var args = Array.prototype.slice.call(arguments, 1);
-            fn.apply(null, args.concat([function (err) {
-                var args = Array.prototype.slice.call(arguments, 1);
-                if (typeof console !== 'undefined') {
-                    if (err) {
-                        if (console.error) {
-                            console.error(err);
-                        }
-                    }
-                    else if (console[name]) {
-                        _each(args, function (x) {
-                            console[name](x);
-                        });
-                    }
-                }
-            }]));
-        };
-    };
-    async.log = _console_fn('log');
-    async.dir = _console_fn('dir');
-    /*async.info = _console_fn('info');
-    async.warn = _console_fn('warn');
-    async.error = _console_fn('error');*/
-
-    async.memoize = function (fn, hasher) {
-        var memo = {};
-        var queues = {};
-        hasher = hasher || function (x) {
-            return x;
-        };
-        var memoized = function () {
-            var args = Array.prototype.slice.call(arguments);
-            var callback = args.pop();
-            var key = hasher.apply(null, args);
-            if (key in memo) {
-                async.nextTick(function () {
-                    callback.apply(null, memo[key]);
-                });
-            }
-            else if (key in queues) {
-                queues[key].push(callback);
-            }
-            else {
-                queues[key] = [callback];
-                fn.apply(null, args.concat([function () {
-                    memo[key] = arguments;
-                    var q = queues[key];
-                    delete queues[key];
-                    for (var i = 0, l = q.length; i < l; i++) {
-                      q[i].apply(null, arguments);
-                    }
-                }]));
-            }
-        };
-        memoized.memo = memo;
-        memoized.unmemoized = fn;
-        return memoized;
-    };
-
-    async.unmemoize = function (fn) {
-      return function () {
-        return (fn.unmemoized || fn).apply(null, arguments);
-      };
-    };
-
-    async.times = function (count, iterator, callback) {
-        var counter = [];
-        for (var i = 0; i < count; i++) {
-            counter.push(i);
-        }
-        return async.map(counter, iterator, callback);
-    };
-
-    async.timesSeries = function (count, iterator, callback) {
-        var counter = [];
-        for (var i = 0; i < count; i++) {
-            counter.push(i);
-        }
-        return async.mapSeries(counter, iterator, callback);
-    };
-
-    async.seq = function (/* functions... */) {
-        var fns = arguments;
-        return function () {
-            var that = this;
-            var args = Array.prototype.slice.call(arguments);
-            var callback = args.pop();
-            async.reduce(fns, args, function (newargs, fn, cb) {
-                fn.apply(that, newargs.concat([function () {
-                    var err = arguments[0];
-                    var nextargs = Array.prototype.slice.call(arguments, 1);
-                    cb(err, nextargs);
-                }]))
-            },
-            function (err, results) {
-                callback.apply(that, [err].concat(results));
-            });
-        };
-    };
-
-    async.compose = function (/* functions... */) {
-      return async.seq.apply(null, Array.prototype.reverse.call(arguments));
-    };
-
-    var _applyEach = function (eachfn, fns /*args...*/) {
-        var go = function () {
-            var that = this;
-            var args = Array.prototype.slice.call(arguments);
-            var callback = args.pop();
-            return eachfn(fns, function (fn, cb) {
-                fn.apply(that, args.concat([cb]));
-            },
-            callback);
-        };
-        if (arguments.length > 2) {
-            var args = Array.prototype.slice.call(arguments, 2);
-            return go.apply(this, args);
-        }
-        else {
-            return go;
-        }
-    };
-    async.applyEach = doParallel(_applyEach);
-    async.applyEachSeries = doSeries(_applyEach);
-
-    async.forever = function (fn, callback) {
-        function next(err) {
-            if (err) {
-                if (callback) {
-                    return callback(err);
-                }
-                throw err;
-            }
-            fn(next);
-        }
-        next();
-    };
-
-    // Node.js
-    if (typeof module !== 'undefined' && module.exports) {
-        module.exports = async;
-    }
-    // AMD / RequireJS
-    else if (typeof define !== 'undefined' && define.amd) {
-        define([], function () {
-            return async;
-        });
-    }
-    // included directly via <script> tag
-    else {
-        root.async = async;
-    }
-
-}());
-
-}).call(this,require('_process'))
-},{"_process":9}],27:[function(require,module,exports){
+},{"intersect":27,"jingle-filetransfer-session":28,"jingle-media-session":79,"jingle-session":111,"util":24,"webrtcsupport":115,"wildemitter":116}],26:[function(require,module,exports){
 var arr = [];
 var each = arr.forEach;
 var slice = arr.slice;
@@ -6514,7 +5400,7 @@ module.exports = function(obj) {
     return obj;
 };
 
-},{}],28:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 module.exports = intersect;
 
 function intersect (a, b) {
@@ -6546,18 +5432,16 @@ function indexOf(arr, el) {
   return -1;
 }
 
-},{}],29:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var util = require('util');
 var extend = require('extend-object');
 var BaseSession = require('jingle-session');
 var RTCPeerConnection = require('rtcpeerconnection');
-var FileTransfer = require('filetransfer');
+var FileTransfer = require('filetransfer/hashed');
 
 
 function FileTransferSession(opts) {
     BaseSession.call(this, opts);
-
-    var self = this;
 
     this.pc = new RTCPeerConnection({
         iceServers: opts.iceServers || [],
@@ -6568,40 +5452,8 @@ function FileTransferSession(opts) {
     this.pc.on('iceConnectionStateChange', this.onIceStateChange.bind(this));
     this.pc.on('addChannel', this.onChannelAdded.bind(this));
 
-    this.sender = new FileTransfer.Sender();
-    this.sender.on('progress', function (sent, size) {
-        self._log('info', 'Send progress ' + sent + '/' + size);
-    });
-    this.sender.on('sentFile', function (meta) {
-        self._log('info', 'Sent file', meta.name);
-
-        var content = self.pc.localDescription.contents[0];
-        delete content.transport;
-
-        content.description = {
-            descType: 'filetransfer',
-            offer: {
-                hash: {
-                    algo: meta.algo,
-                    value: meta.hash
-                }
-            }
-        };
-
-        self.send('description-info', {
-            contents: [content]
-        });
-        self.emit('sentFile', self, meta);
-    });
-
-    this.receiver = new FileTransfer.Receiver();
-    this.receiver.on('progress', function (received, size) {
-        self._log('info', 'Receive progress ' + received + '/' + size);
-    });
-    this.receiver.on('receivedFile', function (file) {
-        self.receivedFile = file;
-        self.maybeReceivedFile();
-    });
+    this.sender = null;
+    this.receiver = null;
 }
 
 
@@ -6619,6 +5471,32 @@ FileTransferSession.prototype = extend(FileTransferSession.prototype, {
         this.state = 'pending';
 
         this.pc.isInitiator = true;
+
+        this.sender = new FileTransfer.Sender();
+        this.sender.on('progress', function (sent, size) {
+            self._log('info', 'Send progress ' + sent + '/' + size);
+        });
+        this.sender.on('sentFile', function (meta) {
+            self._log('info', 'Sent file', meta.name);
+
+            var content = self.pc.localDescription.contents[0];
+            delete content.transport;
+
+            content.description = {
+                descType: 'filetransfer',
+                offer: {
+                    hash: {
+                        algo: meta.algo,
+                        value: meta.hash
+                    }
+                }
+            };
+
+            self.send('description-info', {
+                contents: [content]
+            });
+            self.emit('sentFile', self, meta);
+        });
 
         var sendChannel = this.pc.createDataChannel('filetransfer');
         sendChannel.onopen = function () {
@@ -6667,9 +5545,6 @@ FileTransferSession.prototype = extend(FileTransferSession.prototype, {
                 self._log('error', 'Could not create WebRTC answer', err);
                 return self.end('failed-application');
             }
-
-            answer.jingle.contents[0].name = 'data';
-
             self.send('session-accept', answer.jingle);
         });
     },
@@ -6698,7 +5573,6 @@ FileTransferSession.prototype = extend(FileTransferSession.prototype, {
 
     onIceCandidate: function (candidate) {
         this._log('info', 'Discovered new ICE candidate', candidate.jingle);
-        candidate.jingle.contents[0].name = 'data';
         this.send('transport-info', candidate.jingle);
     },
 
@@ -6746,11 +5620,17 @@ FileTransferSession.prototype = extend(FileTransferSession.prototype, {
         this.pc.isInitiator = false;
 
         var desc = changes.contents[0].description;
-        this.receiver.metadata = desc.offer.toJSON();
 
-        if (this.receiver.metadata.hash) {
-            this.receiver.config.hash = this.receiver.metadata.hash.algo;
-        }
+
+        this.receiver = new FileTransfer.Receiver({hash: desc.offer.hash.algo});
+        this.receiver.on('progress', function (received, size) {
+            self._log('info', 'Receive progress ' + received + '/' + size);
+        });
+        this.receiver.on('receivedFile', function (file) {
+            self.receivedFile = file;
+            self.maybeReceivedFile();
+        });
+        this.receiver.metadata = desc.offer;
 
         changes.contents[0].description = {
             descType: 'datachannel'
@@ -6816,21 +5696,16 @@ FileTransferSession.prototype = extend(FileTransferSession.prototype, {
 
 module.exports = FileTransferSession;
 
-},{"extend-object":27,"filetransfer":30,"jingle-session":109,"rtcpeerconnection":77,"util":24}],30:[function(require,module,exports){
-var async = require('async');
-//var webrtcsupport = require('webrtcsupport');
+},{"extend-object":26,"filetransfer/hashed":30,"jingle-session":111,"rtcpeerconnection":78,"util":24}],29:[function(require,module,exports){
 var WildEmitter = require('wildemitter');
 var util = require('util');
-var hashes = require('iana-hashes');
 
 function Sender(opts) {
     WildEmitter.call(this);
-    var self = this;
     var options = opts || {};
     this.config = {
         chunksize: 16384,
-        pacing: 10,
-        hash: 'sha-1' // note: this uses iana hash names
+        pacing: 0
     };
     // set our config from options
     var item;
@@ -6840,75 +5715,40 @@ function Sender(opts) {
 
     this.file = null;
     this.channel = null;
-    this.hash = null;
-
-    // paced sender
-    // TODO: do we have to do this?
-    this.processingQueue = async.queue(function (task, next) {
-        if (task.type == 'chunk') {
-            var reader = new window.FileReader();
-            reader.onload = (function() {
-                return function(e) {
-                    self.channel.send(e.target.result);
-
-                    if (self.hash) {
-                        self.hash.update(new Uint8Array(e.target.result));
-                    }
-
-                    self.emit('progress', task.start, task.file.size);
-
-                    window.setTimeout(next, self.config.pacing); // pacing
-                };
-            })(task.file);
-            var slice = task.file.slice(task.start, task.start + task.size);
-            reader.readAsArrayBuffer(slice);
-        } else if (task.type == 'complete') {
-            self.emit('progress', self.file.size, self.file.size);
-            self.emit('sentFile', self.hash ? {hash: self.hash.digest('hex'), algo: self.config.hash } : null);
-            next();
-        }
-    });
 }
 util.inherits(Sender, WildEmitter);
 
 Sender.prototype.send = function (file, channel) {
+    var self = this;
     this.file = file;
-    if (this.config.hash) {
-        this.hash = hashes.createHash(this.config.hash);
-    }
-
     this.channel = channel;
-    // FIXME: hook to channel.onopen?
-    for (var start = 0; start < this.file.size; start += this.config.chunksize) {
-        this.processingQueue.push({
-            type: 'chunk',
-            file: file,
-            start: start,
-            size: this.config.chunksize
-        });
-    }
-    this.processingQueue.push({
-        type: 'complete'
-    });
+    var sliceFile = function(offset) {
+        var reader = new window.FileReader();
+        reader.onload = (function() {
+            return function(e) {
+                self.channel.send(e.target.result);
+                self.emit('progress', offset, file.size, e.target.result);
+                if (file.size > offset + e.target.result.byteLength) {
+                    window.setTimeout(sliceFile, self.config.pacing, offset + self.config.chunksize);
+                } else {
+                    self.emit('progress', file.size, file.size, null);
+                    self.emit('sentFile');
+                }
+            };
+        })(file);
+        var slice = file.slice(offset, offset + self.config.chunksize);
+        reader.readAsArrayBuffer(slice);
+    };
+    window.setTimeout(sliceFile, 0, 0);
 };
 
-function Receiver(opts) {
+function Receiver() {
     WildEmitter.call(this);
 
-    var options = opts || {};
-    this.config = {
-        hash: 'sha-1'
-    };
-    // set our config from options
-    var item;
-    for (item in options) {
-        this.config[item] = options[item];
-    }
     this.receiveBuffer = [];
     this.received = 0;
     this.metadata = {};
     this.channel = null;
-    this.hash = null;
 }
 util.inherits(Receiver, WildEmitter);
 
@@ -6918,10 +5758,6 @@ Receiver.prototype.receive = function (metadata, channel) {
     if (metadata) {
         this.metadata = metadata;
     }
-    if (this.config.hash) {
-        this.hash = hashes.createHash(this.config.hash);
-    }
-
     this.channel = channel;
     // chrome only supports arraybuffers and those make it easier to calc the hash
     channel.binaryType = 'arraybuffer';
@@ -6930,15 +5766,8 @@ Receiver.prototype.receive = function (metadata, channel) {
         self.received += len;
         self.receiveBuffer.push(event.data);
 
-        if (self.hash) {
-            self.hash.update(new Uint8Array(event.data));
-        }
-
-        self.emit('progress', self.received, self.metadata.size);
-        if (self.received == self.metadata.size) {
-            if (self.hash) {
-                self.metadata.actualhash = self.hash.digest('hex');
-            }
+        self.emit('progress', self.received, self.metadata.size, event.data);
+        if (self.received === self.metadata.size) {
             self.emit('receivedFile', new window.Blob(self.receiveBuffer), self.metadata);
             self.receiveBuffer = []; // discard receivebuffer
         } else if (self.received > self.metadata.size) {
@@ -6951,11 +5780,84 @@ Receiver.prototype.receive = function (metadata, channel) {
 };
 
 module.exports = {};
-module.exports.support = window && window.File && window.FileReader && window.Blob;
+module.exports.support = typeof window !== 'undefined' && window && window.File && window.FileReader && window.Blob;
 module.exports.Sender = Sender;
 module.exports.Receiver = Receiver;
 
-},{"async":26,"iana-hashes":31,"util":24,"wildemitter":113}],31:[function(require,module,exports){
+},{"util":24,"wildemitter":116}],30:[function(require,module,exports){
+var WildEmitter = require('wildemitter');
+var util = require('util');
+var hashes = require('iana-hashes');
+var base = require('./filetransfer');
+
+// drop-in replacement for filetransfer which also calculates hashes
+function Sender(opts) {
+    WildEmitter.call(this);
+    var self = this;
+    this.base = new base.Sender(opts);
+
+    var options = opts || {};
+    if (!options.hash) {
+        options.hash = 'sha-1';
+    }
+    this.hash = hashes.createHash(options.hash);
+
+    this.base.on('progress', function (start, size, data) {
+        self.emit('progress', start, size, data);
+        if (data) {
+            self.hash.update(new Uint8Array(data));
+        }
+    });
+    this.base.on('sentFile', function () {
+        self.emit('sentFile', {hash: self.hash.digest('hex'), algo: options.hash });
+    });
+}
+util.inherits(Sender, WildEmitter);
+Sender.prototype.send = function () {
+    this.base.send.apply(this.base, arguments);
+};
+
+function Receiver(opts) {
+    WildEmitter.call(this);
+    var self = this;
+    this.base = new base.Receiver(opts);
+
+    var options = opts || {};
+    if (!options.hash) {
+        options.hash = 'sha-1';
+    }
+    this.hash = hashes.createHash(options.hash);
+
+    this.base.on('progress', function (start, size, data) {
+        self.emit('progress', start, size, data);
+        if (data) {
+            self.hash.update(new Uint8Array(data));
+        }
+    });
+    this.base.on('receivedFile', function (file, metadata) {
+        metadata.actualhash = self.hash.digest('hex');
+        self.emit('receivedFile', file, metadata);
+    });
+}
+util.inherits(Receiver, WildEmitter);
+Receiver.prototype.receive = function () {
+    this.base.receive.apply(this.base, arguments);
+};
+Object.defineProperty(Receiver.prototype, 'metadata', {
+    get: function () {
+        return this.base.metadata;
+    },
+    set: function (value) {
+        this.base.metadata = value;
+    }
+});
+
+module.exports = {};
+module.exports.support = base.support;
+module.exports.Sender = Sender;
+module.exports.Receiver = Receiver;
+
+},{"./filetransfer":29,"iana-hashes":31,"util":24,"wildemitter":116}],31:[function(require,module,exports){
 var createHash = require('create-hash');
 var createHmac = require('create-hmac');
 var getHashes = require('./lib/get-hashes');
@@ -8674,7 +7576,7 @@ module.exports = baseEach;
 
 },{"lodash.keys":51}],51:[function(require,module,exports){
 /**
- * lodash 3.1.1 (Custom Build) <https://lodash.com/>
+ * lodash 3.1.2 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
  * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -8698,7 +7600,7 @@ var hasOwnProperty = objectProto.hasOwnProperty;
 var nativeKeys = getNative(Object, 'keys');
 
 /**
- * Used as the [maximum length](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
+ * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
  * of an array-like value.
  */
 var MAX_SAFE_INTEGER = 9007199254740991;
@@ -8756,7 +7658,7 @@ function isIndex(value, length) {
 /**
  * Checks if `value` is a valid array-like length.
  *
- * **Note:** This function is based on [`ToLength`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength).
+ * **Note:** This function is based on [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
  *
  * @private
  * @param {*} value The value to check.
@@ -8825,7 +7727,7 @@ function isObject(value) {
  * Creates an array of the own enumerable property names of `object`.
  *
  * **Note:** Non-object values are coerced to objects. See the
- * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.keys)
+ * [ES spec](http://ecma-international.org/ecma-262/6.0/#sec-object.keys)
  * for more details.
  *
  * @static
@@ -8849,7 +7751,7 @@ function isObject(value) {
  * // => ['0', '1']
  */
 var keys = !nativeKeys ? shimKeys : function(object) {
-  var Ctor = object == null ? null : object.constructor;
+  var Ctor = object == null ? undefined : object.constructor;
   if ((typeof Ctor == 'function' && Ctor.prototype === object) ||
       (typeof object != 'function' && isArrayLike(object))) {
     return shimKeys(object);
@@ -8912,7 +7814,7 @@ module.exports = keys;
 
 },{"lodash._getnative":52,"lodash.isarguments":53,"lodash.isarray":55}],52:[function(require,module,exports){
 /**
- * lodash 3.9.0 (Custom Build) <https://lodash.com/>
+ * lodash 3.9.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
  * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -8923,31 +7825,8 @@ module.exports = keys;
 /** `Object#toString` result references. */
 var funcTag = '[object Function]';
 
-/**
- * Used to match `RegExp` [special characters](http://www.regular-expressions.info/characters.html#special).
- * In addition to special characters the forward slash is escaped to allow for
- * easier `eval` use and `Function` compilation.
- */
-var reRegExpChars = /[.*+?^${}()|[\]\/\\]/g,
-    reHasRegExpChars = RegExp(reRegExpChars.source);
-
 /** Used to detect host constructors (Safari > 5). */
 var reIsHostCtor = /^\[object .+?Constructor\]$/;
-
-/**
- * Converts `value` to a string if it's not one. An empty string is returned
- * for `null` or `undefined` values.
- *
- * @private
- * @param {*} value The value to process.
- * @returns {string} Returns the string.
- */
-function baseToString(value) {
-  if (typeof value == 'string') {
-    return value;
-  }
-  return value == null ? '' : (value + '');
-}
 
 /**
  * Checks if `value` is object-like.
@@ -8970,14 +7849,14 @@ var fnToString = Function.prototype.toString;
 var hasOwnProperty = objectProto.hasOwnProperty;
 
 /**
- * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
  * of values.
  */
 var objToString = objectProto.toString;
 
 /** Used to detect if a method is native. */
 var reIsNative = RegExp('^' +
-  escapeRegExp(fnToString.call(hasOwnProperty))
+  fnToString.call(hasOwnProperty).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
   .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
 );
 
@@ -8992,6 +7871,56 @@ var reIsNative = RegExp('^' +
 function getNative(object, key) {
   var value = object == null ? undefined : object[key];
   return isNative(value) ? value : undefined;
+}
+
+/**
+ * Checks if `value` is classified as a `Function` object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isFunction(_);
+ * // => true
+ *
+ * _.isFunction(/abc/);
+ * // => false
+ */
+function isFunction(value) {
+  // The use of `Object#toString` avoids issues with the `typeof` operator
+  // in older versions of Chrome and Safari which return 'function' for regexes
+  // and Safari 8 equivalents which return 'object' for typed array constructors.
+  return isObject(value) && objToString.call(value) == funcTag;
+}
+
+/**
+ * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
+ * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(1);
+ * // => false
+ */
+function isObject(value) {
+  // Avoid a V8 JIT bug in Chrome 19-20.
+  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
 }
 
 /**
@@ -9014,47 +7943,23 @@ function isNative(value) {
   if (value == null) {
     return false;
   }
-  if (objToString.call(value) == funcTag) {
+  if (isFunction(value)) {
     return reIsNative.test(fnToString.call(value));
   }
   return isObjectLike(value) && reIsHostCtor.test(value);
-}
-
-/**
- * Escapes the `RegExp` special characters "\", "/", "^", "$", ".", "|", "?",
- * "*", "+", "(", ")", "[", "]", "{" and "}" in `string`.
- *
- * @static
- * @memberOf _
- * @category String
- * @param {string} [string=''] The string to escape.
- * @returns {string} Returns the escaped string.
- * @example
- *
- * _.escapeRegExp('[lodash](https://lodash.com/)');
- * // => '\[lodash\]\(https:\/\/lodash\.com\/\)'
- */
-function escapeRegExp(string) {
-  string = baseToString(string);
-  return (string && reHasRegExpChars.test(string))
-    ? string.replace(reRegExpChars, '\\$&')
-    : string;
 }
 
 module.exports = getNative;
 
 },{}],53:[function(require,module,exports){
 /**
- * lodash 3.0.3 (Custom Build) <https://lodash.com/>
+ * lodash 3.0.4 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
  * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <https://lodash.com/license>
  */
-
-/** `Object#toString` result references. */
-var argsTag = '[object Arguments]';
 
 /**
  * Checks if `value` is object-like.
@@ -9070,14 +7975,14 @@ function isObjectLike(value) {
 /** Used for native method references. */
 var objectProto = Object.prototype;
 
-/**
- * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
- * of values.
- */
-var objToString = objectProto.toString;
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/** Native method references. */
+var propertyIsEnumerable = objectProto.propertyIsEnumerable;
 
 /**
- * Used as the [maximum length](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
+ * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
  * of an array-like value.
  */
 var MAX_SAFE_INTEGER = 9007199254740991;
@@ -9121,7 +8026,7 @@ function isArrayLike(value) {
 /**
  * Checks if `value` is a valid array-like length.
  *
- * **Note:** This function is based on [`ToLength`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength).
+ * **Note:** This function is based on [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
  *
  * @private
  * @param {*} value The value to check.
@@ -9148,7 +8053,8 @@ function isLength(value) {
  * // => false
  */
 function isArguments(value) {
-  return isObjectLike(value) && isArrayLike(value) && objToString.call(value) == argsTag;
+  return isObjectLike(value) && isArrayLike(value) &&
+    hasOwnProperty.call(value, 'callee') && !propertyIsEnumerable.call(value, 'callee');
 }
 
 module.exports = isArguments;
@@ -9222,7 +8128,7 @@ module.exports = bindCallback;
 
 },{}],55:[function(require,module,exports){
 /**
- * lodash 3.0.3 (Custom Build) <https://lodash.com/>
+ * lodash 3.0.4 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
  * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -9234,31 +8140,8 @@ module.exports = bindCallback;
 var arrayTag = '[object Array]',
     funcTag = '[object Function]';
 
-/**
- * Used to match `RegExp` [special characters](http://www.regular-expressions.info/characters.html#special).
- * In addition to special characters the forward slash is escaped to allow for
- * easier `eval` use and `Function` compilation.
- */
-var reRegExpChars = /[.*+?^${}()|[\]\/\\]/g,
-    reHasRegExpChars = RegExp(reRegExpChars.source);
-
 /** Used to detect host constructors (Safari > 5). */
 var reIsHostCtor = /^\[object .+?Constructor\]$/;
-
-/**
- * Converts `value` to a string if it's not one. An empty string is returned
- * for `null` or `undefined` values.
- *
- * @private
- * @param {*} value The value to process.
- * @returns {string} Returns the string.
- */
-function baseToString(value) {
-  if (typeof value == 'string') {
-    return value;
-  }
-  return value == null ? '' : (value + '');
-}
 
 /**
  * Checks if `value` is object-like.
@@ -9281,14 +8164,14 @@ var fnToString = Function.prototype.toString;
 var hasOwnProperty = objectProto.hasOwnProperty;
 
 /**
- * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
  * of values.
  */
 var objToString = objectProto.toString;
 
 /** Used to detect if a method is native. */
 var reIsNative = RegExp('^' +
-  escapeRegExp(fnToString.call(hasOwnProperty))
+  fnToString.call(hasOwnProperty).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
   .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
 );
 
@@ -9296,7 +8179,7 @@ var reIsNative = RegExp('^' +
 var nativeIsArray = getNative(Array, 'isArray');
 
 /**
- * Used as the [maximum length](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
+ * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
  * of an array-like value.
  */
 var MAX_SAFE_INTEGER = 9007199254740991;
@@ -9317,7 +8200,7 @@ function getNative(object, key) {
 /**
  * Checks if `value` is a valid array-like length.
  *
- * **Note:** This function is based on [`ToLength`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength).
+ * **Note:** This function is based on [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
  *
  * @private
  * @param {*} value The value to check.
@@ -9348,6 +8231,56 @@ var isArray = nativeIsArray || function(value) {
 };
 
 /**
+ * Checks if `value` is classified as a `Function` object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isFunction(_);
+ * // => true
+ *
+ * _.isFunction(/abc/);
+ * // => false
+ */
+function isFunction(value) {
+  // The use of `Object#toString` avoids issues with the `typeof` operator
+  // in older versions of Chrome and Safari which return 'function' for regexes
+  // and Safari 8 equivalents which return 'object' for typed array constructors.
+  return isObject(value) && objToString.call(value) == funcTag;
+}
+
+/**
+ * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
+ * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(1);
+ * // => false
+ */
+function isObject(value) {
+  // Avoid a V8 JIT bug in Chrome 19-20.
+  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+/**
  * Checks if `value` is a native function.
  *
  * @static
@@ -9367,31 +8300,10 @@ function isNative(value) {
   if (value == null) {
     return false;
   }
-  if (objToString.call(value) == funcTag) {
+  if (isFunction(value)) {
     return reIsNative.test(fnToString.call(value));
   }
   return isObjectLike(value) && reIsHostCtor.test(value);
-}
-
-/**
- * Escapes the `RegExp` special characters "\", "/", "^", "$", ".", "|", "?",
- * "*", "+", "(", ")", "[", "]", "{" and "}" in `string`.
- *
- * @static
- * @memberOf _
- * @category String
- * @param {string} [string=''] The string to escape.
- * @returns {string} Returns the escaped string.
- * @example
- *
- * _.escapeRegExp('[lodash](https://lodash.com/)');
- * // => '\[lodash\]\(https:\/\/lodash\.com\/\)'
- */
-function escapeRegExp(string) {
-  string = baseToString(string);
-  return (string && reHasRegExpChars.test(string))
-    ? string.replace(reRegExpChars, '\\$&')
-    : string;
 }
 
 module.exports = isArray;
@@ -9633,7 +8545,7 @@ module.exports = baseGet;
 
 },{}],58:[function(require,module,exports){
 /**
- * lodash 3.8.0 (Custom Build) <https://lodash.com/>
+ * lodash 3.8.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
  * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -9649,7 +8561,7 @@ var rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\n\\]|\\.)*?
 var reEscapeChar = /\\(\\)?/g;
 
 /**
- * Converts `value` to a string if it is not one. An empty string is returned
+ * Converts `value` to a string if it's not one. An empty string is returned
  * for `null` or `undefined` values.
  *
  * @private
@@ -9657,14 +8569,11 @@ var reEscapeChar = /\\(\\)?/g;
  * @returns {string} Returns the string.
  */
 function baseToString(value) {
-  if (typeof value == 'string') {
-    return value;
-  }
   return value == null ? '' : (value + '');
 }
 
 /**
- * Converts `value` to property path array if it is not one.
+ * Converts `value` to property path array if it's not one.
  *
  * @private
  * @param {*} value The value to process.
@@ -9871,7 +8780,7 @@ module.exports = arrayMap;
 
 },{}],62:[function(require,module,exports){
 /**
- * lodash 3.3.0 (Custom Build) <https://lodash.com/>
+ * lodash 3.3.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
  * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -9900,9 +8809,6 @@ var reEscapeChar = /\\(\\)?/g;
  * @returns {string} Returns the string.
  */
 function baseToString(value) {
-  if (typeof value == 'string') {
-    return value;
-  }
   return value == null ? '' : (value + '');
 }
 
@@ -10034,8 +8940,7 @@ function baseMatches(source) {
 }
 
 /**
- * The base implementation of `_.matchesProperty` which does not which does
- * not clone `value`.
+ * The base implementation of `_.matchesProperty` which does not clone `srcValue`.
  *
  * @private
  * @param {string} path The path of the property to get.
@@ -10270,7 +9175,7 @@ function identity(value) {
 }
 
 /**
- * Creates a function which returns the property value at `path` on a
+ * Creates a function that returns the property value at `path` on a
  * given object.
  *
  * @static
@@ -11736,7 +10641,7 @@ exports.toCandidateSDP = function (candidate) {
 // based on https://github.com/ESTOS/strophe.jingle/
 // adds wildemitter support
 var util = require('util');
-var webrtc = require('webrtcsupport');
+var adapter = require('webrtc-adapter-test');
 var WildEmitter = require('wildemitter');
 
 function dumpSDP(description) {
@@ -11767,7 +10672,7 @@ function TraceablePeerConnection(config, constraints) {
     var self = this;
     WildEmitter.call(this);
 
-    this.peerconnection = new webrtc.PeerConnection(config, constraints);
+    this.peerconnection = new window.RTCPeerConnection(config, constraints);
 
     this.trace = function (what, info) {
         self.emit('PeerConnectionTrace', {
@@ -11832,28 +10737,12 @@ function TraceablePeerConnection(config, constraints) {
 
 util.inherits(TraceablePeerConnection, WildEmitter);
 
-Object.defineProperty(TraceablePeerConnection.prototype, 'signalingState', {
-    get: function () {
-        return this.peerconnection.signalingState;
-    }
-});
-
-Object.defineProperty(TraceablePeerConnection.prototype, 'iceConnectionState', {
-    get: function () {
-        return this.peerconnection.iceConnectionState;
-    }
-});
-
-Object.defineProperty(TraceablePeerConnection.prototype, 'localDescription', {
-    get: function () {
-        return this.peerconnection.localDescription;
-    }
-});
-
-Object.defineProperty(TraceablePeerConnection.prototype, 'remoteDescription', {
-    get: function () {
-        return this.peerconnection.remoteDescription;
-    }
+['signalingState', 'iceConnectionState', 'localDescription', 'remoteDescription'].forEach(function (prop) {
+    Object.defineProperty(TraceablePeerConnection.prototype, prop, {
+        get: function () {
+            return this.peerconnection[prop];
+        }
+    });
 });
 
 TraceablePeerConnection.prototype.addStream = function (stream) {
@@ -11877,11 +10766,11 @@ TraceablePeerConnection.prototype.setLocalDescription = function (description, s
     this.peerconnection.setLocalDescription(description,
         function () {
             self.trace('setLocalDescriptionOnSuccess');
-            successCallback();
+            if (successCallback) successCallback();
         },
         function (err) {
             self.trace('setLocalDescriptionOnFailure', err);
-            failureCallback(err);
+            if (failureCallback) failureCallback(err);
         }
     );
 };
@@ -11892,21 +10781,17 @@ TraceablePeerConnection.prototype.setRemoteDescription = function (description, 
     this.peerconnection.setRemoteDescription(description,
         function () {
             self.trace('setRemoteDescriptionOnSuccess');
-            successCallback();
+            if (successCallback) successCallback();
         },
         function (err) {
             self.trace('setRemoteDescriptionOnFailure', err);
-            failureCallback(err);
+            if (failureCallback) failureCallback(err);
         }
     );
 };
 
 TraceablePeerConnection.prototype.close = function () {
     this.trace('stop');
-    if (this.statsinterval !== null) {
-        window.clearInterval(this.statsinterval);
-        this.statsinterval = null;
-    }
     if (this.peerconnection.signalingState != 'closed') {
         this.peerconnection.close();
     }
@@ -11918,11 +10803,11 @@ TraceablePeerConnection.prototype.createOffer = function (successCallback, failu
     this.peerconnection.createOffer(
         function (offer) {
             self.trace('createOfferOnSuccess', dumpSDP(offer));
-            successCallback(offer);
+            if (successCallback) successCallback(offer);
         },
         function (err) {
             self.trace('createOfferOnFailure', err);
-            failureCallback(err);
+            if (failureCallback) failureCallback(err);
         },
         constraints
     );
@@ -11934,11 +10819,11 @@ TraceablePeerConnection.prototype.createAnswer = function (successCallback, fail
     this.peerconnection.createAnswer(
         function (answer) {
             self.trace('createAnswerOnSuccess', dumpSDP(answer));
-            successCallback(answer);
+            if (successCallback) successCallback(answer);
         },
         function (err) {
             self.trace('createAnswerOnFailure', err);
-            failureCallback(err);
+            if (failureCallback) failureCallback(err);
         },
         constraints
     );
@@ -11959,17 +10844,2034 @@ TraceablePeerConnection.prototype.addIceCandidate = function (candidate, success
     );
 };
 
-TraceablePeerConnection.prototype.getStats = function (callback, errback) {
-    if (navigator.mozGetUserMedia) {
-        this.peerconnection.getStats(null, callback, errback);
-    } else {
-        this.peerconnection.getStats(callback);
-    }
+TraceablePeerConnection.prototype.getStats = function () {
+    this.peerconnection.getStats.apply(this.pc, arguments);
 };
 
 module.exports = TraceablePeerConnection;
 
-},{"util":24,"webrtcsupport":112,"wildemitter":113}],77:[function(require,module,exports){
+},{"util":24,"webrtc-adapter-test":77,"wildemitter":116}],77:[function(require,module,exports){
+/*
+ *  Copyright (c) 2014 The WebRTC project authors. All Rights Reserved.
+ *
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree.
+ */
+
+/* More information about these options at jshint.com/docs/options */
+/* jshint browser: true, camelcase: true, curly: true, devel: true,
+   eqeqeq: true, forin: false, globalstrict: true, node: true,
+   quotmark: single, undef: true, unused: strict */
+/* global mozRTCIceCandidate, mozRTCPeerConnection, Promise,
+mozRTCSessionDescription, webkitRTCPeerConnection, MediaStreamTrack */
+/* exported trace,requestUserMedia */
+
+'use strict';
+
+var getUserMedia = null;
+var attachMediaStream = null;
+var reattachMediaStream = null;
+var webrtcDetectedBrowser = null;
+var webrtcDetectedVersion = null;
+var webrtcMinimumVersion = null;
+var webrtcUtils = {
+  log: function() {
+    // suppress console.log output when being included as a module.
+    if (!(typeof module !== 'undefined' ||
+        typeof require === 'function') && (typeof define === 'function')) {
+      console.log.apply(console, arguments);
+    }
+  }
+};
+
+function trace(text) {
+  // This function is used for logging.
+  if (text[text.length - 1] === '\n') {
+    text = text.substring(0, text.length - 1);
+  }
+  if (window.performance) {
+    var now = (window.performance.now() / 1000).toFixed(3);
+    webrtcUtils.log(now + ': ' + text);
+  } else {
+    webrtcUtils.log(text);
+  }
+}
+
+if (typeof window === 'undefined' || !window.navigator) {
+  webrtcUtils.log('This does not appear to be a browser');
+  webrtcDetectedBrowser = 'not a browser';
+} else if (navigator.mozGetUserMedia) {
+  webrtcUtils.log('This appears to be Firefox');
+
+  webrtcDetectedBrowser = 'firefox';
+
+  // the detected firefox version.
+  webrtcDetectedVersion =
+    parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
+
+  // the minimum firefox version still supported by adapter.
+  webrtcMinimumVersion = 31;
+
+  // The RTCPeerConnection object.
+  window.RTCPeerConnection = function(pcConfig, pcConstraints) {
+    if (webrtcDetectedVersion < 38) {
+      // .urls is not supported in FF < 38.
+      // create RTCIceServers with a single url.
+      if (pcConfig && pcConfig.iceServers) {
+        var newIceServers = [];
+        for (var i = 0; i < pcConfig.iceServers.length; i++) {
+          var server = pcConfig.iceServers[i];
+          if (server.hasOwnProperty('urls')) {
+            for (var j = 0; j < server.urls.length; j++) {
+              var newServer = {
+                url: server.urls[j]
+              };
+              if (server.urls[j].indexOf('turn') === 0) {
+                newServer.username = server.username;
+                newServer.credential = server.credential;
+              }
+              newIceServers.push(newServer);
+            }
+          } else {
+            newIceServers.push(pcConfig.iceServers[i]);
+          }
+        }
+        pcConfig.iceServers = newIceServers;
+      }
+    }
+    return new mozRTCPeerConnection(pcConfig, pcConstraints); // jscs:ignore requireCapitalizedConstructors
+  };
+
+  // The RTCSessionDescription object.
+  window.RTCSessionDescription = mozRTCSessionDescription;
+
+  // The RTCIceCandidate object.
+  window.RTCIceCandidate = mozRTCIceCandidate;
+
+  // getUserMedia constraints shim.
+  getUserMedia = function(constraints, onSuccess, onError) {
+    var constraintsToFF37 = function(c) {
+      if (typeof c !== 'object' || c.require) {
+        return c;
+      }
+      var require = [];
+      Object.keys(c).forEach(function(key) {
+        if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
+          return;
+        }
+        var r = c[key] = (typeof c[key] === 'object') ?
+            c[key] : {ideal: c[key]};
+        if (r.min !== undefined ||
+            r.max !== undefined || r.exact !== undefined) {
+          require.push(key);
+        }
+        if (r.exact !== undefined) {
+          if (typeof r.exact === 'number') {
+            r.min = r.max = r.exact;
+          } else {
+            c[key] = r.exact;
+          }
+          delete r.exact;
+        }
+        if (r.ideal !== undefined) {
+          c.advanced = c.advanced || [];
+          var oc = {};
+          if (typeof r.ideal === 'number') {
+            oc[key] = {min: r.ideal, max: r.ideal};
+          } else {
+            oc[key] = r.ideal;
+          }
+          c.advanced.push(oc);
+          delete r.ideal;
+          if (!Object.keys(r).length) {
+            delete c[key];
+          }
+        }
+      });
+      if (require.length) {
+        c.require = require;
+      }
+      return c;
+    };
+    if (webrtcDetectedVersion < 38) {
+      webrtcUtils.log('spec: ' + JSON.stringify(constraints));
+      if (constraints.audio) {
+        constraints.audio = constraintsToFF37(constraints.audio);
+      }
+      if (constraints.video) {
+        constraints.video = constraintsToFF37(constraints.video);
+      }
+      webrtcUtils.log('ff37: ' + JSON.stringify(constraints));
+    }
+    return navigator.mozGetUserMedia(constraints, onSuccess, onError);
+  };
+
+  navigator.getUserMedia = getUserMedia;
+
+  // Shim for mediaDevices on older versions.
+  if (!navigator.mediaDevices) {
+    navigator.mediaDevices = {getUserMedia: requestUserMedia,
+      addEventListener: function() { },
+      removeEventListener: function() { }
+    };
+  }
+  navigator.mediaDevices.enumerateDevices =
+      navigator.mediaDevices.enumerateDevices || function() {
+    return new Promise(function(resolve) {
+      var infos = [
+        {kind: 'audioinput', deviceId: 'default', label: '', groupId: ''},
+        {kind: 'videoinput', deviceId: 'default', label: '', groupId: ''}
+      ];
+      resolve(infos);
+    });
+  };
+
+  if (webrtcDetectedVersion < 41) {
+    // Work around http://bugzil.la/1169665
+    var orgEnumerateDevices =
+        navigator.mediaDevices.enumerateDevices.bind(navigator.mediaDevices);
+    navigator.mediaDevices.enumerateDevices = function() {
+      return orgEnumerateDevices().catch(function(e) {
+        if (e.name === 'NotFoundError') {
+          return [];
+        }
+        throw e;
+      });
+    };
+  }
+  // Attach a media stream to an element.
+  attachMediaStream = function(element, stream) {
+    element.mozSrcObject = stream;
+  };
+
+  reattachMediaStream = function(to, from) {
+    to.mozSrcObject = from.mozSrcObject;
+  };
+
+} else if (navigator.webkitGetUserMedia) {
+  webrtcUtils.log('This appears to be Chrome');
+
+  webrtcDetectedBrowser = 'chrome';
+
+  // the detected chrome version.
+  webrtcDetectedVersion =
+    parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2], 10);
+
+  // the minimum chrome version still supported by adapter.
+  webrtcMinimumVersion = 38;
+
+  // The RTCPeerConnection object.
+  window.RTCPeerConnection = function(pcConfig, pcConstraints) {
+    // Translate iceTransportPolicy to iceTransports,
+    // see https://code.google.com/p/webrtc/issues/detail?id=4869
+    if (pcConfig && pcConfig.iceTransportPolicy) {
+      pcConfig.iceTransports = pcConfig.iceTransportPolicy;
+    }
+
+    var pc = new webkitRTCPeerConnection(pcConfig, pcConstraints); // jscs:ignore requireCapitalizedConstructors
+    var origGetStats = pc.getStats.bind(pc);
+    pc.getStats = function(selector, successCallback, errorCallback) { // jshint ignore: line
+      var self = this;
+      var args = arguments;
+
+      // If selector is a function then we are in the old style stats so just
+      // pass back the original getStats format to avoid breaking old users.
+      if (arguments.length > 0 && typeof selector === 'function') {
+        return origGetStats(selector, successCallback);
+      }
+
+      var fixChromeStats = function(response) {
+        var standardReport = {};
+        var reports = response.result();
+        reports.forEach(function(report) {
+          var standardStats = {
+            id: report.id,
+            timestamp: report.timestamp,
+            type: report.type
+          };
+          report.names().forEach(function(name) {
+            standardStats[name] = report.stat(name);
+          });
+          standardReport[standardStats.id] = standardStats;
+        });
+
+        return standardReport;
+      };
+
+      if (arguments.length >= 2) {
+        var successCallbackWrapper = function(response) {
+          args[1](fixChromeStats(response));
+        };
+
+        return origGetStats.apply(this, [successCallbackWrapper, arguments[0]]);
+      }
+
+      // promise-support
+      return new Promise(function(resolve, reject) {
+        origGetStats.apply(self, [resolve, reject]);
+      });
+    };
+
+    return pc;
+  };
+
+  // add promise support
+  ['createOffer', 'createAnswer'].forEach(function(method) {
+    var nativeMethod = webkitRTCPeerConnection.prototype[method];
+    webkitRTCPeerConnection.prototype[method] = function() {
+      var self = this;
+      if (arguments.length < 1 || (arguments.length === 1 &&
+          typeof(arguments[0]) === 'object')) {
+        var opts = arguments.length === 1 ? arguments[0] : undefined;
+        return new Promise(function(resolve, reject) {
+          nativeMethod.apply(self, [resolve, reject, opts]);
+        });
+      } else {
+        return nativeMethod.apply(this, arguments);
+      }
+    };
+  });
+
+  ['setLocalDescription', 'setRemoteDescription',
+      'addIceCandidate'].forEach(function(method) {
+    var nativeMethod = webkitRTCPeerConnection.prototype[method];
+    webkitRTCPeerConnection.prototype[method] = function() {
+      var args = arguments;
+      var self = this;
+      return new Promise(function(resolve, reject) {
+        nativeMethod.apply(self, [args[0],
+            function() {
+              resolve();
+              if (args.length >= 2) {
+                args[1].apply(null, []);
+              }
+            },
+            function(err) {
+              reject(err);
+              if (args.length >= 3) {
+                args[2].apply(null, [err]);
+              }
+            }]
+          );
+      });
+    };
+  });
+
+  // getUserMedia constraints shim.
+  var constraintsToChrome = function(c) {
+    if (typeof c !== 'object' || c.mandatory || c.optional) {
+      return c;
+    }
+    var cc = {};
+    Object.keys(c).forEach(function(key) {
+      if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
+        return;
+      }
+      var r = (typeof c[key] === 'object') ? c[key] : {ideal: c[key]};
+      if (r.exact !== undefined && typeof r.exact === 'number') {
+        r.min = r.max = r.exact;
+      }
+      var oldname = function(prefix, name) {
+        if (prefix) {
+          return prefix + name.charAt(0).toUpperCase() + name.slice(1);
+        }
+        return (name === 'deviceId') ? 'sourceId' : name;
+      };
+      if (r.ideal !== undefined) {
+        cc.optional = cc.optional || [];
+        var oc = {};
+        if (typeof r.ideal === 'number') {
+          oc[oldname('min', key)] = r.ideal;
+          cc.optional.push(oc);
+          oc = {};
+          oc[oldname('max', key)] = r.ideal;
+          cc.optional.push(oc);
+        } else {
+          oc[oldname('', key)] = r.ideal;
+          cc.optional.push(oc);
+        }
+      }
+      if (r.exact !== undefined && typeof r.exact !== 'number') {
+        cc.mandatory = cc.mandatory || {};
+        cc.mandatory[oldname('', key)] = r.exact;
+      } else {
+        ['min', 'max'].forEach(function(mix) {
+          if (r[mix] !== undefined) {
+            cc.mandatory = cc.mandatory || {};
+            cc.mandatory[oldname(mix, key)] = r[mix];
+          }
+        });
+      }
+    });
+    if (c.advanced) {
+      cc.optional = (cc.optional || []).concat(c.advanced);
+    }
+    return cc;
+  };
+
+  getUserMedia = function(constraints, onSuccess, onError) {
+    if (constraints.audio) {
+      constraints.audio = constraintsToChrome(constraints.audio);
+    }
+    if (constraints.video) {
+      constraints.video = constraintsToChrome(constraints.video);
+    }
+    webrtcUtils.log('chrome: ' + JSON.stringify(constraints));
+    return navigator.webkitGetUserMedia(constraints, onSuccess, onError);
+  };
+  navigator.getUserMedia = getUserMedia;
+
+  if (!navigator.mediaDevices) {
+    navigator.mediaDevices = {getUserMedia: requestUserMedia,
+                              enumerateDevices: function() {
+      return new Promise(function(resolve) {
+        var kinds = {audio: 'audioinput', video: 'videoinput'};
+        return MediaStreamTrack.getSources(function(devices) {
+          resolve(devices.map(function(device) {
+            return {label: device.label,
+                    kind: kinds[device.kind],
+                    deviceId: device.id,
+                    groupId: ''};
+          }));
+        });
+      });
+    }};
+  }
+
+  // A shim for getUserMedia method on the mediaDevices object.
+  // TODO(KaptenJansson) remove once implemented in Chrome stable.
+  if (!navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia = function(constraints) {
+      return requestUserMedia(constraints);
+    };
+  } else {
+    // Even though Chrome 45 has navigator.mediaDevices and a getUserMedia
+    // function which returns a Promise, it does not accept spec-style
+    // constraints.
+    var origGetUserMedia = navigator.mediaDevices.getUserMedia.
+        bind(navigator.mediaDevices);
+    navigator.mediaDevices.getUserMedia = function(c) {
+      webrtcUtils.log('spec:   ' + JSON.stringify(c)); // whitespace for alignment
+      c.audio = constraintsToChrome(c.audio);
+      c.video = constraintsToChrome(c.video);
+      webrtcUtils.log('chrome: ' + JSON.stringify(c));
+      return origGetUserMedia(c);
+    };
+  }
+
+  // Dummy devicechange event methods.
+  // TODO(KaptenJansson) remove once implemented in Chrome stable.
+  if (typeof navigator.mediaDevices.addEventListener === 'undefined') {
+    navigator.mediaDevices.addEventListener = function() {
+      webrtcUtils.log('Dummy mediaDevices.addEventListener called.');
+    };
+  }
+  if (typeof navigator.mediaDevices.removeEventListener === 'undefined') {
+    navigator.mediaDevices.removeEventListener = function() {
+      webrtcUtils.log('Dummy mediaDevices.removeEventListener called.');
+    };
+  }
+
+  // Attach a media stream to an element.
+  attachMediaStream = function(element, stream) {
+    if (typeof element.srcObject !== 'undefined') {
+      element.srcObject = stream;
+    } else if (typeof element.src !== 'undefined') {
+      element.src = URL.createObjectURL(stream);
+    } else {
+      webrtcUtils.log('Error attaching stream to element.');
+    }
+  };
+
+  reattachMediaStream = function(to, from) {
+    to.src = from.src;
+  };
+
+} else if (navigator.mediaDevices && navigator.userAgent.match(
+    /Edge\/(\d+).(\d+)$/)) {
+  webrtcUtils.log('This appears to be Edge');
+  webrtcDetectedBrowser = 'edge';
+
+  webrtcDetectedVersion =
+    parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10);
+
+  // the minimum version still supported by adapter.
+  webrtcMinimumVersion = 12;
+
+  getUserMedia = navigator.getUserMedia;
+
+  attachMediaStream = function(element, stream) {
+    element.srcObject = stream;
+  };
+  reattachMediaStream = function(to, from) {
+    to.srcObject = from.srcObject;
+  };
+} else {
+  webrtcUtils.log('Browser does not appear to be WebRTC-capable');
+}
+
+// Returns the result of getUserMedia as a Promise.
+function requestUserMedia(constraints) {
+  return new Promise(function(resolve, reject) {
+    getUserMedia(constraints, resolve, reject);
+  });
+}
+
+var webrtcTesting = {};
+Object.defineProperty(webrtcTesting, 'version', {
+  set: function(version) {
+    webrtcDetectedVersion = version;
+  }
+});
+
+if (typeof module !== 'undefined') {
+  var RTCPeerConnection;
+  if (typeof window !== 'undefined') {
+    RTCPeerConnection = window.RTCPeerConnection;
+  }
+  module.exports = {
+    RTCPeerConnection: RTCPeerConnection,
+    getUserMedia: getUserMedia,
+    attachMediaStream: attachMediaStream,
+    reattachMediaStream: reattachMediaStream,
+    webrtcDetectedBrowser: webrtcDetectedBrowser,
+    webrtcDetectedVersion: webrtcDetectedVersion,
+    webrtcMinimumVersion: webrtcMinimumVersion,
+    webrtcTesting: webrtcTesting
+    //requestUserMedia: not exposed on purpose.
+    //trace: not exposed on purpose.
+  };
+} else if ((typeof require === 'function') && (typeof define === 'function')) {
+  // Expose objects and functions when RequireJS is doing the loading.
+  define([], function() {
+    return {
+      RTCPeerConnection: window.RTCPeerConnection,
+      getUserMedia: getUserMedia,
+      attachMediaStream: attachMediaStream,
+      reattachMediaStream: reattachMediaStream,
+      webrtcDetectedBrowser: webrtcDetectedBrowser,
+      webrtcDetectedVersion: webrtcDetectedVersion,
+      webrtcMinimumVersion: webrtcMinimumVersion,
+      webrtcTesting: webrtcTesting
+      //requestUserMedia: not exposed on purpose.
+      //trace: not exposed on purpose.
+    };
+  });
+}
+
+},{}],78:[function(require,module,exports){
+var util = require('util');
+var each = require('lodash.foreach');
+var pluck = require('lodash.pluck');
+var SJJ = require('sdp-jingle-json');
+var WildEmitter = require('wildemitter');
+var peerconn = require('traceablepeerconnection');
+var adapter = require('webrtc-adapter-test');
+
+function PeerConnection(config, constraints) {
+    var self = this;
+    var item;
+    WildEmitter.call(this);
+
+    config = config || {};
+    config.iceServers = config.iceServers || [];
+
+    // make sure this only gets enabled in Google Chrome
+    // EXPERIMENTAL FLAG, might get removed without notice
+    this.enableChromeNativeSimulcast = false;
+    if (constraints && constraints.optional &&
+            adapter.webrtcDetectedBrowser === 'chrome' &&
+            navigator.appVersion.match(/Chromium\//) === null) {
+        constraints.optional.forEach(function (constraint) {
+            if (constraint.enableChromeNativeSimulcast) {
+                self.enableChromeNativeSimulcast = true;
+            }
+        });
+    }
+
+    // EXPERIMENTAL FLAG, might get removed without notice
+    this.enableMultiStreamHacks = false;
+    if (constraints && constraints.optional &&
+            adapter.webrtcDetectedBrowser === 'chrome') {
+        constraints.optional.forEach(function (constraint) {
+            if (constraint.enableMultiStreamHacks) {
+                self.enableMultiStreamHacks = true;
+            }
+        });
+    }
+    // EXPERIMENTAL FLAG, might get removed without notice
+    this.restrictBandwidth = 0;
+    if (constraints && constraints.optional) {
+        constraints.optional.forEach(function (constraint) {
+            if (constraint.andyetRestrictBandwidth) {
+                self.restrictBandwidth = constraint.andyetRestrictBandwidth;
+            }
+        });
+    }
+
+    // EXPERIMENTAL FLAG, might get removed without notice
+    // bundle up ice candidates, only works for jingle mode
+    // number > 0 is the delay to wait for additional candidates
+    // ~20ms seems good
+    this.batchIceCandidates = 0;
+    if (constraints && constraints.optional) {
+        constraints.optional.forEach(function (constraint) {
+            if (constraint.andyetBatchIce) {
+                self.batchIceCandidates = constraint.andyetBatchIce;
+            }
+        });
+    }
+    this.batchedIceCandidates = [];
+
+    // EXPERIMENTAL FLAG, might get removed without notice
+    // this attemps to strip out candidates with an already known foundation
+    // and type -- i.e. those which are gathered via the same TURN server
+    // but different transports (TURN udp, tcp and tls respectively)
+    if (constraints && constraints.optional && adapter.webrtcDetectedBrowser === 'chrome') {
+        constraints.optional.forEach(function (constraint) {
+            if (constraint.andyetFasterICE) {
+                self.eliminateDuplicateCandidates = constraint.andyetFasterICE;
+            }
+        });
+    }
+    // EXPERIMENTAL FLAG, might get removed without notice
+    // when using a server such as the jitsi videobridge we don't need to signal
+    // our candidates
+    if (constraints && constraints.optional) {
+        constraints.optional.forEach(function (constraint) {
+            if (constraint.andyetDontSignalCandidates) {
+                self.dontSignalCandidates = constraint.andyetDontSignalCandidates;
+            }
+        });
+    }
+
+
+    // EXPERIMENTAL FLAG, might get removed without notice
+    this.assumeSetLocalSuccess = false;
+    if (constraints && constraints.optional) {
+        constraints.optional.forEach(function (constraint) {
+            if (constraint.andyetAssumeSetLocalSuccess) {
+                self.assumeSetLocalSuccess = constraint.andyetAssumeSetLocalSuccess;
+            }
+        });
+    }
+
+    // EXPERIMENTAL FLAG, might get removed without notice
+    // working around https://bugzilla.mozilla.org/show_bug.cgi?id=1087551
+    // pass in a timeout for this
+    if (adapter.webrtcDetectedBrowser === 'firefox') {
+        if (constraints && constraints.optional) {
+            this.wtFirefox = 0;
+            constraints.optional.forEach(function (constraint) {
+                if (constraint.andyetFirefoxMakesMeSad) {
+                    self.wtFirefox = constraint.andyetFirefoxMakesMeSad;
+                    if (self.wtFirefox > 0) {
+                        self.firefoxcandidatebuffer = [];
+                    }
+                }
+            });
+        }
+    }
+
+
+    this.pc = new peerconn(config, constraints);
+
+    this.getLocalStreams = this.pc.getLocalStreams.bind(this.pc);
+    this.getRemoteStreams = this.pc.getRemoteStreams.bind(this.pc);
+    this.addStream = this.pc.addStream.bind(this.pc);
+    this.removeStream = this.pc.removeStream.bind(this.pc);
+
+    // proxy events
+    this.pc.on('*', function () {
+        self.emit.apply(self, arguments);
+    });
+
+    // proxy some events directly
+    this.pc.onremovestream = this.emit.bind(this, 'removeStream');
+    this.pc.onaddstream = this.emit.bind(this, 'addStream');
+    this.pc.onnegotiationneeded = this.emit.bind(this, 'negotiationNeeded');
+    this.pc.oniceconnectionstatechange = this.emit.bind(this, 'iceConnectionStateChange');
+    this.pc.onsignalingstatechange = this.emit.bind(this, 'signalingStateChange');
+
+    // handle ice candidate and data channel events
+    this.pc.onicecandidate = this._onIce.bind(this);
+    this.pc.ondatachannel = this._onDataChannel.bind(this);
+
+    this.localDescription = {
+        contents: []
+    };
+    this.remoteDescription = {
+        contents: []
+    };
+
+    this.config = {
+        debug: false,
+        ice: {},
+        sid: '',
+        isInitiator: true,
+        sdpSessionID: Date.now(),
+        useJingle: false
+    };
+
+    // apply our config
+    for (item in config) {
+        this.config[item] = config[item];
+    }
+
+    if (this.config.debug) {
+        this.on('*', function () {
+            var logger = config.logger || console;
+            logger.log('PeerConnection event:', arguments);
+        });
+    }
+    this.hadLocalStunCandidate = false;
+    this.hadRemoteStunCandidate = false;
+    this.hadLocalRelayCandidate = false;
+    this.hadRemoteRelayCandidate = false;
+
+    this.hadLocalIPv6Candidate = false;
+    this.hadRemoteIPv6Candidate = false;
+
+    // keeping references for all our data channels
+    // so they dont get garbage collected
+    // can be removed once the following bugs have been fixed
+    // https://crbug.com/405545
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=964092
+    // to be filed for opera
+    this._remoteDataChannels = [];
+    this._localDataChannels = [];
+
+    this._candidateBuffer = [];
+}
+
+util.inherits(PeerConnection, WildEmitter);
+
+Object.defineProperty(PeerConnection.prototype, 'signalingState', {
+    get: function () {
+        return this.pc.signalingState;
+    }
+});
+Object.defineProperty(PeerConnection.prototype, 'iceConnectionState', {
+    get: function () {
+        return this.pc.iceConnectionState;
+    }
+});
+
+PeerConnection.prototype._role = function () {
+    return this.isInitiator ? 'initiator' : 'responder';
+};
+
+// Add a stream to the peer connection object
+PeerConnection.prototype.addStream = function (stream) {
+    this.localStream = stream;
+    this.pc.addStream(stream);
+};
+
+// helper function to check if a remote candidate is a stun/relay
+// candidate or an ipv6 candidate
+PeerConnection.prototype._checkLocalCandidate = function (candidate) {
+    var cand = SJJ.toCandidateJSON(candidate);
+    if (cand.type == 'srflx') {
+        this.hadLocalStunCandidate = true;
+    } else if (cand.type == 'relay') {
+        this.hadLocalRelayCandidate = true;
+    }
+    if (cand.ip.indexOf(':') != -1) {
+        this.hadLocalIPv6Candidate = true;
+    }
+};
+
+// helper function to check if a remote candidate is a stun/relay
+// candidate or an ipv6 candidate
+PeerConnection.prototype._checkRemoteCandidate = function (candidate) {
+    var cand = SJJ.toCandidateJSON(candidate);
+    if (cand.type == 'srflx') {
+        this.hadRemoteStunCandidate = true;
+    } else if (cand.type == 'relay') {
+        this.hadRemoteRelayCandidate = true;
+    }
+    if (cand.ip.indexOf(':') != -1) {
+        this.hadRemoteIPv6Candidate = true;
+    }
+};
+
+
+// Init and add ice candidate object with correct constructor
+PeerConnection.prototype.processIce = function (update, cb) {
+    cb = cb || function () {};
+    var self = this;
+
+    // ignore any added ice candidates to avoid errors. why does the
+    // spec not do this?
+    if (this.pc.signalingState === 'closed') return cb();
+
+    if (update.contents || (update.jingle && update.jingle.contents)) {
+        var contentNames = pluck(this.remoteDescription.contents, 'name');
+        var contents = update.contents || update.jingle.contents;
+
+        contents.forEach(function (content) {
+            var transport = content.transport || {};
+            var candidates = transport.candidates || [];
+            var mline = contentNames.indexOf(content.name);
+            var mid = content.name;
+
+            candidates.forEach(
+                function (candidate) {
+                var iceCandidate = SJJ.toCandidateSDP(candidate) + '\r\n';
+                self.pc.addIceCandidate(
+                    new RTCIceCandidate({
+                        candidate: iceCandidate,
+                        sdpMLineIndex: mline,
+                        sdpMid: mid
+                    }), function () {
+                        // well, this success callback is pretty meaningless
+                    },
+                    function (err) {
+                        self.emit('error', err);
+                    }
+                );
+                self._checkRemoteCandidate(iceCandidate);
+            });
+        });
+    } else {
+        // working around https://code.google.com/p/webrtc/issues/detail?id=3669
+        if (update.candidate && update.candidate.candidate.indexOf('a=') !== 0) {
+            update.candidate.candidate = 'a=' + update.candidate.candidate;
+        }
+
+        if (this.wtFirefox && this.firefoxcandidatebuffer !== null) {
+            // we cant add this yet due to https://bugzilla.mozilla.org/show_bug.cgi?id=1087551
+            if (this.pc.localDescription && this.pc.localDescription.type === 'offer') {
+                this.firefoxcandidatebuffer.push(update.candidate);
+                return cb();
+            }
+        }
+
+        self.pc.addIceCandidate(
+            new RTCIceCandidate(update.candidate),
+            function () { },
+            function (err) {
+                self.emit('error', err);
+            }
+        );
+        self._checkRemoteCandidate(update.candidate.candidate);
+    }
+    cb();
+};
+
+// Generate and emit an offer with the given constraints
+PeerConnection.prototype.offer = function (constraints, cb) {
+    var self = this;
+    var hasConstraints = arguments.length === 2;
+    var mediaConstraints = hasConstraints && constraints ? constraints : {
+            mandatory: {
+                OfferToReceiveAudio: true,
+                OfferToReceiveVideo: true
+            }
+        };
+    cb = hasConstraints ? cb : constraints;
+    cb = cb || function () {};
+
+    if (this.pc.signalingState === 'closed') return cb('Already closed');
+
+    // Actually generate the offer
+    this.pc.createOffer(
+        function (offer) {
+            // does not work for jingle, but jingle.js doesn't need
+            // this hack...
+            var expandedOffer = {
+                type: 'offer',
+                sdp: offer.sdp
+            };
+            if (self.assumeSetLocalSuccess) {
+                self.emit('offer', expandedOffer);
+                cb(null, expandedOffer);
+            }
+            self._candidateBuffer = [];
+            self.pc.setLocalDescription(offer,
+                function () {
+                    var jingle;
+                    if (self.config.useJingle) {
+                        jingle = SJJ.toSessionJSON(offer.sdp, {
+                            role: self._role(),
+                            direction: 'outgoing'
+                        });
+                        jingle.sid = self.config.sid;
+                        self.localDescription = jingle;
+
+                        // Save ICE credentials
+                        each(jingle.contents, function (content) {
+                            var transport = content.transport || {};
+                            if (transport.ufrag) {
+                                self.config.ice[content.name] = {
+                                    ufrag: transport.ufrag,
+                                    pwd: transport.pwd
+                                };
+                            }
+                        });
+
+                        expandedOffer.jingle = jingle;
+                    }
+                    expandedOffer.sdp.split('\r\n').forEach(function (line) {
+                        if (line.indexOf('a=candidate:') === 0) {
+                            self._checkLocalCandidate(line);
+                        }
+                    });
+
+                    if (!self.assumeSetLocalSuccess) {
+                        self.emit('offer', expandedOffer);
+                        cb(null, expandedOffer);
+                    }
+                },
+                function (err) {
+                    self.emit('error', err);
+                    cb(err);
+                }
+            );
+        },
+        function (err) {
+            self.emit('error', err);
+            cb(err);
+        },
+        mediaConstraints
+    );
+};
+
+
+// Process an incoming offer so that ICE may proceed before deciding
+// to answer the request.
+PeerConnection.prototype.handleOffer = function (offer, cb) {
+    cb = cb || function () {};
+    var self = this;
+    offer.type = 'offer';
+    if (offer.jingle) {
+        if (this.enableChromeNativeSimulcast) {
+            offer.jingle.contents.forEach(function (content) {
+                if (content.name === 'video') {
+                    content.description.googConferenceFlag = true;
+                }
+            });
+        }
+        if (this.enableMultiStreamHacks) {
+            // add a mixed video stream as first stream
+            offer.jingle.contents.forEach(function (content) {
+                if (content.name === 'video') {
+                    var sources = content.description.sources || [];
+                    if (sources.length === 0 || sources[0].ssrc !== "3735928559") {
+                        sources.unshift({
+                            ssrc: "3735928559", // 0xdeadbeef
+                            parameters: [
+                                {
+                                    key: "cname",
+                                    value: "deadbeef"
+                                },
+                                {
+                                    key: "msid",
+                                    value: "mixyourfecintothis please"
+                                }
+                            ]
+                        });
+                        content.description.sources = sources;
+                    }
+                }
+            });
+        }
+        if (self.restrictBandwidth > 0) {
+            if (offer.jingle.contents.length >= 2 && offer.jingle.contents[1].name === 'video') {
+                var content = offer.jingle.contents[1];
+                var hasBw = content.description && content.description.bandwidth;
+                if (!hasBw) {
+                    offer.jingle.contents[1].description.bandwidth = { type: 'AS', bandwidth: self.restrictBandwidth.toString() };
+                    offer.sdp = SJJ.toSessionSDP(offer.jingle, {
+                        sid: self.config.sdpSessionID,
+                        role: self._role(),
+                        direction: 'outgoing'
+                    });
+                }
+            }
+        }
+        offer.sdp = SJJ.toSessionSDP(offer.jingle, {
+            sid: self.config.sdpSessionID,
+            role: self._role(),
+            direction: 'incoming'
+        });
+        self.remoteDescription = offer.jingle;
+    }
+    offer.sdp.split('\r\n').forEach(function (line) {
+        if (line.indexOf('a=candidate:') === 0) {
+            self._checkRemoteCandidate(line);
+        }
+    });
+    self.pc.setRemoteDescription(new RTCSessionDescription(offer),
+        function () {
+            cb();
+        },
+        cb
+    );
+};
+
+// Answer an offer with audio only
+PeerConnection.prototype.answerAudioOnly = function (cb) {
+    var mediaConstraints = {
+            mandatory: {
+                OfferToReceiveAudio: true,
+                OfferToReceiveVideo: false
+            }
+        };
+    this._answer(mediaConstraints, cb);
+};
+
+// Answer an offer without offering to recieve
+PeerConnection.prototype.answerBroadcastOnly = function (cb) {
+    var mediaConstraints = {
+            mandatory: {
+                OfferToReceiveAudio: false,
+                OfferToReceiveVideo: false
+            }
+        };
+    this._answer(mediaConstraints, cb);
+};
+
+// Answer an offer with given constraints default is audio/video
+PeerConnection.prototype.answer = function (constraints, cb) {
+    var hasConstraints = arguments.length === 2;
+    var callback = hasConstraints ? cb : constraints;
+    var mediaConstraints = hasConstraints && constraints ? constraints : {
+            mandatory: {
+                OfferToReceiveAudio: true,
+                OfferToReceiveVideo: true
+            }
+        };
+
+    this._answer(mediaConstraints, callback);
+};
+
+// Process an answer
+PeerConnection.prototype.handleAnswer = function (answer, cb) {
+    cb = cb || function () {};
+    var self = this;
+    if (answer.jingle) {
+        answer.sdp = SJJ.toSessionSDP(answer.jingle, {
+            sid: self.config.sdpSessionID,
+            role: self._role(),
+            direction: 'incoming'
+        });
+        self.remoteDescription = answer.jingle;
+    }
+    answer.sdp.split('\r\n').forEach(function (line) {
+        if (line.indexOf('a=candidate:') === 0) {
+            self._checkRemoteCandidate(line);
+        }
+    });
+    self.pc.setRemoteDescription(
+        new RTCSessionDescription(answer),
+        function () {
+            if (self.wtFirefox) {
+                window.setTimeout(function () {
+                    self.firefoxcandidatebuffer.forEach(function (candidate) {
+                        // add candidates later
+                        self.pc.addIceCandidate(
+                            new RTCIceCandidate(candidate),
+                            function () { },
+                            function (err) {
+                                self.emit('error', err);
+                            }
+                        );
+                        self._checkRemoteCandidate(candidate.candidate);
+                    });
+                    self.firefoxcandidatebuffer = null;
+                }, self.wtFirefox);
+            }
+            cb(null);
+        },
+        cb
+    );
+};
+
+// Close the peer connection
+PeerConnection.prototype.close = function () {
+    this.pc.close();
+
+    this._localDataChannels = [];
+    this._remoteDataChannels = [];
+
+    this.emit('close');
+};
+
+// Internal code sharing for various types of answer methods
+PeerConnection.prototype._answer = function (constraints, cb) {
+    cb = cb || function () {};
+    var self = this;
+    if (!this.pc.remoteDescription) {
+        // the old API is used, call handleOffer
+        throw new Error('remoteDescription not set');
+    }
+
+    if (this.pc.signalingState === 'closed') return cb('Already closed');
+
+    self.pc.createAnswer(
+        function (answer) {
+            var sim = [];
+            if (self.enableChromeNativeSimulcast) {
+                // native simulcast part 1: add another SSRC
+                answer.jingle = SJJ.toSessionJSON(answer.sdp, {
+                    role: self._role(),
+                    direction: 'outgoing'
+                });
+                if (answer.jingle.contents.length >= 2 && answer.jingle.contents[1].name === 'video') {
+                    var groups = answer.jingle.contents[1].description.sourceGroups || [];
+                    var hasSim = false;
+                    groups.forEach(function (group) {
+                        if (group.semantics == 'SIM') hasSim = true;
+                    });
+                    if (!hasSim &&
+                        answer.jingle.contents[1].description.sources.length) {
+                        var newssrc = JSON.parse(JSON.stringify(answer.jingle.contents[1].description.sources[0]));
+                        newssrc.ssrc = '' + Math.floor(Math.random() * 0xffffffff); // FIXME: look for conflicts
+                        answer.jingle.contents[1].description.sources.push(newssrc);
+
+                        sim.push(answer.jingle.contents[1].description.sources[0].ssrc);
+                        sim.push(newssrc.ssrc);
+                        groups.push({
+                            semantics: 'SIM',
+                            sources: sim
+                        });
+
+                        // also create an RTX one for the SIM one
+                        var rtxssrc = JSON.parse(JSON.stringify(newssrc));
+                        rtxssrc.ssrc = '' + Math.floor(Math.random() * 0xffffffff); // FIXME: look for conflicts
+                        answer.jingle.contents[1].description.sources.push(rtxssrc);
+                        groups.push({
+                            semantics: 'FID',
+                            sources: [newssrc.ssrc, rtxssrc.ssrc]
+                        });
+
+                        answer.jingle.contents[1].description.sourceGroups = groups;
+                        answer.sdp = SJJ.toSessionSDP(answer.jingle, {
+                            sid: self.config.sdpSessionID,
+                            role: self._role(),
+                            direction: 'outgoing'
+                        });
+                    }
+                }
+            }
+            var expandedAnswer = {
+                type: 'answer',
+                sdp: answer.sdp
+            };
+            if (self.assumeSetLocalSuccess) {
+                // not safe to do when doing simulcast mangling
+                self.emit('answer', expandedAnswer);
+                cb(null, expandedAnswer);
+            }
+            self._candidateBuffer = [];
+            self.pc.setLocalDescription(answer,
+                function () {
+                    if (self.config.useJingle) {
+                        var jingle = SJJ.toSessionJSON(answer.sdp, {
+                            role: self._role(),
+                            direction: 'outgoing'
+                        });
+                        jingle.sid = self.config.sid;
+                        self.localDescription = jingle;
+                        expandedAnswer.jingle = jingle;
+                    }
+                    if (self.enableChromeNativeSimulcast) {
+                        // native simulcast part 2:
+                        // signal multiple tracks to the receiver
+                        // for anything in the SIM group
+                        if (!expandedAnswer.jingle) {
+                            expandedAnswer.jingle = SJJ.toSessionJSON(answer.sdp, {
+                                role: self._role(),
+                                direction: 'outgoing'
+                            });
+                        }
+                        expandedAnswer.jingle.contents[1].description.sources.forEach(function (source, idx) {
+                            // the floor idx/2 is a hack that relies on a particular order
+                            // of groups, alternating between sim and rtx
+                            source.parameters = source.parameters.map(function (parameter) {
+                                if (parameter.key === 'msid') {
+                                    parameter.value += '-' + Math.floor(idx / 2);
+                                }
+                                return parameter;
+                            });
+                        });
+                        expandedAnswer.sdp = SJJ.toSessionSDP(expandedAnswer.jingle, {
+                            sid: self.sdpSessionID,
+                            role: self._role(),
+                            direction: 'outgoing'
+                        });
+                    }
+                    expandedAnswer.sdp.split('\r\n').forEach(function (line) {
+                        if (line.indexOf('a=candidate:') === 0) {
+                            self._checkLocalCandidate(line);
+                        }
+                    });
+                    if (!self.assumeSetLocalSuccess) {
+                        self.emit('answer', expandedAnswer);
+                        cb(null, expandedAnswer);
+                    }
+                },
+                function (err) {
+                    self.emit('error', err);
+                    cb(err);
+                }
+            );
+        },
+        function (err) {
+            self.emit('error', err);
+            cb(err);
+        },
+        constraints
+    );
+};
+
+// Internal method for emitting ice candidates on our peer object
+PeerConnection.prototype._onIce = function (event) {
+    var self = this;
+    if (event.candidate) {
+        if (this.dontSignalCandidates) return;
+        var ice = event.candidate;
+
+        var expandedCandidate = {
+            candidate: {
+                candidate: ice.candidate,
+                sdpMid: ice.sdpMid,
+                sdpMLineIndex: ice.sdpMLineIndex
+            }
+        };
+        this._checkLocalCandidate(ice.candidate);
+
+        var cand = SJJ.toCandidateJSON(ice.candidate);
+
+        var already;
+        var idx;
+        if (this.eliminateDuplicateCandidates && cand.type === 'relay') {
+            // drop candidates with same foundation, component
+            // take local type pref into account so we don't ignore udp
+            // ones when we know about a TCP one. unlikely but...
+            already = this._candidateBuffer.filter(
+                function (c) {
+                    return c.type === 'relay';
+                }).map(function (c) {
+                    return c.foundation + ':' + c.component;
+                }
+            );
+            idx = already.indexOf(cand.foundation + ':' + cand.component);
+            // remember: local type pref of udp is 0, tcp 1, tls 2
+            if (idx > -1 && ((cand.priority >> 24) >= (already[idx].priority >> 24))) {
+                // drop it, same foundation with higher (worse) type pref
+                return;
+            }
+        }
+        if (this.config.bundlePolicy === 'max-bundle') {
+            // drop candidates which are duplicate for audio/video/data
+            // duplicate means same host/port but different sdpMid
+            already = this._candidateBuffer.filter(
+                function (c) {
+                    return cand.type === c.type;
+                }).map(function (cand) {
+                    return cand.address + ':' + cand.port;
+                }
+            );
+            idx = already.indexOf(cand.address + ':' + cand.port);
+            if (idx > -1) return;
+        }
+        // also drop rtcp candidates since we know the peer supports RTCP-MUX
+        // this is a workaround until browsers implement this natively
+        if (this.config.rtcpMuxPolicy === 'require' && cand.component === '2') {
+            return;
+        }
+        this._candidateBuffer.push(cand);
+
+        if (self.config.useJingle) {
+            if (!ice.sdpMid) { // firefox doesn't set this
+                if (self.pc.remoteDescription && self.pc.remoteDescription.type === 'offer') {
+                    // preserve name from remote
+                    ice.sdpMid = self.remoteDescription.contents[ice.sdpMLineIndex].name;
+                } else {
+                    ice.sdpMid = self.localDescription.contents[ice.sdpMLineIndex].name;
+                }
+            }
+            if (!self.config.ice[ice.sdpMid]) {
+                var jingle = SJJ.toSessionJSON(self.pc.localDescription.sdp, {
+                    role: self._role(),
+                    direction: 'outgoing'
+                });
+                each(jingle.contents, function (content) {
+                    var transport = content.transport || {};
+                    if (transport.ufrag) {
+                        self.config.ice[content.name] = {
+                            ufrag: transport.ufrag,
+                            pwd: transport.pwd
+                        };
+                    }
+                });
+            }
+            expandedCandidate.jingle = {
+                contents: [{
+                    name: ice.sdpMid,
+                    creator: self._role(),
+                    transport: {
+                        transType: 'iceUdp',
+                        ufrag: self.config.ice[ice.sdpMid].ufrag,
+                        pwd: self.config.ice[ice.sdpMid].pwd,
+                        candidates: [
+                            cand
+                        ]
+                    }
+                }]
+            };
+            if (self.batchIceCandidates > 0) {
+                if (self.batchedIceCandidates.length === 0) {
+                    window.setTimeout(function () {
+                        var contents = {};
+                        self.batchedIceCandidates.forEach(function (content) {
+                            content = content.contents[0];
+                            if (!contents[content.name]) contents[content.name] = content;
+                            contents[content.name].transport.candidates.push(content.transport.candidates[0]);
+                        });
+                        var newCand = {
+                            jingle: {
+                                contents: []
+                            }
+                        };
+                        Object.keys(contents).forEach(function (name) {
+                            newCand.jingle.contents.push(contents[name]);
+                        });
+                        self.batchedIceCandidates = [];
+                        self.emit('ice', newCand);
+                    }, self.batchIceCandidates);
+                }
+                self.batchedIceCandidates.push(expandedCandidate.jingle);
+                return;
+            }
+
+        }
+        this.emit('ice', expandedCandidate);
+    } else {
+        this.emit('endOfCandidates');
+    }
+};
+
+// Internal method for processing a new data channel being added by the
+// other peer.
+PeerConnection.prototype._onDataChannel = function (event) {
+    // make sure we keep a reference so this doesn't get garbage collected
+    var channel = event.channel;
+    this._remoteDataChannels.push(channel);
+
+    this.emit('addChannel', channel);
+};
+
+// Create a data channel spec reference:
+// http://dev.w3.org/2011/webrtc/editor/webrtc.html#idl-def-RTCDataChannelInit
+PeerConnection.prototype.createDataChannel = function (name, opts) {
+    var channel = this.pc.createDataChannel(name, opts);
+
+    // make sure we keep a reference so this doesn't get garbage collected
+    this._localDataChannels.push(channel);
+
+    return channel;
+};
+
+// a wrapper around getStats which hides the differences (where possible)
+// TODO: remove in favor of adapter.js shim
+PeerConnection.prototype.getStats = function (cb) {
+    if (adapter.webrtcDetectedBrowser === 'firefox') {
+        this.pc.getStats(
+            function (res) {
+                var items = [];
+                for (var result in res) {
+                    if (typeof res[result] === 'object') {
+                        items.push(res[result]);
+                    }
+                }
+                cb(null, items);
+            },
+            cb
+        );
+    } else {
+        this.pc.getStats(function (res) {
+            var items = [];
+            res.result().forEach(function (result) {
+                var item = {};
+                result.names().forEach(function (name) {
+                    item[name] = result.stat(name);
+                });
+                item.id = result.id;
+                item.type = result.type;
+                item.timestamp = result.timestamp;
+                items.push(item);
+            });
+            cb(null, items);
+        });
+    }
+};
+
+module.exports = PeerConnection;
+
+},{"lodash.foreach":48,"lodash.pluck":56,"sdp-jingle-json":71,"traceablepeerconnection":76,"util":24,"webrtc-adapter-test":77,"wildemitter":116}],79:[function(require,module,exports){
+var util = require('util');
+var extend = require('extend-object');
+var BaseSession = require('jingle-session');
+var RTCPeerConnection = require('rtcpeerconnection');
+
+
+function filterContentSources(content, stream) {
+    delete content.transport;
+    delete content.description.payloads;
+    if (content.description.sources) {
+        content.description.sources = content.description.sources.filter(function (source) {
+            return stream.id === source.parameters[1].value.split(' ')[0];
+        });
+    }
+}
+
+function filterUnusedLabels(content) {
+    // Remove mslabel and label ssrc-specific attributes
+    var sources = content.description.sources || [];
+    sources.forEach(function (source) {
+        source.parameters = source.parameters.filter(function (parameter) {
+            return !(parameter.key === 'mslabel' || parameter.key === 'label');
+        });
+    });
+}
+
+
+function MediaSession(opts) {
+    BaseSession.call(this, opts);
+
+    this.pc = new RTCPeerConnection({
+        iceServers: opts.iceServers || [],
+        useJingle: true
+    }, opts.constraints || {});
+
+    this.pc.on('ice', this.onIceCandidate.bind(this));
+    this.pc.on('iceConnectionStateChange', this.onIceStateChange.bind(this));
+    this.pc.on('addStream', this.onAddStream.bind(this));
+    this.pc.on('removeStream', this.onRemoveStream.bind(this));
+
+    if (opts.stream) {
+        this.addStream(opts.stream);
+    }
+
+    this._ringing = false;
+}
+
+
+util.inherits(MediaSession, BaseSession);
+
+
+Object.defineProperties(MediaSession.prototype, {
+    ringing: {
+        get: function () {
+            return this._ringing;
+        },
+        set: function (value) {
+            if (value !== this._ringing) {
+                this._ringing = value;
+                this.emit('change:ringing', value);
+            }
+        }
+    },
+    streams: {
+        get: function () {
+            if (this.pc.signalingState !== 'closed') {
+                return this.pc.getRemoteStreams();
+            }
+            return [];
+        }
+    }
+});
+
+
+MediaSession.prototype = extend(MediaSession.prototype, {
+
+    // ----------------------------------------------------------------
+    // Session control methods
+    // ----------------------------------------------------------------
+
+    start: function (constraints, next) {
+        var self = this;
+        this.state = 'pending';
+
+        next = next || function () {};
+
+        this.pc.isInitiator = true;
+        this.pc.offer(constraints, function (err, offer) {
+            if (err) {
+                self._log('error', 'Could not create WebRTC offer', err);
+                return self.end('failed-application', true);
+            }
+
+            // a workaround for missing a=sendonly
+            // https://code.google.com/p/webrtc/issues/detail?id=1553
+            if (constraints && constraints.mandatory) {
+                offer.jingle.contents.forEach(function (content) {
+                    var mediaType = content.description.media;
+
+                    if (!content.description || content.description.descType !== 'rtp') {
+                        return;
+                    }
+
+                    if (!constraints.mandatory.OfferToReceiveAudio && mediaType === 'audio') {
+                        content.senders = 'initiator';
+                    }
+
+                    if (!constraints.mandatory.OfferToReceiveVideo && mediaType === 'video') {
+                        content.senders = 'initiator';
+                    }
+                });
+            }
+
+            offer.jingle.contents.forEach(filterUnusedLabels);
+
+            self.send('session-initiate', offer.jingle);
+
+            next();
+        });
+    },
+
+    accept: function (next) {
+        var self = this;
+
+        next = next || function () {};
+
+        this._log('info', 'Accepted incoming session');
+
+        this.state = 'active';
+
+        this.pc.answer(function (err, answer) {
+            if (err) {
+                self._log('error', 'Could not create WebRTC answer', err);
+                return self.end('failed-application');
+            }
+
+            answer.jingle.contents.forEach(filterUnusedLabels);
+
+            self.send('session-accept', answer.jingle);
+
+            next();
+        });
+    },
+
+    end: function (reason, silent) {
+        var self = this;
+        this.streams.forEach(function (stream) {
+            self.onRemoveStream({stream: stream});
+        });
+        this.pc.close();
+        BaseSession.prototype.end.call(this, reason, silent);
+    },
+
+    ring: function () {
+        this._log('info', 'Ringing on incoming session');
+        this.ringing = true;
+        this.send('session-info', {ringing: true});
+    },
+
+    mute: function (creator, name) {
+        this._log('info', 'Muting', name);
+
+        this.send('session-info', {
+            mute: {
+                creator: creator,
+                name: name
+            }
+        });
+    },
+
+    unmute: function (creator, name) {
+        this._log('info', 'Unmuting', name);
+        this.send('session-info', {
+            unmute: {
+                creator: creator,
+                name: name
+            }
+        });
+    },
+
+    hold: function () {
+        this._log('info', 'Placing on hold');
+        this.send('session-info', {hold: true});
+    },
+
+    resume: function () {
+        this._log('info', 'Resuming from hold');
+        this.send('session-info', {active: true});
+    },
+
+    // ----------------------------------------------------------------
+    // Stream control methods
+    // ----------------------------------------------------------------
+
+    addStream: function (stream, renegotiate, cb) {
+        var self = this;
+
+        cb = cb || function () {};
+
+        this.pc.addStream(stream);
+
+        if (!renegotiate) {
+            return;
+        }
+
+        this.pc.handleOffer({
+            type: 'offer',
+            jingle: this.pc.remoteDescription
+        }, function (err) {
+            if (err) {
+                self._log('error', 'Could not create offer for adding new stream');
+                return cb(err);
+            }
+            self.pc.answer(function (err, answer) {
+                if (err) {
+                    self._log('error', 'Could not create answer for adding new stream');
+                    return cb(err);
+                }
+                answer.jingle.contents.forEach(function (content) {
+                    filterContentSources(content, stream);
+                });
+
+                self.send('source-add', answer.jingle);
+                cb();
+            });
+        });
+    },
+
+    addStream2: function (stream, cb) {
+        this.addStream(stream, true, cb);
+    },
+
+    removeStream: function (stream, renegotiate, cb) {
+        var self = this;
+
+        cb = cb || function () {};
+
+        if (!renegotiate) {
+            this.pc.removeStream(stream);
+            return;
+        }
+
+        var desc = this.pc.localDescription;
+        desc.contents.forEach(function (content) {
+            filterContentSources(content, stream);
+        });
+
+        this.send('source-remove', desc);
+        this.pc.removeStream(stream);
+
+        this.pc.handleOffer({
+            type: 'offer',
+            jingle: this.pc.remoteDescription
+        }, function (err) {
+            if (err) {
+                self._log('error', 'Could not process offer for removing stream');
+                return cb(err);
+            }
+            self.pc.answer(function (err) {
+                if (err) {
+                    self._log('error', 'Could not process answer for removing stream');
+                    return cb(err);
+                }
+                cb();
+            });
+        });
+    },
+
+    removeStream2: function (stream, cb) {
+        this.removeStream(stream, true, cb);
+    },
+
+    switchStream: function (oldStream, newStream, cb) {
+        var self = this;
+
+        cb = cb || function () {};
+
+        var desc = this.pc.localDescription;
+        desc.contents.forEach(function (content) {
+            delete content.transport;
+            delete content.description.payloads;
+        });
+
+        this.pc.removeStream(oldStream);
+        this.send('source-remove', desc);
+
+        var audioTracks = oldStream.getAudioTracks();
+        if (audioTracks.length) {
+            newStream.addTrack(audioTracks[0]);
+        }
+
+        this.pc.addStream(newStream);
+        this.pc.handleOffer({
+            type: 'offer',
+            jingle: this.pc.remoteDescription
+        }, function (err) {
+            if (err) {
+                self._log('error', 'Could not process offer for switching streams');
+                return cb(err);
+            }
+            self.pc.answer(function (err, answer) {
+                if (err) {
+                    self._log('error', 'Could not process answer for switching streams');
+                    return cb(err);
+                }
+                answer.jingle.contents.forEach(function (content) {
+                    delete content.transport;
+                    delete content.description.payloads;
+                });
+                self.send('source-add', answer.jingle);
+                cb();
+            });
+        });
+    },
+
+    // ----------------------------------------------------------------
+    // ICE action handers
+    // ----------------------------------------------------------------
+
+    onIceCandidate: function (candidate) {
+        this._log('info', 'Discovered new ICE candidate', candidate.jingle);
+        this.send('transport-info', candidate.jingle);
+    },
+
+    onIceStateChange: function () {
+        switch (this.pc.iceConnectionState) {
+            case 'checking':
+                this.connectionState = 'connecting';
+                break;
+            case 'completed':
+            case 'connected':
+                this.connectionState = 'connected';
+                break;
+            case 'disconnected':
+                if (this.pc.signalingState === 'stable') {
+                    this.connectionState = 'interrupted';
+                } else {
+                    this.connectionState = 'disconnected';
+                }
+                break;
+            case 'failed':
+                this.connectionState = 'failed';
+                this.end('failed-transport');
+                break;
+            case 'closed':
+                this.connectionState = 'disconnected';
+                break;
+        }
+    },
+
+    // ----------------------------------------------------------------
+    // Stream event handlers
+    // ----------------------------------------------------------------
+
+    onAddStream: function (event) {
+        this._log('info', 'Stream added');
+        this.emit('peerStreamAdded', this, event.stream);
+    },
+
+    onRemoveStream: function (event) {
+        this._log('info', 'Stream removed');
+        this.emit('peerStreamRemoved', this, event.stream);
+    },
+
+    // ----------------------------------------------------------------
+    // Jingle action handers
+    // ----------------------------------------------------------------
+
+    onSessionInitiate: function (changes, cb) {
+        var self = this;
+
+        this._log('info', 'Initiating incoming session');
+
+        this.state = 'pending';
+
+        this.pc.isInitiator = false;
+        this.pc.handleOffer({
+            type: 'offer',
+            jingle: changes
+        }, function (err) {
+            if (err) {
+                self._log('error', 'Could not create WebRTC answer');
+                return cb({condition: 'general-error'});
+            }
+            cb();
+        });
+    },
+
+    onSessionAccept: function (changes, cb) {
+        var self = this;
+
+        this.state = 'active';
+        this.pc.handleAnswer({
+            type: 'answer',
+            jingle: changes
+        }, function (err) {
+            if (err) {
+                self._log('error', 'Could not process WebRTC answer');
+                return cb({condition: 'general-error'});
+            }
+            self.emit('accepted', self);
+            cb();
+        });
+    },
+
+    onSessionTerminate: function (changes, cb) {
+        var self = this;
+
+        this._log('info', 'Terminating session');
+        this.streams.forEach(function (stream) {
+            self.onRemoveStream({stream: stream});
+        });
+        this.pc.close();
+        BaseSession.prototype.end.call(this, changes.reason, true);
+
+        cb();
+    },
+
+    onSessionInfo: function (info, cb) {
+        if (info.ringing) {
+            this._log('info', 'Outgoing session is ringing');
+            this.ringing = true;
+            this.emit('ringing', this);
+            return cb();
+        }
+
+        if (info.hold) {
+            this._log('info', 'On hold');
+            this.emit('hold', this);
+            return cb();
+        }
+
+        if (info.active) {
+            this._log('info', 'Resuming from hold');
+            this.emit('resumed', this);
+            return cb();
+        }
+
+        if (info.mute) {
+            this._log('info', 'Muting', info.mute);
+            this.emit('mute', this, info.mute);
+            return cb();
+        }
+
+        if (info.unmute) {
+            this._log('info', 'Unmuting', info.unmute);
+            this.emit('unmute', this, info.unmute);
+            return cb();
+        }
+
+        cb();
+    },
+
+    onTransportInfo: function (changes, cb) {
+        this.pc.processIce(changes, function () {
+            cb();
+        });
+    },
+
+    onSourceAdd: function (changes, cb) {
+        var self = this;
+        this._log('info', 'Adding new stream source');
+
+        var newDesc = this.pc.remoteDescription;
+        this.pc.remoteDescription.contents.forEach(function (content, idx) {
+            var desc = content.description;
+            var ssrcs = desc.sources || [];
+            var groups = desc.sourceGroups || [];
+
+            changes.contents.forEach(function (newContent) {
+                if (content.name !== newContent.name) {
+                    return;
+                }
+
+                var newContentDesc = newContent.description;
+                var newSSRCs = newContentDesc.sources || [];
+
+                ssrcs = ssrcs.concat(newSSRCs);
+                newDesc.contents[idx].description.sources = JSON.parse(JSON.stringify(ssrcs));
+
+                var newGroups = newContentDesc.sourceGroups || [];
+                groups = groups.concat(newGroups);
+                newDesc.contents[idx].description.sourceGroups = JSON.parse(JSON.stringify(groups));
+            });
+        });
+
+        this.pc.handleOffer({
+            type: 'offer',
+            jingle: newDesc
+        }, function (err) {
+            if (err) {
+                self._log('error', 'Error adding new stream source');
+                return cb({
+                    condition: 'general-error'
+                });
+            }
+
+            self.pc.answer(function (err) {
+                if (err) {
+                    self._log('error', 'Error adding new stream source');
+                    return cb({
+                        condition: 'general-error'
+                    });
+                }
+                cb();
+            });
+        });
+    },
+
+    onSourceRemove: function (changes, cb) {
+        var self = this;
+        this._log('info', 'Removing stream source');
+
+        var newDesc = this.pc.remoteDescription;
+        this.pc.remoteDescription.contents.forEach(function (content, idx) {
+            var desc = content.description;
+            var ssrcs = desc.sources || [];
+            var groups = desc.sourceGroups || [];
+
+            changes.contents.forEach(function (newContent) {
+                if (content.name !== newContent.name) {
+                    return;
+                }
+
+                var newContentDesc = newContent.description;
+                var newSSRCs = newContentDesc.sources || [];
+                var newGroups = newContentDesc.sourceGroups || [];
+
+                var found, i, j, k;
+
+
+                for (i = 0; i < newSSRCs.length; i++) {
+                    found = -1;
+                    for (j = 0; j < ssrcs.length; j++) {
+                        if (newSSRCs[i].ssrc === ssrcs[j].ssrc) {
+                            found = j;
+                            break;
+                        }
+                    }
+                    if (found > -1) {
+                        ssrcs.splice(found, 1);
+                        newDesc.contents[idx].description.sources = JSON.parse(JSON.stringify(ssrcs));
+                    }
+                }
+
+                // Remove ssrc-groups that are no longer needed
+                for (i = 0; i < newGroups.length; i++) {
+                    found = -1;
+                    for (j = 0; i < groups.length; j++) {
+                        if (newGroups[i].semantics === groups[j].semantics &&
+                            newGroups[i].sources.length === groups[j].sources.length) {
+                            var same = true;
+                            for (k = 0; k < newGroups[i].sources.length; k++) {
+                                if (newGroups[i].sources[k] !== groups[j].sources[k]) {
+                                    same = false;
+                                    break;
+                                }
+                            }
+                            if (same) {
+                                found = j;
+                                break;
+                            }
+                        }
+                    }
+                    if (found > -1) {
+                        groups.splice(found, 1);
+                        newDesc.contents[idx].description.sourceGroups = JSON.parse(JSON.stringify(groups));
+                    }
+                }
+            });
+        });
+
+        this.pc.handleOffer({
+            type: 'offer',
+            jingle: newDesc
+        }, function (err) {
+            if (err) {
+                self._log('error', 'Error removing stream source');
+                return cb({
+                    condition: 'general-error'
+                });
+            }
+            self.pc.answer(function (err) {
+                if (err) {
+                    self._log('error', 'Error removing stream source');
+                    return cb({
+                        condition: 'general-error'
+                    });
+                }
+                cb();
+            });
+        });
+    }
+});
+
+
+module.exports = MediaSession;
+
+},{"extend-object":26,"jingle-session":111,"rtcpeerconnection":110,"util":24}],80:[function(require,module,exports){
+arguments[4][48][0].apply(exports,arguments)
+},{"dup":48,"lodash._arrayeach":81,"lodash._baseeach":82,"lodash._bindcallback":86,"lodash.isarray":87}],81:[function(require,module,exports){
+arguments[4][49][0].apply(exports,arguments)
+},{"dup":49}],82:[function(require,module,exports){
+arguments[4][50][0].apply(exports,arguments)
+},{"dup":50,"lodash.keys":83}],83:[function(require,module,exports){
+arguments[4][51][0].apply(exports,arguments)
+},{"dup":51,"lodash._getnative":84,"lodash.isarguments":85,"lodash.isarray":87}],84:[function(require,module,exports){
+arguments[4][52][0].apply(exports,arguments)
+},{"dup":52}],85:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"dup":53}],86:[function(require,module,exports){
+arguments[4][54][0].apply(exports,arguments)
+},{"dup":54}],87:[function(require,module,exports){
+arguments[4][55][0].apply(exports,arguments)
+},{"dup":55}],88:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"dup":56,"lodash._baseget":89,"lodash._topath":90,"lodash.isarray":91,"lodash.map":92}],89:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"dup":57}],90:[function(require,module,exports){
+arguments[4][58][0].apply(exports,arguments)
+},{"dup":58,"lodash.isarray":91}],91:[function(require,module,exports){
+arguments[4][55][0].apply(exports,arguments)
+},{"dup":55}],92:[function(require,module,exports){
+arguments[4][60][0].apply(exports,arguments)
+},{"dup":60,"lodash._arraymap":93,"lodash._basecallback":94,"lodash._baseeach":99,"lodash.isarray":91}],93:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"dup":61}],94:[function(require,module,exports){
+arguments[4][62][0].apply(exports,arguments)
+},{"dup":62,"lodash._baseisequal":95,"lodash._bindcallback":97,"lodash.isarray":91,"lodash.pairs":98}],95:[function(require,module,exports){
+arguments[4][63][0].apply(exports,arguments)
+},{"dup":63,"lodash.isarray":91,"lodash.istypedarray":96,"lodash.keys":100}],96:[function(require,module,exports){
+arguments[4][64][0].apply(exports,arguments)
+},{"dup":64}],97:[function(require,module,exports){
+arguments[4][54][0].apply(exports,arguments)
+},{"dup":54}],98:[function(require,module,exports){
+arguments[4][66][0].apply(exports,arguments)
+},{"dup":66,"lodash.keys":100}],99:[function(require,module,exports){
+arguments[4][50][0].apply(exports,arguments)
+},{"dup":50,"lodash.keys":100}],100:[function(require,module,exports){
+arguments[4][51][0].apply(exports,arguments)
+},{"dup":51,"lodash._getnative":101,"lodash.isarguments":102,"lodash.isarray":91}],101:[function(require,module,exports){
+arguments[4][52][0].apply(exports,arguments)
+},{"dup":52}],102:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"dup":53}],103:[function(require,module,exports){
+arguments[4][71][0].apply(exports,arguments)
+},{"./lib/tojson":106,"./lib/tosdp":107,"dup":71}],104:[function(require,module,exports){
+arguments[4][72][0].apply(exports,arguments)
+},{"dup":72}],105:[function(require,module,exports){
+arguments[4][73][0].apply(exports,arguments)
+},{"dup":73}],106:[function(require,module,exports){
+arguments[4][74][0].apply(exports,arguments)
+},{"./parsers":104,"./senders":105,"dup":74}],107:[function(require,module,exports){
+arguments[4][75][0].apply(exports,arguments)
+},{"./senders":105,"dup":75}],108:[function(require,module,exports){
+arguments[4][76][0].apply(exports,arguments)
+},{"dup":76,"util":24,"webrtc-adapter-test":109,"wildemitter":116}],109:[function(require,module,exports){
+arguments[4][77][0].apply(exports,arguments)
+},{"dup":77}],110:[function(require,module,exports){
 var util = require('util');
 var each = require('lodash.foreach');
 var pluck = require('lodash.pluck');
@@ -12825,666 +13727,7 @@ PeerConnection.prototype.getStats = function (cb) {
 
 module.exports = PeerConnection;
 
-},{"lodash.foreach":48,"lodash.pluck":56,"sdp-jingle-json":71,"traceablepeerconnection":76,"util":24,"webrtcsupport":112,"wildemitter":113}],78:[function(require,module,exports){
-var util = require('util');
-var extend = require('extend-object');
-var BaseSession = require('jingle-session');
-var RTCPeerConnection = require('rtcpeerconnection');
-
-
-function filterContentSources(content, stream) {
-    delete content.transport;
-    delete content.description.payloads;
-    if (content.description.sources) {
-        content.description.sources = content.description.sources.filter(function (source) {
-            return stream.id === source.parameters[1].value.split(' ')[0];
-        });
-    }
-}
-
-function filterUnusedLabels(content) {
-    // Remove mslabel and label ssrc-specific attributes
-    var sources = content.description.sources || [];
-    sources.forEach(function (source) {
-        source.parameters = source.parameters.filter(function (parameter) {
-            return !(parameter.key === 'mslabel' || parameter.key === 'label');
-        });
-    });
-}
-
-
-function MediaSession(opts) {
-    BaseSession.call(this, opts);
-
-    this.pc = new RTCPeerConnection({
-        iceServers: opts.iceServers || [],
-        useJingle: true
-    }, opts.constraints || {});
-
-    this.pc.on('ice', this.onIceCandidate.bind(this));
-    this.pc.on('iceConnectionStateChange', this.onIceStateChange.bind(this));
-    this.pc.on('addStream', this.onAddStream.bind(this));
-    this.pc.on('removeStream', this.onRemoveStream.bind(this));
-
-    if (opts.stream) {
-        this.addStream(opts.stream);
-    }
-
-    this._ringing = false;
-}
-
-
-util.inherits(MediaSession, BaseSession);
-
-
-Object.defineProperties(MediaSession.prototype, {
-    ringing: {
-        get: function () {
-            return this._ringing;
-        },
-        set: function (value) {
-            if (value !== this._ringing) {
-                this._ringing = value;
-                this.emit('change:ringing', value);
-            }
-        }
-    },
-    streams: {
-        get: function () {
-            if (this.pc.signalingState !== 'closed') {
-                return this.pc.getRemoteStreams();
-            }
-            return [];
-        }
-    }
-});
-
-
-MediaSession.prototype = extend(MediaSession.prototype, {
-
-    // ----------------------------------------------------------------
-    // Session control methods
-    // ----------------------------------------------------------------
-
-    start: function (constraints, next) {
-        var self = this;
-        this.state = 'pending';
-
-        next = next || function () {};
-
-        this.pc.isInitiator = true;
-        this.pc.offer(constraints, function (err, offer) {
-            if (err) {
-                self._log('error', 'Could not create WebRTC offer', err);
-                return self.end('failed-application', true);
-            }
-
-            // a workaround for missing a=sendonly
-            // https://code.google.com/p/webrtc/issues/detail?id=1553
-            if (constraints && constraints.mandatory) {
-                offer.jingle.contents.forEach(function (content) {
-                    var mediaType = content.description.media;
-
-                    if (!content.description || content.description.descType !== 'rtp') {
-                        return;
-                    }
-
-                    if (!constraints.mandatory.OfferToReceiveAudio && mediaType === 'audio') {
-                        content.senders = 'initiator';
-                    }
-
-                    if (!constraints.mandatory.OfferToReceiveVideo && mediaType === 'video') {
-                        content.senders = 'initiator';
-                    }
-                });
-            }
-
-            offer.jingle.contents.forEach(filterUnusedLabels);
-
-            self.send('session-initiate', offer.jingle);
-
-            next();
-        });
-    },
-
-    accept: function (next) {
-        var self = this;
-
-        next = next || function () {};
-
-        this._log('info', 'Accepted incoming session');
-
-        this.state = 'active';
-
-        this.pc.answer(function (err, answer) {
-            if (err) {
-                self._log('error', 'Could not create WebRTC answer', err);
-                return self.end('failed-application');
-            }
-
-            answer.jingle.contents.forEach(filterUnusedLabels);
-
-            self.send('session-accept', answer.jingle);
-
-            next();
-        });
-    },
-
-    end: function (reason, silent) {
-        var self = this;
-        this.streams.forEach(function (stream) {
-            self.onRemoveStream({stream: stream});
-        });
-        this.pc.close();
-        BaseSession.prototype.end.call(this, reason, silent);
-    },
-
-    ring: function () {
-        this._log('info', 'Ringing on incoming session');
-        this.ringing = true;
-        this.send('session-info', {ringing: true});
-    },
-
-    mute: function (creator, name) {
-        this._log('info', 'Muting', name);
-
-        this.send('session-info', {
-            mute: {
-                creator: creator,
-                name: name
-            }
-        });
-    },
-
-    unmute: function (creator, name) {
-        this._log('info', 'Unmuting', name);
-        this.send('session-info', {
-            unmute: {
-                creator: creator,
-                name: name
-            }
-        });
-    },
-
-    hold: function () {
-        this._log('info', 'Placing on hold');
-        this.send('session-info', {hold: true});
-    },
-
-    resume: function () {
-        this._log('info', 'Resuming from hold');
-        this.send('session-info', {active: true});
-    },
-
-    // ----------------------------------------------------------------
-    // Stream control methods
-    // ----------------------------------------------------------------
-
-    addStream: function (stream, renegotiate, cb) {
-        var self = this;
-
-        cb = cb || function () {};
-
-        this.pc.addStream(stream);
-
-        if (!renegotiate) {
-            return;
-        }
-
-        this.pc.handleOffer({
-            type: 'offer',
-            jingle: this.pc.remoteDescription
-        }, function (err) {
-            if (err) {
-                self._log('error', 'Could not create offer for adding new stream');
-                return cb(err);
-            }
-            self.pc.answer(function (err, answer) {
-                if (err) {
-                    self._log('error', 'Could not create answer for adding new stream');
-                    return cb(err);
-                }
-                answer.jingle.contents.forEach(function (content) {
-                    filterContentSources(content, stream);
-                });
-
-                self.send('source-add', answer.jingle);
-                cb();
-            });
-        });
-    },
-
-    addStream2: function (stream, cb) {
-        this.addStream(stream, true, cb);
-    },
-
-    removeStream: function (stream, renegotiate, cb) {
-        var self = this;
-
-        cb = cb || function () {};
-
-        if (!renegotiate) {
-            this.pc.removeStream(stream);
-            return;
-        }
-
-        var desc = this.pc.localDescription;
-        desc.contents.forEach(function (content) {
-            filterContentSources(content, stream);
-        });
-
-        this.send('source-remove', desc);
-        this.pc.removeStream(stream);
-
-        this.pc.handleOffer({
-            type: 'offer',
-            jingle: this.pc.remoteDescription
-        }, function (err) {
-            if (err) {
-                self._log('error', 'Could not process offer for removing stream');
-                return cb(err);
-            }
-            self.pc.answer(function (err) {
-                if (err) {
-                    self._log('error', 'Could not process answer for removing stream');
-                    return cb(err);
-                }
-                cb();
-            });
-        });
-    },
-
-    removeStream2: function (stream, cb) {
-        this.removeStream(stream, true, cb);
-    },
-
-    switchStream: function (oldStream, newStream, cb) {
-        var self = this;
-
-        cb = cb || function () {};
-
-        var desc = this.pc.localDescription;
-        desc.contents.forEach(function (content) {
-            delete content.transport;
-            delete content.description.payloads;
-        });
-
-        this.pc.removeStream(oldStream);
-        this.send('source-remove', desc);
-
-        var audioTracks = oldStream.getAudioTracks();
-        if (audioTracks.length) {
-            newStream.addTrack(audioTracks[0]);
-        }
-
-        this.pc.addStream(newStream);
-        this.pc.handleOffer({
-            type: 'offer',
-            jingle: this.pc.remoteDescription
-        }, function (err) {
-            if (err) {
-                self._log('error', 'Could not process offer for switching streams');
-                return cb(err);
-            }
-            self.pc.answer(function (err, answer) {
-                if (err) {
-                    self._log('error', 'Could not process answer for switching streams');
-                    return cb(err);
-                }
-                answer.jingle.contents.forEach(function (content) {
-                    delete content.transport;
-                    delete content.description.payloads;
-                });
-                self.send('source-add', answer.jingle);
-                cb();
-            });
-        });
-    },
-
-    // ----------------------------------------------------------------
-    // ICE action handers
-    // ----------------------------------------------------------------
-
-    onIceCandidate: function (candidate) {
-        this._log('info', 'Discovered new ICE candidate', candidate.jingle);
-        this.send('transport-info', candidate.jingle);
-    },
-
-    onIceStateChange: function () {
-        switch (this.pc.iceConnectionState) {
-            case 'checking':
-                this.connectionState = 'connecting';
-                break;
-            case 'completed':
-            case 'connected':
-                this.connectionState = 'connected';
-                break;
-            case 'disconnected':
-                if (this.pc.signalingState === 'stable') {
-                    this.connectionState = 'interrupted';
-                } else {
-                    this.connectionState = 'disconnected';
-                }
-                break;
-            case 'failed':
-                this.connectionState = 'failed';
-                this.end('failed-transport');
-                break;
-            case 'closed':
-                this.connectionState = 'disconnected';
-                break;
-        }
-    },
-
-    // ----------------------------------------------------------------
-    // Stream event handlers
-    // ----------------------------------------------------------------
-
-    onAddStream: function (event) {
-        this._log('info', 'Stream added');
-        this.emit('peerStreamAdded', this, event.stream);
-    },
-
-    onRemoveStream: function (event) {
-        this._log('info', 'Stream removed');
-        this.emit('peerStreamRemoved', this, event.stream);
-    },
-
-    // ----------------------------------------------------------------
-    // Jingle action handers
-    // ----------------------------------------------------------------
-
-    onSessionInitiate: function (changes, cb) {
-        var self = this;
-
-        this._log('info', 'Initiating incoming session');
-
-        this.state = 'pending';
-
-        this.pc.isInitiator = false;
-        this.pc.handleOffer({
-            type: 'offer',
-            jingle: changes
-        }, function (err) {
-            if (err) {
-                self._log('error', 'Could not create WebRTC answer');
-                return cb({condition: 'general-error'});
-            }
-            cb();
-        });
-    },
-
-    onSessionAccept: function (changes, cb) {
-        var self = this;
-
-        this.state = 'active';
-        this.pc.handleAnswer({
-            type: 'answer',
-            jingle: changes
-        }, function (err) {
-            if (err) {
-                self._log('error', 'Could not process WebRTC answer');
-                return cb({condition: 'general-error'});
-            }
-            self.emit('accepted', self);
-            cb();
-        });
-    },
-
-    onSessionTerminate: function (changes, cb) {
-        var self = this;
-
-        this._log('info', 'Terminating session');
-        this.streams.forEach(function (stream) {
-            self.onRemoveStream({stream: stream});
-        });
-        this.pc.close();
-        BaseSession.prototype.end.call(this, changes.reason, true);
-
-        cb();
-    },
-
-    onSessionInfo: function (info, cb) {
-        if (info.ringing) {
-            this._log('info', 'Outgoing session is ringing');
-            this.ringing = true;
-            this.emit('ringing', this);
-            return cb();
-        }
-
-        if (info.hold) {
-            this._log('info', 'On hold');
-            this.emit('hold', this);
-            return cb();
-        }
-
-        if (info.active) {
-            this._log('info', 'Resuming from hold');
-            this.emit('resumed', this);
-            return cb();
-        }
-
-        if (info.mute) {
-            this._log('info', 'Muting', info.mute);
-            this.emit('mute', this, info.mute);
-            return cb();
-        }
-
-        if (info.unmute) {
-            this._log('info', 'Unmuting', info.unmute);
-            this.emit('unmute', this, info.unmute);
-            return cb();
-        }
-
-        cb();
-    },
-
-    onTransportInfo: function (changes, cb) {
-        this.pc.processIce(changes, function () {
-            cb();
-        });
-    },
-
-    onSourceAdd: function (changes, cb) {
-        var self = this;
-        this._log('info', 'Adding new stream source');
-
-        var newDesc = this.pc.remoteDescription;
-        this.pc.remoteDescription.contents.forEach(function (content, idx) {
-            var desc = content.description;
-            var ssrcs = desc.sources || [];
-            var groups = desc.sourceGroups || [];
-
-            changes.contents.forEach(function (newContent) {
-                if (content.name !== newContent.name) {
-                    return;
-                }
-
-                var newContentDesc = newContent.description;
-                var newSSRCs = newContentDesc.sources || [];
-
-                ssrcs = ssrcs.concat(newSSRCs);
-                newDesc.contents[idx].description.sources = JSON.parse(JSON.stringify(ssrcs));
-
-                var newGroups = newContentDesc.sourceGroups || [];
-                groups = groups.concat(newGroups);
-                newDesc.contents[idx].description.sourceGroups = JSON.parse(JSON.stringify(groups));
-            });
-        });
-
-        this.pc.handleOffer({
-            type: 'offer',
-            jingle: newDesc
-        }, function (err) {
-            if (err) {
-                self._log('error', 'Error adding new stream source');
-                return cb({
-                    condition: 'general-error'
-                });
-            }
-
-            self.pc.answer(function (err) {
-                if (err) {
-                    self._log('error', 'Error adding new stream source');
-                    return cb({
-                        condition: 'general-error'
-                    });
-                }
-                cb();
-            });
-        });
-    },
-
-    onSourceRemove: function (changes, cb) {
-        var self = this;
-        this._log('info', 'Removing stream source');
-
-        var newDesc = this.pc.remoteDescription;
-        this.pc.remoteDescription.contents.forEach(function (content, idx) {
-            var desc = content.description;
-            var ssrcs = desc.sources || [];
-            var groups = desc.sourceGroups || [];
-
-            changes.contents.forEach(function (newContent) {
-                if (content.name !== newContent.name) {
-                    return;
-                }
-
-                var newContentDesc = newContent.description;
-                var newSSRCs = newContentDesc.sources || [];
-                var newGroups = newContentDesc.sourceGroups || [];
-
-                var found, i, j, k;
-
-
-                for (i = 0; i < newSSRCs.length; i++) {
-                    found = -1;
-                    for (j = 0; j < ssrcs.length; j++) {
-                        if (newSSRCs[i].ssrc === ssrcs[j].ssrc) {
-                            found = j;
-                            break;
-                        }
-                    }
-                    if (found > -1) {
-                        ssrcs.splice(found, 1);
-                        newDesc.contents[idx].description.sources = JSON.parse(JSON.stringify(ssrcs));
-                    }
-                }
-
-                // Remove ssrc-groups that are no longer needed
-                for (i = 0; i < newGroups.length; i++) {
-                    found = -1;
-                    for (j = 0; i < groups.length; j++) {
-                        if (newGroups[i].semantics === groups[j].semantics &&
-                            newGroups[i].sources.length === groups[j].sources.length) {
-                            var same = true;
-                            for (k = 0; k < newGroups[i].sources.length; k++) {
-                                if (newGroups[i].sources[k] !== groups[j].sources[k]) {
-                                    same = false;
-                                    break;
-                                }
-                            }
-                            if (same) {
-                                found = j;
-                                break;
-                            }
-                        }
-                    }
-                    if (found > -1) {
-                        groups.splice(found, 1);
-                        newDesc.contents[idx].description.sourceGroups = JSON.parse(JSON.stringify(groups));
-                    }
-                }
-            });
-        });
-
-        this.pc.handleOffer({
-            type: 'offer',
-            jingle: newDesc
-        }, function (err) {
-            if (err) {
-                self._log('error', 'Error removing stream source');
-                return cb({
-                    condition: 'general-error'
-                });
-            }
-            self.pc.answer(function (err) {
-                if (err) {
-                    self._log('error', 'Error removing stream source');
-                    return cb({
-                        condition: 'general-error'
-                    });
-                }
-                cb();
-            });
-        });
-    }
-});
-
-
-module.exports = MediaSession;
-
-},{"extend-object":27,"jingle-session":109,"rtcpeerconnection":108,"util":24}],79:[function(require,module,exports){
-arguments[4][48][0].apply(exports,arguments)
-},{"dup":48,"lodash._arrayeach":80,"lodash._baseeach":81,"lodash._bindcallback":85,"lodash.isarray":86}],80:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"dup":49}],81:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50,"lodash.keys":82}],82:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51,"lodash._getnative":83,"lodash.isarguments":84,"lodash.isarray":86}],83:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"dup":52}],84:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],85:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],86:[function(require,module,exports){
-arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],87:[function(require,module,exports){
-arguments[4][56][0].apply(exports,arguments)
-},{"dup":56,"lodash._baseget":88,"lodash._topath":89,"lodash.isarray":90,"lodash.map":91}],88:[function(require,module,exports){
-arguments[4][57][0].apply(exports,arguments)
-},{"dup":57}],89:[function(require,module,exports){
-arguments[4][58][0].apply(exports,arguments)
-},{"dup":58,"lodash.isarray":90}],90:[function(require,module,exports){
-arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],91:[function(require,module,exports){
-arguments[4][60][0].apply(exports,arguments)
-},{"dup":60,"lodash._arraymap":92,"lodash._basecallback":93,"lodash._baseeach":98,"lodash.isarray":90}],92:[function(require,module,exports){
-arguments[4][61][0].apply(exports,arguments)
-},{"dup":61}],93:[function(require,module,exports){
-arguments[4][62][0].apply(exports,arguments)
-},{"dup":62,"lodash._baseisequal":94,"lodash._bindcallback":96,"lodash.isarray":90,"lodash.pairs":97}],94:[function(require,module,exports){
-arguments[4][63][0].apply(exports,arguments)
-},{"dup":63,"lodash.isarray":90,"lodash.istypedarray":95,"lodash.keys":99}],95:[function(require,module,exports){
-arguments[4][64][0].apply(exports,arguments)
-},{"dup":64}],96:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],97:[function(require,module,exports){
-arguments[4][66][0].apply(exports,arguments)
-},{"dup":66,"lodash.keys":99}],98:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50,"lodash.keys":99}],99:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51,"lodash._getnative":100,"lodash.isarguments":101,"lodash.isarray":90}],100:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"dup":52}],101:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],102:[function(require,module,exports){
-arguments[4][71][0].apply(exports,arguments)
-},{"./lib/tojson":105,"./lib/tosdp":106,"dup":71}],103:[function(require,module,exports){
-arguments[4][72][0].apply(exports,arguments)
-},{"dup":72}],104:[function(require,module,exports){
-arguments[4][73][0].apply(exports,arguments)
-},{"dup":73}],105:[function(require,module,exports){
-arguments[4][74][0].apply(exports,arguments)
-},{"./parsers":103,"./senders":104,"dup":74}],106:[function(require,module,exports){
-arguments[4][75][0].apply(exports,arguments)
-},{"./senders":104,"dup":75}],107:[function(require,module,exports){
-arguments[4][76][0].apply(exports,arguments)
-},{"dup":76,"util":24,"webrtcsupport":112,"wildemitter":113}],108:[function(require,module,exports){
-arguments[4][77][0].apply(exports,arguments)
-},{"dup":77,"lodash.foreach":79,"lodash.pluck":87,"sdp-jingle-json":102,"traceablepeerconnection":107,"util":24,"webrtcsupport":112,"wildemitter":113}],109:[function(require,module,exports){
+},{"lodash.foreach":80,"lodash.pluck":88,"sdp-jingle-json":103,"traceablepeerconnection":108,"util":24,"webrtcsupport":115,"wildemitter":116}],111:[function(require,module,exports){
 var util = require('util');
 var uuid = require('uuid');
 var async = require('async');
@@ -13830,7 +14073,1134 @@ JingleSession.prototype = extend(JingleSession.prototype, {
 
 module.exports = JingleSession;
 
-},{"async":26,"extend-object":27,"util":24,"uuid":111,"wildemitter":113}],110:[function(require,module,exports){
+},{"async":112,"extend-object":26,"util":24,"uuid":114,"wildemitter":116}],112:[function(require,module,exports){
+(function (process){
+/*!
+ * async
+ * https://github.com/caolan/async
+ *
+ * Copyright 2010-2014 Caolan McMahon
+ * Released under the MIT license
+ */
+/*jshint onevar: false, indent:4 */
+/*global setImmediate: false, setTimeout: false, console: false */
+(function () {
+
+    var async = {};
+
+    // global on the server, window in the browser
+    var root, previous_async;
+
+    root = this;
+    if (root != null) {
+      previous_async = root.async;
+    }
+
+    async.noConflict = function () {
+        root.async = previous_async;
+        return async;
+    };
+
+    function only_once(fn) {
+        var called = false;
+        return function() {
+            if (called) throw new Error("Callback was already called.");
+            called = true;
+            fn.apply(root, arguments);
+        }
+    }
+
+    //// cross-browser compatiblity functions ////
+
+    var _toString = Object.prototype.toString;
+
+    var _isArray = Array.isArray || function (obj) {
+        return _toString.call(obj) === '[object Array]';
+    };
+
+    var _each = function (arr, iterator) {
+        for (var i = 0; i < arr.length; i += 1) {
+            iterator(arr[i], i, arr);
+        }
+    };
+
+    var _map = function (arr, iterator) {
+        if (arr.map) {
+            return arr.map(iterator);
+        }
+        var results = [];
+        _each(arr, function (x, i, a) {
+            results.push(iterator(x, i, a));
+        });
+        return results;
+    };
+
+    var _reduce = function (arr, iterator, memo) {
+        if (arr.reduce) {
+            return arr.reduce(iterator, memo);
+        }
+        _each(arr, function (x, i, a) {
+            memo = iterator(memo, x, i, a);
+        });
+        return memo;
+    };
+
+    var _keys = function (obj) {
+        if (Object.keys) {
+            return Object.keys(obj);
+        }
+        var keys = [];
+        for (var k in obj) {
+            if (obj.hasOwnProperty(k)) {
+                keys.push(k);
+            }
+        }
+        return keys;
+    };
+
+    //// exported async module functions ////
+
+    //// nextTick implementation with browser-compatible fallback ////
+    if (typeof process === 'undefined' || !(process.nextTick)) {
+        if (typeof setImmediate === 'function') {
+            async.nextTick = function (fn) {
+                // not a direct alias for IE10 compatibility
+                setImmediate(fn);
+            };
+            async.setImmediate = async.nextTick;
+        }
+        else {
+            async.nextTick = function (fn) {
+                setTimeout(fn, 0);
+            };
+            async.setImmediate = async.nextTick;
+        }
+    }
+    else {
+        async.nextTick = process.nextTick;
+        if (typeof setImmediate !== 'undefined') {
+            async.setImmediate = function (fn) {
+              // not a direct alias for IE10 compatibility
+              setImmediate(fn);
+            };
+        }
+        else {
+            async.setImmediate = async.nextTick;
+        }
+    }
+
+    async.each = function (arr, iterator, callback) {
+        callback = callback || function () {};
+        if (!arr.length) {
+            return callback();
+        }
+        var completed = 0;
+        _each(arr, function (x) {
+            iterator(x, only_once(done) );
+        });
+        function done(err) {
+          if (err) {
+              callback(err);
+              callback = function () {};
+          }
+          else {
+              completed += 1;
+              if (completed >= arr.length) {
+                  callback();
+              }
+          }
+        }
+    };
+    async.forEach = async.each;
+
+    async.eachSeries = function (arr, iterator, callback) {
+        callback = callback || function () {};
+        if (!arr.length) {
+            return callback();
+        }
+        var completed = 0;
+        var iterate = function () {
+            iterator(arr[completed], function (err) {
+                if (err) {
+                    callback(err);
+                    callback = function () {};
+                }
+                else {
+                    completed += 1;
+                    if (completed >= arr.length) {
+                        callback();
+                    }
+                    else {
+                        iterate();
+                    }
+                }
+            });
+        };
+        iterate();
+    };
+    async.forEachSeries = async.eachSeries;
+
+    async.eachLimit = function (arr, limit, iterator, callback) {
+        var fn = _eachLimit(limit);
+        fn.apply(null, [arr, iterator, callback]);
+    };
+    async.forEachLimit = async.eachLimit;
+
+    var _eachLimit = function (limit) {
+
+        return function (arr, iterator, callback) {
+            callback = callback || function () {};
+            if (!arr.length || limit <= 0) {
+                return callback();
+            }
+            var completed = 0;
+            var started = 0;
+            var running = 0;
+
+            (function replenish () {
+                if (completed >= arr.length) {
+                    return callback();
+                }
+
+                while (running < limit && started < arr.length) {
+                    started += 1;
+                    running += 1;
+                    iterator(arr[started - 1], function (err) {
+                        if (err) {
+                            callback(err);
+                            callback = function () {};
+                        }
+                        else {
+                            completed += 1;
+                            running -= 1;
+                            if (completed >= arr.length) {
+                                callback();
+                            }
+                            else {
+                                replenish();
+                            }
+                        }
+                    });
+                }
+            })();
+        };
+    };
+
+
+    var doParallel = function (fn) {
+        return function () {
+            var args = Array.prototype.slice.call(arguments);
+            return fn.apply(null, [async.each].concat(args));
+        };
+    };
+    var doParallelLimit = function(limit, fn) {
+        return function () {
+            var args = Array.prototype.slice.call(arguments);
+            return fn.apply(null, [_eachLimit(limit)].concat(args));
+        };
+    };
+    var doSeries = function (fn) {
+        return function () {
+            var args = Array.prototype.slice.call(arguments);
+            return fn.apply(null, [async.eachSeries].concat(args));
+        };
+    };
+
+
+    var _asyncMap = function (eachfn, arr, iterator, callback) {
+        arr = _map(arr, function (x, i) {
+            return {index: i, value: x};
+        });
+        if (!callback) {
+            eachfn(arr, function (x, callback) {
+                iterator(x.value, function (err) {
+                    callback(err);
+                });
+            });
+        } else {
+            var results = [];
+            eachfn(arr, function (x, callback) {
+                iterator(x.value, function (err, v) {
+                    results[x.index] = v;
+                    callback(err);
+                });
+            }, function (err) {
+                callback(err, results);
+            });
+        }
+    };
+    async.map = doParallel(_asyncMap);
+    async.mapSeries = doSeries(_asyncMap);
+    async.mapLimit = function (arr, limit, iterator, callback) {
+        return _mapLimit(limit)(arr, iterator, callback);
+    };
+
+    var _mapLimit = function(limit) {
+        return doParallelLimit(limit, _asyncMap);
+    };
+
+    // reduce only has a series version, as doing reduce in parallel won't
+    // work in many situations.
+    async.reduce = function (arr, memo, iterator, callback) {
+        async.eachSeries(arr, function (x, callback) {
+            iterator(memo, x, function (err, v) {
+                memo = v;
+                callback(err);
+            });
+        }, function (err) {
+            callback(err, memo);
+        });
+    };
+    // inject alias
+    async.inject = async.reduce;
+    // foldl alias
+    async.foldl = async.reduce;
+
+    async.reduceRight = function (arr, memo, iterator, callback) {
+        var reversed = _map(arr, function (x) {
+            return x;
+        }).reverse();
+        async.reduce(reversed, memo, iterator, callback);
+    };
+    // foldr alias
+    async.foldr = async.reduceRight;
+
+    var _filter = function (eachfn, arr, iterator, callback) {
+        var results = [];
+        arr = _map(arr, function (x, i) {
+            return {index: i, value: x};
+        });
+        eachfn(arr, function (x, callback) {
+            iterator(x.value, function (v) {
+                if (v) {
+                    results.push(x);
+                }
+                callback();
+            });
+        }, function (err) {
+            callback(_map(results.sort(function (a, b) {
+                return a.index - b.index;
+            }), function (x) {
+                return x.value;
+            }));
+        });
+    };
+    async.filter = doParallel(_filter);
+    async.filterSeries = doSeries(_filter);
+    // select alias
+    async.select = async.filter;
+    async.selectSeries = async.filterSeries;
+
+    var _reject = function (eachfn, arr, iterator, callback) {
+        var results = [];
+        arr = _map(arr, function (x, i) {
+            return {index: i, value: x};
+        });
+        eachfn(arr, function (x, callback) {
+            iterator(x.value, function (v) {
+                if (!v) {
+                    results.push(x);
+                }
+                callback();
+            });
+        }, function (err) {
+            callback(_map(results.sort(function (a, b) {
+                return a.index - b.index;
+            }), function (x) {
+                return x.value;
+            }));
+        });
+    };
+    async.reject = doParallel(_reject);
+    async.rejectSeries = doSeries(_reject);
+
+    var _detect = function (eachfn, arr, iterator, main_callback) {
+        eachfn(arr, function (x, callback) {
+            iterator(x, function (result) {
+                if (result) {
+                    main_callback(x);
+                    main_callback = function () {};
+                }
+                else {
+                    callback();
+                }
+            });
+        }, function (err) {
+            main_callback();
+        });
+    };
+    async.detect = doParallel(_detect);
+    async.detectSeries = doSeries(_detect);
+
+    async.some = function (arr, iterator, main_callback) {
+        async.each(arr, function (x, callback) {
+            iterator(x, function (v) {
+                if (v) {
+                    main_callback(true);
+                    main_callback = function () {};
+                }
+                callback();
+            });
+        }, function (err) {
+            main_callback(false);
+        });
+    };
+    // any alias
+    async.any = async.some;
+
+    async.every = function (arr, iterator, main_callback) {
+        async.each(arr, function (x, callback) {
+            iterator(x, function (v) {
+                if (!v) {
+                    main_callback(false);
+                    main_callback = function () {};
+                }
+                callback();
+            });
+        }, function (err) {
+            main_callback(true);
+        });
+    };
+    // all alias
+    async.all = async.every;
+
+    async.sortBy = function (arr, iterator, callback) {
+        async.map(arr, function (x, callback) {
+            iterator(x, function (err, criteria) {
+                if (err) {
+                    callback(err);
+                }
+                else {
+                    callback(null, {value: x, criteria: criteria});
+                }
+            });
+        }, function (err, results) {
+            if (err) {
+                return callback(err);
+            }
+            else {
+                var fn = function (left, right) {
+                    var a = left.criteria, b = right.criteria;
+                    return a < b ? -1 : a > b ? 1 : 0;
+                };
+                callback(null, _map(results.sort(fn), function (x) {
+                    return x.value;
+                }));
+            }
+        });
+    };
+
+    async.auto = function (tasks, callback) {
+        callback = callback || function () {};
+        var keys = _keys(tasks);
+        var remainingTasks = keys.length
+        if (!remainingTasks) {
+            return callback();
+        }
+
+        var results = {};
+
+        var listeners = [];
+        var addListener = function (fn) {
+            listeners.unshift(fn);
+        };
+        var removeListener = function (fn) {
+            for (var i = 0; i < listeners.length; i += 1) {
+                if (listeners[i] === fn) {
+                    listeners.splice(i, 1);
+                    return;
+                }
+            }
+        };
+        var taskComplete = function () {
+            remainingTasks--
+            _each(listeners.slice(0), function (fn) {
+                fn();
+            });
+        };
+
+        addListener(function () {
+            if (!remainingTasks) {
+                var theCallback = callback;
+                // prevent final callback from calling itself if it errors
+                callback = function () {};
+
+                theCallback(null, results);
+            }
+        });
+
+        _each(keys, function (k) {
+            var task = _isArray(tasks[k]) ? tasks[k]: [tasks[k]];
+            var taskCallback = function (err) {
+                var args = Array.prototype.slice.call(arguments, 1);
+                if (args.length <= 1) {
+                    args = args[0];
+                }
+                if (err) {
+                    var safeResults = {};
+                    _each(_keys(results), function(rkey) {
+                        safeResults[rkey] = results[rkey];
+                    });
+                    safeResults[k] = args;
+                    callback(err, safeResults);
+                    // stop subsequent errors hitting callback multiple times
+                    callback = function () {};
+                }
+                else {
+                    results[k] = args;
+                    async.setImmediate(taskComplete);
+                }
+            };
+            var requires = task.slice(0, Math.abs(task.length - 1)) || [];
+            var ready = function () {
+                return _reduce(requires, function (a, x) {
+                    return (a && results.hasOwnProperty(x));
+                }, true) && !results.hasOwnProperty(k);
+            };
+            if (ready()) {
+                task[task.length - 1](taskCallback, results);
+            }
+            else {
+                var listener = function () {
+                    if (ready()) {
+                        removeListener(listener);
+                        task[task.length - 1](taskCallback, results);
+                    }
+                };
+                addListener(listener);
+            }
+        });
+    };
+
+    async.retry = function(times, task, callback) {
+        var DEFAULT_TIMES = 5;
+        var attempts = [];
+        // Use defaults if times not passed
+        if (typeof times === 'function') {
+            callback = task;
+            task = times;
+            times = DEFAULT_TIMES;
+        }
+        // Make sure times is a number
+        times = parseInt(times, 10) || DEFAULT_TIMES;
+        var wrappedTask = function(wrappedCallback, wrappedResults) {
+            var retryAttempt = function(task, finalAttempt) {
+                return function(seriesCallback) {
+                    task(function(err, result){
+                        seriesCallback(!err || finalAttempt, {err: err, result: result});
+                    }, wrappedResults);
+                };
+            };
+            while (times) {
+                attempts.push(retryAttempt(task, !(times-=1)));
+            }
+            async.series(attempts, function(done, data){
+                data = data[data.length - 1];
+                (wrappedCallback || callback)(data.err, data.result);
+            });
+        }
+        // If a callback is passed, run this as a controll flow
+        return callback ? wrappedTask() : wrappedTask
+    };
+
+    async.waterfall = function (tasks, callback) {
+        callback = callback || function () {};
+        if (!_isArray(tasks)) {
+          var err = new Error('First argument to waterfall must be an array of functions');
+          return callback(err);
+        }
+        if (!tasks.length) {
+            return callback();
+        }
+        var wrapIterator = function (iterator) {
+            return function (err) {
+                if (err) {
+                    callback.apply(null, arguments);
+                    callback = function () {};
+                }
+                else {
+                    var args = Array.prototype.slice.call(arguments, 1);
+                    var next = iterator.next();
+                    if (next) {
+                        args.push(wrapIterator(next));
+                    }
+                    else {
+                        args.push(callback);
+                    }
+                    async.setImmediate(function () {
+                        iterator.apply(null, args);
+                    });
+                }
+            };
+        };
+        wrapIterator(async.iterator(tasks))();
+    };
+
+    var _parallel = function(eachfn, tasks, callback) {
+        callback = callback || function () {};
+        if (_isArray(tasks)) {
+            eachfn.map(tasks, function (fn, callback) {
+                if (fn) {
+                    fn(function (err) {
+                        var args = Array.prototype.slice.call(arguments, 1);
+                        if (args.length <= 1) {
+                            args = args[0];
+                        }
+                        callback.call(null, err, args);
+                    });
+                }
+            }, callback);
+        }
+        else {
+            var results = {};
+            eachfn.each(_keys(tasks), function (k, callback) {
+                tasks[k](function (err) {
+                    var args = Array.prototype.slice.call(arguments, 1);
+                    if (args.length <= 1) {
+                        args = args[0];
+                    }
+                    results[k] = args;
+                    callback(err);
+                });
+            }, function (err) {
+                callback(err, results);
+            });
+        }
+    };
+
+    async.parallel = function (tasks, callback) {
+        _parallel({ map: async.map, each: async.each }, tasks, callback);
+    };
+
+    async.parallelLimit = function(tasks, limit, callback) {
+        _parallel({ map: _mapLimit(limit), each: _eachLimit(limit) }, tasks, callback);
+    };
+
+    async.series = function (tasks, callback) {
+        callback = callback || function () {};
+        if (_isArray(tasks)) {
+            async.mapSeries(tasks, function (fn, callback) {
+                if (fn) {
+                    fn(function (err) {
+                        var args = Array.prototype.slice.call(arguments, 1);
+                        if (args.length <= 1) {
+                            args = args[0];
+                        }
+                        callback.call(null, err, args);
+                    });
+                }
+            }, callback);
+        }
+        else {
+            var results = {};
+            async.eachSeries(_keys(tasks), function (k, callback) {
+                tasks[k](function (err) {
+                    var args = Array.prototype.slice.call(arguments, 1);
+                    if (args.length <= 1) {
+                        args = args[0];
+                    }
+                    results[k] = args;
+                    callback(err);
+                });
+            }, function (err) {
+                callback(err, results);
+            });
+        }
+    };
+
+    async.iterator = function (tasks) {
+        var makeCallback = function (index) {
+            var fn = function () {
+                if (tasks.length) {
+                    tasks[index].apply(null, arguments);
+                }
+                return fn.next();
+            };
+            fn.next = function () {
+                return (index < tasks.length - 1) ? makeCallback(index + 1): null;
+            };
+            return fn;
+        };
+        return makeCallback(0);
+    };
+
+    async.apply = function (fn) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        return function () {
+            return fn.apply(
+                null, args.concat(Array.prototype.slice.call(arguments))
+            );
+        };
+    };
+
+    var _concat = function (eachfn, arr, fn, callback) {
+        var r = [];
+        eachfn(arr, function (x, cb) {
+            fn(x, function (err, y) {
+                r = r.concat(y || []);
+                cb(err);
+            });
+        }, function (err) {
+            callback(err, r);
+        });
+    };
+    async.concat = doParallel(_concat);
+    async.concatSeries = doSeries(_concat);
+
+    async.whilst = function (test, iterator, callback) {
+        if (test()) {
+            iterator(function (err) {
+                if (err) {
+                    return callback(err);
+                }
+                async.whilst(test, iterator, callback);
+            });
+        }
+        else {
+            callback();
+        }
+    };
+
+    async.doWhilst = function (iterator, test, callback) {
+        iterator(function (err) {
+            if (err) {
+                return callback(err);
+            }
+            var args = Array.prototype.slice.call(arguments, 1);
+            if (test.apply(null, args)) {
+                async.doWhilst(iterator, test, callback);
+            }
+            else {
+                callback();
+            }
+        });
+    };
+
+    async.until = function (test, iterator, callback) {
+        if (!test()) {
+            iterator(function (err) {
+                if (err) {
+                    return callback(err);
+                }
+                async.until(test, iterator, callback);
+            });
+        }
+        else {
+            callback();
+        }
+    };
+
+    async.doUntil = function (iterator, test, callback) {
+        iterator(function (err) {
+            if (err) {
+                return callback(err);
+            }
+            var args = Array.prototype.slice.call(arguments, 1);
+            if (!test.apply(null, args)) {
+                async.doUntil(iterator, test, callback);
+            }
+            else {
+                callback();
+            }
+        });
+    };
+
+    async.queue = function (worker, concurrency) {
+        if (concurrency === undefined) {
+            concurrency = 1;
+        }
+        function _insert(q, data, pos, callback) {
+          if (!q.started){
+            q.started = true;
+          }
+          if (!_isArray(data)) {
+              data = [data];
+          }
+          if(data.length == 0) {
+             // call drain immediately if there are no tasks
+             return async.setImmediate(function() {
+                 if (q.drain) {
+                     q.drain();
+                 }
+             });
+          }
+          _each(data, function(task) {
+              var item = {
+                  data: task,
+                  callback: typeof callback === 'function' ? callback : null
+              };
+
+              if (pos) {
+                q.tasks.unshift(item);
+              } else {
+                q.tasks.push(item);
+              }
+
+              if (q.saturated && q.tasks.length === q.concurrency) {
+                  q.saturated();
+              }
+              async.setImmediate(q.process);
+          });
+        }
+
+        var workers = 0;
+        var q = {
+            tasks: [],
+            concurrency: concurrency,
+            saturated: null,
+            empty: null,
+            drain: null,
+            started: false,
+            paused: false,
+            push: function (data, callback) {
+              _insert(q, data, false, callback);
+            },
+            kill: function () {
+              q.drain = null;
+              q.tasks = [];
+            },
+            unshift: function (data, callback) {
+              _insert(q, data, true, callback);
+            },
+            process: function () {
+                if (!q.paused && workers < q.concurrency && q.tasks.length) {
+                    var task = q.tasks.shift();
+                    if (q.empty && q.tasks.length === 0) {
+                        q.empty();
+                    }
+                    workers += 1;
+                    var next = function () {
+                        workers -= 1;
+                        if (task.callback) {
+                            task.callback.apply(task, arguments);
+                        }
+                        if (q.drain && q.tasks.length + workers === 0) {
+                            q.drain();
+                        }
+                        q.process();
+                    };
+                    var cb = only_once(next);
+                    worker(task.data, cb);
+                }
+            },
+            length: function () {
+                return q.tasks.length;
+            },
+            running: function () {
+                return workers;
+            },
+            idle: function() {
+                return q.tasks.length + workers === 0;
+            },
+            pause: function () {
+                if (q.paused === true) { return; }
+                q.paused = true;
+            },
+            resume: function () {
+                if (q.paused === false) { return; }
+                q.paused = false;
+                // Need to call q.process once per concurrent
+                // worker to preserve full concurrency after pause
+                for (var w = 1; w <= q.concurrency; w++) {
+                    async.setImmediate(q.process);
+                }
+            }
+        };
+        return q;
+    };
+
+    async.priorityQueue = function (worker, concurrency) {
+
+        function _compareTasks(a, b){
+          return a.priority - b.priority;
+        };
+
+        function _binarySearch(sequence, item, compare) {
+          var beg = -1,
+              end = sequence.length - 1;
+          while (beg < end) {
+            var mid = beg + ((end - beg + 1) >>> 1);
+            if (compare(item, sequence[mid]) >= 0) {
+              beg = mid;
+            } else {
+              end = mid - 1;
+            }
+          }
+          return beg;
+        }
+
+        function _insert(q, data, priority, callback) {
+          if (!q.started){
+            q.started = true;
+          }
+          if (!_isArray(data)) {
+              data = [data];
+          }
+          if(data.length == 0) {
+             // call drain immediately if there are no tasks
+             return async.setImmediate(function() {
+                 if (q.drain) {
+                     q.drain();
+                 }
+             });
+          }
+          _each(data, function(task) {
+              var item = {
+                  data: task,
+                  priority: priority,
+                  callback: typeof callback === 'function' ? callback : null
+              };
+
+              q.tasks.splice(_binarySearch(q.tasks, item, _compareTasks) + 1, 0, item);
+
+              if (q.saturated && q.tasks.length === q.concurrency) {
+                  q.saturated();
+              }
+              async.setImmediate(q.process);
+          });
+        }
+
+        // Start with a normal queue
+        var q = async.queue(worker, concurrency);
+
+        // Override push to accept second parameter representing priority
+        q.push = function (data, priority, callback) {
+          _insert(q, data, priority, callback);
+        };
+
+        // Remove unshift function
+        delete q.unshift;
+
+        return q;
+    };
+
+    async.cargo = function (worker, payload) {
+        var working     = false,
+            tasks       = [];
+
+        var cargo = {
+            tasks: tasks,
+            payload: payload,
+            saturated: null,
+            empty: null,
+            drain: null,
+            drained: true,
+            push: function (data, callback) {
+                if (!_isArray(data)) {
+                    data = [data];
+                }
+                _each(data, function(task) {
+                    tasks.push({
+                        data: task,
+                        callback: typeof callback === 'function' ? callback : null
+                    });
+                    cargo.drained = false;
+                    if (cargo.saturated && tasks.length === payload) {
+                        cargo.saturated();
+                    }
+                });
+                async.setImmediate(cargo.process);
+            },
+            process: function process() {
+                if (working) return;
+                if (tasks.length === 0) {
+                    if(cargo.drain && !cargo.drained) cargo.drain();
+                    cargo.drained = true;
+                    return;
+                }
+
+                var ts = typeof payload === 'number'
+                            ? tasks.splice(0, payload)
+                            : tasks.splice(0, tasks.length);
+
+                var ds = _map(ts, function (task) {
+                    return task.data;
+                });
+
+                if(cargo.empty) cargo.empty();
+                working = true;
+                worker(ds, function () {
+                    working = false;
+
+                    var args = arguments;
+                    _each(ts, function (data) {
+                        if (data.callback) {
+                            data.callback.apply(null, args);
+                        }
+                    });
+
+                    process();
+                });
+            },
+            length: function () {
+                return tasks.length;
+            },
+            running: function () {
+                return working;
+            }
+        };
+        return cargo;
+    };
+
+    var _console_fn = function (name) {
+        return function (fn) {
+            var args = Array.prototype.slice.call(arguments, 1);
+            fn.apply(null, args.concat([function (err) {
+                var args = Array.prototype.slice.call(arguments, 1);
+                if (typeof console !== 'undefined') {
+                    if (err) {
+                        if (console.error) {
+                            console.error(err);
+                        }
+                    }
+                    else if (console[name]) {
+                        _each(args, function (x) {
+                            console[name](x);
+                        });
+                    }
+                }
+            }]));
+        };
+    };
+    async.log = _console_fn('log');
+    async.dir = _console_fn('dir');
+    /*async.info = _console_fn('info');
+    async.warn = _console_fn('warn');
+    async.error = _console_fn('error');*/
+
+    async.memoize = function (fn, hasher) {
+        var memo = {};
+        var queues = {};
+        hasher = hasher || function (x) {
+            return x;
+        };
+        var memoized = function () {
+            var args = Array.prototype.slice.call(arguments);
+            var callback = args.pop();
+            var key = hasher.apply(null, args);
+            if (key in memo) {
+                async.nextTick(function () {
+                    callback.apply(null, memo[key]);
+                });
+            }
+            else if (key in queues) {
+                queues[key].push(callback);
+            }
+            else {
+                queues[key] = [callback];
+                fn.apply(null, args.concat([function () {
+                    memo[key] = arguments;
+                    var q = queues[key];
+                    delete queues[key];
+                    for (var i = 0, l = q.length; i < l; i++) {
+                      q[i].apply(null, arguments);
+                    }
+                }]));
+            }
+        };
+        memoized.memo = memo;
+        memoized.unmemoized = fn;
+        return memoized;
+    };
+
+    async.unmemoize = function (fn) {
+      return function () {
+        return (fn.unmemoized || fn).apply(null, arguments);
+      };
+    };
+
+    async.times = function (count, iterator, callback) {
+        var counter = [];
+        for (var i = 0; i < count; i++) {
+            counter.push(i);
+        }
+        return async.map(counter, iterator, callback);
+    };
+
+    async.timesSeries = function (count, iterator, callback) {
+        var counter = [];
+        for (var i = 0; i < count; i++) {
+            counter.push(i);
+        }
+        return async.mapSeries(counter, iterator, callback);
+    };
+
+    async.seq = function (/* functions... */) {
+        var fns = arguments;
+        return function () {
+            var that = this;
+            var args = Array.prototype.slice.call(arguments);
+            var callback = args.pop();
+            async.reduce(fns, args, function (newargs, fn, cb) {
+                fn.apply(that, newargs.concat([function () {
+                    var err = arguments[0];
+                    var nextargs = Array.prototype.slice.call(arguments, 1);
+                    cb(err, nextargs);
+                }]))
+            },
+            function (err, results) {
+                callback.apply(that, [err].concat(results));
+            });
+        };
+    };
+
+    async.compose = function (/* functions... */) {
+      return async.seq.apply(null, Array.prototype.reverse.call(arguments));
+    };
+
+    var _applyEach = function (eachfn, fns /*args...*/) {
+        var go = function () {
+            var that = this;
+            var args = Array.prototype.slice.call(arguments);
+            var callback = args.pop();
+            return eachfn(fns, function (fn, cb) {
+                fn.apply(that, args.concat([cb]));
+            },
+            callback);
+        };
+        if (arguments.length > 2) {
+            var args = Array.prototype.slice.call(arguments, 2);
+            return go.apply(this, args);
+        }
+        else {
+            return go;
+        }
+    };
+    async.applyEach = doParallel(_applyEach);
+    async.applyEachSeries = doSeries(_applyEach);
+
+    async.forever = function (fn, callback) {
+        function next(err) {
+            if (err) {
+                if (callback) {
+                    return callback(err);
+                }
+                throw err;
+            }
+            fn(next);
+        }
+        next();
+    };
+
+    // Node.js
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = async;
+    }
+    // AMD / RequireJS
+    else if (typeof define !== 'undefined' && define.amd) {
+        define([], function () {
+            return async;
+        });
+    }
+    // included directly via <script> tag
+    else {
+        root.async = async;
+    }
+
+}());
+
+}).call(this,require('_process'))
+},{"_process":9}],113:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -13865,7 +15235,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],111:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -14050,7 +15420,7 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":110}],112:[function(require,module,exports){
+},{"./rng":113}],115:[function(require,module,exports){
 // created by @HenrikJoreteg
 var prefix;
 var version;
@@ -14102,7 +15472,7 @@ module.exports = {
     getUserMedia: getUserMedia
 };
 
-},{}],113:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 /*
 WildEmitter.js is a slim little event emitter by @henrikjoreteg largely based 
 on @visionmedia's Emitter from UI Kit.
@@ -14247,7 +15617,7 @@ WildEmitter.prototype.getWildcardCallbacks = function (eventName) {
     return result;
 };
 
-},{}],114:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 'use strict';
 
 var extend = require('lodash.assign');
@@ -14317,25 +15687,22 @@ JXT.prototype.tagged = function (tag) {
 };
 
 JXT.prototype.build = function (xml) {
-    var JXTClass = this._LOOKUP[xml.namespaceURI + '|' + xml.localName];
-    if (JXTClass) {
-        return new JXTClass(null, xml);
-    }
-};
-
-JXT.prototype.parse = function (str) {
-    var xml= ltx.parse(str);
-    if (xml.nodeType !== 1) {
-        return;
-    }
-
     var JXTClass = this.getDefinition(xml.localName, xml.namespaceURI);
     if (JXTClass) {
         return new JXTClass(null, xml);
     }
 };
 
-JXT.prototype.extend = function (ParentJXT, ChildJXT, multiName) {
+JXT.prototype.parse = function (str) {
+    var xml = ltx.parse(str);
+    if (xml.nodeType !== 1) {
+        return;
+    }
+
+    return this.build(xml);
+};
+
+JXT.prototype.extend = function (ParentJXT, ChildJXT, multiName, hideSingle) {
     var parentName = ParentJXT.prototype._NS + '|' + ParentJXT.prototype._EL;
     var name = ChildJXT.prototype._name;
     var qName = ChildJXT.prototype._NS + '|' + ChildJXT.prototype._EL;
@@ -14349,7 +15716,9 @@ JXT.prototype.extend = function (ParentJXT, ChildJXT, multiName) {
     }
     this._LOOKUP_EXT[parentName][name] = ChildJXT;
 
-    this.add(ParentJXT, name, types.extension(ChildJXT));
+    if (!multiName || (multiName && !hideSingle)) {
+        this.add(ParentJXT, name, types.extension(ChildJXT));
+    }
     if (multiName) {
         this.add(ParentJXT, multiName, types.multiExtension(ChildJXT));
     }
@@ -14433,7 +15802,7 @@ JXT.getGlobalJXT = function () {
 
 module.exports = JXT;
 
-},{"./lib/helpers":115,"./lib/stanza":116,"./lib/types":117,"lodash.assign":118,"ltx":131,"uuid":136}],115:[function(require,module,exports){
+},{"./lib/helpers":118,"./lib/stanza":119,"./lib/types":120,"lodash.assign":121,"ltx":134,"uuid":139}],118:[function(require,module,exports){
 'use strict';
 
 var ltx = require('ltx');
@@ -14714,7 +16083,7 @@ exports.setBoolSub = function (xml, NS, element, value) {
     }
 };
 
-},{"ltx":131}],116:[function(require,module,exports){
+},{"ltx":134}],119:[function(require,module,exports){
 'use strict';
 
 var helpers = require('./helpers');
@@ -14830,7 +16199,7 @@ module.exports = function (JXT, opts) {
     return Stanza;
 };
 
-},{"./helpers":115,"lodash.assign":118}],117:[function(require,module,exports){
+},{"./helpers":118,"lodash.assign":121}],120:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -15127,14 +16496,20 @@ exports.enumSub = function (NS, enumValues) {
         },
         set: function (value) {
             var self = this;
+            var alreadyExists = false;
+
             enumValues.forEach(function (enumVal) {
-                var exists = find(self.xml, NS, enumVal);
-                if (exists.length) {
-                    self.xml.removeChild(exists[0]);
+                var elements = find(self.xml, NS, enumVal);
+                if (elements.length) {
+                    if (enumVal === value) {
+                        alreadyExists = true;
+                    } else {
+                        self.xml.removeChild(elements[0]);
+                    }
                 }
             });
 
-            if (value) {
+            if (value && !alreadyExists) {
                 var condition = createElement(NS, value);
                 this.xml.appendChild(condition);
             }
@@ -15223,7 +16598,7 @@ exports.subMultiExtension = function (NS, sub, ChildJXT) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"./helpers":115,"buffer":2,"lodash.assign":118}],118:[function(require,module,exports){
+},{"./helpers":118,"buffer":2,"lodash.assign":121}],121:[function(require,module,exports){
 /**
  * lodash 3.2.0 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -15305,7 +16680,7 @@ var assign = createAssigner(function(object, source, customizer) {
 
 module.exports = assign;
 
-},{"lodash._baseassign":119,"lodash._createassigner":121,"lodash.keys":125}],119:[function(require,module,exports){
+},{"lodash._baseassign":122,"lodash._createassigner":124,"lodash.keys":128}],122:[function(require,module,exports){
 /**
  * lodash 3.2.0 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -15334,7 +16709,7 @@ function baseAssign(object, source) {
 
 module.exports = baseAssign;
 
-},{"lodash._basecopy":120,"lodash.keys":125}],120:[function(require,module,exports){
+},{"lodash._basecopy":123,"lodash.keys":128}],123:[function(require,module,exports){
 /**
  * lodash 3.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -15368,7 +16743,7 @@ function baseCopy(source, props, object) {
 
 module.exports = baseCopy;
 
-},{}],121:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 /**
  * lodash 3.1.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -15422,9 +16797,9 @@ function createAssigner(assigner) {
 
 module.exports = createAssigner;
 
-},{"lodash._bindcallback":122,"lodash._isiterateecall":123,"lodash.restparam":124}],122:[function(require,module,exports){
+},{"lodash._bindcallback":125,"lodash._isiterateecall":126,"lodash.restparam":127}],125:[function(require,module,exports){
 arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],123:[function(require,module,exports){
+},{"dup":54}],126:[function(require,module,exports){
 /**
  * lodash 3.0.9 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -15558,7 +16933,7 @@ function isObject(value) {
 
 module.exports = isIterateeCall;
 
-},{}],124:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 /**
  * lodash 3.6.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -15627,15 +17002,15 @@ function restParam(func, start) {
 
 module.exports = restParam;
 
-},{}],125:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 arguments[4][51][0].apply(exports,arguments)
-},{"dup":51,"lodash._getnative":126,"lodash.isarguments":127,"lodash.isarray":128}],126:[function(require,module,exports){
+},{"dup":51,"lodash._getnative":129,"lodash.isarguments":130,"lodash.isarray":131}],129:[function(require,module,exports){
 arguments[4][52][0].apply(exports,arguments)
-},{"dup":52}],127:[function(require,module,exports){
+},{"dup":52}],130:[function(require,module,exports){
 arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],128:[function(require,module,exports){
+},{"dup":53}],131:[function(require,module,exports){
 arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],129:[function(require,module,exports){
+},{"dup":55}],132:[function(require,module,exports){
 'use strict';
 
 var util = require('util')
@@ -15747,7 +17122,7 @@ DOMElement.prototype.removeChild = function (el) {
 
 module.exports = DOMElement
 
-},{"./element":130,"util":24}],130:[function(require,module,exports){
+},{"./element":133,"util":24}],133:[function(require,module,exports){
 'use strict';
 
 /**
@@ -16141,7 +17516,7 @@ function escapeXmlText(s) {
 exports.Element = Element
 exports.escapeXml = escapeXml
 
-},{}],131:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 'use strict';
 
 /* Cause browserify to bundle SAX parsers: */
@@ -16151,7 +17526,7 @@ parse.availableSaxParsers.push(parse.bestSaxParser = require('./sax/sax_ltx'))
 
 /* SHIM */
 module.exports = require('./index')
-},{"./index":132,"./parse":133,"./sax/sax_ltx":134}],132:[function(require,module,exports){
+},{"./index":135,"./parse":136,"./sax/sax_ltx":137}],135:[function(require,module,exports){
 'use strict';
 
 var parse = require('./parse')
@@ -16178,7 +17553,7 @@ exports.Parser = parse.Parser
 exports.availableSaxParsers = parse.availableSaxParsers
 exports.bestSaxParser = parse.bestSaxParser
 
-},{"./dom-element":129,"./element":130,"./parse":133}],133:[function(require,module,exports){
+},{"./dom-element":132,"./element":133,"./parse":136}],136:[function(require,module,exports){
 'use strict';
 
 var events = require('events')
@@ -16297,7 +17672,7 @@ exports.parse = function(data, saxParser) {
     }
 }
 
-},{"./dom-element":129,"events":6,"util":24}],134:[function(require,module,exports){
+},{"./dom-element":132,"events":6,"util":24}],137:[function(require,module,exports){
 'use strict';
 
 var util = require('util')
@@ -16469,11 +17844,11 @@ function unescapeXml(s) {
         replace(/\&(nbsp|#160);/g, '\n')
 }
 
-},{"events":6,"util":24}],135:[function(require,module,exports){
-arguments[4][110][0].apply(exports,arguments)
-},{"dup":110}],136:[function(require,module,exports){
-arguments[4][111][0].apply(exports,arguments)
-},{"./rng":135,"dup":111}],137:[function(require,module,exports){
+},{"events":6,"util":24}],138:[function(require,module,exports){
+arguments[4][113][0].apply(exports,arguments)
+},{"dup":113}],139:[function(require,module,exports){
+arguments[4][114][0].apply(exports,arguments)
+},{"./rng":138,"dup":114}],140:[function(require,module,exports){
 /*
  *  Copyright (c) 2014 The WebRTC project authors. All Rights Reserved.
  *
@@ -16498,6 +17873,16 @@ var reattachMediaStream = null;
 var webrtcDetectedBrowser = null;
 var webrtcDetectedVersion = null;
 var webrtcMinimumVersion = null;
+var webrtcUtils = {
+  log: function() {
+    // suppress console.log output when being included as a module.
+    if (typeof module !== 'undefined' ||
+        typeof require === 'function' && typeof define === 'function') {
+      return;
+    }
+    console.log.apply(console, arguments);
+  }
+};
 
 function trace(text) {
   // This function is used for logging.
@@ -16506,14 +17891,17 @@ function trace(text) {
   }
   if (window.performance) {
     var now = (window.performance.now() / 1000).toFixed(3);
-    console.log(now + ': ' + text);
+    webrtcUtils.log(now + ': ' + text);
   } else {
-    console.log(text);
+    webrtcUtils.log(text);
   }
 }
 
-if (navigator.mozGetUserMedia) {
-  console.log('This appears to be Firefox');
+if (typeof window === 'undefined' || !window.navigator) {
+  webrtcUtils.log('This does not appear to be a browser');
+  webrtcDetectedBrowser = 'not a browser';
+} else if (navigator.mozGetUserMedia && window.mozRTCPeerConnection) {
+  webrtcUtils.log('This appears to be Firefox');
 
   webrtcDetectedBrowser = 'firefox';
 
@@ -16551,7 +17939,7 @@ if (navigator.mozGetUserMedia) {
         pcConfig.iceServers = newIceServers;
       }
     }
-    return new mozRTCPeerConnection(pcConfig, pcConstraints);
+    return new mozRTCPeerConnection(pcConfig, pcConstraints); // jscs:ignore requireCapitalizedConstructors
   };
 
   // The RTCSessionDescription object.
@@ -16561,27 +17949,38 @@ if (navigator.mozGetUserMedia) {
   window.RTCIceCandidate = mozRTCIceCandidate;
 
   // getUserMedia constraints shim.
-  getUserMedia = (webrtcDetectedVersion < 38) ?
-      function(c, onSuccess, onError) {
+  getUserMedia = function(constraints, onSuccess, onError) {
     var constraintsToFF37 = function(c) {
       if (typeof c !== 'object' || c.require) {
         return c;
       }
       var require = [];
       Object.keys(c).forEach(function(key) {
+        if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
+          return;
+        }
         var r = c[key] = (typeof c[key] === 'object') ?
             c[key] : {ideal: c[key]};
-        if (r.exact !== undefined) {
-          r.min = r.max = r.exact;
-          delete r.exact;
-        }
-        if (r.min !== undefined || r.max !== undefined) {
+        if (r.min !== undefined ||
+            r.max !== undefined || r.exact !== undefined) {
           require.push(key);
+        }
+        if (r.exact !== undefined) {
+          if (typeof r.exact === 'number') {
+            r.min = r.max = r.exact;
+          } else {
+            c[key] = r.exact;
+          }
+          delete r.exact;
         }
         if (r.ideal !== undefined) {
           c.advanced = c.advanced || [];
           var oc = {};
-          oc[key] = {min: r.ideal, max: r.ideal};
+          if (typeof r.ideal === 'number') {
+            oc[key] = {min: r.ideal, max: r.ideal};
+          } else {
+            oc[key] = r.ideal;
+          }
           c.advanced.push(oc);
           delete r.ideal;
           if (!Object.keys(r).length) {
@@ -16594,12 +17993,18 @@ if (navigator.mozGetUserMedia) {
       }
       return c;
     };
-    console.log('spec: ' + JSON.stringify(c));
-    c.audio = constraintsToFF37(c.audio);
-    c.video = constraintsToFF37(c.video);
-    console.log('ff37: ' + JSON.stringify(c));
-    return navigator.mozGetUserMedia(c, onSuccess, onError);
-  } : navigator.mozGetUserMedia.bind(navigator);
+    if (webrtcDetectedVersion < 38) {
+      webrtcUtils.log('spec: ' + JSON.stringify(constraints));
+      if (constraints.audio) {
+        constraints.audio = constraintsToFF37(constraints.audio);
+      }
+      if (constraints.video) {
+        constraints.video = constraintsToFF37(constraints.video);
+      }
+      webrtcUtils.log('ff37: ' + JSON.stringify(constraints));
+    }
+    return navigator.mozGetUserMedia(constraints, onSuccess, onError);
+  };
 
   navigator.getUserMedia = getUserMedia;
 
@@ -16614,8 +18019,8 @@ if (navigator.mozGetUserMedia) {
       navigator.mediaDevices.enumerateDevices || function() {
     return new Promise(function(resolve) {
       var infos = [
-        {kind: 'audioinput', deviceId: 'default', label:'', groupId:''},
-        {kind: 'videoinput', deviceId: 'default', label:'', groupId:''}
+        {kind: 'audioinput', deviceId: 'default', label: '', groupId: ''},
+        {kind: 'videoinput', deviceId: 'default', label: '', groupId: ''}
       ];
       resolve(infos);
     });
@@ -16634,19 +18039,26 @@ if (navigator.mozGetUserMedia) {
       });
     };
   }
+
+  Object.defineProperty(HTMLVideoElement.prototype, 'srcObject', {
+    get: function() {
+      return this.mozSrcObject;
+    },
+    set: function(stream) {
+      this.mozSrcObject = stream;
+    }
+  });
   // Attach a media stream to an element.
   attachMediaStream = function(element, stream) {
-    console.log('Attaching media stream');
-    element.mozSrcObject = stream;
+    element.srcObject = stream;
   };
 
   reattachMediaStream = function(to, from) {
-    console.log('Reattaching media stream');
-    to.mozSrcObject = from.mozSrcObject;
+    to.srcObject = from.srcObject;
   };
 
 } else if (navigator.webkitGetUserMedia) {
-  console.log('This appears to be Chrome');
+  webrtcUtils.log('This appears to be Chrome');
 
   webrtcDetectedBrowser = 'chrome';
 
@@ -16659,8 +18071,66 @@ if (navigator.mozGetUserMedia) {
 
   // The RTCPeerConnection object.
   window.RTCPeerConnection = function(pcConfig, pcConstraints) {
-    return new webkitRTCPeerConnection(pcConfig, pcConstraints);
+    // Translate iceTransportPolicy to iceTransports,
+    // see https://code.google.com/p/webrtc/issues/detail?id=4869
+    if (pcConfig && pcConfig.iceTransportPolicy) {
+      pcConfig.iceTransports = pcConfig.iceTransportPolicy;
+    }
+
+    var pc = new webkitRTCPeerConnection(pcConfig, pcConstraints); // jscs:ignore requireCapitalizedConstructors
+    var origGetStats = pc.getStats.bind(pc);
+    pc.getStats = function(selector, successCallback, errorCallback) { // jshint ignore: line
+      var self = this;
+      var args = arguments;
+
+      // If selector is a function then we are in the old style stats so just
+      // pass back the original getStats format to avoid breaking old users.
+      if (arguments.length > 0 && typeof selector === 'function') {
+        return origGetStats(selector, successCallback);
+      }
+
+      var fixChromeStats = function(response) {
+        var standardReport = {};
+        var reports = response.result();
+        reports.forEach(function(report) {
+          var standardStats = {
+            id: report.id,
+            timestamp: report.timestamp,
+            type: report.type
+          };
+          report.names().forEach(function(name) {
+            standardStats[name] = report.stat(name);
+          });
+          standardReport[standardStats.id] = standardStats;
+        });
+
+        return standardReport;
+      };
+
+      if (arguments.length >= 2) {
+        var successCallbackWrapper = function(response) {
+          args[1](fixChromeStats(response));
+        };
+
+        return origGetStats.apply(this, [successCallbackWrapper, arguments[0]]);
+      }
+
+      // promise-support
+      return new Promise(function(resolve, reject) {
+        if (args.length === 1 && selector === null) {
+          origGetStats.apply(self, [
+              function(response) {
+                resolve.apply(null, [fixChromeStats(response)]);
+              }, reject]);
+        } else {
+          origGetStats.apply(self, [resolve, reject]);
+        }
+      });
+    };
+
+    return pc;
   };
+
   // add promise support
   ['createOffer', 'createAnswer'].forEach(function(method) {
     var nativeMethod = webkitRTCPeerConnection.prototype[method];
@@ -16704,79 +18174,68 @@ if (navigator.mozGetUserMedia) {
   });
 
   // getUserMedia constraints shim.
-  getUserMedia = function(c, onSuccess, onError) {
-    var constraintsToChrome = function(c) {
-      if (typeof c !== 'object' || c.mandatory || c.optional) {
-        return c;
+  var constraintsToChrome = function(c) {
+    if (typeof c !== 'object' || c.mandatory || c.optional) {
+      return c;
+    }
+    var cc = {};
+    Object.keys(c).forEach(function(key) {
+      if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
+        return;
       }
-      var cc = {};
-      Object.keys(c).forEach(function(key) {
-        if (key === 'require' || key === 'advanced') {
-          return;
+      var r = (typeof c[key] === 'object') ? c[key] : {ideal: c[key]};
+      if (r.exact !== undefined && typeof r.exact === 'number') {
+        r.min = r.max = r.exact;
+      }
+      var oldname = function(prefix, name) {
+        if (prefix) {
+          return prefix + name.charAt(0).toUpperCase() + name.slice(1);
         }
-        var r = (typeof c[key] === 'object') ? c[key] : {ideal: c[key]};
-        if (r.exact !== undefined && typeof r.exact === 'number') {
-          r.min = r.max = r.exact;
-        }
-        var oldname = function(prefix, name) {
-          if (prefix) {
-            return prefix + name.charAt(0).toUpperCase() + name.slice(1);
-          }
-          return (name === 'deviceId') ? 'sourceId' : name;
-        };
-        if (r.ideal !== undefined) {
-          cc.optional = cc.optional || [];
-          var oc = {};
-          if (typeof r.ideal === 'number') {
-            oc[oldname('min', key)] = r.ideal;
-            cc.optional.push(oc);
-            oc = {};
-            oc[oldname('max', key)] = r.ideal;
-            cc.optional.push(oc);
-          } else {
-            oc[oldname('', key)] = r.ideal;
-            cc.optional.push(oc);
-          }
-        }
-        if (r.exact !== undefined && typeof r.exact !== 'number') {
-          cc.mandatory = cc.mandatory || {};
-          cc.mandatory[oldname('', key)] = r.exact;
+        return (name === 'deviceId') ? 'sourceId' : name;
+      };
+      if (r.ideal !== undefined) {
+        cc.optional = cc.optional || [];
+        var oc = {};
+        if (typeof r.ideal === 'number') {
+          oc[oldname('min', key)] = r.ideal;
+          cc.optional.push(oc);
+          oc = {};
+          oc[oldname('max', key)] = r.ideal;
+          cc.optional.push(oc);
         } else {
-          ['min', 'max'].forEach(function(mix) {
-            if (r[mix] !== undefined) {
-              cc.mandatory = cc.mandatory || {};
-              cc.mandatory[oldname(mix, key)] = r[mix];
-            }
-          });
+          oc[oldname('', key)] = r.ideal;
+          cc.optional.push(oc);
         }
-      });
-      if (c.advanced) {
-        cc.optional = (cc.optional || []).concat(c.advanced);
       }
-      return cc;
-    };
-    console.log('spec:   ' + JSON.stringify(c)); // whitespace for alignment
-    c.audio = constraintsToChrome(c.audio);
-    c.video = constraintsToChrome(c.video);
-    console.log('chrome: ' + JSON.stringify(c));
-    return navigator.webkitGetUserMedia(c, onSuccess, onError);
+      if (r.exact !== undefined && typeof r.exact !== 'number') {
+        cc.mandatory = cc.mandatory || {};
+        cc.mandatory[oldname('', key)] = r.exact;
+      } else {
+        ['min', 'max'].forEach(function(mix) {
+          if (r[mix] !== undefined) {
+            cc.mandatory = cc.mandatory || {};
+            cc.mandatory[oldname(mix, key)] = r[mix];
+          }
+        });
+      }
+    });
+    if (c.advanced) {
+      cc.optional = (cc.optional || []).concat(c.advanced);
+    }
+    return cc;
+  };
+
+  getUserMedia = function(constraints, onSuccess, onError) {
+    if (constraints.audio) {
+      constraints.audio = constraintsToChrome(constraints.audio);
+    }
+    if (constraints.video) {
+      constraints.video = constraintsToChrome(constraints.video);
+    }
+    webrtcUtils.log('chrome: ' + JSON.stringify(constraints));
+    return navigator.webkitGetUserMedia(constraints, onSuccess, onError);
   };
   navigator.getUserMedia = getUserMedia;
-
-  // Attach a media stream to an element.
-  attachMediaStream = function(element, stream) {
-    if (typeof element.srcObject !== 'undefined') {
-      element.srcObject = stream;
-    } else if (typeof element.src !== 'undefined') {
-      element.src = URL.createObjectURL(stream);
-    } else {
-      console.log('Error attaching stream to element.');
-    }
-  };
-
-  reattachMediaStream = function(to, from) {
-    to.src = from.src;
-  };
 
   if (!navigator.mediaDevices) {
     navigator.mediaDevices = {getUserMedia: requestUserMedia,
@@ -16793,13 +18252,73 @@ if (navigator.mozGetUserMedia) {
         });
       });
     }};
-    // in case someone wants to listen for the devicechange event.
-    navigator.mediaDevices.addEventListener = function() { };
-    navigator.mediaDevices.removeEventListener = function() { };
   }
+
+  // A shim for getUserMedia method on the mediaDevices object.
+  // TODO(KaptenJansson) remove once implemented in Chrome stable.
+  if (!navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia = function(constraints) {
+      return requestUserMedia(constraints);
+    };
+  } else {
+    // Even though Chrome 45 has navigator.mediaDevices and a getUserMedia
+    // function which returns a Promise, it does not accept spec-style
+    // constraints.
+    var origGetUserMedia = navigator.mediaDevices.getUserMedia.
+        bind(navigator.mediaDevices);
+    navigator.mediaDevices.getUserMedia = function(c) {
+      webrtcUtils.log('spec:   ' + JSON.stringify(c)); // whitespace for alignment
+      c.audio = constraintsToChrome(c.audio);
+      c.video = constraintsToChrome(c.video);
+      webrtcUtils.log('chrome: ' + JSON.stringify(c));
+      return origGetUserMedia(c);
+    };
+  }
+
+  // Dummy devicechange event methods.
+  // TODO(KaptenJansson) remove once implemented in Chrome stable.
+  if (typeof navigator.mediaDevices.addEventListener === 'undefined') {
+    navigator.mediaDevices.addEventListener = function() {
+      webrtcUtils.log('Dummy mediaDevices.addEventListener called.');
+    };
+  }
+  if (typeof navigator.mediaDevices.removeEventListener === 'undefined') {
+    navigator.mediaDevices.removeEventListener = function() {
+      webrtcUtils.log('Dummy mediaDevices.removeEventListener called.');
+    };
+  }
+
+  Object.defineProperty(HTMLVideoElement.prototype, 'srcObject', {
+    get: function() {
+      return this._srcObject;
+    },
+    set: function(stream) {
+      this._srcObject = stream;
+      this.src = URL.createObjectURL(stream);
+    }
+  });
+
+  // Attach a media stream to an element.
+  attachMediaStream = function(element, stream) {
+    if (webrtcDetectedVersion >= 43) {
+      element.srcObject = stream;
+    } else if (typeof element.src !== 'undefined') {
+      element.src = URL.createObjectURL(stream);
+    } else {
+      webrtcUtils.log('Error attaching stream to element.');
+    }
+  };
+  reattachMediaStream = function(to, from) {
+    if (webrtcDetectedVersion >= 43) {
+      to.srcObject = from.srcObject;
+    } else {
+      to.src = from.src;
+    }
+  };
+
 } else if (navigator.mediaDevices && navigator.userAgent.match(
     /Edge\/(\d+).(\d+)$/)) {
-  console.log('This appears to be Edge');
+  webrtcUtils.log('This appears to be Edge');
   webrtcDetectedBrowser = 'edge';
 
   webrtcDetectedVersion =
@@ -16808,6 +18327,8 @@ if (navigator.mozGetUserMedia) {
   // the minimum version still supported by adapter.
   webrtcMinimumVersion = 12;
 
+  getUserMedia = navigator.getUserMedia;
+
   attachMediaStream = function(element, stream) {
     element.srcObject = stream;
   };
@@ -16815,7 +18336,7 @@ if (navigator.mozGetUserMedia) {
     to.srcObject = from.srcObject;
   };
 } else {
-  console.log('Browser does not appear to be WebRTC-capable');
+  webrtcUtils.log('Browser does not appear to be WebRTC-capable');
 }
 
 // Returns the result of getUserMedia as a Promise.
@@ -16825,7 +18346,18 @@ function requestUserMedia(constraints) {
   });
 }
 
+var webrtcTesting = {};
+Object.defineProperty(webrtcTesting, 'version', {
+  set: function(version) {
+    webrtcDetectedVersion = version;
+  }
+});
+
 if (typeof module !== 'undefined') {
+  var RTCPeerConnection;
+  if (typeof window !== 'undefined') {
+    RTCPeerConnection = window.RTCPeerConnection;
+  }
   module.exports = {
     RTCPeerConnection: RTCPeerConnection,
     getUserMedia: getUserMedia,
@@ -16833,13 +18365,30 @@ if (typeof module !== 'undefined') {
     reattachMediaStream: reattachMediaStream,
     webrtcDetectedBrowser: webrtcDetectedBrowser,
     webrtcDetectedVersion: webrtcDetectedVersion,
-    webrtcMinimumVersion: webrtcMinimumVersion
+    webrtcMinimumVersion: webrtcMinimumVersion,
+    webrtcTesting: webrtcTesting
     //requestUserMedia: not exposed on purpose.
     //trace: not exposed on purpose.
   };
+} else if ((typeof require === 'function') && (typeof define === 'function')) {
+  // Expose objects and functions when RequireJS is doing the loading.
+  define([], function() {
+    return {
+      RTCPeerConnection: window.RTCPeerConnection,
+      getUserMedia: getUserMedia,
+      attachMediaStream: attachMediaStream,
+      reattachMediaStream: reattachMediaStream,
+      webrtcDetectedBrowser: webrtcDetectedBrowser,
+      webrtcDetectedVersion: webrtcDetectedVersion,
+      webrtcMinimumVersion: webrtcMinimumVersion,
+      webrtcTesting: webrtcTesting
+      //requestUserMedia: not exposed on purpose.
+      //trace: not exposed on purpose.
+    };
+  });
 }
 
-},{}],138:[function(require,module,exports){
+},{}],141:[function(require,module,exports){
 'use strict';
 
 var NS = 'urn:xmpp:jingle:transports:ice-udp:1';
@@ -16929,7 +18478,7 @@ module.exports = function (stanza) {
     });
 };
 
-},{}],139:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 'use strict';
 
 
@@ -16976,7 +18525,7 @@ module.exports = function (stanza) {
     };
 };
 
-},{}],140:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 'use strict';
 
 var NS = 'urn:xmpp:jingle:1';
@@ -17095,7 +18644,7 @@ module.exports = function (stanza) {
     });*/
 };
 
-},{}],141:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 'use strict';
 
 var NS = 'urn:xmpp:jingle:apps:rtp:1';
@@ -17390,7 +18939,7 @@ module.exports = function (stanza) {
     });
 };
 
-},{}],142:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 /* jshint -W117 */
 'use strict';
 
@@ -17540,4 +19089,4 @@ jxt.extend(IqStanza, JingleStanza);
    });
 }(jQuery));
 
-},{"./stanza/iceUdp.js":138,"./stanza/iq.js":139,"./stanza/jingle.js":140,"./stanza/rtp.js":141,"jingle":25,"jxt":114,"webrtc-adapter-test":137}]},{},[142]);
+},{"./stanza/iceUdp.js":141,"./stanza/iq.js":142,"./stanza/jingle.js":143,"./stanza/rtp.js":144,"jingle":25,"jxt":117,"webrtc-adapter-test":140}]},{},[145]);

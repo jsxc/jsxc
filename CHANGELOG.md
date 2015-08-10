@@ -1,3 +1,13 @@
+v2.1.1 / 2015-08-10
+===
+- update strophe.jingle (fix login with safari and older versions of ie, ff, chrome)
+- update favico.js
+- fix undefined error variable in ie
+- fix handling of escaped jids (e.g. used in transports)
+- fix placeholder replacement
+- rearrange bootstrap import
+- add option for custom online user manual
+
 v2.1.0 / 2015-07-31
 ===
 - add bookmark feature for rooms (XEP-0048)

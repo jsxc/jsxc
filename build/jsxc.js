@@ -1,5 +1,5 @@
 /*!
- * jsxc v2.1.0 - 2015-07-31
+ * jsxc v2.1.1 - 2015-08-10
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 2.1.0
+ * @version 2.1.1
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '2.1.0',
+   version: '2.1.1',
 
    /** True if i'm the master */
    master: false,
@@ -649,7 +649,7 @@ jsxc = {
     * @returns comparable bar jid
     */
    jidToBid: function(jid) {
-      return Strophe.getBareJidFromJid(jid).toLowerCase();
+      return Strophe.unescapeNode(Strophe.getBareJidFromJid(jid).toLowerCase());
    },
 
    /**
@@ -3448,7 +3448,7 @@ jsxc.gui.roster = {
       });
 
       $('#jsxc_roster .jsxc_onlineHelp').click(function() {
-         window.open("http://www.jsxc.org/manual.html", "onlineHelp");
+         window.open(jsxc.options.onlineHelp, 'onlineHelp');
       });
 
       $('#jsxc_roster .jsxc_about').click(function() {
@@ -6594,7 +6594,10 @@ jsxc.options = {
       iceServers: [{
          urls: 'stun:stun.stunprotocol.org'
       }]
-   }
+   },
+
+   /** Link to an online user manual */
+   onlineHelp: 'http://www.jsxc.org/manual.html'
 };
 
 /**
@@ -7136,7 +7139,12 @@ jsxc.storage = {
       }
 
       if (typeof(value) === 'object') {
-         value = JSON.stringify(value);
+         // exclude jquery objects, because otherwise safari will fail
+         value = JSON.stringify(value, function(key, val) {
+            if (!(val instanceof jQuery)) {
+               return val;
+            }
+         });
       }
 
       localStorage.setItem(jsxc.storage.getPrefix(uk) + key, value);
@@ -8184,6 +8192,9 @@ jsxc.webrtc = {
     */
    onMediaFailure: function(ev, err) {
       var self = jsxc.webrtc;
+      err = err || {
+         name: 'Undefined'
+      };
 
       self.setStatus('media failure');
 
@@ -9062,7 +9073,7 @@ jsxc.gui.template['aboutDialog'] = '<h3>JavaScript XMPP Chat</h3>\n' +
 '</p>\n' +
 '<p class="jsxc_libraries">\n' +
 '   <b>Libraries: </b>\n' +
-'   < $ dep.libraries $>\n' +
+'   <a href="http://strophe.im/strophejs/">strophe.js</a> (multiple), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/muc</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/disco</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/caps</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/vcard</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins/tree/master/bookmarks">strophe.js/bookmarks</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins/tree/master/dataforms">strophe.js/x</a> (MIT), <a href="https://github.com/sualko/strophe.jinglejs">strophe.jinglejs</a> (MIT), <a href="https://github.com/neoatlantis/node-salsa20">Salsa20</a> (AGPL3), <a href="www.leemon.com">bigint</a> (public domain), <a href="code.google.com/p/crypto-js">cryptojs</a> (code.google.com/p/crypto-js/wiki/license), <a href="http://git.io/ee">eventemitter</a> (MIT), <a href="https://arlolra.github.io/otr/">otr.js</a> (MPL v2.0), <a href="http://i18next.com/">i18next</a> (MIT), <a href="http://dimsemenov.com/plugins/magnific-popup/">Magnific Popup</a> (MIT), <a href="https://github.com/ejci/favico.js">favico.js</a> (MIT)\n' +
 '</p>\n' +
 '\n' +
 '<button class="btn btn-default pull-right jsxc_debuglog">Show debug log</button>\n' +
