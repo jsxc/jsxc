@@ -227,5 +227,8 @@ jsxc.options = {
       iceServers: [{
          urls: 'stun:stun.stunprotocol.org'
       }]
-   }
+   },
+
+   /** Link to an online user manual */
+   onlineHelp: 'http://www.jsxc.org/manual.html'
 };

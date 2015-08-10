@@ -1440,7 +1440,7 @@ jsxc.gui.roster = {
       });
 
       $('#jsxc_roster .jsxc_onlineHelp').click(function() {
-         window.open("http://www.jsxc.org/manual.html", "onlineHelp");
+         window.open(jsxc.options.onlineHelp, 'onlineHelp');
       });
 
       $('#jsxc_roster .jsxc_about').click(function() {
