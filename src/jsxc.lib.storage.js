@@ -50,7 +50,12 @@ jsxc.storage = {
       }
 
       if (typeof(value) === 'object') {
-         value = JSON.stringify(value);
+         // exclude jquery objects, because otherwise safari will fail
+         value = JSON.stringify(value, function(key, val) {
+            if (!(val instanceof jQuery)) {
+               return val;
+            }
+         });
       }
 
       localStorage.setItem(jsxc.storage.getPrefix(uk) + key, value);
