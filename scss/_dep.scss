@@ -17,6 +17,10 @@
 
 
 #jsxc_dialog {
+    @import "../lib/bootstrap/assets/stylesheets/bootstrap/progress-bars";
+}
+
+#jsxc_dialog {
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/utilities";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/code";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/grid";
@@ -24,7 +28,6 @@
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/buttons";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/button-groups";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/forms";
-    @import "../lib/bootstrap/assets/stylesheets/bootstrap/progress-bars";
     .progress {
         margin-bottom: 0px;
     }
