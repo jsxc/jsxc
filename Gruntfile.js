@@ -101,6 +101,14 @@ module.exports = function(grunt) {
                from: 'var jsxc.gui.template = {};',
                to: ''
             }]
+         },
+         imageUrl: {
+            src: ['<%= target %>/css/*.css'],
+            overwrite: true,
+            replacements: [{
+               from: /image-url\(["'](.+)["']\)/g,
+               to: 'url(\'../img/$1\')'
+            }]
          }
       },
       merge_data: {
@@ -228,9 +236,6 @@ module.exports = function(grunt) {
          },
       },
       sass: {
-         options: {
-            imagePath: '../img'
-         },
          dist: {
             files: {
                '<%= target %>/css/jsxc.css': 'scss/jsxc.scss',
@@ -353,7 +358,7 @@ module.exports = function(grunt) {
    //Default task
    grunt.registerTask('default', ['build', 'watch']);
 
-   grunt.registerTask('build', ['jshint', 'clean', 'sass', 'autoprefixer', 'copy', 'merge_data', 'replace:locales', 'htmlConvert', 'replace:template', 'concat']);
+   grunt.registerTask('build', ['jshint', 'clean', 'sass', 'replace:imageUrl', 'autoprefixer', 'copy', 'merge_data', 'replace:locales', 'htmlConvert', 'replace:template', 'concat']);
 
    grunt.registerTask('build:prerelease', 'Build a new pre-release', function() {
       grunt.config.set('target', 'build');
