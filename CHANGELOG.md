@@ -1,3 +1,7 @@
+v2.1.2 / 2015-08-12
+===
+- update grunt-sass (fix invalid css)
+
 v2.1.1 / 2015-08-10
 ===
 - update strophe.jingle (fix login with safari and older versions of ie, ff, chrome)
