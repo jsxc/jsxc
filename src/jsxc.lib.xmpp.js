@@ -490,6 +490,10 @@ jsxc.xmpp = {
          var bid = jsxc.jidToBid(jid);
          var sub = $(this).attr('subscription');
 
+         // jsxc does not distinguish between groups
+         // therefore we should check on duplicates
+         if ($.inArray(bid, buddies) != -1) { return; }
+
          buddies.push(bid);
 
          jsxc.storage.removeUserItem('res', bid);
