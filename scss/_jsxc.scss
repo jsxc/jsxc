@@ -309,7 +309,10 @@ ul.jsxc_vCard {
             cursor: pointer;
             white-space: normal;
             &.jsxc_min {
-                width: 200px !important;
+                width: 30px !important;
+                @media (min-width: 768px) {
+                    width: 200px !important;
+                }
             }
         }
     }

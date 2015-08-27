@@ -835,5 +835,9 @@ jsxc = {
       }
 
       return hash;
+   },
+
+   isExtraSmallDevice: function() {
+      return $(window).width() < 500;
    }
 };

@@ -230,5 +230,17 @@ jsxc.options = {
    },
 
    /** Link to an online user manual */
-   onlineHelp: 'http://www.jsxc.org/manual.html'
+   onlineHelp: 'http://www.jsxc.org/manual.html',
+
+   viewport: {
+      getSize: function() {
+         var w = $(window).width() - ($('#jsxc_roster').outerWidth(true) + parseFloat($('#jsxc_roster').css('right'))) - $('#jsxc_windowListSB').width();
+         var h = $(window).height();
+
+         return {
+            width: w,
+            height: h
+         };
+      }
+   }
 };

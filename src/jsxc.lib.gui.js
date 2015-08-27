@@ -1716,6 +1716,10 @@ jsxc.gui.roster = {
       var roster_right = parseFloat($('#jsxc_roster').css('right'));
       var state = (roster_right < 0) ? 'shown' : 'hidden';
 
+      if (state === 'shown' && jsxc.isExtraSmallDevice()) {
+         jsxc.gui.window.hide();
+      }
+
       jsxc.storage.setUserItem('roster', state);
 
       roster.removeClass('jsxc_state_hidden jsxc_state_shown').addClass('jsxc_state_' + state);
@@ -1962,14 +1966,7 @@ jsxc.gui.window = {
          minHeight: 234,
          minWidth: 250,
          resize: function(event, ui) {
-            win.width(ui.size.width);
-            win.find('.jsxc_textarea').slimScroll({
-               height: ui.size.height
-            });
-            var offset = win.find('.slimScrollDiv').position().top;
-            win.find('.jsxc_emoticons').css('top', (ui.size.height + offset + 6) + 'px');
-
-            $(document).trigger('resize.window.jsxc', [win, bid, ui.size]);
+            jsxc.gui.window.resize(win, ui, true);
          }
       });
 
@@ -2021,6 +2018,63 @@ jsxc.gui.window = {
       $(document).trigger('init.window.jsxc', [win]);
 
       return win;
+   },
+
+   resize: function(win, ui, viaHandler) {
+      var bid;
+
+      if (typeof win === 'object') {
+         bid = win.attr('data-bid');
+      } else if (typeof win === 'string') {
+         bid = win;
+         win = jsxc.gui.window.get(bid);
+      } else {
+         jsxc.warn('jsxc.gui.window.resize has to be called either with bid or window object.');
+         return;
+      }
+
+      if (!ui) {
+         // @TODO dynamic
+         ui = {
+            size: {
+               width: 250,
+               height: 234
+            }
+         };
+      }
+
+      if (!viaHandler) {
+         win.find('.slimScrollDiv').css({
+            width: ui.size.width,
+            height: ui.size.height
+         });
+      }
+
+      win.width(ui.size.width);
+      win.find('.jsxc_textarea').slimScroll({
+         height: ui.size.height
+      });
+
+      var offset = win.find('.slimScrollDiv').position().top;
+      win.find('.jsxc_emoticons').css('top', (ui.size.height + offset + 6) + 'px');
+
+      $(document).trigger('resize.window.jsxc', [win, bid, ui.size]);
+   },
+
+   fullsize: function(bid) {
+      var win = jsxc.gui.window.get(bid);
+      var size = jsxc.options.viewport.getSize();
+
+      size.width -= 10;
+      size.height -= win.find('.jsxc_bar').outerHeight() + win.find('.jsxc_textinput').outerHeight();
+
+      jsxc.gui.window.resize(win, {
+         size: size
+      });
+
+      var right = $('#jsxc_windowList>ul').width() - win.position().left - size.width + parseInt($('#jsxc_windowList>ul').css('right'));
+
+      jsxc.gui.scrollWindowListBy(right);
    },
 
    /**
@@ -2149,7 +2203,6 @@ jsxc.gui.window = {
    _show: function(bid) {
       var win = jsxc.gui.window.get(bid);
       jsxc.gui.window.get(bid).find('.jsxc_fade').slideDown();
-      win.removeClass('jsxc_min');
 
       // If the area is hidden, the scrolldown function doesn't work. So we
       // call it here.
@@ -2159,18 +2212,43 @@ jsxc.gui.window = {
          win.find('.jsxc_textinput').focus();
       }
 
+      if (jsxc.isExtraSmallDevice()) {
+         if (parseFloat($('#jsxc_roster').css('right')) >= 0) {
+            jsxc.gui.roster.toggle();
+         }
+
+         jsxc.gui.window.hide();
+         jsxc.gui.window.fullsize(bid);
+      }
+
+      win.removeClass('jsxc_min');
+
       win.trigger('show.window.jsxc');
    },
 
    /**
     * Minimize text area and save
     * 
-    * @param {String} bid
+    * @param {String} [bid]
     */
    hide: function(bid) {
-      jsxc.storage.updateUserItem('window', bid, 'minimize', true);
+      var hide = function(bid) {
+         jsxc.storage.updateUserItem('window', bid, 'minimize', true);
 
-      jsxc.gui.window._hide(bid);
+         jsxc.gui.window._hide(bid);
+      };
+
+      if (bid) {
+         hide(bid);
+      } else {
+         $('#jsxc_windowList > ul > li').each(function() {
+            var el = $(this);
+
+            if (!el.hasClass('jsxc_min')) {
+               hide(el.attr('data-bid'));
+            }
+         });
+      }
    },
 
    /**
@@ -2179,9 +2257,13 @@ jsxc.gui.window = {
     * @param {String} bid
     */
    _hide: function(bid) {
-      jsxc.gui.window.get(bid).addClass('jsxc_min').find(' .jsxc_fade').slideUp();
+      var win = jsxc.gui.window.get(bid);
 
-      jsxc.gui.window.get(bid).trigger('hidden.window.jsxc');
+      win.addClass('jsxc_min').find(' .jsxc_fade').slideUp();
+
+      //jsxc.gui.window.resize(win);
+
+      win.trigger('hidden.window.jsxc');
    },
 
    /**
