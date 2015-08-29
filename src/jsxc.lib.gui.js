@@ -2254,7 +2254,7 @@ jsxc.gui.window = {
       encrypted = encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
       var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded, stamp, sender);
 
-      if (direction === 'in') {
+      if (direction === 'in' && !jsxc.gui.window.get(bid).find('.jsxc_textinput').is(":focus")) {
          jsxc.gui.unreadMsg(bid);
 
          $(document).trigger('postmessagein.jsxc', [bid, html_msg]);
