@@ -1064,6 +1064,57 @@ jsxc.xmpp = {
       }
 
       return null;
+   },
+
+   /**
+    * Test if jid has given features
+    * 
+    * @param  {string}   jid     Jabber id
+    * @param  {string[]} feature Single feature or list of features
+    * @param  {Function} cb      Called with the result as first param.
+    * @return {boolean}          True, if jid has all given features. Null, if we do not know it currently.
+    */
+   hasFeatureByJid: function(jid, feature, cb) {
+      var conn = jsxc.xmpp.conn;
+      cb = cb || function() {};
+
+      if (!feature) {
+         return false;
+      }
+
+      if (!$.isArray(feature)) {
+         feature = $.makeArray(feature);
+      }
+
+      var check = function(knownCapabilities) {
+         if (!knownCapabilities) {
+            return null;
+         }
+         var i;
+         for (i = 0; i < feature.length; i++) {
+            if (knownCapabilities['features'].indexOf(feature[i]) < 0) {
+               return false;
+            }
+         }
+         return true;
+      };
+
+      if (conn.caps._jidVerIndex[jid] && conn.caps._knownCapabilities[conn.caps._jidVerIndex[jid]]) {
+         var hasFeature = check(conn.caps._knownCapabilities[conn.caps._jidVerIndex[jid]]);
+         cb(hasFeature);
+
+         return hasFeature;
+      }
+
+      $(document).on('strophe.caps', function(ev, j, capabilities) {
+         if (j === jid) {
+            cb(check(capabilities));
+
+            $(document).off(ev);
+         }
+      });
+
+      return null;
    }
 };
 
