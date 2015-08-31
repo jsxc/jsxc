@@ -234,8 +234,12 @@ jsxc.options = {
 
    viewport: {
       getSize: function() {
-         var w = $(window).width() - ($('#jsxc_roster').outerWidth(true) + parseFloat($('#jsxc_roster').css('right'))) - $('#jsxc_windowListSB').width();
+         var w = $(window).width() - $('#jsxc_windowListSB').width();
          var h = $(window).height();
+
+         if (jsxc.storage.getUserItem('roster') === 'shown') {
+            w -= $('#jsxc_roster').outerWidth(true);
+         }
 
          return {
             width: w,
