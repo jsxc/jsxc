@@ -285,7 +285,9 @@ ul.jsxc_vCard {
     right: 210px;
     left: 0;
     z-index: 50;
-    clip: rect(-10000px, 10000px, 30px, 30px);
+    @media (min-width: 768px) {
+        clip: rect(-10000px, 10000px, 30px, 30px);
+    }
     & > ul {
         list-style: none;
         padding: 0;
@@ -309,7 +311,10 @@ ul.jsxc_vCard {
             cursor: pointer;
             white-space: normal;
             &.jsxc_min {
-                width: 200px !important;
+                width: 30px !important;
+                @media (min-width: 768px) {
+                    width: 200px !important;
+                }
             }
         }
     }
@@ -321,6 +326,9 @@ ul.jsxc_vCard {
     bottom: 0;
     width: 30px;
     height: 30px;
+    @media (max-width: 768px) {
+      display: none;
+    }
     > {
         div {
             box-sizing: border-box;

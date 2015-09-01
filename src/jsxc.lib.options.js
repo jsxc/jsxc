@@ -230,5 +230,21 @@ jsxc.options = {
    },
 
    /** Link to an online user manual */
-   onlineHelp: 'http://www.jsxc.org/manual.html'
+   onlineHelp: 'http://www.jsxc.org/manual.html',
+
+   viewport: {
+      getSize: function() {
+         var w = $(window).width() - $('#jsxc_windowListSB').width();
+         var h = $(window).height();
+
+         if (jsxc.storage.getUserItem('roster') === 'shown') {
+            w -= $('#jsxc_roster').outerWidth(true);
+         }
+
+         return {
+            width: w,
+            height: h
+         };
+      }
+   }
 };
