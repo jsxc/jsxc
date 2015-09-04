@@ -1,25 +1,42 @@
-.jsxc_online {
-    border-left: 4px solid $state_online !important;
+.jsxc_online, .jsxc_chat, .jsxc_away, .jsxc_xa, .jsxc_dnd {
+    &:before {
+        content: ' ';
+        display: block;
+        width: 12px;
+        height: 12px;
+        border-radius: 100%;
+        line-height: 12px;
+        text-align: center;
+        color: #fff;
+        z-index: 99;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 100%;
+    }
 }
 
-.jsxc_chat {
-    border-left: 4px solid $state_chat !important;
+.jsxc_online:before {
+    background-color: $state_online;
 }
 
-.jsxc_away {
-    border-left: 4px solid $state_away !important;
+.jsxc_chat:before {
+    background-image: image-url("presence_chat.svg");
+    background-color: $state_chat;
 }
 
-.jsxc_xa {
-    border-left: 4px solid $state_xa !important;
+.jsxc_away:before {
+    background-image: image-url("presence_away.svg");
+    background-color: $state_away;
 }
 
-.jsxc_dnd {
-    border-left: 4px solid $state_dnd !important;
+.jsxc_xa:before {
+    background-image: image-url("presence_xa.svg");
+    background-color: $state_xa;
 }
 
-.jsxc_offline {
-    border-left: 4px solid $state_offline !important;
+.jsxc_dnd:before {
+    background-image: image-url("presence_dnd.svg");
+    background-color: $state_dnd;
 }
 
 .jsxc_hidden {

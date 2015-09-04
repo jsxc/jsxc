@@ -10,17 +10,17 @@
     from {
         background-position: 40px 0;
     }
+
     to {
         background-position: 0 0;
     }
 }
 
-
 #jsxc_dialog {
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/progress-bars";
 }
 
-#jsxc_dialog {
+#jsxc_dialog, #jsxc_webrtc {
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/utilities";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/code";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/grid";
@@ -28,6 +28,7 @@
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/buttons";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/button-groups";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/forms";
+
     .progress {
         margin-bottom: 0px;
     }
