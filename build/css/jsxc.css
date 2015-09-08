@@ -3034,28 +3034,28 @@ ul.jsxc_vCard {
   background-repeat: no-repeat;
   background-position: center center; }
 
-@-webkit-keyframes bounce{
-  0%{
+@-webkit-keyframes bounce {
+  0% {
     bottom: 0;
     -webkit-animation-timing-function: ease-in;
             animation-timing-function: ease-in; }
-  12%{
+  12% {
     bottom: 5px;
     -webkit-animation-timing-function: ease-out;
             animation-timing-function: ease-out; }
-  25%{
+  25% {
     bottom: 0;
     -webkit-animation-timing-function: ease-in;
             animation-timing-function: ease-in; }
-  37%{
+  37% {
     bottom: 5px;
     -webkit-animation-timing-function: ease-out;
             animation-timing-function: ease-out; }
-  50%{
+  50% {
     bottom: 0;
     -webkit-animation-timing-function: ease-in;
             animation-timing-function: ease-in; }
-  100%{
+  100% {
     bottom: 0; } }
 
 @keyframes bounce {
@@ -3253,15 +3253,15 @@ ul.jsxc_vCard {
     border-radius: 0;
     box-sizing: border-box;
     text-align: right; }
-  .jsxc_window input::-webkit-input-placeholder{
-  color: #000;
-  opacity: 0.3; }
-  .jsxc_window input::-moz-placeholder{
-  color: #000;
-  opacity: 0.3; }
-  .jsxc_window input:-ms-input-placeholder{
-  color: #000;
-  opacity: 0.3; }
+  .jsxc_window input::-webkit-input-placeholder {
+    color: #000;
+    opacity: 0.3; }
+  .jsxc_window input::-moz-placeholder {
+    color: #000;
+    opacity: 0.3; }
+  .jsxc_window input:-ms-input-placeholder {
+    color: #000;
+    opacity: 0.3; }
   .jsxc_window input::placeholder {
     color: #000;
     opacity: 0.3; }

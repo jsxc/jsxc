@@ -12,6 +12,7 @@
 
 .jsxc_webrtc {
     width: 900px;
+
     .jsxc_status {
         z-index: 9999;
         border-radius: 20px;
@@ -25,11 +26,14 @@
         font-weight: bold;
         text-align: center;
     }
+
     .slimScrollDiv {
         opacity: 1 !important;
     }
+
     li .jsxc_name {
         cursor: auto;
+
         &:hover {
             color: $window_bar_color;
         }
@@ -41,9 +45,11 @@
     height: 480px;
     position: relative;
     background-color: $video_bg;
+
     video {
         display: none;
     }
+
     .jsxc_noRemoteVideo {
         display: none;
     }
@@ -55,6 +61,7 @@
 
 .jsxc_noRemoteVideo {
     @extend %fullscreen;
+
     p {
         position: absolute;
         bottom: 0;
@@ -64,6 +71,7 @@
         width: 100%;
         z-index: 100;
     }
+
     > div {
         width: 200px;
         height: 200px;
@@ -73,8 +81,10 @@
         margin-top: -100px;
         left: 50%;
         margin-left: -100px;
+
         > div {
             background-color: $novideo_bg;
+
             &:first-child {
                 width: 50%;
                 height: 50%;
@@ -84,6 +94,7 @@
                 margin-left: -25%;
                 top: 10%;
             }
+
             &:last-child {
                 position: absolute;
                 bottom: -50%;
@@ -111,23 +122,28 @@ div {
         width: 100%;
         height: 100%;
         background-color: $black;
+
         &.jsxc_localvideo {
             border: 1px solid $white;
         }
     }
+
     &:fullscreen {
         width: 100%;
         height: 100%;
         background-color: $black;
+
         &.jsxc_localvideo {
             border: 1px solid $white;
         }
     }
+
     &.jsxc_video {
         background-image: image-url("camera_icon_grey.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 15px 15px;
+
         &:not(.jsxc_disabled) {
             &:hover {
                 background-image: image-url("camera_icon_white.svg");
@@ -139,6 +155,7 @@ div {
 .jsxc_controlbar {
     width: 640px;
     margin-top: 10px;
+
     .jsxc_showchat {
         float: right;
     }
@@ -151,6 +168,7 @@ div {
 .jsxc_snapshotbar {
     width: 100%;
     display: none;
+
     img {
         height: 50px;
     }
@@ -158,12 +176,14 @@ div {
 
 .jsxc_buttongroup {
     display: inline;
+
     button {
         &:first-child {
             border-top-right-radius: 0;
             border-bottom-right-radius: 0;
             margin-right: 0;
         }
+
         &:last-child {
             border-top-left-radius: 0;
             border-bottom-left-radius: 0;
@@ -178,20 +198,26 @@ div {
     height: 480px;
     width: 250px;
     background-color: $window_bg;
+
     .jsxc_settings {
         display: none !important;
     }
+
     .jsxc_close {
         display: none !important;
     }
+
     .jsxc_video {
         display: none !important;
     }
+
     .jsxc_bar {}
+
     .jsxc_window {
         bottom: 0;
         box-shadow: none;
     }
+
     > ul {
         width: 250px;
         height: 480px;
@@ -208,6 +234,7 @@ div {
     top: 40%;
     left: 50%;
     margin-left: -64px;
+
     span {
         display: inline-block;
         vertical-align: middle;
@@ -239,6 +266,7 @@ div {
         background-color: $bubbling_start_bg;
         transform: translateY(0);
     }
+
     100% {
         width: 39px;
         height: 39px;
@@ -246,7 +274,6 @@ div {
         transform: translateY(-34px);
     }
 }
-
 
 .jsxc_fullscreen.jsxc_localvideo {
     border: 1px solid $white;
@@ -258,6 +285,7 @@ div {
 
 #jsxc_buddylist .jsxc_options .jsxc_video {
     background-image: image-url("camera_icon_white.svg");
+
     &.jsxc_disabled {
         opacity: 0.2;
     }

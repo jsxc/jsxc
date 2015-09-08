@@ -16,6 +16,7 @@
     cursor: pointer;
     text-overflow: ellipsis;
     white-space: nowrap;
+
     &:hover {
         color: $name_hover;
     }
@@ -34,79 +35,99 @@
     background: #FFF;
     width: auto;
     border-radius: 5px;
+
     * {
         box-sizing: border-box;
     }
+
     ul {
         list-style: none;
         margin: 0;
         padding: 0;
     }
+
     li {
         margin: 0;
         padding: 0;
     }
+
     p {
         margin-bottom: 1em;
+
         input {
             margin-bottom: 5px;
             width: 60%;
             outline: none;
         }
+
         input[type="submit"] {
             width: auto;
         }
     }
+
     hr {
         border: 0;
         border-top: 1px solid #eee;
         margin-top: 20px;
         margin-bottom: 20px;
     }
+
     h3 {
         font-size: 120%;
         font-weight: bold;
         margin-bottom: 10px;
         margin-top: 20px;
     }
+
     .jsxc_right {
         margin-top: 20px;
     }
+
     form {
         fieldset {
             margin-bottom: 30px;
         }
     }
+
     fieldset {
         border-bottom: 1px solid #eee;
     }
+
     legend {
         border: 0;
         font-size: 20px;
     }
+
     input {
         outline: none;
+
         &:invalid {
             border: 1px solid $dialog_input_invalid;
         }
     }
+
     .btn-group button {
         margin-right: 0;
     }
+
     input[type="range"] {
         display: inline;
         height: 34px;
         vertical-align: bottom;
     }
+
     .jsxc_fieldset {}
+
     input[readonly] {
         background-color: $dialog_input_readonly_bg;
     }
+
     .jsxc_inputinfo {
         padding-left: 30%;
         font-style: italic;
         margin-top: -1em;
     }
+
     .jsxc_waiting {
         &:before {
             content: " ";
@@ -118,6 +139,7 @@
             background-image: image-url("loading.gif");
         }
     }
+
     .jsxc_libraries {
         max-width: 300px;
     }
@@ -125,6 +147,7 @@
 
 .jsxc_avatar {
     @extend %avatar-icon;
+
     img {
         display: block;
         width: 25px;
@@ -137,12 +160,15 @@
 
 ul.jsxc_vCard {
     min-width: 400px;
+
     ul {
         margin-left: 20px;
     }
+
     li {
         cursor: default !important;
     }
+
     strong {}
 }
 
@@ -158,21 +184,27 @@ ul.jsxc_vCard {
     border: 1px solid $spot_border !important;
     line-height: 100%;
     cursor: pointer;
+
     &.jsxc_online {
         background-color: $state_online;
     }
+
     &.jsxc_chat {
         background-color: $state_chat;
     }
+
     &.jsxc_away {
         background-color: $state_away;
     }
+
     &.jsxc_xa {
         background-color: $state_xa;
     }
+
     &.jsxc_dnd {
         background-color: $state_dnd;
     }
+
     &.jsxc_offline {
         background-color: $state_offline;
     }
@@ -186,6 +218,7 @@ ul.jsxc_vCard {
     .jsxc_name {
         font-style: italic;
     }
+
     .jsxc_unread {
         display: block;
         background-color: $unread_bg;
@@ -206,6 +239,7 @@ ul.jsxc_vCard {
     cursor: pointer;
     float: right;
     text-align: center;
+
     &:hover > span {
         opacity: 1;
     }
@@ -224,6 +258,7 @@ ul.jsxc_vCard {
     float: right;
     text-align: center;
     line-height: 30px;
+
     span {
         background-color: $notice_bg;
         border-radius: 11px;
@@ -251,27 +286,31 @@ ul.jsxc_vCard {
         bottom: 0;
         animation-timing-function: ease-in;
     }
+
     12% {
         bottom: 5px;
         animation-timing-function: ease-out;
     }
+
     25% {
         bottom: 0;
         animation-timing-function: ease-in;
     }
+
     37% {
         bottom: 5px;
         animation-timing-function: ease-out;
     }
+
     50% {
         bottom: 0;
         animation-timing-function: ease-in;
     }
+
     100% {
         bottom: 0;
     }
 }
-
 
 #jsxc_presence {
     cursor: pointer;
@@ -286,6 +325,7 @@ ul.jsxc_vCard {
     left: 0;
     z-index: 50;
     clip: rect(-10000px, 10000px, 30px, 30px);
+
     & > ul {
         list-style: none;
         padding: 0;
@@ -297,6 +337,7 @@ ul.jsxc_vCard {
         overflow: visible;
         white-space: nowrap;
         transition: right 0.5s;
+
         & > li {
             padding: 0;
             margin: 0;
@@ -308,6 +349,7 @@ ul.jsxc_vCard {
             margin-right: 5px;
             cursor: pointer;
             white-space: normal;
+
             &.jsxc_min {
                 width: 200px !important;
             }
@@ -321,6 +363,7 @@ ul.jsxc_vCard {
     bottom: 0;
     width: 30px;
     height: 30px;
+
     > {
         div {
             box-sizing: border-box;
@@ -333,10 +376,12 @@ ul.jsxc_vCard {
             float: left;
             cursor: pointer;
             user-select: none;
+
             &:hover {
                 background-color: $windowListSB_bg_hover;
             }
         }
+
         .jsxc_disabled {
             background-color: $windowListSB_bg_disabled !important;
             color: $windowListSB_color_disabled;
@@ -367,6 +412,7 @@ ul.jsxc_vCard {
     background-color: $window_bg;
     z-index: 80;
     cursor: default;
+
     .jsxc_emoticons {
         height: 30px;
         width: 30px;
@@ -374,6 +420,7 @@ ul.jsxc_vCard {
         top: 240px;
         right: 0;
         cursor: pointer;
+
         &:after {
             content: ' ';
             background-image: image-url("smiley.png");
@@ -386,6 +433,7 @@ ul.jsxc_vCard {
             top: 0;
             left: 0;
         }
+
         ul {
             display: none;
             position: absolute;
@@ -397,6 +445,7 @@ ul.jsxc_vCard {
             border-radius: 3px;
             z-index: 200;
             list-style-type: none;
+
             &:after {
                 content: '';
                 position: absolute;
@@ -410,27 +459,33 @@ ul.jsxc_vCard {
                 bottom: -6px;
             }
         }
+
         li {
             float: right;
             cursor: pointer;
         }
+
         div {
             cursor: pointer;
             border-radius: 3px;
             background-size: 30px 30px;
             width: 30px;
             height: 30px;
+
             &:hover {
                 background-color: $emoticon_selection_hover;
             }
         }
+
         &:hover:after {
             opacity: 0.5;
         }
     }
+
     .jsxc_fade {
         position: relative;
     }
+
     .jsxc_gradient {
         display: none;
         position: absolute;
@@ -441,19 +496,23 @@ ul.jsxc_vCard {
         z-index: 100;
         background: linear-gradient(to bottom, $window_gradient 0, rgba(0, 0, 0, 0) 100%);
     }
+
     .jsxc_avatar {
         margin-top: 1px;
     }
+
     .jsxc_textarea {
         width: 100%;
         overflow: hidden;
         padding: 3px;
     }
+
     .slimScrollDiv {
         margin: 0 0 6px 0;
         left: auto !important;
         top: auto !important;
     }
+
     input {
         &.jsxc_textinput {
             width: 100%;
@@ -466,14 +525,17 @@ ul.jsxc_vCard {
             box-sizing: border-box;
             text-align: right;
         }
+
         &::placeholder {
             color: $window_placeholder;
             opacity: 0.3;
         }
     }
+
     .jsxc_tools {
         height: 26px;
         float: right;
+
         > div {
             width: 17px;
             height: 26px;
@@ -486,15 +548,19 @@ ul.jsxc_vCard {
             text-align: center;
         }
     }
+
     .jsxc_close {
         font-size: 20px;
+
         &:hover {
             color: $window_close_hover;
         }
     }
+
     .ui-resizable-w {
         left: 0;
     }
+
     .ui-resizable-nw {
         top: 0;
         left: 0;
@@ -503,6 +569,7 @@ ul.jsxc_vCard {
         z-index: 95 !important;
         background-image: image-url("resize_gray.svg");
     }
+
     .ui-resizable-n {
         position: absolute;
         top: 0;
@@ -524,15 +591,18 @@ ul.jsxc_vCard {
     position: relative;
     outline: none;
     clear: both;
+
     a {
         color: $chatmessage_a;
         text-decoration: underline;
     }
+
     img {
         width: 19px;
         height: 19px;
         background-size: 19px 19px;
     }
+
     .jsxc_avatar {
         display: none;
     }
@@ -555,6 +625,7 @@ ul.jsxc_vCard {
     background: $chatmessage_in_bg;
     border: solid 1px $chatmessage_in_border;
     border-radius: 3px;
+
     &:after {
         content: '';
         position: absolute;
@@ -567,6 +638,7 @@ ul.jsxc_vCard {
         left: -6px;
         bottom: 10px;
     }
+
     .jsxc_timestamp {
         float: left;
     }
@@ -579,6 +651,7 @@ ul.jsxc_vCard {
     background: $chatmessage_out_bg;
     border: solid 1px $chatmessage_out_border;
     border-radius: 3px;
+
     &:after {
         content: '';
         position: absolute;
@@ -591,6 +664,7 @@ ul.jsxc_vCard {
         right: -6px;
         bottom: 10px;
     }
+
     &.jsxc_received {
         &:before {
             content: '✓';
@@ -601,10 +675,12 @@ ul.jsxc_vCard {
             line-height: 12px;
             color: $chatmessage_received;
         }
+
         .jsxc_timestamp {
             margin-right: 4px;
         }
     }
+
     .jsxc_timestamp {
         float: right;
     }
@@ -625,9 +701,11 @@ div.jsxc_settings {
     background-repeat: no-repeat;
     background-position: center center;
     overflow: visible;
+
     &:hover, .hover {
         background-image: image-url("gear_white.svg");
     }
+
     ul {
         list-style: none;
         padding: 0;
@@ -641,6 +719,7 @@ div.jsxc_settings {
         background-color: $window_settings_bg;
         display: none;
     }
+
     li {
         width: 170px;
         margin-left: 20px;
@@ -649,13 +728,16 @@ div.jsxc_settings {
         line-height: 30px;
         text-align: left;
         cursor: pointer;
+
         &:first-child {
             border-top: 1px solid $window_settings_border_top;
         }
+
         &.jsxc_disabled {
             color: $window_settings_disabled;
             cursor: default;
         }
+
         &:hover:not(.jsxc_disabled) {
             color: $window_settings_color_hover;
             background-color: $window_settings_bg_hover;
@@ -665,18 +747,23 @@ div.jsxc_settings {
 
 div.jsxc_transfer {
     @extend %padlock-icon;
+
     &:hover {
         background-image: image-url("padlock_open_white.svg");
     }
+
     &.jsxc_fin {
         background-image: image-url("padlock_close_grey.svg");
     }
+
     &.jsxc_enc {
         background-image: image-url("padlock_close_orange.svg");
+
         &.jsxc_trust {
             background-image: image-url("padlock_close_green.svg");
         }
     }
+
     &.jsxc_disabled:hover {
         @extend %padlock-icon;
     }
@@ -750,6 +837,7 @@ img.jsxc_vCard {
     margin-bottom: 20px;
     border: 1px solid transparent;
     border-radius: 4px;
+
     &.jsxc_alert-warning {
         color: #8a6d3b;
         background-color: #fcf8e3;
@@ -766,11 +854,13 @@ img.jsxc_vCard {
     color: #555;
     border: 1px solid rgba(190, 190, 190, 0.9);
     cursor: pointer;
+
     &.jsxc_btn-primary {
         color: #fff;
         background-color: #337ab7;
         border-color: #2e6da4;
     }
+
     &[disabled], &[disabled]:hover {
         opacity: 0.65;
         cursor: not-allowed;

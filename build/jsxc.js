@@ -1,5 +1,5 @@
 /*!
- * jsxc v2.1.2 - 2015-08-12
+ * jsxc v2.1.3 - 2015-09-08
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 2.1.2
+ * @version 2.1.3
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '2.1.2',
+   version: '2.1.3',
 
    /** True if i'm the master */
    master: false,
@@ -1922,6 +1922,57 @@ jsxc.xmpp = {
       if (jidVerIndex[jid]) {
          return knownCapabilities[jidVerIndex[jid]];
       }
+
+      return null;
+   },
+
+   /**
+    * Test if jid has given features
+    * 
+    * @param  {string}   jid     Jabber id
+    * @param  {string[]} feature Single feature or list of features
+    * @param  {Function} cb      Called with the result as first param.
+    * @return {boolean}          True, if jid has all given features. Null, if we do not know it currently.
+    */
+   hasFeatureByJid: function(jid, feature, cb) {
+      var conn = jsxc.xmpp.conn;
+      cb = cb || function() {};
+
+      if (!feature) {
+         return false;
+      }
+
+      if (!$.isArray(feature)) {
+         feature = $.makeArray(feature);
+      }
+
+      var check = function(knownCapabilities) {
+         if (!knownCapabilities) {
+            return null;
+         }
+         var i;
+         for (i = 0; i < feature.length; i++) {
+            if (knownCapabilities['features'].indexOf(feature[i]) < 0) {
+               return false;
+            }
+         }
+         return true;
+      };
+
+      if (conn.caps._jidVerIndex[jid] && conn.caps._knownCapabilities[conn.caps._jidVerIndex[jid]]) {
+         var hasFeature = check(conn.caps._knownCapabilities[conn.caps._jidVerIndex[jid]]);
+         cb(hasFeature);
+
+         return hasFeature;
+      }
+
+      $(document).on('strophe.caps', function(ev, j, capabilities) {
+         if (j === jid) {
+            cb(check(capabilities));
+
+            $(document).off(ev);
+         }
+      });
 
       return null;
    }
@@ -4262,7 +4313,7 @@ jsxc.gui.window = {
       encrypted = encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
       var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded, stamp, sender);
 
-      if (direction === 'in') {
+      if (direction === 'in' && !jsxc.gui.window.get(bid).find('.jsxc_textinput').is(":focus")) {
          jsxc.gui.unreadMsg(bid);
 
          $(document).trigger('postmessagein.jsxc', [bid, html_msg]);
@@ -8724,7 +8775,7 @@ jsxc.xmpp.bookmarks = {};
  * @return {boolean} True: Server supports bookmark storage
  */
 jsxc.xmpp.bookmarks.remote = function() {
-   return jsxc.xmpp.conn.caps && jsxc.xmpp.conn.caps.hasFeatureByJid(jsxc.xmpp.conn.domain, Strophe.NS.PUBSUB + "#publish");
+   return jsxc.xmpp.conn.caps && jsxc.xmpp.hasFeatureByJid(jsxc.xmpp.conn.domain, Strophe.NS.PUBSUB + "#publish");
 };
 
 /**
@@ -8739,12 +8790,11 @@ jsxc.xmpp.bookmarks.load = function() {
    if (!ver || !caps._knownCapabilities[ver]) {
       // wait until we know server capabilities
       $(document).on('caps.strophe', function(ev, from) {
+         if (from === jsxc.xmpp.conn.domain) {
+            jsxc.xmpp.bookmarks.load();
 
-         if (from !== jsxc.xmpp.conn.domain) {
-            return;
+            $(document).off(ev);
          }
-
-         jsxc.xmpp.bookmarks.load();
       });
    }
 

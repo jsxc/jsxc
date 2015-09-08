@@ -10,11 +10,11 @@
     from {
         background-position: 40px 0;
     }
+
     to {
         background-position: 0 0;
     }
 }
-
 
 #jsxc_dialog {
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/progress-bars";
@@ -28,6 +28,7 @@
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/buttons";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/button-groups";
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/forms";
+
     .progress {
         margin-bottom: 0px;
     }
