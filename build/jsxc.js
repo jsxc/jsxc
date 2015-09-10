@@ -1,5 +1,5 @@
 /*!
- * jsxc v2.1.3 - 2015-09-08
+ * jsxc v2.1.4 - 2015-09-10
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 2.1.3
+ * @version 2.1.4
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '2.1.3',
+   version: '2.1.4',
 
    /** True if i'm the master */
    master: false,
@@ -1495,7 +1495,7 @@ jsxc.xmpp = {
 
          var error = $(presence).find('error');
 
-         //@TODO display error message
+         //TODO display error message
          jsxc.error('[XMPP] ' + error.attr('code') + ' ' + error.find(">:first-child").prop('tagName'));
          return true;
       }
@@ -4860,7 +4860,7 @@ jsxc.muc = {
                var roomName = $(stanza).find('identity').attr('name');
                var subject = $(stanza).find('field[var="muc#roominfo_subject"]').attr('label');
 
-               //@TODO display subject, number of occupants, etc.
+               //TODO display subject, number of occupants, etc.
 
                discoReceived(roomName, subject);
             }, function() {
@@ -4919,7 +4919,7 @@ jsxc.muc = {
       }, function() {
          jsxc.debug('Could not load room configuration');
 
-         //@TODO show error
+         //TODO show error
       });
    },
 
@@ -4965,7 +4965,7 @@ jsxc.muc = {
          }, function() {
             jsxc.warn('Could not save room configuration.');
 
-            //@TODO display error
+            //TODO display error
          });
 
          jsxc.gui.dialog.close();
@@ -5473,7 +5473,7 @@ jsxc.muc = {
             }, function() {
                jsxc.warn('Could not save cached room configuration.');
 
-               //@TODO display error
+               //TODO display error
             });
          } else {
             jsxc.gui.showSelectionDialog({
@@ -8418,7 +8418,7 @@ jsxc.webrtc = {
    onRemoteStreamRemoved: function(session) {
       this.setStatus('Remote stream for ' + session.jid + ' removed.');
 
-      //@TODO clean up
+      //TODO clean up
    },
 
    /**
