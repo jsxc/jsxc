@@ -109,6 +109,15 @@ module.exports = function(grunt) {
                from: /image-url\(["'](.+)["']\)/g,
                to: 'url(\'../img/$1\')'
             }]
+         },
+         // IE 10 does not like comments starting with @
+         todo: {
+            src: ['build/jsxc.js'],
+            overwrite: true,
+            replacements: [{
+               from: /\/\/@(.*)/g,
+               to: '//$1'
+            }]
          }
       },
       merge_data: {
@@ -363,7 +372,7 @@ module.exports = function(grunt) {
    grunt.registerTask('build:prerelease', 'Build a new pre-release', function() {
       grunt.config.set('target', 'build');
 
-      grunt.task.run(['search:console', 'build', 'dataUri', 'usebanner', 'replace:version', 'replace:libraries', 'uglify', 'compress']);
+      grunt.task.run(['search:console', 'build', 'dataUri', 'usebanner', 'replace:version', 'replace:libraries', 'replace:todo', 'uglify', 'compress']);
    });
 
    grunt.registerTask('build:release', 'Build a new release', function() {
