@@ -259,7 +259,7 @@ module.exports = function(grunt) {
          },
          css: {
             files: ['scss/*'],
-            tasks: ['sass', 'autoprefixer']
+            tasks: ['sass', 'autoprefixer', 'replace:imageUrl']
          },
          js: {
             files: ['src/jsxc.lib.*'],

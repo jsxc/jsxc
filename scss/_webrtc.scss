@@ -10,8 +10,14 @@
     background-color: $fullscreen_bg;
 }
 
-.jsxc_webrtc {
-    width: 900px;
+#jsxc_webrtc {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: 9999;
+    background-color: black;
 
     .jsxc_status {
         z-index: 9999;
@@ -41,9 +47,11 @@
 }
 
 .jsxc_videoContainer {
-    width: 640px;
-    height: 480px;
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0px;
+    bottom: 0px;
     background-color: $video_bg;
 
     video {
@@ -52,6 +60,21 @@
 
     .jsxc_noRemoteVideo {
         display: none;
+    }
+
+    @media (min-width: 768px) {
+        right: 250px;
+
+        .jsxc_controlbar {
+            opacity: 0;
+            transition: 1s opacity;
+        }
+
+        &:hover {
+            .jsxc_controlbar {
+                opacity: 1.0;
+            }
+        }
     }
 }
 
@@ -139,22 +162,59 @@ div {
     }
 
     &.jsxc_video {
-        background-image: image-url("camera_icon_grey.svg");
+        background-image: image-url("camera_icon_white.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 15px 15px;
+        opacity: 0.4;
 
         &:not(.jsxc_disabled) {
             &:hover {
-                background-image: image-url("camera_icon_white.svg");
+                opacity: 1.0;
             }
         }
     }
 }
 
 .jsxc_controlbar {
-    width: 640px;
-    margin-top: 10px;
+    position: absolute;
+    top: 50px;
+    left: 0;
+    right: 0px;
+    text-align: center;
+    z-index: 9090;
+
+    & > div {
+        background-color: rgba(0, 0, 0, 0.5);
+        height: 44px;
+        border-radius: 22px;
+        padding: 5px;
+        display: inline-block;
+    }
+
+    .jsxc_videoControl {
+        height: 44px;
+        width: 44px;
+        margin: 0 5px;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 90%;
+        cursor: pointer;
+        display: inline-block;
+        opacity: 0.8;
+
+        &:hover {
+            opacity: 1.0;
+        }
+    }
+
+    .jsxc_hangUp {
+        background-image: image-url("hang_up_red.svg");
+    }
+
+    .jsxc_fullscreen {
+        background-image: image-url("fullscreen_white.svg");
+    }
 
     .jsxc_showchat {
         float: right;
@@ -193,9 +253,10 @@ div {
 }
 
 .jsxc_chatarea {
-    position: relative;
-    float: right;
-    height: 480px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
     width: 250px;
     background-color: $window_bg;
 
@@ -219,8 +280,8 @@ div {
     }
 
     > ul {
-        width: 250px;
-        height: 480px;
+        width: 100%;
+        height: 100%;
         list-style: none;
         padding: 0;
     }

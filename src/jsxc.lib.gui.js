@@ -172,7 +172,7 @@ jsxc.gui = {
       ri.data(data);
 
       // Add online status
-      ue.add(spot).removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + jsxc.CONST.STATUS[data.status]);
+      jsxc.gui.updatePresence(bid, jsxc.CONST.STATUS[data.status]);
 
       // Change name and add title
       ue.find('.jsxc_name:first').add(spot).text(data.name).attr('title', $.t('is_', {
@@ -351,35 +351,32 @@ jsxc.gui = {
     * 
     * @memberof jsxc.gui
     */
-   toggleList: function() {
-      var self = $(this);
+   toggleList: function(el) {
+      var self = el || $(this);
 
       self.disableSelection();
+
+      self.addClass('jsxc_list');
 
       var ul = self.find('ul');
       var slideUp = null;
 
       slideUp = function() {
-         ul.slideUp({
-            complete: function() {
-               self.removeClass('jsxc_opened');
-            }
-         });
+
+         self.removeClass('jsxc_opened');
 
          $('body').off('click', null, slideUp);
       };
 
       $(this).click(function() {
 
-         if (ul.is(":hidden")) {
+         if (!self.hasClass('jsxc_opened')) {
             // hide other lists
             $('body').click();
             $('body').one('click', slideUp);
          } else {
             $('body').off('click', null, slideUp);
          }
-
-         ul.slideToggle();
 
          window.clearTimeout(ul.data('timer'));
 
@@ -1151,7 +1148,7 @@ jsxc.gui = {
          jsxc.xmpp.sendPres();
       }
 
-      $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
+      $('#jsxc_presence > span').text($('#jsxc_presence .jsxc_inner ul .jsxc_' + pres).text());
 
       jsxc.gui.updatePresence('own', pres);
    },
@@ -1178,7 +1175,15 @@ jsxc.gui = {
          }
       }
 
-      $('.jsxc_presence[data-bid="' + bid + '"]').removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
+      $('[data-bid="' + bid + '"]').each(function() {
+         var el = $(this);
+
+         if (el.find('.jsxc_avatar').length > 0) {
+            el = el.find('.jsxc_avatar');
+         }
+
+         el.removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
+      });
    },
 
    /**
@@ -1451,7 +1456,7 @@ jsxc.gui.roster = {
          jsxc.gui.roster.toggle();
       });
 
-      $('#jsxc_presence > ul > li').click(function() {
+      $('#jsxc_presence li').click(function() {
          var self = $(this);
          var pres = self.data('pres');
 
@@ -1484,7 +1489,7 @@ jsxc.gui.roster = {
       }
 
       var pres = jsxc.storage.getUserItem('presence') || 'online';
-      $('#jsxc_presence > span').text($('#jsxc_presence > ul .jsxc_' + pres).text());
+      $('#jsxc_presence > span').text($('#jsxc_presence .jsxc_' + pres).text());
       jsxc.gui.updatePresence('own', pres);
 
       jsxc.gui.tooltip('#jsxc_roster');
@@ -1510,8 +1515,10 @@ jsxc.gui.roster = {
          jsxc.gui.window.open(bid);
       });
 
-      bud.find('.jsxc_chaticon').click(function() {
+      bud.find('.jsxc_msg').click(function() {
          jsxc.gui.window.open(bid);
+
+         return false;
       });
 
       bud.find('.jsxc_rename').click(function() {
@@ -1529,17 +1536,25 @@ jsxc.gui.roster = {
       var expandClick = function() {
          bud.trigger('extra.jsxc');
 
-         bud.toggleClass('jsxc_expand');
+         $('body').click();
 
-         jsxc.gui.updateAvatar(bud, data.jid, data.avatar);
+         if (!bud.find('.jsxc_menu').hasClass('jsxc_open')) {
+            bud.find('.jsxc_menu').addClass('jsxc_open');
+
+            $('body').one('click', function() {
+               bud.find('.jsxc_menu').removeClass('jsxc_open');
+            });
+         }
+
          return false;
       };
 
-      bud.find('.jsxc_control').click(expandClick);
+      bud.find('.jsxc_more').click(expandClick);
       bud.dblclick(expandClick);
 
-      bud.find('.jsxc_vcardicon').click(function() {
+      bud.find('.jsxc_vcard').click(function() {
          jsxc.gui.showVcard(data.jid);
+
          return false;
       });
 
@@ -1549,6 +1564,16 @@ jsxc.gui.roster = {
       $('#jsxc_buddylist').slimScroll({
          scrollTo: '0px'
       });
+
+      var chat = jsxc.storage.getUserItem('chat', bid) || [];
+      var i = 0;
+      while (chat.length > i) {
+         if (chat[i].direction !== 'sys') {
+            $('[data-bid="' + bid + '"]').find('.jsxc_lastmsg .jsxc_text').html(chat[i].msg);
+            break;
+         }
+         i++;
+      }
 
       $(document).trigger('add.roster.jsxc', [bid, data, bud]);
    },
@@ -1707,6 +1732,7 @@ jsxc.gui.roster = {
     * @param {Integer} d Duration in ms
     */
    toggle: function(d) {
+      var rosterPromise;
       var duration = d || 500;
 
       var roster = $('#jsxc_roster');
@@ -1716,18 +1742,26 @@ jsxc.gui.roster = {
       var roster_right = parseFloat($('#jsxc_roster').css('right'));
       var state = (roster_right < 0) ? 'shown' : 'hidden';
 
+      if (state === 'shown' && jsxc.isExtraSmallDevice()) {
+         jsxc.gui.window.hide();
+      }
+
       jsxc.storage.setUserItem('roster', state);
 
       roster.removeClass('jsxc_state_hidden jsxc_state_shown').addClass('jsxc_state_' + state);
 
-      roster.animate({
+      rosterPromise = roster.animate({
          right: ((roster_width + roster_right) * -1) + 'px'
-      }, duration);
+      }, duration).promise();
       wl.animate({
          right: (10 - roster_right) + 'px'
-      }, duration);
+      }, duration).promise().done(function() {
+         jsxc.gui.updateWindowListSB();
+      });
 
       $(document).trigger('toggle.roster.jsxc', [state, duration]);
+
+      return rosterPromise;
    },
 
    /**
@@ -1874,7 +1908,7 @@ jsxc.gui.window = {
          return jsxc.gui.window.get(bid);
       }
 
-      var win = jsxc.gui.windowTemplate.clone().attr('data-bid', bid).hide().appendTo('#jsxc_windowList > ul').show('slow');
+      var win = jsxc.gui.windowTemplate.clone().attr('data-bid', bid).appendTo('#jsxc_windowList > ul');
       var data = jsxc.storage.getUserItem('buddy', bid);
 
       // Attach jid to window
@@ -1882,7 +1916,24 @@ jsxc.gui.window = {
 
       // Add handler
 
-      jsxc.gui.toggleList.call(win.find('.jsxc_settings'));
+      // @TODO generalize this. Duplicate of jsxc.roster.add
+      var expandClick = function() {
+         win.trigger('extra.jsxc');
+
+         $('body').click();
+
+         if (!win.find('.jsxc_menu').hasClass('jsxc_open')) {
+            win.find('.jsxc_menu').addClass('jsxc_open');
+
+            $('body').one('click', function() {
+               win.find('.jsxc_menu').removeClass('jsxc_open');
+            });
+         }
+
+         return false;
+      };
+
+      win.find('.jsxc_more').click(expandClick);
 
       win.find('.jsxc_verification').click(function() {
          jsxc.gui.showVerification(bid);
@@ -1953,8 +2004,6 @@ jsxc.gui.window = {
          distance: '3px'
       });
 
-      win.find('.jsxc_fade').hide();
-
       win.find('.jsxc_name').disableSelection();
 
       win.find('.slimScrollDiv').resizable({
@@ -1962,16 +2011,17 @@ jsxc.gui.window = {
          minHeight: 234,
          minWidth: 250,
          resize: function(event, ui) {
-            win.width(ui.size.width);
-            win.find('.jsxc_textarea').slimScroll({
-               height: ui.size.height
-            });
-            var offset = win.find('.slimScrollDiv').position().top;
-            win.find('.jsxc_emoticons').css('top', (ui.size.height + offset + 6) + 'px');
-
-            $(document).trigger('resize.window.jsxc', [win, bid, ui.size]);
+            jsxc.gui.window.resize(win, ui);
+         },
+         start: function() {
+            win.removeClass('jsxc_normal');
+         },
+         stop: function() {
+            win.addClass('jsxc_normal');
          }
       });
+
+      win.find('.jsxc_window').css('bottom', -1 * win.find('.jsxc_fade').height());
 
       if ($.inArray(bid, jsxc.storage.getUserItem('windowlist')) < 0) {
 
@@ -2000,7 +2050,7 @@ jsxc.gui.window = {
             win.find('input').val(win.find('input').val() + ins);
             win.find('input').focus();
          });
-         win.find('.jsxc_emoticons ul').append(li);
+         win.find('.jsxc_emoticons ul').prepend(li);
       });
 
       jsxc.gui.toggleList.call(win.find('.jsxc_emoticons'));
@@ -2024,6 +2074,76 @@ jsxc.gui.window = {
    },
 
    /**
+    * Resize given window to given size. If no size is provided the window is resized to the default size.
+    * 
+    * @param  {string|jquery} win Bid or window object
+    * @param  {object} ui    The size has to be in the format {size:{width: [INT], height: [INT]}}
+    * @param  {[type]} outer If true the given size is used as outer dimensions.
+    */
+   resize: function(win, ui, outer) {
+      var bid;
+
+      if (typeof win === 'object') {
+         bid = win.attr('data-bid');
+      } else if (typeof win === 'string') {
+         bid = win;
+         win = jsxc.gui.window.get(bid);
+      } else {
+         jsxc.warn('jsxc.gui.window.resize has to be called either with bid or window object.');
+         return;
+      }
+
+      if (!win.attr('data-default-height')) {
+         win.attr('data-default-height', win.find('.ui-resizable').height());
+      }
+
+      if (!win.attr('data-default-width')) {
+         win.attr('data-default-width', win.find('.ui-resizable').width());
+      }
+
+      var outer_height_diff = (outer) ? win.find('.jsxc_window').outerHeight() - win.find('.ui-resizable').height() : 0;
+
+      ui = $.extend({
+         size: {
+            width: parseInt(win.attr('data-default-width')),
+            height: parseInt(win.attr('data-default-height')) + outer_height_diff
+         }
+      }, ui || {});
+
+      if (outer) {
+         ui.size.height -= outer_height_diff;
+      }
+
+      win.find('.slimScrollDiv').css({
+         width: ui.size.width,
+         height: ui.size.height
+      });
+
+      win.width(ui.size.width);
+
+      win.find('.jsxc_textarea').slimScroll({
+         height: ui.size.height
+      });
+
+      // var offset = win.find('.slimScrollDiv').position().top;
+      //win.find('.jsxc_emoticons').css('top', (ui.size.height + offset + 6) + 'px');
+
+      $(document).trigger('resize.window.jsxc', [win, bid, ui.size]);
+   },
+
+   fullsize: function(bid) {
+      var win = jsxc.gui.window.get(bid);
+      var size = jsxc.options.viewport.getSize();
+
+      size.width -= 10;
+      size.height -= win.find('.jsxc_bar').outerHeight() + win.find('.jsxc_textinput').outerHeight();
+
+      jsxc.gui.window.resize(win, {
+         size: size
+      });
+   },
+
+   /**
     * Returns the window element
     * 
     * @param {String} bid
@@ -2042,28 +2162,9 @@ jsxc.gui.window = {
     */
    open: function(bid) {
       var win = jsxc.gui.window.init(bid);
+
       jsxc.gui.window.show(bid);
       jsxc.gui.window.highlight(bid);
-
-      var padding = $("#jsxc_windowListSB").width();
-      var innerWidth = $('#jsxc_windowList>ul').width();
-      var outerWidth = $('#jsxc_windowList').width() - padding;
-
-      if (innerWidth > outerWidth) {
-         var offset = parseInt($('#jsxc_windowList>ul').css('right'));
-         var width = win.outerWidth(true);
-
-         var right = innerWidth - win.position().left - width + offset;
-         var left = outerWidth - (innerWidth - win.position().left) - offset;
-
-         if (left < 0) {
-            jsxc.gui.scrollWindowListBy(left * -1);
-         }
-
-         if (right < 0) {
-            jsxc.gui.scrollWindowListBy(right);
-         }
-      }
 
       return win;
    },
@@ -2099,11 +2200,8 @@ jsxc.gui.window = {
     * @param {String} bid
     */
    _close: function(bid) {
-      jsxc.gui.window.get(bid).hide('slow', function() {
-         $(this).remove();
-
-         jsxc.gui.updateWindowListSB();
-      });
+      jsxc.gui.window.get(bid).remove();
+      jsxc.gui.updateWindowListSB();
    },
 
    /**
@@ -2119,7 +2217,7 @@ jsxc.gui.window = {
          return;
       }
 
-      if (win.find('.jsxc_fade').is(':hidden')) {
+      if (win.hasClass('jsxc_min')) {
          jsxc.gui.window.show(bid);
       } else {
          jsxc.gui.window.hide(bid);
@@ -2137,7 +2235,7 @@ jsxc.gui.window = {
 
       jsxc.storage.updateUserItem('window', bid, 'minimize', false);
 
-      jsxc.gui.window._show(bid);
+      return jsxc.gui.window._show(bid);
    },
 
    /**
@@ -2148,8 +2246,41 @@ jsxc.gui.window = {
     */
    _show: function(bid) {
       var win = jsxc.gui.window.get(bid);
-      jsxc.gui.window.get(bid).find('.jsxc_fade').slideDown();
-      win.removeClass('jsxc_min');
+      var rosterPromise, windowPromise;
+
+      if (jsxc.isExtraSmallDevice()) {
+         if (parseFloat($('#jsxc_roster').css('right')) >= 0) {
+            rosterPromise = jsxc.gui.roster.toggle();
+         }
+
+         jsxc.gui.window.hide();
+         jsxc.gui.window.fullsize(bid);
+      }
+
+      win.removeClass('jsxc_min').addClass('jsxc_normal');
+      win.find('.jsxc_window').css('bottom', '0');
+
+      $.when(rosterPromise).done(function() {
+         var padding = $("#jsxc_windowListSB").width();
+         var innerWidth = $('#jsxc_windowList>ul').width();
+         var outerWidth = $('#jsxc_windowList').width() - padding;
+
+         if (innerWidth > outerWidth) {
+            var offset = parseInt($('#jsxc_windowList>ul').css('right'));
+            var width = win.outerWidth(true);
+
+            var right = innerWidth - win.position().left - width + offset;
+            var left = outerWidth - (innerWidth - win.position().left) - offset;
+
+            if (left < 0) {
+               jsxc.gui.scrollWindowListBy(left * -1);
+            }
+
+            if (right < 0) {
+               jsxc.gui.scrollWindowListBy(right);
+            }
+         }
+      });
 
       // If the area is hidden, the scrolldown function doesn't work. So we
       // call it here.
@@ -2160,17 +2291,33 @@ jsxc.gui.window = {
       }
 
       win.trigger('show.window.jsxc');
+
+      return windowPromise;
    },
 
    /**
     * Minimize text area and save
     * 
-    * @param {String} bid
+    * @param {String} [bid]
     */
    hide: function(bid) {
-      jsxc.storage.updateUserItem('window', bid, 'minimize', true);
+      var hide = function(bid) {
+         jsxc.storage.updateUserItem('window', bid, 'minimize', true);
 
-      jsxc.gui.window._hide(bid);
+         jsxc.gui.window._hide(bid);
+      };
+
+      if (bid) {
+         hide(bid);
+      } else {
+         $('#jsxc_windowList > ul > li').each(function() {
+            var el = $(this);
+
+            if (!el.hasClass('jsxc_min')) {
+               hide(el.attr('data-bid'));
+            }
+         });
+      }
    },
 
    /**
@@ -2179,9 +2326,12 @@ jsxc.gui.window = {
     * @param {String} bid
     */
    _hide: function(bid) {
-      jsxc.gui.window.get(bid).addClass('jsxc_min').find(' .jsxc_fade').slideUp();
+      var win = jsxc.gui.window.get(bid);
 
-      jsxc.gui.window.get(bid).trigger('hidden.window.jsxc');
+      win.removeClass('jsxc_normal').addClass('jsxc_min');
+      win.find('.jsxc_window').css('bottom', -1 * win.find('.jsxc_fade').height());
+
+      win.trigger('hidden.window.jsxc');
    },
 
    /**
@@ -2346,6 +2496,10 @@ jsxc.gui.window = {
          jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div style="clear:both"/>');
       } else if (typeof post.stamp !== 'undefined') {
          msgDiv.append(msgTsDiv);
+      }
+
+      if (direction !== 'sys') {
+         $('[data-bid="' + bid + '"]').find('.jsxc_lastmsg .jsxc_text').html(msg);
       }
 
       win.find('.jsxc_textarea').append(msgDiv);

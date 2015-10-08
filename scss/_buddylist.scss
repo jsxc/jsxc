@@ -5,64 +5,7 @@
     padding: 0;
     margin: 0;
     width: 204px;
-
-    li {
-        padding: 0;
-        margin: 0;
-        height: 30px;
-        border-bottom: 1px solid $roster_bottom_border_top;
-        cursor: pointer;
-        width: 200px;
-        position: relative;
-        color: $roster_color;
-        font-family: $font_sans;
-        line-height: 30px;
-        padding-left: 3px;
-        z-index: 85;
-        overflow: hidden;
-
-        &.jsxc_expand {
-            height: 54px;
-
-            .jsxc_avatar {
-                width: 48px;
-                height: 48px;
-
-                img {
-                    width: 48px;
-                    height: 48px;
-                }
-            }
-        }
-
-        &:hover .jsxc_avatar {
-            @extend %avatar-icon;
-        }
-
-        &.jsxc_bookmarked {
-            .jsxc_avatar:after {
-                content: " ";
-                width: 20%;
-                height: 30%;
-                position: absolute;
-                top: 0;
-                right: 2px;
-                background-size: contain;
-                background-repeat: no-repeat;
-                background-image: image-url("bookmark_red.svg");
-            }
-
-            .jsxc_bookmarkOptions {
-                text-indent: 9999px;
-                background-image: image-url("gear_white.svg");
-                background-size: 15px 15px;
-            }
-        }
-    }
-
-    .jsxc_name {
-        padding-right: 30px;
-    }
+    z-index: 85;
 
     .jsxc_unreadMsg {
         .jsxc_name {
@@ -71,7 +14,9 @@
     }
 
     .jsxc_oneway {
-        opacity: 0.7;
+        .jsxc_avatar, .jsxc_caption {
+            opacity: 0.7;
+        }
     }
 
     .jsxc_right {
@@ -91,41 +36,8 @@
         }
     }
 
-    .jsxc_unread {
-        margin-right: 30px;
-        margin-top: 6px;
-    }
-
-    .jsxc_control {
-        position: absolute;
-        width: 30px;
-        height: 30px;
-        top: 0;
-        right: 0;
-        cursor: pointer;
-
-        &:after {
-            content: '▾';
-            position: absolute;
-            left: 50%;
-            top: 15px;
-            width: 16px;
-            height: 16px;
-            line-height: 16px;
-            text-align: center;
-            margin-left: -8px;
-            margin-top: -8px;
-            border-radius: 8px;
-            color: $roster_icon_color;
-            background-color: $roster_icon_bg;
-            opacity: 0.6;
-            transition: transform 0.5s;
-        }
-
-        &:hover:after {
-            color: $white;
-            opacity: 1.0;
-        }
+    .jsxc_more {
+        margin-right: 6px;
     }
 
     .jsxc_options {
@@ -148,29 +60,6 @@
                 opacity: 1;
             }
         }
-    }
-
-    .jsxc_chaticon {
-        background-image: image-url("speech_balloon_white.svg");
-        background-size: 15px 15px;
-    }
-
-    .jsxc_videoicon {
-        background-image: image-url("camera_icon_white.svg");
-        background-size: 13px 13px;
-    }
-
-    .jsxc_vcardicon {
-        font-size: 15px;
-        line-height: 20px;
-        text-align: center;
-        color: $white;
-        font-weight: bold;
-        font-family: $font_serif;
-    }
-
-    li.jsxc_expand .jsxc_control:after {
-        transform: rotate(180deg);
     }
 
     &.jsxc_hideOffline {

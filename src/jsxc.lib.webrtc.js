@@ -254,7 +254,7 @@ jsxc.webrtc = {
       }
 
       var div = $('<div>').addClass('jsxc_video');
-      win.find('.jsxc_transfer:eq(1)').after(div);
+      win.find('.jsxc_tools .jsxc_settings').after(div);
 
       self.updateIcon(jsxc.jidToBid(win.data('jid')));
    },
@@ -575,13 +575,16 @@ jsxc.webrtc = {
       this.localStream = null;
       this.remoteStream = null;
 
-      var win = $('#jsxc_dialog .jsxc_chatarea > ul > li');
+      var win = $('#jsxc_webrtc .jsxc_chatarea > ul > li');
       $('#jsxc_windowList > ul').prepend(win.detach());
       win.find('.slimScrollDiv').resizable('enable');
+      jsxc.gui.window.resize(win);
 
       $(document).off('cleanup.dialog.jsxc');
       $(document).off('error.jingle');
+
       jsxc.gui.dialog.close();
+      $('#jsxc_webrtc').remove();
 
       jsxc.gui.window.postMessage(bid, 'sys', ($.t('Call_terminated') + (reason ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.'));
    },
@@ -617,9 +620,9 @@ jsxc.webrtc = {
       this.setStatus(isAudioDevice ? 'Use remote audio device.' : 'No remote audio device');
 
       if ($('.jsxc_remotevideo').length) {
-         this.attachMediaStream($('#jsxc_dialog .jsxc_remotevideo'), stream);
+         this.attachMediaStream($('#jsxc_webrtc .jsxc_remotevideo'), stream);
 
-         $('#jsxc_dialog .jsxc_' + (isVideoDevice ? 'remotevideo' : 'noRemoteVideo')).addClass('jsxc_deviceAvailable');
+         $('#jsxc_webrtc .jsxc_' + (isVideoDevice ? 'remotevideo' : 'noRemoteVideo')).addClass('jsxc_deviceAvailable');
       }
    },
 
@@ -667,8 +670,8 @@ jsxc.webrtc = {
 
       if (state === 'connected') {
 
-         $('#jsxc_dialog .jsxc_deviceAvailable').show();
-         $('#jsxc_dialog .bubblingG').hide();
+         $('#jsxc_webrtc .jsxc_deviceAvailable').show();
+         $('#jsxc_webrtc .bubblingG').hide();
 
       } else if (state === 'failed') {
          jsxc.gui.window.postMessage(jsxc.jidToBid(session.peerID), 'sys', $.t('ICE_connection_failure'));
@@ -855,129 +858,137 @@ jsxc.webrtc = {
 jsxc.gui.showVideoWindow = function(jid) {
    var self = jsxc.webrtc;
 
-   $(document).one('complete.dialog.jsxc', function() {
-
-      // mute own video element to avoid echoes
-      $('#jsxc_dialog .jsxc_localvideo')[0].muted = true;
-      $('#jsxc_dialog .jsxc_localvideo')[0].volume = 0;
-
-      var rv = $('#jsxc_dialog .jsxc_remotevideo');
-      var lv = $('#jsxc_dialog .jsxc_localvideo');
-
-      lv.draggable({
-         containment: "parent"
-      });
-
-      self.attachMediaStream(lv, self.localStream);
-
-      var w_dialog = $('#jsxc_dialog').width();
-      var w_remote = rv.width();
-
-      // fit in video
-      if (w_remote > w_dialog) {
-         var scale = w_dialog / w_remote;
-         var new_h = rv.height() * scale;
-         var new_w = w_dialog;
-         var vc = $('#jsxc_dialog .jsxc_videoContainer');
-
-         rv.height(new_h);
-         rv.width(new_w);
-
-         vc.height(new_h);
-         vc.width(new_w);
-
-         lv.height(lv.height() * scale);
-         lv.width(lv.width() * scale);
-      }
-
-      if (self.remoteStream) {
-         self.attachMediaStream(rv, self.remoteStream);
-
-         $('#jsxc_dialog .jsxc_' + (self.remoteStream.getVideoTracks().length > 0 ? 'remotevideo' : 'noRemoteVideo')).addClass('jsxc_deviceAvailable');
-      }
-
-      var toggleMulti = function(elem, open) {
-         $('#jsxc_dialog .jsxc_multi > div').not(elem).slideUp();
-
-         var opt = {
-            complete: jsxc.gui.dialog.resize
-         };
-
-         if (open) {
-            elem.slideDown(opt);
-         } else {
-            elem.slideToggle(opt);
-         }
-      };
-
-      var win = jsxc.gui.window.open(jsxc.jidToBid(jid));
-
-      win.find('.slimScrollDiv').resizable('disable');
-      win.find('.jsxc_textarea').slimScroll({
-         height: 413
-      });
-      win.find('.jsxc_emoticons').css('top', (413 + 6) + 'px');
-
-      $('#jsxc_dialog .jsxc_chatarea ul').append(win.detach());
-
-      $('#jsxc_dialog .jsxc_hangUp').click(function() {
-         jsxc.webrtc.hangUp('success');
-      });
-
-      $('#jsxc_dialog .jsxc_snapshot').click(function() {
-         jsxc.webrtc.snapshot(rv);
-         toggleMulti($('#jsxc_dialog .jsxc_snapshotbar'), true);
-      });
-
-      $('#jsxc_dialog .jsxc_snapshots').click(function() {
-         toggleMulti($('#jsxc_dialog .jsxc_snapshotbar'));
-      });
-
-      $('#jsxc_dialog .jsxc_showchat').click(function() {
-         var chatarea = $('#jsxc_dialog .jsxc_chatarea');
-
-         if (chatarea.is(':hidden')) {
-            chatarea.show();
-            $('#jsxc_dialog .jsxc_webrtc').width('900');
-            jsxc.gui.dialog.resize({
-               width: '920px'
-            });
-         } else {
-            chatarea.hide();
-            $('#jsxc_dialog .jsxc_webrtc').width('650');
-            jsxc.gui.dialog.resize({
-               width: '660px'
-            });
-         }
-      });
-
-      $('#jsxc_dialog .jsxc_fullscreen').click(function() {
-
-         if ($.support.fullscreen) {
-            // Reset position of localvideo
-            $(document).one('disabled.fullscreen', function() {
-               lv.removeAttr('style');
-            });
-
-            $('#jsxc_dialog .jsxc_videoContainer').fullscreen();
-         }
-      });
-
-      $('#jsxc_dialog .jsxc_volume').change(function() {
-         rv[0].volume = $(this).val();
-      });
-
-      $('#jsxc_dialog .jsxc_volume').dblclick(function() {
-         $(this).val(0.5);
-      });
-   });
-
    // needed to trigger complete.dialog.jsxc
    jsxc.gui.dialog.close();
 
-   return jsxc.gui.dialog.open(jsxc.gui.template.get('videoWindow'), {
-      noClose: true
+   $('body').append(jsxc.gui.template.get('videoWindow'));
+
+   // mute own video element to avoid echoes
+   $('#jsxc_webrtc .jsxc_localvideo')[0].muted = true;
+   $('#jsxc_webrtc .jsxc_localvideo')[0].volume = 0;
+
+   var rv = $('#jsxc_webrtc .jsxc_remotevideo');
+   var lv = $('#jsxc_webrtc .jsxc_localvideo');
+
+   lv.draggable({
+      containment: "parent"
    });
+
+   if (self.localStream) {
+      self.attachMediaStream(lv, self.localStream);
+   }
+
+   var w_dialog = $('#jsxc_webrtc').width();
+   var w_remote = rv.width();
+
+   // fit in video
+   if (w_remote > w_dialog) {
+      var scale = w_dialog / w_remote;
+      var new_h = rv.height() * scale;
+      var new_w = w_dialog;
+      var vc = $('#jsxc_webrtc .jsxc_videoContainer');
+
+      rv.height(new_h);
+      rv.width(new_w);
+
+      vc.height(new_h);
+      vc.width(new_w);
+
+      lv.height(lv.height() * scale);
+      lv.width(lv.width() * scale);
+   }
+
+   if (self.remoteStream) {
+      self.attachMediaStream(rv, self.remoteStream);
+
+      $('#jsxc_webrtc .jsxc_' + (self.remoteStream.getVideoTracks().length > 0 ? 'remotevideo' : 'noRemoteVideo')).addClass('jsxc_deviceAvailable');
+   }
+
+   var toggleMulti = function(elem, open) {
+      $('#jsxc_webrtc .jsxc_multi > div').not(elem).slideUp();
+
+      var opt = {
+         complete: jsxc.gui.dialog.resize
+      };
+
+      if (open) {
+         elem.slideDown(opt);
+      } else {
+         elem.slideToggle(opt);
+      }
+   };
+
+   var win = jsxc.gui.window.open(jsxc.jidToBid(jid));
+
+   win.find('.slimScrollDiv').resizable('disable');
+   jsxc.gui.window.resize(win, {
+      size: {
+         width: $('#jsxc_webrtc .jsxc_chatarea').width(),
+         height: $('#jsxc_webrtc .jsxc_chatarea').height()
+      }
+   }, true);
+
+   $('#jsxc_webrtc .jsxc_chatarea ul').append(win.detach());
+
+   $('#jsxc_webrtc .jsxc_hangUp').click(function() {
+      jsxc.webrtc.hangUp('success');
+   });
+
+   $('#jsxc_webrtc .jsxc_snapshot').click(function() {
+      jsxc.webrtc.snapshot(rv);
+      toggleMulti($('#jsxc_webrtc .jsxc_snapshotbar'), true);
+   });
+
+   $('#jsxc_webrtc .jsxc_snapshots').click(function() {
+      toggleMulti($('#jsxc_webrtc .jsxc_snapshotbar'));
+   });
+
+   $('#jsxc_webrtc .jsxc_showchat').click(function() {
+      var chatarea = $('#jsxc_webrtc .jsxc_chatarea');
+
+      if (chatarea.is(':hidden')) {
+         chatarea.show();
+         $('#jsxc_webrtc .jsxc_webrtc').width('900');
+         jsxc.gui.dialog.resize({
+            width: '920px'
+         });
+      } else {
+         chatarea.hide();
+         $('#jsxc_webrtc .jsxc_webrtc').width('650');
+         jsxc.gui.dialog.resize({
+            width: '660px'
+         });
+      }
+   });
+
+   $('#jsxc_webrtc .jsxc_fullscreen').click(function() {
+
+      if ($.support.fullscreen) {
+         // Reset position of localvideo
+         $(document).one('disabled.fullscreen', function() {
+            lv.removeAttr('style');
+         });
+
+         $('#jsxc_webrtc .jsxc_videoContainer').fullscreen();
+      }
+   });
+
+   $('#jsxc_webrtc .jsxc_volume').change(function() {
+      rv[0].volume = $(this).val();
+   });
+
+   $('#jsxc_webrtc .jsxc_volume').dblclick(function() {
+      $(this).val(0.5);
+   });
+
+   $('#jsxc_webrtc .jsxc_videoContainer').toggle(function() {
+      $('#jsxc_webrtc .jsxc_controlbar').css('opacity', '1.0');
+   }, function() {
+      $('#jsxc_webrtc .jsxc_controlbar').css('opacity', '');
+   });
+
+
+   return $('#jsxc_webrtc');
 };
 
 $.extend(jsxc.CONST, {
