@@ -1,5 +1,5 @@
 /*!
- * jsxc v2.1.2 - 2015-08-12
+ * jsxc v2.1.4 - 2015-09-10
  * 
  * This file concatenates all dependencies of jsxc.
  * 
@@ -6555,12 +6555,17 @@ Strophe.addConnectionPlugin('disco',
          if (this._jidVerIndex[jid] && feature !== null && typeof feature !== 'undefined') {
             if(!$.isArray(feature)){
                feature = $.makeArray(feature);
-            };
+            }
             
-            var i;
+            var i, knownCapabilities;
+            knownCapabilities = this._knownCapabilities[this._jidVerIndex[jid]];
+            if (!knownCapabilities) {
+               return null;
+            }
             for (i = 0; i < feature.length; i++) {
-               if (this._knownCapabilities[this._jidVerIndex[jid]]['features'].indexOf(feature[i]) < 0)
+               if (knownCapabilities['features'].indexOf(feature[i]) < 0) {
                   return false;
+               }
             }
             return true;
          }
@@ -6587,7 +6592,7 @@ Strophe.addConnectionPlugin('disco',
          }
 
          localStorage.setItem('strophe.caps._jidVerIndex', JSON.stringify(this._jidVerIndex));
-         $(document).trigger('caps.strophe', [ from ]);
+         $(document).trigger('caps.strophe', [ from, this._knownCapabilities[ver], ver]);
 
          return true;
       },
@@ -6654,7 +6659,7 @@ Strophe.addConnectionPlugin('disco',
 
          localStorage.setItem('strophe.caps._jidVerIndex', JSON.stringify(this._jidVerIndex));
          localStorage.setItem('strophe.caps._knownCapabilities', JSON.stringify(this._knownCapabilities));
-         $(document).trigger('caps.strophe', [ from ]);
+         $(document).trigger('caps.strophe', [ from, this._knownCapabilities[ver], ver ]);
 
          return false;
       },

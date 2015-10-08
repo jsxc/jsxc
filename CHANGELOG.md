@@ -1,3 +1,12 @@
+v2.1.4 / 2015-09-10
+===
+- remove leading at sign from comments in build file
+
+v2.1.3 / 2015-09-08
+===
+- fix bookmark loading
+- show unread notifications only if the chat window has no focus
+
 v2.1.2 / 2015-08-12
 ===
 - update grunt-sass (fix invalid css)
