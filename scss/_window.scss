@@ -1,0 +1,471 @@
+#jsxc_windowList {
+    position: fixed;
+    bottom: 0;
+    right: 210px;
+    left: 0;
+    z-index: 50;
+
+    @media (min-width: 768px) {
+        clip: rect(-10000px, 10000px, 30px, 30px);
+    }
+
+    & > ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        height: 44px;
+        overflow: visible;
+        white-space: nowrap;
+        transition: right 0.5s;
+
+        & > li {
+            padding: 0;
+            margin: 0;
+            display: inline-block;
+            height: 44px;
+            width: 46px;
+            position: relative;
+            overflow: visible;
+            margin-right: 5px;
+            cursor: pointer;
+            white-space: normal;
+
+            &.jsxc_normal {
+                transition: width 0.2s;
+                width: 250px;
+            }
+
+            &.jsxc_min {
+                transition: width 0.2s;
+                width: 46px !important;
+
+                /* overwrite resizeable width */
+
+                @media (min-width: 768px) {
+                    width: 200px !important;
+                }
+
+                .jsxc_emoticons {
+                    display: none;
+                }
+
+                .jsxc_tools {
+                    display: none;
+                }
+            }
+        }
+    }
+}
+
+#jsxc_windowListSB {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 30px;
+    height: 30px;
+
+    @media (max-width: 768px) {
+        display: none;
+    }
+
+    > {
+        div {
+            box-sizing: border-box;
+            width: 14px;
+            height: 100%;
+            background-color: $windowListSB_bg;
+            color: $windowListSB_color;
+            text-align: center;
+            line-height: 30px;
+            float: left;
+            cursor: pointer;
+            user-select: none;
+
+            &:hover {
+                background-color: $windowListSB_bg_hover;
+            }
+        }
+
+        .jsxc_disabled {
+            background-color: $windowListSB_bg_disabled !important;
+            color: $windowListSB_color_disabled;
+            cursor: default !important;
+            display: none;
+        }
+    }
+}
+
+.jsxc_bar {
+    background-color: $window_bar_bg;
+    cursor: pointer;
+    height: 44px;
+    line-height: 26px;
+    padding: 2px;
+    color: $window_bar_color;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+
+    &:hover {
+        .jsxc_normal & {
+            color: $window_bar_color_hover;
+        }
+    }
+
+    .jsxc_tools {
+        &:hover {
+            .jsxc_normal & {
+                color: #000;
+            }
+        }
+    }
+
+    .jsxc_min & {
+        background-color: $window_min_bar_bg;
+        color: $window_min_bar_color;
+    }
+}
+
+.jsxc_window {
+    position: absolute;
+    bottom: 0;
+    top: auto;
+    left: 0;
+    right: 0;
+    height: auto;
+    background-color: $window_bg;
+    z-index: 80;
+    cursor: default;
+    border: 1px solid $window_border;
+    border-bottom: 0;
+
+    .jsxc_min & {
+        transition: bottom 0.2s;
+    }
+
+    .jsxc_normal & {
+        transition: bottom 0.2s;
+    }
+
+    .jsxc_emoticons {
+        height: 44px;
+        width: 44px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        cursor: pointer;
+
+        &:after {
+            content: ' ';
+            background-image: image-url("smiley.svg");
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: 30px 30px;
+            opacity: 0.3;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .jsxc_inner {
+            left: 5px;
+        }
+
+        ul {
+            width: 210px;
+            margin-bottom: 8px;
+            background-color: $emoticon_selection_bg;
+            border-radius: 3px;
+            z-index: 200;
+            list-style-type: none;
+            padding: 3px;
+            position: relative;
+
+            &:after {
+                content: '';
+                position: absolute;
+                border-left: 8px solid transparent;
+                border-right: 8px solid transparent;
+                border-top: 8px solid $emoticon_selection_bg;
+                display: block;
+                width: 0;
+                z-index: 1;
+                left: 7px;
+                top: 100%;
+            }
+        }
+
+        li {
+            div {
+                float: left;
+                cursor: pointer;
+                border-radius: 3px;
+                background-size: 30px 30px;
+                width: 30px;
+                height: 30px;
+
+                &:hover {
+                    background-color: $emoticon_selection_hover;
+                }
+            }
+        }
+
+        &:hover:after {
+            opacity: 0.5;
+        }
+    }
+
+    .jsxc_fade {
+        position: relative;
+    }
+
+    .jsxc_avatar {
+        margin-top: 1px;
+    }
+
+    .jsxc_textarea {
+        width: 100%;
+        overflow: hidden;
+        padding: 3px;
+    }
+
+    .slimScrollDiv {
+        margin: 0 0 6px 0;
+        left: auto !important;
+        top: auto !important;
+    }
+
+    input {
+        &.jsxc_textinput {
+            width: 100%;
+            height: 44px;
+            margin: 0;
+            padding: 3px;
+            padding-left: 40px;
+            outline: none;
+            border-radius: 0;
+            box-sizing: border-box;
+            border: 0;
+        }
+
+        &::placeholder {
+            color: $window_placeholder;
+            opacity: 0.3;
+        }
+    }
+
+    .jsxc_tools {
+        float: right;
+
+        > .jsxc_disabled {
+            opacity: 0.3;
+            cursor: default !important;
+        }
+
+        > div {
+            width: 25px;
+            height: 40px;
+            display: block;
+            float: left;
+            color: $tools_color;
+            font-family: $font_sans;
+            line-height: 40px;
+            cursor: pointer;
+            text-align: center;
+        }
+    }
+
+    .jsxc_close {
+        font-size: 20px;
+
+        &:hover {
+            color: $window_close_hover;
+        }
+    }
+
+    .jsxc_more {
+        background-image: image-url("more_white.svg");
+        opacity: 0.7;
+    }
+
+    .ui-resizable-w {
+        left: 0;
+    }
+
+    .ui-resizable-nw {
+        top: 0;
+        left: 0;
+        width: 15px;
+        height: 15px;
+        z-index: 95 !important;
+        background-image: image-url("resize_gray.svg");
+    }
+
+    .ui-resizable-n {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 15px;
+        z-index: 100;
+    }
+}
+
+.jsxc_chatmessage {
+    margin: 3px;
+    padding: 4px;
+    padding-right: 10px;
+    max-width: 76%;
+    word-wrap: break-word;
+    background-color: $chatmessage_bg;
+    position: relative;
+    outline: none;
+    clear: both;
+
+    a {
+        color: $chatmessage_a;
+        text-decoration: underline;
+    }
+
+    img {
+        width: 19px;
+        height: 19px;
+        background-size: 19px 19px;
+    }
+
+    .jsxc_avatar {
+        display: none;
+    }
+}
+
+.jsxc_timestamp {
+    font-size: 8px;
+    color: $chatmessage_timestamp;
+    line-height: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 100%;
+    text-overflow: ellipsis;
+}
+
+.jsxc_in {
+    float: left;
+    position: relative;
+    margin-left: 10px;
+    border-radius: 3px;
+    background-color: $chatmessage_in_bg;
+
+    &:after {
+        content: ' ';
+        position: absolute;
+        border-style: solid;
+        border-width: 5px 6px 5px 0;
+        border-color: transparent $chatmessage_in_bg;
+        display: block;
+        width: 0;
+        z-index: 1;
+        left: -6px;
+        bottom: 10px;
+    }
+
+    .jsxc_timestamp {
+        float: left;
+    }
+}
+
+.jsxc_out {
+    float: right;
+    position: relative;
+    margin-right: 10px;
+    border-radius: 3px;
+    background-color: $chatmessage_out_bg;
+
+    &:after {
+        content: ' ';
+        position: absolute;
+        border-style: solid;
+        border-width: 5px 0 5px 6px;
+        border-color: transparent $chatmessage_out_bg;
+        display: block;
+        width: 0;
+        z-index: 1;
+        right: -6px;
+        bottom: 10px;
+    }
+
+    &.jsxc_received {
+        &:before {
+            content: '✓';
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 12px;
+            line-height: 12px;
+            color: $chatmessage_received;
+        }
+
+        .jsxc_timestamp {
+            margin-right: 4px;
+        }
+    }
+
+    .jsxc_timestamp {
+        float: right;
+    }
+}
+
+.jsxc_sys {
+    width: auto;
+    max-width: none;
+    padding-right: 4px;
+    box-sizing: border-box;
+    margin-right: 3px;
+    border-radius: 3px;
+}
+
+div.jsxc_settings {
+    position: relative;
+
+    .jsxc_inner {
+        left: auto;
+        top: 100%;
+        right: -6px;
+    }
+}
+
+div.jsxc_transfer {
+    background-image: image-url("padlock_open_black.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 14px 14px;
+    opacity: 0.3;
+    height: 44px;
+    width: 44px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1.0;
+    }
+
+    &.jsxc_fin {
+        opacity: 1.0;
+        background-image: image-url("padlock_close_grey.svg");
+    }
+
+    &.jsxc_enc {
+        opacity: 1.0;
+        background-image: image-url("padlock_close_orange.svg");
+
+        &.jsxc_trust {
+            background-image: image-url("padlock_close_green.svg");
+        }
+    }
+}

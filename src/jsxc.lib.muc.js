@@ -103,11 +103,11 @@ jsxc.muc = {
     * @memberOf jsxc.muc
     */
    initMenu: function() {
-      var li = $('<li>').attr('class', 'jsxc_joinChat').text($.t('Join_chat'));
+      var li = $('<li>').attr('class', 'jsxc_joinChat jsxc_groupcontacticon').text($.t('Join_chat'));
 
       li.click(jsxc.muc.showJoinChat);
 
-      $('#jsxc_menu ul').append(li);
+      $('#jsxc_menu ul .jsxc_about').before(li);
    },
 
    /**
