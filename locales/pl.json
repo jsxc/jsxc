@@ -271,6 +271,15 @@
     "onsmp_explanation_secret": "Twój rozmówca próbuje się z Tobą połączyć. Autoryzacja z rozmówcą,  wpisz hasło.",
     "from_sender": "z __sender__",
     "Verified_private_conversation_started": "Zweryfikowano Rozmowa prywatna rozpoczęta.",
-    "Unverified_private_conversation_started": "Niezweryfikowano Rozmowa prywatna rozpoczęta."
+    "Unverified_private_conversation_started": "Niezweryfikowano Rozmowa prywatna rozpoczęta.",
+    "Bookmark": null,
+    "Auto-join": null,
+    "Edit_bookmark": null,
+    "Room_logging_is_disabled": null,
+    "Room_is_now_non-anoymous": null,
+    "Room_is_now_semi-anonymous": null,
+    "Do_you_want_to_change_the_default_room_configuration": null,
+    "Default": null,
+    "Change": null
   }
 }

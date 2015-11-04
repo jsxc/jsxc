@@ -271,6 +271,15 @@
     "onsmp_explanation_secret": "Tu amigo está tratando de determinar si él o ella está realmente hablando con usted. Para autenticar a su amigo,  especifique el secreto.",
     "from_sender": "de __sender__",
     "Verified_private_conversation_started": "Verificado se inició una conversación privada.",
-    "Unverified_private_conversation_started": "No verificado se inició una conversación privada."
+    "Unverified_private_conversation_started": "No verificado se inició una conversación privada.",
+    "Bookmark": null,
+    "Auto-join": null,
+    "Edit_bookmark": null,
+    "Room_logging_is_disabled": null,
+    "Room_is_now_non-anoymous": null,
+    "Room_is_now_semi-anonymous": null,
+    "Do_you_want_to_change_the_default_room_configuration": null,
+    "Default": null,
+    "Change": null
   }
 }

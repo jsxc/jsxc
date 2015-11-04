@@ -271,6 +271,15 @@
     "onsmp_explanation_secret": "Votre ami tente de déterminer si il ou elle parle vraiment à vous. Vous authentifier à votre ami,  Entrez le mot secret",
     "from_sender": "de __sender__",
     "Verified_private_conversation_started": "Vérifié Conversation privé démarrée.",
-    "Unverified_private_conversation_started": "Non vérifié Conversation privé démarrée."
+    "Unverified_private_conversation_started": "Non vérifié Conversation privé démarrée.",
+    "Bookmark": null,
+    "Auto-join": null,
+    "Edit_bookmark": null,
+    "Room_logging_is_disabled": null,
+    "Room_is_now_non-anoymous": null,
+    "Room_is_now_semi-anonymous": null,
+    "Do_you_want_to_change_the_default_room_configuration": null,
+    "Default": null,
+    "Change": null
   }
 }

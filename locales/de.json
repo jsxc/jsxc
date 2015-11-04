@@ -270,7 +270,16 @@
     "onsmp_explanation_question": "Dein Kontakt versucht herauszufinden ob er wirklich mit dir redet. Um dich gegenüber deinem Kontakt zu verifizieren  gib die Antwort ein und klick auf Antworten.",
     "onsmp_explanation_secret": "Dein Kontakt versucht herauszufinden ob er wirklich mit dir redet. Um dich gegenüber deinem Kontakt zu verifizieren  gib das Geheimnis ein.",
     "from_sender": "von __sender__",
-    "Verified_private_conversation_started": "Verifiziert Private Konversation gestartet.",
-    "Unverified_private_conversation_started": "Unverifiziert Private Konversation gestartet."
+    "Verified_private_conversation_started": "Verifizierte private Konversation gestartet.",
+    "Unverified_private_conversation_started": "Unverifizierte private Konversation gestartet.",
+    "Bookmark": null,
+    "Auto-join": null,
+    "Edit_bookmark": null,
+    "Room_logging_is_disabled": null,
+    "Room_is_now_non-anoymous": null,
+    "Room_is_now_semi-anonymous": null,
+    "Do_you_want_to_change_the_default_room_configuration": null,
+    "Default": null,
+    "Change": null
   }
 }

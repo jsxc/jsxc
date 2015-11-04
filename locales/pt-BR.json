@@ -161,22 +161,22 @@
     "Join_chat": null,
     "Join": null,
     "Room": null,
-    "Nickname": null,
+    "Nickname": "Apelido",
     "left_the_building": null,
     "entered_the_room": null,
-    "is_now_known_as": null,
+    "is_now_known_as": "__oldNickname__ agora é conhecido como __newNickname__",
     "This_room_is": null,
     "muc_hidden": {
       "keyword": null,
-      "description": null
+      "description": "Não pode ser encontrado através de pesquisa"
     },
     "muc_membersonly": {
-      "keyword": null,
-      "description": null
+      "keyword": "apenas para membros",
+      "description": "você precisa estar na lista de membros"
     },
     "muc_moderated": {
       "keyword": null,
-      "description": null
+      "description": "Somente pessoas com \"voice\" podem enviar mensagens"
     },
     "muc_nonanonymous": {
       "keyword": null,
@@ -184,15 +184,15 @@
     },
     "muc_open": {
       "keyword": null,
-      "description": null
+      "description": "Todos podem entrar"
     },
     "muc_passwordprotected": {
       "keyword": null,
-      "description": null
+      "description": "você precisa fornecer a senha correta"
     },
     "muc_persistent": {
       "keyword": null,
-      "description": null
+      "description": "Não será destruída se o último ocupante tiver saído"
     },
     "muc_public": {
       "keyword": null,
@@ -200,26 +200,26 @@
     },
     "muc_semianonymous": {
       "keyword": null,
-      "description": null
+      "description": "Sua identificação jabber só é exposta para administradores da sala"
     },
     "muc_temporary": {
       "keyword": null,
-      "description": null
+      "description": "Será destruída se o último ocupante tiver saído"
     },
     "muc_unmoderated": {
       "keyword": null,
-      "description": null
+      "description": "Todos tem permissão de enviar mensagens"
     },
     "muc_unsecured": {
       "keyword": null,
-      "description": null
+      "description": "Você não precisa de senha para entrar"
     },
     "Continue": null,
     "Server": null,
     "Rooms_are_loaded": null,
     "Could_load_only": null,
     "muc_explanation": null,
-    "You_already_joined_this_room": null,
+    "You_already_joined_this_room": "Você já entrou nesta sala",
     "This_room_will_be_closed": null,
     "Room_not_found_": null,
     "Loading_room_information": null,
@@ -229,10 +229,10 @@
     "muc_removed_kicked": null,
     "muc_removed_info_kicked": null,
     "muc_removed_banned": null,
-    "muc_removed_info_banned": null,
+    "muc_removed_info_banned": "__nickname__ foi banido da sala",
     "muc_removed_affiliation": null,
     "muc_removed_info_affiliation": null,
-    "muc_removed_membersonly": null,
+    "muc_removed_membersonly": "Você foi removido da sala pois a sala foi alterada somente para membros e você não é um membro",
     "muc_removed_info_membersonly": null,
     "muc_removed_shutdown": null,
     "Reason": null,
@@ -261,7 +261,7 @@
     "No_local_audio_device": null,
     "No_local_video_device": null,
     "Ok": null,
-    "PermissionDeniedError": null,
+    "PermissionDeniedError": "Você ou seu navegador negou permissão para acessar audio/video",
     "Use_local_audio_device": null,
     "Use_local_video_device": null,
     "is_": "é __status__",
@@ -271,6 +271,15 @@
     "onsmp_explanation_secret": "Seu contato está tentando determinar se ele realmente está falando contigo. Para autenticar seu contato,  escreva a senha.",
     "from_sender": "de __sender__",
     "Verified_private_conversation_started": "Verificado Conversa privada iniciada.",
-    "Unverified_private_conversation_started": "Não verificado Conversa privada iniciada."
+    "Unverified_private_conversation_started": "Não verificado Conversa privada iniciada.",
+    "Bookmark": "Favoritos",
+    "Auto-join": "Entrar Automaticamente",
+    "Edit_bookmark": "Editar favoritos",
+    "Room_logging_is_disabled": "Registro de log na sala está desativado",
+    "Room_is_now_non-anoymous": "A sala é não anônima agora",
+    "Room_is_now_semi-anonymous": "A sala é semi anônima agora",
+    "Do_you_want_to_change_the_default_room_configuration": "Você quer alterar as configurações da sala?",
+    "Default": "Padrão",
+    "Change": "Alterar"
   }
 }
