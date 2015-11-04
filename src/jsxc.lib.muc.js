@@ -670,12 +670,6 @@ jsxc.muc = {
          jsxc.muc.scrollMemberListBy(bid, 0);
       });
 
-      // update emoticon button
-      setTimeout(function() {
-         var top = win.find('.jsxc_emoticons').position().top + win.find('.slimScrollDiv').position().top;
-         win.find('.jsxc_emoticons').css('top', top + 'px');
-      }, 400);
-
       var destroy = $('<li>');
       destroy.text($.t('Destroy'));
       destroy.addClass('jsxc_destroy');

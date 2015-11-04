@@ -181,39 +181,23 @@ ul.jsxc_vCard {
 /** Spot which is attached to xmpp: uris */
 .jsxc_spot {
     display: inline-block;
-    width: 10px;
-    height: 10px;
-    background-color: $white;
-    border-radius: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
     text-indent: -99999em;
     margin-top: 3px;
     margin-right: 5px;
-    border: 1px solid $spot_border !important;
     line-height: 100%;
     cursor: pointer;
+    border: 1px solid $spot_border;
+    background-color: $white;
 
-    &.jsxc_online {
-        background-color: $state_online;
+    &:before {
+        position: absolute;
     }
 
-    &.jsxc_chat {
-        background-color: $state_chat;
-    }
-
-    &.jsxc_away {
-        background-color: $state_away;
-    }
-
-    &.jsxc_xa {
-        background-color: $state_xa;
-    }
-
-    &.jsxc_dnd {
-        background-color: $state_dnd;
-    }
-
-    &.jsxc_offline {
-        background-color: $state_offline;
+    &.jsxc_online, &.jsxc_chat, &.jsxc_away, &.jsxc_xa, &.jsxc_dnd, &.jsxc_offline {
+        border: 0;
     }
 }
 
@@ -391,6 +375,7 @@ img.jsxc_vCard {
     a {
         color: #000;
         opacity: 0.5;
+        white-space: nowrap;
 
         &:hover {
             text-decoration: none;

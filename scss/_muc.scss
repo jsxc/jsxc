@@ -8,7 +8,11 @@
 .jsxc_windowItem {
     &.jsxc_groupchat {
         .jsxc_fade {
-            padding-top: 30px;
+            padding-top: 44px;
+
+            .jsxc_min & {
+                padding-top: 0px;
+            }
         }
 
         .jsxc_video {
@@ -35,14 +39,18 @@
         }
 
         .jsxc_chatmessage.jsxc_in {
-            margin-left: 40px;
+            margin-left: 50px;
 
             .jsxc_avatar {
                 display: block;
                 position: absolute;
                 bottom: 0px;
-                left: -37px;
+                left: -50px;
                 background-color: #777;
+
+                &:before {
+                    display: none;
+                }
             }
         }
 
@@ -54,7 +62,7 @@
     }
 
     .jsxc_memberlist {
-        height: 30px;
+        height: 44px;
         width: 100%;
         background-color: $window_bar_bg;
         overflow: hidden;
@@ -71,6 +79,9 @@
             overflow: hidden;
             transition: left 400ms;
             padding: 0px;
+            padding-left: 6px;
+            padding-right: 6px;
+            padding-top: 3px;
 
             & > li {
                 display: inline-block;
