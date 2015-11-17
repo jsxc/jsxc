@@ -525,11 +525,6 @@ ul.jsxc_vCard {
             box-sizing: border-box;
             text-align: right;
         }
-
-        &::placeholder {
-            color: $window_placeholder;
-            opacity: 0.3;
-        }
     }
 
     .jsxc_tools {

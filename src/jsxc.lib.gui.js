@@ -1929,6 +1929,9 @@ jsxc.gui.window = {
             return;
          }
 
+         ev.stopPropagation();
+         ev.preventDefault();
+
          jsxc.gui.window.postMessage(bid, 'out', $(this).val());
 
          $(this).val('');
