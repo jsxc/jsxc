@@ -1,5 +1,5 @@
 /*!
- * jsxc v2.1.4 - 2015-09-10
+ * jsxc v2.1.5 - 2015-11-17
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 2.1.4
+ * @version 2.1.5
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '2.1.4',
+   version: '2.1.5',
 
    /** True if i'm the master */
    master: false,
@@ -3988,6 +3988,9 @@ jsxc.gui.window = {
             return;
          }
 
+         ev.stopPropagation();
+         ev.preventDefault();
+
          jsxc.gui.window.postMessage(bid, 'out', $(this).val());
 
          $(this).val('');
@@ -7857,6 +7860,11 @@ jsxc.webrtc = {
       }
    },
 
+   onConnected: function() {
+      //Request new credentials after login
+      jsxc.storage.removeUserItem('iceValidity');
+   },
+
    onDisconnected: function() {
       var self = jsxc.webrtc;
 
@@ -8760,6 +8768,7 @@ $(document).ready(function() {
    $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
    $(document).on('attached.jsxc', jsxc.webrtc.init);
    $(document).on('disconnected.jsxc', jsxc.webrtc.onDisconnected);
+   $(document).on('connected.jsxc', jsxc.webrtc.onConnected);
 });
 
 /**
