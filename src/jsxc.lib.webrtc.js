@@ -87,6 +87,11 @@ jsxc.webrtc = {
       }
    },
 
+   onConnected: function() {
+      //Request new credentials after login
+      jsxc.storage.removeUserItem('iceValidity');
+   },
+
    onDisconnected: function() {
       var self = jsxc.webrtc;
 
@@ -990,4 +995,5 @@ $(document).ready(function() {
    $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
    $(document).on('attached.jsxc', jsxc.webrtc.init);
    $(document).on('disconnected.jsxc', jsxc.webrtc.onDisconnected);
+   $(document).on('connected.jsxc', jsxc.webrtc.onConnected);
 });
