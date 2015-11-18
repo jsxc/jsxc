@@ -1959,6 +1959,61 @@ jsxc.gui.window = {
          jsxc.gui.window.clear(bid);
       });
 
+      win.find('.jsxc_sendFile').click(function() {
+         var msg = $('<div><div><label><input type="file" name="files" /><label></div></div>');
+         msg.addClass('jsxc_chatmessage jsxc_out');
+
+         win.find('.jsxc_textarea').append(msg);
+
+         msg.find('label').click();
+
+         msg.find('[type="file"]').change(function(ev) {
+            var file = ev.target.files[0]; // FileList object
+
+            if (!file) {
+               return;
+            }
+
+            // @TODO add spinning icon
+            var img = $('<img>').attr('alt', 'preview').addClass('jsxc_preview');
+            msg.empty().append(img);
+
+            if (FileReader && file.type.match(/^image\//)) {
+               var reader = new FileReader();
+
+               reader.onload = function() {
+                  img.attr('src', reader.result);
+               };
+
+               reader.readAsDataURL(file);
+            } else {
+               // @TODO set default icon
+
+               msg.append('<div>' + file.name + ' (' + file.size + ' byte)</div>');
+            }
+
+            $('<button>').text($.t('Send')).click(function() {
+               jsxc.webrtc.sendFile(win.data('jid'), file);
+
+               jsxc.gui.window.postMessage({
+                  bid: bid,
+                  direction: 'out',
+                  attachment: {
+                     name: file.name,
+                     size: file.size,
+                     type: file.type,
+                     data: (file.type.match(/^image\//)) ? img.attr('src') : null
+                  }
+               });
+
+               msg.remove();
+
+            }).appendTo(msg);
+         });
+
+         $('body').click();
+      });
+
       win.find('.jsxc_tools').click(function() {
          return false;
       });
@@ -2380,44 +2435,75 @@ jsxc.gui.window = {
     * @param {object} sender Information about sender
     * @property {string} sender.jid Sender Jid
     * @property {string} sender.name Sender name or nickname
+    * @param {object} attachment Attached data
+    * @property {string} attachment.name File name
+    * @property {string} attachment.size File size
+    * @property {string} attachment.type File type
+    * @property {string} attachment.data File data
     */
-   postMessage: function(bid, direction, msg, encrypted, forwarded, stamp, sender) {
-      var data = jsxc.storage.getUserItem('buddy', bid);
-      var html_msg = msg;
+   postMessage: function(bid, direction, msg, encrypted, forwarded, stamp, sender, attachment) {
+      var mo = {}; //message object
+
+      if (typeof bid === 'object' && bid !== null) {
+         $.extend(mo, bid);
+      } else {
+         mo.bid = bid;
+         mo.direction = direction;
+         mo.msg = msg;
+         mo.encrypted = encrypted;
+         mo.forwarded = forwarded;
+         mo.stamp = stamp;
+         mo.sender = sender;
+         mo.attachment = attachment;
+      }
+
+      var data = jsxc.storage.getUserItem('buddy', mo.bid);
+      var html_msg = mo.msg;
 
       // remove html tags and reencode html tags
-      msg = jsxc.removeHTML(msg);
-      msg = jsxc.escapeHTML(msg);
+      mo.msg = jsxc.removeHTML(mo.msg);
+      mo.msg = jsxc.escapeHTML(mo.msg);
 
       // exceptions:
 
-      if (direction === 'out' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED && forwarded !== true) {
-         direction = 'sys';
+      if (mo.direction === 'out' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED && mo.forwarded !== true) {
+         mo.direction = 'sys';
          msg = $.t('your_message_wasnt_send_please_end_your_private_conversation');
       }
 
-      if (direction === 'in' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED) {
-         direction = 'sys';
-         msg = $.t('unencrypted_message_received') + ' ' + msg;
+      if (mo.direction === 'in' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED) {
+         mo.direction = 'sys';
+         mo.msg = $.t('unencrypted_message_received') + ' ' + msg;
       }
 
-      encrypted = encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
-      var post = jsxc.storage.saveMessage(bid, direction, msg, encrypted, forwarded, stamp, sender);
+      mo.encrypted = mo.encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
+      var post;
+      try {
+         post = jsxc.storage.saveMessage(mo.bid, mo.direction, mo.msg, mo.encrypted, mo.forwarded, mo.stamp, mo.sender, mo.attachment);
+      } catch (err) {
+         jsxc.warn('Unable to save message.');
 
-      if (direction === 'in' && !jsxc.gui.window.get(bid).find('.jsxc_textinput').is(":focus")) {
-         jsxc.gui.unreadMsg(bid);
-
-         $(document).trigger('postmessagein.jsxc', [bid, html_msg]);
+         post = {
+            msg: 'Unable to save that message. Please clear some chat histories.',
+            direction: 'sys',
+            uid: new Date().getTime() + ':msg'
+         };
       }
 
-      if (direction === 'out' && jsxc.master && forwarded !== true) {
-         jsxc.xmpp.sendMessage(bid, html_msg, post.uid);
+      if (mo.direction === 'in' && !jsxc.gui.window.get(mo.bid).find('.jsxc_textinput').is(":focus")) {
+         jsxc.gui.unreadMsg(mo.bid);
+
+         $(document).trigger('postmessagein.jsxc', [mo.bid, html_msg]);
       }
 
-      jsxc.gui.window._postMessage(bid, post);
+      if (mo.direction === 'out' && jsxc.master && mo.forwarded !== true && html_msg) {
+         jsxc.xmpp.sendMessage(mo.bid, html_msg, post.uid);
+      }
 
-      if (direction === 'out' && msg === '?') {
-         jsxc.gui.window.postMessage(bid, 'sys', '42');
+      jsxc.gui.window._postMessage(mo.bid, post);
+
+      if (mo.direction === 'out' && mo.msg === '?') {
+         jsxc.gui.window.postMessage(mo.bid, 'sys', '42');
       }
    },
 
@@ -2490,6 +2576,27 @@ jsxc.gui.window = {
 
       if (post.encrypted) {
          msgDiv.addClass('jsxc_encrypted');
+      }
+
+      if (post.attachment && post.attachment.name) {
+         var attachment = $('<div>');
+         attachment.addClass('jsxc_attachment');
+         attachment.addClass('jsxc_' + post.attachment.type.replace(/\//, '-'));
+         attachment.addClass('jsxc_' + post.attachment.type.replace(/^([^/]+)\/.*/, '$1'));
+
+         if (post.attachment.type.match(/^image\//) && post.attachment.thumbnail) {
+            $('<img alt="preview">').attr('src', post.attachment.thumbnail).attr('title', post.attachment.name).appendTo(attachment);
+         } else {
+            attachment.text(post.attachment.name);
+         }
+
+         if (post.attachment.data) {
+            attachment = $('<a>').append(attachment);
+            attachment.attr('href', post.attachment.data);
+            attachment.attr('download', post.attachment.name);
+         }
+
+         msgDiv.find('div').first().append(attachment);
       }
 
       if (direction === 'sys') {

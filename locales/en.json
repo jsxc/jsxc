@@ -280,6 +280,7 @@
     "Room_is_now_semi-anonymous": "Room is now semi-anonymous",
     "Do_you_want_to_change_the_default_room_configuration": "Do you want to change the default room configuration?",
     "Default": "Default",
-    "Change": "Change"
+    "Change": "Change",
+    "Send_file": "Send file"
   }
 }

@@ -53,12 +53,34 @@ jsxc.webrtc = {
       $(document).on('mediaready.jingle', self.onMediaReady);
       $(document).on('mediafailure.jingle', self.onMediaFailure);
 
-      manager.on('incoming', $.proxy(self.onCallIncoming, self));
-      manager.on('terminated', $.proxy(self.onCallTerminated, self));
-      manager.on('ringing', $.proxy(self.onCallRinging, self));
+      manager.on('incoming', $.proxy(self.onIncoming, self));
 
-      manager.on('peerStreamAdded', $.proxy(self.onRemoteStreamAdded, self));
-      manager.on('peerStreamRemoved', $.proxy(self.onRemoteStreamRemoved, self));
+      // @TODO
+      //manager.on('terminated', $.proxy(self.onCallTerminated, self));
+      //manager.on('ringing', $.proxy(self.onCallRinging, self));
+
+      manager.on('receivedFile', function(sess, file, metadata) {
+         console.warn('file received', file, metadata);
+         window.f = URL.createObjectURL(file);
+         jsxc.gui.window.postMessage({
+            bid: jsxc.jidToBid(sess.peerID),
+            direction: 'in',
+            attachment: {
+               name: metadata.name,
+               type: metadata.type,
+               size: metadata.size,
+               data: URL.createObjectURL(file)
+            }
+         });
+      });
+
+      manager.on('sentFile', function(sess, metadata) {
+         console.warn('sent File', sess, metadata);
+      });
+
+      // @TODO
+      //manager.on('peerStreamAdded', $.proxy(self.onRemoteStreamAdded, self));
+      //manager.on('peerStreamRemoved', $.proxy(self.onRemoteStreamRemoved, self));
 
       manager.on('log:*', function(level, msg) {
          jsxc.debug('[JINGLE][' + level + ']', msg);
@@ -483,6 +505,23 @@ jsxc.webrtc = {
       jsxc.debug('media failure: ' + err.name);
    },
 
+   onIncoming: function(session) {
+      var self = jsxc.webrtc;
+      var type = (session.constructor) ? session.constructor.name : null;
+
+      if (type === 'FileTransferSession') {
+         self.onIncomingFileTransfer(session);
+      } else if (type === 'MediaSession') {
+         self.onIncomingCall(session);
+      }
+   },
+
+   onIncomingFileTransfer: function(session) {
+      jsxc.debug('incoming file transfer from ' + session.peerID);
+
+      session.accept();
+   },
+
    /**
     * Called on incoming call.
     * 
@@ -491,10 +530,10 @@ jsxc.webrtc = {
     * @param event
     * @param sid Session id
     */
-   onCallIncoming: function(session) {
+   onIncomingCall: function(session) {
       jsxc.debug('incoming call from ' + session.peerID);
 
-      var self = this;
+      var self = jsxc.webrtc;
       var bid = jsxc.jidToBid(session.peerID);
 
       session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
@@ -558,9 +597,9 @@ jsxc.webrtc = {
     * @param [text] Optional explanation
     */
    onCallTerminated: function(session, reason) {
-      this.setStatus('call terminated ' + session.peer + (reason ? reason.condition : ''));
+      this.setStatus('call terminated ' + session.peerID + (reason ? reason.condition : ''));
 
-      var bid = jsxc.jidToBid(session.peer);
+      var bid = jsxc.jidToBid(session.peerID);
 
       if (this.localStream) {
          this.localStream.stop();
@@ -847,6 +886,21 @@ jsxc.webrtc = {
       $('.jsxc_snapshotbar').append(link);
 
       canvas.remove();
+   },
+
+   sendFile: function(jid, file) {
+      var self = jsxc.webrtc;
+
+      var sess = self.conn.jingle.manager.createFileTransferSession(jid);
+
+      sess.on('change:sessionState', function() {
+         jsxc.debug('Session state', sess.state);
+      });
+      sess.on('change:connectionState', function() {
+         jsxc.debug('Connection state', sess.connectionState);
+      });
+
+      sess.start(file);
    }
 };
 

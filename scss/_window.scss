@@ -334,13 +334,54 @@
     }
 
     img {
-        width: 19px;
-        height: 19px;
-        background-size: 19px 19px;
+        max-width: 100%;
     }
 
     .jsxc_avatar {
         display: none;
+    }
+
+    .jsxc_attachment {
+        border-radius: 3px;
+        background-color: #fff;
+        padding: 3px;
+        padding-left: 30px;
+        min-height: 30px;
+        margin-bottom: 5px;
+        background-position: 3px center;
+        background-size: 25px 25px;
+        background-repeat: no-repeat;
+        background-image: image-url("filetypes/file.svg");
+
+        img {
+            border-radius: 3px;
+        }
+
+        &.jsxc_image {
+            line-height: 0px;
+            padding: 0;
+            background-image: url();
+        }
+
+        &.jsxc_application {
+            background-image: image-url("filetypes/application.svg");
+        }
+
+        &.jsxc_application-pdf {
+            background-image: image-url("filetypes/application-pdf.svg");
+        }
+
+        &.jsxc_audio {
+            background-image: image-url("filetypes/audio.svg");
+        }
+
+        &.jsxc_video {
+            background-image: image-url("filetypes/video.svg");
+        }
+
+        &.jsxc_text {
+            background-image: image-url("filetypes/text.svg");
+        }
     }
 }
 

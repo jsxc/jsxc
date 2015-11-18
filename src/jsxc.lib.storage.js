@@ -567,15 +567,56 @@ jsxc.storage = {
     * @param encrypted
     * @param forwarded
     * @param sender
+    * @param {object} attachment Attached data
+    * @property {string} attachment.name File name
+    * @property {string} attachment.size File size
+    * @property {string} attachment.type File type
+    * @property {string} attachment.data File data
     * @return post
     */
-   saveMessage: function(bid, direction, msg, encrypted, forwarded, stamp, sender) {
+   saveMessage: function(bid, direction, msg, encrypted, forwarded, stamp, sender, attachment) {
       var chat = jsxc.storage.getUserItem('chat', bid) || [];
 
       var uid = new Date().getTime() + ':msg';
 
       if (chat.length > jsxc.options.get('numberOfMsg')) {
          chat.pop();
+      }
+
+      if (Image && attachment && attachment.type.match(/^image\//i)) {
+         var sHeight, sWidth, sx, sy;
+         var dHeight = 100,
+            dWidth = 100;
+         var canvas = $("<canvas>").get(0);
+
+         canvas.width = dWidth;
+         canvas.height = dHeight;
+
+         var ctx = canvas.getContext("2d");
+         var img = new Image();
+
+         img.src = attachment.data;
+
+         if (img.height > img.width) {
+            sHeight = img.width;
+            sWidth = img.width;
+            sx = 0;
+            sy = (img.height - img.width) / 2;
+         } else {
+            sHeight = img.height;
+            sWidth = img.height;
+            sx = (img.width - img.height) / 2;
+            sy = 0;
+         }
+
+         ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
+
+         attachment.thumbnail = canvas.toDataURL();
+
+         if (direction === 'out') {
+            // save storage
+            attachment.data = null;
+         }
       }
 
       var post = {
@@ -586,7 +627,8 @@ jsxc.storage = {
          encrypted: encrypted || false,
          forwarded: forwarded || false,
          stamp: stamp || new Date().getTime(),
-         sender: sender
+         sender: sender,
+         attachment: attachment
       };
 
       chat.unshift(post);

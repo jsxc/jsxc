@@ -280,6 +280,7 @@
     "Room_is_now_semi-anonymous": null,
     "Do_you_want_to_change_the_default_room_configuration": null,
     "Default": null,
-    "Change": null
+    "Change": null,
+    "Send_file": "Datei senden"
   }
 }
