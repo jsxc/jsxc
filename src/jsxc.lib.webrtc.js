@@ -55,32 +55,71 @@ jsxc.webrtc = {
 
       manager.on('incoming', $.proxy(self.onIncoming, self));
 
-      // @TODO
-      //manager.on('terminated', $.proxy(self.onCallTerminated, self));
-      //manager.on('ringing', $.proxy(self.onCallRinging, self));
+      manager.on('terminated', $.proxy(self.onTerminated, self));
+      manager.on('ringing', $.proxy(self.onCallRinging, self));
 
       manager.on('receivedFile', function(sess, file, metadata) {
-         console.warn('file received', file, metadata);
-         window.f = URL.createObjectURL(file);
-         jsxc.gui.window.postMessage({
-            bid: jsxc.jidToBid(sess.peerID),
-            direction: 'in',
-            attachment: {
-               name: metadata.name,
-               type: metadata.type,
-               size: metadata.size,
-               data: URL.createObjectURL(file)
+         jsxc.debug('file received', metadata.name);
+
+         if (FileReader) {
+            var reader = new FileReader();
+            var type;
+
+            if (!metadata.type) {
+               // detect file type via file extension, because XEP-0234 v0.14 
+               // does not send any type
+               var ext = metadata.name.replace(/.+\.([a-z0-9]+)$/i, '$1').toLowerCase();
+
+               switch (ext) {
+                  case 'jpg':
+                  case 'jpeg':
+                  case 'png':
+                  case 'gif':
+                  case 'svg':
+                     type = 'image/' + ext;
+                     break;
+                  case 'mp3':
+                  case 'wav':
+                     type = 'audio/' + ext;
+                     break;
+                  case 'pdf':
+                     type = 'application/pdf';
+                     break;
+                  case 'txt':
+                     type = 'text/' + ext;
+                     break;
+                  default:
+                     type = 'application/octet-stream';
+               }
+            } else {
+               type = metadata.type;
             }
-         });
+
+            reader.onload = function(ev) {
+               jsxc.gui.window.postMessage({
+                  bid: jsxc.jidToBid(sess.peerID),
+                  direction: 'in',
+                  attachment: {
+                     name: metadata.name,
+                     type: type,
+                     size: metadata.size,
+                     data: ev.target.result
+                  }
+               });
+            };
+
+            reader.readAsDataURL(file);
+         }
       });
 
       manager.on('sentFile', function(sess, metadata) {
-         console.warn('sent File', sess, metadata);
+         jsxc.debug('sent ' + metadata.name);
+
+         //@TODO inform user
       });
 
-      // @TODO
-      //manager.on('peerStreamAdded', $.proxy(self.onRemoteStreamAdded, self));
-      //manager.on('peerStreamRemoved', $.proxy(self.onRemoteStreamRemoved, self));
+      manager.on('peerStreamAdded', $.proxy(self.onRemoteStreamAdded, self));
+      manager.on('peerStreamRemoved', $.proxy(self.onRemoteStreamRemoved, self));
 
       manager.on('log:*', function(level, msg) {
          jsxc.debug('[JINGLE][' + level + ']', msg);
@@ -519,7 +558,12 @@ jsxc.webrtc = {
    onIncomingFileTransfer: function(session) {
       jsxc.debug('incoming file transfer from ' + session.peerID);
 
-      session.accept();
+      var buddylist = jsxc.storage.getUserItem('buddylist') || [];
+
+      if (buddylist.indexOf(jsxc.jidToBid(session.peerID)) > -1) {
+         //Accept file transfers only from contacts
+         session.accept();
+      }
    },
 
    /**
@@ -584,6 +628,15 @@ jsxc.webrtc = {
 
          session.decline();
       });
+   },
+
+   onTerminated: function(session, reason) {
+      var self = jsxc.webrtc;
+      var type = (session.constructor) ? session.constructor.name : null;
+
+      if (type === 'MediaSession') {
+         self.onCallTerminated(session, reason);
+      }
    },
 
    /**
@@ -901,6 +954,9 @@ jsxc.webrtc = {
       });
 
       sess.start(file);
+      //sess.sender.on('progress', function (sent, size) {
+      //@TODO display progress
+      //});
    }
 };
 

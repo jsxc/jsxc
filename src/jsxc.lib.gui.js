@@ -1974,11 +1974,18 @@ jsxc.gui.window = {
                return;
             }
 
-            // @TODO add spinning icon
-            var img = $('<img>').attr('alt', 'preview').addClass('jsxc_preview');
-            msg.empty().append(img);
+            var attachment = $('<div>');
+            attachment.addClass('jsxc_attachment');
+            attachment.addClass('jsxc_' + file.type.replace(/\//, '-'));
+            attachment.addClass('jsxc_' + file.type.replace(/^([^/]+)\/.*/, '$1'));
+
+            msg.empty().append(attachment);
 
             if (FileReader && file.type.match(/^image\//)) {
+               var img = $('<img alt="preview">').attr('title', file.name);
+               img.attr('src', jsxc.options.get('root') + '/img/loading.gif');
+               img.appendTo(attachment);
+
                var reader = new FileReader();
 
                reader.onload = function() {
@@ -1987,9 +1994,7 @@ jsxc.gui.window = {
 
                reader.readAsDataURL(file);
             } else {
-               // @TODO set default icon
-
-               msg.append('<div>' + file.name + ' (' + file.size + ' byte)</div>');
+               attachment.text(file.name + ' (' + file.size + ' byte)');
             }
 
             $('<button>').text($.t('Send')).click(function() {
@@ -2481,7 +2486,7 @@ jsxc.gui.window = {
       try {
          post = jsxc.storage.saveMessage(mo.bid, mo.direction, mo.msg, mo.encrypted, mo.forwarded, mo.stamp, mo.sender, mo.attachment);
       } catch (err) {
-         jsxc.warn('Unable to save message.');
+         jsxc.warn('Unable to save message.', err);
 
          post = {
             msg: 'Unable to save that message. Please clear some chat histories.',
