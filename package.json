@@ -35,6 +35,7 @@
     "grunt-sass": "^1.0.0",
     "grunt-search": "^0.1.6",
     "grunt-shell": "^1.1.2",
-    "grunt-text-replace": "~0.4.0"
+    "grunt-text-replace": "~0.4.0",
+    "node-sass": "3.3.0"
   }
 }
