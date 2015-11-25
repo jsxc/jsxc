@@ -223,6 +223,9 @@ jsxc.options = {
       /** [optional] If set, jsxc requests and uses RTCPeerConfig from this url */
       url: null,
 
+      /** If true, jsxc send cookies when requesting RTCPeerConfig from the url above */
+      withCredentials: false,
+
       /** ICE servers like defined in http://www.w3.org/TR/webrtc/#idl-def-RTCIceServer */
       iceServers: [{
          urls: 'stun:stun.stunprotocol.org'
