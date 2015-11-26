@@ -950,19 +950,8 @@ jsxc.xmpp = {
 
       if (received.length) {
          var receivedId = received.attr('id').replace(/:/, '-');
-         var chat = jsxc.storage.getUserItem('chat', bid);
-         var i;
 
-         for (i = chat.length - 1; i >= 0; i--) {
-            if (chat[i].uid === receivedId) {
-               chat[i].received = true;
-
-               $('#' + receivedId).addClass('jsxc_received');
-
-               jsxc.storage.setUserItem('chat', bid, chat);
-               break;
-            }
-         }
+         jsxc.gui.window.receivedMessage(bid, receivedId);
       }
 
       return true;

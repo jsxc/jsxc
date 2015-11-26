@@ -331,6 +331,7 @@
     a {
         color: $chatmessage_a;
         text-decoration: underline;
+        display: inline-block;
     }
 
     img {
@@ -393,6 +394,7 @@
     white-space: nowrap;
     max-width: 100%;
     text-overflow: ellipsis;
+    clear: both;
 }
 
 .jsxc_in {

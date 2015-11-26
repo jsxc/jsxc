@@ -576,6 +576,7 @@ jsxc.storage = {
     */
    saveMessage: function(bid, direction, msg, encrypted, forwarded, stamp, sender, attachment) {
       var chat = jsxc.storage.getUserItem('chat', bid) || [];
+      var data = null;
 
       var uid = new Date().getTime() + ':msg';
 
@@ -619,6 +620,15 @@ jsxc.storage = {
          }
       }
 
+      if (attachment && attachment.size > jsxc.options.maxStorableSize && direction === 'in') {
+         jsxc.debug('Attachment to large to store');
+
+         data = attachment.data;
+         attachment.data = null;
+
+         //@TODO inform user
+      }
+
       var post = {
          direction: direction,
          msg: msg,
@@ -633,6 +643,10 @@ jsxc.storage = {
 
       chat.unshift(post);
       jsxc.storage.setUserItem('chat', bid, chat);
+
+      if (data && post.attachment) {
+         post.attachment.data = data;
+      }
 
       return post;
    },

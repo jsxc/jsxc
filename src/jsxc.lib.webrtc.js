@@ -1,4 +1,4 @@
-/* global MediaStreamTrack */
+/* global MediaStreamTrack, File */
 /* jshint -W020 */
 
 /**
@@ -59,7 +59,7 @@ jsxc.webrtc = {
       manager.on('ringing', $.proxy(self.onCallRinging, self));
 
       manager.on('receivedFile', function(sess, file, metadata) {
-         jsxc.debug('file received', metadata.name);
+         jsxc.debug('file received', metadata);
 
          if (FileReader) {
             var reader = new FileReader();
@@ -76,7 +76,7 @@ jsxc.webrtc = {
                   case 'png':
                   case 'gif':
                   case 'svg':
-                     type = 'image/' + ext;
+                     type = 'image/' + ext.replace(/^jpg$/, 'jpeg');
                      break;
                   case 'mp3':
                   case 'wav':
@@ -108,14 +108,19 @@ jsxc.webrtc = {
                });
             };
 
+            if (!file.type) {
+               // file type should be handled in lib
+               file = new File([file], metadata.name, {
+                  type: type
+               });
+            }
+
             reader.readAsDataURL(file);
          }
       });
 
       manager.on('sentFile', function(sess, metadata) {
-         jsxc.debug('sent ' + metadata.name);
-
-         //@TODO inform user
+         jsxc.debug('sent ' + metadata.hash);
       });
 
       manager.on('peerStreamAdded', $.proxy(self.onRemoteStreamAdded, self));
@@ -954,9 +959,8 @@ jsxc.webrtc = {
       });
 
       sess.start(file);
-      //sess.sender.on('progress', function (sent, size) {
-      //@TODO display progress
-      //});
+
+      return sess;
    }
 };
 

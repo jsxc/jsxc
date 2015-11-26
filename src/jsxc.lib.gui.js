@@ -1998,9 +1998,9 @@ jsxc.gui.window = {
             }
 
             $('<button>').text($.t('Send')).click(function() {
-               jsxc.webrtc.sendFile(win.data('jid'), file);
+               var sess = jsxc.webrtc.sendFile(win.data('jid'), file);
 
-               jsxc.gui.window.postMessage({
+               var post = jsxc.gui.window.postMessage({
                   bid: bid,
                   direction: 'out',
                   attachment: {
@@ -2008,6 +2008,24 @@ jsxc.gui.window = {
                      size: file.size,
                      type: file.type,
                      data: (file.type.match(/^image\//)) ? img.attr('src') : null
+                  }
+               });
+
+               sess.sender.on('progress', function(sent, size) {
+                  var div = $('#' + post.uid);
+                  var span = div.find('.jsxc_timestamp span');
+
+                  if (span.length === 0) {
+                     div.find('.jsxc_timestamp').append('<span>');
+                     span = div.find('.jsxc_timestamp span');
+                  }
+
+                  span.text(' ' + Math.round(sent / size * 100) + '%');
+
+                  if (sent === size) {
+                     span.remove();
+
+                     jsxc.gui.window.receivedMessage(bid, post.uid);
                   }
                });
 
@@ -2445,6 +2463,7 @@ jsxc.gui.window = {
     * @property {string} attachment.size File size
     * @property {string} attachment.type File type
     * @property {string} attachment.data File data
+    * @return {object} post object
     */
    postMessage: function(bid, direction, msg, encrypted, forwarded, stamp, sender, attachment) {
       var mo = {}; //message object
@@ -2510,6 +2529,8 @@ jsxc.gui.window = {
       if (mo.direction === 'out' && mo.msg === '?') {
          jsxc.gui.window.postMessage(mo.bid, 'sys', '42');
       }
+
+      return post;
    },
 
    /**
@@ -2690,6 +2711,28 @@ jsxc.gui.window = {
    clear: function(bid) {
       jsxc.storage.setUserItem('chat', bid, []);
       jsxc.gui.window.get(bid).find('.jsxc_textarea').empty();
+   },
+
+   /**
+    * Mark message as received.
+    * 
+    * @param  {string} bid
+    * @param  {string} uid message id
+    */
+   receivedMessage: function(bid, uid) {
+      var chat = jsxc.storage.getUserItem('chat', bid);
+      var i;
+
+      for (i = chat.length - 1; i >= 0; i--) {
+         if (chat[i].uid === uid) {
+            chat[i].received = true;
+
+            $('#' + uid).addClass('jsxc_received');
+
+            jsxc.storage.setUserItem('chat', bid, chat);
+            break;
+         }
+      }
    }
 };
 
