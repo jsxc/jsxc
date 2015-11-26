@@ -133,6 +133,9 @@ jsxc.webrtc = {
 
       $.ajax(url, {
          async: true,
+         xhrFields: {
+            withCredentials: jsxc.options.get('RTCPeerConfig').withCredentials
+         },
          success: function(data) {
             var ttl = data.ttl || 3600;
             var iceServers = data.iceServers;
