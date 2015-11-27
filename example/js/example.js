@@ -27,7 +27,7 @@ $(function() {
          SEND_WHITESPACE_TAG: true,
          WHITESPACE_START_AKE: true
       },
-      loadSettings: function(username, password) {
+      loadSettings: function(username, password, cb) {
          cb(settings);
       },
       xmpp: {

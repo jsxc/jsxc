@@ -1,6 +1,6 @@
 {
   "name": "jsxc",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "Real-time chat app",
   "homepage": "http://www.jsxc.org/",
   "bugs": "https://github.com/jsxc/jsxc/issues",
@@ -32,9 +32,10 @@
     "grunt-merge-data": "^0.4.3",
     "grunt-postcss": "^0.2.0",
     "grunt-prettysass": "^0.2.3",
-    "grunt-sass": "^1.0.0",
+    "grunt-sass": "1.0.0",
     "grunt-search": "^0.1.6",
     "grunt-shell": "^1.1.2",
-    "grunt-text-replace": "~0.4.0"
+    "grunt-text-replace": "~0.4.0",
+    "node-sass": "3.3.0"
   }
 }

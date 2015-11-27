@@ -1,3 +1,8 @@
+v2.1.5 / 2015-11-17
+===
+- Reset TURN credentials on login
+- Fix ie<11 textfield
+
 v2.1.4 / 2015-09-10
 ===
 - remove leading at sign from comments in build file

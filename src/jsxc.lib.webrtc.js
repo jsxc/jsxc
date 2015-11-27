@@ -87,6 +87,11 @@ jsxc.webrtc = {
       }
    },
 
+   onConnected: function() {
+      //Request new credentials after login
+      jsxc.storage.removeUserItem('iceValidity');
+   },
+
    onDisconnected: function() {
       var self = jsxc.webrtc;
 
@@ -128,6 +133,9 @@ jsxc.webrtc = {
 
       $.ajax(url, {
          async: true,
+         xhrFields: {
+            withCredentials: jsxc.options.get('RTCPeerConfig').withCredentials
+         },
          success: function(data) {
             var ttl = data.ttl || 3600;
             var iceServers = data.iceServers;
@@ -1001,4 +1009,5 @@ $(document).ready(function() {
    $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
    $(document).on('attached.jsxc', jsxc.webrtc.init);
    $(document).on('disconnected.jsxc', jsxc.webrtc.onDisconnected);
+   $(document).on('connected.jsxc', jsxc.webrtc.onConnected);
 });
