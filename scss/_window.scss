@@ -150,6 +150,12 @@
         transition: bottom 0.2s;
     }
 
+    .jsxc_showOverlay & {
+        .jsxc_overlay {
+            display: block !important;
+        }
+    }
+
     .jsxc_emoticons {
         height: 44px;
         width: 44px;
@@ -222,6 +228,25 @@
 
     .jsxc_fade {
         position: relative;
+
+        .jsxc_overlay {
+            display: none;
+            background-color: rgba(0, 0, 0, 0.5);
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+
+            & > div {
+                background-color: #fff;
+                margin: 30px 10px;
+                padding: 5px;
+                border-radius: 3px;
+                text-align: center;
+            }
+        }
     }
 
     .jsxc_avatar {
