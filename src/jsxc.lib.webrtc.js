@@ -22,8 +22,11 @@ jsxc.webrtc = {
    /** should we auto accept incoming calls? */
    AUTO_ACCEPT: false,
 
-   /** required disco features */
+   /** required disco features for video call */
    reqVideoFeatures: ['urn:xmpp:jingle:apps:rtp:video', 'urn:xmpp:jingle:apps:rtp:audio', 'urn:xmpp:jingle:transports:ice-udp:1', 'urn:xmpp:jingle:apps:dtls:0'],
+
+   /** required disco features for file transfer */
+   reqFileFeatures: ['urn:xmpp:jingle:1', 'urn:xmpp:jingle:apps:file-transfer:3'],
 
    /** bare jid to current jid mapping */
    chatJids: {},
@@ -58,66 +61,7 @@ jsxc.webrtc = {
       manager.on('terminated', $.proxy(self.onTerminated, self));
       manager.on('ringing', $.proxy(self.onCallRinging, self));
 
-      manager.on('receivedFile', function(sess, file, metadata) {
-         jsxc.debug('file received', metadata);
-
-         if (FileReader) {
-            var reader = new FileReader();
-            var type;
-
-            if (!metadata.type) {
-               // detect file type via file extension, because XEP-0234 v0.14 
-               // does not send any type
-               var ext = metadata.name.replace(/.+\.([a-z0-9]+)$/i, '$1').toLowerCase();
-
-               switch (ext) {
-                  case 'jpg':
-                  case 'jpeg':
-                  case 'png':
-                  case 'gif':
-                  case 'svg':
-                     type = 'image/' + ext.replace(/^jpg$/, 'jpeg');
-                     break;
-                  case 'mp3':
-                  case 'wav':
-                     type = 'audio/' + ext;
-                     break;
-                  case 'pdf':
-                     type = 'application/pdf';
-                     break;
-                  case 'txt':
-                     type = 'text/' + ext;
-                     break;
-                  default:
-                     type = 'application/octet-stream';
-               }
-            } else {
-               type = metadata.type;
-            }
-
-            reader.onload = function(ev) {
-               jsxc.gui.window.postMessage({
-                  bid: jsxc.jidToBid(sess.peerID),
-                  direction: 'in',
-                  attachment: {
-                     name: metadata.name,
-                     type: type,
-                     size: metadata.size,
-                     data: ev.target.result
-                  }
-               });
-            };
-
-            if (!file.type) {
-               // file type should be handled in lib
-               file = new File([file], metadata.name, {
-                  type: type
-               });
-            }
-
-            reader.readAsDataURL(file);
-         }
-      });
+      manager.on('receivedFile', $.proxy(self.onReceivedFile, self));
 
       manager.on('sentFile', function(sess, metadata) {
          jsxc.debug('sent ' + metadata.hash);
@@ -545,7 +489,12 @@ jsxc.webrtc = {
 
       self.setStatus('media failure');
 
-      jsxc.gui.window.postMessage(jsxc.jidToBid(jsxc.webrtc.last_caller), 'sys', $.t('Media_failure') + ': ' + $.t(err.name) + ' (' + err.name + ').');
+      jsxc.gui.window.postMessage({
+         bid: jsxc.jidToBid(jsxc.webrtc.last_caller),
+         direction: jsxc.Message.SYS,
+         msg: $.t('Media_failure') + ': ' + $.t(err.name) + ' (' + err.name + ').'
+      });
+
       jsxc.debug('media failure: ' + err.name);
    },
 
@@ -564,10 +513,25 @@ jsxc.webrtc = {
       jsxc.debug('incoming file transfer from ' + session.peerID);
 
       var buddylist = jsxc.storage.getUserItem('buddylist') || [];
+      var bid = jsxc.jidToBid(session.peerID);
 
-      if (buddylist.indexOf(jsxc.jidToBid(session.peerID)) > -1) {
+      if (buddylist.indexOf(bid) > -1) {
          //Accept file transfers only from contacts
          session.accept();
+
+         var message = jsxc.gui.window.postMessage({
+            _uid: session.sid + ':msg',
+            bid: bid,
+            direction: jsxc.Message.IN,
+            attachment: {
+               name: session.receiver.metadata.name,
+               type: session.receiver.metadata.type || 'application/octet-stream'
+            }
+         });
+
+         session.receiver.on('progress', function(sent, size) {
+            jsxc.gui.window.updateProgress(message, sent, size);
+         });
       }
    },
 
@@ -587,7 +551,11 @@ jsxc.webrtc = {
 
       session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
 
-      jsxc.gui.window.postMessage(bid, 'sys', $.t('Incoming_call'));
+      jsxc.gui.window.postMessage({
+         bid: bid,
+         direction: jsxc.Message.SYS,
+         msg: $.t('Incoming_call')
+      });
 
       // display notification
       jsxc.notification.notify($.t('Incoming_call'), $.t('from_sender', {
@@ -683,7 +651,11 @@ jsxc.webrtc = {
       jsxc.gui.dialog.close();
       $('#jsxc_webrtc').remove();
 
-      jsxc.gui.window.postMessage(bid, 'sys', ($.t('Call_terminated') + (reason ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.'));
+      jsxc.gui.window.postMessage({
+         bid: bid,
+         direction: jsxc.Message.SYS,
+         msg: ($.t('Call_terminated') + (reason ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.')
+      });
    },
 
    /**
@@ -771,7 +743,11 @@ jsxc.webrtc = {
          $('#jsxc_webrtc .bubblingG').hide();
 
       } else if (state === 'failed') {
-         jsxc.gui.window.postMessage(jsxc.jidToBid(session.peerID), 'sys', $.t('ICE_connection_failure'));
+         jsxc.gui.window.postMessage({
+            bid: jsxc.jidToBid(session.peerID),
+            direction: jsxc.Message.SYS,
+            msg: $.t('ICE_connection_failure')
+         });
 
          $(document).off('cleanup.dialog.jsxc');
 
@@ -804,7 +780,11 @@ jsxc.webrtc = {
          'finish.mediaready.jsxc': function() {
             self.setStatus('Initiate call');
 
-            jsxc.gui.window.postMessage(jsxc.jidToBid(jid), 'sys', $.t('Call_started'));
+            jsxc.gui.window.postMessage({
+               bid: jsxc.jidToBid(jid),
+               direction: jsxc.Message.SYS,
+               msg: $.t('Call_started')
+            });
 
             $(document).one('error.jingle', function(e, sid, error) {
                if (error.source !== 'offer') {
@@ -946,6 +926,14 @@ jsxc.webrtc = {
       canvas.remove();
    },
 
+   /**
+    * Send file to full jid.
+    *
+    * @memberOf jsxc.webrtc
+    * @param  {string} jid full jid
+    * @param  {file} file
+    * @return {object} session
+    */
    sendFile: function(jid, file) {
       var self = jsxc.webrtc;
 
@@ -961,6 +949,80 @@ jsxc.webrtc = {
       sess.start(file);
 
       return sess;
+   },
+
+   /**
+    * Display received file.
+    *
+    * @memberOf jsxc.webrtc
+    * @param  {object} sess
+    * @param  {File} file
+    * @param  {object} metadata file metadata
+    */
+   onReceivedFile: function(sess, file, metadata) {
+      jsxc.debug('file received', metadata);
+
+      if (!FileReader) {
+         return;
+      }
+
+      var reader = new FileReader();
+      var type;
+
+      if (!metadata.type) {
+         // detect file type via file extension, because XEP-0234 v0.14 
+         // does not send any type
+         var ext = metadata.name.replace(/.+\.([a-z0-9]+)$/i, '$1').toLowerCase();
+
+         switch (ext) {
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+            case 'gif':
+            case 'svg':
+               type = 'image/' + ext.replace(/^jpg$/, 'jpeg');
+               break;
+            case 'mp3':
+            case 'wav':
+               type = 'audio/' + ext;
+               break;
+            case 'pdf':
+               type = 'application/pdf';
+               break;
+            case 'txt':
+               type = 'text/' + ext;
+               break;
+            default:
+               type = 'application/octet-stream';
+         }
+      } else {
+         type = metadata.type;
+      }
+
+      reader.onload = function(ev) {
+         // modify element with uid metadata.actualhash
+
+         jsxc.gui.window.postMessage({
+            _uid: sess.sid + ':msg',
+            bid: jsxc.jidToBid(sess.peerID),
+            direction: jsxc.Message.IN,
+            attachment: {
+               name: metadata.name,
+               type: type,
+               size: metadata.size,
+               data: ev.target.result
+            }
+         });
+      };
+
+      if (!file.type) {
+         // file type should be handled in lib
+         file = new File([file], metadata.name, {
+            type: type
+         });
+      }
+
+      reader.readAsDataURL(file);
    }
 };
 

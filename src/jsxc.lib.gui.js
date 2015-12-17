@@ -336,7 +336,8 @@ jsxc.gui = {
 
    /**
     * Returns the window element
-    * 
+    *
+    * @deprecated Use {@link jsxc.gui.window.get} instead.
     * @param {String} bid
     * @returns {jquery} jQuery object of the window element
     */
@@ -497,7 +498,11 @@ jsxc.gui = {
          jsxc.gui.dialog.close();
 
          jsxc.storage.updateUserItem('buddy', bid, 'trust', true);
-         jsxc.gui.window.postMessage(bid, 'sys', $.t('conversation_is_now_verified'));
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('conversation_is_now_verified')
+         });
          jsxc.gui.update(bid);
       });
 
@@ -528,7 +533,11 @@ jsxc.gui = {
 
          jsxc.gui.dialog.close();
 
-         jsxc.gui.window.postMessage(bid, 'sys', $.t('authentication_query_sent'));
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('authentication_query_sent')
+         });
       });
 
       // Secret
@@ -557,7 +566,11 @@ jsxc.gui = {
 
          jsxc.gui.dialog.close();
 
-         jsxc.gui.window.postMessage(bid, 'sys', $.t('authentication_query_sent'));
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: 'sys',
+            msg: $.t('authentication_query_sent')
+         });
       });
    },
 
@@ -2000,7 +2013,8 @@ jsxc.gui.window = {
             $('<button>').text($.t('Send')).click(function() {
                var sess = jsxc.webrtc.sendFile(win.data('jid'), file);
 
-               var post = jsxc.gui.window.postMessage({
+               var message = jsxc.gui.window.postMessage({
+                  _uid: sess.sid + ':msg',
                   bid: bid,
                   direction: 'out',
                   attachment: {
@@ -2012,21 +2026,7 @@ jsxc.gui.window = {
                });
 
                sess.sender.on('progress', function(sent, size) {
-                  var div = $('#' + post.uid);
-                  var span = div.find('.jsxc_timestamp span');
-
-                  if (span.length === 0) {
-                     div.find('.jsxc_timestamp').append('<span>');
-                     span = div.find('.jsxc_timestamp span');
-                  }
-
-                  span.text(' ' + Math.round(sent / size * 100) + '%');
-
-                  if (sent === size) {
-                     span.remove();
-
-                     jsxc.gui.window.receivedMessage(bid, post.uid);
-                  }
+                  jsxc.gui.window.updateProgress(message, sent, size);
                });
 
                msg.remove();
@@ -2058,7 +2058,11 @@ jsxc.gui.window = {
             return;
          }
 
-         jsxc.gui.window.postMessage(bid, 'out', $(this).val());
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.OUT,
+            msg: $(this).val()
+         });
 
          $(this).val('');
       }).focus(function() {
@@ -2154,9 +2158,9 @@ jsxc.gui.window = {
    /**
     * Resize given window to given size. If no size is provided the window is resized to the default size.
     * 
-    * @param  {string|jquery} win Bid or window object
+    * @param  {(string|jquery)} win Bid or window object
     * @param  {object} ui    The size has to be in the format {size:{width: [INT], height: [INT]}}
-    * @param  {[type]} outer If true the given size is used as outer dimensions.
+    * @param  {boolean} [outer] If true the given size is used as outer dimensions.
     */
    resize: function(win, ui, outer) {
       var bid;
@@ -2446,91 +2450,92 @@ jsxc.gui.window = {
    },
 
    /**
-    * Write Message to chat area and save
+    * Write Message to chat area and save. Check border cases and remove html.
     * 
-    * @param {String} bid bar jid
-    * @param {String} direction 'in' message is received or 'out' message is
-    *        send
-    * @param {String} msg Message to display
-    * @param {boolean} encrypted Was this message encrypted? Default: false
-    * @param {boolean} forwarded Was this message forwarded? Default: false
-    * @param {integer} stamp Timestamp
-    * @param {object} sender Information about sender
-    * @property {string} sender.jid Sender Jid
-    * @property {string} sender.name Sender name or nickname
-    * @param {object} attachment Attached data
-    * @property {string} attachment.name File name
-    * @property {string} attachment.size File size
-    * @property {string} attachment.type File type
-    * @property {string} attachment.data File data
-    * @return {object} post object
+    * @function postMessage
+    * @memberOf jsxc.gui.window
+    * @param {jsxc.Message} message object to be send
+    * @return {jsxc.Message} maybe modified message object
     */
-   postMessage: function(bid, direction, msg, encrypted, forwarded, stamp, sender, attachment) {
-      var mo = {}; //message object
+   /**
+    * Create message object from given properties, write Message to chat area 
+    * and save. Check border cases and remove html.
+    * 
+    * @function postMessage
+    * @memberOf jsxc.gui.window
+    * @param {object} args New message properties
+    * @param {string} args.bid
+    * @param {direction} args.direction
+    * @param {string} args.msg
+    * @param {boolean} args.encrypted
+    * @param {boolean} args.forwarded
+    * @param {boolean} args.sender
+    * @param {object} args.attachment Attached data
+    * @param {string} args.attachment.name File name
+    * @param {string} args.attachment.size File size
+    * @param {string} args.attachment.type File type
+    * @param {string} args.attachment.data File data
+    * @return {jsxc.Message} maybe modified message object
+    */
+   postMessage: function(message) {
 
-      if (typeof bid === 'object' && bid !== null) {
-         $.extend(mo, bid);
-      } else {
-         mo.bid = bid;
-         mo.direction = direction;
-         mo.msg = msg;
-         mo.encrypted = encrypted;
-         mo.forwarded = forwarded;
-         mo.stamp = stamp;
-         mo.sender = sender;
-         mo.attachment = attachment;
+      if (typeof message === 'object' && !(message instanceof jsxc.Message)) {
+         message = new jsxc.Message(message);
       }
 
-      var data = jsxc.storage.getUserItem('buddy', mo.bid);
-      var html_msg = mo.msg;
+      var data = jsxc.storage.getUserItem('buddy', message.bid);
+      var html_msg = message.msg;
 
       // remove html tags and reencode html tags
-      mo.msg = jsxc.removeHTML(mo.msg);
-      mo.msg = jsxc.escapeHTML(mo.msg);
+      message.msg = jsxc.removeHTML(message.msg);
+      message.msg = jsxc.escapeHTML(message.msg);
 
       // exceptions:
 
-      if (mo.direction === 'out' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED && mo.forwarded !== true) {
-         mo.direction = 'sys';
-         msg = $.t('your_message_wasnt_send_please_end_your_private_conversation');
+      if (message.direction === jsxc.Message.OUT && data.msgstate === OTR.CONST.MSGSTATE_FINISHED && message.forwarded !== true) {
+         message.direction = jsxc.Message.SYS;
+         message.msg = $.t('your_message_wasnt_send_please_end_your_private_conversation');
       }
 
-      if (mo.direction === 'in' && data.msgstate === OTR.CONST.MSGSTATE_FINISHED) {
-         mo.direction = 'sys';
-         mo.msg = $.t('unencrypted_message_received') + ' ' + msg;
+      if (message.direction === jsxc.Message.OUT && data.msgstate === OTR.CONST.MSGSTATE_FINISHED) {
+         message.direction = 'sys';
+         message.msg = $.t('unencrypted_message_received') + ' ' + message.msg;
       }
 
-      mo.encrypted = mo.encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
-      var post;
+      message.encrypted = message.encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
+
       try {
-         post = jsxc.storage.saveMessage(mo.bid, mo.direction, mo.msg, mo.encrypted, mo.forwarded, mo.stamp, mo.sender, mo.attachment);
+         message.save();
       } catch (err) {
          jsxc.warn('Unable to save message.', err);
 
-         post = {
+         message = new jsxc.Message({
             msg: 'Unable to save that message. Please clear some chat histories.',
-            direction: 'sys',
-            uid: new Date().getTime() + ':msg'
-         };
+            direction: jsxc.Message.SYS
+         });
       }
 
-      if (mo.direction === 'in' && !jsxc.gui.window.get(mo.bid).find('.jsxc_textinput').is(":focus")) {
-         jsxc.gui.unreadMsg(mo.bid);
+      if (message.direction === 'in' && !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
+         jsxc.gui.unreadMsg(message.bid);
 
-         $(document).trigger('postmessagein.jsxc', [mo.bid, html_msg]);
+         $(document).trigger('postmessagein.jsxc', [message.bid, html_msg]);
       }
 
-      if (mo.direction === 'out' && jsxc.master && mo.forwarded !== true && html_msg) {
-         jsxc.xmpp.sendMessage(mo.bid, html_msg, post.uid);
+      if (message.direction === jsxc.Message.OUT && jsxc.master && message.forwarded !== true && html_msg) {
+         jsxc.xmpp.sendMessage(message.bid, html_msg, message._uid);
       }
 
-      jsxc.gui.window._postMessage(mo.bid, post);
+      jsxc.gui.window._postMessage(message);
 
-      if (mo.direction === 'out' && mo.msg === '?') {
-         jsxc.gui.window.postMessage(mo.bid, 'sys', '42');
+      if (message.direction === 'out' && message.msg === '?') {
+         jsxc.gui.window.postMessage(new jsxc.Message({
+            bid: message.bid,
+            direction: jsxc.Message.SYS,
+            msg: '42'
+         }));
       }
 
-      return post;
+      return message;
    },
 
    /**
@@ -2540,13 +2545,14 @@ jsxc.gui.window = {
     * @param {Object} post Post object with direction, msg, uid, received
     * @param {Bool} restore If true no highlights are used
     */
-   _postMessage: function(bid, post, restore) {
+   _postMessage: function(message, restore) {
+      var bid = message.bid;
       var win = jsxc.gui.window.get(bid);
-      var msg = post.msg;
-      var direction = post.direction;
-      var uid = post.uid;
+      var msg = message.msg;
+      var direction = message.direction;
+      var uid = message._uid;
 
-      if (win.find('.jsxc_textinput').is(':not(:focus)') && direction === 'in' && !restore) {
+      if (win.find('.jsxc_textinput').is(':not(:focus)') && direction === jsxc.Message.IN && !restore) {
          jsxc.gui.window.highlight(bid);
       }
 
@@ -2554,6 +2560,7 @@ jsxc.gui.window = {
 
          var href = (url.match(/^https?:\/\//i)) ? url : 'http://' + url;
 
+         // @TODO use jquery element builder
          return '<a href="' + href + '" target="_blank">' + url + '</a>';
       });
 
@@ -2563,9 +2570,11 @@ jsxc.gui.window = {
                jid += action;
             }
 
+            // @TODO use jquery element builder
             return '<a href="xmpp:' + jid + '">' + jid + '</a>';
          }
 
+         // @TODO use jquery element builder
          return '<a href="mailto:' + jid + '" target="_blank">' + jid + '</a>';
       });
 
@@ -2587,39 +2596,47 @@ jsxc.gui.window = {
       var msgDiv = $("<div>"),
          msgTsDiv = $("<div>");
       msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
-      msgDiv.attr('id', uid);
+      msgDiv.attr('id', uid.replace(/:/g, '-'));
       msgDiv.html('<div>' + msg + '</div>');
       msgTsDiv.addClass('jsxc_timestamp');
-      msgTsDiv.text(jsxc.getFormattedTime(post.stamp));
+      msgTsDiv.text(jsxc.getFormattedTime(message.stamp));
 
-      if (post.received || false) {
+      if (message.isReceived() || false) {
          msgDiv.addClass('jsxc_received');
       }
 
-      if (post.forwarded) {
+      if (message.forwarded) {
          msgDiv.addClass('jsxc_forwarded');
       }
 
-      if (post.encrypted) {
+      if (message.encrypted) {
          msgDiv.addClass('jsxc_encrypted');
       }
 
-      if (post.attachment && post.attachment.name) {
+      if (message.attachment && message.attachment.name) {
          var attachment = $('<div>');
          attachment.addClass('jsxc_attachment');
-         attachment.addClass('jsxc_' + post.attachment.type.replace(/\//, '-'));
-         attachment.addClass('jsxc_' + post.attachment.type.replace(/^([^/]+)\/.*/, '$1'));
+         attachment.addClass('jsxc_' + message.attachment.type.replace(/\//, '-'));
+         attachment.addClass('jsxc_' + message.attachment.type.replace(/^([^/]+)\/.*/, '$1'));
 
-         if (post.attachment.type.match(/^image\//) && post.attachment.thumbnail) {
-            $('<img alt="preview">').attr('src', post.attachment.thumbnail).attr('title', post.attachment.name).appendTo(attachment);
-         } else {
-            attachment.text(post.attachment.name);
+         if (message.attachment.persistent === false) {
+            attachment.addClass('jsxc_notPersistent');
          }
 
-         if (post.attachment.data) {
+         if (message.attachment.data) {
+            attachment.addClass('jsxc_data');
+         }
+
+         if (message.attachment.type.match(/^image\//) && message.attachment.thumbnail) {
+            $('<img alt="preview">').attr('src', message.attachment.thumbnail).attr('title', message.attachment.name).appendTo(attachment);
+         } else {
+            attachment.text(message.attachment.name);
+         }
+
+         if (message.attachment.data) {
             attachment = $('<a>').append(attachment);
-            attachment.attr('href', post.attachment.data);
-            attachment.attr('download', post.attachment.name);
+            attachment.attr('href', message.attachment.data);
+            attachment.attr('download', message.attachment.name);
          }
 
          msgDiv.find('div').first().append(attachment);
@@ -2627,7 +2644,7 @@ jsxc.gui.window = {
 
       if (direction === 'sys') {
          jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div style="clear:both"/>');
-      } else if (typeof post.stamp !== 'undefined') {
+      } else if (typeof message.stamp !== 'undefined') {
          msgDiv.append(msgTsDiv);
       }
 
@@ -2635,36 +2652,40 @@ jsxc.gui.window = {
          $('[data-bid="' + bid + '"]').find('.jsxc_lastmsg .jsxc_text').html(msg);
       }
 
-      win.find('.jsxc_textarea').append(msgDiv);
+      if (jsxc.Message.getDOM(uid).length > 0) {
+         jsxc.Message.getDOM(uid).replaceWith(msgDiv);
+      } else {
+         win.find('.jsxc_textarea').append(msgDiv);
+      }
 
-      if (typeof post.sender === 'object' && post.sender !== null) {
+      if (typeof message.sender === 'object' && message.sender !== null) {
          var title = '';
          var avatarDiv = $('<div>');
          avatarDiv.addClass('jsxc_avatar').prependTo(msgDiv);
 
-         if (typeof post.sender.jid === 'string') {
-            msgDiv.attr('data-bid', jsxc.jidToBid(post.sender.jid));
+         if (typeof message.sender.jid === 'string') {
+            msgDiv.attr('data-bid', jsxc.jidToBid(message.sender.jid));
 
-            var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(post.sender.jid)) || {};
-            jsxc.gui.updateAvatar(msgDiv, jsxc.jidToBid(post.sender.jid), data.avatar);
+            var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(message.sender.jid)) || {};
+            jsxc.gui.updateAvatar(msgDiv, jsxc.jidToBid(message.sender.jid), data.avatar);
 
-            title = jsxc.jidToBid(post.sender.jid);
+            title = jsxc.jidToBid(message.sender.jid);
          }
 
-         if (typeof post.sender.name === 'string') {
-            msgDiv.attr('data-name', post.sender.name);
+         if (typeof message.sender.name === 'string') {
+            msgDiv.attr('data-name', message.sender.name);
 
-            if (typeof post.sender.jid !== 'string') {
-               jsxc.gui.avatarPlaceholder(avatarDiv, post.sender.name);
+            if (typeof message.sender.jid !== 'string') {
+               jsxc.gui.avatarPlaceholder(avatarDiv, message.sender.name);
             }
 
             if (title !== '') {
                title = '\n' + title;
             }
 
-            title = post.sender.name + title;
+            title = message.sender.name + title;
 
-            msgTsDiv.text(msgTsDiv.text() + ' ' + post.sender.name);
+            msgTsDiv.text(msgTsDiv.text() + ' ' + message.sender.name);
          }
 
          avatarDiv.attr('title', jsxc.escapeHTML(title));
@@ -2696,9 +2717,30 @@ jsxc.gui.window = {
    restoreChat: function(bid) {
       var chat = jsxc.storage.getUserItem('chat', bid);
 
-      while (chat !== null && chat.length > 0) {
-         var c = chat.pop();
-         jsxc.gui.window._postMessage(bid, c, true);
+      // convert legacy storage structure introduced in v3.0.0
+      if (chat) {
+         while (chat !== null && chat.length > 0) {
+            var c = chat.pop();
+
+            c.bid = bid;
+            c._uid = c.uid;
+            delete c.uid;
+
+            var message = new jsxc.Message(c);
+            message.save();
+
+            jsxc.gui.window._postMessage(message, true);
+         }
+
+         jsxc.storage.removeUserItem('chat', bid);
+      }
+
+      var history = jsxc.storage.getUserItem('history', bid);
+
+      while (history !== null && history.length > 0) {
+         var uid = history.pop();
+
+         jsxc.gui.window._postMessage(new jsxc.Message(uid), true);
       }
    },
 
@@ -2718,20 +2760,31 @@ jsxc.gui.window = {
     * 
     * @param  {string} bid
     * @param  {string} uid message id
+    * @deprecated since v3.0.0. Use {@link jsxc.Message.received}.
     */
    receivedMessage: function(bid, uid) {
-      var chat = jsxc.storage.getUserItem('chat', bid);
-      var i;
+      jsxc.warn('Using deprecated receivedMessage.');
 
-      for (i = chat.length - 1; i >= 0; i--) {
-         if (chat[i].uid === uid) {
-            chat[i].received = true;
+      var message = new jsxc.Message(uid);
 
-            $('#' + uid).addClass('jsxc_received');
+      message.received();
+   },
 
-            jsxc.storage.setUserItem('chat', bid, chat);
-            break;
-         }
+   updateProgress: function(message, sent, size) {
+      var div = message.getDOM();
+      var span = div.find('.jsxc_timestamp span');
+
+      if (span.length === 0) {
+         div.find('.jsxc_timestamp').append('<span>');
+         span = div.find('.jsxc_timestamp span');
+      }
+
+      span.text(' ' + Math.round(sent / size * 100) + '%');
+
+      if (sent === size) {
+         span.remove();
+
+         message.received();
       }
    }
 };
