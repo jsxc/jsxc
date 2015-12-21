@@ -2786,6 +2786,59 @@ jsxc.gui.window = {
 
          message.received();
       }
+   },
+
+   showOverlay: function(bid, content) {
+      var win = jsxc.gui.window.get(bid);
+
+      win.find('.jsxc_overlay > div').empty().append(content);
+
+      win.addClass('jsxc_showOverlay');
+   },
+
+   hideOverlay: function(bid) {
+      var win = jsxc.gui.window.get(bid);
+
+      win.removeClass('jsxc_showOverlay');
+   },
+
+   selectResource: function(bid, jid, cb, res) {
+      res = res || jsxc.storage.getUserItem('res', jsxc.jidToBid(jid)) || [];
+      cb = cb || function() {};
+
+      if (res.length === 1) {
+         cb({
+            status: 'single',
+            result: res[0]
+         });
+      } else if (res.length > 1) {
+         var list = $('<ul>'),
+            i, li;
+
+         for (i = 0; i < res.length; i++) {
+            li = $('<li>');
+
+            li.append($('<a>').text(res[i]));
+            li.appendTo(list);
+         }
+
+         list.find('a').click(function(ev) {
+            ev.preventDefault();
+
+            cb({
+               status: 'selected',
+               result: $(this).text()
+            });
+
+            jsxc.gui.window.hideOverlay(bid);
+         });
+         window.ul = list;
+         jsxc.gui.window.showOverlay(bid, list);
+      } else {
+         cb({
+            status: 'unavailable'
+         });
+      }
    }
 };
 
