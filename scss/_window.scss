@@ -238,6 +238,7 @@
             bottom: 0;
             left: 0;
             z-index: 100;
+            overflow-y: scroll;
 
             & > div {
                 background-color: #fff;
@@ -245,6 +246,20 @@
                 padding: 5px;
                 border-radius: 3px;
                 text-align: center;
+
+                p {
+                    margin-bottom: 10px;
+                }
+
+                li {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                a:hover {
+                    text-decoration: underline;
+                }
             }
         }
     }
@@ -346,7 +361,6 @@
     margin: 3px;
     padding: 4px;
     padding-right: 10px;
-    max-width: 76%;
     word-wrap: break-word;
     background-color: $chatmessage_bg;
     position: relative;
@@ -425,6 +439,7 @@
 .jsxc_in {
     float: left;
     position: relative;
+    max-width: 76%;
     margin-left: 10px;
     border-radius: 3px;
     background-color: $chatmessage_in_bg;
@@ -450,6 +465,7 @@
 .jsxc_out {
     float: right;
     position: relative;
+    max-width: 76%;
     margin-right: 10px;
     border-radius: 3px;
     background-color: $chatmessage_out_bg;

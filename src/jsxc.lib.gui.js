@@ -1973,68 +1973,9 @@ jsxc.gui.window = {
       });
 
       win.find('.jsxc_sendFile').click(function() {
-         var msg = $('<div><div><label><input type="file" name="files" /><label></div></div>');
-         msg.addClass('jsxc_chatmessage jsxc_out');
-
-         win.find('.jsxc_textarea').append(msg);
-
-         msg.find('label').click();
-
-         msg.find('[type="file"]').change(function(ev) {
-            var file = ev.target.files[0]; // FileList object
-
-            if (!file) {
-               return;
-            }
-
-            var attachment = $('<div>');
-            attachment.addClass('jsxc_attachment');
-            attachment.addClass('jsxc_' + file.type.replace(/\//, '-'));
-            attachment.addClass('jsxc_' + file.type.replace(/^([^/]+)\/.*/, '$1'));
-
-            msg.empty().append(attachment);
-
-            if (FileReader && file.type.match(/^image\//)) {
-               var img = $('<img alt="preview">').attr('title', file.name);
-               img.attr('src', jsxc.options.get('root') + '/img/loading.gif');
-               img.appendTo(attachment);
-
-               var reader = new FileReader();
-
-               reader.onload = function() {
-                  img.attr('src', reader.result);
-               };
-
-               reader.readAsDataURL(file);
-            } else {
-               attachment.text(file.name + ' (' + file.size + ' byte)');
-            }
-
-            $('<button>').text($.t('Send')).click(function() {
-               var sess = jsxc.webrtc.sendFile(win.data('jid'), file);
-
-               var message = jsxc.gui.window.postMessage({
-                  _uid: sess.sid + ':msg',
-                  bid: bid,
-                  direction: 'out',
-                  attachment: {
-                     name: file.name,
-                     size: file.size,
-                     type: file.type,
-                     data: (file.type.match(/^image\//)) ? img.attr('src') : null
-                  }
-               });
-
-               sess.sender.on('progress', function(sent, size) {
-                  jsxc.gui.window.updateProgress(message, sent, size);
-               });
-
-               msg.remove();
-
-            }).appendTo(msg);
-         });
-
          $('body').click();
+
+         jsxc.gui.window.sendFile(bid);
       });
 
       win.find('.jsxc_tools').click(function() {
@@ -2802,16 +2743,12 @@ jsxc.gui.window = {
       win.removeClass('jsxc_showOverlay');
    },
 
-   selectResource: function(bid, jid, cb, res) {
-      res = res || jsxc.storage.getUserItem('res', jsxc.jidToBid(jid)) || [];
+   selectResource: function(bid, text, cb, res) {
+      res = res || jsxc.storage.getUserItem('res', bid) || [];
       cb = cb || function() {};
 
-      if (res.length === 1) {
-         cb({
-            status: 'single',
-            result: res[0]
-         });
-      } else if (res.length > 1) {
+      if (res.length > 0) {
+         var content = $('<div>');
          var list = $('<ul>'),
             i, li;
 
@@ -2825,20 +2762,122 @@ jsxc.gui.window = {
          list.find('a').click(function(ev) {
             ev.preventDefault();
 
+            jsxc.gui.window.hideOverlay(bid);
+
             cb({
                status: 'selected',
                result: $(this).text()
             });
-
-            jsxc.gui.window.hideOverlay(bid);
          });
-         window.ul = list;
-         jsxc.gui.window.showOverlay(bid, list);
+
+         if (text) {
+            $('<p>').text(text).appendTo(content);
+         }
+
+         list.appendTo(content);
+
+         jsxc.gui.window.showOverlay(bid, content);
       } else {
          cb({
             status: 'unavailable'
          });
       }
+   },
+
+   sendFile: function(jid) {
+      var bid = jsxc.jidToBid(jid);
+      var win = jsxc.gui.window.get(bid);
+      var res = Strophe.getResourceFromJid(jid);
+
+      if (!res) {
+         jid = win.data('jid');
+         res = Strophe.getResourceFromJid(jid);
+
+         var fileCapableRes = jsxc.webrtc.getCapableRes(jid, jsxc.webrtc.reqFileFeatures);
+         var resources = Object.keys(jsxc.storage.getUserItem('res', bid)) || [];
+
+         if (res === null && resources.length === 1 && fileCapableRes.length === 1) {
+            res = fileCapableRes[0];
+            jid = bid + '/' + res;
+         } else if (fileCapableRes.indexOf(res) < 0) {
+            jsxc.gui.window.selectResource(bid, $.t('Your_contact_uses_multiple_clients_'), function(data) {
+               if (data.status === 'unavailable') {
+                  jsxc.gui.window.hideOverlay(bid);
+               } else if (data.status === 'selected') {
+                  jsxc.gui.window.sendFile(bid + '/' + data.result);
+               }
+            }, fileCapableRes);
+
+            return;
+         }
+      }
+
+      var msg = $('<div><div><label><input type="file" name="files" /><label></div></div>');
+      msg.addClass('jsxc_chatmessage');
+
+      jsxc.gui.window.showOverlay(bid, msg);
+
+      msg.find('label').click();
+
+      msg.find('[type="file"]').change(function(ev) {
+         var file = ev.target.files[0]; // FileList object
+
+         if (!file) {
+            return;
+         }
+
+         var attachment = $('<div>');
+         attachment.addClass('jsxc_attachment');
+         attachment.addClass('jsxc_' + file.type.replace(/\//, '-'));
+         attachment.addClass('jsxc_' + file.type.replace(/^([^/]+)\/.*/, '$1'));
+
+         msg.empty().append(attachment);
+
+         if (FileReader && file.type.match(/^image\//)) {
+            var img = $('<img alt="preview">').attr('title', file.name);
+            img.attr('src', jsxc.options.get('root') + '/img/loading.gif');
+            img.appendTo(attachment);
+
+            var reader = new FileReader();
+
+            reader.onload = function() {
+               img.attr('src', reader.result);
+            };
+
+            reader.readAsDataURL(file);
+         } else {
+            attachment.text(file.name + ' (' + file.size + ' byte)');
+         }
+
+         $('<button>').addClass('jsxc_btn jsxc_btn-primary').text($.t('Send')).click(function() {
+            var sess = jsxc.webrtc.sendFile(win.data('jid'), file);
+
+            jsxc.gui.window.hideOverlay(bid);
+
+            var message = jsxc.gui.window.postMessage({
+               _uid: sess.sid + ':msg',
+               bid: bid,
+               direction: 'out',
+               attachment: {
+                  name: file.name,
+                  size: file.size,
+                  type: file.type,
+                  data: (file.type.match(/^image\//)) ? img.attr('src') : null
+               }
+            });
+
+            sess.sender.on('progress', function(sent, size) {
+               jsxc.gui.window.updateProgress(message, sent, size);
+            });
+
+            msg.remove();
+
+         }).appendTo(msg);
+
+         $('<button>').text($.t('Abort')).click(function() {
+            jsxc.gui.window.hideOverlay(bid);
+         }).appendTo(msg);
+      });
    }
 };
 

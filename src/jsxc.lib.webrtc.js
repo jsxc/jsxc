@@ -184,20 +184,27 @@ jsxc.webrtc = {
    },
 
    /**
-    * Return list of video capable resources.
+    * Return list of capable resources.
     * 
     * @memberOf jsxc.webrtc
     * @param jid
+    * @param {(string|string[])} features list of required features
     * @returns {Array}
     */
-   getCapableRes: function(jid) {
+   getCapableRes: function(jid, features) {
       var self = jsxc.webrtc;
       var bid = jsxc.jidToBid(jid);
-      var res = jsxc.storage.getUserItem('res', bid) || [];
+      var res = Object.keys(jsxc.storage.getUserItem('res', bid)) || [];
+
+      if (!features) {
+         return res;
+      } else if (typeof features === 'string') {
+         features = [features];
+      }
 
       var available = [];
-      $.each(res, function(r) {
-         if (self.conn.caps.hasFeatureByJid(bid + '/' + r, self.reqVideoFeatures)) {
+      $.each(res, function(i, r) {
+         if (self.conn.caps.hasFeatureByJid(bid + '/' + r, features)) {
             available.push(r);
          }
       });
@@ -286,6 +293,7 @@ jsxc.webrtc = {
 
       var win = jsxc.gui.window.get(bid);
       var jid = win.data('jid');
+      var res = Strophe.getResourceFromJid(jid);
       var ls = jsxc.storage.getUserItem('buddy', bid);
 
       if (typeof jid !== 'string') {
@@ -299,8 +307,8 @@ jsxc.webrtc = {
 
       var el = win.find('.jsxc_video').add(jsxc.gui.roster.getItem(bid).find('.jsxc_video'));
 
-      var capableRes = self.getCapableRes(jid);
-      var targetRes = Strophe.getResourceFromJid(jid);
+      var capableRes = self.getCapableRes(jid, self.reqVideoFeatures);
+      var targetRes = res;
 
       if (targetRes === null) {
          $.each(jsxc.storage.getUserItem('buddy', bid).res || [], function(index, val) {
@@ -327,6 +335,15 @@ jsxc.webrtc = {
          el.addClass('jsxc_disabled');
 
          el.attr('title', $.t('Video_call_not_possible'));
+      }
+
+      var fileCapableRes = self.getCapableRes(jid, self.reqFileFeatures);
+      var resources = Object.keys(jsxc.storage.getUserItem('res', bid)) || [];
+
+      if (fileCapableRes.indexOf(res) > -1 || (res === null && fileCapableRes.length === 1 && resources.length === 1)) {
+         win.find('.jsxc_sendFile').removeClass('jsxc_disabled');
+      } else {
+         win.find('.jsxc_sendFile').addClass('jsxc_disabled');
       }
    },
 
