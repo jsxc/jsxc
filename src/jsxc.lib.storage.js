@@ -529,7 +529,7 @@ jsxc.storage = {
       }
 
       if (key === 'roster') {
-         jsxc.gui.roster.toggle();
+         jsxc.gui.roster.toggle(e.newValue);
       }
 
       if (jsxc.master && key.match(new RegExp('^vcard' + jsxc.storage.SEP)) && e.newValue !== null && e.newValue.match(/^request:/)) {

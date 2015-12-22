@@ -1495,11 +1495,7 @@ jsxc.gui.roster = {
       var rosterState = jsxc.storage.getUserItem('roster') || (jsxc.options.get('loginForm').startMinimized ? 'hidden' : 'shown');
 
       $('#jsxc_roster').addClass('jsxc_state_' + rosterState);
-
-      if (rosterState === 'hidden') {
-         $('#jsxc_roster').css('right', -1 * $('#jsxc_roster').innerWidth() + 'px');
-         $('#jsxc_windowList').css('right', '10px');
-      }
+      $('#jsxc_windowList').addClass('jsxc_roster_' + rosterState);
 
       var pres = jsxc.storage.getUserItem('presence') || 'online';
       $('#jsxc_presence > span').text($('#jsxc_presence .jsxc_' + pres).text());
@@ -1742,18 +1738,17 @@ jsxc.gui.roster = {
    /**
     * Toogle complete roster
     * 
-    * @param {Integer} d Duration in ms
+    * @param {string} state Toggle to state
     */
-   toggle: function(d) {
-      var rosterPromise;
-      var duration = d || 500;
+   toggle: function(state) {
+      var duration;
 
       var roster = $('#jsxc_roster');
       var wl = $('#jsxc_windowList');
 
-      var roster_width = roster.innerWidth();
-      var roster_right = parseFloat($('#jsxc_roster').css('right'));
-      var state = (roster_right < 0) ? 'shown' : 'hidden';
+      if (!state) {
+         state = (jsxc.storage.getUserItem('roster') === jsxc.CONST.HIDDEN) ? jsxc.CONST.SHOWN : jsxc.CONST.HIDDEN;
+      }
 
       if (state === 'shown' && jsxc.isExtraSmallDevice()) {
          jsxc.gui.window.hide();
@@ -1762,19 +1757,17 @@ jsxc.gui.roster = {
       jsxc.storage.setUserItem('roster', state);
 
       roster.removeClass('jsxc_state_hidden jsxc_state_shown').addClass('jsxc_state_' + state);
+      wl.removeClass('jsxc_roster_hidden jsxc_roster_shown').addClass('jsxc_roster_' + state);
 
-      rosterPromise = roster.animate({
-         right: ((roster_width + roster_right) * -1) + 'px'
-      }, duration).promise();
-      wl.animate({
-         right: (10 - roster_right) + 'px'
-      }, duration).promise().done(function() {
+      duration = parseFloat(roster.css('transitionDuration') || 0) * 1000;
+
+      setTimeout(function() {
          jsxc.gui.updateWindowListSB();
-      });
+      }, duration);
 
       $(document).trigger('toggle.roster.jsxc', [state, duration]);
 
-      return rosterPromise;
+      return duration;
    },
 
    /**
@@ -2269,11 +2262,11 @@ jsxc.gui.window = {
     */
    _show: function(bid) {
       var win = jsxc.gui.window.get(bid);
-      var rosterPromise, windowPromise;
+      var duration = 0;
 
       if (jsxc.isExtraSmallDevice()) {
          if (parseFloat($('#jsxc_roster').css('right')) >= 0) {
-            rosterPromise = jsxc.gui.roster.toggle();
+            duration = jsxc.gui.roster.toggle();
          }
 
          jsxc.gui.window.hide();
@@ -2283,7 +2276,7 @@ jsxc.gui.window = {
       win.removeClass('jsxc_min').addClass('jsxc_normal');
       win.find('.jsxc_window').css('bottom', '0');
 
-      $.when(rosterPromise).done(function() {
+      setTimeout(function() {
          var padding = $("#jsxc_windowListSB").width();
          var innerWidth = $('#jsxc_windowList>ul').width();
          var outerWidth = $('#jsxc_windowList').width() - padding;
@@ -2303,7 +2296,7 @@ jsxc.gui.window = {
                jsxc.gui.scrollWindowListBy(right);
             }
          }
-      });
+      }, duration);
 
       // If the area is hidden, the scrolldown function doesn't work. So we
       // call it here.
@@ -2314,8 +2307,6 @@ jsxc.gui.window = {
       }
 
       win.trigger('show.window.jsxc');
-
-      return windowPromise;
    },
 
    /**

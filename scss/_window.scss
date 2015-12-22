@@ -4,6 +4,11 @@
     right: 210px;
     left: 0;
     z-index: 50;
+    transition: right 0.5s;
+
+    &.jsxc_roster_hidden {
+        right: 10px;
+    }
 
     @media (min-width: 768px) {
         clip: rect(-10000px, 10000px, 30px, 30px);

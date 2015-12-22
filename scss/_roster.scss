@@ -6,6 +6,7 @@
     width: 200px;
     overflow: visible;
     border-left: 1px solid #e1e1e1;
+    display: none;
 
     /*border-left: 1px solid $roster_border_left;*/
     z-index: 80;
@@ -93,11 +94,21 @@
     }
 
     &.jsxc_state_hidden {
+        display: block;
+        right: -200px;
+        transition: right 0.5s;
+
         #jsxc_toggleRoster {
             &:before {
                 transform: rotate(0deg);
             }
         }
+    }
+
+    &.jsxc_state_shown {
+        display: block;
+        right: 0px;
+        transition: right 0.5s;
     }
 }
 

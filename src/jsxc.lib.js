@@ -76,7 +76,9 @@ jsxc = {
       NS: {
          CARBONS: 'urn:xmpp:carbons:2',
          FORWARD: 'urn:xmpp:forward:0'
-      }
+      },
+      HIDDEN: 'hidden',
+      SHOWN: 'shown'
    },
 
    /**
