@@ -314,10 +314,15 @@
             display: block;
             float: left;
             color: $tools_color;
+            opacity: 0.4;
             font-family: $font_sans;
             line-height: 40px;
             cursor: pointer;
             text-align: center;
+
+            &.jsxc_settings {
+                opacity: 1.0;
+            }
         }
     }
 
@@ -326,12 +331,13 @@
 
         &:hover {
             color: $window_close_hover;
+            opacity: 1.0;
         }
     }
 
     .jsxc_more {
         background-image: image-url("more_white.svg");
-        opacity: 0.7;
+        opacity: 0.4;
     }
 
     .ui-resizable-w {

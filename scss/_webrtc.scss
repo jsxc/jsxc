@@ -168,6 +168,10 @@ div {
         background-size: 15px 15px;
         opacity: 0.4;
 
+        &.jsxc_disabled {
+            background-image: image-url("camera_disabled_icon_white.svg");
+        }
+
         &:not(.jsxc_disabled) {
             &:hover {
                 opacity: 1.0;
@@ -342,14 +346,6 @@ div {
 
 .jsxc_videoSuitable .jsxc_name {
     font-style: italic;
-}
-
-#jsxc_buddylist .jsxc_options .jsxc_video {
-    background-image: image-url("camera_icon_white.svg");
-
-    &.jsxc_disabled {
-        opacity: 0.2;
-    }
 }
 
 .jsxc_menu {
