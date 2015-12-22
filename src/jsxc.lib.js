@@ -88,20 +88,22 @@ jsxc = {
     */
    getFormattedTime: function(unixtime) {
       var msgDate = new Date(parseInt(unixtime));
-      var date = ('0' + msgDate.getDate()).slice(-2);
+      var day = ('0' + msgDate.getDate()).slice(-2);
       var month = ('0' + (msgDate.getMonth() + 1)).slice(-2);
       var year = msgDate.getFullYear();
       var hours = ('0' + msgDate.getHours()).slice(-2);
       var minutes = ('0' + msgDate.getMinutes()).slice(-2);
-      var dateNow = new Date(),
-         time = hours + ':' + minutes;
+      var dateNow = new Date();
+
+      var date = (typeof msgDate.toLocaleDateString === 'function') ? msgDate.toLocaleDateString() : day + '.' + month + '.' + year;
+      var time = (typeof msgDate.toLocaleTimeString === 'function') ? msgDate.toLocaleTimeString() : hours + ':' + minutes;
 
       // compare dates only
       dateNow.setHours(0, 0, 0, 0);
       msgDate.setHours(0, 0, 0, 0);
 
       if (dateNow.getTime() !== msgDate.getTime()) {
-         return date + '.' + month + '.' + year + ' ' + time;
+         return date + ' ' + time;
       }
       return time;
    },

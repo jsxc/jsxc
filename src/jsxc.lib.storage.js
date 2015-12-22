@@ -558,44 +558,6 @@ jsxc.storage = {
    },
 
    /**
-    * Save message to storage.
-    * 
-    * @memberOf jsxc.storage
-    * @param bid
-    * @param direction
-    * @param msg
-    * @param encrypted
-    * @param forwarded
-    * @param sender
-    * @return post
-    */
-   saveMessage: function(bid, direction, msg, encrypted, forwarded, stamp, sender) {
-      var chat = jsxc.storage.getUserItem('chat', bid) || [];
-
-      var uid = new Date().getTime() + ':msg';
-
-      if (chat.length > jsxc.options.get('numberOfMsg')) {
-         chat.pop();
-      }
-
-      var post = {
-         direction: direction,
-         msg: msg,
-         uid: uid.replace(/:/, '-'),
-         received: false,
-         encrypted: encrypted || false,
-         forwarded: forwarded || false,
-         stamp: stamp || new Date().getTime(),
-         sender: sender
-      };
-
-      chat.unshift(post);
-      jsxc.storage.setUserItem('chat', bid, chat);
-
-      return post;
-   },
-
-   /**
     * Save or update buddy data.
     * 
     * @memberOf jsxc.storage

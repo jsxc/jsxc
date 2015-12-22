@@ -25,9 +25,23 @@ jsxc.otr = {
       }
 
       if (jsxc.otr.objects[bid].msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !d.encrypted) {
-         jsxc.gui.window.postMessage(bid, 'sys', $.t('Received_an_unencrypted_message') + '. [' + d.msg + ']', d.encrypted, d.forwarded, d.stamp);
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('Received_an_unencrypted_message') + '. [' + d.msg + ']',
+            encrypted: d.encrypted,
+            forwarded: d.forwarded,
+            stamp: d.stamp
+         });
       } else {
-         jsxc.gui.window.postMessage(bid, 'in', d.msg, d.encrypted, d.forwarded, d.stamp);
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.IN,
+            msg: d.msg,
+            encrypted: d.encrypted,
+            forwarded: d.forwarded,
+            stamp: d.stamp
+         });
       }
    },
 
@@ -87,7 +101,11 @@ jsxc.otr = {
 
          switch (status) {
             case OTR.CONST.STATUS_SEND_QUERY:
-               jsxc.gui.window.postMessage(bid, 'sys', $.t('trying_to_start_private_conversation'));
+               jsxc.gui.window.postMessage({
+                  bid: bid,
+                  direction: jsxc.Message.SYS,
+                  msg: $.t('trying_to_start_private_conversation')
+               });
                break;
             case OTR.CONST.STATUS_AKE_SUCCESS:
                data.fingerprint = jsxc.otr.objects[bid].their_priv_pk.fingerprint();
@@ -96,7 +114,11 @@ jsxc.otr = {
                var msg_state = jsxc.otr.objects[bid].trust ? 'Verified' : 'Unverified';
                var msg = $.t(msg_state + '_private_conversation_started');
 
-               jsxc.gui.window.postMessage(bid, 'sys', msg);
+               jsxc.gui.window.postMessage({
+                  bid: bid,
+                  direction: 'sys',
+                  msg: msg
+               });
                break;
             case OTR.CONST.STATUS_END_OTR:
                data.fingerprint = null;
@@ -105,13 +127,21 @@ jsxc.otr = {
                   // we abort the private conversation
 
                   data.msgstate = OTR.CONST.MSGSTATE_PLAINTEXT;
-                  jsxc.gui.window.postMessage(bid, 'sys', $.t('private_conversation_aborted'));
+                  jsxc.gui.window.postMessage({
+                     bid: bid,
+                     direction: jsxc.Message.SYS,
+                     msg: $.t('private_conversation_aborted')
+                  });
 
                } else {
                   // the buddy abort the private conversation
 
                   data.msgstate = OTR.CONST.MSGSTATE_FINISHED;
-                  jsxc.gui.window.postMessage(bid, 'sys', $.t('your_buddy_closed_the_private_conversation_you_should_do_the_same'));
+                  jsxc.gui.window.postMessage({
+                     bid: bid,
+                     direction: jsxc.Message.SYS,
+                     msg: $.t('your_buddy_closed_the_private_conversation_you_should_do_the_same')
+                  });
                }
                break;
             case OTR.CONST.STATUS_SMP_HANDLE:
@@ -128,7 +158,11 @@ jsxc.otr = {
       jsxc.otr.objects[bid].on('smp', function(type, data) {
          switch (type) {
             case 'question': // verification request received
-               jsxc.gui.window.postMessage(bid, 'sys', $.t('Authentication_request_received'));
+               jsxc.gui.window.postMessage({
+                  bid: bid,
+                  direction: jsxc.Message.SYS,
+                  msg: $.t('Authentication_request_received')
+               });
 
                if ($('#jsxc_dialog').length > 0) {
                   jsxc.otr.objects[bid].sm.abort();
@@ -148,15 +182,27 @@ jsxc.otr = {
                jsxc.gui.update(bid);
 
                if (data) {
-                  jsxc.gui.window.postMessage(bid, 'sys', $.t('conversation_is_now_verified'));
+                  jsxc.gui.window.postMessage({
+                     bid: bid,
+                     direction: jsxc.Message.SYS,
+                     msg: $.t('conversation_is_now_verified')
+                  });
                } else {
-                  jsxc.gui.window.postMessage(bid, 'sys', $.t('authentication_failed'));
+                  jsxc.gui.window.postMessage({
+                     bid: bid,
+                     direction: jsxc.Message.SYS,
+                     msg: $.t('authentication_failed')
+                  });
                }
                jsxc.storage.removeUserItem('smp_' + bid);
                jsxc.gui.dialog.close();
                break;
             case 'abort':
-               jsxc.gui.window.postMessage(bid, 'sys', $.t('Authentication_aborted'));
+               jsxc.gui.window.postMessage({
+                  bid: bid,
+                  direction: jsxc.Message.SYS,
+                  msg: $.t('Authentication_aborted')
+               });
                break;
             default:
                jsxc.debug('[OTR] sm callback: Unknown type: ' + type);
@@ -186,7 +232,11 @@ jsxc.otr = {
       jsxc.otr.objects[bid].on('error', function(err) {
          // Handle this case in jsxc.otr.receiveMessage
          if (err !== 'Received an unencrypted message.') {
-            jsxc.gui.window.postMessage(bid, 'sys', '[OTR] ' + $.t(err));
+            jsxc.gui.window.postMessage({
+               bid: bid,
+               direction: jsxc.Message.SYS,
+               msg: '[OTR] ' + $.t(err)
+            });
          }
 
          jsxc.error('[OTR] ' + err);

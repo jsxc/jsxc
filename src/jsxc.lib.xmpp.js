@@ -775,10 +775,17 @@ jsxc.xmpp = {
       stamp = stamp.getTime();
 
       if (carbon) {
-         var direction = (carbon.prop("tagName") === 'sent') ? 'out' : 'in';
+         var direction = (carbon.prop("tagName") === 'sent') ? jsxc.Message.OUT : jsxc.Message.IN;
          bid = jsxc.jidToBid((direction === 'out') ? $(message).attr('to') : from);
 
-         jsxc.gui.window.postMessage(bid, direction, body, false, forwarded, stamp);
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: direction,
+            msg: body,
+            encrypted: false,
+            forwarded: forwarded,
+            stamp: stamp
+         });
 
          return true;
 
@@ -845,7 +852,14 @@ jsxc.xmpp = {
             forwarded: forwarded
          });
       } else {
-         jsxc.gui.window.postMessage(bid, 'in', body, false, forwarded, stamp);
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.IN,
+            msg: body,
+            encrypted: false,
+            forwarded: forwarded,
+            stamp: stamp
+         });
       }
 
       // preserve handler
@@ -942,27 +956,14 @@ jsxc.xmpp = {
       jsxc.gui.roster.purge(bid);
    },
 
-   onReceived: function(message) {
-      var from = $(message).attr('from');
-      var jid = Strophe.getBareJidFromJid(from);
-      var bid = jsxc.jidToBid(jid);
-      var received = $(message).find("received[xmlns='urn:xmpp:receipts']");
+   onReceived: function(stanza) {
+      var received = $(stanza).find("received[xmlns='urn:xmpp:receipts']");
 
       if (received.length) {
-         var receivedId = received.attr('id').replace(/:/, '-');
-         var chat = jsxc.storage.getUserItem('chat', bid);
-         var i;
+         var receivedId = received.attr('id');
+         var message = new jsxc.Message(receivedId);
 
-         for (i = chat.length - 1; i >= 0; i--) {
-            if (chat[i].uid === receivedId) {
-               chat[i].received = true;
-
-               $('#' + receivedId).addClass('jsxc_received');
-
-               jsxc.storage.setUserItem('chat', bid, chat);
-               break;
-            }
-         }
+         message.received();
       }
 
       return true;

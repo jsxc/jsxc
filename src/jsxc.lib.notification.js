@@ -15,7 +15,7 @@ jsxc.notification = {
     */
    init: function() {
       $(document).on('postmessagein.jsxc', function(event, bid, msg) {
-         msg = (msg.match(/^\?OTR/)) ? $.t('Encrypted_message') : msg;
+         msg = (msg && msg.match(/^\?OTR/)) ? $.t('Encrypted_message') : msg;
          var data = jsxc.storage.getUserItem('buddy', bid);
 
          jsxc.notification.notify({

@@ -150,6 +150,12 @@
         transition: bottom 0.2s;
     }
 
+    .jsxc_showOverlay & {
+        .jsxc_overlay {
+            display: block !important;
+        }
+    }
+
     .jsxc_emoticons {
         height: 44px;
         width: 44px;
@@ -222,6 +228,40 @@
 
     .jsxc_fade {
         position: relative;
+
+        .jsxc_overlay {
+            display: none;
+            background-color: rgba(0, 0, 0, 0.5);
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            overflow-y: scroll;
+
+            & > div {
+                background-color: #fff;
+                margin: 30px 10px;
+                padding: 5px;
+                border-radius: 3px;
+                text-align: center;
+
+                p {
+                    margin-bottom: 10px;
+                }
+
+                li {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                a:hover {
+                    text-decoration: underline;
+                }
+            }
+        }
     }
 
     .jsxc_avatar {
@@ -321,7 +361,6 @@
     margin: 3px;
     padding: 4px;
     padding-right: 10px;
-    max-width: 76%;
     word-wrap: break-word;
     background-color: $chatmessage_bg;
     position: relative;
@@ -331,16 +370,58 @@
     a {
         color: $chatmessage_a;
         text-decoration: underline;
+        display: inline-block;
     }
 
     img {
-        width: 19px;
-        height: 19px;
-        background-size: 19px 19px;
+        max-width: 100%;
     }
 
     .jsxc_avatar {
         display: none;
+    }
+
+    .jsxc_attachment {
+        border-radius: 3px;
+        background-color: #fff;
+        padding: 3px;
+        padding-left: 30px;
+        min-height: 30px;
+        margin-bottom: 5px;
+        background-position: 3px center;
+        background-size: 25px 25px;
+        background-repeat: no-repeat;
+        background-image: image-url("filetypes/file.svg");
+
+        img {
+            border-radius: 3px;
+        }
+
+        &.jsxc_image {
+            line-height: 0px;
+            padding: 0;
+            background-image: url();
+        }
+
+        &.jsxc_application {
+            background-image: image-url("filetypes/application.svg");
+        }
+
+        &.jsxc_application-pdf {
+            background-image: image-url("filetypes/application-pdf.svg");
+        }
+
+        &.jsxc_audio {
+            background-image: image-url("filetypes/audio.svg");
+        }
+
+        &.jsxc_video {
+            background-image: image-url("filetypes/video.svg");
+        }
+
+        &.jsxc_text {
+            background-image: image-url("filetypes/text.svg");
+        }
     }
 }
 
@@ -352,11 +433,13 @@
     white-space: nowrap;
     max-width: 100%;
     text-overflow: ellipsis;
+    clear: both;
 }
 
 .jsxc_in {
     float: left;
     position: relative;
+    max-width: 76%;
     margin-left: 10px;
     border-radius: 3px;
     background-color: $chatmessage_in_bg;
@@ -382,6 +465,7 @@
 .jsxc_out {
     float: right;
     position: relative;
+    max-width: 76%;
     margin-right: 10px;
     border-radius: 3px;
     background-color: $chatmessage_out_bg;

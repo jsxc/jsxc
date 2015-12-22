@@ -280,6 +280,7 @@
     "Room_is_now_semi-anonymous": "A sala é semi anônima agora",
     "Do_you_want_to_change_the_default_room_configuration": "Você quer alterar as configurações da sala?",
     "Default": "Padrão",
-    "Change": "Alterar"
+    "Change": "Alterar",
+    "Send_file": null
   }
 }

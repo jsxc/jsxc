@@ -1,4 +1,4 @@
-/* global MediaStreamTrack */
+/* global MediaStreamTrack, File */
 /* jshint -W020 */
 
 /**
@@ -22,8 +22,11 @@ jsxc.webrtc = {
    /** should we auto accept incoming calls? */
    AUTO_ACCEPT: false,
 
-   /** required disco features */
+   /** required disco features for video call */
    reqVideoFeatures: ['urn:xmpp:jingle:apps:rtp:video', 'urn:xmpp:jingle:apps:rtp:audio', 'urn:xmpp:jingle:transports:ice-udp:1', 'urn:xmpp:jingle:apps:dtls:0'],
+
+   /** required disco features for file transfer */
+   reqFileFeatures: ['urn:xmpp:jingle:1', 'urn:xmpp:jingle:apps:file-transfer:3'],
 
    /** bare jid to current jid mapping */
    chatJids: {},
@@ -53,9 +56,16 @@ jsxc.webrtc = {
       $(document).on('mediaready.jingle', self.onMediaReady);
       $(document).on('mediafailure.jingle', self.onMediaFailure);
 
-      manager.on('incoming', $.proxy(self.onCallIncoming, self));
-      manager.on('terminated', $.proxy(self.onCallTerminated, self));
+      manager.on('incoming', $.proxy(self.onIncoming, self));
+
+      manager.on('terminated', $.proxy(self.onTerminated, self));
       manager.on('ringing', $.proxy(self.onCallRinging, self));
+
+      manager.on('receivedFile', $.proxy(self.onReceivedFile, self));
+
+      manager.on('sentFile', function(sess, metadata) {
+         jsxc.debug('sent ' + metadata.hash);
+      });
 
       manager.on('peerStreamAdded', $.proxy(self.onRemoteStreamAdded, self));
       manager.on('peerStreamRemoved', $.proxy(self.onRemoteStreamRemoved, self));
@@ -182,20 +192,27 @@ jsxc.webrtc = {
    },
 
    /**
-    * Return list of video capable resources.
+    * Return list of capable resources.
     * 
     * @memberOf jsxc.webrtc
     * @param jid
+    * @param {(string|string[])} features list of required features
     * @returns {Array}
     */
-   getCapableRes: function(jid) {
+   getCapableRes: function(jid, features) {
       var self = jsxc.webrtc;
       var bid = jsxc.jidToBid(jid);
-      var res = jsxc.storage.getUserItem('res', bid) || [];
+      var res = Object.keys(jsxc.storage.getUserItem('res', bid)) || [];
+
+      if (!features) {
+         return res;
+      } else if (typeof features === 'string') {
+         features = [features];
+      }
 
       var available = [];
-      $.each(res, function(r) {
-         if (self.conn.caps.hasFeatureByJid(bid + '/' + r, self.reqVideoFeatures)) {
+      $.each(res, function(i, r) {
+         if (self.conn.caps.hasFeatureByJid(bid + '/' + r, features)) {
             available.push(r);
          }
       });
@@ -284,6 +301,7 @@ jsxc.webrtc = {
 
       var win = jsxc.gui.window.get(bid);
       var jid = win.data('jid');
+      var res = Strophe.getResourceFromJid(jid);
       var ls = jsxc.storage.getUserItem('buddy', bid);
 
       if (typeof jid !== 'string') {
@@ -297,8 +315,8 @@ jsxc.webrtc = {
 
       var el = win.find('.jsxc_video').add(jsxc.gui.roster.getItem(bid).find('.jsxc_video'));
 
-      var capableRes = self.getCapableRes(jid);
-      var targetRes = Strophe.getResourceFromJid(jid);
+      var capableRes = self.getCapableRes(jid, self.reqVideoFeatures);
+      var targetRes = res;
 
       if (targetRes === null) {
          $.each(jsxc.storage.getUserItem('buddy', bid).res || [], function(index, val) {
@@ -325,6 +343,15 @@ jsxc.webrtc = {
          el.addClass('jsxc_disabled');
 
          el.attr('title', $.t('Video_call_not_possible'));
+      }
+
+      var fileCapableRes = self.getCapableRes(jid, self.reqFileFeatures);
+      var resources = Object.keys(jsxc.storage.getUserItem('res', bid)) || [];
+
+      if (fileCapableRes.indexOf(res) > -1 || (res === null && fileCapableRes.length === 1 && resources.length === 1)) {
+         win.find('.jsxc_sendFile').removeClass('jsxc_disabled');
+      } else {
+         win.find('.jsxc_sendFile').addClass('jsxc_disabled');
       }
    },
 
@@ -487,8 +514,50 @@ jsxc.webrtc = {
 
       self.setStatus('media failure');
 
-      jsxc.gui.window.postMessage(jsxc.jidToBid(jsxc.webrtc.last_caller), 'sys', $.t('Media_failure') + ': ' + $.t(err.name) + ' (' + err.name + ').');
+      jsxc.gui.window.postMessage({
+         bid: jsxc.jidToBid(jsxc.webrtc.last_caller),
+         direction: jsxc.Message.SYS,
+         msg: $.t('Media_failure') + ': ' + $.t(err.name) + ' (' + err.name + ').'
+      });
+
       jsxc.debug('media failure: ' + err.name);
+   },
+
+   onIncoming: function(session) {
+      var self = jsxc.webrtc;
+      var type = (session.constructor) ? session.constructor.name : null;
+
+      if (type === 'FileTransferSession') {
+         self.onIncomingFileTransfer(session);
+      } else if (type === 'MediaSession') {
+         self.onIncomingCall(session);
+      }
+   },
+
+   onIncomingFileTransfer: function(session) {
+      jsxc.debug('incoming file transfer from ' + session.peerID);
+
+      var buddylist = jsxc.storage.getUserItem('buddylist') || [];
+      var bid = jsxc.jidToBid(session.peerID);
+
+      if (buddylist.indexOf(bid) > -1) {
+         //Accept file transfers only from contacts
+         session.accept();
+
+         var message = jsxc.gui.window.postMessage({
+            _uid: session.sid + ':msg',
+            bid: bid,
+            direction: jsxc.Message.IN,
+            attachment: {
+               name: session.receiver.metadata.name,
+               type: session.receiver.metadata.type || 'application/octet-stream'
+            }
+         });
+
+         session.receiver.on('progress', function(sent, size) {
+            jsxc.gui.window.updateProgress(message, sent, size);
+         });
+      }
    },
 
    /**
@@ -499,15 +568,19 @@ jsxc.webrtc = {
     * @param event
     * @param sid Session id
     */
-   onCallIncoming: function(session) {
+   onIncomingCall: function(session) {
       jsxc.debug('incoming call from ' + session.peerID);
 
-      var self = this;
+      var self = jsxc.webrtc;
       var bid = jsxc.jidToBid(session.peerID);
 
       session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
 
-      jsxc.gui.window.postMessage(bid, 'sys', $.t('Incoming_call'));
+      jsxc.gui.window.postMessage({
+         bid: bid,
+         direction: jsxc.Message.SYS,
+         msg: $.t('Incoming_call')
+      });
 
       // display notification
       jsxc.notification.notify($.t('Incoming_call'), $.t('from_sender', {
@@ -555,6 +628,15 @@ jsxc.webrtc = {
       });
    },
 
+   onTerminated: function(session, reason) {
+      var self = jsxc.webrtc;
+      var type = (session.constructor) ? session.constructor.name : null;
+
+      if (type === 'MediaSession') {
+         self.onCallTerminated(session, reason);
+      }
+   },
+
    /**
     * Called if call is terminated.
     * 
@@ -566,9 +648,9 @@ jsxc.webrtc = {
     * @param [text] Optional explanation
     */
    onCallTerminated: function(session, reason) {
-      this.setStatus('call terminated ' + session.peer + (reason ? reason.condition : ''));
+      this.setStatus('call terminated ' + session.peerID + (reason ? reason.condition : ''));
 
-      var bid = jsxc.jidToBid(session.peer);
+      var bid = jsxc.jidToBid(session.peerID);
 
       if (this.localStream) {
          this.localStream.stop();
@@ -594,7 +676,11 @@ jsxc.webrtc = {
       jsxc.gui.dialog.close();
       $('#jsxc_webrtc').remove();
 
-      jsxc.gui.window.postMessage(bid, 'sys', ($.t('Call_terminated') + (reason ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.'));
+      jsxc.gui.window.postMessage({
+         bid: bid,
+         direction: jsxc.Message.SYS,
+         msg: ($.t('Call_terminated') + (reason ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.')
+      });
    },
 
    /**
@@ -682,7 +768,11 @@ jsxc.webrtc = {
          $('#jsxc_webrtc .bubblingG').hide();
 
       } else if (state === 'failed') {
-         jsxc.gui.window.postMessage(jsxc.jidToBid(session.peerID), 'sys', $.t('ICE_connection_failure'));
+         jsxc.gui.window.postMessage({
+            bid: jsxc.jidToBid(session.peerID),
+            direction: jsxc.Message.SYS,
+            msg: $.t('ICE_connection_failure')
+         });
 
          $(document).off('cleanup.dialog.jsxc');
 
@@ -715,7 +805,11 @@ jsxc.webrtc = {
          'finish.mediaready.jsxc': function() {
             self.setStatus('Initiate call');
 
-            jsxc.gui.window.postMessage(jsxc.jidToBid(jid), 'sys', $.t('Call_started'));
+            jsxc.gui.window.postMessage({
+               bid: jsxc.jidToBid(jid),
+               direction: jsxc.Message.SYS,
+               msg: $.t('Call_started')
+            });
 
             $(document).one('error.jingle', function(e, sid, error) {
                if (error.source !== 'offer') {
@@ -855,6 +949,105 @@ jsxc.webrtc = {
       $('.jsxc_snapshotbar').append(link);
 
       canvas.remove();
+   },
+
+   /**
+    * Send file to full jid.
+    *
+    * @memberOf jsxc.webrtc
+    * @param  {string} jid full jid
+    * @param  {file} file
+    * @return {object} session
+    */
+   sendFile: function(jid, file) {
+      var self = jsxc.webrtc;
+
+      var sess = self.conn.jingle.manager.createFileTransferSession(jid);
+
+      sess.on('change:sessionState', function() {
+         jsxc.debug('Session state', sess.state);
+      });
+      sess.on('change:connectionState', function() {
+         jsxc.debug('Connection state', sess.connectionState);
+      });
+
+      sess.start(file);
+
+      return sess;
+   },
+
+   /**
+    * Display received file.
+    *
+    * @memberOf jsxc.webrtc
+    * @param  {object} sess
+    * @param  {File} file
+    * @param  {object} metadata file metadata
+    */
+   onReceivedFile: function(sess, file, metadata) {
+      jsxc.debug('file received', metadata);
+
+      if (!FileReader) {
+         return;
+      }
+
+      var reader = new FileReader();
+      var type;
+
+      if (!metadata.type) {
+         // detect file type via file extension, because XEP-0234 v0.14 
+         // does not send any type
+         var ext = metadata.name.replace(/.+\.([a-z0-9]+)$/i, '$1').toLowerCase();
+
+         switch (ext) {
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+            case 'gif':
+            case 'svg':
+               type = 'image/' + ext.replace(/^jpg$/, 'jpeg');
+               break;
+            case 'mp3':
+            case 'wav':
+               type = 'audio/' + ext;
+               break;
+            case 'pdf':
+               type = 'application/pdf';
+               break;
+            case 'txt':
+               type = 'text/' + ext;
+               break;
+            default:
+               type = 'application/octet-stream';
+         }
+      } else {
+         type = metadata.type;
+      }
+
+      reader.onload = function(ev) {
+         // modify element with uid metadata.actualhash
+
+         jsxc.gui.window.postMessage({
+            _uid: sess.sid + ':msg',
+            bid: jsxc.jidToBid(sess.peerID),
+            direction: jsxc.Message.IN,
+            attachment: {
+               name: metadata.name,
+               type: type,
+               size: metadata.size,
+               data: ev.target.result
+            }
+         });
+      };
+
+      if (!file.type) {
+         // file type should be handled in lib
+         file = new File([file], metadata.name, {
+            type: type
+         });
+      }
+
+      reader.readAsDataURL(file);
    }
 };
 

@@ -249,5 +249,7 @@ jsxc.options = {
             height: h
          };
       }
-   }
+   },
+
+   maxStorableSize: 1000000
 };
