@@ -81,11 +81,21 @@
     form {
         fieldset {
             margin-bottom: 30px;
+            padding: 0px 30px;
+            border: 1px solid #d9d9d9;
+            
+            h3 {
+               font-size: 15px;
+               color: #000;
+               background-color: #f2f2f2;
+               padding:10px;
+               margin: 0 -30px 10px -30px;
+            }
         }
-    }
-
-    fieldset {
-        border-bottom: 1px solid #eee;
+        
+        /*&.col-sm-6:nth-child(odd) {
+           clear: left;
+        }*/
     }
 
     legend {

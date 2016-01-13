@@ -1,6 +1,7 @@
-<form class="form-horizontal">
+<form class="form-horizontal col-sm-6">
    <fieldset class="jsxc_fieldsetXmpp jsxc_fieldset">
-      <legend data-i18n="Login_options"></legend>
+      <h3 data-i18n="Login_options"></h3>
+      <p data-i18n="setting-explanation-xmpp"></p>
       <div class="form-group">
          <label class="col-sm-6 control-label" for="xmpp-url" data-i18n="BOSH_url"></label>
          <div class="col-sm-6">
@@ -33,29 +34,10 @@
    </fieldset>
 </form>
 
-<form class="form-horizontal">
-   <fieldset class="jsxc_fieldsetLoginForm jsxc_fieldset">
-      <legend data-i18n="On_login"></legend>
-      <div class="form-group">
-         <div class="col-sm-offset-6 col-sm-6">
-            <div class="checkbox">
-               <label>
-                  <input type="checkbox" id="loginForm-enable"><span data-i18n="On_login"></span>
-               </label>
-            </div>
-         </div>
-      </div>
-      <div class="form-group">
-         <div class="col-sm-offset-6 col-sm-6">
-            <button class="btn btn-primary jsxc_continue" type="submit" data-i18n="Save"></button>
-         </div>
-      </div>
-   </fieldset>
-</form>
-
-<form class="form-horizontal">
+<form class="form-horizontal col-sm-6">
    <fieldset class="jsxc_fieldsetPriority jsxc_fieldset">
-      <legend data-i18n="Priority"></legend>
+      <h3 data-i18n="Priority"></h3>
+      <p data-i18n="setting-explanation-priority"></p>
       <div class="form-group">
          <label class="col-sm-6 control-label" for="priority-online" data-i18n="Online"></label>
          <div class="col-sm-6">
@@ -94,11 +76,33 @@
    </fieldset>
 </form>
 
-<form class="form-horizontal" data-onsubmit="xmpp.carbons.refresh">
-   <fieldset class="jsxc_fieldsetCarbons jsxc_fieldset">
-      <legend data-i18n="Carbon_copy"></legend>
+<form class="form-horizontal col-sm-6">
+   <fieldset class="jsxc_fieldsetLoginForm jsxc_fieldset">
+      <h3 data-i18n="On_login"></h3>
+      <p data-i18n="setting-explanation-login"></p>
       <div class="form-group">
-         <div class="col-sm-offset-6 col-sm-6">
+         <div class="col-sm-12">
+            <div class="checkbox">
+               <label>
+                  <input type="checkbox" id="loginForm-enable"><span data-i18n="On_login"></span>
+               </label>
+            </div>
+         </div>
+      </div>
+      <div class="form-group">
+         <div class="col-sm-12">
+            <button class="btn btn-primary jsxc_continue" type="submit" data-i18n="Save"></button>
+         </div>
+      </div>
+   </fieldset>
+</form>
+
+<form class="form-horizontal col-sm-6" data-onsubmit="xmpp.carbons.refresh">
+   <fieldset class="jsxc_fieldsetCarbons jsxc_fieldset">
+      <h3 data-i18n="Carbon_copy"></h3>
+      <p data-i18n="setting-explanation-carbon"></p>
+      <div class="form-group">
+         <div class="col-sm-12">
             <div class="checkbox">
                <label>
                   <input type="checkbox" id="carbons-enable"><span data-i18n="Enable"></span>
@@ -107,7 +111,7 @@
          </div>
       </div>
       <div class="form-group">
-         <div class="col-sm-offset-6 col-sm-6">
+         <div class="col-sm-12">
             <button class="btn btn-primary jsxc_continue" type="submit" data-i18n="Save"></button>
          </div>
       </div>
