@@ -260,10 +260,12 @@ jsxc.otr = {
 
       if (data) {
          $('#jsxc_dialog > div:eq(2)').find('#jsxc_quest').val(data).prop('disabled', true);
-         $('#jsxc_dialog > div:eq(2)').find('.jsxc_submit').text($('Answer'));
+         $('#jsxc_dialog > div:eq(2)').find('.jsxc_submit').text($.t('Answer'));
          $('#jsxc_dialog > div:eq(2)').find('.jsxc_explanation').text($.t('onsmp_explanation_question'));
+         $('#jsxc_dialog > div:eq(2)').show();
       } else {
          $('#jsxc_dialog > div:eq(3)').find('.jsxc_explanation').text($.t('onsmp_explanation_secret'));
+         $('#jsxc_dialog > div:eq(3)').show();
       }
 
       $('#jsxc_dialog .jsxc_close').click(function() {
