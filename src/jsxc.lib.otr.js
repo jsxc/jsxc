@@ -432,8 +432,6 @@ jsxc.otr = {
             MSGSTATE_FINISHED: 2
          };
 
-         jsxc._onMaster();
-
          return;
       }
 
@@ -456,8 +454,6 @@ jsxc.otr = {
          if (!jsxc.otr.dsaFallback) {
             // create DSA key in background
 
-            jsxc._onMaster();
-
             worker.onmessage = function(e) {
                var type = e.data.type;
                var val = e.data.val;
@@ -469,6 +465,8 @@ jsxc.otr = {
                }
             };
 
+            jsxc.debug('DSA key creation started.');
+
             // start worker
             worker.postMessage({
                imports: [jsxc.options.root + '/lib/otr/vendor/salsa20.js', jsxc.options.root + '/lib/otr/vendor/bigint.js', jsxc.options.root + '/lib/otr/vendor/crypto.js', jsxc.options.root + '/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/lib/otr/lib/const.js', jsxc.options.root + '/lib/otr/lib/helpers.js', jsxc.options.root + '/lib/otr/lib/dsa.js'],
@@ -478,12 +476,13 @@ jsxc.otr = {
 
          } else {
             // fallback
+            jsxc.xmpp.conn.pause();
 
             jsxc.gui.dialog.open(jsxc.gui.template.get('waitAlert', null, msg), {
                noClose: true
             });
 
-            jsxc.debug('DSA key creation started.');
+            jsxc.debug('DSA key creation started in fallback mode.');
 
             // wait until the wait alert is opened
             setTimeout(function() {
@@ -506,9 +505,9 @@ jsxc.otr = {
 
       jsxc.storage.setUserItem('priv_fingerprint', jsxc.options.otr.priv.fingerprint());
 
-      if (jsxc.otr.dsaFallback !== false) {
-         jsxc._onMaster();
-      }
+      $.each(jsxc.storage.getUserItem('windowlist') || [], function(index, val) {
+         jsxc.otr.create(val);
+      });
    },
 
    /**
@@ -522,11 +521,8 @@ jsxc.otr = {
 
       // close wait alert
       if (jsxc.otr.dsaFallback) {
+         jsxc.xmpp.conn.resume();
          jsxc.gui.dialog.close();
-      } else {
-         $.each(jsxc.storage.getUserItem('windowlist'), function(index, val) {
-            jsxc.otr.create(val);
-         });
       }
 
       jsxc.otr._createDSA();

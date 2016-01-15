@@ -21,6 +21,10 @@ jsxc.storage = {
    getPrefix: function(uk) {
       var self = jsxc.storage;
 
+      if (uk && !jsxc.bid) {
+         jsxc.warn('Unable to create user prefix');
+      }
+
       return self.PREFIX + self.SEP + ((uk && jsxc.bid) ? jsxc.bid + self.SEP : '');
    },
 
@@ -35,7 +39,7 @@ jsxc.storage = {
    setItem: function(key, value, uk) {
 
       // Workaround for non-conform browser
-      if (jsxc.storageNotConform > 0 && key !== 'rid' && key !== 'lastActivity') {
+      if (jsxc.storageNotConform > 0 && key !== 'rid') {
          if (jsxc.storageNotConform > 1 && jsxc.toSNC === null) {
             jsxc.toSNC = window.setTimeout(function() {
                jsxc.storageNotConform = 0;
@@ -121,7 +125,7 @@ jsxc.storage = {
    removeItem: function(key, uk) {
 
       // Workaround for non-conform browser
-      if (jsxc.storageNotConform && key !== 'rid' && key !== 'lastActivity') {
+      if (jsxc.storageNotConform && key !== 'rid') {
          jsxc.ls.push(JSON.stringify({
             key: jsxc.storage.prefix + key,
             value: ''
@@ -264,7 +268,7 @@ jsxc.storage = {
    onStorage: function(e) {
 
       // skip
-      if (e.key === jsxc.storage.PREFIX + jsxc.storage.SEP + 'rid' || e.key === jsxc.storage.PREFIX + jsxc.storage.SEP + 'lastActivity') {
+      if (e.key === jsxc.storage.PREFIX + jsxc.storage.SEP + 'rid') {
          return;
       }
 

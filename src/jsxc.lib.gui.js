@@ -960,7 +960,7 @@ jsxc.gui = {
       jsxc.gui.dialog.open(jsxc.gui.template.get('settings'));
 
       if (jsxc.options.get('xmpp').overwrite === 'false' || jsxc.options.get('xmpp').overwrite === false) {
-         $('.jsxc_fieldsetXmpp').parent().remove();
+         $('.jsxc_fieldsetXmpp').parent().hide();
       }
 
       $('#jsxc_dialog form').each(function() {
@@ -2042,7 +2042,7 @@ jsxc.gui.window = {
       if ($.inArray(bid, jsxc.storage.getUserItem('windowlist')) < 0) {
 
          // add window to windowlist
-         var wl = jsxc.storage.getUserItem('windowlist');
+         var wl = jsxc.storage.getUserItem('windowlist') || [];
          wl.push(bid);
          jsxc.storage.setUserItem('windowlist', wl);
 

@@ -124,9 +124,6 @@ jsxc.options = {
    /** Absolute path root of JSXC installation */
    root: '',
 
-   /** Timeout for restore in ms */
-   loginTimeout: 1000 * 60 * 10,
-
    /**
     * This function decides wether the roster will be displayed or not if no
     * connection is found.

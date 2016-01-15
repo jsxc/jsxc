@@ -11,3 +11,10 @@ dev/
 lib/favico.js/
 lib/strophe.bookmarks/
 lib/strophe.x/
+lib/almond/
+lib/jquery/
+lib/qunit/
+lib/requirejs/
+lib/sinon-qunit/
+lib/sinon/
+lib/strophe.js/

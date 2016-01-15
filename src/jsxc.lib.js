@@ -28,8 +28,8 @@ jsxc = {
    /** Interval for keep-alive */
    keepalive: null,
 
-   /** True if last activity was up to 10 min ago */
-   restore: false,
+   /** True if jid, sid and rid was used to connect */
+   reconnect: false,
 
    /** True if restore is complete */
    restoreCompleted: false,
@@ -199,9 +199,13 @@ jsxc = {
        * @returns default or saved option value
        */
       jsxc.options.get = function(key) {
-         var local = jsxc.storage.getUserItem('options') || {};
+         if (jsxc.bid) {
+            var local = jsxc.storage.getUserItem('options') || {};
 
-         return local[key] || jsxc.options[key];
+            return local[key] || jsxc.options[key];
+         }
+
+         return jsxc.options[key];
       };
 
       /**
@@ -247,19 +251,21 @@ jsxc = {
       // Register event listener for the storage event
       window.addEventListener('storage', jsxc.storage.onStorage, false);
 
-      var lastActivity = jsxc.storage.getItem('lastActivity') || 0;
-
-      if ((new Date()).getTime() - lastActivity < jsxc.options.loginTimeout) {
-         jsxc.restore = true;
-      }
-
       $(document).on('connectionReady.jsxc', function() {
          // Looking for logout element
          if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
-            var logout = function() {
+            var logout = function(ev) {
+               if (!jsxc.xmpp.conn || !jsxc.xmpp.conn.authenticated) {
+                  return;
+               }
+
+               ev.stopPropagation();
+               ev.preventDefault();
+
                jsxc.options.logoutElement = $(this);
                jsxc.triggeredFromLogout = true;
-               return jsxc.xmpp.logout();
+
+               jsxc.xmpp.logout();
             };
 
             jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
@@ -267,7 +273,7 @@ jsxc = {
       });
 
       // Check if we have to establish a new connection
-      if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.restore) {
+      if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.storage.getItem('jid')) {
 
          // clean up rid and sid
          jsxc.storage.removeItem('rid');
@@ -317,7 +323,7 @@ jsxc = {
                   if (enabled) {
                      jsxc.options.loginForm.triggered = true;
 
-                     jsxc.xmpp.login();
+                     jsxc.xmpp.login(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
                   }
                } else {
                   jsxc.submitLoginForm();
@@ -332,16 +338,44 @@ jsxc = {
 
          // Restore old connection
 
-         jsxc.bid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
-
-         jsxc.gui.init();
-
-         if (typeof(jsxc.storage.getItem('alive')) === 'undefined' || !jsxc.restore) {
+         if (typeof(jsxc.storage.getItem('alive')) === 'undefined') {
             jsxc.onMaster();
          } else {
             jsxc.checkMaster();
          }
       }
+   },
+
+   /**
+    * Attach to previous session if jid, sid and rid are available in storage 
+    * (default behaviour also for {@link jsxc.init}). Otherwise try to start new session 
+    * with given jid and password in jsxc.options.xmpp.
+    *
+    * @memberOf jsxc
+    */
+   /**
+    * Start new chat session with given jid and password.
+    *
+    * @memberOf jsxc
+    * @param {string} jid Jabber Id
+    */
+   /**
+    * Attach to new chat session with jid, sid and rid.
+    *
+    * @memberOf jsxc
+    * @param {string} jid Jabber Id
+    * @param {string} sid Session Id
+    * @param {string} rid Request Id
+    */
+   start: function() {
+      if (arguments.length === 3) {
+         $(document).one('attached.jsxc', function() {
+            // save rid after first attachment
+            jsxc.xmpp.onRidChange(jsxc.xmpp.conn._proto.rid);
+         });
+      }
+
+      jsxc.xmpp.login.apply(this, arguments);
    },
 
    /**
@@ -468,6 +502,9 @@ jsxc = {
       jsxc.debug('I am the slave.');
 
       jsxc.role_allocation = true;
+      jsxc.bid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
+
+      jsxc.gui.init();
 
       jsxc.restoreRoster();
       jsxc.restoreWindows();
@@ -487,62 +524,11 @@ jsxc = {
       // Init local storage
       jsxc.storage.setItem('alive', 0);
       jsxc.storage.setItem('alive_busy', 0);
-      if (!jsxc.storage.getUserItem('windowlist')) {
-         jsxc.storage.setUserItem('windowlist', []);
-      }
 
       // Sending keepalive signal
       jsxc.startKeepAlive();
 
-      if (jsxc.options.get('otr').enable) {
-         // create or load DSA key and call _onMaster
-         jsxc.otr.createDSA();
-      } else {
-         jsxc._onMaster();
-      }
-   },
-
-   /**
-    * Second half of the onMaster routine
-    */
-   _onMaster: function() {
-
-      // create otr objects, if we lost the master
-      if (jsxc.role_allocation) {
-         $.each(jsxc.storage.getUserItem('windowlist'), function(index, val) {
-            jsxc.otr.create(val);
-         });
-      }
-
       jsxc.role_allocation = true;
-
-      if (jsxc.restore && !jsxc.restoreCompleted) {
-         jsxc.restoreRoster();
-         jsxc.restoreWindows();
-         jsxc.restoreCompleted = true;
-
-         $(document).trigger('restoreCompleted.jsxc');
-      }
-
-      // Prepare notifications
-      if (jsxc.restore) {
-         var noti = jsxc.storage.getUserItem('notification');
-         noti = (typeof noti === 'number') ? noti : 2;
-         if (jsxc.options.notification && noti > 0 && jsxc.notification.hasSupport()) {
-            if (jsxc.notification.hasPermission()) {
-               jsxc.notification.init();
-            } else {
-               jsxc.notification.prepareRequest();
-            }
-         } else {
-            // No support => disable
-            jsxc.options.notification = false;
-         }
-      }
-
-      $(document).on('connectionReady.jsxc', function() {
-         jsxc.gui.updateAvatar($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
-      });
 
       jsxc.xmpp.login();
    },
@@ -557,6 +543,34 @@ jsxc = {
       jsxc.storage.ink('alive');
    },
 
+   masterActions: function() {
+
+      if (!jsxc.xmpp.conn || !jsxc.xmpp.conn.authenticated) {
+         return;
+      }
+
+      //prepare notifications
+      var noti = jsxc.storage.getUserItem('notification');
+      noti = (typeof noti === 'number') ? noti : 2;
+      if (jsxc.options.notification && noti > 0 && jsxc.notification.hasSupport()) {
+         if (jsxc.notification.hasPermission()) {
+            jsxc.notification.init();
+         } else {
+            jsxc.notification.prepareRequest();
+         }
+      } else {
+         // No support => disable
+         jsxc.options.notification = false;
+      }
+
+      if (jsxc.options.get('otr').enable) {
+         // create or load DSA key
+         jsxc.otr.createDSA();
+      }
+
+      jsxc.gui.updateAvatar($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
+   },
+
    /**
     * Start sending keep-alive signal
     */
@@ -569,10 +583,6 @@ jsxc = {
     */
    keepAlive: function() {
       jsxc.storage.ink('alive');
-
-      if (jsxc.role_allocation) {
-         jsxc.storage.setItem('lastActivity', (new Date()).getTime());
-      }
    },
 
    /**

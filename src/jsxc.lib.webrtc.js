@@ -202,7 +202,7 @@ jsxc.webrtc = {
    getCapableRes: function(jid, features) {
       var self = jsxc.webrtc;
       var bid = jsxc.jidToBid(jid);
-      var res = Object.keys(jsxc.storage.getUserItem('res', bid)) || [];
+      var res = Object.keys(jsxc.storage.getUserItem('res', bid) || {}) || [];
 
       if (!features) {
          return res;
@@ -281,7 +281,7 @@ jsxc.webrtc = {
       var div = $('<div>').addClass('jsxc_video');
       win.find('.jsxc_tools .jsxc_settings').after(div);
 
-      self.updateIcon(jsxc.jidToBid(win.data('jid')));
+      self.updateIcon(win.data('bid'));
    },
 
    /**
@@ -301,7 +301,6 @@ jsxc.webrtc = {
 
       var win = jsxc.gui.window.get(bid);
       var jid = win.data('jid');
-      var res = Strophe.getResourceFromJid(jid);
       var ls = jsxc.storage.getUserItem('buddy', bid);
 
       if (typeof jid !== 'string') {
@@ -312,6 +311,8 @@ jsxc.webrtc = {
             return;
          }
       }
+
+      var res = Strophe.getResourceFromJid(jid);
 
       var el = win.find('.jsxc_video').add(jsxc.gui.roster.getItem(bid).find('.jsxc_video'));
 
@@ -346,7 +347,7 @@ jsxc.webrtc = {
       }
 
       var fileCapableRes = self.getCapableRes(jid, self.reqFileFeatures);
-      var resources = Object.keys(jsxc.storage.getUserItem('res', bid)) || [];
+      var resources = Object.keys(jsxc.storage.getUserItem('res', bid) || {}) || [];
 
       if (fileCapableRes.indexOf(res) > -1 || (res === null && fileCapableRes.length === 1 && resources.length === 1)) {
          win.find('.jsxc_sendFile').removeClass('jsxc_disabled');

@@ -1,7 +1,7 @@
 [
   {
      "name": "strophe.js",
-     "file": "lib/strophe.js",
+     "file": "lib/strophe.js/strophe.js",
      "license": "multiple",
      "url": "http://strophe.im/strophejs/"
   },

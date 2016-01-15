@@ -63,6 +63,16 @@ jsxc.xmpp = {
             }
       }
 
+      if (!jid) {
+         jsxc.warn('Jid required for login');
+
+         return;
+      }
+
+      if (!jsxc.bid) {
+         jsxc.bid = jsxc.jidToBid(jid);
+      }
+
       var url = jsxc.options.get('xmpp').url;
 
       if (!(jsxc.xmpp.conn && jsxc.xmpp.conn.connected)) {
@@ -70,7 +80,6 @@ jsxc.xmpp = {
          $(document).on('connected.jsxc', jsxc.xmpp.connected);
          $(document).on('attached.jsxc', jsxc.xmpp.attached);
          $(document).on('disconnected.jsxc', jsxc.xmpp.disconnected);
-         $(document).on('ridChange', jsxc.xmpp.onRidChange);
          $(document).on('connfail.jsxc', jsxc.xmpp.onConnfail);
          $(document).on('authfail.jsxc', jsxc.xmpp.onAuthFail);
 
@@ -97,6 +106,8 @@ jsxc.xmpp = {
             console.log('>', data);
          };
       }
+
+      jsxc.xmpp.conn.nextValidRid = jsxc.xmpp.onRidChange;
 
       var callback = function(status, condition) {
 
@@ -129,9 +140,12 @@ jsxc.xmpp = {
          jsxc.xmpp.conn.caps.node = 'http://jsxc.org/';
       }
 
-      if (jsxc.restore && sid && rid) {
+      if (sid && rid) {
          jsxc.debug('Try to attach');
          jsxc.debug('SID: ' + sid);
+
+         jsxc.reconnect = true;
+
          jsxc.xmpp.conn.attach(jid, sid, rid, callback);
       } else {
          jsxc.debug('New connection');
@@ -155,7 +169,7 @@ jsxc.xmpp = {
             }, Strophe.NS.CAPS);
          }
 
-         jsxc.xmpp.conn.connect(jid || jsxc.options.xmpp.jid, password || jsxc.options.xmpp.password, callback);
+         jsxc.xmpp.conn.connect(jid, password || jsxc.options.xmpp.password, callback);
       }
    },
 
@@ -235,14 +249,6 @@ jsxc.xmpp = {
 
       jsxc.xmpp.conn.pause();
 
-      var nomJid = Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid).toLowerCase() + '/' + Strophe.getResourceFromJid(jsxc.xmpp.conn.jid);
-
-      // Save sid and jid
-      jsxc.storage.setItem('sid', jsxc.xmpp.conn._proto.sid);
-      jsxc.storage.setItem('jid', nomJid);
-
-      jsxc.storage.setItem('lastActivity', (new Date()).getTime());
-
       // make shure roster will be reloaded
       jsxc.storage.removeUserItem('buddylist');
 
@@ -255,13 +261,14 @@ jsxc.xmpp = {
       // reset user options
       jsxc.storage.removeUserElement('options', 'RTCPeerConfig');
 
+      jsxc.xmpp.connectionReady();
+
       if (jsxc.options.loginForm.triggered) {
          switch (jsxc.options.loginForm.onConnected || 'submit') {
             case 'submit':
                jsxc.submitLoginForm();
-               /* falls through */
+               return;
             case false:
-               jsxc.xmpp.connectionReady();
                return;
          }
       }
@@ -270,10 +277,12 @@ jsxc.xmpp = {
 
       jsxc.gui.init();
       $('#jsxc_roster').removeClass('jsxc_noConnection');
-      jsxc.onMaster();
+
       jsxc.xmpp.conn.resume();
-      jsxc.gui.dialog.close();
-      jsxc.restoreCompleted = true;
+
+      jsxc.onMaster();
+      jsxc.masterActions();
+
       $(document).trigger('attached.jsxc');
    },
 
@@ -288,6 +297,8 @@ jsxc.xmpp = {
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onMessage, null, 'message', 'chat');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onReceived, null, 'message');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
+
+      jsxc.gui.init();
 
       var caps = jsxc.xmpp.conn.caps;
       var domain = jsxc.xmpp.conn.domain;
@@ -327,7 +338,7 @@ jsxc.xmpp = {
       }
 
       // Only load roaster if necessary
-      if (!jsxc.restore || !jsxc.storage.getUserItem('buddylist')) {
+      if (!jsxc.reconnect || !jsxc.storage.getUserItem('buddylist')) {
          // in order to not overide existing presence information, we send
          // pres first after roster is ready
          $(document).one('cloaded.roster.jsxc', jsxc.xmpp.sendPres);
@@ -343,7 +354,17 @@ jsxc.xmpp = {
          jsxc.xmpp.conn.sendIQ(iq, jsxc.xmpp.onRoster);
       } else {
          jsxc.xmpp.sendPres();
+
+         if (!jsxc.restoreCompleted) {
+            jsxc.restoreRoster();
+            jsxc.restoreWindows();
+            jsxc.restoreCompleted = true;
+
+            $(document).trigger('restoreCompleted.jsxc');
+         }
       }
+
+      jsxc.masterActions();
 
       jsxc.xmpp.connectionReady();
    },
@@ -352,6 +373,12 @@ jsxc.xmpp = {
     * Triggered if the connection is ready
     */
    connectionReady: function() {
+
+      var nomJid = Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid).toLowerCase() + '/' + Strophe.getResourceFromJid(jsxc.xmpp.conn.jid);
+
+      // Save sid and jid
+      jsxc.storage.setItem('sid', jsxc.xmpp.conn._proto.sid);
+      jsxc.storage.setItem('jid', nomJid);
 
       // Load saved unique id
       jsxc.xmpp.conn._uniqueId = jsxc.storage.getItem('_uniqueId') || new Date().getTime();
@@ -400,9 +427,9 @@ jsxc.xmpp = {
    disconnected: function() {
       jsxc.debug('disconnected');
 
+      jsxc.storage.removeItem('jid');
       jsxc.storage.removeItem('sid');
       jsxc.storage.removeItem('rid');
-      jsxc.storage.removeItem('lastActivity');
       jsxc.storage.removeItem('hidden');
       jsxc.storage.removeUserItem('avatar', 'own');
       jsxc.storage.removeUserItem('otrlist');
@@ -410,7 +437,6 @@ jsxc.xmpp = {
       $(document).off('connected.jsxc', jsxc.xmpp.connected);
       $(document).off('attached.jsxc', jsxc.xmpp.attached);
       $(document).off('disconnected.jsxc', jsxc.xmpp.disconnected);
-      $(document).off('ridChange', jsxc.xmpp.onRidChange);
       $(document).off('connfail.jsxc', jsxc.xmpp.onConnfail);
       $(document).off('authfail.jsxc', jsxc.xmpp.onAuthFail);
 
@@ -869,12 +895,11 @@ jsxc.xmpp = {
    /**
     * Triggerd if the rid changed
     * 
-    * @param {event} ev
-    * @param {obejct} data
+    * @param {integer} rid next valid request id
     * @private
     */
-   onRidChange: function(ev, data) {
-      jsxc.storage.setItem('rid', data.rid);
+   onRidChange: function(rid) {
+      jsxc.storage.setItem('rid', rid);
    },
 
    /**
