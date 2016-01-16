@@ -1674,8 +1674,11 @@ jsxc.gui.roster = {
     */
    rename: function(bid) {
       var name = jsxc.gui.roster.getItem(bid).find('.jsxc_name');
-      var options = jsxc.gui.roster.getItem(bid).find('.jsxc_options, .jsxc_control, .jsxc_unread');
+      var options = jsxc.gui.roster.getItem(bid).find('.jsxc_lastmsg, .jsxc_more');
       var input = $('<input type="text" name="name"/>');
+
+      // hide more menu
+      $('body').click();
 
       options.hide();
       name = name.replaceWith(input);
