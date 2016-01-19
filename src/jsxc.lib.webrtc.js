@@ -221,40 +221,6 @@ jsxc.webrtc = {
    },
 
    /**
-    * Add "video" button to roster
-    * 
-    * @private
-    * @memberOf jsxc.webrtc
-    * @param event
-    * @param bid bid of roster item
-    * @param data data wich belongs to bid
-    * @param el the roster item
-    */
-   onAddRosterItem: function(event, bid, data, el) {
-      var self = jsxc.webrtc;
-
-      if (!self.conn) {
-         $(document).one('connectionReady.jsxc', function() {
-            self.onAddRosterItem(null, bid, data, el);
-         });
-         return;
-      }
-
-      var videoIcon = $('<div class="jsxc_video jsxc_disabled" title="' + $.t("Start_video_call") + '"></div>');
-
-      videoIcon.click(function() {
-         self.startCall(data.jid);
-         return false;
-      });
-
-      el.find('.jsxc_options.jsxc_left').append(videoIcon);
-
-      el.on('extra.jsxc', function() {
-         self.updateIcon(bid);
-      });
-   },
-
-   /**
     * Add "video" button to window menu.
     * 
     * @private
@@ -314,7 +280,7 @@ jsxc.webrtc = {
 
       var res = Strophe.getResourceFromJid(jid);
 
-      var el = win.find('.jsxc_video').add(jsxc.gui.roster.getItem(bid).find('.jsxc_video'));
+      var el = win.find('.jsxc_video');
 
       var capableRes = self.getCapableRes(jid, self.reqVideoFeatures);
       var targetRes = res;
@@ -1199,7 +1165,6 @@ $.extend(jsxc.CONST, {
 });
 
 $(document).ready(function() {
-   $(document).on('add.roster.jsxc', jsxc.webrtc.onAddRosterItem);
    $(document).on('init.window.jsxc', jsxc.webrtc.initWindow);
    $(document).on('attached.jsxc', jsxc.webrtc.init);
    $(document).on('disconnected.jsxc', jsxc.webrtc.onDisconnected);
