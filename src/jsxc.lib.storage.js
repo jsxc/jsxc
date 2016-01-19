@@ -22,7 +22,7 @@ jsxc.storage = {
       var self = jsxc.storage;
 
       if (uk && !jsxc.bid) {
-         jsxc.warn('Unable to create user prefix');
+         console.trace('Unable to create user prefix');
       }
 
       return self.PREFIX + self.SEP + ((uk && jsxc.bid) ? jsxc.bid + self.SEP : '');

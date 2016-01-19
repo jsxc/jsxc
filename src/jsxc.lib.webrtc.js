@@ -238,7 +238,7 @@ jsxc.webrtc = {
       jsxc.debug('webrtc.initWindow');
 
       if (!self.conn) {
-         $(document).one('connectionReady.jsxc', function() {
+         $(document).one('attached.jsxc', function() {
             self.initWindow(null, win);
          });
          return;

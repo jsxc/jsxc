@@ -251,7 +251,7 @@ jsxc = {
       // Register event listener for the storage event
       window.addEventListener('storage', jsxc.storage.onStorage, false);
 
-      $(document).on('connectionReady.jsxc', function() {
+      $(document).on('attached.jsxc', function() {
          // Looking for logout element
          if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
             var logout = function(ev) {

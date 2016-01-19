@@ -89,15 +89,6 @@ jsxc.xmpp = {
       // Create new connection (no login)
       jsxc.xmpp.conn = new Strophe.Connection(url);
 
-      // Override default function to preserve unique id
-      var stropheGetUniqueId = jsxc.xmpp.conn.getUniqueId;
-      jsxc.xmpp.conn.getUniqueId = function(suffix) {
-         var uid = stropheGetUniqueId.call(jsxc.xmpp.conn, suffix);
-         jsxc.storage.setItem('_uniqueId', jsxc.xmpp.conn._uniqueId);
-
-         return uid;
-      };
-
       if (jsxc.storage.getItem('debug') === true) {
          jsxc.xmpp.conn.xmlInput = function(data) {
             console.log('<', data);
@@ -187,7 +178,6 @@ jsxc.xmpp = {
       // clean up
       jsxc.storage.removeUserItem('buddylist');
       jsxc.storage.removeUserItem('windowlist');
-      jsxc.storage.removeItem('_uniqueId');
 
       if (!jsxc.master) {
          $('#jsxc_roster').remove();
@@ -249,19 +239,9 @@ jsxc.xmpp = {
 
       jsxc.xmpp.conn.pause();
 
-      // make shure roster will be reloaded
-      jsxc.storage.removeUserItem('buddylist');
+      jsxc.xmpp.initNewConnection();
 
-      jsxc.storage.removeUserItem('windowlist');
-      jsxc.storage.removeUserItem('own');
-      jsxc.storage.removeUserItem('avatar', 'own');
-      jsxc.storage.removeUserItem('otrlist');
-      jsxc.storage.removeUserItem('unreadMsg');
-
-      // reset user options
-      jsxc.storage.removeUserElement('options', 'RTCPeerConfig');
-
-      jsxc.xmpp.connectionReady();
+      jsxc.xmpp.saveSessionParameter();
 
       if (jsxc.options.loginForm.triggered) {
          switch (jsxc.options.loginForm.onConnected || 'submit') {
@@ -275,13 +255,8 @@ jsxc.xmpp = {
 
       // start chat
 
-      jsxc.gui.init();
-      $('#jsxc_roster').removeClass('jsxc_noConnection');
-
       jsxc.xmpp.conn.resume();
-
       jsxc.onMaster();
-      jsxc.masterActions();
 
       $(document).trigger('attached.jsxc');
    },
@@ -292,6 +267,8 @@ jsxc.xmpp = {
     * @private
     */
    attached: function() {
+
+      $('#jsxc_roster').removeClass('jsxc_noConnection');
 
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onRosterChanged, 'jabber:iq:roster', 'iq', 'set');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onMessage, null, 'message', 'chat');
@@ -366,24 +343,30 @@ jsxc.xmpp = {
 
       jsxc.masterActions();
 
-      jsxc.xmpp.connectionReady();
+      jsxc.xmpp.saveSessionParameter();
    },
 
-   /**
-    * Triggered if the connection is ready
-    */
-   connectionReady: function() {
+   saveSessionParameter: function() {
 
       var nomJid = Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid).toLowerCase() + '/' + Strophe.getResourceFromJid(jsxc.xmpp.conn.jid);
 
       // Save sid and jid
       jsxc.storage.setItem('sid', jsxc.xmpp.conn._proto.sid);
       jsxc.storage.setItem('jid', nomJid);
+   },
 
-      // Load saved unique id
-      jsxc.xmpp.conn._uniqueId = jsxc.storage.getItem('_uniqueId') || new Date().getTime();
+   initNewConnection: function() {
+      // make shure roster will be reloaded
+      jsxc.storage.removeUserItem('buddylist');
 
-      $(document).trigger('connectionReady.jsxc');
+      jsxc.storage.removeUserItem('windowlist');
+      jsxc.storage.removeUserItem('own');
+      jsxc.storage.removeUserItem('avatar', 'own');
+      jsxc.storage.removeUserItem('otrlist');
+      jsxc.storage.removeUserItem('unreadMsg');
+
+      // reset user options
+      jsxc.storage.removeUserElement('options', 'RTCPeerConfig');
    },
 
    /**

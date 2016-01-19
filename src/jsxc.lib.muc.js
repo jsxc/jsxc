@@ -580,16 +580,17 @@ jsxc.muc = {
     */
    initWindow: function(event, win) {
       var self = jsxc.muc;
-      var data = win.data();
-      var bid = jsxc.jidToBid(data.jid);
-      var roomdata = jsxc.storage.getUserItem('buddy', bid);
 
       if (!jsxc.xmpp.conn) {
-         $(document).one('connectionReady.jsxc', function() {
+         $(document).one('attached.jsxc', function() {
             self.initWindow(null, win);
          });
          return;
       }
+
+      var data = win.data();
+      var bid = jsxc.jidToBid(data.jid);
+      var roomdata = jsxc.storage.getUserItem('buddy', bid);
 
       if (roomdata.type !== 'groupchat') {
          return;
