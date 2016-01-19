@@ -259,7 +259,7 @@ jsxc.gui = {
       if (avatarSrc !== null) {
          setAvatar(avatarSrc);
       } else {
-         jsxc.xmpp.conn.vcard.get(function(stanza) {
+         var handler_cb = function(stanza) {
             jsxc.debug('vCard', stanza);
 
             var vCard = $(stanza).find("vCard > PHOTO");
@@ -281,12 +281,21 @@ jsxc.gui = {
 
             jsxc.storage.setUserItem('avatar', aid, src);
             setAvatar(src);
-         }, Strophe.getBareJidFromJid(jid), function(msg) {
+         };
+
+         var error_cb = function(msg) {
             jsxc.warn('Could not load vcard.', msg);
 
             jsxc.storage.setUserItem('avatar', aid, 0);
             setAvatar(0);
-         });
+         };
+
+         // workaround for https://github.com/strophe/strophejs/issues/172
+         if (Strophe.getBareJidFromJid(jid) === Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid)) {
+            jsxc.xmpp.conn.vcard.get(handler_cb, error_cb);
+         } else {
+            jsxc.xmpp.conn.vcard.get(handler_cb, Strophe.getBareJidFromJid(jid), error_cb);
+         }
       }
    },
 

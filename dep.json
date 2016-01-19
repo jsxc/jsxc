@@ -25,7 +25,7 @@
   },
   {
      "name": "strophe.js/vcard",
-     "file": "lib/strophe.vcard.js",
+     "file": "lib/strophe.vcard/index.js",
      "license": "MIT",
      "url": "https://github.com/strophe/strophejs-plugins"
   },

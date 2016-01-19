@@ -18,3 +18,4 @@ lib/requirejs/
 lib/sinon-qunit/
 lib/sinon/
 lib/strophe.js/
+lib/strophe.vcard/
