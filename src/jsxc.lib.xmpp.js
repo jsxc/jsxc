@@ -255,6 +255,8 @@ jsxc.xmpp = {
 
       // start chat
 
+      jsxc.gui.dialog.close();
+
       jsxc.xmpp.conn.resume();
       jsxc.onMaster();
 
