@@ -1568,7 +1568,6 @@ jsxc.gui.roster = {
       };
 
       bud.find('.jsxc_more').click(expandClick);
-      bud.dblclick(expandClick);
 
       bud.find('.jsxc_vcard').click(function() {
          jsxc.gui.showVcard(data.jid);
