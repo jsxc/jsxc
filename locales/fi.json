@@ -281,6 +281,10 @@
     "Do_you_want_to_change_the_default_room_configuration": null,
     "Default": null,
     "Change": null,
-    "Send_file": null
+    "Send_file": null,
+    "setting-explanation-carbon": null,
+    "setting-explanation-login": null,
+    "setting-explanation-priority": null,
+    "setting-explanation-xmpp": null
   }
 }
