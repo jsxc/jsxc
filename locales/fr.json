@@ -267,10 +267,19 @@
     "is_": "est __status__",
     "You_received_a_message_from_an_unknown_sender_": "Vous avez reçu un message d'un expéditeur inconnu (__sender__) Voulez-vous les afficher ?",
     "Your_roster_is_empty_add_": "Votre liste est vide, ajouter  <a>Nouvel ami</a>",
-    "onsmp_explanation_question": "Votre ami tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre ami,  Saisissez une réponse et cliquez sur Répondre.",
-    "onsmp_explanation_secret": "Votre ami tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre ami,  Entrez le mot secret",
+    "onsmp_explanation_question": "Votre ami tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre ami, saisissez une réponse et cliquez sur Répondre.",
+    "onsmp_explanation_secret": "Votre ami tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre ami, entrez le mot secret",
     "from_sender": "de __sender__",
-    "Verified_private_conversation_started": "Vérifié Conversation privé démarrée.",
-    "Unverified_private_conversation_started": "Non vérifié Conversation privé démarrée."
+    "Verified_private_conversation_started": "La conversation privée non vérifiée a démarré.",
+    "Unverified_private_conversation_started": "La conversation privée non vérifiée a démarré."
+     "Bookmark": "Signet",
+    "Auto-join": "Joindre automatiquement",
+    "Edit_bookmark": "Éditer le signet",
+    "Room_logging_is_disabled": "La connexion au salon est désactivée",
+    "Room_is_now_non-anoymous": "Ce salon n'est désormais plus anonyme",
+    "Room_is_now_semi-anonymous": "Ce salon n'est désormais qu'à moitié anonyme",
+    "Do_you_want_to_change_the_default_room_configuration": "Voulez-vous changer la configuration par défaut du salon ?",
+    "Default": "Défaut",
+    "Change": "Modification"
   }
 }
