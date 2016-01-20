@@ -680,22 +680,22 @@ jsxc = {
       }
 
       $.each(windows, function(index, bid) {
-         var window = jsxc.storage.getUserItem('window', bid);
+         var win = jsxc.storage.getUserItem('window', bid);
 
-         if (!window) {
+         if (!win) {
             jsxc.debug('Associated window-element is missing: ' + bid);
             return true;
          }
 
          jsxc.gui.window.init(bid);
 
-         if (!window.minimize) {
+         if (!win.minimize) {
             jsxc.gui.window.show(bid);
          } else {
             jsxc.gui.window.hide(bid);
          }
 
-         jsxc.gui.window.setText(bid, window.text);
+         jsxc.gui.window.setText(bid, win.text);
       });
    },
 

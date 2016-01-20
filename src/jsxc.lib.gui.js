@@ -2064,6 +2064,8 @@ jsxc.gui.window = {
             text: '',
             unread: 0
          });
+
+         jsxc.gui.window.hide(bid);
       } else {
 
          if (jsxc.storage.getUserItem('window', bid).unread) {
