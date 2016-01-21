@@ -343,9 +343,9 @@ jsxc.xmpp = {
          }
       }
 
-      jsxc.masterActions();
-
       jsxc.xmpp.saveSessionParameter();
+
+      jsxc.masterActions();
    },
 
    saveSessionParameter: function() {

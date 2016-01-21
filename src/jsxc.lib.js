@@ -368,10 +368,24 @@ jsxc = {
     * @param {string} rid Request Id
     */
    start: function() {
+      if (jsxc.role_allocation && !jsxc.master) {
+         jsxc.debug('There is an other master tab');
+
+         return false;
+      }
+
+      if (jsxc.xmpp.conn && jsxc.xmpp.connected) {
+         jsxc.debug('We are already connected');
+
+         return false;
+      }
+
       if (arguments.length === 3) {
          $(document).one('attached.jsxc', function() {
             // save rid after first attachment
             jsxc.xmpp.onRidChange(jsxc.xmpp.conn._proto.rid);
+
+            jsxc.onMaster();
          });
       }
 
