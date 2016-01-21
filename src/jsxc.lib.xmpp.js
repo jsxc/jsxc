@@ -653,6 +653,19 @@ jsxc.xmpp = {
 
       // incoming friendship request
       if (ptype === 'subscribe') {
+         var bl = jsxc.storage.getUserItem('buddylist');
+
+         if (bl.indexOf(bid) > -1) {
+            jsxc.debug('Auto approve contact request, because he is already in our contact list.');
+
+            jsxc.xmpp.resFriendReq(jid, true);
+            if (data.sub !== 'to') {
+               jsxc.xmpp.addBuddy(jid, data.name);
+            }
+
+            return true;
+         }
+
          jsxc.storage.setUserItem('friendReq', {
             jid: jid,
             approve: -1
