@@ -139,13 +139,13 @@ jsxc.Message.prototype.save = function() {
       //@TODO inform user
    }
 
+   jsxc.storage.setUserItem('msg', this._uid, this);
+
    if (history) {
       history.unshift(this._uid);
 
       jsxc.storage.setUserItem('history', this.bid, history);
    }
-
-   jsxc.storage.setUserItem('msg', this._uid, this);
 
    if (data && this.attachment) {
       this.attachment.data = data;

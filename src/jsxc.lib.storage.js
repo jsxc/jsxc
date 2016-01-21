@@ -368,22 +368,24 @@ jsxc.storage = {
          }
       }
 
-      if (key.match(new RegExp('^chat' + jsxc.storage.SEP))) {
+      if (key.match(new RegExp('^history' + jsxc.storage.SEP))) {
 
-         var posts = JSON.parse(e.newValue);
-         var data, el;
+         var history = JSON.parse(e.newValue);
+         var uid, el, message;
 
-         while (posts.length > 0) {
-            data = posts.pop();
-            el = $('#' + data.uid);
+         while (history.length > 0) {
+            uid = history.pop();
+
+            message = new jsxc.Message(uid);
+            el = message.getDOM();
 
             if (el.length === 0) {
-               if (jsxc.master && data.direction === 'out') {
-                  jsxc.xmpp.sendMessage(bid, data.msg, data.uid);
+               if (jsxc.master && message.direction === jsxc.Message.OUT) {
+                  jsxc.xmpp.sendMessage(message.bid, message.msg, message._uid);
                }
 
-               jsxc.gui.window._postMessage(bid, data);
-            } else if (data.received) {
+               jsxc.gui.window._postMessage(message, true);
+            } else if (message.isReceived()) {
                el.addClass('jsxc_received');
             }
          }
