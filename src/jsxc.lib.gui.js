@@ -1337,9 +1337,9 @@ jsxc.gui = {
    detectEmail: function(container) {
       container = (container) ? $(container) : $('body');
 
-      container.find('a[href^="mailto:"]').each(function() {
+      container.find('a[href^="mailto:"],a[href^="xmpp:"]').each(function() {
          var spot = $("<span>X</span>").addClass("jsxc_spot");
-         var href = $(this).attr("href").replace(/^ *mailto:/, "").trim();
+         var href = $(this).attr("href").replace(/^ *(mailto|xmpp):/, "").trim();
 
          if (href !== '' && href !== Strophe.getBareJidFromJid(jsxc.storage.getItem("jid"))) {
             var bid = jsxc.jidToBid(href);
@@ -2516,11 +2516,11 @@ jsxc.gui.window = {
             }
 
             // @TODO use jquery element builder
-            return '<a href="xmpp:' + jid + '">' + jid + '</a>';
+            return '<a href="xmpp:' + jid + '">xmpp:' + jid + '</a>';
          }
 
          // @TODO use jquery element builder
-         return '<a href="mailto:' + jid + '" target="_blank">' + jid + '</a>';
+         return '<a href="mailto:' + jid + '" target="_blank">mailto:' + jid + '</a>';
       });
 
       $.each(jsxc.gui.emotions, function(i, val) {
