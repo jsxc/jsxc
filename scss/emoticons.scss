@@ -1,8 +1,8 @@
 .jsxc_emoticon {
     display: inline-block;
-    width: 19px;
-    height: 19px;
-    background-size: 19px 19px !important;
+    width: 24px;
+    height: 24px;
+    background-size: 24px 24px !important;
     border: 0;
     vertical-align: bottom;
 }
@@ -11,6 +11,6 @@ $emoticons: angel, angry, smile, grin, sad, wink, tonguesmile, surpised, kiss, s
 
 @each $emoticon in $emoticons {
     .jsxc_#{$emoticon} {
-        background: image-url("emotions/#{$emoticon}.png");
+        background: image-url("emotions/#{$emoticon}.svg");
     }
 }
