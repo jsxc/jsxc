@@ -100,5 +100,11 @@
      "file": "lib/favico.js/favico.js",
      "license": "MIT",
      "url": "https://github.com/ejci/favico.js"
+  },
+  {
+     "name": "emoji one",
+     "file": "lib/emojione/lib/js/emojione.js",
+     "license": "CC-BY 4.0",
+     "url": "http://emojione.com"
   }
  ]

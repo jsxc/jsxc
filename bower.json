@@ -25,6 +25,7 @@
   ],
   "private": true,
   "dependencies": {
+    "emojione": "~2.0.1",
     "favico.js": "^0.3.10",
     "strophe.bookmarks": "https://raw.githubusercontent.com/sualko/strophejs-plugins/bookmarks/bookmarks/strophe.bookmarks.js",
     "strophe.js": "strophejs#a11ebefa3db1b6712d51d0d309b9f68f8e391d1b",

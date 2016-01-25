@@ -1,4 +1,4 @@
-/* global Favico*/
+/* global Favico, emojione*/
 /**
  * Handle functions for chat window's and buddylist
  * 
@@ -7,31 +7,46 @@
 jsxc.gui = {
    /** Smilie token to file mapping */
    emotions: [
-      ['O:-) O:)', 'angel'],
+      ['O:-) O:)', 'innocent'],
       ['>:-( >:( &gt;:-( &gt;:(', 'angry'],
-      [':-) :)', 'smile'],
+      [':-) :)', 'slight_smile'],
       [':-D :D', 'grin'],
-      [':-( :(', 'sad'],
+      [':-( :(', 'disappointed'],
       [';-) ;)', 'wink'],
-      [':-P :P', 'tonguesmile'],
-      ['=-O', 'surprised'],
-      [':kiss: :-*', 'kiss'],
-      ['8-) :cool:', 'sunglassess'],
-      [':\'-( :\'( :&amp;apos;-(', 'crysad'],
-      [':-/', 'doubt'],
-      [':-X :X', 'zip'],
+      [':-P :P', 'stuck_out_tongue'],
+      ['=-O', 'astonished'],
+      [':kiss: :-*', 'kissing_heart'],
+      ['8-) :cool:', 'sunglasses'],
+      [':-X :X', 'zipper_mouth'],
       [':yes:', 'thumbsup'],
       [':no:', 'thumbsdown'],
       [':beer:', 'beer'],
-      [':devil:', 'devil'],
+      [':coffee:', 'coffee'],
+      [':devil:', 'smiling_imp'],
       [':kiss: :kissing:', 'kissing'],
-      ['@->-- :rose: @-&gt;--', 'rose'],
-      [':music:', 'music'],
-      [':love:', 'love'],
-      [':zzz:', 'tired']
+      ['@->-- @-&gt;--', 'rose'],
+      [':music:', 'musical_note'],
+      [':love:', 'heart_eyes'],
+      [':heart:', 'heart'],
+      [':brokenheart:', 'broken_heart'],
+      [':zzz:', 'zzz'],
+      [':wait:', 'hand_splayed']
    ],
 
    favicon: null,
+
+   regShortNames: null,
+
+   emoticonList: {
+      'core': {
+         ':klaus:': ['klaus'],
+         ':jabber:': ['jabber'],
+         ':xmpp:': ['xmpp'],
+         ':jsxc:': ['jsxc'],
+         ':owncloud:': ['owncloud']
+      },
+      'emojione': emojione.emojioneList
+   },
 
    /**
     * Different uri query actions as defined in XEP-0147.
@@ -85,6 +100,8 @@ jsxc.gui = {
       if ($('#jsxc_windowList').length > 0) {
          return;
       }
+
+      jsxc.gui.regShortNames = new RegExp(emojione.regShortNames.source + '|(' + Object.keys(jsxc.gui.emoticonList.core).join('|') + ')', 'gi');
 
       $('body').append($(jsxc.gui.template.get('windowList')));
 
@@ -1394,6 +1411,40 @@ jsxc.gui = {
       if (typeof text === 'string' && text.length > 0) {
          el.text(text[0].toUpperCase());
       }
+   },
+
+   /**
+    * Replace shortname emoticons with images.
+    * 
+    * @param  {string} str text with emoticons as shortname
+    * @return {string} text with emoticons as images
+    */
+   shortnameToImage: function(str) {
+      str = str.replace(jsxc.gui.regShortNames, function(shortname) {
+         if (typeof shortname === 'undefined' || shortname === '' || (!(shortname in jsxc.gui.emoticonList.emojione) && !(shortname in jsxc.gui.emoticonList.core))) {
+            return shortname;
+         }
+
+         var src, filename;
+
+         if (jsxc.gui.emoticonList.core[shortname]) {
+            filename = jsxc.gui.emoticonList.core[shortname][jsxc.gui.emoticonList.core[shortname].length - 1].replace(/^:([^:]+):$/, '$1');
+            src = jsxc.options.root + '/img/emotions/' + filename + '.svg';
+         } else if (jsxc.gui.emoticonList.emojione[shortname]) {
+            filename = jsxc.gui.emoticonList.emojione[shortname][jsxc.gui.emoticonList.emojione[shortname].length - 1];
+            src = jsxc.options.root + '/lib/emojione/assets/svg/' + filename + '.svg';
+         }
+
+         var div = $('<div>');
+
+         div.addClass('jsxc_emoticon');
+         div.css('background-image', 'url(' + src + ')');
+         div.attr('title', shortname);
+
+         return div.prop('outerHTML');
+      });
+
+      return str;
    }
 };
 
@@ -2074,7 +2125,9 @@ jsxc.gui.window = {
 
       $.each(jsxc.gui.emotions, function(i, val) {
          var ins = val[0].split(' ')[0];
-         var li = $('<li><div title="' + ins + '" class="jsxc_' + val[1] + '"/></li>');
+         var li = $('<li>');
+         li.append(jsxc.gui.shortnameToImage(':' + val[1] + ':'));
+         li.find('div').attr('title', ins);
          li.click(function() {
             win.find('input').val(win.find('input').val() + ins);
             win.find('input').focus();
@@ -2523,20 +2576,13 @@ jsxc.gui.window = {
          return '<a href="mailto:' + jid + '" target="_blank">mailto:' + jid + '</a>';
       });
 
+      // replace emoticons from XEP-0038 and pidgin with shortnames
       $.each(jsxc.gui.emotions, function(i, val) {
-         msg = msg.replace(val[2], function(match, p1) {
-
-            // escape value for alt and title, this prevents double
-            // replacement
-            var esc = '',
-               i;
-            for (i = 0; i < p1.length; i++) {
-               esc += '&#' + p1.charCodeAt(i) + ';';
-            }
-
-            return '<div title="' + esc + '" class="jsxc_emoticon jsxc_' + val[1] + '"/>';
-         });
+         msg = msg.replace(val[2], ':' + val[1] + ':');
       });
+
+      // translate shortnames to images
+      msg = jsxc.gui.shortnameToImage(msg);
 
       var msgDiv = $("<div>"),
          msgTsDiv = $("<div>");
