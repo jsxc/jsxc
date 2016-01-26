@@ -436,7 +436,8 @@ jsxc.storage = {
 
          if (!e.newValue) {
 
-            jsxc.gui.dialog.close();
+            jsxc.gui.dialog.close('smp');
+            jsxc.gui.window.hideOverlay(bid);
 
             if (jsxc.master) {
                jsxc.otr.objects[bid].sm.abort();
@@ -449,10 +450,11 @@ jsxc.storage = {
 
          if (typeof(n.data) !== 'undefined') {
 
-            jsxc.otr.onSmpQuestion(bid, n.data);
+            jsxc.gui.window.smpRequest(bid, n.data);
 
          } else if (jsxc.master && n.sec) {
-            jsxc.gui.dialog.close();
+            jsxc.gui.dialog.close('smp');
+            jsxc.gui.window.hideOverlay(bid);
 
             jsxc.otr.sendSmpReq(bid, n.sec, n.quest);
          }

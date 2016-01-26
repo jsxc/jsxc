@@ -164,13 +164,8 @@ jsxc.otr = {
                   msg: $.t('Authentication_request_received')
                });
 
-               if ($('#jsxc_dialog').length > 0) {
-                  jsxc.otr.objects[bid].sm.abort();
-                  break;
-               }
-
-               jsxc.otr.onSmpQuestion(bid, data);
-               jsxc.storage.setUserItem('smp_' + bid, {
+               jsxc.gui.window.smpRequest(bid, data);
+               jsxc.storage.setUserItem('smp', bid, {
                   data: data || null
                });
 
@@ -194,10 +189,11 @@ jsxc.otr = {
                      msg: $.t('authentication_failed')
                   });
                }
-               jsxc.storage.removeUserItem('smp_' + bid);
-               jsxc.gui.dialog.close();
+               jsxc.storage.removeUserItem('smp', bid);
+               jsxc.gui.dialog.close('smp');
                break;
             case 'abort':
+               jsxc.gui.window.hideOverlay(bid);
                jsxc.gui.window.postMessage({
                   bid: bid,
                   direction: jsxc.Message.SYS,
@@ -269,7 +265,7 @@ jsxc.otr = {
       }
 
       $('#jsxc_dialog .jsxc_close').click(function() {
-         jsxc.storage.removeUserItem('smp_' + bid);
+         jsxc.storage.removeUserItem('smp', bid);
 
          if (jsxc.master) {
             jsxc.otr.objects[bid].sm.abort();

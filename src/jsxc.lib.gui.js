@@ -498,7 +498,9 @@ jsxc.gui = {
          return;
       }
 
-      jsxc.gui.dialog.open(jsxc.gui.template.get('authenticationDialog', bid));
+      jsxc.gui.dialog.open(jsxc.gui.template.get('authenticationDialog', bid), {
+         name: 'smp'
+      });
 
       // Add handler
 
@@ -521,7 +523,7 @@ jsxc.gui = {
 
          jsxc.storage.updateUserItem('buddy', bid, 'trust', true);
 
-         jsxc.gui.dialog.close();
+         jsxc.gui.dialog.close('smp');
 
          jsxc.storage.updateUserItem('buddy', bid, 'trust', true);
          jsxc.gui.window.postMessage({
@@ -551,13 +553,13 @@ jsxc.gui = {
          if (jsxc.master) {
             jsxc.otr.sendSmpReq(bid, sec, quest);
          } else {
-            jsxc.storage.setUserItem('smp_' + bid, {
+            jsxc.storage.setUserItem('smp', bid, {
                sec: sec,
                quest: quest
             });
          }
 
-         jsxc.gui.dialog.close();
+         jsxc.gui.dialog.close('smp');
 
          jsxc.gui.window.postMessage({
             bid: bid,
@@ -584,13 +586,13 @@ jsxc.gui = {
          if (jsxc.master) {
             jsxc.otr.sendSmpReq(bid, sec);
          } else {
-            jsxc.storage.setUserItem('smp_' + bid, {
+            jsxc.storage.setUserItem('smp', bid, {
                sec: sec,
                quest: null
             });
          }
 
-         jsxc.gui.dialog.close();
+         jsxc.gui.dialog.close('smp');
 
          jsxc.gui.window.postMessage({
             bid: bid,
@@ -1881,11 +1883,13 @@ jsxc.gui.dialog = {
     */
    open: function(data, o) {
 
-      var opt = o || {};
+      var opt = $.extend({
+         name: ''
+      }, o);
 
       $.magnificPopup.open({
          items: {
-            src: '<div id="jsxc_dialog">' + data + '</div>'
+            src: '<div data-name="' + opt.name + '" id="jsxc_dialog">' + data + '</div>'
          },
          type: 'inline',
          modal: opt.noClose,
@@ -1940,10 +1944,17 @@ jsxc.gui.dialog = {
    },
 
    /**
-    * Close current dialog.
+    * If no name is provided every dialog will be closed, 
+    * otherwise only dialog with given name is closed.
+    *
+    * @param {string} [name] Close only dialog with the given name
     */
-   close: function() {
+   close: function(name) {
       jsxc.debug('close dialog');
+
+      if (typeof name === 'string' && name.length > 0 && !jsxc.el_exists('#jsxc_dialog[data-name=' + name + ']')) {
+         return;
+      }
 
       $.magnificPopup.close();
    },
@@ -2832,6 +2843,38 @@ jsxc.gui.window = {
             status: 'unavailable'
          });
       }
+   },
+
+   smpRequest: function(bid, question) {
+      var content = $('<div>');
+
+      var p = $('<p>');
+      p.text($.t('smpRequestReceived'));
+      p.appendTo(content);
+
+      var abort = $('<button>');
+      abort.text($.t('Abort'));
+      abort.click(function() {
+         jsxc.gui.window.hideOverlay(bid);
+         jsxc.storage.removeUserItem('smp', bid);
+
+         if (jsxc.master && jsxc.otr.objects[bid]) {
+            jsxc.otr.objects[bid].sm.abort();
+         }
+      });
+      abort.appendTo(content);
+
+      var verify = $('<button>');
+      verify.text($.t('Verify'));
+      verify.addClass('jsxc_btn jsxc_btn-primary');
+      verify.click(function() {
+         jsxc.gui.window.hideOverlay(bid);
+
+         jsxc.otr.onSmpQuestion(bid, question);
+      });
+      verify.appendTo(content);
+
+      jsxc.gui.window.showOverlay(bid, content);
    },
 
    sendFile: function(jid) {
