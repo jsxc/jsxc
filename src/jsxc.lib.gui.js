@@ -2753,7 +2753,17 @@ jsxc.gui.window = {
     * @returns {undefined}
     */
    clear: function(bid) {
-      jsxc.storage.setUserItem('chat', bid, []);
+      // deprecated
+      jsxc.storage.removeUserItem('chat', bid);
+
+      var history = jsxc.storage.getUserItem('history', bid) || [];
+
+      history.map(function(id) {
+         jsxc.storage.removeUserItem('msg', id);
+      });
+
+      jsxc.storage.setUserItem('history', bid, []);
+
       jsxc.gui.window.get(bid).find('.jsxc_textarea').empty();
    },
 
