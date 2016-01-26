@@ -75,6 +75,12 @@ jsxc.xmpp = {
 
       var url = jsxc.options.get('xmpp').url;
 
+      if (!url) {
+         jsxc.warn('xmpp.url required for login');
+
+         return;
+      }
+
       if (!(jsxc.xmpp.conn && jsxc.xmpp.conn.connected)) {
          // Register eventlistener
          $(document).on('connected.jsxc', jsxc.xmpp.connected);
