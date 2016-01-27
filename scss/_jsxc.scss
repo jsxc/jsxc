@@ -391,6 +391,20 @@ img.jsxc_vCard {
             text-decoration: none;
             opacity: 1.0;
         }
+
+        &.jsxc_disabled {
+            text-decoration: line-through;
+            opacity: 0.5;
+
+            &:hover {
+                text-decoration: line-through;
+                opacity: 0.5;
+            }
+
+            span {
+                cursor: default;
+            }
+        }
     }
 
     .jsxc_icon {
