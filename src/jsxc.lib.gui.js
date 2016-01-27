@@ -229,7 +229,7 @@ jsxc.gui = {
          ue.removeClass('jsxc_oneway');
       }
 
-      var info = '<b>' + Strophe.getBareJidFromJid(data.jid) + '</b>\n';
+      var info = Strophe.getBareJidFromJid(data.jid) + '\n';
       info += $.t('Subscription') + ': ' + $.t(data.sub) + '\n';
       info += $.t('Status') + ': ' + $.t(jsxc.CONST.STATUS[data.status]);
 
@@ -1218,6 +1218,8 @@ jsxc.gui = {
 
       $('[data-bid="' + bid + '"]').each(function() {
          var el = $(this);
+
+         el.attr('data-status', pres);
 
          if (el.find('.jsxc_avatar').length > 0) {
             el = el.find('.jsxc_avatar');

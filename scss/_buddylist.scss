@@ -65,7 +65,7 @@
     }
 
     &.jsxc_hideOffline {
-        .jsxc_offline {
+        .jsxc_rosteritem[data-status='offline'] {
             display: none;
         }
     }
