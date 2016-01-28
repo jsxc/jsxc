@@ -1,5 +1,5 @@
 /*!
- * strophe.jinglejs v0.1.1 - 2015-08-05
+ * strophe.jinglejs v0.1.1 - 2015-11-27
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -14,12 +14,14 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 },{}],2:[function(require,module,exports){
+(function (global){
 /*!
  * The buffer module from node.js, for the browser.
  *
  * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
  * @license  MIT
  */
+/* eslint-disable no-proto */
 
 var base64 = require('base64-js')
 var ieee754 = require('ieee754')
@@ -30,7 +32,6 @@ exports.SlowBuffer = SlowBuffer
 exports.INSPECT_MAX_BYTES = 50
 Buffer.poolSize = 8192 // not used by this implementation
 
-var kMaxLength = 0x3fffffff
 var rootParent = {}
 
 /**
@@ -41,32 +42,49 @@ var rootParent = {}
  * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
  * Opera 11.6+, iOS 4.2+.
  *
+ * Due to various browser bugs, sometimes the Object implementation will be used even
+ * when the browser supports typed arrays.
+ *
  * Note:
  *
- * - Implementation must support adding new properties to `Uint8Array` instances.
- *   Firefox 4-29 lacked support, fixed in Firefox 30+.
- *   See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.
+ *   - Firefox 4-29 lacks support for adding new properties to `Uint8Array` instances,
+ *     See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.
  *
- *  - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.
+ *   - Safari 5-7 lacks support for changing the `Object.prototype.constructor` property
+ *     on objects.
  *
- *  - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of
- *    incorrect length in some situations.
+ *   - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.
  *
- * We detect these buggy browsers and set `Buffer.TYPED_ARRAY_SUPPORT` to `false` so they will
- * get the Object implementation, which is slower but will work correctly.
+ *   - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of
+ *     incorrect length in some situations.
+
+ * We detect these buggy browsers and set `Buffer.TYPED_ARRAY_SUPPORT` to `false` so they
+ * get the Object implementation, which is slower but behaves correctly.
  */
-Buffer.TYPED_ARRAY_SUPPORT = (function () {
+Buffer.TYPED_ARRAY_SUPPORT = global.TYPED_ARRAY_SUPPORT !== undefined
+  ? global.TYPED_ARRAY_SUPPORT
+  : typedArraySupport()
+
+function typedArraySupport () {
+  function Bar () {}
   try {
-    var buf = new ArrayBuffer(0)
-    var arr = new Uint8Array(buf)
+    var arr = new Uint8Array(1)
     arr.foo = function () { return 42 }
+    arr.constructor = Bar
     return arr.foo() === 42 && // typed array instances can be augmented
+        arr.constructor === Bar && // constructor can be set
         typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`
-        new Uint8Array(1).subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`
+        arr.subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`
   } catch (e) {
     return false
   }
-})()
+}
+
+function kMaxLength () {
+  return Buffer.TYPED_ARRAY_SUPPORT
+    ? 0x7fffffff
+    : 0x3fffffff
+}
 
 /**
  * Class: Buffer
@@ -134,8 +152,13 @@ function fromObject (that, object) {
     throw new TypeError('must start with number, buffer, array or string')
   }
 
-  if (typeof ArrayBuffer !== 'undefined' && object.buffer instanceof ArrayBuffer) {
-    return fromTypedArray(that, object)
+  if (typeof ArrayBuffer !== 'undefined') {
+    if (object.buffer instanceof ArrayBuffer) {
+      return fromTypedArray(that, object)
+    }
+    if (object instanceof ArrayBuffer) {
+      return fromArrayBuffer(that, object)
+    }
   }
 
   if (object.length) return fromArrayLike(that, object)
@@ -172,6 +195,18 @@ function fromTypedArray (that, array) {
   return that
 }
 
+function fromArrayBuffer (that, array) {
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    // Return an augmented `Uint8Array` instance, for best performance
+    array.byteLength
+    that = Buffer._augment(new Uint8Array(array))
+  } else {
+    // Fallback: Return an object instance of the Buffer class
+    that = fromTypedArray(that, new Uint8Array(array))
+  }
+  return that
+}
+
 function fromArrayLike (that, array) {
   var length = checked(array.length) | 0
   that = allocate(that, length)
@@ -199,10 +234,16 @@ function fromJsonObject (that, object) {
   return that
 }
 
+if (Buffer.TYPED_ARRAY_SUPPORT) {
+  Buffer.prototype.__proto__ = Uint8Array.prototype
+  Buffer.__proto__ = Uint8Array
+}
+
 function allocate (that, length) {
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     // Return an augmented `Uint8Array` instance, for best performance
     that = Buffer._augment(new Uint8Array(length))
+    that.__proto__ = Buffer.prototype
   } else {
     // Fallback: Return an object instance of the Buffer class
     that.length = length
@@ -218,9 +259,9 @@ function allocate (that, length) {
 function checked (length) {
   // Note: cannot use `length < kMaxLength` here because that fails when
   // length is NaN (which is otherwise coerced to zero.)
-  if (length >= kMaxLength) {
+  if (length >= kMaxLength()) {
     throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
-                         'size: 0x' + kMaxLength.toString(16) + ' bytes')
+                         'size: 0x' + kMaxLength().toString(16) + ' bytes')
   }
   return length | 0
 }
@@ -289,8 +330,6 @@ Buffer.concat = function concat (list, length) {
 
   if (list.length === 0) {
     return new Buffer(0)
-  } else if (list.length === 1) {
-    return list[0]
   }
 
   var i
@@ -312,29 +351,38 @@ Buffer.concat = function concat (list, length) {
 }
 
 function byteLength (string, encoding) {
-  if (typeof string !== 'string') string = String(string)
+  if (typeof string !== 'string') string = '' + string
 
-  if (string.length === 0) return 0
+  var len = string.length
+  if (len === 0) return 0
 
-  switch (encoding || 'utf8') {
-    case 'ascii':
-    case 'binary':
-    case 'raw':
-      return string.length
-    case 'ucs2':
-    case 'ucs-2':
-    case 'utf16le':
-    case 'utf-16le':
-      return string.length * 2
-    case 'hex':
-      return string.length >>> 1
-    case 'utf8':
-    case 'utf-8':
-      return utf8ToBytes(string).length
-    case 'base64':
-      return base64ToBytes(string).length
-    default:
-      return string.length
+  // Use a for loop to avoid recursion
+  var loweredCase = false
+  for (;;) {
+    switch (encoding) {
+      case 'ascii':
+      case 'binary':
+      // Deprecated
+      case 'raw':
+      case 'raws':
+        return len
+      case 'utf8':
+      case 'utf-8':
+        return utf8ToBytes(string).length
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return len * 2
+      case 'hex':
+        return len >>> 1
+      case 'base64':
+        return base64ToBytes(string).length
+      default:
+        if (loweredCase) return utf8ToBytes(string).length // assume utf8
+        encoding = ('' + encoding).toLowerCase()
+        loweredCase = true
+    }
   }
 }
 Buffer.byteLength = byteLength
@@ -343,8 +391,7 @@ Buffer.byteLength = byteLength
 Buffer.prototype.length = undefined
 Buffer.prototype.parent = undefined
 
-// toString(encoding, start=0, end=buffer.length)
-Buffer.prototype.toString = function toString (encoding, start, end) {
+function slowToString (encoding, start, end) {
   var loweredCase = false
 
   start = start | 0
@@ -385,6 +432,13 @@ Buffer.prototype.toString = function toString (encoding, start, end) {
         loweredCase = true
     }
   }
+}
+
+Buffer.prototype.toString = function toString () {
+  var length = this.length | 0
+  if (length === 0) return ''
+  if (arguments.length === 0) return utf8Slice(this, 0, length)
+  return slowToString.apply(this, arguments)
 }
 
 Buffer.prototype.equals = function equals (b) {
@@ -450,13 +504,13 @@ Buffer.prototype.indexOf = function indexOf (val, byteOffset) {
   throw new TypeError('val must be string, number or Buffer')
 }
 
-// `get` will be removed in Node 0.13+
+// `get` is deprecated
 Buffer.prototype.get = function get (offset) {
   console.log('.get() is deprecated. Access using array indexes instead.')
   return this.readUInt8(offset)
 }
 
-// `set` will be removed in Node 0.13+
+// `set` is deprecated
 Buffer.prototype.set = function set (v, offset) {
   console.log('.set() is deprecated. Access using array indexes instead.')
   return this.writeUInt8(v, offset)
@@ -597,20 +651,99 @@ function base64Slice (buf, start, end) {
 }
 
 function utf8Slice (buf, start, end) {
-  var res = ''
-  var tmp = ''
   end = Math.min(buf.length, end)
+  var res = []
 
-  for (var i = start; i < end; i++) {
-    if (buf[i] <= 0x7F) {
-      res += decodeUtf8Char(tmp) + String.fromCharCode(buf[i])
-      tmp = ''
-    } else {
-      tmp += '%' + buf[i].toString(16)
+  var i = start
+  while (i < end) {
+    var firstByte = buf[i]
+    var codePoint = null
+    var bytesPerSequence = (firstByte > 0xEF) ? 4
+      : (firstByte > 0xDF) ? 3
+      : (firstByte > 0xBF) ? 2
+      : 1
+
+    if (i + bytesPerSequence <= end) {
+      var secondByte, thirdByte, fourthByte, tempCodePoint
+
+      switch (bytesPerSequence) {
+        case 1:
+          if (firstByte < 0x80) {
+            codePoint = firstByte
+          }
+          break
+        case 2:
+          secondByte = buf[i + 1]
+          if ((secondByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F)
+            if (tempCodePoint > 0x7F) {
+              codePoint = tempCodePoint
+            }
+          }
+          break
+        case 3:
+          secondByte = buf[i + 1]
+          thirdByte = buf[i + 2]
+          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F)
+            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
+              codePoint = tempCodePoint
+            }
+          }
+          break
+        case 4:
+          secondByte = buf[i + 1]
+          thirdByte = buf[i + 2]
+          fourthByte = buf[i + 3]
+          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F)
+            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
+              codePoint = tempCodePoint
+            }
+          }
+      }
     }
+
+    if (codePoint === null) {
+      // we did not generate a valid codePoint so insert a
+      // replacement char (U+FFFD) and advance only 1 byte
+      codePoint = 0xFFFD
+      bytesPerSequence = 1
+    } else if (codePoint > 0xFFFF) {
+      // encode to utf16 (surrogate pair dance)
+      codePoint -= 0x10000
+      res.push(codePoint >>> 10 & 0x3FF | 0xD800)
+      codePoint = 0xDC00 | codePoint & 0x3FF
+    }
+
+    res.push(codePoint)
+    i += bytesPerSequence
   }
 
-  return res + decodeUtf8Char(tmp)
+  return decodeCodePointsArray(res)
+}
+
+// Based on http://stackoverflow.com/a/22747272/680742, the browser with
+// the lowest limit is Chrome, with 0x10000 args.
+// We go 1 magnitude less, for safety
+var MAX_ARGUMENTS_LENGTH = 0x1000
+
+function decodeCodePointsArray (codePoints) {
+  var len = codePoints.length
+  if (len <= MAX_ARGUMENTS_LENGTH) {
+    return String.fromCharCode.apply(String, codePoints) // avoid extra slice()
+  }
+
+  // Decode in chunks to avoid "call stack size exceeded".
+  var res = ''
+  var i = 0
+  while (i < len) {
+    res += String.fromCharCode.apply(
+      String,
+      codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH)
+    )
+  }
+  return res
 }
 
 function asciiSlice (buf, start, end) {
@@ -899,7 +1032,7 @@ Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
   offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0)
   if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
-  this[offset] = value
+  this[offset] = (value & 0xff)
   return offset + 1
 }
 
@@ -916,7 +1049,7 @@ Buffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert
   offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
-    this[offset] = value
+    this[offset] = (value & 0xff)
     this[offset + 1] = (value >>> 8)
   } else {
     objectWriteUInt16(this, value, offset, true)
@@ -930,7 +1063,7 @@ Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert
   if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     this[offset] = (value >>> 8)
-    this[offset + 1] = value
+    this[offset + 1] = (value & 0xff)
   } else {
     objectWriteUInt16(this, value, offset, false)
   }
@@ -952,7 +1085,7 @@ Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert
     this[offset + 3] = (value >>> 24)
     this[offset + 2] = (value >>> 16)
     this[offset + 1] = (value >>> 8)
-    this[offset] = value
+    this[offset] = (value & 0xff)
   } else {
     objectWriteUInt32(this, value, offset, true)
   }
@@ -967,7 +1100,7 @@ Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert
     this[offset] = (value >>> 24)
     this[offset + 1] = (value >>> 16)
     this[offset + 2] = (value >>> 8)
-    this[offset + 3] = value
+    this[offset + 3] = (value & 0xff)
   } else {
     objectWriteUInt32(this, value, offset, false)
   }
@@ -1020,7 +1153,7 @@ Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
   if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -0x80)
   if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
   if (value < 0) value = 0xff + value + 1
-  this[offset] = value
+  this[offset] = (value & 0xff)
   return offset + 1
 }
 
@@ -1029,7 +1162,7 @@ Buffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) 
   offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
-    this[offset] = value
+    this[offset] = (value & 0xff)
     this[offset + 1] = (value >>> 8)
   } else {
     objectWriteUInt16(this, value, offset, true)
@@ -1043,7 +1176,7 @@ Buffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) 
   if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     this[offset] = (value >>> 8)
-    this[offset + 1] = value
+    this[offset + 1] = (value & 0xff)
   } else {
     objectWriteUInt16(this, value, offset, false)
   }
@@ -1055,7 +1188,7 @@ Buffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) 
   offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
-    this[offset] = value
+    this[offset] = (value & 0xff)
     this[offset + 1] = (value >>> 8)
     this[offset + 2] = (value >>> 16)
     this[offset + 3] = (value >>> 24)
@@ -1074,7 +1207,7 @@ Buffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) 
     this[offset] = (value >>> 24)
     this[offset + 1] = (value >>> 16)
     this[offset + 2] = (value >>> 8)
-    this[offset + 3] = value
+    this[offset + 3] = (value & 0xff)
   } else {
     objectWriteUInt32(this, value, offset, false)
   }
@@ -1145,9 +1278,16 @@ Buffer.prototype.copy = function copy (target, targetStart, start, end) {
   }
 
   var len = end - start
+  var i
 
-  if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
-    for (var i = 0; i < len; i++) {
+  if (this === target && start < targetStart && targetStart < end) {
+    // descending copy from end
+    for (i = len - 1; i >= 0; i--) {
+      target[i + targetStart] = this[i + start]
+    }
+  } else if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
+    // ascending copy from start
+    for (i = 0; i < len; i++) {
       target[i + targetStart] = this[i + start]
     }
   } else {
@@ -1223,7 +1363,7 @@ Buffer._augment = function _augment (arr) {
   // save reference to original Uint8Array set method before overwriting
   arr._set = arr.set
 
-  // deprecated, will be removed in node 0.13+
+  // deprecated
   arr.get = BP.get
   arr.set = BP.set
 
@@ -1279,7 +1419,7 @@ Buffer._augment = function _augment (arr) {
   return arr
 }
 
-var INVALID_BASE64_RE = /[^+\/0-9A-z\-]/g
+var INVALID_BASE64_RE = /[^+\/0-9A-Za-z-_]/g
 
 function base64clean (str) {
   // Node strips out invalid characters like \n and \t from the string, base64-js does not
@@ -1309,28 +1449,15 @@ function utf8ToBytes (string, units) {
   var length = string.length
   var leadSurrogate = null
   var bytes = []
-  var i = 0
 
-  for (; i < length; i++) {
+  for (var i = 0; i < length; i++) {
     codePoint = string.charCodeAt(i)
 
     // is surrogate component
     if (codePoint > 0xD7FF && codePoint < 0xE000) {
       // last char was a lead
-      if (leadSurrogate) {
-        // 2 leads in a row
-        if (codePoint < 0xDC00) {
-          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-          leadSurrogate = codePoint
-          continue
-        } else {
-          // valid surrogate pair
-          codePoint = leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00 | 0x10000
-          leadSurrogate = null
-        }
-      } else {
+      if (!leadSurrogate) {
         // no lead yet
-
         if (codePoint > 0xDBFF) {
           // unexpected trail
           if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
@@ -1339,17 +1466,29 @@ function utf8ToBytes (string, units) {
           // unpaired lead
           if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
           continue
-        } else {
-          // valid lead
-          leadSurrogate = codePoint
-          continue
         }
+
+        // valid lead
+        leadSurrogate = codePoint
+
+        continue
       }
+
+      // 2 leads in a row
+      if (codePoint < 0xDC00) {
+        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+        leadSurrogate = codePoint
+        continue
+      }
+
+      // valid surrogate pair
+      codePoint = leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00 | 0x10000
     } else if (leadSurrogate) {
       // valid bmp char, but last char was a lead
       if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-      leadSurrogate = null
     }
+
+    leadSurrogate = null
 
     // encode utf8
     if (codePoint < 0x80) {
@@ -1368,7 +1507,7 @@ function utf8ToBytes (string, units) {
         codePoint >> 0x6 & 0x3F | 0x80,
         codePoint & 0x3F | 0x80
       )
-    } else if (codePoint < 0x200000) {
+    } else if (codePoint < 0x110000) {
       if ((units -= 4) < 0) break
       bytes.push(
         codePoint >> 0x12 | 0xF0,
@@ -1421,14 +1560,7 @@ function blitBuffer (src, dst, offset, length) {
   return i
 }
 
-function decodeUtf8Char (str) {
-  try {
-    return decodeURIComponent(str)
-  } catch (err) {
-    return String.fromCharCode(0xFFFD) // UTF 8 invalid char
-  }
-}
-
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"base64-js":3,"ieee754":4,"is-array":5}],3:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -2005,11 +2137,30 @@ if (typeof Object.create === 'function') {
 }
 
 },{}],8:[function(require,module,exports){
+/**
+ * Determine if an object is Buffer
+ *
+ * Author:   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * License:  MIT
+ *
+ * `npm install is-buffer`
+ */
+
+module.exports = function (obj) {
+  return !!(obj != null &&
+    (obj._isBuffer || // For Safari 5-7 (missing Object.prototype.constructor)
+      (obj.constructor &&
+      typeof obj.constructor.isBuffer === 'function' &&
+      obj.constructor.isBuffer(obj))
+    ))
+}
+
+},{}],9:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -2042,7 +2193,9 @@ function drainQueue() {
         currentQueue = queue;
         queue = [];
         while (++queueIndex < len) {
-            currentQueue[queueIndex].run();
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
         }
         queueIndex = -1;
         len = queue.length;
@@ -2094,45 +2247,556 @@ process.binding = function (name) {
     throw new Error('process.binding is not supported');
 };
 
-// TODO(shtylman)
 process.cwd = function () { return '/' };
 process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 process.umask = function() { return 0; };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+(function (global){
+/*! https://mths.be/punycode v1.3.2 by @mathias */
+;(function(root) {
+
+	/** Detect free variables */
+	var freeExports = typeof exports == 'object' && exports &&
+		!exports.nodeType && exports;
+	var freeModule = typeof module == 'object' && module &&
+		!module.nodeType && module;
+	var freeGlobal = typeof global == 'object' && global;
+	if (
+		freeGlobal.global === freeGlobal ||
+		freeGlobal.window === freeGlobal ||
+		freeGlobal.self === freeGlobal
+	) {
+		root = freeGlobal;
+	}
+
+	/**
+	 * The `punycode` object.
+	 * @name punycode
+	 * @type Object
+	 */
+	var punycode,
+
+	/** Highest positive signed 32-bit float value */
+	maxInt = 2147483647, // aka. 0x7FFFFFFF or 2^31-1
+
+	/** Bootstring parameters */
+	base = 36,
+	tMin = 1,
+	tMax = 26,
+	skew = 38,
+	damp = 700,
+	initialBias = 72,
+	initialN = 128, // 0x80
+	delimiter = '-', // '\x2D'
+
+	/** Regular expressions */
+	regexPunycode = /^xn--/,
+	regexNonASCII = /[^\x20-\x7E]/, // unprintable ASCII chars + non-ASCII chars
+	regexSeparators = /[\x2E\u3002\uFF0E\uFF61]/g, // RFC 3490 separators
+
+	/** Error messages */
+	errors = {
+		'overflow': 'Overflow: input needs wider integers to process',
+		'not-basic': 'Illegal input >= 0x80 (not a basic code point)',
+		'invalid-input': 'Invalid input'
+	},
+
+	/** Convenience shortcuts */
+	baseMinusTMin = base - tMin,
+	floor = Math.floor,
+	stringFromCharCode = String.fromCharCode,
+
+	/** Temporary variable */
+	key;
+
+	/*--------------------------------------------------------------------------*/
+
+	/**
+	 * A generic error utility function.
+	 * @private
+	 * @param {String} type The error type.
+	 * @returns {Error} Throws a `RangeError` with the applicable error message.
+	 */
+	function error(type) {
+		throw RangeError(errors[type]);
+	}
+
+	/**
+	 * A generic `Array#map` utility function.
+	 * @private
+	 * @param {Array} array The array to iterate over.
+	 * @param {Function} callback The function that gets called for every array
+	 * item.
+	 * @returns {Array} A new array of values returned by the callback function.
+	 */
+	function map(array, fn) {
+		var length = array.length;
+		var result = [];
+		while (length--) {
+			result[length] = fn(array[length]);
+		}
+		return result;
+	}
+
+	/**
+	 * A simple `Array#map`-like wrapper to work with domain name strings or email
+	 * addresses.
+	 * @private
+	 * @param {String} domain The domain name or email address.
+	 * @param {Function} callback The function that gets called for every
+	 * character.
+	 * @returns {Array} A new string of characters returned by the callback
+	 * function.
+	 */
+	function mapDomain(string, fn) {
+		var parts = string.split('@');
+		var result = '';
+		if (parts.length > 1) {
+			// In email addresses, only the domain name should be punycoded. Leave
+			// the local part (i.e. everything up to `@`) intact.
+			result = parts[0] + '@';
+			string = parts[1];
+		}
+		// Avoid `split(regex)` for IE8 compatibility. See #17.
+		string = string.replace(regexSeparators, '\x2E');
+		var labels = string.split('.');
+		var encoded = map(labels, fn).join('.');
+		return result + encoded;
+	}
+
+	/**
+	 * Creates an array containing the numeric code points of each Unicode
+	 * character in the string. While JavaScript uses UCS-2 internally,
+	 * this function will convert a pair of surrogate halves (each of which
+	 * UCS-2 exposes as separate characters) into a single code point,
+	 * matching UTF-16.
+	 * @see `punycode.ucs2.encode`
+	 * @see <https://mathiasbynens.be/notes/javascript-encoding>
+	 * @memberOf punycode.ucs2
+	 * @name decode
+	 * @param {String} string The Unicode input string (UCS-2).
+	 * @returns {Array} The new array of code points.
+	 */
+	function ucs2decode(string) {
+		var output = [],
+		    counter = 0,
+		    length = string.length,
+		    value,
+		    extra;
+		while (counter < length) {
+			value = string.charCodeAt(counter++);
+			if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
+				// high surrogate, and there is a next character
+				extra = string.charCodeAt(counter++);
+				if ((extra & 0xFC00) == 0xDC00) { // low surrogate
+					output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
+				} else {
+					// unmatched surrogate; only append this code unit, in case the next
+					// code unit is the high surrogate of a surrogate pair
+					output.push(value);
+					counter--;
+				}
+			} else {
+				output.push(value);
+			}
+		}
+		return output;
+	}
+
+	/**
+	 * Creates a string based on an array of numeric code points.
+	 * @see `punycode.ucs2.decode`
+	 * @memberOf punycode.ucs2
+	 * @name encode
+	 * @param {Array} codePoints The array of numeric code points.
+	 * @returns {String} The new Unicode string (UCS-2).
+	 */
+	function ucs2encode(array) {
+		return map(array, function(value) {
+			var output = '';
+			if (value > 0xFFFF) {
+				value -= 0x10000;
+				output += stringFromCharCode(value >>> 10 & 0x3FF | 0xD800);
+				value = 0xDC00 | value & 0x3FF;
+			}
+			output += stringFromCharCode(value);
+			return output;
+		}).join('');
+	}
+
+	/**
+	 * Converts a basic code point into a digit/integer.
+	 * @see `digitToBasic()`
+	 * @private
+	 * @param {Number} codePoint The basic numeric code point value.
+	 * @returns {Number} The numeric value of a basic code point (for use in
+	 * representing integers) in the range `0` to `base - 1`, or `base` if
+	 * the code point does not represent a value.
+	 */
+	function basicToDigit(codePoint) {
+		if (codePoint - 48 < 10) {
+			return codePoint - 22;
+		}
+		if (codePoint - 65 < 26) {
+			return codePoint - 65;
+		}
+		if (codePoint - 97 < 26) {
+			return codePoint - 97;
+		}
+		return base;
+	}
+
+	/**
+	 * Converts a digit/integer into a basic code point.
+	 * @see `basicToDigit()`
+	 * @private
+	 * @param {Number} digit The numeric value of a basic code point.
+	 * @returns {Number} The basic code point whose value (when used for
+	 * representing integers) is `digit`, which needs to be in the range
+	 * `0` to `base - 1`. If `flag` is non-zero, the uppercase form is
+	 * used; else, the lowercase form is used. The behavior is undefined
+	 * if `flag` is non-zero and `digit` has no uppercase form.
+	 */
+	function digitToBasic(digit, flag) {
+		//  0..25 map to ASCII a..z or A..Z
+		// 26..35 map to ASCII 0..9
+		return digit + 22 + 75 * (digit < 26) - ((flag != 0) << 5);
+	}
+
+	/**
+	 * Bias adaptation function as per section 3.4 of RFC 3492.
+	 * http://tools.ietf.org/html/rfc3492#section-3.4
+	 * @private
+	 */
+	function adapt(delta, numPoints, firstTime) {
+		var k = 0;
+		delta = firstTime ? floor(delta / damp) : delta >> 1;
+		delta += floor(delta / numPoints);
+		for (/* no initialization */; delta > baseMinusTMin * tMax >> 1; k += base) {
+			delta = floor(delta / baseMinusTMin);
+		}
+		return floor(k + (baseMinusTMin + 1) * delta / (delta + skew));
+	}
+
+	/**
+	 * Converts a Punycode string of ASCII-only symbols to a string of Unicode
+	 * symbols.
+	 * @memberOf punycode
+	 * @param {String} input The Punycode string of ASCII-only symbols.
+	 * @returns {String} The resulting string of Unicode symbols.
+	 */
+	function decode(input) {
+		// Don't use UCS-2
+		var output = [],
+		    inputLength = input.length,
+		    out,
+		    i = 0,
+		    n = initialN,
+		    bias = initialBias,
+		    basic,
+		    j,
+		    index,
+		    oldi,
+		    w,
+		    k,
+		    digit,
+		    t,
+		    /** Cached calculation results */
+		    baseMinusT;
+
+		// Handle the basic code points: let `basic` be the number of input code
+		// points before the last delimiter, or `0` if there is none, then copy
+		// the first basic code points to the output.
+
+		basic = input.lastIndexOf(delimiter);
+		if (basic < 0) {
+			basic = 0;
+		}
+
+		for (j = 0; j < basic; ++j) {
+			// if it's not a basic code point
+			if (input.charCodeAt(j) >= 0x80) {
+				error('not-basic');
+			}
+			output.push(input.charCodeAt(j));
+		}
+
+		// Main decoding loop: start just after the last delimiter if any basic code
+		// points were copied; start at the beginning otherwise.
+
+		for (index = basic > 0 ? basic + 1 : 0; index < inputLength; /* no final expression */) {
+
+			// `index` is the index of the next character to be consumed.
+			// Decode a generalized variable-length integer into `delta`,
+			// which gets added to `i`. The overflow checking is easier
+			// if we increase `i` as we go, then subtract off its starting
+			// value at the end to obtain `delta`.
+			for (oldi = i, w = 1, k = base; /* no condition */; k += base) {
+
+				if (index >= inputLength) {
+					error('invalid-input');
+				}
+
+				digit = basicToDigit(input.charCodeAt(index++));
+
+				if (digit >= base || digit > floor((maxInt - i) / w)) {
+					error('overflow');
+				}
+
+				i += digit * w;
+				t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
+
+				if (digit < t) {
+					break;
+				}
+
+				baseMinusT = base - t;
+				if (w > floor(maxInt / baseMinusT)) {
+					error('overflow');
+				}
+
+				w *= baseMinusT;
+
+			}
+
+			out = output.length + 1;
+			bias = adapt(i - oldi, out, oldi == 0);
+
+			// `i` was supposed to wrap around from `out` to `0`,
+			// incrementing `n` each time, so we'll fix that now:
+			if (floor(i / out) > maxInt - n) {
+				error('overflow');
+			}
+
+			n += floor(i / out);
+			i %= out;
+
+			// Insert `n` at position `i` of the output
+			output.splice(i++, 0, n);
+
+		}
+
+		return ucs2encode(output);
+	}
+
+	/**
+	 * Converts a string of Unicode symbols (e.g. a domain name label) to a
+	 * Punycode string of ASCII-only symbols.
+	 * @memberOf punycode
+	 * @param {String} input The string of Unicode symbols.
+	 * @returns {String} The resulting Punycode string of ASCII-only symbols.
+	 */
+	function encode(input) {
+		var n,
+		    delta,
+		    handledCPCount,
+		    basicLength,
+		    bias,
+		    j,
+		    m,
+		    q,
+		    k,
+		    t,
+		    currentValue,
+		    output = [],
+		    /** `inputLength` will hold the number of code points in `input`. */
+		    inputLength,
+		    /** Cached calculation results */
+		    handledCPCountPlusOne,
+		    baseMinusT,
+		    qMinusT;
+
+		// Convert the input in UCS-2 to Unicode
+		input = ucs2decode(input);
+
+		// Cache the length
+		inputLength = input.length;
+
+		// Initialize the state
+		n = initialN;
+		delta = 0;
+		bias = initialBias;
+
+		// Handle the basic code points
+		for (j = 0; j < inputLength; ++j) {
+			currentValue = input[j];
+			if (currentValue < 0x80) {
+				output.push(stringFromCharCode(currentValue));
+			}
+		}
+
+		handledCPCount = basicLength = output.length;
+
+		// `handledCPCount` is the number of code points that have been handled;
+		// `basicLength` is the number of basic code points.
+
+		// Finish the basic string - if it is not empty - with a delimiter
+		if (basicLength) {
+			output.push(delimiter);
+		}
+
+		// Main encoding loop:
+		while (handledCPCount < inputLength) {
+
+			// All non-basic code points < n have been handled already. Find the next
+			// larger one:
+			for (m = maxInt, j = 0; j < inputLength; ++j) {
+				currentValue = input[j];
+				if (currentValue >= n && currentValue < m) {
+					m = currentValue;
+				}
+			}
+
+			// Increase `delta` enough to advance the decoder's <n,i> state to <m,0>,
+			// but guard against overflow
+			handledCPCountPlusOne = handledCPCount + 1;
+			if (m - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
+				error('overflow');
+			}
+
+			delta += (m - n) * handledCPCountPlusOne;
+			n = m;
+
+			for (j = 0; j < inputLength; ++j) {
+				currentValue = input[j];
+
+				if (currentValue < n && ++delta > maxInt) {
+					error('overflow');
+				}
+
+				if (currentValue == n) {
+					// Represent delta as a generalized variable-length integer
+					for (q = delta, k = base; /* no condition */; k += base) {
+						t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
+						if (q < t) {
+							break;
+						}
+						qMinusT = q - t;
+						baseMinusT = base - t;
+						output.push(
+							stringFromCharCode(digitToBasic(t + qMinusT % baseMinusT, 0))
+						);
+						q = floor(qMinusT / baseMinusT);
+					}
+
+					output.push(stringFromCharCode(digitToBasic(q, 0)));
+					bias = adapt(delta, handledCPCountPlusOne, handledCPCount == basicLength);
+					delta = 0;
+					++handledCPCount;
+				}
+			}
+
+			++delta;
+			++n;
+
+		}
+		return output.join('');
+	}
+
+	/**
+	 * Converts a Punycode string representing a domain name or an email address
+	 * to Unicode. Only the Punycoded parts of the input will be converted, i.e.
+	 * it doesn't matter if you call it on a string that has already been
+	 * converted to Unicode.
+	 * @memberOf punycode
+	 * @param {String} input The Punycoded domain name or email address to
+	 * convert to Unicode.
+	 * @returns {String} The Unicode representation of the given Punycode
+	 * string.
+	 */
+	function toUnicode(input) {
+		return mapDomain(input, function(string) {
+			return regexPunycode.test(string)
+				? decode(string.slice(4).toLowerCase())
+				: string;
+		});
+	}
+
+	/**
+	 * Converts a Unicode string representing a domain name or an email address to
+	 * Punycode. Only the non-ASCII parts of the domain name will be converted,
+	 * i.e. it doesn't matter if you call it with a domain that's already in
+	 * ASCII.
+	 * @memberOf punycode
+	 * @param {String} input The domain name or email address to convert, as a
+	 * Unicode string.
+	 * @returns {String} The Punycode representation of the given domain name or
+	 * email address.
+	 */
+	function toASCII(input) {
+		return mapDomain(input, function(string) {
+			return regexNonASCII.test(string)
+				? 'xn--' + encode(string)
+				: string;
+		});
+	}
+
+	/*--------------------------------------------------------------------------*/
+
+	/** Define the public API */
+	punycode = {
+		/**
+		 * A string representing the current Punycode.js version number.
+		 * @memberOf punycode
+		 * @type String
+		 */
+		'version': '1.3.2',
+		/**
+		 * An object of methods to convert from JavaScript's internal character
+		 * representation (UCS-2) to Unicode code points, and back.
+		 * @see <https://mathiasbynens.be/notes/javascript-encoding>
+		 * @memberOf punycode
+		 * @type Object
+		 */
+		'ucs2': {
+			'decode': ucs2decode,
+			'encode': ucs2encode
+		},
+		'decode': decode,
+		'encode': encode,
+		'toASCII': toASCII,
+		'toUnicode': toUnicode
+	};
+
+	/** Expose `punycode` */
+	// Some AMD build optimizers, like r.js, check for specific condition patterns
+	// like the following:
+	if (
+		typeof define == 'function' &&
+		typeof define.amd == 'object' &&
+		define.amd
+	) {
+		define('punycode', function() {
+			return punycode;
+		});
+	} else if (freeExports && freeModule) {
+		if (module.exports == freeExports) { // in Node.js or RingoJS v0.8.0+
+			freeModule.exports = punycode;
+		} else { // in Narwhal or RingoJS v0.7.0-
+			for (key in punycode) {
+				punycode.hasOwnProperty(key) && (freeExports[key] = punycode[key]);
+			}
+		}
+	} else { // in Rhino or a web browser
+		root.punycode = punycode;
+	}
+
+}(this));
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],12:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":11}],11:[function(require,module,exports){
-(function (process){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+},{"./lib/_stream_duplex.js":13}],13:[function(require,module,exports){
 // a duplex stream is just a stream that is both readable and writable.
 // Since JS doesn't have multiple prototypal inheritance, this class
 // prototypally inherits from Readable, and then parasitically from
 // Writable.
 
-module.exports = Duplex;
+'use strict';
 
 /*<replacement>*/
 var objectKeys = Object.keys || function (obj) {
@@ -2141,6 +2805,14 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 }
 /*</replacement>*/
+
+
+module.exports = Duplex;
+
+/*<replacement>*/
+var processNextTick = require('process-nextick-args');
+/*</replacement>*/
+
 
 
 /*<replacement>*/
@@ -2153,10 +2825,12 @@ var Writable = require('./_stream_writable');
 
 util.inherits(Duplex, Readable);
 
-forEach(objectKeys(Writable.prototype), function(method) {
+var keys = objectKeys(Writable.prototype);
+for (var v = 0; v < keys.length; v++) {
+  var method = keys[v];
   if (!Duplex.prototype[method])
     Duplex.prototype[method] = Writable.prototype[method];
-});
+}
 
 function Duplex(options) {
   if (!(this instanceof Duplex))
@@ -2187,7 +2861,11 @@ function onend() {
 
   // no more data can be written.
   // But allow more writes to happen in this tick.
-  process.nextTick(this.end.bind(this));
+  processNextTick(onEndNT, this);
+}
+
+function onEndNT(self) {
+  self.end();
 }
 
 function forEach (xs, f) {
@@ -2196,32 +2874,12 @@ function forEach (xs, f) {
   }
 }
 
-}).call(this,require('_process'))
-},{"./_stream_readable":13,"./_stream_writable":15,"_process":9,"core-util-is":16,"inherits":7}],12:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+},{"./_stream_readable":15,"./_stream_writable":17,"core-util-is":18,"inherits":7,"process-nextick-args":19}],14:[function(require,module,exports){
 // a passthrough stream.
 // basically just the most minimal sort of Transform stream.
 // Every written chunk gets output as-is.
+
+'use strict';
 
 module.exports = PassThrough;
 
@@ -2245,30 +2903,16 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":14,"core-util-is":16,"inherits":7}],13:[function(require,module,exports){
+},{"./_stream_transform":16,"core-util-is":18,"inherits":7}],15:[function(require,module,exports){
 (function (process){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
+'use strict';
 
 module.exports = Readable;
+
+/*<replacement>*/
+var processNextTick = require('process-nextick-args');
+/*</replacement>*/
+
 
 /*<replacement>*/
 var isArray = require('isarray');
@@ -2281,33 +2925,46 @@ var Buffer = require('buffer').Buffer;
 
 Readable.ReadableState = ReadableState;
 
-var EE = require('events').EventEmitter;
+var EE = require('events');
 
 /*<replacement>*/
-if (!EE.listenerCount) EE.listenerCount = function(emitter, type) {
+var EElistenerCount = function(emitter, type) {
   return emitter.listeners(type).length;
 };
 /*</replacement>*/
 
-var Stream = require('stream');
+
+
+/*<replacement>*/
+var Stream;
+(function (){try{
+  Stream = require('st' + 'ream');
+}catch(_){}finally{
+  if (!Stream)
+    Stream = require('events').EventEmitter;
+}}())
+/*</replacement>*/
+
+var Buffer = require('buffer').Buffer;
 
 /*<replacement>*/
 var util = require('core-util-is');
 util.inherits = require('inherits');
 /*</replacement>*/
 
-var StringDecoder;
 
 
 /*<replacement>*/
-var debug = require('util');
-if (debug && debug.debuglog) {
-  debug = debug.debuglog('stream');
+var debugUtil = require('util');
+var debug;
+if (debugUtil && debugUtil.debuglog) {
+  debug = debugUtil.debuglog('stream');
 } else {
   debug = function () {};
 }
 /*</replacement>*/
 
+var StringDecoder;
 
 util.inherits(Readable, Stream);
 
@@ -2316,10 +2973,17 @@ function ReadableState(options, stream) {
 
   options = options || {};
 
+  // object stream flag. Used to make read(n) ignore n and to
+  // make all the buffer merging and length checks go away
+  this.objectMode = !!options.objectMode;
+
+  if (stream instanceof Duplex)
+    this.objectMode = this.objectMode || !!options.readableObjectMode;
+
   // the point at which it stops calling _read() to fill the buffer
   // Note: 0 is a valid value, means "don't call _read preemptively ever"
   var hwm = options.highWaterMark;
-  var defaultHwm = options.objectMode ? 16 : 16 * 1024;
+  var defaultHwm = this.objectMode ? 16 : 16 * 1024;
   this.highWaterMark = (hwm || hwm === 0) ? hwm : defaultHwm;
 
   // cast to ints.
@@ -2345,14 +3009,6 @@ function ReadableState(options, stream) {
   this.needReadable = false;
   this.emittedReadable = false;
   this.readableListening = false;
-
-
-  // object stream flag. Used to make read(n) ignore n and to
-  // make all the buffer merging and length checks go away
-  this.objectMode = !!options.objectMode;
-
-  if (stream instanceof Duplex)
-    this.objectMode = this.objectMode || !!options.readableObjectMode;
 
   // Crypto is kind of old and crusty.  Historically, its default string
   // encoding is 'binary' so we have to make this configurable.
@@ -2390,6 +3046,9 @@ function Readable(options) {
   // legacy
   this.readable = true;
 
+  if (options && typeof options.read === 'function')
+    this._read = options.read;
+
   Stream.call(this);
 }
 
@@ -2400,7 +3059,7 @@ function Readable(options) {
 Readable.prototype.push = function(chunk, encoding) {
   var state = this._readableState;
 
-  if (util.isString(chunk) && !state.objectMode) {
+  if (!state.objectMode && typeof chunk === 'string') {
     encoding = encoding || state.defaultEncoding;
     if (encoding !== state.encoding) {
       chunk = new Buffer(chunk, encoding);
@@ -2417,14 +3076,17 @@ Readable.prototype.unshift = function(chunk) {
   return readableAddChunk(this, state, chunk, '', true);
 };
 
+Readable.prototype.isPaused = function() {
+  return this._readableState.flowing === false;
+};
+
 function readableAddChunk(stream, state, chunk, encoding, addToFront) {
   var er = chunkInvalid(state, chunk);
   if (er) {
     stream.emit('error', er);
-  } else if (util.isNullOrUndefined(chunk)) {
+  } else if (chunk === null) {
     state.reading = false;
-    if (!state.ended)
-      onEofChunk(stream, state);
+    onEofChunk(stream, state);
   } else if (state.objectMode || chunk && chunk.length > 0) {
     if (state.ended && !addToFront) {
       var e = new Error('stream.push() after EOF');
@@ -2465,7 +3127,6 @@ function readableAddChunk(stream, state, chunk, encoding, addToFront) {
 }
 
 
-
 // if it's past the high water mark, we can push in some more.
 // Also, if we have no data yet, we can stand some
 // more bytes.  This is to work around cases where hwm=0,
@@ -2489,15 +3150,19 @@ Readable.prototype.setEncoding = function(enc) {
   return this;
 };
 
-// Don't raise the hwm > 128MB
+// Don't raise the hwm > 8MB
 var MAX_HWM = 0x800000;
-function roundUpToNextPowerOf2(n) {
+function computeNewHighWaterMark(n) {
   if (n >= MAX_HWM) {
     n = MAX_HWM;
   } else {
     // Get the next highest power of 2
     n--;
-    for (var p = 1; p < 32; p <<= 1) n |= n >> p;
+    n |= n >>> 1;
+    n |= n >>> 2;
+    n |= n >>> 4;
+    n |= n >>> 8;
+    n |= n >>> 16;
     n++;
   }
   return n;
@@ -2510,7 +3175,7 @@ function howMuchToRead(n, state) {
   if (state.objectMode)
     return n === 0 ? 0 : 1;
 
-  if (isNaN(n) || util.isNull(n)) {
+  if (n === null || isNaN(n)) {
     // only flow one buffer at a time
     if (state.flowing && state.buffer.length)
       return state.buffer[0].length;
@@ -2526,15 +3191,16 @@ function howMuchToRead(n, state) {
   // power of 2, to prevent increasing it excessively in tiny
   // amounts.
   if (n > state.highWaterMark)
-    state.highWaterMark = roundUpToNextPowerOf2(n);
+    state.highWaterMark = computeNewHighWaterMark(n);
 
   // don't have that much.  return null, unless we've ended.
   if (n > state.length) {
     if (!state.ended) {
       state.needReadable = true;
       return 0;
-    } else
+    } else {
       return state.length;
+    }
   }
 
   return n;
@@ -2546,7 +3212,7 @@ Readable.prototype.read = function(n) {
   var state = this._readableState;
   var nOrig = n;
 
-  if (!util.isNumber(n) || n > 0)
+  if (typeof n !== 'number' || n > 0)
     state.emittedReadable = false;
 
   // if we're doing read(0) to trigger a readable event, but we
@@ -2634,7 +3300,7 @@ Readable.prototype.read = function(n) {
   else
     ret = null;
 
-  if (util.isNull(ret)) {
+  if (ret === null) {
     state.needReadable = true;
     n = 0;
   }
@@ -2650,7 +3316,7 @@ Readable.prototype.read = function(n) {
   if (nOrig !== n && state.ended && state.length === 0)
     endReadable(this);
 
-  if (!util.isNull(ret))
+  if (ret !== null)
     this.emit('data', ret);
 
   return ret;
@@ -2658,9 +3324,10 @@ Readable.prototype.read = function(n) {
 
 function chunkInvalid(state, chunk) {
   var er = null;
-  if (!util.isBuffer(chunk) &&
-      !util.isString(chunk) &&
-      !util.isNullOrUndefined(chunk) &&
+  if (!(Buffer.isBuffer(chunk)) &&
+      typeof chunk !== 'string' &&
+      chunk !== null &&
+      chunk !== undefined &&
       !state.objectMode) {
     er = new TypeError('Invalid non-string/buffer chunk');
   }
@@ -2669,7 +3336,8 @@ function chunkInvalid(state, chunk) {
 
 
 function onEofChunk(stream, state) {
-  if (state.decoder && !state.ended) {
+  if (state.ended) return;
+  if (state.decoder) {
     var chunk = state.decoder.end();
     if (chunk && chunk.length) {
       state.buffer.push(chunk);
@@ -2692,9 +3360,7 @@ function emitReadable(stream) {
     debug('emitReadable', state.flowing);
     state.emittedReadable = true;
     if (state.sync)
-      process.nextTick(function() {
-        emitReadable_(stream);
-      });
+      processNextTick(emitReadable_, stream);
     else
       emitReadable_(stream);
   }
@@ -2716,9 +3382,7 @@ function emitReadable_(stream) {
 function maybeReadMore(stream, state) {
   if (!state.readingMore) {
     state.readingMore = true;
-    process.nextTick(function() {
-      maybeReadMore_(stream, state);
-    });
+    processNextTick(maybeReadMore_, stream, state);
   }
 }
 
@@ -2769,7 +3433,7 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
 
   var endFn = doEnd ? onend : cleanup;
   if (state.endEmitted)
-    process.nextTick(endFn);
+    processNextTick(endFn);
   else
     src.once('end', endFn);
 
@@ -2793,6 +3457,7 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
   var ondrain = pipeOnDrain(src);
   dest.on('drain', ondrain);
 
+  var cleanedUp = false;
   function cleanup() {
     debug('cleanup');
     // cleanup event handlers once the pipe is broken
@@ -2804,6 +3469,8 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
     src.removeListener('end', onend);
     src.removeListener('end', cleanup);
     src.removeListener('data', ondata);
+
+    cleanedUp = true;
 
     // if the reader is waiting for a drain event from this
     // specific writer, then it would cause it to never start
@@ -2820,9 +3487,16 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
     debug('ondata');
     var ret = dest.write(chunk);
     if (false === ret) {
-      debug('false write response, pause',
-            src._readableState.awaitDrain);
-      src._readableState.awaitDrain++;
+      // If the user unpiped during `dest.write()`, it is possible
+      // to get stuck in a permanently paused state if that write
+      // also returned false.
+      if (state.pipesCount === 1 &&
+          state.pipes[0] === dest &&
+          src.listenerCount('data') === 1 &&
+          !cleanedUp) {
+        debug('false write response, pause', src._readableState.awaitDrain);
+        src._readableState.awaitDrain++;
+      }
       src.pause();
     }
   }
@@ -2833,7 +3507,7 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
     debug('onerror', er);
     unpipe();
     dest.removeListener('error', onerror);
-    if (EE.listenerCount(dest, 'error') === 0)
+    if (EElistenerCount(dest, 'error') === 0)
       dest.emit('error', er);
   }
   // This is a brutally ugly hack to make sure that our error handler
@@ -2844,7 +3518,6 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
     dest._events.error.unshift(onerror);
   else
     dest._events.error = [onerror, dest._events.error];
-
 
 
   // Both close and finish should trigger unpipe, but only once.
@@ -2883,7 +3556,7 @@ function pipeOnDrain(src) {
     debug('pipeOnDrain', state.awaitDrain);
     if (state.awaitDrain)
       state.awaitDrain--;
-    if (state.awaitDrain === 0 && EE.listenerCount(src, 'data')) {
+    if (state.awaitDrain === 0 && EElistenerCount(src, 'data')) {
       state.flowing = true;
       flow(src);
     }
@@ -2964,11 +3637,7 @@ Readable.prototype.on = function(ev, fn) {
       state.emittedReadable = false;
       state.needReadable = true;
       if (!state.reading) {
-        var self = this;
-        process.nextTick(function() {
-          debug('readable nexttick read 0');
-          self.read(0);
-        });
+        processNextTick(nReadingNextTick, this);
       } else if (state.length) {
         emitReadable(this, state);
       }
@@ -2979,6 +3648,11 @@ Readable.prototype.on = function(ev, fn) {
 };
 Readable.prototype.addListener = Readable.prototype.on;
 
+function nReadingNextTick(self) {
+  debug('readable nexttick read 0');
+  self.read(0);
+}
+
 // pause() and resume() are remnants of the legacy readable stream API
 // If the user uses them, then switch into old mode.
 Readable.prototype.resume = function() {
@@ -2986,10 +3660,6 @@ Readable.prototype.resume = function() {
   if (!state.flowing) {
     debug('resume');
     state.flowing = true;
-    if (!state.reading) {
-      debug('resume read 0');
-      this.read(0);
-    }
     resume(this, state);
   }
   return this;
@@ -2998,13 +3668,16 @@ Readable.prototype.resume = function() {
 function resume(stream, state) {
   if (!state.resumeScheduled) {
     state.resumeScheduled = true;
-    process.nextTick(function() {
-      resume_(stream, state);
-    });
+    processNextTick(resume_, stream, state);
   }
 }
 
 function resume_(stream, state) {
+  if (!state.reading) {
+    debug('resume read 0');
+    stream.read(0);
+  }
+
   state.resumeScheduled = false;
   stream.emit('resume');
   flow(stream);
@@ -3055,7 +3728,11 @@ Readable.prototype.wrap = function(stream) {
     debug('wrapped data');
     if (state.decoder)
       chunk = state.decoder.write(chunk);
-    if (!chunk || !state.objectMode && !chunk.length)
+
+    // don't skip over falsy values in objectMode
+    if (state.objectMode && (chunk === null || chunk === undefined))
+      return;
+    else if (!state.objectMode && (!chunk || !chunk.length))
       return;
 
     var ret = self.push(chunk);
@@ -3068,10 +3745,10 @@ Readable.prototype.wrap = function(stream) {
   // proxy all the other methods.
   // important when wrapping filters and duplexes.
   for (var i in stream) {
-    if (util.isFunction(stream[i]) && util.isUndefined(this[i])) {
+    if (this[i] === undefined && typeof stream[i] === 'function') {
       this[i] = function(method) { return function() {
         return stream[method].apply(stream, arguments);
-      }}(i);
+      }; }(i);
     }
   }
 
@@ -3093,7 +3770,6 @@ Readable.prototype.wrap = function(stream) {
 
   return self;
 };
-
 
 
 // exposed for testing purposes only.
@@ -3120,6 +3796,8 @@ function fromList(n, state) {
     // read it all, truncate the array.
     if (stringMode)
       ret = list.join('');
+    else if (list.length === 1)
+      ret = list[0];
     else
       ret = Buffer.concat(list, length);
     list.length = 0;
@@ -3175,14 +3853,16 @@ function endReadable(stream) {
 
   if (!state.endEmitted) {
     state.ended = true;
-    process.nextTick(function() {
-      // Check that we didn't get one last unshift.
-      if (!state.endEmitted && state.length === 0) {
-        state.endEmitted = true;
-        stream.readable = false;
-        stream.emit('end');
-      }
-    });
+    processNextTick(endReadableNT, state, stream);
+  }
+}
+
+function endReadableNT(state, stream) {
+  // Check that we didn't get one last unshift.
+  if (!state.endEmitted && state.length === 0) {
+    state.endEmitted = true;
+    stream.readable = false;
+    stream.emit('end');
   }
 }
 
@@ -3200,29 +3880,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":11,"_process":9,"buffer":2,"core-util-is":16,"events":6,"inherits":7,"isarray":8,"stream":21,"string_decoder/":22,"util":1}],14:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
+},{"./_stream_duplex":13,"_process":10,"buffer":2,"core-util-is":18,"events":6,"inherits":7,"isarray":9,"process-nextick-args":19,"string_decoder/":26,"util":1}],16:[function(require,module,exports){
 // a transform stream is a readable/writable stream where you do
 // something with the data.  Sometimes it's called a "filter",
 // but that's not a great name for it, since that implies a thing where
@@ -3265,6 +3923,8 @@ function indexOf (xs, x) {
 // would be consumed, and then the rest would wait (un-transformed) until
 // the results of the previous transformed chunk were consumed.
 
+'use strict';
+
 module.exports = Transform;
 
 var Duplex = require('./_stream_duplex');
@@ -3277,7 +3937,7 @@ util.inherits = require('inherits');
 util.inherits(Transform, Duplex);
 
 
-function TransformState(options, stream) {
+function TransformState(stream) {
   this.afterTransform = function(er, data) {
     return afterTransform(stream, er, data);
   };
@@ -3300,7 +3960,7 @@ function afterTransform(stream, er, data) {
   ts.writechunk = null;
   ts.writecb = null;
 
-  if (!util.isNullOrUndefined(data))
+  if (data !== null && data !== undefined)
     stream.push(data);
 
   if (cb)
@@ -3320,7 +3980,7 @@ function Transform(options) {
 
   Duplex.call(this, options);
 
-  this._transformState = new TransformState(options, this);
+  this._transformState = new TransformState(this);
 
   // when the writable side finishes, then flush out anything remaining.
   var stream = this;
@@ -3333,8 +3993,16 @@ function Transform(options) {
   // sync guard flag.
   this._readableState.sync = false;
 
+  if (options) {
+    if (typeof options.transform === 'function')
+      this._transform = options.transform;
+
+    if (typeof options.flush === 'function')
+      this._flush = options.flush;
+  }
+
   this.once('prefinish', function() {
-    if (util.isFunction(this._flush))
+    if (typeof this._flush === 'function')
       this._flush(function(er) {
         done(stream, er);
       });
@@ -3382,7 +4050,7 @@ Transform.prototype._write = function(chunk, encoding, cb) {
 Transform.prototype._read = function(n) {
   var ts = this._transformState;
 
-  if (!util.isNull(ts.writechunk) && ts.writecb && !ts.transforming) {
+  if (ts.writechunk !== null && ts.writecb && !ts.transforming) {
     ts.transforming = true;
     this._transform(ts.writechunk, ts.writeencoding, ts.afterTransform);
   } else {
@@ -3411,34 +4079,19 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":11,"core-util-is":16,"inherits":7}],15:[function(require,module,exports){
-(function (process){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+},{"./_stream_duplex":13,"core-util-is":18,"inherits":7}],17:[function(require,module,exports){
 // A bit simpler than readable streams.
-// Implement an async ._write(chunk, cb), and it'll handle all
+// Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 
+'use strict';
+
 module.exports = Writable;
+
+/*<replacement>*/
+var processNextTick = require('process-nextick-args');
+/*</replacement>*/
+
 
 /*<replacement>*/
 var Buffer = require('buffer').Buffer;
@@ -3452,14 +4105,36 @@ var util = require('core-util-is');
 util.inherits = require('inherits');
 /*</replacement>*/
 
-var Stream = require('stream');
+
+/*<replacement>*/
+var internalUtil = {
+  deprecate: require('util-deprecate')
+};
+/*</replacement>*/
+
+
+
+/*<replacement>*/
+var Stream;
+(function (){try{
+  Stream = require('st' + 'ream');
+}catch(_){}finally{
+  if (!Stream)
+    Stream = require('events').EventEmitter;
+}}())
+/*</replacement>*/
+
+var Buffer = require('buffer').Buffer;
 
 util.inherits(Writable, Stream);
+
+function nop() {}
 
 function WriteReq(chunk, encoding, cb) {
   this.chunk = chunk;
   this.encoding = encoding;
   this.callback = cb;
+  this.next = null;
 }
 
 function WritableState(options, stream) {
@@ -3467,19 +4142,19 @@ function WritableState(options, stream) {
 
   options = options || {};
 
-  // the point at which write() starts returning false
-  // Note: 0 is a valid value, means that we always return false if
-  // the entire buffer is not flushed immediately on write()
-  var hwm = options.highWaterMark;
-  var defaultHwm = options.objectMode ? 16 : 16 * 1024;
-  this.highWaterMark = (hwm || hwm === 0) ? hwm : defaultHwm;
-
   // object stream flag to indicate whether or not this stream
   // contains buffers or objects.
   this.objectMode = !!options.objectMode;
 
   if (stream instanceof Duplex)
     this.objectMode = this.objectMode || !!options.writableObjectMode;
+
+  // the point at which write() starts returning false
+  // Note: 0 is a valid value, means that we always return false if
+  // the entire buffer is not flushed immediately on write()
+  var hwm = options.highWaterMark;
+  var defaultHwm = this.objectMode ? 16 : 16 * 1024;
+  this.highWaterMark = (hwm || hwm === 0) ? hwm : defaultHwm;
 
   // cast to ints.
   this.highWaterMark = ~~this.highWaterMark;
@@ -3536,7 +4211,8 @@ function WritableState(options, stream) {
   // the amount that is being written when _write is called.
   this.writelen = 0;
 
-  this.buffer = [];
+  this.bufferedRequest = null;
+  this.lastBufferedRequest = null;
 
   // number of pending user-supplied write callbacks
   // this must be 0 before 'finish' can be emitted
@@ -3549,6 +4225,26 @@ function WritableState(options, stream) {
   // True if the error was already emitted and should not be thrown again
   this.errorEmitted = false;
 }
+
+WritableState.prototype.getBuffer = function writableStateGetBuffer() {
+  var current = this.bufferedRequest;
+  var out = [];
+  while (current) {
+    out.push(current);
+    current = current.next;
+  }
+  return out;
+};
+
+(function (){try {
+Object.defineProperty(WritableState.prototype, 'buffer', {
+  get: internalUtil.deprecate(function() {
+    return this.getBuffer();
+  }, '_writableState.buffer is deprecated. Use _writableState.getBuffer ' +
+     'instead.')
+});
+}catch(_){}}());
+
 
 function Writable(options) {
   var Duplex = require('./_stream_duplex');
@@ -3563,6 +4259,14 @@ function Writable(options) {
   // legacy.
   this.writable = true;
 
+  if (options) {
+    if (typeof options.write === 'function')
+      this._write = options.write;
+
+    if (typeof options.writev === 'function')
+      this._writev = options.writev;
+  }
+
   Stream.call(this);
 }
 
@@ -3572,13 +4276,11 @@ Writable.prototype.pipe = function() {
 };
 
 
-function writeAfterEnd(stream, state, cb) {
+function writeAfterEnd(stream, cb) {
   var er = new Error('write after end');
   // TODO: defer error events consistently everywhere, not just the cb
   stream.emit('error', er);
-  process.nextTick(function() {
-    cb(er);
-  });
+  processNextTick(cb, er);
 }
 
 // If we get something that is not a buffer, string, null, or undefined,
@@ -3588,15 +4290,15 @@ function writeAfterEnd(stream, state, cb) {
 // how many bytes or characters.
 function validChunk(stream, state, chunk, cb) {
   var valid = true;
-  if (!util.isBuffer(chunk) &&
-      !util.isString(chunk) &&
-      !util.isNullOrUndefined(chunk) &&
+
+  if (!(Buffer.isBuffer(chunk)) &&
+      typeof chunk !== 'string' &&
+      chunk !== null &&
+      chunk !== undefined &&
       !state.objectMode) {
     var er = new TypeError('Invalid non-string/buffer chunk');
     stream.emit('error', er);
-    process.nextTick(function() {
-      cb(er);
-    });
+    processNextTick(cb, er);
     valid = false;
   }
   return valid;
@@ -3606,21 +4308,21 @@ Writable.prototype.write = function(chunk, encoding, cb) {
   var state = this._writableState;
   var ret = false;
 
-  if (util.isFunction(encoding)) {
+  if (typeof encoding === 'function') {
     cb = encoding;
     encoding = null;
   }
 
-  if (util.isBuffer(chunk))
+  if (Buffer.isBuffer(chunk))
     encoding = 'buffer';
   else if (!encoding)
     encoding = state.defaultEncoding;
 
-  if (!util.isFunction(cb))
-    cb = function() {};
+  if (typeof cb !== 'function')
+    cb = nop;
 
   if (state.ended)
-    writeAfterEnd(this, state, cb);
+    writeAfterEnd(this, cb);
   else if (validChunk(this, state, chunk, cb)) {
     state.pendingcb++;
     ret = writeOrBuffer(this, state, chunk, encoding, cb);
@@ -3645,15 +4347,26 @@ Writable.prototype.uncork = function() {
         !state.corked &&
         !state.finished &&
         !state.bufferProcessing &&
-        state.buffer.length)
+        state.bufferedRequest)
       clearBuffer(this, state);
   }
+};
+
+Writable.prototype.setDefaultEncoding = function setDefaultEncoding(encoding) {
+  // node::ParseEncoding() requires lower case.
+  if (typeof encoding === 'string')
+    encoding = encoding.toLowerCase();
+  if (!(['hex', 'utf8', 'utf-8', 'ascii', 'binary', 'base64',
+'ucs2', 'ucs-2','utf16le', 'utf-16le', 'raw']
+.indexOf((encoding + '').toLowerCase()) > -1))
+    throw new TypeError('Unknown encoding: ' + encoding);
+  this._writableState.defaultEncoding = encoding;
 };
 
 function decodeChunk(state, chunk, encoding) {
   if (!state.objectMode &&
       state.decodeStrings !== false &&
-      util.isString(chunk)) {
+      typeof chunk === 'string') {
     chunk = new Buffer(chunk, encoding);
   }
   return chunk;
@@ -3664,7 +4377,8 @@ function decodeChunk(state, chunk, encoding) {
 // If we return false, then we need a drain event, so set that flag.
 function writeOrBuffer(stream, state, chunk, encoding, cb) {
   chunk = decodeChunk(state, chunk, encoding);
-  if (util.isBuffer(chunk))
+
+  if (Buffer.isBuffer(chunk))
     encoding = 'buffer';
   var len = state.objectMode ? 1 : chunk.length;
 
@@ -3675,10 +4389,17 @@ function writeOrBuffer(stream, state, chunk, encoding, cb) {
   if (!ret)
     state.needDrain = true;
 
-  if (state.writing || state.corked)
-    state.buffer.push(new WriteReq(chunk, encoding, cb));
-  else
+  if (state.writing || state.corked) {
+    var last = state.lastBufferedRequest;
+    state.lastBufferedRequest = new WriteReq(chunk, encoding, cb);
+    if (last) {
+      last.next = state.lastBufferedRequest;
+    } else {
+      state.bufferedRequest = state.lastBufferedRequest;
+    }
+  } else {
     doWrite(stream, state, false, len, chunk, encoding, cb);
+  }
 
   return ret;
 }
@@ -3696,15 +4417,11 @@ function doWrite(stream, state, writev, len, chunk, encoding, cb) {
 }
 
 function onwriteError(stream, state, sync, er, cb) {
+  --state.pendingcb;
   if (sync)
-    process.nextTick(function() {
-      state.pendingcb--;
-      cb(er);
-    });
-  else {
-    state.pendingcb--;
+    processNextTick(cb, er);
+  else
     cb(er);
-  }
 
   stream._writableState.errorEmitted = true;
   stream.emit('error', er);
@@ -3728,19 +4445,17 @@ function onwrite(stream, er) {
     onwriteError(stream, state, sync, er, cb);
   else {
     // Check if we're actually ready to finish, but don't emit yet
-    var finished = needFinish(stream, state);
+    var finished = needFinish(state);
 
     if (!finished &&
         !state.corked &&
         !state.bufferProcessing &&
-        state.buffer.length) {
+        state.bufferedRequest) {
       clearBuffer(stream, state);
     }
 
     if (sync) {
-      process.nextTick(function() {
-        afterWrite(stream, state, finished, cb);
-      });
+      processNextTick(afterWrite, stream, state, finished, cb);
     } else {
       afterWrite(stream, state, finished, cb);
     }
@@ -3769,17 +4484,23 @@ function onwriteDrain(stream, state) {
 // if there's something in the buffer waiting, then process it
 function clearBuffer(stream, state) {
   state.bufferProcessing = true;
+  var entry = state.bufferedRequest;
 
-  if (stream._writev && state.buffer.length > 1) {
+  if (stream._writev && entry && entry.next) {
     // Fast case, write everything using _writev()
+    var buffer = [];
     var cbs = [];
-    for (var c = 0; c < state.buffer.length; c++)
-      cbs.push(state.buffer[c].callback);
+    while (entry) {
+      cbs.push(entry.callback);
+      buffer.push(entry);
+      entry = entry.next;
+    }
 
     // count the one we are adding, as well.
     // TODO(isaacs) clean this up
     state.pendingcb++;
-    doWrite(stream, state, true, state.length, state.buffer, '', function(err) {
+    state.lastBufferedRequest = null;
+    doWrite(stream, state, true, state.length, buffer, '', function(err) {
       for (var i = 0; i < cbs.length; i++) {
         state.pendingcb--;
         cbs[i](err);
@@ -3787,40 +4508,34 @@ function clearBuffer(stream, state) {
     });
 
     // Clear buffer
-    state.buffer = [];
   } else {
     // Slow case, write chunks one-by-one
-    for (var c = 0; c < state.buffer.length; c++) {
-      var entry = state.buffer[c];
+    while (entry) {
       var chunk = entry.chunk;
       var encoding = entry.encoding;
       var cb = entry.callback;
       var len = state.objectMode ? 1 : chunk.length;
 
       doWrite(stream, state, false, len, chunk, encoding, cb);
-
+      entry = entry.next;
       // if we didn't call the onwrite immediately, then
       // it means that we need to wait until it does.
       // also, that means that the chunk and cb are currently
       // being processed, so move the buffer counter past them.
       if (state.writing) {
-        c++;
         break;
       }
     }
 
-    if (c < state.buffer.length)
-      state.buffer = state.buffer.slice(c);
-    else
-      state.buffer.length = 0;
+    if (entry === null)
+      state.lastBufferedRequest = null;
   }
-
+  state.bufferedRequest = entry;
   state.bufferProcessing = false;
 }
 
 Writable.prototype._write = function(chunk, encoding, cb) {
   cb(new Error('not implemented'));
-
 };
 
 Writable.prototype._writev = null;
@@ -3828,16 +4543,16 @@ Writable.prototype._writev = null;
 Writable.prototype.end = function(chunk, encoding, cb) {
   var state = this._writableState;
 
-  if (util.isFunction(chunk)) {
+  if (typeof chunk === 'function') {
     cb = chunk;
     chunk = null;
     encoding = null;
-  } else if (util.isFunction(encoding)) {
+  } else if (typeof encoding === 'function') {
     cb = encoding;
     encoding = null;
   }
 
-  if (!util.isNullOrUndefined(chunk))
+  if (chunk !== null && chunk !== undefined)
     this.write(chunk, encoding);
 
   // .end() fully uncorks
@@ -3852,9 +4567,10 @@ Writable.prototype.end = function(chunk, encoding, cb) {
 };
 
 
-function needFinish(stream, state) {
+function needFinish(state) {
   return (state.ending &&
           state.length === 0 &&
+          state.bufferedRequest === null &&
           !state.finished &&
           !state.writing);
 }
@@ -3867,14 +4583,15 @@ function prefinish(stream, state) {
 }
 
 function finishMaybe(stream, state) {
-  var need = needFinish(stream, state);
+  var need = needFinish(state);
   if (need) {
     if (state.pendingcb === 0) {
       prefinish(stream, state);
       state.finished = true;
       stream.emit('finish');
-    } else
+    } else {
       prefinish(stream, state);
+    }
   }
   return need;
 }
@@ -3884,15 +4601,14 @@ function endWritable(stream, state, cb) {
   finishMaybe(stream, state);
   if (cb) {
     if (state.finished)
-      process.nextTick(cb);
+      processNextTick(cb);
     else
       stream.once('finish', cb);
   }
   state.ended = true;
 }
 
-}).call(this,require('_process'))
-},{"./_stream_duplex":11,"_process":9,"buffer":2,"core-util-is":16,"inherits":7,"stream":21}],16:[function(require,module,exports){
+},{"./_stream_duplex":13,"buffer":2,"core-util-is":18,"events":6,"inherits":7,"process-nextick-args":19,"util-deprecate":20}],18:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -4001,26 +4717,119 @@ exports.isBuffer = isBuffer;
 function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
-}).call(this,require("buffer").Buffer)
-},{"buffer":2}],17:[function(require,module,exports){
+}).call(this,{"isBuffer":require("../../../../insert-module-globals/node_modules/is-buffer/index.js")})
+},{"../../../../insert-module-globals/node_modules/is-buffer/index.js":8}],19:[function(require,module,exports){
+(function (process){
+'use strict';
+module.exports = nextTick;
+
+function nextTick(fn) {
+  var args = new Array(arguments.length - 1);
+  var i = 0;
+  while (i < args.length) {
+    args[i++] = arguments[i];
+  }
+  process.nextTick(function afterTick() {
+    fn.apply(null, args);
+  });
+}
+
+}).call(this,require('_process'))
+},{"_process":10}],20:[function(require,module,exports){
+(function (global){
+
+/**
+ * Module exports.
+ */
+
+module.exports = deprecate;
+
+/**
+ * Mark that a method should not be used.
+ * Returns a modified function which warns once by default.
+ *
+ * If `localStorage.noDeprecation = true` is set, then it is a no-op.
+ *
+ * If `localStorage.throwDeprecation = true` is set, then deprecated functions
+ * will throw an Error when invoked.
+ *
+ * If `localStorage.traceDeprecation = true` is set, then deprecated functions
+ * will invoke `console.trace()` instead of `console.error()`.
+ *
+ * @param {Function} fn - the function to deprecate
+ * @param {String} msg - the string to print to the console when `fn` is invoked
+ * @returns {Function} a new "deprecated" version of `fn`
+ * @api public
+ */
+
+function deprecate (fn, msg) {
+  if (config('noDeprecation')) {
+    return fn;
+  }
+
+  var warned = false;
+  function deprecated() {
+    if (!warned) {
+      if (config('throwDeprecation')) {
+        throw new Error(msg);
+      } else if (config('traceDeprecation')) {
+        console.trace(msg);
+      } else {
+        console.warn(msg);
+      }
+      warned = true;
+    }
+    return fn.apply(this, arguments);
+  }
+
+  return deprecated;
+}
+
+/**
+ * Checks `localStorage` for boolean values for the given `name`.
+ *
+ * @param {String} name
+ * @returns {Boolean}
+ * @api private
+ */
+
+function config (name) {
+  // accessing global.localStorage can trigger a DOMException in sandboxed iframes
+  try {
+    if (!global.localStorage) return false;
+  } catch (_) {
+    return false;
+  }
+  var val = global.localStorage[name];
+  if (null == val) return false;
+  return String(val).toLowerCase() === 'true';
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],21:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":12}],18:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":14}],22:[function(require,module,exports){
+var Stream = (function (){
+  try {
+    return require('st' + 'ream'); // hack to fix a circular dependency issue when used with browserify
+  } catch(_){}
+}());
 exports = module.exports = require('./lib/_stream_readable.js');
-exports.Stream = require('stream');
+exports.Stream = Stream || exports;
 exports.Readable = exports;
 exports.Writable = require('./lib/_stream_writable.js');
 exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":11,"./lib/_stream_passthrough.js":12,"./lib/_stream_readable.js":13,"./lib/_stream_transform.js":14,"./lib/_stream_writable.js":15,"stream":21}],19:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":13,"./lib/_stream_passthrough.js":14,"./lib/_stream_readable.js":15,"./lib/_stream_transform.js":16,"./lib/_stream_writable.js":17}],23:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":14}],20:[function(require,module,exports){
+},{"./lib/_stream_transform.js":16}],24:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":15}],21:[function(require,module,exports){
+},{"./lib/_stream_writable.js":17}],25:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4149,7 +4958,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":6,"inherits":7,"readable-stream/duplex.js":10,"readable-stream/passthrough.js":17,"readable-stream/readable.js":18,"readable-stream/transform.js":19,"readable-stream/writable.js":20}],22:[function(require,module,exports){
+},{"events":6,"inherits":7,"readable-stream/duplex.js":12,"readable-stream/passthrough.js":21,"readable-stream/readable.js":22,"readable-stream/transform.js":23,"readable-stream/writable.js":24}],26:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4372,14 +5181,14 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":2}],23:[function(require,module,exports){
+},{"buffer":2}],27:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],24:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -4969,7 +5778,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":23,"_process":9,"inherits":7}],25:[function(require,module,exports){
+},{"./support/isBuffer":27,"_process":10,"inherits":7}],29:[function(require,module,exports){
 var util = require('util');
 var intersect = require('intersect');
 var WildEmitter = require('wildemitter');
@@ -5383,7 +6192,7 @@ SessionManager.prototype.process = function (req) {
 
 module.exports = SessionManager;
 
-},{"intersect":27,"jingle-filetransfer-session":28,"jingle-media-session":79,"jingle-session":111,"util":24,"webrtcsupport":115,"wildemitter":116}],26:[function(require,module,exports){
+},{"intersect":31,"jingle-filetransfer-session":32,"jingle-media-session":86,"jingle-session":118,"util":28,"webrtcsupport":123,"wildemitter":124}],30:[function(require,module,exports){
 var arr = [];
 var each = arr.forEach;
 var slice = arr.slice;
@@ -5400,7 +6209,7 @@ module.exports = function(obj) {
     return obj;
 };
 
-},{}],27:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 module.exports = intersect;
 
 function intersect (a, b) {
@@ -5432,7 +6241,7 @@ function indexOf(arr, el) {
   return -1;
 }
 
-},{}],28:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 var util = require('util');
 var extend = require('extend-object');
 var BaseSession = require('jingle-session');
@@ -5696,7 +6505,7 @@ FileTransferSession.prototype = extend(FileTransferSession.prototype, {
 
 module.exports = FileTransferSession;
 
-},{"extend-object":26,"filetransfer/hashed":30,"jingle-session":111,"rtcpeerconnection":78,"util":24}],29:[function(require,module,exports){
+},{"extend-object":30,"filetransfer/hashed":34,"jingle-session":118,"rtcpeerconnection":85,"util":28}],33:[function(require,module,exports){
 var WildEmitter = require('wildemitter');
 var util = require('util');
 
@@ -5784,7 +6593,7 @@ module.exports.support = typeof window !== 'undefined' && window && window.File 
 module.exports.Sender = Sender;
 module.exports.Receiver = Receiver;
 
-},{"util":24,"wildemitter":116}],30:[function(require,module,exports){
+},{"util":28,"wildemitter":53}],34:[function(require,module,exports){
 var WildEmitter = require('wildemitter');
 var util = require('util');
 var hashes = require('iana-hashes');
@@ -5857,7 +6666,7 @@ module.exports.support = base.support;
 module.exports.Sender = Sender;
 module.exports.Receiver = Receiver;
 
-},{"./filetransfer":29,"iana-hashes":31,"util":24,"wildemitter":116}],31:[function(require,module,exports){
+},{"./filetransfer":33,"iana-hashes":35,"util":28,"wildemitter":53}],35:[function(require,module,exports){
 var createHash = require('create-hash');
 var createHmac = require('create-hmac');
 var getHashes = require('./lib/get-hashes');
@@ -5902,12 +6711,12 @@ exports.createHmac = function (algorithm, key) {
     return createHmac(algorithm, key);
 };
 
-},{"./lib/get-hashes":32,"create-hash":33,"create-hmac":46}],32:[function(require,module,exports){
+},{"./lib/get-hashes":36,"create-hash":37,"create-hmac":51}],36:[function(require,module,exports){
 module.exports = function () {
     return ['sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'md5', 'rmd160'];
 };
 
-},{}],33:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var inherits = require('inherits')
@@ -5915,92 +6724,55 @@ var md5 = require('./md5')
 var rmd160 = require('ripemd160')
 var sha = require('sha.js')
 
-var Transform = require('stream').Transform
+var Base = require('cipher-base')
 
 function HashNoConstructor(hash) {
-  Transform.call(this)
+  Base.call(this, 'digest')
 
   this._hash = hash
   this.buffers = []
 }
 
-inherits(HashNoConstructor, Transform)
+inherits(HashNoConstructor, Base)
 
-HashNoConstructor.prototype._transform = function (data, _, next) {
+HashNoConstructor.prototype._update = function (data) {
   this.buffers.push(data)
-
-  next()
 }
 
-HashNoConstructor.prototype._flush = function (next) {
-  this.push(this.digest())
-  next()
-}
-
-HashNoConstructor.prototype.update = function (data, enc) {
-  if (typeof data === 'string') {
-    data = new Buffer(data, enc)
-  }
-
-  this.buffers.push(data)
-  return this
-}
-
-HashNoConstructor.prototype.digest = function (enc) {
+HashNoConstructor.prototype._final = function () {
   var buf = Buffer.concat(this.buffers)
   var r = this._hash(buf)
   this.buffers = null
 
-  return enc ? r.toString(enc) : r
+  return r
 }
 
 function Hash(hash) {
-  Transform.call(this)
+  Base.call(this, 'digest')
 
   this._hash = hash
 }
 
-inherits(Hash, Transform)
+inherits(Hash, Base)
 
-Hash.prototype._transform = function (data, enc, next) {
-  if (enc) data = new Buffer(data, enc)
-
+Hash.prototype._update = function (data) {
   this._hash.update(data)
-
-  next()
 }
 
-Hash.prototype._flush = function (next) {
-  this.push(this._hash.digest())
-  this._hash = null
-
-  next()
-}
-
-Hash.prototype.update = function (data, enc) {
-  if (typeof data === 'string') {
-    data = new Buffer(data, enc)
-  }
-
-  this._hash.update(data)
-  return this
-}
-
-Hash.prototype.digest = function (enc) {
-  var outData = this._hash.digest()
-
-  return enc ? outData.toString(enc) : outData
+Hash.prototype._final = function () {
+  return this._hash.digest()
 }
 
 module.exports = function createHash (alg) {
+  alg = alg.toLowerCase()
   if ('md5' === alg) return new HashNoConstructor(md5)
-  if ('rmd160' === alg) return new HashNoConstructor(rmd160)
+  if ('rmd160' === alg || 'ripemd160' === alg) return new HashNoConstructor(rmd160)
 
   return new Hash(sha(alg))
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./md5":35,"buffer":2,"inherits":36,"ripemd160":37,"sha.js":39,"stream":21}],34:[function(require,module,exports){
+},{"./md5":39,"buffer":2,"cipher-base":40,"inherits":41,"ripemd160":42,"sha.js":44}],38:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var intSize = 4;
@@ -6037,7 +6809,7 @@ function hash(buf, fn, hashSize, bigEndian) {
 }
 exports.hash = hash;
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],35:[function(require,module,exports){
+},{"buffer":2}],39:[function(require,module,exports){
 'use strict';
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
@@ -6194,9 +6966,103 @@ function bit_rol(num, cnt)
 module.exports = function md5(buf) {
   return helpers.hash(buf, core_md5, 16);
 };
-},{"./helpers":34}],36:[function(require,module,exports){
+},{"./helpers":38}],40:[function(require,module,exports){
+(function (Buffer){
+var Transform = require('stream').Transform
+var inherits = require('inherits')
+var StringDecoder = require('string_decoder').StringDecoder
+module.exports = CipherBase
+inherits(CipherBase, Transform)
+function CipherBase (hashMode) {
+  Transform.call(this)
+  this.hashMode = typeof hashMode === 'string'
+  if (this.hashMode) {
+    this[hashMode] = this._finalOrDigest
+  } else {
+    this.final = this._finalOrDigest
+  }
+  this._decoder = null
+  this._encoding = null
+}
+CipherBase.prototype.update = function (data, inputEnc, outputEnc) {
+  if (typeof data === 'string') {
+    data = new Buffer(data, inputEnc)
+  }
+  var outData = this._update(data)
+  if (this.hashMode) {
+    return this
+  }
+  if (outputEnc) {
+    outData = this._toString(outData, outputEnc)
+  }
+  return outData
+}
+
+CipherBase.prototype.setAutoPadding = function () {}
+
+CipherBase.prototype.getAuthTag = function () {
+  throw new Error('trying to get auth tag in unsupported state')
+}
+
+CipherBase.prototype.setAuthTag = function () {
+  throw new Error('trying to set auth tag in unsupported state')
+}
+
+CipherBase.prototype.setAAD = function () {
+  throw new Error('trying to set aad in unsupported state')
+}
+
+CipherBase.prototype._transform = function (data, _, next) {
+  var err
+  try {
+    if (this.hashMode) {
+      this._update(data)
+    } else {
+      this.push(this._update(data))
+    }
+  } catch (e) {
+    err = e
+  } finally {
+    next(err)
+  }
+}
+CipherBase.prototype._flush = function (done) {
+  var err
+  try {
+    this.push(this._final())
+  } catch (e) {
+    err = e
+  } finally {
+    done(err)
+  }
+}
+CipherBase.prototype._finalOrDigest = function (outputEnc) {
+  var outData = this._final() || new Buffer('')
+  if (outputEnc) {
+    outData = this._toString(outData, outputEnc, true)
+  }
+  return outData
+}
+
+CipherBase.prototype._toString = function (value, enc, final) {
+  if (!this._decoder) {
+    this._decoder = new StringDecoder(enc)
+    this._encoding = enc
+  }
+  if (this._encoding !== enc) {
+    throw new Error('can\'t switch encodings')
+  }
+  var out = this._decoder.write(value)
+  if (final) {
+    out += this._decoder.end()
+  }
+  return out
+}
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":2,"inherits":41,"stream":25,"string_decoder":26}],41:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],37:[function(require,module,exports){
+},{"dup":7}],42:[function(require,module,exports){
 (function (Buffer){
 /*
 CryptoJS v3.1.2
@@ -6410,7 +7276,7 @@ function ripemd160 (message) {
 module.exports = ripemd160
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],38:[function(require,module,exports){
+},{"buffer":2}],43:[function(require,module,exports){
 (function (Buffer){
 // prototype class for hash functions
 function Hash (blockSize, finalSize) {
@@ -6483,7 +7349,7 @@ Hash.prototype._update = function () {
 module.exports = Hash
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],39:[function(require,module,exports){
+},{"buffer":2}],44:[function(require,module,exports){
 var exports = module.exports = function SHA (algorithm) {
   algorithm = algorithm.toLowerCase()
 
@@ -6500,7 +7366,7 @@ exports.sha256 = require('./sha256')
 exports.sha384 = require('./sha384')
 exports.sha512 = require('./sha512')
 
-},{"./sha":40,"./sha1":41,"./sha224":42,"./sha256":43,"./sha384":44,"./sha512":45}],40:[function(require,module,exports){
+},{"./sha":45,"./sha1":46,"./sha224":47,"./sha256":48,"./sha384":49,"./sha512":50}],45:[function(require,module,exports){
 (function (Buffer){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-0, as defined
@@ -6550,7 +7416,8 @@ Sha.prototype._update = function (M) {
   var d = this._d
   var e = this._e
 
-  var j = 0, k
+  var j = 0
+  var k
 
   /*
    * SHA-1 has a bitwise rotate left operation. But, SHA is not
@@ -6603,7 +7470,7 @@ module.exports = Sha
 
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":38,"buffer":2,"inherits":36}],41:[function(require,module,exports){
+},{"./hash":43,"buffer":2,"inherits":41}],46:[function(require,module,exports){
 (function (Buffer){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
@@ -6654,7 +7521,8 @@ Sha1.prototype._update = function (M) {
   var d = this._d
   var e = this._e
 
-  var j = 0, k
+  var j = 0
+  var k
 
   function calcW () { return rol(W[j - 3] ^ W[j - 8] ^ W[j - 14] ^ W[j - 16], 1) }
   function loop (w, f) {
@@ -6702,7 +7570,7 @@ Sha1.prototype._hash = function () {
 module.exports = Sha1
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":38,"buffer":2,"inherits":36}],42:[function(require,module,exports){
+},{"./hash":43,"buffer":2,"inherits":41}],47:[function(require,module,exports){
 (function (Buffer){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -6758,7 +7626,7 @@ Sha224.prototype._hash = function () {
 module.exports = Sha224
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":38,"./sha256":43,"buffer":2,"inherits":36}],43:[function(require,module,exports){
+},{"./hash":43,"./sha256":48,"buffer":2,"inherits":41}],48:[function(require,module,exports){
 (function (Buffer){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -6815,36 +7683,28 @@ Sha256.prototype.init = function () {
   return this
 }
 
-function S (X, n) {
-  return (X >>> n) | (X << (32 - n))
-}
-
-function R (X, n) {
-  return (X >>> n)
-}
-
 function Ch (x, y, z) {
-  return ((x & y) ^ ((~x) & z))
+  return z ^ (x & (y ^ z))
 }
 
 function Maj (x, y, z) {
-  return ((x & y) ^ (x & z) ^ (y & z))
+  return (x & y) | (z & (x | y))
 }
 
-function Sigma0256 (x) {
-  return (S(x, 2) ^ S(x, 13) ^ S(x, 22))
+function Sigma0 (x) {
+  return (x >>> 2 | x << 30) ^ (x >>> 13 | x << 19) ^ (x >>> 22 | x << 10)
 }
 
-function Sigma1256 (x) {
-  return (S(x, 6) ^ S(x, 11) ^ S(x, 25))
+function Sigma1 (x) {
+  return (x >>> 6 | x << 26) ^ (x >>> 11 | x << 21) ^ (x >>> 25 | x << 7)
 }
 
-function Gamma0256 (x) {
-  return (S(x, 7) ^ S(x, 18) ^ R(x, 3))
+function Gamma0 (x) {
+  return (x >>> 7 | x << 25) ^ (x >>> 18 | x << 14) ^ (x >>> 3)
 }
 
-function Gamma1256 (x) {
-  return (S(x, 17) ^ S(x, 19) ^ R(x, 10))
+function Gamma1 (x) {
+  return (x >>> 17 | x << 15) ^ (x >>> 19 | x << 13) ^ (x >>> 10)
 }
 
 Sha256.prototype._update = function (M) {
@@ -6861,12 +7721,12 @@ Sha256.prototype._update = function (M) {
 
   var j = 0
 
-  function calcW () { return Gamma1256(W[j - 2]) + W[j - 7] + Gamma0256(W[j - 15]) + W[j - 16] }
+  function calcW () { return Gamma1(W[j - 2]) + W[j - 7] + Gamma0(W[j - 15]) + W[j - 16] }
   function loop (w) {
     W[j] = w
 
-    var T1 = h + Sigma1256(e) + Ch(e, f, g) + K[j] + w
-    var T2 = Sigma0256(a) + Maj(a, b, c)
+    var T1 = h + Sigma1(e) + Ch(e, f, g) + K[j] + w
+    var T2 = Sigma0(a) + Maj(a, b, c)
 
     h = g
     g = f
@@ -6911,7 +7771,7 @@ Sha256.prototype._hash = function () {
 module.exports = Sha256
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":38,"buffer":2,"inherits":36}],44:[function(require,module,exports){
+},{"./hash":43,"buffer":2,"inherits":41}],49:[function(require,module,exports){
 (function (Buffer){
 var inherits = require('inherits')
 var SHA512 = require('./sha512')
@@ -6971,7 +7831,7 @@ Sha384.prototype._hash = function () {
 module.exports = Sha384
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":38,"./sha512":45,"buffer":2,"inherits":36}],45:[function(require,module,exports){
+},{"./hash":43,"./sha512":50,"buffer":2,"inherits":41}],50:[function(require,module,exports){
 (function (Buffer){
 var inherits = require('inherits')
 var Hash = require('./hash')
@@ -7052,16 +7912,36 @@ Sha512.prototype.init = function () {
   return this
 }
 
-function S (X, Xl, n) {
-  return (X >>> n) | (Xl << (32 - n))
-}
-
 function Ch (x, y, z) {
-  return ((x & y) ^ ((~x) & z))
+  return z ^ (x & (y ^ z))
 }
 
 function Maj (x, y, z) {
-  return ((x & y) ^ (x & z) ^ (y & z))
+  return (x & y) | (z & (x | y))
+}
+
+function Sigma0 (x, xl) {
+  return (x >>> 28 | xl << 4) ^ (xl >>> 2 | x << 30) ^ (xl >>> 7 | x << 25)
+}
+
+function Sigma1 (x, xl) {
+  return (x >>> 14 | xl << 18) ^ (x >>> 18 | xl << 14) ^ (xl >>> 9 | x << 23)
+}
+
+function Gamma0 (x, xl) {
+  return (x >>> 1 | xl << 31) ^ (x >>> 8 | xl << 24) ^ (x >>> 7)
+}
+
+function Gamma0l (x, xl) {
+  return (x >>> 1 | xl << 31) ^ (x >>> 8 | xl << 24) ^ (x >>> 7 | xl << 25)
+}
+
+function Gamma1 (x, xl) {
+  return (x >>> 19 | xl << 13) ^ (xl >>> 29 | x << 3) ^ (x >>> 6)
+}
+
+function Gamma1l (x, xl) {
+  return (x >>> 19 | xl << 13) ^ (xl >>> 29 | x << 3) ^ (x >>> 6 | xl << 26)
 }
 
 Sha512.prototype._update = function (M) {
@@ -7085,18 +7965,19 @@ Sha512.prototype._update = function (M) {
   var gl = this._gl | 0
   var hl = this._hl | 0
 
-  var i = 0, j = 0
+  var i = 0
+  var j = 0
   var Wi, Wil
   function calcW () {
     var x = W[j - 15 * 2]
     var xl = W[j - 15 * 2 + 1]
-    var gamma0 = S(x, xl, 1) ^ S(x, xl, 8) ^ (x >>> 7)
-    var gamma0l = S(xl, x, 1) ^ S(xl, x, 8) ^ S(xl, x, 7)
+    var gamma0 = Gamma0(x, xl)
+    var gamma0l = Gamma0l(xl, x)
 
     x = W[j - 2 * 2]
     xl = W[j - 2 * 2 + 1]
-    var gamma1 = S(x, xl, 19) ^ S(xl, x, 29) ^ (x >>> 6)
-    var gamma1l = S(xl, x, 19) ^ S(x, xl, 29) ^ S(xl, x, 6)
+    var gamma1 = Gamma1(x, xl)
+    var gamma1l = Gamma1l(xl, x)
 
     // W[i] = gamma0 + W[i - 7] + gamma1 + W[i - 16]
     var Wi7 = W[j - 7 * 2]
@@ -7120,10 +8001,10 @@ Sha512.prototype._update = function (M) {
     var maj = Maj(a, b, c)
     var majl = Maj(al, bl, cl)
 
-    var sigma0h = S(a, al, 28) ^ S(al, a, 2) ^ S(al, a, 7)
-    var sigma0l = S(al, a, 28) ^ S(a, al, 2) ^ S(a, al, 7)
-    var sigma1h = S(e, el, 14) ^ S(e, el, 18) ^ S(el, e, 9)
-    var sigma1l = S(el, e, 14) ^ S(el, e, 18) ^ S(e, el, 9)
+    var sigma0h = Sigma0(a, al)
+    var sigma0l = Sigma0(al, a)
+    var sigma1h = Sigma1(e, el)
+    var sigma1l = Sigma1(el, e)
 
     // t1 = h + sigma1 + ch + K[i] + W[i]
     var Ki = K[j]
@@ -7220,7 +8101,7 @@ Sha512.prototype._hash = function () {
 module.exports = Sha512
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":38,"buffer":2,"inherits":36}],46:[function(require,module,exports){
+},{"./hash":43,"buffer":2,"inherits":41}],51:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var createHash = require('create-hash/browser');
@@ -7233,7 +8114,7 @@ ZEROS.fill(0)
 
 function Hmac(alg, key) {
   Transform.call(this)
-
+  alg = alg.toLowerCase()
   if (typeof key === 'string') {
     key = new Buffer(key)
   }
@@ -7292,9 +8173,164 @@ module.exports = function createHmac(alg, key) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"create-hash/browser":33,"inherits":47,"stream":21}],47:[function(require,module,exports){
+},{"buffer":2,"create-hash/browser":37,"inherits":52,"stream":25}],52:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],48:[function(require,module,exports){
+},{"dup":7}],53:[function(require,module,exports){
+/*
+WildEmitter.js is a slim little event emitter by @henrikjoreteg largely based
+on @visionmedia's Emitter from UI Kit.
+
+Why? I wanted it standalone.
+
+I also wanted support for wildcard emitters like this:
+
+emitter.on('*', function (eventName, other, event, payloads) {
+
+});
+
+emitter.on('somenamespace*', function (eventName, payloads) {
+
+});
+
+Please note that callbacks triggered by wildcard registered events also get
+the event name as the first argument.
+*/
+
+module.exports = WildEmitter;
+
+function WildEmitter() { }
+
+WildEmitter.mixin = function (constructor) {
+    var prototype = constructor.prototype || constructor;
+
+    prototype.isWildEmitter= true;
+
+    // Listen on the given `event` with `fn`. Store a group name if present.
+    prototype.on = function (event, groupName, fn) {
+        this.callbacks = this.callbacks || {};
+        var hasGroup = (arguments.length === 3),
+            group = hasGroup ? arguments[1] : undefined,
+            func = hasGroup ? arguments[2] : arguments[1];
+        func._groupName = group;
+        (this.callbacks[event] = this.callbacks[event] || []).push(func);
+        return this;
+    };
+
+    // Adds an `event` listener that will be invoked a single
+    // time then automatically removed.
+    prototype.once = function (event, groupName, fn) {
+        var self = this,
+            hasGroup = (arguments.length === 3),
+            group = hasGroup ? arguments[1] : undefined,
+            func = hasGroup ? arguments[2] : arguments[1];
+        function on() {
+            self.off(event, on);
+            func.apply(this, arguments);
+        }
+        this.on(event, group, on);
+        return this;
+    };
+
+    // Unbinds an entire group
+    prototype.releaseGroup = function (groupName) {
+        this.callbacks = this.callbacks || {};
+        var item, i, len, handlers;
+        for (item in this.callbacks) {
+            handlers = this.callbacks[item];
+            for (i = 0, len = handlers.length; i < len; i++) {
+                if (handlers[i]._groupName === groupName) {
+                    //console.log('removing');
+                    // remove it and shorten the array we're looping through
+                    handlers.splice(i, 1);
+                    i--;
+                    len--;
+                }
+            }
+        }
+        return this;
+    };
+
+    // Remove the given callback for `event` or all
+    // registered callbacks.
+    prototype.off = function (event, fn) {
+        this.callbacks = this.callbacks || {};
+        var callbacks = this.callbacks[event],
+            i;
+
+        if (!callbacks) return this;
+
+        // remove all handlers
+        if (arguments.length === 1) {
+            delete this.callbacks[event];
+            return this;
+        }
+
+        // remove specific handler
+        i = callbacks.indexOf(fn);
+        callbacks.splice(i, 1);
+        if (callbacks.length === 0) {
+            delete this.callbacks[event];
+        }
+        return this;
+    };
+
+    /// Emit `event` with the given args.
+    // also calls any `*` handlers
+    prototype.emit = function (event) {
+        this.callbacks = this.callbacks || {};
+        var args = [].slice.call(arguments, 1),
+            callbacks = this.callbacks[event],
+            specialCallbacks = this.getWildcardCallbacks(event),
+            i,
+            len,
+            item,
+            listeners;
+
+        if (callbacks) {
+            listeners = callbacks.slice();
+            for (i = 0, len = listeners.length; i < len; ++i) {
+                if (!listeners[i]) {
+                    break;
+                }
+                listeners[i].apply(this, args);
+            }
+        }
+
+        if (specialCallbacks) {
+            len = specialCallbacks.length;
+            listeners = specialCallbacks.slice();
+            for (i = 0, len = listeners.length; i < len; ++i) {
+                if (!listeners[i]) {
+                    break;
+                }
+                listeners[i].apply(this, [event].concat(args));
+            }
+        }
+
+        return this;
+    };
+
+    // Helper for for finding special wildcard event handlers that match the event
+    prototype.getWildcardCallbacks = function (eventName) {
+        this.callbacks = this.callbacks || {};
+        var item,
+            split,
+            result = [];
+
+        for (item in this.callbacks) {
+            split = item.split('*');
+            if (item === '*' || (split.length === 2 && eventName.slice(0, split[0].length) === split[0])) {
+                result = result.concat(this.callbacks[item]);
+            }
+        }
+        return result;
+    };
+
+};
+
+WildEmitter.mixin(WildEmitter);
+
+},{}],54:[function(require,module,exports){
 /**
  * lodash 3.0.3 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -7358,7 +8394,7 @@ var forEach = createForEach(arrayEach, baseEach);
 
 module.exports = forEach;
 
-},{"lodash._arrayeach":49,"lodash._baseeach":50,"lodash._bindcallback":54,"lodash.isarray":55}],49:[function(require,module,exports){
+},{"lodash._arrayeach":55,"lodash._baseeach":56,"lodash._bindcallback":60,"lodash.isarray":61}],55:[function(require,module,exports){
 /**
  * lodash 3.0.0 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -7391,7 +8427,7 @@ function arrayEach(array, iteratee) {
 
 module.exports = arrayEach;
 
-},{}],50:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 /**
  * lodash 3.0.4 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -7574,7 +8610,7 @@ function isObject(value) {
 
 module.exports = baseEach;
 
-},{"lodash.keys":51}],51:[function(require,module,exports){
+},{"lodash.keys":57}],57:[function(require,module,exports){
 /**
  * lodash 3.1.2 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -7812,7 +8848,7 @@ function keysIn(object) {
 
 module.exports = keys;
 
-},{"lodash._getnative":52,"lodash.isarguments":53,"lodash.isarray":55}],52:[function(require,module,exports){
+},{"lodash._getnative":58,"lodash.isarguments":59,"lodash.isarray":61}],58:[function(require,module,exports){
 /**
  * lodash 3.9.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -7951,7 +8987,7 @@ function isNative(value) {
 
 module.exports = getNative;
 
-},{}],53:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 /**
  * lodash 3.0.4 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -8059,7 +9095,7 @@ function isArguments(value) {
 
 module.exports = isArguments;
 
-},{}],54:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 /**
  * lodash 3.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -8126,7 +9162,7 @@ function identity(value) {
 
 module.exports = bindCallback;
 
-},{}],55:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 /**
  * lodash 3.0.4 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -8308,7 +9344,7 @@ function isNative(value) {
 
 module.exports = isArray;
 
-},{}],56:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 /**
  * lodash 3.1.2 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -8467,7 +9503,7 @@ function property(path) {
 
 module.exports = pluck;
 
-},{"lodash._baseget":57,"lodash._topath":58,"lodash.isarray":59,"lodash.map":60}],57:[function(require,module,exports){
+},{"lodash._baseget":63,"lodash._topath":64,"lodash.isarray":65,"lodash.map":66}],63:[function(require,module,exports){
 /**
  * lodash 3.7.2 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -8543,7 +9579,7 @@ function isObject(value) {
 
 module.exports = baseGet;
 
-},{}],58:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 /**
  * lodash 3.8.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -8592,9 +9628,9 @@ function toPath(value) {
 
 module.exports = toPath;
 
-},{"lodash.isarray":59}],59:[function(require,module,exports){
-arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],60:[function(require,module,exports){
+},{"lodash.isarray":65}],65:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"dup":61}],66:[function(require,module,exports){
 /**
  * lodash 3.1.4 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -8746,7 +9782,7 @@ function map(collection, iteratee, thisArg) {
 
 module.exports = map;
 
-},{"lodash._arraymap":61,"lodash._basecallback":62,"lodash._baseeach":67,"lodash.isarray":59}],61:[function(require,module,exports){
+},{"lodash._arraymap":67,"lodash._basecallback":68,"lodash._baseeach":73,"lodash.isarray":65}],67:[function(require,module,exports){
 /**
  * lodash 3.0.0 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -8778,7 +9814,7 @@ function arrayMap(array, iteratee) {
 
 module.exports = arrayMap;
 
-},{}],62:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 /**
  * lodash 3.3.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -9202,7 +10238,7 @@ function property(path) {
 
 module.exports = baseCallback;
 
-},{"lodash._baseisequal":63,"lodash._bindcallback":65,"lodash.isarray":59,"lodash.pairs":66}],63:[function(require,module,exports){
+},{"lodash._baseisequal":69,"lodash._bindcallback":71,"lodash.isarray":65,"lodash.pairs":72}],69:[function(require,module,exports){
 /**
  * lodash 3.0.7 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -9546,7 +10582,7 @@ function isObject(value) {
 
 module.exports = baseIsEqual;
 
-},{"lodash.isarray":59,"lodash.istypedarray":64,"lodash.keys":68}],64:[function(require,module,exports){
+},{"lodash.isarray":65,"lodash.istypedarray":70,"lodash.keys":74}],70:[function(require,module,exports){
 /**
  * lodash 3.0.2 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -9658,9 +10694,9 @@ function isTypedArray(value) {
 
 module.exports = isTypedArray;
 
-},{}],65:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],66:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
+arguments[4][60][0].apply(exports,arguments)
+},{"dup":60}],72:[function(require,module,exports){
 /**
  * lodash 3.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -9740,15 +10776,15 @@ function pairs(object) {
 
 module.exports = pairs;
 
-},{"lodash.keys":68}],67:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50,"lodash.keys":68}],68:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51,"lodash._getnative":69,"lodash.isarguments":70,"lodash.isarray":59}],69:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"dup":52}],70:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],71:[function(require,module,exports){
+},{"lodash.keys":74}],73:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"dup":56,"lodash.keys":74}],74:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"dup":57,"lodash._getnative":75,"lodash.isarguments":76,"lodash.isarray":65}],75:[function(require,module,exports){
+arguments[4][58][0].apply(exports,arguments)
+},{"dup":58}],76:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"dup":59}],77:[function(require,module,exports){
 var toSDP = require('./lib/tosdp');
 var toJSON = require('./lib/tojson');
 
@@ -9870,7 +10906,7 @@ exports.toCandidateJSON = toJSON.toCandidateJSON;
 exports.toMediaJSON = toJSON.toMediaJSON;
 exports.toSessionJSON = toJSON.toSessionJSON;
 
-},{"./lib/tojson":74,"./lib/tosdp":75}],72:[function(require,module,exports){
+},{"./lib/tojson":80,"./lib/tosdp":81}],78:[function(require,module,exports){
 exports.lines = function (sdp) {
     return sdp.split('\r\n').filter(function (line) {
         return line.length > 0;
@@ -10141,7 +11177,7 @@ exports.msid = function (line) {
     };
 };
 
-},{}],73:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 module.exports = {
     initiator: {
         incoming: {
@@ -10189,7 +11225,7 @@ module.exports = {
     }
 };
 
-},{}],74:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 var SENDERS = require('./senders');
 var parsers = require('./parsers');
 var idCounter = Math.random();
@@ -10413,7 +11449,7 @@ exports.toCandidateJSON = function (line) {
     return candidate;
 };
 
-},{"./parsers":72,"./senders":73}],75:[function(require,module,exports){
+},{"./parsers":78,"./senders":79}],81:[function(require,module,exports){
 var SENDERS = require('./senders');
 
 
@@ -10427,7 +11463,8 @@ exports.toSessionSDP = function (session, opts) {
         'v=0',
         'o=- ' + sid + ' ' + time + ' IN IP4 0.0.0.0',
         's=-',
-        't=0 0'
+        't=0 0',
+        'a=msid-semantic: WMS *'
     ];
 
     var groups = session.groups || [];
@@ -10637,7 +11674,7 @@ exports.toCandidateSDP = function (candidate) {
     return 'a=candidate:' + sdp.join(' ');
 };
 
-},{"./senders":73}],76:[function(require,module,exports){
+},{"./senders":79}],82:[function(require,module,exports){
 // based on https://github.com/ESTOS/strophe.jingle/
 // adds wildemitter support
 var util = require('util');
@@ -10845,12 +11882,12 @@ TraceablePeerConnection.prototype.addIceCandidate = function (candidate, success
 };
 
 TraceablePeerConnection.prototype.getStats = function () {
-    this.peerconnection.getStats.apply(this.pc, arguments);
+    this.peerconnection.getStats.apply(this.peerconnection, arguments);
 };
 
 module.exports = TraceablePeerConnection;
 
-},{"util":24,"webrtc-adapter-test":77,"wildemitter":116}],77:[function(require,module,exports){
+},{"util":28,"webrtc-adapter-test":83,"wildemitter":84}],83:[function(require,module,exports){
 /*
  *  Copyright (c) 2014 The WebRTC project authors. All Rights Reserved.
  *
@@ -10878,10 +11915,15 @@ var webrtcMinimumVersion = null;
 var webrtcUtils = {
   log: function() {
     // suppress console.log output when being included as a module.
-    if (!(typeof module !== 'undefined' ||
-        typeof require === 'function') && (typeof define === 'function')) {
-      console.log.apply(console, arguments);
+    if (typeof module !== 'undefined' ||
+        typeof require === 'function' && typeof define === 'function') {
+      return;
     }
+    console.log.apply(console, arguments);
+  },
+  extractVersion: function(uastring, expr, pos) {
+    var match = uastring.match(expr);
+    return match && match.length >= pos && parseInt(match[pos]);
   }
 };
 
@@ -10898,17 +11940,52 @@ function trace(text) {
   }
 }
 
+if (typeof window === 'object') {
+  if (window.HTMLMediaElement &&
+    !('srcObject' in window.HTMLMediaElement.prototype)) {
+    // Shim the srcObject property, once, when HTMLMediaElement is found.
+    Object.defineProperty(window.HTMLMediaElement.prototype, 'srcObject', {
+      get: function() {
+        // If prefixed srcObject property exists, return it.
+        // Otherwise use the shimmed property, _srcObject
+        return 'mozSrcObject' in this ? this.mozSrcObject : this._srcObject;
+      },
+      set: function(stream) {
+        if ('mozSrcObject' in this) {
+          this.mozSrcObject = stream;
+        } else {
+          // Use _srcObject as a private property for this shim
+          this._srcObject = stream;
+          // TODO: revokeObjectUrl(this.src) when !stream to release resources?
+          this.src = URL.createObjectURL(stream);
+        }
+      }
+    });
+  }
+  // Proxy existing globals
+  getUserMedia = window.navigator && window.navigator.getUserMedia;
+}
+
+// Attach a media stream to an element.
+attachMediaStream = function(element, stream) {
+  element.srcObject = stream;
+};
+
+reattachMediaStream = function(to, from) {
+  to.srcObject = from.srcObject;
+};
+
 if (typeof window === 'undefined' || !window.navigator) {
   webrtcUtils.log('This does not appear to be a browser');
   webrtcDetectedBrowser = 'not a browser';
-} else if (navigator.mozGetUserMedia) {
+} else if (navigator.mozGetUserMedia && window.mozRTCPeerConnection) {
   webrtcUtils.log('This appears to be Firefox');
 
   webrtcDetectedBrowser = 'firefox';
 
   // the detected firefox version.
-  webrtcDetectedVersion =
-    parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
+  webrtcDetectedVersion = webrtcUtils.extractVersion(navigator.userAgent,
+      /Firefox\/([0-9]+)\./, 1);
 
   // the minimum firefox version still supported by adapter.
   webrtcMinimumVersion = 31;
@@ -10944,10 +12021,14 @@ if (typeof window === 'undefined' || !window.navigator) {
   };
 
   // The RTCSessionDescription object.
-  window.RTCSessionDescription = mozRTCSessionDescription;
+  if (!window.RTCSessionDescription) {
+    window.RTCSessionDescription = mozRTCSessionDescription;
+  }
 
   // The RTCIceCandidate object.
-  window.RTCIceCandidate = mozRTCIceCandidate;
+  if (!window.RTCIceCandidate) {
+    window.RTCIceCandidate = mozRTCIceCandidate;
+  }
 
   // getUserMedia constraints shim.
   getUserMedia = function(constraints, onSuccess, onError) {
@@ -11032,7 +12113,7 @@ if (typeof window === 'undefined' || !window.navigator) {
     var orgEnumerateDevices =
         navigator.mediaDevices.enumerateDevices.bind(navigator.mediaDevices);
     navigator.mediaDevices.enumerateDevices = function() {
-      return orgEnumerateDevices().catch(function(e) {
+      return orgEnumerateDevices().then(undefined, function(e) {
         if (e.name === 'NotFoundError') {
           return [];
         }
@@ -11040,23 +12121,14 @@ if (typeof window === 'undefined' || !window.navigator) {
       });
     };
   }
-  // Attach a media stream to an element.
-  attachMediaStream = function(element, stream) {
-    element.mozSrcObject = stream;
-  };
-
-  reattachMediaStream = function(to, from) {
-    to.mozSrcObject = from.mozSrcObject;
-  };
-
-} else if (navigator.webkitGetUserMedia) {
+} else if (navigator.webkitGetUserMedia && window.webkitRTCPeerConnection) {
   webrtcUtils.log('This appears to be Chrome');
 
   webrtcDetectedBrowser = 'chrome';
 
   // the detected chrome version.
-  webrtcDetectedVersion =
-    parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2], 10);
+  webrtcDetectedVersion = webrtcUtils.extractVersion(navigator.userAgent,
+      /Chrom(e|ium)\/([0-9]+)\./, 2);
 
   // the minimum chrome version still supported by adapter.
   webrtcMinimumVersion = 38;
@@ -11109,7 +12181,14 @@ if (typeof window === 'undefined' || !window.navigator) {
 
       // promise-support
       return new Promise(function(resolve, reject) {
-        origGetStats.apply(self, [resolve, reject]);
+        if (args.length === 1 && selector === null) {
+          origGetStats.apply(self, [
+              function(response) {
+                resolve.apply(null, [fixChromeStats(response)]);
+              }, reject]);
+        } else {
+          origGetStats.apply(self, [resolve, reject]);
+        }
       });
     };
 
@@ -11275,7 +12354,7 @@ if (typeof window === 'undefined' || !window.navigator) {
 
   // Attach a media stream to an element.
   attachMediaStream = function(element, stream) {
-    if (typeof element.srcObject !== 'undefined') {
+    if (webrtcDetectedVersion >= 43) {
       element.srcObject = stream;
     } else if (typeof element.src !== 'undefined') {
       element.src = URL.createObjectURL(stream);
@@ -11283,9 +12362,12 @@ if (typeof window === 'undefined' || !window.navigator) {
       webrtcUtils.log('Error attaching stream to element.');
     }
   };
-
   reattachMediaStream = function(to, from) {
-    to.src = from.src;
+    if (webrtcDetectedVersion >= 43) {
+      to.srcObject = from.srcObject;
+    } else {
+      to.src = from.src;
+    }
   };
 
 } else if (navigator.mediaDevices && navigator.userAgent.match(
@@ -11293,20 +12375,11 @@ if (typeof window === 'undefined' || !window.navigator) {
   webrtcUtils.log('This appears to be Edge');
   webrtcDetectedBrowser = 'edge';
 
-  webrtcDetectedVersion =
-    parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10);
+  webrtcDetectedVersion = webrtcUtils.extractVersion(navigator.userAgent,
+      /Edge\/(\d+).(\d+)$/, 2);
 
   // the minimum version still supported by adapter.
   webrtcMinimumVersion = 12;
-
-  getUserMedia = navigator.getUserMedia;
-
-  attachMediaStream = function(element, stream) {
-    element.srcObject = stream;
-  };
-  reattachMediaStream = function(to, from) {
-    to.srcObject = from.srcObject;
-  };
 } else {
   webrtcUtils.log('Browser does not appear to be WebRTC-capable');
 }
@@ -11319,11 +12392,13 @@ function requestUserMedia(constraints) {
 }
 
 var webrtcTesting = {};
-Object.defineProperty(webrtcTesting, 'version', {
-  set: function(version) {
-    webrtcDetectedVersion = version;
-  }
-});
+try {
+  Object.defineProperty(webrtcTesting, 'version', {
+    set: function(version) {
+      webrtcDetectedVersion = version;
+    }
+  });
+} catch (e) {}
 
 if (typeof module !== 'undefined') {
   var RTCPeerConnection;
@@ -11338,7 +12413,8 @@ if (typeof module !== 'undefined') {
     webrtcDetectedBrowser: webrtcDetectedBrowser,
     webrtcDetectedVersion: webrtcDetectedVersion,
     webrtcMinimumVersion: webrtcMinimumVersion,
-    webrtcTesting: webrtcTesting
+    webrtcTesting: webrtcTesting,
+    webrtcUtils: webrtcUtils
     //requestUserMedia: not exposed on purpose.
     //trace: not exposed on purpose.
   };
@@ -11353,14 +12429,17 @@ if (typeof module !== 'undefined') {
       webrtcDetectedBrowser: webrtcDetectedBrowser,
       webrtcDetectedVersion: webrtcDetectedVersion,
       webrtcMinimumVersion: webrtcMinimumVersion,
-      webrtcTesting: webrtcTesting
+      webrtcTesting: webrtcTesting,
+      webrtcUtils: webrtcUtils
       //requestUserMedia: not exposed on purpose.
       //trace: not exposed on purpose.
     };
   });
 }
 
-},{}],78:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"dup":53}],85:[function(require,module,exports){
 var util = require('util');
 var each = require('lodash.foreach');
 var pluck = require('lodash.pluck');
@@ -12212,7 +13291,7 @@ PeerConnection.prototype.getStats = function (cb) {
 
 module.exports = PeerConnection;
 
-},{"lodash.foreach":48,"lodash.pluck":56,"sdp-jingle-json":71,"traceablepeerconnection":76,"util":24,"webrtc-adapter-test":77,"wildemitter":116}],79:[function(require,module,exports){
+},{"lodash.foreach":54,"lodash.pluck":62,"sdp-jingle-json":77,"traceablepeerconnection":82,"util":28,"webrtc-adapter-test":83,"wildemitter":84}],86:[function(require,module,exports){
 var util = require('util');
 var extend = require('extend-object');
 var BaseSession = require('jingle-session');
@@ -12220,11 +13299,30 @@ var RTCPeerConnection = require('rtcpeerconnection');
 
 
 function filterContentSources(content, stream) {
+    if (content.description.descType !== 'rtp') {
+        return;
+    }
     delete content.transport;
     delete content.description.payloads;
+    delete content.description.headerExtensions;
+    content.description.mux = false;
+
     if (content.description.sources) {
         content.description.sources = content.description.sources.filter(function (source) {
             return stream.id === source.parameters[1].value.split(' ')[0];
+        });
+    }
+    // remove source groups not related to this stream
+    if (content.description.sourceGroups) {
+        content.description.sourceGroups = content.description.sourceGroups.filter(function (group) {
+            var found = false;
+            for (var i = 0; i < content.description.sources.length; i++) {
+                if (content.description.sources[i].ssrc === group.sources[0]) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
         });
     }
 }
@@ -12249,6 +13347,7 @@ function MediaSession(opts) {
     }, opts.constraints || {});
 
     this.pc.on('ice', this.onIceCandidate.bind(this));
+    this.pc.on('endOfCandidates', this.onIceEndOfCandidates.bind(this));
     this.pc.on('iceConnectionStateChange', this.onIceStateChange.bind(this));
     this.pc.on('addStream', this.onAddStream.bind(this));
     this.pc.on('removeStream', this.onRemoveStream.bind(this));
@@ -12293,14 +13392,14 @@ MediaSession.prototype = extend(MediaSession.prototype, {
     // Session control methods
     // ----------------------------------------------------------------
 
-    start: function (constraints, next) {
+    start: function (offerOptions, next) {
         var self = this;
         this.state = 'pending';
 
         next = next || function () {};
 
         this.pc.isInitiator = true;
-        this.pc.offer(constraints, function (err, offer) {
+        this.pc.offer(offerOptions, function (err, offer) {
             if (err) {
                 self._log('error', 'Could not create WebRTC offer', err);
                 return self.end('failed-application', true);
@@ -12308,7 +13407,7 @@ MediaSession.prototype = extend(MediaSession.prototype, {
 
             // a workaround for missing a=sendonly
             // https://code.google.com/p/webrtc/issues/detail?id=1553
-            if (constraints && constraints.mandatory) {
+            if (offerOptions && offerOptions.mandatory) {
                 offer.jingle.contents.forEach(function (content) {
                     var mediaType = content.description.media;
 
@@ -12316,11 +13415,11 @@ MediaSession.prototype = extend(MediaSession.prototype, {
                         return;
                     }
 
-                    if (!constraints.mandatory.OfferToReceiveAudio && mediaType === 'audio') {
+                    if (!offerOptions.mandatory.OfferToReceiveAudio && mediaType === 'audio') {
                         content.senders = 'initiator';
                     }
 
-                    if (!constraints.mandatory.OfferToReceiveVideo && mediaType === 'video') {
+                    if (!offerOptions.mandatory.OfferToReceiveVideo && mediaType === 'video') {
                         content.senders = 'initiator';
                     }
                 });
@@ -12434,6 +13533,10 @@ MediaSession.prototype = extend(MediaSession.prototype, {
                 answer.jingle.contents.forEach(function (content) {
                     filterContentSources(content, stream);
                 });
+                answer.jingle.contents = answer.jingle.contents.filter(function (content) {
+                    return content.description.descType === 'rtp' && content.description.sources && content.description.sources.length;
+                });
+                delete answer.jingle.groups;
 
                 self.send('source-add', answer.jingle);
                 cb();
@@ -12459,6 +13562,10 @@ MediaSession.prototype = extend(MediaSession.prototype, {
         desc.contents.forEach(function (content) {
             filterContentSources(content, stream);
         });
+        desc.contents = desc.contents.filter(function (content) {
+            return content.description.descType === 'rtp' && content.description.sources && content.description.sources.length;
+        });
+        delete desc.groups;
 
         this.send('source-remove', desc);
         this.pc.removeStream(stream);
@@ -12535,6 +13642,10 @@ MediaSession.prototype = extend(MediaSession.prototype, {
     onIceCandidate: function (candidate) {
         this._log('info', 'Discovered new ICE candidate', candidate.jingle);
         this.send('transport-info', candidate.jingle);
+    },
+
+    onIceEndOfCandidates: function () {
+        this._log('info', 'ICE end of candidates');
     },
 
     onIceStateChange: function () {
@@ -12761,7 +13872,7 @@ MediaSession.prototype = extend(MediaSession.prototype, {
                 // Remove ssrc-groups that are no longer needed
                 for (i = 0; i < newGroups.length; i++) {
                     found = -1;
-                    for (j = 0; i < groups.length; j++) {
+                    for (j = 0; j < groups.length; j++) {
                         if (newGroups[i].semantics === groups[j].semantics &&
                             newGroups[i].sources.length === groups[j].sources.length) {
                             var same = true;
@@ -12811,923 +13922,69 @@ MediaSession.prototype = extend(MediaSession.prototype, {
 
 module.exports = MediaSession;
 
-},{"extend-object":26,"jingle-session":111,"rtcpeerconnection":110,"util":24}],80:[function(require,module,exports){
-arguments[4][48][0].apply(exports,arguments)
-},{"dup":48,"lodash._arrayeach":81,"lodash._baseeach":82,"lodash._bindcallback":86,"lodash.isarray":87}],81:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"dup":49}],82:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50,"lodash.keys":83}],83:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51,"lodash._getnative":84,"lodash.isarguments":85,"lodash.isarray":87}],84:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"dup":52}],85:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],86:[function(require,module,exports){
+},{"extend-object":30,"jingle-session":118,"rtcpeerconnection":117,"util":28}],87:[function(require,module,exports){
 arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],87:[function(require,module,exports){
+},{"dup":54,"lodash._arrayeach":88,"lodash._baseeach":89,"lodash._bindcallback":93,"lodash.isarray":94}],88:[function(require,module,exports){
 arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],88:[function(require,module,exports){
+},{"dup":55}],89:[function(require,module,exports){
 arguments[4][56][0].apply(exports,arguments)
-},{"dup":56,"lodash._baseget":89,"lodash._topath":90,"lodash.isarray":91,"lodash.map":92}],89:[function(require,module,exports){
+},{"dup":56,"lodash.keys":90}],90:[function(require,module,exports){
 arguments[4][57][0].apply(exports,arguments)
-},{"dup":57}],90:[function(require,module,exports){
+},{"dup":57,"lodash._getnative":91,"lodash.isarguments":92,"lodash.isarray":94}],91:[function(require,module,exports){
 arguments[4][58][0].apply(exports,arguments)
-},{"dup":58,"lodash.isarray":91}],91:[function(require,module,exports){
-arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],92:[function(require,module,exports){
+},{"dup":58}],92:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"dup":59}],93:[function(require,module,exports){
 arguments[4][60][0].apply(exports,arguments)
-},{"dup":60,"lodash._arraymap":93,"lodash._basecallback":94,"lodash._baseeach":99,"lodash.isarray":91}],93:[function(require,module,exports){
+},{"dup":60}],94:[function(require,module,exports){
 arguments[4][61][0].apply(exports,arguments)
-},{"dup":61}],94:[function(require,module,exports){
+},{"dup":61}],95:[function(require,module,exports){
 arguments[4][62][0].apply(exports,arguments)
-},{"dup":62,"lodash._baseisequal":95,"lodash._bindcallback":97,"lodash.isarray":91,"lodash.pairs":98}],95:[function(require,module,exports){
+},{"dup":62,"lodash._baseget":96,"lodash._topath":97,"lodash.isarray":98,"lodash.map":99}],96:[function(require,module,exports){
 arguments[4][63][0].apply(exports,arguments)
-},{"dup":63,"lodash.isarray":91,"lodash.istypedarray":96,"lodash.keys":100}],96:[function(require,module,exports){
+},{"dup":63}],97:[function(require,module,exports){
 arguments[4][64][0].apply(exports,arguments)
-},{"dup":64}],97:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],98:[function(require,module,exports){
+},{"dup":64,"lodash.isarray":98}],98:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"dup":61}],99:[function(require,module,exports){
 arguments[4][66][0].apply(exports,arguments)
-},{"dup":66,"lodash.keys":100}],99:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50,"lodash.keys":100}],100:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51,"lodash._getnative":101,"lodash.isarguments":102,"lodash.isarray":91}],101:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"dup":52}],102:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],103:[function(require,module,exports){
-arguments[4][71][0].apply(exports,arguments)
-},{"./lib/tojson":106,"./lib/tosdp":107,"dup":71}],104:[function(require,module,exports){
+},{"dup":66,"lodash._arraymap":100,"lodash._basecallback":101,"lodash._baseeach":106,"lodash.isarray":98}],100:[function(require,module,exports){
+arguments[4][67][0].apply(exports,arguments)
+},{"dup":67}],101:[function(require,module,exports){
+arguments[4][68][0].apply(exports,arguments)
+},{"dup":68,"lodash._baseisequal":102,"lodash._bindcallback":104,"lodash.isarray":98,"lodash.pairs":105}],102:[function(require,module,exports){
+arguments[4][69][0].apply(exports,arguments)
+},{"dup":69,"lodash.isarray":98,"lodash.istypedarray":103,"lodash.keys":107}],103:[function(require,module,exports){
+arguments[4][70][0].apply(exports,arguments)
+},{"dup":70}],104:[function(require,module,exports){
+arguments[4][60][0].apply(exports,arguments)
+},{"dup":60}],105:[function(require,module,exports){
 arguments[4][72][0].apply(exports,arguments)
-},{"dup":72}],105:[function(require,module,exports){
-arguments[4][73][0].apply(exports,arguments)
-},{"dup":73}],106:[function(require,module,exports){
-arguments[4][74][0].apply(exports,arguments)
-},{"./parsers":104,"./senders":105,"dup":74}],107:[function(require,module,exports){
-arguments[4][75][0].apply(exports,arguments)
-},{"./senders":105,"dup":75}],108:[function(require,module,exports){
-arguments[4][76][0].apply(exports,arguments)
-},{"dup":76,"util":24,"webrtc-adapter-test":109,"wildemitter":116}],109:[function(require,module,exports){
+},{"dup":72,"lodash.keys":107}],106:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"dup":56,"lodash.keys":107}],107:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"dup":57,"lodash._getnative":108,"lodash.isarguments":109,"lodash.isarray":98}],108:[function(require,module,exports){
+arguments[4][58][0].apply(exports,arguments)
+},{"dup":58}],109:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"dup":59}],110:[function(require,module,exports){
 arguments[4][77][0].apply(exports,arguments)
-},{"dup":77}],110:[function(require,module,exports){
-var util = require('util');
-var each = require('lodash.foreach');
-var pluck = require('lodash.pluck');
-var webrtc = require('webrtcsupport');
-var SJJ = require('sdp-jingle-json');
-var WildEmitter = require('wildemitter');
-var peerconn = require('traceablepeerconnection');
-
-
-function PeerConnection(config, constraints) {
-    var self = this;
-    var item;
-    WildEmitter.call(this);
-
-    config = config || {};
-    config.iceServers = config.iceServers || [];
-
-    // make sure this only gets enabled in Google Chrome
-    // EXPERIMENTAL FLAG, might get removed without notice
-    this.enableChromeNativeSimulcast = false;
-    if (constraints && constraints.optional &&
-            webrtc.prefix === 'webkit' &&
-            navigator.appVersion.match(/Chromium\//) === null) {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.enableChromeNativeSimulcast) {
-                self.enableChromeNativeSimulcast = true;
-            }
-        });
-    }
-
-    // EXPERIMENTAL FLAG, might get removed without notice
-    this.enableMultiStreamHacks = false;
-    if (constraints && constraints.optional &&
-            webrtc.prefix === 'webkit') {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.enableMultiStreamHacks) {
-                self.enableMultiStreamHacks = true;
-            }
-        });
-    }
-    // EXPERIMENTAL FLAG, might get removed without notice
-    this.restrictBandwidth = 0;
-    if (constraints && constraints.optional) {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.andyetRestrictBandwidth) {
-                self.restrictBandwidth = constraint.andyetRestrictBandwidth;
-            }
-        });
-    }
-
-    // EXPERIMENTAL FLAG, might get removed without notice
-    // bundle up ice candidates, only works for jingle mode
-    // number > 0 is the delay to wait for additional candidates
-    // ~20ms seems good
-    this.batchIceCandidates = 0;
-    if (constraints && constraints.optional) {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.andyetBatchIce) {
-                self.batchIceCandidates = constraint.andyetBatchIce;
-            }
-        });
-    }
-    this.batchedIceCandidates = [];
-
-    // EXPERIMENTAL FLAG, might get removed without notice
-    // this attemps to strip out candidates with an already known foundation
-    // and type -- i.e. those which are gathered via the same TURN server
-    // but different transports (TURN udp, tcp and tls respectively)
-    if (constraints && constraints.optional && webrtc.prefix === 'webkit') {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.andyetFasterICE) {
-                self.eliminateDuplicateCandidates = constraint.andyetFasterICE;
-            }
-        });
-    }
-    // EXPERIMENTAL FLAG, might get removed without notice
-    // when using a server such as the jitsi videobridge we don't need to signal
-    // our candidates
-    if (constraints && constraints.optional) {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.andyetDontSignalCandidates) {
-                self.dontSignalCandidates = constraint.andyetDontSignalCandidates;
-            }
-        });
-    }
-
-
-    // EXPERIMENTAL FLAG, might get removed without notice
-    this.assumeSetLocalSuccess = false;
-    if (constraints && constraints.optional) {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.andyetAssumeSetLocalSuccess) {
-                self.assumeSetLocalSuccess = constraint.andyetAssumeSetLocalSuccess;
-            }
-        });
-    }
-
-    // EXPERIMENTAL FLAG, might get removed without notice
-    // working around https://bugzilla.mozilla.org/show_bug.cgi?id=1087551
-    // pass in a timeout for this
-    if (webrtc.prefix === 'moz') {
-        if (constraints && constraints.optional) {
-            this.wtFirefox = 0;
-            constraints.optional.forEach(function (constraint, idx) {
-                if (constraint.andyetFirefoxMakesMeSad) {
-                    self.wtFirefox = constraint.andyetFirefoxMakesMeSad;
-                    if (self.wtFirefox > 0) {
-                        self.firefoxcandidatebuffer = [];
-                    }
-                }
-            });
-        }
-    }
-
-
-    this.pc = new peerconn(config, constraints);
-
-    this.getLocalStreams = this.pc.getLocalStreams.bind(this.pc);
-    this.getRemoteStreams = this.pc.getRemoteStreams.bind(this.pc);
-    this.addStream = this.pc.addStream.bind(this.pc);
-    this.removeStream = this.pc.removeStream.bind(this.pc);
-
-    // proxy events
-    this.pc.on('*', function () {
-        self.emit.apply(self, arguments);
-    });
-
-    // proxy some events directly
-    this.pc.onremovestream = this.emit.bind(this, 'removeStream');
-    this.pc.onaddstream = this.emit.bind(this, 'addStream');
-    this.pc.onnegotiationneeded = this.emit.bind(this, 'negotiationNeeded');
-    this.pc.oniceconnectionstatechange = this.emit.bind(this, 'iceConnectionStateChange');
-    this.pc.onsignalingstatechange = this.emit.bind(this, 'signalingStateChange');
-
-    // handle ice candidate and data channel events
-    this.pc.onicecandidate = this._onIce.bind(this);
-    this.pc.ondatachannel = this._onDataChannel.bind(this);
-
-    this.localDescription = {
-        contents: []
-    };
-    this.remoteDescription = {
-        contents: []
-    };
-
-    this.config = {
-        debug: false,
-        ice: {},
-        sid: '',
-        isInitiator: true,
-        sdpSessionID: Date.now(),
-        useJingle: false
-    };
-
-    // apply our config
-    for (item in config) {
-        this.config[item] = config[item];
-    }
-
-    if (this.config.debug) {
-        this.on('*', function (eventName, event) {
-            var logger = config.logger || console;
-            logger.log('PeerConnection event:', arguments);
-        });
-    }
-    this.hadLocalStunCandidate = false;
-    this.hadRemoteStunCandidate = false;
-    this.hadLocalRelayCandidate = false;
-    this.hadRemoteRelayCandidate = false;
-
-    this.hadLocalIPv6Candidate = false;
-    this.hadRemoteIPv6Candidate = false;
-
-    // keeping references for all our data channels
-    // so they dont get garbage collected
-    // can be removed once the following bugs have been fixed
-    // https://crbug.com/405545
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=964092
-    // to be filed for opera
-    this._remoteDataChannels = [];
-    this._localDataChannels = [];
-
-    this._candidateBuffer = [];
-}
-
-util.inherits(PeerConnection, WildEmitter);
-
-Object.defineProperty(PeerConnection.prototype, 'signalingState', {
-    get: function () {
-        return this.pc.signalingState;
-    }
-});
-Object.defineProperty(PeerConnection.prototype, 'iceConnectionState', {
-    get: function () {
-        return this.pc.iceConnectionState;
-    }
-});
-
-PeerConnection.prototype._role = function () {
-    return this.isInitiator ? 'initiator' : 'responder';
-};
-
-// Add a stream to the peer connection object
-PeerConnection.prototype.addStream = function (stream) {
-    this.localStream = stream;
-    this.pc.addStream(stream);
-};
-
-// helper function to check if a remote candidate is a stun/relay
-// candidate or an ipv6 candidate
-PeerConnection.prototype._checkLocalCandidate = function (candidate) {
-    var cand = SJJ.toCandidateJSON(candidate);
-    if (cand.type == 'srflx') {
-        this.hadLocalStunCandidate = true;
-    } else if (cand.type == 'relay') {
-        this.hadLocalRelayCandidate = true;
-    }
-    if (cand.ip.indexOf(':') != -1) {
-        this.hadLocalIPv6Candidate = true;
-    }
-};
-
-// helper function to check if a remote candidate is a stun/relay
-// candidate or an ipv6 candidate
-PeerConnection.prototype._checkRemoteCandidate = function (candidate) {
-    var cand = SJJ.toCandidateJSON(candidate);
-    if (cand.type == 'srflx') {
-        this.hadRemoteStunCandidate = true;
-    } else if (cand.type == 'relay') {
-        this.hadRemoteRelayCandidate = true;
-    }
-    if (cand.ip.indexOf(':') != -1) {
-        this.hadRemoteIPv6Candidate = true;
-    }
-};
-
-
-// Init and add ice candidate object with correct constructor
-PeerConnection.prototype.processIce = function (update, cb) {
-    cb = cb || function () {};
-    var self = this;
-
-    // ignore any added ice candidates to avoid errors. why does the
-    // spec not do this?
-    if (this.pc.signalingState === 'closed') return cb();
-
-    if (update.contents || (update.jingle && update.jingle.contents)) {
-        var contentNames = pluck(this.remoteDescription.contents, 'name');
-        var contents = update.contents || update.jingle.contents;
-
-        contents.forEach(function (content) {
-            var transport = content.transport || {};
-            var candidates = transport.candidates || [];
-            var mline = contentNames.indexOf(content.name);
-            var mid = content.name;
-
-            candidates.forEach(
-                function (candidate) {
-                var iceCandidate = SJJ.toCandidateSDP(candidate) + '\r\n';
-                self.pc.addIceCandidate(
-                    new webrtc.IceCandidate({
-                        candidate: iceCandidate,
-                        sdpMLineIndex: mline,
-                        sdpMid: mid
-                    }), function () {
-                        // well, this success callback is pretty meaningless
-                    },
-                    function (err) {
-                        self.emit('error', err);
-                    }
-                );
-                self._checkRemoteCandidate(iceCandidate);
-            });
-        });
-    } else {
-        // working around https://code.google.com/p/webrtc/issues/detail?id=3669
-        if (update.candidate && update.candidate.candidate.indexOf('a=') !== 0) {
-            update.candidate.candidate = 'a=' + update.candidate.candidate;
-        }
-
-        if (this.wtFirefox && this.firefoxcandidatebuffer !== null) {
-            // we cant add this yet due to https://bugzilla.mozilla.org/show_bug.cgi?id=1087551
-            if (this.pc.localDescription && this.pc.localDescription.type === 'offer') {
-                this.firefoxcandidatebuffer.push(update.candidate);
-                return cb();
-            }
-        }
-
-        self.pc.addIceCandidate(
-            new webrtc.IceCandidate(update.candidate),
-            function () { },
-            function (err) {
-                self.emit('error', err);
-            }
-        );
-        self._checkRemoteCandidate(update.candidate.candidate);
-    }
-    cb();
-};
-
-// Generate and emit an offer with the given constraints
-PeerConnection.prototype.offer = function (constraints, cb) {
-    var self = this;
-    var hasConstraints = arguments.length === 2;
-    var mediaConstraints = hasConstraints && constraints ? constraints : {
-            mandatory: {
-                OfferToReceiveAudio: true,
-                OfferToReceiveVideo: true
-            }
-        };
-    cb = hasConstraints ? cb : constraints;
-    cb = cb || function () {};
-
-    if (this.pc.signalingState === 'closed') return cb('Already closed');
-
-    // Actually generate the offer
-    this.pc.createOffer(
-        function (offer) {
-            // does not work for jingle, but jingle.js doesn't need
-            // this hack...
-            var expandedOffer = {
-                type: 'offer',
-                sdp: offer.sdp
-            };
-            if (self.assumeSetLocalSuccess) {
-                self.emit('offer', expandedOffer);
-                cb(null, expandedOffer);
-            }
-            self._candidateBuffer = [];
-            self.pc.setLocalDescription(offer,
-                function () {
-                    var jingle;
-                    if (self.config.useJingle) {
-                        jingle = SJJ.toSessionJSON(offer.sdp, {
-                            role: self._role(),
-                            direction: 'outgoing'
-                        });
-                        jingle.sid = self.config.sid;
-                        self.localDescription = jingle;
-
-                        // Save ICE credentials
-                        each(jingle.contents, function (content) {
-                            var transport = content.transport || {};
-                            if (transport.ufrag) {
-                                self.config.ice[content.name] = {
-                                    ufrag: transport.ufrag,
-                                    pwd: transport.pwd
-                                };
-                            }
-                        });
-
-                        expandedOffer.jingle = jingle;
-                    }
-                    expandedOffer.sdp.split('\r\n').forEach(function (line) {
-                        if (line.indexOf('a=candidate:') === 0) {
-                            self._checkLocalCandidate(line);
-                        }
-                    });
-
-                    if (!self.assumeSetLocalSuccess) {
-                        self.emit('offer', expandedOffer);
-                        cb(null, expandedOffer);
-                    }
-                },
-                function (err) {
-                    self.emit('error', err);
-                    cb(err);
-                }
-            );
-        },
-        function (err) {
-            self.emit('error', err);
-            cb(err);
-        },
-        mediaConstraints
-    );
-};
-
-
-// Process an incoming offer so that ICE may proceed before deciding
-// to answer the request.
-PeerConnection.prototype.handleOffer = function (offer, cb) {
-    cb = cb || function () {};
-    var self = this;
-    offer.type = 'offer';
-    if (offer.jingle) {
-        if (this.enableChromeNativeSimulcast) {
-            offer.jingle.contents.forEach(function (content) {
-                if (content.name === 'video') {
-                    content.description.googConferenceFlag = true;
-                }
-            });
-        }
-        if (this.enableMultiStreamHacks) {
-            // add a mixed video stream as first stream
-            offer.jingle.contents.forEach(function (content) {
-                if (content.name === 'video') {
-                    var sources = content.description.sources || [];
-                    if (sources.length === 0 || sources[0].ssrc !== "3735928559") {
-                        sources.unshift({
-                            ssrc: "3735928559", // 0xdeadbeef
-                            parameters: [
-                                {
-                                    key: "cname",
-                                    value: "deadbeef"
-                                },
-                                {
-                                    key: "msid",
-                                    value: "mixyourfecintothis please"
-                                }
-                            ]
-                        });
-                        content.description.sources = sources;
-                    }
-                }
-            });
-        }
-        if (self.restrictBandwidth > 0) {
-            if (offer.jingle.contents.length >= 2 && offer.jingle.contents[1].name === 'video') {
-                var content = offer.jingle.contents[1];
-                var hasBw = content.description && content.description.bandwidth;
-                if (!hasBw) {
-                    offer.jingle.contents[1].description.bandwidth = { type: 'AS', bandwidth: self.restrictBandwidth.toString() };
-                    offer.sdp = SJJ.toSessionSDP(offer.jingle, {
-                        sid: self.config.sdpSessionID,
-                        role: self._role(),
-                        direction: 'outgoing'
-                    });
-                }
-            }
-        }
-        offer.sdp = SJJ.toSessionSDP(offer.jingle, {
-            sid: self.config.sdpSessionID,
-            role: self._role(),
-            direction: 'incoming'
-        });
-        self.remoteDescription = offer.jingle;
-    }
-    offer.sdp.split('\r\n').forEach(function (line) {
-        if (line.indexOf('a=candidate:') === 0) {
-            self._checkRemoteCandidate(line);
-        }
-    });
-    self.pc.setRemoteDescription(new webrtc.SessionDescription(offer),
-        function () {
-            cb();
-        },
-        cb
-    );
-};
-
-// Answer an offer with audio only
-PeerConnection.prototype.answerAudioOnly = function (cb) {
-    var mediaConstraints = {
-            mandatory: {
-                OfferToReceiveAudio: true,
-                OfferToReceiveVideo: false
-            }
-        };
-    this._answer(mediaConstraints, cb);
-};
-
-// Answer an offer without offering to recieve
-PeerConnection.prototype.answerBroadcastOnly = function (cb) {
-    var mediaConstraints = {
-            mandatory: {
-                OfferToReceiveAudio: false,
-                OfferToReceiveVideo: false
-            }
-        };
-    this._answer(mediaConstraints, cb);
-};
-
-// Answer an offer with given constraints default is audio/video
-PeerConnection.prototype.answer = function (constraints, cb) {
-    var self = this;
-    var hasConstraints = arguments.length === 2;
-    var callback = hasConstraints ? cb : constraints;
-    var mediaConstraints = hasConstraints && constraints ? constraints : {
-            mandatory: {
-                OfferToReceiveAudio: true,
-                OfferToReceiveVideo: true
-            }
-        };
-
-    this._answer(mediaConstraints, callback);
-};
-
-// Process an answer
-PeerConnection.prototype.handleAnswer = function (answer, cb) {
-    cb = cb || function () {};
-    var self = this;
-    if (answer.jingle) {
-        answer.sdp = SJJ.toSessionSDP(answer.jingle, {
-            sid: self.config.sdpSessionID,
-            role: self._role(),
-            direction: 'incoming'
-        });
-        self.remoteDescription = answer.jingle;
-    }
-    answer.sdp.split('\r\n').forEach(function (line) {
-        if (line.indexOf('a=candidate:') === 0) {
-            self._checkRemoteCandidate(line);
-        }
-    });
-    self.pc.setRemoteDescription(
-        new webrtc.SessionDescription(answer),
-        function () {
-            if (self.wtFirefox) {
-                window.setTimeout(function () {
-                    self.firefoxcandidatebuffer.forEach(function (candidate) {
-                        // add candidates later
-                        self.pc.addIceCandidate(
-                            new webrtc.IceCandidate(candidate),
-                            function () { },
-                            function (err) {
-                                self.emit('error', err);
-                            }
-                        );
-                        self._checkRemoteCandidate(candidate.candidate);
-                    });
-                    self.firefoxcandidatebuffer = null;
-                }, self.wtFirefox);
-            }
-            cb(null);
-        },
-        cb
-    );
-};
-
-// Close the peer connection
-PeerConnection.prototype.close = function () {
-    this.pc.close();
-
-    this._localDataChannels = [];
-    this._remoteDataChannels = [];
-
-    this.emit('close');
-};
-
-// Internal code sharing for various types of answer methods
-PeerConnection.prototype._answer = function (constraints, cb) {
-    cb = cb || function () {};
-    var self = this;
-    if (!this.pc.remoteDescription) {
-        // the old API is used, call handleOffer
-        throw new Error('remoteDescription not set');
-    }
-
-    if (this.pc.signalingState === 'closed') return cb('Already closed');
-
-    self.pc.createAnswer(
-        function (answer) {
-            var sim = [];
-            var rtx = [];
-            if (self.enableChromeNativeSimulcast) {
-                // native simulcast part 1: add another SSRC
-                answer.jingle = SJJ.toSessionJSON(answer.sdp, {
-                    role: self._role(),
-                    direction: 'outgoing'
-                });
-                if (answer.jingle.contents.length >= 2 && answer.jingle.contents[1].name === 'video') {
-                    var hasSimgroup = false;
-                    var groups = answer.jingle.contents[1].description.sourceGroups || [];
-                    var hasSim = false;
-                    groups.forEach(function (group) {
-                        if (group.semantics == 'SIM') hasSim = true;
-                    });
-                    if (!hasSim &&
-                        answer.jingle.contents[1].description.sources.length) {
-                        var newssrc = JSON.parse(JSON.stringify(answer.jingle.contents[1].description.sources[0]));
-                        newssrc.ssrc = '' + Math.floor(Math.random() * 0xffffffff); // FIXME: look for conflicts
-                        answer.jingle.contents[1].description.sources.push(newssrc);
-
-                        sim.push(answer.jingle.contents[1].description.sources[0].ssrc);
-                        sim.push(newssrc.ssrc);
-                        groups.push({
-                            semantics: 'SIM',
-                            sources: sim
-                        });
-
-                        // also create an RTX one for the SIM one
-                        var rtxssrc = JSON.parse(JSON.stringify(newssrc));
-                        rtxssrc.ssrc = '' + Math.floor(Math.random() * 0xffffffff); // FIXME: look for conflicts
-                        answer.jingle.contents[1].description.sources.push(rtxssrc);
-                        groups.push({
-                            semantics: 'FID',
-                            sources: [newssrc.ssrc, rtxssrc.ssrc]
-                        });
-
-                        answer.jingle.contents[1].description.sourceGroups = groups;
-                        answer.sdp = SJJ.toSessionSDP(answer.jingle, {
-                            sid: self.config.sdpSessionID,
-                            role: self._role(),
-                            direction: 'outgoing'
-                        });
-                    }
-                }
-            }
-            var expandedAnswer = {
-                type: 'answer',
-                sdp: answer.sdp
-            };
-            if (self.assumeSetLocalSuccess) {
-                // not safe to do when doing simulcast mangling
-                self.emit('answer', expandedAnswer);
-                cb(null, expandedAnswer);
-            }
-            self._candidateBuffer = [];
-            self.pc.setLocalDescription(answer,
-                function () {
-                    if (self.config.useJingle) {
-                        var jingle = SJJ.toSessionJSON(answer.sdp, {
-                            role: self._role(),
-                            direction: 'outgoing'
-                        });
-                        jingle.sid = self.config.sid;
-                        self.localDescription = jingle;
-                        expandedAnswer.jingle = jingle;
-                    }
-                    if (self.enableChromeNativeSimulcast) {
-                        // native simulcast part 2:
-                        // signal multiple tracks to the receiver
-                        // for anything in the SIM group
-                        if (!expandedAnswer.jingle) {
-                            expandedAnswer.jingle = SJJ.toSessionJSON(answer.sdp, {
-                                role: self._role(),
-                                direction: 'outgoing'
-                            });
-                        }
-                        var groups = expandedAnswer.jingle.contents[1].description.sourceGroups || [];
-                        expandedAnswer.jingle.contents[1].description.sources.forEach(function (source, idx) {
-                            // the floor idx/2 is a hack that relies on a particular order
-                            // of groups, alternating between sim and rtx
-                            source.parameters = source.parameters.map(function (parameter) {
-                                if (parameter.key === 'msid') {
-                                    parameter.value += '-' + Math.floor(idx / 2);
-                                }
-                                return parameter;
-                            });
-                        });
-                        expandedAnswer.sdp = SJJ.toSessionSDP(expandedAnswer.jingle, {
-                            sid: self.sdpSessionID,
-                            role: self._role(),
-                            direction: 'outgoing'
-                        });
-                    }
-                    expandedAnswer.sdp.split('\r\n').forEach(function (line) {
-                        if (line.indexOf('a=candidate:') === 0) {
-                            self._checkLocalCandidate(line);
-                        }
-                    });
-                    if (!self.assumeSetLocalSuccess) {
-                        self.emit('answer', expandedAnswer);
-                        cb(null, expandedAnswer);
-                    }
-                },
-                function (err) {
-                    self.emit('error', err);
-                    cb(err);
-                }
-            );
-        },
-        function (err) {
-            self.emit('error', err);
-            cb(err);
-        },
-        constraints
-    );
-};
-
-// Internal method for emitting ice candidates on our peer object
-PeerConnection.prototype._onIce = function (event) {
-    var self = this;
-    if (event.candidate) {
-        if (this.dontSignalCandidates) return;
-        var ice = event.candidate;
-
-        var expandedCandidate = {
-            candidate: {
-                candidate: ice.candidate,
-                sdpMid: ice.sdpMid,
-                sdpMLineIndex: ice.sdpMLineIndex
-            }
-        };
-        this._checkLocalCandidate(ice.candidate);
-
-        var cand = SJJ.toCandidateJSON(ice.candidate);
-
-        var already;
-        var idx;
-        if (this.eliminateDuplicateCandidates && cand.type === 'relay') {
-            // drop candidates with same foundation, component
-            // take local type pref into account so we don't ignore udp
-            // ones when we know about a TCP one. unlikely but...
-            already = this._candidateBuffer.filter(
-                function (c) {
-                    return c.type === 'relay';
-                }).map(function (c) {
-                    return c.foundation + ':' + c.component;
-                }
-            );
-            idx = already.indexOf(cand.foundation + ':' + cand.component);
-            // remember: local type pref of udp is 0, tcp 1, tls 2
-            if (idx > -1 && ((cand.priority >> 24) >= (already[idx].priority >> 24))) {
-                // drop it, same foundation with higher (worse) type pref
-                return;
-            }
-        }
-        if (this.config.bundlePolicy === 'max-bundle') {
-            // drop candidates which are duplicate for audio/video/data
-            // duplicate means same host/port but different sdpMid
-            already = this._candidateBuffer.filter(
-                function (c) {
-                    return cand.type === c.type;
-                }).map(function (cand) {
-                    return cand.address + ':' + cand.port;
-                }
-            );
-            idx = already.indexOf(cand.address + ':' + cand.port);
-            if (idx > -1) return;
-        }
-        // also drop rtcp candidates since we know the peer supports RTCP-MUX
-        // this is a workaround until browsers implement this natively
-        if (this.config.rtcpMuxPolicy === 'require' && cand.component === '2') {
-            return;
-        }
-        this._candidateBuffer.push(cand);
-
-        if (self.config.useJingle) {
-            if (!ice.sdpMid) { // firefox doesn't set this
-                if (self.pc.remoteDescription && self.pc.remoteDescription.type === 'offer') {
-                    // preserve name from remote
-                    ice.sdpMid = self.remoteDescription.contents[ice.sdpMLineIndex].name;
-                } else {
-                    ice.sdpMid = self.localDescription.contents[ice.sdpMLineIndex].name;
-                }
-            }
-            if (!self.config.ice[ice.sdpMid]) {
-                var jingle = SJJ.toSessionJSON(self.pc.localDescription.sdp, {
-                    role: self._role(),
-                    direction: 'outgoing'
-                });
-                each(jingle.contents, function (content) {
-                    var transport = content.transport || {};
-                    if (transport.ufrag) {
-                        self.config.ice[content.name] = {
-                            ufrag: transport.ufrag,
-                            pwd: transport.pwd
-                        };
-                    }
-                });
-            }
-            expandedCandidate.jingle = {
-                contents: [{
-                    name: ice.sdpMid,
-                    creator: self._role(),
-                    transport: {
-                        transType: 'iceUdp',
-                        ufrag: self.config.ice[ice.sdpMid].ufrag,
-                        pwd: self.config.ice[ice.sdpMid].pwd,
-                        candidates: [
-                            cand
-                        ]
-                    }
-                }]
-            };
-            if (self.batchIceCandidates > 0) {
-                if (self.batchedIceCandidates.length === 0) {
-                    window.setTimeout(function () {
-                        var contents = {};
-                        self.batchedIceCandidates.forEach(function (content) {
-                            content = content.contents[0];
-                            if (!contents[content.name]) contents[content.name] = content;
-                            contents[content.name].transport.candidates.push(content.transport.candidates[0]);
-                        });
-                        var newCand = {
-                            jingle: {
-                                contents: []
-                            }
-                        };
-                        Object.keys(contents).forEach(function (name) {
-                            newCand.jingle.contents.push(contents[name]);
-                        });
-                        self.batchedIceCandidates = [];
-                        self.emit('ice', newCand);
-                    }, self.batchIceCandidates);
-                }
-                self.batchedIceCandidates.push(expandedCandidate.jingle);
-                return;
-            }
-
-        }
-        this.emit('ice', expandedCandidate);
-    } else {
-        this.emit('endOfCandidates');
-    }
-};
-
-// Internal method for processing a new data channel being added by the
-// other peer.
-PeerConnection.prototype._onDataChannel = function (event) {
-    // make sure we keep a reference so this doesn't get garbage collected
-    var channel = event.channel;
-    this._remoteDataChannels.push(channel);
-
-    this.emit('addChannel', channel);
-};
-
-// Create a data channel spec reference:
-// http://dev.w3.org/2011/webrtc/editor/webrtc.html#idl-def-RTCDataChannelInit
-PeerConnection.prototype.createDataChannel = function (name, opts) {
-    var channel = this.pc.createDataChannel(name, opts);
-
-    // make sure we keep a reference so this doesn't get garbage collected
-    this._localDataChannels.push(channel);
-
-    return channel;
-};
-
-// a wrapper around getStats which hides the differences (where possible)
-PeerConnection.prototype.getStats = function (cb) {
-    if (webrtc.prefix === 'moz') {
-        this.pc.getStats(
-            function (res) {
-                var items = [];
-                for (var result in res) {
-                    if (typeof res[result] === 'object') {
-                        items.push(res[result]);
-                    }
-                }
-                cb(null, items);
-            },
-            cb
-        );
-    } else {
-        this.pc.getStats(function (res) {
-            var items = [];
-            res.result().forEach(function (result) {
-                var item = {};
-                result.names().forEach(function (name) {
-                    item[name] = result.stat(name);
-                });
-                item.id = result.id;
-                item.type = result.type;
-                item.timestamp = result.timestamp;
-                items.push(item);
-            });
-            cb(null, items);
-        });
-    }
-};
-
-module.exports = PeerConnection;
-
-},{"lodash.foreach":80,"lodash.pluck":88,"sdp-jingle-json":103,"traceablepeerconnection":108,"util":24,"webrtcsupport":115,"wildemitter":116}],111:[function(require,module,exports){
+},{"./lib/tojson":113,"./lib/tosdp":114,"dup":77}],111:[function(require,module,exports){
+arguments[4][78][0].apply(exports,arguments)
+},{"dup":78}],112:[function(require,module,exports){
+arguments[4][79][0].apply(exports,arguments)
+},{"dup":79}],113:[function(require,module,exports){
+arguments[4][80][0].apply(exports,arguments)
+},{"./parsers":111,"./senders":112,"dup":80}],114:[function(require,module,exports){
+arguments[4][81][0].apply(exports,arguments)
+},{"./senders":112,"dup":81}],115:[function(require,module,exports){
+arguments[4][82][0].apply(exports,arguments)
+},{"dup":82,"util":28,"webrtc-adapter-test":116,"wildemitter":124}],116:[function(require,module,exports){
+arguments[4][83][0].apply(exports,arguments)
+},{"dup":83}],117:[function(require,module,exports){
+arguments[4][85][0].apply(exports,arguments)
+},{"dup":85,"lodash.foreach":87,"lodash.pluck":95,"sdp-jingle-json":110,"traceablepeerconnection":115,"util":28,"webrtc-adapter-test":116,"wildemitter":124}],118:[function(require,module,exports){
 var util = require('util');
 var uuid = require('uuid');
 var async = require('async');
@@ -14073,7 +14330,7 @@ JingleSession.prototype = extend(JingleSession.prototype, {
 
 module.exports = JingleSession;
 
-},{"async":112,"extend-object":26,"util":24,"uuid":114,"wildemitter":116}],112:[function(require,module,exports){
+},{"async":119,"extend-object":30,"util":28,"uuid":121,"wildemitter":122}],119:[function(require,module,exports){
 (function (process){
 /*!
  * async
@@ -15200,7 +15457,7 @@ module.exports = JingleSession;
 }());
 
 }).call(this,require('_process'))
-},{"_process":9}],113:[function(require,module,exports){
+},{"_process":10}],120:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -15235,7 +15492,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],114:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -15420,7 +15677,9 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":113}],115:[function(require,module,exports){
+},{"./rng":120}],122:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"dup":53}],123:[function(require,module,exports){
 // created by @HenrikJoreteg
 var prefix;
 var version;
@@ -15472,152 +15731,5830 @@ module.exports = {
     getUserMedia: getUserMedia
 };
 
-},{}],116:[function(require,module,exports){
-/*
-WildEmitter.js is a slim little event emitter by @henrikjoreteg largely based 
-on @visionmedia's Emitter from UI Kit.
+},{}],124:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"dup":53}],125:[function(require,module,exports){
+'use strict';
 
-Why? I wanted it standalone.
-
-I also wanted support for wildcard emitters like this:
-
-emitter.on('*', function (eventName, other, event, payloads) {
-    
+Object.defineProperty(exports, '__esModule', {
+    value: true
 });
 
-emitter.on('somenamespace*', function (eventName, payloads) {
-    
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _shortcuts = require('./shortcuts');
+
+var _shortcuts2 = _interopRequireDefault(_shortcuts);
+
+var _types = require('./types');
+
+var _types2 = _interopRequireDefault(_types);
+
+exports['default'] = function (JXT) {
+
+    JXT.use(_types2['default']);
+    JXT.use(_shortcuts2['default']);
+};
+
+module.exports = exports['default'];
+
+},{"./shortcuts":126,"./types":127}],126:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
 });
 
-Please note that callbacks triggered by wildcard registered events also get 
-the event name as the first argument.
-*/
-module.exports = WildEmitter;
+var _xmppConstants = require('xmpp-constants');
 
-function WildEmitter() {
-    this.isWildEmitter = true;
-    this.callbacks = {};
+var VERSION = {
+    client: _xmppConstants.Namespace.CLIENT,
+    server: _xmppConstants.Namespace.SERVER,
+    component: _xmppConstants.Namespace.COMPONENT
+};
+
+exports['default'] = function (JXT) {
+
+    // ----------------------------------------------------------------
+    // Shortcuts for common extension calls
+    // ----------------------------------------------------------------
+
+    JXT.extendMessage = function (JXTClass, multiName) {
+        var _this = this;
+
+        this.withMessage(function (Message) {
+
+            _this.extend(Message, JXTClass, multiName);
+        });
+    };
+
+    JXT.extendPresence = function (JXTClass, multiName) {
+        var _this2 = this;
+
+        this.withPresence(function (Presence) {
+
+            _this2.extend(Presence, JXTClass, multiName);
+        });
+    };
+
+    JXT.extendIQ = function (JXTClass, multiName) {
+        var _this3 = this;
+
+        this.withIQ(function (IQ) {
+
+            _this3.extend(IQ, JXTClass, multiName);
+        });
+    };
+
+    JXT.extendStreamFeatures = function (JXTClass) {
+        var _this4 = this;
+
+        this.withStreamFeatures(function (StreamFeatures) {
+
+            _this4.extend(StreamFeatures, JXTClass);
+        });
+    };
+
+    JXT.extendPubsubItem = function (JXTClass) {
+        var _this5 = this;
+
+        this.withPubsubItem(function (PubsubItem) {
+
+            _this5.extend(PubsubItem, JXTClass);
+        });
+    };
+
+    // ----------------------------------------------------------------
+    // Shortcuts for common withDefinition calls
+    // ----------------------------------------------------------------
+
+    JXT.withIQ = function (cb) {
+
+        this.withDefinition('iq', _xmppConstants.Namespace.CLIENT, cb);
+        this.withDefinition('iq', _xmppConstants.Namespace.COMPONENT, cb);
+    };
+
+    JXT.withMessage = function (cb) {
+
+        this.withDefinition('message', _xmppConstants.Namespace.CLIENT, cb);
+        this.withDefinition('message', _xmppConstants.Namespace.COMPONENT, cb);
+    };
+
+    JXT.withPresence = function (cb) {
+
+        this.withDefinition('presence', _xmppConstants.Namespace.CLIENT, cb);
+        this.withDefinition('presence', _xmppConstants.Namespace.COMPONENT, cb);
+    };
+
+    JXT.withStreamFeatures = function (cb) {
+
+        this.withDefinition('features', _xmppConstants.Namespace.STREAM, cb);
+    };
+
+    JXT.withStanzaError = function (cb) {
+
+        this.withDefinition('error', _xmppConstants.Namespace.CLIENT, cb);
+        this.withDefinition('error', _xmppConstants.Namespace.COMPONENT, cb);
+    };
+
+    JXT.withDataForm = function (cb) {
+
+        this.withDefinition('x', _xmppConstants.Namespace.DATAFORM, cb);
+    };
+
+    JXT.withPubsubItem = function (cb) {
+
+        this.withDefinition('item', _xmppConstants.Namespace.PUBSUB, cb);
+        this.withDefinition('item', _xmppConstants.Namespace.PUBSUB_EVENT, cb);
+    };
+
+    // ----------------------------------------------------------------
+    // Shortcuts for common getDefinition calls
+    // ----------------------------------------------------------------
+
+    JXT.getMessage = function () {
+        var version = arguments[0] === undefined ? 'client' : arguments[0];
+
+        return this.getDefinition('message', VERSION[version]);
+    };
+
+    JXT.getPresence = function () {
+        var version = arguments[0] === undefined ? 'client' : arguments[0];
+
+        return this.getDefinition('presence', VERSION[version]);
+    };
+
+    JXT.getIQ = function () {
+        var version = arguments[0] === undefined ? 'client' : arguments[0];
+
+        return this.getDefinition('iq', VERSION[version]);
+    };
+
+    JXT.getStreamError = function () {
+
+        return this.getDefinition('error', _xmppConstants.Namespace.STREAM);
+    };
+
+    // For backward compatibility
+    JXT.getIq = JXT.getIQ;
+    JXT.withIq = JXT.withIQ;
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":128}],127:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppJid = require('xmpp-jid');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    Utils.jidAttribute = function (attr, prepped) {
+
+        return {
+            get: function get() {
+
+                var jid = new _xmppJid.JID(Utils.getAttribute(this.xml, attr));
+                if (prepped) {
+                    jid.prepped = true;
+                }
+                return jid;
+            },
+            set: function set(value) {
+
+                Utils.setAttribute(this.xml, attr, (value || '').toString());
+            }
+        };
+    };
+
+    Utils.jidSub = function (NS, sub, prepped) {
+
+        return {
+            get: function get() {
+
+                var jid = new _xmppJid.JID(Utils.getSubText(this.xml, NS, sub));
+                if (prepped) {
+                    jid.prepped = true;
+                }
+                return jid;
+            },
+            set: function set(value) {
+
+                Utils.setSubText(this.xml, NS, sub, (value || '').toString());
+            }
+        };
+    };
+
+    Utils.tzoSub = Utils.field(function (xml, NS, sub, defaultVal) {
+
+        var hrs = undefined,
+            min = undefined,
+            split = undefined;
+        var sign = -1;
+        var formatted = Utils.getSubText(xml, NS, sub);
+
+        if (!formatted) {
+            return defaultVal;
+        }
+
+        if (formatted.charAt(0) === '-') {
+            sign = 1;
+            formatted = formatted.slice(1);
+        }
+
+        split = formatted.split(':');
+        hrs = parseInt(split[0], 10);
+        min = parseInt(split[1], 10);
+        return (hrs * 60 + min) * sign;
+    }, function (xml, NS, sub, value) {
+
+        var hrs = undefined,
+            min = undefined;
+        var formatted = '-';
+        if (typeof value === 'number') {
+            if (value < 0) {
+                value = -value;
+                formatted = '+';
+            }
+            hrs = value / 60;
+            min = value % 60;
+            formatted += (hrs < 10 ? '0' : '') + hrs + ':' + (min < 10 ? '0' : '') + min;
+        } else {
+            formatted = value;
+        }
+        Utils.setSubText(xml, NS, sub, formatted);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-jid":134}],128:[function(require,module,exports){
+module.exports = {
+    Namespace: require('./lib/namespaces'),
+    MUC: require('./lib/muc'),
+    PubSub: require('./lib/pubsub'),
+    Jingle: require('./lib/jingle'),
+    Presence: require('./lib/presence')
+};
+
+},{"./lib/jingle":129,"./lib/muc":130,"./lib/namespaces":131,"./lib/presence":132,"./lib/pubsub":133}],129:[function(require,module,exports){
+module.exports = {
+    Action: {
+        CONTENT_ACCEPT: 'content-accept',
+        CONTENT_ADD: 'content-add',
+        CONTENT_MODIFY: 'content-modify',
+        CONTENT_REJECT: 'content-reject',
+        CONTENT_REMOVE: 'content-remove',
+        DESCRIPTION_INFO: 'description-info',
+        SECURITY_INFO: 'security-info',
+        SESSION_ACCEPT: 'session-accept',
+        SESSION_INFO: 'session-info',
+        SESSION_INITIATE: 'session-initiate',
+        SESSION_TERMINATE: 'session-terminate',
+        TRANSPORT_ACCEPT: 'transport-accept',
+        TRANSPORT_INFO: 'transport-info',
+        TRANSPORT_REJECT: 'transport-reject',
+        TRANSPORT_REPLACE: 'transport-replace'
+    },
+    Reason: {
+        ALTERNATIVE_SESSION: 'alernative-session',
+        BUSY: 'busy',
+        CANCEL: 'cancel',
+        CONNECTIVITY_ERROR: 'connectivity-error',
+        DECLINE: 'decline',
+        EXPIRED: 'expired',
+        FAILED_APPLICATION: 'failed-application',
+        FAILED_TRANSPORT: 'failed-transport',
+        GENERAL_ERROR: 'general-error',
+        GONE: 'gone',
+        INCOMPATIBLE_PARAMETERS: 'incompatible-parameters',
+        MEDIA_ERROR: 'media-error',
+        SECURITY_ERROR: 'security-error',
+        SUCCESS: 'success',
+        TIMEOUT: 'timeout',
+        UNSUPPORTED_APPLICATIONS: 'unsupported-applications',
+        UNSUPPORTED_TRANSPORTS: 'unsupported-transports'
+    },
+    Condition: {
+        OUT_OF_ORDER: 'out-of-order',
+        TIE_BREAK: 'tie-break',
+        UNKNOWN_SESSION: 'unknown-session',
+        UNSUPPORTED_INFO: 'unsupported-info'
+    }
+};
+
+},{}],130:[function(require,module,exports){
+module.exports = {
+    Status: {
+        REALJID_PUBLIC: '100',
+        AFFILIATION_CHANGED: '101',
+        UNAVAILABLE_SHOWN: '102',
+        UNAVAILABLE_NOT_SHOWN: '103',
+        CONFIGURATION_CHANGED: '104',
+        SELF_PRESENCE: '110',
+        LOGGING_ENABLED: '170',
+        LOGGING_DISABLED: '171',
+        NON_ANONYMOUS: '172',
+        SEMI_ANONYMOUS: '173',
+        FULLY_ANONYMOUS: '174',
+        ROOM_CREATED: '201',
+        NICK_ASSIGNED: '210',
+        BANNED: '301',
+        NEW_NICK: '303',
+        KICKED: '307',
+        REMOVED_AFFILIATION: '321',
+        REMOVED_MEMBERSHIP: '322',
+        REMOVED_SHUTDOWN: '332'
+    },
+    Affiliation: {
+        ADMIN: 'admin',
+        MEMBER: 'member',
+        NONE: 'none',
+        OUTCAST: 'outcast',
+        OWNER: 'owner'
+    },
+    Role: {
+        MODERATOR: 'moderator',
+        NONE: 'none',
+        PARTICIPANT: 'participant',
+        VISITOR: 'visitor'
+    }
+};
+
+},{}],131:[function(require,module,exports){
+module.exports = {
+// ================================================================
+// RFCS
+// ================================================================
+
+// RFC 6120
+    BIND: 'urn:ietf:params:xml:ns:xmpp-bind',
+    CLIENT: 'jabber:client',
+    SASL: 'urn:ietf:params:xml:ns:xmpp-sasl',
+    SERVER: 'jabber:server',
+    SESSION: 'urn:ietf:params:xml:ns:xmpp-session',
+    STANZA_ERROR: 'urn:ietf:params:xml:ns:xmpp-stanzas',
+    STREAM: 'http://etherx.jabber.org/streams',
+    STREAM_ERROR: 'urn:ietf:params:xml:ns:xmpp-streams',
+
+// RFC 6121
+    ROSTER: 'jabber:iq:roster',
+    ROSTER_VERSIONING: 'urn:xmpp:features:rosterver',
+    SUBSCRIPTION_PREAPPROVAL: 'urn:xmpp:features:pre-approval',
+
+// RFC 7395
+    FRAMING: 'urn:ietf:params:xml:ns:xmpp-framing',
+
+// ================================================================
+// XEPS
+// ================================================================
+
+// XEP-0004
+    DATAFORM: 'jabber:x:data',
+
+// XEP-0009
+    RPC: 'jabber:iq:rpc',
+
+// XEP-0012
+    LAST_ACTIVITY: 'jabber:iq:last',
+
+// XEP-0016
+    PRIVACY: 'jabber:iq:privacy',
+
+// XEP-0030
+    DISCO_INFO: 'http://jabber.org/protocol/disco#info',
+    DISCO_ITEMS: 'http://jabber.org/protocol/disco#items',
+
+// XEP-0033
+    ADDRESS: 'http://jabber.org/protocol/address',
+
+// XEP-0045
+    MUC: 'http://jabber.org/protocol/muc',
+    MUC_ADMIN: 'http://jabber.org/protocol/muc#admin',
+    MUC_OWNER: 'http://jabber.org/protocol/muc#owner',
+    MUC_USER: 'http://jabber.org/protocol/muc#user',
+
+// XEP-0047
+    IBB: 'http://jabber.org/protocol/ibb',
+
+// XEP-0048
+    BOOKMARKS: 'storage:bookmarks',
+
+// XEP-0049
+    PRIVATE: 'jabber:iq:private',
+
+// XEP-0050
+    ADHOC_COMMANDS: 'http://jabber.org/protocol/commands',
+
+// XEP-0054
+    VCARD_TEMP: 'vcard-temp',
+
+// XEP-0055
+    SEARCH: 'jabber:iq:search',
+
+// XEP-0059
+    RSM: 'http://jabber.org/protocol/rsm',
+
+// XEP-0060
+    PUBSUB: 'http://jabber.org/protocol/pubsub',
+    PUBSUB_ERRORS: 'http://jabber.org/protocol/pubsub#errors',
+    PUBSUB_EVENT: 'http://jabber.org/protocol/pubsub#event',
+    PUBSUB_OWNER: 'http://jabber.org/protocol/pubsub#owner',
+
+// XEP-0065
+    SOCKS5: 'http://jabber.org/protocol/bytestreams',
+
+// XEP-0066
+    OOB: 'jabber:x:oob',
+
+// XEP-0070
+    HTTP_AUTH: 'http://jabber.org/protocol/http-auth',
+
+// XEP-0071
+    XHTML_IM: 'http://jabber.org/protocol/xhtml-im',
+
+// XEP-0077
+    REGISTER: 'jabber:iq:register',
+
+// XEP-0079
+    AMP: 'http://jabber.org/protocol/amp',
+
+// XEP-0080
+    GEOLOC: 'http://jabber.org/protocol/geoloc',
+
+// XEP-0083
+    ROSTER_DELIMITER: 'roster:delimiter',
+
+// XEP-0084
+    AVATAR_DATA: 'urn:xmpp:avatar:data',
+    AVATAR_METADATA: 'urn:xmpp:avatar:metadata',
+
+// XEP-0085
+    CHAT_STATES: 'http://jabber.org/protocol/chatstates',
+
+// XEP-0092
+    VERSION: 'jabber:iq:version',
+
+// XEP-0107
+    MOOD: 'http://jabber.org/protocol/mood',
+
+// XEP-0108
+    ACTIVITY: 'http://jabber.org/protocol/activity',
+
+// XEP-0114
+    COMPONENT: 'jabber:component:accept',
+
+// XEP-0115
+    CAPS: 'http://jabber.org/protocol/caps',
+
+// XEP-0118
+    TUNE: 'http://jabber.org/protocol/tune',
+
+// XEP-0122
+    DATAFORM_VALIDATION: 'http://jabber.org/protocol/xdata-validate',
+
+// XEP-0124
+    BOSH: 'http://jabber.org/protocol/httpbind',
+
+// XEP-0131
+    SHIM: 'http://jabber.org/protocol/shim',
+
+// XEP-0138
+    COMPRESSION: 'http://jabber.org/features/compress',
+
+// XEP-0141
+    DATAFORM_LAYOUT: 'http://jabber.org/protocol/xdata-layout',
+
+// XEP-0144
+    ROSTER_EXCHANGE: 'http://jabber.org/protocol/rosterx',
+
+// XEP-0145
+    ROSTER_NOTES: 'storage:rosternotes',
+
+// XEP-0152
+    REACH_0: 'urn:xmpp:reach:0',
+
+// XEP-0153
+    VCARD_TEMP_UPDATE: 'vcard-temp:x:update',
+
+// XEP-0158
+    CAPTCHA: 'urn:xmpp:captcha',
+
+// XEP-0166
+    JINGLE_1: 'urn:xmpp:jingle:1',
+    JINGLE_ERRORS_1: 'urn:xmpp:jingle:errors:1',
+
+// XEP-0167
+    JINGLE_RTP_1: 'urn:xmpp:jingle:apps:rtp:1',
+    JINGLE_RTP_ERRORS_1: 'urn:xmpp:jingle:apps:rtp:errors:1',
+    JINGLE_RTP_INFO_1: 'urn:xmpp:jingle:apps:rtp:info:1',
+
+// XEP-0171
+    LANG_TRANS: 'urn:xmpp:langtrans',
+    LANG_TRANS_ITEMS: 'urn:xmpp:langtrans:items',
+
+// XEP-0172
+    NICK: 'http://jabber.org/protocol/nick',
+
+// XEP-0176
+    JINGLE_ICE_UDP_1: 'urn:xmpp:jingle:transports:ice-udp:1',
+
+// XEP-0177
+    JINGLE_RAW_UDP_1: 'urn:xmpp:jingle:transports:raw-udp:1',
+
+// XEP-0184
+    RECEIPTS: 'urn:xmpp:receipts',
+
+// XEP-0186
+    INVISIBLE_0: 'urn:xmpp:invisible:0',
+
+// XEP-0191
+    BLOCKING: 'urn:xmpp:blocking',
+
+// XEP-0198
+    SMACKS_3: 'urn:xmpp:sm:3',
+
+// XEP-0199
+    PING: 'urn:xmpp:ping',
+
+// XEP-0202
+    TIME: 'urn:xmpp:time',
+
+// XEP-0203
+    DELAY: 'urn:xmpp:delay',
+
+// XEP-0206
+    BOSH_XMPP: 'urn:xmpp:xbosh',
+
+// XEP-0215
+    DISCO_EXTERNAL_1: 'urn:xmpp:extdisco:1',
+
+// XEP-0221
+    DATAFORM_MEDIA: 'urn:xmpp:media-element',
+
+// XEP-0224
+    ATTENTION_0: 'urn:xmpp:attention:0',
+
+// XEP-0231
+    BOB: 'urn:xmpp:bob',
+
+// XEP-0234
+    FILE_TRANSFER_3: 'urn:xmpp:jingle:apps:file-transfer:3',
+    FILE_TRANSFER_4: 'urn:xmpp:jingle:apps:file-transfer:4',
+
+// XEP-0249
+    MUC_DIRECT_INVITE: 'jabber:x:conference',
+
+// XEP-0258
+    SEC_LABEL_0: 'urn:xmpp:sec-label:0',
+    SEC_LABEL_CATALOG_2: 'urn:xmpp:sec-label:catalog:2',
+    SEC_LABEL_ESS_0: 'urn:xmpp:sec-label:ess:0',
+
+// XEP-0260
+    JINGLE_SOCKS5_1: 'urn:xmpp:jingle:transports:s5b:1',
+
+// XEP-0261
+    JINGLE_IBB_1: 'urn:xmpp:jingle:transports:ibb:1',
+
+// XEP-0262
+    JINGLE_RTP_ZRTP_1: 'urn:xmpp:jingle:apps:rtp:zrtp:1',
+
+// XEP-0264
+    THUMBS_0: 'urn:xmpp:thumbs:0',
+    THUMBS_1: 'urn:xmpp:thumbs:1',
+
+// XEP-0276
+    DECLOAKING_0: 'urn:xmpp:decloaking:0',
+
+// XEP-0280
+    CARBONS_2: 'urn:xmpp:carbons:2',
+
+// XEP-0293
+    JINGLE_RTP_RTCP_FB_0: 'urn:xmpp:jingle:apps:rtp:rtcp-fb:0',
+
+// XEP-0294
+    JINGLE_RTP_HDREXT_0: 'urn:xmpp:jingle:apps:rtp:rtp-hdrext:0',
+
+// XEP-0297
+    FORWARD_0: 'urn:xmpp:forward:0',
+
+// XEP-0300
+    HASHES_1: 'urn:xmpp:hashes:1',
+
+// XEP-0301
+    RTT_0: 'urn:xmpp:rtt:0',
+
+// XEP-0307
+    MUC_UNIQUE: 'http://jabber.org/protocol/muc#unique',
+
+// XEP-308
+    CORRECTION_0: 'urn:xmpp:message-correct:0',
+
+// XEP-0310
+    PSA: 'urn:xmpp:psa',
+
+// XEP-0313
+    MAM_TMP: 'urn:xmpp:mam:tmp',
+    MAM_0: 'urn:xmpp:mam:0',
+
+// XEP-0317
+    HATS_0: 'urn:xmpp:hats:0',
+
+// XEP-0319
+    IDLE_1: 'urn:xmpp:idle:1',
+
+// XEP-0320
+    JINGLE_DTLS_0: 'urn:xmpp:jingle:apps:dtls:0',
+
+// XEP-0328
+    JID_PREP_0: 'urn:xmpp:jidprep:0',
+
+// XEP-0334
+    HINTS: 'urn:xmpp:hints',
+
+// XEP-0335
+    JSON_0: 'urn:xmpp:json:0',
+
+// XEP-0337
+    EVENTLOG: 'urn:xmpp:eventlog',
+
+// XEP-0338
+    JINGLE_GROUPING_0: 'urn:xmpp:jingle:apps:grouping:0',
+
+// XEP-0339
+    JINGLE_RTP_SSMA_0: 'urn:xmpp:jingle:apps:rtp:ssma:0',
+
+// XEP-0340
+    COLIBRI: 'http://jitsi.org/protocol/colibri',
+
+// XEP-0343
+    DTLS_SCTP_1: 'urn:xmpp:jingle:transports:dtls-sctp:1',
+
+// XEP-0352
+    CSI: 'urn:xmpp:csi',
+
+// XEP-0353
+    JINGLE_MSG_INITIATE_0: 'urn:xmpp:jingle:jingle-message:0',
+
+// XEP-0357
+    PUSH_0: 'urn:xmpp:push:0',
+
+// XEP-0358
+    JINGLE_PUB_1: 'urn:xmpp:jinglepub:1'
+};
+
+},{}],132:[function(require,module,exports){
+module.exports = {
+    Type: {
+        SUBSCRIBE: 'subscribe',
+        SUBSCRIBED: 'subscribed',
+        UNSUBSCRIBE: 'unsubscribe',
+        UNSUBSCRIBED: 'unsubscribed',
+        PROBE: 'probe',
+        UNAVAILABLE: 'unavailable'
+    },
+    Show: {
+        CHAT: 'chat',
+        AWAY: 'away',
+        DO_NOT_DISTURB: 'dnd',
+        EXTENDED_AWAY: 'xa'
+    }
+};
+
+},{}],133:[function(require,module,exports){
+module.exports = {
+    Affiliation: {
+        MEMBER: 'member',
+        NONE: 'none',
+        OUTCAST: 'outcast',
+        OWNER: 'owner',
+        PUBLISHER: 'publisher',
+        PUBLISH_ONLY: 'publish-only'
+    },
+    Subscription: {
+        NONE: 'none',
+        PENDING: 'pending',
+        UNCONFIGURED: 'unconfigured',
+        SUBSCRIBED: 'subscribed'
+    },
+    AccessModel: {
+        OPEN: 'open',
+        PRESENCE: 'presence',
+        ROSTER: 'roster',
+        AUTHORIZE: 'authorize',
+        WHITELIST: 'whitelist'
+    },
+    Condition: {
+        CONFLICT: 'conflict'
+    }
+};
+
+},{}],134:[function(require,module,exports){
+'use strict';
+
+var StringPrep = require('./lib/stringprep');
+
+// All of our StringPrep fallbacks work correctly
+// in the ASCII range, so we can reliably mark
+// ASCII-only JIDs as prepped.
+var ASCII = /^[\x00-\x7F]*$/;
+
+
+
+function bareJID(local, domain) {
+    if (local) {
+        return local + '@' + domain;
+    }
+    return domain;
 }
 
-// Listen on the given `event` with `fn`. Store a group name if present.
-WildEmitter.prototype.on = function (event, groupName, fn) {
-    var hasGroup = (arguments.length === 3),
-        group = hasGroup ? arguments[1] : undefined,
-        func = hasGroup ? arguments[2] : arguments[1];
-    func._groupName = group;
-    (this.callbacks[event] = this.callbacks[event] || []).push(func);
-    return this;
-};
-
-// Adds an `event` listener that will be invoked a single
-// time then automatically removed.
-WildEmitter.prototype.once = function (event, groupName, fn) {
-    var self = this,
-        hasGroup = (arguments.length === 3),
-        group = hasGroup ? arguments[1] : undefined,
-        func = hasGroup ? arguments[2] : arguments[1];
-    function on() {
-        self.off(event, on);
-        func.apply(this, arguments);
+function fullJID(local, domain, resource) {
+    if (resource) {
+        return bareJID(local, domain) + '/' + resource;
     }
-    this.on(event, group, on);
-    return this;
+    return bareJID(local, domain);
+}
+
+
+exports.prep = function (data) {
+    var local = data.local;
+    var domain = data.domain;
+    var resource = data.resource;
+    var unescapedLocal = local;
+
+    if (local) {
+        local = StringPrep.nodeprep(local);
+        unescapedLocal = exports.unescape(local);
+    }
+
+    if (resource) {
+        resource = StringPrep.resourceprep(resource);
+    }
+
+    if (domain[domain.length - 1] === '.') {
+        domain = domain.slice(0, domain.length - 1);
+    }
+
+    domain = StringPrep.nameprep(domain.split('.').map(StringPrep.toUnicode).join('.'));
+
+    return {
+        prepped: data.prepped || StringPrep.available,
+        local: local,
+        domain: domain,
+        resource: resource,
+        bare: bareJID(local, domain),
+        full: fullJID(local, domain, resource),
+        unescapedLocal: unescapedLocal,
+        unescapedBare: bareJID(unescapedLocal, domain),
+        unescapedFull: fullJID(unescapedLocal, domain, resource)
+    };
 };
 
-// Unbinds an entire group
-WildEmitter.prototype.releaseGroup = function (groupName) {
-    var item, i, len, handlers;
-    for (item in this.callbacks) {
-        handlers = this.callbacks[item];
-        for (i = 0, len = handlers.length; i < len; i++) {
-            if (handlers[i]._groupName === groupName) {
-                //console.log('removing');
-                // remove it and shorten the array we're looping through
-                handlers.splice(i, 1);
-                i--;
-                len--;
+exports.parse = function (jid, trusted) {
+    var local = '';
+    var domain = '';
+    var resource = '';
+
+    trusted = trusted || ASCII.test(jid);
+
+    var resourceStart = jid.indexOf('/');
+    if (resourceStart > 0) {
+        resource = jid.slice(resourceStart + 1);
+        jid = jid.slice(0, resourceStart);
+    }
+
+    var localEnd = jid.indexOf('@');
+    if (localEnd > 0) {
+        local = jid.slice(0, localEnd);
+        jid = jid.slice(localEnd + 1);
+    }
+
+    domain = jid;
+
+    var preppedJID = exports.prep({
+        local: local,
+        domain: domain,
+        resource: resource,
+    });
+
+    preppedJID.prepped = preppedJID.prepped || trusted;
+
+    return preppedJID;
+};
+
+exports.equal = function (jid1, jid2, requirePrep) {
+    jid1 = new exports.JID(jid1);
+    jid2 = new exports.JID(jid2);
+    if (arguments.length === 2) {
+        requirePrep = true;
+    }
+    return jid1.local === jid2.local &&
+           jid1.domain === jid2.domain &&
+           jid1.resource === jid2.resource &&
+           (requirePrep ? jid1.prepped && jid2.prepped : true);
+};
+
+exports.equalBare = function (jid1, jid2, requirePrep) {
+    jid1 = new exports.JID(jid1);
+    jid2 = new exports.JID(jid2);
+    if (arguments.length === 2) {
+        requirePrep = true;
+    }
+    return jid1.local === jid2.local &&
+           jid1.domain === jid2.domain &&
+           (requirePrep ? jid1.prepped && jid2.prepped : true);
+};
+
+exports.isBare = function (jid) {
+    jid = new exports.JID(jid);
+
+    var hasResource = !!jid.resource;
+
+    return !hasResource;
+};
+
+exports.isFull = function (jid) {
+    jid = new exports.JID(jid);
+
+    var hasResource = !!jid.resource;
+
+    return hasResource;
+};
+
+exports.escape = function (val) {
+    return val.replace(/^\s+|\s+$/g, '')
+              .replace(/\\5c/g, '\\5c5c')
+              .replace(/\\20/g, '\\5c20')
+              .replace(/\\22/g, '\\5c22')
+              .replace(/\\26/g, '\\5c26')
+              .replace(/\\27/g, '\\5c27')
+              .replace(/\\2f/g, '\\5c2f')
+              .replace(/\\3a/g, '\\5c3a')
+              .replace(/\\3c/g, '\\5c3c')
+              .replace(/\\3e/g, '\\5c3e')
+              .replace(/\\40/g, '\\5c40')
+              .replace(/ /g, '\\20')
+              .replace(/\"/g, '\\22')
+              .replace(/\&/g, '\\26')
+              .replace(/\'/g, '\\27')
+              .replace(/\//g, '\\2f')
+              .replace(/:/g, '\\3a')
+              .replace(/</g, '\\3c')
+              .replace(/>/g, '\\3e')
+              .replace(/@/g, '\\40');
+};
+
+exports.unescape = function (val) {
+    return val.replace(/\\20/g, ' ')
+              .replace(/\\22/g, '"')
+              .replace(/\\26/g, '&')
+              .replace(/\\27/g, '\'')
+              .replace(/\\2f/g, '/')
+              .replace(/\\3a/g, ':')
+              .replace(/\\3c/g, '<')
+              .replace(/\\3e/g, '>')
+              .replace(/\\40/g, '@')
+              .replace(/\\5c/g, '\\');
+};
+
+
+exports.create = function (local, domain, resource) {
+    return new exports.JID(local, domain, resource);
+};
+
+exports.JID = function JID(localOrJID, domain, resource) {
+    var parsed = {};
+    if (localOrJID && !domain && !resource) {
+        if (typeof localOrJID === 'string') {
+            parsed = exports.parse(localOrJID);
+        } else if (localOrJID._isJID || localOrJID instanceof exports.JID) {
+            parsed = localOrJID;
+        } else {
+            throw new Error('Invalid argument type');
+        }
+    } else if (domain) {
+        var trusted = ASCII.test(localOrJID) && ASCII.test(domain);
+        if (resource) {
+            trusted = trusted && ASCII.test(resource);
+        }
+
+        parsed = exports.prep({
+            local: exports.escape(localOrJID),
+            domain: domain,
+            resource: resource,
+            prepped: trusted
+        });
+    } else {
+        parsed = {};
+    }
+
+    this._isJID = true;
+
+    this.local = parsed.local || '';
+    this.domain = parsed.domain || '';
+    this.resource = parsed.resource || '';
+    this.bare = parsed.bare || '';
+    this.full = parsed.full || '';
+
+    this.unescapedLocal = parsed.unescapedLocal || '';
+    this.unescapedBare = parsed.unescapedBare || '';
+    this.unescapedFull = parsed.unescapedFull || '';
+
+    this.prepped = parsed.prepped;
+};
+
+exports.JID.prototype.toString = function () {
+    return this.full;
+};
+
+exports.JID.prototype.toJSON = function () {
+    return this.full;
+};
+
+},{"./lib/stringprep":135}],135:[function(require,module,exports){
+'use strict';
+
+var punycode = require('punycode');
+
+
+exports.available = false;
+
+exports.toUnicode = punycode.toUnicode;
+
+exports.nameprep = function (str) {
+    return str.toLowerCase();
+};
+
+exports.nodeprep = function (str) {
+    return str.toLowerCase();
+};
+
+exports.resourceprep = function (str) {
+    return str;
+};
+
+},{"punycode":11}],136:[function(require,module,exports){
+'use strict';
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var _lodashForeach = require('lodash.foreach');
+
+var _lodashForeach2 = _interopRequireDefault(_lodashForeach);
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Avatar = JXT.define({
+        name: 'avatar',
+        namespace: _xmppConstants.Namespace.AVATAR_METADATA,
+        element: 'info',
+        fields: {
+            id: Utils.attribute('id'),
+            bytes: Utils.attribute('bytes'),
+            height: Utils.attribute('height'),
+            width: Utils.attribute('width'),
+            type: Utils.attribute('type', 'image/png'),
+            url: Utils.attribute('url')
+        }
+    });
+
+    var avatars = {
+        get: function get() {
+
+            var metadata = Utils.find(this.xml, _xmppConstants.Namespace.AVATAR_METADATA, 'metadata');
+            var results = [];
+            if (metadata.length) {
+                var _avatars = Utils.find(metadata[0], _xmppConstants.Namespace.AVATAR_METADATA, 'info');
+                (0, _lodashForeach2['default'])(_avatars, function (info) {
+
+                    results.push(new Avatar({}, info));
+                });
+            }
+            return results;
+        },
+        set: function set(value) {
+
+            var metadata = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.AVATAR_METADATA, 'metadata');
+            Utils.setAttribute(metadata, 'xmlns', _xmppConstants.Namespace.AVATAR_METADATA);
+            (0, _lodashForeach2['default'])(value, function (info) {
+
+                var avatar = new Avatar(info);
+                metadata.appendChild(avatar.xml);
+            });
+        }
+    };
+
+    JXT.withPubsubItem(function (Item) {
+
+        JXT.add(Item, 'avatars', avatars);
+        JXT.add(Item, 'avatarData', Utils.textSub(_xmppConstants.Namespace.AVATAR_DATA, 'data'));
+    });
+};
+
+module.exports = exports['default'];
+
+},{"babel-runtime/helpers/interop-require-default":197,"lodash.foreach":212,"xmpp-constants":220}],137:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Bind = JXT.define({
+        name: 'bind',
+        namespace: _xmppConstants.Namespace.BIND,
+        element: 'bind',
+        fields: {
+            resource: Utils.textSub(_xmppConstants.Namespace.BIND, 'resource'),
+            jid: Utils.jidSub(_xmppConstants.Namespace.BIND, 'jid')
+        }
+    });
+
+    JXT.extendIQ(Bind);
+    JXT.extendStreamFeatures(Bind);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],138:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var _xmppJid = require('xmpp-jid');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var jidList = {
+        get: function get() {
+
+            var result = [];
+            var items = types.find(this.xml, _xmppConstants.Namespace.BLOCKING, 'item');
+            if (!items.length) {
+                return result;
+            }
+
+            items.forEach(function (item) {
+
+                result.push(new _xmppJid.JID(types.getAttribute(item, 'jid', '')));
+            });
+
+            return result;
+        },
+        set: function set(values) {
+
+            var self = this;
+            values.forEach(function (value) {
+
+                var item = types.createElement(_xmppConstants.Namespace.BLOCKING, 'item', _xmppConstants.Namespace.BLOCKING);
+                types.setAttribute(item, 'jid', value.toString());
+                self.xml.appendChild(item);
+            });
+        }
+    };
+
+    var Block = JXT.define({
+        name: 'block',
+        namespace: _xmppConstants.Namespace.BLOCKING,
+        element: 'block',
+        fields: {
+            jids: jidList
+        }
+    });
+
+    var Unblock = JXT.define({
+        name: 'unblock',
+        namespace: _xmppConstants.Namespace.BLOCKING,
+        element: 'unblock',
+        fields: {
+            jids: jidList
+        }
+    });
+
+    var BlockList = JXT.define({
+        name: 'blockList',
+        namespace: _xmppConstants.Namespace.BLOCKING,
+        element: 'blocklist',
+        fields: {
+            jids: jidList
+        }
+    });
+
+    JXT.extendIQ(Block);
+    JXT.extendIQ(Unblock);
+    JXT.extendIQ(BlockList);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220,"xmpp-jid":226}],139:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var BOB = JXT.define({
+        name: 'bob',
+        namespace: _xmppConstants.Namespace.BOB,
+        element: 'data',
+        fields: {
+            cid: Utils.attribute('cid'),
+            maxAge: Utils.numberAttribute('max-age'),
+            type: Utils.attribute('type'),
+            data: Utils.text()
+        }
+    });
+
+    JXT.extendIQ(BOB);
+    JXT.extendMessage(BOB);
+    JXT.extendPresence(BOB);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],140:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Conference = JXT.define({
+        name: '_conference',
+        namespace: _xmppConstants.Namespace.BOOKMARKS,
+        element: 'conference',
+        fields: {
+            name: Utils.attribute('name'),
+            autoJoin: Utils.boolAttribute('autojoin'),
+            jid: Utils.jidAttribute('jid'),
+            nick: Utils.textSub(_xmppConstants.Namespace.BOOKMARKS, 'nick')
+        }
+    });
+
+    var Bookmarks = JXT.define({
+        name: 'bookmarks',
+        namespace: _xmppConstants.Namespace.BOOKMARKS,
+        element: 'storage'
+    });
+
+    JXT.extend(Bookmarks, Conference, 'conferences');
+
+    JXT.withDefinition('query', _xmppConstants.Namespace.PRIVATE, function (PrivateStorage) {
+
+        JXT.extend(PrivateStorage, Bookmarks);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],141:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: 'bosh',
+        namespace: _xmppConstants.Namespace.BOSH,
+        element: 'body',
+        prefixes: {
+            xmpp: _xmppConstants.Namespace.BOSH_XMPP
+        },
+        fields: {
+            accept: Utils.attribute('accept'),
+            ack: Utils.numberAttribute('ack'),
+            authid: Utils.attribute('authid'),
+            charsets: Utils.attribute('charsets'),
+            condition: Utils.attribute('condition'),
+            content: Utils.attribute('content'),
+            from: Utils.jidAttribute('from', true),
+            hold: Utils.numberAttribute('hold'),
+            inactivity: Utils.numberAttribute('inactivity'),
+            key: Utils.attribute('key'),
+            maxpause: Utils.numberAttribute('maxpause'),
+            newKey: Utils.attribute('newkey'),
+            pause: Utils.numberAttribute('pause'),
+            polling: Utils.numberAttribute('polling'),
+            resport: Utils.numberAttribute('report'),
+            requests: Utils.numberAttribute('requests'),
+            rid: Utils.numberAttribute('rid'),
+            sid: Utils.attribute('sid'),
+            stream: Utils.attribute('stream'),
+            time: Utils.attribute('time'),
+            to: Utils.jidAttribute('to', true),
+            type: Utils.attribute('type'),
+            ver: Utils.attribute('ver'),
+            wait: Utils.numberAttribute('wait'),
+            uri: Utils.textSub(_xmppConstants.Namespace.BOSH, 'uri'),
+            lang: Utils.langAttribute(),
+            // These three should be using namespaced attributes, but browsers are stupid
+            // when it comes to serializing attributes with namespaces
+            version: Utils.attribute('xmpp:version', '1.0'),
+            restart: Utils.attribute('xmpp:restart'),
+            restartLogic: Utils.boolAttribute('xmpp:restartLogic'),
+            payload: {
+                get: function get() {
+
+                    var results = [];
+                    for (var i = 0, len = this.xml.childNodes.length; i < len; i++) {
+                        var obj = JXT.build(this.xml.childNodes[i]);
+                        if (obj !== undefined) {
+                            results.push(obj);
+                        }
+                    }
+                    return results;
+                },
+                set: function set(values) {
+                    var _this = this;
+
+                    values.forEach(function (types) {
+
+                        _this.xml.appendChild(types.xml);
+                    });
+                }
             }
         }
-    }
-    return this;
+    });
 };
 
-// Remove the given callback for `event` or all
-// registered callbacks.
-WildEmitter.prototype.off = function (event, fn) {
-    var callbacks = this.callbacks[event],
-        i;
+module.exports = exports['default'];
 
-    if (!callbacks) return this;
+},{"xmpp-constants":220}],142:[function(require,module,exports){
+'use strict';
 
-    // remove all handlers
-    if (arguments.length === 1) {
-        delete this.callbacks[event];
-        return this;
-    }
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
 
-    // remove specific handler
-    i = callbacks.indexOf(fn);
-    callbacks.splice(i, 1);
-    if (callbacks.length === 0) {
-        delete this.callbacks[event];
-    }
-    return this;
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Sent = JXT.define({
+        name: 'carbonSent',
+        eventName: 'carbon:sent',
+        namespace: _xmppConstants.Namespace.CARBONS_2,
+        element: 'sent'
+    });
+
+    var Received = JXT.define({
+        name: 'carbonReceived',
+        eventName: 'carbon:received',
+        namespace: _xmppConstants.Namespace.CARBONS_2,
+        element: 'received'
+    });
+
+    var Private = JXT.define({
+        name: 'carbonPrivate',
+        eventName: 'carbon:private',
+        namespace: _xmppConstants.Namespace.CARBONS_2,
+        element: 'private'
+    });
+
+    var Enable = JXT.define({
+        name: 'enableCarbons',
+        namespace: _xmppConstants.Namespace.CARBONS_2,
+        element: 'enable'
+    });
+
+    var Disable = JXT.define({
+        name: 'disableCarbons',
+        namespace: _xmppConstants.Namespace.CARBONS_2,
+        element: 'disable'
+    });
+
+    JXT.withDefinition('forwarded', _xmppConstants.Namespace.FORWARD_0, function (Forwarded) {
+
+        JXT.extend(Sent, Forwarded);
+        JXT.extend(Received, Forwarded);
+    });
+
+    JXT.extendMessage(Sent);
+    JXT.extendMessage(Received);
+    JXT.extendMessage(Private);
+    JXT.extendIQ(Enable);
+    JXT.extendIQ(Disable);
 };
 
-/// Emit `event` with the given args.
-// also calls any `*` handlers
-WildEmitter.prototype.emit = function (event) {
-    var args = [].slice.call(arguments, 1),
-        callbacks = this.callbacks[event],
-        specialCallbacks = this.getWildcardCallbacks(event),
-        i,
-        len,
-        item,
-        listeners;
+module.exports = exports['default'];
 
-    if (callbacks) {
-        listeners = callbacks.slice();
-        for (i = 0, len = listeners.length; i < len; ++i) {
-            if (listeners[i]) {
-                listeners[i].apply(this, args);
-            } else {
-                break;
+},{"xmpp-constants":220}],143:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var ACTIONS = ['next', 'prev', 'complete', 'cancel'];
+
+var CONDITIONS = ['bad-action', 'bad-locale', 'bad-payload', 'bad-sessionid', 'malformed-action', 'session-expired'];
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Command = JXT.define({
+        name: 'command',
+        namespace: _xmppConstants.Namespace.ADHOC_COMMANDS,
+        element: 'command',
+        fields: {
+            action: Utils.attribute('action'),
+            node: Utils.attribute('node'),
+            sessionid: Utils.attribute('sessionid'),
+            status: Utils.attribute('status'),
+            execute: Utils.subAttribute(_xmppConstants.Namespace.ADHOC_COMMANDS, 'actions', 'execute'),
+            actions: {
+                get: function get() {
+
+                    var result = [];
+                    var actionSet = Utils.find(this.xml, _xmppConstants.Namespace.ADHOC_COMMANDS, 'actions');
+                    if (!actionSet.length) {
+                        return [];
+                    }
+                    ACTIONS.forEach(function (action) {
+
+                        var existing = Utils.find(actionSet[0], _xmppConstants.Namespace.ADHOC_COMMANDS, action);
+                        if (existing.length) {
+                            result.push(action);
+                        }
+                    });
+                    return result;
+                },
+                set: function set(values) {
+
+                    var actionSet = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.ADHOC_COMMANDS, 'actions');
+                    for (var i = 0, len = actionSet.childNodes.length; i < len; i++) {
+                        actionSet.removeChild(actionSet.childNodes[i]);
+                    }
+                    values.forEach(function (value) {
+
+                        actionSet.appendChild(Utils.createElement(_xmppConstants.Namespace.ADHOC_COMMANDS, value.toLowerCase(), _xmppConstants.Namespace.ADHOC_COMMANDS));
+                    });
+                }
             }
         }
-    }
+    });
 
-    if (specialCallbacks) {
-        len = specialCallbacks.length;
-        listeners = specialCallbacks.slice();
-        for (i = 0, len = listeners.length; i < len; ++i) {
-            if (listeners[i]) {
-                listeners[i].apply(this, [event].concat(args));
-            } else {
-                break;
+    var Note = JXT.define({
+        name: '_commandNote',
+        namespace: _xmppConstants.Namespace.ADHOC_COMMANDS,
+        element: 'note',
+        fields: {
+            type: Utils.attribute('type'),
+            value: Utils.text()
+        }
+    });
+
+    JXT.extend(Command, Note, 'notes');
+
+    JXT.extendIQ(Command);
+
+    JXT.withStanzaError(function (StanzaError) {
+
+        JXT.add(StanzaError, 'adhocCommandCondition', Utils.enumSub(_xmppConstants.Namespace.ADHOC_COMMANDS, CONDITIONS));
+    });
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(Command, DataForm);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],144:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var CSIFeature = JXT.define({
+        name: 'clientStateIndication',
+        namespace: _xmppConstants.Namespace.CSI,
+        element: 'csi'
+    });
+
+    JXT.define({
+        name: 'csiActive',
+        eventName: 'csi:active',
+        namespace: _xmppConstants.Namespace.CSI,
+        element: 'active',
+        topLevel: true
+    });
+
+    JXT.define({
+        name: 'csiInactive',
+        eventName: 'csi:inactive',
+        namespace: _xmppConstants.Namespace.CSI,
+        element: 'inactive',
+        topLevel: true
+    });
+
+    JXT.extendStreamFeatures(CSIFeature);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],145:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var _xmppJid = require('xmpp-jid');
+
+var SINGLE_FIELDS = ['text-single', 'text-private', 'list-single', 'jid-single'];
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Field = JXT.define({
+        name: '_field',
+        namespace: _xmppConstants.Namespace.DATAFORM,
+        element: 'field',
+        init: function init(data) {
+
+            this._type = (data || {}).type || this.type;
+        },
+        fields: {
+            type: {
+                get: function get() {
+
+                    return Utils.getAttribute(this.xml, 'type', 'text-single');
+                },
+                set: function set(value) {
+
+                    this._type = value;
+                    Utils.setAttribute(this.xml, 'type', value);
+                }
+            },
+            name: Utils.attribute('var'),
+            desc: Utils.textSub(_xmppConstants.Namespace.DATAFORM, 'desc'),
+            required: Utils.boolSub(_xmppConstants.Namespace.DATAFORM, 'required'),
+            label: Utils.attribute('label'),
+            value: {
+                get: function get() {
+
+                    var vals = Utils.getMultiSubText(this.xml, _xmppConstants.Namespace.DATAFORM, 'value');
+                    if (this._type === 'boolean') {
+                        return vals[0] === '1' || vals[0] === 'true';
+                    }
+                    if (vals.length > 1) {
+                        if (this._type === 'text-multi') {
+                            return vals.join('\n');
+                        }
+
+                        if (this._type === 'jid-multi') {
+                            return vals.map(function (jid) {
+
+                                return new _xmppJid.JID(jid);
+                            });
+                        }
+
+                        return vals;
+                    }
+                    if (SINGLE_FIELDS.indexOf(this._type) >= 0) {
+                        if (this._type === 'jid-single') {
+                            return new _xmppJid.JID(vals[0]);
+                        }
+                        return vals[0];
+                    }
+
+                    return vals;
+                },
+                set: function set(value) {
+
+                    if (this._type === 'boolean' || value === true || value === false) {
+                        var truthy = value === true || value === 'true' || value === '1';
+                        var sub = Utils.createElement(_xmppConstants.Namespace.DATAFORM, 'value', _xmppConstants.Namespace.DATAFORM);
+                        sub.textContent = truthy ? '1' : '0';
+                        this.xml.appendChild(sub);
+                    } else {
+                        if (this._type === 'text-multi' && typeof value === 'string') {
+                            value = value.split('\n');
+                        }
+                        Utils.setMultiSubText(this.xml, _xmppConstants.Namespace.DATAFORM, 'value', value, (function (val) {
+
+                            var sub = Utils.createElement(_xmppConstants.Namespace.DATAFORM, 'value', _xmppConstants.Namespace.DATAFORM);
+                            sub.textContent = val;
+                            this.xml.appendChild(sub);
+                        }).bind(this));
+                    }
+                }
             }
         }
-    }
+    });
 
-    return this;
-};
-
-// Helper for for finding special wildcard event handlers that match the event
-WildEmitter.prototype.getWildcardCallbacks = function (eventName) {
-    var item,
-        split,
-        result = [];
-
-    for (item in this.callbacks) {
-        split = item.split('*');
-        if (item === '*' || (split.length === 2 && eventName.slice(0, split[0].length) === split[0])) {
-            result = result.concat(this.callbacks[item]);
+    var Option = JXT.define({
+        name: '_formoption',
+        namespace: _xmppConstants.Namespace.DATAFORM,
+        element: 'option',
+        fields: {
+            label: Utils.attribute('label'),
+            value: Utils.textSub(_xmppConstants.Namespace.DATAFORM, 'value')
         }
-    }
-    return result;
+    });
+
+    var Item = JXT.define({
+        name: '_formitem',
+        namespace: _xmppConstants.Namespace.DATAFORM,
+        element: 'item'
+    });
+
+    var Media = JXT.define({
+        name: 'media',
+        element: 'media',
+        namespace: _xmppConstants.Namespace.DATAFORM_MEDIA,
+        fields: {
+            height: Utils.numberAttribute('height'),
+            width: Utils.numberAttribute('width')
+        }
+    });
+
+    var MediaURI = JXT.define({
+        name: '_mediaURI',
+        element: 'uri',
+        namespace: _xmppConstants.Namespace.DATAFORM_MEDIA,
+        fields: {
+            uri: Utils.text(),
+            type: Utils.attribute('type')
+        }
+    });
+
+    var Validation = JXT.define({
+        name: 'validation',
+        element: 'validate',
+        namespace: _xmppConstants.Namespace.DATAFORM_VALIDATION,
+        fields: {
+            dataType: Utils.attribute('datatype'),
+            basic: Utils.boolSub(_xmppConstants.Namespace.DATAFORM_VALIDATION, 'basic'),
+            open: Utils.boolSub(_xmppConstants.Namespace.DATAFORM_VALIDATION, 'open'),
+            regex: Utils.textSub(_xmppConstants.Namespace.DATAFORM_VALIDATION, 'regex')
+        }
+    });
+
+    var Range = JXT.define({
+        name: 'range',
+        element: 'range',
+        namespace: _xmppConstants.Namespace.DATAFORM_VALIDATION,
+        fields: {
+            min: Utils.attribute('min'),
+            max: Utils.attribute('max')
+        }
+    });
+
+    var ListRange = JXT.define({
+        name: 'select',
+        element: 'list-range',
+        namespace: _xmppConstants.Namespace.DATAFORM_VALIDATION,
+        fields: {
+            min: Utils.numberAttribute('min'),
+            max: Utils.numberAttribute('max')
+        }
+    });
+
+    var layoutContents = {
+        get: function get() {
+
+            var result = [];
+            for (var i = 0, len = this.xml.childNodes.length; i < len; i++) {
+                var child = this.xml.childNodes[i];
+                if (child.namespaceURI !== _xmppConstants.Namespace.DATAFORM_LAYOUT) {
+                    continue;
+                }
+
+                switch (child.localName) {
+                    case 'text':
+                        result.push({
+                            text: child.textContent
+                        });
+                        break;
+                    case 'fieldref':
+                        result.push({
+                            field: child.getAttribute('var')
+                        });
+                        break;
+                    case 'reportedref':
+                        result.push({
+                            reported: true
+                        });
+                        break;
+                    case 'section':
+                        result.push({
+                            section: new Section(null, child, this).toJSON()
+                        });
+                        break;
+                }
+            }
+
+            return result;
+        },
+        set: function set(values) {
+
+            for (var i = 0, len = values.length; i < len; i++) {
+                var value = values[i];
+                if (value.text) {
+                    var text = Utils.createElement(_xmppConstants.Namespace.DATAFORM_LAYOUT, 'text', _xmppConstants.Namespace.DATAFORM_LAYOUT);
+                    text.textContent = value.text;
+                    this.xml.appendChild(text);
+                }
+                if (value.field) {
+                    var field = Utils.createElement(_xmppConstants.Namespace.DATAFORM_LAYOUT, 'fieldref', _xmppConstants.Namespace.DATAFORM_LAYOUT);
+                    field.setAttribute('var', value.field);
+                    this.xml.appendChild(field);
+                }
+                if (value.reported) {
+                    this.xml.appendChild(Utils.createElement(_xmppConstants.Namespace.DATAFORM_LAYOUT, 'reportedref', _xmppConstants.Namespace.DATAFORM_LAYOUT));
+                }
+                if (value.section) {
+                    var sectionXML = Utils.createElement(_xmppConstants.Namespace.DATAFORM_LAYOUT, 'section', _xmppConstants.Namespace.DATAFORM_LAYOUT);
+                    this.xml.appendChild(sectionXML);
+
+                    var section = new Section(null, sectionXML);
+                    section.label = value.section.label;
+                    section.contents = value.section.contents;
+                }
+            }
+        }
+    };
+
+    var Section = JXT.define({
+        name: '_section',
+        element: 'section',
+        namespace: _xmppConstants.Namespace.DATAFORM_LAYOUT,
+        fields: {
+            label: Utils.attribute('label'),
+            contents: layoutContents
+        }
+    });
+
+    var Page = JXT.define({
+        name: '_page',
+        element: 'page',
+        namespace: _xmppConstants.Namespace.DATAFORM_LAYOUT,
+        fields: {
+            label: Utils.attribute('label'),
+            contents: layoutContents
+        }
+    });
+
+    var DataForm = JXT.define({
+        name: 'form',
+        namespace: _xmppConstants.Namespace.DATAFORM,
+        element: 'x',
+        init: function init() {
+
+            // Propagate reported field types to items
+
+            if (!this.reportedFields.length) {
+                return;
+            }
+
+            var fieldTypes = {};
+            this.reportedFields.forEach(function (reported) {
+
+                fieldTypes[reported.name] = reported.type;
+            });
+            this.items.forEach(function (item) {
+
+                item.fields.forEach(function (field) {
+
+                    field.type = field._type = fieldTypes[field.name];
+                });
+            });
+        },
+        fields: {
+            title: Utils.textSub(_xmppConstants.Namespace.DATAFORM, 'title'),
+            instructions: Utils.multiTextSub(_xmppConstants.Namespace.DATAFORM, 'instructions'),
+            type: Utils.attribute('type', 'form'),
+            reportedFields: Utils.subMultiExtension(_xmppConstants.Namespace.DATAFORM, 'reported', Field)
+        }
+    });
+
+    JXT.extend(DataForm, Field, 'fields');
+    JXT.extend(DataForm, Item, 'items');
+    JXT.extend(DataForm, Page, 'layout');
+
+    JXT.extend(Field, Media);
+    JXT.extend(Field, Validation);
+    JXT.extend(Field, Option, 'options');
+
+    JXT.extend(Item, Field, 'fields');
+
+    JXT.extend(Media, MediaURI, 'uris');
+    JXT.extend(Validation, Range);
+    JXT.extend(Validation, ListRange);
+
+    JXT.extendMessage(DataForm);
 };
 
-},{}],117:[function(require,module,exports){
+module.exports = exports['default'];
+
+},{"xmpp-constants":220,"xmpp-jid":226}],146:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var DelayedDelivery = JXT.define({
+        name: 'delay',
+        namespace: _xmppConstants.Namespace.DELAY,
+        element: 'delay',
+        fields: {
+            from: Utils.jidAttribute('from'),
+            stamp: Utils.dateAttribute('stamp'),
+            reason: Utils.text()
+        }
+    });
+
+    JXT.extendMessage(DelayedDelivery);
+    JXT.extendPresence(DelayedDelivery);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],147:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var DiscoCaps = JXT.define({
+        name: 'caps',
+        namespace: _xmppConstants.Namespace.CAPS,
+        element: 'c',
+        fields: {
+            ver: Utils.attribute('ver'),
+            node: Utils.attribute('node'),
+            hash: Utils.attribute('hash'),
+            ext: Utils.attribute('ext')
+        }
+    });
+
+    var DiscoInfo = JXT.define({
+        name: 'discoInfo',
+        namespace: _xmppConstants.Namespace.DISCO_INFO,
+        element: 'query',
+        fields: {
+            node: Utils.attribute('node'),
+            features: Utils.multiSubAttribute(_xmppConstants.Namespace.DISCO_INFO, 'feature', 'var')
+        }
+    });
+
+    var DiscoIdentity = JXT.define({
+        name: '_discoIdentity',
+        namespace: _xmppConstants.Namespace.DISCO_INFO,
+        element: 'identity',
+        fields: {
+            category: Utils.attribute('category'),
+            type: Utils.attribute('type'),
+            name: Utils.attribute('name'),
+            lang: Utils.langAttribute()
+        }
+    });
+
+    var DiscoItems = JXT.define({
+        name: 'discoItems',
+        namespace: _xmppConstants.Namespace.DISCO_ITEMS,
+        element: 'query',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var DiscoItem = JXT.define({
+        name: '_discoItem',
+        namespace: _xmppConstants.Namespace.DISCO_ITEMS,
+        element: 'item',
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            node: Utils.attribute('node'),
+            name: Utils.attribute('name')
+        }
+    });
+
+    JXT.extend(DiscoItems, DiscoItem, 'items');
+    JXT.extend(DiscoInfo, DiscoIdentity, 'identities');
+
+    JXT.extendIQ(DiscoInfo);
+    JXT.extendIQ(DiscoItems);
+    JXT.extendPresence(DiscoCaps);
+    JXT.extendStreamFeatures(DiscoCaps);
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(DiscoInfo, DataForm, 'extensions');
+    });
+
+    JXT.withDefinition('set', _xmppConstants.Namespace.RSM, function (RSM) {
+
+        JXT.extend(DiscoItems, RSM);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],148:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var CONDITIONS = ['bad-request', 'conflict', 'feature-not-implemented', 'forbidden', 'gone', 'internal-server-error', 'item-not-found', 'jid-malformed', 'not-acceptable', 'not-allowed', 'not-authorized', 'payment-required', 'recipient-unavailable', 'redirect', 'registration-required', 'remote-server-not-found', 'remote-server-timeout', 'resource-constraint', 'service-unavailable', 'subscription-required', 'undefined-condition', 'unexpected-request'];
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var StanzaError = JXT.define({
+        name: 'error',
+        namespace: _xmppConstants.Namespace.CLIENT,
+        element: 'error',
+        fields: {
+            lang: {
+                get: function get() {
+
+                    return (this.parent || {}).lang || '';
+                }
+            },
+            condition: Utils.enumSub(_xmppConstants.Namespace.STANZA_ERROR, CONDITIONS),
+            gone: {
+                get: function get() {
+
+                    return Utils.getSubText(this.xml, _xmppConstants.Namespace.STANZA_ERROR, 'gone');
+                },
+                set: function set(value) {
+
+                    this.condition = 'gone';
+                    Utils.setSubText(this.xml, _xmppConstants.Namespace.STANZA_ERROR, 'gone', value);
+                }
+            },
+            redirect: {
+                get: function get() {
+
+                    return Utils.getSubText(this.xml, _xmppConstants.Namespace.STANZA_ERROR, 'redirect');
+                },
+                set: function set(value) {
+
+                    this.condition = 'redirect';
+                    Utils.setSubText(this.xml, _xmppConstants.Namespace.STANZA_ERROR, 'redirect', value);
+                }
+            },
+            code: Utils.attribute('code'),
+            type: Utils.attribute('type'),
+            by: Utils.jidAttribute('by'),
+            $text: {
+                get: function get() {
+
+                    return Utils.getSubLangText(this.xml, _xmppConstants.Namespace.STANZA_ERROR, 'text', this.lang);
+                }
+            },
+            text: {
+                get: function get() {
+
+                    var text = this.$text;
+                    return text[this.lang] || '';
+                },
+                set: function set(value) {
+
+                    Utils.setSubLangText(this.xml, _xmppConstants.Namespace.STANZA_ERROR, 'text', value, this.lang);
+                }
+            }
+        }
+    });
+
+    JXT.extendMessage(StanzaError);
+    JXT.extendPresence(StanzaError);
+    JXT.extendIQ(StanzaError);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],149:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Services = exports.Services = JXT.define({
+        name: 'services',
+        namespace: _xmppConstants.Namespace.DISCO_EXTERNAL_1,
+        element: 'services',
+        fields: {
+            type: Utils.attribute('type')
+        }
+    });
+
+    var Credentials = exports.Credentials = JXT.define({
+        name: 'credentials',
+        namespace: _xmppConstants.Namespace.DISCO_EXTERNAL_1,
+        element: 'credentials'
+    });
+
+    var Service = JXT.define({
+        name: 'service',
+        namespace: _xmppConstants.Namespace.DISCO_EXTERNAL_1,
+        element: 'service',
+        fields: {
+            host: Utils.attribute('host'),
+            port: Utils.attribute('port'),
+            transport: Utils.attribute('transport'),
+            type: Utils.attribute('type'),
+            username: Utils.attribute('username'),
+            password: Utils.attribute('password')
+        }
+    });
+
+    JXT.extend(Services, Service, 'services');
+    JXT.extend(Credentials, Service);
+
+    JXT.extendIQ(Services);
+    JXT.extendIQ(Credentials);
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(Service, DataForm);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],150:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var FT_NS = _xmppConstants.Namespace.FILE_TRANSFER_3;
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var File = JXT.define({
+        name: '_file',
+        namespace: FT_NS,
+        element: 'file',
+        fields: {
+            name: Utils.textSub(FT_NS, 'name'),
+            desc: Utils.textSub(FT_NS, 'desc'),
+            size: Utils.numberSub(FT_NS, 'size'),
+            date: Utils.dateSub(FT_NS, 'date')
+        }
+    });
+
+    var Range = JXT.define({
+        name: 'range',
+        namespace: FT_NS,
+        element: 'range',
+        fields: {
+            offset: Utils.numberAttribute('offset')
+        }
+    });
+
+    var Thumbnail = JXT.define({
+        name: 'thumbnail',
+        namespace: _xmppConstants.Namespace.THUMBS_0,
+        element: 'thumbnail',
+        fields: {
+            cid: Utils.attribute('cid'),
+            mimeType: Utils.attribute('mime-type'),
+            width: Utils.numberAttribute('width'),
+            height: Utils.numberAttribute('height')
+        }
+    });
+
+    var FileTransfer = JXT.define({
+        name: '_filetransfer',
+        namespace: FT_NS,
+        element: 'description',
+        tags: ['jingle-description'],
+        fields: {
+            descType: { value: 'filetransfer' },
+            offer: Utils.subExtension('offer', FT_NS, 'offer', File),
+            request: Utils.subExtension('request', FT_NS, 'request', File)
+        }
+    });
+
+    JXT.extend(File, Range);
+    JXT.extend(File, Thumbnail);
+
+    JXT.withDefinition('hash', _xmppConstants.Namespace.HASHES_1, function (Hash) {
+
+        JXT.extend(File, Hash, 'hashes');
+    });
+
+    JXT.withDefinition('content', _xmppConstants.Namespace.JINGLE_1, function (Content) {
+
+        JXT.extend(Content, FileTransfer);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],151:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Forwarded = JXT.define({
+        name: 'forwarded',
+        namespace: _xmppConstants.Namespace.FORWARD_0,
+        element: 'forwarded'
+    });
+
+    JXT.extendIQ(Forwarded);
+    JXT.extendPresence(Forwarded);
+
+    JXT.withMessage(function (Message) {
+
+        JXT.extend(Message, Forwarded);
+        JXT.extend(Forwarded, Message);
+    });
+
+    JXT.withDefinition('delay', _xmppConstants.Namespace.DELAY, function (Delayed) {
+
+        JXT.extend(Forwarded, Delayed);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],152:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: 'openStream',
+        namespace: _xmppConstants.Namespace.FRAMING,
+        element: 'open',
+        topLevel: true,
+        fields: {
+            lang: Utils.langAttribute(),
+            id: Utils.attribute('id'),
+            version: Utils.attribute('version', '1.0'),
+            to: Utils.jidAttribute('to', true),
+            from: Utils.jidAttribute('from', true)
+        }
+    });
+
+    JXT.define({
+        name: 'closeStream',
+        namespace: _xmppConstants.Namespace.FRAMING,
+        element: 'close',
+        topLevel: true,
+        fields: {
+            seeOtherURI: Utils.attribute('see-other-uri')
+        }
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],153:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var GeoLoc = JXT.define({
+        name: 'geoloc',
+        namespace: _xmppConstants.Namespace.GEOLOC,
+        element: 'geoloc',
+        fields: {
+            accuracy: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'accuracy', true),
+            altitude: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'alt', true),
+            area: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'area'),
+            heading: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'bearing', true),
+            bearing: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'bearing', true),
+            building: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'building'),
+            country: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'country'),
+            countrycode: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'countrycode'),
+            datum: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'datum'),
+            description: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'description'),
+            error: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'error', true),
+            floor: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'floor'),
+            latitude: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'lat', true),
+            locality: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'locality'),
+            longitude: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'lon', true),
+            postalcode: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'postalcode'),
+            region: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'region'),
+            room: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'room'),
+            speed: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'speed', true),
+            street: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'street'),
+            text: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'text'),
+            timestamp: Utils.dateSub(_xmppConstants.Namespace.GEOLOC, 'timestamp'),
+            tzo: Utils.tzoSub(_xmppConstants.Namespace.GEOLOC, 'tzo'),
+            uri: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'uri')
+        }
+    });
+
+    JXT.extendPubsubItem(GeoLoc);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],154:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    JXT.define({
+        name: 'hash',
+        namespace: _xmppConstants.Namespace.HASHES_1,
+        element: 'hash',
+        fields: {
+            algo: JXT.utils.attribute('algo'),
+            value: JXT.utils.text()
+        }
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],155:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Hat = JXT.define({
+        name: '_hat',
+        namespace: _xmppConstants.Namespace.HATS_0,
+        element: 'hat',
+        fields: {
+            lang: JXT.utils.langAttribute(),
+            name: JXT.utils.attribute('name'),
+            displayName: JXT.utils.attribute('displayName')
+        }
+    });
+
+    JXT.withPresence(function (Presence) {
+
+        JXT.add(Presence, 'hats', JXT.utils.subMultiExtension(_xmppConstants.Namespace.HATS_0, 'hats', Hat));
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],156:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var ICE = JXT.define({
+        name: '_iceUdp',
+        namespace: _xmppConstants.Namespace.JINGLE_ICE_UDP_1,
+        element: 'transport',
+        tags: ['jingle-transport'],
+        fields: {
+            transType: { value: 'iceUdp' },
+            pwd: Utils.attribute('pwd'),
+            ufrag: Utils.attribute('ufrag')
+        }
+    });
+
+    var RemoteCandidate = JXT.define({
+        name: 'remoteCandidate',
+        namespace: _xmppConstants.Namespace.JINGLE_ICE_UDP_1,
+        element: 'remote-candidate',
+        fields: {
+            component: Utils.attribute('component'),
+            ip: Utils.attribute('ip'),
+            port: Utils.attribute('port')
+        }
+    });
+
+    var Candidate = JXT.define({
+        name: '_iceUdpCandidate',
+        namespace: _xmppConstants.Namespace.JINGLE_ICE_UDP_1,
+        element: 'candidate',
+        fields: {
+            component: Utils.attribute('component'),
+            foundation: Utils.attribute('foundation'),
+            generation: Utils.attribute('generation'),
+            id: Utils.attribute('id'),
+            ip: Utils.attribute('ip'),
+            network: Utils.attribute('network'),
+            port: Utils.attribute('port'),
+            priority: Utils.attribute('priority'),
+            protocol: Utils.attribute('protocol'),
+            relAddr: Utils.attribute('rel-addr'),
+            relPort: Utils.attribute('rel-port'),
+            tcpType: Utils.attribute('tcptype'),
+            type: Utils.attribute('type')
+        }
+    });
+
+    var Fingerprint = JXT.define({
+        name: '_iceFingerprint',
+        namespace: _xmppConstants.Namespace.JINGLE_DTLS_0,
+        element: 'fingerprint',
+        fields: {
+            hash: Utils.attribute('hash'),
+            setup: Utils.attribute('setup'),
+            value: Utils.text(),
+            required: Utils.boolAttribute('required')
+        }
+    });
+
+    var SctpMap = JXT.define({
+        name: '_sctpMap',
+        namespace: _xmppConstants.Namespace.DTLS_SCTP_1,
+        element: 'sctpmap',
+        fields: {
+            number: Utils.attribute('number'),
+            protocol: Utils.attribute('protocol'),
+            streams: Utils.attribute('streams')
+        }
+    });
+
+    JXT.extend(ICE, Candidate, 'candidates');
+    JXT.extend(ICE, RemoteCandidate);
+    JXT.extend(ICE, Fingerprint, 'fingerprints');
+    JXT.extend(ICE, SctpMap, 'sctp');
+
+    JXT.withDefinition('content', _xmppConstants.Namespace.JINGLE_1, function (Content) {
+
+        JXT.extend(Content, ICE);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],157:[function(require,module,exports){
+'use strict';
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _avatar = require('./avatar');
+
+var _avatar2 = _interopRequireDefault(_avatar);
+
+var _bind = require('./bind');
+
+var _bind2 = _interopRequireDefault(_bind);
+
+var _blocking = require('./blocking');
+
+var _blocking2 = _interopRequireDefault(_blocking);
+
+var _bob = require('./bob');
+
+var _bob2 = _interopRequireDefault(_bob);
+
+var _bookmarks = require('./bookmarks');
+
+var _bookmarks2 = _interopRequireDefault(_bookmarks);
+
+var _bosh = require('./bosh');
+
+var _bosh2 = _interopRequireDefault(_bosh);
+
+var _carbons = require('./carbons');
+
+var _carbons2 = _interopRequireDefault(_carbons);
+
+var _command = require('./command');
+
+var _command2 = _interopRequireDefault(_command);
+
+var _csi = require('./csi');
+
+var _csi2 = _interopRequireDefault(_csi);
+
+var _dataforms = require('./dataforms');
+
+var _dataforms2 = _interopRequireDefault(_dataforms);
+
+var _delayed = require('./delayed');
+
+var _delayed2 = _interopRequireDefault(_delayed);
+
+var _disco = require('./disco');
+
+var _disco2 = _interopRequireDefault(_disco);
+
+var _error = require('./error');
+
+var _error2 = _interopRequireDefault(_error);
+
+var _extdisco = require('./extdisco');
+
+var _extdisco2 = _interopRequireDefault(_extdisco);
+
+var _file = require('./file');
+
+var _file2 = _interopRequireDefault(_file);
+
+var _forwarded = require('./forwarded');
+
+var _forwarded2 = _interopRequireDefault(_forwarded);
+
+var _framing = require('./framing');
+
+var _framing2 = _interopRequireDefault(_framing);
+
+var _geoloc = require('./geoloc');
+
+var _geoloc2 = _interopRequireDefault(_geoloc);
+
+var _hash = require('./hash');
+
+var _hash2 = _interopRequireDefault(_hash);
+
+var _hats = require('./hats');
+
+var _hats2 = _interopRequireDefault(_hats);
+
+var _iceUdp = require('./iceUdp');
+
+var _iceUdp2 = _interopRequireDefault(_iceUdp);
+
+var _iq = require('./iq');
+
+var _iq2 = _interopRequireDefault(_iq);
+
+var _jidprep = require('./jidprep');
+
+var _jidprep2 = _interopRequireDefault(_jidprep);
+
+var _jingle = require('./jingle');
+
+var _jingle2 = _interopRequireDefault(_jingle);
+
+var _json = require('./json');
+
+var _json2 = _interopRequireDefault(_json);
+
+var _logging = require('./logging');
+
+var _logging2 = _interopRequireDefault(_logging);
+
+var _mam = require('./mam');
+
+var _mam2 = _interopRequireDefault(_mam);
+
+var _message = require('./message');
+
+var _message2 = _interopRequireDefault(_message);
+
+var _mood = require('./mood');
+
+var _mood2 = _interopRequireDefault(_mood);
+
+var _muc = require('./muc');
+
+var _muc2 = _interopRequireDefault(_muc);
+
+var _nick = require('./nick');
+
+var _nick2 = _interopRequireDefault(_nick);
+
+var _oob = require('./oob');
+
+var _oob2 = _interopRequireDefault(_oob);
+
+var _ping = require('./ping');
+
+var _ping2 = _interopRequireDefault(_ping);
+
+var _presence = require('./presence');
+
+var _presence2 = _interopRequireDefault(_presence);
+
+var _private = require('./private');
+
+var _private2 = _interopRequireDefault(_private);
+
+var _psa = require('./psa');
+
+var _psa2 = _interopRequireDefault(_psa);
+
+var _pubsub = require('./pubsub');
+
+var _pubsub2 = _interopRequireDefault(_pubsub);
+
+var _pubsubError = require('./pubsubError');
+
+var _pubsubError2 = _interopRequireDefault(_pubsubError);
+
+var _pubsubEvents = require('./pubsubEvents');
+
+var _pubsubEvents2 = _interopRequireDefault(_pubsubEvents);
+
+var _pubsubOwner = require('./pubsubOwner');
+
+var _pubsubOwner2 = _interopRequireDefault(_pubsubOwner);
+
+var _push = require('./push');
+
+var _push2 = _interopRequireDefault(_push);
+
+var _reach = require('./reach');
+
+var _reach2 = _interopRequireDefault(_reach);
+
+var _register = require('./register');
+
+var _register2 = _interopRequireDefault(_register);
+
+var _roster = require('./roster');
+
+var _roster2 = _interopRequireDefault(_roster);
+
+var _rsm = require('./rsm');
+
+var _rsm2 = _interopRequireDefault(_rsm);
+
+var _rtp = require('./rtp');
+
+var _rtp2 = _interopRequireDefault(_rtp);
+
+var _rtt = require('./rtt');
+
+var _rtt2 = _interopRequireDefault(_rtt);
+
+var _sasl = require('./sasl');
+
+var _sasl2 = _interopRequireDefault(_sasl);
+
+var _session = require('./session');
+
+var _session2 = _interopRequireDefault(_session);
+
+var _shim = require('./shim');
+
+var _shim2 = _interopRequireDefault(_shim);
+
+var _sm = require('./sm');
+
+var _sm2 = _interopRequireDefault(_sm);
+
+var _stream = require('./stream');
+
+var _stream2 = _interopRequireDefault(_stream);
+
+var _streamError = require('./streamError');
+
+var _streamError2 = _interopRequireDefault(_streamError);
+
+var _streamFeatures = require('./streamFeatures');
+
+var _streamFeatures2 = _interopRequireDefault(_streamFeatures);
+
+var _time = require('./time');
+
+var _time2 = _interopRequireDefault(_time);
+
+var _tune = require('./tune');
+
+var _tune2 = _interopRequireDefault(_tune);
+
+var _vcard = require('./vcard');
+
+var _vcard2 = _interopRequireDefault(_vcard);
+
+var _version = require('./version');
+
+var _version2 = _interopRequireDefault(_version);
+
+var _visibility = require('./visibility');
+
+var _visibility2 = _interopRequireDefault(_visibility);
+
+exports['default'] = function (JXT) {
+
+    JXT.use(_avatar2['default']);
+    JXT.use(_bind2['default']);
+    JXT.use(_blocking2['default']);
+    JXT.use(_bob2['default']);
+    JXT.use(_bookmarks2['default']);
+    JXT.use(_bosh2['default']);
+    JXT.use(_carbons2['default']);
+    JXT.use(_command2['default']);
+    JXT.use(_csi2['default']);
+    JXT.use(_dataforms2['default']);
+    JXT.use(_delayed2['default']);
+    JXT.use(_disco2['default']);
+    JXT.use(_error2['default']);
+    JXT.use(_extdisco2['default']);
+    JXT.use(_file2['default']);
+    JXT.use(_forwarded2['default']);
+    JXT.use(_framing2['default']);
+    JXT.use(_geoloc2['default']);
+    JXT.use(_hash2['default']);
+    JXT.use(_hats2['default']);
+    JXT.use(_iceUdp2['default']);
+    JXT.use(_iq2['default']);
+    JXT.use(_jidprep2['default']);
+    JXT.use(_jingle2['default']);
+    JXT.use(_json2['default']);
+    JXT.use(_logging2['default']);
+    JXT.use(_mam2['default']);
+    JXT.use(_message2['default']);
+    JXT.use(_mood2['default']);
+    JXT.use(_muc2['default']);
+    JXT.use(_nick2['default']);
+    JXT.use(_oob2['default']);
+    JXT.use(_ping2['default']);
+    JXT.use(_presence2['default']);
+    JXT.use(_private2['default']);
+    JXT.use(_psa2['default']);
+    JXT.use(_pubsub2['default']);
+    JXT.use(_pubsubError2['default']);
+    JXT.use(_pubsubEvents2['default']);
+    JXT.use(_pubsubOwner2['default']);
+    JXT.use(_push2['default']);
+    JXT.use(_reach2['default']);
+    JXT.use(_register2['default']);
+    JXT.use(_roster2['default']);
+    JXT.use(_rsm2['default']);
+    JXT.use(_rtp2['default']);
+    JXT.use(_rtt2['default']);
+    JXT.use(_sasl2['default']);
+    JXT.use(_session2['default']);
+    JXT.use(_shim2['default']);
+    JXT.use(_sm2['default']);
+    JXT.use(_stream2['default']);
+    JXT.use(_streamError2['default']);
+    JXT.use(_streamFeatures2['default']);
+    JXT.use(_time2['default']);
+    JXT.use(_tune2['default']);
+    JXT.use(_vcard2['default']);
+    JXT.use(_version2['default']);
+    JXT.use(_visibility2['default']);
+};
+
+module.exports = exports['default'];
+
+},{"./avatar":136,"./bind":137,"./blocking":138,"./bob":139,"./bookmarks":140,"./bosh":141,"./carbons":142,"./command":143,"./csi":144,"./dataforms":145,"./delayed":146,"./disco":147,"./error":148,"./extdisco":149,"./file":150,"./forwarded":151,"./framing":152,"./geoloc":153,"./hash":154,"./hats":155,"./iceUdp":156,"./iq":158,"./jidprep":159,"./jingle":160,"./json":161,"./logging":162,"./mam":163,"./message":164,"./mood":165,"./muc":166,"./nick":167,"./oob":168,"./ping":169,"./presence":170,"./private":171,"./psa":172,"./pubsub":173,"./pubsubError":174,"./pubsubEvents":175,"./pubsubOwner":176,"./push":177,"./reach":178,"./register":179,"./roster":180,"./rsm":181,"./rtp":182,"./rtt":183,"./sasl":184,"./session":185,"./shim":186,"./sm":187,"./stream":188,"./streamError":189,"./streamFeatures":190,"./time":191,"./tune":192,"./vcard":193,"./version":194,"./visibility":195,"babel-runtime/helpers/interop-require-default":197}],158:[function(require,module,exports){
+'use strict';
+
+var _Object$assign = require('babel-runtime/core-js/object/assign')['default'];
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var internals = {};
+
+internals.defineIQ = function (JXT, name, namespace) {
+
+    var Utils = JXT.utils;
+
+    var IQ = JXT.define({
+        name: name,
+        namespace: namespace,
+        element: 'iq',
+        topLevel: true,
+        fields: {
+            lang: Utils.langAttribute(),
+            id: Utils.attribute('id'),
+            to: Utils.jidAttribute('to', true),
+            from: Utils.jidAttribute('from', true),
+            type: Utils.attribute('type')
+        }
+    });
+
+    var _toJSON = IQ.prototype.toJSON;
+
+    _Object$assign(IQ.prototype, {
+        toJSON: function toJSON() {
+
+            var result = _toJSON.call(this);
+            result.resultReply = this.resultReply;
+            result.errorReply = this.errorReply;
+            return result;
+        },
+
+        resultReply: function resultReply(data) {
+
+            data = data || {};
+            data.to = this.from;
+            data.id = this.id;
+            data.type = 'result';
+            return new IQ(data);
+        },
+
+        errorReply: function errorReply(data) {
+
+            data = data || {};
+            data.to = this.from;
+            data.id = this.id;
+            data.type = 'error';
+            return new IQ(data);
+        }
+    });
+};
+
+exports['default'] = function (JXT) {
+
+    internals.defineIQ(JXT, 'iq', _xmppConstants.Namespace.CLIENT);
+    internals.defineIQ(JXT, 'serverIQ', _xmppConstants.Namespace.SERVER);
+    internals.defineIQ(JXT, 'componentIQ', _xmppConstants.Namespace.COMPONENT);
+};
+
+module.exports = exports['default'];
+
+},{"babel-runtime/core-js/object/assign":196,"xmpp-constants":220}],159:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var _xmppJid = require('xmpp-jid');
+
+exports['default'] = function (JXT) {
+
+    JXT.withIQ(function (IQ) {
+
+        JXT.add(IQ, 'jidPrep', {
+            get: function get() {
+
+                var data = JXT.utils.getSubText(this.xml, _xmppConstants.Namespace.JID_PREP_0, 'jid');
+                if (data) {
+                    var jid = new _xmppJid.JID(data);
+                    jid.prepped = true;
+                    return jid;
+                }
+            },
+            set: function set(value) {
+
+                JXT.utils.setSubText(this.xml, _xmppConstants.Namespace.JID_PREP_0, 'jid', (value || '').toString());
+            }
+        });
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220,"xmpp-jid":226}],160:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var CONDITIONS = ['out-of-order', 'tie-break', 'unknown-session', 'unsupported-info'];
+var REASONS = ['alternative-session', 'busy', 'cancel', 'connectivity-error', 'decline', 'expired', 'failed-application', 'failed-transport', 'general-error', 'gone', 'incompatible-parameters', 'media-error', 'security-error', 'success', 'timeout', 'unsupported-applications', 'unsupported-transports'];
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Jingle = JXT.define({
+        name: 'jingle',
+        namespace: _xmppConstants.Namespace.JINGLE_1,
+        element: 'jingle',
+        fields: {
+            action: Utils.attribute('action'),
+            initiator: Utils.attribute('initiator'),
+            responder: Utils.attribute('responder'),
+            sid: Utils.attribute('sid')
+        }
+    });
+
+    var Content = JXT.define({
+        name: '_jingleContent',
+        namespace: _xmppConstants.Namespace.JINGLE_1,
+        element: 'content',
+        fields: {
+            creator: Utils.attribute('creator'),
+            disposition: Utils.attribute('disposition', 'session'),
+            name: Utils.attribute('name'),
+            senders: Utils.attribute('senders', 'both'),
+            description: {
+                get: function get() {
+
+                    var opts = JXT.tagged('jingle-description').map(function (Description) {
+
+                        return Description.prototype._name;
+                    });
+                    for (var i = 0, len = opts.length; i < len; i++) {
+                        if (this._extensions[opts[i]]) {
+                            return this._extensions[opts[i]];
+                        }
+                    }
+                },
+                set: function set(value) {
+
+                    var ext = '_' + value.descType;
+                    this[ext] = value;
+                }
+            },
+            transport: {
+                get: function get() {
+
+                    var opts = JXT.tagged('jingle-transport').map(function (Transport) {
+
+                        return Transport.prototype._name;
+                    });
+                    for (var i = 0, len = opts.length; i < len; i++) {
+                        if (this._extensions[opts[i]]) {
+                            return this._extensions[opts[i]];
+                        }
+                    }
+                },
+                set: function set(value) {
+
+                    var ext = '_' + value.transType;
+                    this[ext] = value;
+                }
+            }
+        }
+    });
+
+    var Reason = JXT.define({
+        name: 'reason',
+        namespace: _xmppConstants.Namespace.JINGLE_1,
+        element: 'reason',
+        fields: {
+            condition: Utils.enumSub(_xmppConstants.Namespace.JINGLE_1, REASONS),
+            alternativeSession: {
+                get: function get() {
+
+                    return Utils.getSubText(this.xml, _xmppConstants.Namespace.JINGLE_1, 'alternative-session');
+                },
+                set: function set(value) {
+
+                    this.condition = 'alternative-session';
+                    Utils.setSubText(this.xml, _xmppConstants.Namespace.JINGLE_1, 'alternative-session', value);
+                }
+            },
+            text: Utils.textSub(_xmppConstants.Namespace.JINGLE_1, 'text')
+        }
+    });
+
+    JXT.extend(Jingle, Content, 'contents');
+    JXT.extend(Jingle, Reason);
+
+    JXT.extendIQ(Jingle);
+
+    JXT.withStanzaError(function (StanzaError) {
+
+        JXT.add(StanzaError, 'jingleCondition', Utils.enumSub(_xmppConstants.Namespace.JINGLE_ERRORS_1, CONDITIONS));
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],161:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var JSONExtension = {
+        get: function get() {
+
+            var data = JXT.utils.getSubText(this.xml, _xmppConstants.Namespace.JSON_0, 'json');
+            if (data) {
+                return JSON.parse(data);
+            }
+        },
+        set: function set(value) {
+
+            value = JSON.stringify(value);
+            if (value) {
+                JXT.utils.setSubText(this.xml, _xmppConstants.Namespace.JSON_0, 'json', value);
+            }
+        }
+    };
+
+    JXT.withMessage(function (Message) {
+
+        JXT.add(Message, 'json', JSONExtension);
+    });
+
+    JXT.withPubsubItem(function (Item) {
+
+        JXT.add(Item, 'json', JSONExtension);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],162:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Log = JXT.define({
+        name: 'log',
+        namespace: _xmppConstants.Namespace.EVENTLOG,
+        element: 'log',
+        fields: {
+            id: Utils.attribute('id'),
+            timestamp: Utils.dateAttribute('timestamp'),
+            type: Utils.attribute('type'),
+            level: Utils.attribute('level'),
+            object: Utils.attribute('object'),
+            subject: Utils.attribute('subject'),
+            facility: Utils.attribute('facility'),
+            module: Utils.attribute('module'),
+            message: Utils.textSub(_xmppConstants.Namespace.EVENTLOG, 'message'),
+            stackTrace: Utils.textSub(_xmppConstants.Namespace.EVENTLOG, 'stackTrace')
+        }
+    });
+
+    var Tag = JXT.define({
+        name: '_logtag',
+        namespace: _xmppConstants.Namespace.EVENTLOG,
+        element: 'tag',
+        fields: {
+            name: Utils.attribute('name'),
+            value: Utils.attribute('value'),
+            type: Utils.attribute('type')
+        }
+    });
+
+    JXT.extend(Log, Tag, 'tags');
+
+    JXT.extendMessage(Log);
+    JXT.extendPubsubItem(Log);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],163:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var _xmppJid = require('xmpp-jid');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var MAMQuery = JXT.define({
+        name: 'mam',
+        namespace: _xmppConstants.Namespace.MAM_0,
+        element: 'query',
+        fields: {
+            queryid: Utils.attribute('queryid')
+        }
+    });
+
+    var Result = JXT.define({
+        name: 'mamItem',
+        namespace: _xmppConstants.Namespace.MAM_0,
+        element: 'result',
+        fields: {
+            queryid: Utils.attribute('queryid'),
+            id: Utils.attribute('id')
+        }
+    });
+
+    var Fin = JXT.define({
+        name: 'mamResult',
+        namespace: _xmppConstants.Namespace.MAM_0,
+        element: 'fin',
+        fields: {
+            queryid: Utils.attribute('queryid'),
+            complete: Utils.boolAttribute('complete'),
+            stable: Utils.boolAttribute('stable')
+        }
+    });
+
+    var Prefs = JXT.define({
+        name: 'mamPrefs',
+        namespace: _xmppConstants.Namespace.MAM_0,
+        element: 'prefs',
+        fields: {
+            defaultCondition: Utils.attribute('default'),
+            always: {
+                get: function get() {
+
+                    var results = [];
+                    var container = Utils.find(this.xml, _xmppConstants.Namespace.MAM_0, 'always');
+                    if (container.length === 0) {
+                        return results;
+                    }
+                    container = container[0];
+                    var jids = Utils.getMultiSubText(container, _xmppConstants.Namespace.MAM_0, 'jid');
+                    jids.forEach(function (jid) {
+
+                        results.push(new _xmppJid.JID(jid.textContent));
+                    });
+                    return results;
+                },
+                set: function set(value) {
+
+                    if (value.length > 0) {
+                        var container = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.MAM_0, 'always');
+                        Utils.setMultiSubText(container, _xmppConstants.Namespace.MAM_0, 'jid', value);
+                    }
+                }
+            },
+            never: {
+                get: function get() {
+
+                    var results = [];
+                    var container = Utils.find(this.xml, _xmppConstants.Namespace.MAM_0, 'always');
+                    if (container.length === 0) {
+                        return results;
+                    }
+                    container = container[0];
+                    var jids = Utils.getMultiSubText(container, _xmppConstants.Namespace.MAM_0, 'jid');
+                    jids.forEach(function (jid) {
+
+                        results.push(new _xmppJid.JID(jid.textContent));
+                    });
+                    return results;
+                },
+                set: function set(value) {
+
+                    if (value.length > 0) {
+                        var container = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.MAM_0, 'never');
+                        Utils.setMultiSubText(container, _xmppConstants.Namespace.MAM_0, 'jid', value);
+                    }
+                }
+            }
+        }
+    });
+
+    JXT.extendMessage(Result);
+    JXT.extendMessage(Fin);
+
+    JXT.extendIQ(MAMQuery);
+    JXT.extendIQ(Prefs);
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(MAMQuery, DataForm);
+    });
+
+    JXT.withDefinition('forwarded', _xmppConstants.Namespace.FORWARD_0, function (Forwarded) {
+
+        JXT.extend(Result, Forwarded);
+    });
+
+    JXT.withDefinition('set', _xmppConstants.Namespace.RSM, function (RSM) {
+
+        JXT.extend(MAMQuery, RSM);
+        JXT.extend(Fin, RSM);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220,"xmpp-jid":226}],164:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var internals = {};
+
+internals.defineMessage = function (JXT, name, namespace) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: name,
+        namespace: namespace,
+        element: 'message',
+        topLevel: true,
+        fields: {
+            lang: Utils.langAttribute(),
+            id: Utils.attribute('id'),
+            to: Utils.jidAttribute('to', true),
+            from: Utils.jidAttribute('from', true),
+            type: Utils.attribute('type', 'normal'),
+            thread: Utils.textSub(namespace, 'thread'),
+            parentThread: Utils.subAttribute(namespace, 'thread', 'parent'),
+            subject: Utils.textSub(namespace, 'subject'),
+            $body: {
+                get: function getBody$() {
+
+                    return Utils.getSubLangText(this.xml, namespace, 'body', this.lang);
+                }
+            },
+            body: {
+                get: function getBody() {
+
+                    var bodies = this.$body;
+                    return bodies[this.lang] || '';
+                },
+                set: function setBody(value) {
+
+                    Utils.setSubLangText(this.xml, namespace, 'body', value, this.lang);
+                }
+            },
+            attention: Utils.boolSub(_xmppConstants.Namespace.ATTENTION_0, 'attention'),
+            chatState: Utils.enumSub(_xmppConstants.Namespace.CHAT_STATES, ['active', 'composing', 'paused', 'inactive', 'gone']),
+            replace: Utils.subAttribute(_xmppConstants.Namespace.CORRECTION_0, 'replace', 'id'),
+            requestReceipt: Utils.boolSub(_xmppConstants.Namespace.RECEIPTS, 'request'),
+            receipt: Utils.subAttribute(_xmppConstants.Namespace.RECEIPTS, 'received', 'id')
+        }
+    });
+};
+
+exports['default'] = function (JXT) {
+
+    internals.defineMessage(JXT, 'message', _xmppConstants.Namespace.CLIENT);
+    internals.defineMessage(JXT, 'serverMessage', _xmppConstants.Namespace.SERVER);
+    internals.defineMessage(JXT, 'componentMessage', _xmppConstants.Namespace.COMPONENT);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],165:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var MOODS = ['afraid', 'amazed', 'amorous', 'angry', 'annoyed', 'anxious', 'aroused', 'ashamed', 'bored', 'brave', 'calm', 'cautious', 'cold', 'confident', 'confused', 'contemplative', 'contented', 'cranky', 'crazy', 'creative', 'curious', 'dejected', 'depressed', 'disappointed', 'disgusted', 'dismayed', 'distracted', 'embarrassed', 'envious', 'excited', 'flirtatious', 'frustrated', 'grateful', 'grieving', 'grumpy', 'guilty', 'happy', 'hopeful', 'hot', 'humbled', 'humiliated', 'hungry', 'hurt', 'impressed', 'in_awe', 'in_love', 'indignant', 'interested', 'intoxicated', 'invincible', 'jealous', 'lonely', 'lucky', 'mean', 'moody', 'nervous', 'neutral', 'offended', 'outraged', 'playful', 'proud', 'relaxed', 'relieved', 'remorseful', 'restless', 'sad', 'sarcastic', 'serious', 'shocked', 'shy', 'sick', 'sleepy', 'spontaneous', 'stressed', 'strong', 'surprised', 'thankful', 'thirsty', 'tired', 'undefined', 'weak', 'worried'];
+
+exports['default'] = function (JXT) {
+
+    var Mood = JXT.define({
+        name: 'mood',
+        namespace: _xmppConstants.Namespace.MOOD,
+        element: 'mood',
+        fields: {
+            text: JXT.utils.textSub(_xmppConstants.Namespace.MOOD, 'text'),
+            value: JXT.utils.enumSub(_xmppConstants.Namespace.MOOD, MOODS)
+        }
+    });
+
+    JXT.extendMessage(Mood);
+    JXT.extendPubsubItem(Mood);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],166:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+function proxy(child, field) {
+
+    return {
+        get: function get() {
+
+            if (this._extensions[child]) {
+                return this[child][field];
+            }
+        },
+        set: function set(value) {
+
+            this[child][field] = value;
+        }
+    };
+}
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var UserItem = JXT.define({
+        name: '_mucUserItem',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'item',
+        fields: {
+            affiliation: Utils.attribute('affiliation'),
+            nick: Utils.attribute('nick'),
+            jid: Utils.jidAttribute('jid'),
+            role: Utils.attribute('role'),
+            reason: Utils.textSub(_xmppConstants.Namespace.MUC_USER, 'reason')
+        }
+    });
+
+    var UserActor = JXT.define({
+        name: '_mucUserActor',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'actor',
+        fields: {
+            nick: Utils.attribute('nick'),
+            jid: Utils.jidAttribute('jid')
+        }
+    });
+
+    var Destroyed = JXT.define({
+        name: 'destroyed',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'destroy',
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            reason: Utils.textSub(_xmppConstants.Namespace.MUC_USER, 'reason')
+        }
+    });
+
+    var Invite = JXT.define({
+        name: 'invite',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'invite',
+        fields: {
+            to: Utils.jidAttribute('to'),
+            from: Utils.jidAttribute('from'),
+            reason: Utils.textSub(_xmppConstants.Namespace.MUC_USER, 'reason'),
+            thread: Utils.subAttribute(_xmppConstants.Namespace.MUC_USER, 'continue', 'thread'),
+            'continue': Utils.boolSub(_xmppConstants.Namespace.MUC_USER, 'continue')
+        }
+    });
+
+    var Decline = JXT.define({
+        name: 'decline',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'decline',
+        fields: {
+            to: Utils.jidAttribute('to'),
+            from: Utils.jidAttribute('from'),
+            reason: Utils.textSub(_xmppConstants.Namespace.MUC_USER, 'reason')
+        }
+    });
+
+    var AdminItem = JXT.define({
+        name: '_mucAdminItem',
+        namespace: _xmppConstants.Namespace.MUC_ADMIN,
+        element: 'item',
+        fields: {
+            affiliation: Utils.attribute('affiliation'),
+            nick: Utils.attribute('nick'),
+            jid: Utils.jidAttribute('jid'),
+            role: Utils.attribute('role'),
+            reason: Utils.textSub(_xmppConstants.Namespace.MUC_ADMIN, 'reason')
+        }
+    });
+
+    var AdminActor = JXT.define({
+        name: 'actor',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'actor',
+        fields: {
+            nick: Utils.attribute('nick'),
+            jid: Utils.jidAttribute('jid')
+        }
+    });
+
+    var Destroy = JXT.define({
+        name: 'destroy',
+        namespace: _xmppConstants.Namespace.MUC_OWNER,
+        element: 'destroy',
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            password: Utils.textSub(_xmppConstants.Namespace.MUC_OWNER, 'password'),
+            reason: Utils.textSub(_xmppConstants.Namespace.MUC_OWNER, 'reason')
+        }
+    });
+
+    var MUC = JXT.define({
+        name: 'muc',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'x',
+        fields: {
+            affiliation: proxy('_mucUserItem', 'affiliation'),
+            nick: proxy('_mucUserItem', 'nick'),
+            jid: proxy('_mucUserItem', 'jid'),
+            role: proxy('_mucUserItem', 'role'),
+            actor: proxy('_mucUserItem', '_mucUserActor'),
+            reason: proxy('_mucUserItem', 'reason'),
+            password: Utils.textSub(_xmppConstants.Namespace.MUC_USER, 'password'),
+            codes: {
+                get: function get() {
+
+                    return Utils.getMultiSubText(this.xml, _xmppConstants.Namespace.MUC_USER, 'status', function (sub) {
+
+                        return Utils.getAttribute(sub, 'code');
+                    });
+                },
+                set: function set(value) {
+
+                    var self = this;
+                    Utils.setMultiSubText(this.xml, _xmppConstants.Namespace.MUC_USER, 'status', value, function (val) {
+
+                        var child = Utils.createElement(_xmppConstants.Namespace.MUC_USER, 'status', _xmppConstants.Namespace.MUC_USER);
+                        Utils.setAttribute(child, 'code', val);
+                        self.xml.appendChild(child);
+                    });
+                }
+            }
+        }
+    });
+
+    var MUCAdmin = JXT.define({
+        name: 'mucAdmin',
+        namespace: _xmppConstants.Namespace.MUC_ADMIN,
+        element: 'query',
+        fields: {
+            affiliation: proxy('_mucAdminItem', 'affiliation'),
+            nick: proxy('_mucAdminItem', 'nick'),
+            jid: proxy('_mucAdminItem', 'jid'),
+            role: proxy('_mucAdminItem', 'role'),
+            actor: proxy('_mucAdminItem', '_mucAdminActor'),
+            reason: proxy('_mucAdminItem', 'reason')
+        }
+    });
+
+    var MUCOwner = JXT.define({
+        name: 'mucOwner',
+        namespace: _xmppConstants.Namespace.MUC_OWNER,
+        element: 'query'
+    });
+
+    var MUCJoin = JXT.define({
+        name: 'joinMuc',
+        namespace: _xmppConstants.Namespace.MUC,
+        element: 'x',
+        fields: {
+            password: Utils.textSub(_xmppConstants.Namespace.MUC, 'password'),
+            history: {
+                get: function get() {
+
+                    var result = {};
+                    var hist = Utils.find(this.xml, _xmppConstants.Namespace.MUC, 'history');
+
+                    if (!hist.length) {
+                        return {};
+                    }
+                    hist = hist[0];
+
+                    var maxchars = hist.getAttribute('maxchars') || '';
+                    var maxstanzas = hist.getAttribute('maxstanzas') || '';
+                    var seconds = hist.getAttribute('seconds') || '';
+                    var since = hist.getAttribute('since') || '';
+
+                    if (maxchars) {
+                        result.maxchars = parseInt(maxchars, 10);
+                    }
+                    if (maxstanzas) {
+                        result.maxstanzas = parseInt(maxstanzas, 10);
+                    }
+                    if (seconds) {
+                        result.seconds = parseInt(seconds, 10);
+                    }
+                    if (since) {
+                        result.since = new Date(since);
+                    }
+                },
+                set: function set(opts) {
+
+                    var existing = Utils.find(this.xml, _xmppConstants.Namespace.MUC, 'history');
+                    if (existing.length) {
+                        for (var i = 0; i < existing.length; i++) {
+                            this.xml.removeChild(existing[i]);
+                        }
+                    }
+
+                    var hist = Utils.createElement(_xmppConstants.Namespace.MUC, 'history', _xmppConstants.Namespace.MUC);
+                    this.xml.appendChild(hist);
+
+                    if (opts.maxchars) {
+                        hist.setAttribute('maxchars', '' + opts.maxchars);
+                    }
+                    if (opts.maxstanzas) {
+                        hist.setAttribute('maxstanzas', '' + opts.maxstanzas);
+                    }
+                    if (opts.seconds) {
+                        hist.setAttribute('seconds', '' + opts.seconds);
+                    }
+                    if (opts.since) {
+                        hist.setAttribute('since', opts.since.toISOString());
+                    }
+                }
+            }
+        }
+    });
+
+    var DirectInvite = JXT.define({
+        name: 'mucInvite',
+        namespace: _xmppConstants.Namespace.MUC_DIRECT_INVITE,
+        element: 'x',
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            password: Utils.attribute('password'),
+            reason: Utils.attribute('reason'),
+            thread: Utils.attribute('thread'),
+            'continue': Utils.boolAttribute('continue')
+        }
+    });
+
+    JXT.extend(UserItem, UserActor);
+    JXT.extend(MUC, UserItem);
+    JXT.extend(MUC, Invite, 'invites');
+    JXT.extend(MUC, Decline);
+    JXT.extend(MUC, Destroyed);
+    JXT.extend(AdminItem, AdminActor);
+    JXT.extend(MUCAdmin, AdminItem, 'items');
+    JXT.extend(MUCOwner, Destroy);
+
+    JXT.extendPresence(MUC);
+    JXT.extendPresence(MUCJoin);
+
+    JXT.extendMessage(MUC);
+    JXT.extendMessage(DirectInvite);
+
+    JXT.withIQ(function (IQ) {
+
+        JXT.add(IQ, 'mucUnique', Utils.textSub(_xmppConstants.Namespace.MUC_UNIQUE, 'unique'));
+        JXT.extend(IQ, MUCAdmin);
+        JXT.extend(IQ, MUCOwner);
+    });
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(MUCOwner, DataForm);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],167:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var nick = JXT.utils.textSub(_xmppConstants.Namespace.NICK, 'nick');
+
+    JXT.withPubsubItem(function (Item) {
+
+        JXT.add(Item, 'nick', nick);
+    });
+
+    JXT.withPresence(function (Presence) {
+
+        JXT.add(Presence, 'nick', nick);
+    });
+
+    JXT.withMessage(function (Message) {
+
+        JXT.add(Message, 'nick', nick);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],168:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var OOB = JXT.define({
+        name: 'oob',
+        element: 'x',
+        namespace: _xmppConstants.Namespace.OOB,
+        fields: {
+            url: JXT.utils.textSub(_xmppConstants.Namespace.OOB, 'url'),
+            desc: JXT.utils.textSub(_xmppConstants.Namespace.OOB, 'desc')
+        }
+    });
+
+    JXT.extendMessage(OOB, 'oobURIs');
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],169:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Ping = JXT.define({
+        name: 'ping',
+        namespace: _xmppConstants.Namespace.PING,
+        element: 'ping'
+    });
+
+    JXT.extendIQ(Ping);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],170:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var internals = {};
+
+internals.definePresence = function (JXT, name, namespace) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: name,
+        namespace: namespace,
+        element: 'presence',
+        topLevel: true,
+        fields: {
+            lang: Utils.langAttribute(),
+            id: Utils.attribute('id'),
+            to: Utils.jidAttribute('to', true),
+            from: Utils.jidAttribute('from', true),
+            priority: Utils.numberSub(namespace, 'priority', false, 0),
+            show: Utils.textSub(namespace, 'show'),
+            type: {
+                get: function get() {
+
+                    return Utils.getAttribute(this.xml, 'type', 'available');
+                },
+                set: function set(value) {
+
+                    if (value === 'available') {
+                        value = false;
+                    }
+                    Utils.setAttribute(this.xml, 'type', value);
+                }
+            },
+            $status: {
+                get: function get() {
+
+                    return Utils.getSubLangText(this.xml, namespace, 'status', this.lang);
+                }
+            },
+            status: {
+                get: function get() {
+
+                    var statuses = this.$status;
+                    return statuses[this.lang] || '';
+                },
+                set: function set(value) {
+
+                    Utils.setSubLangText(this.xml, namespace, 'status', value, this.lang);
+                }
+            },
+            idleSince: Utils.dateSubAttribute(_xmppConstants.Namespace.IDLE_1, 'idle', 'since'),
+            decloak: Utils.subAttribute(_xmppConstants.Namespace.DECLOAK_0, 'decloak', 'reason'),
+            avatarId: {
+                get: function get() {
+
+                    var update = Utils.find(this.xml, _xmppConstants.Namespace.VCARD_TEMP_UPDATE, 'x');
+                    if (!update.length) {
+                        return '';
+                    }
+                    return Utils.getSubText(update[0], _xmppConstants.Namespace.VCARD_TEMP_UPDATE, 'photo');
+                },
+                set: function set(value) {
+
+                    var update = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.VCARD_TEMP_UPDATE, 'x');
+
+                    if (value === '') {
+                        Utils.setBoolSub(update, _xmppConstants.Namespace.VCARD_TEMP_UPDATE, 'photo', true);
+                    } else if (value === true) {
+                        return;
+                    } else if (value) {
+                        Utils.setSubText(update, _xmppConstants.Namespace.VCARD_TEMP_UPDATE, 'photo', value);
+                    } else {
+                        this.xml.removeChild(update);
+                    }
+                }
+            }
+        }
+    });
+};
+
+exports['default'] = function (JXT) {
+
+    internals.definePresence(JXT, 'presence', _xmppConstants.Namespace.CLIENT);
+    internals.definePresence(JXT, 'serverPresence', _xmppConstants.Namespace.SERVER);
+    internals.definePresence(JXT, 'componentPresence', _xmppConstants.Namespace.COMPONENT);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],171:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var PrivateStorage = JXT.define({
+        name: 'privateStorage',
+        namespace: _xmppConstants.Namespace.PRIVATE,
+        element: 'query'
+    });
+
+    JXT.extendIQ(PrivateStorage);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],172:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var CONDITIONS = ['server-unavailable', 'connection-paused'];
+
+exports['default'] = function (JXT) {
+
+    var PSA = JXT.define({
+        name: 'state',
+        namespace: _xmppConstants.Namespace.PSA,
+        element: 'state-annotation',
+        fields: {
+            from: JXT.utils.jidAttribute('from'),
+            condition: JXT.utils.enumSub(_xmppConstants.Namespace.PSA, CONDITIONS),
+            description: JXT.utils.textSub(_xmppConstants.Namespace.PSA, 'description')
+        }
+    });
+
+    JXT.extendPresence(PSA);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],173:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Pubsub = JXT.define({
+        name: 'pubsub',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'pubsub',
+        fields: {
+            create: {
+                get: function get() {
+                    var node = Utils.getSubAttribute(this.xml, _xmppConstants.Namespace.PUBSUB, 'create', 'node');
+                    if (node) {
+                        return node;
+                    }
+                    return Utils.getBoolSub(this.xml, _xmppConstants.Namespace.PUBSUB, 'create');
+                },
+                set: function set(value) {
+                    if (value === true || !value) {
+                        Utils.setBoolSub(this.xml, _xmppConstants.Namespace.PUBSUB, 'create', value);
+                    } else {
+                        Utils.setSubAttribute(this.xml, _xmppConstants.Namespace.PUBSUB, 'create', 'node', value);
+                    }
+                }
+            },
+            publishOptions: {
+                get: function get() {
+
+                    var DataForm = JXT.getDefinition('x', _xmppConstants.Namespace.DATAFORM);
+                    var conf = Utils.find(this.xml, _xmppConstants.Namespace.PUBSUB, 'publish-options');
+                    if (conf.length && conf[0].childNodes.length) {
+                        return new DataForm({}, conf[0].childNodes[0]);
+                    }
+                },
+                set: function set(value) {
+
+                    var DataForm = JXT.getDefinition('x', _xmppConstants.Namespace.DATAFORM);
+                    var conf = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.PUBSUB, 'publish-options');
+                    if (value) {
+                        var form = new DataForm(value);
+                        conf.appendChild(form.xml);
+                    }
+                }
+            }
+        }
+    });
+
+    var Configure = JXT.define({
+        name: 'config',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'configure'
+    });
+
+    var Subscribe = JXT.define({
+        name: 'subscribe',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'subscribe',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid')
+        }
+    });
+
+    var Subscription = JXT.define({
+        name: 'subscription',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'subscription',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid'),
+            subid: Utils.attribute('subid'),
+            type: Utils.attribute('subscription'),
+            configurable: Utils.boolSub('subscribe-options'),
+            configurationRequired: {
+                get: function get() {
+
+                    var options = Utils.find(this.xml, _xmppConstants.Namespace.PUBSUB, 'subscribe-options');
+                    if (options.length) {
+                        return Utils.getBoolSub(options[0], _xmppConstants.Namespace.PUBSUB, 'required');
+                    }
+                    return false;
+                }
+            }
+        }
+    });
+
+    var Subscriptions = JXT.define({
+        name: 'subscriptions',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'subscriptions',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid')
+        }
+    });
+
+    var Affiliation = JXT.define({
+        name: 'affiliation',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'affiliation',
+        fields: {
+            node: Utils.attribute('node'),
+            type: Utils.attribute('affiliation')
+        }
+    });
+
+    var Affiliations = JXT.define({
+        name: 'affiliations',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'affiliations',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var SubscriptionOptions = JXT.define({
+        name: 'subscriptionOptions',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'options',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid'),
+            subid: Utils.attribute('subid')
+        }
+    });
+
+    var Unsubscribe = JXT.define({
+        name: 'unsubscribe',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'unsubscribe',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid')
+        }
+    });
+
+    var Publish = JXT.define({
+        name: 'publish',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'publish',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var Retract = JXT.define({
+        name: 'retract',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'retract',
+        fields: {
+            node: Utils.attribute('node'),
+            notify: Utils.boolAttribute('notify'),
+            id: Utils.subAttribute(_xmppConstants.Namespace.PUBSUB, 'item', 'id')
+        }
+    });
+
+    var Retrieve = JXT.define({
+        name: 'retrieve',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'items',
+        fields: {
+            node: Utils.attribute('node'),
+            max: Utils.attribute('max_items')
+        }
+    });
+
+    var Item = JXT.define({
+        name: 'item',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'item',
+        fields: {
+            id: Utils.attribute('id')
+        }
+    });
+
+    JXT.extend(Pubsub, Configure);
+    JXT.extend(Pubsub, Subscribe);
+    JXT.extend(Pubsub, Unsubscribe);
+    JXT.extend(Pubsub, Publish);
+    JXT.extend(Pubsub, Retract);
+    JXT.extend(Pubsub, Retrieve);
+    JXT.extend(Pubsub, Subscription);
+    JXT.extend(Pubsub, SubscriptionOptions);
+    JXT.extend(Pubsub, Subscriptions);
+    JXT.extend(Pubsub, Affiliations);
+
+    JXT.extend(Publish, Item, 'items');
+    JXT.extend(Retrieve, Item, 'items');
+
+    JXT.extend(Subscriptions, Subscription, 'list');
+    JXT.extend(Affiliations, Affiliation, 'list');
+
+    JXT.extendIQ(Pubsub);
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(SubscriptionOptions, DataForm);
+        JXT.extend(Item, DataForm);
+        JXT.extend(Configure, DataForm);
+    });
+
+    JXT.withDefinition('set', _xmppConstants.Namespace.RSM, function (RSM) {
+
+        JXT.extend(Pubsub, RSM);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],174:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var CONDITIONS = ['closed-node', 'configuration-required', 'invalid-jid', 'invalid-options', 'invalid-payload', 'invalid-subid', 'item-forbidden', 'item-required', 'jid-required', 'max-items-exceeded', 'max-nodes-exceeded', 'nodeid-required', 'not-in-roster-group', 'not-subscribed', 'payload-too-big', 'payload-required', 'pending-subscription', 'presence-subscription-required', 'subid-required', 'too-many-subscriptions', 'unsupported', 'unsupported-access-model'];
+
+exports['default'] = function (JXT) {
+
+    JXT.withStanzaError(function (StanzaError) {
+
+        JXT.add(StanzaError, 'pubsubCondition', JXT.utils.enumSub(_xmppConstants.Namespace.PUBSUB_ERRORS, CONDITIONS));
+        JXT.add(StanzaError, 'pubsubUnsupportedFeature', {
+            get: function get() {
+                return JXT.utils.getSubAttribute(this.xml, _xmppConstants.Namespace.PUBSUB_ERRORS, 'unsupported', 'feature');
+            },
+            set: function set(value) {
+                if (value) {
+                    this.pubsubCondition = 'unsupported';
+                }
+                JXT.utils.setSubAttribute(this.xml, _xmppConstants.Namespace.PUBSUB_ERRORS, 'unsupported', 'feature', value);
+            }
+        });
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],175:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Event = JXT.define({
+        name: 'event',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'event'
+    });
+
+    var EventPurge = JXT.define({
+        name: 'purged',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'purge',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var EventDelete = JXT.define({
+        name: 'deleted',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'delete',
+        fields: {
+            node: Utils.attribute('node'),
+            redirect: Utils.subAttribute(_xmppConstants.Namespace.PUBSUB_EVENT, 'redirect', 'uri')
+        }
+    });
+
+    var EventSubscription = JXT.define({
+        name: 'subscriptionChanged',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'subscription',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid'),
+            type: Utils.attribute('subscription'),
+            subid: Utils.attribute('subid'),
+            expiry: {
+                get: function get() {
+
+                    var text = Utils.getAttribute(this.xml, 'expiry');
+                    if (text === 'presence') {
+                        return text;
+                    } else if (text) {
+                        return new Date(text);
+                    }
+                },
+                set: function set(value) {
+
+                    if (!value) {
+                        return;
+                    }
+
+                    if (typeof value !== 'string') {
+                        value = value.toISOString();
+                    }
+
+                    Utils.setAttribute(this.xml, 'expiry', value);
+                }
+            }
+        }
+    });
+
+    var EventConfiguration = JXT.define({
+        name: 'configurationChanged',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'configuration',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var EventItems = JXT.define({
+        name: 'updated',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'items',
+        fields: {
+            node: Utils.attribute('node'),
+            retracted: {
+                get: function get() {
+
+                    var results = [];
+                    var retracted = Utils.find(this.xml, _xmppConstants.Namespace.PUBSUB_EVENT, 'retract');
+
+                    retracted.forEach(function (xml) {
+
+                        results.push(xml.getAttribute('id'));
+                    });
+                    return results;
+                },
+                set: function set(value) {
+
+                    var self = this;
+                    value.forEach(function (id) {
+
+                        var retracted = Utils.createElement(_xmppConstants.Namespace.PUBSUB_EVENT, 'retract', _xmppConstants.Namespace.PUBSUB_EVENT);
+                        retracted.setAttribute('id', id);
+                        this.xml.appendChild(retracted);
+                    });
+                }
+            }
+        }
+    });
+
+    var EventItem = JXT.define({
+        name: '_eventItem',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'item',
+        fields: {
+            id: Utils.attribute('id'),
+            node: Utils.attribute('node'),
+            publisher: Utils.jidAttribute('publisher')
+        }
+    });
+
+    JXT.extend(EventItems, EventItem, 'published');
+
+    JXT.extend(Event, EventItems);
+    JXT.extend(Event, EventSubscription);
+    JXT.extend(Event, EventConfiguration);
+    JXT.extend(Event, EventDelete);
+    JXT.extend(Event, EventPurge);
+
+    JXT.extendMessage(Event);
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(EventConfiguration, DataForm);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],176:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var PubsubOwner = JXT.define({
+        name: 'pubsubOwner',
+        namespace: _xmppConstants.Namespace.PUBSUB_OWNER,
+        element: 'pubsub',
+        fields: {
+            purge: Utils.subAttribute(_xmppConstants.Namespace.PUBSUB_OWNER, 'purge', 'node'),
+            del: Utils.subAttribute(_xmppConstants.Namespace.PUBSUB_OWNER, 'delete', 'node'),
+            redirect: {
+                get: function get() {
+
+                    var del = Utils.find(this.xml, _xmppConstants.Namespace.PUBSUB_OWNER, 'delete');
+                    if (del.length) {
+                        return Utils.getSubAttribute(del[0], _xmppConstants.Namespace.PUBSUB_OWNER, 'redirect', 'uri');
+                    }
+                    return '';
+                },
+                set: function set(value) {
+
+                    var del = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.PUBSUB_OWNER, 'delete');
+                    Utils.setSubAttribute(del, _xmppConstants.Namespace.PUBSUB_OWNER, 'redirect', 'uri', value);
+                }
+            }
+        }
+    });
+
+    var Subscription = JXT.define({
+        name: 'subscription',
+        namespace: _xmppConstants.Namespace.PUBSUB_OWNER,
+        element: 'subscription',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid'),
+            subid: Utils.attribute('subid'),
+            type: Utils.attribute('subscription'),
+            configurable: Utils.boolSub('subscribe-options'),
+            configurationRequired: {
+                get: function get() {
+
+                    var options = Utils.find(this.xml, _xmppConstants.Namespace.PUBSUB_OWNER, 'subscribe-options');
+                    if (options.length) {
+                        return Utils.getBoolSub(options[0], _xmppConstants.Namespace.PUBSUB_OWNER, 'required');
+                    }
+                    return false;
+                }
+            }
+        }
+    });
+
+    var Subscriptions = JXT.define({
+        name: 'subscriptions',
+        namespace: _xmppConstants.Namespace.PUBSUB_OWNER,
+        element: 'subscriptions',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var Affiliation = JXT.define({
+        name: 'affiliation',
+        namespace: _xmppConstants.Namespace.PUBSUB_OWNER,
+        element: 'affiliation',
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            type: Utils.attribute('affiliation')
+        }
+    });
+
+    var Affiliations = JXT.define({
+        name: 'affiliations',
+        namespace: _xmppConstants.Namespace.PUBSUB_OWNER,
+        element: 'affiliations',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var Configure = JXT.define({
+        name: 'config',
+        namespace: _xmppConstants.Namespace.PUBSUB_OWNER,
+        element: 'configure',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    JXT.extend(PubsubOwner, Configure);
+    JXT.extend(PubsubOwner, Subscriptions);
+    JXT.extend(PubsubOwner, Affiliations);
+
+    JXT.extend(Subscriptions, Subscription, 'list');
+    JXT.extend(Affiliations, Affiliation, 'list');
+
+    JXT.extendIQ(PubsubOwner);
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(Configure, DataForm);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],177:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Enable = JXT.define({
+        name: 'enablePush',
+        element: 'enable',
+        namespace: _xmppConstants.Namespace.PUSH_0,
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            node: Utils.attribute('node')
+        }
+    });
+
+    var Disable = JXT.define({
+        name: 'disablePush',
+        element: 'disable',
+        namespace: _xmppConstants.Namespace.PUSH_0,
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            node: Utils.attribute('node')
+        }
+    });
+
+    var Notification = JXT.define({
+        name: 'pushNotification',
+        element: 'notification',
+        namespace: _xmppConstants.Namespace.PUSH_0
+    });
+
+    JXT.withDataForm(function (DataForm) {
+        JXT.extend(Notification, DataForm);
+        JXT.extend(Enable, DataForm);
+    });
+
+    JXT.extendIQ(Enable);
+    JXT.extendIQ(Disable);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],178:[function(require,module,exports){
+'use strict';
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var _lodashForeach = require('lodash.foreach');
+
+var _lodashForeach2 = _interopRequireDefault(_lodashForeach);
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var ReachURI = JXT.define({
+        name: '_reachAddr',
+        namespace: _xmppConstants.Namespace.REACH_0,
+        element: 'addr',
+        fields: {
+            uri: Utils.attribute('uri'),
+            $desc: {
+                get: function get() {
+
+                    return Utils.getSubLangText(this.xml, _xmppConstants.Namespace.REACH_0, 'desc', this.lang);
+                }
+            },
+            desc: {
+                get: function get() {
+
+                    var descs = this.$desc;
+                    return descs[this.lang] || '';
+                },
+                set: function set(value) {
+
+                    Utils.setSubLangText(this.xml, _xmppConstants.Namespace.REACH_0, 'desc', value, this.lang);
+                }
+            }
+        }
+    });
+
+    var reachability = {
+        get: function get() {
+
+            var reach = Utils.find(this.xml, _xmppConstants.Namespace.REACH_0, 'reach');
+            var results = [];
+            if (reach.length) {
+                var addrs = Utils.find(reach[0], _xmppConstants.Namespace.REACH_0, 'addr');
+                (0, _lodashForeach2['default'])(addrs, function (addr) {
+
+                    results.push(new ReachURI({}, addr));
+                });
+            }
+            return results;
+        },
+        set: function set(value) {
+
+            var reach = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.REACH_0, 'reach');
+            Utils.setAttribute(reach, 'xmlns', _xmppConstants.Namespace.REACH_0);
+            (0, _lodashForeach2['default'])(value, function (info) {
+
+                var addr = new ReachURI(info);
+                reach.appendChild(addr.xml);
+            });
+        }
+    };
+
+    JXT.withPubsubItem(function (Item) {
+
+        JXT.add(Item, 'reach', reachability);
+    });
+
+    JXT.withPresence(function (Presence) {
+
+        JXT.add(Presence, 'reach', reachability);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"babel-runtime/helpers/interop-require-default":197,"lodash.foreach":212,"xmpp-constants":220}],179:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Register = JXT.define({
+        name: 'register',
+        namespace: _xmppConstants.Namespace.REGISTER,
+        element: 'query',
+        fields: {
+            instructions: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'instructions'),
+            registered: Utils.boolSub(_xmppConstants.Namespace.REGISTER, 'registered'),
+            remove: Utils.boolSub(_xmppConstants.Namespace.REGISTER, 'remove'),
+            username: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'username'),
+            nick: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'nick'),
+            password: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'password'),
+            name: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'name'),
+            first: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'first'),
+            last: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'last'),
+            email: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'email'),
+            address: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'address'),
+            city: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'city'),
+            state: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'state'),
+            zip: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'zip'),
+            phone: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'phone'),
+            url: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'url'),
+            date: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'date'),
+            misc: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'misc'),
+            text: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'text'),
+            key: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'key')
+        }
+    });
+
+    JXT.extendIQ(Register);
+
+    JXT.withDefinition('x', _xmppConstants.Namespace.OOB, function (OOB) {
+
+        JXT.extend(Register, OOB);
+    });
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(Register, DataForm);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],180:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Roster = JXT.define({
+        name: 'roster',
+        namespace: _xmppConstants.Namespace.ROSTER,
+        element: 'query',
+        fields: {
+            ver: {
+                get: function get() {
+
+                    return Utils.getAttribute(this.xml, 'ver');
+                },
+                set: function set(value) {
+
+                    var force = value === '';
+                    Utils.setAttribute(this.xml, 'ver', value, force);
+                }
+            }
+        }
+    });
+
+    var RosterItem = JXT.define({
+        name: '_rosterItem',
+        namespace: _xmppConstants.Namespace.ROSTER,
+        element: 'item',
+        fields: {
+            jid: Utils.jidAttribute('jid', true),
+            name: Utils.attribute('name'),
+            subscription: Utils.attribute('subscription', 'none'),
+            subscriptionRequested: {
+                get: function get() {
+
+                    var ask = Utils.getAttribute(this.xml, 'ask');
+                    return ask === 'subscribe';
+                }
+            },
+            preApproved: Utils.boolAttribute(_xmppConstants.Namespace.ROSTER, 'approved'),
+            groups: Utils.multiTextSub(_xmppConstants.Namespace.ROSTER, 'group')
+        }
+    });
+
+    JXT.extend(Roster, RosterItem, 'items');
+
+    JXT.extendIQ(Roster);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],181:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: 'rsm',
+        namespace: _xmppConstants.Namespace.RSM,
+        element: 'set',
+        fields: {
+            after: Utils.textSub(_xmppConstants.Namespace.RSM, 'after'),
+            before: {
+                get: function get() {
+
+                    return Utils.getSubText(this.xml, _xmppConstants.Namespace.RSM, 'before');
+                },
+                set: function set(value) {
+
+                    if (value === true) {
+                        Utils.findOrCreate(this.xml, _xmppConstants.Namespace.RSM, 'before');
+                    } else {
+                        Utils.setSubText(this.xml, _xmppConstants.Namespace.RSM, 'before', value);
+                    }
+                }
+            },
+            count: Utils.numberSub(_xmppConstants.Namespace.RSM, 'count', false, 0),
+            first: Utils.textSub(_xmppConstants.Namespace.RSM, 'first'),
+            firstIndex: Utils.subAttribute(_xmppConstants.Namespace.RSM, 'first', 'index'),
+            index: Utils.textSub(_xmppConstants.Namespace.RSM, 'index'),
+            last: Utils.textSub(_xmppConstants.Namespace.RSM, 'last'),
+            max: Utils.textSub(_xmppConstants.Namespace.RSM, 'max')
+        }
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],182:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Feedback = {
+        get: function get() {
+
+            var existing = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_RTCP_FB_0, 'rtcp-fb');
+            var result = [];
+            existing.forEach(function (xml) {
+
+                result.push({
+                    type: Utils.getAttribute(xml, 'type'),
+                    subtype: Utils.getAttribute(xml, 'subtype')
+                });
+            });
+            existing = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_RTCP_FB_0, 'rtcp-fb-trr-int');
+            existing.forEach(function (xml) {
+
+                result.push({
+                    type: Utils.getAttribute(xml, 'type'),
+                    value: Utils.getAttribute(xml, 'value')
+                });
+            });
+            return result;
+        },
+        set: function set(values) {
+
+            var self = this;
+            var existing = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_RTCP_FB_0, 'rtcp-fb');
+            existing.forEach(function (item) {
+
+                self.xml.removeChild(item);
+            });
+            existing = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_RTCP_FB_0, 'rtcp-fb-trr-int');
+            existing.forEach(function (item) {
+
+                self.xml.removeChild(item);
+            });
+
+            values.forEach(function (value) {
+
+                var fb = undefined;
+                if (value.type === 'trr-int') {
+                    fb = Utils.createElement(_xmppConstants.Namespace.JINGLE_RTP_RTCP_FB_0, 'rtcp-fb-trr-int', _xmppConstants.Namespace.JINGLE_RTP_1);
+                    Utils.setAttribute(fb, 'type', value.type);
+                    Utils.setAttribute(fb, 'value', value.value);
+                } else {
+                    fb = Utils.createElement(_xmppConstants.Namespace.JINGLE_RTP_RTCP_FB_0, 'rtcp-fb', _xmppConstants.Namespace.JINGLE_RTP_1);
+                    Utils.setAttribute(fb, 'type', value.type);
+                    Utils.setAttribute(fb, 'subtype', value.subtype);
+                }
+                self.xml.appendChild(fb);
+            });
+        }
+    };
+
+    var Bandwidth = JXT.define({
+        name: 'bandwidth',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_1,
+        element: 'bandwidth',
+        fields: {
+            type: Utils.attribute('type'),
+            bandwidth: Utils.text()
+        }
+    });
+
+    var RTP = JXT.define({
+        name: '_rtp',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_1,
+        element: 'description',
+        tags: ['jingle-description'],
+        fields: {
+            descType: { value: 'rtp' },
+            media: Utils.attribute('media'),
+            ssrc: Utils.attribute('ssrc'),
+            mux: Utils.boolSub(_xmppConstants.Namespace.JINGLE_RTP_1, 'rtcp-mux'),
+            encryption: {
+                get: function get() {
+
+                    var enc = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_1, 'encryption');
+                    if (!enc.length) {
+                        return [];
+                    }
+                    enc = enc[0];
+
+                    var self = this;
+                    var data = Utils.find(enc, _xmppConstants.Namespace.JINGLE_RTP_1, 'crypto');
+                    var results = [];
+
+                    data.forEach(function (xml) {
+
+                        results.push(new Crypto({}, xml, self).toJSON());
+                    });
+                    return results;
+                },
+                set: function set(values) {
+
+                    var enc = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_1, 'encryption');
+                    if (enc.length) {
+                        this.xml.removeChild(enc);
+                    }
+
+                    if (!values.length) {
+                        return;
+                    }
+
+                    Utils.setBoolSubAttribute(this.xml, _xmppConstants.Namespace.JINGLE_RTP_1, 'encryption', 'required', true);
+                    enc = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_1, 'encryption')[0];
+
+                    var self = this;
+                    values.forEach(function (value) {
+
+                        var content = new Crypto(value, null, self);
+                        enc.appendChild(content.xml);
+                    });
+                }
+            },
+            feedback: Feedback,
+            headerExtensions: {
+                get: function get() {
+
+                    var existing = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_HDREXT_0, 'rtp-hdrext');
+                    var result = [];
+                    existing.forEach(function (xml) {
+
+                        result.push({
+                            id: Utils.getAttribute(xml, 'id'),
+                            uri: Utils.getAttribute(xml, 'uri'),
+                            senders: Utils.getAttribute(xml, 'senders')
+                        });
+                    });
+                    return result;
+                },
+                set: function set(values) {
+
+                    var self = this;
+                    var existing = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_HDREXT_0, 'rtp-hdrext');
+                    existing.forEach(function (item) {
+
+                        self.xml.removeChild(item);
+                    });
+
+                    values.forEach(function (value) {
+
+                        var hdr = Utils.createElement(_xmppConstants.Namespace.JINGLE_RTP_HDREXT_0, 'rtp-hdrext', _xmppConstants.Namespace.JINGLE_RTP_1);
+                        Utils.setAttribute(hdr, 'id', value.id);
+                        Utils.setAttribute(hdr, 'uri', value.uri);
+                        Utils.setAttribute(hdr, 'senders', value.senders);
+                        self.xml.appendChild(hdr);
+                    });
+                }
+            }
+        }
+    });
+
+    var PayloadType = JXT.define({
+        name: '_payloadType',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_1,
+        element: 'payload-type',
+        fields: {
+            channels: Utils.attribute('channels'),
+            clockrate: Utils.attribute('clockrate'),
+            id: Utils.attribute('id'),
+            maxptime: Utils.attribute('maxptime'),
+            name: Utils.attribute('name'),
+            ptime: Utils.attribute('ptime'),
+            feedback: Feedback,
+            parameters: {
+                get: function get() {
+
+                    var result = [];
+                    var params = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_1, 'parameter');
+                    params.forEach(function (param) {
+
+                        result.push({
+                            key: Utils.getAttribute(param, 'name'),
+                            value: Utils.getAttribute(param, 'value')
+                        });
+                    });
+                    return result;
+                },
+                set: function set(values) {
+
+                    var self = this;
+                    values.forEach(function (value) {
+
+                        var param = Utils.createElement(_xmppConstants.Namespace.JINGLE_RTP_1, 'parameter');
+                        Utils.setAttribute(param, 'name', value.key);
+                        Utils.setAttribute(param, 'value', value.value);
+                        self.xml.appendChild(param);
+                    });
+                }
+            }
+        }
+    });
+
+    var Crypto = JXT.define({
+        name: 'crypto',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_1,
+        element: 'crypto',
+        fields: {
+            cipherSuite: Utils.attribute('crypto-suite'),
+            keyParams: Utils.attribute('key-params'),
+            sessionParams: Utils.attribute('session-params'),
+            tag: Utils.attribute('tag')
+        }
+    });
+
+    var ContentGroup = JXT.define({
+        name: '_group',
+        namespace: _xmppConstants.Namespace.JINGLE_GROUPING_0,
+        element: 'group',
+        fields: {
+            semantics: Utils.attribute('semantics'),
+            contents: Utils.multiSubAttribute(_xmppConstants.Namespace.JINGLE_GROUPING_0, 'content', 'name')
+        }
+    });
+
+    var SourceGroup = JXT.define({
+        name: '_sourceGroup',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_SSMA_0,
+        element: 'ssrc-group',
+        fields: {
+            semantics: Utils.attribute('semantics'),
+            sources: Utils.multiSubAttribute(_xmppConstants.Namespace.JINGLE_RTP_SSMA_0, 'source', 'ssrc')
+        }
+    });
+
+    var Source = JXT.define({
+        name: '_source',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_SSMA_0,
+        element: 'source',
+        fields: {
+            ssrc: Utils.attribute('ssrc'),
+            parameters: {
+                get: function get() {
+
+                    var result = [];
+                    var params = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_SSMA_0, 'parameter');
+                    params.forEach(function (param) {
+
+                        result.push({
+                            key: Utils.getAttribute(param, 'name'),
+                            value: Utils.getAttribute(param, 'value')
+                        });
+                    });
+                    return result;
+                },
+                set: function set(values) {
+
+                    var self = this;
+                    values.forEach(function (value) {
+
+                        var param = Utils.createElement(_xmppConstants.Namespace.JINGLE_RTP_SSMA_0, 'parameter');
+                        Utils.setAttribute(param, 'name', value.key);
+                        Utils.setAttribute(param, 'value', value.value);
+                        self.xml.appendChild(param);
+                    });
+                }
+            }
+        }
+    });
+
+    var Mute = JXT.define({
+        name: 'mute',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_INFO_1,
+        element: 'mute',
+        fields: {
+            creator: Utils.attribute('creator'),
+            name: Utils.attribute('name')
+        }
+    });
+
+    var Unmute = JXT.define({
+        name: 'unmute',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_INFO_1,
+        element: 'unmute',
+        fields: {
+            creator: Utils.attribute('creator'),
+            name: Utils.attribute('name')
+        }
+    });
+
+    JXT.extend(RTP, Bandwidth);
+    JXT.extend(RTP, PayloadType, 'payloads');
+    JXT.extend(RTP, Source, 'sources');
+    JXT.extend(RTP, SourceGroup, 'sourceGroups');
+
+    JXT.withDefinition('content', _xmppConstants.Namespace.JINGLE_1, function (Content) {
+
+        JXT.extend(Content, RTP);
+    });
+
+    JXT.withDefinition('jingle', _xmppConstants.Namespace.JINGLE_1, function (Jingle) {
+
+        JXT.extend(Jingle, Mute);
+        JXT.extend(Jingle, Unmute);
+        JXT.extend(Jingle, ContentGroup, 'groups');
+        JXT.add(Jingle, 'ringing', Utils.boolSub(_xmppConstants.Namespace.JINGLE_RTP_INFO_1, 'ringing'));
+        JXT.add(Jingle, 'hold', Utils.boolSub(_xmppConstants.Namespace.JINGLE_RTP_INFO_1, 'hold'));
+        JXT.add(Jingle, 'active', Utils.boolSub(_xmppConstants.Namespace.JINGLE_RTP_INFO_1, 'active'));
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],183:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var TYPE_MAP = {
+    insert: 't',
+    erase: 'e',
+    wait: 'w'
+};
+
+var ACTION_MAP = {
+    t: 'insert',
+    e: 'erase',
+    w: 'wait'
+};
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var RTT = JXT.define({
+        name: 'rtt',
+        namespace: _xmppConstants.Namespace.RTT_0,
+        element: 'rtt',
+        fields: {
+            id: Utils.attribute('id'),
+            event: Utils.attribute('event', 'edit'),
+            seq: Utils.numberAttribute('seq'),
+            actions: {
+                get: function get() {
+
+                    var results = [];
+                    for (var i = 0, len = this.xml.childNodes.length; i < len; i++) {
+                        var child = this.xml.childNodes[i];
+                        var _name = child.localName;
+                        var action = {};
+
+                        if (child.namespaceURI !== _xmppConstants.Namespace.RTT_0) {
+                            continue;
+                        }
+
+                        if (ACTION_MAP[_name]) {
+                            action.type = ACTION_MAP[_name];
+                        } else {
+                            continue;
+                        }
+
+                        var pos = Utils.getAttribute(child, 'p');
+                        if (pos) {
+                            action.pos = parseInt(pos, 10);
+                        }
+
+                        var n = Utils.getAttribute(child, 'n');
+                        if (n) {
+                            action.num = parseInt(n, 10);
+                        }
+
+                        var t = Utils.getText(child);
+                        if (t && _name === 't') {
+                            action.text = t;
+                        }
+
+                        results.push(action);
+                    }
+
+                    return results;
+                },
+                set: function set(actions) {
+
+                    var self = this;
+
+                    for (var i = 0, len = this.xml.childNodes.length; i < len; i++) {
+                        this.xml.removeChild(this.xml.childNodes[i]);
+                    }
+
+                    actions.forEach(function (action) {
+
+                        if (!TYPE_MAP[action.type]) {
+                            return;
+                        }
+
+                        var child = Utils.createElement(_xmppConstants.Namespace.RTT_0, TYPE_MAP[action.type], _xmppConstants.Namespace.RTT_0);
+
+                        if (action.pos !== undefined) {
+                            Utils.setAttribute(child, 'p', action.pos.toString());
+                        }
+
+                        if (action.num) {
+                            Utils.setAttribute(child, 'n', action.num.toString());
+                        }
+
+                        if (action.text) {
+                            Utils.setText(child, action.text);
+                        }
+
+                        self.xml.appendChild(child);
+                    });
+                }
+            }
+        }
+    });
+
+    JXT.extendMessage(RTT);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],184:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var CONDITIONS = ['aborted', 'account-disabled', 'credentials-expired', 'encryption-required', 'incorrect-encoding', 'invalid-authzid', 'invalid-mechanism', 'malformed-request', 'mechanism-too-weak', 'not-authorized', 'temporary-auth-failure'];
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Mechanisms = JXT.define({
+        name: 'sasl',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'mechanisms',
+        fields: {
+            mechanisms: Utils.multiTextSub(_xmppConstants.Namespace.SASL, 'mechanism')
+        }
+    });
+
+    JXT.define({
+        name: 'saslAuth',
+        eventName: 'sasl:auth',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'auth',
+        topLevel: true,
+        fields: {
+            value: Utils.text(),
+            mechanism: Utils.attribute('mechanism')
+        }
+    });
+
+    JXT.define({
+        name: 'saslChallenge',
+        eventName: 'sasl:challenge',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'challenge',
+        topLevel: true,
+        fields: {
+            value: Utils.text()
+        }
+    });
+
+    JXT.define({
+        name: 'saslResponse',
+        eventName: 'sasl:response',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'response',
+        topLevel: true,
+        fields: {
+            value: Utils.text()
+        }
+    });
+
+    JXT.define({
+        name: 'saslAbort',
+        eventName: 'sasl:abort',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'abort',
+        topLevel: true
+    });
+
+    JXT.define({
+        name: 'saslSuccess',
+        eventName: 'sasl:success',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'success',
+        topLevel: true,
+        fields: {
+            value: Utils.text()
+        }
+    });
+
+    JXT.define({
+        name: 'saslFailure',
+        eventName: 'sasl:failure',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'failure',
+        topLevel: true,
+        fields: {
+            lang: {
+                get: function get() {
+
+                    return this._lang || '';
+                },
+                set: function set(value) {
+
+                    this._lang = value;
+                }
+            },
+            condition: Utils.enumSub(_xmppConstants.Namespace.SASL, CONDITIONS),
+            $text: {
+                get: function get() {
+
+                    return Utils.getSubLangText(this.xml, _xmppConstants.Namespace.SASL, 'text', this.lang);
+                }
+            },
+            text: {
+                get: function get() {
+
+                    var text = this.$text;
+                    return text[this.lang] || '';
+                },
+                set: function set(value) {
+
+                    Utils.setSubLangText(this.xml, _xmppConstants.Namespace.SASL, 'text', value, this.lang);
+                }
+            }
+        }
+    });
+
+    JXT.extendStreamFeatures(Mechanisms);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],185:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Session = JXT.define({
+        name: 'session',
+        namespace: _xmppConstants.Namespace.SESSION,
+        element: 'session',
+        fields: {
+            required: JXT.utils.boolSub(_xmppConstants.Namespace.SESSION, 'required'),
+            optional: JXT.utils.boolSub(_xmppConstants.Namespace.SESSION, 'optional')
+        }
+    });
+
+    JXT.extendIQ(Session);
+    JXT.extendStreamFeatures(Session);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],186:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var SHIM = {
+        get: function get() {
+
+            var headerSet = Utils.find(this.xml, _xmppConstants.Namespace.SHIM, 'headers');
+            if (headerSet.length) {
+                return Utils.getMultiSubText(headerSet[0], _xmppConstants.Namespace.SHIM, 'header', function (header) {
+
+                    var name = Utils.getAttribute(header, 'name');
+                    if (name) {
+                        return {
+                            name: name,
+                            value: Utils.getText(header)
+                        };
+                    }
+                });
+            }
+            return [];
+        },
+        set: function set(values) {
+
+            var headerSet = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.SHIM, 'headers');
+            JXT.setMultiSubText(headerSet, _xmppConstants.Namespace.SHIM, 'header', values, function (val) {
+
+                var header = Utils.createElement(_xmppConstants.Namespace.SHIM, 'header', _xmppConstants.Namespace.SHIM);
+                Utils.setAttribute(header, 'name', val.name);
+                Utils.setText(header, val.value);
+                headerSet.appendChild(header);
+            });
+        }
+    };
+
+    JXT.withMessage(function (Message) {
+
+        JXT.add(Message, 'headers', SHIM);
+    });
+
+    JXT.withPresence(function (Presence) {
+
+        JXT.add(Presence, 'headers', SHIM);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],187:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var SMFeature = JXT.define({
+        name: 'streamManagement',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'sm'
+    });
+
+    JXT.define({
+        name: 'smEnable',
+        eventName: 'stream:management:enable',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'enable',
+        topLevel: true,
+        fields: {
+            resume: Utils.boolAttribute('resume')
+        }
+    });
+
+    JXT.define({
+        name: 'smEnabled',
+        eventName: 'stream:management:enabled',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'enabled',
+        topLevel: true,
+        fields: {
+            id: Utils.attribute('id'),
+            resume: Utils.boolAttribute('resume')
+        }
+    });
+
+    JXT.define({
+        name: 'smResume',
+        eventName: 'stream:management:resume',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'resume',
+        topLevel: true,
+        fields: {
+            h: Utils.numberAttribute('h', false, 0),
+            previd: Utils.attribute('previd')
+        }
+    });
+
+    JXT.define({
+        name: 'smResumed',
+        eventName: 'stream:management:resumed',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'resumed',
+        topLevel: true,
+        fields: {
+            h: Utils.numberAttribute('h', false, 0),
+            previd: Utils.attribute('previd')
+        }
+    });
+
+    JXT.define({
+        name: 'smFailed',
+        eventName: 'stream:management:failed',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'failed',
+        topLevel: true
+    });
+
+    JXT.define({
+        name: 'smAck',
+        eventName: 'stream:management:ack',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'a',
+        topLevel: true,
+        fields: {
+            h: Utils.numberAttribute('h', false, 0)
+        }
+    });
+
+    JXT.define({
+        name: 'smRequest',
+        eventName: 'stream:management:request',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'r',
+        topLevel: true
+    });
+
+    JXT.extendStreamFeatures(SMFeature);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],188:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: 'stream',
+        namespace: _xmppConstants.Namespace.STREAM,
+        element: 'stream',
+        fields: {
+            lang: Utils.langAttribute(),
+            id: Utils.attribute('id'),
+            version: Utils.attribute('version', '1.0'),
+            to: Utils.jidAttribute('to', true),
+            from: Utils.jidAttribute('from', true)
+        }
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],189:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var CONDITIONS = ['bad-format', 'bad-namespace-prefix', 'conflict', 'connection-timeout', 'host-gone', 'host-unknown', 'improper-addressing', 'internal-server-error', 'invalid-from', 'invalid-namespace', 'invalid-xml', 'not-authorized', 'not-well-formed', 'policy-violation', 'remote-connection-failed', 'reset', 'resource-constraint', 'restricted-xml', 'see-other-host', 'system-shutdown', 'undefined-condition', 'unsupported-encoding', 'unsupported-feature', 'unsupported-stanza-type', 'unsupported-version'];
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: 'streamError',
+        namespace: _xmppConstants.Namespace.STREAM,
+        element: 'error',
+        topLevel: true,
+        fields: {
+            lang: {
+                get: function get() {
+
+                    return this._lang || '';
+                },
+                set: function set(value) {
+
+                    this._lang = value;
+                }
+            },
+            condition: Utils.enumSub(_xmppConstants.Namespace.STREAM_ERROR, CONDITIONS),
+            seeOtherHost: {
+                get: function get() {
+
+                    return Utils.getSubText(this.xml, _xmppConstants.Namespace.STREAM_ERROR, 'see-other-host');
+                },
+                set: function set(value) {
+
+                    this.condition = 'see-other-host';
+                    Utils.setSubText(this.xml, _xmppConstants.Namespace.STREAM_ERROR, 'see-other-host', value);
+                }
+            },
+            $text: {
+                get: function get() {
+
+                    return Utils.getSubLangText(this.xml, _xmppConstants.Namespace.STREAM_ERROR, 'text', this.lang);
+                }
+            },
+            text: {
+                get: function get() {
+
+                    var text = this.$text;
+                    return text[this.lang] || '';
+                },
+                set: function set(value) {
+
+                    Utils.setSubLangText(this.xml, _xmppConstants.Namespace.STREAM_ERROR, 'text', value, this.lang);
+                }
+            }
+        }
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],190:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var StreamFeatures = JXT.define({
+        name: 'streamFeatures',
+        namespace: _xmppConstants.Namespace.STREAM,
+        element: 'features',
+        topLevel: true
+    });
+
+    var RosterVerFeature = JXT.define({
+        name: 'rosterVersioning',
+        namespace: _xmppConstants.Namespace.ROSTER_VERSIONING,
+        element: 'ver'
+    });
+
+    var SubscriptionPreApprovalFeature = JXT.define({
+        name: 'subscriptionPreApproval',
+        namespace: _xmppConstants.Namespace.SUBSCRIPTION_PREAPPROVAL,
+        element: 'sub'
+    });
+
+    JXT.extendStreamFeatures(RosterVerFeature);
+    JXT.extendStreamFeatures(SubscriptionPreApprovalFeature);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],191:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var EntityTime = JXT.define({
+        name: 'time',
+        namespace: _xmppConstants.Namespace.TIME,
+        element: 'time',
+        fields: {
+            utc: JXT.utils.dateSub(_xmppConstants.Namespace.TIME, 'utc'),
+            tzo: JXT.utils.tzoSub(_xmppConstants.Namespace.TIME, 'tzo', 0)
+        }
+    });
+
+    JXT.extendIQ(EntityTime);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],192:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Tune = JXT.define({
+        name: 'tune',
+        namespace: _xmppConstants.Namespace.TUNE,
+        element: 'tune',
+        fields: {
+            artist: Utils.textSub(_xmppConstants.Namespace.TUNE, 'artist'),
+            length: Utils.numberSub(_xmppConstants.Namespace.TUNE, 'length'),
+            rating: Utils.numberSub(_xmppConstants.Namespace.TUNE, 'rating'),
+            source: Utils.textSub(_xmppConstants.Namespace.TUNE, 'source'),
+            title: Utils.textSub(_xmppConstants.Namespace.TUNE, 'title'),
+            track: Utils.textSub(_xmppConstants.Namespace.TUNE, 'track'),
+            uri: Utils.textSub(_xmppConstants.Namespace.TUNE, 'uri')
+        }
+    });
+
+    JXT.extendPubsubItem(Tune);
+    JXT.extendMessage(Tune);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],193:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var VCardTemp = JXT.define({
+        name: 'vCardTemp',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'vCard',
+        fields: {
+            role: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'ROLE'),
+            website: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'URL'),
+            title: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'TITLE'),
+            description: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'DESC'),
+            fullName: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'FN'),
+            birthday: Utils.dateSub(_xmppConstants.Namespace.VCARD_TEMP, 'BDAY'),
+            nicknames: Utils.multiTextSub(_xmppConstants.Namespace.VCARD_TEMP, 'NICKNAME'),
+            jids: Utils.multiTextSub(_xmppConstants.Namespace.VCARD_TEMP, 'JABBERID')
+        }
+    });
+
+    var Email = JXT.define({
+        name: '_email',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'EMAIL',
+        fields: {
+            email: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'USERID'),
+            home: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'HOME'),
+            work: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'WORK'),
+            preferred: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'PREF')
+        }
+    });
+
+    var PhoneNumber = JXT.define({
+        name: '_tel',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'TEL',
+        fields: {
+            number: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'NUMBER'),
+            home: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'HOME'),
+            work: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'WORK'),
+            mobile: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'CELL'),
+            preferred: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'PREF')
+        }
+    });
+
+    var Address = JXT.define({
+        name: '_address',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'ADR',
+        fields: {
+            street: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'STREET'),
+            street2: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'EXTADD'),
+            country: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'CTRY'),
+            city: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'LOCALITY'),
+            region: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'REGION'),
+            postalCode: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'PCODE'),
+            pobox: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'POBOX'),
+            home: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'HOME'),
+            work: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'WORK'),
+            preferred: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'PREF')
+        }
+    });
+
+    var Organization = JXT.define({
+        name: 'organization',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'ORG',
+        fields: {
+            name: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'ORGNAME'),
+            unit: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'ORGUNIT')
+        }
+    });
+
+    var Name = JXT.define({
+        name: 'name',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'N',
+        fields: {
+            family: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'FAMILY'),
+            given: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'GIVEN'),
+            middle: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'MIDDLE'),
+            prefix: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'PREFIX'),
+            suffix: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'SUFFIX')
+        }
+    });
+
+    var Photo = JXT.define({
+        name: 'photo',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'PHOTO',
+        fields: {
+            type: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'TYPE'),
+            data: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'BINVAL'),
+            url: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'EXTVAL')
+        }
+    });
+
+    JXT.extend(VCardTemp, Email, 'emails');
+    JXT.extend(VCardTemp, Address, 'addresses');
+    JXT.extend(VCardTemp, PhoneNumber, 'phoneNumbers');
+    JXT.extend(VCardTemp, Organization);
+    JXT.extend(VCardTemp, Name);
+    JXT.extend(VCardTemp, Photo);
+
+    JXT.extendIQ(VCardTemp);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],194:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Version = JXT.define({
+        name: 'version',
+        namespace: _xmppConstants.Namespace.VERSION,
+        element: 'query',
+        fields: {
+            name: JXT.utils.textSub(_xmppConstants.Namespace.VERSION, 'name'),
+            version: JXT.utils.textSub(_xmppConstants.Namespace.VERSION, 'version'),
+            os: JXT.utils.textSub(_xmppConstants.Namespace.VERSION, 'os')
+        }
+    });
+
+    JXT.extendIQ(Version);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],195:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    JXT.withIQ(function (IQ) {
+
+        JXT.add(IQ, 'visible', JXT.utils.boolSub(_xmppConstants.Namespace.INVISIBLE_0, 'visible'));
+        JXT.add(IQ, 'invisible', JXT.utils.boolSub(_xmppConstants.Namespace.INVISIBLE_0, 'invisible'));
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],196:[function(require,module,exports){
+module.exports = { "default": require("core-js/library/fn/object/assign"), __esModule: true };
+},{"core-js/library/fn/object/assign":198}],197:[function(require,module,exports){
+"use strict";
+
+exports["default"] = function (obj) {
+  return obj && obj.__esModule ? obj : {
+    "default": obj
+  };
+};
+
+exports.__esModule = true;
+},{}],198:[function(require,module,exports){
+require('../../modules/es6.object.assign');
+module.exports = require('../../modules/$.core').Object.assign;
+},{"../../modules/$.core":201,"../../modules/es6.object.assign":211}],199:[function(require,module,exports){
+module.exports = function(it){
+  if(typeof it != 'function')throw TypeError(it + ' is not a function!');
+  return it;
+};
+},{}],200:[function(require,module,exports){
+var toString = {}.toString;
+
+module.exports = function(it){
+  return toString.call(it).slice(8, -1);
+};
+},{}],201:[function(require,module,exports){
+var core = module.exports = {version: '1.2.6'};
+if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
+},{}],202:[function(require,module,exports){
+// optional / simple context binding
+var aFunction = require('./$.a-function');
+module.exports = function(fn, that, length){
+  aFunction(fn);
+  if(that === undefined)return fn;
+  switch(length){
+    case 1: return function(a){
+      return fn.call(that, a);
+    };
+    case 2: return function(a, b){
+      return fn.call(that, a, b);
+    };
+    case 3: return function(a, b, c){
+      return fn.call(that, a, b, c);
+    };
+  }
+  return function(/* ...args */){
+    return fn.apply(that, arguments);
+  };
+};
+},{"./$.a-function":199}],203:[function(require,module,exports){
+// 7.2.1 RequireObjectCoercible(argument)
+module.exports = function(it){
+  if(it == undefined)throw TypeError("Can't call method on  " + it);
+  return it;
+};
+},{}],204:[function(require,module,exports){
+var global    = require('./$.global')
+  , core      = require('./$.core')
+  , ctx       = require('./$.ctx')
+  , PROTOTYPE = 'prototype';
+
+var $export = function(type, name, source){
+  var IS_FORCED = type & $export.F
+    , IS_GLOBAL = type & $export.G
+    , IS_STATIC = type & $export.S
+    , IS_PROTO  = type & $export.P
+    , IS_BIND   = type & $export.B
+    , IS_WRAP   = type & $export.W
+    , exports   = IS_GLOBAL ? core : core[name] || (core[name] = {})
+    , target    = IS_GLOBAL ? global : IS_STATIC ? global[name] : (global[name] || {})[PROTOTYPE]
+    , key, own, out;
+  if(IS_GLOBAL)source = name;
+  for(key in source){
+    // contains in native
+    own = !IS_FORCED && target && key in target;
+    if(own && key in exports)continue;
+    // export native or passed
+    out = own ? target[key] : source[key];
+    // prevent global pollution for namespaces
+    exports[key] = IS_GLOBAL && typeof target[key] != 'function' ? source[key]
+    // bind timers to global for call from export context
+    : IS_BIND && own ? ctx(out, global)
+    // wrap global constructors for prevent change them in library
+    : IS_WRAP && target[key] == out ? (function(C){
+      var F = function(param){
+        return this instanceof C ? new C(param) : C(param);
+      };
+      F[PROTOTYPE] = C[PROTOTYPE];
+      return F;
+    // make static versions for prototype methods
+    })(out) : IS_PROTO && typeof out == 'function' ? ctx(Function.call, out) : out;
+    if(IS_PROTO)(exports[PROTOTYPE] || (exports[PROTOTYPE] = {}))[key] = out;
+  }
+};
+// type bitmap
+$export.F = 1;  // forced
+$export.G = 2;  // global
+$export.S = 4;  // static
+$export.P = 8;  // proto
+$export.B = 16; // bind
+$export.W = 32; // wrap
+module.exports = $export;
+},{"./$.core":201,"./$.ctx":202,"./$.global":206}],205:[function(require,module,exports){
+module.exports = function(exec){
+  try {
+    return !!exec();
+  } catch(e){
+    return true;
+  }
+};
+},{}],206:[function(require,module,exports){
+// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
+var global = module.exports = typeof window != 'undefined' && window.Math == Math
+  ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
+if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
+},{}],207:[function(require,module,exports){
+// fallback for non-array-like ES3 and non-enumerable old V8 strings
+var cof = require('./$.cof');
+module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it){
+  return cof(it) == 'String' ? it.split('') : Object(it);
+};
+},{"./$.cof":200}],208:[function(require,module,exports){
+var $Object = Object;
+module.exports = {
+  create:     $Object.create,
+  getProto:   $Object.getPrototypeOf,
+  isEnum:     {}.propertyIsEnumerable,
+  getDesc:    $Object.getOwnPropertyDescriptor,
+  setDesc:    $Object.defineProperty,
+  setDescs:   $Object.defineProperties,
+  getKeys:    $Object.keys,
+  getNames:   $Object.getOwnPropertyNames,
+  getSymbols: $Object.getOwnPropertySymbols,
+  each:       [].forEach
+};
+},{}],209:[function(require,module,exports){
+// 19.1.2.1 Object.assign(target, source, ...)
+var $        = require('./$')
+  , toObject = require('./$.to-object')
+  , IObject  = require('./$.iobject');
+
+// should work with symbols and should have deterministic property order (V8 bug)
+module.exports = require('./$.fails')(function(){
+  var a = Object.assign
+    , A = {}
+    , B = {}
+    , S = Symbol()
+    , K = 'abcdefghijklmnopqrst';
+  A[S] = 7;
+  K.split('').forEach(function(k){ B[k] = k; });
+  return a({}, A)[S] != 7 || Object.keys(a({}, B)).join('') != K;
+}) ? function assign(target, source){ // eslint-disable-line no-unused-vars
+  var T     = toObject(target)
+    , $$    = arguments
+    , $$len = $$.length
+    , index = 1
+    , getKeys    = $.getKeys
+    , getSymbols = $.getSymbols
+    , isEnum     = $.isEnum;
+  while($$len > index){
+    var S      = IObject($$[index++])
+      , keys   = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S)
+      , length = keys.length
+      , j      = 0
+      , key;
+    while(length > j)if(isEnum.call(S, key = keys[j++]))T[key] = S[key];
+  }
+  return T;
+} : Object.assign;
+},{"./$":208,"./$.fails":205,"./$.iobject":207,"./$.to-object":210}],210:[function(require,module,exports){
+// 7.1.13 ToObject(argument)
+var defined = require('./$.defined');
+module.exports = function(it){
+  return Object(defined(it));
+};
+},{"./$.defined":203}],211:[function(require,module,exports){
+// 19.1.3.1 Object.assign(target, source)
+var $export = require('./$.export');
+
+$export($export.S + $export.F, 'Object', {assign: require('./$.object-assign')});
+},{"./$.export":204,"./$.object-assign":209}],212:[function(require,module,exports){
+arguments[4][54][0].apply(exports,arguments)
+},{"dup":54,"lodash._arrayeach":213,"lodash._baseeach":214,"lodash._bindcallback":218,"lodash.isarray":219}],213:[function(require,module,exports){
+arguments[4][55][0].apply(exports,arguments)
+},{"dup":55}],214:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"dup":56,"lodash.keys":215}],215:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"dup":57,"lodash._getnative":216,"lodash.isarguments":217,"lodash.isarray":219}],216:[function(require,module,exports){
+arguments[4][58][0].apply(exports,arguments)
+},{"dup":58}],217:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"dup":59}],218:[function(require,module,exports){
+arguments[4][60][0].apply(exports,arguments)
+},{"dup":60}],219:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"dup":61}],220:[function(require,module,exports){
+arguments[4][128][0].apply(exports,arguments)
+},{"./lib/jingle":221,"./lib/muc":222,"./lib/namespaces":223,"./lib/presence":224,"./lib/pubsub":225,"dup":128}],221:[function(require,module,exports){
+arguments[4][129][0].apply(exports,arguments)
+},{"dup":129}],222:[function(require,module,exports){
+arguments[4][130][0].apply(exports,arguments)
+},{"dup":130}],223:[function(require,module,exports){
+arguments[4][131][0].apply(exports,arguments)
+},{"dup":131}],224:[function(require,module,exports){
+arguments[4][132][0].apply(exports,arguments)
+},{"dup":132}],225:[function(require,module,exports){
+arguments[4][133][0].apply(exports,arguments)
+},{"dup":133}],226:[function(require,module,exports){
+arguments[4][134][0].apply(exports,arguments)
+},{"./lib/stringprep":227,"dup":134}],227:[function(require,module,exports){
+arguments[4][135][0].apply(exports,arguments)
+},{"dup":135,"punycode":11}],228:[function(require,module,exports){
 'use strict';
 
 var extend = require('lodash.assign');
@@ -15802,7 +21739,7 @@ JXT.getGlobalJXT = function () {
 
 module.exports = JXT;
 
-},{"./lib/helpers":118,"./lib/stanza":119,"./lib/types":120,"lodash.assign":121,"ltx":134,"uuid":139}],118:[function(require,module,exports){
+},{"./lib/helpers":229,"./lib/stanza":230,"./lib/types":231,"lodash.assign":232,"ltx":245,"uuid":250}],229:[function(require,module,exports){
 'use strict';
 
 var ltx = require('ltx');
@@ -16083,7 +22020,7 @@ exports.setBoolSub = function (xml, NS, element, value) {
     }
 };
 
-},{"ltx":134}],119:[function(require,module,exports){
+},{"ltx":245}],230:[function(require,module,exports){
 'use strict';
 
 var helpers = require('./helpers');
@@ -16199,7 +22136,7 @@ module.exports = function (JXT, opts) {
     return Stanza;
 };
 
-},{"./helpers":118,"lodash.assign":121}],120:[function(require,module,exports){
+},{"./helpers":229,"lodash.assign":232}],231:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -16598,7 +22535,7 @@ exports.subMultiExtension = function (NS, sub, ChildJXT) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"./helpers":118,"buffer":2,"lodash.assign":121}],121:[function(require,module,exports){
+},{"./helpers":229,"buffer":2,"lodash.assign":232}],232:[function(require,module,exports){
 /**
  * lodash 3.2.0 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -16680,7 +22617,7 @@ var assign = createAssigner(function(object, source, customizer) {
 
 module.exports = assign;
 
-},{"lodash._baseassign":122,"lodash._createassigner":124,"lodash.keys":128}],122:[function(require,module,exports){
+},{"lodash._baseassign":233,"lodash._createassigner":235,"lodash.keys":239}],233:[function(require,module,exports){
 /**
  * lodash 3.2.0 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -16709,7 +22646,7 @@ function baseAssign(object, source) {
 
 module.exports = baseAssign;
 
-},{"lodash._basecopy":123,"lodash.keys":128}],123:[function(require,module,exports){
+},{"lodash._basecopy":234,"lodash.keys":239}],234:[function(require,module,exports){
 /**
  * lodash 3.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -16743,7 +22680,7 @@ function baseCopy(source, props, object) {
 
 module.exports = baseCopy;
 
-},{}],124:[function(require,module,exports){
+},{}],235:[function(require,module,exports){
 /**
  * lodash 3.1.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -16797,9 +22734,9 @@ function createAssigner(assigner) {
 
 module.exports = createAssigner;
 
-},{"lodash._bindcallback":125,"lodash._isiterateecall":126,"lodash.restparam":127}],125:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],126:[function(require,module,exports){
+},{"lodash._bindcallback":236,"lodash._isiterateecall":237,"lodash.restparam":238}],236:[function(require,module,exports){
+arguments[4][60][0].apply(exports,arguments)
+},{"dup":60}],237:[function(require,module,exports){
 /**
  * lodash 3.0.9 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -16933,7 +22870,7 @@ function isObject(value) {
 
 module.exports = isIterateeCall;
 
-},{}],127:[function(require,module,exports){
+},{}],238:[function(require,module,exports){
 /**
  * lodash 3.6.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -17002,15 +22939,15 @@ function restParam(func, start) {
 
 module.exports = restParam;
 
-},{}],128:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51,"lodash._getnative":129,"lodash.isarguments":130,"lodash.isarray":131}],129:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"dup":52}],130:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],131:[function(require,module,exports){
-arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],132:[function(require,module,exports){
+},{}],239:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"dup":57,"lodash._getnative":240,"lodash.isarguments":241,"lodash.isarray":242}],240:[function(require,module,exports){
+arguments[4][58][0].apply(exports,arguments)
+},{"dup":58}],241:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"dup":59}],242:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"dup":61}],243:[function(require,module,exports){
 'use strict';
 
 var util = require('util')
@@ -17122,7 +23059,7 @@ DOMElement.prototype.removeChild = function (el) {
 
 module.exports = DOMElement
 
-},{"./element":133,"util":24}],133:[function(require,module,exports){
+},{"./element":244,"util":28}],244:[function(require,module,exports){
 'use strict';
 
 /**
@@ -17516,7 +23453,7 @@ function escapeXmlText(s) {
 exports.Element = Element
 exports.escapeXml = escapeXml
 
-},{}],134:[function(require,module,exports){
+},{}],245:[function(require,module,exports){
 'use strict';
 
 /* Cause browserify to bundle SAX parsers: */
@@ -17526,7 +23463,7 @@ parse.availableSaxParsers.push(parse.bestSaxParser = require('./sax/sax_ltx'))
 
 /* SHIM */
 module.exports = require('./index')
-},{"./index":135,"./parse":136,"./sax/sax_ltx":137}],135:[function(require,module,exports){
+},{"./index":246,"./parse":247,"./sax/sax_ltx":248}],246:[function(require,module,exports){
 'use strict';
 
 var parse = require('./parse')
@@ -17553,7 +23490,7 @@ exports.Parser = parse.Parser
 exports.availableSaxParsers = parse.availableSaxParsers
 exports.bestSaxParser = parse.bestSaxParser
 
-},{"./dom-element":132,"./element":133,"./parse":136}],136:[function(require,module,exports){
+},{"./dom-element":243,"./element":244,"./parse":247}],247:[function(require,module,exports){
 'use strict';
 
 var events = require('events')
@@ -17672,7 +23609,7 @@ exports.parse = function(data, saxParser) {
     }
 }
 
-},{"./dom-element":132,"events":6,"util":24}],137:[function(require,module,exports){
+},{"./dom-element":243,"events":6,"util":28}],248:[function(require,module,exports){
 'use strict';
 
 var util = require('util')
@@ -17844,1118 +23781,24 @@ function unescapeXml(s) {
         replace(/\&(nbsp|#160);/g, '\n')
 }
 
-},{"events":6,"util":24}],138:[function(require,module,exports){
-arguments[4][113][0].apply(exports,arguments)
-},{"dup":113}],139:[function(require,module,exports){
-arguments[4][114][0].apply(exports,arguments)
-},{"./rng":138,"dup":114}],140:[function(require,module,exports){
-/*
- *  Copyright (c) 2014 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
-
-/* More information about these options at jshint.com/docs/options */
-/* jshint browser: true, camelcase: true, curly: true, devel: true,
-   eqeqeq: true, forin: false, globalstrict: true, node: true,
-   quotmark: single, undef: true, unused: strict */
-/* global mozRTCIceCandidate, mozRTCPeerConnection, Promise,
-mozRTCSessionDescription, webkitRTCPeerConnection, MediaStreamTrack */
-/* exported trace,requestUserMedia */
-
-'use strict';
-
-var getUserMedia = null;
-var attachMediaStream = null;
-var reattachMediaStream = null;
-var webrtcDetectedBrowser = null;
-var webrtcDetectedVersion = null;
-var webrtcMinimumVersion = null;
-var webrtcUtils = {
-  log: function() {
-    // suppress console.log output when being included as a module.
-    if (typeof module !== 'undefined' ||
-        typeof require === 'function' && typeof define === 'function') {
-      return;
-    }
-    console.log.apply(console, arguments);
-  }
-};
-
-function trace(text) {
-  // This function is used for logging.
-  if (text[text.length - 1] === '\n') {
-    text = text.substring(0, text.length - 1);
-  }
-  if (window.performance) {
-    var now = (window.performance.now() / 1000).toFixed(3);
-    webrtcUtils.log(now + ': ' + text);
-  } else {
-    webrtcUtils.log(text);
-  }
-}
-
-if (typeof window === 'undefined' || !window.navigator) {
-  webrtcUtils.log('This does not appear to be a browser');
-  webrtcDetectedBrowser = 'not a browser';
-} else if (navigator.mozGetUserMedia && window.mozRTCPeerConnection) {
-  webrtcUtils.log('This appears to be Firefox');
-
-  webrtcDetectedBrowser = 'firefox';
-
-  // the detected firefox version.
-  webrtcDetectedVersion =
-    parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
-
-  // the minimum firefox version still supported by adapter.
-  webrtcMinimumVersion = 31;
-
-  // The RTCPeerConnection object.
-  window.RTCPeerConnection = function(pcConfig, pcConstraints) {
-    if (webrtcDetectedVersion < 38) {
-      // .urls is not supported in FF < 38.
-      // create RTCIceServers with a single url.
-      if (pcConfig && pcConfig.iceServers) {
-        var newIceServers = [];
-        for (var i = 0; i < pcConfig.iceServers.length; i++) {
-          var server = pcConfig.iceServers[i];
-          if (server.hasOwnProperty('urls')) {
-            for (var j = 0; j < server.urls.length; j++) {
-              var newServer = {
-                url: server.urls[j]
-              };
-              if (server.urls[j].indexOf('turn') === 0) {
-                newServer.username = server.username;
-                newServer.credential = server.credential;
-              }
-              newIceServers.push(newServer);
-            }
-          } else {
-            newIceServers.push(pcConfig.iceServers[i]);
-          }
-        }
-        pcConfig.iceServers = newIceServers;
-      }
-    }
-    return new mozRTCPeerConnection(pcConfig, pcConstraints); // jscs:ignore requireCapitalizedConstructors
-  };
-
-  // The RTCSessionDescription object.
-  window.RTCSessionDescription = mozRTCSessionDescription;
-
-  // The RTCIceCandidate object.
-  window.RTCIceCandidate = mozRTCIceCandidate;
-
-  // getUserMedia constraints shim.
-  getUserMedia = function(constraints, onSuccess, onError) {
-    var constraintsToFF37 = function(c) {
-      if (typeof c !== 'object' || c.require) {
-        return c;
-      }
-      var require = [];
-      Object.keys(c).forEach(function(key) {
-        if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
-          return;
-        }
-        var r = c[key] = (typeof c[key] === 'object') ?
-            c[key] : {ideal: c[key]};
-        if (r.min !== undefined ||
-            r.max !== undefined || r.exact !== undefined) {
-          require.push(key);
-        }
-        if (r.exact !== undefined) {
-          if (typeof r.exact === 'number') {
-            r.min = r.max = r.exact;
-          } else {
-            c[key] = r.exact;
-          }
-          delete r.exact;
-        }
-        if (r.ideal !== undefined) {
-          c.advanced = c.advanced || [];
-          var oc = {};
-          if (typeof r.ideal === 'number') {
-            oc[key] = {min: r.ideal, max: r.ideal};
-          } else {
-            oc[key] = r.ideal;
-          }
-          c.advanced.push(oc);
-          delete r.ideal;
-          if (!Object.keys(r).length) {
-            delete c[key];
-          }
-        }
-      });
-      if (require.length) {
-        c.require = require;
-      }
-      return c;
-    };
-    if (webrtcDetectedVersion < 38) {
-      webrtcUtils.log('spec: ' + JSON.stringify(constraints));
-      if (constraints.audio) {
-        constraints.audio = constraintsToFF37(constraints.audio);
-      }
-      if (constraints.video) {
-        constraints.video = constraintsToFF37(constraints.video);
-      }
-      webrtcUtils.log('ff37: ' + JSON.stringify(constraints));
-    }
-    return navigator.mozGetUserMedia(constraints, onSuccess, onError);
-  };
-
-  navigator.getUserMedia = getUserMedia;
-
-  // Shim for mediaDevices on older versions.
-  if (!navigator.mediaDevices) {
-    navigator.mediaDevices = {getUserMedia: requestUserMedia,
-      addEventListener: function() { },
-      removeEventListener: function() { }
-    };
-  }
-  navigator.mediaDevices.enumerateDevices =
-      navigator.mediaDevices.enumerateDevices || function() {
-    return new Promise(function(resolve) {
-      var infos = [
-        {kind: 'audioinput', deviceId: 'default', label: '', groupId: ''},
-        {kind: 'videoinput', deviceId: 'default', label: '', groupId: ''}
-      ];
-      resolve(infos);
-    });
-  };
-
-  if (webrtcDetectedVersion < 41) {
-    // Work around http://bugzil.la/1169665
-    var orgEnumerateDevices =
-        navigator.mediaDevices.enumerateDevices.bind(navigator.mediaDevices);
-    navigator.mediaDevices.enumerateDevices = function() {
-      return orgEnumerateDevices().catch(function(e) {
-        if (e.name === 'NotFoundError') {
-          return [];
-        }
-        throw e;
-      });
-    };
-  }
-
-  Object.defineProperty(HTMLVideoElement.prototype, 'srcObject', {
-    get: function() {
-      return this.mozSrcObject;
-    },
-    set: function(stream) {
-      this.mozSrcObject = stream;
-    }
-  });
-  // Attach a media stream to an element.
-  attachMediaStream = function(element, stream) {
-    element.srcObject = stream;
-  };
-
-  reattachMediaStream = function(to, from) {
-    to.srcObject = from.srcObject;
-  };
-
-} else if (navigator.webkitGetUserMedia) {
-  webrtcUtils.log('This appears to be Chrome');
-
-  webrtcDetectedBrowser = 'chrome';
-
-  // the detected chrome version.
-  webrtcDetectedVersion =
-    parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2], 10);
-
-  // the minimum chrome version still supported by adapter.
-  webrtcMinimumVersion = 38;
-
-  // The RTCPeerConnection object.
-  window.RTCPeerConnection = function(pcConfig, pcConstraints) {
-    // Translate iceTransportPolicy to iceTransports,
-    // see https://code.google.com/p/webrtc/issues/detail?id=4869
-    if (pcConfig && pcConfig.iceTransportPolicy) {
-      pcConfig.iceTransports = pcConfig.iceTransportPolicy;
-    }
-
-    var pc = new webkitRTCPeerConnection(pcConfig, pcConstraints); // jscs:ignore requireCapitalizedConstructors
-    var origGetStats = pc.getStats.bind(pc);
-    pc.getStats = function(selector, successCallback, errorCallback) { // jshint ignore: line
-      var self = this;
-      var args = arguments;
-
-      // If selector is a function then we are in the old style stats so just
-      // pass back the original getStats format to avoid breaking old users.
-      if (arguments.length > 0 && typeof selector === 'function') {
-        return origGetStats(selector, successCallback);
-      }
-
-      var fixChromeStats = function(response) {
-        var standardReport = {};
-        var reports = response.result();
-        reports.forEach(function(report) {
-          var standardStats = {
-            id: report.id,
-            timestamp: report.timestamp,
-            type: report.type
-          };
-          report.names().forEach(function(name) {
-            standardStats[name] = report.stat(name);
-          });
-          standardReport[standardStats.id] = standardStats;
-        });
-
-        return standardReport;
-      };
-
-      if (arguments.length >= 2) {
-        var successCallbackWrapper = function(response) {
-          args[1](fixChromeStats(response));
-        };
-
-        return origGetStats.apply(this, [successCallbackWrapper, arguments[0]]);
-      }
-
-      // promise-support
-      return new Promise(function(resolve, reject) {
-        if (args.length === 1 && selector === null) {
-          origGetStats.apply(self, [
-              function(response) {
-                resolve.apply(null, [fixChromeStats(response)]);
-              }, reject]);
-        } else {
-          origGetStats.apply(self, [resolve, reject]);
-        }
-      });
-    };
-
-    return pc;
-  };
-
-  // add promise support
-  ['createOffer', 'createAnswer'].forEach(function(method) {
-    var nativeMethod = webkitRTCPeerConnection.prototype[method];
-    webkitRTCPeerConnection.prototype[method] = function() {
-      var self = this;
-      if (arguments.length < 1 || (arguments.length === 1 &&
-          typeof(arguments[0]) === 'object')) {
-        var opts = arguments.length === 1 ? arguments[0] : undefined;
-        return new Promise(function(resolve, reject) {
-          nativeMethod.apply(self, [resolve, reject, opts]);
-        });
-      } else {
-        return nativeMethod.apply(this, arguments);
-      }
-    };
-  });
-
-  ['setLocalDescription', 'setRemoteDescription',
-      'addIceCandidate'].forEach(function(method) {
-    var nativeMethod = webkitRTCPeerConnection.prototype[method];
-    webkitRTCPeerConnection.prototype[method] = function() {
-      var args = arguments;
-      var self = this;
-      return new Promise(function(resolve, reject) {
-        nativeMethod.apply(self, [args[0],
-            function() {
-              resolve();
-              if (args.length >= 2) {
-                args[1].apply(null, []);
-              }
-            },
-            function(err) {
-              reject(err);
-              if (args.length >= 3) {
-                args[2].apply(null, [err]);
-              }
-            }]
-          );
-      });
-    };
-  });
-
-  // getUserMedia constraints shim.
-  var constraintsToChrome = function(c) {
-    if (typeof c !== 'object' || c.mandatory || c.optional) {
-      return c;
-    }
-    var cc = {};
-    Object.keys(c).forEach(function(key) {
-      if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
-        return;
-      }
-      var r = (typeof c[key] === 'object') ? c[key] : {ideal: c[key]};
-      if (r.exact !== undefined && typeof r.exact === 'number') {
-        r.min = r.max = r.exact;
-      }
-      var oldname = function(prefix, name) {
-        if (prefix) {
-          return prefix + name.charAt(0).toUpperCase() + name.slice(1);
-        }
-        return (name === 'deviceId') ? 'sourceId' : name;
-      };
-      if (r.ideal !== undefined) {
-        cc.optional = cc.optional || [];
-        var oc = {};
-        if (typeof r.ideal === 'number') {
-          oc[oldname('min', key)] = r.ideal;
-          cc.optional.push(oc);
-          oc = {};
-          oc[oldname('max', key)] = r.ideal;
-          cc.optional.push(oc);
-        } else {
-          oc[oldname('', key)] = r.ideal;
-          cc.optional.push(oc);
-        }
-      }
-      if (r.exact !== undefined && typeof r.exact !== 'number') {
-        cc.mandatory = cc.mandatory || {};
-        cc.mandatory[oldname('', key)] = r.exact;
-      } else {
-        ['min', 'max'].forEach(function(mix) {
-          if (r[mix] !== undefined) {
-            cc.mandatory = cc.mandatory || {};
-            cc.mandatory[oldname(mix, key)] = r[mix];
-          }
-        });
-      }
-    });
-    if (c.advanced) {
-      cc.optional = (cc.optional || []).concat(c.advanced);
-    }
-    return cc;
-  };
-
-  getUserMedia = function(constraints, onSuccess, onError) {
-    if (constraints.audio) {
-      constraints.audio = constraintsToChrome(constraints.audio);
-    }
-    if (constraints.video) {
-      constraints.video = constraintsToChrome(constraints.video);
-    }
-    webrtcUtils.log('chrome: ' + JSON.stringify(constraints));
-    return navigator.webkitGetUserMedia(constraints, onSuccess, onError);
-  };
-  navigator.getUserMedia = getUserMedia;
-
-  if (!navigator.mediaDevices) {
-    navigator.mediaDevices = {getUserMedia: requestUserMedia,
-                              enumerateDevices: function() {
-      return new Promise(function(resolve) {
-        var kinds = {audio: 'audioinput', video: 'videoinput'};
-        return MediaStreamTrack.getSources(function(devices) {
-          resolve(devices.map(function(device) {
-            return {label: device.label,
-                    kind: kinds[device.kind],
-                    deviceId: device.id,
-                    groupId: ''};
-          }));
-        });
-      });
-    }};
-  }
-
-  // A shim for getUserMedia method on the mediaDevices object.
-  // TODO(KaptenJansson) remove once implemented in Chrome stable.
-  if (!navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia = function(constraints) {
-      return requestUserMedia(constraints);
-    };
-  } else {
-    // Even though Chrome 45 has navigator.mediaDevices and a getUserMedia
-    // function which returns a Promise, it does not accept spec-style
-    // constraints.
-    var origGetUserMedia = navigator.mediaDevices.getUserMedia.
-        bind(navigator.mediaDevices);
-    navigator.mediaDevices.getUserMedia = function(c) {
-      webrtcUtils.log('spec:   ' + JSON.stringify(c)); // whitespace for alignment
-      c.audio = constraintsToChrome(c.audio);
-      c.video = constraintsToChrome(c.video);
-      webrtcUtils.log('chrome: ' + JSON.stringify(c));
-      return origGetUserMedia(c);
-    };
-  }
-
-  // Dummy devicechange event methods.
-  // TODO(KaptenJansson) remove once implemented in Chrome stable.
-  if (typeof navigator.mediaDevices.addEventListener === 'undefined') {
-    navigator.mediaDevices.addEventListener = function() {
-      webrtcUtils.log('Dummy mediaDevices.addEventListener called.');
-    };
-  }
-  if (typeof navigator.mediaDevices.removeEventListener === 'undefined') {
-    navigator.mediaDevices.removeEventListener = function() {
-      webrtcUtils.log('Dummy mediaDevices.removeEventListener called.');
-    };
-  }
-
-  Object.defineProperty(HTMLVideoElement.prototype, 'srcObject', {
-    get: function() {
-      return this._srcObject;
-    },
-    set: function(stream) {
-      this._srcObject = stream;
-      this.src = URL.createObjectURL(stream);
-    }
-  });
-
-  // Attach a media stream to an element.
-  attachMediaStream = function(element, stream) {
-    if (webrtcDetectedVersion >= 43) {
-      element.srcObject = stream;
-    } else if (typeof element.src !== 'undefined') {
-      element.src = URL.createObjectURL(stream);
-    } else {
-      webrtcUtils.log('Error attaching stream to element.');
-    }
-  };
-  reattachMediaStream = function(to, from) {
-    if (webrtcDetectedVersion >= 43) {
-      to.srcObject = from.srcObject;
-    } else {
-      to.src = from.src;
-    }
-  };
-
-} else if (navigator.mediaDevices && navigator.userAgent.match(
-    /Edge\/(\d+).(\d+)$/)) {
-  webrtcUtils.log('This appears to be Edge');
-  webrtcDetectedBrowser = 'edge';
-
-  webrtcDetectedVersion =
-    parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10);
-
-  // the minimum version still supported by adapter.
-  webrtcMinimumVersion = 12;
-
-  getUserMedia = navigator.getUserMedia;
-
-  attachMediaStream = function(element, stream) {
-    element.srcObject = stream;
-  };
-  reattachMediaStream = function(to, from) {
-    to.srcObject = from.srcObject;
-  };
-} else {
-  webrtcUtils.log('Browser does not appear to be WebRTC-capable');
-}
-
-// Returns the result of getUserMedia as a Promise.
-function requestUserMedia(constraints) {
-  return new Promise(function(resolve, reject) {
-    getUserMedia(constraints, resolve, reject);
-  });
-}
-
-var webrtcTesting = {};
-Object.defineProperty(webrtcTesting, 'version', {
-  set: function(version) {
-    webrtcDetectedVersion = version;
-  }
-});
-
-if (typeof module !== 'undefined') {
-  var RTCPeerConnection;
-  if (typeof window !== 'undefined') {
-    RTCPeerConnection = window.RTCPeerConnection;
-  }
-  module.exports = {
-    RTCPeerConnection: RTCPeerConnection,
-    getUserMedia: getUserMedia,
-    attachMediaStream: attachMediaStream,
-    reattachMediaStream: reattachMediaStream,
-    webrtcDetectedBrowser: webrtcDetectedBrowser,
-    webrtcDetectedVersion: webrtcDetectedVersion,
-    webrtcMinimumVersion: webrtcMinimumVersion,
-    webrtcTesting: webrtcTesting
-    //requestUserMedia: not exposed on purpose.
-    //trace: not exposed on purpose.
-  };
-} else if ((typeof require === 'function') && (typeof define === 'function')) {
-  // Expose objects and functions when RequireJS is doing the loading.
-  define([], function() {
-    return {
-      RTCPeerConnection: window.RTCPeerConnection,
-      getUserMedia: getUserMedia,
-      attachMediaStream: attachMediaStream,
-      reattachMediaStream: reattachMediaStream,
-      webrtcDetectedBrowser: webrtcDetectedBrowser,
-      webrtcDetectedVersion: webrtcDetectedVersion,
-      webrtcMinimumVersion: webrtcMinimumVersion,
-      webrtcTesting: webrtcTesting
-      //requestUserMedia: not exposed on purpose.
-      //trace: not exposed on purpose.
-    };
-  });
-}
-
-},{}],141:[function(require,module,exports){
-'use strict';
-
-var NS = 'urn:xmpp:jingle:transports:ice-udp:1';
-
-
-module.exports = function (stanza) {
-    var types = stanza.utils;
-
-    var ICE = stanza.define({
-        name: '_iceUdp',
-        namespace: NS,
-        element: 'transport',
-        tags: ['jingle-transport'],
-        fields: {
-            transType: {value: 'iceUdp'},
-            pwd: types.attribute('pwd'),
-            ufrag: types.attribute('ufrag')
-        }
-    });
-    
-    
-    var RemoteCandidate = stanza.define({
-        name: 'remoteCandidate',
-        namespace: NS,
-        element: 'remote-candidate',
-        fields: {
-            component: types.attribute('component'),
-            ip: types.attribute('ip'),
-            port: types.attribute('port')
-        }
-    });
-    
-    
-    var Candidate = stanza.define({
-        name: '_iceUdpCandidate',
-        namespace: NS,
-        element: 'candidate',
-        fields: {
-            component: types.attribute('component'),
-            foundation: types.attribute('foundation'),
-            generation: types.attribute('generation'),
-            id: types.attribute('id'),
-            ip: types.attribute('ip'),
-            network: types.attribute('network'),
-            port: types.attribute('port'),
-            priority: types.attribute('priority'),
-            protocol: types.attribute('protocol'),
-            relAddr: types.attribute('rel-addr'),
-            relPort: types.attribute('rel-port'),
-            tcpType: types.attribute('tcptype'),
-            type: types.attribute('type')
-        }
-    });
-    
-    
-    var Fingerprint = stanza.define({
-        name: '_iceFingerprint',
-        namespace: 'urn:xmpp:jingle:apps:dtls:0',
-        element: 'fingerprint',
-        fields: {
-            hash: types.attribute('hash'),
-            setup: types.attribute('setup'),
-            value: types.text(),
-            required: types.boolAttribute('required')
-        }
-    });
-    
-    var SctpMap = stanza.define({
-        name: '_sctpMap',
-        namespace: 'urn:xmpp:jingle:transports:dtls-sctp:1',
-        element: 'sctpmap',
-        fields: {
-            number: types.attribute('number'),
-            protocol: types.attribute('protocol'),
-            streams: types.attribute('streams')
-        }
-    });
-
-    
-    stanza.extend(ICE, Candidate, 'candidates');
-    stanza.extend(ICE, RemoteCandidate);
-    stanza.extend(ICE, Fingerprint, 'fingerprints');
-    stanza.extend(ICE, SctpMap, 'sctp');
-
-    stanza.withDefinition('content', 'urn:xmpp:jingle:1', function (Content) {
-        stanza.extend(Content, ICE);
-    });
-};
-
-},{}],142:[function(require,module,exports){
-'use strict';
-
-
-module.exports = function (stanza) {
-    var types = stanza.utils;
-
-    var Iq = stanza.define({
-        name: 'iq',
-        namespace: 'jabber:client',
-        element: 'iq',
-        topLevel: true,
-        fields: {
-            lang: types.langAttribute(),
-            id: types.attribute('id'),
-            to: types.attribute('to'),
-            from: types.attribute('from'),
-            type: types.attribute('type')
-        }
-    });
-    
-    var toJSON = Iq.prototype.toJSON;
-    
-    Iq.prototype.toJSON = function () {
-        var result = toJSON.call(this);
-        result.resultReply = this.resultReply;
-        result.errorReply = this.errorReply;
-        return result;
-    };
-    
-    Iq.prototype.resultReply = function (data) {
-        data = data || {};
-        data.to = this.from;
-        data.id = this.id;
-        data.type = 'result';
-        return new Iq(data);
-    };
-    
-    Iq.prototype.errorReply = function (data) {
-        data = data || {};
-        data.to = this.from;
-        data.id = this.id;
-        data.type = 'error';
-        return new Iq(data);
-    };
-};
-
-},{}],143:[function(require,module,exports){
-'use strict';
-
-var NS = 'urn:xmpp:jingle:1';
-var ERRNS = 'urn:xmpp:jingle:errors:1';
-var CONDITIONS = ['out-of-order', 'tie-break', 'unknown-session', 'unsupported-info'];
-var REASONS = [
-    'alternative-session',
-    'busy',
-    'cancel',
-    'connectivity-error',
-    'decline',
-    'expired',
-    'failed-application',
-    'failed-transport',
-    'general-error',
-    'gone',
-    'incompatible-parameters',
-    'media-error',
-    'security-error',
-    'success',
-    'timeout',
-    'unsupported-applications',
-    'unsupported-transports'
-];
-
-
-module.exports = function (stanza) {
-    var types = stanza.utils;
-
-    var Jingle = stanza.define({
-        name: 'jingle',
-        namespace: NS,
-        element: 'jingle',
-        fields: {
-            action: types.attribute('action'),
-            initiator: types.attribute('initiator'),
-            responder: types.attribute('responder'),
-            sid: types.attribute('sid')
-        }
-    });
-    
-    
-    var Content = stanza.define({
-        name: '_jingleContent',
-        namespace: NS,
-        element: 'content',
-        fields: {
-            creator: types.attribute('creator'),
-            disposition: types.attribute('disposition', 'session'),
-            name: types.attribute('name'),
-            senders: types.attribute('senders', 'both'),
-            description: {
-                get: function () {
-                    var opts = stanza.tagged('jingle-description').map(function (Description) {
-                        return Description.prototype._name;
-                    });
-                    for (var i = 0, len = opts.length; i < len; i++) {
-                        if (this._extensions[opts[i]]) {
-                            return this._extensions[opts[i]];
-                        }
-                    }
-                },
-                set: function (value) {
-                    var ext = '_' + value.descType;
-                    this[ext] = value;
-                }
-            },
-            transport: {
-                get: function () {
-                    var opts = stanza.tagged('jingle-transport').map(function (Transport) {
-                        return Transport.prototype._name;
-                    });
-                    for (var i = 0, len = opts.length; i < len; i++) {
-                        if (this._extensions[opts[i]]) {
-                            return this._extensions[opts[i]];
-                        }
-                    }
-                },
-                set: function (value) {
-                    var ext = '_' + value.transType;
-                    this[ext] = value;
-                }
-            }
-        }
-    });
-    
-    var Reason = stanza.define({
-        name: 'reason',
-        namespace: NS,
-        element: 'reason',
-        fields: {
-            condition: types.enumSub(NS, REASONS),
-            alternativeSession: {
-                get: function () {
-                    return types.getSubText(this.xml, NS, 'alternative-session');
-                },
-                set: function (value) {
-                    this.condition = 'alternative-session';
-                    types.setSubText(this.xml, NS, 'alternative-session', value);
-                }
-            },
-            text: types.textSub(NS, 'text')
-        }
-    });
-    
-    
-    stanza.extend(Jingle, Content, 'contents');
-    stanza.extend(Jingle, Reason);
-
-    /*stanza.withStanzaError(function (ErrorStanza) {
-        stanza.add(ErrorStanza, 'jingleCondition', types.enumSub(ERRNS, CONDITIONS));
-    });
-    
-    stanza.withIq(function (Iq) {
-        stanza.extend(Iq, Jingle);
-    });*/
-};
-
-},{}],144:[function(require,module,exports){
-'use strict';
-
-var NS = 'urn:xmpp:jingle:apps:rtp:1';
-var FBNS = 'urn:xmpp:jingle:apps:rtp:rtcp-fb:0';
-var HDRNS = 'urn:xmpp:jingle:apps:rtp:rtp-hdrext:0';
-var INFONS = 'urn:xmpp:jingle:apps:rtp:info:1';
-var SSMANS = 'urn:xmpp:jingle:apps:rtp:ssma:0';
-var GROUPNS = 'urn:xmpp:jingle:apps:grouping:0';
-
-
-module.exports = function (stanza) {
-    var types = stanza.utils;
-
-    var Feedback = {
-        get: function () {
-            var existing = types.find(this.xml, FBNS, 'rtcp-fb');
-            var result = [];
-            existing.forEach(function (xml) {
-                result.push({
-                    type: types.getAttribute(xml, 'type'),
-                    subtype: types.getAttribute(xml, 'subtype')
-                });
-            });
-            existing = types.find(this.xml, FBNS, 'rtcp-fb-trr-int');
-            existing.forEach(function (xml) {
-                result.push({
-                    type: types.getAttribute(xml, 'type'),
-                    value: types.getAttribute(xml, 'value')
-                });
-            });
-            return result;
-        },
-        set: function (values) {
-            var self = this;
-            var existing = types.find(this.xml, FBNS, 'rtcp-fb');
-            existing.forEach(function (item) {
-                self.xml.removeChild(item);
-            });
-            existing = types.find(this.xml, FBNS, 'rtcp-fb-trr-int');
-            existing.forEach(function (item) {
-                self.xml.removeChild(item);
-            });
-    
-            values.forEach(function (value) {
-                var fb;
-                if (value.type === 'trr-int') {
-                    fb = types.createElement(FBNS, 'rtcp-fb-trr-int', NS);
-                    types.setAttribute(fb, 'type', value.type);
-                    types.setAttribute(fb, 'value', value.value);
-                } else {
-                    fb = types.createElement(FBNS, 'rtcp-fb', NS);
-                    types.setAttribute(fb, 'type', value.type);
-                    types.setAttribute(fb, 'subtype', value.subtype);
-                }
-                self.xml.appendChild(fb);
-            });
-        }
-    };
-    
-    var Bandwidth = stanza.define({
-        name: 'bandwidth',
-        namespace: NS,
-        element: 'bandwidth',
-        fields: {
-            type: types.attribute('type'),
-            bandwidth: types.text()
-        }
-    });
-
-    var RTP = stanza.define({
-        name: '_rtp',
-        namespace: NS,
-        element: 'description',
-        tags: ['jingle-description'],
-        fields: {
-            descType: {value: 'rtp'},
-            media: types.attribute('media'),
-            ssrc: types.attribute('ssrc'),
-            mux: types.boolSub(NS, 'rtcp-mux'),
-            encryption: {
-                get: function () {
-                    var enc = types.find(this.xml, NS, 'encryption');
-                    if (!enc.length) {
-                        return [];
-                    }
-                    enc = enc[0];
-    
-                    var self = this;
-                    var data = types.find(enc, NS, 'crypto');
-                    var results = [];
-    
-                    data.forEach(function (xml) {
-                        results.push(new Crypto({}, xml, self).toJSON());
-                    });
-                    return results;
-                },
-                set: function (values) {
-                    var enc = types.find(this.xml, NS, 'encryption');
-                    if (enc.length) {
-                        this.xml.removeChild(enc);
-                    }
-    
-                    if (!values.length) {
-                        return;
-                    }
-    
-                    types.setBoolSubAttribute(this.xml, NS, 'encryption', 'required', true);
-                    enc = types.find(this.xml, NS, 'encryption')[0];
-    
-                    var self = this;
-                    values.forEach(function (value) {
-                        var content = new Crypto(value, null, self);
-                        enc.appendChild(content.xml);
-                    });
-                }
-            },
-            feedback: Feedback,
-            headerExtensions: {
-                get: function () {
-                    var existing = types.find(this.xml, HDRNS, 'rtp-hdrext');
-                    var result = [];
-                    existing.forEach(function (xml) {
-                        result.push({
-                            id: types.getAttribute(xml, 'id'),
-                            uri: types.getAttribute(xml, 'uri'),
-                            senders: types.getAttribute(xml, 'senders')
-                        });
-                    });
-                    return result;
-                },
-                set: function (values) {
-                    var self = this;
-                    var existing = types.find(this.xml, HDRNS, 'rtp-hdrext');
-                    existing.forEach(function (item) {
-                        self.xml.removeChild(item);
-                    });
-    
-                    values.forEach(function (value) {
-                        var hdr = types.createElement(HDRNS, 'rtp-hdrext', NS);
-                        types.setAttribute(hdr, 'id', value.id);
-                        types.setAttribute(hdr, 'uri', value.uri);
-                        types.setAttribute(hdr, 'senders', value.senders);
-                        self.xml.appendChild(hdr);
-                    });
-                }
-            }
-        }
-    });
-    
-    
-    var PayloadType = stanza.define({
-        name: '_payloadType',
-        namespace: NS,
-        element: 'payload-type',
-        fields: {
-            channels: types.attribute('channels'),
-            clockrate: types.attribute('clockrate'),
-            id: types.attribute('id'),
-            maxptime: types.attribute('maxptime'),
-            name: types.attribute('name'),
-            ptime: types.attribute('ptime'),
-            feedback: Feedback,
-            parameters: {
-                get: function () {
-                    var result = [];
-                    var params = types.find(this.xml, NS, 'parameter');
-                    params.forEach(function (param) {
-                        result.push({
-                            key: types.getAttribute(param, 'name'),
-                            value: types.getAttribute(param, 'value')
-                        });
-                    });
-                    return result;
-                },
-                set: function (values) {
-                    var self = this;
-                    values.forEach(function (value) {
-                        var param = types.createElement(NS, 'parameter');
-                        types.setAttribute(param, 'name', value.key);
-                        types.setAttribute(param, 'value', value.value);
-                        self.xml.appendChild(param);
-                    });
-                }
-            }
-        }
-    });
-    
-    
-    var Crypto = stanza.define({
-        name: 'crypto',
-        namespace: NS,
-        element: 'crypto',
-        fields: {
-            cipherSuite: types.attribute('crypto-suite'),
-            keyParams: types.attribute('key-params'),
-            sessionParams: types.attribute('session-params'),
-            tag: types.attribute('tag')
-        }
-    });
-    
-    
-    var ContentGroup = stanza.define({
-        name: '_group',
-        namespace: GROUPNS,
-        element: 'group',
-        fields: {
-            semantics: types.attribute('semantics'),
-            contents: types.multiSubAttribute(GROUPNS, 'content', 'name')
-        }
-    });
-    
-    var SourceGroup = stanza.define({
-        name: '_sourceGroup',
-        namespace: SSMANS,
-        element: 'ssrc-group',
-        fields: {
-            semantics: types.attribute('semantics'),
-            sources: types.multiSubAttribute(SSMANS, 'source', 'ssrc')
-        }
-    });
-    
-    var Source = stanza.define({
-        name: '_source',
-        namespace: SSMANS,
-        element: 'source',
-        fields: {
-            ssrc: types.attribute('ssrc'),
-            parameters: {
-                get: function () {
-                    var result = [];
-                    var params = types.find(this.xml, SSMANS, 'parameter');
-                    params.forEach(function (param) {
-                        result.push({
-                            key: types.getAttribute(param, 'name'),
-                            value: types.getAttribute(param, 'value')
-                        });
-                    });
-                    return result;
-                },
-                set: function (values) {
-                    var self = this;
-                    values.forEach(function (value) {
-                        var param = types.createElement(SSMANS, 'parameter');
-                        types.setAttribute(param, 'name', value.key);
-                        types.setAttribute(param, 'value', value.value);
-                        self.xml.appendChild(param);
-                    });
-                }
-            }
-        }
-    });
-    
-    
-    var Mute = stanza.define({
-        name: 'mute',
-        namespace: INFONS,
-        element: 'mute',
-        fields: {
-            creator: types.attribute('creator'),
-            name: types.attribute('name')
-        }
-    });
-    
-    
-    var Unmute = stanza.define({
-        name: 'unmute',
-        namespace: INFONS,
-        element: 'unmute',
-        fields: {
-            creator: types.attribute('creator'),
-            name: types.attribute('name')
-        }
-    });
-    
-    
-    stanza.extend(RTP, Bandwidth);
-    stanza.extend(RTP, PayloadType, 'payloads');
-    stanza.extend(RTP, Source, 'sources');
-    stanza.extend(RTP, SourceGroup, 'sourceGroups');
-    
-    stanza.withDefinition('content', 'urn:xmpp:jingle:1', function (Content) {
-        stanza.extend(Content, RTP);
-    });
-
-    stanza.withDefinition('jingle', 'urn:xmpp:jingle:1', function (Jingle) {
-        stanza.extend(Jingle, Mute);
-        stanza.extend(Jingle, Unmute);
-        stanza.extend(Jingle, ContentGroup, 'groups');
-        stanza.add(Jingle, 'ringing', types.boolSub(INFONS, 'ringing'));
-        stanza.add(Jingle, 'hold', types.boolSub(INFONS, 'hold'));
-        stanza.add(Jingle, 'active', types.boolSub(INFONS, 'active'));
-    });
-};
-
-},{}],145:[function(require,module,exports){
+},{"events":6,"util":28}],249:[function(require,module,exports){
+arguments[4][120][0].apply(exports,arguments)
+},{"dup":120}],250:[function(require,module,exports){
+arguments[4][121][0].apply(exports,arguments)
+},{"./rng":249,"dup":121}],251:[function(require,module,exports){
+arguments[4][83][0].apply(exports,arguments)
+},{"dup":83}],252:[function(require,module,exports){
 /* jshint -W117 */
 'use strict';
 
 var JSM = require('jingle');
 var RTC = require('webrtc-adapter-test');
-var jxt = require('jxt').createRegistry();
 
-jxt.use(require('./stanza/iq.js'));
-jxt.use(require('./stanza/jingle.js'));
-jxt.use(require('./stanza/rtp.js'));
-jxt.use(require('./stanza/iceUdp.js'));
+var jxt = require('jxt').createRegistry();
+jxt.use(require('jxt-xmpp-types'));
+jxt.use(require('jxt-xmpp'));
 
 var IqStanza = jxt.getDefinition('iq', 'jabber:client');
-var JingleStanza = jxt.getDefinition('jingle', 'urn:xmpp:jingle:1');
-
-jxt.extend(IqStanza, JingleStanza);
 
 (function($) {
    Strophe.addConnectionPlugin('jingle', {
@@ -19042,7 +23885,7 @@ jxt.extend(IqStanza, JingleStanza);
       onJingle: function(iq) {
          var req = jxt.parse(iq.outerHTML);
 
-         this.manager.process(req);
+         this.manager.process(req.toJSON());
 
          return true;
       },
@@ -19060,6 +23903,7 @@ jxt.extend(IqStanza, JingleStanza);
          // configure session
          if (this.localStream) {
             session.addStream(this.localStream);
+            //TODO: add offer options here, instead of above in the init
             session.start();
 
             return session;
@@ -19089,4 +23933,4 @@ jxt.extend(IqStanza, JingleStanza);
    });
 }(jQuery));
 
-},{"./stanza/iceUdp.js":141,"./stanza/iq.js":142,"./stanza/jingle.js":143,"./stanza/rtp.js":144,"jingle":25,"jxt":117,"webrtc-adapter-test":140}]},{},[145]);
+},{"jingle":29,"jxt":228,"jxt-xmpp":157,"jxt-xmpp-types":125,"webrtc-adapter-test":251}]},{},[252]);

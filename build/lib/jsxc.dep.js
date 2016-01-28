@@ -1,5 +1,5 @@
 /*!
- * jsxc v2.1.5 - 2015-11-17
+ * jsxc v3.0.0-beta1 - 2016-01-28
  * 
  * This file concatenates all dependencies of jsxc.
  * 
@@ -7,19 +7,46 @@
 
 
 /*!
- * Source: lib/strophe.js, license: multiple, url: http://strophe.im/strophejs/
+ * Source: lib/strophe.js/strophe.js, license: multiple, url: http://strophe.im/strophejs/
  */
-/**
- * Modified by
- * Klaus Herberth, 2014
+/** File: strophe.js
+ *  A JavaScript library for XMPP BOSH/XMPP over Websocket.
+ *
+ *  This is the JavaScript version of the Strophe library.  Since JavaScript
+ *  had no facilities for persistent TCP connections, this library uses
+ *  Bidirectional-streams Over Synchronous HTTP (BOSH) to emulate
+ *  a persistent, stateful, two-way connection to an XMPP server.  More
+ *  information on BOSH can be found in XEP 124.
+ *
+ *  This version of Strophe also works with WebSockets.
+ *  For more information on XMPP-over WebSocket see this RFC:
+ *  http://tools.ietf.org/html/rfc7395
  */
 
-/*! This code was written by Tyler Akins and has been placed in the
-   public domain.  It would be nice if you left this header intact.
-   Base64 code from Tyler Akins -- http://rumkin.com
-*/
+/* All of the Strophe globals are defined in this special function below so
+ * that references to the globals become closures.  This will ensure that
+ * on page reload, these references will still be available to callbacks
+ * that are still executing.
+ */
 
-var Base64 = (function () {
+/* jshint ignore:start */
+(function (callback) {
+/* jshint ignore:end */
+
+// This code was written by Tyler Akins and has been placed in the
+// public domain.  It would be nice if you left this header intact.
+// Base64 code from Tyler Akins -- http://rumkin.com
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define('strophe-base64', function () {
+            return factory();
+        });
+    } else {
+        // Browser globals
+        root.Base64 = factory();
+    }
+}(this, function () {
     var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
     var obj = {
@@ -44,6 +71,7 @@ var Base64 = (function () {
                 enc4 = chr3 & 63;
 
                 if (isNaN(chr2)) {
+                    enc2 = ((chr1 & 3) << 4);
                     enc3 = enc4 = 64;
                 } else if (isNaN(chr3)) {
                     enc4 = 64;
@@ -92,11 +120,10 @@ var Base64 = (function () {
             return output;
         }
     };
-
     return obj;
-})();
+}));
 
-/*!
+/*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
  * in FIPS PUB 180-1
  * Version 2.1a Copyright Paul Johnston 2000 - 2002.
@@ -105,16 +132,21 @@ var Base64 = (function () {
  * See http://pajhome.org.uk/crypt/md5 for details.
  */
 
+/* jshint undef: true, unused: true:, noarg: true, latedef: true */
+/* global define */
+
 /* Some functions and variables have been stripped for use with Strophe */
 
-/*
- * These are the functions you'll usually want to call
- * They take string arguments and return either hex or base-64 encoded strings
- */
-function b64_sha1(s){return binb2b64(core_sha1(str2binb(s),s.length * 8));}
-function str_sha1(s){return binb2str(core_sha1(str2binb(s),s.length * 8));}
-function b64_hmac_sha1(key, data){ return binb2b64(core_hmac_sha1(key, data));}
-function str_hmac_sha1(key, data){ return binb2str(core_hmac_sha1(key, data));}
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define('strophe-sha1', function () {
+            return factory();
+        });
+    } else {
+        // Browser globals
+        root.SHA1 = factory();
+    }
+}(this, function () {
 
 /*
  * Calculate the SHA-1 of an array of big-endian words, and a bit length
@@ -273,7 +305,21 @@ function binb2b64(binarray)
   return str;
 }
 
-/*!
+/*
+ * These are the functions you'll usually want to call
+ * They take string arguments and return either hex or base-64 encoded strings
+ */
+return {
+    b64_hmac_sha1:  function (key, data){ return binb2b64(core_hmac_sha1(key, data)); },
+    b64_sha1:       function (s) { return binb2b64(core_sha1(str2binb(s),s.length * 8)); },
+    binb2str:       binb2str,
+    core_hmac_sha1: core_hmac_sha1,
+    str_hmac_sha1:  function (key, data){ return binb2str(core_hmac_sha1(key, data)); },
+    str_sha1:       function (s) { return binb2str(core_sha1(str2binb(s),s.length * 8)); },
+};
+}));
+
+/*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
  * Digest Algorithm, as defined in RFC 1321.
  * Version 2.1 Copyright (C) Paul Johnston 1999 - 2002.
@@ -286,7 +332,16 @@ function binb2b64(binarray)
  * Everything that isn't used by Strophe has been stripped here!
  */
 
-var MD5 = (function () {
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define('strophe-md5', function () {
+            return factory();
+        });
+    } else {
+        // Browser globals
+        root.MD5 = factory();
+    }
+}(this, function (b) {
     /*
      * Add integers, wrapping at 2^32. This uses 16-bit operations internally
      * to work around bugs in some JS interpreters.
@@ -462,7 +517,6 @@ var MD5 = (function () {
         return [a, b, c, d];
     };
 
-
     var obj = {
         /*
          * These are the functions you'll usually want to call.
@@ -477,11 +531,10 @@ var MD5 = (function () {
             return binl2str(core_md5(str2binl(s), s.length * 8));
         }
     };
-
     return obj;
-})();
+}));
 
-/*!
+/*
     This program is distributed under the terms of the MIT license.
     Please see the LICENSE file for details.
 
@@ -489,24 +542,6 @@ var MD5 = (function () {
 */
 
 /* jshint undef: true, unused: true:, noarg: true, latedef: true */
-/*global document, window, setTimeout, clearTimeout, console,
-    ActiveXObject, Base64, MD5, DOMParser */
-// from sha1.js
-/*global core_hmac_sha1, binb2str, str_hmac_sha1, str_sha1, b64_hmac_sha1*/
-
-/** File: strophe.js
- *  A JavaScript library for XMPP BOSH/XMPP over Websocket.
- *
- *  This is the JavaScript version of the Strophe library.  Since JavaScript
- *  had no facilities for persistent TCP connections, this library uses
- *  Bidirectional-streams Over Synchronous HTTP (BOSH) to emulate
- *  a persistent, stateful, two-way connection to an XMPP server.  More
- *  information on BOSH can be found in XEP 124.
- *
- *  This version of Strophe also works with WebSockets.
- *  For more information on XMPP-over WebSocket see this RFC draft:
- *  http://tools.ietf.org/html/draft-ietf-xmpp-websocket-00
- */
 
 /** PrivateFunction: Function.prototype.bind
  *  Bind a function to an instance.
@@ -545,6 +580,15 @@ if (!Function.prototype.bind) {
     };
 }
 
+/** PrivateFunction: Array.isArray
+ *  This is a polyfill for the ES5 Array.isArray method.
+ */
+if (!Array.isArray) {
+    Array.isArray = function(arg) {
+        return Object.prototype.toString.call(arg) === '[object Array]';
+    };
+}
+
 /** PrivateFunction: Array.prototype.indexOf
  *  Return the index of an object in an array.
  *
@@ -560,34 +604,65 @@ if (!Function.prototype.bind) {
  *    The index of elt in the array or -1 if not found.
  */
 if (!Array.prototype.indexOf)
-{
-    Array.prototype.indexOf = function(elt /*, from*/)
     {
-        var len = this.length;
+        Array.prototype.indexOf = function(elt /*, from*/)
+        {
+            var len = this.length;
 
-        var from = Number(arguments[1]) || 0;
-        from = (from < 0) ? Math.ceil(from) : Math.floor(from);
-        if (from < 0) {
-            from += len;
-        }
-
-        for (; from < len; from++) {
-            if (from in this && this[from] === elt) {
-                return from;
+            var from = Number(arguments[1]) || 0;
+            from = (from < 0) ? Math.ceil(from) : Math.floor(from);
+            if (from < 0) {
+                from += len;
             }
-        }
 
-        return -1;
-    };
-}
+            for (; from < len; from++) {
+                if (from in this && this[from] === elt) {
+                    return from;
+                }
+            }
 
-/* All of the Strophe globals are defined in this special function below so
- * that references to the globals become closures.  This will ensure that
- * on page reload, these references will still be available to callbacks
- * that are still executing.
- */
+            return -1;
+        };
+    }
 
-(function (callback) {
+/*
+    This program is distributed under the terms of the MIT license.
+    Please see the LICENSE file for details.
+
+    Copyright 2006-2008, OGG, LLC
+*/
+
+/* jshint undef: true, unused: true:, noarg: true, latedef: true */
+/*global define, document, window, setTimeout, clearTimeout, console, ActiveXObject, DOMParser */
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define('strophe-core', [
+            'strophe-sha1',
+            'strophe-base64',
+            'strophe-md5',
+            "strophe-polyfill"
+        ], function () {
+            return factory.apply(this, arguments);
+        });
+    } else {
+        // Browser globals
+        var o = factory(root.SHA1, root.Base64, root.MD5);
+        window.Strophe =        o.Strophe;
+        window.$build =         o.$build;
+        window.$iq =            o.$iq;
+        window.$msg =           o.$msg;
+        window.$pres =          o.$pres;
+        window.SHA1 =           o.SHA1;
+        window.Base64 =         o.Base64;
+        window.MD5 =            o.MD5;
+        window.b64_hmac_sha1 =  o.SHA1.b64_hmac_sha1;
+        window.b64_sha1 =       o.SHA1.b64_sha1;
+        window.str_hmac_sha1 =  o.SHA1.str_hmac_sha1;
+        window.str_sha1 =       o.SHA1.str_sha1;
+    }
+}(this, function (SHA1, Base64, MD5) {
+
 var Strophe;
 
 /** Function: $build
@@ -602,16 +677,18 @@ var Strophe;
  *    A new Strophe.Builder object.
  */
 function $build(name, attrs) { return new Strophe.Builder(name, attrs); }
+
 /** Function: $msg
  *  Create a Strophe.Builder with a <message/> element as the root.
  *
- *  Parmaeters:
+ *  Parameters:
  *    (Object) attrs - The <message/> element attributes in object notation.
  *
  *  Returns:
  *    A new Strophe.Builder object.
  */
 function $msg(attrs) { return new Strophe.Builder("message", attrs); }
+
 /** Function: $iq
  *  Create a Strophe.Builder with an <iq/> element as the root.
  *
@@ -622,6 +699,7 @@ function $msg(attrs) { return new Strophe.Builder("message", attrs); }
  *    A new Strophe.Builder object.
  */
 function $iq(attrs) { return new Strophe.Builder("iq", attrs); }
+
 /** Function: $pres
  *  Create a Strophe.Builder with a <presence/> element as the root.
  *
@@ -645,7 +723,7 @@ Strophe = {
      *  The version of the Strophe library. Unreleased builds will have
      *  a version of head-HASH where HASH is a partial revision.
      */
-    VERSION: "1.1.3",
+    VERSION: "1.2.3",
 
     /** Constants: XMPP Namespace Constants
      *  Common namespace constants from the XMPP RFCs and XEPs.
@@ -678,6 +756,7 @@ Strophe = {
         MUC: "http://jabber.org/protocol/muc",
         SASL: "urn:ietf:params:xml:ns:xmpp-sasl",
         STREAM: "http://etherx.jabber.org/streams",
+        FRAMING: "urn:ietf:params:xml:ns:xmpp-framing",
         BIND: "urn:ietf:params:xml:ns:xmpp-bind",
         SESSION: "urn:ietf:params:xml:ns:xmpp-session",
         VERSION: "jabber:iq:version",
@@ -711,17 +790,29 @@ Strophe = {
                         'body':       []
                 },
                 css: ['background-color','color','font-family','font-size','font-style','font-weight','margin-left','margin-right','text-align','text-decoration'],
-                validTag: function(tag)
-                {
-                        for(var i = 0; i < Strophe.XHTML.tags.length; i++) {
-                                if(tag == Strophe.XHTML.tags[i]) {
+                /** Function: XHTML.validTag
+                 *
+                 * Utility method to determine whether a tag is allowed
+                 * in the XHTML_IM namespace.
+                 *
+                 * XHTML tag names are case sensitive and must be lower case.
+                 */
+                validTag: function(tag) {
+                        for (var i = 0; i < Strophe.XHTML.tags.length; i++) {
+                                if (tag == Strophe.XHTML.tags[i]) {
                                         return true;
                                 }
                         }
                         return false;
                 },
-                validAttribute: function(tag, attribute)
-                {
+                /** Function: XHTML.validAttribute
+                 *
+                 * Utility method to determine whether an attribute is allowed
+                 * as recommended per XEP-0071
+                 *
+                 * XHTML attribute names are case sensitive and must be lower case.
+                 */
+                validAttribute: function(tag, attribute) {
                         if(typeof Strophe.XHTML.attributes[tag] !== 'undefined' && Strophe.XHTML.attributes[tag].length > 0) {
                                 for(var i = 0; i < Strophe.XHTML.attributes[tag].length; i++) {
                                         if(attribute == Strophe.XHTML.attributes[tag][i]) {
@@ -765,7 +856,8 @@ Strophe = {
         CONNECTED: 5,
         DISCONNECTED: 6,
         DISCONNECTING: 7,
-        ATTACHED: 8
+        ATTACHED: 8,
+        REDIRECT: 9
     },
 
     /** Constants: Log Level Constants
@@ -863,7 +955,7 @@ Strophe = {
     /** Function: isTagEqual
      *  Compare an element's tag name with a string.
      *
-     *  This function is case insensitive.
+     *  This function is case sensitive.
      *
      *  Parameters:
      *    (XMLElement) el - A DOM element.
@@ -875,7 +967,7 @@ Strophe = {
      */
     isTagEqual: function (el, name)
     {
-        return el.tagName.toLowerCase() == name.toLowerCase();
+        return el.tagName == name;
     },
 
     /** PrivateVariable: _xmlGenerator
@@ -982,23 +1074,29 @@ Strophe = {
         // there are more than two optional args
         var a, i, k;
         for (a = 1; a < arguments.length; a++) {
-            if (!arguments[a]) { continue; }
-            if (typeof(arguments[a]) == "string" ||
-                typeof(arguments[a]) == "number") {
-                node.appendChild(Strophe.xmlTextNode(arguments[a]));
-            } else if (typeof(arguments[a]) == "object" &&
-                       typeof(arguments[a].sort) == "function") {
-                for (i = 0; i < arguments[a].length; i++) {
-                    if (typeof(arguments[a][i]) == "object" &&
-                        typeof(arguments[a][i].sort) == "function") {
-                        node.setAttribute(arguments[a][i][0],
-                                          arguments[a][i][1]);
+            var arg = arguments[a];
+            if (!arg) { continue; }
+            if (typeof(arg) == "string" ||
+                typeof(arg) == "number") {
+                node.appendChild(Strophe.xmlTextNode(arg));
+            } else if (typeof(arg) == "object" &&
+                       typeof(arg.sort) == "function") {
+                for (i = 0; i < arg.length; i++) {
+                    var attr = arg[i];
+                    if (typeof(attr) == "object" &&
+                        typeof(attr.sort) == "function" &&
+                        attr[1] !== undefined &&
+                        attr[1] !== null) {
+                        node.setAttribute(attr[0], attr[1]);
                     }
                 }
-            } else if (typeof(arguments[a]) == "object") {
-                for (k in arguments[a]) {
-                    if (arguments[a].hasOwnProperty(k)) {
-                        node.setAttribute(k, arguments[a][k]);
+            } else if (typeof(arg) == "object") {
+                for (k in arg) {
+                    if (arg.hasOwnProperty(k)) {
+                        if (arg[k] !== undefined &&
+                            arg[k] !== null) {
+                            node.setAttribute(k, arg[k]);
+                        }
                     }
                 }
             }
@@ -1023,6 +1121,25 @@ Strophe = {
         text = text.replace(/>/g,  "&gt;");
         text = text.replace(/'/g,  "&apos;");
         text = text.replace(/"/g,  "&quot;");
+        return text;
+    },
+
+    /*  Function: xmlunescape
+    *  Unexcapes invalid xml characters.
+    *
+    *  Parameters:
+    *     (String) text - text to unescape.
+    *
+    *  Returns:
+    *      Unescaped text.
+    */
+    xmlunescape: function(text)
+    {
+        text = text.replace(/\&amp;/g, "&");
+        text = text.replace(/&lt;/g,  "<");
+        text = text.replace(/&gt;/g,  ">");
+        text = text.replace(/&apos;/g,  "'");
+        text = text.replace(/&quot;/g,  "\"");
         return text;
     },
 
@@ -1113,7 +1230,7 @@ Strophe = {
             el = Strophe.xmlElement(elem.tagName);
 
             for (i = 0; i < elem.attributes.length; i++) {
-                el.setAttribute(elem.attributes[i].nodeName.toLowerCase(),
+                el.setAttribute(elem.attributes[i].nodeName,
                                 elem.attributes[i].value);
             }
 
@@ -1144,7 +1261,7 @@ Strophe = {
     {
         var i, el, j, tag, attribute, value, css, cssAttrs, attr, cssName, cssValue;
         if (elem.nodeType == Strophe.ElementType.NORMAL) {
-            tag = elem.nodeName.toLowerCase();
+            tag = elem.nodeName.toLowerCase(); // XHTML tags must be lower case.
             if(Strophe.XHTML.validTag(tag)) {
                 try {
                     el = Strophe.xmlElement(tag);
@@ -1215,6 +1332,7 @@ Strophe = {
      */
     escapeNode: function (node)
     {
+        if (typeof node !== "string") { return node; }
         return node.replace(/^\s+|\s+$/g, '')
             .replace(/\\/g,  "\\5c")
             .replace(/ /g,   "\\20")
@@ -1239,6 +1357,7 @@ Strophe = {
      */
     unescapeNode: function (node)
     {
+        if (typeof node !== "string") { return node; }
         return node.replace(/\\20/g, " ")
             .replace(/\\22/g, '"')
             .replace(/\\26/g, "&")
@@ -1438,7 +1557,7 @@ Strophe = {
         result = "<" + nodeName;
         for (i = 0; i < elem.attributes.length; i++) {
                if(elem.attributes[i].nodeName != "_realname") {
-                 result += " " + elem.attributes[i].nodeName.toLowerCase() +
+                 result += " " + elem.attributes[i].nodeName +
                 "='" + elem.attributes[i].value
                     .replace(/&/g, "&amp;")
                        .replace(/\'/g, "&apos;")
@@ -1502,7 +1621,7 @@ Strophe = {
  *  XML DOM builder.
  *
  *  This object provides an interface similar to JQuery but for building
- *  DOM element easily and rapidly.  All the functions except for toString()
+ *  DOM elements easily and rapidly.  All the functions except for toString()
  *  and tree() return the object, so calls can be chained.  Here's an
  *  example using the $iq() builder helper.
  *  > $iq({to: 'you', from: 'me', type: 'get', id: '1'})
@@ -1619,7 +1738,11 @@ Strophe.Builder.prototype = {
     {
         for (var k in moreattrs) {
             if (moreattrs.hasOwnProperty(k)) {
-                this.node.setAttribute(k, moreattrs[k]);
+                if (moreattrs[k] === undefined) {
+                    this.node.removeAttribute(k);
+                } else {
+                    this.node.setAttribute(k, moreattrs[k]);
+                }
             }
         }
         return this;
@@ -1645,7 +1768,7 @@ Strophe.Builder.prototype = {
     {
         var child = Strophe.xmlElement(name, attrs, text);
         this.node.appendChild(child);
-        if (!text) {
+        if (typeof text !== "string") {
             this.node = child;
         }
         return this;
@@ -1818,9 +1941,10 @@ Strophe.Handler.prototype = {
             nsMatch = nsMatch || elem.getAttribute("xmlns") == this.ns;
         }
 
+        var elem_type = elem.getAttribute("type");
         if (nsMatch &&
             (!this.name || Strophe.isTagEqual(elem, this.name)) &&
-            (!this.type || elem.getAttribute("type") == this.type) &&
+            (!this.type || (Array.isArray(this.type) ? this.type.indexOf(elem_type) != -1 : elem_type == this.type)) &&
             (!this.id || elem.getAttribute("id") == this.id) &&
             (!this.from || from == this.from)) {
                 return true;
@@ -1951,9 +2075,9 @@ Strophe.TimedHandler.prototype = {
 /** Class: Strophe.Connection
  *  XMPP Connection manager.
  *
- *  This class is the main part of Strophe.  It manages a BOSH connection
- *  to an XMPP server and dispatches events to the user callbacks as
- *  data arrives.  It supports SASL PLAIN, SASL DIGEST-MD5, SASL SCRAM-SHA1
+ *  This class is the main part of Strophe.  It manages a BOSH or websocket
+ *  connection to an XMPP server and dispatches events to the user callbacks
+ *  as data arrives. It supports SASL PLAIN, SASL DIGEST-MD5, SASL SCRAM-SHA1
  *  and legacy authentication.
  *
  *  After creating a Strophe.Connection object, the user will typically
@@ -1964,7 +2088,7 @@ Strophe.TimedHandler.prototype = {
  *  The user will also have several event handlers defined by using
  *  addHandler() and addTimedHandler().  These will allow the user code to
  *  respond to interesting stanzas or do something periodically with the
- *  connection.  These handlers will be active once authentication is
+ *  connection. These handlers will be active once authentication is
  *  finished.
  *
  *  To send data to the connection, use send().
@@ -2002,13 +2126,23 @@ Strophe.TimedHandler.prototype = {
  *
  *  BOSH options:
  *
- *  by adding "sync" to the options, you can control if requests will
+ *  By adding "sync" to the options, you can control if requests will
  *  be made synchronously or not. The default behaviour is asynchronous.
  *  If you want to make requests synchronous, make "sync" evaluate to true:
  *  > var conn = new Strophe.Connection("/http-bind/", {sync: true});
+ *
  *  You can also toggle this on an already established connection:
  *  > conn.options.sync = true;
  *
+ *  The "customHeaders" option can be used to provide custom HTTP headers to be
+ *  included in the XMLHttpRequests made.
+ *
+ *  The "keepalive" option can be used to instruct Strophe to maintain the
+ *  current BOSH session across interruptions such as webpage reloads.
+ *
+ *  It will do this by caching the sessions tokens in sessionStorage, and when
+ *  "restore" is called it will check whether there are cached tokens with
+ *  which it can resume an existing session.
  *
  *  Parameters:
  *    (String) service - The BOSH or WebSocket service URL.
@@ -2033,6 +2167,7 @@ Strophe.Connection = function (service, options)
     } else {
         this._proto = new Strophe.Bosh(this);
     }
+
     /* The connected JID. */
     this.jid = "";
     /* the JIDs domain */
@@ -2057,14 +2192,12 @@ Strophe.Connection = function (service, options)
     this._idleTimeout = null;
     this._disconnectTimeout = null;
 
-    this.do_authentication = true;
     this.authenticated = false;
-    this.disconnecting = false;
     this.connected = false;
-
-    this.errors = 0;
-
+    this.disconnecting = false;
+    this.do_authentication = true;
     this.paused = false;
+    this.restored = false;
 
     this._data = [];
     this._uniqueId = 0;
@@ -2117,11 +2250,11 @@ Strophe.Connection.prototype = {
         this._authentication = {};
 
         this.authenticated = false;
-        this.disconnecting = false;
         this.connected = false;
+        this.disconnecting = false;
+        this.restored = false;
 
-        this.errors = 0;
-
+        this._data = [];
         this._requests = [];
         this._uniqueId = 0;
     },
@@ -2172,12 +2305,16 @@ Strophe.Connection.prototype = {
      *  Returns:
      *    A unique string to be used for the id attribute.
      */
-    getUniqueId: function (suffix)
-    {
+    getUniqueId: function(suffix) {
+        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0,
+                v = c == 'x' ? r : r & 0x3 | 0x8;
+            return v.toString(16);
+        });
         if (typeof(suffix) == "string" || typeof(suffix) == "number") {
-            return ++this._uniqueId + ":" + suffix;
+            return uuid + ":" + suffix;
         } else {
-            return ++this._uniqueId + "";
+            return uuid + "";
         }
     },
 
@@ -2209,8 +2346,10 @@ Strophe.Connection.prototype = {
      *      number of connections the server will hold at one time.  This
      *      should almost always be set to 1 (the default).
      *    (String) route - The optional route value.
+     *    (String) authcid - The optional alternative authentication identity
+     *      (username) if intending to impersonate another user.
      */
-    connect: function (jid, pass, callback, wait, hold, route)
+    connect: function (jid, pass, callback, wait, hold, route, authcid)
     {
         this.jid = jid;
         /** Variable: authzid
@@ -2220,7 +2359,7 @@ Strophe.Connection.prototype = {
         /** Variable: authcid
          *  Authentication identity (User name).
          */
-        this.authcid = Strophe.getNodeFromJid(this.jid);
+        this.authcid = authcid || Strophe.getNodeFromJid(this.jid);
         /** Variable: pass
          *  Authentication identity (User password).
          */
@@ -2233,7 +2372,7 @@ Strophe.Connection.prototype = {
         this.disconnecting = false;
         this.connected = false;
         this.authenticated = false;
-        this.errors = 0;
+        this.restored = false;
 
         // parse jid for domain
         this.domain = Strophe.getDomainFromJid(this.jid);
@@ -2269,7 +2408,72 @@ Strophe.Connection.prototype = {
      */
     attach: function (jid, sid, rid, callback, wait, hold, wind)
     {
-        this._proto._attach(jid, sid, rid, callback, wait, hold, wind);
+        if (this._proto instanceof Strophe.Bosh) {
+            this._proto._attach(jid, sid, rid, callback, wait, hold, wind);
+        } else {
+            throw {
+                name: 'StropheSessionError',
+                message: 'The "attach" method can only be used with a BOSH connection.'
+            };
+        }
+    },
+
+    /** Function: restore
+     *  Attempt to restore a cached BOSH session.
+     *
+     *  This function is only useful in conjunction with providing the
+     *  "keepalive":true option when instantiating a new Strophe.Connection.
+     *
+     *  When "keepalive" is set to true, Strophe will cache the BOSH tokens
+     *  RID (Request ID) and SID (Session ID) and then when this function is
+     *  called, it will attempt to restore the session from those cached
+     *  tokens.
+     *
+     *  This function must therefore be called instead of connect or attach.
+     *
+     *  For an example on how to use it, please see examples/restore.js
+     *
+     *  Parameters:
+     *    (String) jid - The user's JID.  This may be a bare JID or a full JID.
+     *    (Function) callback - The connect callback function.
+     *    (Integer) wait - The optional HTTPBIND wait value.  This is the
+     *      time the server will wait before returning an empty result for
+     *      a request.  The default setting of 60 seconds is recommended.
+     *    (Integer) hold - The optional HTTPBIND hold value.  This is the
+     *      number of connections the server will hold at one time.  This
+     *      should almost always be set to 1 (the default).
+     *    (Integer) wind - The optional HTTBIND window value.  This is the
+     *      allowed range of request ids that are valid.  The default is 5.
+     */
+    restore: function (jid, callback, wait, hold, wind)
+    {
+        if (this._sessionCachingSupported()) {
+            this._proto._restore(jid, callback, wait, hold, wind);
+        } else {
+            throw {
+                name: 'StropheSessionError',
+                message: 'The "restore" method can only be used with a BOSH connection.'
+            };
+        }
+    },
+
+    /** PrivateFunction: _sessionCachingSupported
+     * Checks whether sessionStorage and JSON are supported and whether we're
+     * using BOSH.
+     */
+    _sessionCachingSupported: function ()
+    {
+        if (this._proto instanceof Strophe.Bosh) {
+            if (!JSON) { return false; }
+            try {
+                window.sessionStorage.setItem('_strophe_', '_strophe_');
+                window.sessionStorage.removeItem('_strophe_');
+            } catch (e) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     },
 
     /** Function: xmlInput
@@ -2360,6 +2564,24 @@ Strophe.Connection.prototype = {
     },
     /* jshint unused:true */
 
+    /** Function: nextValidRid
+     *  User overrideable function that receives the new valid rid.
+     *
+     *  The default function does nothing. User code can override this with
+     *  > Strophe.Connection.nextValidRid = function (rid) {
+     *  >    (user code)
+     *  > };
+     *
+     *  Parameters:
+     *    (Number) rid - The next valid rid
+     */
+    /* jshint unused:false */
+    nextValidRid: function (rid)
+    {
+        return;
+    },
+    /* jshint unused:true */
+
     /** Function: send
      *  Send a stanza.
      *
@@ -2433,10 +2655,31 @@ Strophe.Connection.prototype = {
             elem.setAttribute("id", id);
         }
 
+        var expectedFrom = elem.getAttribute("to");
+        var fulljid = this.jid;
+
         var handler = this.addHandler(function (stanza) {
             // remove timeout handler if there is one
             if (timeoutHandler) {
                 that.deleteTimedHandler(timeoutHandler);
+            }
+
+            var acceptable = false;
+            var from = stanza.getAttribute("from");
+            if (from === expectedFrom ||
+               (expectedFrom === null &&
+                   (from === Strophe.getBareJidFromJid(fulljid) ||
+                    from === Strophe.getDomainFromJid(fulljid) ||
+                    from === fulljid))) {
+                acceptable = true;
+            }
+
+            if (!acceptable) {
+                throw {
+                    name: "StropheError",
+                    message: "Got answer to IQ from wrong jid:" + from +
+                             "\nExpected jid: " + expectedFrom
+                };
             }
 
             var iqtype = stanza.getAttribute('type');
@@ -2451,17 +2694,16 @@ Strophe.Connection.prototype = {
             } else {
                 throw {
                     name: "StropheError",
-            message: "Got bad IQ type of " + iqtype
+                    message: "Got bad IQ type of " + iqtype
                 };
             }
-        }, null, 'iq', null, id);
+        }, null, 'iq', ['error', 'result'], id);
 
         // if timeout specified, setup timeout handler.
         if (timeout) {
             timeoutHandler = this.addTimedHandler(timeout, function () {
                 // get rid of normal handler
                 that.deleteHandler(handler);
-
                 // call errback on timeout with null stanza
                 if (errback) {
                     errback(null);
@@ -2469,9 +2711,7 @@ Strophe.Connection.prototype = {
                 return false;
             });
         }
-
         this.send(elem);
-
         return id;
     },
 
@@ -2559,8 +2799,8 @@ Strophe.Connection.prototype = {
      *  they must all match for the handler to be invoked.
      *
      *  The handler will receive the stanza that triggered it as its argument.
-     *  The handler should return true if it is to be invoked again;
-     *  returning false will remove the handler after it returns.
+     *  *The handler should return true if it is to be invoked again;
+     *  returning false will remove the handler after it returns.*
      *
      *  As a convenience, the ns parameters applies to the top level element
      *  and also any of its immediate children.  This is primarily to make
@@ -2610,6 +2850,12 @@ Strophe.Connection.prototype = {
         // this must be done in the Idle loop so that we don't change
         // the handlers during iteration
         this.removeHandlers.push(handRef);
+        // If a handler is being deleted while it is being added,
+        // prevent it from getting added
+        var i = this.addHandlers.indexOf(handRef);
+        if (i >= 0) {
+            this.addHandlers.splice(i, 1);
+        }
     },
 
     /** Function: disconnect
@@ -2619,6 +2865,8 @@ Strophe.Connection.prototype = {
      *  by sending unavailable presence and sending BOSH body of type
      *  terminate.  A timeout handler makes sure that disconnection happens
      *  even if the BOSH server does not respond.
+     *  If the Connection object isn't connected, at least tries to abort all pending requests
+     *  so the connection object won't generate successful requests (which were already opened).
      *
      *  The user supplied connection callback will be notified of the
      *  progress as this process happens.
@@ -2644,6 +2892,9 @@ Strophe.Connection.prototype = {
             this._disconnectTimeout = this._addSysTimedHandler(
                 3000, this._onDisconnectTimeout.bind(this));
             this._proto._disconnect(pres);
+        } else {
+            Strophe.info("Disconnect was called before Strophe connected to the server");
+            this._proto._abortAllRequests();
         }
     },
 
@@ -2690,8 +2941,12 @@ Strophe.Connection.prototype = {
      *  This is the last piece of the disconnection logic.  This resets the
      *  connection and alerts the user's connection callback.
      */
-    _doDisconnect: function ()
+    _doDisconnect: function (condition)
     {
+        if (typeof this._idleTimeout == "number") {
+            clearTimeout(this._idleTimeout);
+        }
+
         // Cancel Disconnect Timeout
         if (this._disconnectTimeout !== null) {
             this.deleteTimedHandler(this._disconnectTimeout);
@@ -2703,6 +2958,7 @@ Strophe.Connection.prototype = {
 
         this.authenticated = false;
         this.disconnecting = false;
+        this.restored = false;
 
         // delete handlers
         this.handlers = [];
@@ -2713,7 +2969,7 @@ Strophe.Connection.prototype = {
         this.addHandlers = [];
 
         // tell the parent we disconnected
-        this._changeConnectStatus(Strophe.Status.DISCONNECTED, null);
+        this._changeConnectStatus(Strophe.Status.DISCONNECTED, condition);
         this.connected = false;
     },
 
@@ -2771,9 +3027,9 @@ Strophe.Connection.prototype = {
             return;
         }
 
-        var typ = elem.getAttribute("type");
+        var type = elem.getAttribute("type");
         var cond, conflict;
-        if (typ !== null && typ == "terminate") {
+        if (type !== null && type == "terminate") {
             // Don't process stanzas that come in after disconnect
             if (this.disconnecting) {
                 return;
@@ -2790,7 +3046,7 @@ Strophe.Connection.prototype = {
             } else {
                 this._changeConnectStatus(Strophe.Status.CONNFAIL, "unknown");
             }
-            this.disconnect('unknown stream-error');
+            this._doDisconnect(cond);
             return;
         }
 
@@ -2881,9 +3137,11 @@ Strophe.Connection.prototype = {
         this._authentication.legacy_auth = false;
 
         // Check for the stream:features tag
-        var hasFeatures = bodyWrap.getElementsByTagName("stream:features").length > 0;
-        if (!hasFeatures) {
-            hasFeatures = bodyWrap.getElementsByTagName("features").length > 0;
+        var hasFeatures;
+        if (bodyWrap.getElementsByTagNameNS) {
+            hasFeatures = bodyWrap.getElementsByTagNameNS(Strophe.NS.STREAM, "features").length > 0;
+        } else {
+            hasFeatures = bodyWrap.getElementsByTagName("stream:features").length > 0 || bodyWrap.getElementsByTagName("features").length > 0;
         }
         var mechanisms = bodyWrap.getElementsByTagName("mechanism");
         var matched = [];
@@ -3101,8 +3359,20 @@ Strophe.Connection.prototype = {
             this._sasl_challenge_handler = null;
         }
 
-        this._addSysHandler(this._sasl_auth1_cb.bind(this), null,
-                            "stream:features", null, null);
+        var streamfeature_handlers = [];
+        var wrapper = function(handlers, elem) {
+            while (handlers.length) {
+                this.deleteHandler(handlers.pop());
+            }
+            this._sasl_auth1_cb.bind(this)(elem);
+            return false;
+        };
+        streamfeature_handlers.push(this._addSysHandler(function(elem) {
+            wrapper.bind(this)(streamfeature_handlers, elem);
+        }.bind(this), null, "stream:features", null, null));
+        streamfeature_handlers.push(this._addSysHandler(function(elem) {
+            wrapper.bind(this)(streamfeature_handlers, elem);
+        }.bind(this), Strophe.NS.STREAM, "features", null, null));
 
         // we must send an xmpp:restart now
         this._sendRestart();
@@ -3405,10 +3675,6 @@ Strophe.Connection.prototype = {
     }
 };
 
-if (callback) {
-    callback(Strophe, $build, $msg, $iq, $pres);
-}
-
 /** Class: Strophe.SASLMechanism
  *
  *  encapsulates SASL authentication mechanisms.
@@ -3653,26 +3919,26 @@ Strophe.SASLSHA1.prototype.onChallenge = function(connection, challenge, test_cn
     salt = Base64.decode(salt);
     salt += "\x00\x00\x00\x01";
 
-    Hi = U_old = core_hmac_sha1(connection.pass, salt);
+    Hi = U_old = SHA1.core_hmac_sha1(connection.pass, salt);
     for (i = 1; i < iter; i++) {
-      U = core_hmac_sha1(connection.pass, binb2str(U_old));
+      U = SHA1.core_hmac_sha1(connection.pass, SHA1.binb2str(U_old));
       for (k = 0; k < 5; k++) {
         Hi[k] ^= U[k];
       }
       U_old = U;
     }
-    Hi = binb2str(Hi);
+    Hi = SHA1.binb2str(Hi);
 
-    clientKey = core_hmac_sha1(Hi, "Client Key");
-    serverKey = str_hmac_sha1(Hi, "Server Key");
-    clientSignature = core_hmac_sha1(str_sha1(binb2str(clientKey)), authMessage);
-    connection._sasl_data["server-signature"] = b64_hmac_sha1(serverKey, authMessage);
+    clientKey = SHA1.core_hmac_sha1(Hi, "Client Key");
+    serverKey = SHA1.str_hmac_sha1(Hi, "Server Key");
+    clientSignature = SHA1.core_hmac_sha1(SHA1.str_sha1(SHA1.binb2str(clientKey)), authMessage);
+    connection._sasl_data["server-signature"] = SHA1.b64_hmac_sha1(serverKey, authMessage);
 
     for (k = 0; k < 5; k++) {
       clientKey[k] ^= clientSignature[k];
     }
 
-    responseText += ",p=" + Base64.encode(binb2str(clientKey));
+    responseText += ",p=" + Base64.encode(SHA1.binb2str(clientKey));
 
     return responseText;
   }.bind(this);
@@ -3765,7 +4031,7 @@ Strophe.SASLMD5.prototype.onChallenge = function(connection, challenge, test_cno
 
   this.onChallenge = function ()
   {
-    return "";
+      return "";
   }.bind(this);
 
   return responseText;
@@ -3773,13 +4039,17 @@ Strophe.SASLMD5.prototype.onChallenge = function(connection, challenge, test_cno
 
 Strophe.Connection.prototype.mechanisms[Strophe.SASLMD5.prototype.name] = Strophe.SASLMD5;
 
-})(function () {
-    window.Strophe = arguments[0];
-    window.$build = arguments[1];
-    window.$msg = arguments[2];
-    window.$iq = arguments[3];
-    window.$pres = arguments[4];
-});
+return {
+    Strophe:        Strophe,
+    $build:         $build,
+    $msg:           $msg,
+    $iq:            $iq,
+    $pres:          $pres,
+    SHA1:           SHA1,
+    Base64:         Base64,
+    MD5:            MD5,
+};
+}));
 
 /*
     This program is distributed under the terms of the MIT license.
@@ -3789,10 +4059,21 @@ Strophe.Connection.prototype.mechanisms[Strophe.SASLMD5.prototype.name] = Stroph
 */
 
 /* jshint undef: true, unused: true:, noarg: true, latedef: true */
-/*global window, setTimeout, clearTimeout,
-    XMLHttpRequest, ActiveXObject,
-    Strophe, $build */
+/* global define, window, setTimeout, clearTimeout, XMLHttpRequest, ActiveXObject, Strophe, $build */
 
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define('strophe-bosh', ['strophe-core'], function (core) {
+            return factory(
+                core.Strophe,
+                core.$build
+            );
+        });
+    } else {
+        // Browser globals
+        return factory(Strophe, $build);
+    }
+}(this, function (Strophe, $build) {
 
 /** PrivateClass: Strophe.Request
  *  _Private_ helper class that provides a cross implementation abstraction
@@ -3890,7 +4171,7 @@ Strophe.Request.prototype = {
         if (window.XMLHttpRequest) {
             xhr = new XMLHttpRequest();
             if (xhr.overrideMimeType) {
-                xhr.overrideMimeType("text/xml");
+                xhr.overrideMimeType("text/xml; charset=utf-8");
             }
         } else if (window.ActiveXObject) {
             xhr = new ActiveXObject("Microsoft.XMLHTTP");
@@ -3938,6 +4219,7 @@ Strophe.Bosh = function(connection) {
     this.hold = 1;
     this.wait = 60;
     this.window = 5;
+    this.errors = 0;
 
     this._requests = [];
 };
@@ -3968,11 +4250,12 @@ Strophe.Bosh.prototype = {
             rid: this.rid++,
             xmlns: Strophe.NS.HTTPBIND
         });
-
         if (this.sid !== null) {
             bodyWrap.attrs({sid: this.sid});
         }
-
+        if (this._conn.options.keepalive) {
+            this._cacheSession();
+        }
         return bodyWrap;
     },
 
@@ -3985,8 +4268,10 @@ Strophe.Bosh.prototype = {
     {
         this.rid = Math.floor(Math.random() * 4294967295);
         this.sid = null;
-        
-        jQuery(document).trigger('ridChange', {rid: this.rid});
+        this.errors = 0;
+        window.sessionStorage.removeItem('strophe-bosh-session');
+
+        this._conn.nextValidRid(this.rid);
     },
 
     /** PrivateFunction: _connect
@@ -3998,6 +4283,7 @@ Strophe.Bosh.prototype = {
     {
         this.wait = wait || this.wait;
         this.hold = hold || this.hold;
+        this.errors = 0;
 
         // build the body tag
         var body = this._buildBody().attrs({
@@ -4071,6 +4357,64 @@ Strophe.Bosh.prototype = {
         this._conn._changeConnectStatus(Strophe.Status.ATTACHED, null);
     },
 
+    /** PrivateFunction: _restore
+     *  Attempt to restore a cached BOSH session
+     *
+     *  Parameters:
+     *    (String) jid - The full JID that is bound by the session.
+     *      This parameter is optional but recommended, specifically in cases
+     *      where prebinded BOSH sessions are used where it's important to know
+     *      that the right session is being restored.
+     *    (Function) callback The connect callback function.
+     *    (Integer) wait - The optional HTTPBIND wait value.  This is the
+     *      time the server will wait before returning an empty result for
+     *      a request.  The default setting of 60 seconds is recommended.
+     *      Other settings will require tweaks to the Strophe.TIMEOUT value.
+     *    (Integer) hold - The optional HTTPBIND hold value.  This is the
+     *      number of connections the server will hold at one time.  This
+     *      should almost always be set to 1 (the default).
+     *    (Integer) wind - The optional HTTBIND window value.  This is the
+     *      allowed range of request ids that are valid.  The default is 5.
+     */
+    _restore: function (jid, callback, wait, hold, wind)
+    {
+        var session = JSON.parse(window.sessionStorage.getItem('strophe-bosh-session'));
+        if (typeof session !== "undefined" &&
+                   session !== null &&
+                   session.rid &&
+                   session.sid &&
+                   session.jid &&
+                   (typeof jid === "undefined" || jid === "null" || Strophe.getBareJidFromJid(session.jid) == Strophe.getBareJidFromJid(jid)))
+        {
+            this._conn.restored = true;
+            this._attach(session.jid, session.sid, session.rid, callback, wait, hold, wind);
+        } else {
+            throw { name: "StropheSessionError", message: "_restore: no restoreable session." };
+        }
+    },
+
+    /** PrivateFunction: _cacheSession
+     *  _Private_ handler for the beforeunload event.
+     *
+     *  This handler is used to process the Bosh-part of the initial request.
+     *  Parameters:
+     *    (Strophe.Request) bodyWrap - The received stanza.
+     */
+    _cacheSession: function ()
+    {
+        if (this._conn.authenticated) {
+            if (this._conn.jid && this.rid && this.sid) {
+                window.sessionStorage.setItem('strophe-bosh-session', JSON.stringify({
+                    'jid': this._conn.jid,
+                    'rid': this.rid,
+                    'sid': this.sid
+                }));
+            }
+        } else {
+            window.sessionStorage.removeItem('strophe-bosh-session');
+        }
+    },
+
     /** PrivateFunction: _connect_cb
      *  _Private_ handler for initial connection request.
      *
@@ -4084,8 +4428,8 @@ Strophe.Bosh.prototype = {
         var cond, conflict;
         if (typ !== null && typ == "terminate") {
             // an error occurred
-            Strophe.error("BOSH-Connection failed: " + cond);
             cond = bodyWrap.getAttribute("condition");
+            Strophe.error("BOSH-Connection failed: " + cond);
             conflict = bodyWrap.getElementsByTagName("conflict");
             if (cond !== null) {
                 if (cond == "remote-stream-error" && conflict.length > 0) {
@@ -4095,7 +4439,7 @@ Strophe.Bosh.prototype = {
             } else {
                 this._conn._changeConnectStatus(Strophe.Status.CONNFAIL, "unknown");
             }
-            this._conn._doDisconnect();
+            this._conn._doDisconnect(cond);
             return Strophe.Status.CONNFAIL;
         }
 
@@ -4132,8 +4476,9 @@ Strophe.Bosh.prototype = {
     {
         this.sid = null;
         this.rid = Math.floor(Math.random() * 4294967295);
-        
-        jQuery(document).trigger('ridChange', {rid: this.rid});
+        window.sessionStorage.removeItem('strophe-bosh-session');
+
+        this._conn.nextValidRid(this.rid);
     },
 
     /** PrivateFunction: _emptyQueue
@@ -4163,7 +4508,7 @@ Strophe.Bosh.prototype = {
         Strophe.warn("request errored, status: " + reqStatus +
                      ", number of errors: " + this.errors);
         if (this.errors > 4) {
-            this._onDisconnectTimeout();
+            this._conn._onDisconnectTimeout();
         }
     },
 
@@ -4193,8 +4538,14 @@ Strophe.Bosh.prototype = {
      *
      *  Cancels all remaining Requests and clears the queue.
      */
-    _onDisconnectTimeout: function ()
-    {
+    _onDisconnectTimeout: function () {
+        this._abortAllRequests();
+    },
+
+    /** PrivateFunction: _abortAllRequests
+     *  _Private_ helper function that makes sure all pending requests are aborted.
+     */
+    _abortAllRequests: function _abortAllRequests() {
         var req;
         while (this._requests.length > 0) {
             req = this._requests.pop();
@@ -4222,8 +4573,11 @@ Strophe.Bosh.prototype = {
             data.push(null);
         }
 
-        if (this._requests.length < 2 && data.length > 0 &&
-            !this._conn.paused) {
+        if (this._conn.paused) {
+            return;
+        }
+
+        if (this._requests.length < 2 && data.length > 0) {
             var body = this._buildBody();
             for (var i = 0; i < data.length; i++) {
                 if (data[i] !== null) {
@@ -4246,7 +4600,7 @@ Strophe.Bosh.prototype = {
                                     this._onRequestStateChange.bind(
                                         this, this._conn._dataRecv.bind(this._conn)),
                                     body.tree().getAttribute("rid")));
-            this._processRequest(this._requests.length - 1);
+            this._throttledRequestHandler();
         }
 
         if (this._requests.length > 0) {
@@ -4291,10 +4645,6 @@ Strophe.Bosh.prototype = {
             return;
         }
 
-        if(req.xhr.readyState == 2){ 
-           jQuery(document).trigger('ridChange', {rid: Number(req.rid)+1});
-        }
-        
         // request complete
         var reqStatus;
         if (req.xhr.readyState == 4) {
@@ -4339,6 +4689,9 @@ Strophe.Bosh.prototype = {
                      this._requests[0].age() > Math.floor(Strophe.SECONDARY_TIMEOUT * this.wait))) {
                     this._restartRequest(0);
                 }
+
+                this._conn.nextValidRid(Number(req.rid) + 1);
+
                 // call handler
                 Strophe.debug("request id " +
                               req.id + "." +
@@ -4355,8 +4708,7 @@ Strophe.Bosh.prototype = {
                     reqStatus >= 12000) {
                     this._hitError(reqStatus);
                     if (reqStatus >= 400 && reqStatus < 500) {
-                        this._conn._changeConnectStatus(Strophe.Status.DISCONNECTING,
-                                                  null);
+                        this._conn._changeConnectStatus(Strophe.Status.DISCONNECTING, null);
                         this._conn._doDisconnect();
                     }
                 }
@@ -4398,8 +4750,8 @@ Strophe.Bosh.prototype = {
         }
 
         // make sure we limit the number of retries
-        if (req.sends > this.maxRetries) {
-            this._onDisconnectTimeout();
+        if (req.sends > this._conn.maxRetries) {
+            this._conn._onDisconnectTimeout();
             return;
         }
 
@@ -4435,6 +4787,7 @@ Strophe.Bosh.prototype = {
 
             try {
                 req.xhr.open("POST", this._conn.service, this._conn.options.sync ? false : true);
+                req.xhr.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
             } catch (e2) {
                 Strophe.error("XHR open failed.");
                 if (!this._conn.connected) {
@@ -4631,6 +4984,8 @@ Strophe.Bosh.prototype = {
         }
     }
 };
+return Strophe;
+}));
 
 /*
     This program is distributed under the terms of the MIT license.
@@ -4640,8 +4995,21 @@ Strophe.Bosh.prototype = {
 */
 
 /* jshint undef: true, unused: true:, noarg: true, latedef: true */
-/*global document, window, clearTimeout, WebSocket,
-    DOMParser, Strophe, $build */
+/* global define, window, clearTimeout, WebSocket, DOMParser, Strophe, $build */
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define('strophe-websocket', ['strophe-core'], function (core) {
+            return factory(
+                core.Strophe,
+                core.$build
+            );
+        });
+    } else {
+        // Browser globals
+        return factory(Strophe, $build);
+    }
+}(this, function (Strophe, $build) {
 
 /** Class: Strophe.WebSocket
  *  _Private_ helper class that handles WebSocket Connections
@@ -4656,8 +5024,8 @@ Strophe.Bosh.prototype = {
  *  This file implements XMPP over WebSockets for Strophejs.
  *  If a Connection is established with a Websocket url (ws://...)
  *  Strophe will use WebSockets.
- *  For more information on XMPP-over WebSocket see this RFC draft:
- *  http://tools.ietf.org/html/draft-ietf-xmpp-websocket-00
+ *  For more information on XMPP-over-WebSocket see RFC 7395:
+ *  http://tools.ietf.org/html/rfc7395
  *
  *  WebSocket support implemented by Andreas Guth (andreas.guth@rwth-aachen.de)
  */
@@ -4674,7 +5042,7 @@ Strophe.Bosh.prototype = {
  */
 Strophe.Websocket = function(connection) {
     this._conn = connection;
-    this.strip = "stream:stream";
+    this.strip = "wrapper";
 
     var service = connection.service;
     if (service.indexOf("ws:") !== 0 && service.indexOf("wss:") !== 0) {
@@ -4709,10 +5077,9 @@ Strophe.Websocket.prototype = {
      */
     _buildStream: function ()
     {
-        return $build("stream:stream", {
+        return $build("open", {
+            "xmlns": Strophe.NS.FRAMING,
             "to": this._conn.domain,
-            "xmlns": Strophe.NS.CLIENT,
-            "xmlns:stream": Strophe.NS.STREAM,
             "version": '1.0'
         });
     },
@@ -4727,7 +5094,12 @@ Strophe.Websocket.prototype = {
      *     true if there was a streamerror, false otherwise.
      */
     _check_streamerror: function (bodyWrap, connectstatus) {
-        var errors = bodyWrap.getElementsByTagName("stream:error");
+        var errors;
+        if (bodyWrap.getElementsByTagNameNS) {
+            errors = bodyWrap.getElementsByTagNameNS(Strophe.NS.STREAM, "error");
+        } else {
+            errors = bodyWrap.getElementsByTagName("stream:error");
+        }
         if (errors.length === 0) {
             return false;
         }
@@ -4813,35 +5185,29 @@ Strophe.Websocket.prototype = {
     },
 
     /** PrivateFunction: _handleStreamStart
-     * _Private_ function that checks the opening stream:stream tag for errors.
+     * _Private_ function that checks the opening <open /> tag for errors.
      *
      * Disconnects if there is an error and returns false, true otherwise.
      *
      *  Parameters:
-     *    (Node) message - Stanza containing the stream:stream.
+     *    (Node) message - Stanza containing the <open /> tag.
      */
     _handleStreamStart: function(message) {
         var error = false;
-        // Check for errors in the stream:stream tag
+
+        // Check for errors in the <open /> tag
         var ns = message.getAttribute("xmlns");
         if (typeof ns !== "string") {
-            error = "Missing xmlns in stream:stream";
-        } else if (ns !== Strophe.NS.CLIENT) {
-            error = "Wrong xmlns in stream:stream: " + ns;
-        }
-
-        var ns_stream = message.namespaceURI;
-        if (typeof ns_stream !== "string") {
-            error = "Missing xmlns:stream in stream:stream";
-        } else if (ns_stream !== Strophe.NS.STREAM) {
-            error = "Wrong xmlns:stream in stream:stream: " + ns_stream;
+            error = "Missing xmlns in <open />";
+        } else if (ns !== Strophe.NS.FRAMING) {
+            error = "Wrong xmlns in <open />: " + ns;
         }
 
         var ver = message.getAttribute("version");
         if (typeof ver !== "string") {
-            error = "Missing version in stream:stream";
+            error = "Missing version in <open />";
         } else if (ver !== "1.0") {
-            error = "Wrong version in stream:stream: " + ver;
+            error = "Wrong version in <open />: " + ver;
         }
 
         if (error) {
@@ -4860,13 +5226,10 @@ Strophe.Websocket.prototype = {
      * message handler. On receiving a stream error the connection is terminated.
      */
     _connect_cb_wrapper: function(message) {
-        if (message.data.indexOf("<stream:stream ") === 0 || message.data.indexOf("<?xml") === 0) {
+        if (message.data.indexOf("<open ") === 0 || message.data.indexOf("<?xml") === 0) {
             // Strip the XML Declaration, if there is one
             var data = message.data.replace(/^(<\?.*?\?>\s*)*/, "");
             if (data === '') return;
-
-            //Make the initial stream:stream selfclosing to parse it without a SAX parser.
-            data = message.data.replace(/<stream:stream (.*[^\/])>/, "<stream:stream $1/>");
 
             var streamStart = new DOMParser().parseFromString(data, "text/xml").documentElement;
             this._conn.xmlInput(streamStart);
@@ -4874,19 +5237,22 @@ Strophe.Websocket.prototype = {
 
             //_handleStreamSteart will check for XML errors and disconnect on error
             if (this._handleStreamStart(streamStart)) {
-
                 //_connect_cb will check for stream:error and disconnect on error
                 this._connect_cb(streamStart);
-
-                // ensure received stream:stream is NOT selfclosing and save it for following messages
-                this.streamStart = message.data.replace(/^<stream:(.*)\/>$/, "<stream:$1>");
             }
-        } else if (message.data === "</stream:stream>") {
+        } else if (message.data.indexOf("<close ") === 0) { //'<close xmlns="urn:ietf:params:xml:ns:xmpp-framing />') {
             this._conn.rawInput(message.data);
-            this._conn.xmlInput(document.createElement("stream:stream"));
-            this._conn._changeConnectStatus(Strophe.Status.CONNFAIL, "Received closing stream");
-            this._conn._doDisconnect();
-            return;
+            this._conn.xmlInput(message);
+            var see_uri = message.getAttribute("see-other-uri");
+            if (see_uri) {
+                this._conn._changeConnectStatus(Strophe.Status.REDIRECT, "Received see-other-uri, resetting connection");
+                this._conn.reset();
+                this._conn.service = see_uri;
+                this._connect();
+            } else {
+                this._conn._changeConnectStatus(Strophe.Status.CONNFAIL, "Received closing stream");
+                this._conn._doDisconnect();
+            }
         } else {
             var string = this._streamWrap(message.data);
             var elem = new DOMParser().parseFromString(string, "text/xml").documentElement;
@@ -4905,20 +5271,20 @@ Strophe.Websocket.prototype = {
      */
     _disconnect: function (pres)
     {
-        if (this.socket.readyState !== WebSocket.CLOSED) {
+        if (this.socket && this.socket.readyState !== WebSocket.CLOSED) {
             if (pres) {
                 this._conn.send(pres);
             }
-            var close = '</stream:stream>';
-            this._conn.xmlOutput(document.createElement("stream:stream"));
-            this._conn.rawOutput(close);
+            var close = $build("close", { "xmlns": Strophe.NS.FRAMING });
+            this._conn.xmlOutput(close);
+            var closeString = Strophe.serialize(close);
+            this._conn.rawOutput(closeString);
             try {
-                this.socket.send(close);
+                this.socket.send(closeString);
             } catch (e) {
-                Strophe.info("Couldn't send closing stream tag.");
+                Strophe.info("Couldn't send <close /> tag.");
             }
         }
-
         this._conn._doDisconnect();
     },
 
@@ -4939,7 +5305,7 @@ Strophe.Websocket.prototype = {
      */
     _streamWrap: function (stanza)
     {
-        return this.streamStart + stanza + '</stream:stream>';
+        return "<wrapper>" + stanza + '</wrapper>';
     },
 
 
@@ -5004,6 +5370,11 @@ Strophe.Websocket.prototype = {
      */
     _onDisconnectTimeout: function () {},
 
+    /** PrivateFunction: _abortAllRequests
+     *  _Private_ helper function that makes sure all pending requests are aborted.
+     */
+    _abortAllRequests: function () {},
+
     /** PrivateFunction: _onError
      * _Private_ function to handle websockets errors.
      *
@@ -5028,13 +5399,11 @@ Strophe.Websocket.prototype = {
                 if (data[i] !== null) {
                     var stanza, rawStanza;
                     if (data[i] === "restart") {
-                        stanza = this._buildStream();
-                        rawStanza = this._removeClosingTag(stanza);
-                        stanza = stanza.tree();
+                        stanza = this._buildStream().tree();
                     } else {
                         stanza = data[i];
-                        rawStanza = Strophe.serialize(stanza);
                     }
+                    rawStanza = Strophe.serialize(stanza);
                     this._conn.xmlOutput(stanza);
                     this._conn.rawOutput(rawStanza);
                     this.socket.send(rawStanza);
@@ -5059,18 +5428,17 @@ Strophe.Websocket.prototype = {
     _onMessage: function(message) {
         var elem, data;
         // check for closing stream
-        if (message.data === "</stream:stream>") {
-            var close = "</stream:stream>";
+        var close = '<close xmlns="urn:ietf:params:xml:ns:xmpp-framing" />';
+        if (message.data === close) {
             this._conn.rawInput(close);
-            this._conn.xmlInput(document.createElement("stream:stream"));
+            this._conn.xmlInput(message);
             if (!this._conn.disconnecting) {
                 this._conn._doDisconnect();
             }
             return;
-        } else if (message.data.search("<stream:stream ") === 0) {
-            //Make the initial stream:stream selfclosing to parse it without a SAX parser.
-            data = message.data.replace(/<stream:stream (.*[^\/])>/, "<stream:stream $1/>");
-            elem = new DOMParser().parseFromString(data, "text/xml").documentElement;
+        } else if (message.data.search("<open ") === 0) {
+            // This handles stream restarts
+            elem = new DOMParser().parseFromString(message.data, "text/xml").documentElement;
 
             if (!this._handleStreamStart(elem)) {
                 return;
@@ -5107,24 +5475,9 @@ Strophe.Websocket.prototype = {
         var start = this._buildStream();
         this._conn.xmlOutput(start.tree());
 
-        var startString = this._removeClosingTag(start);
+        var startString = Strophe.serialize(start);
         this._conn.rawOutput(startString);
         this.socket.send(startString);
-    },
-
-    /** PrivateFunction: _removeClosingTag
-     *  _Private_ function to Make the first <stream:stream> non-selfclosing
-     *
-     *  Parameters:
-     *      (Object) elem - The <stream:stream> tag.
-     *
-     *  Returns:
-     *      The stream:stream tag as String
-     */
-    _removeClosingTag: function(elem) {
-        var string = Strophe.serialize(elem);
-        string = string.replace(/<(stream:stream .*[^\/])\/>$/, "<$1>");
-        return string;
     },
 
     /** PrivateFunction: _reqToData
@@ -5162,6 +5515,23 @@ Strophe.Websocket.prototype = {
         this._conn._onIdle.bind(this._conn)();
     }
 };
+return Strophe;
+}));
+
+/* jshint ignore:start */
+if (callback) {
+    return callback(Strophe, $build, $msg, $iq, $pres);
+}
+
+
+})(function (Strophe, build, msg, iq, pres) {
+    window.Strophe = Strophe;
+    window.$build = build;
+    window.$msg = msg;
+    window.$iq = iq;
+    window.$pres = pres;
+});
+/* jshint ignore:end */
 
 
 /*!
@@ -6707,74 +7077,85 @@ Strophe.addConnectionPlugin('disco',
 
 
 /*!
- * Source: lib/strophe.vcard.js, license: MIT, url: https://github.com/strophe/strophejs-plugins
+ * Source: lib/strophe.vcard/index.js, license: MIT, url: https://github.com/strophe/strophejs-plugins
  */
-// Generated by CoffeeScript 1.3.3
+// Generated by CoffeeScript 1.10.0
+
 /*
 Plugin to implement the vCard extension.
 http://xmpp.org/extensions/xep-0054.html
 
 Author: Nathan Zorn (nathan.zorn@gmail.com)
 CoffeeScript port: Andreas Guth (guth@dbis.rwth-aachen.de)
-*/
+ */
 
-/* jslint configuration:
-*/
+
+/* jslint configuration: */
+
 
 /* global document, window, setTimeout, clearTimeout, console,
     XMLHttpRequest, ActiveXObject,
     Base64, MD5,
     Strophe, $build, $msg, $iq, $pres
-*/
+ */
 
-var buildIq;
+(function() {
+  var buildIq;
 
-buildIq = function(type, jid, vCardEl) {
-  var iq;
-  iq = $iq(jid ? {
-    type: type,
-    to: jid
-  } : {
-    type: type
-  });
-  iq.c("vCard", {
-    xmlns: Strophe.NS.VCARD
-  });
-  if (vCardEl) {
-    iq.cnode(vCardEl);
-  }
-  return iq;
-};
-
-Strophe.addConnectionPlugin('vcard', {
-  _connection: null,
-  init: function(conn) {
-    this._connection = conn;
-    return Strophe.addNamespace('VCARD', 'vcard-temp');
-  },
-  /*Function
-    Retrieve a vCard for a JID/Entity
-    Parameters:
-    (Function) handler_cb - The callback function used to handle the request.
-    (String) jid - optional - The name of the entity to request the vCard
-       If no jid is given, this function retrieves the current user's vcard.
-  */
-
-  get: function(handler_cb, jid, error_cb) {
+  buildIq = function(type, jid, vCardEl) {
     var iq;
-    iq = buildIq("get", jid);
-    return this._connection.sendIQ(iq, handler_cb, error_cb);
-  },
-  /* Function
-      Set an entity's vCard.
-  */
+    iq = $iq(jid ? {
+      type: type,
+      to: jid
+    } : {
+      type: type
+    });
+    iq.c("vCard", {
+      xmlns: Strophe.NS.VCARD
+    });
+    if (vCardEl) {
+      iq.cnode(vCardEl);
+    }
+    return iq;
+  };
 
-  set: function(handler_cb, vCardEl, jid, error_cb) {
-    var iq;
-    iq = buildIq("set", jid, vCardEl);
-    return this._connection.sendIQ(iq, handler_cb, error_rb);
-  }
-});
+  Strophe.addConnectionPlugin('vcard', {
+    _connection: null,
+    init: function(conn) {
+      this._connection = conn;
+      return Strophe.addNamespace('VCARD', 'vcard-temp');
+    },
+
+    /*Function
+      Retrieve a vCard for a JID/Entity
+      Parameters:
+      (Function) handler_cb - The callback function used to handle the request.
+      (String) jid - optional - The name of the entity to request the vCard
+         If no jid is given, this function retrieves the current user's vcard.
+      (Function) error_cb - The callback function used to handle error repsonse.
+     */
+    get: function(handler_cb, jid, error_cb) {
+      var iq;
+      if (typeof jid === 'function') {
+        error_cb = jid;
+        jid = null;
+      }
+      iq = buildIq("get", jid);
+      return this._connection.sendIQ(iq, handler_cb, error_cb);
+    },
+
+    /* Function
+        Set an entity's vCard.
+     */
+    set: function(handler_cb, vCardEl, jid, error_cb) {
+      var iq;
+      iq = buildIq("set", jid, vCardEl);
+      return this._connection.sendIQ(iq, handler_cb, error_cb);
+    }
+  });
+
+}).call(this);
+
 
 /*!
  * Source: lib/strophe.bookmarks/index.js, license: MIT, url: https://github.com/strophe/strophejs-plugins/tree/master/bookmarks
@@ -7751,7 +8132,7 @@ Strophe.addConnectionPlugin('bookmarks', {
  * Source: lib/strophe.jinglejs/strophe.jinglejs-bundle.js, license: MIT, url: https://github.com/sualko/strophe.jinglejs
  */
 /*!
- * strophe.jinglejs v0.1.1 - 2015-08-05
+ * strophe.jinglejs v0.1.1 - 2015-11-27
  * 
  * Copyright (c) 2015 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7766,12 +8147,14 @@ Strophe.addConnectionPlugin('bookmarks', {
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 },{}],2:[function(require,module,exports){
+(function (global){
 /*!
  * The buffer module from node.js, for the browser.
  *
  * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
  * @license  MIT
  */
+/* eslint-disable no-proto */
 
 var base64 = require('base64-js')
 var ieee754 = require('ieee754')
@@ -7782,7 +8165,6 @@ exports.SlowBuffer = SlowBuffer
 exports.INSPECT_MAX_BYTES = 50
 Buffer.poolSize = 8192 // not used by this implementation
 
-var kMaxLength = 0x3fffffff
 var rootParent = {}
 
 /**
@@ -7793,32 +8175,49 @@ var rootParent = {}
  * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
  * Opera 11.6+, iOS 4.2+.
  *
+ * Due to various browser bugs, sometimes the Object implementation will be used even
+ * when the browser supports typed arrays.
+ *
  * Note:
  *
- * - Implementation must support adding new properties to `Uint8Array` instances.
- *   Firefox 4-29 lacked support, fixed in Firefox 30+.
- *   See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.
+ *   - Firefox 4-29 lacks support for adding new properties to `Uint8Array` instances,
+ *     See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.
  *
- *  - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.
+ *   - Safari 5-7 lacks support for changing the `Object.prototype.constructor` property
+ *     on objects.
  *
- *  - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of
- *    incorrect length in some situations.
+ *   - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.
  *
- * We detect these buggy browsers and set `Buffer.TYPED_ARRAY_SUPPORT` to `false` so they will
- * get the Object implementation, which is slower but will work correctly.
+ *   - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of
+ *     incorrect length in some situations.
+
+ * We detect these buggy browsers and set `Buffer.TYPED_ARRAY_SUPPORT` to `false` so they
+ * get the Object implementation, which is slower but behaves correctly.
  */
-Buffer.TYPED_ARRAY_SUPPORT = (function () {
+Buffer.TYPED_ARRAY_SUPPORT = global.TYPED_ARRAY_SUPPORT !== undefined
+  ? global.TYPED_ARRAY_SUPPORT
+  : typedArraySupport()
+
+function typedArraySupport () {
+  function Bar () {}
   try {
-    var buf = new ArrayBuffer(0)
-    var arr = new Uint8Array(buf)
+    var arr = new Uint8Array(1)
     arr.foo = function () { return 42 }
+    arr.constructor = Bar
     return arr.foo() === 42 && // typed array instances can be augmented
+        arr.constructor === Bar && // constructor can be set
         typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`
-        new Uint8Array(1).subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`
+        arr.subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`
   } catch (e) {
     return false
   }
-})()
+}
+
+function kMaxLength () {
+  return Buffer.TYPED_ARRAY_SUPPORT
+    ? 0x7fffffff
+    : 0x3fffffff
+}
 
 /**
  * Class: Buffer
@@ -7886,8 +8285,13 @@ function fromObject (that, object) {
     throw new TypeError('must start with number, buffer, array or string')
   }
 
-  if (typeof ArrayBuffer !== 'undefined' && object.buffer instanceof ArrayBuffer) {
-    return fromTypedArray(that, object)
+  if (typeof ArrayBuffer !== 'undefined') {
+    if (object.buffer instanceof ArrayBuffer) {
+      return fromTypedArray(that, object)
+    }
+    if (object instanceof ArrayBuffer) {
+      return fromArrayBuffer(that, object)
+    }
   }
 
   if (object.length) return fromArrayLike(that, object)
@@ -7924,6 +8328,18 @@ function fromTypedArray (that, array) {
   return that
 }
 
+function fromArrayBuffer (that, array) {
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    // Return an augmented `Uint8Array` instance, for best performance
+    array.byteLength
+    that = Buffer._augment(new Uint8Array(array))
+  } else {
+    // Fallback: Return an object instance of the Buffer class
+    that = fromTypedArray(that, new Uint8Array(array))
+  }
+  return that
+}
+
 function fromArrayLike (that, array) {
   var length = checked(array.length) | 0
   that = allocate(that, length)
@@ -7951,10 +8367,16 @@ function fromJsonObject (that, object) {
   return that
 }
 
+if (Buffer.TYPED_ARRAY_SUPPORT) {
+  Buffer.prototype.__proto__ = Uint8Array.prototype
+  Buffer.__proto__ = Uint8Array
+}
+
 function allocate (that, length) {
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     // Return an augmented `Uint8Array` instance, for best performance
     that = Buffer._augment(new Uint8Array(length))
+    that.__proto__ = Buffer.prototype
   } else {
     // Fallback: Return an object instance of the Buffer class
     that.length = length
@@ -7970,9 +8392,9 @@ function allocate (that, length) {
 function checked (length) {
   // Note: cannot use `length < kMaxLength` here because that fails when
   // length is NaN (which is otherwise coerced to zero.)
-  if (length >= kMaxLength) {
+  if (length >= kMaxLength()) {
     throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
-                         'size: 0x' + kMaxLength.toString(16) + ' bytes')
+                         'size: 0x' + kMaxLength().toString(16) + ' bytes')
   }
   return length | 0
 }
@@ -8041,8 +8463,6 @@ Buffer.concat = function concat (list, length) {
 
   if (list.length === 0) {
     return new Buffer(0)
-  } else if (list.length === 1) {
-    return list[0]
   }
 
   var i
@@ -8064,29 +8484,38 @@ Buffer.concat = function concat (list, length) {
 }
 
 function byteLength (string, encoding) {
-  if (typeof string !== 'string') string = String(string)
+  if (typeof string !== 'string') string = '' + string
 
-  if (string.length === 0) return 0
+  var len = string.length
+  if (len === 0) return 0
 
-  switch (encoding || 'utf8') {
-    case 'ascii':
-    case 'binary':
-    case 'raw':
-      return string.length
-    case 'ucs2':
-    case 'ucs-2':
-    case 'utf16le':
-    case 'utf-16le':
-      return string.length * 2
-    case 'hex':
-      return string.length >>> 1
-    case 'utf8':
-    case 'utf-8':
-      return utf8ToBytes(string).length
-    case 'base64':
-      return base64ToBytes(string).length
-    default:
-      return string.length
+  // Use a for loop to avoid recursion
+  var loweredCase = false
+  for (;;) {
+    switch (encoding) {
+      case 'ascii':
+      case 'binary':
+      // Deprecated
+      case 'raw':
+      case 'raws':
+        return len
+      case 'utf8':
+      case 'utf-8':
+        return utf8ToBytes(string).length
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return len * 2
+      case 'hex':
+        return len >>> 1
+      case 'base64':
+        return base64ToBytes(string).length
+      default:
+        if (loweredCase) return utf8ToBytes(string).length // assume utf8
+        encoding = ('' + encoding).toLowerCase()
+        loweredCase = true
+    }
   }
 }
 Buffer.byteLength = byteLength
@@ -8095,8 +8524,7 @@ Buffer.byteLength = byteLength
 Buffer.prototype.length = undefined
 Buffer.prototype.parent = undefined
 
-// toString(encoding, start=0, end=buffer.length)
-Buffer.prototype.toString = function toString (encoding, start, end) {
+function slowToString (encoding, start, end) {
   var loweredCase = false
 
   start = start | 0
@@ -8137,6 +8565,13 @@ Buffer.prototype.toString = function toString (encoding, start, end) {
         loweredCase = true
     }
   }
+}
+
+Buffer.prototype.toString = function toString () {
+  var length = this.length | 0
+  if (length === 0) return ''
+  if (arguments.length === 0) return utf8Slice(this, 0, length)
+  return slowToString.apply(this, arguments)
 }
 
 Buffer.prototype.equals = function equals (b) {
@@ -8202,13 +8637,13 @@ Buffer.prototype.indexOf = function indexOf (val, byteOffset) {
   throw new TypeError('val must be string, number or Buffer')
 }
 
-// `get` will be removed in Node 0.13+
+// `get` is deprecated
 Buffer.prototype.get = function get (offset) {
   console.log('.get() is deprecated. Access using array indexes instead.')
   return this.readUInt8(offset)
 }
 
-// `set` will be removed in Node 0.13+
+// `set` is deprecated
 Buffer.prototype.set = function set (v, offset) {
   console.log('.set() is deprecated. Access using array indexes instead.')
   return this.writeUInt8(v, offset)
@@ -8349,20 +8784,99 @@ function base64Slice (buf, start, end) {
 }
 
 function utf8Slice (buf, start, end) {
-  var res = ''
-  var tmp = ''
   end = Math.min(buf.length, end)
+  var res = []
 
-  for (var i = start; i < end; i++) {
-    if (buf[i] <= 0x7F) {
-      res += decodeUtf8Char(tmp) + String.fromCharCode(buf[i])
-      tmp = ''
-    } else {
-      tmp += '%' + buf[i].toString(16)
+  var i = start
+  while (i < end) {
+    var firstByte = buf[i]
+    var codePoint = null
+    var bytesPerSequence = (firstByte > 0xEF) ? 4
+      : (firstByte > 0xDF) ? 3
+      : (firstByte > 0xBF) ? 2
+      : 1
+
+    if (i + bytesPerSequence <= end) {
+      var secondByte, thirdByte, fourthByte, tempCodePoint
+
+      switch (bytesPerSequence) {
+        case 1:
+          if (firstByte < 0x80) {
+            codePoint = firstByte
+          }
+          break
+        case 2:
+          secondByte = buf[i + 1]
+          if ((secondByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F)
+            if (tempCodePoint > 0x7F) {
+              codePoint = tempCodePoint
+            }
+          }
+          break
+        case 3:
+          secondByte = buf[i + 1]
+          thirdByte = buf[i + 2]
+          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F)
+            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
+              codePoint = tempCodePoint
+            }
+          }
+          break
+        case 4:
+          secondByte = buf[i + 1]
+          thirdByte = buf[i + 2]
+          fourthByte = buf[i + 3]
+          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
+            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F)
+            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
+              codePoint = tempCodePoint
+            }
+          }
+      }
     }
+
+    if (codePoint === null) {
+      // we did not generate a valid codePoint so insert a
+      // replacement char (U+FFFD) and advance only 1 byte
+      codePoint = 0xFFFD
+      bytesPerSequence = 1
+    } else if (codePoint > 0xFFFF) {
+      // encode to utf16 (surrogate pair dance)
+      codePoint -= 0x10000
+      res.push(codePoint >>> 10 & 0x3FF | 0xD800)
+      codePoint = 0xDC00 | codePoint & 0x3FF
+    }
+
+    res.push(codePoint)
+    i += bytesPerSequence
   }
 
-  return res + decodeUtf8Char(tmp)
+  return decodeCodePointsArray(res)
+}
+
+// Based on http://stackoverflow.com/a/22747272/680742, the browser with
+// the lowest limit is Chrome, with 0x10000 args.
+// We go 1 magnitude less, for safety
+var MAX_ARGUMENTS_LENGTH = 0x1000
+
+function decodeCodePointsArray (codePoints) {
+  var len = codePoints.length
+  if (len <= MAX_ARGUMENTS_LENGTH) {
+    return String.fromCharCode.apply(String, codePoints) // avoid extra slice()
+  }
+
+  // Decode in chunks to avoid "call stack size exceeded".
+  var res = ''
+  var i = 0
+  while (i < len) {
+    res += String.fromCharCode.apply(
+      String,
+      codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH)
+    )
+  }
+  return res
 }
 
 function asciiSlice (buf, start, end) {
@@ -8651,7 +9165,7 @@ Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
   offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0)
   if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
-  this[offset] = value
+  this[offset] = (value & 0xff)
   return offset + 1
 }
 
@@ -8668,7 +9182,7 @@ Buffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert
   offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
-    this[offset] = value
+    this[offset] = (value & 0xff)
     this[offset + 1] = (value >>> 8)
   } else {
     objectWriteUInt16(this, value, offset, true)
@@ -8682,7 +9196,7 @@ Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert
   if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     this[offset] = (value >>> 8)
-    this[offset + 1] = value
+    this[offset + 1] = (value & 0xff)
   } else {
     objectWriteUInt16(this, value, offset, false)
   }
@@ -8704,7 +9218,7 @@ Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert
     this[offset + 3] = (value >>> 24)
     this[offset + 2] = (value >>> 16)
     this[offset + 1] = (value >>> 8)
-    this[offset] = value
+    this[offset] = (value & 0xff)
   } else {
     objectWriteUInt32(this, value, offset, true)
   }
@@ -8719,7 +9233,7 @@ Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert
     this[offset] = (value >>> 24)
     this[offset + 1] = (value >>> 16)
     this[offset + 2] = (value >>> 8)
-    this[offset + 3] = value
+    this[offset + 3] = (value & 0xff)
   } else {
     objectWriteUInt32(this, value, offset, false)
   }
@@ -8772,7 +9286,7 @@ Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
   if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -0x80)
   if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
   if (value < 0) value = 0xff + value + 1
-  this[offset] = value
+  this[offset] = (value & 0xff)
   return offset + 1
 }
 
@@ -8781,7 +9295,7 @@ Buffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) 
   offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
-    this[offset] = value
+    this[offset] = (value & 0xff)
     this[offset + 1] = (value >>> 8)
   } else {
     objectWriteUInt16(this, value, offset, true)
@@ -8795,7 +9309,7 @@ Buffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) 
   if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
     this[offset] = (value >>> 8)
-    this[offset + 1] = value
+    this[offset + 1] = (value & 0xff)
   } else {
     objectWriteUInt16(this, value, offset, false)
   }
@@ -8807,7 +9321,7 @@ Buffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) 
   offset = offset | 0
   if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
   if (Buffer.TYPED_ARRAY_SUPPORT) {
-    this[offset] = value
+    this[offset] = (value & 0xff)
     this[offset + 1] = (value >>> 8)
     this[offset + 2] = (value >>> 16)
     this[offset + 3] = (value >>> 24)
@@ -8826,7 +9340,7 @@ Buffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) 
     this[offset] = (value >>> 24)
     this[offset + 1] = (value >>> 16)
     this[offset + 2] = (value >>> 8)
-    this[offset + 3] = value
+    this[offset + 3] = (value & 0xff)
   } else {
     objectWriteUInt32(this, value, offset, false)
   }
@@ -8897,9 +9411,16 @@ Buffer.prototype.copy = function copy (target, targetStart, start, end) {
   }
 
   var len = end - start
+  var i
 
-  if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
-    for (var i = 0; i < len; i++) {
+  if (this === target && start < targetStart && targetStart < end) {
+    // descending copy from end
+    for (i = len - 1; i >= 0; i--) {
+      target[i + targetStart] = this[i + start]
+    }
+  } else if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
+    // ascending copy from start
+    for (i = 0; i < len; i++) {
       target[i + targetStart] = this[i + start]
     }
   } else {
@@ -8975,7 +9496,7 @@ Buffer._augment = function _augment (arr) {
   // save reference to original Uint8Array set method before overwriting
   arr._set = arr.set
 
-  // deprecated, will be removed in node 0.13+
+  // deprecated
   arr.get = BP.get
   arr.set = BP.set
 
@@ -9031,7 +9552,7 @@ Buffer._augment = function _augment (arr) {
   return arr
 }
 
-var INVALID_BASE64_RE = /[^+\/0-9A-z\-]/g
+var INVALID_BASE64_RE = /[^+\/0-9A-Za-z-_]/g
 
 function base64clean (str) {
   // Node strips out invalid characters like \n and \t from the string, base64-js does not
@@ -9061,28 +9582,15 @@ function utf8ToBytes (string, units) {
   var length = string.length
   var leadSurrogate = null
   var bytes = []
-  var i = 0
 
-  for (; i < length; i++) {
+  for (var i = 0; i < length; i++) {
     codePoint = string.charCodeAt(i)
 
     // is surrogate component
     if (codePoint > 0xD7FF && codePoint < 0xE000) {
       // last char was a lead
-      if (leadSurrogate) {
-        // 2 leads in a row
-        if (codePoint < 0xDC00) {
-          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-          leadSurrogate = codePoint
-          continue
-        } else {
-          // valid surrogate pair
-          codePoint = leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00 | 0x10000
-          leadSurrogate = null
-        }
-      } else {
+      if (!leadSurrogate) {
         // no lead yet
-
         if (codePoint > 0xDBFF) {
           // unexpected trail
           if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
@@ -9091,17 +9599,29 @@ function utf8ToBytes (string, units) {
           // unpaired lead
           if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
           continue
-        } else {
-          // valid lead
-          leadSurrogate = codePoint
-          continue
         }
+
+        // valid lead
+        leadSurrogate = codePoint
+
+        continue
       }
+
+      // 2 leads in a row
+      if (codePoint < 0xDC00) {
+        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+        leadSurrogate = codePoint
+        continue
+      }
+
+      // valid surrogate pair
+      codePoint = leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00 | 0x10000
     } else if (leadSurrogate) {
       // valid bmp char, but last char was a lead
       if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-      leadSurrogate = null
     }
+
+    leadSurrogate = null
 
     // encode utf8
     if (codePoint < 0x80) {
@@ -9120,7 +9640,7 @@ function utf8ToBytes (string, units) {
         codePoint >> 0x6 & 0x3F | 0x80,
         codePoint & 0x3F | 0x80
       )
-    } else if (codePoint < 0x200000) {
+    } else if (codePoint < 0x110000) {
       if ((units -= 4) < 0) break
       bytes.push(
         codePoint >> 0x12 | 0xF0,
@@ -9173,14 +9693,7 @@ function blitBuffer (src, dst, offset, length) {
   return i
 }
 
-function decodeUtf8Char (str) {
-  try {
-    return decodeURIComponent(str)
-  } catch (err) {
-    return String.fromCharCode(0xFFFD) // UTF 8 invalid char
-  }
-}
-
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"base64-js":3,"ieee754":4,"is-array":5}],3:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -9757,11 +10270,30 @@ if (typeof Object.create === 'function') {
 }
 
 },{}],8:[function(require,module,exports){
+/**
+ * Determine if an object is Buffer
+ *
+ * Author:   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * License:  MIT
+ *
+ * `npm install is-buffer`
+ */
+
+module.exports = function (obj) {
+  return !!(obj != null &&
+    (obj._isBuffer || // For Safari 5-7 (missing Object.prototype.constructor)
+      (obj.constructor &&
+      typeof obj.constructor.isBuffer === 'function' &&
+      obj.constructor.isBuffer(obj))
+    ))
+}
+
+},{}],9:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -9794,7 +10326,9 @@ function drainQueue() {
         currentQueue = queue;
         queue = [];
         while (++queueIndex < len) {
-            currentQueue[queueIndex].run();
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
         }
         queueIndex = -1;
         len = queue.length;
@@ -9846,45 +10380,556 @@ process.binding = function (name) {
     throw new Error('process.binding is not supported');
 };
 
-// TODO(shtylman)
 process.cwd = function () { return '/' };
 process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 process.umask = function() { return 0; };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+(function (global){
+/*! https://mths.be/punycode v1.3.2 by @mathias */
+;(function(root) {
+
+	/** Detect free variables */
+	var freeExports = typeof exports == 'object' && exports &&
+		!exports.nodeType && exports;
+	var freeModule = typeof module == 'object' && module &&
+		!module.nodeType && module;
+	var freeGlobal = typeof global == 'object' && global;
+	if (
+		freeGlobal.global === freeGlobal ||
+		freeGlobal.window === freeGlobal ||
+		freeGlobal.self === freeGlobal
+	) {
+		root = freeGlobal;
+	}
+
+	/**
+	 * The `punycode` object.
+	 * @name punycode
+	 * @type Object
+	 */
+	var punycode,
+
+	/** Highest positive signed 32-bit float value */
+	maxInt = 2147483647, // aka. 0x7FFFFFFF or 2^31-1
+
+	/** Bootstring parameters */
+	base = 36,
+	tMin = 1,
+	tMax = 26,
+	skew = 38,
+	damp = 700,
+	initialBias = 72,
+	initialN = 128, // 0x80
+	delimiter = '-', // '\x2D'
+
+	/** Regular expressions */
+	regexPunycode = /^xn--/,
+	regexNonASCII = /[^\x20-\x7E]/, // unprintable ASCII chars + non-ASCII chars
+	regexSeparators = /[\x2E\u3002\uFF0E\uFF61]/g, // RFC 3490 separators
+
+	/** Error messages */
+	errors = {
+		'overflow': 'Overflow: input needs wider integers to process',
+		'not-basic': 'Illegal input >= 0x80 (not a basic code point)',
+		'invalid-input': 'Invalid input'
+	},
+
+	/** Convenience shortcuts */
+	baseMinusTMin = base - tMin,
+	floor = Math.floor,
+	stringFromCharCode = String.fromCharCode,
+
+	/** Temporary variable */
+	key;
+
+	/*--------------------------------------------------------------------------*/
+
+	/**
+	 * A generic error utility function.
+	 * @private
+	 * @param {String} type The error type.
+	 * @returns {Error} Throws a `RangeError` with the applicable error message.
+	 */
+	function error(type) {
+		throw RangeError(errors[type]);
+	}
+
+	/**
+	 * A generic `Array#map` utility function.
+	 * @private
+	 * @param {Array} array The array to iterate over.
+	 * @param {Function} callback The function that gets called for every array
+	 * item.
+	 * @returns {Array} A new array of values returned by the callback function.
+	 */
+	function map(array, fn) {
+		var length = array.length;
+		var result = [];
+		while (length--) {
+			result[length] = fn(array[length]);
+		}
+		return result;
+	}
+
+	/**
+	 * A simple `Array#map`-like wrapper to work with domain name strings or email
+	 * addresses.
+	 * @private
+	 * @param {String} domain The domain name or email address.
+	 * @param {Function} callback The function that gets called for every
+	 * character.
+	 * @returns {Array} A new string of characters returned by the callback
+	 * function.
+	 */
+	function mapDomain(string, fn) {
+		var parts = string.split('@');
+		var result = '';
+		if (parts.length > 1) {
+			// In email addresses, only the domain name should be punycoded. Leave
+			// the local part (i.e. everything up to `@`) intact.
+			result = parts[0] + '@';
+			string = parts[1];
+		}
+		// Avoid `split(regex)` for IE8 compatibility. See #17.
+		string = string.replace(regexSeparators, '\x2E');
+		var labels = string.split('.');
+		var encoded = map(labels, fn).join('.');
+		return result + encoded;
+	}
+
+	/**
+	 * Creates an array containing the numeric code points of each Unicode
+	 * character in the string. While JavaScript uses UCS-2 internally,
+	 * this function will convert a pair of surrogate halves (each of which
+	 * UCS-2 exposes as separate characters) into a single code point,
+	 * matching UTF-16.
+	 * @see `punycode.ucs2.encode`
+	 * @see <https://mathiasbynens.be/notes/javascript-encoding>
+	 * @memberOf punycode.ucs2
+	 * @name decode
+	 * @param {String} string The Unicode input string (UCS-2).
+	 * @returns {Array} The new array of code points.
+	 */
+	function ucs2decode(string) {
+		var output = [],
+		    counter = 0,
+		    length = string.length,
+		    value,
+		    extra;
+		while (counter < length) {
+			value = string.charCodeAt(counter++);
+			if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
+				// high surrogate, and there is a next character
+				extra = string.charCodeAt(counter++);
+				if ((extra & 0xFC00) == 0xDC00) { // low surrogate
+					output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
+				} else {
+					// unmatched surrogate; only append this code unit, in case the next
+					// code unit is the high surrogate of a surrogate pair
+					output.push(value);
+					counter--;
+				}
+			} else {
+				output.push(value);
+			}
+		}
+		return output;
+	}
+
+	/**
+	 * Creates a string based on an array of numeric code points.
+	 * @see `punycode.ucs2.decode`
+	 * @memberOf punycode.ucs2
+	 * @name encode
+	 * @param {Array} codePoints The array of numeric code points.
+	 * @returns {String} The new Unicode string (UCS-2).
+	 */
+	function ucs2encode(array) {
+		return map(array, function(value) {
+			var output = '';
+			if (value > 0xFFFF) {
+				value -= 0x10000;
+				output += stringFromCharCode(value >>> 10 & 0x3FF | 0xD800);
+				value = 0xDC00 | value & 0x3FF;
+			}
+			output += stringFromCharCode(value);
+			return output;
+		}).join('');
+	}
+
+	/**
+	 * Converts a basic code point into a digit/integer.
+	 * @see `digitToBasic()`
+	 * @private
+	 * @param {Number} codePoint The basic numeric code point value.
+	 * @returns {Number} The numeric value of a basic code point (for use in
+	 * representing integers) in the range `0` to `base - 1`, or `base` if
+	 * the code point does not represent a value.
+	 */
+	function basicToDigit(codePoint) {
+		if (codePoint - 48 < 10) {
+			return codePoint - 22;
+		}
+		if (codePoint - 65 < 26) {
+			return codePoint - 65;
+		}
+		if (codePoint - 97 < 26) {
+			return codePoint - 97;
+		}
+		return base;
+	}
+
+	/**
+	 * Converts a digit/integer into a basic code point.
+	 * @see `basicToDigit()`
+	 * @private
+	 * @param {Number} digit The numeric value of a basic code point.
+	 * @returns {Number} The basic code point whose value (when used for
+	 * representing integers) is `digit`, which needs to be in the range
+	 * `0` to `base - 1`. If `flag` is non-zero, the uppercase form is
+	 * used; else, the lowercase form is used. The behavior is undefined
+	 * if `flag` is non-zero and `digit` has no uppercase form.
+	 */
+	function digitToBasic(digit, flag) {
+		//  0..25 map to ASCII a..z or A..Z
+		// 26..35 map to ASCII 0..9
+		return digit + 22 + 75 * (digit < 26) - ((flag != 0) << 5);
+	}
+
+	/**
+	 * Bias adaptation function as per section 3.4 of RFC 3492.
+	 * http://tools.ietf.org/html/rfc3492#section-3.4
+	 * @private
+	 */
+	function adapt(delta, numPoints, firstTime) {
+		var k = 0;
+		delta = firstTime ? floor(delta / damp) : delta >> 1;
+		delta += floor(delta / numPoints);
+		for (/* no initialization */; delta > baseMinusTMin * tMax >> 1; k += base) {
+			delta = floor(delta / baseMinusTMin);
+		}
+		return floor(k + (baseMinusTMin + 1) * delta / (delta + skew));
+	}
+
+	/**
+	 * Converts a Punycode string of ASCII-only symbols to a string of Unicode
+	 * symbols.
+	 * @memberOf punycode
+	 * @param {String} input The Punycode string of ASCII-only symbols.
+	 * @returns {String} The resulting string of Unicode symbols.
+	 */
+	function decode(input) {
+		// Don't use UCS-2
+		var output = [],
+		    inputLength = input.length,
+		    out,
+		    i = 0,
+		    n = initialN,
+		    bias = initialBias,
+		    basic,
+		    j,
+		    index,
+		    oldi,
+		    w,
+		    k,
+		    digit,
+		    t,
+		    /** Cached calculation results */
+		    baseMinusT;
+
+		// Handle the basic code points: let `basic` be the number of input code
+		// points before the last delimiter, or `0` if there is none, then copy
+		// the first basic code points to the output.
+
+		basic = input.lastIndexOf(delimiter);
+		if (basic < 0) {
+			basic = 0;
+		}
+
+		for (j = 0; j < basic; ++j) {
+			// if it's not a basic code point
+			if (input.charCodeAt(j) >= 0x80) {
+				error('not-basic');
+			}
+			output.push(input.charCodeAt(j));
+		}
+
+		// Main decoding loop: start just after the last delimiter if any basic code
+		// points were copied; start at the beginning otherwise.
+
+		for (index = basic > 0 ? basic + 1 : 0; index < inputLength; /* no final expression */) {
+
+			// `index` is the index of the next character to be consumed.
+			// Decode a generalized variable-length integer into `delta`,
+			// which gets added to `i`. The overflow checking is easier
+			// if we increase `i` as we go, then subtract off its starting
+			// value at the end to obtain `delta`.
+			for (oldi = i, w = 1, k = base; /* no condition */; k += base) {
+
+				if (index >= inputLength) {
+					error('invalid-input');
+				}
+
+				digit = basicToDigit(input.charCodeAt(index++));
+
+				if (digit >= base || digit > floor((maxInt - i) / w)) {
+					error('overflow');
+				}
+
+				i += digit * w;
+				t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
+
+				if (digit < t) {
+					break;
+				}
+
+				baseMinusT = base - t;
+				if (w > floor(maxInt / baseMinusT)) {
+					error('overflow');
+				}
+
+				w *= baseMinusT;
+
+			}
+
+			out = output.length + 1;
+			bias = adapt(i - oldi, out, oldi == 0);
+
+			// `i` was supposed to wrap around from `out` to `0`,
+			// incrementing `n` each time, so we'll fix that now:
+			if (floor(i / out) > maxInt - n) {
+				error('overflow');
+			}
+
+			n += floor(i / out);
+			i %= out;
+
+			// Insert `n` at position `i` of the output
+			output.splice(i++, 0, n);
+
+		}
+
+		return ucs2encode(output);
+	}
+
+	/**
+	 * Converts a string of Unicode symbols (e.g. a domain name label) to a
+	 * Punycode string of ASCII-only symbols.
+	 * @memberOf punycode
+	 * @param {String} input The string of Unicode symbols.
+	 * @returns {String} The resulting Punycode string of ASCII-only symbols.
+	 */
+	function encode(input) {
+		var n,
+		    delta,
+		    handledCPCount,
+		    basicLength,
+		    bias,
+		    j,
+		    m,
+		    q,
+		    k,
+		    t,
+		    currentValue,
+		    output = [],
+		    /** `inputLength` will hold the number of code points in `input`. */
+		    inputLength,
+		    /** Cached calculation results */
+		    handledCPCountPlusOne,
+		    baseMinusT,
+		    qMinusT;
+
+		// Convert the input in UCS-2 to Unicode
+		input = ucs2decode(input);
+
+		// Cache the length
+		inputLength = input.length;
+
+		// Initialize the state
+		n = initialN;
+		delta = 0;
+		bias = initialBias;
+
+		// Handle the basic code points
+		for (j = 0; j < inputLength; ++j) {
+			currentValue = input[j];
+			if (currentValue < 0x80) {
+				output.push(stringFromCharCode(currentValue));
+			}
+		}
+
+		handledCPCount = basicLength = output.length;
+
+		// `handledCPCount` is the number of code points that have been handled;
+		// `basicLength` is the number of basic code points.
+
+		// Finish the basic string - if it is not empty - with a delimiter
+		if (basicLength) {
+			output.push(delimiter);
+		}
+
+		// Main encoding loop:
+		while (handledCPCount < inputLength) {
+
+			// All non-basic code points < n have been handled already. Find the next
+			// larger one:
+			for (m = maxInt, j = 0; j < inputLength; ++j) {
+				currentValue = input[j];
+				if (currentValue >= n && currentValue < m) {
+					m = currentValue;
+				}
+			}
+
+			// Increase `delta` enough to advance the decoder's <n,i> state to <m,0>,
+			// but guard against overflow
+			handledCPCountPlusOne = handledCPCount + 1;
+			if (m - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
+				error('overflow');
+			}
+
+			delta += (m - n) * handledCPCountPlusOne;
+			n = m;
+
+			for (j = 0; j < inputLength; ++j) {
+				currentValue = input[j];
+
+				if (currentValue < n && ++delta > maxInt) {
+					error('overflow');
+				}
+
+				if (currentValue == n) {
+					// Represent delta as a generalized variable-length integer
+					for (q = delta, k = base; /* no condition */; k += base) {
+						t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
+						if (q < t) {
+							break;
+						}
+						qMinusT = q - t;
+						baseMinusT = base - t;
+						output.push(
+							stringFromCharCode(digitToBasic(t + qMinusT % baseMinusT, 0))
+						);
+						q = floor(qMinusT / baseMinusT);
+					}
+
+					output.push(stringFromCharCode(digitToBasic(q, 0)));
+					bias = adapt(delta, handledCPCountPlusOne, handledCPCount == basicLength);
+					delta = 0;
+					++handledCPCount;
+				}
+			}
+
+			++delta;
+			++n;
+
+		}
+		return output.join('');
+	}
+
+	/**
+	 * Converts a Punycode string representing a domain name or an email address
+	 * to Unicode. Only the Punycoded parts of the input will be converted, i.e.
+	 * it doesn't matter if you call it on a string that has already been
+	 * converted to Unicode.
+	 * @memberOf punycode
+	 * @param {String} input The Punycoded domain name or email address to
+	 * convert to Unicode.
+	 * @returns {String} The Unicode representation of the given Punycode
+	 * string.
+	 */
+	function toUnicode(input) {
+		return mapDomain(input, function(string) {
+			return regexPunycode.test(string)
+				? decode(string.slice(4).toLowerCase())
+				: string;
+		});
+	}
+
+	/**
+	 * Converts a Unicode string representing a domain name or an email address to
+	 * Punycode. Only the non-ASCII parts of the domain name will be converted,
+	 * i.e. it doesn't matter if you call it with a domain that's already in
+	 * ASCII.
+	 * @memberOf punycode
+	 * @param {String} input The domain name or email address to convert, as a
+	 * Unicode string.
+	 * @returns {String} The Punycode representation of the given domain name or
+	 * email address.
+	 */
+	function toASCII(input) {
+		return mapDomain(input, function(string) {
+			return regexNonASCII.test(string)
+				? 'xn--' + encode(string)
+				: string;
+		});
+	}
+
+	/*--------------------------------------------------------------------------*/
+
+	/** Define the public API */
+	punycode = {
+		/**
+		 * A string representing the current Punycode.js version number.
+		 * @memberOf punycode
+		 * @type String
+		 */
+		'version': '1.3.2',
+		/**
+		 * An object of methods to convert from JavaScript's internal character
+		 * representation (UCS-2) to Unicode code points, and back.
+		 * @see <https://mathiasbynens.be/notes/javascript-encoding>
+		 * @memberOf punycode
+		 * @type Object
+		 */
+		'ucs2': {
+			'decode': ucs2decode,
+			'encode': ucs2encode
+		},
+		'decode': decode,
+		'encode': encode,
+		'toASCII': toASCII,
+		'toUnicode': toUnicode
+	};
+
+	/** Expose `punycode` */
+	// Some AMD build optimizers, like r.js, check for specific condition patterns
+	// like the following:
+	if (
+		typeof define == 'function' &&
+		typeof define.amd == 'object' &&
+		define.amd
+	) {
+		define('punycode', function() {
+			return punycode;
+		});
+	} else if (freeExports && freeModule) {
+		if (module.exports == freeExports) { // in Node.js or RingoJS v0.8.0+
+			freeModule.exports = punycode;
+		} else { // in Narwhal or RingoJS v0.7.0-
+			for (key in punycode) {
+				punycode.hasOwnProperty(key) && (freeExports[key] = punycode[key]);
+			}
+		}
+	} else { // in Rhino or a web browser
+		root.punycode = punycode;
+	}
+
+}(this));
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],12:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":11}],11:[function(require,module,exports){
-(function (process){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+},{"./lib/_stream_duplex.js":13}],13:[function(require,module,exports){
 // a duplex stream is just a stream that is both readable and writable.
 // Since JS doesn't have multiple prototypal inheritance, this class
 // prototypally inherits from Readable, and then parasitically from
 // Writable.
 
-module.exports = Duplex;
+'use strict';
 
 /*<replacement>*/
 var objectKeys = Object.keys || function (obj) {
@@ -9893,6 +10938,14 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 }
 /*</replacement>*/
+
+
+module.exports = Duplex;
+
+/*<replacement>*/
+var processNextTick = require('process-nextick-args');
+/*</replacement>*/
+
 
 
 /*<replacement>*/
@@ -9905,10 +10958,12 @@ var Writable = require('./_stream_writable');
 
 util.inherits(Duplex, Readable);
 
-forEach(objectKeys(Writable.prototype), function(method) {
+var keys = objectKeys(Writable.prototype);
+for (var v = 0; v < keys.length; v++) {
+  var method = keys[v];
   if (!Duplex.prototype[method])
     Duplex.prototype[method] = Writable.prototype[method];
-});
+}
 
 function Duplex(options) {
   if (!(this instanceof Duplex))
@@ -9939,7 +10994,11 @@ function onend() {
 
   // no more data can be written.
   // But allow more writes to happen in this tick.
-  process.nextTick(this.end.bind(this));
+  processNextTick(onEndNT, this);
+}
+
+function onEndNT(self) {
+  self.end();
 }
 
 function forEach (xs, f) {
@@ -9948,32 +11007,12 @@ function forEach (xs, f) {
   }
 }
 
-}).call(this,require('_process'))
-},{"./_stream_readable":13,"./_stream_writable":15,"_process":9,"core-util-is":16,"inherits":7}],12:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+},{"./_stream_readable":15,"./_stream_writable":17,"core-util-is":18,"inherits":7,"process-nextick-args":19}],14:[function(require,module,exports){
 // a passthrough stream.
 // basically just the most minimal sort of Transform stream.
 // Every written chunk gets output as-is.
+
+'use strict';
 
 module.exports = PassThrough;
 
@@ -9997,30 +11036,16 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":14,"core-util-is":16,"inherits":7}],13:[function(require,module,exports){
+},{"./_stream_transform":16,"core-util-is":18,"inherits":7}],15:[function(require,module,exports){
 (function (process){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
+'use strict';
 
 module.exports = Readable;
+
+/*<replacement>*/
+var processNextTick = require('process-nextick-args');
+/*</replacement>*/
+
 
 /*<replacement>*/
 var isArray = require('isarray');
@@ -10033,33 +11058,46 @@ var Buffer = require('buffer').Buffer;
 
 Readable.ReadableState = ReadableState;
 
-var EE = require('events').EventEmitter;
+var EE = require('events');
 
 /*<replacement>*/
-if (!EE.listenerCount) EE.listenerCount = function(emitter, type) {
+var EElistenerCount = function(emitter, type) {
   return emitter.listeners(type).length;
 };
 /*</replacement>*/
 
-var Stream = require('stream');
+
+
+/*<replacement>*/
+var Stream;
+(function (){try{
+  Stream = require('st' + 'ream');
+}catch(_){}finally{
+  if (!Stream)
+    Stream = require('events').EventEmitter;
+}}())
+/*</replacement>*/
+
+var Buffer = require('buffer').Buffer;
 
 /*<replacement>*/
 var util = require('core-util-is');
 util.inherits = require('inherits');
 /*</replacement>*/
 
-var StringDecoder;
 
 
 /*<replacement>*/
-var debug = require('util');
-if (debug && debug.debuglog) {
-  debug = debug.debuglog('stream');
+var debugUtil = require('util');
+var debug;
+if (debugUtil && debugUtil.debuglog) {
+  debug = debugUtil.debuglog('stream');
 } else {
   debug = function () {};
 }
 /*</replacement>*/
 
+var StringDecoder;
 
 util.inherits(Readable, Stream);
 
@@ -10068,10 +11106,17 @@ function ReadableState(options, stream) {
 
   options = options || {};
 
+  // object stream flag. Used to make read(n) ignore n and to
+  // make all the buffer merging and length checks go away
+  this.objectMode = !!options.objectMode;
+
+  if (stream instanceof Duplex)
+    this.objectMode = this.objectMode || !!options.readableObjectMode;
+
   // the point at which it stops calling _read() to fill the buffer
   // Note: 0 is a valid value, means "don't call _read preemptively ever"
   var hwm = options.highWaterMark;
-  var defaultHwm = options.objectMode ? 16 : 16 * 1024;
+  var defaultHwm = this.objectMode ? 16 : 16 * 1024;
   this.highWaterMark = (hwm || hwm === 0) ? hwm : defaultHwm;
 
   // cast to ints.
@@ -10097,14 +11142,6 @@ function ReadableState(options, stream) {
   this.needReadable = false;
   this.emittedReadable = false;
   this.readableListening = false;
-
-
-  // object stream flag. Used to make read(n) ignore n and to
-  // make all the buffer merging and length checks go away
-  this.objectMode = !!options.objectMode;
-
-  if (stream instanceof Duplex)
-    this.objectMode = this.objectMode || !!options.readableObjectMode;
 
   // Crypto is kind of old and crusty.  Historically, its default string
   // encoding is 'binary' so we have to make this configurable.
@@ -10142,6 +11179,9 @@ function Readable(options) {
   // legacy
   this.readable = true;
 
+  if (options && typeof options.read === 'function')
+    this._read = options.read;
+
   Stream.call(this);
 }
 
@@ -10152,7 +11192,7 @@ function Readable(options) {
 Readable.prototype.push = function(chunk, encoding) {
   var state = this._readableState;
 
-  if (util.isString(chunk) && !state.objectMode) {
+  if (!state.objectMode && typeof chunk === 'string') {
     encoding = encoding || state.defaultEncoding;
     if (encoding !== state.encoding) {
       chunk = new Buffer(chunk, encoding);
@@ -10169,14 +11209,17 @@ Readable.prototype.unshift = function(chunk) {
   return readableAddChunk(this, state, chunk, '', true);
 };
 
+Readable.prototype.isPaused = function() {
+  return this._readableState.flowing === false;
+};
+
 function readableAddChunk(stream, state, chunk, encoding, addToFront) {
   var er = chunkInvalid(state, chunk);
   if (er) {
     stream.emit('error', er);
-  } else if (util.isNullOrUndefined(chunk)) {
+  } else if (chunk === null) {
     state.reading = false;
-    if (!state.ended)
-      onEofChunk(stream, state);
+    onEofChunk(stream, state);
   } else if (state.objectMode || chunk && chunk.length > 0) {
     if (state.ended && !addToFront) {
       var e = new Error('stream.push() after EOF');
@@ -10217,7 +11260,6 @@ function readableAddChunk(stream, state, chunk, encoding, addToFront) {
 }
 
 
-
 // if it's past the high water mark, we can push in some more.
 // Also, if we have no data yet, we can stand some
 // more bytes.  This is to work around cases where hwm=0,
@@ -10241,15 +11283,19 @@ Readable.prototype.setEncoding = function(enc) {
   return this;
 };
 
-// Don't raise the hwm > 128MB
+// Don't raise the hwm > 8MB
 var MAX_HWM = 0x800000;
-function roundUpToNextPowerOf2(n) {
+function computeNewHighWaterMark(n) {
   if (n >= MAX_HWM) {
     n = MAX_HWM;
   } else {
     // Get the next highest power of 2
     n--;
-    for (var p = 1; p < 32; p <<= 1) n |= n >> p;
+    n |= n >>> 1;
+    n |= n >>> 2;
+    n |= n >>> 4;
+    n |= n >>> 8;
+    n |= n >>> 16;
     n++;
   }
   return n;
@@ -10262,7 +11308,7 @@ function howMuchToRead(n, state) {
   if (state.objectMode)
     return n === 0 ? 0 : 1;
 
-  if (isNaN(n) || util.isNull(n)) {
+  if (n === null || isNaN(n)) {
     // only flow one buffer at a time
     if (state.flowing && state.buffer.length)
       return state.buffer[0].length;
@@ -10278,15 +11324,16 @@ function howMuchToRead(n, state) {
   // power of 2, to prevent increasing it excessively in tiny
   // amounts.
   if (n > state.highWaterMark)
-    state.highWaterMark = roundUpToNextPowerOf2(n);
+    state.highWaterMark = computeNewHighWaterMark(n);
 
   // don't have that much.  return null, unless we've ended.
   if (n > state.length) {
     if (!state.ended) {
       state.needReadable = true;
       return 0;
-    } else
+    } else {
       return state.length;
+    }
   }
 
   return n;
@@ -10298,7 +11345,7 @@ Readable.prototype.read = function(n) {
   var state = this._readableState;
   var nOrig = n;
 
-  if (!util.isNumber(n) || n > 0)
+  if (typeof n !== 'number' || n > 0)
     state.emittedReadable = false;
 
   // if we're doing read(0) to trigger a readable event, but we
@@ -10386,7 +11433,7 @@ Readable.prototype.read = function(n) {
   else
     ret = null;
 
-  if (util.isNull(ret)) {
+  if (ret === null) {
     state.needReadable = true;
     n = 0;
   }
@@ -10402,7 +11449,7 @@ Readable.prototype.read = function(n) {
   if (nOrig !== n && state.ended && state.length === 0)
     endReadable(this);
 
-  if (!util.isNull(ret))
+  if (ret !== null)
     this.emit('data', ret);
 
   return ret;
@@ -10410,9 +11457,10 @@ Readable.prototype.read = function(n) {
 
 function chunkInvalid(state, chunk) {
   var er = null;
-  if (!util.isBuffer(chunk) &&
-      !util.isString(chunk) &&
-      !util.isNullOrUndefined(chunk) &&
+  if (!(Buffer.isBuffer(chunk)) &&
+      typeof chunk !== 'string' &&
+      chunk !== null &&
+      chunk !== undefined &&
       !state.objectMode) {
     er = new TypeError('Invalid non-string/buffer chunk');
   }
@@ -10421,7 +11469,8 @@ function chunkInvalid(state, chunk) {
 
 
 function onEofChunk(stream, state) {
-  if (state.decoder && !state.ended) {
+  if (state.ended) return;
+  if (state.decoder) {
     var chunk = state.decoder.end();
     if (chunk && chunk.length) {
       state.buffer.push(chunk);
@@ -10444,9 +11493,7 @@ function emitReadable(stream) {
     debug('emitReadable', state.flowing);
     state.emittedReadable = true;
     if (state.sync)
-      process.nextTick(function() {
-        emitReadable_(stream);
-      });
+      processNextTick(emitReadable_, stream);
     else
       emitReadable_(stream);
   }
@@ -10468,9 +11515,7 @@ function emitReadable_(stream) {
 function maybeReadMore(stream, state) {
   if (!state.readingMore) {
     state.readingMore = true;
-    process.nextTick(function() {
-      maybeReadMore_(stream, state);
-    });
+    processNextTick(maybeReadMore_, stream, state);
   }
 }
 
@@ -10521,7 +11566,7 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
 
   var endFn = doEnd ? onend : cleanup;
   if (state.endEmitted)
-    process.nextTick(endFn);
+    processNextTick(endFn);
   else
     src.once('end', endFn);
 
@@ -10545,6 +11590,7 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
   var ondrain = pipeOnDrain(src);
   dest.on('drain', ondrain);
 
+  var cleanedUp = false;
   function cleanup() {
     debug('cleanup');
     // cleanup event handlers once the pipe is broken
@@ -10556,6 +11602,8 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
     src.removeListener('end', onend);
     src.removeListener('end', cleanup);
     src.removeListener('data', ondata);
+
+    cleanedUp = true;
 
     // if the reader is waiting for a drain event from this
     // specific writer, then it would cause it to never start
@@ -10572,9 +11620,16 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
     debug('ondata');
     var ret = dest.write(chunk);
     if (false === ret) {
-      debug('false write response, pause',
-            src._readableState.awaitDrain);
-      src._readableState.awaitDrain++;
+      // If the user unpiped during `dest.write()`, it is possible
+      // to get stuck in a permanently paused state if that write
+      // also returned false.
+      if (state.pipesCount === 1 &&
+          state.pipes[0] === dest &&
+          src.listenerCount('data') === 1 &&
+          !cleanedUp) {
+        debug('false write response, pause', src._readableState.awaitDrain);
+        src._readableState.awaitDrain++;
+      }
       src.pause();
     }
   }
@@ -10585,7 +11640,7 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
     debug('onerror', er);
     unpipe();
     dest.removeListener('error', onerror);
-    if (EE.listenerCount(dest, 'error') === 0)
+    if (EElistenerCount(dest, 'error') === 0)
       dest.emit('error', er);
   }
   // This is a brutally ugly hack to make sure that our error handler
@@ -10596,7 +11651,6 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
     dest._events.error.unshift(onerror);
   else
     dest._events.error = [onerror, dest._events.error];
-
 
 
   // Both close and finish should trigger unpipe, but only once.
@@ -10635,7 +11689,7 @@ function pipeOnDrain(src) {
     debug('pipeOnDrain', state.awaitDrain);
     if (state.awaitDrain)
       state.awaitDrain--;
-    if (state.awaitDrain === 0 && EE.listenerCount(src, 'data')) {
+    if (state.awaitDrain === 0 && EElistenerCount(src, 'data')) {
       state.flowing = true;
       flow(src);
     }
@@ -10716,11 +11770,7 @@ Readable.prototype.on = function(ev, fn) {
       state.emittedReadable = false;
       state.needReadable = true;
       if (!state.reading) {
-        var self = this;
-        process.nextTick(function() {
-          debug('readable nexttick read 0');
-          self.read(0);
-        });
+        processNextTick(nReadingNextTick, this);
       } else if (state.length) {
         emitReadable(this, state);
       }
@@ -10731,6 +11781,11 @@ Readable.prototype.on = function(ev, fn) {
 };
 Readable.prototype.addListener = Readable.prototype.on;
 
+function nReadingNextTick(self) {
+  debug('readable nexttick read 0');
+  self.read(0);
+}
+
 // pause() and resume() are remnants of the legacy readable stream API
 // If the user uses them, then switch into old mode.
 Readable.prototype.resume = function() {
@@ -10738,10 +11793,6 @@ Readable.prototype.resume = function() {
   if (!state.flowing) {
     debug('resume');
     state.flowing = true;
-    if (!state.reading) {
-      debug('resume read 0');
-      this.read(0);
-    }
     resume(this, state);
   }
   return this;
@@ -10750,13 +11801,16 @@ Readable.prototype.resume = function() {
 function resume(stream, state) {
   if (!state.resumeScheduled) {
     state.resumeScheduled = true;
-    process.nextTick(function() {
-      resume_(stream, state);
-    });
+    processNextTick(resume_, stream, state);
   }
 }
 
 function resume_(stream, state) {
+  if (!state.reading) {
+    debug('resume read 0');
+    stream.read(0);
+  }
+
   state.resumeScheduled = false;
   stream.emit('resume');
   flow(stream);
@@ -10807,7 +11861,11 @@ Readable.prototype.wrap = function(stream) {
     debug('wrapped data');
     if (state.decoder)
       chunk = state.decoder.write(chunk);
-    if (!chunk || !state.objectMode && !chunk.length)
+
+    // don't skip over falsy values in objectMode
+    if (state.objectMode && (chunk === null || chunk === undefined))
+      return;
+    else if (!state.objectMode && (!chunk || !chunk.length))
       return;
 
     var ret = self.push(chunk);
@@ -10820,10 +11878,10 @@ Readable.prototype.wrap = function(stream) {
   // proxy all the other methods.
   // important when wrapping filters and duplexes.
   for (var i in stream) {
-    if (util.isFunction(stream[i]) && util.isUndefined(this[i])) {
+    if (this[i] === undefined && typeof stream[i] === 'function') {
       this[i] = function(method) { return function() {
         return stream[method].apply(stream, arguments);
-      }}(i);
+      }; }(i);
     }
   }
 
@@ -10845,7 +11903,6 @@ Readable.prototype.wrap = function(stream) {
 
   return self;
 };
-
 
 
 // exposed for testing purposes only.
@@ -10872,6 +11929,8 @@ function fromList(n, state) {
     // read it all, truncate the array.
     if (stringMode)
       ret = list.join('');
+    else if (list.length === 1)
+      ret = list[0];
     else
       ret = Buffer.concat(list, length);
     list.length = 0;
@@ -10927,14 +11986,16 @@ function endReadable(stream) {
 
   if (!state.endEmitted) {
     state.ended = true;
-    process.nextTick(function() {
-      // Check that we didn't get one last unshift.
-      if (!state.endEmitted && state.length === 0) {
-        state.endEmitted = true;
-        stream.readable = false;
-        stream.emit('end');
-      }
-    });
+    processNextTick(endReadableNT, state, stream);
+  }
+}
+
+function endReadableNT(state, stream) {
+  // Check that we didn't get one last unshift.
+  if (!state.endEmitted && state.length === 0) {
+    state.endEmitted = true;
+    stream.readable = false;
+    stream.emit('end');
   }
 }
 
@@ -10952,29 +12013,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":11,"_process":9,"buffer":2,"core-util-is":16,"events":6,"inherits":7,"isarray":8,"stream":21,"string_decoder/":22,"util":1}],14:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
+},{"./_stream_duplex":13,"_process":10,"buffer":2,"core-util-is":18,"events":6,"inherits":7,"isarray":9,"process-nextick-args":19,"string_decoder/":26,"util":1}],16:[function(require,module,exports){
 // a transform stream is a readable/writable stream where you do
 // something with the data.  Sometimes it's called a "filter",
 // but that's not a great name for it, since that implies a thing where
@@ -11017,6 +12056,8 @@ function indexOf (xs, x) {
 // would be consumed, and then the rest would wait (un-transformed) until
 // the results of the previous transformed chunk were consumed.
 
+'use strict';
+
 module.exports = Transform;
 
 var Duplex = require('./_stream_duplex');
@@ -11029,7 +12070,7 @@ util.inherits = require('inherits');
 util.inherits(Transform, Duplex);
 
 
-function TransformState(options, stream) {
+function TransformState(stream) {
   this.afterTransform = function(er, data) {
     return afterTransform(stream, er, data);
   };
@@ -11052,7 +12093,7 @@ function afterTransform(stream, er, data) {
   ts.writechunk = null;
   ts.writecb = null;
 
-  if (!util.isNullOrUndefined(data))
+  if (data !== null && data !== undefined)
     stream.push(data);
 
   if (cb)
@@ -11072,7 +12113,7 @@ function Transform(options) {
 
   Duplex.call(this, options);
 
-  this._transformState = new TransformState(options, this);
+  this._transformState = new TransformState(this);
 
   // when the writable side finishes, then flush out anything remaining.
   var stream = this;
@@ -11085,8 +12126,16 @@ function Transform(options) {
   // sync guard flag.
   this._readableState.sync = false;
 
+  if (options) {
+    if (typeof options.transform === 'function')
+      this._transform = options.transform;
+
+    if (typeof options.flush === 'function')
+      this._flush = options.flush;
+  }
+
   this.once('prefinish', function() {
-    if (util.isFunction(this._flush))
+    if (typeof this._flush === 'function')
       this._flush(function(er) {
         done(stream, er);
       });
@@ -11134,7 +12183,7 @@ Transform.prototype._write = function(chunk, encoding, cb) {
 Transform.prototype._read = function(n) {
   var ts = this._transformState;
 
-  if (!util.isNull(ts.writechunk) && ts.writecb && !ts.transforming) {
+  if (ts.writechunk !== null && ts.writecb && !ts.transforming) {
     ts.transforming = true;
     this._transform(ts.writechunk, ts.writeencoding, ts.afterTransform);
   } else {
@@ -11163,34 +12212,19 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":11,"core-util-is":16,"inherits":7}],15:[function(require,module,exports){
-(function (process){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+},{"./_stream_duplex":13,"core-util-is":18,"inherits":7}],17:[function(require,module,exports){
 // A bit simpler than readable streams.
-// Implement an async ._write(chunk, cb), and it'll handle all
+// Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 
+'use strict';
+
 module.exports = Writable;
+
+/*<replacement>*/
+var processNextTick = require('process-nextick-args');
+/*</replacement>*/
+
 
 /*<replacement>*/
 var Buffer = require('buffer').Buffer;
@@ -11204,14 +12238,36 @@ var util = require('core-util-is');
 util.inherits = require('inherits');
 /*</replacement>*/
 
-var Stream = require('stream');
+
+/*<replacement>*/
+var internalUtil = {
+  deprecate: require('util-deprecate')
+};
+/*</replacement>*/
+
+
+
+/*<replacement>*/
+var Stream;
+(function (){try{
+  Stream = require('st' + 'ream');
+}catch(_){}finally{
+  if (!Stream)
+    Stream = require('events').EventEmitter;
+}}())
+/*</replacement>*/
+
+var Buffer = require('buffer').Buffer;
 
 util.inherits(Writable, Stream);
+
+function nop() {}
 
 function WriteReq(chunk, encoding, cb) {
   this.chunk = chunk;
   this.encoding = encoding;
   this.callback = cb;
+  this.next = null;
 }
 
 function WritableState(options, stream) {
@@ -11219,19 +12275,19 @@ function WritableState(options, stream) {
 
   options = options || {};
 
-  // the point at which write() starts returning false
-  // Note: 0 is a valid value, means that we always return false if
-  // the entire buffer is not flushed immediately on write()
-  var hwm = options.highWaterMark;
-  var defaultHwm = options.objectMode ? 16 : 16 * 1024;
-  this.highWaterMark = (hwm || hwm === 0) ? hwm : defaultHwm;
-
   // object stream flag to indicate whether or not this stream
   // contains buffers or objects.
   this.objectMode = !!options.objectMode;
 
   if (stream instanceof Duplex)
     this.objectMode = this.objectMode || !!options.writableObjectMode;
+
+  // the point at which write() starts returning false
+  // Note: 0 is a valid value, means that we always return false if
+  // the entire buffer is not flushed immediately on write()
+  var hwm = options.highWaterMark;
+  var defaultHwm = this.objectMode ? 16 : 16 * 1024;
+  this.highWaterMark = (hwm || hwm === 0) ? hwm : defaultHwm;
 
   // cast to ints.
   this.highWaterMark = ~~this.highWaterMark;
@@ -11288,7 +12344,8 @@ function WritableState(options, stream) {
   // the amount that is being written when _write is called.
   this.writelen = 0;
 
-  this.buffer = [];
+  this.bufferedRequest = null;
+  this.lastBufferedRequest = null;
 
   // number of pending user-supplied write callbacks
   // this must be 0 before 'finish' can be emitted
@@ -11301,6 +12358,26 @@ function WritableState(options, stream) {
   // True if the error was already emitted and should not be thrown again
   this.errorEmitted = false;
 }
+
+WritableState.prototype.getBuffer = function writableStateGetBuffer() {
+  var current = this.bufferedRequest;
+  var out = [];
+  while (current) {
+    out.push(current);
+    current = current.next;
+  }
+  return out;
+};
+
+(function (){try {
+Object.defineProperty(WritableState.prototype, 'buffer', {
+  get: internalUtil.deprecate(function() {
+    return this.getBuffer();
+  }, '_writableState.buffer is deprecated. Use _writableState.getBuffer ' +
+     'instead.')
+});
+}catch(_){}}());
+
 
 function Writable(options) {
   var Duplex = require('./_stream_duplex');
@@ -11315,6 +12392,14 @@ function Writable(options) {
   // legacy.
   this.writable = true;
 
+  if (options) {
+    if (typeof options.write === 'function')
+      this._write = options.write;
+
+    if (typeof options.writev === 'function')
+      this._writev = options.writev;
+  }
+
   Stream.call(this);
 }
 
@@ -11324,13 +12409,11 @@ Writable.prototype.pipe = function() {
 };
 
 
-function writeAfterEnd(stream, state, cb) {
+function writeAfterEnd(stream, cb) {
   var er = new Error('write after end');
   // TODO: defer error events consistently everywhere, not just the cb
   stream.emit('error', er);
-  process.nextTick(function() {
-    cb(er);
-  });
+  processNextTick(cb, er);
 }
 
 // If we get something that is not a buffer, string, null, or undefined,
@@ -11340,15 +12423,15 @@ function writeAfterEnd(stream, state, cb) {
 // how many bytes or characters.
 function validChunk(stream, state, chunk, cb) {
   var valid = true;
-  if (!util.isBuffer(chunk) &&
-      !util.isString(chunk) &&
-      !util.isNullOrUndefined(chunk) &&
+
+  if (!(Buffer.isBuffer(chunk)) &&
+      typeof chunk !== 'string' &&
+      chunk !== null &&
+      chunk !== undefined &&
       !state.objectMode) {
     var er = new TypeError('Invalid non-string/buffer chunk');
     stream.emit('error', er);
-    process.nextTick(function() {
-      cb(er);
-    });
+    processNextTick(cb, er);
     valid = false;
   }
   return valid;
@@ -11358,21 +12441,21 @@ Writable.prototype.write = function(chunk, encoding, cb) {
   var state = this._writableState;
   var ret = false;
 
-  if (util.isFunction(encoding)) {
+  if (typeof encoding === 'function') {
     cb = encoding;
     encoding = null;
   }
 
-  if (util.isBuffer(chunk))
+  if (Buffer.isBuffer(chunk))
     encoding = 'buffer';
   else if (!encoding)
     encoding = state.defaultEncoding;
 
-  if (!util.isFunction(cb))
-    cb = function() {};
+  if (typeof cb !== 'function')
+    cb = nop;
 
   if (state.ended)
-    writeAfterEnd(this, state, cb);
+    writeAfterEnd(this, cb);
   else if (validChunk(this, state, chunk, cb)) {
     state.pendingcb++;
     ret = writeOrBuffer(this, state, chunk, encoding, cb);
@@ -11397,15 +12480,26 @@ Writable.prototype.uncork = function() {
         !state.corked &&
         !state.finished &&
         !state.bufferProcessing &&
-        state.buffer.length)
+        state.bufferedRequest)
       clearBuffer(this, state);
   }
+};
+
+Writable.prototype.setDefaultEncoding = function setDefaultEncoding(encoding) {
+  // node::ParseEncoding() requires lower case.
+  if (typeof encoding === 'string')
+    encoding = encoding.toLowerCase();
+  if (!(['hex', 'utf8', 'utf-8', 'ascii', 'binary', 'base64',
+'ucs2', 'ucs-2','utf16le', 'utf-16le', 'raw']
+.indexOf((encoding + '').toLowerCase()) > -1))
+    throw new TypeError('Unknown encoding: ' + encoding);
+  this._writableState.defaultEncoding = encoding;
 };
 
 function decodeChunk(state, chunk, encoding) {
   if (!state.objectMode &&
       state.decodeStrings !== false &&
-      util.isString(chunk)) {
+      typeof chunk === 'string') {
     chunk = new Buffer(chunk, encoding);
   }
   return chunk;
@@ -11416,7 +12510,8 @@ function decodeChunk(state, chunk, encoding) {
 // If we return false, then we need a drain event, so set that flag.
 function writeOrBuffer(stream, state, chunk, encoding, cb) {
   chunk = decodeChunk(state, chunk, encoding);
-  if (util.isBuffer(chunk))
+
+  if (Buffer.isBuffer(chunk))
     encoding = 'buffer';
   var len = state.objectMode ? 1 : chunk.length;
 
@@ -11427,10 +12522,17 @@ function writeOrBuffer(stream, state, chunk, encoding, cb) {
   if (!ret)
     state.needDrain = true;
 
-  if (state.writing || state.corked)
-    state.buffer.push(new WriteReq(chunk, encoding, cb));
-  else
+  if (state.writing || state.corked) {
+    var last = state.lastBufferedRequest;
+    state.lastBufferedRequest = new WriteReq(chunk, encoding, cb);
+    if (last) {
+      last.next = state.lastBufferedRequest;
+    } else {
+      state.bufferedRequest = state.lastBufferedRequest;
+    }
+  } else {
     doWrite(stream, state, false, len, chunk, encoding, cb);
+  }
 
   return ret;
 }
@@ -11448,15 +12550,11 @@ function doWrite(stream, state, writev, len, chunk, encoding, cb) {
 }
 
 function onwriteError(stream, state, sync, er, cb) {
+  --state.pendingcb;
   if (sync)
-    process.nextTick(function() {
-      state.pendingcb--;
-      cb(er);
-    });
-  else {
-    state.pendingcb--;
+    processNextTick(cb, er);
+  else
     cb(er);
-  }
 
   stream._writableState.errorEmitted = true;
   stream.emit('error', er);
@@ -11480,19 +12578,17 @@ function onwrite(stream, er) {
     onwriteError(stream, state, sync, er, cb);
   else {
     // Check if we're actually ready to finish, but don't emit yet
-    var finished = needFinish(stream, state);
+    var finished = needFinish(state);
 
     if (!finished &&
         !state.corked &&
         !state.bufferProcessing &&
-        state.buffer.length) {
+        state.bufferedRequest) {
       clearBuffer(stream, state);
     }
 
     if (sync) {
-      process.nextTick(function() {
-        afterWrite(stream, state, finished, cb);
-      });
+      processNextTick(afterWrite, stream, state, finished, cb);
     } else {
       afterWrite(stream, state, finished, cb);
     }
@@ -11521,17 +12617,23 @@ function onwriteDrain(stream, state) {
 // if there's something in the buffer waiting, then process it
 function clearBuffer(stream, state) {
   state.bufferProcessing = true;
+  var entry = state.bufferedRequest;
 
-  if (stream._writev && state.buffer.length > 1) {
+  if (stream._writev && entry && entry.next) {
     // Fast case, write everything using _writev()
+    var buffer = [];
     var cbs = [];
-    for (var c = 0; c < state.buffer.length; c++)
-      cbs.push(state.buffer[c].callback);
+    while (entry) {
+      cbs.push(entry.callback);
+      buffer.push(entry);
+      entry = entry.next;
+    }
 
     // count the one we are adding, as well.
     // TODO(isaacs) clean this up
     state.pendingcb++;
-    doWrite(stream, state, true, state.length, state.buffer, '', function(err) {
+    state.lastBufferedRequest = null;
+    doWrite(stream, state, true, state.length, buffer, '', function(err) {
       for (var i = 0; i < cbs.length; i++) {
         state.pendingcb--;
         cbs[i](err);
@@ -11539,40 +12641,34 @@ function clearBuffer(stream, state) {
     });
 
     // Clear buffer
-    state.buffer = [];
   } else {
     // Slow case, write chunks one-by-one
-    for (var c = 0; c < state.buffer.length; c++) {
-      var entry = state.buffer[c];
+    while (entry) {
       var chunk = entry.chunk;
       var encoding = entry.encoding;
       var cb = entry.callback;
       var len = state.objectMode ? 1 : chunk.length;
 
       doWrite(stream, state, false, len, chunk, encoding, cb);
-
+      entry = entry.next;
       // if we didn't call the onwrite immediately, then
       // it means that we need to wait until it does.
       // also, that means that the chunk and cb are currently
       // being processed, so move the buffer counter past them.
       if (state.writing) {
-        c++;
         break;
       }
     }
 
-    if (c < state.buffer.length)
-      state.buffer = state.buffer.slice(c);
-    else
-      state.buffer.length = 0;
+    if (entry === null)
+      state.lastBufferedRequest = null;
   }
-
+  state.bufferedRequest = entry;
   state.bufferProcessing = false;
 }
 
 Writable.prototype._write = function(chunk, encoding, cb) {
   cb(new Error('not implemented'));
-
 };
 
 Writable.prototype._writev = null;
@@ -11580,16 +12676,16 @@ Writable.prototype._writev = null;
 Writable.prototype.end = function(chunk, encoding, cb) {
   var state = this._writableState;
 
-  if (util.isFunction(chunk)) {
+  if (typeof chunk === 'function') {
     cb = chunk;
     chunk = null;
     encoding = null;
-  } else if (util.isFunction(encoding)) {
+  } else if (typeof encoding === 'function') {
     cb = encoding;
     encoding = null;
   }
 
-  if (!util.isNullOrUndefined(chunk))
+  if (chunk !== null && chunk !== undefined)
     this.write(chunk, encoding);
 
   // .end() fully uncorks
@@ -11604,9 +12700,10 @@ Writable.prototype.end = function(chunk, encoding, cb) {
 };
 
 
-function needFinish(stream, state) {
+function needFinish(state) {
   return (state.ending &&
           state.length === 0 &&
+          state.bufferedRequest === null &&
           !state.finished &&
           !state.writing);
 }
@@ -11619,14 +12716,15 @@ function prefinish(stream, state) {
 }
 
 function finishMaybe(stream, state) {
-  var need = needFinish(stream, state);
+  var need = needFinish(state);
   if (need) {
     if (state.pendingcb === 0) {
       prefinish(stream, state);
       state.finished = true;
       stream.emit('finish');
-    } else
+    } else {
       prefinish(stream, state);
+    }
   }
   return need;
 }
@@ -11636,15 +12734,14 @@ function endWritable(stream, state, cb) {
   finishMaybe(stream, state);
   if (cb) {
     if (state.finished)
-      process.nextTick(cb);
+      processNextTick(cb);
     else
       stream.once('finish', cb);
   }
   state.ended = true;
 }
 
-}).call(this,require('_process'))
-},{"./_stream_duplex":11,"_process":9,"buffer":2,"core-util-is":16,"inherits":7,"stream":21}],16:[function(require,module,exports){
+},{"./_stream_duplex":13,"buffer":2,"core-util-is":18,"events":6,"inherits":7,"process-nextick-args":19,"util-deprecate":20}],18:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -11753,26 +12850,119 @@ exports.isBuffer = isBuffer;
 function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
-}).call(this,require("buffer").Buffer)
-},{"buffer":2}],17:[function(require,module,exports){
+}).call(this,{"isBuffer":require("../../../../insert-module-globals/node_modules/is-buffer/index.js")})
+},{"../../../../insert-module-globals/node_modules/is-buffer/index.js":8}],19:[function(require,module,exports){
+(function (process){
+'use strict';
+module.exports = nextTick;
+
+function nextTick(fn) {
+  var args = new Array(arguments.length - 1);
+  var i = 0;
+  while (i < args.length) {
+    args[i++] = arguments[i];
+  }
+  process.nextTick(function afterTick() {
+    fn.apply(null, args);
+  });
+}
+
+}).call(this,require('_process'))
+},{"_process":10}],20:[function(require,module,exports){
+(function (global){
+
+/**
+ * Module exports.
+ */
+
+module.exports = deprecate;
+
+/**
+ * Mark that a method should not be used.
+ * Returns a modified function which warns once by default.
+ *
+ * If `localStorage.noDeprecation = true` is set, then it is a no-op.
+ *
+ * If `localStorage.throwDeprecation = true` is set, then deprecated functions
+ * will throw an Error when invoked.
+ *
+ * If `localStorage.traceDeprecation = true` is set, then deprecated functions
+ * will invoke `console.trace()` instead of `console.error()`.
+ *
+ * @param {Function} fn - the function to deprecate
+ * @param {String} msg - the string to print to the console when `fn` is invoked
+ * @returns {Function} a new "deprecated" version of `fn`
+ * @api public
+ */
+
+function deprecate (fn, msg) {
+  if (config('noDeprecation')) {
+    return fn;
+  }
+
+  var warned = false;
+  function deprecated() {
+    if (!warned) {
+      if (config('throwDeprecation')) {
+        throw new Error(msg);
+      } else if (config('traceDeprecation')) {
+        console.trace(msg);
+      } else {
+        console.warn(msg);
+      }
+      warned = true;
+    }
+    return fn.apply(this, arguments);
+  }
+
+  return deprecated;
+}
+
+/**
+ * Checks `localStorage` for boolean values for the given `name`.
+ *
+ * @param {String} name
+ * @returns {Boolean}
+ * @api private
+ */
+
+function config (name) {
+  // accessing global.localStorage can trigger a DOMException in sandboxed iframes
+  try {
+    if (!global.localStorage) return false;
+  } catch (_) {
+    return false;
+  }
+  var val = global.localStorage[name];
+  if (null == val) return false;
+  return String(val).toLowerCase() === 'true';
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],21:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":12}],18:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":14}],22:[function(require,module,exports){
+var Stream = (function (){
+  try {
+    return require('st' + 'ream'); // hack to fix a circular dependency issue when used with browserify
+  } catch(_){}
+}());
 exports = module.exports = require('./lib/_stream_readable.js');
-exports.Stream = require('stream');
+exports.Stream = Stream || exports;
 exports.Readable = exports;
 exports.Writable = require('./lib/_stream_writable.js');
 exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":11,"./lib/_stream_passthrough.js":12,"./lib/_stream_readable.js":13,"./lib/_stream_transform.js":14,"./lib/_stream_writable.js":15,"stream":21}],19:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":13,"./lib/_stream_passthrough.js":14,"./lib/_stream_readable.js":15,"./lib/_stream_transform.js":16,"./lib/_stream_writable.js":17}],23:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":14}],20:[function(require,module,exports){
+},{"./lib/_stream_transform.js":16}],24:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":15}],21:[function(require,module,exports){
+},{"./lib/_stream_writable.js":17}],25:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11901,7 +13091,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":6,"inherits":7,"readable-stream/duplex.js":10,"readable-stream/passthrough.js":17,"readable-stream/readable.js":18,"readable-stream/transform.js":19,"readable-stream/writable.js":20}],22:[function(require,module,exports){
+},{"events":6,"inherits":7,"readable-stream/duplex.js":12,"readable-stream/passthrough.js":21,"readable-stream/readable.js":22,"readable-stream/transform.js":23,"readable-stream/writable.js":24}],26:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12124,14 +13314,14 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":2}],23:[function(require,module,exports){
+},{"buffer":2}],27:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],24:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -12721,7 +13911,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":23,"_process":9,"inherits":7}],25:[function(require,module,exports){
+},{"./support/isBuffer":27,"_process":10,"inherits":7}],29:[function(require,module,exports){
 var util = require('util');
 var intersect = require('intersect');
 var WildEmitter = require('wildemitter');
@@ -13135,7 +14325,7 @@ SessionManager.prototype.process = function (req) {
 
 module.exports = SessionManager;
 
-},{"intersect":27,"jingle-filetransfer-session":28,"jingle-media-session":79,"jingle-session":111,"util":24,"webrtcsupport":115,"wildemitter":116}],26:[function(require,module,exports){
+},{"intersect":31,"jingle-filetransfer-session":32,"jingle-media-session":86,"jingle-session":118,"util":28,"webrtcsupport":123,"wildemitter":124}],30:[function(require,module,exports){
 var arr = [];
 var each = arr.forEach;
 var slice = arr.slice;
@@ -13152,7 +14342,7 @@ module.exports = function(obj) {
     return obj;
 };
 
-},{}],27:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 module.exports = intersect;
 
 function intersect (a, b) {
@@ -13184,7 +14374,7 @@ function indexOf(arr, el) {
   return -1;
 }
 
-},{}],28:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 var util = require('util');
 var extend = require('extend-object');
 var BaseSession = require('jingle-session');
@@ -13448,7 +14638,7 @@ FileTransferSession.prototype = extend(FileTransferSession.prototype, {
 
 module.exports = FileTransferSession;
 
-},{"extend-object":26,"filetransfer/hashed":30,"jingle-session":111,"rtcpeerconnection":78,"util":24}],29:[function(require,module,exports){
+},{"extend-object":30,"filetransfer/hashed":34,"jingle-session":118,"rtcpeerconnection":85,"util":28}],33:[function(require,module,exports){
 var WildEmitter = require('wildemitter');
 var util = require('util');
 
@@ -13536,7 +14726,7 @@ module.exports.support = typeof window !== 'undefined' && window && window.File 
 module.exports.Sender = Sender;
 module.exports.Receiver = Receiver;
 
-},{"util":24,"wildemitter":116}],30:[function(require,module,exports){
+},{"util":28,"wildemitter":53}],34:[function(require,module,exports){
 var WildEmitter = require('wildemitter');
 var util = require('util');
 var hashes = require('iana-hashes');
@@ -13609,7 +14799,7 @@ module.exports.support = base.support;
 module.exports.Sender = Sender;
 module.exports.Receiver = Receiver;
 
-},{"./filetransfer":29,"iana-hashes":31,"util":24,"wildemitter":116}],31:[function(require,module,exports){
+},{"./filetransfer":33,"iana-hashes":35,"util":28,"wildemitter":53}],35:[function(require,module,exports){
 var createHash = require('create-hash');
 var createHmac = require('create-hmac');
 var getHashes = require('./lib/get-hashes');
@@ -13654,12 +14844,12 @@ exports.createHmac = function (algorithm, key) {
     return createHmac(algorithm, key);
 };
 
-},{"./lib/get-hashes":32,"create-hash":33,"create-hmac":46}],32:[function(require,module,exports){
+},{"./lib/get-hashes":36,"create-hash":37,"create-hmac":51}],36:[function(require,module,exports){
 module.exports = function () {
     return ['sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'md5', 'rmd160'];
 };
 
-},{}],33:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var inherits = require('inherits')
@@ -13667,92 +14857,55 @@ var md5 = require('./md5')
 var rmd160 = require('ripemd160')
 var sha = require('sha.js')
 
-var Transform = require('stream').Transform
+var Base = require('cipher-base')
 
 function HashNoConstructor(hash) {
-  Transform.call(this)
+  Base.call(this, 'digest')
 
   this._hash = hash
   this.buffers = []
 }
 
-inherits(HashNoConstructor, Transform)
+inherits(HashNoConstructor, Base)
 
-HashNoConstructor.prototype._transform = function (data, _, next) {
+HashNoConstructor.prototype._update = function (data) {
   this.buffers.push(data)
-
-  next()
 }
 
-HashNoConstructor.prototype._flush = function (next) {
-  this.push(this.digest())
-  next()
-}
-
-HashNoConstructor.prototype.update = function (data, enc) {
-  if (typeof data === 'string') {
-    data = new Buffer(data, enc)
-  }
-
-  this.buffers.push(data)
-  return this
-}
-
-HashNoConstructor.prototype.digest = function (enc) {
+HashNoConstructor.prototype._final = function () {
   var buf = Buffer.concat(this.buffers)
   var r = this._hash(buf)
   this.buffers = null
 
-  return enc ? r.toString(enc) : r
+  return r
 }
 
 function Hash(hash) {
-  Transform.call(this)
+  Base.call(this, 'digest')
 
   this._hash = hash
 }
 
-inherits(Hash, Transform)
+inherits(Hash, Base)
 
-Hash.prototype._transform = function (data, enc, next) {
-  if (enc) data = new Buffer(data, enc)
-
+Hash.prototype._update = function (data) {
   this._hash.update(data)
-
-  next()
 }
 
-Hash.prototype._flush = function (next) {
-  this.push(this._hash.digest())
-  this._hash = null
-
-  next()
-}
-
-Hash.prototype.update = function (data, enc) {
-  if (typeof data === 'string') {
-    data = new Buffer(data, enc)
-  }
-
-  this._hash.update(data)
-  return this
-}
-
-Hash.prototype.digest = function (enc) {
-  var outData = this._hash.digest()
-
-  return enc ? outData.toString(enc) : outData
+Hash.prototype._final = function () {
+  return this._hash.digest()
 }
 
 module.exports = function createHash (alg) {
+  alg = alg.toLowerCase()
   if ('md5' === alg) return new HashNoConstructor(md5)
-  if ('rmd160' === alg) return new HashNoConstructor(rmd160)
+  if ('rmd160' === alg || 'ripemd160' === alg) return new HashNoConstructor(rmd160)
 
   return new Hash(sha(alg))
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./md5":35,"buffer":2,"inherits":36,"ripemd160":37,"sha.js":39,"stream":21}],34:[function(require,module,exports){
+},{"./md5":39,"buffer":2,"cipher-base":40,"inherits":41,"ripemd160":42,"sha.js":44}],38:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var intSize = 4;
@@ -13789,7 +14942,7 @@ function hash(buf, fn, hashSize, bigEndian) {
 }
 exports.hash = hash;
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],35:[function(require,module,exports){
+},{"buffer":2}],39:[function(require,module,exports){
 'use strict';
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
@@ -13946,9 +15099,103 @@ function bit_rol(num, cnt)
 module.exports = function md5(buf) {
   return helpers.hash(buf, core_md5, 16);
 };
-},{"./helpers":34}],36:[function(require,module,exports){
+},{"./helpers":38}],40:[function(require,module,exports){
+(function (Buffer){
+var Transform = require('stream').Transform
+var inherits = require('inherits')
+var StringDecoder = require('string_decoder').StringDecoder
+module.exports = CipherBase
+inherits(CipherBase, Transform)
+function CipherBase (hashMode) {
+  Transform.call(this)
+  this.hashMode = typeof hashMode === 'string'
+  if (this.hashMode) {
+    this[hashMode] = this._finalOrDigest
+  } else {
+    this.final = this._finalOrDigest
+  }
+  this._decoder = null
+  this._encoding = null
+}
+CipherBase.prototype.update = function (data, inputEnc, outputEnc) {
+  if (typeof data === 'string') {
+    data = new Buffer(data, inputEnc)
+  }
+  var outData = this._update(data)
+  if (this.hashMode) {
+    return this
+  }
+  if (outputEnc) {
+    outData = this._toString(outData, outputEnc)
+  }
+  return outData
+}
+
+CipherBase.prototype.setAutoPadding = function () {}
+
+CipherBase.prototype.getAuthTag = function () {
+  throw new Error('trying to get auth tag in unsupported state')
+}
+
+CipherBase.prototype.setAuthTag = function () {
+  throw new Error('trying to set auth tag in unsupported state')
+}
+
+CipherBase.prototype.setAAD = function () {
+  throw new Error('trying to set aad in unsupported state')
+}
+
+CipherBase.prototype._transform = function (data, _, next) {
+  var err
+  try {
+    if (this.hashMode) {
+      this._update(data)
+    } else {
+      this.push(this._update(data))
+    }
+  } catch (e) {
+    err = e
+  } finally {
+    next(err)
+  }
+}
+CipherBase.prototype._flush = function (done) {
+  var err
+  try {
+    this.push(this._final())
+  } catch (e) {
+    err = e
+  } finally {
+    done(err)
+  }
+}
+CipherBase.prototype._finalOrDigest = function (outputEnc) {
+  var outData = this._final() || new Buffer('')
+  if (outputEnc) {
+    outData = this._toString(outData, outputEnc, true)
+  }
+  return outData
+}
+
+CipherBase.prototype._toString = function (value, enc, final) {
+  if (!this._decoder) {
+    this._decoder = new StringDecoder(enc)
+    this._encoding = enc
+  }
+  if (this._encoding !== enc) {
+    throw new Error('can\'t switch encodings')
+  }
+  var out = this._decoder.write(value)
+  if (final) {
+    out += this._decoder.end()
+  }
+  return out
+}
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":2,"inherits":41,"stream":25,"string_decoder":26}],41:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],37:[function(require,module,exports){
+},{"dup":7}],42:[function(require,module,exports){
 (function (Buffer){
 /*
 CryptoJS v3.1.2
@@ -14162,7 +15409,7 @@ function ripemd160 (message) {
 module.exports = ripemd160
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],38:[function(require,module,exports){
+},{"buffer":2}],43:[function(require,module,exports){
 (function (Buffer){
 // prototype class for hash functions
 function Hash (blockSize, finalSize) {
@@ -14235,7 +15482,7 @@ Hash.prototype._update = function () {
 module.exports = Hash
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],39:[function(require,module,exports){
+},{"buffer":2}],44:[function(require,module,exports){
 var exports = module.exports = function SHA (algorithm) {
   algorithm = algorithm.toLowerCase()
 
@@ -14252,7 +15499,7 @@ exports.sha256 = require('./sha256')
 exports.sha384 = require('./sha384')
 exports.sha512 = require('./sha512')
 
-},{"./sha":40,"./sha1":41,"./sha224":42,"./sha256":43,"./sha384":44,"./sha512":45}],40:[function(require,module,exports){
+},{"./sha":45,"./sha1":46,"./sha224":47,"./sha256":48,"./sha384":49,"./sha512":50}],45:[function(require,module,exports){
 (function (Buffer){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-0, as defined
@@ -14302,7 +15549,8 @@ Sha.prototype._update = function (M) {
   var d = this._d
   var e = this._e
 
-  var j = 0, k
+  var j = 0
+  var k
 
   /*
    * SHA-1 has a bitwise rotate left operation. But, SHA is not
@@ -14355,7 +15603,7 @@ module.exports = Sha
 
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":38,"buffer":2,"inherits":36}],41:[function(require,module,exports){
+},{"./hash":43,"buffer":2,"inherits":41}],46:[function(require,module,exports){
 (function (Buffer){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
@@ -14406,7 +15654,8 @@ Sha1.prototype._update = function (M) {
   var d = this._d
   var e = this._e
 
-  var j = 0, k
+  var j = 0
+  var k
 
   function calcW () { return rol(W[j - 3] ^ W[j - 8] ^ W[j - 14] ^ W[j - 16], 1) }
   function loop (w, f) {
@@ -14454,7 +15703,7 @@ Sha1.prototype._hash = function () {
 module.exports = Sha1
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":38,"buffer":2,"inherits":36}],42:[function(require,module,exports){
+},{"./hash":43,"buffer":2,"inherits":41}],47:[function(require,module,exports){
 (function (Buffer){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -14510,7 +15759,7 @@ Sha224.prototype._hash = function () {
 module.exports = Sha224
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":38,"./sha256":43,"buffer":2,"inherits":36}],43:[function(require,module,exports){
+},{"./hash":43,"./sha256":48,"buffer":2,"inherits":41}],48:[function(require,module,exports){
 (function (Buffer){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -14567,36 +15816,28 @@ Sha256.prototype.init = function () {
   return this
 }
 
-function S (X, n) {
-  return (X >>> n) | (X << (32 - n))
-}
-
-function R (X, n) {
-  return (X >>> n)
-}
-
 function Ch (x, y, z) {
-  return ((x & y) ^ ((~x) & z))
+  return z ^ (x & (y ^ z))
 }
 
 function Maj (x, y, z) {
-  return ((x & y) ^ (x & z) ^ (y & z))
+  return (x & y) | (z & (x | y))
 }
 
-function Sigma0256 (x) {
-  return (S(x, 2) ^ S(x, 13) ^ S(x, 22))
+function Sigma0 (x) {
+  return (x >>> 2 | x << 30) ^ (x >>> 13 | x << 19) ^ (x >>> 22 | x << 10)
 }
 
-function Sigma1256 (x) {
-  return (S(x, 6) ^ S(x, 11) ^ S(x, 25))
+function Sigma1 (x) {
+  return (x >>> 6 | x << 26) ^ (x >>> 11 | x << 21) ^ (x >>> 25 | x << 7)
 }
 
-function Gamma0256 (x) {
-  return (S(x, 7) ^ S(x, 18) ^ R(x, 3))
+function Gamma0 (x) {
+  return (x >>> 7 | x << 25) ^ (x >>> 18 | x << 14) ^ (x >>> 3)
 }
 
-function Gamma1256 (x) {
-  return (S(x, 17) ^ S(x, 19) ^ R(x, 10))
+function Gamma1 (x) {
+  return (x >>> 17 | x << 15) ^ (x >>> 19 | x << 13) ^ (x >>> 10)
 }
 
 Sha256.prototype._update = function (M) {
@@ -14613,12 +15854,12 @@ Sha256.prototype._update = function (M) {
 
   var j = 0
 
-  function calcW () { return Gamma1256(W[j - 2]) + W[j - 7] + Gamma0256(W[j - 15]) + W[j - 16] }
+  function calcW () { return Gamma1(W[j - 2]) + W[j - 7] + Gamma0(W[j - 15]) + W[j - 16] }
   function loop (w) {
     W[j] = w
 
-    var T1 = h + Sigma1256(e) + Ch(e, f, g) + K[j] + w
-    var T2 = Sigma0256(a) + Maj(a, b, c)
+    var T1 = h + Sigma1(e) + Ch(e, f, g) + K[j] + w
+    var T2 = Sigma0(a) + Maj(a, b, c)
 
     h = g
     g = f
@@ -14663,7 +15904,7 @@ Sha256.prototype._hash = function () {
 module.exports = Sha256
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":38,"buffer":2,"inherits":36}],44:[function(require,module,exports){
+},{"./hash":43,"buffer":2,"inherits":41}],49:[function(require,module,exports){
 (function (Buffer){
 var inherits = require('inherits')
 var SHA512 = require('./sha512')
@@ -14723,7 +15964,7 @@ Sha384.prototype._hash = function () {
 module.exports = Sha384
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":38,"./sha512":45,"buffer":2,"inherits":36}],45:[function(require,module,exports){
+},{"./hash":43,"./sha512":50,"buffer":2,"inherits":41}],50:[function(require,module,exports){
 (function (Buffer){
 var inherits = require('inherits')
 var Hash = require('./hash')
@@ -14804,16 +16045,36 @@ Sha512.prototype.init = function () {
   return this
 }
 
-function S (X, Xl, n) {
-  return (X >>> n) | (Xl << (32 - n))
-}
-
 function Ch (x, y, z) {
-  return ((x & y) ^ ((~x) & z))
+  return z ^ (x & (y ^ z))
 }
 
 function Maj (x, y, z) {
-  return ((x & y) ^ (x & z) ^ (y & z))
+  return (x & y) | (z & (x | y))
+}
+
+function Sigma0 (x, xl) {
+  return (x >>> 28 | xl << 4) ^ (xl >>> 2 | x << 30) ^ (xl >>> 7 | x << 25)
+}
+
+function Sigma1 (x, xl) {
+  return (x >>> 14 | xl << 18) ^ (x >>> 18 | xl << 14) ^ (xl >>> 9 | x << 23)
+}
+
+function Gamma0 (x, xl) {
+  return (x >>> 1 | xl << 31) ^ (x >>> 8 | xl << 24) ^ (x >>> 7)
+}
+
+function Gamma0l (x, xl) {
+  return (x >>> 1 | xl << 31) ^ (x >>> 8 | xl << 24) ^ (x >>> 7 | xl << 25)
+}
+
+function Gamma1 (x, xl) {
+  return (x >>> 19 | xl << 13) ^ (xl >>> 29 | x << 3) ^ (x >>> 6)
+}
+
+function Gamma1l (x, xl) {
+  return (x >>> 19 | xl << 13) ^ (xl >>> 29 | x << 3) ^ (x >>> 6 | xl << 26)
 }
 
 Sha512.prototype._update = function (M) {
@@ -14837,18 +16098,19 @@ Sha512.prototype._update = function (M) {
   var gl = this._gl | 0
   var hl = this._hl | 0
 
-  var i = 0, j = 0
+  var i = 0
+  var j = 0
   var Wi, Wil
   function calcW () {
     var x = W[j - 15 * 2]
     var xl = W[j - 15 * 2 + 1]
-    var gamma0 = S(x, xl, 1) ^ S(x, xl, 8) ^ (x >>> 7)
-    var gamma0l = S(xl, x, 1) ^ S(xl, x, 8) ^ S(xl, x, 7)
+    var gamma0 = Gamma0(x, xl)
+    var gamma0l = Gamma0l(xl, x)
 
     x = W[j - 2 * 2]
     xl = W[j - 2 * 2 + 1]
-    var gamma1 = S(x, xl, 19) ^ S(xl, x, 29) ^ (x >>> 6)
-    var gamma1l = S(xl, x, 19) ^ S(x, xl, 29) ^ S(xl, x, 6)
+    var gamma1 = Gamma1(x, xl)
+    var gamma1l = Gamma1l(xl, x)
 
     // W[i] = gamma0 + W[i - 7] + gamma1 + W[i - 16]
     var Wi7 = W[j - 7 * 2]
@@ -14872,10 +16134,10 @@ Sha512.prototype._update = function (M) {
     var maj = Maj(a, b, c)
     var majl = Maj(al, bl, cl)
 
-    var sigma0h = S(a, al, 28) ^ S(al, a, 2) ^ S(al, a, 7)
-    var sigma0l = S(al, a, 28) ^ S(a, al, 2) ^ S(a, al, 7)
-    var sigma1h = S(e, el, 14) ^ S(e, el, 18) ^ S(el, e, 9)
-    var sigma1l = S(el, e, 14) ^ S(el, e, 18) ^ S(e, el, 9)
+    var sigma0h = Sigma0(a, al)
+    var sigma0l = Sigma0(al, a)
+    var sigma1h = Sigma1(e, el)
+    var sigma1l = Sigma1(el, e)
 
     // t1 = h + sigma1 + ch + K[i] + W[i]
     var Ki = K[j]
@@ -14972,7 +16234,7 @@ Sha512.prototype._hash = function () {
 module.exports = Sha512
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":38,"buffer":2,"inherits":36}],46:[function(require,module,exports){
+},{"./hash":43,"buffer":2,"inherits":41}],51:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var createHash = require('create-hash/browser');
@@ -14985,7 +16247,7 @@ ZEROS.fill(0)
 
 function Hmac(alg, key) {
   Transform.call(this)
-
+  alg = alg.toLowerCase()
   if (typeof key === 'string') {
     key = new Buffer(key)
   }
@@ -15044,9 +16306,164 @@ module.exports = function createHmac(alg, key) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"create-hash/browser":33,"inherits":47,"stream":21}],47:[function(require,module,exports){
+},{"buffer":2,"create-hash/browser":37,"inherits":52,"stream":25}],52:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],48:[function(require,module,exports){
+},{"dup":7}],53:[function(require,module,exports){
+/*
+WildEmitter.js is a slim little event emitter by @henrikjoreteg largely based
+on @visionmedia's Emitter from UI Kit.
+
+Why? I wanted it standalone.
+
+I also wanted support for wildcard emitters like this:
+
+emitter.on('*', function (eventName, other, event, payloads) {
+
+});
+
+emitter.on('somenamespace*', function (eventName, payloads) {
+
+});
+
+Please note that callbacks triggered by wildcard registered events also get
+the event name as the first argument.
+*/
+
+module.exports = WildEmitter;
+
+function WildEmitter() { }
+
+WildEmitter.mixin = function (constructor) {
+    var prototype = constructor.prototype || constructor;
+
+    prototype.isWildEmitter= true;
+
+    // Listen on the given `event` with `fn`. Store a group name if present.
+    prototype.on = function (event, groupName, fn) {
+        this.callbacks = this.callbacks || {};
+        var hasGroup = (arguments.length === 3),
+            group = hasGroup ? arguments[1] : undefined,
+            func = hasGroup ? arguments[2] : arguments[1];
+        func._groupName = group;
+        (this.callbacks[event] = this.callbacks[event] || []).push(func);
+        return this;
+    };
+
+    // Adds an `event` listener that will be invoked a single
+    // time then automatically removed.
+    prototype.once = function (event, groupName, fn) {
+        var self = this,
+            hasGroup = (arguments.length === 3),
+            group = hasGroup ? arguments[1] : undefined,
+            func = hasGroup ? arguments[2] : arguments[1];
+        function on() {
+            self.off(event, on);
+            func.apply(this, arguments);
+        }
+        this.on(event, group, on);
+        return this;
+    };
+
+    // Unbinds an entire group
+    prototype.releaseGroup = function (groupName) {
+        this.callbacks = this.callbacks || {};
+        var item, i, len, handlers;
+        for (item in this.callbacks) {
+            handlers = this.callbacks[item];
+            for (i = 0, len = handlers.length; i < len; i++) {
+                if (handlers[i]._groupName === groupName) {
+                    //console.log('removing');
+                    // remove it and shorten the array we're looping through
+                    handlers.splice(i, 1);
+                    i--;
+                    len--;
+                }
+            }
+        }
+        return this;
+    };
+
+    // Remove the given callback for `event` or all
+    // registered callbacks.
+    prototype.off = function (event, fn) {
+        this.callbacks = this.callbacks || {};
+        var callbacks = this.callbacks[event],
+            i;
+
+        if (!callbacks) return this;
+
+        // remove all handlers
+        if (arguments.length === 1) {
+            delete this.callbacks[event];
+            return this;
+        }
+
+        // remove specific handler
+        i = callbacks.indexOf(fn);
+        callbacks.splice(i, 1);
+        if (callbacks.length === 0) {
+            delete this.callbacks[event];
+        }
+        return this;
+    };
+
+    /// Emit `event` with the given args.
+    // also calls any `*` handlers
+    prototype.emit = function (event) {
+        this.callbacks = this.callbacks || {};
+        var args = [].slice.call(arguments, 1),
+            callbacks = this.callbacks[event],
+            specialCallbacks = this.getWildcardCallbacks(event),
+            i,
+            len,
+            item,
+            listeners;
+
+        if (callbacks) {
+            listeners = callbacks.slice();
+            for (i = 0, len = listeners.length; i < len; ++i) {
+                if (!listeners[i]) {
+                    break;
+                }
+                listeners[i].apply(this, args);
+            }
+        }
+
+        if (specialCallbacks) {
+            len = specialCallbacks.length;
+            listeners = specialCallbacks.slice();
+            for (i = 0, len = listeners.length; i < len; ++i) {
+                if (!listeners[i]) {
+                    break;
+                }
+                listeners[i].apply(this, [event].concat(args));
+            }
+        }
+
+        return this;
+    };
+
+    // Helper for for finding special wildcard event handlers that match the event
+    prototype.getWildcardCallbacks = function (eventName) {
+        this.callbacks = this.callbacks || {};
+        var item,
+            split,
+            result = [];
+
+        for (item in this.callbacks) {
+            split = item.split('*');
+            if (item === '*' || (split.length === 2 && eventName.slice(0, split[0].length) === split[0])) {
+                result = result.concat(this.callbacks[item]);
+            }
+        }
+        return result;
+    };
+
+};
+
+WildEmitter.mixin(WildEmitter);
+
+},{}],54:[function(require,module,exports){
 /**
  * lodash 3.0.3 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -15110,7 +16527,7 @@ var forEach = createForEach(arrayEach, baseEach);
 
 module.exports = forEach;
 
-},{"lodash._arrayeach":49,"lodash._baseeach":50,"lodash._bindcallback":54,"lodash.isarray":55}],49:[function(require,module,exports){
+},{"lodash._arrayeach":55,"lodash._baseeach":56,"lodash._bindcallback":60,"lodash.isarray":61}],55:[function(require,module,exports){
 /**
  * lodash 3.0.0 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -15143,7 +16560,7 @@ function arrayEach(array, iteratee) {
 
 module.exports = arrayEach;
 
-},{}],50:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 /**
  * lodash 3.0.4 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -15326,7 +16743,7 @@ function isObject(value) {
 
 module.exports = baseEach;
 
-},{"lodash.keys":51}],51:[function(require,module,exports){
+},{"lodash.keys":57}],57:[function(require,module,exports){
 /**
  * lodash 3.1.2 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -15564,7 +16981,7 @@ function keysIn(object) {
 
 module.exports = keys;
 
-},{"lodash._getnative":52,"lodash.isarguments":53,"lodash.isarray":55}],52:[function(require,module,exports){
+},{"lodash._getnative":58,"lodash.isarguments":59,"lodash.isarray":61}],58:[function(require,module,exports){
 /**
  * lodash 3.9.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -15703,7 +17120,7 @@ function isNative(value) {
 
 module.exports = getNative;
 
-},{}],53:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 /**
  * lodash 3.0.4 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -15811,7 +17228,7 @@ function isArguments(value) {
 
 module.exports = isArguments;
 
-},{}],54:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 /**
  * lodash 3.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -15878,7 +17295,7 @@ function identity(value) {
 
 module.exports = bindCallback;
 
-},{}],55:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 /**
  * lodash 3.0.4 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -16060,7 +17477,7 @@ function isNative(value) {
 
 module.exports = isArray;
 
-},{}],56:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 /**
  * lodash 3.1.2 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -16219,7 +17636,7 @@ function property(path) {
 
 module.exports = pluck;
 
-},{"lodash._baseget":57,"lodash._topath":58,"lodash.isarray":59,"lodash.map":60}],57:[function(require,module,exports){
+},{"lodash._baseget":63,"lodash._topath":64,"lodash.isarray":65,"lodash.map":66}],63:[function(require,module,exports){
 /**
  * lodash 3.7.2 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -16295,7 +17712,7 @@ function isObject(value) {
 
 module.exports = baseGet;
 
-},{}],58:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 /**
  * lodash 3.8.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -16344,9 +17761,9 @@ function toPath(value) {
 
 module.exports = toPath;
 
-},{"lodash.isarray":59}],59:[function(require,module,exports){
-arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],60:[function(require,module,exports){
+},{"lodash.isarray":65}],65:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"dup":61}],66:[function(require,module,exports){
 /**
  * lodash 3.1.4 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -16498,7 +17915,7 @@ function map(collection, iteratee, thisArg) {
 
 module.exports = map;
 
-},{"lodash._arraymap":61,"lodash._basecallback":62,"lodash._baseeach":67,"lodash.isarray":59}],61:[function(require,module,exports){
+},{"lodash._arraymap":67,"lodash._basecallback":68,"lodash._baseeach":73,"lodash.isarray":65}],67:[function(require,module,exports){
 /**
  * lodash 3.0.0 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -16530,7 +17947,7 @@ function arrayMap(array, iteratee) {
 
 module.exports = arrayMap;
 
-},{}],62:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 /**
  * lodash 3.3.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -16954,7 +18371,7 @@ function property(path) {
 
 module.exports = baseCallback;
 
-},{"lodash._baseisequal":63,"lodash._bindcallback":65,"lodash.isarray":59,"lodash.pairs":66}],63:[function(require,module,exports){
+},{"lodash._baseisequal":69,"lodash._bindcallback":71,"lodash.isarray":65,"lodash.pairs":72}],69:[function(require,module,exports){
 /**
  * lodash 3.0.7 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -17298,7 +18715,7 @@ function isObject(value) {
 
 module.exports = baseIsEqual;
 
-},{"lodash.isarray":59,"lodash.istypedarray":64,"lodash.keys":68}],64:[function(require,module,exports){
+},{"lodash.isarray":65,"lodash.istypedarray":70,"lodash.keys":74}],70:[function(require,module,exports){
 /**
  * lodash 3.0.2 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -17410,9 +18827,9 @@ function isTypedArray(value) {
 
 module.exports = isTypedArray;
 
-},{}],65:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],66:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
+arguments[4][60][0].apply(exports,arguments)
+},{"dup":60}],72:[function(require,module,exports){
 /**
  * lodash 3.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -17492,15 +18909,15 @@ function pairs(object) {
 
 module.exports = pairs;
 
-},{"lodash.keys":68}],67:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50,"lodash.keys":68}],68:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51,"lodash._getnative":69,"lodash.isarguments":70,"lodash.isarray":59}],69:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"dup":52}],70:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],71:[function(require,module,exports){
+},{"lodash.keys":74}],73:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"dup":56,"lodash.keys":74}],74:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"dup":57,"lodash._getnative":75,"lodash.isarguments":76,"lodash.isarray":65}],75:[function(require,module,exports){
+arguments[4][58][0].apply(exports,arguments)
+},{"dup":58}],76:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"dup":59}],77:[function(require,module,exports){
 var toSDP = require('./lib/tosdp');
 var toJSON = require('./lib/tojson');
 
@@ -17622,7 +19039,7 @@ exports.toCandidateJSON = toJSON.toCandidateJSON;
 exports.toMediaJSON = toJSON.toMediaJSON;
 exports.toSessionJSON = toJSON.toSessionJSON;
 
-},{"./lib/tojson":74,"./lib/tosdp":75}],72:[function(require,module,exports){
+},{"./lib/tojson":80,"./lib/tosdp":81}],78:[function(require,module,exports){
 exports.lines = function (sdp) {
     return sdp.split('\r\n').filter(function (line) {
         return line.length > 0;
@@ -17893,7 +19310,7 @@ exports.msid = function (line) {
     };
 };
 
-},{}],73:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 module.exports = {
     initiator: {
         incoming: {
@@ -17941,7 +19358,7 @@ module.exports = {
     }
 };
 
-},{}],74:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 var SENDERS = require('./senders');
 var parsers = require('./parsers');
 var idCounter = Math.random();
@@ -18165,7 +19582,7 @@ exports.toCandidateJSON = function (line) {
     return candidate;
 };
 
-},{"./parsers":72,"./senders":73}],75:[function(require,module,exports){
+},{"./parsers":78,"./senders":79}],81:[function(require,module,exports){
 var SENDERS = require('./senders');
 
 
@@ -18179,7 +19596,8 @@ exports.toSessionSDP = function (session, opts) {
         'v=0',
         'o=- ' + sid + ' ' + time + ' IN IP4 0.0.0.0',
         's=-',
-        't=0 0'
+        't=0 0',
+        'a=msid-semantic: WMS *'
     ];
 
     var groups = session.groups || [];
@@ -18389,7 +19807,7 @@ exports.toCandidateSDP = function (candidate) {
     return 'a=candidate:' + sdp.join(' ');
 };
 
-},{"./senders":73}],76:[function(require,module,exports){
+},{"./senders":79}],82:[function(require,module,exports){
 // based on https://github.com/ESTOS/strophe.jingle/
 // adds wildemitter support
 var util = require('util');
@@ -18597,12 +20015,12 @@ TraceablePeerConnection.prototype.addIceCandidate = function (candidate, success
 };
 
 TraceablePeerConnection.prototype.getStats = function () {
-    this.peerconnection.getStats.apply(this.pc, arguments);
+    this.peerconnection.getStats.apply(this.peerconnection, arguments);
 };
 
 module.exports = TraceablePeerConnection;
 
-},{"util":24,"webrtc-adapter-test":77,"wildemitter":116}],77:[function(require,module,exports){
+},{"util":28,"webrtc-adapter-test":83,"wildemitter":84}],83:[function(require,module,exports){
 /*
  *  Copyright (c) 2014 The WebRTC project authors. All Rights Reserved.
  *
@@ -18630,10 +20048,15 @@ var webrtcMinimumVersion = null;
 var webrtcUtils = {
   log: function() {
     // suppress console.log output when being included as a module.
-    if (!(typeof module !== 'undefined' ||
-        typeof require === 'function') && (typeof define === 'function')) {
-      console.log.apply(console, arguments);
+    if (typeof module !== 'undefined' ||
+        typeof require === 'function' && typeof define === 'function') {
+      return;
     }
+    console.log.apply(console, arguments);
+  },
+  extractVersion: function(uastring, expr, pos) {
+    var match = uastring.match(expr);
+    return match && match.length >= pos && parseInt(match[pos]);
   }
 };
 
@@ -18650,17 +20073,52 @@ function trace(text) {
   }
 }
 
+if (typeof window === 'object') {
+  if (window.HTMLMediaElement &&
+    !('srcObject' in window.HTMLMediaElement.prototype)) {
+    // Shim the srcObject property, once, when HTMLMediaElement is found.
+    Object.defineProperty(window.HTMLMediaElement.prototype, 'srcObject', {
+      get: function() {
+        // If prefixed srcObject property exists, return it.
+        // Otherwise use the shimmed property, _srcObject
+        return 'mozSrcObject' in this ? this.mozSrcObject : this._srcObject;
+      },
+      set: function(stream) {
+        if ('mozSrcObject' in this) {
+          this.mozSrcObject = stream;
+        } else {
+          // Use _srcObject as a private property for this shim
+          this._srcObject = stream;
+          // TODO: revokeObjectUrl(this.src) when !stream to release resources?
+          this.src = URL.createObjectURL(stream);
+        }
+      }
+    });
+  }
+  // Proxy existing globals
+  getUserMedia = window.navigator && window.navigator.getUserMedia;
+}
+
+// Attach a media stream to an element.
+attachMediaStream = function(element, stream) {
+  element.srcObject = stream;
+};
+
+reattachMediaStream = function(to, from) {
+  to.srcObject = from.srcObject;
+};
+
 if (typeof window === 'undefined' || !window.navigator) {
   webrtcUtils.log('This does not appear to be a browser');
   webrtcDetectedBrowser = 'not a browser';
-} else if (navigator.mozGetUserMedia) {
+} else if (navigator.mozGetUserMedia && window.mozRTCPeerConnection) {
   webrtcUtils.log('This appears to be Firefox');
 
   webrtcDetectedBrowser = 'firefox';
 
   // the detected firefox version.
-  webrtcDetectedVersion =
-    parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
+  webrtcDetectedVersion = webrtcUtils.extractVersion(navigator.userAgent,
+      /Firefox\/([0-9]+)\./, 1);
 
   // the minimum firefox version still supported by adapter.
   webrtcMinimumVersion = 31;
@@ -18696,10 +20154,14 @@ if (typeof window === 'undefined' || !window.navigator) {
   };
 
   // The RTCSessionDescription object.
-  window.RTCSessionDescription = mozRTCSessionDescription;
+  if (!window.RTCSessionDescription) {
+    window.RTCSessionDescription = mozRTCSessionDescription;
+  }
 
   // The RTCIceCandidate object.
-  window.RTCIceCandidate = mozRTCIceCandidate;
+  if (!window.RTCIceCandidate) {
+    window.RTCIceCandidate = mozRTCIceCandidate;
+  }
 
   // getUserMedia constraints shim.
   getUserMedia = function(constraints, onSuccess, onError) {
@@ -18784,7 +20246,7 @@ if (typeof window === 'undefined' || !window.navigator) {
     var orgEnumerateDevices =
         navigator.mediaDevices.enumerateDevices.bind(navigator.mediaDevices);
     navigator.mediaDevices.enumerateDevices = function() {
-      return orgEnumerateDevices().catch(function(e) {
+      return orgEnumerateDevices().then(undefined, function(e) {
         if (e.name === 'NotFoundError') {
           return [];
         }
@@ -18792,23 +20254,14 @@ if (typeof window === 'undefined' || !window.navigator) {
       });
     };
   }
-  // Attach a media stream to an element.
-  attachMediaStream = function(element, stream) {
-    element.mozSrcObject = stream;
-  };
-
-  reattachMediaStream = function(to, from) {
-    to.mozSrcObject = from.mozSrcObject;
-  };
-
-} else if (navigator.webkitGetUserMedia) {
+} else if (navigator.webkitGetUserMedia && window.webkitRTCPeerConnection) {
   webrtcUtils.log('This appears to be Chrome');
 
   webrtcDetectedBrowser = 'chrome';
 
   // the detected chrome version.
-  webrtcDetectedVersion =
-    parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2], 10);
+  webrtcDetectedVersion = webrtcUtils.extractVersion(navigator.userAgent,
+      /Chrom(e|ium)\/([0-9]+)\./, 2);
 
   // the minimum chrome version still supported by adapter.
   webrtcMinimumVersion = 38;
@@ -18861,7 +20314,14 @@ if (typeof window === 'undefined' || !window.navigator) {
 
       // promise-support
       return new Promise(function(resolve, reject) {
-        origGetStats.apply(self, [resolve, reject]);
+        if (args.length === 1 && selector === null) {
+          origGetStats.apply(self, [
+              function(response) {
+                resolve.apply(null, [fixChromeStats(response)]);
+              }, reject]);
+        } else {
+          origGetStats.apply(self, [resolve, reject]);
+        }
       });
     };
 
@@ -19027,7 +20487,7 @@ if (typeof window === 'undefined' || !window.navigator) {
 
   // Attach a media stream to an element.
   attachMediaStream = function(element, stream) {
-    if (typeof element.srcObject !== 'undefined') {
+    if (webrtcDetectedVersion >= 43) {
       element.srcObject = stream;
     } else if (typeof element.src !== 'undefined') {
       element.src = URL.createObjectURL(stream);
@@ -19035,9 +20495,12 @@ if (typeof window === 'undefined' || !window.navigator) {
       webrtcUtils.log('Error attaching stream to element.');
     }
   };
-
   reattachMediaStream = function(to, from) {
-    to.src = from.src;
+    if (webrtcDetectedVersion >= 43) {
+      to.srcObject = from.srcObject;
+    } else {
+      to.src = from.src;
+    }
   };
 
 } else if (navigator.mediaDevices && navigator.userAgent.match(
@@ -19045,20 +20508,11 @@ if (typeof window === 'undefined' || !window.navigator) {
   webrtcUtils.log('This appears to be Edge');
   webrtcDetectedBrowser = 'edge';
 
-  webrtcDetectedVersion =
-    parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10);
+  webrtcDetectedVersion = webrtcUtils.extractVersion(navigator.userAgent,
+      /Edge\/(\d+).(\d+)$/, 2);
 
   // the minimum version still supported by adapter.
   webrtcMinimumVersion = 12;
-
-  getUserMedia = navigator.getUserMedia;
-
-  attachMediaStream = function(element, stream) {
-    element.srcObject = stream;
-  };
-  reattachMediaStream = function(to, from) {
-    to.srcObject = from.srcObject;
-  };
 } else {
   webrtcUtils.log('Browser does not appear to be WebRTC-capable');
 }
@@ -19071,11 +20525,13 @@ function requestUserMedia(constraints) {
 }
 
 var webrtcTesting = {};
-Object.defineProperty(webrtcTesting, 'version', {
-  set: function(version) {
-    webrtcDetectedVersion = version;
-  }
-});
+try {
+  Object.defineProperty(webrtcTesting, 'version', {
+    set: function(version) {
+      webrtcDetectedVersion = version;
+    }
+  });
+} catch (e) {}
 
 if (typeof module !== 'undefined') {
   var RTCPeerConnection;
@@ -19090,7 +20546,8 @@ if (typeof module !== 'undefined') {
     webrtcDetectedBrowser: webrtcDetectedBrowser,
     webrtcDetectedVersion: webrtcDetectedVersion,
     webrtcMinimumVersion: webrtcMinimumVersion,
-    webrtcTesting: webrtcTesting
+    webrtcTesting: webrtcTesting,
+    webrtcUtils: webrtcUtils
     //requestUserMedia: not exposed on purpose.
     //trace: not exposed on purpose.
   };
@@ -19105,14 +20562,17 @@ if (typeof module !== 'undefined') {
       webrtcDetectedBrowser: webrtcDetectedBrowser,
       webrtcDetectedVersion: webrtcDetectedVersion,
       webrtcMinimumVersion: webrtcMinimumVersion,
-      webrtcTesting: webrtcTesting
+      webrtcTesting: webrtcTesting,
+      webrtcUtils: webrtcUtils
       //requestUserMedia: not exposed on purpose.
       //trace: not exposed on purpose.
     };
   });
 }
 
-},{}],78:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"dup":53}],85:[function(require,module,exports){
 var util = require('util');
 var each = require('lodash.foreach');
 var pluck = require('lodash.pluck');
@@ -19964,7 +21424,7 @@ PeerConnection.prototype.getStats = function (cb) {
 
 module.exports = PeerConnection;
 
-},{"lodash.foreach":48,"lodash.pluck":56,"sdp-jingle-json":71,"traceablepeerconnection":76,"util":24,"webrtc-adapter-test":77,"wildemitter":116}],79:[function(require,module,exports){
+},{"lodash.foreach":54,"lodash.pluck":62,"sdp-jingle-json":77,"traceablepeerconnection":82,"util":28,"webrtc-adapter-test":83,"wildemitter":84}],86:[function(require,module,exports){
 var util = require('util');
 var extend = require('extend-object');
 var BaseSession = require('jingle-session');
@@ -19972,11 +21432,30 @@ var RTCPeerConnection = require('rtcpeerconnection');
 
 
 function filterContentSources(content, stream) {
+    if (content.description.descType !== 'rtp') {
+        return;
+    }
     delete content.transport;
     delete content.description.payloads;
+    delete content.description.headerExtensions;
+    content.description.mux = false;
+
     if (content.description.sources) {
         content.description.sources = content.description.sources.filter(function (source) {
             return stream.id === source.parameters[1].value.split(' ')[0];
+        });
+    }
+    // remove source groups not related to this stream
+    if (content.description.sourceGroups) {
+        content.description.sourceGroups = content.description.sourceGroups.filter(function (group) {
+            var found = false;
+            for (var i = 0; i < content.description.sources.length; i++) {
+                if (content.description.sources[i].ssrc === group.sources[0]) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
         });
     }
 }
@@ -20001,6 +21480,7 @@ function MediaSession(opts) {
     }, opts.constraints || {});
 
     this.pc.on('ice', this.onIceCandidate.bind(this));
+    this.pc.on('endOfCandidates', this.onIceEndOfCandidates.bind(this));
     this.pc.on('iceConnectionStateChange', this.onIceStateChange.bind(this));
     this.pc.on('addStream', this.onAddStream.bind(this));
     this.pc.on('removeStream', this.onRemoveStream.bind(this));
@@ -20045,14 +21525,14 @@ MediaSession.prototype = extend(MediaSession.prototype, {
     // Session control methods
     // ----------------------------------------------------------------
 
-    start: function (constraints, next) {
+    start: function (offerOptions, next) {
         var self = this;
         this.state = 'pending';
 
         next = next || function () {};
 
         this.pc.isInitiator = true;
-        this.pc.offer(constraints, function (err, offer) {
+        this.pc.offer(offerOptions, function (err, offer) {
             if (err) {
                 self._log('error', 'Could not create WebRTC offer', err);
                 return self.end('failed-application', true);
@@ -20060,7 +21540,7 @@ MediaSession.prototype = extend(MediaSession.prototype, {
 
             // a workaround for missing a=sendonly
             // https://code.google.com/p/webrtc/issues/detail?id=1553
-            if (constraints && constraints.mandatory) {
+            if (offerOptions && offerOptions.mandatory) {
                 offer.jingle.contents.forEach(function (content) {
                     var mediaType = content.description.media;
 
@@ -20068,11 +21548,11 @@ MediaSession.prototype = extend(MediaSession.prototype, {
                         return;
                     }
 
-                    if (!constraints.mandatory.OfferToReceiveAudio && mediaType === 'audio') {
+                    if (!offerOptions.mandatory.OfferToReceiveAudio && mediaType === 'audio') {
                         content.senders = 'initiator';
                     }
 
-                    if (!constraints.mandatory.OfferToReceiveVideo && mediaType === 'video') {
+                    if (!offerOptions.mandatory.OfferToReceiveVideo && mediaType === 'video') {
                         content.senders = 'initiator';
                     }
                 });
@@ -20186,6 +21666,10 @@ MediaSession.prototype = extend(MediaSession.prototype, {
                 answer.jingle.contents.forEach(function (content) {
                     filterContentSources(content, stream);
                 });
+                answer.jingle.contents = answer.jingle.contents.filter(function (content) {
+                    return content.description.descType === 'rtp' && content.description.sources && content.description.sources.length;
+                });
+                delete answer.jingle.groups;
 
                 self.send('source-add', answer.jingle);
                 cb();
@@ -20211,6 +21695,10 @@ MediaSession.prototype = extend(MediaSession.prototype, {
         desc.contents.forEach(function (content) {
             filterContentSources(content, stream);
         });
+        desc.contents = desc.contents.filter(function (content) {
+            return content.description.descType === 'rtp' && content.description.sources && content.description.sources.length;
+        });
+        delete desc.groups;
 
         this.send('source-remove', desc);
         this.pc.removeStream(stream);
@@ -20287,6 +21775,10 @@ MediaSession.prototype = extend(MediaSession.prototype, {
     onIceCandidate: function (candidate) {
         this._log('info', 'Discovered new ICE candidate', candidate.jingle);
         this.send('transport-info', candidate.jingle);
+    },
+
+    onIceEndOfCandidates: function () {
+        this._log('info', 'ICE end of candidates');
     },
 
     onIceStateChange: function () {
@@ -20513,7 +22005,7 @@ MediaSession.prototype = extend(MediaSession.prototype, {
                 // Remove ssrc-groups that are no longer needed
                 for (i = 0; i < newGroups.length; i++) {
                     found = -1;
-                    for (j = 0; i < groups.length; j++) {
+                    for (j = 0; j < groups.length; j++) {
                         if (newGroups[i].semantics === groups[j].semantics &&
                             newGroups[i].sources.length === groups[j].sources.length) {
                             var same = true;
@@ -20563,923 +22055,69 @@ MediaSession.prototype = extend(MediaSession.prototype, {
 
 module.exports = MediaSession;
 
-},{"extend-object":26,"jingle-session":111,"rtcpeerconnection":110,"util":24}],80:[function(require,module,exports){
-arguments[4][48][0].apply(exports,arguments)
-},{"dup":48,"lodash._arrayeach":81,"lodash._baseeach":82,"lodash._bindcallback":86,"lodash.isarray":87}],81:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"dup":49}],82:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50,"lodash.keys":83}],83:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51,"lodash._getnative":84,"lodash.isarguments":85,"lodash.isarray":87}],84:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"dup":52}],85:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],86:[function(require,module,exports){
+},{"extend-object":30,"jingle-session":118,"rtcpeerconnection":117,"util":28}],87:[function(require,module,exports){
 arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],87:[function(require,module,exports){
+},{"dup":54,"lodash._arrayeach":88,"lodash._baseeach":89,"lodash._bindcallback":93,"lodash.isarray":94}],88:[function(require,module,exports){
 arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],88:[function(require,module,exports){
+},{"dup":55}],89:[function(require,module,exports){
 arguments[4][56][0].apply(exports,arguments)
-},{"dup":56,"lodash._baseget":89,"lodash._topath":90,"lodash.isarray":91,"lodash.map":92}],89:[function(require,module,exports){
+},{"dup":56,"lodash.keys":90}],90:[function(require,module,exports){
 arguments[4][57][0].apply(exports,arguments)
-},{"dup":57}],90:[function(require,module,exports){
+},{"dup":57,"lodash._getnative":91,"lodash.isarguments":92,"lodash.isarray":94}],91:[function(require,module,exports){
 arguments[4][58][0].apply(exports,arguments)
-},{"dup":58,"lodash.isarray":91}],91:[function(require,module,exports){
-arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],92:[function(require,module,exports){
+},{"dup":58}],92:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"dup":59}],93:[function(require,module,exports){
 arguments[4][60][0].apply(exports,arguments)
-},{"dup":60,"lodash._arraymap":93,"lodash._basecallback":94,"lodash._baseeach":99,"lodash.isarray":91}],93:[function(require,module,exports){
+},{"dup":60}],94:[function(require,module,exports){
 arguments[4][61][0].apply(exports,arguments)
-},{"dup":61}],94:[function(require,module,exports){
+},{"dup":61}],95:[function(require,module,exports){
 arguments[4][62][0].apply(exports,arguments)
-},{"dup":62,"lodash._baseisequal":95,"lodash._bindcallback":97,"lodash.isarray":91,"lodash.pairs":98}],95:[function(require,module,exports){
+},{"dup":62,"lodash._baseget":96,"lodash._topath":97,"lodash.isarray":98,"lodash.map":99}],96:[function(require,module,exports){
 arguments[4][63][0].apply(exports,arguments)
-},{"dup":63,"lodash.isarray":91,"lodash.istypedarray":96,"lodash.keys":100}],96:[function(require,module,exports){
+},{"dup":63}],97:[function(require,module,exports){
 arguments[4][64][0].apply(exports,arguments)
-},{"dup":64}],97:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],98:[function(require,module,exports){
+},{"dup":64,"lodash.isarray":98}],98:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"dup":61}],99:[function(require,module,exports){
 arguments[4][66][0].apply(exports,arguments)
-},{"dup":66,"lodash.keys":100}],99:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50,"lodash.keys":100}],100:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51,"lodash._getnative":101,"lodash.isarguments":102,"lodash.isarray":91}],101:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"dup":52}],102:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],103:[function(require,module,exports){
-arguments[4][71][0].apply(exports,arguments)
-},{"./lib/tojson":106,"./lib/tosdp":107,"dup":71}],104:[function(require,module,exports){
+},{"dup":66,"lodash._arraymap":100,"lodash._basecallback":101,"lodash._baseeach":106,"lodash.isarray":98}],100:[function(require,module,exports){
+arguments[4][67][0].apply(exports,arguments)
+},{"dup":67}],101:[function(require,module,exports){
+arguments[4][68][0].apply(exports,arguments)
+},{"dup":68,"lodash._baseisequal":102,"lodash._bindcallback":104,"lodash.isarray":98,"lodash.pairs":105}],102:[function(require,module,exports){
+arguments[4][69][0].apply(exports,arguments)
+},{"dup":69,"lodash.isarray":98,"lodash.istypedarray":103,"lodash.keys":107}],103:[function(require,module,exports){
+arguments[4][70][0].apply(exports,arguments)
+},{"dup":70}],104:[function(require,module,exports){
+arguments[4][60][0].apply(exports,arguments)
+},{"dup":60}],105:[function(require,module,exports){
 arguments[4][72][0].apply(exports,arguments)
-},{"dup":72}],105:[function(require,module,exports){
-arguments[4][73][0].apply(exports,arguments)
-},{"dup":73}],106:[function(require,module,exports){
-arguments[4][74][0].apply(exports,arguments)
-},{"./parsers":104,"./senders":105,"dup":74}],107:[function(require,module,exports){
-arguments[4][75][0].apply(exports,arguments)
-},{"./senders":105,"dup":75}],108:[function(require,module,exports){
-arguments[4][76][0].apply(exports,arguments)
-},{"dup":76,"util":24,"webrtc-adapter-test":109,"wildemitter":116}],109:[function(require,module,exports){
+},{"dup":72,"lodash.keys":107}],106:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"dup":56,"lodash.keys":107}],107:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"dup":57,"lodash._getnative":108,"lodash.isarguments":109,"lodash.isarray":98}],108:[function(require,module,exports){
+arguments[4][58][0].apply(exports,arguments)
+},{"dup":58}],109:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"dup":59}],110:[function(require,module,exports){
 arguments[4][77][0].apply(exports,arguments)
-},{"dup":77}],110:[function(require,module,exports){
-var util = require('util');
-var each = require('lodash.foreach');
-var pluck = require('lodash.pluck');
-var webrtc = require('webrtcsupport');
-var SJJ = require('sdp-jingle-json');
-var WildEmitter = require('wildemitter');
-var peerconn = require('traceablepeerconnection');
-
-
-function PeerConnection(config, constraints) {
-    var self = this;
-    var item;
-    WildEmitter.call(this);
-
-    config = config || {};
-    config.iceServers = config.iceServers || [];
-
-    // make sure this only gets enabled in Google Chrome
-    // EXPERIMENTAL FLAG, might get removed without notice
-    this.enableChromeNativeSimulcast = false;
-    if (constraints && constraints.optional &&
-            webrtc.prefix === 'webkit' &&
-            navigator.appVersion.match(/Chromium\//) === null) {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.enableChromeNativeSimulcast) {
-                self.enableChromeNativeSimulcast = true;
-            }
-        });
-    }
-
-    // EXPERIMENTAL FLAG, might get removed without notice
-    this.enableMultiStreamHacks = false;
-    if (constraints && constraints.optional &&
-            webrtc.prefix === 'webkit') {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.enableMultiStreamHacks) {
-                self.enableMultiStreamHacks = true;
-            }
-        });
-    }
-    // EXPERIMENTAL FLAG, might get removed without notice
-    this.restrictBandwidth = 0;
-    if (constraints && constraints.optional) {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.andyetRestrictBandwidth) {
-                self.restrictBandwidth = constraint.andyetRestrictBandwidth;
-            }
-        });
-    }
-
-    // EXPERIMENTAL FLAG, might get removed without notice
-    // bundle up ice candidates, only works for jingle mode
-    // number > 0 is the delay to wait for additional candidates
-    // ~20ms seems good
-    this.batchIceCandidates = 0;
-    if (constraints && constraints.optional) {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.andyetBatchIce) {
-                self.batchIceCandidates = constraint.andyetBatchIce;
-            }
-        });
-    }
-    this.batchedIceCandidates = [];
-
-    // EXPERIMENTAL FLAG, might get removed without notice
-    // this attemps to strip out candidates with an already known foundation
-    // and type -- i.e. those which are gathered via the same TURN server
-    // but different transports (TURN udp, tcp and tls respectively)
-    if (constraints && constraints.optional && webrtc.prefix === 'webkit') {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.andyetFasterICE) {
-                self.eliminateDuplicateCandidates = constraint.andyetFasterICE;
-            }
-        });
-    }
-    // EXPERIMENTAL FLAG, might get removed without notice
-    // when using a server such as the jitsi videobridge we don't need to signal
-    // our candidates
-    if (constraints && constraints.optional) {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.andyetDontSignalCandidates) {
-                self.dontSignalCandidates = constraint.andyetDontSignalCandidates;
-            }
-        });
-    }
-
-
-    // EXPERIMENTAL FLAG, might get removed without notice
-    this.assumeSetLocalSuccess = false;
-    if (constraints && constraints.optional) {
-        constraints.optional.forEach(function (constraint, idx) {
-            if (constraint.andyetAssumeSetLocalSuccess) {
-                self.assumeSetLocalSuccess = constraint.andyetAssumeSetLocalSuccess;
-            }
-        });
-    }
-
-    // EXPERIMENTAL FLAG, might get removed without notice
-    // working around https://bugzilla.mozilla.org/show_bug.cgi?id=1087551
-    // pass in a timeout for this
-    if (webrtc.prefix === 'moz') {
-        if (constraints && constraints.optional) {
-            this.wtFirefox = 0;
-            constraints.optional.forEach(function (constraint, idx) {
-                if (constraint.andyetFirefoxMakesMeSad) {
-                    self.wtFirefox = constraint.andyetFirefoxMakesMeSad;
-                    if (self.wtFirefox > 0) {
-                        self.firefoxcandidatebuffer = [];
-                    }
-                }
-            });
-        }
-    }
-
-
-    this.pc = new peerconn(config, constraints);
-
-    this.getLocalStreams = this.pc.getLocalStreams.bind(this.pc);
-    this.getRemoteStreams = this.pc.getRemoteStreams.bind(this.pc);
-    this.addStream = this.pc.addStream.bind(this.pc);
-    this.removeStream = this.pc.removeStream.bind(this.pc);
-
-    // proxy events
-    this.pc.on('*', function () {
-        self.emit.apply(self, arguments);
-    });
-
-    // proxy some events directly
-    this.pc.onremovestream = this.emit.bind(this, 'removeStream');
-    this.pc.onaddstream = this.emit.bind(this, 'addStream');
-    this.pc.onnegotiationneeded = this.emit.bind(this, 'negotiationNeeded');
-    this.pc.oniceconnectionstatechange = this.emit.bind(this, 'iceConnectionStateChange');
-    this.pc.onsignalingstatechange = this.emit.bind(this, 'signalingStateChange');
-
-    // handle ice candidate and data channel events
-    this.pc.onicecandidate = this._onIce.bind(this);
-    this.pc.ondatachannel = this._onDataChannel.bind(this);
-
-    this.localDescription = {
-        contents: []
-    };
-    this.remoteDescription = {
-        contents: []
-    };
-
-    this.config = {
-        debug: false,
-        ice: {},
-        sid: '',
-        isInitiator: true,
-        sdpSessionID: Date.now(),
-        useJingle: false
-    };
-
-    // apply our config
-    for (item in config) {
-        this.config[item] = config[item];
-    }
-
-    if (this.config.debug) {
-        this.on('*', function (eventName, event) {
-            var logger = config.logger || console;
-            logger.log('PeerConnection event:', arguments);
-        });
-    }
-    this.hadLocalStunCandidate = false;
-    this.hadRemoteStunCandidate = false;
-    this.hadLocalRelayCandidate = false;
-    this.hadRemoteRelayCandidate = false;
-
-    this.hadLocalIPv6Candidate = false;
-    this.hadRemoteIPv6Candidate = false;
-
-    // keeping references for all our data channels
-    // so they dont get garbage collected
-    // can be removed once the following bugs have been fixed
-    // https://crbug.com/405545
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=964092
-    // to be filed for opera
-    this._remoteDataChannels = [];
-    this._localDataChannels = [];
-
-    this._candidateBuffer = [];
-}
-
-util.inherits(PeerConnection, WildEmitter);
-
-Object.defineProperty(PeerConnection.prototype, 'signalingState', {
-    get: function () {
-        return this.pc.signalingState;
-    }
-});
-Object.defineProperty(PeerConnection.prototype, 'iceConnectionState', {
-    get: function () {
-        return this.pc.iceConnectionState;
-    }
-});
-
-PeerConnection.prototype._role = function () {
-    return this.isInitiator ? 'initiator' : 'responder';
-};
-
-// Add a stream to the peer connection object
-PeerConnection.prototype.addStream = function (stream) {
-    this.localStream = stream;
-    this.pc.addStream(stream);
-};
-
-// helper function to check if a remote candidate is a stun/relay
-// candidate or an ipv6 candidate
-PeerConnection.prototype._checkLocalCandidate = function (candidate) {
-    var cand = SJJ.toCandidateJSON(candidate);
-    if (cand.type == 'srflx') {
-        this.hadLocalStunCandidate = true;
-    } else if (cand.type == 'relay') {
-        this.hadLocalRelayCandidate = true;
-    }
-    if (cand.ip.indexOf(':') != -1) {
-        this.hadLocalIPv6Candidate = true;
-    }
-};
-
-// helper function to check if a remote candidate is a stun/relay
-// candidate or an ipv6 candidate
-PeerConnection.prototype._checkRemoteCandidate = function (candidate) {
-    var cand = SJJ.toCandidateJSON(candidate);
-    if (cand.type == 'srflx') {
-        this.hadRemoteStunCandidate = true;
-    } else if (cand.type == 'relay') {
-        this.hadRemoteRelayCandidate = true;
-    }
-    if (cand.ip.indexOf(':') != -1) {
-        this.hadRemoteIPv6Candidate = true;
-    }
-};
-
-
-// Init and add ice candidate object with correct constructor
-PeerConnection.prototype.processIce = function (update, cb) {
-    cb = cb || function () {};
-    var self = this;
-
-    // ignore any added ice candidates to avoid errors. why does the
-    // spec not do this?
-    if (this.pc.signalingState === 'closed') return cb();
-
-    if (update.contents || (update.jingle && update.jingle.contents)) {
-        var contentNames = pluck(this.remoteDescription.contents, 'name');
-        var contents = update.contents || update.jingle.contents;
-
-        contents.forEach(function (content) {
-            var transport = content.transport || {};
-            var candidates = transport.candidates || [];
-            var mline = contentNames.indexOf(content.name);
-            var mid = content.name;
-
-            candidates.forEach(
-                function (candidate) {
-                var iceCandidate = SJJ.toCandidateSDP(candidate) + '\r\n';
-                self.pc.addIceCandidate(
-                    new webrtc.IceCandidate({
-                        candidate: iceCandidate,
-                        sdpMLineIndex: mline,
-                        sdpMid: mid
-                    }), function () {
-                        // well, this success callback is pretty meaningless
-                    },
-                    function (err) {
-                        self.emit('error', err);
-                    }
-                );
-                self._checkRemoteCandidate(iceCandidate);
-            });
-        });
-    } else {
-        // working around https://code.google.com/p/webrtc/issues/detail?id=3669
-        if (update.candidate && update.candidate.candidate.indexOf('a=') !== 0) {
-            update.candidate.candidate = 'a=' + update.candidate.candidate;
-        }
-
-        if (this.wtFirefox && this.firefoxcandidatebuffer !== null) {
-            // we cant add this yet due to https://bugzilla.mozilla.org/show_bug.cgi?id=1087551
-            if (this.pc.localDescription && this.pc.localDescription.type === 'offer') {
-                this.firefoxcandidatebuffer.push(update.candidate);
-                return cb();
-            }
-        }
-
-        self.pc.addIceCandidate(
-            new webrtc.IceCandidate(update.candidate),
-            function () { },
-            function (err) {
-                self.emit('error', err);
-            }
-        );
-        self._checkRemoteCandidate(update.candidate.candidate);
-    }
-    cb();
-};
-
-// Generate and emit an offer with the given constraints
-PeerConnection.prototype.offer = function (constraints, cb) {
-    var self = this;
-    var hasConstraints = arguments.length === 2;
-    var mediaConstraints = hasConstraints && constraints ? constraints : {
-            mandatory: {
-                OfferToReceiveAudio: true,
-                OfferToReceiveVideo: true
-            }
-        };
-    cb = hasConstraints ? cb : constraints;
-    cb = cb || function () {};
-
-    if (this.pc.signalingState === 'closed') return cb('Already closed');
-
-    // Actually generate the offer
-    this.pc.createOffer(
-        function (offer) {
-            // does not work for jingle, but jingle.js doesn't need
-            // this hack...
-            var expandedOffer = {
-                type: 'offer',
-                sdp: offer.sdp
-            };
-            if (self.assumeSetLocalSuccess) {
-                self.emit('offer', expandedOffer);
-                cb(null, expandedOffer);
-            }
-            self._candidateBuffer = [];
-            self.pc.setLocalDescription(offer,
-                function () {
-                    var jingle;
-                    if (self.config.useJingle) {
-                        jingle = SJJ.toSessionJSON(offer.sdp, {
-                            role: self._role(),
-                            direction: 'outgoing'
-                        });
-                        jingle.sid = self.config.sid;
-                        self.localDescription = jingle;
-
-                        // Save ICE credentials
-                        each(jingle.contents, function (content) {
-                            var transport = content.transport || {};
-                            if (transport.ufrag) {
-                                self.config.ice[content.name] = {
-                                    ufrag: transport.ufrag,
-                                    pwd: transport.pwd
-                                };
-                            }
-                        });
-
-                        expandedOffer.jingle = jingle;
-                    }
-                    expandedOffer.sdp.split('\r\n').forEach(function (line) {
-                        if (line.indexOf('a=candidate:') === 0) {
-                            self._checkLocalCandidate(line);
-                        }
-                    });
-
-                    if (!self.assumeSetLocalSuccess) {
-                        self.emit('offer', expandedOffer);
-                        cb(null, expandedOffer);
-                    }
-                },
-                function (err) {
-                    self.emit('error', err);
-                    cb(err);
-                }
-            );
-        },
-        function (err) {
-            self.emit('error', err);
-            cb(err);
-        },
-        mediaConstraints
-    );
-};
-
-
-// Process an incoming offer so that ICE may proceed before deciding
-// to answer the request.
-PeerConnection.prototype.handleOffer = function (offer, cb) {
-    cb = cb || function () {};
-    var self = this;
-    offer.type = 'offer';
-    if (offer.jingle) {
-        if (this.enableChromeNativeSimulcast) {
-            offer.jingle.contents.forEach(function (content) {
-                if (content.name === 'video') {
-                    content.description.googConferenceFlag = true;
-                }
-            });
-        }
-        if (this.enableMultiStreamHacks) {
-            // add a mixed video stream as first stream
-            offer.jingle.contents.forEach(function (content) {
-                if (content.name === 'video') {
-                    var sources = content.description.sources || [];
-                    if (sources.length === 0 || sources[0].ssrc !== "3735928559") {
-                        sources.unshift({
-                            ssrc: "3735928559", // 0xdeadbeef
-                            parameters: [
-                                {
-                                    key: "cname",
-                                    value: "deadbeef"
-                                },
-                                {
-                                    key: "msid",
-                                    value: "mixyourfecintothis please"
-                                }
-                            ]
-                        });
-                        content.description.sources = sources;
-                    }
-                }
-            });
-        }
-        if (self.restrictBandwidth > 0) {
-            if (offer.jingle.contents.length >= 2 && offer.jingle.contents[1].name === 'video') {
-                var content = offer.jingle.contents[1];
-                var hasBw = content.description && content.description.bandwidth;
-                if (!hasBw) {
-                    offer.jingle.contents[1].description.bandwidth = { type: 'AS', bandwidth: self.restrictBandwidth.toString() };
-                    offer.sdp = SJJ.toSessionSDP(offer.jingle, {
-                        sid: self.config.sdpSessionID,
-                        role: self._role(),
-                        direction: 'outgoing'
-                    });
-                }
-            }
-        }
-        offer.sdp = SJJ.toSessionSDP(offer.jingle, {
-            sid: self.config.sdpSessionID,
-            role: self._role(),
-            direction: 'incoming'
-        });
-        self.remoteDescription = offer.jingle;
-    }
-    offer.sdp.split('\r\n').forEach(function (line) {
-        if (line.indexOf('a=candidate:') === 0) {
-            self._checkRemoteCandidate(line);
-        }
-    });
-    self.pc.setRemoteDescription(new webrtc.SessionDescription(offer),
-        function () {
-            cb();
-        },
-        cb
-    );
-};
-
-// Answer an offer with audio only
-PeerConnection.prototype.answerAudioOnly = function (cb) {
-    var mediaConstraints = {
-            mandatory: {
-                OfferToReceiveAudio: true,
-                OfferToReceiveVideo: false
-            }
-        };
-    this._answer(mediaConstraints, cb);
-};
-
-// Answer an offer without offering to recieve
-PeerConnection.prototype.answerBroadcastOnly = function (cb) {
-    var mediaConstraints = {
-            mandatory: {
-                OfferToReceiveAudio: false,
-                OfferToReceiveVideo: false
-            }
-        };
-    this._answer(mediaConstraints, cb);
-};
-
-// Answer an offer with given constraints default is audio/video
-PeerConnection.prototype.answer = function (constraints, cb) {
-    var self = this;
-    var hasConstraints = arguments.length === 2;
-    var callback = hasConstraints ? cb : constraints;
-    var mediaConstraints = hasConstraints && constraints ? constraints : {
-            mandatory: {
-                OfferToReceiveAudio: true,
-                OfferToReceiveVideo: true
-            }
-        };
-
-    this._answer(mediaConstraints, callback);
-};
-
-// Process an answer
-PeerConnection.prototype.handleAnswer = function (answer, cb) {
-    cb = cb || function () {};
-    var self = this;
-    if (answer.jingle) {
-        answer.sdp = SJJ.toSessionSDP(answer.jingle, {
-            sid: self.config.sdpSessionID,
-            role: self._role(),
-            direction: 'incoming'
-        });
-        self.remoteDescription = answer.jingle;
-    }
-    answer.sdp.split('\r\n').forEach(function (line) {
-        if (line.indexOf('a=candidate:') === 0) {
-            self._checkRemoteCandidate(line);
-        }
-    });
-    self.pc.setRemoteDescription(
-        new webrtc.SessionDescription(answer),
-        function () {
-            if (self.wtFirefox) {
-                window.setTimeout(function () {
-                    self.firefoxcandidatebuffer.forEach(function (candidate) {
-                        // add candidates later
-                        self.pc.addIceCandidate(
-                            new webrtc.IceCandidate(candidate),
-                            function () { },
-                            function (err) {
-                                self.emit('error', err);
-                            }
-                        );
-                        self._checkRemoteCandidate(candidate.candidate);
-                    });
-                    self.firefoxcandidatebuffer = null;
-                }, self.wtFirefox);
-            }
-            cb(null);
-        },
-        cb
-    );
-};
-
-// Close the peer connection
-PeerConnection.prototype.close = function () {
-    this.pc.close();
-
-    this._localDataChannels = [];
-    this._remoteDataChannels = [];
-
-    this.emit('close');
-};
-
-// Internal code sharing for various types of answer methods
-PeerConnection.prototype._answer = function (constraints, cb) {
-    cb = cb || function () {};
-    var self = this;
-    if (!this.pc.remoteDescription) {
-        // the old API is used, call handleOffer
-        throw new Error('remoteDescription not set');
-    }
-
-    if (this.pc.signalingState === 'closed') return cb('Already closed');
-
-    self.pc.createAnswer(
-        function (answer) {
-            var sim = [];
-            var rtx = [];
-            if (self.enableChromeNativeSimulcast) {
-                // native simulcast part 1: add another SSRC
-                answer.jingle = SJJ.toSessionJSON(answer.sdp, {
-                    role: self._role(),
-                    direction: 'outgoing'
-                });
-                if (answer.jingle.contents.length >= 2 && answer.jingle.contents[1].name === 'video') {
-                    var hasSimgroup = false;
-                    var groups = answer.jingle.contents[1].description.sourceGroups || [];
-                    var hasSim = false;
-                    groups.forEach(function (group) {
-                        if (group.semantics == 'SIM') hasSim = true;
-                    });
-                    if (!hasSim &&
-                        answer.jingle.contents[1].description.sources.length) {
-                        var newssrc = JSON.parse(JSON.stringify(answer.jingle.contents[1].description.sources[0]));
-                        newssrc.ssrc = '' + Math.floor(Math.random() * 0xffffffff); // FIXME: look for conflicts
-                        answer.jingle.contents[1].description.sources.push(newssrc);
-
-                        sim.push(answer.jingle.contents[1].description.sources[0].ssrc);
-                        sim.push(newssrc.ssrc);
-                        groups.push({
-                            semantics: 'SIM',
-                            sources: sim
-                        });
-
-                        // also create an RTX one for the SIM one
-                        var rtxssrc = JSON.parse(JSON.stringify(newssrc));
-                        rtxssrc.ssrc = '' + Math.floor(Math.random() * 0xffffffff); // FIXME: look for conflicts
-                        answer.jingle.contents[1].description.sources.push(rtxssrc);
-                        groups.push({
-                            semantics: 'FID',
-                            sources: [newssrc.ssrc, rtxssrc.ssrc]
-                        });
-
-                        answer.jingle.contents[1].description.sourceGroups = groups;
-                        answer.sdp = SJJ.toSessionSDP(answer.jingle, {
-                            sid: self.config.sdpSessionID,
-                            role: self._role(),
-                            direction: 'outgoing'
-                        });
-                    }
-                }
-            }
-            var expandedAnswer = {
-                type: 'answer',
-                sdp: answer.sdp
-            };
-            if (self.assumeSetLocalSuccess) {
-                // not safe to do when doing simulcast mangling
-                self.emit('answer', expandedAnswer);
-                cb(null, expandedAnswer);
-            }
-            self._candidateBuffer = [];
-            self.pc.setLocalDescription(answer,
-                function () {
-                    if (self.config.useJingle) {
-                        var jingle = SJJ.toSessionJSON(answer.sdp, {
-                            role: self._role(),
-                            direction: 'outgoing'
-                        });
-                        jingle.sid = self.config.sid;
-                        self.localDescription = jingle;
-                        expandedAnswer.jingle = jingle;
-                    }
-                    if (self.enableChromeNativeSimulcast) {
-                        // native simulcast part 2:
-                        // signal multiple tracks to the receiver
-                        // for anything in the SIM group
-                        if (!expandedAnswer.jingle) {
-                            expandedAnswer.jingle = SJJ.toSessionJSON(answer.sdp, {
-                                role: self._role(),
-                                direction: 'outgoing'
-                            });
-                        }
-                        var groups = expandedAnswer.jingle.contents[1].description.sourceGroups || [];
-                        expandedAnswer.jingle.contents[1].description.sources.forEach(function (source, idx) {
-                            // the floor idx/2 is a hack that relies on a particular order
-                            // of groups, alternating between sim and rtx
-                            source.parameters = source.parameters.map(function (parameter) {
-                                if (parameter.key === 'msid') {
-                                    parameter.value += '-' + Math.floor(idx / 2);
-                                }
-                                return parameter;
-                            });
-                        });
-                        expandedAnswer.sdp = SJJ.toSessionSDP(expandedAnswer.jingle, {
-                            sid: self.sdpSessionID,
-                            role: self._role(),
-                            direction: 'outgoing'
-                        });
-                    }
-                    expandedAnswer.sdp.split('\r\n').forEach(function (line) {
-                        if (line.indexOf('a=candidate:') === 0) {
-                            self._checkLocalCandidate(line);
-                        }
-                    });
-                    if (!self.assumeSetLocalSuccess) {
-                        self.emit('answer', expandedAnswer);
-                        cb(null, expandedAnswer);
-                    }
-                },
-                function (err) {
-                    self.emit('error', err);
-                    cb(err);
-                }
-            );
-        },
-        function (err) {
-            self.emit('error', err);
-            cb(err);
-        },
-        constraints
-    );
-};
-
-// Internal method for emitting ice candidates on our peer object
-PeerConnection.prototype._onIce = function (event) {
-    var self = this;
-    if (event.candidate) {
-        if (this.dontSignalCandidates) return;
-        var ice = event.candidate;
-
-        var expandedCandidate = {
-            candidate: {
-                candidate: ice.candidate,
-                sdpMid: ice.sdpMid,
-                sdpMLineIndex: ice.sdpMLineIndex
-            }
-        };
-        this._checkLocalCandidate(ice.candidate);
-
-        var cand = SJJ.toCandidateJSON(ice.candidate);
-
-        var already;
-        var idx;
-        if (this.eliminateDuplicateCandidates && cand.type === 'relay') {
-            // drop candidates with same foundation, component
-            // take local type pref into account so we don't ignore udp
-            // ones when we know about a TCP one. unlikely but...
-            already = this._candidateBuffer.filter(
-                function (c) {
-                    return c.type === 'relay';
-                }).map(function (c) {
-                    return c.foundation + ':' + c.component;
-                }
-            );
-            idx = already.indexOf(cand.foundation + ':' + cand.component);
-            // remember: local type pref of udp is 0, tcp 1, tls 2
-            if (idx > -1 && ((cand.priority >> 24) >= (already[idx].priority >> 24))) {
-                // drop it, same foundation with higher (worse) type pref
-                return;
-            }
-        }
-        if (this.config.bundlePolicy === 'max-bundle') {
-            // drop candidates which are duplicate for audio/video/data
-            // duplicate means same host/port but different sdpMid
-            already = this._candidateBuffer.filter(
-                function (c) {
-                    return cand.type === c.type;
-                }).map(function (cand) {
-                    return cand.address + ':' + cand.port;
-                }
-            );
-            idx = already.indexOf(cand.address + ':' + cand.port);
-            if (idx > -1) return;
-        }
-        // also drop rtcp candidates since we know the peer supports RTCP-MUX
-        // this is a workaround until browsers implement this natively
-        if (this.config.rtcpMuxPolicy === 'require' && cand.component === '2') {
-            return;
-        }
-        this._candidateBuffer.push(cand);
-
-        if (self.config.useJingle) {
-            if (!ice.sdpMid) { // firefox doesn't set this
-                if (self.pc.remoteDescription && self.pc.remoteDescription.type === 'offer') {
-                    // preserve name from remote
-                    ice.sdpMid = self.remoteDescription.contents[ice.sdpMLineIndex].name;
-                } else {
-                    ice.sdpMid = self.localDescription.contents[ice.sdpMLineIndex].name;
-                }
-            }
-            if (!self.config.ice[ice.sdpMid]) {
-                var jingle = SJJ.toSessionJSON(self.pc.localDescription.sdp, {
-                    role: self._role(),
-                    direction: 'outgoing'
-                });
-                each(jingle.contents, function (content) {
-                    var transport = content.transport || {};
-                    if (transport.ufrag) {
-                        self.config.ice[content.name] = {
-                            ufrag: transport.ufrag,
-                            pwd: transport.pwd
-                        };
-                    }
-                });
-            }
-            expandedCandidate.jingle = {
-                contents: [{
-                    name: ice.sdpMid,
-                    creator: self._role(),
-                    transport: {
-                        transType: 'iceUdp',
-                        ufrag: self.config.ice[ice.sdpMid].ufrag,
-                        pwd: self.config.ice[ice.sdpMid].pwd,
-                        candidates: [
-                            cand
-                        ]
-                    }
-                }]
-            };
-            if (self.batchIceCandidates > 0) {
-                if (self.batchedIceCandidates.length === 0) {
-                    window.setTimeout(function () {
-                        var contents = {};
-                        self.batchedIceCandidates.forEach(function (content) {
-                            content = content.contents[0];
-                            if (!contents[content.name]) contents[content.name] = content;
-                            contents[content.name].transport.candidates.push(content.transport.candidates[0]);
-                        });
-                        var newCand = {
-                            jingle: {
-                                contents: []
-                            }
-                        };
-                        Object.keys(contents).forEach(function (name) {
-                            newCand.jingle.contents.push(contents[name]);
-                        });
-                        self.batchedIceCandidates = [];
-                        self.emit('ice', newCand);
-                    }, self.batchIceCandidates);
-                }
-                self.batchedIceCandidates.push(expandedCandidate.jingle);
-                return;
-            }
-
-        }
-        this.emit('ice', expandedCandidate);
-    } else {
-        this.emit('endOfCandidates');
-    }
-};
-
-// Internal method for processing a new data channel being added by the
-// other peer.
-PeerConnection.prototype._onDataChannel = function (event) {
-    // make sure we keep a reference so this doesn't get garbage collected
-    var channel = event.channel;
-    this._remoteDataChannels.push(channel);
-
-    this.emit('addChannel', channel);
-};
-
-// Create a data channel spec reference:
-// http://dev.w3.org/2011/webrtc/editor/webrtc.html#idl-def-RTCDataChannelInit
-PeerConnection.prototype.createDataChannel = function (name, opts) {
-    var channel = this.pc.createDataChannel(name, opts);
-
-    // make sure we keep a reference so this doesn't get garbage collected
-    this._localDataChannels.push(channel);
-
-    return channel;
-};
-
-// a wrapper around getStats which hides the differences (where possible)
-PeerConnection.prototype.getStats = function (cb) {
-    if (webrtc.prefix === 'moz') {
-        this.pc.getStats(
-            function (res) {
-                var items = [];
-                for (var result in res) {
-                    if (typeof res[result] === 'object') {
-                        items.push(res[result]);
-                    }
-                }
-                cb(null, items);
-            },
-            cb
-        );
-    } else {
-        this.pc.getStats(function (res) {
-            var items = [];
-            res.result().forEach(function (result) {
-                var item = {};
-                result.names().forEach(function (name) {
-                    item[name] = result.stat(name);
-                });
-                item.id = result.id;
-                item.type = result.type;
-                item.timestamp = result.timestamp;
-                items.push(item);
-            });
-            cb(null, items);
-        });
-    }
-};
-
-module.exports = PeerConnection;
-
-},{"lodash.foreach":80,"lodash.pluck":88,"sdp-jingle-json":103,"traceablepeerconnection":108,"util":24,"webrtcsupport":115,"wildemitter":116}],111:[function(require,module,exports){
+},{"./lib/tojson":113,"./lib/tosdp":114,"dup":77}],111:[function(require,module,exports){
+arguments[4][78][0].apply(exports,arguments)
+},{"dup":78}],112:[function(require,module,exports){
+arguments[4][79][0].apply(exports,arguments)
+},{"dup":79}],113:[function(require,module,exports){
+arguments[4][80][0].apply(exports,arguments)
+},{"./parsers":111,"./senders":112,"dup":80}],114:[function(require,module,exports){
+arguments[4][81][0].apply(exports,arguments)
+},{"./senders":112,"dup":81}],115:[function(require,module,exports){
+arguments[4][82][0].apply(exports,arguments)
+},{"dup":82,"util":28,"webrtc-adapter-test":116,"wildemitter":124}],116:[function(require,module,exports){
+arguments[4][83][0].apply(exports,arguments)
+},{"dup":83}],117:[function(require,module,exports){
+arguments[4][85][0].apply(exports,arguments)
+},{"dup":85,"lodash.foreach":87,"lodash.pluck":95,"sdp-jingle-json":110,"traceablepeerconnection":115,"util":28,"webrtc-adapter-test":116,"wildemitter":124}],118:[function(require,module,exports){
 var util = require('util');
 var uuid = require('uuid');
 var async = require('async');
@@ -21825,7 +22463,7 @@ JingleSession.prototype = extend(JingleSession.prototype, {
 
 module.exports = JingleSession;
 
-},{"async":112,"extend-object":26,"util":24,"uuid":114,"wildemitter":116}],112:[function(require,module,exports){
+},{"async":119,"extend-object":30,"util":28,"uuid":121,"wildemitter":122}],119:[function(require,module,exports){
 (function (process){
 /*!
  * async
@@ -22952,7 +23590,7 @@ module.exports = JingleSession;
 }());
 
 }).call(this,require('_process'))
-},{"_process":9}],113:[function(require,module,exports){
+},{"_process":10}],120:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -22987,7 +23625,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],114:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -23172,7 +23810,9 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":113}],115:[function(require,module,exports){
+},{"./rng":120}],122:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"dup":53}],123:[function(require,module,exports){
 // created by @HenrikJoreteg
 var prefix;
 var version;
@@ -23224,152 +23864,5830 @@ module.exports = {
     getUserMedia: getUserMedia
 };
 
-},{}],116:[function(require,module,exports){
-/*
-WildEmitter.js is a slim little event emitter by @henrikjoreteg largely based 
-on @visionmedia's Emitter from UI Kit.
+},{}],124:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"dup":53}],125:[function(require,module,exports){
+'use strict';
 
-Why? I wanted it standalone.
-
-I also wanted support for wildcard emitters like this:
-
-emitter.on('*', function (eventName, other, event, payloads) {
-    
+Object.defineProperty(exports, '__esModule', {
+    value: true
 });
 
-emitter.on('somenamespace*', function (eventName, payloads) {
-    
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _shortcuts = require('./shortcuts');
+
+var _shortcuts2 = _interopRequireDefault(_shortcuts);
+
+var _types = require('./types');
+
+var _types2 = _interopRequireDefault(_types);
+
+exports['default'] = function (JXT) {
+
+    JXT.use(_types2['default']);
+    JXT.use(_shortcuts2['default']);
+};
+
+module.exports = exports['default'];
+
+},{"./shortcuts":126,"./types":127}],126:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
 });
 
-Please note that callbacks triggered by wildcard registered events also get 
-the event name as the first argument.
-*/
-module.exports = WildEmitter;
+var _xmppConstants = require('xmpp-constants');
 
-function WildEmitter() {
-    this.isWildEmitter = true;
-    this.callbacks = {};
+var VERSION = {
+    client: _xmppConstants.Namespace.CLIENT,
+    server: _xmppConstants.Namespace.SERVER,
+    component: _xmppConstants.Namespace.COMPONENT
+};
+
+exports['default'] = function (JXT) {
+
+    // ----------------------------------------------------------------
+    // Shortcuts for common extension calls
+    // ----------------------------------------------------------------
+
+    JXT.extendMessage = function (JXTClass, multiName) {
+        var _this = this;
+
+        this.withMessage(function (Message) {
+
+            _this.extend(Message, JXTClass, multiName);
+        });
+    };
+
+    JXT.extendPresence = function (JXTClass, multiName) {
+        var _this2 = this;
+
+        this.withPresence(function (Presence) {
+
+            _this2.extend(Presence, JXTClass, multiName);
+        });
+    };
+
+    JXT.extendIQ = function (JXTClass, multiName) {
+        var _this3 = this;
+
+        this.withIQ(function (IQ) {
+
+            _this3.extend(IQ, JXTClass, multiName);
+        });
+    };
+
+    JXT.extendStreamFeatures = function (JXTClass) {
+        var _this4 = this;
+
+        this.withStreamFeatures(function (StreamFeatures) {
+
+            _this4.extend(StreamFeatures, JXTClass);
+        });
+    };
+
+    JXT.extendPubsubItem = function (JXTClass) {
+        var _this5 = this;
+
+        this.withPubsubItem(function (PubsubItem) {
+
+            _this5.extend(PubsubItem, JXTClass);
+        });
+    };
+
+    // ----------------------------------------------------------------
+    // Shortcuts for common withDefinition calls
+    // ----------------------------------------------------------------
+
+    JXT.withIQ = function (cb) {
+
+        this.withDefinition('iq', _xmppConstants.Namespace.CLIENT, cb);
+        this.withDefinition('iq', _xmppConstants.Namespace.COMPONENT, cb);
+    };
+
+    JXT.withMessage = function (cb) {
+
+        this.withDefinition('message', _xmppConstants.Namespace.CLIENT, cb);
+        this.withDefinition('message', _xmppConstants.Namespace.COMPONENT, cb);
+    };
+
+    JXT.withPresence = function (cb) {
+
+        this.withDefinition('presence', _xmppConstants.Namespace.CLIENT, cb);
+        this.withDefinition('presence', _xmppConstants.Namespace.COMPONENT, cb);
+    };
+
+    JXT.withStreamFeatures = function (cb) {
+
+        this.withDefinition('features', _xmppConstants.Namespace.STREAM, cb);
+    };
+
+    JXT.withStanzaError = function (cb) {
+
+        this.withDefinition('error', _xmppConstants.Namespace.CLIENT, cb);
+        this.withDefinition('error', _xmppConstants.Namespace.COMPONENT, cb);
+    };
+
+    JXT.withDataForm = function (cb) {
+
+        this.withDefinition('x', _xmppConstants.Namespace.DATAFORM, cb);
+    };
+
+    JXT.withPubsubItem = function (cb) {
+
+        this.withDefinition('item', _xmppConstants.Namespace.PUBSUB, cb);
+        this.withDefinition('item', _xmppConstants.Namespace.PUBSUB_EVENT, cb);
+    };
+
+    // ----------------------------------------------------------------
+    // Shortcuts for common getDefinition calls
+    // ----------------------------------------------------------------
+
+    JXT.getMessage = function () {
+        var version = arguments[0] === undefined ? 'client' : arguments[0];
+
+        return this.getDefinition('message', VERSION[version]);
+    };
+
+    JXT.getPresence = function () {
+        var version = arguments[0] === undefined ? 'client' : arguments[0];
+
+        return this.getDefinition('presence', VERSION[version]);
+    };
+
+    JXT.getIQ = function () {
+        var version = arguments[0] === undefined ? 'client' : arguments[0];
+
+        return this.getDefinition('iq', VERSION[version]);
+    };
+
+    JXT.getStreamError = function () {
+
+        return this.getDefinition('error', _xmppConstants.Namespace.STREAM);
+    };
+
+    // For backward compatibility
+    JXT.getIq = JXT.getIQ;
+    JXT.withIq = JXT.withIQ;
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":128}],127:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppJid = require('xmpp-jid');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    Utils.jidAttribute = function (attr, prepped) {
+
+        return {
+            get: function get() {
+
+                var jid = new _xmppJid.JID(Utils.getAttribute(this.xml, attr));
+                if (prepped) {
+                    jid.prepped = true;
+                }
+                return jid;
+            },
+            set: function set(value) {
+
+                Utils.setAttribute(this.xml, attr, (value || '').toString());
+            }
+        };
+    };
+
+    Utils.jidSub = function (NS, sub, prepped) {
+
+        return {
+            get: function get() {
+
+                var jid = new _xmppJid.JID(Utils.getSubText(this.xml, NS, sub));
+                if (prepped) {
+                    jid.prepped = true;
+                }
+                return jid;
+            },
+            set: function set(value) {
+
+                Utils.setSubText(this.xml, NS, sub, (value || '').toString());
+            }
+        };
+    };
+
+    Utils.tzoSub = Utils.field(function (xml, NS, sub, defaultVal) {
+
+        var hrs = undefined,
+            min = undefined,
+            split = undefined;
+        var sign = -1;
+        var formatted = Utils.getSubText(xml, NS, sub);
+
+        if (!formatted) {
+            return defaultVal;
+        }
+
+        if (formatted.charAt(0) === '-') {
+            sign = 1;
+            formatted = formatted.slice(1);
+        }
+
+        split = formatted.split(':');
+        hrs = parseInt(split[0], 10);
+        min = parseInt(split[1], 10);
+        return (hrs * 60 + min) * sign;
+    }, function (xml, NS, sub, value) {
+
+        var hrs = undefined,
+            min = undefined;
+        var formatted = '-';
+        if (typeof value === 'number') {
+            if (value < 0) {
+                value = -value;
+                formatted = '+';
+            }
+            hrs = value / 60;
+            min = value % 60;
+            formatted += (hrs < 10 ? '0' : '') + hrs + ':' + (min < 10 ? '0' : '') + min;
+        } else {
+            formatted = value;
+        }
+        Utils.setSubText(xml, NS, sub, formatted);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-jid":134}],128:[function(require,module,exports){
+module.exports = {
+    Namespace: require('./lib/namespaces'),
+    MUC: require('./lib/muc'),
+    PubSub: require('./lib/pubsub'),
+    Jingle: require('./lib/jingle'),
+    Presence: require('./lib/presence')
+};
+
+},{"./lib/jingle":129,"./lib/muc":130,"./lib/namespaces":131,"./lib/presence":132,"./lib/pubsub":133}],129:[function(require,module,exports){
+module.exports = {
+    Action: {
+        CONTENT_ACCEPT: 'content-accept',
+        CONTENT_ADD: 'content-add',
+        CONTENT_MODIFY: 'content-modify',
+        CONTENT_REJECT: 'content-reject',
+        CONTENT_REMOVE: 'content-remove',
+        DESCRIPTION_INFO: 'description-info',
+        SECURITY_INFO: 'security-info',
+        SESSION_ACCEPT: 'session-accept',
+        SESSION_INFO: 'session-info',
+        SESSION_INITIATE: 'session-initiate',
+        SESSION_TERMINATE: 'session-terminate',
+        TRANSPORT_ACCEPT: 'transport-accept',
+        TRANSPORT_INFO: 'transport-info',
+        TRANSPORT_REJECT: 'transport-reject',
+        TRANSPORT_REPLACE: 'transport-replace'
+    },
+    Reason: {
+        ALTERNATIVE_SESSION: 'alernative-session',
+        BUSY: 'busy',
+        CANCEL: 'cancel',
+        CONNECTIVITY_ERROR: 'connectivity-error',
+        DECLINE: 'decline',
+        EXPIRED: 'expired',
+        FAILED_APPLICATION: 'failed-application',
+        FAILED_TRANSPORT: 'failed-transport',
+        GENERAL_ERROR: 'general-error',
+        GONE: 'gone',
+        INCOMPATIBLE_PARAMETERS: 'incompatible-parameters',
+        MEDIA_ERROR: 'media-error',
+        SECURITY_ERROR: 'security-error',
+        SUCCESS: 'success',
+        TIMEOUT: 'timeout',
+        UNSUPPORTED_APPLICATIONS: 'unsupported-applications',
+        UNSUPPORTED_TRANSPORTS: 'unsupported-transports'
+    },
+    Condition: {
+        OUT_OF_ORDER: 'out-of-order',
+        TIE_BREAK: 'tie-break',
+        UNKNOWN_SESSION: 'unknown-session',
+        UNSUPPORTED_INFO: 'unsupported-info'
+    }
+};
+
+},{}],130:[function(require,module,exports){
+module.exports = {
+    Status: {
+        REALJID_PUBLIC: '100',
+        AFFILIATION_CHANGED: '101',
+        UNAVAILABLE_SHOWN: '102',
+        UNAVAILABLE_NOT_SHOWN: '103',
+        CONFIGURATION_CHANGED: '104',
+        SELF_PRESENCE: '110',
+        LOGGING_ENABLED: '170',
+        LOGGING_DISABLED: '171',
+        NON_ANONYMOUS: '172',
+        SEMI_ANONYMOUS: '173',
+        FULLY_ANONYMOUS: '174',
+        ROOM_CREATED: '201',
+        NICK_ASSIGNED: '210',
+        BANNED: '301',
+        NEW_NICK: '303',
+        KICKED: '307',
+        REMOVED_AFFILIATION: '321',
+        REMOVED_MEMBERSHIP: '322',
+        REMOVED_SHUTDOWN: '332'
+    },
+    Affiliation: {
+        ADMIN: 'admin',
+        MEMBER: 'member',
+        NONE: 'none',
+        OUTCAST: 'outcast',
+        OWNER: 'owner'
+    },
+    Role: {
+        MODERATOR: 'moderator',
+        NONE: 'none',
+        PARTICIPANT: 'participant',
+        VISITOR: 'visitor'
+    }
+};
+
+},{}],131:[function(require,module,exports){
+module.exports = {
+// ================================================================
+// RFCS
+// ================================================================
+
+// RFC 6120
+    BIND: 'urn:ietf:params:xml:ns:xmpp-bind',
+    CLIENT: 'jabber:client',
+    SASL: 'urn:ietf:params:xml:ns:xmpp-sasl',
+    SERVER: 'jabber:server',
+    SESSION: 'urn:ietf:params:xml:ns:xmpp-session',
+    STANZA_ERROR: 'urn:ietf:params:xml:ns:xmpp-stanzas',
+    STREAM: 'http://etherx.jabber.org/streams',
+    STREAM_ERROR: 'urn:ietf:params:xml:ns:xmpp-streams',
+
+// RFC 6121
+    ROSTER: 'jabber:iq:roster',
+    ROSTER_VERSIONING: 'urn:xmpp:features:rosterver',
+    SUBSCRIPTION_PREAPPROVAL: 'urn:xmpp:features:pre-approval',
+
+// RFC 7395
+    FRAMING: 'urn:ietf:params:xml:ns:xmpp-framing',
+
+// ================================================================
+// XEPS
+// ================================================================
+
+// XEP-0004
+    DATAFORM: 'jabber:x:data',
+
+// XEP-0009
+    RPC: 'jabber:iq:rpc',
+
+// XEP-0012
+    LAST_ACTIVITY: 'jabber:iq:last',
+
+// XEP-0016
+    PRIVACY: 'jabber:iq:privacy',
+
+// XEP-0030
+    DISCO_INFO: 'http://jabber.org/protocol/disco#info',
+    DISCO_ITEMS: 'http://jabber.org/protocol/disco#items',
+
+// XEP-0033
+    ADDRESS: 'http://jabber.org/protocol/address',
+
+// XEP-0045
+    MUC: 'http://jabber.org/protocol/muc',
+    MUC_ADMIN: 'http://jabber.org/protocol/muc#admin',
+    MUC_OWNER: 'http://jabber.org/protocol/muc#owner',
+    MUC_USER: 'http://jabber.org/protocol/muc#user',
+
+// XEP-0047
+    IBB: 'http://jabber.org/protocol/ibb',
+
+// XEP-0048
+    BOOKMARKS: 'storage:bookmarks',
+
+// XEP-0049
+    PRIVATE: 'jabber:iq:private',
+
+// XEP-0050
+    ADHOC_COMMANDS: 'http://jabber.org/protocol/commands',
+
+// XEP-0054
+    VCARD_TEMP: 'vcard-temp',
+
+// XEP-0055
+    SEARCH: 'jabber:iq:search',
+
+// XEP-0059
+    RSM: 'http://jabber.org/protocol/rsm',
+
+// XEP-0060
+    PUBSUB: 'http://jabber.org/protocol/pubsub',
+    PUBSUB_ERRORS: 'http://jabber.org/protocol/pubsub#errors',
+    PUBSUB_EVENT: 'http://jabber.org/protocol/pubsub#event',
+    PUBSUB_OWNER: 'http://jabber.org/protocol/pubsub#owner',
+
+// XEP-0065
+    SOCKS5: 'http://jabber.org/protocol/bytestreams',
+
+// XEP-0066
+    OOB: 'jabber:x:oob',
+
+// XEP-0070
+    HTTP_AUTH: 'http://jabber.org/protocol/http-auth',
+
+// XEP-0071
+    XHTML_IM: 'http://jabber.org/protocol/xhtml-im',
+
+// XEP-0077
+    REGISTER: 'jabber:iq:register',
+
+// XEP-0079
+    AMP: 'http://jabber.org/protocol/amp',
+
+// XEP-0080
+    GEOLOC: 'http://jabber.org/protocol/geoloc',
+
+// XEP-0083
+    ROSTER_DELIMITER: 'roster:delimiter',
+
+// XEP-0084
+    AVATAR_DATA: 'urn:xmpp:avatar:data',
+    AVATAR_METADATA: 'urn:xmpp:avatar:metadata',
+
+// XEP-0085
+    CHAT_STATES: 'http://jabber.org/protocol/chatstates',
+
+// XEP-0092
+    VERSION: 'jabber:iq:version',
+
+// XEP-0107
+    MOOD: 'http://jabber.org/protocol/mood',
+
+// XEP-0108
+    ACTIVITY: 'http://jabber.org/protocol/activity',
+
+// XEP-0114
+    COMPONENT: 'jabber:component:accept',
+
+// XEP-0115
+    CAPS: 'http://jabber.org/protocol/caps',
+
+// XEP-0118
+    TUNE: 'http://jabber.org/protocol/tune',
+
+// XEP-0122
+    DATAFORM_VALIDATION: 'http://jabber.org/protocol/xdata-validate',
+
+// XEP-0124
+    BOSH: 'http://jabber.org/protocol/httpbind',
+
+// XEP-0131
+    SHIM: 'http://jabber.org/protocol/shim',
+
+// XEP-0138
+    COMPRESSION: 'http://jabber.org/features/compress',
+
+// XEP-0141
+    DATAFORM_LAYOUT: 'http://jabber.org/protocol/xdata-layout',
+
+// XEP-0144
+    ROSTER_EXCHANGE: 'http://jabber.org/protocol/rosterx',
+
+// XEP-0145
+    ROSTER_NOTES: 'storage:rosternotes',
+
+// XEP-0152
+    REACH_0: 'urn:xmpp:reach:0',
+
+// XEP-0153
+    VCARD_TEMP_UPDATE: 'vcard-temp:x:update',
+
+// XEP-0158
+    CAPTCHA: 'urn:xmpp:captcha',
+
+// XEP-0166
+    JINGLE_1: 'urn:xmpp:jingle:1',
+    JINGLE_ERRORS_1: 'urn:xmpp:jingle:errors:1',
+
+// XEP-0167
+    JINGLE_RTP_1: 'urn:xmpp:jingle:apps:rtp:1',
+    JINGLE_RTP_ERRORS_1: 'urn:xmpp:jingle:apps:rtp:errors:1',
+    JINGLE_RTP_INFO_1: 'urn:xmpp:jingle:apps:rtp:info:1',
+
+// XEP-0171
+    LANG_TRANS: 'urn:xmpp:langtrans',
+    LANG_TRANS_ITEMS: 'urn:xmpp:langtrans:items',
+
+// XEP-0172
+    NICK: 'http://jabber.org/protocol/nick',
+
+// XEP-0176
+    JINGLE_ICE_UDP_1: 'urn:xmpp:jingle:transports:ice-udp:1',
+
+// XEP-0177
+    JINGLE_RAW_UDP_1: 'urn:xmpp:jingle:transports:raw-udp:1',
+
+// XEP-0184
+    RECEIPTS: 'urn:xmpp:receipts',
+
+// XEP-0186
+    INVISIBLE_0: 'urn:xmpp:invisible:0',
+
+// XEP-0191
+    BLOCKING: 'urn:xmpp:blocking',
+
+// XEP-0198
+    SMACKS_3: 'urn:xmpp:sm:3',
+
+// XEP-0199
+    PING: 'urn:xmpp:ping',
+
+// XEP-0202
+    TIME: 'urn:xmpp:time',
+
+// XEP-0203
+    DELAY: 'urn:xmpp:delay',
+
+// XEP-0206
+    BOSH_XMPP: 'urn:xmpp:xbosh',
+
+// XEP-0215
+    DISCO_EXTERNAL_1: 'urn:xmpp:extdisco:1',
+
+// XEP-0221
+    DATAFORM_MEDIA: 'urn:xmpp:media-element',
+
+// XEP-0224
+    ATTENTION_0: 'urn:xmpp:attention:0',
+
+// XEP-0231
+    BOB: 'urn:xmpp:bob',
+
+// XEP-0234
+    FILE_TRANSFER_3: 'urn:xmpp:jingle:apps:file-transfer:3',
+    FILE_TRANSFER_4: 'urn:xmpp:jingle:apps:file-transfer:4',
+
+// XEP-0249
+    MUC_DIRECT_INVITE: 'jabber:x:conference',
+
+// XEP-0258
+    SEC_LABEL_0: 'urn:xmpp:sec-label:0',
+    SEC_LABEL_CATALOG_2: 'urn:xmpp:sec-label:catalog:2',
+    SEC_LABEL_ESS_0: 'urn:xmpp:sec-label:ess:0',
+
+// XEP-0260
+    JINGLE_SOCKS5_1: 'urn:xmpp:jingle:transports:s5b:1',
+
+// XEP-0261
+    JINGLE_IBB_1: 'urn:xmpp:jingle:transports:ibb:1',
+
+// XEP-0262
+    JINGLE_RTP_ZRTP_1: 'urn:xmpp:jingle:apps:rtp:zrtp:1',
+
+// XEP-0264
+    THUMBS_0: 'urn:xmpp:thumbs:0',
+    THUMBS_1: 'urn:xmpp:thumbs:1',
+
+// XEP-0276
+    DECLOAKING_0: 'urn:xmpp:decloaking:0',
+
+// XEP-0280
+    CARBONS_2: 'urn:xmpp:carbons:2',
+
+// XEP-0293
+    JINGLE_RTP_RTCP_FB_0: 'urn:xmpp:jingle:apps:rtp:rtcp-fb:0',
+
+// XEP-0294
+    JINGLE_RTP_HDREXT_0: 'urn:xmpp:jingle:apps:rtp:rtp-hdrext:0',
+
+// XEP-0297
+    FORWARD_0: 'urn:xmpp:forward:0',
+
+// XEP-0300
+    HASHES_1: 'urn:xmpp:hashes:1',
+
+// XEP-0301
+    RTT_0: 'urn:xmpp:rtt:0',
+
+// XEP-0307
+    MUC_UNIQUE: 'http://jabber.org/protocol/muc#unique',
+
+// XEP-308
+    CORRECTION_0: 'urn:xmpp:message-correct:0',
+
+// XEP-0310
+    PSA: 'urn:xmpp:psa',
+
+// XEP-0313
+    MAM_TMP: 'urn:xmpp:mam:tmp',
+    MAM_0: 'urn:xmpp:mam:0',
+
+// XEP-0317
+    HATS_0: 'urn:xmpp:hats:0',
+
+// XEP-0319
+    IDLE_1: 'urn:xmpp:idle:1',
+
+// XEP-0320
+    JINGLE_DTLS_0: 'urn:xmpp:jingle:apps:dtls:0',
+
+// XEP-0328
+    JID_PREP_0: 'urn:xmpp:jidprep:0',
+
+// XEP-0334
+    HINTS: 'urn:xmpp:hints',
+
+// XEP-0335
+    JSON_0: 'urn:xmpp:json:0',
+
+// XEP-0337
+    EVENTLOG: 'urn:xmpp:eventlog',
+
+// XEP-0338
+    JINGLE_GROUPING_0: 'urn:xmpp:jingle:apps:grouping:0',
+
+// XEP-0339
+    JINGLE_RTP_SSMA_0: 'urn:xmpp:jingle:apps:rtp:ssma:0',
+
+// XEP-0340
+    COLIBRI: 'http://jitsi.org/protocol/colibri',
+
+// XEP-0343
+    DTLS_SCTP_1: 'urn:xmpp:jingle:transports:dtls-sctp:1',
+
+// XEP-0352
+    CSI: 'urn:xmpp:csi',
+
+// XEP-0353
+    JINGLE_MSG_INITIATE_0: 'urn:xmpp:jingle:jingle-message:0',
+
+// XEP-0357
+    PUSH_0: 'urn:xmpp:push:0',
+
+// XEP-0358
+    JINGLE_PUB_1: 'urn:xmpp:jinglepub:1'
+};
+
+},{}],132:[function(require,module,exports){
+module.exports = {
+    Type: {
+        SUBSCRIBE: 'subscribe',
+        SUBSCRIBED: 'subscribed',
+        UNSUBSCRIBE: 'unsubscribe',
+        UNSUBSCRIBED: 'unsubscribed',
+        PROBE: 'probe',
+        UNAVAILABLE: 'unavailable'
+    },
+    Show: {
+        CHAT: 'chat',
+        AWAY: 'away',
+        DO_NOT_DISTURB: 'dnd',
+        EXTENDED_AWAY: 'xa'
+    }
+};
+
+},{}],133:[function(require,module,exports){
+module.exports = {
+    Affiliation: {
+        MEMBER: 'member',
+        NONE: 'none',
+        OUTCAST: 'outcast',
+        OWNER: 'owner',
+        PUBLISHER: 'publisher',
+        PUBLISH_ONLY: 'publish-only'
+    },
+    Subscription: {
+        NONE: 'none',
+        PENDING: 'pending',
+        UNCONFIGURED: 'unconfigured',
+        SUBSCRIBED: 'subscribed'
+    },
+    AccessModel: {
+        OPEN: 'open',
+        PRESENCE: 'presence',
+        ROSTER: 'roster',
+        AUTHORIZE: 'authorize',
+        WHITELIST: 'whitelist'
+    },
+    Condition: {
+        CONFLICT: 'conflict'
+    }
+};
+
+},{}],134:[function(require,module,exports){
+'use strict';
+
+var StringPrep = require('./lib/stringprep');
+
+// All of our StringPrep fallbacks work correctly
+// in the ASCII range, so we can reliably mark
+// ASCII-only JIDs as prepped.
+var ASCII = /^[\x00-\x7F]*$/;
+
+
+
+function bareJID(local, domain) {
+    if (local) {
+        return local + '@' + domain;
+    }
+    return domain;
 }
 
-// Listen on the given `event` with `fn`. Store a group name if present.
-WildEmitter.prototype.on = function (event, groupName, fn) {
-    var hasGroup = (arguments.length === 3),
-        group = hasGroup ? arguments[1] : undefined,
-        func = hasGroup ? arguments[2] : arguments[1];
-    func._groupName = group;
-    (this.callbacks[event] = this.callbacks[event] || []).push(func);
-    return this;
-};
-
-// Adds an `event` listener that will be invoked a single
-// time then automatically removed.
-WildEmitter.prototype.once = function (event, groupName, fn) {
-    var self = this,
-        hasGroup = (arguments.length === 3),
-        group = hasGroup ? arguments[1] : undefined,
-        func = hasGroup ? arguments[2] : arguments[1];
-    function on() {
-        self.off(event, on);
-        func.apply(this, arguments);
+function fullJID(local, domain, resource) {
+    if (resource) {
+        return bareJID(local, domain) + '/' + resource;
     }
-    this.on(event, group, on);
-    return this;
+    return bareJID(local, domain);
+}
+
+
+exports.prep = function (data) {
+    var local = data.local;
+    var domain = data.domain;
+    var resource = data.resource;
+    var unescapedLocal = local;
+
+    if (local) {
+        local = StringPrep.nodeprep(local);
+        unescapedLocal = exports.unescape(local);
+    }
+
+    if (resource) {
+        resource = StringPrep.resourceprep(resource);
+    }
+
+    if (domain[domain.length - 1] === '.') {
+        domain = domain.slice(0, domain.length - 1);
+    }
+
+    domain = StringPrep.nameprep(domain.split('.').map(StringPrep.toUnicode).join('.'));
+
+    return {
+        prepped: data.prepped || StringPrep.available,
+        local: local,
+        domain: domain,
+        resource: resource,
+        bare: bareJID(local, domain),
+        full: fullJID(local, domain, resource),
+        unescapedLocal: unescapedLocal,
+        unescapedBare: bareJID(unescapedLocal, domain),
+        unescapedFull: fullJID(unescapedLocal, domain, resource)
+    };
 };
 
-// Unbinds an entire group
-WildEmitter.prototype.releaseGroup = function (groupName) {
-    var item, i, len, handlers;
-    for (item in this.callbacks) {
-        handlers = this.callbacks[item];
-        for (i = 0, len = handlers.length; i < len; i++) {
-            if (handlers[i]._groupName === groupName) {
-                //console.log('removing');
-                // remove it and shorten the array we're looping through
-                handlers.splice(i, 1);
-                i--;
-                len--;
+exports.parse = function (jid, trusted) {
+    var local = '';
+    var domain = '';
+    var resource = '';
+
+    trusted = trusted || ASCII.test(jid);
+
+    var resourceStart = jid.indexOf('/');
+    if (resourceStart > 0) {
+        resource = jid.slice(resourceStart + 1);
+        jid = jid.slice(0, resourceStart);
+    }
+
+    var localEnd = jid.indexOf('@');
+    if (localEnd > 0) {
+        local = jid.slice(0, localEnd);
+        jid = jid.slice(localEnd + 1);
+    }
+
+    domain = jid;
+
+    var preppedJID = exports.prep({
+        local: local,
+        domain: domain,
+        resource: resource,
+    });
+
+    preppedJID.prepped = preppedJID.prepped || trusted;
+
+    return preppedJID;
+};
+
+exports.equal = function (jid1, jid2, requirePrep) {
+    jid1 = new exports.JID(jid1);
+    jid2 = new exports.JID(jid2);
+    if (arguments.length === 2) {
+        requirePrep = true;
+    }
+    return jid1.local === jid2.local &&
+           jid1.domain === jid2.domain &&
+           jid1.resource === jid2.resource &&
+           (requirePrep ? jid1.prepped && jid2.prepped : true);
+};
+
+exports.equalBare = function (jid1, jid2, requirePrep) {
+    jid1 = new exports.JID(jid1);
+    jid2 = new exports.JID(jid2);
+    if (arguments.length === 2) {
+        requirePrep = true;
+    }
+    return jid1.local === jid2.local &&
+           jid1.domain === jid2.domain &&
+           (requirePrep ? jid1.prepped && jid2.prepped : true);
+};
+
+exports.isBare = function (jid) {
+    jid = new exports.JID(jid);
+
+    var hasResource = !!jid.resource;
+
+    return !hasResource;
+};
+
+exports.isFull = function (jid) {
+    jid = new exports.JID(jid);
+
+    var hasResource = !!jid.resource;
+
+    return hasResource;
+};
+
+exports.escape = function (val) {
+    return val.replace(/^\s+|\s+$/g, '')
+              .replace(/\\5c/g, '\\5c5c')
+              .replace(/\\20/g, '\\5c20')
+              .replace(/\\22/g, '\\5c22')
+              .replace(/\\26/g, '\\5c26')
+              .replace(/\\27/g, '\\5c27')
+              .replace(/\\2f/g, '\\5c2f')
+              .replace(/\\3a/g, '\\5c3a')
+              .replace(/\\3c/g, '\\5c3c')
+              .replace(/\\3e/g, '\\5c3e')
+              .replace(/\\40/g, '\\5c40')
+              .replace(/ /g, '\\20')
+              .replace(/\"/g, '\\22')
+              .replace(/\&/g, '\\26')
+              .replace(/\'/g, '\\27')
+              .replace(/\//g, '\\2f')
+              .replace(/:/g, '\\3a')
+              .replace(/</g, '\\3c')
+              .replace(/>/g, '\\3e')
+              .replace(/@/g, '\\40');
+};
+
+exports.unescape = function (val) {
+    return val.replace(/\\20/g, ' ')
+              .replace(/\\22/g, '"')
+              .replace(/\\26/g, '&')
+              .replace(/\\27/g, '\'')
+              .replace(/\\2f/g, '/')
+              .replace(/\\3a/g, ':')
+              .replace(/\\3c/g, '<')
+              .replace(/\\3e/g, '>')
+              .replace(/\\40/g, '@')
+              .replace(/\\5c/g, '\\');
+};
+
+
+exports.create = function (local, domain, resource) {
+    return new exports.JID(local, domain, resource);
+};
+
+exports.JID = function JID(localOrJID, domain, resource) {
+    var parsed = {};
+    if (localOrJID && !domain && !resource) {
+        if (typeof localOrJID === 'string') {
+            parsed = exports.parse(localOrJID);
+        } else if (localOrJID._isJID || localOrJID instanceof exports.JID) {
+            parsed = localOrJID;
+        } else {
+            throw new Error('Invalid argument type');
+        }
+    } else if (domain) {
+        var trusted = ASCII.test(localOrJID) && ASCII.test(domain);
+        if (resource) {
+            trusted = trusted && ASCII.test(resource);
+        }
+
+        parsed = exports.prep({
+            local: exports.escape(localOrJID),
+            domain: domain,
+            resource: resource,
+            prepped: trusted
+        });
+    } else {
+        parsed = {};
+    }
+
+    this._isJID = true;
+
+    this.local = parsed.local || '';
+    this.domain = parsed.domain || '';
+    this.resource = parsed.resource || '';
+    this.bare = parsed.bare || '';
+    this.full = parsed.full || '';
+
+    this.unescapedLocal = parsed.unescapedLocal || '';
+    this.unescapedBare = parsed.unescapedBare || '';
+    this.unescapedFull = parsed.unescapedFull || '';
+
+    this.prepped = parsed.prepped;
+};
+
+exports.JID.prototype.toString = function () {
+    return this.full;
+};
+
+exports.JID.prototype.toJSON = function () {
+    return this.full;
+};
+
+},{"./lib/stringprep":135}],135:[function(require,module,exports){
+'use strict';
+
+var punycode = require('punycode');
+
+
+exports.available = false;
+
+exports.toUnicode = punycode.toUnicode;
+
+exports.nameprep = function (str) {
+    return str.toLowerCase();
+};
+
+exports.nodeprep = function (str) {
+    return str.toLowerCase();
+};
+
+exports.resourceprep = function (str) {
+    return str;
+};
+
+},{"punycode":11}],136:[function(require,module,exports){
+'use strict';
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var _lodashForeach = require('lodash.foreach');
+
+var _lodashForeach2 = _interopRequireDefault(_lodashForeach);
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Avatar = JXT.define({
+        name: 'avatar',
+        namespace: _xmppConstants.Namespace.AVATAR_METADATA,
+        element: 'info',
+        fields: {
+            id: Utils.attribute('id'),
+            bytes: Utils.attribute('bytes'),
+            height: Utils.attribute('height'),
+            width: Utils.attribute('width'),
+            type: Utils.attribute('type', 'image/png'),
+            url: Utils.attribute('url')
+        }
+    });
+
+    var avatars = {
+        get: function get() {
+
+            var metadata = Utils.find(this.xml, _xmppConstants.Namespace.AVATAR_METADATA, 'metadata');
+            var results = [];
+            if (metadata.length) {
+                var _avatars = Utils.find(metadata[0], _xmppConstants.Namespace.AVATAR_METADATA, 'info');
+                (0, _lodashForeach2['default'])(_avatars, function (info) {
+
+                    results.push(new Avatar({}, info));
+                });
+            }
+            return results;
+        },
+        set: function set(value) {
+
+            var metadata = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.AVATAR_METADATA, 'metadata');
+            Utils.setAttribute(metadata, 'xmlns', _xmppConstants.Namespace.AVATAR_METADATA);
+            (0, _lodashForeach2['default'])(value, function (info) {
+
+                var avatar = new Avatar(info);
+                metadata.appendChild(avatar.xml);
+            });
+        }
+    };
+
+    JXT.withPubsubItem(function (Item) {
+
+        JXT.add(Item, 'avatars', avatars);
+        JXT.add(Item, 'avatarData', Utils.textSub(_xmppConstants.Namespace.AVATAR_DATA, 'data'));
+    });
+};
+
+module.exports = exports['default'];
+
+},{"babel-runtime/helpers/interop-require-default":197,"lodash.foreach":212,"xmpp-constants":220}],137:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Bind = JXT.define({
+        name: 'bind',
+        namespace: _xmppConstants.Namespace.BIND,
+        element: 'bind',
+        fields: {
+            resource: Utils.textSub(_xmppConstants.Namespace.BIND, 'resource'),
+            jid: Utils.jidSub(_xmppConstants.Namespace.BIND, 'jid')
+        }
+    });
+
+    JXT.extendIQ(Bind);
+    JXT.extendStreamFeatures(Bind);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],138:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var _xmppJid = require('xmpp-jid');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var jidList = {
+        get: function get() {
+
+            var result = [];
+            var items = types.find(this.xml, _xmppConstants.Namespace.BLOCKING, 'item');
+            if (!items.length) {
+                return result;
+            }
+
+            items.forEach(function (item) {
+
+                result.push(new _xmppJid.JID(types.getAttribute(item, 'jid', '')));
+            });
+
+            return result;
+        },
+        set: function set(values) {
+
+            var self = this;
+            values.forEach(function (value) {
+
+                var item = types.createElement(_xmppConstants.Namespace.BLOCKING, 'item', _xmppConstants.Namespace.BLOCKING);
+                types.setAttribute(item, 'jid', value.toString());
+                self.xml.appendChild(item);
+            });
+        }
+    };
+
+    var Block = JXT.define({
+        name: 'block',
+        namespace: _xmppConstants.Namespace.BLOCKING,
+        element: 'block',
+        fields: {
+            jids: jidList
+        }
+    });
+
+    var Unblock = JXT.define({
+        name: 'unblock',
+        namespace: _xmppConstants.Namespace.BLOCKING,
+        element: 'unblock',
+        fields: {
+            jids: jidList
+        }
+    });
+
+    var BlockList = JXT.define({
+        name: 'blockList',
+        namespace: _xmppConstants.Namespace.BLOCKING,
+        element: 'blocklist',
+        fields: {
+            jids: jidList
+        }
+    });
+
+    JXT.extendIQ(Block);
+    JXT.extendIQ(Unblock);
+    JXT.extendIQ(BlockList);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220,"xmpp-jid":226}],139:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var BOB = JXT.define({
+        name: 'bob',
+        namespace: _xmppConstants.Namespace.BOB,
+        element: 'data',
+        fields: {
+            cid: Utils.attribute('cid'),
+            maxAge: Utils.numberAttribute('max-age'),
+            type: Utils.attribute('type'),
+            data: Utils.text()
+        }
+    });
+
+    JXT.extendIQ(BOB);
+    JXT.extendMessage(BOB);
+    JXT.extendPresence(BOB);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],140:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Conference = JXT.define({
+        name: '_conference',
+        namespace: _xmppConstants.Namespace.BOOKMARKS,
+        element: 'conference',
+        fields: {
+            name: Utils.attribute('name'),
+            autoJoin: Utils.boolAttribute('autojoin'),
+            jid: Utils.jidAttribute('jid'),
+            nick: Utils.textSub(_xmppConstants.Namespace.BOOKMARKS, 'nick')
+        }
+    });
+
+    var Bookmarks = JXT.define({
+        name: 'bookmarks',
+        namespace: _xmppConstants.Namespace.BOOKMARKS,
+        element: 'storage'
+    });
+
+    JXT.extend(Bookmarks, Conference, 'conferences');
+
+    JXT.withDefinition('query', _xmppConstants.Namespace.PRIVATE, function (PrivateStorage) {
+
+        JXT.extend(PrivateStorage, Bookmarks);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],141:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: 'bosh',
+        namespace: _xmppConstants.Namespace.BOSH,
+        element: 'body',
+        prefixes: {
+            xmpp: _xmppConstants.Namespace.BOSH_XMPP
+        },
+        fields: {
+            accept: Utils.attribute('accept'),
+            ack: Utils.numberAttribute('ack'),
+            authid: Utils.attribute('authid'),
+            charsets: Utils.attribute('charsets'),
+            condition: Utils.attribute('condition'),
+            content: Utils.attribute('content'),
+            from: Utils.jidAttribute('from', true),
+            hold: Utils.numberAttribute('hold'),
+            inactivity: Utils.numberAttribute('inactivity'),
+            key: Utils.attribute('key'),
+            maxpause: Utils.numberAttribute('maxpause'),
+            newKey: Utils.attribute('newkey'),
+            pause: Utils.numberAttribute('pause'),
+            polling: Utils.numberAttribute('polling'),
+            resport: Utils.numberAttribute('report'),
+            requests: Utils.numberAttribute('requests'),
+            rid: Utils.numberAttribute('rid'),
+            sid: Utils.attribute('sid'),
+            stream: Utils.attribute('stream'),
+            time: Utils.attribute('time'),
+            to: Utils.jidAttribute('to', true),
+            type: Utils.attribute('type'),
+            ver: Utils.attribute('ver'),
+            wait: Utils.numberAttribute('wait'),
+            uri: Utils.textSub(_xmppConstants.Namespace.BOSH, 'uri'),
+            lang: Utils.langAttribute(),
+            // These three should be using namespaced attributes, but browsers are stupid
+            // when it comes to serializing attributes with namespaces
+            version: Utils.attribute('xmpp:version', '1.0'),
+            restart: Utils.attribute('xmpp:restart'),
+            restartLogic: Utils.boolAttribute('xmpp:restartLogic'),
+            payload: {
+                get: function get() {
+
+                    var results = [];
+                    for (var i = 0, len = this.xml.childNodes.length; i < len; i++) {
+                        var obj = JXT.build(this.xml.childNodes[i]);
+                        if (obj !== undefined) {
+                            results.push(obj);
+                        }
+                    }
+                    return results;
+                },
+                set: function set(values) {
+                    var _this = this;
+
+                    values.forEach(function (types) {
+
+                        _this.xml.appendChild(types.xml);
+                    });
+                }
             }
         }
-    }
-    return this;
+    });
 };
 
-// Remove the given callback for `event` or all
-// registered callbacks.
-WildEmitter.prototype.off = function (event, fn) {
-    var callbacks = this.callbacks[event],
-        i;
+module.exports = exports['default'];
 
-    if (!callbacks) return this;
+},{"xmpp-constants":220}],142:[function(require,module,exports){
+'use strict';
 
-    // remove all handlers
-    if (arguments.length === 1) {
-        delete this.callbacks[event];
-        return this;
-    }
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
 
-    // remove specific handler
-    i = callbacks.indexOf(fn);
-    callbacks.splice(i, 1);
-    if (callbacks.length === 0) {
-        delete this.callbacks[event];
-    }
-    return this;
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Sent = JXT.define({
+        name: 'carbonSent',
+        eventName: 'carbon:sent',
+        namespace: _xmppConstants.Namespace.CARBONS_2,
+        element: 'sent'
+    });
+
+    var Received = JXT.define({
+        name: 'carbonReceived',
+        eventName: 'carbon:received',
+        namespace: _xmppConstants.Namespace.CARBONS_2,
+        element: 'received'
+    });
+
+    var Private = JXT.define({
+        name: 'carbonPrivate',
+        eventName: 'carbon:private',
+        namespace: _xmppConstants.Namespace.CARBONS_2,
+        element: 'private'
+    });
+
+    var Enable = JXT.define({
+        name: 'enableCarbons',
+        namespace: _xmppConstants.Namespace.CARBONS_2,
+        element: 'enable'
+    });
+
+    var Disable = JXT.define({
+        name: 'disableCarbons',
+        namespace: _xmppConstants.Namespace.CARBONS_2,
+        element: 'disable'
+    });
+
+    JXT.withDefinition('forwarded', _xmppConstants.Namespace.FORWARD_0, function (Forwarded) {
+
+        JXT.extend(Sent, Forwarded);
+        JXT.extend(Received, Forwarded);
+    });
+
+    JXT.extendMessage(Sent);
+    JXT.extendMessage(Received);
+    JXT.extendMessage(Private);
+    JXT.extendIQ(Enable);
+    JXT.extendIQ(Disable);
 };
 
-/// Emit `event` with the given args.
-// also calls any `*` handlers
-WildEmitter.prototype.emit = function (event) {
-    var args = [].slice.call(arguments, 1),
-        callbacks = this.callbacks[event],
-        specialCallbacks = this.getWildcardCallbacks(event),
-        i,
-        len,
-        item,
-        listeners;
+module.exports = exports['default'];
 
-    if (callbacks) {
-        listeners = callbacks.slice();
-        for (i = 0, len = listeners.length; i < len; ++i) {
-            if (listeners[i]) {
-                listeners[i].apply(this, args);
-            } else {
-                break;
+},{"xmpp-constants":220}],143:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var ACTIONS = ['next', 'prev', 'complete', 'cancel'];
+
+var CONDITIONS = ['bad-action', 'bad-locale', 'bad-payload', 'bad-sessionid', 'malformed-action', 'session-expired'];
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Command = JXT.define({
+        name: 'command',
+        namespace: _xmppConstants.Namespace.ADHOC_COMMANDS,
+        element: 'command',
+        fields: {
+            action: Utils.attribute('action'),
+            node: Utils.attribute('node'),
+            sessionid: Utils.attribute('sessionid'),
+            status: Utils.attribute('status'),
+            execute: Utils.subAttribute(_xmppConstants.Namespace.ADHOC_COMMANDS, 'actions', 'execute'),
+            actions: {
+                get: function get() {
+
+                    var result = [];
+                    var actionSet = Utils.find(this.xml, _xmppConstants.Namespace.ADHOC_COMMANDS, 'actions');
+                    if (!actionSet.length) {
+                        return [];
+                    }
+                    ACTIONS.forEach(function (action) {
+
+                        var existing = Utils.find(actionSet[0], _xmppConstants.Namespace.ADHOC_COMMANDS, action);
+                        if (existing.length) {
+                            result.push(action);
+                        }
+                    });
+                    return result;
+                },
+                set: function set(values) {
+
+                    var actionSet = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.ADHOC_COMMANDS, 'actions');
+                    for (var i = 0, len = actionSet.childNodes.length; i < len; i++) {
+                        actionSet.removeChild(actionSet.childNodes[i]);
+                    }
+                    values.forEach(function (value) {
+
+                        actionSet.appendChild(Utils.createElement(_xmppConstants.Namespace.ADHOC_COMMANDS, value.toLowerCase(), _xmppConstants.Namespace.ADHOC_COMMANDS));
+                    });
+                }
             }
         }
-    }
+    });
 
-    if (specialCallbacks) {
-        len = specialCallbacks.length;
-        listeners = specialCallbacks.slice();
-        for (i = 0, len = listeners.length; i < len; ++i) {
-            if (listeners[i]) {
-                listeners[i].apply(this, [event].concat(args));
-            } else {
-                break;
+    var Note = JXT.define({
+        name: '_commandNote',
+        namespace: _xmppConstants.Namespace.ADHOC_COMMANDS,
+        element: 'note',
+        fields: {
+            type: Utils.attribute('type'),
+            value: Utils.text()
+        }
+    });
+
+    JXT.extend(Command, Note, 'notes');
+
+    JXT.extendIQ(Command);
+
+    JXT.withStanzaError(function (StanzaError) {
+
+        JXT.add(StanzaError, 'adhocCommandCondition', Utils.enumSub(_xmppConstants.Namespace.ADHOC_COMMANDS, CONDITIONS));
+    });
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(Command, DataForm);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],144:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var CSIFeature = JXT.define({
+        name: 'clientStateIndication',
+        namespace: _xmppConstants.Namespace.CSI,
+        element: 'csi'
+    });
+
+    JXT.define({
+        name: 'csiActive',
+        eventName: 'csi:active',
+        namespace: _xmppConstants.Namespace.CSI,
+        element: 'active',
+        topLevel: true
+    });
+
+    JXT.define({
+        name: 'csiInactive',
+        eventName: 'csi:inactive',
+        namespace: _xmppConstants.Namespace.CSI,
+        element: 'inactive',
+        topLevel: true
+    });
+
+    JXT.extendStreamFeatures(CSIFeature);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],145:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var _xmppJid = require('xmpp-jid');
+
+var SINGLE_FIELDS = ['text-single', 'text-private', 'list-single', 'jid-single'];
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Field = JXT.define({
+        name: '_field',
+        namespace: _xmppConstants.Namespace.DATAFORM,
+        element: 'field',
+        init: function init(data) {
+
+            this._type = (data || {}).type || this.type;
+        },
+        fields: {
+            type: {
+                get: function get() {
+
+                    return Utils.getAttribute(this.xml, 'type', 'text-single');
+                },
+                set: function set(value) {
+
+                    this._type = value;
+                    Utils.setAttribute(this.xml, 'type', value);
+                }
+            },
+            name: Utils.attribute('var'),
+            desc: Utils.textSub(_xmppConstants.Namespace.DATAFORM, 'desc'),
+            required: Utils.boolSub(_xmppConstants.Namespace.DATAFORM, 'required'),
+            label: Utils.attribute('label'),
+            value: {
+                get: function get() {
+
+                    var vals = Utils.getMultiSubText(this.xml, _xmppConstants.Namespace.DATAFORM, 'value');
+                    if (this._type === 'boolean') {
+                        return vals[0] === '1' || vals[0] === 'true';
+                    }
+                    if (vals.length > 1) {
+                        if (this._type === 'text-multi') {
+                            return vals.join('\n');
+                        }
+
+                        if (this._type === 'jid-multi') {
+                            return vals.map(function (jid) {
+
+                                return new _xmppJid.JID(jid);
+                            });
+                        }
+
+                        return vals;
+                    }
+                    if (SINGLE_FIELDS.indexOf(this._type) >= 0) {
+                        if (this._type === 'jid-single') {
+                            return new _xmppJid.JID(vals[0]);
+                        }
+                        return vals[0];
+                    }
+
+                    return vals;
+                },
+                set: function set(value) {
+
+                    if (this._type === 'boolean' || value === true || value === false) {
+                        var truthy = value === true || value === 'true' || value === '1';
+                        var sub = Utils.createElement(_xmppConstants.Namespace.DATAFORM, 'value', _xmppConstants.Namespace.DATAFORM);
+                        sub.textContent = truthy ? '1' : '0';
+                        this.xml.appendChild(sub);
+                    } else {
+                        if (this._type === 'text-multi' && typeof value === 'string') {
+                            value = value.split('\n');
+                        }
+                        Utils.setMultiSubText(this.xml, _xmppConstants.Namespace.DATAFORM, 'value', value, (function (val) {
+
+                            var sub = Utils.createElement(_xmppConstants.Namespace.DATAFORM, 'value', _xmppConstants.Namespace.DATAFORM);
+                            sub.textContent = val;
+                            this.xml.appendChild(sub);
+                        }).bind(this));
+                    }
+                }
             }
         }
-    }
+    });
 
-    return this;
-};
-
-// Helper for for finding special wildcard event handlers that match the event
-WildEmitter.prototype.getWildcardCallbacks = function (eventName) {
-    var item,
-        split,
-        result = [];
-
-    for (item in this.callbacks) {
-        split = item.split('*');
-        if (item === '*' || (split.length === 2 && eventName.slice(0, split[0].length) === split[0])) {
-            result = result.concat(this.callbacks[item]);
+    var Option = JXT.define({
+        name: '_formoption',
+        namespace: _xmppConstants.Namespace.DATAFORM,
+        element: 'option',
+        fields: {
+            label: Utils.attribute('label'),
+            value: Utils.textSub(_xmppConstants.Namespace.DATAFORM, 'value')
         }
-    }
-    return result;
+    });
+
+    var Item = JXT.define({
+        name: '_formitem',
+        namespace: _xmppConstants.Namespace.DATAFORM,
+        element: 'item'
+    });
+
+    var Media = JXT.define({
+        name: 'media',
+        element: 'media',
+        namespace: _xmppConstants.Namespace.DATAFORM_MEDIA,
+        fields: {
+            height: Utils.numberAttribute('height'),
+            width: Utils.numberAttribute('width')
+        }
+    });
+
+    var MediaURI = JXT.define({
+        name: '_mediaURI',
+        element: 'uri',
+        namespace: _xmppConstants.Namespace.DATAFORM_MEDIA,
+        fields: {
+            uri: Utils.text(),
+            type: Utils.attribute('type')
+        }
+    });
+
+    var Validation = JXT.define({
+        name: 'validation',
+        element: 'validate',
+        namespace: _xmppConstants.Namespace.DATAFORM_VALIDATION,
+        fields: {
+            dataType: Utils.attribute('datatype'),
+            basic: Utils.boolSub(_xmppConstants.Namespace.DATAFORM_VALIDATION, 'basic'),
+            open: Utils.boolSub(_xmppConstants.Namespace.DATAFORM_VALIDATION, 'open'),
+            regex: Utils.textSub(_xmppConstants.Namespace.DATAFORM_VALIDATION, 'regex')
+        }
+    });
+
+    var Range = JXT.define({
+        name: 'range',
+        element: 'range',
+        namespace: _xmppConstants.Namespace.DATAFORM_VALIDATION,
+        fields: {
+            min: Utils.attribute('min'),
+            max: Utils.attribute('max')
+        }
+    });
+
+    var ListRange = JXT.define({
+        name: 'select',
+        element: 'list-range',
+        namespace: _xmppConstants.Namespace.DATAFORM_VALIDATION,
+        fields: {
+            min: Utils.numberAttribute('min'),
+            max: Utils.numberAttribute('max')
+        }
+    });
+
+    var layoutContents = {
+        get: function get() {
+
+            var result = [];
+            for (var i = 0, len = this.xml.childNodes.length; i < len; i++) {
+                var child = this.xml.childNodes[i];
+                if (child.namespaceURI !== _xmppConstants.Namespace.DATAFORM_LAYOUT) {
+                    continue;
+                }
+
+                switch (child.localName) {
+                    case 'text':
+                        result.push({
+                            text: child.textContent
+                        });
+                        break;
+                    case 'fieldref':
+                        result.push({
+                            field: child.getAttribute('var')
+                        });
+                        break;
+                    case 'reportedref':
+                        result.push({
+                            reported: true
+                        });
+                        break;
+                    case 'section':
+                        result.push({
+                            section: new Section(null, child, this).toJSON()
+                        });
+                        break;
+                }
+            }
+
+            return result;
+        },
+        set: function set(values) {
+
+            for (var i = 0, len = values.length; i < len; i++) {
+                var value = values[i];
+                if (value.text) {
+                    var text = Utils.createElement(_xmppConstants.Namespace.DATAFORM_LAYOUT, 'text', _xmppConstants.Namespace.DATAFORM_LAYOUT);
+                    text.textContent = value.text;
+                    this.xml.appendChild(text);
+                }
+                if (value.field) {
+                    var field = Utils.createElement(_xmppConstants.Namespace.DATAFORM_LAYOUT, 'fieldref', _xmppConstants.Namespace.DATAFORM_LAYOUT);
+                    field.setAttribute('var', value.field);
+                    this.xml.appendChild(field);
+                }
+                if (value.reported) {
+                    this.xml.appendChild(Utils.createElement(_xmppConstants.Namespace.DATAFORM_LAYOUT, 'reportedref', _xmppConstants.Namespace.DATAFORM_LAYOUT));
+                }
+                if (value.section) {
+                    var sectionXML = Utils.createElement(_xmppConstants.Namespace.DATAFORM_LAYOUT, 'section', _xmppConstants.Namespace.DATAFORM_LAYOUT);
+                    this.xml.appendChild(sectionXML);
+
+                    var section = new Section(null, sectionXML);
+                    section.label = value.section.label;
+                    section.contents = value.section.contents;
+                }
+            }
+        }
+    };
+
+    var Section = JXT.define({
+        name: '_section',
+        element: 'section',
+        namespace: _xmppConstants.Namespace.DATAFORM_LAYOUT,
+        fields: {
+            label: Utils.attribute('label'),
+            contents: layoutContents
+        }
+    });
+
+    var Page = JXT.define({
+        name: '_page',
+        element: 'page',
+        namespace: _xmppConstants.Namespace.DATAFORM_LAYOUT,
+        fields: {
+            label: Utils.attribute('label'),
+            contents: layoutContents
+        }
+    });
+
+    var DataForm = JXT.define({
+        name: 'form',
+        namespace: _xmppConstants.Namespace.DATAFORM,
+        element: 'x',
+        init: function init() {
+
+            // Propagate reported field types to items
+
+            if (!this.reportedFields.length) {
+                return;
+            }
+
+            var fieldTypes = {};
+            this.reportedFields.forEach(function (reported) {
+
+                fieldTypes[reported.name] = reported.type;
+            });
+            this.items.forEach(function (item) {
+
+                item.fields.forEach(function (field) {
+
+                    field.type = field._type = fieldTypes[field.name];
+                });
+            });
+        },
+        fields: {
+            title: Utils.textSub(_xmppConstants.Namespace.DATAFORM, 'title'),
+            instructions: Utils.multiTextSub(_xmppConstants.Namespace.DATAFORM, 'instructions'),
+            type: Utils.attribute('type', 'form'),
+            reportedFields: Utils.subMultiExtension(_xmppConstants.Namespace.DATAFORM, 'reported', Field)
+        }
+    });
+
+    JXT.extend(DataForm, Field, 'fields');
+    JXT.extend(DataForm, Item, 'items');
+    JXT.extend(DataForm, Page, 'layout');
+
+    JXT.extend(Field, Media);
+    JXT.extend(Field, Validation);
+    JXT.extend(Field, Option, 'options');
+
+    JXT.extend(Item, Field, 'fields');
+
+    JXT.extend(Media, MediaURI, 'uris');
+    JXT.extend(Validation, Range);
+    JXT.extend(Validation, ListRange);
+
+    JXT.extendMessage(DataForm);
 };
 
-},{}],117:[function(require,module,exports){
+module.exports = exports['default'];
+
+},{"xmpp-constants":220,"xmpp-jid":226}],146:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var DelayedDelivery = JXT.define({
+        name: 'delay',
+        namespace: _xmppConstants.Namespace.DELAY,
+        element: 'delay',
+        fields: {
+            from: Utils.jidAttribute('from'),
+            stamp: Utils.dateAttribute('stamp'),
+            reason: Utils.text()
+        }
+    });
+
+    JXT.extendMessage(DelayedDelivery);
+    JXT.extendPresence(DelayedDelivery);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],147:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var DiscoCaps = JXT.define({
+        name: 'caps',
+        namespace: _xmppConstants.Namespace.CAPS,
+        element: 'c',
+        fields: {
+            ver: Utils.attribute('ver'),
+            node: Utils.attribute('node'),
+            hash: Utils.attribute('hash'),
+            ext: Utils.attribute('ext')
+        }
+    });
+
+    var DiscoInfo = JXT.define({
+        name: 'discoInfo',
+        namespace: _xmppConstants.Namespace.DISCO_INFO,
+        element: 'query',
+        fields: {
+            node: Utils.attribute('node'),
+            features: Utils.multiSubAttribute(_xmppConstants.Namespace.DISCO_INFO, 'feature', 'var')
+        }
+    });
+
+    var DiscoIdentity = JXT.define({
+        name: '_discoIdentity',
+        namespace: _xmppConstants.Namespace.DISCO_INFO,
+        element: 'identity',
+        fields: {
+            category: Utils.attribute('category'),
+            type: Utils.attribute('type'),
+            name: Utils.attribute('name'),
+            lang: Utils.langAttribute()
+        }
+    });
+
+    var DiscoItems = JXT.define({
+        name: 'discoItems',
+        namespace: _xmppConstants.Namespace.DISCO_ITEMS,
+        element: 'query',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var DiscoItem = JXT.define({
+        name: '_discoItem',
+        namespace: _xmppConstants.Namespace.DISCO_ITEMS,
+        element: 'item',
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            node: Utils.attribute('node'),
+            name: Utils.attribute('name')
+        }
+    });
+
+    JXT.extend(DiscoItems, DiscoItem, 'items');
+    JXT.extend(DiscoInfo, DiscoIdentity, 'identities');
+
+    JXT.extendIQ(DiscoInfo);
+    JXT.extendIQ(DiscoItems);
+    JXT.extendPresence(DiscoCaps);
+    JXT.extendStreamFeatures(DiscoCaps);
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(DiscoInfo, DataForm, 'extensions');
+    });
+
+    JXT.withDefinition('set', _xmppConstants.Namespace.RSM, function (RSM) {
+
+        JXT.extend(DiscoItems, RSM);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],148:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var CONDITIONS = ['bad-request', 'conflict', 'feature-not-implemented', 'forbidden', 'gone', 'internal-server-error', 'item-not-found', 'jid-malformed', 'not-acceptable', 'not-allowed', 'not-authorized', 'payment-required', 'recipient-unavailable', 'redirect', 'registration-required', 'remote-server-not-found', 'remote-server-timeout', 'resource-constraint', 'service-unavailable', 'subscription-required', 'undefined-condition', 'unexpected-request'];
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var StanzaError = JXT.define({
+        name: 'error',
+        namespace: _xmppConstants.Namespace.CLIENT,
+        element: 'error',
+        fields: {
+            lang: {
+                get: function get() {
+
+                    return (this.parent || {}).lang || '';
+                }
+            },
+            condition: Utils.enumSub(_xmppConstants.Namespace.STANZA_ERROR, CONDITIONS),
+            gone: {
+                get: function get() {
+
+                    return Utils.getSubText(this.xml, _xmppConstants.Namespace.STANZA_ERROR, 'gone');
+                },
+                set: function set(value) {
+
+                    this.condition = 'gone';
+                    Utils.setSubText(this.xml, _xmppConstants.Namespace.STANZA_ERROR, 'gone', value);
+                }
+            },
+            redirect: {
+                get: function get() {
+
+                    return Utils.getSubText(this.xml, _xmppConstants.Namespace.STANZA_ERROR, 'redirect');
+                },
+                set: function set(value) {
+
+                    this.condition = 'redirect';
+                    Utils.setSubText(this.xml, _xmppConstants.Namespace.STANZA_ERROR, 'redirect', value);
+                }
+            },
+            code: Utils.attribute('code'),
+            type: Utils.attribute('type'),
+            by: Utils.jidAttribute('by'),
+            $text: {
+                get: function get() {
+
+                    return Utils.getSubLangText(this.xml, _xmppConstants.Namespace.STANZA_ERROR, 'text', this.lang);
+                }
+            },
+            text: {
+                get: function get() {
+
+                    var text = this.$text;
+                    return text[this.lang] || '';
+                },
+                set: function set(value) {
+
+                    Utils.setSubLangText(this.xml, _xmppConstants.Namespace.STANZA_ERROR, 'text', value, this.lang);
+                }
+            }
+        }
+    });
+
+    JXT.extendMessage(StanzaError);
+    JXT.extendPresence(StanzaError);
+    JXT.extendIQ(StanzaError);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],149:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Services = exports.Services = JXT.define({
+        name: 'services',
+        namespace: _xmppConstants.Namespace.DISCO_EXTERNAL_1,
+        element: 'services',
+        fields: {
+            type: Utils.attribute('type')
+        }
+    });
+
+    var Credentials = exports.Credentials = JXT.define({
+        name: 'credentials',
+        namespace: _xmppConstants.Namespace.DISCO_EXTERNAL_1,
+        element: 'credentials'
+    });
+
+    var Service = JXT.define({
+        name: 'service',
+        namespace: _xmppConstants.Namespace.DISCO_EXTERNAL_1,
+        element: 'service',
+        fields: {
+            host: Utils.attribute('host'),
+            port: Utils.attribute('port'),
+            transport: Utils.attribute('transport'),
+            type: Utils.attribute('type'),
+            username: Utils.attribute('username'),
+            password: Utils.attribute('password')
+        }
+    });
+
+    JXT.extend(Services, Service, 'services');
+    JXT.extend(Credentials, Service);
+
+    JXT.extendIQ(Services);
+    JXT.extendIQ(Credentials);
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(Service, DataForm);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],150:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var FT_NS = _xmppConstants.Namespace.FILE_TRANSFER_3;
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var File = JXT.define({
+        name: '_file',
+        namespace: FT_NS,
+        element: 'file',
+        fields: {
+            name: Utils.textSub(FT_NS, 'name'),
+            desc: Utils.textSub(FT_NS, 'desc'),
+            size: Utils.numberSub(FT_NS, 'size'),
+            date: Utils.dateSub(FT_NS, 'date')
+        }
+    });
+
+    var Range = JXT.define({
+        name: 'range',
+        namespace: FT_NS,
+        element: 'range',
+        fields: {
+            offset: Utils.numberAttribute('offset')
+        }
+    });
+
+    var Thumbnail = JXT.define({
+        name: 'thumbnail',
+        namespace: _xmppConstants.Namespace.THUMBS_0,
+        element: 'thumbnail',
+        fields: {
+            cid: Utils.attribute('cid'),
+            mimeType: Utils.attribute('mime-type'),
+            width: Utils.numberAttribute('width'),
+            height: Utils.numberAttribute('height')
+        }
+    });
+
+    var FileTransfer = JXT.define({
+        name: '_filetransfer',
+        namespace: FT_NS,
+        element: 'description',
+        tags: ['jingle-description'],
+        fields: {
+            descType: { value: 'filetransfer' },
+            offer: Utils.subExtension('offer', FT_NS, 'offer', File),
+            request: Utils.subExtension('request', FT_NS, 'request', File)
+        }
+    });
+
+    JXT.extend(File, Range);
+    JXT.extend(File, Thumbnail);
+
+    JXT.withDefinition('hash', _xmppConstants.Namespace.HASHES_1, function (Hash) {
+
+        JXT.extend(File, Hash, 'hashes');
+    });
+
+    JXT.withDefinition('content', _xmppConstants.Namespace.JINGLE_1, function (Content) {
+
+        JXT.extend(Content, FileTransfer);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],151:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Forwarded = JXT.define({
+        name: 'forwarded',
+        namespace: _xmppConstants.Namespace.FORWARD_0,
+        element: 'forwarded'
+    });
+
+    JXT.extendIQ(Forwarded);
+    JXT.extendPresence(Forwarded);
+
+    JXT.withMessage(function (Message) {
+
+        JXT.extend(Message, Forwarded);
+        JXT.extend(Forwarded, Message);
+    });
+
+    JXT.withDefinition('delay', _xmppConstants.Namespace.DELAY, function (Delayed) {
+
+        JXT.extend(Forwarded, Delayed);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],152:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: 'openStream',
+        namespace: _xmppConstants.Namespace.FRAMING,
+        element: 'open',
+        topLevel: true,
+        fields: {
+            lang: Utils.langAttribute(),
+            id: Utils.attribute('id'),
+            version: Utils.attribute('version', '1.0'),
+            to: Utils.jidAttribute('to', true),
+            from: Utils.jidAttribute('from', true)
+        }
+    });
+
+    JXT.define({
+        name: 'closeStream',
+        namespace: _xmppConstants.Namespace.FRAMING,
+        element: 'close',
+        topLevel: true,
+        fields: {
+            seeOtherURI: Utils.attribute('see-other-uri')
+        }
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],153:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var GeoLoc = JXT.define({
+        name: 'geoloc',
+        namespace: _xmppConstants.Namespace.GEOLOC,
+        element: 'geoloc',
+        fields: {
+            accuracy: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'accuracy', true),
+            altitude: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'alt', true),
+            area: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'area'),
+            heading: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'bearing', true),
+            bearing: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'bearing', true),
+            building: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'building'),
+            country: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'country'),
+            countrycode: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'countrycode'),
+            datum: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'datum'),
+            description: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'description'),
+            error: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'error', true),
+            floor: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'floor'),
+            latitude: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'lat', true),
+            locality: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'locality'),
+            longitude: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'lon', true),
+            postalcode: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'postalcode'),
+            region: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'region'),
+            room: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'room'),
+            speed: Utils.numberSub(_xmppConstants.Namespace.GEOLOC, 'speed', true),
+            street: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'street'),
+            text: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'text'),
+            timestamp: Utils.dateSub(_xmppConstants.Namespace.GEOLOC, 'timestamp'),
+            tzo: Utils.tzoSub(_xmppConstants.Namespace.GEOLOC, 'tzo'),
+            uri: Utils.textSub(_xmppConstants.Namespace.GEOLOC, 'uri')
+        }
+    });
+
+    JXT.extendPubsubItem(GeoLoc);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],154:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    JXT.define({
+        name: 'hash',
+        namespace: _xmppConstants.Namespace.HASHES_1,
+        element: 'hash',
+        fields: {
+            algo: JXT.utils.attribute('algo'),
+            value: JXT.utils.text()
+        }
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],155:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Hat = JXT.define({
+        name: '_hat',
+        namespace: _xmppConstants.Namespace.HATS_0,
+        element: 'hat',
+        fields: {
+            lang: JXT.utils.langAttribute(),
+            name: JXT.utils.attribute('name'),
+            displayName: JXT.utils.attribute('displayName')
+        }
+    });
+
+    JXT.withPresence(function (Presence) {
+
+        JXT.add(Presence, 'hats', JXT.utils.subMultiExtension(_xmppConstants.Namespace.HATS_0, 'hats', Hat));
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],156:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var ICE = JXT.define({
+        name: '_iceUdp',
+        namespace: _xmppConstants.Namespace.JINGLE_ICE_UDP_1,
+        element: 'transport',
+        tags: ['jingle-transport'],
+        fields: {
+            transType: { value: 'iceUdp' },
+            pwd: Utils.attribute('pwd'),
+            ufrag: Utils.attribute('ufrag')
+        }
+    });
+
+    var RemoteCandidate = JXT.define({
+        name: 'remoteCandidate',
+        namespace: _xmppConstants.Namespace.JINGLE_ICE_UDP_1,
+        element: 'remote-candidate',
+        fields: {
+            component: Utils.attribute('component'),
+            ip: Utils.attribute('ip'),
+            port: Utils.attribute('port')
+        }
+    });
+
+    var Candidate = JXT.define({
+        name: '_iceUdpCandidate',
+        namespace: _xmppConstants.Namespace.JINGLE_ICE_UDP_1,
+        element: 'candidate',
+        fields: {
+            component: Utils.attribute('component'),
+            foundation: Utils.attribute('foundation'),
+            generation: Utils.attribute('generation'),
+            id: Utils.attribute('id'),
+            ip: Utils.attribute('ip'),
+            network: Utils.attribute('network'),
+            port: Utils.attribute('port'),
+            priority: Utils.attribute('priority'),
+            protocol: Utils.attribute('protocol'),
+            relAddr: Utils.attribute('rel-addr'),
+            relPort: Utils.attribute('rel-port'),
+            tcpType: Utils.attribute('tcptype'),
+            type: Utils.attribute('type')
+        }
+    });
+
+    var Fingerprint = JXT.define({
+        name: '_iceFingerprint',
+        namespace: _xmppConstants.Namespace.JINGLE_DTLS_0,
+        element: 'fingerprint',
+        fields: {
+            hash: Utils.attribute('hash'),
+            setup: Utils.attribute('setup'),
+            value: Utils.text(),
+            required: Utils.boolAttribute('required')
+        }
+    });
+
+    var SctpMap = JXT.define({
+        name: '_sctpMap',
+        namespace: _xmppConstants.Namespace.DTLS_SCTP_1,
+        element: 'sctpmap',
+        fields: {
+            number: Utils.attribute('number'),
+            protocol: Utils.attribute('protocol'),
+            streams: Utils.attribute('streams')
+        }
+    });
+
+    JXT.extend(ICE, Candidate, 'candidates');
+    JXT.extend(ICE, RemoteCandidate);
+    JXT.extend(ICE, Fingerprint, 'fingerprints');
+    JXT.extend(ICE, SctpMap, 'sctp');
+
+    JXT.withDefinition('content', _xmppConstants.Namespace.JINGLE_1, function (Content) {
+
+        JXT.extend(Content, ICE);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],157:[function(require,module,exports){
+'use strict';
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _avatar = require('./avatar');
+
+var _avatar2 = _interopRequireDefault(_avatar);
+
+var _bind = require('./bind');
+
+var _bind2 = _interopRequireDefault(_bind);
+
+var _blocking = require('./blocking');
+
+var _blocking2 = _interopRequireDefault(_blocking);
+
+var _bob = require('./bob');
+
+var _bob2 = _interopRequireDefault(_bob);
+
+var _bookmarks = require('./bookmarks');
+
+var _bookmarks2 = _interopRequireDefault(_bookmarks);
+
+var _bosh = require('./bosh');
+
+var _bosh2 = _interopRequireDefault(_bosh);
+
+var _carbons = require('./carbons');
+
+var _carbons2 = _interopRequireDefault(_carbons);
+
+var _command = require('./command');
+
+var _command2 = _interopRequireDefault(_command);
+
+var _csi = require('./csi');
+
+var _csi2 = _interopRequireDefault(_csi);
+
+var _dataforms = require('./dataforms');
+
+var _dataforms2 = _interopRequireDefault(_dataforms);
+
+var _delayed = require('./delayed');
+
+var _delayed2 = _interopRequireDefault(_delayed);
+
+var _disco = require('./disco');
+
+var _disco2 = _interopRequireDefault(_disco);
+
+var _error = require('./error');
+
+var _error2 = _interopRequireDefault(_error);
+
+var _extdisco = require('./extdisco');
+
+var _extdisco2 = _interopRequireDefault(_extdisco);
+
+var _file = require('./file');
+
+var _file2 = _interopRequireDefault(_file);
+
+var _forwarded = require('./forwarded');
+
+var _forwarded2 = _interopRequireDefault(_forwarded);
+
+var _framing = require('./framing');
+
+var _framing2 = _interopRequireDefault(_framing);
+
+var _geoloc = require('./geoloc');
+
+var _geoloc2 = _interopRequireDefault(_geoloc);
+
+var _hash = require('./hash');
+
+var _hash2 = _interopRequireDefault(_hash);
+
+var _hats = require('./hats');
+
+var _hats2 = _interopRequireDefault(_hats);
+
+var _iceUdp = require('./iceUdp');
+
+var _iceUdp2 = _interopRequireDefault(_iceUdp);
+
+var _iq = require('./iq');
+
+var _iq2 = _interopRequireDefault(_iq);
+
+var _jidprep = require('./jidprep');
+
+var _jidprep2 = _interopRequireDefault(_jidprep);
+
+var _jingle = require('./jingle');
+
+var _jingle2 = _interopRequireDefault(_jingle);
+
+var _json = require('./json');
+
+var _json2 = _interopRequireDefault(_json);
+
+var _logging = require('./logging');
+
+var _logging2 = _interopRequireDefault(_logging);
+
+var _mam = require('./mam');
+
+var _mam2 = _interopRequireDefault(_mam);
+
+var _message = require('./message');
+
+var _message2 = _interopRequireDefault(_message);
+
+var _mood = require('./mood');
+
+var _mood2 = _interopRequireDefault(_mood);
+
+var _muc = require('./muc');
+
+var _muc2 = _interopRequireDefault(_muc);
+
+var _nick = require('./nick');
+
+var _nick2 = _interopRequireDefault(_nick);
+
+var _oob = require('./oob');
+
+var _oob2 = _interopRequireDefault(_oob);
+
+var _ping = require('./ping');
+
+var _ping2 = _interopRequireDefault(_ping);
+
+var _presence = require('./presence');
+
+var _presence2 = _interopRequireDefault(_presence);
+
+var _private = require('./private');
+
+var _private2 = _interopRequireDefault(_private);
+
+var _psa = require('./psa');
+
+var _psa2 = _interopRequireDefault(_psa);
+
+var _pubsub = require('./pubsub');
+
+var _pubsub2 = _interopRequireDefault(_pubsub);
+
+var _pubsubError = require('./pubsubError');
+
+var _pubsubError2 = _interopRequireDefault(_pubsubError);
+
+var _pubsubEvents = require('./pubsubEvents');
+
+var _pubsubEvents2 = _interopRequireDefault(_pubsubEvents);
+
+var _pubsubOwner = require('./pubsubOwner');
+
+var _pubsubOwner2 = _interopRequireDefault(_pubsubOwner);
+
+var _push = require('./push');
+
+var _push2 = _interopRequireDefault(_push);
+
+var _reach = require('./reach');
+
+var _reach2 = _interopRequireDefault(_reach);
+
+var _register = require('./register');
+
+var _register2 = _interopRequireDefault(_register);
+
+var _roster = require('./roster');
+
+var _roster2 = _interopRequireDefault(_roster);
+
+var _rsm = require('./rsm');
+
+var _rsm2 = _interopRequireDefault(_rsm);
+
+var _rtp = require('./rtp');
+
+var _rtp2 = _interopRequireDefault(_rtp);
+
+var _rtt = require('./rtt');
+
+var _rtt2 = _interopRequireDefault(_rtt);
+
+var _sasl = require('./sasl');
+
+var _sasl2 = _interopRequireDefault(_sasl);
+
+var _session = require('./session');
+
+var _session2 = _interopRequireDefault(_session);
+
+var _shim = require('./shim');
+
+var _shim2 = _interopRequireDefault(_shim);
+
+var _sm = require('./sm');
+
+var _sm2 = _interopRequireDefault(_sm);
+
+var _stream = require('./stream');
+
+var _stream2 = _interopRequireDefault(_stream);
+
+var _streamError = require('./streamError');
+
+var _streamError2 = _interopRequireDefault(_streamError);
+
+var _streamFeatures = require('./streamFeatures');
+
+var _streamFeatures2 = _interopRequireDefault(_streamFeatures);
+
+var _time = require('./time');
+
+var _time2 = _interopRequireDefault(_time);
+
+var _tune = require('./tune');
+
+var _tune2 = _interopRequireDefault(_tune);
+
+var _vcard = require('./vcard');
+
+var _vcard2 = _interopRequireDefault(_vcard);
+
+var _version = require('./version');
+
+var _version2 = _interopRequireDefault(_version);
+
+var _visibility = require('./visibility');
+
+var _visibility2 = _interopRequireDefault(_visibility);
+
+exports['default'] = function (JXT) {
+
+    JXT.use(_avatar2['default']);
+    JXT.use(_bind2['default']);
+    JXT.use(_blocking2['default']);
+    JXT.use(_bob2['default']);
+    JXT.use(_bookmarks2['default']);
+    JXT.use(_bosh2['default']);
+    JXT.use(_carbons2['default']);
+    JXT.use(_command2['default']);
+    JXT.use(_csi2['default']);
+    JXT.use(_dataforms2['default']);
+    JXT.use(_delayed2['default']);
+    JXT.use(_disco2['default']);
+    JXT.use(_error2['default']);
+    JXT.use(_extdisco2['default']);
+    JXT.use(_file2['default']);
+    JXT.use(_forwarded2['default']);
+    JXT.use(_framing2['default']);
+    JXT.use(_geoloc2['default']);
+    JXT.use(_hash2['default']);
+    JXT.use(_hats2['default']);
+    JXT.use(_iceUdp2['default']);
+    JXT.use(_iq2['default']);
+    JXT.use(_jidprep2['default']);
+    JXT.use(_jingle2['default']);
+    JXT.use(_json2['default']);
+    JXT.use(_logging2['default']);
+    JXT.use(_mam2['default']);
+    JXT.use(_message2['default']);
+    JXT.use(_mood2['default']);
+    JXT.use(_muc2['default']);
+    JXT.use(_nick2['default']);
+    JXT.use(_oob2['default']);
+    JXT.use(_ping2['default']);
+    JXT.use(_presence2['default']);
+    JXT.use(_private2['default']);
+    JXT.use(_psa2['default']);
+    JXT.use(_pubsub2['default']);
+    JXT.use(_pubsubError2['default']);
+    JXT.use(_pubsubEvents2['default']);
+    JXT.use(_pubsubOwner2['default']);
+    JXT.use(_push2['default']);
+    JXT.use(_reach2['default']);
+    JXT.use(_register2['default']);
+    JXT.use(_roster2['default']);
+    JXT.use(_rsm2['default']);
+    JXT.use(_rtp2['default']);
+    JXT.use(_rtt2['default']);
+    JXT.use(_sasl2['default']);
+    JXT.use(_session2['default']);
+    JXT.use(_shim2['default']);
+    JXT.use(_sm2['default']);
+    JXT.use(_stream2['default']);
+    JXT.use(_streamError2['default']);
+    JXT.use(_streamFeatures2['default']);
+    JXT.use(_time2['default']);
+    JXT.use(_tune2['default']);
+    JXT.use(_vcard2['default']);
+    JXT.use(_version2['default']);
+    JXT.use(_visibility2['default']);
+};
+
+module.exports = exports['default'];
+
+},{"./avatar":136,"./bind":137,"./blocking":138,"./bob":139,"./bookmarks":140,"./bosh":141,"./carbons":142,"./command":143,"./csi":144,"./dataforms":145,"./delayed":146,"./disco":147,"./error":148,"./extdisco":149,"./file":150,"./forwarded":151,"./framing":152,"./geoloc":153,"./hash":154,"./hats":155,"./iceUdp":156,"./iq":158,"./jidprep":159,"./jingle":160,"./json":161,"./logging":162,"./mam":163,"./message":164,"./mood":165,"./muc":166,"./nick":167,"./oob":168,"./ping":169,"./presence":170,"./private":171,"./psa":172,"./pubsub":173,"./pubsubError":174,"./pubsubEvents":175,"./pubsubOwner":176,"./push":177,"./reach":178,"./register":179,"./roster":180,"./rsm":181,"./rtp":182,"./rtt":183,"./sasl":184,"./session":185,"./shim":186,"./sm":187,"./stream":188,"./streamError":189,"./streamFeatures":190,"./time":191,"./tune":192,"./vcard":193,"./version":194,"./visibility":195,"babel-runtime/helpers/interop-require-default":197}],158:[function(require,module,exports){
+'use strict';
+
+var _Object$assign = require('babel-runtime/core-js/object/assign')['default'];
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var internals = {};
+
+internals.defineIQ = function (JXT, name, namespace) {
+
+    var Utils = JXT.utils;
+
+    var IQ = JXT.define({
+        name: name,
+        namespace: namespace,
+        element: 'iq',
+        topLevel: true,
+        fields: {
+            lang: Utils.langAttribute(),
+            id: Utils.attribute('id'),
+            to: Utils.jidAttribute('to', true),
+            from: Utils.jidAttribute('from', true),
+            type: Utils.attribute('type')
+        }
+    });
+
+    var _toJSON = IQ.prototype.toJSON;
+
+    _Object$assign(IQ.prototype, {
+        toJSON: function toJSON() {
+
+            var result = _toJSON.call(this);
+            result.resultReply = this.resultReply;
+            result.errorReply = this.errorReply;
+            return result;
+        },
+
+        resultReply: function resultReply(data) {
+
+            data = data || {};
+            data.to = this.from;
+            data.id = this.id;
+            data.type = 'result';
+            return new IQ(data);
+        },
+
+        errorReply: function errorReply(data) {
+
+            data = data || {};
+            data.to = this.from;
+            data.id = this.id;
+            data.type = 'error';
+            return new IQ(data);
+        }
+    });
+};
+
+exports['default'] = function (JXT) {
+
+    internals.defineIQ(JXT, 'iq', _xmppConstants.Namespace.CLIENT);
+    internals.defineIQ(JXT, 'serverIQ', _xmppConstants.Namespace.SERVER);
+    internals.defineIQ(JXT, 'componentIQ', _xmppConstants.Namespace.COMPONENT);
+};
+
+module.exports = exports['default'];
+
+},{"babel-runtime/core-js/object/assign":196,"xmpp-constants":220}],159:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var _xmppJid = require('xmpp-jid');
+
+exports['default'] = function (JXT) {
+
+    JXT.withIQ(function (IQ) {
+
+        JXT.add(IQ, 'jidPrep', {
+            get: function get() {
+
+                var data = JXT.utils.getSubText(this.xml, _xmppConstants.Namespace.JID_PREP_0, 'jid');
+                if (data) {
+                    var jid = new _xmppJid.JID(data);
+                    jid.prepped = true;
+                    return jid;
+                }
+            },
+            set: function set(value) {
+
+                JXT.utils.setSubText(this.xml, _xmppConstants.Namespace.JID_PREP_0, 'jid', (value || '').toString());
+            }
+        });
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220,"xmpp-jid":226}],160:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var CONDITIONS = ['out-of-order', 'tie-break', 'unknown-session', 'unsupported-info'];
+var REASONS = ['alternative-session', 'busy', 'cancel', 'connectivity-error', 'decline', 'expired', 'failed-application', 'failed-transport', 'general-error', 'gone', 'incompatible-parameters', 'media-error', 'security-error', 'success', 'timeout', 'unsupported-applications', 'unsupported-transports'];
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Jingle = JXT.define({
+        name: 'jingle',
+        namespace: _xmppConstants.Namespace.JINGLE_1,
+        element: 'jingle',
+        fields: {
+            action: Utils.attribute('action'),
+            initiator: Utils.attribute('initiator'),
+            responder: Utils.attribute('responder'),
+            sid: Utils.attribute('sid')
+        }
+    });
+
+    var Content = JXT.define({
+        name: '_jingleContent',
+        namespace: _xmppConstants.Namespace.JINGLE_1,
+        element: 'content',
+        fields: {
+            creator: Utils.attribute('creator'),
+            disposition: Utils.attribute('disposition', 'session'),
+            name: Utils.attribute('name'),
+            senders: Utils.attribute('senders', 'both'),
+            description: {
+                get: function get() {
+
+                    var opts = JXT.tagged('jingle-description').map(function (Description) {
+
+                        return Description.prototype._name;
+                    });
+                    for (var i = 0, len = opts.length; i < len; i++) {
+                        if (this._extensions[opts[i]]) {
+                            return this._extensions[opts[i]];
+                        }
+                    }
+                },
+                set: function set(value) {
+
+                    var ext = '_' + value.descType;
+                    this[ext] = value;
+                }
+            },
+            transport: {
+                get: function get() {
+
+                    var opts = JXT.tagged('jingle-transport').map(function (Transport) {
+
+                        return Transport.prototype._name;
+                    });
+                    for (var i = 0, len = opts.length; i < len; i++) {
+                        if (this._extensions[opts[i]]) {
+                            return this._extensions[opts[i]];
+                        }
+                    }
+                },
+                set: function set(value) {
+
+                    var ext = '_' + value.transType;
+                    this[ext] = value;
+                }
+            }
+        }
+    });
+
+    var Reason = JXT.define({
+        name: 'reason',
+        namespace: _xmppConstants.Namespace.JINGLE_1,
+        element: 'reason',
+        fields: {
+            condition: Utils.enumSub(_xmppConstants.Namespace.JINGLE_1, REASONS),
+            alternativeSession: {
+                get: function get() {
+
+                    return Utils.getSubText(this.xml, _xmppConstants.Namespace.JINGLE_1, 'alternative-session');
+                },
+                set: function set(value) {
+
+                    this.condition = 'alternative-session';
+                    Utils.setSubText(this.xml, _xmppConstants.Namespace.JINGLE_1, 'alternative-session', value);
+                }
+            },
+            text: Utils.textSub(_xmppConstants.Namespace.JINGLE_1, 'text')
+        }
+    });
+
+    JXT.extend(Jingle, Content, 'contents');
+    JXT.extend(Jingle, Reason);
+
+    JXT.extendIQ(Jingle);
+
+    JXT.withStanzaError(function (StanzaError) {
+
+        JXT.add(StanzaError, 'jingleCondition', Utils.enumSub(_xmppConstants.Namespace.JINGLE_ERRORS_1, CONDITIONS));
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],161:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var JSONExtension = {
+        get: function get() {
+
+            var data = JXT.utils.getSubText(this.xml, _xmppConstants.Namespace.JSON_0, 'json');
+            if (data) {
+                return JSON.parse(data);
+            }
+        },
+        set: function set(value) {
+
+            value = JSON.stringify(value);
+            if (value) {
+                JXT.utils.setSubText(this.xml, _xmppConstants.Namespace.JSON_0, 'json', value);
+            }
+        }
+    };
+
+    JXT.withMessage(function (Message) {
+
+        JXT.add(Message, 'json', JSONExtension);
+    });
+
+    JXT.withPubsubItem(function (Item) {
+
+        JXT.add(Item, 'json', JSONExtension);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],162:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Log = JXT.define({
+        name: 'log',
+        namespace: _xmppConstants.Namespace.EVENTLOG,
+        element: 'log',
+        fields: {
+            id: Utils.attribute('id'),
+            timestamp: Utils.dateAttribute('timestamp'),
+            type: Utils.attribute('type'),
+            level: Utils.attribute('level'),
+            object: Utils.attribute('object'),
+            subject: Utils.attribute('subject'),
+            facility: Utils.attribute('facility'),
+            module: Utils.attribute('module'),
+            message: Utils.textSub(_xmppConstants.Namespace.EVENTLOG, 'message'),
+            stackTrace: Utils.textSub(_xmppConstants.Namespace.EVENTLOG, 'stackTrace')
+        }
+    });
+
+    var Tag = JXT.define({
+        name: '_logtag',
+        namespace: _xmppConstants.Namespace.EVENTLOG,
+        element: 'tag',
+        fields: {
+            name: Utils.attribute('name'),
+            value: Utils.attribute('value'),
+            type: Utils.attribute('type')
+        }
+    });
+
+    JXT.extend(Log, Tag, 'tags');
+
+    JXT.extendMessage(Log);
+    JXT.extendPubsubItem(Log);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],163:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var _xmppJid = require('xmpp-jid');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var MAMQuery = JXT.define({
+        name: 'mam',
+        namespace: _xmppConstants.Namespace.MAM_0,
+        element: 'query',
+        fields: {
+            queryid: Utils.attribute('queryid')
+        }
+    });
+
+    var Result = JXT.define({
+        name: 'mamItem',
+        namespace: _xmppConstants.Namespace.MAM_0,
+        element: 'result',
+        fields: {
+            queryid: Utils.attribute('queryid'),
+            id: Utils.attribute('id')
+        }
+    });
+
+    var Fin = JXT.define({
+        name: 'mamResult',
+        namespace: _xmppConstants.Namespace.MAM_0,
+        element: 'fin',
+        fields: {
+            queryid: Utils.attribute('queryid'),
+            complete: Utils.boolAttribute('complete'),
+            stable: Utils.boolAttribute('stable')
+        }
+    });
+
+    var Prefs = JXT.define({
+        name: 'mamPrefs',
+        namespace: _xmppConstants.Namespace.MAM_0,
+        element: 'prefs',
+        fields: {
+            defaultCondition: Utils.attribute('default'),
+            always: {
+                get: function get() {
+
+                    var results = [];
+                    var container = Utils.find(this.xml, _xmppConstants.Namespace.MAM_0, 'always');
+                    if (container.length === 0) {
+                        return results;
+                    }
+                    container = container[0];
+                    var jids = Utils.getMultiSubText(container, _xmppConstants.Namespace.MAM_0, 'jid');
+                    jids.forEach(function (jid) {
+
+                        results.push(new _xmppJid.JID(jid.textContent));
+                    });
+                    return results;
+                },
+                set: function set(value) {
+
+                    if (value.length > 0) {
+                        var container = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.MAM_0, 'always');
+                        Utils.setMultiSubText(container, _xmppConstants.Namespace.MAM_0, 'jid', value);
+                    }
+                }
+            },
+            never: {
+                get: function get() {
+
+                    var results = [];
+                    var container = Utils.find(this.xml, _xmppConstants.Namespace.MAM_0, 'always');
+                    if (container.length === 0) {
+                        return results;
+                    }
+                    container = container[0];
+                    var jids = Utils.getMultiSubText(container, _xmppConstants.Namespace.MAM_0, 'jid');
+                    jids.forEach(function (jid) {
+
+                        results.push(new _xmppJid.JID(jid.textContent));
+                    });
+                    return results;
+                },
+                set: function set(value) {
+
+                    if (value.length > 0) {
+                        var container = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.MAM_0, 'never');
+                        Utils.setMultiSubText(container, _xmppConstants.Namespace.MAM_0, 'jid', value);
+                    }
+                }
+            }
+        }
+    });
+
+    JXT.extendMessage(Result);
+    JXT.extendMessage(Fin);
+
+    JXT.extendIQ(MAMQuery);
+    JXT.extendIQ(Prefs);
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(MAMQuery, DataForm);
+    });
+
+    JXT.withDefinition('forwarded', _xmppConstants.Namespace.FORWARD_0, function (Forwarded) {
+
+        JXT.extend(Result, Forwarded);
+    });
+
+    JXT.withDefinition('set', _xmppConstants.Namespace.RSM, function (RSM) {
+
+        JXT.extend(MAMQuery, RSM);
+        JXT.extend(Fin, RSM);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220,"xmpp-jid":226}],164:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var internals = {};
+
+internals.defineMessage = function (JXT, name, namespace) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: name,
+        namespace: namespace,
+        element: 'message',
+        topLevel: true,
+        fields: {
+            lang: Utils.langAttribute(),
+            id: Utils.attribute('id'),
+            to: Utils.jidAttribute('to', true),
+            from: Utils.jidAttribute('from', true),
+            type: Utils.attribute('type', 'normal'),
+            thread: Utils.textSub(namespace, 'thread'),
+            parentThread: Utils.subAttribute(namespace, 'thread', 'parent'),
+            subject: Utils.textSub(namespace, 'subject'),
+            $body: {
+                get: function getBody$() {
+
+                    return Utils.getSubLangText(this.xml, namespace, 'body', this.lang);
+                }
+            },
+            body: {
+                get: function getBody() {
+
+                    var bodies = this.$body;
+                    return bodies[this.lang] || '';
+                },
+                set: function setBody(value) {
+
+                    Utils.setSubLangText(this.xml, namespace, 'body', value, this.lang);
+                }
+            },
+            attention: Utils.boolSub(_xmppConstants.Namespace.ATTENTION_0, 'attention'),
+            chatState: Utils.enumSub(_xmppConstants.Namespace.CHAT_STATES, ['active', 'composing', 'paused', 'inactive', 'gone']),
+            replace: Utils.subAttribute(_xmppConstants.Namespace.CORRECTION_0, 'replace', 'id'),
+            requestReceipt: Utils.boolSub(_xmppConstants.Namespace.RECEIPTS, 'request'),
+            receipt: Utils.subAttribute(_xmppConstants.Namespace.RECEIPTS, 'received', 'id')
+        }
+    });
+};
+
+exports['default'] = function (JXT) {
+
+    internals.defineMessage(JXT, 'message', _xmppConstants.Namespace.CLIENT);
+    internals.defineMessage(JXT, 'serverMessage', _xmppConstants.Namespace.SERVER);
+    internals.defineMessage(JXT, 'componentMessage', _xmppConstants.Namespace.COMPONENT);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],165:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var MOODS = ['afraid', 'amazed', 'amorous', 'angry', 'annoyed', 'anxious', 'aroused', 'ashamed', 'bored', 'brave', 'calm', 'cautious', 'cold', 'confident', 'confused', 'contemplative', 'contented', 'cranky', 'crazy', 'creative', 'curious', 'dejected', 'depressed', 'disappointed', 'disgusted', 'dismayed', 'distracted', 'embarrassed', 'envious', 'excited', 'flirtatious', 'frustrated', 'grateful', 'grieving', 'grumpy', 'guilty', 'happy', 'hopeful', 'hot', 'humbled', 'humiliated', 'hungry', 'hurt', 'impressed', 'in_awe', 'in_love', 'indignant', 'interested', 'intoxicated', 'invincible', 'jealous', 'lonely', 'lucky', 'mean', 'moody', 'nervous', 'neutral', 'offended', 'outraged', 'playful', 'proud', 'relaxed', 'relieved', 'remorseful', 'restless', 'sad', 'sarcastic', 'serious', 'shocked', 'shy', 'sick', 'sleepy', 'spontaneous', 'stressed', 'strong', 'surprised', 'thankful', 'thirsty', 'tired', 'undefined', 'weak', 'worried'];
+
+exports['default'] = function (JXT) {
+
+    var Mood = JXT.define({
+        name: 'mood',
+        namespace: _xmppConstants.Namespace.MOOD,
+        element: 'mood',
+        fields: {
+            text: JXT.utils.textSub(_xmppConstants.Namespace.MOOD, 'text'),
+            value: JXT.utils.enumSub(_xmppConstants.Namespace.MOOD, MOODS)
+        }
+    });
+
+    JXT.extendMessage(Mood);
+    JXT.extendPubsubItem(Mood);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],166:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+function proxy(child, field) {
+
+    return {
+        get: function get() {
+
+            if (this._extensions[child]) {
+                return this[child][field];
+            }
+        },
+        set: function set(value) {
+
+            this[child][field] = value;
+        }
+    };
+}
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var UserItem = JXT.define({
+        name: '_mucUserItem',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'item',
+        fields: {
+            affiliation: Utils.attribute('affiliation'),
+            nick: Utils.attribute('nick'),
+            jid: Utils.jidAttribute('jid'),
+            role: Utils.attribute('role'),
+            reason: Utils.textSub(_xmppConstants.Namespace.MUC_USER, 'reason')
+        }
+    });
+
+    var UserActor = JXT.define({
+        name: '_mucUserActor',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'actor',
+        fields: {
+            nick: Utils.attribute('nick'),
+            jid: Utils.jidAttribute('jid')
+        }
+    });
+
+    var Destroyed = JXT.define({
+        name: 'destroyed',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'destroy',
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            reason: Utils.textSub(_xmppConstants.Namespace.MUC_USER, 'reason')
+        }
+    });
+
+    var Invite = JXT.define({
+        name: 'invite',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'invite',
+        fields: {
+            to: Utils.jidAttribute('to'),
+            from: Utils.jidAttribute('from'),
+            reason: Utils.textSub(_xmppConstants.Namespace.MUC_USER, 'reason'),
+            thread: Utils.subAttribute(_xmppConstants.Namespace.MUC_USER, 'continue', 'thread'),
+            'continue': Utils.boolSub(_xmppConstants.Namespace.MUC_USER, 'continue')
+        }
+    });
+
+    var Decline = JXT.define({
+        name: 'decline',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'decline',
+        fields: {
+            to: Utils.jidAttribute('to'),
+            from: Utils.jidAttribute('from'),
+            reason: Utils.textSub(_xmppConstants.Namespace.MUC_USER, 'reason')
+        }
+    });
+
+    var AdminItem = JXT.define({
+        name: '_mucAdminItem',
+        namespace: _xmppConstants.Namespace.MUC_ADMIN,
+        element: 'item',
+        fields: {
+            affiliation: Utils.attribute('affiliation'),
+            nick: Utils.attribute('nick'),
+            jid: Utils.jidAttribute('jid'),
+            role: Utils.attribute('role'),
+            reason: Utils.textSub(_xmppConstants.Namespace.MUC_ADMIN, 'reason')
+        }
+    });
+
+    var AdminActor = JXT.define({
+        name: 'actor',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'actor',
+        fields: {
+            nick: Utils.attribute('nick'),
+            jid: Utils.jidAttribute('jid')
+        }
+    });
+
+    var Destroy = JXT.define({
+        name: 'destroy',
+        namespace: _xmppConstants.Namespace.MUC_OWNER,
+        element: 'destroy',
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            password: Utils.textSub(_xmppConstants.Namespace.MUC_OWNER, 'password'),
+            reason: Utils.textSub(_xmppConstants.Namespace.MUC_OWNER, 'reason')
+        }
+    });
+
+    var MUC = JXT.define({
+        name: 'muc',
+        namespace: _xmppConstants.Namespace.MUC_USER,
+        element: 'x',
+        fields: {
+            affiliation: proxy('_mucUserItem', 'affiliation'),
+            nick: proxy('_mucUserItem', 'nick'),
+            jid: proxy('_mucUserItem', 'jid'),
+            role: proxy('_mucUserItem', 'role'),
+            actor: proxy('_mucUserItem', '_mucUserActor'),
+            reason: proxy('_mucUserItem', 'reason'),
+            password: Utils.textSub(_xmppConstants.Namespace.MUC_USER, 'password'),
+            codes: {
+                get: function get() {
+
+                    return Utils.getMultiSubText(this.xml, _xmppConstants.Namespace.MUC_USER, 'status', function (sub) {
+
+                        return Utils.getAttribute(sub, 'code');
+                    });
+                },
+                set: function set(value) {
+
+                    var self = this;
+                    Utils.setMultiSubText(this.xml, _xmppConstants.Namespace.MUC_USER, 'status', value, function (val) {
+
+                        var child = Utils.createElement(_xmppConstants.Namespace.MUC_USER, 'status', _xmppConstants.Namespace.MUC_USER);
+                        Utils.setAttribute(child, 'code', val);
+                        self.xml.appendChild(child);
+                    });
+                }
+            }
+        }
+    });
+
+    var MUCAdmin = JXT.define({
+        name: 'mucAdmin',
+        namespace: _xmppConstants.Namespace.MUC_ADMIN,
+        element: 'query',
+        fields: {
+            affiliation: proxy('_mucAdminItem', 'affiliation'),
+            nick: proxy('_mucAdminItem', 'nick'),
+            jid: proxy('_mucAdminItem', 'jid'),
+            role: proxy('_mucAdminItem', 'role'),
+            actor: proxy('_mucAdminItem', '_mucAdminActor'),
+            reason: proxy('_mucAdminItem', 'reason')
+        }
+    });
+
+    var MUCOwner = JXT.define({
+        name: 'mucOwner',
+        namespace: _xmppConstants.Namespace.MUC_OWNER,
+        element: 'query'
+    });
+
+    var MUCJoin = JXT.define({
+        name: 'joinMuc',
+        namespace: _xmppConstants.Namespace.MUC,
+        element: 'x',
+        fields: {
+            password: Utils.textSub(_xmppConstants.Namespace.MUC, 'password'),
+            history: {
+                get: function get() {
+
+                    var result = {};
+                    var hist = Utils.find(this.xml, _xmppConstants.Namespace.MUC, 'history');
+
+                    if (!hist.length) {
+                        return {};
+                    }
+                    hist = hist[0];
+
+                    var maxchars = hist.getAttribute('maxchars') || '';
+                    var maxstanzas = hist.getAttribute('maxstanzas') || '';
+                    var seconds = hist.getAttribute('seconds') || '';
+                    var since = hist.getAttribute('since') || '';
+
+                    if (maxchars) {
+                        result.maxchars = parseInt(maxchars, 10);
+                    }
+                    if (maxstanzas) {
+                        result.maxstanzas = parseInt(maxstanzas, 10);
+                    }
+                    if (seconds) {
+                        result.seconds = parseInt(seconds, 10);
+                    }
+                    if (since) {
+                        result.since = new Date(since);
+                    }
+                },
+                set: function set(opts) {
+
+                    var existing = Utils.find(this.xml, _xmppConstants.Namespace.MUC, 'history');
+                    if (existing.length) {
+                        for (var i = 0; i < existing.length; i++) {
+                            this.xml.removeChild(existing[i]);
+                        }
+                    }
+
+                    var hist = Utils.createElement(_xmppConstants.Namespace.MUC, 'history', _xmppConstants.Namespace.MUC);
+                    this.xml.appendChild(hist);
+
+                    if (opts.maxchars) {
+                        hist.setAttribute('maxchars', '' + opts.maxchars);
+                    }
+                    if (opts.maxstanzas) {
+                        hist.setAttribute('maxstanzas', '' + opts.maxstanzas);
+                    }
+                    if (opts.seconds) {
+                        hist.setAttribute('seconds', '' + opts.seconds);
+                    }
+                    if (opts.since) {
+                        hist.setAttribute('since', opts.since.toISOString());
+                    }
+                }
+            }
+        }
+    });
+
+    var DirectInvite = JXT.define({
+        name: 'mucInvite',
+        namespace: _xmppConstants.Namespace.MUC_DIRECT_INVITE,
+        element: 'x',
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            password: Utils.attribute('password'),
+            reason: Utils.attribute('reason'),
+            thread: Utils.attribute('thread'),
+            'continue': Utils.boolAttribute('continue')
+        }
+    });
+
+    JXT.extend(UserItem, UserActor);
+    JXT.extend(MUC, UserItem);
+    JXT.extend(MUC, Invite, 'invites');
+    JXT.extend(MUC, Decline);
+    JXT.extend(MUC, Destroyed);
+    JXT.extend(AdminItem, AdminActor);
+    JXT.extend(MUCAdmin, AdminItem, 'items');
+    JXT.extend(MUCOwner, Destroy);
+
+    JXT.extendPresence(MUC);
+    JXT.extendPresence(MUCJoin);
+
+    JXT.extendMessage(MUC);
+    JXT.extendMessage(DirectInvite);
+
+    JXT.withIQ(function (IQ) {
+
+        JXT.add(IQ, 'mucUnique', Utils.textSub(_xmppConstants.Namespace.MUC_UNIQUE, 'unique'));
+        JXT.extend(IQ, MUCAdmin);
+        JXT.extend(IQ, MUCOwner);
+    });
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(MUCOwner, DataForm);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],167:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var nick = JXT.utils.textSub(_xmppConstants.Namespace.NICK, 'nick');
+
+    JXT.withPubsubItem(function (Item) {
+
+        JXT.add(Item, 'nick', nick);
+    });
+
+    JXT.withPresence(function (Presence) {
+
+        JXT.add(Presence, 'nick', nick);
+    });
+
+    JXT.withMessage(function (Message) {
+
+        JXT.add(Message, 'nick', nick);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],168:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var OOB = JXT.define({
+        name: 'oob',
+        element: 'x',
+        namespace: _xmppConstants.Namespace.OOB,
+        fields: {
+            url: JXT.utils.textSub(_xmppConstants.Namespace.OOB, 'url'),
+            desc: JXT.utils.textSub(_xmppConstants.Namespace.OOB, 'desc')
+        }
+    });
+
+    JXT.extendMessage(OOB, 'oobURIs');
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],169:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Ping = JXT.define({
+        name: 'ping',
+        namespace: _xmppConstants.Namespace.PING,
+        element: 'ping'
+    });
+
+    JXT.extendIQ(Ping);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],170:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var internals = {};
+
+internals.definePresence = function (JXT, name, namespace) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: name,
+        namespace: namespace,
+        element: 'presence',
+        topLevel: true,
+        fields: {
+            lang: Utils.langAttribute(),
+            id: Utils.attribute('id'),
+            to: Utils.jidAttribute('to', true),
+            from: Utils.jidAttribute('from', true),
+            priority: Utils.numberSub(namespace, 'priority', false, 0),
+            show: Utils.textSub(namespace, 'show'),
+            type: {
+                get: function get() {
+
+                    return Utils.getAttribute(this.xml, 'type', 'available');
+                },
+                set: function set(value) {
+
+                    if (value === 'available') {
+                        value = false;
+                    }
+                    Utils.setAttribute(this.xml, 'type', value);
+                }
+            },
+            $status: {
+                get: function get() {
+
+                    return Utils.getSubLangText(this.xml, namespace, 'status', this.lang);
+                }
+            },
+            status: {
+                get: function get() {
+
+                    var statuses = this.$status;
+                    return statuses[this.lang] || '';
+                },
+                set: function set(value) {
+
+                    Utils.setSubLangText(this.xml, namespace, 'status', value, this.lang);
+                }
+            },
+            idleSince: Utils.dateSubAttribute(_xmppConstants.Namespace.IDLE_1, 'idle', 'since'),
+            decloak: Utils.subAttribute(_xmppConstants.Namespace.DECLOAK_0, 'decloak', 'reason'),
+            avatarId: {
+                get: function get() {
+
+                    var update = Utils.find(this.xml, _xmppConstants.Namespace.VCARD_TEMP_UPDATE, 'x');
+                    if (!update.length) {
+                        return '';
+                    }
+                    return Utils.getSubText(update[0], _xmppConstants.Namespace.VCARD_TEMP_UPDATE, 'photo');
+                },
+                set: function set(value) {
+
+                    var update = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.VCARD_TEMP_UPDATE, 'x');
+
+                    if (value === '') {
+                        Utils.setBoolSub(update, _xmppConstants.Namespace.VCARD_TEMP_UPDATE, 'photo', true);
+                    } else if (value === true) {
+                        return;
+                    } else if (value) {
+                        Utils.setSubText(update, _xmppConstants.Namespace.VCARD_TEMP_UPDATE, 'photo', value);
+                    } else {
+                        this.xml.removeChild(update);
+                    }
+                }
+            }
+        }
+    });
+};
+
+exports['default'] = function (JXT) {
+
+    internals.definePresence(JXT, 'presence', _xmppConstants.Namespace.CLIENT);
+    internals.definePresence(JXT, 'serverPresence', _xmppConstants.Namespace.SERVER);
+    internals.definePresence(JXT, 'componentPresence', _xmppConstants.Namespace.COMPONENT);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],171:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var PrivateStorage = JXT.define({
+        name: 'privateStorage',
+        namespace: _xmppConstants.Namespace.PRIVATE,
+        element: 'query'
+    });
+
+    JXT.extendIQ(PrivateStorage);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],172:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var CONDITIONS = ['server-unavailable', 'connection-paused'];
+
+exports['default'] = function (JXT) {
+
+    var PSA = JXT.define({
+        name: 'state',
+        namespace: _xmppConstants.Namespace.PSA,
+        element: 'state-annotation',
+        fields: {
+            from: JXT.utils.jidAttribute('from'),
+            condition: JXT.utils.enumSub(_xmppConstants.Namespace.PSA, CONDITIONS),
+            description: JXT.utils.textSub(_xmppConstants.Namespace.PSA, 'description')
+        }
+    });
+
+    JXT.extendPresence(PSA);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],173:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Pubsub = JXT.define({
+        name: 'pubsub',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'pubsub',
+        fields: {
+            create: {
+                get: function get() {
+                    var node = Utils.getSubAttribute(this.xml, _xmppConstants.Namespace.PUBSUB, 'create', 'node');
+                    if (node) {
+                        return node;
+                    }
+                    return Utils.getBoolSub(this.xml, _xmppConstants.Namespace.PUBSUB, 'create');
+                },
+                set: function set(value) {
+                    if (value === true || !value) {
+                        Utils.setBoolSub(this.xml, _xmppConstants.Namespace.PUBSUB, 'create', value);
+                    } else {
+                        Utils.setSubAttribute(this.xml, _xmppConstants.Namespace.PUBSUB, 'create', 'node', value);
+                    }
+                }
+            },
+            publishOptions: {
+                get: function get() {
+
+                    var DataForm = JXT.getDefinition('x', _xmppConstants.Namespace.DATAFORM);
+                    var conf = Utils.find(this.xml, _xmppConstants.Namespace.PUBSUB, 'publish-options');
+                    if (conf.length && conf[0].childNodes.length) {
+                        return new DataForm({}, conf[0].childNodes[0]);
+                    }
+                },
+                set: function set(value) {
+
+                    var DataForm = JXT.getDefinition('x', _xmppConstants.Namespace.DATAFORM);
+                    var conf = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.PUBSUB, 'publish-options');
+                    if (value) {
+                        var form = new DataForm(value);
+                        conf.appendChild(form.xml);
+                    }
+                }
+            }
+        }
+    });
+
+    var Configure = JXT.define({
+        name: 'config',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'configure'
+    });
+
+    var Subscribe = JXT.define({
+        name: 'subscribe',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'subscribe',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid')
+        }
+    });
+
+    var Subscription = JXT.define({
+        name: 'subscription',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'subscription',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid'),
+            subid: Utils.attribute('subid'),
+            type: Utils.attribute('subscription'),
+            configurable: Utils.boolSub('subscribe-options'),
+            configurationRequired: {
+                get: function get() {
+
+                    var options = Utils.find(this.xml, _xmppConstants.Namespace.PUBSUB, 'subscribe-options');
+                    if (options.length) {
+                        return Utils.getBoolSub(options[0], _xmppConstants.Namespace.PUBSUB, 'required');
+                    }
+                    return false;
+                }
+            }
+        }
+    });
+
+    var Subscriptions = JXT.define({
+        name: 'subscriptions',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'subscriptions',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid')
+        }
+    });
+
+    var Affiliation = JXT.define({
+        name: 'affiliation',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'affiliation',
+        fields: {
+            node: Utils.attribute('node'),
+            type: Utils.attribute('affiliation')
+        }
+    });
+
+    var Affiliations = JXT.define({
+        name: 'affiliations',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'affiliations',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var SubscriptionOptions = JXT.define({
+        name: 'subscriptionOptions',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'options',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid'),
+            subid: Utils.attribute('subid')
+        }
+    });
+
+    var Unsubscribe = JXT.define({
+        name: 'unsubscribe',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'unsubscribe',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid')
+        }
+    });
+
+    var Publish = JXT.define({
+        name: 'publish',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'publish',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var Retract = JXT.define({
+        name: 'retract',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'retract',
+        fields: {
+            node: Utils.attribute('node'),
+            notify: Utils.boolAttribute('notify'),
+            id: Utils.subAttribute(_xmppConstants.Namespace.PUBSUB, 'item', 'id')
+        }
+    });
+
+    var Retrieve = JXT.define({
+        name: 'retrieve',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'items',
+        fields: {
+            node: Utils.attribute('node'),
+            max: Utils.attribute('max_items')
+        }
+    });
+
+    var Item = JXT.define({
+        name: 'item',
+        namespace: _xmppConstants.Namespace.PUBSUB,
+        element: 'item',
+        fields: {
+            id: Utils.attribute('id')
+        }
+    });
+
+    JXT.extend(Pubsub, Configure);
+    JXT.extend(Pubsub, Subscribe);
+    JXT.extend(Pubsub, Unsubscribe);
+    JXT.extend(Pubsub, Publish);
+    JXT.extend(Pubsub, Retract);
+    JXT.extend(Pubsub, Retrieve);
+    JXT.extend(Pubsub, Subscription);
+    JXT.extend(Pubsub, SubscriptionOptions);
+    JXT.extend(Pubsub, Subscriptions);
+    JXT.extend(Pubsub, Affiliations);
+
+    JXT.extend(Publish, Item, 'items');
+    JXT.extend(Retrieve, Item, 'items');
+
+    JXT.extend(Subscriptions, Subscription, 'list');
+    JXT.extend(Affiliations, Affiliation, 'list');
+
+    JXT.extendIQ(Pubsub);
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(SubscriptionOptions, DataForm);
+        JXT.extend(Item, DataForm);
+        JXT.extend(Configure, DataForm);
+    });
+
+    JXT.withDefinition('set', _xmppConstants.Namespace.RSM, function (RSM) {
+
+        JXT.extend(Pubsub, RSM);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],174:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var CONDITIONS = ['closed-node', 'configuration-required', 'invalid-jid', 'invalid-options', 'invalid-payload', 'invalid-subid', 'item-forbidden', 'item-required', 'jid-required', 'max-items-exceeded', 'max-nodes-exceeded', 'nodeid-required', 'not-in-roster-group', 'not-subscribed', 'payload-too-big', 'payload-required', 'pending-subscription', 'presence-subscription-required', 'subid-required', 'too-many-subscriptions', 'unsupported', 'unsupported-access-model'];
+
+exports['default'] = function (JXT) {
+
+    JXT.withStanzaError(function (StanzaError) {
+
+        JXT.add(StanzaError, 'pubsubCondition', JXT.utils.enumSub(_xmppConstants.Namespace.PUBSUB_ERRORS, CONDITIONS));
+        JXT.add(StanzaError, 'pubsubUnsupportedFeature', {
+            get: function get() {
+                return JXT.utils.getSubAttribute(this.xml, _xmppConstants.Namespace.PUBSUB_ERRORS, 'unsupported', 'feature');
+            },
+            set: function set(value) {
+                if (value) {
+                    this.pubsubCondition = 'unsupported';
+                }
+                JXT.utils.setSubAttribute(this.xml, _xmppConstants.Namespace.PUBSUB_ERRORS, 'unsupported', 'feature', value);
+            }
+        });
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],175:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Event = JXT.define({
+        name: 'event',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'event'
+    });
+
+    var EventPurge = JXT.define({
+        name: 'purged',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'purge',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var EventDelete = JXT.define({
+        name: 'deleted',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'delete',
+        fields: {
+            node: Utils.attribute('node'),
+            redirect: Utils.subAttribute(_xmppConstants.Namespace.PUBSUB_EVENT, 'redirect', 'uri')
+        }
+    });
+
+    var EventSubscription = JXT.define({
+        name: 'subscriptionChanged',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'subscription',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid'),
+            type: Utils.attribute('subscription'),
+            subid: Utils.attribute('subid'),
+            expiry: {
+                get: function get() {
+
+                    var text = Utils.getAttribute(this.xml, 'expiry');
+                    if (text === 'presence') {
+                        return text;
+                    } else if (text) {
+                        return new Date(text);
+                    }
+                },
+                set: function set(value) {
+
+                    if (!value) {
+                        return;
+                    }
+
+                    if (typeof value !== 'string') {
+                        value = value.toISOString();
+                    }
+
+                    Utils.setAttribute(this.xml, 'expiry', value);
+                }
+            }
+        }
+    });
+
+    var EventConfiguration = JXT.define({
+        name: 'configurationChanged',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'configuration',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var EventItems = JXT.define({
+        name: 'updated',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'items',
+        fields: {
+            node: Utils.attribute('node'),
+            retracted: {
+                get: function get() {
+
+                    var results = [];
+                    var retracted = Utils.find(this.xml, _xmppConstants.Namespace.PUBSUB_EVENT, 'retract');
+
+                    retracted.forEach(function (xml) {
+
+                        results.push(xml.getAttribute('id'));
+                    });
+                    return results;
+                },
+                set: function set(value) {
+
+                    var self = this;
+                    value.forEach(function (id) {
+
+                        var retracted = Utils.createElement(_xmppConstants.Namespace.PUBSUB_EVENT, 'retract', _xmppConstants.Namespace.PUBSUB_EVENT);
+                        retracted.setAttribute('id', id);
+                        this.xml.appendChild(retracted);
+                    });
+                }
+            }
+        }
+    });
+
+    var EventItem = JXT.define({
+        name: '_eventItem',
+        namespace: _xmppConstants.Namespace.PUBSUB_EVENT,
+        element: 'item',
+        fields: {
+            id: Utils.attribute('id'),
+            node: Utils.attribute('node'),
+            publisher: Utils.jidAttribute('publisher')
+        }
+    });
+
+    JXT.extend(EventItems, EventItem, 'published');
+
+    JXT.extend(Event, EventItems);
+    JXT.extend(Event, EventSubscription);
+    JXT.extend(Event, EventConfiguration);
+    JXT.extend(Event, EventDelete);
+    JXT.extend(Event, EventPurge);
+
+    JXT.extendMessage(Event);
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(EventConfiguration, DataForm);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],176:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var PubsubOwner = JXT.define({
+        name: 'pubsubOwner',
+        namespace: _xmppConstants.Namespace.PUBSUB_OWNER,
+        element: 'pubsub',
+        fields: {
+            purge: Utils.subAttribute(_xmppConstants.Namespace.PUBSUB_OWNER, 'purge', 'node'),
+            del: Utils.subAttribute(_xmppConstants.Namespace.PUBSUB_OWNER, 'delete', 'node'),
+            redirect: {
+                get: function get() {
+
+                    var del = Utils.find(this.xml, _xmppConstants.Namespace.PUBSUB_OWNER, 'delete');
+                    if (del.length) {
+                        return Utils.getSubAttribute(del[0], _xmppConstants.Namespace.PUBSUB_OWNER, 'redirect', 'uri');
+                    }
+                    return '';
+                },
+                set: function set(value) {
+
+                    var del = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.PUBSUB_OWNER, 'delete');
+                    Utils.setSubAttribute(del, _xmppConstants.Namespace.PUBSUB_OWNER, 'redirect', 'uri', value);
+                }
+            }
+        }
+    });
+
+    var Subscription = JXT.define({
+        name: 'subscription',
+        namespace: _xmppConstants.Namespace.PUBSUB_OWNER,
+        element: 'subscription',
+        fields: {
+            node: Utils.attribute('node'),
+            jid: Utils.jidAttribute('jid'),
+            subid: Utils.attribute('subid'),
+            type: Utils.attribute('subscription'),
+            configurable: Utils.boolSub('subscribe-options'),
+            configurationRequired: {
+                get: function get() {
+
+                    var options = Utils.find(this.xml, _xmppConstants.Namespace.PUBSUB_OWNER, 'subscribe-options');
+                    if (options.length) {
+                        return Utils.getBoolSub(options[0], _xmppConstants.Namespace.PUBSUB_OWNER, 'required');
+                    }
+                    return false;
+                }
+            }
+        }
+    });
+
+    var Subscriptions = JXT.define({
+        name: 'subscriptions',
+        namespace: _xmppConstants.Namespace.PUBSUB_OWNER,
+        element: 'subscriptions',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var Affiliation = JXT.define({
+        name: 'affiliation',
+        namespace: _xmppConstants.Namespace.PUBSUB_OWNER,
+        element: 'affiliation',
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            type: Utils.attribute('affiliation')
+        }
+    });
+
+    var Affiliations = JXT.define({
+        name: 'affiliations',
+        namespace: _xmppConstants.Namespace.PUBSUB_OWNER,
+        element: 'affiliations',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    var Configure = JXT.define({
+        name: 'config',
+        namespace: _xmppConstants.Namespace.PUBSUB_OWNER,
+        element: 'configure',
+        fields: {
+            node: Utils.attribute('node')
+        }
+    });
+
+    JXT.extend(PubsubOwner, Configure);
+    JXT.extend(PubsubOwner, Subscriptions);
+    JXT.extend(PubsubOwner, Affiliations);
+
+    JXT.extend(Subscriptions, Subscription, 'list');
+    JXT.extend(Affiliations, Affiliation, 'list');
+
+    JXT.extendIQ(PubsubOwner);
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(Configure, DataForm);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],177:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Enable = JXT.define({
+        name: 'enablePush',
+        element: 'enable',
+        namespace: _xmppConstants.Namespace.PUSH_0,
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            node: Utils.attribute('node')
+        }
+    });
+
+    var Disable = JXT.define({
+        name: 'disablePush',
+        element: 'disable',
+        namespace: _xmppConstants.Namespace.PUSH_0,
+        fields: {
+            jid: Utils.jidAttribute('jid'),
+            node: Utils.attribute('node')
+        }
+    });
+
+    var Notification = JXT.define({
+        name: 'pushNotification',
+        element: 'notification',
+        namespace: _xmppConstants.Namespace.PUSH_0
+    });
+
+    JXT.withDataForm(function (DataForm) {
+        JXT.extend(Notification, DataForm);
+        JXT.extend(Enable, DataForm);
+    });
+
+    JXT.extendIQ(Enable);
+    JXT.extendIQ(Disable);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],178:[function(require,module,exports){
+'use strict';
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var _lodashForeach = require('lodash.foreach');
+
+var _lodashForeach2 = _interopRequireDefault(_lodashForeach);
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var ReachURI = JXT.define({
+        name: '_reachAddr',
+        namespace: _xmppConstants.Namespace.REACH_0,
+        element: 'addr',
+        fields: {
+            uri: Utils.attribute('uri'),
+            $desc: {
+                get: function get() {
+
+                    return Utils.getSubLangText(this.xml, _xmppConstants.Namespace.REACH_0, 'desc', this.lang);
+                }
+            },
+            desc: {
+                get: function get() {
+
+                    var descs = this.$desc;
+                    return descs[this.lang] || '';
+                },
+                set: function set(value) {
+
+                    Utils.setSubLangText(this.xml, _xmppConstants.Namespace.REACH_0, 'desc', value, this.lang);
+                }
+            }
+        }
+    });
+
+    var reachability = {
+        get: function get() {
+
+            var reach = Utils.find(this.xml, _xmppConstants.Namespace.REACH_0, 'reach');
+            var results = [];
+            if (reach.length) {
+                var addrs = Utils.find(reach[0], _xmppConstants.Namespace.REACH_0, 'addr');
+                (0, _lodashForeach2['default'])(addrs, function (addr) {
+
+                    results.push(new ReachURI({}, addr));
+                });
+            }
+            return results;
+        },
+        set: function set(value) {
+
+            var reach = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.REACH_0, 'reach');
+            Utils.setAttribute(reach, 'xmlns', _xmppConstants.Namespace.REACH_0);
+            (0, _lodashForeach2['default'])(value, function (info) {
+
+                var addr = new ReachURI(info);
+                reach.appendChild(addr.xml);
+            });
+        }
+    };
+
+    JXT.withPubsubItem(function (Item) {
+
+        JXT.add(Item, 'reach', reachability);
+    });
+
+    JXT.withPresence(function (Presence) {
+
+        JXT.add(Presence, 'reach', reachability);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"babel-runtime/helpers/interop-require-default":197,"lodash.foreach":212,"xmpp-constants":220}],179:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Register = JXT.define({
+        name: 'register',
+        namespace: _xmppConstants.Namespace.REGISTER,
+        element: 'query',
+        fields: {
+            instructions: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'instructions'),
+            registered: Utils.boolSub(_xmppConstants.Namespace.REGISTER, 'registered'),
+            remove: Utils.boolSub(_xmppConstants.Namespace.REGISTER, 'remove'),
+            username: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'username'),
+            nick: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'nick'),
+            password: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'password'),
+            name: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'name'),
+            first: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'first'),
+            last: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'last'),
+            email: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'email'),
+            address: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'address'),
+            city: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'city'),
+            state: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'state'),
+            zip: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'zip'),
+            phone: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'phone'),
+            url: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'url'),
+            date: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'date'),
+            misc: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'misc'),
+            text: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'text'),
+            key: Utils.textSub(_xmppConstants.Namespace.REGISTER, 'key')
+        }
+    });
+
+    JXT.extendIQ(Register);
+
+    JXT.withDefinition('x', _xmppConstants.Namespace.OOB, function (OOB) {
+
+        JXT.extend(Register, OOB);
+    });
+
+    JXT.withDataForm(function (DataForm) {
+
+        JXT.extend(Register, DataForm);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],180:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Roster = JXT.define({
+        name: 'roster',
+        namespace: _xmppConstants.Namespace.ROSTER,
+        element: 'query',
+        fields: {
+            ver: {
+                get: function get() {
+
+                    return Utils.getAttribute(this.xml, 'ver');
+                },
+                set: function set(value) {
+
+                    var force = value === '';
+                    Utils.setAttribute(this.xml, 'ver', value, force);
+                }
+            }
+        }
+    });
+
+    var RosterItem = JXT.define({
+        name: '_rosterItem',
+        namespace: _xmppConstants.Namespace.ROSTER,
+        element: 'item',
+        fields: {
+            jid: Utils.jidAttribute('jid', true),
+            name: Utils.attribute('name'),
+            subscription: Utils.attribute('subscription', 'none'),
+            subscriptionRequested: {
+                get: function get() {
+
+                    var ask = Utils.getAttribute(this.xml, 'ask');
+                    return ask === 'subscribe';
+                }
+            },
+            preApproved: Utils.boolAttribute(_xmppConstants.Namespace.ROSTER, 'approved'),
+            groups: Utils.multiTextSub(_xmppConstants.Namespace.ROSTER, 'group')
+        }
+    });
+
+    JXT.extend(Roster, RosterItem, 'items');
+
+    JXT.extendIQ(Roster);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],181:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: 'rsm',
+        namespace: _xmppConstants.Namespace.RSM,
+        element: 'set',
+        fields: {
+            after: Utils.textSub(_xmppConstants.Namespace.RSM, 'after'),
+            before: {
+                get: function get() {
+
+                    return Utils.getSubText(this.xml, _xmppConstants.Namespace.RSM, 'before');
+                },
+                set: function set(value) {
+
+                    if (value === true) {
+                        Utils.findOrCreate(this.xml, _xmppConstants.Namespace.RSM, 'before');
+                    } else {
+                        Utils.setSubText(this.xml, _xmppConstants.Namespace.RSM, 'before', value);
+                    }
+                }
+            },
+            count: Utils.numberSub(_xmppConstants.Namespace.RSM, 'count', false, 0),
+            first: Utils.textSub(_xmppConstants.Namespace.RSM, 'first'),
+            firstIndex: Utils.subAttribute(_xmppConstants.Namespace.RSM, 'first', 'index'),
+            index: Utils.textSub(_xmppConstants.Namespace.RSM, 'index'),
+            last: Utils.textSub(_xmppConstants.Namespace.RSM, 'last'),
+            max: Utils.textSub(_xmppConstants.Namespace.RSM, 'max')
+        }
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],182:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Feedback = {
+        get: function get() {
+
+            var existing = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_RTCP_FB_0, 'rtcp-fb');
+            var result = [];
+            existing.forEach(function (xml) {
+
+                result.push({
+                    type: Utils.getAttribute(xml, 'type'),
+                    subtype: Utils.getAttribute(xml, 'subtype')
+                });
+            });
+            existing = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_RTCP_FB_0, 'rtcp-fb-trr-int');
+            existing.forEach(function (xml) {
+
+                result.push({
+                    type: Utils.getAttribute(xml, 'type'),
+                    value: Utils.getAttribute(xml, 'value')
+                });
+            });
+            return result;
+        },
+        set: function set(values) {
+
+            var self = this;
+            var existing = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_RTCP_FB_0, 'rtcp-fb');
+            existing.forEach(function (item) {
+
+                self.xml.removeChild(item);
+            });
+            existing = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_RTCP_FB_0, 'rtcp-fb-trr-int');
+            existing.forEach(function (item) {
+
+                self.xml.removeChild(item);
+            });
+
+            values.forEach(function (value) {
+
+                var fb = undefined;
+                if (value.type === 'trr-int') {
+                    fb = Utils.createElement(_xmppConstants.Namespace.JINGLE_RTP_RTCP_FB_0, 'rtcp-fb-trr-int', _xmppConstants.Namespace.JINGLE_RTP_1);
+                    Utils.setAttribute(fb, 'type', value.type);
+                    Utils.setAttribute(fb, 'value', value.value);
+                } else {
+                    fb = Utils.createElement(_xmppConstants.Namespace.JINGLE_RTP_RTCP_FB_0, 'rtcp-fb', _xmppConstants.Namespace.JINGLE_RTP_1);
+                    Utils.setAttribute(fb, 'type', value.type);
+                    Utils.setAttribute(fb, 'subtype', value.subtype);
+                }
+                self.xml.appendChild(fb);
+            });
+        }
+    };
+
+    var Bandwidth = JXT.define({
+        name: 'bandwidth',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_1,
+        element: 'bandwidth',
+        fields: {
+            type: Utils.attribute('type'),
+            bandwidth: Utils.text()
+        }
+    });
+
+    var RTP = JXT.define({
+        name: '_rtp',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_1,
+        element: 'description',
+        tags: ['jingle-description'],
+        fields: {
+            descType: { value: 'rtp' },
+            media: Utils.attribute('media'),
+            ssrc: Utils.attribute('ssrc'),
+            mux: Utils.boolSub(_xmppConstants.Namespace.JINGLE_RTP_1, 'rtcp-mux'),
+            encryption: {
+                get: function get() {
+
+                    var enc = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_1, 'encryption');
+                    if (!enc.length) {
+                        return [];
+                    }
+                    enc = enc[0];
+
+                    var self = this;
+                    var data = Utils.find(enc, _xmppConstants.Namespace.JINGLE_RTP_1, 'crypto');
+                    var results = [];
+
+                    data.forEach(function (xml) {
+
+                        results.push(new Crypto({}, xml, self).toJSON());
+                    });
+                    return results;
+                },
+                set: function set(values) {
+
+                    var enc = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_1, 'encryption');
+                    if (enc.length) {
+                        this.xml.removeChild(enc);
+                    }
+
+                    if (!values.length) {
+                        return;
+                    }
+
+                    Utils.setBoolSubAttribute(this.xml, _xmppConstants.Namespace.JINGLE_RTP_1, 'encryption', 'required', true);
+                    enc = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_1, 'encryption')[0];
+
+                    var self = this;
+                    values.forEach(function (value) {
+
+                        var content = new Crypto(value, null, self);
+                        enc.appendChild(content.xml);
+                    });
+                }
+            },
+            feedback: Feedback,
+            headerExtensions: {
+                get: function get() {
+
+                    var existing = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_HDREXT_0, 'rtp-hdrext');
+                    var result = [];
+                    existing.forEach(function (xml) {
+
+                        result.push({
+                            id: Utils.getAttribute(xml, 'id'),
+                            uri: Utils.getAttribute(xml, 'uri'),
+                            senders: Utils.getAttribute(xml, 'senders')
+                        });
+                    });
+                    return result;
+                },
+                set: function set(values) {
+
+                    var self = this;
+                    var existing = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_HDREXT_0, 'rtp-hdrext');
+                    existing.forEach(function (item) {
+
+                        self.xml.removeChild(item);
+                    });
+
+                    values.forEach(function (value) {
+
+                        var hdr = Utils.createElement(_xmppConstants.Namespace.JINGLE_RTP_HDREXT_0, 'rtp-hdrext', _xmppConstants.Namespace.JINGLE_RTP_1);
+                        Utils.setAttribute(hdr, 'id', value.id);
+                        Utils.setAttribute(hdr, 'uri', value.uri);
+                        Utils.setAttribute(hdr, 'senders', value.senders);
+                        self.xml.appendChild(hdr);
+                    });
+                }
+            }
+        }
+    });
+
+    var PayloadType = JXT.define({
+        name: '_payloadType',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_1,
+        element: 'payload-type',
+        fields: {
+            channels: Utils.attribute('channels'),
+            clockrate: Utils.attribute('clockrate'),
+            id: Utils.attribute('id'),
+            maxptime: Utils.attribute('maxptime'),
+            name: Utils.attribute('name'),
+            ptime: Utils.attribute('ptime'),
+            feedback: Feedback,
+            parameters: {
+                get: function get() {
+
+                    var result = [];
+                    var params = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_1, 'parameter');
+                    params.forEach(function (param) {
+
+                        result.push({
+                            key: Utils.getAttribute(param, 'name'),
+                            value: Utils.getAttribute(param, 'value')
+                        });
+                    });
+                    return result;
+                },
+                set: function set(values) {
+
+                    var self = this;
+                    values.forEach(function (value) {
+
+                        var param = Utils.createElement(_xmppConstants.Namespace.JINGLE_RTP_1, 'parameter');
+                        Utils.setAttribute(param, 'name', value.key);
+                        Utils.setAttribute(param, 'value', value.value);
+                        self.xml.appendChild(param);
+                    });
+                }
+            }
+        }
+    });
+
+    var Crypto = JXT.define({
+        name: 'crypto',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_1,
+        element: 'crypto',
+        fields: {
+            cipherSuite: Utils.attribute('crypto-suite'),
+            keyParams: Utils.attribute('key-params'),
+            sessionParams: Utils.attribute('session-params'),
+            tag: Utils.attribute('tag')
+        }
+    });
+
+    var ContentGroup = JXT.define({
+        name: '_group',
+        namespace: _xmppConstants.Namespace.JINGLE_GROUPING_0,
+        element: 'group',
+        fields: {
+            semantics: Utils.attribute('semantics'),
+            contents: Utils.multiSubAttribute(_xmppConstants.Namespace.JINGLE_GROUPING_0, 'content', 'name')
+        }
+    });
+
+    var SourceGroup = JXT.define({
+        name: '_sourceGroup',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_SSMA_0,
+        element: 'ssrc-group',
+        fields: {
+            semantics: Utils.attribute('semantics'),
+            sources: Utils.multiSubAttribute(_xmppConstants.Namespace.JINGLE_RTP_SSMA_0, 'source', 'ssrc')
+        }
+    });
+
+    var Source = JXT.define({
+        name: '_source',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_SSMA_0,
+        element: 'source',
+        fields: {
+            ssrc: Utils.attribute('ssrc'),
+            parameters: {
+                get: function get() {
+
+                    var result = [];
+                    var params = Utils.find(this.xml, _xmppConstants.Namespace.JINGLE_RTP_SSMA_0, 'parameter');
+                    params.forEach(function (param) {
+
+                        result.push({
+                            key: Utils.getAttribute(param, 'name'),
+                            value: Utils.getAttribute(param, 'value')
+                        });
+                    });
+                    return result;
+                },
+                set: function set(values) {
+
+                    var self = this;
+                    values.forEach(function (value) {
+
+                        var param = Utils.createElement(_xmppConstants.Namespace.JINGLE_RTP_SSMA_0, 'parameter');
+                        Utils.setAttribute(param, 'name', value.key);
+                        Utils.setAttribute(param, 'value', value.value);
+                        self.xml.appendChild(param);
+                    });
+                }
+            }
+        }
+    });
+
+    var Mute = JXT.define({
+        name: 'mute',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_INFO_1,
+        element: 'mute',
+        fields: {
+            creator: Utils.attribute('creator'),
+            name: Utils.attribute('name')
+        }
+    });
+
+    var Unmute = JXT.define({
+        name: 'unmute',
+        namespace: _xmppConstants.Namespace.JINGLE_RTP_INFO_1,
+        element: 'unmute',
+        fields: {
+            creator: Utils.attribute('creator'),
+            name: Utils.attribute('name')
+        }
+    });
+
+    JXT.extend(RTP, Bandwidth);
+    JXT.extend(RTP, PayloadType, 'payloads');
+    JXT.extend(RTP, Source, 'sources');
+    JXT.extend(RTP, SourceGroup, 'sourceGroups');
+
+    JXT.withDefinition('content', _xmppConstants.Namespace.JINGLE_1, function (Content) {
+
+        JXT.extend(Content, RTP);
+    });
+
+    JXT.withDefinition('jingle', _xmppConstants.Namespace.JINGLE_1, function (Jingle) {
+
+        JXT.extend(Jingle, Mute);
+        JXT.extend(Jingle, Unmute);
+        JXT.extend(Jingle, ContentGroup, 'groups');
+        JXT.add(Jingle, 'ringing', Utils.boolSub(_xmppConstants.Namespace.JINGLE_RTP_INFO_1, 'ringing'));
+        JXT.add(Jingle, 'hold', Utils.boolSub(_xmppConstants.Namespace.JINGLE_RTP_INFO_1, 'hold'));
+        JXT.add(Jingle, 'active', Utils.boolSub(_xmppConstants.Namespace.JINGLE_RTP_INFO_1, 'active'));
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],183:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var TYPE_MAP = {
+    insert: 't',
+    erase: 'e',
+    wait: 'w'
+};
+
+var ACTION_MAP = {
+    t: 'insert',
+    e: 'erase',
+    w: 'wait'
+};
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var RTT = JXT.define({
+        name: 'rtt',
+        namespace: _xmppConstants.Namespace.RTT_0,
+        element: 'rtt',
+        fields: {
+            id: Utils.attribute('id'),
+            event: Utils.attribute('event', 'edit'),
+            seq: Utils.numberAttribute('seq'),
+            actions: {
+                get: function get() {
+
+                    var results = [];
+                    for (var i = 0, len = this.xml.childNodes.length; i < len; i++) {
+                        var child = this.xml.childNodes[i];
+                        var _name = child.localName;
+                        var action = {};
+
+                        if (child.namespaceURI !== _xmppConstants.Namespace.RTT_0) {
+                            continue;
+                        }
+
+                        if (ACTION_MAP[_name]) {
+                            action.type = ACTION_MAP[_name];
+                        } else {
+                            continue;
+                        }
+
+                        var pos = Utils.getAttribute(child, 'p');
+                        if (pos) {
+                            action.pos = parseInt(pos, 10);
+                        }
+
+                        var n = Utils.getAttribute(child, 'n');
+                        if (n) {
+                            action.num = parseInt(n, 10);
+                        }
+
+                        var t = Utils.getText(child);
+                        if (t && _name === 't') {
+                            action.text = t;
+                        }
+
+                        results.push(action);
+                    }
+
+                    return results;
+                },
+                set: function set(actions) {
+
+                    var self = this;
+
+                    for (var i = 0, len = this.xml.childNodes.length; i < len; i++) {
+                        this.xml.removeChild(this.xml.childNodes[i]);
+                    }
+
+                    actions.forEach(function (action) {
+
+                        if (!TYPE_MAP[action.type]) {
+                            return;
+                        }
+
+                        var child = Utils.createElement(_xmppConstants.Namespace.RTT_0, TYPE_MAP[action.type], _xmppConstants.Namespace.RTT_0);
+
+                        if (action.pos !== undefined) {
+                            Utils.setAttribute(child, 'p', action.pos.toString());
+                        }
+
+                        if (action.num) {
+                            Utils.setAttribute(child, 'n', action.num.toString());
+                        }
+
+                        if (action.text) {
+                            Utils.setText(child, action.text);
+                        }
+
+                        self.xml.appendChild(child);
+                    });
+                }
+            }
+        }
+    });
+
+    JXT.extendMessage(RTT);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],184:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var CONDITIONS = ['aborted', 'account-disabled', 'credentials-expired', 'encryption-required', 'incorrect-encoding', 'invalid-authzid', 'invalid-mechanism', 'malformed-request', 'mechanism-too-weak', 'not-authorized', 'temporary-auth-failure'];
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Mechanisms = JXT.define({
+        name: 'sasl',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'mechanisms',
+        fields: {
+            mechanisms: Utils.multiTextSub(_xmppConstants.Namespace.SASL, 'mechanism')
+        }
+    });
+
+    JXT.define({
+        name: 'saslAuth',
+        eventName: 'sasl:auth',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'auth',
+        topLevel: true,
+        fields: {
+            value: Utils.text(),
+            mechanism: Utils.attribute('mechanism')
+        }
+    });
+
+    JXT.define({
+        name: 'saslChallenge',
+        eventName: 'sasl:challenge',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'challenge',
+        topLevel: true,
+        fields: {
+            value: Utils.text()
+        }
+    });
+
+    JXT.define({
+        name: 'saslResponse',
+        eventName: 'sasl:response',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'response',
+        topLevel: true,
+        fields: {
+            value: Utils.text()
+        }
+    });
+
+    JXT.define({
+        name: 'saslAbort',
+        eventName: 'sasl:abort',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'abort',
+        topLevel: true
+    });
+
+    JXT.define({
+        name: 'saslSuccess',
+        eventName: 'sasl:success',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'success',
+        topLevel: true,
+        fields: {
+            value: Utils.text()
+        }
+    });
+
+    JXT.define({
+        name: 'saslFailure',
+        eventName: 'sasl:failure',
+        namespace: _xmppConstants.Namespace.SASL,
+        element: 'failure',
+        topLevel: true,
+        fields: {
+            lang: {
+                get: function get() {
+
+                    return this._lang || '';
+                },
+                set: function set(value) {
+
+                    this._lang = value;
+                }
+            },
+            condition: Utils.enumSub(_xmppConstants.Namespace.SASL, CONDITIONS),
+            $text: {
+                get: function get() {
+
+                    return Utils.getSubLangText(this.xml, _xmppConstants.Namespace.SASL, 'text', this.lang);
+                }
+            },
+            text: {
+                get: function get() {
+
+                    var text = this.$text;
+                    return text[this.lang] || '';
+                },
+                set: function set(value) {
+
+                    Utils.setSubLangText(this.xml, _xmppConstants.Namespace.SASL, 'text', value, this.lang);
+                }
+            }
+        }
+    });
+
+    JXT.extendStreamFeatures(Mechanisms);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],185:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Session = JXT.define({
+        name: 'session',
+        namespace: _xmppConstants.Namespace.SESSION,
+        element: 'session',
+        fields: {
+            required: JXT.utils.boolSub(_xmppConstants.Namespace.SESSION, 'required'),
+            optional: JXT.utils.boolSub(_xmppConstants.Namespace.SESSION, 'optional')
+        }
+    });
+
+    JXT.extendIQ(Session);
+    JXT.extendStreamFeatures(Session);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],186:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var SHIM = {
+        get: function get() {
+
+            var headerSet = Utils.find(this.xml, _xmppConstants.Namespace.SHIM, 'headers');
+            if (headerSet.length) {
+                return Utils.getMultiSubText(headerSet[0], _xmppConstants.Namespace.SHIM, 'header', function (header) {
+
+                    var name = Utils.getAttribute(header, 'name');
+                    if (name) {
+                        return {
+                            name: name,
+                            value: Utils.getText(header)
+                        };
+                    }
+                });
+            }
+            return [];
+        },
+        set: function set(values) {
+
+            var headerSet = Utils.findOrCreate(this.xml, _xmppConstants.Namespace.SHIM, 'headers');
+            JXT.setMultiSubText(headerSet, _xmppConstants.Namespace.SHIM, 'header', values, function (val) {
+
+                var header = Utils.createElement(_xmppConstants.Namespace.SHIM, 'header', _xmppConstants.Namespace.SHIM);
+                Utils.setAttribute(header, 'name', val.name);
+                Utils.setText(header, val.value);
+                headerSet.appendChild(header);
+            });
+        }
+    };
+
+    JXT.withMessage(function (Message) {
+
+        JXT.add(Message, 'headers', SHIM);
+    });
+
+    JXT.withPresence(function (Presence) {
+
+        JXT.add(Presence, 'headers', SHIM);
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],187:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var SMFeature = JXT.define({
+        name: 'streamManagement',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'sm'
+    });
+
+    JXT.define({
+        name: 'smEnable',
+        eventName: 'stream:management:enable',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'enable',
+        topLevel: true,
+        fields: {
+            resume: Utils.boolAttribute('resume')
+        }
+    });
+
+    JXT.define({
+        name: 'smEnabled',
+        eventName: 'stream:management:enabled',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'enabled',
+        topLevel: true,
+        fields: {
+            id: Utils.attribute('id'),
+            resume: Utils.boolAttribute('resume')
+        }
+    });
+
+    JXT.define({
+        name: 'smResume',
+        eventName: 'stream:management:resume',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'resume',
+        topLevel: true,
+        fields: {
+            h: Utils.numberAttribute('h', false, 0),
+            previd: Utils.attribute('previd')
+        }
+    });
+
+    JXT.define({
+        name: 'smResumed',
+        eventName: 'stream:management:resumed',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'resumed',
+        topLevel: true,
+        fields: {
+            h: Utils.numberAttribute('h', false, 0),
+            previd: Utils.attribute('previd')
+        }
+    });
+
+    JXT.define({
+        name: 'smFailed',
+        eventName: 'stream:management:failed',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'failed',
+        topLevel: true
+    });
+
+    JXT.define({
+        name: 'smAck',
+        eventName: 'stream:management:ack',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'a',
+        topLevel: true,
+        fields: {
+            h: Utils.numberAttribute('h', false, 0)
+        }
+    });
+
+    JXT.define({
+        name: 'smRequest',
+        eventName: 'stream:management:request',
+        namespace: _xmppConstants.Namespace.SMACKS_3,
+        element: 'r',
+        topLevel: true
+    });
+
+    JXT.extendStreamFeatures(SMFeature);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],188:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: 'stream',
+        namespace: _xmppConstants.Namespace.STREAM,
+        element: 'stream',
+        fields: {
+            lang: Utils.langAttribute(),
+            id: Utils.attribute('id'),
+            version: Utils.attribute('version', '1.0'),
+            to: Utils.jidAttribute('to', true),
+            from: Utils.jidAttribute('from', true)
+        }
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],189:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+var CONDITIONS = ['bad-format', 'bad-namespace-prefix', 'conflict', 'connection-timeout', 'host-gone', 'host-unknown', 'improper-addressing', 'internal-server-error', 'invalid-from', 'invalid-namespace', 'invalid-xml', 'not-authorized', 'not-well-formed', 'policy-violation', 'remote-connection-failed', 'reset', 'resource-constraint', 'restricted-xml', 'see-other-host', 'system-shutdown', 'undefined-condition', 'unsupported-encoding', 'unsupported-feature', 'unsupported-stanza-type', 'unsupported-version'];
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    JXT.define({
+        name: 'streamError',
+        namespace: _xmppConstants.Namespace.STREAM,
+        element: 'error',
+        topLevel: true,
+        fields: {
+            lang: {
+                get: function get() {
+
+                    return this._lang || '';
+                },
+                set: function set(value) {
+
+                    this._lang = value;
+                }
+            },
+            condition: Utils.enumSub(_xmppConstants.Namespace.STREAM_ERROR, CONDITIONS),
+            seeOtherHost: {
+                get: function get() {
+
+                    return Utils.getSubText(this.xml, _xmppConstants.Namespace.STREAM_ERROR, 'see-other-host');
+                },
+                set: function set(value) {
+
+                    this.condition = 'see-other-host';
+                    Utils.setSubText(this.xml, _xmppConstants.Namespace.STREAM_ERROR, 'see-other-host', value);
+                }
+            },
+            $text: {
+                get: function get() {
+
+                    return Utils.getSubLangText(this.xml, _xmppConstants.Namespace.STREAM_ERROR, 'text', this.lang);
+                }
+            },
+            text: {
+                get: function get() {
+
+                    var text = this.$text;
+                    return text[this.lang] || '';
+                },
+                set: function set(value) {
+
+                    Utils.setSubLangText(this.xml, _xmppConstants.Namespace.STREAM_ERROR, 'text', value, this.lang);
+                }
+            }
+        }
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],190:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var StreamFeatures = JXT.define({
+        name: 'streamFeatures',
+        namespace: _xmppConstants.Namespace.STREAM,
+        element: 'features',
+        topLevel: true
+    });
+
+    var RosterVerFeature = JXT.define({
+        name: 'rosterVersioning',
+        namespace: _xmppConstants.Namespace.ROSTER_VERSIONING,
+        element: 'ver'
+    });
+
+    var SubscriptionPreApprovalFeature = JXT.define({
+        name: 'subscriptionPreApproval',
+        namespace: _xmppConstants.Namespace.SUBSCRIPTION_PREAPPROVAL,
+        element: 'sub'
+    });
+
+    JXT.extendStreamFeatures(RosterVerFeature);
+    JXT.extendStreamFeatures(SubscriptionPreApprovalFeature);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],191:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var EntityTime = JXT.define({
+        name: 'time',
+        namespace: _xmppConstants.Namespace.TIME,
+        element: 'time',
+        fields: {
+            utc: JXT.utils.dateSub(_xmppConstants.Namespace.TIME, 'utc'),
+            tzo: JXT.utils.tzoSub(_xmppConstants.Namespace.TIME, 'tzo', 0)
+        }
+    });
+
+    JXT.extendIQ(EntityTime);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],192:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var Tune = JXT.define({
+        name: 'tune',
+        namespace: _xmppConstants.Namespace.TUNE,
+        element: 'tune',
+        fields: {
+            artist: Utils.textSub(_xmppConstants.Namespace.TUNE, 'artist'),
+            length: Utils.numberSub(_xmppConstants.Namespace.TUNE, 'length'),
+            rating: Utils.numberSub(_xmppConstants.Namespace.TUNE, 'rating'),
+            source: Utils.textSub(_xmppConstants.Namespace.TUNE, 'source'),
+            title: Utils.textSub(_xmppConstants.Namespace.TUNE, 'title'),
+            track: Utils.textSub(_xmppConstants.Namespace.TUNE, 'track'),
+            uri: Utils.textSub(_xmppConstants.Namespace.TUNE, 'uri')
+        }
+    });
+
+    JXT.extendPubsubItem(Tune);
+    JXT.extendMessage(Tune);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],193:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Utils = JXT.utils;
+
+    var VCardTemp = JXT.define({
+        name: 'vCardTemp',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'vCard',
+        fields: {
+            role: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'ROLE'),
+            website: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'URL'),
+            title: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'TITLE'),
+            description: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'DESC'),
+            fullName: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'FN'),
+            birthday: Utils.dateSub(_xmppConstants.Namespace.VCARD_TEMP, 'BDAY'),
+            nicknames: Utils.multiTextSub(_xmppConstants.Namespace.VCARD_TEMP, 'NICKNAME'),
+            jids: Utils.multiTextSub(_xmppConstants.Namespace.VCARD_TEMP, 'JABBERID')
+        }
+    });
+
+    var Email = JXT.define({
+        name: '_email',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'EMAIL',
+        fields: {
+            email: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'USERID'),
+            home: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'HOME'),
+            work: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'WORK'),
+            preferred: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'PREF')
+        }
+    });
+
+    var PhoneNumber = JXT.define({
+        name: '_tel',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'TEL',
+        fields: {
+            number: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'NUMBER'),
+            home: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'HOME'),
+            work: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'WORK'),
+            mobile: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'CELL'),
+            preferred: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'PREF')
+        }
+    });
+
+    var Address = JXT.define({
+        name: '_address',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'ADR',
+        fields: {
+            street: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'STREET'),
+            street2: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'EXTADD'),
+            country: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'CTRY'),
+            city: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'LOCALITY'),
+            region: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'REGION'),
+            postalCode: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'PCODE'),
+            pobox: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'POBOX'),
+            home: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'HOME'),
+            work: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'WORK'),
+            preferred: Utils.boolSub(_xmppConstants.Namespace.VCARD_TEMP, 'PREF')
+        }
+    });
+
+    var Organization = JXT.define({
+        name: 'organization',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'ORG',
+        fields: {
+            name: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'ORGNAME'),
+            unit: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'ORGUNIT')
+        }
+    });
+
+    var Name = JXT.define({
+        name: 'name',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'N',
+        fields: {
+            family: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'FAMILY'),
+            given: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'GIVEN'),
+            middle: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'MIDDLE'),
+            prefix: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'PREFIX'),
+            suffix: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'SUFFIX')
+        }
+    });
+
+    var Photo = JXT.define({
+        name: 'photo',
+        namespace: _xmppConstants.Namespace.VCARD_TEMP,
+        element: 'PHOTO',
+        fields: {
+            type: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'TYPE'),
+            data: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'BINVAL'),
+            url: Utils.textSub(_xmppConstants.Namespace.VCARD_TEMP, 'EXTVAL')
+        }
+    });
+
+    JXT.extend(VCardTemp, Email, 'emails');
+    JXT.extend(VCardTemp, Address, 'addresses');
+    JXT.extend(VCardTemp, PhoneNumber, 'phoneNumbers');
+    JXT.extend(VCardTemp, Organization);
+    JXT.extend(VCardTemp, Name);
+    JXT.extend(VCardTemp, Photo);
+
+    JXT.extendIQ(VCardTemp);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],194:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    var Version = JXT.define({
+        name: 'version',
+        namespace: _xmppConstants.Namespace.VERSION,
+        element: 'query',
+        fields: {
+            name: JXT.utils.textSub(_xmppConstants.Namespace.VERSION, 'name'),
+            version: JXT.utils.textSub(_xmppConstants.Namespace.VERSION, 'version'),
+            os: JXT.utils.textSub(_xmppConstants.Namespace.VERSION, 'os')
+        }
+    });
+
+    JXT.extendIQ(Version);
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],195:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _xmppConstants = require('xmpp-constants');
+
+exports['default'] = function (JXT) {
+
+    JXT.withIQ(function (IQ) {
+
+        JXT.add(IQ, 'visible', JXT.utils.boolSub(_xmppConstants.Namespace.INVISIBLE_0, 'visible'));
+        JXT.add(IQ, 'invisible', JXT.utils.boolSub(_xmppConstants.Namespace.INVISIBLE_0, 'invisible'));
+    });
+};
+
+module.exports = exports['default'];
+
+},{"xmpp-constants":220}],196:[function(require,module,exports){
+module.exports = { "default": require("core-js/library/fn/object/assign"), __esModule: true };
+},{"core-js/library/fn/object/assign":198}],197:[function(require,module,exports){
+"use strict";
+
+exports["default"] = function (obj) {
+  return obj && obj.__esModule ? obj : {
+    "default": obj
+  };
+};
+
+exports.__esModule = true;
+},{}],198:[function(require,module,exports){
+require('../../modules/es6.object.assign');
+module.exports = require('../../modules/$.core').Object.assign;
+},{"../../modules/$.core":201,"../../modules/es6.object.assign":211}],199:[function(require,module,exports){
+module.exports = function(it){
+  if(typeof it != 'function')throw TypeError(it + ' is not a function!');
+  return it;
+};
+},{}],200:[function(require,module,exports){
+var toString = {}.toString;
+
+module.exports = function(it){
+  return toString.call(it).slice(8, -1);
+};
+},{}],201:[function(require,module,exports){
+var core = module.exports = {version: '1.2.6'};
+if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
+},{}],202:[function(require,module,exports){
+// optional / simple context binding
+var aFunction = require('./$.a-function');
+module.exports = function(fn, that, length){
+  aFunction(fn);
+  if(that === undefined)return fn;
+  switch(length){
+    case 1: return function(a){
+      return fn.call(that, a);
+    };
+    case 2: return function(a, b){
+      return fn.call(that, a, b);
+    };
+    case 3: return function(a, b, c){
+      return fn.call(that, a, b, c);
+    };
+  }
+  return function(/* ...args */){
+    return fn.apply(that, arguments);
+  };
+};
+},{"./$.a-function":199}],203:[function(require,module,exports){
+// 7.2.1 RequireObjectCoercible(argument)
+module.exports = function(it){
+  if(it == undefined)throw TypeError("Can't call method on  " + it);
+  return it;
+};
+},{}],204:[function(require,module,exports){
+var global    = require('./$.global')
+  , core      = require('./$.core')
+  , ctx       = require('./$.ctx')
+  , PROTOTYPE = 'prototype';
+
+var $export = function(type, name, source){
+  var IS_FORCED = type & $export.F
+    , IS_GLOBAL = type & $export.G
+    , IS_STATIC = type & $export.S
+    , IS_PROTO  = type & $export.P
+    , IS_BIND   = type & $export.B
+    , IS_WRAP   = type & $export.W
+    , exports   = IS_GLOBAL ? core : core[name] || (core[name] = {})
+    , target    = IS_GLOBAL ? global : IS_STATIC ? global[name] : (global[name] || {})[PROTOTYPE]
+    , key, own, out;
+  if(IS_GLOBAL)source = name;
+  for(key in source){
+    // contains in native
+    own = !IS_FORCED && target && key in target;
+    if(own && key in exports)continue;
+    // export native or passed
+    out = own ? target[key] : source[key];
+    // prevent global pollution for namespaces
+    exports[key] = IS_GLOBAL && typeof target[key] != 'function' ? source[key]
+    // bind timers to global for call from export context
+    : IS_BIND && own ? ctx(out, global)
+    // wrap global constructors for prevent change them in library
+    : IS_WRAP && target[key] == out ? (function(C){
+      var F = function(param){
+        return this instanceof C ? new C(param) : C(param);
+      };
+      F[PROTOTYPE] = C[PROTOTYPE];
+      return F;
+    // make static versions for prototype methods
+    })(out) : IS_PROTO && typeof out == 'function' ? ctx(Function.call, out) : out;
+    if(IS_PROTO)(exports[PROTOTYPE] || (exports[PROTOTYPE] = {}))[key] = out;
+  }
+};
+// type bitmap
+$export.F = 1;  // forced
+$export.G = 2;  // global
+$export.S = 4;  // static
+$export.P = 8;  // proto
+$export.B = 16; // bind
+$export.W = 32; // wrap
+module.exports = $export;
+},{"./$.core":201,"./$.ctx":202,"./$.global":206}],205:[function(require,module,exports){
+module.exports = function(exec){
+  try {
+    return !!exec();
+  } catch(e){
+    return true;
+  }
+};
+},{}],206:[function(require,module,exports){
+// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
+var global = module.exports = typeof window != 'undefined' && window.Math == Math
+  ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
+if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
+},{}],207:[function(require,module,exports){
+// fallback for non-array-like ES3 and non-enumerable old V8 strings
+var cof = require('./$.cof');
+module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it){
+  return cof(it) == 'String' ? it.split('') : Object(it);
+};
+},{"./$.cof":200}],208:[function(require,module,exports){
+var $Object = Object;
+module.exports = {
+  create:     $Object.create,
+  getProto:   $Object.getPrototypeOf,
+  isEnum:     {}.propertyIsEnumerable,
+  getDesc:    $Object.getOwnPropertyDescriptor,
+  setDesc:    $Object.defineProperty,
+  setDescs:   $Object.defineProperties,
+  getKeys:    $Object.keys,
+  getNames:   $Object.getOwnPropertyNames,
+  getSymbols: $Object.getOwnPropertySymbols,
+  each:       [].forEach
+};
+},{}],209:[function(require,module,exports){
+// 19.1.2.1 Object.assign(target, source, ...)
+var $        = require('./$')
+  , toObject = require('./$.to-object')
+  , IObject  = require('./$.iobject');
+
+// should work with symbols and should have deterministic property order (V8 bug)
+module.exports = require('./$.fails')(function(){
+  var a = Object.assign
+    , A = {}
+    , B = {}
+    , S = Symbol()
+    , K = 'abcdefghijklmnopqrst';
+  A[S] = 7;
+  K.split('').forEach(function(k){ B[k] = k; });
+  return a({}, A)[S] != 7 || Object.keys(a({}, B)).join('') != K;
+}) ? function assign(target, source){ // eslint-disable-line no-unused-vars
+  var T     = toObject(target)
+    , $$    = arguments
+    , $$len = $$.length
+    , index = 1
+    , getKeys    = $.getKeys
+    , getSymbols = $.getSymbols
+    , isEnum     = $.isEnum;
+  while($$len > index){
+    var S      = IObject($$[index++])
+      , keys   = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S)
+      , length = keys.length
+      , j      = 0
+      , key;
+    while(length > j)if(isEnum.call(S, key = keys[j++]))T[key] = S[key];
+  }
+  return T;
+} : Object.assign;
+},{"./$":208,"./$.fails":205,"./$.iobject":207,"./$.to-object":210}],210:[function(require,module,exports){
+// 7.1.13 ToObject(argument)
+var defined = require('./$.defined');
+module.exports = function(it){
+  return Object(defined(it));
+};
+},{"./$.defined":203}],211:[function(require,module,exports){
+// 19.1.3.1 Object.assign(target, source)
+var $export = require('./$.export');
+
+$export($export.S + $export.F, 'Object', {assign: require('./$.object-assign')});
+},{"./$.export":204,"./$.object-assign":209}],212:[function(require,module,exports){
+arguments[4][54][0].apply(exports,arguments)
+},{"dup":54,"lodash._arrayeach":213,"lodash._baseeach":214,"lodash._bindcallback":218,"lodash.isarray":219}],213:[function(require,module,exports){
+arguments[4][55][0].apply(exports,arguments)
+},{"dup":55}],214:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"dup":56,"lodash.keys":215}],215:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"dup":57,"lodash._getnative":216,"lodash.isarguments":217,"lodash.isarray":219}],216:[function(require,module,exports){
+arguments[4][58][0].apply(exports,arguments)
+},{"dup":58}],217:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"dup":59}],218:[function(require,module,exports){
+arguments[4][60][0].apply(exports,arguments)
+},{"dup":60}],219:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"dup":61}],220:[function(require,module,exports){
+arguments[4][128][0].apply(exports,arguments)
+},{"./lib/jingle":221,"./lib/muc":222,"./lib/namespaces":223,"./lib/presence":224,"./lib/pubsub":225,"dup":128}],221:[function(require,module,exports){
+arguments[4][129][0].apply(exports,arguments)
+},{"dup":129}],222:[function(require,module,exports){
+arguments[4][130][0].apply(exports,arguments)
+},{"dup":130}],223:[function(require,module,exports){
+arguments[4][131][0].apply(exports,arguments)
+},{"dup":131}],224:[function(require,module,exports){
+arguments[4][132][0].apply(exports,arguments)
+},{"dup":132}],225:[function(require,module,exports){
+arguments[4][133][0].apply(exports,arguments)
+},{"dup":133}],226:[function(require,module,exports){
+arguments[4][134][0].apply(exports,arguments)
+},{"./lib/stringprep":227,"dup":134}],227:[function(require,module,exports){
+arguments[4][135][0].apply(exports,arguments)
+},{"dup":135,"punycode":11}],228:[function(require,module,exports){
 'use strict';
 
 var extend = require('lodash.assign');
@@ -23554,7 +29872,7 @@ JXT.getGlobalJXT = function () {
 
 module.exports = JXT;
 
-},{"./lib/helpers":118,"./lib/stanza":119,"./lib/types":120,"lodash.assign":121,"ltx":134,"uuid":139}],118:[function(require,module,exports){
+},{"./lib/helpers":229,"./lib/stanza":230,"./lib/types":231,"lodash.assign":232,"ltx":245,"uuid":250}],229:[function(require,module,exports){
 'use strict';
 
 var ltx = require('ltx');
@@ -23835,7 +30153,7 @@ exports.setBoolSub = function (xml, NS, element, value) {
     }
 };
 
-},{"ltx":134}],119:[function(require,module,exports){
+},{"ltx":245}],230:[function(require,module,exports){
 'use strict';
 
 var helpers = require('./helpers');
@@ -23951,7 +30269,7 @@ module.exports = function (JXT, opts) {
     return Stanza;
 };
 
-},{"./helpers":118,"lodash.assign":121}],120:[function(require,module,exports){
+},{"./helpers":229,"lodash.assign":232}],231:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -24350,7 +30668,7 @@ exports.subMultiExtension = function (NS, sub, ChildJXT) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"./helpers":118,"buffer":2,"lodash.assign":121}],121:[function(require,module,exports){
+},{"./helpers":229,"buffer":2,"lodash.assign":232}],232:[function(require,module,exports){
 /**
  * lodash 3.2.0 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -24432,7 +30750,7 @@ var assign = createAssigner(function(object, source, customizer) {
 
 module.exports = assign;
 
-},{"lodash._baseassign":122,"lodash._createassigner":124,"lodash.keys":128}],122:[function(require,module,exports){
+},{"lodash._baseassign":233,"lodash._createassigner":235,"lodash.keys":239}],233:[function(require,module,exports){
 /**
  * lodash 3.2.0 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -24461,7 +30779,7 @@ function baseAssign(object, source) {
 
 module.exports = baseAssign;
 
-},{"lodash._basecopy":123,"lodash.keys":128}],123:[function(require,module,exports){
+},{"lodash._basecopy":234,"lodash.keys":239}],234:[function(require,module,exports){
 /**
  * lodash 3.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -24495,7 +30813,7 @@ function baseCopy(source, props, object) {
 
 module.exports = baseCopy;
 
-},{}],124:[function(require,module,exports){
+},{}],235:[function(require,module,exports){
 /**
  * lodash 3.1.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -24549,9 +30867,9 @@ function createAssigner(assigner) {
 
 module.exports = createAssigner;
 
-},{"lodash._bindcallback":125,"lodash._isiterateecall":126,"lodash.restparam":127}],125:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],126:[function(require,module,exports){
+},{"lodash._bindcallback":236,"lodash._isiterateecall":237,"lodash.restparam":238}],236:[function(require,module,exports){
+arguments[4][60][0].apply(exports,arguments)
+},{"dup":60}],237:[function(require,module,exports){
 /**
  * lodash 3.0.9 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -24685,7 +31003,7 @@ function isObject(value) {
 
 module.exports = isIterateeCall;
 
-},{}],127:[function(require,module,exports){
+},{}],238:[function(require,module,exports){
 /**
  * lodash 3.6.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -24754,15 +31072,15 @@ function restParam(func, start) {
 
 module.exports = restParam;
 
-},{}],128:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51,"lodash._getnative":129,"lodash.isarguments":130,"lodash.isarray":131}],129:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"dup":52}],130:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"dup":53}],131:[function(require,module,exports){
-arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],132:[function(require,module,exports){
+},{}],239:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"dup":57,"lodash._getnative":240,"lodash.isarguments":241,"lodash.isarray":242}],240:[function(require,module,exports){
+arguments[4][58][0].apply(exports,arguments)
+},{"dup":58}],241:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"dup":59}],242:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"dup":61}],243:[function(require,module,exports){
 'use strict';
 
 var util = require('util')
@@ -24874,7 +31192,7 @@ DOMElement.prototype.removeChild = function (el) {
 
 module.exports = DOMElement
 
-},{"./element":133,"util":24}],133:[function(require,module,exports){
+},{"./element":244,"util":28}],244:[function(require,module,exports){
 'use strict';
 
 /**
@@ -25268,7 +31586,7 @@ function escapeXmlText(s) {
 exports.Element = Element
 exports.escapeXml = escapeXml
 
-},{}],134:[function(require,module,exports){
+},{}],245:[function(require,module,exports){
 'use strict';
 
 /* Cause browserify to bundle SAX parsers: */
@@ -25278,7 +31596,7 @@ parse.availableSaxParsers.push(parse.bestSaxParser = require('./sax/sax_ltx'))
 
 /* SHIM */
 module.exports = require('./index')
-},{"./index":135,"./parse":136,"./sax/sax_ltx":137}],135:[function(require,module,exports){
+},{"./index":246,"./parse":247,"./sax/sax_ltx":248}],246:[function(require,module,exports){
 'use strict';
 
 var parse = require('./parse')
@@ -25305,7 +31623,7 @@ exports.Parser = parse.Parser
 exports.availableSaxParsers = parse.availableSaxParsers
 exports.bestSaxParser = parse.bestSaxParser
 
-},{"./dom-element":132,"./element":133,"./parse":136}],136:[function(require,module,exports){
+},{"./dom-element":243,"./element":244,"./parse":247}],247:[function(require,module,exports){
 'use strict';
 
 var events = require('events')
@@ -25424,7 +31742,7 @@ exports.parse = function(data, saxParser) {
     }
 }
 
-},{"./dom-element":132,"events":6,"util":24}],137:[function(require,module,exports){
+},{"./dom-element":243,"events":6,"util":28}],248:[function(require,module,exports){
 'use strict';
 
 var util = require('util')
@@ -25596,1118 +31914,24 @@ function unescapeXml(s) {
         replace(/\&(nbsp|#160);/g, '\n')
 }
 
-},{"events":6,"util":24}],138:[function(require,module,exports){
-arguments[4][113][0].apply(exports,arguments)
-},{"dup":113}],139:[function(require,module,exports){
-arguments[4][114][0].apply(exports,arguments)
-},{"./rng":138,"dup":114}],140:[function(require,module,exports){
-/*
- *  Copyright (c) 2014 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
-
-/* More information about these options at jshint.com/docs/options */
-/* jshint browser: true, camelcase: true, curly: true, devel: true,
-   eqeqeq: true, forin: false, globalstrict: true, node: true,
-   quotmark: single, undef: true, unused: strict */
-/* global mozRTCIceCandidate, mozRTCPeerConnection, Promise,
-mozRTCSessionDescription, webkitRTCPeerConnection, MediaStreamTrack */
-/* exported trace,requestUserMedia */
-
-'use strict';
-
-var getUserMedia = null;
-var attachMediaStream = null;
-var reattachMediaStream = null;
-var webrtcDetectedBrowser = null;
-var webrtcDetectedVersion = null;
-var webrtcMinimumVersion = null;
-var webrtcUtils = {
-  log: function() {
-    // suppress console.log output when being included as a module.
-    if (typeof module !== 'undefined' ||
-        typeof require === 'function' && typeof define === 'function') {
-      return;
-    }
-    console.log.apply(console, arguments);
-  }
-};
-
-function trace(text) {
-  // This function is used for logging.
-  if (text[text.length - 1] === '\n') {
-    text = text.substring(0, text.length - 1);
-  }
-  if (window.performance) {
-    var now = (window.performance.now() / 1000).toFixed(3);
-    webrtcUtils.log(now + ': ' + text);
-  } else {
-    webrtcUtils.log(text);
-  }
-}
-
-if (typeof window === 'undefined' || !window.navigator) {
-  webrtcUtils.log('This does not appear to be a browser');
-  webrtcDetectedBrowser = 'not a browser';
-} else if (navigator.mozGetUserMedia && window.mozRTCPeerConnection) {
-  webrtcUtils.log('This appears to be Firefox');
-
-  webrtcDetectedBrowser = 'firefox';
-
-  // the detected firefox version.
-  webrtcDetectedVersion =
-    parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
-
-  // the minimum firefox version still supported by adapter.
-  webrtcMinimumVersion = 31;
-
-  // The RTCPeerConnection object.
-  window.RTCPeerConnection = function(pcConfig, pcConstraints) {
-    if (webrtcDetectedVersion < 38) {
-      // .urls is not supported in FF < 38.
-      // create RTCIceServers with a single url.
-      if (pcConfig && pcConfig.iceServers) {
-        var newIceServers = [];
-        for (var i = 0; i < pcConfig.iceServers.length; i++) {
-          var server = pcConfig.iceServers[i];
-          if (server.hasOwnProperty('urls')) {
-            for (var j = 0; j < server.urls.length; j++) {
-              var newServer = {
-                url: server.urls[j]
-              };
-              if (server.urls[j].indexOf('turn') === 0) {
-                newServer.username = server.username;
-                newServer.credential = server.credential;
-              }
-              newIceServers.push(newServer);
-            }
-          } else {
-            newIceServers.push(pcConfig.iceServers[i]);
-          }
-        }
-        pcConfig.iceServers = newIceServers;
-      }
-    }
-    return new mozRTCPeerConnection(pcConfig, pcConstraints); // jscs:ignore requireCapitalizedConstructors
-  };
-
-  // The RTCSessionDescription object.
-  window.RTCSessionDescription = mozRTCSessionDescription;
-
-  // The RTCIceCandidate object.
-  window.RTCIceCandidate = mozRTCIceCandidate;
-
-  // getUserMedia constraints shim.
-  getUserMedia = function(constraints, onSuccess, onError) {
-    var constraintsToFF37 = function(c) {
-      if (typeof c !== 'object' || c.require) {
-        return c;
-      }
-      var require = [];
-      Object.keys(c).forEach(function(key) {
-        if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
-          return;
-        }
-        var r = c[key] = (typeof c[key] === 'object') ?
-            c[key] : {ideal: c[key]};
-        if (r.min !== undefined ||
-            r.max !== undefined || r.exact !== undefined) {
-          require.push(key);
-        }
-        if (r.exact !== undefined) {
-          if (typeof r.exact === 'number') {
-            r.min = r.max = r.exact;
-          } else {
-            c[key] = r.exact;
-          }
-          delete r.exact;
-        }
-        if (r.ideal !== undefined) {
-          c.advanced = c.advanced || [];
-          var oc = {};
-          if (typeof r.ideal === 'number') {
-            oc[key] = {min: r.ideal, max: r.ideal};
-          } else {
-            oc[key] = r.ideal;
-          }
-          c.advanced.push(oc);
-          delete r.ideal;
-          if (!Object.keys(r).length) {
-            delete c[key];
-          }
-        }
-      });
-      if (require.length) {
-        c.require = require;
-      }
-      return c;
-    };
-    if (webrtcDetectedVersion < 38) {
-      webrtcUtils.log('spec: ' + JSON.stringify(constraints));
-      if (constraints.audio) {
-        constraints.audio = constraintsToFF37(constraints.audio);
-      }
-      if (constraints.video) {
-        constraints.video = constraintsToFF37(constraints.video);
-      }
-      webrtcUtils.log('ff37: ' + JSON.stringify(constraints));
-    }
-    return navigator.mozGetUserMedia(constraints, onSuccess, onError);
-  };
-
-  navigator.getUserMedia = getUserMedia;
-
-  // Shim for mediaDevices on older versions.
-  if (!navigator.mediaDevices) {
-    navigator.mediaDevices = {getUserMedia: requestUserMedia,
-      addEventListener: function() { },
-      removeEventListener: function() { }
-    };
-  }
-  navigator.mediaDevices.enumerateDevices =
-      navigator.mediaDevices.enumerateDevices || function() {
-    return new Promise(function(resolve) {
-      var infos = [
-        {kind: 'audioinput', deviceId: 'default', label: '', groupId: ''},
-        {kind: 'videoinput', deviceId: 'default', label: '', groupId: ''}
-      ];
-      resolve(infos);
-    });
-  };
-
-  if (webrtcDetectedVersion < 41) {
-    // Work around http://bugzil.la/1169665
-    var orgEnumerateDevices =
-        navigator.mediaDevices.enumerateDevices.bind(navigator.mediaDevices);
-    navigator.mediaDevices.enumerateDevices = function() {
-      return orgEnumerateDevices().catch(function(e) {
-        if (e.name === 'NotFoundError') {
-          return [];
-        }
-        throw e;
-      });
-    };
-  }
-
-  Object.defineProperty(HTMLVideoElement.prototype, 'srcObject', {
-    get: function() {
-      return this.mozSrcObject;
-    },
-    set: function(stream) {
-      this.mozSrcObject = stream;
-    }
-  });
-  // Attach a media stream to an element.
-  attachMediaStream = function(element, stream) {
-    element.srcObject = stream;
-  };
-
-  reattachMediaStream = function(to, from) {
-    to.srcObject = from.srcObject;
-  };
-
-} else if (navigator.webkitGetUserMedia) {
-  webrtcUtils.log('This appears to be Chrome');
-
-  webrtcDetectedBrowser = 'chrome';
-
-  // the detected chrome version.
-  webrtcDetectedVersion =
-    parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2], 10);
-
-  // the minimum chrome version still supported by adapter.
-  webrtcMinimumVersion = 38;
-
-  // The RTCPeerConnection object.
-  window.RTCPeerConnection = function(pcConfig, pcConstraints) {
-    // Translate iceTransportPolicy to iceTransports,
-    // see https://code.google.com/p/webrtc/issues/detail?id=4869
-    if (pcConfig && pcConfig.iceTransportPolicy) {
-      pcConfig.iceTransports = pcConfig.iceTransportPolicy;
-    }
-
-    var pc = new webkitRTCPeerConnection(pcConfig, pcConstraints); // jscs:ignore requireCapitalizedConstructors
-    var origGetStats = pc.getStats.bind(pc);
-    pc.getStats = function(selector, successCallback, errorCallback) { // jshint ignore: line
-      var self = this;
-      var args = arguments;
-
-      // If selector is a function then we are in the old style stats so just
-      // pass back the original getStats format to avoid breaking old users.
-      if (arguments.length > 0 && typeof selector === 'function') {
-        return origGetStats(selector, successCallback);
-      }
-
-      var fixChromeStats = function(response) {
-        var standardReport = {};
-        var reports = response.result();
-        reports.forEach(function(report) {
-          var standardStats = {
-            id: report.id,
-            timestamp: report.timestamp,
-            type: report.type
-          };
-          report.names().forEach(function(name) {
-            standardStats[name] = report.stat(name);
-          });
-          standardReport[standardStats.id] = standardStats;
-        });
-
-        return standardReport;
-      };
-
-      if (arguments.length >= 2) {
-        var successCallbackWrapper = function(response) {
-          args[1](fixChromeStats(response));
-        };
-
-        return origGetStats.apply(this, [successCallbackWrapper, arguments[0]]);
-      }
-
-      // promise-support
-      return new Promise(function(resolve, reject) {
-        if (args.length === 1 && selector === null) {
-          origGetStats.apply(self, [
-              function(response) {
-                resolve.apply(null, [fixChromeStats(response)]);
-              }, reject]);
-        } else {
-          origGetStats.apply(self, [resolve, reject]);
-        }
-      });
-    };
-
-    return pc;
-  };
-
-  // add promise support
-  ['createOffer', 'createAnswer'].forEach(function(method) {
-    var nativeMethod = webkitRTCPeerConnection.prototype[method];
-    webkitRTCPeerConnection.prototype[method] = function() {
-      var self = this;
-      if (arguments.length < 1 || (arguments.length === 1 &&
-          typeof(arguments[0]) === 'object')) {
-        var opts = arguments.length === 1 ? arguments[0] : undefined;
-        return new Promise(function(resolve, reject) {
-          nativeMethod.apply(self, [resolve, reject, opts]);
-        });
-      } else {
-        return nativeMethod.apply(this, arguments);
-      }
-    };
-  });
-
-  ['setLocalDescription', 'setRemoteDescription',
-      'addIceCandidate'].forEach(function(method) {
-    var nativeMethod = webkitRTCPeerConnection.prototype[method];
-    webkitRTCPeerConnection.prototype[method] = function() {
-      var args = arguments;
-      var self = this;
-      return new Promise(function(resolve, reject) {
-        nativeMethod.apply(self, [args[0],
-            function() {
-              resolve();
-              if (args.length >= 2) {
-                args[1].apply(null, []);
-              }
-            },
-            function(err) {
-              reject(err);
-              if (args.length >= 3) {
-                args[2].apply(null, [err]);
-              }
-            }]
-          );
-      });
-    };
-  });
-
-  // getUserMedia constraints shim.
-  var constraintsToChrome = function(c) {
-    if (typeof c !== 'object' || c.mandatory || c.optional) {
-      return c;
-    }
-    var cc = {};
-    Object.keys(c).forEach(function(key) {
-      if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
-        return;
-      }
-      var r = (typeof c[key] === 'object') ? c[key] : {ideal: c[key]};
-      if (r.exact !== undefined && typeof r.exact === 'number') {
-        r.min = r.max = r.exact;
-      }
-      var oldname = function(prefix, name) {
-        if (prefix) {
-          return prefix + name.charAt(0).toUpperCase() + name.slice(1);
-        }
-        return (name === 'deviceId') ? 'sourceId' : name;
-      };
-      if (r.ideal !== undefined) {
-        cc.optional = cc.optional || [];
-        var oc = {};
-        if (typeof r.ideal === 'number') {
-          oc[oldname('min', key)] = r.ideal;
-          cc.optional.push(oc);
-          oc = {};
-          oc[oldname('max', key)] = r.ideal;
-          cc.optional.push(oc);
-        } else {
-          oc[oldname('', key)] = r.ideal;
-          cc.optional.push(oc);
-        }
-      }
-      if (r.exact !== undefined && typeof r.exact !== 'number') {
-        cc.mandatory = cc.mandatory || {};
-        cc.mandatory[oldname('', key)] = r.exact;
-      } else {
-        ['min', 'max'].forEach(function(mix) {
-          if (r[mix] !== undefined) {
-            cc.mandatory = cc.mandatory || {};
-            cc.mandatory[oldname(mix, key)] = r[mix];
-          }
-        });
-      }
-    });
-    if (c.advanced) {
-      cc.optional = (cc.optional || []).concat(c.advanced);
-    }
-    return cc;
-  };
-
-  getUserMedia = function(constraints, onSuccess, onError) {
-    if (constraints.audio) {
-      constraints.audio = constraintsToChrome(constraints.audio);
-    }
-    if (constraints.video) {
-      constraints.video = constraintsToChrome(constraints.video);
-    }
-    webrtcUtils.log('chrome: ' + JSON.stringify(constraints));
-    return navigator.webkitGetUserMedia(constraints, onSuccess, onError);
-  };
-  navigator.getUserMedia = getUserMedia;
-
-  if (!navigator.mediaDevices) {
-    navigator.mediaDevices = {getUserMedia: requestUserMedia,
-                              enumerateDevices: function() {
-      return new Promise(function(resolve) {
-        var kinds = {audio: 'audioinput', video: 'videoinput'};
-        return MediaStreamTrack.getSources(function(devices) {
-          resolve(devices.map(function(device) {
-            return {label: device.label,
-                    kind: kinds[device.kind],
-                    deviceId: device.id,
-                    groupId: ''};
-          }));
-        });
-      });
-    }};
-  }
-
-  // A shim for getUserMedia method on the mediaDevices object.
-  // TODO(KaptenJansson) remove once implemented in Chrome stable.
-  if (!navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia = function(constraints) {
-      return requestUserMedia(constraints);
-    };
-  } else {
-    // Even though Chrome 45 has navigator.mediaDevices and a getUserMedia
-    // function which returns a Promise, it does not accept spec-style
-    // constraints.
-    var origGetUserMedia = navigator.mediaDevices.getUserMedia.
-        bind(navigator.mediaDevices);
-    navigator.mediaDevices.getUserMedia = function(c) {
-      webrtcUtils.log('spec:   ' + JSON.stringify(c)); // whitespace for alignment
-      c.audio = constraintsToChrome(c.audio);
-      c.video = constraintsToChrome(c.video);
-      webrtcUtils.log('chrome: ' + JSON.stringify(c));
-      return origGetUserMedia(c);
-    };
-  }
-
-  // Dummy devicechange event methods.
-  // TODO(KaptenJansson) remove once implemented in Chrome stable.
-  if (typeof navigator.mediaDevices.addEventListener === 'undefined') {
-    navigator.mediaDevices.addEventListener = function() {
-      webrtcUtils.log('Dummy mediaDevices.addEventListener called.');
-    };
-  }
-  if (typeof navigator.mediaDevices.removeEventListener === 'undefined') {
-    navigator.mediaDevices.removeEventListener = function() {
-      webrtcUtils.log('Dummy mediaDevices.removeEventListener called.');
-    };
-  }
-
-  Object.defineProperty(HTMLVideoElement.prototype, 'srcObject', {
-    get: function() {
-      return this._srcObject;
-    },
-    set: function(stream) {
-      this._srcObject = stream;
-      this.src = URL.createObjectURL(stream);
-    }
-  });
-
-  // Attach a media stream to an element.
-  attachMediaStream = function(element, stream) {
-    if (webrtcDetectedVersion >= 43) {
-      element.srcObject = stream;
-    } else if (typeof element.src !== 'undefined') {
-      element.src = URL.createObjectURL(stream);
-    } else {
-      webrtcUtils.log('Error attaching stream to element.');
-    }
-  };
-  reattachMediaStream = function(to, from) {
-    if (webrtcDetectedVersion >= 43) {
-      to.srcObject = from.srcObject;
-    } else {
-      to.src = from.src;
-    }
-  };
-
-} else if (navigator.mediaDevices && navigator.userAgent.match(
-    /Edge\/(\d+).(\d+)$/)) {
-  webrtcUtils.log('This appears to be Edge');
-  webrtcDetectedBrowser = 'edge';
-
-  webrtcDetectedVersion =
-    parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10);
-
-  // the minimum version still supported by adapter.
-  webrtcMinimumVersion = 12;
-
-  getUserMedia = navigator.getUserMedia;
-
-  attachMediaStream = function(element, stream) {
-    element.srcObject = stream;
-  };
-  reattachMediaStream = function(to, from) {
-    to.srcObject = from.srcObject;
-  };
-} else {
-  webrtcUtils.log('Browser does not appear to be WebRTC-capable');
-}
-
-// Returns the result of getUserMedia as a Promise.
-function requestUserMedia(constraints) {
-  return new Promise(function(resolve, reject) {
-    getUserMedia(constraints, resolve, reject);
-  });
-}
-
-var webrtcTesting = {};
-Object.defineProperty(webrtcTesting, 'version', {
-  set: function(version) {
-    webrtcDetectedVersion = version;
-  }
-});
-
-if (typeof module !== 'undefined') {
-  var RTCPeerConnection;
-  if (typeof window !== 'undefined') {
-    RTCPeerConnection = window.RTCPeerConnection;
-  }
-  module.exports = {
-    RTCPeerConnection: RTCPeerConnection,
-    getUserMedia: getUserMedia,
-    attachMediaStream: attachMediaStream,
-    reattachMediaStream: reattachMediaStream,
-    webrtcDetectedBrowser: webrtcDetectedBrowser,
-    webrtcDetectedVersion: webrtcDetectedVersion,
-    webrtcMinimumVersion: webrtcMinimumVersion,
-    webrtcTesting: webrtcTesting
-    //requestUserMedia: not exposed on purpose.
-    //trace: not exposed on purpose.
-  };
-} else if ((typeof require === 'function') && (typeof define === 'function')) {
-  // Expose objects and functions when RequireJS is doing the loading.
-  define([], function() {
-    return {
-      RTCPeerConnection: window.RTCPeerConnection,
-      getUserMedia: getUserMedia,
-      attachMediaStream: attachMediaStream,
-      reattachMediaStream: reattachMediaStream,
-      webrtcDetectedBrowser: webrtcDetectedBrowser,
-      webrtcDetectedVersion: webrtcDetectedVersion,
-      webrtcMinimumVersion: webrtcMinimumVersion,
-      webrtcTesting: webrtcTesting
-      //requestUserMedia: not exposed on purpose.
-      //trace: not exposed on purpose.
-    };
-  });
-}
-
-},{}],141:[function(require,module,exports){
-'use strict';
-
-var NS = 'urn:xmpp:jingle:transports:ice-udp:1';
-
-
-module.exports = function (stanza) {
-    var types = stanza.utils;
-
-    var ICE = stanza.define({
-        name: '_iceUdp',
-        namespace: NS,
-        element: 'transport',
-        tags: ['jingle-transport'],
-        fields: {
-            transType: {value: 'iceUdp'},
-            pwd: types.attribute('pwd'),
-            ufrag: types.attribute('ufrag')
-        }
-    });
-    
-    
-    var RemoteCandidate = stanza.define({
-        name: 'remoteCandidate',
-        namespace: NS,
-        element: 'remote-candidate',
-        fields: {
-            component: types.attribute('component'),
-            ip: types.attribute('ip'),
-            port: types.attribute('port')
-        }
-    });
-    
-    
-    var Candidate = stanza.define({
-        name: '_iceUdpCandidate',
-        namespace: NS,
-        element: 'candidate',
-        fields: {
-            component: types.attribute('component'),
-            foundation: types.attribute('foundation'),
-            generation: types.attribute('generation'),
-            id: types.attribute('id'),
-            ip: types.attribute('ip'),
-            network: types.attribute('network'),
-            port: types.attribute('port'),
-            priority: types.attribute('priority'),
-            protocol: types.attribute('protocol'),
-            relAddr: types.attribute('rel-addr'),
-            relPort: types.attribute('rel-port'),
-            tcpType: types.attribute('tcptype'),
-            type: types.attribute('type')
-        }
-    });
-    
-    
-    var Fingerprint = stanza.define({
-        name: '_iceFingerprint',
-        namespace: 'urn:xmpp:jingle:apps:dtls:0',
-        element: 'fingerprint',
-        fields: {
-            hash: types.attribute('hash'),
-            setup: types.attribute('setup'),
-            value: types.text(),
-            required: types.boolAttribute('required')
-        }
-    });
-    
-    var SctpMap = stanza.define({
-        name: '_sctpMap',
-        namespace: 'urn:xmpp:jingle:transports:dtls-sctp:1',
-        element: 'sctpmap',
-        fields: {
-            number: types.attribute('number'),
-            protocol: types.attribute('protocol'),
-            streams: types.attribute('streams')
-        }
-    });
-
-    
-    stanza.extend(ICE, Candidate, 'candidates');
-    stanza.extend(ICE, RemoteCandidate);
-    stanza.extend(ICE, Fingerprint, 'fingerprints');
-    stanza.extend(ICE, SctpMap, 'sctp');
-
-    stanza.withDefinition('content', 'urn:xmpp:jingle:1', function (Content) {
-        stanza.extend(Content, ICE);
-    });
-};
-
-},{}],142:[function(require,module,exports){
-'use strict';
-
-
-module.exports = function (stanza) {
-    var types = stanza.utils;
-
-    var Iq = stanza.define({
-        name: 'iq',
-        namespace: 'jabber:client',
-        element: 'iq',
-        topLevel: true,
-        fields: {
-            lang: types.langAttribute(),
-            id: types.attribute('id'),
-            to: types.attribute('to'),
-            from: types.attribute('from'),
-            type: types.attribute('type')
-        }
-    });
-    
-    var toJSON = Iq.prototype.toJSON;
-    
-    Iq.prototype.toJSON = function () {
-        var result = toJSON.call(this);
-        result.resultReply = this.resultReply;
-        result.errorReply = this.errorReply;
-        return result;
-    };
-    
-    Iq.prototype.resultReply = function (data) {
-        data = data || {};
-        data.to = this.from;
-        data.id = this.id;
-        data.type = 'result';
-        return new Iq(data);
-    };
-    
-    Iq.prototype.errorReply = function (data) {
-        data = data || {};
-        data.to = this.from;
-        data.id = this.id;
-        data.type = 'error';
-        return new Iq(data);
-    };
-};
-
-},{}],143:[function(require,module,exports){
-'use strict';
-
-var NS = 'urn:xmpp:jingle:1';
-var ERRNS = 'urn:xmpp:jingle:errors:1';
-var CONDITIONS = ['out-of-order', 'tie-break', 'unknown-session', 'unsupported-info'];
-var REASONS = [
-    'alternative-session',
-    'busy',
-    'cancel',
-    'connectivity-error',
-    'decline',
-    'expired',
-    'failed-application',
-    'failed-transport',
-    'general-error',
-    'gone',
-    'incompatible-parameters',
-    'media-error',
-    'security-error',
-    'success',
-    'timeout',
-    'unsupported-applications',
-    'unsupported-transports'
-];
-
-
-module.exports = function (stanza) {
-    var types = stanza.utils;
-
-    var Jingle = stanza.define({
-        name: 'jingle',
-        namespace: NS,
-        element: 'jingle',
-        fields: {
-            action: types.attribute('action'),
-            initiator: types.attribute('initiator'),
-            responder: types.attribute('responder'),
-            sid: types.attribute('sid')
-        }
-    });
-    
-    
-    var Content = stanza.define({
-        name: '_jingleContent',
-        namespace: NS,
-        element: 'content',
-        fields: {
-            creator: types.attribute('creator'),
-            disposition: types.attribute('disposition', 'session'),
-            name: types.attribute('name'),
-            senders: types.attribute('senders', 'both'),
-            description: {
-                get: function () {
-                    var opts = stanza.tagged('jingle-description').map(function (Description) {
-                        return Description.prototype._name;
-                    });
-                    for (var i = 0, len = opts.length; i < len; i++) {
-                        if (this._extensions[opts[i]]) {
-                            return this._extensions[opts[i]];
-                        }
-                    }
-                },
-                set: function (value) {
-                    var ext = '_' + value.descType;
-                    this[ext] = value;
-                }
-            },
-            transport: {
-                get: function () {
-                    var opts = stanza.tagged('jingle-transport').map(function (Transport) {
-                        return Transport.prototype._name;
-                    });
-                    for (var i = 0, len = opts.length; i < len; i++) {
-                        if (this._extensions[opts[i]]) {
-                            return this._extensions[opts[i]];
-                        }
-                    }
-                },
-                set: function (value) {
-                    var ext = '_' + value.transType;
-                    this[ext] = value;
-                }
-            }
-        }
-    });
-    
-    var Reason = stanza.define({
-        name: 'reason',
-        namespace: NS,
-        element: 'reason',
-        fields: {
-            condition: types.enumSub(NS, REASONS),
-            alternativeSession: {
-                get: function () {
-                    return types.getSubText(this.xml, NS, 'alternative-session');
-                },
-                set: function (value) {
-                    this.condition = 'alternative-session';
-                    types.setSubText(this.xml, NS, 'alternative-session', value);
-                }
-            },
-            text: types.textSub(NS, 'text')
-        }
-    });
-    
-    
-    stanza.extend(Jingle, Content, 'contents');
-    stanza.extend(Jingle, Reason);
-
-    /*stanza.withStanzaError(function (ErrorStanza) {
-        stanza.add(ErrorStanza, 'jingleCondition', types.enumSub(ERRNS, CONDITIONS));
-    });
-    
-    stanza.withIq(function (Iq) {
-        stanza.extend(Iq, Jingle);
-    });*/
-};
-
-},{}],144:[function(require,module,exports){
-'use strict';
-
-var NS = 'urn:xmpp:jingle:apps:rtp:1';
-var FBNS = 'urn:xmpp:jingle:apps:rtp:rtcp-fb:0';
-var HDRNS = 'urn:xmpp:jingle:apps:rtp:rtp-hdrext:0';
-var INFONS = 'urn:xmpp:jingle:apps:rtp:info:1';
-var SSMANS = 'urn:xmpp:jingle:apps:rtp:ssma:0';
-var GROUPNS = 'urn:xmpp:jingle:apps:grouping:0';
-
-
-module.exports = function (stanza) {
-    var types = stanza.utils;
-
-    var Feedback = {
-        get: function () {
-            var existing = types.find(this.xml, FBNS, 'rtcp-fb');
-            var result = [];
-            existing.forEach(function (xml) {
-                result.push({
-                    type: types.getAttribute(xml, 'type'),
-                    subtype: types.getAttribute(xml, 'subtype')
-                });
-            });
-            existing = types.find(this.xml, FBNS, 'rtcp-fb-trr-int');
-            existing.forEach(function (xml) {
-                result.push({
-                    type: types.getAttribute(xml, 'type'),
-                    value: types.getAttribute(xml, 'value')
-                });
-            });
-            return result;
-        },
-        set: function (values) {
-            var self = this;
-            var existing = types.find(this.xml, FBNS, 'rtcp-fb');
-            existing.forEach(function (item) {
-                self.xml.removeChild(item);
-            });
-            existing = types.find(this.xml, FBNS, 'rtcp-fb-trr-int');
-            existing.forEach(function (item) {
-                self.xml.removeChild(item);
-            });
-    
-            values.forEach(function (value) {
-                var fb;
-                if (value.type === 'trr-int') {
-                    fb = types.createElement(FBNS, 'rtcp-fb-trr-int', NS);
-                    types.setAttribute(fb, 'type', value.type);
-                    types.setAttribute(fb, 'value', value.value);
-                } else {
-                    fb = types.createElement(FBNS, 'rtcp-fb', NS);
-                    types.setAttribute(fb, 'type', value.type);
-                    types.setAttribute(fb, 'subtype', value.subtype);
-                }
-                self.xml.appendChild(fb);
-            });
-        }
-    };
-    
-    var Bandwidth = stanza.define({
-        name: 'bandwidth',
-        namespace: NS,
-        element: 'bandwidth',
-        fields: {
-            type: types.attribute('type'),
-            bandwidth: types.text()
-        }
-    });
-
-    var RTP = stanza.define({
-        name: '_rtp',
-        namespace: NS,
-        element: 'description',
-        tags: ['jingle-description'],
-        fields: {
-            descType: {value: 'rtp'},
-            media: types.attribute('media'),
-            ssrc: types.attribute('ssrc'),
-            mux: types.boolSub(NS, 'rtcp-mux'),
-            encryption: {
-                get: function () {
-                    var enc = types.find(this.xml, NS, 'encryption');
-                    if (!enc.length) {
-                        return [];
-                    }
-                    enc = enc[0];
-    
-                    var self = this;
-                    var data = types.find(enc, NS, 'crypto');
-                    var results = [];
-    
-                    data.forEach(function (xml) {
-                        results.push(new Crypto({}, xml, self).toJSON());
-                    });
-                    return results;
-                },
-                set: function (values) {
-                    var enc = types.find(this.xml, NS, 'encryption');
-                    if (enc.length) {
-                        this.xml.removeChild(enc);
-                    }
-    
-                    if (!values.length) {
-                        return;
-                    }
-    
-                    types.setBoolSubAttribute(this.xml, NS, 'encryption', 'required', true);
-                    enc = types.find(this.xml, NS, 'encryption')[0];
-    
-                    var self = this;
-                    values.forEach(function (value) {
-                        var content = new Crypto(value, null, self);
-                        enc.appendChild(content.xml);
-                    });
-                }
-            },
-            feedback: Feedback,
-            headerExtensions: {
-                get: function () {
-                    var existing = types.find(this.xml, HDRNS, 'rtp-hdrext');
-                    var result = [];
-                    existing.forEach(function (xml) {
-                        result.push({
-                            id: types.getAttribute(xml, 'id'),
-                            uri: types.getAttribute(xml, 'uri'),
-                            senders: types.getAttribute(xml, 'senders')
-                        });
-                    });
-                    return result;
-                },
-                set: function (values) {
-                    var self = this;
-                    var existing = types.find(this.xml, HDRNS, 'rtp-hdrext');
-                    existing.forEach(function (item) {
-                        self.xml.removeChild(item);
-                    });
-    
-                    values.forEach(function (value) {
-                        var hdr = types.createElement(HDRNS, 'rtp-hdrext', NS);
-                        types.setAttribute(hdr, 'id', value.id);
-                        types.setAttribute(hdr, 'uri', value.uri);
-                        types.setAttribute(hdr, 'senders', value.senders);
-                        self.xml.appendChild(hdr);
-                    });
-                }
-            }
-        }
-    });
-    
-    
-    var PayloadType = stanza.define({
-        name: '_payloadType',
-        namespace: NS,
-        element: 'payload-type',
-        fields: {
-            channels: types.attribute('channels'),
-            clockrate: types.attribute('clockrate'),
-            id: types.attribute('id'),
-            maxptime: types.attribute('maxptime'),
-            name: types.attribute('name'),
-            ptime: types.attribute('ptime'),
-            feedback: Feedback,
-            parameters: {
-                get: function () {
-                    var result = [];
-                    var params = types.find(this.xml, NS, 'parameter');
-                    params.forEach(function (param) {
-                        result.push({
-                            key: types.getAttribute(param, 'name'),
-                            value: types.getAttribute(param, 'value')
-                        });
-                    });
-                    return result;
-                },
-                set: function (values) {
-                    var self = this;
-                    values.forEach(function (value) {
-                        var param = types.createElement(NS, 'parameter');
-                        types.setAttribute(param, 'name', value.key);
-                        types.setAttribute(param, 'value', value.value);
-                        self.xml.appendChild(param);
-                    });
-                }
-            }
-        }
-    });
-    
-    
-    var Crypto = stanza.define({
-        name: 'crypto',
-        namespace: NS,
-        element: 'crypto',
-        fields: {
-            cipherSuite: types.attribute('crypto-suite'),
-            keyParams: types.attribute('key-params'),
-            sessionParams: types.attribute('session-params'),
-            tag: types.attribute('tag')
-        }
-    });
-    
-    
-    var ContentGroup = stanza.define({
-        name: '_group',
-        namespace: GROUPNS,
-        element: 'group',
-        fields: {
-            semantics: types.attribute('semantics'),
-            contents: types.multiSubAttribute(GROUPNS, 'content', 'name')
-        }
-    });
-    
-    var SourceGroup = stanza.define({
-        name: '_sourceGroup',
-        namespace: SSMANS,
-        element: 'ssrc-group',
-        fields: {
-            semantics: types.attribute('semantics'),
-            sources: types.multiSubAttribute(SSMANS, 'source', 'ssrc')
-        }
-    });
-    
-    var Source = stanza.define({
-        name: '_source',
-        namespace: SSMANS,
-        element: 'source',
-        fields: {
-            ssrc: types.attribute('ssrc'),
-            parameters: {
-                get: function () {
-                    var result = [];
-                    var params = types.find(this.xml, SSMANS, 'parameter');
-                    params.forEach(function (param) {
-                        result.push({
-                            key: types.getAttribute(param, 'name'),
-                            value: types.getAttribute(param, 'value')
-                        });
-                    });
-                    return result;
-                },
-                set: function (values) {
-                    var self = this;
-                    values.forEach(function (value) {
-                        var param = types.createElement(SSMANS, 'parameter');
-                        types.setAttribute(param, 'name', value.key);
-                        types.setAttribute(param, 'value', value.value);
-                        self.xml.appendChild(param);
-                    });
-                }
-            }
-        }
-    });
-    
-    
-    var Mute = stanza.define({
-        name: 'mute',
-        namespace: INFONS,
-        element: 'mute',
-        fields: {
-            creator: types.attribute('creator'),
-            name: types.attribute('name')
-        }
-    });
-    
-    
-    var Unmute = stanza.define({
-        name: 'unmute',
-        namespace: INFONS,
-        element: 'unmute',
-        fields: {
-            creator: types.attribute('creator'),
-            name: types.attribute('name')
-        }
-    });
-    
-    
-    stanza.extend(RTP, Bandwidth);
-    stanza.extend(RTP, PayloadType, 'payloads');
-    stanza.extend(RTP, Source, 'sources');
-    stanza.extend(RTP, SourceGroup, 'sourceGroups');
-    
-    stanza.withDefinition('content', 'urn:xmpp:jingle:1', function (Content) {
-        stanza.extend(Content, RTP);
-    });
-
-    stanza.withDefinition('jingle', 'urn:xmpp:jingle:1', function (Jingle) {
-        stanza.extend(Jingle, Mute);
-        stanza.extend(Jingle, Unmute);
-        stanza.extend(Jingle, ContentGroup, 'groups');
-        stanza.add(Jingle, 'ringing', types.boolSub(INFONS, 'ringing'));
-        stanza.add(Jingle, 'hold', types.boolSub(INFONS, 'hold'));
-        stanza.add(Jingle, 'active', types.boolSub(INFONS, 'active'));
-    });
-};
-
-},{}],145:[function(require,module,exports){
+},{"events":6,"util":28}],249:[function(require,module,exports){
+arguments[4][120][0].apply(exports,arguments)
+},{"dup":120}],250:[function(require,module,exports){
+arguments[4][121][0].apply(exports,arguments)
+},{"./rng":249,"dup":121}],251:[function(require,module,exports){
+arguments[4][83][0].apply(exports,arguments)
+},{"dup":83}],252:[function(require,module,exports){
 /* jshint -W117 */
 'use strict';
 
 var JSM = require('jingle');
 var RTC = require('webrtc-adapter-test');
-var jxt = require('jxt').createRegistry();
 
-jxt.use(require('./stanza/iq.js'));
-jxt.use(require('./stanza/jingle.js'));
-jxt.use(require('./stanza/rtp.js'));
-jxt.use(require('./stanza/iceUdp.js'));
+var jxt = require('jxt').createRegistry();
+jxt.use(require('jxt-xmpp-types'));
+jxt.use(require('jxt-xmpp'));
 
 var IqStanza = jxt.getDefinition('iq', 'jabber:client');
-var JingleStanza = jxt.getDefinition('jingle', 'urn:xmpp:jingle:1');
-
-jxt.extend(IqStanza, JingleStanza);
 
 (function($) {
    Strophe.addConnectionPlugin('jingle', {
@@ -26794,7 +32018,7 @@ jxt.extend(IqStanza, JingleStanza);
       onJingle: function(iq) {
          var req = jxt.parse(iq.outerHTML);
 
-         this.manager.process(req);
+         this.manager.process(req.toJSON());
 
          return true;
       },
@@ -26812,6 +32036,7 @@ jxt.extend(IqStanza, JingleStanza);
          // configure session
          if (this.localStream) {
             session.addStream(this.localStream);
+            //TODO: add offer options here, instead of above in the init
             session.start();
 
             return session;
@@ -26841,7 +32066,7 @@ jxt.extend(IqStanza, JingleStanza);
    });
 }(jQuery));
 
-},{"./stanza/iceUdp.js":141,"./stanza/iq.js":142,"./stanza/jingle.js":143,"./stanza/rtp.js":144,"jingle":25,"jxt":117,"webrtc-adapter-test":140}]},{},[145]);
+},{"jingle":29,"jxt":228,"jxt-xmpp":157,"jxt-xmpp-types":125,"webrtc-adapter-test":251}]},{},[252]);
 
 
 /*!
@@ -34379,7 +39604,7 @@ CryptoJS.mode.CTR = (function () {
 /*!
  * Source: lib/translation.js, license: MIT, url: https://webtranslateit.com/en/projects/10365-JSXC
  */
-var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connection_is_unencrypted":"Deine Verbindung ist unverschlüsselt.","your_connection_is_encrypted":"Deine Verbindung ist verschlüsselt.","your_buddy_closed_the_private_connection":"Dein Kontakt hat die private Verbindung getrennt.","start_private":"Privat starten","close_private":"Privat abbrechen","your_buddy_is_verificated":"Dein Kontakt ist verifiziert.","you_have_only_a_subscription_in_one_way":"Der Kontaktstatus ist einseitig.","authentication_query_sent":"Authentifizierungsanfrage gesendet.","your_message_wasnt_send_please_end_your_private_conversation":"Deine Nachricht wurde nicht gesendet. Bitte beende die private Konversation.","unencrypted_message_received":"Unverschlüsselte Nachricht erhalten.","not_available":"Nicht verfügbar.","no_connection":"Keine Verbindung.","relogin":"Neu anmelden.","trying_to_start_private_conversation":"Versuche private Konversation zu starten.","Verified":"Verifiziert","Unverified":"Unverifiziert","private_conversation_aborted":"Private Konversation abgebrochen.","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Dein Kontakt hat die private Konversation beendet. Das solltest du auch tun!","conversation_is_now_verified":"Konversation ist jetzt verifiziert","authentication_failed":"Authentifizierung fehlgeschlagen.","Creating_your_private_key_":"Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.","Authenticating_a_buddy_helps_":"Einen Kontakt zu authentifizieren hilft sicherzustellen, dass die Person mit der du sprichst auch die ist die sie sagt.","How_do_you_want_to_authenticate_your_buddy":"Wie willst du {{bid_name}} (<b>{{bid_jid}}</b>) authentifizieren?","Select_method":"Wähle...","Manual":"Manual","Question":"Frage","Secret":"Geheimnis","To_verify_the_fingerprint_":"Um den Fingerprint zu verifizieren kontaktiere dein Kontakt über einen anderen Kommunikationsweg. Zum Beispiel per Telefonanruf.","Your_fingerprint":"Dein Fingerprint","Buddy_fingerprint":"Sein/Ihr Fingerprint","Close":"Schließen","Compared":"Verglichen","To_authenticate_using_a_question_":"Um die Authentifizierung per Frage durchzuführen, wähle eine Frage bei welcher nur dein Kontakt die Antwort kennt.","Ask":"Frage","To_authenticate_pick_a_secret_":"Um deinen Kontakt zu authentifizieren, wähle ein Geheimnis welches nur deinem Kontakt und dir bekannt ist.","Compare":"Vergleiche","Fingerprints":"Fingerprints","Authentication":"Authentifizierung","Message":"Nachricht","Add_buddy":"Kontakt hinzufügen","rename_buddy":"Kontakt umbenennen","delete_buddy":"Kontakt löschen","Login":"Anmeldung","Username":"Benutzername","Password":"Passwort","Cancel":"Abbrechen","Connect":"Verbinden","Type_in_the_full_username_":"Gib bitte den vollen Benutzernamen und optional ein Alias an.","Alias":"Alias","Add":"Hinzufügen","Subscription_request":"Kontaktanfrage","You_have_a_request_from":"Du hast eine Anfrage von","Deny":"Ablehnen","Approve":"Bestätigen","Remove_buddy":"Kontakt entfernen","You_are_about_to_remove_":"Du bist gerade dabei {{bid_name}} (<b>{{bid_jid}}</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.","Continue_without_chat":"Weiter ohne Chat","Please_wait":"Bitte warten","Login_failed":"Chat-Anmeldung fehlgeschlagen","Sorry_we_cant_authentikate_":"Der Chatserver hat die Anmeldung abgelehnt. Falsches Passwort?","Retry":"Zurück","clear_history":"Lösche Verlauf","New_message_from":"Neue Nachricht von __name__","Should_we_notify_you_":"Sollen wir dich in Zukunft über eingehende Nachrichten informieren, auch wenn dieser Tab nicht im Vordergrund ist?","Please_accept_":"Bitte klick auf den \"Zulassen\" Button oben.","Hide_offline":"Offline ausblenden","Show_offline":"Offline einblenden","About":"Über","dnd":"Beschäftigt","Mute":"Ton aus","Unmute":"Ton an","Subscription":"Bezug","both":"beidseitig","Status":"Status","online":"online","chat":"chat","away":"abwesend","xa":"länger abwesend","offline":"offline","none":"keine","Unknown_instance_tag":"Unbekannter instance tag.","Not_one_of_our_latest_keys":"Nicht einer unserer letzten Schlüssel.","Received_an_unreadable_encrypted_message":"Eine unlesbare verschlüsselte Nachricht erhalten.","Online":"Online","Chatty":"Gesprächig","Away":"Abwesend","Extended_away":"Länger abwesend","Offline":"Offline","Friendship_request":"Kontaktanfrage","Confirm":"Bestätigen","Dismiss":"Ablehnen","Remove":"Löschen","Online_help":"Online Hilfe","FN":"Name","N":" ","FAMILY":"Familienname","GIVEN":"Vorname","NICKNAME":"Spitzname","URL":"URL","ADR":"Adresse","STREET":"Straße","EXTADD":"Zusätzliche Adresse","LOCALITY":"Ortschaft","REGION":"Region","PCODE":"Postleitzahl","CTRY":"Land","TEL":"Telefon","NUMBER":"Nummer","EMAIL":"E-Mail","USERID":" ","ORG":"Organisation","ORGNAME":"Name","ORGUNIT":"Abteilung","TITLE":"Titel","ROLE":"Rolle","BDAY":"Geburtstag","DESC":"Beschreibung","PHOTO":" ","send_message":"Sende Nachricht","get_info":"Benutzerinformationen","Settings":"Einstellungen","Priority":"Priorität","Save":"Speichern","User_settings":"Benutzereinstellungen","A_fingerprint_":"Ein Fingerabdruck wird dazu benutzt deinen Gesprächspartner zu identifizieren.","is":"ist","Login_options":"Anmeldeoptionen","BOSH_url":"BOSH url","Domain":"Domain","Resource":"Ressource","On_login":"Beim Anmelden","Received_an_unencrypted_message":"Unverschlüsselte Nachricht empfangen","Sorry_your_buddy_doesnt_provide_any_information":"Dein Kontakt stellt leider keine Informationen bereit.","Info_about":"Info über","Authentication_aborted":"Authentifizierung abgebrochen.","Authentication_request_received":"Authentifizierungsanfrage empfangen.","Log_in_without_chat":"Anmelden ohne Chat","has_come_online":"ist online gekommen","Unknown_sender":"Unbekannter Sender","Please_allow_access_to_microphone_and_camera":"Bitte klick auf den \"Zulassen\" Button oben, um den Zugriff auf Kamera und Mikrofon zu erlauben.","Incoming_call":"Eingehender Anruf","from":"von","Do_you_want_to_accept_the_call_from":"Möchtest Du den Anruf annehmen von","Reject":"Ablehnen","Accept":"Annehmen","hang_up":"Auflegen","snapshot":"Schnappschuss","mute_my_audio":"Mein Ton aus","pause_my_video":"Mein Video pausieren","fullscreen":"Vollbild","Info":"Info","Local_IP":"Lokale IP","Remote_IP":"Remote IP","Local_Fingerprint":"Lokaler Fingerprint","Remote_Fingerprint":"Remote Fingerprint","Video_call_not_possible":"Videoanruf nicht verfügbar. Dein Gesprächspartner unterstützt keine Videotelefonie.","Start_video_call":"Starte Videoanruf","Join_chat":"Gruppe beitreten","Join":"Betreten","Room":"Gruppe","Nickname":"Nickname","left_the_building":"__nickname__ hat die Gruppe verlassen","entered_the_room":"__nickname__ ist der Gruppe beigetreten","is_now_known_as":"__oldNickname__ ist nun unter __newNickname__ bekannt","This_room_is":"Diese Gruppe ist","muc_hidden":{"keyword":"versteckt","description":"kann durch die Suche nicht gefunden werden"},"muc_membersonly":{"keyword":"nur für Mitglieder","description":"du musst auf der Mitgliederliste stehen"},"muc_moderated":{"keyword":"moderiert","description":"Nur Personen die \"Mitspracherecht\" haben dürfen Nachrichten senden"},"muc_nonanonymous":{"keyword":"nicht anonym","description":"deine Jabber ID wird für alle Mitglieder sichtbar sein"},"muc_open":{"keyword":"offen","description":"jeder darf dieser Gruppe beitreten"},"muc_passwordprotected":{"keyword":"passwortgeschützt","description":"du benötigst das korrekte Passwort"},"muc_persistent":{"keyword":"permanent","description":"wird nicht geschlossen, wenn das letzte Mitglied die Gruppe verlässt"},"muc_public":{"keyword":"öffentlich","description":"kann durch die Suche gefunden werden"},"muc_semianonymous":{"keyword":"teilweise anonym","description":"deine Jabber ID wird nur für die Gruppen Administratoren sichtbar sein"},"muc_temporary":{"keyword":"temporär","description":"wird geschlossen, wenn das letzte Mitglied die Gruppe verlässt"},"muc_unmoderated":{"keyword":"nicht moderiert","description":"jeder darf Nachrichten senden"},"muc_unsecured":{"keyword":"ungesichert","description":"es wird kein Passwort benötigt"},"Continue":"Weiter","Server":"Server","Rooms_are_loaded":"Gruppen werden geladen","Could_load_only":"Es konnten nur __count__ Gruppen für die Autovervollständigung geladen werden","muc_explanation":"Bitte trage den Gruppennamen und optional ein Nickname und Passwort ein um einer Gruppe beizutreten","You_already_joined_this_room":"Du bist dieser Gruppe bereits beigetreten","This_room_will_be_closed":"Diese Gruppe wird geschlossen","Room_not_found_":"Es wird eine neue Gruppe erstellt","Loading_room_information":"Informationen über Gruppe werden geladen","Destroy":"Auflösen","Leave":"Verlassen","changed_subject_to":"__nickname__ hat das Thema auf __subject__ geändert","muc_removed_kicked":"Du wurdest aus der Gruppe entfernt","muc_removed_info_kicked":"__nickname__ wurde aus der Gruppe entfernt","muc_removed_banned":"Du wurdest aus der Gruppe ausgeschlossen","muc_removed_info_banned":"__nickname__ wurde aus der Gruppe ausgeschlossen","muc_removed_affiliation":"Du wurdest aus der Gruppe entfernt wegen einer Änderung deines Mitgliedstatus","muc_removed_info_affiliation":"__nickname__ wurde aus der Gruppe entfernt wegen einer Änderung seines Mitgliedstatus","muc_removed_membersonly":"Diese Gruppe erlaubt jetzt nur noch eingetragene Mitglieder und da du nicht dazugehörst, wurdest du aus der Gruppen entfernt","muc_removed_info_membersonly":"Diese Gruppe erlaubt jetzt nur noch eingetragene Mitglieder und __nickname__ gehört nicht dazu, daher wurde er aus der Gruppe entfernt","muc_removed_shutdown":"Du wurdest aus der Gruppe entfernt, da der MUC Server heruntergefahren wird","Reason":"Grund","message_not_send":"Deine Nachricht wurde aufgrund eines Fehlers nicht versandt","message_not_send_item-not-found":"Deine Nachricht wurde nicht versandt, da der Raum nicht mehr existiert","message_not_send_forbidden":"Deine Nachricht wurde nicht versandt, da du kein \"Mitspracherecht\" hast","message_not_send_not-acceptable":"Deine Nachricht wurde nicht versandt, da du kein Mitglied dieser Gruppe bist","This_room_has_been_closed":"Diese Gruppe wurde geschlossen","Room_logging_is_enabled":"Gesprächsverlauf kann öffentlich einsehbar sein","A_password_is_required":"Es wird ein Passwort benötigt","You_are_not_on_the_member_list":"Du bist kein eingetragenes Mitglied","You_are_banned_from_this_room":"Du wurdest von dieser Gruppe ausgeschlossen","Your_desired_nickname_":"Dein gewünschter Nickname wird bereits verwendet. Bitte wähle einen anderen.","The_maximum_number_":"Die maximale Anzahl der Mitglieder wurde erreicht.","This_room_is_locked_":"Diese Gruppe ist gesperrt","You_are_not_allowed_to_create_":"Du darfst keine neue Gruppe erstellen","Alert":"Alarm","Call_started":"Anruf gestarted","Call_terminated":"Anruf beendet","Carbon_copy":null,"Enable":"Aktivieren","jingle_reason_busy":"beschäftigt","jingle_reason_decline":"abgelehnt","jingle_reason_success":"aufgelegt","Media_failure":"Gerätefehler","No_local_audio_device":"Kein eigenes Audio Gerät","No_local_video_device":"Keine eigene Webcam","Ok":"Ok","PermissionDeniedError":"Du oder dein Browser haben die Audio/Video Berechtigung verweigert","Use_local_audio_device":"Nutze eigenes Audio Gerät","Use_local_video_device":"Benutze eigene Webcam","is_":"ist __status__","You_received_a_message_from_an_unknown_sender_":"Du hast eine Nachricht von einem unbekannten Sender erhalten (__sender__) Möchtest du sie sehen?","Your_roster_is_empty_add_":"Deine Kontaktliste ist leer, füge einen neuen Kontakt  <a>hinzu</a>","onsmp_explanation_question":"Dein Kontakt versucht herauszufinden ob er wirklich mit dir redet. Um dich gegenüber deinem Kontakt zu verifizieren  gib die Antwort ein und klick auf Antworten.","onsmp_explanation_secret":"Dein Kontakt versucht herauszufinden ob er wirklich mit dir redet. Um dich gegenüber deinem Kontakt zu verifizieren  gib das Geheimnis ein.","from_sender":"von __sender__","Verified_private_conversation_started":"Verifiziert Private Konversation gestartet.","Unverified_private_conversation_started":"Unverifiziert Private Konversation gestartet."}},"el":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null}},"en":{"translation":{"Logging_in":"Logging in…","your_connection_is_unencrypted":"Your connection is unencrypted.","your_connection_is_encrypted":"Your connection is encrypted.","your_buddy_closed_the_private_connection":"Your contact closed the private connection.","start_private":"Start private","close_private":"Close private","your_buddy_is_verificated":"Your contact is verified.","you_have_only_a_subscription_in_one_way":"You only have a one-way subscription.","authentication_query_sent":"Authentication query sent.","your_message_wasnt_send_please_end_your_private_conversation":"Your message was not sent. Please end your private conversation.","unencrypted_message_received":"Unencrypted message received","not_available":"Not available","no_connection":"No connection!","relogin":"relogin","trying_to_start_private_conversation":"Trying to start private conversation!","Verified":"Verified","Unverified":"Unverified","private_conversation_aborted":"Private conversation aborted!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Your contact closed the private conversation! You should do the same.","conversation_is_now_verified":"Conversation is now verified.","authentication_failed":"Authentication failed.","Creating_your_private_key_":"Creating your private key; this may take a while.","Authenticating_a_buddy_helps_":"Authenticating a contact helps ensure that the person you are talking to is really the one they claim to be.","How_do_you_want_to_authenticate_your_buddy":"How do you want to authenticate {{bid_name}} (<b>{{bid_jid}}</b>)?","Select_method":"Select method...","Manual":"Manual","Question":"Question","Secret":"Secret","To_verify_the_fingerprint_":"To verify the fingerprint, contact your contact via some other trustworthy channel, such as the telephone.","Your_fingerprint":"Your fingerprint","Buddy_fingerprint":"Contact fingerprint","Close":"Close","Compared":"Compared","To_authenticate_using_a_question_":"To authenticate using a question, pick a question whose answer is known only you and your contact.","Ask":"Ask","To_authenticate_pick_a_secret_":"To authenticate, pick a secret known only to you and your contact.","Compare":"Compare","Fingerprints":"Fingerprints","Authentication":"Authentication","Message":"Message","Add_buddy":"Add contact","rename_buddy":"rename contact","delete_buddy":"delete contact","Login":"Login","Username":"Username","Password":"Password","Cancel":"Cancel","Connect":"Connect","Type_in_the_full_username_":"Type in the full username and an optional alias.","Alias":"Alias","Add":"Add","Subscription_request":"Subscription request","You_have_a_request_from":"You have a request from","Deny":"Deny","Approve":"Approve","Remove_buddy":"Remove contact","You_are_about_to_remove_":"You are about to remove {{bid_name}} (<b>{{bid_jid}}</b>) from your contact list. All related chats will be closed.","Continue_without_chat":"Continue without chat","Please_wait":"Please wait","Login_failed":"Chat login failed","Sorry_we_cant_authentikate_":"Authentication failed with the chat server. Maybe the password is wrong?","Retry":"Back","clear_history":"Clear history","New_message_from":"New message from __name__","Should_we_notify_you_":"Should we notify you about new messages in the future?","Please_accept_":"Please click the \"Allow\" button at the top.","Hide_offline":"Hide offline contacts","Show_offline":"Show offline contacts","About":"About","dnd":"Do Not Disturb","Mute":"Mute","Unmute":"Unmute","Subscription":"Subscription","both":"both","Status":"Status","online":"online","chat":"chat","away":"away","xa":"extended away","offline":"offline","none":"none","Unknown_instance_tag":"Unknown instance tag.","Not_one_of_our_latest_keys":"Not one of our latest keys.","Received_an_unreadable_encrypted_message":"Received an unreadable encrypted message.","Online":"Online","Chatty":"Chatty","Away":"Away","Extended_away":"Extended away","Offline":"Offline","Friendship_request":"Contact request","Confirm":"Confirm","Dismiss":"Dismiss","Remove":"Remove","Online_help":"Online help","FN":"Full name","N":" ","FAMILY":"Family name","GIVEN":"Given name","NICKNAME":"Nickname","URL":"URL","ADR":"Address","STREET":"Street Address","EXTADD":"Extended Address","LOCALITY":"Locality","REGION":"Region","PCODE":"Postal Code","CTRY":"Country","TEL":"Telephone","NUMBER":"Number","EMAIL":"Email","USERID":" ","ORG":"Organization","ORGNAME":"Name","ORGUNIT":"Unit","TITLE":"Job title","ROLE":"Role","BDAY":"Birthday","DESC":"Description","PHOTO":" ","send_message":"Send message","get_info":"Show information","Settings":"Settings","Priority":"Priority","Save":"Save","User_settings":"User settings","A_fingerprint_":"A fingerprint is used to make sure that the person you are talking to is who he or she is saying.","is":"is","Login_options":"Login options","BOSH_url":"BOSH URL","Domain":"Domain","Resource":"Resource","On_login":"On login","Received_an_unencrypted_message":"Received an unencrypted message","Sorry_your_buddy_doesnt_provide_any_information":"Sorry, your contact does not provide any information.","Info_about":"Info about","Authentication_aborted":"Authentication aborted.","Authentication_request_received":"Authentication request received.","Log_in_without_chat":"Log in without chat","has_come_online":"has come online","Unknown_sender":"Unknown sender","Please_allow_access_to_microphone_and_camera":"Please click the \"Allow\" button at the top, to allow access to microphone and camera.","Incoming_call":"Incoming call","from":"from","Do_you_want_to_accept_the_call_from":"Do you want to accept the call from","Reject":"Reject","Accept":"Accept","hang_up":"hang up","snapshot":"snapshot","mute_my_audio":"mute my audio","pause_my_video":"pause my video","fullscreen":"fullscreen","Info":"Info","Local_IP":"Local IP","Remote_IP":"Remote IP","Local_Fingerprint":"Local fingerprint","Remote_Fingerprint":"Remote fingerprint","Video_call_not_possible":"Video call not possible. Your contact does not support video calls.","Start_video_call":"Start video call","Join_chat":"Join chat","Join":"Join","Room":"Room","Nickname":"Nickname","left_the_building":"__nickname__ left the building","entered_the_room":"__nickname__ entered the room","is_now_known_as":"__oldNickname__ is now known as __newNickname__","This_room_is":"This room is","muc_hidden":{"keyword":"hidden","description":"can not be found through search"},"muc_membersonly":{"keyword":"members-only","description":"you need to be on the member list"},"muc_moderated":{"keyword":"moderated","description":"only persons with \"voice\" are allowed to send messages"},"muc_nonanonymous":{"keyword":"non-anonymous","description":"your jabber id is exposed to all other occupants"},"muc_open":{"keyword":"open","description":"everyone is allowed to join"},"muc_passwordprotected":{"keyword":"password-protected","description":"you need to provide the correct password"},"muc_persistent":{"keyword":"persistent","description":"will not be destroyed if the last occupant left"},"muc_public":{"keyword":"public","description":"can be found through search"},"muc_semianonymous":{"keyword":"semi-anonymous","description":"your jabber id is only exposed to room admins"},"muc_temporary":{"keyword":"temporary","description":"will be destroyed if the last occupant left"},"muc_unmoderated":{"keyword":"unmoderated","description":"everyone is allowed to send messages"},"muc_unsecured":{"keyword":"unsecured","description":"you need no password to enter"},"Continue":"Continue","Server":"Server","Rooms_are_loaded":"Rooms are loaded","Could_load_only":"Could load only __count__ rooms for autocomplete","muc_explanation":"Please enter room name and optional a nickname and password to join a chat","You_already_joined_this_room":"You already joined this room","This_room_will_be_closed":"This room will be closed","Room_not_found_":"A new room will be created","Loading_room_information":"Loading room information","Destroy":"Destroy","Leave":"Leave","changed_subject_to":"__nickname__ changed the room subject to \"__subject__\"","muc_removed_kicked":"You have been kicked from the room","muc_removed_info_kicked":"__nickname__ has been kicked from the room","muc_removed_banned":"You have been banned from the room","muc_removed_info_banned":"__nickname__ has been banned from the room","muc_removed_affiliation":"You have been removed from the room, because of an affiliation change","muc_removed_info_affiliation":"__nickname__ has been removed from the room, because of an affiliation change","muc_removed_membersonly":"You have been removed from the room, because the room has been changed to members-only and you are no member","muc_removed_info_membersonly":"__nickname__ has been removed from the room, because the room has been changed to members-only and you are no member","muc_removed_shutdown":"You have been removed from the room, because the MUC service is being shut down","Reason":"Reason","message_not_send":"Your message was not send because of an error","message_not_send_item-not-found":"Your message was not send because this room does not exist","message_not_send_forbidden":"Your message was not send because you have no voice in this room","message_not_send_not-acceptable":"Your message was not send because you are no occupant of this room","This_room_has_been_closed":"This room has been closed","Room_logging_is_enabled":"Room logging is enabled","A_password_is_required":"A password is required","You_are_not_on_the_member_list":"You are not on the member list","You_are_banned_from_this_room":"You are banned from this room","Your_desired_nickname_":"Your desired nickname is already in use. Please choose another","The_maximum_number_":"The maximum number of user is reached in this room","This_room_is_locked_":"This room is locked","You_are_not_allowed_to_create_":"You are not allowed to create a room","Alert":"Alert","Call_started":"Call started","Call_terminated":"Call terminated","Carbon_copy":"Carbon copy","Enable":"Enable","jingle_reason_busy":"busy","jingle_reason_decline":"decline","jingle_reason_success":"hung up","Media_failure":"Media failure","No_local_audio_device":"No local audio device.","No_local_video_device":"No local video device.","Ok":"Ok","PermissionDeniedError":"You or your browser denied audio/video permission","Use_local_audio_device":"Use local audio device.","Use_local_video_device":"Use local video device.","is_":"is __status__","You_received_a_message_from_an_unknown_sender_":"You received a message from an unknown sender (__sender__) Do you want to display them?","Your_roster_is_empty_add_":"Your roster is empty, add a  <a>new contact</a>","onsmp_explanation_question":"You contact is attempting to determine if they are really talking to you. To authenticate to your contact,  enter the answer and click Answer.","onsmp_explanation_secret":"You contact is attempting to determine if they are really talking to you. To authenticate to your contact,  enter the secret.","from_sender":"from __sender__","Verified_private_conversation_started":"Verified Private conversation started.","Unverified_private_conversation_started":"Unverified Private conversation started.","Bookmark":"Bookmark","Auto-join":"Auto-join","Edit_bookmark":"Edit bookmark","Room_logging_is_disabled":"Room logging is disabled","Room_is_now_non-anoymous":"Room is now non-anonymous","Room_is_now_semi-anonymous":"Room is now semi-anonymous","Do_you_want_to_change_the_default_room_configuration":"Do you want to change the default room configuration?","Default":"Default","Change":"Change"}},"es":{"translation":{"Logging_in":"Por favor, espere...","your_connection_is_unencrypted":"Su conexión no está cifrada.","your_connection_is_encrypted":"Su conexión está cifrada.","your_buddy_closed_the_private_connection":"Su amigo ha cerrado la conexión privada.","start_private":"Iniciar privado","close_private":"Cerrar privado","your_buddy_is_verificated":"Tu amigo está verificado.","you_have_only_a_subscription_in_one_way":"Sólo tienes una suscripción de un modo.","authentication_query_sent":"Consulta de verificación enviada.","your_message_wasnt_send_please_end_your_private_conversation":"Su mensaje no fue enviado. Por favor, termine su conversación privada.","unencrypted_message_received":"Mensaje no cifrado recibido:","not_available":"No disponible","no_connection":"Sin conexión!","relogin":"iniciar sesión nuevamente","trying_to_start_private_conversation":"Intentando iniciar una conversación privada!","Verified":"Verificado","Unverified":"No verificado","private_conversation_aborted":"Conversación privada abortada!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Su amigo cerró la conversación privada! Usted debería hacer lo mismo.","conversation_is_now_verified":"La conversación es ahora verificada.","authentication_failed":"Fallo la verificación.","Creating_your_private_key_":"Ahora vamos a crear su clave privada. Esto puede tomar algún tiempo.","Authenticating_a_buddy_helps_":"Autenticación de un amigo ayuda a garantizar que la persona que está hablando es quien él o ella está diciendo.","How_do_you_want_to_authenticate_your_buddy":"¿Cómo desea autenticar {{bid_name}} (<b>{{bid_jid}}</b>)?","Select_method":"Escoja un método...","Manual":"Manual","Question":"Pregunta","Secret":"Secreto","To_verify_the_fingerprint_":"Para verificar la firma digital, póngase en contacto con su amigo a través de algún otro canal autenticado, como el teléfono.","Your_fingerprint":"Tu firma digital","Buddy_fingerprint":"firma digital de tu amigo","Close":"Cerrar","Compared":"Comparado","To_authenticate_using_a_question_":"Para autenticar mediante una pregunta, elegir una pregunta cuya respuesta se conoce sólo usted y su amigo.","Ask":"Preguntar","To_authenticate_pick_a_secret_":"Para autenticar, elija un secreto conocido sólo por usted y su amigo.","Compare":"Comparar","Fingerprints":"Firmas digitales","Authentication":"Autenticación","Message":"Mensaje","Add_buddy":"Añadir amigo","rename_buddy":"renombrar amigo","delete_buddy":"eliminar amigo","Login":"Iniciar Sesión","Username":"Usuario","Password":"Contraseña","Cancel":"Cancelar","Connect":"Conectar","Type_in_the_full_username_":"Escriba el usuario completo y un alias opcional.","Alias":"Alias","Add":"Añadir","Subscription_request":"Solicitud de suscripción","You_have_a_request_from":"Tienes una petición de","Deny":"Rechazar","Approve":"Aprobar","Remove_buddy":"Eliminar amigo","You_are_about_to_remove_":"Vas a eliminar a {{bid_name}} (<b>{{bid_jid}}</b>) de tu lista de amigos. Todas las conversaciones relacionadas serán cerradas.","Continue_without_chat":"Continuar","Please_wait":"Espere por favor","Login_failed":"Fallo el inicio de sesión","Sorry_we_cant_authentikate_":"Lo sentimos, no podemos autentificarlo en nuestro servidor de chat. ¿Tal vez la contraseña es incorrecta?","Retry":"Reintentar","clear_history":"Borrar el historial","New_message_from":"Nuevo mensaje de __name__","Should_we_notify_you_":"¿Debemos notificarle sobre nuevos mensajes en el futuro?","Please_accept_":"Por favor, haga clic en el botón \"Permitir\" en la parte superior.","Hide_offline":"Ocultar contactos desconectados","Show_offline":"Mostrar contactos desconectados","About":"Acerca de","dnd":"No Molestar","Mute":"Desactivar sonido","Unmute":"Activar sonido","Subscription":"Suscripción","both":"ambos","Status":"Estado","online":"en línea","chat":"chat","away":"ausente","xa":"mas ausente","offline":"desconectado","none":"nadie","Unknown_instance_tag":"Etiqueta de instancia desconocida.","Not_one_of_our_latest_keys":"No de nuestra ultima tecla.","Received_an_unreadable_encrypted_message":"Se recibió un mensaje cifrado ilegible.","Online":"En linea","Chatty":"Hablador","Away":"Ausente","Extended_away":"Mas ausente","Offline":"Desconectado","Friendship_request":"Solicitud de amistad","Confirm":"Confirmar","Dismiss":"Rechazar","Remove":"Eliminar","Online_help":"Ayuda en línea","FN":"Nombre completo ","N":" ","FAMILY":"Apellido","GIVEN":"Nombre","NICKNAME":"Apodar","URL":"URL","ADR":"Dirección","STREET":"Calle","EXTADD":"Extendido dirección","LOCALITY":"Población","REGION":"Región","PCODE":"Código postal","CTRY":"País","TEL":"Teléfono","NUMBER":"Número","EMAIL":"Emilio","USERID":" ","ORG":"Organización","ORGNAME":"Nombre","ORGUNIT":"Departamento","TITLE":"Título","ROLE":"Rol","BDAY":"Cumpleaños","DESC":"Descripción","PHOTO":" ","send_message":"mandar un texto","get_info":"obtener información","Settings":"Ajustes","Priority":"Prioridad","Save":"Guardar","User_settings":"Configuración de usuario","A_fingerprint_":"La huella digital se utiliza para que puedas estar seguro que la persona con la que estas hablando es quien realmente dice ser","is":"es","Login_options":"Opciones de login","BOSH_url":"BOSH url","Domain":"Dominio","Resource":"Recurso","On_login":"Iniciar sesión","Received_an_unencrypted_message":"Recibe un mensaje no cifrado","Sorry_your_buddy_doesnt_provide_any_information":"Lo sentimos, su amigo no provee ninguna información.","Info_about":"Info acerca de","Authentication_aborted":"Autenticación abortada","Authentication_request_received":"Pedido de autenticación recibido.","Log_in_without_chat":"Ingresar sin chat","has_come_online":"se ha conectado","Unknown_sender":"Remitente desconocido","Please_allow_access_to_microphone_and_camera":"Por favor, permitir el acceso al micrófono y la cámara.","Incoming_call":"Llamada entrante","from":"de","Do_you_want_to_accept_the_call_from":"Desea aceptar la llamada de","Reject":"Rechazar","Accept":"Aceptar","hang_up":"colgar","snapshot":"instantánea","mute_my_audio":"silenciar mi audio","pause_my_video":"pausar mi vídeo","fullscreen":"pantalla completa","Info":"Info","Local_IP":"IP local","Remote_IP":"IP remota","Local_Fingerprint":"Firma digital local","Remote_Fingerprint":"Firma digital remota","Video_call_not_possible":"Llamada de vídeo no es posible","Start_video_call":"Iniciar llamada de vídeo","Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":"Activar","jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":"es __status__","You_received_a_message_from_an_unknown_sender_":"Ha recibido un mensaje de un remitente desconocido (__sender__) ¿Quiere mostrarlos?","Your_roster_is_empty_add_":"Tu lista de amigos esta vacia <a>Nuevo amigo</a>","onsmp_explanation_question":"Tu amigo está tratando de determinar si él o ella está realmente hablando con usted. Para autenticar a su amigo,  introduce la respuesta y haga clic en Contestar.","onsmp_explanation_secret":"Tu amigo está tratando de determinar si él o ella está realmente hablando con usted. Para autenticar a su amigo,  especifique el secreto.","from_sender":"de __sender__","Verified_private_conversation_started":"Verificado se inició una conversación privada.","Unverified_private_conversation_started":"No verificado se inició una conversación privada."}},"fr":{"translation":{"Logging_in":"Connexion...","your_connection_is_unencrypted":"Connexion non chiffrée.","your_connection_is_encrypted":"Connexion chiffrée.","your_buddy_closed_the_private_connection":"Votre ami a fermé la connexion privée.","start_private":"Démarrer une conversation privé","close_private":"Clôturer une conversation privée","your_buddy_is_verificated":"Votre contact est vérifié.","you_have_only_a_subscription_in_one_way":"Vous ne pouvez souscrire qu'une fois.","authentication_query_sent":"Requête d’authentification envoyée.","your_message_wasnt_send_please_end_your_private_conversation":"Votre message n'a pas été envoyé. Veuillez terminer votre conversation privée.","unencrypted_message_received":"Message non chiffré reçu","not_available":"Pas disponible","no_connection":"Pas de connexion !","relogin":"Re-connexion","trying_to_start_private_conversation":"Essai de démarrage d'une conversation privée !","Verified":"Vérifié","Unverified":"Non vérifié","private_conversation_aborted":"Conversation privée interrompue !","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Votre ami a fermé la conversation privée ! Vous devriez faire de même.","conversation_is_now_verified":"La conversation est maintenant vérifiée.","authentication_failed":"L'authentification a échoué.","Creating_your_private_key_":"Création de votre clé privée; cela peut prendre un moment.","Authenticating_a_buddy_helps_":"L'authentification d'un ami permet de s'assurer que la personne à qui vous parlez est vraiment celui qu'il ou elle prétend être.","How_do_you_want_to_authenticate_your_buddy":"Comment voulez-vous vous authentifier {{bid_name}} (<b>{{bid_jid}}</b>)?","Select_method":"Sélection de la méthode...","Manual":"Manuel","Question":"Question","Secret":"Sécurité","To_verify_the_fingerprint_":"Pour vérifier l'empreinte, contactez votre ami via un autre canal digne de confiance, tel que le téléphone.","Your_fingerprint":"Votre empreinte","Buddy_fingerprint":"Empreinte de l'ami","Close":"Fermer","Compared":"Comparé","To_authenticate_using_a_question_":"Pour s'authentifier à l'aide d'une question, choisissez une question dont la réponse n'est connue que vous et de votre ami.","Ask":"Demander","To_authenticate_pick_a_secret_":"Pour vous authentifier, choisissez un secret connu seulement de vous et de votre ami.","Compare":"Comparer","Fingerprints":"Empreintes","Authentication":"Authentification","Message":"Message","Add_buddy":"Ajouter comme ami","rename_buddy":"Renommer l'ami","delete_buddy":"Supprimer l'ami","Login":"Connexion","Username":"Nom d'utilisateur","Password":"Mot de passe","Cancel":"Annuler","Connect":"Connecter","Type_in_the_full_username_":"Tapez un nom d'utilisateur complet et un alias(optionnel).","Alias":"Alias","Add":"Ajouter","Subscription_request":"Demande d'abonnement","You_have_a_request_from":"Vous avez une requête de ","Deny":"Refuser","Approve":"Approuver","Remove_buddy":"Supprimer l'ami","You_are_about_to_remove_":"Vous allez retirer {{bid_name}} (<b>{{bid_jid}}</b>) de votre liste d'amis. Toutes les fenêtres de chat en lien avec celui-ci seront fermées.","Continue_without_chat":"Continuer sans tchat","Please_wait":"Merci de patienter","Login_failed":"Authentification échouée","Sorry_we_cant_authentikate_":"La connexion avec le serveur de tchat a échoué. Vérifiez le mot de passe.","Retry":"Retour","clear_history":"Effacer l’historique","New_message_from":"Nouveau message de __name__","Should_we_notify_you_":"Dans le futur, devrons-nous vous notifier les nouveaux messages ?","Please_accept_":"Merci de cliquer sur le bouton \"autoriser\" en haut de page","Hide_offline":"Masquer les contacts non connectés","Show_offline":"Afficher les contacts non connectés","About":"À propos","dnd":"Ne pas déranger","Mute":"Muet","Unmute":"Son actif","Subscription":"Abonnement","both":"Les deux","Status":"Status","online":"En ligne","chat":"tchat","away":"Absent","xa":"Options étendues","offline":"Hors ligne","none":"Aucun","Unknown_instance_tag":"Tag inconnu","Not_one_of_our_latest_keys":"Ce n'est pas l'une des dernières touches","Received_an_unreadable_encrypted_message":"Message chiffré non lisible","Online":"En ligne","Chatty":"tchatty","Away":"Absent","Extended_away":"Options étendues","Offline":"Hors ligne","Friendship_request":"Demande d'amitié","Confirm":"Valider","Dismiss":"Rejeter","Remove":"Supprimer","Online_help":"Aide en ligne","FN":"Nom","N":" N ","FAMILY":"Nom de famille","GIVEN":"prénom","NICKNAME":"Surnom","URL":"URL","ADR":"Adresse","STREET":"Rue","EXTADD":"Adresse (suite)","LOCALITY":"Localité","REGION":"Région","PCODE":"Code Postal","CTRY":"Pays","TEL":"Téléphone","NUMBER":"Numéro","EMAIL":"Courriel","USERID":" USERID ","ORG":"Organisation","ORGNAME":"Nom","ORGUNIT":"Unité","TITLE":"Qualité:","ROLE":"Rôle","BDAY":"Date de naissance","DESC":"Description","PHOTO":"Photo","send_message":"Envoyer le message","get_info":"Montrer les informations","Settings":"Réglages","Priority":"Priorité","Save":"Enregistrer","User_settings":"Paramètres utilisateur","A_fingerprint_":"Une empreinte est utilisée pour s'assurer de l'identité de la personne à qui vous parlez","is":"est","Login_options":"Options d'identification","BOSH_url":"URL BOSH","Domain":"Domaine","Resource":"Ressource","On_login":"Après authentification","Received_an_unencrypted_message":"Reçu un message non chiffré","Sorry_your_buddy_doesnt_provide_any_information":"Désolé, votre ami n'a pas fourni d'informations","Info_about":"A propos de","Authentication_aborted":"Authentification interrompue.","Authentication_request_received":"Requête d'authentification reçue.","Log_in_without_chat":"S'identifier sans tchat","has_come_online":"vient d'arriver","Unknown_sender":"Expéditeur inconnu","Please_allow_access_to_microphone_and_camera":"Veuillez cliquez sur le bouton \"Autoriser\" en haut, pour permettre l'accès au micro et à la caméra.","Incoming_call":"Appel entrant","from":"de","Do_you_want_to_accept_the_call_from":"Voulez-vous accepter l'appel de","Reject":"Rejeté","Accept":"Accepté","hang_up":"Décrochez","snapshot":"Capture d’écran","mute_my_audio":"Couper l'audio","pause_my_video":"Mettre ma vidéo en pause","fullscreen":"Plein écran","Info":"Info","Local_IP":"IP locale","Remote_IP":"IP distante","Local_Fingerprint":"Empreinte locale","Remote_Fingerprint":"Empreinte distante","Video_call_not_possible":"L'appel vidéo n'est possible. Votre ami ne supporte pas les appels vidéo.","Start_video_call":"Démarrer l'appel vidéo","Join_chat":"Joindre la discution","Join":"Joindre","Room":"Salon","Nickname":"Surnom","left_the_building":"__nickname__ a quitté l'immeuble","entered_the_room":"__nickname__ entre dans le salon","is_now_known_as":null,"This_room_is":"Ce salon est","muc_hidden":{"keyword":"caché","description":null},"muc_membersonly":{"keyword":"pour les membres seulement","description":"Vous devez être sur la liste des membres"},"muc_moderated":{"keyword":"modéré","description":"Seulement les personnes avec la \"voix\" sont autorisés à envoyer des messages"},"muc_nonanonymous":{"keyword":"non anonyme","description":"Votre identifiant Jabber est visible de tous les autres occupants"},"muc_open":{"keyword":"ouvert","description":"Tout le monde est autorisé à se connecter"},"muc_passwordprotected":{"keyword":"protégé par un mot de passe","description":"Vous devez fournir un mot de passe correct"},"muc_persistent":{"keyword":"persistent","description":null},"muc_public":{"keyword":"public","description":null},"muc_semianonymous":{"keyword":"semi-anonyme","description":"Votre identifiant Jabber est seulement visible aux administrateurs de ce salon"},"muc_temporary":{"keyword":"temporaire","description":"sera détruit au départ de son dernier occupant"},"muc_unmoderated":{"keyword":"non modéré","description":"Tout le monde est autorisé à envoyer des messages"},"muc_unsecured":{"keyword":"non sécurisé","description":"un mot de passe n'est pas nécessaire pour entrer"},"Continue":"Continuer","Server":"Serveur","Rooms_are_loaded":"Les salons sont chargés","Could_load_only":null,"muc_explanation":"Veuillez saisir le nom du salon, un surnom (optionnel) et un mot de passe pour joindre la conversation","You_already_joined_this_room":"Vous avez déjà rejoins ce salon","This_room_will_be_closed":"Ce salon va être fermé","Room_not_found_":"Un nouveau salon va être créé","Loading_room_information":"Chargement des informations du salon","Destroy":"Détruire","Leave":"Quitter","changed_subject_to":"__nickname__ a changé le sujet du salon à \"__subject__\"","muc_removed_kicked":"Vous avez été éjecté de ce salon","muc_removed_info_kicked":"__nickname__ a été éjecté de ce salon","muc_removed_banned":"Vous avez été banni de ce salon","muc_removed_info_banned":"__nickname__ a été banni de ce salon","muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":"Raison","message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":"Votre message n'a pas été envoyé car il n'y a personne dans ce salon","This_room_has_been_closed":"Ce salon a été fermé","Room_logging_is_enabled":null,"A_password_is_required":"Un mot de passe est requis","You_are_not_on_the_member_list":"Vous n'êtes pas sur la liste des membres","You_are_banned_from_this_room":"Vous avez été banni de ce salon","Your_desired_nickname_":"Votre Surnom souhaité est déjà utilisé.Veuillez en choisir un autre","The_maximum_number_":"Le nombre maximum d'utilisateur est atteint dans ce salon","This_room_is_locked_":"Ce salon est vérouillé","You_are_not_allowed_to_create_":"Vous n'êtes pas autorisé à créer un salon","Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":"est __status__","You_received_a_message_from_an_unknown_sender_":"Vous avez reçu un message d'un expéditeur inconnu (__sender__) Voulez-vous les afficher ?","Your_roster_is_empty_add_":"Votre liste est vide, ajouter  <a>Nouvel ami</a>","onsmp_explanation_question":"Votre ami tente de déterminer si il ou elle parle vraiment à vous. Vous authentifier à votre ami,  Saisissez une réponse et cliquer sur Répondre.","onsmp_explanation_secret":"Votre ami tente de déterminer si il ou elle parle vraiment à vous. Vous authentifier à votre ami,  Entrez le mot secret","from_sender":"de __sender__","Verified_private_conversation_started":"Vérifié Conversation privé démarrée.","Unverified_private_conversation_started":"Non vérifié Conversation privé démarrée."}},"it":{"translation":{"Logging_in":"login…","your_connection_is_unencrypted":"La sua connessione è non cifrata.","your_connection_is_encrypted":"La sua connessione è cifrata.","your_buddy_closed_the_private_connection":"La sua connessione privata è stato chiuso dal suo compagno.","start_private":"Inizia privata","close_private":"Chiude privata","your_buddy_is_verificated":"Il tuo compagno è stato verificato","you_have_only_a_subscription_in_one_way":"Hai solo una one-way inscrizione.","authentication_query_sent":"Domanda d'autenticità inviata.","your_message_wasnt_send_please_end_your_private_conversation":"Il tuo messaggio non è stato inviato. Si prega di finire la sua conversazione privata.","unencrypted_message_received":"Messaggio non cifrato ricevuto","not_available":"non disponibile","no_connection":"nessun collegamento!","relogin":"nuovo login","trying_to_start_private_conversation":"Cercando di avviare una conversazione privata!","Verified":"verificato","Unverified":"non verificato","private_conversation_aborted":"Conversazione privata abortito!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Il tuo compagno ha chiuso la conversazione privata! Si dovrebbe fare lo stesso.","conversation_is_now_verified":"Conversazione è ora verificato.","authentication_failed":"autenticazione fallita.","Creating_your_private_key_":"Creare la propria chiave privata; questo potrebbe richiedere un po'.","Authenticating_a_buddy_helps_":"Autenticazione un compagno aiuta a garantire che la persona si sta parlando è davvero quello che lui o lei sostiene di essere.","How_do_you_want_to_authenticate_your_buddy":"Come si desidera autenticare {{bid_name}} (<b>{{bid_jid}}</b>)?","Select_method":"Seleziona metodo ..","Manual":"manuale","Question":"domanda","Secret":"segreto","To_verify_the_fingerprint_":"Per verificare l'impronta digitale, contattare il proprio compagno attraverso qualche altro canale affidabile, come il telefono.","Your_fingerprint":"il tuo impronta digitale","Buddy_fingerprint":"impronta digitale da compagno","Close":"chiude","Compared":"comparato","To_authenticate_using_a_question_":"Per autenticare tramite una questione, scegli una questione la cui risposta è nota solo voi e il tuo compagno","Ask":"chiedi","To_authenticate_pick_a_secret_":"Per autenticare, scegli un segreto noto solo a te e il tuo compagno.","Compare":"Comparare","Fingerprints":"Impronta digitale","Authentication":"Autenticazione","Message":"Messagio","Add_buddy":"Aggiungi un compagno","rename_buddy":"rinomina compagno","delete_buddy":"elimina compagno","Login":"Login","Username":"Identificazione dell'utente","Password":"Password","Cancel":"Cancella","Connect":"Collega","Type_in_the_full_username_":"Digita l'identificazione utente completo e un alias opzionale.","Alias":"Alias","Add":"Aggiungi","Subscription_request":"Rrichiesta di sottoscrizione","You_have_a_request_from":"Hai una richiesta da","Deny":"Refiuta","Approve":"Approva","Remove_buddy":"Rimuova il compagno","You_are_about_to_remove_":"Stai rimovendo {{bid_name}} (<b>{{bid_jid}}</b>) del suo lista di compagni. Tutte le chat appartenente saranno chiuse.","Continue_without_chat":"Continua senza chat","Please_wait":"Si prega d'attendere","Login_failed":"Chat login è fallito","Sorry_we_cant_authentikate_":"Autenticazione non riuscita con il server di chat. Forse la password è sbagliata?","Retry":"Indietro","clear_history":"Cancella la cronologia","New_message_from":"Nuovo messaggio da __name__","Should_we_notify_you_":"Vuoi ricevere una notifica di nuovi messaggi in futuro?","Please_accept_":"Si prega di fare clic sul bottone \"Autorizzazione\" sopra.","Hide_offline":"Nascondere i contatti non in linea","Show_offline":"Mostra i contatti non in linea","About":"Informazione legale","dnd":"Non disturbare","Mute":"Muto attivo","Unmute":"Muto inattivo","Subscription":"Sottoscrizione","both":"etrambi","Status":"Status","online":"In linea","chat":"chat","away":"via","xa":"via estensivo","offline":"non in linea","none":"nessuno","Unknown_instance_tag":"Instance tag sconosciuta.","Not_one_of_our_latest_keys":"Non è una delle nostre ultime chiavi.","Received_an_unreadable_encrypted_message":"Ricevuto un messaggio crittografato illeggibile.","Online":"In linea","Chatty":"Chiacchierino","Away":"Via","Extended_away":"Via estensivo","Offline":"Non in linea","Friendship_request":"Amicizia richiesto","Confirm":"Conferma","Dismiss":"Rifiuta","Remove":"Rimuovi","Online_help":"Guida in linea","FN":"Nome e cognome","N":null,"FAMILY":"Cognome","GIVEN":"Nome","NICKNAME":"Soprannome","URL":"URL","ADR":"Indirizzo","STREET":"Via","EXTADD":"Esteso Indirizzo","LOCALITY":"Località","REGION":"Regione","PCODE":"Codice Postale","CTRY":"Paese","TEL":"Telefono","NUMBER":"Numero","EMAIL":"E-mail","USERID":null,"ORG":"Organizzazione","ORGNAME":"Nome","ORGUNIT":"Unità","TITLE":"Titolo di lavoro","ROLE":"Funzione","BDAY":"Compleanno","DESC":"Descrizione","PHOTO":null,"send_message":"Messagio inviato","get_info":"Mostra informazioni","Settings":"Impostazione","Priority":"Priorità","Save":"Salva","User_settings":"Impostazione dell'utente","A_fingerprint_":"Una impronta digitale è usato per assicurarsi che la persona con cui stai parlando è lui o lei che sta dicendo.","is":"è","Login_options":"Opzioni di login","BOSH_url":"BOSH URL","Domain":"Domain","Resource":"Risorsa","On_login":"Login on","Received_an_unencrypted_message":"Ricevuto un messaggio non crittografato","Sorry_your_buddy_doesnt_provide_any_information":"Spiace, il tuo compagno non fornisce alcuna informazione.","Info_about":"Informazioni","Authentication_aborted":"Autenticazione interrotta","Authentication_request_received":"Richiesta di autenticazione ricevuto.","Log_in_without_chat":"Log in senza chat","has_come_online":"È venuto in linea","Unknown_sender":"Mittente sconosciuto","Please_allow_access_to_microphone_and_camera":"Si prega di fare clic sul bottone \"Autorizzazione\" sopra per autorizzazione del l'accesso al microfono e fotocamera.","Incoming_call":"Chiamata in arrivo","from":"di","Do_you_want_to_accept_the_call_from":"Vuoi accettare la chiamata di","Reject":"Rifiuta","Accept":"Accetta","hang_up":"Riattacca","snapshot":"istantanea","mute_my_audio":"disattiva il mio audio","pause_my_video":"pausa il mio audio","fullscreen":"schermo intero","Info":"Informazione","Local_IP":"IP locale","Remote_IP":"IP remoto","Local_Fingerprint":"Impronta digitale locale","Remote_Fingerprint":"Impronta digitale remoto","Video_call_not_possible":"Videochiamata non è possibile. Il tuo compagno non può effettuare videochiamate.","Start_video_call":"Inizia videochiamata","Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":"è __status__","You_received_a_message_from_an_unknown_sender_":"Hai ricevuto un messaggio da un mittente sconosciuto (__sender__) Vuoi che venga visualizzato?","Your_roster_is_empty_add_":"Il suo elenco è vuoto, aggiungi un  <a>compagno nuovo</a>","onsmp_explanation_question":"Il tuo compagno sta cercando di determinare se lui o lei sta davvero parlando con te. Per autenticare a il tuo compagno.  inserisci la risposta e fare click su risposta.","onsmp_explanation_secret":"Il tuo compagno sta cercando di determinare se lui o lei sta davvero parlando con te. Per autenticare a il tuo compagno.  inserire il segreto.","from_sender":"di __sender__","Verified_private_conversation_started":"verificato Conversazione privata iniziato.","Unverified_private_conversation_started":"non verificato Conversazione privata iniziato."}},"nds":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null}},"pl":{"translation":{"Logging_in":"Logowanie...","your_connection_is_unencrypted":"Twoje połączenie nie jest szyfrowane.","your_connection_is_encrypted":"Twoje połączenie jest szyfrowane.","your_buddy_closed_the_private_connection":"Twój rozmówca zamknął połączenie.","start_private":"Rozpocznij rozmowę.","close_private":"Zakończ rozmowę.","your_buddy_is_verificated":"Twój rozmówca został zweryfikowany.","you_have_only_a_subscription_in_one_way":"Masz jednostronną subskrypcję.","authentication_query_sent":"Wysłano proźbę o autentykację.","your_message_wasnt_send_please_end_your_private_conversation":"Twoja wiadomość nie została wysłana. Proszę, zamknij rozmowę.","unencrypted_message_received":"Zwrotna niezaszyfrowana wiadomość.","not_available":"Niedostępny.","no_connection":"Brak połączenia!","relogin":"Połącz ponownie","trying_to_start_private_conversation":"Rozpocznij rozmowę!","Verified":"Zweryfikowano","Unverified":"Niezweryfikowano","private_conversation_aborted":"Anulowano rozmowę!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Rozmówca przerwał połączenie!","conversation_is_now_verified":"Zweryfikowano połączenie.","authentication_failed":"Weryfikacja się nie powiodła.","Creating_your_private_key_":"Tworzenie klucza prywatnego; może to chwilę potrwać","Authenticating_a_buddy_helps_":"Autoryzacja pomoże w ustaleniu faktycznej tożsamości rozmówcy ;).","How_do_you_want_to_authenticate_your_buddy":"Jakiej autoryzacji chcesz użyć {{bid_name}} (<b>{{bid_jid}}</b>)?","Select_method":"Wybierz sposób...","Manual":"Ręcznie","Question":"Pytanie","Secret":"Hasło","To_verify_the_fingerprint_":"Aby zweryfikować kod najpierw skontaktuj się z rozmówcą np. za pomocą telefonu.","Your_fingerprint":"Twój kod:","Buddy_fingerprint":"Kod rozmówcy","Close":"Zamknij","Compared":"Porównano","To_authenticate_using_a_question_":"Aby autoryzować za pomocą pytania, wybierz pytanie na które tylko Twój rozmówca zna odpowiedź.","Ask":"Zadaj pytanie","To_authenticate_pick_a_secret_":"Aby autoryzować za pomocą hasła, wybierz hasło na które zna tylko Twój rozmówca.","Compare":"Dopasuj","Fingerprints":"Kody autoryzacyjne","Authentication":"Autoryzacja","Message":"Wiadomość","Add_buddy":"Dodaj kontakt","rename_buddy":"Zmień nazwę","delete_buddy":"Usuń kontakt","Login":"Login","Username":"Nazwa Użytkownika","Password":"Hasło","Cancel":"Anuluj","Connect":"Połączenie","Type_in_the_full_username_":"Wpisz pełną nazwę użytkownika (np. <B>imię.nazwisko@zajezdnia.local</B>) oraz jego nazwę wyświetlaną (Alias).","Alias":"Alias","Add":"Dodaj","Subscription_request":"Potwierdzenie subskrypcji","You_have_a_request_from":"Masz potwierdzenie od","Deny":"Odmów","Approve":"Zatwierdź","Remove_buddy":"Usuń rozmówcę","You_are_about_to_remove_":"Twój rozmówca {{bid_name}} (<b>{{bid_jid}}</b>) usunął Cię ze swojej listy kontaktów.","Continue_without_chat":"Kontynuuj bez komunikatora","Please_wait":"Proszę czekać","Login_failed":"Błędne logowanie","Sorry_we_cant_authentikate_":"Błędna autoryzacja z serwerem. Może hasło jest nieprawidłowe?","Retry":"Powrót","clear_history":"Wyczyść historię","New_message_from":"Nowa wiadomość od __name__","Should_we_notify_you_":"Czy chcesz otrzymywać powiadomienia o nowych wiadomościach w przyszłości?","Please_accept_":"Kliknij \"Zezwól\" na górze.","Hide_offline":"Schowaj niedostępne kontakty","Show_offline":"Pokaż niedostępne kontakty","About":"Info","dnd":"Nie przeszkadzać","Mute":"Wycisz","Unmute":"Włącz dźwięk","Subscription":"Subskrybcja","both":"obustronna","Status":"Status","online":"Dostępny","chat":"czat","away":"z dala od kompa","xa":"hen hen...","offline":"niedostępny","none":"brak","Unknown_instance_tag":"Nieznany przypadek.","Not_one_of_our_latest_keys":"Not one of our latest keys.","Received_an_unreadable_encrypted_message":"Otrzymano nieczytelną, zaszyfrowaną wiadomość.","Online":"Połączony","Chatty":"Pogawędzimy?","Away":"Daleko","Extended_away":"Hen Hen...","Offline":"Niedostępny","Friendship_request":"Zapytanie od znajomego?","Confirm":"Potwierdzenie","Dismiss":"Odwołaj","Remove":"Usuń","Online_help":"Pomoc Online","FN":"Pełna nazwa","N":"  ","FAMILY":"Nazwisko","GIVEN":"Imię","NICKNAME":"Pseudonim","URL":"Strona WWW","ADR":"Adres","STREET":"Ulica","EXTADD":"Pełny adres","LOCALITY":"Lokalizacja","REGION":"Region","PCODE":"Kod pocztowy","CTRY":"Kraj","TEL":"Telefon","NUMBER":"Numer","EMAIL":"Email","USERID":" ","ORG":"Organizacja","ORGNAME":"Nazwa","ORGUNIT":"Jednostka","TITLE":"Stanowisko","ROLE":"Rola","BDAY":"Data urodzin","DESC":"Opis","PHOTO":" ","send_message":"Wyślij wiadomość","get_info":"Pokaż informację","Settings":"Ustawienia","Priority":"Priorytet","Save":"Zapisz","User_settings":"Ustawienia Użytkownika","A_fingerprint_":"Kod służy do autoryzacji Twojego rozmówcy aby potwierdzić jego tożsamość.","is":"jest","Login_options":"opcje logowania","BOSH_url":"Adres BOSH","Domain":"Domena","Resource":"Źródło","On_login":"Na login","Received_an_unencrypted_message":"Zatwierdzono nieszyfrowaną wiadomość.","Sorry_your_buddy_doesnt_provide_any_information":"Twój rozmówca nie posiada żadnych informacji.","Info_about":"Informacja o...","Authentication_aborted":"Autoryzacja anulowana.","Authentication_request_received":"Prośba o autoryzację została przyjęta.","Log_in_without_chat":"Zaloguj bez komunikatora","has_come_online":"jest teraz dostępny","Unknown_sender":"Nieznany nadawca","Please_allow_access_to_microphone_and_camera":"Kliknij \"Potwierdź\" na górze, aby móc korzystać z mikrofonu oraz kamery.","Incoming_call":"Przychodzące połączenie","from":"z","Do_you_want_to_accept_the_call_from":"Akceptujesz połączenie od","Reject":"Odrzuć","Accept":"Zaakceptuj","hang_up":"odbierz","snapshot":"zrób zdjęcie","mute_my_audio":"wycisz dźwięk","pause_my_video":"zatrzymaj moje wideo","fullscreen":"Pełny ekran","Info":"Informacja","Local_IP":"Adres IP","Remote_IP":"Zdalny adres IP","Local_Fingerprint":"Kod lokalny","Remote_Fingerprint":"Zdalny kod","Video_call_not_possible":"Rozmowa wideo jest niemożliwa. Twój rozmówca nie ma możliwości prowadzenia takich rozmów.","Start_video_call":"Rozpocznij rozmowę wideo","Join_chat":"Dołącz do czata","Join":"Dołącz","Room":"Pokój","Nickname":"Nazwa użytkownika","left_the_building":"__nickname__ wyszedł","entered_the_room":"__nickname__ wszedł do pokoju","is_now_known_as":"__oldNickname__ zmienił nazwę na __newNickname__","This_room_is":"Ten pokój jest","muc_hidden":{"keyword":"ukryty","description":"nie można odnaleźć elementów wyszukiwania"},"muc_membersonly":{"keyword":"tylko zalogowani","description":"musisz być członkiem listy"},"muc_moderated":{"keyword":"moderowano","description":"tylko osoby z opcją \"głos\" mogą wysyłać wiadomość"},"muc_nonanonymous":{"keyword":"nie-anonimowy","description":"Twój identyfikator jabber jest widoczny dla wszystkich innych osób"},"muc_open":{"keyword":"otwarty","description":"wszyscy mają pozwolenie aby dołączyć"},"muc_passwordprotected":{"keyword":"ograniczone hasłem","description":"musisz wpisać prawidłowe hasło"},"muc_persistent":{"keyword":"trwale","description":"nie zostaną zniszczone, jeśli ostatnia osoba wyszła"},"muc_public":{"keyword":"publiczny","description":"wyszukawno"},"muc_semianonymous":{"keyword":"pół-anonimowy","description":"Twój identyfikator jabber jest widoczny w pokoju adminów"},"muc_temporary":{"keyword":"tymczasowy","description":"zostanie usunięty jeżeli ostatnia osoba wyjdzie"},"muc_unmoderated":{"keyword":"niemoderowany","description":"wszyscy są uprawnieni do pisania wiadomości"},"muc_unsecured":{"keyword":"niezabezpieczone","description":"nie musisz wpisywać hasła"},"Continue":"Kontynuuj","Server":"Serwer","Rooms_are_loaded":"Pokoje zostały załadowane","Could_load_only":"Nie załadowano __count__ pokoi","muc_explanation":"Aby się zalogować, wpisz nazwę pokoju oraz opcjonalnie nazwę użytkownika i hasło","You_already_joined_this_room":"Już dołączyłeś do tego pokoju","This_room_will_be_closed":"Ten pokój będzie zamknięty","Room_not_found_":"Nowy pokój będzie stworzony","Loading_room_information":"Ładowani informacji o pokoju","Destroy":"Zniszczony","Leave":"Opuść","changed_subject_to":"__nickname__ zmienił temat pokoju na \"__subject__\"","muc_removed_kicked":"Zostałeś wyrzucony z pokoju","muc_removed_info_kicked":"__nickname__ został wyrzucony z pokoju","muc_removed_banned":"Zostałeś zbanowany","muc_removed_info_banned":"__nickname__ został zbanowany","muc_removed_affiliation":"Zostałeś usunięty z pokoju ze względu na zmianę przynależnosci","muc_removed_info_affiliation":"__nickname__ został usunięty z pokoju ze względu na zmianę przynależnosci","muc_removed_membersonly":"Zostałeś usunięty z pokoju ze względu na zmianę pokoju tylko dla członków, a Ty nie jesteś członkiem...","muc_removed_info_membersonly":"__nickname__ został usunięty z pokoju ze względu na zmianę pokoju na tylko dla członków","muc_removed_shutdown":"Zostałeś usunięty z pokoju ze względu na zamknięcie usługi","Reason":"Powód","message_not_send":"Wystąpił błąd i twoja wiadomość nie została wysłana.","message_not_send_item-not-found":"Twoja wiadomość nie została wysłana ponieważ ten pokój nie istnieje","message_not_send_forbidden":"Twoja wiadomość nie została wysłana ponieważ nie masz głosu w tym pokoju","message_not_send_not-acceptable":"Twoja wiadomość nie została wysłana ponieważ nie jesteś właścicielem tego pokoju","This_room_has_been_closed":"Ten pokój został zamknięty","Room_logging_is_enabled":"Logowanie do pokoju jest włączone","A_password_is_required":"Hasło jest wymagane","You_are_not_on_the_member_list":"Nie jesteś na liście członków","You_are_banned_from_this_room":"Zostałeś zbanowany w tym pokoju","Your_desired_nickname_":"Twoja nazwa użytkownika jest już użyta. Spróbuj wybrać inną","The_maximum_number_":"Została osiągnięta maksymalna liczba użytkowników w tym pokoju","This_room_is_locked_":"Ten pokój jest zablokowany","You_are_not_allowed_to_create_":"Nie masz uprawnień do tworzenia pokoju","Alert":"Alarm","Call_started":null,"Call_terminated":null,"Carbon_copy":"Do wiadomości","Enable":"Włączone","jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":"Ok","PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":"jest __status__","You_received_a_message_from_an_unknown_sender_":"Masz wiadomość od nieznanego nadawcy. (__sender__) Chcesz to wyświetlić?","Your_roster_is_empty_add_":"Twoja lista jest pusta, dodaj kontakty  <a>Nowy kontakt</a>","onsmp_explanation_question":"Twój rozmówca próbuje się z Tobą połączyć. Autoryzacja z rozmówcą,  napisz odpowiedź.","onsmp_explanation_secret":"Twój rozmówca próbuje się z Tobą połączyć. Autoryzacja z rozmówcą,  wpisz hasło.","from_sender":"z __sender__","Verified_private_conversation_started":"Zweryfikowano Rozmowa prywatna rozpoczęta.","Unverified_private_conversation_started":"Niezweryfikowano Rozmowa prywatna rozpoczęta."}},"pt-BR":{"translation":{"Logging_in":"Entrando...","your_connection_is_unencrypted":"Sua conexão não é encriptada","your_connection_is_encrypted":"Sua conexão é encriptada","your_buddy_closed_the_private_connection":"Seu contato fechou a conexão privada","start_private":"Iniciar conversa privada","close_private":"Fechar conversa privada","your_buddy_is_verificated":"Seu contato está verificado","you_have_only_a_subscription_in_one_way":"Você só tem a inscrição one-way","authentication_query_sent":"Pergunta de autenticação enviada","your_message_wasnt_send_please_end_your_private_conversation":"Sua mensagem não foi enviada. Por favor finalize sua conversa privada","unencrypted_message_received":"Mensagem não encriptada recebida","not_available":"Indisponível","no_connection":"Sem conexão!","relogin":"reentrar","trying_to_start_private_conversation":"Tentando iniciar conversa privada","Verified":"Verificado","Unverified":"Não verificado","private_conversation_aborted":"Conversa privada abortada!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Seu contato encerrou a conversa privada! Você deveria fazer o mesmo.","conversation_is_now_verified":"Conversa verificada.","authentication_failed":"Autenticação falhou.","Creating_your_private_key_":"Criando sua chave privada: isso pode demorar um pouco.","Authenticating_a_buddy_helps_":"Autenticar seu contato ajuda a garantir que a pessoa com a qual você está falando é realmente a pessoa que ela alega ser.","How_do_you_want_to_authenticate_your_buddy":"Como você gostaria de se autenticar {{bid_name}} (<b>{{bid_jid}}</b>)?","Select_method":"Selecione o método...","Manual":"Manual","Question":"Pergunta","Secret":"Senha","To_verify_the_fingerprint_":"Para verificar o fingerprint, entre em contato com seu contato usando outro meio, de preferência seguro, como o telefone.","Your_fingerprint":"Seu fingerprint","Buddy_fingerprint":"Fingerprint do contato","Close":"Fechar","Compared":"Comparado","To_authenticate_using_a_question_":"Para autenticar seu contato faça uma pergunta, mas escolha que só ele saiba a resposta.","Ask":"Pergunta","To_authenticate_pick_a_secret_":"Para autenticar, escolha um segredo que somente você e seu contato saibam.","Compare":"Compare","Fingerprints":"Fingerprints","Authentication":"Autenticação","Message":"Mensagem","Add_buddy":"Adicionar contato","rename_buddy":"renomear contato","delete_buddy":"remover contato","Login":"Entrar","Username":"Usuário","Password":"Senha","Cancel":"Cancelar","Connect":"Conectar","Type_in_the_full_username_":"Digite seu nome completo e um apelido opcional.","Alias":"Apelido","Add":"Adicionar","Subscription_request":"Pedido de inscrição","You_have_a_request_from":"Você tem um pedido de","Deny":"Negar","Approve":"Aprovar","Remove_buddy":"Remover contato","You_are_about_to_remove_":"Você está prestes a remover {{bid_name}} (<b>{{bid_jid}}</b>) de sua lista de contatos. Todas as conversas serão fechadas.","Continue_without_chat":"Continue sem converar","Please_wait":"Por favor aguarde","Login_failed":"Autenticação da conversa falhou","Sorry_we_cant_authentikate_":"A autenticação com o servidor falhou. Talvez seja a senha errada?","Retry":"Voltar","clear_history":"Limpar histórico","New_message_from":"Nova mensagem de __name__","Should_we_notify_you_":"Devemos continuar notificando sobre novas mensagens no futuro?","Please_accept_":"Por favor clique no botão \"Permitir\" na parte superior.","Hide_offline":"Esconder contatos desconectados","Show_offline":"Mostrar contatos desconectados","About":"Sobre","dnd":"Não perturbe","Mute":"Mudo","Unmute":"Ligar","Subscription":"Inscrição","both":"ambos","Status":"Status","online":"online","chat":"conversa","away":"ausente","xa":"ausente por mais tempo","offline":"desativado","none":"nenhum","Unknown_instance_tag":"Marcação desconhecida da instância","Not_one_of_our_latest_keys":"Nenhuma de nossas ultimas chaves.","Received_an_unreadable_encrypted_message":"Mensagem encriptada ilegível foi recebida.","Online":"Online","Chatty":"Tagarela","Away":"Ausente","Extended_away":"Ausente por mais tempo","Offline":"Desativado","Friendship_request":"Pedido de amizade","Confirm":"Confirmar","Dismiss":"Ignorar","Remove":"Remover","Online_help":"Ajuda online","FN":"Nome completo","N":"  ","FAMILY":"Sobrenome","GIVEN":"Nome","NICKNAME":"Apelido","URL":"URL","ADR":"Endereço","STREET":"Rua, Av, etc","EXTADD":"Complemento","LOCALITY":"Localidade","REGION":"Região","PCODE":"CEP","CTRY":"País","TEL":"Telefone","NUMBER":"Número","EMAIL":"Email","USERID":"  ","ORG":"Empresa","ORGNAME":"Nome","ORGUNIT":"Unidade","TITLE":"Cargo","ROLE":"Rol","BDAY":"Data de nascimento","DESC":"Descrição","PHOTO":"  ","send_message":"Enviar mensagem","get_info":"Exibir informações","Settings":"Configurações","Priority":"Prioridade","Save":"Salvar","User_settings":"Configurações do usuário","A_fingerprint_":"O fingerprint é usado para certificar que a pessoa com a qual se está falando é que ela diz ser.","is":"é","Login_options":"Opções de login","BOSH_url":"BOSH URL","Domain":"Domínio","Resource":"Recurso","On_login":"Ao autenticar","Received_an_unencrypted_message":"Mensagem não encriptada recebida","Sorry_your_buddy_doesnt_provide_any_information":"Desculpe, seu contato não forneceu nenhuma informação","Info_about":"Informações sobre","Authentication_aborted":"Autenticação encerrada.","Authentication_request_received":"Pedido de autenticação recebido","Log_in_without_chat":"Entrar sem conversar","has_come_online":"ficou online","Unknown_sender":"Emissor desconhecido","Please_allow_access_to_microphone_and_camera":"Por favor clique no botão \"Permitir\" no topo, para conceder acesso ao seu microfone e câmera.","Incoming_call":"Recebendo chamada","from":"de","Do_you_want_to_accept_the_call_from":"Você aceita a chamada de","Reject":"Negar","Accept":"Aceitar","hang_up":"desligar","snapshot":"registrar imagem","mute_my_audio":"mudo","pause_my_video":"pausar vídeo","fullscreen":"tela cheia","Info":"Informações","Local_IP":"IP local","Remote_IP":"IP remoto","Local_Fingerprint":"Fingerprint local","Remote_Fingerprint":"Fingerprint remoto","Video_call_not_possible":"Chamada de vídeo impossível. Seu contato não suporta chamadas desse tipo.","Start_video_call":"Iniciar chamada de vídeo","Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":"é __status__","You_received_a_message_from_an_unknown_sender_":"Você recebeu uma mensagem de um emissor desconhecido (__sender__) Você quer mostrá-los?","Your_roster_is_empty_add_":"Sua lista está vazia, adicione um  <a>novo contato</a>","onsmp_explanation_question":"Seu contato está tentando determinar se ele realmente está falando contigo. Para autenticar seu contato,  entre com a resposta e clique em Responder.","onsmp_explanation_secret":"Seu contato está tentando determinar se ele realmente está falando contigo. Para autenticar seu contato,  escreva a senha.","from_sender":"de __sender__","Verified_private_conversation_started":"Verificado Conversa privada iniciada.","Unverified_private_conversation_started":"Não verificado Conversa privada iniciada."}},"ro":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null}},"ru":{"translation":{"Logging_in":"Вход в систему...","your_connection_is_unencrypted":"Ваше соединение не зашифровано.","your_connection_is_encrypted":"Ваше соединение зашифровано.","your_buddy_closed_the_private_connection":"Ваш собеседник закончил зашифрованное соединение.","start_private":"Начать зашифрованный чат","close_private":"Закончить зашифрованный чат","your_buddy_is_verificated":"Собеседник подтвержден.","you_have_only_a_subscription_in_one_way":"У вас только односторонняя подписка.","authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":"Сообщение не отправлено. Завершите зашифрованный чат, пожалуйста.","unencrypted_message_received":"Получено незашифрованное сообщение","not_available":"Не доступен","no_connection":"Нет соединения!","relogin":"переподключиться","trying_to_start_private_conversation":"Попытка начать зашифрованный чат!","Verified":"Подтверждено","Unverified":"Не подтверждено","private_conversation_aborted":"Зашифрованный чат отклонен!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Ваш собеседник завершил зашифрованный чат! Вы должны сделать тоже самое.","conversation_is_now_verified":"Чат теперь утвержден.","authentication_failed":"Ошибка авторизации.","Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":"Выберите метод...","Manual":"Вручную","Question":"Вопрос","Secret":"Пароль","To_verify_the_fingerprint_":null,"Your_fingerprint":"Ваш отпечаток","Buddy_fingerprint":"Отпечаток собеседника","Close":"Закрыть","Compared":"Сравнение завершено","To_authenticate_using_a_question_":"Для авторизации с помощью вопроса выберите вопрос, ответ на который знаете только Вы и собеседник.","Ask":null,"To_authenticate_pick_a_secret_":"Для авторизации выберите пароль, который знаете только Вы и собеседник.","Compare":"Сравнить","Fingerprints":"Отпечатки","Authentication":"Авторизация","Message":"Сообщение","Add_buddy":"Добавить контакт","rename_buddy":"переименовать контакт","delete_buddy":"удалить контакт","Login":"Вход","Username":"Логин","Password":"Пароль","Cancel":"Отмена","Connect":"Подключить","Type_in_the_full_username_":null,"Alias":"Псевдоним","Add":"Добавить","Subscription_request":"Запрос подписки","You_have_a_request_from":"Получен запрос от","Deny":"Отказ","Approve":"Подтвердить","Remove_buddy":"Удалить контакт","You_are_about_to_remove_":null,"Continue_without_chat":"Продолжить без чата","Please_wait":"Подождите…","Login_failed":"Неудачный вход в чат","Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":"Очистить историю","New_message_from":"Новое сообщение от __name__","Should_we_notify_you_":"Уведомлять о новых сообщениях в будущем?","Please_accept_":null,"Hide_offline":"Спрятать отключенных","Show_offline":"Показать отключенных","About":"О проекте","dnd":"Не беспокоить","Mute":"Выкл. уведомления","Unmute":"Вкл. уведомления","Subscription":"Подписка","both":"оба","Status":"Статус","online":"в сети","chat":"готов общаться","away":"отошел","xa":"отсутствую","offline":"не в сети","none":"нет","Unknown_instance_tag":"Неизвестный тег.","Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":"В сети","Chatty":"Готов общаться","Away":"Отошел","Extended_away":"Отсутствую","Offline":"Не в сети","Friendship_request":null,"Confirm":"Подтвердить","Dismiss":"Отклонить","Remove":"Удалить","Online_help":"Онлайн помощь","FN":"Полное имя","N":null,"FAMILY":"Фамилия","GIVEN":null,"NICKNAME":"Ник","URL":null,"ADR":"Адрес","STREET":"Улица","EXTADD":"Дополнительный адрес","LOCALITY":null,"REGION":null,"PCODE":"Индекс","CTRY":"Страна","TEL":"Телефон","NUMBER":"Номер","EMAIL":"Почта","USERID":null,"ORG":"Организация","ORGNAME":"Название","ORGUNIT":"Отдел","TITLE":"Должность","ROLE":"Обязанности","BDAY":"День рождения","DESC":"Описание","PHOTO":null,"send_message":"Отправить сообщение","get_info":"Показать информацию","Settings":"Настройки","Priority":"Приоритет","Save":"Сохранить","User_settings":"Пользовательские настройки","A_fingerprint_":null,"is":null,"Login_options":"Параметры входа","BOSH_url":null,"Domain":"Домен","Resource":"Ресурс","On_login":"Автоматически подключаться","Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":"Информация о","Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":"Вход без чата","has_come_online":"появился в сети","Unknown_sender":"Неизвестный отправитель","Please_allow_access_to_microphone_and_camera":null,"Incoming_call":"Входящий вызов","from":"от","Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":"Включить","jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":"Вы получили сообщение от неизвестного отправителя (__sender__)","Your_roster_is_empty_add_":"Ваш список контактов пуст, добавить  <a>новый контакт</a>","onsmp_explanation_question":"Собеседник пытается определить, что общается действительно с Вами.","onsmp_explanation_secret":"Собеседник пытается определить, что общается действительно с Вами. введите пароль.","from_sender":"от __sender__","Verified_private_conversation_started":"Подтверждено Зашифрованный чат начат.","Unverified_private_conversation_started":"Не подтверждено Зашифрованный чат начат."}}};
+var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connection_is_unencrypted":"Deine Verbindung ist unverschlüsselt.","your_connection_is_encrypted":"Deine Verbindung ist verschlüsselt.","your_buddy_closed_the_private_connection":"Dein Kontakt hat die private Verbindung getrennt.","start_private":"Privat starten","close_private":"Privat abbrechen","your_buddy_is_verificated":"Dein Kontakt ist verifiziert.","you_have_only_a_subscription_in_one_way":"Der Kontaktstatus ist einseitig.","authentication_query_sent":"Authentifizierungsanfrage gesendet.","your_message_wasnt_send_please_end_your_private_conversation":"Deine Nachricht wurde nicht gesendet. Bitte beende die private Konversation.","unencrypted_message_received":"Unverschlüsselte Nachricht erhalten.","not_available":"Nicht verfügbar.","no_connection":"Keine Verbindung.","relogin":"Neu anmelden.","trying_to_start_private_conversation":"Versuche private Konversation zu starten.","Verified":"Verifiziert","Unverified":"Unverifiziert","private_conversation_aborted":"Private Konversation abgebrochen.","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Dein Kontakt hat die private Konversation beendet. Das solltest du auch tun!","conversation_is_now_verified":"Konversation ist jetzt verifiziert","authentication_failed":"Authentifizierung fehlgeschlagen.","Creating_your_private_key_":"Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.","Authenticating_a_buddy_helps_":"Einen Kontakt zu authentifizieren hilft sicherzustellen, dass die Person mit der du sprichst auch die ist die sie sagt.","How_do_you_want_to_authenticate_your_buddy":"Wie willst du {{bid_name}} (<b>{{bid_jid}}</b>) authentifizieren?","Select_method":"Wähle...","Manual":"Manual","Question":"Frage","Secret":"Geheimnis","To_verify_the_fingerprint_":"Um den Fingerprint zu verifizieren kontaktiere dein Kontakt über einen anderen Kommunikationsweg. Zum Beispiel per Telefonanruf.","Your_fingerprint":"Dein Fingerprint","Buddy_fingerprint":"Sein/Ihr Fingerprint","Close":"Schließen","Compared":"Verglichen","To_authenticate_using_a_question_":"Um die Authentifizierung per Frage durchzuführen, wähle eine Frage bei welcher nur dein Kontakt die Antwort kennt.","Ask":"Frage","To_authenticate_pick_a_secret_":"Um deinen Kontakt zu authentifizieren, wähle ein Geheimnis welches nur deinem Kontakt und dir bekannt ist.","Compare":"Vergleiche","Fingerprints":"Fingerprints","Authentication":"Authentifizierung","Message":"Nachricht","Add_buddy":"Kontakt hinzufügen","rename_buddy":"Kontakt umbenennen","delete_buddy":"Kontakt löschen","Login":"Anmeldung","Username":"Benutzername","Password":"Passwort","Cancel":"Abbrechen","Connect":"Verbinden","Type_in_the_full_username_":"Gib bitte den vollen Benutzernamen und optional ein Alias an.","Alias":"Alias","Add":"Hinzufügen","Subscription_request":"Kontaktanfrage","You_have_a_request_from":"Du hast eine Anfrage von","Deny":"Ablehnen","Approve":"Bestätigen","Remove_buddy":"Kontakt entfernen","You_are_about_to_remove_":"Du bist gerade dabei {{bid_name}} (<b>{{bid_jid}}</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.","Continue_without_chat":"Weiter ohne Chat","Please_wait":"Bitte warten","Login_failed":"Chat-Anmeldung fehlgeschlagen","Sorry_we_cant_authentikate_":"Der Chatserver hat die Anmeldung abgelehnt. Falsches Passwort?","Retry":"Zurück","clear_history":"Lösche Verlauf","New_message_from":"Neue Nachricht von __name__","Should_we_notify_you_":"Sollen wir dich in Zukunft über eingehende Nachrichten informieren, auch wenn dieser Tab nicht im Vordergrund ist?","Please_accept_":"Bitte klick auf den \"Zulassen\" Button oben.","Hide_offline":"Offline ausblenden","Show_offline":"Offline einblenden","About":"Über","dnd":"Beschäftigt","Mute":"Ton aus","Unmute":"Ton an","Subscription":"Bezug","both":"beidseitig","Status":"Status","online":"online","chat":"chat","away":"abwesend","xa":"länger abwesend","offline":"offline","none":"keine","Unknown_instance_tag":"Unbekannter instance tag.","Not_one_of_our_latest_keys":"Nicht einer unserer letzten Schlüssel.","Received_an_unreadable_encrypted_message":"Eine unlesbare verschlüsselte Nachricht erhalten.","Online":"Online","Chatty":"Gesprächig","Away":"Abwesend","Extended_away":"Länger abwesend","Offline":"Offline","Friendship_request":"Kontaktanfrage","Confirm":"Bestätigen","Dismiss":"Ablehnen","Remove":"Löschen","Online_help":"Online Hilfe","FN":"Name","N":" ","FAMILY":"Familienname","GIVEN":"Vorname","NICKNAME":"Spitzname","URL":"URL","ADR":"Adresse","STREET":"Straße","EXTADD":"Zusätzliche Adresse","LOCALITY":"Ortschaft","REGION":"Region","PCODE":"Postleitzahl","CTRY":"Land","TEL":"Telefon","NUMBER":"Nummer","EMAIL":"E-Mail","USERID":" ","ORG":"Organisation","ORGNAME":"Name","ORGUNIT":"Abteilung","TITLE":"Titel","ROLE":"Rolle","BDAY":"Geburtstag","DESC":"Beschreibung","PHOTO":" ","send_message":"Sende Nachricht","get_info":"Benutzerinformationen","Settings":"Einstellungen","Priority":"Priorität","Save":"Speichern","User_settings":"Benutzereinstellungen","A_fingerprint_":"Ein Fingerabdruck wird dazu benutzt deinen Gesprächspartner zu identifizieren.","is":"ist","Login_options":"Anmeldeoptionen","BOSH_url":"BOSH url","Domain":"Domain","Resource":"Ressource","On_login":"Beim Anmelden","Received_an_unencrypted_message":"Unverschlüsselte Nachricht empfangen","Sorry_your_buddy_doesnt_provide_any_information":"Dein Kontakt stellt leider keine Informationen bereit.","Info_about":"Info über","Authentication_aborted":"Authentifizierung abgebrochen.","Authentication_request_received":"Authentifizierungsanfrage empfangen.","Log_in_without_chat":"Anmelden ohne Chat","has_come_online":"ist online gekommen","Unknown_sender":"Unbekannter Sender","Please_allow_access_to_microphone_and_camera":"Bitte klick auf den \"Zulassen\" Button oben, um den Zugriff auf Kamera und Mikrofon zu erlauben.","Incoming_call":"Eingehender Anruf","from":"von","Do_you_want_to_accept_the_call_from":"Möchtest Du den Anruf annehmen von","Reject":"Ablehnen","Accept":"Annehmen","hang_up":"Auflegen","snapshot":"Schnappschuss","mute_my_audio":"Mein Ton aus","pause_my_video":"Mein Video pausieren","fullscreen":"Vollbild","Info":"Info","Local_IP":"Lokale IP","Remote_IP":"Remote IP","Local_Fingerprint":"Lokaler Fingerprint","Remote_Fingerprint":"Remote Fingerprint","Video_call_not_possible":"Videoanruf nicht verfügbar. Dein Gesprächspartner unterstützt keine Videotelefonie.","Start_video_call":"Starte Videoanruf","Join_chat":"Gruppe beitreten","Join":"Betreten","Room":"Gruppe","Nickname":"Nickname","left_the_building":"__nickname__ hat die Gruppe verlassen","entered_the_room":"__nickname__ ist der Gruppe beigetreten","is_now_known_as":"__oldNickname__ ist nun unter __newNickname__ bekannt","This_room_is":"Diese Gruppe ist","muc_hidden":{"keyword":"versteckt","description":"kann durch die Suche nicht gefunden werden"},"muc_membersonly":{"keyword":"nur für Mitglieder","description":"du musst auf der Mitgliederliste stehen"},"muc_moderated":{"keyword":"moderiert","description":"Nur Personen die \"Mitspracherecht\" haben dürfen Nachrichten senden"},"muc_nonanonymous":{"keyword":"nicht anonym","description":"deine Jabber ID wird für alle Mitglieder sichtbar sein"},"muc_open":{"keyword":"offen","description":"jeder darf dieser Gruppe beitreten"},"muc_passwordprotected":{"keyword":"passwortgeschützt","description":"du benötigst das korrekte Passwort"},"muc_persistent":{"keyword":"permanent","description":"wird nicht geschlossen, wenn das letzte Mitglied die Gruppe verlässt"},"muc_public":{"keyword":"öffentlich","description":"kann durch die Suche gefunden werden"},"muc_semianonymous":{"keyword":"teilweise anonym","description":"deine Jabber ID wird nur für die Gruppen Administratoren sichtbar sein"},"muc_temporary":{"keyword":"temporär","description":"wird geschlossen, wenn das letzte Mitglied die Gruppe verlässt"},"muc_unmoderated":{"keyword":"nicht moderiert","description":"jeder darf Nachrichten senden"},"muc_unsecured":{"keyword":"ungesichert","description":"es wird kein Passwort benötigt"},"Continue":"Weiter","Server":"Server","Rooms_are_loaded":"Gruppen werden geladen","Could_load_only":"Es konnten nur __count__ Gruppen für die Autovervollständigung geladen werden","muc_explanation":"Bitte trage den Gruppennamen und optional ein Nickname und Passwort ein um einer Gruppe beizutreten","You_already_joined_this_room":"Du bist dieser Gruppe bereits beigetreten","This_room_will_be_closed":"Diese Gruppe wird geschlossen","Room_not_found_":"Es wird eine neue Gruppe erstellt","Loading_room_information":"Informationen über Gruppe werden geladen","Destroy":"Auflösen","Leave":"Verlassen","changed_subject_to":"__nickname__ hat das Thema auf __subject__ geändert","muc_removed_kicked":"Du wurdest aus der Gruppe entfernt","muc_removed_info_kicked":"__nickname__ wurde aus der Gruppe entfernt","muc_removed_banned":"Du wurdest aus der Gruppe ausgeschlossen","muc_removed_info_banned":"__nickname__ wurde aus der Gruppe ausgeschlossen","muc_removed_affiliation":"Du wurdest aus der Gruppe entfernt wegen einer Änderung deines Mitgliedstatus","muc_removed_info_affiliation":"__nickname__ wurde aus der Gruppe entfernt wegen einer Änderung seines Mitgliedstatus","muc_removed_membersonly":"Diese Gruppe erlaubt jetzt nur noch eingetragene Mitglieder und da du nicht dazugehörst, wurdest du aus der Gruppen entfernt","muc_removed_info_membersonly":"Diese Gruppe erlaubt jetzt nur noch eingetragene Mitglieder und __nickname__ gehört nicht dazu, daher wurde er aus der Gruppe entfernt","muc_removed_shutdown":"Du wurdest aus der Gruppe entfernt, da der MUC Server heruntergefahren wird","Reason":"Grund","message_not_send":"Deine Nachricht wurde aufgrund eines Fehlers nicht versandt","message_not_send_item-not-found":"Deine Nachricht wurde nicht versandt, da der Raum nicht mehr existiert","message_not_send_forbidden":"Deine Nachricht wurde nicht versandt, da du kein \"Mitspracherecht\" hast","message_not_send_not-acceptable":"Deine Nachricht wurde nicht versandt, da du kein Mitglied dieser Gruppe bist","This_room_has_been_closed":"Diese Gruppe wurde geschlossen","Room_logging_is_enabled":"Gesprächsverlauf kann öffentlich einsehbar sein","A_password_is_required":"Es wird ein Passwort benötigt","You_are_not_on_the_member_list":"Du bist kein eingetragenes Mitglied","You_are_banned_from_this_room":"Du wurdest von dieser Gruppe ausgeschlossen","Your_desired_nickname_":"Dein gewünschter Nickname wird bereits verwendet. Bitte wähle einen anderen.","The_maximum_number_":"Die maximale Anzahl der Mitglieder wurde erreicht.","This_room_is_locked_":"Diese Gruppe ist gesperrt","You_are_not_allowed_to_create_":"Du darfst keine neue Gruppe erstellen","Alert":"Alarm","Call_started":"Anruf gestarted","Call_terminated":"Anruf beendet","Carbon_copy":"Kopie","Enable":"Aktivieren","jingle_reason_busy":"beschäftigt","jingle_reason_decline":"abgelehnt","jingle_reason_success":"aufgelegt","Media_failure":"Gerätefehler","No_local_audio_device":"Kein eigenes Audio Gerät","No_local_video_device":"Keine eigene Webcam","Ok":"Ok","PermissionDeniedError":"Du oder dein Browser haben die Audio/Video Berechtigung verweigert","Use_local_audio_device":"Nutze eigenes Audio Gerät","Use_local_video_device":"Benutze eigene Webcam","is_":"ist __status__","You_received_a_message_from_an_unknown_sender_":"Du hast eine Nachricht von einem unbekannten Sender erhalten (__sender__) Möchtest du sie sehen?","Your_roster_is_empty_add_":"Deine Kontaktliste ist leer, füge einen neuen Kontakt  <a>hinzu</a>","onsmp_explanation_question":"Dein Kontakt versucht herauszufinden ob er wirklich mit dir redet. Um dich gegenüber deinem Kontakt zu verifizieren  gib die Antwort ein und klick auf Antworten.","onsmp_explanation_secret":"Dein Kontakt versucht herauszufinden ob er wirklich mit dir redet. Um dich gegenüber deinem Kontakt zu verifizieren  gib das Geheimnis ein.","from_sender":"von __sender__","Verified_private_conversation_started":"Verifizierte private Konversation gestartet.","Unverified_private_conversation_started":"Unverifizierte private Konversation gestartet.","Bookmark":"Lesezeichen","Auto-join":"Automatisch beitreten","Edit_bookmark":"Lesezeichen bearbeiten","Room_logging_is_disabled":"Gruppen Log ist deaktiviert","Room_is_now_non-anoymous":"Gruppe ist jetzt nicht anonym","Room_is_now_semi-anonymous":"Gruppe ist jetzt semi-anonym","Do_you_want_to_change_the_default_room_configuration":"Möchtest du die Gruppenkonfiguration ändern?","Default":"Standard","Change":"Ändern","Send_file":"Datei senden","setting-explanation-carbon":"Wenn Kopien aktiviert sind, werden alle eingehenden Nachrichten zu allen angemeldeten Clients gesendet.","setting-explanation-login":"Wenn diese Option aktiviert ist, wird der Chat beim anmelden automatisch gestartet.","setting-explanation-priority":"Wenn du mit deinem XMPP Konto mehrfach angemeldet bist, werden Nachrichten zu dem Client mit der höchsten Priorität zugestellt.","setting-explanation-xmpp":"Diese Optionen werden für die Verbindung zum XMPP server genutzt."}},"el":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null}},"en":{"translation":{"Logging_in":"Logging in…","your_connection_is_unencrypted":"Your connection is unencrypted.","your_connection_is_encrypted":"Your connection is encrypted.","your_buddy_closed_the_private_connection":"Your contact closed the private connection.","start_private":"Start private","close_private":"Close private","your_buddy_is_verificated":"Your contact is verified.","you_have_only_a_subscription_in_one_way":"You only have a one-way subscription.","authentication_query_sent":"Authentication query sent.","your_message_wasnt_send_please_end_your_private_conversation":"Your message was not sent. Please end your private conversation.","unencrypted_message_received":"Unencrypted message received","not_available":"Not available","no_connection":"No connection!","relogin":"relogin","trying_to_start_private_conversation":"Trying to start private conversation!","Verified":"Verified","Unverified":"Unverified","private_conversation_aborted":"Private conversation aborted!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Your contact closed the private conversation! You should do the same.","conversation_is_now_verified":"Conversation is now verified.","authentication_failed":"Authentication failed.","Creating_your_private_key_":"Creating your private key; this may take a while.","Authenticating_a_buddy_helps_":"Authenticating a contact helps ensure that the person you are talking to is really the one they claim to be.","How_do_you_want_to_authenticate_your_buddy":"How do you want to authenticate {{bid_name}} (<b>{{bid_jid}}</b>)?","Select_method":"Select method...","Manual":"Manual","Question":"Question","Secret":"Secret","To_verify_the_fingerprint_":"To verify the fingerprint, contact your contact via some other trustworthy channel, such as the telephone.","Your_fingerprint":"Your fingerprint","Buddy_fingerprint":"Contact fingerprint","Close":"Close","Compared":"Compared","To_authenticate_using_a_question_":"To authenticate using a question, pick a question whose answer is known only you and your contact.","Ask":"Ask","To_authenticate_pick_a_secret_":"To authenticate, pick a secret known only to you and your contact.","Compare":"Compare","Fingerprints":"Fingerprints","Authentication":"Authentication","Message":"Message","Add_buddy":"Add contact","rename_buddy":"rename contact","delete_buddy":"delete contact","Login":"Login","Username":"Username","Password":"Password","Cancel":"Cancel","Connect":"Connect","Type_in_the_full_username_":"Type in the full username and an optional alias.","Alias":"Alias","Add":"Add","Subscription_request":"Subscription request","You_have_a_request_from":"You have a request from","Deny":"Deny","Approve":"Approve","Remove_buddy":"Remove contact","You_are_about_to_remove_":"You are about to remove {{bid_name}} (<b>{{bid_jid}}</b>) from your contact list. All related chats will be closed.","Continue_without_chat":"Continue without chat","Please_wait":"Please wait","Login_failed":"Chat login failed","Sorry_we_cant_authentikate_":"Authentication failed with the chat server. Maybe the password is wrong?","Retry":"Back","clear_history":"Clear history","New_message_from":"New message from __name__","Should_we_notify_you_":"Should we notify you about new messages in the future?","Please_accept_":"Please click the \"Allow\" button at the top.","Hide_offline":"Hide offline contacts","Show_offline":"Show offline contacts","About":"About","dnd":"Do Not Disturb","Mute":"Mute","Unmute":"Unmute","Subscription":"Subscription","both":"both","Status":"Status","online":"online","chat":"chat","away":"away","xa":"extended away","offline":"offline","none":"none","Unknown_instance_tag":"Unknown instance tag.","Not_one_of_our_latest_keys":"Not one of our latest keys.","Received_an_unreadable_encrypted_message":"Received an unreadable encrypted message.","Online":"Online","Chatty":"Chatty","Away":"Away","Extended_away":"Extended away","Offline":"Offline","Friendship_request":"Contact request","Confirm":"Confirm","Dismiss":"Dismiss","Remove":"Remove","Online_help":"Online help","FN":"Full name","N":" ","FAMILY":"Family name","GIVEN":"Given name","NICKNAME":"Nickname","URL":"URL","ADR":"Address","STREET":"Street Address","EXTADD":"Extended Address","LOCALITY":"Locality","REGION":"Region","PCODE":"Postal Code","CTRY":"Country","TEL":"Telephone","NUMBER":"Number","EMAIL":"Email","USERID":" ","ORG":"Organization","ORGNAME":"Name","ORGUNIT":"Unit","TITLE":"Job title","ROLE":"Role","BDAY":"Birthday","DESC":"Description","PHOTO":" ","send_message":"Send message","get_info":"Show information","Settings":"Settings","Priority":"Priority","Save":"Save","User_settings":"User settings","A_fingerprint_":"A fingerprint is used to make sure that the person you are talking to is who he or she is saying.","is":"is","Login_options":"Login options","BOSH_url":"BOSH URL","Domain":"Domain","Resource":"Resource","On_login":"On login","Received_an_unencrypted_message":"Received an unencrypted message","Sorry_your_buddy_doesnt_provide_any_information":"Sorry, your contact does not provide any information.","Info_about":"Info about","Authentication_aborted":"Authentication aborted.","Authentication_request_received":"Authentication request received.","Log_in_without_chat":"Log in without chat","has_come_online":"has come online","Unknown_sender":"Unknown sender","Please_allow_access_to_microphone_and_camera":"Please click the \"Allow\" button at the top, to allow access to microphone and camera.","Incoming_call":"Incoming call","from":"from","Do_you_want_to_accept_the_call_from":"Do you want to accept the call from","Reject":"Reject","Accept":"Accept","hang_up":"hang up","snapshot":"snapshot","mute_my_audio":"mute my audio","pause_my_video":"pause my video","fullscreen":"fullscreen","Info":"Info","Local_IP":"Local IP","Remote_IP":"Remote IP","Local_Fingerprint":"Local fingerprint","Remote_Fingerprint":"Remote fingerprint","Video_call_not_possible":"Video call not possible. Your contact does not support video calls.","Start_video_call":"Start video call","Join_chat":"Join chat","Join":"Join","Room":"Room","Nickname":"Nickname","left_the_building":"__nickname__ left the building","entered_the_room":"__nickname__ entered the room","is_now_known_as":"__oldNickname__ is now known as __newNickname__","This_room_is":"This room is","muc_hidden":{"keyword":"hidden","description":"can not be found through search"},"muc_membersonly":{"keyword":"members-only","description":"you need to be on the member list"},"muc_moderated":{"keyword":"moderated","description":"only persons with \"voice\" are allowed to send messages"},"muc_nonanonymous":{"keyword":"non-anonymous","description":"your jabber id is exposed to all other occupants"},"muc_open":{"keyword":"open","description":"everyone is allowed to join"},"muc_passwordprotected":{"keyword":"password-protected","description":"you need to provide the correct password"},"muc_persistent":{"keyword":"persistent","description":"will not be destroyed if the last occupant left"},"muc_public":{"keyword":"public","description":"can be found through search"},"muc_semianonymous":{"keyword":"semi-anonymous","description":"your jabber id is only exposed to room admins"},"muc_temporary":{"keyword":"temporary","description":"will be destroyed if the last occupant left"},"muc_unmoderated":{"keyword":"unmoderated","description":"everyone is allowed to send messages"},"muc_unsecured":{"keyword":"unsecured","description":"you need no password to enter"},"Continue":"Continue","Server":"Server","Rooms_are_loaded":"Rooms are loaded","Could_load_only":"Could load only __count__ rooms for autocomplete","muc_explanation":"Please enter room name and optional a nickname and password to join a chat","You_already_joined_this_room":"You already joined this room","This_room_will_be_closed":"This room will be closed","Room_not_found_":"A new room will be created","Loading_room_information":"Loading room information","Destroy":"Destroy","Leave":"Leave","changed_subject_to":"__nickname__ changed the room subject to \"__subject__\"","muc_removed_kicked":"You have been kicked from the room","muc_removed_info_kicked":"__nickname__ has been kicked from the room","muc_removed_banned":"You have been banned from the room","muc_removed_info_banned":"__nickname__ has been banned from the room","muc_removed_affiliation":"You have been removed from the room, because of an affiliation change","muc_removed_info_affiliation":"__nickname__ has been removed from the room, because of an affiliation change","muc_removed_membersonly":"You have been removed from the room, because the room has been changed to members-only and you are no member","muc_removed_info_membersonly":"__nickname__ has been removed from the room, because the room has been changed to members-only and you are no member","muc_removed_shutdown":"You have been removed from the room, because the MUC service is being shut down","Reason":"Reason","message_not_send":"Your message was not send because of an error","message_not_send_item-not-found":"Your message was not send because this room does not exist","message_not_send_forbidden":"Your message was not send because you have no voice in this room","message_not_send_not-acceptable":"Your message was not send because you are no occupant of this room","This_room_has_been_closed":"This room has been closed","Room_logging_is_enabled":"Room logging is enabled","A_password_is_required":"A password is required","You_are_not_on_the_member_list":"You are not on the member list","You_are_banned_from_this_room":"You are banned from this room","Your_desired_nickname_":"Your desired nickname is already in use. Please choose another","The_maximum_number_":"The maximum number of user is reached in this room","This_room_is_locked_":"This room is locked","You_are_not_allowed_to_create_":"You are not allowed to create a room","Alert":"Alert","Call_started":"Call started","Call_terminated":"Call terminated","Carbon_copy":"Carbon copy","Enable":"Enable","jingle_reason_busy":"busy","jingle_reason_decline":"decline","jingle_reason_success":"hung up","Media_failure":"Media failure","No_local_audio_device":"No local audio device.","No_local_video_device":"No local video device.","Ok":"Ok","PermissionDeniedError":"You or your browser denied audio/video permission","Use_local_audio_device":"Use local audio device.","Use_local_video_device":"Use local video device.","is_":"is __status__","You_received_a_message_from_an_unknown_sender_":"You received a message from an unknown sender (__sender__) Do you want to display them?","Your_roster_is_empty_add_":"Your roster is empty, add a  <a>new contact</a>","onsmp_explanation_question":"You contact is attempting to determine if they are really talking to you. To authenticate to your contact,  enter the answer and click Answer.","onsmp_explanation_secret":"You contact is attempting to determine if they are really talking to you. To authenticate to your contact,  enter the secret.","from_sender":"from __sender__","Verified_private_conversation_started":"Verified Private conversation started.","Unverified_private_conversation_started":"Unverified Private conversation started.","Bookmark":"Bookmark","Auto-join":"Auto-join","Edit_bookmark":"Edit bookmark","Room_logging_is_disabled":"Room logging is disabled","Room_is_now_non-anoymous":"Room is now non-anonymous","Room_is_now_semi-anonymous":"Room is now semi-anonymous","Do_you_want_to_change_the_default_room_configuration":"Do you want to change the default room configuration?","Default":"Default","Change":"Change","Send_file":"Send file","setting-explanation-carbon":"With enabled carbon copy your XMPP server will send a copy of every incoming message for you to this client even if it was not addressed to it.","setting-explanation-login":"If this option is enabled, the chat will start on login.","setting-explanation-priority":"If you are logged in multiple times with the same account, your XMPP server will deliver messages to the client with the highest priority.","setting-explanation-xmpp":"These options are used to connect to the XMPP server."}},"es":{"translation":{"Logging_in":"Por favor, espere...","your_connection_is_unencrypted":"Su conexión no está cifrada.","your_connection_is_encrypted":"Su conexión está cifrada.","your_buddy_closed_the_private_connection":"Su amigo ha cerrado la conexión privada.","start_private":"Iniciar privado","close_private":"Cerrar privado","your_buddy_is_verificated":"Tu amigo está verificado.","you_have_only_a_subscription_in_one_way":"Sólo tienes una suscripción de un modo.","authentication_query_sent":"Consulta de verificación enviada.","your_message_wasnt_send_please_end_your_private_conversation":"Su mensaje no fue enviado. Por favor, termine su conversación privada.","unencrypted_message_received":"Mensaje no cifrado recibido:","not_available":"No disponible","no_connection":"Sin conexión!","relogin":"iniciar sesión nuevamente","trying_to_start_private_conversation":"Intentando iniciar una conversación privada!","Verified":"Verificado","Unverified":"No verificado","private_conversation_aborted":"Conversación privada abortada!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Su amigo cerró la conversación privada! Usted debería hacer lo mismo.","conversation_is_now_verified":"La conversación es ahora verificada.","authentication_failed":"Fallo la verificación.","Creating_your_private_key_":"Ahora vamos a crear su clave privada. Esto puede tomar algún tiempo.","Authenticating_a_buddy_helps_":"Autenticación de un amigo ayuda a garantizar que la persona que está hablando es quien él o ella está diciendo.","How_do_you_want_to_authenticate_your_buddy":"¿Cómo desea autenticar {{bid_name}} (<b>{{bid_jid}}</b>)?","Select_method":"Escoja un método...","Manual":"Manual","Question":"Pregunta","Secret":"Secreto","To_verify_the_fingerprint_":"Para verificar la firma digital, póngase en contacto con su amigo a través de algún otro canal autenticado, como el teléfono.","Your_fingerprint":"Tu firma digital","Buddy_fingerprint":"firma digital de tu amigo","Close":"Cerrar","Compared":"Comparado","To_authenticate_using_a_question_":"Para autenticar mediante una pregunta, elegir una pregunta cuya respuesta se conoce sólo usted y su amigo.","Ask":"Preguntar","To_authenticate_pick_a_secret_":"Para autenticar, elija un secreto conocido sólo por usted y su amigo.","Compare":"Comparar","Fingerprints":"Firmas digitales","Authentication":"Autenticación","Message":"Mensaje","Add_buddy":"Añadir amigo","rename_buddy":"renombrar amigo","delete_buddy":"eliminar amigo","Login":"Iniciar Sesión","Username":"Usuario","Password":"Contraseña","Cancel":"Cancelar","Connect":"Conectar","Type_in_the_full_username_":"Escriba el usuario completo y un alias opcional.","Alias":"Alias","Add":"Añadir","Subscription_request":"Solicitud de suscripción","You_have_a_request_from":"Tienes una petición de","Deny":"Rechazar","Approve":"Aprobar","Remove_buddy":"Eliminar amigo","You_are_about_to_remove_":"Vas a eliminar a {{bid_name}} (<b>{{bid_jid}}</b>) de tu lista de amigos. Todas las conversaciones relacionadas serán cerradas.","Continue_without_chat":"Continuar","Please_wait":"Espere por favor","Login_failed":"Fallo el inicio de sesión","Sorry_we_cant_authentikate_":"Lo sentimos, no podemos autentificarlo en nuestro servidor de chat. ¿Tal vez la contraseña es incorrecta?","Retry":"Reintentar","clear_history":"Borrar el historial","New_message_from":"Nuevo mensaje de __name__","Should_we_notify_you_":"¿Debemos notificarle sobre nuevos mensajes en el futuro?","Please_accept_":"Por favor, haga clic en el botón \"Permitir\" en la parte superior.","Hide_offline":"Ocultar contactos desconectados","Show_offline":"Mostrar contactos desconectados","About":"Acerca de","dnd":"No Molestar","Mute":"Desactivar sonido","Unmute":"Activar sonido","Subscription":"Suscripción","both":"ambos","Status":"Estado","online":"en línea","chat":"chat","away":"ausente","xa":"mas ausente","offline":"desconectado","none":"nadie","Unknown_instance_tag":"Etiqueta de instancia desconocida.","Not_one_of_our_latest_keys":"No de nuestra ultima tecla.","Received_an_unreadable_encrypted_message":"Se recibió un mensaje cifrado ilegible.","Online":"En linea","Chatty":"Hablador","Away":"Ausente","Extended_away":"Mas ausente","Offline":"Desconectado","Friendship_request":"Solicitud de amistad","Confirm":"Confirmar","Dismiss":"Rechazar","Remove":"Eliminar","Online_help":"Ayuda en línea","FN":"Nombre completo ","N":" ","FAMILY":"Apellido","GIVEN":"Nombre","NICKNAME":"Apodar","URL":"URL","ADR":"Dirección","STREET":"Calle","EXTADD":"Extendido dirección","LOCALITY":"Población","REGION":"Región","PCODE":"Código postal","CTRY":"País","TEL":"Teléfono","NUMBER":"Número","EMAIL":"Emilio","USERID":" ","ORG":"Organización","ORGNAME":"Nombre","ORGUNIT":"Departamento","TITLE":"Título","ROLE":"Rol","BDAY":"Cumpleaños","DESC":"Descripción","PHOTO":" ","send_message":"mandar un texto","get_info":"obtener información","Settings":"Ajustes","Priority":"Prioridad","Save":"Guardar","User_settings":"Configuración de usuario","A_fingerprint_":"La huella digital se utiliza para que puedas estar seguro que la persona con la que estas hablando es quien realmente dice ser","is":"es","Login_options":"Opciones de login","BOSH_url":"BOSH url","Domain":"Dominio","Resource":"Recurso","On_login":"Iniciar sesión","Received_an_unencrypted_message":"Recibe un mensaje no cifrado","Sorry_your_buddy_doesnt_provide_any_information":"Lo sentimos, su amigo no provee ninguna información.","Info_about":"Info acerca de","Authentication_aborted":"Autenticación abortada","Authentication_request_received":"Pedido de autenticación recibido.","Log_in_without_chat":"Ingresar sin chat","has_come_online":"se ha conectado","Unknown_sender":"Remitente desconocido","Please_allow_access_to_microphone_and_camera":"Por favor, permitir el acceso al micrófono y la cámara.","Incoming_call":"Llamada entrante","from":"de","Do_you_want_to_accept_the_call_from":"Desea aceptar la llamada de","Reject":"Rechazar","Accept":"Aceptar","hang_up":"colgar","snapshot":"instantánea","mute_my_audio":"silenciar mi audio","pause_my_video":"pausar mi vídeo","fullscreen":"pantalla completa","Info":"Info","Local_IP":"IP local","Remote_IP":"IP remota","Local_Fingerprint":"Firma digital local","Remote_Fingerprint":"Firma digital remota","Video_call_not_possible":"Llamada de vídeo no es posible","Start_video_call":"Iniciar llamada de vídeo","Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":"Activar","jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":"es __status__","You_received_a_message_from_an_unknown_sender_":"Ha recibido un mensaje de un remitente desconocido (__sender__) ¿Quiere mostrarlos?","Your_roster_is_empty_add_":"Tu lista de amigos esta vacia <a>Nuevo amigo</a>","onsmp_explanation_question":"Tu amigo está tratando de determinar si él o ella está realmente hablando con usted. Para autenticar a su amigo,  introduce la respuesta y haga clic en Contestar.","onsmp_explanation_secret":"Tu amigo está tratando de determinar si él o ella está realmente hablando con usted. Para autenticar a su amigo,  especifique el secreto.","from_sender":"de __sender__","Verified_private_conversation_started":"Verificado se inició una conversación privada.","Unverified_private_conversation_started":"No verificado se inició una conversación privada.","Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null}},"fi":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null}},"fr":{"translation":{"Logging_in":"Connexion...","your_connection_is_unencrypted":"Connexion non chiffrée.","your_connection_is_encrypted":"Connexion chiffrée.","your_buddy_closed_the_private_connection":"Votre contact a fermé la connexion privée.","start_private":"Démarrer une conversation privée","close_private":"Clôturer une conversation privée","your_buddy_is_verificated":"Votre contact est vérifié.","you_have_only_a_subscription_in_one_way":"Vous ne pouvez souscrire qu'une fois.","authentication_query_sent":"Requête d’authentification envoyée.","your_message_wasnt_send_please_end_your_private_conversation":"Votre message n'a pas été envoyé. Veuillez terminer votre conversation privée.","unencrypted_message_received":"Message non chiffré reçu","not_available":"Non disponible","no_connection":"Pas de connexion !","relogin":"Re-connexion","trying_to_start_private_conversation":"Essai de démarrage d'une conversation privée !","Verified":"Vérifié","Unverified":"Non vérifié","private_conversation_aborted":"Conversation privée interrompue !","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Votre contact a fermé la conversation privée ! Vous devriez faire de même.","conversation_is_now_verified":"La conversation est maintenant vérifiée.","authentication_failed":"L'authentification a échoué.","Creating_your_private_key_":"Création de votre clé privée; cela peut prendre un moment.","Authenticating_a_buddy_helps_":"L'authentification d'un contact permet de s'assurer que la personne à qui vous parlez est vraiment celui qu'il ou elle prétend être.","How_do_you_want_to_authenticate_your_buddy":"Comment voulez-vous vous authentifier {{bid_name}} (<b>{{bid_jid}}</b>)?","Select_method":"Sélection de la méthode...","Manual":"Manuel","Question":"Question","Secret":"Sécurité","To_verify_the_fingerprint_":"Pour vérifier l'empreinte, joignez votre contact via un autre canal digne de confiance, tel que le téléphone.","Your_fingerprint":"Votre empreinte","Buddy_fingerprint":"Empreinte du contact","Close":"Fermer","Compared":"Comparé","To_authenticate_using_a_question_":"Pour s'authentifier à l'aide d'une question, choisissez une question dont la réponse n'est connue que vous et de votre contact.","Ask":"Demander","To_authenticate_pick_a_secret_":"Pour vous authentifier, choisissez un secret connu seulement de vous et de votre contact.","Compare":"Comparer","Fingerprints":"Empreintes","Authentication":"Authentification","Message":"Message","Add_buddy":"Ajouter un contact","rename_buddy":"Renommer le contact","delete_buddy":"Supprimer le contact","Login":"Connexion","Username":"Nom d'utilisateur","Password":"Mot de passe","Cancel":"Annuler","Connect":"Connecter","Type_in_the_full_username_":"Tapez un nom d'utilisateur complet et un alias(optionnel).","Alias":"Alias","Add":"Ajouter","Subscription_request":"Demande d'abonnement","You_have_a_request_from":"Vous avez une requête de ","Deny":"Refuser","Approve":"Approuver","Remove_buddy":"Supprimer le contact","You_are_about_to_remove_":"Vous allez retirer {{bid_name}} (<b>{{bid_jid}}</b>) de votre liste de contacts. Toutes les fenêtres de discussion en lien avec celui-ci seront fermées.","Continue_without_chat":"Continuer sans tchat","Please_wait":"Merci de patienter","Login_failed":"Authentification échouée","Sorry_we_cant_authentikate_":"La connexion avec le serveur de tchat a échoué. Vérifiez le mot de passe.","Retry":"Retour","clear_history":"Effacer l’historique","New_message_from":"Nouveau message de __name__","Should_we_notify_you_":"Dans le futur, devrons-nous vous notifier les nouveaux messages ?","Please_accept_":"Merci de cliquer sur le bouton \"autoriser\" en haut de page","Hide_offline":"Masquer les contacts non connectés","Show_offline":"Afficher les contacts non connectés","About":"À propos","dnd":"Ne pas déranger","Mute":"Muet","Unmute":"Son actif","Subscription":"Abonnement","both":"Les deux","Status":"Statut","online":"En ligne","chat":"tchat","away":"Absent","xa":"Longue absence","offline":"Hors ligne","none":"Aucun","Unknown_instance_tag":"Tag inconnu","Not_one_of_our_latest_keys":"Ce n'est pas l'une des dernières touches","Received_an_unreadable_encrypted_message":"Message chiffré non lisible","Online":"En ligne","Chatty":"Libre pour discuter","Away":"Absent","Extended_away":"Longue absence","Offline":"Hors ligne","Friendship_request":"Demande de contact","Confirm":"Valider","Dismiss":"Rejeter","Remove":"Supprimer","Online_help":"Aide en ligne","FN":"Nom","N":" N ","FAMILY":"Nom de famille","GIVEN":"prénom","NICKNAME":"Pseudo","URL":"URL","ADR":"Adresse","STREET":"Rue","EXTADD":"Adresse (suite)","LOCALITY":"Localité","REGION":"Région","PCODE":"Code Postal","CTRY":"Pays","TEL":"Téléphone","NUMBER":"Numéro","EMAIL":"Courriel","USERID":" USERID ","ORG":"Organisation","ORGNAME":"Nom","ORGUNIT":"Unité","TITLE":"Qualité:","ROLE":"Rôle","BDAY":"Date de naissance","DESC":"Description","PHOTO":"Photo","send_message":"Envoyer un message","get_info":"Montrer les informations","Settings":"Réglages","Priority":"Priorité","Save":"Enregistrer","User_settings":"Paramètres utilisateur","A_fingerprint_":"Une empreinte est utilisée pour s'assurer de l'identité de la personne à qui vous parlez","is":"est","Login_options":"Options d'identification","BOSH_url":"URL BOSH","Domain":"Domaine","Resource":"Ressource","On_login":"Après authentification","Received_an_unencrypted_message":"Reçu un message non chiffré","Sorry_your_buddy_doesnt_provide_any_information":"Désolé, votre contact n'a pas fourni d'informations","Info_about":"À propos de","Authentication_aborted":"Authentification interrompue.","Authentication_request_received":"Requête d'authentification reçue.","Log_in_without_chat":"S'identifier sans tchat","has_come_online":"vient d'arriver","Unknown_sender":"Expéditeur inconnu","Please_allow_access_to_microphone_and_camera":"Veuillez cliquez sur le bouton \"Autoriser\" en haut, pour permettre l'accès au micro et à la caméra.","Incoming_call":"Appel entrant","from":"de","Do_you_want_to_accept_the_call_from":"Voulez-vous accepter l'appel de","Reject":"Rejeté","Accept":"Accepté","hang_up":"raccrocher","snapshot":"Capture d’écran","mute_my_audio":"Couper l'audio","pause_my_video":"Mettre ma vidéo en pause","fullscreen":"Plein écran","Info":"Info","Local_IP":"IP locale","Remote_IP":"IP distante","Local_Fingerprint":"Empreinte locale","Remote_Fingerprint":"Empreinte distante","Video_call_not_possible":"L'appel vidéo n'est possible. Votre contact ne supporte pas les appels vidéo.","Start_video_call":"Démarrer l'appel vidéo","Join_chat":"Joindre la discussion","Join":"Joindre","Room":"Salon","Nickname":"Pseudo","left_the_building":"__nickname__ a quitté l'immeuble","entered_the_room":"__nickname__ entre dans le salon","is_now_known_as":"__oldNickname__ est maintenant connu comme __newNickname__","This_room_is":"Ce salon est","muc_hidden":{"keyword":"caché","description":"ne peut être trouvé avec une recherche"},"muc_membersonly":{"keyword":"pour les membres seulement","description":"Vous devez être sur la liste des membres"},"muc_moderated":{"keyword":"modéré","description":"Seulement les personnes avec la \"voix\" sont autorisés à envoyer des messages"},"muc_nonanonymous":{"keyword":"non anonyme","description":"Votre identifiant Jabber est visible de tous les autres occupants"},"muc_open":{"keyword":"ouvert","description":"Tout le monde est autorisé à se connecter"},"muc_passwordprotected":{"keyword":"protégé par un mot de passe","description":"Vous devez fournir un mot de passe correct"},"muc_persistent":{"keyword":"persistent","description":"ne sera pas détruit si le dernier occupant part"},"muc_public":{"keyword":"public","description":"peut être touvé avec une recherche"},"muc_semianonymous":{"keyword":"semi-anonyme","description":"Votre identifiant Jabber est seulement visible aux administrateurs de ce salon"},"muc_temporary":{"keyword":"temporaire","description":"sera détruit au départ de son dernier occupant"},"muc_unmoderated":{"keyword":"non modéré","description":"Tout le monde est autorisé à envoyer des messages"},"muc_unsecured":{"keyword":"non sécurisé","description":"un mot de passe n'est pas nécessaire pour entrer"},"Continue":"Continuer","Server":"Serveur","Rooms_are_loaded":"Les salons sont chargés","Could_load_only":"Ne peut charger que __count__ salons pour l'autocomplétion","muc_explanation":"Veuillez saisir le nom du salon, un surnom (optionnel) et un mot de passe pour joindre la conversation","You_already_joined_this_room":"Vous avez déjà rejoint ce salon","This_room_will_be_closed":"Ce salon va être fermé","Room_not_found_":"Un nouveau salon va être créé","Loading_room_information":"Chargement des informations du salon","Destroy":"Détruire","Leave":"Quitter","changed_subject_to":"__nickname__ a changé le sujet du salon à \"__subject__\"","muc_removed_kicked":"Vous avez été éjecté de ce salon","muc_removed_info_kicked":"__nickname__ a été éjecté de ce salon","muc_removed_banned":"Vous avez été banni de ce salon","muc_removed_info_banned":"__nickname__ a été banni de ce salon","muc_removed_affiliation":"Vous avez été retiré du salon en raison d'un changement d'affiliation","muc_removed_info_affiliation":"__nickname__ a été retiré du salon en raison d'un changement d'affiliation","muc_removed_membersonly":"Vous avez été retiré du salon parce que celui-ci est maintenant réservé aux membres et vous n'en faites pas partie","muc_removed_info_membersonly":"__nickname__ a été retiré du salon parce que celui-ci est maintenant réservé aux membres","muc_removed_shutdown":"Vous avez été retiré du salon parce que le service de salon de discussion est en train de s'éteindre","Reason":"Raison","message_not_send":"Votre message n'a pu être envoyé a cause d'une erreur","message_not_send_item-not-found":"Votre message n'a pu être envoyé parce que ce salon n'existe pas","message_not_send_forbidden":"Votre message n'a pas été envoyé parce que vous n'avez pas le droit de parler dans ce salon","message_not_send_not-acceptable":"Votre message n'a pas été envoyé car il n'y a personne dans ce salon","This_room_has_been_closed":"Ce salon a été fermé","Room_logging_is_enabled":"L'historique du salon est archivé","A_password_is_required":"Un mot de passe est requis","You_are_not_on_the_member_list":"Vous n'êtes pas sur la liste des membres","You_are_banned_from_this_room":"Vous avez été banni de ce salon","Your_desired_nickname_":"Votre pseudo souhaité est déjà utilisé. Veuillez en choisir un autre","The_maximum_number_":"Le nombre maximum d'utilisateurs est atteint dans ce salon","This_room_is_locked_":"Ce salon est verrouillé","You_are_not_allowed_to_create_":"Vous n'êtes pas autorisé à créer un salon","Alert":"Alerte","Call_started":"Appel démarré","Call_terminated":"Appel terminé","Carbon_copy":"Copie carbone","Enable":"Activé","jingle_reason_busy":"occupé","jingle_reason_decline":"refusé","jingle_reason_success":"raccroché","Media_failure":"échec du média","No_local_audio_device":"Pas de périphérique audio local","No_local_video_device":"Pas de périphérique vidéo local","Ok":"Ok","PermissionDeniedError":"Vous ou votre navigateur à refusé de donner les permissions audio/vidéo","Use_local_audio_device":"Utiliser un périphérique audio local.","Use_local_video_device":"Utiliser un périphérique vidéo local.","is_":"est __status__","You_received_a_message_from_an_unknown_sender_":"Vous avez reçu un message d'un expéditeur inconnu (__sender__) Voulez-vous les afficher ?","Your_roster_is_empty_add_":"Votre liste est vide, ajouter  <a>Nouveau contact</a>","onsmp_explanation_question":"Votre contact tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre contact, saisissez une réponse et cliquez sur Répondre.","onsmp_explanation_secret":"Votre contact tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre contact, entrez le mot secret","from_sender":"de __sender__","Verified_private_conversation_started":"La conversation privée vérifiée a démarré.","Unverified_private_conversation_started":"La conversation privée non vérifiée a démarré.","Bookmark":"Marque-page","Auto-join":"Joindre automatiquement","Edit_bookmark":"Éditer le marque-page","Room_logging_is_disabled":"La connexion au salon est désactivée","Room_is_now_non-anoymous":"Ce salon n'est désormais plus anonyme","Room_is_now_semi-anonymous":"Ce salon est désormais semi-anonyme","Do_you_want_to_change_the_default_room_configuration":"Voulez-vous changer la configuration par défaut du salon ?","Default":"Par défaut","Change":"Changer","Send_file":"Envoyer un fichier","setting-explanation-carbon":"Avec la copie carbone activé, votre serveur XMPP envera une copie de tous les messages entrant qui vous sont destiné à ce client, même s'il ne lui sont pas directement addressés.","setting-explanation-login":"Si cette option est activé, le chat commencera lorsque vous vos connectez.","setting-explanation-priority":"Si vous êtes connecté plusieurs fois avec le même compte, votre serveur XMPP enverra les messages au client ayant le plus haute priorité.","setting-explanation-xmpp":"Ces options sont utilisées pour se connecter au serveur XMPP."}},"hu-HU":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null}},"it":{"translation":{"Logging_in":"login…","your_connection_is_unencrypted":"La sua connessione è non cifrata.","your_connection_is_encrypted":"La sua connessione è cifrata.","your_buddy_closed_the_private_connection":"La sua connessione privata è stato chiuso dal suo compagno.","start_private":"Inizia privata","close_private":"Chiude privata","your_buddy_is_verificated":"Il tuo compagno è stato verificato","you_have_only_a_subscription_in_one_way":"Hai solo una one-way inscrizione.","authentication_query_sent":"Domanda d'autenticità inviata.","your_message_wasnt_send_please_end_your_private_conversation":"Il tuo messaggio non è stato inviato. Si prega di finire la sua conversazione privata.","unencrypted_message_received":"Messaggio non cifrato ricevuto","not_available":"non disponibile","no_connection":"nessun collegamento!","relogin":"nuovo login","trying_to_start_private_conversation":"Cercando di avviare una conversazione privata!","Verified":"verificato","Unverified":"non verificato","private_conversation_aborted":"Conversazione privata abortito!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Il tuo compagno ha chiuso la conversazione privata! Si dovrebbe fare lo stesso.","conversation_is_now_verified":"Conversazione è ora verificato.","authentication_failed":"autenticazione fallita.","Creating_your_private_key_":"Creare la propria chiave privata; questo potrebbe richiedere un po'.","Authenticating_a_buddy_helps_":"Autenticazione un compagno aiuta a garantire che la persona si sta parlando è davvero quello che lui o lei sostiene di essere.","How_do_you_want_to_authenticate_your_buddy":"Come si desidera autenticare {{bid_name}} (<b>{{bid_jid}}</b>)?","Select_method":"Seleziona metodo ..","Manual":"manuale","Question":"domanda","Secret":"segreto","To_verify_the_fingerprint_":"Per verificare l'impronta digitale, contattare il proprio compagno attraverso qualche altro canale affidabile, come il telefono.","Your_fingerprint":"il tuo impronta digitale","Buddy_fingerprint":"impronta digitale da compagno","Close":"chiude","Compared":"comparato","To_authenticate_using_a_question_":"Per autenticare tramite una questione, scegli una questione la cui risposta è nota solo voi e il tuo compagno","Ask":"chiedi","To_authenticate_pick_a_secret_":"Per autenticare, scegli un segreto noto solo a te e il tuo compagno.","Compare":"Comparare","Fingerprints":"Impronta digitale","Authentication":"Autenticazione","Message":"Messagio","Add_buddy":"Aggiungi un compagno","rename_buddy":"rinomina compagno","delete_buddy":"elimina compagno","Login":"Login","Username":"Identificazione dell'utente","Password":"Password","Cancel":"Cancella","Connect":"Collega","Type_in_the_full_username_":"Digita l'identificazione utente completo e un alias opzionale.","Alias":"Alias","Add":"Aggiungi","Subscription_request":"Rrichiesta di sottoscrizione","You_have_a_request_from":"Hai una richiesta da","Deny":"Refiuta","Approve":"Approva","Remove_buddy":"Rimuova il compagno","You_are_about_to_remove_":"Stai rimovendo {{bid_name}} (<b>{{bid_jid}}</b>) del suo lista di compagni. Tutte le chat appartenente saranno chiuse.","Continue_without_chat":"Continua senza chat","Please_wait":"Si prega d'attendere","Login_failed":"Chat login è fallito","Sorry_we_cant_authentikate_":"Autenticazione non riuscita con il server di chat. Forse la password è sbagliata?","Retry":"Indietro","clear_history":"Cancella la cronologia","New_message_from":"Nuovo messaggio da __name__","Should_we_notify_you_":"Vuoi ricevere una notifica di nuovi messaggi in futuro?","Please_accept_":"Si prega di fare clic sul bottone \"Autorizzazione\" sopra.","Hide_offline":"Nascondere i contatti non in linea","Show_offline":"Mostra i contatti non in linea","About":"Informazione legale","dnd":"Non disturbare","Mute":"Muto attivo","Unmute":"Muto inattivo","Subscription":"Sottoscrizione","both":"etrambi","Status":"Status","online":"In linea","chat":"chat","away":"via","xa":"via estensivo","offline":"non in linea","none":"nessuno","Unknown_instance_tag":"Instance tag sconosciuta.","Not_one_of_our_latest_keys":"Non è una delle nostre ultime chiavi.","Received_an_unreadable_encrypted_message":"Ricevuto un messaggio crittografato illeggibile.","Online":"In linea","Chatty":"Chiacchierino","Away":"Via","Extended_away":"Via estensivo","Offline":"Non in linea","Friendship_request":"Amicizia richiesto","Confirm":"Conferma","Dismiss":"Rifiuta","Remove":"Rimuovi","Online_help":"Guida in linea","FN":"Nome e cognome","N":null,"FAMILY":"Cognome","GIVEN":"Nome","NICKNAME":"Soprannome","URL":"URL","ADR":"Indirizzo","STREET":"Via","EXTADD":"Esteso Indirizzo","LOCALITY":"Località","REGION":"Regione","PCODE":"Codice Postale","CTRY":"Paese","TEL":"Telefono","NUMBER":"Numero","EMAIL":"E-mail","USERID":null,"ORG":"Organizzazione","ORGNAME":"Nome","ORGUNIT":"Unità","TITLE":"Titolo di lavoro","ROLE":"Funzione","BDAY":"Compleanno","DESC":"Descrizione","PHOTO":null,"send_message":"Messagio inviato","get_info":"Mostra informazioni","Settings":"Impostazione","Priority":"Priorità","Save":"Salva","User_settings":"Impostazione dell'utente","A_fingerprint_":"Una impronta digitale è usato per assicurarsi che la persona con cui stai parlando è lui o lei che sta dicendo.","is":"è","Login_options":"Opzioni di login","BOSH_url":"BOSH URL","Domain":"Domain","Resource":"Risorsa","On_login":"Login on","Received_an_unencrypted_message":"Ricevuto un messaggio non crittografato","Sorry_your_buddy_doesnt_provide_any_information":"Spiace, il tuo compagno non fornisce alcuna informazione.","Info_about":"Informazioni","Authentication_aborted":"Autenticazione interrotta","Authentication_request_received":"Richiesta di autenticazione ricevuto.","Log_in_without_chat":"Log in senza chat","has_come_online":"È venuto in linea","Unknown_sender":"Mittente sconosciuto","Please_allow_access_to_microphone_and_camera":"Si prega di fare clic sul bottone \"Autorizzazione\" sopra per autorizzazione del l'accesso al microfono e fotocamera.","Incoming_call":"Chiamata in arrivo","from":"di","Do_you_want_to_accept_the_call_from":"Vuoi accettare la chiamata di","Reject":"Rifiuta","Accept":"Accetta","hang_up":"Riattacca","snapshot":"istantanea","mute_my_audio":"disattiva il mio audio","pause_my_video":"pausa il mio audio","fullscreen":"schermo intero","Info":"Informazione","Local_IP":"IP locale","Remote_IP":"IP remoto","Local_Fingerprint":"Impronta digitale locale","Remote_Fingerprint":"Impronta digitale remoto","Video_call_not_possible":"Videochiamata non è possibile. Il tuo compagno non può effettuare videochiamate.","Start_video_call":"Inizia videochiamata","Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":"è __status__","You_received_a_message_from_an_unknown_sender_":"Hai ricevuto un messaggio da un mittente sconosciuto (__sender__) Vuoi che venga visualizzato?","Your_roster_is_empty_add_":"Il suo elenco è vuoto, aggiungi un  <a>compagno nuovo</a>","onsmp_explanation_question":"Il tuo compagno sta cercando di determinare se lui o lei sta davvero parlando con te. Per autenticare a il tuo compagno.  inserisci la risposta e fare click su risposta.","onsmp_explanation_secret":"Il tuo compagno sta cercando di determinare se lui o lei sta davvero parlando con te. Per autenticare a il tuo compagno.  inserire il segreto.","from_sender":"di __sender__","Verified_private_conversation_started":"verificato Conversazione privata iniziato.","Unverified_private_conversation_started":"non verificato Conversazione privata iniziato.","Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null}},"nds":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null}},"pl":{"translation":{"Logging_in":"Logowanie...","your_connection_is_unencrypted":"Twoje połączenie nie jest szyfrowane.","your_connection_is_encrypted":"Twoje połączenie jest szyfrowane.","your_buddy_closed_the_private_connection":"Twój rozmówca zamknął połączenie.","start_private":"Rozpocznij rozmowę.","close_private":"Zakończ rozmowę.","your_buddy_is_verificated":"Twój rozmówca został zweryfikowany.","you_have_only_a_subscription_in_one_way":"Masz jednostronną subskrypcję.","authentication_query_sent":"Wysłano proźbę o autentykację.","your_message_wasnt_send_please_end_your_private_conversation":"Twoja wiadomość nie została wysłana. Proszę, zamknij rozmowę.","unencrypted_message_received":"Zwrotna niezaszyfrowana wiadomość.","not_available":"Niedostępny.","no_connection":"Brak połączenia!","relogin":"Połącz ponownie","trying_to_start_private_conversation":"Rozpocznij rozmowę!","Verified":"Zweryfikowano","Unverified":"Niezweryfikowano","private_conversation_aborted":"Anulowano rozmowę!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Rozmówca przerwał połączenie!","conversation_is_now_verified":"Zweryfikowano połączenie.","authentication_failed":"Weryfikacja się nie powiodła.","Creating_your_private_key_":"Tworzenie klucza prywatnego; może to chwilę potrwać","Authenticating_a_buddy_helps_":"Autoryzacja pomoże w ustaleniu faktycznej tożsamości rozmówcy ;).","How_do_you_want_to_authenticate_your_buddy":"Jakiej autoryzacji chcesz użyć {{bid_name}} (<b>{{bid_jid}}</b>)?","Select_method":"Wybierz sposób...","Manual":"Ręcznie","Question":"Pytanie","Secret":"Hasło","To_verify_the_fingerprint_":"Aby zweryfikować kod najpierw skontaktuj się z rozmówcą np. za pomocą telefonu.","Your_fingerprint":"Twój kod:","Buddy_fingerprint":"Kod rozmówcy","Close":"Zamknij","Compared":"Porównano","To_authenticate_using_a_question_":"Aby autoryzować za pomocą pytania, wybierz pytanie na które tylko Twój rozmówca zna odpowiedź.","Ask":"Zadaj pytanie","To_authenticate_pick_a_secret_":"Aby autoryzować za pomocą hasła, wybierz hasło na które zna tylko Twój rozmówca.","Compare":"Dopasuj","Fingerprints":"Kody autoryzacyjne","Authentication":"Autoryzacja","Message":"Wiadomość","Add_buddy":"Dodaj kontakt","rename_buddy":"Zmień nazwę","delete_buddy":"Usuń kontakt","Login":"Login","Username":"Nazwa Użytkownika","Password":"Hasło","Cancel":"Anuluj","Connect":"Połączenie","Type_in_the_full_username_":"Wpisz pełną nazwę użytkownika (np. <B>imię.nazwisko@zajezdnia.local</B>) oraz jego nazwę wyświetlaną (Alias).","Alias":"Alias","Add":"Dodaj","Subscription_request":"Potwierdzenie subskrypcji","You_have_a_request_from":"Masz potwierdzenie od","Deny":"Odmów","Approve":"Zatwierdź","Remove_buddy":"Usuń rozmówcę","You_are_about_to_remove_":"Twój rozmówca {{bid_name}} (<b>{{bid_jid}}</b>) usunął Cię ze swojej listy kontaktów.","Continue_without_chat":"Kontynuuj bez komunikatora","Please_wait":"Proszę czekać","Login_failed":"Błędne logowanie","Sorry_we_cant_authentikate_":"Błędna autoryzacja z serwerem. Może hasło jest nieprawidłowe?","Retry":"Powrót","clear_history":"Wyczyść historię","New_message_from":"Nowa wiadomość od __name__","Should_we_notify_you_":"Czy chcesz otrzymywać powiadomienia o nowych wiadomościach w przyszłości?","Please_accept_":"Kliknij \"Zezwól\" na górze.","Hide_offline":"Schowaj niedostępne kontakty","Show_offline":"Pokaż niedostępne kontakty","About":"Info","dnd":"Nie przeszkadzać","Mute":"Wycisz","Unmute":"Włącz dźwięk","Subscription":"Subskrybcja","both":"obustronna","Status":"Status","online":"Dostępny","chat":"czat","away":"z dala od kompa","xa":"hen hen...","offline":"niedostępny","none":"brak","Unknown_instance_tag":"Nieznany przypadek.","Not_one_of_our_latest_keys":"Not one of our latest keys.","Received_an_unreadable_encrypted_message":"Otrzymano nieczytelną, zaszyfrowaną wiadomość.","Online":"Połączony","Chatty":"Pogawędzimy?","Away":"Daleko","Extended_away":"Hen Hen...","Offline":"Niedostępny","Friendship_request":"Zapytanie od znajomego?","Confirm":"Potwierdzenie","Dismiss":"Odwołaj","Remove":"Usuń","Online_help":"Pomoc Online","FN":"Pełna nazwa","N":"  ","FAMILY":"Nazwisko","GIVEN":"Imię","NICKNAME":"Pseudonim","URL":"Strona WWW","ADR":"Adres","STREET":"Ulica","EXTADD":"Pełny adres","LOCALITY":"Lokalizacja","REGION":"Region","PCODE":"Kod pocztowy","CTRY":"Kraj","TEL":"Telefon","NUMBER":"Numer","EMAIL":"Email","USERID":" ","ORG":"Organizacja","ORGNAME":"Nazwa","ORGUNIT":"Jednostka","TITLE":"Stanowisko","ROLE":"Rola","BDAY":"Data urodzin","DESC":"Opis","PHOTO":" ","send_message":"Wyślij wiadomość","get_info":"Pokaż informację","Settings":"Ustawienia","Priority":"Priorytet","Save":"Zapisz","User_settings":"Ustawienia Użytkownika","A_fingerprint_":"Kod służy do autoryzacji Twojego rozmówcy aby potwierdzić jego tożsamość.","is":"jest","Login_options":"opcje logowania","BOSH_url":"Adres BOSH","Domain":"Domena","Resource":"Źródło","On_login":"Na login","Received_an_unencrypted_message":"Zatwierdzono nieszyfrowaną wiadomość.","Sorry_your_buddy_doesnt_provide_any_information":"Twój rozmówca nie posiada żadnych informacji.","Info_about":"Informacja o...","Authentication_aborted":"Autoryzacja anulowana.","Authentication_request_received":"Prośba o autoryzację została przyjęta.","Log_in_without_chat":"Zaloguj bez komunikatora","has_come_online":"jest teraz dostępny","Unknown_sender":"Nieznany nadawca","Please_allow_access_to_microphone_and_camera":"Kliknij \"Potwierdź\" na górze, aby móc korzystać z mikrofonu oraz kamery.","Incoming_call":"Przychodzące połączenie","from":"z","Do_you_want_to_accept_the_call_from":"Akceptujesz połączenie od","Reject":"Odrzuć","Accept":"Zaakceptuj","hang_up":"odbierz","snapshot":"zrób zdjęcie","mute_my_audio":"wycisz dźwięk","pause_my_video":"zatrzymaj moje wideo","fullscreen":"Pełny ekran","Info":"Informacja","Local_IP":"Adres IP","Remote_IP":"Zdalny adres IP","Local_Fingerprint":"Kod lokalny","Remote_Fingerprint":"Zdalny kod","Video_call_not_possible":"Rozmowa wideo jest niemożliwa. Twój rozmówca nie ma możliwości prowadzenia takich rozmów.","Start_video_call":"Rozpocznij rozmowę wideo","Join_chat":"Dołącz do czata","Join":"Dołącz","Room":"Pokój","Nickname":"Nazwa użytkownika","left_the_building":"__nickname__ wyszedł","entered_the_room":"__nickname__ wszedł do pokoju","is_now_known_as":"__oldNickname__ zmienił nazwę na __newNickname__","This_room_is":"Ten pokój jest","muc_hidden":{"keyword":"ukryty","description":"nie można odnaleźć elementów wyszukiwania"},"muc_membersonly":{"keyword":"tylko zalogowani","description":"musisz być członkiem listy"},"muc_moderated":{"keyword":"moderowano","description":"tylko osoby z opcją \"głos\" mogą wysyłać wiadomość"},"muc_nonanonymous":{"keyword":"nie-anonimowy","description":"Twój identyfikator jabber jest widoczny dla wszystkich innych osób"},"muc_open":{"keyword":"otwarty","description":"wszyscy mają pozwolenie aby dołączyć"},"muc_passwordprotected":{"keyword":"ograniczone hasłem","description":"musisz wpisać prawidłowe hasło"},"muc_persistent":{"keyword":"trwale","description":"nie zostaną zniszczone, jeśli ostatnia osoba wyszła"},"muc_public":{"keyword":"publiczny","description":"wyszukawno"},"muc_semianonymous":{"keyword":"pół-anonimowy","description":"Twój identyfikator jabber jest widoczny w pokoju adminów"},"muc_temporary":{"keyword":"tymczasowy","description":"zostanie usunięty jeżeli ostatnia osoba wyjdzie"},"muc_unmoderated":{"keyword":"niemoderowany","description":"wszyscy są uprawnieni do pisania wiadomości"},"muc_unsecured":{"keyword":"niezabezpieczone","description":"nie musisz wpisywać hasła"},"Continue":"Kontynuuj","Server":"Serwer","Rooms_are_loaded":"Pokoje zostały załadowane","Could_load_only":"Nie załadowano __count__ pokoi","muc_explanation":"Aby się zalogować, wpisz nazwę pokoju oraz opcjonalnie nazwę użytkownika i hasło","You_already_joined_this_room":"Już dołączyłeś do tego pokoju","This_room_will_be_closed":"Ten pokój będzie zamknięty","Room_not_found_":"Nowy pokój będzie stworzony","Loading_room_information":"Ładowani informacji o pokoju","Destroy":"Zniszczony","Leave":"Opuść","changed_subject_to":"__nickname__ zmienił temat pokoju na \"__subject__\"","muc_removed_kicked":"Zostałeś wyrzucony z pokoju","muc_removed_info_kicked":"__nickname__ został wyrzucony z pokoju","muc_removed_banned":"Zostałeś zbanowany","muc_removed_info_banned":"__nickname__ został zbanowany","muc_removed_affiliation":"Zostałeś usunięty z pokoju ze względu na zmianę przynależnosci","muc_removed_info_affiliation":"__nickname__ został usunięty z pokoju ze względu na zmianę przynależnosci","muc_removed_membersonly":"Zostałeś usunięty z pokoju ze względu na zmianę pokoju tylko dla członków, a Ty nie jesteś członkiem...","muc_removed_info_membersonly":"__nickname__ został usunięty z pokoju ze względu na zmianę pokoju na tylko dla członków","muc_removed_shutdown":"Zostałeś usunięty z pokoju ze względu na zamknięcie usługi","Reason":"Powód","message_not_send":"Wystąpił błąd i twoja wiadomość nie została wysłana.","message_not_send_item-not-found":"Twoja wiadomość nie została wysłana ponieważ ten pokój nie istnieje","message_not_send_forbidden":"Twoja wiadomość nie została wysłana ponieważ nie masz głosu w tym pokoju","message_not_send_not-acceptable":"Twoja wiadomość nie została wysłana ponieważ nie jesteś właścicielem tego pokoju","This_room_has_been_closed":"Ten pokój został zamknięty","Room_logging_is_enabled":"Logowanie do pokoju jest włączone","A_password_is_required":"Hasło jest wymagane","You_are_not_on_the_member_list":"Nie jesteś na liście członków","You_are_banned_from_this_room":"Zostałeś zbanowany w tym pokoju","Your_desired_nickname_":"Twoja nazwa użytkownika jest już użyta. Spróbuj wybrać inną","The_maximum_number_":"Została osiągnięta maksymalna liczba użytkowników w tym pokoju","This_room_is_locked_":"Ten pokój jest zablokowany","You_are_not_allowed_to_create_":"Nie masz uprawnień do tworzenia pokoju","Alert":"Alarm","Call_started":null,"Call_terminated":null,"Carbon_copy":"Do wiadomości","Enable":"Włączone","jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":"Ok","PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":"jest __status__","You_received_a_message_from_an_unknown_sender_":"Masz wiadomość od nieznanego nadawcy. (__sender__) Chcesz to wyświetlić?","Your_roster_is_empty_add_":"Twoja lista jest pusta, dodaj kontakty  <a>Nowy kontakt</a>","onsmp_explanation_question":"Twój rozmówca próbuje się z Tobą połączyć. Autoryzacja z rozmówcą,  napisz odpowiedź.","onsmp_explanation_secret":"Twój rozmówca próbuje się z Tobą połączyć. Autoryzacja z rozmówcą,  wpisz hasło.","from_sender":"z __sender__","Verified_private_conversation_started":"Zweryfikowano Rozmowa prywatna rozpoczęta.","Unverified_private_conversation_started":"Niezweryfikowano Rozmowa prywatna rozpoczęta.","Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null}},"pt-BR":{"translation":{"Logging_in":"Entrando...","your_connection_is_unencrypted":"Sua conexão não é encriptada","your_connection_is_encrypted":"Sua conexão é encriptada","your_buddy_closed_the_private_connection":"Seu contato fechou a conexão privada","start_private":"Iniciar conversa privada","close_private":"Fechar conversa privada","your_buddy_is_verificated":"Seu contato está verificado","you_have_only_a_subscription_in_one_way":"Você só tem a inscrição one-way","authentication_query_sent":"Pergunta de autenticação enviada","your_message_wasnt_send_please_end_your_private_conversation":"Sua mensagem não foi enviada. Por favor finalize sua conversa privada","unencrypted_message_received":"Mensagem não encriptada recebida","not_available":"Indisponível","no_connection":"Sem conexão!","relogin":"reentrar","trying_to_start_private_conversation":"Tentando iniciar conversa privada","Verified":"Verificado","Unverified":"Não verificado","private_conversation_aborted":"Conversa privada abortada!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Seu contato encerrou a conversa privada! Você deveria fazer o mesmo.","conversation_is_now_verified":"Conversa verificada.","authentication_failed":"Autenticação falhou.","Creating_your_private_key_":"Criando sua chave privada: isso pode demorar um pouco.","Authenticating_a_buddy_helps_":"Autenticar seu contato ajuda a garantir que a pessoa com a qual você está falando é realmente a pessoa que ela alega ser.","How_do_you_want_to_authenticate_your_buddy":"Como você gostaria de se autenticar {{bid_name}} (<b>{{bid_jid}}</b>)?","Select_method":"Selecione o método...","Manual":"Manual","Question":"Pergunta","Secret":"Senha","To_verify_the_fingerprint_":"Para verificar o fingerprint, entre em contato com seu contato usando outro meio, de preferência seguro, como o telefone.","Your_fingerprint":"Seu fingerprint","Buddy_fingerprint":"Fingerprint do contato","Close":"Fechar","Compared":"Comparado","To_authenticate_using_a_question_":"Para autenticar seu contato faça uma pergunta, mas escolha que só ele saiba a resposta.","Ask":"Pergunta","To_authenticate_pick_a_secret_":"Para autenticar, escolha um segredo que somente você e seu contato saibam.","Compare":"Compare","Fingerprints":"Fingerprints","Authentication":"Autenticação","Message":"Mensagem","Add_buddy":"Adicionar contato","rename_buddy":"renomear contato","delete_buddy":"remover contato","Login":"Entrar","Username":"Usuário","Password":"Senha","Cancel":"Cancelar","Connect":"Conectar","Type_in_the_full_username_":"Digite seu nome completo e um apelido opcional.","Alias":"Apelido","Add":"Adicionar","Subscription_request":"Pedido de inscrição","You_have_a_request_from":"Você tem um pedido de","Deny":"Negar","Approve":"Aprovar","Remove_buddy":"Remover contato","You_are_about_to_remove_":"Você está prestes a remover {{bid_name}} (<b>{{bid_jid}}</b>) de sua lista de contatos. Todas as conversas serão fechadas.","Continue_without_chat":"Continue sem converar","Please_wait":"Por favor aguarde","Login_failed":"Autenticação da conversa falhou","Sorry_we_cant_authentikate_":"A autenticação com o servidor falhou. Talvez seja a senha errada?","Retry":"Voltar","clear_history":"Limpar histórico","New_message_from":"Nova mensagem de __name__","Should_we_notify_you_":"Devemos continuar notificando sobre novas mensagens no futuro?","Please_accept_":"Por favor clique no botão \"Permitir\" na parte superior.","Hide_offline":"Esconder contatos desconectados","Show_offline":"Mostrar contatos desconectados","About":"Sobre","dnd":"Não perturbe","Mute":"Mudo","Unmute":"Ligar","Subscription":"Inscrição","both":"ambos","Status":"Status","online":"online","chat":"conversa","away":"ausente","xa":"ausente por mais tempo","offline":"desativado","none":"nenhum","Unknown_instance_tag":"Marcação desconhecida da instância","Not_one_of_our_latest_keys":"Nenhuma de nossas ultimas chaves.","Received_an_unreadable_encrypted_message":"Mensagem encriptada ilegível foi recebida.","Online":"Online","Chatty":"Tagarela","Away":"Ausente","Extended_away":"Ausente por mais tempo","Offline":"Desativado","Friendship_request":"Pedido de amizade","Confirm":"Confirmar","Dismiss":"Ignorar","Remove":"Remover","Online_help":"Ajuda online","FN":"Nome completo","N":"  ","FAMILY":"Sobrenome","GIVEN":"Nome","NICKNAME":"Apelido","URL":"URL","ADR":"Endereço","STREET":"Rua, Av, etc","EXTADD":"Complemento","LOCALITY":"Localidade","REGION":"Região","PCODE":"CEP","CTRY":"País","TEL":"Telefone","NUMBER":"Número","EMAIL":"Email","USERID":"  ","ORG":"Empresa","ORGNAME":"Nome","ORGUNIT":"Unidade","TITLE":"Cargo","ROLE":"Rol","BDAY":"Data de nascimento","DESC":"Descrição","PHOTO":"  ","send_message":"Enviar mensagem","get_info":"Exibir informações","Settings":"Configurações","Priority":"Prioridade","Save":"Salvar","User_settings":"Configurações do usuário","A_fingerprint_":"O fingerprint é usado para certificar que a pessoa com a qual se está falando é que ela diz ser.","is":"é","Login_options":"Opções de login","BOSH_url":"BOSH URL","Domain":"Domínio","Resource":"Recurso","On_login":"Ao autenticar","Received_an_unencrypted_message":"Mensagem não encriptada recebida","Sorry_your_buddy_doesnt_provide_any_information":"Desculpe, seu contato não forneceu nenhuma informação","Info_about":"Informações sobre","Authentication_aborted":"Autenticação encerrada.","Authentication_request_received":"Pedido de autenticação recebido","Log_in_without_chat":"Entrar sem conversar","has_come_online":"ficou online","Unknown_sender":"Emissor desconhecido","Please_allow_access_to_microphone_and_camera":"Por favor clique no botão \"Permitir\" no topo, para conceder acesso ao seu microfone e câmera.","Incoming_call":"Recebendo chamada","from":"de","Do_you_want_to_accept_the_call_from":"Você aceita a chamada de","Reject":"Negar","Accept":"Aceitar","hang_up":"desligar","snapshot":"registrar imagem","mute_my_audio":"mudo","pause_my_video":"pausar vídeo","fullscreen":"tela cheia","Info":"Informações","Local_IP":"IP local","Remote_IP":"IP remoto","Local_Fingerprint":"Fingerprint local","Remote_Fingerprint":"Fingerprint remoto","Video_call_not_possible":"Chamada de vídeo impossível. Seu contato não suporta chamadas desse tipo.","Start_video_call":"Iniciar chamada de vídeo","Join_chat":null,"Join":null,"Room":null,"Nickname":"Apelido","left_the_building":null,"entered_the_room":null,"is_now_known_as":"__oldNickname__ agora é conhecido como __newNickname__","This_room_is":null,"muc_hidden":{"keyword":null,"description":"Não pode ser encontrado através de pesquisa"},"muc_membersonly":{"keyword":"apenas para membros","description":"você precisa estar na lista de membros"},"muc_moderated":{"keyword":null,"description":"Somente pessoas com \"voice\" podem enviar mensagens"},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":"Todos podem entrar"},"muc_passwordprotected":{"keyword":null,"description":"você precisa fornecer a senha correta"},"muc_persistent":{"keyword":null,"description":"Não será destruída se o último ocupante tiver saído"},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":"Sua identificação jabber só é exposta para administradores da sala"},"muc_temporary":{"keyword":null,"description":"Será destruída se o último ocupante tiver saído"},"muc_unmoderated":{"keyword":null,"description":"Todos tem permissão de enviar mensagens"},"muc_unsecured":{"keyword":null,"description":"Você não precisa de senha para entrar"},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":"Você já entrou nesta sala","This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":"__nickname__ foi banido da sala","muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":"Você foi removido da sala pois a sala foi alterada somente para membros e você não é um membro","muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":"Você ou seu navegador negou permissão para acessar audio/video","Use_local_audio_device":null,"Use_local_video_device":null,"is_":"é __status__","You_received_a_message_from_an_unknown_sender_":"Você recebeu uma mensagem de um emissor desconhecido (__sender__) Você quer mostrá-los?","Your_roster_is_empty_add_":"Sua lista está vazia, adicione um  <a>novo contato</a>","onsmp_explanation_question":"Seu contato está tentando determinar se ele realmente está falando contigo. Para autenticar seu contato,  entre com a resposta e clique em Responder.","onsmp_explanation_secret":"Seu contato está tentando determinar se ele realmente está falando contigo. Para autenticar seu contato,  escreva a senha.","from_sender":"de __sender__","Verified_private_conversation_started":"Verificado Conversa privada iniciada.","Unverified_private_conversation_started":"Não verificado Conversa privada iniciada.","Bookmark":"Favoritos","Auto-join":"Entrar Automaticamente","Edit_bookmark":"Editar favoritos","Room_logging_is_disabled":"Registro de log na sala está desativado","Room_is_now_non-anoymous":"A sala é não anônima agora","Room_is_now_semi-anonymous":"A sala é semi anônima agora","Do_you_want_to_change_the_default_room_configuration":"Você quer alterar as configurações da sala?","Default":"Padrão","Change":"Alterar","Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null}},"ro":{"translation":{"Logging_in":"Autentificare...","your_connection_is_unencrypted":"Conexiunea nu este criptată.","your_connection_is_encrypted":"Conexiunea este criptată.","your_buddy_closed_the_private_connection":"Interlocutorul a închis conexiunea privată.","start_private":"Pornește în privat","close_private":"Închide privat","your_buddy_is_verificated":"Interlocutorul este verificat.","you_have_only_a_subscription_in_one_way":"Subscrierea este într-o singură direcție.","authentication_query_sent":"Cererea de autentificare a fost trimisă.","your_message_wasnt_send_please_end_your_private_conversation":"Mesajul nu a fost trimis. Te rog închide conversația în privat.","unencrypted_message_received":"A fost primit un mesaj necriptat","not_available":"Indisponibil","no_connection":"Fără conexiune!","relogin":"Re-autentificare","trying_to_start_private_conversation":"Se încearcă deschiderea conversației în privat!","Verified":"Verificat","Unverified":"Neverificat","private_conversation_aborted":"Conversație în privat eșuată!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Interlocutorul a închis conversația în privat! Ar trebui să faci la fel și tu.","conversation_is_now_verified":"Conversația este acum verificată.","authentication_failed":"Autentificarea a eşuat.","Creating_your_private_key_":"Se crează cheia privată; ar putea să dureze ceva timp.","Authenticating_a_buddy_helps_":"Autentificând un contact ne asigură că persoana cu care vorbești este într-adevăr cine pretinde că este.","How_do_you_want_to_authenticate_your_buddy":"Cum vrei să te autentifici {{bid_name}} (<b>{{bid_jid}}</b>)","Select_method":"Alege metoda...","Manual":"Manual","Question":"Întrebare","Secret":"Secret","To_verify_the_fingerprint_":"Pentru a verifica amprenta, contactează interlocutorul printr-un canal de încredere, cum ar fi telefonul.","Your_fingerprint":"Amprenta ta","Buddy_fingerprint":"Amprenta interlocutorului","Close":"Închide","Compared":"Prin comparație","To_authenticate_using_a_question_":"Pentru autentificarea folosind o întrebare, alege o întrebare cu un răspuns cunoscut doar de tine și de interlocutor.","Ask":"Întreabă","To_authenticate_pick_a_secret_":"Pentru autentificare, alege un secret cunoscut doar de tine și de interlocutor.","Compare":"Compară","Fingerprints":"Amprente","Authentication":"Autentificare","Message":"Mesaj","Add_buddy":"Adaugă contact","rename_buddy":"redenumește contact","delete_buddy":"șterge contact","Login":"Logare","Username":"Utilizator","Password":"Parolă","Cancel":"Renunță","Connect":"Conectare","Type_in_the_full_username_":"Scrie numele complet al utilizatorului și un alias opțional.","Alias":"Alias","Add":"Adaugă","Subscription_request":"Cerere de subscriere","You_have_a_request_from":"Ai o cerere de la","Deny":"Refuză","Approve":"Aprobă","Remove_buddy":"Șterge contact","You_are_about_to_remove_":"Urmează să ștergi {{bid_name}} (<b>{{bid_jid}}</b>) din lista de contacte. Toate chat-urile asociate vor fi închise.","Continue_without_chat":"Continuă fără chat","Please_wait":"Te rog așteaptă","Login_failed":"Logarea pe chat a eșuat","Sorry_we_cant_authentikate_":"Autentificarea cu serverul de chat a eșuat. Poate parola este greșită ?","Retry":"Înapoi","clear_history":"Curăță istoria","New_message_from":"Un nou mesaj de la __name__","Should_we_notify_you_":"Vrei să fi notificat despre mesajele noi în viitor ?","Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null}},"ru":{"translation":{"Logging_in":"Вход в систему...","your_connection_is_unencrypted":"Ваше соединение не зашифровано.","your_connection_is_encrypted":"Ваше соединение зашифровано.","your_buddy_closed_the_private_connection":"Ваш собеседник закончил зашифрованное соединение.","start_private":"Начать зашифрованный чат","close_private":"Закончить зашифрованный чат","your_buddy_is_verificated":"Собеседник подтвержден.","you_have_only_a_subscription_in_one_way":"У вас только односторонняя подписка.","authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":"Сообщение не отправлено. Завершите зашифрованный чат, пожалуйста.","unencrypted_message_received":"Получено незашифрованное сообщение","not_available":"Не доступен","no_connection":"Нет соединения!","relogin":"переподключиться","trying_to_start_private_conversation":"Попытка начать зашифрованный чат!","Verified":"Подтверждено","Unverified":"Не подтверждено","private_conversation_aborted":"Зашифрованный чат отклонен!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Ваш собеседник завершил зашифрованный чат! Вы должны сделать тоже самое.","conversation_is_now_verified":"Чат теперь утвержден.","authentication_failed":"Ошибка авторизации.","Creating_your_private_key_":"Создается приватный ключ. Это может занять некоторое время","Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":"Выберите метод...","Manual":"Вручную","Question":"Вопрос","Secret":"Пароль","To_verify_the_fingerprint_":null,"Your_fingerprint":"Ваш отпечаток","Buddy_fingerprint":"Отпечаток собеседника","Close":"Закрыть","Compared":"Сравнение завершено","To_authenticate_using_a_question_":"Для авторизации с помощью вопроса выберите вопрос, ответ на который знаете только Вы и собеседник.","Ask":null,"To_authenticate_pick_a_secret_":"Для авторизации выберите пароль, который знаете только Вы и собеседник.","Compare":"Сравнить","Fingerprints":"Отпечатки","Authentication":"Авторизация","Message":"Сообщение","Add_buddy":"Добавить контакт","rename_buddy":"переименовать контакт","delete_buddy":"удалить контакт","Login":"Вход","Username":"Логин","Password":"Пароль","Cancel":"Отмена","Connect":"Подключить","Type_in_the_full_username_":"Введите полное имя пользователя и дополнительный псевдоним","Alias":"Псевдоним","Add":"Добавить","Subscription_request":"Запрос подписки","You_have_a_request_from":"Получен запрос от","Deny":"Отказ","Approve":"Подтвердить","Remove_buddy":"Удалить контакт","You_are_about_to_remove_":"Вы собираетесь удалить {{bid_name}} (<b>{{bid_jid}}</b>) из списка контактов. Все связанные с чаты будут закрыты.","Continue_without_chat":"Продолжить без чата","Please_wait":"Подождите…","Login_failed":"Неудачный вход в чат","Sorry_we_cant_authentikate_":"Неудачная попытка входа","Retry":"Назад","clear_history":"Очистить историю","New_message_from":"Новое сообщение от __name__","Should_we_notify_you_":"Уведомлять о новых сообщениях в будущем?","Please_accept_":"Нажмите кнопку \"Разрешить\" вверху страницы, пожалуйста","Hide_offline":"Спрятать отключенных","Show_offline":"Показать отключенных","About":"О проекте","dnd":"Не беспокоить","Mute":"Выкл. уведомления","Unmute":"Вкл. уведомления","Subscription":"Подписка","both":"оба","Status":"Статус","online":"в сети","chat":"готов общаться","away":"отошел","xa":"отсутствую","offline":"не в сети","none":"нет","Unknown_instance_tag":"Неизвестный тег.","Not_one_of_our_latest_keys":"Ни один из наших последних ключей","Received_an_unreadable_encrypted_message":"Получено нечитаемое зашифрованное сообщение","Online":"В сети","Chatty":"Готов общаться","Away":"Отошел","Extended_away":"Отсутствую","Offline":"Не в сети","Friendship_request":"Запрос на добавление в контакты","Confirm":"Подтвердить","Dismiss":"Отклонить","Remove":"Удалить","Online_help":"Онлайн помощь","FN":"Полное имя","N":null,"FAMILY":"Фамилия","GIVEN":"Имя","NICKNAME":"Ник","URL":"URL","ADR":"Адрес","STREET":"Улица","EXTADD":"Дополнительный адрес","LOCALITY":"Город","REGION":"Область","PCODE":"Индекс","CTRY":"Страна","TEL":"Телефон","NUMBER":"Номер","EMAIL":"Почта","USERID":null,"ORG":"Организация","ORGNAME":"Название","ORGUNIT":"Отдел","TITLE":"Должность","ROLE":"Обязанности","BDAY":"День рождения","DESC":"Описание","PHOTO":" Фото ","send_message":"Отправить сообщение","get_info":"Показать информацию","Settings":"Настройки","Priority":"Приоритет","Save":"Сохранить","User_settings":"Пользовательские настройки","A_fingerprint_":null,"is":"  ","Login_options":"Параметры входа","BOSH_url":"BOSH URL","Domain":"Домен","Resource":"Ресурс","On_login":"Автоматически подключаться","Received_an_unencrypted_message":"Получено незашифрованное сообщение","Sorry_your_buddy_doesnt_provide_any_information":"К сожалению, контакт не предоставил какой-либо информации.","Info_about":"Информация о","Authentication_aborted":"Аутентификация прервана.","Authentication_request_received":"Получен запрос проверки подлинности.","Log_in_without_chat":"Вход без чата","has_come_online":"появился в сети","Unknown_sender":"Неизвестный отправитель","Please_allow_access_to_microphone_and_camera":"Нажмите кнопку \"Разрешить\" вверху страницы, чтобы предоставить доступ к микрофону и камере.","Incoming_call":"Входящий вызов","from":"от","Do_you_want_to_accept_the_call_from":"Вы хотите принять вызов от","Reject":"Отклонить","Accept":"Принять","hang_up":"Завершить","snapshot":"Снимок","mute_my_audio":"Без звука","pause_my_video":"Остановить моё видео","fullscreen":"На весь экран","Info":"Инфо","Local_IP":"Мой IP","Remote_IP":"Удаленный IP","Local_Fingerprint":"Мой отпечаток","Remote_Fingerprint":"Удаленный отпечаток","Video_call_not_possible":"Видео-вызов невозможен. Ваш собеседник не поддерживает видео-вызовы.","Start_video_call":"Видео-вызов","Join_chat":"Присоединиться к комнате","Join":"Присоедениться","Room":"Комната","Nickname":"Ник","left_the_building":"__nickname__ выходит из комнаты","entered_the_room":"__nickname__  заходит в комнату","is_now_known_as":"__oldNickname__ теперь известен как __newNickname__","This_room_is":"Эта комната","muc_hidden":{"keyword":"скрыта","description":"не может быть найдена через поиск"},"muc_membersonly":{"keyword":"только для участников","description":"Вы должны быть в списке участников"},"muc_moderated":{"keyword":"модерируется","description":"Только пользователи с правом голоса могут отправлять сообщения"},"muc_nonanonymous":{"keyword":"неанонимная","description":"Ваш JID будет показан всем посетителям"},"muc_open":{"keyword":"открытая","description":"Любой пользователь может присоедениться"},"muc_passwordprotected":{"keyword":"защищена паролем","description":"Необходимо ввести правильный пароль"},"muc_persistent":{"keyword":"постоянная","description":"Не будет уничтожена, когда ее покинут все участники"},"muc_public":{"keyword":"публичная","description":"Может быть найдена через поиск"},"muc_semianonymous":{"keyword":"полу-анонимная","description":"Ваш JID могут увидеть только администраторы"},"muc_temporary":{"keyword":"временная","description":"Будет уничтожена как только не останется ни одного участника"},"muc_unmoderated":{"keyword":"не модерируется","description":"Любой посетитель может отправлять сообщения"},"muc_unsecured":{"keyword":"без пароля","description":"Не нужно вводить пароль для входа"},"Continue":"Далее","Server":"Сервер","Rooms_are_loaded":"Комнаты загружены","Could_load_only":"Подгрузка только __count__ комнат в автодополнении","muc_explanation":"Введите название комнаты, свой ник и пароль для входа в комнату","You_already_joined_this_room":"Вы уже в этой комнате","This_room_will_be_closed":"Эта комната была закрыта","Room_not_found_":"Новая комната будет создана","Loading_room_information":"Загрузка информации о комнате","Destroy":"Уничтожить","Leave":"Покинуть","changed_subject_to":"__nickname__ изменил тему комнаты на \"__subject__\"","muc_removed_kicked":"Вас выкинули из комнаты","muc_removed_info_kicked":"__nickname__ был удален из комнаты","muc_removed_banned":"Вас забанили в комнате","muc_removed_info_banned":"__nickname__ был забанен в комнате","muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":"Вы были исключены из комнаты, т.к. комната стала доступна только для членов комнаты, а Вы им не являетесь","muc_removed_info_membersonly":"__nickname__  исключен(а) из комнаты, т.к. комната стала доступна только для членов комнаты, а он(она) им не является","muc_removed_shutdown":"Вы были удалены из комнаты, т.к. сервис чат-комнат недоступен","Reason":"Причина","message_not_send":"Ваше сообщение не было отправлено из-за ошибки","message_not_send_item-not-found":"Ваше сообщение не было отправлено, т.к. этой комнаты не существует","message_not_send_forbidden":"Ваше сообщение не было отправлено, т.к. у Вас нет права голоса в этой комнате","message_not_send_not-acceptable":"Ваше сообщение не было отправлено, т.к. Вы не являетесь участником этой комнаты","This_room_has_been_closed":"Эта комната была закрыта","Room_logging_is_enabled":"Журналирование комнаты включено","A_password_is_required":"Необходим пароль","You_are_not_on_the_member_list":"Вы не в списке участников","You_are_banned_from_this_room":"Вас забанили в этой комнате","Your_desired_nickname_":"Данное имя пользователя уже занято, пожалуйста, выберите другое имя пользователя","The_maximum_number_":"Достигнут лимит максимального количества посетителей этой комнаты","This_room_is_locked_":"Эта комната заблокирована","You_are_not_allowed_to_create_":"Вы не можете создавать комнаты","Alert":"Внимание","Call_started":"Вызов начался","Call_terminated":"Вызов завершен","Carbon_copy":"Копировать сообщения","Enable":"Включить","jingle_reason_busy":"занято","jingle_reason_decline":"запрещено","jingle_reason_success":"сбросили","Media_failure":"Ошибка передачи медиа","No_local_audio_device":"Нет локального аудио-устройства.","No_local_video_device":"Нет локального видео-устройства.","Ok":"Ок","PermissionDeniedError":"Вы или Ваш браузер запретили использовать микрофон/камеру","Use_local_audio_device":"Использовать локальное аудио-устройство.","Use_local_video_device":"Использовать локальное видео-устройство.","is_":"__status__","You_received_a_message_from_an_unknown_sender_":"Вы получили сообщение от неизвестного отправителя (__sender__)","Your_roster_is_empty_add_":"Ваш список контактов пуст, добавить  <a>новый контакт</a>","onsmp_explanation_question":"Собеседник пытается определить, что общается действительно с Вами.","onsmp_explanation_secret":"Собеседник пытается определить, что общается действительно с Вами. введите пароль.","from_sender":"от __sender__","Verified_private_conversation_started":"Подтверждено Зашифрованный чат начат.","Unverified_private_conversation_started":"Не подтверждено Зашифрованный чат начат.","Bookmark":"Закладка","Auto-join":"Автоматически входить","Edit_bookmark":"Редактировать закладку","Room_logging_is_disabled":"Журналирование комнаты отключено","Room_is_now_non-anoymous":"Комната теперь не анонимная","Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":"Вы хотите изменить стандартную конфигурацию комнаты?","Default":"Станд.","Change":"Изменить","Send_file":"Отправить файл","setting-explanation-carbon":"С включенным Carbon Copy Ваш XMPP сервер будет отправлять копию каждого входящего сообщения на все подключенные устройства.","setting-explanation-login":"Если эта опция включена, то чат будет начинаться сразу после аутентификации.","setting-explanation-priority":"Если вы подключены к одному аккаунту с нескольких устройств, то XMPP сервер будет доставлять сообщения на клиент с наивысшим приоритетом.","setting-explanation-xmpp":"Эти настройки используются для подключения к XMPP серверу."}}};
 
 /*!
  * Source: lib/favico.js/favico.js, license: MIT, url: https://github.com/ejci/favico.js
@@ -34388,7 +39613,7 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
  * @license MIT
  * @fileOverview Favico animations
  * @author Miroslav Magda, http://blog.ejci.net
- * @version 0.3.9
+ * @version 0.3.10
  */
 
 /**
@@ -34408,21 +39633,21 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
  *    win: top
  * });
  */
-(function() {
+(function () {
 
-	var Favico = (function(opt) {
+	var Favico = (function (opt) {
 		'use strict';
 		opt = (opt) ? opt : {};
 		var _def = {
-			bgColor : '#d00',
-			textColor : '#fff',
-			fontFamily : 'sans-serif', //Arial,Verdana,Times New Roman,serif,sans-serif,...
-			fontStyle : 'bold', //normal,italic,oblique,bold,bolder,lighter,100,200,300,400,500,600,700,800,900
-			type : 'circle',
-			position : 'down', // down, up, left, leftup (upleft)
-			animation : 'slide',
-			elementId : false,
-			dataUrl : false,
+			bgColor: '#d00',
+			textColor: '#fff',
+			fontFamily: 'sans-serif', //Arial,Verdana,Times New Roman,serif,sans-serif,...
+			fontStyle: 'bold', //normal,italic,oblique,bold,bolder,lighter,100,200,300,400,500,600,700,800,900
+			type: 'circle',
+			position: 'down', // down, up, left, leftup (upleft)
+			animation: 'slide',
+			elementId: false,
+			dataUrl: false,
 			win: window
 		};
 		var _opt, _orig, _h, _w, _canvas, _context, _img, _ready, _lastBadge, _running, _readyCb, _stop, _browser, _animTimeout, _drawTimeout, _doc;
@@ -34436,13 +39661,13 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		_browser.supported = (_browser.chrome || _browser.ff || _browser.opera);
 
 		var _queue = [];
-		_readyCb = function() {
+		_readyCb = function () {
 		};
 		_ready = _stop = false;
 		/**
 		 * Initialize favico
 		 */
-		var init = function() {
+		var init = function () {
 			//merge initial options
 			_opt = merge(_def, opt);
 			_opt.bgColor = hexToRgb(_opt.bgColor);
@@ -34488,9 +39713,8 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 			_img = document.createElement('img');
 			if (_orig.hasAttribute('href')) {
 				_img.setAttribute('crossOrigin', 'anonymous');
-				_img.setAttribute('src', _orig.getAttribute('href'));
 				//get width/height
-				_img.onload = function() {
+				_img.onload = function () {
 					_h = (_img.height > 0) ? _img.height : 32;
 					_w = (_img.width > 0) ? _img.width : 32;
 					_canvas.height = _h;
@@ -34498,16 +39722,19 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 					_context = _canvas.getContext('2d');
 					icon.ready();
 				};
+				_img.setAttribute('src', _orig.getAttribute('href'));
 			} else {
+				_img.onload = function () {
+					_h = 32;
+					_w = 32;
+					_img.height = _h;
+					_img.width = _w;
+					_canvas.height = _h;
+					_canvas.width = _w;
+					_context = _canvas.getContext('2d');
+					icon.ready();
+				};
 				_img.setAttribute('src', '');
-				_h = 32;
-				_w = 32;
-				_img.height = _h;
-				_img.width = _w;
-				_canvas.height = _h;
-				_canvas.width = _w;
-				_context = _canvas.getContext('2d');
-				icon.ready();
 			}
 
 		};
@@ -34518,7 +39745,7 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		/**
 		 * Icon is ready (reset icon) and start animation (if ther is any)
 		 */
-		icon.ready = function() {
+		icon.ready = function () {
 			_ready = true;
 			icon.reset();
 			_readyCb();
@@ -34526,7 +39753,7 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		/**
 		 * Reset icon to default state
 		 */
-		icon.reset = function() {
+		icon.reset = function () {
 			//reset
 			if (!_ready) {
 				return;
@@ -34546,11 +39773,11 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		/**
 		 * Start animation
 		 */
-		icon.start = function() {
+		icon.start = function () {
 			if (!_ready || _running) {
 				return;
 			}
-			var finished = function() {
+			var finished = function () {
 				_lastBadge = _queue[0];
 				_running = false;
 				if (_queue.length > 0) {
@@ -34562,19 +39789,19 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 			};
 			if (_queue.length > 0) {
 				_running = true;
-				var run = function() {
+				var run = function () {
 					// apply options for this animation
-					['type', 'animation', 'bgColor', 'textColor', 'fontFamily', 'fontStyle'].forEach(function(a) {
-						if ( a in _queue[0].options) {
+					['type', 'animation', 'bgColor', 'textColor', 'fontFamily', 'fontStyle'].forEach(function (a) {
+						if (a in _queue[0].options) {
 							_opt[a] = _queue[0].options[a];
 						}
 					});
-					animation.run(_queue[0].options, function() {
+					animation.run(_queue[0].options, function () {
 						finished();
 					}, false);
 				};
 				if (_lastBadge) {
-					animation.run(_lastBadge.options, function() {
+					animation.run(_lastBadge.options, function () {
 						run();
 					}, true);
 				} else {
@@ -34587,8 +39814,8 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		 * Badge types
 		 */
 		var type = {};
-		var options = function(opt) {
-			opt.n = (( typeof opt.n) === 'number') ? Math.abs(opt.n | 0) : opt.n;
+		var options = function (opt) {
+			opt.n = ((typeof opt.n) === 'number') ? Math.abs(opt.n | 0) : opt.n;
 			opt.x = _w * opt.x;
 			opt.y = _h * opt.y;
 			opt.w = _w * opt.w;
@@ -34600,7 +39827,7 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		 * Generate circle
 		 * @param {Object} opt Badge options
 		 */
-		type.circle = function(opt) {
+		type.circle = function (opt) {
 			opt = options(opt);
 			var more = false;
 			if (opt.len === 2) {
@@ -34637,8 +39864,8 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 			_context.stroke();
 			_context.fillStyle = 'rgba(' + _opt.textColor.r + ',' + _opt.textColor.g + ',' + _opt.textColor.b + ',' + opt.o + ')';
 			//_context.fillText((more) ? '9+' : opt.n, Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.15));
-			if (( typeof opt.n) === 'number' && opt.n > 999) {
-				_context.fillText(((opt.n > 9999) ? 9 : Math.floor(opt.n / 1000) ) + 'k+', Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.2));
+			if ((typeof opt.n) === 'number' && opt.n > 999) {
+				_context.fillText(((opt.n > 9999) ? 9 : Math.floor(opt.n / 1000)) + 'k+', Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.2));
 			} else {
 				_context.fillText(opt.n, Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.15));
 			}
@@ -34648,7 +39875,7 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		 * Generate rectangle
 		 * @param {Object} opt Badge options
 		 */
-		type.rectangle = function(opt) {
+		type.rectangle = function (opt) {
 			opt = options(opt);
 			var more = false;
 			if (opt.len === 2) {
@@ -34669,8 +39896,8 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 			_context.fillRect(opt.x, opt.y, opt.w, opt.h);
 			_context.fillStyle = 'rgba(' + _opt.textColor.r + ',' + _opt.textColor.g + ',' + _opt.textColor.b + ',' + opt.o + ')';
 			//_context.fillText((more) ? '9+' : opt.n, Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.15));
-			if (( typeof opt.n) === 'number' && opt.n > 999) {
-				_context.fillText(((opt.n > 9999) ? 9 : Math.floor(opt.n / 1000) ) + 'k+', Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.2));
+			if ((typeof opt.n) === 'number' && opt.n > 999) {
+				_context.fillText(((opt.n > 9999) ? 9 : Math.floor(opt.n / 1000)) + 'k+', Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.2));
 			} else {
 				_context.fillText(opt.n, Math.floor(opt.x + opt.w / 2), Math.floor(opt.y + opt.h - opt.h * 0.15));
 			}
@@ -34680,17 +39907,17 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		/**
 		 * Set badge
 		 */
-		var badge = function(number, opts) {
-			opts = (( typeof opts) === 'string' ? {
-				animation : opts
+		var badge = function (number, opts) {
+			opts = ((typeof opts) === 'string' ? {
+				animation: opts
 			} : opts) || {};
-			_readyCb = function() {
+			_readyCb = function () {
 				try {
-					if ( typeof (number) === 'number' ? (number > 0) : (number !== '')) {
+					if (typeof (number) === 'number' ? (number > 0) : (number !== '')) {
 						var q = {
-							type : 'badge',
-							options : {
-								n : number
+							type: 'badge',
+							options: {
+								n: number
 							}
 						};
 						if ('animation' in opts && animation.types['' + opts.animation]) {
@@ -34699,13 +39926,13 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 						if ('type' in opts && type['' + opts.type]) {
 							q.options.type = '' + opts.type;
 						}
-						['bgColor', 'textColor'].forEach(function(o) {
-							if ( o in opts) {
+						['bgColor', 'textColor'].forEach(function (o) {
+							if (o in opts) {
 								q.options[o] = hexToRgb(opts[o]);
 							}
 						});
-						['fontStyle', 'fontFamily'].forEach(function(o) {
-							if ( o in opts) {
+						['fontStyle', 'fontFamily'].forEach(function (o) {
+							if (o in opts) {
 								q.options[o] = opts[o];
 							}
 						});
@@ -34717,7 +39944,7 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 					} else {
 						icon.reset();
 					}
-				} catch(e) {
+				} catch (e) {
 					throw new Error('Error setting badge. Message: ' + e.message);
 				}
 			};
@@ -34729,21 +39956,23 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		/**
 		 * Set image as icon
 		 */
-		var image = function(imageElement) {
-			_readyCb = function() {
+		var image = function (imageElement) {
+			_readyCb = function () {
 				try {
 					var w = imageElement.width;
 					var h = imageElement.height;
 					var newImg = document.createElement('img');
 					var ratio = (w / _w < h / _h) ? (w / _w) : (h / _h);
 					newImg.setAttribute('crossOrigin', 'anonymous');
+					newImg.onload=function(){
+						_context.clearRect(0, 0, _w, _h);
+						_context.drawImage(newImg, 0, 0, _w, _h);
+						link.setIcon(_canvas);
+					};
 					newImg.setAttribute('src', imageElement.getAttribute('src'));
 					newImg.height = (h / ratio);
 					newImg.width = (w / ratio);
-					_context.clearRect(0, 0, _w, _h);
-					_context.drawImage(newImg, 0, 0, _w, _h);
-					link.setIcon(_canvas);
-				} catch(e) {
+				} catch (e) {
 					throw new Error('Error setting image. Message: ' + e.message);
 				}
 			};
@@ -34754,8 +39983,8 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		/**
 		 * Set video as icon
 		 */
-		var video = function(videoElement) {
-			_readyCb = function() {
+		var video = function (videoElement) {
+			_readyCb = function () {
 				try {
 					if (videoElement === 'stop') {
 						_stop = true;
@@ -34766,11 +39995,11 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 					//var w = videoElement.width;
 					//var h = videoElement.height;
 					//var ratio = (w / _w < h / _h) ? (w / _w) : (h / _h);
-					videoElement.addEventListener('play', function() {
+					videoElement.addEventListener('play', function () {
 						drawVideo(this);
 					}, false);
 
-				} catch(e) {
+				} catch (e) {
 					throw new Error('Error setting video. Message: ' + e.message);
 				}
 			};
@@ -34781,18 +40010,18 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		/**
 		 * Set video as icon
 		 */
-		var webcam = function(action) {
+		var webcam = function (action) {
 			//UR
 			if (!window.URL || !window.URL.createObjectURL) {
 				window.URL = window.URL || {};
-				window.URL.createObjectURL = function(obj) {
+				window.URL.createObjectURL = function (obj) {
 					return obj;
 				};
 			}
 			if (_browser.supported) {
 				var newVideo = false;
 				navigator.getUserMedia = navigator.getUserMedia || navigator.oGetUserMedia || navigator.msGetUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
-				_readyCb = function() {
+				_readyCb = function () {
 					try {
 						if (action === 'stop') {
 							_stop = true;
@@ -34804,15 +40033,15 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 						newVideo.width = _w;
 						newVideo.height = _h;
 						navigator.getUserMedia({
-							video : true,
-							audio : false
-						}, function(stream) {
+							video: true,
+							audio: false
+						}, function (stream) {
 							newVideo.src = URL.createObjectURL(stream);
 							newVideo.play();
 							drawVideo(newVideo);
-						}, function() {
+						}, function () {
 						});
-					} catch(e) {
+					} catch (e) {
 						throw new Error('Error setting webcam. Message: ' + e.message);
 					}
 				};
@@ -34834,10 +40063,12 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 			try {
 				_context.clearRect(0, 0, _w, _h);
 				_context.drawImage(video, 0, 0, _w, _h);
-			} catch(e) {
+			} catch (e) {
 
 			}
-			_drawTimeout = setTimeout(drawVideo, animation.duration, video);
+			_drawTimeout = setTimeout(function () {
+				drawVideo(video);
+			}, animation.duration);
 			link.setIcon(_canvas);
 		}
 
@@ -34845,10 +40076,10 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		/**
 		 * Get icon from HEAD tag or create a new <link> element
 		 */
-		link.getIcon = function() {
+		link.getIcon = function () {
 			var elm = false;
 			//get link element
-			var getLink = function() {
+			var getLink = function () {
 				var link = _doc.getElementsByTagName('head')[0].getElementsByTagName('link');
 				for (var l = link.length, i = (l - 1); i >= 0; i--) {
 					if ((/(^|\s)icon(\s|$)/i).test(link[i].getAttribute('rel'))) {
@@ -34875,7 +40106,7 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 			elm.setAttribute('type', 'image/png');
 			return elm;
 		};
-		link.setIcon = function(canvas) {
+		link.setIcon = function (canvas) {
 			var url = canvas.toDataURL('image/png');
 			if (_opt.dataUrl) {
 				//if using custom exporter
@@ -34917,14 +40148,14 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		//HEX to RGB convertor
 		function hexToRgb(hex) {
 			var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-			hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+			hex = hex.replace(shorthandRegex, function (m, r, g, b) {
 				return r + r + g + g + b + b;
 			});
 			var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 			return result ? {
-				r : parseInt(result[1], 16),
-				g : parseInt(result[2], 16),
-				b : parseInt(result[3], 16)
+				r: parseInt(result[1], 16),
+				g: parseInt(result[2], 16),
+				b: parseInt(result[3], 16)
 			} : false;
 		}
 
@@ -34964,214 +40195,214 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		 */
 		animation.types = {};
 		animation.types.fade = [{
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 0.0
+			x: 0.4,
+			y: 0.4,
+			w: 0.6,
+			h: 0.6,
+			o: 0.0
 		}, {
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 0.1
-		}, {
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 0.2
-		}, {
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 0.3
-		}, {
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 0.4
-		}, {
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 0.5
-		}, {
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 0.6
-		}, {
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 0.7
-		}, {
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 0.8
-		}, {
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 0.9
-		}, {
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 1.0
-		}];
+				x: 0.4,
+				y: 0.4,
+				w: 0.6,
+				h: 0.6,
+				o: 0.1
+			}, {
+				x: 0.4,
+				y: 0.4,
+				w: 0.6,
+				h: 0.6,
+				o: 0.2
+			}, {
+				x: 0.4,
+				y: 0.4,
+				w: 0.6,
+				h: 0.6,
+				o: 0.3
+			}, {
+				x: 0.4,
+				y: 0.4,
+				w: 0.6,
+				h: 0.6,
+				o: 0.4
+			}, {
+				x: 0.4,
+				y: 0.4,
+				w: 0.6,
+				h: 0.6,
+				o: 0.5
+			}, {
+				x: 0.4,
+				y: 0.4,
+				w: 0.6,
+				h: 0.6,
+				o: 0.6
+			}, {
+				x: 0.4,
+				y: 0.4,
+				w: 0.6,
+				h: 0.6,
+				o: 0.7
+			}, {
+				x: 0.4,
+				y: 0.4,
+				w: 0.6,
+				h: 0.6,
+				o: 0.8
+			}, {
+				x: 0.4,
+				y: 0.4,
+				w: 0.6,
+				h: 0.6,
+				o: 0.9
+			}, {
+				x: 0.4,
+				y: 0.4,
+				w: 0.6,
+				h: 0.6,
+				o: 1.0
+			}];
 		animation.types.none = [{
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 1
+			x: 0.4,
+			y: 0.4,
+			w: 0.6,
+			h: 0.6,
+			o: 1
 		}];
 		animation.types.pop = [{
-			x : 1,
-			y : 1,
-			w : 0,
-			h : 0,
-			o : 1
+			x: 1,
+			y: 1,
+			w: 0,
+			h: 0,
+			o: 1
 		}, {
-			x : 0.9,
-			y : 0.9,
-			w : 0.1,
-			h : 0.1,
-			o : 1
-		}, {
-			x : 0.8,
-			y : 0.8,
-			w : 0.2,
-			h : 0.2,
-			o : 1
-		}, {
-			x : 0.7,
-			y : 0.7,
-			w : 0.3,
-			h : 0.3,
-			o : 1
-		}, {
-			x : 0.6,
-			y : 0.6,
-			w : 0.4,
-			h : 0.4,
-			o : 1
-		}, {
-			x : 0.5,
-			y : 0.5,
-			w : 0.5,
-			h : 0.5,
-			o : 1
-		}, {
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 1
-		}];
+				x: 0.9,
+				y: 0.9,
+				w: 0.1,
+				h: 0.1,
+				o: 1
+			}, {
+				x: 0.8,
+				y: 0.8,
+				w: 0.2,
+				h: 0.2,
+				o: 1
+			}, {
+				x: 0.7,
+				y: 0.7,
+				w: 0.3,
+				h: 0.3,
+				o: 1
+			}, {
+				x: 0.6,
+				y: 0.6,
+				w: 0.4,
+				h: 0.4,
+				o: 1
+			}, {
+				x: 0.5,
+				y: 0.5,
+				w: 0.5,
+				h: 0.5,
+				o: 1
+			}, {
+				x: 0.4,
+				y: 0.4,
+				w: 0.6,
+				h: 0.6,
+				o: 1
+			}];
 		animation.types.popFade = [{
-			x : 0.75,
-			y : 0.75,
-			w : 0,
-			h : 0,
-			o : 0
+			x: 0.75,
+			y: 0.75,
+			w: 0,
+			h: 0,
+			o: 0
 		}, {
-			x : 0.65,
-			y : 0.65,
-			w : 0.1,
-			h : 0.1,
-			o : 0.2
-		}, {
-			x : 0.6,
-			y : 0.6,
-			w : 0.2,
-			h : 0.2,
-			o : 0.4
-		}, {
-			x : 0.55,
-			y : 0.55,
-			w : 0.3,
-			h : 0.3,
-			o : 0.6
-		}, {
-			x : 0.50,
-			y : 0.50,
-			w : 0.4,
-			h : 0.4,
-			o : 0.8
-		}, {
-			x : 0.45,
-			y : 0.45,
-			w : 0.5,
-			h : 0.5,
-			o : 0.9
-		}, {
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 1
-		}];
+				x: 0.65,
+				y: 0.65,
+				w: 0.1,
+				h: 0.1,
+				o: 0.2
+			}, {
+				x: 0.6,
+				y: 0.6,
+				w: 0.2,
+				h: 0.2,
+				o: 0.4
+			}, {
+				x: 0.55,
+				y: 0.55,
+				w: 0.3,
+				h: 0.3,
+				o: 0.6
+			}, {
+				x: 0.50,
+				y: 0.50,
+				w: 0.4,
+				h: 0.4,
+				o: 0.8
+			}, {
+				x: 0.45,
+				y: 0.45,
+				w: 0.5,
+				h: 0.5,
+				o: 0.9
+			}, {
+				x: 0.4,
+				y: 0.4,
+				w: 0.6,
+				h: 0.6,
+				o: 1
+			}];
 		animation.types.slide = [{
-			x : 0.4,
-			y : 1,
-			w : 0.6,
-			h : 0.6,
-			o : 1
+			x: 0.4,
+			y: 1,
+			w: 0.6,
+			h: 0.6,
+			o: 1
 		}, {
-			x : 0.4,
-			y : 0.9,
-			w : 0.6,
-			h : 0.6,
-			o : 1
-		}, {
-			x : 0.4,
-			y : 0.9,
-			w : 0.6,
-			h : 0.6,
-			o : 1
-		}, {
-			x : 0.4,
-			y : 0.8,
-			w : 0.6,
-			h : 0.6,
-			o : 1
-		}, {
-			x : 0.4,
-			y : 0.7,
-			w : 0.6,
-			h : 0.6,
-			o : 1
-		}, {
-			x : 0.4,
-			y : 0.6,
-			w : 0.6,
-			h : 0.6,
-			o : 1
-		}, {
-			x : 0.4,
-			y : 0.5,
-			w : 0.6,
-			h : 0.6,
-			o : 1
-		}, {
-			x : 0.4,
-			y : 0.4,
-			w : 0.6,
-			h : 0.6,
-			o : 1
-		}];
+				x: 0.4,
+				y: 0.9,
+				w: 0.6,
+				h: 0.6,
+				o: 1
+			}, {
+				x: 0.4,
+				y: 0.9,
+				w: 0.6,
+				h: 0.6,
+				o: 1
+			}, {
+				x: 0.4,
+				y: 0.8,
+				w: 0.6,
+				h: 0.6,
+				o: 1
+			}, {
+				x: 0.4,
+				y: 0.7,
+				w: 0.6,
+				h: 0.6,
+				o: 1
+			}, {
+				x: 0.4,
+				y: 0.6,
+				w: 0.6,
+				h: 0.6,
+				o: 1
+			}, {
+				x: 0.4,
+				y: 0.5,
+				w: 0.6,
+				h: 0.6,
+				o: 1
+			}, {
+				x: 0.4,
+				y: 0.4,
+				w: 0.6,
+				h: 0.6,
+				o: 1
+			}];
 		/**
 		 * Run animation
 		 * @param {Object} opt Animation options
@@ -35179,18 +40410,18 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		 * @param {Object} revert Reverse order? true|false
 		 * @param {Object} step Optional step number (frame bumber)
 		 */
-		animation.run = function(opt, cb, revert, step) {
+		animation.run = function (opt, cb, revert, step) {
 			var animationType = animation.types[isPageHidden() ? 'none' : _opt.animation];
 			if (revert === true) {
-				step = ( typeof step !== 'undefined') ? step : animationType.length - 1;
+				step = (typeof step !== 'undefined') ? step : animationType.length - 1;
 			} else {
-				step = ( typeof step !== 'undefined') ? step : 0;
+				step = (typeof step !== 'undefined') ? step : 0;
 			}
-			cb = (cb) ? cb : function() {
+			cb = (cb) ? cb : function () {
 			};
 			if ((step < animationType.length) && (step >= 0)) {
 				type[_opt.type](merge(opt, animationType[step]));
-				_animTimeout = setTimeout(function() {
+				_animTimeout = setTimeout(function () {
 					if (revert) {
 						step = step - 1;
 					} else {
@@ -35208,25 +40439,25 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 		//auto init
 		init();
 		return {
-			badge : badge,
-			video : video,
-			image : image,
-			webcam : webcam,
-			reset : icon.reset,
-			browser : {
-				supported : _browser.supported
+			badge: badge,
+			video: video,
+			image: image,
+			webcam: webcam,
+			reset: icon.reset,
+			browser: {
+				supported: _browser.supported
 			}
 		};
 	});
 
 	// AMD / RequireJS
-	if ( typeof define !== 'undefined' && define.amd) {
-		define([], function() {
+	if (typeof define !== 'undefined' && define.amd) {
+		define([], function () {
 			return Favico;
 		});
 	}
 	// CommonJS
-	else if ( typeof module !== 'undefined' && module.exports) {
+	else if (typeof module !== 'undefined' && module.exports) {
 		module.exports = Favico;
 	}
 	// included directly via <script> tag
@@ -35235,3 +40466,487 @@ var I18next = {"de":{"translation":{"Logging_in":"Login läuft…","your_connect
 	}
 
 })();
+
+
+/*!
+ * Source: lib/emojione/lib/js/emojione.js, license: CC-BY 4.0, url: http://emojione.com
+ */
+/* jshint maxerr: 10000 */
+/* jslint unused: true */
+/* jshint shadow: true */
+/* jshint -W075 */
+(function(ns){
+    // this list must be ordered from largest length of the value array, index 0, to the shortest
+    ns.emojioneList = {':kiss_ww:':["1f469-200d-2764-fe0f-200d-1f48b-200d-1f469","1f469-2764-1f48b-1f469"],':couplekiss_ww:':["1f469-200d-2764-fe0f-200d-1f48b-200d-1f469","1f469-2764-1f48b-1f469"],':kiss_mm:':["1f468-200d-2764-fe0f-200d-1f48b-200d-1f468","1f468-2764-1f48b-1f468"],':couplekiss_mm:':["1f468-200d-2764-fe0f-200d-1f48b-200d-1f468","1f468-2764-1f48b-1f468"],':family_mmbb:':["1f468-200d-1f468-200d-1f466-200d-1f466","1f468-1f468-1f466-1f466"],':family_mmgb:':["1f468-200d-1f468-200d-1f467-200d-1f466","1f468-1f468-1f467-1f466"],':family_mmgg:':["1f468-200d-1f468-200d-1f467-200d-1f467","1f468-1f468-1f467-1f467"],':family_mwbb:':["1f468-200d-1f469-200d-1f466-200d-1f466","1f468-1f469-1f466-1f466"],':family_mwgb:':["1f468-200d-1f469-200d-1f467-200d-1f466","1f468-1f469-1f467-1f466"],':family_mwgg:':["1f468-200d-1f469-200d-1f467-200d-1f467","1f468-1f469-1f467-1f467"],':family_wwbb:':["1f469-200d-1f469-200d-1f466-200d-1f466","1f469-1f469-1f466-1f466"],':family_wwgb:':["1f469-200d-1f469-200d-1f467-200d-1f466","1f469-1f469-1f467-1f466"],':family_wwgg:':["1f469-200d-1f469-200d-1f467-200d-1f467","1f469-1f469-1f467-1f467"],':couple_ww:':["1f469-200d-2764-fe0f-200d-1f469","1f469-2764-1f469"],':couple_with_heart_ww:':["1f469-200d-2764-fe0f-200d-1f469","1f469-2764-1f469"],':couple_mm:':["1f468-200d-2764-fe0f-200d-1f468","1f468-2764-1f468"],':couple_with_heart_mm:':["1f468-200d-2764-fe0f-200d-1f468","1f468-2764-1f468"],':family_mmb:':["1f468-200d-1f468-200d-1f466","1f468-1f468-1f466"],':family_mmg:':["1f468-200d-1f468-200d-1f467","1f468-1f468-1f467"],':family_mwg:':["1f468-200d-1f469-200d-1f467","1f468-1f469-1f467"],':family_wwb:':["1f469-200d-1f469-200d-1f466","1f469-1f469-1f466"],':family_wwg:':["1f469-200d-1f469-200d-1f467","1f469-1f469-1f467"],':eye_in_speech_bubble:':["1f441-200d-1f5e8","1f441-1f5e8"],':hash:':["0023-fe0f-20e3","0023-20e3"],':zero:':["0030-fe0f-20e3","0030-20e3"],':one:':["0031-fe0f-20e3","0031-20e3"],':two:':["0032-fe0f-20e3","0032-20e3"],':three:':["0033-fe0f-20e3","0033-20e3"],':four:':["0034-fe0f-20e3","0034-20e3"],':five:':["0035-fe0f-20e3","0035-20e3"],':six:':["0036-fe0f-20e3","0036-20e3"],':seven:':["0037-fe0f-20e3","0037-20e3"],':eight:':["0038-fe0f-20e3","0038-20e3"],':nine:':["0039-fe0f-20e3","0039-20e3"],':asterisk:':["002a-fe0f-20e3","002a-20e3"],':keycap_asterisk:':["002a-fe0f-20e3","002a-20e3"],':metal_tone5:':["1f918-1f3ff"],':sign_of_the_horns_tone5:':["1f918-1f3ff"],':metal_tone4:':["1f918-1f3fe"],':sign_of_the_horns_tone4:':["1f918-1f3fe"],':metal_tone3:':["1f918-1f3fd"],':sign_of_the_horns_tone3:':["1f918-1f3fd"],':metal_tone2:':["1f918-1f3fc"],':sign_of_the_horns_tone2:':["1f918-1f3fc"],':metal_tone1:':["1f918-1f3fb"],':sign_of_the_horns_tone1:':["1f918-1f3fb"],':bath_tone5:':["1f6c0-1f3ff"],':bath_tone4:':["1f6c0-1f3fe"],':bath_tone3:':["1f6c0-1f3fd"],':bath_tone2:':["1f6c0-1f3fc"],':bath_tone1:':["1f6c0-1f3fb"],':walking_tone5:':["1f6b6-1f3ff"],':walking_tone4:':["1f6b6-1f3fe"],':walking_tone3:':["1f6b6-1f3fd"],':walking_tone2:':["1f6b6-1f3fc"],':walking_tone1:':["1f6b6-1f3fb"],':mountain_bicyclist_tone5:':["1f6b5-1f3ff"],':mountain_bicyclist_tone4:':["1f6b5-1f3fe"],':mountain_bicyclist_tone3:':["1f6b5-1f3fd"],':mountain_bicyclist_tone2:':["1f6b5-1f3fc"],':mountain_bicyclist_tone1:':["1f6b5-1f3fb"],':bicyclist_tone5:':["1f6b4-1f3ff"],':bicyclist_tone4:':["1f6b4-1f3fe"],':bicyclist_tone3:':["1f6b4-1f3fd"],':bicyclist_tone2:':["1f6b4-1f3fc"],':bicyclist_tone1:':["1f6b4-1f3fb"],':rowboat_tone5:':["1f6a3-1f3ff"],':rowboat_tone4:':["1f6a3-1f3fe"],':rowboat_tone3:':["1f6a3-1f3fd"],':rowboat_tone2:':["1f6a3-1f3fc"],':rowboat_tone1:':["1f6a3-1f3fb"],':pray_tone5:':["1f64f-1f3ff"],':pray_tone4:':["1f64f-1f3fe"],':pray_tone3:':["1f64f-1f3fd"],':pray_tone2:':["1f64f-1f3fc"],':pray_tone1:':["1f64f-1f3fb"],':person_with_pouting_face_tone5:':["1f64e-1f3ff"],':person_with_pouting_face_tone4:':["1f64e-1f3fe"],':person_with_pouting_face_tone3:':["1f64e-1f3fd"],':person_with_pouting_face_tone2:':["1f64e-1f3fc"],':person_with_pouting_face_tone1:':["1f64e-1f3fb"],':person_frowning_tone5:':["1f64d-1f3ff"],':person_frowning_tone4:':["1f64d-1f3fe"],':person_frowning_tone3:':["1f64d-1f3fd"],':person_frowning_tone2:':["1f64d-1f3fc"],':person_frowning_tone1:':["1f64d-1f3fb"],':raised_hands_tone5:':["1f64c-1f3ff"],':raised_hands_tone4:':["1f64c-1f3fe"],':raised_hands_tone3:':["1f64c-1f3fd"],':raised_hands_tone2:':["1f64c-1f3fc"],':raised_hands_tone1:':["1f64c-1f3fb"],':raising_hand_tone5:':["1f64b-1f3ff"],':raising_hand_tone4:':["1f64b-1f3fe"],':raising_hand_tone3:':["1f64b-1f3fd"],':raising_hand_tone2:':["1f64b-1f3fc"],':raising_hand_tone1:':["1f64b-1f3fb"],':bow_tone5:':["1f647-1f3ff"],':bow_tone4:':["1f647-1f3fe"],':bow_tone3:':["1f647-1f3fd"],':bow_tone2:':["1f647-1f3fc"],':bow_tone1:':["1f647-1f3fb"],':ok_woman_tone5:':["1f646-1f3ff"],':ok_woman_tone4:':["1f646-1f3fe"],':ok_woman_tone3:':["1f646-1f3fd"],':ok_woman_tone2:':["1f646-1f3fc"],':ok_woman_tone1:':["1f646-1f3fb"],':no_good_tone5:':["1f645-1f3ff"],':no_good_tone4:':["1f645-1f3fe"],':no_good_tone3:':["1f645-1f3fd"],':no_good_tone2:':["1f645-1f3fc"],':no_good_tone1:':["1f645-1f3fb"],':vulcan_tone5:':["1f596-1f3ff"],':raised_hand_with_part_between_middle_and_ring_fingers_tone5:':["1f596-1f3ff"],':vulcan_tone4:':["1f596-1f3fe"],':raised_hand_with_part_between_middle_and_ring_fingers_tone4:':["1f596-1f3fe"],':vulcan_tone3:':["1f596-1f3fd"],':raised_hand_with_part_between_middle_and_ring_fingers_tone3:':["1f596-1f3fd"],':vulcan_tone2:':["1f596-1f3fc"],':raised_hand_with_part_between_middle_and_ring_fingers_tone2:':["1f596-1f3fc"],':vulcan_tone1:':["1f596-1f3fb"],':raised_hand_with_part_between_middle_and_ring_fingers_tone1:':["1f596-1f3fb"],':middle_finger_tone5:':["1f595-1f3ff"],':reversed_hand_with_middle_finger_extended_tone5:':["1f595-1f3ff"],':middle_finger_tone4:':["1f595-1f3fe"],':reversed_hand_with_middle_finger_extended_tone4:':["1f595-1f3fe"],':middle_finger_tone3:':["1f595-1f3fd"],':reversed_hand_with_middle_finger_extended_tone3:':["1f595-1f3fd"],':middle_finger_tone2:':["1f595-1f3fc"],':reversed_hand_with_middle_finger_extended_tone2:':["1f595-1f3fc"],':middle_finger_tone1:':["1f595-1f3fb"],':reversed_hand_with_middle_finger_extended_tone1:':["1f595-1f3fb"],':hand_splayed_tone5:':["1f590-1f3ff"],':raised_hand_with_fingers_splayed_tone5:':["1f590-1f3ff"],':hand_splayed_tone4:':["1f590-1f3fe"],':raised_hand_with_fingers_splayed_tone4:':["1f590-1f3fe"],':hand_splayed_tone3:':["1f590-1f3fd"],':raised_hand_with_fingers_splayed_tone3:':["1f590-1f3fd"],':hand_splayed_tone2:':["1f590-1f3fc"],':raised_hand_with_fingers_splayed_tone2:':["1f590-1f3fc"],':hand_splayed_tone1:':["1f590-1f3fb"],':raised_hand_with_fingers_splayed_tone1:':["1f590-1f3fb"],':spy_tone5:':["1f575-1f3ff"],':sleuth_or_spy_tone5:':["1f575-1f3ff"],':spy_tone4:':["1f575-1f3fe"],':sleuth_or_spy_tone4:':["1f575-1f3fe"],':spy_tone3:':["1f575-1f3fd"],':sleuth_or_spy_tone3:':["1f575-1f3fd"],':spy_tone2:':["1f575-1f3fc"],':sleuth_or_spy_tone2:':["1f575-1f3fc"],':spy_tone1:':["1f575-1f3fb"],':sleuth_or_spy_tone1:':["1f575-1f3fb"],':muscle_tone5:':["1f4aa-1f3ff"],':muscle_tone4:':["1f4aa-1f3fe"],':muscle_tone3:':["1f4aa-1f3fd"],':muscle_tone2:':["1f4aa-1f3fc"],':muscle_tone1:':["1f4aa-1f3fb"],':haircut_tone5:':["1f487-1f3ff"],':haircut_tone4:':["1f487-1f3fe"],':haircut_tone3:':["1f487-1f3fd"],':haircut_tone2:':["1f487-1f3fc"],':haircut_tone1:':["1f487-1f3fb"],':massage_tone5:':["1f486-1f3ff"],':massage_tone4:':["1f486-1f3fe"],':massage_tone3:':["1f486-1f3fd"],':massage_tone2:':["1f486-1f3fc"],':massage_tone1:':["1f486-1f3fb"],':nail_care_tone5:':["1f485-1f3ff"],':nail_care_tone4:':["1f485-1f3fe"],':nail_care_tone3:':["1f485-1f3fd"],':nail_care_tone2:':["1f485-1f3fc"],':nail_care_tone1:':["1f485-1f3fb"],':dancer_tone5:':["1f483-1f3ff"],':dancer_tone4:':["1f483-1f3fe"],':dancer_tone3:':["1f483-1f3fd"],':dancer_tone2:':["1f483-1f3fc"],':dancer_tone1:':["1f483-1f3fb"],':guardsman_tone5:':["1f482-1f3ff"],':guardsman_tone4:':["1f482-1f3fe"],':guardsman_tone3:':["1f482-1f3fd"],':guardsman_tone2:':["1f482-1f3fc"],':guardsman_tone1:':["1f482-1f3fb"],':information_desk_person_tone5:':["1f481-1f3ff"],':information_desk_person_tone4:':["1f481-1f3fe"],':information_desk_person_tone3:':["1f481-1f3fd"],':information_desk_person_tone2:':["1f481-1f3fc"],':information_desk_person_tone1:':["1f481-1f3fb"],':angel_tone5:':["1f47c-1f3ff"],':angel_tone4:':["1f47c-1f3fe"],':angel_tone3:':["1f47c-1f3fd"],':angel_tone2:':["1f47c-1f3fc"],':angel_tone1:':["1f47c-1f3fb"],':princess_tone5:':["1f478-1f3ff"],':princess_tone4:':["1f478-1f3fe"],':princess_tone3:':["1f478-1f3fd"],':princess_tone2:':["1f478-1f3fc"],':princess_tone1:':["1f478-1f3fb"],':construction_worker_tone5:':["1f477-1f3ff"],':construction_worker_tone4:':["1f477-1f3fe"],':construction_worker_tone3:':["1f477-1f3fd"],':construction_worker_tone2:':["1f477-1f3fc"],':construction_worker_tone1:':["1f477-1f3fb"],':baby_tone5:':["1f476-1f3ff"],':baby_tone4:':["1f476-1f3fe"],':baby_tone3:':["1f476-1f3fd"],':baby_tone2:':["1f476-1f3fc"],':baby_tone1:':["1f476-1f3fb"],':older_woman_tone5:':["1f475-1f3ff"],':grandma_tone5:':["1f475-1f3ff"],':older_woman_tone4:':["1f475-1f3fe"],':grandma_tone4:':["1f475-1f3fe"],':older_woman_tone3:':["1f475-1f3fd"],':grandma_tone3:':["1f475-1f3fd"],':older_woman_tone2:':["1f475-1f3fc"],':grandma_tone2:':["1f475-1f3fc"],':older_woman_tone1:':["1f475-1f3fb"],':grandma_tone1:':["1f475-1f3fb"],':older_man_tone5:':["1f474-1f3ff"],':older_man_tone4:':["1f474-1f3fe"],':older_man_tone3:':["1f474-1f3fd"],':older_man_tone2:':["1f474-1f3fc"],':older_man_tone1:':["1f474-1f3fb"],':man_with_turban_tone5:':["1f473-1f3ff"],':man_with_turban_tone4:':["1f473-1f3fe"],':man_with_turban_tone3:':["1f473-1f3fd"],':man_with_turban_tone2:':["1f473-1f3fc"],':man_with_turban_tone1:':["1f473-1f3fb"],':man_with_gua_pi_mao_tone5:':["1f472-1f3ff"],':man_with_gua_pi_mao_tone4:':["1f472-1f3fe"],':man_with_gua_pi_mao_tone3:':["1f472-1f3fd"],':man_with_gua_pi_mao_tone2:':["1f472-1f3fc"],':man_with_gua_pi_mao_tone1:':["1f472-1f3fb"],':person_with_blond_hair_tone5:':["1f471-1f3ff"],':person_with_blond_hair_tone4:':["1f471-1f3fe"],':person_with_blond_hair_tone3:':["1f471-1f3fd"],':person_with_blond_hair_tone2:':["1f471-1f3fc"],':person_with_blond_hair_tone1:':["1f471-1f3fb"],':bride_with_veil_tone5:':["1f470-1f3ff"],':bride_with_veil_tone4:':["1f470-1f3fe"],':bride_with_veil_tone3:':["1f470-1f3fd"],':bride_with_veil_tone2:':["1f470-1f3fc"],':bride_with_veil_tone1:':["1f470-1f3fb"],':cop_tone5:':["1f46e-1f3ff"],':cop_tone4:':["1f46e-1f3fe"],':cop_tone3:':["1f46e-1f3fd"],':cop_tone2:':["1f46e-1f3fc"],':cop_tone1:':["1f46e-1f3fb"],':woman_tone5:':["1f469-1f3ff"],':woman_tone4:':["1f469-1f3fe"],':woman_tone3:':["1f469-1f3fd"],':woman_tone2:':["1f469-1f3fc"],':woman_tone1:':["1f469-1f3fb"],':man_tone5:':["1f468-1f3ff"],':man_tone4:':["1f468-1f3fe"],':man_tone3:':["1f468-1f3fd"],':man_tone2:':["1f468-1f3fc"],':man_tone1:':["1f468-1f3fb"],':girl_tone5:':["1f467-1f3ff"],':girl_tone4:':["1f467-1f3fe"],':girl_tone3:':["1f467-1f3fd"],':girl_tone2:':["1f467-1f3fc"],':girl_tone1:':["1f467-1f3fb"],':boy_tone5:':["1f466-1f3ff"],':boy_tone4:':["1f466-1f3fe"],':boy_tone3:':["1f466-1f3fd"],':boy_tone2:':["1f466-1f3fc"],':boy_tone1:':["1f466-1f3fb"],':open_hands_tone5:':["1f450-1f3ff"],':open_hands_tone4:':["1f450-1f3fe"],':open_hands_tone3:':["1f450-1f3fd"],':open_hands_tone2:':["1f450-1f3fc"],':open_hands_tone1:':["1f450-1f3fb"],':clap_tone5:':["1f44f-1f3ff"],':clap_tone4:':["1f44f-1f3fe"],':clap_tone3:':["1f44f-1f3fd"],':clap_tone2:':["1f44f-1f3fc"],':clap_tone1:':["1f44f-1f3fb"],':thumbsdown_tone5:':["1f44e-1f3ff"],':-1_tone5:':["1f44e-1f3ff"],':thumbsdown_tone4:':["1f44e-1f3fe"],':-1_tone4:':["1f44e-1f3fe"],':thumbsdown_tone3:':["1f44e-1f3fd"],':-1_tone3:':["1f44e-1f3fd"],':thumbsdown_tone2:':["1f44e-1f3fc"],':-1_tone2:':["1f44e-1f3fc"],':thumbsdown_tone1:':["1f44e-1f3fb"],':-1_tone1:':["1f44e-1f3fb"],':thumbsup_tone5:':["1f44d-1f3ff"],':+1_tone5:':["1f44d-1f3ff"],':thumbsup_tone4:':["1f44d-1f3fe"],':+1_tone4:':["1f44d-1f3fe"],':thumbsup_tone3:':["1f44d-1f3fd"],':+1_tone3:':["1f44d-1f3fd"],':thumbsup_tone2:':["1f44d-1f3fc"],':+1_tone2:':["1f44d-1f3fc"],':thumbsup_tone1:':["1f44d-1f3fb"],':+1_tone1:':["1f44d-1f3fb"],':ok_hand_tone5:':["1f44c-1f3ff"],':ok_hand_tone4:':["1f44c-1f3fe"],':ok_hand_tone3:':["1f44c-1f3fd"],':ok_hand_tone2:':["1f44c-1f3fc"],':ok_hand_tone1:':["1f44c-1f3fb"],':wave_tone5:':["1f44b-1f3ff"],':wave_tone4:':["1f44b-1f3fe"],':wave_tone3:':["1f44b-1f3fd"],':wave_tone2:':["1f44b-1f3fc"],':wave_tone1:':["1f44b-1f3fb"],':punch_tone5:':["1f44a-1f3ff"],':punch_tone4:':["1f44a-1f3fe"],':punch_tone3:':["1f44a-1f3fd"],':punch_tone2:':["1f44a-1f3fc"],':punch_tone1:':["1f44a-1f3fb"],':point_right_tone5:':["1f449-1f3ff"],':point_right_tone4:':["1f449-1f3fe"],':point_right_tone3:':["1f449-1f3fd"],':point_right_tone2:':["1f449-1f3fc"],':point_right_tone1:':["1f449-1f3fb"],':point_left_tone5:':["1f448-1f3ff"],':point_left_tone4:':["1f448-1f3fe"],':point_left_tone3:':["1f448-1f3fd"],':point_left_tone2:':["1f448-1f3fc"],':point_left_tone1:':["1f448-1f3fb"],':point_down_tone5:':["1f447-1f3ff"],':point_down_tone4:':["1f447-1f3fe"],':point_down_tone3:':["1f447-1f3fd"],':point_down_tone2:':["1f447-1f3fc"],':point_down_tone1:':["1f447-1f3fb"],':point_up_2_tone5:':["1f446-1f3ff"],':point_up_2_tone4:':["1f446-1f3fe"],':point_up_2_tone3:':["1f446-1f3fd"],':point_up_2_tone2:':["1f446-1f3fc"],':point_up_2_tone1:':["1f446-1f3fb"],':nose_tone5:':["1f443-1f3ff"],':nose_tone4:':["1f443-1f3fe"],':nose_tone3:':["1f443-1f3fd"],':nose_tone2:':["1f443-1f3fc"],':nose_tone1:':["1f443-1f3fb"],':ear_tone5:':["1f442-1f3ff"],':ear_tone4:':["1f442-1f3fe"],':ear_tone3:':["1f442-1f3fd"],':ear_tone2:':["1f442-1f3fc"],':ear_tone1:':["1f442-1f3fb"],':lifter_tone5:':["1f3cb-1f3ff"],':weight_lifter_tone5:':["1f3cb-1f3ff"],':lifter_tone4:':["1f3cb-1f3fe"],':weight_lifter_tone4:':["1f3cb-1f3fe"],':lifter_tone3:':["1f3cb-1f3fd"],':weight_lifter_tone3:':["1f3cb-1f3fd"],':lifter_tone2:':["1f3cb-1f3fc"],':weight_lifter_tone2:':["1f3cb-1f3fc"],':lifter_tone1:':["1f3cb-1f3fb"],':weight_lifter_tone1:':["1f3cb-1f3fb"],':swimmer_tone5:':["1f3ca-1f3ff"],':swimmer_tone4:':["1f3ca-1f3fe"],':swimmer_tone3:':["1f3ca-1f3fd"],':swimmer_tone2:':["1f3ca-1f3fc"],':swimmer_tone1:':["1f3ca-1f3fb"],':horse_racing_tone5:':["1f3c7-1f3ff"],':horse_racing_tone4:':["1f3c7-1f3fe"],':horse_racing_tone3:':["1f3c7-1f3fd"],':horse_racing_tone2:':["1f3c7-1f3fc"],':horse_racing_tone1:':["1f3c7-1f3fb"],':surfer_tone5:':["1f3c4-1f3ff"],':surfer_tone4:':["1f3c4-1f3fe"],':surfer_tone3:':["1f3c4-1f3fd"],':surfer_tone2:':["1f3c4-1f3fc"],':surfer_tone1:':["1f3c4-1f3fb"],':runner_tone5:':["1f3c3-1f3ff"],':runner_tone4:':["1f3c3-1f3fe"],':runner_tone3:':["1f3c3-1f3fd"],':runner_tone2:':["1f3c3-1f3fc"],':runner_tone1:':["1f3c3-1f3fb"],':santa_tone5:':["1f385-1f3ff"],':santa_tone4:':["1f385-1f3fe"],':santa_tone3:':["1f385-1f3fd"],':santa_tone2:':["1f385-1f3fc"],':santa_tone1:':["1f385-1f3fb"],':flag_zw:':["1f1ff-1f1fc"],':zw:':["1f1ff-1f1fc"],':flag_zm:':["1f1ff-1f1f2"],':zm:':["1f1ff-1f1f2"],':flag_za:':["1f1ff-1f1e6"],':za:':["1f1ff-1f1e6"],':flag_yt:':["1f1fe-1f1f9"],':yt:':["1f1fe-1f1f9"],':flag_ye:':["1f1fe-1f1ea"],':ye:':["1f1fe-1f1ea"],':flag_xk:':["1f1fd-1f1f0"],':xk:':["1f1fd-1f1f0"],':flag_ws:':["1f1fc-1f1f8"],':ws:':["1f1fc-1f1f8"],':flag_wf:':["1f1fc-1f1eb"],':wf:':["1f1fc-1f1eb"],':flag_vu:':["1f1fb-1f1fa"],':vu:':["1f1fb-1f1fa"],':flag_vn:':["1f1fb-1f1f3"],':vn:':["1f1fb-1f1f3"],':flag_vi:':["1f1fb-1f1ee"],':vi:':["1f1fb-1f1ee"],':flag_vg:':["1f1fb-1f1ec"],':vg:':["1f1fb-1f1ec"],':flag_ve:':["1f1fb-1f1ea"],':ve:':["1f1fb-1f1ea"],':flag_vc:':["1f1fb-1f1e8"],':vc:':["1f1fb-1f1e8"],':flag_va:':["1f1fb-1f1e6"],':va:':["1f1fb-1f1e6"],':flag_uz:':["1f1fa-1f1ff"],':uz:':["1f1fa-1f1ff"],':flag_uy:':["1f1fa-1f1fe"],':uy:':["1f1fa-1f1fe"],':flag_us:':["1f1fa-1f1f8"],':us:':["1f1fa-1f1f8"],':flag_um:':["1f1fa-1f1f2"],':um:':["1f1fa-1f1f2"],':flag_ug:':["1f1fa-1f1ec"],':ug:':["1f1fa-1f1ec"],':flag_ua:':["1f1fa-1f1e6"],':ua:':["1f1fa-1f1e6"],':flag_tz:':["1f1f9-1f1ff"],':tz:':["1f1f9-1f1ff"],':flag_tw:':["1f1f9-1f1fc"],':tw:':["1f1f9-1f1fc"],':flag_tv:':["1f1f9-1f1fb"],':tuvalu:':["1f1f9-1f1fb"],':flag_tt:':["1f1f9-1f1f9"],':tt:':["1f1f9-1f1f9"],':flag_tr:':["1f1f9-1f1f7"],':tr:':["1f1f9-1f1f7"],':flag_to:':["1f1f9-1f1f4"],':to:':["1f1f9-1f1f4"],':flag_tn:':["1f1f9-1f1f3"],':tn:':["1f1f9-1f1f3"],':flag_tm:':["1f1f9-1f1f2"],':turkmenistan:':["1f1f9-1f1f2"],':flag_tl:':["1f1f9-1f1f1"],':tl:':["1f1f9-1f1f1"],':flag_tk:':["1f1f9-1f1f0"],':tk:':["1f1f9-1f1f0"],':flag_tj:':["1f1f9-1f1ef"],':tj:':["1f1f9-1f1ef"],':flag_th:':["1f1f9-1f1ed"],':th:':["1f1f9-1f1ed"],':flag_tg:':["1f1f9-1f1ec"],':tg:':["1f1f9-1f1ec"],':flag_tf:':["1f1f9-1f1eb"],':tf:':["1f1f9-1f1eb"],':flag_td:':["1f1f9-1f1e9"],':td:':["1f1f9-1f1e9"],':flag_tc:':["1f1f9-1f1e8"],':tc:':["1f1f9-1f1e8"],':flag_ta:':["1f1f9-1f1e6"],':ta:':["1f1f9-1f1e6"],':flag_sz:':["1f1f8-1f1ff"],':sz:':["1f1f8-1f1ff"],':flag_sy:':["1f1f8-1f1fe"],':sy:':["1f1f8-1f1fe"],':flag_sx:':["1f1f8-1f1fd"],':sx:':["1f1f8-1f1fd"],':flag_sv:':["1f1f8-1f1fb"],':sv:':["1f1f8-1f1fb"],':flag_st:':["1f1f8-1f1f9"],':st:':["1f1f8-1f1f9"],':flag_ss:':["1f1f8-1f1f8"],':ss:':["1f1f8-1f1f8"],':flag_sr:':["1f1f8-1f1f7"],':sr:':["1f1f8-1f1f7"],':flag_so:':["1f1f8-1f1f4"],':so:':["1f1f8-1f1f4"],':flag_sn:':["1f1f8-1f1f3"],':sn:':["1f1f8-1f1f3"],':flag_sm:':["1f1f8-1f1f2"],':sm:':["1f1f8-1f1f2"],':flag_sl:':["1f1f8-1f1f1"],':sl:':["1f1f8-1f1f1"],':flag_sk:':["1f1f8-1f1f0"],':sk:':["1f1f8-1f1f0"],':flag_sj:':["1f1f8-1f1ef"],':sj:':["1f1f8-1f1ef"],':flag_si:':["1f1f8-1f1ee"],':si:':["1f1f8-1f1ee"],':flag_sh:':["1f1f8-1f1ed"],':sh:':["1f1f8-1f1ed"],':flag_sg:':["1f1f8-1f1ec"],':sg:':["1f1f8-1f1ec"],':flag_se:':["1f1f8-1f1ea"],':se:':["1f1f8-1f1ea"],':flag_sd:':["1f1f8-1f1e9"],':sd:':["1f1f8-1f1e9"],':flag_sc:':["1f1f8-1f1e8"],':sc:':["1f1f8-1f1e8"],':flag_sb:':["1f1f8-1f1e7"],':sb:':["1f1f8-1f1e7"],':flag_sa:':["1f1f8-1f1e6"],':saudiarabia:':["1f1f8-1f1e6"],':saudi:':["1f1f8-1f1e6"],':flag_rw:':["1f1f7-1f1fc"],':rw:':["1f1f7-1f1fc"],':flag_ru:':["1f1f7-1f1fa"],':ru:':["1f1f7-1f1fa"],':flag_rs:':["1f1f7-1f1f8"],':rs:':["1f1f7-1f1f8"],':flag_ro:':["1f1f7-1f1f4"],':ro:':["1f1f7-1f1f4"],':flag_re:':["1f1f7-1f1ea"],':re:':["1f1f7-1f1ea"],':flag_qa:':["1f1f6-1f1e6"],':qa:':["1f1f6-1f1e6"],':flag_py:':["1f1f5-1f1fe"],':py:':["1f1f5-1f1fe"],':flag_pw:':["1f1f5-1f1fc"],':pw:':["1f1f5-1f1fc"],':flag_pt:':["1f1f5-1f1f9"],':pt:':["1f1f5-1f1f9"],':flag_ps:':["1f1f5-1f1f8"],':ps:':["1f1f5-1f1f8"],':flag_pr:':["1f1f5-1f1f7"],':pr:':["1f1f5-1f1f7"],':flag_pn:':["1f1f5-1f1f3"],':pn:':["1f1f5-1f1f3"],':flag_pm:':["1f1f5-1f1f2"],':pm:':["1f1f5-1f1f2"],':flag_pl:':["1f1f5-1f1f1"],':pl:':["1f1f5-1f1f1"],':flag_pk:':["1f1f5-1f1f0"],':pk:':["1f1f5-1f1f0"],':flag_ph:':["1f1f5-1f1ed"],':ph:':["1f1f5-1f1ed"],':flag_pg:':["1f1f5-1f1ec"],':pg:':["1f1f5-1f1ec"],':flag_pf:':["1f1f5-1f1eb"],':pf:':["1f1f5-1f1eb"],':flag_pe:':["1f1f5-1f1ea"],':pe:':["1f1f5-1f1ea"],':flag_pa:':["1f1f5-1f1e6"],':pa:':["1f1f5-1f1e6"],':flag_om:':["1f1f4-1f1f2"],':om:':["1f1f4-1f1f2"],':flag_nz:':["1f1f3-1f1ff"],':nz:':["1f1f3-1f1ff"],':flag_nu:':["1f1f3-1f1fa"],':nu:':["1f1f3-1f1fa"],':flag_nr:':["1f1f3-1f1f7"],':nr:':["1f1f3-1f1f7"],':flag_np:':["1f1f3-1f1f5"],':np:':["1f1f3-1f1f5"],':flag_no:':["1f1f3-1f1f4"],':no:':["1f1f3-1f1f4"],':flag_nl:':["1f1f3-1f1f1"],':nl:':["1f1f3-1f1f1"],':flag_ni:':["1f1f3-1f1ee"],':ni:':["1f1f3-1f1ee"],':flag_ng:':["1f1f3-1f1ec"],':nigeria:':["1f1f3-1f1ec"],':flag_nf:':["1f1f3-1f1eb"],':nf:':["1f1f3-1f1eb"],':flag_ne:':["1f1f3-1f1ea"],':ne:':["1f1f3-1f1ea"],':flag_nc:':["1f1f3-1f1e8"],':nc:':["1f1f3-1f1e8"],':flag_na:':["1f1f3-1f1e6"],':na:':["1f1f3-1f1e6"],':flag_mz:':["1f1f2-1f1ff"],':mz:':["1f1f2-1f1ff"],':flag_my:':["1f1f2-1f1fe"],':my:':["1f1f2-1f1fe"],':flag_mx:':["1f1f2-1f1fd"],':mx:':["1f1f2-1f1fd"],':flag_mw:':["1f1f2-1f1fc"],':mw:':["1f1f2-1f1fc"],':flag_mv:':["1f1f2-1f1fb"],':mv:':["1f1f2-1f1fb"],':flag_mu:':["1f1f2-1f1fa"],':mu:':["1f1f2-1f1fa"],':flag_mt:':["1f1f2-1f1f9"],':mt:':["1f1f2-1f1f9"],':flag_ms:':["1f1f2-1f1f8"],':ms:':["1f1f2-1f1f8"],':flag_mr:':["1f1f2-1f1f7"],':mr:':["1f1f2-1f1f7"],':flag_mq:':["1f1f2-1f1f6"],':mq:':["1f1f2-1f1f6"],':flag_mp:':["1f1f2-1f1f5"],':mp:':["1f1f2-1f1f5"],':flag_mo:':["1f1f2-1f1f4"],':mo:':["1f1f2-1f1f4"],':flag_mn:':["1f1f2-1f1f3"],':mn:':["1f1f2-1f1f3"],':flag_mm:':["1f1f2-1f1f2"],':mm:':["1f1f2-1f1f2"],':flag_ml:':["1f1f2-1f1f1"],':ml:':["1f1f2-1f1f1"],':flag_mk:':["1f1f2-1f1f0"],':mk:':["1f1f2-1f1f0"],':flag_mh:':["1f1f2-1f1ed"],':mh:':["1f1f2-1f1ed"],':flag_mg:':["1f1f2-1f1ec"],':mg:':["1f1f2-1f1ec"],':flag_mf:':["1f1f2-1f1eb"],':mf:':["1f1f2-1f1eb"],':flag_me:':["1f1f2-1f1ea"],':me:':["1f1f2-1f1ea"],':flag_md:':["1f1f2-1f1e9"],':md:':["1f1f2-1f1e9"],':flag_mc:':["1f1f2-1f1e8"],':mc:':["1f1f2-1f1e8"],':flag_ma:':["1f1f2-1f1e6"],':ma:':["1f1f2-1f1e6"],':flag_ly:':["1f1f1-1f1fe"],':ly:':["1f1f1-1f1fe"],':flag_lv:':["1f1f1-1f1fb"],':lv:':["1f1f1-1f1fb"],':flag_lu:':["1f1f1-1f1fa"],':lu:':["1f1f1-1f1fa"],':flag_lt:':["1f1f1-1f1f9"],':lt:':["1f1f1-1f1f9"],':flag_ls:':["1f1f1-1f1f8"],':ls:':["1f1f1-1f1f8"],':flag_lr:':["1f1f1-1f1f7"],':lr:':["1f1f1-1f1f7"],':flag_lk:':["1f1f1-1f1f0"],':lk:':["1f1f1-1f1f0"],':flag_li:':["1f1f1-1f1ee"],':li:':["1f1f1-1f1ee"],':flag_lc:':["1f1f1-1f1e8"],':lc:':["1f1f1-1f1e8"],':flag_lb:':["1f1f1-1f1e7"],':lb:':["1f1f1-1f1e7"],':flag_la:':["1f1f1-1f1e6"],':la:':["1f1f1-1f1e6"],':flag_kz:':["1f1f0-1f1ff"],':kz:':["1f1f0-1f1ff"],':flag_ky:':["1f1f0-1f1fe"],':ky:':["1f1f0-1f1fe"],':flag_kw:':["1f1f0-1f1fc"],':kw:':["1f1f0-1f1fc"],':flag_kr:':["1f1f0-1f1f7"],':kr:':["1f1f0-1f1f7"],':flag_kp:':["1f1f0-1f1f5"],':kp:':["1f1f0-1f1f5"],':flag_kn:':["1f1f0-1f1f3"],':kn:':["1f1f0-1f1f3"],':flag_km:':["1f1f0-1f1f2"],':km:':["1f1f0-1f1f2"],':flag_ki:':["1f1f0-1f1ee"],':ki:':["1f1f0-1f1ee"],':flag_kh:':["1f1f0-1f1ed"],':kh:':["1f1f0-1f1ed"],':flag_kg:':["1f1f0-1f1ec"],':kg:':["1f1f0-1f1ec"],':flag_ke:':["1f1f0-1f1ea"],':ke:':["1f1f0-1f1ea"],':flag_jp:':["1f1ef-1f1f5"],':jp:':["1f1ef-1f1f5"],':flag_jo:':["1f1ef-1f1f4"],':jo:':["1f1ef-1f1f4"],':flag_jm:':["1f1ef-1f1f2"],':jm:':["1f1ef-1f1f2"],':flag_je:':["1f1ef-1f1ea"],':je:':["1f1ef-1f1ea"],':flag_it:':["1f1ee-1f1f9"],':it:':["1f1ee-1f1f9"],':flag_is:':["1f1ee-1f1f8"],':is:':["1f1ee-1f1f8"],':flag_ir:':["1f1ee-1f1f7"],':ir:':["1f1ee-1f1f7"],':flag_iq:':["1f1ee-1f1f6"],':iq:':["1f1ee-1f1f6"],':flag_io:':["1f1ee-1f1f4"],':io:':["1f1ee-1f1f4"],':flag_in:':["1f1ee-1f1f3"],':in:':["1f1ee-1f1f3"],':flag_im:':["1f1ee-1f1f2"],':im:':["1f1ee-1f1f2"],':flag_il:':["1f1ee-1f1f1"],':il:':["1f1ee-1f1f1"],':flag_ie:':["1f1ee-1f1ea"],':ie:':["1f1ee-1f1ea"],':flag_id:':["1f1ee-1f1e9"],':indonesia:':["1f1ee-1f1e9"],':flag_ic:':["1f1ee-1f1e8"],':ic:':["1f1ee-1f1e8"],':flag_hu:':["1f1ed-1f1fa"],':hu:':["1f1ed-1f1fa"],':flag_ht:':["1f1ed-1f1f9"],':ht:':["1f1ed-1f1f9"],':flag_hr:':["1f1ed-1f1f7"],':hr:':["1f1ed-1f1f7"],':flag_hn:':["1f1ed-1f1f3"],':hn:':["1f1ed-1f1f3"],':flag_hm:':["1f1ed-1f1f2"],':hm:':["1f1ed-1f1f2"],':flag_hk:':["1f1ed-1f1f0"],':hk:':["1f1ed-1f1f0"],':flag_gy:':["1f1ec-1f1fe"],':gy:':["1f1ec-1f1fe"],':flag_gw:':["1f1ec-1f1fc"],':gw:':["1f1ec-1f1fc"],':flag_gu:':["1f1ec-1f1fa"],':gu:':["1f1ec-1f1fa"],':flag_gt:':["1f1ec-1f1f9"],':gt:':["1f1ec-1f1f9"],':flag_gs:':["1f1ec-1f1f8"],':gs:':["1f1ec-1f1f8"],':flag_gr:':["1f1ec-1f1f7"],':gr:':["1f1ec-1f1f7"],':flag_gq:':["1f1ec-1f1f6"],':gq:':["1f1ec-1f1f6"],':flag_gp:':["1f1ec-1f1f5"],':gp:':["1f1ec-1f1f5"],':flag_gn:':["1f1ec-1f1f3"],':gn:':["1f1ec-1f1f3"],':flag_gm:':["1f1ec-1f1f2"],':gm:':["1f1ec-1f1f2"],':flag_gl:':["1f1ec-1f1f1"],':gl:':["1f1ec-1f1f1"],':flag_gi:':["1f1ec-1f1ee"],':gi:':["1f1ec-1f1ee"],':flag_gh:':["1f1ec-1f1ed"],':gh:':["1f1ec-1f1ed"],':flag_gg:':["1f1ec-1f1ec"],':gg:':["1f1ec-1f1ec"],':flag_gf:':["1f1ec-1f1eb"],':gf:':["1f1ec-1f1eb"],':flag_ge:':["1f1ec-1f1ea"],':ge:':["1f1ec-1f1ea"],':flag_gd:':["1f1ec-1f1e9"],':gd:':["1f1ec-1f1e9"],':flag_gb:':["1f1ec-1f1e7"],':gb:':["1f1ec-1f1e7"],':flag_ga:':["1f1ec-1f1e6"],':ga:':["1f1ec-1f1e6"],':flag_fr:':["1f1eb-1f1f7"],':fr:':["1f1eb-1f1f7"],':flag_fo:':["1f1eb-1f1f4"],':fo:':["1f1eb-1f1f4"],':flag_fm:':["1f1eb-1f1f2"],':fm:':["1f1eb-1f1f2"],':flag_fk:':["1f1eb-1f1f0"],':fk:':["1f1eb-1f1f0"],':flag_fj:':["1f1eb-1f1ef"],':fj:':["1f1eb-1f1ef"],':flag_fi:':["1f1eb-1f1ee"],':fi:':["1f1eb-1f1ee"],':flag_eu:':["1f1ea-1f1fa"],':eu:':["1f1ea-1f1fa"],':flag_et:':["1f1ea-1f1f9"],':et:':["1f1ea-1f1f9"],':flag_es:':["1f1ea-1f1f8"],':es:':["1f1ea-1f1f8"],':flag_er:':["1f1ea-1f1f7"],':er:':["1f1ea-1f1f7"],':flag_eh:':["1f1ea-1f1ed"],':eh:':["1f1ea-1f1ed"],':flag_eg:':["1f1ea-1f1ec"],':eg:':["1f1ea-1f1ec"],':flag_ee:':["1f1ea-1f1ea"],':ee:':["1f1ea-1f1ea"],':flag_ec:':["1f1ea-1f1e8"],':ec:':["1f1ea-1f1e8"],':flag_ea:':["1f1ea-1f1e6"],':ea:':["1f1ea-1f1e6"],':flag_dz:':["1f1e9-1f1ff"],':dz:':["1f1e9-1f1ff"],':flag_do:':["1f1e9-1f1f4"],':do:':["1f1e9-1f1f4"],':flag_dm:':["1f1e9-1f1f2"],':dm:':["1f1e9-1f1f2"],':flag_dk:':["1f1e9-1f1f0"],':dk:':["1f1e9-1f1f0"],':flag_dj:':["1f1e9-1f1ef"],':dj:':["1f1e9-1f1ef"],':flag_dg:':["1f1e9-1f1ec"],':dg:':["1f1e9-1f1ec"],':flag_de:':["1f1e9-1f1ea"],':de:':["1f1e9-1f1ea"],':flag_cz:':["1f1e8-1f1ff"],':cz:':["1f1e8-1f1ff"],':flag_cy:':["1f1e8-1f1fe"],':cy:':["1f1e8-1f1fe"],':flag_cx:':["1f1e8-1f1fd"],':cx:':["1f1e8-1f1fd"],':flag_cw:':["1f1e8-1f1fc"],':cw:':["1f1e8-1f1fc"],':flag_cv:':["1f1e8-1f1fb"],':cv:':["1f1e8-1f1fb"],':flag_cu:':["1f1e8-1f1fa"],':cu:':["1f1e8-1f1fa"],':flag_cr:':["1f1e8-1f1f7"],':cr:':["1f1e8-1f1f7"],':flag_cp:':["1f1e8-1f1f5"],':cp:':["1f1e8-1f1f5"],':flag_co:':["1f1e8-1f1f4"],':co:':["1f1e8-1f1f4"],':flag_cn:':["1f1e8-1f1f3"],':cn:':["1f1e8-1f1f3"],':flag_cm:':["1f1e8-1f1f2"],':cm:':["1f1e8-1f1f2"],':flag_cl:':["1f1e8-1f1f1"],':chile:':["1f1e8-1f1f1"],':flag_ck:':["1f1e8-1f1f0"],':ck:':["1f1e8-1f1f0"],':flag_ci:':["1f1e8-1f1ee"],':ci:':["1f1e8-1f1ee"],':flag_ch:':["1f1e8-1f1ed"],':ch:':["1f1e8-1f1ed"],':flag_cg:':["1f1e8-1f1ec"],':cg:':["1f1e8-1f1ec"],':flag_cf:':["1f1e8-1f1eb"],':cf:':["1f1e8-1f1eb"],':flag_cd:':["1f1e8-1f1e9"],':congo:':["1f1e8-1f1e9"],':flag_cc:':["1f1e8-1f1e8"],':cc:':["1f1e8-1f1e8"],':flag_ca:':["1f1e8-1f1e6"],':ca:':["1f1e8-1f1e6"],':flag_bz:':["1f1e7-1f1ff"],':bz:':["1f1e7-1f1ff"],':flag_by:':["1f1e7-1f1fe"],':by:':["1f1e7-1f1fe"],':flag_bw:':["1f1e7-1f1fc"],':bw:':["1f1e7-1f1fc"],':flag_bv:':["1f1e7-1f1fb"],':bv:':["1f1e7-1f1fb"],':flag_bt:':["1f1e7-1f1f9"],':bt:':["1f1e7-1f1f9"],':flag_bs:':["1f1e7-1f1f8"],':bs:':["1f1e7-1f1f8"],':flag_br:':["1f1e7-1f1f7"],':br:':["1f1e7-1f1f7"],':flag_bq:':["1f1e7-1f1f6"],':bq:':["1f1e7-1f1f6"],':flag_bo:':["1f1e7-1f1f4"],':bo:':["1f1e7-1f1f4"],':flag_bn:':["1f1e7-1f1f3"],':bn:':["1f1e7-1f1f3"],':flag_bm:':["1f1e7-1f1f2"],':bm:':["1f1e7-1f1f2"],':flag_bl:':["1f1e7-1f1f1"],':bl:':["1f1e7-1f1f1"],':flag_bj:':["1f1e7-1f1ef"],':bj:':["1f1e7-1f1ef"],':flag_bi:':["1f1e7-1f1ee"],':bi:':["1f1e7-1f1ee"],':flag_bh:':["1f1e7-1f1ed"],':bh:':["1f1e7-1f1ed"],':flag_bg:':["1f1e7-1f1ec"],':bg:':["1f1e7-1f1ec"],':flag_bf:':["1f1e7-1f1eb"],':bf:':["1f1e7-1f1eb"],':flag_be:':["1f1e7-1f1ea"],':be:':["1f1e7-1f1ea"],':flag_bd:':["1f1e7-1f1e9"],':bd:':["1f1e7-1f1e9"],':flag_bb:':["1f1e7-1f1e7"],':bb:':["1f1e7-1f1e7"],':flag_ba:':["1f1e7-1f1e6"],':ba:':["1f1e7-1f1e6"],':flag_az:':["1f1e6-1f1ff"],':az:':["1f1e6-1f1ff"],':flag_ax:':["1f1e6-1f1fd"],':ax:':["1f1e6-1f1fd"],':flag_aw:':["1f1e6-1f1fc"],':aw:':["1f1e6-1f1fc"],':flag_au:':["1f1e6-1f1fa"],':au:':["1f1e6-1f1fa"],':flag_at:':["1f1e6-1f1f9"],':at:':["1f1e6-1f1f9"],':flag_as:':["1f1e6-1f1f8"],':as:':["1f1e6-1f1f8"],':flag_ar:':["1f1e6-1f1f7"],':ar:':["1f1e6-1f1f7"],':flag_aq:':["1f1e6-1f1f6"],':aq:':["1f1e6-1f1f6"],':flag_ao:':["1f1e6-1f1f4"],':ao:':["1f1e6-1f1f4"],':flag_am:':["1f1e6-1f1f2"],':am:':["1f1e6-1f1f2"],':flag_al:':["1f1e6-1f1f1"],':al:':["1f1e6-1f1f1"],':flag_ai:':["1f1e6-1f1ee"],':ai:':["1f1e6-1f1ee"],':flag_ag:':["1f1e6-1f1ec"],':ag:':["1f1e6-1f1ec"],':flag_af:':["1f1e6-1f1eb"],':af:':["1f1e6-1f1eb"],':flag_ae:':["1f1e6-1f1ea"],':ae:':["1f1e6-1f1ea"],':flag_ad:':["1f1e6-1f1e9"],':ad:':["1f1e6-1f1e9"],':flag_ac:':["1f1e6-1f1e8"],':ac:':["1f1e6-1f1e8"],':mahjong:':["1f004-fe0f","1f004"],':parking:':["1f17f-fe0f","1f17f"],':u7121:':["1f21a-fe0f","1f21a"],':u6307:':["1f22f-fe0f","1f22f"],':u6708:':["1f237-fe0f","1f237"],':point_up_tone1:':["261d-1f3fb"],':point_up_tone2:':["261d-1f3fc"],':point_up_tone3:':["261d-1f3fd"],':point_up_tone4:':["261d-1f3fe"],':point_up_tone5:':["261d-1f3ff"],':v_tone1:':["270c-1f3fb"],':v_tone2:':["270c-1f3fc"],':v_tone3:':["270c-1f3fd"],':v_tone4:':["270c-1f3fe"],':v_tone5:':["270c-1f3ff"],':fist_tone1:':["270a-1f3fb"],':fist_tone2:':["270a-1f3fc"],':fist_tone3:':["270a-1f3fd"],':fist_tone4:':["270a-1f3fe"],':fist_tone5:':["270a-1f3ff"],':raised_hand_tone1:':["270b-1f3fb"],':raised_hand_tone2:':["270b-1f3fc"],':raised_hand_tone3:':["270b-1f3fd"],':raised_hand_tone4:':["270b-1f3fe"],':raised_hand_tone5:':["270b-1f3ff"],':writing_hand_tone1:':["270d-1f3fb"],':writing_hand_tone2:':["270d-1f3fc"],':writing_hand_tone3:':["270d-1f3fd"],':writing_hand_tone4:':["270d-1f3fe"],':writing_hand_tone5:':["270d-1f3ff"],':basketball_player_tone1:':["26f9-1f3fb"],':person_with_ball_tone1:':["26f9-1f3fb"],':basketball_player_tone2:':["26f9-1f3fc"],':person_with_ball_tone2:':["26f9-1f3fc"],':basketball_player_tone3:':["26f9-1f3fd"],':person_with_ball_tone3:':["26f9-1f3fd"],':basketball_player_tone4:':["26f9-1f3fe"],':person_with_ball_tone4:':["26f9-1f3fe"],':basketball_player_tone5:':["26f9-1f3ff"],':person_with_ball_tone5:':["26f9-1f3ff"],':copyright:':["00a9-fe0f","00a9"],':registered:':["00ae-fe0f","00ae"],':bangbang:':["203c-fe0f","203c"],':interrobang:':["2049-fe0f","2049"],':tm:':["2122-fe0f","2122"],':information_source:':["2139-fe0f","2139"],':left_right_arrow:':["2194-fe0f","2194"],':arrow_up_down:':["2195-fe0f","2195"],':arrow_upper_left:':["2196-fe0f","2196"],':arrow_upper_right:':["2197-fe0f","2197"],':arrow_lower_right:':["2198-fe0f","2198"],':arrow_lower_left:':["2199-fe0f","2199"],':leftwards_arrow_with_hook:':["21a9-fe0f","21a9"],':arrow_right_hook:':["21aa-fe0f","21aa"],':watch:':["231a-fe0f","231a"],':hourglass:':["231b-fe0f","231b"],':m:':["24c2-fe0f","24c2"],':black_small_square:':["25aa-fe0f","25aa"],':white_small_square:':["25ab-fe0f","25ab"],':arrow_forward:':["25b6-fe0f","25b6"],':arrow_backward:':["25c0-fe0f","25c0"],':white_medium_square:':["25fb-fe0f","25fb"],':black_medium_square:':["25fc-fe0f","25fc"],':white_medium_small_square:':["25fd-fe0f","25fd"],':black_medium_small_square:':["25fe-fe0f","25fe"],':sunny:':["2600-fe0f","2600"],':cloud:':["2601-fe0f","2601"],':telephone:':["260e-fe0f","260e"],':ballot_box_with_check:':["2611-fe0f","2611"],':umbrella:':["2614-fe0f","2614"],':coffee:':["2615-fe0f","2615"],':point_up:':["261d-fe0f","261d"],':relaxed:':["263a-fe0f","263a"],':aries:':["2648-fe0f","2648"],':taurus:':["2649-fe0f","2649"],':gemini:':["264a-fe0f","264a"],':cancer:':["264b-fe0f","264b"],':leo:':["264c-fe0f","264c"],':virgo:':["264d-fe0f","264d"],':libra:':["264e-fe0f","264e"],':scorpius:':["264f-fe0f","264f"],':sagittarius:':["2650-fe0f","2650"],':capricorn:':["2651-fe0f","2651"],':aquarius:':["2652-fe0f","2652"],':pisces:':["2653-fe0f","2653"],':spades:':["2660-fe0f","2660"],':clubs:':["2663-fe0f","2663"],':hearts:':["2665-fe0f","2665"],':diamonds:':["2666-fe0f","2666"],':hotsprings:':["2668-fe0f","2668"],':recycle:':["267b-fe0f","267b"],':wheelchair:':["267f-fe0f","267f"],':anchor:':["2693-fe0f","2693"],':warning:':["26a0-fe0f","26a0"],':zap:':["26a1-fe0f","26a1"],':white_circle:':["26aa-fe0f","26aa"],':black_circle:':["26ab-fe0f","26ab"],':soccer:':["26bd-fe0f","26bd"],':baseball:':["26be-fe0f","26be"],':snowman:':["26c4-fe0f","26c4"],':partly_sunny:':["26c5-fe0f","26c5"],':no_entry:':["26d4-fe0f","26d4"],':church:':["26ea-fe0f","26ea"],':fountain:':["26f2-fe0f","26f2"],':golf:':["26f3-fe0f","26f3"],':sailboat:':["26f5-fe0f","26f5"],':tent:':["26fa-fe0f","26fa"],':fuelpump:':["26fd-fe0f","26fd"],':scissors:':["2702-fe0f","2702"],':airplane:':["2708-fe0f","2708"],':envelope:':["2709-fe0f","2709"],':v:':["270c-fe0f","270c"],':pencil2:':["270f-fe0f","270f"],':black_nib:':["2712-fe0f","2712"],':heavy_check_mark:':["2714-fe0f","2714"],':heavy_multiplication_x:':["2716-fe0f","2716"],':eight_spoked_asterisk:':["2733-fe0f","2733"],':eight_pointed_black_star:':["2734-fe0f","2734"],':snowflake:':["2744-fe0f","2744"],':sparkle:':["2747-fe0f","2747"],':exclamation:':["2757-fe0f","2757"],':heart:':["2764-fe0f","2764"],':arrow_right:':["27a1-fe0f","27a1"],':arrow_heading_up:':["2934-fe0f","2934"],':arrow_heading_down:':["2935-fe0f","2935"],':arrow_left:':["2b05-fe0f","2b05"],':arrow_up:':["2b06-fe0f","2b06"],':arrow_down:':["2b07-fe0f","2b07"],':black_large_square:':["2b1b-fe0f","2b1b"],':white_large_square:':["2b1c-fe0f","2b1c"],':star:':["2b50-fe0f","2b50"],':o:':["2b55-fe0f","2b55"],':part_alternation_mark:':["303d-fe0f","303d"],':congratulations:':["3297-fe0f","3297"],':secret:':["3299-fe0f","3299"],':black_joker:':["1f0cf"],':a:':["1f170"],':b:':["1f171"],':o2:':["1f17e"],':ab:':["1f18e"],':cl:':["1f191"],':cool:':["1f192"],':free:':["1f193"],':id:':["1f194"],':new:':["1f195"],':ng:':["1f196"],':ok:':["1f197"],':sos:':["1f198"],':up:':["1f199"],':vs:':["1f19a"],':koko:':["1f201"],':sa:':["1f202"],':u7981:':["1f232"],':u7a7a:':["1f233"],':u5408:':["1f234"],':u6e80:':["1f235"],':u6709:':["1f236"],':u7533:':["1f238"],':u5272:':["1f239"],':u55b6:':["1f23a"],':ideograph_advantage:':["1f250"],':accept:':["1f251"],':cyclone:':["1f300"],':foggy:':["1f301"],':closed_umbrella:':["1f302"],':night_with_stars:':["1f303"],':sunrise_over_mountains:':["1f304"],':sunrise:':["1f305"],':city_dusk:':["1f306"],':city_sunset:':["1f307"],':city_sunrise:':["1f307"],':rainbow:':["1f308"],':bridge_at_night:':["1f309"],':ocean:':["1f30a"],':volcano:':["1f30b"],':milky_way:':["1f30c"],':earth_asia:':["1f30f"],':new_moon:':["1f311"],':first_quarter_moon:':["1f313"],':waxing_gibbous_moon:':["1f314"],':full_moon:':["1f315"],':crescent_moon:':["1f319"],':first_quarter_moon_with_face:':["1f31b"],':star2:':["1f31f"],':stars:':["1f320"],':chestnut:':["1f330"],':seedling:':["1f331"],':palm_tree:':["1f334"],':cactus:':["1f335"],':tulip:':["1f337"],':cherry_blossom:':["1f338"],':rose:':["1f339"],':hibiscus:':["1f33a"],':sunflower:':["1f33b"],':blossom:':["1f33c"],':corn:':["1f33d"],':ear_of_rice:':["1f33e"],':herb:':["1f33f"],':four_leaf_clover:':["1f340"],':maple_leaf:':["1f341"],':fallen_leaf:':["1f342"],':leaves:':["1f343"],':mushroom:':["1f344"],':tomato:':["1f345"],':eggplant:':["1f346"],':grapes:':["1f347"],':melon:':["1f348"],':watermelon:':["1f349"],':tangerine:':["1f34a"],':banana:':["1f34c"],':pineapple:':["1f34d"],':apple:':["1f34e"],':green_apple:':["1f34f"],':peach:':["1f351"],':cherries:':["1f352"],':strawberry:':["1f353"],':hamburger:':["1f354"],':pizza:':["1f355"],':meat_on_bone:':["1f356"],':poultry_leg:':["1f357"],':rice_cracker:':["1f358"],':rice_ball:':["1f359"],':rice:':["1f35a"],':curry:':["1f35b"],':ramen:':["1f35c"],':spaghetti:':["1f35d"],':bread:':["1f35e"],':fries:':["1f35f"],':sweet_potato:':["1f360"],':dango:':["1f361"],':oden:':["1f362"],':sushi:':["1f363"],':fried_shrimp:':["1f364"],':fish_cake:':["1f365"],':icecream:':["1f366"],':shaved_ice:':["1f367"],':ice_cream:':["1f368"],':doughnut:':["1f369"],':cookie:':["1f36a"],':chocolate_bar:':["1f36b"],':candy:':["1f36c"],':lollipop:':["1f36d"],':custard:':["1f36e"],':honey_pot:':["1f36f"],':cake:':["1f370"],':bento:':["1f371"],':stew:':["1f372"],':egg:':["1f373"],':fork_and_knife:':["1f374"],':tea:':["1f375"],':sake:':["1f376"],':wine_glass:':["1f377"],':cocktail:':["1f378"],':tropical_drink:':["1f379"],':beer:':["1f37a"],':beers:':["1f37b"],':ribbon:':["1f380"],':gift:':["1f381"],':birthday:':["1f382"],':jack_o_lantern:':["1f383"],':christmas_tree:':["1f384"],':santa:':["1f385"],':fireworks:':["1f386"],':sparkler:':["1f387"],':balloon:':["1f388"],':tada:':["1f389"],':confetti_ball:':["1f38a"],':tanabata_tree:':["1f38b"],':crossed_flags:':["1f38c"],':bamboo:':["1f38d"],':dolls:':["1f38e"],':flags:':["1f38f"],':wind_chime:':["1f390"],':rice_scene:':["1f391"],':school_satchel:':["1f392"],':mortar_board:':["1f393"],':carousel_horse:':["1f3a0"],':ferris_wheel:':["1f3a1"],':roller_coaster:':["1f3a2"],':fishing_pole_and_fish:':["1f3a3"],':microphone:':["1f3a4"],':movie_camera:':["1f3a5"],':cinema:':["1f3a6"],':headphones:':["1f3a7"],':art:':["1f3a8"],':tophat:':["1f3a9"],':circus_tent:':["1f3aa"],':ticket:':["1f3ab"],':clapper:':["1f3ac"],':performing_arts:':["1f3ad"],':video_game:':["1f3ae"],':dart:':["1f3af"],':slot_machine:':["1f3b0"],':8ball:':["1f3b1"],':game_die:':["1f3b2"],':bowling:':["1f3b3"],':flower_playing_cards:':["1f3b4"],':musical_note:':["1f3b5"],':notes:':["1f3b6"],':saxophone:':["1f3b7"],':guitar:':["1f3b8"],':musical_keyboard:':["1f3b9"],':trumpet:':["1f3ba"],':violin:':["1f3bb"],':musical_score:':["1f3bc"],':running_shirt_with_sash:':["1f3bd"],':tennis:':["1f3be"],':ski:':["1f3bf"],':basketball:':["1f3c0"],':checkered_flag:':["1f3c1"],':snowboarder:':["1f3c2"],':runner:':["1f3c3"],':surfer:':["1f3c4"],':trophy:':["1f3c6"],':football:':["1f3c8"],':swimmer:':["1f3ca"],':house:':["1f3e0"],':house_with_garden:':["1f3e1"],':office:':["1f3e2"],':post_office:':["1f3e3"],':hospital:':["1f3e5"],':bank:':["1f3e6"],':atm:':["1f3e7"],':hotel:':["1f3e8"],':love_hotel:':["1f3e9"],':convenience_store:':["1f3ea"],':school:':["1f3eb"],':department_store:':["1f3ec"],':factory:':["1f3ed"],':izakaya_lantern:':["1f3ee"],':japanese_castle:':["1f3ef"],':european_castle:':["1f3f0"],':snail:':["1f40c"],':snake:':["1f40d"],':racehorse:':["1f40e"],':sheep:':["1f411"],':monkey:':["1f412"],':chicken:':["1f414"],':boar:':["1f417"],':elephant:':["1f418"],':octopus:':["1f419"],':shell:':["1f41a"],':bug:':["1f41b"],':ant:':["1f41c"],':bee:':["1f41d"],':beetle:':["1f41e"],':fish:':["1f41f"],':tropical_fish:':["1f420"],':blowfish:':["1f421"],':turtle:':["1f422"],':hatching_chick:':["1f423"],':baby_chick:':["1f424"],':hatched_chick:':["1f425"],':bird:':["1f426"],':penguin:':["1f427"],':koala:':["1f428"],':poodle:':["1f429"],':camel:':["1f42b"],':dolphin:':["1f42c"],':mouse:':["1f42d"],':cow:':["1f42e"],':tiger:':["1f42f"],':rabbit:':["1f430"],':cat:':["1f431"],':dragon_face:':["1f432"],':whale:':["1f433"],':horse:':["1f434"],':monkey_face:':["1f435"],':dog:':["1f436"],':pig:':["1f437"],':frog:':["1f438"],':hamster:':["1f439"],':wolf:':["1f43a"],':bear:':["1f43b"],':panda_face:':["1f43c"],':pig_nose:':["1f43d"],':feet:':["1f43e"],':paw_prints:':["1f43e"],':eyes:':["1f440"],':ear:':["1f442"],':nose:':["1f443"],':lips:':["1f444"],':tongue:':["1f445"],':point_up_2:':["1f446"],':point_down:':["1f447"],':point_left:':["1f448"],':point_right:':["1f449"],':punch:':["1f44a"],':wave:':["1f44b"],':ok_hand:':["1f44c"],':thumbsup:':["1f44d"],':+1:':["1f44d"],':thumbsdown:':["1f44e"],':-1:':["1f44e"],':clap:':["1f44f"],':open_hands:':["1f450"],':crown:':["1f451"],':womans_hat:':["1f452"],':eyeglasses:':["1f453"],':necktie:':["1f454"],':shirt:':["1f455"],':jeans:':["1f456"],':dress:':["1f457"],':kimono:':["1f458"],':bikini:':["1f459"],':womans_clothes:':["1f45a"],':purse:':["1f45b"],':handbag:':["1f45c"],':pouch:':["1f45d"],':mans_shoe:':["1f45e"],':athletic_shoe:':["1f45f"],':high_heel:':["1f460"],':sandal:':["1f461"],':boot:':["1f462"],':footprints:':["1f463"],':bust_in_silhouette:':["1f464"],':boy:':["1f466"],':girl:':["1f467"],':man:':["1f468"],':woman:':["1f469"],':family:':["1f46a"],':couple:':["1f46b"],':cop:':["1f46e"],':dancers:':["1f46f"],':bride_with_veil:':["1f470"],':person_with_blond_hair:':["1f471"],':man_with_gua_pi_mao:':["1f472"],':man_with_turban:':["1f473"],':older_man:':["1f474"],':older_woman:':["1f475"],':grandma:':["1f475"],':baby:':["1f476"],':construction_worker:':["1f477"],':princess:':["1f478"],':japanese_ogre:':["1f479"],':japanese_goblin:':["1f47a"],':ghost:':["1f47b"],':angel:':["1f47c"],':alien:':["1f47d"],':space_invader:':["1f47e"],':imp:':["1f47f"],':skull:':["1f480"],':skeleton:':["1f480"],':card_index:':["1f4c7"],':information_desk_person:':["1f481"],':guardsman:':["1f482"],':dancer:':["1f483"],':lipstick:':["1f484"],':nail_care:':["1f485"],':ledger:':["1f4d2"],':massage:':["1f486"],':notebook:':["1f4d3"],':haircut:':["1f487"],':notebook_with_decorative_cover:':["1f4d4"],':barber:':["1f488"],':closed_book:':["1f4d5"],':syringe:':["1f489"],':book:':["1f4d6"],':pill:':["1f48a"],':green_book:':["1f4d7"],':kiss:':["1f48b"],':blue_book:':["1f4d8"],':love_letter:':["1f48c"],':orange_book:':["1f4d9"],':ring:':["1f48d"],':books:':["1f4da"],':gem:':["1f48e"],':name_badge:':["1f4db"],':couplekiss:':["1f48f"],':scroll:':["1f4dc"],':bouquet:':["1f490"],':pencil:':["1f4dd"],':couple_with_heart:':["1f491"],':telephone_receiver:':["1f4de"],':wedding:':["1f492"],':pager:':["1f4df"],':fax:':["1f4e0"],':heartbeat:':["1f493"],':satellite:':["1f4e1"],':loudspeaker:':["1f4e2"],':broken_heart:':["1f494"],':mega:':["1f4e3"],':outbox_tray:':["1f4e4"],':two_hearts:':["1f495"],':inbox_tray:':["1f4e5"],':package:':["1f4e6"],':sparkling_heart:':["1f496"],':e-mail:':["1f4e7"],':email:':["1f4e7"],':incoming_envelope:':["1f4e8"],':heartpulse:':["1f497"],':envelope_with_arrow:':["1f4e9"],':mailbox_closed:':["1f4ea"],':cupid:':["1f498"],':mailbox:':["1f4eb"],':postbox:':["1f4ee"],':blue_heart:':["1f499"],':newspaper:':["1f4f0"],':iphone:':["1f4f1"],':green_heart:':["1f49a"],':calling:':["1f4f2"],':vibration_mode:':["1f4f3"],':yellow_heart:':["1f49b"],':mobile_phone_off:':["1f4f4"],':signal_strength:':["1f4f6"],':purple_heart:':["1f49c"],':camera:':["1f4f7"],':video_camera:':["1f4f9"],':gift_heart:':["1f49d"],':tv:':["1f4fa"],':radio:':["1f4fb"],':revolving_hearts:':["1f49e"],':vhs:':["1f4fc"],':arrows_clockwise:':["1f503"],':heart_decoration:':["1f49f"],':loud_sound:':["1f50a"],':battery:':["1f50b"],':diamond_shape_with_a_dot_inside:':["1f4a0"],':electric_plug:':["1f50c"],':mag:':["1f50d"],':bulb:':["1f4a1"],':mag_right:':["1f50e"],':lock_with_ink_pen:':["1f50f"],':anger:':["1f4a2"],':closed_lock_with_key:':["1f510"],':key:':["1f511"],':bomb:':["1f4a3"],':lock:':["1f512"],':unlock:':["1f513"],':zzz:':["1f4a4"],':bell:':["1f514"],':bookmark:':["1f516"],':boom:':["1f4a5"],':link:':["1f517"],':radio_button:':["1f518"],':sweat_drops:':["1f4a6"],':back:':["1f519"],':end:':["1f51a"],':droplet:':["1f4a7"],':on:':["1f51b"],':soon:':["1f51c"],':dash:':["1f4a8"],':top:':["1f51d"],':underage:':["1f51e"],':poop:':["1f4a9"],':shit:':["1f4a9"],':hankey:':["1f4a9"],':poo:':["1f4a9"],':ten:':["1f51f"],':muscle:':["1f4aa"],':capital_abcd:':["1f520"],':abcd:':["1f521"],':dizzy:':["1f4ab"],':1234:':["1f522"],':symbols:':["1f523"],':speech_balloon:':["1f4ac"],':abc:':["1f524"],':fire:':["1f525"],':flame:':["1f525"],':white_flower:':["1f4ae"],':flashlight:':["1f526"],':wrench:':["1f527"],':100:':["1f4af"],':hammer:':["1f528"],':nut_and_bolt:':["1f529"],':moneybag:':["1f4b0"],':knife:':["1f52a"],':gun:':["1f52b"],':currency_exchange:':["1f4b1"],':crystal_ball:':["1f52e"],':heavy_dollar_sign:':["1f4b2"],':six_pointed_star:':["1f52f"],':credit_card:':["1f4b3"],':beginner:':["1f530"],':trident:':["1f531"],':yen:':["1f4b4"],':black_square_button:':["1f532"],':white_square_button:':["1f533"],':dollar:':["1f4b5"],':red_circle:':["1f534"],':large_blue_circle:':["1f535"],':money_with_wings:':["1f4b8"],':large_orange_diamond:':["1f536"],':large_blue_diamond:':["1f537"],':chart:':["1f4b9"],':small_orange_diamond:':["1f538"],':small_blue_diamond:':["1f539"],':seat:':["1f4ba"],':small_red_triangle:':["1f53a"],':small_red_triangle_down:':["1f53b"],':computer:':["1f4bb"],':arrow_up_small:':["1f53c"],':briefcase:':["1f4bc"],':arrow_down_small:':["1f53d"],':clock1:':["1f550"],':minidisc:':["1f4bd"],':clock2:':["1f551"],':floppy_disk:':["1f4be"],':clock3:':["1f552"],':cd:':["1f4bf"],':clock4:':["1f553"],':dvd:':["1f4c0"],':clock5:':["1f554"],':clock6:':["1f555"],':file_folder:':["1f4c1"],':clock7:':["1f556"],':clock8:':["1f557"],':open_file_folder:':["1f4c2"],':clock9:':["1f558"],':clock10:':["1f559"],':page_with_curl:':["1f4c3"],':clock11:':["1f55a"],':clock12:':["1f55b"],':page_facing_up:':["1f4c4"],':mount_fuji:':["1f5fb"],':tokyo_tower:':["1f5fc"],':date:':["1f4c5"],':statue_of_liberty:':["1f5fd"],':japan:':["1f5fe"],':calendar:':["1f4c6"],':moyai:':["1f5ff"],':grin:':["1f601"],':joy:':["1f602"],':smiley:':["1f603"],':chart_with_upwards_trend:':["1f4c8"],':smile:':["1f604"],':sweat_smile:':["1f605"],':chart_with_downwards_trend:':["1f4c9"],':laughing:':["1f606"],':satisfied:':["1f606"],':wink:':["1f609"],':bar_chart:':["1f4ca"],':blush:':["1f60a"],':yum:':["1f60b"],':clipboard:':["1f4cb"],':relieved:':["1f60c"],':heart_eyes:':["1f60d"],':pushpin:':["1f4cc"],':smirk:':["1f60f"],':unamused:':["1f612"],':round_pushpin:':["1f4cd"],':sweat:':["1f613"],':pensive:':["1f614"],':paperclip:':["1f4ce"],':confounded:':["1f616"],':kissing_heart:':["1f618"],':straight_ruler:':["1f4cf"],':kissing_closed_eyes:':["1f61a"],':stuck_out_tongue_winking_eye:':["1f61c"],':triangular_ruler:':["1f4d0"],':stuck_out_tongue_closed_eyes:':["1f61d"],':disappointed:':["1f61e"],':bookmark_tabs:':["1f4d1"],':angry:':["1f620"],':rage:':["1f621"],':cry:':["1f622"],':persevere:':["1f623"],':triumph:':["1f624"],':disappointed_relieved:':["1f625"],':fearful:':["1f628"],':weary:':["1f629"],':sleepy:':["1f62a"],':tired_face:':["1f62b"],':sob:':["1f62d"],':cold_sweat:':["1f630"],':scream:':["1f631"],':astonished:':["1f632"],':flushed:':["1f633"],':dizzy_face:':["1f635"],':mask:':["1f637"],':smile_cat:':["1f638"],':joy_cat:':["1f639"],':smiley_cat:':["1f63a"],':heart_eyes_cat:':["1f63b"],':smirk_cat:':["1f63c"],':kissing_cat:':["1f63d"],':pouting_cat:':["1f63e"],':crying_cat_face:':["1f63f"],':scream_cat:':["1f640"],':no_good:':["1f645"],':ok_woman:':["1f646"],':bow:':["1f647"],':see_no_evil:':["1f648"],':hear_no_evil:':["1f649"],':speak_no_evil:':["1f64a"],':raising_hand:':["1f64b"],':raised_hands:':["1f64c"],':person_frowning:':["1f64d"],':person_with_pouting_face:':["1f64e"],':pray:':["1f64f"],':rocket:':["1f680"],':railway_car:':["1f683"],':bullettrain_side:':["1f684"],':bullettrain_front:':["1f685"],':metro:':["1f687"],':station:':["1f689"],':bus:':["1f68c"],':busstop:':["1f68f"],':ambulance:':["1f691"],':fire_engine:':["1f692"],':police_car:':["1f693"],':taxi:':["1f695"],':red_car:':["1f697"],':blue_car:':["1f699"],':truck:':["1f69a"],':ship:':["1f6a2"],':speedboat:':["1f6a4"],':traffic_light:':["1f6a5"],':construction:':["1f6a7"],':rotating_light:':["1f6a8"],':triangular_flag_on_post:':["1f6a9"],':door:':["1f6aa"],':no_entry_sign:':["1f6ab"],':smoking:':["1f6ac"],':no_smoking:':["1f6ad"],':bike:':["1f6b2"],':walking:':["1f6b6"],':mens:':["1f6b9"],':womens:':["1f6ba"],':restroom:':["1f6bb"],':baby_symbol:':["1f6bc"],':toilet:':["1f6bd"],':wc:':["1f6be"],':bath:':["1f6c0"],':metal:':["1f918"],':sign_of_the_horns:':["1f918"],':grinning:':["1f600"],':innocent:':["1f607"],':smiling_imp:':["1f608"],':sunglasses:':["1f60e"],':neutral_face:':["1f610"],':expressionless:':["1f611"],':confused:':["1f615"],':kissing:':["1f617"],':kissing_smiling_eyes:':["1f619"],':stuck_out_tongue:':["1f61b"],':worried:':["1f61f"],':frowning:':["1f626"],':anguished:':["1f627"],':grimacing:':["1f62c"],':open_mouth:':["1f62e"],':hushed:':["1f62f"],':sleeping:':["1f634"],':no_mouth:':["1f636"],':helicopter:':["1f681"],':steam_locomotive:':["1f682"],':train2:':["1f686"],':light_rail:':["1f688"],':tram:':["1f68a"],':oncoming_bus:':["1f68d"],':trolleybus:':["1f68e"],':minibus:':["1f690"],':oncoming_police_car:':["1f694"],':oncoming_taxi:':["1f696"],':oncoming_automobile:':["1f698"],':articulated_lorry:':["1f69b"],':tractor:':["1f69c"],':monorail:':["1f69d"],':mountain_railway:':["1f69e"],':suspension_railway:':["1f69f"],':mountain_cableway:':["1f6a0"],':aerial_tramway:':["1f6a1"],':rowboat:':["1f6a3"],':vertical_traffic_light:':["1f6a6"],':put_litter_in_its_place:':["1f6ae"],':do_not_litter:':["1f6af"],':potable_water:':["1f6b0"],':non-potable_water:':["1f6b1"],':no_bicycles:':["1f6b3"],':bicyclist:':["1f6b4"],':mountain_bicyclist:':["1f6b5"],':no_pedestrians:':["1f6b7"],':children_crossing:':["1f6b8"],':shower:':["1f6bf"],':bathtub:':["1f6c1"],':passport_control:':["1f6c2"],':customs:':["1f6c3"],':baggage_claim:':["1f6c4"],':left_luggage:':["1f6c5"],':earth_africa:':["1f30d"],':earth_americas:':["1f30e"],':globe_with_meridians:':["1f310"],':waxing_crescent_moon:':["1f312"],':waning_gibbous_moon:':["1f316"],':last_quarter_moon:':["1f317"],':waning_crescent_moon:':["1f318"],':new_moon_with_face:':["1f31a"],':last_quarter_moon_with_face:':["1f31c"],':full_moon_with_face:':["1f31d"],':sun_with_face:':["1f31e"],':evergreen_tree:':["1f332"],':deciduous_tree:':["1f333"],':lemon:':["1f34b"],':pear:':["1f350"],':baby_bottle:':["1f37c"],':horse_racing:':["1f3c7"],':rugby_football:':["1f3c9"],':european_post_office:':["1f3e4"],':rat:':["1f400"],':mouse2:':["1f401"],':ox:':["1f402"],':water_buffalo:':["1f403"],':cow2:':["1f404"],':tiger2:':["1f405"],':leopard:':["1f406"],':rabbit2:':["1f407"],':cat2:':["1f408"],':dragon:':["1f409"],':crocodile:':["1f40a"],':whale2:':["1f40b"],':ram:':["1f40f"],':goat:':["1f410"],':rooster:':["1f413"],':dog2:':["1f415"],':pig2:':["1f416"],':dromedary_camel:':["1f42a"],':busts_in_silhouette:':["1f465"],':two_men_holding_hands:':["1f46c"],':two_women_holding_hands:':["1f46d"],':thought_balloon:':["1f4ad"],':euro:':["1f4b6"],':pound:':["1f4b7"],':mailbox_with_mail:':["1f4ec"],':mailbox_with_no_mail:':["1f4ed"],':postal_horn:':["1f4ef"],':no_mobile_phones:':["1f4f5"],':twisted_rightwards_arrows:':["1f500"],':repeat:':["1f501"],':repeat_one:':["1f502"],':arrows_counterclockwise:':["1f504"],':low_brightness:':["1f505"],':high_brightness:':["1f506"],':mute:':["1f507"],':sound:':["1f509"],':no_bell:':["1f515"],':microscope:':["1f52c"],':telescope:':["1f52d"],':clock130:':["1f55c"],':clock230:':["1f55d"],':clock330:':["1f55e"],':clock430:':["1f55f"],':clock530:':["1f560"],':clock630:':["1f561"],':clock730:':["1f562"],':clock830:':["1f563"],':clock930:':["1f564"],':clock1030:':["1f565"],':clock1130:':["1f566"],':clock1230:':["1f567"],':speaker:':["1f508"],':train:':["1f68b"],':film_frames:':["1f39e"],':tickets:':["1f39f"],':admission_tickets:':["1f39f"],':medal:':["1f3c5"],':sports_medal:':["1f3c5"],':lifter:':["1f3cb"],':weight_lifter:':["1f3cb"],':golfer:':["1f3cc"],':motorcycle:':["1f3cd"],':racing_motorcycle:':["1f3cd"],':race_car:':["1f3ce"],':racing_car:':["1f3ce"],':military_medal:':["1f396"],':reminder_ribbon:':["1f397"],':hot_pepper:':["1f336"],':cloud_rain:':["1f327"],':cloud_with_rain:':["1f327"],':cloud_snow:':["1f328"],':cloud_with_snow:':["1f328"],':cloud_lightning:':["1f329"],':cloud_with_lightning:':["1f329"],':cloud_tornado:':["1f32a"],':cloud_with_tornado:':["1f32a"],':fog:':["1f32b"],':wind_blowing_face:':["1f32c"],':chipmunk:':["1f43f"],':spider:':["1f577"],':spider_web:':["1f578"],':thermometer:':["1f321"],':microphone2:':["1f399"],':studio_microphone:':["1f399"],':level_slider:':["1f39a"],':control_knobs:':["1f39b"],':flag_white:':["1f3f3"],':waving_white_flag:':["1f3f3"],':flag_black:':["1f3f4"],':waving_black_flag:':["1f3f4"],':rosette:':["1f3f5"],':label:':["1f3f7"],':camera_with_flash:':["1f4f8"],':projector:':["1f4fd"],':film_projector:':["1f4fd"],':om_symbol:':["1f549"],':dove:':["1f54a"],':dove_of_peace:':["1f54a"],':candle:':["1f56f"],':clock:':["1f570"],':mantlepiece_clock:':["1f570"],':hole:':["1f573"],':dark_sunglasses:':["1f576"],':joystick:':["1f579"],':paperclips:':["1f587"],':linked_paperclips:':["1f587"],':pen_ballpoint:':["1f58a"],':lower_left_ballpoint_pen:':["1f58a"],':pen_fountain:':["1f58b"],':lower_left_fountain_pen:':["1f58b"],':paintbrush:':["1f58c"],':lower_left_paintbrush:':["1f58c"],':crayon:':["1f58d"],':lower_left_crayon:':["1f58d"],':desktop:':["1f5a5"],':desktop_computer:':["1f5a5"],':printer:':["1f5a8"],':trackball:':["1f5b2"],':frame_photo:':["1f5bc"],':frame_with_picture:':["1f5bc"],':dividers:':["1f5c2"],':card_index_dividers:':["1f5c2"],':card_box:':["1f5c3"],':card_file_box:':["1f5c3"],':file_cabinet:':["1f5c4"],':wastebasket:':["1f5d1"],':notepad_spiral:':["1f5d2"],':spiral_note_pad:':["1f5d2"],':calendar_spiral:':["1f5d3"],':spiral_calendar_pad:':["1f5d3"],':compression:':["1f5dc"],':key2:':["1f5dd"],':old_key:':["1f5dd"],':newspaper2:':["1f5de"],':rolled_up_newspaper:':["1f5de"],':dagger:':["1f5e1"],':dagger_knife:':["1f5e1"],':speaking_head:':["1f5e3"],':speaking_head_in_silhouette:':["1f5e3"],':anger_right:':["1f5ef"],':right_anger_bubble:':["1f5ef"],':ballot_box:':["1f5f3"],':ballot_box_with_ballot:':["1f5f3"],':map:':["1f5fa"],':world_map:':["1f5fa"],':sleeping_accommodation:':["1f6cc"],':tools:':["1f6e0"],':hammer_and_wrench:':["1f6e0"],':shield:':["1f6e1"],':oil:':["1f6e2"],':oil_drum:':["1f6e2"],':satellite_orbital:':["1f6f0"],':fork_knife_plate:':["1f37d"],':fork_and_knife_with_plate:':["1f37d"],':eye:':["1f441"],':levitate:':["1f574"],':man_in_business_suit_levitating:':["1f574"],':spy:':["1f575"],':sleuth_or_spy:':["1f575"],':hand_splayed:':["1f590"],':raised_hand_with_fingers_splayed:':["1f590"],':middle_finger:':["1f595"],':reversed_hand_with_middle_finger_extended:':["1f595"],':vulcan:':["1f596"],':raised_hand_with_part_between_middle_and_ring_fingers:':["1f596"],':slight_frown:':["1f641"],':slightly_frowning_face:':["1f641"],':slight_smile:':["1f642"],':slightly_smiling_face:':["1f642"],':mountain_snow:':["1f3d4"],':snow_capped_mountain:':["1f3d4"],':camping:':["1f3d5"],':beach:':["1f3d6"],':beach_with_umbrella:':["1f3d6"],':construction_site:':["1f3d7"],':building_construction:':["1f3d7"],':homes:':["1f3d8"],':house_buildings:':["1f3d8"],':cityscape:':["1f3d9"],':house_abandoned:':["1f3da"],':derelict_house_building:':["1f3da"],':classical_building:':["1f3db"],':desert:':["1f3dc"],':island:':["1f3dd"],':desert_island:':["1f3dd"],':park:':["1f3de"],':national_park:':["1f3de"],':stadium:':["1f3df"],':couch:':["1f6cb"],':couch_and_lamp:':["1f6cb"],':shopping_bags:':["1f6cd"],':bellhop:':["1f6ce"],':bellhop_bell:':["1f6ce"],':bed:':["1f6cf"],':motorway:':["1f6e3"],':railway_track:':["1f6e4"],':railroad_track:':["1f6e4"],':motorboat:':["1f6e5"],':airplane_small:':["1f6e9"],':small_airplane:':["1f6e9"],':airplane_departure:':["1f6eb"],':airplane_arriving:':["1f6ec"],':cruise_ship:':["1f6f3"],':passenger_ship:':["1f6f3"],':tone1:':["1f3fb"],':tone2:':["1f3fc"],':tone3:':["1f3fd"],':tone4:':["1f3fe"],':tone5:':["1f3ff"],':white_sun_small_cloud:':["1f324"],':white_sun_with_small_cloud:':["1f324"],':white_sun_cloud:':["1f325"],':white_sun_behind_cloud:':["1f325"],':white_sun_rain_cloud:':["1f326"],':white_sun_behind_cloud_with_rain:':["1f326"],':mouse_three_button:':["1f5b1"],':three_button_mouse:':["1f5b1"],':upside_down:':["1f643"],':upside_down_face:':["1f643"],':money_mouth:':["1f911"],':money_mouth_face:':["1f911"],':nerd:':["1f913"],':nerd_face:':["1f913"],':hugging:':["1f917"],':hugging_face:':["1f917"],':rolling_eyes:':["1f644"],':face_with_rolling_eyes:':["1f644"],':thinking:':["1f914"],':thinking_face:':["1f914"],':zipper_mouth:':["1f910"],':zipper_mouth_face:':["1f910"],':thermometer_face:':["1f912"],':face_with_thermometer:':["1f912"],':head_bandage:':["1f915"],':face_with_head_bandage:':["1f915"],':robot:':["1f916"],':robot_face:':["1f916"],':lion_face:':["1f981"],':lion:':["1f981"],':unicorn:':["1f984"],':unicorn_face:':["1f984"],':scorpion:':["1f982"],':crab:':["1f980"],':turkey:':["1f983"],':cheese:':["1f9c0"],':cheese_wedge:':["1f9c0"],':hotdog:':["1f32d"],':hot_dog:':["1f32d"],':taco:':["1f32e"],':burrito:':["1f32f"],':popcorn:':["1f37f"],':champagne:':["1f37e"],':bottle_with_popping_cork:':["1f37e"],':bow_and_arrow:':["1f3f9"],':archery:':["1f3f9"],':amphora:':["1f3fa"],':place_of_worship:':["1f6d0"],':worship_symbol:':["1f6d0"],':kaaba:':["1f54b"],':mosque:':["1f54c"],':synagogue:':["1f54d"],':menorah:':["1f54e"],':prayer_beads:':["1f4ff"],':cricket:':["1f3cf"],':cricket_bat_ball:':["1f3cf"],':volleyball:':["1f3d0"],':field_hockey:':["1f3d1"],':hockey:':["1f3d2"],':ping_pong:':["1f3d3"],':table_tennis:':["1f3d3"],':badminton:':["1f3f8"],':fast_forward:':["23e9"],':rewind:':["23ea"],':arrow_double_up:':["23eb"],':arrow_double_down:':["23ec"],':alarm_clock:':["23f0"],':hourglass_flowing_sand:':["23f3"],':ophiuchus:':["26ce"],':white_check_mark:':["2705"],':fist:':["270a"],':raised_hand:':["270b"],':sparkles:':["2728"],':x:':["274c"],':negative_squared_cross_mark:':["274e"],':question:':["2753"],':grey_question:':["2754"],':grey_exclamation:':["2755"],':heavy_plus_sign:':["2795"],':heavy_minus_sign:':["2796"],':heavy_division_sign:':["2797"],':curly_loop:':["27b0"],':wavy_dash:':["3030"],':loop:':["27bf"],':cross:':["271d"],':latin_cross:':["271d"],':keyboard:':["2328"],':writing_hand:':["270d"],':track_next:':["23ed"],':next_track:':["23ed"],':track_previous:':["23ee"],':previous_track:':["23ee"],':play_pause:':["23ef"],':stopwatch:':["23f1"],':timer:':["23f2"],':timer_clock:':["23f2"],':pause_button:':["23f8"],':double_vertical_bar:':["23f8"],':stop_button:':["23f9"],':record_button:':["23fa"],':umbrella2:':["2602"],':snowman2:':["2603"],':comet:':["2604"],':shamrock:':["2618"],':skull_crossbones:':["2620"],':skull_and_crossbones:':["2620"],':radioactive:':["2622"],':radioactive_sign:':["2622"],':biohazard:':["2623"],':biohazard_sign:':["2623"],':orthodox_cross:':["2626"],':star_and_crescent:':["262a"],':peace:':["262e"],':peace_symbol:':["262e"],':yin_yang:':["262f"],':wheel_of_dharma:':["2638"],':frowning2:':["2639"],':white_frowning_face:':["2639"],':hammer_pick:':["2692"],':hammer_and_pick:':["2692"],':crossed_swords:':["2694"],':scales:':["2696"],':alembic:':["2697"],':gear:':["2699"],':atom:':["269b"],':atom_symbol:':["269b"],':fleur-de-lis:':["269c"],':coffin:':["26b0"],':urn:':["26b1"],':funeral_urn:':["26b1"],':thunder_cloud_rain:':["26c8"],':thunder_cloud_and_rain:':["26c8"],':pick:':["26cf"],':helmet_with_cross:':["26d1"],':helmet_with_white_cross:':["26d1"],':chains:':["26d3"],':shinto_shrine:':["26e9"],':mountain:':["26f0"],':beach_umbrella:':["26f1"],':umbrella_on_ground:':["26f1"],':ferry:':["26f4"],':skier:':["26f7"],':ice_skate:':["26f8"],':basketball_player:':["26f9"],':person_with_ball:':["26f9"],':star_of_david:':["2721"],':heart_exclamation:':["2763"],':heavy_heart_exclamation_mark_ornament:':["2763"]};
+    // ns.shortnames = Object.keys(ns.emojioneList).map(function(emoji) {
+    //     return emoji.replace(/[+]/g, "\\$&");
+    // }).join('|');
+    var tmpShortNames = [],
+        emoji;
+    for (emoji in ns.emojioneList) {
+        if (!ns.emojioneList.hasOwnProperty(emoji)) continue;
+        tmpShortNames.push(emoji.replace(/[+]/g, "\\$&"));
+    }
+    ns.shortnames = tmpShortNames.join('|');
+    ns.asciiList = {
+        '<3':'2764',
+        '</3':'1f494',
+        ':\')':'1f602',
+        ':\'-)':'1f602',
+        ':D':'1f603',
+        ':-D':'1f603',
+        '=D':'1f603',
+        ':)':'1f604',
+        ':-)':'1f604',
+        '=]':'1f604',
+        '=)':'1f604',
+        ':]':'1f604',
+        '\':)':'1f605',
+        '\':-)':'1f605',
+        '\'=)':'1f605',
+        '\':D':'1f605',
+        '\':-D':'1f605',
+        '\'=D':'1f605',
+        '>:)':'1f606',
+        '>;)':'1f606',
+        '>:-)':'1f606',
+        '>=)':'1f606',
+        ';)':'1f609',
+        ';-)':'1f609',
+        '*-)':'1f609',
+        '*)':'1f609',
+        ';-]':'1f609',
+        ';]':'1f609',
+        ';D':'1f609',
+        ';^)':'1f609',
+        '\':(':'1f613',
+        '\':-(':'1f613',
+        '\'=(':'1f613',
+        ':*':'1f618',
+        ':-*':'1f618',
+        '=*':'1f618',
+        ':^*':'1f618',
+        '>:P':'1f61c',
+        'X-P':'1f61c',
+        'x-p':'1f61c',
+        '>:[':'1f61e',
+        ':-(':'1f61e',
+        ':(':'1f61e',
+        ':-[':'1f61e',
+        ':[':'1f61e',
+        '=(':'1f61e',
+        '>:(':'1f620',
+        '>:-(':'1f620',
+        ':@':'1f620',
+        ':\'(':'1f622',
+        ':\'-(':'1f622',
+        ';(':'1f622',
+        ';-(':'1f622',
+        '>.<':'1f623',
+        'D:':'1f628',
+        ':$':'1f633',
+        '=$':'1f633',
+        '#-)':'1f635',
+        '#)':'1f635',
+        '%-)':'1f635',
+        '%)':'1f635',
+        'X)':'1f635',
+        'X-)':'1f635',
+        '*\\0/*':'1f646',
+        '\\0/':'1f646',
+        '*\\O/*':'1f646',
+        '\\O/':'1f646',
+        'O:-)':'1f607',
+        '0:-3':'1f607',
+        '0:3':'1f607',
+        '0:-)':'1f607',
+        '0:)':'1f607',
+        '0;^)':'1f607',
+        'O:)':'1f607',
+        'O;-)':'1f607',
+        'O=)':'1f607',
+        '0;-)':'1f607',
+        'O:-3':'1f607',
+        'O:3':'1f607',
+        'B-)':'1f60e',
+        'B)':'1f60e',
+        '8)':'1f60e',
+        '8-)':'1f60e',
+        'B-D':'1f60e',
+        '8-D':'1f60e',
+        '-_-':'1f611',
+        '-__-':'1f611',
+        '-___-':'1f611',
+        '>:\\':'1f615',
+        '>:/':'1f615',
+        ':-/':'1f615',
+        ':-.':'1f615',
+        ':/':'1f615',
+        ':\\':'1f615',
+        '=/':'1f615',
+        '=\\':'1f615',
+        ':L':'1f615',
+        '=L':'1f615',
+        ':P':'1f61b',
+        ':-P':'1f61b',
+        '=P':'1f61b',
+        ':-p':'1f61b',
+        ':p':'1f61b',
+        '=p':'1f61b',
+        ':-Þ':'1f61b',
+        ':Þ':'1f61b',
+        ':þ':'1f61b',
+        ':-þ':'1f61b',
+        ':-b':'1f61b',
+        ':b':'1f61b',
+        'd:':'1f61b',
+        ':-O':'1f62e',
+        ':O':'1f62e',
+        ':-o':'1f62e',
+        ':o':'1f62e',
+        'O_O':'1f62e',
+        '>:O':'1f62e',
+        ':-X':'1f636',
+        ':X':'1f636',
+        ':-#':'1f636',
+        ':#':'1f636',
+        '=X':'1f636',
+        '=x':'1f636',
+        ':x':'1f636',
+        ':-x':'1f636',
+        '=#':'1f636'
+    };
+    ns.asciiRegexp = '(\\<3|&lt;3|\\<\\/3|&lt;\\/3|\\:\'\\)|\\:\'\\-\\)|\\:D|\\:\\-D|\\=D|\\:\\)|\\:\\-\\)|\\=\\]|\\=\\)|\\:\\]|\'\\:\\)|\'\\:\\-\\)|\'\\=\\)|\'\\:D|\'\\:\\-D|\'\\=D|\\>\\:\\)|&gt;\\:\\)|\\>;\\)|&gt;;\\)|\\>\\:\\-\\)|&gt;\\:\\-\\)|\\>\\=\\)|&gt;\\=\\)|;\\)|;\\-\\)|\\*\\-\\)|\\*\\)|;\\-\\]|;\\]|;D|;\\^\\)|\'\\:\\(|\'\\:\\-\\(|\'\\=\\(|\\:\\*|\\:\\-\\*|\\=\\*|\\:\\^\\*|\\>\\:P|&gt;\\:P|X\\-P|x\\-p|\\>\\:\\[|&gt;\\:\\[|\\:\\-\\(|\\:\\(|\\:\\-\\[|\\:\\[|\\=\\(|\\>\\:\\(|&gt;\\:\\(|\\>\\:\\-\\(|&gt;\\:\\-\\(|\\:@|\\:\'\\(|\\:\'\\-\\(|;\\(|;\\-\\(|\\>\\.\\<|&gt;\\.&lt;|D\\:|\\:\\$|\\=\\$|#\\-\\)|#\\)|%\\-\\)|%\\)|X\\)|X\\-\\)|\\*\\\\0\\/\\*|\\\\0\\/|\\*\\\\O\\/\\*|\\\\O\\/|O\\:\\-\\)|0\\:\\-3|0\\:3|0\\:\\-\\)|0\\:\\)|0;\\^\\)|O\\:\\-\\)|O\\:\\)|O;\\-\\)|O\\=\\)|0;\\-\\)|O\\:\\-3|O\\:3|B\\-\\)|B\\)|8\\)|8\\-\\)|B\\-D|8\\-D|\\-_\\-|\\-__\\-|\\-___\\-|\\>\\:\\\\|&gt;\\:\\\\|\\>\\:\\/|&gt;\\:\\/|\\:\\-\\/|\\:\\-\\.|\\:\\/|\\:\\\\|\\=\\/|\\=\\\\|\\:L|\\=L|\\:P|\\:\\-P|\\=P|\\:\\-p|\\:p|\\=p|\\:\\-Þ|\\:\\-&THORN;|\\:Þ|\\:&THORN;|\\:þ|\\:&thorn;|\\:\\-þ|\\:\\-&thorn;|\\:\\-b|\\:b|d\\:|\\:\\-O|\\:O|\\:\\-o|\\:o|O_O|\\>\\:O|&gt;\\:O|\\:\\-X|\\:X|\\:\\-#|\\:#|\\=X|\\=x|\\:x|\\:\\-x|\\=#)';
+    // javascript escapes here must be ordered from largest length to shortest
+    ns.unicodeRegexp = '(\\uD83D\\uDC68\\u200D\\uD83D\\uDC69\\u200D\\uD83D\\uDC67\\u200D\\uD83D\\uDC67|\\uD83D\\uDC69\\u200D\\u2764\\uFE0F\\u200D\\uD83D\\uDC8B\\u200D\\uD83D\\uDC69|\\uD83D\\uDC68\\u200D\\uD83D\\uDC68\\u200D\\uD83D\\uDC67\\u200D\\uD83D\\uDC67|\\uD83D\\uDC68\\u200D\\uD83D\\uDC69\\u200D\\uD83D\\uDC66\\u200D\\uD83D\\uDC66|\\uD83D\\uDC68\\u200D\\uD83D\\uDC69\\u200D\\uD83D\\uDC67\\u200D\\uD83D\\uDC66|\\uD83D\\uDC68\\u200D\\uD83D\\uDC68\\u200D\\uD83D\\uDC67\\u200D\\uD83D\\uDC66|\\uD83D\\uDC69\\u200D\\uD83D\\uDC69\\u200D\\uD83D\\uDC66\\u200D\\uD83D\\uDC66|\\uD83D\\uDC69\\u200D\\uD83D\\uDC69\\u200D\\uD83D\\uDC67\\u200D\\uD83D\\uDC66|\\uD83D\\uDC69\\u200D\\uD83D\\uDC69\\u200D\\uD83D\\uDC67\\u200D\\uD83D\\uDC67|\\uD83D\\uDC68\\u200D\\uD83D\\uDC68\\u200D\\uD83D\\uDC66\\u200D\\uD83D\\uDC66|\\uD83D\\uDC68\\u200D\\u2764\\uFE0F\\u200D\\uD83D\\uDC8B\\u200D\\uD83D\\uDC68|\\uD83D\\uDC68\\u200D\\u2764\\uFE0F\\u200D\\uD83D\\uDC68|\\uD83D\\uDC68\\u200D\\uD83D\\uDC68\\u200D\\uD83D\\uDC66|\\uD83D\\uDC68\\u200D\\uD83D\\uDC68\\u200D\\uD83D\\uDC67|\\uD83D\\uDC68\\u200D\\uD83D\\uDC69\\u200D\\uD83D\\uDC67|\\uD83D\\uDC69\\u200D\\uD83D\\uDC69\\u200D\\uD83D\\uDC66|\\uD83D\\uDC69\\u200D\\uD83D\\uDC69\\u200D\\uD83D\\uDC67|\\uD83D\\uDC69\\u200D\\u2764\\uFE0F\\u200D\\uD83D\\uDC69|\\uD83D\\uDC41\\u200D\\uD83D\\uDDE8|\\uD83C\\uDFCB\\uD83C\\uDFFE|\\uD83E\\uDD18\\uD83C\\uDFFE|\\uD83E\\uDD18\\uD83C\\uDFFD|\\uD83E\\uDD18\\uD83C\\uDFFC|\\uD83E\\uDD18\\uD83C\\uDFFB|\\uD83D\\uDEC0\\uD83C\\uDFFF|\\uD83D\\uDEC0\\uD83C\\uDFFE|\\uD83D\\uDEC0\\uD83C\\uDFFD|\\uD83D\\uDEC0\\uD83C\\uDFFC|\\uD83D\\uDEC0\\uD83C\\uDFFB|\\uD83D\\uDEB6\\uD83C\\uDFFF|\\uD83D\\uDEB6\\uD83C\\uDFFE|\\uD83D\\uDEB6\\uD83C\\uDFFD|\\uD83D\\uDEB6\\uD83C\\uDFFC|\\uD83D\\uDEB6\\uD83C\\uDFFB|\\uD83D\\uDEB5\\uD83C\\uDFFF|\\uD83D\\uDEB5\\uD83C\\uDFFE|\\uD83D\\uDEB5\\uD83C\\uDFFD|\\uD83D\\uDEB5\\uD83C\\uDFFC|\\uD83D\\uDEB5\\uD83C\\uDFFB|\\uD83D\\uDEB4\\uD83C\\uDFFF|\\uD83D\\uDEB4\\uD83C\\uDFFE|\\uD83D\\uDEB4\\uD83C\\uDFFD|\\uD83D\\uDEB4\\uD83C\\uDFFC|\\uD83D\\uDEB4\\uD83C\\uDFFB|\\uD83D\\uDEA3\\uD83C\\uDFFF|\\uD83D\\uDEA3\\uD83C\\uDFFE|\\uD83D\\uDEA3\\uD83C\\uDFFD|\\uD83D\\uDEA3\\uD83C\\uDFFC|\\uD83D\\uDEA3\\uD83C\\uDFFB|\\uD83D\\uDE4F\\uD83C\\uDFFF|\\uD83D\\uDE4F\\uD83C\\uDFFE|\\uD83D\\uDE4F\\uD83C\\uDFFD|\\uD83D\\uDE4F\\uD83C\\uDFFC|\\uD83D\\uDE4F\\uD83C\\uDFFB|\\uD83D\\uDE4E\\uD83C\\uDFFF|\\uD83D\\uDE4E\\uD83C\\uDFFE|\\uD83D\\uDE4E\\uD83C\\uDFFD|\\uD83D\\uDE4E\\uD83C\\uDFFC|\\uD83D\\uDE4E\\uD83C\\uDFFB|\\uD83D\\uDE4D\\uD83C\\uDFFF|\\uD83D\\uDE4D\\uD83C\\uDFFE|\\uD83D\\uDE4D\\uD83C\\uDFFD|\\uD83D\\uDE4D\\uD83C\\uDFFC|\\uD83D\\uDE4D\\uD83C\\uDFFB|\\uD83D\\uDE4C\\uD83C\\uDFFF|\\uD83D\\uDE4C\\uD83C\\uDFFE|\\uD83D\\uDE4C\\uD83C\\uDFFD|\\uD83D\\uDE4C\\uD83C\\uDFFC|\\uD83D\\uDE4C\\uD83C\\uDFFB|\\uD83D\\uDE4B\\uD83C\\uDFFF|\\uD83D\\uDE4B\\uD83C\\uDFFE|\\uD83D\\uDE4B\\uD83C\\uDFFD|\\uD83D\\uDE4B\\uD83C\\uDFFC|\\uD83D\\uDE4B\\uD83C\\uDFFB|\\uD83D\\uDE47\\uD83C\\uDFFF|\\uD83D\\uDE47\\uD83C\\uDFFE|\\uD83D\\uDE47\\uD83C\\uDFFD|\\uD83D\\uDE47\\uD83C\\uDFFC|\\uD83D\\uDE47\\uD83C\\uDFFB|\\uD83D\\uDE46\\uD83C\\uDFFF|\\uD83D\\uDE46\\uD83C\\uDFFE|\\uD83D\\uDE46\\uD83C\\uDFFD|\\uD83D\\uDE46\\uD83C\\uDFFC|\\uD83D\\uDE46\\uD83C\\uDFFB|\\uD83D\\uDE45\\uD83C\\uDFFF|\\uD83D\\uDE45\\uD83C\\uDFFE|\\uD83D\\uDE45\\uD83C\\uDFFD|\\uD83D\\uDE45\\uD83C\\uDFFC|\\uD83D\\uDE45\\uD83C\\uDFFB|\\uD83D\\uDD96\\uD83C\\uDFFF|\\uD83D\\uDD96\\uD83C\\uDFFE|\\uD83D\\uDD96\\uD83C\\uDFFD|\\uD83D\\uDD96\\uD83C\\uDFFC|\\uD83D\\uDD96\\uD83C\\uDFFB|\\uD83D\\uDD95\\uD83C\\uDFFF|\\uD83D\\uDD95\\uD83C\\uDFFE|\\uD83D\\uDD95\\uD83C\\uDFFD|\\uD83D\\uDD95\\uD83C\\uDFFC|\\uD83D\\uDD95\\uD83C\\uDFFB|\\uD83D\\uDD90\\uD83C\\uDFFF|\\uD83D\\uDD90\\uD83C\\uDFFE|\\uD83D\\uDD90\\uD83C\\uDFFD|\\uD83D\\uDD90\\uD83C\\uDFFC|\\uD83D\\uDD90\\uD83C\\uDFFB|\\uD83D\\uDD75\\uD83C\\uDFFF|\\uD83D\\uDD75\\uD83C\\uDFFE|\\uD83D\\uDD75\\uD83C\\uDFFD|\\uD83D\\uDD75\\uD83C\\uDFFC|\\uD83D\\uDD75\\uD83C\\uDFFB|\\uD83D\\uDCAA\\uD83C\\uDFFF|\\uD83D\\uDCAA\\uD83C\\uDFFE|\\uD83D\\uDCAA\\uD83C\\uDFFD|\\uD83D\\uDCAA\\uD83C\\uDFFC|\\uD83D\\uDCAA\\uD83C\\uDFFB|\\uD83D\\uDC87\\uD83C\\uDFFF|\\uD83D\\uDC87\\uD83C\\uDFFE|\\uD83D\\uDC87\\uD83C\\uDFFD|\\uD83D\\uDC87\\uD83C\\uDFFC|\\uD83D\\uDC87\\uD83C\\uDFFB|\\uD83D\\uDC86\\uD83C\\uDFFF|\\uD83D\\uDC86\\uD83C\\uDFFE|\\uD83D\\uDC86\\uD83C\\uDFFD|\\uD83D\\uDC86\\uD83C\\uDFFC|\\uD83D\\uDC86\\uD83C\\uDFFB|\\uD83D\\uDC85\\uD83C\\uDFFF|\\uD83D\\uDC85\\uD83C\\uDFFE|\\uD83D\\uDC85\\uD83C\\uDFFD|\\uD83D\\uDC85\\uD83C\\uDFFC|\\uD83D\\uDC85\\uD83C\\uDFFB|\\uD83D\\uDC83\\uD83C\\uDFFF|\\uD83D\\uDC83\\uD83C\\uDFFE|\\uD83D\\uDC83\\uD83C\\uDFFD|\\uD83D\\uDC83\\uD83C\\uDFFC|\\uD83D\\uDC83\\uD83C\\uDFFB|\\uD83D\\uDC82\\uD83C\\uDFFF|\\uD83D\\uDC82\\uD83C\\uDFFE|\\uD83D\\uDC82\\uD83C\\uDFFD|\\uD83D\\uDC82\\uD83C\\uDFFC|\\uD83D\\uDC82\\uD83C\\uDFFB|\\uD83D\\uDC81\\uD83C\\uDFFF|\\uD83D\\uDC81\\uD83C\\uDFFE|\\uD83D\\uDC81\\uD83C\\uDFFD|\\uD83D\\uDC81\\uD83C\\uDFFC|\\uD83D\\uDC81\\uD83C\\uDFFB|\\uD83D\\uDC7C\\uD83C\\uDFFF|\\uD83D\\uDC7C\\uD83C\\uDFFE|\\uD83D\\uDC7C\\uD83C\\uDFFD|\\uD83D\\uDC7C\\uD83C\\uDFFC|\\uD83D\\uDC7C\\uD83C\\uDFFB|\\uD83D\\uDC78\\uD83C\\uDFFF|\\uD83D\\uDC78\\uD83C\\uDFFE|\\uD83D\\uDC78\\uD83C\\uDFFD|\\uD83D\\uDC78\\uD83C\\uDFFC|\\uD83D\\uDC78\\uD83C\\uDFFB|\\uD83D\\uDC77\\uD83C\\uDFFF|\\uD83D\\uDC77\\uD83C\\uDFFE|\\uD83D\\uDC77\\uD83C\\uDFFD|\\uD83D\\uDC77\\uD83C\\uDFFC|\\uD83D\\uDC77\\uD83C\\uDFFB|\\uD83D\\uDC76\\uD83C\\uDFFF|\\uD83D\\uDC76\\uD83C\\uDFFE|\\uD83D\\uDC76\\uD83C\\uDFFD|\\uD83D\\uDC76\\uD83C\\uDFFC|\\uD83D\\uDC76\\uD83C\\uDFFB|\\uD83D\\uDC75\\uD83C\\uDFFF|\\uD83D\\uDC75\\uD83C\\uDFFE|\\uD83D\\uDC75\\uD83C\\uDFFD|\\uD83D\\uDC75\\uD83C\\uDFFC|\\uD83D\\uDC75\\uD83C\\uDFFB|\\uD83D\\uDC74\\uD83C\\uDFFF|\\uD83D\\uDC74\\uD83C\\uDFFE|\\uD83D\\uDC74\\uD83C\\uDFFD|\\uD83D\\uDC74\\uD83C\\uDFFC|\\uD83D\\uDC74\\uD83C\\uDFFB|\\uD83D\\uDC73\\uD83C\\uDFFF|\\uD83D\\uDC73\\uD83C\\uDFFE|\\uD83D\\uDC73\\uD83C\\uDFFD|\\uD83D\\uDC73\\uD83C\\uDFFC|\\uD83D\\uDC73\\uD83C\\uDFFB|\\uD83D\\uDC72\\uD83C\\uDFFF|\\uD83D\\uDC72\\uD83C\\uDFFE|\\uD83D\\uDC72\\uD83C\\uDFFD|\\uD83D\\uDC72\\uD83C\\uDFFC|\\uD83D\\uDC72\\uD83C\\uDFFB|\\uD83D\\uDC71\\uD83C\\uDFFF|\\uD83D\\uDC71\\uD83C\\uDFFE|\\uD83D\\uDC71\\uD83C\\uDFFD|\\uD83D\\uDC71\\uD83C\\uDFFC|\\uD83D\\uDC71\\uD83C\\uDFFB|\\uD83D\\uDC70\\uD83C\\uDFFF|\\uD83D\\uDC70\\uD83C\\uDFFE|\\uD83D\\uDC70\\uD83C\\uDFFD|\\uD83D\\uDC70\\uD83C\\uDFFC|\\uD83D\\uDC70\\uD83C\\uDFFB|\\uD83D\\uDC6E\\uD83C\\uDFFF|\\uD83D\\uDC6E\\uD83C\\uDFFE|\\uD83D\\uDC6E\\uD83C\\uDFFD|\\uD83D\\uDC6E\\uD83C\\uDFFC|\\uD83D\\uDC6E\\uD83C\\uDFFB|\\uD83D\\uDC69\\uD83C\\uDFFF|\\uD83D\\uDC69\\uD83C\\uDFFE|\\uD83D\\uDC69\\uD83C\\uDFFD|\\uD83D\\uDC69\\uD83C\\uDFFC|\\uD83D\\uDC69\\uD83C\\uDFFB|\\uD83D\\uDC68\\uD83C\\uDFFF|\\uD83D\\uDC68\\uD83C\\uDFFE|\\uD83D\\uDC68\\uD83C\\uDFFD|\\uD83D\\uDC68\\uD83C\\uDFFC|\\uD83D\\uDC68\\uD83C\\uDFFB|\\uD83D\\uDC67\\uD83C\\uDFFF|\\uD83D\\uDC67\\uD83C\\uDFFE|\\uD83D\\uDC67\\uD83C\\uDFFD|\\uD83D\\uDC67\\uD83C\\uDFFC|\\uD83D\\uDC67\\uD83C\\uDFFB|\\uD83D\\uDC66\\uD83C\\uDFFF|\\uD83D\\uDC66\\uD83C\\uDFFE|\\uD83D\\uDC66\\uD83C\\uDFFD|\\uD83D\\uDC66\\uD83C\\uDFFC|\\uD83D\\uDC66\\uD83C\\uDFFB|\\uD83D\\uDC50\\uD83C\\uDFFF|\\uD83D\\uDC50\\uD83C\\uDFFE|\\uD83D\\uDC50\\uD83C\\uDFFD|\\uD83D\\uDC50\\uD83C\\uDFFC|\\uD83D\\uDC50\\uD83C\\uDFFB|\\uD83D\\uDC4F\\uD83C\\uDFFF|\\uD83D\\uDC4F\\uD83C\\uDFFE|\\uD83D\\uDC4F\\uD83C\\uDFFD|\\uD83D\\uDC4F\\uD83C\\uDFFC|\\uD83D\\uDC4F\\uD83C\\uDFFB|\\uD83D\\uDC4E\\uD83C\\uDFFF|\\uD83D\\uDC4E\\uD83C\\uDFFE|\\uD83D\\uDC4E\\uD83C\\uDFFD|\\uD83D\\uDC4E\\uD83C\\uDFFC|\\uD83D\\uDC4E\\uD83C\\uDFFB|\\uD83D\\uDC4D\\uD83C\\uDFFF|\\uD83D\\uDC4D\\uD83C\\uDFFE|\\uD83D\\uDC4D\\uD83C\\uDFFD|\\uD83D\\uDC4D\\uD83C\\uDFFC|\\uD83D\\uDC4D\\uD83C\\uDFFB|\\uD83D\\uDC4C\\uD83C\\uDFFF|\\uD83D\\uDC4C\\uD83C\\uDFFE|\\uD83D\\uDC4C\\uD83C\\uDFFD|\\uD83D\\uDC4C\\uD83C\\uDFFC|\\uD83D\\uDC4C\\uD83C\\uDFFB|\\uD83D\\uDC4B\\uD83C\\uDFFF|\\uD83D\\uDC4B\\uD83C\\uDFFE|\\uD83D\\uDC4B\\uD83C\\uDFFD|\\uD83D\\uDC4B\\uD83C\\uDFFC|\\uD83D\\uDC4B\\uD83C\\uDFFB|\\uD83D\\uDC4A\\uD83C\\uDFFF|\\uD83D\\uDC4A\\uD83C\\uDFFE|\\uD83D\\uDC4A\\uD83C\\uDFFD|\\uD83D\\uDC4A\\uD83C\\uDFFC|\\uD83D\\uDC4A\\uD83C\\uDFFB|\\uD83D\\uDC49\\uD83C\\uDFFF|\\uD83D\\uDC49\\uD83C\\uDFFE|\\uD83D\\uDC49\\uD83C\\uDFFD|\\uD83D\\uDC49\\uD83C\\uDFFC|\\uD83D\\uDC49\\uD83C\\uDFFB|\\uD83D\\uDC48\\uD83C\\uDFFF|\\uD83D\\uDC48\\uD83C\\uDFFE|\\uD83D\\uDC48\\uD83C\\uDFFD|\\uD83D\\uDC48\\uD83C\\uDFFC|\\uD83D\\uDC48\\uD83C\\uDFFB|\\uD83D\\uDC47\\uD83C\\uDFFF|\\uD83D\\uDC47\\uD83C\\uDFFE|\\uD83D\\uDC47\\uD83C\\uDFFD|\\uD83D\\uDC47\\uD83C\\uDFFC|\\uD83D\\uDC47\\uD83C\\uDFFB|\\uD83D\\uDC46\\uD83C\\uDFFF|\\uD83D\\uDC46\\uD83C\\uDFFE|\\uD83D\\uDC46\\uD83C\\uDFFD|\\uD83D\\uDC46\\uD83C\\uDFFC|\\uD83D\\uDC46\\uD83C\\uDFFB|\\uD83D\\uDC43\\uD83C\\uDFFF|\\uD83D\\uDC43\\uD83C\\uDFFE|\\uD83D\\uDC43\\uD83C\\uDFFD|\\uD83D\\uDC43\\uD83C\\uDFFC|\\uD83D\\uDC43\\uD83C\\uDFFB|\\uD83D\\uDC42\\uD83C\\uDFFF|\\uD83D\\uDC42\\uD83C\\uDFFE|\\uD83D\\uDC42\\uD83C\\uDFFD|\\uD83D\\uDC42\\uD83C\\uDFFC|\\uD83D\\uDC42\\uD83C\\uDFFB|\\uD83C\\uDFCB\\uD83C\\uDFFF|\\uD83C\\uDFC7\\uD83C\\uDFFD|\\uD83C\\uDFCB\\uD83C\\uDFFD|\\uD83C\\uDFCB\\uD83C\\uDFFC|\\uD83C\\uDFCB\\uD83C\\uDFFB|\\uD83C\\uDFCA\\uD83C\\uDFFF|\\uD83C\\uDFCA\\uD83C\\uDFFE|\\uD83C\\uDFCA\\uD83C\\uDFFD|\\uD83C\\uDFCA\\uD83C\\uDFFC|\\uD83C\\uDFCA\\uD83C\\uDFFB|\\uD83C\\uDFC7\\uD83C\\uDFFF|\\uD83C\\uDFC7\\uD83C\\uDFFE|\\uD83E\\uDD18\\uD83C\\uDFFF|\\uD83C\\uDFC7\\uD83C\\uDFFC|\\uD83C\\uDFC7\\uD83C\\uDFFB|\\uD83C\\uDFC4\\uD83C\\uDFFF|\\uD83C\\uDFC4\\uD83C\\uDFFE|\\uD83C\\uDFC4\\uD83C\\uDFFD|\\uD83C\\uDFC4\\uD83C\\uDFFC|\\uD83C\\uDFC4\\uD83C\\uDFFB|\\uD83C\\uDFC3\\uD83C\\uDFFF|\\uD83C\\uDFC3\\uD83C\\uDFFE|\\uD83C\\uDFC3\\uD83C\\uDFFD|\\uD83C\\uDFC3\\uD83C\\uDFFC|\\uD83C\\uDFC3\\uD83C\\uDFFB|\\uD83C\\uDF85\\uD83C\\uDFFF|\\uD83C\\uDF85\\uD83C\\uDFFE|\\uD83C\\uDF85\\uD83C\\uDFFD|\\uD83C\\uDF85\\uD83C\\uDFFC|\\uD83C\\uDF85\\uD83C\\uDFFB|\\uD83C\\uDDFF\\uD83C\\uDDFC|\\uD83C\\uDDFF\\uD83C\\uDDF2|\\uD83C\\uDDFF\\uD83C\\uDDE6|\\uD83C\\uDDFE\\uD83C\\uDDF9|\\uD83C\\uDDFE\\uD83C\\uDDEA|\\uD83C\\uDDFD\\uD83C\\uDDF0|\\uD83C\\uDDFC\\uD83C\\uDDF8|\\uD83C\\uDDFC\\uD83C\\uDDEB|\\uD83C\\uDDFB\\uD83C\\uDDFA|\\uD83C\\uDDFB\\uD83C\\uDDF3|\\uD83C\\uDDFB\\uD83C\\uDDEE|\\uD83C\\uDDFB\\uD83C\\uDDEC|\\uD83C\\uDDFB\\uD83C\\uDDEA|\\uD83C\\uDDFB\\uD83C\\uDDE8|\\uD83C\\uDDFB\\uD83C\\uDDE6|\\uD83C\\uDDFA\\uD83C\\uDDFF|\\uD83C\\uDDFA\\uD83C\\uDDFE|\\uD83C\\uDDFA\\uD83C\\uDDF8|\\uD83C\\uDDFA\\uD83C\\uDDF2|\\uD83C\\uDDFA\\uD83C\\uDDEC|\\uD83C\\uDDFA\\uD83C\\uDDE6|\\uD83C\\uDDF9\\uD83C\\uDDFF|\\uD83C\\uDDF9\\uD83C\\uDDFC|\\uD83C\\uDDF9\\uD83C\\uDDFB|\\uD83C\\uDDF9\\uD83C\\uDDF9|\\uD83C\\uDDF9\\uD83C\\uDDF7|\\uD83C\\uDDF9\\uD83C\\uDDF4|\\uD83C\\uDDF9\\uD83C\\uDDF3|\\uD83C\\uDDF9\\uD83C\\uDDF2|\\uD83C\\uDDF9\\uD83C\\uDDF1|\\uD83C\\uDDF9\\uD83C\\uDDF0|\\uD83C\\uDDF9\\uD83C\\uDDEF|\\uD83C\\uDDF9\\uD83C\\uDDED|\\uD83C\\uDDF9\\uD83C\\uDDEC|\\uD83C\\uDDF9\\uD83C\\uDDEB|\\uD83C\\uDDF9\\uD83C\\uDDE9|\\uD83C\\uDDF9\\uD83C\\uDDE8|\\uD83C\\uDDF9\\uD83C\\uDDE6|\\uD83C\\uDDF8\\uD83C\\uDDFF|\\uD83C\\uDDF8\\uD83C\\uDDFE|\\uD83C\\uDDF8\\uD83C\\uDDFD|\\uD83C\\uDDF8\\uD83C\\uDDFB|\\uD83C\\uDDF8\\uD83C\\uDDF9|\\uD83C\\uDDF8\\uD83C\\uDDF8|\\uD83C\\uDDF8\\uD83C\\uDDF7|\\uD83C\\uDDF8\\uD83C\\uDDF4|\\uD83C\\uDDF8\\uD83C\\uDDF3|\\uD83C\\uDDF8\\uD83C\\uDDF2|\\uD83C\\uDDF8\\uD83C\\uDDF1|\\uD83C\\uDDF8\\uD83C\\uDDF0|\\uD83C\\uDDF8\\uD83C\\uDDEF|\\uD83C\\uDDF8\\uD83C\\uDDEE|\\uD83C\\uDDF8\\uD83C\\uDDED|\\uD83C\\uDDF8\\uD83C\\uDDEC|\\uD83C\\uDDF8\\uD83C\\uDDEA|\\uD83C\\uDDF8\\uD83C\\uDDE9|\\uD83C\\uDDF8\\uD83C\\uDDE8|\\uD83C\\uDDF8\\uD83C\\uDDE7|\\uD83C\\uDDF8\\uD83C\\uDDE6|\\uD83C\\uDDF7\\uD83C\\uDDFC|\\uD83C\\uDDF7\\uD83C\\uDDFA|\\uD83C\\uDDF7\\uD83C\\uDDF8|\\uD83C\\uDDF7\\uD83C\\uDDF4|\\uD83C\\uDDF7\\uD83C\\uDDEA|\\uD83C\\uDDF6\\uD83C\\uDDE6|\\uD83C\\uDDF5\\uD83C\\uDDFE|\\uD83C\\uDDF5\\uD83C\\uDDFC|\\uD83C\\uDDF5\\uD83C\\uDDF9|\\uD83C\\uDDF5\\uD83C\\uDDF8|\\uD83C\\uDDF5\\uD83C\\uDDF7|\\uD83C\\uDDF5\\uD83C\\uDDF3|\\uD83C\\uDDF5\\uD83C\\uDDF2|\\uD83C\\uDDF5\\uD83C\\uDDF1|\\uD83C\\uDDF5\\uD83C\\uDDF0|\\uD83C\\uDDF5\\uD83C\\uDDED|\\uD83C\\uDDF5\\uD83C\\uDDEC|\\uD83C\\uDDF5\\uD83C\\uDDEB|\\uD83C\\uDDF5\\uD83C\\uDDEA|\\uD83C\\uDDF5\\uD83C\\uDDE6|\\uD83C\\uDDF4\\uD83C\\uDDF2|\\uD83C\\uDDF3\\uD83C\\uDDFF|\\uD83C\\uDDF3\\uD83C\\uDDFA|\\uD83C\\uDDF3\\uD83C\\uDDF7|\\uD83C\\uDDF3\\uD83C\\uDDF5|\\uD83C\\uDDF3\\uD83C\\uDDF4|\\uD83C\\uDDF3\\uD83C\\uDDF1|\\uD83C\\uDDF3\\uD83C\\uDDEE|\\uD83C\\uDDF3\\uD83C\\uDDEC|\\uD83C\\uDDF3\\uD83C\\uDDEB|\\uD83C\\uDDF3\\uD83C\\uDDEA|\\uD83C\\uDDF3\\uD83C\\uDDE8|\\uD83C\\uDDF3\\uD83C\\uDDE6|\\uD83C\\uDDF2\\uD83C\\uDDFF|\\uD83C\\uDDF2\\uD83C\\uDDFE|\\uD83C\\uDDF2\\uD83C\\uDDFD|\\uD83C\\uDDF2\\uD83C\\uDDFC|\\uD83C\\uDDF2\\uD83C\\uDDFB|\\uD83C\\uDDF2\\uD83C\\uDDFA|\\uD83C\\uDDF2\\uD83C\\uDDF9|\\uD83C\\uDDF2\\uD83C\\uDDF8|\\uD83C\\uDDF2\\uD83C\\uDDF7|\\uD83C\\uDDF2\\uD83C\\uDDF6|\\uD83C\\uDDF2\\uD83C\\uDDF5|\\uD83C\\uDDF2\\uD83C\\uDDF4|\\uD83C\\uDDF2\\uD83C\\uDDF3|\\uD83C\\uDDF2\\uD83C\\uDDF2|\\uD83C\\uDDF2\\uD83C\\uDDF1|\\uD83C\\uDDF2\\uD83C\\uDDF0|\\uD83C\\uDDF2\\uD83C\\uDDED|\\uD83C\\uDDF2\\uD83C\\uDDEC|\\uD83C\\uDDF2\\uD83C\\uDDEB|\\uD83C\\uDDF2\\uD83C\\uDDEA|\\uD83C\\uDDF2\\uD83C\\uDDE9|\\uD83C\\uDDF2\\uD83C\\uDDE8|\\uD83C\\uDDF2\\uD83C\\uDDE6|\\uD83C\\uDDF1\\uD83C\\uDDFE|\\uD83C\\uDDF1\\uD83C\\uDDFB|\\uD83C\\uDDF1\\uD83C\\uDDFA|\\uD83C\\uDDF1\\uD83C\\uDDF9|\\uD83C\\uDDF1\\uD83C\\uDDF8|\\uD83C\\uDDF1\\uD83C\\uDDF7|\\uD83C\\uDDF1\\uD83C\\uDDF0|\\uD83C\\uDDF1\\uD83C\\uDDEE|\\uD83C\\uDDF1\\uD83C\\uDDE8|\\uD83C\\uDDF1\\uD83C\\uDDE7|\\uD83C\\uDDF1\\uD83C\\uDDE6|\\uD83C\\uDDF0\\uD83C\\uDDFF|\\uD83C\\uDDF0\\uD83C\\uDDFE|\\uD83C\\uDDF0\\uD83C\\uDDFC|\\uD83C\\uDDF0\\uD83C\\uDDF7|\\uD83C\\uDDF0\\uD83C\\uDDF5|\\uD83C\\uDDF0\\uD83C\\uDDF3|\\uD83C\\uDDF0\\uD83C\\uDDF2|\\uD83C\\uDDF0\\uD83C\\uDDEE|\\uD83C\\uDDF0\\uD83C\\uDDED|\\uD83C\\uDDF0\\uD83C\\uDDEC|\\uD83C\\uDDF0\\uD83C\\uDDEA|\\uD83C\\uDDEF\\uD83C\\uDDF5|\\uD83C\\uDDEF\\uD83C\\uDDF4|\\uD83C\\uDDEF\\uD83C\\uDDF2|\\uD83C\\uDDEF\\uD83C\\uDDEA|\\uD83C\\uDDEE\\uD83C\\uDDF9|\\uD83C\\uDDEE\\uD83C\\uDDF8|\\uD83C\\uDDEE\\uD83C\\uDDF7|\\uD83C\\uDDEE\\uD83C\\uDDF6|\\uD83C\\uDDEE\\uD83C\\uDDF4|\\uD83C\\uDDEE\\uD83C\\uDDF3|\\uD83C\\uDDEE\\uD83C\\uDDF2|\\uD83C\\uDDEE\\uD83C\\uDDF1|\\uD83C\\uDDEE\\uD83C\\uDDEA|\\uD83C\\uDDEE\\uD83C\\uDDE9|\\uD83C\\uDDEE\\uD83C\\uDDE8|\\uD83C\\uDDED\\uD83C\\uDDFA|\\uD83C\\uDDED\\uD83C\\uDDF9|\\uD83C\\uDDED\\uD83C\\uDDF7|\\uD83C\\uDDED\\uD83C\\uDDF3|\\uD83C\\uDDED\\uD83C\\uDDF2|\\uD83C\\uDDED\\uD83C\\uDDF0|\\uD83C\\uDDEC\\uD83C\\uDDFE|\\uD83C\\uDDEC\\uD83C\\uDDFC|\\uD83C\\uDDEC\\uD83C\\uDDFA|\\uD83C\\uDDEC\\uD83C\\uDDF9|\\uD83C\\uDDEC\\uD83C\\uDDF8|\\uD83C\\uDDEC\\uD83C\\uDDF7|\\uD83C\\uDDEC\\uD83C\\uDDF6|\\uD83C\\uDDEC\\uD83C\\uDDF5|\\uD83C\\uDDEC\\uD83C\\uDDF3|\\uD83C\\uDDEC\\uD83C\\uDDF2|\\uD83C\\uDDEC\\uD83C\\uDDF1|\\uD83C\\uDDEC\\uD83C\\uDDEE|\\uD83C\\uDDEC\\uD83C\\uDDED|\\uD83C\\uDDEC\\uD83C\\uDDEC|\\uD83C\\uDDEC\\uD83C\\uDDEB|\\uD83C\\uDDEC\\uD83C\\uDDEA|\\uD83C\\uDDEC\\uD83C\\uDDE9|\\uD83C\\uDDEC\\uD83C\\uDDE7|\\uD83C\\uDDEC\\uD83C\\uDDE6|\\uD83C\\uDDEB\\uD83C\\uDDF7|\\uD83C\\uDDEB\\uD83C\\uDDF4|\\uD83C\\uDDEB\\uD83C\\uDDF2|\\uD83C\\uDDEB\\uD83C\\uDDF0|\\uD83C\\uDDEB\\uD83C\\uDDEF|\\uD83C\\uDDEB\\uD83C\\uDDEE|\\uD83C\\uDDEA\\uD83C\\uDDFA|\\uD83C\\uDDEA\\uD83C\\uDDF9|\\uD83C\\uDDEA\\uD83C\\uDDF8|\\uD83C\\uDDEA\\uD83C\\uDDF7|\\uD83C\\uDDEA\\uD83C\\uDDED|\\uD83C\\uDDEA\\uD83C\\uDDEC|\\uD83C\\uDDEA\\uD83C\\uDDEA|\\uD83C\\uDDEA\\uD83C\\uDDE8|\\uD83C\\uDDEA\\uD83C\\uDDE6|\\uD83C\\uDDE9\\uD83C\\uDDFF|\\uD83C\\uDDE9\\uD83C\\uDDF4|\\uD83C\\uDDE9\\uD83C\\uDDF2|\\uD83C\\uDDE9\\uD83C\\uDDF0|\\uD83C\\uDDE9\\uD83C\\uDDEF|\\uD83C\\uDDE9\\uD83C\\uDDEC|\\uD83C\\uDDE9\\uD83C\\uDDEA|\\uD83C\\uDDE8\\uD83C\\uDDFF|\\uD83C\\uDDE8\\uD83C\\uDDFE|\\uD83C\\uDDE8\\uD83C\\uDDFD|\\uD83C\\uDDE8\\uD83C\\uDDFC|\\uD83C\\uDDE8\\uD83C\\uDDFB|\\uD83C\\uDDE8\\uD83C\\uDDFA|\\uD83C\\uDDE8\\uD83C\\uDDF7|\\uD83C\\uDDE8\\uD83C\\uDDF5|\\uD83C\\uDDE8\\uD83C\\uDDF4|\\uD83C\\uDDE8\\uD83C\\uDDF3|\\uD83C\\uDDE8\\uD83C\\uDDF2|\\uD83C\\uDDE8\\uD83C\\uDDF1|\\uD83C\\uDDE8\\uD83C\\uDDF0|\\uD83C\\uDDE8\\uD83C\\uDDEE|\\uD83C\\uDDE8\\uD83C\\uDDED|\\uD83C\\uDDE8\\uD83C\\uDDEC|\\uD83C\\uDDE8\\uD83C\\uDDEB|\\uD83C\\uDDE8\\uD83C\\uDDE9|\\uD83C\\uDDE8\\uD83C\\uDDE8|\\uD83C\\uDDE8\\uD83C\\uDDE6|\\uD83C\\uDDE7\\uD83C\\uDDFF|\\uD83C\\uDDE7\\uD83C\\uDDFE|\\uD83C\\uDDE7\\uD83C\\uDDFC|\\uD83C\\uDDE7\\uD83C\\uDDFB|\\uD83C\\uDDE7\\uD83C\\uDDF9|\\uD83C\\uDDE7\\uD83C\\uDDF8|\\uD83C\\uDDE7\\uD83C\\uDDF7|\\uD83C\\uDDE7\\uD83C\\uDDF6|\\uD83C\\uDDE7\\uD83C\\uDDF4|\\uD83C\\uDDE7\\uD83C\\uDDF3|\\uD83C\\uDDE7\\uD83C\\uDDF2|\\uD83C\\uDDE7\\uD83C\\uDDF1|\\uD83C\\uDDE7\\uD83C\\uDDEF|\\uD83C\\uDDE7\\uD83C\\uDDEE|\\uD83C\\uDDE7\\uD83C\\uDDED|\\uD83C\\uDDE7\\uD83C\\uDDEC|\\uD83C\\uDDE7\\uD83C\\uDDEB|\\uD83C\\uDDE7\\uD83C\\uDDEA|\\uD83C\\uDDE7\\uD83C\\uDDE9|\\uD83C\\uDDE7\\uD83C\\uDDE7|\\uD83C\\uDDE7\\uD83C\\uDDE6|\\uD83C\\uDDE6\\uD83C\\uDDFF|\\uD83C\\uDDE6\\uD83C\\uDDFD|\\uD83C\\uDDE6\\uD83C\\uDDFC|\\uD83C\\uDDE6\\uD83C\\uDDFA|\\uD83C\\uDDE6\\uD83C\\uDDF9|\\uD83C\\uDDE6\\uD83C\\uDDF8|\\uD83C\\uDDE6\\uD83C\\uDDF7|\\uD83C\\uDDE6\\uD83C\\uDDF6|\\uD83C\\uDDE6\\uD83C\\uDDF4|\\uD83C\\uDDE6\\uD83C\\uDDF2|\\uD83C\\uDDE6\\uD83C\\uDDF1|\\uD83C\\uDDE6\\uD83C\\uDDEE|\\uD83C\\uDDE6\\uD83C\\uDDEC|\\uD83C\\uDDE6\\uD83C\\uDDEB|\\uD83C\\uDDE6\\uD83C\\uDDEA|\\uD83C\\uDDE6\\uD83C\\uDDE9|\\uD83C\\uDDE6\\uD83C\\uDDE8|\\u270D\\uD83C\\uDFFE|\\u270D\\uD83C\\uDFFD|\\u270D\\uD83C\\uDFFC|\\u270D\\uD83C\\uDFFB|\\u270B\\uD83C\\uDFFF|\\u270B\\uD83C\\uDFFE|\\u270B\\uD83C\\uDFFD|\\u26F9\\uD83C\\uDFFF|\\u26F9\\uD83C\\uDFFE|\\u26F9\\uD83C\\uDFFD|\\u26F9\\uD83C\\uDFFC|\\u26F9\\uD83C\\uDFFB|\\u270D\\uD83C\\uDFFF|\\uD83C\\uDC04\\uFE0F|\\uD83C\\uDD7F\\uFE0F|\\uD83C\\uDE1A\\uFE0F|\\uD83C\\uDE2F\\uFE0F|\\uD83C\\uDE37\\uFE0F|\\u261D\\uD83C\\uDFFB|\\u261D\\uD83C\\uDFFC|\\u261D\\uD83C\\uDFFD|\\u261D\\uD83C\\uDFFE|\\u261D\\uD83C\\uDFFF|\\u270C\\uD83C\\uDFFB|\\u270C\\uD83C\\uDFFC|\\u270C\\uD83C\\uDFFD|\\u270C\\uD83C\\uDFFE|\\u270C\\uD83C\\uDFFF|\\u270A\\uD83C\\uDFFB|\\u270A\\uD83C\\uDFFC|\\u270A\\uD83C\\uDFFD|\\u270A\\uD83C\\uDFFE|\\u270A\\uD83C\\uDFFF|\\u270B\\uD83C\\uDFFB|\\u270B\\uD83C\\uDFFC|4\\uFE0F\\u20E3|\\*\\uFE0F\\u20E3|8\\uFE0F\\u20E3|7\\uFE0F\\u20E3|6\\uFE0F\\u20E3|5\\uFE0F\\u20E3|9\\uFE0F\\u20E3|3\\uFE0F\\u20E3|2\\uFE0F\\u20E3|1\\uFE0F\\u20E3|0\\uFE0F\\u20E3|#\\uFE0F\\u20E3|\\uD83C\\uDF61|\\u2198\\uFE0F|\\u2199\\uFE0F|\\uD83C\\uDFF8|\\u2600\\uFE0F|\\u2601\\uFE0F|\\uD83C\\uDFD3|\\uD83C\\uDFD2|\\uD83C\\uDFD1|\\u2611\\uFE0F|\\u2614\\uFE0F|\\u2615\\uFE0F|\\uD83C\\uDFD0|\\uD83C\\uDFCF|\\uD83D\\uDCFF|\\uD83D\\uDD4E|\\uD83D\\uDD4D|\\uD83D\\uDD4C|\\uD83D\\uDD4B|\\u2648\\uFE0F|\\u2649\\uFE0F|\\u2650\\uFE0F|\\u2651\\uFE0F|\\u2652\\uFE0F|\\u2653\\uFE0F|\\u2660\\uFE0F|\\u2663\\uFE0F|\\u2665\\uFE0F|\\u2666\\uFE0F|\\u2668\\uFE0F|\\uD83D\\uDED0|\\u2693\\uFE0F|\\uD83C\\uDFFA|\\uD83C\\uDFF9|\\uD83C\\uDF7E|\\uD83C\\uDF7F|\\u2702\\uFE0F|\\uD83C\\uDF2F|\\u2708\\uFE0F|\\u2709\\uFE0F|\\u2712\\uFE0F|\\u2714\\uFE0F|\\u2716\\uFE0F|\\uD83C\\uDF2E|\\uD83C\\uDF2D|\\u2733\\uFE0F|\\u2734\\uFE0F|\\u2744\\uFE0F|\\u2747\\uFE0F|\\uD83E\\uDDC0|\\uD83E\\uDD83|\\uD83E\\uDD80|\\u2757\\uFE0F|\\uD83E\\uDD82|\\u2764\\uFE0F|\\uD83E\\uDD84|\\uD83E\\uDD81|\\uD83E\\uDD16|\\u2934\\uFE0F|\\u2935\\uFE0F|\\uD83E\\uDD15|\\u3297\\uFE0F|\\u3299\\uFE0F|\\u2049\\uFE0F|\\u2139\\uFE0F|\\u2194\\uFE0F|\\u2195\\uFE0F|\\u2196\\uFE0F|\\u2197\\uFE0F|\\u00A9\\uFE0F|\\u00AE\\uFE0F|\\u203C\\uFE0F|\\u21A9\\uFE0F|\\u21AA\\uFE0F|\\u231A\\uFE0F|\\u231B\\uFE0F|\\u24C2\\uFE0F|\\u25AA\\uFE0F|\\u25AB\\uFE0F|\\u25B6\\uFE0F|\\u25C0\\uFE0F|\\u25FB\\uFE0F|\\u25FC\\uFE0F|\\u25FD\\uFE0F|\\u25FE\\uFE0F|\\u260E\\uFE0F|\\u261D\\uFE0F|\\u263A\\uFE0F|\\u264A\\uFE0F|\\u264B\\uFE0F|\\u264C\\uFE0F|\\u264D\\uFE0F|\\u264E\\uFE0F|\\u264F\\uFE0F|\\u267B\\uFE0F|\\u267F\\uFE0F|\\u26A0\\uFE0F|\\u26A1\\uFE0F|\\u26AA\\uFE0F|\\u26AB\\uFE0F|\\u26BD\\uFE0F|\\u26BE\\uFE0F|\\u26C4\\uFE0F|\\u26C5\\uFE0F|\\u26D4\\uFE0F|\\u26EA\\uFE0F|\\u26F2\\uFE0F|\\u26F3\\uFE0F|\\u26F5\\uFE0F|\\u26FA\\uFE0F|\\u26FD\\uFE0F|\\u270C\\uFE0F|\\u270F\\uFE0F|\\u27A1\\uFE0F|\\u2B05\\uFE0F|\\u2B06\\uFE0F|\\u2B07\\uFE0F|\\u2B1B\\uFE0F|\\u2B1C\\uFE0F|\\u2B50\\uFE0F|\\u2B55\\uFE0F|\\u303D\\uFE0F|\\uD83C\\uDCCF|\\uD83C\\uDD70|\\uD83C\\uDD71|\\uD83C\\uDD7E|\\uD83C\\uDD8E|\\uD83C\\uDD91|\\uD83C\\uDD92|\\uD83C\\uDD93|\\uD83C\\uDD94|\\uD83C\\uDD95|\\uD83C\\uDD96|\\uD83C\\uDD97|\\uD83C\\uDD98|\\uD83C\\uDD99|\\uD83C\\uDD9A|\\uD83C\\uDE01|\\uD83C\\uDE02|\\uD83C\\uDE32|\\uD83C\\uDE33|\\uD83C\\uDE34|\\uD83C\\uDE35|\\uD83C\\uDE36|\\uD83C\\uDE38|\\uD83C\\uDE39|\\uD83C\\uDE3A|\\uD83C\\uDE50|\\uD83C\\uDE51|\\uD83C\\uDF00|\\uD83C\\uDF01|\\uD83C\\uDF02|\\uD83C\\uDF03|\\uD83C\\uDF04|\\uD83C\\uDF05|\\uD83C\\uDF06|\\uD83C\\uDF07|\\uD83C\\uDF08|\\uD83C\\uDF09|\\uD83C\\uDF0A|\\uD83C\\uDF0B|\\uD83C\\uDF0C|\\uD83C\\uDF0F|\\uD83C\\uDF11|\\uD83C\\uDF13|\\uD83C\\uDF14|\\uD83C\\uDF15|\\uD83C\\uDF19|\\uD83C\\uDF1B|\\uD83C\\uDF1F|\\uD83C\\uDF20|\\uD83C\\uDF30|\\uD83C\\uDF31|\\uD83C\\uDF34|\\uD83C\\uDF35|\\uD83C\\uDF37|\\uD83C\\uDF38|\\uD83C\\uDF39|\\uD83C\\uDF3A|\\uD83C\\uDF3B|\\uD83C\\uDF3C|\\uD83C\\uDF3D|\\uD83C\\uDF3E|\\uD83C\\uDF3F|\\uD83C\\uDF40|\\uD83C\\uDF41|\\uD83C\\uDF42|\\uD83C\\uDF43|\\uD83C\\uDF44|\\uD83C\\uDF45|\\uD83C\\uDF46|\\uD83C\\uDF47|\\uD83C\\uDF48|\\uD83C\\uDF49|\\uD83C\\uDF4A|\\uD83C\\uDF4C|\\uD83C\\uDF4D|\\uD83C\\uDF4E|\\uD83C\\uDF4F|\\uD83C\\uDF51|\\uD83C\\uDF52|\\uD83C\\uDF53|\\uD83C\\uDF54|\\uD83C\\uDF55|\\uD83C\\uDF56|\\uD83C\\uDF57|\\uD83C\\uDF58|\\uD83C\\uDF59|\\uD83C\\uDF5A|\\uD83C\\uDF5B|\\uD83C\\uDF5C|\\uD83C\\uDF5D|\\uD83C\\uDF5E|\\uD83C\\uDF5F|\\uD83C\\uDF60|\\u2122\\uFE0F|\\uD83C\\uDF62|\\uD83C\\uDF63|\\uD83C\\uDF64|\\uD83C\\uDF65|\\uD83C\\uDF66|\\uD83C\\uDF67|\\uD83C\\uDF68|\\uD83C\\uDF69|\\uD83C\\uDF6A|\\uD83C\\uDF6B|\\uD83C\\uDF6C|\\uD83C\\uDF6D|\\uD83C\\uDF6E|\\uD83C\\uDF6F|\\uD83C\\uDF70|\\uD83C\\uDF71|\\uD83C\\uDF72|\\uD83C\\uDF73|\\uD83C\\uDF74|\\uD83C\\uDF75|\\uD83C\\uDF76|\\uD83C\\uDF77|\\uD83C\\uDF78|\\uD83C\\uDF79|\\uD83C\\uDF7A|\\uD83C\\uDF7B|\\uD83C\\uDF80|\\uD83C\\uDF81|\\uD83C\\uDF82|\\uD83C\\uDF83|\\uD83C\\uDF84|\\uD83C\\uDF85|\\uD83C\\uDF86|\\uD83C\\uDF87|\\uD83C\\uDF88|\\uD83C\\uDF89|\\uD83C\\uDF8A|\\uD83C\\uDF8B|\\uD83C\\uDF8C|\\uD83C\\uDF8D|\\uD83C\\uDF8E|\\uD83C\\uDF8F|\\uD83C\\uDF90|\\uD83C\\uDF91|\\uD83C\\uDF92|\\uD83C\\uDF93|\\uD83C\\uDFA0|\\uD83C\\uDFA1|\\uD83C\\uDFA2|\\uD83C\\uDFA3|\\uD83C\\uDFA4|\\uD83C\\uDFA5|\\uD83C\\uDFA6|\\uD83C\\uDFA7|\\uD83C\\uDFA8|\\uD83C\\uDFA9|\\uD83C\\uDFAA|\\uD83C\\uDFAB|\\uD83C\\uDFAC|\\uD83C\\uDFAD|\\uD83C\\uDFAE|\\uD83C\\uDFAF|\\uD83C\\uDFB0|\\uD83C\\uDFB1|\\uD83C\\uDFB2|\\uD83C\\uDFB3|\\uD83C\\uDFB4|\\uD83C\\uDFB5|\\uD83C\\uDFB6|\\uD83C\\uDFB7|\\uD83C\\uDFB8|\\uD83C\\uDFB9|\\uD83C\\uDFBA|\\uD83C\\uDFBB|\\uD83C\\uDFBC|\\uD83C\\uDFBD|\\uD83C\\uDFBE|\\uD83C\\uDFBF|\\uD83C\\uDFC0|\\uD83C\\uDFC1|\\uD83C\\uDFC2|\\uD83C\\uDFC3|\\uD83C\\uDFC4|\\uD83C\\uDFC6|\\uD83C\\uDFC8|\\uD83C\\uDFCA|\\uD83C\\uDFE0|\\uD83C\\uDFE1|\\uD83C\\uDFE2|\\uD83C\\uDFE3|\\uD83C\\uDFE5|\\uD83C\\uDFE6|\\uD83C\\uDFE7|\\uD83C\\uDFE8|\\uD83C\\uDFE9|\\uD83C\\uDFEA|\\uD83C\\uDFEB|\\uD83C\\uDFEC|\\uD83C\\uDFED|\\uD83C\\uDFEE|\\uD83C\\uDFEF|\\uD83C\\uDFF0|\\uD83D\\uDC0C|\\uD83D\\uDC0D|\\uD83D\\uDC0E|\\uD83D\\uDC11|\\uD83D\\uDC12|\\uD83D\\uDC14|\\uD83D\\uDC17|\\uD83D\\uDC18|\\uD83D\\uDC19|\\uD83D\\uDC1A|\\uD83D\\uDC1B|\\uD83D\\uDC1C|\\uD83D\\uDC1D|\\uD83D\\uDC1E|\\uD83D\\uDC1F|\\uD83D\\uDC20|\\uD83D\\uDC21|\\uD83D\\uDC22|\\uD83D\\uDC23|\\uD83D\\uDC24|\\uD83D\\uDC25|\\uD83D\\uDC26|\\uD83D\\uDC27|\\uD83D\\uDC28|\\uD83D\\uDC29|\\uD83D\\uDC2B|\\uD83D\\uDC2C|\\uD83D\\uDC2D|\\uD83D\\uDC2E|\\uD83D\\uDC2F|\\uD83D\\uDC30|\\uD83D\\uDC31|\\uD83D\\uDC32|\\uD83D\\uDC33|\\uD83D\\uDC34|\\uD83D\\uDC35|\\uD83D\\uDC36|\\uD83D\\uDC37|\\uD83D\\uDC38|\\uD83D\\uDC39|\\uD83D\\uDC3A|\\uD83D\\uDC3B|\\uD83D\\uDC3C|\\uD83D\\uDC3D|\\uD83D\\uDC3E|\\uD83D\\uDC40|\\uD83D\\uDC42|\\uD83D\\uDC43|\\uD83D\\uDC44|\\uD83D\\uDC45|\\uD83D\\uDC46|\\uD83D\\uDC47|\\uD83D\\uDC48|\\uD83D\\uDC49|\\uD83D\\uDC4A|\\uD83D\\uDC4B|\\uD83D\\uDC4C|\\uD83D\\uDC4D|\\uD83D\\uDC4E|\\uD83D\\uDC4F|\\uD83D\\uDC50|\\uD83D\\uDC51|\\uD83D\\uDC52|\\uD83D\\uDC53|\\uD83D\\uDC54|\\uD83D\\uDC55|\\uD83D\\uDC56|\\uD83D\\uDC57|\\uD83D\\uDC58|\\uD83D\\uDC59|\\uD83D\\uDC5A|\\uD83D\\uDC5B|\\uD83D\\uDC5C|\\uD83D\\uDC5D|\\uD83D\\uDC5E|\\uD83D\\uDC5F|\\uD83D\\uDC60|\\uD83D\\uDC61|\\uD83D\\uDC62|\\uD83D\\uDC63|\\uD83D\\uDC64|\\uD83D\\uDC66|\\uD83D\\uDC67|\\uD83D\\uDC68|\\uD83D\\uDC69|\\uD83D\\uDC6A|\\uD83D\\uDC6B|\\uD83D\\uDC6E|\\uD83D\\uDC6F|\\uD83D\\uDC70|\\uD83D\\uDC71|\\uD83D\\uDC72|\\uD83D\\uDC73|\\uD83D\\uDC74|\\uD83D\\uDC75|\\uD83D\\uDC76|\\uD83D\\uDC77|\\uD83D\\uDC78|\\uD83D\\uDC79|\\uD83D\\uDC7A|\\uD83D\\uDC7B|\\uD83D\\uDC7C|\\uD83D\\uDC7D|\\uD83D\\uDC7E|\\uD83D\\uDC7F|\\uD83D\\uDC80|\\uD83D\\uDCC7|\\uD83D\\uDC81|\\uD83D\\uDC82|\\uD83D\\uDC83|\\uD83D\\uDC84|\\uD83D\\uDC85|\\uD83D\\uDCD2|\\uD83D\\uDC86|\\uD83D\\uDCD3|\\uD83D\\uDC87|\\uD83D\\uDCD4|\\uD83D\\uDC88|\\uD83D\\uDCD5|\\uD83D\\uDC89|\\uD83D\\uDCD6|\\uD83D\\uDC8A|\\uD83D\\uDCD7|\\uD83D\\uDC8B|\\uD83D\\uDCD8|\\uD83D\\uDC8C|\\uD83D\\uDCD9|\\uD83D\\uDC8D|\\uD83D\\uDCDA|\\uD83D\\uDC8E|\\uD83D\\uDCDB|\\uD83D\\uDC8F|\\uD83D\\uDCDC|\\uD83D\\uDC90|\\uD83D\\uDCDD|\\uD83D\\uDC91|\\uD83D\\uDCDE|\\uD83D\\uDC92|\\uD83D\\uDCDF|\\uD83D\\uDCE0|\\uD83D\\uDC93|\\uD83D\\uDCE1|\\uD83D\\uDCE2|\\uD83D\\uDC94|\\uD83D\\uDCE3|\\uD83D\\uDCE4|\\uD83D\\uDC95|\\uD83D\\uDCE5|\\uD83D\\uDCE6|\\uD83D\\uDC96|\\uD83D\\uDCE7|\\uD83D\\uDCE8|\\uD83D\\uDC97|\\uD83D\\uDCE9|\\uD83D\\uDCEA|\\uD83D\\uDC98|\\uD83D\\uDCEB|\\uD83D\\uDCEE|\\uD83D\\uDC99|\\uD83D\\uDCF0|\\uD83D\\uDCF1|\\uD83D\\uDC9A|\\uD83D\\uDCF2|\\uD83D\\uDCF3|\\uD83D\\uDC9B|\\uD83D\\uDCF4|\\uD83D\\uDCF6|\\uD83D\\uDC9C|\\uD83D\\uDCF7|\\uD83D\\uDCF9|\\uD83D\\uDC9D|\\uD83D\\uDCFA|\\uD83D\\uDCFB|\\uD83D\\uDC9E|\\uD83D\\uDCFC|\\uD83D\\uDD03|\\uD83D\\uDC9F|\\uD83D\\uDD0A|\\uD83D\\uDD0B|\\uD83D\\uDCA0|\\uD83D\\uDD0C|\\uD83D\\uDD0D|\\uD83D\\uDCA1|\\uD83D\\uDD0E|\\uD83D\\uDD0F|\\uD83D\\uDCA2|\\uD83D\\uDD10|\\uD83D\\uDD11|\\uD83D\\uDCA3|\\uD83D\\uDD12|\\uD83D\\uDD13|\\uD83D\\uDCA4|\\uD83D\\uDD14|\\uD83D\\uDD16|\\uD83D\\uDCA5|\\uD83D\\uDD17|\\uD83D\\uDD18|\\uD83D\\uDCA6|\\uD83D\\uDD19|\\uD83D\\uDD1A|\\uD83D\\uDCA7|\\uD83D\\uDD1B|\\uD83D\\uDD1C|\\uD83D\\uDCA8|\\uD83D\\uDD1D|\\uD83D\\uDD1E|\\uD83D\\uDCA9|\\uD83D\\uDD1F|\\uD83D\\uDCAA|\\uD83D\\uDD20|\\uD83D\\uDD21|\\uD83D\\uDCAB|\\uD83D\\uDD22|\\uD83D\\uDD23|\\uD83D\\uDCAC|\\uD83D\\uDD24|\\uD83D\\uDD25|\\uD83D\\uDCAE|\\uD83D\\uDD26|\\uD83D\\uDD27|\\uD83D\\uDCAF|\\uD83D\\uDD28|\\uD83D\\uDD29|\\uD83D\\uDCB0|\\uD83D\\uDD2A|\\uD83D\\uDD2B|\\uD83D\\uDCB1|\\uD83D\\uDD2E|\\uD83D\\uDCB2|\\uD83D\\uDD2F|\\uD83D\\uDCB3|\\uD83D\\uDD30|\\uD83D\\uDD31|\\uD83D\\uDCB4|\\uD83D\\uDD32|\\uD83D\\uDD33|\\uD83D\\uDCB5|\\uD83D\\uDD34|\\uD83D\\uDD35|\\uD83D\\uDCB8|\\uD83D\\uDD36|\\uD83D\\uDD37|\\uD83D\\uDCB9|\\uD83D\\uDD38|\\uD83D\\uDD39|\\uD83D\\uDCBA|\\uD83D\\uDD3A|\\uD83D\\uDD3B|\\uD83D\\uDCBB|\\uD83D\\uDD3C|\\uD83D\\uDCBC|\\uD83D\\uDD3D|\\uD83D\\uDD50|\\uD83D\\uDCBD|\\uD83D\\uDD51|\\uD83D\\uDCBE|\\uD83D\\uDD52|\\uD83D\\uDCBF|\\uD83D\\uDD53|\\uD83D\\uDCC0|\\uD83D\\uDD54|\\uD83D\\uDD55|\\uD83D\\uDCC1|\\uD83D\\uDD56|\\uD83D\\uDD57|\\uD83D\\uDCC2|\\uD83D\\uDD58|\\uD83D\\uDD59|\\uD83D\\uDCC3|\\uD83D\\uDD5A|\\uD83D\\uDD5B|\\uD83D\\uDCC4|\\uD83D\\uDDFB|\\uD83D\\uDDFC|\\uD83D\\uDCC5|\\uD83D\\uDDFD|\\uD83D\\uDDFE|\\uD83D\\uDCC6|\\uD83D\\uDDFF|\\uD83D\\uDE01|\\uD83D\\uDE02|\\uD83D\\uDE03|\\uD83D\\uDCC8|\\uD83D\\uDE04|\\uD83D\\uDE05|\\uD83D\\uDCC9|\\uD83D\\uDE06|\\uD83D\\uDE09|\\uD83D\\uDCCA|\\uD83D\\uDE0A|\\uD83D\\uDE0B|\\uD83D\\uDCCB|\\uD83D\\uDE0C|\\uD83D\\uDE0D|\\uD83D\\uDCCC|\\uD83D\\uDE0F|\\uD83D\\uDE12|\\uD83D\\uDCCD|\\uD83D\\uDE13|\\uD83D\\uDE14|\\uD83D\\uDCCE|\\uD83D\\uDE16|\\uD83D\\uDE18|\\uD83D\\uDCCF|\\uD83D\\uDE1A|\\uD83D\\uDE1C|\\uD83D\\uDCD0|\\uD83D\\uDE1D|\\uD83D\\uDE1E|\\uD83D\\uDCD1|\\uD83D\\uDE20|\\uD83D\\uDE21|\\uD83D\\uDE22|\\uD83D\\uDE23|\\uD83D\\uDE24|\\uD83D\\uDE25|\\uD83D\\uDE28|\\uD83D\\uDE29|\\uD83D\\uDE2A|\\uD83D\\uDE2B|\\uD83D\\uDE2D|\\uD83D\\uDE30|\\uD83D\\uDE31|\\uD83D\\uDE32|\\uD83D\\uDE33|\\uD83D\\uDE35|\\uD83D\\uDE37|\\uD83D\\uDE38|\\uD83D\\uDE39|\\uD83D\\uDE3A|\\uD83D\\uDE3B|\\uD83D\\uDE3C|\\uD83D\\uDE3D|\\uD83D\\uDE3E|\\uD83D\\uDE3F|\\uD83D\\uDE40|\\uD83D\\uDE45|\\uD83D\\uDE46|\\uD83D\\uDE47|\\uD83D\\uDE48|\\uD83D\\uDE49|\\uD83D\\uDE4A|\\uD83D\\uDE4B|\\uD83D\\uDE4C|\\uD83D\\uDE4D|\\uD83D\\uDE4E|\\uD83D\\uDE4F|\\uD83D\\uDE80|\\uD83D\\uDE83|\\uD83D\\uDE84|\\uD83D\\uDE85|\\uD83D\\uDE87|\\uD83D\\uDE89|\\uD83D\\uDE8C|\\uD83D\\uDE8F|\\uD83D\\uDE91|\\uD83D\\uDE92|\\uD83D\\uDE93|\\uD83D\\uDE95|\\uD83D\\uDE97|\\uD83D\\uDE99|\\uD83D\\uDE9A|\\uD83D\\uDEA2|\\uD83D\\uDEA4|\\uD83D\\uDEA5|\\uD83D\\uDEA7|\\uD83D\\uDEA8|\\uD83D\\uDEA9|\\uD83D\\uDEAA|\\uD83D\\uDEAB|\\uD83D\\uDEAC|\\uD83D\\uDEAD|\\uD83D\\uDEB2|\\uD83D\\uDEB6|\\uD83D\\uDEB9|\\uD83D\\uDEBA|\\uD83D\\uDEBB|\\uD83D\\uDEBC|\\uD83D\\uDEBD|\\uD83D\\uDEBE|\\uD83D\\uDEC0|\\uD83E\\uDD18|\\uD83D\\uDE00|\\uD83D\\uDE07|\\uD83D\\uDE08|\\uD83D\\uDE0E|\\uD83D\\uDE10|\\uD83D\\uDE11|\\uD83D\\uDE15|\\uD83D\\uDE17|\\uD83D\\uDE19|\\uD83D\\uDE1B|\\uD83D\\uDE1F|\\uD83D\\uDE26|\\uD83D\\uDE27|\\uD83D\\uDE2C|\\uD83D\\uDE2E|\\uD83D\\uDE2F|\\uD83D\\uDE34|\\uD83D\\uDE36|\\uD83D\\uDE81|\\uD83D\\uDE82|\\uD83D\\uDE86|\\uD83D\\uDE88|\\uD83D\\uDE8A|\\uD83D\\uDE8D|\\uD83D\\uDE8E|\\uD83D\\uDE90|\\uD83D\\uDE94|\\uD83D\\uDE96|\\uD83D\\uDE98|\\uD83D\\uDE9B|\\uD83D\\uDE9C|\\uD83D\\uDE9D|\\uD83D\\uDE9E|\\uD83D\\uDE9F|\\uD83D\\uDEA0|\\uD83D\\uDEA1|\\uD83D\\uDEA3|\\uD83D\\uDEA6|\\uD83D\\uDEAE|\\uD83D\\uDEAF|\\uD83D\\uDEB0|\\uD83D\\uDEB1|\\uD83D\\uDEB3|\\uD83D\\uDEB4|\\uD83D\\uDEB5|\\uD83D\\uDEB7|\\uD83D\\uDEB8|\\uD83D\\uDEBF|\\uD83D\\uDEC1|\\uD83D\\uDEC2|\\uD83D\\uDEC3|\\uD83D\\uDEC4|\\uD83D\\uDEC5|\\uD83C\\uDF0D|\\uD83C\\uDF0E|\\uD83C\\uDF10|\\uD83C\\uDF12|\\uD83C\\uDF16|\\uD83C\\uDF17|\\uD83C\\uDF18|\\uD83C\\uDF1A|\\uD83C\\uDF1C|\\uD83C\\uDF1D|\\uD83C\\uDF1E|\\uD83C\\uDF32|\\uD83C\\uDF33|\\uD83C\\uDF4B|\\uD83C\\uDF50|\\uD83C\\uDF7C|\\uD83C\\uDFC7|\\uD83C\\uDFC9|\\uD83C\\uDFE4|\\uD83D\\uDC00|\\uD83D\\uDC01|\\uD83D\\uDC02|\\uD83D\\uDC03|\\uD83D\\uDC04|\\uD83D\\uDC05|\\uD83D\\uDC06|\\uD83D\\uDC07|\\uD83D\\uDC08|\\uD83D\\uDC09|\\uD83D\\uDC0A|\\uD83D\\uDC0B|\\uD83D\\uDC0F|\\uD83D\\uDC10|\\uD83D\\uDC13|\\uD83D\\uDC15|\\uD83D\\uDC16|\\uD83D\\uDC2A|\\uD83D\\uDC65|\\uD83D\\uDC6C|\\uD83D\\uDC6D|\\uD83D\\uDCAD|\\uD83D\\uDCB6|\\uD83D\\uDCB7|\\uD83D\\uDCEC|\\uD83D\\uDCED|\\uD83D\\uDCEF|\\uD83D\\uDCF5|\\uD83D\\uDD00|\\uD83D\\uDD01|\\uD83D\\uDD02|\\uD83D\\uDD04|\\uD83D\\uDD05|\\uD83D\\uDD06|\\uD83D\\uDD07|\\uD83D\\uDD09|\\uD83D\\uDD15|\\uD83D\\uDD2C|\\uD83D\\uDD2D|\\uD83D\\uDD5C|\\uD83D\\uDD5D|\\uD83D\\uDD5E|\\uD83D\\uDD5F|\\uD83D\\uDD60|\\uD83D\\uDD61|\\uD83D\\uDD62|\\uD83D\\uDD63|\\uD83D\\uDD64|\\uD83D\\uDD65|\\uD83D\\uDD66|\\uD83D\\uDD67|\\uD83D\\uDD08|\\uD83D\\uDE8B|\\uD83C\\uDF9E|\\uD83C\\uDF9F|\\uD83C\\uDFC5|\\uD83C\\uDFCB|\\uD83C\\uDFCC|\\uD83C\\uDFCD|\\uD83C\\uDFCE|\\uD83C\\uDF96|\\uD83C\\uDF97|\\uD83C\\uDF36|\\uD83C\\uDF27|\\uD83C\\uDF28|\\uD83C\\uDF29|\\uD83C\\uDF2A|\\uD83C\\uDF2B|\\uD83C\\uDF2C|\\uD83D\\uDC3F|\\uD83D\\uDD77|\\uD83D\\uDD78|\\uD83C\\uDF21|\\uD83C\\uDF99|\\uD83C\\uDF9A|\\uD83C\\uDF9B|\\uD83C\\uDFF3|\\uD83C\\uDFF4|\\uD83C\\uDFF5|\\uD83C\\uDFF7|\\uD83D\\uDCF8|\\uD83D\\uDCFD|\\uD83D\\uDD49|\\uD83D\\uDD4A|\\uD83D\\uDD6F|\\uD83D\\uDD70|\\uD83D\\uDD73|\\uD83D\\uDD76|\\uD83D\\uDD79|\\uD83D\\uDD87|\\uD83D\\uDD8A|\\uD83D\\uDD8B|\\uD83D\\uDD8C|\\uD83D\\uDD8D|\\uD83D\\uDDA5|\\uD83D\\uDDA8|\\uD83D\\uDDB2|\\uD83D\\uDDBC|\\uD83D\\uDDC2|\\uD83D\\uDDC3|\\uD83D\\uDDC4|\\uD83D\\uDDD1|\\uD83D\\uDDD2|\\uD83D\\uDDD3|\\uD83D\\uDDDC|\\uD83D\\uDDDD|\\uD83D\\uDDDE|\\uD83D\\uDDE1|\\uD83D\\uDDE3|\\uD83D\\uDDEF|\\uD83D\\uDDF3|\\uD83D\\uDDFA|\\uD83D\\uDECC|\\uD83D\\uDEE0|\\uD83D\\uDEE1|\\uD83D\\uDEE2|\\uD83D\\uDEF0|\\uD83C\\uDF7D|\\uD83D\\uDC41|\\uD83D\\uDD74|\\uD83D\\uDD75|\\uD83D\\uDD90|\\uD83D\\uDD95|\\uD83D\\uDD96|\\uD83D\\uDE41|\\uD83D\\uDE42|\\uD83C\\uDFD4|\\uD83C\\uDFD5|\\uD83C\\uDFD6|\\uD83C\\uDFD7|\\uD83C\\uDFD8|\\uD83C\\uDFD9|\\uD83C\\uDFDA|\\uD83C\\uDFDB|\\uD83C\\uDFDC|\\uD83C\\uDFDD|\\uD83C\\uDFDE|\\uD83C\\uDFDF|\\uD83D\\uDECB|\\uD83D\\uDECD|\\uD83D\\uDECE|\\uD83D\\uDECF|\\uD83D\\uDEE3|\\uD83D\\uDEE4|\\uD83D\\uDEE5|\\uD83D\\uDEE9|\\uD83D\\uDEEB|\\uD83D\\uDEEC|\\uD83D\\uDEF3|\\uD83C\\uDFFB|\\uD83C\\uDFFC|\\uD83C\\uDFFD|\\uD83C\\uDFFE|\\uD83C\\uDFFF|\\uD83C\\uDF24|\\uD83C\\uDF25|\\uD83C\\uDF26|\\uD83D\\uDDB1|\\uD83D\\uDE43|\\uD83E\\uDD11|\\uD83E\\uDD13|\\uD83E\\uDD17|\\uD83D\\uDE44|\\uD83E\\uDD14|\\uD83E\\uDD10|\\uD83E\\uDD12|\\u270A|\\u3030|\\u2796|\\u2795|\\u2763|\\u2755|\\u2754|\\u2753|\\u2728|\\u2721|\\u2705|\\u2699|\\u2697|\\u2696|\\u2694|\\u2692|\\u2639|\\u2638|\\u2626|\\u2623|\\u2622|\\u2620|\\u2618|\\u2604|\\u2603|\\u2602|\\u2328|\\u23E9|\\u23EA|\\u23EB|\\u23EC|\\u23F0|\\u23F3|\\u26CE|\\u2797|\\u270B|\\u274C|\\u274E|\\u27B0|\\u27BF|\\u271D|\\u270D|\\u23ED|\\u23EE|\\u23EF|\\u23F1|\\u23F2|\\u23F8|\\u23F9|\\u23FA|\\u262A|\\u262E|\\u262F|\\u269B|\\u269C|\\u26B0|\\u26B1|\\u26C8|\\u26CF|\\u26D1|\\u26D3|\\u26E9|\\u26F0|\\u26F1|\\u26F4|\\u26F7|\\u26F8|\\u26F9)';
+    ns.jsEscapeMap = {"\u2049\uFE0F":"2049","\u2122\uFE0F":"2122","\u2139\uFE0F":"2139","\u2194\uFE0F":"2194","\u2195\uFE0F":"2195","\u2196\uFE0F":"2196","\u2197\uFE0F":"2197","\u2198\uFE0F":"2198","\u2199\uFE0F":"2199","\u2328":"2328","\u2600\uFE0F":"2600","\u2601\uFE0F":"2601","\u2602":"2602","\u2603":"2603","\u2604":"2604","\u2611\uFE0F":"2611","\u2614\uFE0F":"2614","\u2615\uFE0F":"2615","\u2618":"2618","\u2620":"2620","\u2622":"2622","\u2623":"2623","\u2626":"2626","\u2638":"2638","\u2639":"2639","\u2648\uFE0F":"2648","\u2649\uFE0F":"2649","\u2650\uFE0F":"2650","\u2651\uFE0F":"2651","\u2652\uFE0F":"2652","\u2653\uFE0F":"2653","\u2660\uFE0F":"2660","\u2663\uFE0F":"2663","\u2665\uFE0F":"2665","\u2666\uFE0F":"2666","\u2668\uFE0F":"2668","\u2692":"2692","\u2693\uFE0F":"2693","\u2694":"2694","\u2696":"2696","\u2697":"2697","\u2699":"2699","\u2702\uFE0F":"2702","\u2705":"2705","\u2708\uFE0F":"2708","\u2709\uFE0F":"2709","\u2712\uFE0F":"2712","\u2714\uFE0F":"2714","\u2716\uFE0F":"2716","\u2721":"2721","\u2728":"2728","\u2733\uFE0F":"2733","\u2734\uFE0F":"2734","\u2744\uFE0F":"2744","\u2747\uFE0F":"2747","\u2753":"2753","\u2754":"2754","\u2755":"2755","\u2757\uFE0F":"2757","\u2763":"2763","\u2764\uFE0F":"2764","\u2795":"2795","\u2796":"2796","\u2797":"2797","\u2934\uFE0F":"2934","\u2935\uFE0F":"2935","\u3030":"3030","\u3297\uFE0F":"3297","\u3299\uFE0F":"3299","\uD83D\uDC69\u200D\u2764\uFE0F\u200D\uD83D\uDC8B\u200D\uD83D\uDC69":"1f469-2764-1f48b-1f469","\uD83D\uDC68\u200D\u2764\uFE0F\u200D\uD83D\uDC8B\u200D\uD83D\uDC68":"1f468-2764-1f48b-1f468","\uD83D\uDC68\u200D\uD83D\uDC68\u200D\uD83D\uDC66\u200D\uD83D\uDC66":"1f468-1f468-1f466-1f466","\uD83D\uDC68\u200D\uD83D\uDC68\u200D\uD83D\uDC67\u200D\uD83D\uDC66":"1f468-1f468-1f467-1f466","\uD83D\uDC68\u200D\uD83D\uDC68\u200D\uD83D\uDC67\u200D\uD83D\uDC67":"1f468-1f468-1f467-1f467","\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66":"1f468-1f469-1f466-1f466","\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC66":"1f468-1f469-1f467-1f466","\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC67":"1f468-1f469-1f467-1f467","\uD83D\uDC69\u200D\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66":"1f469-1f469-1f466-1f466","\uD83D\uDC69\u200D\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC66":"1f469-1f469-1f467-1f466","\uD83D\uDC69\u200D\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC67":"1f469-1f469-1f467-1f467","\uD83D\uDC69\u200D\u2764\uFE0F\u200D\uD83D\uDC69":"1f469-2764-1f469","\uD83D\uDC68\u200D\u2764\uFE0F\u200D\uD83D\uDC68":"1f468-2764-1f468","\uD83D\uDC68\u200D\uD83D\uDC68\u200D\uD83D\uDC66":"1f468-1f468-1f466","\uD83D\uDC68\u200D\uD83D\uDC68\u200D\uD83D\uDC67":"1f468-1f468-1f467","\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67":"1f468-1f469-1f467","\uD83D\uDC69\u200D\uD83D\uDC69\u200D\uD83D\uDC66":"1f469-1f469-1f466","\uD83D\uDC69\u200D\uD83D\uDC69\u200D\uD83D\uDC67":"1f469-1f469-1f467","\uD83D\uDC41\u200D\uD83D\uDDE8":"1f441-1f5e8","#\uFE0F\u20E3":"0023-20e3","0\uFE0F\u20E3":"0030-20e3","1\uFE0F\u20E3":"0031-20e3","2\uFE0F\u20E3":"0032-20e3","3\uFE0F\u20E3":"0033-20e3","4\uFE0F\u20E3":"0034-20e3","5\uFE0F\u20E3":"0035-20e3","6\uFE0F\u20E3":"0036-20e3","7\uFE0F\u20E3":"0037-20e3","8\uFE0F\u20E3":"0038-20e3","9\uFE0F\u20E3":"0039-20e3","*\uFE0F\u20E3":"002a-20e3","\uD83E\uDD18\uD83C\uDFFF":"1f918-1f3ff","\uD83E\uDD18\uD83C\uDFFE":"1f918-1f3fe","\uD83E\uDD18\uD83C\uDFFD":"1f918-1f3fd","\uD83E\uDD18\uD83C\uDFFC":"1f918-1f3fc","\uD83E\uDD18\uD83C\uDFFB":"1f918-1f3fb","\uD83D\uDEC0\uD83C\uDFFF":"1f6c0-1f3ff","\uD83D\uDEC0\uD83C\uDFFE":"1f6c0-1f3fe","\uD83D\uDEC0\uD83C\uDFFD":"1f6c0-1f3fd","\uD83D\uDEC0\uD83C\uDFFC":"1f6c0-1f3fc","\uD83D\uDEC0\uD83C\uDFFB":"1f6c0-1f3fb","\uD83D\uDEB6\uD83C\uDFFF":"1f6b6-1f3ff","\uD83D\uDEB6\uD83C\uDFFE":"1f6b6-1f3fe","\uD83D\uDEB6\uD83C\uDFFD":"1f6b6-1f3fd","\uD83D\uDEB6\uD83C\uDFFC":"1f6b6-1f3fc","\uD83D\uDEB6\uD83C\uDFFB":"1f6b6-1f3fb","\uD83D\uDEB5\uD83C\uDFFF":"1f6b5-1f3ff","\uD83D\uDEB5\uD83C\uDFFE":"1f6b5-1f3fe","\uD83D\uDEB5\uD83C\uDFFD":"1f6b5-1f3fd","\uD83D\uDEB5\uD83C\uDFFC":"1f6b5-1f3fc","\uD83D\uDEB5\uD83C\uDFFB":"1f6b5-1f3fb","\uD83D\uDEB4\uD83C\uDFFF":"1f6b4-1f3ff","\uD83D\uDEB4\uD83C\uDFFE":"1f6b4-1f3fe","\uD83D\uDEB4\uD83C\uDFFD":"1f6b4-1f3fd","\uD83D\uDEB4\uD83C\uDFFC":"1f6b4-1f3fc","\uD83D\uDEB4\uD83C\uDFFB":"1f6b4-1f3fb","\uD83D\uDEA3\uD83C\uDFFF":"1f6a3-1f3ff","\uD83D\uDEA3\uD83C\uDFFE":"1f6a3-1f3fe","\uD83D\uDEA3\uD83C\uDFFD":"1f6a3-1f3fd","\uD83D\uDEA3\uD83C\uDFFC":"1f6a3-1f3fc","\uD83D\uDEA3\uD83C\uDFFB":"1f6a3-1f3fb","\uD83D\uDE4F\uD83C\uDFFF":"1f64f-1f3ff","\uD83D\uDE4F\uD83C\uDFFE":"1f64f-1f3fe","\uD83D\uDE4F\uD83C\uDFFD":"1f64f-1f3fd","\uD83D\uDE4F\uD83C\uDFFC":"1f64f-1f3fc","\uD83D\uDE4F\uD83C\uDFFB":"1f64f-1f3fb","\uD83D\uDE4E\uD83C\uDFFF":"1f64e-1f3ff","\uD83D\uDE4E\uD83C\uDFFE":"1f64e-1f3fe","\uD83D\uDE4E\uD83C\uDFFD":"1f64e-1f3fd","\uD83D\uDE4E\uD83C\uDFFC":"1f64e-1f3fc","\uD83D\uDE4E\uD83C\uDFFB":"1f64e-1f3fb","\uD83D\uDE4D\uD83C\uDFFF":"1f64d-1f3ff","\uD83D\uDE4D\uD83C\uDFFE":"1f64d-1f3fe","\uD83D\uDE4D\uD83C\uDFFD":"1f64d-1f3fd","\uD83D\uDE4D\uD83C\uDFFC":"1f64d-1f3fc","\uD83D\uDE4D\uD83C\uDFFB":"1f64d-1f3fb","\uD83D\uDE4C\uD83C\uDFFF":"1f64c-1f3ff","\uD83D\uDE4C\uD83C\uDFFE":"1f64c-1f3fe","\uD83D\uDE4C\uD83C\uDFFD":"1f64c-1f3fd","\uD83D\uDE4C\uD83C\uDFFC":"1f64c-1f3fc","\uD83D\uDE4C\uD83C\uDFFB":"1f64c-1f3fb","\uD83D\uDE4B\uD83C\uDFFF":"1f64b-1f3ff","\uD83D\uDE4B\uD83C\uDFFE":"1f64b-1f3fe","\uD83D\uDE4B\uD83C\uDFFD":"1f64b-1f3fd","\uD83D\uDE4B\uD83C\uDFFC":"1f64b-1f3fc","\uD83D\uDE4B\uD83C\uDFFB":"1f64b-1f3fb","\uD83D\uDE47\uD83C\uDFFF":"1f647-1f3ff","\uD83D\uDE47\uD83C\uDFFE":"1f647-1f3fe","\uD83D\uDE47\uD83C\uDFFD":"1f647-1f3fd","\uD83D\uDE47\uD83C\uDFFC":"1f647-1f3fc","\uD83D\uDE47\uD83C\uDFFB":"1f647-1f3fb","\uD83D\uDE46\uD83C\uDFFF":"1f646-1f3ff","\uD83D\uDE46\uD83C\uDFFE":"1f646-1f3fe","\uD83D\uDE46\uD83C\uDFFD":"1f646-1f3fd","\uD83D\uDE46\uD83C\uDFFC":"1f646-1f3fc","\uD83D\uDE46\uD83C\uDFFB":"1f646-1f3fb","\uD83D\uDE45\uD83C\uDFFF":"1f645-1f3ff","\uD83D\uDE45\uD83C\uDFFE":"1f645-1f3fe","\uD83D\uDE45\uD83C\uDFFD":"1f645-1f3fd","\uD83D\uDE45\uD83C\uDFFC":"1f645-1f3fc","\uD83D\uDE45\uD83C\uDFFB":"1f645-1f3fb","\uD83D\uDD96\uD83C\uDFFF":"1f596-1f3ff","\uD83D\uDD96\uD83C\uDFFE":"1f596-1f3fe","\uD83D\uDD96\uD83C\uDFFD":"1f596-1f3fd","\uD83D\uDD96\uD83C\uDFFC":"1f596-1f3fc","\uD83D\uDD96\uD83C\uDFFB":"1f596-1f3fb","\uD83D\uDD95\uD83C\uDFFF":"1f595-1f3ff","\uD83D\uDD95\uD83C\uDFFE":"1f595-1f3fe","\uD83D\uDD95\uD83C\uDFFD":"1f595-1f3fd","\uD83D\uDD95\uD83C\uDFFC":"1f595-1f3fc","\uD83D\uDD95\uD83C\uDFFB":"1f595-1f3fb","\uD83D\uDD90\uD83C\uDFFF":"1f590-1f3ff","\uD83D\uDD90\uD83C\uDFFE":"1f590-1f3fe","\uD83D\uDD90\uD83C\uDFFD":"1f590-1f3fd","\uD83D\uDD90\uD83C\uDFFC":"1f590-1f3fc","\uD83D\uDD90\uD83C\uDFFB":"1f590-1f3fb","\uD83D\uDD75\uD83C\uDFFF":"1f575-1f3ff","\uD83D\uDD75\uD83C\uDFFE":"1f575-1f3fe","\uD83D\uDD75\uD83C\uDFFD":"1f575-1f3fd","\uD83D\uDD75\uD83C\uDFFC":"1f575-1f3fc","\uD83D\uDD75\uD83C\uDFFB":"1f575-1f3fb","\uD83D\uDCAA\uD83C\uDFFF":"1f4aa-1f3ff","\uD83D\uDCAA\uD83C\uDFFE":"1f4aa-1f3fe","\uD83D\uDCAA\uD83C\uDFFD":"1f4aa-1f3fd","\uD83D\uDCAA\uD83C\uDFFC":"1f4aa-1f3fc","\uD83D\uDCAA\uD83C\uDFFB":"1f4aa-1f3fb","\uD83D\uDC87\uD83C\uDFFF":"1f487-1f3ff","\uD83D\uDC87\uD83C\uDFFE":"1f487-1f3fe","\uD83D\uDC87\uD83C\uDFFD":"1f487-1f3fd","\uD83D\uDC87\uD83C\uDFFC":"1f487-1f3fc","\uD83D\uDC87\uD83C\uDFFB":"1f487-1f3fb","\uD83D\uDC86\uD83C\uDFFF":"1f486-1f3ff","\uD83D\uDC86\uD83C\uDFFE":"1f486-1f3fe","\uD83D\uDC86\uD83C\uDFFD":"1f486-1f3fd","\uD83D\uDC86\uD83C\uDFFC":"1f486-1f3fc","\uD83D\uDC86\uD83C\uDFFB":"1f486-1f3fb","\uD83D\uDC85\uD83C\uDFFF":"1f485-1f3ff","\uD83D\uDC85\uD83C\uDFFE":"1f485-1f3fe","\uD83D\uDC85\uD83C\uDFFD":"1f485-1f3fd","\uD83D\uDC85\uD83C\uDFFC":"1f485-1f3fc","\uD83D\uDC85\uD83C\uDFFB":"1f485-1f3fb","\uD83D\uDC83\uD83C\uDFFF":"1f483-1f3ff","\uD83D\uDC83\uD83C\uDFFE":"1f483-1f3fe","\uD83D\uDC83\uD83C\uDFFD":"1f483-1f3fd","\uD83D\uDC83\uD83C\uDFFC":"1f483-1f3fc","\uD83D\uDC83\uD83C\uDFFB":"1f483-1f3fb","\uD83D\uDC82\uD83C\uDFFF":"1f482-1f3ff","\uD83D\uDC82\uD83C\uDFFE":"1f482-1f3fe","\uD83D\uDC82\uD83C\uDFFD":"1f482-1f3fd","\uD83D\uDC82\uD83C\uDFFC":"1f482-1f3fc","\uD83D\uDC82\uD83C\uDFFB":"1f482-1f3fb","\uD83D\uDC81\uD83C\uDFFF":"1f481-1f3ff","\uD83D\uDC81\uD83C\uDFFE":"1f481-1f3fe","\uD83D\uDC81\uD83C\uDFFD":"1f481-1f3fd","\uD83D\uDC81\uD83C\uDFFC":"1f481-1f3fc","\uD83D\uDC81\uD83C\uDFFB":"1f481-1f3fb","\uD83D\uDC7C\uD83C\uDFFF":"1f47c-1f3ff","\uD83D\uDC7C\uD83C\uDFFE":"1f47c-1f3fe","\uD83D\uDC7C\uD83C\uDFFD":"1f47c-1f3fd","\uD83D\uDC7C\uD83C\uDFFC":"1f47c-1f3fc","\uD83D\uDC7C\uD83C\uDFFB":"1f47c-1f3fb","\uD83D\uDC78\uD83C\uDFFF":"1f478-1f3ff","\uD83D\uDC78\uD83C\uDFFE":"1f478-1f3fe","\uD83D\uDC78\uD83C\uDFFD":"1f478-1f3fd","\uD83D\uDC78\uD83C\uDFFC":"1f478-1f3fc","\uD83D\uDC78\uD83C\uDFFB":"1f478-1f3fb","\uD83D\uDC77\uD83C\uDFFF":"1f477-1f3ff","\uD83D\uDC77\uD83C\uDFFE":"1f477-1f3fe","\uD83D\uDC77\uD83C\uDFFD":"1f477-1f3fd","\uD83D\uDC77\uD83C\uDFFC":"1f477-1f3fc","\uD83D\uDC77\uD83C\uDFFB":"1f477-1f3fb","\uD83D\uDC76\uD83C\uDFFF":"1f476-1f3ff","\uD83D\uDC76\uD83C\uDFFE":"1f476-1f3fe","\uD83D\uDC76\uD83C\uDFFD":"1f476-1f3fd","\uD83D\uDC76\uD83C\uDFFC":"1f476-1f3fc","\uD83D\uDC76\uD83C\uDFFB":"1f476-1f3fb","\uD83D\uDC75\uD83C\uDFFF":"1f475-1f3ff","\uD83D\uDC75\uD83C\uDFFE":"1f475-1f3fe","\uD83D\uDC75\uD83C\uDFFD":"1f475-1f3fd","\uD83D\uDC75\uD83C\uDFFC":"1f475-1f3fc","\uD83D\uDC75\uD83C\uDFFB":"1f475-1f3fb","\uD83D\uDC74\uD83C\uDFFF":"1f474-1f3ff","\uD83D\uDC74\uD83C\uDFFE":"1f474-1f3fe","\uD83D\uDC74\uD83C\uDFFD":"1f474-1f3fd","\uD83D\uDC74\uD83C\uDFFC":"1f474-1f3fc","\uD83D\uDC74\uD83C\uDFFB":"1f474-1f3fb","\uD83D\uDC73\uD83C\uDFFF":"1f473-1f3ff","\uD83D\uDC73\uD83C\uDFFE":"1f473-1f3fe","\uD83D\uDC73\uD83C\uDFFD":"1f473-1f3fd","\uD83D\uDC73\uD83C\uDFFC":"1f473-1f3fc","\uD83D\uDC73\uD83C\uDFFB":"1f473-1f3fb","\uD83D\uDC72\uD83C\uDFFF":"1f472-1f3ff","\uD83D\uDC72\uD83C\uDFFE":"1f472-1f3fe","\uD83D\uDC72\uD83C\uDFFD":"1f472-1f3fd","\uD83D\uDC72\uD83C\uDFFC":"1f472-1f3fc","\uD83D\uDC72\uD83C\uDFFB":"1f472-1f3fb","\uD83D\uDC71\uD83C\uDFFF":"1f471-1f3ff","\uD83D\uDC71\uD83C\uDFFE":"1f471-1f3fe","\uD83D\uDC71\uD83C\uDFFD":"1f471-1f3fd","\uD83D\uDC71\uD83C\uDFFC":"1f471-1f3fc","\uD83D\uDC71\uD83C\uDFFB":"1f471-1f3fb","\uD83D\uDC70\uD83C\uDFFF":"1f470-1f3ff","\uD83D\uDC70\uD83C\uDFFE":"1f470-1f3fe","\uD83D\uDC70\uD83C\uDFFD":"1f470-1f3fd","\uD83D\uDC70\uD83C\uDFFC":"1f470-1f3fc","\uD83D\uDC70\uD83C\uDFFB":"1f470-1f3fb","\uD83D\uDC6E\uD83C\uDFFF":"1f46e-1f3ff","\uD83D\uDC6E\uD83C\uDFFE":"1f46e-1f3fe","\uD83D\uDC6E\uD83C\uDFFD":"1f46e-1f3fd","\uD83D\uDC6E\uD83C\uDFFC":"1f46e-1f3fc","\uD83D\uDC6E\uD83C\uDFFB":"1f46e-1f3fb","\uD83D\uDC69\uD83C\uDFFF":"1f469-1f3ff","\uD83D\uDC69\uD83C\uDFFE":"1f469-1f3fe","\uD83D\uDC69\uD83C\uDFFD":"1f469-1f3fd","\uD83D\uDC69\uD83C\uDFFC":"1f469-1f3fc","\uD83D\uDC69\uD83C\uDFFB":"1f469-1f3fb","\uD83D\uDC68\uD83C\uDFFF":"1f468-1f3ff","\uD83D\uDC68\uD83C\uDFFE":"1f468-1f3fe","\uD83D\uDC68\uD83C\uDFFD":"1f468-1f3fd","\uD83D\uDC68\uD83C\uDFFC":"1f468-1f3fc","\uD83D\uDC68\uD83C\uDFFB":"1f468-1f3fb","\uD83D\uDC67\uD83C\uDFFF":"1f467-1f3ff","\uD83D\uDC67\uD83C\uDFFE":"1f467-1f3fe","\uD83D\uDC67\uD83C\uDFFD":"1f467-1f3fd","\uD83D\uDC67\uD83C\uDFFC":"1f467-1f3fc","\uD83D\uDC67\uD83C\uDFFB":"1f467-1f3fb","\uD83D\uDC66\uD83C\uDFFF":"1f466-1f3ff","\uD83D\uDC66\uD83C\uDFFE":"1f466-1f3fe","\uD83D\uDC66\uD83C\uDFFD":"1f466-1f3fd","\uD83D\uDC66\uD83C\uDFFC":"1f466-1f3fc","\uD83D\uDC66\uD83C\uDFFB":"1f466-1f3fb","\uD83D\uDC50\uD83C\uDFFF":"1f450-1f3ff","\uD83D\uDC50\uD83C\uDFFE":"1f450-1f3fe","\uD83D\uDC50\uD83C\uDFFD":"1f450-1f3fd","\uD83D\uDC50\uD83C\uDFFC":"1f450-1f3fc","\uD83D\uDC50\uD83C\uDFFB":"1f450-1f3fb","\uD83D\uDC4F\uD83C\uDFFF":"1f44f-1f3ff","\uD83D\uDC4F\uD83C\uDFFE":"1f44f-1f3fe","\uD83D\uDC4F\uD83C\uDFFD":"1f44f-1f3fd","\uD83D\uDC4F\uD83C\uDFFC":"1f44f-1f3fc","\uD83D\uDC4F\uD83C\uDFFB":"1f44f-1f3fb","\uD83D\uDC4E\uD83C\uDFFF":"1f44e-1f3ff","\uD83D\uDC4E\uD83C\uDFFE":"1f44e-1f3fe","\uD83D\uDC4E\uD83C\uDFFD":"1f44e-1f3fd","\uD83D\uDC4E\uD83C\uDFFC":"1f44e-1f3fc","\uD83D\uDC4E\uD83C\uDFFB":"1f44e-1f3fb","\uD83D\uDC4D\uD83C\uDFFF":"1f44d-1f3ff","\uD83D\uDC4D\uD83C\uDFFE":"1f44d-1f3fe","\uD83D\uDC4D\uD83C\uDFFD":"1f44d-1f3fd","\uD83D\uDC4D\uD83C\uDFFC":"1f44d-1f3fc","\uD83D\uDC4D\uD83C\uDFFB":"1f44d-1f3fb","\uD83D\uDC4C\uD83C\uDFFF":"1f44c-1f3ff","\uD83D\uDC4C\uD83C\uDFFE":"1f44c-1f3fe","\uD83D\uDC4C\uD83C\uDFFD":"1f44c-1f3fd","\uD83D\uDC4C\uD83C\uDFFC":"1f44c-1f3fc","\uD83D\uDC4C\uD83C\uDFFB":"1f44c-1f3fb","\uD83D\uDC4B\uD83C\uDFFF":"1f44b-1f3ff","\uD83D\uDC4B\uD83C\uDFFE":"1f44b-1f3fe","\uD83D\uDC4B\uD83C\uDFFD":"1f44b-1f3fd","\uD83D\uDC4B\uD83C\uDFFC":"1f44b-1f3fc","\uD83D\uDC4B\uD83C\uDFFB":"1f44b-1f3fb","\uD83D\uDC4A\uD83C\uDFFF":"1f44a-1f3ff","\uD83D\uDC4A\uD83C\uDFFE":"1f44a-1f3fe","\uD83D\uDC4A\uD83C\uDFFD":"1f44a-1f3fd","\uD83D\uDC4A\uD83C\uDFFC":"1f44a-1f3fc","\uD83D\uDC4A\uD83C\uDFFB":"1f44a-1f3fb","\uD83D\uDC49\uD83C\uDFFF":"1f449-1f3ff","\uD83D\uDC49\uD83C\uDFFE":"1f449-1f3fe","\uD83D\uDC49\uD83C\uDFFD":"1f449-1f3fd","\uD83D\uDC49\uD83C\uDFFC":"1f449-1f3fc","\uD83D\uDC49\uD83C\uDFFB":"1f449-1f3fb","\uD83D\uDC48\uD83C\uDFFF":"1f448-1f3ff","\uD83D\uDC48\uD83C\uDFFE":"1f448-1f3fe","\uD83D\uDC48\uD83C\uDFFD":"1f448-1f3fd","\uD83D\uDC48\uD83C\uDFFC":"1f448-1f3fc","\uD83D\uDC48\uD83C\uDFFB":"1f448-1f3fb","\uD83D\uDC47\uD83C\uDFFF":"1f447-1f3ff","\uD83D\uDC47\uD83C\uDFFE":"1f447-1f3fe","\uD83D\uDC47\uD83C\uDFFD":"1f447-1f3fd","\uD83D\uDC47\uD83C\uDFFC":"1f447-1f3fc","\uD83D\uDC47\uD83C\uDFFB":"1f447-1f3fb","\uD83D\uDC46\uD83C\uDFFF":"1f446-1f3ff","\uD83D\uDC46\uD83C\uDFFE":"1f446-1f3fe","\uD83D\uDC46\uD83C\uDFFD":"1f446-1f3fd","\uD83D\uDC46\uD83C\uDFFC":"1f446-1f3fc","\uD83D\uDC46\uD83C\uDFFB":"1f446-1f3fb","\uD83D\uDC43\uD83C\uDFFF":"1f443-1f3ff","\uD83D\uDC43\uD83C\uDFFE":"1f443-1f3fe","\uD83D\uDC43\uD83C\uDFFD":"1f443-1f3fd","\uD83D\uDC43\uD83C\uDFFC":"1f443-1f3fc","\uD83D\uDC43\uD83C\uDFFB":"1f443-1f3fb","\uD83D\uDC42\uD83C\uDFFF":"1f442-1f3ff","\uD83D\uDC42\uD83C\uDFFE":"1f442-1f3fe","\uD83D\uDC42\uD83C\uDFFD":"1f442-1f3fd","\uD83D\uDC42\uD83C\uDFFC":"1f442-1f3fc","\uD83D\uDC42\uD83C\uDFFB":"1f442-1f3fb","\uD83C\uDFCB\uD83C\uDFFF":"1f3cb-1f3ff","\uD83C\uDFCB\uD83C\uDFFE":"1f3cb-1f3fe","\uD83C\uDFCB\uD83C\uDFFD":"1f3cb-1f3fd","\uD83C\uDFCB\uD83C\uDFFC":"1f3cb-1f3fc","\uD83C\uDFCB\uD83C\uDFFB":"1f3cb-1f3fb","\uD83C\uDFCA\uD83C\uDFFF":"1f3ca-1f3ff","\uD83C\uDFCA\uD83C\uDFFE":"1f3ca-1f3fe","\uD83C\uDFCA\uD83C\uDFFD":"1f3ca-1f3fd","\uD83C\uDFCA\uD83C\uDFFC":"1f3ca-1f3fc","\uD83C\uDFCA\uD83C\uDFFB":"1f3ca-1f3fb","\uD83C\uDFC7\uD83C\uDFFF":"1f3c7-1f3ff","\uD83C\uDFC7\uD83C\uDFFE":"1f3c7-1f3fe","\uD83C\uDFC7\uD83C\uDFFD":"1f3c7-1f3fd","\uD83C\uDFC7\uD83C\uDFFC":"1f3c7-1f3fc","\uD83C\uDFC7\uD83C\uDFFB":"1f3c7-1f3fb","\uD83C\uDFC4\uD83C\uDFFF":"1f3c4-1f3ff","\uD83C\uDFC4\uD83C\uDFFE":"1f3c4-1f3fe","\uD83C\uDFC4\uD83C\uDFFD":"1f3c4-1f3fd","\uD83C\uDFC4\uD83C\uDFFC":"1f3c4-1f3fc","\uD83C\uDFC4\uD83C\uDFFB":"1f3c4-1f3fb","\uD83C\uDFC3\uD83C\uDFFF":"1f3c3-1f3ff","\uD83C\uDFC3\uD83C\uDFFE":"1f3c3-1f3fe","\uD83C\uDFC3\uD83C\uDFFD":"1f3c3-1f3fd","\uD83C\uDFC3\uD83C\uDFFC":"1f3c3-1f3fc","\uD83C\uDFC3\uD83C\uDFFB":"1f3c3-1f3fb","\uD83C\uDF85\uD83C\uDFFF":"1f385-1f3ff","\uD83C\uDF85\uD83C\uDFFE":"1f385-1f3fe","\uD83C\uDF85\uD83C\uDFFD":"1f385-1f3fd","\uD83C\uDF85\uD83C\uDFFC":"1f385-1f3fc","\uD83C\uDF85\uD83C\uDFFB":"1f385-1f3fb","\uD83C\uDDFF\uD83C\uDDFC":"1f1ff-1f1fc","\uD83C\uDDFF\uD83C\uDDF2":"1f1ff-1f1f2","\uD83C\uDDFF\uD83C\uDDE6":"1f1ff-1f1e6","\uD83C\uDDFE\uD83C\uDDF9":"1f1fe-1f1f9","\uD83C\uDDFE\uD83C\uDDEA":"1f1fe-1f1ea","\uD83C\uDDFD\uD83C\uDDF0":"1f1fd-1f1f0","\uD83C\uDDFC\uD83C\uDDF8":"1f1fc-1f1f8","\uD83C\uDDFC\uD83C\uDDEB":"1f1fc-1f1eb","\uD83C\uDDFB\uD83C\uDDFA":"1f1fb-1f1fa","\uD83C\uDDFB\uD83C\uDDF3":"1f1fb-1f1f3","\uD83C\uDDFB\uD83C\uDDEE":"1f1fb-1f1ee","\uD83C\uDDFB\uD83C\uDDEC":"1f1fb-1f1ec","\uD83C\uDDFB\uD83C\uDDEA":"1f1fb-1f1ea","\uD83C\uDDFB\uD83C\uDDE8":"1f1fb-1f1e8","\uD83C\uDDFB\uD83C\uDDE6":"1f1fb-1f1e6","\uD83C\uDDFA\uD83C\uDDFF":"1f1fa-1f1ff","\uD83C\uDDFA\uD83C\uDDFE":"1f1fa-1f1fe","\uD83C\uDDFA\uD83C\uDDF8":"1f1fa-1f1f8","\uD83C\uDDFA\uD83C\uDDF2":"1f1fa-1f1f2","\uD83C\uDDFA\uD83C\uDDEC":"1f1fa-1f1ec","\uD83C\uDDFA\uD83C\uDDE6":"1f1fa-1f1e6","\uD83C\uDDF9\uD83C\uDDFF":"1f1f9-1f1ff","\uD83C\uDDF9\uD83C\uDDFC":"1f1f9-1f1fc","\uD83C\uDDF9\uD83C\uDDFB":"1f1f9-1f1fb","\uD83C\uDDF9\uD83C\uDDF9":"1f1f9-1f1f9","\uD83C\uDDF9\uD83C\uDDF7":"1f1f9-1f1f7","\uD83C\uDDF9\uD83C\uDDF4":"1f1f9-1f1f4","\uD83C\uDDF9\uD83C\uDDF3":"1f1f9-1f1f3","\uD83C\uDDF9\uD83C\uDDF2":"1f1f9-1f1f2","\uD83C\uDDF9\uD83C\uDDF1":"1f1f9-1f1f1","\uD83C\uDDF9\uD83C\uDDF0":"1f1f9-1f1f0","\uD83C\uDDF9\uD83C\uDDEF":"1f1f9-1f1ef","\uD83C\uDDF9\uD83C\uDDED":"1f1f9-1f1ed","\uD83C\uDDF9\uD83C\uDDEC":"1f1f9-1f1ec","\uD83C\uDDF9\uD83C\uDDEB":"1f1f9-1f1eb","\uD83C\uDDF9\uD83C\uDDE9":"1f1f9-1f1e9","\uD83C\uDDF9\uD83C\uDDE8":"1f1f9-1f1e8","\uD83C\uDDF9\uD83C\uDDE6":"1f1f9-1f1e6","\uD83C\uDDF8\uD83C\uDDFF":"1f1f8-1f1ff","\uD83C\uDDF8\uD83C\uDDFE":"1f1f8-1f1fe","\uD83C\uDDF8\uD83C\uDDFD":"1f1f8-1f1fd","\uD83C\uDDF8\uD83C\uDDFB":"1f1f8-1f1fb","\uD83C\uDDF8\uD83C\uDDF9":"1f1f8-1f1f9","\uD83C\uDDF8\uD83C\uDDF8":"1f1f8-1f1f8","\uD83C\uDDF8\uD83C\uDDF7":"1f1f8-1f1f7","\uD83C\uDDF8\uD83C\uDDF4":"1f1f8-1f1f4","\uD83C\uDDF8\uD83C\uDDF3":"1f1f8-1f1f3","\uD83C\uDDF8\uD83C\uDDF2":"1f1f8-1f1f2","\uD83C\uDDF8\uD83C\uDDF1":"1f1f8-1f1f1","\uD83C\uDDF8\uD83C\uDDF0":"1f1f8-1f1f0","\uD83C\uDDF8\uD83C\uDDEF":"1f1f8-1f1ef","\uD83C\uDDF8\uD83C\uDDEE":"1f1f8-1f1ee","\uD83C\uDDF8\uD83C\uDDED":"1f1f8-1f1ed","\uD83C\uDDF8\uD83C\uDDEC":"1f1f8-1f1ec","\uD83C\uDDF8\uD83C\uDDEA":"1f1f8-1f1ea","\uD83C\uDDF8\uD83C\uDDE9":"1f1f8-1f1e9","\uD83C\uDDF8\uD83C\uDDE8":"1f1f8-1f1e8","\uD83C\uDDF8\uD83C\uDDE7":"1f1f8-1f1e7","\uD83C\uDDF8\uD83C\uDDE6":"1f1f8-1f1e6","\uD83C\uDDF7\uD83C\uDDFC":"1f1f7-1f1fc","\uD83C\uDDF7\uD83C\uDDFA":"1f1f7-1f1fa","\uD83C\uDDF7\uD83C\uDDF8":"1f1f7-1f1f8","\uD83C\uDDF7\uD83C\uDDF4":"1f1f7-1f1f4","\uD83C\uDDF7\uD83C\uDDEA":"1f1f7-1f1ea","\uD83C\uDDF6\uD83C\uDDE6":"1f1f6-1f1e6","\uD83C\uDDF5\uD83C\uDDFE":"1f1f5-1f1fe","\uD83C\uDDF5\uD83C\uDDFC":"1f1f5-1f1fc","\uD83C\uDDF5\uD83C\uDDF9":"1f1f5-1f1f9","\uD83C\uDDF5\uD83C\uDDF8":"1f1f5-1f1f8","\uD83C\uDDF5\uD83C\uDDF7":"1f1f5-1f1f7","\uD83C\uDDF5\uD83C\uDDF3":"1f1f5-1f1f3","\uD83C\uDDF5\uD83C\uDDF2":"1f1f5-1f1f2","\uD83C\uDDF5\uD83C\uDDF1":"1f1f5-1f1f1","\uD83C\uDDF5\uD83C\uDDF0":"1f1f5-1f1f0","\uD83C\uDDF5\uD83C\uDDED":"1f1f5-1f1ed","\uD83C\uDDF5\uD83C\uDDEC":"1f1f5-1f1ec","\uD83C\uDDF5\uD83C\uDDEB":"1f1f5-1f1eb","\uD83C\uDDF5\uD83C\uDDEA":"1f1f5-1f1ea","\uD83C\uDDF5\uD83C\uDDE6":"1f1f5-1f1e6","\uD83C\uDDF4\uD83C\uDDF2":"1f1f4-1f1f2","\uD83C\uDDF3\uD83C\uDDFF":"1f1f3-1f1ff","\uD83C\uDDF3\uD83C\uDDFA":"1f1f3-1f1fa","\uD83C\uDDF3\uD83C\uDDF7":"1f1f3-1f1f7","\uD83C\uDDF3\uD83C\uDDF5":"1f1f3-1f1f5","\uD83C\uDDF3\uD83C\uDDF4":"1f1f3-1f1f4","\uD83C\uDDF3\uD83C\uDDF1":"1f1f3-1f1f1","\uD83C\uDDF3\uD83C\uDDEE":"1f1f3-1f1ee","\uD83C\uDDF3\uD83C\uDDEC":"1f1f3-1f1ec","\uD83C\uDDF3\uD83C\uDDEB":"1f1f3-1f1eb","\uD83C\uDDF3\uD83C\uDDEA":"1f1f3-1f1ea","\uD83C\uDDF3\uD83C\uDDE8":"1f1f3-1f1e8","\uD83C\uDDF3\uD83C\uDDE6":"1f1f3-1f1e6","\uD83C\uDDF2\uD83C\uDDFF":"1f1f2-1f1ff","\uD83C\uDDF2\uD83C\uDDFE":"1f1f2-1f1fe","\uD83C\uDDF2\uD83C\uDDFD":"1f1f2-1f1fd","\uD83C\uDDF2\uD83C\uDDFC":"1f1f2-1f1fc","\uD83C\uDDF2\uD83C\uDDFB":"1f1f2-1f1fb","\uD83C\uDDF2\uD83C\uDDFA":"1f1f2-1f1fa","\uD83C\uDDF2\uD83C\uDDF9":"1f1f2-1f1f9","\uD83C\uDDF2\uD83C\uDDF8":"1f1f2-1f1f8","\uD83C\uDDF2\uD83C\uDDF7":"1f1f2-1f1f7","\uD83C\uDDF2\uD83C\uDDF6":"1f1f2-1f1f6","\uD83C\uDDF2\uD83C\uDDF5":"1f1f2-1f1f5","\uD83C\uDDF2\uD83C\uDDF4":"1f1f2-1f1f4","\uD83C\uDDF2\uD83C\uDDF3":"1f1f2-1f1f3","\uD83C\uDDF2\uD83C\uDDF2":"1f1f2-1f1f2","\uD83C\uDDF2\uD83C\uDDF1":"1f1f2-1f1f1","\uD83C\uDDF2\uD83C\uDDF0":"1f1f2-1f1f0","\uD83C\uDDF2\uD83C\uDDED":"1f1f2-1f1ed","\uD83C\uDDF2\uD83C\uDDEC":"1f1f2-1f1ec","\uD83C\uDDF2\uD83C\uDDEB":"1f1f2-1f1eb","\uD83C\uDDF2\uD83C\uDDEA":"1f1f2-1f1ea","\uD83C\uDDF2\uD83C\uDDE9":"1f1f2-1f1e9","\uD83C\uDDF2\uD83C\uDDE8":"1f1f2-1f1e8","\uD83C\uDDF2\uD83C\uDDE6":"1f1f2-1f1e6","\uD83C\uDDF1\uD83C\uDDFE":"1f1f1-1f1fe","\uD83C\uDDF1\uD83C\uDDFB":"1f1f1-1f1fb","\uD83C\uDDF1\uD83C\uDDFA":"1f1f1-1f1fa","\uD83C\uDDF1\uD83C\uDDF9":"1f1f1-1f1f9","\uD83C\uDDF1\uD83C\uDDF8":"1f1f1-1f1f8","\uD83C\uDDF1\uD83C\uDDF7":"1f1f1-1f1f7","\uD83C\uDDF1\uD83C\uDDF0":"1f1f1-1f1f0","\uD83C\uDDF1\uD83C\uDDEE":"1f1f1-1f1ee","\uD83C\uDDF1\uD83C\uDDE8":"1f1f1-1f1e8","\uD83C\uDDF1\uD83C\uDDE7":"1f1f1-1f1e7","\uD83C\uDDF1\uD83C\uDDE6":"1f1f1-1f1e6","\uD83C\uDDF0\uD83C\uDDFF":"1f1f0-1f1ff","\uD83C\uDDF0\uD83C\uDDFE":"1f1f0-1f1fe","\uD83C\uDDF0\uD83C\uDDFC":"1f1f0-1f1fc","\uD83C\uDDF0\uD83C\uDDF7":"1f1f0-1f1f7","\uD83C\uDDF0\uD83C\uDDF5":"1f1f0-1f1f5","\uD83C\uDDF0\uD83C\uDDF3":"1f1f0-1f1f3","\uD83C\uDDF0\uD83C\uDDF2":"1f1f0-1f1f2","\uD83C\uDDF0\uD83C\uDDEE":"1f1f0-1f1ee","\uD83C\uDDF0\uD83C\uDDED":"1f1f0-1f1ed","\uD83C\uDDF0\uD83C\uDDEC":"1f1f0-1f1ec","\uD83C\uDDF0\uD83C\uDDEA":"1f1f0-1f1ea","\uD83C\uDDEF\uD83C\uDDF5":"1f1ef-1f1f5","\uD83C\uDDEF\uD83C\uDDF4":"1f1ef-1f1f4","\uD83C\uDDEF\uD83C\uDDF2":"1f1ef-1f1f2","\uD83C\uDDEF\uD83C\uDDEA":"1f1ef-1f1ea","\uD83C\uDDEE\uD83C\uDDF9":"1f1ee-1f1f9","\uD83C\uDDEE\uD83C\uDDF8":"1f1ee-1f1f8","\uD83C\uDDEE\uD83C\uDDF7":"1f1ee-1f1f7","\uD83C\uDDEE\uD83C\uDDF6":"1f1ee-1f1f6","\uD83C\uDDEE\uD83C\uDDF4":"1f1ee-1f1f4","\uD83C\uDDEE\uD83C\uDDF3":"1f1ee-1f1f3","\uD83C\uDDEE\uD83C\uDDF2":"1f1ee-1f1f2","\uD83C\uDDEE\uD83C\uDDF1":"1f1ee-1f1f1","\uD83C\uDDEE\uD83C\uDDEA":"1f1ee-1f1ea","\uD83C\uDDEE\uD83C\uDDE9":"1f1ee-1f1e9","\uD83C\uDDEE\uD83C\uDDE8":"1f1ee-1f1e8","\uD83C\uDDED\uD83C\uDDFA":"1f1ed-1f1fa","\uD83C\uDDED\uD83C\uDDF9":"1f1ed-1f1f9","\uD83C\uDDED\uD83C\uDDF7":"1f1ed-1f1f7","\uD83C\uDDED\uD83C\uDDF3":"1f1ed-1f1f3","\uD83C\uDDED\uD83C\uDDF2":"1f1ed-1f1f2","\uD83C\uDDED\uD83C\uDDF0":"1f1ed-1f1f0","\uD83C\uDDEC\uD83C\uDDFE":"1f1ec-1f1fe","\uD83C\uDDEC\uD83C\uDDFC":"1f1ec-1f1fc","\uD83C\uDDEC\uD83C\uDDFA":"1f1ec-1f1fa","\uD83C\uDDEC\uD83C\uDDF9":"1f1ec-1f1f9","\uD83C\uDDEC\uD83C\uDDF8":"1f1ec-1f1f8","\uD83C\uDDEC\uD83C\uDDF7":"1f1ec-1f1f7","\uD83C\uDDEC\uD83C\uDDF6":"1f1ec-1f1f6","\uD83C\uDDEC\uD83C\uDDF5":"1f1ec-1f1f5","\uD83C\uDDEC\uD83C\uDDF3":"1f1ec-1f1f3","\uD83C\uDDEC\uD83C\uDDF2":"1f1ec-1f1f2","\uD83C\uDDEC\uD83C\uDDF1":"1f1ec-1f1f1","\uD83C\uDDEC\uD83C\uDDEE":"1f1ec-1f1ee","\uD83C\uDDEC\uD83C\uDDED":"1f1ec-1f1ed","\uD83C\uDDEC\uD83C\uDDEC":"1f1ec-1f1ec","\uD83C\uDDEC\uD83C\uDDEB":"1f1ec-1f1eb","\uD83C\uDDEC\uD83C\uDDEA":"1f1ec-1f1ea","\uD83C\uDDEC\uD83C\uDDE9":"1f1ec-1f1e9","\uD83C\uDDEC\uD83C\uDDE7":"1f1ec-1f1e7","\uD83C\uDDEC\uD83C\uDDE6":"1f1ec-1f1e6","\uD83C\uDDEB\uD83C\uDDF7":"1f1eb-1f1f7","\uD83C\uDDEB\uD83C\uDDF4":"1f1eb-1f1f4","\uD83C\uDDEB\uD83C\uDDF2":"1f1eb-1f1f2","\uD83C\uDDEB\uD83C\uDDF0":"1f1eb-1f1f0","\uD83C\uDDEB\uD83C\uDDEF":"1f1eb-1f1ef","\uD83C\uDDEB\uD83C\uDDEE":"1f1eb-1f1ee","\uD83C\uDDEA\uD83C\uDDFA":"1f1ea-1f1fa","\uD83C\uDDEA\uD83C\uDDF9":"1f1ea-1f1f9","\uD83C\uDDEA\uD83C\uDDF8":"1f1ea-1f1f8","\uD83C\uDDEA\uD83C\uDDF7":"1f1ea-1f1f7","\uD83C\uDDEA\uD83C\uDDED":"1f1ea-1f1ed","\uD83C\uDDEA\uD83C\uDDEC":"1f1ea-1f1ec","\uD83C\uDDEA\uD83C\uDDEA":"1f1ea-1f1ea","\uD83C\uDDEA\uD83C\uDDE8":"1f1ea-1f1e8","\uD83C\uDDEA\uD83C\uDDE6":"1f1ea-1f1e6","\uD83C\uDDE9\uD83C\uDDFF":"1f1e9-1f1ff","\uD83C\uDDE9\uD83C\uDDF4":"1f1e9-1f1f4","\uD83C\uDDE9\uD83C\uDDF2":"1f1e9-1f1f2","\uD83C\uDDE9\uD83C\uDDF0":"1f1e9-1f1f0","\uD83C\uDDE9\uD83C\uDDEF":"1f1e9-1f1ef","\uD83C\uDDE9\uD83C\uDDEC":"1f1e9-1f1ec","\uD83C\uDDE9\uD83C\uDDEA":"1f1e9-1f1ea","\uD83C\uDDE8\uD83C\uDDFF":"1f1e8-1f1ff","\uD83C\uDDE8\uD83C\uDDFE":"1f1e8-1f1fe","\uD83C\uDDE8\uD83C\uDDFD":"1f1e8-1f1fd","\uD83C\uDDE8\uD83C\uDDFC":"1f1e8-1f1fc","\uD83C\uDDE8\uD83C\uDDFB":"1f1e8-1f1fb","\uD83C\uDDE8\uD83C\uDDFA":"1f1e8-1f1fa","\uD83C\uDDE8\uD83C\uDDF7":"1f1e8-1f1f7","\uD83C\uDDE8\uD83C\uDDF5":"1f1e8-1f1f5","\uD83C\uDDE8\uD83C\uDDF4":"1f1e8-1f1f4","\uD83C\uDDE8\uD83C\uDDF3":"1f1e8-1f1f3","\uD83C\uDDE8\uD83C\uDDF2":"1f1e8-1f1f2","\uD83C\uDDE8\uD83C\uDDF1":"1f1e8-1f1f1","\uD83C\uDDE8\uD83C\uDDF0":"1f1e8-1f1f0","\uD83C\uDDE8\uD83C\uDDEE":"1f1e8-1f1ee","\uD83C\uDDE8\uD83C\uDDED":"1f1e8-1f1ed","\uD83C\uDDE8\uD83C\uDDEC":"1f1e8-1f1ec","\uD83C\uDDE8\uD83C\uDDEB":"1f1e8-1f1eb","\uD83C\uDDE8\uD83C\uDDE9":"1f1e8-1f1e9","\uD83C\uDDE8\uD83C\uDDE8":"1f1e8-1f1e8","\uD83C\uDDE8\uD83C\uDDE6":"1f1e8-1f1e6","\uD83C\uDDE7\uD83C\uDDFF":"1f1e7-1f1ff","\uD83C\uDDE7\uD83C\uDDFE":"1f1e7-1f1fe","\uD83C\uDDE7\uD83C\uDDFC":"1f1e7-1f1fc","\uD83C\uDDE7\uD83C\uDDFB":"1f1e7-1f1fb","\uD83C\uDDE7\uD83C\uDDF9":"1f1e7-1f1f9","\uD83C\uDDE7\uD83C\uDDF8":"1f1e7-1f1f8","\uD83C\uDDE7\uD83C\uDDF7":"1f1e7-1f1f7","\uD83C\uDDE7\uD83C\uDDF6":"1f1e7-1f1f6","\uD83C\uDDE7\uD83C\uDDF4":"1f1e7-1f1f4","\uD83C\uDDE7\uD83C\uDDF3":"1f1e7-1f1f3","\uD83C\uDDE7\uD83C\uDDF2":"1f1e7-1f1f2","\uD83C\uDDE7\uD83C\uDDF1":"1f1e7-1f1f1","\uD83C\uDDE7\uD83C\uDDEF":"1f1e7-1f1ef","\uD83C\uDDE7\uD83C\uDDEE":"1f1e7-1f1ee","\uD83C\uDDE7\uD83C\uDDED":"1f1e7-1f1ed","\uD83C\uDDE7\uD83C\uDDEC":"1f1e7-1f1ec","\uD83C\uDDE7\uD83C\uDDEB":"1f1e7-1f1eb","\uD83C\uDDE7\uD83C\uDDEA":"1f1e7-1f1ea","\uD83C\uDDE7\uD83C\uDDE9":"1f1e7-1f1e9","\uD83C\uDDE7\uD83C\uDDE7":"1f1e7-1f1e7","\uD83C\uDDE7\uD83C\uDDE6":"1f1e7-1f1e6","\uD83C\uDDE6\uD83C\uDDFF":"1f1e6-1f1ff","\uD83C\uDDE6\uD83C\uDDFD":"1f1e6-1f1fd","\uD83C\uDDE6\uD83C\uDDFC":"1f1e6-1f1fc","\uD83C\uDDE6\uD83C\uDDFA":"1f1e6-1f1fa","\uD83C\uDDE6\uD83C\uDDF9":"1f1e6-1f1f9","\uD83C\uDDE6\uD83C\uDDF8":"1f1e6-1f1f8","\uD83C\uDDE6\uD83C\uDDF7":"1f1e6-1f1f7","\uD83C\uDDE6\uD83C\uDDF6":"1f1e6-1f1f6","\uD83C\uDDE6\uD83C\uDDF4":"1f1e6-1f1f4","\uD83C\uDDE6\uD83C\uDDF2":"1f1e6-1f1f2","\uD83C\uDDE6\uD83C\uDDF1":"1f1e6-1f1f1","\uD83C\uDDE6\uD83C\uDDEE":"1f1e6-1f1ee","\uD83C\uDDE6\uD83C\uDDEC":"1f1e6-1f1ec","\uD83C\uDDE6\uD83C\uDDEB":"1f1e6-1f1eb","\uD83C\uDDE6\uD83C\uDDEA":"1f1e6-1f1ea","\uD83C\uDDE6\uD83C\uDDE9":"1f1e6-1f1e9","\uD83C\uDDE6\uD83C\uDDE8":"1f1e6-1f1e8","\uD83C\uDC04\uFE0F":"1f004","\uD83C\uDD7F\uFE0F":"1f17f","\uD83C\uDE1A\uFE0F":"1f21a","\uD83C\uDE2F\uFE0F":"1f22f","\uD83C\uDE37\uFE0F":"1f237","\u261D\uD83C\uDFFB":"261d-1f3fb","\u261D\uD83C\uDFFC":"261d-1f3fc","\u261D\uD83C\uDFFD":"261d-1f3fd","\u261D\uD83C\uDFFE":"261d-1f3fe","\u261D\uD83C\uDFFF":"261d-1f3ff","\u270C\uD83C\uDFFB":"270c-1f3fb","\u270C\uD83C\uDFFC":"270c-1f3fc","\u270C\uD83C\uDFFD":"270c-1f3fd","\u270C\uD83C\uDFFE":"270c-1f3fe","\u270C\uD83C\uDFFF":"270c-1f3ff","\u270A\uD83C\uDFFB":"270a-1f3fb","\u270A\uD83C\uDFFC":"270a-1f3fc","\u270A\uD83C\uDFFD":"270a-1f3fd","\u270A\uD83C\uDFFE":"270a-1f3fe","\u270A\uD83C\uDFFF":"270a-1f3ff","\u270B\uD83C\uDFFB":"270b-1f3fb","\u270B\uD83C\uDFFC":"270b-1f3fc","\u270B\uD83C\uDFFD":"270b-1f3fd","\u270B\uD83C\uDFFE":"270b-1f3fe","\u270B\uD83C\uDFFF":"270b-1f3ff","\u270D\uD83C\uDFFB":"270d-1f3fb","\u270D\uD83C\uDFFC":"270d-1f3fc","\u270D\uD83C\uDFFD":"270d-1f3fd","\u270D\uD83C\uDFFE":"270d-1f3fe","\u270D\uD83C\uDFFF":"270d-1f3ff","\u26F9\uD83C\uDFFB":"26f9-1f3fb","\u26F9\uD83C\uDFFC":"26f9-1f3fc","\u26F9\uD83C\uDFFD":"26f9-1f3fd","\u26F9\uD83C\uDFFE":"26f9-1f3fe","\u26F9\uD83C\uDFFF":"26f9-1f3ff","\u00A9\uFE0F":"00a9","\u00AE\uFE0F":"00ae","\u203C\uFE0F":"203c","\u21A9\uFE0F":"21a9","\u21AA\uFE0F":"21aa","\u231A\uFE0F":"231a","\u231B\uFE0F":"231b","\u24C2\uFE0F":"24c2","\u25AA\uFE0F":"25aa","\u25AB\uFE0F":"25ab","\u25B6\uFE0F":"25b6","\u25C0\uFE0F":"25c0","\u25FB\uFE0F":"25fb","\u25FC\uFE0F":"25fc","\u25FD\uFE0F":"25fd","\u25FE\uFE0F":"25fe","\u260E\uFE0F":"260e","\u261D\uFE0F":"261d","\u263A\uFE0F":"263a","\u264A\uFE0F":"264a","\u264B\uFE0F":"264b","\u264C\uFE0F":"264c","\u264D\uFE0F":"264d","\u264E\uFE0F":"264e","\u264F\uFE0F":"264f","\u267B\uFE0F":"267b","\u267F\uFE0F":"267f","\u26A0\uFE0F":"26a0","\u26A1\uFE0F":"26a1","\u26AA\uFE0F":"26aa","\u26AB\uFE0F":"26ab","\u26BD\uFE0F":"26bd","\u26BE\uFE0F":"26be","\u26C4\uFE0F":"26c4","\u26C5\uFE0F":"26c5","\u26D4\uFE0F":"26d4","\u26EA\uFE0F":"26ea","\u26F2\uFE0F":"26f2","\u26F3\uFE0F":"26f3","\u26F5\uFE0F":"26f5","\u26FA\uFE0F":"26fa","\u26FD\uFE0F":"26fd","\u270C\uFE0F":"270c","\u270F\uFE0F":"270f","\u27A1\uFE0F":"27a1","\u2B05\uFE0F":"2b05","\u2B06\uFE0F":"2b06","\u2B07\uFE0F":"2b07","\u2B1B\uFE0F":"2b1b","\u2B1C\uFE0F":"2b1c","\u2B50\uFE0F":"2b50","\u2B55\uFE0F":"2b55","\u303D\uFE0F":"303d","\uD83C\uDCCF":"1f0cf","\uD83C\uDD70":"1f170","\uD83C\uDD71":"1f171","\uD83C\uDD7E":"1f17e","\uD83C\uDD8E":"1f18e","\uD83C\uDD91":"1f191","\uD83C\uDD92":"1f192","\uD83C\uDD93":"1f193","\uD83C\uDD94":"1f194","\uD83C\uDD95":"1f195","\uD83C\uDD96":"1f196","\uD83C\uDD97":"1f197","\uD83C\uDD98":"1f198","\uD83C\uDD99":"1f199","\uD83C\uDD9A":"1f19a","\uD83C\uDE01":"1f201","\uD83C\uDE02":"1f202","\uD83C\uDE32":"1f232","\uD83C\uDE33":"1f233","\uD83C\uDE34":"1f234","\uD83C\uDE35":"1f235","\uD83C\uDE36":"1f236","\uD83C\uDE38":"1f238","\uD83C\uDE39":"1f239","\uD83C\uDE3A":"1f23a","\uD83C\uDE50":"1f250","\uD83C\uDE51":"1f251","\uD83C\uDF00":"1f300","\uD83C\uDF01":"1f301","\uD83C\uDF02":"1f302","\uD83C\uDF03":"1f303","\uD83C\uDF04":"1f304","\uD83C\uDF05":"1f305","\uD83C\uDF06":"1f306","\uD83C\uDF07":"1f307","\uD83C\uDF08":"1f308","\uD83C\uDF09":"1f309","\uD83C\uDF0A":"1f30a","\uD83C\uDF0B":"1f30b","\uD83C\uDF0C":"1f30c","\uD83C\uDF0F":"1f30f","\uD83C\uDF11":"1f311","\uD83C\uDF13":"1f313","\uD83C\uDF14":"1f314","\uD83C\uDF15":"1f315","\uD83C\uDF19":"1f319","\uD83C\uDF1B":"1f31b","\uD83C\uDF1F":"1f31f","\uD83C\uDF20":"1f320","\uD83C\uDF30":"1f330","\uD83C\uDF31":"1f331","\uD83C\uDF34":"1f334","\uD83C\uDF35":"1f335","\uD83C\uDF37":"1f337","\uD83C\uDF38":"1f338","\uD83C\uDF39":"1f339","\uD83C\uDF3A":"1f33a","\uD83C\uDF3B":"1f33b","\uD83C\uDF3C":"1f33c","\uD83C\uDF3D":"1f33d","\uD83C\uDF3E":"1f33e","\uD83C\uDF3F":"1f33f","\uD83C\uDF40":"1f340","\uD83C\uDF41":"1f341","\uD83C\uDF42":"1f342","\uD83C\uDF43":"1f343","\uD83C\uDF44":"1f344","\uD83C\uDF45":"1f345","\uD83C\uDF46":"1f346","\uD83C\uDF47":"1f347","\uD83C\uDF48":"1f348","\uD83C\uDF49":"1f349","\uD83C\uDF4A":"1f34a","\uD83C\uDF4C":"1f34c","\uD83C\uDF4D":"1f34d","\uD83C\uDF4E":"1f34e","\uD83C\uDF4F":"1f34f","\uD83C\uDF51":"1f351","\uD83C\uDF52":"1f352","\uD83C\uDF53":"1f353","\uD83C\uDF54":"1f354","\uD83C\uDF55":"1f355","\uD83C\uDF56":"1f356","\uD83C\uDF57":"1f357","\uD83C\uDF58":"1f358","\uD83C\uDF59":"1f359","\uD83C\uDF5A":"1f35a","\uD83C\uDF5B":"1f35b","\uD83C\uDF5C":"1f35c","\uD83C\uDF5D":"1f35d","\uD83C\uDF5E":"1f35e","\uD83C\uDF5F":"1f35f","\uD83C\uDF60":"1f360","\uD83C\uDF61":"1f361","\uD83C\uDF62":"1f362","\uD83C\uDF63":"1f363","\uD83C\uDF64":"1f364","\uD83C\uDF65":"1f365","\uD83C\uDF66":"1f366","\uD83C\uDF67":"1f367","\uD83C\uDF68":"1f368","\uD83C\uDF69":"1f369","\uD83C\uDF6A":"1f36a","\uD83C\uDF6B":"1f36b","\uD83C\uDF6C":"1f36c","\uD83C\uDF6D":"1f36d","\uD83C\uDF6E":"1f36e","\uD83C\uDF6F":"1f36f","\uD83C\uDF70":"1f370","\uD83C\uDF71":"1f371","\uD83C\uDF72":"1f372","\uD83C\uDF73":"1f373","\uD83C\uDF74":"1f374","\uD83C\uDF75":"1f375","\uD83C\uDF76":"1f376","\uD83C\uDF77":"1f377","\uD83C\uDF78":"1f378","\uD83C\uDF79":"1f379","\uD83C\uDF7A":"1f37a","\uD83C\uDF7B":"1f37b","\uD83C\uDF80":"1f380","\uD83C\uDF81":"1f381","\uD83C\uDF82":"1f382","\uD83C\uDF83":"1f383","\uD83C\uDF84":"1f384","\uD83C\uDF85":"1f385","\uD83C\uDF86":"1f386","\uD83C\uDF87":"1f387","\uD83C\uDF88":"1f388","\uD83C\uDF89":"1f389","\uD83C\uDF8A":"1f38a","\uD83C\uDF8B":"1f38b","\uD83C\uDF8C":"1f38c","\uD83C\uDF8D":"1f38d","\uD83C\uDF8E":"1f38e","\uD83C\uDF8F":"1f38f","\uD83C\uDF90":"1f390","\uD83C\uDF91":"1f391","\uD83C\uDF92":"1f392","\uD83C\uDF93":"1f393","\uD83C\uDFA0":"1f3a0","\uD83C\uDFA1":"1f3a1","\uD83C\uDFA2":"1f3a2","\uD83C\uDFA3":"1f3a3","\uD83C\uDFA4":"1f3a4","\uD83C\uDFA5":"1f3a5","\uD83C\uDFA6":"1f3a6","\uD83C\uDFA7":"1f3a7","\uD83C\uDFA8":"1f3a8","\uD83C\uDFA9":"1f3a9","\uD83C\uDFAA":"1f3aa","\uD83C\uDFAB":"1f3ab","\uD83C\uDFAC":"1f3ac","\uD83C\uDFAD":"1f3ad","\uD83C\uDFAE":"1f3ae","\uD83C\uDFAF":"1f3af","\uD83C\uDFB0":"1f3b0","\uD83C\uDFB1":"1f3b1","\uD83C\uDFB2":"1f3b2","\uD83C\uDFB3":"1f3b3","\uD83C\uDFB4":"1f3b4","\uD83C\uDFB5":"1f3b5","\uD83C\uDFB6":"1f3b6","\uD83C\uDFB7":"1f3b7","\uD83C\uDFB8":"1f3b8","\uD83C\uDFB9":"1f3b9","\uD83C\uDFBA":"1f3ba","\uD83C\uDFBB":"1f3bb","\uD83C\uDFBC":"1f3bc","\uD83C\uDFBD":"1f3bd","\uD83C\uDFBE":"1f3be","\uD83C\uDFBF":"1f3bf","\uD83C\uDFC0":"1f3c0","\uD83C\uDFC1":"1f3c1","\uD83C\uDFC2":"1f3c2","\uD83C\uDFC3":"1f3c3","\uD83C\uDFC4":"1f3c4","\uD83C\uDFC6":"1f3c6","\uD83C\uDFC8":"1f3c8","\uD83C\uDFCA":"1f3ca","\uD83C\uDFE0":"1f3e0","\uD83C\uDFE1":"1f3e1","\uD83C\uDFE2":"1f3e2","\uD83C\uDFE3":"1f3e3","\uD83C\uDFE5":"1f3e5","\uD83C\uDFE6":"1f3e6","\uD83C\uDFE7":"1f3e7","\uD83C\uDFE8":"1f3e8","\uD83C\uDFE9":"1f3e9","\uD83C\uDFEA":"1f3ea","\uD83C\uDFEB":"1f3eb","\uD83C\uDFEC":"1f3ec","\uD83C\uDFED":"1f3ed","\uD83C\uDFEE":"1f3ee","\uD83C\uDFEF":"1f3ef","\uD83C\uDFF0":"1f3f0","\uD83D\uDC0C":"1f40c","\uD83D\uDC0D":"1f40d","\uD83D\uDC0E":"1f40e","\uD83D\uDC11":"1f411","\uD83D\uDC12":"1f412","\uD83D\uDC14":"1f414","\uD83D\uDC17":"1f417","\uD83D\uDC18":"1f418","\uD83D\uDC19":"1f419","\uD83D\uDC1A":"1f41a","\uD83D\uDC1B":"1f41b","\uD83D\uDC1C":"1f41c","\uD83D\uDC1D":"1f41d","\uD83D\uDC1E":"1f41e","\uD83D\uDC1F":"1f41f","\uD83D\uDC20":"1f420","\uD83D\uDC21":"1f421","\uD83D\uDC22":"1f422","\uD83D\uDC23":"1f423","\uD83D\uDC24":"1f424","\uD83D\uDC25":"1f425","\uD83D\uDC26":"1f426","\uD83D\uDC27":"1f427","\uD83D\uDC28":"1f428","\uD83D\uDC29":"1f429","\uD83D\uDC2B":"1f42b","\uD83D\uDC2C":"1f42c","\uD83D\uDC2D":"1f42d","\uD83D\uDC2E":"1f42e","\uD83D\uDC2F":"1f42f","\uD83D\uDC30":"1f430","\uD83D\uDC31":"1f431","\uD83D\uDC32":"1f432","\uD83D\uDC33":"1f433","\uD83D\uDC34":"1f434","\uD83D\uDC35":"1f435","\uD83D\uDC36":"1f436","\uD83D\uDC37":"1f437","\uD83D\uDC38":"1f438","\uD83D\uDC39":"1f439","\uD83D\uDC3A":"1f43a","\uD83D\uDC3B":"1f43b","\uD83D\uDC3C":"1f43c","\uD83D\uDC3D":"1f43d","\uD83D\uDC3E":"1f43e","\uD83D\uDC40":"1f440","\uD83D\uDC42":"1f442","\uD83D\uDC43":"1f443","\uD83D\uDC44":"1f444","\uD83D\uDC45":"1f445","\uD83D\uDC46":"1f446","\uD83D\uDC47":"1f447","\uD83D\uDC48":"1f448","\uD83D\uDC49":"1f449","\uD83D\uDC4A":"1f44a","\uD83D\uDC4B":"1f44b","\uD83D\uDC4C":"1f44c","\uD83D\uDC4D":"1f44d","\uD83D\uDC4E":"1f44e","\uD83D\uDC4F":"1f44f","\uD83D\uDC50":"1f450","\uD83D\uDC51":"1f451","\uD83D\uDC52":"1f452","\uD83D\uDC53":"1f453","\uD83D\uDC54":"1f454","\uD83D\uDC55":"1f455","\uD83D\uDC56":"1f456","\uD83D\uDC57":"1f457","\uD83D\uDC58":"1f458","\uD83D\uDC59":"1f459","\uD83D\uDC5A":"1f45a","\uD83D\uDC5B":"1f45b","\uD83D\uDC5C":"1f45c","\uD83D\uDC5D":"1f45d","\uD83D\uDC5E":"1f45e","\uD83D\uDC5F":"1f45f","\uD83D\uDC60":"1f460","\uD83D\uDC61":"1f461","\uD83D\uDC62":"1f462","\uD83D\uDC63":"1f463","\uD83D\uDC64":"1f464","\uD83D\uDC66":"1f466","\uD83D\uDC67":"1f467","\uD83D\uDC68":"1f468","\uD83D\uDC69":"1f469","\uD83D\uDC6A":"1f46a","\uD83D\uDC6B":"1f46b","\uD83D\uDC6E":"1f46e","\uD83D\uDC6F":"1f46f","\uD83D\uDC70":"1f470","\uD83D\uDC71":"1f471","\uD83D\uDC72":"1f472","\uD83D\uDC73":"1f473","\uD83D\uDC74":"1f474","\uD83D\uDC75":"1f475","\uD83D\uDC76":"1f476","\uD83D\uDC77":"1f477","\uD83D\uDC78":"1f478","\uD83D\uDC79":"1f479","\uD83D\uDC7A":"1f47a","\uD83D\uDC7B":"1f47b","\uD83D\uDC7C":"1f47c","\uD83D\uDC7D":"1f47d","\uD83D\uDC7E":"1f47e","\uD83D\uDC7F":"1f47f","\uD83D\uDC80":"1f480","\uD83D\uDCC7":"1f4c7","\uD83D\uDC81":"1f481","\uD83D\uDC82":"1f482","\uD83D\uDC83":"1f483","\uD83D\uDC84":"1f484","\uD83D\uDC85":"1f485","\uD83D\uDCD2":"1f4d2","\uD83D\uDC86":"1f486","\uD83D\uDCD3":"1f4d3","\uD83D\uDC87":"1f487","\uD83D\uDCD4":"1f4d4","\uD83D\uDC88":"1f488","\uD83D\uDCD5":"1f4d5","\uD83D\uDC89":"1f489","\uD83D\uDCD6":"1f4d6","\uD83D\uDC8A":"1f48a","\uD83D\uDCD7":"1f4d7","\uD83D\uDC8B":"1f48b","\uD83D\uDCD8":"1f4d8","\uD83D\uDC8C":"1f48c","\uD83D\uDCD9":"1f4d9","\uD83D\uDC8D":"1f48d","\uD83D\uDCDA":"1f4da","\uD83D\uDC8E":"1f48e","\uD83D\uDCDB":"1f4db","\uD83D\uDC8F":"1f48f","\uD83D\uDCDC":"1f4dc","\uD83D\uDC90":"1f490","\uD83D\uDCDD":"1f4dd","\uD83D\uDC91":"1f491","\uD83D\uDCDE":"1f4de","\uD83D\uDC92":"1f492","\uD83D\uDCDF":"1f4df","\uD83D\uDCE0":"1f4e0","\uD83D\uDC93":"1f493","\uD83D\uDCE1":"1f4e1","\uD83D\uDCE2":"1f4e2","\uD83D\uDC94":"1f494","\uD83D\uDCE3":"1f4e3","\uD83D\uDCE4":"1f4e4","\uD83D\uDC95":"1f495","\uD83D\uDCE5":"1f4e5","\uD83D\uDCE6":"1f4e6","\uD83D\uDC96":"1f496","\uD83D\uDCE7":"1f4e7","\uD83D\uDCE8":"1f4e8","\uD83D\uDC97":"1f497","\uD83D\uDCE9":"1f4e9","\uD83D\uDCEA":"1f4ea","\uD83D\uDC98":"1f498","\uD83D\uDCEB":"1f4eb","\uD83D\uDCEE":"1f4ee","\uD83D\uDC99":"1f499","\uD83D\uDCF0":"1f4f0","\uD83D\uDCF1":"1f4f1","\uD83D\uDC9A":"1f49a","\uD83D\uDCF2":"1f4f2","\uD83D\uDCF3":"1f4f3","\uD83D\uDC9B":"1f49b","\uD83D\uDCF4":"1f4f4","\uD83D\uDCF6":"1f4f6","\uD83D\uDC9C":"1f49c","\uD83D\uDCF7":"1f4f7","\uD83D\uDCF9":"1f4f9","\uD83D\uDC9D":"1f49d","\uD83D\uDCFA":"1f4fa","\uD83D\uDCFB":"1f4fb","\uD83D\uDC9E":"1f49e","\uD83D\uDCFC":"1f4fc","\uD83D\uDD03":"1f503","\uD83D\uDC9F":"1f49f","\uD83D\uDD0A":"1f50a","\uD83D\uDD0B":"1f50b","\uD83D\uDCA0":"1f4a0","\uD83D\uDD0C":"1f50c","\uD83D\uDD0D":"1f50d","\uD83D\uDCA1":"1f4a1","\uD83D\uDD0E":"1f50e","\uD83D\uDD0F":"1f50f","\uD83D\uDCA2":"1f4a2","\uD83D\uDD10":"1f510","\uD83D\uDD11":"1f511","\uD83D\uDCA3":"1f4a3","\uD83D\uDD12":"1f512","\uD83D\uDD13":"1f513","\uD83D\uDCA4":"1f4a4","\uD83D\uDD14":"1f514","\uD83D\uDD16":"1f516","\uD83D\uDCA5":"1f4a5","\uD83D\uDD17":"1f517","\uD83D\uDD18":"1f518","\uD83D\uDCA6":"1f4a6","\uD83D\uDD19":"1f519","\uD83D\uDD1A":"1f51a","\uD83D\uDCA7":"1f4a7","\uD83D\uDD1B":"1f51b","\uD83D\uDD1C":"1f51c","\uD83D\uDCA8":"1f4a8","\uD83D\uDD1D":"1f51d","\uD83D\uDD1E":"1f51e","\uD83D\uDCA9":"1f4a9","\uD83D\uDD1F":"1f51f","\uD83D\uDCAA":"1f4aa","\uD83D\uDD20":"1f520","\uD83D\uDD21":"1f521","\uD83D\uDCAB":"1f4ab","\uD83D\uDD22":"1f522","\uD83D\uDD23":"1f523","\uD83D\uDCAC":"1f4ac","\uD83D\uDD24":"1f524","\uD83D\uDD25":"1f525","\uD83D\uDCAE":"1f4ae","\uD83D\uDD26":"1f526","\uD83D\uDD27":"1f527","\uD83D\uDCAF":"1f4af","\uD83D\uDD28":"1f528","\uD83D\uDD29":"1f529","\uD83D\uDCB0":"1f4b0","\uD83D\uDD2A":"1f52a","\uD83D\uDD2B":"1f52b","\uD83D\uDCB1":"1f4b1","\uD83D\uDD2E":"1f52e","\uD83D\uDCB2":"1f4b2","\uD83D\uDD2F":"1f52f","\uD83D\uDCB3":"1f4b3","\uD83D\uDD30":"1f530","\uD83D\uDD31":"1f531","\uD83D\uDCB4":"1f4b4","\uD83D\uDD32":"1f532","\uD83D\uDD33":"1f533","\uD83D\uDCB5":"1f4b5","\uD83D\uDD34":"1f534","\uD83D\uDD35":"1f535","\uD83D\uDCB8":"1f4b8","\uD83D\uDD36":"1f536","\uD83D\uDD37":"1f537","\uD83D\uDCB9":"1f4b9","\uD83D\uDD38":"1f538","\uD83D\uDD39":"1f539","\uD83D\uDCBA":"1f4ba","\uD83D\uDD3A":"1f53a","\uD83D\uDD3B":"1f53b","\uD83D\uDCBB":"1f4bb","\uD83D\uDD3C":"1f53c","\uD83D\uDCBC":"1f4bc","\uD83D\uDD3D":"1f53d","\uD83D\uDD50":"1f550","\uD83D\uDCBD":"1f4bd","\uD83D\uDD51":"1f551","\uD83D\uDCBE":"1f4be","\uD83D\uDD52":"1f552","\uD83D\uDCBF":"1f4bf","\uD83D\uDD53":"1f553","\uD83D\uDCC0":"1f4c0","\uD83D\uDD54":"1f554","\uD83D\uDD55":"1f555","\uD83D\uDCC1":"1f4c1","\uD83D\uDD56":"1f556","\uD83D\uDD57":"1f557","\uD83D\uDCC2":"1f4c2","\uD83D\uDD58":"1f558","\uD83D\uDD59":"1f559","\uD83D\uDCC3":"1f4c3","\uD83D\uDD5A":"1f55a","\uD83D\uDD5B":"1f55b","\uD83D\uDCC4":"1f4c4","\uD83D\uDDFB":"1f5fb","\uD83D\uDDFC":"1f5fc","\uD83D\uDCC5":"1f4c5","\uD83D\uDDFD":"1f5fd","\uD83D\uDDFE":"1f5fe","\uD83D\uDCC6":"1f4c6","\uD83D\uDDFF":"1f5ff","\uD83D\uDE01":"1f601","\uD83D\uDE02":"1f602","\uD83D\uDE03":"1f603","\uD83D\uDCC8":"1f4c8","\uD83D\uDE04":"1f604","\uD83D\uDE05":"1f605","\uD83D\uDCC9":"1f4c9","\uD83D\uDE06":"1f606","\uD83D\uDE09":"1f609","\uD83D\uDCCA":"1f4ca","\uD83D\uDE0A":"1f60a","\uD83D\uDE0B":"1f60b","\uD83D\uDCCB":"1f4cb","\uD83D\uDE0C":"1f60c","\uD83D\uDE0D":"1f60d","\uD83D\uDCCC":"1f4cc","\uD83D\uDE0F":"1f60f","\uD83D\uDE12":"1f612","\uD83D\uDCCD":"1f4cd","\uD83D\uDE13":"1f613","\uD83D\uDE14":"1f614","\uD83D\uDCCE":"1f4ce","\uD83D\uDE16":"1f616","\uD83D\uDE18":"1f618","\uD83D\uDCCF":"1f4cf","\uD83D\uDE1A":"1f61a","\uD83D\uDE1C":"1f61c","\uD83D\uDCD0":"1f4d0","\uD83D\uDE1D":"1f61d","\uD83D\uDE1E":"1f61e","\uD83D\uDCD1":"1f4d1","\uD83D\uDE20":"1f620","\uD83D\uDE21":"1f621","\uD83D\uDE22":"1f622","\uD83D\uDE23":"1f623","\uD83D\uDE24":"1f624","\uD83D\uDE25":"1f625","\uD83D\uDE28":"1f628","\uD83D\uDE29":"1f629","\uD83D\uDE2A":"1f62a","\uD83D\uDE2B":"1f62b","\uD83D\uDE2D":"1f62d","\uD83D\uDE30":"1f630","\uD83D\uDE31":"1f631","\uD83D\uDE32":"1f632","\uD83D\uDE33":"1f633","\uD83D\uDE35":"1f635","\uD83D\uDE37":"1f637","\uD83D\uDE38":"1f638","\uD83D\uDE39":"1f639","\uD83D\uDE3A":"1f63a","\uD83D\uDE3B":"1f63b","\uD83D\uDE3C":"1f63c","\uD83D\uDE3D":"1f63d","\uD83D\uDE3E":"1f63e","\uD83D\uDE3F":"1f63f","\uD83D\uDE40":"1f640","\uD83D\uDE45":"1f645","\uD83D\uDE46":"1f646","\uD83D\uDE47":"1f647","\uD83D\uDE48":"1f648","\uD83D\uDE49":"1f649","\uD83D\uDE4A":"1f64a","\uD83D\uDE4B":"1f64b","\uD83D\uDE4C":"1f64c","\uD83D\uDE4D":"1f64d","\uD83D\uDE4E":"1f64e","\uD83D\uDE4F":"1f64f","\uD83D\uDE80":"1f680","\uD83D\uDE83":"1f683","\uD83D\uDE84":"1f684","\uD83D\uDE85":"1f685","\uD83D\uDE87":"1f687","\uD83D\uDE89":"1f689","\uD83D\uDE8C":"1f68c","\uD83D\uDE8F":"1f68f","\uD83D\uDE91":"1f691","\uD83D\uDE92":"1f692","\uD83D\uDE93":"1f693","\uD83D\uDE95":"1f695","\uD83D\uDE97":"1f697","\uD83D\uDE99":"1f699","\uD83D\uDE9A":"1f69a","\uD83D\uDEA2":"1f6a2","\uD83D\uDEA4":"1f6a4","\uD83D\uDEA5":"1f6a5","\uD83D\uDEA7":"1f6a7","\uD83D\uDEA8":"1f6a8","\uD83D\uDEA9":"1f6a9","\uD83D\uDEAA":"1f6aa","\uD83D\uDEAB":"1f6ab","\uD83D\uDEAC":"1f6ac","\uD83D\uDEAD":"1f6ad","\uD83D\uDEB2":"1f6b2","\uD83D\uDEB6":"1f6b6","\uD83D\uDEB9":"1f6b9","\uD83D\uDEBA":"1f6ba","\uD83D\uDEBB":"1f6bb","\uD83D\uDEBC":"1f6bc","\uD83D\uDEBD":"1f6bd","\uD83D\uDEBE":"1f6be","\uD83D\uDEC0":"1f6c0","\uD83E\uDD18":"1f918","\uD83D\uDE00":"1f600","\uD83D\uDE07":"1f607","\uD83D\uDE08":"1f608","\uD83D\uDE0E":"1f60e","\uD83D\uDE10":"1f610","\uD83D\uDE11":"1f611","\uD83D\uDE15":"1f615","\uD83D\uDE17":"1f617","\uD83D\uDE19":"1f619","\uD83D\uDE1B":"1f61b","\uD83D\uDE1F":"1f61f","\uD83D\uDE26":"1f626","\uD83D\uDE27":"1f627","\uD83D\uDE2C":"1f62c","\uD83D\uDE2E":"1f62e","\uD83D\uDE2F":"1f62f","\uD83D\uDE34":"1f634","\uD83D\uDE36":"1f636","\uD83D\uDE81":"1f681","\uD83D\uDE82":"1f682","\uD83D\uDE86":"1f686","\uD83D\uDE88":"1f688","\uD83D\uDE8A":"1f68a","\uD83D\uDE8D":"1f68d","\uD83D\uDE8E":"1f68e","\uD83D\uDE90":"1f690","\uD83D\uDE94":"1f694","\uD83D\uDE96":"1f696","\uD83D\uDE98":"1f698","\uD83D\uDE9B":"1f69b","\uD83D\uDE9C":"1f69c","\uD83D\uDE9D":"1f69d","\uD83D\uDE9E":"1f69e","\uD83D\uDE9F":"1f69f","\uD83D\uDEA0":"1f6a0","\uD83D\uDEA1":"1f6a1","\uD83D\uDEA3":"1f6a3","\uD83D\uDEA6":"1f6a6","\uD83D\uDEAE":"1f6ae","\uD83D\uDEAF":"1f6af","\uD83D\uDEB0":"1f6b0","\uD83D\uDEB1":"1f6b1","\uD83D\uDEB3":"1f6b3","\uD83D\uDEB4":"1f6b4","\uD83D\uDEB5":"1f6b5","\uD83D\uDEB7":"1f6b7","\uD83D\uDEB8":"1f6b8","\uD83D\uDEBF":"1f6bf","\uD83D\uDEC1":"1f6c1","\uD83D\uDEC2":"1f6c2","\uD83D\uDEC3":"1f6c3","\uD83D\uDEC4":"1f6c4","\uD83D\uDEC5":"1f6c5","\uD83C\uDF0D":"1f30d","\uD83C\uDF0E":"1f30e","\uD83C\uDF10":"1f310","\uD83C\uDF12":"1f312","\uD83C\uDF16":"1f316","\uD83C\uDF17":"1f317","\uD83C\uDF18":"1f318","\uD83C\uDF1A":"1f31a","\uD83C\uDF1C":"1f31c","\uD83C\uDF1D":"1f31d","\uD83C\uDF1E":"1f31e","\uD83C\uDF32":"1f332","\uD83C\uDF33":"1f333","\uD83C\uDF4B":"1f34b","\uD83C\uDF50":"1f350","\uD83C\uDF7C":"1f37c","\uD83C\uDFC7":"1f3c7","\uD83C\uDFC9":"1f3c9","\uD83C\uDFE4":"1f3e4","\uD83D\uDC00":"1f400","\uD83D\uDC01":"1f401","\uD83D\uDC02":"1f402","\uD83D\uDC03":"1f403","\uD83D\uDC04":"1f404","\uD83D\uDC05":"1f405","\uD83D\uDC06":"1f406","\uD83D\uDC07":"1f407","\uD83D\uDC08":"1f408","\uD83D\uDC09":"1f409","\uD83D\uDC0A":"1f40a","\uD83D\uDC0B":"1f40b","\uD83D\uDC0F":"1f40f","\uD83D\uDC10":"1f410","\uD83D\uDC13":"1f413","\uD83D\uDC15":"1f415","\uD83D\uDC16":"1f416","\uD83D\uDC2A":"1f42a","\uD83D\uDC65":"1f465","\uD83D\uDC6C":"1f46c","\uD83D\uDC6D":"1f46d","\uD83D\uDCAD":"1f4ad","\uD83D\uDCB6":"1f4b6","\uD83D\uDCB7":"1f4b7","\uD83D\uDCEC":"1f4ec","\uD83D\uDCED":"1f4ed","\uD83D\uDCEF":"1f4ef","\uD83D\uDCF5":"1f4f5","\uD83D\uDD00":"1f500","\uD83D\uDD01":"1f501","\uD83D\uDD02":"1f502","\uD83D\uDD04":"1f504","\uD83D\uDD05":"1f505","\uD83D\uDD06":"1f506","\uD83D\uDD07":"1f507","\uD83D\uDD09":"1f509","\uD83D\uDD15":"1f515","\uD83D\uDD2C":"1f52c","\uD83D\uDD2D":"1f52d","\uD83D\uDD5C":"1f55c","\uD83D\uDD5D":"1f55d","\uD83D\uDD5E":"1f55e","\uD83D\uDD5F":"1f55f","\uD83D\uDD60":"1f560","\uD83D\uDD61":"1f561","\uD83D\uDD62":"1f562","\uD83D\uDD63":"1f563","\uD83D\uDD64":"1f564","\uD83D\uDD65":"1f565","\uD83D\uDD66":"1f566","\uD83D\uDD67":"1f567","\uD83D\uDD08":"1f508","\uD83D\uDE8B":"1f68b","\uD83C\uDF9E":"1f39e","\uD83C\uDF9F":"1f39f","\uD83C\uDFC5":"1f3c5","\uD83C\uDFCB":"1f3cb","\uD83C\uDFCC":"1f3cc","\uD83C\uDFCD":"1f3cd","\uD83C\uDFCE":"1f3ce","\uD83C\uDF96":"1f396","\uD83C\uDF97":"1f397","\uD83C\uDF36":"1f336","\uD83C\uDF27":"1f327","\uD83C\uDF28":"1f328","\uD83C\uDF29":"1f329","\uD83C\uDF2A":"1f32a","\uD83C\uDF2B":"1f32b","\uD83C\uDF2C":"1f32c","\uD83D\uDC3F":"1f43f","\uD83D\uDD77":"1f577","\uD83D\uDD78":"1f578","\uD83C\uDF21":"1f321","\uD83C\uDF99":"1f399","\uD83C\uDF9A":"1f39a","\uD83C\uDF9B":"1f39b","\uD83C\uDFF3":"1f3f3","\uD83C\uDFF4":"1f3f4","\uD83C\uDFF5":"1f3f5","\uD83C\uDFF7":"1f3f7","\uD83D\uDCF8":"1f4f8","\uD83D\uDCFD":"1f4fd","\uD83D\uDD49":"1f549","\uD83D\uDD4A":"1f54a","\uD83D\uDD6F":"1f56f","\uD83D\uDD70":"1f570","\uD83D\uDD73":"1f573","\uD83D\uDD76":"1f576","\uD83D\uDD79":"1f579","\uD83D\uDD87":"1f587","\uD83D\uDD8A":"1f58a","\uD83D\uDD8B":"1f58b","\uD83D\uDD8C":"1f58c","\uD83D\uDD8D":"1f58d","\uD83D\uDDA5":"1f5a5","\uD83D\uDDA8":"1f5a8","\uD83D\uDDB2":"1f5b2","\uD83D\uDDBC":"1f5bc","\uD83D\uDDC2":"1f5c2","\uD83D\uDDC3":"1f5c3","\uD83D\uDDC4":"1f5c4","\uD83D\uDDD1":"1f5d1","\uD83D\uDDD2":"1f5d2","\uD83D\uDDD3":"1f5d3","\uD83D\uDDDC":"1f5dc","\uD83D\uDDDD":"1f5dd","\uD83D\uDDDE":"1f5de","\uD83D\uDDE1":"1f5e1","\uD83D\uDDE3":"1f5e3","\uD83D\uDDEF":"1f5ef","\uD83D\uDDF3":"1f5f3","\uD83D\uDDFA":"1f5fa","\uD83D\uDECC":"1f6cc","\uD83D\uDEE0":"1f6e0","\uD83D\uDEE1":"1f6e1","\uD83D\uDEE2":"1f6e2","\uD83D\uDEF0":"1f6f0","\uD83C\uDF7D":"1f37d","\uD83D\uDC41":"1f441","\uD83D\uDD74":"1f574","\uD83D\uDD75":"1f575","\uD83D\uDD90":"1f590","\uD83D\uDD95":"1f595","\uD83D\uDD96":"1f596","\uD83D\uDE41":"1f641","\uD83D\uDE42":"1f642","\uD83C\uDFD4":"1f3d4","\uD83C\uDFD5":"1f3d5","\uD83C\uDFD6":"1f3d6","\uD83C\uDFD7":"1f3d7","\uD83C\uDFD8":"1f3d8","\uD83C\uDFD9":"1f3d9","\uD83C\uDFDA":"1f3da","\uD83C\uDFDB":"1f3db","\uD83C\uDFDC":"1f3dc","\uD83C\uDFDD":"1f3dd","\uD83C\uDFDE":"1f3de","\uD83C\uDFDF":"1f3df","\uD83D\uDECB":"1f6cb","\uD83D\uDECD":"1f6cd","\uD83D\uDECE":"1f6ce","\uD83D\uDECF":"1f6cf","\uD83D\uDEE3":"1f6e3","\uD83D\uDEE4":"1f6e4","\uD83D\uDEE5":"1f6e5","\uD83D\uDEE9":"1f6e9","\uD83D\uDEEB":"1f6eb","\uD83D\uDEEC":"1f6ec","\uD83D\uDEF3":"1f6f3","\uD83C\uDFFB":"1f3fb","\uD83C\uDFFC":"1f3fc","\uD83C\uDFFD":"1f3fd","\uD83C\uDFFE":"1f3fe","\uD83C\uDFFF":"1f3ff","\uD83C\uDF24":"1f324","\uD83C\uDF25":"1f325","\uD83C\uDF26":"1f326","\uD83D\uDDB1":"1f5b1","\uD83D\uDE43":"1f643","\uD83E\uDD11":"1f911","\uD83E\uDD13":"1f913","\uD83E\uDD17":"1f917","\uD83D\uDE44":"1f644","\uD83E\uDD14":"1f914","\uD83E\uDD10":"1f910","\uD83E\uDD12":"1f912","\uD83E\uDD15":"1f915","\uD83E\uDD16":"1f916","\uD83E\uDD81":"1f981","\uD83E\uDD84":"1f984","\uD83E\uDD82":"1f982","\uD83E\uDD80":"1f980","\uD83E\uDD83":"1f983","\uD83E\uDDC0":"1f9c0","\uD83C\uDF2D":"1f32d","\uD83C\uDF2E":"1f32e","\uD83C\uDF2F":"1f32f","\uD83C\uDF7F":"1f37f","\uD83C\uDF7E":"1f37e","\uD83C\uDFF9":"1f3f9","\uD83C\uDFFA":"1f3fa","\uD83D\uDED0":"1f6d0","\uD83D\uDD4B":"1f54b","\uD83D\uDD4C":"1f54c","\uD83D\uDD4D":"1f54d","\uD83D\uDD4E":"1f54e","\uD83D\uDCFF":"1f4ff","\uD83C\uDFCF":"1f3cf","\uD83C\uDFD0":"1f3d0","\uD83C\uDFD1":"1f3d1","\uD83C\uDFD2":"1f3d2","\uD83C\uDFD3":"1f3d3","\uD83C\uDFF8":"1f3f8","\u23E9":"23e9","\u23EA":"23ea","\u23EB":"23eb","\u23EC":"23ec","\u23F0":"23f0","\u23F3":"23f3","\u26CE":"26ce","\u270A":"270a","\u270B":"270b","\u274C":"274c","\u274E":"274e","\u27B0":"27b0","\u27BF":"27bf","\u271D":"271d","\u270D":"270d","\u23ED":"23ed","\u23EE":"23ee","\u23EF":"23ef","\u23F1":"23f1","\u23F2":"23f2","\u23F8":"23f8","\u23F9":"23f9","\u23FA":"23fa","\u262A":"262a","\u262E":"262e","\u262F":"262f","\u269B":"269b","\u269C":"269c","\u26B0":"26b0","\u26B1":"26b1","\u26C8":"26c8","\u26CF":"26cf","\u26D1":"26d1","\u26D3":"26d3","\u26E9":"26e9","\u26F0":"26f0","\u26F1":"26f1","\u26F4":"26f4","\u26F7":"26f7","\u26F8":"26f8","\u26F9":"26f9"};
+    ns.imagePathPNG = '//cdn.jsdelivr.net/emojione/assets/png/';
+    ns.imagePathSVG = '//cdn.jsdelivr.net/emojione/assets/svg/';
+    ns.imagePathSVGSprites = './../assets/sprites/emojione.sprites.svg';
+    ns.imageType = 'png'; // or svg
+    ns.sprites = false; // if this is true then sprite markup will be used (if SVG image type is set then you must include the SVG sprite file locally)
+    ns.unicodeAlt = true; // use the unicode char as the alt attribute (makes copy and pasting the resulting text better)
+    ns.ascii = false; // change to true to convert ascii smileys
+    ns.cacheBustParam = '?v=2.0.1'; // you can [optionally] modify this to force browsers to refresh their cache. it will be appended to the send of the filenames
+
+    ns.regShortNames = new RegExp("<object[^>]*>.*?<\/object>|<span[^>]*>.*?<\/span>|<(?:object|embed|svg|img|div|span|p|a)[^>]*>|("+ns.shortnames+")", "gi");
+    ns.regAscii = new RegExp("<object[^>]*>.*?<\/object>|<span[^>]*>.*?<\/span>|<(?:object|embed|svg|img|div|span|p|a)[^>]*>|((\\s|^)"+ns.asciiRegexp+"(?=\\s|$|[!,.?]))", "g");
+    ns.regUnicode = new RegExp("<object[^>]*>.*?<\/object>|<span[^>]*>.*?<\/span>|<(?:object|embed|svg|img|div|span|p|a)[^>]*>|("+ns.unicodeRegexp+")", "gi");
+                    
+    ns.toImage = function(str) {
+        str = ns.unicodeToImage(str);
+        str = ns.shortnameToImage(str);
+        return str;
+    };
+
+    // Uses toShort to transform all unicode into a standard shortname
+    // then transforms the shortname into unicode
+    // This is done for standardization when converting several unicode types
+    ns.unifyUnicode = function(str) {
+        str = ns.toShort(str);
+        str = ns.shortnameToUnicode(str);
+        return str;
+    };
+
+    // Replace shortnames (:wink:) with Ascii equivalents ( ;^) )
+    // Useful for systems that dont support unicode nor images
+    ns.shortnameToAscii = function(str) {
+        var unicode,
+            // something to keep in mind here is that array flip will destroy
+            // half of the ascii text "emojis" because the unicode numbers are duplicated
+            // this is ok for what it's being used for
+            unicodeToAscii = ns.objectFlip(ns.asciiList);
+
+        str = str.replace(ns.regShortNames, function(shortname) {
+            if( (typeof shortname === 'undefined') || (shortname === '') || (!(shortname in ns.emojioneList)) ) {
+                // if the shortname doesnt exist just return the entire match
+                return shortname;
+            }
+            else {
+                unicode = ns.emojioneList[shortname][ns.emojioneList[shortname].length-1];
+                if(typeof unicodeToAscii[unicode] !== 'undefined') {
+                    return unicodeToAscii[unicode];
+                } else {
+                    return shortname;
+                }
+            }
+        });
+        return str;
+    };
+
+    // will output unicode from shortname
+    // useful for sending emojis back to mobile devices
+    ns.shortnameToUnicode = function(str) {
+        // replace regular shortnames first
+        var unicode;
+        str = str.replace(ns.regShortNames, function(shortname) {
+            if( (typeof shortname === 'undefined') || (shortname === '') || (!(shortname in ns.emojioneList)) ) {
+                // if the shortname doesnt exist just return the entire match
+                return shortname;
+            }
+            unicode = ns.emojioneList[shortname][0].toUpperCase();
+            return ns.convert(unicode);
+        });
+
+        // if ascii smileys are turned on, then we'll replace them!
+        if (ns.ascii) {
+
+            str = str.replace(ns.regAscii, function(entire, m1, m2, m3) {
+                if( (typeof m3 === 'undefined') || (m3 === '') || (!(ns.unescapeHTML(m3) in ns.asciiList)) ) {
+                    // if the shortname doesnt exist just return the entire match
+                    return entire;
+                }
+
+                m3 = ns.unescapeHTML(m3);
+                unicode = ns.asciiList[m3].toUpperCase();
+                return m2+ns.convert(unicode);
+            });
+        }
+
+		return str;
+    };
+
+    ns.shortnameToImage = function(str) {
+        // replace regular shortnames first
+        var replaceWith,unicode,alt;
+        str = str.replace(ns.regShortNames, function(shortname) {
+            if( (typeof shortname === 'undefined') || (shortname === '') || (!(shortname in ns.emojioneList)) ) {
+                // if the shortname doesnt exist just return the entire match
+                return shortname;
+            }
+            else {
+                unicode = ns.emojioneList[shortname][ns.emojioneList[shortname].length-1];
+
+                // depending on the settings, we'll either add the native unicode as the alt tag, otherwise the shortname
+                alt = (ns.unicodeAlt) ? ns.convert(unicode.toUpperCase()) : shortname;
+
+                if(ns.imageType === 'png') {
+                    if(ns.sprites) {
+                        replaceWith = '<span class="emojione-'+unicode+'" title="'+shortname+'">'+alt+'</span>';
+                    }
+                    else {
+                        replaceWith = '<img class="emojione" alt="'+alt+'" src="'+ns.imagePathPNG+unicode+'.png'+ns.cacheBustParam+'"/>';
+                    }
+                }
+                else {
+                    // svg
+                    if(ns.sprites) {
+                        replaceWith = '<svg class="emojione"><description>'+alt+'</description><use xlink:href="'+ns.imagePathSVGSprites+'#emoji-'+unicode+'"></use></svg>';
+                    }
+                    else {
+                        replaceWith = '<object class="emojione" data="'+ns.imagePathSVG+unicode+'.svg'+ns.cacheBustParam+'" type="image/svg+xml" standby="'+alt+'">'+alt+'</object>';
+                    }
+                }
+
+                return replaceWith;
+            }
+        });
+
+        // if ascii smileys are turned on, then we'll replace them!
+        if (ns.ascii) {
+
+            str = str.replace(ns.regAscii, function(entire, m1, m2, m3) {
+                if( (typeof m3 === 'undefined') || (m3 === '') || (!(ns.unescapeHTML(m3) in ns.asciiList)) ) {
+                    // if the shortname doesnt exist just return the entire match
+                    return entire;
+                }
+
+                m3 = ns.unescapeHTML(m3);
+                unicode = ns.asciiList[m3];
+
+                // depending on the settings, we'll either add the native unicode as the alt tag, otherwise the shortname
+                alt = (ns.unicodeAlt) ? ns.convert(unicode.toUpperCase()) : ns.escapeHTML(m3);
+
+                if(ns.imageType === 'png') {
+                    if(ns.sprites) {
+                        replaceWith = m2+'<span class="emojione-'+unicode+'" title="'+ns.escapeHTML(m3)+'">'+alt+'</span>';
+                    }
+                    else {
+                        replaceWith = m2+'<img class="emojione" alt="'+alt+'" src="'+ns.imagePathPNG+unicode+'.png'+ns.cacheBustParam+'"/>';
+                    }
+                }
+                else {
+                    // svg
+                    if(ns.sprites) {
+                        replaceWith = '<svg class="emojione"><description>'+alt+'</description><use xlink:href="'+ns.imagePathSVGSprites+'#emoji-'+unicode+'"></use></svg>';
+                    }
+                    else {
+                        replaceWith = m2+'<object class="emojione" data="'+ns.imagePathSVG+unicode+'.svg'+ns.cacheBustParam+'" type="image/svg+xml" standby="'+alt+'">'+alt+'</object>';
+                    }
+                }
+
+                return replaceWith;
+            });
+        }
+
+        return str;
+    };
+
+    ns.unicodeToImage = function(str) {
+
+        var replaceWith,unicode,alt;
+
+        if((!ns.unicodeAlt) || (ns.sprites)) {
+            // if we are using the shortname as the alt tag then we need a reversed array to map unicode code point to shortnames
+            var mappedUnicode = ns.mapShortToUnicode();
+        }
+
+        str = str.replace(ns.regUnicode, function(unicodeChar) {
+            if( (typeof unicodeChar === 'undefined') || (unicodeChar === '') || (!(unicodeChar in ns.jsEscapeMap)) ) {
+                // if the unicodeChar doesnt exist just return the entire match
+                return unicodeChar;
+            }
+            else {
+                // get the unicode codepoint from the actual char
+                unicode = ns.jsEscapeMap[unicodeChar];
+
+                // depending on the settings, we'll either add the native unicode as the alt tag, otherwise the shortname
+                alt = (ns.unicodeAlt) ? ns.convert(unicode.toUpperCase()) : mappedUnicode[unicode];
+
+                if(ns.imageType === 'png') {
+                    if(ns.sprites) {
+                        replaceWith = '<span class="emojione-'+unicode+'" title="'+mappedUnicode[unicode]+'">'+alt+'</span>';
+                    }
+                    else {
+                        replaceWith = '<img class="emojione" alt="'+alt+'" src="'+ns.imagePathPNG+unicode+'.png'+ns.cacheBustParam+'"/>';
+                    }
+                }
+                else {
+                    // svg
+                    if(ns.sprites) {
+                        replaceWith = '<svg class="emojione"><description>'+alt+'</description><use xlink:href="'+ns.imagePathSVGSprites+'#emoji-'+unicode+'"></use></svg>';
+                    }
+                    else {
+                        replaceWith = '<img class="emojione" alt="'+alt+'" src="'+ns.imagePathSVG+unicode+'.svg'+ns.cacheBustParam+'"/>';
+                    }
+                }
+
+                return replaceWith;
+            }
+        });
+
+        return str;
+    };
+
+    // super simple loop to replace all unicode emoji to shortnames
+    // needs to be improved into one big replacement instead, for performance reasons
+    ns.toShort = function(str) { // this is really just unicodeToShortname() but I opted for the shorthand name to match toImage()
+        for (var shortcode in ns.emojioneList) {
+            if (!ns.emojioneList.hasOwnProperty(shortcode)) { continue; }
+            for(var i = 0, len = ns.emojioneList[shortcode].length; i < len; i++){
+                var unicode = ns.emojioneList[shortcode][i];
+                str = ns.replaceAll(str,ns.convert(unicode.toUpperCase()),shortcode);
+            }
+        }
+        return str;
+    };
+
+    // for converting unicode code points and code pairs to their respective characters
+    ns.convert = function(unicode) {
+        if(unicode.indexOf("-") > -1) {
+            var parts = [];
+            var s = unicode.split('-');
+            for(var i = 0; i < s.length; i++) {
+                var part = parseInt(s[i], 16);
+                if (part >= 0x10000 && part <= 0x10FFFF) {
+                    var hi = Math.floor((part - 0x10000) / 0x400) + 0xD800;
+                    var lo = ((part - 0x10000) % 0x400) + 0xDC00;
+                    part = (String.fromCharCode(hi) + String.fromCharCode(lo));
+                }
+                else {
+                    part = String.fromCharCode(part);
+                }
+                parts.push(part);
+            }
+            return parts.join('');
+        }
+        else {
+            var s = parseInt(unicode, 16);
+            if (s >= 0x10000 && s <= 0x10FFFF) {
+                var hi = Math.floor((s - 0x10000) / 0x400) + 0xD800;
+                var lo = ((s - 0x10000) % 0x400) + 0xDC00;
+                return (String.fromCharCode(hi) + String.fromCharCode(lo));
+            }
+            else {
+                return String.fromCharCode(s);
+            }
+        }
+    };
+
+    ns.escapeHTML = function (string) {
+        var escaped = {
+            '&' : '&amp;',
+            '<' : '&lt;',
+            '>' : '&gt;',
+            '"' : '&quot;',
+            '\'': '&#039;'
+        };
+
+        return string.replace(/[&<>"']/g, function (match) {
+            return escaped[match];
+        });
+    };
+    ns.unescapeHTML = function (string) {
+        var unescaped = {
+            '&amp;'  : '&',
+            '&#38;'  : '&',
+            '&#x26;' : '&',
+            '&lt;'   : '<',
+            '&#60;'  : '<',
+            '&#x3C;' : '<',
+            '&gt;'   : '>',
+            '&#62;'  : '>',
+            '&#x3E;' : '>',
+            '&quot;' : '"',
+            '&#34;'  : '"',
+            '&#x22;' : '"',
+            '&apos;' : '\'',
+            '&#39;'  : '\'',
+            '&#x27;' : '\''
+        };
+
+        return string.replace(/&(?:amp|#38|#x26|lt|#60|#x3C|gt|#62|#x3E|apos|#39|#x27|quot|#34|#x22);/ig, function (match) {
+            return unescaped[match];
+        });
+    };
+    ns.mapShortToUnicode = function() {
+        var new_obj = {};
+        for (var shortname in ns.emojioneList) {
+            if (!ns.emojioneList.hasOwnProperty(shortname)) { continue; }
+            for(var i = 0, len = ns.emojioneList[shortname].length; i < len; i++){
+                new_obj[ns.emojioneList[shortname][i]] = shortname;
+            }
+        }
+        return new_obj;
+    };
+    //reverse an object
+    ns.objectFlip = function (obj) {
+        var key, tmp_obj = {};
+
+        for (key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                tmp_obj[obj[key]] = key;
+            }
+        }
+
+        return tmp_obj;
+    };
+
+    ns.escapeRegExp = function(string) {
+        return string.replace(/[-[\]{}()*+?.,;:&\\^$|#\s]/g, "\\$&");
+    };
+
+    ns.replaceAll = function(string, find, replaceWith) {
+        var escapedFind = ns.escapeRegExp(find);
+        var search = new RegExp("<object[^>]*>.*?<\/object>|<span[^>]*>.*?<\/span>|<(?:object|embed|svg|img|div|span|p|a)[^>]*>|("+escapedFind+")", "gi");
+
+        // callback prevents replacing anything inside of these common html tags as well as between an <object></object> tag
+        var replace = function(entire, m1) {
+            return ((typeof  m1 === 'undefined') || (m1 === '')) ? entire : replaceWith;
+        };
+
+        return string.replace(search,replace);
+    };
+
+}(this.emojione = this.emojione || {}));
+if(typeof module === "object") module.exports = this.emojione;
