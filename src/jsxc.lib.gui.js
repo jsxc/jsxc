@@ -2955,7 +2955,7 @@ jsxc.gui.window = {
          }
 
          $('<button>').addClass('jsxc_btn jsxc_btn-primary').text($.t('Send')).click(function() {
-            var sess = jsxc.webrtc.sendFile(win.data('jid'), file);
+            var sess = jsxc.webrtc.sendFile(jid, file);
 
             jsxc.gui.window.hideOverlay(bid);
 
