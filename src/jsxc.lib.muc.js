@@ -524,7 +524,11 @@ jsxc.muc = {
       var roomdata = jsxc.storage.getUserItem('buddy', room);
 
       jsxc.storage.updateUserItem('buddy', room, 'state', self.CONST.ROOMSTATE.AWAIT_DESTRUCTION);
-      jsxc.gui.window.postMessage(room, 'sys', $.t('This_room_will_be_closed'));
+      jsxc.gui.window.postMessage({
+         bid: room,
+         direction: jsxc.Message.SYS,
+         msg: $.t('This_room_will_be_closed')
+      });
 
       var iq = $iq({
          to: room,
@@ -768,7 +772,11 @@ jsxc.muc = {
             // room has been destroyed
             member = {};
 
-            jsxc.gui.window.postMessage(room, 'sys', $.t('This_room_has_been_closed'));
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.SYS,
+               msg: $.t('This_room_has_been_closed')
+            });
 
             self.close(room);
          } else {
@@ -786,27 +794,39 @@ jsxc.muc = {
                // prevent to display enter message
                member[newNickname] = {};
 
-               jsxc.gui.window.postMessage(room, 'sys', $.t('is_now_known_as', {
-                  oldNickname: nickname,
-                  newNickname: newNickname,
-                  escapeInterpolation: true
-               }));
+               jsxc.gui.window.postMessage({
+                  bid: room,
+                  direction: jsxc.Message.SYS,
+                  msg: $.t('is_now_known_as', {
+                     oldNickname: nickname,
+                     newNickname: newNickname,
+                     escapeInterpolation: true
+                  })
+               });
             } else if (codes.length === 0 || (codes.length === 1 && codes.indexOf('110') > -1)) {
                // normal user exit
-               jsxc.gui.window.postMessage(room, 'sys', $.t('left_the_building', {
-                  nickname: nickname,
-                  escapeInterpolation: true
-               }));
+               jsxc.gui.window.postMessage({
+                  bid: room,
+                  direction: jsxc.Message.SYS,
+                  msg: $.t('left_the_building', {
+                     nickname: nickname,
+                     escapeInterpolation: true
+                  })
+               });
             }
          }
       } else {
          // new member joined
 
          if (!member[nickname] && own[room]) {
-            jsxc.gui.window.postMessage(room, 'sys', $.t('entered_the_room', {
-               nickname: nickname,
-               escapeInterpolation: true
-            }));
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.SYS,
+               msg: $.t('entered_the_room', {
+                  nickname: nickname,
+                  escapeInterpolation: true
+               })
+            });
          }
 
          member[nickname] = {
@@ -891,19 +911,35 @@ jsxc.muc = {
       },
       /** Inform occupants that room logging is now enabled */
       170: function(room) {
-         jsxc.gui.window.postMessage(room, 'sys', $.t('Room_logging_is_enabled'));
+         jsxc.gui.window.postMessage({
+            bid: room,
+            direction: jsxc.Message.SYS,
+            msg: $.t('Room_logging_is_enabled')
+         });
       },
       /** Inform occupants that room logging is now disabled */
       171: function(room) {
-         jsxc.gui.window.postMessage(room, 'sys', $.t('Room_logging_is_disabled'));
+         jsxc.gui.window.postMessage({
+            bid: room,
+            direction: jsxc.Message.SYS,
+            msg: $.t('Room_logging_is_disabled')
+         });
       },
       /** Inform occupants that the room is now non-anonymous */
       172: function(room) {
-         jsxc.gui.window.postMessage(room, 'sys', $.t('Room_is_now_non-anoymous'));
+         jsxc.gui.window.postMessage({
+            bid: room,
+            direction: jsxc.Message.SYS,
+            msg: $.t('Room_is_now_non-anoymous')
+         });
       },
       /** Inform occupants that the room is now semi-anonymous */
       173: function(room) {
-         jsxc.gui.window.postMessage(room, 'sys', $.t('Room_is_now_semi-anonymous'));
+         jsxc.gui.window.postMessage({
+            bid: room,
+            direction: jsxc.Message.SYS,
+            msg: $.t('Room_is_now_semi-anonymous')
+         });
       },
       /** Inform user that a new room has been created */
       201: function(room) {
@@ -949,14 +985,22 @@ jsxc.muc = {
 
          if (own[room] === nickname) {
             jsxc.muc.close(room);
-            jsxc.gui.window.postMessage(room, 'sys', $.t('muc_removed_banned'));
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.SYS,
+               msg: $.t('muc_removed_banned')
+            });
 
             jsxc.muc.postReason(room, xdata);
          } else {
-            jsxc.gui.window.postMessage(room, 'sys', $.t('muc_removed_info_banned', {
-               nickname: nickname,
-               escapeInterpolation: true
-            }));
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.SYS,
+               msg: $.t('muc_removed_info_banned', {
+                  nickname: nickname,
+                  escapeInterpolation: true
+               })
+            });
          }
       },
       /** Inform user that he or she has been kicked */
@@ -965,14 +1009,22 @@ jsxc.muc = {
 
          if (own[room] === nickname) {
             jsxc.muc.close(room);
-            jsxc.gui.window.postMessage(room, 'sys', $.t('muc_removed_kicked'));
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.SYS,
+               msg: $.t('muc_removed_kicked')
+            });
 
             jsxc.muc.postReason(room, xdata);
          } else {
-            jsxc.gui.window.postMessage(room, 'sys', $.t('muc_removed_info_kicked', {
-               nickname: nickname,
-               escapeInterpolation: true
-            }));
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.SYS,
+               msg: $.t('muc_removed_info_kicked', {
+                  nickname: nickname,
+                  escapeInterpolation: true
+               })
+            });
          }
       },
       /** Inform user that he or she is beeing removed from the room because of an affiliation change */
@@ -981,12 +1033,21 @@ jsxc.muc = {
 
          if (own[room] === nickname) {
             jsxc.muc.close(room);
-            jsxc.gui.window.postMessage(room, 'sys', $.t('muc_removed_affiliation'));
+
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.SYS,
+               msg: $.t('muc_removed_affiliation')
+            });
          } else {
-            jsxc.gui.window.postMessage(room, 'sys', $.t('muc_removed_info_affiliation', {
-               nickname: nickname,
-               escapeInterpolation: true
-            }));
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.SYS,
+               msg: $.t('muc_removed_info_affiliation', {
+                  nickname: nickname,
+                  escapeInterpolation: true
+               })
+            });
          }
       },
       /** 
@@ -998,12 +1059,20 @@ jsxc.muc = {
 
          if (own[room] === nickname) {
             jsxc.muc.close(room);
-            jsxc.gui.window.postMessage(room, 'sys', $.t('muc_removed_membersonly'));
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.SYS,
+               msg: $.t('muc_removed_membersonly')
+            });
          } else {
-            jsxc.gui.window.postMessage(room, 'sys', $.t('muc_removed_info_membersonly', {
-               nickname: nickname,
-               escapeInterpolation: true
-            }));
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.SYS,
+               msg: $.t('muc_removed_info_membersonly', {
+                  nickname: nickname,
+                  escapeInterpolation: true
+               })
+            });
          }
       },
       /**
@@ -1012,7 +1081,11 @@ jsxc.muc = {
        */
       332: function(room) {
          jsxc.muc.close(room);
-         jsxc.gui.window.postMessage(room, 'sys', $.t('muc_removed_shutdown'));
+         jsxc.gui.window.postMessage({
+            bid: room,
+            direction: jsxc.Message.SYS,
+            msg: $.t('muc_removed_shutdown')
+         });
       }
    },
 
@@ -1034,9 +1107,18 @@ jsxc.muc = {
          reason = $.t('Reason') + ': ' + reason;
 
          if (typeof actor.name === 'string' || typeof actor.jid === 'string') {
-            jsxc.gui.window.postMessage(room, 'in', reason, false, false, null, actor);
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.IN,
+               msg: reason,
+               sender: actor
+            });
          } else {
-            jsxc.gui.window.postMessage(room, 'sys', reason);
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.SYS,
+               msg: reason
+            });
          }
       }
    },
@@ -1156,7 +1238,7 @@ jsxc.muc = {
    onGroupchatMessage: function(message) {
       var id = $(message).attr('id');
 
-      if (jsxc.el_exists($('#' + id))) {
+      if (jsxc.el_exists(jsxc.Message.getDOM(id))) {
          // ignore own incoming messages
          return true;
       }
@@ -1180,7 +1262,15 @@ jsxc.muc = {
             sender.jid = member[nickname].jid;
          }
 
-         jsxc.gui.window.postMessage(room, 'in', body, false, false, stamp, sender);
+         jsxc.gui.window.init(room);
+
+         jsxc.gui.window.postMessage({
+            bid: room,
+            direction: jsxc.Message.IN,
+            msg: body,
+            stamp: stamp,
+            sender: sender
+         });
       }
 
       var subject = $(message).find('subject');
@@ -1192,10 +1282,14 @@ jsxc.muc = {
 
          jsxc.storage.setUserItem('buddy', room, roomdata);
 
-         jsxc.gui.window.postMessage(room, 'sys', $.t('changed_subject_to', {
-            nickname: nickname,
-            subject: subject.text()
-         }));
+         jsxc.gui.window.postMessage({
+            bid: room,
+            direction: jsxc.Message.SYS,
+            msg: $.t('changed_subject_to', {
+               nickname: nickname,
+               subject: subject.text()
+            })
+         });
       }
 
       return true;
@@ -1216,13 +1310,29 @@ jsxc.muc = {
       }
 
       if ($(message).find('item-not-found').length > 0) {
-         jsxc.gui.window.postMessage(room, 'sys', $.t('message_not_send_item-not-found'));
+         jsxc.gui.window.postMessage({
+            bid: room,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send_item-not-found')
+         });
       } else if ($(message).find('forbidden').length > 0) {
-         jsxc.gui.window.postMessage(room, 'sys', $.t('message_not_send_forbidden'));
+         jsxc.gui.window.postMessage({
+            bid: room,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send_forbidden')
+         });
       } else if ($(message).find('not-acceptable').length > 0) {
-         jsxc.gui.window.postMessage(room, 'sys', $.t('message_not_send_not-acceptable'));
+         jsxc.gui.window.postMessage({
+            bid: room,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send_not-acceptable')
+         });
       } else {
-         jsxc.gui.window.postMessage(room, 'sys', $.t('message_not_send'));
+         jsxc.gui.window.postMessage({
+            bid: room,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send')
+         });
       }
 
       jsxc.debug('[muc] error message for ' + room, $(message).find('error')[0]);

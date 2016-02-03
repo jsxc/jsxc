@@ -17,6 +17,7 @@
  * @param {boolean} args.encrypted
  * @param {boolean} args.forwarded
  * @param {boolean} args.sender
+ * @param {integer} args.stamp
  * @param {object} args.attachment Attached data
  * @param {string} args.attachment.name File name
  * @param {string} args.attachment.size File size
