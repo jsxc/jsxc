@@ -11,26 +11,18 @@
             padding-top: 44px;
         }
 
-        .jsxc_video {
-            display: none;
-        }
-
-        .jsxc_transfer {
-            display: none;
-        }
-
-        .jsxc_fingerprints, .jsxc_verification, .jsxc_transfer {
+        .jsxc_fingerprints, .jsxc_verification, .jsxc_transfer, .jsxc_video, .jsxc_sendFile {
             display: none;
         }
 
         .jsxc_members {
-            background-image: image-url("group_grey.svg");
+            background-image: image-url("group_white.svg");
             background-size: 15px 15px;
             background-repeat: no-repeat;
             background-position: center;
 
             &:hover {
-                background-image: image-url("group_white.svg");
+                opacity: 1.0;
             }
         }
 
@@ -105,8 +97,8 @@
                 & > li {
                     display: block;
                     width: 100%;
-                    height: 27px;
-                    line-height: 27px;
+                    height: 40px;
+                    line-height: 40px;
 
                     .jsxc_name {
                         display: block;

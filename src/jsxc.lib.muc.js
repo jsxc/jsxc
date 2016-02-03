@@ -606,7 +606,7 @@ jsxc.muc = {
       var ownNickname = own[bid];
       var mlIcon = $('<div class="jsxc_members"></div>');
 
-      win.find('.jsxc_tools > .jsxc_transfer').after(mlIcon);
+      win.find('.jsxc_tools > .jsxc_settings').after(mlIcon);
 
       var ml = $('<div class="jsxc_memberlist"><ul></ul></div>');
       win.find('.jsxc_fade').prepend(ml);
@@ -675,7 +675,7 @@ jsxc.muc = {
          jsxc.muc.scrollMemberListBy(bid, 0);
       });
 
-      var destroy = $('<li>');
+      var destroy = $('<a>');
       destroy.text($.t('Destroy'));
       destroy.addClass('jsxc_destroy');
       destroy.hide();
@@ -683,7 +683,7 @@ jsxc.muc = {
          self.destroy(bid);
       });
 
-      win.find('.jsxc_settings ul').append(destroy);
+      win.find('.jsxc_settings ul').append($('<li>').append(destroy));
 
       if (roomdata.state > self.CONST.ROOMSTATE.INIT) {
          var member = jsxc.storage.getUserItem('member', bid) || {};
@@ -697,14 +697,14 @@ jsxc.muc = {
          });
       }
 
-      var leave = $('<li>');
+      var leave = $('<a>');
       leave.text($.t('Leave'));
       leave.addClass('jsxc_leave');
       leave.click(function() {
          self.leave(bid);
       });
 
-      win.find('.jsxc_settings ul').append(leave);
+      win.find('.jsxc_settings ul').append($('<li>').append(leave));
    },
 
    /**
@@ -1357,8 +1357,9 @@ jsxc.muc = {
          return;
       }
 
-      var bo = $('<div>');
-      bo.text('+');
+      var bo = $('<a>');
+      $('<span>').addClass('jsxc_icon jsxc_bookmarkicon').appendTo(bo);
+      $('<span>').text($.t('Bookmark')).appendTo(bo);
       bo.addClass('jsxc_bookmarkOptions');
       bo.click(function(ev) {
          ev.preventDefault();
@@ -1368,7 +1369,7 @@ jsxc.muc = {
          return false;
       });
 
-      bud.find('.jsxc_rename').before(bo);
+      bud.find('.jsxc_menu ul').append($('<li>').append(bo));
 
       if (data.bookmarked) {
          bud.addClass('jsxc_bookmarked');
