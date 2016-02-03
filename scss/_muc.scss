@@ -6,13 +6,9 @@
 }
 
 .jsxc_windowItem {
-    &.jsxc_groupchat {
+    &.jsxc_groupchat.jsxc_normal {
         .jsxc_fade {
             padding-top: 44px;
-
-            .jsxc_min & {
-                padding-top: 0px;
-            }
         }
 
         .jsxc_video {
