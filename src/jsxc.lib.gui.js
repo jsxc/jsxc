@@ -1236,7 +1236,7 @@ jsxc.gui = {
     * @param bid
     */
    unreadMsg: function(bid) {
-      var winData = jsxc.storage.getUserItem('window', bid);
+      var winData = jsxc.storage.getUserItem('window', bid) || {};
       var count = (winData && winData.unread) || 0;
       count = (count === true) ? 1 : count + 1; //unread was boolean (<2.1.0)
 
@@ -2481,6 +2481,7 @@ jsxc.gui.window = {
     * @param {boolean} args.encrypted
     * @param {boolean} args.forwarded
     * @param {boolean} args.sender
+    * @param {integer} args.stamp
     * @param {object} args.attachment Attached data
     * @param {string} args.attachment.name File name
     * @param {string} args.attachment.size File size
