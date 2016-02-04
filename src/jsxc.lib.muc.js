@@ -280,6 +280,10 @@ jsxc.muc = {
                   var bookmark = $("#jsxc_bookmark").prop("checked");
                   var autojoin = $('#jsxc_autojoin').prop('checked');
 
+                  // clean up
+                  jsxc.gui.window.clear(room);
+                  jsxc.storage.setUserItem('member', room, {});
+
                   self.join(room, nickname, password, roomName, subject, bookmark, autojoin);
 
                   return false;
@@ -745,10 +749,6 @@ jsxc.muc = {
          // successfully joined
 
          jsxc.storage.setUserItem('roomNames', jsxc.xmpp.conn.muc.roomNames);
-
-         // clean up
-         jsxc.storage.removeUserItem('chat', room);
-         member = {};
 
          if (jsxc.gui.roster.getItem(room).length === 0) {
             var bl = jsxc.storage.getUserItem('buddylist');

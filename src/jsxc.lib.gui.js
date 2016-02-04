@@ -2771,7 +2771,11 @@ jsxc.gui.window = {
 
       jsxc.storage.setUserItem('history', bid, []);
 
-      jsxc.gui.window.get(bid).find('.jsxc_textarea').empty();
+      var win = jsxc.gui.window.get(bid);
+
+      if (win.length > 0) {
+         win.find('.jsxc_textarea').empty();
+      }
    },
 
    /**
