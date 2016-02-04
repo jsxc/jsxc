@@ -632,16 +632,9 @@ jsxc.webrtc = {
       this.localStream = null;
       this.remoteStream = null;
 
-      var win = $('#jsxc_webrtc .jsxc_chatarea > ul > li');
-      $('#jsxc_windowList > ul').prepend(win.detach());
-      win.find('.slimScrollDiv').resizable('enable');
-      jsxc.gui.window.resize(win);
+      jsxc.gui.closeVideoWindow();
 
-      $(document).off('cleanup.dialog.jsxc');
       $(document).off('error.jingle');
-
-      jsxc.gui.dialog.close();
-      $('#jsxc_webrtc').remove();
 
       jsxc.gui.window.postMessage({
          bid: bid,
@@ -741,8 +734,6 @@ jsxc.webrtc = {
             msg: $.t('ICE_connection_failure')
          });
 
-         $(document).off('cleanup.dialog.jsxc');
-
          session.end('failed-transport');
 
          $(document).trigger('callterminated.jingle');
@@ -783,7 +774,6 @@ jsxc.webrtc = {
                   return;
                }
 
-               $(document).off('cleanup.dialog.jsxc');
                setTimeout(function() {
                   jsxc.gui.showAlert("Sorry, we couldn't establish a connection. Maybe your buddy is offline.");
                }, 500);
@@ -807,9 +797,13 @@ jsxc.webrtc = {
     * @memberOf jsxc.webrtc
     */
    hangUp: function(reason, text) {
-      $(document).off('cleanup.dialog.jsxc');
+      if (jsxc.webrtc.conn.jingle.manager && !$.isEmptyObject(jsxc.webrtc.conn.jingle.manager.peers)) {
+         jsxc.webrtc.conn.jingle.terminate(null, reason, text);
+      } else {
+         jsxc.gui.closeVideoWindow();
+      }
 
-      jsxc.webrtc.conn.jingle.terminate(null, reason, text);
+      // @TODO check event
       $(document).trigger('callterminated.jingle');
    },
 
@@ -1072,20 +1066,6 @@ jsxc.gui.showVideoWindow = function(jid) {
       $('#jsxc_webrtc .jsxc_' + (self.remoteStream.getVideoTracks().length > 0 ? 'remotevideo' : 'noRemoteVideo')).addClass('jsxc_deviceAvailable');
    }
 
-   var toggleMulti = function(elem, open) {
-      $('#jsxc_webrtc .jsxc_multi > div').not(elem).slideUp();
-
-      var opt = {
-         complete: jsxc.gui.dialog.resize
-      };
-
-      if (open) {
-         elem.slideDown(opt);
-      } else {
-         elem.slideToggle(opt);
-      }
-   };
-
    var win = jsxc.gui.window.open(jsxc.jidToBid(jid));
 
    win.find('.slimScrollDiv').resizable('disable');
@@ -1102,33 +1082,6 @@ jsxc.gui.showVideoWindow = function(jid) {
       jsxc.webrtc.hangUp('success');
    });
 
-   $('#jsxc_webrtc .jsxc_snapshot').click(function() {
-      jsxc.webrtc.snapshot(rv);
-      toggleMulti($('#jsxc_webrtc .jsxc_snapshotbar'), true);
-   });
-
-   $('#jsxc_webrtc .jsxc_snapshots').click(function() {
-      toggleMulti($('#jsxc_webrtc .jsxc_snapshotbar'));
-   });
-
-   $('#jsxc_webrtc .jsxc_showchat').click(function() {
-      var chatarea = $('#jsxc_webrtc .jsxc_chatarea');
-
-      if (chatarea.is(':hidden')) {
-         chatarea.show();
-         $('#jsxc_webrtc .jsxc_webrtc').width('900');
-         jsxc.gui.dialog.resize({
-            width: '920px'
-         });
-      } else {
-         chatarea.hide();
-         $('#jsxc_webrtc .jsxc_webrtc').width('650');
-         jsxc.gui.dialog.resize({
-            width: '660px'
-         });
-      }
-   });
-
    $('#jsxc_webrtc .jsxc_fullscreen').click(function() {
 
       if ($.support.fullscreen) {
@@ -1141,22 +1094,22 @@ jsxc.gui.showVideoWindow = function(jid) {
       }
    });
 
-   $('#jsxc_webrtc .jsxc_volume').change(function() {
-      rv[0].volume = $(this).val();
-   });
-
-   $('#jsxc_webrtc .jsxc_volume').dblclick(function() {
-      $(this).val(0.5);
-   });
-
    $('#jsxc_webrtc .jsxc_videoContainer').toggle(function() {
       $('#jsxc_webrtc .jsxc_controlbar').css('opacity', '1.0');
    }, function() {
       $('#jsxc_webrtc .jsxc_controlbar').css('opacity', '');
    });
 
-
    return $('#jsxc_webrtc');
+};
+
+jsxc.gui.closeVideoWindow = function() {
+   var win = $('#jsxc_webrtc .jsxc_chatarea > ul > li');
+   $('#jsxc_windowList > ul').prepend(win.detach());
+   win.find('.slimScrollDiv').resizable('enable');
+   jsxc.gui.window.resize(win);
+
+   $('#jsxc_webrtc').remove();
 };
 
 $.extend(jsxc.CONST, {
