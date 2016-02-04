@@ -184,6 +184,7 @@ jsxc.xmpp = {
       // clean up
       jsxc.storage.removeUserItem('buddylist');
       jsxc.storage.removeUserItem('windowlist');
+      jsxc.storage.removeUserItem('unreadMsg');
 
       if (!jsxc.master) {
          $('#jsxc_roster').remove();
