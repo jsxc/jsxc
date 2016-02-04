@@ -371,7 +371,6 @@
 .jsxc_chatmessage {
     margin: 3px;
     padding: 4px;
-    padding-right: 10px;
     word-wrap: break-word;
     background-color: $chatmessage_bg;
     position: relative;
@@ -447,6 +446,23 @@
     clear: both;
 }
 
+.jsxc_encrypted {
+    &.jsxc_received.jsxc_out .jsxc_timestamp {
+        margin-right: 1px;
+    }
+
+    .jsxc_timestamp:after {
+        content: " ";
+        display: inline-block;
+        width: 10px;
+        height: 8px;
+        margin-left: 2px;
+        background-image: image-url("padlock_close_grey.svg");
+        background-size: contain;
+        background-repeat: no-repeat;
+    }
+}
+
 .jsxc_in {
     float: left;
     position: relative;
@@ -478,6 +494,7 @@
     position: relative;
     max-width: 76%;
     margin-right: 10px;
+    padding-right: 10px;
     border-radius: 3px;
     background-color: $chatmessage_out_bg;
 
