@@ -1637,11 +1637,12 @@ jsxc.gui.roster = {
          scrollTo: '0px'
       });
 
-      var chat = jsxc.storage.getUserItem('chat', bid) || [];
+      var history = jsxc.storage.getUserItem('history', bid) || [];
       var i = 0;
-      while (chat.length > i) {
-         if (chat[i].direction !== 'sys') {
-            $('[data-bid="' + bid + '"]').find('.jsxc_lastmsg .jsxc_text').html(chat[i].msg);
+      while (history.length > i) {
+         var message = new jsxc.Message(history[i]);
+         if (message.direction !== jsxc.Message.SYS) {
+            $('[data-bid="' + bid + '"]').find('.jsxc_lastmsg .jsxc_text').html(message.msg);
             break;
          }
          i++;
