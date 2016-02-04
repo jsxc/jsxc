@@ -2694,6 +2694,10 @@ jsxc.gui.window = {
          }
 
          avatarDiv.attr('title', jsxc.escapeHTML(title));
+
+         if (msgDiv.prev().length > 0 && msgDiv.prev().find('.jsxc_avatar').attr('title') === avatarDiv.attr('title')) {
+            avatarDiv.css('visibility', 'hidden');
+         }
       }
 
       jsxc.gui.detectUriScheme(win);
