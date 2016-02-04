@@ -90,8 +90,23 @@ jsxc.options = {
        */
       onAuthFail: 'submit',
 
-      /** True: Attach connection even is login form was found */
+      /**
+       * True: Attach connection even is login form was found.
+       * 
+       * @type {Boolean}
+       * @deprecated since 3.0.0. Use now loginForm.ifFound (true => attach, false => pause)
+       */
       attachIfFound: true,
+
+      /**
+       * Describes what we should do if login form was found: 
+       * - Attach connection
+       * - Force new connection with loginForm.jid and loginForm.passed
+       * - Pause connection and do nothing
+       * 
+       * @type {('attach', 'force', 'pause')}
+       */
+      ifFound: 'attach',
 
       /**
        * True: Display roster minimized after first login. Afterwards the last 

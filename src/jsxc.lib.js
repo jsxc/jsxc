@@ -181,6 +181,11 @@ jsxc = {
     */
    init: function(options) {
 
+      if (options && options.loginForm && typeof options.loginForm.attachIfFound === 'boolean' && !options.loginForm.ifFound) {
+         // translate deprated option attachIfFound found to new ifFound
+         options.loginForm.ifFound = (options.loginForm.attachIfFound) ? 'attach' : 'pause';
+      }
+
       if (options) {
          // override default options
          $.extend(true, jsxc.options, options);
@@ -273,7 +278,7 @@ jsxc = {
       });
 
       // Check if we have to establish a new connection
-      if (!jsxc.storage.getItem('rid') || !jsxc.storage.getItem('sid') || !jsxc.storage.getItem('jid')) {
+      if (!(jsxc.storage.getItem('rid') && jsxc.storage.getItem('sid') && jsxc.storage.getItem('jid')) || (jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'force' && jsxc.isLoginForm())) {
 
          // clean up rid and sid
          jsxc.storage.removeItem('rid');
@@ -334,7 +339,7 @@ jsxc = {
             return false;
          });
 
-      } else if (!jsxc.isLoginForm() || (jsxc.options.loginForm && jsxc.options.loginForm.attachIfFound)) {
+      } else if (!jsxc.isLoginForm() || (jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'attach')) {
 
          // Restore old connection
 
