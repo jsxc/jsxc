@@ -604,6 +604,15 @@ div.jsxc_transfer {
         opacity: 1.0;
     }
 
+    &.jsxc_disabled {
+        background-image: image-url("padlock_open_disabled_black.svg");
+        cursor: default;
+
+        &:hover {
+            opacity: 0.3;
+        }
+    }
+
     &.jsxc_fin {
         opacity: 1.0;
         background-image: image-url("padlock_close_grey.svg");
