@@ -185,10 +185,10 @@ jsxc.options = {
     * 
     * @memberOf jsxc.options
     * @param data Holds all data as key/value
-    * @returns {boolean} false if function failes
+    * @param cb Called with true on success, false otherwise
     */
-   saveSettinsPermanent: function() {
-
+   saveSettinsPermanent: function(data, cb) {
+      cb(true);
    },
 
    carbons: {

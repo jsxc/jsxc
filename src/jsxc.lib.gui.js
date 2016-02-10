@@ -1043,22 +1043,24 @@ jsxc.gui = {
             jsxc.options.set(key, val);
          });
 
-         var success = jsxc.options.saveSettinsPermanent.call(this, data);
-
-         if (typeof self.attr('data-onsubmit') === 'string') {
-            jsxc.exec(self.attr('data-onsubmit'), [success]);
-         }
-
-         setTimeout(function() {
-            if (success) {
-               self.find('button[type="submit"]').switchClass('btn-primary', 'btn-success');
-            } else {
-               self.find('button[type="submit"]').switchClass('btn-primary', 'btn-danger');
+         var cb = function(success) {
+            if (typeof self.attr('data-onsubmit') === 'string') {
+               jsxc.exec(self.attr('data-onsubmit'), [success]);
             }
+
             setTimeout(function() {
-               self.find('button[type="submit"]').switchClass('btn-danger btn-success', 'btn-primary');
-            }, 2000);
-         }, 200);
+               if (success) {
+                  self.find('button[type="submit"]').switchClass('btn-primary', 'btn-success');
+               } else {
+                  self.find('button[type="submit"]').switchClass('btn-primary', 'btn-danger');
+               }
+               setTimeout(function() {
+                  self.find('button[type="submit"]').switchClass('btn-danger btn-success', 'btn-primary');
+               }, 2000);
+            }, 200);
+         };
+
+         jsxc.options.saveSettinsPermanent.call(this, data, cb);
 
          return false;
       });
