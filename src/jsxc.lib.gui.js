@@ -2812,10 +2812,19 @@ jsxc.gui.window = {
       }
    },
 
-   showOverlay: function(bid, content) {
+   showOverlay: function(bid, content, allowClose) {
       var win = jsxc.gui.window.get(bid);
 
-      win.find('.jsxc_overlay > div').empty().append(content);
+      win.find('.jsxc_overlay .jsxc_body').empty().append(content);
+      win.find('.jsxc_overlay .jsxc_close').off('click').click(function() {
+         jsxc.gui.window.hideOverlay(bid);
+      });
+
+      if (allowClose !== true) {
+         win.find('.jsxc_overlay .jsxc_close').hide();
+      } else {
+         win.find('.jsxc_overlay .jsxc_close').show();
+      }
 
       win.addClass('jsxc_showOverlay');
    },
@@ -2930,7 +2939,7 @@ jsxc.gui.window = {
       var msg = $('<div><div><label><input type="file" name="files" /><label></div></div>');
       msg.addClass('jsxc_chatmessage');
 
-      jsxc.gui.window.showOverlay(bid, msg);
+      jsxc.gui.window.showOverlay(bid, msg, true);
 
       msg.find('label').click();
 

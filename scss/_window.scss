@@ -251,6 +251,42 @@
                 padding: 5px;
                 border-radius: 3px;
                 text-align: center;
+                position: relative;
+
+                .jsxc_close {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    height: 44px;
+                    width: 44px;
+
+                    &:after {
+                        content: '×';
+                        position: absolute;
+                        top: 4px;
+                        right: 4px;
+                        font-size: 20px;
+                        font-family: Arial, sans-serif;
+                        cursor: pointer;
+                        color: #000;
+                        opacity: 0.4;
+                    }
+
+                    &:hover {
+                        &:after {
+                            opacity: 1;
+                        }
+                    }
+
+                    @media (min-width: 768px) {
+                        width: 30px;
+                        height: 30px;
+                    }
+                }
+
+                .jsxc_body {
+                    margin-top: 20px;
+                }
 
                 p {
                     margin-bottom: 10px;
