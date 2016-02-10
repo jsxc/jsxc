@@ -2599,6 +2599,9 @@ jsxc.gui.window = {
       // translate shortnames to images
       msg = jsxc.gui.shortnameToImage(msg);
 
+      // replace line breaks
+      msg = msg.replace(/(\r\n|\r|\n)/g, '<br />');
+
       var msgDiv = $("<div>"),
          msgTsDiv = $("<div>");
       msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
