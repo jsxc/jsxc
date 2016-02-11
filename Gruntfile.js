@@ -372,7 +372,7 @@ module.exports = function(grunt) {
    grunt.registerTask('build:prerelease', 'Build a new pre-release', function() {
       grunt.config.set('target', 'build');
 
-      grunt.task.run(['search:console', 'build', 'dataUri', 'usebanner', 'replace:version', 'replace:libraries', 'replace:todo', 'uglify', 'compress']);
+      grunt.task.run(['search:console', 'build', 'usebanner', 'replace:version', 'replace:libraries', 'replace:todo', 'uglify', 'compress']);
    });
 
    grunt.registerTask('build:release', 'Build a new release', function() {
