@@ -620,7 +620,14 @@ jsxc.webrtc = {
       var bid = jsxc.jidToBid(session.peerID);
 
       if (this.localStream) {
-         this.localStream.stop();
+         if (typeof this.localStream.stop === 'function') {
+            this.localStream.stop();
+         } else {
+            var tracks = this.localStream.getTracks();
+            tracks.forEach(function(track) {
+               track.stop();
+            });
+         }
       }
 
       if ($('.jsxc_videoContainer').length) {
