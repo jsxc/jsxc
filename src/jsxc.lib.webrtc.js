@@ -777,7 +777,7 @@ jsxc.webrtc = {
             });
 
             $(document).one('error.jingle', function(e, sid, error) {
-               if (error.source !== 'offer') {
+               if (error && error.source !== 'offer') {
                   return;
                }
 
