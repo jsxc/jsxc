@@ -1238,7 +1238,7 @@ jsxc.muc = {
    onGroupchatMessage: function(message) {
       var id = $(message).attr('id');
 
-      if (jsxc.el_exists(jsxc.Message.getDOM(id))) {
+      if (id && jsxc.el_exists(jsxc.Message.getDOM(id))) {
          // ignore own incoming messages
          return true;
       }
