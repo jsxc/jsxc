@@ -67,7 +67,6 @@
 
         .jsxc_controlbar {
             opacity: 0;
-            transition: 1s opacity;
         }
 
         &:hover {
@@ -187,12 +186,23 @@ div {
     right: 0px;
     text-align: center;
     z-index: 9090;
+    transition: 1s opacity;
+    opacity: 0;
+
+    @media (min-width: 768px) {
+        bottom: 5%;
+        top: initial;
+    }
+
+    &.jsxc_visible {
+        opacity: 1.0;
+    }
 
     & > div {
         background-color: rgba(0, 0, 0, 0.5);
         height: 44px;
         border-radius: 22px;
-        padding: 5px;
+        padding: 0px 5px;
         display: inline-block;
     }
 
@@ -263,6 +273,11 @@ div {
     bottom: 0;
     width: 250px;
     background-color: $window_bg;
+    display: none;
+
+    @media (min-width: 768px) {
+        display: block;
+    }
 
     .jsxc_settings {
         display: none !important;

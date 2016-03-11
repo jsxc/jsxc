@@ -1101,10 +1101,8 @@ jsxc.gui.showVideoWindow = function(jid) {
       }
    });
 
-   $('#jsxc_webrtc .jsxc_videoContainer').toggle(function() {
-      $('#jsxc_webrtc .jsxc_controlbar').css('opacity', '1.0');
-   }, function() {
-      $('#jsxc_webrtc .jsxc_controlbar').css('opacity', '');
+   $('#jsxc_webrtc .jsxc_videoContainer').click(function() {
+      $('#jsxc_webrtc .jsxc_controlbar').toggleClass('jsxc_visible');
    });
 
    return $('#jsxc_webrtc');
