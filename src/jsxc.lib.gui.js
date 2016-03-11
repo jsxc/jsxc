@@ -3007,7 +3007,7 @@ jsxc.gui.window = {
 
          }).appendTo(msg);
 
-         $('<button>').text($.t('Abort')).click(function() {
+         $('<button>').addClass('jsxc_btn jsxc_btn-default').text($.t('Abort')).click(function() {
             jsxc.gui.window.hideOverlay(bid);
          }).appendTo(msg);
       });

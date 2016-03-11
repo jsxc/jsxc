@@ -319,12 +319,26 @@ img.jsxc_vCard {
 .jsxc_btn {
     width: auto;
     min-width: 25px;
-    padding: 5px;
-    background-color: rgba(240, 240, 240, 0.9);
-    font-weight: bold;
-    color: #555;
-    border: 1px solid rgba(190, 190, 190, 0.9);
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 0px 2px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
     cursor: pointer;
+    user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+
+    &.jsxc_btn-default {
+        border-color: #ccc;
+        color: #555;
+        background-color: rgba(240, 240, 240, 0.9);
+    }
 
     &.jsxc_btn-primary {
         color: #fff;
