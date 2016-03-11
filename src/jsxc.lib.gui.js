@@ -828,10 +828,14 @@ jsxc.gui = {
       if (navigator) {
          var key;
          for (key in navigator) {
-            if (navigator.hasOwnProperty(key) && typeof navigator[key] === 'string') {
+            if (typeof navigator[key] === 'string') {
                userInfo += '<b>' + key + ':</b> ' + navigator[key] + '<br />';
             }
          }
+      }
+
+      if ($.fn && $.fn.jquery) {
+         userInfo += '<b>jQuery:</b> ' + $.fn.jquery + '<br />';
       }
 
       if (window.screen) {
