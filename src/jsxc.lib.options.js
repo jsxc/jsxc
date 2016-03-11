@@ -104,7 +104,7 @@ jsxc.options = {
        * - Force new connection with loginForm.jid and loginForm.passed
        * - Pause connection and do nothing
        * 
-       * @type {('attach', 'force', 'pause')}
+       * @type {(attach|force|pause)}
        */
       ifFound: 'attach',
 

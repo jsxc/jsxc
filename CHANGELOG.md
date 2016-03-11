@@ -1,3 +1,49 @@
+v3.0.0 / 2016-03-11
+===
+### New features
+- responsive material-like design
+ - refactoring settings dialog
+ - over 1600 emoticons from emojione
+ - support mobile devices
+ - new video call interface
+ - status usable for daltonian
+ - use css for animations
+- file transfer via webrtc
+ - previews
+ - show progress
+- use local date and time format
+- add no-video-call-possible icon
+- add disabled otr icon
+- add padlock icon to message
+- display line breaks in chat messages
+- hide avatar for connected messages (muc)
+- auto approve incoming contact request (if contact is already in our roster)
+
+### Bug fixes
+- use crendential when performing turn credential ajax crossdomain call
+- update favico.js
+- update strophe.js
+- update strophe.jinglejs
+- improve otr verification
+- update locales
+- reset unread counter on logout
+- fix blank video
+- fix hang up video call
+- fix debug information
+- fix muc message without id
+- fix type error in jingle error
+
+### Developer changes
+- remove "develop" branch and use instead "master" branch
+- Makefile for setup developer environment
+- remove loginTimeout option
+- add new jsxc.start function to start chat with password or sid/rid
+- add new option loginForm.ifFound (deprecates loginForm.attachIfFound)
+- add named dialogs
+- new message object
+- remove outdated stuff
+- merge jsxc.webrtc.css into jsxc.css
+
 v2.1.5 / 2015-11-17
 ===
 - Reset TURN credentials on login

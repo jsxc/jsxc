@@ -188,7 +188,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line29">line 29</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line32">line 32</a>
     </li></ul></dd>
     
     
@@ -422,6 +422,60 @@
         
             
 <dt>
+    <h4 class="name" id="reqFileFeatures"><span class="type-signature">&lt;static> </span>reqFileFeatures<span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        required disco features for file transfer
+    </div>
+    
+    
+    
+
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line29">line 29</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="reqVideoFeatures"><span class="type-signature">&lt;static> </span>reqVideoFeatures<span class="type-signature"></span></h4>
     
     
@@ -429,7 +483,7 @@
 <dd>
     
     <div class="description">
-        required disco features
+        required disco features for video call
     </div>
     
     
@@ -597,7 +651,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line638">line 638</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line697">line 697</a>
     </li></ul></dd>
     
     
@@ -625,7 +679,7 @@
         
             
 <dt>
-    <h4 class="name" id="getCapableRes"><span class="type-signature">&lt;static> </span>getCapableRes<span class="signature">(jid)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id="getCapableRes"><span class="type-signature">&lt;static> </span>getCapableRes<span class="signature">(jid, features)</span><span class="type-signature"> &rarr; {Array}</span></h4>
     
     
 </dt>
@@ -633,7 +687,7 @@
     
     
     <div class="description">
-        Return list of video capable resources.
+        Return list of capable resources.
     </div>
     
 
@@ -682,6 +736,32 @@
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>features</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">list of required features</td>
+        </tr>
+	
+	
 	</tbody>
 </table>
     
@@ -709,7 +789,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line188">line 188</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line202">line 202</a>
     </li></ul></dd>
     
     
@@ -856,7 +936,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line113">line 113</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line123">line 123</a>
     </li></ul></dd>
     
     
@@ -925,7 +1005,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line742">line 742</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line806">line 806</a>
     </li></ul></dd>
     
     
@@ -994,7 +1074,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line37">line 37</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line40">line 40</a>
     </li></ul></dd>
     
     
@@ -1124,303 +1204,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line245">line 245</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="onAddRosterItem"><span class="type-signature">&lt;private, static> </span>onAddRosterItem<span class="signature">(event, bid, data, el)</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Add "video" button to roster
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>event</code></td>
-            
-            
-            <td class="type">
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last"></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>bid</code></td>
-            
-            
-            <td class="type">
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">bid of roster item</td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-            
-            <td class="type">
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">data wich belongs to bid</td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>el</code></td>
-            
-            
-            <td class="type">
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">the roster item</td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line213">line 213</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="onCallIncoming"><span class="type-signature">&lt;private, static> </span>onCallIncoming<span class="signature">(event, sid)</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Called on incoming call.
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>event</code></td>
-            
-            
-            <td class="type">
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last"></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>sid</code></td>
-            
-            
-            <td class="type">
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">Session id</td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line499">line 499</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line231">line 231</a>
     </li></ul></dd>
     
     
@@ -1489,7 +1273,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line600">line 600</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line659">line 659</a>
     </li></ul></dd>
     
     
@@ -1691,7 +1475,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line565">line 565</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line617">line 617</a>
     </li></ul></dd>
     
     
@@ -1821,7 +1605,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line421">line 421</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line418">line 418</a>
     </li></ul></dd>
     
     
@@ -1969,7 +1753,137 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line668">line 668</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line727">line 727</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="onIncomingCall"><span class="type-signature">&lt;private, static> </span>onIncomingCall<span class="signature">(event, sid)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Called on incoming call.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>sid</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">Session id</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line538">line 538</a>
     </li></ul></dd>
     
     
@@ -2038,7 +1952,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line479">line 479</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line476">line 476</a>
     </li></ul></dd>
     
     
@@ -2168,7 +2082,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line441">line 441</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line438">line 438</a>
     </li></ul></dd>
     
     
@@ -2298,7 +2212,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line336">line 336</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line333">line 333</a>
     </li></ul></dd>
     
     
@@ -2428,7 +2342,170 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line356">line 356</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line353">line 353</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="onReceivedFile"><span class="type-signature">&lt;static> </span>onReceivedFile<span class="signature">(sess, file, metadata)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Display received file.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>sess</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>file</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">File</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>metadata</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">file metadata</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line955">line 955</a>
     </li></ul></dd>
     
     
@@ -2576,7 +2653,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line613">line 613</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line672">line 672</a>
     </li></ul></dd>
     
     
@@ -2724,7 +2801,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line653">line 653</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line712">line 712</a>
     </li></ul></dd>
     
     
@@ -2793,7 +2870,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line754">line 754</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line822">line 822</a>
     </li></ul></dd>
     
     
@@ -2814,6 +2891,168 @@
     
     
     
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="sendFile"><span class="type-signature">&lt;static> </span>sendFile<span class="signature">(jid, file)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Send file to full jid.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>jid</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">full jid</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>file</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">file</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line930">line 930</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    session
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">object</span>
+
+
+	</dd>
+</dl>
+
+        
     
     
 </dd>
@@ -2923,7 +3162,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line373">line 373</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line370">line 370</a>
     </li></ul></dd>
     
     
@@ -3035,7 +3274,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line819">line 819</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line887">line 887</a>
     </li></ul></dd>
     
     
@@ -3165,7 +3404,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line698">line 698</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line759">line 759</a>
     </li></ul></dd>
     
     
@@ -3277,7 +3516,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line273">line 273</a>
+        <a href="jsxc.lib.webrtc.js.html">jsxc.lib.webrtc.js</a>, <a href="jsxc.lib.webrtc.js.html#line259">line 259</a>
     </li></ul></dd>
     
     
@@ -3318,13 +3557,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3>Global</h3><ul><li>{boolean}</li><li>{integer}</li><li>{string}</li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Tue Nov 17 2015 17:01:05 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Fri Mar 11 2016 17:32:13 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>
