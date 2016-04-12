@@ -207,7 +207,7 @@ jsxc = {
          if (jsxc.bid) {
             var local = jsxc.storage.getUserItem('options') || {};
 
-            return local[key] || jsxc.options[key];
+            return (typeof local[key] !== 'undefined') ? local[key] : jsxc.options[key];
          }
 
          return jsxc.options[key];
