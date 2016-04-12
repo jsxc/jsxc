@@ -53,6 +53,15 @@ jsxc.options = {
       dnd: 0
    },
 
+   /**
+    * This function is called if a login form was found, but before any 
+    * modification is done to it.
+    * 
+    * @memberOf jsxc.options
+    * @function
+    */
+   formFound: null,
+
    /** If all 3 properties are set and enable is true, the login form is used */
    loginForm: {
       /** False, disables login through login form */
