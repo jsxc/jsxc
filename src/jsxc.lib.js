@@ -258,7 +258,7 @@ jsxc = {
 
       $(document).on('attached.jsxc', function() {
          // Looking for logout element
-         if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+         if (jsxc.options.logoutElement !== null && $(jsxc.options.logoutElement).length > 0) {
             var logout = function(ev) {
                if (!jsxc.xmpp.conn || !jsxc.xmpp.conn.authenticated) {
                   return;
@@ -272,6 +272,8 @@ jsxc = {
 
                jsxc.xmpp.logout();
             };
+
+            jsxc.options.logoutElement = $(jsxc.options.logoutElement);
 
             jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
          }
