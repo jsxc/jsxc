@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.0.0-beta2 - 2016-02-11
+ * jsxc v3.0.0 - 2016-03-11
  * 
  * Copyright (c) 2016 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.0.0-beta2
+ * @version 3.0.0
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.0.0-beta2',
+   version: '3.0.0',
 
    /** True if i'm the master */
    master: false,
@@ -161,10 +161,10 @@ jsxc = {
             }
          }
 
-         jsxc.log = jsxc.log + msg + ': ' + d + '\n';
+         jsxc.log = jsxc.log + '$ ' + msg + ': ' + d + '\n';
       } else {
          console.log(msg);
-         jsxc.log = jsxc.log + msg + '\n';
+         jsxc.log = jsxc.log + '$ ' + msg + '\n';
       }
    },
 
@@ -3218,10 +3218,14 @@ jsxc.gui = {
       if (navigator) {
          var key;
          for (key in navigator) {
-            if (navigator.hasOwnProperty(key) && typeof navigator[key] === 'string') {
+            if (typeof navigator[key] === 'string') {
                userInfo += '<b>' + key + ':</b> ' + navigator[key] + '<br />';
             }
          }
+      }
+
+      if ($.fn && $.fn.jquery) {
+         userInfo += '<b>jQuery:</b> ' + $.fn.jquery + '<br />';
       }
 
       if (window.screen) {
@@ -3433,22 +3437,24 @@ jsxc.gui = {
             jsxc.options.set(key, val);
          });
 
-         var success = jsxc.options.saveSettinsPermanent.call(this, data);
-
-         if (typeof self.attr('data-onsubmit') === 'string') {
-            jsxc.exec(self.attr('data-onsubmit'), [success]);
-         }
-
-         setTimeout(function() {
-            if (success) {
-               self.find('button[type="submit"]').switchClass('btn-primary', 'btn-success');
-            } else {
-               self.find('button[type="submit"]').switchClass('btn-primary', 'btn-danger');
+         var cb = function(success) {
+            if (typeof self.attr('data-onsubmit') === 'string') {
+               jsxc.exec(self.attr('data-onsubmit'), [success]);
             }
+
             setTimeout(function() {
-               self.find('button[type="submit"]').switchClass('btn-danger btn-success', 'btn-primary');
-            }, 2000);
-         }, 200);
+               if (success) {
+                  self.find('button[type="submit"]').switchClass('btn-primary', 'btn-success');
+               } else {
+                  self.find('button[type="submit"]').switchClass('btn-primary', 'btn-danger');
+               }
+               setTimeout(function() {
+                  self.find('button[type="submit"]').switchClass('btn-danger btn-success', 'btn-primary');
+               }, 2000);
+            }, 200);
+         };
+
+         jsxc.options.saveSettinsPermanent.call(this, data, cb);
 
          return false;
       });
@@ -5391,7 +5397,7 @@ jsxc.gui.window = {
 
          }).appendTo(msg);
 
-         $('<button>').text($.t('Abort')).click(function() {
+         $('<button>').addClass('jsxc_btn jsxc_btn-default').text($.t('Abort')).click(function() {
             jsxc.gui.window.hideOverlay(bid);
          }).appendTo(msg);
       });
@@ -6700,7 +6706,7 @@ jsxc.muc = {
    onGroupchatMessage: function(message) {
       var id = $(message).attr('id');
 
-      if (jsxc.el_exists(jsxc.Message.getDOM(id))) {
+      if (id && jsxc.el_exists(jsxc.Message.getDOM(id))) {
          // ignore own incoming messages
          return true;
       }
@@ -7540,7 +7546,7 @@ jsxc.options = {
        * - Force new connection with loginForm.jid and loginForm.passed
        * - Pause connection and do nothing
        * 
-       * @type {('attach', 'force', 'pause')}
+       * @type {(attach|force|pause)}
        */
       ifFound: 'attach',
 
@@ -7621,10 +7627,10 @@ jsxc.options = {
     * 
     * @memberOf jsxc.options
     * @param data Holds all data as key/value
-    * @returns {boolean} false if function failes
+    * @param cb Called with true on success, false otherwise
     */
-   saveSettinsPermanent: function() {
-
+   saveSettinsPermanent: function(data, cb) {
+      cb(true);
    },
 
    carbons: {
@@ -9455,7 +9461,14 @@ jsxc.webrtc = {
       var bid = jsxc.jidToBid(session.peerID);
 
       if (this.localStream) {
-         this.localStream.stop();
+         if (typeof this.localStream.stop === 'function') {
+            this.localStream.stop();
+         } else {
+            var tracks = this.localStream.getTracks();
+            tracks.forEach(function(track) {
+               track.stop();
+            });
+         }
       }
 
       if ($('.jsxc_videoContainer').length) {
@@ -9605,7 +9618,7 @@ jsxc.webrtc = {
             });
 
             $(document).one('error.jingle', function(e, sid, error) {
-               if (error.source !== 'offer') {
+               if (error && error.source !== 'offer') {
                   return;
                }
 
@@ -9929,10 +9942,8 @@ jsxc.gui.showVideoWindow = function(jid) {
       }
    });
 
-   $('#jsxc_webrtc .jsxc_videoContainer').toggle(function() {
-      $('#jsxc_webrtc .jsxc_controlbar').css('opacity', '1.0');
-   }, function() {
-      $('#jsxc_webrtc .jsxc_controlbar').css('opacity', '');
+   $('#jsxc_webrtc .jsxc_videoContainer').click(function() {
+      $('#jsxc_webrtc .jsxc_controlbar').toggleClass('jsxc_visible');
    });
 
    return $('#jsxc_webrtc');
@@ -10888,7 +10899,7 @@ jsxc.gui.template['videoWindow'] = '<div id="jsxc_webrtc">\n' +
 '            <div></div>\n' +
 '         </div>\n' +
 '      </div>\n' +
-'      <div class="jsxc_controlbar">\n' +
+'      <div class="jsxc_controlbar jsxc_visible">\n' +
 '         <div>\n' +
 '            <div class="jsxc_hangUp jsxc_videoControl" />\n' +
 '            <div class="jsxc_fullscreen jsxc_videoControl" />\n' +

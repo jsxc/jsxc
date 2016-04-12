@@ -2546,12 +2546,16 @@ jsxc.gui.window = {
 
       jsxc.gui.window._postMessage(message);
 
-      if (message.direction === 'out' && message.msg === '?') {
-         jsxc.gui.window.postMessage(new jsxc.Message({
-            bid: message.bid,
-            direction: jsxc.Message.SYS,
-            msg: '42'
-         }));
+      if (message.direction === 'out' && message.msg === '?' && jsxc.options.get('theAnswerToAnything') !== false) {
+         if (typeof jsxc.options.get('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) < 1) {
+            jsxc.options.set('theAnswerToAnything', true);
+
+            jsxc.gui.window.postMessage(new jsxc.Message({
+               bid: message.bid,
+               direction: jsxc.Message.SYS,
+               msg: '42'
+            }));
+         }
       }
 
       return message;
@@ -3007,7 +3011,7 @@ jsxc.gui.window = {
 
          }).appendTo(msg);
 
-         $('<button>').text($.t('Abort')).click(function() {
+         $('<button>').addClass('jsxc_btn jsxc_btn-default').text($.t('Abort')).click(function() {
             jsxc.gui.window.hideOverlay(bid);
          }).appendTo(msg);
       });
