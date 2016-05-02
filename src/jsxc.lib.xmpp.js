@@ -448,6 +448,9 @@ jsxc.xmpp = {
       }
 
       window.clearInterval(jsxc.keepalive);
+      jsxc.role_allocation = false;
+      jsxc.master = false;
+      jsxc.storage.removeItem('alive');
    },
 
    /**

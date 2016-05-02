@@ -345,7 +345,7 @@ jsxc = {
 
          // Restore old connection
 
-         if (typeof(jsxc.storage.getItem('alive')) === 'undefined') {
+         if (typeof jsxc.storage.getItem('alive') !== 'number') {
             jsxc.onMaster();
          } else {
             jsxc.checkMaster();
@@ -375,6 +375,8 @@ jsxc = {
     * @param {string} rid Request Id
     */
    start: function() {
+      var args = arguments;
+
       if (jsxc.role_allocation && !jsxc.master) {
          jsxc.debug('There is an other master tab');
 
@@ -387,7 +389,7 @@ jsxc = {
          return false;
       }
 
-      if (arguments.length === 3) {
+      if (args.length === 3) {
          $(document).one('attached.jsxc', function() {
             // save rid after first attachment
             jsxc.xmpp.onRidChange(jsxc.xmpp.conn._proto.rid);
@@ -396,7 +398,9 @@ jsxc = {
          });
       }
 
-      jsxc.xmpp.login.apply(this, arguments);
+      jsxc.checkMaster(function() {
+         jsxc.xmpp.login.apply(this, args);
+      });
    },
 
    /**
@@ -556,12 +560,20 @@ jsxc = {
 
    /**
     * Checks if there is a master
+    *
+    * @param {function} [cb] Called if no master was found.
     */
-   checkMaster: function() {
+   checkMaster: function(cb) {
       jsxc.debug('check master');
 
-      jsxc.to = window.setTimeout(jsxc.onMaster, 1000);
-      jsxc.storage.ink('alive');
+      cb = (cb && typeof cb === 'function') ? cb : jsxc.onMaster;
+
+      if (typeof jsxc.storage.getItem('alive') !== 'number') {
+         cb.call();
+      } else {
+         jsxc.to = window.setTimeout(cb, 1000);
+         jsxc.storage.ink('alive');
+      }
    },
 
    masterActions: function() {
