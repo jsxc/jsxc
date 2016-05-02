@@ -463,7 +463,6 @@ jsxc.webrtc = {
          dialog.find('.jsxc_localvideo').show();
       }
 
-      $(document).one('cleanup.dialog.jsxc', $.proxy(self.hangUp, self));
       $(document).trigger('finish.mediaready.jsxc');
    },
 
@@ -615,7 +614,7 @@ jsxc.webrtc = {
     * @param [text] Optional explanation
     */
    onCallTerminated: function(session, reason) {
-      this.setStatus('call terminated ' + session.peerID + (reason ? reason.condition : ''));
+      this.setStatus('call terminated ' + session.peerID + (reason && reason.condition ? reason.condition : ''));
 
       var bid = jsxc.jidToBid(session.peerID);
 
@@ -646,7 +645,7 @@ jsxc.webrtc = {
       jsxc.gui.window.postMessage({
          bid: bid,
          direction: jsxc.Message.SYS,
-         msg: ($.t('Call_terminated') + (reason ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.')
+         msg: ($.t('Call_terminated') + (reason && reason.condition ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.')
       });
    },
 
