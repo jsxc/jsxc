@@ -322,9 +322,13 @@ jsxc.storage = {
       // master alive
       if (!jsxc.master && (key === 'alive' || key === 'alive_busy') && !jsxc.triggeredFromElement) {
 
-         // reset timeout
-         window.clearTimeout(jsxc.to);
-         jsxc.to = window.setTimeout(jsxc.checkMaster, ((key === 'alive') ? jsxc.options.timeout : jsxc.options.busyTimeout) + jsxc.random(60));
+         // reset timeouts
+         jsxc.to = $.grep(jsxc.to, function(timeout) {
+            window.clearTimeout(timeout);
+
+            return false;
+         });
+         jsxc.to.push(window.setTimeout(jsxc.checkMaster, ((key === 'alive') ? jsxc.options.timeout : jsxc.options.busyTimeout) + jsxc.random(60)));
 
          // only call the first time
          if (!jsxc.role_allocation) {

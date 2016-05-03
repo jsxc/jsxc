@@ -14,7 +14,7 @@ jsxc = {
    role_allocation: false,
 
    /** Timeout for keepalive */
-   to: null,
+   to: [],
 
    /** Timeout after normal keepalive starts */
    toBusy: null,
@@ -571,7 +571,7 @@ jsxc = {
       if (typeof jsxc.storage.getItem('alive') !== 'number') {
          cb.call();
       } else {
-         jsxc.to = window.setTimeout(cb, 1000);
+         jsxc.to.push(window.setTimeout(cb, 1000));
          jsxc.storage.ink('alive');
       }
    },

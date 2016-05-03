@@ -32,6 +32,7 @@ jsxc.xmpp = {
    login: function() {
 
       if (jsxc.xmpp.conn && jsxc.xmpp.conn.authenticated) {
+         jsxc.debug('Connection already authenticated.');
          return;
       }
 
