@@ -174,10 +174,20 @@ jsxc = {
    log: '',
 
    /**
-    * Starts the action
+    * This function initializes important core functions and event handlers. 
+    * Afterwards it performs the following actions in the given order:
+    *
+    * <ol>
+    *  <li>If (loginForm.ifFound = 'force' and form was found) or (jid or rid or 
+    * 	sid was not found) intercept form, and listen for credentials.</li>
+    *  <li>Attach with jid, rid and sid from storage, if no form was found or 
+    * 	loginForm.ifFound = 'attach'</li>
+    *  <li>Attach with jid, rid and sid from options.xmpp, if no form was found or 
+    * 	loginForm.ifFound = 'attach'</li>
+    * </ol>
     * 
     * @memberOf jsxc
-    * @param {object} options
+    * @param {object} options See {@link jsxc.options}
     */
    init: function(options) {
 
@@ -279,8 +289,12 @@ jsxc = {
          }
       });
 
+      var isStorageAttachParameters = jsxc.storage.getItem('rid') && jsxc.storage.getItem('sid') && jsxc.storage.getItem('jid');
+      var isOptionsAttachParameters = jsxc.options.xmpp.rid && jsxc.options.xmpp.sid && jsxc.options.xmpp.jid;
+      var isForceLoginForm = jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'force' && jsxc.isLoginForm();
+
       // Check if we have to establish a new connection
-      if (!(jsxc.storage.getItem('rid') && jsxc.storage.getItem('sid') && jsxc.storage.getItem('jid')) || (jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'force' && jsxc.isLoginForm())) {
+      if ((!isStorageAttachParameters && !isOptionsAttachParameters) || isForceLoginForm) {
 
          // clean up rid and sid
          jsxc.storage.removeItem('rid');
@@ -354,9 +368,8 @@ jsxc = {
    },
 
    /**
-    * Attach to previous session if jid, sid and rid are available in storage 
-    * (default behaviour also for {@link jsxc.init}). Otherwise try to start new session 
-    * with given jid and password in jsxc.options.xmpp.
+    * Attach to previous session if jid, sid and rid are available 
+    * in storage or options (default behaviour also for {@link jsxc.init}).
     *
     * @memberOf jsxc
     */
@@ -365,6 +378,7 @@ jsxc = {
     *
     * @memberOf jsxc
     * @param {string} jid Jabber Id
+    * @param {string} password Jabber password
     */
    /**
     * Attach to new chat session with jid, sid and rid.

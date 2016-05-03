@@ -37,6 +37,12 @@ jsxc.options = {
       /** XMPP password */
       password: null,
 
+      /** session id */
+      sid: null,
+
+      /** request id */
+      rid: null,
+
       /** True: Allow user to overwrite xmpp settings */
       overwrite: false,
 

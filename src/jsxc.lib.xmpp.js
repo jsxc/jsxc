@@ -11,6 +11,7 @@ jsxc.xmpp = {
     * 
     * @name login
     * @memberOf jsxc.xmpp
+    * @private
     */
    /**
     * Create new connection with given parameters.
@@ -19,6 +20,7 @@ jsxc.xmpp = {
     * @param {string} jid
     * @param {string} password
     * @memberOf jsxc.xmpp
+    * @private
     */
    /**
     * Attach connection with given parameters.
@@ -28,6 +30,7 @@ jsxc.xmpp = {
     * @param {string} sid
     * @param {string} rid
     * @memberOf jsxc.xmpp
+    * @private
     */
    login: function() {
 
@@ -58,8 +61,8 @@ jsxc.xmpp = {
             if (sid !== null && rid !== null) {
                jid = jsxc.storage.getItem('jid');
             } else {
-               sid = null;
-               rid = null;
+               sid = jsxc.options.xmpp.sid || null;
+               rid = jsxc.options.xmpp.rid || null;
                jid = jsxc.options.xmpp.jid;
             }
       }
