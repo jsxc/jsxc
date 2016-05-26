@@ -50,7 +50,7 @@ jsxc.muc = {
       if (!options || typeof options.server !== 'string') {
          jsxc.debug('Discover muc service');
 
-         // prosody does not response, if we send query before initial presence was send
+         // prosody does not respond, if we send query before initial presence was sent
          setTimeout(function() {
             self.conn.disco.items(Strophe.getDomainFromJid(self.conn.jid), null, function(items) {
                $(items).find('item').each(function() {
