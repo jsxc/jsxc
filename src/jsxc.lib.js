@@ -14,7 +14,7 @@ jsxc = {
    role_allocation: false,
 
    /** Timeout for keepalive */
-   to: null,
+   to: [],
 
    /** Timeout after normal keepalive starts */
    toBusy: null,
@@ -174,10 +174,20 @@ jsxc = {
    log: '',
 
    /**
-    * Starts the action
+    * This function initializes important core functions and event handlers. 
+    * Afterwards it performs the following actions in the given order:
+    *
+    * <ol>
+    *  <li>If (loginForm.ifFound = 'force' and form was found) or (jid or rid or 
+    * 	sid was not found) intercept form, and listen for credentials.</li>
+    *  <li>Attach with jid, rid and sid from storage, if no form was found or 
+    * 	loginForm.ifFound = 'attach'</li>
+    *  <li>Attach with jid, rid and sid from options.xmpp, if no form was found or 
+    * 	loginForm.ifFound = 'attach'</li>
+    * </ol>
     * 
     * @memberOf jsxc
-    * @param {object} options
+    * @param {object} options See {@link jsxc.options}
     */
    init: function(options) {
 
@@ -207,7 +217,7 @@ jsxc = {
          if (jsxc.bid) {
             var local = jsxc.storage.getUserItem('options') || {};
 
-            return local[key] || jsxc.options[key];
+            return (typeof local[key] !== 'undefined') ? local[key] : jsxc.options[key];
          }
 
          return jsxc.options[key];
@@ -258,7 +268,7 @@ jsxc = {
 
       $(document).on('attached.jsxc', function() {
          // Looking for logout element
-         if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+         if (jsxc.options.logoutElement !== null && $(jsxc.options.logoutElement).length > 0) {
             var logout = function(ev) {
                if (!jsxc.xmpp.conn || !jsxc.xmpp.conn.authenticated) {
                   return;
@@ -273,12 +283,18 @@ jsxc = {
                jsxc.xmpp.logout();
             };
 
+            jsxc.options.logoutElement = $(jsxc.options.logoutElement);
+
             jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
          }
       });
 
+      var isStorageAttachParameters = jsxc.storage.getItem('rid') && jsxc.storage.getItem('sid') && jsxc.storage.getItem('jid');
+      var isOptionsAttachParameters = jsxc.options.xmpp.rid && jsxc.options.xmpp.sid && jsxc.options.xmpp.jid;
+      var isForceLoginForm = jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'force' && jsxc.isLoginForm();
+
       // Check if we have to establish a new connection
-      if (!(jsxc.storage.getItem('rid') && jsxc.storage.getItem('sid') && jsxc.storage.getItem('jid')) || (jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'force' && jsxc.isLoginForm())) {
+      if ((!isStorageAttachParameters && !isOptionsAttachParameters) || isForceLoginForm) {
 
          // clean up rid and sid
          jsxc.storage.removeItem('rid');
@@ -343,7 +359,7 @@ jsxc = {
 
          // Restore old connection
 
-         if (typeof(jsxc.storage.getItem('alive')) === 'undefined') {
+         if (typeof jsxc.storage.getItem('alive') !== 'number') {
             jsxc.onMaster();
          } else {
             jsxc.checkMaster();
@@ -352,9 +368,8 @@ jsxc = {
    },
 
    /**
-    * Attach to previous session if jid, sid and rid are available in storage 
-    * (default behaviour also for {@link jsxc.init}). Otherwise try to start new session 
-    * with given jid and password in jsxc.options.xmpp.
+    * Attach to previous session if jid, sid and rid are available 
+    * in storage or options (default behaviour also for {@link jsxc.init}).
     *
     * @memberOf jsxc
     */
@@ -363,6 +378,7 @@ jsxc = {
     *
     * @memberOf jsxc
     * @param {string} jid Jabber Id
+    * @param {string} password Jabber password
     */
    /**
     * Attach to new chat session with jid, sid and rid.
@@ -373,6 +389,8 @@ jsxc = {
     * @param {string} rid Request Id
     */
    start: function() {
+      var args = arguments;
+
       if (jsxc.role_allocation && !jsxc.master) {
          jsxc.debug('There is an other master tab');
 
@@ -385,7 +403,7 @@ jsxc = {
          return false;
       }
 
-      if (arguments.length === 3) {
+      if (args.length === 3) {
          $(document).one('attached.jsxc', function() {
             // save rid after first attachment
             jsxc.xmpp.onRidChange(jsxc.xmpp.conn._proto.rid);
@@ -394,7 +412,9 @@ jsxc = {
          });
       }
 
-      jsxc.xmpp.login.apply(this, arguments);
+      jsxc.checkMaster(function() {
+         jsxc.xmpp.login.apply(this, args);
+      });
    },
 
    /**
@@ -554,12 +574,20 @@ jsxc = {
 
    /**
     * Checks if there is a master
+    *
+    * @param {function} [cb] Called if no master was found.
     */
-   checkMaster: function() {
+   checkMaster: function(cb) {
       jsxc.debug('check master');
 
-      jsxc.to = window.setTimeout(jsxc.onMaster, 1000);
-      jsxc.storage.ink('alive');
+      cb = (cb && typeof cb === 'function') ? cb : jsxc.onMaster;
+
+      if (typeof jsxc.storage.getItem('alive') !== 'number') {
+         cb.call();
+      } else {
+         jsxc.to.push(window.setTimeout(cb, 1000));
+         jsxc.storage.ink('alive');
+      }
    },
 
    masterActions: function() {

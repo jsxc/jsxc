@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.0.0 - 2016-03-11
+ * jsxc v3.0.1-nightly.20160504 - 2016-05-04
  * 
  * Copyright (c) 2016 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.0.0
+ * @version 3.0.1-nightly.20160504
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.0.0',
+   version: '3.0.1-nightly.20160504',
 
    /** True if i'm the master */
    master: false,
@@ -34,7 +34,7 @@ jsxc = {
    role_allocation: false,
 
    /** Timeout for keepalive */
-   to: null,
+   to: [],
 
    /** Timeout after normal keepalive starts */
    toBusy: null,
@@ -194,10 +194,20 @@ jsxc = {
    log: '',
 
    /**
-    * Starts the action
+    * This function initializes important core functions and event handlers. 
+    * Afterwards it performs the following actions in the given order:
+    *
+    * <ol>
+    *  <li>If (loginForm.ifFound = 'force' and form was found) or (jid or rid or 
+    * 	sid was not found) intercept form, and listen for credentials.</li>
+    *  <li>Attach with jid, rid and sid from storage, if no form was found or 
+    * 	loginForm.ifFound = 'attach'</li>
+    *  <li>Attach with jid, rid and sid from options.xmpp, if no form was found or 
+    * 	loginForm.ifFound = 'attach'</li>
+    * </ol>
     * 
     * @memberOf jsxc
-    * @param {object} options
+    * @param {object} options See {@link jsxc.options}
     */
    init: function(options) {
 
@@ -227,7 +237,7 @@ jsxc = {
          if (jsxc.bid) {
             var local = jsxc.storage.getUserItem('options') || {};
 
-            return local[key] || jsxc.options[key];
+            return (typeof local[key] !== 'undefined') ? local[key] : jsxc.options[key];
          }
 
          return jsxc.options[key];
@@ -278,7 +288,7 @@ jsxc = {
 
       $(document).on('attached.jsxc', function() {
          // Looking for logout element
-         if (jsxc.options.logoutElement !== null && jsxc.options.logoutElement.length > 0) {
+         if (jsxc.options.logoutElement !== null && $(jsxc.options.logoutElement).length > 0) {
             var logout = function(ev) {
                if (!jsxc.xmpp.conn || !jsxc.xmpp.conn.authenticated) {
                   return;
@@ -293,12 +303,18 @@ jsxc = {
                jsxc.xmpp.logout();
             };
 
+            jsxc.options.logoutElement = $(jsxc.options.logoutElement);
+
             jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
          }
       });
 
+      var isStorageAttachParameters = jsxc.storage.getItem('rid') && jsxc.storage.getItem('sid') && jsxc.storage.getItem('jid');
+      var isOptionsAttachParameters = jsxc.options.xmpp.rid && jsxc.options.xmpp.sid && jsxc.options.xmpp.jid;
+      var isForceLoginForm = jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'force' && jsxc.isLoginForm();
+
       // Check if we have to establish a new connection
-      if (!(jsxc.storage.getItem('rid') && jsxc.storage.getItem('sid') && jsxc.storage.getItem('jid')) || (jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'force' && jsxc.isLoginForm())) {
+      if ((!isStorageAttachParameters && !isOptionsAttachParameters) || isForceLoginForm) {
 
          // clean up rid and sid
          jsxc.storage.removeItem('rid');
@@ -363,7 +379,7 @@ jsxc = {
 
          // Restore old connection
 
-         if (typeof(jsxc.storage.getItem('alive')) === 'undefined') {
+         if (typeof jsxc.storage.getItem('alive') !== 'number') {
             jsxc.onMaster();
          } else {
             jsxc.checkMaster();
@@ -372,9 +388,8 @@ jsxc = {
    },
 
    /**
-    * Attach to previous session if jid, sid and rid are available in storage 
-    * (default behaviour also for {@link jsxc.init}). Otherwise try to start new session 
-    * with given jid and password in jsxc.options.xmpp.
+    * Attach to previous session if jid, sid and rid are available 
+    * in storage or options (default behaviour also for {@link jsxc.init}).
     *
     * @memberOf jsxc
     */
@@ -383,6 +398,7 @@ jsxc = {
     *
     * @memberOf jsxc
     * @param {string} jid Jabber Id
+    * @param {string} password Jabber password
     */
    /**
     * Attach to new chat session with jid, sid and rid.
@@ -393,6 +409,8 @@ jsxc = {
     * @param {string} rid Request Id
     */
    start: function() {
+      var args = arguments;
+
       if (jsxc.role_allocation && !jsxc.master) {
          jsxc.debug('There is an other master tab');
 
@@ -405,7 +423,7 @@ jsxc = {
          return false;
       }
 
-      if (arguments.length === 3) {
+      if (args.length === 3) {
          $(document).one('attached.jsxc', function() {
             // save rid after first attachment
             jsxc.xmpp.onRidChange(jsxc.xmpp.conn._proto.rid);
@@ -414,7 +432,9 @@ jsxc = {
          });
       }
 
-      jsxc.xmpp.login.apply(this, arguments);
+      jsxc.checkMaster(function() {
+         jsxc.xmpp.login.apply(this, args);
+      });
    },
 
    /**
@@ -574,12 +594,20 @@ jsxc = {
 
    /**
     * Checks if there is a master
+    *
+    * @param {function} [cb] Called if no master was found.
     */
-   checkMaster: function() {
+   checkMaster: function(cb) {
       jsxc.debug('check master');
 
-      jsxc.to = window.setTimeout(jsxc.onMaster, 1000);
-      jsxc.storage.ink('alive');
+      cb = (cb && typeof cb === 'function') ? cb : jsxc.onMaster;
+
+      if (typeof jsxc.storage.getItem('alive') !== 'number') {
+         cb.call();
+      } else {
+         jsxc.to.push(window.setTimeout(cb, 1000));
+         jsxc.storage.ink('alive');
+      }
    },
 
    masterActions: function() {
@@ -909,6 +937,7 @@ jsxc.xmpp = {
     * 
     * @name login
     * @memberOf jsxc.xmpp
+    * @private
     */
    /**
     * Create new connection with given parameters.
@@ -917,6 +946,7 @@ jsxc.xmpp = {
     * @param {string} jid
     * @param {string} password
     * @memberOf jsxc.xmpp
+    * @private
     */
    /**
     * Attach connection with given parameters.
@@ -926,10 +956,12 @@ jsxc.xmpp = {
     * @param {string} sid
     * @param {string} rid
     * @memberOf jsxc.xmpp
+    * @private
     */
    login: function() {
 
       if (jsxc.xmpp.conn && jsxc.xmpp.conn.authenticated) {
+         jsxc.debug('Connection already authenticated.');
          return;
       }
 
@@ -955,8 +987,8 @@ jsxc.xmpp = {
             if (sid !== null && rid !== null) {
                jid = jsxc.storage.getItem('jid');
             } else {
-               sid = null;
-               rid = null;
+               sid = jsxc.options.xmpp.sid || null;
+               rid = jsxc.options.xmpp.rid || null;
                jid = jsxc.options.xmpp.jid;
             }
       }
@@ -1346,6 +1378,9 @@ jsxc.xmpp = {
       }
 
       window.clearInterval(jsxc.keepalive);
+      jsxc.role_allocation = false;
+      jsxc.master = false;
+      jsxc.storage.removeItem('alive');
    },
 
    /**
@@ -4936,12 +4971,16 @@ jsxc.gui.window = {
 
       jsxc.gui.window._postMessage(message);
 
-      if (message.direction === 'out' && message.msg === '?') {
-         jsxc.gui.window.postMessage(new jsxc.Message({
-            bid: message.bid,
-            direction: jsxc.Message.SYS,
-            msg: '42'
-         }));
+      if (message.direction === 'out' && message.msg === '?' && jsxc.options.get('theAnswerToAnything') !== false) {
+         if (typeof jsxc.options.get('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) < 1) {
+            jsxc.options.set('theAnswerToAnything', true);
+
+            jsxc.gui.window.postMessage(new jsxc.Message({
+               bid: message.bid,
+               direction: jsxc.Message.SYS,
+               msg: '42'
+            }));
+         }
       }
 
       return message;
@@ -7479,6 +7518,12 @@ jsxc.options = {
       /** XMPP password */
       password: null,
 
+      /** session id */
+      sid: null,
+
+      /** request id */
+      rid: null,
+
       /** True: Allow user to overwrite xmpp settings */
       overwrite: false,
 
@@ -7494,6 +7539,15 @@ jsxc.options = {
       xa: 0,
       dnd: 0
    },
+
+   /**
+    * This function is called if a login form was found, but before any 
+    * modification is done to it.
+    * 
+    * @memberOf jsxc.options
+    * @function
+    */
+   formFound: null,
 
    /** If all 3 properties are set and enable is true, the login form is used */
    loginForm: {
@@ -8563,9 +8617,13 @@ jsxc.storage = {
       // master alive
       if (!jsxc.master && (key === 'alive' || key === 'alive_busy') && !jsxc.triggeredFromElement) {
 
-         // reset timeout
-         window.clearTimeout(jsxc.to);
-         jsxc.to = window.setTimeout(jsxc.checkMaster, ((key === 'alive') ? jsxc.options.timeout : jsxc.options.busyTimeout) + jsxc.random(60));
+         // reset timeouts
+         jsxc.to = $.grep(jsxc.to, function(timeout) {
+            window.clearTimeout(timeout);
+
+            return false;
+         });
+         jsxc.to.push(window.setTimeout(jsxc.checkMaster, ((key === 'alive') ? jsxc.options.timeout : jsxc.options.busyTimeout) + jsxc.random(60)));
 
          // only call the first time
          if (!jsxc.role_allocation) {
@@ -9304,7 +9362,6 @@ jsxc.webrtc = {
          dialog.find('.jsxc_localvideo').show();
       }
 
-      $(document).one('cleanup.dialog.jsxc', $.proxy(self.hangUp, self));
       $(document).trigger('finish.mediaready.jsxc');
    },
 
@@ -9456,7 +9513,7 @@ jsxc.webrtc = {
     * @param [text] Optional explanation
     */
    onCallTerminated: function(session, reason) {
-      this.setStatus('call terminated ' + session.peerID + (reason ? reason.condition : ''));
+      this.setStatus('call terminated ' + session.peerID + (reason && reason.condition ? reason.condition : ''));
 
       var bid = jsxc.jidToBid(session.peerID);
 
@@ -9487,7 +9544,7 @@ jsxc.webrtc = {
       jsxc.gui.window.postMessage({
          bid: bid,
          direction: jsxc.Message.SYS,
-         msg: ($.t('Call_terminated') + (reason ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.')
+         msg: ($.t('Call_terminated') + (reason && reason.condition ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.')
       });
    },
 

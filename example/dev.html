@@ -30,7 +30,7 @@
    <script src="../dev/jsxc.js"></script>
 
    <!-- init script -->
-   <script src="js/dev.js"></script>
+   <script src="js/example.js"></script>
 
 </head>
 
@@ -41,7 +41,27 @@
          <div class="col-xs-12">
             <h1 class="page-header">JSXC <small>developer example</small></h1>
 
-            <p>This example demonstrates different types of login methods for <a href="https://www.jsxc.org/">JSXC</a>. You find further information in our <a href="https://github.com/jsxc/jsxc/wiki">wiki</a>.</p>
+            <div class="row">
+               <div class="col-md-6">
+                  <p>This example demonstrates different types of login methods for <a href="https://www.jsxc.org/">JSXC</a>. You find further information in our <a href="https://github.com/jsxc/jsxc/wiki">wiki</a>.</p>
+               </div>
+
+               <div class="form form-horizontal col-md-6">
+                  <div class="form-group">
+                     <label for="xmpp-domain" class="col-xs-4 control-label">XMPP domain:</label>
+                     <div class="col-xs-8">
+                        <input type="text" id="xmpp-domain" name="xmpp-domain" class="form-control" value="localhost" />
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <label for="bosh-url" class="col-xs-4 control-label">BOSH url:</label>
+                     <div class="col-xs-8">
+                        <input type="text" id="bosh-url" name="bosh-url" class="form-control" value="/http-bind/" />
+                        <p id="server-flash"></p>
+                     </div>
+                  </div>
+               </div>
+            </div>
          </div>
       </div>
 
@@ -158,7 +178,7 @@ $('#submit').click(function(){
 
   var jid = username + '@localhost';
 
-  jsxc.xmpp.login(jid , password);
+  jsxc.start(jid , password);
 });
 </pre>
          </div>
@@ -191,6 +211,41 @@ $('#submit').click(function(){
 $('#button').click(jsxc.gui.showLoginBox);</pre>
          </div>
 
+      </div>
+
+      <div class="row">
+         <div class="col-xs-12 col-md-4">
+            <h3>Prelogin</h3>
+
+            <p>Attach to existing BOSH connection. Helpful if you login server side.</p>
+
+            <pre>jsxc.init({
+  xmpp: {
+    url: '/http-bind/',
+    jid: 'username@localhost',
+    sid: 'SID',
+    rid: 'RID'
+  },
+  root: '/jsxc/'
+});</pre>
+         </div>
+
+         <div class="col-xs-12 col-md-4">
+            <h3>AJAX Prelogin</h3>
+
+            <p>Attach to existing BOSH connection after JSXC was initialized.</p>
+
+            <pre>jsxc.init({
+  xmpp: {
+    url: '/http-bind/'
+  },
+  root: '/jsxc/'
+});
+
+function callback() {
+   jsxc.start('username@localhost', 'SID', 'RID');
+}</pre>
+         </div>
       </div>
    </div>
 </body>

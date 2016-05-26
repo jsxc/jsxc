@@ -1415,7 +1415,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line455">line 455</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line475">line 475</a>
     </li></ul></dd>
     
     
@@ -1443,7 +1443,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
         
             
 <dt>
-    <h4 class="name" id="checkMaster"><span class="type-signature">&lt;static> </span>checkMaster<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="checkMaster"><span class="type-signature">&lt;static> </span>checkMaster<span class="signature">(<span class="optional">cb</span>)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -1459,6 +1459,66 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     
     
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Argument</th>
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">Called if no master was found.</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -1484,7 +1544,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line558">line 558</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line580">line 580</a>
     </li></ul></dd>
     
     
@@ -1764,7 +1824,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line640">line 640</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line668">line 668</a>
     </li></ul></dd>
     
     
@@ -1991,7 +2051,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line743">line 743</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line771">line 771</a>
     </li></ul></dd>
     
     
@@ -2131,7 +2191,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line838">line 838</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line866">line 866</a>
     </li></ul></dd>
     
     
@@ -2337,7 +2397,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line814">line 814</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line842">line 842</a>
     </li></ul></dd>
     
     
@@ -2476,7 +2536,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line858">line 858</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line886">line 886</a>
     </li></ul></dd>
     
     
@@ -2534,7 +2594,17 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     
     <div class="description">
-        Starts the action
+        This function initializes important core functions and event handlers. 
+Afterwards it performs the following actions in the given order:
+
+<ol>
+ <li>If (loginForm.ifFound = 'force' and form was found) or (jid or rid or 
+	sid was not found) intercept form, and listen for credentials.</li>
+ <li>Attach with jid, rid and sid from storage, if no form was found or 
+	loginForm.ifFound = 'attach'</li>
+ <li>Attach with jid, rid and sid from options.xmpp, if no form was found or 
+	loginForm.ifFound = 'attach'</li>
+</ol>
     </div>
     
 
@@ -2584,7 +2654,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
             
             
             
-            <td class="description last"></td>
+            <td class="description last">See <a href="jsxc.options.html">jsxc.options</a></td>
         </tr>
 	
 	
@@ -2615,7 +2685,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line182">line 182</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line192">line 192</a>
     </li></ul></dd>
     
     
@@ -2684,7 +2754,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line786">line 786</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line814">line 814</a>
     </li></ul></dd>
     
     
@@ -2775,7 +2845,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line406">line 406</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line426">line 426</a>
     </li></ul></dd>
     
     
@@ -2909,7 +2979,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line665">line 665</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line693">line 693</a>
     </li></ul></dd>
     
     
@@ -3036,7 +3106,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line650">line 650</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line678">line 678</a>
     </li></ul></dd>
     
     
@@ -3127,7 +3197,7 @@ workaround) 0: conform, 1: not conform, 2: not shure
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line603">line 603</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line631">line 631</a>
     </li></ul></dd>
     
     
@@ -3197,7 +3267,7 @@ normal signal
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line611">line 611</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line639">line 639</a>
     </li></ul></dd>
     
     
@@ -3266,7 +3336,7 @@ normal signal
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line538">line 538</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line558">line 558</a>
     </li></ul></dd>
     
     
@@ -3335,7 +3405,7 @@ normal signal
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line520">line 520</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line540">line 540</a>
     </li></ul></dd>
     
     
@@ -3498,7 +3568,7 @@ normal signal
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line418">line 418</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line438">line 438</a>
     </li></ul></dd>
     
     
@@ -3615,7 +3685,7 @@ normal signal
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line630">line 630</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line658">line 658</a>
     </li></ul></dd>
     
     
@@ -3749,7 +3819,7 @@ normal signal
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line755">line 755</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line783">line 783</a>
     </li></ul></dd>
     
     
@@ -3828,7 +3898,7 @@ normal signal
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line672">line 672</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line700">line 700</a>
     </li></ul></dd>
     
     
@@ -3897,7 +3967,7 @@ normal signal
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line694">line 694</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line722">line 722</a>
     </li></ul></dd>
     
     
@@ -4060,7 +4130,7 @@ normal signal
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line375">line 375</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line391">line 391</a>
     </li></ul></dd>
     
     
@@ -4129,7 +4199,7 @@ normal signal
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line596">line 596</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line624">line 624</a>
     </li></ul></dd>
     
     
@@ -4198,7 +4268,7 @@ normal signal
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line724">line 724</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line752">line 752</a>
     </li></ul></dd>
     
     
@@ -4338,7 +4408,7 @@ normal signal
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line766">line 766</a>
+        <a href="jsxc.lib.js.html">jsxc.lib.js</a>, <a href="jsxc.lib.js.html#line794">line 794</a>
     </li></ul></dd>
     
     
@@ -4547,7 +4617,7 @@ normal signal
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Fri Mar 11 2016 17:32:12 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Wed May 04 2016 11:50:36 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>
