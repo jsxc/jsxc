@@ -2050,7 +2050,7 @@ jsxc.gui.window = {
       win.find('.jsxc_sendFile').click(function() {
          $('body').click();
 
-         jsxc.gui.window.sendFile(bid);
+         jsxc.httpupload.sendFile(bid);
       });
 
       win.find('.jsxc_tools').click(function() {
@@ -2941,7 +2941,7 @@ jsxc.gui.window = {
                if (data.status === 'unavailable') {
                   jsxc.gui.window.hideOverlay(bid);
                } else if (data.status === 'selected') {
-                  jsxc.gui.window.sendFile(bid + '/' + data.result);
+                  jsxc.httpupload.sendFile(bid + '/' + data.result);
                }
             }, fileCapableRes);
 
