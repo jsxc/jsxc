@@ -2050,7 +2050,7 @@ jsxc.gui.window = {
       win.find('.jsxc_sendFile').click(function() {
          $('body').click();
 
-         if(jsxc.options.get('httpupload').server !== null){
+         if(typeof jsxc.options.get('httpupload') !== "undefined"){
             jsxc.httpupload.sendFile(bid);
          }else{
             jsxc.gui.window.sendFile(bid);
@@ -2946,7 +2946,7 @@ jsxc.gui.window = {
                if (data.status === 'unavailable') {
                   jsxc.gui.window.hideOverlay(bid);
                } else if (data.status === 'selected') {
-                  if(jsxc.options.get('httpupload').server !== null){
+                  if(typeof jsxc.options.get('httpupload') !== "undefined"){
                      jsxc.httpupload.sendFile(bid + '/' + data.result);
                   }else {
                      jsxc.gui.window.sendFile(bid + '/' + data.result);

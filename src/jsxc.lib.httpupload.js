@@ -131,8 +131,8 @@ jsxc.httpupload = {
                crossDomain: true,
                processData:false,
                complete: function(xhr) {
-                  if (xhr.readyState == 4) {
-                     if (xhr.status == 201) {
+                  if (xhr.readyState === 4) {
+                     if (xhr.status === 201) {
                         var uid = Date.parse(new Date()) + ':msg';
                         var message = jsxc.gui.window.postMessage({
                            _uid: uid,
