@@ -92,7 +92,7 @@ $(function() {
    }
 
    // Check bosh url, if input changed
-   $('#bosh-url, #xmpp-domain').on('input', function(){
+   $('#bosh-url, #xmpp-domain').on('input', function() {
       var self = $(this);
       var timeout = self.data('timeout');
 
@@ -131,12 +131,12 @@ $(function() {
 });
 
 /**
-* Test if bosh server is up and running.
-* 
-* @param  {string}   url    BOSH url
-* @param  {string}   domain host domain for BOSH server
-* @param  {Function} cb     called if test is done
-*/
+ * Test if bosh server is up and running.
+ * 
+ * @param  {string}   url    BOSH url
+ * @param  {string}   domain host domain for BOSH server
+ * @param  {Function} cb     called if test is done
+ */
 function testBoshServer(url, domain, cb) {
    var rid = jsxc.storage.getItem('rid') || '123456';
 
@@ -204,7 +204,7 @@ function testBoshServer(url, domain, cb) {
          }
       }
 
-      if(xhr.status === 0) {
+      if (xhr.status === 0) {
          // cross-side
          fail('Cross domain request was not possible. Either your BOSH server does not send any ' +
             'Access-Control-Allow-Origin header or the content-security-policy (CSP) blocks your request. ' +
