@@ -182,28 +182,28 @@ jsxc.xmpp = {
     */
    logout: function(complete) {
 
-      // instruct all tabs
-      jsxc.storage.removeItem('sid');
+      jsxc.triggeredFromElement = (typeof complete === 'boolean') ? complete : true;
 
+      if (!jsxc.master) {
+         // instruct master
+         jsxc.storage.removeItem('sid');
+
+         // jsxc.xmpp.disconnected is called if master deletes alive after logout
+         return true;
+      }
+
+      // REVIEW: this should maybe moved to xmpp.disconnected
       // clean up
       jsxc.storage.removeUserItem('buddylist');
       jsxc.storage.removeUserItem('windowlist');
       jsxc.storage.removeUserItem('unreadMsg');
 
-      if (!jsxc.master) {
-         $('#jsxc_roster').remove();
-         $('#jsxc_windowlist').remove();
-         return true;
-      }
-
-      if (jsxc.xmpp.conn === null) {
-         return true;
-      }
-
       // Hide dropdown menu
       $('body').click();
 
-      jsxc.triggeredFromElement = (typeof complete === 'boolean') ? complete : true;
+      if (!jsxc.xmpp.conn || !jsxc.xmpp.conn.authenticated) {
+         return true;
+      }
 
       // restore all otr objects
       $.each(jsxc.storage.getUserItem('otrlist') || {}, function(i, val) {
@@ -444,6 +444,7 @@ jsxc.xmpp = {
          $(document).trigger('toggle.roster.jsxc', ['hidden', 0]);
          $('#jsxc_roster').remove();
 
+         // REVIEW: logoutElement without href attribute?
          if (jsxc.triggeredFromLogout) {
             window.location = jsxc.options.logoutElement.attr('href');
          }
@@ -451,7 +452,7 @@ jsxc.xmpp = {
          jsxc.gui.roster.noConnection();
       }
 
-      window.clearInterval(jsxc.keepalive);
+      window.clearInterval(jsxc.keepaliveInterval);
       jsxc.role_allocation = false;
       jsxc.master = false;
       jsxc.storage.removeItem('alive');
@@ -524,7 +525,8 @@ jsxc.xmpp = {
             name: name,
             status: 0,
             sub: sub,
-            res: []
+            res: [],
+            rnd: Math.random() // force storage event
          });
 
          jsxc.gui.roster.add(bid);

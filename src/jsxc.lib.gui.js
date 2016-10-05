@@ -1588,6 +1588,9 @@ jsxc.gui.roster = {
       var data = jsxc.storage.getUserItem('buddy', bid);
       var bud = jsxc.gui.buddyTemplate.clone().attr('data-bid', bid).attr('data-type', data.type || 'chat');
 
+      // remove all messages (offline, empty roster) from roster
+      $('#jsxc_roster > p').remove();
+
       jsxc.gui.roster.insert(bid, bud);
 
       bud.click(function() {

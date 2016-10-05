@@ -317,12 +317,17 @@ jsxc.storage = {
       if (jsxc.master && key === 'alive') {
          jsxc.debug('Master request.');
 
-         jsxc.storage.ink('alive');
+         if (e.newValue && e.newValue.match(/:master$/)) {
+            jsxc.warn('Master request from master. Something went wrong... :-(');
+            return;
+         }
+
+         jsxc.keepAlive();
          return;
       }
 
       // master alive
-      if (!jsxc.master && (key === 'alive' || key === 'alive_busy') && !jsxc.triggeredFromElement) {
+      if (!jsxc.master && (key === 'alive' || key === 'alive_busy')) {
 
          // reset timeouts
          jsxc.to = $.grep(jsxc.to, function(timeout) {
@@ -330,6 +335,12 @@ jsxc.storage = {
 
             return false;
          });
+
+         if (typeof e.newValue === 'undefined' || e.newValue === null) {
+            jsxc.xmpp.disconnected();
+            return;
+         }
+
          jsxc.to.push(window.setTimeout(jsxc.checkMaster, ((key === 'alive') ? jsxc.options.timeout : jsxc.options.busyTimeout) + jsxc.random(60)));
 
          // only call the first time
@@ -338,6 +349,10 @@ jsxc.storage = {
          }
 
          return;
+      }
+
+      if (jsxc.master && key === 'sid' && !e.newValue) {
+         jsxc.xmpp.logout(false);
       }
 
       if (key.match(/^notices/)) {
@@ -472,7 +487,7 @@ jsxc.storage = {
             jsxc.gui.roster.purge(bid);
             return;
          }
-         if (!e.oldValue) {
+         if (jsxc.gui.roster.getItem(bid).length === 0) {
             jsxc.gui.roster.add(bid);
             return;
          }
@@ -513,19 +528,6 @@ jsxc.storage = {
          if (o.name !== n.name) {
             jsxc.gui.roster._rename(bid, n.name);
          }
-      }
-
-      // logout
-      if (key === 'sid') {
-         if (!e.newValue) {
-            // if (jsxc.master && jsxc.xmpp.conn) {
-            // jsxc.xmpp.conn.disconnect();
-            // jsxc.triggeredFromElement = true;
-            // }
-            jsxc.xmpp.logout();
-
-         }
-         return;
       }
 
       if (key === 'friendReq') {

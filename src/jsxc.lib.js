@@ -26,7 +26,7 @@ jsxc = {
    toNotificationDelay: 500,
 
    /** Interval for keep-alive */
-   keepalive: null,
+   keepaliveInterval: null,
 
    /** True if jid, sid and rid was used to connect */
    reconnect: false,
@@ -266,28 +266,7 @@ jsxc = {
       // Register event listener for the storage event
       window.addEventListener('storage', jsxc.storage.onStorage, false);
 
-      $(document).on('attached.jsxc', function() {
-         // Looking for logout element
-         if (jsxc.options.logoutElement !== null && $(jsxc.options.logoutElement).length > 0) {
-            var logout = function(ev) {
-               if (!jsxc.xmpp.conn || !jsxc.xmpp.conn.authenticated) {
-                  return;
-               }
-
-               ev.stopPropagation();
-               ev.preventDefault();
-
-               jsxc.options.logoutElement = $(this);
-               jsxc.triggeredFromLogout = true;
-
-               jsxc.xmpp.logout();
-            };
-
-            jsxc.options.logoutElement = $(jsxc.options.logoutElement);
-
-            jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
-         }
-      });
+      $(document).on('attached.jsxc', jsxc.registerLogout);
 
       var isStorageAttachParameters = jsxc.storage.getItem('rid') && jsxc.storage.getItem('sid') && jsxc.storage.getItem('jid');
       var isOptionsAttachParameters = jsxc.options.xmpp.rid && jsxc.options.xmpp.sid && jsxc.options.xmpp.jid;
@@ -359,7 +338,7 @@ jsxc = {
 
          // Restore old connection
 
-         if (typeof jsxc.storage.getItem('alive') !== 'number') {
+         if (typeof jsxc.storage.getItem('alive') === 'undefined') {
             jsxc.onMaster();
          } else {
             jsxc.checkMaster();
@@ -415,6 +394,25 @@ jsxc = {
       jsxc.checkMaster(function() {
          jsxc.xmpp.login.apply(this, args);
       });
+   },
+
+   registerLogout: function() {
+      // Looking for logout element
+      if (jsxc.options.logoutElement !== null && $(jsxc.options.logoutElement).length > 0) {
+         var logout = function(ev) {
+            ev.stopPropagation();
+            ev.preventDefault();
+
+            jsxc.options.logoutElement = $(this);
+            jsxc.triggeredFromLogout = true;
+
+            jsxc.xmpp.logout();
+         };
+
+         jsxc.options.logoutElement = $(jsxc.options.logoutElement);
+
+         jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
+      }
    },
 
    /**
@@ -544,10 +542,13 @@ jsxc = {
       jsxc.bid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
 
       jsxc.gui.init();
+      $('#jsxc_roster').removeClass('jsxc_noConnection');
 
       jsxc.restoreRoster();
       jsxc.restoreWindows();
       jsxc.restoreCompleted = true;
+
+      jsxc.registerLogout();
 
       $(document).trigger('restoreCompleted.jsxc');
    },
@@ -582,11 +583,11 @@ jsxc = {
 
       cb = (cb && typeof cb === 'function') ? cb : jsxc.onMaster;
 
-      if (typeof jsxc.storage.getItem('alive') !== 'number') {
+      if (typeof jsxc.storage.getItem('alive') === 'undefined') {
          cb.call();
       } else {
          jsxc.to.push(window.setTimeout(cb, 1000));
-         jsxc.storage.ink('alive');
+         jsxc.keepAlive('slave');
       }
    },
 
@@ -622,14 +623,17 @@ jsxc = {
     * Start sending keep-alive signal
     */
    startKeepAlive: function() {
-      jsxc.keepalive = window.setInterval(jsxc.keepAlive, jsxc.options.timeout - 1000);
+      jsxc.keepaliveInterval = window.setInterval(jsxc.keepAlive, jsxc.options.timeout - 1000);
    },
 
    /**
     * Sends the keep-alive signal to signal that the master is still there.
     */
-   keepAlive: function() {
-      jsxc.storage.ink('alive');
+   keepAlive: function(role) {
+      var next = parseInt(jsxc.storage.getItem('alive')) + 1;
+      role = role || 'master';
+
+      jsxc.storage.setItem('alive', next + ':' + role);
    },
 
    /**
@@ -641,8 +645,8 @@ jsxc = {
          window.clearTimeout(jsxc.toBusy);
       }
 
-      if (jsxc.keepalive) {
-         window.clearInterval(jsxc.keepalive);
+      if (jsxc.keepaliveInterval) {
+         window.clearInterval(jsxc.keepaliveInterval);
       }
 
       jsxc.storage.ink('alive_busy');
