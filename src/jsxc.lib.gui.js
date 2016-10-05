@@ -1899,9 +1899,11 @@ jsxc.gui.dialog = {
          name: ''
       }, o);
 
+      var src = $('<div data-name="' + opt.name + '" id="jsxc_dialog" />').append(data);
+
       $.magnificPopup.open({
          items: {
-            src: '<div data-name="' + opt.name + '" id="jsxc_dialog">' + data + '</div>'
+            src: src
          },
          type: 'inline',
          modal: opt.noClose,
@@ -3030,7 +3032,7 @@ jsxc.gui.template = {};
  * @param {type} name template name
  * @param {type} bid
  * @param {type} msg
- * @returns {String} HTML Template
+ * @returns {jQuery} HTML Template
  */
 jsxc.gui.template.get = function(name, bid, msg) {
 
@@ -3068,13 +3070,20 @@ jsxc.gui.template.get = function(name, bid, msg) {
       // prevent 404
       ret = ret.replace(/\{\{root\}\}/g, ph.root);
 
-      // convert to string
-      ret = $('<div>').append($(ret).i18n()).html();
+      ret = $(ret);
 
-      // replace placeholders
-      ret = ret.replace(/\{\{([a-zA-Z0-9_\-]+)\}\}/g, function(s, key) {
-         return (typeof ph[key] === 'string') ? ph[key] : s;
+      ret.find('[data-var]').each(function() {
+         var key = $(this).attr('data-var');
+         var val = (typeof ph[key] === 'string') ? ph[key] : '(Unknown placeholder: ' + key + ')';
+
+         if ($(this).prop('tagName').toUpperCase() === 'INPUT') {
+            $(this).val(val);
+         } else {
+            $(this).text(val);
+         }
       });
+
+      ret.i18n();
 
       return ret;
    }
