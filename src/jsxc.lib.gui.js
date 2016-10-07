@@ -273,6 +273,11 @@ jsxc.gui = {
 
       var avatarSrc = jsxc.storage.getUserItem('avatar', aid);
 
+      if (!jsxc.master && !avatarSrc) {
+         // force avatar placeholder for slave tab, until master tab requested vCard
+         avatarSrc = 0;
+      }
+
       if (avatarSrc !== null) {
          setAvatar(avatarSrc);
       } else {
