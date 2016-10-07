@@ -1,6 +1,6 @@
 /**
  * JavaScript Xmpp Chat namespace
- * 
+ *
  * @namespace jsxc
  */
 jsxc = {
@@ -83,7 +83,7 @@ jsxc = {
 
    /**
     * Parse a unix timestamp and return a formatted time string
-    * 
+    *
     * @memberOf jsxc
     * @param {Object} unixtime
     * @returns time of day and/or date
@@ -112,7 +112,7 @@ jsxc = {
 
    /**
     * Write debug message to console and to log.
-    * 
+    *
     * @memberOf jsxc
     * @param {String} msg Debug message
     * @param {Object} data
@@ -150,7 +150,7 @@ jsxc = {
 
    /**
     * Write warn message.
-    * 
+    *
     * @memberOf jsxc
     * @param {String} msg Warn message
     * @param {Object} data
@@ -161,7 +161,7 @@ jsxc = {
 
    /**
     * Write error message.
-    * 
+    *
     * @memberOf jsxc
     * @param {String} msg Error message
     * @param {Object} data
@@ -174,18 +174,18 @@ jsxc = {
    log: '',
 
    /**
-    * This function initializes important core functions and event handlers. 
+    * This function initializes important core functions and event handlers.
     * Afterwards it performs the following actions in the given order:
     *
     * <ol>
-    *  <li>If (loginForm.ifFound = 'force' and form was found) or (jid or rid or 
+    *  <li>If (loginForm.ifFound = 'force' and form was found) or (jid or rid or
     * 	sid was not found) intercept form, and listen for credentials.</li>
-    *  <li>Attach with jid, rid and sid from storage, if no form was found or 
+    *  <li>Attach with jid, rid and sid from storage, if no form was found or
     * 	loginForm.ifFound = 'attach'</li>
-    *  <li>Attach with jid, rid and sid from options.xmpp, if no form was found or 
+    *  <li>Attach with jid, rid and sid from options.xmpp, if no form was found or
     * 	loginForm.ifFound = 'attach'</li>
     * </ol>
-    * 
+    *
     * @memberOf jsxc
     * @param {object} options See {@link jsxc.options}
     */
@@ -209,7 +209,7 @@ jsxc = {
 
       /**
        * Getter method for options. Saved options will override default one.
-       * 
+       *
        * @param {string} key option key
        * @returns default or saved option value
        */
@@ -225,7 +225,7 @@ jsxc = {
 
       /**
        * Setter method for options. Will write into localstorage.
-       * 
+       *
        * @param {string} key option key
        * @param {object} value option value
        */
@@ -347,7 +347,7 @@ jsxc = {
    },
 
    /**
-    * Attach to previous session if jid, sid and rid are available 
+    * Attach to previous session if jid, sid and rid are available
     * in storage or options (default behaviour also for {@link jsxc.init}).
     *
     * @memberOf jsxc
@@ -427,7 +427,7 @@ jsxc = {
 
    /**
     * Load settings and prepare jid.
-    * 
+    *
     * @memberOf jsxc
     * @param {string} username
     * @param {string} password
@@ -462,7 +462,7 @@ jsxc = {
 
    /**
     * Process xmpp settings and save loaded settings.
-    * 
+    *
     * @private
     * @memberOf jsxc
     * @param {string} username
@@ -655,7 +655,7 @@ jsxc = {
 
    /**
     * Generates a random integer number between 0 and max
-    * 
+    *
     * @param {Integer} max
     * @return {Integer} random integer between 0 and max
     */
@@ -665,7 +665,7 @@ jsxc = {
 
    /**
     * Checks if there is a element with the given selector
-    * 
+    *
     * @param {String} selector jQuery selector
     * @return {Boolean}
     */
@@ -675,7 +675,7 @@ jsxc = {
 
    /**
     * Creates a CSS compatible string from a JID
-    * 
+    *
     * @param {type} jid Valid Jabber ID
     * @returns {String} css Compatible string
     */
@@ -689,7 +689,7 @@ jsxc = {
 
    /**
     * Create comparable bar jid.
-    * 
+    *
     * @memberOf jsxc
     * @param jid
     * @returns comparable bar jid
@@ -779,7 +779,7 @@ jsxc = {
 
    /**
     * Removes all html tags.
-    * 
+    *
     * @memberOf jsxc
     * @param text
     * @returns stripped text
@@ -790,7 +790,7 @@ jsxc = {
 
    /**
     * Executes only one of the given events
-    * 
+    *
     * @param {string} obj.key event name
     * @param {function} obj.value function to execute
     * @returns {string} namespace of all events
@@ -812,7 +812,7 @@ jsxc = {
 
    /**
     * Checks if tab is hidden.
-    * 
+    *
     * @returns {boolean} True if tab is hidden
     */
    isHidden: function() {
@@ -861,7 +861,7 @@ jsxc = {
 
    /**
     * Executes the given function in jsxc namespace.
-    * 
+    *
     * @memberOf jsxc
     * @param {string} fnName Function name
     * @param {array} fnParams Function parameters
@@ -882,7 +882,7 @@ jsxc = {
 
    /**
     * Hash string into 32-bit signed integer.
-    * 
+    *
     * @memberOf jsxc
     * @param {string} str input string
     * @returns {integer} 32-bit signed integer
