@@ -255,12 +255,10 @@
   cursor: progress; }
 
 .mfp-zoom-out-cur, .mfp-zoom-out-cur .mfp-image-holder .mfp-close {
-  cursor: -webkit-zoom-out;
   cursor: zoom-out; }
 
 .mfp-zoom {
   cursor: pointer;
-  cursor: -webkit-zoom-in;
   cursor: zoom-in; }
 
 .mfp-auto-cursor .mfp-content {
@@ -548,16 +546,13 @@ img.mfp-img {
 @media all and (max-width: 900px) {
   .mfp-arrow {
     -webkit-transform: scale(0.75);
-    -ms-transform: scale(0.75);
-        transform: scale(0.75); }
+    transform: scale(0.75); }
   .mfp-arrow-left {
     -webkit-transform-origin: 0;
-    -ms-transform-origin: 0;
-        transform-origin: 0; }
+    transform-origin: 0; }
   .mfp-arrow-right {
     -webkit-transform-origin: 100%;
-    -ms-transform-origin: 100%;
-        transform-origin: 100%; }
+    transform-origin: 100%; }
   .mfp-container {
     padding-left: 6px;
     padding-right: 6px; } }
@@ -2951,7 +2946,6 @@ fieldset[disabled] #jsxc_webrtc .checkbox label {
             transition: right 0.5s; }
     #jsxc_roster.jsxc_state_hidden #jsxc_toggleRoster:before {
       -webkit-transform: rotate(0deg);
-          -ms-transform: rotate(0deg);
               transform: rotate(0deg); }
   #jsxc_roster.jsxc_state_shown {
     display: block;
@@ -2981,7 +2975,6 @@ fieldset[disabled] #jsxc_webrtc .checkbox label {
     border-width: 6px 4px 6px 0;
     border-color: transparent whitesmoke;
     -webkit-transform: rotate(180deg);
-        -ms-transform: rotate(180deg);
             transform: rotate(180deg); }
 
 .jsxc_rosteritem {

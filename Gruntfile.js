@@ -176,6 +176,20 @@ module.exports = function(grunt) {
          }
       },
       search: {
+         bower: {
+           files: {
+             src: ['bower.json']
+           },
+           options: {
+             searchString: "<%= app.version %>",
+             logFormat: 'console',
+             onComplete: function(m) {
+                if (m.numMatches === 0) {
+                   grunt.fail.fatal('No entry in bower.json for current version found.');
+                }
+             }
+           }
+         },
          console: {
             files: {
                src: ['src/*.js']
@@ -372,7 +386,7 @@ module.exports = function(grunt) {
    grunt.registerTask('build:prerelease', 'Build a new pre-release', function() {
       grunt.config.set('target', 'build');
 
-      grunt.task.run(['search:console', 'build', 'usebanner', 'replace:version', 'replace:libraries', 'replace:todo', 'uglify', 'compress']);
+      grunt.task.run(['search:console', 'search:bower', 'build', 'usebanner', 'replace:version', 'replace:libraries', 'replace:todo', 'uglify', 'compress']);
    });
 
    grunt.registerTask('build:release', 'Build a new release', function() {
