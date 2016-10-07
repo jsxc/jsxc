@@ -269,7 +269,7 @@ jsxc.storage = {
    onStorage: function(e) {
 
       // skip
-      if (e.key === jsxc.storage.PREFIX + jsxc.storage.SEP + 'rid') {
+      if (e.key === jsxc.storage.PREFIX + jsxc.storage.SEP + 'rid' || !e.key) {
          return;
       }
 
