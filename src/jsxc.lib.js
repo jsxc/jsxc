@@ -754,7 +754,7 @@ jsxc = {
     * This method submits the specified login form.
     */
    submitLoginForm: function() {
-      var form = jsxc.options.loginForm.form.off('submit');
+      var form = $(jsxc.options.loginForm.form).off('submit');
 
       // Attach original events
       var submits = form.data('submits') || [];
