@@ -393,7 +393,7 @@ jsxc.muc = {
       var submit = $('<button>');
       submit.addClass('btn btn-primary');
       submit.attr('type', 'submit');
-      submit.text($.t('Join'));
+      submit.text($.t('Save'));
 
       var cancel = $('<button>');
       cancel.addClass('btn btn-default');
@@ -701,6 +701,18 @@ jsxc.muc = {
 
       win.find('.jsxc_settings ul').append($('<li>').append(destroy));
 
+      var configure = $('<a>');
+      configure.text($.t('Configure'));
+      configure.addClass('jsxc_configure');
+      configure.hide();
+      configure.click(function() {
+         self.showRoomConfiguration(bid);
+      });
+
+      if (self.conn) {
+         win.find('.jsxc_settings ul').append($('<li>').append(configure));
+      }
+
       if (roomdata.state > self.CONST.ROOMSTATE.INIT) {
          var member = jsxc.storage.getUserItem('member', bid) || {};
 
@@ -709,6 +721,10 @@ jsxc.muc = {
 
             if (nickname === ownNickname && val.affiliation === self.CONST.AFFILIATION.OWNER) {
                destroy.show();
+            }
+
+            if (nickname === ownNickname && (val.affiliation === self.CONST.AFFILIATION.OWNER || val.affiliation === self.CONST.AFFILIATION.OWNER)) {
+               configure.show();
             }
          });
       }
