@@ -1,12 +1,12 @@
 /**
  * Handle long-live data
- * 
+ *
  * @namespace jsxc.storage
  */
 jsxc.storage = {
    /**
     * Prefix for localstorage
-    * 
+    *
     * @privat
     */
    PREFIX: 'jsxc',
@@ -30,7 +30,7 @@ jsxc.storage = {
 
    /**
     * Save item to storage
-    * 
+    *
     * @function
     * @param {String} key variablename
     * @param {Object} value value
@@ -81,7 +81,7 @@ jsxc.storage = {
 
    /**
     * Load item from storage
-    * 
+    *
     * @function
     * @param {String} key variablename
     * @param {String} uk Userkey? Should we add the bid as prefix?
@@ -99,7 +99,7 @@ jsxc.storage = {
 
    /**
     * Get a user item from storage.
-    * 
+    *
     * @param key
     * @returns user item
     */
@@ -117,7 +117,7 @@ jsxc.storage = {
 
    /**
     * Remove item from storage
-    * 
+    *
     * @function
     * @param {String} key variablename
     * @param {String} uk Userkey? Should we add the bid as prefix?
@@ -137,7 +137,7 @@ jsxc.storage = {
 
    /**
     * Remove user item from storage.
-    * 
+    *
     * @param key
     */
    removeUserItem: function(type, key) {
@@ -154,7 +154,7 @@ jsxc.storage = {
 
    /**
     * Updates value of a variable in a saved object.
-    * 
+    *
     * @function
     * @param {String} key variablename
     * @param {String|object} variable variablename in object or object with
@@ -188,7 +188,7 @@ jsxc.storage = {
 
    /**
     * Updates value of a variable in a saved user object.
-    * 
+    *
     * @param {String} type variable type (a prefix)
     * @param {String} key variable name
     * @param {String|object} variable variable name in object or object with
@@ -211,7 +211,7 @@ jsxc.storage = {
 
    /**
     * Increments value
-    * 
+    *
     * @function
     * @param {String} key variablename
     * @param {String} uk Userkey? Should we add the bid as prefix?
@@ -223,7 +223,7 @@ jsxc.storage = {
 
    /**
     * Remove element from array or object
-    * 
+    *
     * @param {string} key name of array or object
     * @param {string} name name of element in array or object
     * @param {String} uk Userkey? Should we add the bid as prefix?
@@ -258,7 +258,7 @@ jsxc.storage = {
 
    /**
     * Triggered if changes are recognized
-    * 
+    *
     * @function
     * @param {event} e Storage event
     * @param {String} e.key Key name which triggered event
@@ -571,11 +571,22 @@ jsxc.storage = {
 
          jsxc.storage.removeUserItem('vcard', bid);
       }
+
+      if (key === '_cmd' && e.newValue) {
+         n = JSON.parse(e.newValue) || {};
+         jsxc.storage.removeUserItem('_cmd');
+
+         if (n.cmd && n.target === jsxc.tab.CONST[jsxc.master ? 'MASTER' : 'SLAVE']) {
+            jsxc.debug('Execute tab cmd: ' + n.cmd);
+
+            jsxc.exec(n.cmd, n.params);
+         }
+      }
    },
 
    /**
     * Save or update buddy data.
-    * 
+    *
     * @memberOf jsxc.storage
     * @param bid
     * @param data

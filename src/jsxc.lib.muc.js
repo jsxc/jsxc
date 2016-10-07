@@ -1,6 +1,6 @@
 /**
  * Implements Multi-User Chat (XEP-0045).
- * 
+ *
  * @namespace jsxc.muc
  */
 jsxc.muc = {
@@ -36,7 +36,7 @@ jsxc.muc = {
 
    /**
     * Initialize muc plugin.
-    * 
+    *
     * @private
     * @memberof jsxc.muc
     * @param {object} o Options
@@ -99,7 +99,7 @@ jsxc.muc = {
 
    /**
     * Add entry to menu.
-    * 
+    *
     * @memberOf jsxc.muc
     */
    initMenu: function() {
@@ -112,7 +112,7 @@ jsxc.muc = {
 
    /**
     * Open join dialog.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} [r] - room jid
     * @param {string} [p] - room password
@@ -355,7 +355,7 @@ jsxc.muc = {
       });
    },
 
-   /** 
+   /**
     * Request and show room configuration.
     *
     * @memberOf jsxc.muc
@@ -436,7 +436,7 @@ jsxc.muc = {
 
    /**
     * Join the given room.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     * @param {string} nickname Desired nickname
@@ -469,11 +469,16 @@ jsxc.muc = {
 
    /**
     * Leave given room.
-    * 
-    * @memberOf jsxc.muc 
+    *
+    * @memberOf jsxc.muc
     * @param {string} room Room jid
     */
    leave: function(room) {
+      if (!jsxc.master) {
+         jsxc.tab.execMaster('muc.leave', room);
+         return;
+      }
+
       var self = jsxc.muc;
       var own = jsxc.storage.getUserItem('ownNicknames') || {};
       var data = jsxc.storage.getUserItem('buddy', room) || {};
@@ -489,7 +494,7 @@ jsxc.muc = {
 
    /**
     * Clean up after we exited a room.
-    * 
+    *
     * @private
     * @memberOf jsxc.muc
     * @param {string} room Room jid
@@ -517,13 +522,18 @@ jsxc.muc = {
 
    /**
     * Destroy the given room.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     * @param {function} handler_cb Function to handle the successful destruction
     * @param {function} error_cb Function to handle an error
     */
    destroy: function(room, handler_cb, error_cb) {
+      if (!jsxc.master) {
+         jsxc.tab.execMaster('muc.destroy', room);
+         return;
+      }
+
       var self = jsxc.muc;
       var roomdata = jsxc.storage.getUserItem('buddy', room);
 
@@ -549,8 +559,8 @@ jsxc.muc = {
    },
 
    /**
-    * Close the given room. 
-    * 
+    * Close the given room.
+    *
     * @memberOf jsxc.muc
     * @param room Room jid
     */
@@ -573,14 +583,16 @@ jsxc.muc = {
          self.onExited(room);
       }
 
-      roomdata.state = self.CONST.ROOMSTATE.DESTROYED;
+      if (jsxc.storage.getUserItem('budy', room)) {
+         roomdata.state = self.CONST.ROOMSTATE.DESTROYED;
 
-      jsxc.storage.setUserItem('buddy', room, roomdata);
+         jsxc.storage.setUserItem('buddy', room, roomdata);
+      }
    },
 
    /**
     * Init group chat window.
-    * 
+    *
     * @private
     * @memberOf jsxc.muc
     * @param event Event
@@ -589,7 +601,7 @@ jsxc.muc = {
    initWindow: function(event, win) {
       var self = jsxc.muc;
 
-      if (!jsxc.xmpp.conn) {
+      if (!jsxc.xmpp.conn && jsxc.master) {
          $(document).one('attached.jsxc', function() {
             self.initWindow(null, win);
          });
@@ -713,7 +725,7 @@ jsxc.muc = {
 
    /**
     * Triggered on incoming presence stanzas.
-    * 
+    *
     * @private
     * @memberOf jsxc.muc
     * @param event
@@ -735,6 +747,7 @@ jsxc.muc = {
       var nickname = Strophe.unescapeNode(res);
       var own = jsxc.storage.getUserItem('ownNicknames') || {};
       var member = jsxc.storage.getUserItem('member', room) || {};
+      var openWindow = false;
       var codes = [];
 
       xdata.find('status').each(function() {
@@ -759,8 +772,8 @@ jsxc.muc = {
          }
 
          if ($('#jsxc_dialog').length > 0) {
-            // User joined the room manually 
-            jsxc.gui.window.open(room);
+            // User joined the room manually
+            openWindow = true;
             jsxc.gui.dialog.close();
          }
       }
@@ -852,12 +865,17 @@ jsxc.muc = {
          $(document).trigger('status.muc.jsxc', [code, room, nickname, member[nickname] || {}, presence]);
       });
 
+      if (openWindow) {
+         // we wait until all parameters are set up correctly (e.g. state)
+         jsxc.gui.window.open(room);
+      }
+
       return true;
    },
 
    /**
     * Handle group chat presence errors.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param event
     * @param {string} from Jid
@@ -885,7 +903,7 @@ jsxc.muc = {
 
    /**
     * Handle status codes. Every function gets room jid, nickname, member data and xdata.
-    * 
+    *
     * @memberOf jsxc.muc
     */
    onStatus: {
@@ -1050,8 +1068,8 @@ jsxc.muc = {
             });
          }
       },
-      /** 
-       * Inform user that he or she is beeing removed from the room because the room has been 
+      /**
+       * Inform user that he or she is beeing removed from the room because the room has been
        * changed to members-only and the user is not a member
        */
       322: function(room, nickname) {
@@ -1077,7 +1095,7 @@ jsxc.muc = {
       },
       /**
        * Inform user that he or she is beeing removed from the room because the MUC service
-       * is being shut down 
+       * is being shut down
        */
       332: function(room) {
          jsxc.muc.close(room);
@@ -1091,7 +1109,7 @@ jsxc.muc = {
 
    /**
     * Extract reason from xdata and if available post it to room.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     * @param {jQuery} xdata Xdata
@@ -1125,16 +1143,16 @@ jsxc.muc = {
 
    /**
     * Insert member to room member list.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     * @param {string} nickname Nickname
     * @param {string} memberdata Member data
     */
    insertMember: function(room, nickname, memberdata) {
-      var self = jsxc.muc;
       var win = jsxc.gui.window.get(room);
       var jid = memberdata.jid;
+      var ownBid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
       var m = win.find('.jsxc_memberlist li[data-nickname="' + nickname + '"]');
 
       if (m.length === 0) {
@@ -1154,7 +1172,7 @@ jsxc.muc = {
 
             if (data !== null && typeof data === 'object') {
                jsxc.gui.updateAvatar(m, jsxc.jidToBid(jid), data.avatar);
-            } else if (jsxc.jidToBid(jid) === jsxc.jidToBid(self.conn.jid)) {
+            } else if (jsxc.jidToBid(jid) === ownBid) {
                jsxc.gui.updateAvatar(m, jsxc.jidToBid(jid), 'own');
             }
          } else {
@@ -1169,7 +1187,7 @@ jsxc.muc = {
 
    /**
     * Remove member from room member list.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     * @param {string} nickname Nickname
@@ -1185,7 +1203,7 @@ jsxc.muc = {
 
    /**
     * Scroll or update member list position.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     * @param {integer} offset =0: update position; >0: Scroll to left; <0: Scroll to right
@@ -1215,7 +1233,7 @@ jsxc.muc = {
 
    /**
     * Empty member list.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     */
@@ -1229,7 +1247,7 @@ jsxc.muc = {
 
    /**
     * Handle incoming group chat message.
-    * 
+    *
     * @private
     * @memberOf jsxc.muc
     * @param {string} message Message stanza
@@ -1297,7 +1315,7 @@ jsxc.muc = {
 
    /**
     * Handle group chat error message.
-    * 
+    *
     * @private
     * @memberOf jsxc.muc
     * @param {string} message Message stanza
@@ -1342,7 +1360,7 @@ jsxc.muc = {
 
    /**
     * Prepare group chat roster item.
-    * 
+    *
     * @private
     * @memberOf jsxc.muc
     * @param event
@@ -1403,13 +1421,13 @@ jsxc.muc = {
 
    /**
     * Some helper functions.
-    * 
+    *
     * @type {Object}
     */
    helper: {
       /**
        * Convert x:data form to html.
-       * 
+       *
        * @param  {Strophe.x.Form} form - x:data form
        * @return {jQuery} jQuery representation of x:data field
        */
@@ -1443,7 +1461,7 @@ jsxc.muc = {
 
       /**
        * Convert x:data field to html.
-       * 
+       *
        * @param  {Strophe.x.Field} field - x:data field
        * @return {html} html representation of x:data field
        */

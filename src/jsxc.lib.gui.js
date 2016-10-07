@@ -1,7 +1,7 @@
 /* global Favico, emojione*/
 /**
  * Handle functions for chat window's and buddylist
- * 
+ *
  * @namespace jsxc.gui
  */
 jsxc.gui = {
@@ -50,7 +50,7 @@ jsxc.gui = {
 
    /**
     * Different uri query actions as defined in XEP-0147.
-    * 
+    *
     * @namespace jsxc.gui.queryActions
     */
    queryActions: {
@@ -92,7 +92,7 @@ jsxc.gui = {
 
    /**
     * Creates application skeleton.
-    * 
+    *
     * @memberOf jsxc.gui
     */
    init: function() {
@@ -152,7 +152,7 @@ jsxc.gui = {
 
    /**
     * Init tooltip plugin for given jQuery selector.
-    * 
+    *
     * @param {String} selector jQuery selector
     * @memberOf jsxc.gui
     */
@@ -169,7 +169,7 @@ jsxc.gui = {
 
    /**
     * Updates Information in roster and chatbar
-    * 
+    *
     * @param {String} bid bar jid
     */
    update: function(bid) {
@@ -240,7 +240,7 @@ jsxc.gui = {
 
    /**
     * Update avatar on all given elements.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param {jQuery} el Elements with subelement .jsxc_avatar
     * @param {string} jid Jid
@@ -318,7 +318,7 @@ jsxc.gui = {
 
    /**
     * Updates scrollbar handlers.
-    * 
+    *
     * @memberOf jsxc.gui
     */
    updateWindowListSB: function() {
@@ -333,7 +333,7 @@ jsxc.gui = {
 
    /**
     * Scroll window list by offset.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param offset
     */
@@ -375,7 +375,7 @@ jsxc.gui = {
 
    /**
     * Toggle list with timeout, like menu or settings
-    * 
+    *
     * @memberof jsxc.gui
     */
    toggleList: function(el) {
@@ -470,7 +470,7 @@ jsxc.gui = {
 
    /**
     * Creates and show the fingerprint dialog
-    * 
+    *
     * @param {String} bid
     */
    showFingerprints: function(bid) {
@@ -479,7 +479,7 @@ jsxc.gui = {
 
    /**
     * Creates and show the verification dialog
-    * 
+    *
     * @param {String} bid
     */
    showVerification: function(bid) {
@@ -604,7 +604,7 @@ jsxc.gui = {
 
    /**
     * Create and show approve dialog
-    * 
+    *
     * @param {type} from valid jid
     */
    showApproveDialog: function(from) {
@@ -638,7 +638,7 @@ jsxc.gui = {
 
    /**
     * Create and show dialog to add a buddy
-    * 
+    *
     * @param {string} [username] jabber id
     */
    showContactDialog: function(username) {
@@ -713,7 +713,7 @@ jsxc.gui = {
 
    /**
     * Create and show dialog to remove a buddy
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -741,7 +741,7 @@ jsxc.gui = {
 
    /**
     * Create and show a wait dialog
-    * 
+    *
     * @param {type} msg message to display to the user
     * @returns {undefined}
     */
@@ -753,7 +753,7 @@ jsxc.gui = {
 
    /**
     * Create and show a wait dialog
-    * 
+    *
     * @param {type} msg message to display to the user
     * @returns {undefined}
     */
@@ -763,7 +763,7 @@ jsxc.gui = {
 
    /**
     * Create and show a auth fail dialog
-    * 
+    *
     * @returns {undefined}
     */
    showAuthFail: function() {
@@ -784,7 +784,7 @@ jsxc.gui = {
 
    /**
     * Create and show a confirm dialog
-    * 
+    *
     * @param {String} msg Message
     * @param {function} confirm
     * @param {function} dismiss
@@ -806,7 +806,7 @@ jsxc.gui = {
 
    /**
     * Show about dialog.
-    * 
+    *
     * @memberOf jsxc.gui
     */
    showAboutDialog: function() {
@@ -819,7 +819,7 @@ jsxc.gui = {
 
    /**
     * Show debug log.
-    * 
+    *
     * @memberOf jsxc.gui
     */
    showDebugLog: function() {
@@ -850,7 +850,7 @@ jsxc.gui = {
 
    /**
     * Show vCard of user with the given bar jid.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param {String} jid
     */
@@ -1072,7 +1072,7 @@ jsxc.gui = {
 
    /**
     * Show prompt for notification permission.
-    * 
+    *
     * @memberOf jsxc.gui
     */
    showRequestNotification: function() {
@@ -1180,7 +1180,7 @@ jsxc.gui = {
 
    /**
     * Change own presence to pres.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param pres {CONST.STATUS} New presence state
     * @param external {boolean} True if triggered from other tab.
@@ -1202,7 +1202,7 @@ jsxc.gui = {
 
    /**
     * Update all presence objects for given user.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param bid bar jid of user.
     * @param {CONST.STATUS} pres New presence state.
@@ -1237,7 +1237,7 @@ jsxc.gui = {
 
    /**
     * Switch read state to UNread and increase counter.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param bid
     */
@@ -1264,7 +1264,7 @@ jsxc.gui = {
 
    /**
     * Switch read state to UNread.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param bid
     * @param count
@@ -1287,7 +1287,7 @@ jsxc.gui = {
 
    /**
     * Switch read state to read.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param bid
     */
@@ -1318,7 +1318,7 @@ jsxc.gui = {
 
    /**
     * This function searches for URI scheme according to XEP-0147.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param container In which element should we search?
     */
@@ -1425,7 +1425,7 @@ jsxc.gui = {
 
    /**
     * Replace shortname emoticons with images.
-    * 
+    *
     * @param  {string} str text with emoticons as shortname
     * @return {string} text with emoticons as images
     */
@@ -1460,7 +1460,7 @@ jsxc.gui = {
 
 /**
  * Handle functions related to the gui of the roster
- * 
+ *
  * @namespace jsxc.gui.roster
  */
 jsxc.gui.roster = {
@@ -1473,7 +1473,7 @@ jsxc.gui.roster = {
 
    /**
     * Init the roster skeleton
-    * 
+    *
     * @memberOf jsxc.gui.roster
     * @returns {undefined}
     */
@@ -1581,7 +1581,7 @@ jsxc.gui.roster = {
 
    /**
     * Create roster item and add it to the roster
-    * 
+    *
     * @param {String} bid bar jid
     */
    add: function(bid) {
@@ -1667,7 +1667,7 @@ jsxc.gui.roster = {
    /**
     * Insert roster item. First order: online > away > offline. Second order:
     * alphabetical of the name
-    * 
+    *
     * @param {type} bid
     * @param {jquery} li roster item which should be insert
     * @returns {undefined}
@@ -1677,6 +1677,10 @@ jsxc.gui.roster = {
       var data = jsxc.storage.getUserItem('buddy', bid);
       var listElements = $('#jsxc_buddylist > li');
       var insert = false;
+
+      if (!data.name) {
+         data.name = bid;
+      }
 
       // Insert buddy with no mutual friendship to the end
       var status = (data.sub === 'both') ? data.status : -1;
@@ -1701,7 +1705,7 @@ jsxc.gui.roster = {
 
    /**
     * Initiate reorder of roster item
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -1711,7 +1715,7 @@ jsxc.gui.roster = {
 
    /**
     * Removes buddy from roster
-    * 
+    *
     * @param {String} bid bar jid
     * @return {JQueryObject} Roster list element
     */
@@ -1721,7 +1725,7 @@ jsxc.gui.roster = {
 
    /**
     * Removes buddy from roster and clean up
-    * 
+    *
     * @param {String} bid bar compatible jid
     */
    purge: function(bid) {
@@ -1741,7 +1745,7 @@ jsxc.gui.roster = {
 
    /**
     * Create input element for rename action
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -1783,7 +1787,7 @@ jsxc.gui.roster = {
 
    /**
     * Rename buddy
-    * 
+    *
     * @param {type} bid
     * @param {type} newname new name of buddy
     * @returns {undefined}
@@ -1813,7 +1817,7 @@ jsxc.gui.roster = {
 
    /**
     * Toogle complete roster
-    * 
+    *
     * @param {string} state Toggle to state
     */
    toggle: function(state) {
@@ -1861,7 +1865,7 @@ jsxc.gui.roster = {
 
    /**
     * Shows a text with link to add a new buddy.
-    * 
+    *
     * @memberOf jsxc.gui.roster
     */
    empty: function() {
@@ -1880,13 +1884,13 @@ jsxc.gui.roster = {
 
 /**
  * Wrapper for dialog
- * 
+ *
  * @namespace jsxc.gui.dialog
  */
 jsxc.gui.dialog = {
    /**
     * Open a Dialog.
-    * 
+    *
     * @memberOf jsxc.gui.dialog
     * @param {String} data Data of the dialog
     * @param {Object} [o] Options for the dialog
@@ -1958,7 +1962,7 @@ jsxc.gui.dialog = {
    },
 
    /**
-    * If no name is provided every dialog will be closed, 
+    * If no name is provided every dialog will be closed,
     * otherwise only dialog with given name is closed.
     *
     * @param {string} [name] Close only dialog with the given name
@@ -1975,7 +1979,7 @@ jsxc.gui.dialog = {
 
    /**
     * Resizes current dialog.
-    * 
+    *
     * @param {Object} options e.g. width and height
     */
    resize: function() {
@@ -1985,13 +1989,13 @@ jsxc.gui.dialog = {
 
 /**
  * Handle functions related to the gui of the window
- * 
+ *
  * @namespace jsxc.gui.window
  */
 jsxc.gui.window = {
    /**
     * Init a window skeleton
-    * 
+    *
     * @memberOf jsxc.gui.window
     * @param {String} bid
     * @returns {jQuery} Window object
@@ -2182,7 +2186,7 @@ jsxc.gui.window = {
 
    /**
     * Resize given window to given size. If no size is provided the window is resized to the default size.
-    * 
+    *
     * @param  {(string|jquery)} win Bid or window object
     * @param  {object} ui    The size has to be in the format {size:{width: [INT], height: [INT]}}
     * @param  {boolean} [outer] If true the given size is used as outer dimensions.
@@ -2252,7 +2256,7 @@ jsxc.gui.window = {
 
    /**
     * Returns the window element
-    * 
+    *
     * @param {String} bid
     * @returns {jquery} jQuery object of the window element
     */
@@ -2263,7 +2267,7 @@ jsxc.gui.window = {
    /**
     * Open a window, related to the bid. If the window doesn't exist, it will be
     * created.
-    * 
+    *
     * @param {String} bid
     * @returns {jQuery} Window object
     */
@@ -2278,7 +2282,7 @@ jsxc.gui.window = {
 
    /**
     * Close chatwindow and clean up
-    * 
+    *
     * @param {String} bid bar jid
     */
    close: function(bid) {
@@ -2303,7 +2307,7 @@ jsxc.gui.window = {
 
    /**
     * Close chatwindow
-    * 
+    *
     * @param {String} bid
     */
    _close: function(bid) {
@@ -2313,7 +2317,7 @@ jsxc.gui.window = {
 
    /**
     * Toggle between minimize and maximize of the text area
-    * 
+    *
     * @param {String} bid bar jid
     */
    toggle: function(bid) {
@@ -2335,7 +2339,7 @@ jsxc.gui.window = {
 
    /**
     * Maximize text area and save
-    * 
+    *
     * @param {String} bid
     */
    show: function(bid) {
@@ -2347,7 +2351,7 @@ jsxc.gui.window = {
 
    /**
     * Maximize text area
-    * 
+    *
     * @param {String} bid
     * @returns {undefined}
     */
@@ -2402,7 +2406,7 @@ jsxc.gui.window = {
 
    /**
     * Minimize text area and save
-    * 
+    *
     * @param {String} [bid]
     */
    hide: function(bid) {
@@ -2427,7 +2431,7 @@ jsxc.gui.window = {
 
    /**
     * Minimize text area
-    * 
+    *
     * @param {String} bid
     */
    _hide: function(bid) {
@@ -2441,7 +2445,7 @@ jsxc.gui.window = {
 
    /**
     * Highlight window
-    * 
+    *
     * @param {type} bid
     */
    highlight: function(bid) {
@@ -2456,7 +2460,7 @@ jsxc.gui.window = {
 
    /**
     * Scroll chat area to the bottom
-    * 
+    *
     * @param {String} bid bar jid
     */
    scrollDown: function(bid) {
@@ -2474,16 +2478,16 @@ jsxc.gui.window = {
 
    /**
     * Write Message to chat area and save. Check border cases and remove html.
-    * 
+    *
     * @function postMessage
     * @memberOf jsxc.gui.window
     * @param {jsxc.Message} message object to be send
     * @return {jsxc.Message} maybe modified message object
     */
    /**
-    * Create message object from given properties, write Message to chat area 
+    * Create message object from given properties, write Message to chat area
     * and save. Check border cases and remove html.
-    * 
+    *
     * @function postMessage
     * @memberOf jsxc.gui.window
     * @param {object} args New message properties
@@ -2568,7 +2572,7 @@ jsxc.gui.window = {
 
    /**
     * Write Message to chat area
-    * 
+    *
     * @param {String} bid bar jid
     * @param {Object} post Post object with direction, msg, uid, received
     * @param {Bool} restore If true no highlights are used
@@ -2727,7 +2731,7 @@ jsxc.gui.window = {
 
    /**
     * Set text into input area
-    * 
+    *
     * @param {type} bid
     * @param {type} text
     * @returns {undefined}
@@ -2738,7 +2742,7 @@ jsxc.gui.window = {
 
    /**
     * Load old log into chat area
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -2774,7 +2778,7 @@ jsxc.gui.window = {
 
    /**
     * Clear chat history
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -2799,7 +2803,7 @@ jsxc.gui.window = {
 
    /**
     * Mark message as received.
-    * 
+    *
     * @param  {string} bid
     * @param  {string} uid message id
     * @deprecated since v3.0.0. Use {@link jsxc.Message.received}.
@@ -3027,7 +3031,7 @@ jsxc.gui.template = {};
 
 /**
  * Return requested template and replace all placeholder
- * 
+ *
  * @memberOf jsxc.gui.template;
  * @param {type} name template name
  * @param {type} bid
