@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.0.1-beta1 - 2016-10-07
+ * jsxc v3.0.1-beta2 - 2016-10-14
  * 
  * This file concatenates all dependencies of jsxc.
  * 

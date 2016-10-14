@@ -177,18 +177,18 @@ module.exports = function(grunt) {
       },
       search: {
          bower: {
-           files: {
-             src: ['bower.json']
-           },
-           options: {
-             searchString: "<%= app.version %>",
-             logFormat: 'console',
-             onComplete: function(m) {
-                if (m.numMatches === 0) {
-                   grunt.fail.fatal('No entry in bower.json for current version found.');
-                }
-             }
-           }
+            files: {
+               src: ['bower.json']
+            },
+            options: {
+               searchString: "<%= app.version %>",
+               logFormat: 'console',
+               onComplete: function(m) {
+                  if (m.numMatches === 0) {
+                     grunt.fail.fatal('No entry in bower.json for current version found.');
+                  }
+               }
+            }
          },
          console: {
             files: {

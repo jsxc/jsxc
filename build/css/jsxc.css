@@ -2628,6 +2628,8 @@ fieldset[disabled] #jsxc_webrtc .checkbox label {
 
 #jsxc_dialog .progress, #jsxc_webrtc .progress {
   margin-bottom: 0px; }
+  #jsxc_dialog .progress .progress-bar, #jsxc_webrtc .progress .progress-bar {
+    width: 100%; }
 
 .mfp-bg {
   z-index: 9000; }
@@ -3716,6 +3718,15 @@ li[data-type="groupchat"] .jsxc_video {
 
 .jsxc_center {
   text-align: center; }
+
+.jsxc_hidden {
+  display: none; }
+
+.jsxc_clear {
+  clear: both; }
+
+.jsxc_uppercase {
+  text-transform: uppercase; }
 
 .jsxc_sep {
   border-top: 1px solid #000; }

@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.0.1-beta1 - 2016-10-07
+ * jsxc v3.0.1-beta2 - 2016-10-14
  * 
  * Copyright (c) 2016 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.0.1-beta1
+ * @version 3.0.1-beta2
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.0.1-beta1',
+   version: '3.0.1-beta2',
 
    /** True if i'm the master */
    master: false,
@@ -262,6 +262,8 @@ jsxc = {
       var lang;
       if (jsxc.storage.getItem('lang') !== null) {
          lang = jsxc.storage.getItem('lang');
+      } else if (jsxc.options.autoLang && navigator.languages && navigator.languages.length > 0) {
+         lang = navigator.languages[0].substr(0, 2);
       } else if (jsxc.options.autoLang && navigator.language) {
          lang = navigator.language.substr(0, 2);
       } else {
@@ -5108,7 +5110,7 @@ jsxc.gui.window = {
       }
 
       if (direction === 'sys') {
-         jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div style="clear:both"/>');
+         jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div class="jsxc_clear"/>');
       } else if (typeof message.stamp !== 'undefined') {
          msgDiv.append(msgTsDiv);
       }
@@ -10562,22 +10564,22 @@ jsxc.gui.template['authenticationDialog'] = '<h3>Verification</h3>\n' +
 '   </div>\n' +
 '</div>\n' +
 '<hr />\n' +
-'<div style="display: none">\n' +
+'<div class="jsxc_hidden">\n' +
 '   <p data-i18n="To_verify_the_fingerprint_" class="jsxc_explanation"></p>\n' +
 '   <p>\n' +
 '      <strong data-i18n="Your_fingerprint"></strong>\n' +
-'      <br /> <span style="text-transform: uppercase"><span data-var="my_priv_fingerprint"/></span>\n' +
+'      <br /> <span class="jsxc_uppercase"><span data-var="my_priv_fingerprint"/></span>\n' +
 '   </p>\n' +
 '   <p>\n' +
 '      <strong data-i18n="Buddy_fingerprint"></strong>\n' +
-'      <br /> <span style="text-transform: uppercase"><span data-var="bid_priv_fingerprint"/></span>\n' +
+'      <br /> <span class="jsxc_uppercase"><span data-var="bid_priv_fingerprint"/></span>\n' +
 '   </p>\n' +
 '   <div class="jsxc_right">\n' +
 '      <button class="btn btn-default jsxc_close" data-i18n="Close"></button>\n' +
 '      <button class="btn btn-primary jsxc_submit" data-i18n="Compared"></button>\n' +
 '   </div>\n' +
 '</div>\n' +
-'<div style="display: none" class="form-horizontal">\n' +
+'<div class="form-horizontal jsxc_hidden">\n' +
 '   <p data-i18n="To_authenticate_using_a_question_" class="jsxc_explanation"></p>\n' +
 '   <div class="form-group">\n' +
 '      <label class="col-sm-4 control-label" for="jsxc_quest" data-i18n="Question"></label>\n' +
@@ -10598,7 +10600,7 @@ jsxc.gui.template['authenticationDialog'] = '<h3>Verification</h3>\n' +
 '      </div>\n' +
 '   </div>\n' +
 '</div>\n' +
-'<div style="display: none" class="form-horizontal">\n' +
+'<div class="form-horizontal jsxc_hidden">\n' +
 '   <p class="jsxc_explanation" data-i18n="To_authenticate_pick_a_secret_"></p>\n' +
 '   <div class="form-group">\n' +
 '      <label class="col-sm-4 control-label" for="jsxc_secret" data-i18n="Secret"></label>\n' +
@@ -10704,7 +10706,7 @@ jsxc.gui.template['chatWindow'] = '<li class="jsxc_windowItem">\n' +
 '         <div class="jsxc_emoticons">\n' +
 '            <div class="jsxc_inner">\n' +
 '               <ul>\n' +
-'                  <li style="clear:both"></li>\n' +
+'                  <li class="jsxc_clear"></li>\n' +
 '               </ul>\n' +
 '            </div>\n' +
 '         </div>\n' +
@@ -10750,11 +10752,11 @@ jsxc.gui.template['fingerprintsDialog'] = '<div>\n' +
 '   <p class="jsxc_maxWidth" data-i18n="A_fingerprint_"></p>\n' +
 '   <p>\n' +
 '      <strong data-i18n="Your_fingerprint"></strong>\n' +
-'      <br /> <span style="text-transform: uppercase" data-var="my_priv_fingerprint"></span>\n' +
+'      <br /> <span class="jsxc_uppercase" data-var="my_priv_fingerprint"></span>\n' +
 '   </p>\n' +
 '   <p>\n' +
 '      <strong data-i18n="Buddy_fingerprint"></strong>\n' +
-'      <br /> <span style="text-transform: uppercase" data-var="bid_priv_fingerprint"></span>\n' +
+'      <br /> <span class="jsxc_uppercase" data-var="bid_priv_fingerprint"></span>\n' +
 '   </p>\n' +
 '</div>\n' +
 '';
@@ -11107,7 +11109,7 @@ jsxc.gui.template['videoWindow'] = '<div id="jsxc_webrtc">\n' +
 jsxc.gui.template['waitAlert'] = '<h3 data-var="msg"></h3>\n' +
 '\n' +
 '<div class="progress">\n' +
-'   <div class="progress-bar progress-bar-striped active" style="width: 100%" data-i18n="Please_wait">\n' +
+'   <div class="progress-bar progress-bar-striped active" data-i18n="Please_wait">\n' +
 '   </div>\n' +
 '</div>\n' +
 '';
