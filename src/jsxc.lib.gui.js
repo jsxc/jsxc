@@ -2676,7 +2676,7 @@ jsxc.gui.window = {
       }
 
       if (direction === 'sys') {
-         jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div style="clear:both"/>');
+         jsxc.gui.window.get(bid).find('.jsxc_textarea').append('<div class="jsxc_clear"/>');
       } else if (typeof message.stamp !== 'undefined') {
          msgDiv.append(msgTsDiv);
       }
