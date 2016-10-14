@@ -242,6 +242,8 @@ jsxc = {
       var lang;
       if (jsxc.storage.getItem('lang') !== null) {
          lang = jsxc.storage.getItem('lang');
+      } else if (jsxc.options.autoLang && navigator.languages && navigator.languages.length > 0) {
+         lang = navigator.languages[0].substr(0, 2);
       } else if (jsxc.options.autoLang && navigator.language) {
          lang = navigator.language.substr(0, 2);
       } else {
