@@ -390,6 +390,11 @@ jsxc.muc = {
       var dialog = jsxc.gui.dialog.open(jsxc.muc.helper.formToHTML(config));
       var form = dialog.find('form');
 
+      // work around Strophe.x behaviour
+      form.find('[type="checkbox"]').change(function(){
+        $(this).val(this.checked ? 1 : 0);
+      });
+
       var submit = $('<button>');
       submit.addClass('btn btn-primary');
       submit.attr('type', 'submit');
