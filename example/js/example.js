@@ -10,7 +10,7 @@ $(function() {
       }
    };
 
-   // Initialize core functions, intercept login form 
+   // Initialize core functions, intercept login form
    // and attach connection if possible.
    jsxc.init({
       loginForm: {
@@ -49,7 +49,7 @@ $(function() {
    $('#form3 .submit').click(jsxc.gui.showLoginBox);
 
    // ============================================
-   // Below you find only some helper to show/hide 
+   // Below you find only some helper to show/hide
    // logout buttons and similiar stuff.
    // ============================================
 
@@ -80,6 +80,12 @@ $(function() {
       $('.submit').show();
       $('.logout').hide().off('click');
    });
+
+   // special setup for jsxc.org/example
+   if (window.location.hostname === 'www.jsxc.org' && !localStorage.getItem('bosh-url') && !localStorage.getItem('xmpp-domain')) {
+     $('#bosh-url').val('/http-bind/');
+     $('#xmpp-domain').val('jsxc.org');
+   }
 
    // load bosh url from storage
    if (typeof localStorage.getItem('bosh-url') === 'string') {
@@ -128,11 +134,16 @@ $(function() {
 
    // check initial bosh url
    $('#bosh-url').trigger('input');
+
+   // show special information for jsxc.org/example
+   if (window.location.hostname === 'www.jsxc.org') {
+     $('.jsxc-org').show();
+   }
 });
 
 /**
  * Test if bosh server is up and running.
- * 
+ *
  * @param  {string}   url    BOSH url
  * @param  {string}   domain host domain for BOSH server
  * @param  {Function} cb     called if test is done

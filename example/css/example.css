@@ -6,6 +6,10 @@ body {
    display: none;
 }
 
+.jsxc-org {
+  display: none;
+}
+
 #content form .alert {
    display: none;
 }
