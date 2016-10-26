@@ -29,15 +29,15 @@
     "Question": "Pergunta",
     "Secret": "Senha",
     "To_verify_the_fingerprint_": "Para verificar o fingerprint, entre em contato com seu contato usando outro meio, de preferência seguro, como o telefone.",
-    "Your_fingerprint": "Seu fingerprint",
-    "Buddy_fingerprint": "Fingerprint do contato",
+    "Your_fingerprint": "Sua impressão digital",
+    "Buddy_fingerprint": "Impressão digital do contato",
     "Close": "Fechar",
     "Compared": "Comparado",
     "To_authenticate_using_a_question_": "Para autenticar seu contato faça uma pergunta, mas escolha que só ele saiba a resposta.",
     "Ask": "Pergunta",
     "To_authenticate_pick_a_secret_": "Para autenticar, escolha um segredo que somente você e seu contato saibam.",
     "Compare": "Compare",
-    "Fingerprints": "Fingerprints",
+    "Fingerprints": "Impressões digitais",
     "Authentication": "Autenticação",
     "Message": "Mensagem",
     "Add_buddy": "Adicionar contato",
@@ -110,15 +110,15 @@
     "TEL": "Telefone",
     "NUMBER": "Número",
     "EMAIL": "Email",
-    "USERID": "  ",
+    "USERID": "  IDUsuário",
     "ORG": "Empresa",
     "ORGNAME": "Nome",
     "ORGUNIT": "Unidade",
     "TITLE": "Cargo",
-    "ROLE": "Rol",
+    "ROLE": "Função",
     "BDAY": "Data de nascimento",
     "DESC": "Descrição",
-    "PHOTO": "  ",
+    "PHOTO": "Foto",
     "send_message": "Enviar mensagem",
     "get_info": "Exibir informações",
     "Settings": "Configurações",
@@ -179,7 +179,7 @@
       "description": "Somente pessoas com \"voice\" podem enviar mensagens"
     },
     "muc_nonanonymous": {
-      "keyword": null,
+      "keyword": "não-anônimo",
       "description": "Seu id jabber esta esposto para todos os outros ocupantes"
     },
     "muc_open": {
@@ -187,11 +187,11 @@
       "description": "Todos podem entrar"
     },
     "muc_passwordprotected": {
-      "keyword": null,
+      "keyword": "protegido por senha",
       "description": "você precisa fornecer a senha correta"
     },
     "muc_persistent": {
-      "keyword": null,
+      "keyword": "persistente",
       "description": "Não será destruída se o último ocupante tiver saído"
     },
     "muc_public": {
@@ -199,7 +199,7 @@
       "description": "pode ser localizado pela busca"
     },
     "muc_semianonymous": {
-      "keyword": null,
+      "keyword": "semi-anônimos",
       "description": "Sua identificação jabber só é exposta para administradores da sala"
     },
     "muc_temporary": {
@@ -211,7 +211,7 @@
       "description": "Todos tem permissão de enviar mensagens"
     },
     "muc_unsecured": {
-      "keyword": null,
+      "keyword": "inseguro",
       "description": "Você não precisa de senha para entrar"
     },
     "Continue": "Avançar",
