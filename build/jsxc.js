@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.0.1-beta2 - 2016-10-14
+ * jsxc v3.0.1 - 2016-10-28
  * 
  * Copyright (c) 2016 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.0.1-beta2
+ * @version 3.0.1
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.0.1-beta2',
+   version: '3.0.1',
 
    /** True if i'm the master */
    master: false,
@@ -5926,6 +5926,11 @@ jsxc.muc = {
       var self = jsxc.muc;
       var dialog = jsxc.gui.dialog.open(jsxc.muc.helper.formToHTML(config));
       var form = dialog.find('form');
+
+      // work around Strophe.x behaviour
+      form.find('[type="checkbox"]').change(function(){
+        $(this).val(this.checked ? 1 : 0);
+      });
 
       var submit = $('<button>');
       submit.addClass('btn btn-primary');

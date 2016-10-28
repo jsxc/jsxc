@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>JSDoc: Source: jsxc.lib.gui.js</title>
-    
+
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
     <!--[if lt IE 9]>
@@ -16,26 +16,27 @@
 <body>
 
 <div id="main">
-    
+
     <h1 class="page-title">Source: jsxc.lib.gui.js</h1>
+
     
-    
+
 
 
     
     <section>
         <article>
-            <pre class="prettyprint source"><code>/* global Favico, emojione*/
+            <pre class="prettyprint source linenums"><code>/* global Favico, emojione*/
 /**
  * Handle functions for chat window's and buddylist
- * 
+ *
  * @namespace jsxc.gui
  */
 jsxc.gui = {
    /** Smilie token to file mapping */
    emotions: [
       ['O:-) O:)', 'innocent'],
-      ['>:-( >:( &gt;:-( &gt;:(', 'angry'],
+      ['>:-( >:( &amp;gt;:-( &amp;gt;:(', 'angry'],
       [':-) :)', 'slight_smile'],
       [':-D :D', 'grin'],
       [':-( :(', 'disappointed'],
@@ -51,7 +52,7 @@ jsxc.gui = {
       [':coffee:', 'coffee'],
       [':devil:', 'smiling_imp'],
       [':kiss: :kissing:', 'kissing'],
-      ['@->-- @-&gt;--', 'rose'],
+      ['@->-- @-&amp;gt;--', 'rose'],
       [':music:', 'musical_note'],
       [':love:', 'heart_eyes'],
       [':heart:', 'heart'],
@@ -77,7 +78,7 @@ jsxc.gui = {
 
    /**
     * Different uri query actions as defined in XEP-0147.
-    * 
+    *
     * @namespace jsxc.gui.queryActions
     */
    queryActions: {
@@ -85,7 +86,7 @@ jsxc.gui = {
       message: function(jid, params) {
          var win = jsxc.gui.window.open(jsxc.jidToBid(jid));
 
-         if (params && typeof params.body === 'string') {
+         if (params &amp;&amp; typeof params.body === 'string') {
             win.find('.jsxc_textinput').val(params.body);
          }
       },
@@ -99,7 +100,7 @@ jsxc.gui = {
       subscribe: function(jid, params) {
          jsxc.gui.showContactDialog(jid);
 
-         if (params && typeof params.name) {
+         if (params &amp;&amp; typeof params.name) {
             $('#jsxc_alias').val(params.name);
          }
       },
@@ -111,7 +112,7 @@ jsxc.gui = {
 
       /** xmpp:JID?join[;password=TEXT] */
       join: function(jid, params) {
-         var password = (params && params.password) ? params.password : null;
+         var password = (params &amp;&amp; params.password) ? params.password : null;
 
          jsxc.muc.showJoinChat(jid, password);
       }
@@ -119,7 +120,7 @@ jsxc.gui = {
 
    /**
     * Creates application skeleton.
-    * 
+    *
     * @memberOf jsxc.gui
     */
    init: function() {
@@ -150,7 +151,7 @@ jsxc.gui = {
       jsxc.gui.tooltip('#jsxc_windowList');
 
       var fo = jsxc.options.get('favicon');
-      if (fo && fo.enable) {
+      if (fo &amp;&amp; fo.enable) {
          jsxc.gui.favicon = new Favico({
             animation: 'pop',
             bgColor: fo.bgColor,
@@ -179,7 +180,7 @@ jsxc.gui = {
 
    /**
     * Init tooltip plugin for given jQuery selector.
-    * 
+    *
     * @param {String} selector jQuery selector
     * @memberOf jsxc.gui
     */
@@ -196,7 +197,7 @@ jsxc.gui = {
 
    /**
     * Updates Information in roster and chatbar
-    * 
+    *
     * @param {String} bid bar jid
     */
    update: function(bid) {
@@ -250,7 +251,7 @@ jsxc.gui = {
       }
 
       // update gui according to subscription state
-      if (data.sub && data.sub !== 'both') {
+      if (data.sub &amp;&amp; data.sub !== 'both') {
          ue.addClass('jsxc_oneway');
       } else {
          ue.removeClass('jsxc_oneway');
@@ -267,7 +268,7 @@ jsxc.gui = {
 
    /**
     * Update avatar on all given elements.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param {jQuery} el Elements with subelement .jsxc_avatar
     * @param {string} jid Jid
@@ -299,6 +300,11 @@ jsxc.gui = {
       }
 
       var avatarSrc = jsxc.storage.getUserItem('avatar', aid);
+
+      if (!jsxc.master &amp;&amp; !avatarSrc) {
+         // force avatar placeholder for slave tab, until master tab requested vCard
+         avatarSrc = 0;
+      }
 
       if (avatarSrc !== null) {
          setAvatar(avatarSrc);
@@ -345,7 +351,7 @@ jsxc.gui = {
 
    /**
     * Updates scrollbar handlers.
-    * 
+    *
     * @memberOf jsxc.gui
     */
    updateWindowListSB: function() {
@@ -360,7 +366,7 @@ jsxc.gui = {
 
    /**
     * Scroll window list by offset.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param offset
     */
@@ -402,7 +408,7 @@ jsxc.gui = {
 
    /**
     * Toggle list with timeout, like menu or settings
-    * 
+    *
     * @memberof jsxc.gui
     */
    toggleList: function(el) {
@@ -497,7 +503,7 @@ jsxc.gui = {
 
    /**
     * Creates and show the fingerprint dialog
-    * 
+    *
     * @param {String} bid
     */
    showFingerprints: function(bid) {
@@ -506,7 +512,7 @@ jsxc.gui = {
 
    /**
     * Creates and show the verification dialog
-    * 
+    *
     * @param {String} bid
     */
    showVerification: function(bid) {
@@ -631,7 +637,7 @@ jsxc.gui = {
 
    /**
     * Create and show approve dialog
-    * 
+    *
     * @param {type} from valid jid
     */
    showApproveDialog: function(from) {
@@ -665,7 +671,7 @@ jsxc.gui = {
 
    /**
     * Create and show dialog to add a buddy
-    * 
+    *
     * @param {string} [username] jabber id
     */
    showContactDialog: function(username) {
@@ -740,7 +746,7 @@ jsxc.gui = {
 
    /**
     * Create and show dialog to remove a buddy
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -768,7 +774,7 @@ jsxc.gui = {
 
    /**
     * Create and show a wait dialog
-    * 
+    *
     * @param {type} msg message to display to the user
     * @returns {undefined}
     */
@@ -780,7 +786,7 @@ jsxc.gui = {
 
    /**
     * Create and show a wait dialog
-    * 
+    *
     * @param {type} msg message to display to the user
     * @returns {undefined}
     */
@@ -790,7 +796,7 @@ jsxc.gui = {
 
    /**
     * Create and show a auth fail dialog
-    * 
+    *
     * @returns {undefined}
     */
    showAuthFail: function() {
@@ -811,7 +817,7 @@ jsxc.gui = {
 
    /**
     * Create and show a confirm dialog
-    * 
+    *
     * @param {String} msg Message
     * @param {function} confirm
     * @param {function} dismiss
@@ -833,7 +839,7 @@ jsxc.gui = {
 
    /**
     * Show about dialog.
-    * 
+    *
     * @memberOf jsxc.gui
     */
    showAboutDialog: function() {
@@ -846,7 +852,7 @@ jsxc.gui = {
 
    /**
     * Show debug log.
-    * 
+    *
     * @memberOf jsxc.gui
     */
    showDebugLog: function() {
@@ -861,7 +867,7 @@ jsxc.gui = {
          }
       }
 
-      if ($.fn && $.fn.jquery) {
+      if ($.fn &amp;&amp; $.fn.jquery) {
          userInfo += '&lt;b>jQuery:&lt;/b> ' + $.fn.jquery + '&lt;br />';
       }
 
@@ -877,7 +883,7 @@ jsxc.gui = {
 
    /**
     * Show vCard of user with the given bar jid.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param {String} jid
     */
@@ -897,7 +903,7 @@ jsxc.gui = {
             identities = [];
             cap = jsxc.xmpp.getCapabilitiesByJid(bid + '/' + res);
 
-            if (cap !== null && cap.identities !== null) {
+            if (cap !== null &amp;&amp; cap.identities !== null) {
                identities = cap.identities;
             }
 
@@ -948,7 +954,7 @@ jsxc.gui = {
 
             content += '&lt;/li>';
 
-            if (depth === 0 && $('#jsxc_dialog ul.jsxc_vCard').length > 0) {
+            if (depth === 0 &amp;&amp; $('#jsxc_dialog ul.jsxc_vCard').length > 0) {
                if ($('#jsxc_dialog ul.jsxc_vCard li.jsxc_sep:first').length > 0) {
                   $('#jsxc_dialog ul.jsxc_vCard li.jsxc_sep:first').before(content);
                } else {
@@ -1005,7 +1011,7 @@ jsxc.gui = {
             $('#jsxc_dialog h3').before(img_el);
          }
 
-         if ($(stanza).find('vCard').length === 0 || ($(stanza).find('vcard > *').length === 1 && photo.length === 1)) {
+         if ($(stanza).find('vCard').length === 0 || ($(stanza).find('vcard > *').length === 1 &amp;&amp; photo.length === 1)) {
             failedToLoad();
             return;
          }
@@ -1033,9 +1039,9 @@ jsxc.gui = {
 
             var data = jsxc.options.get(prop);
 
-            if (data && typeof data[key] !== 'undefined') {
+            if (data &amp;&amp; typeof data[key] !== 'undefined') {
                if (type === 'checkbox') {
-                  if (data[key] !== 'false' && data[key] !== false) {
+                  if (data[key] !== 'false' &amp;&amp; data[key] !== false) {
                      this.checked = 'checked';
                   }
                } else {
@@ -1099,7 +1105,7 @@ jsxc.gui = {
 
    /**
     * Show prompt for notification permission.
-    * 
+    *
     * @memberOf jsxc.gui
     */
    showRequestNotification: function() {
@@ -1155,7 +1161,7 @@ jsxc.gui = {
    showSelectionDialog: function(header, msg, primary, option, primaryLabel, optionLabel) {
       var opt;
 
-      if (arguments.length === 1 && typeof header === 'object' && header !== null) {
+      if (arguments.length === 1 &amp;&amp; typeof header === 'object' &amp;&amp; header !== null) {
          opt = header;
       } else {
          opt = {
@@ -1188,26 +1194,26 @@ jsxc.gui = {
          dialog.find('p').hide();
       }
 
-      if (opt.primary && opt.primary.label) {
+      if (opt.primary &amp;&amp; opt.primary.label) {
          dialog.find('.btn-primary').text(opt.primary.label);
       }
 
-      if (opt.primary && opt.option.label) {
+      if (opt.primary &amp;&amp; opt.option.label) {
          dialog.find('.btn-default').text(opt.option.label);
       }
 
-      if (opt.primary && opt.primary.cb) {
+      if (opt.primary &amp;&amp; opt.primary.cb) {
          dialog.find('.btn-primary').click(opt.primary.cb);
       }
 
-      if (opt.primary && opt.option.cb) {
+      if (opt.primary &amp;&amp; opt.option.cb) {
          dialog.find('.btn-primary').click(opt.option.cb);
       }
    },
 
    /**
     * Change own presence to pres.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param pres {CONST.STATUS} New presence state
     * @param external {boolean} True if triggered from other tab.
@@ -1229,7 +1235,7 @@ jsxc.gui = {
 
    /**
     * Update all presence objects for given user.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param bid bar jid of user.
     * @param {CONST.STATUS} pres New presence state.
@@ -1264,13 +1270,13 @@ jsxc.gui = {
 
    /**
     * Switch read state to UNread and increase counter.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param bid
     */
    unreadMsg: function(bid) {
       var winData = jsxc.storage.getUserItem('window', bid) || {};
-      var count = (winData && winData.unread) || 0;
+      var count = (winData &amp;&amp; winData.unread) || 0;
       count = (count === true) ? 1 : count + 1; //unread was boolean (&lt;2.1.0)
 
       // update user counter
@@ -1291,7 +1297,7 @@ jsxc.gui = {
 
    /**
     * Switch read state to UNread.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param bid
     * @param count
@@ -1302,7 +1308,7 @@ jsxc.gui = {
       if (typeof count !== 'number') {
          // get counter after page reload
          var winData = jsxc.storage.getUserItem('window', bid);
-         count = (winData && winData.unread) || 1;
+         count = (winData &amp;&amp; winData.unread) || 1;
          count = (count === true) ? 1 : count; //unread was boolean (&lt;2.1.0)
       }
 
@@ -1314,14 +1320,14 @@ jsxc.gui = {
 
    /**
     * Switch read state to read.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param bid
     */
    readMsg: function(bid) {
       var win = jsxc.gui.window.get(bid);
       var winData = jsxc.storage.getUserItem('window', bid);
-      var count = (winData && winData.unread) || 0;
+      var count = (winData &amp;&amp; winData.unread) || 0;
       count = (count === true) ? 0 : count; //unread was boolean (&lt;2.1.0)
 
       var el = jsxc.gui.roster.getItem(bid).add(win);
@@ -1345,7 +1351,7 @@ jsxc.gui = {
 
    /**
     * This function searches for URI scheme according to XEP-0147.
-    * 
+    *
     * @memberOf jsxc.gui
     * @param container In which element should we search?
     */
@@ -1395,7 +1401,7 @@ jsxc.gui = {
          var spot = $("&lt;span>X&lt;/span>").addClass("jsxc_spot");
          var href = $(this).attr("href").replace(/^ *(mailto|xmpp):/, "").trim();
 
-         if (href !== '' && href !== Strophe.getBareJidFromJid(jsxc.storage.getItem("jid"))) {
+         if (href !== '' &amp;&amp; href !== Strophe.getBareJidFromJid(jsxc.storage.getItem("jid"))) {
             var bid = jsxc.jidToBid(href);
             var self = $(this);
             var s = self.prev();
@@ -1445,20 +1451,20 @@ jsxc.gui = {
          'font-size': el.height() * 0.6 + 'px'
       });
 
-      if (typeof text === 'string' && text.length > 0) {
+      if (typeof text === 'string' &amp;&amp; text.length > 0) {
          el.text(text[0].toUpperCase());
       }
    },
 
    /**
     * Replace shortname emoticons with images.
-    * 
+    *
     * @param  {string} str text with emoticons as shortname
     * @return {string} text with emoticons as images
     */
    shortnameToImage: function(str) {
       str = str.replace(jsxc.gui.regShortNames, function(shortname) {
-         if (typeof shortname === 'undefined' || shortname === '' || (!(shortname in jsxc.gui.emoticonList.emojione) && !(shortname in jsxc.gui.emoticonList.core))) {
+         if (typeof shortname === 'undefined' || shortname === '' || (!(shortname in jsxc.gui.emoticonList.emojione) &amp;&amp; !(shortname in jsxc.gui.emoticonList.core))) {
             return shortname;
          }
 
@@ -1487,7 +1493,7 @@ jsxc.gui = {
 
 /**
  * Handle functions related to the gui of the roster
- * 
+ *
  * @namespace jsxc.gui.roster
  */
 jsxc.gui.roster = {
@@ -1500,7 +1506,7 @@ jsxc.gui.roster = {
 
    /**
     * Init the roster skeleton
-    * 
+    *
     * @memberOf jsxc.gui.roster
     * @returns {undefined}
     */
@@ -1608,12 +1614,15 @@ jsxc.gui.roster = {
 
    /**
     * Create roster item and add it to the roster
-    * 
+    *
     * @param {String} bid bar jid
     */
    add: function(bid) {
       var data = jsxc.storage.getUserItem('buddy', bid);
       var bud = jsxc.gui.buddyTemplate.clone().attr('data-bid', bid).attr('data-type', data.type || 'chat');
+
+      // remove all messages (offline, empty roster) from roster
+      $('#jsxc_roster > p').remove();
 
       jsxc.gui.roster.insert(bid, bud);
 
@@ -1691,7 +1700,7 @@ jsxc.gui.roster = {
    /**
     * Insert roster item. First order: online > away > offline. Second order:
     * alphabetical of the name
-    * 
+    *
     * @param {type} bid
     * @param {jquery} li roster item which should be insert
     * @returns {undefined}
@@ -1702,6 +1711,10 @@ jsxc.gui.roster = {
       var listElements = $('#jsxc_buddylist > li');
       var insert = false;
 
+      if (!data.name) {
+         data.name = bid;
+      }
+
       // Insert buddy with no mutual friendship to the end
       var status = (data.sub === 'both') ? data.status : -1;
 
@@ -1709,7 +1722,7 @@ jsxc.gui.roster = {
 
          var thisStatus = ($(this).data('sub') === 'both') ? $(this).data('status') : -1;
 
-         if (($(this).data('name').toLowerCase() > data.name.toLowerCase() && thisStatus === status) || thisStatus &lt; status) {
+         if (($(this).data('name').toLowerCase() > data.name.toLowerCase() &amp;&amp; thisStatus === status) || thisStatus &lt; status) {
 
             $(this).before(li);
             insert = true;
@@ -1725,7 +1738,7 @@ jsxc.gui.roster = {
 
    /**
     * Initiate reorder of roster item
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -1735,7 +1748,7 @@ jsxc.gui.roster = {
 
    /**
     * Removes buddy from roster
-    * 
+    *
     * @param {String} bid bar jid
     * @return {JQueryObject} Roster list element
     */
@@ -1745,7 +1758,7 @@ jsxc.gui.roster = {
 
    /**
     * Removes buddy from roster and clean up
-    * 
+    *
     * @param {String} bid bar compatible jid
     */
    purge: function(bid) {
@@ -1765,7 +1778,7 @@ jsxc.gui.roster = {
 
    /**
     * Create input element for rename action
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -1807,7 +1820,7 @@ jsxc.gui.roster = {
 
    /**
     * Rename buddy
-    * 
+    *
     * @param {type} bid
     * @param {type} newname new name of buddy
     * @returns {undefined}
@@ -1837,7 +1850,7 @@ jsxc.gui.roster = {
 
    /**
     * Toogle complete roster
-    * 
+    *
     * @param {string} state Toggle to state
     */
    toggle: function(state) {
@@ -1850,7 +1863,7 @@ jsxc.gui.roster = {
          state = (jsxc.storage.getUserItem('roster') === jsxc.CONST.HIDDEN) ? jsxc.CONST.SHOWN : jsxc.CONST.HIDDEN;
       }
 
-      if (state === 'shown' && jsxc.isExtraSmallDevice()) {
+      if (state === 'shown' &amp;&amp; jsxc.isExtraSmallDevice()) {
          jsxc.gui.window.hide();
       }
 
@@ -1885,7 +1898,7 @@ jsxc.gui.roster = {
 
    /**
     * Shows a text with link to add a new buddy.
-    * 
+    *
     * @memberOf jsxc.gui.roster
     */
    empty: function() {
@@ -1904,13 +1917,13 @@ jsxc.gui.roster = {
 
 /**
  * Wrapper for dialog
- * 
+ *
  * @namespace jsxc.gui.dialog
  */
 jsxc.gui.dialog = {
    /**
     * Open a Dialog.
-    * 
+    *
     * @memberOf jsxc.gui.dialog
     * @param {String} data Data of the dialog
     * @param {Object} [o] Options for the dialog
@@ -1923,9 +1936,11 @@ jsxc.gui.dialog = {
          name: ''
       }, o);
 
+      var src = $('&lt;div data-name="' + opt.name + '" id="jsxc_dialog" />').append(data);
+
       $.magnificPopup.open({
          items: {
-            src: '&lt;div data-name="' + opt.name + '" id="jsxc_dialog">' + data + '&lt;/div>'
+            src: src
          },
          type: 'inline',
          modal: opt.noClose,
@@ -1980,7 +1995,7 @@ jsxc.gui.dialog = {
    },
 
    /**
-    * If no name is provided every dialog will be closed, 
+    * If no name is provided every dialog will be closed,
     * otherwise only dialog with given name is closed.
     *
     * @param {string} [name] Close only dialog with the given name
@@ -1988,7 +2003,7 @@ jsxc.gui.dialog = {
    close: function(name) {
       jsxc.debug('close dialog');
 
-      if (typeof name === 'string' && name.length > 0 && !jsxc.el_exists('#jsxc_dialog[data-name=' + name + ']')) {
+      if (typeof name === 'string' &amp;&amp; name.length > 0 &amp;&amp; !jsxc.el_exists('#jsxc_dialog[data-name=' + name + ']')) {
          return;
       }
 
@@ -1997,7 +2012,7 @@ jsxc.gui.dialog = {
 
    /**
     * Resizes current dialog.
-    * 
+    *
     * @param {Object} options e.g. width and height
     */
    resize: function() {
@@ -2007,13 +2022,13 @@ jsxc.gui.dialog = {
 
 /**
  * Handle functions related to the gui of the window
- * 
+ *
  * @namespace jsxc.gui.window
  */
 jsxc.gui.window = {
    /**
     * Init a window skeleton
-    * 
+    *
     * @memberOf jsxc.gui.window
     * @param {String} bid
     * @returns {jQuery} Window object
@@ -2119,7 +2134,7 @@ jsxc.gui.window = {
 
       win.find('.jsxc_textarea').click(function() {
          // check if user clicks element or selects text
-         if (typeof getSelection === 'function' && !getSelection().toString()) {
+         if (typeof getSelection === 'function' &amp;&amp; !getSelection().toString()) {
             win.find('.jsxc_textinput').focus();
          }
       });
@@ -2191,7 +2206,7 @@ jsxc.gui.window = {
       jsxc.gui.updateWindowListSB();
 
       // create related otr object
-      if (jsxc.master && !jsxc.otr.objects[bid]) {
+      if (jsxc.master &amp;&amp; !jsxc.otr.objects[bid]) {
          jsxc.otr.create(bid);
       } else {
          jsxc.otr.enable(bid);
@@ -2204,7 +2219,7 @@ jsxc.gui.window = {
 
    /**
     * Resize given window to given size. If no size is provided the window is resized to the default size.
-    * 
+    *
     * @param  {(string|jquery)} win Bid or window object
     * @param  {object} ui    The size has to be in the format {size:{width: [INT], height: [INT]}}
     * @param  {boolean} [outer] If true the given size is used as outer dimensions.
@@ -2274,7 +2289,7 @@ jsxc.gui.window = {
 
    /**
     * Returns the window element
-    * 
+    *
     * @param {String} bid
     * @returns {jquery} jQuery object of the window element
     */
@@ -2285,7 +2300,7 @@ jsxc.gui.window = {
    /**
     * Open a window, related to the bid. If the window doesn't exist, it will be
     * created.
-    * 
+    *
     * @param {String} bid
     * @returns {jQuery} Window object
     */
@@ -2300,7 +2315,7 @@ jsxc.gui.window = {
 
    /**
     * Close chatwindow and clean up
-    * 
+    *
     * @param {String} bid bar jid
     */
    close: function(bid) {
@@ -2325,7 +2340,7 @@ jsxc.gui.window = {
 
    /**
     * Close chatwindow
-    * 
+    *
     * @param {String} bid
     */
    _close: function(bid) {
@@ -2335,7 +2350,7 @@ jsxc.gui.window = {
 
    /**
     * Toggle between minimize and maximize of the text area
-    * 
+    *
     * @param {String} bid bar jid
     */
    toggle: function(bid) {
@@ -2357,7 +2372,7 @@ jsxc.gui.window = {
 
    /**
     * Maximize text area and save
-    * 
+    *
     * @param {String} bid
     */
    show: function(bid) {
@@ -2369,7 +2384,7 @@ jsxc.gui.window = {
 
    /**
     * Maximize text area
-    * 
+    *
     * @param {String} bid
     * @returns {undefined}
     */
@@ -2424,7 +2439,7 @@ jsxc.gui.window = {
 
    /**
     * Minimize text area and save
-    * 
+    *
     * @param {String} [bid]
     */
    hide: function(bid) {
@@ -2449,7 +2464,7 @@ jsxc.gui.window = {
 
    /**
     * Minimize text area
-    * 
+    *
     * @param {String} bid
     */
    _hide: function(bid) {
@@ -2463,7 +2478,7 @@ jsxc.gui.window = {
 
    /**
     * Highlight window
-    * 
+    *
     * @param {type} bid
     */
    highlight: function(bid) {
@@ -2478,7 +2493,7 @@ jsxc.gui.window = {
 
    /**
     * Scroll chat area to the bottom
-    * 
+    *
     * @param {String} bid bar jid
     */
    scrollDown: function(bid) {
@@ -2496,16 +2511,16 @@ jsxc.gui.window = {
 
    /**
     * Write Message to chat area and save. Check border cases and remove html.
-    * 
+    *
     * @function postMessage
     * @memberOf jsxc.gui.window
     * @param {jsxc.Message} message object to be send
     * @return {jsxc.Message} maybe modified message object
     */
    /**
-    * Create message object from given properties, write Message to chat area 
+    * Create message object from given properties, write Message to chat area
     * and save. Check border cases and remove html.
-    * 
+    *
     * @function postMessage
     * @memberOf jsxc.gui.window
     * @param {object} args New message properties
@@ -2525,7 +2540,7 @@ jsxc.gui.window = {
     */
    postMessage: function(message) {
 
-      if (typeof message === 'object' && !(message instanceof jsxc.Message)) {
+      if (typeof message === 'object' &amp;&amp; !(message instanceof jsxc.Message)) {
          message = new jsxc.Message(message);
       }
 
@@ -2538,12 +2553,12 @@ jsxc.gui.window = {
 
       // exceptions:
 
-      if (message.direction === jsxc.Message.OUT && data.msgstate === OTR.CONST.MSGSTATE_FINISHED && message.forwarded !== true) {
+      if (message.direction === jsxc.Message.OUT &amp;&amp; data.msgstate === OTR.CONST.MSGSTATE_FINISHED &amp;&amp; message.forwarded !== true) {
          message.direction = jsxc.Message.SYS;
          message.msg = $.t('your_message_wasnt_send_please_end_your_private_conversation');
       }
 
-      if (message.direction === jsxc.Message.OUT && data.msgstate === OTR.CONST.MSGSTATE_FINISHED) {
+      if (message.direction === jsxc.Message.OUT &amp;&amp; data.msgstate === OTR.CONST.MSGSTATE_FINISHED) {
          message.direction = 'sys';
          message.msg = $.t('unencrypted_message_received') + ' ' + message.msg;
       }
@@ -2561,19 +2576,19 @@ jsxc.gui.window = {
          });
       }
 
-      if (message.direction === 'in' && !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
+      if (message.direction === 'in' &amp;&amp; !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
          jsxc.gui.unreadMsg(message.bid);
 
          $(document).trigger('postmessagein.jsxc', [message.bid, html_msg]);
       }
 
-      if (message.direction === jsxc.Message.OUT && jsxc.master && message.forwarded !== true && html_msg) {
+      if (message.direction === jsxc.Message.OUT &amp;&amp; jsxc.master &amp;&amp; message.forwarded !== true &amp;&amp; html_msg) {
          jsxc.xmpp.sendMessage(message.bid, html_msg, message._uid);
       }
 
       jsxc.gui.window._postMessage(message);
 
-      if (message.direction === 'out' && message.msg === '?' && jsxc.options.get('theAnswerToAnything') !== false) {
+      if (message.direction === 'out' &amp;&amp; message.msg === '?' &amp;&amp; jsxc.options.get('theAnswerToAnything') !== false) {
          if (typeof jsxc.options.get('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) &lt; 1) {
             jsxc.options.set('theAnswerToAnything', true);
 
@@ -2590,7 +2605,7 @@ jsxc.gui.window = {
 
    /**
     * Write Message to chat area
-    * 
+    *
     * @param {String} bid bar jid
     * @param {Object} post Post object with direction, msg, uid, received
     * @param {Bool} restore If true no highlights are used
@@ -2602,7 +2617,7 @@ jsxc.gui.window = {
       var direction = message.direction;
       var uid = message._uid;
 
-      if (win.find('.jsxc_textinput').is(':not(:focus)') && direction === jsxc.Message.IN && !restore) {
+      if (win.find('.jsxc_textinput').is(':not(:focus)') &amp;&amp; direction === jsxc.Message.IN &amp;&amp; !restore) {
          jsxc.gui.window.highlight(bid);
       }
 
@@ -2659,7 +2674,7 @@ jsxc.gui.window = {
          msgDiv.addClass('jsxc_encrypted');
       }
 
-      if (message.attachment && message.attachment.name) {
+      if (message.attachment &amp;&amp; message.attachment.name) {
          var attachment = $('&lt;div>');
          attachment.addClass('jsxc_attachment');
          attachment.addClass('jsxc_' + message.attachment.type.replace(/\//, '-'));
@@ -2673,7 +2688,7 @@ jsxc.gui.window = {
             attachment.addClass('jsxc_data');
          }
 
-         if (message.attachment.type.match(/^image\//) && message.attachment.thumbnail) {
+         if (message.attachment.type.match(/^image\//) &amp;&amp; message.attachment.thumbnail) {
             $('&lt;img alt="preview">').attr('src', message.attachment.thumbnail).attr('title', message.attachment.name).appendTo(attachment);
          } else {
             attachment.text(message.attachment.name);
@@ -2689,7 +2704,7 @@ jsxc.gui.window = {
       }
 
       if (direction === 'sys') {
-         jsxc.gui.window.get(bid).find('.jsxc_textarea').append('&lt;div style="clear:both"/>');
+         jsxc.gui.window.get(bid).find('.jsxc_textarea').append('&lt;div class="jsxc_clear"/>');
       } else if (typeof message.stamp !== 'undefined') {
          msgDiv.append(msgTsDiv);
       }
@@ -2704,7 +2719,7 @@ jsxc.gui.window = {
          win.find('.jsxc_textarea').append(msgDiv);
       }
 
-      if (typeof message.sender === 'object' && message.sender !== null) {
+      if (typeof message.sender === 'object' &amp;&amp; message.sender !== null) {
          var title = '';
          var avatarDiv = $('&lt;div>');
          avatarDiv.addClass('jsxc_avatar').prependTo(msgDiv);
@@ -2736,7 +2751,7 @@ jsxc.gui.window = {
 
          avatarDiv.attr('title', jsxc.escapeHTML(title));
 
-         if (msgDiv.prev().length > 0 && msgDiv.prev().find('.jsxc_avatar').attr('title') === avatarDiv.attr('title')) {
+         if (msgDiv.prev().length > 0 &amp;&amp; msgDiv.prev().find('.jsxc_avatar').attr('title') === avatarDiv.attr('title')) {
             avatarDiv.css('visibility', 'hidden');
          }
       }
@@ -2749,7 +2764,7 @@ jsxc.gui.window = {
 
    /**
     * Set text into input area
-    * 
+    *
     * @param {type} bid
     * @param {type} text
     * @returns {undefined}
@@ -2760,7 +2775,7 @@ jsxc.gui.window = {
 
    /**
     * Load old log into chat area
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -2769,7 +2784,7 @@ jsxc.gui.window = {
 
       // convert legacy storage structure introduced in v3.0.0
       if (chat) {
-         while (chat !== null && chat.length > 0) {
+         while (chat !== null &amp;&amp; chat.length > 0) {
             var c = chat.pop();
 
             c.bid = bid;
@@ -2787,7 +2802,7 @@ jsxc.gui.window = {
 
       var history = jsxc.storage.getUserItem('history', bid);
 
-      while (history !== null && history.length > 0) {
+      while (history !== null &amp;&amp; history.length > 0) {
          var uid = history.pop();
 
          jsxc.gui.window._postMessage(new jsxc.Message(uid), true);
@@ -2796,7 +2811,7 @@ jsxc.gui.window = {
 
    /**
     * Clear chat history
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -2821,7 +2836,7 @@ jsxc.gui.window = {
 
    /**
     * Mark message as received.
-    * 
+    *
     * @param  {string} bid
     * @param  {string} uid message id
     * @deprecated since v3.0.0. Use {@link jsxc.Message.received}.
@@ -2929,7 +2944,7 @@ jsxc.gui.window = {
          jsxc.gui.window.hideOverlay(bid);
          jsxc.storage.removeUserItem('smp', bid);
 
-         if (jsxc.master && jsxc.otr.objects[bid]) {
+         if (jsxc.master &amp;&amp; jsxc.otr.objects[bid]) {
             jsxc.otr.objects[bid].sm.abort();
          }
       });
@@ -2960,7 +2975,7 @@ jsxc.gui.window = {
          var fileCapableRes = jsxc.webrtc.getCapableRes(jid, jsxc.webrtc.reqFileFeatures);
          var resources = Object.keys(jsxc.storage.getUserItem('res', bid)) || [];
 
-         if (res === null && resources.length === 1 && fileCapableRes.length === 1) {
+         if (res === null &amp;&amp; resources.length === 1 &amp;&amp; fileCapableRes.length === 1) {
             res = fileCapableRes[0];
             jid = bid + '/' + res;
          } else if (fileCapableRes.indexOf(res) &lt; 0) {
@@ -2997,7 +3012,7 @@ jsxc.gui.window = {
 
          msg.empty().append(attachment);
 
-         if (FileReader && file.type.match(/^image\//)) {
+         if (FileReader &amp;&amp; file.type.match(/^image\//)) {
             var img = $('&lt;img alt="preview">').attr('title', file.name);
             img.attr('src', jsxc.options.get('root') + '/img/loading.gif');
             img.appendTo(attachment);
@@ -3049,12 +3064,12 @@ jsxc.gui.template = {};
 
 /**
  * Return requested template and replace all placeholder
- * 
+ *
  * @memberOf jsxc.gui.template;
  * @param {type} name template name
  * @param {type} bid
  * @param {type} msg
- * @returns {String} HTML Template
+ * @returns {jQuery} HTML Template
  */
 jsxc.gui.template.get = function(name, bid, msg) {
 
@@ -3073,9 +3088,9 @@ jsxc.gui.template.get = function(name, bid, msg) {
       var data = jsxc.storage.getUserItem('buddy', bid);
 
       $.extend(ph, {
-         bid_priv_fingerprint: (data && data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : $.t('not_available'),
+         bid_priv_fingerprint: (data &amp;&amp; data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : $.t('not_available'),
          bid_jid: bid,
-         bid_name: (data && data.name) ? data.name : bid
+         bid_name: (data &amp;&amp; data.name) ? data.name : bid
       });
    }
 
@@ -3092,13 +3107,20 @@ jsxc.gui.template.get = function(name, bid, msg) {
       // prevent 404
       ret = ret.replace(/\{\{root\}\}/g, ph.root);
 
-      // convert to string
-      ret = $('&lt;div>').append($(ret).i18n()).html();
+      ret = $(ret);
 
-      // replace placeholders
-      ret = ret.replace(/\{\{([a-zA-Z0-9_\-]+)\}\}/g, function(s, key) {
-         return (typeof ph[key] === 'string') ? ph[key] : s;
+      ret.find('[data-var]').each(function() {
+         var key = $(this).attr('data-var');
+         var val = (typeof ph[key] === 'string') ? ph[key] : '(Unknown placeholder: ' + key + ')';
+
+         if ($(this).prop('tagName').toUpperCase() === 'INPUT') {
+            $(this).val(val);
+         } else {
+            $(this).text(val);
+         }
       });
+
+      ret.i18n();
 
       return ret;
    }
@@ -3116,13 +3138,13 @@ jsxc.gui.template.get = function(name, bid, msg) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3>Global</h3><ul><li>{boolean}</li><li>{integer}</li><li>{string}</li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
-<br clear="both">
+<br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Wed May 04 2016 11:50:36 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Fri Oct 28 2016 13:29:05 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

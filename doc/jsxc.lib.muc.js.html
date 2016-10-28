@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>JSDoc: Source: jsxc.lib.muc.js</title>
-    
+
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
     <!--[if lt IE 9]>
@@ -16,18 +16,19 @@
 <body>
 
 <div id="main">
-    
+
     <h1 class="page-title">Source: jsxc.lib.muc.js</h1>
+
     
-    
+
 
 
     
     <section>
         <article>
-            <pre class="prettyprint source"><code>/**
+            <pre class="prettyprint source linenums"><code>/**
  * Implements Multi-User Chat (XEP-0045).
- * 
+ *
  * @namespace jsxc.muc
  */
 jsxc.muc = {
@@ -63,7 +64,7 @@ jsxc.muc = {
 
    /**
     * Initialize muc plugin.
-    * 
+    *
     * @private
     * @memberof jsxc.muc
     * @param {object} o Options
@@ -77,7 +78,7 @@ jsxc.muc = {
       if (!options || typeof options.server !== 'string') {
          jsxc.debug('Discover muc service');
 
-         // prosody does not response, if we send query before initial presence was send
+         // prosody does not respond, if we send query before initial presence was sent
          setTimeout(function() {
             self.conn.disco.items(Strophe.getDomainFromJid(self.conn.jid), null, function(items) {
                $(items).find('item').each(function() {
@@ -88,7 +89,7 @@ jsxc.muc = {
                      var mucFeature = $(info).find('feature[var="' + Strophe.NS.MUC + '"]');
                      var mucIdentity = $(info).find('identity[category="conference"][type="text"]');
 
-                     if (mucFeature.length > 0 && mucIdentity.length > 0) {
+                     if (mucFeature.length > 0 &amp;&amp; mucIdentity.length > 0) {
                         jsxc.debug('muc service found', jid);
 
                         jsxc.options.set('muc', {
@@ -126,7 +127,7 @@ jsxc.muc = {
 
    /**
     * Add entry to menu.
-    * 
+    *
     * @memberOf jsxc.muc
     */
    initMenu: function() {
@@ -139,7 +140,7 @@ jsxc.muc = {
 
    /**
     * Open join dialog.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} [r] - room jid
     * @param {string} [p] - room password
@@ -274,7 +275,7 @@ jsxc.muc = {
          var nickname = $('#jsxc_nickname').val() || Strophe.getNodeFromJid(self.conn.jid);
          var password = $('#jsxc_password').val() || null;
 
-         if (!room || !room.match(/^[^"&\'\/:&lt;>@\s]+$/i)) {
+         if (!room || !room.match(/^[^"&amp;\'\/:&lt;>@\s]+$/i)) {
             $('#jsxc_room').addClass('jsxc_invalid').keyup(function() {
                if ($(this).val()) {
                   $(this).removeClass('jsxc_invalid');
@@ -328,7 +329,7 @@ jsxc.muc = {
                $(stanza).find('feature').each(function() {
                   var feature = $(this).attr('var');
 
-                  if (feature !== '' && i18n.exists(feature)) {
+                  if (feature !== '' &amp;&amp; i18n.exists(feature)) {
                      var tr = $('&lt;tr>');
                      $('&lt;td>').text($.t(feature + '.keyword')).appendTo(tr);
                      $('&lt;td>').text($.t(feature + '.description')).appendTo(tr);
@@ -382,7 +383,7 @@ jsxc.muc = {
       });
    },
 
-   /** 
+   /**
     * Request and show room configuration.
     *
     * @memberOf jsxc.muc
@@ -417,10 +418,15 @@ jsxc.muc = {
       var dialog = jsxc.gui.dialog.open(jsxc.muc.helper.formToHTML(config));
       var form = dialog.find('form');
 
+      // work around Strophe.x behaviour
+      form.find('[type="checkbox"]').change(function(){
+        $(this).val(this.checked ? 1 : 0);
+      });
+
       var submit = $('&lt;button>');
       submit.addClass('btn btn-primary');
       submit.attr('type', 'submit');
-      submit.text($.t('Join'));
+      submit.text($.t('Save'));
 
       var cancel = $('&lt;button>');
       cancel.addClass('btn btn-default');
@@ -463,7 +469,7 @@ jsxc.muc = {
 
    /**
     * Join the given room.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     * @param {string} nickname Desired nickname
@@ -496,11 +502,16 @@ jsxc.muc = {
 
    /**
     * Leave given room.
-    * 
-    * @memberOf jsxc.muc 
+    *
+    * @memberOf jsxc.muc
     * @param {string} room Room jid
     */
    leave: function(room) {
+      if (!jsxc.master) {
+         jsxc.tab.execMaster('muc.leave', room);
+         return;
+      }
+
       var self = jsxc.muc;
       var own = jsxc.storage.getUserItem('ownNicknames') || {};
       var data = jsxc.storage.getUserItem('buddy', room) || {};
@@ -516,7 +527,7 @@ jsxc.muc = {
 
    /**
     * Clean up after we exited a room.
-    * 
+    *
     * @private
     * @memberOf jsxc.muc
     * @param {string} room Room jid
@@ -544,13 +555,18 @@ jsxc.muc = {
 
    /**
     * Destroy the given room.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     * @param {function} handler_cb Function to handle the successful destruction
     * @param {function} error_cb Function to handle an error
     */
    destroy: function(room, handler_cb, error_cb) {
+      if (!jsxc.master) {
+         jsxc.tab.execMaster('muc.destroy', room);
+         return;
+      }
+
       var self = jsxc.muc;
       var roomdata = jsxc.storage.getUserItem('buddy', room);
 
@@ -576,8 +592,8 @@ jsxc.muc = {
    },
 
    /**
-    * Close the given room. 
-    * 
+    * Close the given room.
+    *
     * @memberOf jsxc.muc
     * @param room Room jid
     */
@@ -600,14 +616,16 @@ jsxc.muc = {
          self.onExited(room);
       }
 
-      roomdata.state = self.CONST.ROOMSTATE.DESTROYED;
+      if (jsxc.storage.getUserItem('budy', room)) {
+         roomdata.state = self.CONST.ROOMSTATE.DESTROYED;
 
-      jsxc.storage.setUserItem('buddy', room, roomdata);
+         jsxc.storage.setUserItem('buddy', room, roomdata);
+      }
    },
 
    /**
     * Init group chat window.
-    * 
+    *
     * @private
     * @memberOf jsxc.muc
     * @param event Event
@@ -616,7 +634,7 @@ jsxc.muc = {
    initWindow: function(event, win) {
       var self = jsxc.muc;
 
-      if (!jsxc.xmpp.conn) {
+      if (!jsxc.xmpp.conn &amp;&amp; jsxc.master) {
          $(document).one('attached.jsxc', function() {
             self.initWindow(null, win);
          });
@@ -716,14 +734,30 @@ jsxc.muc = {
 
       win.find('.jsxc_settings ul').append($('&lt;li>').append(destroy));
 
+      var configure = $('&lt;a>');
+      configure.text($.t('Configure'));
+      configure.addClass('jsxc_configure');
+      configure.hide();
+      configure.click(function() {
+         self.showRoomConfiguration(bid);
+      });
+
+      if (self.conn) {
+         win.find('.jsxc_settings ul').append($('&lt;li>').append(configure));
+      }
+
       if (roomdata.state > self.CONST.ROOMSTATE.INIT) {
          var member = jsxc.storage.getUserItem('member', bid) || {};
 
          $.each(member, function(nickname, val) {
             self.insertMember(bid, nickname, val);
 
-            if (nickname === ownNickname && val.affiliation === self.CONST.AFFILIATION.OWNER) {
+            if (nickname === ownNickname &amp;&amp; val.affiliation === self.CONST.AFFILIATION.OWNER) {
                destroy.show();
+            }
+
+            if (nickname === ownNickname &amp;&amp; (val.affiliation === self.CONST.AFFILIATION.OWNER || val.affiliation === self.CONST.AFFILIATION.OWNER)) {
+               configure.show();
             }
          });
       }
@@ -740,7 +774,7 @@ jsxc.muc = {
 
    /**
     * Triggered on incoming presence stanzas.
-    * 
+    *
     * @private
     * @memberOf jsxc.muc
     * @param event
@@ -762,6 +796,7 @@ jsxc.muc = {
       var nickname = Strophe.unescapeNode(res);
       var own = jsxc.storage.getUserItem('ownNicknames') || {};
       var member = jsxc.storage.getUserItem('member', room) || {};
+      var openWindow = false;
       var codes = [];
 
       xdata.find('status').each(function() {
@@ -786,8 +821,8 @@ jsxc.muc = {
          }
 
          if ($('#jsxc_dialog').length > 0) {
-            // User joined the room manually 
-            jsxc.gui.window.open(room);
+            // User joined the room manually
+            openWindow = true;
             jsxc.gui.dialog.close();
          }
       }
@@ -813,7 +848,7 @@ jsxc.muc = {
 
             var newNickname = xdata.find('item').attr('nick');
 
-            if (codes.indexOf('303') > -1 && newNickname) {
+            if (codes.indexOf('303') > -1 &amp;&amp; newNickname) {
                // user changed his nickname
 
                newNickname = Strophe.unescapeNode(newNickname);
@@ -830,7 +865,7 @@ jsxc.muc = {
                      escapeInterpolation: true
                   })
                });
-            } else if (codes.length === 0 || (codes.length === 1 && codes.indexOf('110') > -1)) {
+            } else if (codes.length === 0 || (codes.length === 1 &amp;&amp; codes.indexOf('110') > -1)) {
                // normal user exit
                jsxc.gui.window.postMessage({
                   bid: room,
@@ -845,7 +880,7 @@ jsxc.muc = {
       } else {
          // new member joined
 
-         if (!member[nickname] && own[room]) {
+         if (!member[nickname] &amp;&amp; own[room]) {
             jsxc.gui.window.postMessage({
                bid: room,
                direction: jsxc.Message.SYS,
@@ -879,12 +914,17 @@ jsxc.muc = {
          $(document).trigger('status.muc.jsxc', [code, room, nickname, member[nickname] || {}, presence]);
       });
 
+      if (openWindow) {
+         // we wait until all parameters are set up correctly (e.g. state)
+         jsxc.gui.window.open(room);
+      }
+
       return true;
    },
 
    /**
     * Handle group chat presence errors.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param event
     * @param {string} from Jid
@@ -912,7 +952,7 @@ jsxc.muc = {
 
    /**
     * Handle status codes. Every function gets room jid, nickname, member data and xdata.
-    * 
+    *
     * @memberOf jsxc.muc
     */
    onStatus: {
@@ -973,9 +1013,9 @@ jsxc.muc = {
          var self = jsxc.muc;
          var roomdata = jsxc.storage.getUserItem('buddy', room) || {};
 
-         if (roomdata.autojoin && roomdata.config === self.CONST.ROOMCONFIG.INSTANT) {
+         if (roomdata.autojoin &amp;&amp; roomdata.config === self.CONST.ROOMCONFIG.INSTANT) {
             self.conn.muc.createInstantRoom(room);
-         } else if (roomdata.autojoin && typeof roomdata.config !== 'undefined' && roomdata.config !== null) {
+         } else if (roomdata.autojoin &amp;&amp; typeof roomdata.config !== 'undefined' &amp;&amp; roomdata.config !== null) {
             self.conn.muc.saveConfiguration(room, roomdata.config, function() {
                jsxc.debug('Cached room configuration saved.');
             }, function() {
@@ -1077,8 +1117,8 @@ jsxc.muc = {
             });
          }
       },
-      /** 
-       * Inform user that he or she is beeing removed from the room because the room has been 
+      /**
+       * Inform user that he or she is beeing removed from the room because the room has been
        * changed to members-only and the user is not a member
        */
       322: function(room, nickname) {
@@ -1104,7 +1144,7 @@ jsxc.muc = {
       },
       /**
        * Inform user that he or she is beeing removed from the room because the MUC service
-       * is being shut down 
+       * is being shut down
        */
       332: function(room) {
          jsxc.muc.close(room);
@@ -1118,7 +1158,7 @@ jsxc.muc = {
 
    /**
     * Extract reason from xdata and if available post it to room.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     * @param {jQuery} xdata Xdata
@@ -1152,16 +1192,16 @@ jsxc.muc = {
 
    /**
     * Insert member to room member list.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     * @param {string} nickname Nickname
     * @param {string} memberdata Member data
     */
    insertMember: function(room, nickname, memberdata) {
-      var self = jsxc.muc;
       var win = jsxc.gui.window.get(room);
       var jid = memberdata.jid;
+      var ownBid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
       var m = win.find('.jsxc_memberlist li[data-nickname="' + nickname + '"]');
 
       if (m.length === 0) {
@@ -1179,9 +1219,9 @@ jsxc.muc = {
 
             var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(jid));
 
-            if (data !== null && typeof data === 'object') {
+            if (data !== null &amp;&amp; typeof data === 'object') {
                jsxc.gui.updateAvatar(m, jsxc.jidToBid(jid), data.avatar);
-            } else if (jsxc.jidToBid(jid) === jsxc.jidToBid(self.conn.jid)) {
+            } else if (jsxc.jidToBid(jid) === ownBid) {
                jsxc.gui.updateAvatar(m, jsxc.jidToBid(jid), 'own');
             }
          } else {
@@ -1196,7 +1236,7 @@ jsxc.muc = {
 
    /**
     * Remove member from room member list.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     * @param {string} nickname Nickname
@@ -1212,7 +1252,7 @@ jsxc.muc = {
 
    /**
     * Scroll or update member list position.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     * @param {integer} offset =0: update position; >0: Scroll to left; &lt;0: Scroll to right
@@ -1242,7 +1282,7 @@ jsxc.muc = {
 
    /**
     * Empty member list.
-    * 
+    *
     * @memberOf jsxc.muc
     * @param {string} room Room jid
     */
@@ -1256,7 +1296,7 @@ jsxc.muc = {
 
    /**
     * Handle incoming group chat message.
-    * 
+    *
     * @private
     * @memberOf jsxc.muc
     * @param {string} message Message stanza
@@ -1265,7 +1305,7 @@ jsxc.muc = {
    onGroupchatMessage: function(message) {
       var id = $(message).attr('id');
 
-      if (id && jsxc.el_exists(jsxc.Message.getDOM(id))) {
+      if (id &amp;&amp; jsxc.el_exists(jsxc.Message.getDOM(id))) {
          // ignore own incoming messages
          return true;
       }
@@ -1285,7 +1325,7 @@ jsxc.muc = {
          var sender = {};
          sender.name = nickname;
 
-         if (member[nickname] && typeof member[nickname].jid === 'string') {
+         if (member[nickname] &amp;&amp; typeof member[nickname].jid === 'string') {
             sender.jid = member[nickname].jid;
          }
 
@@ -1324,7 +1364,7 @@ jsxc.muc = {
 
    /**
     * Handle group chat error message.
-    * 
+    *
     * @private
     * @memberOf jsxc.muc
     * @param {string} message Message stanza
@@ -1369,7 +1409,7 @@ jsxc.muc = {
 
    /**
     * Prepare group chat roster item.
-    * 
+    *
     * @private
     * @memberOf jsxc.muc
     * @param event
@@ -1430,13 +1470,13 @@ jsxc.muc = {
 
    /**
     * Some helper functions.
-    * 
+    *
     * @type {Object}
     */
    helper: {
       /**
        * Convert x:data form to html.
-       * 
+       *
        * @param  {Strophe.x.Form} form - x:data form
        * @return {jQuery} jQuery representation of x:data field
        */
@@ -1470,7 +1510,7 @@ jsxc.muc = {
 
       /**
        * Convert x:data field to html.
-       * 
+       *
        * @param  {Strophe.x.Field} field - x:data field
        * @return {html} html representation of x:data field
        */
@@ -1552,7 +1592,7 @@ jsxc.muc = {
                   case 'boolean':
                      el.attr('type', 'checkbox');
                      val = (_ref2 = self.values[0]) != null ? typeof _ref2.toString === "function" ? _ref2.toString() : void 0 : void 0;
-                     if (val && (val === "true" || val === "1")) {
+                     if (val &amp;&amp; (val === "true" || val === "1")) {
                         el.attr('checked', 'checked');
                      }
                      break;
@@ -1616,13 +1656,13 @@ $(document).one('connected.jsxc', function() {
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3>Global</h3><ul><li>{boolean}</li><li>{integer}</li><li>{string}</li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
-<br clear="both">
+<br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Wed May 04 2016 11:50:36 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Fri Oct 28 2016 13:29:05 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

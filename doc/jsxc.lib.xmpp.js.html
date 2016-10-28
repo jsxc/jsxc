@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>JSDoc: Source: jsxc.lib.xmpp.js</title>
-    
+
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
     <!--[if lt IE 9]>
@@ -16,16 +16,17 @@
 <body>
 
 <div id="main">
-    
+
     <h1 class="page-title">Source: jsxc.lib.xmpp.js</h1>
+
     
-    
+
 
 
     
     <section>
         <article>
-            <pre class="prettyprint source"><code>/**
+            <pre class="prettyprint source linenums"><code>/**
  * Handle XMPP stuff.
  * 
  * @namespace jsxc.xmpp
@@ -61,7 +62,7 @@ jsxc.xmpp = {
     */
    login: function() {
 
-      if (jsxc.xmpp.conn && jsxc.xmpp.conn.authenticated) {
+      if (jsxc.xmpp.conn &amp;&amp; jsxc.xmpp.conn.authenticated) {
          jsxc.debug('Connection already authenticated.');
          return;
       }
@@ -85,7 +86,7 @@ jsxc.xmpp = {
             sid = jsxc.storage.getItem('sid');
             rid = jsxc.storage.getItem('rid');
 
-            if (sid !== null && rid !== null) {
+            if (sid !== null &amp;&amp; rid !== null) {
                jid = jsxc.storage.getItem('jid');
             } else {
                sid = jsxc.options.xmpp.sid || null;
@@ -112,7 +113,7 @@ jsxc.xmpp = {
          return;
       }
 
-      if (!(jsxc.xmpp.conn && jsxc.xmpp.conn.connected)) {
+      if (!(jsxc.xmpp.conn &amp;&amp; jsxc.xmpp.conn.connected)) {
          // Register eventlistener
          $(document).on('connected.jsxc', jsxc.xmpp.connected);
          $(document).on('attached.jsxc', jsxc.xmpp.attached);
@@ -168,7 +169,7 @@ jsxc.xmpp = {
          jsxc.xmpp.conn.caps.node = 'http://jsxc.org/';
       }
 
-      if (sid && rid) {
+      if (sid &amp;&amp; rid) {
          jsxc.debug('Try to attach');
          jsxc.debug('SID: ' + sid);
 
@@ -209,28 +210,28 @@ jsxc.xmpp = {
     */
    logout: function(complete) {
 
-      // instruct all tabs
-      jsxc.storage.removeItem('sid');
+      jsxc.triggeredFromElement = (typeof complete === 'boolean') ? complete : true;
 
+      if (!jsxc.master) {
+         // instruct master
+         jsxc.storage.removeItem('sid');
+
+         // jsxc.xmpp.disconnected is called if master deletes alive after logout
+         return true;
+      }
+
+      // REVIEW: this should maybe moved to xmpp.disconnected
       // clean up
       jsxc.storage.removeUserItem('buddylist');
       jsxc.storage.removeUserItem('windowlist');
       jsxc.storage.removeUserItem('unreadMsg');
 
-      if (!jsxc.master) {
-         $('#jsxc_roster').remove();
-         $('#jsxc_windowlist').remove();
-         return true;
-      }
-
-      if (jsxc.xmpp.conn === null) {
-         return true;
-      }
-
       // Hide dropdown menu
       $('body').click();
 
-      jsxc.triggeredFromElement = (typeof complete === 'boolean') ? complete : true;
+      if (!jsxc.xmpp.conn || !jsxc.xmpp.conn.authenticated) {
+         return true;
+      }
 
       // restore all otr objects
       $.each(jsxc.storage.getUserItem('otrlist') || {}, function(i, val) {
@@ -434,7 +435,7 @@ jsxc.xmpp = {
       }
 
       var priority = jsxc.options.get('priority');
-      if (priority && typeof priority[presState] !== 'undefined' && parseInt(priority[presState]) !== 0) {
+      if (priority &amp;&amp; typeof priority[presState] !== 'undefined' &amp;&amp; parseInt(priority[presState]) !== 0) {
          pres.c('priority').t(priority[presState]).up();
       }
 
@@ -471,6 +472,7 @@ jsxc.xmpp = {
          $(document).trigger('toggle.roster.jsxc', ['hidden', 0]);
          $('#jsxc_roster').remove();
 
+         // REVIEW: logoutElement without href attribute?
          if (jsxc.triggeredFromLogout) {
             window.location = jsxc.options.logoutElement.attr('href');
          }
@@ -478,7 +480,7 @@ jsxc.xmpp = {
          jsxc.gui.roster.noConnection();
       }
 
-      window.clearInterval(jsxc.keepalive);
+      window.clearInterval(jsxc.keepaliveInterval);
       jsxc.role_allocation = false;
       jsxc.master = false;
       jsxc.storage.removeItem('alive');
@@ -551,7 +553,8 @@ jsxc.xmpp = {
             name: name,
             status: 0,
             sub: sub,
-            res: []
+            res: [],
+            rnd: Math.random() // force storage event
          });
 
          jsxc.gui.roster.add(bid);
@@ -627,7 +630,7 @@ jsxc.xmpp = {
             for (noticeKey in notices) {
                notice = notices[noticeKey];
 
-               if (notice.fnName === 'gui.showApproveDialog' && notice.fnParams[0] === jid) {
+               if (notice.fnName === 'gui.showApproveDialog' &amp;&amp; notice.fnParams[0] === jid) {
                   jsxc.debug('Remove notice with key ' + noticeKey);
 
                   jsxc.notice.remove(noticeKey);
@@ -746,7 +749,7 @@ jsxc.xmpp = {
          }
       }
 
-      if (data.status === 0 && max > 0) {
+      if (data.status === 0 &amp;&amp; max > 0) {
          // buddy has come online
          jsxc.notification.notify({
             title: data.name,
@@ -765,10 +768,10 @@ jsxc.xmpp = {
       data.jid = jid;
 
       // Looking for avatar
-      if (xVCard.length > 0 && data.type !== 'groupchat') {
+      if (xVCard.length > 0 &amp;&amp; data.type !== 'groupchat') {
          var photo = xVCard.find('photo');
 
-         if (photo.length > 0 && photo.text() !== data.avatar) {
+         if (photo.length > 0 &amp;&amp; photo.text() !== data.avatar) {
             jsxc.storage.removeUserItem('avatar', data.avatar);
             data.avatar = photo.text();
          }
@@ -825,7 +828,7 @@ jsxc.xmpp = {
 
       var body = $(message).find('body:first').text();
 
-      if (!body || (body.match(/\?OTR/i) && forwarded)) {
+      if (!body || (body.match(/\?OTR/i) &amp;&amp; forwarded)) {
          return true;
       }
 
@@ -897,11 +900,11 @@ jsxc.xmpp = {
       $(document).trigger('message.jsxc', [from, body]);
 
       // create related otr object
-      if (jsxc.master && !jsxc.otr.objects[bid]) {
+      if (jsxc.master &amp;&amp; !jsxc.otr.objects[bid]) {
          jsxc.otr.create(bid);
       }
 
-      if (!forwarded && mid !== null && request.length && data !== null && (data.sub === 'both' || data.sub === 'from') && type === 'chat') {
+      if (!forwarded &amp;&amp; mid !== null &amp;&amp; request.length &amp;&amp; data !== null &amp;&amp; (data.sub === 'both' || data.sub === 'from') &amp;&amp; type === 'chat') {
          // Send received according to XEP-0184
          jsxc.xmpp.conn.send($msg({
             to: from
@@ -1069,13 +1072,13 @@ jsxc.xmpp = {
          id: uid
       }).c('body').t(msg);
 
-      if (jsxc.xmpp.carbons.enabled && msg.match(/^\?OTR/)) {
+      if (jsxc.xmpp.carbons.enabled &amp;&amp; msg.match(/^\?OTR/)) {
          xmlMsg.up().c("private", {
             xmlns: jsxc.CONST.NS.CARBONS
          });
       }
 
-      if (type === 'chat' && (isBar || jsxc.xmpp.conn.caps.hasFeatureByJid(jid, Strophe.NS.RECEIPTS))) {
+      if (type === 'chat' &amp;&amp; (isBar || jsxc.xmpp.conn.caps.hasFeatureByJid(jid, Strophe.NS.RECEIPTS))) {
          // Add request according to XEP-0184
          xmlMsg.up().c('request', {
             xmlns: 'urn:xmpp:receipts'
@@ -1100,7 +1103,7 @@ jsxc.xmpp = {
          jsxc.storage.setUserItem('vcard', bid, 'request:' + (new Date()).getTime());
 
          $(document).one('loaded.vcard.jsxc', function(ev, result) {
-            if (result && result.state === 'success') {
+            if (result &amp;&amp; result.state === 'success') {
                cb($(result.data).get(0));
             } else {
                error_cb();
@@ -1164,7 +1167,7 @@ jsxc.xmpp = {
          return true;
       };
 
-      if (conn.caps._jidVerIndex[jid] && conn.caps._knownCapabilities[conn.caps._jidVerIndex[jid]]) {
+      if (conn.caps._jidVerIndex[jid] &amp;&amp; conn.caps._knownCapabilities[conn.caps._jidVerIndex[jid]]) {
          var hasFeature = check(conn.caps._knownCapabilities[conn.caps._jidVerIndex[jid]]);
          cb(hasFeature);
 
@@ -1271,13 +1274,13 @@ jsxc.xmpp.carbons = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3>Global</h3><ul><li>{boolean}</li><li>{integer}</li><li>{string}</li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
-<br clear="both">
+<br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Wed May 04 2016 11:50:36 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Fri Oct 28 2016 13:29:05 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

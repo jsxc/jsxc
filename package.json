@@ -1,6 +1,6 @@
 {
   "name": "jsxc",
-  "version": "3.0.1-beta2",
+  "version": "3.0.1",
   "description": "Real-time chat app",
   "homepage": "http://www.jsxc.org/",
   "bugs": "https://github.com/jsxc/jsxc/issues",
@@ -28,7 +28,7 @@
     "grunt-data-uri": "^0.2.0",
     "grunt-html-convert": "0.0.2",
     "grunt-jsbeautifier": "^0.2.10",
-    "grunt-jsdoc": "^0.5.7",
+    "grunt-jsdoc": "^2.1.0",
     "grunt-merge-data": "^0.4.3",
     "grunt-postcss": "^0.2.0",
     "grunt-prettysass": "^0.2.3",

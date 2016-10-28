@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>JSDoc: Source: jsxc.lib.webrtc.js</title>
-    
+
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
     <!--[if lt IE 9]>
@@ -16,16 +16,17 @@
 <body>
 
 <div id="main">
-    
+
     <h1 class="page-title">Source: jsxc.lib.webrtc.js</h1>
+
     
-    
+
 
 
     
     <section>
         <article>
-            <pre class="prettyprint source"><code>/* global MediaStreamTrack, File */
+            <pre class="prettyprint source linenums"><code>/* global MediaStreamTrack, File */
 /* jshint -W020 */
 
 /**
@@ -108,7 +109,7 @@ jsxc.webrtc = {
       var url = jsxc.options.get('RTCPeerConfig').url || jsxc.options.turnCredentialsPath;
       var peerConfig = jsxc.options.get('RTCPeerConfig');
 
-      if (typeof url === 'string' && url.length > 0) {
+      if (typeof url === 'string' &amp;&amp; url.length > 0) {
          self.getTurnCrendentials(url);
       } else {
          if (jsxc.storage.getUserItem('iceValidity')) {
@@ -177,7 +178,7 @@ jsxc.webrtc = {
             var ttl = data.ttl || 3600;
             var iceServers = data.iceServers;
 
-            if (!iceServers && data.url) {
+            if (!iceServers &amp;&amp; data.url) {
                // parse deprecated (v2.1.0) syntax
                jsxc.warn('Received RTCPeer configuration is deprecated. Use now RTCPeerConfig.url.');
 
@@ -194,10 +195,10 @@ jsxc.webrtc = {
                }
             }
 
-            if (iceServers && iceServers.length > 0) {
+            if (iceServers &amp;&amp; iceServers.length > 0) {
                // url as parameter is deprecated
-               var url = iceServers[0].url && iceServers[0].url.length > 0;
-               var urls = iceServers[0].urls && iceServers[0].urls.length > 0;
+               var url = iceServers[0].url &amp;&amp; iceServers[0].url.length > 0;
+               var urls = iceServers[0].urls &amp;&amp; iceServers[0].urls.length > 0;
 
                if (urls || url) {
                   jsxc.debug('ice servers received');
@@ -297,7 +298,7 @@ jsxc.webrtc = {
       var ls = jsxc.storage.getUserItem('buddy', bid);
 
       if (typeof jid !== 'string') {
-         if (ls && typeof ls.jid === 'string') {
+         if (ls &amp;&amp; typeof ls.jid === 'string') {
             jid = ls.jid;
          } else {
             jsxc.debug('[webrtc] Could not update icon, because could not find jid for ' + bid);
@@ -342,7 +343,7 @@ jsxc.webrtc = {
       var fileCapableRes = self.getCapableRes(jid, self.reqFileFeatures);
       var resources = Object.keys(jsxc.storage.getUserItem('res', bid) || {}) || [];
 
-      if (fileCapableRes.indexOf(res) > -1 || (res === null && fileCapableRes.length === 1 && resources.length === 1)) {
+      if (fileCapableRes.indexOf(res) > -1 || (res === null &amp;&amp; fileCapableRes.length === 1 &amp;&amp; resources.length === 1)) {
          win.find('.jsxc_sendFile').removeClass('jsxc_disabled');
       } else {
          win.find('.jsxc_sendFile').addClass('jsxc_disabled');
@@ -585,16 +586,7 @@ jsxc.webrtc = {
 
       jsxc.webrtc.last_caller = session.peerID;
 
-      if (jsxc.webrtc.AUTO_ACCEPT) {
-         self.reqUserMedia();
-         return;
-      }
-
-      var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', bid), {
-         noClose: true
-      });
-
-      dialog.find('.jsxc_accept').click(function() {
+      function acceptCall() {
          $(document).trigger('accept.call.jsxc');
 
          jsxc.switchEvents({
@@ -611,7 +603,18 @@ jsxc.webrtc = {
          });
 
          self.reqUserMedia();
+      }
+
+      if (jsxc.webrtc.AUTO_ACCEPT) {
+         acceptCall();
+         return;
+      }
+
+      var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', bid), {
+         noClose: true
       });
+
+      dialog.find('.jsxc_accept').click(acceptCall);
 
       dialog.find('.jsxc_reject').click(function() {
          jsxc.gui.dialog.close();
@@ -641,7 +644,7 @@ jsxc.webrtc = {
     * @param [text] Optional explanation
     */
    onCallTerminated: function(session, reason) {
-      this.setStatus('call terminated ' + session.peerID + (reason && reason.condition ? reason.condition : ''));
+      this.setStatus('call terminated ' + session.peerID + (reason &amp;&amp; reason.condition ? reason.condition : ''));
 
       var bid = jsxc.jidToBid(session.peerID);
 
@@ -672,7 +675,7 @@ jsxc.webrtc = {
       jsxc.gui.window.postMessage({
          bid: bid,
          direction: jsxc.Message.SYS,
-         msg: ($.t('Call_terminated') + (reason && reason.condition ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.')
+         msg: ($.t('Call_terminated') + (reason &amp;&amp; reason.condition ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.')
       });
    },
 
@@ -803,7 +806,7 @@ jsxc.webrtc = {
             });
 
             $(document).one('error.jingle', function(e, sid, error) {
-               if (error && error.source !== 'offer') {
+               if (error &amp;&amp; error.source !== 'offer') {
                   return;
                }
 
@@ -830,7 +833,7 @@ jsxc.webrtc = {
     * @memberOf jsxc.webrtc
     */
    hangUp: function(reason, text) {
-      if (jsxc.webrtc.conn.jingle.manager && !$.isEmptyObject(jsxc.webrtc.conn.jingle.manager.peers)) {
+      if (jsxc.webrtc.conn.jingle.manager &amp;&amp; !$.isEmptyObject(jsxc.webrtc.conn.jingle.manager.peers)) {
          jsxc.webrtc.conn.jingle.terminate(null, reason, text);
       } else {
          jsxc.gui.closeVideoWindow();
@@ -858,7 +861,7 @@ jsxc.webrtc = {
       });
       this.setStatus('please allow access to microphone and camera');
 
-      if (typeof MediaStreamTrack !== 'undefined' && typeof MediaStreamTrack.getSources !== 'undefined') {
+      if (typeof MediaStreamTrack !== 'undefined' &amp;&amp; typeof MediaStreamTrack.getSources !== 'undefined') {
          MediaStreamTrack.getSources(function(sourceInfo) {
             var availableDevices = sourceInfo.map(function(el) {
 
@@ -1164,13 +1167,13 @@ $(document).ready(function() {
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3>Global</h3><ul><li>{boolean}</li><li>{integer}</li><li>{string}</li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
-<br clear="both">
+<br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Wed May 04 2016 11:50:36 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Fri Oct 28 2016 13:29:05 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

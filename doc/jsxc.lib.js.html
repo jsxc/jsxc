@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>JSDoc: Source: jsxc.lib.js</title>
-    
+
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
     <!--[if lt IE 9]>
@@ -16,18 +16,19 @@
 <body>
 
 <div id="main">
-    
+
     <h1 class="page-title">Source: jsxc.lib.js</h1>
+
     
-    
+
 
 
     
     <section>
         <article>
-            <pre class="prettyprint source"><code>/**
+            <pre class="prettyprint source linenums"><code>/**
  * JavaScript Xmpp Chat namespace
- * 
+ *
  * @namespace jsxc
  */
 jsxc = {
@@ -53,7 +54,7 @@ jsxc = {
    toNotificationDelay: 500,
 
    /** Interval for keep-alive */
-   keepalive: null,
+   keepaliveInterval: null,
 
    /** True if jid, sid and rid was used to connect */
    reconnect: false,
@@ -97,7 +98,7 @@ jsxc = {
          NOTICE: 'Ping1.mp3'
       },
       REGEX: {
-         JID: new RegExp('\\b[^"&\'\\/:&lt;>@\\s]+@[\\w-_.]+\\b', 'ig'),
+         JID: new RegExp('\\b[^"&amp;\'\\/:&lt;>@\\s]+@[\\w-_.]+\\b', 'ig'),
          URL: new RegExp(/(https?:\/\/|www\.)[^\s&lt;>'"]+/gi)
       },
       NS: {
@@ -110,7 +111,7 @@ jsxc = {
 
    /**
     * Parse a unix timestamp and return a formatted time string
-    * 
+    *
     * @memberOf jsxc
     * @param {Object} unixtime
     * @returns time of day and/or date
@@ -139,7 +140,7 @@ jsxc = {
 
    /**
     * Write debug message to console and to log.
-    * 
+    *
     * @memberOf jsxc
     * @param {String} msg Debug message
     * @param {Object} data
@@ -177,7 +178,7 @@ jsxc = {
 
    /**
     * Write warn message.
-    * 
+    *
     * @memberOf jsxc
     * @param {String} msg Warn message
     * @param {Object} data
@@ -188,7 +189,7 @@ jsxc = {
 
    /**
     * Write error message.
-    * 
+    *
     * @memberOf jsxc
     * @param {String} msg Error message
     * @param {Object} data
@@ -201,24 +202,24 @@ jsxc = {
    log: '',
 
    /**
-    * This function initializes important core functions and event handlers. 
+    * This function initializes important core functions and event handlers.
     * Afterwards it performs the following actions in the given order:
     *
     * &lt;ol>
-    *  &lt;li>If (loginForm.ifFound = 'force' and form was found) or (jid or rid or 
+    *  &lt;li>If (loginForm.ifFound = 'force' and form was found) or (jid or rid or
     * 	sid was not found) intercept form, and listen for credentials.&lt;/li>
-    *  &lt;li>Attach with jid, rid and sid from storage, if no form was found or 
+    *  &lt;li>Attach with jid, rid and sid from storage, if no form was found or
     * 	loginForm.ifFound = 'attach'&lt;/li>
-    *  &lt;li>Attach with jid, rid and sid from options.xmpp, if no form was found or 
+    *  &lt;li>Attach with jid, rid and sid from options.xmpp, if no form was found or
     * 	loginForm.ifFound = 'attach'&lt;/li>
     * &lt;/ol>
-    * 
+    *
     * @memberOf jsxc
     * @param {object} options See {@link jsxc.options}
     */
    init: function(options) {
 
-      if (options && options.loginForm && typeof options.loginForm.attachIfFound === 'boolean' && !options.loginForm.ifFound) {
+      if (options &amp;&amp; options.loginForm &amp;&amp; typeof options.loginForm.attachIfFound === 'boolean' &amp;&amp; !options.loginForm.ifFound) {
          // translate deprated option attachIfFound found to new ifFound
          options.loginForm.ifFound = (options.loginForm.attachIfFound) ? 'attach' : 'pause';
       }
@@ -236,7 +237,7 @@ jsxc = {
 
       /**
        * Getter method for options. Saved options will override default one.
-       * 
+       *
        * @param {string} key option key
        * @returns default or saved option value
        */
@@ -252,7 +253,7 @@ jsxc = {
 
       /**
        * Setter method for options. Will write into localstorage.
-       * 
+       *
        * @param {string} key option key
        * @param {object} value option value
        */
@@ -269,7 +270,9 @@ jsxc = {
       var lang;
       if (jsxc.storage.getItem('lang') !== null) {
          lang = jsxc.storage.getItem('lang');
-      } else if (jsxc.options.autoLang && navigator.language) {
+      } else if (jsxc.options.autoLang &amp;&amp; navigator.languages &amp;&amp; navigator.languages.length > 0) {
+         lang = navigator.languages[0].substr(0, 2);
+      } else if (jsxc.options.autoLang &amp;&amp; navigator.language) {
          lang = navigator.language.substr(0, 2);
       } else {
          lang = jsxc.options.defaultLang;
@@ -293,35 +296,14 @@ jsxc = {
       // Register event listener for the storage event
       window.addEventListener('storage', jsxc.storage.onStorage, false);
 
-      $(document).on('attached.jsxc', function() {
-         // Looking for logout element
-         if (jsxc.options.logoutElement !== null && $(jsxc.options.logoutElement).length > 0) {
-            var logout = function(ev) {
-               if (!jsxc.xmpp.conn || !jsxc.xmpp.conn.authenticated) {
-                  return;
-               }
+      $(document).on('attached.jsxc', jsxc.registerLogout);
 
-               ev.stopPropagation();
-               ev.preventDefault();
-
-               jsxc.options.logoutElement = $(this);
-               jsxc.triggeredFromLogout = true;
-
-               jsxc.xmpp.logout();
-            };
-
-            jsxc.options.logoutElement = $(jsxc.options.logoutElement);
-
-            jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
-         }
-      });
-
-      var isStorageAttachParameters = jsxc.storage.getItem('rid') && jsxc.storage.getItem('sid') && jsxc.storage.getItem('jid');
-      var isOptionsAttachParameters = jsxc.options.xmpp.rid && jsxc.options.xmpp.sid && jsxc.options.xmpp.jid;
-      var isForceLoginForm = jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'force' && jsxc.isLoginForm();
+      var isStorageAttachParameters = jsxc.storage.getItem('rid') &amp;&amp; jsxc.storage.getItem('sid') &amp;&amp; jsxc.storage.getItem('jid');
+      var isOptionsAttachParameters = jsxc.options.xmpp.rid &amp;&amp; jsxc.options.xmpp.sid &amp;&amp; jsxc.options.xmpp.jid;
+      var isForceLoginForm = jsxc.options.loginForm &amp;&amp; jsxc.options.loginForm.ifFound === 'force' &amp;&amp; jsxc.isLoginForm();
 
       // Check if we have to establish a new connection
-      if ((!isStorageAttachParameters && !isOptionsAttachParameters) || isForceLoginForm) {
+      if ((!isStorageAttachParameters &amp;&amp; !isOptionsAttachParameters) || isForceLoginForm) {
 
          // clean up rid and sid
          jsxc.storage.removeItem('rid');
@@ -365,7 +347,7 @@ jsxc = {
             jsxc.prepareLogin(function(settings) {
                if (settings !== false) {
                   // settings.xmpp.onlogin is deprecated since v2.1.0
-                  var enabled = (settings.loginForm && settings.loginForm.enable) || (settings.xmpp && settings.xmpp.onlogin);
+                  var enabled = (settings.loginForm &amp;&amp; settings.loginForm.enable) || (settings.xmpp &amp;&amp; settings.xmpp.onlogin);
                   enabled = enabled === "true" || enabled === true;
 
                   if (enabled) {
@@ -382,11 +364,11 @@ jsxc = {
             return false;
          });
 
-      } else if (!jsxc.isLoginForm() || (jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'attach')) {
+      } else if (!jsxc.isLoginForm() || (jsxc.options.loginForm &amp;&amp; jsxc.options.loginForm.ifFound === 'attach')) {
 
          // Restore old connection
 
-         if (typeof jsxc.storage.getItem('alive') !== 'number') {
+         if (typeof jsxc.storage.getItem('alive') === 'undefined') {
             jsxc.onMaster();
          } else {
             jsxc.checkMaster();
@@ -395,7 +377,7 @@ jsxc = {
    },
 
    /**
-    * Attach to previous session if jid, sid and rid are available 
+    * Attach to previous session if jid, sid and rid are available
     * in storage or options (default behaviour also for {@link jsxc.init}).
     *
     * @memberOf jsxc
@@ -418,13 +400,13 @@ jsxc = {
    start: function() {
       var args = arguments;
 
-      if (jsxc.role_allocation && !jsxc.master) {
+      if (jsxc.role_allocation &amp;&amp; !jsxc.master) {
          jsxc.debug('There is an other master tab');
 
          return false;
       }
 
-      if (jsxc.xmpp.conn && jsxc.xmpp.connected) {
+      if (jsxc.xmpp.conn &amp;&amp; jsxc.xmpp.connected) {
          jsxc.debug('We are already connected');
 
          return false;
@@ -444,6 +426,25 @@ jsxc = {
       });
    },
 
+   registerLogout: function() {
+      // Looking for logout element
+      if (jsxc.options.logoutElement !== null &amp;&amp; $(jsxc.options.logoutElement).length > 0) {
+         var logout = function(ev) {
+            ev.stopPropagation();
+            ev.preventDefault();
+
+            jsxc.options.logoutElement = $(this);
+            jsxc.triggeredFromLogout = true;
+
+            jsxc.xmpp.logout();
+         };
+
+         jsxc.options.logoutElement = $(jsxc.options.logoutElement);
+
+         jsxc.options.logoutElement.off('click', null, logout).one('click', logout);
+      }
+   },
+
    /**
     * Returns true if login form is found.
     *
@@ -451,12 +452,12 @@ jsxc = {
     * @returns {boolean} True if login form was found.
     */
    isLoginForm: function() {
-      return jsxc.options.loginForm.form && jsxc.el_exists(jsxc.options.loginForm.form) && jsxc.el_exists(jsxc.options.loginForm.jid) && jsxc.el_exists(jsxc.options.loginForm.pass);
+      return jsxc.options.loginForm.form &amp;&amp; jsxc.el_exists(jsxc.options.loginForm.form) &amp;&amp; jsxc.el_exists(jsxc.options.loginForm.jid) &amp;&amp; jsxc.el_exists(jsxc.options.loginForm.pass);
    },
 
    /**
     * Load settings and prepare jid.
-    * 
+    *
     * @memberOf jsxc
     * @param {string} username
     * @param {string} password
@@ -470,7 +471,7 @@ jsxc = {
       username = username || $(jsxc.options.loginForm.jid).val();
       password = password || $(jsxc.options.loginForm.pass).val();
 
-      if (!jsxc.triggeredFromBox && (jsxc.options.loginForm.onConnecting === 'dialog' || typeof jsxc.options.loginForm.onConnecting === 'undefined')) {
+      if (!jsxc.triggeredFromBox &amp;&amp; (jsxc.options.loginForm.onConnecting === 'dialog' || typeof jsxc.options.loginForm.onConnecting === 'undefined')) {
          jsxc.gui.showWaitAlert($.t('Logging_in'));
       }
 
@@ -491,7 +492,7 @@ jsxc = {
 
    /**
     * Process xmpp settings and save loaded settings.
-    * 
+    *
     * @private
     * @memberOf jsxc
     * @param {string} username
@@ -571,10 +572,14 @@ jsxc = {
       jsxc.bid = jsxc.jidToBid(jsxc.storage.getItem('jid'));
 
       jsxc.gui.init();
+      $('#jsxc_roster').removeClass('jsxc_noConnection');
 
       jsxc.restoreRoster();
       jsxc.restoreWindows();
       jsxc.restoreCompleted = true;
+
+      jsxc.registerLogout();
+      jsxc.gui.updateAvatar($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
 
       $(document).trigger('restoreCompleted.jsxc');
    },
@@ -607,13 +612,13 @@ jsxc = {
    checkMaster: function(cb) {
       jsxc.debug('check master');
 
-      cb = (cb && typeof cb === 'function') ? cb : jsxc.onMaster;
+      cb = (cb &amp;&amp; typeof cb === 'function') ? cb : jsxc.onMaster;
 
-      if (typeof jsxc.storage.getItem('alive') !== 'number') {
+      if (typeof jsxc.storage.getItem('alive') === 'undefined') {
          cb.call();
       } else {
          jsxc.to.push(window.setTimeout(cb, 1000));
-         jsxc.storage.ink('alive');
+         jsxc.keepAlive('slave');
       }
    },
 
@@ -626,7 +631,7 @@ jsxc = {
       //prepare notifications
       var noti = jsxc.storage.getUserItem('notification');
       noti = (typeof noti === 'number') ? noti : 2;
-      if (jsxc.options.notification && noti > 0 && jsxc.notification.hasSupport()) {
+      if (jsxc.options.notification &amp;&amp; noti > 0 &amp;&amp; jsxc.notification.hasSupport()) {
          if (jsxc.notification.hasPermission()) {
             jsxc.notification.init();
          } else {
@@ -649,14 +654,17 @@ jsxc = {
     * Start sending keep-alive signal
     */
    startKeepAlive: function() {
-      jsxc.keepalive = window.setInterval(jsxc.keepAlive, jsxc.options.timeout - 1000);
+      jsxc.keepaliveInterval = window.setInterval(jsxc.keepAlive, jsxc.options.timeout - 1000);
    },
 
    /**
     * Sends the keep-alive signal to signal that the master is still there.
     */
-   keepAlive: function() {
-      jsxc.storage.ink('alive');
+   keepAlive: function(role) {
+      var next = parseInt(jsxc.storage.getItem('alive')) + 1;
+      role = role || 'master';
+
+      jsxc.storage.setItem('alive', next + ':' + role);
    },
 
    /**
@@ -668,8 +676,8 @@ jsxc = {
          window.clearTimeout(jsxc.toBusy);
       }
 
-      if (jsxc.keepalive) {
-         window.clearInterval(jsxc.keepalive);
+      if (jsxc.keepaliveInterval) {
+         window.clearInterval(jsxc.keepaliveInterval);
       }
 
       jsxc.storage.ink('alive_busy');
@@ -678,7 +686,7 @@ jsxc = {
 
    /**
     * Generates a random integer number between 0 and max
-    * 
+    *
     * @param {Integer} max
     * @return {Integer} random integer between 0 and max
     */
@@ -688,7 +696,7 @@ jsxc = {
 
    /**
     * Checks if there is a element with the given selector
-    * 
+    *
     * @param {String} selector jQuery selector
     * @return {Boolean}
     */
@@ -698,7 +706,7 @@ jsxc = {
 
    /**
     * Creates a CSS compatible string from a JID
-    * 
+    *
     * @param {type} jid Valid Jabber ID
     * @returns {String} css Compatible string
     */
@@ -712,7 +720,7 @@ jsxc = {
 
    /**
     * Create comparable bar jid.
-    * 
+    *
     * @memberOf jsxc
     * @param jid
     * @returns comparable bar jid
@@ -777,7 +785,7 @@ jsxc = {
     * This method submits the specified login form.
     */
    submitLoginForm: function() {
-      var form = jsxc.options.loginForm.form.off('submit');
+      var form = $(jsxc.options.loginForm.form).off('submit');
 
       // Attach original events
       var submits = form.data('submits') || [];
@@ -796,13 +804,13 @@ jsxc = {
     * Escapes some characters to HTML character
     */
    escapeHTML: function(text) {
-      text = text.replace(/&amp;/g, '&').replace(/&lt;/g, '&lt;').replace(/&gt;/g, '>');
-      return text.replace(/&/g, '&amp;').replace(/&lt;/g, '&lt;').replace(/>/g, '&gt;');
+      text = text.replace(/&amp;amp;/g, '&amp;').replace(/&amp;lt;/g, '&lt;').replace(/&amp;gt;/g, '>');
+      return text.replace(/&amp;/g, '&amp;amp;').replace(/&lt;/g, '&amp;lt;').replace(/>/g, '&amp;gt;');
    },
 
    /**
     * Removes all html tags.
-    * 
+    *
     * @memberOf jsxc
     * @param text
     * @returns stripped text
@@ -813,7 +821,7 @@ jsxc = {
 
    /**
     * Executes only one of the given events
-    * 
+    *
     * @param {string} obj.key event name
     * @param {function} obj.value function to execute
     * @returns {string} namespace of all events
@@ -835,7 +843,7 @@ jsxc = {
 
    /**
     * Checks if tab is hidden.
-    * 
+    *
     * @returns {boolean} True if tab is hidden
     */
    isHidden: function() {
@@ -852,9 +860,9 @@ jsxc = {
       }
 
       // handle multiple tabs
-      if (hidden && jsxc.master) {
+      if (hidden &amp;&amp; jsxc.master) {
          jsxc.storage.ink('hidden', 0);
-      } else if (!hidden && !jsxc.master) {
+      } else if (!hidden &amp;&amp; !jsxc.master) {
          jsxc.storage.ink('hidden');
       }
 
@@ -873,9 +881,9 @@ jsxc = {
          focus = document.hasFocus();
       }
 
-      if (!focus && jsxc.master) {
+      if (!focus &amp;&amp; jsxc.master) {
          jsxc.storage.ink('focus', 0);
-      } else if (focus && !jsxc.master) {
+      } else if (focus &amp;&amp; !jsxc.master) {
          jsxc.storage.ink('focus');
       }
 
@@ -884,7 +892,7 @@ jsxc = {
 
    /**
     * Executes the given function in jsxc namespace.
-    * 
+    *
     * @memberOf jsxc
     * @param {string} fnName Function name
     * @param {array} fnParams Function parameters
@@ -905,7 +913,7 @@ jsxc = {
 
    /**
     * Hash string into 32-bit signed integer.
-    * 
+    *
     * @memberOf jsxc
     * @param {string} str input string
     * @returns {integer} 32-bit signed integer
@@ -940,13 +948,13 @@ jsxc = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3>Global</h3><ul><li>{boolean}</li><li>{integer}</li><li>{string}</li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
-<br clear="both">
+<br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Wed May 04 2016 11:50:36 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Fri Oct 28 2016 13:29:05 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

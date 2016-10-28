@@ -1,3 +1,25 @@
+v3.0.1 / 2016-10-28
+===
+### Enhancements
+- add room configuration in master tab
+- improve muc multi tab support
+- update/add languages: zh, pt, hu, pl, en, pt
+- use user preferred browser languages
+- remove inline styles
+
+### Bug fixes
+- fix multi-tab support
+- fix uncaught type error on login
+- fix second call issue
+- fix option retrieval
+- fix auto-accept
+- fix the answer to anything
+- fix boolean muc configurations
+
+### Developer changes
+- allow selector for options.logoutElement
+- attach also with parameters from options.xmpp
+
 v3.0.0 / 2016-03-11
 ===
 ### New features
