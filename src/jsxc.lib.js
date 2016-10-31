@@ -767,8 +767,12 @@ jsxc = {
 
       if (form.find('#submit').length > 0) {
          form.find('#submit').click();
-      } else {
+      } else if (form.get(0) && typeof form.get(0).submit === 'function') {
          form.submit();
+      } else if (form.find('[type="submit"]').length > 0) {
+         form.find('[type="submit"]').click();
+      } else {
+         jsxc.warn('Could not submit login form.');
       }
    },
 
