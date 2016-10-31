@@ -83,8 +83,8 @@ $(function() {
 
    // special setup for jsxc.org/example
    if (window.location.hostname === 'www.jsxc.org' && !localStorage.getItem('bosh-url') && !localStorage.getItem('xmpp-domain')) {
-     $('#bosh-url').val('/http-bind/');
-     $('#xmpp-domain').val('jsxc.org');
+      $('#bosh-url').val('/http-bind/');
+      $('#xmpp-domain').val('jsxc.org');
    }
 
    // load bosh url from storage
@@ -137,7 +137,7 @@ $(function() {
 
    // show special information for jsxc.org/example
    if (window.location.hostname === 'www.jsxc.org') {
-     $('.jsxc-org').show();
+      $('.jsxc-org').show();
    }
 });
 

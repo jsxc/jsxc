@@ -391,8 +391,8 @@ jsxc.muc = {
       var form = dialog.find('form');
 
       // work around Strophe.x behaviour
-      form.find('[type="checkbox"]').change(function(){
-        $(this).val(this.checked ? 1 : 0);
+      form.find('[type="checkbox"]').change(function() {
+         $(this).val(this.checked ? 1 : 0);
       });
 
       var submit = $('<button>');

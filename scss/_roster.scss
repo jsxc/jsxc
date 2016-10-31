@@ -251,71 +251,71 @@
 }
 
 #jsxc_roster > .jsxc_bottom {
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        line-height: 34px;
-        background-color: $roster_bottom_bg;
-        z-index: 50;
-        padding-right: 4px;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    line-height: 34px;
+    background-color: $roster_bottom_bg;
+    z-index: 50;
+    padding-right: 4px;
 
-        &:hover {
+    &:hover {
+        background-color: $roster_bottom_bg_hover;
+    }
+
+    .jsxc_inner {
+        width: 100%;
+    }
+
+    ul {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        border-top: 1px solid $roster_bottom_border_top;
+        background-color: $roster_bottom_bg;
+        margin: 0;
+
+        li:last-child {
+            border-bottom: 1px solid $roster_bottom_border_top;
+        }
+    }
+
+    li {
+        height: 44px;
+        background-color: $roster_bottom_bg;
+        color: $roster_bottom_color;
+        cursor: pointer;
+        width: 100%;
+        padding-left: 44px;
+        line-height: 44px;
+        text-align: left;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        background-repeat: no-repeat;
+        background-position: 15px center;
+        background-size: 16px 16px;
+        opacity: 0.8;
+
+        &.jsxc_disabled {
+            color: $roster_bottom_disabled;
+            cursor: default;
+        }
+
+        &:hover:not(.jsxc_disabled) {
+            color: $roster_bottom_color_hover;
             background-color: $roster_bottom_bg_hover;
         }
+    }
 
-        .jsxc_inner {
-            width: 100%;
-        }
+    > div > span {
+        cursor: pointer;
+    }
 
-        ul {
-            padding: 0;
-            margin: 0;
-            width: 100%;
-            border-top: 1px solid $roster_bottom_border_top;
-            background-color: $roster_bottom_bg;
-            margin: 0;
-
-            li:last-child {
-                border-bottom: 1px solid $roster_bottom_border_top;
-            }
-        }
-
-        li {
-            height: 44px;
-            background-color: $roster_bottom_bg;
-            color: $roster_bottom_color;
-            cursor: pointer;
-            width: 100%;
-            padding-left: 44px;
-            line-height: 44px;
-            text-align: left;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            background-repeat: no-repeat;
-            background-position: 15px center;
-            background-size: 16px 16px;
-            opacity: 0.8;
-
-            &.jsxc_disabled {
-                color: $roster_bottom_disabled;
-                cursor: default;
-            }
-
-            &:hover:not(.jsxc_disabled) {
-                color: $roster_bottom_color_hover;
-                background-color: $roster_bottom_bg_hover;
-            }
-        }
-
-        > div > span {
-            cursor: pointer;
-        }
-
-        > div:hover {
-            /*color: $roster_bottom_color_hover;*/
-        }
+    > div:hover {
+        /*color: $roster_bottom_color_hover;*/
+    }
 }
 
 #jsxc_avatar {
