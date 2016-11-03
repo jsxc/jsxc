@@ -79,7 +79,13 @@
   },
   {
      "name": "i18next",
-     "file": "lib/i18next/release/i18next-latest.min.js",
+     "file": "lib/i18next/i18next.min.js",
+     "license": "MIT",
+     "url": "http://i18next.com/"
+  },
+  {
+     "name": "jquery-i18next",
+     "file": "lib/jquery-i18next/jquery-i18next.min.js",
      "license": "MIT",
      "url": "http://i18next.com/"
   },

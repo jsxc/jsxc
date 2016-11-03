@@ -250,15 +250,18 @@ jsxc = {
          lang = jsxc.options.defaultLang;
       }
 
-      // initialize i18n translator
-      $.i18n.init({
+      // initialize i18next translator
+      window.i18next.init({
          lng: lang,
          fallbackLng: 'en',
-         resStore: I18next,
-         // use localStorage and set expiration to a day
-         useLocalStorage: true,
-         localStorageExpirationTime: 60 * 60 * 24 * 1000,
+         resources: I18next,
          debug: jsxc.storage.getItem('debug') === true
+      }, function() {
+         window.jqueryI18next.init(window.i18next, $, {
+            tName: 't',
+            i18nName: 'i18next',
+            handleName: 'localize',
+         });
       });
 
       if (jsxc.storage.getItem('debug') === true) {

@@ -1,9 +1,6 @@
 [submodule "lib/otr"]
 	path = lib/otr
 	url = https://github.com/sualko/otr.git
-[submodule "lib/i18next"]
-	path = lib/i18next
-	url = https://github.com/i18next/i18next.git
 [submodule "lib/bootstrap"]
 	path = lib/bootstrap
 	url = https://github.com/twbs/bootstrap-sass/

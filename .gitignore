@@ -20,3 +20,5 @@ dev/
 /lib/strophe.js/
 /lib/strophe.vcard/
 /lib/emojione/
+lib/i18next/
+lib/jquery-i18next/

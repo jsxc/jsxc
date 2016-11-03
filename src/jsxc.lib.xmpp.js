@@ -1,6 +1,6 @@
 /**
  * Handle XMPP stuff.
- * 
+ *
  * @namespace jsxc.xmpp
  */
 jsxc.xmpp = {
@@ -8,14 +8,14 @@ jsxc.xmpp = {
 
    /**
     * Create new connection or attach to old
-    * 
+    *
     * @name login
     * @memberOf jsxc.xmpp
     * @private
     */
    /**
     * Create new connection with given parameters.
-    * 
+    *
     * @name login^2
     * @param {string} jid
     * @param {string} password
@@ -24,7 +24,7 @@ jsxc.xmpp = {
     */
    /**
     * Attach connection with given parameters.
-    * 
+    *
     * @name login^3
     * @param {string} jid
     * @param {string} sid
@@ -176,7 +176,7 @@ jsxc.xmpp = {
 
    /**
     * Logs user out of his xmpp session and does some clean up.
-    * 
+    *
     * @param {boolean} complete If set to false, roster will not be removed
     * @returns {Boolean}
     */
@@ -243,7 +243,7 @@ jsxc.xmpp = {
 
    /**
     * Triggered if connection is established
-    * 
+    *
     * @private
     */
    connected: function() {
@@ -276,7 +276,7 @@ jsxc.xmpp = {
 
    /**
     * Triggered if connection is attached
-    * 
+    *
     * @private
     */
    attached: function() {
@@ -417,7 +417,7 @@ jsxc.xmpp = {
 
    /**
     * Triggered if lost connection
-    * 
+    *
     * @private
     */
    disconnected: function() {
@@ -460,7 +460,7 @@ jsxc.xmpp = {
 
    /**
     * Triggered on connection fault
-    * 
+    *
     * @param {String} condition information why we lost the connection
     * @private
     */
@@ -474,7 +474,7 @@ jsxc.xmpp = {
 
    /**
     * Triggered on auth fail.
-    * 
+    *
     * @private
     */
    onAuthFail: function() {
@@ -496,7 +496,7 @@ jsxc.xmpp = {
 
    /**
     * Triggered on initial roster load
-    * 
+    *
     * @param {dom} iq
     * @private
     */
@@ -548,7 +548,7 @@ jsxc.xmpp = {
 
    /**
     * Triggerd on roster changes
-    * 
+    *
     * @param {dom} iq
     * @returns {Boolean} True to preserve handler
     * @private
@@ -623,19 +623,19 @@ jsxc.xmpp = {
 
    /**
     * Triggered on incoming presence stanzas
-    * 
+    *
     * @param {dom} presence
     * @private
     */
    onPresence: function(presence) {
       /*
        * <presence xmlns='jabber:client' type='unavailable' from='' to=''/>
-       * 
+       *
        * <presence xmlns='jabber:client' from='' to=''> <priority>5</priority>
        * <c xmlns='http://jabber.org/protocol/caps'
        * node='http://psi-im.org/caps' ver='caps-b75d8d2b25' ext='ca cs
        * ep-notify-2 html'/> </presence>
-       * 
+       *
        * <presence xmlns='jabber:client' from='' to=''> <show>chat</show>
        * <status></status> <priority>5</priority> <c
        * xmlns='http://jabber.org/protocol/caps' node='http://psi-im.org/caps'
@@ -770,7 +770,7 @@ jsxc.xmpp = {
 
    /**
     * Triggered on incoming message stanzas
-    * 
+    *
     * @param {dom} presence
     * @returns {Boolean}
     * @private
@@ -908,7 +908,7 @@ jsxc.xmpp = {
 
    /**
     * Triggerd if the rid changed
-    * 
+    *
     * @param {integer} rid next valid request id
     * @private
     */
@@ -918,7 +918,7 @@ jsxc.xmpp = {
 
    /**
     * response to friendship request
-    * 
+    *
     * @param {string} from jid from original friendship req
     * @param {boolean} approve
     */
@@ -939,7 +939,7 @@ jsxc.xmpp = {
 
    /**
     * Add buddy to my friends
-    * 
+    *
     * @param {string} username jid
     * @param {string} alias
     */
@@ -975,7 +975,7 @@ jsxc.xmpp = {
 
    /**
     * Remove buddy from my friends
-    * 
+    *
     * @param {type} jid
     */
    removeBuddy: function(jid) {
@@ -1010,7 +1010,7 @@ jsxc.xmpp = {
 
    /**
     * Public function to send message.
-    * 
+    *
     * @memberOf jsxc.xmpp
     * @param bid css jid of user
     * @param msg message
@@ -1026,7 +1026,7 @@ jsxc.xmpp = {
 
    /**
     * Create message stanza and send it.
-    * 
+    *
     * @memberOf jsxc.xmpp
     * @param jid Jabber id
     * @param msg Message
@@ -1062,7 +1062,7 @@ jsxc.xmpp = {
 
    /**
     * This function loads a vcard.
-    * 
+    *
     * @memberOf jsxc.xmpp
     * @param bid
     * @param cb
@@ -1086,7 +1086,7 @@ jsxc.xmpp = {
 
    /**
     * Retrieves capabilities.
-    * 
+    *
     * @memberOf jsxc.xmpp
     * @param jid
     * @returns List of known capabilities
@@ -1108,7 +1108,7 @@ jsxc.xmpp = {
 
    /**
     * Test if jid has given features
-    * 
+    *
     * @param  {string}   jid     Jabber id
     * @param  {string[]} feature Single feature or list of features
     * @param  {Function} cb      Called with the result as first param.
@@ -1160,7 +1160,7 @@ jsxc.xmpp = {
 
 /**
  * Handle carbons (XEP-0280);
- * 
+ *
  * @namespace jsxc.xmpp.carbons
  */
 jsxc.xmpp.carbons = {
@@ -1168,7 +1168,7 @@ jsxc.xmpp.carbons = {
 
    /**
     * Enable carbons.
-    * 
+    *
     * @memberOf jsxc.xmpp.carbons
     * @param cb callback
     */
@@ -1194,7 +1194,7 @@ jsxc.xmpp.carbons = {
 
    /**
     * Disable carbons.
-    * 
+    *
     * @memberOf jsxc.xmpp.carbons
     * @param cb callback
     */
@@ -1220,7 +1220,7 @@ jsxc.xmpp.carbons = {
 
    /**
     * Enable/Disable carbons depending on options key.
-    * 
+    *
     * @memberOf jsxc.xmpp.carbons
     * @param err error message
     */

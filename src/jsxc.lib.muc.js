@@ -301,7 +301,7 @@ jsxc.muc = {
                $(stanza).find('feature').each(function() {
                   var feature = $(this).attr('var');
 
-                  if (feature !== '' && i18n.exists(feature)) {
+                  if (feature !== '' && i18next.exists(feature)) {
                      var tr = $('<tr>');
                      $('<td>').text($.t(feature + '.keyword')).appendTo(tr);
                      $('<td>').text($.t(feature + '.description')).appendTo(tr);

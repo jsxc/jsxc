@@ -3092,7 +3092,7 @@ jsxc.gui.template.get = function(name, bid, msg) {
          }
       });
 
-      ret.i18n();
+      ret.localize();
 
       return ret;
    }

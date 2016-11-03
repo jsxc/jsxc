@@ -17,6 +17,7 @@
       "t":true,
       "i18n":true,
       "I18next":true,
+      "i18next":true,
       "OTR":true,
       "DSA":true,
       "Worker":true,
