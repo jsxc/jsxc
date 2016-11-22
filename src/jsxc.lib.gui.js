@@ -426,9 +426,15 @@ jsxc.gui = {
     * Creates and show loginbox
     */
    showLoginBox: function() {
-      // Set focus to password field
-      $(document).on("complete.dialog.jsxc", function() {
-         $('#jsxc_password').focus();
+      // Set focus to username or password field
+      $(document).one("complete.dialog.jsxc", function() {
+         setTimeout(function() {
+            if ($("#jsxc_username").val().length === 0) {
+               $("#jsxc_username").focus();
+            } else {
+               $('#jsxc_password').focus();
+            }
+         }, 50);
       });
 
       jsxc.gui.dialog.open(jsxc.gui.template.get('loginBox'));
