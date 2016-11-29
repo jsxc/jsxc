@@ -58,6 +58,12 @@ jsxc = {
    /** My bar id */
    bid: null,
 
+   /** Current state */
+   currentState: null,
+
+   /** Current UI state */
+   currentUIState: null,
+
    /** Some constants */
    CONST: {
       NOTIFICATION_DEFAULT: 'default',
@@ -78,7 +84,20 @@ jsxc = {
          FORWARD: 'urn:xmpp:forward:0'
       },
       HIDDEN: 'hidden',
-      SHOWN: 'shown'
+      SHOWN: 'shown',
+      STATE: {
+         INITIATING: 0,
+         PREVCONFOUND: 1,
+         SUSPEND: 2,
+         TRYTOINTERCEPT: 3,
+         INTERCEPTED: 4,
+         ESTABLISHING: 5,
+         READY: 6
+      },
+      UISTATE: {
+         INITIATING: 0,
+         READY: 1
+      }
    },
 
    /**
@@ -190,6 +209,7 @@ jsxc = {
     * @param {object} options See {@link jsxc.options}
     */
    init: function(options) {
+      jsxc.changeState(jsxc.CONST.STATE.INITIATING);
 
       if (options && options.loginForm && typeof options.loginForm.attachIfFound === 'boolean' && !options.loginForm.ifFound) {
          // translate deprated option attachIfFound found to new ifFound
@@ -286,6 +306,7 @@ jsxc = {
 
          // Looking for a login form
          if (!jsxc.isLoginForm()) {
+            jsxc.changeState(jsxc.CONST.STATE.SUSPEND);
 
             if (jsxc.options.displayRosterMinimized()) {
                // Show minimized roster
@@ -296,6 +317,8 @@ jsxc = {
 
             return;
          }
+
+         jsxc.changeState(jsxc.CONST.STATE.TRYTOINTERCEPT);
 
          if (typeof jsxc.options.formFound === 'function') {
             jsxc.options.formFound.call();
@@ -339,9 +362,12 @@ jsxc = {
             return false;
          });
 
+         jsxc.changeState(jsxc.CONST.STATE.INTERCEPTED);
+
       } else if (!jsxc.isLoginForm() || (jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'attach')) {
 
          // Restore old connection
+         jsxc.changeState(jsxc.CONST.STATE.PREVCONFOUND);
 
          if (typeof jsxc.storage.getItem('alive') === 'undefined') {
             jsxc.onMaster();
@@ -549,14 +575,10 @@ jsxc = {
       jsxc.gui.init();
       $('#jsxc_roster').removeClass('jsxc_noConnection');
 
-      jsxc.restoreRoster();
-      jsxc.restoreWindows();
-      jsxc.restoreCompleted = true;
-
       jsxc.registerLogout();
       jsxc.gui.updateAvatar($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
 
-      $(document).trigger('restoreCompleted.jsxc');
+      jsxc.gui.restore();
    },
 
    /**
@@ -915,5 +937,21 @@ jsxc = {
 
    isExtraSmallDevice: function() {
       return $(window).width() < 500;
+   },
+
+   changeState: function(state) {
+      jsxc.currentState = state;
+
+      jsxc.debug('State changed to ' + Object.keys(jsxc.CONST.STATE)[state]);
+
+      $(document).trigger('stateChange.jsxc', state);
+   },
+
+   changeUIState: function(state) {
+      jsxc.currentUIState = state;
+
+      jsxc.debug('UI State changed to ' + Object.keys(jsxc.CONST.UISTATE)[state]);
+
+      $(document).trigger('stateUIChange.jsxc', state);
    }
 };

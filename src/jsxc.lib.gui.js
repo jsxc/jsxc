@@ -101,6 +101,8 @@ jsxc.gui = {
          return;
       }
 
+      jsxc.changeUIState(jsxc.CONST.UISTATE.INITIATING);
+
       jsxc.gui.regShortNames = new RegExp(emojione.regShortNames.source + '|(' + Object.keys(jsxc.gui.emoticonList.core).join('|') + ')', 'gi');
 
       $('body').append($(jsxc.gui.template.get('windowList')));
@@ -1460,6 +1462,15 @@ jsxc.gui = {
       });
 
       return str;
+   },
+
+   restore: function() {
+      jsxc.restoreRoster();
+      jsxc.restoreWindows();
+      jsxc.restoreCompleted = true;
+
+      $(document).trigger('restoreCompleted.jsxc');
+      jsxc.changeUIState(jsxc.CONST.UISTATE.READY);
    }
 };
 
