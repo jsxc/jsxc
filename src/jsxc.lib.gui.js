@@ -2643,6 +2643,12 @@ jsxc.gui.window = {
       // replace line breaks
       msg = msg.replace(/(\r\n|\r|\n)/g, '<br />');
 
+      // replace /me command (XEP-0245)
+      var bidData = jsxc.storage.getUserItem('buddy', bid) || {};
+      if (direction === 'in') {
+         msg = msg.replace(/^\/me /, '<i title="/me">' + jsxc.removeHTML(bidData.name || bid) + '</i> ');
+      }
+
       var msgDiv = $("<div>"),
          msgTsDiv = $("<div>");
       msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
