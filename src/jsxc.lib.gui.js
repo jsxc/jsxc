@@ -1461,6 +1461,12 @@ jsxc.gui = {
          return div.prop('outerHTML');
       });
 
+      var obj = $('<div>' + str + '</div>');
+      if (obj.find('.jsxc_emoticon').length === 1 && obj.text().replace(/ /, '').length === 0 && obj.find('*').length === 1) {
+         obj.find('.jsxc_emoticon').addClass('jsxc_large');
+         str = obj.prop('outerHTML');
+      }
+
       return str;
    },
 
