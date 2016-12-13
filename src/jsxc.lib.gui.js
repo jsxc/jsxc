@@ -101,6 +101,8 @@ jsxc.gui = {
          return;
       }
 
+      jsxc.changeUIState(jsxc.CONST.UISTATE.INITIATING);
+
       jsxc.gui.regShortNames = new RegExp(emojione.regShortNames.source + '|(' + Object.keys(jsxc.gui.emoticonList.core).join('|') + ')', 'gi');
 
       $('body').append($(jsxc.gui.template.get('windowList')));
@@ -426,9 +428,15 @@ jsxc.gui = {
     * Creates and show loginbox
     */
    showLoginBox: function() {
-      // Set focus to password field
-      $(document).on("complete.dialog.jsxc", function() {
-         $('#jsxc_password').focus();
+      // Set focus to username or password field
+      $(document).one("complete.dialog.jsxc", function() {
+         setTimeout(function() {
+            if ($("#jsxc_username").val().length === 0) {
+               $("#jsxc_username").focus();
+            } else {
+               $('#jsxc_password').focus();
+            }
+         }, 50);
       });
 
       jsxc.gui.dialog.open(jsxc.gui.template.get('loginBox'));
@@ -1459,7 +1467,22 @@ jsxc.gui = {
          return div.prop('outerHTML');
       });
 
+      var obj = $('<div>' + str + '</div>');
+      if (obj.find('.jsxc_emoticon').length === 1 && obj.text().replace(/ /, '').length === 0 && obj.find('*').length === 1) {
+         obj.find('.jsxc_emoticon').addClass('jsxc_large');
+         str = obj.prop('outerHTML');
+      }
+
       return str;
+   },
+
+   restore: function() {
+      jsxc.restoreRoster();
+      jsxc.restoreWindows();
+      jsxc.restoreCompleted = true;
+
+      $(document).trigger('restoreCompleted.jsxc');
+      jsxc.changeUIState(jsxc.CONST.UISTATE.READY);
    }
 };
 
@@ -2625,6 +2648,12 @@ jsxc.gui.window = {
 
       // replace line breaks
       msg = msg.replace(/(\r\n|\r|\n)/g, '<br />');
+
+      // replace /me command (XEP-0245)
+      var bidData = jsxc.storage.getUserItem('buddy', bid) || {};
+      if (direction === 'in') {
+         msg = msg.replace(/^\/me /, '<i title="/me">' + jsxc.removeHTML(bidData.name || bid) + '</i> ');
+      }
 
       var msgDiv = $("<div>"),
          msgTsDiv = $("<div>");

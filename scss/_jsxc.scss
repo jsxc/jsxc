@@ -133,9 +133,9 @@
     }
 
     .jsxc_inputinfo {
-        padding-left: 30%;
+        padding: 0;
         font-style: italic;
-        margin-top: -1em;
+        margin: 0;
     }
 
     .jsxc_waiting {
@@ -152,6 +152,10 @@
 
     .jsxc_libraries, .jsxc_credits {
         max-width: 300px;
+    }
+
+    .jsxc_warning {
+      display: block;
     }
 }
 

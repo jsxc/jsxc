@@ -141,6 +141,8 @@ jsxc.xmpp = {
          jsxc.xmpp.conn.caps.node = 'http://jsxc.org/';
       }
 
+      jsxc.changeState(jsxc.CONST.STATE.ESTABLISHING);
+
       if (sid && rid) {
          jsxc.debug('Try to attach');
          jsxc.debug('SID: ' + sid);
@@ -271,6 +273,7 @@ jsxc.xmpp = {
       jsxc.xmpp.conn.resume();
       jsxc.onMaster();
 
+      jsxc.changeState(jsxc.CONST.STATE.READY);
       $(document).trigger('attached.jsxc');
    },
 
@@ -346,17 +349,15 @@ jsxc.xmpp = {
          jsxc.xmpp.sendPres();
 
          if (!jsxc.restoreCompleted) {
-            jsxc.restoreRoster();
-            jsxc.restoreWindows();
-            jsxc.restoreCompleted = true;
-
-            $(document).trigger('restoreCompleted.jsxc');
+            jsxc.gui.restore();
          }
       }
 
       jsxc.xmpp.saveSessionParameter();
 
       jsxc.masterActions();
+
+      jsxc.changeState(jsxc.CONST.STATE.READY);
    },
 
    saveSessionParameter: function() {
@@ -456,6 +457,8 @@ jsxc.xmpp = {
       jsxc.role_allocation = false;
       jsxc.master = false;
       jsxc.storage.removeItem('alive');
+
+      jsxc.changeState(jsxc.CONST.STATE.SUSPEND);
    },
 
    /**
@@ -544,6 +547,7 @@ jsxc.xmpp = {
       jsxc.gui.roster.loaded = true;
       jsxc.debug('Roster loaded');
       $(document).trigger('cloaded.roster.jsxc');
+      jsxc.changeUIState(jsxc.CONST.UISTATE.READY);
    },
 
    /**
@@ -757,7 +761,7 @@ jsxc.xmpp = {
       jsxc.storage.setUserItem('buddy', bid, data);
       jsxc.storage.setUserItem('res', bid, res);
 
-      jsxc.debug('Presence (' + from + '): ' + status);
+      jsxc.debug('Presence (' + from + '): ' + jsxc.CONST.STATUS[status]);
 
       jsxc.gui.update(bid);
       jsxc.gui.roster.reorder(bid);
