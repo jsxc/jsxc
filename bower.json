@@ -24,7 +24,7 @@
     "tests"
   ],
   "private": true,
-  "dependencies": {
+  "devDependencies": {
     "emojione": "~2.0.1",
     "favico.js": "^0.3.10",
     "strophe.bookmarks": "https://raw.githubusercontent.com/sualko/strophejs-plugins/bookmarks/bookmarks/strophe.bookmarks.js",
