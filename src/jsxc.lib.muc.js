@@ -121,6 +121,8 @@ jsxc.muc = {
       var self = jsxc.muc;
       var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('joinChat'));
 
+      // @TODO split this monster function apart
+
       // hide second step button
       dialog.find('.jsxc_join').hide();
 
@@ -135,7 +137,27 @@ jsxc.muc = {
       }
 
       // display conference server
+      var serverInputTimeout;
       dialog.find('#jsxc_server').val(jsxc.options.get('muc').server);
+      dialog.find('#jsxc_server').on('input', function() {
+         var self = $(this);
+
+         if (serverInputTimeout) {
+            clearTimeout(serverInputTimeout);
+            dialog.find('.jsxc_inputinfo.jsxc_room').hide();
+         }
+
+         dialog.find('.jsxc_inputinfo.jsxc_server').hide().text('');
+         dialog.find('#jsxc_server').removeClass('jsxc_invalid');
+
+         if (self.val() && self.val().match(/^[.-0-9a-zA-Z]+$/i)) {
+            dialog.find('.jsxc_inputinfo.jsxc_room').show().addClass('jsxc_waiting');
+
+            serverInputTimeout = setTimeout(function() {
+               loadRoomList(self.val());
+            }, 1800);
+         }
+      }).trigger('input');
 
       // handle error response
       var error_handler = function(event, condition, room) {
@@ -192,42 +214,6 @@ jsxc.muc = {
          $(document).off('error.muc.jsxc', error_handler);
       });
 
-      // load room list
-      self.conn.muc.listRooms(jsxc.options.get('muc').server, function(stanza) {
-         // workaround: chrome does not display dropdown arrow for dynamically filled datalists
-         $('#jsxc_roomlist option:last').remove();
-
-         $(stanza).find('item').each(function() {
-            var r = $('<option>');
-            var rjid = $(this).attr('jid').toLowerCase();
-            var rnode = Strophe.getNodeFromJid(rjid);
-            var rname = $(this).attr('name') || rnode;
-
-            r.text(rname);
-            r.attr('data-jid', rjid);
-            r.attr('value', rnode);
-
-            $('#jsxc_roomlist select').append(r);
-         });
-
-         var set = $(stanza).find('set[xmlns="http://jabber.org/protocol/rsm"]');
-
-         if (set.length > 0) {
-            var count = set.find('count').text() || '?';
-
-            dialog.find('.jsxc_inputinfo').removeClass('jsxc_waiting').text($.t('Could_load_only', {
-               count: count
-            }));
-         } else {
-            dialog.find('.jsxc_inputinfo').hide();
-         }
-      }, function() {
-         jsxc.warn('Could not load rooms');
-
-         // room autocompletion is a comfort feature, so it is not necessary to inform the user
-         dialog.find('.jsxc_inputinfo').hide();
-      });
-
       dialog.find('#jsxc_nickname').attr('placeholder', Strophe.getNodeFromJid(self.conn.jid));
 
       dialog.find('#jsxc_bookmark').change(function() {
@@ -246,6 +232,7 @@ jsxc.muc = {
          var room = ($('#jsxc_room').val()) ? jsxc.jidToBid($('#jsxc_room').val()) : null;
          var nickname = $('#jsxc_nickname').val() || Strophe.getNodeFromJid(self.conn.jid);
          var password = $('#jsxc_password').val() || null;
+         var server = dialog.find('#jsxc_server').val();
 
          if (!room || !room.match(/^[^"&\'\/:<>@\s]+$/i)) {
             $('#jsxc_room').addClass('jsxc_invalid').keyup(function() {
@@ -256,8 +243,12 @@ jsxc.muc = {
             return false;
          }
 
+         if (dialog.find('#jsxc_server').hasClass('jsxc_invalid')) {
+            return false;
+         }
+
          if (!room.match(/@(.*)$/)) {
-            room += '@' + jsxc.options.get('muc').server;
+            room += '@' + server;
          }
 
          if (jsxc.xmpp.conn.muc.roomNames.indexOf(room) < 0) {
@@ -353,6 +344,58 @@ jsxc.muc = {
             dialog.find('.jsxc_join').click();
          }
       });
+
+      function loadRoomList(server) {
+         if (!server) {
+            dialog.find('.jsxc_inputinfo').hide();
+
+            return;
+         }
+
+         // load room list
+         self.conn.muc.listRooms(server, function(stanza) {
+            // workaround: chrome does not display dropdown arrow for dynamically filled datalists
+            $('#jsxc_roomlist option:last').remove();
+
+            $(stanza).find('item').each(function() {
+               var r = $('<option>');
+               var rjid = $(this).attr('jid').toLowerCase();
+               var rnode = Strophe.getNodeFromJid(rjid);
+               var rname = $(this).attr('name') || rnode;
+
+               r.text(rname);
+               r.attr('data-jid', rjid);
+               r.attr('value', rnode);
+
+               $('#jsxc_roomlist select').append(r);
+            });
+
+            var set = $(stanza).find('set[xmlns="http://jabber.org/protocol/rsm"]');
+
+            if (set.length > 0) {
+               var count = set.find('count').text() || '?';
+
+               dialog.find('.jsxc_inputinfo').show().removeClass('jsxc_waiting').text($.t('Could_load_only', {
+                  count: count
+               }));
+            } else {
+               dialog.find('.jsxc_inputinfo').hide();
+            }
+         }, function(stanza) {
+            var errTextMsg = $(stanza).find('error text').text() || null;
+            jsxc.warn('Could not load rooms', errTextMsg);
+
+            if (errTextMsg) {
+               dialog.find('.jsxc_inputinfo.jsxc_server').show().text(errTextMsg);
+            }
+
+            if ($(stanza).find('error remote-server-not-found')) {
+               dialog.find('#jsxc_server').addClass('jsxc_invalid');
+            }
+
+            dialog.find('.jsxc_inputinfo.jsxc_room').hide();
+         });
+      }
    },
 
    /**
