@@ -443,6 +443,7 @@ jsxc.xmpp = {
 
       if (jsxc.triggeredFromElement) {
          $(document).trigger('toggle.roster.jsxc', ['hidden', 0]);
+         jsxc.gui.roster.ready = false;
          $('#jsxc_roster').remove();
 
          // REVIEW: logoutElement without href attribute?

@@ -89,6 +89,10 @@ jsxc.muc = {
          $(document).one('ready.roster.jsxc', jsxc.muc.initMenu);
       }
 
+      // remove maybe previously attached handlers
+      $(document).off('presence.jsxc', jsxc.muc.onPresence);
+      $(document).off('error.presence.jsxc', jsxc.muc.onPresenceError);
+
       $(document).on('presence.jsxc', jsxc.muc.onPresence);
       $(document).on('error.presence.jsxc', jsxc.muc.onPresenceError);
 
@@ -1653,7 +1657,7 @@ jsxc.muc = {
 $(document).on('init.window.jsxc', jsxc.muc.initWindow);
 $(document).on('add.roster.jsxc', jsxc.muc.onAddRoster);
 
-$(document).one('attached.jsxc', function() {
+$(document).on('attached.jsxc', function() {
    jsxc.muc.init();
 });
 
