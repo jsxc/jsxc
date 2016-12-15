@@ -1022,7 +1022,10 @@ jsxc.xmpp = {
     * @param uid unique id
     */
    sendMessage: function(bid, msg, uid) {
-      if (jsxc.otr.objects.hasOwnProperty(bid)) {
+      var mucRoomNames = (jsxc.xmpp.conn.muc && jsxc.xmpp.conn.muc.roomNames) ? jsxc.xmpp.conn.muc.roomNames : [];
+      var isMucBid = mucRoomNames.indexOf(bid) >= 0;
+
+      if (jsxc.otr.objects.hasOwnProperty(bid) && !isMucBid) {
          jsxc.otr.objects[bid].sendMsg(msg, uid);
       } else {
          jsxc.xmpp._sendMessage(jsxc.gui.window.get(bid).data('jid'), msg, uid);
