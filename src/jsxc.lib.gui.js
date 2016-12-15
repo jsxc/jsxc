@@ -2147,7 +2147,7 @@ jsxc.gui.window = {
          if (!$(this).data('originalHeight')) {
             $(this).data('originalHeight', $(this).outerHeight());
          }
-         if ($(this).outerHeight() < this.scrollHeight) {
+         if ($(this).outerHeight() < this.scrollHeight && $(this).val()) {
             $(this).height($(this).data('originalHeight') * 1.5);
          }
       }
