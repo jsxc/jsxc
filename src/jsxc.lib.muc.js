@@ -209,7 +209,7 @@ jsxc.muc = {
             delete self.conn.muc.rooms[room];
          }
 
-         dialog.find('.jsxc_warning').text(msg);
+         $('<p>').addClass('jsxc_warning').text(msg).appendTo(dialog.find('.jsxc_msg'));
       };
 
       $(document).on('error.muc.jsxc', error_handler);
@@ -235,7 +235,6 @@ jsxc.muc = {
 
          var room = ($('#jsxc_room').val()) ? jsxc.jidToBid($('#jsxc_room').val()) : null;
          var nickname = $('#jsxc_nickname').val() || Strophe.getNodeFromJid(self.conn.jid);
-         var password = $('#jsxc_password').val() || null;
          var server = dialog.find('#jsxc_server').val();
 
          if (!room || !room.match(/^[^"&\'\/:<>@\s]+$/i)) {
@@ -274,6 +273,7 @@ jsxc.muc = {
 
                   var bookmark = $("#jsxc_bookmark").prop("checked");
                   var autojoin = $('#jsxc_autojoin').prop('checked');
+                  var password = $('#jsxc_password').val() || null;
 
                   // clean up
                   jsxc.gui.window.clear(room);
@@ -302,6 +302,12 @@ jsxc.muc = {
                      $('<td>').text($.t(feature + '.description')).appendTo(tr);
                      tr.appendTo(table);
                   }
+
+                  if (feature === 'muc_passwordprotected') {
+                     dialog.find('#jsxc_password').parents('.form-group').removeClass('jsxc_hidden');
+                     dialog.find('#jsxc_password').attr('required', 'required');
+                     dialog.find('#jsxc_password').addClass('jsxc_invalid');
+                  }
                });
 
                dialog.find('.jsxc_msg').append(table);
@@ -319,7 +325,7 @@ jsxc.muc = {
                discoReceived();
             });
          } else {
-            dialog.find('.jsxc_warning').text($.t('You_already_joined_this_room'));
+            $('<p>').addClass('jsxc_warning').text($.t('You_already_joined_this_room')).appendTo(dialog.find('.jsxc_msg'));
          }
 
          return false;
@@ -330,12 +336,15 @@ jsxc.muc = {
          if (ev.which !== 13) {
             // reset messages and room information
 
-            dialog.find('.jsxc_warning').empty();
+            dialog.find('.jsxc_warning').remove();
 
-            if (dialog.find('.jsxc_continue').is(":hidden")) {
+            if (dialog.find('.jsxc_continue').is(":hidden") && $(this).attr('id') !== 'jsxc_password') {
                dialog.find('.jsxc_continue').show();
                dialog.find('.jsxc_join').hide().off('click');
                dialog.find('.jsxc_msg').empty();
+               dialog.find('#jsxc_password').parents('.form-group').addClass('jsxc_hidden');
+               dialog.find('#jsxc_password').attr('required', '');
+               dialog.find('#jsxc_password').removeClass('jsxc_invalid');
                jsxc.gui.dialog.resize();
             }
 

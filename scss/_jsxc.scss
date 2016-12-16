@@ -73,6 +73,10 @@
         }
     }
 
+    table {
+        margin-bottom: 1em;
+    }
+
     hr {
         border: 0;
         border-top: 1px solid #eee;
@@ -156,6 +160,9 @@
 
     .jsxc_warning {
         display: block;
+        background-color: #fbfe7a;
+        padding: 3px 10px;
+        border-radius: 3px;
     }
 }
 
