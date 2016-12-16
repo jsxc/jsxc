@@ -25,6 +25,9 @@ jsxc = {
    /** Timeout delay for notification */
    toNotificationDelay: 500,
 
+   /** Delay between two notification on the message composing */
+   toComposingNotificationDelay: 900,
+
    /** Interval for keep-alive */
    keepaliveInterval: null,
 

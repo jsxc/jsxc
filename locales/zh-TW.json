@@ -285,6 +285,8 @@
     "setting-explanation-carbon": "如果打開副本選項的話，XMPP 伺服器會把每一個收到的訊息，都送一份到這個用戶端程式，即使它不是訊息發送的對象。",
     "setting-explanation-login": "打開這個選項會在登入時同時開啟聊天。",
     "setting-explanation-priority": "如果你用同一個帳號同時登入好幾次的話，XMPP 伺服器會把訊息送給優先度最高的那個用戶端程式。",
-    "setting-explanation-xmpp": "這些是用在 XMPP 伺服器連線的選項。"
+    "setting-explanation-xmpp": "這些是用在 XMPP 伺服器連線的選項。",
+    "_is_composing": null,
+    "_are_composing": null
   }
 }

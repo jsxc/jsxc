@@ -6,6 +6,24 @@
 }
 
 .jsxc_windowItem {
+    .jsxc_composing {
+
+        text-align: center;
+        font-size: 0.9em;
+        font-style: italic;
+
+        &:before {
+            content: " ";
+            width: 1.5em;
+            height: 1em;
+            display: inline-block;
+            background-size: 80%;
+            background-repeat: no-repeat;
+            margin: 0 3px 0 0;
+            background-image: image-url("composing.png");
+        }
+    }
+
     &.jsxc_groupchat.jsxc_normal {
         .jsxc_fade {
             padding-top: 44px;

@@ -288,6 +288,8 @@ jsxc.xmpp = {
 
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onRosterChanged, 'jabber:iq:roster', 'iq', 'set');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onMessage, null, 'message', 'chat');
+      jsxc.xmpp.conn.addHandler(jsxc.xmpp.onComposing, 'http://jabber.org/protocol/chatstates',
+          'message');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onReceived, null, 'message');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
 
@@ -1009,6 +1011,73 @@ jsxc.xmpp = {
 
          message.received();
       }
+
+      return true;
+   },
+
+   onComposing: function(stanza) {
+      var composing = $(stanza).find("composing[xmlns='http://jabber.org/protocol/chatstates']");
+      if (composing.length === 0) {
+         return true;
+      }
+
+      var type = $(stanza).attr("type");
+      var from = $(stanza).attr("from");
+
+      // ignore own notifications in groupchat
+      if (type === 'groupchat' &&
+           Strophe.getResourceFromJid(from) === Strophe.getNodeFromJid(jsxc.xmpp.conn.jid)) {
+          return true;
+      }
+
+      var bid = jsxc.jidToBid(from);
+      var user = type === 'chat' ? Strophe.getNodeFromJid(from) : Strophe.getResourceFromJid(from);
+      $('#jsxc_windowList .jsxc_windowItem').each(function() {
+         var self = $(this);
+         var winBid = self.data('bid');
+
+         // check conversation
+         if (winBid === bid) {
+            // add user in array if necessary
+            var usersComposing = self.data('composing') || [];
+            if (usersComposing.indexOf(user) === -1) {
+               usersComposing.push(user);
+               self.data('composing', usersComposing);
+            }
+
+            var textarea = self.find('.jsxc_textarea');
+            var composingNotif = textarea.find('.jsxc_composing');
+
+            // scroll to bottom
+            jsxc.gui.window.scrollDown(winBid);
+
+            // change text
+            var msg = usersComposing.length > 1 ? usersComposing.join(', ') + $.t('_are_composing') :
+               usersComposing[0] + $.t('_is_composing');
+
+            if (composingNotif.length < 1) {
+              // notification not present, add it
+              composingNotif = $('<div>').addClass('jsxc_composing')
+                  .addClass('jsxc_chatmessage')
+                  .addClass('jsxc_sys')
+                  .css({opacity : 0, display : 'block'})
+                  .html(msg);
+               textarea.append(composingNotif);
+            } else {
+               // notification present, modify it and show it if necessary
+               composingNotif.html(msg);
+            }
+            if (composingNotif.css('opacity') !== '1') {
+               composingNotif.animate({opacity : 1}, 600);
+               setTimeout(function() {
+                  composingNotif.animate({opacity : 0}, 600, function() {
+                   composingNotif.remove();
+                  });
+                  self.data('data', []);
+               }, 3000);
+            }
+         }
+      });
 
       return true;
    },
