@@ -2094,10 +2094,11 @@ jsxc.gui.window = {
          return false;
       });
 
+      var textinputBlurTimeout;
       win.find('.jsxc_textinput').keyup(function(ev) {
          var body = $(this).val();
 
-         if (ev.which === 13) {
+         if (ev.which === 13 && !ev.shiftKey) {
             body = '';
          }
 
@@ -2107,7 +2108,8 @@ jsxc.gui.window = {
             jsxc.gui.window.close(bid);
          }
       }).keypress(function(ev) {
-         if (ev.which !== 13 || !$(this).val()) {
+         if (ev.which !== 13 || ev.shiftKey || !$(this).val()) {
+            resizeTextarea.call(this);
             return;
          }
 
@@ -2117,15 +2119,38 @@ jsxc.gui.window = {
             msg: $(this).val()
          });
 
-         $(this).val('');
+         $(this).css('height', '').val('');
+
+         ev.preventDefault();
       }).focus(function() {
+         if (textinputBlurTimeout) {
+            clearTimeout(textinputBlurTimeout);
+         }
+
          // remove unread flag
          jsxc.gui.readMsg(bid);
+
+         resizeTextarea.call(this);
+      }).blur(function() {
+         var self = $(this);
+
+         textinputBlurTimeout = setTimeout(function() {
+            self.css('height', '');
+         }, 1200);
       }).mouseenter(function() {
          $('#jsxc_windowList').data('isOver', true);
       }).mouseleave(function() {
          $('#jsxc_windowList').data('isOver', false);
       });
+
+      function resizeTextarea() {
+         if (!$(this).data('originalHeight')) {
+            $(this).data('originalHeight', $(this).outerHeight());
+         }
+         if ($(this).outerHeight() < this.scrollHeight && $(this).val()) {
+            $(this).height($(this).data('originalHeight') * 1.5);
+         }
+      }
 
       win.find('.jsxc_textarea').click(function() {
          // check if user clicks element or selects text
@@ -2186,8 +2211,8 @@ jsxc.gui.window = {
          li.append(jsxc.gui.shortnameToImage(':' + val[1] + ':'));
          li.find('div').attr('title', ins);
          li.click(function() {
-            win.find('input').val(win.find('input').val() + ins);
-            win.find('input').focus();
+            win.find('.jsxc_textinput').val(win.find('.jsxc_textinput').val() + ins);
+            win.find('.jsxc_textinput').focus();
          });
          win.find('.jsxc_emoticons ul').prepend(li);
       });
