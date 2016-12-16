@@ -3055,12 +3055,12 @@ jsxc.gui.window = {
          }
 
          $('<button>').addClass('jsxc_btn jsxc_btn-primary').text($.t('Send')).click(function() {
-            var sess = jsxc.webrtc.sendFile(jid, file);
+            //var sess = jsxc.webrtc.sendFile(jid, file);
 
             jsxc.gui.window.hideOverlay(bid);
 
             var message = jsxc.gui.window.postMessage({
-               _uid: sess.sid + ':msg',
+               //_uid: sess.sid + ':msg',
                bid: bid,
                direction: 'out',
                attachment: {
@@ -3071,9 +3071,11 @@ jsxc.gui.window = {
                }
             });
 
-            sess.sender.on('progress', function(sent, size) {
+            jsxc.xmpp.httpUpload.sendFile(file, message);
+
+            /*sess.sender.on('progress', function(sent, size) {
                jsxc.gui.window.updateProgress(message, sent, size);
-            });
+            });*/
 
             msg.remove();
 
