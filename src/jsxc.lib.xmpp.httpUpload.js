@@ -7,6 +7,8 @@
 jsxc.xmpp.httpUpload = {
    conn: null,
 
+   ready: false,
+
    CONST: {
       NS: {
          HTTPUPLOAD: 'urn:xmpp:http:upload'
@@ -29,6 +31,8 @@ jsxc.xmpp.httpUpload = {
       }
 
       if (options && options.server) {
+         self.ready = true;
+
          return;
       }
 
@@ -79,10 +83,11 @@ jsxc.xmpp.httpUpload = {
                   jsxc.options.set('httpUpload', {
                      server: jid,
                      name: $(info).find('identity').attr('name'),
-                     maxSize: httpUploadMaxSize.text()
+                     maxSize: parseInt(httpUploadMaxSize.text())
                   });
 
                   discovered = true;
+                  self.ready = true;
                }
             });
 
@@ -92,7 +97,11 @@ jsxc.xmpp.httpUpload = {
    },
 
    sendFile: function(file, message) {
+      jsxc.debug('Send file via http upload');
+
       var self = jsxc.xmpp.httpUpload;
+
+      message.encrypted = false;
 
       self.requestSlot(file, function(data) {
          if (!data) {
@@ -100,9 +109,33 @@ jsxc.xmpp.httpUpload = {
          } else if (data.error) {
             jsxc.warn('The xmpp server responded with an error of the type "' + data.error.type + '"');
 
-            //@TODO display error message
+            message.getDOM().remove();
+            message.delete();
+
+            jsxc.gui.window.postMessage({
+               bid: message.bid,
+               direction: jsxc.Message.SYS,
+               msg: data.error.text
+            });
          } else if (data.get && data.put) {
-            self.uploadFile(data.put, file, message);
+            self.uploadFile(data.put, file, message, function() {
+               var a = $('<a>');
+               a.attr('href', data.get);
+               a.attr('data-name', message.attachment.name);
+               a.attr('data-type', message.attachment.type);
+               a.attr('data-size', message.attachment.size);
+
+               if (message.attachment.thumbnail) {
+                  a.attr('data-thumbnail', message.attachment.thumbnail);
+               }
+
+               a.text(data.get);
+               message.attachment.data = data.get;
+
+               message.msg = $('<span>').append(a).html();
+               message.type = jsxc.Message.HTML;
+               jsxc.gui.window.postMessage(message);
+            });
          }
       });
    },
@@ -110,10 +143,10 @@ jsxc.xmpp.httpUpload = {
    /**
     * Upload the given file to the given url.
     */
-   uploadFile: function(url, file, message) {
+   uploadFile: function(url, file, message, success_cb) {
       $.ajax({
          url: url,
-         type: 'POST',
+         type: 'PUT',
          contentType: 'application/octet-stream',
          data: file,
          processData: false,
@@ -128,19 +161,21 @@ jsxc.xmpp.httpUpload = {
             return xhr;
          },
          success: function() {
+            jsxc.debug('file successful uploaded');
 
             // In case that upload progress is not available, inform user
             // @TODO modify updateProgress to not mark this message as received
             jsxc.gui.window.updateProgress(message, 1, 1);
 
-            message.msg = url;
-            jsxc.gui.window.postMessage(message);
-
-            jsxc.debug('file successful uploaded');
+            if (success_cb) {
+               success_cb();
+            }
          },
          error: function() {
-            // @TODO display error message
-            jsxc.debug('error while uploading file');
+            jsxc.warn('error while uploading file to ' + url);
+
+            message.error = 'Could not upload file';
+            jsxc.gui.window.postMessage(message);
          }
       });
    },
@@ -169,10 +204,8 @@ jsxc.xmpp.httpUpload = {
 
       self.conn.sendIQ(iq, function(stanza) {
          self.successfulRequestSlotCB(stanza, cb);
-      }, function() {
-         jsxc.warn('error while sending iq');
-
-         cb();
+      }, function(stanza) {
+         self.failedRequestSlotCB(stanza, cb);
       });
    },
 
@@ -192,28 +225,40 @@ jsxc.xmpp.httpUpload = {
             get: get
          });
       } else {
-         if ($(stanza).find('error').length <= 0) {
-            jsxc.warn('response does not contain a slot element');
-
-            cb();
-
-            return;
-         }
-
-         var error = {
-            type: $(stanza).find('error').attr('type') || 'unknown',
-            text: $(stanza).find('error text').text()
-         };
-
-         if ($(stanza).find('error not-acceptable')) {
-            error.reason = 'not-acceptable';
-         } else if ($(stanza).find('error resource-constraint')) {
-            error.reason = 'resource-constraint';
-         } else if ($(stanza).find('error not-allowed')) {
-            error.reason = 'not-allowed';
-         }
-
-         cb(error);
+         self.failedRequestSlotCB(stanza, cb);
       }
+   },
+
+   failedRequestSlotCB: function(stanza, cb) {
+      if ($(stanza).find('error').length <= 0) {
+         jsxc.warn('response does not contain a slot element');
+
+         cb();
+
+         return;
+      }
+
+      var error = {
+         type: $(stanza).find('error').attr('type') || 'unknown',
+         text: $(stanza).find('error text').text()
+      };
+
+      if ($(stanza).find('error not-acceptable')) {
+         error.reason = 'not-acceptable';
+      } else if ($(stanza).find('error resource-constraint')) {
+         error.reason = 'resource-constraint';
+      } else if ($(stanza).find('error not-allowed')) {
+         error.reason = 'not-allowed';
+      }
+
+      cb({
+         error: error
+      });
    }
 };
+
+$(document).on('stateChange.jsxc', function(ev, state) {
+   if (state === jsxc.CONST.STATE.READY) {
+      jsxc.xmpp.httpUpload.init();
+   }
+});

@@ -3,7 +3,7 @@
 
 /**
  * WebRTC namespace for jsxc.
- * 
+ *
  * @namespace jsxc.webrtc
  */
 jsxc.webrtc = {
@@ -33,7 +33,7 @@ jsxc.webrtc = {
 
    /**
     * Initialize webrtc plugin.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     */
@@ -116,7 +116,7 @@ jsxc.webrtc = {
 
    /**
     * Checks if cached configuration is valid and if necessary update it.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param {string} [url]
     */
@@ -193,7 +193,7 @@ jsxc.webrtc = {
 
    /**
     * Return list of capable resources.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param jid
     * @param {(string|string[])} features list of required features
@@ -222,7 +222,7 @@ jsxc.webrtc = {
 
    /**
     * Add "video" button to window menu.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     * @param event
@@ -252,7 +252,7 @@ jsxc.webrtc = {
 
    /**
     * Enable or disable "video" icon and assign full jid.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param bid CSS conform jid
     */
@@ -311,20 +311,11 @@ jsxc.webrtc = {
 
          el.attr('title', $.t('Video_call_not_possible'));
       }
-
-      var fileCapableRes = self.getCapableRes(jid, self.reqFileFeatures);
-      var resources = Object.keys(jsxc.storage.getUserItem('res', bid) || {}) || [];
-
-      if (fileCapableRes.indexOf(res) > -1 || (res === null && fileCapableRes.length === 1 && resources.length === 1)) {
-         win.find('.jsxc_sendFile').removeClass('jsxc_disabled');
-      } else {
-         win.find('.jsxc_sendFile').addClass('jsxc_disabled');
-      }
    },
 
    /**
     * Check if full jid changed.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     * @param e
@@ -344,7 +335,7 @@ jsxc.webrtc = {
 
    /**
     * Update icon on presence.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param ev
     * @param status
@@ -362,7 +353,7 @@ jsxc.webrtc = {
 
    /**
     * Display status message to user.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param txt message
     * @param d duration in ms
@@ -409,7 +400,7 @@ jsxc.webrtc = {
 
    /**
     * Update "video" button if we receive cap information.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     * @param event
@@ -429,7 +420,7 @@ jsxc.webrtc = {
 
    /**
     * Called if video/audio is ready. Open window and display some messages.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     * @param event
@@ -468,7 +459,7 @@ jsxc.webrtc = {
 
    /**
     * Called if media failes.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     */
@@ -528,7 +519,7 @@ jsxc.webrtc = {
 
    /**
     * Called on incoming call.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     * @param event
@@ -607,7 +598,7 @@ jsxc.webrtc = {
 
    /**
     * Called if call is terminated.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     * @param event
@@ -653,7 +644,7 @@ jsxc.webrtc = {
 
    /**
     * Remote station is ringing.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     */
@@ -663,7 +654,7 @@ jsxc.webrtc = {
 
    /**
     * Called if we receive a remote stream.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     * @param event
@@ -690,7 +681,7 @@ jsxc.webrtc = {
 
    /**
     * Attach media stream to element.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param element {Element|jQuery}
     * @param stream {mediastream}
@@ -703,7 +694,7 @@ jsxc.webrtc = {
 
    /**
     * Called if the remote stream was removed.
-    * 
+    *
     * @private
     * @meberOf jsxc.webrtc
     * @param event
@@ -718,7 +709,7 @@ jsxc.webrtc = {
 
    /**
     * Extracts local and remote ip and display it to the user.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     * @param event
@@ -752,7 +743,7 @@ jsxc.webrtc = {
 
    /**
     * Start a call to the specified jid.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param jid full jid
     * @param um requested user media
@@ -801,7 +792,7 @@ jsxc.webrtc = {
 
    /**
     * Hang up the current call.
-    * 
+    *
     * @memberOf jsxc.webrtc
     */
    hangUp: function(reason, text) {
@@ -817,7 +808,7 @@ jsxc.webrtc = {
 
    /**
     * Request video and audio from local user.
-    * 
+    *
     * @memberOf jsxc.webrtc
     */
    reqUserMedia: function(um) {
@@ -881,7 +872,7 @@ jsxc.webrtc = {
 
    /**
     * Make a snapshot from a video stream and display it.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param video Video stream
     */
@@ -929,7 +920,15 @@ jsxc.webrtc = {
     * @return {object} session
     */
    sendFile: function(jid, file) {
+      jsxc.debug('Send file via webrtc');
+
       var self = jsxc.webrtc;
+
+      if (!Strophe.getResourceFromJid(jid)) {
+         jsxc.warn('Require full jid to send file via webrtc');
+
+         return;
+      }
 
       var sess = self.conn.jingle.manager.createFileTransferSession(jid);
 
@@ -964,7 +963,7 @@ jsxc.webrtc = {
       var type;
 
       if (!metadata.type) {
-         // detect file type via file extension, because XEP-0234 v0.14 
+         // detect file type via file extension, because XEP-0234 v0.14
          // does not send any type
          var ext = metadata.name.replace(/.+\.([a-z0-9]+)$/i, '$1').toLowerCase();
 
@@ -1022,7 +1021,7 @@ jsxc.webrtc = {
 
 /**
  * Display window for video call.
- * 
+ *
  * @memberOf jsxc.gui
  */
 jsxc.gui.showVideoWindow = function(jid) {

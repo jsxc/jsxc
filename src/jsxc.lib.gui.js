@@ -238,6 +238,8 @@ jsxc.gui = {
       ri.find('.jsxc_name').attr('title', info);
 
       jsxc.gui.updateAvatar(ri.add(we.find('.jsxc_bar')), data.jid, data.avatar);
+
+      $(document).trigger('update.gui.jsxc', [bid]);
    },
 
    /**
@@ -2565,7 +2567,10 @@ jsxc.gui.window = {
       }
 
       var data = jsxc.storage.getUserItem('buddy', message.bid);
-      var html_msg = message.msg;
+
+      if (!message.htmlMsg && message.msg) {
+         message.htmlMsg = message.msg;
+      }
 
       // remove html tags and reencode html tags
       message.msg = jsxc.removeHTML(message.msg);
@@ -2583,7 +2588,7 @@ jsxc.gui.window = {
          message.msg = $.t('unencrypted_message_received') + ' ' + message.msg;
       }
 
-      message.encrypted = message.encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
+      message.encrypted = (typeof message.encrypted === 'boolean') ? message.encrypted : data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
 
       try {
          message.save();
@@ -2599,11 +2604,11 @@ jsxc.gui.window = {
       if (message.direction === 'in' && !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
          jsxc.gui.unreadMsg(message.bid);
 
-         $(document).trigger('postmessagein.jsxc', [message.bid, html_msg]);
+         $(document).trigger('postmessagein.jsxc', [message.bid, message.htmlMsg]);
       }
 
-      if (message.direction === jsxc.Message.OUT && jsxc.master && message.forwarded !== true && html_msg) {
-         jsxc.xmpp.sendMessage(message.bid, html_msg, message._uid);
+      if (message.direction === jsxc.Message.OUT && jsxc.master && message.forwarded !== true && message.htmlMsg) {
+         jsxc.xmpp.sendMessage(message);
       }
 
       jsxc.gui.window._postMessage(message);
@@ -2690,15 +2695,29 @@ jsxc.gui.window = {
 
       if (message.isReceived() || false) {
          msgDiv.addClass('jsxc_received');
+      } else {
+         msgDiv.removeClass('jsxc_received');
       }
 
       if (message.forwarded) {
          msgDiv.addClass('jsxc_forwarded');
+      } else {
+         msgDiv.removeClass('jsxc_forwarded');
       }
 
       if (message.encrypted) {
          msgDiv.addClass('jsxc_encrypted');
+      } else {
+         msgDiv.removeClass('jsxc_encrypted');
       }
+
+      if (message.error) {
+         msgDiv.addClass('jsxc_error');
+      } else {
+         msgDiv.removeClass('jsxc_error');
+      }
+
+      msgDiv.attr('title', message.error);
 
       if (message.attachment && message.attachment.name) {
          var attachment = $('<div>');
@@ -2724,6 +2743,10 @@ jsxc.gui.window = {
             attachment = $('<a>').append(attachment);
             attachment.attr('href', message.attachment.data);
             attachment.attr('download', message.attachment.name);
+
+            if (message.attachment.data === message.msg) {
+               msgDiv.find('div').first().empty();
+            }
          }
 
          msgDiv.find('div').first().append(attachment);
@@ -2990,101 +3013,7 @@ jsxc.gui.window = {
    },
 
    sendFile: function(jid) {
-      var bid = jsxc.jidToBid(jid);
-      var win = jsxc.gui.window.get(bid);
-      var res = Strophe.getResourceFromJid(jid);
-
-      if (!res) {
-         jid = win.data('jid');
-         res = Strophe.getResourceFromJid(jid);
-
-         var fileCapableRes = jsxc.webrtc.getCapableRes(jid, jsxc.webrtc.reqFileFeatures);
-         var resources = Object.keys(jsxc.storage.getUserItem('res', bid)) || [];
-
-         if (res === null && resources.length === 1 && fileCapableRes.length === 1) {
-            res = fileCapableRes[0];
-            jid = bid + '/' + res;
-         } else if (fileCapableRes.indexOf(res) < 0) {
-            jsxc.gui.window.selectResource(bid, $.t('Your_contact_uses_multiple_clients_'), function(data) {
-               if (data.status === 'unavailable') {
-                  jsxc.gui.window.hideOverlay(bid);
-               } else if (data.status === 'selected') {
-                  jsxc.gui.window.sendFile(bid + '/' + data.result);
-               }
-            }, fileCapableRes);
-
-            return;
-         }
-      }
-
-      var msg = $('<div><div><label><input type="file" name="files" /><label></div></div>');
-      msg.addClass('jsxc_chatmessage');
-
-      jsxc.gui.window.showOverlay(bid, msg, true);
-
-      msg.find('label').click();
-
-      msg.find('[type="file"]').change(function(ev) {
-         var file = ev.target.files[0]; // FileList object
-
-         if (!file) {
-            return;
-         }
-
-         var attachment = $('<div>');
-         attachment.addClass('jsxc_attachment');
-         attachment.addClass('jsxc_' + file.type.replace(/\//, '-'));
-         attachment.addClass('jsxc_' + file.type.replace(/^([^/]+)\/.*/, '$1'));
-
-         msg.empty().append(attachment);
-
-         if (FileReader && file.type.match(/^image\//)) {
-            var img = $('<img alt="preview">').attr('title', file.name);
-            img.attr('src', jsxc.options.get('root') + '/img/loading.gif');
-            img.appendTo(attachment);
-
-            var reader = new FileReader();
-
-            reader.onload = function() {
-               img.attr('src', reader.result);
-            };
-
-            reader.readAsDataURL(file);
-         } else {
-            attachment.text(file.name + ' (' + file.size + ' byte)');
-         }
-
-         $('<button>').addClass('jsxc_btn jsxc_btn-primary').text($.t('Send')).click(function() {
-            //var sess = jsxc.webrtc.sendFile(jid, file);
-
-            jsxc.gui.window.hideOverlay(bid);
-
-            var message = jsxc.gui.window.postMessage({
-               //_uid: sess.sid + ':msg',
-               bid: bid,
-               direction: 'out',
-               attachment: {
-                  name: file.name,
-                  size: file.size,
-                  type: file.type,
-                  data: (file.type.match(/^image\//)) ? img.attr('src') : null
-               }
-            });
-
-            jsxc.xmpp.httpUpload.sendFile(file, message);
-
-            /*sess.sender.on('progress', function(sent, size) {
-               jsxc.gui.window.updateProgress(message, sent, size);
-            });*/
-
-            msg.remove();
-
-         }).appendTo(msg);
-
-         $('<button>').addClass('jsxc_btn jsxc_btn-default').text($.t('Abort')).click(function() {
-            jsxc.gui.window.hideOverlay(bid);
-         }).appendTo(msg);
-      });
+      jsxc.fileTransfer.startGuiAction(jid);
    }
 };
 
