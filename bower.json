@@ -31,7 +31,6 @@
     "strophe.js": "strophejs#a11ebefa3db1b6712d51d0d309b9f68f8e391d1b",
     "strophe.vcard": "https://raw.githubusercontent.com/strophe/strophejs-plugins/2f07137ad2cbeaed41650ee46373c2f44e0f263a/vcard/strophe.vcard.js",
     "strophe.x": "https://raw.githubusercontent.com/strophe/strophejs-plugins/master/dataforms/src/strophe.x.js",
-    "strophe.chatstates": "https://raw.githubusercontent.com/strophe/strophejs-plugins/master/chatstates/strophe.chatstates.js",
     "jquery-i18next": "^1.1.0",
     "i18next": "^3.4.4",
     "magnific-popup": "^1.1.0"

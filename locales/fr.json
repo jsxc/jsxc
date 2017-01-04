@@ -285,8 +285,6 @@
     "setting-explanation-carbon": "Avec la copie carbone activé, votre serveur XMPP envera une copie de tous les messages entrant qui vous sont destiné à ce client, même s'il ne lui sont pas directement addressés.",
     "setting-explanation-login": "Si cette option est activé, le chat commencera lorsque vous vos connectez.",
     "setting-explanation-priority": "Si vous êtes connecté plusieurs fois avec le même compte, votre serveur XMPP enverra les messages au client ayant le plus haute priorité.",
-    "setting-explanation-xmpp": "Ces options sont utilisées pour se connecter au serveur XMPP.",
-    "_is_composing": " est en train d'écrire ...",
-    "_are_composing": " sont en train d'écrire ..."
+    "setting-explanation-xmpp": "Ces options sont utilisées pour se connecter au serveur XMPP."
   }
 }

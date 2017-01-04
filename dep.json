@@ -42,12 +42,6 @@
      "url": "https://github.com/strophe/strophejs-plugins/tree/master/dataforms"
   },
   {
-     "name": "strophe.js/chatstates",
-     "file": "lib/strophe.chatstates/index.js",
-     "license": "MIT",
-     "url": "https://github.com/strophe/strophejs-plugins/tree/master/chatstates"
-  },
-  {
      "name": "strophe.jinglejs",
      "file": "lib/strophe.jinglejs/strophe.jinglejs-bundle.js",
      "license": "MIT",
