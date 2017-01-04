@@ -672,6 +672,7 @@ jsxc.gui = {
 
             if (val !== '') {
                jsxc.options.getUsers.call(this, val, function(list) {
+                  $('#jsxc_userlist').empty();
                   $.each(list || {}, function(uid, displayname) {
                      var option = $('<option>');
                      option.attr('data-username', uid);
