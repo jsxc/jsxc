@@ -289,7 +289,7 @@ jsxc.xmpp = {
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onRosterChanged, 'jabber:iq:roster', 'iq', 'set');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onMessage, null, 'message', 'chat');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onComposing, 'http://jabber.org/protocol/chatstates',
-          'message');
+         'message');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onReceived, null, 'message');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
 
@@ -1026,8 +1026,8 @@ jsxc.xmpp = {
 
       // ignore own notifications in groupchat
       if (type === 'groupchat' &&
-           Strophe.getResourceFromJid(from) === Strophe.getNodeFromJid(jsxc.xmpp.conn.jid)) {
-          return true;
+         Strophe.getResourceFromJid(from) === Strophe.getNodeFromJid(jsxc.xmpp.conn.jid)) {
+         return true;
       }
 
       var bid = jsxc.jidToBid(from);
@@ -1038,8 +1038,8 @@ jsxc.xmpp = {
          // add user in array if necessary
          var usersComposing = window.data('composing') || [];
          if (usersComposing.indexOf(user) === -1) {
-           usersComposing.push(user);
-           window.data('composing', usersComposing);
+            usersComposing.push(user);
+            window.data('composing', usersComposing);
          }
 
          var textarea = window.find('.jsxc_textarea');
@@ -1050,23 +1050,25 @@ jsxc.xmpp = {
 
          // change text
          var msg = usersComposing.length > 1 ? usersComposing.join(', ') + $.t('_are_composing') :
-             usersComposing[0] + $.t('_is_composing');
+            usersComposing[0] + $.t('_is_composing');
 
          if (composingNotif.length < 1) {
-           // notification not present, add it
-           composingNotif = $('<div>').addClass('jsxc_composing')
+            // notification not present, add it
+            composingNotif = $('<div>').addClass('jsxc_composing')
                .addClass('jsxc_chatmessage')
                .addClass('jsxc_sys')
                .text(msg)
                .appendTo(textarea);
          } else {
-           // notification present, modify it and show it if necessary
-           composingNotif.text(msg);
+            // notification present, modify it and show it if necessary
+            composingNotif.text(msg);
          }
          if (!composingNotif.hasClass('jsxc_fadein')) {
             composingNotif.addClass('jsxc_fadein');
             setTimeout(function() {
-               composingNotif.animate({opacity : 0}, 600, function() {
+               composingNotif.animate({
+                  opacity: 0
+               }, 600, function() {
                   composingNotif.remove();
                });
                window.data('data', []);
