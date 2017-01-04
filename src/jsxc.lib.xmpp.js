@@ -1032,52 +1032,47 @@ jsxc.xmpp = {
 
       var bid = jsxc.jidToBid(from);
       var user = type === 'chat' ? Strophe.getNodeFromJid(from) : Strophe.getResourceFromJid(from);
-      $('#jsxc_windowList .jsxc_windowItem').each(function() {
-         var self = $(this);
-         var winBid = self.data('bid');
+      var window = jsxc.gui.window.get(bid);
 
-         // check conversation
-         if (winBid === bid) {
-            // add user in array if necessary
-            var usersComposing = self.data('composing') || [];
-            if (usersComposing.indexOf(user) === -1) {
-               usersComposing.push(user);
-               self.data('composing', usersComposing);
-            }
-
-            var textarea = self.find('.jsxc_textarea');
-            var composingNotif = textarea.find('.jsxc_composing');
-
-            // scroll to bottom
-            jsxc.gui.window.scrollDown(winBid);
-
-            // change text
-            var msg = usersComposing.length > 1 ? usersComposing.join(', ') + $.t('_are_composing') :
-               usersComposing[0] + $.t('_is_composing');
-
-            if (composingNotif.length < 1) {
-              // notification not present, add it
-              composingNotif = $('<div>').addClass('jsxc_composing')
-                  .addClass('jsxc_chatmessage')
-                  .addClass('jsxc_sys')
-                  .css({opacity : 0, display : 'block'})
-                  .html(msg);
-               textarea.append(composingNotif);
-            } else {
-               // notification present, modify it and show it if necessary
-               composingNotif.html(msg);
-            }
-            if (composingNotif.css('opacity') !== '1') {
-               composingNotif.animate({opacity : 1}, 600);
-               setTimeout(function() {
-                  composingNotif.animate({opacity : 0}, 600, function() {
-                   composingNotif.remove();
-                  });
-                  self.data('data', []);
-               }, 3000);
-            }
+      if (window.length > 0) {
+         // add user in array if necessary
+         var usersComposing = window.data('composing') || [];
+         if (usersComposing.indexOf(user) === -1) {
+           usersComposing.push(user);
+           window.data('composing', usersComposing);
          }
-      });
+
+         var textarea = window.find('.jsxc_textarea');
+         var composingNotif = textarea.find('.jsxc_composing');
+
+         // scroll to bottom
+         jsxc.gui.window.scrollDown(bid);
+
+         // change text
+         var msg = usersComposing.length > 1 ? usersComposing.join(', ') + $.t('_are_composing') :
+             usersComposing[0] + $.t('_is_composing');
+
+         if (composingNotif.length < 1) {
+           // notification not present, add it
+           composingNotif = $('<div>').addClass('jsxc_composing')
+               .addClass('jsxc_chatmessage')
+               .addClass('jsxc_sys')
+               .text(msg)
+               .appendTo(textarea);
+         } else {
+           // notification present, modify it and show it if necessary
+           composingNotif.text(msg);
+         }
+         if (!composingNotif.hasClass('jsxc_fadein')) {
+            composingNotif.addClass('jsxc_fadein');
+            setTimeout(function() {
+               composingNotif.animate({opacity : 0}, 600, function() {
+                  composingNotif.remove();
+               });
+               window.data('data', []);
+            }, 3000);
+         }
+      }
 
       return true;
    },

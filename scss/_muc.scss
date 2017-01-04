@@ -11,6 +11,7 @@
         text-align: center;
         font-size: 0.9em;
         font-style: italic;
+        display: block;
 
         &:before {
             content: " ";
@@ -22,6 +23,12 @@
             margin: 0 3px 0 0;
             background-image: image-url("composing.png");
         }
+
+        .jsxc_fadein {
+            opacity: 0;
+            transition: opacity 0.6s linear;
+        }
+
     }
 
     &.jsxc_groupchat.jsxc_normal {
