@@ -278,11 +278,14 @@ jsxc.options = {
       }
    },
 
+   /** Maximal storage size for attachments received via data channels (webrtc). */
    maxStorableSize: 1000000,
 
+   /** Options for file transfer. */
    fileTransfer: {
       httpUpload: {
          enable: true
-      }
+      },
+      // @TODO add option to enable/disable data channels
    }
 };

@@ -2912,8 +2912,6 @@ jsxc.gui.window = {
 
       if (sent === size) {
          span.remove();
-
-         message.received();
       }
    },
 

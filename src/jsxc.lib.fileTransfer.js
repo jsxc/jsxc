@@ -194,6 +194,10 @@ jsxc.fileTransfer.fileSelected = function(jid, msg, file) {
 
          sess.sender.on('progress', function(sent, size) {
             jsxc.gui.window.updateProgress(message, sent, size);
+
+            if (sent === size) {
+               message.received();
+            }
          });
       } else {
          // progress is updated in xmpp.httpUpload.uploadFile

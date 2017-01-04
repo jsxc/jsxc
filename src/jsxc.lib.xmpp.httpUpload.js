@@ -13,248 +13,292 @@ jsxc.xmpp.httpUpload = {
       NS: {
          HTTPUPLOAD: 'urn:xmpp:http:upload'
       }
-   },
+   }
+};
 
-   init: function(o) {
-      var self = jsxc.xmpp.httpUpload;
-      self.conn = jsxc.xmpp.conn;
+/**
+ * Set up http file upload.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ * @param  {Object} o options
+ */
+jsxc.xmpp.httpUpload.init = function(o) {
+   var self = jsxc.xmpp.httpUpload;
+   self.conn = jsxc.xmpp.conn;
 
-      var fileTransferOptions = jsxc.options.get('fileTransfer') || {};
-      var options = o || jsxc.options.get('httpUpload');
+   var fileTransferOptions = jsxc.options.get('fileTransfer') || {};
+   var options = o || jsxc.options.get('httpUpload');
 
-      if (!fileTransferOptions.httpUpload.enable) {
-         jsxc.debug('http upload disabled');
+   if (!fileTransferOptions.httpUpload.enable) {
+      jsxc.debug('http upload disabled');
 
-         jsxc.options.set('httpUpload', false);
+      jsxc.options.set('httpUpload', false);
 
-         return;
-      }
+      return;
+   }
 
-      if (options && options.server) {
-         self.ready = true;
+   if (options && options.server) {
+      self.ready = true;
 
-         return;
-      }
+      return;
+   }
 
-      var caps = jsxc.xmpp.conn.caps;
-      var domain = jsxc.xmpp.conn.domain;
+   var caps = jsxc.xmpp.conn.caps;
+   var domain = jsxc.xmpp.conn.domain;
 
-      if (typeof caps._knownCapabilities[caps._jidVerIndex[domain]] === 'undefined') {
-         jsxc.debug('Waiting for server capabilities');
+   if (!caps || !domain || typeof caps._knownCapabilities[caps._jidVerIndex[domain]] === 'undefined') {
+      jsxc.debug('Waiting for server capabilities');
 
-         $(document).on('caps.strophe', function onCaps(ev, from) {
+      $(document).on('caps.strophe', function onCaps(ev, from) {
 
-            if (from !== domain) {
-               return;
-            }
-
-            self.init();
-
-            $(document).off('caps.strophe', onCaps);
-         });
-
-         return;
-      }
-
-      if (caps.hasFeatureByJid(domain, self.CONST.NS.HTTPUPLOAD)) {
-         self.discoverUploadService();
-      } else {
-         jsxc.debug(domain + ' does not support http upload');
-      }
-   },
-
-   discoverUploadService: function() {
-      var self = jsxc.xmpp.httpUpload;
-
-      jsxc.debug('discover http upload service');
-
-      self.conn.disco.items(self.conn.domain, null, function(items) {
-         $(items).find('item').each(function() {
-            var jid = $(this).attr('jid');
-            var discovered = false;
-
-            self.conn.disco.info(jid, null, function(info) {
-               var httpUploadFeature = $(info).find('feature[var="' + self.CONST.NS.HTTPUPLOAD + '"]');
-               var httpUploadMaxSize = $(info).find('field[var="max-file-size"]');
-
-               if (httpUploadFeature.length > 0) {
-                  jsxc.debug('http upload service found', jid);
-
-                  jsxc.options.set('httpUpload', {
-                     server: jid,
-                     name: $(info).find('identity').attr('name'),
-                     maxSize: parseInt(httpUploadMaxSize.text())
-                  });
-
-                  discovered = true;
-                  self.ready = true;
-               }
-            });
-
-            return !discovered;
-         });
-      });
-   },
-
-   sendFile: function(file, message) {
-      jsxc.debug('Send file via http upload');
-
-      var self = jsxc.xmpp.httpUpload;
-
-      message.encrypted = false;
-
-      self.requestSlot(file, function(data) {
-         if (!data) {
-            jsxc.warn('Unknown error occured. Please check the debug log.');
-         } else if (data.error) {
-            jsxc.warn('The xmpp server responded with an error of the type "' + data.error.type + '"');
-
-            message.getDOM().remove();
-            message.delete();
-
-            jsxc.gui.window.postMessage({
-               bid: message.bid,
-               direction: jsxc.Message.SYS,
-               msg: data.error.text
-            });
-         } else if (data.get && data.put) {
-            self.uploadFile(data.put, file, message, function() {
-               var a = $('<a>');
-               a.attr('href', data.get);
-               a.attr('data-name', message.attachment.name);
-               a.attr('data-type', message.attachment.type);
-               a.attr('data-size', message.attachment.size);
-
-               if (message.attachment.thumbnail) {
-                  a.attr('data-thumbnail', message.attachment.thumbnail);
-               }
-
-               a.text(data.get);
-               message.attachment.data = data.get;
-
-               message.msg = $('<span>').append(a).html();
-               message.type = jsxc.Message.HTML;
-               jsxc.gui.window.postMessage(message);
-            });
+         if (from !== domain) {
+            return;
          }
+
+         self.init();
+
+         $(document).off('caps.strophe', onCaps);
       });
-   },
 
-   /**
-    * Upload the given file to the given url.
-    */
-   uploadFile: function(url, file, message, success_cb) {
-      $.ajax({
-         url: url,
-         type: 'PUT',
-         contentType: 'application/octet-stream',
-         data: file,
-         processData: false,
-         xhr: function() {
-            var xhr = $.ajaxSettings.xhr();
+      return;
+   }
 
-            xhr.upload.onprogress = function(ev) {
-               if (ev.lengthComputable) {
-                  jsxc.gui.window.updateProgress(message, ev.loaded, ev.total);
-               }
-            };
-            return xhr;
-         },
-         success: function() {
-            jsxc.debug('file successful uploaded');
+   if (caps.hasFeatureByJid(domain, self.CONST.NS.HTTPUPLOAD)) {
+      self.discoverUploadService();
+   } else {
+      jsxc.debug(domain + ' does not support http upload');
+   }
+};
 
-            // In case that upload progress is not available, inform user
-            // @TODO modify updateProgress to not mark this message as received
-            jsxc.gui.window.updateProgress(message, 1, 1);
+/**
+ * Discover upload service for http upload.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ */
+jsxc.xmpp.httpUpload.discoverUploadService = function() {
+   var self = jsxc.xmpp.httpUpload;
 
-            if (success_cb) {
-               success_cb();
+   jsxc.debug('discover http upload service');
+
+   self.conn.disco.items(self.conn.domain, null, function(items) {
+      $(items).find('item').each(function() {
+         var jid = $(this).attr('jid');
+         var discovered = false;
+
+         self.conn.disco.info(jid, null, function(info) {
+            var httpUploadFeature = $(info).find('feature[var="' + self.CONST.NS.HTTPUPLOAD + '"]');
+            var httpUploadMaxSize = $(info).find('field[var="max-file-size"]');
+
+            if (httpUploadFeature.length > 0) {
+               jsxc.debug('http upload service found', jid);
+
+               jsxc.options.set('httpUpload', {
+                  server: jid,
+                  name: $(info).find('identity').attr('name'),
+                  maxSize: parseInt(httpUploadMaxSize.text())
+               });
+
+               discovered = true;
+               self.ready = true;
             }
-         },
-         error: function() {
-            jsxc.warn('error while uploading file to ' + url);
+         });
 
-            message.error = 'Could not upload file';
+         return !discovered;
+      });
+   });
+};
+
+/**
+ * Upload file and send link to peer.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ * @param  {File} file
+ * @param  {Message} message Preview message
+ */
+jsxc.xmpp.httpUpload.sendFile = function(file, message) {
+   jsxc.debug('Send file via http upload');
+
+   var self = jsxc.xmpp.httpUpload;
+
+   // even if the link is encrypted the file isn't
+   message.encrypted = false;
+
+   self.requestSlot(file, function(data) {
+      if (!data) {
+         // general error
+         jsxc.warn('Unknown error occured. Please check the debug log.');
+      } else if (data.error) {
+         // specific error
+         jsxc.warn('The xmpp server responded with an error of the type "' + data.error.type + '"');
+
+         message.getDOM().remove();
+
+         jsxc.gui.window.postMessage({
+            bid: message.bid,
+            direction: jsxc.Message.SYS,
+            msg: data.error.text
+         });
+
+         message.delete();
+      } else if (data.get && data.put) {
+         // slot received, start upload
+         self.uploadFile(data.put, file, message, function() {
+            var a = $('<a>');
+            a.attr('href', data.get);
+            a.attr('data-name', message.attachment.name);
+            a.attr('data-type', message.attachment.type);
+            a.attr('data-size', message.attachment.size);
+
+            if (message.attachment.thumbnail) {
+               a.attr('data-thumbnail', message.attachment.thumbnail);
+            }
+
+            a.text(data.get);
+            message.attachment.data = data.get;
+
+            message.msg = $('<span>').append(a).html();
+            message.type = jsxc.Message.HTML;
             jsxc.gui.window.postMessage(message);
-         }
-      });
-   },
-
-   /**
-    * Request upload slot
-    */
-   requestSlot: function(file, cb) {
-      var self = jsxc.xmpp.httpUpload;
-      var options = jsxc.options.get('httpUpload');
-
-      if (!options || !options.server) {
-         jsxc.warn('could not request upload slot, because I am not aware of a server');
-
-         return;
-      }
-
-      var iq = $iq({
-            to: options.server,
-            type: 'get'
-         }).c('request', {
-            xmlns: self.CONST.NS.HTTPUPLOAD
-         }).c('filename').t(file.name)
-         .up()
-         .c('size').t(file.size);
-
-      self.conn.sendIQ(iq, function(stanza) {
-         self.successfulRequestSlotCB(stanza, cb);
-      }, function(stanza) {
-         self.failedRequestSlotCB(stanza, cb);
-      });
-   },
-
-   /**
-    * Process successful response to slot request.
-    */
-   successfulRequestSlotCB: function(stanza, cb) {
-      var self = jsxc.xmpp.httpUpload;
-      var slot = $(stanza).find('slot[xmlns="' + self.CONST.NS.HTTPUPLOAD + '"]');
-
-      if (slot.length > 0) {
-         var put = slot.find('put').text();
-         var get = slot.find('get').text();
-
-         cb({
-            put: put,
-            get: get
          });
-      } else {
-         self.failedRequestSlotCB(stanza, cb);
       }
-   },
+   });
+};
 
-   failedRequestSlotCB: function(stanza, cb) {
-      if ($(stanza).find('error').length <= 0) {
-         jsxc.warn('response does not contain a slot element');
+/**
+ * Upload the given file to the given url.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ * @param  {String} url upload url
+ * @param  {File} file
+ * @param  {Message} message preview message
+ * @param  {Function} success_cb callback on successful transition
+ */
+jsxc.xmpp.httpUpload.uploadFile = function(url, file, message, success_cb) {
+   $.ajax({
+      url: url,
+      type: 'PUT',
+      contentType: 'application/octet-stream',
+      data: file,
+      processData: false,
+      xhr: function() {
+         var xhr = $.ajaxSettings.xhr();
 
-         cb();
+         // track upload progress
+         xhr.upload.onprogress = function(ev) {
+            if (ev.lengthComputable) {
+               jsxc.gui.window.updateProgress(message, ev.loaded, ev.total);
+            }
+         };
+         return xhr;
+      },
+      success: function() {
+         jsxc.debug('file successful uploaded');
 
-         return;
+         // In case that upload progress is not available, inform user
+         jsxc.gui.window.updateProgress(message, 1, 1);
+
+         if (success_cb) {
+            success_cb();
+         }
+      },
+      error: function() {
+         jsxc.warn('error while uploading file to ' + url);
+
+         message.error = 'Could not upload file';
+         jsxc.gui.window.postMessage(message);
       }
+   });
+};
 
-      var error = {
-         type: $(stanza).find('error').attr('type') || 'unknown',
-         text: $(stanza).find('error text').text()
-      };
+/**
+ * Request upload slot.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ * @param  {File} file
+ * @param  {Function} cb Callback after finished request
+ */
+jsxc.xmpp.httpUpload.requestSlot = function(file, cb) {
+   var self = jsxc.xmpp.httpUpload;
+   var options = jsxc.options.get('httpUpload');
 
-      if ($(stanza).find('error not-acceptable')) {
-         error.reason = 'not-acceptable';
-      } else if ($(stanza).find('error resource-constraint')) {
-         error.reason = 'resource-constraint';
-      } else if ($(stanza).find('error not-allowed')) {
-         error.reason = 'not-allowed';
-      }
+   if (!options || !options.server) {
+      jsxc.warn('could not request upload slot, because I am not aware of a server or http upload is disabled');
+
+      return;
+   }
+
+   var iq = $iq({
+         to: options.server,
+         type: 'get'
+      }).c('request', {
+         xmlns: self.CONST.NS.HTTPUPLOAD
+      }).c('filename').t(file.name)
+      .up()
+      .c('size').t(file.size);
+
+   self.conn.sendIQ(iq, function(stanza) {
+      self.successfulRequestSlotCB(stanza, cb);
+   }, function(stanza) {
+      self.failedRequestSlotCB(stanza, cb);
+   });
+};
+
+/**
+ * Process successful response to slot request.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ * @param {String} stanza
+ * @param {Function} cb
+ */
+jsxc.xmpp.httpUpload.successfulRequestSlotCB = function(stanza, cb) {
+   var self = jsxc.xmpp.httpUpload;
+   var slot = $(stanza).find('slot[xmlns="' + self.CONST.NS.HTTPUPLOAD + '"]');
+
+   if (slot.length > 0) {
+      var put = slot.find('put').text();
+      var get = slot.find('get').text();
 
       cb({
-         error: error
+         put: put,
+         get: get
       });
+   } else {
+      self.failedRequestSlotCB(stanza, cb);
    }
+};
+
+/**
+ * Process failed response to slot request.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ * @param  {String} stanza
+ * @param  {Function} cb
+ */
+jsxc.xmpp.httpUpload.failedRequestSlotCB = function(stanza, cb) {
+   if ($(stanza).find('error').length <= 0) {
+      jsxc.warn('response does not contain a slot element');
+
+      cb();
+
+      return;
+   }
+
+   var error = {
+      type: $(stanza).find('error').attr('type') || 'unknown',
+      text: $(stanza).find('error text').text()
+   };
+
+   if ($(stanza).find('error not-acceptable')) {
+      error.reason = 'not-acceptable';
+   } else if ($(stanza).find('error resource-constraint')) {
+      error.reason = 'resource-constraint';
+   } else if ($(stanza).find('error not-allowed')) {
+      error.reason = 'not-allowed';
+   }
+
+   cb({
+      error: error
+   });
 };
 
 $(document).on('stateChange.jsxc', function(ev, state) {
