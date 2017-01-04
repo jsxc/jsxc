@@ -10,6 +10,7 @@ dev/
 /tmp/
 /lib/favico.js/
 /lib/strophe.bookmarks/
+/lib/strophe.chatstates/
 /lib/strophe.x/
 /lib/almond/
 /lib/jquery/
@@ -23,3 +24,4 @@ dev/
 lib/i18next/
 lib/jquery-i18next/
 lib/magnific-popup/
+.idea

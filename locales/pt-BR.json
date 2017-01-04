@@ -285,6 +285,8 @@
     "setting-explanation-carbon": "Com carbon copy ativado seu servidor XMPP vai enviar uma copia de cada mensagem para você neste cliente mesmo que não tenha endereço",
     "setting-explanation-login": "Se essa opção esta habilitada, o chat vai começar ao logar.",
     "setting-explanation-priority": "Você esta logado varias vezes com a mesma conta, seu servidor XMPP vai entregar as mensagens para o cliente com a prioridade mais alta.",
-    "setting-explanation-xmpp": "Essas opções são usadas para conectar no Servidor XMPP"
+    "setting-explanation-xmpp": "Essas opções são usadas para conectar no Servidor XMPP",
+    "_is_composing": null,
+    "_are_composing": null
   }
 }

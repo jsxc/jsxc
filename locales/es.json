@@ -285,6 +285,8 @@
     "setting-explanation-carbon": "Con el Calco habilitado tu servidor XMPP enviará una copia de cada mensaje entrante dirigido a ti a este cliente incluso si no estaba siendo enviado a él",
     "setting-explanation-login": "Si esta opción está habilitada, el chat empezará al inicio de sesión",
     "setting-explanation-priority": "Si tú has iniciado sesión varias veces con la misma cuenta, tu servidor XMPP enviará los mensajes al cliente con la mayor prioridad",
-    "setting-explanation-xmpp": "Estas opciones son usadas para conectar con el servidor XMPP"
+    "setting-explanation-xmpp": "Estas opciones son usadas para conectar con el servidor XMPP",
+    "_is_composing": " está escribiendo",
+    "_are_composing": " están escribiendo"
   }
 }
