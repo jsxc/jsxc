@@ -20,12 +20,18 @@ jsxc.xmpp.chatState.init = function() {
       return;
    }
 
-   self.conn = jsxc.xmpp.conn;
-
    // prevent double execution after reconnect
    $(document).off('composing.chatstates', jsxc.xmpp.chatState.onComposing);
    $(document).off('paused.chatstates', jsxc.xmpp.chatState.onPaused);
    $(document).off('active.chatstates', jsxc.xmpp.chatState.onActive);
+
+   if (self.isDisabled()) {
+      jsxc.debug('chat state notification disabled');
+
+      return;
+   }
+
+   self.conn = jsxc.xmpp.conn;
 
    $(document).on('composing.chatstates', jsxc.xmpp.chatState.onComposing);
    $(document).on('paused.chatstates', jsxc.xmpp.chatState.onPaused);
@@ -44,7 +50,7 @@ jsxc.xmpp.chatState.onComposing = function(ev, jid) {
    var bid = jsxc.jidToBid(jid);
    var data = jsxc.storage.getUserItem('buddy', bid) || null;
 
-   if (!data) {
+   if (!data || jsxc.xmpp.chatState.isDisabled()) {
       return;
    }
 
@@ -103,7 +109,7 @@ jsxc.xmpp.chatState.onPaused = function(ev, jid) {
    var bid = jsxc.jidToBid(jid);
    var data = jsxc.storage.getUserItem('buddy', bid) || null;
 
-   if (!data) {
+   if (!data || jsxc.xmpp.chatState.isDisabled()) {
       return;
    }
 
@@ -163,7 +169,7 @@ jsxc.xmpp.chatState.onActive = function(ev, jid) {
 jsxc.xmpp.chatState.startComposing = function(bid) {
    var self = jsxc.xmpp.chatState;
 
-   if (!jsxc.xmpp.conn || !jsxc.xmpp.conn.chatstates) {
+   if (!jsxc.xmpp.conn || !jsxc.xmpp.conn.chatstates || jsxc.xmpp.chatState.isDisabled()) {
       return;
    }
 
@@ -194,6 +200,10 @@ jsxc.xmpp.chatState.startComposing = function(bid) {
  * @param  {String} bid
  */
 jsxc.xmpp.chatState.pauseComposing = function(bid, type) {
+   if (jsxc.xmpp.chatState.isDisabled()) {
+      return;
+   }
+
    jsxc.xmpp.conn.chatstates.sendPaused(bid, type);
 };
 
@@ -226,6 +236,12 @@ jsxc.xmpp.chatState._genComposingMsg = function(usersComposing) {
       return usersComposing.length > 1 ? usersComposing.join(', ') + $.t('_are_composing') :
          usersComposing[0] + $.t('_is_composing');
    }
+};
+
+jsxc.xmpp.chatState.isDisabled = function() {
+   var options = jsxc.options.get('chatState') || {};
+
+   return !options.enable;
 };
 
 $(document).on('attached.jsxc', jsxc.xmpp.chatState.init);

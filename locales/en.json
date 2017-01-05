@@ -287,6 +287,8 @@
     "setting-explanation-priority": "If you are logged in multiple times with the same account, your XMPP server will deliver messages to the client with the highest priority.",
     "setting-explanation-xmpp": "These options are used to connect to the XMPP server.",
     "_is_composing": " is composing...",
-    "_are_composing": " are composing..."
+    "_are_composing": " are composing...",
+    "Chat_state_notifications": "Chat state notifications",
+    "setting-explanation-chat-state": "Do you want to send and receive chat state notifications, like someone starts or stops composing a message?"
   }
 }
