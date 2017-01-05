@@ -285,8 +285,6 @@
     "setting-explanation-carbon": "Wenn Kopien aktiviert sind, werden alle eingehenden Nachrichten zu allen angemeldeten Clients gesendet.",
     "setting-explanation-login": "Wenn diese Option aktiviert ist, wird der Chat beim anmelden automatisch gestartet.",
     "setting-explanation-priority": "Wenn du mit deinem XMPP Konto mehrfach angemeldet bist, werden Nachrichten zu dem Client mit der höchsten Priorität zugestellt.",
-    "setting-explanation-xmpp": "Diese Optionen werden für die Verbindung zum XMPP server genutzt.",
-    "_is_composing": " schreibt ...",
-    "_are_composing": " schrieben ..."
+    "setting-explanation-xmpp": "Diese Optionen werden für die Verbindung zum XMPP server genutzt."
   }
 }
