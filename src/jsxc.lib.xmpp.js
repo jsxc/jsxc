@@ -288,8 +288,6 @@ jsxc.xmpp = {
 
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onRosterChanged, 'jabber:iq:roster', 'iq', 'set');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onMessage, null, 'message', 'chat');
-      jsxc.xmpp.conn.addHandler(jsxc.xmpp.onComposing, 'http://jabber.org/protocol/chatstates',
-         'message');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onReceived, null, 'message');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
 
@@ -1015,70 +1013,6 @@ jsxc.xmpp = {
       return true;
    },
 
-   onComposing: function(stanza) {
-      var composing = $(stanza).find("composing[xmlns='http://jabber.org/protocol/chatstates']");
-      if (composing.length === 0) {
-         return true;
-      }
-
-      var type = $(stanza).attr("type");
-      var from = $(stanza).attr("from");
-
-      // ignore own notifications in groupchat
-      if (type === 'groupchat' &&
-         Strophe.getResourceFromJid(from) === Strophe.getNodeFromJid(jsxc.xmpp.conn.jid)) {
-         return true;
-      }
-
-      var bid = jsxc.jidToBid(from);
-      var user = type === 'chat' ? Strophe.getNodeFromJid(from) : Strophe.getResourceFromJid(from);
-      var window = jsxc.gui.window.get(bid);
-
-      if (window.length > 0) {
-         // add user in array if necessary
-         var usersComposing = window.data('composing') || [];
-         if (usersComposing.indexOf(user) === -1) {
-            usersComposing.push(user);
-            window.data('composing', usersComposing);
-         }
-
-         var textarea = window.find('.jsxc_textarea');
-         var composingNotif = textarea.find('.jsxc_composing');
-
-         // scroll to bottom
-         jsxc.gui.window.scrollDown(bid);
-
-         // change text
-         var msg = usersComposing.length > 1 ? usersComposing.join(', ') + $.t('_are_composing') :
-            usersComposing[0] + $.t('_is_composing');
-
-         if (composingNotif.length < 1) {
-            // notification not present, add it
-            composingNotif = $('<div>').addClass('jsxc_composing')
-               .addClass('jsxc_chatmessage')
-               .addClass('jsxc_sys')
-               .text(msg)
-               .appendTo(textarea);
-         } else {
-            // notification present, modify it and show it if necessary
-            composingNotif.text(msg);
-         }
-         if (!composingNotif.hasClass('jsxc_fadein')) {
-            composingNotif.addClass('jsxc_fadein');
-            setTimeout(function() {
-               composingNotif.animate({
-                  opacity: 0
-               }, 600, function() {
-                  composingNotif.remove();
-               });
-               window.data('data', []);
-            }, 3000);
-         }
-      }
-
-      return true;
-   },
-
    /**
     * Public function to send message.
     *
@@ -1128,6 +1062,13 @@ jsxc.xmpp = {
          // Add request according to XEP-0184
          xmlMsg.up().c('request', {
             xmlns: 'urn:xmpp:receipts'
+         });
+      }
+
+      if (jsxc.xmpp.conn.chatstates) {
+         // send active event (XEP-0085)
+         xmlMsg.up().c('active', {
+            xmlns: Strophe.NS.CHATSTATES
          });
       }
 

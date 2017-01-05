@@ -2099,27 +2099,21 @@ jsxc.gui.window = {
       win.find('.jsxc_textinput').keyup(function(ev) {
          var body = $(this).val();
 
+         // I'm composing a message
+         if (ev.which !== 13) {
+            jsxc.xmpp.chatState.startComposing(bid);
+         }
+
          if (ev.which === 13 && !ev.shiftKey) {
             body = '';
+
+            jsxc.xmpp.chatState.endComposing(bid);
          }
 
          jsxc.storage.updateUserItem('window', bid, 'text', body);
 
          if (ev.which === 27) {
             jsxc.gui.window.close(bid);
-         }
-
-         // I'm composing a message
-         if (jsxc.xmpp.conn) {
-            var now = new Date().getTime();
-            var last = win.data('composing-timestamp');
-
-            // send only every toComposingNotificationDelay ms interval
-            if (!last || (now - last) > jsxc.toComposingNotificationDelay) {
-               var type = win.hasClass('jsxc_groupchat') ? 'groupchat' : 'chat';
-               jsxc.xmpp.conn.chatstates.sendComposing(bid, type);
-               win.data('composing-timestamp', now);
-            }
          }
       }).keypress(function(ev) {
          if (ev.which !== 13 || ev.shiftKey || !$(this).val()) {
