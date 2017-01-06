@@ -2088,7 +2088,12 @@ jsxc.gui.window = {
       win.find('.jsxc_sendFile').click(function() {
          $('body').click();
 
-         jsxc.gui.window.sendFile(bid);
+         if(jsxc.options.get('httpupload').server !== null){
+            jsxc.httpupload.sendFile(bid);
+         }else{
+            jsxc.gui.window.sendFile(bid);
+         }
+
       });
 
       win.find('.jsxc_tools').click(function() {
@@ -3010,7 +3015,12 @@ jsxc.gui.window = {
                if (data.status === 'unavailable') {
                   jsxc.gui.window.hideOverlay(bid);
                } else if (data.status === 'selected') {
-                  jsxc.gui.window.sendFile(bid + '/' + data.result);
+                  if(jsxc.options.get('httpupload').server !== null){
+                     jsxc.httpupload.sendFile(bid + '/' + data.result);
+                  }else {
+                     jsxc.gui.window.sendFile(bid + '/' + data.result);
+                  }
+
                }
             }, fileCapableRes);
 
