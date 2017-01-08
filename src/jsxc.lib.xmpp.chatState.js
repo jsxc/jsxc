@@ -130,9 +130,10 @@ jsxc.xmpp.chatState.onPaused = function(ev, jid) {
    }
 
    if (usersComposing.length === 0) {
-      var duration = parseFloat(el.css('transition-duration'));
+      var durationValue = el.css('transition-duration') || '0';
+      var duration = parseFloat(durationValue) || 0;
 
-      if (el.css('transition-duration').match(/s$/)) {
+      if (durationValue.match(/s$/)) {
          duration *= 1000;
       }
 
