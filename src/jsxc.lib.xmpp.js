@@ -781,7 +781,6 @@ jsxc.xmpp = {
     * @private
     */
    onMessage: function(stanza) {
-
       var forwarded = $(stanza).find('forwarded[xmlns="' + jsxc.CONST.NS.FORWARD + '"]');
       var message, carbon;
 
@@ -804,6 +803,7 @@ jsxc.xmpp = {
       }
 
       var body = $(message).find('body:first').text();
+      var htmlBody = $(message).find('body[xmlns="' + Strophe.NS.XHTML + '"]');
 
       if (!body || (body.match(/\?OTR/i) && forwarded)) {
          return true;
@@ -891,10 +891,40 @@ jsxc.xmpp = {
          }));
       }
 
-      if (jsxc.otr.objects.hasOwnProperty(bid)) {
+      var attachment;
+      if (htmlBody.length === 1) {
+         var httpUploadElement = htmlBody.find('a[data-type][data-name][data-size]');
+
+         if (httpUploadElement.length === 1) {
+            attachment = {
+               type: httpUploadElement.attr('data-type'),
+               name: httpUploadElement.attr('data-name'),
+               size: httpUploadElement.attr('data-size'),
+            };
+
+            if (httpUploadElement.attr('data-thumbnail') && httpUploadElement.attr('data-thumbnail').match(/^\s*data:[a-z]+\/[a-z0-9-+.*]+;base64,[a-z0-9=+/]+$/i)) {
+               attachment.thumbnail = httpUploadElement.attr('data-thumbnail');
+            }
+
+            if (httpUploadElement.attr('href') && httpUploadElement.attr('href').match(/^https:\/\//)) {
+               attachment.data = httpUploadElement.attr('href');
+               body = null;
+            }
+
+            if (!attachment.type.match(/^[a-z]+\/[a-z0-9-+.*]+$/i) || !attachment.name.match(/^[\s\w.,-]+$/i) || !attachment.size.match(/^\d+$/i)) {
+               attachment = undefined;
+
+               jsxc.warn('Invalid file type, name or size.');
+            }
+         }
+      }
+
+      if (jsxc.otr.objects.hasOwnProperty(bid) && body) {
+         // @TODO check for file upload url after decryption
          jsxc.otr.objects[bid].receiveMsg(body, {
             stamp: stamp,
-            forwarded: forwarded
+            forwarded: forwarded,
+            attachment: attachment
          });
       } else {
          jsxc.gui.window.postMessage({
@@ -903,7 +933,8 @@ jsxc.xmpp = {
             msg: body,
             encrypted: false,
             forwarded: forwarded,
-            stamp: stamp
+            stamp: stamp,
+            attachment: attachment
          });
       }
 
@@ -1021,14 +1052,17 @@ jsxc.xmpp = {
     * @param msg message
     * @param uid unique id
     */
-   sendMessage: function(bid, msg, uid) {
+   sendMessage: function(message) {
+      var bid = message.bid;
+      var msg = message.htmlMsg;
+
       var mucRoomNames = (jsxc.xmpp.conn.muc && jsxc.xmpp.conn.muc.roomNames) ? jsxc.xmpp.conn.muc.roomNames : [];
       var isMucBid = mucRoomNames.indexOf(bid) >= 0;
 
       if (jsxc.otr.objects.hasOwnProperty(bid) && !isMucBid) {
-         jsxc.otr.objects[bid].sendMsg(msg, uid);
+         jsxc.otr.objects[bid].sendMsg(msg, message);
       } else {
-         jsxc.xmpp._sendMessage(jsxc.gui.window.get(bid).data('jid'), msg, uid);
+         jsxc.xmpp._sendMessage(jsxc.gui.window.get(bid).data('jid'), msg, message);
       }
    },
 
@@ -1041,16 +1075,34 @@ jsxc.xmpp = {
     * @param uid unique id
     * @private
     */
-   _sendMessage: function(jid, msg, uid) {
+   _sendMessage: function(jid, msg, message) {
+      // @TODO put jid into message object
       var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(jid)) || {};
       var isBar = (Strophe.getBareJidFromJid(jid) === jid);
       var type = data.type || 'chat';
+      message = message || {};
 
       var xmlMsg = $msg({
          to: jid,
          type: type,
-         id: uid
-      }).c('body').t(msg);
+         id: message._uid
+      });
+
+      if (message.type === jsxc.Message.HTML) {
+         xmlMsg.c("html", {
+            xmlns: Strophe.NS.XHTML_IM
+         });
+
+         // Omit StropheJS XEP-0071 limitations
+         var body = Strophe.xmlElement("body", {
+            xmlns: Strophe.NS.XHTML
+         });
+         body.innerHTML = msg;
+
+         xmlMsg.node.appendChild(body);
+      } else {
+         xmlMsg.c('body').t(msg);
+      }
 
       if (jsxc.xmpp.carbons.enabled && msg.match(/^\?OTR/)) {
          xmlMsg.up().c("private", {
