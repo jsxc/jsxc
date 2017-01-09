@@ -287,5 +287,10 @@ jsxc.options = {
          enable: true
       },
       // @TODO add option to enable/disable data channels
+   },
+
+   /** Default option for chat state notifications */
+   chatState: {
+      enable: true
    }
 };

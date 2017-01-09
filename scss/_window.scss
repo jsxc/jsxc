@@ -334,6 +334,7 @@
             display: block;
             resize: none;
             transition: height 0.5s;
+            font-size: 13px;
         }
 
         &::placeholder {
@@ -617,6 +618,31 @@
     box-sizing: border-box;
     margin-right: 3px;
     border-radius: 3px;
+
+    &.jsxc_composing {
+        text-align: center;
+        font-size: 0.9em;
+        font-style: italic;
+        display: block;
+        opacity: 0;
+        overflow: hidden;
+        transition: opacity 0.6s;
+
+        &:before {
+            content: " ";
+            width: 1.5em;
+            height: 1em;
+            display: inline-block;
+            background-size: 80%;
+            background-repeat: no-repeat;
+            margin: 0 3px 0 0;
+            background-image: image-url("composing.png");
+        }
+
+        &.jsxc_fadein {
+            opacity: 1;
+        }
+    }
 }
 
 div.jsxc_settings {
