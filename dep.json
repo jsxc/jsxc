@@ -36,6 +36,12 @@
      "url": "https://github.com/strophe/strophejs-plugins/tree/master/bookmarks"
   },
   {
+     "name": "strophe.js/mam",
+     "file": "lib/strophe.mam/index.js",
+     "license": "MIT",
+     "url": "https://github.com/strophe/strophejs-plugins/tree/master/mam"
+  },
+  {
      "name": "strophe.js/x",
      "file": "lib/strophe.x/index.js",
      "license": "MIT",
