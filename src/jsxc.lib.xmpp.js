@@ -1065,6 +1065,13 @@ jsxc.xmpp = {
          });
       }
 
+      if (jsxc.xmpp.conn.chatstates && !jsxc.xmpp.chatState.isDisabled()) {
+         // send active event (XEP-0085)
+         xmlMsg.up().c('active', {
+            xmlns: Strophe.NS.CHATSTATES
+         });
+      }
+
       jsxc.xmpp.conn.send(xmlMsg);
    },
 

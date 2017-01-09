@@ -2099,8 +2099,15 @@ jsxc.gui.window = {
       win.find('.jsxc_textinput').keyup(function(ev) {
          var body = $(this).val();
 
+         // I'm composing a message
+         if (ev.which !== 13) {
+            jsxc.xmpp.chatState.startComposing(bid);
+         }
+
          if (ev.which === 13 && !ev.shiftKey) {
             body = '';
+
+            jsxc.xmpp.chatState.endComposing(bid);
          }
 
          jsxc.storage.updateUserItem('window', bid, 'text', body);

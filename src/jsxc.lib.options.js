@@ -1,6 +1,6 @@
 /**
  * Set some options for the chat.
- * 
+ *
  * @namespace jsxc.options
  */
 jsxc.options = {
@@ -60,9 +60,9 @@ jsxc.options = {
    },
 
    /**
-    * This function is called if a login form was found, but before any 
+    * This function is called if a login form was found, but before any
     * modification is done to it.
-    * 
+    *
     * @memberOf jsxc.options
     * @function
     */
@@ -88,7 +88,7 @@ jsxc.options = {
       },
 
       /**
-       * Action after login was called: dialog [String] Show wait dialog, false [boolean] | 
+       * Action after login was called: dialog [String] Show wait dialog, false [boolean] |
        * quiet [String] Do nothing
        */
       onConnecting: 'dialog',
@@ -107,25 +107,25 @@ jsxc.options = {
 
       /**
        * True: Attach connection even is login form was found.
-       * 
+       *
        * @type {Boolean}
        * @deprecated since 3.0.0. Use now loginForm.ifFound (true => attach, false => pause)
        */
       attachIfFound: true,
 
       /**
-       * Describes what we should do if login form was found: 
+       * Describes what we should do if login form was found:
        * - Attach connection
        * - Force new connection with loginForm.jid and loginForm.passed
        * - Pause connection and do nothing
-       * 
+       *
        * @type {(attach|force|pause)}
        */
       ifFound: 'attach',
 
       /**
-       * True: Display roster minimized after first login. Afterwards the last 
-       * roster state will be used. 
+       * True: Display roster minimized after first login. Afterwards the last
+       * roster state will be used.
        */
       startMinimized: false
    },
@@ -170,7 +170,7 @@ jsxc.options = {
 
    /**
     * If no avatar is found, this function is called.
-    * 
+    *
     * @param jid Jid of that user.
     * @this {jQuery} Elements to update with probable .jsxc_avatar elements
     */
@@ -186,7 +186,7 @@ jsxc.options = {
 
    /**
     * Returns permanent saved settings and overwrite default jsxc.options.
-    * 
+    *
     * @memberOf jsxc.options
     * @function
     * @param username {string} username
@@ -197,7 +197,7 @@ jsxc.options = {
 
    /**
     * Call this function to save user settings permanent.
-    * 
+    *
     * @memberOf jsxc.options
     * @param data Holds all data as key/value
     * @param cb Called with true on success, false otherwise
@@ -213,14 +213,14 @@ jsxc.options = {
 
    /**
     * Processes user list.
-    * 
+    *
     * @callback getUsers-cb
     * @param {object} list List of users, key: username, value: alias
     */
 
    /**
     * Returns a list of usernames and aliases
-    * 
+    *
     * @function getUsers
     * @memberOf jsxc.options
     * @param {string} search Search token (start with)
@@ -276,6 +276,11 @@ jsxc.options = {
             height: h
          };
       }
+   },
+
+   /** Default option for chat state notifications */
+   chatState: {
+      enable: true
    },
 
    maxStorableSize: 1000000
