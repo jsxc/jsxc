@@ -26,7 +26,18 @@ module.exports = function(grunt) {
          main: {
             files: [{
                expand: true,
-               src: ['lib/i18next/i18next.min.js', 'lib/jquery-i18next/jquery-i18next.min.js', 'lib/magnific-popup/dist/*.js', 'lib/favico.js/favico.js', 'lib/emojione/lib/js/*.js', 'lib/emojione/assets/svg/*.svg', 'lib/strophe.js/strophe.js', 'lib/strophe.x/*.js', 'lib/strophe.bookmarks/*.js', 'lib/strophe.chatstates/*.js', 'lib/strophe.vcard/*.js', 'lib/strophe.jinglejs/*-bundle.js', 'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js', 'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js', 'lib/otr/vendor/*.js', 'lib/*.js', 'LICENSE', 'img/**', 'sound/**'],
+               src: ['lib/i18next/i18next.min.js', 'lib/jquery-i18next/jquery-i18next.min.js',
+                  'lib/magnific-popup/dist/*.js', 'lib/favico.js/favico.js',
+                  'lib/emojione/lib/js/*.js', 'lib/emojione/assets/svg/*.svg',
+                  'lib/strophe.js/strophe.js', 'lib/strophe.x/*.js',
+                  'lib/strophe.bookmarks/*.js', 'lib/strophe.chatstates/*.js',
+                  'lib/strophe.vcard/*.js', 'lib/strophe.jinglejs/*-bundle.js',
+                  'lib/otr/build/**', 'lib/otr/lib/dsa-webworker.js',
+                  'lib/otr/lib/sm-webworker.js', 'lib/otr/lib/const.js',
+                  'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js',
+                  'lib/otr/vendor/*.js', 'lib/*.js', 'LICENSE',
+                  'img/**', 'sound/**'
+               ],
                dest: '<%= target %>/'
             }, {
                expand: true,
@@ -156,7 +167,9 @@ module.exports = function(grunt) {
             options: {
                banner: '/*! This file is concatenated for the browser. */\n\n'
             },
-            src: ['src/jsxc.intro.js', 'src/jsxc.lib.js', 'src/jsxc.lib.xmpp.js', 'src/jsxc.lib.*.js', 'tmp/template.js', 'src/jsxc.outro.js'],
+            src: ['src/jsxc.intro.js', 'src/jsxc.lib.js', 'src/jsxc.lib.xmpp.js',
+               'src/jsxc.lib.*.js', 'tmp/template.js', 'src/jsxc.outro.js'
+            ],
             dest: '<%= target %>/jsxc.js'
          }
       },
@@ -283,7 +296,10 @@ module.exports = function(grunt) {
          }
       },
       jsbeautifier: {
-         files: ['Gruntfile.js', 'src/jsxc.lib.*', 'template/*.html', 'example/*.html', 'example/js/dev.js', 'example/js/example.js', 'example/css/example.css'],
+         files: ['Gruntfile.js', 'src/jsxc.lib.*', 'template/*.html',
+            'example/*.html', 'example/js/dev.js', 'example/js/example.js',
+            'example/css/example.css'
+         ],
          options: {
             config: '.jsbeautifyrc'
          }
@@ -338,12 +354,18 @@ module.exports = function(grunt) {
    //Default task
    grunt.registerTask('default', ['build', 'watch']);
 
-   grunt.registerTask('build', ['jshint', 'clean', 'sass', 'replace:imageUrl', 'autoprefixer', 'copy', 'merge_data', 'replace:locales', 'htmlConvert', 'replace:template', 'concat']);
+   grunt.registerTask('build', ['jshint', 'clean', 'sass', 'replace:imageUrl',
+      'autoprefixer', 'copy', 'merge_data', 'replace:locales', 'htmlConvert',
+      'replace:template', 'concat'
+   ]);
 
    grunt.registerTask('build:prerelease', 'Build a new pre-release', function() {
       grunt.config.set('target', 'build');
 
-      grunt.task.run(['search:console', 'search:bower', 'build', 'usebanner', 'replace:version', 'replace:libraries', 'replace:todo', 'uglify', 'compress']);
+      grunt.task.run(['search:console', 'search:bower', 'build', 'usebanner',
+         'replace:version', 'replace:libraries', 'replace:todo',
+         'uglify', 'compress'
+      ]);
    });
 
    grunt.registerTask('build:release', 'Build a new release', function() {
