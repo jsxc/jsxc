@@ -275,7 +275,11 @@ jsxc = {
          lng: lang,
          fallbackLng: 'en',
          resources: I18next,
-         debug: jsxc.storage.getItem('debug') === true
+         debug: jsxc.storage.getItem('debug') === true,
+         interpolation: {
+            prefix: '__',
+            suffix: '__'
+         }
       }, function() {
          window.jqueryI18next.init(window.i18next, $, {
             tName: 't',
