@@ -3053,7 +3053,7 @@ jsxc.gui.template.get = function(name, bid, msg) {
       $.extend(ph, {
          bid_priv_fingerprint: (data && data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : $.t('not_available'),
          bid_jid: bid,
-         bid_name: (data && data.name) ? data.name : bid
+         bid_name: (data && data.name) ? jsxc.escapeHTML(data.name) : bid
       });
    }
 
@@ -3083,7 +3083,7 @@ jsxc.gui.template.get = function(name, bid, msg) {
          }
       });
 
-      ret.localize();
+      ret.localize(ph);
 
       return ret;
    }
