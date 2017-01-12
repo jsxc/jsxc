@@ -33,6 +33,7 @@
     "strophe.x": "https://raw.githubusercontent.com/strophe/strophejs-plugins/master/dataforms/src/strophe.x.js",
     "strophe.mam": "https://raw.githubusercontent.com/metajack/strophejs-plugins/master/mam/strophe.mam.js", 
     "strophe.rsm": "https://raw.githubusercontent.com/metajack/strophejs-plugins/master/rsm/strophe.rsm.js",
+    "strophe.chatstates": "https://raw.githubusercontent.com/strophe/strophejs-plugins/master/chatstates/strophe.chatstates.js",
     "jquery-i18next": "^1.1.0",
     "i18next": "^3.4.4",
     "magnific-popup": "^1.1.0"

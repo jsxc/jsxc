@@ -1,6 +1,6 @@
 /**
  * Load message object with given uid.
- * 
+ *
  * @class Message
  * @memberOf jsxc
  * @param {string} uid Unified identifier from message object
@@ -34,13 +34,15 @@ jsxc.Message = function() {
    this._received = false;
 
    /** @member {boolean} */
-   this.encrypted = false;
+   this.encrypted = null;
 
    /** @member {boolean} */
    this.forwarded = false;
 
    /** @member {integer} */
    this.stamp = new Date().getTime();
+
+   this.type = jsxc.Message.PLAIN;
 
    if (typeof arguments[0] === 'string' && arguments[0].length > 0 && arguments.length === 1) {
       this._uid = arguments[0];
@@ -92,7 +94,7 @@ jsxc.Message.prototype.save = function() {
       }
    }
 
-   if (Image && this.attachment && this.attachment.type.match(/^image\//i) && this.attachment.data) {
+   if (Image && this.attachment && this.attachment.type.match(/^image\//i) && this.attachment.data && !this.attachment.thumbnail) {
       var sHeight, sWidth, sx, sy;
       var dHeight = 100,
          dWidth = 100;
@@ -157,7 +159,7 @@ jsxc.Message.prototype.save = function() {
 
 /**
  * Remove object from storage.
- * 
+ *
  * @memberOf jsxc.Message
  */
 jsxc.Message.prototype.delete = function() {
@@ -176,7 +178,7 @@ jsxc.Message.prototype.getDOM = function() {
 
 /**
  * Mark message as received.
- * 
+ *
  * @memberOf jsxc.Message
  */
 jsxc.Message.prototype.received = function() {
@@ -216,7 +218,7 @@ jsxc.Message.delete = function(uid) {
             return el !== uid;
          });
 
-         jsxc.storage.setUserItem('history', data.bid);
+         jsxc.storage.setUserItem('history', data.bid, history);
       }
    }
 };
@@ -235,7 +237,7 @@ jsxc.Message.getDOM = function(uid) {
 
 /**
  * Message direction can be incoming, outgoing or system.
- * 
+ *
  * @typedef {(jsxc.Message.IN|jsxc.Message.OUT|jsxc.Message.SYS)} direction
  */
 
@@ -259,3 +261,7 @@ jsxc.Message.OUT = 'out';
  * @default
  */
 jsxc.Message.SYS = 'sys';
+
+jsxc.Message.HTML = 'html';
+
+jsxc.Message.PLAIN = 'plain';

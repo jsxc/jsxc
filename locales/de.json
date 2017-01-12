@@ -23,7 +23,7 @@
     "authentication_failed": "Authentifizierung fehlgeschlagen.",
     "Creating_your_private_key_": "Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.",
     "Authenticating_a_buddy_helps_": "Einen Kontakt zu authentifizieren hilft sicherzustellen, dass die Person mit der du sprichst auch die ist die sie sagt.",
-    "How_do_you_want_to_authenticate_your_buddy": "Wie willst du {{bid_name}} (<b>{{bid_jid}}</b>) authentifizieren?",
+    "How_do_you_want_to_authenticate_your_buddy": "Wie willst du __bid_name__ (<b>__bid_jid__</b>) authentifizieren?",
     "Select_method": "Wähle...",
     "Manual": "Manual",
     "Question": "Frage",
@@ -56,7 +56,7 @@
     "Deny": "Ablehnen",
     "Approve": "Bestätigen",
     "Remove_buddy": "Kontakt entfernen",
-    "You_are_about_to_remove_": "Du bist gerade dabei {{bid_name}} (<b>{{bid_jid}}</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.",
+    "You_are_about_to_remove_": "Du bist gerade dabei __bid_name__ (<b>__bid_jid__</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.",
     "Continue_without_chat": "Weiter ohne Chat",
     "Please_wait": "Bitte warten",
     "Login_failed": "Chat-Anmeldung fehlgeschlagen",
@@ -285,6 +285,10 @@
     "setting-explanation-carbon": "Wenn Kopien aktiviert sind, werden alle eingehenden Nachrichten zu allen angemeldeten Clients gesendet.",
     "setting-explanation-login": "Wenn diese Option aktiviert ist, wird der Chat beim anmelden automatisch gestartet.",
     "setting-explanation-priority": "Wenn du mit deinem XMPP Konto mehrfach angemeldet bist, werden Nachrichten zu dem Client mit der höchsten Priorität zugestellt.",
-    "setting-explanation-xmpp": "Diese Optionen werden für die Verbindung zum XMPP server genutzt."
+    "setting-explanation-xmpp": "Diese Optionen werden für die Verbindung zum XMPP server genutzt.",
+    "_is_composing": " tippt gerade...",
+    "_are_composing": " tippen gerade...",
+    "Chat_state_notifications": "Statusbenachrichtigungen",
+    "setting-explanation-chat-state": "Möchtest Benachrichtigungen senden und erhalten wenn du oder dein Kontakt Nachrichten tippt?"
   }
 }

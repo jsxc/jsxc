@@ -8,7 +8,7 @@ jsxc.otr = {
    dsaFallback: null,
    /**
     * Handler for otr receive event
-    * 
+    *
     * @memberOf jsxc.otr
     * @param {Object} d
     * @param {string} d.bid
@@ -40,28 +40,29 @@ jsxc.otr = {
             msg: d.msg,
             encrypted: d.encrypted,
             forwarded: d.forwarded,
-            stamp: d.stamp
+            stamp: d.stamp,
+            attachment: d.attachment
          });
       }
    },
 
    /**
     * Handler for otr send event
-    * 
+    *
     * @param {string} jid
     * @param {string} msg message to be send
     */
-   sendMessage: function(jid, msg, uid) {
+   sendMessage: function(jid, msg, message) {
       if (jsxc.otr.objects[jsxc.jidToBid(jid)].msgstate !== 0) {
          jsxc.otr.backup(jsxc.jidToBid(jid));
       }
 
-      jsxc.xmpp._sendMessage(jid, msg, uid);
+      jsxc.xmpp._sendMessage(jid, msg, message);
    },
 
    /**
     * Create new otr instance
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -212,17 +213,18 @@ jsxc.otr = {
             msg: msg,
             encrypted: encrypted === true,
             stamp: meta.stamp,
-            forwarded: meta.forwarded
+            forwarded: meta.forwarded,
+            attachment: meta.attachment
          });
       });
 
       // Send message
-      jsxc.otr.objects[bid].on('io', function(msg, uid) {
+      jsxc.otr.objects[bid].on('io', function(msg, message) {
          var jid = jsxc.gui.window.get(bid).data('jid') || jsxc.otr.objects[bid].jid;
 
          jsxc.otr.objects[bid].jid = jid;
 
-         jsxc.otr.sendMessage(jid, msg, uid);
+         jsxc.otr.sendMessage(jid, msg, message);
       });
 
       jsxc.otr.objects[bid].on('error', function(err) {
@@ -243,7 +245,7 @@ jsxc.otr = {
 
    /**
     * show verification dialog with related part (secret or question)
-    * 
+    *
     * @param {type} bid
     * @param {string} [data]
     * @returns {undefined}
@@ -275,7 +277,7 @@ jsxc.otr = {
 
    /**
     * Send verification request to buddy
-    * 
+    *
     * @param {string} bid
     * @param {string} sec secret
     * @param {string} [quest] question
@@ -289,7 +291,7 @@ jsxc.otr = {
 
    /**
     * Toggle encryption state
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -307,7 +309,7 @@ jsxc.otr = {
 
    /**
     * Send request to encrypt the session
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -323,7 +325,7 @@ jsxc.otr = {
 
    /**
     * Abort encryptet session
-    * 
+    *
     * @param {type} bid
     * @param cb callback
     * @returns {undefined}
@@ -343,7 +345,7 @@ jsxc.otr = {
 
    /**
     * Backups otr session
-    * 
+    *
     * @param {string} bid
     */
    backup: function(bid) {
@@ -375,7 +377,7 @@ jsxc.otr = {
 
    /**
     * Restore old otr session
-    * 
+    *
     * @param {string} bid
     */
    restore: function(bid) {
@@ -410,7 +412,7 @@ jsxc.otr = {
 
    /**
     * Create or load DSA key
-    * 
+    *
     * @returns {unresolved}
     */
    createDSA: function() {
@@ -508,7 +510,7 @@ jsxc.otr = {
 
    /**
     * Ending of DSA key generation.
-    * 
+    *
     * @param {DSA} dsa DSA object
     */
    DSAready: function(dsa) {

@@ -415,10 +415,49 @@
     outline: none;
     clear: both;
 
+    &.jsxc_error {
+        opacity: 0.7;
+
+        &:before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 8px;
+            height: 8px;
+            background-color: yellow;
+        }
+    }
+
     a {
         color: $chatmessage_a;
         text-decoration: underline;
         display: inline-block;
+        max-width: 100%;
+        position: relative;
+
+        &[download]:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 5px;
+            left: 0;
+            border-radius: 3px;
+            background-color: rgba(255, 255, 255, 0.7);
+            background-image: url(../img/download_icon_black.svg);
+            background-size: contain;
+            background-position: center center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        &[download]:hover {
+            &:before {
+                opacity: 0.6;
+            }
+        }
     }
 
     img {
@@ -449,6 +488,7 @@
             line-height: 0px;
             padding: 0;
             background-image: url();
+            display: inline-block;
         }
 
         &.jsxc_application {
@@ -465,6 +505,7 @@
 
         &.jsxc_video {
             background-image: image-url("filetypes/video.svg");
+            opacity: 1;
         }
 
         &.jsxc_text {
@@ -577,6 +618,31 @@
     box-sizing: border-box;
     margin-right: 3px;
     border-radius: 3px;
+
+    &.jsxc_composing {
+        text-align: center;
+        font-size: 0.9em;
+        font-style: italic;
+        display: block;
+        opacity: 0;
+        overflow: hidden;
+        transition: opacity 0.6s;
+
+        &:before {
+            content: " ";
+            width: 1.5em;
+            height: 1em;
+            display: inline-block;
+            background-size: 80%;
+            background-repeat: no-repeat;
+            margin: 0 3px 0 0;
+            background-image: image-url("composing.png");
+        }
+
+        &.jsxc_fadein {
+            opacity: 1;
+        }
+    }
 }
 
 div.jsxc_settings {
