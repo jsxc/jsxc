@@ -247,6 +247,12 @@ jsxc.webrtc = {
       var div = $('<div>').addClass('jsxc_video');
       win.find('.jsxc_tools .jsxc_settings').after(div);
 
+      var a = $('<a>');
+      a.text($.t('Broadcast'));
+      a.addClass('jsxc_broadcast jsxc_video');
+      a.attr('href', '#');
+      win.find('.jsxc_settings .jsxc_menu li:last').after($('<li>').append(a));
+
       self.updateIcon(win.data('bid'));
    },
 
@@ -300,7 +306,11 @@ jsxc.webrtc = {
 
       if (capableRes.indexOf(targetRes) > -1) {
          el.click(function() {
-            self.startCall(jid);
+            if (el.hasClass('jsxc_broadcast')) {
+               self.startScreenBroadcast(jid);
+            } else {
+               self.startCall(jid);
+            }
          });
 
          el.removeClass('jsxc_disabled');
@@ -487,7 +497,73 @@ jsxc.webrtc = {
       if (type === 'FileTransferSession') {
          self.onIncomingFileTransfer(session);
       } else if (type === 'MediaSession') {
-         self.onIncomingCall(session);
+         var reqMedia = false;
+
+         $.each(session.pc.remoteDescription.contents, function() {
+            if (this.senders === 'both') {
+               reqMedia = true;
+            }
+         });
+
+         if (reqMedia) {
+            self.onIncomingCall(session);
+         } else {
+            self.onIncomingBroadcast(session);
+         }
+      }
+   },
+
+   onIncomingBroadcast: function(session) {
+      jsxc.debug('incoming broadcast from ' + session.peerID);
+
+      var self = jsxc.webrtc;
+      var bid = jsxc.jidToBid(session.peerID);
+
+      session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
+
+      jsxc.gui.window.postMessage({
+         bid: bid,
+         direction: jsxc.Message.SYS,
+         msg: $.t('Incoming_broadcast')
+      });
+
+      // display notification
+      jsxc.notification.notify($.t('Incoming_broadcast'), $.t('from_sender', {
+         sender: bid
+      }));
+
+      // send signal to partner
+      session.ring();
+
+      jsxc.webrtc.last_caller = session.peerID;
+
+      if (jsxc.webrtc.AUTO_ACCEPT) {
+         acceptIncomingBroadcast(session);
+
+         return;
+      }
+
+      var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', bid), {
+         noClose: true
+      });
+
+      dialog.find('.jsxc_accept').click(function() {
+         acceptIncomingBroadcast(session);
+      });
+
+      dialog.find('.jsxc_reject').click(function() {
+         jsxc.gui.dialog.close();
+         $(document).trigger('reject.call.jsxc');
+
+         session.decline();
+      });
+
+      function acceptIncomingBroadcast(session) {
+         jsxc.gui.dialog.close();
+
+         jsxc.gui.showVideoWindow(session.peerID);
+
+         session.accept();
       }
    },
 
@@ -806,6 +882,54 @@ jsxc.webrtc = {
       $(document).trigger('callterminated.jingle');
    },
 
+   startScreenBroadcast: function(jid) {
+      var self = this;
+
+      if (Strophe.getResourceFromJid(jid) === null) {
+         jsxc.debug('We need a full jid');
+         return;
+      }
+
+      self.last_caller = jid;
+
+      jsxc.switchEvents({
+         'finish.mediaready.jsxc': function() {
+            self.setStatus('Initiate call');
+
+            jsxc.gui.window.postMessage({
+               bid: jsxc.jidToBid(jid),
+               direction: jsxc.Message.SYS,
+               msg: $.t('Call_started')
+            });
+
+            $(document).one('error.jingle', function(e, sid, error) {
+               if (error && error.source !== 'offer') {
+                  return;
+               }
+
+               setTimeout(function() {
+                  jsxc.gui.showAlert("Sorry, we couldn't establish a connection. Maybe your buddy is offline.");
+               }, 500);
+            });
+
+            // @REVIEW cross browser compatibility
+            var session = self.conn.jingle.initiate(jid, undefined, {
+               mandatory: {
+                  'OfferToReceiveAudio': false,
+                  'OfferToReceiveVideo': false
+               }
+            });
+
+            session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
+         },
+         'mediafailure.jingle': function() {
+            jsxc.gui.dialog.close();
+         }
+      });
+
+      self.reqUserMedia(['screen']);
+   },
+
    /**
     * Request video and audio from local user.
     *
@@ -824,7 +948,9 @@ jsxc.webrtc = {
       });
       this.setStatus('please allow access to microphone and camera');
 
-      if (typeof MediaStreamTrack !== 'undefined' && typeof MediaStreamTrack.getSources !== 'undefined') {
+      if (um.indexOf('screen') >= 0) {
+         jsxc.webrtc.getScreenMedia();
+      } else if (typeof MediaStreamTrack !== 'undefined' && typeof MediaStreamTrack.getSources !== 'undefined') {
          MediaStreamTrack.getSources(function(sourceInfo) {
             var availableDevices = sourceInfo.map(function(el) {
 
@@ -868,6 +994,34 @@ jsxc.webrtc = {
          jsxc.error('GUM failed: ', e);
          $(document).trigger('mediafailure.jingle');
       }
+   },
+
+   getScreenMedia: function() {
+      var self = jsxc.webrtc;
+
+      self.conn.jingle.getScreenMedia(self.screenMediaCallback);
+   },
+
+   screenMediaCallback: function(err, stream) {
+      if (err) {
+         // @TODO evaluate error
+         return;
+      }
+
+      if (stream) {
+         jsxc.debug('onScreenMediaSuccess');
+         $(document).trigger('mediaready.jingle', [stream]);
+      }
+   },
+
+   screenMediaAvailable: function() {
+      // test if chrome extension for this domain is available
+      var chrome = !!sessionStorage.getScreenMediaJSExtensionId;
+
+      // @TODO find way to determine if we are able to get screen media
+      var firefox = true;
+
+      return chrome || firefox;
    },
 
    /**
