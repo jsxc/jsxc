@@ -248,8 +248,8 @@ jsxc.webrtc = {
       win.find('.jsxc_tools .jsxc_settings').after(div);
 
       var a = $('<a>');
-      a.text($.t('Broadcast'));
-      a.addClass('jsxc_broadcast jsxc_video');
+      a.text($.t('Share_screen'));
+      a.addClass('jsxc_shareScreen jsxc_video');
       a.attr('href', '#');
       win.find('.jsxc_settings .jsxc_menu li:last').after($('<li>').append(a));
 
@@ -306,8 +306,8 @@ jsxc.webrtc = {
 
       if (capableRes.indexOf(targetRes) > -1) {
          el.click(function() {
-            if (el.hasClass('jsxc_broadcast')) {
-               self.startScreenBroadcast(jid);
+            if (el.hasClass('jsxc_shareScreen')) {
+               self.startScreenSharing(jid);
             } else {
                self.startCall(jid);
             }
@@ -475,16 +475,28 @@ jsxc.webrtc = {
     */
    onMediaFailure: function(ev, err) {
       var self = jsxc.webrtc;
-      err = err || {
-         name: 'Undefined'
-      };
+      var msg;
+      err = err || {};
 
       self.setStatus('media failure');
+
+      switch (err.name) {
+         case 'NotAllowedError':
+         case 'PERMISSION_DENIED':
+            msg = $.t('PermissionDeniedError');
+            break;
+         case 'HTTPS_REQUIRED':
+         case 'EXTENSION_UNAVAILABLE':
+            msg = $.t(err.name);
+            break;
+         default:
+            msg = $.t(err.name) !== err.name ? $.t(err.name) : $.t('UNKNOWN_ERROR');
+      }
 
       jsxc.gui.window.postMessage({
          bid: jsxc.jidToBid(jsxc.webrtc.last_caller),
          direction: jsxc.Message.SYS,
-         msg: $.t('Media_failure') + ': ' + $.t(err.name) + ' (' + err.name + ').'
+         msg: $.t('Media_failure') + ': ' + msg + ' (' + err.name + ').'
       });
 
       jsxc.debug('media failure: ' + err.name);
@@ -508,13 +520,13 @@ jsxc.webrtc = {
          if (reqMedia) {
             self.onIncomingCall(session);
          } else {
-            self.onIncomingBroadcast(session);
+            self.onIncomingStream(session);
          }
       }
    },
 
-   onIncomingBroadcast: function(session) {
-      jsxc.debug('incoming broadcast from ' + session.peerID);
+   onIncomingStream: function(session) {
+      jsxc.debug('incoming stream from ' + session.peerID);
 
       var self = jsxc.webrtc;
       var bid = jsxc.jidToBid(session.peerID);
@@ -524,11 +536,11 @@ jsxc.webrtc = {
       jsxc.gui.window.postMessage({
          bid: bid,
          direction: jsxc.Message.SYS,
-         msg: $.t('Incoming_broadcast')
+         msg: $.t('Incoming_stream')
       });
 
       // display notification
-      jsxc.notification.notify($.t('Incoming_broadcast'), $.t('from_sender', {
+      jsxc.notification.notify($.t('Incoming_stream'), $.t('from_sender', {
          sender: bid
       }));
 
@@ -538,7 +550,7 @@ jsxc.webrtc = {
       jsxc.webrtc.last_caller = session.peerID;
 
       if (jsxc.webrtc.AUTO_ACCEPT) {
-         acceptIncomingBroadcast(session);
+         acceptIncomingStream(session);
 
          return;
       }
@@ -548,7 +560,7 @@ jsxc.webrtc = {
       });
 
       dialog.find('.jsxc_accept').click(function() {
-         acceptIncomingBroadcast(session);
+         acceptIncomingStream(session);
       });
 
       dialog.find('.jsxc_reject').click(function() {
@@ -558,7 +570,7 @@ jsxc.webrtc = {
          session.decline();
       });
 
-      function acceptIncomingBroadcast(session) {
+      function acceptIncomingStream(session) {
          jsxc.gui.dialog.close();
 
          jsxc.gui.showVideoWindow(session.peerID);
@@ -882,7 +894,7 @@ jsxc.webrtc = {
       $(document).trigger('callterminated.jingle');
    },
 
-   startScreenBroadcast: function(jid) {
+   startScreenSharing: function(jid) {
       var self = this;
 
       if (Strophe.getResourceFromJid(jid) === null) {
@@ -894,12 +906,12 @@ jsxc.webrtc = {
 
       jsxc.switchEvents({
          'finish.mediaready.jsxc': function() {
-            self.setStatus('Initiate call');
+            self.setStatus('Initiate stream');
 
             jsxc.gui.window.postMessage({
                bid: jsxc.jidToBid(jid),
                direction: jsxc.Message.SYS,
-               msg: $.t('Call_started')
+               msg: $.t('Stream_started')
             });
 
             $(document).one('error.jingle', function(e, sid, error) {
@@ -912,18 +924,44 @@ jsxc.webrtc = {
                }, 500);
             });
 
-            // @REVIEW cross browser compatibility
-            var session = self.conn.jingle.initiate(jid, undefined, {
-               mandatory: {
-                  'OfferToReceiveAudio': false,
-                  'OfferToReceiveVideo': false
-               }
-            });
+            var browser = self.conn.jingle.RTC.webrtcDetectedBrowser;
+            var browserVersion = self.conn.jingle.RTC.webrtcDetectedVersion;
+            var constraints;
+
+            if ((browserVersion < 33 && browser === 'firefox') || browser === 'chrome') {
+               constraints = {
+                  mandatory: {
+                     'OfferToReceiveAudio': false,
+                     'OfferToReceiveVideo': false
+                  }
+               };
+            } else {
+               constraints = {
+                  'offerToReceiveAudio': false,
+                  'offerToReceiveVideo': false
+               };
+            }
+
+            var session = self.conn.jingle.initiate(jid, undefined, constraints);
 
             session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
          },
-         'mediafailure.jingle': function() {
+         'mediafailure.jingle': function(ev, err) {
             jsxc.gui.dialog.close();
+
+            var browser = self.conn.jingle.RTC.webrtcDetectedBrowser;
+
+            if (jsxc.options.screenMediaExtension && jsxc.options.screenMediaExtension[browser] &&
+              (err.name === 'EXTENSION_UNAVAILABLE' || (err.name === 'NotAllowedError' && browser === 'firefox'))) {
+                // post download link after explanation
+              setTimeout(function() {
+                  jsxc.gui.window.postMessage({
+                     bid: jsxc.jidToBid(jid),
+                     direction: jsxc.Message.SYS,
+                     msg: $.t('Install_extension') + jsxc.options.screenMediaExtension[browser]
+                  });
+              }, 500);
+            }
          }
       });
 
@@ -1004,7 +1042,8 @@ jsxc.webrtc = {
 
    screenMediaCallback: function(err, stream) {
       if (err) {
-         // @TODO evaluate error
+         $(document).trigger('mediafailure.jingle', [err]);
+
          return;
       }
 
@@ -1015,11 +1054,17 @@ jsxc.webrtc = {
    },
 
    screenMediaAvailable: function() {
-      // test if chrome extension for this domain is available
-      var chrome = !!sessionStorage.getScreenMediaJSExtensionId;
+      var self = jsxc.webrtc;
+      var browser = self.conn.jingle.RTC.webrtcDetectedBrowser;
 
-      // @TODO find way to determine if we are able to get screen media
-      var firefox = true;
+      // test if chrome extension for this domain is available
+      var chrome = !!sessionStorage.getScreenMediaJSExtensionId && browser === 'chrome';
+
+      // the ff extension from {@link https://github.com/otalk/getScreenMedia}
+      // does not provide any possibility to determine if it is installed or not.
+      // Starting with Firefox 52 {@link https://www.mozilla.org/en-US/firefox/52.0a2/auroranotes/}
+      // no extension is needed anyway.
+      var firefox = browser === 'firefox';
 
       return chrome || firefox;
    },
