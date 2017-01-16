@@ -701,13 +701,15 @@ jsxc.webrtc = {
       var bid = jsxc.jidToBid(session.peerID);
 
       if (this.localStream) {
-         if (typeof this.localStream.stop === 'function') {
-            this.localStream.stop();
-         } else {
+         if (typeof this.localStream.getTracks === 'function') {
             var tracks = this.localStream.getTracks();
             tracks.forEach(function(track) {
                track.stop();
             });
+         } else if (typeof this.localStream.stop === 'function') {
+            this.localStream.stop();
+         } else {
+            jsxc.warn('Could not stop local stream');
          }
       }
 
