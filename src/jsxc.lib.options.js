@@ -301,7 +301,7 @@ jsxc.options = {
     * @see example extensions {@link https://github.com/otalk/getScreenMedia}
     */
    screenMediaExtension: {
-     firefox: '',
-     chrome: ''
+      firefox: '',
+      chrome: ''
    }
 };
