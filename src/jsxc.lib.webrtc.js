@@ -53,7 +53,6 @@ jsxc.webrtc = {
       $(document).on('message.jsxc', self.onMessage);
       $(document).on('presence.jsxc', self.onPresence);
 
-      $(document).on('mediaready.jingle', self.onMediaReady);
       $(document).on('mediafailure.jingle', self.onMediaFailure);
 
       manager.on('incoming', $.proxy(self.onIncoming, self));
@@ -306,7 +305,7 @@ jsxc.webrtc = {
 
       if (capableRes.indexOf(targetRes) > -1) {
          el.click(function() {
-            if (el.hasClass('jsxc_shareScreen')) {
+            if ($(this).hasClass('jsxc_shareScreen')) {
                self.startScreenSharing(jid);
             } else {
                self.startCall(jid);
@@ -446,8 +445,8 @@ jsxc.webrtc = {
 
       var dialog = jsxc.gui.showVideoWindow(self.last_caller);
 
-      var audioTracks = stream.getAudioTracks();
-      var videoTracks = stream.getVideoTracks();
+      var audioTracks = stream.getAudioTracks() || [];
+      var videoTracks = stream.getVideoTracks() || [];
       var i;
 
       for (i = 0; i < audioTracks.length; i++) {
@@ -621,6 +620,8 @@ jsxc.webrtc = {
 
       session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
 
+      $(document).one('mediaready.jingle', self.onMediaReady);
+
       jsxc.gui.window.postMessage({
          bid: bid,
          direction: jsxc.Message.SYS,
@@ -710,8 +711,11 @@ jsxc.webrtc = {
          }
       }
 
-      if ($('.jsxc_videoContainer').length) {
+      if ($('.jsxc_remotevideo').length) {
          $('.jsxc_remotevideo')[0].src = "";
+      }
+
+      if ($('.jsxc_localvideo').length) {
          $('.jsxc_localvideo')[0].src = "";
       }
 
@@ -846,6 +850,8 @@ jsxc.webrtc = {
 
       self.last_caller = jid;
 
+      $(document).one('mediaready.jingle', self.onMediaReady);
+
       jsxc.switchEvents({
          'finish.mediaready.jsxc': function() {
             self.setStatus('Initiate call');
@@ -903,6 +909,16 @@ jsxc.webrtc = {
       }
 
       self.last_caller = jid;
+
+      // @TODO generalize
+      $(document).on('mediaready.jingle', function(ev, stream){
+        jsxc.webrtc.localStream = stream;
+        jsxc.webrtc.conn.jingle.localStream = stream;
+
+        jsxc.gui.showMinimizedVideoWindow();
+
+        $(document).trigger('finish.mediaready.jsxc');
+      });
 
       jsxc.switchEvents({
          'finish.mediaready.jsxc': function() {
@@ -1218,6 +1234,38 @@ jsxc.webrtc = {
    }
 };
 
+jsxc.gui.showMinimizedVideoWindow = function() {
+  var self = jsxc.webrtc;
+
+  // needed to trigger complete.dialog.jsxc
+  jsxc.gui.dialog.close();
+
+  var videoContainer = $('<div/>');
+  videoContainer.addClass('jsxc_videoContainer jsxc_minimized');
+  videoContainer.appendTo('body');
+  videoContainer.draggable({
+     containment: "parent"
+  });
+
+  var videoElement = $('<video class="jsxc_localvideo" autoplay=""></video>');
+  videoElement.appendTo(videoContainer);
+
+  videoElement[0].muted = true;
+  videoElement[0].volume = 0;
+
+  if (self.localStream) {
+     self.attachMediaStream(videoElement, self.localStream);
+  }
+
+  videoContainer.append('<div class="jsxc_controlbar jsxc_visible"><div><div class="jsxc_hangUp jsxc_videoControl"></div></div></div></div>');
+  videoContainer.find('.jsxc_hangUp').click(function() {
+     jsxc.webrtc.hangUp('success');
+  });
+  videoContainer.click(function() {
+     videoContainer.find('.jsxc_controlbar').toggleClass('jsxc_visible');
+  });
+};
+
 /**
  * Display window for video call.
  *
@@ -1309,11 +1357,14 @@ jsxc.gui.showVideoWindow = function(jid) {
 
 jsxc.gui.closeVideoWindow = function() {
    var win = $('#jsxc_webrtc .jsxc_chatarea > ul > li');
-   $('#jsxc_windowList > ul').prepend(win.detach());
-   win.find('.slimScrollDiv').resizable('enable');
-   jsxc.gui.window.resize(win);
 
-   $('#jsxc_webrtc').remove();
+   if (win.length > 0) {
+     $('#jsxc_windowList > ul').prepend(win.detach());
+     win.find('.slimScrollDiv').resizable('enable');
+     jsxc.gui.window.resize(win);
+   }
+
+   $('#jsxc_webrtc, .jsxc_videoContainer').remove();
 };
 
 $.extend(jsxc.CONST, {
