@@ -518,6 +518,8 @@ jsxc.webrtc = {
             }
          });
 
+         session.call = reqMedia;
+
          if (reqMedia) {
             self.onIncomingCall(session);
          } else {
@@ -534,11 +536,7 @@ jsxc.webrtc = {
 
       session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
 
-      jsxc.gui.window.postMessage({
-         bid: bid,
-         direction: jsxc.Message.SYS,
-         msg: $.t('Incoming_stream')
-      });
+      self.postScreenMessage(bid, $.t('Incoming_stream'), session.sid);
 
       // display notification
       jsxc.notification.notify($.t('Incoming_stream'), $.t('from_sender', {
@@ -624,11 +622,7 @@ jsxc.webrtc = {
 
       $(document).one('mediaready.jingle', self.onMediaReady);
 
-      jsxc.gui.window.postMessage({
-         bid: bid,
-         direction: jsxc.Message.SYS,
-         msg: $.t('Incoming_call')
-      });
+      self.postCallMessage(bid, $.t('Incoming_call'), session.sid);
 
       // display notification
       jsxc.notification.notify($.t('Incoming_call'), $.t('from_sender', {
@@ -731,11 +725,14 @@ jsxc.webrtc = {
 
       $(document).off('error.jingle');
 
-      jsxc.gui.window.postMessage({
-         bid: bid,
-         direction: jsxc.Message.SYS,
-         msg: ($.t('Call_terminated') + (reason && reason.condition ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.')
-      });
+      var msg = (reason && reason.condition ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.';
+      if (session.call) {
+         msg = $.t('Call_terminated') + msg;
+         jsxc.webrtc.postCallMessage(bid, msg, session.sid);
+      } else {
+         msg = $.t('Stream_terminated') + msg;
+         jsxc.webrtc.postScreenMessage(bid, msg, session.sid);
+      }
    },
 
    /**
@@ -862,12 +859,6 @@ jsxc.webrtc = {
          'finish.mediaready.jsxc': function() {
             self.setStatus('Initiate call');
 
-            jsxc.gui.window.postMessage({
-               bid: jsxc.jidToBid(jid),
-               direction: jsxc.Message.SYS,
-               msg: $.t('Call_started')
-            });
-
             $(document).one('error.jingle', function(e, sid, error) {
                if (error && error.source !== 'offer') {
                   return;
@@ -881,6 +872,8 @@ jsxc.webrtc = {
             var session = self.conn.jingle.initiate(jid);
 
             session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
+
+            self.postCallMessage(jsxc.jidToBid(jid), $.t('Call_started'), session.sid);
          },
          'mediafailure.jingle': function() {
             jsxc.gui.dialog.close();
@@ -915,6 +908,7 @@ jsxc.webrtc = {
       }
 
       self.last_caller = jid;
+      var bid = jsxc.jidToBid(jid);
 
       // @TODO generalize
       $(document).on('mediaready.jingle', function(ev, stream) {
@@ -930,12 +924,6 @@ jsxc.webrtc = {
       jsxc.switchEvents({
          'finish.mediaready.jsxc': function() {
             self.setStatus('Initiate stream');
-
-            jsxc.gui.window.postMessage({
-               bid: jsxc.jidToBid(jid),
-               direction: jsxc.Message.SYS,
-               msg: $.t('Stream_started')
-            });
 
             $(document).one('error.jingle', function(e, sid, error) {
                if (error && error.source !== 'offer') {
@@ -973,12 +961,10 @@ jsxc.webrtc = {
 
                $('.jsxc_videoContainer').removeClass('jsxc_ringing');
 
-               jsxc.gui.window.postMessage({
-                  bid: jsxc.jidToBid(jid),
-                  direction: jsxc.Message.SYS,
-                  msg: $.t('Connection_accepted')
-               });
+               self.postScreenMessage(bid, $.t('Connection_accepted'), session.sid);
             });
+
+            self.postScreenMessage(bid, $.t('Stream_started'), session.sid);
          },
          'mediafailure.jingle': function(ev, err) {
             jsxc.gui.dialog.close();
@@ -1254,6 +1240,23 @@ jsxc.webrtc = {
 
       reader.readAsDataURL(file);
    }
+};
+
+jsxc.webrtc.postCallMessage = function(bid, msg, uid) {
+   jsxc.gui.window.postMessage({
+      _uid: uid,
+      bid: bid,
+      direction: jsxc.Message.SYS,
+      msg: ':telephone_receiver: ' + msg
+   });
+};
+jsxc.webrtc.postScreenMessage = function(bid, msg, uid) {
+   jsxc.gui.window.postMessage({
+      _uid: uid,
+      bid: bid,
+      direction: jsxc.Message.SYS,
+      msg: ':computer: ' + msg
+   });
 };
 
 jsxc.gui.showMinimizedVideoWindow = function() {
