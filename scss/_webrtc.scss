@@ -46,6 +46,128 @@
     }
 }
 
+.jsxc_establishing, .jsxc_ringing {
+    &:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: rgba(0, 0, 0, 0.4);
+        z-index: 10;
+    }
+}
+
+$establishingColor1: #98d48f;
+$establishingColor2: #76ba6c;
+
+.jsxc_establishing:before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    box-sizing: border-box;
+    border: 0px solid $establishingColor2;
+    background-color: $establishingColor1;
+    border-radius: 50%;
+    animation-name: jsxc_establishing;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 20;
+    margin-left: -10px;
+    margin-top: -10px;
+}
+
+@keyframes jsxc_establishing {
+    0% {
+        border-width: 0px;
+        border-color: $establishingColor2;
+        background-color: $establishingColor1;
+        width: 20px;
+        height: 20px;
+        margin-left: -10px;
+        margin-top: -10px;
+    }
+
+    50% {
+        border-color: $establishingColor1;
+        background-color: $establishingColor2;
+        width: 80px;
+        height: 80px;
+        margin-left: -40px;
+        margin-top: -40px;
+    }
+
+    100% {
+        border-width: 0px;
+        border-color: $establishingColor2;
+        background-color: $establishingColor1;
+        width: 20px;
+        height: 20px;
+        margin-left: -10px;
+        margin-top: -10px;
+    }
+}
+
+.jsxc_ringing:before {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 80px;
+    box-sizing: border-box;
+    background-image: image-url("bell.svg");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    animation-name: jsxc_ringing;
+    animation-duration: 1.5s;
+    animation-iteration-count: infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 20;
+    margin-left: -40px;
+    margin-top: -40px;
+}
+
+@keyframes jsxc_ringing {
+    0% {
+        margin-left: -50px;
+    }
+
+    5% {
+        margin-left: -30px;
+    }
+
+    10% {
+        margin-left: -50px;
+    }
+
+    15% {
+        margin-left: -30px;
+    }
+
+    20% {
+        margin-left: -50px;
+    }
+
+    25% {
+        margin-left: -30px;
+    }
+
+    30% {
+        margin-left: -50px;
+    }
+
+    35% {
+        margin-left: -40px;
+    }
+}
+
 .jsxc_videoContainer {
     position: absolute;
     top: 0;
@@ -53,6 +175,22 @@
     right: 0px;
     bottom: 0px;
     background-color: $video_bg;
+
+    &.jsxc_minimized {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        right: auto;
+        bottom: auto;
+        z-index: 99;
+        background-color: transparent;
+        box-shadow: 0 0 10px #a1a1a1;
+
+        .jsxc_localvideo {
+            position: static;
+            display: block;
+        }
+    }
 
     video {
         display: none;
@@ -136,7 +274,7 @@
     bottom: 10px;
     z-index: 9990;
     background-color: $black;
-    cursor: pointer;
+    cursor: move;
 }
 
 div {
@@ -303,55 +441,6 @@ div {
         height: 100%;
         list-style: none;
         padding: 0;
-    }
-}
-
-.bubblingG {
-    text-align: center;
-    width: 129px;
-    height: 80px;
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    margin-left: -64px;
-
-    span {
-        display: inline-block;
-        vertical-align: middle;
-        width: 16px;
-        height: 16px;
-        margin: 40px auto;
-        background: $bubbling_bg;
-        border-radius: 81px;
-        animation: bubblingG 1.3s infinite alternate;
-    }
-}
-
-#bubblingG_1 {
-    animation-delay: 0s;
-}
-
-#bubblingG_2 {
-    animation-delay: 0.39s;
-}
-
-#bubblingG_3 {
-    animation-delay: 0.78s;
-}
-
-@keyframes bubblingG {
-    0% {
-        width: 16px;
-        height: 16px;
-        background-color: $bubbling_start_bg;
-        transform: translateY(0);
-    }
-
-    100% {
-        width: 39px;
-        height: 39px;
-        background-color: $white;
-        transform: translateY(-34px);
     }
 }
 

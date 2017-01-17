@@ -445,6 +445,8 @@ jsxc.webrtc = {
 
       var dialog = jsxc.gui.showVideoWindow(self.last_caller);
 
+      dialog.find('.jsxc_videoContainer').addClass('jsxc_establishing');
+
       var audioTracks = stream.getAudioTracks() || [];
       var videoTracks = stream.getVideoTracks() || [];
       var i;
@@ -744,6 +746,8 @@ jsxc.webrtc = {
     */
    onCallRinging: function() {
       this.setStatus('ringing...', 0);
+
+      $('.jsxc_videoContainer').removeClass('jsxc_establishing').addClass('jsxc_ringing');
    },
 
    /**
@@ -917,7 +921,8 @@ jsxc.webrtc = {
          jsxc.webrtc.localStream = stream;
          jsxc.webrtc.conn.jingle.localStream = stream;
 
-         jsxc.gui.showMinimizedVideoWindow();
+         var container = jsxc.gui.showMinimizedVideoWindow();
+         container.addClass('jsxc_establishing');
 
          $(document).trigger('finish.mediaready.jsxc');
       });
@@ -963,6 +968,17 @@ jsxc.webrtc = {
             var session = self.conn.jingle.initiate(jid, undefined, constraints);
 
             session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
+            session.on('accepted', function() {
+               self.sessionAccepted(session);
+
+               $('.jsxc_videoContainer').removeClass('jsxc_ringing');
+
+               jsxc.gui.window.postMessage({
+                  bid: jsxc.jidToBid(jid),
+                  direction: jsxc.Message.SYS,
+                  msg: $.t('Connection_accepted')
+               });
+            });
          },
          'mediafailure.jingle': function(ev, err) {
             jsxc.gui.dialog.close();
@@ -984,6 +1000,10 @@ jsxc.webrtc = {
       });
 
       self.reqUserMedia(['screen']);
+   },
+
+   sessionAccepted: function() {
+      $('.jsxc_videoContainer').removeClass('jsxc_ringing');
    },
 
    /**
@@ -1259,13 +1279,15 @@ jsxc.gui.showMinimizedVideoWindow = function() {
       self.attachMediaStream(videoElement, self.localStream);
    }
 
-   videoContainer.append('<div class="jsxc_controlbar jsxc_visible"><div><div class="jsxc_hangUp jsxc_videoControl"></div></div></div></div>');
+   videoContainer.append('<div class="jsxc_controlbar"><div><div class="jsxc_hangUp jsxc_videoControl"></div></div></div></div>');
    videoContainer.find('.jsxc_hangUp').click(function() {
       jsxc.webrtc.hangUp('success');
    });
    videoContainer.click(function() {
       videoContainer.find('.jsxc_controlbar').toggleClass('jsxc_visible');
    });
+
+   return videoContainer;
 };
 
 /**
