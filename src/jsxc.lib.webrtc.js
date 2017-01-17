@@ -870,6 +870,7 @@ jsxc.webrtc = {
             });
 
             var session = self.conn.jingle.initiate(jid);
+            session.call = true;
 
             session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
 
@@ -954,6 +955,7 @@ jsxc.webrtc = {
             }
 
             var session = self.conn.jingle.initiate(jid, undefined, constraints);
+            session.call = false;
 
             session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
             session.on('accepted', function() {
