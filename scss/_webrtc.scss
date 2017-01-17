@@ -59,19 +59,61 @@
     }
 }
 
-$establishingColor1: #98d48f;
-$establishingColor2: #76ba6c;
+$establishingColor1: #a1a1a1;
+$establishingColor2: #f1f1f1;
 
 .jsxc_establishing:before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 10px;
+    box-sizing: border-box;
+    background-color: $establishingColor1;
+    animation-name: jsxc_establishing;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 20;
+    margin-left: -20px;
+    margin-top: -5px;
+}
+
+@keyframes jsxc_establishing {
+    0% {
+        border-width: 0px;
+        background-color: $establishingColor1;
+        width: 40px;
+        margin-left: -20px;
+    }
+
+    50% {
+        background-color: $establishingColor2;
+        width: 80px;
+        margin-left: -40px;
+    }
+
+    100% {
+        border-width: 0px;
+        background-color: $establishingColor1;
+        width: 40px;
+        margin-left: -20px;
+    }
+}
+
+$ringingColor1: #98d48f;
+$ringingColor2: #76ba6c;
+
+.jsxc_ringing:before {
     content: '';
     display: block;
     width: 20px;
     height: 20px;
     box-sizing: border-box;
-    border: 0px solid $establishingColor2;
-    background-color: $establishingColor1;
+    background-color: $ringingColor1;
     border-radius: 50%;
-    animation-name: jsxc_establishing;
+    animation-name: jsxc_ringing;
     animation-duration: 2s;
     animation-iteration-count: infinite;
     position: absolute;
@@ -82,11 +124,9 @@ $establishingColor2: #76ba6c;
     margin-top: -10px;
 }
 
-@keyframes jsxc_establishing {
+@keyframes jsxc_ringing {
     0% {
-        border-width: 0px;
-        border-color: $establishingColor2;
-        background-color: $establishingColor1;
+        background-color: $ringingColor1;
         width: 20px;
         height: 20px;
         margin-left: -10px;
@@ -94,8 +134,7 @@ $establishingColor2: #76ba6c;
     }
 
     50% {
-        border-color: $establishingColor1;
-        background-color: $establishingColor2;
+        background-color: $ringingColor2;
         width: 80px;
         height: 80px;
         margin-left: -40px;
@@ -103,9 +142,7 @@ $establishingColor2: #76ba6c;
     }
 
     100% {
-        border-width: 0px;
-        border-color: $establishingColor2;
-        background-color: $establishingColor1;
+        background-color: $ringingColor1;
         width: 20px;
         height: 20px;
         margin-left: -10px;
@@ -113,7 +150,7 @@ $establishingColor2: #76ba6c;
     }
 }
 
-.jsxc_ringing:before {
+.jsxc_bell:before {
     content: '';
     display: block;
     width: 80px;
@@ -134,7 +171,7 @@ $establishingColor2: #76ba6c;
     margin-top: -40px;
 }
 
-@keyframes jsxc_ringing {
+@keyframes jsxc_bell {
     0% {
         margin-left: -50px;
     }
