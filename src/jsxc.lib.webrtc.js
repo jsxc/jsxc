@@ -57,15 +57,16 @@ jsxc.webrtc = {
 
       manager.on('incoming', $.proxy(self.onIncoming, self));
 
+      // @REVIEW those events could be session based
       manager.on('terminated', $.proxy(self.onTerminated, self));
       manager.on('ringing', $.proxy(self.onCallRinging, self));
 
       manager.on('receivedFile', $.proxy(self.onReceivedFile, self));
-
       manager.on('sentFile', function(sess, metadata) {
          jsxc.debug('sent ' + metadata.hash);
       });
 
+      // @REVIEW those events could be session based
       manager.on('peerStreamAdded', $.proxy(self.onRemoteStreamAdded, self));
       manager.on('peerStreamRemoved', $.proxy(self.onRemoteStreamRemoved, self));
 
@@ -107,7 +108,6 @@ jsxc.webrtc = {
       $(document).off('message.jsxc', self.onMessage);
       $(document).off('presence.jsxc', self.onPresence);
 
-      $(document).off('mediaready.jingle', self.onMediaReady);
       $(document).off('mediafailure.jingle', self.onMediaFailure);
 
       $(document).off('caps.strophe', self.onCaps);
@@ -243,9 +243,12 @@ jsxc.webrtc = {
          return;
       }
 
+      // Add video call icon
       var div = $('<div>').addClass('jsxc_video');
       win.find('.jsxc_tools .jsxc_settings').after(div);
 
+      // @TODO check if download url is available
+      // Add screen sharing button
       var a = $('<a>');
       a.text($.t('Share_screen'));
       a.addClass('jsxc_shareScreen jsxc_video');
@@ -428,47 +431,6 @@ jsxc.webrtc = {
    },
 
    /**
-    * Called if video/audio is ready. Open window and display some messages.
-    *
-    * @private
-    * @memberOf jsxc.webrtc
-    * @param event
-    * @param stream
-    */
-   onMediaReady: function(event, stream) {
-      jsxc.debug('media ready');
-
-      var self = jsxc.webrtc;
-
-      self.localStream = stream;
-      self.conn.jingle.localStream = stream;
-
-      var dialog = jsxc.gui.showVideoWindow(self.last_caller);
-
-      dialog.find('.jsxc_videoContainer').addClass('jsxc_establishing');
-
-      var audioTracks = stream.getAudioTracks() || [];
-      var videoTracks = stream.getVideoTracks() || [];
-      var i;
-
-      for (i = 0; i < audioTracks.length; i++) {
-         self.setStatus((audioTracks.length > 0) ? $.t('Use_local_audio_device') : $.t('No_local_audio_device'));
-
-         jsxc.debug('using audio device "' + audioTracks[i].label + '"');
-      }
-
-      for (i = 0; i < videoTracks.length; i++) {
-         self.setStatus((videoTracks.length > 0) ? $.t('Use_local_video_device') : $.t('No_local_video_device'));
-
-         jsxc.debug('using video device "' + videoTracks[i].label + '"');
-
-         dialog.find('.jsxc_localvideo').show();
-      }
-
-      $(document).trigger('finish.mediaready.jsxc');
-   },
-
-   /**
     * Called if media failes.
     *
     * @private
@@ -500,9 +462,16 @@ jsxc.webrtc = {
          msg: $.t('Media_failure') + ': ' + msg + ' (' + err.name + ').'
       });
 
+      jsxc.gui.dialog.close();
+
       jsxc.debug('media failure: ' + err.name);
    },
 
+   /**
+    * Process incoming jingle offer.
+    *
+    * @param  {BaseSession} session
+    */
    onIncoming: function(session) {
       var self = jsxc.webrtc;
       var type = (session.constructor) ? session.constructor.name : null;
@@ -525,9 +494,16 @@ jsxc.webrtc = {
          } else {
             self.onIncomingStream(session);
          }
+      } else {
+         jsxc.warn('Unknown session type.');
       }
    },
 
+   /**
+    * Process incoming stream offer.
+    *
+    * @param  {MediaSession} session
+    */
    onIncomingStream: function(session) {
       jsxc.debug('incoming stream from ' + session.peerID);
 
@@ -559,6 +535,8 @@ jsxc.webrtc = {
       });
 
       dialog.find('.jsxc_accept').click(function() {
+         $(document).trigger('accept.call.jsxc');
+
          acceptIncomingStream(session);
       });
 
@@ -578,6 +556,11 @@ jsxc.webrtc = {
       }
    },
 
+   /**
+    * Process incoming file offer.
+    *
+    * @param  {FileSession} session
+    */
    onIncomingFileTransfer: function(session) {
       jsxc.debug('incoming file transfer from ' + session.peerID);
 
@@ -609,8 +592,7 @@ jsxc.webrtc = {
     *
     * @private
     * @memberOf jsxc.webrtc
-    * @param event
-    * @param sid Session id
+    * @param {MediaSession} session
     */
    onIncomingCall: function(session) {
       jsxc.debug('incoming call from ' + session.peerID);
@@ -619,8 +601,6 @@ jsxc.webrtc = {
       var bid = jsxc.jidToBid(session.peerID);
 
       session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
-
-      $(document).one('mediaready.jingle', self.onMediaReady);
 
       self.postCallMessage(bid, $.t('Incoming_call'), session.sid);
 
@@ -634,27 +614,8 @@ jsxc.webrtc = {
 
       jsxc.webrtc.last_caller = session.peerID;
 
-      function acceptCall() {
-         $(document).trigger('accept.call.jsxc');
-
-         jsxc.switchEvents({
-            'mediaready.jingle': function(event, stream) {
-               self.setStatus('Accept call');
-
-               session.addStream(stream);
-
-               session.accept();
-            },
-            'mediafailure.jingle': function() {
-               session.decline();
-            }
-         });
-
-         self.reqUserMedia();
-      }
-
       if (jsxc.webrtc.AUTO_ACCEPT) {
-         acceptCall();
+         self.acceptIncomingCall(session);
          return;
       }
 
@@ -662,7 +623,9 @@ jsxc.webrtc = {
          noClose: true
       });
 
-      dialog.find('.jsxc_accept').click(acceptCall);
+      dialog.find('.jsxc_accept').click(function() {
+         self.acceptIncomingCall(session);
+      });
 
       dialog.find('.jsxc_reject').click(function() {
          jsxc.gui.dialog.close();
@@ -672,6 +635,45 @@ jsxc.webrtc = {
       });
    },
 
+   /**
+    * Called on incoming call.
+    *
+    * @private
+    * @memberOf jsxc.webrtc
+    * @param {MediaSession} session
+    */
+   acceptIncomingCall: function(session) {
+      $(document).trigger('accept.call.jsxc');
+
+      var self = jsxc.webrtc;
+
+      jsxc.switchEvents({
+         'mediaready.jingle': function(ev, stream) {
+            self.setStatus('Accept call');
+
+            self.localStream = stream;
+            self.conn.jingle.localStream = stream;
+
+            var dialog = jsxc.gui.showVideoWindow(session.peerID);
+            dialog.find('.jsxc_videoContainer').addClass('jsxc_establishing');
+
+            session.addStream(stream);
+            session.accept();
+         },
+         'mediafailure.jingle': function() {
+            session.decline();
+         }
+      });
+
+      self.reqUserMedia();
+   },
+
+   /**
+    * Process jingle termination event.
+    *
+    * @param  {BaseSession} session
+    * @param  {Object} reason Reason for termination
+    */
    onTerminated: function(session, reason) {
       var self = jsxc.webrtc;
       var type = (session.constructor) ? session.constructor.name : null;
@@ -686,29 +688,31 @@ jsxc.webrtc = {
     *
     * @private
     * @memberOf jsxc.webrtc
-    * @param event
-    * @param sid Session id
-    * @param reason Reason for termination
-    * @param [text] Optional explanation
+    * @param {BaseSession} session
+    * @param  {Object} reason Reason for termination
     */
    onCallTerminated: function(session, reason) {
-      this.setStatus('call terminated ' + session.peerID + (reason && reason.condition ? reason.condition : ''));
+      var self = jsxc.webrtc;
+
+      self.setStatus('call terminated ' + session.peerID + (reason && reason.condition ? reason.condition : ''));
 
       var bid = jsxc.jidToBid(session.peerID);
 
-      if (this.localStream) {
-         if (typeof this.localStream.getTracks === 'function') {
-            var tracks = this.localStream.getTracks();
+      if (self.localStream) {
+         // stop local stream
+         if (typeof self.localStream.getTracks === 'function') {
+            var tracks = self.localStream.getTracks();
             tracks.forEach(function(track) {
                track.stop();
             });
-         } else if (typeof this.localStream.stop === 'function') {
-            this.localStream.stop();
+         } else if (typeof self.localStream.stop === 'function') {
+            self.localStream.stop();
          } else {
             jsxc.warn('Could not stop local stream');
          }
       }
 
+      // @REVIEW necessary?
       if ($('.jsxc_remotevideo').length) {
          $('.jsxc_remotevideo')[0].src = "";
       }
@@ -717,11 +721,12 @@ jsxc.webrtc = {
          $('.jsxc_localvideo')[0].src = "";
       }
 
-      this.conn.jingle.localStream = null;
-      this.localStream = null;
-      this.remoteStream = null;
+      self.conn.jingle.localStream = null;
+      self.localStream = null;
+      self.remoteStream = null;
 
       jsxc.gui.closeVideoWindow();
+      //@TODO stop ringing + close dialog
 
       $(document).off('error.jingle');
 
@@ -752,23 +757,24 @@ jsxc.webrtc = {
     *
     * @private
     * @memberOf jsxc.webrtc
-    * @param event
-    * @param data
-    * @param sid Session id
+    * @param {BaseSession} session
+    * @param {Object} stream
     */
    onRemoteStreamAdded: function(session, stream) {
-      this.setStatus('Remote stream for session ' + session.sid + ' added.');
+      var self = jsxc.webrtc;
 
-      this.remoteStream = stream;
+      self.setStatus('Remote stream for session ' + session.sid + ' added.');
+
+      self.remoteStream = stream;
 
       var isVideoDevice = stream.getVideoTracks().length > 0;
       var isAudioDevice = stream.getAudioTracks().length > 0;
 
-      this.setStatus(isVideoDevice ? 'Use remote video device.' : 'No remote video device');
-      this.setStatus(isAudioDevice ? 'Use remote audio device.' : 'No remote audio device');
+      self.setStatus(isVideoDevice ? 'Use remote video device.' : 'No remote video device');
+      self.setStatus(isAudioDevice ? 'Use remote audio device.' : 'No remote audio device');
 
       if ($('.jsxc_remotevideo').length) {
-         this.attachMediaStream($('#jsxc_webrtc .jsxc_remotevideo'), stream);
+         self.attachMediaStream($('#jsxc_webrtc .jsxc_remotevideo'), stream);
 
          $('#jsxc_webrtc .jsxc_' + (isVideoDevice ? 'remotevideo' : 'noRemoteVideo')).addClass('jsxc_deviceAvailable');
       }
@@ -785,6 +791,8 @@ jsxc.webrtc = {
       var self = jsxc.webrtc;
 
       self.conn.jingle.RTC.attachMediaStream((element instanceof jQuery) ? element.get(0) : element, stream);
+
+      $(element).show();
    },
 
    /**
@@ -792,9 +800,7 @@ jsxc.webrtc = {
     *
     * @private
     * @meberOf jsxc.webrtc
-    * @param event
-    * @param data
-    * @param sid Session id
+    * @param {BaseSession} session
     */
    onRemoteStreamRemoved: function(session) {
       this.setStatus('Remote stream for ' + session.jid + ' removed.');
@@ -803,13 +809,12 @@ jsxc.webrtc = {
    },
 
    /**
-    * Extracts local and remote ip and display it to the user.
+    * Display information according to the connection state.
     *
     * @private
     * @memberOf jsxc.webrtc
-    * @param event
-    * @param sid session id
-    * @param sess
+    * @param {BaseSession} session
+    * @param {String} state
     */
    onIceConnectionStateChanged: function(session, state) {
       var self = jsxc.webrtc;
@@ -817,10 +822,7 @@ jsxc.webrtc = {
       jsxc.debug('connection state for ' + session.sid, state);
 
       if (state === 'connected') {
-
          $('#jsxc_webrtc .jsxc_deviceAvailable').show();
-         $('#jsxc_webrtc .bubblingG').hide();
-
       } else if (state === 'failed') {
          jsxc.gui.window.postMessage({
             bid: jsxc.jidToBid(session.peerID),
@@ -840,11 +842,11 @@ jsxc.webrtc = {
     * Start a call to the specified jid.
     *
     * @memberOf jsxc.webrtc
-    * @param jid full jid
-    * @param um requested user media
+    * @param {String} jid full jid
+    * @param {String[]} um requested user media
     */
    startCall: function(jid, um) {
-      var self = this;
+      var self = jsxc.webrtc;
 
       if (Strophe.getResourceFromJid(jid) === null) {
          jsxc.debug('We need a full jid');
@@ -853,28 +855,11 @@ jsxc.webrtc = {
 
       self.last_caller = jid;
 
-      $(document).one('mediaready.jingle', self.onMediaReady);
-
       jsxc.switchEvents({
-         'finish.mediaready.jsxc': function() {
-            self.setStatus('Initiate call');
+         'mediaready.jingle': function(ev, stream) {
+            jsxc.debug('media ready for outgoing call');
 
-            $(document).one('error.jingle', function(e, sid, error) {
-               if (error && error.source !== 'offer') {
-                  return;
-               }
-
-               setTimeout(function() {
-                  jsxc.gui.showAlert("Sorry, we couldn't establish a connection. Maybe your buddy is offline.");
-               }, 500);
-            });
-
-            var session = self.conn.jingle.initiate(jid);
-            session.call = true;
-
-            session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
-
-            self.postCallMessage(jsxc.jidToBid(jid), $.t('Call_started'), session.sid);
+            self.initiateOutgoingCall(jid, stream);
          },
          'mediafailure.jingle': function() {
             jsxc.gui.dialog.close();
@@ -882,6 +867,45 @@ jsxc.webrtc = {
       });
 
       self.reqUserMedia(um);
+   },
+
+   /**
+    * Start jingle session to jid with stream.
+    *
+    * @param  {String} jid
+    * @param  {Object} stream
+    */
+   initiateOutgoingCall: function(jid, stream) {
+      var self = jsxc.webrtc;
+
+      self.localStream = stream;
+      self.conn.jingle.localStream = stream;
+
+      var dialog = jsxc.gui.showVideoWindow(jid);
+
+      dialog.find('.jsxc_videoContainer').addClass('jsxc_establishing');
+
+      self.setStatus('Initiate call');
+
+      // @REVIEW session based?
+      $(document).one('error.jingle', function(ev, sid, error) {
+         if (error && error.source !== 'offer') {
+            return;
+         }
+
+         setTimeout(function() {
+            jsxc.gui.showAlert("Sorry, we couldn't establish a connection. Maybe your buddy is offline.");
+         }, 500);
+      });
+
+      var session = self.conn.jingle.initiate(jid);
+
+      // flag session as call
+      session.call = true;
+
+      session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
+
+      self.postCallMessage(jsxc.jidToBid(jid), $.t('Call_started'), session.sid);
    },
 
    /**
@@ -900,6 +924,11 @@ jsxc.webrtc = {
       $(document).trigger('callterminated.jingle');
    },
 
+   /**
+    * Start outgoing screen sharing session.
+    *
+    * @param  {String} jid
+    */
    startScreenSharing: function(jid) {
       var self = this;
 
@@ -909,64 +938,10 @@ jsxc.webrtc = {
       }
 
       self.last_caller = jid;
-      var bid = jsxc.jidToBid(jid);
-
-      // @TODO generalize
-      $(document).on('mediaready.jingle', function(ev, stream) {
-         jsxc.webrtc.localStream = stream;
-         jsxc.webrtc.conn.jingle.localStream = stream;
-
-         var container = jsxc.gui.showMinimizedVideoWindow();
-         container.addClass('jsxc_establishing');
-
-         $(document).trigger('finish.mediaready.jsxc');
-      });
 
       jsxc.switchEvents({
-         'finish.mediaready.jsxc': function() {
-            self.setStatus('Initiate stream');
-
-            $(document).one('error.jingle', function(e, sid, error) {
-               if (error && error.source !== 'offer') {
-                  return;
-               }
-
-               setTimeout(function() {
-                  jsxc.gui.showAlert("Sorry, we couldn't establish a connection. Maybe your buddy is offline.");
-               }, 500);
-            });
-
-            var browser = self.conn.jingle.RTC.webrtcDetectedBrowser;
-            var browserVersion = self.conn.jingle.RTC.webrtcDetectedVersion;
-            var constraints;
-
-            if ((browserVersion < 33 && browser === 'firefox') || browser === 'chrome') {
-               constraints = {
-                  mandatory: {
-                     'OfferToReceiveAudio': false,
-                     'OfferToReceiveVideo': false
-                  }
-               };
-            } else {
-               constraints = {
-                  'offerToReceiveAudio': false,
-                  'offerToReceiveVideo': false
-               };
-            }
-
-            var session = self.conn.jingle.initiate(jid, undefined, constraints);
-            session.call = false;
-
-            session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
-            session.on('accepted', function() {
-               self.sessionAccepted(session);
-
-               $('.jsxc_videoContainer').removeClass('jsxc_ringing');
-
-               self.postScreenMessage(bid, $.t('Connection_accepted'), session.sid);
-            });
-
-            self.postScreenMessage(bid, $.t('Stream_started'), session.sid);
+         'mediaready.jingle': function(ev, stream) {
+            self.initiateScreenSharing(jid, stream);
          },
          'mediafailure.jingle': function(ev, err) {
             jsxc.gui.dialog.close();
@@ -990,12 +965,79 @@ jsxc.webrtc = {
       self.reqUserMedia(['screen']);
    },
 
-   sessionAccepted: function() {
-      $('.jsxc_videoContainer').removeClass('jsxc_ringing');
+   /**
+    * Initiate outgoing (one-way) jingle session to jid with stream.
+    *
+    * @param  {String} jid
+    * @param  {Object} stream
+    */
+   initiateScreenSharing: function(jid, stream) {
+      var self = jsxc.webrtc;
+      var bid = jsxc.jidToBid(jid);
+
+      jsxc.webrtc.localStream = stream;
+      jsxc.webrtc.conn.jingle.localStream = stream;
+
+      var container = jsxc.gui.showMinimizedVideoWindow();
+      container.addClass('jsxc_establishing');
+
+      self.setStatus('Initiate stream');
+
+      $(document).one('error.jingle', function(e, sid, error) {
+         if (error && error.source !== 'offer') {
+            return;
+         }
+
+         setTimeout(function() {
+            jsxc.gui.showAlert("Sorry, we couldn't establish a connection. Maybe your buddy is offline.");
+         }, 500);
+      });
+
+      var browser = self.conn.jingle.RTC.webrtcDetectedBrowser;
+      var browserVersion = self.conn.jingle.RTC.webrtcDetectedVersion;
+      var constraints;
+
+      if ((browserVersion < 33 && browser === 'firefox') || browser === 'chrome') {
+         constraints = {
+            mandatory: {
+               'OfferToReceiveAudio': false,
+               'OfferToReceiveVideo': false
+            }
+         };
+      } else {
+         constraints = {
+            'offerToReceiveAudio': false,
+            'offerToReceiveVideo': false
+         };
+      }
+
+      var session = self.conn.jingle.initiate(jid, undefined, constraints);
+      session.call = false;
+
+      session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
+      // @REVIEW also for calls?
+      session.on('accepted', function() {
+         self.onSessionAccepted(session);
+      });
+
+      self.postScreenMessage(bid, $.t('Stream_started'), session.sid);
    },
 
    /**
-    * Request video and audio from local user.
+    * Session was accepted by other peer.
+    *
+    * @param  {BaseSession} session
+    */
+   onSessionAccepted: function(session) {
+      var self = jsxc.webrtc;
+
+      $('.jsxc_videoContainer').removeClass('jsxc_ringing');
+
+      self.postScreenMessage(jsxc.jidToBid(session.peerID), $.t('Connection_accepted'), session.sid);
+   },
+
+   /**
+    * Request media from local user.
     *
     * @memberOf jsxc.webrtc
     */
@@ -1010,28 +1052,45 @@ jsxc.webrtc = {
       jsxc.gui.dialog.open(jsxc.gui.template.get('allowMediaAccess'), {
          noClose: true
       });
-      this.setStatus('please allow access to microphone and camera');
 
       if (um.indexOf('screen') >= 0) {
          jsxc.webrtc.getScreenMedia();
+      } else if (typeof navigator !== 'undefined' && typeof navigator.mediaDevices !== 'undefined' &&
+         typeof navigator.mediaDevices.enumerateDevices !== 'undefined') {
+         navigator.mediaDevices.enumerateDevices()
+            .then(filterUserMedia)
+            .catch(function(err) {
+               jsxc.warn(err.name + ": " + err.message);
+            });
       } else if (typeof MediaStreamTrack !== 'undefined' && typeof MediaStreamTrack.getSources !== 'undefined') {
-         MediaStreamTrack.getSources(function(sourceInfo) {
-            var availableDevices = sourceInfo.map(function(el) {
-
-               return el.kind;
-            });
-
-            um = um.filter(function(el) {
-               return availableDevices.indexOf(el) !== -1;
-            });
-
-            jsxc.webrtc.getUserMedia(um);
-         });
+         // @deprecated in chrome since v56
+         MediaStreamTrack.getSources(filterUserMedia);
       } else {
          jsxc.webrtc.getUserMedia(um);
       }
+
+      function filterUserMedia(devices) {
+         var availableDevices = devices.map(function(device) {
+            return device.kind;
+         });
+
+         um = um.filter(function(el) {
+            return availableDevices.indexOf(el) !== -1 || availableDevices.indexOf(el + 'input') !== -1;
+         });
+
+         if (um.length) {
+            jsxc.webrtc.getUserMedia(um);
+         } else {
+            jsxc.warn('No audio/video device available.');
+         }
+      }
    },
 
+   /**
+    * Get user media from local browser.
+    *
+    * @memberOf jsxc.webrtc
+    */
    getUserMedia: function(um) {
       var self = jsxc.webrtc;
       var constraints = {};
@@ -1060,8 +1119,15 @@ jsxc.webrtc = {
       }
    },
 
+   /**
+    * Get screen media from local browser.
+    *
+    * @memberOf jsxc.webrtc
+    */
    getScreenMedia: function() {
       var self = jsxc.webrtc;
+
+      jsxc.debug('get screen media');
 
       self.conn.jingle.getScreenMedia(self.screenMediaCallback);
    },
@@ -1137,7 +1203,7 @@ jsxc.webrtc = {
    },
 
    /**
-    * Send file to full jid.
+    * Send file to full jid via jingle.
     *
     * @memberOf jsxc.webrtc
     * @param  {string} jid full jid
