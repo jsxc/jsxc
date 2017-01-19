@@ -729,7 +729,10 @@ jsxc.webrtc = {
       self.remoteStream = null;
 
       jsxc.gui.closeVideoWindow();
-      //@TODO stop ringing + close dialog
+
+      // Close incoming call dialog and stop ringing
+      jsxc.gui.dialog.close();
+      $(document).trigger('reject.call.jsxc');
 
       $(document).off('error.jingle');
 
