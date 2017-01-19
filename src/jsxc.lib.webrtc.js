@@ -954,14 +954,15 @@ jsxc.webrtc = {
 
             var browser = self.conn.jingle.RTC.webrtcDetectedBrowser;
 
-            if (jsxc.options.screenMediaExtension && jsxc.options.screenMediaExtension[browser] &&
+            var screenMediaExtension = jsxc.options.get('screenMediaExtension') || {};
+            if (screenMediaExtension[browser] &&
                (err.name === 'EXTENSION_UNAVAILABLE' || (err.name === 'NotAllowedError' && browser === 'firefox'))) {
                // post download link after explanation
                setTimeout(function() {
                   jsxc.gui.window.postMessage({
                      bid: jsxc.jidToBid(jid),
                      direction: jsxc.Message.SYS,
-                     msg: $.t('Install_extension') + jsxc.options.screenMediaExtension[browser]
+                     msg: $.t('Install_extension') + screenMediaExtension[browser]
                   });
                }, 500);
             }
