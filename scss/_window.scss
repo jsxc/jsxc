@@ -14,7 +14,7 @@
         clip: rect(-10000px, 10000px, 30px, 30px);
     }
 
-    & > ul {
+    > ul {
         list-style: none;
         padding: 0;
         margin: 0;
@@ -26,7 +26,7 @@
         white-space: nowrap;
         transition: right 0.5s;
 
-        & > li {
+        > li {
             padding: 0;
             margin: 0;
             display: inline-block;
@@ -47,7 +47,7 @@
                 transition: width 0.2s;
                 width: 46px !important;
 
-                /* overwrite resizeable width */
+                //  overwrite resizeable width
 
                 @media (min-width: 768px) {
                     width: 200px !important;
@@ -170,7 +170,7 @@
         cursor: pointer;
 
         &:after {
-            content: ' ';
+            content: " ";
             background-image: image-url("smiley.svg");
             background-position: center center;
             background-repeat: no-repeat;
@@ -198,7 +198,7 @@
             position: relative;
 
             &:after {
-                content: '';
+                content: " ";
                 position: absolute;
                 border-left: 8px solid transparent;
                 border-right: 8px solid transparent;
@@ -245,7 +245,7 @@
             z-index: 100;
             overflow-y: scroll;
 
-            & > div {
+            > div {
                 background-color: #fff;
                 margin: 30px 10px;
                 padding: 5px;
@@ -261,7 +261,7 @@
                     width: 44px;
 
                     &:after {
-                        content: '×';
+                        content: "×";
                         position: absolute;
                         top: 4px;
                         right: 4px;
@@ -316,7 +316,7 @@
     }
 
     .slimScrollDiv {
-        margin: 0 0 6px 0;
+        margin: 0 0 6px;
         left: auto !important;
         top: auto !important;
     }
@@ -326,7 +326,7 @@
             width: 100%;
             height: 44px;
             margin: 0;
-            padding: 14px 40px 12px 40px;
+            padding: 14px 40px 12px;
             outline: none;
             border-radius: 0;
             box-sizing: border-box;
@@ -364,7 +364,7 @@
             text-align: center;
 
             &.jsxc_settings {
-                opacity: 1.0;
+                opacity: 1;
             }
         }
     }
@@ -374,7 +374,7 @@
 
         &:hover {
             color: $window_close_hover;
-            opacity: 1.0;
+            opacity: 1;
         }
     }
 
@@ -419,7 +419,7 @@
         opacity: 0.7;
 
         &:before {
-            content: '';
+            content: " ";
             position: absolute;
             top: 3px;
             right: 3px;
@@ -437,7 +437,7 @@
         position: relative;
 
         &[download]:before {
-            content: '';
+            content: " ";
             position: absolute;
             top: 0;
             right: 0;
@@ -445,7 +445,7 @@
             left: 0;
             border-radius: 3px;
             background-color: rgba(255, 255, 255, 0.7);
-            background-image: url(../img/download_icon_black.svg);
+            background-image: url("../img/download_icon_black.svg");
             background-size: contain;
             background-position: center center;
             background-repeat: no-repeat;
@@ -485,9 +485,9 @@
         }
 
         &.jsxc_image {
-            line-height: 0px;
+            line-height: 0;
             padding: 0;
-            background-image: url();
+            background-image: url("");
             display: inline-block;
         }
 
@@ -551,7 +551,7 @@
     background-color: $chatmessage_in_bg;
 
     &:after {
-        content: ' ';
+        content: " ";
         position: absolute;
         border-style: solid;
         border-width: 5px 6px 5px 0;
@@ -578,7 +578,7 @@
     background-color: $chatmessage_out_bg;
 
     &:after {
-        content: ' ';
+        content: " ";
         position: absolute;
         border-style: solid;
         border-width: 5px 0 5px 6px;
@@ -592,7 +592,7 @@
 
     &.jsxc_received {
         &:before {
-            content: '✓';
+            content: "✓";
             position: absolute;
             bottom: 2px;
             right: 2px;
@@ -678,7 +678,7 @@ div.jsxc_transfer {
     cursor: pointer;
 
     &:hover {
-        opacity: 1.0;
+        opacity: 1;
     }
 
     &.jsxc_disabled {
@@ -691,12 +691,12 @@ div.jsxc_transfer {
     }
 
     &.jsxc_fin {
-        opacity: 1.0;
+        opacity: 1;
         background-image: image-url("padlock_close_grey.svg");
     }
 
     &.jsxc_enc {
-        opacity: 1.0;
+        opacity: 1;
         background-image: image-url("padlock_close_orange.svg");
 
         &.jsxc_trust {
