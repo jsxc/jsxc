@@ -208,7 +208,7 @@ jsxc.options = {
 
    carbons: {
       /** Enable carbon copies? */
-      enable: false
+      enable: true
    },
 
    /**
