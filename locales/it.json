@@ -289,6 +289,15 @@
     "_is_composing": null,
     "_are_composing": null,
     "Chat_state_notifications": null,
-    "setting-explanation-chat-state": null
+    "setting-explanation-chat-state": null,
+    "Share_screen": null,
+    "Incoming_stream": null,
+    "Stream_started": null,
+    "HTTPS_REQUIRED": null,
+    "EXTENSION_UNAVAILABLE": null,
+    "UNKNOWN_ERROR": null,
+    "Install_extension": null,
+    "Connection_accepted": null,
+    "Stream_terminated": null
   }
 }

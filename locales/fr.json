@@ -289,6 +289,15 @@
     "_is_composing": " est en train d'écrire...",
     "_are_composing": " sont en train d'écrire...",
     "Chat_state_notifications": "Notifications de composition",
-    "setting-explanation-chat-state": "Voulez-vous envoyer et recevoir les notifications de composition, comme lorsque quelqu'un commence ou arrête d'écrire un message ?"
+    "setting-explanation-chat-state": "Voulez-vous envoyer et recevoir les notifications de composition, comme lorsque quelqu'un commence ou arrête d'écrire un message ?",
+    "Share_screen": null,
+    "Incoming_stream": null,
+    "Stream_started": null,
+    "HTTPS_REQUIRED": null,
+    "EXTENSION_UNAVAILABLE": null,
+    "UNKNOWN_ERROR": null,
+    "Install_extension": null,
+    "Connection_accepted": null,
+    "Stream_terminated": null
   }
 }

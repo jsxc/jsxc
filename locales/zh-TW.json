@@ -289,6 +289,15 @@
     "_is_composing": "正在打字中...",
     "_are_composing": "正在打字中...",
     "Chat_state_notifications": "聊天狀態通知",
-    "setting-explanation-chat-state": "想要傳送以及接收聊天狀態的通知嗎？也就是有人開始或停止寫訊息之類？"
+    "setting-explanation-chat-state": "想要傳送以及接收聊天狀態的通知嗎？也就是有人開始或停止寫訊息之類？",
+    "Share_screen": null,
+    "Incoming_stream": null,
+    "Stream_started": null,
+    "HTTPS_REQUIRED": null,
+    "EXTENSION_UNAVAILABLE": null,
+    "UNKNOWN_ERROR": null,
+    "Install_extension": null,
+    "Connection_accepted": null,
+    "Stream_terminated": null
   }
 }
