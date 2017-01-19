@@ -247,13 +247,16 @@ jsxc.webrtc = {
       var div = $('<div>').addClass('jsxc_video');
       win.find('.jsxc_tools .jsxc_settings').after(div);
 
-      // @TODO check if download url is available
-      // Add screen sharing button
-      var a = $('<a>');
-      a.text($.t('Share_screen'));
-      a.addClass('jsxc_shareScreen jsxc_video');
-      a.attr('href', '#');
-      win.find('.jsxc_settings .jsxc_menu li:last').after($('<li>').append(a));
+      var screenMediaExtension = jsxc.options.get('screenMediaExtension') || {};
+      var browser = self.conn.jingle.RTC.webrtcDetectedBrowser;
+      if (screenMediaExtension[browser] || jsxc.storage.getItem('debug')) {
+         // Add screen sharing button if extension is available or we are in debug mode
+         var a = $('<a>');
+         a.text($.t('Share_screen'));
+         a.addClass('jsxc_shareScreen jsxc_video');
+         a.attr('href', '#');
+         win.find('.jsxc_settings .jsxc_menu li:last').after($('<li>').append(a));
+      }
 
       self.updateIcon(win.data('bid'));
    },
