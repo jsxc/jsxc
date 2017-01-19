@@ -618,6 +618,15 @@
     box-sizing: border-box;
     margin-right: 3px;
     border-radius: 3px;
+    background-color: transparent;
+    font-size: 0.8em;
+    font-style: italic;
+
+    .jsxc_emoticon {
+        width: 1.2em;
+        height: 1.2em;
+        vertical-align: middle;
+    }
 
     &.jsxc_composing {
         text-align: center;

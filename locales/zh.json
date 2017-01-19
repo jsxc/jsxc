@@ -285,6 +285,10 @@
     "setting-explanation-carbon": null,
     "setting-explanation-login": null,
     "setting-explanation-priority": null,
-    "setting-explanation-xmpp": null
+    "setting-explanation-xmpp": null,
+    "_is_composing": null,
+    "_are_composing": null,
+    "Chat_state_notifications": null,
+    "setting-explanation-chat-state": null
   }
 }

@@ -292,5 +292,16 @@ jsxc.options = {
    /** Default option for chat state notifications */
    chatState: {
       enable: true
+   },
+
+   /**
+    * Download urls to screen media extensions.
+    *
+    * @type {Object}
+    * @see example extensions {@link https://github.com/otalk/getScreenMedia}
+    */
+   screenMediaExtension: {
+      firefox: '',
+      chrome: ''
    }
 };

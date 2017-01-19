@@ -1,0 +1,56 @@
+scss_files: 'scss/*.scss'
+
+linters:
+  ColorKeyword:
+    enabled: false
+  ColorVariable:
+    enabled: false
+  Comment:
+    enabled: false
+  DuplicateProperty:
+    enabled: false
+  EmptyRule:
+    enabled: false
+  HexNotation:
+    enabled: false
+  IdSelector:
+    enabled: false
+  ImportPath:
+    enabled: false
+  ImportantRule:
+    enabled: false
+  Indentation:
+    enabled: false
+  LeadingZero:
+    enabled: false
+  MergeableSelector:
+    enabled: false
+  NameFormat:
+    enabled: false
+  NestingDepth:
+    enabled: false
+  PropertySortOrder:
+    enabled: false
+  PseudoElement:
+    enabled: false
+  QualifyingElement:
+    enabled: false
+  SelectorDepth:
+    enabled: false
+  SelectorFormat:
+    enabled: false
+  Shorthand:
+    enabled: false
+  SingleLinePerSelector:
+    enabled: false
+  StringQuotes:
+    enabled: false
+  UnnecessaryMantissa:
+    enabled: false
+  UnnecessaryParentReference:
+    enabled: false
+  UrlQuotes:
+    enabled: false
+  ZeroUnit:
+    enabled: false
+
