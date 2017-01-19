@@ -19,7 +19,7 @@ jsxc.options = {
       enable: true,
       ERROR_START_AKE: false,
       debug: false,
-      SEND_WHITESPACE_TAG: true,
+      SEND_WHITESPACE_TAG: false,
       WHITESPACE_START_AKE: true
    },
 
