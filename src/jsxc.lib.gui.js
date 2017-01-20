@@ -1457,7 +1457,7 @@ jsxc.gui = {
             filename = jsxc.gui.emoticonList.core[shortname][jsxc.gui.emoticonList.core[shortname].length - 1].replace(/^:([^:]+):$/, '$1');
             src = jsxc.options.root + '/img/emotions/' + filename + '.svg';
          } else if (jsxc.gui.emoticonList.emojione[shortname]) {
-            filename = jsxc.gui.emoticonList.emojione[shortname][jsxc.gui.emoticonList.emojione[shortname].length - 1];
+            filename = jsxc.gui.emoticonList.emojione[shortname].fname;
             src = jsxc.options.root + '/lib/emojione/assets/svg/' + filename + '.svg';
          }
 
