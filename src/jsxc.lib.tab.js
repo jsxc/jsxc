@@ -40,10 +40,10 @@ jsxc.tab = {
       jsxc.tab.exec.apply(this, args);
    },
    execSlave: function(cmd, params) {
-         var args = Array.prototype.slice.call(arguments);
-         args.unshift(jsxc.tab.CONST.SLAVE);
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift(jsxc.tab.CONST.SLAVE);
 
-         jsxc.tab.exec.apply(this, args);
-      }
-      /*jshint +W098 */
+      jsxc.tab.exec.apply(this, args);
+   }
+   /*jshint +W098 */
 };
