@@ -43,7 +43,8 @@ jsxc.gui = {
          ':jabber:': ['jabber'],
          ':xmpp:': ['xmpp'],
          ':jsxc:': ['jsxc'],
-         ':owncloud:': ['owncloud']
+         ':owncloud:': ['owncloud'],
+         ':nextcloud:': ['nextcloud']
       },
       'emojione': emojione.emojioneList
    },
