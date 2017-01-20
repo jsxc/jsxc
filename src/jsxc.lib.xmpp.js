@@ -707,7 +707,7 @@ jsxc.xmpp = {
 
       if (status === 0) {
          delete res[r];
-      } else {
+      } else if (r) {
          res[r] = status;
       }
 
