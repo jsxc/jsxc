@@ -345,7 +345,9 @@ jsxc = {
          form.off('submit');
 
          // Add jsxc login action to form
-         form.submit(function() {
+         form.submit(function(ev) {
+            ev.preventDefault();
+
             jsxc.prepareLogin(function(settings) {
                if (settings !== false) {
                   // settings.xmpp.onlogin is deprecated since v2.1.0
