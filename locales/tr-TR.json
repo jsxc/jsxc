@@ -285,6 +285,19 @@
     "setting-explanation-carbon": "Etkinleştirilmiş karbon kopya ile, XMPP sunucusu kendisine gönderilen her iletinin bir kopyasını, bu adrese gönderilmemiş olsa bile sizin için bu istemciye gönderir.",
     "setting-explanation-login": "Bu seçenek etkinleştirilirse, sohbet girişle beraber başlayacaktır.",
     "setting-explanation-priority": "Aynı hesapla bir çok kez oturum açtıysanız, XMPP sunucusu, istemciye  iletileri en yüksek öncelikle gönderecektir.",
-    "setting-explanation-xmpp": "Bu seçenekler XMPP sunucusuna bağlanmak için kullanılır."
+    "setting-explanation-xmpp": "Bu seçenekler XMPP sunucusuna bağlanmak için kullanılır.",
+    "_is_composing": null,
+    "_are_composing": null,
+    "Chat_state_notifications": null,
+    "setting-explanation-chat-state": null,
+    "Share_screen": null,
+    "Incoming_stream": null,
+    "Stream_started": null,
+    "HTTPS_REQUIRED": null,
+    "EXTENSION_UNAVAILABLE": null,
+    "UNKNOWN_ERROR": null,
+    "Install_extension": null,
+    "Connection_accepted": null,
+    "Stream_terminated": null
   }
 }

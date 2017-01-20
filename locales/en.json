@@ -261,7 +261,7 @@
     "No_local_audio_device": "No local audio device.",
     "No_local_video_device": "No local video device.",
     "Ok": "Ok",
-    "PermissionDeniedError": "You or your browser denied audio/video permission",
+    "PermissionDeniedError": "You or your browser denied media permission",
     "Use_local_audio_device": "Use local audio device.",
     "Use_local_video_device": "Use local video device.",
     "is_": "is __status__",
@@ -289,6 +289,15 @@
     "_is_composing": " is composing...",
     "_are_composing": " are composing...",
     "Chat_state_notifications": "Chat state notifications",
-    "setting-explanation-chat-state": "Do you want to send and receive chat state notifications, like someone starts or stops composing a message?"
+    "setting-explanation-chat-state": "Do you want to send and receive chat state notifications, like someone starts or stops composing a message?",
+    "Share_screen": "Share screen",
+    "Incoming_stream": "Incoming stream",
+    "Stream_started": "Stream started",
+    "HTTPS_REQUIRED": "This action requires an encrypted connection.",
+    "EXTENSION_UNAVAILABLE": "You need a browser extension/addon.",
+    "UNKNOWN_ERROR": "An unknown error occured.",
+    "Install_extension": "Please install the extension in order to use screen sharing: ",
+    "Connection_accepted": "Connection accepted",
+    "Stream_terminated": "Stream terminated"
   }
 }

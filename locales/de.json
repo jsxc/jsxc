@@ -289,6 +289,15 @@
     "_is_composing": " tippt gerade...",
     "_are_composing": " tippen gerade...",
     "Chat_state_notifications": "Statusbenachrichtigungen",
-    "setting-explanation-chat-state": "Möchtest Benachrichtigungen senden und erhalten wenn du oder dein Kontakt Nachrichten tippt?"
+    "setting-explanation-chat-state": "Möchtest Benachrichtigungen senden und erhalten wenn du oder dein Kontakt Nachrichten tippt?",
+    "Share_screen": null,
+    "Incoming_stream": null,
+    "Stream_started": null,
+    "HTTPS_REQUIRED": null,
+    "EXTENSION_UNAVAILABLE": null,
+    "UNKNOWN_ERROR": null,
+    "Install_extension": null,
+    "Connection_accepted": null,
+    "Stream_terminated": null
   }
 }

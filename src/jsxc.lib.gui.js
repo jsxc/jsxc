@@ -2062,6 +2062,9 @@ jsxc.gui.window = {
       };
 
       win.find('.jsxc_more').click(expandClick);
+      win.find('.jsxc_menu').click(function() {
+         $('body').click();
+      });
 
       win.find('.jsxc_verification').click(function() {
          jsxc.gui.showVerification(bid);

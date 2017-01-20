@@ -285,6 +285,19 @@
     "setting-explanation-carbon": "С включенным Carbon Copy Ваш XMPP сервер будет отправлять копию каждого входящего сообщения на все подключенные устройства.",
     "setting-explanation-login": "Если эта опция включена, то чат будет начинаться сразу после аутентификации.",
     "setting-explanation-priority": "Если вы подключены к одному аккаунту с нескольких устройств, то XMPP сервер будет доставлять сообщения на клиент с наивысшим приоритетом.",
-    "setting-explanation-xmpp": "Эти настройки используются для подключения к XMPP серверу."
+    "setting-explanation-xmpp": "Эти настройки используются для подключения к XMPP серверу.",
+    "_is_composing": null,
+    "_are_composing": null,
+    "Chat_state_notifications": null,
+    "setting-explanation-chat-state": null,
+    "Share_screen": null,
+    "Incoming_stream": null,
+    "Stream_started": null,
+    "HTTPS_REQUIRED": null,
+    "EXTENSION_UNAVAILABLE": null,
+    "UNKNOWN_ERROR": null,
+    "Install_extension": null,
+    "Connection_accepted": null,
+    "Stream_terminated": null
   }
 }

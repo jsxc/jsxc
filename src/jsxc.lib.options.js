@@ -19,7 +19,7 @@ jsxc.options = {
       enable: true,
       ERROR_START_AKE: false,
       debug: false,
-      SEND_WHITESPACE_TAG: true,
+      SEND_WHITESPACE_TAG: false,
       WHITESPACE_START_AKE: true
    },
 
@@ -208,7 +208,7 @@ jsxc.options = {
 
    carbons: {
       /** Enable carbon copies? */
-      enable: false
+      enable: true
    },
 
    /**
@@ -292,5 +292,16 @@ jsxc.options = {
    /** Default option for chat state notifications */
    chatState: {
       enable: true
+   },
+
+   /**
+    * Download urls to screen media extensions.
+    *
+    * @type {Object}
+    * @see example extensions {@link https://github.com/otalk/getScreenMedia}
+    */
+   screenMediaExtension: {
+      firefox: '',
+      chrome: ''
    }
 };

@@ -42,7 +42,6 @@
     position: relative;
     background: #FFF;
     width: auto;
-    border-radius: 5px;
 
     * {
         box-sizing: border-box;
@@ -356,17 +355,26 @@ img.jsxc_vCard {
     background-image: none;
     border: 1px solid transparent;
     border-radius: 4px;
+    transition: background-color 0.5s;
 
     &.jsxc_btn-default {
         border-color: #ccc;
         color: #555;
         background-color: rgba(240, 240, 240, 0.9);
+
+        &:hover {
+            background-color: #d6d6d6;
+        }
     }
 
     &.jsxc_btn-primary {
         color: #fff;
         background-color: #337ab7;
         border-color: #2e6da4;
+
+        &:hover {
+            background-color: #296496;
+        }
     }
 
     &[disabled], &[disabled]:hover {
