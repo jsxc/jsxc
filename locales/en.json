@@ -298,6 +298,7 @@
     "UNKNOWN_ERROR": "An unknown error occured.",
     "Install_extension": "Please install the extension in order to use screen sharing: ",
     "Connection_accepted": "Connection accepted",
-    "Stream_terminated": "Stream terminated"
+    "Stream_terminated": "Stream terminated",
+    "Close_all": "Close all"
   }
 }

@@ -1,6 +1,6 @@
 /**
  * This namespace handle the notice system.
- * 
+ *
  * @namspace jsxc.notice
  * @memberOf jsxc
  */
@@ -10,7 +10,7 @@ jsxc.notice = {
 
    /**
     * Loads the saved notices.
-    * 
+    *
     * @memberOf jsxc.notice
     */
    load: function() {
@@ -33,7 +33,7 @@ jsxc.notice = {
 
    /**
     * Add a new notice to the stack;
-    * 
+    *
     * @memberOf jsxc.notice
     * @param msg Header message
     * @param description Notice description
@@ -61,8 +61,9 @@ jsxc.notice = {
 
       $('#jsxc_notice > span').text(++jsxc.notice._num);
 
+      var saved = jsxc.storage.getUserItem('notices') || {};
+
       if (!id) {
-         var saved = jsxc.storage.getUserItem('notices') || {};
          saved[nid] = {
             msg: msg,
             description: description,
@@ -73,11 +74,23 @@ jsxc.notice = {
 
          jsxc.notification.notify(msg, description || '', null, true, jsxc.CONST.SOUNDS.NOTICE);
       }
+
+      if (Object.keys(saved).length > 3 && list.find('.jsxc_closeAll').length === 0) {
+         // add close all button
+         var closeAll = $('<li>');
+         closeAll.addClass('jsxc_closeAll jsxc_deleteicon jsxc_warning');
+         closeAll.text($.t('Close_all'));
+         closeAll.prependTo(list);
+         closeAll.click(jsxc.notice.removeAll);
+      } else if (Object.keys(saved).length <= 3 && list.find('.jsxc_closeAll').length !== 0) {
+         // remove close all button
+         list.find('.jsxc_closeAll').remove();
+      }
    },
 
    /**
     * Removes notice from stack
-    * 
+    *
     * @memberOf jsxc.notice
     * @param nid The notice id
     */
@@ -87,14 +100,30 @@ jsxc.notice = {
       el.remove();
       $('#jsxc_notice > span').text(--jsxc.notice._num || '');
 
-      var s = jsxc.storage.getUserItem('notices');
+      var s = jsxc.storage.getUserItem('notices') || {};
       delete s[nid];
       jsxc.storage.setUserItem('notices', s);
+
+      if (Object.keys(s).length <= 3 && $('#jsxc_notice .jsxc_closeAll').length !== 0) {
+         // remove close all button
+         $('#jsxc_notice .jsxc_closeAll').remove();
+      }
+   },
+
+   /**
+    * Remove all notices.
+    */
+   removeAll: function() {
+      jsxc.notice._num = 0;
+      jsxc.storage.setUserItem('notices', {});
+
+      $('#jsxc_notice ul').empty();
+      $('#jsxc_notice > span').text('');
    },
 
    /**
     * Check if there is already a notice for the given function name.
-    * 
+    *
     * @memberOf jsxc.notice
     * @param {string} fnName Function name
     * @returns {boolean} True if there is >0 functions with the given name

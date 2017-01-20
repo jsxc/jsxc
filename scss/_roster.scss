@@ -167,6 +167,14 @@
                 color: $roster_bottom_color_hover;
                 background-color: $roster_bottom_bg_hover;
             }
+
+            &.jsxc_warning {
+                background-color: $warning_bg;
+
+                &:hover {
+                    background-color: $warning_bg_hover;
+                }
+            }
         }
 
         > div > span {
