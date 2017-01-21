@@ -26,7 +26,7 @@ jsxc.notice = {
          if (saved.hasOwnProperty(key)) {
             var val = saved[key];
 
-            jsxc.notice.add(val.msg, val.description, val.fnName, val.fnParams, key);
+            jsxc.notice.add(val, val.fnName, val.fnParams, key);
          }
       }
    },
@@ -35,16 +35,19 @@ jsxc.notice = {
     * Add a new notice to the stack;
     *
     * @memberOf jsxc.notice
-    * @param msg Header message
-    * @param description Notice description
-    * @param fnName Function name to be called if you open the notice
+    * @param {Object} data
+    * @param {String} data.msg Header message
+    * @param {String} data.description Notice description
+    * @param {String} fnName Function name to be called if you open the notice
     * @param fnParams Array of params for function
-    * @param id Notice id
+    * @param {String} id Notice id
     */
-   add: function(msg, description, fnName, fnParams, id) {
+   add: function(data, fnName, fnParams, id) {
       var nid = id || Date.now();
       var list = $('#jsxc_notice ul');
       var notice = $('<li/>');
+      var msg = data.msg;
+      var description = data.description;
 
       notice.click(function() {
          jsxc.notice.remove(nid);
@@ -53,6 +56,10 @@ jsxc.notice = {
 
          return false;
       });
+
+      if (data.type) {
+         notice.addClass('jsxc_' + data.type + 'icon');
+      }
 
       notice.text(msg);
       notice.attr('title', description || '');
@@ -67,6 +74,7 @@ jsxc.notice = {
          saved[nid] = {
             msg: msg,
             description: description,
+            type: data.type,
             fnName: fnName,
             fnParams: fnParams
          };

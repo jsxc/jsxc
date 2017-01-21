@@ -692,7 +692,11 @@ jsxc.xmpp = {
             jid: jid,
             approve: -1
          });
-         jsxc.notice.add($.t('Friendship_request'), $.t('from') + ' ' + jid, 'gui.showApproveDialog', [jid]);
+         jsxc.notice.add({
+            msg: $.t('Friendship_request'),
+            description: $.t('from') + ' ' + jid,
+            type: 'contact'
+         }, 'gui.showApproveDialog', [jid]);
 
          return true;
       } else if (ptype === 'unavailable' || ptype === 'unsubscribed') {
@@ -854,7 +858,10 @@ jsxc.xmpp = {
          var chat = jsxc.storage.getUserItem('chat', bid) || [];
 
          if (chat.length === 0) {
-            jsxc.notice.add($.t('Unknown_sender'), $.t('You_received_a_message_from_an_unknown_sender') + ' (' + bid + ').', 'gui.showUnknownSender', [bid]);
+            jsxc.notice.add({
+               msg: $.t('Unknown_sender'),
+               description: $.t('You_received_a_message_from_an_unknown_sender') + ' (' + bid + ').'
+            }, 'gui.showUnknownSender', [bid]);
          }
 
          var msg = jsxc.removeHTML(body);
@@ -966,7 +973,11 @@ jsxc.xmpp = {
       var subject = stanza.find('subject:first').text() || $.t('Notification');
       var body = stanza.find('body:first').text();
 
-      jsxc.notice.add(subject, body, 'gui.showNotification', [subject, body, from]);
+      jsxc.notice.add({
+         msg: subject,
+         description: body,
+         type: (domain === from) ? 'announcement' : null
+      }, 'gui.showNotification', [subject, body, from]);
 
       return true;
    },
