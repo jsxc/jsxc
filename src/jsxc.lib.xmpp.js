@@ -287,7 +287,8 @@ jsxc.xmpp = {
       $('#jsxc_roster').removeClass('jsxc_noConnection');
 
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onRosterChanged, 'jabber:iq:roster', 'iq', 'set');
-      jsxc.xmpp.conn.addHandler(jsxc.xmpp.onMessage, null, 'message', 'chat');
+      jsxc.xmpp.conn.addHandler(jsxc.xmpp.onChatMessage, null, 'message', 'chat');
+      jsxc.xmpp.conn.addHandler(jsxc.xmpp.onHeadlineMessage, null, 'message', 'headline');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onReceived, null, 'message');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
 
@@ -780,7 +781,7 @@ jsxc.xmpp = {
     * @returns {Boolean}
     * @private
     */
-   onMessage: function(stanza) {
+   onChatMessage: function(stanza) {
       var forwarded = $(stanza).find('forwarded[xmlns="' + jsxc.CONST.NS.FORWARD + '"]');
       var message, carbon;
 
@@ -939,6 +940,34 @@ jsxc.xmpp = {
       }
 
       // preserve handler
+      return true;
+   },
+
+   /**
+    * Process message stanzas of type headline.
+    *
+    * @param  {String} stanza Message stanza of type headline
+    * @return {Boolean}
+    */
+   onHeadlineMessage: function(stanza) {
+      stanza = $(stanza);
+
+      var from = stanza.attr('from');
+      var domain = Strophe.getDomainFromJid(from);
+
+      if (domain !== from) {
+         if (!jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from))) {
+            return true;
+         }
+      } else if (domain !== Strophe.getDomainFromJid(jsxc.xmpp.conn.jid)) {
+         return true;
+      }
+
+      var subject = stanza.find('subject:first').text() || $.t('Notification');
+      var body = stanza.find('body:first').text();
+
+      jsxc.notice.add(subject, body, 'gui.showNotification', [subject, body, from]);
+
       return true;
    },
 

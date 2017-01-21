@@ -1196,6 +1196,26 @@ jsxc.gui = {
    },
 
    /**
+    * Show notification dialog.
+    *
+    * @param  {String} subject
+    * @param  {String} body
+    * @param  {String} from
+    */
+   showNotification: function(subject, body, from) {
+      var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('notification'));
+
+      dialog.find('h3').text(subject);
+      dialog.find('.jsxc_msg').text(body);
+
+      if (from) {
+         dialog.find('.jsxc_meta').text($.t('from') + ' ' + from);
+      } else {
+         dialog.find('.jsxc_meta').hide();
+      }
+   },
+
+   /**
     * Change own presence to pres.
     *
     * @memberOf jsxc.gui
