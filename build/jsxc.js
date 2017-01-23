@@ -1,13 +1,13 @@
 /*!
- * jsxc v3.0.1 - 2016-10-28
+ * jsxc v3.1.0-beta - 2017-01-23
  * 
- * Copyright (c) 2016 Klaus Herberth <klaus@jsxc.org> <br>
+ * Copyright (c) 2017 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
  * 
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.0.1
+ * @version 3.1.0-beta
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.0.1',
+   version: '3.1.0-beta',
 
    /** True if i'm the master */
    master: false,
@@ -78,6 +78,12 @@ jsxc = {
    /** My bar id */
    bid: null,
 
+   /** Current state */
+   currentState: null,
+
+   /** Current UI state */
+   currentUIState: null,
+
    /** Some constants */
    CONST: {
       NOTIFICATION_DEFAULT: 'default',
@@ -98,7 +104,20 @@ jsxc = {
          FORWARD: 'urn:xmpp:forward:0'
       },
       HIDDEN: 'hidden',
-      SHOWN: 'shown'
+      SHOWN: 'shown',
+      STATE: {
+         INITIATING: 0,
+         PREVCONFOUND: 1,
+         SUSPEND: 2,
+         TRYTOINTERCEPT: 3,
+         INTERCEPTED: 4,
+         ESTABLISHING: 5,
+         READY: 6
+      },
+      UISTATE: {
+         INITIATING: 0,
+         READY: 1
+      }
    },
 
    /**
@@ -210,6 +229,7 @@ jsxc = {
     * @param {object} options See {@link jsxc.options}
     */
    init: function(options) {
+      jsxc.changeState(jsxc.CONST.STATE.INITIATING);
 
       if (options && options.loginForm && typeof options.loginForm.attachIfFound === 'boolean' && !options.loginForm.ifFound) {
          // translate deprated option attachIfFound found to new ifFound
@@ -270,15 +290,22 @@ jsxc = {
          lang = jsxc.options.defaultLang;
       }
 
-      // initialize i18n translator
-      $.i18n.init({
+      // initialize i18next translator
+      window.i18next.init({
          lng: lang,
          fallbackLng: 'en',
-         resStore: I18next,
-         // use localStorage and set expiration to a day
-         useLocalStorage: true,
-         localStorageExpirationTime: 60 * 60 * 24 * 1000,
-         debug: jsxc.storage.getItem('debug') === true
+         resources: I18next,
+         debug: jsxc.storage.getItem('debug') === true,
+         interpolation: {
+            prefix: '__',
+            suffix: '__'
+         }
+      }, function() {
+         window.jqueryI18next.init(window.i18next, $, {
+            tName: 't',
+            i18nName: 'i18next',
+            handleName: 'localize',
+         });
       });
 
       if (jsxc.storage.getItem('debug') === true) {
@@ -303,6 +330,7 @@ jsxc = {
 
          // Looking for a login form
          if (!jsxc.isLoginForm()) {
+            jsxc.changeState(jsxc.CONST.STATE.SUSPEND);
 
             if (jsxc.options.displayRosterMinimized()) {
                // Show minimized roster
@@ -313,6 +341,8 @@ jsxc = {
 
             return;
          }
+
+         jsxc.changeState(jsxc.CONST.STATE.TRYTOINTERCEPT);
 
          if (typeof jsxc.options.formFound === 'function') {
             jsxc.options.formFound.call();
@@ -335,7 +365,9 @@ jsxc = {
          form.off('submit');
 
          // Add jsxc login action to form
-         form.submit(function() {
+         form.submit(function(ev) {
+            ev.preventDefault();
+
             jsxc.prepareLogin(function(settings) {
                if (settings !== false) {
                   // settings.xmpp.onlogin is deprecated since v2.1.0
@@ -356,9 +388,12 @@ jsxc = {
             return false;
          });
 
+         jsxc.changeState(jsxc.CONST.STATE.INTERCEPTED);
+
       } else if (!jsxc.isLoginForm() || (jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'attach')) {
 
          // Restore old connection
+         jsxc.changeState(jsxc.CONST.STATE.PREVCONFOUND);
 
          if (typeof jsxc.storage.getItem('alive') === 'undefined') {
             jsxc.onMaster();
@@ -566,14 +601,10 @@ jsxc = {
       jsxc.gui.init();
       $('#jsxc_roster').removeClass('jsxc_noConnection');
 
-      jsxc.restoreRoster();
-      jsxc.restoreWindows();
-      jsxc.restoreCompleted = true;
-
       jsxc.registerLogout();
       jsxc.gui.updateAvatar($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
 
-      $(document).trigger('restoreCompleted.jsxc');
+      jsxc.gui.restore();
    },
 
    /**
@@ -787,8 +818,12 @@ jsxc = {
 
       if (form.find('#submit').length > 0) {
          form.find('#submit').click();
-      } else {
+      } else if (form.get(0) && typeof form.get(0).submit === 'function') {
          form.submit();
+      } else if (form.find('[type="submit"]').length > 0) {
+         form.find('[type="submit"]').click();
+      } else {
+         jsxc.warn('Could not submit login form.');
       }
    },
 
@@ -928,12 +963,28 @@ jsxc = {
 
    isExtraSmallDevice: function() {
       return $(window).width() < 500;
+   },
+
+   changeState: function(state) {
+      jsxc.currentState = state;
+
+      jsxc.debug('State changed to ' + Object.keys(jsxc.CONST.STATE)[state]);
+
+      $(document).trigger('stateChange.jsxc', state);
+   },
+
+   changeUIState: function(state) {
+      jsxc.currentUIState = state;
+
+      jsxc.debug('UI State changed to ' + Object.keys(jsxc.CONST.UISTATE)[state]);
+
+      $(document).trigger('stateUIChange.jsxc', state);
    }
 };
 
 /**
  * Handle XMPP stuff.
- * 
+ *
  * @namespace jsxc.xmpp
  */
 jsxc.xmpp = {
@@ -941,14 +992,14 @@ jsxc.xmpp = {
 
    /**
     * Create new connection or attach to old
-    * 
+    *
     * @name login
     * @memberOf jsxc.xmpp
     * @private
     */
    /**
     * Create new connection with given parameters.
-    * 
+    *
     * @name login^2
     * @param {string} jid
     * @param {string} password
@@ -957,7 +1008,7 @@ jsxc.xmpp = {
     */
    /**
     * Attach connection with given parameters.
-    * 
+    *
     * @name login^3
     * @param {string} jid
     * @param {string} sid
@@ -1074,6 +1125,8 @@ jsxc.xmpp = {
          jsxc.xmpp.conn.caps.node = 'http://jsxc.org/';
       }
 
+      jsxc.changeState(jsxc.CONST.STATE.ESTABLISHING);
+
       if (sid && rid) {
          jsxc.debug('Try to attach');
          jsxc.debug('SID: ' + sid);
@@ -1109,7 +1162,7 @@ jsxc.xmpp = {
 
    /**
     * Logs user out of his xmpp session and does some clean up.
-    * 
+    *
     * @param {boolean} complete If set to false, roster will not be removed
     * @returns {Boolean}
     */
@@ -1176,7 +1229,7 @@ jsxc.xmpp = {
 
    /**
     * Triggered if connection is established
-    * 
+    *
     * @private
     */
    connected: function() {
@@ -1204,12 +1257,13 @@ jsxc.xmpp = {
       jsxc.xmpp.conn.resume();
       jsxc.onMaster();
 
+      jsxc.changeState(jsxc.CONST.STATE.READY);
       $(document).trigger('attached.jsxc');
    },
 
    /**
     * Triggered if connection is attached
-    * 
+    *
     * @private
     */
    attached: function() {
@@ -1217,7 +1271,8 @@ jsxc.xmpp = {
       $('#jsxc_roster').removeClass('jsxc_noConnection');
 
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onRosterChanged, 'jabber:iq:roster', 'iq', 'set');
-      jsxc.xmpp.conn.addHandler(jsxc.xmpp.onMessage, null, 'message', 'chat');
+      jsxc.xmpp.conn.addHandler(jsxc.xmpp.onChatMessage, null, 'message', 'chat');
+      jsxc.xmpp.conn.addHandler(jsxc.xmpp.onHeadlineMessage, null, 'message', 'headline');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onReceived, null, 'message');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
 
@@ -1279,17 +1334,15 @@ jsxc.xmpp = {
          jsxc.xmpp.sendPres();
 
          if (!jsxc.restoreCompleted) {
-            jsxc.restoreRoster();
-            jsxc.restoreWindows();
-            jsxc.restoreCompleted = true;
-
-            $(document).trigger('restoreCompleted.jsxc');
+            jsxc.gui.restore();
          }
       }
 
       jsxc.xmpp.saveSessionParameter();
 
       jsxc.masterActions();
+
+      jsxc.changeState(jsxc.CONST.STATE.READY);
    },
 
    saveSessionParameter: function() {
@@ -1350,7 +1403,7 @@ jsxc.xmpp = {
 
    /**
     * Triggered if lost connection
-    * 
+    *
     * @private
     */
    disconnected: function() {
@@ -1375,6 +1428,7 @@ jsxc.xmpp = {
 
       if (jsxc.triggeredFromElement) {
          $(document).trigger('toggle.roster.jsxc', ['hidden', 0]);
+         jsxc.gui.roster.ready = false;
          $('#jsxc_roster').remove();
 
          // REVIEW: logoutElement without href attribute?
@@ -1389,11 +1443,13 @@ jsxc.xmpp = {
       jsxc.role_allocation = false;
       jsxc.master = false;
       jsxc.storage.removeItem('alive');
+
+      jsxc.changeState(jsxc.CONST.STATE.SUSPEND);
    },
 
    /**
     * Triggered on connection fault
-    * 
+    *
     * @param {String} condition information why we lost the connection
     * @private
     */
@@ -1407,7 +1463,7 @@ jsxc.xmpp = {
 
    /**
     * Triggered on auth fail.
-    * 
+    *
     * @private
     */
    onAuthFail: function() {
@@ -1429,7 +1485,7 @@ jsxc.xmpp = {
 
    /**
     * Triggered on initial roster load
-    * 
+    *
     * @param {dom} iq
     * @private
     */
@@ -1477,11 +1533,12 @@ jsxc.xmpp = {
       jsxc.gui.roster.loaded = true;
       jsxc.debug('Roster loaded');
       $(document).trigger('cloaded.roster.jsxc');
+      jsxc.changeUIState(jsxc.CONST.UISTATE.READY);
    },
 
    /**
     * Triggerd on roster changes
-    * 
+    *
     * @param {dom} iq
     * @returns {Boolean} True to preserve handler
     * @private
@@ -1556,19 +1613,19 @@ jsxc.xmpp = {
 
    /**
     * Triggered on incoming presence stanzas
-    * 
+    *
     * @param {dom} presence
     * @private
     */
    onPresence: function(presence) {
       /*
        * <presence xmlns='jabber:client' type='unavailable' from='' to=''/>
-       * 
+       *
        * <presence xmlns='jabber:client' from='' to=''> <priority>5</priority>
        * <c xmlns='http://jabber.org/protocol/caps'
        * node='http://psi-im.org/caps' ver='caps-b75d8d2b25' ext='ca cs
        * ep-notify-2 html'/> </presence>
-       * 
+       *
        * <presence xmlns='jabber:client' from='' to=''> <show>chat</show>
        * <status></status> <priority>5</priority> <c
        * xmlns='http://jabber.org/protocol/caps' node='http://psi-im.org/caps'
@@ -1619,7 +1676,11 @@ jsxc.xmpp = {
             jid: jid,
             approve: -1
          });
-         jsxc.notice.add($.t('Friendship_request'), $.t('from') + ' ' + jid, 'gui.showApproveDialog', [jid]);
+         jsxc.notice.add({
+            msg: $.t('Friendship_request'),
+            description: $.t('from') + ' ' + jid,
+            type: 'contact'
+         }, 'gui.showApproveDialog', [jid]);
 
          return true;
       } else if (ptype === 'unavailable' || ptype === 'unsubscribed') {
@@ -1635,7 +1696,7 @@ jsxc.xmpp = {
 
       if (status === 0) {
          delete res[r];
-      } else {
+      } else if (r) {
          res[r] = status;
       }
 
@@ -1690,7 +1751,7 @@ jsxc.xmpp = {
       jsxc.storage.setUserItem('buddy', bid, data);
       jsxc.storage.setUserItem('res', bid, res);
 
-      jsxc.debug('Presence (' + from + '): ' + status);
+      jsxc.debug('Presence (' + from + '): ' + jsxc.CONST.STATUS[status]);
 
       jsxc.gui.update(bid);
       jsxc.gui.roster.reorder(bid);
@@ -1703,13 +1764,12 @@ jsxc.xmpp = {
 
    /**
     * Triggered on incoming message stanzas
-    * 
+    *
     * @param {dom} presence
     * @returns {Boolean}
     * @private
     */
-   onMessage: function(stanza) {
-
+   onChatMessage: function(stanza) {
       var forwarded = $(stanza).find('forwarded[xmlns="' + jsxc.CONST.NS.FORWARD + '"]');
       var message, carbon;
 
@@ -1732,6 +1792,7 @@ jsxc.xmpp = {
       }
 
       var body = $(message).find('body:first').text();
+      var htmlBody = $(message).find('body[xmlns="' + Strophe.NS.XHTML + '"]');
 
       if (!body || (body.match(/\?OTR/i) && forwarded)) {
          return true;
@@ -1781,7 +1842,10 @@ jsxc.xmpp = {
          var chat = jsxc.storage.getUserItem('chat', bid) || [];
 
          if (chat.length === 0) {
-            jsxc.notice.add($.t('Unknown_sender'), $.t('You_received_a_message_from_an_unknown_sender') + ' (' + bid + ').', 'gui.showUnknownSender', [bid]);
+            jsxc.notice.add({
+               msg: $.t('Unknown_sender'),
+               description: $.t('You_received_a_message_from_an_unknown_sender') + ' (' + bid + ').'
+            }, 'gui.showUnknownSender', [bid]);
          }
 
          var msg = jsxc.removeHTML(body);
@@ -1819,10 +1883,40 @@ jsxc.xmpp = {
          }));
       }
 
-      if (jsxc.otr.objects.hasOwnProperty(bid)) {
+      var attachment;
+      if (htmlBody.length === 1) {
+         var httpUploadElement = htmlBody.find('a[data-type][data-name][data-size]');
+
+         if (httpUploadElement.length === 1) {
+            attachment = {
+               type: httpUploadElement.attr('data-type'),
+               name: httpUploadElement.attr('data-name'),
+               size: httpUploadElement.attr('data-size'),
+            };
+
+            if (httpUploadElement.attr('data-thumbnail') && httpUploadElement.attr('data-thumbnail').match(/^\s*data:[a-z]+\/[a-z0-9-+.*]+;base64,[a-z0-9=+/]+$/i)) {
+               attachment.thumbnail = httpUploadElement.attr('data-thumbnail');
+            }
+
+            if (httpUploadElement.attr('href') && httpUploadElement.attr('href').match(/^https:\/\//)) {
+               attachment.data = httpUploadElement.attr('href');
+               body = null;
+            }
+
+            if (!attachment.type.match(/^[a-z]+\/[a-z0-9-+.*]+$/i) || !attachment.name.match(/^[\s\w.,-]+$/i) || !attachment.size.match(/^\d+$/i)) {
+               attachment = undefined;
+
+               jsxc.warn('Invalid file type, name or size.');
+            }
+         }
+      }
+
+      if (jsxc.otr.objects.hasOwnProperty(bid) && body) {
+         // @TODO check for file upload url after decryption
          jsxc.otr.objects[bid].receiveMsg(body, {
             stamp: stamp,
-            forwarded: forwarded
+            forwarded: forwarded,
+            attachment: attachment
          });
       } else {
          jsxc.gui.window.postMessage({
@@ -1831,7 +1925,8 @@ jsxc.xmpp = {
             msg: body,
             encrypted: false,
             forwarded: forwarded,
-            stamp: stamp
+            stamp: stamp,
+            attachment: attachment
          });
       }
 
@@ -1840,8 +1935,40 @@ jsxc.xmpp = {
    },
 
    /**
+    * Process message stanzas of type headline.
+    *
+    * @param  {String} stanza Message stanza of type headline
+    * @return {Boolean}
+    */
+   onHeadlineMessage: function(stanza) {
+      stanza = $(stanza);
+
+      var from = stanza.attr('from');
+      var domain = Strophe.getDomainFromJid(from);
+
+      if (domain !== from) {
+         if (!jsxc.storage.getUserItem('buddy', jsxc.jidToBid(from))) {
+            return true;
+         }
+      } else if (domain !== Strophe.getDomainFromJid(jsxc.xmpp.conn.jid)) {
+         return true;
+      }
+
+      var subject = stanza.find('subject:first').text() || $.t('Notification');
+      var body = stanza.find('body:first').text();
+
+      jsxc.notice.add({
+         msg: subject,
+         description: body,
+         type: (domain === from) ? 'announcement' : null
+      }, 'gui.showNotification', [subject, body, from]);
+
+      return true;
+   },
+
+   /**
     * Triggerd if the rid changed
-    * 
+    *
     * @param {integer} rid next valid request id
     * @private
     */
@@ -1851,7 +1978,7 @@ jsxc.xmpp = {
 
    /**
     * response to friendship request
-    * 
+    *
     * @param {string} from jid from original friendship req
     * @param {boolean} approve
     */
@@ -1872,7 +1999,7 @@ jsxc.xmpp = {
 
    /**
     * Add buddy to my friends
-    * 
+    *
     * @param {string} username jid
     * @param {string} alias
     */
@@ -1908,7 +2035,7 @@ jsxc.xmpp = {
 
    /**
     * Remove buddy from my friends
-    * 
+    *
     * @param {type} jid
     */
    removeBuddy: function(jid) {
@@ -1943,39 +2070,63 @@ jsxc.xmpp = {
 
    /**
     * Public function to send message.
-    * 
+    *
     * @memberOf jsxc.xmpp
     * @param bid css jid of user
     * @param msg message
     * @param uid unique id
     */
-   sendMessage: function(bid, msg, uid) {
-      if (jsxc.otr.objects.hasOwnProperty(bid)) {
-         jsxc.otr.objects[bid].sendMsg(msg, uid);
+   sendMessage: function(message) {
+      var bid = message.bid;
+      var msg = message.htmlMsg;
+
+      var mucRoomNames = (jsxc.xmpp.conn.muc && jsxc.xmpp.conn.muc.roomNames) ? jsxc.xmpp.conn.muc.roomNames : [];
+      var isMucBid = mucRoomNames.indexOf(bid) >= 0;
+
+      if (jsxc.otr.objects.hasOwnProperty(bid) && !isMucBid) {
+         jsxc.otr.objects[bid].sendMsg(msg, message);
       } else {
-         jsxc.xmpp._sendMessage(jsxc.gui.window.get(bid).data('jid'), msg, uid);
+         jsxc.xmpp._sendMessage(jsxc.gui.window.get(bid).data('jid'), msg, message);
       }
    },
 
    /**
     * Create message stanza and send it.
-    * 
+    *
     * @memberOf jsxc.xmpp
     * @param jid Jabber id
     * @param msg Message
     * @param uid unique id
     * @private
     */
-   _sendMessage: function(jid, msg, uid) {
+   _sendMessage: function(jid, msg, message) {
+      // @TODO put jid into message object
       var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(jid)) || {};
       var isBar = (Strophe.getBareJidFromJid(jid) === jid);
       var type = data.type || 'chat';
+      message = message || {};
 
       var xmlMsg = $msg({
          to: jid,
          type: type,
-         id: uid
-      }).c('body').t(msg);
+         id: message._uid
+      });
+
+      if (message.type === jsxc.Message.HTML) {
+         xmlMsg.c("html", {
+            xmlns: Strophe.NS.XHTML_IM
+         });
+
+         // Omit StropheJS XEP-0071 limitations
+         var body = Strophe.xmlElement("body", {
+            xmlns: Strophe.NS.XHTML
+         });
+         body.innerHTML = msg;
+
+         xmlMsg.node.appendChild(body);
+      } else {
+         xmlMsg.c('body').t(msg);
+      }
 
       if (jsxc.xmpp.carbons.enabled && msg.match(/^\?OTR/)) {
          xmlMsg.up().c("private", {
@@ -1990,12 +2141,19 @@ jsxc.xmpp = {
          });
       }
 
+      if (jsxc.xmpp.conn.chatstates && !jsxc.xmpp.chatState.isDisabled()) {
+         // send active event (XEP-0085)
+         xmlMsg.up().c('active', {
+            xmlns: Strophe.NS.CHATSTATES
+         });
+      }
+
       jsxc.xmpp.conn.send(xmlMsg);
    },
 
    /**
     * This function loads a vcard.
-    * 
+    *
     * @memberOf jsxc.xmpp
     * @param bid
     * @param cb
@@ -2019,7 +2177,7 @@ jsxc.xmpp = {
 
    /**
     * Retrieves capabilities.
-    * 
+    *
     * @memberOf jsxc.xmpp
     * @param jid
     * @returns List of known capabilities
@@ -2041,7 +2199,7 @@ jsxc.xmpp = {
 
    /**
     * Test if jid has given features
-    * 
+    *
     * @param  {string}   jid     Jabber id
     * @param  {string[]} feature Single feature or list of features
     * @param  {Function} cb      Called with the result as first param.
@@ -2093,7 +2251,7 @@ jsxc.xmpp = {
 
 /**
  * Handle carbons (XEP-0280);
- * 
+ *
  * @namespace jsxc.xmpp.carbons
  */
 jsxc.xmpp.carbons = {
@@ -2101,7 +2259,7 @@ jsxc.xmpp.carbons = {
 
    /**
     * Enable carbons.
-    * 
+    *
     * @memberOf jsxc.xmpp.carbons
     * @param cb callback
     */
@@ -2127,7 +2285,7 @@ jsxc.xmpp.carbons = {
 
    /**
     * Disable carbons.
-    * 
+    *
     * @memberOf jsxc.xmpp.carbons
     * @param cb callback
     */
@@ -2153,7 +2311,7 @@ jsxc.xmpp.carbons = {
 
    /**
     * Enable/Disable carbons depending on options key.
-    * 
+    *
     * @memberOf jsxc.xmpp.carbons
     * @param err error message
     */
@@ -2171,266 +2329,254 @@ jsxc.xmpp.carbons = {
 };
 
 /**
- * Load message object with given uid.
- * 
- * @class Message
- * @memberOf jsxc
- * @param {string} uid Unified identifier from message object
+ * @namespace jsxc.fileTransfer
+ * @type {Object}
  */
+jsxc.fileTransfer = {};
+
 /**
- * Create new message object.
+ * Make bytes more human readable.
  *
- * @class Message
- * @memberOf jsxc
- * @param {object} args New message properties
- * @param {string} args.bid
- * @param {direction} args.direction
- * @param {string} args.msg
- * @param {boolean} args.encrypted
- * @param {boolean} args.forwarded
- * @param {boolean} args.sender
- * @param {integer} args.stamp
- * @param {object} args.attachment Attached data
- * @param {string} args.attachment.name File name
- * @param {string} args.attachment.size File size
- * @param {string} args.attachment.type File type
- * @param {string} args.attachment.data File data
+ * @memberOf jsxc.fileTransfer
+ * @param  {Integer} byte
+ * @return {String}
  */
+jsxc.fileTransfer.formatByte = function(byte) {
+   var s = ['', 'KB', 'MB', 'GB', 'TB'];
+   var i;
 
-jsxc.Message = function() {
-
-   /** @member {string} */
-   this._uid = null;
-
-   /** @member {boolean} */
-   this._received = false;
-
-   /** @member {boolean} */
-   this.encrypted = false;
-
-   /** @member {boolean} */
-   this.forwarded = false;
-
-   /** @member {integer} */
-   this.stamp = new Date().getTime();
-
-   if (typeof arguments[0] === 'string' && arguments[0].length > 0 && arguments.length === 1) {
-      this._uid = arguments[0];
-
-      this.load(this._uid);
-   } else if (typeof arguments[0] === 'object' && arguments[0] !== null) {
-      $.extend(this, arguments[0]);
+   for (i = 1; i < s.length; i++) {
+      if (byte < 1024) {
+         break;
+      }
+      byte /= 1024;
    }
 
-   if (!this._uid) {
-      this._uid = new Date().getTime() + ':msg';
-   }
+   return (Math.round(byte * 10) / 10) + s[i - 1];
 };
 
 /**
- * Load message properties.
+ * Start file transfer dialog.
  *
- * @memberof jsxc.Message
- * @param  {string} uid
+ * @memberOf jsxc.fileTransfer
+ * @param  {String} jid
  */
-jsxc.Message.prototype.load = function(uid) {
-   var data = jsxc.storage.getUserItem('msg', uid);
+jsxc.fileTransfer.startGuiAction = function(jid) {
+   var bid = jsxc.jidToBid(jid);
+   var res = Strophe.getResourceFromJid(jid);
 
-   if (!data) {
-      jsxc.debug('Could not load message with uid ' + uid);
+   if (!res && !jsxc.xmpp.httpUpload.ready) {
+      jsxc.fileTransfer.selectResource(bid, jsxc.fileTransfer.startGuiAction);
+
+      return;
    }
 
-   $.extend(this, data);
+   jsxc.fileTransfer.showFileSelection(jid);
 };
 
 /**
- * Save message properties and create thumbnail.
+ * Show select dialog for file transfer capable resources.
  *
- * @memberOf jsxc.Message
- * @return {Message} this object
+ * @memberOf jsxc.fileTransfer
+ * @param  {String} bid
+ * @param  {Function} success_cb Called if user selects resource
+ * @param  {Function} error_cb Called if no resource was found or selected
  */
-jsxc.Message.prototype.save = function() {
-   var history;
+jsxc.fileTransfer.selectResource = function(bid, success_cb, error_cb) {
+   var win = jsxc.gui.window.get(bid);
+   var jid = win.data('jid');
+   var res = Strophe.getResourceFromJid(jid);
 
-   if (this.bid) {
-      history = jsxc.storage.getUserItem('history', this.bid) || [];
+   var fileCapableRes = jsxc.webrtc.getCapableRes(jid, jsxc.webrtc.reqFileFeatures);
+   var resources = Object.keys(jsxc.storage.getUserItem('res', bid)) || [];
 
-      if (history.indexOf(this._uid) < 0) {
-         if (history.length > jsxc.options.get('numberOfMsg')) {
-            jsxc.Message.delete(history.pop());
+   if (res === null && resources.length === 1 && fileCapableRes.length === 1) {
+      // only one resource is available and this resource is also capable to receive files
+      res = fileCapableRes[0];
+      jid = bid + '/' + res;
+
+      success_cb(jid);
+   } else if (fileCapableRes.indexOf(res) >= 0) {
+      // currently used resource is capable to receive files
+      success_cb(bid + '/' + res);
+   } else if (fileCapableRes.indexOf(res) < 0) {
+      // show selection dialog
+      jsxc.gui.window.selectResource(bid, $.t('Your_contact_uses_multiple_clients_'), function(data) {
+         if (data.status === 'unavailable') {
+            jsxc.gui.window.hideOverlay(bid);
+
+            if (typeof error_cb === 'function') {
+               error_cb();
+            }
+         } else if (data.status === 'selected') {
+            success_cb(bid + '/' + data.result);
          }
-      } else {
-         history = null;
-      }
+      }, fileCapableRes);
    }
+};
 
-   if (Image && this.attachment && this.attachment.type.match(/^image\//i) && this.attachment.data) {
-      var sHeight, sWidth, sx, sy;
-      var dHeight = 100,
-         dWidth = 100;
-      var canvas = $("<canvas>").get(0);
+/**
+ * Show file selector.
+ *
+ * @memberOf jsxc.fileTransfer
+ * @param  {String} jid
+ */
+jsxc.fileTransfer.showFileSelection = function(jid) {
+   var bid = jsxc.jidToBid(jid);
+   var msg = $('<div><div><label><input type="file" name="files" /><label></div></div>');
+   msg.addClass('jsxc_chatmessage');
 
-      canvas.width = dWidth;
-      canvas.height = dHeight;
+   jsxc.gui.window.showOverlay(bid, msg, true);
 
-      var ctx = canvas.getContext("2d");
-      var img = new Image();
+   // open file selection for user
+   msg.find('label').click();
 
-      img.src = this.attachment.data;
+   msg.find('[type="file"]').change(function(ev) {
+      var file = ev.target.files[0]; // FileList object
 
-      if (img.height > img.width) {
-         sHeight = img.width;
-         sWidth = img.width;
-         sx = 0;
-         sy = (img.height - img.width) / 2;
-      } else {
-         sHeight = img.height;
-         sWidth = img.height;
-         sx = (img.width - img.height) / 2;
-         sy = 0;
+      if (!file) {
+         return;
       }
 
-      ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
-
-      this.attachment.thumbnail = canvas.toDataURL();
-
-      if (this.direction === 'out') {
-         // save storage
-         this.attachment.data = null;
-      }
-   }
-
-   var data;
-
-   if (this.attachment && this.attachment.size > jsxc.options.maxStorableSize && this.direction === 'in') {
-      jsxc.debug('Attachment to large to store');
-
-      data = this.attachment.data;
-      this.attachment.data = null;
-      this.attachment.persistent = false;
-
-      //TODO inform user
-   }
-
-   jsxc.storage.setUserItem('msg', this._uid, this);
-
-   if (history) {
-      history.unshift(this._uid);
-
-      jsxc.storage.setUserItem('history', this.bid, history);
-   }
-
-   if (data && this.attachment) {
-      this.attachment.data = data;
-   }
-
-   return this;
+      jsxc.fileTransfer.fileSelected(jid, msg, file);
+   });
 };
 
 /**
- * Remove object from storage.
- * 
- * @memberOf jsxc.Message
- */
-jsxc.Message.prototype.delete = function() {
-   jsxc.Message.delete(this._uid);
-};
-
-/**
- * Returns object as jquery object.
+ * Callback for file selector.
  *
- * @memberOf jsxc.Message
- * @return {jQuery} Representation in DOM
+ * @memberOf jsxc.fileTransfer
+ * @param  {String} jid
+ * @param  {jQuery} msg jQuery object of temporary file message
+ * @param  {File} file selected file
  */
-jsxc.Message.prototype.getDOM = function() {
-   return jsxc.Message.getDOM(this._uid);
-};
+jsxc.fileTransfer.fileSelected = function(jid, msg, file) {
+   var bid = jsxc.jidToBid(jid);
 
-/**
- * Mark message as received.
- * 
- * @memberOf jsxc.Message
- */
-jsxc.Message.prototype.received = function() {
-   this._received = true;
-   this.save();
+   if (file.transportMethod !== 'webrtc' && jsxc.xmpp.httpUpload.ready && file.size > jsxc.options.get('httpUpload').maxSize) {
+      jsxc.debug('File too large for http upload.');
 
-   this.getDOM().addClass('jsxc_received');
-};
+      file.transportMethod = 'webrtc';
 
-/**
- * Returns true if the message was already received.
- *
- * @memberOf jsxc.Message
- * @return {boolean} true means received
- */
-jsxc.Message.prototype.isReceived = function() {
-   return this._received;
-};
+      jsxc.fileTransfer.selectResource(bid, function(jid) {
+         jsxc.fileTransfer.fileSelected(jid, msg, file);
+      }, function() {
+         var maxSize = jsxc.fileTransfer.formatByte(jsxc.options.get('httpUpload').maxSize);
+         var fileSize = jsxc.fileTransfer.formatByte(file.size);
 
-/**
- * Remove message with uid.
- *
- * @memberOf jsxc.Message
- * @static
- * @param  {string} uid message uid
- */
-jsxc.Message.delete = function(uid) {
-   var data = jsxc.storage.getUserItem('msg', uid);
-
-   if (data) {
-      jsxc.storage.removeUserItem('msg', uid);
-
-      if (data.bid) {
-         var history = jsxc.storage.getUserItem('history', data.bid) || [];
-
-         history = $.grep(history, function(el) {
-            return el !== uid;
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('File_too_large') + ' (' + fileSize + ' > ' + maxSize + ')'
          });
 
-         jsxc.storage.setUserItem('history', data.bid);
+         jsxc.gui.window.hideOverlay(bid);
+      });
+
+      return;
+   } else if (!jsxc.xmpp.httpUpload.ready && Strophe.getResourceFromJid(jid)) {
+      // http upload not available
+      file.transportMethod = 'webrtc';
+   }
+
+   var attachment = $('<div>');
+   attachment.addClass('jsxc_attachment');
+   attachment.addClass('jsxc_' + file.type.replace(/\//, '-'));
+   attachment.addClass('jsxc_' + file.type.replace(/^([^/]+)\/.*/, '$1'));
+
+   msg.empty().append(attachment);
+
+   if (FileReader && file.type.match(/^image\//)) {
+      // show image preview
+      var img = $('<img alt="preview">').attr('title', file.name);
+      img.attr('src', jsxc.options.get('root') + '/img/loading.gif');
+      img.appendTo(attachment);
+
+      var reader = new FileReader();
+
+      reader.onload = function() {
+         img.attr('src', reader.result);
+      };
+
+      reader.readAsDataURL(file);
+   } else {
+      attachment.text(file.name + ' (' + file.size + ' byte)');
+   }
+
+   $('<button>').addClass('jsxc_btn jsxc_btn-primary').text($.t('Send')).click(function() {
+      // user confirmed file transfer
+      jsxc.gui.window.hideOverlay(bid);
+      msg.remove();
+
+      var message = jsxc.gui.window.postMessage({
+         bid: bid,
+         direction: 'out',
+         attachment: {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            data: (file.type.match(/^image\//)) ? img.attr('src') : null
+         }
+      });
+
+      if (file.transportMethod === 'webrtc') {
+         var sess = jsxc.webrtc.sendFile(jid, file);
+
+         sess.sender.on('progress', function(sent, size) {
+            jsxc.gui.window.updateProgress(message, sent, size);
+
+            if (sent === size) {
+               message.received();
+            }
+         });
+      } else {
+         // progress is updated in xmpp.httpUpload.uploadFile
+         jsxc.xmpp.httpUpload.sendFile(file, message);
       }
+   }).appendTo(msg);
+
+   $('<button>').addClass('jsxc_btn jsxc_btn-default').text($.t('Abort')).click(function() {
+      // user aborted file transfer
+      jsxc.gui.window.hideOverlay(bid);
+   }).appendTo(msg);
+};
+
+/**
+ * Enable/disable icons for file transfer.
+ *
+ * @memberOf jsxc.fileTransfer
+ * @param  {String} bid
+ */
+jsxc.fileTransfer.updateIcons = function(bid) {
+   var win = jsxc.gui.window.get(bid);
+
+   if (!win || win.length === 0 || !jsxc.xmpp.conn) {
+      return;
+   }
+
+   jsxc.debug('Update file transfer icons for ' + bid);
+
+   if (jsxc.xmpp.httpUpload.ready) {
+      win.find('.jsxc_sendFile').removeClass('jsxc_disabled');
+
+      return;
+   }
+
+   var jid = win.data('jid');
+   var res = Strophe.getResourceFromJid(jid);
+   var fileCapableRes = jsxc.webrtc.getCapableRes(bid, jsxc.webrtc.reqFileFeatures);
+   var resources = Object.keys(jsxc.storage.getUserItem('res', bid) || {}) || [];
+
+   if (fileCapableRes.indexOf(res) > -1 || (res === null && fileCapableRes.length === 1 && resources.length === 1)) {
+      win.find('.jsxc_sendFile').removeClass('jsxc_disabled');
+   } else {
+      win.find('.jsxc_sendFile').addClass('jsxc_disabled');
    }
 };
 
-/**
- * Returns message object as jquery object.
- *
- * @memberOf jsxc.Message
- * @static
- * @param  {string} uid message uid
- * @return {jQuery} jQuery representation in DOM
- */
-jsxc.Message.getDOM = function(uid) {
-   return $('#' + uid.replace(/:/g, '-'));
-};
-
-/**
- * Message direction can be incoming, outgoing or system.
- * 
- * @typedef {(jsxc.Message.IN|jsxc.Message.OUT|jsxc.Message.SYS)} direction
- */
-
-/**
- * @constant
- * @type {string}
- * @default
- */
-jsxc.Message.IN = 'in';
-
-/**
- * @constant
- * @type {string}
- * @default
- */
-jsxc.Message.OUT = 'out';
-
-/**
- * @constant
- * @type {string}
- * @default
- */
-jsxc.Message.SYS = 'sys';
+$(document).on('update.gui.jsxc', function(ev, bid) {
+   jsxc.fileTransfer.updateIcons(bid);
+});
 
 /* global Favico, emojione*/
 /**
@@ -2477,7 +2623,8 @@ jsxc.gui = {
          ':jabber:': ['jabber'],
          ':xmpp:': ['xmpp'],
          ':jsxc:': ['jsxc'],
-         ':owncloud:': ['owncloud']
+         ':owncloud:': ['owncloud'],
+         ':nextcloud:': ['nextcloud']
       },
       'emojione': emojione.emojioneList
    },
@@ -2534,6 +2681,8 @@ jsxc.gui = {
       if ($('#jsxc_windowList').length > 0) {
          return;
       }
+
+      jsxc.changeUIState(jsxc.CONST.UISTATE.INITIATING);
 
       jsxc.gui.regShortNames = new RegExp(emojione.regShortNames.source + '|(' + Object.keys(jsxc.gui.emoticonList.core).join('|') + ')', 'gi');
 
@@ -2670,6 +2819,8 @@ jsxc.gui = {
       ri.find('.jsxc_name').attr('title', info);
 
       jsxc.gui.updateAvatar(ri.add(we.find('.jsxc_bar')), data.jid, data.avatar);
+
+      $(document).trigger('update.gui.jsxc', [bid]);
    },
 
    /**
@@ -2860,9 +3011,15 @@ jsxc.gui = {
     * Creates and show loginbox
     */
    showLoginBox: function() {
-      // Set focus to password field
-      $(document).on("complete.dialog.jsxc", function() {
-         $('#jsxc_password').focus();
+      // Set focus to username or password field
+      $(document).one("complete.dialog.jsxc", function() {
+         setTimeout(function() {
+            if ($("#jsxc_username").val().length === 0) {
+               $("#jsxc_username").focus();
+            } else {
+               $('#jsxc_password').focus();
+            }
+         }, 50);
       });
 
       jsxc.gui.dialog.open(jsxc.gui.template.get('loginBox'));
@@ -3096,6 +3253,7 @@ jsxc.gui = {
 
             if (val !== '') {
                jsxc.options.getUsers.call(this, val, function(list) {
+                  $('#jsxc_userlist').empty();
                   $.each(list || {}, function(uid, displayname) {
                      var option = $('<option>');
                      option.attr('data-username', uid);
@@ -3618,6 +3776,26 @@ jsxc.gui = {
    },
 
    /**
+    * Show notification dialog.
+    *
+    * @param  {String} subject
+    * @param  {String} body
+    * @param  {String} from
+    */
+   showNotification: function(subject, body, from) {
+      var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('notification'));
+
+      dialog.find('h3').text(subject);
+      dialog.find('.jsxc_msg').text(body);
+
+      if (from) {
+         dialog.find('.jsxc_meta').text($.t('from') + ' ' + from);
+      } else {
+         dialog.find('.jsxc_meta').hide();
+      }
+   },
+
+   /**
     * Change own presence to pres.
     *
     * @memberOf jsxc.gui
@@ -3880,7 +4058,7 @@ jsxc.gui = {
             filename = jsxc.gui.emoticonList.core[shortname][jsxc.gui.emoticonList.core[shortname].length - 1].replace(/^:([^:]+):$/, '$1');
             src = jsxc.options.root + '/img/emotions/' + filename + '.svg';
          } else if (jsxc.gui.emoticonList.emojione[shortname]) {
-            filename = jsxc.gui.emoticonList.emojione[shortname][jsxc.gui.emoticonList.emojione[shortname].length - 1];
+            filename = jsxc.gui.emoticonList.emojione[shortname].fname;
             src = jsxc.options.root + '/lib/emojione/assets/svg/' + filename + '.svg';
          }
 
@@ -3893,7 +4071,22 @@ jsxc.gui = {
          return div.prop('outerHTML');
       });
 
+      var obj = $('<div>' + str + '</div>');
+      if (obj.find('.jsxc_emoticon').length === 1 && obj.text().replace(/ /, '').length === 0 && obj.find('*').length === 1) {
+         obj.find('.jsxc_emoticon').addClass('jsxc_large');
+         str = obj.prop('outerHTML');
+      }
+
       return str;
+   },
+
+   restore: function() {
+      jsxc.restoreRoster();
+      jsxc.restoreWindows();
+      jsxc.restoreCompleted = true;
+
+      $(document).trigger('restoreCompleted.jsxc');
+      jsxc.changeUIState(jsxc.CONST.UISTATE.READY);
    }
 };
 
@@ -4470,6 +4663,9 @@ jsxc.gui.window = {
       };
 
       win.find('.jsxc_more').click(expandClick);
+      win.find('.jsxc_menu').click(function() {
+         $('body').click();
+      });
 
       win.find('.jsxc_verification').click(function() {
          jsxc.gui.showVerification(bid);
@@ -4505,11 +4701,19 @@ jsxc.gui.window = {
          return false;
       });
 
+      var textinputBlurTimeout;
       win.find('.jsxc_textinput').keyup(function(ev) {
          var body = $(this).val();
 
-         if (ev.which === 13) {
+         // I'm composing a message
+         if (ev.which !== 13) {
+            jsxc.xmpp.chatState.startComposing(bid);
+         }
+
+         if (ev.which === 13 && !ev.shiftKey) {
             body = '';
+
+            jsxc.xmpp.chatState.endComposing(bid);
          }
 
          jsxc.storage.updateUserItem('window', bid, 'text', body);
@@ -4518,7 +4722,8 @@ jsxc.gui.window = {
             jsxc.gui.window.close(bid);
          }
       }).keypress(function(ev) {
-         if (ev.which !== 13 || !$(this).val()) {
+         if (ev.which !== 13 || ev.shiftKey || !$(this).val()) {
+            resizeTextarea.call(this);
             return;
          }
 
@@ -4528,15 +4733,39 @@ jsxc.gui.window = {
             msg: $(this).val()
          });
 
-         $(this).val('');
+         $(this).css('height', '').val('');
+
+         ev.preventDefault();
       }).focus(function() {
+         if (textinputBlurTimeout) {
+            clearTimeout(textinputBlurTimeout);
+         }
+
          // remove unread flag
          jsxc.gui.readMsg(bid);
+
+         resizeTextarea.call(this);
+      }).blur(function() {
+         var self = $(this);
+
+         textinputBlurTimeout = setTimeout(function() {
+            self.css('height', '');
+         }, 1200);
       }).mouseenter(function() {
          $('#jsxc_windowList').data('isOver', true);
       }).mouseleave(function() {
          $('#jsxc_windowList').data('isOver', false);
       });
+
+      function resizeTextarea() {
+         if (!$(this).data('originalHeight')) {
+            $(this).data('originalHeight', $(this).outerHeight());
+         }
+         // compensate rounding error
+         if ($(this).outerHeight() < (this.scrollHeight - 1) && $(this).val()) {
+            $(this).height($(this).data('originalHeight') * 1.5);
+         }
+      }
 
       win.find('.jsxc_textarea').click(function() {
          // check if user clicks element or selects text
@@ -4597,8 +4826,8 @@ jsxc.gui.window = {
          li.append(jsxc.gui.shortnameToImage(':' + val[1] + ':'));
          li.find('div').attr('title', ins);
          li.click(function() {
-            win.find('input').val(win.find('input').val() + ins);
-            win.find('input').focus();
+            win.find('.jsxc_textinput').val(win.find('.jsxc_textinput').val() + ins);
+            win.find('.jsxc_textinput').focus();
          });
          win.find('.jsxc_emoticons ul').prepend(li);
       });
@@ -4951,7 +5180,10 @@ jsxc.gui.window = {
       }
 
       var data = jsxc.storage.getUserItem('buddy', message.bid);
-      var html_msg = message.msg;
+
+      if (!message.htmlMsg && message.msg) {
+         message.htmlMsg = message.msg;
+      }
 
       // remove html tags and reencode html tags
       message.msg = jsxc.removeHTML(message.msg);
@@ -4969,7 +5201,7 @@ jsxc.gui.window = {
          message.msg = $.t('unencrypted_message_received') + ' ' + message.msg;
       }
 
-      message.encrypted = message.encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
+      message.encrypted = (typeof message.encrypted === 'boolean') ? message.encrypted : data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
 
       try {
          message.save();
@@ -4985,11 +5217,11 @@ jsxc.gui.window = {
       if (message.direction === 'in' && !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
          jsxc.gui.unreadMsg(message.bid);
 
-         $(document).trigger('postmessagein.jsxc', [message.bid, html_msg]);
+         $(document).trigger('postmessagein.jsxc', [message.bid, message.htmlMsg]);
       }
 
-      if (message.direction === jsxc.Message.OUT && jsxc.master && message.forwarded !== true && html_msg) {
-         jsxc.xmpp.sendMessage(message.bid, html_msg, message._uid);
+      if (message.direction === jsxc.Message.OUT && jsxc.master && message.forwarded !== true && message.htmlMsg) {
+         jsxc.xmpp.sendMessage(message);
       }
 
       jsxc.gui.window._postMessage(message);
@@ -5060,6 +5292,12 @@ jsxc.gui.window = {
       // replace line breaks
       msg = msg.replace(/(\r\n|\r|\n)/g, '<br />');
 
+      // replace /me command (XEP-0245)
+      var bidData = jsxc.storage.getUserItem('buddy', bid) || {};
+      if (direction === 'in') {
+         msg = msg.replace(/^\/me /, '<i title="/me">' + jsxc.removeHTML(bidData.name || bid) + '</i> ');
+      }
+
       var msgDiv = $("<div>"),
          msgTsDiv = $("<div>");
       msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
@@ -5070,15 +5308,29 @@ jsxc.gui.window = {
 
       if (message.isReceived() || false) {
          msgDiv.addClass('jsxc_received');
+      } else {
+         msgDiv.removeClass('jsxc_received');
       }
 
       if (message.forwarded) {
          msgDiv.addClass('jsxc_forwarded');
+      } else {
+         msgDiv.removeClass('jsxc_forwarded');
       }
 
       if (message.encrypted) {
          msgDiv.addClass('jsxc_encrypted');
+      } else {
+         msgDiv.removeClass('jsxc_encrypted');
       }
+
+      if (message.error) {
+         msgDiv.addClass('jsxc_error');
+      } else {
+         msgDiv.removeClass('jsxc_error');
+      }
+
+      msgDiv.attr('title', message.error);
 
       if (message.attachment && message.attachment.name) {
          var attachment = $('<div>');
@@ -5104,6 +5356,10 @@ jsxc.gui.window = {
             attachment = $('<a>').append(attachment);
             attachment.attr('href', message.attachment.data);
             attachment.attr('download', message.attachment.name);
+
+            if (message.attachment.data === message.msg) {
+               msgDiv.find('div').first().empty();
+            }
          }
 
          msgDiv.find('div').first().append(attachment);
@@ -5268,8 +5524,6 @@ jsxc.gui.window = {
 
       if (sent === size) {
          span.remove();
-
-         message.received();
       }
    },
 
@@ -5370,99 +5624,7 @@ jsxc.gui.window = {
    },
 
    sendFile: function(jid) {
-      var bid = jsxc.jidToBid(jid);
-      var win = jsxc.gui.window.get(bid);
-      var res = Strophe.getResourceFromJid(jid);
-
-      if (!res) {
-         jid = win.data('jid');
-         res = Strophe.getResourceFromJid(jid);
-
-         var fileCapableRes = jsxc.webrtc.getCapableRes(jid, jsxc.webrtc.reqFileFeatures);
-         var resources = Object.keys(jsxc.storage.getUserItem('res', bid)) || [];
-
-         if (res === null && resources.length === 1 && fileCapableRes.length === 1) {
-            res = fileCapableRes[0];
-            jid = bid + '/' + res;
-         } else if (fileCapableRes.indexOf(res) < 0) {
-            jsxc.gui.window.selectResource(bid, $.t('Your_contact_uses_multiple_clients_'), function(data) {
-               if (data.status === 'unavailable') {
-                  jsxc.gui.window.hideOverlay(bid);
-               } else if (data.status === 'selected') {
-                  jsxc.gui.window.sendFile(bid + '/' + data.result);
-               }
-            }, fileCapableRes);
-
-            return;
-         }
-      }
-
-      var msg = $('<div><div><label><input type="file" name="files" /><label></div></div>');
-      msg.addClass('jsxc_chatmessage');
-
-      jsxc.gui.window.showOverlay(bid, msg, true);
-
-      msg.find('label').click();
-
-      msg.find('[type="file"]').change(function(ev) {
-         var file = ev.target.files[0]; // FileList object
-
-         if (!file) {
-            return;
-         }
-
-         var attachment = $('<div>');
-         attachment.addClass('jsxc_attachment');
-         attachment.addClass('jsxc_' + file.type.replace(/\//, '-'));
-         attachment.addClass('jsxc_' + file.type.replace(/^([^/]+)\/.*/, '$1'));
-
-         msg.empty().append(attachment);
-
-         if (FileReader && file.type.match(/^image\//)) {
-            var img = $('<img alt="preview">').attr('title', file.name);
-            img.attr('src', jsxc.options.get('root') + '/img/loading.gif');
-            img.appendTo(attachment);
-
-            var reader = new FileReader();
-
-            reader.onload = function() {
-               img.attr('src', reader.result);
-            };
-
-            reader.readAsDataURL(file);
-         } else {
-            attachment.text(file.name + ' (' + file.size + ' byte)');
-         }
-
-         $('<button>').addClass('jsxc_btn jsxc_btn-primary').text($.t('Send')).click(function() {
-            var sess = jsxc.webrtc.sendFile(jid, file);
-
-            jsxc.gui.window.hideOverlay(bid);
-
-            var message = jsxc.gui.window.postMessage({
-               _uid: sess.sid + ':msg',
-               bid: bid,
-               direction: 'out',
-               attachment: {
-                  name: file.name,
-                  size: file.size,
-                  type: file.type,
-                  data: (file.type.match(/^image\//)) ? img.attr('src') : null
-               }
-            });
-
-            sess.sender.on('progress', function(sent, size) {
-               jsxc.gui.window.updateProgress(message, sent, size);
-            });
-
-            msg.remove();
-
-         }).appendTo(msg);
-
-         $('<button>').addClass('jsxc_btn jsxc_btn-default').text($.t('Abort')).click(function() {
-            jsxc.gui.window.hideOverlay(bid);
-         }).appendTo(msg);
-      });
+      jsxc.fileTransfer.startGuiAction(jid);
    }
 };
 
@@ -5496,7 +5658,7 @@ jsxc.gui.template.get = function(name, bid, msg) {
       $.extend(ph, {
          bid_priv_fingerprint: (data && data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : $.t('not_available'),
          bid_jid: bid,
-         bid_name: (data && data.name) ? data.name : bid
+         bid_name: (data && data.name) ? jsxc.escapeHTML(data.name) : bid
       });
    }
 
@@ -5526,7 +5688,7 @@ jsxc.gui.template.get = function(name, bid, msg) {
          }
       });
 
-      ret.i18n();
+      ret.localize(ph);
 
       return ret;
    }
@@ -5534,6 +5696,274 @@ jsxc.gui.template.get = function(name, bid, msg) {
    jsxc.debug('Template not available: ' + name);
    return name;
 };
+
+/**
+ * Load message object with given uid.
+ *
+ * @class Message
+ * @memberOf jsxc
+ * @param {string} uid Unified identifier from message object
+ */
+/**
+ * Create new message object.
+ *
+ * @class Message
+ * @memberOf jsxc
+ * @param {object} args New message properties
+ * @param {string} args.bid
+ * @param {direction} args.direction
+ * @param {string} args.msg
+ * @param {boolean} args.encrypted
+ * @param {boolean} args.forwarded
+ * @param {boolean} args.sender
+ * @param {integer} args.stamp
+ * @param {object} args.attachment Attached data
+ * @param {string} args.attachment.name File name
+ * @param {string} args.attachment.size File size
+ * @param {string} args.attachment.type File type
+ * @param {string} args.attachment.data File data
+ */
+
+jsxc.Message = function() {
+
+   /** @member {string} */
+   this._uid = null;
+
+   /** @member {boolean} */
+   this._received = false;
+
+   /** @member {boolean} */
+   this.encrypted = null;
+
+   /** @member {boolean} */
+   this.forwarded = false;
+
+   /** @member {integer} */
+   this.stamp = new Date().getTime();
+
+   this.type = jsxc.Message.PLAIN;
+
+   if (typeof arguments[0] === 'string' && arguments[0].length > 0 && arguments.length === 1) {
+      this._uid = arguments[0];
+
+      this.load(this._uid);
+   } else if (typeof arguments[0] === 'object' && arguments[0] !== null) {
+      $.extend(this, arguments[0]);
+   }
+
+   if (!this._uid) {
+      this._uid = new Date().getTime() + ':msg';
+   }
+};
+
+/**
+ * Load message properties.
+ *
+ * @memberof jsxc.Message
+ * @param  {string} uid
+ */
+jsxc.Message.prototype.load = function(uid) {
+   var data = jsxc.storage.getUserItem('msg', uid);
+
+   if (!data) {
+      jsxc.debug('Could not load message with uid ' + uid);
+   }
+
+   $.extend(this, data);
+};
+
+/**
+ * Save message properties and create thumbnail.
+ *
+ * @memberOf jsxc.Message
+ * @return {Message} this object
+ */
+jsxc.Message.prototype.save = function() {
+   var history;
+
+   if (this.bid) {
+      history = jsxc.storage.getUserItem('history', this.bid) || [];
+
+      if (history.indexOf(this._uid) < 0) {
+         if (history.length > jsxc.options.get('numberOfMsg')) {
+            jsxc.Message.delete(history.pop());
+         }
+      } else {
+         history = null;
+      }
+   }
+
+   if (Image && this.attachment && this.attachment.type.match(/^image\//i) && this.attachment.data && !this.attachment.thumbnail) {
+      var sHeight, sWidth, sx, sy;
+      var dHeight = 100,
+         dWidth = 100;
+      var canvas = $("<canvas>").get(0);
+
+      canvas.width = dWidth;
+      canvas.height = dHeight;
+
+      var ctx = canvas.getContext("2d");
+      var img = new Image();
+
+      img.src = this.attachment.data;
+
+      if (img.height > img.width) {
+         sHeight = img.width;
+         sWidth = img.width;
+         sx = 0;
+         sy = (img.height - img.width) / 2;
+      } else {
+         sHeight = img.height;
+         sWidth = img.height;
+         sx = (img.width - img.height) / 2;
+         sy = 0;
+      }
+
+      ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
+
+      this.attachment.thumbnail = canvas.toDataURL();
+
+      if (this.direction === 'out') {
+         // save storage
+         this.attachment.data = null;
+      }
+   }
+
+   var data;
+
+   if (this.attachment && this.attachment.size > jsxc.options.maxStorableSize && this.direction === 'in') {
+      jsxc.debug('Attachment to large to store');
+
+      data = this.attachment.data;
+      this.attachment.data = null;
+      this.attachment.persistent = false;
+
+      //TODO inform user
+   }
+
+   jsxc.storage.setUserItem('msg', this._uid, this);
+
+   if (history) {
+      history.unshift(this._uid);
+
+      jsxc.storage.setUserItem('history', this.bid, history);
+   }
+
+   if (data && this.attachment) {
+      this.attachment.data = data;
+   }
+
+   return this;
+};
+
+/**
+ * Remove object from storage.
+ *
+ * @memberOf jsxc.Message
+ */
+jsxc.Message.prototype.delete = function() {
+   jsxc.Message.delete(this._uid);
+};
+
+/**
+ * Returns object as jquery object.
+ *
+ * @memberOf jsxc.Message
+ * @return {jQuery} Representation in DOM
+ */
+jsxc.Message.prototype.getDOM = function() {
+   return jsxc.Message.getDOM(this._uid);
+};
+
+/**
+ * Mark message as received.
+ *
+ * @memberOf jsxc.Message
+ */
+jsxc.Message.prototype.received = function() {
+   this._received = true;
+   this.save();
+
+   this.getDOM().addClass('jsxc_received');
+};
+
+/**
+ * Returns true if the message was already received.
+ *
+ * @memberOf jsxc.Message
+ * @return {boolean} true means received
+ */
+jsxc.Message.prototype.isReceived = function() {
+   return this._received;
+};
+
+/**
+ * Remove message with uid.
+ *
+ * @memberOf jsxc.Message
+ * @static
+ * @param  {string} uid message uid
+ */
+jsxc.Message.delete = function(uid) {
+   var data = jsxc.storage.getUserItem('msg', uid);
+
+   if (data) {
+      jsxc.storage.removeUserItem('msg', uid);
+
+      if (data.bid) {
+         var history = jsxc.storage.getUserItem('history', data.bid) || [];
+
+         history = $.grep(history, function(el) {
+            return el !== uid;
+         });
+
+         jsxc.storage.setUserItem('history', data.bid, history);
+      }
+   }
+};
+
+/**
+ * Returns message object as jquery object.
+ *
+ * @memberOf jsxc.Message
+ * @static
+ * @param  {string} uid message uid
+ * @return {jQuery} jQuery representation in DOM
+ */
+jsxc.Message.getDOM = function(uid) {
+   return $('#' + uid.replace(/:/g, '-'));
+};
+
+/**
+ * Message direction can be incoming, outgoing or system.
+ *
+ * @typedef {(jsxc.Message.IN|jsxc.Message.OUT|jsxc.Message.SYS)} direction
+ */
+
+/**
+ * @constant
+ * @type {string}
+ * @default
+ */
+jsxc.Message.IN = 'in';
+
+/**
+ * @constant
+ * @type {string}
+ * @default
+ */
+jsxc.Message.OUT = 'out';
+
+/**
+ * @constant
+ * @type {string}
+ * @default
+ */
+jsxc.Message.SYS = 'sys';
+
+jsxc.Message.HTML = 'html';
+
+jsxc.Message.PLAIN = 'plain';
 
 /**
  * Implements Multi-User Chat (XEP-0045).
@@ -5626,6 +6056,10 @@ jsxc.muc = {
          $(document).one('ready.roster.jsxc', jsxc.muc.initMenu);
       }
 
+      // remove maybe previously attached handlers
+      $(document).off('presence.jsxc', jsxc.muc.onPresence);
+      $(document).off('error.presence.jsxc', jsxc.muc.onPresenceError);
+
       $(document).on('presence.jsxc', jsxc.muc.onPresence);
       $(document).on('error.presence.jsxc', jsxc.muc.onPresenceError);
 
@@ -5658,6 +6092,8 @@ jsxc.muc = {
       var self = jsxc.muc;
       var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('joinChat'));
 
+      // @TODO split this monster function apart
+
       // hide second step button
       dialog.find('.jsxc_join').hide();
 
@@ -5672,7 +6108,27 @@ jsxc.muc = {
       }
 
       // display conference server
+      var serverInputTimeout;
       dialog.find('#jsxc_server').val(jsxc.options.get('muc').server);
+      dialog.find('#jsxc_server').on('input', function() {
+         var self = $(this);
+
+         if (serverInputTimeout) {
+            clearTimeout(serverInputTimeout);
+            dialog.find('.jsxc_inputinfo.jsxc_room').hide();
+         }
+
+         dialog.find('.jsxc_inputinfo.jsxc_server').hide().text('');
+         dialog.find('#jsxc_server').removeClass('jsxc_invalid');
+
+         if (self.val() && self.val().match(/^[.-0-9a-zA-Z]+$/i)) {
+            dialog.find('.jsxc_inputinfo.jsxc_room').show().addClass('jsxc_waiting');
+
+            serverInputTimeout = setTimeout(function() {
+               loadRoomList(self.val());
+            }, 1800);
+         }
+      }).trigger('input');
 
       // handle error response
       var error_handler = function(event, condition, room) {
@@ -5720,49 +6176,13 @@ jsxc.muc = {
             delete self.conn.muc.rooms[room];
          }
 
-         dialog.find('.jsxc_warning').text(msg);
+         $('<p>').addClass('jsxc_warning').text(msg).appendTo(dialog.find('.jsxc_msg'));
       };
 
       $(document).on('error.muc.jsxc', error_handler);
 
       $(document).on('close.dialog.jsxc', function() {
          $(document).off('error.muc.jsxc', error_handler);
-      });
-
-      // load room list
-      self.conn.muc.listRooms(jsxc.options.get('muc').server, function(stanza) {
-         // workaround: chrome does not display dropdown arrow for dynamically filled datalists
-         $('#jsxc_roomlist option:last').remove();
-
-         $(stanza).find('item').each(function() {
-            var r = $('<option>');
-            var rjid = $(this).attr('jid').toLowerCase();
-            var rnode = Strophe.getNodeFromJid(rjid);
-            var rname = $(this).attr('name') || rnode;
-
-            r.text(rname);
-            r.attr('data-jid', rjid);
-            r.attr('value', rnode);
-
-            $('#jsxc_roomlist select').append(r);
-         });
-
-         var set = $(stanza).find('set[xmlns="http://jabber.org/protocol/rsm"]');
-
-         if (set.length > 0) {
-            var count = set.find('count').text() || '?';
-
-            dialog.find('.jsxc_inputinfo').removeClass('jsxc_waiting').text($.t('Could_load_only', {
-               count: count
-            }));
-         } else {
-            dialog.find('.jsxc_inputinfo').hide();
-         }
-      }, function() {
-         jsxc.warn('Could not load rooms');
-
-         // room autocompletion is a comfort feature, so it is not necessary to inform the user
-         dialog.find('.jsxc_inputinfo').hide();
       });
 
       dialog.find('#jsxc_nickname').attr('placeholder', Strophe.getNodeFromJid(self.conn.jid));
@@ -5782,7 +6202,7 @@ jsxc.muc = {
 
          var room = ($('#jsxc_room').val()) ? jsxc.jidToBid($('#jsxc_room').val()) : null;
          var nickname = $('#jsxc_nickname').val() || Strophe.getNodeFromJid(self.conn.jid);
-         var password = $('#jsxc_password').val() || null;
+         var server = dialog.find('#jsxc_server').val();
 
          if (!room || !room.match(/^[^"&\'\/:<>@\s]+$/i)) {
             $('#jsxc_room').addClass('jsxc_invalid').keyup(function() {
@@ -5793,8 +6213,12 @@ jsxc.muc = {
             return false;
          }
 
+         if (dialog.find('#jsxc_server').hasClass('jsxc_invalid')) {
+            return false;
+         }
+
          if (!room.match(/@(.*)$/)) {
-            room += '@' + jsxc.options.get('muc').server;
+            room += '@' + server;
          }
 
          if (jsxc.xmpp.conn.muc.roomNames.indexOf(room) < 0) {
@@ -5816,6 +6240,7 @@ jsxc.muc = {
 
                   var bookmark = $("#jsxc_bookmark").prop("checked");
                   var autojoin = $('#jsxc_autojoin').prop('checked');
+                  var password = $('#jsxc_password').val() || null;
 
                   // clean up
                   jsxc.gui.window.clear(room);
@@ -5838,11 +6263,17 @@ jsxc.muc = {
                $(stanza).find('feature').each(function() {
                   var feature = $(this).attr('var');
 
-                  if (feature !== '' && i18n.exists(feature)) {
+                  if (feature !== '' && i18next.exists(feature)) {
                      var tr = $('<tr>');
                      $('<td>').text($.t(feature + '.keyword')).appendTo(tr);
                      $('<td>').text($.t(feature + '.description')).appendTo(tr);
                      tr.appendTo(table);
+                  }
+
+                  if (feature === 'muc_passwordprotected') {
+                     dialog.find('#jsxc_password').parents('.form-group').removeClass('jsxc_hidden');
+                     dialog.find('#jsxc_password').attr('required', 'required');
+                     dialog.find('#jsxc_password').addClass('jsxc_invalid');
                   }
                });
 
@@ -5861,7 +6292,7 @@ jsxc.muc = {
                discoReceived();
             });
          } else {
-            dialog.find('.jsxc_warning').text($.t('You_already_joined_this_room'));
+            $('<p>').addClass('jsxc_warning').text($.t('You_already_joined_this_room')).appendTo(dialog.find('.jsxc_msg'));
          }
 
          return false;
@@ -5872,12 +6303,15 @@ jsxc.muc = {
          if (ev.which !== 13) {
             // reset messages and room information
 
-            dialog.find('.jsxc_warning').empty();
+            dialog.find('.jsxc_warning').remove();
 
-            if (dialog.find('.jsxc_continue').is(":hidden")) {
+            if (dialog.find('.jsxc_continue').is(":hidden") && $(this).attr('id') !== 'jsxc_password') {
                dialog.find('.jsxc_continue').show();
                dialog.find('.jsxc_join').hide().off('click');
                dialog.find('.jsxc_msg').empty();
+               dialog.find('#jsxc_password').parents('.form-group').addClass('jsxc_hidden');
+               dialog.find('#jsxc_password').attr('required', '');
+               dialog.find('#jsxc_password').removeClass('jsxc_invalid');
                jsxc.gui.dialog.resize();
             }
 
@@ -5890,6 +6324,58 @@ jsxc.muc = {
             dialog.find('.jsxc_join').click();
          }
       });
+
+      function loadRoomList(server) {
+         if (!server) {
+            dialog.find('.jsxc_inputinfo').hide();
+
+            return;
+         }
+
+         // load room list
+         self.conn.muc.listRooms(server, function(stanza) {
+            // workaround: chrome does not display dropdown arrow for dynamically filled datalists
+            $('#jsxc_roomlist option:last').remove();
+
+            $(stanza).find('item').each(function() {
+               var r = $('<option>');
+               var rjid = $(this).attr('jid').toLowerCase();
+               var rnode = Strophe.getNodeFromJid(rjid);
+               var rname = $(this).attr('name') || rnode;
+
+               r.text(rname);
+               r.attr('data-jid', rjid);
+               r.attr('value', rnode);
+
+               $('#jsxc_roomlist select').append(r);
+            });
+
+            var set = $(stanza).find('set[xmlns="http://jabber.org/protocol/rsm"]');
+
+            if (set.length > 0) {
+               var count = set.find('count').text() || '?';
+
+               dialog.find('.jsxc_inputinfo').show().removeClass('jsxc_waiting').text($.t('Could_load_only', {
+                  count: count
+               }));
+            } else {
+               dialog.find('.jsxc_inputinfo').hide();
+            }
+         }, function(stanza) {
+            var errTextMsg = $(stanza).find('error text').text() || null;
+            jsxc.warn('Could not load rooms', errTextMsg);
+
+            if (errTextMsg) {
+               dialog.find('.jsxc_inputinfo.jsxc_server').show().text(errTextMsg);
+            }
+
+            if ($(stanza).find('error remote-server-not-found')) {
+               dialog.find('#jsxc_server').addClass('jsxc_invalid');
+            }
+
+            dialog.find('.jsxc_inputinfo.jsxc_room').hide();
+         });
+      }
    },
 
    /**
@@ -5928,8 +6414,8 @@ jsxc.muc = {
       var form = dialog.find('form');
 
       // work around Strophe.x behaviour
-      form.find('[type="checkbox"]').change(function(){
-        $(this).val(this.checked ? 1 : 0);
+      form.find('[type="checkbox"]').change(function() {
+         $(this).val(this.checked ? 1 : 0);
       });
 
       var submit = $('<button>');
@@ -7147,7 +7633,7 @@ jsxc.muc = {
 $(document).on('init.window.jsxc', jsxc.muc.initWindow);
 $(document).on('add.roster.jsxc', jsxc.muc.onAddRoster);
 
-$(document).one('attached.jsxc', function() {
+$(document).on('attached.jsxc', function() {
    jsxc.muc.init();
 });
 
@@ -7158,7 +7644,7 @@ $(document).one('connected.jsxc', function() {
 
 /**
  * This namespace handle the notice system.
- * 
+ *
  * @namspace jsxc.notice
  * @memberOf jsxc
  */
@@ -7168,7 +7654,7 @@ jsxc.notice = {
 
    /**
     * Loads the saved notices.
-    * 
+    *
     * @memberOf jsxc.notice
     */
    load: function() {
@@ -7184,25 +7670,28 @@ jsxc.notice = {
          if (saved.hasOwnProperty(key)) {
             var val = saved[key];
 
-            jsxc.notice.add(val.msg, val.description, val.fnName, val.fnParams, key);
+            jsxc.notice.add(val, val.fnName, val.fnParams, key);
          }
       }
    },
 
    /**
     * Add a new notice to the stack;
-    * 
+    *
     * @memberOf jsxc.notice
-    * @param msg Header message
-    * @param description Notice description
-    * @param fnName Function name to be called if you open the notice
+    * @param {Object} data
+    * @param {String} data.msg Header message
+    * @param {String} data.description Notice description
+    * @param {String} fnName Function name to be called if you open the notice
     * @param fnParams Array of params for function
-    * @param id Notice id
+    * @param {String} id Notice id
     */
-   add: function(msg, description, fnName, fnParams, id) {
+   add: function(data, fnName, fnParams, id) {
       var nid = id || Date.now();
       var list = $('#jsxc_notice ul');
       var notice = $('<li/>');
+      var msg = data.msg;
+      var description = data.description;
 
       notice.click(function() {
          jsxc.notice.remove(nid);
@@ -7212,6 +7701,10 @@ jsxc.notice = {
          return false;
       });
 
+      if (data.type) {
+         notice.addClass('jsxc_' + data.type + 'icon');
+      }
+
       notice.text(msg);
       notice.attr('title', description || '');
       notice.attr('data-nid', nid);
@@ -7219,11 +7712,13 @@ jsxc.notice = {
 
       $('#jsxc_notice > span').text(++jsxc.notice._num);
 
+      var saved = jsxc.storage.getUserItem('notices') || {};
+
       if (!id) {
-         var saved = jsxc.storage.getUserItem('notices') || {};
          saved[nid] = {
             msg: msg,
             description: description,
+            type: data.type,
             fnName: fnName,
             fnParams: fnParams
          };
@@ -7231,11 +7726,23 @@ jsxc.notice = {
 
          jsxc.notification.notify(msg, description || '', null, true, jsxc.CONST.SOUNDS.NOTICE);
       }
+
+      if (Object.keys(saved).length > 3 && list.find('.jsxc_closeAll').length === 0) {
+         // add close all button
+         var closeAll = $('<li>');
+         closeAll.addClass('jsxc_closeAll jsxc_deleteicon jsxc_warning');
+         closeAll.text($.t('Close_all'));
+         closeAll.prependTo(list);
+         closeAll.click(jsxc.notice.removeAll);
+      } else if (Object.keys(saved).length <= 3 && list.find('.jsxc_closeAll').length !== 0) {
+         // remove close all button
+         list.find('.jsxc_closeAll').remove();
+      }
    },
 
    /**
     * Removes notice from stack
-    * 
+    *
     * @memberOf jsxc.notice
     * @param nid The notice id
     */
@@ -7245,14 +7752,30 @@ jsxc.notice = {
       el.remove();
       $('#jsxc_notice > span').text(--jsxc.notice._num || '');
 
-      var s = jsxc.storage.getUserItem('notices');
+      var s = jsxc.storage.getUserItem('notices') || {};
       delete s[nid];
       jsxc.storage.setUserItem('notices', s);
+
+      if (Object.keys(s).length <= 3 && $('#jsxc_notice .jsxc_closeAll').length !== 0) {
+         // remove close all button
+         $('#jsxc_notice .jsxc_closeAll').remove();
+      }
+   },
+
+   /**
+    * Remove all notices.
+    */
+   removeAll: function() {
+      jsxc.notice._num = 0;
+      jsxc.storage.setUserItem('notices', {});
+
+      $('#jsxc_notice ul').empty();
+      $('#jsxc_notice > span').text('');
    },
 
    /**
     * Check if there is already a notice for the given function name.
-    * 
+    *
     * @memberOf jsxc.notice
     * @param {string} fnName Function name
     * @returns {boolean} True if there is >0 functions with the given name
@@ -7275,7 +7798,7 @@ jsxc.notice = {
 
 /**
  * This namespace handles the Notification API.
- * 
+ *
  * @namespace jsxc.notification
  */
 jsxc.notification = {
@@ -7285,7 +7808,7 @@ jsxc.notification = {
 
    /**
     * Register notification on incoming messages.
-    * 
+    *
     * @memberOf jsxc.notification
     */
    init: function() {
@@ -7314,7 +7837,7 @@ jsxc.notification = {
 
    /**
     * Shows a pop up notification and optional play sound.
-    * 
+    *
     * @param title Title
     * @param msg Message
     * @param d Duration
@@ -7383,7 +7906,7 @@ jsxc.notification = {
    /**
     * Checks if browser has support for notifications and add on chrome to the
     * default api.
-    * 
+    *
     * @returns {Boolean} True if the browser has support.
     */
    hasSupport: function() {
@@ -7438,7 +7961,10 @@ jsxc.notification = {
 
       $(document).one('postmessagein.jsxc', function() {
          setTimeout(function() {
-            jsxc.notice.add($.t('Notifications') + '?', $.t('Should_we_notify_you_'), 'gui.showRequestNotification');
+            jsxc.notice.add({
+               msg: $.t('Notifications') + '?',
+               description: $.t('Should_we_notify_you_')
+            }, 'gui.showRequestNotification');
          }, 1000);
       });
    },
@@ -7462,7 +7988,7 @@ jsxc.notification = {
 
    /**
     * Check permission.
-    * 
+    *
     * @returns {Boolean} True if we have the permission
     */
    hasPermission: function() {
@@ -7471,7 +7997,7 @@ jsxc.notification = {
 
    /**
     * Plays the given file.
-    * 
+    *
     * @memberOf jsxc.notification
     * @param {string} soundFile File relative to the sound directory
     * @param {boolean} loop True for loop
@@ -7505,7 +8031,7 @@ jsxc.notification = {
 
    /**
     * Stop/remove current sound.
-    * 
+    *
     * @memberOf jsxc.notification
     */
    stopSound: function() {
@@ -7519,7 +8045,7 @@ jsxc.notification = {
 
    /**
     * Mute sound.
-    * 
+    *
     * @memberOf jsxc.notification
     * @param {boolean} external True if triggered from external tab. Default:
     *        false.
@@ -7534,7 +8060,7 @@ jsxc.notification = {
 
    /**
     * Unmute sound.
-    * 
+    *
     * @memberOf jsxc.notification
     * @param {boolean} external True if triggered from external tab. Default:
     *        false.
@@ -7550,7 +8076,7 @@ jsxc.notification = {
 
 /**
  * Set some options for the chat.
- * 
+ *
  * @namespace jsxc.options
  */
 jsxc.options = {
@@ -7569,7 +8095,7 @@ jsxc.options = {
       enable: true,
       ERROR_START_AKE: false,
       debug: false,
-      SEND_WHITESPACE_TAG: true,
+      SEND_WHITESPACE_TAG: false,
       WHITESPACE_START_AKE: true
    },
 
@@ -7610,9 +8136,9 @@ jsxc.options = {
    },
 
    /**
-    * This function is called if a login form was found, but before any 
+    * This function is called if a login form was found, but before any
     * modification is done to it.
-    * 
+    *
     * @memberOf jsxc.options
     * @function
     */
@@ -7638,7 +8164,7 @@ jsxc.options = {
       },
 
       /**
-       * Action after login was called: dialog [String] Show wait dialog, false [boolean] | 
+       * Action after login was called: dialog [String] Show wait dialog, false [boolean] |
        * quiet [String] Do nothing
        */
       onConnecting: 'dialog',
@@ -7657,25 +8183,25 @@ jsxc.options = {
 
       /**
        * True: Attach connection even is login form was found.
-       * 
+       *
        * @type {Boolean}
        * @deprecated since 3.0.0. Use now loginForm.ifFound (true => attach, false => pause)
        */
       attachIfFound: true,
 
       /**
-       * Describes what we should do if login form was found: 
+       * Describes what we should do if login form was found:
        * - Attach connection
        * - Force new connection with loginForm.jid and loginForm.passed
        * - Pause connection and do nothing
-       * 
+       *
        * @type {(attach|force|pause)}
        */
       ifFound: 'attach',
 
       /**
-       * True: Display roster minimized after first login. Afterwards the last 
-       * roster state will be used. 
+       * True: Display roster minimized after first login. Afterwards the last
+       * roster state will be used.
        */
       startMinimized: false
    },
@@ -7720,7 +8246,7 @@ jsxc.options = {
 
    /**
     * If no avatar is found, this function is called.
-    * 
+    *
     * @param jid Jid of that user.
     * @this {jQuery} Elements to update with probable .jsxc_avatar elements
     */
@@ -7736,7 +8262,7 @@ jsxc.options = {
 
    /**
     * Returns permanent saved settings and overwrite default jsxc.options.
-    * 
+    *
     * @memberOf jsxc.options
     * @function
     * @param username {string} username
@@ -7747,7 +8273,7 @@ jsxc.options = {
 
    /**
     * Call this function to save user settings permanent.
-    * 
+    *
     * @memberOf jsxc.options
     * @param data Holds all data as key/value
     * @param cb Called with true on success, false otherwise
@@ -7758,19 +8284,19 @@ jsxc.options = {
 
    carbons: {
       /** Enable carbon copies? */
-      enable: false
+      enable: true
    },
 
    /**
     * Processes user list.
-    * 
+    *
     * @callback getUsers-cb
     * @param {object} list List of users, key: username, value: alias
     */
 
    /**
     * Returns a list of usernames and aliases
-    * 
+    *
     * @function getUsers
     * @memberOf jsxc.options
     * @param {string} search Search token (start with)
@@ -7828,7 +8354,32 @@ jsxc.options = {
       }
    },
 
-   maxStorableSize: 1000000
+   /** Maximal storage size for attachments received via data channels (webrtc). */
+   maxStorableSize: 1000000,
+
+   /** Options for file transfer. */
+   fileTransfer: {
+      httpUpload: {
+         enable: true
+      },
+      // @TODO add option to enable/disable data channels
+   },
+
+   /** Default option for chat state notifications */
+   chatState: {
+      enable: true
+   },
+
+   /**
+    * Download urls to screen media extensions.
+    *
+    * @type {Object}
+    * @see example extensions {@link https://github.com/otalk/getScreenMedia}
+    */
+   screenMediaExtension: {
+      firefox: '',
+      chrome: ''
+   }
 };
 
 /**
@@ -7841,7 +8392,7 @@ jsxc.otr = {
    dsaFallback: null,
    /**
     * Handler for otr receive event
-    * 
+    *
     * @memberOf jsxc.otr
     * @param {Object} d
     * @param {string} d.bid
@@ -7873,28 +8424,29 @@ jsxc.otr = {
             msg: d.msg,
             encrypted: d.encrypted,
             forwarded: d.forwarded,
-            stamp: d.stamp
+            stamp: d.stamp,
+            attachment: d.attachment
          });
       }
    },
 
    /**
     * Handler for otr send event
-    * 
+    *
     * @param {string} jid
     * @param {string} msg message to be send
     */
-   sendMessage: function(jid, msg, uid) {
+   sendMessage: function(jid, msg, message) {
       if (jsxc.otr.objects[jsxc.jidToBid(jid)].msgstate !== 0) {
          jsxc.otr.backup(jsxc.jidToBid(jid));
       }
 
-      jsxc.xmpp._sendMessage(jid, msg, uid);
+      jsxc.xmpp._sendMessage(jid, msg, message);
    },
 
    /**
     * Create new otr instance
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -8045,17 +8597,18 @@ jsxc.otr = {
             msg: msg,
             encrypted: encrypted === true,
             stamp: meta.stamp,
-            forwarded: meta.forwarded
+            forwarded: meta.forwarded,
+            attachment: meta.attachment
          });
       });
 
       // Send message
-      jsxc.otr.objects[bid].on('io', function(msg, uid) {
+      jsxc.otr.objects[bid].on('io', function(msg, message) {
          var jid = jsxc.gui.window.get(bid).data('jid') || jsxc.otr.objects[bid].jid;
 
          jsxc.otr.objects[bid].jid = jid;
 
-         jsxc.otr.sendMessage(jid, msg, uid);
+         jsxc.otr.sendMessage(jid, msg, message);
       });
 
       jsxc.otr.objects[bid].on('error', function(err) {
@@ -8076,7 +8629,7 @@ jsxc.otr = {
 
    /**
     * show verification dialog with related part (secret or question)
-    * 
+    *
     * @param {type} bid
     * @param {string} [data]
     * @returns {undefined}
@@ -8108,7 +8661,7 @@ jsxc.otr = {
 
    /**
     * Send verification request to buddy
-    * 
+    *
     * @param {string} bid
     * @param {string} sec secret
     * @param {string} [quest] question
@@ -8122,7 +8675,7 @@ jsxc.otr = {
 
    /**
     * Toggle encryption state
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -8140,7 +8693,7 @@ jsxc.otr = {
 
    /**
     * Send request to encrypt the session
-    * 
+    *
     * @param {type} bid
     * @returns {undefined}
     */
@@ -8156,7 +8709,7 @@ jsxc.otr = {
 
    /**
     * Abort encryptet session
-    * 
+    *
     * @param {type} bid
     * @param cb callback
     * @returns {undefined}
@@ -8176,7 +8729,7 @@ jsxc.otr = {
 
    /**
     * Backups otr session
-    * 
+    *
     * @param {string} bid
     */
    backup: function(bid) {
@@ -8208,7 +8761,7 @@ jsxc.otr = {
 
    /**
     * Restore old otr session
-    * 
+    *
     * @param {string} bid
     */
    restore: function(bid) {
@@ -8243,7 +8796,7 @@ jsxc.otr = {
 
    /**
     * Create or load DSA key
-    * 
+    *
     * @returns {unresolved}
     */
    createDSA: function() {
@@ -8341,7 +8894,7 @@ jsxc.otr = {
 
    /**
     * Ending of DSA key generation.
-    * 
+    *
     * @param {DSA} dsa DSA object
     */
    DSAready: function(dsa) {
@@ -8386,7 +8939,7 @@ jsxc.storage = {
       var self = jsxc.storage;
 
       if (uk && !jsxc.bid) {
-         console.trace('Unable to create user prefix');
+         jsxc.warn('Unable to create user prefix');
       }
 
       return self.PREFIX + self.SEP + ((uk && jsxc.bid) ? jsxc.bid + self.SEP : '');
@@ -9015,20 +9568,31 @@ jsxc.tab = {
       });
    },
 
-   /*jshint -W098 */
-   execMaster: function(cmd, params) {
+   /**
+    * Execute command in master tab.
+    *
+    * @param  {String} cmd Command
+    * @param  {String[]} params List of parameters
+    */
+   execMaster: function() {
       var args = Array.prototype.slice.call(arguments);
       args.unshift(jsxc.tab.CONST.MASTER);
 
       jsxc.tab.exec.apply(this, args);
    },
-   execSlave: function(cmd, params) {
-         var args = Array.prototype.slice.call(arguments);
-         args.unshift(jsxc.tab.CONST.SLAVE);
 
-         jsxc.tab.exec.apply(this, args);
-      }
-      /*jshint +W098 */
+   /**
+    * Execute command in all slave tabs.
+    *
+    * @param  {String} cmd Command
+    * @param  {String[]} params List of parameters
+    */
+   execSlave: function() {
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift(jsxc.tab.CONST.SLAVE);
+
+      jsxc.tab.exec.apply(this, args);
+   }
 };
 
 /* global MediaStreamTrack, File */
@@ -9036,7 +9600,7 @@ jsxc.tab = {
 
 /**
  * WebRTC namespace for jsxc.
- * 
+ *
  * @namespace jsxc.webrtc
  */
 jsxc.webrtc = {
@@ -9066,7 +9630,7 @@ jsxc.webrtc = {
 
    /**
     * Initialize webrtc plugin.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     */
@@ -9086,20 +9650,20 @@ jsxc.webrtc = {
       $(document).on('message.jsxc', self.onMessage);
       $(document).on('presence.jsxc', self.onPresence);
 
-      $(document).on('mediaready.jingle', self.onMediaReady);
       $(document).on('mediafailure.jingle', self.onMediaFailure);
 
       manager.on('incoming', $.proxy(self.onIncoming, self));
 
+      // @REVIEW those events could be session based
       manager.on('terminated', $.proxy(self.onTerminated, self));
       manager.on('ringing', $.proxy(self.onCallRinging, self));
 
       manager.on('receivedFile', $.proxy(self.onReceivedFile, self));
-
       manager.on('sentFile', function(sess, metadata) {
          jsxc.debug('sent ' + metadata.hash);
       });
 
+      // @REVIEW those events could be session based
       manager.on('peerStreamAdded', $.proxy(self.onRemoteStreamAdded, self));
       manager.on('peerStreamRemoved', $.proxy(self.onRemoteStreamRemoved, self));
 
@@ -9141,7 +9705,6 @@ jsxc.webrtc = {
       $(document).off('message.jsxc', self.onMessage);
       $(document).off('presence.jsxc', self.onPresence);
 
-      $(document).off('mediaready.jingle', self.onMediaReady);
       $(document).off('mediafailure.jingle', self.onMediaFailure);
 
       $(document).off('caps.strophe', self.onCaps);
@@ -9149,7 +9712,7 @@ jsxc.webrtc = {
 
    /**
     * Checks if cached configuration is valid and if necessary update it.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param {string} [url]
     */
@@ -9226,7 +9789,7 @@ jsxc.webrtc = {
 
    /**
     * Return list of capable resources.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param jid
     * @param {(string|string[])} features list of required features
@@ -9255,7 +9818,7 @@ jsxc.webrtc = {
 
    /**
     * Add "video" button to window menu.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     * @param event
@@ -9277,15 +9840,27 @@ jsxc.webrtc = {
          return;
       }
 
+      // Add video call icon
       var div = $('<div>').addClass('jsxc_video');
       win.find('.jsxc_tools .jsxc_settings').after(div);
+
+      var screenMediaExtension = jsxc.options.get('screenMediaExtension') || {};
+      var browser = self.conn.jingle.RTC.webrtcDetectedBrowser;
+      if (screenMediaExtension[browser] || jsxc.storage.getItem('debug')) {
+         // Add screen sharing button if extension is available or we are in debug mode
+         var a = $('<a>');
+         a.text($.t('Share_screen'));
+         a.addClass('jsxc_shareScreen jsxc_video');
+         a.attr('href', '#');
+         win.find('.jsxc_settings .jsxc_menu li:last').after($('<li>').append(a));
+      }
 
       self.updateIcon(win.data('bid'));
    },
 
    /**
     * Enable or disable "video" icon and assign full jid.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param bid CSS conform jid
     */
@@ -9333,7 +9908,11 @@ jsxc.webrtc = {
 
       if (capableRes.indexOf(targetRes) > -1) {
          el.click(function() {
-            self.startCall(jid);
+            if ($(this).hasClass('jsxc_shareScreen')) {
+               self.startScreenSharing(jid);
+            } else {
+               self.startCall(jid);
+            }
          });
 
          el.removeClass('jsxc_disabled');
@@ -9344,20 +9923,11 @@ jsxc.webrtc = {
 
          el.attr('title', $.t('Video_call_not_possible'));
       }
-
-      var fileCapableRes = self.getCapableRes(jid, self.reqFileFeatures);
-      var resources = Object.keys(jsxc.storage.getUserItem('res', bid) || {}) || [];
-
-      if (fileCapableRes.indexOf(res) > -1 || (res === null && fileCapableRes.length === 1 && resources.length === 1)) {
-         win.find('.jsxc_sendFile').removeClass('jsxc_disabled');
-      } else {
-         win.find('.jsxc_sendFile').addClass('jsxc_disabled');
-      }
    },
 
    /**
     * Check if full jid changed.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     * @param e
@@ -9377,7 +9947,7 @@ jsxc.webrtc = {
 
    /**
     * Update icon on presence.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param ev
     * @param status
@@ -9395,7 +9965,7 @@ jsxc.webrtc = {
 
    /**
     * Display status message to user.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param txt message
     * @param d duration in ms
@@ -9442,7 +10012,7 @@ jsxc.webrtc = {
 
    /**
     * Update "video" button if we receive cap information.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     * @param event
@@ -9461,67 +10031,47 @@ jsxc.webrtc = {
    },
 
    /**
-    * Called if video/audio is ready. Open window and display some messages.
-    * 
-    * @private
-    * @memberOf jsxc.webrtc
-    * @param event
-    * @param stream
-    */
-   onMediaReady: function(event, stream) {
-      jsxc.debug('media ready');
-
-      var self = jsxc.webrtc;
-
-      self.localStream = stream;
-      self.conn.jingle.localStream = stream;
-
-      var dialog = jsxc.gui.showVideoWindow(self.last_caller);
-
-      var audioTracks = stream.getAudioTracks();
-      var videoTracks = stream.getVideoTracks();
-      var i;
-
-      for (i = 0; i < audioTracks.length; i++) {
-         self.setStatus((audioTracks.length > 0) ? $.t('Use_local_audio_device') : $.t('No_local_audio_device'));
-
-         jsxc.debug('using audio device "' + audioTracks[i].label + '"');
-      }
-
-      for (i = 0; i < videoTracks.length; i++) {
-         self.setStatus((videoTracks.length > 0) ? $.t('Use_local_video_device') : $.t('No_local_video_device'));
-
-         jsxc.debug('using video device "' + videoTracks[i].label + '"');
-
-         dialog.find('.jsxc_localvideo').show();
-      }
-
-      $(document).trigger('finish.mediaready.jsxc');
-   },
-
-   /**
     * Called if media failes.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     */
    onMediaFailure: function(ev, err) {
       var self = jsxc.webrtc;
-      err = err || {
-         name: 'Undefined'
-      };
+      var msg;
+      err = err || {};
 
       self.setStatus('media failure');
+
+      switch (err.name) {
+         case 'NotAllowedError':
+         case 'PERMISSION_DENIED':
+            msg = $.t('PermissionDeniedError');
+            break;
+         case 'HTTPS_REQUIRED':
+         case 'EXTENSION_UNAVAILABLE':
+            msg = $.t(err.name);
+            break;
+         default:
+            msg = $.t(err.name) !== err.name ? $.t(err.name) : $.t('UNKNOWN_ERROR');
+      }
 
       jsxc.gui.window.postMessage({
          bid: jsxc.jidToBid(jsxc.webrtc.last_caller),
          direction: jsxc.Message.SYS,
-         msg: $.t('Media_failure') + ': ' + $.t(err.name) + ' (' + err.name + ').'
+         msg: $.t('Media_failure') + ': ' + msg + ' (' + err.name + ').'
       });
+
+      jsxc.gui.dialog.close();
 
       jsxc.debug('media failure: ' + err.name);
    },
 
+   /**
+    * Process incoming jingle offer.
+    *
+    * @param  {BaseSession} session
+    */
    onIncoming: function(session) {
       var self = jsxc.webrtc;
       var type = (session.constructor) ? session.constructor.name : null;
@@ -9529,10 +10079,88 @@ jsxc.webrtc = {
       if (type === 'FileTransferSession') {
          self.onIncomingFileTransfer(session);
       } else if (type === 'MediaSession') {
-         self.onIncomingCall(session);
+         var reqMedia = false;
+
+         $.each(session.pc.remoteDescription.contents, function() {
+            if (this.senders === 'both') {
+               reqMedia = true;
+            }
+         });
+
+         session.call = reqMedia;
+
+         if (reqMedia) {
+            self.onIncomingCall(session);
+         } else {
+            self.onIncomingStream(session);
+         }
+      } else {
+         jsxc.warn('Unknown session type.');
       }
    },
 
+   /**
+    * Process incoming stream offer.
+    *
+    * @param  {MediaSession} session
+    */
+   onIncomingStream: function(session) {
+      jsxc.debug('incoming stream from ' + session.peerID);
+
+      var self = jsxc.webrtc;
+      var bid = jsxc.jidToBid(session.peerID);
+
+      session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
+
+      self.postScreenMessage(bid, $.t('Incoming_stream'), session.sid);
+
+      // display notification
+      jsxc.notification.notify($.t('Incoming_stream'), $.t('from_sender', {
+         sender: bid
+      }));
+
+      // send signal to partner
+      session.ring();
+
+      jsxc.webrtc.last_caller = session.peerID;
+
+      if (jsxc.webrtc.AUTO_ACCEPT) {
+         acceptIncomingStream(session);
+
+         return;
+      }
+
+      var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('incomingCall', bid), {
+         noClose: true
+      });
+
+      dialog.find('.jsxc_accept').click(function() {
+         $(document).trigger('accept.call.jsxc');
+
+         acceptIncomingStream(session);
+      });
+
+      dialog.find('.jsxc_reject').click(function() {
+         jsxc.gui.dialog.close();
+         $(document).trigger('reject.call.jsxc');
+
+         session.decline();
+      });
+
+      function acceptIncomingStream(session) {
+         jsxc.gui.dialog.close();
+
+         jsxc.gui.showVideoWindow(session.peerID);
+
+         session.accept();
+      }
+   },
+
+   /**
+    * Process incoming file offer.
+    *
+    * @param  {FileSession} session
+    */
    onIncomingFileTransfer: function(session) {
       jsxc.debug('incoming file transfer from ' + session.peerID);
 
@@ -9561,11 +10189,10 @@ jsxc.webrtc = {
 
    /**
     * Called on incoming call.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
-    * @param event
-    * @param sid Session id
+    * @param {MediaSession} session
     */
    onIncomingCall: function(session) {
       jsxc.debug('incoming call from ' + session.peerID);
@@ -9575,11 +10202,7 @@ jsxc.webrtc = {
 
       session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
 
-      jsxc.gui.window.postMessage({
-         bid: bid,
-         direction: jsxc.Message.SYS,
-         msg: $.t('Incoming_call')
-      });
+      self.postCallMessage(bid, $.t('Incoming_call'), session.sid);
 
       // display notification
       jsxc.notification.notify($.t('Incoming_call'), $.t('from_sender', {
@@ -9591,27 +10214,8 @@ jsxc.webrtc = {
 
       jsxc.webrtc.last_caller = session.peerID;
 
-      function acceptCall() {
-         $(document).trigger('accept.call.jsxc');
-
-         jsxc.switchEvents({
-            'mediaready.jingle': function(event, stream) {
-               self.setStatus('Accept call');
-
-               session.addStream(stream);
-
-               session.accept();
-            },
-            'mediafailure.jingle': function() {
-               session.decline();
-            }
-         });
-
-         self.reqUserMedia();
-      }
-
       if (jsxc.webrtc.AUTO_ACCEPT) {
-         acceptCall();
+         self.acceptIncomingCall(session);
          return;
       }
 
@@ -9619,7 +10223,9 @@ jsxc.webrtc = {
          noClose: true
       });
 
-      dialog.find('.jsxc_accept').click(acceptCall);
+      dialog.find('.jsxc_accept').click(function() {
+         self.acceptIncomingCall(session);
+      });
 
       dialog.find('.jsxc_reject').click(function() {
          jsxc.gui.dialog.close();
@@ -9629,6 +10235,45 @@ jsxc.webrtc = {
       });
    },
 
+   /**
+    * Called on incoming call.
+    *
+    * @private
+    * @memberOf jsxc.webrtc
+    * @param {MediaSession} session
+    */
+   acceptIncomingCall: function(session) {
+      $(document).trigger('accept.call.jsxc');
+
+      var self = jsxc.webrtc;
+
+      jsxc.switchEvents({
+         'mediaready.jingle': function(ev, stream) {
+            self.setStatus('Accept call');
+
+            self.localStream = stream;
+            self.conn.jingle.localStream = stream;
+
+            var dialog = jsxc.gui.showVideoWindow(session.peerID);
+            dialog.find('.jsxc_videoContainer').addClass('jsxc_establishing');
+
+            session.addStream(stream);
+            session.accept();
+         },
+         'mediafailure.jingle': function() {
+            session.decline();
+         }
+      });
+
+      self.reqUserMedia();
+   },
+
+   /**
+    * Process jingle termination event.
+    *
+    * @param  {BaseSession} session
+    * @param  {Object} reason Reason for termination
+    */
    onTerminated: function(session, reason) {
       var self = jsxc.webrtc;
       var type = (session.constructor) ? session.constructor.name : null;
@@ -9640,82 +10285,99 @@ jsxc.webrtc = {
 
    /**
     * Called if call is terminated.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
-    * @param event
-    * @param sid Session id
-    * @param reason Reason for termination
-    * @param [text] Optional explanation
+    * @param {BaseSession} session
+    * @param  {Object} reason Reason for termination
     */
    onCallTerminated: function(session, reason) {
-      this.setStatus('call terminated ' + session.peerID + (reason && reason.condition ? reason.condition : ''));
+      var self = jsxc.webrtc;
+
+      self.setStatus('call terminated ' + session.peerID + (reason && reason.condition ? reason.condition : ''));
 
       var bid = jsxc.jidToBid(session.peerID);
 
-      if (this.localStream) {
-         if (typeof this.localStream.stop === 'function') {
-            this.localStream.stop();
-         } else {
-            var tracks = this.localStream.getTracks();
+      if (self.localStream) {
+         // stop local stream
+         if (typeof self.localStream.getTracks === 'function') {
+            var tracks = self.localStream.getTracks();
             tracks.forEach(function(track) {
                track.stop();
             });
+         } else if (typeof self.localStream.stop === 'function') {
+            self.localStream.stop();
+         } else {
+            jsxc.warn('Could not stop local stream');
          }
       }
 
-      if ($('.jsxc_videoContainer').length) {
+      // @REVIEW necessary?
+      if ($('.jsxc_remotevideo').length) {
          $('.jsxc_remotevideo')[0].src = "";
+      }
+
+      if ($('.jsxc_localvideo').length) {
          $('.jsxc_localvideo')[0].src = "";
       }
 
-      this.conn.jingle.localStream = null;
-      this.localStream = null;
-      this.remoteStream = null;
+      self.conn.jingle.localStream = null;
+      self.localStream = null;
+      self.remoteStream = null;
 
       jsxc.gui.closeVideoWindow();
 
+      // Close incoming call dialog and stop ringing
+      jsxc.gui.dialog.close();
+      $(document).trigger('reject.call.jsxc');
+
       $(document).off('error.jingle');
 
-      jsxc.gui.window.postMessage({
-         bid: bid,
-         direction: jsxc.Message.SYS,
-         msg: ($.t('Call_terminated') + (reason && reason.condition ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.')
-      });
+      var msg = (reason && reason.condition ? (': ' + $.t('jingle_reason_' + reason.condition)) : '') + '.';
+      if (session.call) {
+         msg = $.t('Call_terminated') + msg;
+         jsxc.webrtc.postCallMessage(bid, msg, session.sid);
+      } else {
+         msg = $.t('Stream_terminated') + msg;
+         jsxc.webrtc.postScreenMessage(bid, msg, session.sid);
+      }
    },
 
    /**
     * Remote station is ringing.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
     */
    onCallRinging: function() {
       this.setStatus('ringing...', 0);
+
+      $('.jsxc_videoContainer').removeClass('jsxc_establishing').addClass('jsxc_ringing');
    },
 
    /**
     * Called if we receive a remote stream.
-    * 
+    *
     * @private
     * @memberOf jsxc.webrtc
-    * @param event
-    * @param data
-    * @param sid Session id
+    * @param {BaseSession} session
+    * @param {Object} stream
     */
    onRemoteStreamAdded: function(session, stream) {
-      this.setStatus('Remote stream for session ' + session.sid + ' added.');
+      var self = jsxc.webrtc;
 
-      this.remoteStream = stream;
+      self.setStatus('Remote stream for session ' + session.sid + ' added.');
+
+      self.remoteStream = stream;
 
       var isVideoDevice = stream.getVideoTracks().length > 0;
       var isAudioDevice = stream.getAudioTracks().length > 0;
 
-      this.setStatus(isVideoDevice ? 'Use remote video device.' : 'No remote video device');
-      this.setStatus(isAudioDevice ? 'Use remote audio device.' : 'No remote audio device');
+      self.setStatus(isVideoDevice ? 'Use remote video device.' : 'No remote video device');
+      self.setStatus(isAudioDevice ? 'Use remote audio device.' : 'No remote audio device');
 
       if ($('.jsxc_remotevideo').length) {
-         this.attachMediaStream($('#jsxc_webrtc .jsxc_remotevideo'), stream);
+         self.attachMediaStream($('#jsxc_webrtc .jsxc_remotevideo'), stream);
 
          $('#jsxc_webrtc .jsxc_' + (isVideoDevice ? 'remotevideo' : 'noRemoteVideo')).addClass('jsxc_deviceAvailable');
       }
@@ -9723,7 +10385,7 @@ jsxc.webrtc = {
 
    /**
     * Attach media stream to element.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param element {Element|jQuery}
     * @param stream {mediastream}
@@ -9732,16 +10394,16 @@ jsxc.webrtc = {
       var self = jsxc.webrtc;
 
       self.conn.jingle.RTC.attachMediaStream((element instanceof jQuery) ? element.get(0) : element, stream);
+
+      $(element).show();
    },
 
    /**
     * Called if the remote stream was removed.
-    * 
+    *
     * @private
     * @meberOf jsxc.webrtc
-    * @param event
-    * @param data
-    * @param sid Session id
+    * @param {BaseSession} session
     */
    onRemoteStreamRemoved: function(session) {
       this.setStatus('Remote stream for ' + session.jid + ' removed.');
@@ -9750,13 +10412,12 @@ jsxc.webrtc = {
    },
 
    /**
-    * Extracts local and remote ip and display it to the user.
-    * 
+    * Display information according to the connection state.
+    *
     * @private
     * @memberOf jsxc.webrtc
-    * @param event
-    * @param sid session id
-    * @param sess
+    * @param {BaseSession} session
+    * @param {String} state
     */
    onIceConnectionStateChanged: function(session, state) {
       var self = jsxc.webrtc;
@@ -9764,10 +10425,7 @@ jsxc.webrtc = {
       jsxc.debug('connection state for ' + session.sid, state);
 
       if (state === 'connected') {
-
          $('#jsxc_webrtc .jsxc_deviceAvailable').show();
-         $('#jsxc_webrtc .bubblingG').hide();
-
       } else if (state === 'failed') {
          jsxc.gui.window.postMessage({
             bid: jsxc.jidToBid(session.peerID),
@@ -9785,13 +10443,13 @@ jsxc.webrtc = {
 
    /**
     * Start a call to the specified jid.
-    * 
+    *
     * @memberOf jsxc.webrtc
-    * @param jid full jid
-    * @param um requested user media
+    * @param {String} jid full jid
+    * @param {String[]} um requested user media
     */
    startCall: function(jid, um) {
-      var self = this;
+      var self = jsxc.webrtc;
 
       if (Strophe.getResourceFromJid(jid) === null) {
          jsxc.debug('We need a full jid');
@@ -9801,28 +10459,10 @@ jsxc.webrtc = {
       self.last_caller = jid;
 
       jsxc.switchEvents({
-         'finish.mediaready.jsxc': function() {
-            self.setStatus('Initiate call');
+         'mediaready.jingle': function(ev, stream) {
+            jsxc.debug('media ready for outgoing call');
 
-            jsxc.gui.window.postMessage({
-               bid: jsxc.jidToBid(jid),
-               direction: jsxc.Message.SYS,
-               msg: $.t('Call_started')
-            });
-
-            $(document).one('error.jingle', function(e, sid, error) {
-               if (error && error.source !== 'offer') {
-                  return;
-               }
-
-               setTimeout(function() {
-                  jsxc.gui.showAlert("Sorry, we couldn't establish a connection. Maybe your buddy is offline.");
-               }, 500);
-            });
-
-            var session = self.conn.jingle.initiate(jid);
-
-            session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
+            self.initiateOutgoingCall(jid, stream);
          },
          'mediafailure.jingle': function() {
             jsxc.gui.dialog.close();
@@ -9833,8 +10473,47 @@ jsxc.webrtc = {
    },
 
    /**
+    * Start jingle session to jid with stream.
+    *
+    * @param  {String} jid
+    * @param  {Object} stream
+    */
+   initiateOutgoingCall: function(jid, stream) {
+      var self = jsxc.webrtc;
+
+      self.localStream = stream;
+      self.conn.jingle.localStream = stream;
+
+      var dialog = jsxc.gui.showVideoWindow(jid);
+
+      dialog.find('.jsxc_videoContainer').addClass('jsxc_establishing');
+
+      self.setStatus('Initiate call');
+
+      // @REVIEW session based?
+      $(document).one('error.jingle', function(ev, sid, error) {
+         if (error && error.source !== 'offer') {
+            return;
+         }
+
+         setTimeout(function() {
+            jsxc.gui.showAlert("Sorry, we couldn't establish a connection. Maybe your buddy is offline.");
+         }, 500);
+      });
+
+      var session = self.conn.jingle.initiate(jid);
+
+      // flag session as call
+      session.call = true;
+
+      session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
+
+      self.postCallMessage(jsxc.jidToBid(jid), $.t('Call_started'), session.sid);
+   },
+
+   /**
     * Hang up the current call.
-    * 
+    *
     * @memberOf jsxc.webrtc
     */
    hangUp: function(reason, text) {
@@ -9849,8 +10528,121 @@ jsxc.webrtc = {
    },
 
    /**
-    * Request video and audio from local user.
-    * 
+    * Start outgoing screen sharing session.
+    *
+    * @param  {String} jid
+    */
+   startScreenSharing: function(jid) {
+      var self = this;
+
+      if (Strophe.getResourceFromJid(jid) === null) {
+         jsxc.debug('We need a full jid');
+         return;
+      }
+
+      self.last_caller = jid;
+
+      jsxc.switchEvents({
+         'mediaready.jingle': function(ev, stream) {
+            self.initiateScreenSharing(jid, stream);
+         },
+         'mediafailure.jingle': function(ev, err) {
+            jsxc.gui.dialog.close();
+
+            var browser = self.conn.jingle.RTC.webrtcDetectedBrowser;
+
+            var screenMediaExtension = jsxc.options.get('screenMediaExtension') || {};
+            if (screenMediaExtension[browser] &&
+               (err.name === 'EXTENSION_UNAVAILABLE' || (err.name === 'NotAllowedError' && browser === 'firefox'))) {
+               // post download link after explanation
+               setTimeout(function() {
+                  jsxc.gui.window.postMessage({
+                     bid: jsxc.jidToBid(jid),
+                     direction: jsxc.Message.SYS,
+                     msg: $.t('Install_extension') + screenMediaExtension[browser]
+                  });
+               }, 500);
+            }
+         }
+      });
+
+      self.reqUserMedia(['screen']);
+   },
+
+   /**
+    * Initiate outgoing (one-way) jingle session to jid with stream.
+    *
+    * @param  {String} jid
+    * @param  {Object} stream
+    */
+   initiateScreenSharing: function(jid, stream) {
+      var self = jsxc.webrtc;
+      var bid = jsxc.jidToBid(jid);
+
+      jsxc.webrtc.localStream = stream;
+      jsxc.webrtc.conn.jingle.localStream = stream;
+
+      var container = jsxc.gui.showMinimizedVideoWindow();
+      container.addClass('jsxc_establishing');
+
+      self.setStatus('Initiate stream');
+
+      $(document).one('error.jingle', function(e, sid, error) {
+         if (error && error.source !== 'offer') {
+            return;
+         }
+
+         setTimeout(function() {
+            jsxc.gui.showAlert("Sorry, we couldn't establish a connection. Maybe your buddy is offline.");
+         }, 500);
+      });
+
+      var browser = self.conn.jingle.RTC.webrtcDetectedBrowser;
+      var browserVersion = self.conn.jingle.RTC.webrtcDetectedVersion;
+      var constraints;
+
+      if ((browserVersion < 33 && browser === 'firefox') || browser === 'chrome') {
+         constraints = {
+            mandatory: {
+               'OfferToReceiveAudio': false,
+               'OfferToReceiveVideo': false
+            }
+         };
+      } else {
+         constraints = {
+            'offerToReceiveAudio': false,
+            'offerToReceiveVideo': false
+         };
+      }
+
+      var session = self.conn.jingle.initiate(jid, undefined, constraints);
+      session.call = false;
+
+      session.on('change:connectionState', $.proxy(self.onIceConnectionStateChanged, self));
+      // @REVIEW also for calls?
+      session.on('accepted', function() {
+         self.onSessionAccepted(session);
+      });
+
+      self.postScreenMessage(bid, $.t('Stream_started'), session.sid);
+   },
+
+   /**
+    * Session was accepted by other peer.
+    *
+    * @param  {BaseSession} session
+    */
+   onSessionAccepted: function(session) {
+      var self = jsxc.webrtc;
+
+      $('.jsxc_videoContainer').removeClass('jsxc_ringing');
+
+      self.postScreenMessage(jsxc.jidToBid(session.peerID), $.t('Connection_accepted'), session.sid);
+   },
+
+   /**
+    * Request media from local user.
+    *
     * @memberOf jsxc.webrtc
     */
    reqUserMedia: function(um) {
@@ -9864,26 +10656,45 @@ jsxc.webrtc = {
       jsxc.gui.dialog.open(jsxc.gui.template.get('allowMediaAccess'), {
          noClose: true
       });
-      this.setStatus('please allow access to microphone and camera');
 
-      if (typeof MediaStreamTrack !== 'undefined' && typeof MediaStreamTrack.getSources !== 'undefined') {
-         MediaStreamTrack.getSources(function(sourceInfo) {
-            var availableDevices = sourceInfo.map(function(el) {
-
-               return el.kind;
+      if (um.indexOf('screen') >= 0) {
+         jsxc.webrtc.getScreenMedia();
+      } else if (typeof navigator !== 'undefined' && typeof navigator.mediaDevices !== 'undefined' &&
+         typeof navigator.mediaDevices.enumerateDevices !== 'undefined') {
+         navigator.mediaDevices.enumerateDevices()
+            .then(filterUserMedia)
+            .catch(function(err) {
+               jsxc.warn(err.name + ": " + err.message);
             });
-
-            um = um.filter(function(el) {
-               return availableDevices.indexOf(el) !== -1;
-            });
-
-            jsxc.webrtc.getUserMedia(um);
-         });
+      } else if (typeof MediaStreamTrack !== 'undefined' && typeof MediaStreamTrack.getSources !== 'undefined') {
+         // @deprecated in chrome since v56
+         MediaStreamTrack.getSources(filterUserMedia);
       } else {
          jsxc.webrtc.getUserMedia(um);
       }
+
+      function filterUserMedia(devices) {
+         var availableDevices = devices.map(function(device) {
+            return device.kind;
+         });
+
+         um = um.filter(function(el) {
+            return availableDevices.indexOf(el) !== -1 || availableDevices.indexOf(el + 'input') !== -1;
+         });
+
+         if (um.length) {
+            jsxc.webrtc.getUserMedia(um);
+         } else {
+            jsxc.warn('No audio/video device available.');
+         }
+      }
    },
 
+   /**
+    * Get user media from local browser.
+    *
+    * @memberOf jsxc.webrtc
+    */
    getUserMedia: function(um) {
       var self = jsxc.webrtc;
       var constraints = {};
@@ -9913,8 +10724,50 @@ jsxc.webrtc = {
    },
 
    /**
+    * Get screen media from local browser.
+    *
+    * @memberOf jsxc.webrtc
+    */
+   getScreenMedia: function() {
+      var self = jsxc.webrtc;
+
+      jsxc.debug('get screen media');
+
+      self.conn.jingle.getScreenMedia(self.screenMediaCallback);
+   },
+
+   screenMediaCallback: function(err, stream) {
+      if (err) {
+         $(document).trigger('mediafailure.jingle', [err]);
+
+         return;
+      }
+
+      if (stream) {
+         jsxc.debug('onScreenMediaSuccess');
+         $(document).trigger('mediaready.jingle', [stream]);
+      }
+   },
+
+   screenMediaAvailable: function() {
+      var self = jsxc.webrtc;
+      var browser = self.conn.jingle.RTC.webrtcDetectedBrowser;
+
+      // test if chrome extension for this domain is available
+      var chrome = !!sessionStorage.getScreenMediaJSExtensionId && browser === 'chrome';
+
+      // the ff extension from {@link https://github.com/otalk/getScreenMedia}
+      // does not provide any possibility to determine if it is installed or not.
+      // Starting with Firefox 52 {@link https://www.mozilla.org/en-US/firefox/52.0a2/auroranotes/}
+      // no extension is needed anyway.
+      var firefox = browser === 'firefox';
+
+      return chrome || firefox;
+   },
+
+   /**
     * Make a snapshot from a video stream and display it.
-    * 
+    *
     * @memberOf jsxc.webrtc
     * @param video Video stream
     */
@@ -9954,7 +10807,7 @@ jsxc.webrtc = {
    },
 
    /**
-    * Send file to full jid.
+    * Send file to full jid via jingle.
     *
     * @memberOf jsxc.webrtc
     * @param  {string} jid full jid
@@ -9962,7 +10815,15 @@ jsxc.webrtc = {
     * @return {object} session
     */
    sendFile: function(jid, file) {
+      jsxc.debug('Send file via webrtc');
+
       var self = jsxc.webrtc;
+
+      if (!Strophe.getResourceFromJid(jid)) {
+         jsxc.warn('Require full jid to send file via webrtc');
+
+         return;
+      }
 
       var sess = self.conn.jingle.manager.createFileTransferSession(jid);
 
@@ -9997,7 +10858,7 @@ jsxc.webrtc = {
       var type;
 
       if (!metadata.type) {
-         // detect file type via file extension, because XEP-0234 v0.14 
+         // detect file type via file extension, because XEP-0234 v0.14
          // does not send any type
          var ext = metadata.name.replace(/.+\.([a-z0-9]+)$/i, '$1').toLowerCase();
 
@@ -10053,9 +10914,60 @@ jsxc.webrtc = {
    }
 };
 
+jsxc.webrtc.postCallMessage = function(bid, msg, uid) {
+   jsxc.gui.window.postMessage({
+      _uid: uid,
+      bid: bid,
+      direction: jsxc.Message.SYS,
+      msg: ':telephone_receiver: ' + msg
+   });
+};
+jsxc.webrtc.postScreenMessage = function(bid, msg, uid) {
+   jsxc.gui.window.postMessage({
+      _uid: uid,
+      bid: bid,
+      direction: jsxc.Message.SYS,
+      msg: ':computer: ' + msg
+   });
+};
+
+jsxc.gui.showMinimizedVideoWindow = function() {
+   var self = jsxc.webrtc;
+
+   // needed to trigger complete.dialog.jsxc
+   jsxc.gui.dialog.close();
+
+   var videoContainer = $('<div/>');
+   videoContainer.addClass('jsxc_videoContainer jsxc_minimized');
+   videoContainer.appendTo('body');
+   videoContainer.draggable({
+      containment: "parent"
+   });
+
+   var videoElement = $('<video class="jsxc_localvideo" autoplay=""></video>');
+   videoElement.appendTo(videoContainer);
+
+   videoElement[0].muted = true;
+   videoElement[0].volume = 0;
+
+   if (self.localStream) {
+      self.attachMediaStream(videoElement, self.localStream);
+   }
+
+   videoContainer.append('<div class="jsxc_controlbar"><div><div class="jsxc_hangUp jsxc_videoControl"></div></div></div></div>');
+   videoContainer.find('.jsxc_hangUp').click(function() {
+      jsxc.webrtc.hangUp('success');
+   });
+   videoContainer.click(function() {
+      videoContainer.find('.jsxc_controlbar').toggleClass('jsxc_visible');
+   });
+
+   return videoContainer;
+};
+
 /**
  * Display window for video call.
- * 
+ *
  * @memberOf jsxc.gui
  */
 jsxc.gui.showVideoWindow = function(jid) {
@@ -10144,11 +11056,14 @@ jsxc.gui.showVideoWindow = function(jid) {
 
 jsxc.gui.closeVideoWindow = function() {
    var win = $('#jsxc_webrtc .jsxc_chatarea > ul > li');
-   $('#jsxc_windowList > ul').prepend(win.detach());
-   win.find('.slimScrollDiv').resizable('enable');
-   jsxc.gui.window.resize(win);
 
-   $('#jsxc_webrtc').remove();
+   if (win.length > 0) {
+      $('#jsxc_windowList > ul').prepend(win.detach());
+      win.find('.slimScrollDiv').resizable('enable');
+      jsxc.gui.window.resize(win);
+   }
+
+   $('#jsxc_webrtc, .jsxc_videoContainer').remove();
 };
 
 $.extend(jsxc.CONST, {
@@ -10505,6 +11420,564 @@ jsxc.xmpp.bookmarks.showDialog = function(room) {
    });
 };
 
+/**
+ * Implements XEP-0085: Chat State Notifications.
+ *
+ * @namespace jsxc.xmpp.chatState
+ * @see {@link http://xmpp.org/extensions/xep-0085.html}
+ */
+jsxc.xmpp.chatState = {
+   conn: null,
+
+   /** Delay between two notification on the message composing */
+   toComposingNotificationDelay: 900,
+};
+
+jsxc.xmpp.chatState.init = function() {
+   var self = jsxc.xmpp.chatState;
+
+   if (!jsxc.xmpp.conn || !jsxc.xmpp.connected) {
+      $(document).on('attached.jsxc', self.init);
+
+      return;
+   }
+
+   // prevent double execution after reconnect
+   $(document).off('composing.chatstates', jsxc.xmpp.chatState.onComposing);
+   $(document).off('paused.chatstates', jsxc.xmpp.chatState.onPaused);
+   $(document).off('active.chatstates', jsxc.xmpp.chatState.onActive);
+
+   if (self.isDisabled()) {
+      jsxc.debug('chat state notification disabled');
+
+      return;
+   }
+
+   self.conn = jsxc.xmpp.conn;
+
+   $(document).on('composing.chatstates', jsxc.xmpp.chatState.onComposing);
+   $(document).on('paused.chatstates', jsxc.xmpp.chatState.onPaused);
+   $(document).on('active.chatstates', jsxc.xmpp.chatState.onActive);
+};
+
+/**
+ * Composing event received. Display message.
+ *
+ * @memberOf jsxc.xmpp.chatState
+ * @param  {Event} ev
+ * @param  {String} jid
+ */
+jsxc.xmpp.chatState.onComposing = function(ev, jid) {
+   var self = jsxc.xmpp.chatState;
+   var bid = jsxc.jidToBid(jid);
+   var data = jsxc.storage.getUserItem('buddy', bid) || null;
+
+   if (!data || jsxc.xmpp.chatState.isDisabled()) {
+      return;
+   }
+
+   // ignore own notifications in groupchat
+   if (data.type === 'groupchat' &&
+      Strophe.getResourceFromJid(jid) === Strophe.getNodeFromJid(self.conn.jid)) {
+      return;
+   }
+
+   var user = data.type === 'groupchat' ? Strophe.getResourceFromJid(jid) : data.name;
+   var win = jsxc.gui.window.get(bid);
+
+   if (win.length === 0) {
+      return;
+   }
+
+   clearTimeout(win.data('composing-timeout'));
+
+   // add user in array if necessary
+   var usersComposing = win.data('composing') || [];
+   if (usersComposing.indexOf(user) === -1) {
+      usersComposing.push(user);
+      win.data('composing', usersComposing);
+   }
+
+   var textarea = win.find('.jsxc_textarea');
+   var composingNotif = textarea.find('.jsxc_composing');
+
+   if (composingNotif.length < 1) {
+      // notification not present, add it
+      composingNotif = $('<div>').addClass('jsxc_composing')
+         .addClass('jsxc_chatmessage')
+         .addClass('jsxc_sys')
+         .appendTo(textarea);
+   }
+
+   var msg = self._genComposingMsg(usersComposing);
+   composingNotif.text(msg);
+
+   // scroll to bottom
+   jsxc.gui.window.scrollDown(bid);
+
+   // show message
+   composingNotif.addClass('jsxc_fadein');
+};
+
+/**
+ * Pause event receive. Remove or update composing message.
+ *
+ * @memberOf jsxc.xmpp.chatState
+ * @param  {Event} ev
+ * @param  {String} jid
+ */
+jsxc.xmpp.chatState.onPaused = function(ev, jid) {
+   var self = jsxc.xmpp.chatState;
+   var bid = jsxc.jidToBid(jid);
+   var data = jsxc.storage.getUserItem('buddy', bid) || null;
+
+   if (!data || jsxc.xmpp.chatState.isDisabled()) {
+      return;
+   }
+
+   var user = data.type === 'groupchat' ? Strophe.getResourceFromJid(jid) : data.name;
+   var win = jsxc.gui.window.get(bid);
+
+   if (win.length === 0) {
+      return;
+   }
+
+   var el = win.find('.jsxc_composing');
+   var usersComposing = win.data('composing') || [];
+
+   if (usersComposing.indexOf(user) >= 0) {
+      // remove user from list
+      usersComposing.splice(usersComposing.indexOf(user), 1);
+      win.data('composing', usersComposing);
+   }
+
+   if (usersComposing.length === 0) {
+      var durationValue = el.css('transition-duration') || '0s';
+      var duration = parseFloat(durationValue) || 0;
+
+      if (durationValue.match(/[^m]s$/)) {
+         duration *= 1000;
+      }
+
+      el.removeClass('jsxc_fadein');
+
+      var to = setTimeout(function() {
+         el.remove();
+      }, duration);
+
+      win.data('composing-timeout', to);
+   } else {
+      // update message
+      el.text(self._genComposingMsg(usersComposing));
+   }
+};
+
+/**
+ * Active event received.
+ *
+ * @memberOf jsxc.xmpp.chatState
+ * @param  {Event} ev
+ * @param  {String} jid
+ */
+jsxc.xmpp.chatState.onActive = function(ev, jid) {
+   jsxc.xmpp.chatState.onPaused(ev, jid);
+};
+
+/**
+ * Send composing event.
+ *
+ * @memberOf jsxc.xmpp.chatState
+ * @param  {String} bid
+ */
+jsxc.xmpp.chatState.startComposing = function(bid) {
+   var self = jsxc.xmpp.chatState;
+
+   if (!jsxc.xmpp.conn || !jsxc.xmpp.conn.chatstates || jsxc.xmpp.chatState.isDisabled()) {
+      return;
+   }
+
+   var win = jsxc.gui.window.get(bid);
+   var timeout = win.data('composing-timeout');
+   var type = win.hasClass('jsxc_groupchat') ? 'groupchat' : 'chat';
+
+   if (timeout) {
+      // @REVIEW page reload?
+      clearTimeout(timeout);
+   } else {
+      jsxc.xmpp.conn.chatstates.sendComposing(bid, type);
+   }
+
+   timeout = setTimeout(function() {
+      self.pauseComposing(bid, type);
+
+      win.data('composing-timeout', null);
+   }, self.toComposingNotificationDelay);
+
+   win.data('composing-timeout', timeout);
+};
+
+/**
+ * Send pause event.
+ *
+ * @memberOf jsxc.xmpp.chatState
+ * @param  {String} bid
+ */
+jsxc.xmpp.chatState.pauseComposing = function(bid, type) {
+   if (jsxc.xmpp.chatState.isDisabled()) {
+      return;
+   }
+
+   jsxc.xmpp.conn.chatstates.sendPaused(bid, type);
+};
+
+/**
+ * End composing without sending a pause event.
+ *
+ * @memberOf jsxc.xmpp.chatState
+ * @param  {String} bid
+ */
+jsxc.xmpp.chatState.endComposing = function(bid) {
+   var win = jsxc.gui.window.get(bid);
+
+   if (win.data('composing-timeout')) {
+      clearTimeout(win.data('composing-timeout'));
+   }
+};
+
+/**
+ * Generate composing message.
+ *
+ * @memberOf jsxc.xmpp.chatState
+ * @param  {Array} usersComposing List of users which are currently composing a message
+ */
+jsxc.xmpp.chatState._genComposingMsg = function(usersComposing) {
+   if (!usersComposing || usersComposing.length === 0) {
+      jsxc.debug('usersComposing array is empty?');
+
+      return '';
+   } else {
+      return usersComposing.length > 1 ? usersComposing.join(', ') + $.t('_are_composing') :
+         usersComposing[0] + $.t('_is_composing');
+   }
+};
+
+jsxc.xmpp.chatState.isDisabled = function() {
+   var options = jsxc.options.get('chatState') || {};
+
+   return !options.enable;
+};
+
+$(document).on('attached.jsxc', jsxc.xmpp.chatState.init);
+
+/**
+ * Implements Http File Upload (XEP-0363)
+ *
+ * @namespace jsxc.xmpp.httpUpload
+ * @see {@link http://xmpp.org/extensions/xep-0363.html}
+ */
+jsxc.xmpp.httpUpload = {
+   conn: null,
+
+   ready: false,
+
+   CONST: {
+      NS: {
+         HTTPUPLOAD: 'urn:xmpp:http:upload'
+      }
+   }
+};
+
+/**
+ * Set up http file upload.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ * @param  {Object} o options
+ */
+jsxc.xmpp.httpUpload.init = function(o) {
+   var self = jsxc.xmpp.httpUpload;
+   self.conn = jsxc.xmpp.conn;
+
+   var fileTransferOptions = jsxc.options.get('fileTransfer') || {};
+   var options = o || jsxc.options.get('httpUpload');
+
+   if (!fileTransferOptions.httpUpload.enable) {
+      jsxc.debug('http upload disabled');
+
+      jsxc.options.set('httpUpload', false);
+
+      return;
+   }
+
+   if (options && options.server) {
+      self.ready = true;
+
+      return;
+   }
+
+   var caps = jsxc.xmpp.conn.caps;
+   var domain = jsxc.xmpp.conn.domain;
+
+   if (!caps || !domain || typeof caps._knownCapabilities[caps._jidVerIndex[domain]] === 'undefined') {
+      jsxc.debug('Waiting for server capabilities');
+
+      $(document).on('caps.strophe', function onCaps(ev, from) {
+
+         if (from !== domain) {
+            return;
+         }
+
+         self.init();
+
+         $(document).off('caps.strophe', onCaps);
+      });
+
+      return;
+   }
+
+   if (caps.hasFeatureByJid(domain, self.CONST.NS.HTTPUPLOAD)) {
+      self.discoverUploadService();
+   } else {
+      jsxc.debug(domain + ' does not support http upload');
+   }
+};
+
+/**
+ * Discover upload service for http upload.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ */
+jsxc.xmpp.httpUpload.discoverUploadService = function() {
+   var self = jsxc.xmpp.httpUpload;
+
+   jsxc.debug('discover http upload service');
+
+   self.conn.disco.items(self.conn.domain, null, function(items) {
+      $(items).find('item').each(function() {
+         var jid = $(this).attr('jid');
+         var discovered = false;
+
+         self.conn.disco.info(jid, null, function(info) {
+            var httpUploadFeature = $(info).find('feature[var="' + self.CONST.NS.HTTPUPLOAD + '"]');
+            var httpUploadMaxSize = $(info).find('field[var="max-file-size"]');
+
+            if (httpUploadFeature.length > 0) {
+               jsxc.debug('http upload service found', jid);
+
+               jsxc.options.set('httpUpload', {
+                  server: jid,
+                  name: $(info).find('identity').attr('name'),
+                  maxSize: parseInt(httpUploadMaxSize.text())
+               });
+
+               discovered = true;
+               self.ready = true;
+            }
+         });
+
+         return !discovered;
+      });
+   });
+};
+
+/**
+ * Upload file and send link to peer.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ * @param  {File} file
+ * @param  {Message} message Preview message
+ */
+jsxc.xmpp.httpUpload.sendFile = function(file, message) {
+   jsxc.debug('Send file via http upload');
+
+   var self = jsxc.xmpp.httpUpload;
+
+   // even if the link is encrypted the file isn't
+   message.encrypted = false;
+
+   self.requestSlot(file, function(data) {
+      if (!data) {
+         // general error
+         jsxc.warn('Unknown error occured. Please check the debug log.');
+      } else if (data.error) {
+         // specific error
+         jsxc.warn('The xmpp server responded with an error of the type "' + data.error.type + '"');
+
+         message.getDOM().remove();
+
+         jsxc.gui.window.postMessage({
+            bid: message.bid,
+            direction: jsxc.Message.SYS,
+            msg: data.error.text
+         });
+
+         message.delete();
+      } else if (data.get && data.put) {
+         // slot received, start upload
+         self.uploadFile(data.put, file, message, function() {
+            var a = $('<a>');
+            a.attr('href', data.get);
+            a.attr('data-name', message.attachment.name);
+            a.attr('data-type', message.attachment.type);
+            a.attr('data-size', message.attachment.size);
+
+            if (message.attachment.thumbnail) {
+               a.attr('data-thumbnail', message.attachment.thumbnail);
+            }
+
+            a.text(data.get);
+            message.attachment.data = data.get;
+
+            message.msg = $('<span>').append(a).html();
+            message.type = jsxc.Message.HTML;
+            jsxc.gui.window.postMessage(message);
+         });
+      }
+   });
+};
+
+/**
+ * Upload the given file to the given url.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ * @param  {String} url upload url
+ * @param  {File} file
+ * @param  {Message} message preview message
+ * @param  {Function} success_cb callback on successful transition
+ */
+jsxc.xmpp.httpUpload.uploadFile = function(url, file, message, success_cb) {
+   $.ajax({
+      url: url,
+      type: 'PUT',
+      contentType: 'application/octet-stream',
+      data: file,
+      processData: false,
+      xhr: function() {
+         var xhr = $.ajaxSettings.xhr();
+
+         // track upload progress
+         xhr.upload.onprogress = function(ev) {
+            if (ev.lengthComputable) {
+               jsxc.gui.window.updateProgress(message, ev.loaded, ev.total);
+            }
+         };
+         return xhr;
+      },
+      success: function() {
+         jsxc.debug('file successful uploaded');
+
+         // In case that upload progress is not available, inform user
+         jsxc.gui.window.updateProgress(message, 1, 1);
+
+         if (success_cb) {
+            success_cb();
+         }
+      },
+      error: function() {
+         jsxc.warn('error while uploading file to ' + url);
+
+         message.error = 'Could not upload file';
+         jsxc.gui.window.postMessage(message);
+      }
+   });
+};
+
+/**
+ * Request upload slot.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ * @param  {File} file
+ * @param  {Function} cb Callback after finished request
+ */
+jsxc.xmpp.httpUpload.requestSlot = function(file, cb) {
+   var self = jsxc.xmpp.httpUpload;
+   var options = jsxc.options.get('httpUpload');
+
+   if (!options || !options.server) {
+      jsxc.warn('could not request upload slot, because I am not aware of a server or http upload is disabled');
+
+      return;
+   }
+
+   var iq = $iq({
+         to: options.server,
+         type: 'get'
+      }).c('request', {
+         xmlns: self.CONST.NS.HTTPUPLOAD
+      }).c('filename').t(file.name)
+      .up()
+      .c('size').t(file.size);
+
+   self.conn.sendIQ(iq, function(stanza) {
+      self.successfulRequestSlotCB(stanza, cb);
+   }, function(stanza) {
+      self.failedRequestSlotCB(stanza, cb);
+   });
+};
+
+/**
+ * Process successful response to slot request.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ * @param {String} stanza
+ * @param {Function} cb
+ */
+jsxc.xmpp.httpUpload.successfulRequestSlotCB = function(stanza, cb) {
+   var self = jsxc.xmpp.httpUpload;
+   var slot = $(stanza).find('slot[xmlns="' + self.CONST.NS.HTTPUPLOAD + '"]');
+
+   if (slot.length > 0) {
+      var put = slot.find('put').text();
+      var get = slot.find('get').text();
+
+      cb({
+         put: put,
+         get: get
+      });
+   } else {
+      self.failedRequestSlotCB(stanza, cb);
+   }
+};
+
+/**
+ * Process failed response to slot request.
+ *
+ * @memberOf jsxc.xmpp.httpUpload
+ * @param  {String} stanza
+ * @param  {Function} cb
+ */
+jsxc.xmpp.httpUpload.failedRequestSlotCB = function(stanza, cb) {
+   if ($(stanza).find('error').length <= 0) {
+      jsxc.warn('response does not contain a slot element');
+
+      cb();
+
+      return;
+   }
+
+   var error = {
+      type: $(stanza).find('error').attr('type') || 'unknown',
+      text: $(stanza).find('error text').text()
+   };
+
+   if ($(stanza).find('error not-acceptable')) {
+      error.reason = 'not-acceptable';
+   } else if ($(stanza).find('error resource-constraint')) {
+      error.reason = 'resource-constraint';
+   } else if ($(stanza).find('error not-allowed')) {
+      error.reason = 'not-allowed';
+   }
+
+   cb({
+      error: error
+   });
+};
+
+$(document).on('stateChange.jsxc', function(ev, state) {
+   if (state === jsxc.CONST.STATE.READY) {
+      jsxc.xmpp.httpUpload.init();
+   }
+});
+
 
 
 jsxc.gui.template['aboutDialog'] = '<h3>JavaScript XMPP Chat</h3>\n' +
@@ -10526,7 +11999,7 @@ jsxc.gui.template['aboutDialog'] = '<h3>JavaScript XMPP Chat</h3>\n' +
 '</p>\n' +
 '<p class="jsxc_libraries">\n' +
 '   <b>Libraries: </b>\n' +
-'   <a href="http://strophe.im/strophejs/">strophe.js</a> (multiple), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/muc</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/disco</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/caps</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/vcard</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins/tree/master/bookmarks">strophe.js/bookmarks</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins/tree/master/dataforms">strophe.js/x</a> (MIT), <a href="https://github.com/sualko/strophe.jinglejs">strophe.jinglejs</a> (MIT), <a href="https://github.com/neoatlantis/node-salsa20">Salsa20</a> (AGPL3), <a href="www.leemon.com">bigint</a> (public domain), <a href="code.google.com/p/crypto-js">cryptojs</a> (code.google.com/p/crypto-js/wiki/license), <a href="http://git.io/ee">eventemitter</a> (MIT), <a href="https://arlolra.github.io/otr/">otr.js</a> (MPL v2.0), <a href="http://i18next.com/">i18next</a> (MIT), <a href="http://dimsemenov.com/plugins/magnific-popup/">Magnific Popup</a> (MIT), <a href="https://github.com/ejci/favico.js">favico.js</a> (MIT), <a href="http://emojione.com">emoji one</a> (CC-BY 4.0)\n' +
+'   <a href="http://strophe.im/strophejs/">strophe.js</a> (multiple), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/muc</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/disco</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/caps</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins">strophe.js/vcard</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins/tree/master/bookmarks">strophe.js/bookmarks</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins/tree/master/dataforms">strophe.js/x</a> (MIT), <a href="https://github.com/strophe/strophejs-plugins/tree/master/chatstates">strophe.js/chatstates</a> (MIT), <a href="https://github.com/sualko/strophe.jinglejs">strophe.jinglejs</a> (MIT), <a href="https://github.com/neoatlantis/node-salsa20">Salsa20</a> (AGPL3), <a href="www.leemon.com">bigint</a> (public domain), <a href="code.google.com/p/crypto-js">cryptojs</a> (code.google.com/p/crypto-js/wiki/license), <a href="http://git.io/ee">eventemitter</a> (MIT), <a href="https://arlolra.github.io/otr/">otr.js</a> (MPL v2.0), <a href="http://i18next.com/">i18next</a> (MIT), <a href="http://i18next.com/">jquery-i18next</a> (MIT), <a href="http://dimsemenov.com/plugins/magnific-popup/">Magnific Popup</a> (MIT), <a href="https://github.com/ejci/favico.js">favico.js</a> (MIT), <a href="http://emojione.com">emoji one</a> (CC-BY 4.0)\n' +
 '</p>\n' +
 '\n' +
 '<button class="btn btn-default pull-right jsxc_debuglog">Show debug log</button>\n' +
@@ -10548,13 +12021,6 @@ jsxc.gui.template['approveDialog'] = '<h3 data-i18n="Subscription_request"></h3>
 '\n' +
 '<button class="btn btn-primary jsxc_approve pull-right" data-i18n="Approve"></button>\n' +
 '<button class="btn btn-default jsxc_deny pull-right" data-i18n="Deny"></button>\n' +
-'';
-
-jsxc.gui.template['authFailDialog'] = '<h3 data-i18n="Login_failed"></h3>\n' +
-'<p data-i18n="Sorry_we_cant_authentikate_"></p>\n' +
-'\n' +
-'<button class="btn btn-primary jsxc_retry pull-right" data-i18n="Continue_without_chat"></button>\n' +
-'<button class="btn btn-default jsxc_cancel pull-right" data-i18n="Retry"></button>\n' +
 '';
 
 jsxc.gui.template['authenticationDialog'] = '<h3>Verification</h3>\n' +
@@ -10620,6 +12086,13 @@ jsxc.gui.template['authenticationDialog'] = '<h3>Verification</h3>\n' +
 '      </div>\n' +
 '   </div>\n' +
 '</div>\n' +
+'';
+
+jsxc.gui.template['authFailDialog'] = '<h3 data-i18n="Login_failed"></h3>\n' +
+'<p data-i18n="Sorry_we_cant_authentikate_"></p>\n' +
+'\n' +
+'<button class="btn btn-primary jsxc_retry pull-right" data-i18n="Continue_without_chat"></button>\n' +
+'<button class="btn btn-default jsxc_cancel pull-right" data-i18n="Retry"></button>\n' +
 '';
 
 jsxc.gui.template['bookmarkDialog'] = '<h3 data-i18n="Edit_bookmark"></h3>\n' +
@@ -10716,7 +12189,7 @@ jsxc.gui.template['chatWindow'] = '<li class="jsxc_windowItem">\n' +
 '            </div>\n' +
 '         </div>\n' +
 '         <div class="jsxc_transfer jsxc_otr jsxc_disabled" />\n' +
-'         <input type="text" class="jsxc_textinput" data-i18n="[placeholder]Message" />\n' +
+'         <textarea class="jsxc_textinput" data-i18n="[placeholder]Message"></textarea>\n' +
 '      </div>\n' +
 '   </div>\n' +
 '</li>\n' +
@@ -10724,8 +12197,8 @@ jsxc.gui.template['chatWindow'] = '<li class="jsxc_windowItem">\n' +
 
 jsxc.gui.template['confirmDialog'] = '<p data-var="msg"></p>\n' +
 '\n' +
-'<button class="btn btn-primary jsxc_confirm pull-right" data-i18n="Confirm"></button>\n' +
-'<button class="btn btn-default jsxc_dismiss jsxc_close pull-right" data-i18n="Dismiss"></button>\n' +
+'<button class="jsxc_btn jsxc_btn-primary jsxc_confirm pull-right" data-i18n="Confirm"></button>\n' +
+'<button class="jsxc_btn jsxc_btn-default jsxc_dismiss jsxc_close pull-right" data-i18n="Dismiss"></button>\n' +
 '';
 
 jsxc.gui.template['contactDialog'] = '<h3 data-i18n="Add_buddy"></h3>\n' +
@@ -10771,8 +12244,8 @@ jsxc.gui.template['incomingCall'] = '<h3 data-i18n="Incoming_call"></h3>\n' +
 '   <span data-i18n="Do_you_want_to_accept_the_call_from"></span> <span data-var="bid_name" />?\n' +
 '</p>\n' +
 '\n' +
-'<button class="btn btn-primary jsxc_accept pull-right" data-i18n="Accept"></button>\n' +
-'<button class="btn btn-default jsxc_reject pull-right" data-i18n="Reject"></button>\n' +
+'<button class="jsxc_btn jsxc_btn-primary jsxc_accept pull-right" data-i18n="Accept"></button>\n' +
+'<button class="jsxc_btn jsxc_btn-default jsxc_reject pull-right" data-i18n="Reject"></button>\n' +
 '';
 
 jsxc.gui.template['joinChat'] = '<h3 data-i18n="Join_chat"></h3>\n' +
@@ -10781,16 +12254,17 @@ jsxc.gui.template['joinChat'] = '<h3 data-i18n="Join_chat"></h3>\n' +
 '   <div class="form-group">\n' +
 '      <label class="col-sm-4 control-label" for="jsxc_server" data-i18n="Server"></label>\n' +
 '      <div class="col-sm-8">\n' +
-'         <input type="text" name="server" id="jsxc_server" class="form-control" required="required" readonly="readonly" />\n' +
+'         <input type="text" name="server" id="jsxc_server" class="form-control" required="required" pattern="^[.-0-9a-zA-Z]+" />\n' +
+'         <p class="jsxc_inputinfo jsxc_server jsxc_hidden"></p>\n' +
 '      </div>\n' +
 '   </div>\n' +
 '   <div class="form-group">\n' +
 '      <label class="col-sm-4 control-label" for="jsxc_room" data-i18n="Room"></label>\n' +
 '      <div class="col-sm-8">\n' +
 '         <input type="text" name="room" id="jsxc_room" class="form-control" autocomplete="off" list="jsxc_roomlist" required="required" pattern="^[^\\x22&\'\\/:<>@\\s]+" />\n' +
+'         <p class="jsxc_inputinfo jsxc_room" data-i18n="Rooms_are_loaded"></p>\n' +
 '      </div>\n' +
 '   </div>\n' +
-'   <p class="jsxc_inputinfo jsxc_waiting jsxc_room" data-i18n="Rooms_are_loaded"></p>\n' +
 '   <datalist id="jsxc_roomlist">\n' +
 '      <p>\n' +
 '         <label for="jsxc_roomlist_select"></label>\n' +
@@ -10806,7 +12280,7 @@ jsxc.gui.template['joinChat'] = '<h3 data-i18n="Join_chat"></h3>\n' +
 '         <input type="text" name="nickname" id="jsxc_nickname" class="form-control" />\n' +
 '      </div>\n' +
 '   </div>\n' +
-'   <div class="form-group">\n' +
+'   <div class="form-group jsxc_hidden">\n' +
 '      <label class="col-sm-4 control-label" for="jsxc_password" data-i18n="Password"></label>\n' +
 '      <div class="col-sm-8">\n' +
 '         <input type="text" name="password" id="jsxc_password" class="form-control" />\n' +
@@ -10833,7 +12307,6 @@ jsxc.gui.template['joinChat'] = '<h3 data-i18n="Join_chat"></h3>\n' +
 '   <div class="jsxc_msg"></div>\n' +
 '   <div class="form-group">\n' +
 '      <div class="col-sm-offset-4 col-sm-8">\n' +
-'         <span class="jsxc_warning"></span>\n' +
 '         <button class="btn btn-default jsxc_close" data-i18n="Close"></button>\n' +
 '         <button class="btn btn-primary jsxc_continue" data-i18n="Continue"></button>\n' +
 '         <button class="btn btn-success jsxc_join" data-i18n="Join"></button>\n' +
@@ -10864,6 +12337,13 @@ jsxc.gui.template['loginBox'] = '<h3 data-i18n="Login"></h3>\n' +
 '      </div>\n' +
 '   </div>\n' +
 '</form>\n' +
+'';
+
+jsxc.gui.template['notification'] = '<h3></h3>\n' +
+'\n' +
+'<p class="jsxc_msg"></p>\n' +
+'\n' +
+'<p class="jsxc_meta"></p>\n' +
 '';
 
 jsxc.gui.template['pleaseAccept'] = '<p data-i18n="Please_accept_"></p>\n' +
@@ -11063,6 +12543,27 @@ jsxc.gui.template['settings'] = '<form class="form-horizontal col-sm-6">\n' +
 '      </div>\n' +
 '   </fieldset>\n' +
 '</form>\n' +
+'\n' +
+'<form class="form-horizontal col-sm-6" data-onsubmit="xmpp.chatState.init">\n' +
+'   <fieldset class="jsxc_fieldsetCarbons jsxc_fieldset">\n' +
+'      <h3 data-i18n="Chat_state_notifications"></h3>\n' +
+'      <p data-i18n="setting-explanation-chat-state"></p>\n' +
+'      <div class="form-group">\n' +
+'         <div class="col-sm-12">\n' +
+'            <div class="checkbox">\n' +
+'               <label>\n' +
+'                  <input type="checkbox" id="chatState-enable"><span data-i18n="Enable"></span>\n' +
+'               </label>\n' +
+'            </div>\n' +
+'         </div>\n' +
+'      </div>\n' +
+'      <div class="form-group">\n' +
+'         <div class="col-sm-12">\n' +
+'            <button class="btn btn-primary jsxc_continue" type="submit" data-i18n="Save"></button>\n' +
+'         </div>\n' +
+'      </div>\n' +
+'   </fieldset>\n' +
+'</form>\n' +
 '';
 
 jsxc.gui.template['vCard'] = '<h3>\n' +
@@ -11082,9 +12583,6 @@ jsxc.gui.template['videoWindow'] = '<div id="jsxc_webrtc">\n' +
 '      <video class="jsxc_localvideo" autoplay></video>\n' +
 '      <video class="jsxc_remotevideo" autoplay></video>\n' +
 '      <div class="jsxc_status"></div>\n' +
-'      <div class="bubblingG">\n' +
-'         <span id="bubblingG_1"> </span> <span id="bubblingG_2"> </span> <span id="bubblingG_3"> </span>\n' +
-'      </div>\n' +
 '      <div class="jsxc_noRemoteVideo">\n' +
 '         <div>\n' +
 '            <div></div>\n' +
