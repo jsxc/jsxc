@@ -297,12 +297,24 @@ module.exports = function(grunt) {
          }
       },
       jsbeautifier: {
-         files: ['Gruntfile.js', 'src/jsxc.lib.*', 'template/*.html',
-            'example/*.html', 'example/js/dev.js', 'example/js/example.js',
-            'example/css/example.css'
-         ],
-         options: {
-            config: '.jsbeautifyrc'
+         'default': {
+            src: ['Gruntfile.js', 'src/jsxc.lib.*', 'template/*.html',
+               'example/*.html', 'example/js/dev.js', 'example/js/example.js',
+               'example/css/example.css'
+            ],
+            options: {
+               config: '.jsbeautifyrc'
+            }
+         },
+         'pre-commit': {
+            src: ['Gruntfile.js', 'src/jsxc.lib.*', 'template/*.html',
+               'example/*.html', 'example/js/dev.js', 'example/js/example.js',
+               'example/css/example.css'
+            ],
+            options: {
+               config: '.jsbeautifyrc',
+               mode: 'VERIFY_ONLY'
+            }
          }
       },
       prettysass: {
@@ -328,6 +340,12 @@ module.exports = function(grunt) {
             src: 'template/*.html',
             dest: 'tmp/template.js'
          }
+      },
+      scsslint: {
+         files: ['scss/*.scss'],
+         options: {
+            config: '.scss-lint.yml'
+         }
       }
    });
 
@@ -351,6 +369,7 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-jsbeautifier');
    grunt.loadNpmTasks('grunt-prettysass');
    grunt.loadNpmTasks('grunt-html-convert');
+   grunt.loadNpmTasks('grunt-scss-lint');
 
    //Default task
    grunt.registerTask('default', ['build', 'watch']);
@@ -375,9 +394,8 @@ module.exports = function(grunt) {
       grunt.task.run(['search:changelog', 'build:prerelease', 'jsdoc']);
    });
 
-   // Create alpha/beta build @deprecated
-   grunt.registerTask('pre', ['build:prerelease']);
-
    // before commit
-   grunt.registerTask('commit', ['search:console', 'jsbeautifier', 'prettysass', 'jshint']);
+   grunt.registerTask('pre-commit', ['search:console', 'jsbeautifier:pre-commit', 'scsslint', 'jshint']);
+
+   grunt.registerTask('beautify', ['jsbeautifier', 'prettysass']);
 };

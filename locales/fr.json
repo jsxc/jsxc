@@ -261,7 +261,7 @@
     "No_local_audio_device": "Pas de périphérique audio local",
     "No_local_video_device": "Pas de périphérique vidéo local",
     "Ok": "Ok",
-    "PermissionDeniedError": "Vous ou votre navigateur à refusé de donner les permissions audio/vidéo",
+    "PermissionDeniedError": "Vous ou votre navigateur avez refusé de donner des permissions audio/vidéo",
     "Use_local_audio_device": "Utiliser un périphérique audio local.",
     "Use_local_video_device": "Utiliser un périphérique vidéo local.",
     "is_": "est __status__",
@@ -290,14 +290,15 @@
     "_are_composing": " sont en train d'écrire...",
     "Chat_state_notifications": "Notifications de composition",
     "setting-explanation-chat-state": "Voulez-vous envoyer et recevoir les notifications de composition, comme lorsque quelqu'un commence ou arrête d'écrire un message ?",
-    "Share_screen": null,
-    "Incoming_stream": null,
-    "Stream_started": null,
-    "HTTPS_REQUIRED": null,
-    "EXTENSION_UNAVAILABLE": null,
-    "UNKNOWN_ERROR": null,
-    "Install_extension": null,
-    "Connection_accepted": null,
-    "Stream_terminated": null
+    "Share_screen": "Ecran partagé",
+    "Incoming_stream": "Flux entrant",
+    "Stream_started": "flux démarré",
+    "HTTPS_REQUIRED": "Cette action nécessite une connexion cryptée.",
+    "EXTENSION_UNAVAILABLE": "Vous avez besoin d'une extension / d'un addon pour votre navigateur.",
+    "UNKNOWN_ERROR": "Une erreur inconnue s'est produite.",
+    "Install_extension": "Veuillez installer l'extension afin d'utiliser le partage d'écran: ",
+    "Connection_accepted": "Connexion acceptée",
+    "Stream_terminated": "Flux terminé",
+    "Close_all": null
   }
 }

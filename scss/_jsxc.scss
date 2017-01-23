@@ -33,6 +33,11 @@
     max-width: 500px;
 }
 
+.jsxc_meta {
+    text-align: right;
+    font-style: italic;
+}
+
 #jsxc_dialog {
     padding: 20px;
     min-width: 320px;
@@ -67,7 +72,7 @@
             outline: none;
         }
 
-        input[type="submit"] {
+        input[type='submit'] {
             width: auto;
         }
     }
@@ -97,7 +102,7 @@
     form {
         fieldset {
             margin-bottom: 30px;
-            padding: 0px 30px;
+            padding: 0 30px;
             border: 1px solid #d9d9d9;
 
             h3 {
@@ -105,13 +110,9 @@
                 color: #000;
                 background-color: #f2f2f2;
                 padding: 10px;
-                margin: 0 -30px 10px -30px;
+                margin: 0 -30px 10px;
             }
         }
-
-        /*&.col-sm-6:nth-child(odd) {
-           clear: left;
-        }*/
     }
 
     legend {
@@ -169,7 +170,7 @@
     width: 36px;
     height: 36px;
     line-height: 36px;
-    margin: 0px 5px;
+    margin: 0 5px;
     background-color: $avatar_bg;
     border-radius: 50%;
     float: left;
@@ -211,7 +212,7 @@ ul.jsxc_vCard {
     }
 }
 
-/** Spot which is attached to xmpp: uris */
+//  Spot which is attached to xmpp: uris
 .jsxc_spot {
     display: inline-block;
     width: 12px;
@@ -257,7 +258,7 @@ ul.jsxc_vCard {
     }
 }
 
-/** TODO: check if required */
+//  TODO: check if required
 .jsxc_list {
     .jsxc_inner {
         box-sizing: border-box;
@@ -292,8 +293,8 @@ ul.jsxc_vCard {
     background: image-url("loading.gif");
 }
 
-/* @TODO: check */
-#jsxc_loginForm input[type="submit"] {
+//  @TODO: check
+#jsxc_loginForm input[type='submit'] {
     height: 34px;
     display: inline-block;
     padding: 6px 12px;
@@ -343,7 +344,7 @@ img.jsxc_vCard {
     min-width: 25px;
     display: inline-block;
     padding: 6px 12px;
-    margin: 0px 2px;
+    margin: 0 2px;
     font-size: 14px;
     font-weight: 400;
     line-height: 1.42857143;
@@ -391,11 +392,11 @@ img.jsxc_vCard {
     position: absolute;
     background-color: #FFF;
     color: #333;
-    border-radius: 3px 3px 3px 3px;
+    border-radius: 3px;
     z-index: 110;
     margin: 8px 2px 5px 10px;
-    right: 0px;
-    filter: drop-shadow(0px 0px 5px rgba(150, 150, 150, 0.75));
+    right: 0;
+    filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
     padding: 4px 12px;
     padding-left: 5px;
 
@@ -435,7 +436,7 @@ img.jsxc_vCard {
 
         &:hover {
             text-decoration: none;
-            opacity: 1.0;
+            opacity: 1;
         }
 
         &.jsxc_disabled {
@@ -505,6 +506,10 @@ img.jsxc_vCard {
     background-image: image-url("bookmark_black.svg");
 }
 
+.jsxc_announcementicon {
+    background-image: image-url("megaphone_icon_black.svg");
+}
+
 .jsxc_more {
     float: right;
     width: 44px;
@@ -516,7 +521,7 @@ img.jsxc_vCard {
     opacity: 0.4;
 
     &:hover {
-        opacity: 1.0;
+        opacity: 1;
     }
 
     @media (min-width: 768px) {

@@ -1,6 +1,6 @@
 #jsxc_roster {
     position: fixed;
-    top: 0px;
+    top: 0;
     bottom: 0;
     right: 0;
     width: 200px;
@@ -8,7 +8,7 @@
     border-left: 1px solid #e1e1e1;
     display: none;
 
-    /*border-left: 1px solid $roster_border_left;*/
+    // border-left: 1px solid $roster_border_left;
     z-index: 80;
     margin-left: 10px;
     background-color: $roster_bg;
@@ -107,8 +107,79 @@
 
     &.jsxc_state_shown {
         display: block;
-        right: 0px;
+        right: 0;
         transition: right 0.5s;
+    }
+
+    > .jsxc_bottom {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        line-height: 34px;
+        background-color: $roster_bottom_bg;
+        z-index: 50;
+        padding-right: 4px;
+
+        &:hover {
+            background-color: $roster_bottom_bg_hover;
+        }
+
+        .jsxc_inner {
+            width: 100%;
+        }
+
+        ul {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            border-top: 1px solid $roster_bottom_border_top;
+            background-color: $roster_bottom_bg;
+
+            li:last-child {
+                border-bottom: 1px solid $roster_bottom_border_top;
+            }
+        }
+
+        li {
+            height: 44px;
+            background-color: $roster_bottom_bg;
+            color: $roster_bottom_color;
+            cursor: pointer;
+            width: 100%;
+            padding-left: 44px;
+            line-height: 44px;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background-repeat: no-repeat;
+            background-position: 15px center;
+            background-size: 16px 16px;
+            opacity: 0.8;
+
+            &.jsxc_disabled {
+                color: $roster_bottom_disabled;
+                cursor: default;
+            }
+
+            &:hover:not(.jsxc_disabled) {
+                color: $roster_bottom_color_hover;
+                background-color: $roster_bottom_bg_hover;
+            }
+
+            &.jsxc_warning {
+                background-color: $warning_bg;
+
+                &:hover {
+                    background-color: $warning_bg_hover;
+                }
+            }
+        }
+
+        > div > span {
+            cursor: pointer;
+        }
     }
 }
 
@@ -127,12 +198,12 @@
     }
 
     &:before {
-        content: '';
+        content: " ";
         position: absolute;
         display: block;
         width: 0;
         top: 50%;
-        right: 0px;
+        right: 0;
         border-style: solid;
         border-width: 6px 4px 6px 0;
         border-color: transparent $roster_bg;
@@ -180,7 +251,7 @@
     height: 100%;
     line-height: 100%;
 
-    /*padding-top: 4px;*/
+    // padding-top: 4px;
     box-sizing: border-box;
 
     * {
@@ -250,74 +321,6 @@
     }
 }
 
-#jsxc_roster > .jsxc_bottom {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    line-height: 34px;
-    background-color: $roster_bottom_bg;
-    z-index: 50;
-    padding-right: 4px;
-
-    &:hover {
-        background-color: $roster_bottom_bg_hover;
-    }
-
-    .jsxc_inner {
-        width: 100%;
-    }
-
-    ul {
-        padding: 0;
-        margin: 0;
-        width: 100%;
-        border-top: 1px solid $roster_bottom_border_top;
-        background-color: $roster_bottom_bg;
-        margin: 0;
-
-        li:last-child {
-            border-bottom: 1px solid $roster_bottom_border_top;
-        }
-    }
-
-    li {
-        height: 44px;
-        background-color: $roster_bottom_bg;
-        color: $roster_bottom_color;
-        cursor: pointer;
-        width: 100%;
-        padding-left: 44px;
-        line-height: 44px;
-        text-align: left;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        background-repeat: no-repeat;
-        background-position: 15px center;
-        background-size: 16px 16px;
-        opacity: 0.8;
-
-        &.jsxc_disabled {
-            color: $roster_bottom_disabled;
-            cursor: default;
-        }
-
-        &:hover:not(.jsxc_disabled) {
-            color: $roster_bottom_color_hover;
-            background-color: $roster_bottom_bg_hover;
-        }
-    }
-
-    > div > span {
-        cursor: pointer;
-    }
-
-    > div:hover {
-        /*color: $roster_bottom_color_hover;*/
-    }
-}
-
 #jsxc_avatar {
     cursor: default !important;
 }
@@ -327,7 +330,7 @@
     padding-left: 2px;
     overflow: hidden;
 
-    & > span {
+    > span {
         opacity: 0.8;
     }
 
@@ -335,7 +338,7 @@
         position: relative;
 
         &:before {
-            /** Presence indicator */
+            //  Presence indicator
             position: absolute;
             top: 50%;
             left: 10px;
@@ -356,7 +359,7 @@
         opacity: 1;
     }
 
-    & > span {
+    > span {
         opacity: 0.5;
         display: block;
         width: 100%;

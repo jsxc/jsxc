@@ -1,6 +1,6 @@
 /**
  * This namespace handles the Notification API.
- * 
+ *
  * @namespace jsxc.notification
  */
 jsxc.notification = {
@@ -10,7 +10,7 @@ jsxc.notification = {
 
    /**
     * Register notification on incoming messages.
-    * 
+    *
     * @memberOf jsxc.notification
     */
    init: function() {
@@ -39,7 +39,7 @@ jsxc.notification = {
 
    /**
     * Shows a pop up notification and optional play sound.
-    * 
+    *
     * @param title Title
     * @param msg Message
     * @param d Duration
@@ -108,7 +108,7 @@ jsxc.notification = {
    /**
     * Checks if browser has support for notifications and add on chrome to the
     * default api.
-    * 
+    *
     * @returns {Boolean} True if the browser has support.
     */
    hasSupport: function() {
@@ -163,7 +163,10 @@ jsxc.notification = {
 
       $(document).one('postmessagein.jsxc', function() {
          setTimeout(function() {
-            jsxc.notice.add($.t('Notifications') + '?', $.t('Should_we_notify_you_'), 'gui.showRequestNotification');
+            jsxc.notice.add({
+               msg: $.t('Notifications') + '?',
+               description: $.t('Should_we_notify_you_')
+            }, 'gui.showRequestNotification');
          }, 1000);
       });
    },
@@ -187,7 +190,7 @@ jsxc.notification = {
 
    /**
     * Check permission.
-    * 
+    *
     * @returns {Boolean} True if we have the permission
     */
    hasPermission: function() {
@@ -196,7 +199,7 @@ jsxc.notification = {
 
    /**
     * Plays the given file.
-    * 
+    *
     * @memberOf jsxc.notification
     * @param {string} soundFile File relative to the sound directory
     * @param {boolean} loop True for loop
@@ -230,7 +233,7 @@ jsxc.notification = {
 
    /**
     * Stop/remove current sound.
-    * 
+    *
     * @memberOf jsxc.notification
     */
    stopSound: function() {
@@ -244,7 +247,7 @@ jsxc.notification = {
 
    /**
     * Mute sound.
-    * 
+    *
     * @memberOf jsxc.notification
     * @param {boolean} external True if triggered from external tab. Default:
     *        false.
@@ -259,7 +262,7 @@ jsxc.notification = {
 
    /**
     * Unmute sound.
-    * 
+    *
     * @memberOf jsxc.notification
     * @param {boolean} external True if triggered from external tab. Default:
     *        false.

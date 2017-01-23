@@ -32,18 +32,29 @@ jsxc.tab = {
       });
    },
 
-   /*jshint -W098 */
-   execMaster: function(cmd, params) {
+   /**
+    * Execute command in master tab.
+    *
+    * @param  {String} cmd Command
+    * @param  {String[]} params List of parameters
+    */
+   execMaster: function() {
       var args = Array.prototype.slice.call(arguments);
       args.unshift(jsxc.tab.CONST.MASTER);
 
       jsxc.tab.exec.apply(this, args);
    },
-   execSlave: function(cmd, params) {
+   
+   /**
+    * Execute command in all slave tabs.
+    *
+    * @param  {String} cmd Command
+    * @param  {String[]} params List of parameters
+    */
+   execSlave: function() {
       var args = Array.prototype.slice.call(arguments);
       args.unshift(jsxc.tab.CONST.SLAVE);
 
       jsxc.tab.exec.apply(this, args);
    }
-   /*jshint +W098 */
 };
