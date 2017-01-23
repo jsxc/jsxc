@@ -2181,7 +2181,8 @@ jsxc.gui.window = {
          if (!$(this).data('originalHeight')) {
             $(this).data('originalHeight', $(this).outerHeight());
          }
-         if ($(this).outerHeight() < this.scrollHeight && $(this).val()) {
+         // compensate rounding error
+         if ($(this).outerHeight() < (this.scrollHeight - 1) && $(this).val()) {
             $(this).height($(this).data('originalHeight') * 1.5);
          }
       }
