@@ -43,7 +43,8 @@ jsxc.gui = {
          ':jabber:': ['jabber'],
          ':xmpp:': ['xmpp'],
          ':jsxc:': ['jsxc'],
-         ':owncloud:': ['owncloud']
+         ':owncloud:': ['owncloud'],
+         ':nextcloud:': ['nextcloud']
       },
       'emojione': emojione.emojioneList
    },
@@ -1195,6 +1196,26 @@ jsxc.gui = {
    },
 
    /**
+    * Show notification dialog.
+    *
+    * @param  {String} subject
+    * @param  {String} body
+    * @param  {String} from
+    */
+   showNotification: function(subject, body, from) {
+      var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('notification'));
+
+      dialog.find('h3').text(subject);
+      dialog.find('.jsxc_msg').text(body);
+
+      if (from) {
+         dialog.find('.jsxc_meta').text($.t('from') + ' ' + from);
+      } else {
+         dialog.find('.jsxc_meta').hide();
+      }
+   },
+
+   /**
     * Change own presence to pres.
     *
     * @memberOf jsxc.gui
@@ -1457,7 +1478,7 @@ jsxc.gui = {
             filename = jsxc.gui.emoticonList.core[shortname][jsxc.gui.emoticonList.core[shortname].length - 1].replace(/^:([^:]+):$/, '$1');
             src = jsxc.options.root + '/img/emotions/' + filename + '.svg';
          } else if (jsxc.gui.emoticonList.emojione[shortname]) {
-            filename = jsxc.gui.emoticonList.emojione[shortname][jsxc.gui.emoticonList.emojione[shortname].length - 1];
+            filename = jsxc.gui.emoticonList.emojione[shortname].fname;
             src = jsxc.options.root + '/lib/emojione/assets/svg/' + filename + '.svg';
          }
 

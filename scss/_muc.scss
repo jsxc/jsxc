@@ -22,7 +22,7 @@
             background-position: center;
 
             &:hover {
-                opacity: 1.0;
+                opacity: 1;
             }
         }
 
@@ -32,7 +32,7 @@
             .jsxc_avatar {
                 display: block;
                 position: absolute;
-                bottom: 0px;
+                bottom: 0;
                 left: -50px;
                 background-color: #777;
 
@@ -55,7 +55,7 @@
         background-color: $window_bar_bg;
         overflow: hidden;
         position: absolute;
-        top: 0px;
+        top: 0;
         transition: height 400ms;
         z-index: 100;
 
@@ -66,12 +66,12 @@
             color: $window_bar_color;
             overflow: hidden;
             transition: left 400ms;
-            padding: 0px;
+            padding: 0;
             padding-left: 6px;
             padding-right: 6px;
             padding-top: 3px;
 
-            & > li {
+            > li {
                 display: inline-block;
                 white-space: normal;
 
@@ -85,7 +85,7 @@
 
                 .jsxc_avatar {
                     margin-left: 2px;
-                    margin-right: 0px;
+                    margin-right: 0;
                 }
             }
         }
@@ -94,7 +94,7 @@
             ul {
                 white-space: normal;
 
-                & > li {
+                > li {
                     display: block;
                     width: 100%;
                     height: 40px;
@@ -118,7 +118,7 @@
     }
 }
 
-li[data-type="groupchat"] {
+li[data-type='groupchat'] {
     .jsxc_avatar {
         @extend %muc-avatar-icon;
     }

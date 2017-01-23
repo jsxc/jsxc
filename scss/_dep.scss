@@ -2,7 +2,7 @@
 @import "../lib/magnific-popup/src/css/main";
 @import "../lib/emojione/assets/css/emojione";
 
-/* BEGIN: bootstrap */
+// BEGIN: bootstrap
 @import "../lib/bootstrap/assets/stylesheets/bootstrap/variables";
 @import "../lib/bootstrap/assets/stylesheets/bootstrap/mixins";
 
@@ -31,11 +31,15 @@
     @import "../lib/bootstrap/assets/stylesheets/bootstrap/forms";
 
     .progress {
-        margin-bottom: 0px;
+        margin-bottom: 0;
 
         .progress-bar {
             width: 100%;
         }
+    }
+
+    .mfp-close {
+        font-size: 23px;
     }
 }
 
@@ -51,10 +55,4 @@
     text-align: center;
 }
 
-#jsxc_dialog {
-    .mfp-close {
-        font-size: 23px;
-    }
-}
-
-/* END: bootstrap */
+//  END: bootstrap

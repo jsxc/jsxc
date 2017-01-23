@@ -48,7 +48,7 @@
 
 .jsxc_establishing, .jsxc_ringing {
     &:after {
-        content: '';
+        content: " ";
         position: absolute;
         top: 0;
         right: 0;
@@ -63,7 +63,7 @@ $establishingColor1: #a1a1a1;
 $establishingColor2: #f1f1f1;
 
 .jsxc_establishing:before {
-    content: '';
+    content: " ";
     display: block;
     width: 40px;
     height: 10px;
@@ -82,7 +82,7 @@ $establishingColor2: #f1f1f1;
 
 @keyframes jsxc_establishing {
     0% {
-        border-width: 0px;
+        border-width: 0;
         background-color: $establishingColor1;
         width: 40px;
         margin-left: -20px;
@@ -95,7 +95,7 @@ $establishingColor2: #f1f1f1;
     }
 
     100% {
-        border-width: 0px;
+        border-width: 0;
         background-color: $establishingColor1;
         width: 40px;
         margin-left: -20px;
@@ -106,7 +106,7 @@ $ringingColor1: #98d48f;
 $ringingColor2: #76ba6c;
 
 .jsxc_ringing:before {
-    content: '';
+    content: " ";
     display: block;
     width: 20px;
     height: 20px;
@@ -151,7 +151,7 @@ $ringingColor2: #76ba6c;
 }
 
 .jsxc_bell:before {
-    content: '';
+    content: " ";
     display: block;
     width: 80px;
     height: 80px;
@@ -209,8 +209,8 @@ $ringingColor2: #76ba6c;
     position: absolute;
     top: 0;
     left: 0;
-    right: 0px;
-    bottom: 0px;
+    right: 0;
+    bottom: 0;
     background-color: $video_bg;
 
     &.jsxc_minimized {
@@ -246,7 +246,7 @@ $ringingColor2: #76ba6c;
 
         &:hover {
             .jsxc_controlbar {
-                opacity: 1.0;
+                opacity: 1;
             }
         }
     }
@@ -348,7 +348,7 @@ div {
 
         &:not(.jsxc_disabled) {
             &:hover {
-                opacity: 1.0;
+                opacity: 1;
             }
         }
     }
@@ -358,7 +358,7 @@ div {
     position: absolute;
     top: 50px;
     left: 0;
-    right: 0px;
+    right: 0;
     text-align: center;
     z-index: 9090;
     transition: 1s opacity;
@@ -370,14 +370,14 @@ div {
     }
 
     &.jsxc_visible {
-        opacity: 1.0;
+        opacity: 1;
     }
 
-    & > div {
+    > div {
         background-color: rgba(0, 0, 0, 0.5);
         height: 44px;
         border-radius: 22px;
-        padding: 0px 5px;
+        padding: 0 5px;
         display: inline-block;
     }
 
@@ -393,7 +393,7 @@ div {
         opacity: 0.8;
 
         &:hover {
-            opacity: 1.0;
+            opacity: 1;
         }
     }
 

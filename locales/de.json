@@ -298,6 +298,7 @@
     "UNKNOWN_ERROR": null,
     "Install_extension": null,
     "Connection_accepted": null,
-    "Stream_terminated": null
+    "Stream_terminated": null,
+    "Close_all": "Schließe alle"
   }
 }

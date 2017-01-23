@@ -1,13 +1,11 @@
 scss_files: 'scss/*.scss'
 
 linters:
+  ChainedClasses:
+    enabled: false
   ColorKeyword:
     enabled: false
   ColorVariable:
-    enabled: false
-  Comment:
-    enabled: false
-  DuplicateProperty:
     enabled: false
   EmptyRule:
     enabled: false
@@ -20,11 +18,9 @@ linters:
   ImportantRule:
     enabled: false
   Indentation:
-    enabled: false
+    width: 4
   LeadingZero:
-    enabled: false
-  MergeableSelector:
-    enabled: false
+    style: include_zero
   NameFormat:
     enabled: false
   NestingDepth:
@@ -39,18 +35,7 @@ linters:
     enabled: false
   SelectorFormat:
     enabled: false
-  Shorthand:
-    enabled: false
   SingleLinePerSelector:
     enabled: false
   StringQuotes:
-    enabled: false
-  UnnecessaryMantissa:
-    enabled: false
-  UnnecessaryParentReference:
-    enabled: false
-  UrlQuotes:
-    enabled: false
-  ZeroUnit:
-    enabled: false
-
+     style: double_quotes
