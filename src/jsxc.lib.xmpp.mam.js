@@ -27,14 +27,64 @@
  *
  */
 
-/*jsxc.xmpp.mam = {
+jsxc.xmpp.mam = {
   conn: jsxc.xmpp.conn
 };
 
 jsxc.xmpp.mam.init = function(){
-  var self = jsxc.xmpp.mam;
-  self.getHistory(userid, count, before);
-};*/
+  var self = jsxc.xmpp.conn.mam;
+  console.log(self);
+
+  //self has now the object of the strophe.mam
+  // make a call to the get history function.
+
+
+  //self.getHistory(userid, count, before);
+};
+
+
+jsxc.xmpp.mam.getHistory = function(bid) {
+  var self = jsxc.xmpp.conn.mam;
+  var ownjid = jsxc.xmpp.conn.jid;
+  var ownbid = jsxc.jidToBid(ownjid);
+
+  self.query(ownbid, {
+    with: bid, 
+    before: "", 
+    onMessage: function(message) {
+      var timeOfMessage = $(message).find("forwarded delay").attr("stamp");
+      var stamp = new Date(timeOfMessage).getTime();
+      var msgBody = $(message).find("forwarded message body").text();
+      var mamUid = stamp + ":msg";
+      var msg = {
+        "_uid": mamUid,
+        "_received": false,
+        "encrypted": false,
+        "forwarded": false,
+        "stamp": $(message).find("forwarded delay").attr("stamp"),
+
+        "type": "plain",
+        "bid": bid,
+        "direction": "in",
+        "msg": msgBody
+      };
+
+      console.log(message);
+      console.log(mamUid);
+
+      jsxc.storage.setUserItem('msg', mamUid, msg);
+      //This line is not working
+      jsxc.gui.window.postMessage(msg);
+
+      //console.log("Message from ", $(message).find("forwarded message").attr("from"), " on ", $(message).find("forwarded delay").attr("stamp"),": ", $(message).find("forwarded message body").text() );
+      return true;
+    },
+    onComplete: function(response) {
+      console.log("Got all the messages");
+      console.log(response);
+    }
+  });
+};
 
 //example code to query an personal archive for conversations with 
 //juliet@capulet.com
@@ -94,4 +144,3 @@ connection.mam.query("you@example.com", {
   }
 };
 */
-  

@@ -2360,6 +2360,7 @@ jsxc.gui.window = {
     */
    open: function(bid) {
       var win = jsxc.gui.window.init(bid);
+      jsxc.xmpp.mam.getHistory(bid);
 
       jsxc.gui.window.show(bid);
       jsxc.gui.window.highlight(bid);

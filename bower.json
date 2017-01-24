@@ -32,7 +32,7 @@
     "strophe.vcard": "https://raw.githubusercontent.com/strophe/strophejs-plugins/2f07137ad2cbeaed41650ee46373c2f44e0f263a/vcard/strophe.vcard.js",
     "strophe.x": "https://raw.githubusercontent.com/strophe/strophejs-plugins/master/dataforms/src/strophe.x.js",
     "strophe.mam": "https://raw.githubusercontent.com/strophe/strophejs-plugins/master/mam/strophe.mam.v0.3.js", 
-    "strophe.rsm": "https://raw.githubusercontent.com/metajack/strophejs-plugins/master/rsm/strophe.rsm.js",
+    "strophe.rsm": "https://raw.githubusercontent.com/strophe/strophejs-plugins/master/rsm/strophe.rsm.js",
     "strophe.chatstates": "https://raw.githubusercontent.com/strophe/strophejs-plugins/master/chatstates/strophe.chatstates.js",
     "jquery-i18next": "^1.2.0",
     "i18next": "^5.0.0",
