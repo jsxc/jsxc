@@ -102,12 +102,6 @@
      "url": "http://dimsemenov.com/plugins/magnific-popup/"
   },
   {
-     "name": null,
-     "file": "lib/translation.js",
-     "license": "MIT",
-     "url": "https://webtranslateit.com/en/projects/10365-JSXC"
-  },
-  {
      "name": "favico.js",
      "file": "lib/favico.js/favico.js",
      "license": "MIT",
