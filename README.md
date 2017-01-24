@@ -1,6 +1,7 @@
 # JavaScript XMPP Client
 
 [![Build Status](https://travis-ci.org/jsxc/jsxc.svg?branch=master)](https://travis-ci.org/jsxc/jsxc)
+[![Dependency Status](https://dependencyci.com/github/jsxc/jsxc/badge)](https://dependencyci.com/github/jsxc/jsxc)
 
 Real-time chat app. This app requires an external XMPP server (openfire, ejabberd etc.).
 
