@@ -44,14 +44,52 @@ jsxc.xmpp.mam.init = function(){
 
 
 jsxc.xmpp.mam.getHistory = function(bid) {
+  /*
+  To include the whole functionality of strophe-plugin we used self
+  */
   var self = jsxc.xmpp.conn.mam;
+  /*
+  ownjid is the jid of the person who is logged in
+  */
   var ownjid = jsxc.xmpp.conn.jid;
+
+  // Now we are converting the jid into bid
   var ownbid = jsxc.jidToBid(ownjid);
 
+
+  // We are calling the strophe plugin as specified by them
   self.query(ownbid, {
     with: bid, 
     before: "", 
     onMessage: function(message) {
+      /*
+      The message looks like this:
+      <message xmlns="jabber:client" from="ownbid" to="bid">
+        <result xmlns="urn:xmpp:mam:0" id="1485155123866746">
+          <forwarded xmlns="urn:xmpp:forward:0">
+            <message xmlns="jabber:client" from="jid from which message is sent" to="bid who recived the message" type="chat" id="1485141093744:msg">
+              <body>gdhjcb</body>
+              <request xmlns="urn:xmpp:receipts"></request>
+              <delay xmlns="urn:xmpp:delay" from="serverAddress" stamp="2017-01-23T03:11:43.446Z">Offline Storage</delay>
+            </message>
+            <delay xmlns="urn:xmpp:delay" from="serverAddress" stamp="2017-01-23T07:05:23.867Z"></delay>
+          </forwarded>
+        </result>
+        <no-store xmlns="urn:xmpp:hints"></no-store>
+      </message>
+      
+      */
+      var direction;
+
+      /*
+      Check the direction of the message i.e. In which direction messages are exchanged.
+      */
+      if(bid === $(message).find("forwarded message").attr("to")){
+        direction = "out";
+      }
+      else{
+        direction = "in";
+      }
       var timeOfMessage = $(message).find("forwarded delay").attr("stamp");
       var stamp = new Date(timeOfMessage).getTime();
       var msgBody = $(message).find("forwarded message body").text();
@@ -60,17 +98,26 @@ jsxc.xmpp.mam.getHistory = function(bid) {
         "_uid": mamUid,
         "_received": false,
         "encrypted": false,
-        "forwarded": false,
-        "stamp": $(message).find("forwarded delay").attr("stamp"),
+
+        /* 
+        forwarded is true becuase we don't want the user to get notifications 
+        of the old messages
+        */
+        "forwarded": true,
+        /*
+        For stamp we pass the number of milliseconds that have been passed since 
+        05 January, 1975
+        */
+        "stamp": stamp,
 
         "type": "plain",
         "bid": bid,
-        "direction": "in",
+        "direction": direction,
         "msg": msgBody
       };
 
-      console.log(message);
-      console.log(mamUid);
+      //console.log(message);
+      //console.log(mamUid);
 
       jsxc.storage.setUserItem('msg', mamUid, msg);
       //This line is not working
