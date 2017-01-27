@@ -2718,6 +2718,11 @@ jsxc.gui.window = {
          msg = msg.replace(/^\/me /, '<i title="/me">' + jsxc.removeHTML(bidData.name || bid) + '</i> ');
       }
 
+      // hide unprocessed otr messages
+      if (msg.match(/^\?OTR([:,|?]|[?v0-9x]+)/)) {
+         msg = '<i title="' + msg + '">' + $.t('Unreadable_OTR_message') + '</i>';
+      }
+
       var msgDiv = $("<div>"),
          msgTsDiv = $("<div>");
       msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
