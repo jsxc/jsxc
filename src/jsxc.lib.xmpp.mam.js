@@ -31,17 +31,6 @@ jsxc.xmpp.mam = {
   conn: jsxc.xmpp.conn
 };
 
-jsxc.xmpp.mam.init = function(){
-  var self = jsxc.xmpp.conn.mam;
-  console.log(self);
-
-  //self has now the object of the strophe.mam
-  // make a call to the get history function.
-
-
-  //self.getHistory(userid, count, before);
-};
-
 
 jsxc.xmpp.mam.getHistory = function(bid) {
   /*
@@ -56,7 +45,8 @@ jsxc.xmpp.mam.getHistory = function(bid) {
   // Now we are converting the jid into bid
   var ownbid = jsxc.jidToBid(ownjid);
 
-
+  console.log(bid);
+  //console.log(ownbid);
   // We are calling the strophe plugin as specified by them
   self.query(ownbid, {
     with: bid, 
@@ -93,7 +83,7 @@ jsxc.xmpp.mam.getHistory = function(bid) {
       var timeOfMessage = $(message).find("forwarded delay").attr("stamp");
       var stamp = new Date(timeOfMessage).getTime();
       var msgBody = $(message).find("forwarded message body").text();
-      var mamUid = stamp + ":msg";
+      var mamUid = $(message).find("result").attr("id") + ":msg";
       var msg = {
         "_uid": mamUid,
         "_received": false,
@@ -106,7 +96,7 @@ jsxc.xmpp.mam.getHistory = function(bid) {
         "forwarded": true,
         /*
         For stamp we pass the number of milliseconds that have been passed since 
-        05 January, 1975
+        05 January, 1975. Please change the date format
         */
         "stamp": stamp,
 
@@ -116,19 +106,17 @@ jsxc.xmpp.mam.getHistory = function(bid) {
         "msg": msgBody
       };
 
-      //console.log(message);
-      //console.log(mamUid);
 
-      jsxc.storage.setUserItem('msg', mamUid, msg);
       //This line is not working
       jsxc.gui.window.postMessage(msg);
-
-      //console.log("Message from ", $(message).find("forwarded message").attr("from"), " on ", $(message).find("forwarded delay").attr("stamp"),": ", $(message).find("forwarded message body").text() );
+      if(isNaN(msg.stamp)){
+        console.log("I found null stamp");
+        return true;
+      }
       return true;
     },
     onComplete: function(response) {
-      console.log("Got all the messages");
-      console.log(response);
+      console.log("Got all the messages" + response);
     }
   });
 };

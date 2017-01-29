@@ -2607,10 +2607,9 @@ jsxc.gui.window = {
 
       // remove html tags and reencode html tags
       message.msg = jsxc.removeHTML(message.msg);
-      message.msg = jsxc.escapeHTML(message.msg);
-
+      message.msg = jsxc.escapeHTML(message.msg); 
+      
       // exceptions:
-
       if (message.direction === jsxc.Message.OUT && data.msgstate === OTR.CONST.MSGSTATE_FINISHED && message.forwarded !== true) {
          message.direction = jsxc.Message.SYS;
          message.msg = $.t('your_message_wasnt_send_please_end_your_private_conversation');
@@ -2674,6 +2673,7 @@ jsxc.gui.window = {
       var msg = message.msg;
       var direction = message.direction;
       var uid = message._uid;
+      var stamp = message.stamp;
 
       if (win.find('.jsxc_textinput').is(':not(:focus)') && direction === jsxc.Message.IN && !restore) {
          jsxc.gui.window.highlight(bid);
