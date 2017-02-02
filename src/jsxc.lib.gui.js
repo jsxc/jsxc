@@ -1264,8 +1264,8 @@ jsxc.gui = {
 
          el.attr('data-status', pres);
 
-         if (el.find('.jsxc_avatar').length > 0) {
-            el = el.find('.jsxc_avatar');
+         if (el.find('.jsxc_statusIndicator').length > 0) {
+            el = el.find('.jsxc_statusIndicator');
          }
 
          el.removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
