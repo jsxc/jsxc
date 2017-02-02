@@ -7,7 +7,7 @@ jsxc.xmpp.bookmarks = {};
 
 /**
  * Determines if server is able to store bookmarks.
- * 
+ *
  * @return {boolean} True: Server supports bookmark storage
  */
 jsxc.xmpp.bookmarks.remote = function() {
@@ -70,7 +70,7 @@ jsxc.xmpp.bookmarks.loadFromLocal = function() {
 
 /**
  * Load bookmarks from remote storage.
- * 
+ *
  * @private
  */
 jsxc.xmpp.bookmarks.loadFromRemote = function() {
@@ -128,7 +128,11 @@ jsxc.xmpp.bookmarks.loadFromRemote = function() {
       if (err.reasons[0] === 'item-not-found') {
          jsxc.debug('create bookmark node');
 
-         bookmarks.createBookmarksNode();
+         bookmarks.createBookmarksNode(function() {
+            jsxc.debug('Bookmark node created.');
+         }, function() {
+            jsxc.debug('Could not create bookmark node.');
+         });
       } else {
          jsxc.debug('[XMPP] Could not create bookmark: ' + err.type, err.reasons);
       }
