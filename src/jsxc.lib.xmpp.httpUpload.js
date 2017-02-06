@@ -80,31 +80,48 @@ jsxc.xmpp.httpUpload.discoverUploadService = function() {
 
    jsxc.debug('discover http upload service');
 
+   self.queryItemForUploadService(self.conn.domain);
+
    self.conn.disco.items(self.conn.domain, null, function(items) {
       $(items).find('item').each(function() {
          var jid = $(this).attr('jid');
-         var discovered = false;
 
-         self.conn.disco.info(jid, null, function(info) {
-            var httpUploadFeature = $(info).find('feature[var="' + self.CONST.NS.HTTPUPLOAD + '"]');
-            var httpUploadMaxSize = $(info).find('field[var="max-file-size"]');
+         self.queryItemForUploadService(jid);
+      });
+   });
+};
 
-            if (httpUploadFeature.length > 0) {
-               jsxc.debug('http upload service found', jid);
+/**
+ * Query item for upload service.
+ *
+ * @param {String} jid
+ * @param {Function} cb Callback on success
+ * @memberOf jsxc.xmpp.httpUpload
+ */
+jsxc.xmpp.httpUpload.queryItemForUploadService = function(jid, cb) {
+   var self = jsxc.xmpp.httpUpload;
 
-               jsxc.options.set('httpUpload', {
-                  server: jid,
-                  name: $(info).find('identity').attr('name'),
-                  maxSize: parseInt(httpUploadMaxSize.text())
-               });
+   jsxc.debug('query ' + jid + ' for upload service');
 
-               discovered = true;
-               self.ready = true;
-            }
+   self.conn.disco.info(jid, null, function(info) {
+      var httpUploadFeature = $(info).find('feature[var="' + self.CONST.NS.HTTPUPLOAD + '"]');
+      var httpUploadMaxSize = $(info).find('field[var="max-file-size"]');
+
+      if (httpUploadFeature.length > 0) {
+         jsxc.debug('http upload service found on ' + jid);
+
+         jsxc.options.set('httpUpload', {
+            server: jid,
+            name: $(info).find('identity').attr('name'),
+            maxSize: parseInt(httpUploadMaxSize.text())
          });
 
-         return !discovered;
-      });
+         self.ready = true;
+
+         if (typeof cb === 'function') {
+            cb.call(info);
+         }
+      }
    });
 };
 
