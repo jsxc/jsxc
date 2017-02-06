@@ -86,6 +86,11 @@ jsxc.xmpp.httpUpload.discoverUploadService = function() {
       $(items).find('item').each(function() {
          var jid = $(this).attr('jid');
 
+         if (self.ready) {
+            // abort, because we already found a service
+            return false;
+         }
+
          self.queryItemForUploadService(jid);
       });
    });
