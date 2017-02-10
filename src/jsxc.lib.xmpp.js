@@ -788,6 +788,7 @@ jsxc.xmpp = {
    onChatMessage: function(stanza) {
       var forwarded = $(stanza).find('forwarded[xmlns="' + jsxc.CONST.NS.FORWARD + '"]');
       var message, carbon;
+      var originalSender = $(stanza).attr('from');
 
       if (forwarded.length > 0) {
          message = forwarded.find('> message');
@@ -796,6 +797,9 @@ jsxc.xmpp = {
 
          if (carbon.length === 0) {
             carbon = false;
+         } else if (originalSender !== Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid)) {
+            // ignore this carbon copy
+            return true;
          }
 
          jsxc.debug('Incoming forwarded message', message);
