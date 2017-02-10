@@ -7,29 +7,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added
 - add application states
-- #393 add the me command (XEP-0245)
-- #422 add multiline message support
-- #431 add Chat State Notifications (XEP-0085)
-- #426 add HTTP File Upload (XEP-0363)
+- [#393](https://github.com/jsxc/jsxc/issues/393) add the me command (XEP-0245)
+- [#422](https://github.com/jsxc/jsxc/issues/422) add multiline message support
+- [#431](https://github.com/jsxc/jsxc/issues/431) add Chat State Notifications (XEP-0085)
+- [#426](https://github.com/jsxc/jsxc/issues/426) add HTTP File Upload (XEP-0363)
 - add Turkish
-- #438 add desktop sharing
+- [#438](https://github.com/jsxc/jsxc/issues/438) add desktop sharing
 - add nextcloud emoticon
-- #301 add close all button for notices
-- #344 support messages of type headline
+- [#301](https://github.com/jsxc/jsxc/issues/301) add close all button for notices
+- [#344](https://github.com/jsxc/jsxc/issues/344) support messages of type headline
 - add icon to notices
 
 ### Fixed
 - fix login form submission
 - fix display of muc warning
-- #391 fix muc initialisation after relogin
-- #394 disable otr for muc conversations
-- #399 prompt for muc password if required
-- #435 fix list of user name suggestions
-- #433 fix i18n interpolation pattern
+- [#391](https://github.com/jsxc/jsxc/issues/391) fix muc initialisation after relogin
+- [#394](https://github.com/jsxc/jsxc/issues/394) disable otr for muc conversations
+- [#399](https://github.com/jsxc/jsxc/issues/399) prompt for muc password if required
+- [#435](https://github.com/jsxc/jsxc/issues/435) fix list of user name suggestions
+- [#433](https://github.com/jsxc/jsxc/issues/433) fix i18n interpolation pattern
 - fix minor webrtc issues
-- #440 prevent login form submission
-- #441 remove console.trace
-- #409 fix presence after accepting contact request
+- [#440](https://github.com/jsxc/jsxc/issues/440) prevent login form submission
+- [#441](https://github.com/jsxc/jsxc/issues/441) remove console.trace
+- [#409](https://github.com/jsxc/jsxc/issues/409) fix presence after accepting contact request
 - fix template system
 - fix path to strophe.bookmarks (regression)
 - fix disabled login form
@@ -39,10 +39,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - update dependencies
-- #385 update i18next
+- [#385](https://github.com/jsxc/jsxc/issues/385) update i18next
 - improve initial focus for login box
 - add large emoticons
-- #421 make muc server field editable
+- [#421](https://github.com/jsxc/jsxc/issues/421) make muc server field editable
 - system message style
 - disable sending of otr whitespace tag by default
 - enable carbon copies by default
