@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.1.0-beta - 2017-01-23
+ * jsxc v3.1.0-beta.2 - 2017-02-10
  * 
  * Copyright (c) 2017 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.1.0-beta
+ * @version 3.1.0-beta.2
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.1.0-beta',
+   version: '3.1.0-beta.2',
 
    /** True if i'm the master */
    master: false,
@@ -378,10 +378,12 @@ jsxc = {
                      jsxc.options.loginForm.triggered = true;
 
                      jsxc.xmpp.login(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
+
+                     return;
                   }
-               } else {
-                  jsxc.submitLoginForm();
                }
+
+               jsxc.submitLoginForm();
             });
 
             // Trigger submit in jsxc.xmpp.connected()
@@ -1544,13 +1546,18 @@ jsxc.xmpp = {
     * @private
     */
    onRosterChanged: function(iq) {
-      /*
-       * <iq from='' type='set' id=''> <query xmlns='jabber:iq:roster'> <item
-       * jid='' name='' subscription='' /> </query> </iq>
-       */
+
+      var iqSender = $(iq).attr('from');
+      var ownBareJid = Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid);
+
+      if (iqSender && iqSender !== ownBareJid) {
+         return true;
+      }
 
       jsxc.debug('onRosterChanged', iq);
 
+      // @REVIEW there should be only one item, according to RFC6121
+      // https://xmpp.org/rfcs/rfc6121.html#roster-syntax-actions-push
       $(iq).find('item').each(function() {
          var jid = $(this).attr('jid');
          var name = $(this).attr('name') || jid;
@@ -1772,6 +1779,7 @@ jsxc.xmpp = {
    onChatMessage: function(stanza) {
       var forwarded = $(stanza).find('forwarded[xmlns="' + jsxc.CONST.NS.FORWARD + '"]');
       var message, carbon;
+      var originalSender = $(stanza).attr('from');
 
       if (forwarded.length > 0) {
          message = forwarded.find('> message');
@@ -1780,6 +1788,9 @@ jsxc.xmpp = {
 
          if (carbon.length === 0) {
             carbon = false;
+         } else if (originalSender !== Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid)) {
+            // ignore this carbon copy
+            return true;
          }
 
          jsxc.debug('Incoming forwarded message', message);
@@ -5298,6 +5309,11 @@ jsxc.gui.window = {
          msg = msg.replace(/^\/me /, '<i title="/me">' + jsxc.removeHTML(bidData.name || bid) + '</i> ');
       }
 
+      // hide unprocessed otr messages
+      if (msg.match(/^\?OTR([:,|?]|[?v0-9x]+)/)) {
+         msg = '<i title="' + msg + '">' + $.t('Unreadable_OTR_message') + '</i>';
+      }
+
       var msgDiv = $("<div>"),
          msgTsDiv = $("<div>");
       msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
@@ -5675,7 +5691,8 @@ jsxc.gui.template.get = function(name, bid, msg) {
       // prevent 404
       ret = ret.replace(/\{\{root\}\}/g, ph.root);
 
-      ret = $(ret);
+      // encapsulate template to find all desired elements in the next step
+      ret = $('<div>' + ret + '</div>');
 
       ret.find('[data-var]').each(function() {
          var key = $(this).attr('data-var');
@@ -5687,6 +5704,9 @@ jsxc.gui.template.get = function(name, bid, msg) {
             $(this).text(val);
          }
       });
+
+      // remove encapsulation
+      ret = ret.find('>*');
 
       ret.localize(ph);
 
@@ -6078,7 +6098,9 @@ jsxc.muc = {
 
       li.click(jsxc.muc.showJoinChat);
 
-      $('#jsxc_menu ul .jsxc_about').before(li);
+      if ($('#jsxc_menu .jsxc_joinChat').length === 0) {
+         $('#jsxc_menu ul .jsxc_about').before(li);
+      }
    },
 
    /**
@@ -11087,7 +11109,7 @@ jsxc.xmpp.bookmarks = {};
 
 /**
  * Determines if server is able to store bookmarks.
- * 
+ *
  * @return {boolean} True: Server supports bookmark storage
  */
 jsxc.xmpp.bookmarks.remote = function() {
@@ -11150,7 +11172,7 @@ jsxc.xmpp.bookmarks.loadFromLocal = function() {
 
 /**
  * Load bookmarks from remote storage.
- * 
+ *
  * @private
  */
 jsxc.xmpp.bookmarks.loadFromRemote = function() {
@@ -11208,7 +11230,11 @@ jsxc.xmpp.bookmarks.loadFromRemote = function() {
       if (err.reasons[0] === 'item-not-found') {
          jsxc.debug('create bookmark node');
 
-         bookmarks.createBookmarksNode();
+         bookmarks.createBookmarksNode(function() {
+            jsxc.debug('Bookmark node created.');
+         }, function() {
+            jsxc.debug('Could not create bookmark node.');
+         });
       } else {
          jsxc.debug('[XMPP] Could not create bookmark: ' + err.type, err.reasons);
       }
@@ -11751,31 +11777,53 @@ jsxc.xmpp.httpUpload.discoverUploadService = function() {
 
    jsxc.debug('discover http upload service');
 
+   self.queryItemForUploadService(self.conn.domain);
+
    self.conn.disco.items(self.conn.domain, null, function(items) {
       $(items).find('item').each(function() {
          var jid = $(this).attr('jid');
-         var discovered = false;
 
-         self.conn.disco.info(jid, null, function(info) {
-            var httpUploadFeature = $(info).find('feature[var="' + self.CONST.NS.HTTPUPLOAD + '"]');
-            var httpUploadMaxSize = $(info).find('field[var="max-file-size"]');
+         if (self.ready) {
+            // abort, because we already found a service
+            return false;
+         }
 
-            if (httpUploadFeature.length > 0) {
-               jsxc.debug('http upload service found', jid);
+         self.queryItemForUploadService(jid);
+      });
+   });
+};
 
-               jsxc.options.set('httpUpload', {
-                  server: jid,
-                  name: $(info).find('identity').attr('name'),
-                  maxSize: parseInt(httpUploadMaxSize.text())
-               });
+/**
+ * Query item for upload service.
+ *
+ * @param {String} jid
+ * @param {Function} cb Callback on success
+ * @memberOf jsxc.xmpp.httpUpload
+ */
+jsxc.xmpp.httpUpload.queryItemForUploadService = function(jid, cb) {
+   var self = jsxc.xmpp.httpUpload;
 
-               discovered = true;
-               self.ready = true;
-            }
+   jsxc.debug('query ' + jid + ' for upload service');
+
+   self.conn.disco.info(jid, null, function(info) {
+      var httpUploadFeature = $(info).find('feature[var="' + self.CONST.NS.HTTPUPLOAD + '"]');
+      var httpUploadMaxSize = $(info).find('field[var="max-file-size"]');
+
+      if (httpUploadFeature.length > 0) {
+         jsxc.debug('http upload service found on ' + jid);
+
+         jsxc.options.set('httpUpload', {
+            server: jid,
+            name: $(info).find('identity').attr('name'),
+            maxSize: parseInt(httpUploadMaxSize.text())
          });
 
-         return !discovered;
-      });
+         self.ready = true;
+
+         if (typeof cb === 'function') {
+            cb.call(info);
+         }
+      }
    });
 };
 
