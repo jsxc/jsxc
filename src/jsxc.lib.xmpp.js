@@ -560,13 +560,18 @@ jsxc.xmpp = {
     * @private
     */
    onRosterChanged: function(iq) {
-      /*
-       * <iq from='' type='set' id=''> <query xmlns='jabber:iq:roster'> <item
-       * jid='' name='' subscription='' /> </query> </iq>
-       */
+
+      var iqSender = $(iq).attr('from');
+      var ownBareJid = Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid);
+
+      if (iqSender && iqSender !== ownBareJid) {
+         return true;
+      }
 
       jsxc.debug('onRosterChanged', iq);
 
+      // @REVIEW there should be only one item, according to RFC6121
+      // https://xmpp.org/rfcs/rfc6121.html#roster-syntax-actions-push
       $(iq).find('item').each(function() {
          var jid = $(this).attr('jid');
          var name = $(this).attr('name') || jid;
