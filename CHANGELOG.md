@@ -30,6 +30,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - #440 prevent login form submission
 - #441 remove console.trace
 - #409 fix presence after accepting contact request
+- fix template system
+- fix path to strophe.bookmarks (regression)
+- fix disabled login form
+- fix carbon copy impersonation vulnerability ([CVE-2017-5589+](https://rt-solutions.de/en/2017/02/CVE-2017-5589_xmpp_carbons/))
+- ignore malicious roster updates
+- prevent double insertion of muc setting
 
 ### Changed
 - update dependencies
@@ -41,6 +47,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - disable sending of otr whitespace tag by default
 - enable carbon copies by default
 - remove border radius from dialog
+- exclude dev dependencies from build
+- move jquery library to example folder
+- omit unreadable otr messages
 
 ## 3.0.1 - 2016-10-28
 ### Added
