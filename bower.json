@@ -29,9 +29,9 @@
     "favico.js": "^0.3.10",
     "strophe.bookmarks": "strophe/strophejs-plugin-bookmarks#f51c60629cb0ad278f92bfb8d8dbb8cb455d9c98",
     "strophe.js": "strophejs#a11ebefa3db1b6712d51d0d309b9f68f8e391d1b",
-    "strophe.vcard": "https://raw.githubusercontent.com/strophe/strophejs-plugins/2f07137ad2cbeaed41650ee46373c2f44e0f263a/vcard/strophe.vcard.js",
-    "strophe.x": "https://raw.githubusercontent.com/strophe/strophejs-plugins/master/dataforms/src/strophe.x.js",
-    "strophe.chatstates": "https://raw.githubusercontent.com/strophe/strophejs-plugins/master/chatstates/strophe.chatstates.js",
+    "strophe.vcard": "strophe/strophejs-plugin-vcard#de3a0c97a2c520ed900ee15b04a0c16d5c663891",
+    "strophe.x": "strophe/strophejs-plugin-dataforms",
+    "strophe.chatstates": "strophe/strophejs-plugin-chatstates",
     "jquery-i18next": "^1.2.0",
     "i18next": "^5.0.0",
     "magnific-popup": "^1.1.0"
