@@ -117,6 +117,10 @@ jsxc.muc = {
          $(document).one('ready.roster.jsxc', jsxc.muc.initMenu);
       }
 
+      // remove maybe previously attached handlers
+      $(document).off('presence.jsxc', jsxc.muc.onPresence);
+      $(document).off('error.presence.jsxc', jsxc.muc.onPresenceError);
+
       $(document).on('presence.jsxc', jsxc.muc.onPresence);
       $(document).on('error.presence.jsxc', jsxc.muc.onPresenceError);
 
@@ -135,7 +139,9 @@ jsxc.muc = {
 
       li.click(jsxc.muc.showJoinChat);
 
-      $('#jsxc_menu ul .jsxc_about').before(li);
+      if ($('#jsxc_menu .jsxc_joinChat').length === 0) {
+         $('#jsxc_menu ul .jsxc_about').before(li);
+      }
    },
 
    /**
@@ -148,6 +154,8 @@ jsxc.muc = {
    showJoinChat: function(r, p) {
       var self = jsxc.muc;
       var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('joinChat'));
+
+      // @TODO split this monster function apart
 
       // hide second step button
       dialog.find('.jsxc_join').hide();
@@ -163,7 +171,27 @@ jsxc.muc = {
       }
 
       // display conference server
+      var serverInputTimeout;
       dialog.find('#jsxc_server').val(jsxc.options.get('muc').server);
+      dialog.find('#jsxc_server').on('input', function() {
+         var self = $(this);
+
+         if (serverInputTimeout) {
+            clearTimeout(serverInputTimeout);
+            dialog.find('.jsxc_inputinfo.jsxc_room').hide();
+         }
+
+         dialog.find('.jsxc_inputinfo.jsxc_server').hide().text('');
+         dialog.find('#jsxc_server').removeClass('jsxc_invalid');
+
+         if (self.val() &amp;&amp; self.val().match(/^[.-0-9a-zA-Z]+$/i)) {
+            dialog.find('.jsxc_inputinfo.jsxc_room').show().addClass('jsxc_waiting');
+
+            serverInputTimeout = setTimeout(function() {
+               loadRoomList(self.val());
+            }, 1800);
+         }
+      }).trigger('input');
 
       // handle error response
       var error_handler = function(event, condition, room) {
@@ -211,49 +239,13 @@ jsxc.muc = {
             delete self.conn.muc.rooms[room];
          }
 
-         dialog.find('.jsxc_warning').text(msg);
+         $('&lt;p>').addClass('jsxc_warning').text(msg).appendTo(dialog.find('.jsxc_msg'));
       };
 
       $(document).on('error.muc.jsxc', error_handler);
 
       $(document).on('close.dialog.jsxc', function() {
          $(document).off('error.muc.jsxc', error_handler);
-      });
-
-      // load room list
-      self.conn.muc.listRooms(jsxc.options.get('muc').server, function(stanza) {
-         // workaround: chrome does not display dropdown arrow for dynamically filled datalists
-         $('#jsxc_roomlist option:last').remove();
-
-         $(stanza).find('item').each(function() {
-            var r = $('&lt;option>');
-            var rjid = $(this).attr('jid').toLowerCase();
-            var rnode = Strophe.getNodeFromJid(rjid);
-            var rname = $(this).attr('name') || rnode;
-
-            r.text(rname);
-            r.attr('data-jid', rjid);
-            r.attr('value', rnode);
-
-            $('#jsxc_roomlist select').append(r);
-         });
-
-         var set = $(stanza).find('set[xmlns="http://jabber.org/protocol/rsm"]');
-
-         if (set.length > 0) {
-            var count = set.find('count').text() || '?';
-
-            dialog.find('.jsxc_inputinfo').removeClass('jsxc_waiting').text($.t('Could_load_only', {
-               count: count
-            }));
-         } else {
-            dialog.find('.jsxc_inputinfo').hide();
-         }
-      }, function() {
-         jsxc.warn('Could not load rooms');
-
-         // room autocompletion is a comfort feature, so it is not necessary to inform the user
-         dialog.find('.jsxc_inputinfo').hide();
       });
 
       dialog.find('#jsxc_nickname').attr('placeholder', Strophe.getNodeFromJid(self.conn.jid));
@@ -273,7 +265,7 @@ jsxc.muc = {
 
          var room = ($('#jsxc_room').val()) ? jsxc.jidToBid($('#jsxc_room').val()) : null;
          var nickname = $('#jsxc_nickname').val() || Strophe.getNodeFromJid(self.conn.jid);
-         var password = $('#jsxc_password').val() || null;
+         var server = dialog.find('#jsxc_server').val();
 
          if (!room || !room.match(/^[^"&amp;\'\/:&lt;>@\s]+$/i)) {
             $('#jsxc_room').addClass('jsxc_invalid').keyup(function() {
@@ -284,8 +276,12 @@ jsxc.muc = {
             return false;
          }
 
+         if (dialog.find('#jsxc_server').hasClass('jsxc_invalid')) {
+            return false;
+         }
+
          if (!room.match(/@(.*)$/)) {
-            room += '@' + jsxc.options.get('muc').server;
+            room += '@' + server;
          }
 
          if (jsxc.xmpp.conn.muc.roomNames.indexOf(room) &lt; 0) {
@@ -307,6 +303,7 @@ jsxc.muc = {
 
                   var bookmark = $("#jsxc_bookmark").prop("checked");
                   var autojoin = $('#jsxc_autojoin').prop('checked');
+                  var password = $('#jsxc_password').val() || null;
 
                   // clean up
                   jsxc.gui.window.clear(room);
@@ -329,11 +326,17 @@ jsxc.muc = {
                $(stanza).find('feature').each(function() {
                   var feature = $(this).attr('var');
 
-                  if (feature !== '' &amp;&amp; i18n.exists(feature)) {
+                  if (feature !== '' &amp;&amp; i18next.exists(feature)) {
                      var tr = $('&lt;tr>');
                      $('&lt;td>').text($.t(feature + '.keyword')).appendTo(tr);
                      $('&lt;td>').text($.t(feature + '.description')).appendTo(tr);
                      tr.appendTo(table);
+                  }
+
+                  if (feature === 'muc_passwordprotected') {
+                     dialog.find('#jsxc_password').parents('.form-group').removeClass('jsxc_hidden');
+                     dialog.find('#jsxc_password').attr('required', 'required');
+                     dialog.find('#jsxc_password').addClass('jsxc_invalid');
                   }
                });
 
@@ -352,7 +355,7 @@ jsxc.muc = {
                discoReceived();
             });
          } else {
-            dialog.find('.jsxc_warning').text($.t('You_already_joined_this_room'));
+            $('&lt;p>').addClass('jsxc_warning').text($.t('You_already_joined_this_room')).appendTo(dialog.find('.jsxc_msg'));
          }
 
          return false;
@@ -363,12 +366,15 @@ jsxc.muc = {
          if (ev.which !== 13) {
             // reset messages and room information
 
-            dialog.find('.jsxc_warning').empty();
+            dialog.find('.jsxc_warning').remove();
 
-            if (dialog.find('.jsxc_continue').is(":hidden")) {
+            if (dialog.find('.jsxc_continue').is(":hidden") &amp;&amp; $(this).attr('id') !== 'jsxc_password') {
                dialog.find('.jsxc_continue').show();
                dialog.find('.jsxc_join').hide().off('click');
                dialog.find('.jsxc_msg').empty();
+               dialog.find('#jsxc_password').parents('.form-group').addClass('jsxc_hidden');
+               dialog.find('#jsxc_password').attr('required', '');
+               dialog.find('#jsxc_password').removeClass('jsxc_invalid');
                jsxc.gui.dialog.resize();
             }
 
@@ -381,6 +387,58 @@ jsxc.muc = {
             dialog.find('.jsxc_join').click();
          }
       });
+
+      function loadRoomList(server) {
+         if (!server) {
+            dialog.find('.jsxc_inputinfo').hide();
+
+            return;
+         }
+
+         // load room list
+         self.conn.muc.listRooms(server, function(stanza) {
+            // workaround: chrome does not display dropdown arrow for dynamically filled datalists
+            $('#jsxc_roomlist option:last').remove();
+
+            $(stanza).find('item').each(function() {
+               var r = $('&lt;option>');
+               var rjid = $(this).attr('jid').toLowerCase();
+               var rnode = Strophe.getNodeFromJid(rjid);
+               var rname = $(this).attr('name') || rnode;
+
+               r.text(rname);
+               r.attr('data-jid', rjid);
+               r.attr('value', rnode);
+
+               $('#jsxc_roomlist select').append(r);
+            });
+
+            var set = $(stanza).find('set[xmlns="http://jabber.org/protocol/rsm"]');
+
+            if (set.length > 0) {
+               var count = set.find('count').text() || '?';
+
+               dialog.find('.jsxc_inputinfo').show().removeClass('jsxc_waiting').text($.t('Could_load_only', {
+                  count: count
+               }));
+            } else {
+               dialog.find('.jsxc_inputinfo').hide();
+            }
+         }, function(stanza) {
+            var errTextMsg = $(stanza).find('error text').text() || null;
+            jsxc.warn('Could not load rooms', errTextMsg);
+
+            if (errTextMsg) {
+               dialog.find('.jsxc_inputinfo.jsxc_server').show().text(errTextMsg);
+            }
+
+            if ($(stanza).find('error remote-server-not-found')) {
+               dialog.find('#jsxc_server').addClass('jsxc_invalid');
+            }
+
+            dialog.find('.jsxc_inputinfo.jsxc_room').hide();
+         });
+      }
    },
 
    /**
@@ -419,8 +477,8 @@ jsxc.muc = {
       var form = dialog.find('form');
 
       // work around Strophe.x behaviour
-      form.find('[type="checkbox"]').change(function(){
-        $(this).val(this.checked ? 1 : 0);
+      form.find('[type="checkbox"]').change(function() {
+         $(this).val(this.checked ? 1 : 0);
       });
 
       var submit = $('&lt;button>');
@@ -1638,7 +1696,7 @@ jsxc.muc = {
 $(document).on('init.window.jsxc', jsxc.muc.initWindow);
 $(document).on('add.roster.jsxc', jsxc.muc.onAddRoster);
 
-$(document).one('attached.jsxc', function() {
+$(document).on('attached.jsxc', function() {
    jsxc.muc.init();
 });
 
@@ -1656,13 +1714,13 @@ $(document).one('connected.jsxc', function() {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.fileTransfer.html">fileTransfer</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li><li><a href="jsxc.xmpp.chatState.html">chatState</a></li><li><a href="jsxc.xmpp.httpUpload.html">httpUpload</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Fri Oct 28 2016 13:29:05 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Feb 14 2017 13:39:34 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>

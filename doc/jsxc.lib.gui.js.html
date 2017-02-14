@@ -71,7 +71,8 @@ jsxc.gui = {
          ':jabber:': ['jabber'],
          ':xmpp:': ['xmpp'],
          ':jsxc:': ['jsxc'],
-         ':owncloud:': ['owncloud']
+         ':owncloud:': ['owncloud'],
+         ':nextcloud:': ['nextcloud']
       },
       'emojione': emojione.emojioneList
    },
@@ -128,6 +129,8 @@ jsxc.gui = {
       if ($('#jsxc_windowList').length > 0) {
          return;
       }
+
+      jsxc.changeUIState(jsxc.CONST.UISTATE.INITIATING);
 
       jsxc.gui.regShortNames = new RegExp(emojione.regShortNames.source + '|(' + Object.keys(jsxc.gui.emoticonList.core).join('|') + ')', 'gi');
 
@@ -264,6 +267,8 @@ jsxc.gui = {
       ri.find('.jsxc_name').attr('title', info);
 
       jsxc.gui.updateAvatar(ri.add(we.find('.jsxc_bar')), data.jid, data.avatar);
+
+      $(document).trigger('update.gui.jsxc', [bid]);
    },
 
    /**
@@ -454,9 +459,15 @@ jsxc.gui = {
     * Creates and show loginbox
     */
    showLoginBox: function() {
-      // Set focus to password field
-      $(document).on("complete.dialog.jsxc", function() {
-         $('#jsxc_password').focus();
+      // Set focus to username or password field
+      $(document).one("complete.dialog.jsxc", function() {
+         setTimeout(function() {
+            if ($("#jsxc_username").val().length === 0) {
+               $("#jsxc_username").focus();
+            } else {
+               $('#jsxc_password').focus();
+            }
+         }, 50);
       });
 
       jsxc.gui.dialog.open(jsxc.gui.template.get('loginBox'));
@@ -690,6 +701,7 @@ jsxc.gui = {
 
             if (val !== '') {
                jsxc.options.getUsers.call(this, val, function(list) {
+                  $('#jsxc_userlist').empty();
                   $.each(list || {}, function(uid, displayname) {
                      var option = $('&lt;option>');
                      option.attr('data-username', uid);
@@ -1212,6 +1224,26 @@ jsxc.gui = {
    },
 
    /**
+    * Show notification dialog.
+    *
+    * @param  {String} subject
+    * @param  {String} body
+    * @param  {String} from
+    */
+   showNotification: function(subject, body, from) {
+      var dialog = jsxc.gui.dialog.open(jsxc.gui.template.get('notification'));
+
+      dialog.find('h3').text(subject);
+      dialog.find('.jsxc_msg').text(body);
+
+      if (from) {
+         dialog.find('.jsxc_meta').text($.t('from') + ' ' + from);
+      } else {
+         dialog.find('.jsxc_meta').hide();
+      }
+   },
+
+   /**
     * Change own presence to pres.
     *
     * @memberOf jsxc.gui
@@ -1474,7 +1506,7 @@ jsxc.gui = {
             filename = jsxc.gui.emoticonList.core[shortname][jsxc.gui.emoticonList.core[shortname].length - 1].replace(/^:([^:]+):$/, '$1');
             src = jsxc.options.root + '/img/emotions/' + filename + '.svg';
          } else if (jsxc.gui.emoticonList.emojione[shortname]) {
-            filename = jsxc.gui.emoticonList.emojione[shortname][jsxc.gui.emoticonList.emojione[shortname].length - 1];
+            filename = jsxc.gui.emoticonList.emojione[shortname].fname;
             src = jsxc.options.root + '/lib/emojione/assets/svg/' + filename + '.svg';
          }
 
@@ -1487,7 +1519,22 @@ jsxc.gui = {
          return div.prop('outerHTML');
       });
 
+      var obj = $('&lt;div>' + str + '&lt;/div>');
+      if (obj.find('.jsxc_emoticon').length === 1 &amp;&amp; obj.text().replace(/ /, '').length === 0 &amp;&amp; obj.find('*').length === 1) {
+         obj.find('.jsxc_emoticon').addClass('jsxc_large');
+         str = obj.prop('outerHTML');
+      }
+
       return str;
+   },
+
+   restore: function() {
+      jsxc.restoreRoster();
+      jsxc.restoreWindows();
+      jsxc.restoreCompleted = true;
+
+      $(document).trigger('restoreCompleted.jsxc');
+      jsxc.changeUIState(jsxc.CONST.UISTATE.READY);
    }
 };
 
@@ -2064,6 +2111,9 @@ jsxc.gui.window = {
       };
 
       win.find('.jsxc_more').click(expandClick);
+      win.find('.jsxc_menu').click(function() {
+         $('body').click();
+      });
 
       win.find('.jsxc_verification').click(function() {
          jsxc.gui.showVerification(bid);
@@ -2099,11 +2149,19 @@ jsxc.gui.window = {
          return false;
       });
 
+      var textinputBlurTimeout;
       win.find('.jsxc_textinput').keyup(function(ev) {
          var body = $(this).val();
 
-         if (ev.which === 13) {
+         // I'm composing a message
+         if (ev.which !== 13) {
+            jsxc.xmpp.chatState.startComposing(bid);
+         }
+
+         if (ev.which === 13 &amp;&amp; !ev.shiftKey) {
             body = '';
+
+            jsxc.xmpp.chatState.endComposing(bid);
          }
 
          jsxc.storage.updateUserItem('window', bid, 'text', body);
@@ -2112,7 +2170,8 @@ jsxc.gui.window = {
             jsxc.gui.window.close(bid);
          }
       }).keypress(function(ev) {
-         if (ev.which !== 13 || !$(this).val()) {
+         if (ev.which !== 13 || ev.shiftKey || !$(this).val()) {
+            resizeTextarea.call(this);
             return;
          }
 
@@ -2122,15 +2181,39 @@ jsxc.gui.window = {
             msg: $(this).val()
          });
 
-         $(this).val('');
+         $(this).css('height', '').val('');
+
+         ev.preventDefault();
       }).focus(function() {
+         if (textinputBlurTimeout) {
+            clearTimeout(textinputBlurTimeout);
+         }
+
          // remove unread flag
          jsxc.gui.readMsg(bid);
+
+         resizeTextarea.call(this);
+      }).blur(function() {
+         var self = $(this);
+
+         textinputBlurTimeout = setTimeout(function() {
+            self.css('height', '');
+         }, 1200);
       }).mouseenter(function() {
          $('#jsxc_windowList').data('isOver', true);
       }).mouseleave(function() {
          $('#jsxc_windowList').data('isOver', false);
       });
+
+      function resizeTextarea() {
+         if (!$(this).data('originalHeight')) {
+            $(this).data('originalHeight', $(this).outerHeight());
+         }
+         // compensate rounding error
+         if ($(this).outerHeight() &lt; (this.scrollHeight - 1) &amp;&amp; $(this).val()) {
+            $(this).height($(this).data('originalHeight') * 1.5);
+         }
+      }
 
       win.find('.jsxc_textarea').click(function() {
          // check if user clicks element or selects text
@@ -2191,8 +2274,8 @@ jsxc.gui.window = {
          li.append(jsxc.gui.shortnameToImage(':' + val[1] + ':'));
          li.find('div').attr('title', ins);
          li.click(function() {
-            win.find('input').val(win.find('input').val() + ins);
-            win.find('input').focus();
+            win.find('.jsxc_textinput').val(win.find('.jsxc_textinput').val() + ins);
+            win.find('.jsxc_textinput').focus();
          });
          win.find('.jsxc_emoticons ul').prepend(li);
       });
@@ -2545,7 +2628,10 @@ jsxc.gui.window = {
       }
 
       var data = jsxc.storage.getUserItem('buddy', message.bid);
-      var html_msg = message.msg;
+
+      if (!message.htmlMsg &amp;&amp; message.msg) {
+         message.htmlMsg = message.msg;
+      }
 
       // remove html tags and reencode html tags
       message.msg = jsxc.removeHTML(message.msg);
@@ -2563,7 +2649,7 @@ jsxc.gui.window = {
          message.msg = $.t('unencrypted_message_received') + ' ' + message.msg;
       }
 
-      message.encrypted = message.encrypted || data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
+      message.encrypted = (typeof message.encrypted === 'boolean') ? message.encrypted : data.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
 
       try {
          message.save();
@@ -2579,11 +2665,11 @@ jsxc.gui.window = {
       if (message.direction === 'in' &amp;&amp; !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
          jsxc.gui.unreadMsg(message.bid);
 
-         $(document).trigger('postmessagein.jsxc', [message.bid, html_msg]);
+         $(document).trigger('postmessagein.jsxc', [message.bid, message.htmlMsg]);
       }
 
-      if (message.direction === jsxc.Message.OUT &amp;&amp; jsxc.master &amp;&amp; message.forwarded !== true &amp;&amp; html_msg) {
-         jsxc.xmpp.sendMessage(message.bid, html_msg, message._uid);
+      if (message.direction === jsxc.Message.OUT &amp;&amp; jsxc.master &amp;&amp; message.forwarded !== true &amp;&amp; message.htmlMsg) {
+         jsxc.xmpp.sendMessage(message);
       }
 
       jsxc.gui.window._postMessage(message);
@@ -2654,6 +2740,17 @@ jsxc.gui.window = {
       // replace line breaks
       msg = msg.replace(/(\r\n|\r|\n)/g, '&lt;br />');
 
+      // replace /me command (XEP-0245)
+      var bidData = jsxc.storage.getUserItem('buddy', bid) || {};
+      if (direction === 'in') {
+         msg = msg.replace(/^\/me /, '&lt;i title="/me">' + jsxc.removeHTML(bidData.name || bid) + '&lt;/i> ');
+      }
+
+      // hide unprocessed otr messages
+      if (msg.match(/^\?OTR([:,|?]|[?v0-9x]+)/)) {
+         msg = '&lt;i title="' + msg + '">' + $.t('Unreadable_OTR_message') + '&lt;/i>';
+      }
+
       var msgDiv = $("&lt;div>"),
          msgTsDiv = $("&lt;div>");
       msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
@@ -2664,15 +2761,29 @@ jsxc.gui.window = {
 
       if (message.isReceived() || false) {
          msgDiv.addClass('jsxc_received');
+      } else {
+         msgDiv.removeClass('jsxc_received');
       }
 
       if (message.forwarded) {
          msgDiv.addClass('jsxc_forwarded');
+      } else {
+         msgDiv.removeClass('jsxc_forwarded');
       }
 
       if (message.encrypted) {
          msgDiv.addClass('jsxc_encrypted');
+      } else {
+         msgDiv.removeClass('jsxc_encrypted');
       }
+
+      if (message.error) {
+         msgDiv.addClass('jsxc_error');
+      } else {
+         msgDiv.removeClass('jsxc_error');
+      }
+
+      msgDiv.attr('title', message.error);
 
       if (message.attachment &amp;&amp; message.attachment.name) {
          var attachment = $('&lt;div>');
@@ -2698,6 +2809,10 @@ jsxc.gui.window = {
             attachment = $('&lt;a>').append(attachment);
             attachment.attr('href', message.attachment.data);
             attachment.attr('download', message.attachment.name);
+
+            if (message.attachment.data === message.msg) {
+               msgDiv.find('div').first().empty();
+            }
          }
 
          msgDiv.find('div').first().append(attachment);
@@ -2862,8 +2977,6 @@ jsxc.gui.window = {
 
       if (sent === size) {
          span.remove();
-
-         message.received();
       }
    },
 
@@ -2964,99 +3077,7 @@ jsxc.gui.window = {
    },
 
    sendFile: function(jid) {
-      var bid = jsxc.jidToBid(jid);
-      var win = jsxc.gui.window.get(bid);
-      var res = Strophe.getResourceFromJid(jid);
-
-      if (!res) {
-         jid = win.data('jid');
-         res = Strophe.getResourceFromJid(jid);
-
-         var fileCapableRes = jsxc.webrtc.getCapableRes(jid, jsxc.webrtc.reqFileFeatures);
-         var resources = Object.keys(jsxc.storage.getUserItem('res', bid)) || [];
-
-         if (res === null &amp;&amp; resources.length === 1 &amp;&amp; fileCapableRes.length === 1) {
-            res = fileCapableRes[0];
-            jid = bid + '/' + res;
-         } else if (fileCapableRes.indexOf(res) &lt; 0) {
-            jsxc.gui.window.selectResource(bid, $.t('Your_contact_uses_multiple_clients_'), function(data) {
-               if (data.status === 'unavailable') {
-                  jsxc.gui.window.hideOverlay(bid);
-               } else if (data.status === 'selected') {
-                  jsxc.gui.window.sendFile(bid + '/' + data.result);
-               }
-            }, fileCapableRes);
-
-            return;
-         }
-      }
-
-      var msg = $('&lt;div>&lt;div>&lt;label>&lt;input type="file" name="files" />&lt;label>&lt;/div>&lt;/div>');
-      msg.addClass('jsxc_chatmessage');
-
-      jsxc.gui.window.showOverlay(bid, msg, true);
-
-      msg.find('label').click();
-
-      msg.find('[type="file"]').change(function(ev) {
-         var file = ev.target.files[0]; // FileList object
-
-         if (!file) {
-            return;
-         }
-
-         var attachment = $('&lt;div>');
-         attachment.addClass('jsxc_attachment');
-         attachment.addClass('jsxc_' + file.type.replace(/\//, '-'));
-         attachment.addClass('jsxc_' + file.type.replace(/^([^/]+)\/.*/, '$1'));
-
-         msg.empty().append(attachment);
-
-         if (FileReader &amp;&amp; file.type.match(/^image\//)) {
-            var img = $('&lt;img alt="preview">').attr('title', file.name);
-            img.attr('src', jsxc.options.get('root') + '/img/loading.gif');
-            img.appendTo(attachment);
-
-            var reader = new FileReader();
-
-            reader.onload = function() {
-               img.attr('src', reader.result);
-            };
-
-            reader.readAsDataURL(file);
-         } else {
-            attachment.text(file.name + ' (' + file.size + ' byte)');
-         }
-
-         $('&lt;button>').addClass('jsxc_btn jsxc_btn-primary').text($.t('Send')).click(function() {
-            var sess = jsxc.webrtc.sendFile(jid, file);
-
-            jsxc.gui.window.hideOverlay(bid);
-
-            var message = jsxc.gui.window.postMessage({
-               _uid: sess.sid + ':msg',
-               bid: bid,
-               direction: 'out',
-               attachment: {
-                  name: file.name,
-                  size: file.size,
-                  type: file.type,
-                  data: (file.type.match(/^image\//)) ? img.attr('src') : null
-               }
-            });
-
-            sess.sender.on('progress', function(sent, size) {
-               jsxc.gui.window.updateProgress(message, sent, size);
-            });
-
-            msg.remove();
-
-         }).appendTo(msg);
-
-         $('&lt;button>').addClass('jsxc_btn jsxc_btn-default').text($.t('Abort')).click(function() {
-            jsxc.gui.window.hideOverlay(bid);
-         }).appendTo(msg);
-      });
+      jsxc.fileTransfer.startGuiAction(jid);
    }
 };
 
@@ -3090,7 +3111,7 @@ jsxc.gui.template.get = function(name, bid, msg) {
       $.extend(ph, {
          bid_priv_fingerprint: (data &amp;&amp; data.fingerprint) ? data.fingerprint.replace(/(.{8})/g, '$1 ') : $.t('not_available'),
          bid_jid: bid,
-         bid_name: (data &amp;&amp; data.name) ? data.name : bid
+         bid_name: (data &amp;&amp; data.name) ? jsxc.escapeHTML(data.name) : bid
       });
    }
 
@@ -3107,7 +3128,8 @@ jsxc.gui.template.get = function(name, bid, msg) {
       // prevent 404
       ret = ret.replace(/\{\{root\}\}/g, ph.root);
 
-      ret = $(ret);
+      // encapsulate template to find all desired elements in the next step
+      ret = $('&lt;div>' + ret + '&lt;/div>');
 
       ret.find('[data-var]').each(function() {
          var key = $(this).attr('data-var');
@@ -3120,7 +3142,10 @@ jsxc.gui.template.get = function(name, bid, msg) {
          }
       });
 
-      ret.i18n();
+      // remove encapsulation
+      ret = ret.find('>*');
+
+      ret.localize(ph);
 
       return ret;
    }
@@ -3138,13 +3163,13 @@ jsxc.gui.template.get = function(name, bid, msg) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.fileTransfer.html">fileTransfer</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li><li><a href="jsxc.xmpp.chatState.html">chatState</a></li><li><a href="jsxc.xmpp.httpUpload.html">httpUpload</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Fri Oct 28 2016 13:29:05 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Feb 14 2017 13:39:34 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>

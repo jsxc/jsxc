@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: xmpp</title>
+    <title>JSDoc: Namespace: httpUpload</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Namespace: xmpp</h1>
+    <h1 class="page-title">Namespace: httpUpload</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="jsxc.html">jsxc</a>.</span>xmpp</h2>
+            <span class="ancestors"><a href="jsxc.html">jsxc</a><a href="jsxc.xmpp.html">.xmpp</a>.</span>httpUpload</h2>
         
     
 </header>
@@ -38,7 +38,7 @@
     <div class="container-overview">
     
         
-            <div class="description">Handle XMPP stuff.</div>
+            <div class="description">Implements Http File Upload (XEP-0363)</div>
         
 
         
@@ -73,12 +73,19 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.xmpp.js.html">jsxc.lib.xmpp.js</a>, <a href="jsxc.lib.xmpp.js.html#line1">line 1</a>
+        <a href="jsxc.lib.xmpp.httpUpload.js.html">jsxc.lib.xmpp.httpUpload.js</a>, <a href="jsxc.lib.xmpp.httpUpload.js.html#line1">line 1</a>
     </li></ul></dd>
     
 
     
 
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="http://xmpp.org/extensions/xep-0363.html">http://xmpp.org/extensions/xep-0363.html</a></li>
+        </ul>
+    </dd>
     
 
     
@@ -98,22 +105,6 @@
      
 
     
-        <h3 class="subsection-title">Namespaces</h3>
-
-        <dl>
-            <dt><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></dt>
-            <dd></dd>
-        
-            <dt><a href="jsxc.xmpp.carbons.html">carbons</a></dt>
-            <dd></dd>
-        
-            <dt><a href="jsxc.xmpp.chatState.html">chatState</a></dt>
-            <dd></dd>
-        
-            <dt><a href="jsxc.xmpp.httpUpload.html">httpUpload</a></dt>
-            <dd></dd>
-        </dl>
-    
 
     
 
@@ -125,14 +116,14 @@
 
     
 
-    <h4 class="name" id=".addBuddy"><span class="type-signature">(static) </span>addBuddy<span class="signature">(username, alias)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".discoverUploadService"><span class="type-signature">(static) </span>discoverUploadService<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Add buddy to my friends
+    Discover upload service for http upload.
 </div>
 
 
@@ -141,78 +132,6 @@
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>username</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">jid</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>alias</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -248,7 +167,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.xmpp.js.html">jsxc.lib.xmpp.js</a>, <a href="jsxc.lib.xmpp.js.html#line1031">line 1031</a>
+        <a href="jsxc.lib.xmpp.httpUpload.js.html">jsxc.lib.xmpp.httpUpload.js</a>, <a href="jsxc.lib.xmpp.httpUpload.js.html#line78">line 78</a>
     </li></ul></dd>
     
 
@@ -279,660 +198,14 @@
 
     
 
-    <h4 class="name" id=".getCapabilitiesByJid"><span class="type-signature">(static) </span>getCapabilitiesByJid<span class="signature">(jid)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".failedRequestSlotCB"><span class="type-signature">(static) </span>failedRequestSlotCB<span class="signature">(stanza, cb)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Retrieves capabilities.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>jid</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.xmpp.js.html">jsxc.lib.xmpp.js</a>, <a href="jsxc.lib.xmpp.js.html#line1210">line 1210</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    List of known capabilities
-</div>
-
-
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id=".hasFeatureByJid"><span class="type-signature">(static) </span>hasFeatureByJid<span class="signature">(jid, feature, cb)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Test if jid has given features
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>jid</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Jabber id</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>feature</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;string></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Single feature or list of features</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>cb</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Called with the result as first param.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.xmpp.js.html">jsxc.lib.xmpp.js</a>, <a href="jsxc.lib.xmpp.js.html#line1233">line 1233</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    True, if jid has all given features. Null, if we do not know it currently.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">boolean</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id=".loadVcard"><span class="type-signature">(static) </span>loadVcard<span class="signature">(bid, cb, error_cb)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    This function loads a vcard.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>bid</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>cb</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>error_cb</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.xmpp.js.html">jsxc.lib.xmpp.js</a>, <a href="jsxc.lib.xmpp.js.html#line1187">line 1187</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id=".logout"><span class="type-signature">(static) </span>logout<span class="signature">(complete)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Logs user out of his xmpp session and does some clean up.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>complete</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">If set to false, roster will not be removed</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.xmpp.js.html">jsxc.lib.xmpp.js</a>, <a href="jsxc.lib.xmpp.js.html#line185">line 185</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Boolean</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id=".onHeadlineMessage"><span class="type-signature">(static) </span>onHeadlineMessage<span class="signature">(stanza)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Process message stanzas of type headline.
+    Process failed response to slot request.
 </div>
 
 
@@ -984,7 +257,30 @@
 
             
 
-            <td class="description last">Message stanza of type headline</td>
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
         </tr>
 
     
@@ -1025,7 +321,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.xmpp.js.html">jsxc.lib.xmpp.js</a>, <a href="jsxc.lib.xmpp.js.html#line968">line 968</a>
+        <a href="jsxc.lib.xmpp.httpUpload.js.html">jsxc.lib.xmpp.httpUpload.js</a>, <a href="jsxc.lib.xmpp.httpUpload.js.html#line299">line 299</a>
     </li></ul></dd>
     
 
@@ -1048,24 +344,6 @@
 
 
 
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Boolean</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
@@ -1074,14 +352,145 @@
 
     
 
-    <h4 class="name" id=".removeBuddy"><span class="type-signature">(static) </span>removeBuddy<span class="signature">(jid)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".init"><span class="type-signature">(static) </span>init<span class="signature">(o)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Remove buddy from my friends
+    Set up http file upload.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>o</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">options</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jsxc.lib.xmpp.httpUpload.js.html">jsxc.lib.xmpp.httpUpload.js</a>, <a href="jsxc.lib.xmpp.httpUpload.js.html#line25">line 25</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".queryItemForUploadService"><span class="type-signature">(static) </span>queryItemForUploadService<span class="signature">(jid, cb)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Query item for upload service.
 </div>
 
 
@@ -1123,7 +532,492 @@
             <td class="type">
             
                 
-<span class="param-type">type</span>
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Callback on success</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jsxc.lib.xmpp.httpUpload.js.html">jsxc.lib.xmpp.httpUpload.js</a>, <a href="jsxc.lib.xmpp.httpUpload.js.html#line106">line 106</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".requestSlot"><span class="type-signature">(static) </span>requestSlot<span class="signature">(file, cb)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Request upload slot.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>file</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">File</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Callback after finished request</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jsxc.lib.xmpp.httpUpload.js.html">jsxc.lib.xmpp.httpUpload.js</a>, <a href="jsxc.lib.xmpp.httpUpload.js.html#line242">line 242</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".sendFile"><span class="type-signature">(static) </span>sendFile<span class="signature">(file, message)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Upload file and send link to peer.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>file</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">File</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>message</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Message</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Preview message</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jsxc.lib.xmpp.httpUpload.js.html">jsxc.lib.xmpp.httpUpload.js</a>, <a href="jsxc.lib.xmpp.httpUpload.js.html#line140">line 140</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".successfulRequestSlotCB"><span class="type-signature">(static) </span>successfulRequestSlotCB<span class="signature">(stanza, cb)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Process successful response to slot request.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>stanza</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
 
 
             
@@ -1174,7 +1068,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.xmpp.js.html">jsxc.lib.xmpp.js</a>, <a href="jsxc.lib.xmpp.js.html#line1066">line 1066</a>
+        <a href="jsxc.lib.xmpp.httpUpload.js.html">jsxc.lib.xmpp.httpUpload.js</a>, <a href="jsxc.lib.xmpp.httpUpload.js.html#line275">line 275</a>
     </li></ul></dd>
     
 
@@ -1205,14 +1099,14 @@
 
     
 
-    <h4 class="name" id=".resFriendReq"><span class="type-signature">(static) </span>resFriendReq<span class="signature">(from, approve)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".uploadFile"><span class="type-signature">(static) </span>uploadFile<span class="signature">(url, file, message, success_cb)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    response to friendship request
+    Upload the given file to the given url.
 </div>
 
 
@@ -1248,13 +1142,13 @@
 
         <tr>
             
-                <td class="name"><code>from</code></td>
+                <td class="name"><code>url</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">String</span>
 
 
             
@@ -1264,20 +1158,20 @@
 
             
 
-            <td class="description last">jid from original friendship req</td>
+            <td class="description last">upload url</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>approve</code></td>
+                <td class="name"><code>file</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
+<span class="param-type">File</span>
 
 
             
@@ -1291,121 +1185,18 @@
         </tr>
 
     
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.xmpp.js.html">jsxc.lib.xmpp.js</a>, <a href="jsxc.lib.xmpp.js.html#line1010">line 1010</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id=".sendMessage"><span class="type-signature">(static) </span>sendMessage<span class="signature">(bid, msg, uid)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    Public function to send message.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
 
         <tr>
             
-                <td class="name"><code>bid</code></td>
+                <td class="name"><code>message</code></td>
             
 
             <td class="type">
+            
+                
+<span class="param-type">Message</span>
+
+
             
             </td>
 
@@ -1413,17 +1204,22 @@
 
             
 
-            <td class="description last">css jid of user</td>
+            <td class="description last">preview message</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>msg</code></td>
+                <td class="name"><code>success_cb</code></td>
             
 
             <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
             
             </td>
 
@@ -1431,25 +1227,7 @@
 
             
 
-            <td class="description last">message</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>uid</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">unique id</td>
+            <td class="description last">callback on successful transition</td>
         </tr>
 
     
@@ -1490,89 +1268,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.xmpp.js.html">jsxc.lib.xmpp.js</a>, <a href="jsxc.lib.xmpp.js.html#line1104">line 1104</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id=".sendPres"><span class="type-signature">(static) </span>sendPres<span class="signature">()</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    Sends presence stanza to server.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jsxc.lib.xmpp.js.html">jsxc.lib.xmpp.js</a>, <a href="jsxc.lib.xmpp.js.html#line390">line 390</a>
+        <a href="jsxc.lib.xmpp.httpUpload.js.html">jsxc.lib.xmpp.httpUpload.js</a>, <a href="jsxc.lib.xmpp.httpUpload.js.html#line198">line 198</a>
     </li></ul></dd>
     
 

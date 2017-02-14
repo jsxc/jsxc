@@ -86,6 +86,12 @@ jsxc = {
    /** My bar id */
    bid: null,
 
+   /** Current state */
+   currentState: null,
+
+   /** Current UI state */
+   currentUIState: null,
+
    /** Some constants */
    CONST: {
       NOTIFICATION_DEFAULT: 'default',
@@ -106,7 +112,20 @@ jsxc = {
          FORWARD: 'urn:xmpp:forward:0'
       },
       HIDDEN: 'hidden',
-      SHOWN: 'shown'
+      SHOWN: 'shown',
+      STATE: {
+         INITIATING: 0,
+         PREVCONFOUND: 1,
+         SUSPEND: 2,
+         TRYTOINTERCEPT: 3,
+         INTERCEPTED: 4,
+         ESTABLISHING: 5,
+         READY: 6
+      },
+      UISTATE: {
+         INITIATING: 0,
+         READY: 1
+      }
    },
 
    /**
@@ -218,6 +237,7 @@ jsxc = {
     * @param {object} options See {@link jsxc.options}
     */
    init: function(options) {
+      jsxc.changeState(jsxc.CONST.STATE.INITIATING);
 
       if (options &amp;&amp; options.loginForm &amp;&amp; typeof options.loginForm.attachIfFound === 'boolean' &amp;&amp; !options.loginForm.ifFound) {
          // translate deprated option attachIfFound found to new ifFound
@@ -278,15 +298,22 @@ jsxc = {
          lang = jsxc.options.defaultLang;
       }
 
-      // initialize i18n translator
-      $.i18n.init({
+      // initialize i18next translator
+      window.i18next.init({
          lng: lang,
          fallbackLng: 'en',
-         resStore: I18next,
-         // use localStorage and set expiration to a day
-         useLocalStorage: true,
-         localStorageExpirationTime: 60 * 60 * 24 * 1000,
-         debug: jsxc.storage.getItem('debug') === true
+         resources: I18next,
+         debug: jsxc.storage.getItem('debug') === true,
+         interpolation: {
+            prefix: '__',
+            suffix: '__'
+         }
+      }, function() {
+         window.jqueryI18next.init(window.i18next, $, {
+            tName: 't',
+            i18nName: 'i18next',
+            handleName: 'localize',
+         });
       });
 
       if (jsxc.storage.getItem('debug') === true) {
@@ -311,6 +338,7 @@ jsxc = {
 
          // Looking for a login form
          if (!jsxc.isLoginForm()) {
+            jsxc.changeState(jsxc.CONST.STATE.SUSPEND);
 
             if (jsxc.options.displayRosterMinimized()) {
                // Show minimized roster
@@ -321,6 +349,8 @@ jsxc = {
 
             return;
          }
+
+         jsxc.changeState(jsxc.CONST.STATE.TRYTOINTERCEPT);
 
          if (typeof jsxc.options.formFound === 'function') {
             jsxc.options.formFound.call();
@@ -343,7 +373,9 @@ jsxc = {
          form.off('submit');
 
          // Add jsxc login action to form
-         form.submit(function() {
+         form.submit(function(ev) {
+            ev.preventDefault();
+
             jsxc.prepareLogin(function(settings) {
                if (settings !== false) {
                   // settings.xmpp.onlogin is deprecated since v2.1.0
@@ -354,19 +386,24 @@ jsxc = {
                      jsxc.options.loginForm.triggered = true;
 
                      jsxc.xmpp.login(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
+
+                     return;
                   }
-               } else {
-                  jsxc.submitLoginForm();
                }
+
+               jsxc.submitLoginForm();
             });
 
             // Trigger submit in jsxc.xmpp.connected()
             return false;
          });
 
+         jsxc.changeState(jsxc.CONST.STATE.INTERCEPTED);
+
       } else if (!jsxc.isLoginForm() || (jsxc.options.loginForm &amp;&amp; jsxc.options.loginForm.ifFound === 'attach')) {
 
          // Restore old connection
+         jsxc.changeState(jsxc.CONST.STATE.PREVCONFOUND);
 
          if (typeof jsxc.storage.getItem('alive') === 'undefined') {
             jsxc.onMaster();
@@ -574,14 +611,10 @@ jsxc = {
       jsxc.gui.init();
       $('#jsxc_roster').removeClass('jsxc_noConnection');
 
-      jsxc.restoreRoster();
-      jsxc.restoreWindows();
-      jsxc.restoreCompleted = true;
-
       jsxc.registerLogout();
       jsxc.gui.updateAvatar($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
 
-      $(document).trigger('restoreCompleted.jsxc');
+      jsxc.gui.restore();
    },
 
    /**
@@ -795,8 +828,12 @@ jsxc = {
 
       if (form.find('#submit').length > 0) {
          form.find('#submit').click();
-      } else {
+      } else if (form.get(0) &amp;&amp; typeof form.get(0).submit === 'function') {
          form.submit();
+      } else if (form.find('[type="submit"]').length > 0) {
+         form.find('[type="submit"]').click();
+      } else {
+         jsxc.warn('Could not submit login form.');
       }
    },
 
@@ -936,6 +973,22 @@ jsxc = {
 
    isExtraSmallDevice: function() {
       return $(window).width() &lt; 500;
+   },
+
+   changeState: function(state) {
+      jsxc.currentState = state;
+
+      jsxc.debug('State changed to ' + Object.keys(jsxc.CONST.STATE)[state]);
+
+      $(document).trigger('stateChange.jsxc', state);
+   },
+
+   changeUIState: function(state) {
+      jsxc.currentUIState = state;
+
+      jsxc.debug('UI State changed to ' + Object.keys(jsxc.CONST.UISTATE)[state]);
+
+      $(document).trigger('stateUIChange.jsxc', state);
    }
 };
 </code></pre>
@@ -948,13 +1001,13 @@ jsxc = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.fileTransfer.html">fileTransfer</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li><li><a href="jsxc.xmpp.chatState.html">chatState</a></li><li><a href="jsxc.xmpp.httpUpload.html">httpUpload</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Fri Oct 28 2016 13:29:05 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Feb 14 2017 13:39:34 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>
