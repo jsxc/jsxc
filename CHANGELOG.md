@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## 3.1.1 - 2017-02-14
+### Fixed
+- fix path to dependencies
+
 ## 3.1.0 - 2017-02-14
 ### Added
 - add application states
