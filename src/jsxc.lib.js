@@ -358,10 +358,12 @@ jsxc = {
                      jsxc.options.loginForm.triggered = true;
 
                      jsxc.xmpp.login(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
+
+                     return;
                   }
-               } else {
-                  jsxc.submitLoginForm();
                }
+
+               jsxc.submitLoginForm();
             });
 
             // Trigger submit in jsxc.xmpp.connected()

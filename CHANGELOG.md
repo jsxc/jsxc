@@ -1,13 +1,65 @@
-v3.0.1 / 2016-10-28
-===
-### Enhancements
+# Change Log
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](http://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](http://semver.org/).
+
+## [Unreleased]
+### Added
+- add application states
+- [#393](https://github.com/jsxc/jsxc/issues/393) add the /me command (XEP-0245)
+- [#422](https://github.com/jsxc/jsxc/issues/422) add multiline message support
+- [#431](https://github.com/jsxc/jsxc/issues/431) add Chat State Notifications (XEP-0085)
+- [#426](https://github.com/jsxc/jsxc/issues/426) add HTTP File Upload (XEP-0363)
+- add Turkish
+- [#438](https://github.com/jsxc/jsxc/issues/438) add desktop sharing
+- add Nextcloud emoticon
+- [#301](https://github.com/jsxc/jsxc/issues/301) add close all button for notices
+- [#344](https://github.com/jsxc/jsxc/issues/344) support messages of type `headline`
+- add icon to notices
+
+### Fixed
+- fix login form submission
+- fix display of MUC warning
+- [#391](https://github.com/jsxc/jsxc/issues/391) fix MUC initialisation after relogin
+- [#394](https://github.com/jsxc/jsxc/issues/394) disable OTR for MUC conversations
+- [#399](https://github.com/jsxc/jsxc/issues/399) prompt for MUC password if required
+- [#435](https://github.com/jsxc/jsxc/issues/435) fix list of user name suggestions
+- [#433](https://github.com/jsxc/jsxc/issues/433) fix i18n interpolation pattern
+- fix minor WebRTC issues
+- [#440](https://github.com/jsxc/jsxc/issues/440) prevent original login form submission
+- [#441](https://github.com/jsxc/jsxc/issues/441) remove console.trace
+- [#409](https://github.com/jsxc/jsxc/issues/409) fix presence after accepting contact request
+- fix template system
+- fix path to strophe.bookmarks (regression)
+- fix disabled login form
+- fix carbon copy impersonation vulnerability ([CVE-2017-5589+](https://rt-solutions.de/en/2017/02/CVE-2017-5589_xmpp_carbons/))
+- ignore malicious roster updates (similar to [CVE-2014-0364](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0364))
+- prevent double insertion of MUC setting
+
+### Changed
+- update dependencies
+- [#385](https://github.com/jsxc/jsxc/issues/385) update i18next
+- improve initial focus for login box
+- add large emoticons
+- [#421](https://github.com/jsxc/jsxc/issues/421) make MUC server field editable
+- system message style
+- disable sending of OTR whitespace tag by default
+- enable carbon copies by default
+- remove border radius from dialog
+- exclude dev dependencies from build
+- move jquery library to example folder
+- omit unreadable OTR messages
+
+## 3.0.1 - 2016-10-28
+### Added
 - add room configuration in master tab
 - improve muc multi tab support
 - update/add languages: zh, pt, hu, pl, en, pt
 - use user preferred browser languages
 - remove inline styles
 
-### Bug fixes
+### Fixed
 - fix multi-tab support
 - fix uncaught type error on login
 - fix second call issue
@@ -16,13 +68,12 @@ v3.0.1 / 2016-10-28
 - fix the answer to anything
 - fix boolean muc configurations
 
-### Developer changes
+### Changed
 - allow selector for options.logoutElement
 - attach also with parameters from options.xmpp
 
-v3.0.0 / 2016-03-11
-===
-### New features
+## 3.0.0 - 2016-03-11
+### Added
 - responsive material-like design
  - refactoring settings dialog
  - over 1600 emoticons from emojione
@@ -30,18 +81,18 @@ v3.0.0 / 2016-03-11
  - new video call interface
  - status usable for daltonian
  - use css for animations
-- file transfer via webrtc
+- file transfer via WebRTC
  - previews
  - show progress
 - use local date and time format
 - add no-video-call-possible icon
-- add disabled otr icon
+- add disabled OTR icon
 - add padlock icon to message
 - display line breaks in chat messages
-- hide avatar for connected messages (muc)
+- hide avatar for connected messages (MUC)
 - auto approve incoming contact request (if contact is already in our roster)
 
-### Bug fixes
+### Fixed
 - use crendential when performing turn credential ajax crossdomain call
 - update favico.js
 - update strophe.js
@@ -55,7 +106,7 @@ v3.0.0 / 2016-03-11
 - fix muc message without id
 - fix type error in jingle error
 
-### Developer changes
+### Changed
 - remove "develop" branch and use instead "master" branch
 - Makefile for setup developer environment
 - remove loginTimeout option
@@ -66,36 +117,30 @@ v3.0.0 / 2016-03-11
 - remove outdated stuff
 - merge jsxc.webrtc.css into jsxc.css
 
-v2.1.5 / 2015-11-17
-===
+## 2.1.5 - 2015-11-17
 - Reset TURN credentials on login
-- Fix ie<11 textfield
+- Fix IE&lt;11 textfield
 
-v2.1.4 / 2015-09-10
-===
+## 2.1.4 - 2015-09-10
 - remove leading at sign from comments in build file
 
-v2.1.3 / 2015-09-08
-===
+## 2.1.3 - 2015-09-08
 - fix bookmark loading
 - show unread notifications only if the chat window has no focus
 
-v2.1.2 / 2015-08-12
-===
+## 2.1.2 - 2015-08-12
 - update grunt-sass (fix invalid css)
 
-v2.1.1 / 2015-08-10
-===
-- update strophe.jingle (fix login with safari and older versions of ie, ff, chrome)
+## 2.1.1 - 2015-08-10
+- update strophe.jingle (fix login with Safari and older versions of IE, FF, Chrome)
 - update favico.js
-- fix undefined error variable in ie
-- fix handling of escaped jids (e.g. used in transports)
+- fix undefined error variable in IE
+- fix handling of escaped JIDs (e.g. used in transports)
 - fix placeholder replacement
 - rearrange bootstrap import
 - add option for custom online user manual
 
-v2.1.0 / 2015-07-31
-===
+## 2.1.0 - 2015-07-31
 - add bookmark feature for rooms (XEP-0048)
 - add reserved room feature for muc (XEP-0045#10.1.3)
 - add counter of unread messages to roster, window and favicon
@@ -105,9 +150,9 @@ v2.1.0 / 2015-07-31
 - make dialog responsive
 - allow messages to persons without valid friendship
 - replace video library for more stable connection
-- fix dsa key generation in chrome > 42
-- fix minor roster ui issues
- 
+- fix DSA key generation in Chrome &gt; 42
+- fix minor roster UI issues
+
 - add jsbeautifier and prettysass
 - improve example
 - extract templates to single files
@@ -122,21 +167,19 @@ v2.1.0 / 2015-07-31
 - ICE servers can now be passed as init option
 - loadSettings option is no longer required and supports now async requests
 
-v2.0.1 / 2015-05-23
-===
+## 2.0.1 - 2015-05-23
 - improve login box
 - fix browsers without CSPRNG generator
-- fix ajax login after credential failure
-- fix some webrtc issues
+- fix AJAX login after credential failure
+- fix some WebRTC issues
 - fix login with different username after dirty logout
-- remove ie (<11) gradient
-- remove broken mitm detection
+- remove IE (&lt;11) gradient
+- remove broken MITM detection
 - fix temporary template 404
 - fix login option
 - add connecting event
 
-v2.0.0 / 2015-05-08
-===
+## 2.0.0 - 2015-05-08
 - add multi-user chat (XEP-0045)
 - add window resize handle
 - add username autocomplete
@@ -145,7 +188,7 @@ v2.0.0 / 2015-05-08
 - use user avatar as notification icon
 - show notifications if tabs has no focus
 - split files into namespaces
-- sass improvements
+- SASS improvements
 - replace own translation engine with i18next
 - fix login from login box
 - fix selection of chat messages
@@ -155,26 +198,23 @@ v2.0.0 / 2015-05-08
 - fix notification request
 - fix logout
 
-v1.1.0a / 2015-02-25
-===
-- fix css url path
+## 1.1.0a - 2015-02-25
+- fix CSS URL path
 
-v1.1.0 / 2015-01-08
-===
-- move from plain css to sass
-- show avatar also by EXTVAL (url), not only by BINVAL
+## 1.1.0 - 2015-01-08
+- move from plain CSS to SASS
+- show avatar also by EXTVAL (URL), not only by BINVAL
 - add XEP-0280 (Message Carbons)
 - add XEP-0297 (Stanza Forwarding)
-- add option to disable otr
+- add option to disable OTR
 - add timestamp to messages
-- add ajax/prebind login
+- add AJAX/prebind login
 - fix offline subscription request
 - fix hide offline contacts
 - fix error with multiple own resources
 - fix avatars with newlines
 
-v1.0.0 / 2014-11-06
-===
+## 1.0.0 - 2014-11-06
 - add unread flag to roster and scroll to target window
 - add XEP-0147 URI Scheme Query support
 - add has-come-online notification
@@ -183,55 +223,52 @@ v1.0.0 / 2014-11-06
 - add resizable function to chat window
 - add vertical scrollbar to window list
 - add call information to chat window
-- add concatinated and uglified files
+- add concatenated and uglified files
 - add translations
 - minor video call improvements
 - minor style improvements
-- generate dsa key complete in background
+- generate DSA key complete in background
 - update caps node property to jsxc.org
 - update strophe.jingle
-- update otr
+- update OTR
 - fix wrong avatars
-- fix minor message delivery errors 
-- fix ff snapshot security error
+- fix minor message delivery errors
+- fix FF snapshot security error
 - fix case sensitive resource handling
 - fix non-square avatars
 - fix several video issues
 - fix messages from unknown (not in roster) jid
-- fix vcard retrieval from unknown (not in roster) jid
-- fix vcard in second tab
-- fix jids with non-word characters (replace user identifier)
+- fix vCard retrieval from unknown (not in roster) jid
+- fix vCard in second tab
+- fix JIDs with non-word characters (replace user identifier)
 - improve video window design
 - improve user info
 - improve login box
-- improve smp user interaction
+- improve SMP user interaction
 - improve notifications (sync sound/message, icon)
 - minor chat window improvements
 - detect email in message
-- detect uri scheme in message
+- detect URI scheme in message
 - end all private conversations on logout
 - remove email pattern from contact dialog
 - disable video on second tab
-- add/require disco dtls feature for webrtc
-- move emoticons to css
+- add/require DISCO DTLS feature for WebRTC
+- move emoticons to CSS
 - handle loadSettings failure
 - change cursor for some elements
 - prevent event bubbling for dialog
 
-v0.8.2 / 2014-08-20
-===
+## 0.8.2 - 2014-08-20
 - fix use of custom username
 - write to console only if debug flag is set
 - allow string|boolean as config param
 - add translations
 
-v0.8.1 / 2014-08-12
-===
+## 0.8.1 - 2014-08-12
 - add user-defined xmpp options
 - fix login form without id submit
 
-v0.8.0 / 2014-07-02
-===
+## 0.8.0 - 2014-07-02
 - add spanish translation
 - add vCard view
 - add more emoticons
@@ -242,16 +279,15 @@ v0.8.0 / 2014-07-02
 - new chat window design
 - enhanced roster design
 - fix emoticon replacement (XEP-0038)
-- fix some ui issues (explanations,...)
+- fix some UI issues (explanations,...)
 - fix issue with password only field
 
-v0.7.2 / 2014-05-28
-===
+## 0.7.2 - 2014-05-28
 - fix login issue
 - fix different dialogs
-- fix safari mobile bug
+- fix Safari mobile bug
 - fix webworker debugging
-- fix issue with prosody
+- fix issue with Prosody
 - fix submodule state
 - add debug flag
 - add icon for video calls
@@ -265,55 +301,49 @@ v0.7.2 / 2014-05-28
 - minor style fixes
 - move complete to new notification api
 
-
-v0.7.1 / 2014-03-18
-===
+## 0.7.1 - 2014-03-18
 - fix emoticons
 - fix unique message id
 
-v0.7.0 / 2014-03-07
-===
+## 0.7.0 - 2014-03-07
 - add sound notifications
 - add support for custom default avatars
 - add support for XEP-0184 (Message Delivery Receipts)
 - update & extend hover info
 - handle presence of type unsubscribed
 - remove roster footer if offline
-- enhance otr error handling
+- enhance OTR error handling
 - enhance translations
 - reduce initial timeout
 - fix notices
 - fix friendship response dialog
 - fix shared roster item removel
 - fix debug function
-- fix webrtc bug
+- fix WebRTC bug
 - fix storage check
-- fix firefox fullscreen
+- fix Firefox fullscreen
 
-v0.6.0 / 2014-02-28
-===
+## 0.6.0 - 2014-02-28
 - add notice stack (for e.g. friendship requests)
 - add option to change presence
 - support all available presence states
 - display own avatar
-- fix issue with prosody
+- fix issue with Prosody
 - fix multi-tab support
-- fix chrome notifications
-- fix otr error handling
-- fix webrtc bug
+- fix Chrome notifications
+- fix OTR error handling
+- fix WebRTC bug
 
-v0.5.2 / 2014-01-28
-===
+## 0.5.2 - 2014-01-28
 - update strophe.js to v1.1.3
 - fix debug function (fix initial presence)
 - add debug log window
 - add warn|error debug functions
 
-v0.5.1 / 2014-01-27
-===
+## 0.5.1 - 2014-01-27
 - fix chat window after call
-- fix nullpointer and context in webrtc
+- fix NULL pointer and context in WebRTC
 - handle already attached submit events on login form
 - style changes
-- fix webrtc startup
-- don't block application on dsa key generation
+- fix WebRTC startup
+- don't block application on DSA key generation
