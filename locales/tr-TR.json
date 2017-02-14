@@ -299,6 +299,8 @@
     "Install_extension": "Ekran paylaşımını kullanabilmek için lütfen eklentiyi yükleyin: ",
     "Connection_accepted": "Bağlantı kabul edildi",
     "Stream_terminated": "Akış sonlandırıldı",
-    "Close_all": "Hepsini kapat"
+    "Close_all": "Hepsini kapat",
+    "Notification": null,
+    "Unreadable_OTR_message": null
   }
 }

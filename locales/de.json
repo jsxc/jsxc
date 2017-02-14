@@ -299,6 +299,8 @@
     "Install_extension": "Bitte installieren Sie die Erweiterung um ihren Bildschirm zu teilen: ",
     "Connection_accepted": "Verbindung angenommen",
     "Stream_terminated": "Stream beendet",
-    "Close_all": "Schließe alle"
+    "Close_all": "Schließe alle",
+    "Notification": null,
+    "Unreadable_OTR_message": null
   }
 }

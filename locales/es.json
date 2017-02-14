@@ -299,6 +299,8 @@
     "Install_extension": null,
     "Connection_accepted": null,
     "Stream_terminated": null,
-    "Close_all": null
+    "Close_all": null,
+    "Notification": null,
+    "Unreadable_OTR_message": null
   }
 }
