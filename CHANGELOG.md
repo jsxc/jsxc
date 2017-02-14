@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## 3.1.0 - 2017-02-14
 ### Added
 - add application states
 - [#393](https://github.com/jsxc/jsxc/issues/393) add the /me command (XEP-0245)
