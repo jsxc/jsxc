@@ -155,7 +155,15 @@ module.exports = function(grunt) {
                }
             },
             src: dep_files,
-            dest: '<%= target %>/lib/jsxc.dep.js'
+            dest: '<%= target %>/lib/jsxc.dep.js',
+            filter: function (filepath) {
+                if (!grunt.file.exists(filepath)) {
+                    grunt.fail.warn('Could not find: ' + filepath);
+                } else {
+                    return true;
+                }
+            },
+            nonull: true,
          },
          jsxc: {
             options: {
