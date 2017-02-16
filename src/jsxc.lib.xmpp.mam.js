@@ -14,7 +14,7 @@
  *
  *archivedMessagePageSize = '20' //No. of messages in one page
  *
- *rsmAttributes = ['max', 'first', 'last', 'after', 'before', 
+ *rsmAttributes = ['max', 'first', 'last', 'after', 'before',
  *'index', 'count']
  *
  *mamAttributes = ['with', 'start', 'end']
@@ -22,13 +22,13 @@
  *messageArchiving = 'never' // Supported values are 'always', 'never',
  * 'roster' (See https://xmpp.org/extensions/xep-0313.html#prefs )
  *
- *mucHistoryMaxStanzas: undefined, // Takes an integer, limits the 
+ *mucHistoryMaxStanzas: undefined, // Takes an integer, limits the
  *amount of messages to fetch from chat room's history
  *
  */
 
 jsxc.xmpp.mam = {
-  conn: jsxc.xmpp.conn
+   conn: jsxc.xmpp.conn,
 };
 
 
@@ -49,8 +49,8 @@ jsxc.xmpp.mam.getHistory = function(bid) {
   //console.log(ownbid);
   // We are calling the strophe plugin as specified by them
   self.query(ownbid, {
-    with: bid, 
-    before: "", 
+    with: bid,
+    before: "",
     onMessage: function(message) {
       /*
       The message looks like this:
@@ -67,7 +67,7 @@ jsxc.xmpp.mam.getHistory = function(bid) {
         </result>
         <no-store xmlns="urn:xmpp:hints"></no-store>
       </message>
-      
+
       */
       var direction;
 
@@ -89,13 +89,13 @@ jsxc.xmpp.mam.getHistory = function(bid) {
         "_received": false,
         "encrypted": false,
 
-        /* 
-        forwarded is true becuase we don't want the user to get notifications 
+        /*
+        forwarded is true becuase we don't want the user to get notifications
         of the old messages
         */
         "forwarded": true,
         /*
-        For stamp we pass the number of milliseconds that have been passed since 
+        For stamp we pass the number of milliseconds that have been passed since
         05 January, 1975. Please change the date format
         */
         "stamp": stamp,
@@ -106,13 +106,15 @@ jsxc.xmpp.mam.getHistory = function(bid) {
         "msg": msgBody
       };
 
-
-      //This line is not working
+      /*
+      Last stanza contain no message.
+      It just tells that all messages were retrieved successfully
+      */
+      // if(isNaN(msg.stamp)){
+      //    jsxc.gui.window.postMessage(msg);
+      //    return true;
+      // }
       jsxc.gui.window.postMessage(msg);
-      if(isNaN(msg.stamp)){
-        console.log("I found null stamp");
-        return true;
-      }
       return true;
     },
     onComplete: function(response) {
@@ -121,7 +123,7 @@ jsxc.xmpp.mam.getHistory = function(bid) {
   });
 };
 
-//example code to query an personal archive for conversations with 
+//example code to query an personal archive for conversations with
 //juliet@capulet.com
 
 /*
@@ -167,7 +169,7 @@ connection.mam.query("you@example.com", {
 
       onComplete: function(response) {
         //attach a code in here to notify when all the message has reached
-        
+
     	console.log(response);
         return true;
       }

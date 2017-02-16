@@ -5,6 +5,12 @@
  */
 jsxc.options = {
 
+   /**
+    * Declare empty list to be used for sorting the messages 
+    *  
+   */
+   allMessages: [],
+
    /** name of container application (e.g. owncloud or SOGo) */
    app_name: 'web applications',
 
