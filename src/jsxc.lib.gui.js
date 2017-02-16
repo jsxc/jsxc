@@ -2181,7 +2181,8 @@ jsxc.gui.window = {
          if (!$(this).data('originalHeight')) {
             $(this).data('originalHeight', $(this).outerHeight());
          }
-         if ($(this).outerHeight() < this.scrollHeight && $(this).val()) {
+         // compensate rounding error
+         if ($(this).outerHeight() < (this.scrollHeight - 1) && $(this).val()) {
             $(this).height($(this).data('originalHeight') * 1.5);
          }
       }
@@ -2718,6 +2719,11 @@ jsxc.gui.window = {
          msg = msg.replace(/^\/me /, '<i title="/me">' + jsxc.removeHTML(bidData.name || bid) + '</i> ');
       }
 
+      // hide unprocessed otr messages
+      if (msg.match(/^\?OTR([:,|?]|[?v0-9x]+)/)) {
+         msg = '<i title="' + msg + '">' + $.t('Unreadable_OTR_message') + '</i>';
+      }
+
       var msgDiv = $("<div>"),
          msgTsDiv = $("<div>");
       msgDiv.addClass('jsxc_chatmessage jsxc_' + direction);
@@ -3095,7 +3101,8 @@ jsxc.gui.template.get = function(name, bid, msg) {
       // prevent 404
       ret = ret.replace(/\{\{root\}\}/g, ph.root);
 
-      ret = $(ret);
+      // encapsulate template to find all desired elements in the next step
+      ret = $('<div>' + ret + '</div>');
 
       ret.find('[data-var]').each(function() {
          var key = $(this).attr('data-var');
@@ -3107,6 +3114,9 @@ jsxc.gui.template.get = function(name, bid, msg) {
             $(this).text(val);
          }
       });
+
+      // remove encapsulation
+      ret = ret.find('>*');
 
       ret.localize(ph);
 
