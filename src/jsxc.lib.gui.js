@@ -2680,6 +2680,7 @@ jsxc.gui.window = {
                position++;
                jsxc.gui.window._postMessage(messageArray[position-1]);
             }
+            jsxc.options.allMessages = [];
             return messageArray;            
          }
          if (firstMessage || (message.stamp > messageArray[position - 1].stamp)) {
