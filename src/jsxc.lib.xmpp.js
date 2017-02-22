@@ -94,6 +94,7 @@ jsxc.xmpp = {
          $(document).on('authfail.jsxc', jsxc.xmpp.onAuthFail);
 
          Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
+         Strophe.addNamespace('VERSION', 'jabber:iq:version');
       }
 
       // Create new connection (no login)
@@ -286,11 +287,14 @@ jsxc.xmpp = {
 
       $('#jsxc_roster').removeClass('jsxc_noConnection');
 
+      Strophe.addNamespace('VERSION', 'jabber:iq:version');
+
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onRosterChanged, 'jabber:iq:roster', 'iq', 'set');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onChatMessage, null, 'message', 'chat');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onHeadlineMessage, null, 'message', 'headline');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onReceived, null, 'message');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
+      jsxc.xmpp.conn.addHandler(jsxc.xmpp.onVersionRequest, Strophe.NS.VERSION, 'iq', 'get');
 
       jsxc.gui.init();
 
@@ -393,6 +397,7 @@ jsxc.xmpp = {
          jsxc.xmpp.conn.disco.addIdentity('client', 'web', 'JSXC');
          jsxc.xmpp.conn.disco.addFeature(Strophe.NS.DISCO_INFO);
          jsxc.xmpp.conn.disco.addFeature(Strophe.NS.RECEIPTS);
+         jsxc.xmpp.conn.disco.addFeature(Strophe.NS.VERSION);
       }
 
       // create presence stanza
@@ -987,6 +992,29 @@ jsxc.xmpp = {
          description: body,
          type: (domain === from) ? 'announcement' : null
       }, 'gui.showNotification', [subject, body, from]);
+
+      return true;
+   },
+
+   /**
+    * Respond to version request (XEP-0092).
+    */
+   onVersionRequest: function(stanza) {
+      stanza = $(stanza);
+
+      var from = stanza.attr('from');
+      var id = stanza.attr('id');
+
+      var iq = $iq({
+            type: 'result',
+            to: from,
+            id: id
+         }).c('query', {
+            xmlns: Strophe.NS.VERSION
+         }).c('name').t('JSXC').up()
+         .c('version').t(jsxc.version);
+
+      jsxc.xmpp.conn.sendIQ(iq);
 
       return true;
    },
