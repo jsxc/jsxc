@@ -32,6 +32,8 @@
     "strophe.vcard": "strophe/strophejs-plugin-vcard#de3a0c97a2c520ed900ee15b04a0c16d5c663891",
     "strophe.x": "strophe/strophejs-plugin-dataforms",
     "strophe.chatstates": "strophe/strophejs-plugin-chatstates",
+    "strophe.mam": "https://raw.githubusercontent.com/strophe/strophejs-plugins/master/mam/strophe.mam.v0.3.js", 
+    "strophe.rsm": "https://raw.githubusercontent.com/strophe/strophejs-plugins/master/rsm/strophe.rsm.js",
     "jquery-i18next": "^1.2.0",
     "i18next": "^5.0.0",
     "magnific-popup": "^1.1.0"

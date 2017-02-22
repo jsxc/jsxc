@@ -9,7 +9,9 @@ dev/
 *~
 /tmp/
 /lib/favico.js/
-/lib/strophe.bookmarks
+/lib/strophe.bookmarks/
+/lib/strophe.mam/
+/lib/strophe.rsm/
 /lib/strophe.chatstates/
 /lib/strophe.x/
 /lib/almond/

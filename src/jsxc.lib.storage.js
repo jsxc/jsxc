@@ -7,7 +7,7 @@ jsxc.storage = {
    /**
     * Prefix for localstorage
     *
-    * @privat
+    * @private
     */
    PREFIX: 'jsxc',
 

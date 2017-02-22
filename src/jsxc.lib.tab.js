@@ -44,7 +44,7 @@ jsxc.tab = {
 
       jsxc.tab.exec.apply(this, args);
    },
-
+   
    /**
     * Execute command in all slave tabs.
     *

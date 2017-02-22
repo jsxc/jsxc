@@ -2361,6 +2361,7 @@ jsxc.gui.window = {
     */
    open: function(bid) {
       var win = jsxc.gui.window.init(bid);
+      jsxc.xmpp.mam.getHistory(bid);
 
       jsxc.gui.window.show(bid);
       jsxc.gui.window.highlight(bid);
@@ -2595,9 +2596,9 @@ jsxc.gui.window = {
     */
    postMessage: function(message) {
 
-      if (typeof message === 'object' && !(message instanceof jsxc.Message)) {
-         message = new jsxc.Message(message);
-      }
+	   if (typeof message === 'object' && !(message instanceof jsxc.Message)) {
+	      message = new jsxc.Message(message);
+	   }
 
       var data = jsxc.storage.getUserItem('buddy', message.bid);
 
@@ -2610,7 +2611,6 @@ jsxc.gui.window = {
       message.msg = jsxc.escapeHTML(message.msg);
 
       // exceptions:
-
       if (message.direction === jsxc.Message.OUT && data.msgstate === OTR.CONST.MSGSTATE_FINISHED && message.forwarded !== true) {
          message.direction = jsxc.Message.SYS;
          message.msg = $.t('your_message_wasnt_send_please_end_your_private_conversation');
@@ -2631,7 +2631,7 @@ jsxc.gui.window = {
          message = new jsxc.Message({
             msg: 'Unable to save that message. Please clear some chat histories.',
             direction: jsxc.Message.SYS
-         });
+         });       
       }
 
       if (message.direction === 'in' && !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
@@ -2644,20 +2644,57 @@ jsxc.gui.window = {
          jsxc.xmpp.sendMessage(message);
       }
 
-      jsxc.gui.window._postMessage(message);
+      /*
+       New Line added to sort the messages
+      */
+      jsxc.gui.window.sortMessages(message);
 
       if (message.direction === 'out' && message.msg === '?' && jsxc.options.get('theAnswerToAnything') !== false) {
          if (typeof jsxc.options.get('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) < 1) {
-            jsxc.options.set('theAnswerToAnything', true);
+	         jsxc.options.set('theAnswerToAnything', true);
 
-            jsxc.gui.window.postMessage(new jsxc.Message({
-               bid: message.bid,
-               direction: jsxc.Message.SYS,
-               msg: '42'
-            }));
+	         jsxc.gui.window.postMessage(new jsxc.Message({
+	            bid: message.bid,
+	            direction: jsxc.Message.SYS,
+	            msg: '42'
+	         }));
          }
       }
+      return message;
+   },
 
+   sortMessages: function(message){
+      var messageArray = jsxc.options.allMessages;
+      var length = messageArray.length;
+      var position = length;
+      var firstMessage;
+
+      do{
+         if (typeof messageArray[position-1] === 'undefined') {
+            firstMessage = true;
+         }
+         if (isNaN(message.stamp)) {
+            length = messageArray.length;
+            position = 0;
+            while (position < length) {
+               position++;
+               jsxc.gui.window._postMessage(messageArray[position-1]);
+            }
+            jsxc.options.allMessages = [];
+            return messageArray;            
+         }
+         if (firstMessage || (message.stamp > messageArray[position - 1].stamp)) {
+            // Inserting elements at the specified position
+            messageArray.splice(position - 1, 0, message);
+            firstMessage = false;
+            break;
+         }
+         else {
+            messageArray[position] = messageArray[position - 1];
+         }
+         position--;
+         
+      }while (position > 0);
       return message;
    },
 
@@ -2847,6 +2884,7 @@ jsxc.gui.window = {
       jsxc.gui.detectEmail(win);
 
       jsxc.gui.window.scrollDown(bid);
+         
    },
 
    /**
