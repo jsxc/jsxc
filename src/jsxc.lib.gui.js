@@ -877,7 +877,7 @@ jsxc.gui = {
 
       var data = jsxc.storage.getUserItem('buddy', bid);
 
-      if (data) {
+      if (data && data.res) {
          // Display resources and corresponding information
          var i, j, res, identities, identity = null,
             cap, client;
