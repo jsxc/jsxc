@@ -63,11 +63,7 @@ jsxc.xmpp.httpUpload.init = function(o) {
       return;
    }
 
-   if (caps.hasFeatureByJid(domain, self.CONST.NS.HTTPUPLOAD)) {
-      self.discoverUploadService();
-   } else {
-      jsxc.debug(domain + ' does not support http upload');
-   }
+   self.discoverUploadService();
 };
 
 /**
@@ -77,12 +73,15 @@ jsxc.xmpp.httpUpload.init = function(o) {
  */
 jsxc.xmpp.httpUpload.discoverUploadService = function() {
    var self = jsxc.xmpp.httpUpload;
+   var domain = self.conn.domain;
 
    jsxc.debug('discover http upload service');
 
-   self.queryItemForUploadService(self.conn.domain);
+   if (jsxc.xmpp.conn.caps.hasFeatureByJid(domain, self.CONST.NS.HTTPUPLOAD)) {
+      self.queryItemForUploadService(domain);
+   }
 
-   self.conn.disco.items(self.conn.domain, null, function(items) {
+   self.conn.disco.items(domain, null, function(items) {
       $(items).find('item').each(function() {
          var jid = $(this).attr('jid');
 
