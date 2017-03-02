@@ -122,8 +122,9 @@ jsxc.fileTransfer.showFileSelection = function(jid) {
  */
 jsxc.fileTransfer.fileSelected = function(jid, msg, file) {
    var bid = jsxc.jidToBid(jid);
+   var maxSize = jsxc.options.get('httpUpload').maxSize;
 
-   if (file.transportMethod !== 'webrtc' && jsxc.xmpp.httpUpload.ready && file.size > jsxc.options.get('httpUpload').maxSize) {
+   if (file.transportMethod !== 'webrtc' && jsxc.xmpp.httpUpload.ready && maxSize >= 0 && file.size > maxSize) {
       jsxc.debug('File too large for http upload.');
 
       file.transportMethod = 'webrtc';

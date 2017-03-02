@@ -117,7 +117,7 @@ jsxc.xmpp.httpUpload.queryItemForUploadService = function(jid, cb) {
          jsxc.options.set('httpUpload', {
             server: jid,
             name: $(info).find('identity').attr('name'),
-            maxSize: parseInt(httpUploadMaxSize.text())
+            maxSize: parseInt(httpUploadMaxSize.text()) || -1
          });
 
          self.ready = true;
