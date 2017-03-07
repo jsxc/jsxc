@@ -881,7 +881,15 @@ jsxc.xmpp = {
          var msg = jsxc.removeHTML(body);
          msg = jsxc.escapeHTML(msg);
 
-         jsxc.storage.saveMessage(bid, 'in', msg, false, forwarded, stamp);
+         var messageObj = new jsxc.Message({
+            bid: bid,
+            msg: msg,
+            direction: jsxc.Message.IN,
+            encrypted: false,
+            forwarded: forwarded,
+            stamp: stamp
+         });
+         messageObj.save();
 
          return true;
       }
