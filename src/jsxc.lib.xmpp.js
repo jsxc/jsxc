@@ -157,6 +157,7 @@ jsxc.xmpp = {
          if (jsxc.xmpp.conn.caps) {
             // Add system handler, because user handler isn't called before
             // we are authenticated
+            // @REVIEW this could maybe retrieved from jsxc.xmpp.conn.features
             jsxc.xmpp.conn._addSysHandler(function(stanza) {
                var from = jsxc.xmpp.conn.domain,
                   c = stanza.querySelector('c'),
@@ -197,7 +198,6 @@ jsxc.xmpp = {
 
       // REVIEW: this should maybe moved to xmpp.disconnected
       // clean up
-      jsxc.storage.removeUserItem('buddylist');
       jsxc.storage.removeUserItem('windowlist');
       jsxc.storage.removeUserItem('unreadMsg');
 
@@ -256,6 +256,9 @@ jsxc.xmpp = {
       jsxc.xmpp.initNewConnection();
 
       jsxc.xmpp.saveSessionParameter();
+
+      var rosterVerSupport = $(jsxc.xmpp.conn.features).find('[xmlns="urn:xmpp:features:rosterver"]').length > 0;
+      jsxc.storage.setUserItem('rosterVerSupport', rosterVerSupport);
 
       if (jsxc.options.loginForm.triggered) {
          switch (jsxc.options.loginForm.onConnected || 'submit') {
@@ -336,18 +339,25 @@ jsxc.xmpp = {
       }
 
       // Only load roaster if necessary
-      if (!jsxc.reconnect || !jsxc.storage.getUserItem('buddylist')) {
+      if (!jsxc.reconnect) {
          // in order to not overide existing presence information, we send
          // pres first after roster is ready
          $(document).one('cloaded.roster.jsxc', jsxc.xmpp.sendPres);
 
          $('#jsxc_roster > p:first').remove();
 
+         var queryAttr = {
+            xmlns: 'jabber:iq:roster'
+         };
+
+         if (jsxc.storage.getUserItem('rosterVerSupport')) {
+            // @TODO check if we really cached the roster
+            queryAttr.ver = jsxc.storage.getUserItem('rosterVer') || '';
+         }
+
          var iq = $iq({
             type: 'get'
-         }).c('query', {
-            xmlns: 'jabber:iq:roster'
-         });
+         }).c('query', queryAttr);
 
          jsxc.xmpp.conn.sendIQ(iq, jsxc.xmpp.onRoster);
       } else {
@@ -375,9 +385,6 @@ jsxc.xmpp = {
    },
 
    initNewConnection: function() {
-      // make shure roster will be reloaded
-      jsxc.storage.removeUserItem('buddylist');
-
       jsxc.storage.removeUserItem('windowlist');
       jsxc.storage.removeUserItem('own');
       jsxc.storage.removeUserItem('avatar', 'own');
@@ -511,12 +518,14 @@ jsxc.xmpp = {
     * @private
     */
    onRoster: function(iq) {
-      /*
-       * <iq from='' type='get' id=''> <query xmlns='jabber:iq:roster'> <item
-       * jid='' name='' subscription='' /> ... </query> </iq>
-       */
-
       jsxc.debug('Load roster', iq);
+
+      if ($(iq).find('query').length === 0) {
+         jsxc.debug('Use cached roster');
+
+         jsxc.restoreRoster();
+         return;
+      }
 
       var buddies = [];
 
@@ -547,6 +556,10 @@ jsxc.xmpp = {
       }
 
       jsxc.storage.setUserItem('buddylist', buddies);
+
+      if ($(iq).find('query').attr('ver')) {
+         jsxc.storage.setUserItem('rosterVer', $(iq).find('query').attr('ver'));
+      }
 
       // load bookmarks
       jsxc.xmpp.bookmarks.load();
@@ -626,6 +639,10 @@ jsxc.xmpp = {
             }
          }
       });
+
+      if ($(iq).find('query').attr('ver')) {
+         jsxc.storage.setUserItem('rosterVer', $(iq).find('query').attr('ver'));
+      }
 
       if (!jsxc.storage.getUserItem('buddylist') || jsxc.storage.getUserItem('buddylist').length === 0) {
          jsxc.gui.roster.empty();
