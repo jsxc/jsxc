@@ -584,7 +584,7 @@ jsxc = {
       $('#jsxc_roster').removeClass('jsxc_noConnection');
 
       jsxc.registerLogout();
-      jsxc.gui.updateAvatar($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
+      jsxc.gui.avatar.update($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
 
       jsxc.gui.restore();
    },
@@ -652,7 +652,7 @@ jsxc = {
          jsxc.otr.createDSA();
       }
 
-      jsxc.gui.updateAvatar($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
+      jsxc.gui.avatar.update($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
    },
 
    /**
