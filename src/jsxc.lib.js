@@ -222,8 +222,8 @@ jsxc = {
       }
 
       // Check localStorage
-      if (typeof(localStorage) === 'undefined') {
-         jsxc.warn("Browser doesn't support localStorage.");
+      if (!jsxc.storage.hasSupport()) {
+         jsxc.error("Browser doesn't support localStorage. JSXC will be disabled.");
          return;
       }
 
