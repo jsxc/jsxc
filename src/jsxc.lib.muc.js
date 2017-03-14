@@ -826,7 +826,6 @@ jsxc.muc = {
       var nickname = Strophe.unescapeNode(res);
       var own = jsxc.storage.getUserItem('ownNicknames') || {};
       var member = jsxc.storage.getUserItem('member', room) || {};
-      var openWindow = false;
       var codes = [];
 
       xdata.find('status').each(function() {
@@ -840,6 +839,9 @@ jsxc.muc = {
       if (roomdata.state === self.CONST.ROOMSTATE.INIT) {
          // successfully joined
 
+         roomdata.status = jsxc.CONST.STATUS.indexOf('online');
+         jsxc.storage.setUserItem('buddy', room, roomdata);
+
          jsxc.storage.setUserItem('roomNames', jsxc.xmpp.conn.muc.roomNames);
 
          if (jsxc.gui.roster.getItem(room).length === 0) {
@@ -852,8 +854,9 @@ jsxc.muc = {
 
          if ($('#jsxc_dialog').length > 0) {
             // User joined the room manually
-            openWindow = true;
             jsxc.gui.dialog.close();
+
+            jsxc.gui.window.open(room);
          }
       }
 
@@ -943,11 +946,6 @@ jsxc.muc = {
 
          $(document).trigger('status.muc.jsxc', [code, room, nickname, member[nickname] || {}, presence]);
       });
-
-      if (openWindow) {
-         // we wait until all parameters are set up correctly (e.g. state)
-         jsxc.gui.window.open(room);
-      }
 
       return true;
    },
@@ -1244,15 +1242,14 @@ jsxc.muc = {
 
          if (typeof jid === 'string') {
             m.find('.jsxc_name').text(jsxc.jidToBid(jid));
-            m.attr('data-bid', jsxc.jidToBid(jid));
             title = title + '\n' + jsxc.jidToBid(jid);
 
             var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(jid));
 
             if (data !== null && typeof data === 'object') {
-               jsxc.gui.updateAvatar(m, jsxc.jidToBid(jid), data.avatar);
+               jsxc.gui.avatar.update(m, jsxc.jidToBid(jid), data.avatar);
             } else if (jsxc.jidToBid(jid) === ownBid) {
-               jsxc.gui.updateAvatar(m, jsxc.jidToBid(jid), 'own');
+               jsxc.gui.avatar.update(m, jsxc.jidToBid(jid), 'own');
             }
          } else {
             m.find('.jsxc_name').text(nickname);

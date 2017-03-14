@@ -767,9 +767,7 @@ jsxc.xmpp = {
          });
       }
 
-      if (data.type === 'groupchat') {
-         data.status = status;
-      } else {
+      if (data.type !== 'groupchat') {
          data.status = max;
       }
 
