@@ -1247,9 +1247,9 @@ jsxc.muc = {
             var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(jid));
 
             if (data !== null && typeof data === 'object') {
-               jsxc.gui.updateAvatar(m, jsxc.jidToBid(jid), data.avatar);
+               jsxc.gui.avatar.update(m, jsxc.jidToBid(jid), data.avatar);
             } else if (jsxc.jidToBid(jid) === ownBid) {
-               jsxc.gui.updateAvatar(m, jsxc.jidToBid(jid), 'own');
+               jsxc.gui.avatar.update(m, jsxc.jidToBid(jid), 'own');
             }
          } else {
             m.find('.jsxc_name').text(nickname);
