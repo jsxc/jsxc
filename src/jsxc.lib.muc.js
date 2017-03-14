@@ -839,6 +839,9 @@ jsxc.muc = {
       if (roomdata.state === self.CONST.ROOMSTATE.INIT) {
          // successfully joined
 
+         roomdata.status = jsxc.CONST.STATUS.indexOf('online');
+         jsxc.storage.setUserItem('buddy', room, roomdata);
+
          jsxc.storage.setUserItem('roomNames', jsxc.xmpp.conn.muc.roomNames);
 
          if (jsxc.gui.roster.getItem(room).length === 0) {
