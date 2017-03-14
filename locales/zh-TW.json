@@ -299,6 +299,8 @@
     "Install_extension": "要使用螢幕分享功能請安裝這個擴充套件: ",
     "Connection_accepted": "連線接受了",
     "Stream_terminated": "串流結束了",
-    "Close_all": null
+    "Close_all": "全部關掉",
+    "Notification": null,
+    "Unreadable_OTR_message": null
   }
 }

@@ -94,6 +94,7 @@ jsxc.xmpp = {
          $(document).on('authfail.jsxc', jsxc.xmpp.onAuthFail);
 
          Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
+         Strophe.addNamespace('VERSION', 'jabber:iq:version');
       }
 
       // Create new connection (no login)
@@ -156,6 +157,7 @@ jsxc.xmpp = {
          if (jsxc.xmpp.conn.caps) {
             // Add system handler, because user handler isn't called before
             // we are authenticated
+            // @REVIEW this could maybe retrieved from jsxc.xmpp.conn.features
             jsxc.xmpp.conn._addSysHandler(function(stanza) {
                var from = jsxc.xmpp.conn.domain,
                   c = stanza.querySelector('c'),
@@ -196,7 +198,6 @@ jsxc.xmpp = {
 
       // REVIEW: this should maybe moved to xmpp.disconnected
       // clean up
-      jsxc.storage.removeUserItem('buddylist');
       jsxc.storage.removeUserItem('windowlist');
       jsxc.storage.removeUserItem('unreadMsg');
 
@@ -256,6 +257,9 @@ jsxc.xmpp = {
 
       jsxc.xmpp.saveSessionParameter();
 
+      var rosterVerSupport = $(jsxc.xmpp.conn.features).find('[xmlns="urn:xmpp:features:rosterver"]').length > 0;
+      jsxc.storage.setUserItem('rosterVerSupport', rosterVerSupport);
+
       if (jsxc.options.loginForm.triggered) {
          switch (jsxc.options.loginForm.onConnected || 'submit') {
             case 'submit':
@@ -286,11 +290,14 @@ jsxc.xmpp = {
 
       $('#jsxc_roster').removeClass('jsxc_noConnection');
 
+      Strophe.addNamespace('VERSION', 'jabber:iq:version');
+
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onRosterChanged, 'jabber:iq:roster', 'iq', 'set');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onChatMessage, null, 'message', 'chat');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onHeadlineMessage, null, 'message', 'headline');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onReceived, null, 'message');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
+      jsxc.xmpp.conn.addHandler(jsxc.xmpp.onVersionRequest, Strophe.NS.VERSION, 'iq', 'get');
 
       jsxc.gui.init();
 
@@ -332,18 +339,25 @@ jsxc.xmpp = {
       }
 
       // Only load roaster if necessary
-      if (!jsxc.reconnect || !jsxc.storage.getUserItem('buddylist')) {
+      if (!jsxc.reconnect) {
          // in order to not overide existing presence information, we send
          // pres first after roster is ready
          $(document).one('cloaded.roster.jsxc', jsxc.xmpp.sendPres);
 
          $('#jsxc_roster > p:first').remove();
 
+         var queryAttr = {
+            xmlns: 'jabber:iq:roster'
+         };
+
+         if (jsxc.storage.getUserItem('rosterVerSupport')) {
+            // @TODO check if we really cached the roster
+            queryAttr.ver = jsxc.storage.getUserItem('rosterVer') || '';
+         }
+
          var iq = $iq({
             type: 'get'
-         }).c('query', {
-            xmlns: 'jabber:iq:roster'
-         });
+         }).c('query', queryAttr);
 
          jsxc.xmpp.conn.sendIQ(iq, jsxc.xmpp.onRoster);
       } else {
@@ -371,9 +385,6 @@ jsxc.xmpp = {
    },
 
    initNewConnection: function() {
-      // make shure roster will be reloaded
-      jsxc.storage.removeUserItem('buddylist');
-
       jsxc.storage.removeUserItem('windowlist');
       jsxc.storage.removeUserItem('own');
       jsxc.storage.removeUserItem('avatar', 'own');
@@ -393,6 +404,7 @@ jsxc.xmpp = {
          jsxc.xmpp.conn.disco.addIdentity('client', 'web', 'JSXC');
          jsxc.xmpp.conn.disco.addFeature(Strophe.NS.DISCO_INFO);
          jsxc.xmpp.conn.disco.addFeature(Strophe.NS.RECEIPTS);
+         jsxc.xmpp.conn.disco.addFeature(Strophe.NS.VERSION);
       }
 
       // create presence stanza
@@ -506,12 +518,14 @@ jsxc.xmpp = {
     * @private
     */
    onRoster: function(iq) {
-      /*
-       * <iq from='' type='get' id=''> <query xmlns='jabber:iq:roster'> <item
-       * jid='' name='' subscription='' /> ... </query> </iq>
-       */
-
       jsxc.debug('Load roster', iq);
+
+      if ($(iq).find('query').length === 0) {
+         jsxc.debug('Use cached roster');
+
+         jsxc.restoreRoster();
+         return;
+      }
 
       var buddies = [];
 
@@ -543,6 +557,10 @@ jsxc.xmpp = {
 
       jsxc.storage.setUserItem('buddylist', buddies);
 
+      if ($(iq).find('query').attr('ver')) {
+         jsxc.storage.setUserItem('rosterVer', $(iq).find('query').attr('ver'));
+      }
+
       // load bookmarks
       jsxc.xmpp.bookmarks.load();
 
@@ -560,13 +578,18 @@ jsxc.xmpp = {
     * @private
     */
    onRosterChanged: function(iq) {
-      /*
-       * <iq from='' type='set' id=''> <query xmlns='jabber:iq:roster'> <item
-       * jid='' name='' subscription='' /> </query> </iq>
-       */
+
+      var iqSender = $(iq).attr('from');
+      var ownBareJid = Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid);
+
+      if (iqSender && iqSender !== ownBareJid) {
+         return true;
+      }
 
       jsxc.debug('onRosterChanged', iq);
 
+      // @REVIEW there should be only one item, according to RFC6121
+      // https://xmpp.org/rfcs/rfc6121.html#roster-syntax-actions-push
       $(iq).find('item').each(function() {
          var jid = $(this).attr('jid');
          var name = $(this).attr('name') || jid;
@@ -616,6 +639,10 @@ jsxc.xmpp = {
             }
          }
       });
+
+      if ($(iq).find('query').attr('ver')) {
+         jsxc.storage.setUserItem('rosterVer', $(iq).find('query').attr('ver'));
+      }
 
       if (!jsxc.storage.getUserItem('buddylist') || jsxc.storage.getUserItem('buddylist').length === 0) {
          jsxc.gui.roster.empty();
@@ -786,6 +813,7 @@ jsxc.xmpp = {
    onChatMessage: function(stanza) {
       var forwarded = $(stanza).find('forwarded[xmlns="' + jsxc.CONST.NS.FORWARD + '"]');
       var message, carbon;
+      var originalSender = $(stanza).attr('from');
 
       if (forwarded.length > 0) {
          message = forwarded.find('> message');
@@ -794,6 +822,9 @@ jsxc.xmpp = {
 
          if (carbon.length === 0) {
             carbon = false;
+         } else if (originalSender !== Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid)) {
+            // ignore this carbon copy
+            return true;
          }
 
          jsxc.debug('Incoming forwarded message', message);
@@ -865,7 +896,15 @@ jsxc.xmpp = {
          var msg = jsxc.removeHTML(body);
          msg = jsxc.escapeHTML(msg);
 
-         jsxc.storage.saveMessage(bid, 'in', msg, false, forwarded, stamp);
+         var messageObj = new jsxc.Message({
+            bid: bid,
+            msg: msg,
+            direction: jsxc.Message.IN,
+            encrypted: false,
+            forwarded: forwarded,
+            stamp: stamp
+         });
+         messageObj.save();
 
          return true;
       }
@@ -976,6 +1015,29 @@ jsxc.xmpp = {
          description: body,
          type: (domain === from) ? 'announcement' : null
       }, 'gui.showNotification', [subject, body, from]);
+
+      return true;
+   },
+
+   /**
+    * Respond to version request (XEP-0092).
+    */
+   onVersionRequest: function(stanza) {
+      stanza = $(stanza);
+
+      var from = stanza.attr('from');
+      var id = stanza.attr('id');
+
+      var iq = $iq({
+            type: 'result',
+            to: from,
+            id: id
+         }).c('query', {
+            xmlns: Strophe.NS.VERSION
+         }).c('name').t('JSXC').up()
+         .c('version').t(jsxc.version);
+
+      jsxc.xmpp.conn.sendIQ(iq);
 
       return true;
    },

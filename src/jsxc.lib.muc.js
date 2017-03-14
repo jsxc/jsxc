@@ -111,7 +111,9 @@ jsxc.muc = {
 
       li.click(jsxc.muc.showJoinChat);
 
-      $('#jsxc_menu ul .jsxc_about').before(li);
+      if ($('#jsxc_menu .jsxc_joinChat').length === 0) {
+         $('#jsxc_menu ul .jsxc_about').before(li);
+      }
    },
 
    /**

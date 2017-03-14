@@ -70,7 +70,6 @@
     left: 0;
     bottom: 0;
     width: 30px;
-    height: 30px;
 
     @media (max-width: 768px) {
         display: none;
@@ -80,7 +79,7 @@
         div {
             box-sizing: border-box;
             width: 14px;
-            height: 100%;
+            height: 30px;
             background-color: $windowListSB_bg;
             color: $windowListSB_color;
             text-align: center;

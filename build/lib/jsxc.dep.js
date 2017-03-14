@@ -1,22 +1,20 @@
 /*!
- * jsxc v3.1.0-beta - 2017-01-23
+ * jsxc v3.1.1 - 2017-02-14
  * 
  * This file concatenates all dependencies of jsxc.
  * 
  */
 
-
-/*!
- * Source: lib/strophe.js/strophe.js, license: multiple, url: http://strophe.im/strophejs/
- */
 /** File: strophe.js
- *  A JavaScript library for writing XMPP clients.
+ *  A JavaScript library for XMPP BOSH/XMPP over Websocket.
  *
- *  This library uses either Bidirectional-streams Over Synchronous HTTP (BOSH)
- *  to emulate a persistent, stateful, two-way connection to an XMPP server or
- *  alternatively WebSockets.
+ *  This is the JavaScript version of the Strophe library.  Since JavaScript
+ *  had no facilities for persistent TCP connections, this library uses
+ *  Bidirectional-streams Over Synchronous HTTP (BOSH) to emulate
+ *  a persistent, stateful, two-way connection to an XMPP server.  More
+ *  information on BOSH can be found in XEP 124.
  *
- *  More information on BOSH can be found in XEP 124.
+ *  This version of Strophe also works with WebSockets.
  *  For more information on XMPP-over WebSocket see this RFC:
  *  http://tools.ietf.org/html/rfc7395
  */
@@ -130,7 +128,7 @@
  * See http://pajhome.org.uk/crypt/md5 for details.
  */
 
-/* jshint undef: true, unused: true:, noarg: true, latedef: false */
+/* jshint undef: true, unused: true:, noarg: true, latedef: true */
 /* global define */
 
 /* Some functions and variables have been stripped for use with Strophe */
@@ -532,80 +530,6 @@ return {
     return obj;
 }));
 
-(function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define('strophe-utils', function () {
-            return factory();
-        });
-    } else {
-        // Browser globals
-        root.stropheUtils = factory();
-    }
-}(this, function () {
-
-    var utils = {
-
-        utf16to8: function (str) {
-            var i, c;
-            var out = "";
-            var len = str.length;
-            for (i = 0; i < len; i++) {
-                c = str.charCodeAt(i);
-                if ((c >= 0x0000) && (c <= 0x007F)) {
-                    out += str.charAt(i);
-                } else if (c > 0x07FF) {
-                    out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
-                    out += String.fromCharCode(0x80 | ((c >>  6) & 0x3F));
-                    out += String.fromCharCode(0x80 | ((c >>  0) & 0x3F));
-                } else {
-                    out += String.fromCharCode(0xC0 | ((c >>  6) & 0x1F));
-                    out += String.fromCharCode(0x80 | ((c >>  0) & 0x3F));
-                }
-            }
-            return out;
-        },
-
-        addCookies: function (cookies) {
-            /* Parameters:
-             *  (Object) cookies - either a map of cookie names
-             *    to string values or to maps of cookie values.
-             *
-             * For example:
-             * { "myCookie": "1234" }
-             *
-             * or:
-             * { "myCookie": {
-             *      "value": "1234",
-             *      "domain": ".example.org",
-             *      "path": "/",
-             *      "expires": expirationDate
-             *      }
-             *  }
-             *
-             *  These values get passed to Strophe.Connection via
-             *   options.cookies
-             */
-            var cookieName, cookieObj, isObj, cookieValue, expires, domain, path;
-            for (cookieName in (cookies || {})) {
-                expires = '';
-                domain = '';
-                path = '';
-                cookieObj = cookies[cookieName];
-                isObj = typeof cookieObj == "object";
-                cookieValue = escape(unescape(isObj ? cookieObj.value : cookieObj));
-                if (isObj) {
-                    expires = cookieObj.expires ? ";expires="+cookieObj.expires : '';
-                    domain = cookieObj.domain ? ";domain="+cookieObj.domain : '';
-                    path = cookieObj.path ? ";path="+cookieObj.path : '';
-                }
-                document.cookie =
-                    cookieName+'='+cookieValue + expires + domain + path;
-            }
-        }
-    };
-    return utils;
-}));
-
 /*
     This program is distributed under the terms of the MIT license.
     Please see the LICENSE file for details.
@@ -614,20 +538,8 @@ return {
 */
 
 /* jshint undef: true, unused: true:, noarg: true, latedef: true */
-/* global define */
 
-(function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define('strophe-polyfill', [], function () {
-            return factory();
-        });
-    } else {
-        // Browser globals
-        return factory();
-    }
-}(this, function () {
-
-/** Function: Function.prototype.bind
+/** PrivateFunction: Function.prototype.bind
  *  Bind a function to an instance.
  *
  *  This Function object extension method creates a bound method similar
@@ -649,18 +561,22 @@ return {
  *    The bound function.
  */
 if (!Function.prototype.bind) {
-    Function.prototype.bind = function (obj /*, arg1, arg2, ... */) {
+    Function.prototype.bind = function (obj /*, arg1, arg2, ... */)
+    {
         var func = this;
         var _slice = Array.prototype.slice;
         var _concat = Array.prototype.concat;
         var _args = _slice.call(arguments, 1);
+
         return function () {
-            return func.apply(obj ? obj : this, _concat.call(_args, _slice.call(arguments, 0)));
+            return func.apply(obj ? obj : this,
+                              _concat.call(_args,
+                                           _slice.call(arguments, 0)));
         };
     };
 }
 
-/** Function: Array.isArray
+/** PrivateFunction: Array.isArray
  *  This is a polyfill for the ES5 Array.isArray method.
  */
 if (!Array.isArray) {
@@ -669,7 +585,7 @@ if (!Array.isArray) {
     };
 }
 
-/** Function: Array.prototype.indexOf
+/** PrivateFunction: Array.prototype.indexOf
  *  Return the index of an object in an array.
  *
  *  This function is not supplied by some JavaScript implementations, so
@@ -683,9 +599,12 @@ if (!Array.isArray) {
  *  Returns:
  *    The index of elt in the array or -1 if not found.
  */
-if (!Array.prototype.indexOf) {
-        Array.prototype.indexOf = function(elt /*, from*/) {
+if (!Array.prototype.indexOf)
+    {
+        Array.prototype.indexOf = function(elt /*, from*/)
+        {
             var len = this.length;
+
             var from = Number(arguments[1]) || 0;
             from = (from < 0) ? Math.ceil(from) : Math.floor(from);
             if (from < 0) {
@@ -697,66 +616,10 @@ if (!Array.prototype.indexOf) {
                     return from;
                 }
             }
+
             return -1;
         };
     }
-}));
-
-
-/** Function: Array.prototype.forEach
- *
- *  This function is not available in IE < 9
- *  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach
- */
-if (!Array.prototype.forEach) {
-    Array.prototype.forEach = function(callback, thisArg) {
-        var T, k;
-        if (this === null) {
-            throw new TypeError(' this is null or not defined');
-        }
-
-        // 1. Let O be the result of calling toObject() passing the
-        // |this| value as the argument.
-        var O = Object(this);
-        // 2. Let lenValue be the result of calling the Get() internal
-        // method of O with the argument "length".
-        // 3. Let len be toUint32(lenValue).
-        var len = O.length >>> 0;
-        // 4. If isCallable(callback) is false, throw a TypeError exception.
-        // See: http://es5.github.com/#x9.11
-        if (typeof callback !== "function") {
-            throw new TypeError(callback + ' is not a function');
-        }
-        // 5. If thisArg was supplied, let T be thisArg; else let
-        // T be undefined.
-        if (arguments.length > 1) {
-            T = thisArg;
-        }
-        // 6. Let k be 0
-        k = 0;
-        // 7. Repeat, while k < len
-        while (k < len) {
-            var kValue;
-            // a. Let Pk be ToString(k).
-            //        This is implicit for LHS operands of the in operator
-            // b. Let kPresent be the result of calling the HasProperty
-            //        internal method of O with argument Pk.
-            //        This step can be combined with c
-            // c. If kPresent is true, then
-            if (k in O) {
-                // i. Let kValue be the result of calling the Get internal
-                // method of O with argument Pk.
-                kValue = O[k];
-                // ii. Call the Call internal method of callback with T as
-                // the this value and argument list containing kValue, k, and O.
-                callback.call(T, kValue, k, O);
-            }
-            // d. Increase k by 1.
-            k++;
-        }
-        // 8. return undefined
-    };
-}
 
 /*
     This program is distributed under the terms of the MIT license.
@@ -766,7 +629,7 @@ if (!Array.prototype.forEach) {
 */
 
 /* jshint undef: true, unused: true:, noarg: true, latedef: true */
-/*global define, document, window, setTimeout, clearTimeout, ActiveXObject, DOMParser */
+/*global define, document, window, setTimeout, clearTimeout, console, ActiveXObject, DOMParser */
 
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
@@ -774,14 +637,13 @@ if (!Array.prototype.forEach) {
             'strophe-sha1',
             'strophe-base64',
             'strophe-md5',
-            'strophe-utils',
             "strophe-polyfill"
         ], function () {
             return factory.apply(this, arguments);
         });
     } else {
         // Browser globals
-        var o = factory(root.SHA1, root.Base64, root.MD5, root.stropheUtils);
+        var o = factory(root.SHA1, root.Base64, root.MD5);
         window.Strophe =        o.Strophe;
         window.$build =         o.$build;
         window.$iq =            o.$iq;
@@ -795,7 +657,7 @@ if (!Array.prototype.forEach) {
         window.str_hmac_sha1 =  o.SHA1.str_hmac_sha1;
         window.str_sha1 =       o.SHA1.str_sha1;
     }
-}(this, function (SHA1, Base64, MD5, utils) {
+}(this, function (SHA1, Base64, MD5) {
 
 var Strophe;
 
@@ -857,7 +719,7 @@ Strophe = {
      *  The version of the Strophe library. Unreleased builds will have
      *  a version of head-HASH where HASH is a partial revision.
      */
-    VERSION: "1.2.9",
+    VERSION: "1.2.3",
 
     /** Constants: XMPP Namespace Constants
      *  Common namespace constants from the XMPP RFCs and XEPs.
@@ -899,6 +761,7 @@ Strophe = {
         XHTML: "http://www.w3.org/1999/xhtml"
     },
 
+
     /** Constants: XHTML_IM Namespace
      *  contains allowed tags, tag attributes, and css properties.
      *  Used in the createHtml function to filter incoming html into the allowed XHTML-IM subset.
@@ -906,63 +769,64 @@ Strophe = {
      *  allowed tags and their attributes.
      */
     XHTML: {
-        tags: ['a','blockquote','br','cite','em','img','li','ol','p','span','strong','ul','body'],
-        attributes: {
-            'a':          ['href'],
-            'blockquote': ['style'],
-            'br':         [],
-            'cite':       ['style'],
-            'em':         [],
-            'img':        ['src', 'alt', 'style', 'height', 'width'],
-            'li':         ['style'],
-            'ol':         ['style'],
-            'p':          ['style'],
-            'span':       ['style'],
-            'strong':     [],
-            'ul':         ['style'],
-            'body':       []
-        },
-        css: ['background-color','color','font-family','font-size','font-style','font-weight','margin-left','margin-right','text-align','text-decoration'],
-        /** Function: XHTML.validTag
-         *
-         * Utility method to determine whether a tag is allowed
-         * in the XHTML_IM namespace.
-         *
-         * XHTML tag names are case sensitive and must be lower case.
-         */
-        validTag: function(tag) {
-            for (var i = 0; i < Strophe.XHTML.tags.length; i++) {
-                if (tag == Strophe.XHTML.tags[i]) {
-                    return true;
+                tags: ['a','blockquote','br','cite','em','img','li','ol','p','span','strong','ul','body'],
+                attributes: {
+                        'a':          ['href'],
+                        'blockquote': ['style'],
+                        'br':         [],
+                        'cite':       ['style'],
+                        'em':         [],
+                        'img':        ['src', 'alt', 'style', 'height', 'width'],
+                        'li':         ['style'],
+                        'ol':         ['style'],
+                        'p':          ['style'],
+                        'span':       ['style'],
+                        'strong':     [],
+                        'ul':         ['style'],
+                        'body':       []
+                },
+                css: ['background-color','color','font-family','font-size','font-style','font-weight','margin-left','margin-right','text-align','text-decoration'],
+                /** Function: XHTML.validTag
+                 *
+                 * Utility method to determine whether a tag is allowed
+                 * in the XHTML_IM namespace.
+                 *
+                 * XHTML tag names are case sensitive and must be lower case.
+                 */
+                validTag: function(tag) {
+                        for (var i = 0; i < Strophe.XHTML.tags.length; i++) {
+                                if (tag == Strophe.XHTML.tags[i]) {
+                                        return true;
+                                }
+                        }
+                        return false;
+                },
+                /** Function: XHTML.validAttribute
+                 *
+                 * Utility method to determine whether an attribute is allowed
+                 * as recommended per XEP-0071
+                 *
+                 * XHTML attribute names are case sensitive and must be lower case.
+                 */
+                validAttribute: function(tag, attribute) {
+                        if(typeof Strophe.XHTML.attributes[tag] !== 'undefined' && Strophe.XHTML.attributes[tag].length > 0) {
+                                for(var i = 0; i < Strophe.XHTML.attributes[tag].length; i++) {
+                                        if(attribute == Strophe.XHTML.attributes[tag][i]) {
+                                                return true;
+                                        }
+                                }
+                        }
+                        return false;
+                },
+                validCSS: function(style)
+                {
+                        for(var i = 0; i < Strophe.XHTML.css.length; i++) {
+                                if(style == Strophe.XHTML.css[i]) {
+                                        return true;
+                                }
+                        }
+                        return false;
                 }
-            }
-            return false;
-        },
-        /** Function: XHTML.validAttribute
-         *
-         * Utility method to determine whether an attribute is allowed
-         * as recommended per XEP-0071
-         *
-         * XHTML attribute names are case sensitive and must be lower case.
-         */
-        validAttribute: function(tag, attribute) {
-            if (typeof Strophe.XHTML.attributes[tag] !== 'undefined' && Strophe.XHTML.attributes[tag].length > 0) {
-                for (var i = 0; i < Strophe.XHTML.attributes[tag].length; i++) {
-                    if (attribute == Strophe.XHTML.attributes[tag][i]) {
-                        return true;
-                    }
-                }
-            }
-        return false;
-        },
-        validCSS: function(style) {
-            for (var i = 0; i < Strophe.XHTML.css.length; i++) {
-                if (style == Strophe.XHTML.css[i]) {
-                    return true;
-                }
-            }
-            return false;
-        }
     },
 
     /** Constants: Connection Status Constants
@@ -978,7 +842,6 @@ Strophe = {
      *  Status.DISCONNECTED - The connection has been terminated
      *  Status.DISCONNECTING - The connection is currently being terminated
      *  Status.ATTACHED - The connection has been attached
-     *  Status.CONNTIMEOUT - The connection has timed out
      */
     Status: {
         ERROR: 0,
@@ -990,8 +853,7 @@ Strophe = {
         DISCONNECTED: 6,
         DISCONNECTING: 7,
         ATTACHED: 8,
-        REDIRECT: 9,
-        CONNTIMEOUT: 10
+        REDIRECT: 9
     },
 
     /** Constants: Log Level Constants
@@ -1054,8 +916,9 @@ Strophe = {
      *      referenced under Strophe.NS
      *    (String) value - The actual namespace.
      */
-    addNamespace: function (name, value) {
-        Strophe.NS[name] = value;
+    addNamespace: function (name, value)
+    {
+      Strophe.NS[name] = value;
     },
 
     /** Function: forEachChild
@@ -1072,8 +935,10 @@ Strophe = {
      *    (Function) func - The function to apply to each child.  This
      *      function should take a single argument, a DOM element.
      */
-    forEachChild: function (elem, elemName, func) {
+    forEachChild: function (elem, elemName, func)
+    {
         var i, childNode;
+
         for (i = 0; i < elem.childNodes.length; i++) {
             childNode = elem.childNodes[i];
             if (childNode.nodeType == Strophe.ElementType.NORMAL &&
@@ -1096,7 +961,8 @@ Strophe = {
      *    true if the element's tag name matches _el_, and false
      *    otherwise.
      */
-    isTagEqual: function (el, name) {
+    isTagEqual: function (el, name)
+    {
         return el.tagName == name;
     },
 
@@ -1112,6 +978,7 @@ Strophe = {
      */
     _makeGenerator: function () {
         var doc;
+
         // IE9 does implement createDocument(); however, using it will cause the browser to leak memory on page unload.
         // Here, we test for presence of createDocument() plus IE's proprietary documentMode attribute, which would be
                 // less than 10 in the case of IE9 and below.
@@ -1123,6 +990,7 @@ Strophe = {
             doc = document.implementation
                 .createDocument('jabber:client', 'strophe', null);
         }
+
         return doc;
     },
 
@@ -1170,6 +1038,7 @@ Strophe = {
                 break;
             }
         }
+
         return doc;
     },
 
@@ -1191,10 +1060,12 @@ Strophe = {
      *  Returns:
      *    A new XML DOM element.
      */
-    xmlElement: function (name) {
+    xmlElement: function (name)
+    {
         if (!name) { return null; }
 
         var node = Strophe.xmlGenerator().createElement(name);
+
         // FIXME: this should throw errors if args are the wrong type or
         // there are more than two optional args
         var a, i, k;
@@ -1239,7 +1110,8 @@ Strophe = {
      *  Returns:
      *      Escaped text.
      */
-    xmlescape: function(text) {
+    xmlescape: function(text)
+    {
         text = text.replace(/\&/g, "&amp;");
         text = text.replace(/</g,  "&lt;");
         text = text.replace(/>/g,  "&gt;");
@@ -1257,7 +1129,8 @@ Strophe = {
     *  Returns:
     *      Unescaped text.
     */
-    xmlunescape: function(text) {
+    xmlunescape: function(text)
+    {
         text = text.replace(/\&amp;/g, "&");
         text = text.replace(/&lt;/g,  "<");
         text = text.replace(/&gt;/g,  ">");
@@ -1277,7 +1150,8 @@ Strophe = {
      *  Returns:
      *    A new XML DOM text node.
      */
-    xmlTextNode: function (text) {
+    xmlTextNode: function (text)
+    {
         return Strophe.xmlGenerator().createTextNode(text);
     },
 
@@ -1290,7 +1164,8 @@ Strophe = {
      *  Returns:
      *    A new XML DOM text node.
      */
-    xmlHtmlNode: function (html) {
+    xmlHtmlNode: function (html)
+    {
         var node;
         //ensure text is escaped
         if (window.DOMParser) {
@@ -1313,7 +1188,8 @@ Strophe = {
      *  Returns:
      *    A String with the concatenated text of all text element children.
      */
-    getText: function (elem) {
+    getText: function (elem)
+    {
         if (!elem) { return null; }
 
         var str = "";
@@ -1343,7 +1219,8 @@ Strophe = {
      *  Returns:
      *    A new, copied DOM element tree.
      */
-    copyElement: function (elem) {
+    copyElement: function (elem)
+    {
         var i, el;
         if (elem.nodeType == Strophe.ElementType.NORMAL) {
             el = Strophe.xmlElement(elem.tagName);
@@ -1359,6 +1236,7 @@ Strophe = {
         } else if (elem.nodeType == Strophe.ElementType.TEXT) {
             el = Strophe.xmlGenerator().createTextNode(elem.nodeValue);
         }
+
         return el;
     },
 
@@ -1375,7 +1253,8 @@ Strophe = {
      *  Returns:
      *    A new, copied DOM element tree.
      */
-    createHtml: function (elem) {
+    createHtml: function (elem)
+    {
         var i, el, j, tag, attribute, value, css, cssAttrs, attr, cssName, cssValue;
         if (elem.nodeType == Strophe.ElementType.NORMAL) {
             tag = elem.nodeName.toLowerCase(); // XHTML tags must be lower case.
@@ -1434,6 +1313,7 @@ Strophe = {
         } else if (elem.nodeType == Strophe.ElementType.TEXT) {
             el = Strophe.xmlTextNode(elem.nodeValue);
         }
+
         return el;
     },
 
@@ -1446,7 +1326,8 @@ Strophe = {
      *  Returns:
      *    An escaped node (or local part).
      */
-    escapeNode: function (node) {
+    escapeNode: function (node)
+    {
         if (typeof node !== "string") { return node; }
         return node.replace(/^\s+|\s+$/g, '')
             .replace(/\\/g,  "\\5c")
@@ -1470,7 +1351,8 @@ Strophe = {
      *  Returns:
      *    An unescaped node (or local part).
      */
-    unescapeNode: function (node) {
+    unescapeNode: function (node)
+    {
         if (typeof node !== "string") { return node; }
         return node.replace(/\\20/g, " ")
             .replace(/\\22/g, '"')
@@ -1493,7 +1375,8 @@ Strophe = {
      *  Returns:
      *    A String containing the node.
      */
-    getNodeFromJid: function (jid) {
+    getNodeFromJid: function (jid)
+    {
         if (jid.indexOf("@") < 0) { return null; }
         return jid.split("@")[0];
     },
@@ -1507,7 +1390,8 @@ Strophe = {
      *  Returns:
      *    A String containing the domain.
      */
-    getDomainFromJid: function (jid) {
+    getDomainFromJid: function (jid)
+    {
         var bare = Strophe.getBareJidFromJid(jid);
         if (bare.indexOf("@") < 0) {
             return bare;
@@ -1527,7 +1411,8 @@ Strophe = {
      *  Returns:
      *    A String containing the resource.
      */
-    getResourceFromJid: function (jid) {
+    getResourceFromJid: function (jid)
+    {
         var s = jid.split("/");
         if (s.length < 2) { return null; }
         s.splice(0, 1);
@@ -1543,27 +1428,9 @@ Strophe = {
      *  Returns:
      *    A String containing the bare JID.
      */
-    getBareJidFromJid: function (jid) {
+    getBareJidFromJid: function (jid)
+    {
         return jid ? jid.split("/")[0] : null;
-    },
-
-    /** PrivateFunction: _handleError
-     *  _Private_ function that properly logs an error to the console
-     */
-    _handleError: function (e) {
-        if (typeof e.stack !== "undefined") {
-            Strophe.fatal(e.stack);
-        }
-        if (e.sourceURL) {
-            Strophe.fatal("error: " + this.handler + " " + e.sourceURL + ":" +
-                          e.line + " - " + e.name + ": " + e.message);
-        } else if (e.fileName) {
-            Strophe.fatal("error: " + this.handler + " " +
-                          e.fileName + ":" + e.lineNumber + " - " +
-                          e.name + ": " + e.message);
-        } else {
-            Strophe.fatal("error: " + e.message);
-        }
     },
 
     /** Function: log
@@ -1596,7 +1463,8 @@ Strophe = {
      *    (String) msg - The log message.
      */
     /* jshint ignore:start */
-    log: function (level, msg) {
+    log: function (level, msg)
+    {
         return;
     },
     /* jshint ignore:end */
@@ -1607,7 +1475,8 @@ Strophe = {
      *  Parameters:
      *    (String) msg - The log message.
      */
-    debug: function(msg) {
+    debug: function(msg)
+    {
         this.log(this.LogLevel.DEBUG, msg);
     },
 
@@ -1617,7 +1486,8 @@ Strophe = {
      *  Parameters:
      *    (String) msg - The log message.
      */
-    info: function (msg) {
+    info: function (msg)
+    {
         this.log(this.LogLevel.INFO, msg);
     },
 
@@ -1627,7 +1497,8 @@ Strophe = {
      *  Parameters:
      *    (String) msg - The log message.
      */
-    warn: function (msg) {
+    warn: function (msg)
+    {
         this.log(this.LogLevel.WARN, msg);
     },
 
@@ -1637,7 +1508,8 @@ Strophe = {
      *  Parameters:
      *    (String) msg - The log message.
      */
-    error: function (msg) {
+    error: function (msg)
+    {
         this.log(this.LogLevel.ERROR, msg);
     },
 
@@ -1647,7 +1519,8 @@ Strophe = {
      *  Parameters:
      *    (String) msg - The log message.
      */
-    fatal: function (msg) {
+    fatal: function (msg)
+    {
         this.log(this.LogLevel.FATAL, msg);
     },
 
@@ -1660,7 +1533,8 @@ Strophe = {
      *  Returns:
      *    The serialized element tree as a String.
      */
-    serialize: function (elem) {
+    serialize: function (elem)
+    {
         var result;
 
         if (!elem) { return null; }
@@ -1678,10 +1552,14 @@ Strophe = {
 
         result = "<" + nodeName;
         for (i = 0; i < elem.attributes.length; i++) {
-             if(elem.attributes[i].nodeName != "_realname") {
-               result += " " + elem.attributes[i].nodeName +
-                   "='" + Strophe.xmlescape(elem.attributes[i].value) + "'";
-             }
+               if(elem.attributes[i].nodeName != "_realname") {
+                 result += " " + elem.attributes[i].nodeName +
+                "='" + elem.attributes[i].value
+                    .replace(/&/g, "&amp;")
+                       .replace(/\'/g, "&apos;")
+                       .replace(/>/g, "&gt;")
+                       .replace(/</g, "&lt;") + "'";
+               }
         }
 
         if (elem.childNodes.length > 0) {
@@ -1729,7 +1607,8 @@ Strophe = {
      *    (String) name - The name of the extension.
      *    (Object) ptype - The plugin's prototype.
      */
-    addConnectionPlugin: function (name, ptype) {
+    addConnectionPlugin: function (name, ptype)
+    {
         Strophe._connectionPlugins[name] = ptype;
     }
 };
@@ -1745,7 +1624,6 @@ Strophe = {
  *  >     .c('query', {xmlns: 'strophe:example'})
  *  >     .c('example')
  *  >     .toString()
- *
  *  The above generates this XML fragment
  *  > <iq to='you' from='me' type='get' id='1'>
  *  >   <query xmlns='strophe:example'>
@@ -1776,7 +1654,8 @@ Strophe = {
  *  Returns:
  *    A new Strophe.Builder.
  */
-Strophe.Builder = function (name, attrs) {
+Strophe.Builder = function (name, attrs)
+{
     // Set correct namespace for jabber:client elements
     if (name == "presence" || name == "message" || name == "iq") {
         if (attrs && !attrs.xmlns) {
@@ -1803,7 +1682,8 @@ Strophe.Builder.prototype = {
      *  Returns:
      *    The DOM tree as a element object.
      */
-    tree: function () {
+    tree: function ()
+    {
         return this.nodeTree;
     },
 
@@ -1817,7 +1697,8 @@ Strophe.Builder.prototype = {
      *  Returns:
      *    The serialized DOM tree in a String.
      */
-    toString: function () {
+    toString: function ()
+    {
         return Strophe.serialize(this.nodeTree);
     },
 
@@ -1831,23 +1712,9 @@ Strophe.Builder.prototype = {
      *  Returns:
      *    The Stophe.Builder object.
      */
-    up: function () {
+    up: function ()
+    {
         this.node = this.node.parentNode;
-        return this;
-    },
-
-    /** Function: root
-     *  Make the root element the new current element.
-     *
-     *  When at a deeply nested element in the tree, this function can be used
-     *  to jump back to the root of the tree, instead of having to repeatedly
-     *  call up().
-     *
-     *  Returns:
-     *    The Stophe.Builder object.
-     */
-    root: function () {
-        this.node = this.nodeTree;
         return this;
     },
 
@@ -1863,7 +1730,8 @@ Strophe.Builder.prototype = {
      *  Returns:
      *    The Strophe.Builder object.
      */
-    attrs: function (moreattrs) {
+    attrs: function (moreattrs)
+    {
         for (var k in moreattrs) {
             if (moreattrs.hasOwnProperty(k)) {
                 if (moreattrs[k] === undefined) {
@@ -1892,10 +1760,11 @@ Strophe.Builder.prototype = {
      *  Returns:
      *    The Strophe.Builder object.
      */
-    c: function (name, attrs, text) {
+    c: function (name, attrs, text)
+    {
         var child = Strophe.xmlElement(name, attrs, text);
         this.node.appendChild(child);
-        if (typeof text !== "string" && typeof text !=="number") {
+        if (typeof text !== "string") {
             this.node = child;
         }
         return this;
@@ -1915,12 +1784,14 @@ Strophe.Builder.prototype = {
      *  Returns:
      *    The Strophe.Builder object.
      */
-    cnode: function (elem) {
+    cnode: function (elem)
+    {
         var impNode;
         var xmlGen = Strophe.xmlGenerator();
         try {
             impNode = (xmlGen.importNode !== undefined);
-        } catch (e) {
+        }
+        catch (e) {
             impNode = false;
         }
         var newElem = impNode ?
@@ -1943,7 +1814,8 @@ Strophe.Builder.prototype = {
      *  Returns:
      *    The Strophe.Builder object.
      */
-    t: function (text) {
+    t: function (text)
+    {
         var child = Strophe.xmlTextNode(text);
         this.node.appendChild(child);
         return this;
@@ -1960,7 +1832,8 @@ Strophe.Builder.prototype = {
      *  Returns:
      *    The Strophe.Builder object.
      */
-    h: function (html) {
+    h: function (html)
+    {
         var fragment = document.createElement('body');
 
         // force the browser to try and fix any invalid HTML tags
@@ -2005,74 +1878,31 @@ Strophe.Builder.prototype = {
  *  Returns:
  *    A new Strophe.Handler object.
  */
-Strophe.Handler = function (handler, ns, name, type, id, from, options) {
+Strophe.Handler = function (handler, ns, name, type, id, from, options)
+{
     this.handler = handler;
     this.ns = ns;
     this.name = name;
     this.type = type;
     this.id = id;
-    this.options = options || {'matchBareFromJid': false, 'ignoreNamespaceFragment': false};
-    // BBB: Maintain backward compatibility with old `matchBare` option
-    if (this.options.matchBare) {
-        Strophe.warn('The "matchBare" option is deprecated, use "matchBareFromJid" instead.');
-        this.options.matchBareFromJid = this.options.matchBare;
-        delete this.options.matchBare;
+    this.options = options || {matchBare: false};
+
+    // default matchBare to false if undefined
+    if (!this.options.matchBare) {
+        this.options.matchBare = false;
     }
 
-    if (this.options.matchBareFromJid) {
+    if (this.options.matchBare) {
         this.from = from ? Strophe.getBareJidFromJid(from) : null;
     } else {
         this.from = from;
     }
+
     // whether the handler is a user handler or a system handler
     this.user = true;
 };
 
 Strophe.Handler.prototype = {
-    /** PrivateFunction: getNamespace
-     *  Returns the XML namespace attribute on an element.
-     *  If `ignoreNamespaceFragment` was passed in for this handler, then the
-     *  URL fragment will be stripped.
-     *
-     *  Parameters:
-     *    (XMLElement) elem - The XML element with the namespace.
-     *
-     *  Returns:
-     *    The namespace, with optionally the fragment stripped.
-     */
-    getNamespace: function (elem) {
-        var elNamespace = elem.getAttribute("xmlns");
-        if (elNamespace && this.options.ignoreNamespaceFragment) {
-            elNamespace = elNamespace.split('#')[0];
-        }
-        return elNamespace;
-    },
-
-    /** PrivateFunction: namespaceMatch
-     *  Tests if a stanza matches the namespace set for this Strophe.Handler.
-     *
-     *  Parameters:
-     *    (XMLElement) elem - The XML element to test.
-     *
-     *  Returns:
-     *    true if the stanza matches and false otherwise.
-     */
-    namespaceMatch: function (elem) {
-        var nsMatch = false;
-        if (!this.ns) {
-            return true;
-        } else {
-            var that = this;
-            Strophe.forEachChild(elem, null, function (elem) {
-                if (that.getNamespace(elem) === that.ns) {
-                    nsMatch = true;
-                }
-            });
-            nsMatch = nsMatch || this.getNamespace(elem) === this.ns;
-        }
-        return nsMatch;
-    },
-
     /** PrivateFunction: isMatch
      *  Tests if a stanza matches the Strophe.Handler.
      *
@@ -2082,19 +1912,40 @@ Strophe.Handler.prototype = {
      *  Returns:
      *    true if the stanza matches and false otherwise.
      */
-    isMatch: function (elem) {
-        var from = elem.getAttribute('from');
-        if (this.options.matchBareFromJid) {
-            from = Strophe.getBareJidFromJid(from);
+    isMatch: function (elem)
+    {
+        var nsMatch;
+        var from = null;
+
+        if (this.options.matchBare) {
+            from = Strophe.getBareJidFromJid(elem.getAttribute('from'));
+        } else {
+            from = elem.getAttribute('from');
         }
+
+        nsMatch = false;
+        if (!this.ns) {
+            nsMatch = true;
+        } else {
+            var that = this;
+            Strophe.forEachChild(elem, null, function (elem) {
+                if (elem.getAttribute("xmlns") == that.ns) {
+                    nsMatch = true;
+                }
+            });
+
+            nsMatch = nsMatch || elem.getAttribute("xmlns") == this.ns;
+        }
+
         var elem_type = elem.getAttribute("type");
-        if (this.namespaceMatch(elem) &&
+        if (nsMatch &&
             (!this.name || Strophe.isTagEqual(elem, this.name)) &&
             (!this.type || (Array.isArray(this.type) ? this.type.indexOf(elem_type) != -1 : elem_type == this.type)) &&
             (!this.id || elem.getAttribute("id") == this.id) &&
             (!this.from || from == this.from)) {
                 return true;
         }
+
         return false;
     },
 
@@ -2108,14 +1959,31 @@ Strophe.Handler.prototype = {
      *  Returns:
      *    A boolean indicating if the handler should remain active.
      */
-    run: function (elem) {
+    run: function (elem)
+    {
         var result = null;
         try {
             result = this.handler(elem);
         } catch (e) {
-            Strophe._handleError(e);
+            if (e.sourceURL) {
+                Strophe.fatal("error: " + this.handler +
+                              " " + e.sourceURL + ":" +
+                              e.line + " - " + e.name + ": " + e.message);
+            } else if (e.fileName) {
+                if (typeof(console) != "undefined") {
+                    console.trace();
+                    console.error(this.handler, " - error - ", e, e.message);
+                }
+                Strophe.fatal("error: " + this.handler + " " +
+                              e.fileName + ":" + e.lineNumber + " - " +
+                              e.name + ": " + e.message);
+            } else {
+                Strophe.fatal("error: " + e.message + "\n" + e.stack);
+            }
+
             throw e;
         }
+
         return result;
     },
 
@@ -2125,7 +1993,8 @@ Strophe.Handler.prototype = {
      *  Returns:
      *    A String.
      */
-    toString: function () {
+    toString: function ()
+    {
         return "{Handler: " + this.handler + "(" + this.name + "," +
             this.id + "," + this.ns + ")}";
     }
@@ -2156,9 +2025,11 @@ Strophe.Handler.prototype = {
  *  Returns:
  *    A new Strophe.TimedHandler object.
  */
-Strophe.TimedHandler = function (period, handler) {
+Strophe.TimedHandler = function (period, handler)
+{
     this.period = period;
     this.handler = handler;
+
     this.lastCalled = new Date().getTime();
     this.user = true;
 };
@@ -2171,7 +2042,8 @@ Strophe.TimedHandler.prototype = {
      *    true if the Strophe.TimedHandler should be called again, and false
      *      otherwise.
      */
-    run: function () {
+    run: function ()
+    {
         this.lastCalled = new Date().getTime();
         return this.handler();
     },
@@ -2179,7 +2051,8 @@ Strophe.TimedHandler.prototype = {
     /** PrivateFunction: reset
      *  Reset the last called time for the Strophe.TimedHandler.
      */
-    reset: function () {
+    reset: function ()
+    {
         this.lastCalled = new Date().getTime();
     },
 
@@ -2189,7 +2062,8 @@ Strophe.TimedHandler.prototype = {
      *  Returns:
      *    The string representation.
      */
-    toString: function () {
+    toString: function ()
+    {
         return "{TimedHandler: " + this.handler + "(" + this.period +")}";
     }
 };
@@ -2229,53 +2103,7 @@ Strophe.TimedHandler.prototype = {
  *
  *  > var conn = new Strophe.Connection("/http-bind/");
  *
- *  Options common to both Websocket and BOSH:
- *  ------------------------------------------
- *
- *  cookies
- *  ~~~~~~~
- *
- *  The "cookies" option allows you to pass in cookies to be added to the
- *  document. These cookies will then be included in the BOSH XMLHttpRequest
- *  or in the websocket connection.
- *
- *  The passed in value must be a map of cookie names and string values:
- *
- *  > { "myCookie": {
- *  >     "value": "1234",
- *  >     "domain": ".example.org",
- *  >     "path": "/",
- *  >     "expires": expirationDate
- *  >     }
- *  > }
- *
- *  Note that cookies can't be set in this way for other domains (i.e. cross-domain).
- *  Those cookies need to be set under those domains, for example they can be
- *  set server-side by making a XHR call to that domain to ask it to set any
- *  necessary cookies.
- *
- *  mechanisms
- *  ~~~~~~~~~~
- *
- *  The "mechanisms" option allows you to specify the SASL mechanisms that this
- *  instance of Strophe.Connection (and therefore your XMPP client) will
- *  support.
- *
- *  The value must be an array of objects with Strophe.SASLMechanism
- *  prototypes.
- *
- *  If nothing is specified, then the following mechanisms (and their
- *  priorities) are registered:
- *
- *      EXTERNAL - 60
- *      OAUTHBEARER - 50
- *      SCRAM-SHA1 - 40
- *      DIGEST-MD5 - 30
- *      PLAIN - 20
- *      ANONYMOUS - 10
- *
  *  WebSocket options:
- *  ------------------
  *
  *  If you want to connect to the current host with a WebSocket connection you
  *  can tell Strophe to use WebSockets through a "protocol" attribute in the
@@ -2293,7 +2121,6 @@ Strophe.TimedHandler.prototype = {
  *  variants if the current connection to the site is also secure (https).
  *
  *  BOSH options:
- *  -------------
  *
  *  By adding "sync" to the options, you can control if requests will
  *  be made synchronously or not. The default behaviour is asynchronous.
@@ -2313,23 +2140,6 @@ Strophe.TimedHandler.prototype = {
  *  "restore" is called it will check whether there are cached tokens with
  *  which it can resume an existing session.
  *
- *  The "withCredentials" option should receive a Boolean value and is used to
- *  indicate wether cookies should be included in ajax requests (by default
- *  they're not).
- *  Set this value to true if you are connecting to a BOSH service
- *  and for some reason need to send cookies to it.
- *  In order for this to work cross-domain, the server must also enable
- *  credentials by setting the Access-Control-Allow-Credentials response header
- *  to "true". For most usecases however this setting should be false (which
- *  is the default).
- *  Additionally, when using Access-Control-Allow-Credentials, the
- *  Access-Control-Allow-Origin header can't be set to the wildcard "*", but
- *  instead must be restricted to actual domains.
- *
- *  The "contentType" option can be set to change the default Content-Type
- *  of "text/xml; charset=utf-8", which can be useful to reduce the amount of
- *  CORS preflight requests that are sent to the server.
- *
  *  Parameters:
  *    (String) service - The BOSH or WebSocket service URL.
  *    (Object) options - A hash of configuration options
@@ -2337,9 +2147,11 @@ Strophe.TimedHandler.prototype = {
  *  Returns:
  *    A new Strophe.Connection object.
  */
-Strophe.Connection = function (service, options) {
+Strophe.Connection = function (service, options)
+{
     // The service URL
     this.service = service;
+
     // Configuration options
     this.options = options || {};
     var proto = this.options.protocol || "";
@@ -2371,11 +2183,8 @@ Strophe.Connection = function (service, options) {
     this.removeHandlers = [];
     this.addTimeds = [];
     this.addHandlers = [];
-    this.protocolErrorHandlers = {
-        'HTTP': {},
-        'websocket': {}
-    };
 
+    this._authentication = {};
     this._idleTimeout = null;
     this._disconnectTimeout = null;
 
@@ -2396,14 +2205,8 @@ Strophe.Connection = function (service, options) {
     // Max retries before disconnecting
     this.maxRetries = 5;
 
-    // Call onIdle callback every 1/10th of a second
-    // XXX: setTimeout should be called only with function expressions (23974bc1)
-    this._idleTimeout = setTimeout(function() {
-        this._onIdle();
-    }.bind(this), 100);
-
-    utils.addCookies(this.options.cookies);
-    this.registerSASLMechanisms(this.options.mechanisms);
+    // setup onIdle callback every 1/10th of a second
+    this._idleTimeout = setTimeout(this._onIdle.bind(this), 100);
 
     // initialize plugins
     for (var k in Strophe._connectionPlugins) {
@@ -2425,7 +2228,8 @@ Strophe.Connection.prototype = {
      *  This function should be called after a connection is disconnected
      *  before that connection is reused.
      */
-    reset: function () {
+    reset: function ()
+    {
         this._proto._reset();
 
         // SASL
@@ -2439,6 +2243,7 @@ Strophe.Connection.prototype = {
         this.removeHandlers = [];
         this.addTimeds = [];
         this.addHandlers = [];
+        this._authentication = {};
 
         this.authenticated = false;
         this.connected = false;
@@ -2459,7 +2264,8 @@ Strophe.Connection.prototype = {
      *  This causes Strophe to send the data in a single request, saving
      *  many request trips.
      */
-    pause: function () {
+    pause: function ()
+    {
         this.paused = true;
     },
 
@@ -2468,7 +2274,8 @@ Strophe.Connection.prototype = {
      *
      *  This resumes after pause() has been called.
      */
-    resume: function () {
+    resume: function ()
+    {
         this.paused = false;
     },
 
@@ -2507,33 +2314,6 @@ Strophe.Connection.prototype = {
         }
     },
 
-    /** Function: addProtocolErrorHandler
-     *  Register a handler function for when a protocol (websocker or HTTP)
-     *  error occurs.
-     *
-     *  NOTE: Currently only HTTP errors for BOSH requests are handled.
-     *  Patches that handle websocket errors would be very welcome.
-     *
-     *  Parameters:
-     *    (String) protocol - 'HTTP' or 'websocket' 
-     *    (Integer) status_code - Error status code (e.g 500, 400 or 404)
-     *    (Function) callback - Function that will fire on Http error
-     *
-     *  Example:
-     *  function onError(err_code){
-     *    //do stuff
-     *  }
-     *
-     *  var conn = Strophe.connect('http://example.com/http-bind');
-     *  conn.addProtocolErrorHandler('HTTP', 500, onError);
-     *  // Triggers HTTP 500 error and onError handler will be called
-     *  conn.connect('user_jid@incorrect_jabber_host', 'secret', onConnect);
-     */
-    addProtocolErrorHandler: function(protocol, status_code, callback){
-        this.protocolErrorHandlers[protocol][status_code] = callback;
-    },
-
-
     /** Function: connect
      *  Starts the connection process.
      *
@@ -2564,37 +2344,26 @@ Strophe.Connection.prototype = {
      *    (String) route - The optional route value.
      *    (String) authcid - The optional alternative authentication identity
      *      (username) if intending to impersonate another user.
-     *      When using the SASL-EXTERNAL authentication mechanism, for example
-     *      with client certificates, then the authcid value is used to
-     *      determine whether an authorization JID (authzid) should be sent to
-     *      the server. The authzid should not be sent to the server if the
-     *      authzid and authcid are the same. So to prevent it from being sent
-     *      (for example when the JID is already contained in the client
-     *      certificate), set authcid to that same JID. See XEP-178 for more
-     *      details.
      */
-    connect: function (jid, pass, callback, wait, hold, route, authcid) {
+    connect: function (jid, pass, callback, wait, hold, route, authcid)
+    {
         this.jid = jid;
         /** Variable: authzid
          *  Authorization identity.
          */
         this.authzid = Strophe.getBareJidFromJid(this.jid);
-
         /** Variable: authcid
          *  Authentication identity (User name).
          */
         this.authcid = authcid || Strophe.getNodeFromJid(this.jid);
-
         /** Variable: pass
          *  Authentication identity (User password).
          */
         this.pass = pass;
-
         /** Variable: servtype
          *  Digest MD5 compatibility.
          */
         this.servtype = "xmpp";
-
         this.connect_callback = callback;
         this.disconnecting = false;
         this.connected = false;
@@ -2633,7 +2402,8 @@ Strophe.Connection.prototype = {
      *    (Integer) wind - The optional HTTBIND window value.  This is the
      *      allowed range of request ids that are valid.  The default is 5.
      */
-    attach: function (jid, sid, rid, callback, wait, hold, wind) {
+    attach: function (jid, sid, rid, callback, wait, hold, wind)
+    {
         if (this._proto instanceof Strophe.Bosh) {
             this._proto._attach(jid, sid, rid, callback, wait, hold, wind);
         } else {
@@ -2671,7 +2441,8 @@ Strophe.Connection.prototype = {
      *    (Integer) wind - The optional HTTBIND window value.  This is the
      *      allowed range of request ids that are valid.  The default is 5.
      */
-    restore: function (jid, callback, wait, hold, wind) {
+    restore: function (jid, callback, wait, hold, wind)
+    {
         if (this._sessionCachingSupported()) {
             this._proto._restore(jid, callback, wait, hold, wind);
         } else {
@@ -2686,7 +2457,8 @@ Strophe.Connection.prototype = {
      * Checks whether sessionStorage and JSON are supported and whether we're
      * using BOSH.
      */
-    _sessionCachingSupported: function () {
+    _sessionCachingSupported: function ()
+    {
         if (this._proto instanceof Strophe.Bosh) {
             if (!JSON) { return false; }
             try {
@@ -2719,7 +2491,8 @@ Strophe.Connection.prototype = {
      *    (XMLElement) elem - The XML data received by the connection.
      */
     /* jshint unused:false */
-    xmlInput: function (elem) {
+    xmlInput: function (elem)
+    {
         return;
     },
     /* jshint unused:true */
@@ -2743,7 +2516,8 @@ Strophe.Connection.prototype = {
      *    (XMLElement) elem - The XMLdata sent by the connection.
      */
     /* jshint unused:false */
-    xmlOutput: function (elem) {
+    xmlOutput: function (elem)
+    {
         return;
     },
     /* jshint unused:true */
@@ -2761,7 +2535,8 @@ Strophe.Connection.prototype = {
      *    (String) data - The data received by the connection.
      */
     /* jshint unused:false */
-    rawInput: function (data) {
+    rawInput: function (data)
+    {
         return;
     },
     /* jshint unused:true */
@@ -2779,7 +2554,8 @@ Strophe.Connection.prototype = {
      *    (String) data - The data sent by the connection.
      */
     /* jshint unused:false */
-    rawOutput: function (data) {
+    rawOutput: function (data)
+    {
         return;
     },
     /* jshint unused:true */
@@ -2796,7 +2572,8 @@ Strophe.Connection.prototype = {
      *    (Number) rid - The next valid rid
      */
     /* jshint unused:false */
-    nextValidRid: function (rid) {
+    nextValidRid: function (rid)
+    {
         return;
     },
     /* jshint unused:true */
@@ -2813,7 +2590,8 @@ Strophe.Connection.prototype = {
      *     [XMLElement] |
      *     Strophe.Builder) elem - The stanza to send.
      */
-    send: function (elem) {
+    send: function (elem)
+    {
         if (elem === null) { return ; }
         if (typeof(elem.sort) === "function") {
             for (var i = 0; i < elem.length; i++) {
@@ -2836,7 +2614,8 @@ Strophe.Connection.prototype = {
      *  several send()s are called in succession. flush() can be used to
      *  immediately send all pending data.
      */
-    flush: function () {
+    flush: function ()
+    {
         // cancel the pending idle period and run the idle function
         // immediately
         clearTimeout(this._idleTimeout);
@@ -2865,16 +2644,40 @@ Strophe.Connection.prototype = {
             elem = elem.tree();
         }
         var id = elem.getAttribute('id');
-        if (!id) { // inject id if not found
+
+        // inject id if not found
+        if (!id) {
             id = this.getUniqueId("sendIQ");
             elem.setAttribute("id", id);
         }
+
+        var expectedFrom = elem.getAttribute("to");
+        var fulljid = this.jid;
 
         var handler = this.addHandler(function (stanza) {
             // remove timeout handler if there is one
             if (timeoutHandler) {
                 that.deleteTimedHandler(timeoutHandler);
             }
+
+            var acceptable = false;
+            var from = stanza.getAttribute("from");
+            if (from === expectedFrom ||
+               (expectedFrom === null &&
+                   (from === Strophe.getBareJidFromJid(fulljid) ||
+                    from === Strophe.getDomainFromJid(fulljid) ||
+                    from === fulljid))) {
+                acceptable = true;
+            }
+
+            if (!acceptable) {
+                throw {
+                    name: "StropheError",
+                    message: "Got answer to IQ from wrong jid:" + from +
+                             "\nExpected jid: " + expectedFrom
+                };
+            }
+
             var iqtype = stanza.getAttribute('type');
             if (iqtype == 'result') {
                 if (callback) {
@@ -2892,7 +2695,7 @@ Strophe.Connection.prototype = {
             }
         }, null, 'iq', ['error', 'result'], id);
 
-        // if timeout specified, set up a timeout handler.
+        // if timeout specified, setup timeout handler.
         if (timeout) {
             timeoutHandler = this.addTimedHandler(timeout, function () {
                 // get rid of normal handler
@@ -2921,19 +2724,20 @@ Strophe.Connection.prototype = {
                 message: "Cannot queue non-DOMElement."
             };
         }
+
         this._data.push(element);
     },
 
     /** PrivateFunction: _sendRestart
      *  Send an xmpp:restart stanza.
      */
-    _sendRestart: function () {
+    _sendRestart: function ()
+    {
         this._data.push("restart");
+
         this._proto._sendRestart();
-        // XXX: setTimeout should be called only with function expressions (23974bc1)
-        this._idleTimeout = setTimeout(function() {
-            this._onIdle();
-        }.bind(this), 100);
+
+        this._idleTimeout = setTimeout(this._onIdle.bind(this), 100);
     },
 
     /** Function: addTimedHandler
@@ -2958,7 +2762,8 @@ Strophe.Connection.prototype = {
      *  Returns:
      *    A reference to the handler that can be used to remove it.
      */
-    addTimedHandler: function (period, handler) {
+    addTimedHandler: function (period, handler)
+    {
         var thand = new Strophe.TimedHandler(period, handler);
         this.addTimeds.push(thand);
         return thand;
@@ -2974,7 +2779,8 @@ Strophe.Connection.prototype = {
      *  Parameters:
      *    (Strophe.TimedHandler) handRef - The handler reference.
      */
-    deleteTimedHandler: function (handRef) {
+    deleteTimedHandler: function (handRef)
+    {
         // this must be done in the Idle loop so that we don't change
         // the handlers during iteration
         this.removeTimeds.push(handRef);
@@ -2996,39 +2802,13 @@ Strophe.Connection.prototype = {
      *  and also any of its immediate children.  This is primarily to make
      *  matching /iq/query elements easy.
      *
-     *  Options
-     *  ~~~~~~~
-     *  With the options argument, you can specify boolean flags that affect how
-     *  matches are being done.
+     *  The options argument contains handler matching flags that affect how
+     *  matches are determined. Currently the only flag is matchBare (a
+     *  boolean). When matchBare is true, the from parameter and the from
+     *  attribute on the stanza will be matched as bare JIDs instead of
+     *  full JIDs. To use this, pass {matchBare: true} as the value of
+     *  options. The default value for matchBare is false.
      *
-     *  Currently two flags exist:
-     *
-     *  - matchBareFromJid:
-     *      When set to true, the from parameter and the
-     *      from attribute on the stanza will be matched as bare JIDs instead
-     *      of full JIDs. To use this, pass {matchBareFromJid: true} as the
-     *      value of options. The default value for matchBareFromJid is false.
-     *
-     *  - ignoreNamespaceFragment:
-     *      When set to true, a fragment specified on the stanza's namespace
-     *      URL will be ignored when it's matched with the one configured for
-     *      the handler.
-     *
-     *      This means that if you register like this:
-     *      >   connection.addHandler(
-     *      >       handler,
-     *      >       'http://jabber.org/protocol/muc',
-     *      >       null, null, null, null,
-     *      >       {'ignoreNamespaceFragment': true}
-     *      >   );
-     *
-     *      Then a stanza with XML namespace of
-     *      'http://jabber.org/protocol/muc#user' will also be matched. If
-     *      'ignoreNamespaceFragment' is false, then only stanzas with
-     *      'http://jabber.org/protocol/muc' will be matched.
-     *
-     *  Deleting the handler
-     *  ~~~~~~~~~~~~~~~~~~~~
      *  The return value should be saved if you wish to remove the handler
      *  with deleteHandler().
      *
@@ -3036,7 +2816,7 @@ Strophe.Connection.prototype = {
      *    (Function) handler - The user callback.
      *    (String) ns - The namespace to match.
      *    (String) name - The stanza name to match.
-     *    (String|Array) type - The stanza type (or types if an array) to match.
+     *    (String) type - The stanza type attribute to match.
      *    (String) id - The stanza id attribute to match.
      *    (String) from - The stanza from attribute to match.
      *    (String) options - The handler options
@@ -3044,7 +2824,8 @@ Strophe.Connection.prototype = {
      *  Returns:
      *    A reference to the handler that can be used to remove it.
      */
-    addHandler: function (handler, ns, name, type, id, from, options) {
+    addHandler: function (handler, ns, name, type, id, from, options)
+    {
         var hand = new Strophe.Handler(handler, ns, name, type, id, from, options);
         this.addHandlers.push(hand);
         return hand;
@@ -3060,7 +2841,8 @@ Strophe.Connection.prototype = {
      *  Parameters:
      *    (Strophe.Handler) handRef - The handler reference.
      */
-    deleteHandler: function (handRef) {
+    deleteHandler: function (handRef)
+    {
         // this must be done in the Idle loop so that we don't change
         // the handlers during iteration
         this.removeHandlers.push(handRef);
@@ -3070,40 +2852,6 @@ Strophe.Connection.prototype = {
         if (i >= 0) {
             this.addHandlers.splice(i, 1);
         }
-    },
-
-    /** Function: registerSASLMechanisms
-     *
-     * Register the SASL mechanisms which will be supported by this instance of
-     * Strophe.Connection (i.e. which this XMPP client will support).
-     *
-     *  Parameters:
-     *    (Array) mechanisms - Array of objects with Strophe.SASLMechanism prototypes
-     *
-     */
-    registerSASLMechanisms: function (mechanisms) {
-        this.mechanisms = {};
-        mechanisms = mechanisms || [
-            Strophe.SASLAnonymous,
-            Strophe.SASLExternal,
-            Strophe.SASLMD5,
-            Strophe.SASLOAuthBearer,
-            Strophe.SASLPlain,
-            Strophe.SASLSHA1
-        ];
-        mechanisms.forEach(this.registerSASLMechanism.bind(this));
-    },
-
-    /** Function: registerSASLMechanism
-     *
-     * Register a single SASL mechanism, to be supported by this client.
-     *
-     *  Parameters:
-     *    (Object) mechanism - Object with a Strophe.SASLMechanism prototype
-     *
-     */
-    registerSASLMechanism: function (mechanism) {
-        this.mechanisms[mechanism.prototype.name] = mechanism;
     },
 
     /** Function: disconnect
@@ -3122,7 +2870,8 @@ Strophe.Connection.prototype = {
      *  Parameters:
      *    (String) reason - The reason the disconnect is occuring.
      */
-    disconnect: function (reason) {
+    disconnect: function (reason)
+    {
         this._changeConnectStatus(Strophe.Status.DISCONNECTING, reason);
 
         Strophe.info("Disconnect was called because: " + reason);
@@ -3154,7 +2903,8 @@ Strophe.Connection.prototype = {
      *      in Strophe.Status
      *    (String) condition - the error condition or null
      */
-    _changeConnectStatus: function (status, condition) {
+    _changeConnectStatus: function (status, condition)
+    {
         // notify all plugins listening for status changes
         for (var k in Strophe._connectionPlugins) {
             if (Strophe._connectionPlugins.hasOwnProperty(k)) {
@@ -3175,9 +2925,8 @@ Strophe.Connection.prototype = {
             try {
                 this.connect_callback(status, condition);
             } catch (e) {
-                Strophe._handleError(e);
-                Strophe.error(
-                    "User connection callback caused an "+"exception: "+e);
+                Strophe.error("User connection callback caused an " +
+                              "exception: " + e);
             }
         }
     },
@@ -3188,7 +2937,8 @@ Strophe.Connection.prototype = {
      *  This is the last piece of the disconnection logic.  This resets the
      *  connection and alerts the user's connection callback.
      */
-    _doDisconnect: function (condition) {
+    _doDisconnect: function (condition)
+    {
         if (typeof this._idleTimeout == "number") {
             clearTimeout(this._idleTimeout);
         }
@@ -3231,7 +2981,8 @@ Strophe.Connection.prototype = {
      *    (Strophe.Request) req - The request that has data ready.
      *    (string) req - The stanza a raw string (optiona).
      */
-    _dataRecv: function (req, raw) {
+    _dataRecv: function (req, raw)
+    {
         Strophe.info("_dataRecv called");
         var elem = this._proto._reqToData(req);
         if (elem === null) { return; }
@@ -3317,7 +3068,7 @@ Strophe.Connection.prototype = {
                     }
                 } catch(e) {
                     // if the handler throws an exception, we consider it as false
-                    Strophe.warn('Removing Strophe handlers due to uncaught exception: '+e.message);
+                    Strophe.warn('Removing Strophe handlers due to uncaught exception: ' + e.message);
                 }
             }
         });
@@ -3325,7 +3076,7 @@ Strophe.Connection.prototype = {
 
 
     /** Attribute: mechanisms
-     *  SASL Mechanisms available for Connection.
+     *  SASL Mechanisms available for Conncection.
      */
     mechanisms: {},
 
@@ -3345,18 +3096,13 @@ Strophe.Connection.prototype = {
      *      Useful for plugins with their own xmpp connect callback (when their)
      *      want to do something special).
      */
-    _connect_cb: function (req, _callback, raw) {
+    _connect_cb: function (req, _callback, raw)
+    {
         Strophe.info("_connect_cb was called");
+
         this.connected = true;
 
-        var bodyWrap;
-        try {
-            bodyWrap = this._proto._reqToData(req);
-        } catch (e) {
-            if (e != "badformat") { throw e; }
-            this._changeConnectStatus(Strophe.Status.CONNFAIL, 'bad-format');
-            this._doDisconnect('bad-format');
-        }
+        var bodyWrap = this._proto._reqToData(req);
         if (!bodyWrap) { return; }
 
         if (this.xmlInput !== Strophe.Connection.prototype.xmlInput) {
@@ -3379,180 +3125,145 @@ Strophe.Connection.prototype = {
             return;
         }
 
+        this._authentication.sasl_scram_sha1 = false;
+        this._authentication.sasl_plain = false;
+        this._authentication.sasl_digest_md5 = false;
+        this._authentication.sasl_anonymous = false;
+
+        this._authentication.legacy_auth = false;
+
         // Check for the stream:features tag
         var hasFeatures;
         if (bodyWrap.getElementsByTagNameNS) {
             hasFeatures = bodyWrap.getElementsByTagNameNS(Strophe.NS.STREAM, "features").length > 0;
         } else {
-            hasFeatures = bodyWrap.getElementsByTagName("stream:features").length > 0 ||
-                            bodyWrap.getElementsByTagName("features").length > 0;
+            hasFeatures = bodyWrap.getElementsByTagName("stream:features").length > 0 || bodyWrap.getElementsByTagName("features").length > 0;
         }
+        var mechanisms = bodyWrap.getElementsByTagName("mechanism");
+        var matched = [];
+        var i, mech, found_authentication = false;
         if (!hasFeatures) {
             this._proto._no_auth_received(_callback);
             return;
         }
-
-        var matched = [], i, mech;
-        var mechanisms = bodyWrap.getElementsByTagName("mechanism");
         if (mechanisms.length > 0) {
             for (i = 0; i < mechanisms.length; i++) {
                 mech = Strophe.getText(mechanisms[i]);
                 if (this.mechanisms[mech]) matched.push(this.mechanisms[mech]);
             }
         }
-        if (matched.length === 0) {
-            if (bodyWrap.getElementsByTagName("auth").length === 0) {
-                // There are no matching SASL mechanisms and also no legacy
-                // auth available.
-                this._proto._no_auth_received(_callback);
-                return;
-            }
+        this._authentication.legacy_auth =
+            bodyWrap.getElementsByTagName("auth").length > 0;
+        found_authentication = this._authentication.legacy_auth ||
+            matched.length > 0;
+        if (!found_authentication) {
+            this._proto._no_auth_received(_callback);
+            return;
         }
-        if (this.do_authentication !== false) {
+        if (this.do_authentication !== false)
             this.authenticate(matched);
-        }
-    },
-
-    /** Function: sortMechanismsByPriority
-     *
-     *  Sorts an array of objects with prototype SASLMechanism according to
-     *  their priorities.
-     *
-     *  Parameters:
-     *    (Array) mechanisms - Array of SASL mechanisms.
-     *
-     */
-    sortMechanismsByPriority: function (mechanisms) {
-        // Sorting mechanisms according to priority.
-        var i, j, higher, swap;
-        for (i = 0; i < mechanisms.length - 1; ++i) {
-            higher = i;
-            for (j = i + 1; j < mechanisms.length; ++j) {
-                if (mechanisms[j].prototype.priority > mechanisms[higher].prototype.priority) {
-                    higher = j;
-                }
-            }
-            if (higher != i) {
-                swap = mechanisms[i];
-                mechanisms[i] = mechanisms[higher];
-                mechanisms[higher] = swap;
-            }
-        }
-        return mechanisms;
-    },
-
-    /** PrivateFunction: _attemptSASLAuth
-     *
-     *  Iterate through an array of SASL mechanisms and attempt authentication
-     *  with the highest priority (enabled) mechanism.
-     *
-     *  Parameters:
-     *    (Array) mechanisms - Array of SASL mechanisms.
-     *
-     *  Returns:
-     *    (Boolean) mechanism_found - true or false, depending on whether a
-     *          valid SASL mechanism was found with which authentication could be
-     *          started.
-     */
-    _attemptSASLAuth: function (mechanisms) {
-        mechanisms = this.sortMechanismsByPriority(mechanisms || []);
-        var i = 0, mechanism_found = false;
-        for (i = 0; i < mechanisms.length; ++i) {
-            if (!mechanisms[i].prototype.test(this)) {
-                continue;
-            }
-            this._sasl_success_handler = this._addSysHandler(
-                this._sasl_success_cb.bind(this), null,
-                "success", null, null);
-            this._sasl_failure_handler = this._addSysHandler(
-                this._sasl_failure_cb.bind(this), null,
-                "failure", null, null);
-            this._sasl_challenge_handler = this._addSysHandler(
-                this._sasl_challenge_cb.bind(this), null,
-                "challenge", null, null);
-
-            this._sasl_mechanism = new mechanisms[i]();
-            this._sasl_mechanism.onStart(this);
-
-            var request_auth_exchange = $build("auth", {
-                xmlns: Strophe.NS.SASL,
-                mechanism: this._sasl_mechanism.name
-            });
-            if (this._sasl_mechanism.isClientFirst) {
-                var response = this._sasl_mechanism.onChallenge(this, null);
-                request_auth_exchange.t(Base64.encode(response));
-            }
-            this.send(request_auth_exchange.tree());
-            mechanism_found = true;
-            break;
-        }
-        return mechanism_found;
-    },
-
-    /** PrivateFunction: _attemptLegacyAuth
-     *
-     *  Attempt legacy (i.e. non-SASL) authentication.
-     *
-     */
-    _attemptLegacyAuth: function () {
-        if (Strophe.getNodeFromJid(this.jid) === null) {
-            // we don't have a node, which is required for non-anonymous
-            // client connections
-            this._changeConnectStatus(
-                Strophe.Status.CONNFAIL,
-                'x-strophe-bad-non-anon-jid'
-            );
-            this.disconnect('x-strophe-bad-non-anon-jid');
-        } else {
-            // Fall back to legacy authentication
-            this._changeConnectStatus(Strophe.Status.AUTHENTICATING, null);
-            this._addSysHandler(
-                this._auth1_cb.bind(this),
-                null, null, null, "_auth_1"
-            );
-            this.send($iq({
-                    'type': "get",
-                    'to': this.domain,
-                    'id': "_auth_1"
-                }).c("query", {xmlns: Strophe.NS.AUTH})
-                .c("username", {}).t(Strophe.getNodeFromJid(this.jid))
-                .tree());
-        }
     },
 
     /** Function: authenticate
      * Set up authentication
      *
-     *  Continues the initial connection request by setting up authentication
-     *  handlers and starting the authentication process.
+     *  Contiunues the initial connection request by setting up authentication
+     *  handlers and start the authentication process.
      *
      *  SASL authentication will be attempted if available, otherwise
      *  the code will fall back to legacy authentication.
      *
-     *  Parameters:
-     *    (Array) matched - Array of SASL mechanisms supported.
-     *
      */
-    authenticate: function (matched) {
-        if (!this._attemptSASLAuth(matched)) {
-            this._attemptLegacyAuth();
+    authenticate: function (matched)
+    {
+      var i;
+      // Sorting matched mechanisms according to priority.
+      for (i = 0; i < matched.length - 1; ++i) {
+        var higher = i;
+        for (var j = i + 1; j < matched.length; ++j) {
+          if (matched[j].prototype.priority > matched[higher].prototype.priority) {
+            higher = j;
+          }
         }
+        if (higher != i) {
+          var swap = matched[i];
+          matched[i] = matched[higher];
+          matched[higher] = swap;
+        }
+      }
+
+      // run each mechanism
+      var mechanism_found = false;
+      for (i = 0; i < matched.length; ++i) {
+        if (!matched[i].test(this)) continue;
+
+        this._sasl_success_handler = this._addSysHandler(
+          this._sasl_success_cb.bind(this), null,
+          "success", null, null);
+        this._sasl_failure_handler = this._addSysHandler(
+          this._sasl_failure_cb.bind(this), null,
+          "failure", null, null);
+        this._sasl_challenge_handler = this._addSysHandler(
+          this._sasl_challenge_cb.bind(this), null,
+          "challenge", null, null);
+
+        this._sasl_mechanism = new matched[i]();
+        this._sasl_mechanism.onStart(this);
+
+        var request_auth_exchange = $build("auth", {
+          xmlns: Strophe.NS.SASL,
+          mechanism: this._sasl_mechanism.name
+        });
+
+        if (this._sasl_mechanism.isClientFirst) {
+          var response = this._sasl_mechanism.onChallenge(this, null);
+          request_auth_exchange.t(Base64.encode(response));
+        }
+
+        this.send(request_auth_exchange.tree());
+
+        mechanism_found = true;
+        break;
+      }
+
+      if (!mechanism_found) {
+        // if none of the mechanism worked
+        if (Strophe.getNodeFromJid(this.jid) === null) {
+            // we don't have a node, which is required for non-anonymous
+            // client connections
+            this._changeConnectStatus(Strophe.Status.CONNFAIL,
+                                      'x-strophe-bad-non-anon-jid');
+            this.disconnect('x-strophe-bad-non-anon-jid');
+        } else {
+          // fall back to legacy authentication
+          this._changeConnectStatus(Strophe.Status.AUTHENTICATING, null);
+          this._addSysHandler(this._auth1_cb.bind(this), null, null,
+                              null, "_auth_1");
+
+          this.send($iq({
+            type: "get",
+            to: this.domain,
+            id: "_auth_1"
+          }).c("query", {
+            xmlns: Strophe.NS.AUTH
+          }).c("username", {}).t(Strophe.getNodeFromJid(this.jid)).tree());
+        }
+      }
+
     },
 
-    /** PrivateFunction: _sasl_challenge_cb
-     *  _Private_ handler for the SASL challenge
-     *
-     */
     _sasl_challenge_cb: function(elem) {
       var challenge = Base64.decode(Strophe.getText(elem));
       var response = this._sasl_mechanism.onChallenge(this, challenge);
+
       var stanza = $build('response', {
-          'xmlns': Strophe.NS.SASL
+          xmlns: Strophe.NS.SASL
       });
       if (response !== "") {
         stanza.t(Base64.encode(response));
       }
       this.send(stanza.tree());
+
       return true;
     },
 
@@ -3571,7 +3282,8 @@ Strophe.Connection.prototype = {
      *    false to remove the handler.
      */
     /* jshint unused:false */
-    _auth1_cb: function (elem) {
+    _auth1_cb: function (elem)
+    {
         // build plaintext auth iq
         var iq = $iq({type: "set", id: "_auth_2"})
             .c('query', {xmlns: Strophe.NS.AUTH})
@@ -3589,7 +3301,9 @@ Strophe.Connection.prototype = {
 
         this._addSysHandler(this._auth2_cb.bind(this), null,
                             null, null, "_auth_2");
+
         this.send(iq.tree());
+
         return false;
     },
     /* jshint unused:true */
@@ -3603,7 +3317,8 @@ Strophe.Connection.prototype = {
      *  Returns:
      *    false to remove the handler.
      */
-    _sasl_success_cb: function (elem) {
+    _sasl_success_cb: function (elem)
+    {
         if (this._sasl_data["server-signature"]) {
             var serverSignature;
             var success = Base64.decode(Strophe.getText(elem));
@@ -3626,11 +3341,11 @@ Strophe.Connection.prototype = {
               return this._sasl_failure_cb(null);
             }
         }
+
         Strophe.info("SASL authentication succeeded.");
 
-        if (this._sasl_mechanism) {
+        if(this._sasl_mechanism)
           this._sasl_mechanism.onSuccess();
-        }
 
         // remove old handlers
         this.deleteHandler(this._sasl_failure_handler);
@@ -3670,10 +3385,13 @@ Strophe.Connection.prototype = {
      *  Returns:
      *    false to remove the handler.
      */
-    _sasl_auth1_cb: function (elem) {
+    _sasl_auth1_cb: function (elem)
+    {
         // save stream:features for future usage
         this.features = elem;
+
         var i, child;
+
         for (i = 0; i < elem.childNodes.length; i++) {
             child = elem.childNodes[i];
             if (child.nodeName == 'bind') {
@@ -3703,6 +3421,7 @@ Strophe.Connection.prototype = {
                           .tree());
             }
         }
+
         return false;
     },
 
@@ -3715,7 +3434,8 @@ Strophe.Connection.prototype = {
      *  Returns:
      *    false to remove the handler.
      */
-    _sasl_bind_cb: function (elem) {
+    _sasl_bind_cb: function (elem)
+    {
         if (elem.getAttribute("type") == "error") {
             Strophe.info("SASL binding failed.");
             var conflict = elem.getElementsByTagName("conflict"), condition;
@@ -3766,7 +3486,8 @@ Strophe.Connection.prototype = {
      *  Returns:
      *    false to remove the handler.
      */
-    _sasl_session_cb: function (elem) {
+    _sasl_session_cb: function (elem)
+    {
         if (elem.getAttribute("type") == "result") {
             this.authenticated = true;
             this._changeConnectStatus(Strophe.Status.CONNECTED, null);
@@ -3775,6 +3496,7 @@ Strophe.Connection.prototype = {
             this._changeConnectStatus(Strophe.Status.AUTHFAIL, null);
             return false;
         }
+
         return false;
     },
 
@@ -3788,7 +3510,8 @@ Strophe.Connection.prototype = {
      *    false to remove the handler.
      */
     /* jshint unused:false */
-    _sasl_failure_cb: function (elem) {
+    _sasl_failure_cb: function (elem)
+    {
         // delete unneeded handlers
         if (this._sasl_success_handler) {
             this.deleteHandler(this._sasl_success_handler);
@@ -3818,7 +3541,8 @@ Strophe.Connection.prototype = {
      *  Returns:
      *    false to remove the handler.
      */
-    _auth2_cb: function (elem) {
+    _auth2_cb: function (elem)
+    {
         if (elem.getAttribute("type") == "result") {
             this.authenticated = true;
             this._changeConnectStatus(Strophe.Status.CONNECTED, null);
@@ -3826,6 +3550,7 @@ Strophe.Connection.prototype = {
             this._changeConnectStatus(Strophe.Status.AUTHFAIL, null);
             this.disconnect('authentication failed');
         }
+
         return false;
     },
 
@@ -3840,7 +3565,8 @@ Strophe.Connection.prototype = {
      *    (Integer) period - The period of the handler.
      *    (Function) handler - The callback function.
      */
-    _addSysTimedHandler: function (period, handler) {
+    _addSysTimedHandler: function (period, handler)
+    {
         var thand = new Strophe.TimedHandler(period, handler);
         thand.user = false;
         this.addTimeds.push(thand);
@@ -3861,7 +3587,8 @@ Strophe.Connection.prototype = {
      *    (String) type - The stanza type attribute to match.
      *    (String) id - The stanza id attribute to match.
      */
-    _addSysHandler: function (handler, ns, name, type, id) {
+    _addSysHandler: function (handler, ns, name, type, id)
+    {
         var hand = new Strophe.Handler(handler, ns, name, type, id);
         hand.user = false;
         this.addHandlers.push(hand);
@@ -3877,12 +3604,15 @@ Strophe.Connection.prototype = {
      *  Returns:
      *    false to remove the handler.
      */
-    _onDisconnectTimeout: function () {
+    _onDisconnectTimeout: function ()
+    {
         Strophe.info("_onDisconnectTimeout was called");
-        this._changeConnectStatus(Strophe.Status.CONNTIMEOUT, null);
+
         this._proto._onDisconnectTimeout();
+
         // actually disconnect
         this._doDisconnect();
+
         return false;
     },
 
@@ -3892,7 +3622,8 @@ Strophe.Connection.prototype = {
      *  This handler is called every 100ms to fire timed handlers that
      *  are ready and keep poll requests going.
      */
-    _onIdle: function () {
+    _onIdle: function ()
+    {
         var i, thand, since, newList;
 
         // add timed handlers scheduled for addition
@@ -3935,10 +3666,7 @@ Strophe.Connection.prototype = {
 
         // reactivate the timer only if connected
         if (this.connected) {
-            // XXX: setTimeout should be called only with function expressions (23974bc1)
-            this._idleTimeout = setTimeout(function() {
-                this._onIdle();
-            }.bind(this), 100);
+            this._idleTimeout = setTimeout(this._onIdle.bind(this), 100);
         }
     }
 };
@@ -3953,14 +3681,9 @@ Strophe.Connection.prototype = {
  *
  *  By default, all mechanisms are enabled and the priorities are
  *
- *  EXTERNAL - 60
- *  OAUTHBEARER - 50
  *  SCRAM-SHA1 - 40
  *  DIGEST-MD5 - 30
- *  PLAIN - 20
- *  ANONYMOUS - 10
- *
- *  See: Strophe.Connection.addSupportedSASLMechanisms
+ *  Plain - 20
  */
 
 /**
@@ -4035,7 +3758,8 @@ Strophe.SASLMechanism.prototype = {
    *  Parameters:
    *    (Strophe.Connection) connection - Target Connection.
    */
-  onStart: function(connection) {
+  onStart: function(connection)
+  {
     this._connection = connection;
   },
 
@@ -4074,69 +3798,89 @@ Strophe.SASLMechanism.prototype = {
   /** Constants: SASL mechanisms
    *  Available authentication mechanisms
    *
-   *  Strophe.SASLAnonymous - SASL ANONYMOUS authentication.
-   *  Strophe.SASLPlain - SASL PLAIN authentication.
-   *  Strophe.SASLMD5 - SASL DIGEST-MD5 authentication
+   *  Strophe.SASLAnonymous - SASL Anonymous authentication.
+   *  Strophe.SASLPlain - SASL Plain authentication.
+   *  Strophe.SASLMD5 - SASL Digest-MD5 authentication
    *  Strophe.SASLSHA1 - SASL SCRAM-SHA1 authentication
-   *  Strophe.SASLOAuthBearer - SASL OAuth Bearer authentication
-   *  Strophe.SASLExternal - SASL EXTERNAL authentication
    */
 
 // Building SASL callbacks
 
 /** PrivateConstructor: SASLAnonymous
- *  SASL ANONYMOUS authentication.
+ *  SASL Anonymous authentication.
  */
 Strophe.SASLAnonymous = function() {};
+
 Strophe.SASLAnonymous.prototype = new Strophe.SASLMechanism("ANONYMOUS", false, 10);
 
-Strophe.SASLAnonymous.prototype.test = function(connection) {
-    return connection.authcid === null;
+Strophe.SASLAnonymous.test = function(connection) {
+  return connection.authcid === null;
 };
 
+Strophe.Connection.prototype.mechanisms[Strophe.SASLAnonymous.prototype.name] = Strophe.SASLAnonymous;
 
 /** PrivateConstructor: SASLPlain
- *  SASL PLAIN authentication.
+ *  SASL Plain authentication.
  */
 Strophe.SASLPlain = function() {};
+
 Strophe.SASLPlain.prototype = new Strophe.SASLMechanism("PLAIN", true, 20);
 
-Strophe.SASLPlain.prototype.test = function(connection) {
-    return connection.authcid !== null;
+Strophe.SASLPlain.test = function(connection) {
+  return connection.authcid !== null;
 };
 
 Strophe.SASLPlain.prototype.onChallenge = function(connection) {
-    var auth_str = connection.authzid;
-    auth_str = auth_str + "\u0000";
-    auth_str = auth_str + connection.authcid;
-    auth_str = auth_str + "\u0000";
-    auth_str = auth_str + connection.pass;
-    return utils.utf16to8(auth_str);
+  var auth_str = connection.authzid;
+  auth_str = auth_str + "\u0000";
+  auth_str = auth_str + connection.authcid;
+  auth_str = auth_str + "\u0000";
+  auth_str = auth_str + connection.pass;
+  return auth_str;
 };
 
+Strophe.Connection.prototype.mechanisms[Strophe.SASLPlain.prototype.name] = Strophe.SASLPlain;
 
 /** PrivateConstructor: SASLSHA1
  *  SASL SCRAM SHA 1 authentication.
  */
 Strophe.SASLSHA1 = function() {};
+
+/* TEST:
+ * This is a simple example of a SCRAM-SHA-1 authentication exchange
+ * when the client doesn't support channel bindings (username 'user' and
+ * password 'pencil' are used):
+ *
+ * C: n,,n=user,r=fyko+d2lbbFgONRv9qkxdawL
+ * S: r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j,s=QSXCR+Q6sek8bf92,
+ * i=4096
+ * C: c=biws,r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j,
+ * p=v0X8v3Bz2T0CJGbJQyF0X+HI4Ts=
+ * S: v=rmF9pqV8S7suAoZWja4dJRkFsKQ=
+ *
+ */
+
 Strophe.SASLSHA1.prototype = new Strophe.SASLMechanism("SCRAM-SHA-1", true, 40);
 
-Strophe.SASLSHA1.prototype.test = function(connection) {
-    return connection.authcid !== null;
+Strophe.SASLSHA1.test = function(connection) {
+  return connection.authcid !== null;
 };
 
 Strophe.SASLSHA1.prototype.onChallenge = function(connection, challenge, test_cnonce) {
   var cnonce = test_cnonce || MD5.hexdigest(Math.random() * 1234567890);
-  var auth_str = "n=" + utils.utf16to8(connection.authcid);
+
+  var auth_str = "n=" + connection.authcid;
   auth_str += ",r=";
   auth_str += cnonce;
+
   connection._sasl_data.cnonce = cnonce;
   connection._sasl_data["client-first-message-bare"] = auth_str;
 
   auth_str = "n,," + auth_str;
 
-  this.onChallenge = function (connection, challenge) {
-    var nonce, salt, iter, Hi, U, U_old, i, k, pass;
+  this.onChallenge = function (connection, challenge)
+  {
+    var nonce, salt, iter, Hi, U, U_old, i, k;
     var clientKey, serverKey, clientSignature;
     var responseText = "c=biws,";
     var authMessage = connection._sasl_data["client-first-message-bare"] + "," +
@@ -4171,10 +3915,9 @@ Strophe.SASLSHA1.prototype.onChallenge = function(connection, challenge, test_cn
     salt = Base64.decode(salt);
     salt += "\x00\x00\x00\x01";
 
-    pass = utils.utf16to8(connection.pass);
-    Hi = U_old = SHA1.core_hmac_sha1(pass, salt);
+    Hi = U_old = SHA1.core_hmac_sha1(connection.pass, salt);
     for (i = 1; i < iter; i++) {
-      U = SHA1.core_hmac_sha1(pass, SHA1.binb2str(U_old));
+      U = SHA1.core_hmac_sha1(connection.pass, SHA1.binb2str(U_old));
       for (k = 0; k < 5; k++) {
         Hi[k] ^= U[k];
       }
@@ -4192,21 +3935,24 @@ Strophe.SASLSHA1.prototype.onChallenge = function(connection, challenge, test_cn
     }
 
     responseText += ",p=" + Base64.encode(SHA1.binb2str(clientKey));
+
     return responseText;
   }.bind(this);
 
   return auth_str;
 };
 
+Strophe.Connection.prototype.mechanisms[Strophe.SASLSHA1.prototype.name] = Strophe.SASLSHA1;
 
 /** PrivateConstructor: SASLMD5
  *  SASL DIGEST MD5 authentication.
  */
 Strophe.SASLMD5 = function() {};
+
 Strophe.SASLMD5.prototype = new Strophe.SASLMechanism("DIGEST-MD5", false, 30);
 
-Strophe.SASLMD5.prototype.test = function(connection) {
-    return connection.authcid !== null;
+Strophe.SASLMD5.test = function(connection) {
+  return connection.authcid !== null;
 };
 
 /** PrivateFunction: _quote
@@ -4218,10 +3964,12 @@ Strophe.SASLMD5.prototype.test = function(connection) {
  *  Returns:
  *    quoted string
  */
-Strophe.SASLMD5.prototype._quote = function (str) {
+Strophe.SASLMD5.prototype._quote = function (str)
+  {
     return '"' + str.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
     //" end string workaround for emacs
-};
+  };
+
 
 Strophe.SASLMD5.prototype.onChallenge = function(connection, challenge, test_cnonce) {
   var attribMatch = /([a-z]+)=("[^"]+"|[^,"]+)(?:,|$)/;
@@ -4257,13 +4005,15 @@ Strophe.SASLMD5.prototype.onChallenge = function(connection, challenge, test_cno
     digest_uri = digest_uri + "/" + host;
   }
 
-  var cred = utils.utf16to8(connection.authcid + ":" + realm + ":" + this._connection.pass);
-  var A1 = MD5.hash(cred) + ":" + nonce + ":" + cnonce;
+  var A1 = MD5.hash(connection.authcid +
+                    ":" + realm + ":" + this._connection.pass) +
+    ":" + nonce + ":" + cnonce;
   var A2 = 'AUTHENTICATE:' + digest_uri;
 
   var responseText = "";
   responseText += 'charset=utf-8,';
-  responseText += 'username=' + this._quote(utils.utf16to8(connection.authcid)) + ',';
+  responseText += 'username=' +
+    this._quote(connection.authcid) + ',';
   responseText += 'realm=' + this._quote(realm) + ',';
   responseText += 'nonce=' + this._quote(nonce) + ',';
   responseText += 'nc=00000001,';
@@ -4275,57 +4025,15 @@ Strophe.SASLMD5.prototype.onChallenge = function(connection, challenge, test_cno
                                               MD5.hexdigest(A2)) + ",";
   responseText += 'qop=auth';
 
-  this.onChallenge = function () {
+  this.onChallenge = function ()
+  {
       return "";
-  };
+  }.bind(this);
+
   return responseText;
 };
 
-
-/** PrivateConstructor: SASLOAuthBearer
- *  SASL OAuth Bearer authentication.
- */
-Strophe.SASLOAuthBearer = function() {};
-Strophe.SASLOAuthBearer.prototype = new Strophe.SASLMechanism("OAUTHBEARER", true, 50);
-
-Strophe.SASLOAuthBearer.prototype.test = function(connection) {
-    return connection.authcid !== null;
-};
-
-Strophe.SASLOAuthBearer.prototype.onChallenge = function(connection) {
-    var auth_str = 'n,a=';
-    auth_str = auth_str + connection.authzid;
-    auth_str = auth_str + ',';
-    auth_str = auth_str + "\u0001";
-    auth_str = auth_str + 'auth=Bearer ';
-    auth_str = auth_str + connection.pass;
-    auth_str = auth_str + "\u0001";
-    auth_str = auth_str + "\u0001";
-    return utils.utf16to8(auth_str);
-};
-
-
-/** PrivateConstructor: SASLExternal
- *  SASL EXTERNAL authentication.
- *
- *  The EXTERNAL mechanism allows a client to request the server to use
- *  credentials established by means external to the mechanism to
- *  authenticate the client. The external means may be, for instance,
- *  TLS services.
- */
-Strophe.SASLExternal = function() {};
-Strophe.SASLExternal.prototype = new Strophe.SASLMechanism("EXTERNAL", true, 60);
-
-Strophe.SASLExternal.prototype.onChallenge = function(connection) {
-    /** According to XEP-178, an authzid SHOULD NOT be presented when the
-     * authcid contained or implied in the client certificate is the JID (i.e.
-     * authzid) with which the user wants to log in as.
-     *
-     * To NOT send the authzid, the user should therefore set the authcid equal
-     * to the JID when instantiating a new Strophe.Connection object.
-     */
-    return connection.authcid === connection.authzid ? '' : connection.authzid;
-};
+Strophe.Connection.prototype.mechanisms[Strophe.SASLMD5.prototype.name] = Strophe.SASLMD5;
 
 return {
     Strophe:        Strophe,
@@ -4379,9 +4087,11 @@ return {
  *    (Function) func - The function that will be called when the
  *      XMLHttpRequest readyState changes.
  *    (Integer) rid - The BOSH rid attribute associated with this request.
- *    (Integer) sends - The number of times this same request has been sent.
+ *    (Integer) sends - The number of times this same request has been
+ *      sent.
  */
-Strophe.Request = function (elem, func, rid, sends) {
+Strophe.Request = function (elem, func, rid, sends)
+{
     this.id = ++Strophe._requestId;
     this.xmlData = elem;
     this.data = Strophe.serialize(elem);
@@ -4417,12 +4127,12 @@ Strophe.Request.prototype = {
      *
      *  Throws:
      *    "parsererror" - A parser error occured.
-     *    "badformat" - The entity has sent XML that cannot be processed.
      *
      *  Returns:
      *    The DOM element tree of the response.
      */
-    getResponse: function () {
+    getResponse: function ()
+    {
         var node = null;
         if (this.xhr.responseXML && this.xhr.responseXML.documentElement) {
             node = this.xhr.responseXML.documentElement;
@@ -4436,7 +4146,8 @@ Strophe.Request.prototype = {
         } else if (this.xhr.responseText) {
             Strophe.error("invalid response received");
             Strophe.error("responseText: " + this.xhr.responseText);
-            throw "badformat";
+            Strophe.error("responseXML: " +
+                          Strophe.serialize(this.xhr.responseXML));
         }
 
         return node;
@@ -4450,7 +4161,8 @@ Strophe.Request.prototype = {
      *  Returns:
      *    A new XMLHttpRequest.
      */
-    _newXHR: function () {
+    _newXHR: function ()
+    {
         var xhr = null;
         if (window.XMLHttpRequest) {
             xhr = new XMLHttpRequest();
@@ -4460,8 +4172,10 @@ Strophe.Request.prototype = {
         } else if (window.ActiveXObject) {
             xhr = new ActiveXObject("Microsoft.XMLHTTP");
         }
+
         // use Function.bind() to prepend ourselves as an argument
         xhr.onreadystatechange = this.func.bind(null, this);
+
         return xhr;
     }
 };
@@ -4502,7 +4216,6 @@ Strophe.Bosh = function(connection) {
     this.wait = 60;
     this.window = 5;
     this.errors = 0;
-    this.inactivity = null;
 
     this._requests = [];
 };
@@ -4527,7 +4240,8 @@ Strophe.Bosh.prototype = {
      *  Returns:
      *    A Strophe.Builder with a <body/> element.
      */
-    _buildBody: function () {
+    _buildBody: function ()
+    {
         var bodyWrap = $build('body', {
             rid: this.rid++,
             xmlns: Strophe.NS.HTTPBIND
@@ -4535,7 +4249,7 @@ Strophe.Bosh.prototype = {
         if (this.sid !== null) {
             bodyWrap.attrs({sid: this.sid});
         }
-        if (this._conn.options.keepalive && this._conn._sessionCachingSupported()) {
+        if (this._conn.options.keepalive) {
             this._cacheSession();
         }
         return bodyWrap;
@@ -4546,13 +4260,12 @@ Strophe.Bosh.prototype = {
      *
      *  This function is called by the reset function of the Strophe Connection
      */
-    _reset: function () {
+    _reset: function ()
+    {
         this.rid = Math.floor(Math.random() * 4294967295);
         this.sid = null;
         this.errors = 0;
-        if (this._conn._sessionCachingSupported()) {
-            window.sessionStorage.removeItem('strophe-bosh-session');
-        }
+        window.sessionStorage.removeItem('strophe-bosh-session');
 
         this._conn.nextValidRid(this.rid);
     },
@@ -4562,7 +4275,8 @@ Strophe.Bosh.prototype = {
      *
      *  Creates and sends the Request that initializes the BOSH connection.
      */
-    _connect: function (wait, hold, route) {
+    _connect: function (wait, hold, route)
+    {
         this.wait = wait || this.wait;
         this.hold = hold || this.hold;
         this.errors = 0;
@@ -4619,7 +4333,8 @@ Strophe.Bosh.prototype = {
      *    (Integer) wind - The optional HTTBIND window value.  This is the
      *      allowed range of request ids that are valid.  The default is 5.
      */
-    _attach: function (jid, sid, rid, callback, wait, hold, wind) {
+    _attach: function (jid, sid, rid, callback, wait, hold, wind)
+    {
         this._conn.jid = jid;
         this.sid = sid;
         this.rid = rid;
@@ -4657,14 +4372,15 @@ Strophe.Bosh.prototype = {
      *    (Integer) wind - The optional HTTBIND window value.  This is the
      *      allowed range of request ids that are valid.  The default is 5.
      */
-    _restore: function (jid, callback, wait, hold, wind) {
+    _restore: function (jid, callback, wait, hold, wind)
+    {
         var session = JSON.parse(window.sessionStorage.getItem('strophe-bosh-session'));
         if (typeof session !== "undefined" &&
                    session !== null &&
                    session.rid &&
                    session.sid &&
                    session.jid &&
-                   (typeof jid === "undefined" || jid === null || Strophe.getBareJidFromJid(session.jid) == Strophe.getBareJidFromJid(jid)))
+                   (typeof jid === "undefined" || jid === "null" || Strophe.getBareJidFromJid(session.jid) == Strophe.getBareJidFromJid(jid)))
         {
             this._conn.restored = true;
             this._attach(session.jid, session.sid, session.rid, callback, wait, hold, wind);
@@ -4680,7 +4396,8 @@ Strophe.Bosh.prototype = {
      *  Parameters:
      *    (Strophe.Request) bodyWrap - The received stanza.
      */
-    _cacheSession: function () {
+    _cacheSession: function ()
+    {
         if (this._conn.authenticated) {
             if (this._conn.jid && this.rid && this.sid) {
                 window.sessionStorage.setItem('strophe-bosh-session', JSON.stringify({
@@ -4701,7 +4418,8 @@ Strophe.Bosh.prototype = {
      *  Parameters:
      *    (Strophe.Request) bodyWrap - The received stanza.
      */
-    _connect_cb: function (bodyWrap) {
+    _connect_cb: function (bodyWrap)
+    {
         var typ = bodyWrap.getAttribute("type");
         var cond, conflict;
         if (typ !== null && typ == "terminate") {
@@ -4732,8 +4450,6 @@ Strophe.Bosh.prototype = {
         if (hold) { this.hold = parseInt(hold, 10); }
         var wait = bodyWrap.getAttribute('wait');
         if (wait) { this.wait = parseInt(wait, 10); }
-        var inactivity = bodyWrap.getAttribute('inactivity');
-        if (inactivity) { this.inactivity = parseInt(inactivity, 10); }
     },
 
     /** PrivateFunction: _disconnect
@@ -4742,7 +4458,8 @@ Strophe.Bosh.prototype = {
      *  Parameters:
      *    (Request) pres - This stanza will be sent before disconnecting.
      */
-    _disconnect: function (pres) {
+    _disconnect: function (pres)
+    {
         this._sendTerminate(pres);
     },
 
@@ -4751,12 +4468,11 @@ Strophe.Bosh.prototype = {
      *
      *  Resets the SID and RID.
      */
-    _doDisconnect: function () {
+    _doDisconnect: function ()
+    {
         this.sid = null;
         this.rid = Math.floor(Math.random() * 4294967295);
-        if (this._conn._sessionCachingSupported()) {
-            window.sessionStorage.removeItem('strophe-bosh-session');
-        }
+        window.sessionStorage.removeItem('strophe-bosh-session');
 
         this._conn.nextValidRid(this.rid);
     },
@@ -4767,23 +4483,9 @@ Strophe.Bosh.prototype = {
      *  Returns:
      *    True, if there are no Requests queued, False otherwise.
      */
-    _emptyQueue: function () {
+    _emptyQueue: function ()
+    {
         return this._requests.length === 0;
-    },
-
-    /** PrivateFunction: _callProtocolErrorHandlers
-     *  _Private_ function to call error handlers registered for HTTP errors.
-     *
-     *  Parameters:
-     *    (Strophe.Request) req - The request that is changing readyState.
-     */
-    _callProtocolErrorHandlers: function (req) {
-        var reqStatus = this._getRequestStatus(req),
-            err_callback;
-        err_callback = this._conn.protocolErrorHandlers.HTTP[reqStatus];
-        if (err_callback) {
-            err_callback.call(this, reqStatus);
-        }
     },
 
     /** PrivateFunction: _hitError
@@ -4796,7 +4498,8 @@ Strophe.Bosh.prototype = {
      *  Parameters:
      *    (Integer) reqStatus - The request status.
      */
-    _hitError: function (reqStatus) {
+    _hitError: function (reqStatus)
+    {
         this.errors++;
         Strophe.warn("request errored, status: " + reqStatus +
                      ", number of errors: " + this.errors);
@@ -4810,7 +4513,8 @@ Strophe.Bosh.prototype = {
      * Called on stream start/restart when no stream:features
      * has been received and sends a blank poll request.
      */
-    _no_auth_received: function (_callback) {
+    _no_auth_received: function (_callback)
+    {
         if (_callback) {
             _callback = _callback.bind(this._conn);
         } else {
@@ -4856,6 +4560,7 @@ Strophe.Bosh.prototype = {
      */
     _onIdle: function () {
         var data = this._conn._data;
+
         // if no requests are in progress, poll
         if (this._conn.authenticated && this._requests.length === 0 &&
             data.length === 0 && !this._conn.disconnecting) {
@@ -4913,34 +4618,6 @@ Strophe.Bosh.prototype = {
         }
     },
 
-    /** PrivateFunction: _getRequestStatus
-     *
-     *  Returns the HTTP status code from a Strophe.Request
-     *
-     *  Parameters:
-     *    (Strophe.Request) req - The Strophe.Request instance.
-     *    (Integer) def - The default value that should be returned if no
-     *          status value was found.
-     */
-    _getRequestStatus: function (req, def) {
-        var reqStatus;
-        if (req.xhr.readyState == 4) {
-            try {
-                reqStatus = req.xhr.status;
-            } catch (e) {
-                // ignore errors from undefined status attribute. Works
-                // around a browser bug
-                Strophe.error(
-                    "Caught an error while retrieving a request's status, " +
-                    "reqStatus: " + reqStatus);
-            }
-        }
-        if (typeof(reqStatus) == "undefined") {
-            reqStatus = typeof def === 'number' ? def : 0;
-        }
-        return reqStatus;
-    },
-
     /** PrivateFunction: _onRequestStateChange
      *  _Private_ handler for Strophe.Request state changes.
      *
@@ -4953,63 +4630,90 @@ Strophe.Bosh.prototype = {
      *    (Function) func - The handler for the request.
      *    (Strophe.Request) req - The request that is changing readyState.
      */
-    _onRequestStateChange: function (func, req) {
-        Strophe.debug("request id "+req.id+"."+req.sends+
-                      " state changed to "+req.xhr.readyState);
+    _onRequestStateChange: function (func, req)
+    {
+        Strophe.debug("request id " + req.id +
+                      "." + req.sends + " state changed to " +
+                      req.xhr.readyState);
+
         if (req.abort) {
             req.abort = false;
             return;
         }
-        if (req.xhr.readyState !== 4) {
-            // The request is not yet complete
-            return;
-        }
-        var reqStatus = this._getRequestStatus(req);
-        if (this.disconnecting && reqStatus >= 400) {
-            this._hitError(reqStatus);
-            this._callProtocolErrorHandlers(req);
-            return;
-        }
 
-        if ((reqStatus > 0 && reqStatus < 500) || req.sends > 5) {
-            // remove from internal queue
-            this._removeRequest(req);
-            Strophe.debug("request id "+req.id+" should now be removed");
-        }
+        // request complete
+        var reqStatus;
+        if (req.xhr.readyState == 4) {
+            reqStatus = 0;
+            try {
+                reqStatus = req.xhr.status;
+            } catch (e) {
+                // ignore errors from undefined status attribute.  works
+                // around a browser bug
+            }
 
-        if (reqStatus == 200) {
-            // request succeeded
+            if (typeof(reqStatus) == "undefined") {
+                reqStatus = 0;
+            }
+
+            if (this.disconnecting) {
+                if (reqStatus >= 400) {
+                    this._hitError(reqStatus);
+                    return;
+                }
+            }
+
             var reqIs0 = (this._requests[0] == req);
             var reqIs1 = (this._requests[1] == req);
-            // if request 1 finished, or request 0 finished and request
-            // 1 is over Strophe.SECONDARY_TIMEOUT seconds old, we need to
-            // restart the other - both will be in the first spot, as the
-            // completed request has been removed from the queue already
-            if (reqIs1 ||
-                (reqIs0 && this._requests.length > 0 &&
-                    this._requests[0].age() > Math.floor(Strophe.SECONDARY_TIMEOUT * this.wait))) {
-                this._restartRequest(0);
+
+            if ((reqStatus > 0 && reqStatus < 500) || req.sends > 5) {
+                // remove from internal queue
+                this._removeRequest(req);
+                Strophe.debug("request id " +
+                              req.id +
+                              " should now be removed");
             }
-            this._conn.nextValidRid(Number(req.rid) + 1);
-            Strophe.debug("request id "+req.id+"."+req.sends+" got 200");
-            func(req); // call handler
-            this.errors = 0;
-        } else if (reqStatus === 0 ||
-                   (reqStatus >= 400 && reqStatus < 600) ||
-                   reqStatus >= 12000) {
-            // request failed
-            Strophe.error("request id "+req.id+"."+req.sends+" error "+reqStatus+" happened");
-            this._hitError(reqStatus);
-            this._callProtocolErrorHandlers(req);
-            if (reqStatus >= 400 && reqStatus < 500) {
-                this._conn._changeConnectStatus(Strophe.Status.DISCONNECTING, null);
-                this._conn._doDisconnect();
+
+            // request succeeded
+            if (reqStatus == 200) {
+                // if request 1 finished, or request 0 finished and request
+                // 1 is over Strophe.SECONDARY_TIMEOUT seconds old, we need to
+                // restart the other - both will be in the first spot, as the
+                // completed request has been removed from the queue already
+                if (reqIs1 ||
+                    (reqIs0 && this._requests.length > 0 &&
+                     this._requests[0].age() > Math.floor(Strophe.SECONDARY_TIMEOUT * this.wait))) {
+                    this._restartRequest(0);
+                }
+
+                this._conn.nextValidRid(Number(req.rid) + 1);
+
+                // call handler
+                Strophe.debug("request id " +
+                              req.id + "." +
+                              req.sends + " got 200");
+                func(req);
+                this.errors = 0;
+            } else {
+                Strophe.error("request id " +
+                              req.id + "." +
+                              req.sends + " error " + reqStatus +
+                              " happened");
+                if (reqStatus === 0 ||
+                    (reqStatus >= 400 && reqStatus < 600) ||
+                    reqStatus >= 12000) {
+                    this._hitError(reqStatus);
+                    if (reqStatus >= 400 && reqStatus < 500) {
+                        this._conn._changeConnectStatus(Strophe.Status.DISCONNECTING, null);
+                        this._conn._doDisconnect();
+                    }
+                }
             }
-        } else {
-            Strophe.error("request id "+req.id+"."+req.sends+" error "+reqStatus+" happened");
-        }
-        if (!(reqStatus > 0 && reqStatus < 500) || req.sends > 5) {
-            this._throttledRequestHandler();
+
+            if (!((reqStatus > 0 && reqStatus < 500) ||
+                  req.sends > 5)) {
+                this._throttledRequestHandler();
+            }
         }
     },
 
@@ -5022,10 +4726,24 @@ Strophe.Bosh.prototype = {
      *  Parameters:
      *    (Integer) i - The index of the request in the queue.
      */
-    _processRequest: function (i) {
+    _processRequest: function (i)
+    {
         var self = this;
         var req = this._requests[i];
-        var reqStatus = this._getRequestStatus(req, -1);
+        var reqStatus = -1;
+
+        try {
+            if (req.xhr.readyState == 4) {
+                reqStatus = req.xhr.status;
+            }
+        } catch (e) {
+            Strophe.error("caught an error in _requests[" + i +
+                          "], reqStatus: " + reqStatus);
+        }
+
+        if (typeof(reqStatus) == "undefined") {
+            reqStatus = -1;
+        }
 
         // make sure we limit the number of retries
         if (req.sends > this._conn.maxRetries) {
@@ -5039,11 +4757,13 @@ Strophe.Bosh.prototype = {
         var secondaryTimeout = (req.dead !== null &&
                                 req.timeDead() > Math.floor(Strophe.SECONDARY_TIMEOUT * this.wait));
         var requestCompletedWithServerError = (req.xhr.readyState == 4 &&
-                                               (reqStatus < 1 || reqStatus >= 500));
+                                               (reqStatus < 1 ||
+                                                reqStatus >= 500));
         if (primaryTimeout || secondaryTimeout ||
             requestCompletedWithServerError) {
             if (secondaryTimeout) {
-                Strophe.error("Request " + this._requests[i].id +
+                Strophe.error("Request " +
+                              this._requests[i].id +
                               " timed out (secondary), restarting");
             }
             req.abort = true;
@@ -5058,23 +4778,17 @@ Strophe.Bosh.prototype = {
         }
 
         if (req.xhr.readyState === 0) {
-            Strophe.debug("request id "+req.id+"."+req.sends+" posting");
+            Strophe.debug("request id " + req.id +
+                          "." + req.sends + " posting");
 
             try {
-                var contentType = this._conn.options.contentType || "text/xml; charset=utf-8";
                 req.xhr.open("POST", this._conn.service, this._conn.options.sync ? false : true);
-                if (typeof req.xhr.setRequestHeader !== 'undefined') {
-                    // IE9 doesn't have setRequestHeader
-                    req.xhr.setRequestHeader("Content-Type", contentType);
-                }
-                if (this._conn.options.withCredentials) {
-                    req.xhr.withCredentials = true;
-                }
+                req.xhr.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
             } catch (e2) {
                 Strophe.error("XHR open failed.");
                 if (!this._conn.connected) {
-                    this._conn._changeConnectStatus(
-                            Strophe.Status.CONNFAIL, "bad-service");
+                    this._conn._changeConnectStatus(Strophe.Status.CONNFAIL,
+                                              "bad-service");
                 }
                 this._conn.disconnect();
                 return;
@@ -5102,10 +4816,7 @@ Strophe.Bosh.prototype = {
                 // expanding retry window
                 var backoff = Math.min(Math.floor(Strophe.TIMEOUT * this.wait),
                                        Math.pow(req.sends, 3)) * 1000;
-                setTimeout(function() {
-                    // XXX: setTimeout should be called only with function expressions (23974bc1)
-                    sendFunc();
-                }, backoff);
+                setTimeout(sendFunc, backoff);
             } else {
                 sendFunc();
             }
@@ -5136,16 +4847,20 @@ Strophe.Bosh.prototype = {
      *  Parameters:
      *    (Strophe.Request) req - The request to remove.
      */
-    _removeRequest: function (req) {
+    _removeRequest: function (req)
+    {
         Strophe.debug("removing request");
+
         var i;
         for (i = this._requests.length - 1; i >= 0; i--) {
             if (req == this._requests[i]) {
                 this._requests.splice(i, 1);
             }
         }
+
         // IE6 fails on setting to null, so set to empty function
         req.xhr.onreadystatechange = function () {};
+
         this._throttledRequestHandler();
     },
 
@@ -5155,7 +4870,8 @@ Strophe.Bosh.prototype = {
      *  Parameters:
      *    (Integer) i - The index of the request in the queue.
      */
-    _restartRequest: function (i) {
+    _restartRequest: function (i)
+    {
         var req = this._requests[i];
         if (req.dead === null) {
             req.dead = new Date();
@@ -5176,7 +4892,8 @@ Strophe.Bosh.prototype = {
      *  Returns:
      *    The stanza that was passed.
      */
-    _reqToData: function (req) {
+    _reqToData: function (req)
+    {
         try {
             return req.getResponse();
         } catch (e) {
@@ -5192,18 +4909,20 @@ Strophe.Bosh.prototype = {
      *  the BOSH server a terminate body and includes an unavailable
      *  presence if authentication has completed.
      */
-    _sendTerminate: function (pres) {
+    _sendTerminate: function (pres)
+    {
         Strophe.info("_sendTerminate was called");
         var body = this._buildBody().attrs({type: "terminate"});
+
         if (pres) {
             body.cnode(pres.tree());
         }
-        var req = new Strophe.Request(
-            body.tree(),
-            this._onRequestStateChange.bind(
-            this, this._conn._dataRecv.bind(this._conn)),
-            body.tree().getAttribute("rid")
-        );
+
+        var req = new Strophe.Request(body.tree(),
+                                      this._onRequestStateChange.bind(
+                                          this, this._conn._dataRecv.bind(this._conn)),
+                                      body.tree().getAttribute("rid"));
+
         this._requests.push(req);
         this._throttledRequestHandler();
     },
@@ -5216,18 +4935,15 @@ Strophe.Bosh.prototype = {
     _send: function () {
         clearTimeout(this._conn._idleTimeout);
         this._throttledRequestHandler();
-
-        // XXX: setTimeout should be called only with function expressions (23974bc1)
-        this._conn._idleTimeout = setTimeout(function() {
-            this._onIdle();
-        }.bind(this._conn), 100);
+        this._conn._idleTimeout = setTimeout(this._conn._onIdle.bind(this._conn), 100);
     },
 
     /** PrivateFunction: _sendRestart
      *
      *  Send an xmpp:restart stanza.
      */
-    _sendRestart: function () {
+    _sendRestart: function ()
+    {
         this._throttledRequestHandler();
         clearTimeout(this._conn._idleTimeout);
     },
@@ -5239,7 +4955,8 @@ Strophe.Bosh.prototype = {
      *  request ids overflow the connection window in the case that one
      *  request died.
      */
-    _throttledRequestHandler: function () {
+    _throttledRequestHandler: function ()
+    {
         if (!this._requests) {
             Strophe.debug("_throttledRequestHandler called with " +
                           "undefined requests");
@@ -5354,7 +5071,8 @@ Strophe.Websocket.prototype = {
      *  Returns:
      *    A Strophe.Builder with a <stream> element.
      */
-    _buildStream: function () {
+    _buildStream: function ()
+    {
         return $build("open", {
             "xmlns": Strophe.NS.FRAMING,
             "to": this._conn.domain,
@@ -5424,7 +5142,8 @@ Strophe.Websocket.prototype = {
      *  This function is called by the reset function of the Strophe Connection.
      *  Is not needed by WebSockets.
      */
-    _reset: function () {
+    _reset: function ()
+    {
         return;
     },
 
@@ -5546,7 +5265,8 @@ Strophe.Websocket.prototype = {
      *  Parameters:
      *    (Request) pres - This stanza will be sent before disconnecting.
      */
-    _disconnect: function (pres) {
+    _disconnect: function (pres)
+    {
         if (this.socket && this.socket.readyState !== WebSocket.CLOSED) {
             if (pres) {
                 this._conn.send(pres);
@@ -5569,7 +5289,8 @@ Strophe.Websocket.prototype = {
      *
      *  Just closes the Socket for WebSockets
      */
-    _doDisconnect: function () {
+    _doDisconnect: function ()
+    {
         Strophe.info("WebSockets _doDisconnect was called");
         this._closeSocket();
     },
@@ -5578,7 +5299,8 @@ Strophe.Websocket.prototype = {
      *  _Private_ helper function to wrap a stanza in a <stream> tag.
      *  This is used so Strophe can process stanzas from WebSockets like BOSH
      */
-    _streamWrap: function (stanza) {
+    _streamWrap: function (stanza)
+    {
         return "<wrapper>" + stanza + '</wrapper>';
     },
 
@@ -5588,7 +5310,8 @@ Strophe.Websocket.prototype = {
      *
      *  Closes the socket if it is still open and deletes it
      */
-    _closeSocket: function () {
+    _closeSocket: function ()
+    {
         if (this.socket) { try {
             this.socket.close();
         } catch (e) {} }
@@ -5601,7 +5324,8 @@ Strophe.Websocket.prototype = {
      *  Returns:
      *    True, because WebSocket messages are send immediately after queueing.
      */
-    _emptyQueue: function () {
+    _emptyQueue: function ()
+    {
         return true;
     },
 
@@ -5612,7 +5336,7 @@ Strophe.Websocket.prototype = {
      */
     _onClose: function() {
         if(this._conn.connected && !this._conn.disconnecting) {
-            Strophe.error("Websocket closed unexpectedly");
+            Strophe.error("Websocket closed unexcectedly");
             this._conn._doDisconnect();
         } else {
             Strophe.info("Websocket closed");
@@ -5624,7 +5348,8 @@ Strophe.Websocket.prototype = {
      * Called on stream start/restart when no stream:features
      * has been received.
      */
-    _no_auth_received: function (_callback) {
+    _no_auth_received: function (_callback)
+    {
         Strophe.error("Server did not send any auth methods");
         this._conn._changeConnectStatus(Strophe.Status.CONNFAIL, "Server did not send any auth methods");
         if (_callback) {
@@ -5654,7 +5379,7 @@ Strophe.Websocket.prototype = {
      */
     _onError: function(error) {
         Strophe.error("Websocket error " + error);
-        this._conn._changeConnectStatus(Strophe.Status.CONNFAIL, "The WebSocket connection could not be established or was disconnected.");
+        this._conn._changeConnectStatus(Strophe.Status.CONNFAIL, "The WebSocket connection could not be established was disconnected.");
         this._disconnect();
     },
 
@@ -5687,22 +5412,11 @@ Strophe.Websocket.prototype = {
     /** PrivateFunction: _onMessage
      * _Private_ function to handle websockets messages.
      *
-     * This function parses each of the messages as if they are full documents.
-     * [TODO : We may actually want to use a SAX Push parser].
+     * This function parses each of the messages as if they are full documents. [TODO : We may actually want to use a SAX Push parser].
      *
-     * Since all XMPP traffic starts with
-     *  <stream:stream version='1.0'
-     *                 xml:lang='en'
-     *                 xmlns='jabber:client'
-     *                 xmlns:stream='http://etherx.jabber.org/streams'
-     *                 id='3697395463'
-     *                 from='SERVER'>
-     *
-     * The first stanza will always fail to be parsed.
-     *
-     * Additionally, the seconds stanza will always be <stream:features> with
-     * the stream NS defined in the previous stanza, so we need to 'force'
-     * the inclusion of the NS in this stanza.
+     * Since all XMPP traffic starts with "<stream:stream version='1.0' xml:lang='en' xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' id='3697395463' from='SERVER'>"
+     * The first stanza will always fail to be parsed...
+     * Addtionnaly, the seconds stanza will always be a <stream:features> with the stream NS defined in the previous stanza... so we need to 'force' the inclusion of the NS in this stanza!
      *
      * Parameters:
      * (string) message - The websocket message.
@@ -5721,6 +5435,7 @@ Strophe.Websocket.prototype = {
         } else if (message.data.search("<open ") === 0) {
             // This handles stream restarts
             elem = new DOMParser().parseFromString(message.data, "text/xml").documentElement;
+
             if (!this._handleStreamStart(elem)) {
                 return;
             }
@@ -5772,7 +5487,8 @@ Strophe.Websocket.prototype = {
      *  Returns:
      *    The stanza that was passed.
      */
-    _reqToData: function (stanza) {
+    _reqToData: function (stanza)
+    {
         return stanza;
     },
 
@@ -5789,7 +5505,8 @@ Strophe.Websocket.prototype = {
      *
      *  Send an xmpp:restart stanza.
      */
-    _sendRestart: function () {
+    _sendRestart: function ()
+    {
         clearTimeout(this._conn._idleTimeout);
         this._conn._onIdle.bind(this._conn)();
     }
@@ -5797,35 +5514,9 @@ Strophe.Websocket.prototype = {
 return Strophe;
 }));
 
-(function(root){
-    if(typeof define === 'function' && define.amd){
-        define("strophe", [
-            "strophe-core",
-            "strophe-bosh",
-            "strophe-websocket"
-        ], function (wrapper) {
-            return wrapper;
-        });
-    }
-})(this);
-
 /* jshint ignore:start */
 if (callback) {
-    if(typeof define === 'function' && define.amd){
-        //For backwards compatability
-        var n_callback = callback;
-        if (typeof requirejs === 'function') {
-            requirejs(["strophe"], function(o){
-                n_callback(o.Strophe,o.$build,o.$msg,o.$iq,o.$pres);
-            });
-        } else {
-            require(["strophe"], function(o){
-                n_callback(o.Strophe,o.$build,o.$msg,o.$iq,o.$pres);
-            });
-        }
-    }else{
-        return callback(Strophe, $build, $msg, $iq, $pres);
-    }
+    return callback(Strophe, $build, $msg, $iq, $pres);
 }
 
 
@@ -5838,10 +5529,6 @@ if (callback) {
 });
 /* jshint ignore:end */
 
-
-/*!
- * Source: lib/strophe.muc.js, license: MIT, url: https://github.com/strophe/strophejs-plugins
- */
 // Generated by CoffeeScript 1.3.3
 /*
  *Plugin to implement the MUC extension.
@@ -6863,10 +6550,6 @@ Occupant = (function() {
 
 })();
 
-
-/*!
- * Source: lib/strophe.disco.js, license: MIT, url: https://github.com/strophe/strophejs-plugins
- */
 /*
   Copyright 2010, François de Metz <francois@2metz.fr>
 */
@@ -7100,10 +6783,6 @@ Strophe.addConnectionPlugin('disco',
     }
 });
 
-
-/*!
- * Source: lib/strophe.caps.js, license: MIT, url: https://github.com/strophe/strophejs-plugins
- */
 /**
  * Entity Capabilities (XEP-0115)
  * 
@@ -7380,10 +7059,6 @@ Strophe.addConnectionPlugin('disco',
    });
 }(jQuery));
 
-
-/*!
- * Source: lib/strophe.vcard/index.js, license: MIT, url: https://github.com/strophe/strophejs-plugins
- */
 // Generated by CoffeeScript 1.10.0
 
 /*
@@ -7461,10 +7136,6 @@ CoffeeScript port: Andreas Guth (guth@dbis.rwth-aachen.de)
 
 }).call(this);
 
-
-/*!
- * Source: lib/strophe.bookmarks/index.js, license: MIT, url: https://github.com/strophe/strophejs-plugins/tree/master/bookmarks
- */
 Strophe.addConnectionPlugin('bookmarks', {
 	init : function(connection) {
 		this.connection = connection;
@@ -7582,10 +7253,6 @@ Strophe.addConnectionPlugin('bookmarks', {
 
 });
 
-
-/*!
- * Source: lib/strophe.x/index.js, license: MIT, url: https://github.com/strophe/strophejs-plugins/tree/master/dataforms
- */
 // Generated by CoffeeScript 1.8.0
 (function() {
   var $field, $form, $item, $opt, Field, Form, Item, Option, helper,
@@ -8432,10 +8099,6 @@ Strophe.addConnectionPlugin('bookmarks', {
 
 }).call(this);
 
-
-/*!
- * Source: lib/strophe.chatstates/index.js, license: MIT, url: https://github.com/strophe/strophejs-plugins/tree/master/chatstates
- */
 /**
  * Chat state notifications (XEP 0085) plugin
  * @see http://xmpp.org/extensions/xep-0085.html
@@ -8517,10 +8180,6 @@ Strophe.addConnectionPlugin('chatstates',
 	}
 });
 
-
-/*!
- * Source: lib/strophe.jinglejs/strophe.jinglejs-bundle.js, license: MIT, url: https://github.com/sualko/strophe.jinglejs
- */
 /*!
  * strophe.jinglejs v0.1.2 - 2017-01-12
  * 
@@ -40190,10 +39849,6 @@ var IqStanza = jxt.getDefinition('iq', 'jabber:client');
 
 },{"getscreenmedia":31,"getusermedia":32,"jingle":53,"jxt":120,"jxt-xmpp":81,"jxt-xmpp-types":54,"webrtc-adapter-test":200}]},{},[220]);
 
-
-/*!
- * Source: lib/otr/build/dep/salsa20.js, license: AGPL3, url: https://github.com/neoatlantis/node-salsa20
- */
 // Salsa20 implementation
 // Contributed to Cryptocat by Dmitry Chestnykh
 // 21-01-2013
@@ -40448,10 +40103,6 @@ var IqStanza = jxt.getDefinition('iq', 'jabber:client');
   return Salsa20
 
 }))
-
-/*!
- * Source: lib/otr/build/dep/bigint.js, license: public domain, url: www.leemon.com
- */
 ;(function (root, factory) {
 
   if (typeof define === 'function' && define.amd) {
@@ -42161,10 +41812,6 @@ var IqStanza = jxt.getDefinition('iq', 'jabber:client');
   }
 
 }))
-
-/*!
- * Source: lib/otr/build/dep/crypto.js, license: code.google.com/p/crypto-js/wiki/license, url: code.google.com/p/crypto-js
- */
 ;(function (root, factory) {
 
   if (typeof define === "function" && define.amd) {
@@ -44599,10 +44246,6 @@ CryptoJS.mode.CTR = (function () {
   return CryptoJS
 
 }));
-
-/*!
- * Source: lib/otr/build/dep/eventemitter.js, license: MIT, url: http://git.io/ee
- */
 /*!
  * EventEmitter v4.2.3 - git.io/ee
  * Oliver Caldwell
@@ -45059,10 +44702,6 @@ CryptoJS.mode.CTR = (function () {
 	}
 }.call(this));
 
-
-/*!
- * Source: lib/otr/build/otr.js, license: MPL v2.0, url: https://arlolra.github.io/otr/
- */
 /*!
 
   otr.js v0.2.15 - 2015-05-04
@@ -47705,35 +47344,14 @@ CryptoJS.mode.CTR = (function () {
   }
 
 }))
-
-/*!
- * Source: lib/i18next/i18next.min.js, license: MIT, url: http://i18next.com/
- */
 !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):t.i18next=e()}(this,function(){"use strict";function t(t){return null==t?"":""+t}function e(t,e,n){t.forEach(function(t){e[t]&&(n[t]=e[t])})}function n(t,e,n){function o(t){return t&&t.indexOf("###")>-1?t.replace(/###/g,"."):t}for(var r="string"!=typeof e?[].concat(e):e.split(".");r.length>1;){if(!t)return{};var i=o(r.shift());!t[i]&&n&&(t[i]=new n),t=t[i]}return t?{obj:t,k:o(r.shift())}:{}}function o(t,e,o){var r=n(t,e,Object),i=r.obj,a=r.k;i[a]=o}function r(t,e,o,r){var i=n(t,e,Object),a=i.obj,s=i.k;a[s]=a[s]||[],r&&(a[s]=a[s].concat(o)),r||a[s].push(o)}function i(t,e){var o=n(t,e),r=o.obj,i=o.k;if(r)return r[i]}function a(t,e,n){for(var o in e)o in t?"string"==typeof t[o]||t[o]instanceof String||"string"==typeof e[o]||e[o]instanceof String?n&&(t[o]=e[o]):a(t[o],e[o],n):t[o]=e[o];return t}function s(t){return t.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&")}function u(t){return"string"==typeof t?t.replace(/[&<>"'\/]/g,function(t){return R[t]}):t}function l(t){return t.interpolation={unescapeSuffix:"HTML"},t.interpolation.prefix=t.interpolationPrefix||"__",t.interpolation.suffix=t.interpolationSuffix||"__",t.interpolation.escapeValue=t.escapeInterpolation||!1,t.interpolation.nestingPrefix=t.reusePrefix||"$t(",t.interpolation.nestingSuffix=t.reuseSuffix||")",t}function c(t){return t.resStore&&(t.resources=t.resStore),t.ns&&t.ns.defaultNs?(t.defaultNS=t.ns.defaultNs,t.ns=t.ns.namespaces):t.defaultNS=t.ns||"translation",t.fallbackToDefaultNS&&t.defaultNS&&(t.fallbackNS=t.defaultNS),t.saveMissing=t.sendMissing,t.saveMissingTo=t.sendMissingTo||"current",t.returnNull=!t.fallbackOnNull,t.returnEmptyString=!t.fallbackOnEmpty,t.returnObjects=t.returnObjectTrees,t.joinArrays="\n",t.returnedObjectHandler=t.objectTreeKeyHandler,t.parseMissingKeyHandler=t.parseMissingKey,t.appendNamespaceToMissingKey=!0,t.nsSeparator=t.nsseparator,t.keySeparator=t.keyseparator,"sprintf"===t.shortcutFunction&&(t.overloadTranslationOptionHandler=function(t){for(var e=[],n=1;n<t.length;n++)e.push(t[n]);return{postProcess:"sprintf",sprintf:e}}),t.whitelist=t.lngWhitelist,t.preload=t.preload,"current"===t.load&&(t.load="currentOnly"),"unspecific"===t.load&&(t.load="languageOnly"),t.backend=t.backend||{},t.backend.loadPath=t.resGetPath||"locales/__lng__/__ns__.json",t.backend.addPath=t.resPostPath||"locales/add/__lng__/__ns__",t.backend.allowMultiLoading=t.dynamicLoad,t.cache=t.cache||{},t.cache.prefix="res_",t.cache.expirationTime=6048e5,t.cache.enabled=!!t.useLocalStorage,t=l(t),t.defaultVariables&&(t.interpolation.defaultVariables=t.defaultVariables),t}function p(t){return t=l(t),t.joinArrays="\n",t}function f(t){return(t.interpolationPrefix||t.interpolationSuffix||t.escapeInterpolation)&&(t=l(t)),t.nsSeparator=t.nsseparator,t.keySeparator=t.keyseparator,t.returnObjects=t.returnObjectTrees,t}function g(t){t.lng=function(){return C.deprecate("i18next.lng() can be replaced by i18next.language for detected language or i18next.languages for languages ordered by translation lookup."),t.services.languageUtils.toResolveHierarchy(t.language)[0]},t.preload=function(e,n){C.deprecate("i18next.preload() can be replaced with i18next.loadLanguages()"),t.loadLanguages(e,n)},t.setLng=function(e,n,o){return C.deprecate("i18next.setLng() can be replaced with i18next.changeLanguage() or i18next.getFixedT() to get a translation function with fixed language or namespace."),"function"==typeof n&&(o=n,n={}),n||(n={}),n.fixLng===!0&&o?o(null,t.getFixedT(e)):void t.changeLanguage(e,o)},t.addPostProcessor=function(e,n){C.deprecate("i18next.addPostProcessor() can be replaced by i18next.use({ type: 'postProcessor', name: 'name', process: fc })"),t.use({type:"postProcessor",name:e,process:n})}}function h(t){return t.charAt(0).toUpperCase()+t.slice(1)}function d(){var t={};return T.forEach(function(e){e.lngs.forEach(function(n){return t[n]={numbers:e.nr,plurals:H[e.fc]}})}),t}function v(t,e){for(var n=t.indexOf(e);n!==-1;)t.splice(n,1),n=t.indexOf(e)}function y(){return{debug:!1,initImmediate:!0,ns:["translation"],defaultNS:["translation"],fallbackLng:["dev"],fallbackNS:!1,whitelist:!1,nonExplicitWhitelist:!1,load:"all",preload:!1,keySeparator:".",nsSeparator:":",pluralSeparator:"_",contextSeparator:"_",saveMissing:!1,saveMissingTo:"fallback",missingKeyHandler:!1,postProcess:!1,returnNull:!0,returnEmptyString:!0,returnObjects:!1,joinArrays:!1,returnedObjectHandler:function(){},parseMissingKeyHandler:!1,appendNamespaceToMissingKey:!1,overloadTranslationOptionHandler:function(t){return{defaultValue:t[1]}},interpolation:{escapeValue:!0,format:function(t,e,n){return t},prefix:"{{",suffix:"}}",formatSeparator:",",unescapePrefix:"-",nestingPrefix:"$t(",nestingSuffix:")",defaultVariables:void 0}}}function b(t){return"string"==typeof t.ns&&(t.ns=[t.ns]),"string"==typeof t.fallbackLng&&(t.fallbackLng=[t.fallbackLng]),"string"==typeof t.fallbackNS&&(t.fallbackNS=[t.fallbackNS]),t.whitelist&&t.whitelist.indexOf("cimode")<0&&t.whitelist.push("cimode"),t}function m(){}var x="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},k=(function(){function t(t){this.value=t}function e(e){function n(t,e){return new Promise(function(n,r){var s={key:t,arg:e,resolve:n,reject:r,next:null};a?a=a.next=s:(i=a=s,o(t,e))})}function o(n,i){try{var a=e[n](i),s=a.value;s instanceof t?Promise.resolve(s.value).then(function(t){o("next",t)},function(t){o("throw",t)}):r(a.done?"return":"normal",a.value)}catch(t){r("throw",t)}}function r(t,e){switch(t){case"return":i.resolve({value:e,done:!0});break;case"throw":i.reject(e);break;default:i.resolve({value:e,done:!1})}i=i.next,i?o(i.key,i.arg):a=null}var i,a;this._invoke=n,"function"!=typeof e.return&&(this.return=void 0)}return"function"==typeof Symbol&&Symbol.asyncIterator&&(e.prototype[Symbol.asyncIterator]=function(){return this}),e.prototype.next=function(t){return this._invoke("next",t)},e.prototype.throw=function(t){return this._invoke("throw",t)},e.prototype.return=function(t){return this._invoke("return",t)},{wrap:function(t){return function(){return new e(t.apply(this,arguments))}},await:function(e){return new t(e)}}}(),function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}),S=Object.assign||function(t){for(var e=1;e<arguments.length;e++){var n=arguments[e];for(var o in n)Object.prototype.hasOwnProperty.call(n,o)&&(t[o]=n[o])}return t},w=function(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function, not "+typeof e);t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,enumerable:!1,writable:!0,configurable:!0}}),e&&(Object.setPrototypeOf?Object.setPrototypeOf(t,e):t.__proto__=e)},O=function(t,e){if(!t)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!e||"object"!=typeof e&&"function"!=typeof e?t:e},N=function(){function t(t,e){var n=[],o=!0,r=!1,i=void 0;try{for(var a,s=t[Symbol.iterator]();!(o=(a=s.next()).done)&&(n.push(a.value),!e||n.length!==e);o=!0);}catch(t){r=!0,i=t}finally{try{!o&&s.return&&s.return()}finally{if(r)throw i}}return n}return function(e,n){if(Array.isArray(e))return e;if(Symbol.iterator in Object(e))return t(e,n);throw new TypeError("Invalid attempt to destructure non-iterable instance")}}(),L={type:"logger",log:function(t){this._output("log",t)},warn:function(t){this._output("warn",t)},error:function(t){this._output("error",t)},_output:function(t,e){console&&console[t]&&console[t].apply(console,Array.prototype.slice.call(e))}},j=function(){function t(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};k(this,t),this.init(e,n)}return t.prototype.init=function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};this.prefix=e.prefix||"i18next:",this.logger=t||L,this.options=e,this.debug=e.debug!==!1},t.prototype.setDebug=function(t){this.debug=t},t.prototype.log=function(){this.forward(arguments,"log","",!0)},t.prototype.warn=function(){this.forward(arguments,"warn","",!0)},t.prototype.error=function(){this.forward(arguments,"error","")},t.prototype.deprecate=function(){this.forward(arguments,"warn","WARNING DEPRECATED: ",!0)},t.prototype.forward=function(t,e,n,o){o&&!this.debug||("string"==typeof t[0]&&(t[0]=n+this.prefix+" "+t[0]),this.logger[e](t))},t.prototype.create=function(e){var n=new t(this.logger,S({prefix:this.prefix+":"+e+":"},this.options));return n},t}(),C=new j,P=function(){function t(){k(this,t),this.observers={}}return t.prototype.on=function(t,e){var n=this;t.split(" ").forEach(function(t){n.observers[t]=n.observers[t]||[],n.observers[t].push(e)})},t.prototype.off=function(t,e){var n=this;this.observers[t]&&this.observers[t].forEach(function(){if(e){var o=n.observers[t].indexOf(e);o>-1&&n.observers[t].splice(o,1)}else delete n.observers[t]})},t.prototype.emit=function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),o=1;o<e;o++)n[o-1]=arguments[o];this.observers[t]&&this.observers[t].forEach(function(t){t.apply(void 0,n)}),this.observers["*"]&&this.observers["*"].forEach(function(e){var o;e.apply(e,(o=[t]).concat.apply(o,n))})},t}(),R={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;","/":"&#x2F;"},E=function(t){function e(){var n=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},o=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{ns:["translation"],defaultNS:"translation"};k(this,e);var r=O(this,t.call(this));return r.data=n,r.options=o,r}return w(e,t),e.prototype.addNamespaces=function(t){this.options.ns.indexOf(t)<0&&this.options.ns.push(t)},e.prototype.removeNamespaces=function(t){var e=this.options.ns.indexOf(t);e>-1&&this.options.ns.splice(e,1)},e.prototype.getResource=function(t,e,n){var o=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{},r=o.keySeparator||this.options.keySeparator;void 0===r&&(r=".");var a=[t,e];return n&&"string"!=typeof n&&(a=a.concat(n)),n&&"string"==typeof n&&(a=a.concat(r?n.split(r):n)),t.indexOf(".")>-1&&(a=t.split(".")),i(this.data,a)},e.prototype.addResource=function(t,e,n,r){var i=arguments.length>4&&void 0!==arguments[4]?arguments[4]:{silent:!1},a=this.options.keySeparator;void 0===a&&(a=".");var s=[t,e];n&&(s=s.concat(a?n.split(a):n)),t.indexOf(".")>-1&&(s=t.split("."),r=e,e=s[1]),this.addNamespaces(e),o(this.data,s,r),i.silent||this.emit("added",t,e,n,r)},e.prototype.addResources=function(t,e,n){for(var o in n)"string"==typeof n[o]&&this.addResource(t,e,o,n[o],{silent:!0});this.emit("added",t,e,n)},e.prototype.addResourceBundle=function(t,e,n,r,s){var u=[t,e];t.indexOf(".")>-1&&(u=t.split("."),r=n,n=e,e=u[1]),this.addNamespaces(e);var l=i(this.data,u)||{};r?a(l,n,s):l=S({},l,n),o(this.data,u,l),this.emit("added",t,e,n)},e.prototype.removeResourceBundle=function(t,e){this.hasResourceBundle(t,e)&&delete this.data[t][e],this.removeNamespaces(e),this.emit("removed",t,e)},e.prototype.hasResourceBundle=function(t,e){return void 0!==this.getResource(t,e)},e.prototype.getResourceBundle=function(t,e){return e||(e=this.options.defaultNS),"v1"===this.options.compatibilityAPI?S({},this.getResource(t,e)):this.getResource(t,e)},e.prototype.toJSON=function(){return this.data},e}(P),_={processors:{},addPostProcessor:function(t){this.processors[t.name]=t},handle:function(t,e,n,o,r){var i=this;return t.forEach(function(t){i.processors[t]&&(e=i.processors[t].process(e,n,o,r))}),e}},A=function(t){function n(o){var r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};k(this,n);var i=O(this,t.call(this));return e(["resourceStore","languageUtils","pluralResolver","interpolator","backendConnector"],o,i),i.options=r,i.logger=C.create("translator"),i}return w(n,t),n.prototype.changeLanguage=function(t){t&&(this.language=t)},n.prototype.exists=function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{interpolation:{}};return"v1"===this.options.compatibilityAPI&&(e=f(e)),void 0!==this.resolve(t,e)},n.prototype.extractFromKey=function(t,e){var n=e.nsSeparator||this.options.nsSeparator;void 0===n&&(n=":");var o=e.ns||this.options.defaultNS;if(n&&t.indexOf(n)>-1){var r=t.split(n);o=r[0],t=r[1]}return"string"==typeof o&&(o=[o]),{key:t,namespaces:o}},n.prototype.translate=function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if("object"!==("undefined"==typeof e?"undefined":x(e))?e=this.options.overloadTranslationOptionHandler(arguments):"v1"===this.options.compatibilityAPI&&(e=f(e)),void 0===t||null===t||""===t)return"";"number"==typeof t&&(t=String(t)),"string"==typeof t&&(t=[t]);var n=e.lng||this.language;if(n&&"cimode"===n.toLowerCase())return t[t.length-1];var o=e.keySeparator||this.options.keySeparator||".",r=this.extractFromKey(t[t.length-1],e),i=r.key,a=r.namespaces,s=a[a.length-1],u=this.resolve(t,e),l=Object.prototype.toString.apply(u),c=["[object Number]","[object Function]","[object RegExp]"],p=void 0!==e.joinArrays?e.joinArrays:this.options.joinArrays;if(u&&"string"!=typeof u&&c.indexOf(l)<0&&(!p||"[object Array]"!==l)){if(!e.returnObjects&&!this.options.returnObjects)return this.logger.warn("accessing an object - but returnObjects options is not enabled!"),this.options.returnedObjectHandler?this.options.returnedObjectHandler(i,u,e):"key '"+i+" ("+this.language+")' returned an object instead of string.";var g="[object Array]"===l?[]:{};for(var h in u)g[h]=this.translate(""+i+o+h,S({joinArrays:!1,ns:a},e));u=g}else if(p&&"[object Array]"===l)u=u.join(p),u&&(u=this.extendTranslation(u,i,e));else{var d=!1,v=!1;if(this.isValidLookup(u)||void 0===e.defaultValue||(d=!0,u=e.defaultValue),this.isValidLookup(u)||(v=!0,u=i),v||d){this.logger.log("missingKey",n,s,i,u);var y=[],b=this.languageUtils.getFallbackCodes(this.options.fallbackLng,e.lng||this.language);if("fallback"===this.options.saveMissingTo&&b&&b[0])for(var m=0;m<b.length;m++)y.push(b[m]);else"all"===this.options.saveMissingTo?y=this.languageUtils.toResolveHierarchy(e.lng||this.language):y.push(e.lng||this.language);this.options.saveMissing&&(this.options.missingKeyHandler?this.options.missingKeyHandler(y,s,i,u):this.backendConnector&&this.backendConnector.saveMissing&&this.backendConnector.saveMissing(y,s,i,u)),this.emit("missingKey",y,s,i,u)}u=this.extendTranslation(u,i,e),v&&u===i&&this.options.appendNamespaceToMissingKey&&(u=s+":"+i),v&&this.options.parseMissingKeyHandler&&(u=this.options.parseMissingKeyHandler(u))}return u},n.prototype.extendTranslation=function(t,e,n){var o=this;n.interpolation&&this.interpolator.init(S({},n,{interpolation:S({},this.options.interpolation,n.interpolation)}));var r=n.replace&&"string"!=typeof n.replace?n.replace:n;this.options.interpolation.defaultVariables&&(r=S({},this.options.interpolation.defaultVariables,r)),t=this.interpolator.interpolate(t,r,this.language),t=this.interpolator.nest(t,function(){for(var t=arguments.length,e=Array(t),n=0;n<t;n++)e[n]=arguments[n];return o.translate.apply(o,e)},n),n.interpolation&&this.interpolator.reset();var i=n.postProcess||this.options.postProcess,a="string"==typeof i?[i]:i;return void 0!==t&&a&&a.length&&n.applyPostProcessor!==!1&&(t=_.handle(a,t,e,n,this)),t},n.prototype.resolve=function(t){var e=this,n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},o=void 0;return"string"==typeof t&&(t=[t]),t.forEach(function(t){if(!e.isValidLookup(o)){var r=e.extractFromKey(t,n),i=r.key,a=r.namespaces;e.options.fallbackNS&&(a=a.concat(e.options.fallbackNS));var s=void 0!==n.count&&"string"!=typeof n.count,u=void 0!==n.context&&"string"==typeof n.context&&""!==n.context,l=n.lngs?n.lngs:e.languageUtils.toResolveHierarchy(n.lng||e.language);a.forEach(function(t){e.isValidLookup(o)||l.forEach(function(r){if(!e.isValidLookup(o)){var a=i,l=[a],c=void 0;s&&(c=e.pluralResolver.getSuffix(r,n.count)),s&&u&&l.push(a+c),u&&l.push(a+=""+e.options.contextSeparator+n.context),s&&l.push(a+=c);for(var p=void 0;p=l.pop();)e.isValidLookup(o)||(o=e.getResource(r,t,p,n))}})})}}),o},n.prototype.isValidLookup=function(t){return!(void 0===t||!this.options.returnNull&&null===t||!this.options.returnEmptyString&&""===t)},n.prototype.getResource=function(t,e,n){var o=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{};return this.resourceStore.getResource(t,e,n,o)},n}(P),M=function(){function t(e){k(this,t),this.options=e,this.whitelist=this.options.whitelist||!1,this.logger=C.create("languageUtils")}return t.prototype.getLanguagePartFromCode=function(t){if(t.indexOf("-")<0)return t;var e=["NB-NO","NN-NO","nb-NO","nn-NO","nb-no","nn-no"],n=t.split("-");return this.formatLanguageCode(e.indexOf(t)>-1?n[1].toLowerCase():n[0])},t.prototype.getScriptPartFromCode=function(t){if(t.indexOf("-")<0)return null;var e=t.split("-");return 2===e.length?null:(e.pop(),this.formatLanguageCode(e.join("-")))},t.prototype.getLanguagePartFromCode=function(t){if(t.indexOf("-")<0)return t;var e=["NB-NO","NN-NO","nb-NO","nn-NO","nb-no","nn-no"],n=t.split("-");return this.formatLanguageCode(e.indexOf(t)>-1?n[1].toLowerCase():n[0])},t.prototype.formatLanguageCode=function(t){if("string"==typeof t&&t.indexOf("-")>-1){var e=["hans","hant","latn","cyrl","cans","mong","arab"],n=t.split("-");return this.options.lowerCaseLng?n=n.map(function(t){return t.toLowerCase()}):2===n.length?(n[0]=n[0].toLowerCase(),n[1]=n[1].toUpperCase(),e.indexOf(n[1].toLowerCase())>-1&&(n[1]=h(n[1].toLowerCase()))):3===n.length&&(n[0]=n[0].toLowerCase(),2===n[1].length&&(n[1]=n[1].toUpperCase()),"sgn"!==n[0]&&2===n[2].length&&(n[2]=n[2].toUpperCase()),e.indexOf(n[1].toLowerCase())>-1&&(n[1]=h(n[1].toLowerCase())),e.indexOf(n[2].toLowerCase())>-1&&(n[2]=h(n[2].toLowerCase()))),n.join("-")}return this.options.cleanCode||this.options.lowerCaseLng?t.toLowerCase():t},t.prototype.isWhitelisted=function(t,e){return("languageOnly"===this.options.load||this.options.nonExplicitWhitelist&&!e)&&(t=this.getLanguagePartFromCode(t)),!this.whitelist||!this.whitelist.length||this.whitelist.indexOf(t)>-1},t.prototype.getFallbackCodes=function(t,e){if(!t)return[];if("string"==typeof t&&(t=[t]),"[object Array]"===Object.prototype.toString.apply(t))return t;var n=t[e];return n||(n=t[this.getScriptPartFromCode(e)]),n||(n=t[this.formatLanguageCode(e)]),n||(n=t.default),n||[]},t.prototype.toResolveHierarchy=function(t,e){var n=this,o=this.getFallbackCodes(e||this.options.fallbackLng||[],t),r=[],i=function(t){var e=arguments.length>1&&void 0!==arguments[1]&&arguments[1];t&&(n.isWhitelisted(t,e)?r.push(t):n.logger.warn("rejecting non-whitelisted language code: "+t))};return"string"==typeof t&&t.indexOf("-")>-1?("languageOnly"!==this.options.load&&i(this.formatLanguageCode(t),!0),"languageOnly"!==this.options.load&&"currentOnly"!==this.options.load&&i(this.getScriptPartFromCode(t),!0),"currentOnly"!==this.options.load&&i(this.getLanguagePartFromCode(t))):"string"==typeof t&&i(this.formatLanguageCode(t)),o.forEach(function(t){r.indexOf(t)<0&&i(n.formatLanguageCode(t))}),r},t}(),T=[{lngs:["ach","ak","am","arn","br","fil","gun","ln","mfe","mg","mi","oc","tg","ti","tr","uz","wa"],nr:[1,2],fc:1},{lngs:["af","an","ast","az","bg","bn","ca","da","de","dev","el","en","eo","es","es_ar","et","eu","fi","fo","fur","fy","gl","gu","ha","he","hi","hu","hy","ia","it","kn","ku","lb","mai","ml","mn","mr","nah","nap","nb","ne","nl","nn","no","nso","pa","pap","pms","ps","pt","pt_br","rm","sco","se","si","so","son","sq","sv","sw","ta","te","tk","ur","yo"],nr:[1,2],fc:2},{lngs:["ay","bo","cgg","fa","id","ja","jbo","ka","kk","km","ko","ky","lo","ms","sah","su","th","tt","ug","vi","wo","zh"],nr:[1],fc:3},{lngs:["be","bs","dz","hr","ru","sr","uk"],nr:[1,2,5],fc:4},{lngs:["ar"],nr:[0,1,2,3,11,100],fc:5},{lngs:["cs","sk"],nr:[1,2,5],fc:6},{lngs:["csb","pl"],nr:[1,2,5],fc:7},{lngs:["cy"],nr:[1,2,3,8],fc:8},{lngs:["fr"],nr:[1,2],fc:9},{lngs:["ga"],nr:[1,2,3,7,11],fc:10},{lngs:["gd"],nr:[1,2,3,20],fc:11},{lngs:["is"],nr:[1,2],fc:12},{lngs:["jv"],nr:[0,1],fc:13},{lngs:["kw"],nr:[1,2,3,4],fc:14},{lngs:["lt"],nr:[1,2,10],fc:15},{lngs:["lv"],nr:[1,2,0],fc:16},{lngs:["mk"],nr:[1,2],fc:17},{lngs:["mnk"],nr:[0,1,2],fc:18},{lngs:["mt"],nr:[1,2,11,20],fc:19},{lngs:["or"],nr:[2,1],fc:2},{lngs:["ro"],nr:[1,2,20],fc:20},{lngs:["sl"],nr:[5,1,2,3],fc:21}],H={1:function(t){return Number(t>1)},2:function(t){return Number(1!=t)},3:function(t){return 0},4:function(t){return Number(t%10==1&&t%100!=11?0:t%10>=2&&t%10<=4&&(t%100<10||t%100>=20)?1:2)},5:function(t){return Number(0===t?0:1==t?1:2==t?2:t%100>=3&&t%100<=10?3:t%100>=11?4:5)},6:function(t){return Number(1==t?0:t>=2&&t<=4?1:2)},7:function(t){return Number(1==t?0:t%10>=2&&t%10<=4&&(t%100<10||t%100>=20)?1:2)},8:function(t){return Number(1==t?0:2==t?1:8!=t&&11!=t?2:3)},9:function(t){return Number(t>=2)},10:function(t){return Number(1==t?0:2==t?1:t<7?2:t<11?3:4)},11:function(t){return Number(1==t||11==t?0:2==t||12==t?1:t>2&&t<20?2:3)},12:function(t){return Number(t%10!=1||t%100==11)},13:function(t){return Number(0!==t)},14:function(t){return Number(1==t?0:2==t?1:3==t?2:3)},15:function(t){return Number(t%10==1&&t%100!=11?0:t%10>=2&&(t%100<10||t%100>=20)?1:2)},16:function(t){return Number(t%10==1&&t%100!=11?0:0!==t?1:2)},17:function(t){return Number(1==t||t%10==1?0:1)},18:function(t){return Number(0==t?0:1==t?1:2)},19:function(t){return Number(1==t?0:0===t||t%100>1&&t%100<11?1:t%100>10&&t%100<20?2:3)},20:function(t){return Number(1==t?0:0===t||t%100>0&&t%100<20?1:2)},21:function(t){return Number(t%100==1?1:t%100==2?2:t%100==3||t%100==4?3:0)}},U=function(){function t(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};k(this,t),this.languageUtils=e,this.options=n,this.logger=C.create("pluralResolver"),this.rules=d()}return t.prototype.addRule=function(t,e){this.rules[t]=e},t.prototype.getRule=function(t){return this.rules[this.languageUtils.getLanguagePartFromCode(t)]},t.prototype.needsPlural=function(t){var e=this.getRule(t);return!(e&&e.numbers.length<=1)},t.prototype.getSuffix=function(t,e){var n=this,o=this.getRule(t);if(!o)return this.logger.warn("no plural rule found for: "+t),"";var r=function(){if(1===o.numbers.length)return{v:""};var t=o.noAbs?o.plurals(e):o.plurals(Math.abs(e)),r=o.numbers[t];2===o.numbers.length&&1===o.numbers[0]&&(2===r?r="plural":1===r&&(r=""));var i=function(){return n.options.prepend&&r.toString()?n.options.prepend+r.toString():r.toString()};return"v1"===n.options.compatibilityJSON?1===r?{v:""}:"number"==typeof r?{v:"_plural_"+r.toString()}:{v:i()}:"v2"===n.options.compatibilityJSON||2===o.numbers.length&&1===o.numbers[0]?{v:i()}:2===o.numbers.length&&1===o.numbers[0]?{v:i()}:{v:n.options.prepend&&t.toString()?n.options.prepend+t.toString():t.toString()}}();return"object"===("undefined"==typeof r?"undefined":x(r))?r.v:void 0},t}(),V=function(){function e(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};k(this,e),this.logger=C.create("interpolator"),this.init(t,!0)}return e.prototype.init=function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},e=arguments[1];e&&(this.options=t,this.format=t.interpolation&&t.interpolation.format||function(t){return t},this.escape=t.interpolation&&t.interpolation.escape||u),t.interpolation||(t.interpolation={escapeValue:!0});var n=t.interpolation;this.escapeValue=void 0===n.escapeValue||n.escapeValue,this.prefix=n.prefix?s(n.prefix):n.prefixEscaped||"{{",this.suffix=n.suffix?s(n.suffix):n.suffixEscaped||"}}",this.formatSeparator=n.formatSeparator?s(n.formatSeparator):n.formatSeparator||",",this.unescapePrefix=n.unescapeSuffix?"":n.unescapePrefix||"-",this.unescapeSuffix=this.unescapePrefix?"":n.unescapeSuffix||"",this.nestingPrefix=n.nestingPrefix?s(n.nestingPrefix):n.nestingPrefixEscaped||s("$t("),this.nestingSuffix=n.nestingSuffix?s(n.nestingSuffix):n.nestingSuffixEscaped||s(")"),this.resetRegExp()},e.prototype.reset=function(){this.options&&this.init(this.options)},e.prototype.resetRegExp=function(){var t=this.prefix+"(.+?)"+this.suffix;this.regexp=new RegExp(t,"g");var e=this.prefix+this.unescapePrefix+"(.+?)"+this.unescapeSuffix+this.suffix;this.regexpUnescape=new RegExp(e,"g");var n=this.nestingPrefix+"(.+?)"+this.nestingSuffix;this.nestingRegexp=new RegExp(n,"g")},e.prototype.interpolate=function(e,n,o){function r(t){return t.replace(/\$/g,"$$$$")}var a=this,s=void 0,u=void 0,l=function(t){if(t.indexOf(a.formatSeparator)<0)return i(n,t);var e=t.split(a.formatSeparator),r=e.shift().trim(),s=e.join(a.formatSeparator).trim();return a.format(i(n,r),s,o)};for(this.resetRegExp();s=this.regexpUnescape.exec(e);){var c=l(s[1].trim());e=e.replace(s[0],c),this.regexpUnescape.lastIndex=0}for(;s=this.regexp.exec(e);)u=l(s[1].trim()),"string"!=typeof u&&(u=t(u)),u||(this.logger.warn("missed to pass in variable "+s[1]+" for interpolating "+e),u=""),u=r(this.escapeValue?this.escape(u):u),e=e.replace(s[0],u),this.regexp.lastIndex=0;return e},e.prototype.nest=function(e,n){function o(t){if(t.indexOf(",")<0)return t;var e=t.split(",");t=e.shift();var n=e.join(",");n=this.interpolate(n,s),n=n.replace(/'/g,'"');try{s=JSON.parse(n)}catch(e){this.logger.error("failed parsing options string in nesting for key "+t,e)}return t}var r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{},i=void 0,a=void 0,s=JSON.parse(JSON.stringify(r));for(s.applyPostProcessor=!1;i=this.nestingRegexp.exec(e);)a=n(o.call(this,i[1].trim()),s),"string"!=typeof a&&(a=t(a)),a||(this.logger.warn("missed to pass in variable "+i[1]+" for interpolating "+e),a=""),e=e.replace(i[0],a),this.regexp.lastIndex=0;return e},e}(),F=function(t){function e(n,o,r){var i=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{};k(this,e);var a=O(this,t.call(this));return a.backend=n,a.store=o,a.services=r,a.options=i,a.logger=C.create("backendConnector"),a.state={},a.queue=[],a.backend&&a.backend.init&&a.backend.init(r,i.backend,i),a}return w(e,t),e.prototype.queueLoad=function(t,e,n){var o=this,r=[],i=[],a=[],s=[];return t.forEach(function(t){var n=!0;e.forEach(function(e){var a=t+"|"+e;o.store.hasResourceBundle(t,e)?o.state[a]=2:o.state[a]<0||(1===o.state[a]?i.indexOf(a)<0&&i.push(a):(o.state[a]=1,n=!1,i.indexOf(a)<0&&i.push(a),r.indexOf(a)<0&&r.push(a),s.indexOf(e)<0&&s.push(e)))}),n||a.push(t)}),(r.length||i.length)&&this.queue.push({pending:i,loaded:{},errors:[],callback:n}),{toLoad:r,pending:i,toLoadLanguages:a,toLoadNamespaces:s}},e.prototype.loaded=function(t,e,n){var o=this,i=t.split("|"),a=N(i,2),s=a[0],u=a[1];e&&this.emit("failedLoading",s,u,e),n&&this.store.addResourceBundle(s,u,n),this.state[t]=e?-1:2,this.queue.forEach(function(n){r(n.loaded,[s],u),v(n.pending,t),e&&n.errors.push(e),0!==n.pending.length||n.done||(o.emit("loaded",n.loaded),n.errors.length?n.callback(n.errors):n.callback(),n.done=!0)}),this.queue=this.queue.filter(function(t){return!t.done})},e.prototype.read=function(t,e,n,o,r,i){var a=this;return o||(o=0),r||(r=250),t.length?void this.backend[n](t,e,function(s,u){return s&&u&&o<5?void setTimeout(function(){a.read.call(a,t,e,n,++o,2*r,i)},r):void i(s,u)}):i(null,{})},e.prototype.load=function(t,e,n){var o=this;if(!this.backend)return this.logger.warn("No backend was added via i18next.use. Will not load resources."),n&&n();var r=S({},this.backend.options,this.options.backend);"string"==typeof t&&(t=this.services.languageUtils.toResolveHierarchy(t)),"string"==typeof e&&(e=[e]);var a=this.queueLoad(t,e,n);return a.toLoad.length?void(r.allowMultiLoading&&this.backend.readMulti?this.read(a.toLoadLanguages,a.toLoadNamespaces,"readMulti",null,null,function(t,e){t&&o.logger.warn("loading namespaces "+a.toLoadNamespaces.join(", ")+" for languages "+a.toLoadLanguages.join(", ")+" via multiloading failed",t),!t&&e&&o.logger.log("loaded namespaces "+a.toLoadNamespaces.join(", ")+" for languages "+a.toLoadLanguages.join(", ")+" via multiloading",e),a.toLoad.forEach(function(n){var r=n.split("|"),a=N(r,2),s=a[0],u=a[1],l=i(e,[s,u]);if(l)o.loaded(n,t,l);else{var c="loading namespace "+u+" for language "+s+" via multiloading failed";o.loaded(n,c),o.logger.error(c)}})}):!function(){var t=function(t){var e=this,n=t.split("|"),o=N(n,2),r=o[0],i=o[1];this.read(r,i,"read",null,null,function(n,o){n&&e.logger.warn("loading namespace "+i+" for language "+r+" failed",n),!n&&o&&e.logger.log("loaded namespace "+i+" for language "+r,o),e.loaded(t,n,o)})};a.toLoad.forEach(function(e){t.call(o,e)})}()):void(a.pending.length||n())},e.prototype.reload=function(t,e){var n=this;this.backend||this.logger.warn("No backend was added via i18next.use. Will not load resources.");var o=S({},this.backend.options,this.options.backend);"string"==typeof t&&(t=this.services.languageUtils.toResolveHierarchy(t)),"string"==typeof e&&(e=[e]),o.allowMultiLoading&&this.backend.readMulti?this.read(t,e,"readMulti",null,null,function(o,r){o&&n.logger.warn("reloading namespaces "+e.join(", ")+" for languages "+t.join(", ")+" via multiloading failed",o),!o&&r&&n.logger.log("reloaded namespaces "+e.join(", ")+" for languages "+t.join(", ")+" via multiloading",r),t.forEach(function(t){e.forEach(function(e){var a=i(r,[t,e]);if(a)n.loaded(t+"|"+e,o,a);else{var s="reloading namespace "+e+" for language "+t+" via multiloading failed";n.loaded(t+"|"+e,s),n.logger.error(s)}})})}):!function(){var o=function(t){var e=this,n=t.split("|"),o=N(n,2),r=o[0],i=o[1];this.read(r,i,"read",null,null,function(n,o){n&&e.logger.warn("reloading namespace "+i+" for language "+r+" failed",n),!n&&o&&e.logger.log("reloaded namespace "+i+" for language "+r,o),e.loaded(t,n,o)})};t.forEach(function(t){e.forEach(function(e){o.call(n,t+"|"+e)})})}()},e.prototype.saveMissing=function(t,e,n,o){this.backend&&this.backend.create&&this.backend.create(t,e,n,o),t&&t[0]&&this.store.addResource(t[0],e,n,o)},e}(P),I=function(t){function e(n,o,r){var i=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{};k(this,e);var a=O(this,t.call(this));return a.cache=n,a.store=o,a.services=r,a.options=i,a.logger=C.create("cacheConnector"),a.cache&&a.cache.init&&a.cache.init(r,i.cache,i),a}return w(e,t),e.prototype.load=function(t,e,n){var o=this;if(!this.cache)return n&&n();var r=S({},this.cache.options,this.options.cache);"string"==typeof t&&(t=this.services.languageUtils.toResolveHierarchy(t)),"string"==typeof e&&(e=[e]),r.enabled?this.cache.load(t,function(e,r){if(e&&o.logger.error("loading languages "+t.join(", ")+" from cache failed",e),r)for(var i in r)for(var a in r[i])if("i18nStamp"!==a){var s=r[i][a];s&&o.store.addResourceBundle(i,a,s)}n&&n()}):n&&n()},e.prototype.save=function(){this.cache&&this.options.cache&&this.options.cache.enabled&&this.cache.save(this.store.data)},e}(P),K=function(t){function e(){var n=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},o=arguments[1];k(this,e);var r=O(this,t.call(this));return r.options=b(n),r.services={},r.logger=C,r.modules={},o&&!r.isInitialized&&r.init(n,o),r}return w(e,t),e.prototype.init=function(t,e){function n(t){if(t)return"function"==typeof t?new t:t}var o=this;if("function"==typeof t&&(e=t,t={}),t||(t={}),"v1"===t.compatibilityAPI?this.options=S({},y(),b(c(t)),{}):"v1"===t.compatibilityJSON?this.options=S({},y(),b(p(t)),{}):this.options=S({},y(),this.options,b(t)),e||(e=m),!this.options.isClone){this.modules.logger?C.init(n(this.modules.logger),this.options):C.init(null,this.options);var r=new M(this.options);this.store=new E(this.options.resources,this.options);var i=this.services;i.logger=C,i.resourceStore=this.store,i.resourceStore.on("added removed",function(t,e){i.cacheConnector.save()}),i.languageUtils=r,i.pluralResolver=new U(r,{prepend:this.options.pluralSeparator,compatibilityJSON:this.options.compatibilityJSON}),i.interpolator=new V(this.options),i.backendConnector=new F(n(this.modules.backend),i.resourceStore,i,this.options),i.backendConnector.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];o.emit.apply(o,[t].concat(n));
 }),i.backendConnector.on("loaded",function(t){i.cacheConnector.save()}),i.cacheConnector=new I(n(this.modules.cache),i.resourceStore,i,this.options),i.cacheConnector.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];o.emit.apply(o,[t].concat(n))}),this.modules.languageDetector&&(i.languageDetector=n(this.modules.languageDetector),i.languageDetector.init(i,this.options.detection,this.options)),this.translator=new A(this.services,this.options),this.translator.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];o.emit.apply(o,[t].concat(n))})}var a=["getResource","addResource","addResources","addResourceBundle","removeResourceBundle","hasResourceBundle","getResourceBundle"];a.forEach(function(t){o[t]=function(){return this.store[t].apply(this.store,arguments)}}),"v1"===this.options.compatibilityAPI&&g(this);var s=function(){o.changeLanguage(o.options.lng,function(t,n){o.isInitialized=!0,o.emit("initialized",o.options),o.logger.log("initialized",o.options),e(t,n)})};return this.options.resources||!this.options.initImmediate?s():setTimeout(s,0),this},e.prototype.loadResources=function(){var t=this,e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:m;if(this.options.resources)e(null);else{var n=function(){if(t.language&&"cimode"===t.language.toLowerCase())return{v:e()};var n=[],o=function(e){var o=t.services.languageUtils.toResolveHierarchy(e);o.forEach(function(t){n.indexOf(t)<0&&n.push(t)})};o(t.language),t.options.preload&&t.options.preload.forEach(function(t){o(t)}),t.services.cacheConnector.load(n,t.options.ns,function(){t.services.backendConnector.load(n,t.options.ns,e)})}();if("object"===("undefined"==typeof n?"undefined":x(n)))return n.v}},e.prototype.reloadResources=function(t,e){t||(t=this.languages),e||(e=this.options.ns),this.services.backendConnector.reload(t,e)},e.prototype.use=function(t){return"backend"===t.type&&(this.modules.backend=t),"cache"===t.type&&(this.modules.cache=t),("logger"===t.type||t.log&&t.warn&&t.warn)&&(this.modules.logger=t),"languageDetector"===t.type&&(this.modules.languageDetector=t),"postProcessor"===t.type&&_.addPostProcessor(t),this},e.prototype.changeLanguage=function(t,e){var n=this,o=function(o){t&&(n.emit("languageChanged",t),n.logger.log("languageChanged",t)),e&&e(o,function(){for(var t=arguments.length,e=Array(t),o=0;o<t;o++)e[o]=arguments[o];return n.t.apply(n,e)})};!t&&this.services.languageDetector&&(t=this.services.languageDetector.detect()),t&&(this.language=t,this.languages=this.services.languageUtils.toResolveHierarchy(t),this.translator.changeLanguage(t),this.services.languageDetector&&this.services.languageDetector.cacheUserLanguage(t)),this.loadResources(function(t){o(t)})},e.prototype.getFixedT=function(t,e){var n=this,o=function t(e){var o=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},r=S({},o);return r.lng=r.lng||t.lng,r.ns=r.ns||t.ns,n.t(e,r)};return o.lng=t,o.ns=e,o},e.prototype.t=function(){return this.translator&&this.translator.translate.apply(this.translator,arguments)},e.prototype.exists=function(){return this.translator&&this.translator.exists.apply(this.translator,arguments)},e.prototype.setDefaultNamespace=function(t){this.options.defaultNS=t},e.prototype.loadNamespaces=function(t,e){var n=this;return this.options.ns?("string"==typeof t&&(t=[t]),t.forEach(function(t){n.options.ns.indexOf(t)<0&&n.options.ns.push(t)}),void this.loadResources(e)):e&&e()},e.prototype.loadLanguages=function(t,e){"string"==typeof t&&(t=[t]);var n=this.options.preload||[],o=t.filter(function(t){return n.indexOf(t)<0});return o.length?(this.options.preload=n.concat(o),void this.loadResources(e)):e()},e.prototype.dir=function(t){if(t||(t=this.language),!t)return"rtl";var e=["ar","shu","sqr","ssh","xaa","yhd","yud","aao","abh","abv","acm","acq","acw","acx","acy","adf","ads","aeb","aec","afb","ajp","apc","apd","arb","arq","ars","ary","arz","auz","avl","ayh","ayl","ayn","ayp","bbz","pga","he","iw","ps","pbt","pbu","pst","prp","prd","ur","ydd","yds","yih","ji","yi","hbo","men","xmn","fa","jpr","peo","pes","prs","dv","sam"];return e.indexOf(this.services.languageUtils.getLanguagePartFromCode(t))>=0?"rtl":"ltr"},e.prototype.createInstance=function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},n=arguments[1];return new e(t,n)},e.prototype.cloneInstance=function(){var t=this,n=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},o=arguments.length>1&&void 0!==arguments[1]?arguments[1]:m,r=new e(S({},n,this.options,{isClone:!0}),o),i=["store","services","language"];return i.forEach(function(e){r[e]=t[e]}),r.translator=new A(r.services,r.options),r.translator.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),o=1;o<e;o++)n[o-1]=arguments[o];r.emit.apply(r,[t].concat(n))}),r},e}(P),D=new K;return D});
 
-
-/*!
- * Source: lib/jquery-i18next/jquery-i18next.min.js, license: MIT, url: http://i18next.com/
- */
 !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):t.jqueryI18next=e()}(this,function(){"use strict";function t(t,a){function i(n,a,i){function r(t,n){return f.parseDefaultValueFromContent?e({},t,{defaultValue:n}):t}if(0!==a.length){var o="text";if(0===a.indexOf("[")){var l=a.split("]");a=l[1],o=l[0].substr(1,l[0].length-1)}if(a.indexOf(";")===a.length-1&&(a=a.substr(0,a.length-2)),"html"===o)n.html(t.t(a,r(i,n.html())));else if("text"===o)n.text(t.t(a,r(i,n.text())));else if("prepend"===o)n.prepend(t.t(a,r(i,n.html())));else if("append"===o)n.append(t.t(a,r(i,n.html())));else if(0===o.indexOf("data-")){var s=o.substr("data-".length),d=t.t(a,r(i,n.data(s)));n.data(s,d),n.attr(o,d)}else n.attr(o,t.t(a,r(i,n.attr(o))))}}function r(t,n){var r=t.attr(f.selectorAttr);if(r||"undefined"==typeof r||r===!1||(r=t.text()||t.val()),r){var o=t,l=t.data(f.targetAttr);if(l&&(o=t.find(l)||t),n||f.useOptionsAttr!==!0||(n=t.data(f.optionsAttr)),n=n||{},r.indexOf(";")>=0){var s=r.split(";");a.each(s,function(t,e){""!==e&&i(o,e,n)})}else i(o,r,n);if(f.useOptionsAttr===!0){var d={};d=e({clone:d},n),delete d.lng,t.data(f.optionsAttr,d)}}}function o(t){return this.each(function(){r(a(this),t);var e=a(this).find("["+f.selectorAttr+"]");e.each(function(){r(a(this),t)})})}var f=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};f=e({},n,f),a[f.tName]=t.t.bind(t),a[f.i18nName]=t,a.fn[f.handleName]=o}var e=Object.assign||function(t){for(var e=1;e<arguments.length;e++){var n=arguments[e];for(var a in n)Object.prototype.hasOwnProperty.call(n,a)&&(t[a]=n[a])}return t},n={tName:"t",i18nName:"i18n",handleName:"localize",selectorAttr:"data-i18n",targetAttr:"i18n-target",optionsAttr:"i18n-options",useOptionsAttr:!1,parseDefaultValueFromContent:!0},a={init:t};return a});
-
-/*!
- * Source: lib/magnific-popup/dist/jquery.magnific-popup.min.js, license: MIT, url: http://dimsemenov.com/plugins/magnific-popup/
- */
 /*! Magnific Popup - v1.1.0 - 2016-02-20
 * http://dimsemenov.com/plugins/magnific-popup/
 * Copyright (c) 2016 Dmitry Semenov; */
 !function(a){"function"==typeof define&&define.amd?define(["jquery"],a):a("object"==typeof exports?require("jquery"):window.jQuery||window.Zepto)}(function(a){var b,c,d,e,f,g,h="Close",i="BeforeClose",j="AfterClose",k="BeforeAppend",l="MarkupParse",m="Open",n="Change",o="mfp",p="."+o,q="mfp-ready",r="mfp-removing",s="mfp-prevent-close",t=function(){},u=!!window.jQuery,v=a(window),w=function(a,c){b.ev.on(o+a+p,c)},x=function(b,c,d,e){var f=document.createElement("div");return f.className="mfp-"+b,d&&(f.innerHTML=d),e?c&&c.appendChild(f):(f=a(f),c&&f.appendTo(c)),f},y=function(c,d){b.ev.triggerHandler(o+c,d),b.st.callbacks&&(c=c.charAt(0).toLowerCase()+c.slice(1),b.st.callbacks[c]&&b.st.callbacks[c].apply(b,a.isArray(d)?d:[d]))},z=function(c){return c===g&&b.currTemplate.closeBtn||(b.currTemplate.closeBtn=a(b.st.closeMarkup.replace("%title%",b.st.tClose)),g=c),b.currTemplate.closeBtn},A=function(){a.magnificPopup.instance||(b=new t,b.init(),a.magnificPopup.instance=b)},B=function(){var a=document.createElement("p").style,b=["ms","O","Moz","Webkit"];if(void 0!==a.transition)return!0;for(;b.length;)if(b.pop()+"Transition"in a)return!0;return!1};t.prototype={constructor:t,init:function(){var c=navigator.appVersion;b.isLowIE=b.isIE8=document.all&&!document.addEventListener,b.isAndroid=/android/gi.test(c),b.isIOS=/iphone|ipad|ipod/gi.test(c),b.supportsTransition=B(),b.probablyMobile=b.isAndroid||b.isIOS||/(Opera Mini)|Kindle|webOS|BlackBerry|(Opera Mobi)|(Windows Phone)|IEMobile/i.test(navigator.userAgent),d=a(document),b.popupsCache={}},open:function(c){var e;if(c.isObj===!1){b.items=c.items.toArray(),b.index=0;var g,h=c.items;for(e=0;e<h.length;e++)if(g=h[e],g.parsed&&(g=g.el[0]),g===c.el[0]){b.index=e;break}}else b.items=a.isArray(c.items)?c.items:[c.items],b.index=c.index||0;if(b.isOpen)return void b.updateItemHTML();b.types=[],f="",c.mainEl&&c.mainEl.length?b.ev=c.mainEl.eq(0):b.ev=d,c.key?(b.popupsCache[c.key]||(b.popupsCache[c.key]={}),b.currTemplate=b.popupsCache[c.key]):b.currTemplate={},b.st=a.extend(!0,{},a.magnificPopup.defaults,c),b.fixedContentPos="auto"===b.st.fixedContentPos?!b.probablyMobile:b.st.fixedContentPos,b.st.modal&&(b.st.closeOnContentClick=!1,b.st.closeOnBgClick=!1,b.st.showCloseBtn=!1,b.st.enableEscapeKey=!1),b.bgOverlay||(b.bgOverlay=x("bg").on("click"+p,function(){b.close()}),b.wrap=x("wrap").attr("tabindex",-1).on("click"+p,function(a){b._checkIfClose(a.target)&&b.close()}),b.container=x("container",b.wrap)),b.contentContainer=x("content"),b.st.preloader&&(b.preloader=x("preloader",b.container,b.st.tLoading));var i=a.magnificPopup.modules;for(e=0;e<i.length;e++){var j=i[e];j=j.charAt(0).toUpperCase()+j.slice(1),b["init"+j].call(b)}y("BeforeOpen"),b.st.showCloseBtn&&(b.st.closeBtnInside?(w(l,function(a,b,c,d){c.close_replaceWith=z(d.type)}),f+=" mfp-close-btn-in"):b.wrap.append(z())),b.st.alignTop&&(f+=" mfp-align-top"),b.fixedContentPos?b.wrap.css({overflow:b.st.overflowY,overflowX:"hidden",overflowY:b.st.overflowY}):b.wrap.css({top:v.scrollTop(),position:"absolute"}),(b.st.fixedBgPos===!1||"auto"===b.st.fixedBgPos&&!b.fixedContentPos)&&b.bgOverlay.css({height:d.height(),position:"absolute"}),b.st.enableEscapeKey&&d.on("keyup"+p,function(a){27===a.keyCode&&b.close()}),v.on("resize"+p,function(){b.updateSize()}),b.st.closeOnContentClick||(f+=" mfp-auto-cursor"),f&&b.wrap.addClass(f);var k=b.wH=v.height(),n={};if(b.fixedContentPos&&b._hasScrollBar(k)){var o=b._getScrollbarSize();o&&(n.marginRight=o)}b.fixedContentPos&&(b.isIE7?a("body, html").css("overflow","hidden"):n.overflow="hidden");var r=b.st.mainClass;return b.isIE7&&(r+=" mfp-ie7"),r&&b._addClassToMFP(r),b.updateItemHTML(),y("BuildControls"),a("html").css(n),b.bgOverlay.add(b.wrap).prependTo(b.st.prependTo||a(document.body)),b._lastFocusedEl=document.activeElement,setTimeout(function(){b.content?(b._addClassToMFP(q),b._setFocus()):b.bgOverlay.addClass(q),d.on("focusin"+p,b._onFocusIn)},16),b.isOpen=!0,b.updateSize(k),y(m),c},close:function(){b.isOpen&&(y(i),b.isOpen=!1,b.st.removalDelay&&!b.isLowIE&&b.supportsTransition?(b._addClassToMFP(r),setTimeout(function(){b._close()},b.st.removalDelay)):b._close())},_close:function(){y(h);var c=r+" "+q+" ";if(b.bgOverlay.detach(),b.wrap.detach(),b.container.empty(),b.st.mainClass&&(c+=b.st.mainClass+" "),b._removeClassFromMFP(c),b.fixedContentPos){var e={marginRight:""};b.isIE7?a("body, html").css("overflow",""):e.overflow="",a("html").css(e)}d.off("keyup"+p+" focusin"+p),b.ev.off(p),b.wrap.attr("class","mfp-wrap").removeAttr("style"),b.bgOverlay.attr("class","mfp-bg"),b.container.attr("class","mfp-container"),!b.st.showCloseBtn||b.st.closeBtnInside&&b.currTemplate[b.currItem.type]!==!0||b.currTemplate.closeBtn&&b.currTemplate.closeBtn.detach(),b.st.autoFocusLast&&b._lastFocusedEl&&a(b._lastFocusedEl).focus(),b.currItem=null,b.content=null,b.currTemplate=null,b.prevHeight=0,y(j)},updateSize:function(a){if(b.isIOS){var c=document.documentElement.clientWidth/window.innerWidth,d=window.innerHeight*c;b.wrap.css("height",d),b.wH=d}else b.wH=a||v.height();b.fixedContentPos||b.wrap.css("height",b.wH),y("Resize")},updateItemHTML:function(){var c=b.items[b.index];b.contentContainer.detach(),b.content&&b.content.detach(),c.parsed||(c=b.parseEl(b.index));var d=c.type;if(y("BeforeChange",[b.currItem?b.currItem.type:"",d]),b.currItem=c,!b.currTemplate[d]){var f=b.st[d]?b.st[d].markup:!1;y("FirstMarkupParse",f),f?b.currTemplate[d]=a(f):b.currTemplate[d]=!0}e&&e!==c.type&&b.container.removeClass("mfp-"+e+"-holder");var g=b["get"+d.charAt(0).toUpperCase()+d.slice(1)](c,b.currTemplate[d]);b.appendContent(g,d),c.preloaded=!0,y(n,c),e=c.type,b.container.prepend(b.contentContainer),y("AfterChange")},appendContent:function(a,c){b.content=a,a?b.st.showCloseBtn&&b.st.closeBtnInside&&b.currTemplate[c]===!0?b.content.find(".mfp-close").length||b.content.append(z()):b.content=a:b.content="",y(k),b.container.addClass("mfp-"+c+"-holder"),b.contentContainer.append(b.content)},parseEl:function(c){var d,e=b.items[c];if(e.tagName?e={el:a(e)}:(d=e.type,e={data:e,src:e.src}),e.el){for(var f=b.types,g=0;g<f.length;g++)if(e.el.hasClass("mfp-"+f[g])){d=f[g];break}e.src=e.el.attr("data-mfp-src"),e.src||(e.src=e.el.attr("href"))}return e.type=d||b.st.type||"inline",e.index=c,e.parsed=!0,b.items[c]=e,y("ElementParse",e),b.items[c]},addGroup:function(a,c){var d=function(d){d.mfpEl=this,b._openClick(d,a,c)};c||(c={});var e="click.magnificPopup";c.mainEl=a,c.items?(c.isObj=!0,a.off(e).on(e,d)):(c.isObj=!1,c.delegate?a.off(e).on(e,c.delegate,d):(c.items=a,a.off(e).on(e,d)))},_openClick:function(c,d,e){var f=void 0!==e.midClick?e.midClick:a.magnificPopup.defaults.midClick;if(f||!(2===c.which||c.ctrlKey||c.metaKey||c.altKey||c.shiftKey)){var g=void 0!==e.disableOn?e.disableOn:a.magnificPopup.defaults.disableOn;if(g)if(a.isFunction(g)){if(!g.call(b))return!0}else if(v.width()<g)return!0;c.type&&(c.preventDefault(),b.isOpen&&c.stopPropagation()),e.el=a(c.mfpEl),e.delegate&&(e.items=d.find(e.delegate)),b.open(e)}},updateStatus:function(a,d){if(b.preloader){c!==a&&b.container.removeClass("mfp-s-"+c),d||"loading"!==a||(d=b.st.tLoading);var e={status:a,text:d};y("UpdateStatus",e),a=e.status,d=e.text,b.preloader.html(d),b.preloader.find("a").on("click",function(a){a.stopImmediatePropagation()}),b.container.addClass("mfp-s-"+a),c=a}},_checkIfClose:function(c){if(!a(c).hasClass(s)){var d=b.st.closeOnContentClick,e=b.st.closeOnBgClick;if(d&&e)return!0;if(!b.content||a(c).hasClass("mfp-close")||b.preloader&&c===b.preloader[0])return!0;if(c===b.content[0]||a.contains(b.content[0],c)){if(d)return!0}else if(e&&a.contains(document,c))return!0;return!1}},_addClassToMFP:function(a){b.bgOverlay.addClass(a),b.wrap.addClass(a)},_removeClassFromMFP:function(a){this.bgOverlay.removeClass(a),b.wrap.removeClass(a)},_hasScrollBar:function(a){return(b.isIE7?d.height():document.body.scrollHeight)>(a||v.height())},_setFocus:function(){(b.st.focus?b.content.find(b.st.focus).eq(0):b.wrap).focus()},_onFocusIn:function(c){return c.target===b.wrap[0]||a.contains(b.wrap[0],c.target)?void 0:(b._setFocus(),!1)},_parseMarkup:function(b,c,d){var e;d.data&&(c=a.extend(d.data,c)),y(l,[b,c,d]),a.each(c,function(c,d){if(void 0===d||d===!1)return!0;if(e=c.split("_"),e.length>1){var f=b.find(p+"-"+e[0]);if(f.length>0){var g=e[1];"replaceWith"===g?f[0]!==d[0]&&f.replaceWith(d):"img"===g?f.is("img")?f.attr("src",d):f.replaceWith(a("<img>").attr("src",d).attr("class",f.attr("class"))):f.attr(e[1],d)}}else b.find(p+"-"+c).html(d)})},_getScrollbarSize:function(){if(void 0===b.scrollbarSize){var a=document.createElement("div");a.style.cssText="width: 99px; height: 99px; overflow: scroll; position: absolute; top: -9999px;",document.body.appendChild(a),b.scrollbarSize=a.offsetWidth-a.clientWidth,document.body.removeChild(a)}return b.scrollbarSize}},a.magnificPopup={instance:null,proto:t.prototype,modules:[],open:function(b,c){return A(),b=b?a.extend(!0,{},b):{},b.isObj=!0,b.index=c||0,this.instance.open(b)},close:function(){return a.magnificPopup.instance&&a.magnificPopup.instance.close()},registerModule:function(b,c){c.options&&(a.magnificPopup.defaults[b]=c.options),a.extend(this.proto,c.proto),this.modules.push(b)},defaults:{disableOn:0,key:null,midClick:!1,mainClass:"",preloader:!0,focus:"",closeOnContentClick:!1,closeOnBgClick:!0,closeBtnInside:!0,showCloseBtn:!0,enableEscapeKey:!0,modal:!1,alignTop:!1,removalDelay:0,prependTo:null,fixedContentPos:"auto",fixedBgPos:"auto",overflowY:"auto",closeMarkup:'<button title="%title%" type="button" class="mfp-close">&#215;</button>',tClose:"Close (Esc)",tLoading:"Loading...",autoFocusLast:!0}},a.fn.magnificPopup=function(c){A();var d=a(this);if("string"==typeof c)if("open"===c){var e,f=u?d.data("magnificPopup"):d[0].magnificPopup,g=parseInt(arguments[1],10)||0;f.items?e=f.items[g]:(e=d,f.delegate&&(e=e.find(f.delegate)),e=e.eq(g)),b._openClick({mfpEl:e},d,f)}else b.isOpen&&b[c].apply(b,Array.prototype.slice.call(arguments,1));else c=a.extend(!0,{},c),u?d.data("magnificPopup",c):d[0].magnificPopup=c,b.addGroup(d,c);return d};var C,D,E,F="inline",G=function(){E&&(D.after(E.addClass(C)).detach(),E=null)};a.magnificPopup.registerModule(F,{options:{hiddenClass:"hide",markup:"",tNotFound:"Content not found"},proto:{initInline:function(){b.types.push(F),w(h+"."+F,function(){G()})},getInline:function(c,d){if(G(),c.src){var e=b.st.inline,f=a(c.src);if(f.length){var g=f[0].parentNode;g&&g.tagName&&(D||(C=e.hiddenClass,D=x(C),C="mfp-"+C),E=f.after(D).detach().removeClass(C)),b.updateStatus("ready")}else b.updateStatus("error",e.tNotFound),f=a("<div>");return c.inlineElement=f,f}return b.updateStatus("ready"),b._parseMarkup(d,{},c),d}}});var H,I="ajax",J=function(){H&&a(document.body).removeClass(H)},K=function(){J(),b.req&&b.req.abort()};a.magnificPopup.registerModule(I,{options:{settings:null,cursor:"mfp-ajax-cur",tError:'<a href="%url%">The content</a> could not be loaded.'},proto:{initAjax:function(){b.types.push(I),H=b.st.ajax.cursor,w(h+"."+I,K),w("BeforeChange."+I,K)},getAjax:function(c){H&&a(document.body).addClass(H),b.updateStatus("loading");var d=a.extend({url:c.src,success:function(d,e,f){var g={data:d,xhr:f};y("ParseAjax",g),b.appendContent(a(g.data),I),c.finished=!0,J(),b._setFocus(),setTimeout(function(){b.wrap.addClass(q)},16),b.updateStatus("ready"),y("AjaxContentAdded")},error:function(){J(),c.finished=c.loadError=!0,b.updateStatus("error",b.st.ajax.tError.replace("%url%",c.src))}},b.st.ajax.settings);return b.req=a.ajax(d),""}}});var L,M=function(c){if(c.data&&void 0!==c.data.title)return c.data.title;var d=b.st.image.titleSrc;if(d){if(a.isFunction(d))return d.call(b,c);if(c.el)return c.el.attr(d)||""}return""};a.magnificPopup.registerModule("image",{options:{markup:'<div class="mfp-figure"><div class="mfp-close"></div><figure><div class="mfp-img"></div><figcaption><div class="mfp-bottom-bar"><div class="mfp-title"></div><div class="mfp-counter"></div></div></figcaption></figure></div>',cursor:"mfp-zoom-out-cur",titleSrc:"title",verticalFit:!0,tError:'<a href="%url%">The image</a> could not be loaded.'},proto:{initImage:function(){var c=b.st.image,d=".image";b.types.push("image"),w(m+d,function(){"image"===b.currItem.type&&c.cursor&&a(document.body).addClass(c.cursor)}),w(h+d,function(){c.cursor&&a(document.body).removeClass(c.cursor),v.off("resize"+p)}),w("Resize"+d,b.resizeImage),b.isLowIE&&w("AfterChange",b.resizeImage)},resizeImage:function(){var a=b.currItem;if(a&&a.img&&b.st.image.verticalFit){var c=0;b.isLowIE&&(c=parseInt(a.img.css("padding-top"),10)+parseInt(a.img.css("padding-bottom"),10)),a.img.css("max-height",b.wH-c)}},_onImageHasSize:function(a){a.img&&(a.hasSize=!0,L&&clearInterval(L),a.isCheckingImgSize=!1,y("ImageHasSize",a),a.imgHidden&&(b.content&&b.content.removeClass("mfp-loading"),a.imgHidden=!1))},findImageSize:function(a){var c=0,d=a.img[0],e=function(f){L&&clearInterval(L),L=setInterval(function(){return d.naturalWidth>0?void b._onImageHasSize(a):(c>200&&clearInterval(L),c++,void(3===c?e(10):40===c?e(50):100===c&&e(500)))},f)};e(1)},getImage:function(c,d){var e=0,f=function(){c&&(c.img[0].complete?(c.img.off(".mfploader"),c===b.currItem&&(b._onImageHasSize(c),b.updateStatus("ready")),c.hasSize=!0,c.loaded=!0,y("ImageLoadComplete")):(e++,200>e?setTimeout(f,100):g()))},g=function(){c&&(c.img.off(".mfploader"),c===b.currItem&&(b._onImageHasSize(c),b.updateStatus("error",h.tError.replace("%url%",c.src))),c.hasSize=!0,c.loaded=!0,c.loadError=!0)},h=b.st.image,i=d.find(".mfp-img");if(i.length){var j=document.createElement("img");j.className="mfp-img",c.el&&c.el.find("img").length&&(j.alt=c.el.find("img").attr("alt")),c.img=a(j).on("load.mfploader",f).on("error.mfploader",g),j.src=c.src,i.is("img")&&(c.img=c.img.clone()),j=c.img[0],j.naturalWidth>0?c.hasSize=!0:j.width||(c.hasSize=!1)}return b._parseMarkup(d,{title:M(c),img_replaceWith:c.img},c),b.resizeImage(),c.hasSize?(L&&clearInterval(L),c.loadError?(d.addClass("mfp-loading"),b.updateStatus("error",h.tError.replace("%url%",c.src))):(d.removeClass("mfp-loading"),b.updateStatus("ready")),d):(b.updateStatus("loading"),c.loading=!0,c.hasSize||(c.imgHidden=!0,d.addClass("mfp-loading"),b.findImageSize(c)),d)}}});var N,O=function(){return void 0===N&&(N=void 0!==document.createElement("p").style.MozTransform),N};a.magnificPopup.registerModule("zoom",{options:{enabled:!1,easing:"ease-in-out",duration:300,opener:function(a){return a.is("img")?a:a.find("img")}},proto:{initZoom:function(){var a,c=b.st.zoom,d=".zoom";if(c.enabled&&b.supportsTransition){var e,f,g=c.duration,j=function(a){var b=a.clone().removeAttr("style").removeAttr("class").addClass("mfp-animated-image"),d="all "+c.duration/1e3+"s "+c.easing,e={position:"fixed",zIndex:9999,left:0,top:0,"-webkit-backface-visibility":"hidden"},f="transition";return e["-webkit-"+f]=e["-moz-"+f]=e["-o-"+f]=e[f]=d,b.css(e),b},k=function(){b.content.css("visibility","visible")};w("BuildControls"+d,function(){if(b._allowZoom()){if(clearTimeout(e),b.content.css("visibility","hidden"),a=b._getItemToZoom(),!a)return void k();f=j(a),f.css(b._getOffset()),b.wrap.append(f),e=setTimeout(function(){f.css(b._getOffset(!0)),e=setTimeout(function(){k(),setTimeout(function(){f.remove(),a=f=null,y("ZoomAnimationEnded")},16)},g)},16)}}),w(i+d,function(){if(b._allowZoom()){if(clearTimeout(e),b.st.removalDelay=g,!a){if(a=b._getItemToZoom(),!a)return;f=j(a)}f.css(b._getOffset(!0)),b.wrap.append(f),b.content.css("visibility","hidden"),setTimeout(function(){f.css(b._getOffset())},16)}}),w(h+d,function(){b._allowZoom()&&(k(),f&&f.remove(),a=null)})}},_allowZoom:function(){return"image"===b.currItem.type},_getItemToZoom:function(){return b.currItem.hasSize?b.currItem.img:!1},_getOffset:function(c){var d;d=c?b.currItem.img:b.st.zoom.opener(b.currItem.el||b.currItem);var e=d.offset(),f=parseInt(d.css("padding-top"),10),g=parseInt(d.css("padding-bottom"),10);e.top-=a(window).scrollTop()-f;var h={width:d.width(),height:(u?d.innerHeight():d[0].offsetHeight)-g-f};return O()?h["-moz-transform"]=h.transform="translate("+e.left+"px,"+e.top+"px)":(h.left=e.left,h.top=e.top),h}}});var P="iframe",Q="//about:blank",R=function(a){if(b.currTemplate[P]){var c=b.currTemplate[P].find("iframe");c.length&&(a||(c[0].src=Q),b.isIE8&&c.css("display",a?"block":"none"))}};a.magnificPopup.registerModule(P,{options:{markup:'<div class="mfp-iframe-scaler"><div class="mfp-close"></div><iframe class="mfp-iframe" src="//about:blank" frameborder="0" allowfullscreen></iframe></div>',srcAction:"iframe_src",patterns:{youtube:{index:"youtube.com",id:"v=",src:"//www.youtube.com/embed/%id%?autoplay=1"},vimeo:{index:"vimeo.com/",id:"/",src:"//player.vimeo.com/video/%id%?autoplay=1"},gmaps:{index:"//maps.google.",src:"%id%&output=embed"}}},proto:{initIframe:function(){b.types.push(P),w("BeforeChange",function(a,b,c){b!==c&&(b===P?R():c===P&&R(!0))}),w(h+"."+P,function(){R()})},getIframe:function(c,d){var e=c.src,f=b.st.iframe;a.each(f.patterns,function(){return e.indexOf(this.index)>-1?(this.id&&(e="string"==typeof this.id?e.substr(e.lastIndexOf(this.id)+this.id.length,e.length):this.id.call(this,e)),e=this.src.replace("%id%",e),!1):void 0});var g={};return f.srcAction&&(g[f.srcAction]=e),b._parseMarkup(d,g,c),b.updateStatus("ready"),d}}});var S=function(a){var c=b.items.length;return a>c-1?a-c:0>a?c+a:a},T=function(a,b,c){return a.replace(/%curr%/gi,b+1).replace(/%total%/gi,c)};a.magnificPopup.registerModule("gallery",{options:{enabled:!1,arrowMarkup:'<button title="%title%" type="button" class="mfp-arrow mfp-arrow-%dir%"></button>',preload:[0,2],navigateByImgClick:!0,arrows:!0,tPrev:"Previous (Left arrow key)",tNext:"Next (Right arrow key)",tCounter:"%curr% of %total%"},proto:{initGallery:function(){var c=b.st.gallery,e=".mfp-gallery";return b.direction=!0,c&&c.enabled?(f+=" mfp-gallery",w(m+e,function(){c.navigateByImgClick&&b.wrap.on("click"+e,".mfp-img",function(){return b.items.length>1?(b.next(),!1):void 0}),d.on("keydown"+e,function(a){37===a.keyCode?b.prev():39===a.keyCode&&b.next()})}),w("UpdateStatus"+e,function(a,c){c.text&&(c.text=T(c.text,b.currItem.index,b.items.length))}),w(l+e,function(a,d,e,f){var g=b.items.length;e.counter=g>1?T(c.tCounter,f.index,g):""}),w("BuildControls"+e,function(){if(b.items.length>1&&c.arrows&&!b.arrowLeft){var d=c.arrowMarkup,e=b.arrowLeft=a(d.replace(/%title%/gi,c.tPrev).replace(/%dir%/gi,"left")).addClass(s),f=b.arrowRight=a(d.replace(/%title%/gi,c.tNext).replace(/%dir%/gi,"right")).addClass(s);e.click(function(){b.prev()}),f.click(function(){b.next()}),b.container.append(e.add(f))}}),w(n+e,function(){b._preloadTimeout&&clearTimeout(b._preloadTimeout),b._preloadTimeout=setTimeout(function(){b.preloadNearbyImages(),b._preloadTimeout=null},16)}),void w(h+e,function(){d.off(e),b.wrap.off("click"+e),b.arrowRight=b.arrowLeft=null})):!1},next:function(){b.direction=!0,b.index=S(b.index+1),b.updateItemHTML()},prev:function(){b.direction=!1,b.index=S(b.index-1),b.updateItemHTML()},goTo:function(a){b.direction=a>=b.index,b.index=a,b.updateItemHTML()},preloadNearbyImages:function(){var a,c=b.st.gallery.preload,d=Math.min(c[0],b.items.length),e=Math.min(c[1],b.items.length);for(a=1;a<=(b.direction?e:d);a++)b._preloadItem(b.index+a);for(a=1;a<=(b.direction?d:e);a++)b._preloadItem(b.index-a)},_preloadItem:function(c){if(c=S(c),!b.items[c].preloaded){var d=b.items[c];d.parsed||(d=b.parseEl(c)),y("LazyLoad",d),"image"===d.type&&(d.img=a('<img class="mfp-img" />').on("load.mfploader",function(){d.hasSize=!0}).on("error.mfploader",function(){d.hasSize=!0,d.loadError=!0,y("LazyLoadError",d)}).attr("src",d.src)),d.preloaded=!0}}}});var U="retina";a.magnificPopup.registerModule(U,{options:{replaceSrc:function(a){return a.src.replace(/\.\w+$/,function(a){return"@2x"+a})},ratio:1},proto:{initRetina:function(){if(window.devicePixelRatio>1){var a=b.st.retina,c=a.ratio;c=isNaN(c)?c():c,c>1&&(w("ImageHasSize."+U,function(a,b){b.img.css({"max-width":b.img[0].naturalWidth/c,width:"100%"})}),w("ElementParse."+U,function(b,d){d.src=a.replaceSrc(d,c)}))}}}}),A()});
-
-/*!
- * Source: lib/translation.js, license: MIT, url: https://webtranslateit.com/en/projects/10365-JSXC
- */
-var I18next = {"bg":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"bn-BD":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"de":{"translation":{"Logging_in":"Login läuft…","your_connection_is_unencrypted":"Deine Verbindung ist unverschlüsselt.","your_connection_is_encrypted":"Deine Verbindung ist verschlüsselt.","your_buddy_closed_the_private_connection":"Dein Kontakt hat die private Verbindung getrennt.","start_private":"Privat starten","close_private":"Privat abbrechen","your_buddy_is_verificated":"Dein Kontakt ist verifiziert.","you_have_only_a_subscription_in_one_way":"Der Kontaktstatus ist einseitig.","authentication_query_sent":"Authentifizierungsanfrage gesendet.","your_message_wasnt_send_please_end_your_private_conversation":"Deine Nachricht wurde nicht gesendet. Bitte beende die private Konversation.","unencrypted_message_received":"Unverschlüsselte Nachricht erhalten.","not_available":"Nicht verfügbar.","no_connection":"Keine Verbindung.","relogin":"Neu anmelden.","trying_to_start_private_conversation":"Versuche private Konversation zu starten.","Verified":"Verifiziert","Unverified":"Unverifiziert","private_conversation_aborted":"Private Konversation abgebrochen.","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Dein Kontakt hat die private Konversation beendet. Das solltest du auch tun!","conversation_is_now_verified":"Konversation ist jetzt verifiziert","authentication_failed":"Authentifizierung fehlgeschlagen.","Creating_your_private_key_":"Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.","Authenticating_a_buddy_helps_":"Einen Kontakt zu authentifizieren hilft sicherzustellen, dass die Person mit der du sprichst auch die ist die sie sagt.","How_do_you_want_to_authenticate_your_buddy":"Wie willst du __bid_name__ (<b>__bid_jid__</b>) authentifizieren?","Select_method":"Wähle...","Manual":"Manual","Question":"Frage","Secret":"Geheimnis","To_verify_the_fingerprint_":"Um den Fingerprint zu verifizieren kontaktiere dein Kontakt über einen anderen Kommunikationsweg. Zum Beispiel per Telefonanruf.","Your_fingerprint":"Dein Fingerprint","Buddy_fingerprint":"Sein/Ihr Fingerprint","Close":"Schließen","Compared":"Verglichen","To_authenticate_using_a_question_":"Um die Authentifizierung per Frage durchzuführen, wähle eine Frage bei welcher nur dein Kontakt die Antwort kennt.","Ask":"Frage","To_authenticate_pick_a_secret_":"Um deinen Kontakt zu authentifizieren, wähle ein Geheimnis welches nur deinem Kontakt und dir bekannt ist.","Compare":"Vergleiche","Fingerprints":"Fingerprints","Authentication":"Authentifizierung","Message":"Nachricht","Add_buddy":"Kontakt hinzufügen","rename_buddy":"Kontakt umbenennen","delete_buddy":"Kontakt löschen","Login":"Anmeldung","Username":"Benutzername","Password":"Passwort","Cancel":"Abbrechen","Connect":"Verbinden","Type_in_the_full_username_":"Gib bitte den vollen Benutzernamen und optional ein Alias an.","Alias":"Alias","Add":"Hinzufügen","Subscription_request":"Kontaktanfrage","You_have_a_request_from":"Du hast eine Anfrage von","Deny":"Ablehnen","Approve":"Bestätigen","Remove_buddy":"Kontakt entfernen","You_are_about_to_remove_":"Du bist gerade dabei __bid_name__ (<b>__bid_jid__</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.","Continue_without_chat":"Weiter ohne Chat","Please_wait":"Bitte warten","Login_failed":"Chat-Anmeldung fehlgeschlagen","Sorry_we_cant_authentikate_":"Der Chatserver hat die Anmeldung abgelehnt. Falsches Passwort?","Retry":"Zurück","clear_history":"Lösche Verlauf","New_message_from":"Neue Nachricht von __name__","Should_we_notify_you_":"Sollen wir dich in Zukunft über eingehende Nachrichten informieren, auch wenn dieser Tab nicht im Vordergrund ist?","Please_accept_":"Bitte klick auf den \"Zulassen\" Button oben.","Hide_offline":"Offline ausblenden","Show_offline":"Offline einblenden","About":"Über","dnd":"Beschäftigt","Mute":"Ton aus","Unmute":"Ton an","Subscription":"Bezug","both":"beidseitig","Status":"Status","online":"online","chat":"chat","away":"abwesend","xa":"länger abwesend","offline":"offline","none":"keine","Unknown_instance_tag":"Unbekannter instance tag.","Not_one_of_our_latest_keys":"Nicht einer unserer letzten Schlüssel.","Received_an_unreadable_encrypted_message":"Eine unlesbare verschlüsselte Nachricht erhalten.","Online":"Online","Chatty":"Gesprächig","Away":"Abwesend","Extended_away":"Länger abwesend","Offline":"Offline","Friendship_request":"Kontaktanfrage","Confirm":"Bestätigen","Dismiss":"Ablehnen","Remove":"Löschen","Online_help":"Online Hilfe","FN":"Name","N":" ","FAMILY":"Familienname","GIVEN":"Vorname","NICKNAME":"Spitzname","URL":"URL","ADR":"Adresse","STREET":"Straße","EXTADD":"Zusätzliche Adresse","LOCALITY":"Ortschaft","REGION":"Region","PCODE":"Postleitzahl","CTRY":"Land","TEL":"Telefon","NUMBER":"Nummer","EMAIL":"E-Mail","USERID":" ","ORG":"Organisation","ORGNAME":"Name","ORGUNIT":"Abteilung","TITLE":"Titel","ROLE":"Rolle","BDAY":"Geburtstag","DESC":"Beschreibung","PHOTO":" ","send_message":"Sende Nachricht","get_info":"Benutzerinformationen","Settings":"Einstellungen","Priority":"Priorität","Save":"Speichern","User_settings":"Benutzereinstellungen","A_fingerprint_":"Ein Fingerabdruck wird dazu benutzt deinen Gesprächspartner zu identifizieren.","is":"ist","Login_options":"Anmeldeoptionen","BOSH_url":"BOSH url","Domain":"Domain","Resource":"Ressource","On_login":"Beim Anmelden","Received_an_unencrypted_message":"Unverschlüsselte Nachricht empfangen","Sorry_your_buddy_doesnt_provide_any_information":"Dein Kontakt stellt leider keine Informationen bereit.","Info_about":"Info über","Authentication_aborted":"Authentifizierung abgebrochen.","Authentication_request_received":"Authentifizierungsanfrage empfangen.","Log_in_without_chat":"Anmelden ohne Chat","has_come_online":"ist online gekommen","Unknown_sender":"Unbekannter Sender","Please_allow_access_to_microphone_and_camera":"Bitte klick auf den \"Zulassen\" Button oben, um den Zugriff auf Kamera und Mikrofon zu erlauben.","Incoming_call":"Eingehender Anruf","from":"von","Do_you_want_to_accept_the_call_from":"Möchtest Du den Anruf annehmen von","Reject":"Ablehnen","Accept":"Annehmen","hang_up":"Auflegen","snapshot":"Schnappschuss","mute_my_audio":"Mein Ton aus","pause_my_video":"Mein Video pausieren","fullscreen":"Vollbild","Info":"Info","Local_IP":"Lokale IP","Remote_IP":"Remote IP","Local_Fingerprint":"Lokaler Fingerprint","Remote_Fingerprint":"Remote Fingerprint","Video_call_not_possible":"Videoanruf nicht verfügbar. Dein Gesprächspartner unterstützt keine Videotelefonie.","Start_video_call":"Starte Videoanruf","Join_chat":"Gruppe beitreten","Join":"Betreten","Room":"Gruppe","Nickname":"Nickname","left_the_building":"__nickname__ hat die Gruppe verlassen","entered_the_room":"__nickname__ ist der Gruppe beigetreten","is_now_known_as":"__oldNickname__ ist nun unter __newNickname__ bekannt","This_room_is":"Diese Gruppe ist","muc_hidden":{"keyword":"versteckt","description":"kann durch die Suche nicht gefunden werden"},"muc_membersonly":{"keyword":"nur für Mitglieder","description":"du musst auf der Mitgliederliste stehen"},"muc_moderated":{"keyword":"moderiert","description":"Nur Personen die \"Mitspracherecht\" haben dürfen Nachrichten senden"},"muc_nonanonymous":{"keyword":"nicht anonym","description":"deine Jabber ID wird für alle Mitglieder sichtbar sein"},"muc_open":{"keyword":"offen","description":"jeder darf dieser Gruppe beitreten"},"muc_passwordprotected":{"keyword":"passwortgeschützt","description":"du benötigst das korrekte Passwort"},"muc_persistent":{"keyword":"permanent","description":"wird nicht geschlossen, wenn das letzte Mitglied die Gruppe verlässt"},"muc_public":{"keyword":"öffentlich","description":"kann durch die Suche gefunden werden"},"muc_semianonymous":{"keyword":"teilweise anonym","description":"deine Jabber ID wird nur für die Gruppen Administratoren sichtbar sein"},"muc_temporary":{"keyword":"temporär","description":"wird geschlossen, wenn das letzte Mitglied die Gruppe verlässt"},"muc_unmoderated":{"keyword":"nicht moderiert","description":"jeder darf Nachrichten senden"},"muc_unsecured":{"keyword":"ungesichert","description":"es wird kein Passwort benötigt"},"Continue":"Weiter","Server":"Server","Rooms_are_loaded":"Gruppen werden geladen","Could_load_only":"Es konnten nur __count__ Gruppen für die Autovervollständigung geladen werden","muc_explanation":"Bitte trage den Gruppennamen und optional ein Nickname und Passwort ein um einer Gruppe beizutreten","You_already_joined_this_room":"Du bist dieser Gruppe bereits beigetreten","This_room_will_be_closed":"Diese Gruppe wird geschlossen","Room_not_found_":"Es wird eine neue Gruppe erstellt","Loading_room_information":"Informationen über Gruppe werden geladen","Destroy":"Auflösen","Leave":"Verlassen","changed_subject_to":"__nickname__ hat das Thema auf __subject__ geändert","muc_removed_kicked":"Du wurdest aus der Gruppe entfernt","muc_removed_info_kicked":"__nickname__ wurde aus der Gruppe entfernt","muc_removed_banned":"Du wurdest aus der Gruppe ausgeschlossen","muc_removed_info_banned":"__nickname__ wurde aus der Gruppe ausgeschlossen","muc_removed_affiliation":"Du wurdest aus der Gruppe entfernt wegen einer Änderung deines Mitgliedstatus","muc_removed_info_affiliation":"__nickname__ wurde aus der Gruppe entfernt wegen einer Änderung seines Mitgliedstatus","muc_removed_membersonly":"Diese Gruppe erlaubt jetzt nur noch eingetragene Mitglieder und da du nicht dazugehörst, wurdest du aus der Gruppen entfernt","muc_removed_info_membersonly":"Diese Gruppe erlaubt jetzt nur noch eingetragene Mitglieder und __nickname__ gehört nicht dazu, daher wurde er aus der Gruppe entfernt","muc_removed_shutdown":"Du wurdest aus der Gruppe entfernt, da der MUC Server heruntergefahren wird","Reason":"Grund","message_not_send":"Deine Nachricht wurde aufgrund eines Fehlers nicht versandt","message_not_send_item-not-found":"Deine Nachricht wurde nicht versandt, da der Raum nicht mehr existiert","message_not_send_forbidden":"Deine Nachricht wurde nicht versandt, da du kein \"Mitspracherecht\" hast","message_not_send_not-acceptable":"Deine Nachricht wurde nicht versandt, da du kein Mitglied dieser Gruppe bist","This_room_has_been_closed":"Diese Gruppe wurde geschlossen","Room_logging_is_enabled":"Gesprächsverlauf kann öffentlich einsehbar sein","A_password_is_required":"Es wird ein Passwort benötigt","You_are_not_on_the_member_list":"Du bist kein eingetragenes Mitglied","You_are_banned_from_this_room":"Du wurdest von dieser Gruppe ausgeschlossen","Your_desired_nickname_":"Dein gewünschter Nickname wird bereits verwendet. Bitte wähle einen anderen.","The_maximum_number_":"Die maximale Anzahl der Mitglieder wurde erreicht.","This_room_is_locked_":"Diese Gruppe ist gesperrt","You_are_not_allowed_to_create_":"Du darfst keine neue Gruppe erstellen","Alert":"Alarm","Call_started":"Anruf gestarted","Call_terminated":"Anruf beendet","Carbon_copy":"Kopie","Enable":"Aktivieren","jingle_reason_busy":"beschäftigt","jingle_reason_decline":"abgelehnt","jingle_reason_success":"aufgelegt","Media_failure":"Gerätefehler","No_local_audio_device":"Kein eigenes Audio Gerät","No_local_video_device":"Keine eigene Webcam","Ok":"Ok","PermissionDeniedError":"Du oder dein Browser haben die Audio/Video Berechtigung verweigert","Use_local_audio_device":"Nutze eigenes Audio Gerät","Use_local_video_device":"Benutze eigene Webcam","is_":"ist __status__","You_received_a_message_from_an_unknown_sender_":"Du hast eine Nachricht von einem unbekannten Sender erhalten (__sender__) Möchtest du sie sehen?","Your_roster_is_empty_add_":"Deine Kontaktliste ist leer, füge einen neuen Kontakt  <a>hinzu</a>","onsmp_explanation_question":"Dein Kontakt versucht herauszufinden ob er wirklich mit dir redet. Um dich gegenüber deinem Kontakt zu verifizieren  gib die Antwort ein und klick auf Antworten.","onsmp_explanation_secret":"Dein Kontakt versucht herauszufinden ob er wirklich mit dir redet. Um dich gegenüber deinem Kontakt zu verifizieren  gib das Geheimnis ein.","from_sender":"von __sender__","Verified_private_conversation_started":"Verifizierte private Konversation gestartet.","Unverified_private_conversation_started":"Unverifizierte private Konversation gestartet.","Bookmark":"Lesezeichen","Auto-join":"Automatisch beitreten","Edit_bookmark":"Lesezeichen bearbeiten","Room_logging_is_disabled":"Gruppen Log ist deaktiviert","Room_is_now_non-anoymous":"Gruppe ist jetzt nicht anonym","Room_is_now_semi-anonymous":"Gruppe ist jetzt semi-anonym","Do_you_want_to_change_the_default_room_configuration":"Möchtest du die Gruppenkonfiguration ändern?","Default":"Standard","Change":"Ändern","Send_file":"Datei senden","setting-explanation-carbon":"Wenn Kopien aktiviert sind, werden alle eingehenden Nachrichten zu allen angemeldeten Clients gesendet.","setting-explanation-login":"Wenn diese Option aktiviert ist, wird der Chat beim anmelden automatisch gestartet.","setting-explanation-priority":"Wenn du mit deinem XMPP Konto mehrfach angemeldet bist, werden Nachrichten zu dem Client mit der höchsten Priorität zugestellt.","setting-explanation-xmpp":"Diese Optionen werden für die Verbindung zum XMPP server genutzt.","_is_composing":" tippt gerade...","_are_composing":" tippen gerade...","Chat_state_notifications":"Statusbenachrichtigungen","setting-explanation-chat-state":"Möchtest Benachrichtigungen senden und erhalten wenn du oder dein Kontakt Nachrichten tippt?","Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":"Schließe alle"}},"el":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"en":{"translation":{"Logging_in":"Logging in…","your_connection_is_unencrypted":"Your connection is unencrypted.","your_connection_is_encrypted":"Your connection is encrypted.","your_buddy_closed_the_private_connection":"Your contact closed the private connection.","start_private":"Start private","close_private":"Close private","your_buddy_is_verificated":"Your contact is verified.","you_have_only_a_subscription_in_one_way":"You only have a one-way subscription.","authentication_query_sent":"Authentication query sent.","your_message_wasnt_send_please_end_your_private_conversation":"Your message was not sent. Please end your private conversation.","unencrypted_message_received":"Unencrypted message received","not_available":"Not available","no_connection":"No connection!","relogin":"relogin","trying_to_start_private_conversation":"Trying to start private conversation!","Verified":"Verified","Unverified":"Unverified","private_conversation_aborted":"Private conversation aborted!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Your contact closed the private conversation! You should do the same.","conversation_is_now_verified":"Conversation is now verified.","authentication_failed":"Authentication failed.","Creating_your_private_key_":"Creating your private key; this may take a while.","Authenticating_a_buddy_helps_":"Authenticating a contact helps ensure that the person you are talking to is really the one they claim to be.","How_do_you_want_to_authenticate_your_buddy":"How do you want to authenticate __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Select method...","Manual":"Manual","Question":"Question","Secret":"Secret","To_verify_the_fingerprint_":"To verify the fingerprint, contact your contact via some other trustworthy channel, such as the telephone.","Your_fingerprint":"Your fingerprint","Buddy_fingerprint":"Contact fingerprint","Close":"Close","Compared":"Compared","To_authenticate_using_a_question_":"To authenticate using a question, pick a question whose answer is known only you and your contact.","Ask":"Ask","To_authenticate_pick_a_secret_":"To authenticate, pick a secret known only to you and your contact.","Compare":"Compare","Fingerprints":"Fingerprints","Authentication":"Authentication","Message":"Message","Add_buddy":"Add contact","rename_buddy":"rename contact","delete_buddy":"delete contact","Login":"Login","Username":"Username","Password":"Password","Cancel":"Cancel","Connect":"Connect","Type_in_the_full_username_":"Type in the full username and an optional alias.","Alias":"Alias","Add":"Add","Subscription_request":"Subscription request","You_have_a_request_from":"You have a request from","Deny":"Deny","Approve":"Approve","Remove_buddy":"Remove contact","You_are_about_to_remove_":"You are about to remove __bid_name__ (<b>__bid_jid__</b>) from your contact list. All related chats will be closed.","Continue_without_chat":"Continue without chat","Please_wait":"Please wait","Login_failed":"Chat login failed","Sorry_we_cant_authentikate_":"Authentication failed with the chat server. Maybe the password is wrong?","Retry":"Back","clear_history":"Clear history","New_message_from":"New message from __name__","Should_we_notify_you_":"Should we notify you about new messages in the future?","Please_accept_":"Please click the \"Allow\" button at the top.","Hide_offline":"Hide offline contacts","Show_offline":"Show offline contacts","About":"About","dnd":"Do Not Disturb","Mute":"Mute","Unmute":"Unmute","Subscription":"Subscription","both":"both","Status":"Status","online":"online","chat":"chat","away":"away","xa":"extended away","offline":"offline","none":"none","Unknown_instance_tag":"Unknown instance tag.","Not_one_of_our_latest_keys":"Not one of our latest keys.","Received_an_unreadable_encrypted_message":"Received an unreadable encrypted message.","Online":"Online","Chatty":"Chatty","Away":"Away","Extended_away":"Extended away","Offline":"Offline","Friendship_request":"Contact request","Confirm":"Confirm","Dismiss":"Dismiss","Remove":"Remove","Online_help":"Online help","FN":"Full name","N":" ","FAMILY":"Family name","GIVEN":"Given name","NICKNAME":"Nickname","URL":"URL","ADR":"Address","STREET":"Street Address","EXTADD":"Extended Address","LOCALITY":"Locality","REGION":"Region","PCODE":"Postal Code","CTRY":"Country","TEL":"Telephone","NUMBER":"Number","EMAIL":"Email","USERID":" ","ORG":"Organization","ORGNAME":"Name","ORGUNIT":"Unit","TITLE":"Job title","ROLE":"Role","BDAY":"Birthday","DESC":"Description","PHOTO":" ","send_message":"Send message","get_info":"Show information","Settings":"Settings","Priority":"Priority","Save":"Save","User_settings":"User settings","A_fingerprint_":"A fingerprint is used to make sure that the person you are talking to is who he or she is saying.","is":"is","Login_options":"Login options","BOSH_url":"BOSH URL","Domain":"Domain","Resource":"Resource","On_login":"On login","Received_an_unencrypted_message":"Received an unencrypted message","Sorry_your_buddy_doesnt_provide_any_information":"Sorry, your contact does not provide any information.","Info_about":"Info about","Authentication_aborted":"Authentication aborted.","Authentication_request_received":"Authentication request received.","Log_in_without_chat":"Log in without chat","has_come_online":"has come online","Unknown_sender":"Unknown sender","Please_allow_access_to_microphone_and_camera":"Please click the \"Allow\" button at the top, to allow access to microphone and camera.","Incoming_call":"Incoming call","from":"from","Do_you_want_to_accept_the_call_from":"Do you want to accept the call from","Reject":"Reject","Accept":"Accept","hang_up":"hang up","snapshot":"snapshot","mute_my_audio":"mute my audio","pause_my_video":"pause my video","fullscreen":"fullscreen","Info":"Info","Local_IP":"Local IP","Remote_IP":"Remote IP","Local_Fingerprint":"Local fingerprint","Remote_Fingerprint":"Remote fingerprint","Video_call_not_possible":"Video call not possible. Your contact does not support video calls.","Start_video_call":"Start video call","Join_chat":"Join chat","Join":"Join","Room":"Room","Nickname":"Nickname","left_the_building":"__nickname__ left the building","entered_the_room":"__nickname__ entered the room","is_now_known_as":"__oldNickname__ is now known as __newNickname__","This_room_is":"This room is","muc_hidden":{"keyword":"hidden","description":"can not be found through search"},"muc_membersonly":{"keyword":"members-only","description":"you need to be on the member list"},"muc_moderated":{"keyword":"moderated","description":"only persons with \"voice\" are allowed to send messages"},"muc_nonanonymous":{"keyword":"non-anonymous","description":"your jabber id is exposed to all other occupants"},"muc_open":{"keyword":"open","description":"everyone is allowed to join"},"muc_passwordprotected":{"keyword":"password-protected","description":"you need to provide the correct password"},"muc_persistent":{"keyword":"persistent","description":"will not be destroyed if the last occupant left"},"muc_public":{"keyword":"public","description":"can be found through search"},"muc_semianonymous":{"keyword":"semi-anonymous","description":"your jabber id is only exposed to room admins"},"muc_temporary":{"keyword":"temporary","description":"will be destroyed if the last occupant left"},"muc_unmoderated":{"keyword":"unmoderated","description":"everyone is allowed to send messages"},"muc_unsecured":{"keyword":"unsecured","description":"you need no password to enter"},"Continue":"Continue","Server":"Server","Rooms_are_loaded":"Rooms are loaded","Could_load_only":"Could load only __count__ rooms for autocomplete","muc_explanation":"Please enter room name and optional a nickname and password to join a chat","You_already_joined_this_room":"You already joined this room","This_room_will_be_closed":"This room will be closed","Room_not_found_":"A new room will be created","Loading_room_information":"Loading room information","Destroy":"Destroy","Leave":"Leave","changed_subject_to":"__nickname__ changed the room subject to \"__subject__\"","muc_removed_kicked":"You have been kicked from the room","muc_removed_info_kicked":"__nickname__ has been kicked from the room","muc_removed_banned":"You have been banned from the room","muc_removed_info_banned":"__nickname__ has been banned from the room","muc_removed_affiliation":"You have been removed from the room, because of an affiliation change","muc_removed_info_affiliation":"__nickname__ has been removed from the room, because of an affiliation change","muc_removed_membersonly":"You have been removed from the room, because the room has been changed to members-only and you are no member","muc_removed_info_membersonly":"__nickname__ has been removed from the room, because the room has been changed to members-only and you are no member","muc_removed_shutdown":"You have been removed from the room, because the MUC service is being shut down","Reason":"Reason","message_not_send":"Your message was not send because of an error","message_not_send_item-not-found":"Your message was not send because this room does not exist","message_not_send_forbidden":"Your message was not send because you have no voice in this room","message_not_send_not-acceptable":"Your message was not send because you are no occupant of this room","This_room_has_been_closed":"This room has been closed","Room_logging_is_enabled":"Room logging is enabled","A_password_is_required":"A password is required","You_are_not_on_the_member_list":"You are not on the member list","You_are_banned_from_this_room":"You are banned from this room","Your_desired_nickname_":"Your desired nickname is already in use. Please choose another","The_maximum_number_":"The maximum number of user is reached in this room","This_room_is_locked_":"This room is locked","You_are_not_allowed_to_create_":"You are not allowed to create a room","Alert":"Alert","Call_started":"Call started","Call_terminated":"Call terminated","Carbon_copy":"Carbon copy","Enable":"Enable","jingle_reason_busy":"busy","jingle_reason_decline":"decline","jingle_reason_success":"hung up","Media_failure":"Media failure","No_local_audio_device":"No local audio device.","No_local_video_device":"No local video device.","Ok":"Ok","PermissionDeniedError":"You or your browser denied media permission","Use_local_audio_device":"Use local audio device.","Use_local_video_device":"Use local video device.","is_":"is __status__","You_received_a_message_from_an_unknown_sender_":"You received a message from an unknown sender (__sender__) Do you want to display them?","Your_roster_is_empty_add_":"Your roster is empty, add a  <a>new contact</a>","onsmp_explanation_question":"You contact is attempting to determine if they are really talking to you. To authenticate to your contact,  enter the answer and click Answer.","onsmp_explanation_secret":"You contact is attempting to determine if they are really talking to you. To authenticate to your contact,  enter the secret.","from_sender":"from __sender__","Verified_private_conversation_started":"Verified Private conversation started.","Unverified_private_conversation_started":"Unverified Private conversation started.","Bookmark":"Bookmark","Auto-join":"Auto-join","Edit_bookmark":"Edit bookmark","Room_logging_is_disabled":"Room logging is disabled","Room_is_now_non-anoymous":"Room is now non-anonymous","Room_is_now_semi-anonymous":"Room is now semi-anonymous","Do_you_want_to_change_the_default_room_configuration":"Do you want to change the default room configuration?","Default":"Default","Change":"Change","Send_file":"Send file","setting-explanation-carbon":"With enabled carbon copy your XMPP server will send a copy of every incoming message for you to this client even if it was not addressed to it.","setting-explanation-login":"If this option is enabled, the chat will start on login.","setting-explanation-priority":"If you are logged in multiple times with the same account, your XMPP server will deliver messages to the client with the highest priority.","setting-explanation-xmpp":"These options are used to connect to the XMPP server.","_is_composing":" is composing...","_are_composing":" are composing...","Chat_state_notifications":"Chat state notifications","setting-explanation-chat-state":"Do you want to send and receive chat state notifications, like someone starts or stops composing a message?","Share_screen":"Share screen","Incoming_stream":"Incoming stream","Stream_started":"Stream started","HTTPS_REQUIRED":"This action requires an encrypted connection.","EXTENSION_UNAVAILABLE":"You need a browser extension/addon.","UNKNOWN_ERROR":"An unknown error occured.","Install_extension":"Please install the extension in order to use screen sharing: ","Connection_accepted":"Connection accepted","Stream_terminated":"Stream terminated","Close_all":"Close all","Notification":"Notification"}},"es":{"translation":{"Logging_in":"Por favor, espere...","your_connection_is_unencrypted":"Su conexión no está cifrada.","your_connection_is_encrypted":"Su conexión está cifrada.","your_buddy_closed_the_private_connection":"Su amigo ha cerrado la conexión privada.","start_private":"Iniciar privado","close_private":"Cerrar privado","your_buddy_is_verificated":"Tu amigo está verificado.","you_have_only_a_subscription_in_one_way":"Solo tienes una suscripción de un modo.","authentication_query_sent":"Consulta de verificación enviada.","your_message_wasnt_send_please_end_your_private_conversation":"Su mensaje no fue enviado. Por favor, termine su conversación privada.","unencrypted_message_received":"Mensaje no cifrado recibido:","not_available":"No disponible","no_connection":"¡Sin conexión!","relogin":"iniciar sesión nuevamente","trying_to_start_private_conversation":"¡Intentando iniciar una conversación privada!","Verified":"Verificado","Unverified":"No verificado","private_conversation_aborted":"¡Conversación privada abortada!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"¡Su amigo cerró la conversación privada! Usted debería hacer lo mismo.","conversation_is_now_verified":"La conversación es ahora verificada.","authentication_failed":"Falló la verificación.","Creating_your_private_key_":"Ahora vamos a crear su clave privada. Esto puede tomar algún tiempo.","Authenticating_a_buddy_helps_":"Autenticación de un amigo ayuda a garantizar que la persona que está hablando es quien él o ella está diciendo.","How_do_you_want_to_authenticate_your_buddy":"¿Cómo desea autenticar __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Escoja un método...","Manual":"Manual","Question":"Pregunta","Secret":"Secreto","To_verify_the_fingerprint_":"Para verificar la firma digital, póngase en contacto con su amigo a través de algún otro canal autenticado, como el teléfono.","Your_fingerprint":"Tu firma digital","Buddy_fingerprint":"firma digital de tu amigo","Close":"Cerrar","Compared":"Comparado","To_authenticate_using_a_question_":"Para autenticar mediante una pregunta, elegid una pregunta cuya respuesta se conoce solo usted y su amigo.","Ask":"Preguntar","To_authenticate_pick_a_secret_":"Para autenticar, elija un secreto conocido solo por usted y su amigo.","Compare":"Comparar","Fingerprints":"Firmas digitales","Authentication":"Autenticación","Message":"Mensaje","Add_buddy":"Añadir amigo","rename_buddy":"renombrar amigo","delete_buddy":"eliminar amigo","Login":"Iniciar Sesión","Username":"Usuario","Password":"Contraseña","Cancel":"Cancelar","Connect":"Conectar","Type_in_the_full_username_":"Escriba el usuario completo y un alias opcional.","Alias":"Alias","Add":"Añadir","Subscription_request":"Solicitud de suscripción","You_have_a_request_from":"Tienes una petición de","Deny":"Rechazar","Approve":"Aprobar","Remove_buddy":"Eliminar amigo","You_are_about_to_remove_":"Vas a eliminar a __bid_name__ (<b>__bid_jid__</b>) de tu lista de amigos. Todas las conversaciones relacionadas serán cerradas.","Continue_without_chat":"Continuar","Please_wait":"Espere por favor","Login_failed":"Fallo el inicio de sesión","Sorry_we_cant_authentikate_":"Lo sentimos, no podemos autentificarlo en nuestro servidor de chat. ¿Tal vez la contraseña es incorrecta?","Retry":"Reintentar","clear_history":"Borrar el historial","New_message_from":"Nuevo mensaje de __name__","Should_we_notify_you_":"¿Debemos notificarle sobre nuevos mensajes en el futuro?","Please_accept_":"Por favor, haga clic en el botón \"Permitir\" en la parte superior.","Hide_offline":"Ocultar contactos desconectados","Show_offline":"Mostrar contactos desconectados","About":"Acerca de","dnd":"No Molestar","Mute":"Desactivar sonido","Unmute":"Activar sonido","Subscription":"Suscripción","both":"ambos","Status":"Estado","online":"en línea","chat":"chat","away":"ausente","xa":"más ausente","offline":"desconectado","none":"nadie","Unknown_instance_tag":"Etiqueta de instancia desconocida.","Not_one_of_our_latest_keys":"No una de nuestras última claves.","Received_an_unreadable_encrypted_message":"Se recibió un mensaje cifrado ilegible.","Online":"En linea","Chatty":"Hablador","Away":"Ausente","Extended_away":"Más ausente","Offline":"Desconectado","Friendship_request":"Solicitud de amistad","Confirm":"Confirmar","Dismiss":"Rechazar","Remove":"Eliminar","Online_help":"Ayuda en línea","FN":"Nombre completo ","N":" ","FAMILY":"Apellido","GIVEN":"Nombre","NICKNAME":"Apodo","URL":"URL","ADR":"Dirección","STREET":"Calle","EXTADD":"Dirección extendida","LOCALITY":"Población","REGION":"Región","PCODE":"Código postal","CTRY":"País","TEL":"Teléfono","NUMBER":"Número","EMAIL":"Correo electrónico","USERID":" ","ORG":"Organización","ORGNAME":"Nombre","ORGUNIT":"Departamento","TITLE":"Título","ROLE":"Rol","BDAY":"Cumpleaños","DESC":"Descripción","PHOTO":" ","send_message":"mandar un texto","get_info":"obtener información","Settings":"Ajustes","Priority":"Prioridad","Save":"Guardar","User_settings":"Configuración de usuario","A_fingerprint_":"La huella digital se utiliza para que puedas estar seguro que la persona con la que estas hablando es quien realmente dice ser","is":"es","Login_options":"Opciones de login","BOSH_url":"BOSH url","Domain":"Dominio","Resource":"Recurso","On_login":"Iniciar sesión","Received_an_unencrypted_message":"Recibe un mensaje no cifrado","Sorry_your_buddy_doesnt_provide_any_information":"Lo sentimos, su amigo no provee ninguna información.","Info_about":"Info acerca de","Authentication_aborted":"Autenticación abortada","Authentication_request_received":"Pedido de autenticación recibido.","Log_in_without_chat":"Ingresar sin chat","has_come_online":"se ha conectado","Unknown_sender":"Remitente desconocido","Please_allow_access_to_microphone_and_camera":"Por favor, permitir el acceso al micrófono y la cámara.","Incoming_call":"Llamada entrante","from":"de","Do_you_want_to_accept_the_call_from":"Desea aceptar la llamada de","Reject":"Rechazar","Accept":"Aceptar","hang_up":"colgar","snapshot":"instantánea","mute_my_audio":"silenciar mi audio","pause_my_video":"pausar mi vídeo","fullscreen":"pantalla completa","Info":"Info","Local_IP":"IP local","Remote_IP":"IP remota","Local_Fingerprint":"Firma digital local","Remote_Fingerprint":"Firma digital remota","Video_call_not_possible":"Llamada de vídeo no es posible","Start_video_call":"Iniciar llamada de vídeo","Join_chat":"Unirse al chat","Join":"Unirse","Room":"Sala","Nickname":"Alias","left_the_building":"__nickname__ dejó el edificio","entered_the_room":"__nickname__ entró en la sala","is_now_known_as":"__oldNickname__ ahora es conocido como __newNickname__","This_room_is":"Esta sala es","muc_hidden":{"keyword":"oculta","description":"no se encontró mediante la búsqueda"},"muc_membersonly":{"keyword":"miembros solo","description":"necesitas estar en la lista de miembros"},"muc_moderated":{"keyword":"moderada","description":"solo personas con \"voice\" están permitidas para mandar mensajes"},"muc_nonanonymous":{"keyword":"no anónima","description":"tu id de jabber es expuesta al resto de ocupantes"},"muc_open":{"keyword":"abierta","description":"todo el mundo puede unirse"},"muc_passwordprotected":{"keyword":"protegida por contraseña","description":"necesitas dar la contraseña correcta"},"muc_persistent":{"keyword":"persistente","description":"no será destruida si el último ocupante sale"},"muc_public":{"keyword":"pública","description":"puede ser encontrada mediante la búsqueda"},"muc_semianonymous":{"keyword":"semi-anónima","description":"tu id de jabber es expuesta a los administradores de la sala"},"muc_temporary":{"keyword":"temporal","description":"será destruida si el último ocupante sale"},"muc_unmoderated":{"keyword":"no moderada","description":"todo el mundo puede enviar mensajes"},"muc_unsecured":{"keyword":"sin asegurar","description":"no necesitas contraseña para entrar"},"Continue":"Continuar","Server":"Servidor","Rooms_are_loaded":"Las salas han sido cargadas","Could_load_only":"Se cargaron solo __count__ salas para el autocompletado","muc_explanation":"Por favor introduce el nombre de la sala, un alias opcional y una contraseña para unirse al chat","You_already_joined_this_room":"Ya te has unido a esta sala","This_room_will_be_closed":"Esta sale será cerrada","Room_not_found_":"Sala no encontrada","Loading_room_information":"Cargando información de la sala","Destroy":"Destruir","Leave":"Abandonar","changed_subject_to":"__nickname__ cambió el asunto de la sala a \"__subject__\"","muc_removed_kicked":"Has sido echado de la sala","muc_removed_info_kicked":"__nickname__ ha sido echado de la sala","muc_removed_banned":"Has sido expulsado de la sala","muc_removed_info_banned":"__nickname__ ha sido expulsado","muc_removed_affiliation":"Has sido eliminado de la sala debido a un cambio en la afiliación","muc_removed_info_affiliation":"__nickname__ ha sido eliminado de la sala debido a un cambio en la afiliación","muc_removed_membersonly":"Has sido eliminado de la sala debido a que la sala ha sido cambiada a miembros solo y tú no eres un miembro","muc_removed_info_membersonly":"__nickname__ ha sido eliminado de la sala debido a que la sala ha sido cambiada a miembros solo y tú no eres un miembro","muc_removed_shutdown":"Has sido eliminado de la sala debido a que el servicio MUC está siendo apagado","Reason":"Razón","message_not_send":"Tu mensaje no fue enviado debido a un error","message_not_send_item-not-found":"Tu mensaje no fue enviado debido a que esta sala no existe","message_not_send_forbidden":"Tu mensaje no fue enviado debido a que no tienes voz en esta sala","message_not_send_not-acceptable":"Tu mensaje no fue enviado debido a que no eres un ocupante de esta sala ","This_room_has_been_closed":"Esta sala ha sido cerrada","Room_logging_is_enabled":"Log de sala está habilitado","A_password_is_required":"Se requiere una contraseña","You_are_not_on_the_member_list":"No estás en la lista de miembros","You_are_banned_from_this_room":"Estás expulsado de esta sala","Your_desired_nickname_":"Tu alias ya está en uso. Por favor elige otro","The_maximum_number_":"El máximo número de usuarios ha sido alcanzado en esta sala","This_room_is_locked_":"Esta sala está bloqueada","You_are_not_allowed_to_create_":"No tienes permiso para crear una sala","Alert":"Alerta","Call_started":"Llamada empezada","Call_terminated":"Llamada terminada","Carbon_copy":"Calco","Enable":"Activar","jingle_reason_busy":"ocupado","jingle_reason_decline":"rechazar","jingle_reason_success":"colgar","Media_failure":"Fallo multimedia","No_local_audio_device":"No hay dispositivo de audio local","No_local_video_device":"No hay dispositivo de vídeo local","Ok":"Ok","PermissionDeniedError":"Tú o tu navegador denegaron el permiso de audio/vídeo","Use_local_audio_device":"Usar dispositivo de audio local","Use_local_video_device":"Usar dispositivo de vídeo","is_":"es __status__","You_received_a_message_from_an_unknown_sender_":"Ha recibido un mensaje de un remitente desconocido (__sender__) ¿Quiere mostrarlos?","Your_roster_is_empty_add_":"Tu lista de amigos esta vacía, añadir un <a>nuevo amigo</a>","onsmp_explanation_question":"Tu amigo está tratando de determinar si él o ella está realmente hablando con usted. Para autenticar a su amigo,  introduce la respuesta y haga clic en Contestar.","onsmp_explanation_secret":"Tu amigo está tratando de determinar si él o ella está realmente hablando con usted. Para autenticar a su amigo,  especifique el secreto.","from_sender":"de __sender__","Verified_private_conversation_started":"Verificado se inició una conversación privada.","Unverified_private_conversation_started":"No verificado se inició una conversación privada.","Bookmark":"Favorito","Auto-join":"Auto-unir","Edit_bookmark":"Editar favorito","Room_logging_is_disabled":"Log de sala está deshabilitado","Room_is_now_non-anoymous":"La sala es ahora no anónima","Room_is_now_semi-anonymous":"La sale es ahora semi-anónima","Do_you_want_to_change_the_default_room_configuration":"¿Quieres cambiar la configuración por defecto de la sala?","Default":"Por defecto","Change":"Cambiar","Send_file":"Enviar archivo","setting-explanation-carbon":"Con el Calco habilitado tu servidor XMPP enviará una copia de cada mensaje entrante dirigido a ti a este cliente incluso si no estaba siendo enviado a él","setting-explanation-login":"Si esta opción está habilitada, el chat empezará al inicio de sesión","setting-explanation-priority":"Si tú has iniciado sesión varias veces con la misma cuenta, tu servidor XMPP enviará los mensajes al cliente con la mayor prioridad","setting-explanation-xmpp":"Estas opciones son usadas para conectar con el servidor XMPP","_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"fi":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"fr":{"translation":{"Logging_in":"Connexion...","your_connection_is_unencrypted":"Connexion non chiffrée.","your_connection_is_encrypted":"Connexion chiffrée.","your_buddy_closed_the_private_connection":"Votre contact a fermé la connexion privée.","start_private":"Démarrer une conversation privée","close_private":"Clôturer une conversation privée","your_buddy_is_verificated":"Votre contact est vérifié.","you_have_only_a_subscription_in_one_way":"Vous ne pouvez souscrire qu'une fois.","authentication_query_sent":"Requête d’authentification envoyée.","your_message_wasnt_send_please_end_your_private_conversation":"Votre message n'a pas été envoyé. Veuillez terminer votre conversation privée.","unencrypted_message_received":"Message non chiffré reçu","not_available":"Non disponible","no_connection":"Pas de connexion !","relogin":"Re-connexion","trying_to_start_private_conversation":"Essai de démarrage d'une conversation privée !","Verified":"Vérifié","Unverified":"Non vérifié","private_conversation_aborted":"Conversation privée interrompue !","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Votre contact a fermé la conversation privée ! Vous devriez faire de même.","conversation_is_now_verified":"La conversation est maintenant vérifiée.","authentication_failed":"L'authentification a échoué.","Creating_your_private_key_":"Création de votre clé privée; cela peut prendre un moment.","Authenticating_a_buddy_helps_":"L'authentification d'un contact permet de s'assurer que la personne à qui vous parlez est vraiment celui qu'il ou elle prétend être.","How_do_you_want_to_authenticate_your_buddy":"Comment voulez-vous vous authentifier __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Sélection de la méthode...","Manual":"Manuel","Question":"Question","Secret":"Sécurité","To_verify_the_fingerprint_":"Pour vérifier l'empreinte, joignez votre contact via un autre canal digne de confiance, tel que le téléphone.","Your_fingerprint":"Votre empreinte","Buddy_fingerprint":"Empreinte du contact","Close":"Fermer","Compared":"Comparé","To_authenticate_using_a_question_":"Pour s'authentifier à l'aide d'une question, choisissez une question dont la réponse n'est connue que vous et de votre contact.","Ask":"Demander","To_authenticate_pick_a_secret_":"Pour vous authentifier, choisissez un secret connu seulement de vous et de votre contact.","Compare":"Comparer","Fingerprints":"Empreintes","Authentication":"Authentification","Message":"Message","Add_buddy":"Ajouter un contact","rename_buddy":"Renommer le contact","delete_buddy":"Supprimer le contact","Login":"Connexion","Username":"Nom d'utilisateur","Password":"Mot de passe","Cancel":"Annuler","Connect":"Connecter","Type_in_the_full_username_":"Tapez un nom d'utilisateur complet et un alias(optionnel).","Alias":"Alias","Add":"Ajouter","Subscription_request":"Demande d'abonnement","You_have_a_request_from":"Vous avez une requête de ","Deny":"Refuser","Approve":"Approuver","Remove_buddy":"Supprimer le contact","You_are_about_to_remove_":"Vous allez retirer __bid_name__ (<b>__bid_jid__</b>) de votre liste de contacts. Toutes les fenêtres de discussion en lien avec celui-ci seront fermées.","Continue_without_chat":"Continuer sans tchat","Please_wait":"Merci de patienter","Login_failed":"Authentification échouée","Sorry_we_cant_authentikate_":"La connexion avec le serveur de tchat a échoué. Vérifiez le mot de passe.","Retry":"Retour","clear_history":"Effacer l’historique","New_message_from":"Nouveau message de __name__","Should_we_notify_you_":"Dans le futur, devrons-nous vous notifier les nouveaux messages ?","Please_accept_":"Merci de cliquer sur le bouton \"autoriser\" en haut de page","Hide_offline":"Masquer les contacts non connectés","Show_offline":"Afficher les contacts non connectés","About":"À propos","dnd":"Ne pas déranger","Mute":"Muet","Unmute":"Son actif","Subscription":"Abonnement","both":"Les deux","Status":"Statut","online":"En ligne","chat":"tchat","away":"Absent","xa":"Longue absence","offline":"Hors ligne","none":"Aucun","Unknown_instance_tag":"Tag inconnu","Not_one_of_our_latest_keys":"Ce n'est pas l'une des dernières touches","Received_an_unreadable_encrypted_message":"Message chiffré non lisible","Online":"En ligne","Chatty":"Libre pour discuter","Away":"Absent","Extended_away":"Longue absence","Offline":"Hors ligne","Friendship_request":"Demande de contact","Confirm":"Valider","Dismiss":"Rejeter","Remove":"Supprimer","Online_help":"Aide en ligne","FN":"Nom","N":" N ","FAMILY":"Nom de famille","GIVEN":"prénom","NICKNAME":"Pseudo","URL":"URL","ADR":"Adresse","STREET":"Rue","EXTADD":"Adresse (suite)","LOCALITY":"Localité","REGION":"Région","PCODE":"Code Postal","CTRY":"Pays","TEL":"Téléphone","NUMBER":"Numéro","EMAIL":"Courriel","USERID":" USERID ","ORG":"Organisation","ORGNAME":"Nom","ORGUNIT":"Unité","TITLE":"Qualité:","ROLE":"Rôle","BDAY":"Date de naissance","DESC":"Description","PHOTO":"Photo","send_message":"Envoyer un message","get_info":"Montrer les informations","Settings":"Réglages","Priority":"Priorité","Save":"Enregistrer","User_settings":"Paramètres utilisateur","A_fingerprint_":"Une empreinte est utilisée pour s'assurer de l'identité de la personne à qui vous parlez","is":"est","Login_options":"Options d'identification","BOSH_url":"URL BOSH","Domain":"Domaine","Resource":"Ressource","On_login":"Après authentification","Received_an_unencrypted_message":"Reçu un message non chiffré","Sorry_your_buddy_doesnt_provide_any_information":"Désolé, votre contact n'a pas fourni d'informations","Info_about":"À propos de","Authentication_aborted":"Authentification interrompue.","Authentication_request_received":"Requête d'authentification reçue.","Log_in_without_chat":"S'identifier sans tchat","has_come_online":"vient d'arriver","Unknown_sender":"Expéditeur inconnu","Please_allow_access_to_microphone_and_camera":"Veuillez cliquez sur le bouton \"Autoriser\" en haut, pour permettre l'accès au micro et à la caméra.","Incoming_call":"Appel entrant","from":"de","Do_you_want_to_accept_the_call_from":"Voulez-vous accepter l'appel de","Reject":"Rejeté","Accept":"Accepté","hang_up":"raccrocher","snapshot":"Capture d’écran","mute_my_audio":"Couper l'audio","pause_my_video":"Mettre ma vidéo en pause","fullscreen":"Plein écran","Info":"Info","Local_IP":"IP locale","Remote_IP":"IP distante","Local_Fingerprint":"Empreinte locale","Remote_Fingerprint":"Empreinte distante","Video_call_not_possible":"L'appel vidéo n'est possible. Votre contact ne supporte pas les appels vidéo.","Start_video_call":"Démarrer l'appel vidéo","Join_chat":"Joindre la discussion","Join":"Joindre","Room":"Salon","Nickname":"Pseudo","left_the_building":"__nickname__ a quitté l'immeuble","entered_the_room":"__nickname__ entre dans le salon","is_now_known_as":"__oldNickname__ est maintenant connu comme __newNickname__","This_room_is":"Ce salon est","muc_hidden":{"keyword":"caché","description":"ne peut être trouvé avec une recherche"},"muc_membersonly":{"keyword":"pour les membres seulement","description":"Vous devez être sur la liste des membres"},"muc_moderated":{"keyword":"modéré","description":"Seulement les personnes avec la \"voix\" sont autorisés à envoyer des messages"},"muc_nonanonymous":{"keyword":"non anonyme","description":"Votre identifiant Jabber est visible de tous les autres occupants"},"muc_open":{"keyword":"ouvert","description":"Tout le monde est autorisé à se connecter"},"muc_passwordprotected":{"keyword":"protégé par un mot de passe","description":"Vous devez fournir un mot de passe correct"},"muc_persistent":{"keyword":"persistent","description":"ne sera pas détruit si le dernier occupant part"},"muc_public":{"keyword":"public","description":"peut être touvé avec une recherche"},"muc_semianonymous":{"keyword":"semi-anonyme","description":"Votre identifiant Jabber est seulement visible aux administrateurs de ce salon"},"muc_temporary":{"keyword":"temporaire","description":"sera détruit au départ de son dernier occupant"},"muc_unmoderated":{"keyword":"non modéré","description":"Tout le monde est autorisé à envoyer des messages"},"muc_unsecured":{"keyword":"non sécurisé","description":"un mot de passe n'est pas nécessaire pour entrer"},"Continue":"Continuer","Server":"Serveur","Rooms_are_loaded":"Les salons sont chargés","Could_load_only":"Ne peut charger que __count__ salons pour l'autocomplétion","muc_explanation":"Veuillez saisir le nom du salon, un surnom (optionnel) et un mot de passe pour joindre la conversation","You_already_joined_this_room":"Vous avez déjà rejoint ce salon","This_room_will_be_closed":"Ce salon va être fermé","Room_not_found_":"Un nouveau salon va être créé","Loading_room_information":"Chargement des informations du salon","Destroy":"Détruire","Leave":"Quitter","changed_subject_to":"__nickname__ a changé le sujet du salon à \"__subject__\"","muc_removed_kicked":"Vous avez été éjecté de ce salon","muc_removed_info_kicked":"__nickname__ a été éjecté de ce salon","muc_removed_banned":"Vous avez été banni de ce salon","muc_removed_info_banned":"__nickname__ a été banni de ce salon","muc_removed_affiliation":"Vous avez été retiré du salon en raison d'un changement d'affiliation","muc_removed_info_affiliation":"__nickname__ a été retiré du salon en raison d'un changement d'affiliation","muc_removed_membersonly":"Vous avez été retiré du salon parce que celui-ci est maintenant réservé aux membres et vous n'en faites pas partie","muc_removed_info_membersonly":"__nickname__ a été retiré du salon parce que celui-ci est maintenant réservé aux membres","muc_removed_shutdown":"Vous avez été retiré du salon parce que le service de salon de discussion est en train de s'éteindre","Reason":"Raison","message_not_send":"Votre message n'a pu être envoyé a cause d'une erreur","message_not_send_item-not-found":"Votre message n'a pu être envoyé parce que ce salon n'existe pas","message_not_send_forbidden":"Votre message n'a pas été envoyé parce que vous n'avez pas le droit de parler dans ce salon","message_not_send_not-acceptable":"Votre message n'a pas été envoyé car il n'y a personne dans ce salon","This_room_has_been_closed":"Ce salon a été fermé","Room_logging_is_enabled":"L'historique du salon est conservé","A_password_is_required":"Un mot de passe est requis","You_are_not_on_the_member_list":"Vous n'êtes pas sur la liste des membres","You_are_banned_from_this_room":"Vous avez été banni de ce salon","Your_desired_nickname_":"Votre pseudo souhaité est déjà utilisé. Veuillez en choisir un autre","The_maximum_number_":"Le nombre maximum d'utilisateurs est atteint dans ce salon","This_room_is_locked_":"Ce salon est verrouillé","You_are_not_allowed_to_create_":"Vous n'êtes pas autorisé à créer un salon","Alert":"Alerte","Call_started":"Appel démarré","Call_terminated":"Appel terminé","Carbon_copy":"Copie carbone","Enable":"Activé","jingle_reason_busy":"occupé","jingle_reason_decline":"refusé","jingle_reason_success":"raccroché","Media_failure":"échec du média","No_local_audio_device":"Pas de périphérique audio local","No_local_video_device":"Pas de périphérique vidéo local","Ok":"Ok","PermissionDeniedError":"Vous ou votre navigateur avez refusé de donner des permissions audio/vidéo","Use_local_audio_device":"Utiliser un périphérique audio local.","Use_local_video_device":"Utiliser un périphérique vidéo local.","is_":"est __status__","You_received_a_message_from_an_unknown_sender_":"Vous avez reçu un message d'un expéditeur inconnu (__sender__) Voulez-vous les afficher ?","Your_roster_is_empty_add_":"Votre liste est vide, ajouter  <a>Nouveau contact</a>","onsmp_explanation_question":"Votre contact tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre contact, saisissez une réponse et cliquez sur Répondre.","onsmp_explanation_secret":"Votre contact tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre contact, entrez le mot secret","from_sender":"de __sender__","Verified_private_conversation_started":"La conversation privée vérifiée a démarré.","Unverified_private_conversation_started":"La conversation privée non vérifiée a démarré.","Bookmark":"Marque-page","Auto-join":"Joindre automatiquement","Edit_bookmark":"Éditer le marque-page","Room_logging_is_disabled":"La connexion au salon est désactivée","Room_is_now_non-anoymous":"Ce salon n'est désormais plus anonyme","Room_is_now_semi-anonymous":"Ce salon est désormais semi-anonyme","Do_you_want_to_change_the_default_room_configuration":"Voulez-vous changer la configuration par défaut du salon ?","Default":"Par défaut","Change":"Changer","Send_file":"Envoyer un fichier","setting-explanation-carbon":"Avec la copie carbone activé, votre serveur XMPP envera une copie de tous les messages entrant qui vous sont destiné à ce client, même s'il ne lui sont pas directement addressés.","setting-explanation-login":"Si cette option est activé, le chat commencera lorsque vous vos connectez.","setting-explanation-priority":"Si vous êtes connecté plusieurs fois avec le même compte, votre serveur XMPP enverra les messages au client ayant le plus haute priorité.","setting-explanation-xmpp":"Ces options sont utilisées pour se connecter au serveur XMPP.","_is_composing":" est en train d'écrire...","_are_composing":" sont en train d'écrire...","Chat_state_notifications":"Notifications de composition","setting-explanation-chat-state":"Voulez-vous envoyer et recevoir les notifications de composition, comme lorsque quelqu'un commence ou arrête d'écrire un message ?","Share_screen":"Ecran partagé","Incoming_stream":"Flux entrant","Stream_started":"flux démarré","HTTPS_REQUIRED":"Cette action nécessite une connexion cryptée.","EXTENSION_UNAVAILABLE":"Vous avez besoin d'une extension / d'un addon pour votre navigateur.","UNKNOWN_ERROR":"Une erreur inconnue s'est produite.","Install_extension":"Veuillez installer l'extension afin d'utiliser le partage d'écran: ","Connection_accepted":"Connexion acceptée","Stream_terminated":"Flux terminé","Close_all":null}},"hu-HU":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":"Az Ön kapcsolata titkosítatlan.","your_connection_is_encrypted":"Az Ön kapcsolata titkosított.","your_buddy_closed_the_private_connection":"Partnere megszakította a privát kapcsolatot.","start_private":"Privát beszélgetés indítása","close_private":"Privát beszélgetés bezárása","your_buddy_is_verificated":"Az Ön partnere megerősítve.","you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":"Azonosítási kérelem elküldve.","your_message_wasnt_send_please_end_your_private_conversation":"Az üzenetet nem sikerült elküldeni. Kérem fejezze be a privát beszélgetést.","unencrypted_message_received":"Titkosítatlan üzenet fogadva","not_available":"Nem elérhető","no_connection":"Nincs kapcsolat!","relogin":"relogin","trying_to_start_private_conversation":"Privát beszélgetés indítása!","Verified":"Megerősítve","Unverified":"Nem megerősített","private_conversation_aborted":"Privát beszélgetés megszakítva!","your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":"Azonosítás sikertelen.","Creating_your_private_key_":"Privát kulcs generálása. Egy kis időbe telhet...","Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":"Kérdés","Secret":"Kulcs","To_verify_the_fingerprint_":null,"Your_fingerprint":"Az Ön lenyomata","Buddy_fingerprint":"Partnere lenyomata","Close":"Bezárás","Compared":"Összehasonlítva","To_authenticate_using_a_question_":"Az azonosításhoz adjon meg egy kérdést, amelyre a választ csak Ön és Partnere ismerhetik.","Ask":"Kérdez","To_authenticate_pick_a_secret_":"Az azonosításhoz adjon meg egy titkot, amelyet csak Ön és Partnere ismerhetnek.","Compare":"Összehasonlítás","Fingerprints":"Lenyomatok","Authentication":"Azonosítás","Message":"Üzenet","Add_buddy":"Partner hozzáadása","rename_buddy":"Partner átnevezése","delete_buddy":"Partner törlése","Login":"Belépés","Username":"Felhasználónév","Password":"Jelszó","Cancel":"Mégsem","Connect":"Csatlakozás","Type_in_the_full_username_":"Adjon meg egy teljes felhasználónevet, és egy opcionális becenevet.","Alias":"Becenév","Add":"Hozzáadás","Subscription_request":"Feliratkozási kérelem","You_have_a_request_from":"Ön felkérést kapott a következőtől","Deny":"Elutasít","Approve":"Jóváhagy","Remove_buddy":"Partner eltávolítása","You_are_about_to_remove_":null,"Continue_without_chat":"Folytatás chat nélkül","Please_wait":"Kérem várjon","Login_failed":"Chat bejelentkezés sikertelen","Sorry_we_cant_authentikate_":null,"Retry":"Vissza","clear_history":"Előzmények törlése","New_message_from":"Új üzenet __name__ partnerétől","Should_we_notify_you_":"Kívánja hogy értesítsük a jövőben új üzeneteiről?","Please_accept_":"Kérem kattintson a fent megjelenő \"Engedélyez\" gombra.","Hide_offline":"Offline partnerek elrejtése","Show_offline":"Offline partnerek mutatása","About":null,"dnd":"Ne zavarj","Mute":"Némítás","Unmute":"Hangok engedélyezése","Subscription":null,"both":"mindkettő","Status":"Állapot","online":"elérhető","chat":null,"away":"távol","xa":"huzamosabban távol","offline":"offline","none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":"Teljes név","N":null,"FAMILY":"Családi név","GIVEN":"Keresztnév","NICKNAME":"Becenév","URL":"URL","ADR":"Cím","STREET":"Utcanév","EXTADD":"Cím","LOCALITY":"Helység","REGION":"Régió","PCODE":"Irányítószám","CTRY":"Ország","TEL":"Telefonszám","NUMBER":"Házszám","EMAIL":"E-mail cím","USERID":null,"ORG":"Vállalat","ORGNAME":"Név","ORGUNIT":"Osztály","TITLE":"Beosztás","ROLE":"Részleg","BDAY":"Születésnap","DESC":"Leírás","PHOTO":null,"send_message":"Üzenet küldése","get_info":"Info mutatása","Settings":"Beállítások","Priority":"Prioritás","Save":"Mentés","User_settings":"Felhasználó beállítások","A_fingerprint_":null,"is":null,"Login_options":"Bejelentkezési lehetőségek","BOSH_url":"BOSH URL","Domain":"Domain","Resource":"Erőforrás","On_login":"Bejelentkezéskor","Received_an_unencrypted_message":"Titkosítatlan üzenetet fogadott","Sorry_your_buddy_doesnt_provide_any_information":"Sajnos az Ön partnere nem adott meg semmilyen információt.","Info_about":null,"Authentication_aborted":"Azonosítás megszakítva.","Authentication_request_received":"Azonosítási kérelem fogadva.","Log_in_without_chat":"Bejelentkezés chat nélkül","has_come_online":"bejelentkezett","Unknown_sender":"Ismeretlen küldő","Please_allow_access_to_microphone_and_camera":"Kérem kattintson a fent megjelenő \"Engedélyez/Allow\" gombra hogy hozzáférést biztosítson mikrofonjához és kamerájához.","Incoming_call":"Bejövő hívás","from":"tőle","Do_you_want_to_accept_the_call_from":"Szeretné fogadni következő partnere hívását:","Reject":"Elutasít","Accept":"Fogadás","hang_up":"tartás","snapshot":"képernyőfotó","mute_my_audio":"hangom némítása","pause_my_video":"videóképem megállítása","fullscreen":"teljes képernyő","Info":"Info","Local_IP":"Helyi IP","Remote_IP":"Távoli IP","Local_Fingerprint":"Helyi lenyomat","Remote_Fingerprint":"Távoli lenyomat","Video_call_not_possible":"Videóhívás nem lehetséges. Az Ön partnerének készüléke nem támogatja a videóhívásokat.","Start_video_call":"Videóhívás indítása","Join_chat":"Belépés a chatbe","Join":"Belépés","Room":"Szoba","Nickname":"Becenév","left_the_building":"__nickname__ elhagyta az épületet.","entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"it":{"translation":{"Logging_in":"login…","your_connection_is_unencrypted":"La sua connessione è non cifrata.","your_connection_is_encrypted":"La sua connessione è cifrata.","your_buddy_closed_the_private_connection":"La sua connessione privata è stato chiuso dal suo compagno.","start_private":"Inizia privata","close_private":"Chiude privata","your_buddy_is_verificated":"Il tuo compagno è stato verificato","you_have_only_a_subscription_in_one_way":"Hai solo una one-way inscrizione.","authentication_query_sent":"Domanda d'autenticità inviata.","your_message_wasnt_send_please_end_your_private_conversation":"Il tuo messaggio non è stato inviato. Si prega di finire la sua conversazione privata.","unencrypted_message_received":"Messaggio non cifrato ricevuto","not_available":"non disponibile","no_connection":"nessun collegamento!","relogin":"nuovo login","trying_to_start_private_conversation":"Cercando di avviare una conversazione privata!","Verified":"verificato","Unverified":"non verificato","private_conversation_aborted":"Conversazione privata abortito!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Il tuo compagno ha chiuso la conversazione privata! Si dovrebbe fare lo stesso.","conversation_is_now_verified":"Conversazione è ora verificato.","authentication_failed":"autenticazione fallita.","Creating_your_private_key_":"Creare la propria chiave privata; questo potrebbe richiedere un po'.","Authenticating_a_buddy_helps_":"Autenticazione un compagno aiuta a garantire che la persona si sta parlando è davvero quello che lui o lei sostiene di essere.","How_do_you_want_to_authenticate_your_buddy":"Come si desidera autenticare __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Seleziona metodo ..","Manual":"manuale","Question":"domanda","Secret":"segreto","To_verify_the_fingerprint_":"Per verificare l'impronta digitale, contattare il proprio compagno attraverso qualche altro canale affidabile, come il telefono.","Your_fingerprint":"il tuo impronta digitale","Buddy_fingerprint":"impronta digitale da compagno","Close":"chiude","Compared":"comparato","To_authenticate_using_a_question_":"Per autenticare tramite una questione, scegli una questione la cui risposta è nota solo voi e il tuo compagno","Ask":"chiedi","To_authenticate_pick_a_secret_":"Per autenticare, scegli un segreto noto solo a te e il tuo compagno.","Compare":"Comparare","Fingerprints":"Impronta digitale","Authentication":"Autenticazione","Message":"Messagio","Add_buddy":"Aggiungi un compagno","rename_buddy":"rinomina compagno","delete_buddy":"elimina compagno","Login":"Login","Username":"Identificazione dell'utente","Password":"Password","Cancel":"Cancella","Connect":"Collega","Type_in_the_full_username_":"Digita l'identificazione utente completo e un alias opzionale.","Alias":"Alias","Add":"Aggiungi","Subscription_request":"Rrichiesta di sottoscrizione","You_have_a_request_from":"Hai una richiesta da","Deny":"Refiuta","Approve":"Approva","Remove_buddy":"Rimuova il compagno","You_are_about_to_remove_":"Stai rimovendo __bid_name__ (<b>__bid_jid__</b>) del suo lista di compagni. Tutte le chat appartenente saranno chiuse.","Continue_without_chat":"Continua senza chat","Please_wait":"Si prega d'attendere","Login_failed":"Chat login è fallito","Sorry_we_cant_authentikate_":"Autenticazione non riuscita con il server di chat. Forse la password è sbagliata?","Retry":"Indietro","clear_history":"Cancella la cronologia","New_message_from":"Nuovo messaggio da __name__","Should_we_notify_you_":"Vuoi ricevere una notifica di nuovi messaggi in futuro?","Please_accept_":"Si prega di fare clic sul bottone \"Autorizzazione\" sopra.","Hide_offline":"Nascondere i contatti non in linea","Show_offline":"Mostra i contatti non in linea","About":"Informazione legale","dnd":"Non disturbare","Mute":"Muto attivo","Unmute":"Muto inattivo","Subscription":"Sottoscrizione","both":"etrambi","Status":"Status","online":"In linea","chat":"chat","away":"via","xa":"via estensivo","offline":"non in linea","none":"nessuno","Unknown_instance_tag":"Instance tag sconosciuta.","Not_one_of_our_latest_keys":"Non è una delle nostre ultime chiavi.","Received_an_unreadable_encrypted_message":"Ricevuto un messaggio crittografato illeggibile.","Online":"In linea","Chatty":"Chiacchierino","Away":"Via","Extended_away":"Via estensivo","Offline":"Non in linea","Friendship_request":"Amicizia richiesto","Confirm":"Conferma","Dismiss":"Rifiuta","Remove":"Rimuovi","Online_help":"Guida in linea","FN":"Nome e cognome","N":null,"FAMILY":"Cognome","GIVEN":"Nome","NICKNAME":"Soprannome","URL":"URL","ADR":"Indirizzo","STREET":"Via","EXTADD":"Esteso Indirizzo","LOCALITY":"Località","REGION":"Regione","PCODE":"Codice Postale","CTRY":"Paese","TEL":"Telefono","NUMBER":"Numero","EMAIL":"E-mail","USERID":null,"ORG":"Organizzazione","ORGNAME":"Nome","ORGUNIT":"Unità","TITLE":"Titolo di lavoro","ROLE":"Funzione","BDAY":"Compleanno","DESC":"Descrizione","PHOTO":null,"send_message":"Messagio inviato","get_info":"Mostra informazioni","Settings":"Impostazione","Priority":"Priorità","Save":"Salva","User_settings":"Impostazione dell'utente","A_fingerprint_":"Una impronta digitale è usato per assicurarsi che la persona con cui stai parlando è lui o lei che sta dicendo.","is":"è","Login_options":"Opzioni di login","BOSH_url":"BOSH URL","Domain":"Domain","Resource":"Risorsa","On_login":"Login on","Received_an_unencrypted_message":"Ricevuto un messaggio non crittografato","Sorry_your_buddy_doesnt_provide_any_information":"Spiace, il tuo compagno non fornisce alcuna informazione.","Info_about":"Informazioni","Authentication_aborted":"Autenticazione interrotta","Authentication_request_received":"Richiesta di autenticazione ricevuto.","Log_in_without_chat":"Log in senza chat","has_come_online":"È venuto in linea","Unknown_sender":"Mittente sconosciuto","Please_allow_access_to_microphone_and_camera":"Si prega di fare clic sul bottone \"Autorizzazione\" sopra per autorizzazione del l'accesso al microfono e fotocamera.","Incoming_call":"Chiamata in arrivo","from":"di","Do_you_want_to_accept_the_call_from":"Vuoi accettare la chiamata di","Reject":"Rifiuta","Accept":"Accetta","hang_up":"Riattacca","snapshot":"istantanea","mute_my_audio":"disattiva il mio audio","pause_my_video":"pausa il mio audio","fullscreen":"schermo intero","Info":"Informazione","Local_IP":"IP locale","Remote_IP":"IP remoto","Local_Fingerprint":"Impronta digitale locale","Remote_Fingerprint":"Impronta digitale remoto","Video_call_not_possible":"Videochiamata non è possibile. Il tuo compagno non può effettuare videochiamate.","Start_video_call":"Inizia videochiamata","Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":"è __status__","You_received_a_message_from_an_unknown_sender_":"Hai ricevuto un messaggio da un mittente sconosciuto (__sender__) Vuoi che venga visualizzato?","Your_roster_is_empty_add_":"Il suo elenco è vuoto, aggiungi un  <a>compagno nuovo</a>","onsmp_explanation_question":"Il tuo compagno sta cercando di determinare se lui o lei sta davvero parlando con te. Per autenticare a il tuo compagno.  inserisci la risposta e fare click su risposta.","onsmp_explanation_secret":"Il tuo compagno sta cercando di determinare se lui o lei sta davvero parlando con te. Per autenticare a il tuo compagno.  inserire il segreto.","from_sender":"di __sender__","Verified_private_conversation_started":"verificato Conversazione privata iniziato.","Unverified_private_conversation_started":"non verificato Conversazione privata iniziato.","Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"nds":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"pl":{"translation":{"Logging_in":"Logowanie...","your_connection_is_unencrypted":"Twoje połączenie nie jest szyfrowane.","your_connection_is_encrypted":"Twoje połączenie jest szyfrowane.","your_buddy_closed_the_private_connection":"Twój rozmówca zamknął połączenie.","start_private":"Rozpocznij rozmowę.","close_private":"Zakończ rozmowę.","your_buddy_is_verificated":"Twój rozmówca został zweryfikowany.","you_have_only_a_subscription_in_one_way":"Posiadasz tylko jednostronną subskrypcję.","authentication_query_sent":"Wysłano proźbę o autentykację.","your_message_wasnt_send_please_end_your_private_conversation":"Twoja wiadomość nie została wysłana. Proszę, zamknij rozmowę.","unencrypted_message_received":"Otrzymano niezaszyfrowaną wiadomość.","not_available":"Niedostępny.","no_connection":"Brak połączenia!","relogin":"Połącz ponownie","trying_to_start_private_conversation":"Rozpocznij rozmowę!","Verified":"Zweryfikowano","Unverified":"Niezweryfikowano","private_conversation_aborted":"Anulowano rozmowę!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Rozmówca przerwał połączenie! Powinieneś zrobić to samo.","conversation_is_now_verified":"Zweryfikowano połączenie.","authentication_failed":"Weryfikacja się nie powiodła.","Creating_your_private_key_":"Tworzenie klucza prywatnego; może to chwilę potrwać","Authenticating_a_buddy_helps_":"Autoryzacja pomoże w ustaleniu faktycznej tożsamości rozmówcy ;).","How_do_you_want_to_authenticate_your_buddy":"Jakiej autoryzacji chcesz użyć __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Wybierz sposób...","Manual":"Ręcznie","Question":"Pytanie","Secret":"Hasło","To_verify_the_fingerprint_":"Aby zweryfikować kod, najpierw skontaktuj się z rozmówcą za pomocą zaufanego sposobu, np telefonu.","Your_fingerprint":"Twój kod:","Buddy_fingerprint":"Kod kontaktu","Close":"Zamknij","Compared":"Porównano","To_authenticate_using_a_question_":"Aby autoryzować za pomocą pytania, wybierz pytanie na które tylko ty i twój rozmówca zna odpowiedź.","Ask":"Zadaj pytanie","To_authenticate_pick_a_secret_":"Aby autoryzować za pomocą hasła, wybierz hasło na które znasz tylko Ty i twój rozmówca.","Compare":"Dopasuj","Fingerprints":"Kody autoryzacyjne","Authentication":"Autoryzacja","Message":"Wiadomość","Add_buddy":"Dodaj kontakt","rename_buddy":"Zmień nazwę kontaktu","delete_buddy":"Usuń kontakt","Login":"Login","Username":"Nazwa Użytkownika","Password":"Hasło","Cancel":"Anuluj","Connect":"Połączenie","Type_in_the_full_username_":"Wpisz pełną nazwę użytkownika (np. <B>imię.nazwisko@zajezdnia.local</B>) oraz jego nazwę wyświetlaną (Alias).","Alias":"Alias","Add":"Dodaj","Subscription_request":"Potwierdzenie subskrypcji","You_have_a_request_from":"Masz potwierdzenie od","Deny":"Odmów","Approve":"Zatwierdź","Remove_buddy":"Usuń kontakt","You_are_about_to_remove_":"Chcesz usunąć __bid_name__ (<b>__bid_jid__</b>) z twojej listy kontaktów. Wszystkie powiązane rozmowy zostaną zamknięte.","Continue_without_chat":"Kontynuuj bez komunikatora","Please_wait":"Proszę czekać","Login_failed":"Błędne logowanie","Sorry_we_cant_authentikate_":"Błędna autoryzacja z serwerem. Może hasło jest nieprawidłowe?","Retry":"Powrót","clear_history":"Wyczyść historię","New_message_from":"Nowa wiadomość od __name__","Should_we_notify_you_":"Czy chcesz otrzymywać powiadomienia o nowych wiadomościach w przyszłości?","Please_accept_":"Kliknij \"Zezwól\" na górze.","Hide_offline":"Schowaj niedostępne kontakty","Show_offline":"Pokaż niedostępne kontakty","About":"Info","dnd":"Nie przeszkadzać","Mute":"Wycisz","Unmute":"Włącz dźwięk","Subscription":"Subskrybcja","both":"obustronna","Status":"Status","online":"Dostępny","chat":"czat","away":"z dala od kompa","xa":"hen hen...","offline":"niedostępny","none":"brak","Unknown_instance_tag":"Nieznany przypadek.","Not_one_of_our_latest_keys":"Not one of our latest keys.","Received_an_unreadable_encrypted_message":"Otrzymano nieczytelną, zaszyfrowaną wiadomość.","Online":"Połączony","Chatty":"Pogawędzimy?","Away":"Daleko","Extended_away":"Hen Hen...","Offline":"Niedostępny","Friendship_request":"Prośba o kontakt","Confirm":"Potwierdzenie","Dismiss":"Odwołaj","Remove":"Usuń","Online_help":"Pomoc Online","FN":"Pełna nazwa","N":"  ","FAMILY":"Nazwisko","GIVEN":"Imię","NICKNAME":"Pseudonim","URL":"Strona WWW","ADR":"Adres","STREET":"Ulica","EXTADD":"Pełny adres","LOCALITY":"Lokalizacja","REGION":"Region","PCODE":"Kod pocztowy","CTRY":"Kraj","TEL":"Telefon","NUMBER":"Numer","EMAIL":"Email","USERID":" ","ORG":"Organizacja","ORGNAME":"Nazwa","ORGUNIT":"Jednostka","TITLE":"Stanowisko","ROLE":"Rola","BDAY":"Data urodzin","DESC":"Opis","PHOTO":" ","send_message":"Wyślij wiadomość","get_info":"Pokaż informację","Settings":"Ustawienia","Priority":"Priorytet","Save":"Zapisz","User_settings":"Ustawienia Użytkownika","A_fingerprint_":"Kod służy do autoryzacji Twojego rozmówcy aby potwierdzić jego tożsamość.","is":"jest","Login_options":"opcje logowania","BOSH_url":"Adres BOSH","Domain":"Domena","Resource":"Źródło","On_login":"Na login","Received_an_unencrypted_message":"Zatwierdzono nieszyfrowaną wiadomość.","Sorry_your_buddy_doesnt_provide_any_information":"Wybacz, twój rozmówca nie posiada żadnych informacji.","Info_about":"Informacja o...","Authentication_aborted":"Autoryzacja anulowana.","Authentication_request_received":"Prośba o autoryzację została przyjęta.","Log_in_without_chat":"Zaloguj bez komunikatora","has_come_online":"jest teraz dostępny","Unknown_sender":"Nieznany nadawca","Please_allow_access_to_microphone_and_camera":"Kliknij \"Potwierdź\" na górze, aby móc korzystać z mikrofonu oraz kamery.","Incoming_call":"Przychodzące połączenie","from":"z","Do_you_want_to_accept_the_call_from":"Akceptujesz połączenie od","Reject":"Odrzuć","Accept":"Zaakceptuj","hang_up":"odbierz","snapshot":"zrób zdjęcie","mute_my_audio":"wycisz dźwięk","pause_my_video":"zatrzymaj moje wideo","fullscreen":"Pełny ekran","Info":"Informacja","Local_IP":"Adres IP","Remote_IP":"Zdalny adres IP","Local_Fingerprint":"Kod lokalny","Remote_Fingerprint":"Zdalny kod","Video_call_not_possible":"Rozmowa wideo jest niemożliwa. Twój rozmówca nie ma możliwości prowadzenia takich rozmów.","Start_video_call":"Rozpocznij rozmowę wideo","Join_chat":"Dołącz do czata","Join":"Dołącz","Room":"Pokój","Nickname":"Nazwa użytkownika","left_the_building":"__nickname__ wyszedł","entered_the_room":"__nickname__ wszedł do pokoju","is_now_known_as":"__oldNickname__ zmienił nazwę na __newNickname__","This_room_is":"Ten pokój jest","muc_hidden":{"keyword":"ukryty","description":"nie można odnaleźć elementów wyszukiwania"},"muc_membersonly":{"keyword":"tylko zalogowani","description":"musisz być członkiem listy"},"muc_moderated":{"keyword":"moderowano","description":"tylko osoby z opcją \"głos\" mogą wysyłać wiadomość"},"muc_nonanonymous":{"keyword":"nie-anonimowy","description":"Twój identyfikator jabber jest widoczny dla wszystkich innych osób"},"muc_open":{"keyword":"otwarty","description":"wszyscy mają pozwolenie aby dołączyć"},"muc_passwordprotected":{"keyword":"ograniczone hasłem","description":"musisz wpisać prawidłowe hasło"},"muc_persistent":{"keyword":"trwale","description":"nie zostaną zniszczone, jeśli ostatnia osoba wyszła"},"muc_public":{"keyword":"publiczny","description":"wyszukawno"},"muc_semianonymous":{"keyword":"pół-anonimowy","description":"Twój identyfikator jabber jest widoczny w pokoju adminów"},"muc_temporary":{"keyword":"tymczasowy","description":"zostanie usunięty jeżeli ostatnia osoba wyjdzie"},"muc_unmoderated":{"keyword":"niemoderowany","description":"wszyscy są uprawnieni do pisania wiadomości"},"muc_unsecured":{"keyword":"niezabezpieczone","description":"nie musisz wpisywać hasła"},"Continue":"Kontynuuj","Server":"Serwer","Rooms_are_loaded":"Pokoje zostały załadowane","Could_load_only":"Nie załadowano __count__ pokoi","muc_explanation":"Aby się zalogować, wpisz nazwę pokoju oraz opcjonalnie nazwę użytkownika i hasło","You_already_joined_this_room":"Już dołączyłeś do tego pokoju","This_room_will_be_closed":"Ten pokój będzie zamknięty","Room_not_found_":"Nowy pokój będzie stworzony","Loading_room_information":"Ładowani informacji o pokoju","Destroy":"Zniszczony","Leave":"Opuść","changed_subject_to":"__nickname__ zmienił temat pokoju na \"__subject__\"","muc_removed_kicked":"Zostałeś wyrzucony z pokoju","muc_removed_info_kicked":"__nickname__ został wyrzucony z pokoju","muc_removed_banned":"Zostałeś zbanowany","muc_removed_info_banned":"__nickname__ został zbanowany","muc_removed_affiliation":"Zostałeś usunięty z pokoju ze względu na zmianę przynależnosci","muc_removed_info_affiliation":"__nickname__ został usunięty z pokoju ze względu na zmianę przynależnosci","muc_removed_membersonly":"Zostałeś usunięty z pokoju ze względu na zmianę pokoju tylko dla członków, a Ty nie jesteś członkiem...","muc_removed_info_membersonly":"__nickname__ został usunięty z pokoju ze względu na zmianę pokoju na tylko dla członków","muc_removed_shutdown":"Zostałeś usunięty z pokoju ze względu na zamknięcie usługi","Reason":"Powód","message_not_send":"Wystąpił błąd i twoja wiadomość nie została wysłana.","message_not_send_item-not-found":"Twoja wiadomość nie została wysłana ponieważ ten pokój nie istnieje","message_not_send_forbidden":"Twoja wiadomość nie została wysłana ponieważ nie masz głosu w tym pokoju","message_not_send_not-acceptable":"Twoja wiadomość nie została wysłana ponieważ nie jesteś właścicielem tego pokoju","This_room_has_been_closed":"Ten pokój został zamknięty","Room_logging_is_enabled":"Logowanie do pokoju jest włączone","A_password_is_required":"Hasło jest wymagane","You_are_not_on_the_member_list":"Nie jesteś na liście członków","You_are_banned_from_this_room":"Zostałeś zbanowany w tym pokoju","Your_desired_nickname_":"Twoja nazwa użytkownika jest już użyta. Spróbuj wybrać inną","The_maximum_number_":"Została osiągnięta maksymalna liczba użytkowników w tym pokoju","This_room_is_locked_":"Ten pokój jest zablokowany","You_are_not_allowed_to_create_":"Nie masz uprawnień do tworzenia pokoju","Alert":"Alarm","Call_started":"Rozmowa rozpoczęta","Call_terminated":"Rozmowa zakończona","Carbon_copy":"Do wiadomości","Enable":"Włączone","jingle_reason_busy":"zajęte","jingle_reason_decline":"odmów","jingle_reason_success":"zakończono","Media_failure":"Błąd mediów","No_local_audio_device":"Brak lokalnego urządzenia audio.","No_local_video_device":"Brak lokalnego urządzenia wideo.","Ok":"Ok","PermissionDeniedError":"Ty lub twoja przeglądarka odmówiła dostępu do audio/video","Use_local_audio_device":"Użyj lokalnego urządzenia audio.","Use_local_video_device":"Użyj lokalnego urządzenia wideo.","is_":"jest __status__","You_received_a_message_from_an_unknown_sender_":"Masz wiadomość od nieznanego nadawcy. (__sender__) Chcesz to wyświetlić?","Your_roster_is_empty_add_":"Twoja lista jest pusta, dodaj kontakty  <a>Nowy kontakt</a>","onsmp_explanation_question":"Twój rozmówca próbuje się z Tobą połączyć. Autoryzacja z rozmówcą,  napisz odpowiedź.","onsmp_explanation_secret":"Twój rozmówca próbuje się z Tobą połączyć. Autoryzacja z rozmówcą,  wpisz hasło.","from_sender":"z __sender__","Verified_private_conversation_started":"Zweryfikowano Rozmowa prywatna rozpoczęta.","Unverified_private_conversation_started":"Niezweryfikowano Rozmowa prywatna rozpoczęta.","Bookmark":"Zakładka","Auto-join":"Auto-połączenie","Edit_bookmark":"Edytuj zakładkę","Room_logging_is_disabled":"Logowanie pokoju jest wyłączone","Room_is_now_non-anoymous":"Pokój jest teraz nie-anonimowy","Room_is_now_semi-anonymous":"Pokój jest teraz pół-anonimowy","Do_you_want_to_change_the_default_room_configuration":"Chcesz zmienić domyślną konfigurację pokoju?","Default":"Domyślny","Change":"Zmień","Send_file":"Wyślij plik","setting-explanation-carbon":null,"setting-explanation-login":"Jeżeli ta opcja jest włączona, czat uruchomi się przy zalogowaniu.","setting-explanation-priority":"Jeżeli jesteś zalogowany wiele razy na to samo konto twój serwer XMPP dostarczy wiadomości do klienta z najwyższym priorytetem.","setting-explanation-xmpp":"Te ustawienia używane są do połączenia z serwerem XMPP.","_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"pt-BR":{"translation":{"Logging_in":"Entrando...","your_connection_is_unencrypted":"Sua conexão não é encriptada","your_connection_is_encrypted":"Sua conexão é encriptada","your_buddy_closed_the_private_connection":"Seu contato fechou a conexão privada","start_private":"Iniciar conversa privada","close_private":"Fechar conversa privada","your_buddy_is_verificated":"Seu contato está verificado","you_have_only_a_subscription_in_one_way":"Você só tem a inscrição one-way","authentication_query_sent":"Pergunta de autenticação enviada","your_message_wasnt_send_please_end_your_private_conversation":"Sua mensagem não foi enviada. Por favor finalize sua conversa privada","unencrypted_message_received":"Mensagem não encriptada recebida","not_available":"Indisponível","no_connection":"Sem conexão!","relogin":"reentrar","trying_to_start_private_conversation":"Tentando iniciar conversa privada","Verified":"Verificado","Unverified":"Não verificado","private_conversation_aborted":"Conversa privada abortada!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Seu contato encerrou a conversa privada! Você deveria fazer o mesmo.","conversation_is_now_verified":"Conversa verificada.","authentication_failed":"Autenticação falhou.","Creating_your_private_key_":"Criando sua chave privada: isso pode demorar um pouco.","Authenticating_a_buddy_helps_":"Autenticar seu contato ajuda a garantir que a pessoa com a qual você está falando é realmente a pessoa que ela alega ser.","How_do_you_want_to_authenticate_your_buddy":"Como você gostaria de se autenticar __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Selecione o método...","Manual":"Manual","Question":"Pergunta","Secret":"Senha","To_verify_the_fingerprint_":"Para verificar o fingerprint, entre em contato com seu contato usando outro meio, de preferência seguro, como o telefone.","Your_fingerprint":"Sua impressão digital","Buddy_fingerprint":"Impressão digital do contato","Close":"Fechar","Compared":"Comparado","To_authenticate_using_a_question_":"Para autenticar seu contato faça uma pergunta, mas escolha que só ele saiba a resposta.","Ask":"Pergunta","To_authenticate_pick_a_secret_":"Para autenticar, escolha um segredo que somente você e seu contato saibam.","Compare":"Compare","Fingerprints":"Impressões digitais","Authentication":"Autenticação","Message":"Mensagem","Add_buddy":"Adicionar contato","rename_buddy":"renomear contato","delete_buddy":"remover contato","Login":"Entrar","Username":"Usuário","Password":"Senha","Cancel":"Cancelar","Connect":"Conectar","Type_in_the_full_username_":"Digite seu nome completo e um apelido opcional.","Alias":"Apelido","Add":"Adicionar","Subscription_request":"Pedido de inscrição","You_have_a_request_from":"Você tem um pedido de","Deny":"Negar","Approve":"Aprovar","Remove_buddy":"Remover contato","You_are_about_to_remove_":"Você está prestes a remover __bid_name__ (<b>__bid_jid__</b>) de sua lista de contatos. Todas as conversas serão fechadas.","Continue_without_chat":"Continue sem converar","Please_wait":"Por favor aguarde","Login_failed":"Autenticação da conversa falhou","Sorry_we_cant_authentikate_":"A autenticação com o servidor falhou. Talvez seja a senha errada?","Retry":"Voltar","clear_history":"Limpar histórico","New_message_from":"Nova mensagem de __name__","Should_we_notify_you_":"Devemos continuar notificando sobre novas mensagens no futuro?","Please_accept_":"Por favor clique no botão \"Permitir\" na parte superior.","Hide_offline":"Esconder contatos desconectados","Show_offline":"Mostrar contatos desconectados","About":"Sobre","dnd":"Não perturbe","Mute":"Mudo","Unmute":"Ligar","Subscription":"Inscrição","both":"ambos","Status":"Status","online":"online","chat":"conversa","away":"ausente","xa":"ausente por mais tempo","offline":"desativado","none":"nenhum","Unknown_instance_tag":"Marcação desconhecida da instância","Not_one_of_our_latest_keys":"Nenhuma de nossas ultimas chaves.","Received_an_unreadable_encrypted_message":"Mensagem encriptada ilegível foi recebida.","Online":"Online","Chatty":"Tagarela","Away":"Ausente","Extended_away":"Ausente por mais tempo","Offline":"Desativado","Friendship_request":"Pedido de amizade","Confirm":"Confirmar","Dismiss":"Ignorar","Remove":"Remover","Online_help":"Ajuda online","FN":"Nome completo","N":"  ","FAMILY":"Sobrenome","GIVEN":"Nome","NICKNAME":"Apelido","URL":"URL","ADR":"Endereço","STREET":"Rua, Av, etc","EXTADD":"Complemento","LOCALITY":"Localidade","REGION":"Região","PCODE":"CEP","CTRY":"País","TEL":"Telefone","NUMBER":"Número","EMAIL":"Email","USERID":"  IDUsuário","ORG":"Empresa","ORGNAME":"Nome","ORGUNIT":"Unidade","TITLE":"Cargo","ROLE":"Função","BDAY":"Data de nascimento","DESC":"Descrição","PHOTO":"Foto","send_message":"Enviar mensagem","get_info":"Exibir informações","Settings":"Configurações","Priority":"Prioridade","Save":"Salvar","User_settings":"Configurações do usuário","A_fingerprint_":"O fingerprint é usado para certificar que a pessoa com a qual se está falando é que ela diz ser.","is":"é","Login_options":"Opções de login","BOSH_url":"BOSH URL","Domain":"Domínio","Resource":"Recurso","On_login":"Ao autenticar","Received_an_unencrypted_message":"Mensagem não encriptada recebida","Sorry_your_buddy_doesnt_provide_any_information":"Desculpe, seu contato não forneceu nenhuma informação","Info_about":"Informações sobre","Authentication_aborted":"Autenticação encerrada.","Authentication_request_received":"Pedido de autenticação recebido","Log_in_without_chat":"Entrar sem conversar","has_come_online":"ficou online","Unknown_sender":"Emissor desconhecido","Please_allow_access_to_microphone_and_camera":"Por favor clique no botão \"Permitir\" no topo, para conceder acesso ao seu microfone e câmera.","Incoming_call":"Recebendo chamada","from":"de","Do_you_want_to_accept_the_call_from":"Você aceita a chamada de","Reject":"Negar","Accept":"Aceitar","hang_up":"desligar","snapshot":"registrar imagem","mute_my_audio":"mudo","pause_my_video":"pausar vídeo","fullscreen":"tela cheia","Info":"Informações","Local_IP":"IP local","Remote_IP":"IP remoto","Local_Fingerprint":"Fingerprint local","Remote_Fingerprint":"Fingerprint remoto","Video_call_not_possible":"Chamada de vídeo impossível. Seu contato não suporta chamadas desse tipo.","Start_video_call":"Iniciar chamada de vídeo","Join_chat":"Entrar no chat","Join":"Entrar","Room":"Sala","Nickname":"Apelido","left_the_building":"__nickname__ deixou o prédio","entered_the_room":"__nickname__ entrou na sala","is_now_known_as":"__oldNickname__ agora é conhecido como __newNickname__","This_room_is":"Esta sala é","muc_hidden":{"keyword":"oculto","description":"Não pode ser encontrado através de pesquisa"},"muc_membersonly":{"keyword":"apenas para membros","description":"você precisa estar na lista de membros"},"muc_moderated":{"keyword":"moderado","description":"Somente pessoas com \"voice\" podem enviar mensagens"},"muc_nonanonymous":{"keyword":"não-anônimo","description":"Seu id jabber esta esposto para todos os outros ocupantes"},"muc_open":{"keyword":"abrir","description":"Todos podem entrar"},"muc_passwordprotected":{"keyword":"protegido por senha","description":"você precisa fornecer a senha correta"},"muc_persistent":{"keyword":"persistente","description":"Não será destruída se o último ocupante tiver saído"},"muc_public":{"keyword":"público","description":"pode ser localizado pela busca"},"muc_semianonymous":{"keyword":"semi-anônimos","description":"Sua identificação jabber só é exposta para administradores da sala"},"muc_temporary":{"keyword":"temporário","description":"Será destruída se o último ocupante tiver saído"},"muc_unmoderated":{"keyword":"sem moderação","description":"Todos tem permissão de enviar mensagens"},"muc_unsecured":{"keyword":"inseguro","description":"Você não precisa de senha para entrar"},"Continue":"Avançar","Server":"Servidor","Rooms_are_loaded":"Sala carregada","Could_load_only":"Pode carregar somente __count__ salas para autocompletar","muc_explanation":"Por favor entre um nome de sala e um nickname opcional e uma senha para entrar no chat","You_already_joined_this_room":"Você já entrou nesta sala","This_room_will_be_closed":"Esta sala será fechada","Room_not_found_":"Uma nova sala será criada","Loading_room_information":"Carregar informação da sala","Destroy":"Destruir","Leave":"Sair","changed_subject_to":"__nickname__ alterar o assunto da sala para \"__subject__\"","muc_removed_kicked":"Você foi removido da sala","muc_removed_info_kicked":"__nickname__ foi removido da sala","muc_removed_banned":"Você foi banido da sala","muc_removed_info_banned":"__nickname__ foi banido da sala","muc_removed_affiliation":"Você foi removido da sala pois a sala, por que a afiliação mudou","muc_removed_info_affiliation":"__nickname__ foi removido da sala, por que a afiliação mudou","muc_removed_membersonly":"Você foi removido da sala pois a sala foi alterada somente para membros e você não é um membro","muc_removed_info_membersonly":"__nickname__ foi removido da sala porque a sala foi alterada para somente membros e você não é um membro","muc_removed_shutdown":"Você foi removido da sala, por que o serviço MUC esta sendo desligado","Reason":"Motivo","message_not_send":"Sua mensagem não foi enviada devido a um erro","message_not_send_item-not-found":"Sua mensagem não foi enviada por que essa sala nao existe mais","message_not_send_forbidden":"Sua mensagem não foi enviada por que não  tem 'voz' para essa sala","message_not_send_not-acceptable":"Sua mensagem não foi enviada por que você nao é ocupante desta sala","This_room_has_been_closed":"Essa sala foi fechada","Room_logging_is_enabled":"O Logging esta habilitado","A_password_is_required":"Senha é obrigatória","You_are_not_on_the_member_list":"Você não esta na lista de usuarios","You_are_banned_from_this_room":"Você foi banido desta sala","Your_desired_nickname_":"O nickname escolhido já esta em uso. Por favor escolha outro","The_maximum_number_":"O número máximo de usuarios já foi antigido para essa sala","This_room_is_locked_":"A sala esta trancada","You_are_not_allowed_to_create_":"Você não esta autorizado para criar uma sala","Alert":"Alerta","Call_started":"Chamada iniciada","Call_terminated":"Chamada finalizada","Carbon_copy":"Copia carbono","Enable":"Habilitado","jingle_reason_busy":"ocupado","jingle_reason_decline":"recusado","jingle_reason_success":"sucesso","Media_failure":"Media falhou","No_local_audio_device":"sem dispositivo local de audio","No_local_video_device":"sem dispositivo local de video","Ok":"Ok","PermissionDeniedError":"Você ou seu navegador negou permissão para acessar audio/video","Use_local_audio_device":"Usar dispositivo local de audio","Use_local_video_device":"Usar dispositivo local de video","is_":"é __status__","You_received_a_message_from_an_unknown_sender_":"Você recebeu uma mensagem de um emissor desconhecido (__sender__) Você quer mostrá-los?","Your_roster_is_empty_add_":"Sua lista está vazia, adicione um  <a>novo contato</a>","onsmp_explanation_question":"Seu contato está tentando determinar se ele realmente está falando contigo. Para autenticar seu contato,  entre com a resposta e clique em Responder.","onsmp_explanation_secret":"Seu contato está tentando determinar se ele realmente está falando contigo. Para autenticar seu contato,  escreva a senha.","from_sender":"de __sender__","Verified_private_conversation_started":"Verificado Conversa privada iniciada.","Unverified_private_conversation_started":"Não verificado Conversa privada iniciada.","Bookmark":"Favoritos","Auto-join":"Entrar Automaticamente","Edit_bookmark":"Editar favoritos","Room_logging_is_disabled":"Registro de log na sala está desativado","Room_is_now_non-anoymous":"A sala é não anônima agora","Room_is_now_semi-anonymous":"A sala é semi anônima agora","Do_you_want_to_change_the_default_room_configuration":"Você quer alterar as configurações da sala?","Default":"Padrão","Change":"Alterar","Send_file":"Enviar arquivo","setting-explanation-carbon":"Com carbon copy ativado seu servidor XMPP vai enviar uma copia de cada mensagem para você neste cliente mesmo que não tenha endereço","setting-explanation-login":"Se essa opção esta habilitada, o chat vai começar ao logar.","setting-explanation-priority":"Você esta logado varias vezes com a mesma conta, seu servidor XMPP vai entregar as mensagens para o cliente com a prioridade mais alta.","setting-explanation-xmpp":"Essas opções são usadas para conectar no Servidor XMPP","_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"ro":{"translation":{"Logging_in":"Autentificare...","your_connection_is_unencrypted":"Conexiunea nu este criptată.","your_connection_is_encrypted":"Conexiunea este criptată.","your_buddy_closed_the_private_connection":"Interlocutorul a închis conexiunea privată.","start_private":"Pornește în privat","close_private":"Închide privat","your_buddy_is_verificated":"Interlocutorul este verificat.","you_have_only_a_subscription_in_one_way":"Subscrierea este într-o singură direcție.","authentication_query_sent":"Cererea de autentificare a fost trimisă.","your_message_wasnt_send_please_end_your_private_conversation":"Mesajul nu a fost trimis. Te rog închide conversația în privat.","unencrypted_message_received":"A fost primit un mesaj necriptat","not_available":"Indisponibil","no_connection":"Fără conexiune!","relogin":"Re-autentificare","trying_to_start_private_conversation":"Se încearcă deschiderea conversației în privat!","Verified":"Verificat","Unverified":"Neverificat","private_conversation_aborted":"Conversație în privat eșuată!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Interlocutorul a închis conversația în privat! Ar trebui să faci la fel și tu.","conversation_is_now_verified":"Conversația este acum verificată.","authentication_failed":"Autentificarea a eşuat.","Creating_your_private_key_":"Se crează cheia privată; ar putea să dureze ceva timp.","Authenticating_a_buddy_helps_":"Autentificând un contact ne asigură că persoana cu care vorbești este într-adevăr cine pretinde că este.","How_do_you_want_to_authenticate_your_buddy":"Cum vrei să te autentifici __bid_name__ (<b>__bid_jid__</b>)","Select_method":"Alege metoda...","Manual":"Manual","Question":"Întrebare","Secret":"Secret","To_verify_the_fingerprint_":"Pentru a verifica amprenta, contactează interlocutorul printr-un canal de încredere, cum ar fi telefonul.","Your_fingerprint":"Amprenta ta","Buddy_fingerprint":"Amprenta interlocutorului","Close":"Închide","Compared":"Prin comparație","To_authenticate_using_a_question_":"Pentru autentificarea folosind o întrebare, alege o întrebare cu un răspuns cunoscut doar de tine și de interlocutor.","Ask":"Întreabă","To_authenticate_pick_a_secret_":"Pentru autentificare, alege un secret cunoscut doar de tine și de interlocutor.","Compare":"Compară","Fingerprints":"Amprente","Authentication":"Autentificare","Message":"Mesaj","Add_buddy":"Adaugă contact","rename_buddy":"redenumește contact","delete_buddy":"șterge contact","Login":"Logare","Username":"Utilizator","Password":"Parolă","Cancel":"Renunță","Connect":"Conectare","Type_in_the_full_username_":"Scrie numele complet al utilizatorului și un alias opțional.","Alias":"Alias","Add":"Adaugă","Subscription_request":"Cerere de subscriere","You_have_a_request_from":"Ai o cerere de la","Deny":"Refuză","Approve":"Aprobă","Remove_buddy":"Șterge contact","You_are_about_to_remove_":"Urmează să ștergi __bid_name__ (<b>__bid_jid__</b>) din lista de contacte. Toate chat-urile asociate vor fi închise.","Continue_without_chat":"Continuă fără chat","Please_wait":"Te rog așteaptă","Login_failed":"Logarea pe chat a eșuat","Sorry_we_cant_authentikate_":"Autentificarea cu serverul de chat a eșuat. Poate parola este greșită ?","Retry":"Înapoi","clear_history":"Curăță istoria","New_message_from":"Un nou mesaj de la __name__","Should_we_notify_you_":"Vrei să fi notificat despre mesajele noi în viitor ?","Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"ru":{"translation":{"Logging_in":"Вход в систему...","your_connection_is_unencrypted":"Ваше соединение не зашифровано.","your_connection_is_encrypted":"Ваше соединение зашифровано.","your_buddy_closed_the_private_connection":"Ваш собеседник закончил зашифрованное соединение.","start_private":"Начать зашифрованный чат","close_private":"Закончить зашифрованный чат","your_buddy_is_verificated":"Собеседник подтвержден.","you_have_only_a_subscription_in_one_way":"У вас только односторонняя подписка.","authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":"Сообщение не отправлено. Завершите зашифрованный чат, пожалуйста.","unencrypted_message_received":"Получено незашифрованное сообщение","not_available":"Не доступен","no_connection":"Нет соединения!","relogin":"переподключиться","trying_to_start_private_conversation":"Попытка начать зашифрованный чат!","Verified":"Подтверждено","Unverified":"Не подтверждено","private_conversation_aborted":"Зашифрованный чат отклонен!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Ваш собеседник завершил зашифрованный чат! Вы должны сделать тоже самое.","conversation_is_now_verified":"Чат теперь утвержден.","authentication_failed":"Ошибка авторизации.","Creating_your_private_key_":"Создается приватный ключ. Это может занять некоторое время","Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":"Выберите метод...","Manual":"Вручную","Question":"Вопрос","Secret":"Пароль","To_verify_the_fingerprint_":null,"Your_fingerprint":"Ваш отпечаток","Buddy_fingerprint":"Отпечаток собеседника","Close":"Закрыть","Compared":"Сравнение завершено","To_authenticate_using_a_question_":"Для авторизации с помощью вопроса выберите вопрос, ответ на который знаете только Вы и собеседник.","Ask":null,"To_authenticate_pick_a_secret_":"Для авторизации выберите пароль, который знаете только Вы и собеседник.","Compare":"Сравнить","Fingerprints":"Отпечатки","Authentication":"Авторизация","Message":"Сообщение","Add_buddy":"Добавить контакт","rename_buddy":"переименовать контакт","delete_buddy":"удалить контакт","Login":"Вход","Username":"Логин","Password":"Пароль","Cancel":"Отмена","Connect":"Подключить","Type_in_the_full_username_":"Введите полное имя пользователя и дополнительный псевдоним","Alias":"Псевдоним","Add":"Добавить","Subscription_request":"Запрос подписки","You_have_a_request_from":"Получен запрос от","Deny":"Отказ","Approve":"Подтвердить","Remove_buddy":"Удалить контакт","You_are_about_to_remove_":"Вы собираетесь удалить __bid_name__ (<b>__bid_jid__</b>) из списка контактов. Все связанные с чаты будут закрыты.","Continue_without_chat":"Продолжить без чата","Please_wait":"Подождите…","Login_failed":"Неудачный вход в чат","Sorry_we_cant_authentikate_":"Неудачная попытка входа","Retry":"Назад","clear_history":"Очистить историю","New_message_from":"Новое сообщение от __name__","Should_we_notify_you_":"Уведомлять о новых сообщениях в будущем?","Please_accept_":"Нажмите кнопку \"Разрешить\" вверху страницы, пожалуйста","Hide_offline":"Спрятать отключенных","Show_offline":"Показать отключенных","About":"О проекте","dnd":"Не беспокоить","Mute":"Выкл. уведомления","Unmute":"Вкл. уведомления","Subscription":"Подписка","both":"оба","Status":"Статус","online":"в сети","chat":"готов общаться","away":"отошел","xa":"отсутствую","offline":"не в сети","none":"нет","Unknown_instance_tag":"Неизвестный тег.","Not_one_of_our_latest_keys":"Ни один из наших последних ключей","Received_an_unreadable_encrypted_message":"Получено нечитаемое зашифрованное сообщение","Online":"В сети","Chatty":"Готов общаться","Away":"Отошел","Extended_away":"Отсутствую","Offline":"Не в сети","Friendship_request":"Запрос на добавление в контакты","Confirm":"Подтвердить","Dismiss":"Отклонить","Remove":"Удалить","Online_help":"Онлайн помощь","FN":"Полное имя","N":null,"FAMILY":"Фамилия","GIVEN":"Имя","NICKNAME":"Ник","URL":"URL","ADR":"Адрес","STREET":"Улица","EXTADD":"Дополнительный адрес","LOCALITY":"Город","REGION":"Область","PCODE":"Индекс","CTRY":"Страна","TEL":"Телефон","NUMBER":"Номер","EMAIL":"Почта","USERID":null,"ORG":"Организация","ORGNAME":"Название","ORGUNIT":"Отдел","TITLE":"Должность","ROLE":"Обязанности","BDAY":"День рождения","DESC":"Описание","PHOTO":" Фото ","send_message":"Отправить сообщение","get_info":"Показать информацию","Settings":"Настройки","Priority":"Приоритет","Save":"Сохранить","User_settings":"Пользовательские настройки","A_fingerprint_":null,"is":"  ","Login_options":"Параметры входа","BOSH_url":"BOSH URL","Domain":"Домен","Resource":"Ресурс","On_login":"Автоматически подключаться","Received_an_unencrypted_message":"Получено незашифрованное сообщение","Sorry_your_buddy_doesnt_provide_any_information":"К сожалению, контакт не предоставил какой-либо информации.","Info_about":"Информация о","Authentication_aborted":"Аутентификация прервана.","Authentication_request_received":"Получен запрос проверки подлинности.","Log_in_without_chat":"Вход без чата","has_come_online":"появился в сети","Unknown_sender":"Неизвестный отправитель","Please_allow_access_to_microphone_and_camera":"Нажмите кнопку \"Разрешить\" вверху страницы, чтобы предоставить доступ к микрофону и камере.","Incoming_call":"Входящий вызов","from":"от","Do_you_want_to_accept_the_call_from":"Вы хотите принять вызов от","Reject":"Отклонить","Accept":"Принять","hang_up":"Завершить","snapshot":"Снимок","mute_my_audio":"Без звука","pause_my_video":"Остановить моё видео","fullscreen":"На весь экран","Info":"Инфо","Local_IP":"Мой IP","Remote_IP":"Удаленный IP","Local_Fingerprint":"Мой отпечаток","Remote_Fingerprint":"Удаленный отпечаток","Video_call_not_possible":"Видео-вызов невозможен. Ваш собеседник не поддерживает видео-вызовы.","Start_video_call":"Видео-вызов","Join_chat":"Присоединиться к комнате","Join":"Присоедениться","Room":"Комната","Nickname":"Ник","left_the_building":"__nickname__ выходит из комнаты","entered_the_room":"__nickname__  заходит в комнату","is_now_known_as":"__oldNickname__ теперь известен как __newNickname__","This_room_is":"Эта комната","muc_hidden":{"keyword":"скрыта","description":"не может быть найдена через поиск"},"muc_membersonly":{"keyword":"только для участников","description":"Вы должны быть в списке участников"},"muc_moderated":{"keyword":"модерируется","description":"Только пользователи с правом голоса могут отправлять сообщения"},"muc_nonanonymous":{"keyword":"неанонимная","description":"Ваш JID будет показан всем посетителям"},"muc_open":{"keyword":"открытая","description":"Любой пользователь может присоедениться"},"muc_passwordprotected":{"keyword":"защищена паролем","description":"Необходимо ввести правильный пароль"},"muc_persistent":{"keyword":"постоянная","description":"Не будет уничтожена, когда ее покинут все участники"},"muc_public":{"keyword":"публичная","description":"Может быть найдена через поиск"},"muc_semianonymous":{"keyword":"полу-анонимная","description":"Ваш JID могут увидеть только администраторы"},"muc_temporary":{"keyword":"временная","description":"Будет уничтожена как только не останется ни одного участника"},"muc_unmoderated":{"keyword":"не модерируется","description":"Любой посетитель может отправлять сообщения"},"muc_unsecured":{"keyword":"без пароля","description":"Не нужно вводить пароль для входа"},"Continue":"Далее","Server":"Сервер","Rooms_are_loaded":"Комнаты загружены","Could_load_only":"Подгрузка только __count__ комнат в автодополнении","muc_explanation":"Введите название комнаты, свой ник и пароль для входа в комнату","You_already_joined_this_room":"Вы уже в этой комнате","This_room_will_be_closed":"Эта комната была закрыта","Room_not_found_":"Новая комната будет создана","Loading_room_information":"Загрузка информации о комнате","Destroy":"Уничтожить","Leave":"Покинуть","changed_subject_to":"__nickname__ изменил тему комнаты на \"__subject__\"","muc_removed_kicked":"Вас выкинули из комнаты","muc_removed_info_kicked":"__nickname__ был удален из комнаты","muc_removed_banned":"Вас забанили в комнате","muc_removed_info_banned":"__nickname__ был забанен в комнате","muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":"Вы были исключены из комнаты, т.к. комната стала доступна только для членов комнаты, а Вы им не являетесь","muc_removed_info_membersonly":"__nickname__  исключен(а) из комнаты, т.к. комната стала доступна только для членов комнаты, а он(она) им не является","muc_removed_shutdown":"Вы были удалены из комнаты, т.к. сервис чат-комнат недоступен","Reason":"Причина","message_not_send":"Ваше сообщение не было отправлено из-за ошибки","message_not_send_item-not-found":"Ваше сообщение не было отправлено, т.к. этой комнаты не существует","message_not_send_forbidden":"Ваше сообщение не было отправлено, т.к. у Вас нет права голоса в этой комнате","message_not_send_not-acceptable":"Ваше сообщение не было отправлено, т.к. Вы не являетесь участником этой комнаты","This_room_has_been_closed":"Эта комната была закрыта","Room_logging_is_enabled":"Журналирование комнаты включено","A_password_is_required":"Необходим пароль","You_are_not_on_the_member_list":"Вы не в списке участников","You_are_banned_from_this_room":"Вас забанили в этой комнате","Your_desired_nickname_":"Данное имя пользователя уже занято, пожалуйста, выберите другое имя пользователя","The_maximum_number_":"Достигнут лимит максимального количества посетителей этой комнаты","This_room_is_locked_":"Эта комната заблокирована","You_are_not_allowed_to_create_":"Вы не можете создавать комнаты","Alert":"Внимание","Call_started":"Вызов начался","Call_terminated":"Вызов завершен","Carbon_copy":"Копировать сообщения","Enable":"Включить","jingle_reason_busy":"занято","jingle_reason_decline":"запрещено","jingle_reason_success":"сбросили","Media_failure":"Ошибка передачи медиа","No_local_audio_device":"Нет локального аудио-устройства.","No_local_video_device":"Нет локального видео-устройства.","Ok":"Ок","PermissionDeniedError":"Вы или Ваш браузер запретили использовать микрофон/камеру","Use_local_audio_device":"Использовать локальное аудио-устройство.","Use_local_video_device":"Использовать локальное видео-устройство.","is_":"__status__","You_received_a_message_from_an_unknown_sender_":"Вы получили сообщение от неизвестного отправителя (__sender__)","Your_roster_is_empty_add_":"Ваш список контактов пуст, добавить  <a>новый контакт</a>","onsmp_explanation_question":"Собеседник пытается определить, что общается действительно с Вами.","onsmp_explanation_secret":"Собеседник пытается определить, что общается действительно с Вами. введите пароль.","from_sender":"от __sender__","Verified_private_conversation_started":"Подтверждено Зашифрованный чат начат.","Unverified_private_conversation_started":"Не подтверждено Зашифрованный чат начат.","Bookmark":"Закладка","Auto-join":"Автоматически входить","Edit_bookmark":"Редактировать закладку","Room_logging_is_disabled":"Журналирование комнаты отключено","Room_is_now_non-anoymous":"Комната теперь не анонимная","Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":"Вы хотите изменить стандартную конфигурацию комнаты?","Default":"Станд.","Change":"Изменить","Send_file":"Отправить файл","setting-explanation-carbon":"С включенным Carbon Copy Ваш XMPP сервер будет отправлять копию каждого входящего сообщения на все подключенные устройства.","setting-explanation-login":"Если эта опция включена, то чат будет начинаться сразу после аутентификации.","setting-explanation-priority":"Если вы подключены к одному аккаунту с нескольких устройств, то XMPP сервер будет доставлять сообщения на клиент с наивысшим приоритетом.","setting-explanation-xmpp":"Эти настройки используются для подключения к XMPP серверу.","_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"sv-SE":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"tr-TR":{"translation":{"Logging_in":"Giriş yapılıyor…","your_connection_is_unencrypted":"Bağlantınız şifrelenmemiş.","your_connection_is_encrypted":"Bağlantınız şifrelenmiş.","your_buddy_closed_the_private_connection":"Sohbet ettiğiniz kişi özel bağlantı kapatıldı.","start_private":"Özel bağlantı başlat.","close_private":"Özel bağlantıyı kapat.","your_buddy_is_verificated":"Kişi doğrulandı.","you_have_only_a_subscription_in_one_way":"Sadece tek yönlü bir aboneliğiniz var.","authentication_query_sent":"Kimlik doğrulama sorgusu gönderildi.","your_message_wasnt_send_please_end_your_private_conversation":"Mesajınız gönderilmedi. Lütfen özel görüşmelerinizi bitirin.","unencrypted_message_received":"Şifrelenmemiş mesaj alındı","not_available":"Müsait değil","no_connection":"Bağlantı yok!","relogin":"Yeniden gir","trying_to_start_private_conversation":"Özel sohbet başlatılmaya çalışılıyor!","Verified":"Doğrulandı","Unverified":"Doğrulanamadı","private_conversation_aborted":"Özel sohbet iptal edildi!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Sohbet ettiğiniz kişi özel görüşmeyi kapattı! Siz de aynı şeyi yapmalısınız.","conversation_is_now_verified":"Sohbet doğrulandı.","authentication_failed":"Kimlik doğrulama başarısız.","Creating_your_private_key_":"Özel anahtarınız oluşturuluyor; bu işlem biraz sürebilir.","Authenticating_a_buddy_helps_":"Kimlik doğrulaması, konuşmakta olduğunuz kişinin gerçekten o kişi olduğundan emin olmanıza yardımcı olur.","How_do_you_want_to_authenticate_your_buddy":"Kimlik doğrulasını nasıl yapmak istersiniz __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Yöntemi seçin...","Manual":"Elle","Question":"Soru","Secret":"Gizli anahtar","To_verify_the_fingerprint_":"Parmakizini doğrulamak için, telefon gibi başka bir güvenilir kanalı kullanın.","Your_fingerprint":"Parmakiziniz","Buddy_fingerprint":"Kişinin parmakizi","Close":"Kapat","Compared":"Kıyaslandı","To_authenticate_using_a_question_":"Bir soru ile kimlik doğrulaması için, yanıtını yalnızca siz ve karşınızdaki kişinin bildiği bir soru seçin.","Ask":"Sor","To_authenticate_pick_a_secret_":"Kimlik doğrulaması için, yalnızca siz ve karşınızdaki kişinin bildiği bir parola seçin.","Compare":"Karşılaştır","Fingerprints":"Parmakizleri","Authentication":"Kimlik doğrulama","Message":"İleti","Add_buddy":"Kişi ekle","rename_buddy":"Kişiyi yeniden adlandır","delete_buddy":"Kişiyi sil","Login":"Giriş","Username":"Kullanıcı adı","Password":"Şifre","Cancel":"iptal","Connect":"Bağlan","Type_in_the_full_username_":"Tam kullanıcı adını ve isteğe bağlı bir takma ad yazın.","Alias":"Takma ad","Add":"Ekle","Subscription_request":"Abonelik isteği","You_have_a_request_from":"Size gelen bir istek var","Deny":"Reddet","Approve":"Onayla","Remove_buddy":"Kişiyi çıkar","You_are_about_to_remove_":"__bid_name__ (<b>__bid_jid__</b>) adlı kişiyi listenizden çıkarmak üzeresiniz. Tüm ilişkili sohbetler kapanacak.","Continue_without_chat":"Sohbet etmeden devam et","Please_wait":"Lütfen bekleyin","Login_failed":"Sohbet girişi başarısız oldu","Sorry_we_cant_authentikate_":"Kimlik doğrulaması başarısız oldu. Şifreniz yanlış olabilir.","Retry":"Geri","clear_history":"Geçmişi sil","New_message_from":"__name__ adlı kişiden yeni bir mesaj aldınız","Should_we_notify_you_":"İleride aldığınız yeni mesajları size bildirelim mi?","Please_accept_":"Lütfen üstteki \"İzin ver\" düğmesini tıklayın.","Hide_offline":"Çevrimdışı kişileri gizle","Show_offline":"Çevrimdışı kişileri göster","About":"hakkında","dnd":"Rahatsız etmeyin","Mute":"Sessiz","Unmute":"Sesli","Subscription":"Üyelik","both":"her ikisi de","Status":"Durum","online":"çevrimiçi","chat":"sohbet","away":"uzakta","xa":"çok uzakta","offline":"çevrimdışı","none":"hiç biri","Unknown_instance_tag":"Bilinmeyen örnek etiketi.","Not_one_of_our_latest_keys":"En son anahtarlarımızdan biri değil.","Received_an_unreadable_encrypted_message":"Okunamayan şifrelenmiş bir mesaj alındı.","Online":"Çevrimiçi","Chatty":"Konuşkan","Away":"Uzakta","Extended_away":"Çok uzakta","Offline":"Çevrimdışı","Friendship_request":"İrtibat isteği","Confirm":"Onayla","Dismiss":"Reddet","Remove":"Çıkar","Online_help":"Çevrimiçi yardım","FN":"Tam adı","N":" ","FAMILY":"Soyadı","GIVEN":"Adı","NICKNAME":"Takma ad","URL":"URL","ADR":"Adres","STREET":"Sokak","EXTADD":"Genişletilmiş Adres","LOCALITY":"Yer","REGION":"Bölge","PCODE":"Posta Kodu","CTRY":"Ülke","TEL":"Telefon","NUMBER":"Numara","EMAIL":"Eposta","USERID":" ","ORG":"Organizasyon","ORGNAME":"İsim","ORGUNIT":"Birim","TITLE":"İş tenımı","ROLE":"Görevi","BDAY":"Doğum günü","DESC":"Tanım","PHOTO":" ","send_message":"İletiyi gönder","get_info":"Bilgileri göster","Settings":"Ayarlar","Priority":"Öncelik","Save":"Kaydet","User_settings":"Kullanıcı tercihleri","A_fingerprint_":"Parmak izi konuştuğunuz kişinin söylediği kişi olduğundan emin olmak için kullanılır.","is":"Eşit","Login_options":"Giriş seçenekleri","BOSH_url":"BOSH URL","Domain":"Alan adı","Resource":"Kaynak","On_login":"Girişte","Received_an_unencrypted_message":"Şifrelenmemiş bir mesaj alındı","Sorry_your_buddy_doesnt_provide_any_information":"Maalesef kişi her hangi bir bilgi sunmamış.","Info_about":"Bilinen özellikleri","Authentication_aborted":"Kimlik doğrulama iptal edildi.","Authentication_request_received":"Kimlik doğrulama isteği alındı.","Log_in_without_chat":"Sohbetsiz giriş yap","has_come_online":"Çevrimiçi oldu","Unknown_sender":"Bilinmeyen gönderen","Please_allow_access_to_microphone_and_camera":"Mikrofona ve kameraya erişime izin vermek için lütfen üstteki \"İzin Ver\" düğmesini tıklayın.","Incoming_call":"Gelen çağrı","from":"gönderen","Do_you_want_to_accept_the_call_from":"Gelen aramayı kabul etmek istiyor musunuz","Reject":"Reddet","Accept":"Kabul et","hang_up":"aramayı sonlandır","snapshot":"anlık fotoğraf","mute_my_audio":"Sesi kapat","pause_my_video":"videoyu duraklat","fullscreen":"tam ekran","Info":"bilgi","Local_IP":"Yerel IP","Remote_IP":"Uzak IP","Local_Fingerprint":"Yerel parmakizi","Remote_Fingerprint":"Uzak parmakizi","Video_call_not_possible":"Video çağrısı yapılamıyor. Aranan kişi video görüşmelerini desteklemiyor.","Start_video_call":"Video görüşmesini başlat","Join_chat":"Sohbete katıl","Join":"Katıl","Room":"Oda","Nickname":"Takma ad","left_the_building":"__nickname__ binadan ayrıldı","entered_the_room":"__nickname__ odaya girdi","is_now_known_as":"__oldNickname__ şimdi __newNickname__ olarak biliniyor","This_room_is":"Bu oda","muc_hidden":{"keyword":"gizli","description":"Arama yoluyla bulunamıyor"},"muc_membersonly":{"keyword":"sadece-üye-olanlar","description":"üye listenizde olmanız gerekiyor"},"muc_moderated":{"keyword":"yöneticili","description":"Yalnızca \"sesli\" kişilerin mesaj göndermesine izin verilir"},"muc_nonanonymous":{"keyword":"Anonim-değil","description":"Sohbet kimliğiniz diğer tüm oturanlara görünüyor"},"muc_open":{"keyword":"açık","description":"herkes katılabilir"},"muc_passwordprotected":{"keyword":"şifre-korumalı","description":"Doğru şifreyi girmeniz gerekiyor"},"muc_persistent":{"keyword":"kalıcı","description":"Son oturan ayrıldığında kapanmaz"},"muc_public":{"keyword":"herkese açık","description":"Arama yoluyla bulunabilir"},"muc_semianonymous":{"keyword":"yarı-anonim","description":"Sohbet kimliğiniz sadece oda yöneticilerine görünüyor"},"muc_temporary":{"keyword":"geçici","description":"Son oturan ayrıldığında kapanır"},"muc_unmoderated":{"keyword":"yöneticisiz","description":"herkes ileti gönderebilir"},"muc_unsecured":{"keyword":"güvensiz","description":"şifre girmenize gerek yok"},"Continue":"Devam","Server":"Sunucu","Rooms_are_loaded":"Oda yüklendi","Could_load_only":"Sadece __count__ oda otomatik tamamlamayla yüklenebilir","muc_explanation":"Bir sohbete katılmak için, lütfen oda adını ve isteniyorsa takma adınız ve parolanızı girin","You_already_joined_this_room":"Zaten bu odaya katılmış durumdasınız","This_room_will_be_closed":"Bu oda kapanacak","Room_not_found_":"Yeni oda oluşturulacak","Loading_room_information":"Oda bilgileri yükleniyor","Destroy":"Sil","Leave":"Ayrıl","changed_subject_to":"__nickname__ bu odanın konusunu \"__subject__\" olarak değiştirdi","muc_removed_kicked":"Bu odadan atıldınız","muc_removed_info_kicked":"__nickname__ bu odadan atıldı","muc_removed_banned":"Odadan yasaklandınız","muc_removed_info_banned":"__nickname__ odadan yasaklandınız","muc_removed_affiliation":"Üyelik değişikliği nedeniyle odadan çıkarıldınız","muc_removed_info_affiliation":"__nickname__ üyelik değişikliği nedeniyle odadan çıkarıldı","muc_removed_membersonly":"Odanın durumu sadece-üyeler olarak değiştirildiği ve siz üye olmadığınız için odadan çıkarıldınız","muc_removed_info_membersonly":"Odanın durumu sadece-üyeler olarak değiştirildiği ve __nickname__ üye olmadığı için odadan çıkarıldı","muc_removed_shutdown":"Odadan çıkarıldınız çünkü, MUC sunucusu kapandı","Reason":"Sebep","message_not_send":"Mesajınız bir hata nedeniyle gönderilmedi","message_not_send_item-not-found":"Mesajınız gönderilmedi, çünkü bu oda mevcut değil","message_not_send_forbidden":"Mesajınız gönderilmedi çünkü bu odada sesiniz yok","message_not_send_not-acceptable":"Mesajınız gönderilmedi çünkü bu odaya bulunmuyorsunuz","This_room_has_been_closed":"Bu oda kapatıldı","Room_logging_is_enabled":"Oda günlüğü etkinleştirildi","A_password_is_required":"Şifre gerekli","You_are_not_on_the_member_list":"Üye listesinde değilsiniz","You_are_banned_from_this_room":"Bu odadan yasaklandınız","Your_desired_nickname_":"İstediğiniz takma ad başkası tarafından kullanılıyor. Lütfen başka bir takma ad","The_maximum_number_":"Bu odada maksimum kullanıcı sayısına ulaşıldı","This_room_is_locked_":"Bu oda kilitli","You_are_not_allowed_to_create_":"Oda açma izniniz yok","Alert":"Uyarı","Call_started":"Arama başlatıldı","Call_terminated":"Arama bitirildi","Carbon_copy":"Karbon kopya","Enable":"Etkinleştir","jingle_reason_busy":"meşgul","jingle_reason_decline":"kabul etme","jingle_reason_success":"kapatıldı","Media_failure":"Medya istek hatası","No_local_audio_device":"Yerel ses cihazı bulunamadı.","No_local_video_device":"Yerel video cihazı bulunamadı.","Ok":"Tamam","PermissionDeniedError":"Siz veya tarayıcınız sesli/görüntülü izni reddetti","Use_local_audio_device":"Yerel video cihazını kullan.","Use_local_video_device":"Yerel video cihazını kullanın.","is_":"__status__","You_received_a_message_from_an_unknown_sender_":"Bilinmeyen bir gönderenden bir ileti aldınız (__sender__) İletiyi görüntülemek istiyor musunuz?","Your_roster_is_empty_add_":"Listeniz boş, yeni bir <a>kişi ekleyin</a>","onsmp_explanation_question":"Karşınızdaki kişi, konuştuğu kişinin gerçekten siz olduğunuzu belirlemeye çalışıyor. Karşınızdaki kişiye kimliğinizi kanıtlamak için, yanıtı girin ve Yanıtla'yı tıklayın.","onsmp_explanation_secret":"Karşınızdaki kişi, konuştuğu kişinin gerçekten siz olduğunuzu belirlemeye çalışıyor. Karşınızdaki kişiye kimliğinizi kanıtlamak için, parolayı girin.","from_sender":"__sender__'den","Verified_private_conversation_started":"Doğrulanmış Özel görüşme başladı.","Unverified_private_conversation_started":"Doğrulanmamış Özel görüşme başladı.","Bookmark":"Yer imi","Auto-join":"Otomatik katıl","Edit_bookmark":"yer imini düzenle","Room_logging_is_disabled":"Oda günlüğü devre dışı","Room_is_now_non-anoymous":"Oda artık anonim değil","Room_is_now_semi-anonymous":"Oda yarı-anonim","Do_you_want_to_change_the_default_room_configuration":"Öntanımlı oda yapılandırmasını değiştirmek istiyor musunuz?","Default":"Öntanımlı","Change":"Değiştir","Send_file":"Dosya gönder","setting-explanation-carbon":"Etkinleştirilmiş karbon kopya ile, XMPP sunucusu kendisine gönderilen her iletinin bir kopyasını, bu adrese gönderilmemiş olsa bile sizin için bu istemciye gönderir.","setting-explanation-login":"Bu seçenek etkinleştirilirse, sohbet girişle beraber başlayacaktır.","setting-explanation-priority":"Aynı hesapla bir çok kez oturum açtıysanız, XMPP sunucusu, istemciye  iletileri en yüksek öncelikle gönderecektir.","setting-explanation-xmpp":"Bu seçenekler XMPP sunucusuna bağlanmak için kullanılır.","_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"vi-VN":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}},"zh-TW":{"translation":{"Logging_in":"正在登入…","your_connection_is_unencrypted":"連線沒加密。","your_connection_is_encrypted":"連線有加密。","your_buddy_closed_the_private_connection":"聯絡人關閉了加密連線。","start_private":"開始加密","close_private":"結束加密","your_buddy_is_verificated":"聯絡人已校驗。","you_have_only_a_subscription_in_one_way":"只有單向訂閱。","authentication_query_sent":"驗證要求送出了。","your_message_wasnt_send_please_end_your_private_conversation":"訊息沒送出去。請結束加密的對話。","unencrypted_message_received":"收到沒加密的訊息","not_available":"不存在","no_connection":"沒有連線！","relogin":"重新登入","trying_to_start_private_conversation":"正在試著開始加密的對話！","Verified":"已校驗","Unverified":"未校驗","private_conversation_aborted":"加密的對話中斷了！","your_buddy_closed_the_private_conversation_you_should_do_the_same":"聯絡人把這場加密的對話關掉了！你也應該同樣關掉。","conversation_is_now_verified":"對話現在校驗過了。","authentication_failed":"驗證失敗。","Creating_your_private_key_":"正在產生你的私人金鑰，會花一段時間。","Authenticating_a_buddy_helps_":"聯絡人驗證可以確保跟你說話的是真的那個人。","How_do_you_want_to_authenticate_your_buddy":"想要怎樣驗證__bid_name__ (<b>__bid_jid__</b>)？","Select_method":"選個方式...","Manual":"手動","Question":"問答","Secret":"祕密","To_verify_the_fingerprint_":"要校驗聯絡人的電子指紋，請透過其他可靠的管道跟她/他聯絡，比如說電話。","Your_fingerprint":"你的電子指紋","Buddy_fingerprint":"聯絡人的電子指紋","Close":"關閉","Compared":"比對正確","To_authenticate_using_a_question_":"要用問答來驗證的話，請找一個只有你和聯絡人才知道答案的問題。","Ask":"問題","To_authenticate_pick_a_secret_":"要驗證的話，請找一個只有你和聯絡人知道的祕密。","Compare":"比對","Fingerprints":"電子指紋","Authentication":"驗證","Message":"訊息","Add_buddy":"加聯絡人","rename_buddy":"重新命名聯絡人","delete_buddy":"刪掉聯絡人","Login":"登入","Username":"使用者名稱","Password":"密碼","Cancel":"取消","Connect":"連線","Type_in_the_full_username_":"請打全名，別名可有可無","Alias":"別名","Add":"加入","Subscription_request":"訂閱請求","You_have_a_request_from":"收到聯絡人的請求：","Deny":"拒絕","Approve":"同意","Remove_buddy":"刪除聯絡人","You_are_about_to_remove_":"要把__bid_name__ (<b>__bid_jid__</b>)從聯絡簿裡刪掉了。所有相關的對話也都會關掉。","Continue_without_chat":"繼續不聊天","Please_wait":"請等一下","Login_failed":"登入聊天失敗","Sorry_we_cant_authentikate_":"跟聊天伺服器驗證失敗，會不會是密碼打錯了？","Retry":"上一步","clear_history":"清除歷史紀錄","New_message_from":"有新訊息：__name__","Should_we_notify_you_":"以後若有新訊息要通知你嗎？","Please_accept_":"請點上方的「允許」按鈕。","Hide_offline":"隱藏離線聯絡人","Show_offline":"顯示離線聯絡人","About":"關於我","dnd":"別打擾","Mute":"開靜音","Unmute":"關靜音","Subscription":"訂閱狀態","both":"雙向","Status":"狀態","online":"上線","chat":"聊天","away":"離開","xa":"離開很久","offline":"離線","none":"沒有","Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":"收到了一則加密但無法辨認的訊息。","Online":"上線","Chatty":"想聊天","Away":"離開","Extended_away":"離開很久","Offline":"離線","Friendship_request":"聯絡請求","Confirm":"確定","Dismiss":"取消","Remove":"刪掉","Online_help":"線上說明","FN":"全名","N":" ","FAMILY":"姓氏","GIVEN":"名字","NICKNAME":"綽號","URL":"網址","ADR":"位址","STREET":"地址","EXTADD":"更多位址","LOCALITY":"所在地","REGION":"區域","PCODE":"郵遞區號","CTRY":"國家","TEL":"電話","NUMBER":"編號","EMAIL":"電子郵件","USERID":" ","ORG":"團體","ORGNAME":"名稱","ORGUNIT":"單位","TITLE":"職稱","ROLE":"職位","BDAY":"生日","DESC":"簡介","PHOTO":" ","send_message":"發送訊息","get_info":"顯示帳號資訊","Settings":"設定","Priority":"優先度","Save":"儲存","User_settings":"使用者設定","A_fingerprint_":"電子指紋是用來確認跟你說話的是真的那個人。","is":"狀態:","Login_options":"登入選項","BOSH_url":"BOSH 網址","Domain":"網域","Resource":"資源","On_login":"登入啟動","Received_an_unencrypted_message":"收到了一則沒加密的訊息","Sorry_your_buddy_doesnt_provide_any_information":"抱歉，聯絡人沒有提供任何資訊。","Info_about":"帳號資訊：","Authentication_aborted":"驗證中斷。","Authentication_request_received":"驗證請求收到了。","Log_in_without_chat":"登入但不啟用聊天","has_come_online":"上線了","Unknown_sender":"不明傳訊人","Please_allow_access_to_microphone_and_camera":"請點上方的「接受」按鈕來允許我們使用麥克風和相機。","Incoming_call":"來電","from":"只出","Do_you_want_to_accept_the_call_from":"是否要接聽來電:","Reject":"拒絕","Accept":"接受","hang_up":"掛斷","snapshot":"截圖","mute_my_audio":"關掉我的聲音","pause_my_video":"暫停我的影像","fullscreen":"全螢幕","Info":"資料","Local_IP":"本機網路位址","Remote_IP":"遠端網路位址","Local_Fingerprint":"本機電子指紋","Remote_Fingerprint":"遠端電子指紋","Video_call_not_possible":"無法視訊通話。聯絡人不支援視訊。","Start_video_call":"開始視訊通話","Join_chat":"參加聊天","Join":"參加","Room":"聊天室","Nickname":"綽號","left_the_building":"__nickname__離開了大樓","entered_the_room":"__nickname__進入了聊天室","is_now_known_as":"__oldNickname__改名叫做__newNickname__","This_room_is":"聊天室屬性：","muc_hidden":{"keyword":"隱藏","description":"搜尋也找不到"},"muc_membersonly":{"keyword":"限會員","description":"會員才會加入"},"muc_moderated":{"keyword":"有管制","description":"沒被消音的人才能送訊息"},"muc_nonanonymous":{"keyword":"禁匿名","description":"每個參與人都能看到你的 jabber 代碼"},"muc_open":{"keyword":"開放","description":"任何人都能參加"},"muc_passwordprotected":{"keyword":"密碼鎖","description":"要輸入正確的密碼才能加入"},"muc_persistent":{"keyword":"永久性","description":"最後一個參與人都離開了也不會結束"},"muc_public":{"keyword":"公開","description":"搜尋得到"},"muc_semianonymous":{"keyword":"半匿名","description":"只有聊天室管理員才看得到你的 jabber 代碼"},"muc_temporary":{"keyword":"暫時性","description":"最後一個參與人離開了就會結束"},"muc_unmoderated":{"keyword":"沒管制","description":"每個人都可以送訊息"},"muc_unsecured":{"keyword":"沒保護","description":"不需要密碼就能加入"},"Continue":"繼續","Server":"伺服器","Rooms_are_loaded":"聊天室載入完成","Could_load_only":"只能載入__count__間聊天室供輸入自動完成使用","muc_explanation":"請輸入要參加的聊天室名稱，綽號和密碼非必要","You_already_joined_this_room":"你已經參加這間聊天室了","This_room_will_be_closed":"聊天室即將關閉","Room_not_found_":"新聊天室即將開啟","Loading_room_information":"正在載入聊天室資訊","Destroy":"關閉","Leave":"離開","changed_subject_to":"__nickname__把聊天室的標題改成了\"__subject__\"","muc_removed_kicked":"你被踢出聊天室了","muc_removed_info_kicked":"__nickname__被踢出聊天室了","muc_removed_banned":"你被禁止進入聊天室了","muc_removed_info_banned":"__nickname__被禁止進入聊天室了","muc_removed_affiliation":"你因為身份改變而離開聊天室了","muc_removed_info_affiliation":"__nickname__因為身份改變而離開聊天室了","muc_removed_membersonly":"你離開聊天室了，因為聊天室改為只限會員，但你不是會員","muc_removed_info_membersonly":"__nickname__離開聊天室了，因為聊天室改為只限會員，但她/他不是會員","muc_removed_shutdown":"你離開聊天室了，因為多人聊天服務正在關閉中。","Reason":"原因","message_not_send":"訊息因為發生錯誤沒送出去","message_not_send_item-not-found":"訊息沒送出去，因為聊天室不存在了","message_not_send_forbidden":"訊息沒送出去，因為你被消音了","message_not_send_not-acceptable":"訊息沒送出去，因為你不是聊天室的參與人了","This_room_has_been_closed":"聊天室已經關閉了","Room_logging_is_enabled":"聊天室紀錄打開了","A_password_is_required":"需要密碼","You_are_not_on_the_member_list":"你不是會員","You_are_banned_from_this_room":"你被禁止進入聊天室了","Your_desired_nickname_":"這個綽號被用掉了，請換一個","The_maximum_number_":"這間聊天室已經到達使用者數目的上限","This_room_is_locked_":"聊天室上鎖了","You_are_not_allowed_to_create_":"不允許你開新的聊天室","Alert":"警告","Call_started":"通話開始","Call_terminated":"通話結束","Carbon_copy":"副本","Enable":"打開","jingle_reason_busy":"忙線中","jingle_reason_decline":"被拒絕","jingle_reason_success":"被掛斷","Media_failure":"媒體錯誤","No_local_audio_device":"本機沒有音訊設備。","No_local_video_device":"本機沒有視訊設備。","Ok":"好","PermissionDeniedError":"你或你的瀏覽器拒絕了媒體使用權限","Use_local_audio_device":"使用本機音訊設備。","Use_local_video_device":"使用本機視訊設備。","is_":"狀態: __status__","You_received_a_message_from_an_unknown_sender_":"收到了不明人士(__sender__)傳來的訊息。你要打開來看嗎？","Your_roster_is_empty_add_":"好友清單是空的，請加<a>新的聯絡人</a>","onsmp_explanation_question":"聯絡人想要確定她/他是在跟真的你說話。要完成你的驗證，請輸入問題的答案，然後按\"回答\"。","onsmp_explanation_secret":"聯絡人想要確定她/他是在跟真的你說話。要完成你的驗證，請輸入你們之間的祕密。","from_sender":"來自：__sender__","Verified_private_conversation_started":"加密且已校驗的對話開始了。","Unverified_private_conversation_started":"加密但未校驗的對話開始了。","Bookmark":"書籤","Auto-join":"自動參加","Edit_bookmark":"編輯書籤","Room_logging_is_disabled":"聊天室紀錄關掉了","Room_is_now_non-anoymous":"現在聊天室禁止匿名了","Room_is_now_semi-anonymous":"現在聊天室變半匿名了","Do_you_want_to_change_the_default_room_configuration":"你想要改變聊天室的預設配置嗎？","Default":"預設值","Change":"修改","Send_file":"傳送檔案","setting-explanation-carbon":"如果打開副本選項的話，XMPP 伺服器會把每一個收到的訊息，都送一份到這個用戶端程式，即使它不是訊息發送的對象。","setting-explanation-login":"打開這個選項會在登入時同時開啟聊天。","setting-explanation-priority":"如果你用同一個帳號同時登入好幾次的話，XMPP 伺服器會把訊息送給優先度最高的那個用戶端程式。","setting-explanation-xmpp":"這些是用在 XMPP 伺服器連線的選項。","_is_composing":"正在打字中...","_are_composing":"正在打字中...","Chat_state_notifications":"聊天狀態通知","setting-explanation-chat-state":"想要傳送以及接收聊天狀態的通知嗎？也就是有人開始或停止寫訊息之類？","Share_screen":"分享螢幕","Incoming_stream":"有串流來","Stream_started":"串流開始了","HTTPS_REQUIRED":"這個動作需要連線有加密。","EXTENSION_UNAVAILABLE":"瀏覽器必須要安裝擴充套件或是附加元件。","UNKNOWN_ERROR":"發生了不明錯誤。","Install_extension":"要使用螢幕分享功能請安裝這個擴充套件: ","Connection_accepted":"連線接受了","Stream_terminated":"串流結束了","Close_all":null}},"zh":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null}}};
-
-/*!
- * Source: lib/favico.js/favico.js, license: MIT, url: https://github.com/ejci/favico.js
- */
 /**
  * @license MIT
  * @fileOverview Favico animations
@@ -48592,10 +48210,6 @@ var I18next = {"bg":{"translation":{"Logging_in":null,"your_connection_is_unencr
 
 })();
 
-
-/*!
- * Source: lib/emojione/lib/js/emojione.js, license: CC-BY 4.0, url: http://emojione.com
- */
 /* jshint maxerr: 10000 */
 /* jslint unused: true */
 /* jshint shadow: true */
@@ -49111,3 +48725,4 @@ var I18next = {"bg":{"translation":{"Logging_in":null,"your_connection_is_unencr
 
 }(this.emojione = this.emojione || {}));
 if(typeof module === "object") module.exports = this.emojione;
+var I18next = {"bg":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"bn-BD":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"de":{"translation":{"Logging_in":"Login läuft…","your_connection_is_unencrypted":"Deine Verbindung ist unverschlüsselt.","your_connection_is_encrypted":"Deine Verbindung ist verschlüsselt.","your_buddy_closed_the_private_connection":"Dein Kontakt hat die private Verbindung getrennt.","start_private":"Privat starten","close_private":"Privat abbrechen","your_buddy_is_verificated":"Dein Kontakt ist verifiziert.","you_have_only_a_subscription_in_one_way":"Der Kontaktstatus ist einseitig.","authentication_query_sent":"Authentifizierungsanfrage gesendet.","your_message_wasnt_send_please_end_your_private_conversation":"Deine Nachricht wurde nicht gesendet. Bitte beende die private Konversation.","unencrypted_message_received":"Unverschlüsselte Nachricht erhalten.","not_available":"Nicht verfügbar.","no_connection":"Keine Verbindung.","relogin":"Neu anmelden.","trying_to_start_private_conversation":"Versuche private Konversation zu starten.","Verified":"Verifiziert","Unverified":"Unverifiziert","private_conversation_aborted":"Private Konversation abgebrochen.","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Dein Kontakt hat die private Konversation beendet. Das solltest du auch tun!","conversation_is_now_verified":"Konversation ist jetzt verifiziert","authentication_failed":"Authentifizierung fehlgeschlagen.","Creating_your_private_key_":"Wir werden jetzt deinen privaten Schlüssel generieren. Das kann einige Zeit in Anspruch nehmen.","Authenticating_a_buddy_helps_":"Einen Kontakt zu authentifizieren hilft sicherzustellen, dass die Person mit der du sprichst auch die ist die sie sagt.","How_do_you_want_to_authenticate_your_buddy":"Wie willst du __bid_name__ (<b>__bid_jid__</b>) authentifizieren?","Select_method":"Wähle...","Manual":"Manual","Question":"Frage","Secret":"Geheimnis","To_verify_the_fingerprint_":"Um den Fingerprint zu verifizieren kontaktiere dein Kontakt über einen anderen Kommunikationsweg. Zum Beispiel per Telefonanruf.","Your_fingerprint":"Dein Fingerprint","Buddy_fingerprint":"Sein/Ihr Fingerprint","Close":"Schließen","Compared":"Verglichen","To_authenticate_using_a_question_":"Um die Authentifizierung per Frage durchzuführen, wähle eine Frage bei welcher nur dein Kontakt die Antwort kennt.","Ask":"Frage","To_authenticate_pick_a_secret_":"Um deinen Kontakt zu authentifizieren, wähle ein Geheimnis welches nur deinem Kontakt und dir bekannt ist.","Compare":"Vergleiche","Fingerprints":"Fingerprints","Authentication":"Authentifizierung","Message":"Nachricht","Add_buddy":"Kontakt hinzufügen","rename_buddy":"Kontakt umbenennen","delete_buddy":"Kontakt löschen","Login":"Anmeldung","Username":"Benutzername","Password":"Passwort","Cancel":"Abbrechen","Connect":"Verbinden","Type_in_the_full_username_":"Gib bitte den vollen Benutzernamen und optional ein Alias an.","Alias":"Alias","Add":"Hinzufügen","Subscription_request":"Kontaktanfrage","You_have_a_request_from":"Du hast eine Anfrage von","Deny":"Ablehnen","Approve":"Bestätigen","Remove_buddy":"Kontakt entfernen","You_are_about_to_remove_":"Du bist gerade dabei __bid_name__ (<b>__bid_jid__</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.","Continue_without_chat":"Weiter ohne Chat","Please_wait":"Bitte warten","Login_failed":"Chat-Anmeldung fehlgeschlagen","Sorry_we_cant_authentikate_":"Der Chatserver hat die Anmeldung abgelehnt. Falsches Passwort?","Retry":"Zurück","clear_history":"Lösche Verlauf","New_message_from":"Neue Nachricht von __name__","Should_we_notify_you_":"Sollen wir dich in Zukunft über eingehende Nachrichten informieren, auch wenn dieser Tab nicht im Vordergrund ist?","Please_accept_":"Bitte klick auf den \"Zulassen\" Button oben.","Hide_offline":"Offline ausblenden","Show_offline":"Offline einblenden","About":"Über","dnd":"Beschäftigt","Mute":"Ton aus","Unmute":"Ton an","Subscription":"Bezug","both":"beidseitig","Status":"Status","online":"online","chat":"chat","away":"abwesend","xa":"länger abwesend","offline":"offline","none":"keine","Unknown_instance_tag":"Unbekannter instance tag.","Not_one_of_our_latest_keys":"Nicht einer unserer letzten Schlüssel.","Received_an_unreadable_encrypted_message":"Eine unlesbare verschlüsselte Nachricht erhalten.","Online":"Online","Chatty":"Gesprächig","Away":"Abwesend","Extended_away":"Länger abwesend","Offline":"Offline","Friendship_request":"Kontaktanfrage","Confirm":"Bestätigen","Dismiss":"Ablehnen","Remove":"Löschen","Online_help":"Online Hilfe","FN":"Name","N":" ","FAMILY":"Familienname","GIVEN":"Vorname","NICKNAME":"Spitzname","URL":"URL","ADR":"Adresse","STREET":"Straße","EXTADD":"Zusätzliche Adresse","LOCALITY":"Ortschaft","REGION":"Region","PCODE":"Postleitzahl","CTRY":"Land","TEL":"Telefon","NUMBER":"Nummer","EMAIL":"E-Mail","USERID":" ","ORG":"Organisation","ORGNAME":"Name","ORGUNIT":"Abteilung","TITLE":"Titel","ROLE":"Rolle","BDAY":"Geburtstag","DESC":"Beschreibung","PHOTO":" ","send_message":"Sende Nachricht","get_info":"Benutzerinformationen","Settings":"Einstellungen","Priority":"Priorität","Save":"Speichern","User_settings":"Benutzereinstellungen","A_fingerprint_":"Ein Fingerabdruck wird dazu benutzt deinen Gesprächspartner zu identifizieren.","is":"ist","Login_options":"Anmeldeoptionen","BOSH_url":"BOSH url","Domain":"Domain","Resource":"Ressource","On_login":"Beim Anmelden","Received_an_unencrypted_message":"Unverschlüsselte Nachricht empfangen","Sorry_your_buddy_doesnt_provide_any_information":"Dein Kontakt stellt leider keine Informationen bereit.","Info_about":"Info über","Authentication_aborted":"Authentifizierung abgebrochen.","Authentication_request_received":"Authentifizierungsanfrage empfangen.","Log_in_without_chat":"Anmelden ohne Chat","has_come_online":"ist online gekommen","Unknown_sender":"Unbekannter Sender","Please_allow_access_to_microphone_and_camera":"Bitte klick auf den \"Zulassen\" Button oben, um den Zugriff auf Kamera und Mikrofon zu erlauben.","Incoming_call":"Eingehender Anruf","from":"von","Do_you_want_to_accept_the_call_from":"Möchtest Du den Anruf annehmen von","Reject":"Ablehnen","Accept":"Annehmen","hang_up":"Auflegen","snapshot":"Schnappschuss","mute_my_audio":"Mein Ton aus","pause_my_video":"Mein Video pausieren","fullscreen":"Vollbild","Info":"Info","Local_IP":"Lokale IP","Remote_IP":"Remote IP","Local_Fingerprint":"Lokaler Fingerprint","Remote_Fingerprint":"Remote Fingerprint","Video_call_not_possible":"Videoanruf nicht verfügbar. Dein Gesprächspartner unterstützt keine Videotelefonie.","Start_video_call":"Starte Videoanruf","Join_chat":"Gruppe beitreten","Join":"Betreten","Room":"Gruppe","Nickname":"Nickname","left_the_building":"__nickname__ hat die Gruppe verlassen","entered_the_room":"__nickname__ ist der Gruppe beigetreten","is_now_known_as":"__oldNickname__ ist nun unter __newNickname__ bekannt","This_room_is":"Diese Gruppe ist","muc_hidden":{"keyword":"versteckt","description":"kann durch die Suche nicht gefunden werden"},"muc_membersonly":{"keyword":"nur für Mitglieder","description":"du musst auf der Mitgliederliste stehen"},"muc_moderated":{"keyword":"moderiert","description":"Nur Personen die \"Mitspracherecht\" haben dürfen Nachrichten senden"},"muc_nonanonymous":{"keyword":"nicht anonym","description":"deine Jabber ID wird für alle Mitglieder sichtbar sein"},"muc_open":{"keyword":"offen","description":"jeder darf dieser Gruppe beitreten"},"muc_passwordprotected":{"keyword":"passwortgeschützt","description":"du benötigst das korrekte Passwort"},"muc_persistent":{"keyword":"permanent","description":"wird nicht geschlossen, wenn das letzte Mitglied die Gruppe verlässt"},"muc_public":{"keyword":"öffentlich","description":"kann durch die Suche gefunden werden"},"muc_semianonymous":{"keyword":"teilweise anonym","description":"deine Jabber ID wird nur für die Gruppen Administratoren sichtbar sein"},"muc_temporary":{"keyword":"temporär","description":"wird geschlossen, wenn das letzte Mitglied die Gruppe verlässt"},"muc_unmoderated":{"keyword":"nicht moderiert","description":"jeder darf Nachrichten senden"},"muc_unsecured":{"keyword":"ungesichert","description":"es wird kein Passwort benötigt"},"Continue":"Weiter","Server":"Server","Rooms_are_loaded":"Gruppen werden geladen","Could_load_only":"Es konnten nur __count__ Gruppen für die Autovervollständigung geladen werden","muc_explanation":"Bitte trage den Gruppennamen und optional ein Nickname und Passwort ein um einer Gruppe beizutreten","You_already_joined_this_room":"Du bist dieser Gruppe bereits beigetreten","This_room_will_be_closed":"Diese Gruppe wird geschlossen","Room_not_found_":"Es wird eine neue Gruppe erstellt","Loading_room_information":"Informationen über Gruppe werden geladen","Destroy":"Auflösen","Leave":"Verlassen","changed_subject_to":"__nickname__ hat das Thema auf __subject__ geändert","muc_removed_kicked":"Du wurdest aus der Gruppe entfernt","muc_removed_info_kicked":"__nickname__ wurde aus der Gruppe entfernt","muc_removed_banned":"Du wurdest aus der Gruppe ausgeschlossen","muc_removed_info_banned":"__nickname__ wurde aus der Gruppe ausgeschlossen","muc_removed_affiliation":"Du wurdest aus der Gruppe entfernt wegen einer Änderung deines Mitgliedstatus","muc_removed_info_affiliation":"__nickname__ wurde aus der Gruppe entfernt wegen einer Änderung seines Mitgliedstatus","muc_removed_membersonly":"Diese Gruppe erlaubt jetzt nur noch eingetragene Mitglieder und da du nicht dazugehörst, wurdest du aus der Gruppen entfernt","muc_removed_info_membersonly":"Diese Gruppe erlaubt jetzt nur noch eingetragene Mitglieder und __nickname__ gehört nicht dazu, daher wurde er aus der Gruppe entfernt","muc_removed_shutdown":"Du wurdest aus der Gruppe entfernt, da der MUC Server heruntergefahren wird","Reason":"Grund","message_not_send":"Deine Nachricht wurde aufgrund eines Fehlers nicht versandt","message_not_send_item-not-found":"Deine Nachricht wurde nicht versandt, da der Raum nicht mehr existiert","message_not_send_forbidden":"Deine Nachricht wurde nicht versandt, da du kein \"Mitspracherecht\" hast","message_not_send_not-acceptable":"Deine Nachricht wurde nicht versandt, da du kein Mitglied dieser Gruppe bist","This_room_has_been_closed":"Diese Gruppe wurde geschlossen","Room_logging_is_enabled":"Gesprächsverlauf kann öffentlich einsehbar sein","A_password_is_required":"Es wird ein Passwort benötigt","You_are_not_on_the_member_list":"Du bist kein eingetragenes Mitglied","You_are_banned_from_this_room":"Du wurdest von dieser Gruppe ausgeschlossen","Your_desired_nickname_":"Dein gewünschter Nickname wird bereits verwendet. Bitte wähle einen anderen.","The_maximum_number_":"Die maximale Anzahl der Mitglieder wurde erreicht.","This_room_is_locked_":"Diese Gruppe ist gesperrt","You_are_not_allowed_to_create_":"Du darfst keine neue Gruppe erstellen","Alert":"Alarm","Call_started":"Anruf gestarted","Call_terminated":"Anruf beendet","Carbon_copy":"Kopie","Enable":"Aktivieren","jingle_reason_busy":"beschäftigt","jingle_reason_decline":"abgelehnt","jingle_reason_success":"aufgelegt","Media_failure":"Gerätefehler","No_local_audio_device":"Kein eigenes Audio Gerät","No_local_video_device":"Keine eigene Webcam","Ok":"Ok","PermissionDeniedError":"Du oder dein Browser haben die Audio/Video Berechtigung verweigert","Use_local_audio_device":"Nutze eigenes Audio Gerät","Use_local_video_device":"Benutze eigene Webcam","is_":"ist __status__","You_received_a_message_from_an_unknown_sender_":"Du hast eine Nachricht von einem unbekannten Sender erhalten (__sender__) Möchtest du sie sehen?","Your_roster_is_empty_add_":"Deine Kontaktliste ist leer, füge einen neuen Kontakt  <a>hinzu</a>","onsmp_explanation_question":"Dein Kontakt versucht herauszufinden ob er wirklich mit dir redet. Um dich gegenüber deinem Kontakt zu verifizieren  gib die Antwort ein und klick auf Antworten.","onsmp_explanation_secret":"Dein Kontakt versucht herauszufinden ob er wirklich mit dir redet. Um dich gegenüber deinem Kontakt zu verifizieren  gib das Geheimnis ein.","from_sender":"von __sender__","Verified_private_conversation_started":"Verifizierte private Konversation gestartet.","Unverified_private_conversation_started":"Unverifizierte private Konversation gestartet.","Bookmark":"Lesezeichen","Auto-join":"Automatisch beitreten","Edit_bookmark":"Lesezeichen bearbeiten","Room_logging_is_disabled":"Gruppen Log ist deaktiviert","Room_is_now_non-anoymous":"Gruppe ist jetzt nicht anonym","Room_is_now_semi-anonymous":"Gruppe ist jetzt semi-anonym","Do_you_want_to_change_the_default_room_configuration":"Möchtest du die Gruppenkonfiguration ändern?","Default":"Standard","Change":"Ändern","Send_file":"Datei senden","setting-explanation-carbon":"Wenn Kopien aktiviert sind, werden alle eingehenden Nachrichten zu allen angemeldeten Clients gesendet.","setting-explanation-login":"Wenn diese Option aktiviert ist, wird der Chat beim anmelden automatisch gestartet.","setting-explanation-priority":"Wenn du mit deinem XMPP Konto mehrfach angemeldet bist, werden Nachrichten zu dem Client mit der höchsten Priorität zugestellt.","setting-explanation-xmpp":"Diese Optionen werden für die Verbindung zum XMPP server genutzt.","_is_composing":" tippt gerade...","_are_composing":" tippen gerade...","Chat_state_notifications":"Statusbenachrichtigungen","setting-explanation-chat-state":"Möchtest Benachrichtigungen senden und erhalten wenn du oder dein Kontakt Nachrichten tippt?","Share_screen":"Teile Bildschirm","Incoming_stream":"Eingehender Stream","Stream_started":"Stream gestarted","HTTPS_REQUIRED":"Diese Aktion erfordert eine verschlüsselte Verbindung.","EXTENSION_UNAVAILABLE":"Sie benötigen eine Browser Erweiterung.","UNKNOWN_ERROR":"Ein unbekannter Fehler ist aufgetreten.","Install_extension":"Bitte installieren Sie die Erweiterung um ihren Bildschirm zu teilen: ","Connection_accepted":"Verbindung angenommen","Stream_terminated":"Stream beendet","Close_all":"Schließe alle","Notification":null,"Unreadable_OTR_message":null}},"el":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"en":{"translation":{"Logging_in":"Logging in…","your_connection_is_unencrypted":"Your connection is unencrypted.","your_connection_is_encrypted":"Your connection is encrypted.","your_buddy_closed_the_private_connection":"Your contact closed the private connection.","start_private":"Start private","close_private":"Close private","your_buddy_is_verificated":"Your contact is verified.","you_have_only_a_subscription_in_one_way":"You only have a one-way subscription.","authentication_query_sent":"Authentication query sent.","your_message_wasnt_send_please_end_your_private_conversation":"Your message was not sent. Please end your private conversation.","unencrypted_message_received":"Unencrypted message received","not_available":"Not available","no_connection":"No connection!","relogin":"relogin","trying_to_start_private_conversation":"Trying to start private conversation!","Verified":"Verified","Unverified":"Unverified","private_conversation_aborted":"Private conversation aborted!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Your contact closed the private conversation! You should do the same.","conversation_is_now_verified":"Conversation is now verified.","authentication_failed":"Authentication failed.","Creating_your_private_key_":"Creating your private key; this may take a while.","Authenticating_a_buddy_helps_":"Authenticating a contact helps ensure that the person you are talking to is really the one they claim to be.","How_do_you_want_to_authenticate_your_buddy":"How do you want to authenticate __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Select method...","Manual":"Manual","Question":"Question","Secret":"Secret","To_verify_the_fingerprint_":"To verify the fingerprint, contact your contact via some other trustworthy channel, such as the telephone.","Your_fingerprint":"Your fingerprint","Buddy_fingerprint":"Contact fingerprint","Close":"Close","Compared":"Compared","To_authenticate_using_a_question_":"To authenticate using a question, pick a question whose answer is known only you and your contact.","Ask":"Ask","To_authenticate_pick_a_secret_":"To authenticate, pick a secret known only to you and your contact.","Compare":"Compare","Fingerprints":"Fingerprints","Authentication":"Authentication","Message":"Message","Add_buddy":"Add contact","rename_buddy":"rename contact","delete_buddy":"delete contact","Login":"Login","Username":"Username","Password":"Password","Cancel":"Cancel","Connect":"Connect","Type_in_the_full_username_":"Type in the full username and an optional alias.","Alias":"Alias","Add":"Add","Subscription_request":"Subscription request","You_have_a_request_from":"You have a request from","Deny":"Deny","Approve":"Approve","Remove_buddy":"Remove contact","You_are_about_to_remove_":"You are about to remove __bid_name__ (<b>__bid_jid__</b>) from your contact list. All related chats will be closed.","Continue_without_chat":"Continue without chat","Please_wait":"Please wait","Login_failed":"Chat login failed","Sorry_we_cant_authentikate_":"Authentication failed with the chat server. Maybe the password is wrong?","Retry":"Back","clear_history":"Clear history","New_message_from":"New message from __name__","Should_we_notify_you_":"Should we notify you about new messages in the future?","Please_accept_":"Please click the \"Allow\" button at the top.","Hide_offline":"Hide offline contacts","Show_offline":"Show offline contacts","About":"About","dnd":"Do Not Disturb","Mute":"Mute","Unmute":"Unmute","Subscription":"Subscription","both":"both","Status":"Status","online":"online","chat":"chat","away":"away","xa":"extended away","offline":"offline","none":"none","Unknown_instance_tag":"Unknown instance tag.","Not_one_of_our_latest_keys":"Not one of our latest keys.","Received_an_unreadable_encrypted_message":"Received an unreadable encrypted message.","Online":"Online","Chatty":"Chatty","Away":"Away","Extended_away":"Extended away","Offline":"Offline","Friendship_request":"Contact request","Confirm":"Confirm","Dismiss":"Dismiss","Remove":"Remove","Online_help":"Online help","FN":"Full name","N":" ","FAMILY":"Family name","GIVEN":"Given name","NICKNAME":"Nickname","URL":"URL","ADR":"Address","STREET":"Street Address","EXTADD":"Extended Address","LOCALITY":"Locality","REGION":"Region","PCODE":"Postal Code","CTRY":"Country","TEL":"Telephone","NUMBER":"Number","EMAIL":"Email","USERID":" ","ORG":"Organization","ORGNAME":"Name","ORGUNIT":"Unit","TITLE":"Job title","ROLE":"Role","BDAY":"Birthday","DESC":"Description","PHOTO":" ","send_message":"Send message","get_info":"Show information","Settings":"Settings","Priority":"Priority","Save":"Save","User_settings":"User settings","A_fingerprint_":"A fingerprint is used to make sure that the person you are talking to is who he or she is saying.","is":"is","Login_options":"Login options","BOSH_url":"BOSH URL","Domain":"Domain","Resource":"Resource","On_login":"On login","Received_an_unencrypted_message":"Received an unencrypted message","Sorry_your_buddy_doesnt_provide_any_information":"Sorry, your contact does not provide any information.","Info_about":"Info about","Authentication_aborted":"Authentication aborted.","Authentication_request_received":"Authentication request received.","Log_in_without_chat":"Log in without chat","has_come_online":"has come online","Unknown_sender":"Unknown sender","Please_allow_access_to_microphone_and_camera":"Please click the \"Allow\" button at the top, to allow access to microphone and camera.","Incoming_call":"Incoming call","from":"from","Do_you_want_to_accept_the_call_from":"Do you want to accept the call from","Reject":"Reject","Accept":"Accept","hang_up":"hang up","snapshot":"snapshot","mute_my_audio":"mute my audio","pause_my_video":"pause my video","fullscreen":"fullscreen","Info":"Info","Local_IP":"Local IP","Remote_IP":"Remote IP","Local_Fingerprint":"Local fingerprint","Remote_Fingerprint":"Remote fingerprint","Video_call_not_possible":"Video call not possible. Your contact does not support video calls.","Start_video_call":"Start video call","Join_chat":"Join chat","Join":"Join","Room":"Room","Nickname":"Nickname","left_the_building":"__nickname__ left the building","entered_the_room":"__nickname__ entered the room","is_now_known_as":"__oldNickname__ is now known as __newNickname__","This_room_is":"This room is","muc_hidden":{"keyword":"hidden","description":"can not be found through search"},"muc_membersonly":{"keyword":"members-only","description":"you need to be on the member list"},"muc_moderated":{"keyword":"moderated","description":"only persons with \"voice\" are allowed to send messages"},"muc_nonanonymous":{"keyword":"non-anonymous","description":"your jabber id is exposed to all other occupants"},"muc_open":{"keyword":"open","description":"everyone is allowed to join"},"muc_passwordprotected":{"keyword":"password-protected","description":"you need to provide the correct password"},"muc_persistent":{"keyword":"persistent","description":"will not be destroyed if the last occupant left"},"muc_public":{"keyword":"public","description":"can be found through search"},"muc_semianonymous":{"keyword":"semi-anonymous","description":"your jabber id is only exposed to room admins"},"muc_temporary":{"keyword":"temporary","description":"will be destroyed if the last occupant left"},"muc_unmoderated":{"keyword":"unmoderated","description":"everyone is allowed to send messages"},"muc_unsecured":{"keyword":"unsecured","description":"you need no password to enter"},"Continue":"Continue","Server":"Server","Rooms_are_loaded":"Rooms are loaded","Could_load_only":"Could load only __count__ rooms for autocomplete","muc_explanation":"Please enter room name and optional a nickname and password to join a chat","You_already_joined_this_room":"You already joined this room","This_room_will_be_closed":"This room will be closed","Room_not_found_":"A new room will be created","Loading_room_information":"Loading room information","Destroy":"Destroy","Leave":"Leave","changed_subject_to":"__nickname__ changed the room subject to \"__subject__\"","muc_removed_kicked":"You have been kicked from the room","muc_removed_info_kicked":"__nickname__ has been kicked from the room","muc_removed_banned":"You have been banned from the room","muc_removed_info_banned":"__nickname__ has been banned from the room","muc_removed_affiliation":"You have been removed from the room, because of an affiliation change","muc_removed_info_affiliation":"__nickname__ has been removed from the room, because of an affiliation change","muc_removed_membersonly":"You have been removed from the room, because the room has been changed to members-only and you are no member","muc_removed_info_membersonly":"__nickname__ has been removed from the room, because the room has been changed to members-only and you are no member","muc_removed_shutdown":"You have been removed from the room, because the MUC service is being shut down","Reason":"Reason","message_not_send":"Your message was not send because of an error","message_not_send_item-not-found":"Your message was not send because this room does not exist","message_not_send_forbidden":"Your message was not send because you have no voice in this room","message_not_send_not-acceptable":"Your message was not send because you are no occupant of this room","This_room_has_been_closed":"This room has been closed","Room_logging_is_enabled":"Room logging is enabled","A_password_is_required":"A password is required","You_are_not_on_the_member_list":"You are not on the member list","You_are_banned_from_this_room":"You are banned from this room","Your_desired_nickname_":"Your desired nickname is already in use. Please choose another","The_maximum_number_":"The maximum number of user is reached in this room","This_room_is_locked_":"This room is locked","You_are_not_allowed_to_create_":"You are not allowed to create a room","Alert":"Alert","Call_started":"Call started","Call_terminated":"Call terminated","Carbon_copy":"Carbon copy","Enable":"Enable","jingle_reason_busy":"busy","jingle_reason_decline":"decline","jingle_reason_success":"hung up","Media_failure":"Media failure","No_local_audio_device":"No local audio device.","No_local_video_device":"No local video device.","Ok":"Ok","PermissionDeniedError":"You or your browser denied media permission","Use_local_audio_device":"Use local audio device.","Use_local_video_device":"Use local video device.","is_":"is __status__","You_received_a_message_from_an_unknown_sender_":"You received a message from an unknown sender (__sender__) Do you want to display them?","Your_roster_is_empty_add_":"Your roster is empty, add a  <a>new contact</a>","onsmp_explanation_question":"You contact is attempting to determine if they are really talking to you. To authenticate to your contact,  enter the answer and click Answer.","onsmp_explanation_secret":"You contact is attempting to determine if they are really talking to you. To authenticate to your contact,  enter the secret.","from_sender":"from __sender__","Verified_private_conversation_started":"Verified Private conversation started.","Unverified_private_conversation_started":"Unverified Private conversation started.","Bookmark":"Bookmark","Auto-join":"Auto-join","Edit_bookmark":"Edit bookmark","Room_logging_is_disabled":"Room logging is disabled","Room_is_now_non-anoymous":"Room is now non-anonymous","Room_is_now_semi-anonymous":"Room is now semi-anonymous","Do_you_want_to_change_the_default_room_configuration":"Do you want to change the default room configuration?","Default":"Default","Change":"Change","Send_file":"Send file","setting-explanation-carbon":"With enabled carbon copy your XMPP server will send a copy of every incoming message for you to this client even if it was not addressed to it.","setting-explanation-login":"If this option is enabled, the chat will start on login.","setting-explanation-priority":"If you are logged in multiple times with the same account, your XMPP server will deliver messages to the client with the highest priority.","setting-explanation-xmpp":"These options are used to connect to the XMPP server.","_is_composing":" is composing...","_are_composing":" are composing...","Chat_state_notifications":"Chat state notifications","setting-explanation-chat-state":"Do you want to send and receive chat state notifications, like someone starts or stops composing a message?","Share_screen":"Share screen","Incoming_stream":"Incoming stream","Stream_started":"Stream started","HTTPS_REQUIRED":"This action requires an encrypted connection.","EXTENSION_UNAVAILABLE":"You need a browser extension/addon.","UNKNOWN_ERROR":"An unknown error occured.","Install_extension":"Please install the extension in order to use screen sharing: ","Connection_accepted":"Connection accepted","Stream_terminated":"Stream terminated","Close_all":"Close all","Notification":"Notification","Unreadable_OTR_message":"Unreadable OTR message omitted"}},"es":{"translation":{"Logging_in":"Por favor, espere...","your_connection_is_unencrypted":"Su conexión no está cifrada.","your_connection_is_encrypted":"Su conexión está cifrada.","your_buddy_closed_the_private_connection":"Su amigo ha cerrado la conexión privada.","start_private":"Iniciar privado","close_private":"Cerrar privado","your_buddy_is_verificated":"Tu amigo está verificado.","you_have_only_a_subscription_in_one_way":"Solo tienes una suscripción de un modo.","authentication_query_sent":"Consulta de verificación enviada.","your_message_wasnt_send_please_end_your_private_conversation":"Su mensaje no fue enviado. Por favor, termine su conversación privada.","unencrypted_message_received":"Mensaje no cifrado recibido:","not_available":"No disponible","no_connection":"¡Sin conexión!","relogin":"iniciar sesión nuevamente","trying_to_start_private_conversation":"¡Intentando iniciar una conversación privada!","Verified":"Verificado","Unverified":"No verificado","private_conversation_aborted":"¡Conversación privada abortada!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"¡Su amigo cerró la conversación privada! Usted debería hacer lo mismo.","conversation_is_now_verified":"La conversación es ahora verificada.","authentication_failed":"Falló la verificación.","Creating_your_private_key_":"Ahora vamos a crear su clave privada. Esto puede tomar algún tiempo.","Authenticating_a_buddy_helps_":"Autenticación de un amigo ayuda a garantizar que la persona que está hablando es quien él o ella está diciendo.","How_do_you_want_to_authenticate_your_buddy":"¿Cómo desea autenticar __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Escoja un método...","Manual":"Manual","Question":"Pregunta","Secret":"Secreto","To_verify_the_fingerprint_":"Para verificar la firma digital, póngase en contacto con su amigo a través de algún otro canal autenticado, como el teléfono.","Your_fingerprint":"Tu firma digital","Buddy_fingerprint":"firma digital de tu amigo","Close":"Cerrar","Compared":"Comparado","To_authenticate_using_a_question_":"Para autenticar mediante una pregunta, elegid una pregunta cuya respuesta se conoce solo usted y su amigo.","Ask":"Preguntar","To_authenticate_pick_a_secret_":"Para autenticar, elija un secreto conocido solo por usted y su amigo.","Compare":"Comparar","Fingerprints":"Firmas digitales","Authentication":"Autenticación","Message":"Mensaje","Add_buddy":"Añadir amigo","rename_buddy":"renombrar amigo","delete_buddy":"eliminar amigo","Login":"Iniciar Sesión","Username":"Usuario","Password":"Contraseña","Cancel":"Cancelar","Connect":"Conectar","Type_in_the_full_username_":"Escriba el usuario completo y un alias opcional.","Alias":"Alias","Add":"Añadir","Subscription_request":"Solicitud de suscripción","You_have_a_request_from":"Tienes una petición de","Deny":"Rechazar","Approve":"Aprobar","Remove_buddy":"Eliminar amigo","You_are_about_to_remove_":"Vas a eliminar a __bid_name__ (<b>__bid_jid__</b>) de tu lista de amigos. Todas las conversaciones relacionadas serán cerradas.","Continue_without_chat":"Continuar","Please_wait":"Espere por favor","Login_failed":"Fallo el inicio de sesión","Sorry_we_cant_authentikate_":"Lo sentimos, no podemos autentificarlo en nuestro servidor de chat. ¿Tal vez la contraseña es incorrecta?","Retry":"Reintentar","clear_history":"Borrar el historial","New_message_from":"Nuevo mensaje de __name__","Should_we_notify_you_":"¿Debemos notificarle sobre nuevos mensajes en el futuro?","Please_accept_":"Por favor, haga clic en el botón \"Permitir\" en la parte superior.","Hide_offline":"Ocultar contactos desconectados","Show_offline":"Mostrar contactos desconectados","About":"Acerca de","dnd":"No Molestar","Mute":"Desactivar sonido","Unmute":"Activar sonido","Subscription":"Suscripción","both":"ambos","Status":"Estado","online":"en línea","chat":"chat","away":"ausente","xa":"más ausente","offline":"desconectado","none":"nadie","Unknown_instance_tag":"Etiqueta de instancia desconocida.","Not_one_of_our_latest_keys":"No una de nuestras última claves.","Received_an_unreadable_encrypted_message":"Se recibió un mensaje cifrado ilegible.","Online":"En linea","Chatty":"Hablador","Away":"Ausente","Extended_away":"Más ausente","Offline":"Desconectado","Friendship_request":"Solicitud de amistad","Confirm":"Confirmar","Dismiss":"Rechazar","Remove":"Eliminar","Online_help":"Ayuda en línea","FN":"Nombre completo ","N":" ","FAMILY":"Apellido","GIVEN":"Nombre","NICKNAME":"Apodo","URL":"URL","ADR":"Dirección","STREET":"Calle","EXTADD":"Dirección extendida","LOCALITY":"Población","REGION":"Región","PCODE":"Código postal","CTRY":"País","TEL":"Teléfono","NUMBER":"Número","EMAIL":"Correo electrónico","USERID":" ","ORG":"Organización","ORGNAME":"Nombre","ORGUNIT":"Departamento","TITLE":"Título","ROLE":"Rol","BDAY":"Cumpleaños","DESC":"Descripción","PHOTO":" ","send_message":"mandar un texto","get_info":"obtener información","Settings":"Ajustes","Priority":"Prioridad","Save":"Guardar","User_settings":"Configuración de usuario","A_fingerprint_":"La huella digital se utiliza para que puedas estar seguro que la persona con la que estas hablando es quien realmente dice ser","is":"es","Login_options":"Opciones de login","BOSH_url":"BOSH url","Domain":"Dominio","Resource":"Recurso","On_login":"Iniciar sesión","Received_an_unencrypted_message":"Recibe un mensaje no cifrado","Sorry_your_buddy_doesnt_provide_any_information":"Lo sentimos, su amigo no provee ninguna información.","Info_about":"Info acerca de","Authentication_aborted":"Autenticación abortada","Authentication_request_received":"Pedido de autenticación recibido.","Log_in_without_chat":"Ingresar sin chat","has_come_online":"se ha conectado","Unknown_sender":"Remitente desconocido","Please_allow_access_to_microphone_and_camera":"Por favor, permitir el acceso al micrófono y la cámara.","Incoming_call":"Llamada entrante","from":"de","Do_you_want_to_accept_the_call_from":"Desea aceptar la llamada de","Reject":"Rechazar","Accept":"Aceptar","hang_up":"colgar","snapshot":"instantánea","mute_my_audio":"silenciar mi audio","pause_my_video":"pausar mi vídeo","fullscreen":"pantalla completa","Info":"Info","Local_IP":"IP local","Remote_IP":"IP remota","Local_Fingerprint":"Firma digital local","Remote_Fingerprint":"Firma digital remota","Video_call_not_possible":"Llamada de vídeo no es posible","Start_video_call":"Iniciar llamada de vídeo","Join_chat":"Unirse al chat","Join":"Unirse","Room":"Sala","Nickname":"Alias","left_the_building":"__nickname__ dejó el edificio","entered_the_room":"__nickname__ entró en la sala","is_now_known_as":"__oldNickname__ ahora es conocido como __newNickname__","This_room_is":"Esta sala es","muc_hidden":{"keyword":"oculta","description":"no se encontró mediante la búsqueda"},"muc_membersonly":{"keyword":"miembros solo","description":"necesitas estar en la lista de miembros"},"muc_moderated":{"keyword":"moderada","description":"solo personas con \"voice\" están permitidas para mandar mensajes"},"muc_nonanonymous":{"keyword":"no anónima","description":"tu id de jabber es expuesta al resto de ocupantes"},"muc_open":{"keyword":"abierta","description":"todo el mundo puede unirse"},"muc_passwordprotected":{"keyword":"protegida por contraseña","description":"necesitas dar la contraseña correcta"},"muc_persistent":{"keyword":"persistente","description":"no será destruida si el último ocupante sale"},"muc_public":{"keyword":"pública","description":"puede ser encontrada mediante la búsqueda"},"muc_semianonymous":{"keyword":"semi-anónima","description":"tu id de jabber es expuesta a los administradores de la sala"},"muc_temporary":{"keyword":"temporal","description":"será destruida si el último ocupante sale"},"muc_unmoderated":{"keyword":"no moderada","description":"todo el mundo puede enviar mensajes"},"muc_unsecured":{"keyword":"sin asegurar","description":"no necesitas contraseña para entrar"},"Continue":"Continuar","Server":"Servidor","Rooms_are_loaded":"Las salas han sido cargadas","Could_load_only":"Se cargaron solo __count__ salas para el autocompletado","muc_explanation":"Por favor introduce el nombre de la sala, un alias opcional y una contraseña para unirse al chat","You_already_joined_this_room":"Ya te has unido a esta sala","This_room_will_be_closed":"Esta sale será cerrada","Room_not_found_":"Sala no encontrada","Loading_room_information":"Cargando información de la sala","Destroy":"Destruir","Leave":"Abandonar","changed_subject_to":"__nickname__ cambió el asunto de la sala a \"__subject__\"","muc_removed_kicked":"Has sido echado de la sala","muc_removed_info_kicked":"__nickname__ ha sido echado de la sala","muc_removed_banned":"Has sido expulsado de la sala","muc_removed_info_banned":"__nickname__ ha sido expulsado","muc_removed_affiliation":"Has sido eliminado de la sala debido a un cambio en la afiliación","muc_removed_info_affiliation":"__nickname__ ha sido eliminado de la sala debido a un cambio en la afiliación","muc_removed_membersonly":"Has sido eliminado de la sala debido a que la sala ha sido cambiada a miembros solo y tú no eres un miembro","muc_removed_info_membersonly":"__nickname__ ha sido eliminado de la sala debido a que la sala ha sido cambiada a miembros solo y tú no eres un miembro","muc_removed_shutdown":"Has sido eliminado de la sala debido a que el servicio MUC está siendo apagado","Reason":"Razón","message_not_send":"Tu mensaje no fue enviado debido a un error","message_not_send_item-not-found":"Tu mensaje no fue enviado debido a que esta sala no existe","message_not_send_forbidden":"Tu mensaje no fue enviado debido a que no tienes voz en esta sala","message_not_send_not-acceptable":"Tu mensaje no fue enviado debido a que no eres un ocupante de esta sala ","This_room_has_been_closed":"Esta sala ha sido cerrada","Room_logging_is_enabled":"Log de sala está habilitado","A_password_is_required":"Se requiere una contraseña","You_are_not_on_the_member_list":"No estás en la lista de miembros","You_are_banned_from_this_room":"Estás expulsado de esta sala","Your_desired_nickname_":"Tu alias ya está en uso. Por favor elige otro","The_maximum_number_":"El máximo número de usuarios ha sido alcanzado en esta sala","This_room_is_locked_":"Esta sala está bloqueada","You_are_not_allowed_to_create_":"No tienes permiso para crear una sala","Alert":"Alerta","Call_started":"Llamada empezada","Call_terminated":"Llamada terminada","Carbon_copy":"Calco","Enable":"Activar","jingle_reason_busy":"ocupado","jingle_reason_decline":"rechazar","jingle_reason_success":"colgar","Media_failure":"Fallo multimedia","No_local_audio_device":"No hay dispositivo de audio local","No_local_video_device":"No hay dispositivo de vídeo local","Ok":"Ok","PermissionDeniedError":"Tú o tu navegador denegaron el permiso de audio/vídeo","Use_local_audio_device":"Usar dispositivo de audio local","Use_local_video_device":"Usar dispositivo de vídeo","is_":"es __status__","You_received_a_message_from_an_unknown_sender_":"Ha recibido un mensaje de un remitente desconocido (__sender__) ¿Quiere mostrarlos?","Your_roster_is_empty_add_":"Tu lista de amigos esta vacía, añadir un <a>nuevo amigo</a>","onsmp_explanation_question":"Tu amigo está tratando de determinar si él o ella está realmente hablando con usted. Para autenticar a su amigo,  introduce la respuesta y haga clic en Contestar.","onsmp_explanation_secret":"Tu amigo está tratando de determinar si él o ella está realmente hablando con usted. Para autenticar a su amigo,  especifique el secreto.","from_sender":"de __sender__","Verified_private_conversation_started":"Verificado se inició una conversación privada.","Unverified_private_conversation_started":"No verificado se inició una conversación privada.","Bookmark":"Favorito","Auto-join":"Auto-unir","Edit_bookmark":"Editar favorito","Room_logging_is_disabled":"Log de sala está deshabilitado","Room_is_now_non-anoymous":"La sala es ahora no anónima","Room_is_now_semi-anonymous":"La sale es ahora semi-anónima","Do_you_want_to_change_the_default_room_configuration":"¿Quieres cambiar la configuración por defecto de la sala?","Default":"Por defecto","Change":"Cambiar","Send_file":"Enviar archivo","setting-explanation-carbon":"Con el Calco habilitado tu servidor XMPP enviará una copia de cada mensaje entrante dirigido a ti a este cliente incluso si no estaba siendo enviado a él","setting-explanation-login":"Si esta opción está habilitada, el chat empezará al inicio de sesión","setting-explanation-priority":"Si tú has iniciado sesión varias veces con la misma cuenta, tu servidor XMPP enviará los mensajes al cliente con la mayor prioridad","setting-explanation-xmpp":"Estas opciones son usadas para conectar con el servidor XMPP","_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"fi":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"fr":{"translation":{"Logging_in":"Connexion...","your_connection_is_unencrypted":"Connexion non chiffrée.","your_connection_is_encrypted":"Connexion chiffrée.","your_buddy_closed_the_private_connection":"Votre contact a fermé la connexion privée.","start_private":"Démarrer une conversation privée","close_private":"Clôturer une conversation privée","your_buddy_is_verificated":"Votre contact est vérifié.","you_have_only_a_subscription_in_one_way":"Vous ne pouvez souscrire qu'une fois.","authentication_query_sent":"Requête d’authentification envoyée.","your_message_wasnt_send_please_end_your_private_conversation":"Votre message n'a pas été envoyé. Veuillez terminer votre conversation privée.","unencrypted_message_received":"Message non chiffré reçu","not_available":"Non disponible","no_connection":"Pas de connexion !","relogin":"Re-connexion","trying_to_start_private_conversation":"Essai de démarrage d'une conversation privée !","Verified":"Vérifié","Unverified":"Non vérifié","private_conversation_aborted":"Conversation privée interrompue !","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Votre contact a fermé la conversation privée ! Vous devriez faire de même.","conversation_is_now_verified":"La conversation est maintenant vérifiée.","authentication_failed":"L'authentification a échoué.","Creating_your_private_key_":"Création de votre clé privée; cela peut prendre un moment.","Authenticating_a_buddy_helps_":"L'authentification d'un contact permet de s'assurer que la personne à qui vous parlez est vraiment celui qu'il ou elle prétend être.","How_do_you_want_to_authenticate_your_buddy":"Comment voulez-vous vous authentifier __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Sélection de la méthode...","Manual":"Manuel","Question":"Question","Secret":"Sécurité","To_verify_the_fingerprint_":"Pour vérifier l'empreinte, joignez votre contact via un autre canal digne de confiance, tel que le téléphone.","Your_fingerprint":"Votre empreinte","Buddy_fingerprint":"Empreinte du contact","Close":"Fermer","Compared":"Comparé","To_authenticate_using_a_question_":"Pour s'authentifier à l'aide d'une question, choisissez une question dont la réponse n'est connue que vous et de votre contact.","Ask":"Demander","To_authenticate_pick_a_secret_":"Pour vous authentifier, choisissez un secret connu seulement de vous et de votre contact.","Compare":"Comparer","Fingerprints":"Empreintes","Authentication":"Authentification","Message":"Message","Add_buddy":"Ajouter un contact","rename_buddy":"Renommer le contact","delete_buddy":"Supprimer le contact","Login":"Connexion","Username":"Nom d'utilisateur","Password":"Mot de passe","Cancel":"Annuler","Connect":"Connecter","Type_in_the_full_username_":"Tapez un nom d'utilisateur complet et un alias(optionnel).","Alias":"Alias","Add":"Ajouter","Subscription_request":"Demande d'abonnement","You_have_a_request_from":"Vous avez une requête de ","Deny":"Refuser","Approve":"Approuver","Remove_buddy":"Supprimer le contact","You_are_about_to_remove_":"Vous allez retirer __bid_name__ (<b>__bid_jid__</b>) de votre liste de contacts. Toutes les fenêtres de discussion en lien avec celui-ci seront fermées.","Continue_without_chat":"Continuer sans tchat","Please_wait":"Merci de patienter","Login_failed":"Authentification échouée","Sorry_we_cant_authentikate_":"La connexion avec le serveur de tchat a échoué. Vérifiez le mot de passe.","Retry":"Retour","clear_history":"Effacer l’historique","New_message_from":"Nouveau message de __name__","Should_we_notify_you_":"Dans le futur, devrons-nous vous notifier les nouveaux messages ?","Please_accept_":"Merci de cliquer sur le bouton \"autoriser\" en haut de page","Hide_offline":"Masquer les contacts non connectés","Show_offline":"Afficher les contacts non connectés","About":"À propos","dnd":"Ne pas déranger","Mute":"Muet","Unmute":"Son actif","Subscription":"Abonnement","both":"Les deux","Status":"Statut","online":"En ligne","chat":"tchat","away":"Absent","xa":"Longue absence","offline":"Hors ligne","none":"Aucun","Unknown_instance_tag":"Tag inconnu","Not_one_of_our_latest_keys":"Ce n'est pas l'une des dernières touches","Received_an_unreadable_encrypted_message":"Message chiffré non lisible","Online":"En ligne","Chatty":"Libre pour discuter","Away":"Absent","Extended_away":"Longue absence","Offline":"Hors ligne","Friendship_request":"Demande de contact","Confirm":"Valider","Dismiss":"Rejeter","Remove":"Supprimer","Online_help":"Aide en ligne","FN":"Nom","N":" N ","FAMILY":"Nom de famille","GIVEN":"prénom","NICKNAME":"Pseudo","URL":"URL","ADR":"Adresse","STREET":"Rue","EXTADD":"Adresse (suite)","LOCALITY":"Localité","REGION":"Région","PCODE":"Code Postal","CTRY":"Pays","TEL":"Téléphone","NUMBER":"Numéro","EMAIL":"Courriel","USERID":" USERID ","ORG":"Organisation","ORGNAME":"Nom","ORGUNIT":"Unité","TITLE":"Qualité:","ROLE":"Rôle","BDAY":"Date de naissance","DESC":"Description","PHOTO":"Photo","send_message":"Envoyer un message","get_info":"Montrer les informations","Settings":"Réglages","Priority":"Priorité","Save":"Enregistrer","User_settings":"Paramètres utilisateur","A_fingerprint_":"Une empreinte est utilisée pour s'assurer de l'identité de la personne à qui vous parlez","is":"est","Login_options":"Options d'identification","BOSH_url":"URL BOSH","Domain":"Domaine","Resource":"Ressource","On_login":"Après authentification","Received_an_unencrypted_message":"Reçu un message non chiffré","Sorry_your_buddy_doesnt_provide_any_information":"Désolé, votre contact n'a pas fourni d'informations","Info_about":"À propos de","Authentication_aborted":"Authentification interrompue.","Authentication_request_received":"Requête d'authentification reçue.","Log_in_without_chat":"S'identifier sans tchat","has_come_online":"vient d'arriver","Unknown_sender":"Expéditeur inconnu","Please_allow_access_to_microphone_and_camera":"Veuillez cliquez sur le bouton \"Autoriser\" en haut, pour permettre l'accès au micro et à la caméra.","Incoming_call":"Appel entrant","from":"de","Do_you_want_to_accept_the_call_from":"Voulez-vous accepter l'appel de","Reject":"Rejeté","Accept":"Accepté","hang_up":"raccrocher","snapshot":"Capture d’écran","mute_my_audio":"Couper l'audio","pause_my_video":"Mettre ma vidéo en pause","fullscreen":"Plein écran","Info":"Info","Local_IP":"IP locale","Remote_IP":"IP distante","Local_Fingerprint":"Empreinte locale","Remote_Fingerprint":"Empreinte distante","Video_call_not_possible":"L'appel vidéo n'est possible. Votre contact ne supporte pas les appels vidéo.","Start_video_call":"Démarrer l'appel vidéo","Join_chat":"Joindre la discussion","Join":"Joindre","Room":"Salon","Nickname":"Pseudo","left_the_building":"__nickname__ a quitté l'immeuble","entered_the_room":"__nickname__ entre dans le salon","is_now_known_as":"__oldNickname__ est maintenant connu comme __newNickname__","This_room_is":"Ce salon est","muc_hidden":{"keyword":"caché","description":"ne peut être trouvé avec une recherche"},"muc_membersonly":{"keyword":"pour les membres seulement","description":"Vous devez être sur la liste des membres"},"muc_moderated":{"keyword":"modéré","description":"Seulement les personnes avec la \"voix\" sont autorisés à envoyer des messages"},"muc_nonanonymous":{"keyword":"non anonyme","description":"Votre identifiant Jabber est visible de tous les autres occupants"},"muc_open":{"keyword":"ouvert","description":"Tout le monde est autorisé à se connecter"},"muc_passwordprotected":{"keyword":"protégé par un mot de passe","description":"Vous devez fournir un mot de passe correct"},"muc_persistent":{"keyword":"persistent","description":"ne sera pas détruit si le dernier occupant part"},"muc_public":{"keyword":"public","description":"peut être touvé avec une recherche"},"muc_semianonymous":{"keyword":"semi-anonyme","description":"Votre identifiant Jabber est seulement visible aux administrateurs de ce salon"},"muc_temporary":{"keyword":"temporaire","description":"sera détruit au départ de son dernier occupant"},"muc_unmoderated":{"keyword":"non modéré","description":"Tout le monde est autorisé à envoyer des messages"},"muc_unsecured":{"keyword":"non sécurisé","description":"un mot de passe n'est pas nécessaire pour entrer"},"Continue":"Continuer","Server":"Serveur","Rooms_are_loaded":"Les salons sont chargés","Could_load_only":"Ne peut charger que __count__ salons pour l'autocomplétion","muc_explanation":"Veuillez saisir le nom du salon, un surnom (optionnel) et un mot de passe pour joindre la conversation","You_already_joined_this_room":"Vous avez déjà rejoint ce salon","This_room_will_be_closed":"Ce salon va être fermé","Room_not_found_":"Un nouveau salon va être créé","Loading_room_information":"Chargement des informations du salon","Destroy":"Détruire","Leave":"Quitter","changed_subject_to":"__nickname__ a changé le sujet du salon à \"__subject__\"","muc_removed_kicked":"Vous avez été éjecté de ce salon","muc_removed_info_kicked":"__nickname__ a été éjecté de ce salon","muc_removed_banned":"Vous avez été banni de ce salon","muc_removed_info_banned":"__nickname__ a été banni de ce salon","muc_removed_affiliation":"Vous avez été retiré du salon en raison d'un changement d'affiliation","muc_removed_info_affiliation":"__nickname__ a été retiré du salon en raison d'un changement d'affiliation","muc_removed_membersonly":"Vous avez été retiré du salon parce que celui-ci est maintenant réservé aux membres et vous n'en faites pas partie","muc_removed_info_membersonly":"__nickname__ a été retiré du salon parce que celui-ci est maintenant réservé aux membres","muc_removed_shutdown":"Vous avez été retiré du salon parce que le service de salon de discussion est en train de s'éteindre","Reason":"Raison","message_not_send":"Votre message n'a pu être envoyé a cause d'une erreur","message_not_send_item-not-found":"Votre message n'a pu être envoyé parce que ce salon n'existe pas","message_not_send_forbidden":"Votre message n'a pas été envoyé parce que vous n'avez pas le droit de parler dans ce salon","message_not_send_not-acceptable":"Votre message n'a pas été envoyé car il n'y a personne dans ce salon","This_room_has_been_closed":"Ce salon a été fermé","Room_logging_is_enabled":"L'historique du salon est conservé","A_password_is_required":"Un mot de passe est requis","You_are_not_on_the_member_list":"Vous n'êtes pas sur la liste des membres","You_are_banned_from_this_room":"Vous avez été banni de ce salon","Your_desired_nickname_":"Votre pseudo souhaité est déjà utilisé. Veuillez en choisir un autre","The_maximum_number_":"Le nombre maximum d'utilisateurs est atteint dans ce salon","This_room_is_locked_":"Ce salon est verrouillé","You_are_not_allowed_to_create_":"Vous n'êtes pas autorisé à créer un salon","Alert":"Alerte","Call_started":"Appel démarré","Call_terminated":"Appel terminé","Carbon_copy":"Copie carbone","Enable":"Activé","jingle_reason_busy":"occupé","jingle_reason_decline":"refusé","jingle_reason_success":"raccroché","Media_failure":"échec du média","No_local_audio_device":"Pas de périphérique audio local","No_local_video_device":"Pas de périphérique vidéo local","Ok":"Ok","PermissionDeniedError":"Vous ou votre navigateur avez refusé de donner des permissions audio/vidéo","Use_local_audio_device":"Utiliser un périphérique audio local.","Use_local_video_device":"Utiliser un périphérique vidéo local.","is_":"est __status__","You_received_a_message_from_an_unknown_sender_":"Vous avez reçu un message d'un expéditeur inconnu (__sender__) Voulez-vous les afficher ?","Your_roster_is_empty_add_":"Votre liste est vide, ajouter  <a>Nouveau contact</a>","onsmp_explanation_question":"Votre contact tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre contact, saisissez une réponse et cliquez sur Répondre.","onsmp_explanation_secret":"Votre contact tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre contact, entrez le mot secret","from_sender":"de __sender__","Verified_private_conversation_started":"La conversation privée vérifiée a démarré.","Unverified_private_conversation_started":"La conversation privée non vérifiée a démarré.","Bookmark":"Marque-page","Auto-join":"Joindre automatiquement","Edit_bookmark":"Éditer le marque-page","Room_logging_is_disabled":"La connexion au salon est désactivée","Room_is_now_non-anoymous":"Ce salon n'est désormais plus anonyme","Room_is_now_semi-anonymous":"Ce salon est désormais semi-anonyme","Do_you_want_to_change_the_default_room_configuration":"Voulez-vous changer la configuration par défaut du salon ?","Default":"Par défaut","Change":"Changer","Send_file":"Envoyer un fichier","setting-explanation-carbon":"Avec la copie carbone activé, votre serveur XMPP envera une copie de tous les messages entrant qui vous sont destiné à ce client, même s'il ne lui sont pas directement addressés.","setting-explanation-login":"Si cette option est activé, le chat commencera lorsque vous vos connectez.","setting-explanation-priority":"Si vous êtes connecté plusieurs fois avec le même compte, votre serveur XMPP enverra les messages au client ayant le plus haute priorité.","setting-explanation-xmpp":"Ces options sont utilisées pour se connecter au serveur XMPP.","_is_composing":" est en train d'écrire...","_are_composing":" sont en train d'écrire...","Chat_state_notifications":"Notifications de composition","setting-explanation-chat-state":"Voulez-vous envoyer et recevoir les notifications de composition, comme lorsque quelqu'un commence ou arrête d'écrire un message ?","Share_screen":"Ecran partagé","Incoming_stream":"Flux entrant","Stream_started":"flux démarré","HTTPS_REQUIRED":"Cette action nécessite une connexion cryptée.","EXTENSION_UNAVAILABLE":"Vous avez besoin d'une extension / d'un addon pour votre navigateur.","UNKNOWN_ERROR":"Une erreur inconnue s'est produite.","Install_extension":"Veuillez installer l'extension afin d'utiliser le partage d'écran: ","Connection_accepted":"Connexion acceptée","Stream_terminated":"Flux terminé","Close_all":"Tout fermer","Notification":null,"Unreadable_OTR_message":null}},"hu-HU":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":"Az Ön kapcsolata titkosítatlan.","your_connection_is_encrypted":"Az Ön kapcsolata titkosított.","your_buddy_closed_the_private_connection":"Partnere megszakította a privát kapcsolatot.","start_private":"Privát beszélgetés indítása","close_private":"Privát beszélgetés bezárása","your_buddy_is_verificated":"Az Ön partnere megerősítve.","you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":"Azonosítási kérelem elküldve.","your_message_wasnt_send_please_end_your_private_conversation":"Az üzenetet nem sikerült elküldeni. Kérem fejezze be a privát beszélgetést.","unencrypted_message_received":"Titkosítatlan üzenet fogadva","not_available":"Nem elérhető","no_connection":"Nincs kapcsolat!","relogin":"relogin","trying_to_start_private_conversation":"Privát beszélgetés indítása!","Verified":"Megerősítve","Unverified":"Nem megerősített","private_conversation_aborted":"Privát beszélgetés megszakítva!","your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":"Azonosítás sikertelen.","Creating_your_private_key_":"Privát kulcs generálása. Egy kis időbe telhet...","Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":"Kérdés","Secret":"Kulcs","To_verify_the_fingerprint_":null,"Your_fingerprint":"Az Ön lenyomata","Buddy_fingerprint":"Partnere lenyomata","Close":"Bezárás","Compared":"Összehasonlítva","To_authenticate_using_a_question_":"Az azonosításhoz adjon meg egy kérdést, amelyre a választ csak Ön és Partnere ismerhetik.","Ask":"Kérdez","To_authenticate_pick_a_secret_":"Az azonosításhoz adjon meg egy titkot, amelyet csak Ön és Partnere ismerhetnek.","Compare":"Összehasonlítás","Fingerprints":"Lenyomatok","Authentication":"Azonosítás","Message":"Üzenet","Add_buddy":"Partner hozzáadása","rename_buddy":"Partner átnevezése","delete_buddy":"Partner törlése","Login":"Belépés","Username":"Felhasználónév","Password":"Jelszó","Cancel":"Mégsem","Connect":"Csatlakozás","Type_in_the_full_username_":"Adjon meg egy teljes felhasználónevet, és egy opcionális becenevet.","Alias":"Becenév","Add":"Hozzáadás","Subscription_request":"Feliratkozási kérelem","You_have_a_request_from":"Ön felkérést kapott a következőtől","Deny":"Elutasít","Approve":"Jóváhagy","Remove_buddy":"Partner eltávolítása","You_are_about_to_remove_":null,"Continue_without_chat":"Folytatás chat nélkül","Please_wait":"Kérem várjon","Login_failed":"Chat bejelentkezés sikertelen","Sorry_we_cant_authentikate_":null,"Retry":"Vissza","clear_history":"Előzmények törlése","New_message_from":"Új üzenet __name__ partnerétől","Should_we_notify_you_":"Kívánja hogy értesítsük a jövőben új üzeneteiről?","Please_accept_":"Kérem kattintson a fent megjelenő \"Engedélyez\" gombra.","Hide_offline":"Offline partnerek elrejtése","Show_offline":"Offline partnerek mutatása","About":null,"dnd":"Ne zavarj","Mute":"Némítás","Unmute":"Hangok engedélyezése","Subscription":null,"both":"mindkettő","Status":"Állapot","online":"elérhető","chat":null,"away":"távol","xa":"huzamosabban távol","offline":"offline","none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":"Teljes név","N":null,"FAMILY":"Családi név","GIVEN":"Keresztnév","NICKNAME":"Becenév","URL":"URL","ADR":"Cím","STREET":"Utcanév","EXTADD":"Cím","LOCALITY":"Helység","REGION":"Régió","PCODE":"Irányítószám","CTRY":"Ország","TEL":"Telefonszám","NUMBER":"Házszám","EMAIL":"E-mail cím","USERID":null,"ORG":"Vállalat","ORGNAME":"Név","ORGUNIT":"Osztály","TITLE":"Beosztás","ROLE":"Részleg","BDAY":"Születésnap","DESC":"Leírás","PHOTO":null,"send_message":"Üzenet küldése","get_info":"Info mutatása","Settings":"Beállítások","Priority":"Prioritás","Save":"Mentés","User_settings":"Felhasználó beállítások","A_fingerprint_":null,"is":null,"Login_options":"Bejelentkezési lehetőségek","BOSH_url":"BOSH URL","Domain":"Domain","Resource":"Erőforrás","On_login":"Bejelentkezéskor","Received_an_unencrypted_message":"Titkosítatlan üzenetet fogadott","Sorry_your_buddy_doesnt_provide_any_information":"Sajnos az Ön partnere nem adott meg semmilyen információt.","Info_about":null,"Authentication_aborted":"Azonosítás megszakítva.","Authentication_request_received":"Azonosítási kérelem fogadva.","Log_in_without_chat":"Bejelentkezés chat nélkül","has_come_online":"bejelentkezett","Unknown_sender":"Ismeretlen küldő","Please_allow_access_to_microphone_and_camera":"Kérem kattintson a fent megjelenő \"Engedélyez/Allow\" gombra hogy hozzáférést biztosítson mikrofonjához és kamerájához.","Incoming_call":"Bejövő hívás","from":"tőle","Do_you_want_to_accept_the_call_from":"Szeretné fogadni következő partnere hívását:","Reject":"Elutasít","Accept":"Fogadás","hang_up":"tartás","snapshot":"képernyőfotó","mute_my_audio":"hangom némítása","pause_my_video":"videóképem megállítása","fullscreen":"teljes képernyő","Info":"Info","Local_IP":"Helyi IP","Remote_IP":"Távoli IP","Local_Fingerprint":"Helyi lenyomat","Remote_Fingerprint":"Távoli lenyomat","Video_call_not_possible":"Videóhívás nem lehetséges. Az Ön partnerének készüléke nem támogatja a videóhívásokat.","Start_video_call":"Videóhívás indítása","Join_chat":"Belépés a chatbe","Join":"Belépés","Room":"Szoba","Nickname":"Becenév","left_the_building":"__nickname__ elhagyta az épületet.","entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"it":{"translation":{"Logging_in":"login…","your_connection_is_unencrypted":"La sua connessione è non cifrata.","your_connection_is_encrypted":"La sua connessione è cifrata.","your_buddy_closed_the_private_connection":"La sua connessione privata è stato chiuso dal suo compagno.","start_private":"Inizia privata","close_private":"Chiude privata","your_buddy_is_verificated":"Il tuo compagno è stato verificato","you_have_only_a_subscription_in_one_way":"Hai solo una one-way inscrizione.","authentication_query_sent":"Domanda d'autenticità inviata.","your_message_wasnt_send_please_end_your_private_conversation":"Il tuo messaggio non è stato inviato. Si prega di finire la sua conversazione privata.","unencrypted_message_received":"Messaggio non cifrato ricevuto","not_available":"non disponibile","no_connection":"nessun collegamento!","relogin":"nuovo login","trying_to_start_private_conversation":"Cercando di avviare una conversazione privata!","Verified":"verificato","Unverified":"non verificato","private_conversation_aborted":"Conversazione privata abortito!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Il tuo compagno ha chiuso la conversazione privata! Si dovrebbe fare lo stesso.","conversation_is_now_verified":"Conversazione è ora verificato.","authentication_failed":"autenticazione fallita.","Creating_your_private_key_":"Creare la propria chiave privata; questo potrebbe richiedere un po'.","Authenticating_a_buddy_helps_":"Autenticazione un compagno aiuta a garantire che la persona si sta parlando è davvero quello che lui o lei sostiene di essere.","How_do_you_want_to_authenticate_your_buddy":"Come si desidera autenticare __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Seleziona metodo ..","Manual":"manuale","Question":"domanda","Secret":"segreto","To_verify_the_fingerprint_":"Per verificare l'impronta digitale, contattare il proprio compagno attraverso qualche altro canale affidabile, come il telefono.","Your_fingerprint":"il tuo impronta digitale","Buddy_fingerprint":"impronta digitale da compagno","Close":"chiude","Compared":"comparato","To_authenticate_using_a_question_":"Per autenticare tramite una questione, scegli una questione la cui risposta è nota solo voi e il tuo compagno","Ask":"chiedi","To_authenticate_pick_a_secret_":"Per autenticare, scegli un segreto noto solo a te e il tuo compagno.","Compare":"Comparare","Fingerprints":"Impronta digitale","Authentication":"Autenticazione","Message":"Messagio","Add_buddy":"Aggiungi un compagno","rename_buddy":"rinomina compagno","delete_buddy":"elimina compagno","Login":"Login","Username":"Identificazione dell'utente","Password":"Password","Cancel":"Cancella","Connect":"Collega","Type_in_the_full_username_":"Digita l'identificazione utente completo e un alias opzionale.","Alias":"Alias","Add":"Aggiungi","Subscription_request":"Rrichiesta di sottoscrizione","You_have_a_request_from":"Hai una richiesta da","Deny":"Refiuta","Approve":"Approva","Remove_buddy":"Rimuova il compagno","You_are_about_to_remove_":"Stai rimovendo __bid_name__ (<b>__bid_jid__</b>) del suo lista di compagni. Tutte le chat appartenente saranno chiuse.","Continue_without_chat":"Continua senza chat","Please_wait":"Si prega d'attendere","Login_failed":"Chat login è fallito","Sorry_we_cant_authentikate_":"Autenticazione non riuscita con il server di chat. Forse la password è sbagliata?","Retry":"Indietro","clear_history":"Cancella la cronologia","New_message_from":"Nuovo messaggio da __name__","Should_we_notify_you_":"Vuoi ricevere una notifica di nuovi messaggi in futuro?","Please_accept_":"Si prega di fare clic sul bottone \"Autorizzazione\" sopra.","Hide_offline":"Nascondere i contatti non in linea","Show_offline":"Mostra i contatti non in linea","About":"Informazione legale","dnd":"Non disturbare","Mute":"Muto attivo","Unmute":"Muto inattivo","Subscription":"Sottoscrizione","both":"etrambi","Status":"Status","online":"In linea","chat":"chat","away":"via","xa":"via estensivo","offline":"non in linea","none":"nessuno","Unknown_instance_tag":"Instance tag sconosciuta.","Not_one_of_our_latest_keys":"Non è una delle nostre ultime chiavi.","Received_an_unreadable_encrypted_message":"Ricevuto un messaggio crittografato illeggibile.","Online":"In linea","Chatty":"Chiacchierino","Away":"Via","Extended_away":"Via estensivo","Offline":"Non in linea","Friendship_request":"Amicizia richiesto","Confirm":"Conferma","Dismiss":"Rifiuta","Remove":"Rimuovi","Online_help":"Guida in linea","FN":"Nome e cognome","N":null,"FAMILY":"Cognome","GIVEN":"Nome","NICKNAME":"Soprannome","URL":"URL","ADR":"Indirizzo","STREET":"Via","EXTADD":"Esteso Indirizzo","LOCALITY":"Località","REGION":"Regione","PCODE":"Codice Postale","CTRY":"Paese","TEL":"Telefono","NUMBER":"Numero","EMAIL":"E-mail","USERID":null,"ORG":"Organizzazione","ORGNAME":"Nome","ORGUNIT":"Unità","TITLE":"Titolo di lavoro","ROLE":"Funzione","BDAY":"Compleanno","DESC":"Descrizione","PHOTO":null,"send_message":"Messagio inviato","get_info":"Mostra informazioni","Settings":"Impostazione","Priority":"Priorità","Save":"Salva","User_settings":"Impostazione dell'utente","A_fingerprint_":"Una impronta digitale è usato per assicurarsi che la persona con cui stai parlando è lui o lei che sta dicendo.","is":"è","Login_options":"Opzioni di login","BOSH_url":"BOSH URL","Domain":"Domain","Resource":"Risorsa","On_login":"Login on","Received_an_unencrypted_message":"Ricevuto un messaggio non crittografato","Sorry_your_buddy_doesnt_provide_any_information":"Spiace, il tuo compagno non fornisce alcuna informazione.","Info_about":"Informazioni","Authentication_aborted":"Autenticazione interrotta","Authentication_request_received":"Richiesta di autenticazione ricevuto.","Log_in_without_chat":"Log in senza chat","has_come_online":"È venuto in linea","Unknown_sender":"Mittente sconosciuto","Please_allow_access_to_microphone_and_camera":"Si prega di fare clic sul bottone \"Autorizzazione\" sopra per autorizzazione del l'accesso al microfono e fotocamera.","Incoming_call":"Chiamata in arrivo","from":"di","Do_you_want_to_accept_the_call_from":"Vuoi accettare la chiamata di","Reject":"Rifiuta","Accept":"Accetta","hang_up":"Riattacca","snapshot":"istantanea","mute_my_audio":"disattiva il mio audio","pause_my_video":"pausa il mio audio","fullscreen":"schermo intero","Info":"Informazione","Local_IP":"IP locale","Remote_IP":"IP remoto","Local_Fingerprint":"Impronta digitale locale","Remote_Fingerprint":"Impronta digitale remoto","Video_call_not_possible":"Videochiamata non è possibile. Il tuo compagno non può effettuare videochiamate.","Start_video_call":"Inizia videochiamata","Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":"è __status__","You_received_a_message_from_an_unknown_sender_":"Hai ricevuto un messaggio da un mittente sconosciuto (__sender__) Vuoi che venga visualizzato?","Your_roster_is_empty_add_":"Il suo elenco è vuoto, aggiungi un  <a>compagno nuovo</a>","onsmp_explanation_question":"Il tuo compagno sta cercando di determinare se lui o lei sta davvero parlando con te. Per autenticare a il tuo compagno.  inserisci la risposta e fare click su risposta.","onsmp_explanation_secret":"Il tuo compagno sta cercando di determinare se lui o lei sta davvero parlando con te. Per autenticare a il tuo compagno.  inserire il segreto.","from_sender":"di __sender__","Verified_private_conversation_started":"verificato Conversazione privata iniziato.","Unverified_private_conversation_started":"non verificato Conversazione privata iniziato.","Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"nds":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"pl":{"translation":{"Logging_in":"Logowanie...","your_connection_is_unencrypted":"Twoje połączenie nie jest szyfrowane.","your_connection_is_encrypted":"Twoje połączenie jest szyfrowane.","your_buddy_closed_the_private_connection":"Twój rozmówca zamknął połączenie.","start_private":"Rozpocznij rozmowę.","close_private":"Zakończ rozmowę.","your_buddy_is_verificated":"Twój rozmówca został zweryfikowany.","you_have_only_a_subscription_in_one_way":"Posiadasz tylko jednostronną subskrypcję.","authentication_query_sent":"Wysłano proźbę o autentykację.","your_message_wasnt_send_please_end_your_private_conversation":"Twoja wiadomość nie została wysłana. Proszę, zamknij rozmowę.","unencrypted_message_received":"Otrzymano niezaszyfrowaną wiadomość.","not_available":"Niedostępny.","no_connection":"Brak połączenia!","relogin":"Połącz ponownie","trying_to_start_private_conversation":"Rozpocznij rozmowę!","Verified":"Zweryfikowano","Unverified":"Niezweryfikowano","private_conversation_aborted":"Anulowano rozmowę!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Rozmówca przerwał połączenie! Powinieneś zrobić to samo.","conversation_is_now_verified":"Zweryfikowano połączenie.","authentication_failed":"Weryfikacja się nie powiodła.","Creating_your_private_key_":"Tworzenie klucza prywatnego; może to chwilę potrwać","Authenticating_a_buddy_helps_":"Autoryzacja pomoże w ustaleniu faktycznej tożsamości rozmówcy ;).","How_do_you_want_to_authenticate_your_buddy":"Jakiej autoryzacji chcesz użyć __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Wybierz sposób...","Manual":"Ręcznie","Question":"Pytanie","Secret":"Hasło","To_verify_the_fingerprint_":"Aby zweryfikować kod, najpierw skontaktuj się z rozmówcą za pomocą zaufanego sposobu, np telefonu.","Your_fingerprint":"Twój kod:","Buddy_fingerprint":"Kod kontaktu","Close":"Zamknij","Compared":"Porównano","To_authenticate_using_a_question_":"Aby autoryzować za pomocą pytania, wybierz pytanie na które tylko ty i twój rozmówca zna odpowiedź.","Ask":"Zadaj pytanie","To_authenticate_pick_a_secret_":"Aby autoryzować za pomocą hasła, wybierz hasło na które znasz tylko Ty i twój rozmówca.","Compare":"Dopasuj","Fingerprints":"Kody autoryzacyjne","Authentication":"Autoryzacja","Message":"Wiadomość","Add_buddy":"Dodaj kontakt","rename_buddy":"Zmień nazwę kontaktu","delete_buddy":"Usuń kontakt","Login":"Login","Username":"Nazwa Użytkownika","Password":"Hasło","Cancel":"Anuluj","Connect":"Połączenie","Type_in_the_full_username_":"Wpisz pełną nazwę użytkownika (np. <B>imię.nazwisko@zajezdnia.local</B>) oraz jego nazwę wyświetlaną (Alias).","Alias":"Alias","Add":"Dodaj","Subscription_request":"Potwierdzenie subskrypcji","You_have_a_request_from":"Masz potwierdzenie od","Deny":"Odmów","Approve":"Zatwierdź","Remove_buddy":"Usuń kontakt","You_are_about_to_remove_":"Chcesz usunąć __bid_name__ (<b>__bid_jid__</b>) z twojej listy kontaktów. Wszystkie powiązane rozmowy zostaną zamknięte.","Continue_without_chat":"Kontynuuj bez komunikatora","Please_wait":"Proszę czekać","Login_failed":"Błędne logowanie","Sorry_we_cant_authentikate_":"Błędna autoryzacja z serwerem. Może hasło jest nieprawidłowe?","Retry":"Powrót","clear_history":"Wyczyść historię","New_message_from":"Nowa wiadomość od __name__","Should_we_notify_you_":"Czy chcesz otrzymywać powiadomienia o nowych wiadomościach w przyszłości?","Please_accept_":"Kliknij \"Zezwól\" na górze.","Hide_offline":"Schowaj niedostępne kontakty","Show_offline":"Pokaż niedostępne kontakty","About":"Info","dnd":"Nie przeszkadzać","Mute":"Wycisz","Unmute":"Włącz dźwięk","Subscription":"Subskrybcja","both":"obustronna","Status":"Status","online":"Dostępny","chat":"czat","away":"z dala od kompa","xa":"hen hen...","offline":"niedostępny","none":"brak","Unknown_instance_tag":"Nieznany przypadek.","Not_one_of_our_latest_keys":"Not one of our latest keys.","Received_an_unreadable_encrypted_message":"Otrzymano nieczytelną, zaszyfrowaną wiadomość.","Online":"Połączony","Chatty":"Pogawędzimy?","Away":"Daleko","Extended_away":"Hen Hen...","Offline":"Niedostępny","Friendship_request":"Prośba o kontakt","Confirm":"Potwierdzenie","Dismiss":"Odwołaj","Remove":"Usuń","Online_help":"Pomoc Online","FN":"Pełna nazwa","N":"  ","FAMILY":"Nazwisko","GIVEN":"Imię","NICKNAME":"Pseudonim","URL":"Strona WWW","ADR":"Adres","STREET":"Ulica","EXTADD":"Pełny adres","LOCALITY":"Lokalizacja","REGION":"Region","PCODE":"Kod pocztowy","CTRY":"Kraj","TEL":"Telefon","NUMBER":"Numer","EMAIL":"Email","USERID":" ","ORG":"Organizacja","ORGNAME":"Nazwa","ORGUNIT":"Jednostka","TITLE":"Stanowisko","ROLE":"Rola","BDAY":"Data urodzin","DESC":"Opis","PHOTO":" ","send_message":"Wyślij wiadomość","get_info":"Pokaż informację","Settings":"Ustawienia","Priority":"Priorytet","Save":"Zapisz","User_settings":"Ustawienia Użytkownika","A_fingerprint_":"Kod służy do autoryzacji Twojego rozmówcy aby potwierdzić jego tożsamość.","is":"jest","Login_options":"opcje logowania","BOSH_url":"Adres BOSH","Domain":"Domena","Resource":"Źródło","On_login":"Na login","Received_an_unencrypted_message":"Zatwierdzono nieszyfrowaną wiadomość.","Sorry_your_buddy_doesnt_provide_any_information":"Wybacz, twój rozmówca nie posiada żadnych informacji.","Info_about":"Informacja o...","Authentication_aborted":"Autoryzacja anulowana.","Authentication_request_received":"Prośba o autoryzację została przyjęta.","Log_in_without_chat":"Zaloguj bez komunikatora","has_come_online":"jest teraz dostępny","Unknown_sender":"Nieznany nadawca","Please_allow_access_to_microphone_and_camera":"Kliknij \"Potwierdź\" na górze, aby móc korzystać z mikrofonu oraz kamery.","Incoming_call":"Przychodzące połączenie","from":"z","Do_you_want_to_accept_the_call_from":"Akceptujesz połączenie od","Reject":"Odrzuć","Accept":"Zaakceptuj","hang_up":"odbierz","snapshot":"zrób zdjęcie","mute_my_audio":"wycisz dźwięk","pause_my_video":"zatrzymaj moje wideo","fullscreen":"Pełny ekran","Info":"Informacja","Local_IP":"Adres IP","Remote_IP":"Zdalny adres IP","Local_Fingerprint":"Kod lokalny","Remote_Fingerprint":"Zdalny kod","Video_call_not_possible":"Rozmowa wideo jest niemożliwa. Twój rozmówca nie ma możliwości prowadzenia takich rozmów.","Start_video_call":"Rozpocznij rozmowę wideo","Join_chat":"Dołącz do czata","Join":"Dołącz","Room":"Pokój","Nickname":"Nazwa użytkownika","left_the_building":"__nickname__ wyszedł","entered_the_room":"__nickname__ wszedł do pokoju","is_now_known_as":"__oldNickname__ zmienił nazwę na __newNickname__","This_room_is":"Ten pokój jest","muc_hidden":{"keyword":"ukryty","description":"nie można odnaleźć elementów wyszukiwania"},"muc_membersonly":{"keyword":"tylko zalogowani","description":"musisz być członkiem listy"},"muc_moderated":{"keyword":"moderowano","description":"tylko osoby z opcją \"głos\" mogą wysyłać wiadomość"},"muc_nonanonymous":{"keyword":"nie-anonimowy","description":"Twój identyfikator jabber jest widoczny dla wszystkich innych osób"},"muc_open":{"keyword":"otwarty","description":"wszyscy mają pozwolenie aby dołączyć"},"muc_passwordprotected":{"keyword":"ograniczone hasłem","description":"musisz wpisać prawidłowe hasło"},"muc_persistent":{"keyword":"trwale","description":"nie zostaną zniszczone, jeśli ostatnia osoba wyszła"},"muc_public":{"keyword":"publiczny","description":"wyszukawno"},"muc_semianonymous":{"keyword":"pół-anonimowy","description":"Twój identyfikator jabber jest widoczny w pokoju adminów"},"muc_temporary":{"keyword":"tymczasowy","description":"zostanie usunięty jeżeli ostatnia osoba wyjdzie"},"muc_unmoderated":{"keyword":"niemoderowany","description":"wszyscy są uprawnieni do pisania wiadomości"},"muc_unsecured":{"keyword":"niezabezpieczone","description":"nie musisz wpisywać hasła"},"Continue":"Kontynuuj","Server":"Serwer","Rooms_are_loaded":"Pokoje zostały załadowane","Could_load_only":"Nie załadowano __count__ pokoi","muc_explanation":"Aby się zalogować, wpisz nazwę pokoju oraz opcjonalnie nazwę użytkownika i hasło","You_already_joined_this_room":"Już dołączyłeś do tego pokoju","This_room_will_be_closed":"Ten pokój będzie zamknięty","Room_not_found_":"Nowy pokój będzie stworzony","Loading_room_information":"Ładowani informacji o pokoju","Destroy":"Zniszczony","Leave":"Opuść","changed_subject_to":"__nickname__ zmienił temat pokoju na \"__subject__\"","muc_removed_kicked":"Zostałeś wyrzucony z pokoju","muc_removed_info_kicked":"__nickname__ został wyrzucony z pokoju","muc_removed_banned":"Zostałeś zbanowany","muc_removed_info_banned":"__nickname__ został zbanowany","muc_removed_affiliation":"Zostałeś usunięty z pokoju ze względu na zmianę przynależnosci","muc_removed_info_affiliation":"__nickname__ został usunięty z pokoju ze względu na zmianę przynależnosci","muc_removed_membersonly":"Zostałeś usunięty z pokoju ze względu na zmianę pokoju tylko dla członków, a Ty nie jesteś członkiem...","muc_removed_info_membersonly":"__nickname__ został usunięty z pokoju ze względu na zmianę pokoju na tylko dla członków","muc_removed_shutdown":"Zostałeś usunięty z pokoju ze względu na zamknięcie usługi","Reason":"Powód","message_not_send":"Wystąpił błąd i twoja wiadomość nie została wysłana.","message_not_send_item-not-found":"Twoja wiadomość nie została wysłana ponieważ ten pokój nie istnieje","message_not_send_forbidden":"Twoja wiadomość nie została wysłana ponieważ nie masz głosu w tym pokoju","message_not_send_not-acceptable":"Twoja wiadomość nie została wysłana ponieważ nie jesteś właścicielem tego pokoju","This_room_has_been_closed":"Ten pokój został zamknięty","Room_logging_is_enabled":"Logowanie do pokoju jest włączone","A_password_is_required":"Hasło jest wymagane","You_are_not_on_the_member_list":"Nie jesteś na liście członków","You_are_banned_from_this_room":"Zostałeś zbanowany w tym pokoju","Your_desired_nickname_":"Twoja nazwa użytkownika jest już użyta. Spróbuj wybrać inną","The_maximum_number_":"Została osiągnięta maksymalna liczba użytkowników w tym pokoju","This_room_is_locked_":"Ten pokój jest zablokowany","You_are_not_allowed_to_create_":"Nie masz uprawnień do tworzenia pokoju","Alert":"Alarm","Call_started":"Rozmowa rozpoczęta","Call_terminated":"Rozmowa zakończona","Carbon_copy":"Do wiadomości","Enable":"Włączone","jingle_reason_busy":"zajęte","jingle_reason_decline":"odmów","jingle_reason_success":"zakończono","Media_failure":"Błąd mediów","No_local_audio_device":"Brak lokalnego urządzenia audio.","No_local_video_device":"Brak lokalnego urządzenia wideo.","Ok":"Ok","PermissionDeniedError":"Ty lub twoja przeglądarka odmówiła dostępu do audio/video","Use_local_audio_device":"Użyj lokalnego urządzenia audio.","Use_local_video_device":"Użyj lokalnego urządzenia wideo.","is_":"jest __status__","You_received_a_message_from_an_unknown_sender_":"Masz wiadomość od nieznanego nadawcy. (__sender__) Chcesz to wyświetlić?","Your_roster_is_empty_add_":"Twoja lista jest pusta, dodaj kontakty  <a>Nowy kontakt</a>","onsmp_explanation_question":"Twój rozmówca próbuje się z Tobą połączyć. Autoryzacja z rozmówcą,  napisz odpowiedź.","onsmp_explanation_secret":"Twój rozmówca próbuje się z Tobą połączyć. Autoryzacja z rozmówcą,  wpisz hasło.","from_sender":"z __sender__","Verified_private_conversation_started":"Zweryfikowano Rozmowa prywatna rozpoczęta.","Unverified_private_conversation_started":"Niezweryfikowano Rozmowa prywatna rozpoczęta.","Bookmark":"Zakładka","Auto-join":"Auto-połączenie","Edit_bookmark":"Edytuj zakładkę","Room_logging_is_disabled":"Logowanie pokoju jest wyłączone","Room_is_now_non-anoymous":"Pokój jest teraz nie-anonimowy","Room_is_now_semi-anonymous":"Pokój jest teraz pół-anonimowy","Do_you_want_to_change_the_default_room_configuration":"Chcesz zmienić domyślną konfigurację pokoju?","Default":"Domyślny","Change":"Zmień","Send_file":"Wyślij plik","setting-explanation-carbon":null,"setting-explanation-login":"Jeżeli ta opcja jest włączona, czat uruchomi się przy zalogowaniu.","setting-explanation-priority":"Jeżeli jesteś zalogowany wiele razy na to samo konto twój serwer XMPP dostarczy wiadomości do klienta z najwyższym priorytetem.","setting-explanation-xmpp":"Te ustawienia używane są do połączenia z serwerem XMPP.","_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"pt-BR":{"translation":{"Logging_in":"Entrando...","your_connection_is_unencrypted":"Sua conexão não é encriptada","your_connection_is_encrypted":"Sua conexão é encriptada","your_buddy_closed_the_private_connection":"Seu contato fechou a conexão privada","start_private":"Iniciar conversa privada","close_private":"Fechar conversa privada","your_buddy_is_verificated":"Seu contato está verificado","you_have_only_a_subscription_in_one_way":"Você só tem a inscrição one-way","authentication_query_sent":"Pergunta de autenticação enviada","your_message_wasnt_send_please_end_your_private_conversation":"Sua mensagem não foi enviada. Por favor finalize sua conversa privada","unencrypted_message_received":"Mensagem não encriptada recebida","not_available":"Indisponível","no_connection":"Sem conexão!","relogin":"reentrar","trying_to_start_private_conversation":"Tentando iniciar conversa privada","Verified":"Verificado","Unverified":"Não verificado","private_conversation_aborted":"Conversa privada abortada!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Seu contato encerrou a conversa privada! Você deveria fazer o mesmo.","conversation_is_now_verified":"Conversa verificada.","authentication_failed":"Autenticação falhou.","Creating_your_private_key_":"Criando sua chave privada: isso pode demorar um pouco.","Authenticating_a_buddy_helps_":"Autenticar seu contato ajuda a garantir que a pessoa com a qual você está falando é realmente a pessoa que ela alega ser.","How_do_you_want_to_authenticate_your_buddy":"Como você gostaria de se autenticar __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Selecione o método...","Manual":"Manual","Question":"Pergunta","Secret":"Senha","To_verify_the_fingerprint_":"Para verificar o fingerprint, entre em contato com seu contato usando outro meio, de preferência seguro, como o telefone.","Your_fingerprint":"Sua impressão digital","Buddy_fingerprint":"Impressão digital do contato","Close":"Fechar","Compared":"Comparado","To_authenticate_using_a_question_":"Para autenticar seu contato faça uma pergunta, mas escolha que só ele saiba a resposta.","Ask":"Pergunta","To_authenticate_pick_a_secret_":"Para autenticar, escolha um segredo que somente você e seu contato saibam.","Compare":"Compare","Fingerprints":"Impressões digitais","Authentication":"Autenticação","Message":"Mensagem","Add_buddy":"Adicionar contato","rename_buddy":"renomear contato","delete_buddy":"remover contato","Login":"Entrar","Username":"Usuário","Password":"Senha","Cancel":"Cancelar","Connect":"Conectar","Type_in_the_full_username_":"Digite seu nome completo e um apelido opcional.","Alias":"Apelido","Add":"Adicionar","Subscription_request":"Pedido de inscrição","You_have_a_request_from":"Você tem um pedido de","Deny":"Negar","Approve":"Aprovar","Remove_buddy":"Remover contato","You_are_about_to_remove_":"Você está prestes a remover __bid_name__ (<b>__bid_jid__</b>) de sua lista de contatos. Todas as conversas serão fechadas.","Continue_without_chat":"Continue sem converar","Please_wait":"Por favor aguarde","Login_failed":"Autenticação da conversa falhou","Sorry_we_cant_authentikate_":"A autenticação com o servidor falhou. Talvez seja a senha errada?","Retry":"Voltar","clear_history":"Limpar histórico","New_message_from":"Nova mensagem de __name__","Should_we_notify_you_":"Devemos continuar notificando sobre novas mensagens no futuro?","Please_accept_":"Por favor clique no botão \"Permitir\" na parte superior.","Hide_offline":"Esconder contatos desconectados","Show_offline":"Mostrar contatos desconectados","About":"Sobre","dnd":"Não perturbe","Mute":"Mudo","Unmute":"Ligar","Subscription":"Inscrição","both":"ambos","Status":"Status","online":"online","chat":"conversa","away":"ausente","xa":"ausente por mais tempo","offline":"desativado","none":"nenhum","Unknown_instance_tag":"Marcação desconhecida da instância","Not_one_of_our_latest_keys":"Nenhuma de nossas ultimas chaves.","Received_an_unreadable_encrypted_message":"Mensagem encriptada ilegível foi recebida.","Online":"Online","Chatty":"Tagarela","Away":"Ausente","Extended_away":"Ausente por mais tempo","Offline":"Desativado","Friendship_request":"Pedido de amizade","Confirm":"Confirmar","Dismiss":"Ignorar","Remove":"Remover","Online_help":"Ajuda online","FN":"Nome completo","N":"  ","FAMILY":"Sobrenome","GIVEN":"Nome","NICKNAME":"Apelido","URL":"URL","ADR":"Endereço","STREET":"Rua, Av, etc","EXTADD":"Complemento","LOCALITY":"Localidade","REGION":"Região","PCODE":"CEP","CTRY":"País","TEL":"Telefone","NUMBER":"Número","EMAIL":"Email","USERID":"  IDUsuário","ORG":"Empresa","ORGNAME":"Nome","ORGUNIT":"Unidade","TITLE":"Cargo","ROLE":"Função","BDAY":"Data de nascimento","DESC":"Descrição","PHOTO":"Foto","send_message":"Enviar mensagem","get_info":"Exibir informações","Settings":"Configurações","Priority":"Prioridade","Save":"Salvar","User_settings":"Configurações do usuário","A_fingerprint_":"O fingerprint é usado para certificar que a pessoa com a qual se está falando é que ela diz ser.","is":"é","Login_options":"Opções de login","BOSH_url":"BOSH URL","Domain":"Domínio","Resource":"Recurso","On_login":"Ao autenticar","Received_an_unencrypted_message":"Mensagem não encriptada recebida","Sorry_your_buddy_doesnt_provide_any_information":"Desculpe, seu contato não forneceu nenhuma informação","Info_about":"Informações sobre","Authentication_aborted":"Autenticação encerrada.","Authentication_request_received":"Pedido de autenticação recebido","Log_in_without_chat":"Entrar sem conversar","has_come_online":"ficou online","Unknown_sender":"Emissor desconhecido","Please_allow_access_to_microphone_and_camera":"Por favor clique no botão \"Permitir\" no topo, para conceder acesso ao seu microfone e câmera.","Incoming_call":"Recebendo chamada","from":"de","Do_you_want_to_accept_the_call_from":"Você aceita a chamada de","Reject":"Negar","Accept":"Aceitar","hang_up":"desligar","snapshot":"registrar imagem","mute_my_audio":"mudo","pause_my_video":"pausar vídeo","fullscreen":"tela cheia","Info":"Informações","Local_IP":"IP local","Remote_IP":"IP remoto","Local_Fingerprint":"Fingerprint local","Remote_Fingerprint":"Fingerprint remoto","Video_call_not_possible":"Chamada de vídeo impossível. Seu contato não suporta chamadas desse tipo.","Start_video_call":"Iniciar chamada de vídeo","Join_chat":"Entrar no chat","Join":"Entrar","Room":"Sala","Nickname":"Apelido","left_the_building":"__nickname__ deixou o prédio","entered_the_room":"__nickname__ entrou na sala","is_now_known_as":"__oldNickname__ agora é conhecido como __newNickname__","This_room_is":"Esta sala é","muc_hidden":{"keyword":"oculto","description":"Não pode ser encontrado através de pesquisa"},"muc_membersonly":{"keyword":"apenas para membros","description":"você precisa estar na lista de membros"},"muc_moderated":{"keyword":"moderado","description":"Somente pessoas com \"voice\" podem enviar mensagens"},"muc_nonanonymous":{"keyword":"não-anônimo","description":"Seu id jabber esta esposto para todos os outros ocupantes"},"muc_open":{"keyword":"abrir","description":"Todos podem entrar"},"muc_passwordprotected":{"keyword":"protegido por senha","description":"você precisa fornecer a senha correta"},"muc_persistent":{"keyword":"persistente","description":"Não será destruída se o último ocupante tiver saído"},"muc_public":{"keyword":"público","description":"pode ser localizado pela busca"},"muc_semianonymous":{"keyword":"semi-anônimos","description":"Sua identificação jabber só é exposta para administradores da sala"},"muc_temporary":{"keyword":"temporário","description":"Será destruída se o último ocupante tiver saído"},"muc_unmoderated":{"keyword":"sem moderação","description":"Todos tem permissão de enviar mensagens"},"muc_unsecured":{"keyword":"inseguro","description":"Você não precisa de senha para entrar"},"Continue":"Avançar","Server":"Servidor","Rooms_are_loaded":"Sala carregada","Could_load_only":"Pode carregar somente __count__ salas para autocompletar","muc_explanation":"Por favor entre um nome de sala e um nickname opcional e uma senha para entrar no chat","You_already_joined_this_room":"Você já entrou nesta sala","This_room_will_be_closed":"Esta sala será fechada","Room_not_found_":"Uma nova sala será criada","Loading_room_information":"Carregar informação da sala","Destroy":"Destruir","Leave":"Sair","changed_subject_to":"__nickname__ alterar o assunto da sala para \"__subject__\"","muc_removed_kicked":"Você foi removido da sala","muc_removed_info_kicked":"__nickname__ foi removido da sala","muc_removed_banned":"Você foi banido da sala","muc_removed_info_banned":"__nickname__ foi banido da sala","muc_removed_affiliation":"Você foi removido da sala pois a sala, por que a afiliação mudou","muc_removed_info_affiliation":"__nickname__ foi removido da sala, por que a afiliação mudou","muc_removed_membersonly":"Você foi removido da sala pois a sala foi alterada somente para membros e você não é um membro","muc_removed_info_membersonly":"__nickname__ foi removido da sala porque a sala foi alterada para somente membros e você não é um membro","muc_removed_shutdown":"Você foi removido da sala, por que o serviço MUC esta sendo desligado","Reason":"Motivo","message_not_send":"Sua mensagem não foi enviada devido a um erro","message_not_send_item-not-found":"Sua mensagem não foi enviada por que essa sala nao existe mais","message_not_send_forbidden":"Sua mensagem não foi enviada por que não  tem 'voz' para essa sala","message_not_send_not-acceptable":"Sua mensagem não foi enviada por que você nao é ocupante desta sala","This_room_has_been_closed":"Essa sala foi fechada","Room_logging_is_enabled":"O Logging esta habilitado","A_password_is_required":"Senha é obrigatória","You_are_not_on_the_member_list":"Você não esta na lista de usuarios","You_are_banned_from_this_room":"Você foi banido desta sala","Your_desired_nickname_":"O nickname escolhido já esta em uso. Por favor escolha outro","The_maximum_number_":"O número máximo de usuarios já foi antigido para essa sala","This_room_is_locked_":"A sala esta trancada","You_are_not_allowed_to_create_":"Você não esta autorizado para criar uma sala","Alert":"Alerta","Call_started":"Chamada iniciada","Call_terminated":"Chamada finalizada","Carbon_copy":"Copia carbono","Enable":"Habilitado","jingle_reason_busy":"ocupado","jingle_reason_decline":"recusado","jingle_reason_success":"sucesso","Media_failure":"Media falhou","No_local_audio_device":"sem dispositivo local de audio","No_local_video_device":"sem dispositivo local de video","Ok":"Ok","PermissionDeniedError":"Você ou seu navegador negou permissão para acessar audio/video","Use_local_audio_device":"Usar dispositivo local de audio","Use_local_video_device":"Usar dispositivo local de video","is_":"é __status__","You_received_a_message_from_an_unknown_sender_":"Você recebeu uma mensagem de um emissor desconhecido (__sender__) Você quer mostrá-los?","Your_roster_is_empty_add_":"Sua lista está vazia, adicione um  <a>novo contato</a>","onsmp_explanation_question":"Seu contato está tentando determinar se ele realmente está falando contigo. Para autenticar seu contato,  entre com a resposta e clique em Responder.","onsmp_explanation_secret":"Seu contato está tentando determinar se ele realmente está falando contigo. Para autenticar seu contato,  escreva a senha.","from_sender":"de __sender__","Verified_private_conversation_started":"Verificado Conversa privada iniciada.","Unverified_private_conversation_started":"Não verificado Conversa privada iniciada.","Bookmark":"Favoritos","Auto-join":"Entrar Automaticamente","Edit_bookmark":"Editar favoritos","Room_logging_is_disabled":"Registro de log na sala está desativado","Room_is_now_non-anoymous":"A sala é não anônima agora","Room_is_now_semi-anonymous":"A sala é semi anônima agora","Do_you_want_to_change_the_default_room_configuration":"Você quer alterar as configurações da sala?","Default":"Padrão","Change":"Alterar","Send_file":"Enviar arquivo","setting-explanation-carbon":"Com carbon copy ativado seu servidor XMPP vai enviar uma copia de cada mensagem para você neste cliente mesmo que não tenha endereço","setting-explanation-login":"Se essa opção esta habilitada, o chat vai começar ao logar.","setting-explanation-priority":"Você esta logado varias vezes com a mesma conta, seu servidor XMPP vai entregar as mensagens para o cliente com a prioridade mais alta.","setting-explanation-xmpp":"Essas opções são usadas para conectar no Servidor XMPP","_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"ro":{"translation":{"Logging_in":"Autentificare...","your_connection_is_unencrypted":"Conexiunea nu este criptată.","your_connection_is_encrypted":"Conexiunea este criptată.","your_buddy_closed_the_private_connection":"Interlocutorul a închis conexiunea privată.","start_private":"Pornește în privat","close_private":"Închide privat","your_buddy_is_verificated":"Interlocutorul este verificat.","you_have_only_a_subscription_in_one_way":"Subscrierea este într-o singură direcție.","authentication_query_sent":"Cererea de autentificare a fost trimisă.","your_message_wasnt_send_please_end_your_private_conversation":"Mesajul nu a fost trimis. Te rog închide conversația în privat.","unencrypted_message_received":"A fost primit un mesaj necriptat","not_available":"Indisponibil","no_connection":"Fără conexiune!","relogin":"Re-autentificare","trying_to_start_private_conversation":"Se încearcă deschiderea conversației în privat!","Verified":"Verificat","Unverified":"Neverificat","private_conversation_aborted":"Conversație în privat eșuată!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Interlocutorul a închis conversația în privat! Ar trebui să faci la fel și tu.","conversation_is_now_verified":"Conversația este acum verificată.","authentication_failed":"Autentificarea a eşuat.","Creating_your_private_key_":"Se crează cheia privată; ar putea să dureze ceva timp.","Authenticating_a_buddy_helps_":"Autentificând un contact ne asigură că persoana cu care vorbești este într-adevăr cine pretinde că este.","How_do_you_want_to_authenticate_your_buddy":"Cum vrei să te autentifici __bid_name__ (<b>__bid_jid__</b>)","Select_method":"Alege metoda...","Manual":"Manual","Question":"Întrebare","Secret":"Secret","To_verify_the_fingerprint_":"Pentru a verifica amprenta, contactează interlocutorul printr-un canal de încredere, cum ar fi telefonul.","Your_fingerprint":"Amprenta ta","Buddy_fingerprint":"Amprenta interlocutorului","Close":"Închide","Compared":"Prin comparație","To_authenticate_using_a_question_":"Pentru autentificarea folosind o întrebare, alege o întrebare cu un răspuns cunoscut doar de tine și de interlocutor.","Ask":"Întreabă","To_authenticate_pick_a_secret_":"Pentru autentificare, alege un secret cunoscut doar de tine și de interlocutor.","Compare":"Compară","Fingerprints":"Amprente","Authentication":"Autentificare","Message":"Mesaj","Add_buddy":"Adaugă contact","rename_buddy":"redenumește contact","delete_buddy":"șterge contact","Login":"Logare","Username":"Utilizator","Password":"Parolă","Cancel":"Renunță","Connect":"Conectare","Type_in_the_full_username_":"Scrie numele complet al utilizatorului și un alias opțional.","Alias":"Alias","Add":"Adaugă","Subscription_request":"Cerere de subscriere","You_have_a_request_from":"Ai o cerere de la","Deny":"Refuză","Approve":"Aprobă","Remove_buddy":"Șterge contact","You_are_about_to_remove_":"Urmează să ștergi __bid_name__ (<b>__bid_jid__</b>) din lista de contacte. Toate chat-urile asociate vor fi închise.","Continue_without_chat":"Continuă fără chat","Please_wait":"Te rog așteaptă","Login_failed":"Logarea pe chat a eșuat","Sorry_we_cant_authentikate_":"Autentificarea cu serverul de chat a eșuat. Poate parola este greșită ?","Retry":"Înapoi","clear_history":"Curăță istoria","New_message_from":"Un nou mesaj de la __name__","Should_we_notify_you_":"Vrei să fi notificat despre mesajele noi în viitor ?","Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"ru":{"translation":{"Logging_in":"Вход в систему...","your_connection_is_unencrypted":"Ваше соединение не зашифровано.","your_connection_is_encrypted":"Ваше соединение зашифровано.","your_buddy_closed_the_private_connection":"Ваш собеседник закончил зашифрованное соединение.","start_private":"Начать зашифрованный чат","close_private":"Закончить зашифрованный чат","your_buddy_is_verificated":"Собеседник подтвержден.","you_have_only_a_subscription_in_one_way":"У вас только односторонняя подписка.","authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":"Сообщение не отправлено. Завершите зашифрованный чат, пожалуйста.","unencrypted_message_received":"Получено незашифрованное сообщение","not_available":"Не доступен","no_connection":"Нет соединения!","relogin":"переподключиться","trying_to_start_private_conversation":"Попытка начать зашифрованный чат!","Verified":"Подтверждено","Unverified":"Не подтверждено","private_conversation_aborted":"Зашифрованный чат отклонен!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Ваш собеседник завершил зашифрованный чат! Вы должны сделать тоже самое.","conversation_is_now_verified":"Чат теперь утвержден.","authentication_failed":"Ошибка авторизации.","Creating_your_private_key_":"Создается приватный ключ. Это может занять некоторое время","Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":"Выберите метод...","Manual":"Вручную","Question":"Вопрос","Secret":"Пароль","To_verify_the_fingerprint_":null,"Your_fingerprint":"Ваш отпечаток","Buddy_fingerprint":"Отпечаток собеседника","Close":"Закрыть","Compared":"Сравнение завершено","To_authenticate_using_a_question_":"Для авторизации с помощью вопроса выберите вопрос, ответ на который знаете только Вы и собеседник.","Ask":null,"To_authenticate_pick_a_secret_":"Для авторизации выберите пароль, который знаете только Вы и собеседник.","Compare":"Сравнить","Fingerprints":"Отпечатки","Authentication":"Авторизация","Message":"Сообщение","Add_buddy":"Добавить контакт","rename_buddy":"переименовать контакт","delete_buddy":"удалить контакт","Login":"Вход","Username":"Логин","Password":"Пароль","Cancel":"Отмена","Connect":"Подключить","Type_in_the_full_username_":"Введите полное имя пользователя и дополнительный псевдоним","Alias":"Псевдоним","Add":"Добавить","Subscription_request":"Запрос подписки","You_have_a_request_from":"Получен запрос от","Deny":"Отказ","Approve":"Подтвердить","Remove_buddy":"Удалить контакт","You_are_about_to_remove_":"Вы собираетесь удалить __bid_name__ (<b>__bid_jid__</b>) из списка контактов. Все связанные с чаты будут закрыты.","Continue_without_chat":"Продолжить без чата","Please_wait":"Подождите…","Login_failed":"Неудачный вход в чат","Sorry_we_cant_authentikate_":"Неудачная попытка входа","Retry":"Назад","clear_history":"Очистить историю","New_message_from":"Новое сообщение от __name__","Should_we_notify_you_":"Уведомлять о новых сообщениях в будущем?","Please_accept_":"Нажмите кнопку \"Разрешить\" вверху страницы, пожалуйста","Hide_offline":"Спрятать отключенных","Show_offline":"Показать отключенных","About":"О проекте","dnd":"Не беспокоить","Mute":"Выкл. уведомления","Unmute":"Вкл. уведомления","Subscription":"Подписка","both":"оба","Status":"Статус","online":"в сети","chat":"готов общаться","away":"отошел","xa":"отсутствую","offline":"не в сети","none":"нет","Unknown_instance_tag":"Неизвестный тег.","Not_one_of_our_latest_keys":"Ни один из наших последних ключей","Received_an_unreadable_encrypted_message":"Получено нечитаемое зашифрованное сообщение","Online":"В сети","Chatty":"Готов общаться","Away":"Отошел","Extended_away":"Отсутствую","Offline":"Не в сети","Friendship_request":"Запрос на добавление в контакты","Confirm":"Подтвердить","Dismiss":"Отклонить","Remove":"Удалить","Online_help":"Онлайн помощь","FN":"Полное имя","N":null,"FAMILY":"Фамилия","GIVEN":"Имя","NICKNAME":"Ник","URL":"URL","ADR":"Адрес","STREET":"Улица","EXTADD":"Дополнительный адрес","LOCALITY":"Город","REGION":"Область","PCODE":"Индекс","CTRY":"Страна","TEL":"Телефон","NUMBER":"Номер","EMAIL":"Почта","USERID":null,"ORG":"Организация","ORGNAME":"Название","ORGUNIT":"Отдел","TITLE":"Должность","ROLE":"Обязанности","BDAY":"День рождения","DESC":"Описание","PHOTO":" Фото ","send_message":"Отправить сообщение","get_info":"Показать информацию","Settings":"Настройки","Priority":"Приоритет","Save":"Сохранить","User_settings":"Пользовательские настройки","A_fingerprint_":null,"is":"  ","Login_options":"Параметры входа","BOSH_url":"BOSH URL","Domain":"Домен","Resource":"Ресурс","On_login":"Автоматически подключаться","Received_an_unencrypted_message":"Получено незашифрованное сообщение","Sorry_your_buddy_doesnt_provide_any_information":"К сожалению, контакт не предоставил какой-либо информации.","Info_about":"Информация о","Authentication_aborted":"Аутентификация прервана.","Authentication_request_received":"Получен запрос проверки подлинности.","Log_in_without_chat":"Вход без чата","has_come_online":"появился в сети","Unknown_sender":"Неизвестный отправитель","Please_allow_access_to_microphone_and_camera":"Нажмите кнопку \"Разрешить\" вверху страницы, чтобы предоставить доступ к микрофону и камере.","Incoming_call":"Входящий вызов","from":"от","Do_you_want_to_accept_the_call_from":"Вы хотите принять вызов от","Reject":"Отклонить","Accept":"Принять","hang_up":"Завершить","snapshot":"Снимок","mute_my_audio":"Без звука","pause_my_video":"Остановить моё видео","fullscreen":"На весь экран","Info":"Инфо","Local_IP":"Мой IP","Remote_IP":"Удаленный IP","Local_Fingerprint":"Мой отпечаток","Remote_Fingerprint":"Удаленный отпечаток","Video_call_not_possible":"Видео-вызов невозможен. Ваш собеседник не поддерживает видео-вызовы.","Start_video_call":"Видео-вызов","Join_chat":"Присоединиться к комнате","Join":"Присоедениться","Room":"Комната","Nickname":"Ник","left_the_building":"__nickname__ выходит из комнаты","entered_the_room":"__nickname__  заходит в комнату","is_now_known_as":"__oldNickname__ теперь известен как __newNickname__","This_room_is":"Эта комната","muc_hidden":{"keyword":"скрыта","description":"не может быть найдена через поиск"},"muc_membersonly":{"keyword":"только для участников","description":"Вы должны быть в списке участников"},"muc_moderated":{"keyword":"модерируется","description":"Только пользователи с правом голоса могут отправлять сообщения"},"muc_nonanonymous":{"keyword":"неанонимная","description":"Ваш JID будет показан всем посетителям"},"muc_open":{"keyword":"открытая","description":"Любой пользователь может присоедениться"},"muc_passwordprotected":{"keyword":"защищена паролем","description":"Необходимо ввести правильный пароль"},"muc_persistent":{"keyword":"постоянная","description":"Не будет уничтожена, когда ее покинут все участники"},"muc_public":{"keyword":"публичная","description":"Может быть найдена через поиск"},"muc_semianonymous":{"keyword":"полу-анонимная","description":"Ваш JID могут увидеть только администраторы"},"muc_temporary":{"keyword":"временная","description":"Будет уничтожена как только не останется ни одного участника"},"muc_unmoderated":{"keyword":"не модерируется","description":"Любой посетитель может отправлять сообщения"},"muc_unsecured":{"keyword":"без пароля","description":"Не нужно вводить пароль для входа"},"Continue":"Далее","Server":"Сервер","Rooms_are_loaded":"Комнаты загружены","Could_load_only":"Подгрузка только __count__ комнат в автодополнении","muc_explanation":"Введите название комнаты, свой ник и пароль для входа в комнату","You_already_joined_this_room":"Вы уже в этой комнате","This_room_will_be_closed":"Эта комната была закрыта","Room_not_found_":"Новая комната будет создана","Loading_room_information":"Загрузка информации о комнате","Destroy":"Уничтожить","Leave":"Покинуть","changed_subject_to":"__nickname__ изменил тему комнаты на \"__subject__\"","muc_removed_kicked":"Вас выкинули из комнаты","muc_removed_info_kicked":"__nickname__ был удален из комнаты","muc_removed_banned":"Вас забанили в комнате","muc_removed_info_banned":"__nickname__ был забанен в комнате","muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":"Вы были исключены из комнаты, т.к. комната стала доступна только для членов комнаты, а Вы им не являетесь","muc_removed_info_membersonly":"__nickname__  исключен(а) из комнаты, т.к. комната стала доступна только для членов комнаты, а он(она) им не является","muc_removed_shutdown":"Вы были удалены из комнаты, т.к. сервис чат-комнат недоступен","Reason":"Причина","message_not_send":"Ваше сообщение не было отправлено из-за ошибки","message_not_send_item-not-found":"Ваше сообщение не было отправлено, т.к. этой комнаты не существует","message_not_send_forbidden":"Ваше сообщение не было отправлено, т.к. у Вас нет права голоса в этой комнате","message_not_send_not-acceptable":"Ваше сообщение не было отправлено, т.к. Вы не являетесь участником этой комнаты","This_room_has_been_closed":"Эта комната была закрыта","Room_logging_is_enabled":"Журналирование комнаты включено","A_password_is_required":"Необходим пароль","You_are_not_on_the_member_list":"Вы не в списке участников","You_are_banned_from_this_room":"Вас забанили в этой комнате","Your_desired_nickname_":"Данное имя пользователя уже занято, пожалуйста, выберите другое имя пользователя","The_maximum_number_":"Достигнут лимит максимального количества посетителей этой комнаты","This_room_is_locked_":"Эта комната заблокирована","You_are_not_allowed_to_create_":"Вы не можете создавать комнаты","Alert":"Внимание","Call_started":"Вызов начался","Call_terminated":"Вызов завершен","Carbon_copy":"Копировать сообщения","Enable":"Включить","jingle_reason_busy":"занято","jingle_reason_decline":"запрещено","jingle_reason_success":"сбросили","Media_failure":"Ошибка передачи медиа","No_local_audio_device":"Нет локального аудио-устройства.","No_local_video_device":"Нет локального видео-устройства.","Ok":"Ок","PermissionDeniedError":"Вы или Ваш браузер запретили использовать микрофон/камеру","Use_local_audio_device":"Использовать локальное аудио-устройство.","Use_local_video_device":"Использовать локальное видео-устройство.","is_":"__status__","You_received_a_message_from_an_unknown_sender_":"Вы получили сообщение от неизвестного отправителя (__sender__)","Your_roster_is_empty_add_":"Ваш список контактов пуст, добавить  <a>новый контакт</a>","onsmp_explanation_question":"Собеседник пытается определить, что общается действительно с Вами.","onsmp_explanation_secret":"Собеседник пытается определить, что общается действительно с Вами. введите пароль.","from_sender":"от __sender__","Verified_private_conversation_started":"Подтверждено Зашифрованный чат начат.","Unverified_private_conversation_started":"Не подтверждено Зашифрованный чат начат.","Bookmark":"Закладка","Auto-join":"Автоматически входить","Edit_bookmark":"Редактировать закладку","Room_logging_is_disabled":"Журналирование комнаты отключено","Room_is_now_non-anoymous":"Комната теперь не анонимная","Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":"Вы хотите изменить стандартную конфигурацию комнаты?","Default":"Станд.","Change":"Изменить","Send_file":"Отправить файл","setting-explanation-carbon":"С включенным Carbon Copy Ваш XMPP сервер будет отправлять копию каждого входящего сообщения на все подключенные устройства.","setting-explanation-login":"Если эта опция включена, то чат будет начинаться сразу после аутентификации.","setting-explanation-priority":"Если вы подключены к одному аккаунту с нескольких устройств, то XMPP сервер будет доставлять сообщения на клиент с наивысшим приоритетом.","setting-explanation-xmpp":"Эти настройки используются для подключения к XMPP серверу.","_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"sv-SE":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"tr-TR":{"translation":{"Logging_in":"Giriş yapılıyor…","your_connection_is_unencrypted":"Bağlantınız şifrelenmemiş.","your_connection_is_encrypted":"Bağlantınız şifrelenmiş.","your_buddy_closed_the_private_connection":"Sohbet ettiğiniz kişi özel bağlantı kapatıldı.","start_private":"Özel bağlantı başlat.","close_private":"Özel bağlantıyı kapat.","your_buddy_is_verificated":"Kişi doğrulandı.","you_have_only_a_subscription_in_one_way":"Sadece tek yönlü bir aboneliğiniz var.","authentication_query_sent":"Kimlik doğrulama sorgusu gönderildi.","your_message_wasnt_send_please_end_your_private_conversation":"Mesajınız gönderilmedi. Lütfen özel görüşmelerinizi bitirin.","unencrypted_message_received":"Şifrelenmemiş mesaj alındı","not_available":"Müsait değil","no_connection":"Bağlantı yok!","relogin":"Yeniden gir","trying_to_start_private_conversation":"Özel sohbet başlatılmaya çalışılıyor!","Verified":"Doğrulandı","Unverified":"Doğrulanamadı","private_conversation_aborted":"Özel sohbet iptal edildi!","your_buddy_closed_the_private_conversation_you_should_do_the_same":"Sohbet ettiğiniz kişi özel görüşmeyi kapattı! Siz de aynı şeyi yapmalısınız.","conversation_is_now_verified":"Sohbet doğrulandı.","authentication_failed":"Kimlik doğrulama başarısız.","Creating_your_private_key_":"Özel anahtarınız oluşturuluyor; bu işlem biraz sürebilir.","Authenticating_a_buddy_helps_":"Kimlik doğrulaması, konuşmakta olduğunuz kişinin gerçekten o kişi olduğundan emin olmanıza yardımcı olur.","How_do_you_want_to_authenticate_your_buddy":"Kimlik doğrulasını nasıl yapmak istersiniz __bid_name__ (<b>__bid_jid__</b>)?","Select_method":"Yöntemi seçin...","Manual":"Elle","Question":"Soru","Secret":"Gizli anahtar","To_verify_the_fingerprint_":"Parmakizini doğrulamak için, telefon gibi başka bir güvenilir kanalı kullanın.","Your_fingerprint":"Parmakiziniz","Buddy_fingerprint":"Kişinin parmakizi","Close":"Kapat","Compared":"Kıyaslandı","To_authenticate_using_a_question_":"Bir soru ile kimlik doğrulaması için, yanıtını yalnızca siz ve karşınızdaki kişinin bildiği bir soru seçin.","Ask":"Sor","To_authenticate_pick_a_secret_":"Kimlik doğrulaması için, yalnızca siz ve karşınızdaki kişinin bildiği bir parola seçin.","Compare":"Karşılaştır","Fingerprints":"Parmakizleri","Authentication":"Kimlik doğrulama","Message":"İleti","Add_buddy":"Kişi ekle","rename_buddy":"Kişiyi yeniden adlandır","delete_buddy":"Kişiyi sil","Login":"Giriş","Username":"Kullanıcı adı","Password":"Şifre","Cancel":"iptal","Connect":"Bağlan","Type_in_the_full_username_":"Tam kullanıcı adını ve isteğe bağlı bir takma ad yazın.","Alias":"Takma ad","Add":"Ekle","Subscription_request":"Abonelik isteği","You_have_a_request_from":"Size gelen bir istek var","Deny":"Reddet","Approve":"Onayla","Remove_buddy":"Kişiyi çıkar","You_are_about_to_remove_":"__bid_name__ (<b>__bid_jid__</b>) adlı kişiyi listenizden çıkarmak üzeresiniz. Tüm ilişkili sohbetler kapanacak.","Continue_without_chat":"Sohbet etmeden devam et","Please_wait":"Lütfen bekleyin","Login_failed":"Sohbet girişi başarısız oldu","Sorry_we_cant_authentikate_":"Kimlik doğrulaması başarısız oldu. Şifreniz yanlış olabilir.","Retry":"Geri","clear_history":"Geçmişi sil","New_message_from":"__name__ adlı kişiden yeni bir mesaj aldınız","Should_we_notify_you_":"İleride aldığınız yeni mesajları size bildirelim mi?","Please_accept_":"Lütfen üstteki \"İzin ver\" düğmesini tıklayın.","Hide_offline":"Çevrimdışı kişileri gizle","Show_offline":"Çevrimdışı kişileri göster","About":"hakkında","dnd":"Rahatsız etmeyin","Mute":"Sessiz","Unmute":"Sesli","Subscription":"Üyelik","both":"her ikisi de","Status":"Durum","online":"çevrimiçi","chat":"sohbet","away":"uzakta","xa":"çok uzakta","offline":"çevrimdışı","none":"hiç biri","Unknown_instance_tag":"Bilinmeyen örnek etiketi.","Not_one_of_our_latest_keys":"En son anahtarlarımızdan biri değil.","Received_an_unreadable_encrypted_message":"Okunamayan şifrelenmiş bir mesaj alındı.","Online":"Çevrimiçi","Chatty":"Konuşkan","Away":"Uzakta","Extended_away":"Çok uzakta","Offline":"Çevrimdışı","Friendship_request":"İrtibat isteği","Confirm":"Onayla","Dismiss":"Reddet","Remove":"Çıkar","Online_help":"Çevrimiçi yardım","FN":"Tam adı","N":" ","FAMILY":"Soyadı","GIVEN":"Adı","NICKNAME":"Takma ad","URL":"URL","ADR":"Adres","STREET":"Sokak","EXTADD":"Genişletilmiş Adres","LOCALITY":"Yer","REGION":"Bölge","PCODE":"Posta Kodu","CTRY":"Ülke","TEL":"Telefon","NUMBER":"Numara","EMAIL":"Eposta","USERID":" ","ORG":"Organizasyon","ORGNAME":"İsim","ORGUNIT":"Birim","TITLE":"İş tenımı","ROLE":"Görevi","BDAY":"Doğum günü","DESC":"Tanım","PHOTO":" ","send_message":"İletiyi gönder","get_info":"Bilgileri göster","Settings":"Ayarlar","Priority":"Öncelik","Save":"Kaydet","User_settings":"Kullanıcı tercihleri","A_fingerprint_":"Parmak izi konuştuğunuz kişinin söylediği kişi olduğundan emin olmak için kullanılır.","is":"Eşit","Login_options":"Giriş seçenekleri","BOSH_url":"BOSH URL","Domain":"Alan adı","Resource":"Kaynak","On_login":"Girişte","Received_an_unencrypted_message":"Şifrelenmemiş bir mesaj alındı","Sorry_your_buddy_doesnt_provide_any_information":"Maalesef kişi her hangi bir bilgi sunmamış.","Info_about":"Bilinen özellikleri","Authentication_aborted":"Kimlik doğrulama iptal edildi.","Authentication_request_received":"Kimlik doğrulama isteği alındı.","Log_in_without_chat":"Sohbetsiz giriş yap","has_come_online":"Çevrimiçi oldu","Unknown_sender":"Bilinmeyen gönderen","Please_allow_access_to_microphone_and_camera":"Mikrofona ve kameraya erişime izin vermek için lütfen üstteki \"İzin Ver\" düğmesini tıklayın.","Incoming_call":"Gelen çağrı","from":"gönderen","Do_you_want_to_accept_the_call_from":"Gelen aramayı kabul etmek istiyor musunuz","Reject":"Reddet","Accept":"Kabul et","hang_up":"aramayı sonlandır","snapshot":"anlık fotoğraf","mute_my_audio":"Sesi kapat","pause_my_video":"videoyu duraklat","fullscreen":"tam ekran","Info":"bilgi","Local_IP":"Yerel IP","Remote_IP":"Uzak IP","Local_Fingerprint":"Yerel parmakizi","Remote_Fingerprint":"Uzak parmakizi","Video_call_not_possible":"Video çağrısı yapılamıyor. Aranan kişi video görüşmelerini desteklemiyor.","Start_video_call":"Video görüşmesini başlat","Join_chat":"Sohbete katıl","Join":"Katıl","Room":"Oda","Nickname":"Takma ad","left_the_building":"__nickname__ binadan ayrıldı","entered_the_room":"__nickname__ odaya girdi","is_now_known_as":"__oldNickname__ şimdi __newNickname__ olarak biliniyor","This_room_is":"Bu oda","muc_hidden":{"keyword":"gizli","description":"Arama yoluyla bulunamıyor"},"muc_membersonly":{"keyword":"sadece-üye-olanlar","description":"üye listenizde olmanız gerekiyor"},"muc_moderated":{"keyword":"yöneticili","description":"Yalnızca \"sesli\" kişilerin mesaj göndermesine izin verilir"},"muc_nonanonymous":{"keyword":"Anonim-değil","description":"Sohbet kimliğiniz diğer tüm oturanlara görünüyor"},"muc_open":{"keyword":"açık","description":"herkes katılabilir"},"muc_passwordprotected":{"keyword":"şifre-korumalı","description":"Doğru şifreyi girmeniz gerekiyor"},"muc_persistent":{"keyword":"kalıcı","description":"Son oturan ayrıldığında kapanmaz"},"muc_public":{"keyword":"herkese açık","description":"Arama yoluyla bulunabilir"},"muc_semianonymous":{"keyword":"yarı-anonim","description":"Sohbet kimliğiniz sadece oda yöneticilerine görünüyor"},"muc_temporary":{"keyword":"geçici","description":"Son oturan ayrıldığında kapanır"},"muc_unmoderated":{"keyword":"yöneticisiz","description":"herkes ileti gönderebilir"},"muc_unsecured":{"keyword":"güvensiz","description":"şifre girmenize gerek yok"},"Continue":"Devam","Server":"Sunucu","Rooms_are_loaded":"Oda yüklendi","Could_load_only":"Sadece __count__ oda otomatik tamamlamayla yüklenebilir","muc_explanation":"Bir sohbete katılmak için, lütfen oda adını ve isteniyorsa takma adınız ve parolanızı girin","You_already_joined_this_room":"Zaten bu odaya katılmış durumdasınız","This_room_will_be_closed":"Bu oda kapanacak","Room_not_found_":"Yeni oda oluşturulacak","Loading_room_information":"Oda bilgileri yükleniyor","Destroy":"Sil","Leave":"Ayrıl","changed_subject_to":"__nickname__ bu odanın konusunu \"__subject__\" olarak değiştirdi","muc_removed_kicked":"Bu odadan atıldınız","muc_removed_info_kicked":"__nickname__ bu odadan atıldı","muc_removed_banned":"Odadan yasaklandınız","muc_removed_info_banned":"__nickname__ odadan yasaklandınız","muc_removed_affiliation":"Üyelik değişikliği nedeniyle odadan çıkarıldınız","muc_removed_info_affiliation":"__nickname__ üyelik değişikliği nedeniyle odadan çıkarıldı","muc_removed_membersonly":"Odanın durumu sadece-üyeler olarak değiştirildiği ve siz üye olmadığınız için odadan çıkarıldınız","muc_removed_info_membersonly":"Odanın durumu sadece-üyeler olarak değiştirildiği ve __nickname__ üye olmadığı için odadan çıkarıldı","muc_removed_shutdown":"Odadan çıkarıldınız çünkü, MUC sunucusu kapandı","Reason":"Sebep","message_not_send":"Mesajınız bir hata nedeniyle gönderilmedi","message_not_send_item-not-found":"Mesajınız gönderilmedi, çünkü bu oda mevcut değil","message_not_send_forbidden":"Mesajınız gönderilmedi çünkü bu odada sesiniz yok","message_not_send_not-acceptable":"Mesajınız gönderilmedi çünkü bu odaya bulunmuyorsunuz","This_room_has_been_closed":"Bu oda kapatıldı","Room_logging_is_enabled":"Oda günlüğü etkinleştirildi","A_password_is_required":"Şifre gerekli","You_are_not_on_the_member_list":"Üye listesinde değilsiniz","You_are_banned_from_this_room":"Bu odadan yasaklandınız","Your_desired_nickname_":"İstediğiniz takma ad başkası tarafından kullanılıyor. Lütfen başka bir takma ad","The_maximum_number_":"Bu odada maksimum kullanıcı sayısına ulaşıldı","This_room_is_locked_":"Bu oda kilitli","You_are_not_allowed_to_create_":"Oda açma izniniz yok","Alert":"Uyarı","Call_started":"Arama başlatıldı","Call_terminated":"Arama bitirildi","Carbon_copy":"Karbon kopya","Enable":"Etkinleştir","jingle_reason_busy":"meşgul","jingle_reason_decline":"kabul etme","jingle_reason_success":"kapatıldı","Media_failure":"Medya istek hatası","No_local_audio_device":"Yerel ses cihazı bulunamadı.","No_local_video_device":"Yerel video cihazı bulunamadı.","Ok":"Tamam","PermissionDeniedError":"Siz veya tarayıcınız sesli/görüntülü izni reddetti","Use_local_audio_device":"Yerel video cihazını kullan.","Use_local_video_device":"Yerel video cihazını kullanın.","is_":"__status__","You_received_a_message_from_an_unknown_sender_":"Bilinmeyen bir gönderenden bir ileti aldınız (__sender__) İletiyi görüntülemek istiyor musunuz?","Your_roster_is_empty_add_":"Listeniz boş, yeni bir <a>kişi ekleyin</a>","onsmp_explanation_question":"Karşınızdaki kişi, konuştuğu kişinin gerçekten siz olduğunuzu belirlemeye çalışıyor. Karşınızdaki kişiye kimliğinizi kanıtlamak için, yanıtı girin ve Yanıtla'yı tıklayın.","onsmp_explanation_secret":"Karşınızdaki kişi, konuştuğu kişinin gerçekten siz olduğunuzu belirlemeye çalışıyor. Karşınızdaki kişiye kimliğinizi kanıtlamak için, parolayı girin.","from_sender":"__sender__'den","Verified_private_conversation_started":"Doğrulanmış Özel görüşme başladı.","Unverified_private_conversation_started":"Doğrulanmamış Özel görüşme başladı.","Bookmark":"Yer imi","Auto-join":"Otomatik katıl","Edit_bookmark":"yer imini düzenle","Room_logging_is_disabled":"Oda günlüğü devre dışı","Room_is_now_non-anoymous":"Oda artık anonim değil","Room_is_now_semi-anonymous":"Oda yarı-anonim","Do_you_want_to_change_the_default_room_configuration":"Öntanımlı oda yapılandırmasını değiştirmek istiyor musunuz?","Default":"Öntanımlı","Change":"Değiştir","Send_file":"Dosya gönder","setting-explanation-carbon":"Etkinleştirilmiş karbon kopya ile, XMPP sunucusu kendisine gönderilen her iletinin bir kopyasını, bu adrese gönderilmemiş olsa bile sizin için bu istemciye gönderir.","setting-explanation-login":"Bu seçenek etkinleştirilirse, sohbet girişle beraber başlayacaktır.","setting-explanation-priority":"Aynı hesapla bir çok kez oturum açtıysanız, XMPP sunucusu, istemciye  iletileri en yüksek öncelikle gönderecektir.","setting-explanation-xmpp":"Bu seçenekler XMPP sunucusuna bağlanmak için kullanılır.","_is_composing":" yazıyor...","_are_composing":" yazıyorlar...","Chat_state_notifications":"Sohbet durumu bildirimleri","setting-explanation-chat-state":"Birisi mesaj başlattığında veya mesaj yazmayı bıraktığında, sohbet durumu bildirimleri göndermek ve almak istiyor musunuz?","Share_screen":"Ekran paylaşımı","Incoming_stream":"Gelen akış","Stream_started":"Akış başladı","HTTPS_REQUIRED":"Bu eylem, şifreli bir bağlantı gerektirir.","EXTENSION_UNAVAILABLE":"Tarayıcı eklentisine ihtiyacınız var.","UNKNOWN_ERROR":"Bilinmeyen bir hata oluştu.","Install_extension":"Ekran paylaşımını kullanabilmek için lütfen eklentiyi yükleyin: ","Connection_accepted":"Bağlantı kabul edildi","Stream_terminated":"Akış sonlandırıldı","Close_all":"Hepsini kapat","Notification":null,"Unreadable_OTR_message":null}},"vi-VN":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}},"zh-TW":{"translation":{"Logging_in":"正在登入…","your_connection_is_unencrypted":"連線沒加密。","your_connection_is_encrypted":"連線有加密。","your_buddy_closed_the_private_connection":"聯絡人關閉了加密連線。","start_private":"開始加密","close_private":"結束加密","your_buddy_is_verificated":"聯絡人已校驗。","you_have_only_a_subscription_in_one_way":"只有單向訂閱。","authentication_query_sent":"驗證要求送出了。","your_message_wasnt_send_please_end_your_private_conversation":"訊息沒送出去。請結束加密的對話。","unencrypted_message_received":"收到沒加密的訊息","not_available":"不存在","no_connection":"沒有連線！","relogin":"重新登入","trying_to_start_private_conversation":"正在試著開始加密的對話！","Verified":"已校驗","Unverified":"未校驗","private_conversation_aborted":"加密的對話中斷了！","your_buddy_closed_the_private_conversation_you_should_do_the_same":"聯絡人把這場加密的對話關掉了！你也應該同樣關掉。","conversation_is_now_verified":"對話現在校驗過了。","authentication_failed":"驗證失敗。","Creating_your_private_key_":"正在產生你的私人金鑰，會花一段時間。","Authenticating_a_buddy_helps_":"聯絡人驗證可以確保跟你說話的是真的那個人。","How_do_you_want_to_authenticate_your_buddy":"想要怎樣驗證__bid_name__ (<b>__bid_jid__</b>)？","Select_method":"選個方式...","Manual":"手動","Question":"問答","Secret":"祕密","To_verify_the_fingerprint_":"要校驗聯絡人的電子指紋，請透過其他可靠的管道跟她/他聯絡，比如說電話。","Your_fingerprint":"你的電子指紋","Buddy_fingerprint":"聯絡人的電子指紋","Close":"關閉","Compared":"比對正確","To_authenticate_using_a_question_":"要用問答來驗證的話，請找一個只有你和聯絡人才知道答案的問題。","Ask":"問題","To_authenticate_pick_a_secret_":"要驗證的話，請找一個只有你和聯絡人知道的祕密。","Compare":"比對","Fingerprints":"電子指紋","Authentication":"驗證","Message":"訊息","Add_buddy":"加聯絡人","rename_buddy":"重新命名聯絡人","delete_buddy":"刪掉聯絡人","Login":"登入","Username":"使用者名稱","Password":"密碼","Cancel":"取消","Connect":"連線","Type_in_the_full_username_":"請打全名，別名可有可無","Alias":"別名","Add":"加入","Subscription_request":"訂閱請求","You_have_a_request_from":"收到聯絡人的請求：","Deny":"拒絕","Approve":"同意","Remove_buddy":"刪除聯絡人","You_are_about_to_remove_":"要把__bid_name__ (<b>__bid_jid__</b>)從聯絡簿裡刪掉了。所有相關的對話也都會關掉。","Continue_without_chat":"繼續不聊天","Please_wait":"請等一下","Login_failed":"登入聊天失敗","Sorry_we_cant_authentikate_":"跟聊天伺服器驗證失敗，會不會是密碼打錯了？","Retry":"上一步","clear_history":"清除歷史紀錄","New_message_from":"有新訊息：__name__","Should_we_notify_you_":"以後若有新訊息要通知你嗎？","Please_accept_":"請點上方的「允許」按鈕。","Hide_offline":"隱藏離線聯絡人","Show_offline":"顯示離線聯絡人","About":"關於我","dnd":"別打擾","Mute":"開靜音","Unmute":"關靜音","Subscription":"訂閱狀態","both":"雙向","Status":"狀態","online":"上線","chat":"聊天","away":"離開","xa":"離開很久","offline":"離線","none":"沒有","Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":"收到了一則加密但無法辨認的訊息。","Online":"上線","Chatty":"想聊天","Away":"離開","Extended_away":"離開很久","Offline":"離線","Friendship_request":"聯絡請求","Confirm":"確定","Dismiss":"取消","Remove":"刪掉","Online_help":"線上說明","FN":"全名","N":" ","FAMILY":"姓氏","GIVEN":"名字","NICKNAME":"綽號","URL":"網址","ADR":"位址","STREET":"地址","EXTADD":"更多位址","LOCALITY":"所在地","REGION":"區域","PCODE":"郵遞區號","CTRY":"國家","TEL":"電話","NUMBER":"編號","EMAIL":"電子郵件","USERID":" ","ORG":"團體","ORGNAME":"名稱","ORGUNIT":"單位","TITLE":"職稱","ROLE":"職位","BDAY":"生日","DESC":"簡介","PHOTO":" ","send_message":"發送訊息","get_info":"顯示帳號資訊","Settings":"設定","Priority":"優先度","Save":"儲存","User_settings":"使用者設定","A_fingerprint_":"電子指紋是用來確認跟你說話的是真的那個人。","is":"狀態:","Login_options":"登入選項","BOSH_url":"BOSH 網址","Domain":"網域","Resource":"資源","On_login":"登入啟動","Received_an_unencrypted_message":"收到了一則沒加密的訊息","Sorry_your_buddy_doesnt_provide_any_information":"抱歉，聯絡人沒有提供任何資訊。","Info_about":"帳號資訊：","Authentication_aborted":"驗證中斷。","Authentication_request_received":"驗證請求收到了。","Log_in_without_chat":"登入但不啟用聊天","has_come_online":"上線了","Unknown_sender":"不明傳訊人","Please_allow_access_to_microphone_and_camera":"請點上方的「接受」按鈕來允許我們使用麥克風和相機。","Incoming_call":"來電","from":"只出","Do_you_want_to_accept_the_call_from":"是否要接聽來電:","Reject":"拒絕","Accept":"接受","hang_up":"掛斷","snapshot":"截圖","mute_my_audio":"關掉我的聲音","pause_my_video":"暫停我的影像","fullscreen":"全螢幕","Info":"資料","Local_IP":"本機網路位址","Remote_IP":"遠端網路位址","Local_Fingerprint":"本機電子指紋","Remote_Fingerprint":"遠端電子指紋","Video_call_not_possible":"無法視訊通話。聯絡人不支援視訊。","Start_video_call":"開始視訊通話","Join_chat":"參加聊天","Join":"參加","Room":"聊天室","Nickname":"綽號","left_the_building":"__nickname__離開了大樓","entered_the_room":"__nickname__進入了聊天室","is_now_known_as":"__oldNickname__改名叫做__newNickname__","This_room_is":"聊天室屬性：","muc_hidden":{"keyword":"隱藏","description":"搜尋也找不到"},"muc_membersonly":{"keyword":"限會員","description":"會員才會加入"},"muc_moderated":{"keyword":"有管制","description":"沒被消音的人才能送訊息"},"muc_nonanonymous":{"keyword":"禁匿名","description":"每個參與人都能看到你的 jabber 代碼"},"muc_open":{"keyword":"開放","description":"任何人都能參加"},"muc_passwordprotected":{"keyword":"密碼鎖","description":"要輸入正確的密碼才能加入"},"muc_persistent":{"keyword":"永久性","description":"最後一個參與人都離開了也不會結束"},"muc_public":{"keyword":"公開","description":"搜尋得到"},"muc_semianonymous":{"keyword":"半匿名","description":"只有聊天室管理員才看得到你的 jabber 代碼"},"muc_temporary":{"keyword":"暫時性","description":"最後一個參與人離開了就會結束"},"muc_unmoderated":{"keyword":"沒管制","description":"每個人都可以送訊息"},"muc_unsecured":{"keyword":"沒保護","description":"不需要密碼就能加入"},"Continue":"繼續","Server":"伺服器","Rooms_are_loaded":"聊天室載入完成","Could_load_only":"只能載入__count__間聊天室供輸入自動完成使用","muc_explanation":"請輸入要參加的聊天室名稱，綽號和密碼非必要","You_already_joined_this_room":"你已經參加這間聊天室了","This_room_will_be_closed":"聊天室即將關閉","Room_not_found_":"新聊天室即將開啟","Loading_room_information":"正在載入聊天室資訊","Destroy":"關閉","Leave":"離開","changed_subject_to":"__nickname__把聊天室的標題改成了\"__subject__\"","muc_removed_kicked":"你被踢出聊天室了","muc_removed_info_kicked":"__nickname__被踢出聊天室了","muc_removed_banned":"你被禁止進入聊天室了","muc_removed_info_banned":"__nickname__被禁止進入聊天室了","muc_removed_affiliation":"你因為身份改變而離開聊天室了","muc_removed_info_affiliation":"__nickname__因為身份改變而離開聊天室了","muc_removed_membersonly":"你離開聊天室了，因為聊天室改為只限會員，但你不是會員","muc_removed_info_membersonly":"__nickname__離開聊天室了，因為聊天室改為只限會員，但她/他不是會員","muc_removed_shutdown":"你離開聊天室了，因為多人聊天服務正在關閉中。","Reason":"原因","message_not_send":"訊息因為發生錯誤沒送出去","message_not_send_item-not-found":"訊息沒送出去，因為聊天室不存在了","message_not_send_forbidden":"訊息沒送出去，因為你被消音了","message_not_send_not-acceptable":"訊息沒送出去，因為你不是聊天室的參與人了","This_room_has_been_closed":"聊天室已經關閉了","Room_logging_is_enabled":"聊天室紀錄打開了","A_password_is_required":"需要密碼","You_are_not_on_the_member_list":"你不是會員","You_are_banned_from_this_room":"你被禁止進入聊天室了","Your_desired_nickname_":"這個綽號被用掉了，請換一個","The_maximum_number_":"這間聊天室已經到達使用者數目的上限","This_room_is_locked_":"聊天室上鎖了","You_are_not_allowed_to_create_":"不允許你開新的聊天室","Alert":"警告","Call_started":"通話開始","Call_terminated":"通話結束","Carbon_copy":"副本","Enable":"打開","jingle_reason_busy":"忙線中","jingle_reason_decline":"被拒絕","jingle_reason_success":"被掛斷","Media_failure":"媒體錯誤","No_local_audio_device":"本機沒有音訊設備。","No_local_video_device":"本機沒有視訊設備。","Ok":"好","PermissionDeniedError":"你或你的瀏覽器拒絕了媒體使用權限","Use_local_audio_device":"使用本機音訊設備。","Use_local_video_device":"使用本機視訊設備。","is_":"狀態: __status__","You_received_a_message_from_an_unknown_sender_":"收到了不明人士(__sender__)傳來的訊息。你要打開來看嗎？","Your_roster_is_empty_add_":"好友清單是空的，請加<a>新的聯絡人</a>","onsmp_explanation_question":"聯絡人想要確定她/他是在跟真的你說話。要完成你的驗證，請輸入問題的答案，然後按\"回答\"。","onsmp_explanation_secret":"聯絡人想要確定她/他是在跟真的你說話。要完成你的驗證，請輸入你們之間的祕密。","from_sender":"來自：__sender__","Verified_private_conversation_started":"加密且已校驗的對話開始了。","Unverified_private_conversation_started":"加密但未校驗的對話開始了。","Bookmark":"書籤","Auto-join":"自動參加","Edit_bookmark":"編輯書籤","Room_logging_is_disabled":"聊天室紀錄關掉了","Room_is_now_non-anoymous":"現在聊天室禁止匿名了","Room_is_now_semi-anonymous":"現在聊天室變半匿名了","Do_you_want_to_change_the_default_room_configuration":"你想要改變聊天室的預設配置嗎？","Default":"預設值","Change":"修改","Send_file":"傳送檔案","setting-explanation-carbon":"如果打開副本選項的話，XMPP 伺服器會把每一個收到的訊息，都送一份到這個用戶端程式，即使它不是訊息發送的對象。","setting-explanation-login":"打開這個選項會在登入時同時開啟聊天。","setting-explanation-priority":"如果你用同一個帳號同時登入好幾次的話，XMPP 伺服器會把訊息送給優先度最高的那個用戶端程式。","setting-explanation-xmpp":"這些是用在 XMPP 伺服器連線的選項。","_is_composing":"正在打字中...","_are_composing":"正在打字中...","Chat_state_notifications":"聊天狀態通知","setting-explanation-chat-state":"想要傳送以及接收聊天狀態的通知嗎？也就是有人開始或停止寫訊息之類？","Share_screen":"分享螢幕","Incoming_stream":"有串流來","Stream_started":"串流開始了","HTTPS_REQUIRED":"這個動作需要連線有加密。","EXTENSION_UNAVAILABLE":"瀏覽器必須要安裝擴充套件或是附加元件。","UNKNOWN_ERROR":"發生了不明錯誤。","Install_extension":"要使用螢幕分享功能請安裝這個擴充套件: ","Connection_accepted":"連線接受了","Stream_terminated":"串流結束了","Close_all":"全部關掉","Notification":null,"Unreadable_OTR_message":null}},"zh":{"translation":{"Logging_in":null,"your_connection_is_unencrypted":null,"your_connection_is_encrypted":null,"your_buddy_closed_the_private_connection":null,"start_private":null,"close_private":null,"your_buddy_is_verificated":null,"you_have_only_a_subscription_in_one_way":null,"authentication_query_sent":null,"your_message_wasnt_send_please_end_your_private_conversation":null,"unencrypted_message_received":null,"not_available":null,"no_connection":null,"relogin":null,"trying_to_start_private_conversation":null,"Verified":null,"Unverified":null,"private_conversation_aborted":null,"your_buddy_closed_the_private_conversation_you_should_do_the_same":null,"conversation_is_now_verified":null,"authentication_failed":null,"Creating_your_private_key_":null,"Authenticating_a_buddy_helps_":null,"How_do_you_want_to_authenticate_your_buddy":null,"Select_method":null,"Manual":null,"Question":null,"Secret":null,"To_verify_the_fingerprint_":null,"Your_fingerprint":null,"Buddy_fingerprint":null,"Close":null,"Compared":null,"To_authenticate_using_a_question_":null,"Ask":null,"To_authenticate_pick_a_secret_":null,"Compare":null,"Fingerprints":null,"Authentication":null,"Message":null,"Add_buddy":null,"rename_buddy":null,"delete_buddy":null,"Login":null,"Username":null,"Password":null,"Cancel":null,"Connect":null,"Type_in_the_full_username_":null,"Alias":null,"Add":null,"Subscription_request":null,"You_have_a_request_from":null,"Deny":null,"Approve":null,"Remove_buddy":null,"You_are_about_to_remove_":null,"Continue_without_chat":null,"Please_wait":null,"Login_failed":null,"Sorry_we_cant_authentikate_":null,"Retry":null,"clear_history":null,"New_message_from":null,"Should_we_notify_you_":null,"Please_accept_":null,"Hide_offline":null,"Show_offline":null,"About":null,"dnd":null,"Mute":null,"Unmute":null,"Subscription":null,"both":null,"Status":null,"online":null,"chat":null,"away":null,"xa":null,"offline":null,"none":null,"Unknown_instance_tag":null,"Not_one_of_our_latest_keys":null,"Received_an_unreadable_encrypted_message":null,"Online":null,"Chatty":null,"Away":null,"Extended_away":null,"Offline":null,"Friendship_request":null,"Confirm":null,"Dismiss":null,"Remove":null,"Online_help":null,"FN":null,"N":null,"FAMILY":null,"GIVEN":null,"NICKNAME":null,"URL":null,"ADR":null,"STREET":null,"EXTADD":null,"LOCALITY":null,"REGION":null,"PCODE":null,"CTRY":null,"TEL":null,"NUMBER":null,"EMAIL":null,"USERID":null,"ORG":null,"ORGNAME":null,"ORGUNIT":null,"TITLE":null,"ROLE":null,"BDAY":null,"DESC":null,"PHOTO":null,"send_message":null,"get_info":null,"Settings":null,"Priority":null,"Save":null,"User_settings":null,"A_fingerprint_":null,"is":null,"Login_options":null,"BOSH_url":null,"Domain":null,"Resource":null,"On_login":null,"Received_an_unencrypted_message":null,"Sorry_your_buddy_doesnt_provide_any_information":null,"Info_about":null,"Authentication_aborted":null,"Authentication_request_received":null,"Log_in_without_chat":null,"has_come_online":null,"Unknown_sender":null,"Please_allow_access_to_microphone_and_camera":null,"Incoming_call":null,"from":null,"Do_you_want_to_accept_the_call_from":null,"Reject":null,"Accept":null,"hang_up":null,"snapshot":null,"mute_my_audio":null,"pause_my_video":null,"fullscreen":null,"Info":null,"Local_IP":null,"Remote_IP":null,"Local_Fingerprint":null,"Remote_Fingerprint":null,"Video_call_not_possible":null,"Start_video_call":null,"Join_chat":null,"Join":null,"Room":null,"Nickname":null,"left_the_building":null,"entered_the_room":null,"is_now_known_as":null,"This_room_is":null,"muc_hidden":{"keyword":null,"description":null},"muc_membersonly":{"keyword":null,"description":null},"muc_moderated":{"keyword":null,"description":null},"muc_nonanonymous":{"keyword":null,"description":null},"muc_open":{"keyword":null,"description":null},"muc_passwordprotected":{"keyword":null,"description":null},"muc_persistent":{"keyword":null,"description":null},"muc_public":{"keyword":null,"description":null},"muc_semianonymous":{"keyword":null,"description":null},"muc_temporary":{"keyword":null,"description":null},"muc_unmoderated":{"keyword":null,"description":null},"muc_unsecured":{"keyword":null,"description":null},"Continue":null,"Server":null,"Rooms_are_loaded":null,"Could_load_only":null,"muc_explanation":null,"You_already_joined_this_room":null,"This_room_will_be_closed":null,"Room_not_found_":null,"Loading_room_information":null,"Destroy":null,"Leave":null,"changed_subject_to":null,"muc_removed_kicked":null,"muc_removed_info_kicked":null,"muc_removed_banned":null,"muc_removed_info_banned":null,"muc_removed_affiliation":null,"muc_removed_info_affiliation":null,"muc_removed_membersonly":null,"muc_removed_info_membersonly":null,"muc_removed_shutdown":null,"Reason":null,"message_not_send":null,"message_not_send_item-not-found":null,"message_not_send_forbidden":null,"message_not_send_not-acceptable":null,"This_room_has_been_closed":null,"Room_logging_is_enabled":null,"A_password_is_required":null,"You_are_not_on_the_member_list":null,"You_are_banned_from_this_room":null,"Your_desired_nickname_":null,"The_maximum_number_":null,"This_room_is_locked_":null,"You_are_not_allowed_to_create_":null,"Alert":null,"Call_started":null,"Call_terminated":null,"Carbon_copy":null,"Enable":null,"jingle_reason_busy":null,"jingle_reason_decline":null,"jingle_reason_success":null,"Media_failure":null,"No_local_audio_device":null,"No_local_video_device":null,"Ok":null,"PermissionDeniedError":null,"Use_local_audio_device":null,"Use_local_video_device":null,"is_":null,"You_received_a_message_from_an_unknown_sender_":null,"Your_roster_is_empty_add_":null,"onsmp_explanation_question":null,"onsmp_explanation_secret":null,"from_sender":null,"Verified_private_conversation_started":null,"Unverified_private_conversation_started":null,"Bookmark":null,"Auto-join":null,"Edit_bookmark":null,"Room_logging_is_disabled":null,"Room_is_now_non-anoymous":null,"Room_is_now_semi-anonymous":null,"Do_you_want_to_change_the_default_room_configuration":null,"Default":null,"Change":null,"Send_file":null,"setting-explanation-carbon":null,"setting-explanation-login":null,"setting-explanation-priority":null,"setting-explanation-xmpp":null,"_is_composing":null,"_are_composing":null,"Chat_state_notifications":null,"setting-explanation-chat-state":null,"Share_screen":null,"Incoming_stream":null,"Stream_started":null,"HTTPS_REQUIRED":null,"EXTENSION_UNAVAILABLE":null,"UNKNOWN_ERROR":null,"Install_extension":null,"Connection_accepted":null,"Stream_terminated":null,"Close_all":null,"Notification":null,"Unreadable_OTR_message":null}}};

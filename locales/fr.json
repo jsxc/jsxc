@@ -299,6 +299,8 @@
     "Install_extension": "Veuillez installer l'extension afin d'utiliser le partage d'écran: ",
     "Connection_accepted": "Connexion acceptée",
     "Stream_terminated": "Flux terminé",
-    "Close_all": null
+    "Close_all": "Tout fermer",
+    "Notification": null,
+    "Unreadable_OTR_message": null
   }
 }

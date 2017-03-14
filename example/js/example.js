@@ -117,6 +117,7 @@ $(function() {
       localStorage.setItem('bosh-url', url);
       localStorage.setItem('xmpp-domain', domain);
 
+      jsxc.options.xmpp.url = url;
       settings.xmpp.url = url;
       settings.xmpp.domain = domain;
 

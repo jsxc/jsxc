@@ -238,92 +238,9 @@ jsxc.gui = {
 
       ri.find('.jsxc_name').attr('title', info);
 
-      jsxc.gui.updateAvatar(ri.add(we.find('.jsxc_bar')), data.jid, data.avatar);
+      jsxc.gui.avatar.update(ri.add(we.find('.jsxc_bar')), data.jid, data.avatar);
 
       $(document).trigger('update.gui.jsxc', [bid]);
-   },
-
-   /**
-    * Update avatar on all given elements.
-    *
-    * @memberOf jsxc.gui
-    * @param {jQuery} el Elements with subelement .jsxc_avatar
-    * @param {string} jid Jid
-    * @param {string} aid Avatar id (sha1 hash of image)
-    */
-   updateAvatar: function(el, jid, aid) {
-
-      var setAvatar = function(src) {
-         if (src === 0 || src === '0') {
-            if (typeof jsxc.options.defaultAvatar === 'function') {
-               jsxc.options.defaultAvatar.call(el, jid);
-               return;
-            }
-            jsxc.gui.avatarPlaceholder(el.find('.jsxc_avatar'), jid);
-            return;
-         }
-
-         el.find('.jsxc_avatar').removeAttr('style');
-
-         el.find('.jsxc_avatar').css({
-            'background-image': 'url(' + src + ')',
-            'text-indent': '999px'
-         });
-      };
-
-      if (typeof aid === 'undefined') {
-         setAvatar(0);
-         return;
-      }
-
-      var avatarSrc = jsxc.storage.getUserItem('avatar', aid);
-
-      if (!jsxc.master && !avatarSrc) {
-         // force avatar placeholder for slave tab, until master tab requested vCard
-         avatarSrc = 0;
-      }
-
-      if (avatarSrc !== null) {
-         setAvatar(avatarSrc);
-      } else {
-         var handler_cb = function(stanza) {
-            jsxc.debug('vCard', stanza);
-
-            var vCard = $(stanza).find("vCard > PHOTO");
-            var src;
-
-            if (vCard.length === 0) {
-               jsxc.debug('No photo provided');
-               src = '0';
-            } else if (vCard.find('EXTVAL').length > 0) {
-               src = vCard.find('EXTVAL').text();
-            } else {
-               var img = vCard.find('BINVAL').text();
-               var type = vCard.find('TYPE').text();
-               src = 'data:' + type + ';base64,' + img;
-            }
-
-            // concat chunks
-            src = src.replace(/[\t\r\n\f]/gi, '');
-
-            jsxc.storage.setUserItem('avatar', aid, src);
-            setAvatar(src);
-         };
-
-         var error_cb = function(msg) {
-            jsxc.warn('Could not load vcard.', msg);
-
-            jsxc.storage.setUserItem('avatar', aid, 0);
-            setAvatar(0);
-         };
-
-         // workaround for https://github.com/strophe/strophejs/issues/172
-         if (Strophe.getBareJidFromJid(jid) === Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid)) {
-            jsxc.xmpp.conn.vcard.get(handler_cb, error_cb);
-         } else {
-            jsxc.xmpp.conn.vcard.get(handler_cb, Strophe.getBareJidFromJid(jid), error_cb);
-         }
-      }
    },
 
    /**
@@ -877,7 +794,7 @@ jsxc.gui = {
 
       var data = jsxc.storage.getUserItem('buddy', bid);
 
-      if (data) {
+      if (data && data.res) {
          // Display resources and corresponding information
          var i, j, res, identities, identity = null,
             cap, client;
@@ -2815,7 +2732,7 @@ jsxc.gui.window = {
             msgDiv.attr('data-bid', jsxc.jidToBid(message.sender.jid));
 
             var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(message.sender.jid)) || {};
-            jsxc.gui.updateAvatar(msgDiv, jsxc.jidToBid(message.sender.jid), data.avatar);
+            jsxc.gui.avatar.update(msgDiv, jsxc.jidToBid(message.sender.jid), data.avatar);
 
             title = jsxc.jidToBid(message.sender.jid);
          }

@@ -28,7 +28,7 @@
         <article>
             <pre class="prettyprint source linenums"><code>/**
  * Set some options for the chat.
- * 
+ *
  * @namespace jsxc.options
  */
 jsxc.options = {
@@ -47,7 +47,7 @@ jsxc.options = {
       enable: true,
       ERROR_START_AKE: false,
       debug: false,
-      SEND_WHITESPACE_TAG: true,
+      SEND_WHITESPACE_TAG: false,
       WHITESPACE_START_AKE: true
    },
 
@@ -88,9 +88,9 @@ jsxc.options = {
    },
 
    /**
-    * This function is called if a login form was found, but before any 
+    * This function is called if a login form was found, but before any
     * modification is done to it.
-    * 
+    *
     * @memberOf jsxc.options
     * @function
     */
@@ -116,7 +116,7 @@ jsxc.options = {
       },
 
       /**
-       * Action after login was called: dialog [String] Show wait dialog, false [boolean] | 
+       * Action after login was called: dialog [String] Show wait dialog, false [boolean] |
        * quiet [String] Do nothing
        */
       onConnecting: 'dialog',
@@ -135,25 +135,25 @@ jsxc.options = {
 
       /**
        * True: Attach connection even is login form was found.
-       * 
+       *
        * @type {Boolean}
        * @deprecated since 3.0.0. Use now loginForm.ifFound (true => attach, false => pause)
        */
       attachIfFound: true,
 
       /**
-       * Describes what we should do if login form was found: 
+       * Describes what we should do if login form was found:
        * - Attach connection
        * - Force new connection with loginForm.jid and loginForm.passed
        * - Pause connection and do nothing
-       * 
+       *
        * @type {(attach|force|pause)}
        */
       ifFound: 'attach',
 
       /**
-       * True: Display roster minimized after first login. Afterwards the last 
-       * roster state will be used. 
+       * True: Display roster minimized after first login. Afterwards the last
+       * roster state will be used.
        */
       startMinimized: false
    },
@@ -198,7 +198,7 @@ jsxc.options = {
 
    /**
     * If no avatar is found, this function is called.
-    * 
+    *
     * @param jid Jid of that user.
     * @this {jQuery} Elements to update with probable .jsxc_avatar elements
     */
@@ -214,7 +214,7 @@ jsxc.options = {
 
    /**
     * Returns permanent saved settings and overwrite default jsxc.options.
-    * 
+    *
     * @memberOf jsxc.options
     * @function
     * @param username {string} username
@@ -225,7 +225,7 @@ jsxc.options = {
 
    /**
     * Call this function to save user settings permanent.
-    * 
+    *
     * @memberOf jsxc.options
     * @param data Holds all data as key/value
     * @param cb Called with true on success, false otherwise
@@ -236,19 +236,19 @@ jsxc.options = {
 
    carbons: {
       /** Enable carbon copies? */
-      enable: false
+      enable: true
    },
 
    /**
     * Processes user list.
-    * 
+    *
     * @callback getUsers-cb
     * @param {object} list List of users, key: username, value: alias
     */
 
    /**
     * Returns a list of usernames and aliases
-    * 
+    *
     * @function getUsers
     * @memberOf jsxc.options
     * @param {string} search Search token (start with)
@@ -306,7 +306,32 @@ jsxc.options = {
       }
    },
 
-   maxStorableSize: 1000000
+   /** Maximal storage size for attachments received via data channels (webrtc). */
+   maxStorableSize: 1000000,
+
+   /** Options for file transfer. */
+   fileTransfer: {
+      httpUpload: {
+         enable: true
+      },
+      // @TODO add option to enable/disable data channels
+   },
+
+   /** Default option for chat state notifications */
+   chatState: {
+      enable: true
+   },
+
+   /**
+    * Download urls to screen media extensions.
+    *
+    * @type {Object}
+    * @see example extensions {@link https://github.com/otalk/getScreenMedia}
+    */
+   screenMediaExtension: {
+      firefox: '',
+      chrome: ''
+   }
 };
 </code></pre>
         </article>
@@ -318,13 +343,13 @@ jsxc.options = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.fileTransfer.html">fileTransfer</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li><li><a href="jsxc.xmpp.chatState.html">chatState</a></li><li><a href="jsxc.xmpp.httpUpload.html">httpUpload</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Fri Oct 28 2016 13:29:05 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Feb 14 2017 16:15:49 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>

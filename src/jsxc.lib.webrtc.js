@@ -794,9 +794,8 @@ jsxc.webrtc = {
     * @param stream {mediastream}
     */
    attachMediaStream: function(element, stream) {
-      var self = jsxc.webrtc;
-
-      self.conn.jingle.RTC.attachMediaStream((element instanceof jQuery) ? element.get(0) : element, stream);
+      var el = (element instanceof jQuery) ? element.get(0) : element;
+      el.srcObject = stream;
 
       $(element).show();
    },
@@ -1111,18 +1110,20 @@ jsxc.webrtc = {
       }
 
       try {
-         self.conn.jingle.RTC.getUserMedia(constraints,
-            function(stream) {
-               jsxc.debug('onUserMediaSuccess');
-               $(document).trigger('mediaready.jingle', [stream]);
-            },
-            function(error) {
-               jsxc.warn('Failed to get access to local media. Error ', error);
-               $(document).trigger('mediafailure.jingle', [error]);
-            });
+         self.conn.jingle.getUserMedia(constraints, self.userMediaCallback);
       } catch (e) {
          jsxc.error('GUM failed: ', e);
          $(document).trigger('mediafailure.jingle');
+      }
+   },
+
+   userMediaCallback: function(err, stream) {
+      if (err) {
+         jsxc.warn('Failed to get access to local media. Error ', err);
+         $(document).trigger('mediafailure.jingle', [err]);
+      } else if (stream) {
+         jsxc.debug('onUserMediaSuccess');
+         $(document).trigger('mediaready.jingle', [stream]);
       }
    },
 

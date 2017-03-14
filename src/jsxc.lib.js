@@ -222,8 +222,8 @@ jsxc = {
       }
 
       // Check localStorage
-      if (typeof(localStorage) === 'undefined') {
-         jsxc.warn("Browser doesn't support localStorage.");
+      if (!jsxc.storage.hasSupport()) {
+         jsxc.error("Browser doesn't support localStorage. JSXC will be disabled.");
          return;
       }
 
@@ -358,10 +358,12 @@ jsxc = {
                      jsxc.options.loginForm.triggered = true;
 
                      jsxc.xmpp.login(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
+
+                     return;
                   }
-               } else {
-                  jsxc.submitLoginForm();
                }
+
+               jsxc.submitLoginForm();
             });
 
             // Trigger submit in jsxc.xmpp.connected()
@@ -582,7 +584,7 @@ jsxc = {
       $('#jsxc_roster').removeClass('jsxc_noConnection');
 
       jsxc.registerLogout();
-      jsxc.gui.updateAvatar($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
+      jsxc.gui.avatar.update($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
 
       jsxc.gui.restore();
    },
@@ -650,7 +652,7 @@ jsxc = {
          jsxc.otr.createDSA();
       }
 
-      jsxc.gui.updateAvatar($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
+      jsxc.gui.avatar.update($('#jsxc_roster > .jsxc_bottom'), jsxc.jidToBid(jsxc.storage.getItem('jid')), 'own');
    },
 
    /**

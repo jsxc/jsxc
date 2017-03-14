@@ -290,15 +290,17 @@
     "_are_composing": " tippen gerade...",
     "Chat_state_notifications": "Statusbenachrichtigungen",
     "setting-explanation-chat-state": "Möchtest Benachrichtigungen senden und erhalten wenn du oder dein Kontakt Nachrichten tippt?",
-    "Share_screen": null,
-    "Incoming_stream": null,
-    "Stream_started": null,
-    "HTTPS_REQUIRED": null,
-    "EXTENSION_UNAVAILABLE": null,
-    "UNKNOWN_ERROR": null,
-    "Install_extension": null,
-    "Connection_accepted": null,
-    "Stream_terminated": null,
-    "Close_all": "Schließe alle"
+    "Share_screen": "Teile Bildschirm",
+    "Incoming_stream": "Eingehender Stream",
+    "Stream_started": "Stream gestarted",
+    "HTTPS_REQUIRED": "Diese Aktion erfordert eine verschlüsselte Verbindung.",
+    "EXTENSION_UNAVAILABLE": "Sie benötigen eine Browser Erweiterung.",
+    "UNKNOWN_ERROR": "Ein unbekannter Fehler ist aufgetreten.",
+    "Install_extension": "Bitte installieren Sie die Erweiterung um ihren Bildschirm zu teilen: ",
+    "Connection_accepted": "Verbindung angenommen",
+    "Stream_terminated": "Stream beendet",
+    "Close_all": "Schließe alle",
+    "Notification": null,
+    "Unreadable_OTR_message": null
   }
 }

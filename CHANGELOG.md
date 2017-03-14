@@ -5,42 +5,57 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## 3.1.1 - 2017-02-14
+### Fixed
+- fix path to dependencies
+
+## 3.1.0 - 2017-02-14
 ### Added
 - add application states
-- #393 add the me command (XEP-0245)
-- #422 add multiline message support
-- #431 add Chat State Notifications (XEP-0085)
-- #426 add HTTP File Upload (XEP-0363)
+- [#393](https://github.com/jsxc/jsxc/issues/393) add the /me command (XEP-0245)
+- [#422](https://github.com/jsxc/jsxc/issues/422) add multiline message support
+- [#431](https://github.com/jsxc/jsxc/issues/431) add Chat State Notifications (XEP-0085)
+- [#426](https://github.com/jsxc/jsxc/issues/426) add HTTP File Upload (XEP-0363)
 - add Turkish
-- #438 add desktop sharing
-- add nextcloud emoticon
-- #301 add close all button for notices
-- #344 support messages of type headline
+- [#438](https://github.com/jsxc/jsxc/issues/438) add desktop sharing
+- add Nextcloud emoticon
+- [#301](https://github.com/jsxc/jsxc/issues/301) add close all button for notices
+- [#344](https://github.com/jsxc/jsxc/issues/344) support messages of type `headline`
 - add icon to notices
 
 ### Fixed
 - fix login form submission
-- fix display of muc warning
-- #391 fix muc initialisation after relogin
-- #394 disable otr for muc conversations
-- #399 prompt for muc password if required
-- #435 fix list of user name suggestions
-- #433 fix i18n interpolation pattern
-- fix minor webrtc issues
-- #440 prevent login form submission
-- #441 remove console.trace
-- #409 fix presence after accepting contact request
+- fix display of MUC warning
+- [#391](https://github.com/jsxc/jsxc/issues/391) fix MUC initialisation after relogin
+- [#394](https://github.com/jsxc/jsxc/issues/394) disable OTR for MUC conversations
+- [#399](https://github.com/jsxc/jsxc/issues/399) prompt for MUC password if required
+- [#435](https://github.com/jsxc/jsxc/issues/435) fix list of user name suggestions
+- [#433](https://github.com/jsxc/jsxc/issues/433) fix i18n interpolation pattern
+- fix minor WebRTC issues
+- [#440](https://github.com/jsxc/jsxc/issues/440) prevent original login form submission
+- [#441](https://github.com/jsxc/jsxc/issues/441) remove console.trace
+- [#409](https://github.com/jsxc/jsxc/issues/409) fix presence after accepting contact request
+- fix template system
+- fix path to strophe.bookmarks (regression)
+- fix disabled login form
+- fix carbon copy impersonation vulnerability ([CVE-2017-5589+](https://rt-solutions.de/en/2017/02/CVE-2017-5589_xmpp_carbons/))
+- ignore malicious roster updates (similar to [CVE-2014-0364](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0364))
+- prevent double insertion of MUC setting
 
 ### Changed
 - update dependencies
-- #385 update i18next
+- [#385](https://github.com/jsxc/jsxc/issues/385) update i18next
 - improve initial focus for login box
 - add large emoticons
-- #421 make muc server field editable
+- [#421](https://github.com/jsxc/jsxc/issues/421) make MUC server field editable
 - system message style
-- disable sending of otr whitespace tag by default
+- disable sending of OTR whitespace tag by default
 - enable carbon copies by default
 - remove border radius from dialog
+- exclude dev dependencies from build
+- move jquery library to example folder
+- omit unreadable OTR messages
 
 ## 3.0.1 - 2016-10-28
 ### Added
@@ -72,15 +87,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
  - new video call interface
  - status usable for daltonian
  - use css for animations
-- file transfer via webrtc
+- file transfer via WebRTC
  - previews
  - show progress
 - use local date and time format
 - add no-video-call-possible icon
-- add disabled otr icon
+- add disabled OTR icon
 - add padlock icon to message
 - display line breaks in chat messages
-- hide avatar for connected messages (muc)
+- hide avatar for connected messages (MUC)
 - auto approve incoming contact request (if contact is already in our roster)
 
 ### Fixed
@@ -110,7 +125,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 2.1.5 - 2015-11-17
 - Reset TURN credentials on login
-- Fix ie<11 textfield
+- Fix IE&lt;11 textfield
 
 ## 2.1.4 - 2015-09-10
 - remove leading at sign from comments in build file
@@ -123,10 +138,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - update grunt-sass (fix invalid css)
 
 ## 2.1.1 - 2015-08-10
-- update strophe.jingle (fix login with safari and older versions of ie, ff, chrome)
+- update strophe.jingle (fix login with Safari and older versions of IE, FF, Chrome)
 - update favico.js
-- fix undefined error variable in ie
-- fix handling of escaped jids (e.g. used in transports)
+- fix undefined error variable in IE
+- fix handling of escaped JIDs (e.g. used in transports)
 - fix placeholder replacement
 - rearrange bootstrap import
 - add option for custom online user manual
@@ -141,8 +156,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - make dialog responsive
 - allow messages to persons without valid friendship
 - replace video library for more stable connection
-- fix dsa key generation in chrome > 42
-- fix minor roster ui issues
+- fix DSA key generation in Chrome &gt; 42
+- fix minor roster UI issues
 
 - add jsbeautifier and prettysass
 - improve example
@@ -161,11 +176,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## 2.0.1 - 2015-05-23
 - improve login box
 - fix browsers without CSPRNG generator
-- fix ajax login after credential failure
-- fix some webrtc issues
+- fix AJAX login after credential failure
+- fix some WebRTC issues
 - fix login with different username after dirty logout
-- remove ie (<11) gradient
-- remove broken mitm detection
+- remove IE (&lt;11) gradient
+- remove broken MITM detection
 - fix temporary template 404
 - fix login option
 - add connecting event
@@ -179,7 +194,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - use user avatar as notification icon
 - show notifications if tabs has no focus
 - split files into namespaces
-- sass improvements
+- SASS improvements
 - replace own translation engine with i18next
 - fix login from login box
 - fix selection of chat messages
@@ -190,16 +205,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - fix logout
 
 ## 1.1.0a - 2015-02-25
-- fix css url path
+- fix CSS URL path
 
 ## 1.1.0 - 2015-01-08
-- move from plain css to sass
-- show avatar also by EXTVAL (url), not only by BINVAL
+- move from plain CSS to SASS
+- show avatar also by EXTVAL (URL), not only by BINVAL
 - add XEP-0280 (Message Carbons)
 - add XEP-0297 (Stanza Forwarding)
-- add option to disable otr
+- add option to disable OTR
 - add timestamp to messages
-- add ajax/prebind login
+- add AJAX/prebind login
 - fix offline subscription request
 - fix hide offline contacts
 - fix error with multiple own resources
@@ -214,37 +229,37 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - add resizable function to chat window
 - add vertical scrollbar to window list
 - add call information to chat window
-- add concatinated and uglified files
+- add concatenated and uglified files
 - add translations
 - minor video call improvements
 - minor style improvements
-- generate dsa key complete in background
+- generate DSA key complete in background
 - update caps node property to jsxc.org
 - update strophe.jingle
-- update otr
+- update OTR
 - fix wrong avatars
 - fix minor message delivery errors
-- fix ff snapshot security error
+- fix FF snapshot security error
 - fix case sensitive resource handling
 - fix non-square avatars
 - fix several video issues
 - fix messages from unknown (not in roster) jid
-- fix vcard retrieval from unknown (not in roster) jid
-- fix vcard in second tab
-- fix jids with non-word characters (replace user identifier)
+- fix vCard retrieval from unknown (not in roster) jid
+- fix vCard in second tab
+- fix JIDs with non-word characters (replace user identifier)
 - improve video window design
 - improve user info
 - improve login box
-- improve smp user interaction
+- improve SMP user interaction
 - improve notifications (sync sound/message, icon)
 - minor chat window improvements
 - detect email in message
-- detect uri scheme in message
+- detect URI scheme in message
 - end all private conversations on logout
 - remove email pattern from contact dialog
 - disable video on second tab
-- add/require disco dtls feature for webrtc
-- move emoticons to css
+- add/require DISCO DTLS feature for WebRTC
+- move emoticons to CSS
 - handle loadSettings failure
 - change cursor for some elements
 - prevent event bubbling for dialog
@@ -270,15 +285,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - new chat window design
 - enhanced roster design
 - fix emoticon replacement (XEP-0038)
-- fix some ui issues (explanations,...)
+- fix some UI issues (explanations,...)
 - fix issue with password only field
 
 ## 0.7.2 - 2014-05-28
 - fix login issue
 - fix different dialogs
-- fix safari mobile bug
+- fix Safari mobile bug
 - fix webworker debugging
-- fix issue with prosody
+- fix issue with Prosody
 - fix submodule state
 - add debug flag
 - add icon for video calls
@@ -292,7 +307,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - minor style fixes
 - move complete to new notification api
 
-
 ## 0.7.1 - 2014-03-18
 - fix emoticons
 - fix unique message id
@@ -304,27 +318,27 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - update & extend hover info
 - handle presence of type unsubscribed
 - remove roster footer if offline
-- enhance otr error handling
+- enhance OTR error handling
 - enhance translations
 - reduce initial timeout
 - fix notices
 - fix friendship response dialog
 - fix shared roster item removel
 - fix debug function
-- fix webrtc bug
+- fix WebRTC bug
 - fix storage check
-- fix firefox fullscreen
+- fix Firefox fullscreen
 
 ## 0.6.0 - 2014-02-28
 - add notice stack (for e.g. friendship requests)
 - add option to change presence
 - support all available presence states
 - display own avatar
-- fix issue with prosody
+- fix issue with Prosody
 - fix multi-tab support
-- fix chrome notifications
-- fix otr error handling
-- fix webrtc bug
+- fix Chrome notifications
+- fix OTR error handling
+- fix WebRTC bug
 
 ## 0.5.2 - 2014-01-28
 - update strophe.js to v1.1.3
@@ -334,8 +348,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 0.5.1 - 2014-01-27
 - fix chat window after call
-- fix nullpointer and context in webrtc
+- fix NULL pointer and context in WebRTC
 - handle already attached submit events on login form
 - style changes
-- fix webrtc startup
-- don't block application on dsa key generation
+- fix WebRTC startup
+- don't block application on DSA key generation
