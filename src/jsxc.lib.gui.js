@@ -1179,11 +1179,11 @@ jsxc.gui = {
       $('[data-bid="' + bid + '"]').each(function() {
          var el = $(this);
 
-         el.attr('data-status', pres);
-
-         if (el.find('.jsxc_statusIndicator').length > 0) {
+         if (!el.hasClass('jsxc_statusIndicator')) {
             el = el.find('.jsxc_statusIndicator');
          }
+
+         el.attr('data-status', pres);
 
          el.removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
       });
