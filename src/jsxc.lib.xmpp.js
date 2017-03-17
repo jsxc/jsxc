@@ -967,12 +967,15 @@ jsxc.xmpp = {
       if (jsxc.otr.objects.hasOwnProperty(bid) && body) {
          // @TODO check for file upload url after decryption
          jsxc.otr.objects[bid].receiveMsg(body, {
+            _uid: mid,
+            foo: 'bar',
             stamp: stamp,
             forwarded: forwarded,
             attachment: attachment
          });
       } else {
          jsxc.gui.window.postMessage({
+            _uid: mid,
             bid: bid,
             direction: jsxc.Message.IN,
             msg: body,

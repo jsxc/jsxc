@@ -2717,8 +2717,12 @@ jsxc.gui.window = {
          $('[data-bid="' + bid + '"]').find('.jsxc_lastmsg .jsxc_text').html(msg);
       }
 
-      if (jsxc.Message.getDOM(uid).length > 0) {
-         jsxc.Message.getDOM(uid).replaceWith(msgDiv);
+      var currentMessageElement = jsxc.Message.getDOM(uid);
+      if (currentMessageElement.length > 0) {
+         if (currentMessageElement.attr('data-queryId')) {
+            msgDiv.attr('data-queryId', currentMessageElement.attr('data-queryId'));
+         }
+         currentMessageElement.replaceWith(msgDiv);
       } else {
          win.find('.jsxc_textarea').append(msgDiv);
       }
@@ -2763,7 +2767,9 @@ jsxc.gui.window = {
       jsxc.gui.detectUriScheme(win);
       jsxc.gui.detectEmail(win);
 
-      jsxc.gui.window.scrollDown(bid);
+      if (!message.forwarded) {
+         jsxc.gui.window.scrollDown(bid);
+      }
    },
 
    /**
@@ -2836,6 +2842,11 @@ jsxc.gui.window = {
       if (win.length > 0) {
          win.find('.jsxc_textarea').empty();
       }
+
+      var buddyData = jsxc.storage.getUserItem('buddy', bid) || {};
+      delete buddyData.lastArchiveUid;
+      delete buddyData.archiveExhausted;
+      jsxc.storage.setUserItem('buddy', bid, buddyData);
    },
 
    /**

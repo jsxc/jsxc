@@ -25,3 +25,5 @@ lib/i18next/
 lib/jquery-i18next/
 lib/magnific-popup/
 .idea
+/lib/strophejs-plugin-mam
+/lib/strophejs-plugin-rsm

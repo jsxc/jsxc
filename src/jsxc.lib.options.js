@@ -301,5 +301,10 @@ jsxc.options = {
    screenMediaExtension: {
       firefox: '',
       chrome: ''
+   },
+
+   mam: {
+      enable: true,
+      max: null
    }
 };

@@ -35,6 +35,7 @@ jsxc.otr = {
          });
       } else {
          jsxc.gui.window.postMessage({
+            _uid: d._uid,
             bid: bid,
             direction: jsxc.Message.IN,
             msg: d.msg,
@@ -209,6 +210,7 @@ jsxc.otr = {
       // Receive message
       jsxc.otr.objects[bid].on('ui', function(msg, encrypted, meta) {
          jsxc.otr.receiveMessage({
+            _uid: meta._uid,
             bid: bid,
             msg: msg,
             encrypted: encrypted === true,

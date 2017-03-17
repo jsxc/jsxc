@@ -232,6 +232,7 @@
 
     .jsxc_fade {
         position: relative;
+        overflow: hidden;
 
         .jsxc_overlay {
             display: none;
@@ -302,6 +303,31 @@
                 }
             }
         }
+
+        .jsxc_mam-load-more {
+            text-align: center;
+            font-size: 0.8em;
+            font-style: italic;
+            position: absolute;
+            top: -42px;
+            left: 0;
+            right: 0;
+            height: 42px;
+            cursor: pointer;
+            z-index: 80;
+            line-height: 42px;
+            opacity: 0;
+            transition: opacity 0.5s, top 0.5s;
+
+            &.jsxc_show {
+                top: 0;
+                opacity: 0.7;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+        }
     }
 
     .jsxc_avatar {
@@ -312,6 +338,7 @@
         width: 100%;
         overflow: hidden;
         padding: 3px;
+        padding-top: 42px;
     }
 
     .slimScrollDiv {

@@ -34,6 +34,8 @@
     "strophe.chatstates": "strophe/strophejs-plugin-chatstates",
     "jquery-i18next": "^1.2.0",
     "i18next": "^5.0.0",
-    "magnific-popup": "^1.1.0"
+    "magnific-popup": "^1.1.0",
+    "strophejs-plugin-mam": "strophe/strophejs-plugin-mam#27e8d25",
+    "strophejs-plugin-rsm": "strophe/strophejs-plugin-rsm#fa16b3b"
   }
 }
