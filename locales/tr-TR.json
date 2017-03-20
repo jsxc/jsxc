@@ -23,7 +23,7 @@
     "authentication_failed": "Kimlik doğrulama başarısız.",
     "Creating_your_private_key_": "Özel anahtarınız oluşturuluyor; bu işlem biraz sürebilir.",
     "Authenticating_a_buddy_helps_": "Kimlik doğrulaması, konuşmakta olduğunuz kişinin gerçekten o kişi olduğundan emin olmanıza yardımcı olur.",
-    "How_do_you_want_to_authenticate_your_buddy": "Kimlik doğrulasını nasıl yapmak istersiniz __bid_name__ (<b>__bid_jid__</b>)?",
+    "How_do_you_want_to_authenticate_your_buddy": "Kimlik doğrulamasını nasıl yapmak istersiniz __bid_name__ (<b>__bid_jid__</b>)?",
     "Select_method": "Yöntemi seçin...",
     "Manual": "Elle",
     "Question": "Soru",
@@ -261,7 +261,7 @@
     "No_local_audio_device": "Yerel ses cihazı bulunamadı.",
     "No_local_video_device": "Yerel video cihazı bulunamadı.",
     "Ok": "Tamam",
-    "PermissionDeniedError": "Siz veya tarayıcınız sesli/görüntülü izni reddetti",
+    "PermissionDeniedError": "Siz veya tarayıcınız medya iznini reddetti",
     "Use_local_audio_device": "Yerel video cihazını kullan.",
     "Use_local_video_device": "Yerel video cihazını kullanın.",
     "is_": "__status__",
@@ -300,7 +300,8 @@
     "Connection_accepted": "Bağlantı kabul edildi",
     "Stream_terminated": "Akış sonlandırıldı",
     "Close_all": "Hepsini kapat",
-    "Notification": null,
-    "Unreadable_OTR_message": null
+    "Notification": "Bildirim",
+    "Unreadable_OTR_message": "Okunamayan OTR iletisi atlandı",
+    "Load_older_messages": null
   }
 }

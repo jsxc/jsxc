@@ -265,13 +265,13 @@
     "Use_local_audio_device": "Use local audio device.",
     "Use_local_video_device": "Use local video device.",
     "is_": "is __status__",
-    "You_received_a_message_from_an_unknown_sender_": "You received a message from an unknown sender (__sender__) Do you want to display them?",
+    "You_received_a_message_from_an_unknown_sender_": "You received a message from an unknown sender (__sender__). Do you want to display them?",
     "Your_roster_is_empty_add_": "Your roster is empty, add a  <a>new contact</a>",
-    "onsmp_explanation_question": "You contact is attempting to determine if they are really talking to you. To authenticate to your contact,  enter the answer and click Answer.",
-    "onsmp_explanation_secret": "You contact is attempting to determine if they are really talking to you. To authenticate to your contact,  enter the secret.",
+    "onsmp_explanation_question": "Your contact is attempting to determine if they are really talking to you. To authenticate to your contact,  enter the answer and click Answer.",
+    "onsmp_explanation_secret": "Your contact is attempting to determine if they are really talking to you. To authenticate to your contact, enter the secret.",
     "from_sender": "from __sender__",
-    "Verified_private_conversation_started": "Verified Private conversation started.",
-    "Unverified_private_conversation_started": "Unverified Private conversation started.",
+    "Verified_private_conversation_started": "Verified private conversation started.",
+    "Unverified_private_conversation_started": "Unverified private conversation started.",
     "Bookmark": "Bookmark",
     "Auto-join": "Auto-join",
     "Edit_bookmark": "Edit bookmark",
@@ -301,6 +301,7 @@
     "Stream_terminated": "Stream terminated",
     "Close_all": "Close all",
     "Notification": "Notification",
-    "Unreadable_OTR_message": "Unreadable OTR message omitted"
+    "Unreadable_OTR_message": "Unreadable OTR message omitted",
+    "Load_older_messages": "Load older messages"
   }
 }

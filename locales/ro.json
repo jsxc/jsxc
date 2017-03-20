@@ -301,6 +301,7 @@
     "Stream_terminated": null,
     "Close_all": null,
     "Notification": null,
-    "Unreadable_OTR_message": null
+    "Unreadable_OTR_message": null,
+    "Load_older_messages": null
   }
 }

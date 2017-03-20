@@ -265,10 +265,10 @@
     "Use_local_audio_device": "Nutze eigenes Audio Gerät",
     "Use_local_video_device": "Benutze eigene Webcam",
     "is_": "ist __status__",
-    "You_received_a_message_from_an_unknown_sender_": "Du hast eine Nachricht von einem unbekannten Sender erhalten (__sender__) Möchtest du sie sehen?",
+    "You_received_a_message_from_an_unknown_sender_": "Du hast eine Nachricht von einem unbekannten Absender erhalten (__sender__). Möchtest du sie sehen?",
     "Your_roster_is_empty_add_": "Deine Kontaktliste ist leer, füge einen neuen Kontakt  <a>hinzu</a>",
     "onsmp_explanation_question": "Dein Kontakt versucht herauszufinden ob er wirklich mit dir redet. Um dich gegenüber deinem Kontakt zu verifizieren  gib die Antwort ein und klick auf Antworten.",
-    "onsmp_explanation_secret": "Dein Kontakt versucht herauszufinden ob er wirklich mit dir redet. Um dich gegenüber deinem Kontakt zu verifizieren  gib das Geheimnis ein.",
+    "onsmp_explanation_secret": "Dein Kontakt versucht herauszufinden ob er wirklich mit dir redet. Um dich gegenüber deinem Kontakt zu verifizieren gib das Geheimnis ein.",
     "from_sender": "von __sender__",
     "Verified_private_conversation_started": "Verifizierte private Konversation gestartet.",
     "Unverified_private_conversation_started": "Unverifizierte private Konversation gestartet.",
@@ -283,9 +283,9 @@
     "Change": "Ändern",
     "Send_file": "Datei senden",
     "setting-explanation-carbon": "Wenn Kopien aktiviert sind, werden alle eingehenden Nachrichten zu allen angemeldeten Clients gesendet.",
-    "setting-explanation-login": "Wenn diese Option aktiviert ist, wird der Chat beim anmelden automatisch gestartet.",
+    "setting-explanation-login": "Wenn diese Option aktiviert ist, wird der Chat beim Anmelden automatisch gestartet.",
     "setting-explanation-priority": "Wenn du mit deinem XMPP Konto mehrfach angemeldet bist, werden Nachrichten zu dem Client mit der höchsten Priorität zugestellt.",
-    "setting-explanation-xmpp": "Diese Optionen werden für die Verbindung zum XMPP server genutzt.",
+    "setting-explanation-xmpp": "Diese Optionen werden für die Verbindung zum XMPP Server genutzt.",
     "_is_composing": " tippt gerade...",
     "_are_composing": " tippen gerade...",
     "Chat_state_notifications": "Statusbenachrichtigungen",
@@ -300,7 +300,8 @@
     "Connection_accepted": "Verbindung angenommen",
     "Stream_terminated": "Stream beendet",
     "Close_all": "Schließe alle",
-    "Notification": null,
-    "Unreadable_OTR_message": null
+    "Notification": "Benachrichtigung",
+    "Unreadable_OTR_message": "Unlesbare OTR Nachricht verworfen",
+    "Load_older_messages": "Lade ältere Nachrichten"
   }
 }
