@@ -5,6 +5,26 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- [#150](https://github.com/jsxc/jsxc/issues/150) add Message Archive Management (XEP-0313)
+- [#464](https://github.com/jsxc/jsxc/issues/464) respond to software version request (XEP-0092)
+
+### Fixed
+- [#447](https://github.com/jsxc/jsxc/pull/447) fix muc member presence
+- fix http upload discovery
+- fix vcard retrieval for rooms
+- fix bookmarks
+- [#470](https://github.com/jsxc/jsxc/issues/470) fix receiving message from unknown sender
+- [#483](https://github.com/jsxc/jsxc/issues/483) fix unclickable space
+- catch quota exceeded errors (e.g. Safari in private mode has a quota of 0)
+
+### Changed
+- update strophe.jinglejs
+- make max file size optional for http upload service
+- [#480](https://github.com/jsxc/jsxc/issues/480) split avatar loading into chunks
+- [#478](https://github.com/jsxc/jsxc/issues/478) support roster versioning
+- prefer xmpp password from settings over login form
+- [#468](https://github.com/jsxc/jsxc/issues/468) move composing message to window header
 
 ## 3.1.1 - 2017-02-14
 ### Fixed
