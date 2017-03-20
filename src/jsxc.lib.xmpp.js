@@ -390,6 +390,7 @@ jsxc.xmpp = {
       jsxc.storage.removeUserItem('avatar', 'own');
       jsxc.storage.removeUserItem('otrlist');
       jsxc.storage.removeUserItem('unreadMsg');
+      jsxc.storage.removeUserItem('features');
 
       // reset user options
       jsxc.storage.removeUserElement('options', 'RTCPeerConfig');
@@ -460,6 +461,7 @@ jsxc.xmpp = {
       jsxc.storage.removeItem('hidden');
       jsxc.storage.removeUserItem('avatar', 'own');
       jsxc.storage.removeUserItem('otrlist');
+      jsxc.storage.removeUserItem('features');
 
       $(document).off('connected.jsxc', jsxc.xmpp.connected);
       $(document).off('attached.jsxc', jsxc.xmpp.attached);
