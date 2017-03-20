@@ -626,31 +626,6 @@
         height: 1.2em;
         vertical-align: middle;
     }
-
-    &.jsxc_composing {
-        text-align: center;
-        font-size: 0.9em;
-        font-style: italic;
-        display: block;
-        opacity: 0;
-        overflow: hidden;
-        transition: opacity 0.6s;
-
-        &:before {
-            content: " ";
-            width: 1.5em;
-            height: 1em;
-            display: inline-block;
-            background-size: 80%;
-            background-repeat: no-repeat;
-            margin: 0 3px 0 0;
-            background-image: image-url("composing.png");
-        }
-
-        &.jsxc_fadein {
-            opacity: 1;
-        }
-    }
 }
 
 div.jsxc_settings {
@@ -701,5 +676,44 @@ div.jsxc_transfer {
         &.jsxc_trust {
             background-image: image-url("padlock_close_green.svg");
         }
+    }
+}
+
+.jsxc_status-msg {
+    font-size: 12px;
+    display: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    height: 50%;
+    line-height: 17.5px;
+    opacity: 0.7;
+
+    &.jsxc_composing {
+        &:before {
+            content: " ";
+            width: 1em;
+            height: 1em;
+            display: inline-block;
+            background-size: cover;
+            vertical-align: middle;
+            background-repeat: no-repeat;
+            background-image: image-url("composing.png");
+        }
+    }
+}
+
+.jsxc_status-msg-show {
+    .jsxc_name {
+        height: 50%;
+        line-height: 20px;
+    }
+
+    .jsxc_status-msg {
+        display: block;
+    }
+
+    .jsxc_lastmsg {
+        display: none !important;
     }
 }
