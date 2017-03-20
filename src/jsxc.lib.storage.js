@@ -422,7 +422,7 @@ jsxc.storage = {
 
             if (el.length === 0) {
                if (jsxc.master && message.direction === jsxc.Message.OUT) {
-                  jsxc.xmpp.sendMessage(message.bid, message.msg, message._uid);
+                  jsxc.xmpp.sendMessage(message);
                }
 
                jsxc.gui.window._postMessage(message, true);
