@@ -2837,16 +2837,17 @@ jsxc.gui.window = {
 
       jsxc.storage.setUserItem('history', bid, []);
 
-      var win = jsxc.gui.window.get(bid);
-
-      if (win.length > 0) {
-         win.find('.jsxc_textarea').empty();
-      }
-
       var buddyData = jsxc.storage.getUserItem('buddy', bid) || {};
       delete buddyData.lastArchiveUid;
       delete buddyData.archiveExhausted;
       jsxc.storage.setUserItem('buddy', bid, buddyData);
+
+      var win = jsxc.gui.window.get(bid);
+
+      if (win.length > 0) {
+         win.find('.jsxc_textarea').empty();
+         win.find('.jsxc_textarea').scroll();
+      }
    },
 
    /**

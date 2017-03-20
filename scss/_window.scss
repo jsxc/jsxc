@@ -338,7 +338,10 @@
         width: 100%;
         overflow: hidden;
         padding: 3px;
-        padding-top: 42px;
+
+        &.jsxc_mam-enable {
+            padding-top: 42px;
+        }
     }
 
     .slimScrollDiv {

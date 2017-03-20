@@ -414,6 +414,11 @@ jsxc.storage = {
          var history = JSON.parse(e.newValue);
          var uid, el, message;
 
+         if (!jsxc.master) {
+            var win = jsxc.gui.window.get(bid);
+            win.find('.jsxc_textarea').empty();
+         }
+
          while (history.length > 0) {
             uid = history.pop();
 

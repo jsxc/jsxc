@@ -18,11 +18,9 @@ jsxc.xmpp.mam.isEnabled = function() {
    var self = jsxc.xmpp.mam;
    var mamOptions = jsxc.options.get('mam') || {};
 
-   // prosody does not announce mam:2, while it is supported
-   var hasFeatureMam0 = jsxc.xmpp.hasFeatureByJid(self.conn.domain, 'urn:xmpp:mam:0');
    var hasFeatureMam2 = jsxc.xmpp.hasFeatureByJid(self.conn.domain, Strophe.NS.MAM);
 
-   return (hasFeatureMam0 || hasFeatureMam2) && mamOptions.enable;
+   return hasFeatureMam2 && mamOptions.enable;
 };
 
 jsxc.xmpp.mam.nextMessages = function(bid) {
@@ -144,15 +142,22 @@ jsxc.xmpp.mam.onComplete = function(bid, stanza) {
    stanza = $(stanza);
    var fin = stanza.find('fin[xmlns="' + Strophe.NS.MAM + '"]');
    var buddyData = jsxc.storage.getUserItem('buddy', bid) || {};
+   var win = jsxc.gui.window.get(bid);
 
    buddyData.archiveExhausted = fin.attr('complete') === 'true';
    buddyData.lastArchiveUid = fin.find('first').text();
+
+   if (buddyData.archiveExhausted) {
+      win.find('.jsxc_textarea').removeClass('jsxc_mam-enable');
+   }
 
    jsxc.storage.setUserItem('buddy', bid, buddyData);
 };
 
 jsxc.xmpp.mam.initWindow = function(ev, win) {
    var self = jsxc.xmpp.mam;
+   var classNameShow = 'jsxc_show';
+   var classNameMamEnable = 'jsxc_mam-enable';
 
    if (!jsxc.xmpp.conn && jsxc.master) {
       $(document).one('attached.jsxc', function() {
@@ -161,7 +166,7 @@ jsxc.xmpp.mam.initWindow = function(ev, win) {
       return;
    }
 
-   if (!jsxc.xmpp.mam.isEnabled()) {
+   if (!jsxc.master || !jsxc.xmpp.mam.isEnabled()) {
       return;
    }
 
@@ -175,13 +180,19 @@ jsxc.xmpp.mam.initWindow = function(ev, win) {
    });
    element.text($.t('Load_older_messages'));
 
+   win.find('.jsxc_textarea').addClass(classNameShow);
+
    win.find('.jsxc_textarea').scroll(function() {
       var buddyData = jsxc.storage.getUserItem('buddy', bid) || {};
 
       if (this.scrollTop < 42 && !buddyData.archiveExhausted) {
-         element.addClass('jsxc_show');
+         element.addClass(classNameShow);
       } else {
-         element.removeClass('jsxc_show');
+         element.removeClass(classNameShow);
+      }
+
+      if (!buddyData.archiveExhausted) {
+         $(this).addClass(classNameMamEnable);
       }
    });
 
