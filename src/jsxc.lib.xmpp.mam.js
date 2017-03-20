@@ -166,7 +166,6 @@ jsxc.xmpp.mam.initWindow = function(ev, win) {
    }
 
    var bid = win.attr('data-bid');
-   var buddyData = jsxc.storage.getUserItem('buddy', bid) || {};
 
    var element = $('<div>');
    element.addClass('jsxc_mam-load-more');
@@ -177,6 +176,8 @@ jsxc.xmpp.mam.initWindow = function(ev, win) {
    element.text($.t('Load_older_messages'));
 
    win.find('.jsxc_textarea').scroll(function() {
+      var buddyData = jsxc.storage.getUserItem('buddy', bid) || {};
+
       if (this.scrollTop < 42 && !buddyData.archiveExhausted) {
          element.addClass('jsxc_show');
       } else {
