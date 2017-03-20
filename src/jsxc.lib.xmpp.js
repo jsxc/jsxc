@@ -470,6 +470,7 @@ jsxc.xmpp = {
       window.clearInterval(jsxc.keepaliveInterval);
       jsxc.role_allocation = false;
       jsxc.master = false;
+      jsxc.reconnect = false;
       jsxc.storage.removeItem('alive');
 
       jsxc.changeState(jsxc.CONST.STATE.SUSPEND);
