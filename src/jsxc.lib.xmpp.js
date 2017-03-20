@@ -1213,6 +1213,12 @@ jsxc.xmpp = {
          });
       }
 
+      if (msg.match(/^\?OTR/)) {
+         xmlMsg.up().c("no-permanent-store", {
+            xmlns: jsxc.CONST.NS.HINTS
+         });
+      }
+
       if (type === 'chat' && (isBar || jsxc.xmpp.conn.caps.hasFeatureByJid(jid, Strophe.NS.RECEIPTS))) {
          // Add request according to XEP-0184
          xmlMsg.up().c('request', {
