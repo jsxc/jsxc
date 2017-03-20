@@ -305,6 +305,7 @@
         }
 
         .jsxc_mam-load-more {
+            display: none;
             text-align: center;
             font-size: 0.8em;
             font-style: italic;
@@ -328,6 +329,16 @@
                 }
             }
         }
+
+        &.jsxc_mam-enable {
+            .jsxc_textarea {
+                padding-top: 42px;
+            }
+
+            .jsxc_mam-load-more {
+                display: block;
+            }
+        }
     }
 
     .jsxc_avatar {
@@ -338,10 +349,6 @@
         width: 100%;
         overflow: hidden;
         padding: 3px;
-
-        &.jsxc_mam-enable {
-            padding-top: 42px;
-        }
     }
 
     .slimScrollDiv {

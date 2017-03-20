@@ -15,10 +15,10 @@ jsxc.xmpp.mam.init = function() {
 };
 
 jsxc.xmpp.mam.isEnabled = function() {
-   var self = jsxc.xmpp.mam;
    var mamOptions = jsxc.options.get('mam') || {};
 
-   var hasFeatureMam2 = jsxc.xmpp.hasFeatureByJid(self.conn.domain, Strophe.NS.MAM);
+   var features = jsxc.storage.getUserItem('features') || [];
+   var hasFeatureMam2 = features.indexOf(Strophe.NS.MAM) >= 0;
 
    return hasFeatureMam2 && mamOptions.enable;
 };
@@ -148,7 +148,7 @@ jsxc.xmpp.mam.onComplete = function(bid, stanza) {
    buddyData.lastArchiveUid = fin.find('first').text();
 
    if (buddyData.archiveExhausted) {
-      win.find('.jsxc_textarea').removeClass('jsxc_mam-enable');
+      win.find('.jsxc_fade').removeClass('jsxc_mam-enable');
    }
 
    jsxc.storage.setUserItem('buddy', bid, buddyData);
@@ -156,8 +156,6 @@ jsxc.xmpp.mam.onComplete = function(bid, stanza) {
 
 jsxc.xmpp.mam.initWindow = function(ev, win) {
    var self = jsxc.xmpp.mam;
-   var classNameShow = 'jsxc_show';
-   var classNameMamEnable = 'jsxc_mam-enable';
 
    if (!jsxc.xmpp.conn && jsxc.master) {
       $(document).one('attached.jsxc', function() {
@@ -166,10 +164,28 @@ jsxc.xmpp.mam.initWindow = function(ev, win) {
       return;
    }
 
-   if (!jsxc.master || !jsxc.xmpp.mam.isEnabled()) {
+   if (!jsxc.master) {
       return;
    }
 
+   $(document).on('features.jsxc', function() {
+      jsxc.xmpp.mam.addLoadButton(win);
+   });
+
+   var features = jsxc.storage.getUserItem('features');
+   if (features !== null) {
+      // features.jsxc was already fired
+      jsxc.xmpp.mam.addLoadButton(win);
+   }
+};
+
+jsxc.xmpp.mam.addLoadButton = function(win) {
+   if (!jsxc.xmpp.mam.isEnabled()) {
+      return;
+   }
+
+   var classNameShow = 'jsxc_show';
+   var classNameMamEnable = 'jsxc_mam-enable';
    var bid = win.attr('data-bid');
 
    var element = $('<div>');
@@ -179,8 +195,6 @@ jsxc.xmpp.mam.initWindow = function(ev, win) {
       jsxc.xmpp.mam.nextMessages(bid);
    });
    element.text($.t('Load_older_messages'));
-
-   win.find('.jsxc_textarea').addClass(classNameShow);
 
    win.find('.jsxc_textarea').scroll(function() {
       var buddyData = jsxc.storage.getUserItem('buddy', bid) || {};
@@ -192,7 +206,7 @@ jsxc.xmpp.mam.initWindow = function(ev, win) {
       }
 
       if (!buddyData.archiveExhausted) {
-         $(this).addClass(classNameMamEnable);
+         win.find('.jsxc_fade').addClass(classNameMamEnable);
       }
    });
 

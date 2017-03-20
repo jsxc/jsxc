@@ -427,6 +427,23 @@ jsxc.xmpp = {
 
       jsxc.debug('Send presence', pres.toString());
       jsxc.xmpp.conn.send(pres);
+
+      if (!jsxc.storage.getUserItem('features')) {
+         jsxc.xmpp.conn.flush();
+
+         var barJid = Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid);
+
+         jsxc.xmpp.conn.disco.info(barJid, undefined, function(stanza) {
+            var features = $(stanza).find('feature').map(function() {
+               return $(this).attr('var');
+            });
+
+            jsxc.storage.setUserItem('features', features.toArray());
+            $(document).trigger('features.jsxc');
+         });
+      } else {
+         $(document).trigger('features.jsxc');
+      }
    },
 
    /**
