@@ -74,7 +74,7 @@ jsxc.xmpp.chatState.onComposing = function(ev, jid) {
       win.data('composing', usersComposing);
    }
 
-   var msg = self._genComposingMsg(usersComposing);
+   var msg = self._genComposingMsg(data.type, usersComposing);
    jsxc.xmpp.chatState.setStatus(win, msg);
 };
 
@@ -111,7 +111,7 @@ jsxc.xmpp.chatState.onPaused = function(ev, jid) {
 
    var composingMsg;
    if (usersComposing.length !== 0) {
-      composingMsg = self._genComposingMsg(usersComposing);
+      composingMsg = self._genComposingMsg(data.type, usersComposing);
    }
 
    jsxc.xmpp.chatState.setStatus(win, composingMsg);
@@ -193,16 +193,20 @@ jsxc.xmpp.chatState.endComposing = function(bid) {
  * Generate composing message.
  *
  * @memberOf jsxc.xmpp.chatState
+ * @param  {String} the type of the chat ('groupchat' or 'chat')
  * @param  {Array} usersComposing List of users which are currently composing a message
  */
-jsxc.xmpp.chatState._genComposingMsg = function(usersComposing) {
+jsxc.xmpp.chatState._genComposingMsg = function(chatType, usersComposing) {
    if (!usersComposing || usersComposing.length === 0) {
       jsxc.debug('usersComposing array is empty?');
 
       return '';
    } else {
-      return usersComposing.length > 1 ? usersComposing.join(', ') + $.t('_are_composing') :
-         $.t('_is_composing');
+      if (chatType === 'groupchat') {
+         return usersComposing.length > 1 ? usersComposing.join(', ') + $.t('_are_composing') :
+            usersComposing[0] + $.t('_is_composing');
+      }
+      return $.t('_is_composing');
    }
 };
 
