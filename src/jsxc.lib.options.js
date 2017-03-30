@@ -303,8 +303,11 @@ jsxc.options = {
       chrome: ''
    },
 
+   /**
+    * Options for Message Archive Management (XEP-0313)
+    */
    mam: {
-      enable: true,
+      enable: false,
       max: null
    }
 };

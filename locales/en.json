@@ -302,6 +302,8 @@
     "Close_all": "Close all",
     "Notification": "Notification",
     "Unreadable_OTR_message": "Unreadable OTR message omitted",
-    "Load_older_messages": "Load older messages"
+    "Load_older_messages": "Load older messages",
+    "setting-mam-enable": "If enabled you are able to retrieve stored message from the server.",
+    "Message_history": "Message history"
   }
 }
