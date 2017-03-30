@@ -23,7 +23,7 @@
     "authentication_failed": "Kimlik doğrulama başarısız.",
     "Creating_your_private_key_": "Özel anahtarınız oluşturuluyor; bu işlem biraz sürebilir.",
     "Authenticating_a_buddy_helps_": "Kimlik doğrulaması, konuşmakta olduğunuz kişinin gerçekten o kişi olduğundan emin olmanıza yardımcı olur.",
-    "How_do_you_want_to_authenticate_your_buddy": "Kimlik doğrulasını nasıl yapmak istersiniz __bid_name__ (<b>__bid_jid__</b>)?",
+    "How_do_you_want_to_authenticate_your_buddy": "Kimlik doğrulamasını nasıl yapmak istersiniz __bid_name__ (<b>__bid_jid__</b>)?",
     "Select_method": "Yöntemi seçin...",
     "Manual": "Elle",
     "Question": "Soru",
@@ -261,13 +261,13 @@
     "No_local_audio_device": "Yerel ses cihazı bulunamadı.",
     "No_local_video_device": "Yerel video cihazı bulunamadı.",
     "Ok": "Tamam",
-    "PermissionDeniedError": "Siz veya tarayıcınız sesli/görüntülü izni reddetti",
+    "PermissionDeniedError": "Siz veya tarayıcınız medya iznini reddetti",
     "Use_local_audio_device": "Yerel video cihazını kullan.",
     "Use_local_video_device": "Yerel video cihazını kullanın.",
     "is_": "__status__",
     "You_received_a_message_from_an_unknown_sender_": "Bilinmeyen bir gönderenden bir ileti aldınız (__sender__) İletiyi görüntülemek istiyor musunuz?",
     "Your_roster_is_empty_add_": "Listeniz boş, yeni bir <a>kişi ekleyin</a>",
-    "onsmp_explanation_question": "Karşınızdaki kişi, konuştuğu kişinin gerçekten siz olduğunuzu belirlemeye çalışıyor. Karşınızdaki kişiye kimliğinizi kanıtlamak için, yanıtı girin ve Yanıtla'yı tıklayın.",
+    "onsmp_explanation_question": "Karşınızdaki kişi, konuştuğu kişinin gerçekten siz olup olmadığınızı belirlemeye çalışıyor. Kimliğinizi doğrulamak için yanıtı girin ve Yanıtla'yı tıklayın.",
     "onsmp_explanation_secret": "Karşınızdaki kişi, konuştuğu kişinin gerçekten siz olduğunuzu belirlemeye çalışıyor. Karşınızdaki kişiye kimliğinizi kanıtlamak için, parolayı girin.",
     "from_sender": "__sender__'den",
     "Verified_private_conversation_started": "Doğrulanmış Özel görüşme başladı.",
@@ -300,7 +300,10 @@
     "Connection_accepted": "Bağlantı kabul edildi",
     "Stream_terminated": "Akış sonlandırıldı",
     "Close_all": "Hepsini kapat",
-    "Notification": null,
-    "Unreadable_OTR_message": null
+    "Notification": "Bildirim",
+    "Unreadable_OTR_message": "Okunamayan OTR iletisi atlandı",
+    "Load_older_messages": "Eski iletileri yükle",
+    "Message_history": null,
+    "setting-mam-enable": null
   }
 }

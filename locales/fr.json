@@ -267,7 +267,7 @@
     "is_": "est __status__",
     "You_received_a_message_from_an_unknown_sender_": "Vous avez reçu un message d'un expéditeur inconnu (__sender__) Voulez-vous les afficher ?",
     "Your_roster_is_empty_add_": "Votre liste est vide, ajouter  <a>Nouveau contact</a>",
-    "onsmp_explanation_question": "Votre contact tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre contact, saisissez une réponse et cliquez sur Répondre.",
+    "onsmp_explanation_question": "Votre contact tente de déterminer si il ou elle vous parle vraiment. Pour vous authentifier auprès de votre contact, saisissez une réponse et cliquez sur Répondre.",
     "onsmp_explanation_secret": "Votre contact tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre contact, entrez le mot secret",
     "from_sender": "de __sender__",
     "Verified_private_conversation_started": "La conversation privée vérifiée a démarré.",
@@ -300,7 +300,10 @@
     "Connection_accepted": "Connexion acceptée",
     "Stream_terminated": "Flux terminé",
     "Close_all": "Tout fermer",
-    "Notification": null,
-    "Unreadable_OTR_message": null
+    "Notification": "Notification",
+    "Unreadable_OTR_message": "Message OTR illisible omis",
+    "Load_older_messages": "Charger des messages plus anciens",
+    "Message_history": null,
+    "setting-mam-enable": null
   }
 }
