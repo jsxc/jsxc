@@ -248,8 +248,10 @@ jsxc.webrtc = {
       win.find('.jsxc_tools .jsxc_settings').after(div);
 
       var screenMediaExtension = jsxc.options.get('screenMediaExtension') || {};
-      var browser = self.conn.jingle.RTC.webrtcDetectedBrowser;
-      if (screenMediaExtension[browser] || jsxc.storage.getItem('debug')) {
+      var browserDetails = self.conn.jingle.RTC.browserDetails || {};
+      var browser = browserDetails.browser;
+      var version = browserDetails.version;
+      if (screenMediaExtension[browser] || jsxc.storage.getItem('debug') || (browser === 'firefox' && version >= 52)) {
          // Add screen sharing button if extension is available or we are in debug mode
          var a = $('<a>');
          a.text($.t('Share_screen'));
