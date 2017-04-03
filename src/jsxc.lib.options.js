@@ -301,5 +301,13 @@ jsxc.options = {
    screenMediaExtension: {
       firefox: '',
       chrome: ''
+   },
+
+   /**
+    * Options for Message Archive Management (XEP-0313)
+    */
+   mam: {
+      enable: false,
+      max: null
    }
 };

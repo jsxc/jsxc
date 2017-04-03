@@ -390,6 +390,7 @@ jsxc.xmpp = {
       jsxc.storage.removeUserItem('avatar', 'own');
       jsxc.storage.removeUserItem('otrlist');
       jsxc.storage.removeUserItem('unreadMsg');
+      jsxc.storage.removeUserItem('features');
 
       // reset user options
       jsxc.storage.removeUserElement('options', 'RTCPeerConfig');
@@ -427,6 +428,23 @@ jsxc.xmpp = {
 
       jsxc.debug('Send presence', pres.toString());
       jsxc.xmpp.conn.send(pres);
+
+      if (!jsxc.storage.getUserItem('features')) {
+         jsxc.xmpp.conn.flush();
+
+         var barJid = Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid);
+
+         jsxc.xmpp.conn.disco.info(barJid, undefined, function(stanza) {
+            var features = $(stanza).find('feature').map(function() {
+               return $(this).attr('var');
+            });
+
+            jsxc.storage.setUserItem('features', features.toArray());
+            $(document).trigger('features.jsxc');
+         });
+      } else {
+         $(document).trigger('features.jsxc');
+      }
    },
 
    /**
@@ -443,6 +461,7 @@ jsxc.xmpp = {
       jsxc.storage.removeItem('hidden');
       jsxc.storage.removeUserItem('avatar', 'own');
       jsxc.storage.removeUserItem('otrlist');
+      jsxc.storage.removeUserItem('features');
 
       $(document).off('connected.jsxc', jsxc.xmpp.connected);
       $(document).off('attached.jsxc', jsxc.xmpp.attached);
@@ -968,12 +987,15 @@ jsxc.xmpp = {
       if (jsxc.otr.objects.hasOwnProperty(bid) && body) {
          // @TODO check for file upload url after decryption
          jsxc.otr.objects[bid].receiveMsg(body, {
+            _uid: mid,
+            foo: 'bar',
             stamp: stamp,
             forwarded: forwarded,
             attachment: attachment
          });
       } else {
          jsxc.gui.window.postMessage({
+            _uid: mid,
             bid: bid,
             direction: jsxc.Message.IN,
             msg: body,
@@ -1208,6 +1230,12 @@ jsxc.xmpp = {
       if (jsxc.xmpp.carbons.enabled && msg.match(/^\?OTR/)) {
          xmlMsg.up().c("private", {
             xmlns: jsxc.CONST.NS.CARBONS
+         });
+      }
+
+      if (msg.match(/^\?OTR/)) {
+         xmlMsg.up().c("no-permanent-store", {
+            xmlns: jsxc.CONST.NS.HINTS
          });
       }
 

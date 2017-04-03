@@ -2168,7 +2168,8 @@ fieldset[disabled]
     width: 100%; }
 
 #jsxc_dialog .mfp-close, #jsxc_webrtc .mfp-close {
-  font-size: 23px; }
+  font-size: 23px;
+  font-weight: normal; }
 
 .mfp-bg {
   z-index: 9000; }
@@ -2763,15 +2764,14 @@ fieldset[disabled]
   position: fixed;
   left: 0;
   bottom: 0;
-  width: 30px;
-  height: 30px; }
+  width: 30px; }
   @media (max-width: 768px) {
     #jsxc_windowListSB {
       display: none; } }
   #jsxc_windowListSB > div {
     box-sizing: border-box;
     width: 14px;
-    height: 100%;
+    height: 30px;
     background-color: #cccccc;
     color: #807f7f;
     text-align: center;
@@ -2881,7 +2881,8 @@ fieldset[disabled]
     .jsxc_window .jsxc_emoticons:hover:after {
       opacity: 0.5; }
   .jsxc_window .jsxc_fade {
-    position: relative; }
+    position: relative;
+    overflow: hidden; }
     .jsxc_window .jsxc_fade .jsxc_overlay {
       display: none;
       background-color: rgba(0, 0, 0, 0.5);
@@ -2931,6 +2932,31 @@ fieldset[disabled]
           text-overflow: ellipsis; }
         .jsxc_window .jsxc_fade .jsxc_overlay > div a:hover {
           text-decoration: underline; }
+    .jsxc_window .jsxc_fade .jsxc_mam-load-more {
+      display: none;
+      text-align: center;
+      font-size: 0.8em;
+      font-style: italic;
+      position: absolute;
+      top: -42px;
+      left: 0;
+      right: 0;
+      height: 42px;
+      cursor: pointer;
+      z-index: 80;
+      line-height: 42px;
+      opacity: 0;
+      -webkit-transition: opacity 0.5s, top 0.5s;
+              transition: opacity 0.5s, top 0.5s; }
+      .jsxc_window .jsxc_fade .jsxc_mam-load-more.jsxc_show {
+        top: 0;
+        opacity: 0.7; }
+        .jsxc_window .jsxc_fade .jsxc_mam-load-more.jsxc_show:hover {
+          opacity: 1; }
+    .jsxc_window .jsxc_fade.jsxc_mam-enable .jsxc_textarea {
+      padding-top: 42px; }
+    .jsxc_window .jsxc_fade.jsxc_mam-enable .jsxc_mam-load-more {
+      display: block; }
   .jsxc_window .jsxc_avatar {
     margin-top: 1px; }
   .jsxc_window .jsxc_textarea {
@@ -3176,26 +3202,6 @@ fieldset[disabled]
     width: 1.2em;
     height: 1.2em;
     vertical-align: middle; }
-  .jsxc_sys.jsxc_composing {
-    text-align: center;
-    font-size: 0.9em;
-    font-style: italic;
-    display: block;
-    opacity: 0;
-    overflow: hidden;
-    -webkit-transition: opacity 0.6s;
-            transition: opacity 0.6s; }
-    .jsxc_sys.jsxc_composing:before {
-      content: " ";
-      width: 1.5em;
-      height: 1em;
-      display: inline-block;
-      background-size: 80%;
-      background-repeat: no-repeat;
-      margin: 0 3px 0 0;
-      background-image: url('../img/composing.png'); }
-    .jsxc_sys.jsxc_composing.jsxc_fadein {
-      opacity: 1; }
 
 div.jsxc_settings {
   position: relative; }
@@ -3231,6 +3237,35 @@ div.jsxc_transfer {
     background-image: url('../img/padlock_close_orange.svg'); }
     div.jsxc_transfer.jsxc_enc.jsxc_trust {
       background-image: url('../img/padlock_close_green.svg'); }
+
+.jsxc_status-msg {
+  font-size: 12px;
+  display: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  height: 50%;
+  line-height: 17.5px;
+  opacity: 0.7; }
+  .jsxc_status-msg.jsxc_composing:before {
+    content: " ";
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    background-size: cover;
+    vertical-align: middle;
+    background-repeat: no-repeat;
+    background-image: url('../img/composing.png'); }
+
+.jsxc_status-msg-show .jsxc_name {
+  height: 50%;
+  line-height: 20px; }
+
+.jsxc_status-msg-show .jsxc_status-msg {
+  display: block; }
+
+.jsxc_status-msg-show .jsxc_lastmsg {
+  display: none !important; }
 
 .jsxc_windowItem.jsxc_groupchat.jsxc_normal .jsxc_bar .jsxc_avatar, li[data-type='groupchat'] .jsxc_avatar {
   text-indent: 999px;
@@ -3309,6 +3344,8 @@ div.jsxc_transfer {
           color: inherit; }
       .jsxc_windowItem .jsxc_memberlist.jsxc_expand ul > li .jsxc_avatar {
         margin-right: 4px; }
+  .jsxc_windowItem .jsxc_memberlist .jsxc_avatar :before {
+    display: none; }
 
 li[data-type='groupchat'] .jsxc_video {
   display: none; }

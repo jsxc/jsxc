@@ -414,6 +414,11 @@ jsxc.storage = {
          var history = JSON.parse(e.newValue);
          var uid, el, message;
 
+         if (!jsxc.master) {
+            var win = jsxc.gui.window.get(bid);
+            win.find('.jsxc_textarea').empty();
+         }
+
          while (history.length > 0) {
             uid = history.pop();
 
@@ -422,7 +427,7 @@ jsxc.storage = {
 
             if (el.length === 0) {
                if (jsxc.master && message.direction === jsxc.Message.OUT) {
-                  jsxc.xmpp.sendMessage(message.bid, message.msg, message._uid);
+                  jsxc.xmpp.sendMessage(message);
                }
 
                jsxc.gui.window._postMessage(message, true);
