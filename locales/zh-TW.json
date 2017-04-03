@@ -302,6 +302,8 @@
     "Close_all": "全部關掉",
     "Notification": "通知",
     "Unreadable_OTR_message": "忽略無法解讀的 OTR 訊息",
-    "Load_older_messages": null
+    "Load_older_messages": "下載舊訊息",
+    "Message_history": null,
+    "setting-mam-enable": null
   }
 }

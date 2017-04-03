@@ -56,7 +56,7 @@
     "Deny": "Ablehnen",
     "Approve": "Bestätigen",
     "Remove_buddy": "Kontakt entfernen",
-    "You_are_about_to_remove_": "Du bist gerade dabei __bid_name__ (<b>__bid_jid__</b>) von deiner Kontaktliste zu entfernen. Alle Chats werden geschlossen.",
+    "You_are_about_to_remove_": "Du bist gerade dabei __bid_name__ (<b>__bid_jid__</b>) von deiner Kontaktliste zu entfernen. Alle zugehörigen Chats werden geschlossen.",
     "Continue_without_chat": "Weiter ohne Chat",
     "Please_wait": "Bitte warten",
     "Login_failed": "Chat-Anmeldung fehlgeschlagen",
@@ -302,6 +302,8 @@
     "Close_all": "Schließe alle",
     "Notification": "Benachrichtigung",
     "Unreadable_OTR_message": "Unlesbare OTR Nachricht verworfen",
-    "Load_older_messages": "Lade ältere Nachrichten"
+    "Load_older_messages": "Ältere Nachrichten laden",
+    "Message_history": "Nachrichten Verlauf",
+    "setting-mam-enable": null
   }
 }

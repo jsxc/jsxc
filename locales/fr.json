@@ -302,6 +302,8 @@
     "Close_all": "Tout fermer",
     "Notification": "Notification",
     "Unreadable_OTR_message": "Message OTR illisible omis",
-    "Load_older_messages": "Charger des messages plus anciens"
+    "Load_older_messages": "Charger des messages plus anciens",
+    "Message_history": null,
+    "setting-mam-enable": null
   }
 }

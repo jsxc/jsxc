@@ -302,6 +302,8 @@
     "Close_all": null,
     "Notification": null,
     "Unreadable_OTR_message": null,
-    "Load_older_messages": null
+    "Load_older_messages": null,
+    "Message_history": null,
+    "setting-mam-enable": null
   }
 }

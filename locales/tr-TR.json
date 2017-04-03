@@ -267,7 +267,7 @@
     "is_": "__status__",
     "You_received_a_message_from_an_unknown_sender_": "Bilinmeyen bir gönderenden bir ileti aldınız (__sender__) İletiyi görüntülemek istiyor musunuz?",
     "Your_roster_is_empty_add_": "Listeniz boş, yeni bir <a>kişi ekleyin</a>",
-    "onsmp_explanation_question": "Karşınızdaki kişi, konuştuğu kişinin gerçekten siz olduğunuzu belirlemeye çalışıyor. Karşınızdaki kişiye kimliğinizi kanıtlamak için, yanıtı girin ve Yanıtla'yı tıklayın.",
+    "onsmp_explanation_question": "Karşınızdaki kişi, konuştuğu kişinin gerçekten siz olup olmadığınızı belirlemeye çalışıyor. Kimliğinizi doğrulamak için yanıtı girin ve Yanıtla'yı tıklayın.",
     "onsmp_explanation_secret": "Karşınızdaki kişi, konuştuğu kişinin gerçekten siz olduğunuzu belirlemeye çalışıyor. Karşınızdaki kişiye kimliğinizi kanıtlamak için, parolayı girin.",
     "from_sender": "__sender__'den",
     "Verified_private_conversation_started": "Doğrulanmış Özel görüşme başladı.",
@@ -302,6 +302,8 @@
     "Close_all": "Hepsini kapat",
     "Notification": "Bildirim",
     "Unreadable_OTR_message": "Okunamayan OTR iletisi atlandı",
-    "Load_older_messages": null
+    "Load_older_messages": "Eski iletileri yükle",
+    "Message_history": null,
+    "setting-mam-enable": null
   }
 }
