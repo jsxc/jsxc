@@ -3431,6 +3431,14 @@ li[data-type='groupchat'] .jsxc_video {
       background-color: #f2f2f2;
       padding: 10px;
       margin: 0 -30px 10px; }
+      #jsxc_dialog form fieldset h3.jsxc_experimental:after {
+        content: "experimental";
+        font-size: 0.7em;
+        border-radius: 2px;
+        padding: 1px 5px;
+        background-color: orange;
+        margin-left: 5px;
+        font-weight: normal; }
   #jsxc_dialog legend {
     border: 0;
     font-size: 20px; }

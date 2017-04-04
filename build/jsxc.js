@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.2.0-nightly.1 - 2017-03-20
+ * jsxc v3.2.0-beta.1 - 2017-04-04
  * 
  * Copyright (c) 2017 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.2.0-nightly.1
+ * @version 3.2.0-beta.1
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.2.0-nightly.1',
+   version: '3.2.0-beta.1',
 
    /** True if i'm the master */
    master: false,
@@ -8579,8 +8579,11 @@ jsxc.options = {
       chrome: ''
    },
 
+   /**
+    * Options for Message Archive Management (XEP-0313)
+    */
    mam: {
-      enable: true,
+      enable: false,
       max: null
    }
 };
@@ -10075,8 +10078,10 @@ jsxc.webrtc = {
       win.find('.jsxc_tools .jsxc_settings').after(div);
 
       var screenMediaExtension = jsxc.options.get('screenMediaExtension') || {};
-      var browser = self.conn.jingle.RTC.webrtcDetectedBrowser;
-      if (screenMediaExtension[browser] || jsxc.storage.getItem('debug')) {
+      var browserDetails = self.conn.jingle.RTC.browserDetails || {};
+      var browser = browserDetails.browser;
+      var version = browserDetails.version;
+      if (screenMediaExtension[browser] || jsxc.storage.getItem('debug') || (browser === 'firefox' && version >= 52)) {
          // Add screen sharing button if extension is available or we are in debug mode
          var a = $('<a>');
          a.text($.t('Share_screen'));
@@ -11731,7 +11736,7 @@ jsxc.xmpp.chatState.onComposing = function(ev, jid) {
       win.data('composing', usersComposing);
    }
 
-   var msg = self._genComposingMsg(usersComposing);
+   var msg = self._genComposingMsg(data.type, usersComposing);
    jsxc.xmpp.chatState.setStatus(win, msg);
 };
 
@@ -11768,7 +11773,7 @@ jsxc.xmpp.chatState.onPaused = function(ev, jid) {
 
    var composingMsg;
    if (usersComposing.length !== 0) {
-      composingMsg = self._genComposingMsg(usersComposing);
+      composingMsg = self._genComposingMsg(data.type, usersComposing);
    }
 
    jsxc.xmpp.chatState.setStatus(win, composingMsg);
@@ -11850,16 +11855,20 @@ jsxc.xmpp.chatState.endComposing = function(bid) {
  * Generate composing message.
  *
  * @memberOf jsxc.xmpp.chatState
+ * @param  {String} the type of the chat ('groupchat' or 'chat')
  * @param  {Array} usersComposing List of users which are currently composing a message
  */
-jsxc.xmpp.chatState._genComposingMsg = function(usersComposing) {
+jsxc.xmpp.chatState._genComposingMsg = function(chatType, usersComposing) {
    if (!usersComposing || usersComposing.length === 0) {
       jsxc.debug('usersComposing array is empty?');
 
       return '';
    } else {
-      return usersComposing.length > 1 ? usersComposing.join(', ') + $.t('_are_composing') :
-         $.t('_is_composing');
+      if (chatType === 'groupchat') {
+         return usersComposing.length > 1 ? usersComposing.join(', ') + $.t('_are_composing') :
+            usersComposing[0] + $.t('_is_composing');
+      }
+      return $.t('_is_composing');
    }
 };
 
@@ -12968,6 +12977,27 @@ jsxc.gui.template['settings'] = '<form class="form-horizontal col-sm-6">\n' +
 '            <div class="checkbox">\n' +
 '               <label>\n' +
 '                  <input type="checkbox" id="loginForm-enable"><span data-i18n="On_login"></span>\n' +
+'               </label>\n' +
+'            </div>\n' +
+'         </div>\n' +
+'      </div>\n' +
+'      <div class="form-group">\n' +
+'         <div class="col-sm-12">\n' +
+'            <button class="btn btn-primary jsxc_continue" type="submit" data-i18n="Save"></button>\n' +
+'         </div>\n' +
+'      </div>\n' +
+'   </fieldset>\n' +
+'</form>\n' +
+'\n' +
+'<form class="form-horizontal col-sm-6">\n' +
+'   <fieldset class="jsxc_fieldsetMam jsxc_fieldset">\n' +
+'      <h3 class="jsxc_experimental" data-i18n="Message_history"></h3>\n' +
+'      <p data-i18n="setting-mam-enable"></p>\n' +
+'      <div class="form-group">\n' +
+'         <div class="col-sm-12">\n' +
+'            <div class="checkbox">\n' +
+'               <label>\n' +
+'                  <input type="checkbox" id="mam-enable"><span data-i18n="Enable"></span>\n' +
 '               </label>\n' +
 '            </div>\n' +
 '         </div>\n' +
