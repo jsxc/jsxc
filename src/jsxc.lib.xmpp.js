@@ -909,7 +909,7 @@ jsxc.xmpp = {
          if (chat.length === 0) {
             jsxc.notice.add({
                msg: $.t('Unknown_sender'),
-               description: $.t('You_received_a_message_from_an_unknown_sender') + ' (' + bid + ').'
+               description: $.t('You_received_a_message_from_an_unknown_sender_') + ' (' + bid + ').'
             }, 'gui.showUnknownSender', [bid]);
          }
 
