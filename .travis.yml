@@ -8,5 +8,5 @@ before_install:
   - gem install scss_lint
 
 script:
-  - touch .github.json
+  - echo {} > .github.json
   - ./node_modules/.bin/grunt pre-commit
