@@ -1573,7 +1573,7 @@ jsxc.muc = {
                   }
                   o = $(opt.toHTML());
 
-                  for (j = 0; j < self.values; j++) {
+                  for (j = 0; j < self.values.length; j++) {
                      k = self.values[j];
                      if (k.toString() === opt.value.toString()) {
                         o.attr('selected', 'selected');
