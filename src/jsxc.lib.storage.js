@@ -639,5 +639,35 @@ jsxc.storage = {
       }, data));
 
       return 'created';
+   },
+
+   /**
+    * Saves an incoming message into the user storage for future treatment. This method is used by
+    * jsxc when a message is received from an unknown sender, that is to say a sender that is not
+    * in the user's roster.
+    * @param bid the buddy identifier of the sender.
+    * @param direction the direction of the message ('in' for incoming message, 'out' for output
+    * message, etc.)
+    * @param msg the message body.
+    * @param encrypted is the message encrypted?
+    * @param forwarded is a message that was forwarded by another user?
+    * @param stamp the timestamp of the message.
+    */
+   saveMessage: function(bid, direction, msg, encrypted, forwarded, stamp) {
+
+      var chat = jsxc.storage.getUserItem('chat', bid) || [];
+
+      chat.push({
+         bid: bid,
+         direction: direction,
+         msg: msg,
+         encrypted: encrypted,
+         forwarded: forwarded,
+         stamp: stamp,
+         attachment: null
+      });
+
+      jsxc.storage.setUserItem('chat', bid, chat);
    }
+
 };

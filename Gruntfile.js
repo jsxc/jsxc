@@ -9,7 +9,7 @@ module.exports = function(grunt) {
 
    // Project configuration.
    grunt.initConfig({
-      github: grunt.file.readJSON('.github.json'),
+      //github: grunt.file.readJSON('.github.json'),
       app: grunt.file.readJSON('package.json'),
       meta: {
          banner: grunt.file.read('banner.js')
