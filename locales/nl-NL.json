@@ -240,6 +240,7 @@
     "message_not_send_item-not-found": "Je bericht was niet verzonden omdat de kamer niet bestaat",
     "message_not_send_forbidden": "Je bericht was niet verzonden omdat er geen spraak is in deze kamer",
     "message_not_send_not-acceptable": "Je bericht is niet verzonden omdat je geen deelnemer bent van deze kamer",
+    "message_not_send_resource-unavailable": null,
     "This_room_has_been_closed": "Deze kamer is gesloten",
     "Room_logging_is_enabled": "Kamerlog is ingeschakeld",
     "A_password_is_required": "Een wachtwoord is vereist",

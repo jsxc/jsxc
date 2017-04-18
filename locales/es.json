@@ -240,6 +240,7 @@
     "message_not_send_item-not-found": "Tu mensaje no fue enviado debido a que esta sala no existe",
     "message_not_send_forbidden": "Tu mensaje no fue enviado debido a que no tienes voz en esta sala",
     "message_not_send_not-acceptable": "Tu mensaje no fue enviado debido a que no eres un ocupante de esta sala ",
+    "message_not_send_resource-unavailable": "Tu mensaje no fue enviado porque tu interlocutor no está disponible o conectado",
     "This_room_has_been_closed": "Esta sala ha sido cerrada",
     "Room_logging_is_enabled": "Log de sala está habilitado",
     "A_password_is_required": "Se requiere una contraseña",
