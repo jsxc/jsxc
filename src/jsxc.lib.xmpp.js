@@ -1123,9 +1123,9 @@ jsxc.xmpp = {
             type: 'subscribe'
          }));
 
-         jsxc.storage.removeUserItem('add_' + bid);
+         jsxc.storage.removeUserItem('add', bid);
       } else {
-         jsxc.storage.setUserItem('add_' + bid, {
+         jsxc.storage.setUserItem('add', bid, {
             username: username,
             alias: alias || null
          });
