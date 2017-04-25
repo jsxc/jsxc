@@ -148,8 +148,6 @@ jsxc.xmpp = {
          jsxc.debug('Try to attach');
          jsxc.debug('SID: ' + sid);
 
-         jsxc.reconnect = true;
-
          jsxc.xmpp.conn.attach(jid, sid, rid, callback);
       } else {
          jsxc.debug('New connection');
@@ -338,8 +336,10 @@ jsxc.xmpp = {
          }
       }
 
+      var rosterLoaded = jsxc.storage.getUserItem('rosterLoaded');
+
       // Only load roaster if necessary
-      if (!jsxc.reconnect) {
+      if (rosterLoaded !== jsxc.xmpp.conn._proto.sid) {
          // in order to not overide existing presence information, we send
          // pres first after roster is ready
          $(document).one('cloaded.roster.jsxc', jsxc.xmpp.sendPres);
@@ -489,7 +489,6 @@ jsxc.xmpp = {
       window.clearInterval(jsxc.keepaliveInterval);
       jsxc.role_allocation = false;
       jsxc.master = false;
-      jsxc.reconnect = false;
       jsxc.storage.removeItem('alive');
 
       jsxc.changeState(jsxc.CONST.STATE.SUSPEND);
@@ -539,6 +538,8 @@ jsxc.xmpp = {
     */
    onRoster: function(iq) {
       jsxc.debug('Load roster', iq);
+
+      jsxc.storage.setUserItem('rosterLoaded', jsxc.xmpp.conn._proto.sid);
 
       if ($(iq).find('query').length === 0) {
          jsxc.debug('Use cached roster');

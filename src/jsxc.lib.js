@@ -28,9 +28,6 @@ jsxc = {
    /** Interval for keep-alive */
    keepaliveInterval: null,
 
-   /** True if jid, sid and rid was used to connect */
-   reconnect: false,
-
    /** True if restore is complete */
    restoreCompleted: false,
 
