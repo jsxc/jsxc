@@ -2673,6 +2673,7 @@ jsxc.gui.window = {
       }
 
       msgDiv.attr('title', message.error);
+      msgDiv.attr('data-error-msg', message.error);
 
       if (message.attachment && message.attachment.name) {
          var attachment = $('<div>');
