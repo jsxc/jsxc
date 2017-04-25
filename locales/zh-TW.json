@@ -1,6 +1,6 @@
 {
   "translation": {
-    "Logging_in": "正在登入…",
+    "Logging_in": "正在登入中…",
     "your_connection_is_unencrypted": "連線沒加密。",
     "your_connection_is_encrypted": "連線有加密。",
     "your_buddy_closed_the_private_connection": "聯絡人關閉了加密連線。",
@@ -81,8 +81,8 @@
     "xa": "離開很久",
     "offline": "離線",
     "none": "沒有",
-    "Unknown_instance_tag": null,
-    "Not_one_of_our_latest_keys": null,
+    "Unknown_instance_tag": "狀況標籤不明。",
+    "Not_one_of_our_latest_keys": "不是最近使用密鑰其中的一個。",
     "Received_an_unreadable_encrypted_message": "收到了一則加密但無法辨認的訊息。",
     "Online": "上線",
     "Chatty": "想聊天",
@@ -303,7 +303,7 @@
     "Notification": "通知",
     "Unreadable_OTR_message": "忽略無法解讀的 OTR 訊息",
     "Load_older_messages": "下載舊訊息",
-    "Message_history": null,
-    "setting-mam-enable": null
+    "Message_history": "訊息紀錄",
+    "setting-mam-enable": "打開後就可以從伺服器取得儲存訊息"
   }
 }

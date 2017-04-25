@@ -303,7 +303,7 @@
     "Notification": "Bildirim",
     "Unreadable_OTR_message": "Okunamayan OTR iletisi atlandı",
     "Load_older_messages": "Eski iletileri yükle",
-    "Message_history": null,
-    "setting-mam-enable": null
+    "Message_history": "İleti geçmişi",
+    "setting-mam-enable": "Etkinleştirdiğiniz takdirde kaydedilmiş iletileri sunucudan alabilirsiniz."
   }
 }
