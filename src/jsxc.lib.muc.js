@@ -1421,6 +1421,14 @@ jsxc.muc = {
             direction: jsxc.Message.SYS,
             msg: $.t('message_not_send_not-acceptable')
          });
+      } else if ($(message).find('service-unavailable').length > 0) {
+         if ($(message).find('[xmlns="' + Strophe.NS.CHATSTATES + '"]').length === 0) {
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.SYS,
+               msg: $.t('message_not_send_resource-unavailable')
+            });
+         }
       } else {
          jsxc.gui.window.postMessage({
             bid: room,
