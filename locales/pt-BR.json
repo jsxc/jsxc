@@ -241,6 +241,7 @@
     "message_not_send_forbidden": "Sua mensagem não foi enviada por que não  tem 'voz' para essa sala",
     "message_not_send_not-acceptable": "Sua mensagem não foi enviada por que você nao é ocupante desta sala",
     "message_not_send_resource-unavailable": null,
+    "message_not_send_remote-server-not-found": null,
     "This_room_has_been_closed": "Essa sala foi fechada",
     "Room_logging_is_enabled": "O Logging esta habilitado",
     "A_password_is_required": "Senha é obrigatória",

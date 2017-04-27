@@ -97,7 +97,6 @@ jsxc.muc = {
       $(document).on('error.presence.jsxc', jsxc.muc.onPresenceError);
 
       self.conn.addHandler(self.onGroupchatMessage, null, 'message', 'groupchat');
-      self.conn.addHandler(self.onErrorMessage, null, 'message', 'error');
       self.conn.muc.roomNames = jsxc.storage.getUserItem('roomNames') || [];
    },
 
@@ -1385,59 +1384,6 @@ jsxc.muc = {
             })
          });
       }
-
-      return true;
-   },
-
-   /**
-    * Handle group chat error message.
-    *
-    * @private
-    * @memberOf jsxc.muc
-    * @param {string} message Message stanza
-    */
-   onErrorMessage: function(message) {
-      var room = jsxc.jidToBid($(message).attr('from'));
-
-      if (jsxc.gui.window.get(room).length === 0) {
-         return true;
-      }
-
-      if ($(message).find('item-not-found').length > 0) {
-         jsxc.gui.window.postMessage({
-            bid: room,
-            direction: jsxc.Message.SYS,
-            msg: $.t('message_not_send_item-not-found')
-         });
-      } else if ($(message).find('forbidden').length > 0) {
-         jsxc.gui.window.postMessage({
-            bid: room,
-            direction: jsxc.Message.SYS,
-            msg: $.t('message_not_send_forbidden')
-         });
-      } else if ($(message).find('not-acceptable').length > 0) {
-         jsxc.gui.window.postMessage({
-            bid: room,
-            direction: jsxc.Message.SYS,
-            msg: $.t('message_not_send_not-acceptable')
-         });
-      } else if ($(message).find('service-unavailable').length > 0) {
-         if ($(message).find('[xmlns="' + Strophe.NS.CHATSTATES + '"]').length === 0) {
-            jsxc.gui.window.postMessage({
-               bid: room,
-               direction: jsxc.Message.SYS,
-               msg: $.t('message_not_send_resource-unavailable')
-            });
-         }
-      } else {
-         jsxc.gui.window.postMessage({
-            bid: room,
-            direction: jsxc.Message.SYS,
-            msg: $.t('message_not_send')
-         });
-      }
-
-      jsxc.debug('[muc] error message for ' + room, $(message).find('error')[0]);
 
       return true;
    },

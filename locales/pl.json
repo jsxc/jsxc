@@ -241,6 +241,7 @@
     "message_not_send_forbidden": "Twoja wiadomość nie została wysłana ponieważ nie masz głosu w tym pokoju",
     "message_not_send_not-acceptable": "Twoja wiadomość nie została wysłana ponieważ nie jesteś właścicielem tego pokoju",
     "message_not_send_resource-unavailable": null,
+    "message_not_send_remote-server-not-found": null,
     "This_room_has_been_closed": "Ten pokój został zamknięty",
     "Room_logging_is_enabled": "Logowanie do pokoju jest włączone",
     "A_password_is_required": "Hasło jest wymagane",

@@ -241,6 +241,7 @@
     "message_not_send_forbidden": "Ваше сообщение не было отправлено, т.к. у Вас нет права голоса в этой комнате",
     "message_not_send_not-acceptable": "Ваше сообщение не было отправлено, т.к. Вы не являетесь участником этой комнаты",
     "message_not_send_resource-unavailable": null,
+    "message_not_send_remote-server-not-found": null,
     "This_room_has_been_closed": "Эта комната была закрыта",
     "Room_logging_is_enabled": "Журналирование комнаты включено",
     "A_password_is_required": "Необходим пароль",

@@ -241,6 +241,7 @@
     "message_not_send_forbidden": "Deine Nachricht wurde nicht versandt, da du kein \"Mitspracherecht\" hast",
     "message_not_send_not-acceptable": "Deine Nachricht wurde nicht versandt, da du kein Mitglied dieser Gruppe bist",
     "message_not_send_resource-unavailable": "Ihre Nachricht wurde nicht gesendet, weil Ihr Gesprächspartner nicht oder zugänglich verbunden ist",
+    "message_not_send_remote-server-not-found": null,
     "This_room_has_been_closed": "Diese Gruppe wurde geschlossen",
     "Room_logging_is_enabled": "Gesprächsverlauf kann öffentlich einsehbar sein",
     "A_password_is_required": "Es wird ein Passwort benötigt",

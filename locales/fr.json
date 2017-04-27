@@ -241,6 +241,7 @@
     "message_not_send_forbidden": "Votre message n'a pas été envoyé parce que vous n'avez pas le droit de parler dans ce salon",
     "message_not_send_not-acceptable": "Votre message n'a pas été envoyé car il n'y a personne dans ce salon",
     "message_not_send_resource-unavailable": "Votre message n'a pas été envoyé parce que votre interlocuteur n'est pas connecté ou accessible",
+    "message_not_send_remote-server-not-found": null,
     "This_room_has_been_closed": "Ce salon a été fermé",
     "Room_logging_is_enabled": "L'historique du salon est conservé",
     "A_password_is_required": "Un mot de passe est requis",

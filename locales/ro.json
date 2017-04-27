@@ -241,6 +241,7 @@
     "message_not_send_forbidden": null,
     "message_not_send_not-acceptable": null,
     "message_not_send_resource-unavailable": null,
+    "message_not_send_remote-server-not-found": null,
     "This_room_has_been_closed": null,
     "Room_logging_is_enabled": null,
     "A_password_is_required": null,

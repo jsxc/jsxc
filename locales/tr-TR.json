@@ -241,6 +241,7 @@
     "message_not_send_forbidden": "Mesajınız gönderilmedi çünkü bu odada sesiniz yok",
     "message_not_send_not-acceptable": "Mesajınız gönderilmedi çünkü bu odaya bulunmuyorsunuz",
     "message_not_send_resource-unavailable": null,
+    "message_not_send_remote-server-not-found": null,
     "This_room_has_been_closed": "Bu oda kapatıldı",
     "Room_logging_is_enabled": "Oda günlüğü etkinleştirildi",
     "A_password_is_required": "Şifre gerekli",

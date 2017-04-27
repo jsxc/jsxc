@@ -292,6 +292,7 @@ jsxc.xmpp = {
 
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onRosterChanged, 'jabber:iq:roster', 'iq', 'set');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onChatMessage, null, 'message', 'chat');
+      jsxc.xmpp.conn.addHandler(jsxc.xmpp.onErrorMessage, null, 'message', 'error');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onHeadlineMessage, null, 'message', 'headline');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onReceived, null, 'message');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
@@ -1008,6 +1009,58 @@ jsxc.xmpp = {
       }
 
       // preserve handler
+      return true;
+   },
+
+   onErrorMessage: function(message) {
+      var bid = jsxc.jidToBid($(message).attr('from'));
+
+      if (jsxc.gui.window.get(bid).length === 0 || !$(message).attr('id')) {
+         return true;
+      }
+
+      if ($(message).find('item-not-found').length > 0) {
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send_item-not-found')
+         });
+      } else if ($(message).find('forbidden').length > 0) {
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send_forbidden')
+         });
+      } else if ($(message).find('not-acceptable').length > 0) {
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send_not-acceptable')
+         });
+      } else if ($(message).find('remote-server-not-found').length > 0) {
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send_remote-server-not-found')
+         });
+      } else if ($(message).find('service-unavailable').length > 0) {
+         if ($(message).find('[xmlns="' + Strophe.NS.CHATSTATES + '"]').length === 0) {
+            jsxc.gui.window.postMessage({
+               bid: bid,
+               direction: jsxc.Message.SYS,
+               msg: $.t('message_not_send_resource-unavailable')
+            });
+         }
+      } else {
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send')
+         });
+      }
+
+      jsxc.debug('error message for ' + bid, $(message).find('error')[0]);
+
       return true;
    },
 

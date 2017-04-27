@@ -241,6 +241,7 @@
     "message_not_send_forbidden": "訊息沒送出去，因為你被消音了",
     "message_not_send_not-acceptable": "訊息沒送出去，因為你不是聊天室的參與人了",
     "message_not_send_resource-unavailable": null,
+    "message_not_send_remote-server-not-found": null,
     "This_room_has_been_closed": "聊天室已經關閉了",
     "Room_logging_is_enabled": "聊天室紀錄打開了",
     "A_password_is_required": "需要密碼",

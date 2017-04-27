@@ -241,6 +241,7 @@
     "message_not_send_forbidden": "Your message was not sent because you have no voice in this room",
     "message_not_send_not-acceptable": "Your message was not sent because you are no occupant of this room",
     "message_not_send_resource-unavailable": "Your message was not sent because your interlocutor isn't available or connected",
+    "message_not_send_remote-server-not-found": "Your message was not sent because the server-to-server connection failed",
     "This_room_has_been_closed": "This room has been closed",
     "Room_logging_is_enabled": "Room logging is enabled",
     "A_password_is_required": "A password is required",
