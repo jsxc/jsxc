@@ -1300,6 +1300,9 @@ jsxc.gui = {
          var jid = href.split('?')[0];
          var action, params = {};
 
+         element.attr('data-bid', jsxc.jidToBid(jid));
+         jsxc.gui.update(jsxc.jidToBid(jid));
+
          if (href.indexOf('?') < 0) {
             action = 'message';
          } else {
