@@ -1422,7 +1422,7 @@ jsxc.muc = {
             msg: $.t('message_not_send_not-acceptable')
          });
       } else if ($(message).find('service-unavailable').length > 0) {
-         if ($(message).find("[xmlns='http://jabber.org/protocol/chatstates']").length === 0) {
+         if ($(message).find('[xmlns="' + Strophe.NS.CHATSTATES + '"]').length === 0) {
             jsxc.gui.window.postMessage({
                bid: room,
                direction: jsxc.Message.SYS,
