@@ -57,7 +57,21 @@ jsxc.gui = {
    queryActions: {
       /** xmpp:JID?message[;body=TEXT] */
       message: function(jid, params) {
-         var win = jsxc.gui.window.open(jsxc.jidToBid(jid));
+         var bid = jsxc.jidToBid(jid);
+
+         if (!jsxc.storage.getUserItem('buddy', bid)) {
+            // init contact
+            jsxc.storage.saveBuddy(bid, {
+               jid: jid,
+               name: bid,
+               status: 0,
+               sub: 'none',
+               res: [],
+               rnd: Math.random()
+            });
+         }
+
+         var win = jsxc.gui.window.open(bid);
 
          if (params && typeof params.body === 'string') {
             win.find('.jsxc_textinput').val(params.body);
