@@ -3044,16 +3044,16 @@ fieldset[disabled]
   position: relative;
   outline: none;
   clear: both; }
-  .jsxc_chatmessage.jsxc_error {
-    opacity: 0.7; }
-    .jsxc_chatmessage.jsxc_error:before {
-      content: " ";
-      position: absolute;
-      top: 3px;
-      right: 3px;
-      width: 8px;
-      height: 8px;
-      background-color: yellow; }
+  .jsxc_chatmessage.jsxc_error:before {
+    content: attr(data-error-msg);
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    padding: 10px 5px; }
   .jsxc_chatmessage a {
     color: #00f;
     text-decoration: underline;

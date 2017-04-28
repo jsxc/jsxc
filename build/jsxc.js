@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.2.0-beta.1 - 2017-04-04
+ * jsxc v3.2.0-beta.2 - 2017-04-28
  * 
  * Copyright (c) 2017 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.2.0-beta.1
+ * @version 3.2.0-beta.2
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.2.0-beta.1',
+   version: '3.2.0-beta.2',
 
    /** True if i'm the master */
    master: false,
@@ -47,9 +47,6 @@ jsxc = {
 
    /** Interval for keep-alive */
    keepaliveInterval: null,
-
-   /** True if jid, sid and rid was used to connect */
-   reconnect: false,
 
    /** True if restore is complete */
    restoreCompleted: false,
@@ -1139,8 +1136,6 @@ jsxc.xmpp = {
          jsxc.debug('Try to attach');
          jsxc.debug('SID: ' + sid);
 
-         jsxc.reconnect = true;
-
          jsxc.xmpp.conn.attach(jid, sid, rid, callback);
       } else {
          jsxc.debug('New connection');
@@ -1285,6 +1280,7 @@ jsxc.xmpp = {
 
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onRosterChanged, 'jabber:iq:roster', 'iq', 'set');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onChatMessage, null, 'message', 'chat');
+      jsxc.xmpp.conn.addHandler(jsxc.xmpp.onErrorMessage, null, 'message', 'error');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onHeadlineMessage, null, 'message', 'headline');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onReceived, null, 'message');
       jsxc.xmpp.conn.addHandler(jsxc.xmpp.onPresence, null, 'presence');
@@ -1329,8 +1325,10 @@ jsxc.xmpp = {
          }
       }
 
+      var rosterLoaded = jsxc.storage.getUserItem('rosterLoaded');
+
       // Only load roaster if necessary
-      if (!jsxc.reconnect) {
+      if (rosterLoaded !== jsxc.xmpp.conn._proto.sid) {
          // in order to not overide existing presence information, we send
          // pres first after roster is ready
          $(document).one('cloaded.roster.jsxc', jsxc.xmpp.sendPres);
@@ -1480,7 +1478,6 @@ jsxc.xmpp = {
       window.clearInterval(jsxc.keepaliveInterval);
       jsxc.role_allocation = false;
       jsxc.master = false;
-      jsxc.reconnect = false;
       jsxc.storage.removeItem('alive');
 
       jsxc.changeState(jsxc.CONST.STATE.SUSPEND);
@@ -1530,6 +1527,8 @@ jsxc.xmpp = {
     */
    onRoster: function(iq) {
       jsxc.debug('Load roster', iq);
+
+      jsxc.storage.setUserItem('rosterLoaded', jsxc.xmpp.conn._proto.sid);
 
       if ($(iq).find('query').length === 0) {
          jsxc.debug('Use cached roster');
@@ -1900,7 +1899,7 @@ jsxc.xmpp = {
          if (chat.length === 0) {
             jsxc.notice.add({
                msg: $.t('Unknown_sender'),
-               description: $.t('You_received_a_message_from_an_unknown_sender') + ' (' + bid + ').'
+               description: $.t('You_received_a_message_from_an_unknown_sender_') + ' (' + bid + ').'
             }, 'gui.showUnknownSender', [bid]);
          }
 
@@ -1998,6 +1997,58 @@ jsxc.xmpp = {
       }
 
       // preserve handler
+      return true;
+   },
+
+   onErrorMessage: function(message) {
+      var bid = jsxc.jidToBid($(message).attr('from'));
+
+      if (jsxc.gui.window.get(bid).length === 0 || !$(message).attr('id')) {
+         return true;
+      }
+
+      if ($(message).find('item-not-found').length > 0) {
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send_item-not-found')
+         });
+      } else if ($(message).find('forbidden').length > 0) {
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send_forbidden')
+         });
+      } else if ($(message).find('not-acceptable').length > 0) {
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send_not-acceptable')
+         });
+      } else if ($(message).find('remote-server-not-found').length > 0) {
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send_remote-server-not-found')
+         });
+      } else if ($(message).find('service-unavailable').length > 0) {
+         if ($(message).find('[xmlns="' + Strophe.NS.CHATSTATES + '"]').length === 0) {
+            jsxc.gui.window.postMessage({
+               bid: bid,
+               direction: jsxc.Message.SYS,
+               msg: $.t('message_not_send_resource-unavailable')
+            });
+         }
+      } else {
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('message_not_send')
+         });
+      }
+
+      jsxc.debug('error message for ' + bid, $(message).find('error')[0]);
+
       return true;
    },
 
@@ -2114,9 +2165,9 @@ jsxc.xmpp = {
             type: 'subscribe'
          }));
 
-         jsxc.storage.removeUserItem('add_' + bid);
+         jsxc.storage.removeUserItem('add', bid);
       } else {
-         jsxc.storage.setUserItem('add_' + bid, {
+         jsxc.storage.setUserItem('add', bid, {
             username: username,
             alias: alias || null
          });
@@ -2483,7 +2534,21 @@ jsxc.gui = {
    queryActions: {
       /** xmpp:JID?message[;body=TEXT] */
       message: function(jid, params) {
-         var win = jsxc.gui.window.open(jsxc.jidToBid(jid));
+         var bid = jsxc.jidToBid(jid);
+
+         if (!jsxc.storage.getUserItem('buddy', bid)) {
+            // init contact
+            jsxc.storage.saveBuddy(bid, {
+               jid: jid,
+               name: bid,
+               status: 0,
+               sub: 'none',
+               res: [],
+               rnd: Math.random()
+            });
+         }
+
+         var win = jsxc.gui.window.open(bid);
 
          if (params && typeof params.body === 'string') {
             win.find('.jsxc_textinput').val(params.body);
@@ -3712,6 +3777,9 @@ jsxc.gui = {
          var jid = href.split('?')[0];
          var action, params = {};
 
+         element.attr('data-bid', jsxc.jidToBid(jid));
+         jsxc.gui.update(jsxc.jidToBid(jid));
+
          if (href.indexOf('?') < 0) {
             action = 'message';
          } else {
@@ -3971,7 +4039,8 @@ jsxc.gui.roster = {
       jsxc.notice.load();
 
       jsxc.gui.roster.ready = true;
-      $(document).trigger('ready.roster.jsxc');
+      $(document).trigger('ready.roster.jsxc', [rosterState]);
+      $(document).trigger('ready-roster-jsxc', [rosterState]);
    },
 
    /**
@@ -5099,6 +5168,7 @@ jsxc.gui.window = {
       }
 
       msgDiv.attr('title', message.error);
+      msgDiv.attr('data-error-msg', message.error);
 
       if (message.attachment && message.attachment.name) {
          var attachment = $('<div>');
@@ -6265,7 +6335,6 @@ jsxc.muc = {
       $(document).on('error.presence.jsxc', jsxc.muc.onPresenceError);
 
       self.conn.addHandler(self.onGroupchatMessage, null, 'message', 'groupchat');
-      self.conn.addHandler(self.onErrorMessage, null, 'message', 'error');
       self.conn.muc.roomNames = jsxc.storage.getUserItem('roomNames') || [];
    },
 
@@ -7558,51 +7627,6 @@ jsxc.muc = {
    },
 
    /**
-    * Handle group chat error message.
-    *
-    * @private
-    * @memberOf jsxc.muc
-    * @param {string} message Message stanza
-    */
-   onErrorMessage: function(message) {
-      var room = jsxc.jidToBid($(message).attr('from'));
-
-      if (jsxc.gui.window.get(room).length === 0) {
-         return true;
-      }
-
-      if ($(message).find('item-not-found').length > 0) {
-         jsxc.gui.window.postMessage({
-            bid: room,
-            direction: jsxc.Message.SYS,
-            msg: $.t('message_not_send_item-not-found')
-         });
-      } else if ($(message).find('forbidden').length > 0) {
-         jsxc.gui.window.postMessage({
-            bid: room,
-            direction: jsxc.Message.SYS,
-            msg: $.t('message_not_send_forbidden')
-         });
-      } else if ($(message).find('not-acceptable').length > 0) {
-         jsxc.gui.window.postMessage({
-            bid: room,
-            direction: jsxc.Message.SYS,
-            msg: $.t('message_not_send_not-acceptable')
-         });
-      } else {
-         jsxc.gui.window.postMessage({
-            bid: room,
-            direction: jsxc.Message.SYS,
-            msg: $.t('message_not_send')
-         });
-      }
-
-      jsxc.debug('[muc] error message for ' + room, $(message).find('error')[0]);
-
-      return true;
-   },
-
-   /**
     * Prepare group chat roster item.
     *
     * @private
@@ -7741,7 +7765,7 @@ jsxc.muc = {
                   }
                   o = $(opt.toHTML());
 
-                  for (j = 0; j < self.values; j++) {
+                  for (j = 0; j < self.values.length; j++) {
                      k = self.values[j];
                      if (k.toString() === opt.value.toString()) {
                         o.attr('selected', 'selected');
