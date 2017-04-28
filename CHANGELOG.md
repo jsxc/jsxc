@@ -17,14 +17,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - [#470](https://github.com/jsxc/jsxc/issues/470) fix receiving message from unknown sender
 - [#483](https://github.com/jsxc/jsxc/issues/483) fix unclickable space
 - catch quota exceeded errors (e.g. Safari in private mode has a quota of 0)
+- [#510](https://github.com/jsxc/jsxc/pull/510) fix muc form
+- [#505](https://github.com/jsxc/jsxc/pull/505) fix i18n key
+- [#515](https://github.com/jsxc/jsxc/issues/515) fix add contact in slave tab
+- fix initial roster loading
+- fix xmpp message uri to unknown jid
 
 ### Changed
-- update strophe.jinglejs
+- update dependencies
+   - strophe.jinglejs
+   - grunt-contrib-clean
+   - grunt-contrib-uglify
+   - node-sass
+   - strophe.chatstates
+   - strophejs-plugin-mam
 - make max file size optional for http upload service
 - [#480](https://github.com/jsxc/jsxc/issues/480) split avatar loading into chunks
 - [#478](https://github.com/jsxc/jsxc/issues/478) support roster versioning
 - prefer xmpp password from settings over login form
 - [#468](https://github.com/jsxc/jsxc/issues/468) move composing message to window header
+- make message error more visible
+- ignore message errors without id
+- add data-bid to xmpp uris
+- add roster state to roster ready event
 
 ## 3.1.1 - 2017-02-14
 ### Fixed
