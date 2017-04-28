@@ -95,7 +95,7 @@
     "Remove": "Remove",
     "Online_help": "Online help",
     "FN": "Full name",
-    "N": " ",
+    "N": "Name",
     "FAMILY": "Family name",
     "GIVEN": "Given name",
     "NICKNAME": "Nickname",
@@ -110,7 +110,7 @@
     "TEL": "Telephone",
     "NUMBER": "Number",
     "EMAIL": "Email",
-    "USERID": " ",
+    "USERID": "User ID",
     "ORG": "Organization",
     "ORGNAME": "Name",
     "ORGUNIT": "Unit",
@@ -118,7 +118,7 @@
     "ROLE": "Role",
     "BDAY": "Birthday",
     "DESC": "Description",
-    "PHOTO": " ",
+    "PHOTO": "Photo",
     "send_message": "Send message",
     "get_info": "Show information",
     "Settings": "Settings",
@@ -269,7 +269,7 @@
     "is_": "is __status__",
     "You_received_a_message_from_an_unknown_sender_": "You received a message from an unknown sender (__sender__). Do you want to display them?",
     "Your_roster_is_empty_add_": "Your roster is empty, add a  <a>new contact</a>",
-    "onsmp_explanation_question": "Your contact is attempting to determine if they are really talking to you. To authenticate to your contact,  enter the answer and click Answer.",
+    "onsmp_explanation_question": "Your contact is attempting to determine if they are really talking to you. To authenticate to your contact, enter the answer and click Answer.",
     "onsmp_explanation_secret": "Your contact is attempting to determine if they are really talking to you. To authenticate to your contact, enter the secret.",
     "from_sender": "from __sender__",
     "Verified_private_conversation_started": "Verified private conversation started.",
@@ -306,6 +306,6 @@
     "Unreadable_OTR_message": "Unreadable OTR message omitted",
     "Load_older_messages": "Load older messages",
     "Message_history": "Message history",
-    "setting-mam-enable": "If enabled you are able to retrieve stored message from the server."
+    "setting-mam-enable": "If enabled you are able to retrieve stored messages from the server."
   }
 }
