@@ -1562,7 +1562,8 @@ jsxc.gui.roster = {
       jsxc.notice.load();
 
       jsxc.gui.roster.ready = true;
-      $(document).trigger('ready.roster.jsxc');
+      $(document).trigger('ready.roster.jsxc', [rosterState]);
+      $(document).trigger('ready-roster-jsxc', [rosterState]);
    },
 
    /**
