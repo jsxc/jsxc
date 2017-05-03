@@ -306,6 +306,7 @@
     "Unreadable_OTR_message": "Onleesbaar OTR bericht is weggelaten",
     "Load_older_messages": "Oudere berichten laden",
     "Message_history": "Berichten geschiedenis",
-    "setting-mam-enable": "Wanneer ingeschakeld ontvang je opgeslagen berichten van de server."
+    "setting-mam-enable": "Wanneer ingeschakeld ontvang je opgeslagen berichten van de server.",
+    "You_have_to_go_online_": null
   }
 }

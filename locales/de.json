@@ -306,6 +306,7 @@
     "Unreadable_OTR_message": "Unlesbare OTR Nachricht verworfen",
     "Load_older_messages": "Ältere Nachrichten laden",
     "Message_history": "Nachrichten Verlauf",
-    "setting-mam-enable": "Falls aktiviert können Sie gespeicherte Nachrichten vom Server abrufen"
+    "setting-mam-enable": "Falls aktiviert können Sie gespeicherte Nachrichten vom Server abrufen",
+    "You_have_to_go_online_": "Du musst online sein um diese Aktion auszuführen."
   }
 }

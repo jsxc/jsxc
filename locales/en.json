@@ -306,6 +306,7 @@
     "Unreadable_OTR_message": "Unreadable OTR message omitted",
     "Load_older_messages": "Load older messages",
     "Message_history": "Message history",
-    "setting-mam-enable": "If enabled you are able to retrieve stored messages from the server."
+    "setting-mam-enable": "If enabled you are able to retrieve stored messages from the server.",
+    "You_have_to_go_online_": "You have to go online to execute this operation."
   }
 }

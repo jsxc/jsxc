@@ -1324,7 +1324,11 @@ jsxc.gui = {
             element.off('click').click(function(ev) {
                ev.stopPropagation();
 
-               jsxc.gui.queryActions[action].call(jsxc, jid, params);
+               if (jsxc.xmpp.conn && jsxc.xmpp.conn.connected) {
+                  jsxc.gui.queryActions[action].call(jsxc, jid, params);
+               } else {
+                  jsxc.gui.showNotification($.t('no_connection'), $.t('You_have_to_go_online_'));
+               }
 
                return false;
             });
