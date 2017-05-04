@@ -274,8 +274,7 @@ module.exports = function(grunt) {
       sass: {
          dist: {
             files: {
-               '<%= target %>/css/jsxc.css': 'scss/jsxc.scss',
-               '<%= target %>/css/jsxc.webrtc.css': 'scss/jsxc.webrtc.scss'
+               '<%= target %>/css/jsxc.css': 'scss/main.scss'
             }
          }
       },
@@ -285,7 +284,7 @@ module.exports = function(grunt) {
             tasks: ['merge_data', 'replace:locales', 'concat:dep']
          },
          css: {
-            files: ['scss/*'],
+            files: ['scss/**'],
             tasks: ['sass', 'autoprefixer', 'replace:imageUrl']
          },
          js: {
@@ -347,6 +346,11 @@ module.exports = function(grunt) {
          options: {
             config: '.scss-lint.yml'
          }
+      },
+      karma: {
+        unit: {
+          configFile: 'karma.conf.js'
+        }
       }
    });
 
@@ -371,6 +375,7 @@ module.exports = function(grunt) {
    grunt.loadNpmTasks('grunt-prettysass');
    grunt.loadNpmTasks('grunt-html-convert');
    grunt.loadNpmTasks('grunt-scss-lint');
+   grunt.loadNpmTasks('grunt-karma');
 
    //Default task
    grunt.registerTask('default', ['build', 'watch']);

@@ -1,0 +1,21 @@
+@import "modules/all";
+@import "vendor/all";
+
+//fonts
+$font_sans: Arial, sans-serif;
+$font_serif: serif;
+
+@import "partials/button";
+@import "partials/dialog";
+@import "partials/emoticons";
+@import "partials/icon";
+@import "partials/jsxc";
+@import "partials/menu";
+@import "partials/presence";
+@import "partials/roster";
+@import "partials/webrtc";
+@import "partials/window-list";
+@import "partials/window";
+
+@import "partials/jsxc";
+@import "partials/webrtc";

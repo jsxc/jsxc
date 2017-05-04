@@ -1,0 +1,209 @@
+.jsxc-right {
+    text-align: right;
+}
+
+.jsxc-center {
+    text-align: center;
+}
+
+.jsxc-hidden {
+    display: none;
+}
+
+.jsxc-clear {
+    clear: both;
+}
+
+.jsxc-uppercase {
+    text-transform: uppercase;
+}
+
+.jsxc-separator {
+    border-top: 1px solid $separator;
+}
+
+.jsxc-name {
+    overflow: hidden;
+    cursor: pointer;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.jsxc-max-width {
+    max-width: 500px;
+}
+
+.jsxc-meta {
+    text-align: right;
+    font-style: italic;
+}
+
+.jsxc-invalid {
+    border: 2px solid $invalid_border !important;
+}
+
+.jsxc-avatar {
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    margin: 0 5px;
+    background-color: $avatar_bg;
+    border-radius: 50%;
+    float: left;
+    text-align: center;
+    font-weight: bold;
+    font-size: 30px;
+    color: $avatar_color;
+    position: relative;
+    font-family: $font_sans;
+    background-size: cover;
+    background-position: center center;
+
+    img {
+        display: block;
+        width: 25px;
+        height: 25px;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    &:before {
+        position: absolute;
+        top: -2px;
+        left: -6px;
+        border: 2px solid $roster_bg;
+    }
+}
+
+ul.jsxc-vCard {
+    min-width: 400px;
+
+    ul {
+        margin-left: 20px;
+    }
+
+    li {
+        cursor: default !important;
+    }
+}
+
+//  Spot which is attached to xmpp: uris
+.jsxc-spot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    text-indent: -99999em;
+    margin-top: 3px;
+    margin-right: 5px;
+    line-height: 100%;
+    cursor: pointer;
+    border: 1px solid $spot_border;
+    background-color: $white;
+
+    &:before {
+        position: absolute;
+    }
+
+    &.jsxc-online, &.jsxc-chat, &.jsxc-away, &.jsxc-xa, &.jsxc-dnd, &.jsxc-offline {
+        border: 0;
+    }
+}
+
+.jsxc-unread {
+    display: none;
+}
+
+.jsxc-unreadMsg {
+    .jsxc-name {
+        font-style: italic;
+    }
+
+    .jsxc-unread {
+        display: block;
+        background-color: $unread_bg;
+        border-radius: 11px;
+        color: $unread_color;
+        font-size: 80%;
+        padding: 2px;
+        line-height: 15px;
+        float: right;
+        margin-right: 3px;
+        margin-top: 4px;
+    }
+}
+
+.jsxc-loading {
+    margin: 0 auto;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    background-size: 32px 32px !important;
+    background: image-url("loading.gif");
+}
+
+//  @TODO: check
+#jsxc-login-form input[type='submit'] {
+    height: 34px;
+    display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.428571429;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    user-select: none;
+    color: $white;
+    background-color: $loginForm_bg;
+    border-color: $loginForm_border;
+}
+
+.jsxc-oneway .jsxc-avatar {
+    filter: grayscale(100%);
+}
+
+img.jsxc-vCard {
+    float: right;
+    max-width: 200px;
+    max-height: 200px;
+    border: 5px solid $white;
+    border-radius: 2px;
+}
+
+.jsxc-alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+
+    &.jsxc-alert-warning {
+        color: #8a6d3b;
+        background-color: #fcf8e3;
+        border-color: #faebcc;
+    }
+}
+
+.jsxc-more {
+    float: right;
+    width: 44px;
+    height: 100%;
+    cursor: pointer;
+    background-image: image-url("more_black.svg");
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.4;
+
+    &:hover {
+        opacity: 1;
+    }
+
+    @media (min-width: 768px) {
+        width: 25px;
+    }
+}

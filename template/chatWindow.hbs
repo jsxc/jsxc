@@ -1,0 +1,58 @@
+<li class="jsxc-window-item" data-contact-id="{{contactId}}" data-account-id="{{accountId}}">
+   <div class="jsxc-window">
+      <div class="jsxc-window-bar">
+         <div class="jsxc-avatar"></div>
+         {{! transfer this to jsxc-menu }}
+         <div class="jsxc-tools">
+            <div class="jsxc-settings">
+               <div class="jsxc-more"></div>
+               <div class="jsxc-inner jsxc-menu">
+                  <ul>
+                     <li>
+                        <a class="jsxc-verification" href="#">
+                           <span data-i18n="Authentication"></span>
+                        </a>
+                     </li>
+                     <li>
+                        <a class="jsxc-clear" href="#">
+                           <span data-i18n="clear_history"></span>
+                        </a>
+                     </li>
+                     <li>
+                        <a class="jsxc-sendFile" href="#">
+                           <span data-i18n="Send_file"></span>
+                        </a>
+                     </li>
+                  </ul>
+               </div>
+            </div>
+            <div class="jsxc-close">×</div>
+         </div>
+         <div class="jsxc-caption">
+            <div class="jsxc-name">{{name}}</div>
+            <div class="jsxc-lastmsg">
+               <span class="jsxc-unread" />
+               <span class="jsxc-text" />
+            </div>
+         </div>
+      </div>
+      <div class="jsxc-window-fade">
+         <div class="jsxc-overlay">
+            <div>
+               <div class="jsxc-body" />
+               <div class="jsxc-close" />
+            </div>
+         </div>
+         <div class="jsxc-message-area" />
+         <div class="jsxc-menu jsxc-menu-emoticons">
+            <div class="jsxc-inner">
+               <ul>
+                  <li class="jsxc-clear"></li>
+               </ul>
+            </div>
+         </div>
+         <div class="jsxc-transfer jsxc-otr jsxc-disabled" />
+         <textarea class="jsxc-textinput" data-i18n="[placeholder]Message"></textarea>
+      </div>
+   </div>
+</li>

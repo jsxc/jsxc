@@ -1,0 +1,490 @@
+#jsxc-roster {
+   position: fixed;
+   top: 0;
+   bottom: 0;
+   right: 0;
+   width: 200px;
+   overflow: visible;
+   border-left: 1px solid #e1e1e1;
+   z-index: 80;
+   margin-left: 10px;
+   background-color: $roster_bg;
+   transition: right 0.5s;
+
+   .jsxc-roster-hidden & {
+      right: -200px;
+   }
+
+   a {
+      cursor: pointer;
+   }
+
+   .jsxc-avatar {
+      position: relative;
+      cursor: pointer;
+
+      img {
+         cursor: pointer;
+      }
+   }
+
+   .jsxc-wait {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 160px;
+      padding: 20px;
+      background-color: $white;
+      z-index: 60;
+
+      img {
+         padding: 5px;
+      }
+
+      h3 {
+         margin-bottom: 5px;
+         font-size: 1.13em;
+         font-weight: bold;
+      }
+   }
+
+   input {
+      position: absolute;
+      margin: 0;
+      height: 35px;
+      padding: 7px 6px 5px;
+      font-size: 13px;
+      width: 145px;
+      border: 1px solid #ddd;
+      box-sizing: border-box;
+      background-image: none;
+      background-color: $roster_input_bg;
+      border-radius: 3px;
+      box-shadow: inner 0 0 5px $roster_input_shadow;
+      outline: none;
+   }
+
+   p {
+      color: $roster_color;
+      padding: 10px;
+
+      a {
+         color: $roster_a;
+         text-decoration: underline;
+      }
+   }
+
+   .jsxc-expand input {
+      left: 51px;
+      width: 137px;
+   }
+
+   &.jsxc-state_hidden {
+      display: block;
+      right: -200px;
+      transition: right 0.5s;
+   }
+
+   &.jsxc-state_shown {
+      display: block;
+      right: 0;
+      transition: right 0.5s;
+   }
+
+   > .jsxc-bottom {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      line-height: 34px;
+      background-color: $roster_bottom_bg;
+      z-index: 50;
+      padding-right: 4px;
+
+      &:hover {
+         background-color: $roster_bottom_bg_hover;
+      }
+
+      .jsxc-inner {
+         width: 100%;
+      }
+
+      ul {
+         padding: 0;
+         margin: 0;
+         width: 100%;
+         border-top: 1px solid $roster_bottom_border_top;
+         background-color: $roster_bottom_bg;
+
+         li:last-child {
+            border-bottom: 1px solid $roster_bottom_border_top;
+         }
+      }
+
+      li {
+         height: 44px;
+         background-color: $roster_bottom_bg;
+         color: $roster_bottom_color;
+         cursor: pointer;
+         width: 100%;
+         padding-left: 44px;
+         line-height: 44px;
+         text-align: left;
+         overflow: hidden;
+         text-overflow: ellipsis;
+         white-space: nowrap;
+         background-repeat: no-repeat;
+         background-position: 15px center;
+         background-size: 16px 16px;
+         opacity: 0.8;
+
+         &.jsxc-disabled {
+            color: $roster_bottom_disabled;
+            cursor: default;
+         }
+
+         &:hover:not(.jsxc-disabled) {
+            color: $roster_bottom_color_hover;
+            background-color: $roster_bottom_bg_hover;
+         }
+
+         &.jsxc-warning {
+            background-color: $warning_bg;
+
+            &:hover {
+               background-color: $warning_bg_hover;
+            }
+         }
+      }
+
+      > div > span {
+         cursor: pointer;
+      }
+   }
+
+   form {
+      padding: 15px;
+
+      button,
+      input {
+         width: 100%;
+         margin: 0 0 5px;
+         border-radius: 0;
+      }
+
+      .btn-primary {
+         background-color: #dadada;
+         border-color: #c1c1c1;
+         transition: background-color 0.5s;
+
+         &:hover {
+            background-color: #a2a2a2;
+         }
+      }
+
+      label {
+         display: block;
+      }
+
+      input {
+         position: static;
+      }
+   }
+
+   .jsxc-roster-status {
+      display: none;
+      position: absolute;
+      bottom: 0;
+   }
+
+   &.jsxc-status-show {
+      .jsxc-roster-status {
+         display: block;
+      }
+
+      .jsxc-bottom, .jsxc-contact-list {
+         display: none;
+      }
+   }
+}
+
+.jsxc-roster-toggle {
+   width: 14px;
+   height: 100%;
+   position: absolute;
+   left: -14px;
+   top: 0;
+   z-index: 110;
+   background-color: transparent;
+   cursor: pointer;
+
+   &:hover {
+      background-color: $roster_toggle_hover;
+   }
+}
+
+.jsxc-roster-item {
+   padding: 0;
+   margin: 0;
+   height: 44px;
+   border-bottom: 1px solid $roster_bottom_border_top;
+   cursor: pointer;
+   width: 100%;
+   position: relative;
+   color: $roster_color;
+   font-family: $font_sans;
+   line-height: 44px;
+   padding-left: 6px;
+   padding-top: 4px;
+   padding-bottom: 4px;
+   box-sizing: border-box;
+
+   &:hover {
+      background-color: $roster_bg_hover;
+   }
+
+   &.jsxc-bookmarked {
+      .jsxc-avatar:after {
+         content: " ";
+         width: 20%;
+         height: 30%;
+         position: absolute;
+         top: 0;
+         right: 2px;
+         background-size: contain;
+         background-repeat: no-repeat;
+         background-image: image-url("bookmark_red.svg");
+      }
+   }
+}
+
+.jsxc-caption {
+   padding-right: 30px;
+   height: 100%;
+   line-height: 100%;
+   // padding-top: 4px;
+   box-sizing: border-box;
+
+   * {
+      cursor: pointer;
+   }
+
+   .jsxc-name {
+      height: 100%;
+      line-height: 40px;
+
+      .jsxc-min & {
+         height: 50%;
+         line-height: 20px;
+      }
+
+      .jsxc-rosteritem & {
+         height: 50%;
+         line-height: 20px;
+      }
+   }
+
+   .jsxc-lastmsg {
+      font-size: 12px;
+      display: none;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+
+      .jsxc-min & {
+         display: block;
+         height: 50%;
+         line-height: 17.5px;
+      }
+
+      .jsxc-rosteritem & {
+         display: block;
+         height: 50%;
+         line-height: 17.5px;
+      }
+
+      .jsxc-text {
+         opacity: 0.6;
+      }
+
+      .jsxc-unread {
+         line-height: 100%;
+         font-size: 8px;
+         color: #fff;
+         text-align: center;
+         display: none;
+         height: 1em;
+         width: 1em;
+         border-radius: 50%;
+         background-color: orange;
+         vertical-align: top;
+         margin: 0;
+         float: none;
+
+         .jsxc-unreadMsg & {
+            display: inline-block !important;
+         }
+      }
+
+      .jsxc-emoticon {
+         vertical-align: middle;
+      }
+   }
+}
+
+.jsxc-menu-presence {
+   cursor: pointer;
+   padding-left: 2px;
+   overflow: hidden;
+
+   > span {
+      opacity: 0.8;
+   }
+
+   li {
+      position: relative;
+
+      &:before {
+         //  Presence indicator
+         position: absolute;
+         top: 50%;
+         left: 10px;
+         margin-top: -8px;
+         border: 2px solid whitesmoke;
+      }
+   }
+}
+
+.jsxc-menu-main {
+   height: 44px;
+   width: 44px;
+   cursor: pointer;
+   float: right;
+   text-align: center;
+
+   &:hover > span {
+      opacity: 1;
+   }
+
+   > span {
+      opacity: 0.5;
+      display: block;
+      width: 100%;
+      height: 100%;
+      background-image: image-url("menu_black.svg");
+      background-repeat: no-repeat;
+      background-position: center 10px;
+      background-size: 17px;
+   }
+
+   @media (min-width: 768px) {
+      height: 30px;
+      width: 30px;
+   }
+}
+
+#jsxc-notice {
+   height: 30px;
+   width: 30px;
+   float: right;
+   text-align: center;
+   line-height: 30px;
+
+   span {
+      background-color: $notice_bg;
+      border-radius: 11px;
+      color: $notice_color;
+      font-size: 80%;
+      padding: 2px;
+      position: relative;
+      animation: bounce 2s 1s infinite;
+   }
+
+   > span:empty {
+      display: none;
+   }
+}
+
+.jsxc-contact-list {
+   list-style: none;
+   padding: 0;
+   margin: 0;
+   width: 204px;
+   z-index: 85;
+
+   &.jsxc-hide-offline {
+      .jsxc-roster-item[data-status='offline'] {
+         display: none;
+      }
+   }
+
+   .jsxc-unreadMsg {
+      .jsxc-name {
+         padding-right: 0;
+      }
+   }
+
+   .jsxc-oneway {
+      .jsxc-avatar,
+      .jsxc-caption {
+         opacity: 0.7;
+      }
+   }
+
+   .jsxc-right {
+      float: right;
+      margin-right: 6px;
+
+      div {
+         font-weight: bold;
+         text-align: center;
+         font-size: 13px;
+         line-height: 20px;
+         color: $white;
+
+         &:hover {
+            opacity: 1;
+         }
+      }
+   }
+
+   .jsxc-menu {
+      float: right;
+      height: 100%;
+      width: 42px;
+
+      > span {
+         display: block;
+         height: 100%;
+         width: 100%;
+         background-image: url("../../img/more_black.svg");
+         background-repeat: no-repeat;
+         background-position: center center;
+         opacity: 0.6;
+         cursor: pointer;
+
+         &:hover {
+            opacity: 1;
+         }
+      }
+
+      .jsxc-inner {
+         left: auto;
+         right: 5px;
+         padding: 4px;
+         overflow: visible;
+
+         a {
+            display: block;
+            line-height: 42px;
+            width: 42px;
+            text-align: center;
+
+            span {
+               margin: 0;
+            }
+         }
+      }
+   }
+}

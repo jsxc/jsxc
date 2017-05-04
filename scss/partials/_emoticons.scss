@@ -1,0 +1,27 @@
+.jsxc-emoticon {
+    display: inline-block;
+    width: 19px;
+    height: 19px;
+    background-size: contain;
+    border: 0;
+    vertical-align: bottom;
+
+    &.jsxc-large {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 7px;
+    }
+}
+
+#jsxc-roster .jsxc-emoticon.jsxc-large {
+    width: 19px;
+    height: 19px;
+}
+
+$emoticons: angel, angry, smile, grin, sad, wink, tonguesmile, surpised, kiss, sunglassess, crysad, doubt, zip, thumbsup, thumbsdown, beer, devil, kissing, rose, music, love, tired, surprised;
+
+@each $emoticon in $emoticons {
+    .jsxc-#{$emoticon} {
+        background: image-url("emotions/#{$emoticon}.png");
+    }
+}

@@ -1,0 +1,18 @@
+<h3>{{t "Info_about"}} {{name}}</h3>
+<ul class="jsxc-vcard">
+   {{#each basic}}
+   <li>
+      <strong>{{t "Resource"}}</strong> {{resource}}
+   </li>
+   <li>
+      <strong>{{t "Client"}}</strong> {{client}}
+   </li>
+   <li class="jsxc-seperator">
+      <strong>{{t "Status"}}</strong> {{status}}
+   </li>
+   {{/each}}
+</ul>
+
+<div class="jsxc-waiting">
+   {{t "Please_wait"}}
+</div>

@@ -1,0 +1,104 @@
+#jsxc-window-list {
+    position: fixed;
+    bottom: 0;
+    right: 210px;
+    left: 0;
+    z-index: 50;
+    transition: right 0.5s;
+
+    &.jsxc-roster_hidden {
+        right: 10px;
+    }
+
+    @media (min-width: 768px) {
+        clip: rect(-10000px, 10000px, 30px, 30px);
+    }
+
+    > ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        height: 44px;
+        overflow: visible;
+        white-space: nowrap;
+        transition: right 0.5s;
+
+        > li {
+            padding: 0;
+            margin: 0;
+            display: inline-block;
+            height: 44px;
+            width: 46px;
+            position: relative;
+            overflow: visible;
+            margin-right: 5px;
+            cursor: pointer;
+            white-space: normal;
+
+            &.jsxc-normal {
+                transition: width 0.2s;
+                width: 250px;
+            }
+
+            &.jsxc-minimized {
+                transition: width 0.2s;
+                width: 46px !important;
+
+                //  overwrite resizeable width
+
+                @media (min-width: 768px) {
+                    width: 200px !important;
+                }
+
+                .jsxc-emoticons {
+                    display: none;
+                }
+
+                .jsxc-tools {
+                    display: none;
+                }
+            }
+        }
+    }
+}
+
+#jsxc-window-list-handler {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 30px;
+    height: 30px;
+
+    @media (max-width: 768px) {
+        display: none;
+    }
+
+    > {
+        div {
+            box-sizing: border-box;
+            width: 14px;
+            height: 100%;
+            background-color: $windowListSB_bg;
+            color: $windowListSB_color;
+            text-align: center;
+            line-height: 30px;
+            float: left;
+            cursor: pointer;
+            user-select: none;
+
+            &:hover {
+                background-color: $windowListSB_bg_hover;
+            }
+        }
+
+        .jsxc-disabled {
+            background-color: $windowListSB_bg_disabled !important;
+            color: $windowListSB_color_disabled;
+            cursor: default !important;
+            display: none;
+        }
+    }
+}

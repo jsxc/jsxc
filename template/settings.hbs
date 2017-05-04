@@ -1,0 +1,142 @@
+{{#if xmppSettingsAlterable}}
+<form class="form-horizontal col-sm-6">
+   <fieldset class="jsxc_fieldsetXmpp jsxc_fieldset">
+      <h3 data-i18n="Login_options"></h3>
+      <p data-i18n="setting-explanation-xmpp"></p>
+      <div class="form-group">
+         <label class="col-sm-6 control-label" for="xmpp-url" data-i18n="BOSH_url"></label>
+         <div class="col-sm-6">
+            <input type="text" id="xmpp-url" class="form-control" readonly="readonly" />
+         </div>
+      </div>
+      <div class="form-group">
+         <label class="col-sm-6 control-label" for="xmpp-username" data-i18n="Username"></label>
+         <div class="col-sm-6">
+            <input type="text" id="xmpp-username" class="form-control" />
+         </div>
+      </div>
+      <div class="form-group">
+         <label class="col-sm-6 control-label" for="xmpp-domain" data-i18n="Domain"></label>
+         <div class="col-sm-6">
+            <input type="text" id="xmpp-domain" class="form-control" />
+         </div>
+      </div>
+      <div class="form-group">
+         <label class="col-sm-6 control-label" for="xmpp-resource" data-i18n="Resource"></label>
+         <div class="col-sm-6">
+            <input class="form-control" type="text" id="xmpp-resource" class="form-control" />
+         </div>
+      </div>
+      <div class="form-group">
+         <div class="col-sm-offset-6 col-sm-6">
+            <button class="btn btn-primary jsxc_continue" type="submit" data-i18n="Save"></button>
+         </div>
+      </div>
+   </fieldset>
+</form>
+{{/if}}
+
+<form class="form-horizontal col-sm-6">
+   <fieldset class="jsxc_fieldsetPriority jsxc_fieldset">
+      <h3 data-i18n="Priority"></h3>
+      <p data-i18n="setting-explanation-priority"></p>
+      <div class="form-group">
+         <label class="col-sm-6 control-label" for="priority-online" data-i18n="Online"></label>
+         <div class="col-sm-6">
+            <input type="number" value="0" id="priority-online" class="form-control" min="-128" max="127" step="1" required="required" />
+         </div>
+      </div>
+      <div class="form-group">
+         <label class="col-sm-6 control-label" for="priority-chat" data-i18n="Chatty"></label>
+         <div class="col-sm-6">
+            <input type="number" value="0" id="priority-chat" class="form-control" min="-128" max="127" step="1" required="required" />
+         </div>
+      </div>
+      <div class="form-group">
+         <label class="col-sm-6 control-label" for="priority-away" data-i18n="Away"></label>
+         <div class="col-sm-6">
+            <input type="number" value="0" id="priority-away" class="form-control" min="-128" max="127" step="1" required="required" />
+         </div>
+      </div>
+      <div class="form-group">
+         <label class="col-sm-6 control-label" for="priority-xa" data-i18n="Extended_away"></label>
+         <div class="col-sm-6">
+            <input type="number" value="0" id="priority-xa" class="form-control" min="-128" max="127" step="1" required="required" />
+         </div>
+      </div>
+      <div class="form-group">
+         <label class="col-sm-6 control-label" for="priority-dnd" data-i18n="dnd"></label>
+         <div class="col-sm-6">
+            <input type="number" value="0" id="priority-dnd" class="form-control" min="-128" max="127" step="1" required="required" />
+         </div>
+      </div>
+      <div class="form-group">
+         <div class="col-sm-offset-6 col-sm-6">
+            <button class="btn btn-primary jsxc_continue" type="submit" data-i18n="Save"></button>
+         </div>
+      </div>
+   </fieldset>
+</form>
+
+<form class="form-horizontal col-sm-6">
+   <fieldset class="jsxc_fieldsetLoginForm jsxc_fieldset">
+      <h3 data-i18n="On_login"></h3>
+      <p data-i18n="setting-explanation-login"></p>
+      <div class="form-group">
+         <div class="col-sm-12">
+            <div class="checkbox">
+               <label>
+                  <input type="checkbox" id="loginForm-enable"><span data-i18n="On_login"></span>
+               </label>
+            </div>
+         </div>
+      </div>
+      <div class="form-group">
+         <div class="col-sm-12">
+            <button class="btn btn-primary jsxc_continue" type="submit" data-i18n="Save"></button>
+         </div>
+      </div>
+   </fieldset>
+</form>
+
+<form class="form-horizontal col-sm-6" data-onsubmit="xmpp.carbons.refresh">
+   <fieldset class="jsxc_fieldsetCarbons jsxc_fieldset">
+      <h3 data-i18n="Carbon_copy"></h3>
+      <p data-i18n="setting-explanation-carbon"></p>
+      <div class="form-group">
+         <div class="col-sm-12">
+            <div class="checkbox">
+               <label>
+                  <input type="checkbox" id="carbons-enable"><span data-i18n="Enable"></span>
+               </label>
+            </div>
+         </div>
+      </div>
+      <div class="form-group">
+         <div class="col-sm-12">
+            <button class="btn btn-primary jsxc_continue" type="submit" data-i18n="Save"></button>
+         </div>
+      </div>
+   </fieldset>
+</form>
+
+<form class="form-horizontal col-sm-6" data-onsubmit="xmpp.chatState.init">
+   <fieldset class="jsxc_fieldsetCarbons jsxc_fieldset">
+      <h3 data-i18n="Chat_state_notifications"></h3>
+      <p data-i18n="setting-explanation-chat-state"></p>
+      <div class="form-group">
+         <div class="col-sm-12">
+            <div class="checkbox">
+               <label>
+                  <input type="checkbox" id="chatState-enable"><span data-i18n="Enable"></span>
+               </label>
+            </div>
+         </div>
+      </div>
+      <div class="form-group">
+         <div class="col-sm-12">
+            <button class="btn btn-primary jsxc_continue" type="submit" data-i18n="Save"></button>
+         </div>
+      </div>
+   </fieldset>
+</form>

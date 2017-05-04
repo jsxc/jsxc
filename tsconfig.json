@@ -1,0 +1,19 @@
+{
+    "allowSyntheticDefaultImports": true,
+    "compilerOptions": {
+        "module": "commonjs",
+        "outDir": "./dist",
+        "allowJs": true,
+        "target": "es5",
+        "lib": ["dom", "es2015.promise", "es5"]
+    },
+    "include": [
+        "./src/**/*.ts",
+        "./template/*.hbs",
+        "./*.d.ts"
+    ],
+    "exclude": [
+       "node_modules",
+       "typings"
+     ]
+}

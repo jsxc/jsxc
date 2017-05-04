@@ -1,0 +1,127 @@
+.jsxc-dialog {
+    padding: 20px;
+    min-width: 320px;
+    max-width: 100%;
+    display: inline-block;
+    text-align: left;
+    position: relative;
+    background: #FFF;
+    width: auto;
+
+    * {
+        box-sizing: border-box;
+    }
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    li {
+        margin: 0;
+        padding: 0;
+    }
+
+    p {
+        margin-bottom: 1em;
+
+        input {
+            margin-bottom: 5px;
+            width: 60%;
+            outline: none;
+        }
+
+        input[type='submit'] {
+            width: auto;
+        }
+    }
+
+    table {
+        margin-bottom: 1em;
+    }
+
+    hr {
+        border: 0;
+        border-top: 1px solid #eee;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    h3 {
+        font-size: 120%;
+        font-weight: bold;
+        margin-bottom: 10px;
+        margin-top: 20px;
+    }
+
+    .jsxc-right {
+        margin-top: 20px;
+    }
+
+    form {
+        fieldset {
+            margin-bottom: 30px;
+            padding: 0 30px;
+            border: 1px solid #d9d9d9;
+
+            h3 {
+                font-size: 15px;
+                color: #000;
+                background-color: #f2f2f2;
+                padding: 10px;
+                margin: 0 -30px 10px;
+            }
+        }
+    }
+
+    legend {
+        border: 0;
+        font-size: 20px;
+    }
+
+    input {
+        outline: none;
+
+        &:invalid {
+            border: 1px solid $dialog_input_invalid;
+        }
+    }
+
+    .btn-group button {
+        margin-right: 0;
+    }
+
+    input[readonly] {
+        background-color: $dialog_input_readonly_bg;
+    }
+
+    .jsxc-inputinfo {
+        padding: 0;
+        font-style: italic;
+        margin: 0;
+    }
+
+    .jsxc-waiting {
+        &:before {
+            content: " ";
+            width: 1em;
+            height: 1em;
+            display: inline-block;
+            background-size: 100%;
+            margin: 0 3px 0 0;
+            background-image: image-url("loading.gif");
+        }
+    }
+
+    .jsxc-libraries, .jsxc-credits {
+        max-width: 300px;
+    }
+
+    .jsxc-warning {
+        display: block;
+        background-color: #fbfe7a;
+        padding: 3px 10px;
+        border-radius: 3px;
+    }
+}

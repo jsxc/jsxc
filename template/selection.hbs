@@ -1,0 +1,27 @@
+{{#if header}}
+<h3>{{header}}</h3>
+{{/if}}
+
+{{#if message}}
+<p>{{message}}</p>
+{{/if}}
+
+{{#if primary.cb}}
+<button class="jsxc-btn jsxc-btn-primary jsxc-pull-right">
+   {{#if primary.label}}
+      {{primary.label}}
+   {{#else}}
+      {{t "Confirm"}}
+   {{/if}}
+</button>
+{{/if}}
+
+{{#if option.cb}}
+<button class="jsxc-btn jsxc-btn-default jsxc-pull-right">
+   {{#if option.label}}
+      {{option.label}}
+   {{#else}}
+      {{t "Dismiss"}}
+   {{/if}}
+</button>
+{{/if}}

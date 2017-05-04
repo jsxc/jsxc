@@ -1,0 +1,47 @@
+<div id="jsxc-roster">
+   <div data-simplebar>
+      <ul class="jsxc-contact-list"></ul>
+   </div>
+   <div class="jsxc-roster-status"></div>
+   <div class="jsxc-bottom jsxc-presence jsxc-roster-item" data-bid="own">
+      <div class="jsxc-avatar" />
+      <div class="jsxc-menu jsxc-menu-main">
+         <span></span>
+         <div class="jsxc-inner">
+            <ul>
+               <li class="jsxc-settings jsxc-icon-setting">{{t "Settings"}}</li>
+               <li class="jsxc-mute-notification">{{t "Mute"}}</li>
+               <li class="jsxc-hide-offline">
+                  <span class="jsxc-hide-offline">{{t "Hide_offline"}}</span>
+                  <span class="jsxc-show-offline">{{t "Show_offline"}}</span>
+               </li>
+               <li class="jsxc-add-contact jsxc-icon-contact">{{t "Add_buddy"}}</li>
+               <li class="jsxc-online-help jsxc-icon-help">
+                  <a href="{{onlineHelpUrl}}" target="_blank">{{t "Online_help"}}</a>
+               </li>
+               <li class="jsxc-about">{{t "About"}}</li>
+            </ul>
+         </div>
+      </div>
+      <div class="jsxc-menu" id="jsxc-notice">
+         <span></span>
+         <div class="jsxc-inner">
+            <ul></ul>
+         </div>
+      </div>
+      <div class="jsxc-menu jsxc-menu-presence">
+         <span>{{t "Offline"}}</span>
+         <div class="jsxc-inner">
+            <ul>
+               <li data-presence="online" class="jsxc-online">{{t "Online"}}</li>
+               <li data-presence="chat" class="jsxc-chat">{{t "Chatty"}}</li>
+               <li data-presence="away" class="jsxc-away">{{t "Away"}}</li>
+               <li data-presence="xa" class="jsxc-xa">{{t "Extended_away"}}</li>
+               <li data-presence="dnd" class="jsxc-dnd">{{t "dnd"}}</li>
+               <li data-presence="offline" class="jsxc-offline">{{t "Offline"}}</li>
+            </ul>
+         </div>
+      </div>
+   </div>
+   <div class="jsxc-roster-toggle"></div>
+</div>
