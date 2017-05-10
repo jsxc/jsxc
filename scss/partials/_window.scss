@@ -82,7 +82,7 @@
          cursor: pointer;
          text-align: center;
 
-         &.jsxc-settings {
+         &.jsxc-menu {
             opacity: 1;
          }
       }
@@ -269,7 +269,7 @@
    }
 
    ul {
-      width: 210px;
+      width: 217px;
       margin-bottom: 8px;
       background-color: $emoticon_selection_bg;
       border-radius: 3px;
@@ -293,17 +293,20 @@
    }
 
    li {
-      div {
-         float: left;
-         cursor: pointer;
-         border-radius: 3px;
-         background-size: 30px 30px;
-         width: 30px;
-         height: 30px;
+      display: inline-block;
+      cursor: pointer;
+      border-radius: 3px;
+      width: 30px;
+      height: 30px;
 
-         &:hover {
-            background-color: $emoticon_selection_hover;
-         }
+      &:hover {
+         background-color: $emoticon_selection_hover;
+      }
+
+      .jsxc-emoticon {
+         width: 100%;
+         height: 100%;
+         background-size: contain;
       }
    }
 
@@ -559,7 +562,8 @@
    }
 }
 
-div.jsxc-settings {
+
+.jsxc-menu-settings {
    position: relative;
 
    .jsxc-inner {

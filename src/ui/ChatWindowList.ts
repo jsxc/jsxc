@@ -70,6 +70,22 @@ export default class ChatWindowList {
          chatWindow.highlight();
 
          this.element.find('> ul').append(chatWindow.getDom());
+
+         this.save();
+      }
+
+      this.updateWindowListSB();
+   }
+
+   public remove(chatWindow:ChatWindow) {
+      let chatWindowIds = this.getChatWindowIds();
+
+      if (chatWindowIds.indexOf(chatWindow.getId()) > -1) {
+         chatWindow.close();
+
+         delete chatWindowIds[chatWindow.getId()];
+
+         this.save();
       }
 
       this.updateWindowListSB();

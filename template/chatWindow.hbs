@@ -4,23 +4,23 @@
          <div class="jsxc-avatar"></div>
          {{! transfer this to jsxc-menu }}
          <div class="jsxc-tools">
-            <div class="jsxc-settings">
-               <div class="jsxc-more"></div>
-               <div class="jsxc-inner jsxc-menu">
+            <div class="jsxc-menu jsxc-menu-dropdown jsxc-menu-settings">
+               <span class="jsxc-more"></span>
+               <div class="jsxc-inner">
                   <ul>
                      <li>
                         <a class="jsxc-verification" href="#">
-                           <span data-i18n="Authentication"></span>
+                           <span>{{t "Authentication"}}</span>
                         </a>
                      </li>
                      <li>
                         <a class="jsxc-clear" href="#">
-                           <span data-i18n="clear_history"></span>
+                           <span>{{t "clear_history"}}</span>
                         </a>
                      </li>
                      <li>
                         <a class="jsxc-sendFile" href="#">
-                           <span data-i18n="Send_file"></span>
+                           <span>{{t "Send_file"}}</span>
                         </a>
                      </li>
                   </ul>
@@ -52,7 +52,7 @@
             </div>
          </div>
          <div class="jsxc-transfer jsxc-otr jsxc-disabled" />
-         <textarea class="jsxc-textinput" data-i18n="[placeholder]Message"></textarea>
+         <textarea class="jsxc-textinput" placeholder="{{t "Message"}}"></textarea>
       </div>
    </div>
 </li>

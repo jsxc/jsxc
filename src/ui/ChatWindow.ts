@@ -30,6 +30,8 @@ export default class ChatWindow {
 
    private readonly HIGHTLIGHT_DURATION = 2000;
 
+   private minimized:boolean = false;
+
    constructor(private account:Account, private contact:Contact) {
       let template = chatWindowTemplate({
          accountId: account.getUid(),
@@ -274,11 +276,17 @@ export default class ChatWindow {
          jsxc.otr.toggleTransfer(bid);
       });
 
-      this.element.find('.jsxc-window-bar').click(this.toggle);
+      this.element.find('.jsxc-window-bar').click(() => {
+         this.toggle();
+      });
 
-      this.element.find('.jsxc-close').click(this.close);
+      this.element.find('.jsxc-close').click(() => {
+         this.account.closeChatWindow(this);
+      });
 
-      this.element.find('.jsxc-clear').click(this.clear);
+      this.element.find('.jsxc-clear').click(() => {
+         this.clear();
+      });
 
       this.element.find('.jsxc-sendFile').click(function() {
          $('body').click();
@@ -432,7 +440,7 @@ export default class ChatWindow {
 
    private initEmoticonMenu() {
       let inputElement = this.element.find('.jsxc-textinput');
-      let emoticonListElement = this.element.find('.jsxc-emoticons ul');
+      let emoticonListElement = this.element.find('.jsxc-menu-emoticons ul');
       let emoticonList = Emoticons.getDefaultEmoticonList();
 
       emoticonList.forEach(emoticon => {

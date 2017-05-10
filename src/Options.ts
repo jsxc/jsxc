@@ -1,5 +1,19 @@
 export default class Options {
 
+   public static get(key) {
+      if (jsxc && jsxc.bid) {
+         var local = jsxc.storage.getUserItem('options') || {};
+
+         return (typeof local[key] !== 'undefined') ? local[key] : Options[key];
+      }
+
+      return (typeof Options[key] !== 'undefined') ? Options[key] : {};
+   };
+
+   public static set(key, value) {
+      jsxc.storage.updateItem('options', key, value, true);
+   };
+
    /** name of container application (e.g. owncloud or SOGo) */
    private static app_name = 'web applications';
 
@@ -147,7 +161,7 @@ export default class Options {
    private static popupDuration = 6000;
 
    /** Absolute path root of JSXC installation */
-   private static root = '';
+   private static root = '/jsxc4.0/';
 
    /**
     * This function decides wether the roster will be displayed or not if no
@@ -301,18 +315,4 @@ export default class Options {
    };
 
    private static storage;
-
-   public static get(key) {
-      if (jsxc && jsxc.bid) {
-         var local = jsxc.storage.getUserItem('options') || {};
-
-         return (typeof local[key] !== 'undefined') ? local[key] : jsxc.options[key];
-      }
-
-      return Options[key] || {};
-   };
-
-   public static set(key, value) {
-      jsxc.storage.updateItem('options', key, value, true);
-   };
 };

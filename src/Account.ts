@@ -31,6 +31,8 @@ export default class Account {
 
    private contacts = {};
 
+   private windows = {};
+
    constructor(boshUrl: string, jid: string, sid: string, rid:string);
    constructor(boshUrl: string, jid: string, password: string);
    constructor(uid:string);
@@ -107,6 +109,20 @@ export default class Account {
       let chatWindow = new ChatWindow(this, contact);
 
       ChatWindowList.get().add(chatWindow);
+
+      this.windows[contact.getId()] = chatWindow;
+
+      this.save();
+   }
+
+   public closeChatWindow(chatWindow:ChatWindow) {
+      let id = chatWindow.getContact().getId();
+
+      chatWindow.close();
+
+      delete this.windows[id];
+
+      this.save();
    }
 
    public getStorage() {
@@ -128,7 +144,8 @@ export default class Account {
    private save() {
       this.getStorage().setItem('account', {
          connectionParameters: this.connectionParameters,
-         contacts: Object.keys(this.contacts)
+         contacts: Object.keys(this.contacts),
+         windows: Object.keys(this.windows)
       });
    }
 
@@ -145,6 +162,13 @@ export default class Account {
          this.contacts[id] = new Contact(this, id);
 
          Roster.get().add(this.contacts[id]);
+      });
+
+      storedAccountData.windows.forEach((id) => { console.log('restore window for contact id', id)
+         let chatWindow = new ChatWindow(this, this.contacts[id]);
+         this.windows[id] = chatWindow;
+
+         ChatWindowList.get().add(chatWindow);
       });
    }
 }
