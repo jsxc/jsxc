@@ -1193,6 +1193,8 @@ jsxc.gui = {
       $('[data-bid="' + bid + '"]').each(function() {
          var el = $(this);
 
+         el.attr('data-status', pres);
+
          if (!el.hasClass('jsxc_statusIndicator')) {
             el = el.find('.jsxc_statusIndicator');
          }
