@@ -307,6 +307,6 @@
     "Load_older_messages": "下載舊訊息",
     "Message_history": "訊息紀錄",
     "setting-mam-enable": "打開後就可以從伺服器取得儲存訊息",
-    "You_have_to_go_online_": null
+    "You_have_to_go_online_": "必須要上線才能執行這個動作。"
   }
 }

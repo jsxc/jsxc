@@ -236,12 +236,12 @@
     "muc_removed_info_membersonly": "__nickname__is verwijderd van de kamer, door de wijziging naar alleen voor leden. Je bent geen lid.",
     "muc_removed_shutdown": "Je bent verwijderd van de kamer, omdat de MUC dienst is uitgeschakeld",
     "Reason": "Reden",
-    "message_not_send": "Je bericht was niet verzonden door een error",
+    "message_not_send": "Je bericht was niet verzonden door een foutmelding",
     "message_not_send_item-not-found": "Je bericht was niet verzonden omdat de kamer niet bestaat",
     "message_not_send_forbidden": "Je bericht was niet verzonden omdat er geen spraak is in deze kamer",
     "message_not_send_not-acceptable": "Je bericht is niet verzonden omdat je geen deelnemer bent van deze kamer",
-    "message_not_send_resource-unavailable": null,
-    "message_not_send_remote-server-not-found": null,
+    "message_not_send_resource-unavailable": "Je bericht was niet verzonden omdat je gesprekspartner niet verbonden is",
+    "message_not_send_remote-server-not-found": "Je bericht was niet verzonden omdat de server tot server verbinding faalde",
     "This_room_has_been_closed": "Deze kamer is gesloten",
     "Room_logging_is_enabled": "Kamerlog is ingeschakeld",
     "A_password_is_required": "Een wachtwoord is vereist",
@@ -263,7 +263,7 @@
     "No_local_audio_device": "Lokaal audioapparaat niet aanwezig.",
     "No_local_video_device": "Lokaal videoapparaat niet aanwezig.",
     "Ok": "Ok",
-    "PermissionDeniedError": "Jij of je browser weigerde media toestemming",
+    "PermissionDeniedError": "De media toestemming is geweigerd voor jou of je browser",
     "Use_local_audio_device": "Lokaal audioapparaat gebruiken.",
     "Use_local_video_device": "Lokaal videoapparaat gebruiken.",
     "is_": "is __status__",
@@ -297,7 +297,7 @@
     "Stream_started": "Stream gestart",
     "HTTPS_REQUIRED": "Deze actie vereist een versleutelde verbinding.",
     "EXTENSION_UNAVAILABLE": "Je hebt een browser extensie/addon nodig.",
-    "UNKNOWN_ERROR": "Een onbekende error vond plaats.",
+    "UNKNOWN_ERROR": "Een onbekende foutmelding vond plaats.",
     "Install_extension": "Installeer extensie om scherm delen te gebruiken: ",
     "Connection_accepted": "Verbinding geaccepteerd",
     "Stream_terminated": "Stream beëindigd",
@@ -307,6 +307,6 @@
     "Load_older_messages": "Oudere berichten laden",
     "Message_history": "Berichten geschiedenis",
     "setting-mam-enable": "Wanneer ingeschakeld ontvang je opgeslagen berichten van de server.",
-    "You_have_to_go_online_": null
+    "You_have_to_go_online_": "Je dient online te gaan om deze operatie uit te voeren"
   }
 }
