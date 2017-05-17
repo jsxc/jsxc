@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: jsxc.lib.xmpp.mam.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: jsxc.lib.xmpp.mam.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Implements XEP-0313: Message Archive Management.
+ *
+ * @namespace jsxc.xmpp.mam
+ * @see {@link https://xmpp.org/extensions/xep-0313.html}
+ */
+jsxc.xmpp.mam = {
+   conn: null
+};
+
+jsxc.xmpp.mam.init = function() {
+   var self = jsxc.xmpp.mam;
+
+   self.conn = jsxc.xmpp.conn;
+};
+
+jsxc.xmpp.mam.isEnabled = function() {
+   var mamOptions = jsxc.options.get('mam') || {};
+
+   var features = jsxc.storage.getUserItem('features') || [];
+   var hasFeatureMam2 = features.indexOf(Strophe.NS.MAM) >= 0;
+
+   return hasFeatureMam2 &amp;&amp; mamOptions.enable;
+};
+
+jsxc.xmpp.mam.nextMessages = function(bid) {
+   var self = jsxc.xmpp.mam;
+   var buddyData = jsxc.storage.getUserItem('buddy', bid) || {};
+   var lastArchiveUid = buddyData.lastArchiveUid;
+   var queryId = self.conn.getUniqueId();
+   var mamOptions = jsxc.options.get('mam') || {};
+   var history = jsxc.storage.getUserItem('history', bid) || [];
+
+   if (buddyData.archiveExhausted) {
+      jsxc.debug('No more archived messages.');
+      return;
+   }
+
+   var queryOptions = {
+      queryid: queryId,
+      before: lastArchiveUid || '',
+      with: bid,
+      onMessage: function() {
+         var args = Array.from(arguments);
+         args.unshift(bid);
+         self.onMessage.apply(this, args);
+         return true;
+      },
+      onComplete: function() {
+         var args = Array.from(arguments);
+         args.unshift(bid);
+         self.onComplete.apply(this, args);
+         return true;
+      }
+   };
+
+   var oldestMessageId = history[history.length - 1];
+
+   if (oldestMessageId &amp;&amp; !lastArchiveUid) {
+      var oldestMessage = new jsxc.Message(oldestMessageId);
+      queryOptions.end = (new Date(oldestMessage.stamp)).toISOString();
+   }
+
+   if (mamOptions.max) {
+      queryOptions.max = mamOptions.max;
+   }
+
+   self.conn.mam.query(undefined, queryOptions);
+};
+
+jsxc.xmpp.mam.onMessage = function(bid, stanza) {
+   stanza = $(stanza);
+   var result = stanza.find('result[xmlns="' + Strophe.NS.MAM + '"]');
+   var queryId = result.attr('queryid');
+
+   if (result.length !== 1) {
+      return;
+   }
+
+   var forwarded = result.find('forwarded[xmlns="' + jsxc.CONST.NS.FORWARD + '"]');
+   var message = forwarded.find('message');
+   var messageId = $(message).attr('id');
+
+   if (message.length !== 1) {
+      return;
+   }
+
+   var from = message.attr('from');
+   var to = message.attr('to');
+
+   if (jsxc.jidToBid(from) !== bid &amp;&amp; jsxc.jidToBid(to) !== bid) {
+      return;
+   }
+
+   var delay = forwarded.find('delay[xmlns="urn:xmpp:delay"]');
+   var stamp = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
+   stamp = stamp.getTime();
+
+   var body = $(message).find('body:first').text();
+
+   if (!body || body.match(/\?OTR/i)) {
+      return true;
+   }
+
+   var direction = (jsxc.jidToBid(to) === bid) ? jsxc.Message.OUT : jsxc.Message.IN;
+
+   var win = jsxc.gui.window.get(bid);
+   var textarea = win.find('.jsxc_textarea');
+   if (textarea.find('[id="' + messageId + '"]').length === 0) {
+      var pseudoChatElement = $('&lt;div>');
+      pseudoChatElement.attr('id', messageId.replace(/:/g, '-'));
+      pseudoChatElement.attr('data-queryId', queryId);
+
+      var lastMessage = textarea.find('[data-queryId="' + queryId + '"]').last();
+      var history = jsxc.storage.getUserItem('history', bid) || [];
+
+      if (history.indexOf(messageId) &lt; 0) {
+         if (lastMessage.length === 0) {
+            textarea.prepend(pseudoChatElement);
+            history.push(messageId);
+         } else {
+            lastMessage.after(pseudoChatElement);
+            history.splice(history.indexOf(lastMessage.attr('id').replace(/-/g, ':')), 0, messageId);
+         }
+      }
+
+      jsxc.storage.setUserItem('history', bid, history);
+   }
+
+   jsxc.gui.window.postMessage({
+      _uid: messageId,
+      bid: bid,
+      direction: direction,
+      msg: body,
+      encrypted: false,
+      forwarded: true,
+      stamp: stamp
+   });
+};
+
+jsxc.xmpp.mam.onComplete = function(bid, stanza) {
+   stanza = $(stanza);
+   var fin = stanza.find('fin[xmlns="' + Strophe.NS.MAM + '"]');
+   var buddyData = jsxc.storage.getUserItem('buddy', bid) || {};
+   var win = jsxc.gui.window.get(bid);
+
+   buddyData.archiveExhausted = fin.attr('complete') === 'true';
+   buddyData.lastArchiveUid = fin.find('first').text();
+
+   if (buddyData.archiveExhausted) {
+      win.find('.jsxc_fade').removeClass('jsxc_mam-enable');
+   }
+
+   jsxc.storage.setUserItem('buddy', bid, buddyData);
+};
+
+jsxc.xmpp.mam.initWindow = function(ev, win) {
+   var self = jsxc.xmpp.mam;
+
+   if (!jsxc.xmpp.conn &amp;&amp; jsxc.master) {
+      $(document).one('attached.jsxc', function() {
+         self.initWindow(null, win);
+      });
+      return;
+   }
+
+   if (!jsxc.master) {
+      return;
+   }
+
+   $(document).on('features.jsxc', function() {
+      jsxc.xmpp.mam.addLoadButton(win);
+   });
+
+   var features = jsxc.storage.getUserItem('features');
+   if (features !== null) {
+      // features.jsxc was already fired
+      jsxc.xmpp.mam.addLoadButton(win);
+   }
+};
+
+jsxc.xmpp.mam.addLoadButton = function(win) {
+   if (!jsxc.xmpp.mam.isEnabled()) {
+      return;
+   }
+
+   var classNameShow = 'jsxc_show';
+   var classNameMamEnable = 'jsxc_mam-enable';
+   var bid = win.attr('data-bid');
+
+   var element = $('&lt;div>');
+   element.addClass('jsxc_mam-load-more');
+   element.appendTo(win.find('.slimScrollDiv'));
+   element.click(function() {
+      jsxc.xmpp.mam.nextMessages(bid);
+   });
+   element.text($.t('Load_older_messages'));
+
+   win.find('.jsxc_textarea').scroll(function() {
+      var buddyData = jsxc.storage.getUserItem('buddy', bid) || {};
+
+      if (this.scrollTop &lt; 42 &amp;&amp; !buddyData.archiveExhausted) {
+         element.addClass(classNameShow);
+      } else {
+         element.removeClass(classNameShow);
+      }
+
+      if (!buddyData.archiveExhausted) {
+         win.find('.jsxc_fade').addClass(classNameMamEnable);
+      }
+   });
+
+   win.find('.jsxc_textarea').scroll();
+};
+
+$(document).on('attached.jsxc', jsxc.xmpp.mam.init);
+$(document).on('init.window.jsxc', jsxc.xmpp.mam.initWindow);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.fileTransfer.html">fileTransfer</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li><li><a href="jsxc.xmpp.chatState.html">chatState</a></li><li><a href="jsxc.xmpp.httpUpload.html">httpUpload</a></li><li><a href="jsxc.xmpp.mam.html">mam</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed May 17 2017 13:19:50 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: jsxc.lib.tab.js</title>
+    <title>JSDoc: Namespace: mam</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,78 +17,105 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: jsxc.lib.tab.js</h1>
+    <h1 class="page-title">Namespace: mam</h1>
 
     
 
 
 
+
+<section>
+
+<header>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>/**
- * Provides communication between tabs.
- *
- * @namespace jsxc.tab
- */
-jsxc.tab = {
-   CONST: {
-      MASTER: 'master',
-      SLAVE: 'slave'
-   },
+        <h2>
+            <span class="ancestors"><a href="jsxc.html">jsxc</a><a href="jsxc.xmpp.html">.xmpp</a>.</span>mam</h2>
+        
+    
+</header>
 
-   exec: function(target, cmd, params) {
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Implements XEP-0313: Message Archive Management.</div>
+        
 
-      params = Array.prototype.slice.call(arguments, 2);
-      if (params.length === 1 &amp;&amp; $.isArray(params[0])) {
-         params = params[0];
-      }
+        
 
-      if (target === jsxc.tab.CONST[jsxc.master ? 'MASTER' : 'SLAVE']) {
-         jsxc.exec(cmd, params);
 
-         if (jsxc.master) {
-            return;
-         }
-      }
+<dl class="details">
 
-      jsxc.storage.setUserItem('_cmd', {
-         target: target,
-         cmd: cmd,
-         params: params,
-         rnd: Math.random() // force storage event
-      });
-   },
+    
 
-   /**
-    * Execute command in master tab.
-    *
-    * @param  {String} cmd Command
-    * @param  {String[]} params List of parameters
-    */
-   execMaster: function() {
-      var args = Array.prototype.slice.call(arguments);
-      args.unshift(jsxc.tab.CONST.MASTER);
+    
 
-      jsxc.tab.exec.apply(this, args);
-   },
+    
 
-   /**
-    * Execute command in all slave tabs.
-    *
-    * @param  {String} cmd Command
-    * @param  {String[]} params List of parameters
-    */
-   execSlave: function() {
-      var args = Array.prototype.slice.call(arguments);
-      args.unshift(jsxc.tab.CONST.SLAVE);
+    
 
-      jsxc.tab.exec.apply(this, args);
-   }
-};
-</code></pre>
-        </article>
-    </section>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jsxc.lib.xmpp.mam.js.html">jsxc.lib.xmpp.mam.js</a>, <a href="jsxc.lib.xmpp.mam.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://xmpp.org/extensions/xep-0313.html">https://xmpp.org/extensions/xep-0313.html</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 

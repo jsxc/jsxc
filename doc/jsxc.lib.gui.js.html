@@ -85,7 +85,21 @@ jsxc.gui = {
    queryActions: {
       /** xmpp:JID?message[;body=TEXT] */
       message: function(jid, params) {
-         var win = jsxc.gui.window.open(jsxc.jidToBid(jid));
+         var bid = jsxc.jidToBid(jid);
+
+         if (!jsxc.storage.getUserItem('buddy', bid)) {
+            // init contact
+            jsxc.storage.saveBuddy(bid, {
+               jid: jid,
+               name: bid,
+               status: 0,
+               sub: 'none',
+               res: [],
+               rnd: Math.random()
+            });
+         }
+
+         var win = jsxc.gui.window.open(bid);
 
          if (params &amp;&amp; typeof params.body === 'string') {
             win.find('.jsxc_textinput').val(params.body);
@@ -266,92 +280,9 @@ jsxc.gui = {
 
       ri.find('.jsxc_name').attr('title', info);
 
-      jsxc.gui.updateAvatar(ri.add(we.find('.jsxc_bar')), data.jid, data.avatar);
+      jsxc.gui.avatar.update(ri.add(we.find('.jsxc_bar')), data.jid, data.avatar);
 
       $(document).trigger('update.gui.jsxc', [bid]);
-   },
-
-   /**
-    * Update avatar on all given elements.
-    *
-    * @memberOf jsxc.gui
-    * @param {jQuery} el Elements with subelement .jsxc_avatar
-    * @param {string} jid Jid
-    * @param {string} aid Avatar id (sha1 hash of image)
-    */
-   updateAvatar: function(el, jid, aid) {
-
-      var setAvatar = function(src) {
-         if (src === 0 || src === '0') {
-            if (typeof jsxc.options.defaultAvatar === 'function') {
-               jsxc.options.defaultAvatar.call(el, jid);
-               return;
-            }
-            jsxc.gui.avatarPlaceholder(el.find('.jsxc_avatar'), jid);
-            return;
-         }
-
-         el.find('.jsxc_avatar').removeAttr('style');
-
-         el.find('.jsxc_avatar').css({
-            'background-image': 'url(' + src + ')',
-            'text-indent': '999px'
-         });
-      };
-
-      if (typeof aid === 'undefined') {
-         setAvatar(0);
-         return;
-      }
-
-      var avatarSrc = jsxc.storage.getUserItem('avatar', aid);
-
-      if (!jsxc.master &amp;&amp; !avatarSrc) {
-         // force avatar placeholder for slave tab, until master tab requested vCard
-         avatarSrc = 0;
-      }
-
-      if (avatarSrc !== null) {
-         setAvatar(avatarSrc);
-      } else {
-         var handler_cb = function(stanza) {
-            jsxc.debug('vCard', stanza);
-
-            var vCard = $(stanza).find("vCard > PHOTO");
-            var src;
-
-            if (vCard.length === 0) {
-               jsxc.debug('No photo provided');
-               src = '0';
-            } else if (vCard.find('EXTVAL').length > 0) {
-               src = vCard.find('EXTVAL').text();
-            } else {
-               var img = vCard.find('BINVAL').text();
-               var type = vCard.find('TYPE').text();
-               src = 'data:' + type + ';base64,' + img;
-            }
-
-            // concat chunks
-            src = src.replace(/[\t\r\n\f]/gi, '');
-
-            jsxc.storage.setUserItem('avatar', aid, src);
-            setAvatar(src);
-         };
-
-         var error_cb = function(msg) {
-            jsxc.warn('Could not load vcard.', msg);
-
-            jsxc.storage.setUserItem('avatar', aid, 0);
-            setAvatar(0);
-         };
-
-         // workaround for https://github.com/strophe/strophejs/issues/172
-         if (Strophe.getBareJidFromJid(jid) === Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid)) {
-            jsxc.xmpp.conn.vcard.get(handler_cb, error_cb);
-         } else {
-            jsxc.xmpp.conn.vcard.get(handler_cb, Strophe.getBareJidFromJid(jid), error_cb);
-         }
-      }
    },
 
    /**
@@ -905,7 +836,7 @@ jsxc.gui = {
 
       var data = jsxc.storage.getUserItem('buddy', bid);
 
-      if (data) {
+      if (data &amp;&amp; data.res) {
          // Display resources and corresponding information
          var i, j, res, identities, identity = null,
             cap, client;
@@ -1292,9 +1223,11 @@ jsxc.gui = {
 
          el.attr('data-status', pres);
 
-         if (el.find('.jsxc_avatar').length > 0) {
-            el = el.find('.jsxc_avatar');
+         if (!el.hasClass('jsxc_statusIndicator')) {
+            el = el.find('.jsxc_statusIndicator');
          }
+
+         el.attr('data-status', pres);
 
          el.removeClass('jsxc_' + jsxc.CONST.STATUS.join(' jsxc_')).addClass('jsxc_' + pres);
       });
@@ -1397,6 +1330,9 @@ jsxc.gui = {
          var jid = href.split('?')[0];
          var action, params = {};
 
+         element.attr('data-bid', jsxc.jidToBid(jid));
+         jsxc.gui.update(jsxc.jidToBid(jid));
+
          if (href.indexOf('?') &lt; 0) {
             action = 'message';
          } else {
@@ -1418,7 +1354,11 @@ jsxc.gui = {
             element.off('click').click(function(ev) {
                ev.stopPropagation();
 
-               jsxc.gui.queryActions[action].call(jsxc, jid, params);
+               if (jsxc.xmpp.conn &amp;&amp; jsxc.xmpp.conn.connected) {
+                  jsxc.gui.queryActions[action].call(jsxc, jid, params);
+               } else {
+                  jsxc.gui.showNotification($.t('no_connection'), $.t('You_have_to_go_online_'));
+               }
 
                return false;
             });
@@ -1656,7 +1596,8 @@ jsxc.gui.roster = {
       jsxc.notice.load();
 
       jsxc.gui.roster.ready = true;
-      $(document).trigger('ready.roster.jsxc');
+      $(document).trigger('ready.roster.jsxc', [rosterState]);
+      $(document).trigger('ready-roster-jsxc', [rosterState]);
    },
 
    /**
@@ -2784,6 +2725,7 @@ jsxc.gui.window = {
       }
 
       msgDiv.attr('title', message.error);
+      msgDiv.attr('data-error-msg', message.error);
 
       if (message.attachment &amp;&amp; message.attachment.name) {
          var attachment = $('&lt;div>');
@@ -2828,8 +2770,12 @@ jsxc.gui.window = {
          $('[data-bid="' + bid + '"]').find('.jsxc_lastmsg .jsxc_text').html(msg);
       }
 
-      if (jsxc.Message.getDOM(uid).length > 0) {
-         jsxc.Message.getDOM(uid).replaceWith(msgDiv);
+      var currentMessageElement = jsxc.Message.getDOM(uid);
+      if (currentMessageElement.length > 0) {
+         if (currentMessageElement.attr('data-queryId')) {
+            msgDiv.attr('data-queryId', currentMessageElement.attr('data-queryId'));
+         }
+         currentMessageElement.replaceWith(msgDiv);
       } else {
          win.find('.jsxc_textarea').append(msgDiv);
       }
@@ -2843,7 +2789,7 @@ jsxc.gui.window = {
             msgDiv.attr('data-bid', jsxc.jidToBid(message.sender.jid));
 
             var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(message.sender.jid)) || {};
-            jsxc.gui.updateAvatar(msgDiv, jsxc.jidToBid(message.sender.jid), data.avatar);
+            jsxc.gui.avatar.update(msgDiv, jsxc.jidToBid(message.sender.jid), data.avatar);
 
             title = jsxc.jidToBid(message.sender.jid);
          }
@@ -2874,7 +2820,9 @@ jsxc.gui.window = {
       jsxc.gui.detectUriScheme(win);
       jsxc.gui.detectEmail(win);
 
-      jsxc.gui.window.scrollDown(bid);
+      if (!message.forwarded) {
+         jsxc.gui.window.scrollDown(bid);
+      }
    },
 
    /**
@@ -2942,10 +2890,16 @@ jsxc.gui.window = {
 
       jsxc.storage.setUserItem('history', bid, []);
 
+      var buddyData = jsxc.storage.getUserItem('buddy', bid) || {};
+      delete buddyData.lastArchiveUid;
+      delete buddyData.archiveExhausted;
+      jsxc.storage.setUserItem('buddy', bid, buddyData);
+
       var win = jsxc.gui.window.get(bid);
 
       if (win.length > 0) {
          win.find('.jsxc_textarea').empty();
+         win.find('.jsxc_textarea').scroll();
       }
    },
 
@@ -3163,13 +3117,13 @@ jsxc.gui.template.get = function(name, bid, msg) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.fileTransfer.html">fileTransfer</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li><li><a href="jsxc.xmpp.chatState.html">chatState</a></li><li><a href="jsxc.xmpp.httpUpload.html">httpUpload</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="jsxc.Message.html">Message</a></li></ul><h3>Namespaces</h3><ul><li><a href="jsxc.html">jsxc</a></li><li><a href="jsxc.fileTransfer.html">fileTransfer</a></li><li><a href="jsxc.gui.html">gui</a></li><li><a href="jsxc.gui.dialog.html">dialog</a></li><li><a href="jsxc.gui.queryActions.html">queryActions</a></li><li><a href="jsxc.gui.roster.html">roster</a></li><li><a href="jsxc.gui.window.html">window</a></li><li><a href="jsxc.muc.html">muc</a></li><li><a href="jsxc.notification.html">notification</a></li><li><a href="jsxc.options.html">options</a></li><li><a href="jsxc.otr.html">otr</a></li><li><a href="jsxc.storage.html">storage</a></li><li><a href="jsxc.tab.html">tab</a></li><li><a href="jsxc.webrtc.html">webrtc</a></li><li><a href="jsxc.xmpp.html">xmpp</a></li><li><a href="jsxc.xmpp.bookmarks.html">bookmarks</a></li><li><a href="jsxc.xmpp.carbons.html">carbons</a></li><li><a href="jsxc.xmpp.chatState.html">chatState</a></li><li><a href="jsxc.xmpp.httpUpload.html">httpUpload</a></li><li><a href="jsxc.xmpp.mam.html">mam</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Feb 14 2017 16:15:49 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed May 17 2017 13:19:50 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

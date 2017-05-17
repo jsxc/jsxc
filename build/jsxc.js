@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.2.0-beta.2 - 2017-04-28
+ * jsxc v3.2.0 - 2017-05-17
  * 
  * Copyright (c) 2017 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.2.0-beta.2
+ * @version 3.2.0
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.2.0-beta.2',
+   version: '3.2.0',
 
    /** True if i'm the master */
    master: false,
@@ -3670,6 +3670,8 @@ jsxc.gui = {
       $('[data-bid="' + bid + '"]').each(function() {
          var el = $(this);
 
+         el.attr('data-status', pres);
+
          if (!el.hasClass('jsxc_statusIndicator')) {
             el = el.find('.jsxc_statusIndicator');
          }
@@ -3801,7 +3803,11 @@ jsxc.gui = {
             element.off('click').click(function(ev) {
                ev.stopPropagation();
 
-               jsxc.gui.queryActions[action].call(jsxc, jid, params);
+               if (jsxc.xmpp.conn && jsxc.xmpp.conn.connected) {
+                  jsxc.gui.queryActions[action].call(jsxc, jid, params);
+               } else {
+                  jsxc.gui.showNotification($.t('no_connection'), $.t('You_have_to_go_online_'));
+               }
 
                return false;
             });

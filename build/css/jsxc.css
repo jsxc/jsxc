@@ -2552,7 +2552,7 @@ fieldset[disabled]
   width: 14px;
   height: 100%;
   position: absolute;
-  left: -14px !important;
+  right: 100%;
   top: 0;
   z-index: 110;
   background-color: transparent;

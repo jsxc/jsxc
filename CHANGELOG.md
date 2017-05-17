@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## 3.2.0 - 2017-05-17
 ### Added
 - [#150](https://github.com/jsxc/jsxc/issues/150) add Message Archive Management (XEP-0313)
 - [#464](https://github.com/jsxc/jsxc/issues/464) respond to software version request (XEP-0092)
@@ -22,6 +24,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - [#515](https://github.com/jsxc/jsxc/issues/515) fix add contact in slave tab
 - fix initial roster loading
 - fix xmpp message uri to unknown jid
+- fix uri scheme handling if offline
+- fix hiding of offline users in roster
 
 ### Changed
 - update dependencies
