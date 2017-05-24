@@ -754,6 +754,7 @@ jsxc.muc = {
       });
 
       var destroy = $('<a>');
+      destroy.attr('href', '#');
       destroy.text($.t('Destroy'));
       destroy.addClass('jsxc_destroy');
       destroy.hide();
@@ -764,6 +765,7 @@ jsxc.muc = {
       win.find('.jsxc_settings ul').append($('<li>').append(destroy));
 
       var configure = $('<a>');
+      configure.attr('href', '#');
       configure.text($.t('Configure'));
       configure.addClass('jsxc_configure');
       configure.hide();
@@ -792,6 +794,7 @@ jsxc.muc = {
       }
 
       var leave = $('<a>');
+      leave.attr('href', '#');
       leave.text($.t('Leave'));
       leave.addClass('jsxc_leave');
       leave.click(function() {
