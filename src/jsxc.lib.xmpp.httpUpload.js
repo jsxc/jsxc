@@ -322,8 +322,8 @@ jsxc.xmpp.httpUpload.failedRequestSlotCB = function(stanza, cb) {
    });
 };
 
-$(document).on('stateChange.jsxc', function(ev, state) {
-   if (state === jsxc.CONST.STATE.READY) {
+$(document).on('stateUIChange.jsxc', function(ev, state) {
+   if (state === jsxc.CONST.UISTATE.INITIATING) {
       jsxc.xmpp.httpUpload.init();
    }
 });
