@@ -1616,6 +1616,14 @@ jsxc.muc = {
 
          return html.get(0);
       }
+   },
+
+   isGroupchat: function(jid) {
+      var bid = jsxc.jidToBid(jid);
+
+      var userData = jsxc.storage.setUserItem('buddy', bid) || {};
+
+      return userData.type === 'groupchat';
    }
 };
 
