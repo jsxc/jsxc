@@ -199,6 +199,10 @@ jsxc.xmpp = {
       jsxc.storage.removeUserItem('windowlist');
       jsxc.storage.removeUserItem('unreadMsg');
 
+      if (jsxc.gui.favicon) {
+         jsxc.gui.favicon.badge(0);
+      }
+
       // Hide dropdown menu
       $('body').click();
 
