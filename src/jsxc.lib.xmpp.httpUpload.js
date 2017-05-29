@@ -162,7 +162,8 @@ jsxc.xmpp.httpUpload.sendFile = function(file, message) {
 
          message.delete();
       } else if (data.get && data.put) {
-         // slot received, start upload
+         jsxc.debug('slot received, start upload to ' + data.put);
+
          self.uploadFile(data.put, file, message, function() {
             var a = $('<a>');
             a.attr('href', data.get);
