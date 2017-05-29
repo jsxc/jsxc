@@ -2055,6 +2055,10 @@ jsxc.gui.window = {
       win.find('.jsxc_sendFile').click(function() {
          $('body').click();
 
+         if ($(this).hasClass('jsxc_disabled')) {
+            return;
+         }
+
          jsxc.gui.window.sendFile(bid);
       });
 
