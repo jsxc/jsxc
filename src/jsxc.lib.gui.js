@@ -1644,7 +1644,7 @@ jsxc.gui.roster = {
       while (history.length > i) {
          var message = new jsxc.Message(history[i]);
          if (message.direction !== jsxc.Message.SYS) {
-            $('[data-bid="' + bid + '"]').find('.jsxc_lastmsg .jsxc_text').html(message.msg);
+            jsxc.gui.window.setLastMsg(bid, message.msg);
             break;
          }
          i++;
@@ -2743,7 +2743,7 @@ jsxc.gui.window = {
       }
 
       if (direction !== 'sys') {
-         $('[data-bid="' + bid + '"]').find('.jsxc_lastmsg .jsxc_text').html(msg);
+         jsxc.gui.window.setLastMsg(bid, msg);
       }
 
       var currentMessageElement = jsxc.Message.getDOM(uid);
@@ -2810,6 +2810,15 @@ jsxc.gui.window = {
     */
    setText: function(bid, text) {
       jsxc.gui.window.get(bid).find('.jsxc_textinput').val(text);
+   },
+
+   setLastMsg: function(bid, msg) {
+      var lastMsgTextElement = $('[data-bid="' + bid + '"]').find('.jsxc_lastmsg .jsxc_text');
+
+      lastMsgTextElement.html(msg);
+      lastMsgTextElement.find('a').each(function() {
+         $(this).replaceWith('<span>' + $(this).text() + '</span>');
+      });
    },
 
    /**
