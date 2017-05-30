@@ -36,7 +36,15 @@ jsxc.fileTransfer.startGuiAction = function(jid) {
    var res = Strophe.getResourceFromJid(jid);
 
    if (!res && !jsxc.xmpp.httpUpload.ready) {
-      jsxc.fileTransfer.selectResource(bid, jsxc.fileTransfer.startGuiAction);
+      if (jsxc.fileTransfer.isWebrtcCapable(bid)) {
+         jsxc.fileTransfer.selectResource(bid, jsxc.fileTransfer.startGuiAction);
+      } else {
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('No_proper_file_transfer_method_available')
+         });
+      }
 
       return;
    }
@@ -112,6 +120,19 @@ jsxc.fileTransfer.showFileSelection = function(jid) {
    });
 };
 
+jsxc.fileTransfer.showFileTooLarge = function(bid, file) {
+   var maxSize = jsxc.fileTransfer.formatByte(jsxc.options.get('httpUpload').maxSize);
+   var fileSize = jsxc.fileTransfer.formatByte(file.size);
+
+   jsxc.gui.window.postMessage({
+      bid: bid,
+      direction: jsxc.Message.SYS,
+      msg: $.t('File_too_large') + ' (' + fileSize + ' > ' + maxSize + ')'
+   });
+
+   jsxc.gui.window.hideOverlay(bid);
+};
+
 /**
  * Callback for file selector.
  *
@@ -128,22 +149,18 @@ jsxc.fileTransfer.fileSelected = function(jid, msg, file) {
    if (file.transportMethod !== 'webrtc' && jsxc.xmpp.httpUpload.ready && maxSize >= 0 && file.size > maxSize) {
       jsxc.debug('File too large for http upload.');
 
-      file.transportMethod = 'webrtc';
+      if (jsxc.fileTransfer.isWebrtcCapable(bid)) {
+         // try data channels
+         file.transportMethod = 'webrtc';
 
-      jsxc.fileTransfer.selectResource(bid, function(jid) {
-         jsxc.fileTransfer.fileSelected(jid, msg, file);
-      }, function() {
-         var maxSize = jsxc.fileTransfer.formatByte(jsxc.options.get('httpUpload').maxSize);
-         var fileSize = jsxc.fileTransfer.formatByte(file.size);
-
-         jsxc.gui.window.postMessage({
-            bid: bid,
-            direction: jsxc.Message.SYS,
-            msg: $.t('File_too_large') + ' (' + fileSize + ' > ' + maxSize + ')'
+         jsxc.fileTransfer.selectResource(bid, function(jid) {
+            jsxc.fileTransfer.fileSelected(jid, msg, file);
+         }, function() {
+            jsxc.fileTransfer.showFileTooLarge(bid, file);
          });
-
-         jsxc.gui.window.hideOverlay(bid);
-      });
+      } else {
+         jsxc.fileTransfer.showFileTooLarge(bid, file);
+      }
 
       return;
    } else if (!jsxc.xmpp.httpUpload.ready && Strophe.getResourceFromJid(jid)) {
@@ -232,6 +249,10 @@ jsxc.fileTransfer.updateIcons = function(bid) {
       win.find('.jsxc_sendFile').removeClass('jsxc_disabled');
 
       return;
+   } else if (!jsxc.fileTransfer.isWebrtcCapable(bid)) {
+      win.find('.jsxc_sendFile').addClass('jsxc_disabled');
+
+      return;
    }
 
    var jid = win.data('jid');
@@ -244,6 +265,10 @@ jsxc.fileTransfer.updateIcons = function(bid) {
    } else {
       win.find('.jsxc_sendFile').addClass('jsxc_disabled');
    }
+};
+
+jsxc.fileTransfer.isWebrtcCapable = function(bid) {
+   return !jsxc.muc.isGroupchat(bid);
 };
 
 $(document).on('update.gui.jsxc', function(ev, bid) {
