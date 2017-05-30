@@ -273,6 +273,7 @@ jsxc = {
          lng: lang,
          fallbackLng: 'en',
          resources: I18next,
+         returnNull: false,
          debug: jsxc.storage.getItem('debug') === true,
          interpolation: {
             prefix: '__',
