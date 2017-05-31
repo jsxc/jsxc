@@ -122,7 +122,7 @@ jsxc.Message.prototype.save = function() {
 
       ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
 
-      this.attachment.thumbnail = canvas.toDataURL();
+      this.attachment.thumbnail = canvas.toDataURL('image/jpeg', 0.3);
 
       if (this.direction === 'out') {
          // save storage

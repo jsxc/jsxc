@@ -165,20 +165,24 @@ jsxc.xmpp.httpUpload.sendFile = function(file, message) {
          jsxc.debug('slot received, start upload to ' + data.put);
 
          self.uploadFile(data.put, file, message, function() {
+            var attachment = message.attachment;
+            var metaString = attachment.type + '|' + attachment.size + '|' + attachment.name;
             var a = $('<a>');
             a.attr('href', data.get);
-            a.attr('data-name', message.attachment.name);
-            a.attr('data-type', message.attachment.type);
-            a.attr('data-size', message.attachment.size);
 
-            if (message.attachment.thumbnail) {
-               a.attr('data-thumbnail', message.attachment.thumbnail);
+            attachment.data = data.get;
+
+            if (attachment.thumbnail) {
+               var img = $('<img>');
+               img.attr('alt', 'Preview:' + metaString);
+               img.attr('src', attachment.thumbnail);
+               a.prepend(img);
+            } else {
+               a.text(metaString);
             }
 
-            a.text(data.get);
-            message.attachment.data = data.get;
-
-            message.msg = $('<span>').append(a).html();
+            message.msg = data.get;
+            message.htmlMsg = $('<span>').append(a).html();
             message.type = jsxc.Message.HTML;
             jsxc.gui.window.postMessage(message);
          });

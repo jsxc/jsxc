@@ -967,6 +967,7 @@ jsxc.xmpp = {
          var httpUploadElement = htmlBody.find('a[data-type][data-name][data-size]');
 
          if (httpUploadElement.length === 1) {
+            // deprecated syntax @since 3.2.1
             attachment = {
                type: httpUploadElement.attr('data-type'),
                name: httpUploadElement.attr('data-name'),
@@ -987,6 +988,44 @@ jsxc.xmpp = {
 
                jsxc.warn('Invalid file type, name or size.');
             }
+         } else if (htmlBody.find('>a').length === 1) {
+            var linkElement = htmlBody.find('>a');
+            var metaString = '';
+            var thumbnail;
+
+            if (linkElement.find('>img').length === 1) {
+               var imgElement = linkElement.find('>img');
+               var src = imgElement.attr('src') || '';
+               var altString = imgElement.attr('alt') || '';
+               metaString = altString.replace(/^Preview:/, '');
+
+               if (src.match(/^\s*data:[a-z]+\/[a-z0-9-+.*]+;base64,[a-z0-9=+/]+$/i)) {
+                  thumbnail = src;
+               }
+            } else {
+               metaString = linkElement.text();
+            }
+
+            var metaMatch = metaString.match(/^([a-z]+\/[a-z0-9-+.*]+)\|(\d+)\|([\s\w.,-]+)/);
+
+            if (metaMatch) {
+               attachment = {
+                  type: metaMatch[1],
+                  size: metaMatch[2],
+                  name: metaMatch[3],
+               };
+
+               if (thumbnail) {
+                  attachment.thumbnail = thumbnail;
+               }
+
+               if (linkElement.attr('href') && linkElement.attr('href').match(/^https?:\/\//)) {
+                  attachment.data = linkElement.attr('href');
+                  body = null;
+               }
+            } else {
+               jsxc.warn('Invalid file type, name or size.');
+            }
          }
       }
 
@@ -994,7 +1033,6 @@ jsxc.xmpp = {
          // @TODO check for file upload url after decryption
          jsxc.otr.objects[bid].receiveMsg(body, {
             _uid: mid,
-            foo: 'bar',
             stamp: stamp,
             forwarded: forwarded,
             attachment: attachment
@@ -1235,7 +1273,7 @@ jsxc.xmpp = {
     */
    sendMessage: function(message) {
       var bid = message.bid;
-      var msg = message.htmlMsg;
+      var msg = message.msg;
 
       var mucRoomNames = (jsxc.xmpp.conn.muc && jsxc.xmpp.conn.muc.roomNames) ? jsxc.xmpp.conn.muc.roomNames : [];
       var isMucBid = mucRoomNames.indexOf(bid) >= 0;
@@ -1269,18 +1307,14 @@ jsxc.xmpp = {
          id: message._uid
       });
 
-      if (message.type === jsxc.Message.HTML) {
-         xmlMsg.c("html", {
+      if (message.type === jsxc.Message.HTML && msg === message.msg && message.htmlMsg) {
+         xmlMsg.c('body').t(msg);
+
+         xmlMsg.up().c('html', {
             xmlns: Strophe.NS.XHTML_IM
-         });
-
-         // Omit StropheJS XEP-0071 limitations
-         var body = Strophe.xmlElement("body", {
+         }).c('body', {
             xmlns: Strophe.NS.XHTML
-         });
-         body.innerHTML = msg;
-
-         xmlMsg.node.appendChild(body);
+         }).h(message.htmlMsg).up();
       } else {
          xmlMsg.c('body').t(msg);
       }
