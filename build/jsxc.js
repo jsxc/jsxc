@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.2.0 - 2017-05-17
+ * jsxc v3.2.1 - 2017-06-01
  * 
  * Copyright (c) 2017 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.2.0
+ * @version 3.2.1
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.2.0',
+   version: '3.2.1',
 
    /** True if i'm the master */
    master: false,
@@ -293,6 +293,7 @@ jsxc = {
          lng: lang,
          fallbackLng: 'en',
          resources: I18next,
+         returnNull: false,
          debug: jsxc.storage.getItem('debug') === true,
          interpolation: {
             prefix: '__',
@@ -1187,6 +1188,10 @@ jsxc.xmpp = {
       jsxc.storage.removeUserItem('windowlist');
       jsxc.storage.removeUserItem('unreadMsg');
 
+      if (jsxc.gui.favicon) {
+         jsxc.gui.favicon.badge(0);
+      }
+
       // Hide dropdown menu
       $('body').click();
 
@@ -1951,6 +1956,7 @@ jsxc.xmpp = {
          var httpUploadElement = htmlBody.find('a[data-type][data-name][data-size]');
 
          if (httpUploadElement.length === 1) {
+            // deprecated syntax @since 3.2.1
             attachment = {
                type: httpUploadElement.attr('data-type'),
                name: httpUploadElement.attr('data-name'),
@@ -1971,6 +1977,44 @@ jsxc.xmpp = {
 
                jsxc.warn('Invalid file type, name or size.');
             }
+         } else if (htmlBody.find('>a').length === 1) {
+            var linkElement = htmlBody.find('>a');
+            var metaString = '';
+            var thumbnail;
+
+            if (linkElement.find('>img').length === 1) {
+               var imgElement = linkElement.find('>img');
+               var src = imgElement.attr('src') || '';
+               var altString = imgElement.attr('alt') || '';
+               metaString = altString.replace(/^Preview:/, '');
+
+               if (src.match(/^\s*data:[a-z]+\/[a-z0-9-+.*]+;base64,[a-z0-9=+/]+$/i)) {
+                  thumbnail = src;
+               }
+            } else {
+               metaString = linkElement.text();
+            }
+
+            var metaMatch = metaString.match(/^([a-z]+\/[a-z0-9-+.*]+)\|(\d+)\|([\s\w.,-]+)/);
+
+            if (metaMatch) {
+               attachment = {
+                  type: metaMatch[1],
+                  size: metaMatch[2],
+                  name: metaMatch[3],
+               };
+
+               if (thumbnail) {
+                  attachment.thumbnail = thumbnail;
+               }
+
+               if (linkElement.attr('href') && linkElement.attr('href').match(/^https?:\/\//)) {
+                  attachment.data = linkElement.attr('href');
+                  body = null;
+               }
+            } else {
+               jsxc.warn('Invalid file type, name or size.');
+            }
          }
       }
 
@@ -1978,7 +2022,6 @@ jsxc.xmpp = {
          // @TODO check for file upload url after decryption
          jsxc.otr.objects[bid].receiveMsg(body, {
             _uid: mid,
-            foo: 'bar',
             stamp: stamp,
             forwarded: forwarded,
             attachment: attachment
@@ -2219,7 +2262,7 @@ jsxc.xmpp = {
     */
    sendMessage: function(message) {
       var bid = message.bid;
-      var msg = message.htmlMsg;
+      var msg = message.msg;
 
       var mucRoomNames = (jsxc.xmpp.conn.muc && jsxc.xmpp.conn.muc.roomNames) ? jsxc.xmpp.conn.muc.roomNames : [];
       var isMucBid = mucRoomNames.indexOf(bid) >= 0;
@@ -2253,18 +2296,14 @@ jsxc.xmpp = {
          id: message._uid
       });
 
-      if (message.type === jsxc.Message.HTML) {
-         xmlMsg.c("html", {
+      if (message.type === jsxc.Message.HTML && msg === message.msg && message.htmlMsg) {
+         xmlMsg.c('body').t(msg);
+
+         xmlMsg.up().c('html', {
             xmlns: Strophe.NS.XHTML_IM
-         });
-
-         // Omit StropheJS XEP-0071 limitations
-         var body = Strophe.xmlElement("body", {
+         }).c('body', {
             xmlns: Strophe.NS.XHTML
-         });
-         body.innerHTML = msg;
-
-         xmlMsg.node.appendChild(body);
+         }).h(message.htmlMsg).up();
       } else {
          xmlMsg.c('body').t(msg);
       }
@@ -4121,7 +4160,7 @@ jsxc.gui.roster = {
       while (history.length > i) {
          var message = new jsxc.Message(history[i]);
          if (message.direction !== jsxc.Message.SYS) {
-            $('[data-bid="' + bid + '"]').find('.jsxc_lastmsg .jsxc_text').html(message.msg);
+            jsxc.gui.window.setLastMsg(bid, message.msg);
             break;
          }
          i++;
@@ -4531,6 +4570,10 @@ jsxc.gui.window = {
 
       win.find('.jsxc_sendFile').click(function() {
          $('body').click();
+
+         if ($(this).hasClass('jsxc_disabled')) {
+            return;
+         }
 
          jsxc.gui.window.sendFile(bid);
       });
@@ -5216,7 +5259,7 @@ jsxc.gui.window = {
       }
 
       if (direction !== 'sys') {
-         $('[data-bid="' + bid + '"]').find('.jsxc_lastmsg .jsxc_text').html(msg);
+         jsxc.gui.window.setLastMsg(bid, msg);
       }
 
       var currentMessageElement = jsxc.Message.getDOM(uid);
@@ -5283,6 +5326,15 @@ jsxc.gui.window = {
     */
    setText: function(bid, text) {
       jsxc.gui.window.get(bid).find('.jsxc_textinput').val(text);
+   },
+
+   setLastMsg: function(bid, msg) {
+      var lastMsgTextElement = $('[data-bid="' + bid + '"]').find('.jsxc_lastmsg .jsxc_text');
+
+      lastMsgTextElement.html(msg);
+      lastMsgTextElement.find('a').each(function() {
+         $(this).replaceWith('<span>' + $(this).text() + '</span>');
+      });
    },
 
    /**
@@ -5595,7 +5647,15 @@ jsxc.fileTransfer.startGuiAction = function(jid) {
    var res = Strophe.getResourceFromJid(jid);
 
    if (!res && !jsxc.xmpp.httpUpload.ready) {
-      jsxc.fileTransfer.selectResource(bid, jsxc.fileTransfer.startGuiAction);
+      if (jsxc.fileTransfer.isWebrtcCapable(bid)) {
+         jsxc.fileTransfer.selectResource(bid, jsxc.fileTransfer.startGuiAction);
+      } else {
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('No_proper_file_transfer_method_available')
+         });
+      }
 
       return;
    }
@@ -5671,6 +5731,19 @@ jsxc.fileTransfer.showFileSelection = function(jid) {
    });
 };
 
+jsxc.fileTransfer.showFileTooLarge = function(bid, file) {
+   var maxSize = jsxc.fileTransfer.formatByte(jsxc.options.get('httpUpload').maxSize);
+   var fileSize = jsxc.fileTransfer.formatByte(file.size);
+
+   jsxc.gui.window.postMessage({
+      bid: bid,
+      direction: jsxc.Message.SYS,
+      msg: $.t('File_too_large') + ' (' + fileSize + ' > ' + maxSize + ')'
+   });
+
+   jsxc.gui.window.hideOverlay(bid);
+};
+
 /**
  * Callback for file selector.
  *
@@ -5681,27 +5754,24 @@ jsxc.fileTransfer.showFileSelection = function(jid) {
  */
 jsxc.fileTransfer.fileSelected = function(jid, msg, file) {
    var bid = jsxc.jidToBid(jid);
-   var maxSize = jsxc.options.get('httpUpload').maxSize;
+   var httpUploadOptions = jsxc.options.get('httpUpload') || {};
+   var maxSize = httpUploadOptions.maxSize || 0;
 
    if (file.transportMethod !== 'webrtc' && jsxc.xmpp.httpUpload.ready && maxSize >= 0 && file.size > maxSize) {
       jsxc.debug('File too large for http upload.');
 
-      file.transportMethod = 'webrtc';
+      if (jsxc.fileTransfer.isWebrtcCapable(bid)) {
+         // try data channels
+         file.transportMethod = 'webrtc';
 
-      jsxc.fileTransfer.selectResource(bid, function(jid) {
-         jsxc.fileTransfer.fileSelected(jid, msg, file);
-      }, function() {
-         var maxSize = jsxc.fileTransfer.formatByte(jsxc.options.get('httpUpload').maxSize);
-         var fileSize = jsxc.fileTransfer.formatByte(file.size);
-
-         jsxc.gui.window.postMessage({
-            bid: bid,
-            direction: jsxc.Message.SYS,
-            msg: $.t('File_too_large') + ' (' + fileSize + ' > ' + maxSize + ')'
+         jsxc.fileTransfer.selectResource(bid, function(jid) {
+            jsxc.fileTransfer.fileSelected(jid, msg, file);
+         }, function() {
+            jsxc.fileTransfer.showFileTooLarge(bid, file);
          });
-
-         jsxc.gui.window.hideOverlay(bid);
-      });
+      } else {
+         jsxc.fileTransfer.showFileTooLarge(bid, file);
+      }
 
       return;
    } else if (!jsxc.xmpp.httpUpload.ready && Strophe.getResourceFromJid(jid)) {
@@ -5790,6 +5860,10 @@ jsxc.fileTransfer.updateIcons = function(bid) {
       win.find('.jsxc_sendFile').removeClass('jsxc_disabled');
 
       return;
+   } else if (!jsxc.fileTransfer.isWebrtcCapable(bid)) {
+      win.find('.jsxc_sendFile').addClass('jsxc_disabled');
+
+      return;
    }
 
    var jid = win.data('jid');
@@ -5802,6 +5876,10 @@ jsxc.fileTransfer.updateIcons = function(bid) {
    } else {
       win.find('.jsxc_sendFile').addClass('jsxc_disabled');
    }
+};
+
+jsxc.fileTransfer.isWebrtcCapable = function(bid) {
+   return !jsxc.muc.isGroupchat(bid);
 };
 
 $(document).on('update.gui.jsxc', function(ev, bid) {
@@ -6098,7 +6176,7 @@ jsxc.Message.prototype.save = function() {
 
       ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
 
-      this.attachment.thumbnail = canvas.toDataURL();
+      this.attachment.thumbnail = canvas.toDataURL('image/jpeg', 0.3);
 
       if (this.direction === 'out') {
          // save storage
@@ -6998,6 +7076,7 @@ jsxc.muc = {
       });
 
       var destroy = $('<a>');
+      destroy.attr('href', '#');
       destroy.text($.t('Destroy'));
       destroy.addClass('jsxc_destroy');
       destroy.hide();
@@ -7008,6 +7087,7 @@ jsxc.muc = {
       win.find('.jsxc_settings ul').append($('<li>').append(destroy));
 
       var configure = $('<a>');
+      configure.attr('href', '#');
       configure.text($.t('Configure'));
       configure.addClass('jsxc_configure');
       configure.hide();
@@ -7036,6 +7116,7 @@ jsxc.muc = {
       }
 
       var leave = $('<a>');
+      leave.attr('href', '#');
       leave.text($.t('Leave'));
       leave.addClass('jsxc_leave');
       leave.click(function() {
@@ -7857,6 +7938,14 @@ jsxc.muc = {
 
          return html.get(0);
       }
+   },
+
+   isGroupchat: function(jid) {
+      var bid = jsxc.jidToBid(jid);
+
+      var userData = jsxc.storage.setUserItem('buddy', bid) || {};
+
+      return userData.type === 'groupchat';
    }
 };
 
@@ -12089,22 +12178,27 @@ jsxc.xmpp.httpUpload.sendFile = function(file, message) {
 
          message.delete();
       } else if (data.get && data.put) {
-         // slot received, start upload
+         jsxc.debug('slot received, start upload to ' + data.put);
+
          self.uploadFile(data.put, file, message, function() {
+            var attachment = message.attachment;
+            var metaString = attachment.type + '|' + attachment.size + '|' + attachment.name;
             var a = $('<a>');
             a.attr('href', data.get);
-            a.attr('data-name', message.attachment.name);
-            a.attr('data-type', message.attachment.type);
-            a.attr('data-size', message.attachment.size);
 
-            if (message.attachment.thumbnail) {
-               a.attr('data-thumbnail', message.attachment.thumbnail);
+            attachment.data = data.get;
+
+            if (attachment.thumbnail) {
+               var img = $('<img>');
+               img.attr('alt', 'Preview:' + metaString);
+               img.attr('src', attachment.thumbnail);
+               a.prepend(img);
+            } else {
+               a.text(metaString);
             }
 
-            a.text(data.get);
-            message.attachment.data = data.get;
-
-            message.msg = $('<span>').append(a).html();
+            message.msg = data.get;
+            message.htmlMsg = $('<span>').append(a).html();
             message.type = jsxc.Message.HTML;
             jsxc.gui.window.postMessage(message);
          });
@@ -12249,8 +12343,8 @@ jsxc.xmpp.httpUpload.failedRequestSlotCB = function(stanza, cb) {
    });
 };
 
-$(document).on('stateChange.jsxc', function(ev, state) {
-   if (state === jsxc.CONST.STATE.READY) {
+$(document).on('stateUIChange.jsxc', function(ev, state) {
+   if (state === jsxc.CONST.UISTATE.INITIATING) {
       jsxc.xmpp.httpUpload.init();
    }
 });

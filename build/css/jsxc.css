@@ -3276,7 +3276,7 @@ div.jsxc_transfer {
 .jsxc_windowItem.jsxc_groupchat.jsxc_normal .jsxc_fade {
   padding-top: 44px; }
 
-.jsxc_windowItem.jsxc_groupchat.jsxc_normal .jsxc_fingerprints, .jsxc_windowItem.jsxc_groupchat.jsxc_normal .jsxc_verification, .jsxc_windowItem.jsxc_groupchat.jsxc_normal .jsxc_transfer, .jsxc_windowItem.jsxc_groupchat.jsxc_normal .jsxc_video, .jsxc_windowItem.jsxc_groupchat.jsxc_normal .jsxc_sendFile {
+.jsxc_windowItem.jsxc_groupchat.jsxc_normal .jsxc_fingerprints, .jsxc_windowItem.jsxc_groupchat.jsxc_normal .jsxc_verification, .jsxc_windowItem.jsxc_groupchat.jsxc_normal .jsxc_transfer, .jsxc_windowItem.jsxc_groupchat.jsxc_normal .jsxc_video {
   display: none; }
 
 .jsxc_windowItem.jsxc_groupchat.jsxc_normal .jsxc_members {
