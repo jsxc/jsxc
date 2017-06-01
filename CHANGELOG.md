@@ -5,6 +5,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- add Greek translation
+
+### Fixed
+- fix thumbnail transfer
+- fix handler for muc menu items
+- catch undefined exception during file transfer
+- fix disabled file transfer link
+- [#542](https://github.com/jsxc/jsxc/issues/542) fix fallback language
+- remove favicon badge after logout
+
+### Changed
+- reduce thumbnail size
+- enable http upload for muc
+- disable links in last message view
 
 ## 3.2.0 - 2017-05-17
 ### Added
