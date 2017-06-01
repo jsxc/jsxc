@@ -307,6 +307,8 @@
     "Load_older_messages": "Eski iletileri yükle",
     "Message_history": "İleti geçmişi",
     "setting-mam-enable": "Etkinleştirdiğiniz takdirde kaydedilmiş iletileri sunucudan alabilirsiniz.",
+    "File_too_large": null,
+    "No_proper_file_transfer_method_available": null,
     "You_have_to_go_online_": "Bu işlemi gerçekleştirebilmek için çevrimiçi olmalısınız."
   }
 }

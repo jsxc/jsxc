@@ -307,6 +307,8 @@
     "Load_older_messages": "Charger des messages plus anciens",
     "Message_history": null,
     "setting-mam-enable": null,
+    "File_too_large": "Fichier trop grand",
+    "No_proper_file_transfer_method_available": "Pas de méthode de transfert de fichier disponible.",
     "You_have_to_go_online_": "Vous devez être connecté pour exécuter cette opération"
   }
 }

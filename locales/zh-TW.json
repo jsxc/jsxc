@@ -307,6 +307,8 @@
     "Load_older_messages": "下載舊訊息",
     "Message_history": "訊息紀錄",
     "setting-mam-enable": "打開後就可以從伺服器取得儲存訊息",
+    "File_too_large": "檔案太大了",
+    "No_proper_file_transfer_method_available": "沒有適合的檔案傳輸方式",
     "You_have_to_go_online_": "必須要上線才能執行這個動作。"
   }
 }

@@ -307,6 +307,8 @@
     "Load_older_messages": "Oudere berichten laden",
     "Message_history": "Berichten geschiedenis",
     "setting-mam-enable": "Wanneer ingeschakeld ontvang je opgeslagen berichten van de server.",
+    "File_too_large": null,
+    "No_proper_file_transfer_method_available": null,
     "You_have_to_go_online_": "Je dient online te gaan om deze operatie uit te voeren"
   }
 }

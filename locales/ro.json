@@ -307,6 +307,8 @@
     "Load_older_messages": "Încărcaţi mesaje mai vechi",
     "Message_history": "Istoricul mesajelor",
     "setting-mam-enable": "Dacă este activat puteţi prelua mesajele stocate pe server.",
+    "File_too_large": null,
+    "No_proper_file_transfer_method_available": null,
     "You_have_to_go_online_": "Trebuie sa fi online pentru a executa aceasta operatiune."
   }
 }

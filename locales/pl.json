@@ -307,6 +307,8 @@
     "Load_older_messages": null,
     "Message_history": null,
     "setting-mam-enable": null,
+    "File_too_large": null,
+    "No_proper_file_transfer_method_available": null,
     "You_have_to_go_online_": null
   }
 }

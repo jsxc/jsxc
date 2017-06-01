@@ -307,6 +307,8 @@
     "Load_older_messages": "Load older messages",
     "Message_history": "Message history",
     "setting-mam-enable": "If enabled you are able to retrieve stored messages from the server.",
+    "File_too_large": "File too large",
+    "No_proper_file_transfer_method_available": "No proper file transfer method available",
     "You_have_to_go_online_": "You have to go online to execute this operation."
   }
 }
