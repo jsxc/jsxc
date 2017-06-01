@@ -9,3 +9,7 @@ before_install:
 
 script:
   - ./node_modules/.bin/grunt pre-commit
+
+branches:
+   except:
+      - refactoring
