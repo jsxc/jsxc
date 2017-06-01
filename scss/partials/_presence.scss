@@ -21,21 +21,21 @@
 }
 
 .jsxc-chat:before {
-    background-image: image-url("presence_chat.svg");
+    background-image: url("../img/presence_chat.svg");
     background-color: $state_chat;
 }
 
 .jsxc-away:before {
-    background-image: image-url("presence_away.svg");
+    background-image: url("../img/presence_away.svg");
     background-color: $state_away;
 }
 
 .jsxc-xa:before {
-    background-image: image-url("presence_xa.svg");
+    background-image: url("../img/presence_xa.svg");
     background-color: $state_xa;
 }
 
 .jsxc-dnd:before {
-    background-image: image-url("presence_dnd.svg");
+    background-image: url("../img/presence_dnd.svg");
     background-color: $state_dnd;
 }

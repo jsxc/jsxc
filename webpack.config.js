@@ -1,8 +1,9 @@
 /* jshint node:true */
 var path = require("path");
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
-   entry: './src/index.ts',
+   entry: ['./scss/main.scss', './src/index.ts'],
    output: {
       filename: 'bundle.js',
       path: __dirname,
@@ -24,6 +25,23 @@ module.exports = {
                   path.resolve(__dirname, "template", 'helpers')
                 ]
               }
+         },
+         {
+            test: /\.css$/,
+            use: ExtractTextPlugin.extract({
+               use: 'css-loader?importLoaders=1',
+            }),
+         },
+         {
+           test: /\.(sass|scss)$/,
+           use: ExtractTextPlugin.extract({
+             use: [{
+                loader: 'css-loader',
+                options: {
+                   url: false
+                }
+             }, 'sass-loader']
+          })
          }
       ]
    },
@@ -33,4 +51,10 @@ module.exports = {
    externals: {
       'jquery': 'jQuery'
    },
+   plugins: [
+      new ExtractTextPlugin({
+        filename: 'css/bundle.css',
+         allChunks: true,
+      }),
+  ],
 };

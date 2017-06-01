@@ -145,7 +145,7 @@ $ringingColor2: #76ba6c;
     width: 80px;
     height: 80px;
     box-sizing: border-box;
-    background-image: image-url("bell.svg");
+    background-image: url("../img/bell.svg");
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
@@ -325,14 +325,14 @@ div {
     }
 
     &.jsxc-video {
-        background-image: image-url("camera_icon_white.svg");
+        background-image: url("../img/camera_icon_white.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 15px 15px;
         opacity: 0.4;
 
         &.jsxc-disabled {
-            background-image: image-url("camera_disabled_icon_white.svg");
+            background-image: url("../img/camera_disabled_icon_white.svg");
         }
 
         &:not(.jsxc-disabled) {
@@ -387,11 +387,11 @@ div {
     }
 
     .jsxc-hangUp {
-        background-image: image-url("hang_up_red.svg");
+        background-image: url("../img/hang_up_red.svg");
     }
 
     .jsxc-fullscreen {
-        background-image: image-url("fullscreen_white.svg");
+        background-image: url("../img/fullscreen_white.svg");
     }
 
     .jsxc-showchat {

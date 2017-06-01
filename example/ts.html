@@ -12,13 +12,55 @@
 
    <!-- require:dependencies -->
    <link href="../build/css/jquery-ui.min.css" media="all" rel="stylesheet" type="text/css" />
-   <link href="../dev/css/jsxc.css" media="all" rel="stylesheet" type="text/css" />
+   <link href="../css/bundle.css" media="all" rel="stylesheet" type="text/css" />
    <!--  endrequire -->
 
+   <link href="../node_modules/simplebar/dist/simplebar.css" media="all" rel="stylesheet" type="text/css" />
+
    <link href="css/example.css" media="all" rel="stylesheet" type="text/css" />
+
+   <style>
+   #jsxc-role {
+      width: 50px;
+      height: 50px;
+      background-color: #a1a1a1;
+      border-radius: 50%;
+      position: absolute;
+      top: 15px;
+      left: 15px;
+   }
+   .jsxc-master #jsxc-role {
+      background-color: green;
+   }
+   .jsxc-slave #jsxc-role {
+      background-color: orange;
+   }
+   </style>
 </head>
 
 <body>
+
+   <div id="jsxc-role"></div>
+
+   <form id="loginForm" style="margin-top: 100px; padding:15px;" class="form-inline">
+      <div class="form-group">
+         <input class="form-control" type="text" name="url" placeholder="Bosh url" value="/http-bind/" />
+      </div>
+
+      <div class="form-group">
+         <input class="form-control" type="text" name="jid" placeholder="Jabber Id" value="" />
+      </div>
+
+      <div class="form-group">
+         <input class="form-control" type="text" name="password" placeholder="Password" value="" />
+      </div>
+
+      <button class="btn btn-primary">Login</button>
+   </form>
+
+   <p style="padding:15px"><a class="btn btn-danger" href="javascript:jsxc.deleteAllData()">Delete all Data</a>
+      <a class="btn btn-default" href="javascript:jsxc.enableDebugMode()">Enable Debug Mode</a>
+      <a class="btn btn-default" href="javascript:jsxc.disableDebugMode()">Disable Debug Mode</a></p>
 
    <!-- require:dependencies -->
    <script src="js/jquery.min.js"></script>
@@ -28,13 +70,23 @@
    <script src="../build/lib/jsxc.dep.js"></script>
    <!--  endrequire -->
 
+   <script src="../node_modules/simplebar/dist/simplebar.js"></script>
+
    <script src="js/bootstrap.min.js"></script>
 
    <!-- jsxc library -->
    <script src="../bundle.js"></script>
 
    <script>
-//jsxc.start('/http-bind/', 'klaus@localhost', 'klaus');
+   $('#loginForm').submit(function(ev){
+      ev.preventDefault();
+
+      var url = $(this).find('[name="url"]').val();
+      var jid = $(this).find('[name="jid"]').val();
+      var password = $(this).find('[name="password"]').val();
+
+      jsxc.start(url, jid, password);
+   });
    </script>
 </body>
 </html>

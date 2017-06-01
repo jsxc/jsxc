@@ -140,7 +140,7 @@ ul.jsxc-vCard {
     height: 32px;
     border: 0;
     background-size: 32px 32px !important;
-    background: image-url("loading.gif");
+    background: url("../img/loading.gif");
 }
 
 //  @TODO: check
@@ -194,7 +194,7 @@ img.jsxc-vCard {
     width: 44px;
     height: 100%;
     cursor: pointer;
-    background-image: image-url("more_black.svg");
+    background-image: url("../img/more_black.svg");
     background-repeat: no-repeat;
     background-position: center;
     opacity: 0.4;
