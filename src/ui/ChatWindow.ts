@@ -11,6 +11,10 @@ import DateTime from './util/DateTime'
 import showVerificationDialog from './dialogs/verification'
 import showFingerprintsDialog from './dialogs/fingerprints'
 import Emoticons from '../Emoticons'
+import SortedPersistentMap from '../SortedPersistentMap'
+import PersistentMap from '../PersistentMap'
+import Avatar from './Avatar'
+import 'simplebar'
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -28,9 +32,11 @@ export default class ChatWindow {
 
    private readonly INPUT_RESIZE_DELAY = 1200;
 
-   private readonly HIGHTLIGHT_DURATION = 2000;
+   private readonly HIGHTLIGHT_DURATION = 600;
 
-   private minimized:boolean = false;
+   private properties:PersistentMap;
+
+   private messages:SortedPersistentMap;
 
    constructor(private account:Account, private contact:Contact) {
       let template = chatWindowTemplate({
@@ -49,18 +55,57 @@ export default class ChatWindow {
       this.initEmoticonMenu();
       this.restoreLocalHistory();
       this.registerHandler();
+      this.registerInputHandler();
 
       this.element.find('.jsxc-name').disableSelection();
       this.element.find('.jsxc-window').css('bottom', -1 * this.element.find('.jsxc-window-fade').height());
 
+      this.messages.registerHook((newMessages, oldMessages) => {
+         oldMessages = oldMessages || [];
+
+         if (newMessages.length === 0 && oldMessages.length > 0) {
+            this.clear();
+         } // else if(newMessages.length > oldMessages.length) {
+         //    let diff = $(newMessages).not(oldMessages).get();
+         //
+         //    for (let messageId of diff) {
+         //       this.postMessage(new Message(messageId));
+         //    }
+         // }
+      });
+
+      this.properties = new PersistentMap(this.storage, 'chatWindow', this.contact.getId());
+
+      if (this.properties.get('minimized') === false) {
+         this.unminimize();
+      } else {
+         this.minimize();
+      }
+
+      this.properties.registerHook('minimized', (minimized) => { console.log('properties.minimized')
+         if (minimized) {
+            this.minimize();
+         } else {
+            this.unminimize();
+         }
+      });
+
+      let avatar = Avatar.get(contact);
+      avatar.addElement(this.element.find('.jsxc-avatar'));
+
       // @TODO update gui
+      this.contact.registerHook('name', (newName) => {
+         this.element.find('.jsxc-name').text(newName);
+      });
       // @TODO init otr
+
+      // let simpleBar = new SimpleBar(this.element.find('.jsxc-message-area')[0]);
 
       $(document).trigger('init.window.jsxc', [this.element]);
    }
 
    public getId() {
-      return this.account.getUid() + '@' + this.contact.getId();
+      return /*this.account.getUid() + '@' +*/ this.contact.getId();
    }
 
    public getAccount() {
@@ -82,6 +127,8 @@ export default class ChatWindow {
    public minimize(ev?) {
       this.element.removeClass('jsxc-normal').addClass('jsxc-minimized');
 
+      this.properties.set('minimized', true);
+
       //@TODO replace this with max-height css property
       //win.find('.jsxc-window').css('bottom', -1 * win.find('.jsxc-window-fade').height());
    }
@@ -100,6 +147,8 @@ export default class ChatWindow {
 
       element.removeClass('jsxc-minimized').addClass('jsxc-normal');
 
+      this.properties.set('minimized', false);
+
       // @REVIEW is this still required?
       //element.find('.jsxc-window').css('bottom', '0');
 
@@ -113,13 +162,9 @@ export default class ChatWindow {
    }
 
    public clear() {
-      var history = this.storage.getItem('history', this.contact.getId()) || [];
-
-      history.map((id) => {
-         this.storage.removeItem('msg', id);
-      });
-
-      this.storage.setItem('history', this.contact.getId(), []);
+      this.messages.empty(function(id, message){ console.log(id, message)
+         message.delete();
+      })
 
       this.element.find('.jsxc-message-area').empty();
    }
@@ -208,7 +253,7 @@ export default class ChatWindow {
       }
 
       if (message.direction === Message.SYS) {
-         //jsxc.gui.window.get(bid).find('.jsxc-textarea').append('<div class="jsxc-clear"/>');
+         this.element.find('.jsxc-message-area').append('<div class="jsxc-clear"/>');
       } else {
          //@TODO update last message
          //$('[data-bid="' + bid + '"]').find('.jsxc-lastmsg .jsxc-text').html(msg);
@@ -260,7 +305,7 @@ export default class ChatWindow {
       this.scrollMessageAreaToBottom();
    }
 
-   private registerHandler() { console.log('registerHandler')
+   private registerHandler() {
       let self = this;
       let contact = this.contact;
 
@@ -273,7 +318,7 @@ export default class ChatWindow {
       });
 
       this.element.find('.jsxc-transfer').click(function() {
-         jsxc.otr.toggleTransfer(bid);
+         // jsxc.otr.toggleTransfer(bid);
       });
 
       this.element.find('.jsxc-window-bar').click(() => {
@@ -291,7 +336,7 @@ export default class ChatWindow {
       this.element.find('.jsxc-sendFile').click(function() {
          $('body').click();
 
-         jsxc.gui.window.sendFile(bid);
+         // jsxc.gui.window.sendFile(bid);
       });
 
       this.element.find('.jsxc-message-area').click(function() {
@@ -302,17 +347,14 @@ export default class ChatWindow {
       });
    }
 
-   private registerInputHandler() { console.log('registerInputHandler')
+   private registerInputHandler() {
       let self = this;
       var textinputBlurTimeout;
       let inputElement = this.inputElement;
 
       inputElement.keyup(self.onInputKeyUp);
-
       inputElement.keypress(self.onInputKeyPress);
-
       inputElement.focus(this.onInputFocus);
-
       inputElement.blur(this.onInputBlur);
 
       // @REVIEW
@@ -324,10 +366,12 @@ export default class ChatWindow {
    }
 
    private onInputKeyUp = (ev) => {
-      var body = $(ev.target).val();
+      var message = $(ev.target).val();
 
       if (ev.which === ENTER_KEY && !ev.shiftKey) {
-         body = '';
+         message = '';
+      } else {
+         this.resizeInputArea();
       }
 
       if (ev.which === ESC_KEY) {
@@ -339,8 +383,6 @@ export default class ChatWindow {
       let message = $(ev.target).val();
 
       if (ev.which !== ENTER_KEY || ev.shiftKey || !message) {
-         this.resizeInputArea();
-
          return;
       }
 
@@ -358,30 +400,33 @@ export default class ChatWindow {
       }
 
       // remove unread flag
-      jsxc.gui.readMsg(bid);
+      //jsxc.gui.readMsg(bid);
 
       this.resizeInputArea();
    }
 
    private onInputBlur = (ev) => {
       this.inputBlurTimeout = setTimeout(function() {
-         ev.target.css('height', '');
+         $(ev.target).css('height', '');
       }, this.INPUT_RESIZE_DELAY);
    }
 
    private sendOutgoingMessage(messageString:string) {
-
       if (this.contact.isEncrypted()) {
          //@TODO send sys $.t('your_message_wasnt_send_please_end_your_private_conversation');
          return;
       }
-
+//@TODO we need a full jid
       let message = new Message({
          peer: this.contact,
          direction: Message.OUT,
-         message: messageString
+         body: messageString
       });
       message.save();
+
+      this.messages.push(message);
+
+      this.getAccount().getConnection().sendMessage(message);
 
       if (messageString === '?' && Options.get('theAnswerToAnything') !== false) {
          if (typeof Options.get('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) < 1) {
@@ -390,13 +435,13 @@ export default class ChatWindow {
             (new Message({
                peer: this.contact,
                direction: Message.SYS,
-               msg: '42'
+               body: '42'
             })).save();
          }
       }
    }
 
-   private toggle = (ev?) => { console.log('toggle', this.element)
+   private toggle = (ev?) => {
       if (this.element.hasClass('jsxc-minimized')) {
          this.unminimize(ev);
       } else {
@@ -458,13 +503,15 @@ export default class ChatWindow {
    }
 
    private restoreLocalHistory() {
-      let history = this.storage.getItem('history', this.contact.getId());
+      this.messages = new SortedPersistentMap(this.storage, 'history', this.contact.getId());
+      this.messages.setPushHook(uid => {
+         let message = new Message(uid);
 
-      while (history !== null && history.length > 0) {
-         var uid = history.pop();
+         this.postMessage(message);
 
-         this.postMessage(new Message(uid));
-      }
+         return message;
+      });
+      this.messages.init();
    }
 
    private resizeMessageArea(width?:number, height?:number, outer?) {
@@ -510,7 +557,9 @@ export default class ChatWindow {
    }
 
    private scrollMessageAreaToBottom() {
+      let messageArea = this.element.find('.jsxc-message-area');
 
+      messageArea[0].scrollTop = messageArea[0].scrollHeight;
    }
 }
 

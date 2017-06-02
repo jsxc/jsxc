@@ -5,6 +5,7 @@ import Storage from './Storage';
 import * as UI from './ui/web'
 import JID from './JID'
 import Roster from './ui/Roster'
+import RoleAllocator from './RoleAllocator'
 
 export default class Client {
    private static storage;
@@ -12,16 +13,23 @@ export default class Client {
    private static accounts = {};
 
    public static init() {
+      let roleAllocator = RoleAllocator.get();
       let accountIds = Client.getStorage().getItem('accounts') || [];
 
-      accountIds.forEach(function(id){
+      accountIds.forEach(function(id) {
          Client.accounts[id] = new Account(id);
-         Client.accounts[id].connect().then(function(){
+
+         roleAllocator.waitUntilMaster().then(function(){
+            return Client.accounts[id].connect();
+         }).then(function(){
 
          }).catch(function(msg){
             Roster.get().setNoConnection();
 
             console.warn(msg)
+
+            delete Client.accounts[id];
+            Client.save();
          });
       });
    }
@@ -40,6 +48,10 @@ export default class Client {
 
    public static isExtraSmallDevice():boolean {
       return $(window).width() < 500;
+   }
+
+   public static isDebugMode():boolean {
+      return Client.getStorage().getItem('debug') === true;
    }
 
    public static getStorage() {

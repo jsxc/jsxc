@@ -58,9 +58,8 @@ export default class Roster {
 
       this.setPresence(presence);
 
-      let self = this;
-      storage.registerHook('roster', function(state){
-         self.setVisibility(state);
+      storage.registerHook('roster', state => {
+         this.setVisibility(state);
       });
 
       // jsxc.notice.load();
@@ -69,11 +68,15 @@ export default class Roster {
    public add(contact:Contact) {
       this.clearStatus();
 
+      if (this.element.find('.jsxc-roster-item[data-id="'+contact.getId()+'"]').length > 0) {
+         return;
+      }
+
       let rosterItem = new RosterItem(contact);
       this.insert(rosterItem);
    }
 
-   public clearStatus() { console.log('clearStatus', this.element)
+   public clearStatus() {
       this.element.find('.jsxc-roster-status').empty();
 
       this.element.removeClass('jsxc-status-show');

@@ -2,12 +2,14 @@ import Storage from './Storage'
 import {IConnection} from './connection/ConnectionInterface'
 import * as Connector from './connection/xmpp/connector'
 import XMPPConnection from './connection/xmpp/connection'
+import StorageConnection from './connection/storage/Connection'
 import JID from './JID'
 import Contact from './Contact'
 import ContactData from './ContactData'
 import Roster from './ui/Roster'
 import ChatWindow from './ui/ChatWindow'
 import ChatWindowList from './ui/ChatWindowList'
+import SortedPersistentMap from './SortedPersistentMap'
 
 interface IConnectionParameters {
    url:string,
@@ -31,28 +33,47 @@ export default class Account {
 
    private contacts = {};
 
-   private windows = {};
+   private windows:SortedPersistentMap;
 
    constructor(boshUrl: string, jid: string, sid: string, rid:string);
    constructor(boshUrl: string, jid: string, password: string);
    constructor(uid:string);
    constructor() {
       if (arguments.length === 1) {
-         this.restore(arguments[0]);
+         this.uid = arguments[0];
       } else if (arguments.length === 3 || arguments.length === 4) {
          this.uid = (new JID(arguments[1])).bare;
          this.connectionArguments = arguments;
       }
 
-      this.getStorage().registerHook('contact:', (contactData) => {
-         let contact = new Contact(this, contactData);
+      this.connection = new StorageConnection();
 
-         Roster.get().add(contact);
+      this.windows = new SortedPersistentMap(this.getStorage(), 'windows');
+      this.windows.setRemoveHook((id, chatWindow) => {
+         console.log('remove hook', id, chatWindow);
+         ChatWindowList.get().remove(chatWindow);
+      });
+
+      if (arguments.length === 1) {
+         //@REVIEW this can probably called always, because the new PM iterates also over an empty list
+         this.restore(this.uid);
+      }
+
+      this.getStorage().registerHook('contact:', (contactData) => {
+         let contact = new Contact(this, contactData.jid);
+
+         if (typeof this.contacts[contact.getId()] === 'undefined') {
+            this.contacts[contact.getId()] = contact;
+
+            Roster.get().add(contact);
+         }
       });
    }
 
    public connect() {
       let self = this;
+
+      this.reloadConnectionData();
 
       if (self.connectionParameters && self.connectionParameters.inactivity && (new Date()).getTime() - self.connectionParameters.timestamp > self.connectionParameters.inactivity) {
          console.warn('Credentials expired')
@@ -60,7 +81,7 @@ export default class Account {
          return Promise.reject('Credentials expired');
       }
 
-      return Connector.login.apply(this, this.connectionArguments).then(function(data) {window._conn = connection;
+      return Connector.login.apply(this, this.connectionArguments).then(function(data) {
          let connection = data.connection;
          let status = data.status;
 
@@ -89,7 +110,7 @@ export default class Account {
          self.connection.sendPresence();
 
          if (status === Strophe.Status.CONNECTED) {
-            self.connection.getRoster().then(function(){
+            self.connection.getRoster().then(function() {
 
             });
          }
@@ -108,19 +129,21 @@ export default class Account {
    public openChatWindow(contact:Contact) {
       let chatWindow = new ChatWindow(this, contact);
 
-      ChatWindowList.get().add(chatWindow);
+      chatWindow = ChatWindowList.get().add(chatWindow);
 
-      this.windows[contact.getId()] = chatWindow;
+      this.windows.push(chatWindow);
 
       this.save();
+
+      return chatWindow;
    }
 
    public closeChatWindow(chatWindow:ChatWindow) {
-      let id = chatWindow.getContact().getId();
+      // let id = chatWindow.getContact().getId();
 
-      chatWindow.close();
+      ChatWindowList.get().remove(chatWindow);
 
-      delete this.windows[id];
+      this.windows.remove(chatWindow);
 
       this.save();
    }
@@ -145,30 +168,39 @@ export default class Account {
       this.getStorage().setItem('account', {
          connectionParameters: this.connectionParameters,
          contacts: Object.keys(this.contacts),
-         windows: Object.keys(this.windows)
+         // windows: Object.keys(this.windows)
       });
    }
 
-   private restore(uid:string) {
-      this.uid = uid;
-
-      let storedAccountData = this.getStorage().getItem('account');
+   private reloadConnectionData() {
+      let storedAccountData = this.getStorage().getItem('account') || {};
+console.log('storedAccountData', storedAccountData)
       this.connectionParameters = storedAccountData.connectionParameters;
 
       let p = this.connectionParameters;
-      this.connectionArguments = [p.url, (new JID(p.jid)).bare, p.sid, p.rid];
+      this.connectionArguments = this.connectionArguments || [p.url, (new JID(p.jid)).bare, p.sid, p.rid];
+   }
 
-      storedAccountData.contacts.forEach((id) => { console.log('restore contact with id', id)
+   private restore(uid:string) {
+      let storedAccountData = this.getStorage().getItem('account');
+
+      storedAccountData.contacts.forEach((id) => {
          this.contacts[id] = new Contact(this, id);
 
          Roster.get().add(this.contacts[id]);
       });
 
-      storedAccountData.windows.forEach((id) => { console.log('restore window for contact id', id)
+      this.windows.setPushHook((id) => {
          let chatWindow = new ChatWindow(this, this.contacts[id]);
          this.windows[id] = chatWindow;
 
          ChatWindowList.get().add(chatWindow);
+
+         return chatWindow;
       });
+      this.windows.init();
+
+      // storedAccountData.windows.forEach((id) => {
+      // });
    }
 }

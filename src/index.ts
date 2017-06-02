@@ -35,3 +35,39 @@ function startWithCredentials(boshUrl: string, jid: string, password: string) {
 function startWithBoshParameters(boshUrl: string, jid: string, sid: string, rid: string) {
 
 }
+
+export function enableDebugMode() {
+   let storage = Client.getStorage();
+
+   storage.setItem('debug', true);
+}
+
+export function disableDebugMode() {
+   let storage = Client.getStorage();
+
+   storage.setItem('debug', false);
+}
+
+export function deleteAllData() {
+   if (!Client.isDebugMode()) {
+      Log.warn('This action is only available in debug mode.');
+
+      return 0;
+   }
+
+   let storage = Client.getStorage();
+   let prefix = storage.getPrefix();
+   let prefixRegex = new RegExp('^' + prefix);
+   let backend = storage.getBackend();
+   let keys = Object.keys(backend);
+   let count = 0;
+
+   for(let key of keys) {
+      if (prefixRegex.test(key) && key !== prefix + 'debug') {
+         backend.removeItem(key);
+         count++;
+      }
+   }
+
+   return count;
+}

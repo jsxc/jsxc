@@ -7,8 +7,10 @@ import JID from './JID'
 import * as CONST from './CONST'
 import Emoticons from './Emoticons'
 import Translation from './util/Translation'
+import Identifiable from './IdentifiableInterface'
+import Client from './Client'
 
-export default class Message {
+export default class Message implements Identifiable {
 
    public bid = null;
 
@@ -55,13 +57,13 @@ export default class Message {
    constructor(uid:string);
    constructor(data:any); //@TODO any is not specific enough
    constructor() {
-      this.storage = StorageSingleton.getUserStorage();
+      this.storage = Client.getStorage();
 
       if (typeof arguments[0] === 'string' && arguments[0].length > 0 && arguments.length === 1) {
          this._uid = arguments[0];
 
          this.load(this._uid);
-      } else if (typeof arguments[0] === 'object' && arguments[0] !== null) {
+      } else if (typeof arguments[0] === 'object' && arguments[0] !== null) { console.log('arg', arguments[0])
          $.extend(this, arguments[0]);
       }
 
@@ -71,31 +73,25 @@ export default class Message {
       }
    }
 
-   private load(uid:string):void {
-      var data = this.storage.getItem('msg', uid);
-
-      if (!data) {
-         Log.debug('Could not load message with uid ' + uid);
-      }
-
-      $.extend(this, data);
+   public getId() {
+      return this._uid;
    }
 
-   public save() {
-      var history;
+   public save() { window.msg = this;
+      // var history;
 
-      if (this.bid) {
-         // @REVIEW MessageHistory class?
-         history = this.storage.getItem('history', this.bid) || [];
-
-         if (history.indexOf(this._uid) < 0) {
-            if (history.length > Options.get('numberOfMsg')) {
-               (new Message(history.pop())).delete();
-            }
-         } else {
-            history = null;
-         }
-      }
+      // if (this.bid) {
+      //    // @REVIEW MessageHistory class?
+      //    history = this.storage.getItem('history', this.bid) || [];
+      //
+      //    if (history.indexOf(this._uid) < 0) {
+      //       if (history.length > Options.get('numberOfMsg')) {
+      //          (new Message(history.pop())).delete();
+      //       }
+      //    } else {
+      //       history = null;
+      //    }
+      // }
 
       if (this.attachment) {
          if (this.direction === 'out') {
@@ -110,16 +106,30 @@ export default class Message {
          }
       }
 
-      var data;
-
       // @TODO this will not work, because properties of this are not accessable for Storage
-      this.storage.setItem('msg', this._uid, this);
+      this.storage.setItem('msg', this._uid, {
+         payload: {
+            bid: this.bid,
+            body: this.body,
+            _uid: this._uid,
+            _received: this._received,
+            encrypted: this.encrypted,
+            forwarded: this.forwarded,
+            stamp: this.stamp,
+            format: this.format,
+            type: this.type,
+            direction: this.direction,
+            receiver: this.receiver,
+            error: this.error,
+            // attachment: this.attachment
+         }
+      });
 
-      if (history) {
-         history.unshift(this._uid);
-
-         this.storage.setItem('history', this.bid, history);
-      }
+      // if (history) {
+      //    history.unshift(this._uid);
+      //
+      //    this.storage.setItem('history', this.bid, history);
+      // }
 
       return this;
    }
@@ -129,16 +139,6 @@ export default class Message {
 
       if (data) {
          this.storage.removeItem('msg', this._uid);
-
-         if (data.bid) {
-            var history = this.storage.getItem('history', data.bid) || [];
-
-            history = $.grep(history, function(el) {
-               return el !== this._uid;
-            });
-
-            this.storage.setItem('history', data.bid, history);
-         }
       }
    }
 
@@ -209,5 +209,15 @@ export default class Message {
       }
 
       return body;
+   }
+
+   private load(uid:string):void {
+      var data = this.storage.getItem('msg', uid);
+
+      if (!data) {
+         Log.debug('Could not load message with uid ' + uid);
+      }
+
+      $.extend(this, data.payload); console.log(this, data)
    }
 }

@@ -1,5 +1,6 @@
 import Contact from '../Contact'
 import Menu from './util/Menu'
+import Avatar from './Avatar'
 
 let rosterItemTemplate = require('../../template/roster-item.hbs')
 
@@ -19,7 +20,12 @@ export default class RosterItem {
       this.element.attr('data-presence', this.contact.getPresence());
       this.element.attr('data-subscription', this.contact.getSubscription());
 
-      this.element.click(contact.openWindow);
+      this.element.click(function(){
+         let chatWindow = contact.openWindow();
+
+         chatWindow.unminimize();
+         chatWindow.highlight();
+      });
 
       this.element.find('.jsxc-rename').click(function(ev) {
          ev.stopPropagation();
@@ -40,6 +46,13 @@ export default class RosterItem {
       });
 
       Menu.init(this.element.find('.jsxc-menu'));
+
+      let avatar = Avatar.get(this.contact);
+      avatar.addElement(this.element.find('.jsxc-avatar'));
+
+      this.contact.registerHook('name', (newName) => {
+         this.element.find('.jsxc-name').text(newName);
+      });
 
       // $(document).trigger('add.roster.jsxc', [bid, data, bud]);
    }

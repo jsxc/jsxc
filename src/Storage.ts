@@ -6,6 +6,8 @@ const SEP = ':';
 
 const IGNORE_KEY = ['rid'];
 
+const BACKEND = localStorage;
+
 export default class Storage {
    static storageNotConform: boolean = false;
    static tested: boolean = false;
@@ -24,6 +26,20 @@ export default class Storage {
       window.addEventListener('storage', this.onStorageEvent, false);
    }
 
+   public generateKey(...args:string[]):string {
+      let key = '';
+
+      args.forEach(function(arg) {
+         if (key !== '') {
+            key += SEP;
+         }
+
+         key += arg;
+      })
+
+      return key;
+   }
+
    private testStorage() {
       let randomNumber = Math.round(Math.random() * 1000000000) + '';
       let key = this.getPrefix() + randomNumber;
@@ -39,7 +55,7 @@ export default class Storage {
 
       let cleanup = function() {
          window.removeEventListener('storage', listenerFunction, false);
-         localStorage.removeItem(key)
+         BACKEND.removeItem(key)
       }
 
       window.addEventListener('storage', listenerFunction, false);
@@ -48,10 +64,10 @@ export default class Storage {
          cleanup();
       }, 20);
 
-      localStorage.setItem(key, randomNumber);
+      BACKEND.setItem(key, randomNumber);
    }
 
-   private getPrefix(): string {
+   public getPrefix(): string {
       let prefix = PREFIX + SEP;
 
       if (this.name) {
@@ -59,6 +75,10 @@ export default class Storage {
       }
 
       return prefix;
+   }
+
+   public getBackend() {
+      return BACKEND;
    }
 
    public setItem(type: string, key: string, value: any): void;
@@ -87,10 +107,11 @@ export default class Storage {
          }
       }
 
-      localStorage.setItem(this.getPrefix() + key, value);
+      let oldValue = BACKEND.getItem(this.getPrefix() + key);
 
-      if (!Storage.storageNotConform) {
-         let oldValue = localStorage.getItem(this.getPrefix() + key);
+      BACKEND.setItem(this.getPrefix() + key, value);
+
+      if (!Storage.storageNotConform && oldValue !== value) {
          this.onStorageEvent({
             key: this.getPrefix() + key,
             oldValue: oldValue,
@@ -112,7 +133,7 @@ export default class Storage {
 
       key = this.getPrefix() + key;
 
-      var value = localStorage.getItem(key);
+      var value = BACKEND.getItem(key);
 
       return this.parseValue(value);
    }
@@ -128,7 +149,7 @@ export default class Storage {
          key = arguments[0] + SEP + arguments[1];
       }
 
-      localStorage.removeItem(this.getPrefix() + key);
+      BACKEND.removeItem(this.getPrefix() + key);
    }
 
    public updateItem(type, key, variable, value): void;
@@ -205,7 +226,19 @@ export default class Storage {
          this.hooks[eventName] = [];
       }
 
-      this.hooks[eventName].push(func); console.log('hooks', this.hooks)
+      this.hooks[eventName].push(func);
+   }
+
+   public removeHook(eventName:string, func: (newValue: any, oldValue: any, key: string) => void) {
+      let eventNameList = this.hooks[eventName] || [];
+
+      if (eventNameList.indexOf(func) > -1) {
+         eventNameList = $.grep(eventNameList, function(i) {
+            return func !== i;
+         });
+      }
+
+      this.hooks[eventName] = eventNameList;
    }
 
    private onStorageEvent = (ev: any) => {

@@ -12,5 +12,9 @@ export default class DateTime{
       elements.each(function(){
          $(this).text(fromNow);
       });
+
+      setTimeout(function(){
+         DateTime.stringify(stamp, elements);
+      }, 1000 * 60);
    }
 }
