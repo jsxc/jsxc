@@ -1,13 +1,13 @@
 {{#*inline "list"}}
 <ul>
-{{#each properties}}
-   <li>
-      <strong>{{name}}</strong> {{value}}
-      {{#if properties}}
-         {{> list}}
-      {{/if}}
-   </li>
-{{/each}}
+   {{#each properties}}
+      <li>
+         <strong>{{name}}</strong> {{value}}
+         {{#if properties}}
+            {{> list}}
+         {{/if}}
+      </li>
+   {{/each}}
 </ul>
 {{/inline}}
 

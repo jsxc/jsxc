@@ -1,7 +1,7 @@
 import Storage from './Storage'
 import {IConnection} from './connection/ConnectionInterface'
 import * as Connector from './connection/xmpp/connector'
-import XMPPConnection from './connection/xmpp/connection'
+import XMPPConnection from './connection/xmpp/Connection'
 import StorageConnection from './connection/storage/Connection'
 import JID from './JID'
 import Contact from './Contact'
@@ -10,6 +10,7 @@ import Roster from './ui/Roster'
 import ChatWindow from './ui/ChatWindow'
 import ChatWindowList from './ui/ChatWindowList'
 import SortedPersistentMap from './SortedPersistentMap'
+import Log from './util/Log'
 
 interface IConnectionParameters {
    url:string,
@@ -46,12 +47,14 @@ export default class Account {
          this.connectionArguments = arguments;
       }
 
-      this.connection = new StorageConnection();
+      this.connection = new StorageConnection(this);
 
       this.windows = new SortedPersistentMap(this.getStorage(), 'windows');
       this.windows.setRemoveHook((id, chatWindow) => {
          console.log('remove hook', id, chatWindow);
-         ChatWindowList.get().remove(chatWindow);
+         if (chatWindow) {
+            ChatWindowList.get().remove(chatWindow);
+         }
       });
 
       if (arguments.length === 1) {
@@ -73,10 +76,14 @@ export default class Account {
    public connect() {
       let self = this;
 
-      this.reloadConnectionData();
+      if (!this.connectionArguments) {
+         this.reloadConnectionData();
+      }
 
       if (self.connectionParameters && self.connectionParameters.inactivity && (new Date()).getTime() - self.connectionParameters.timestamp > self.connectionParameters.inactivity) {
-         console.warn('Credentials expired')
+         Log.warn('Credentials expired')
+
+         //@TODO close all chat windows
 
          return Promise.reject('Credentials expired');
       }
@@ -105,7 +112,7 @@ export default class Account {
             self.save();
          };
 
-         self.connection = new XMPPConnection(connection);
+         self.connection = new XMPPConnection(self, connection);
 
          self.connection.sendPresence();
 
@@ -115,6 +122,10 @@ export default class Account {
             });
          }
       });
+   }
+
+   public getContact(jid:JID) {
+      return this.contacts[jid.bare];
    }
 
    public addContact(data:ContactData) {
@@ -140,7 +151,7 @@ export default class Account {
 
    public closeChatWindow(chatWindow:ChatWindow) {
       // let id = chatWindow.getContact().getId();
-
+console.log('chatWindow', chatWindow)
       ChatWindowList.get().remove(chatWindow);
 
       this.windows.remove(chatWindow);
@@ -164,6 +175,14 @@ export default class Account {
       return this.uid;
    }
 
+   public getJID():JID {
+      let storedAccountData = this.getStorage().getItem('account') || {};
+      let jidString = (storedAccountData.connectionParameters) ? storedAccountData.connectionParameters.jid : this.getUid();
+      console.log('jidString', jidString)
+      //@REVIEW maybe promise?
+      return new JID(jidString);
+   }
+
    private save() {
       this.getStorage().setItem('account', {
          connectionParameters: this.connectionParameters,
@@ -178,7 +197,7 @@ console.log('storedAccountData', storedAccountData)
       this.connectionParameters = storedAccountData.connectionParameters;
 
       let p = this.connectionParameters;
-      this.connectionArguments = this.connectionArguments || [p.url, (new JID(p.jid)).bare, p.sid, p.rid];
+      this.connectionArguments = [p.url, (new JID(p.jid)).full, p.sid, p.rid];
    }
 
    private restore(uid:string) {

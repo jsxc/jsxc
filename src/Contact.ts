@@ -92,11 +92,15 @@ export default class Contact implements IdentifiableInterface {
    }
 
    public sendMessage(message:Message) {
-      message.bid = this.getId();
+      // message.bid = this.getId();
    }
 
    public getId():string {
       return this.jid.bare;
+   }
+
+   public getJid():JID {
+      return this.jid;
    }
 
    public getFingerprint() {
@@ -129,6 +133,15 @@ export default class Contact implements IdentifiableInterface {
 
    public getSubscription() {
       return this.data.get('subscription');
+   }
+
+   public getCapabilitiesByRessource():Promise<{}> {
+      // @TODO
+      return Promise.resolve({});
+   }
+
+   public getVcard():Promise<{}> {
+      return this.account.getConnection().loadVcard(this.getJid());
    }
 
    public isEncrypted() {

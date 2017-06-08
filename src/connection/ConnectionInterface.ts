@@ -19,5 +19,7 @@ export interface IConnection {
    hasFeatureByJid(jid:JID, feature:string);
    hasFeatureByJid(jid:JID, feature:string[]);
 
+   getRoster();
+
    logout();
 }

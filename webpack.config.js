@@ -23,7 +23,8 @@ module.exports = {
             query: {
                 helperDirs: [
                   path.resolve(__dirname, "template", 'helpers')
-                ]
+               ],
+               ignorePartials: ['list']
               }
          },
          {

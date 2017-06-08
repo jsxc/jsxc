@@ -9,141 +9,112 @@ import Emoticons from './Emoticons'
 import Translation from './util/Translation'
 import Identifiable from './IdentifiableInterface'
 import Client from './Client'
+import Utils from './util/Utils'
+
+const MSGPOSTFIX = ':msg';
+
+const ATREGEX = new RegExp('(xmpp:)?(' + CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i');
+
+enum DIRECTION {
+   IN, OUT, SYS
+};
+
+enum MSGTYPE {
+   CHAT, GROUPCHAT
+};
+
+interface MessagePayload {
+   peer:JID,
+   direction:DIRECTION,
+   plaintextMessage?:string,
+   htmlMessage?:string,
+   errorMessage?:string,
+   attachment?:Attachment,
+   received?:boolean,
+   encrypted?:boolean,
+   forwarded?:boolean,
+   stamp?:number,
+   type?:MSGTYPE,
+}
 
 export default class Message implements Identifiable {
 
-   public bid = null;
+   private uid:string;
 
-   public _uid = null;
+   private payload:MessagePayload = {
+      received: false,
+      encrypted: null,
+      forwarded: false,
+      stamp: new Date().getTime(),
+      type: MSGTYPE.CHAT
+   } as any;
 
-   public _received = false;
+   static readonly DIRECTION = DIRECTION;
 
-   public encrypted = null;
-
-   public forwarded = false;
-
-   public stamp = new Date().getTime();
-
-   public direction;
-
-   public body:string;
-
-   public attachment:Attachment;
-
-   public format = Message.PLAIN;
-
-   public type = Message.CHAT;
-
-   public receiver:JID;
-
-   public error;
-
-   static readonly CHAT = 'chat';
-
-   static readonly GROUPCHAT = 'groupchat';
-
-   static readonly PLAIN = 'plain';
-
-   static readonly SYS = 'sys';
-
-   static readonly HTML = 'html';
-
-   static readonly IN = 'in';
-
-   static readonly OUT = 'out';
+   static readonly MSGTYPE = MSGTYPE;
 
    private storage:Storage;
 
    constructor(uid:string);
-   constructor(data:any); //@TODO any is not specific enough
+   constructor(data:MessagePayload);
    constructor() {
       this.storage = Client.getStorage();
 
       if (typeof arguments[0] === 'string' && arguments[0].length > 0 && arguments.length === 1) {
-         this._uid = arguments[0];
+         this.uid = arguments[0];
 
-         this.load(this._uid);
+         this.load(this.uid);
       } else if (typeof arguments[0] === 'object' && arguments[0] !== null) { console.log('arg', arguments[0])
-         $.extend(this, arguments[0]);
+         $.extend(this.payload, arguments[0]);
       }
 
-      if (!this._uid) {
-         // @TODO use constant for :msg?
-         this._uid = new Date().getTime() + ':msg';
+      if (!this.uid) {
+         this.uid = new Date().getTime() + MSGPOSTFIX;
       }
    }
 
    public getId() {
-      return this._uid;
+      return this.uid;
    }
 
-   public save() { window.msg = this;
-      // var history;
+   public save() {
+      let attachment = this.getAttachment();
 
-      // if (this.bid) {
-      //    // @REVIEW MessageHistory class?
-      //    history = this.storage.getItem('history', this.bid) || [];
-      //
-      //    if (history.indexOf(this._uid) < 0) {
-      //       if (history.length > Options.get('numberOfMsg')) {
-      //          (new Message(history.pop())).delete();
-      //       }
-      //    } else {
-      //       history = null;
-      //    }
-      // }
-
-      if (this.attachment) {
-         if (this.direction === 'out') {
+      if (attachment) {
+         if (this.getDirection() === DIRECTION.OUT) {
             // save storage
-            this.attachment.clearData();
+            attachment.clearData();
          }
 
-         let saved = this.attachment.save();
+         let saved = attachment.save();
 
-         if (!saved && this.direction === Message.IN) {
+         if (!saved && this.getDirection() === DIRECTION.IN) {
             //@TODO inform user
          }
       }
 
-      // @TODO this will not work, because properties of this are not accessable for Storage
-      this.storage.setItem('msg', this._uid, {
-         payload: {
-            bid: this.bid,
-            body: this.body,
-            _uid: this._uid,
-            _received: this._received,
-            encrypted: this.encrypted,
-            forwarded: this.forwarded,
-            stamp: this.stamp,
-            format: this.format,
-            type: this.type,
-            direction: this.direction,
-            receiver: this.receiver,
-            error: this.error,
-            // attachment: this.attachment
-         }
-      });
+      let payloadCopy = $.extend({}, this.payload); //Object.assign
+      if (payloadCopy.attachment) {
+         payloadCopy.attachment = payloadCopy.attachment.getId();
+      }
 
-      // if (history) {
-      //    history.unshift(this._uid);
-      //
-      //    this.storage.setItem('history', this.bid, history);
-      // }
+      this.storage.setItem('msg', this.uid, {
+         payload: payloadCopy
+      });
 
       return this;
    }
 
    public delete() {
-      var data = this.storage.getItem('msg', this._uid);
+      var data = this.storage.getItem('msg', this.uid);
 
       if (data) {
-         this.storage.removeItem('msg', this._uid);
+         this.storage.removeItem('msg', this.uid);
       }
    }
 
    public getCssId() {
-      return this._uid.replace(/:/g, '-');
+      return this.uid.replace(/:/g, '-');
    }
 
    public getDOM() {
@@ -151,18 +122,62 @@ export default class Message implements Identifiable {
    }
 
    public getStamp() {
-      return this.stamp;
+      return this.payload.stamp;
+   }
+
+   public getDirection():DIRECTION {
+      return this.payload.direction;
+   }
+
+   public getDirectionString():string {
+      return DIRECTION[this.payload.direction].toLowerCase();
+   }
+
+   public getAttachment():Attachment {
+      return this.payload.attachment;
+   }
+
+   public getPeer():JID {
+      return this.payload.peer;
+   }
+
+   public getType():MSGTYPE {
+      return this.payload.type;
+   }
+
+   public getTypeString():string {
+      return MSGTYPE[this.payload.type].toLowerCase();
+   }
+
+   public getHtmlMessage():string {
+      return this.payload.htmlMessage;
+   }
+
+   public getPlaintextMessage():string {
+      return this.payload.plaintextMessage;
    }
 
    public received() {
-      this._received = true;
+      this.payload.received = true;
       this.save();
 
       this.getDOM().addClass('jsxc_received');
    }
 
    public isReceived():boolean {
-      return this._received;
+      return this.payload.received;
+   }
+
+   public isForwarded():boolean {
+      return this.payload.forwarded;
+   }
+
+   public isEncrypted():boolean {
+      return this.payload.encrypted;
+   }
+
+   public hasAttachment():boolean {
+      return !!this.payload.attachment;
    }
 
    public setUnread() {
@@ -170,19 +185,56 @@ export default class Message implements Identifiable {
    }
 
    public getProcessedBody():string {
-      let body = this.body;
+      let body = this.payload.plaintextMessage;
 
-      // @TODO filter html
+      body = this.convertUrlToLink(body);
 
-      body = body.replace(CONST.REGEX.URL, function(url) {
+      body = this.convertEmailToLink(body);
+
+      body = Emoticons.toImage(body);
+
+      body = this.replaceLineBreaks(body);
+
+      // hide unprocessed otr messages
+      if (body.match(/^\?OTR([:,|?]|[?v0-9x]+)/)) {
+         body = '<i title="' + body + '">' + Translation.t('Unreadable_OTR_message') + '</i>';
+      }
+
+      return body;
+   }
+
+   public getErrorMessage():string {
+      return this.payload.errorMessage;
+   }
+
+   private load(uid:string):void {
+      var data = this.storage.getItem('msg', uid);
+
+      if (!data) {
+         Log.debug('Could not load message with uid ' + uid);
+      }
+
+      $.extend(this.payload, data.payload);
+
+      if (data.attachment) {
+         this.payload.attachment = new Attachment(data.attachment);
+      }
+   }
+
+   private replaceLineBreaks(text) {
+      return text.replace(/(\r\n|\r|\n)/g, '<br />');
+   }
+
+   private convertUrlToLink(text) {
+      return text.replace(CONST.REGEX.URL, function(url) {
          let href = (url.match(/^https?:\/\//i)) ? url : 'http://' + url;
 
          return '<a href="' + href + '" target="_blank">' + url + '</a>';
       });
+   }
 
-      let atRegex = new RegExp('(xmpp:)?(' + CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i');
-
-      body = body.replace(atRegex, function(undefined, protocol, jid, action) {
+   private convertEmailToLink(text) {
+      return text.replace(ATREGEX, function(undefined, protocol, jid, action) {
          if (protocol === 'xmpp:') {
             if (typeof action === 'string') {
                jid += action;
@@ -193,31 +245,5 @@ export default class Message implements Identifiable {
 
          return '<a href="mailto:' + jid + '" target="_blank">mailto:' + jid + '</a>';
       });
-
-      body = Emoticons.toImage(body);
-
-      // replace line breaks
-      body = body.replace(/(\r\n|\r|\n)/g, '<br />');
-
-      if (this.direction === Message.IN) {
-         body = body.replace(/^\/me /, '<i title="/me">' + jsxc.removeHTML(this.sender.getName()) + '</i> ');
-      }
-
-      // hide unprocessed otr messages
-      if (body.match(/^\?OTR([:,|?]|[?v0-9x]+)/)) {
-         body = '<i title="' + body + '">' + Translation.t('Unreadable_OTR_message') + '</i>';
-      }
-
-      return body;
-   }
-
-   private load(uid:string):void {
-      var data = this.storage.getItem('msg', uid);
-
-      if (!data) {
-         Log.debug('Could not load message with uid ' + uid);
-      }
-
-      $.extend(this, data.payload); console.log(this, data)
    }
 }

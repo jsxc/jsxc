@@ -181,13 +181,17 @@ export default class ChatWindow {
       }
    }
 
+   public receiveIncomingMessage(message:Message) {
+      this.messages.push(message);
+   }
+
    public postMessage(message:Message) {
-      if (message.direction === Message.IN && !this.inputElement.is(':focus')) {
+      if (message.getDirection() === Message.DIRECTION.IN && !this.inputElement.is(':focus')) {
          message.setUnread();
       }
 
       let messageElement = $('<div>');
-      messageElement.addClass('jsxc-chatmessage jsxc-' + message.direction);
+      messageElement.addClass('jsxc-chatmessage jsxc-' + message.getDirectionString());
       messageElement.attr('id', message.getCssId());
       messageElement.html('<div>' + message.getProcessedBody() + '</div>');
 
@@ -202,32 +206,32 @@ export default class ChatWindow {
          messageElement.removeClass('jsxc-received');
       }
 
-      if (message.forwarded) {
+      if (message.isForwarded()) {
          messageElement.addClass('jsxc-forwarded');
       } else {
          messageElement.removeClass('jsxc-forwarded');
       }
 
-      if (message.encrypted) {
+      if (message.isEncrypted()) {
          messageElement.addClass('jsxc-encrypted');
       } else {
          messageElement.removeClass('jsxc-encrypted');
       }
 
-      if (message.error) {
+      if (message.getErrorMessage()) {
          messageElement.addClass('jsxc-error');
-         messageElement.attr('title', message.error);
+         messageElement.attr('title', message.getErrorMessage());
       } else {
          messageElement.removeClass('jsxc-error');
       }
 
-      if (message.attachment) {
-         let attachment = message.attachment;
+      if (message.hasAttachment()) {
+         let attachment = message.getAttachment();
          let mimeType = attachment.getMimeType();
          let attachmentElement = $('<div>');
          attachmentElement.addClass('jsxc-attachment');
-         attachmentElement.addClass('jsxc-' + message.attachment.type.replace(/\//, '-'));
-         attachmentElement.addClass('jsxc-' + message.attachment.type.replace(/^([^/]+)\/.*/, '$1'));
+         attachmentElement.addClass('jsxc-' + mimeType.replace(/\//, '-'));
+         attachmentElement.addClass('jsxc-' + mimeType.replace(/^([^/]+)\/.*/, '$1'));
 
          if (attachment.isPersistent()) {
             attachmentElement.addClass('jsxc-persistent');
@@ -237,7 +241,7 @@ export default class ChatWindow {
             $('<img>')
                .attr('alt', 'preview')
                .attr('src', attachment.getThumbnailData())
-               .attr('title', message.getName())
+               // .attr('title', message.getName())
                .appendTo(attachmentElement);
          } else {
             attachmentElement.text(attachment.getName());
@@ -252,7 +256,7 @@ export default class ChatWindow {
          messageElement.find('div').first().append(attachmentElement);
       }
 
-      if (message.direction === Message.SYS) {
+      if (message.getDirection() === Message.DIRECTION.SYS) {
          this.element.find('.jsxc-message-area').append('<div class="jsxc-clear"/>');
       } else {
          //@TODO update last message
@@ -418,9 +422,9 @@ export default class ChatWindow {
       }
 //@TODO we need a full jid
       let message = new Message({
-         peer: this.contact,
-         direction: Message.OUT,
-         body: messageString
+         peer: this.contact.getJid(),
+         direction: Message.DIRECTION.OUT,
+         plaintextMessage: messageString
       });
       message.save();
 
@@ -433,9 +437,9 @@ export default class ChatWindow {
             Options.set('theAnswerToAnything', true);
 
             (new Message({
-               peer: this.contact,
-               direction: Message.SYS,
-               body: '42'
+               peer: this.contact.getJid(),
+               direction: Message.DIRECTION.SYS,
+               plaintextMessage: '42'
             })).save();
          }
       }
@@ -472,7 +476,7 @@ export default class ChatWindow {
          minHeight: 234,
          minWidth: 250,
          resize: function(ev, ui) {
-            jsxc.gui.window.resize(element, ui);
+            //jsxc.gui.window.resize(element, ui);
          },
          start: function() {
             element.removeClass('jsxc-normal');

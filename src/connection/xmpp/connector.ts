@@ -33,7 +33,7 @@ export function login() {
    }
 }
 
-function loginWithPassword(url:string, jid:string, password:string) {
+function loginWithPassword(url:string, jid:string, password:string):Promise<{}> {
    testBasicConnectionParameters(url, jid);
    let connection = prepareConnection(url);
 

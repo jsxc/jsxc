@@ -14,7 +14,11 @@ export default class Attachment {
 
    private name:string;
 
-   //@TODO create constructor
+   constructor(name:string, mimeType:string, data:any);
+   constructor(id:string);
+   constructor() {
+      // @TODO
+   }
 
    public save():boolean {
       if (this.isImage() && this.data && !this.thumbnailData) {

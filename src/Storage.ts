@@ -253,7 +253,7 @@ export default class Storage {
 
       let eventNames = Object.keys(hooks);
       eventNames.forEach(function(eventName) {
-         if (key.match(new RegExp('^' + eventName))) {
+         if (key.match(new RegExp('^' + eventName + '(:.+)?$'))) {
             let eventNameHooks = hooks[eventName] || [];
             eventNameHooks.forEach(function(hook) {
                hook(newValue, oldValue, key);

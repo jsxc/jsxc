@@ -1,35 +1,37 @@
 import Dialog from '../Dialog';
 import JID from '../../JID';
-import StorageSingleton from '../../StorageSingleton';
-import Connection from '../../connection/Connection';
+import Contact from '../../Contact';
+import Templates from '../../util/Templates'
 
-var vcardTemplate = require('../../../template/vcard.hbs');
+let vcardTemplate = require('../../../template/vcard.hbs');
+let vcardBodyTemplate = require('../../../template/vcard-body.hbs');
 
-export default function(jid:JID) {
-   let storage = StorageSingleton.getUserStorage();
-   let userData = storage.getItem('buddy', jid.bare);
+let dialog:Dialog;
 
-   let basicData = aggregateBasicUserData(userData);
+export default function(contact:Contact) {
+
+   let basicData = []; // aggregateBasicUserData(userData);
 
    let content = vcardTemplate({
-      name: userData.name,
+      name: contact.getName(),
       basic: basicData
    });
-   let dialog = new Dialog(content);
+
+   dialog = new Dialog(content);
    dialog.open();
 
-   Connection.loadVcard(jid)
+   contact.getVcard()
       .then(vcardSuccessCallback)
-      .catch(vcardErrorCallback)
       .then(function(vcardData){
-         let content = Templates.get('vcard-body', {
+         let content = vcardBodyTemplate({
             properties: vcardData
          });
 
-         dialog.append(content);
+         dialog.getDom().append(content);
 
          dialog.getDom().find('.jsxc-waiting').remove();
-      });
+      })
+      .catch(vcardErrorCallback);
 }
 
 // @TODO use interface for user data
@@ -73,83 +75,59 @@ function aggregateBasicUserData(userData) {
    return basicUserData;
 }
 
-function aggregateProperties(el) {
+function vcardSuccessCallback(vCardData) {
+   let dialogElement = dialog.getDom();
+
+   dialogElement.find('p').remove();
+
+   if (vCardData.PHOTO) {
+      var img_el = $('<img class="jsxc-vCard" alt="avatar" />');
+      img_el.attr('src', vCardData.PHOTO.src);
+
+      dialogElement.find('h3').before(img_el);
+   }
+
+   let numberOfProperties = Object.keys(vCardData).length;
+
+   if (numberOfProperties === 0 || (numberOfProperties === 1 && vCardData.PHOTO)) {
+      return Promise.reject({});;
+   }
+
+   delete vCardData.PHOTO;
+
+   return convertToTemplateData(vCardData);
+}
+
+function vcardErrorCallback() {
+   let dialogElement = dialog.getDom();
+
+   dialogElement.find('.jsxc-dialog p').remove();
+
+   var content = '<p>';
+   content += 'Sorry_your_buddy_doesnt_provide_any_information';
+   content += '</p>';
+
+   dialogElement.find('.jsxc-dialog').append(content);
+}
+
+function convertToTemplateData(vCardData) {
    let properties = [];
 
-   el.each(function() {
-      var item = $(this);
-      var children = $(this).children();
+   for (let name in vCardData) {
+      let value = vCardData[name];
+      let childProperties;
 
-      let name = item[0].tagName;
-      let value = null, props = null;
-
-      if (name !== ' ') {
-         // @TODO ?
-      }
-
-      if (name === 'PHOTO') {
-         // @TODO ?
-      } else if (children.length > 0) {
-         props = aggregateProperties(children);
-      } else if (item.text() !== '') {
-         value = item.text();
+      if (typeof value === 'object' && value !== null) {
+         childProperties = convertToTemplateData(value);
+         value = undefined;
       }
 
       properties.push({
          name: name,
          value: value,
-         properties: props
+         properties: childProperties
       });
-   });
+   }
 
    return properties;
-}
-
-function vcardSuccessCallback(stanza:string) {
-
-   if ($('#jsxc_dialog ul.jsxc_vCard').length === 0) {
-      return;
-   }
-
-   $('#jsxc_dialog p').remove();
-
-   var photo = $(stanza).find("vCard > PHOTO");
-
-   if (photo.length > 0) {
-      var img = photo.find('BINVAL').text();
-      var type = photo.find('TYPE').text();
-      var src = 'data:' + type + ';base64,' + img;
-
-      if (photo.find('EXTVAL').length > 0) {
-         src = photo.find('EXTVAL').text();
-      }
-
-      // concat chunks
-      src = src.replace(/[\t\r\n\f]/gi, '');
-
-      var img_el = $('<img class="jsxc_vCard" alt="avatar" />');
-      img_el.attr('src', src);
-
-      $('#jsxc_dialog h3').before(img_el);
-   }
-
-   if ($(stanza).find('vCard').length === 0 || ($(stanza).find('vcard > *').length === 1 && photo.length === 1)) {
-      return vcardErrorCallback();
-   }
-
-   return aggregateProperties($(stanza).find('vcard > *'));
-}
-
-function vcardErrorCallback() {
-   if ($('#jsxc_dialog ul.jsxc_vCard').length === 0) {
-      return;
-   }
-
-   $('#jsxc_dialog p').remove();
-
-   var content = '<p>';
-   content += $.t('Sorry_your_buddy_doesnt_provide_any_information');
-   content += '</p>';
-
-   $('#jsxc_dialog').append(content);
 }

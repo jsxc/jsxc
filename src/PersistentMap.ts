@@ -67,7 +67,7 @@ export default class PersistentMap {
          let func = arguments[1];
 
          this.storage.registerHook(this.key, function(newData, oldData) {
-            if (newData[id] !== oldData[id]) {
+            if (!oldData || newData[id] !== oldData[id]) {
                func(newData[id], oldData[id]);
             }
          });

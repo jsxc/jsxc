@@ -1,6 +1,7 @@
 import Contact from '../Contact'
 import Menu from './util/Menu'
 import Avatar from './Avatar'
+import showVcardDialog from './dialogs/vcard';
 
 let rosterItemTemplate = require('../../template/roster-item.hbs')
 

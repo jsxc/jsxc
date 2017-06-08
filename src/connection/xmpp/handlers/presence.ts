@@ -1,6 +1,8 @@
 import Log from '../../../util/Log';
 import JID from '../../../JID';
 import Contact from '../../../Contact';
+import Client from '../../../Client';
+import Roster from '../../../ui/Roster';
 
 let PRESERVE_HANDLER = true;
 let REMOVE_HANDLER = false;
@@ -10,13 +12,27 @@ let SUBSCRIPTION = {
    BOTH: 'both'
 };
 let PRESENCE = {
+   ERROR: 'error',
    SUBSCRIBE: 'subscribe',
    UNAVAILABLE: 'unavailable',
    UNSUBSCRIBED: 'unsubscribed'
 };
 
+//@TODO duplicate of AbstractConnection
+enum Status {
+   online,
+   chat,
+   away,
+   xa,
+   dnd,
+   offline
+}
+
 export default function(stanza: Element): boolean {
    Log.debug('onPresence', stanza);
+
+   //@TODO use sid to retrieve the correct account
+   let account = Client.getAccout();
 
    let presence = {
       type: $(stanza).attr('type'),
@@ -24,15 +40,19 @@ export default function(stanza: Element): boolean {
       show: $(stanza).find('show').text()
    }
 
-   let contact = Contact.get(presence.from);
-   let status = null;
-   let xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
+   let status:Status = determinePresenceStatus(presence);
+console.log(presence, status)
+   if (presence.from.bare === account.getJID().bare) {
+      //@TODO this is not suitable for multi account support
+      //Roster.get().setPresence(status);
 
-   if (presence.from.bare === this.connectionJid.bare) {
       return PRESERVE_HANDLER;
    }
 
-   if (presence.type === 'error') {
+   let xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
+   let contact = account.getContact(presence.from);
+
+   if (presence.type === PRESENCE.ERROR) {
       // $(document).trigger('error.presence.jsxc', [from, presence]);
 
       var error = $(presence).find('error');
@@ -49,46 +69,46 @@ export default function(stanza: Element): boolean {
       return PRESERVE_HANDLER;
    }
 
-   status = determinePresenceStatus(presence);
-
    contact.setStatus(presence.from.resource, status);
 
-   if (data.type === 'groupchat') {
-      data.status = status;
-   } else {
-      data.status = max;
-   }
-
-   data.res = maxVal;
-   data.jid = jid;
-
-   // Looking for avatar
-   if (xVCard.length > 0 && data.type !== 'groupchat') {
-      var photo = xVCard.find('photo');
-
-      if (photo.length > 0 && photo.text() !== data.avatar) {
-         jsxc.storage.removeUserItem('avatar', data.avatar);
-         data.avatar = photo.text();
-      }
-   }
+   // if (data.type === 'groupchat') {
+   //    data.status = status;
+   // } else {
+   //    data.status = max;
+   // }
+   //
+   // data.res = maxVal;
+   // data.jid = jid;
+   //
+   // // Looking for avatar
+   // if (xVCard.length > 0 && data.type !== 'groupchat') {
+   //    var photo = xVCard.find('photo');
+   //
+   //    if (photo.length > 0 && photo.text() !== data.avatar) {
+   //       jsxc.storage.removeUserItem('avatar', data.avatar);
+   //       data.avatar = photo.text();
+   //    }
+   // }
 
    // Reset jid
-   if (jsxc.gui.window.get(bid).length > 0) {
-      jsxc.gui.window.get(bid).data('jid', jid);
-   }
+   // if (jsxc.gui.window.get(bid).length > 0) {
+   //    jsxc.gui.window.get(bid).data('jid', jid);
+   // }
 
-   jsxc.storage.setUserItem('buddy', bid, data);
-   jsxc.storage.setUserItem('res', bid, res);
+   // jsxc.storage.setUserItem('buddy', bid, data);
+   // jsxc.storage.setUserItem('res', bid, res);
 
-   jsxc.debug('Presence (' + from + '): ' + jsxc.CONST.STATUS[status]);
+   Log.debug('Presence (' + presence.from.full + '): ' + Status[status]);
 
-   jsxc.gui.update(bid);
-   jsxc.gui.roster.reorder(bid);
+   // jsxc.gui.update(bid);
+   // jsxc.gui.roster.reorder(bid);
 
-   $(document).trigger('presence.jsxc', [from, status, presence]);
+
+
+   // $(document).trigger('presence.jsxc', [from, status, presence]);
 
    // preserve handler
-   return true;
+   return PRESERVE_HANDLER;
 };
 
 function processSubscribtionRequest(contact:Contact) {
@@ -116,15 +136,18 @@ function processSubscribtionRequest(contact:Contact) {
    }, 'gui.showApproveDialog', [jid]);
 }
 
-function determinePresenceStatus(presence) {
+function determinePresenceStatus(presence):Status {
+   let status;
+
    if (presence.type === PRESENCE.UNAVAILABLE || presence.type === PRESENCE.UNSUBSCRIBED) {
-      status = jsxc.CONST.STATUS.indexOf('offline');
+      status = Status['offline'];
    } else {
-      var show = presence.show;
+      let show = presence.show;
+
       if (show === '') {
-         status = jsxc.CONST.STATUS.indexOf('online');
+         status = Status['online'];
       } else {
-         status = jsxc.CONST.STATUS.indexOf(show);
+         status = Status[show];
       }
    }
 

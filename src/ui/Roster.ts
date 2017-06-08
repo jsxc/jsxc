@@ -10,13 +10,28 @@ import Menu from './util/Menu'
 import Contact from '../Contact'
 import WindowList from './ChatWindowList'
 import Client from '../Client'
+import Storage from '../Storage'
+import PersistentMap from '../PersistentMap'
+import Translation from '../util/Translation'
 //import rosterTemplate from '../../template/roster.hbs'
 let rosterTemplate = require('../../template/roster.hbs')
+
+//@TODO duplicate of AbstractConnection
+enum Status {
+   online,
+   chat,
+   away,
+   xa,
+   dnd,
+   offline
+}
 
 export default class Roster {
 
    private element:JQuery;
    private contactList:JQuery;
+   private storage:Storage;
+   private options:PersistentMap;
 
    private static instance:Roster;
 
@@ -43,23 +58,25 @@ export default class Roster {
 
       this.hideOffline(Options.get('hideOffline'));
 
+      this.storage = Client.getStorage();
+      this.options = new PersistentMap(this.storage, 'roster');
+
       this.registerMainMenuHandler();
       this.registerPresenceHandler();
       this.registerToggleHandler();
 
       Menu.init(this.element.find('.jsxc-menu'));
 
-      let storage = Client.getStorage();
-      let rosterState = storage.getItem('roster') || (Options.get('loginForm').startMinimized ? CONST.HIDDEN : CONST.SHOWN);
-
+      let rosterState = this.options.get('visibility') || (Options.get('loginForm').startMinimized ? CONST.HIDDEN : CONST.SHOWN);
       this.setVisibility(rosterState);
+      this.options.registerHook('visibility', (visibility) => {
+         this.setVisibility(visibility);
+      });
 
-      let presence = storage.getItem('presence') || 'offline';
-
+      let presence = this.options.get('presence') || Status.offline;
       this.setPresence(presence);
-
-      storage.registerHook('roster', state => {
-         this.setVisibility(state);
+      this.options.registerHook('presence', (presence) => {
+         this.setPresence(presence);
       });
 
       // jsxc.notice.load();
@@ -109,8 +126,8 @@ export default class Roster {
       this.setStatus(statusElement);
    }
 
-   public setPresence(presence:string) {
-      let label = $('.jsxc-menu-presence .jsxc-' + presence).text();
+   public setPresence(presence:Status) {
+      let label = $('.jsxc-menu-presence .jsxc-' + Status[presence]).text();
 
       $('.jsxc-menu-presence > span').text(label);
    }
@@ -158,15 +175,14 @@ export default class Roster {
    }
 
    private registerPresenceHandler() {
-      this.element.find('.jsxc-menu-presence li').click(function() {
-         var self = $(this);
-         var presence = self.data('presence');
+      let options = this.options;
 
-         if (presence === 'offline') {
-            jsxc.xmpp.logout(false);
-         } else {
-            jsxc.gui.changePresence(presence);
-         }
+      this.element.find('.jsxc-menu-presence li').click(function() {
+         let presence = $(this).data('presence');
+
+         options.set('presence', Status[presence]);
+
+         Client.getAccout().getConnection().sendPresence(Status[presence]);
       });
    }
 
@@ -192,32 +208,31 @@ export default class Roster {
 
    private muteNotification() {
 
-      if (jsxc.storage.getUserItem('presence') === 'dnd') {
-         return;
-      }
-
-      // invert current choice
-      var mute = !jsxc.options.get('muteNotification');
-
-      if (mute) {
-         jsxc.notification.muteSound();
-      } else {
-         jsxc.notification.unmuteSound();
-      }
+      // if (jsxc.storage.getUserItem('presence') === 'dnd') {
+      //    return;
+      // }
+      //
+      // // invert current choice
+      // var mute = !jsxc.options.get('muteNotification');
+      //
+      // if (mute) {
+      //    jsxc.notification.muteSound();
+      // } else {
+      //    jsxc.notification.unmuteSound();
+      // }
    }
 
-   private toggle() {
-      let storage = Client.getStorage();
-      let state = storage.getItem('roster');
+   private toggle = () => {
+      let state = this.options.get('visibility');
 
       state = (state === CONST.HIDDEN) ? CONST.SHOWN : CONST.HIDDEN;
 
-      storage.setItem('roster', state);
+      this.options.set('visibility', state);
    }
 
    private setVisibility(state:string) {
       if (state === CONST.SHOWN && Client.isExtraSmallDevice()) {
-         WindowList.minimizeAll();
+         WindowList.get().minimizeAll();
       }
 
       $('body').removeClass('jsxc-roster-hidden jsxc-roster-shown');

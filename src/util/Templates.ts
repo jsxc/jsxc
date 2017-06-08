@@ -29,7 +29,7 @@ export default class Templates {
 
    public static get(name:string, context:any = {}, options?:any):string {
       Templates.setup();
-
+console.warn('Deprecated? Template.get');
       // @TODO log or through exception if template does not exist
       return this.handlebars.templates[name](context, options);
    }
