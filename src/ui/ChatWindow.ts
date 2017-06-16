@@ -18,6 +18,16 @@ import 'simplebar'
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
+//@TODO duplicate of AbstractConnection
+enum Status {
+   online,
+   chat,
+   away,
+   xa,
+   dnd,
+   offline
+}
+
 const ENTER_KEY = 13;
 const ESC_KEY = 27;
 
@@ -98,6 +108,12 @@ export default class ChatWindow {
          this.element.find('.jsxc-name').text(newName);
       });
       // @TODO init otr
+
+      this.element.attr('data-presence', Status[this.contact.getPresence()]);
+
+      this.contact.registerHook('status', (newStatus) => {
+         this.element.attr('data-presence', Status[newStatus]);
+      });
 
       // let simpleBar = new SimpleBar(this.element.find('.jsxc-message-area')[0]);
 
@@ -451,8 +467,6 @@ export default class ChatWindow {
       } else {
          this.minimize(ev);
       }
-
-      // @TODO update storage
    }
 
    private resizeInputArea() {

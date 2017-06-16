@@ -31,12 +31,16 @@ export default class SortedPersistentMap {
 
       if (typeof this.pushHook !== 'function') {
          Log.error('push hook required');
+
          return;
       }
 
       this.list.forEach(id => {
-         console.log('execute push hook for', id)
-         this.map[id] = this.pushHook(id);
+         try {
+            this.map[id] = this.pushHook(id);
+         } catch(err) {
+            Log.error('Push hook threw the following error', err);
+         }
       });
 
       this.initialized = true;

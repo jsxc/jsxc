@@ -16,6 +16,8 @@ export interface IConnection {
 
    getAvatar(jid:JID);
 
+   setDisplayName(jid:JID, displayName:string);
+
    hasFeatureByJid(jid:JID, feature:string);
    hasFeatureByJid(jid:JID, feature:string[]);
 

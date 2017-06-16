@@ -6,6 +6,7 @@ import Message from '../../../Message'
 import Utils from '../../../util/Utils'
 import Translation from '../../../util/Translation'
 import Client from '../../../Client'
+import Contact from '../../../Contact'
 
 // body.replace(/^\/me /, '<i title="/me">' + Utils.removeHTML(this.sender.getName()) + '</i> ');
 const PRESERVE_HANDLER = true;
@@ -29,10 +30,10 @@ export default function onChatMessage(stanza: Element): boolean {
 
       if (carbonStanza.length === 0) {
          carbonCopy = false;
-      } /*else if (from.full !== Strophe.getBareJidFromJid(jsxc.xmpp.conn.jid)) {
+      } else if (from.bare !== to.bare) {
          // ignore this carbon copy
-         return true;
-      } */else {
+         return PRESERVE_HANDLER;
+      } else {
          carbonCopy = true;
       }
 
@@ -57,7 +58,7 @@ export default function onChatMessage(stanza: Element): boolean {
 
    let delayElement = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
    let stamp = (delayElement.length > 0) ? new Date(delayElement.attr('stamp')) : new Date();
-   let peer:JID;
+   let peer:JID = from; //@REVIEW do we need peer?
 
    if (carbonCopy) {
       let direction = (carbonStanza.prop('tagName') === 'sent') ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
@@ -85,7 +86,7 @@ export default function onChatMessage(stanza: Element): boolean {
       messageFrom = $(stanza).attr('from');
    }
 
-   let contact = account.getContact(from);
+   let contact:Contact = account.getContact(from);
    if (typeof contact === 'undefined') {
       // jid not in roster
 
@@ -107,12 +108,7 @@ export default function onChatMessage(stanza: Element): boolean {
    }
 
    // If we now the full jid, we use it
-   if (messageType === 'chat') {
-      // win.data('jid', from);
-      // jsxc.storage.updateUserItem('buddy', bid, {
-      //    jid: from
-      // });
-   }
+   contact.setResource(from.resource);
 
    $(document).trigger('message.jsxc', [from, plaintextBody]);
 

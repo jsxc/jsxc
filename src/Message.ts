@@ -209,9 +209,11 @@ export default class Message implements Identifiable {
 
    private load(uid:string):void {
       var data = this.storage.getItem('msg', uid);
-
+window._storage = this.storage;
       if (!data) {
          Log.debug('Could not load message with uid ' + uid);
+
+         throw new Error('Could not load message with uid ' + uid)
       }
 
       $.extend(this.payload, data.payload);

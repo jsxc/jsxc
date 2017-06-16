@@ -3,6 +3,7 @@ import JID from '../../../JID'
 import Client from '../../../Client'
 import Account from '../../../Account'
 import ContactData from '../../../ContactData'
+import Roster from '../../../ui/Roster'
 
 const REMOVE_HANDLER = false;
 
@@ -26,15 +27,19 @@ export default function onRoster(stanzaElement: Element): boolean {
       let name = item.attr('name') || jid.bare;
       let subscription = item.attr('subscription');
 
-      account.addContact(new ContactData({
+      let contact = account.addContact(new ContactData({
          jid: jid,
          name: name,
-         sub: subscription
+         subscription: subscription
       }));
+
+      Roster.get().add(contact);
    });
 
-   if (stanza.find('query').attr('ver')) {
-      account.getStorage().setItem('roster', 'version', stanza.find('query').attr('ver'));
+   let rosterVersion = $(stanza).find('query').attr('ver');
+
+   if (rosterVersion) {
+      account.getStorage().setItem('roster', 'version', rosterVersion);
    }
 
    return REMOVE_HANDLER;

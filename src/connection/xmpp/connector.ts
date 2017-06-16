@@ -2,6 +2,7 @@ import {$iq,Strophe} from 'strophe.js';
 import Options from '../../Options';
 import Log from '../../util/Log';
 import SM from '../../StateMachine'
+import Client from '../../Client'
 
 export function login(url:string, jid:string, sid:string, rid:string);
 export function login(url:string, jid:string, password:string);
@@ -12,6 +13,7 @@ export function login() {
       return attachConnection(arguments[0], arguments[1], arguments[2], arguments[3]);
    } else {
       Log.warn('This should not happen');
+
       //@TODO this should be moved to some connection parameter detection method
       // let jid;
       // let storage = StorageSingleton.getGlobalStorage();

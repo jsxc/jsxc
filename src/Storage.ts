@@ -1,6 +1,6 @@
 import Log from './util/Log'
 
-const PREFIX = 'jsxc';
+const PREFIX = 'jsxc2';
 
 const SEP = ':';
 

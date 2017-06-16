@@ -31,11 +31,6 @@ export default class ChatWindowList {
 
       let storage = Client.getStorage();
 
-      let chatWindowIds = storage.getItem('chatWindowIds') || [];
-      chatWindowIds.forEach(id => {
-         // ChatWindowList.chatWindowList[id] = new ChatWindow(id);
-      });
-
       // $(window).resize(jsxc.gui.updateWindowListSB);
       // $('#jsxc_windowList').resize(jsxc.gui.updateWindowListSB);
 
@@ -53,14 +48,22 @@ export default class ChatWindowList {
    }
 
    public closeAll() {
+      for (let chatWindowId in this.chatWindowList) {
+         let chatWindow:ChatWindow = this.chatWindowList[chatWindowId];
 
+         chatWindow.close();
+      }
    }
 
    public minimizeAll() {
+      for (let chatWindowId in this.chatWindowList) {
+         let chatWindow:ChatWindow = this.chatWindowList[chatWindowId];
 
+         chatWindow.minimize();
+      }
    }
 
-   public add(chatWindow:ChatWindow) {
+   public add(chatWindow:ChatWindow) { console.log('add', chatWindow)
       let chatWindowIds = this.getChatWindowIds();
 
       if (chatWindowIds.indexOf(chatWindow.getId()) < 0) {
@@ -69,8 +72,6 @@ export default class ChatWindowList {
          // chatWindow.unminimize();
 
          this.element.find('> ul').append(chatWindow.getDom());
-
-         this.save();
       } else {
          chatWindow = this.chatWindowList[chatWindow.getId()];
       }
@@ -87,8 +88,6 @@ export default class ChatWindowList {
          chatWindow.close();
 
          delete this.chatWindowList[chatWindow.getId()];
-
-         this.save();
       }
 
       this.updateWindowListSB();
@@ -129,11 +128,5 @@ export default class ChatWindowList {
 
    private getChatWindowIds() {
       return Object.keys(this.chatWindowList || {});
-   }
-
-   private save() {
-      let storage = Client.getStorage();
-
-      storage.setItem('chatWindowIds', this.getChatWindowIds());
    }
 }

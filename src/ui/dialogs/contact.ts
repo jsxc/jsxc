@@ -4,6 +4,8 @@ import Log from '../../util/Log'
 import StorageSingleton from '../../StorageSingleton'
 import Options from '../../Options'
 import * as CONST from '../../CONST'
+import Client from '../../Client'
+import JID from '../../JID'
 
 let contactTemplate = require('../../../template/contact.hbs');
 
@@ -12,6 +14,8 @@ let contact: Contact;
 
 export default function(username?: string) {
    let storage = StorageSingleton.getUserStorage();
+
+   username = (typeof username === 'string') ? username : undefined;
 
    let content = contactTemplate({
       username: username
@@ -32,7 +36,7 @@ function onUsernameKeyUp() {
       return;
    }
 
-   var val = $(this).val();
+   let val = $(this).val();
    $('#jsxc-userlist').empty();
 
    if (val !== '') {
@@ -40,7 +44,7 @@ function onUsernameKeyUp() {
          $('#jsxc-userlist').empty();
 
          $.each(list || {}, function(uid, displayname) {
-            var option = $('<option>');
+            let option = $('<option>');
             option.attr('data-username', uid);
             option.attr('data-alias', displayname);
 
@@ -55,8 +59,8 @@ function onUsernameKeyUp() {
 }
 
 function onUsernameInput() {
-   var val = $(this).val();
-   var option = $('#jsxc-userlist').find('option[data-username="' + val + '"], option[data-alias="' + val + '"]');
+   let val = $(this).val();
+   let option = $('#jsxc-userlist').find('option[data-username="' + val + '"], option[data-alias="' + val + '"]');
 
    if (option.length > 0) {
       $('#jsxc-username').val(option.attr('data-username'));
@@ -67,11 +71,13 @@ function onUsernameInput() {
 function onSubmit(ev) {
    ev.preventDefault();
 
-   var username = $('#jsxc-username').val();
-   var alias = $('#jsxc-alias').val();
+   let username = $('#jsxc-username').val();
+   let alias = $('#jsxc-alias').val();
+   //@TODO if we support multi account, we need an account selection dialog
+   let account = Client.getAccout();
 
    if (!username.match(/@(.*)$/)) {
-      username += '@' + Strophe.getDomainFromJid(jsxc.storage.getItem('jid'));
+      username += '@' + account.getJID().domain;
    }
 
    // Check if the username is valid
@@ -86,7 +92,9 @@ function onSubmit(ev) {
       return false;
    }
 
-   jsxc.xmpp.addBuddy(username, alias);
+   let jid = new JID(username);
+
+   account.getConnection().addContact(jid, alias);
 
    dialog.close();
 }

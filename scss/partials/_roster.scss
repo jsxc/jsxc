@@ -407,6 +407,8 @@
 }
 
 .jsxc-contact-list {
+   @include presenceIndicator(".jsxc-avatar");
+
    list-style: none;
    padding: 0;
    margin: 0;

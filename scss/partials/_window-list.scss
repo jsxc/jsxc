@@ -1,4 +1,6 @@
 #jsxc-window-list {
+   @include presenceIndicator(".jsxc-window-bar .jsxc-avatar");
+
    position: fixed;
    bottom: 0;
    right: 210px;

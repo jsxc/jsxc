@@ -1,15 +1,19 @@
 import Log from '../../../util/Log';
 import JID from '../../../JID';
+import Account from '../../../Account';
 import Contact from '../../../Contact';
 import Client from '../../../Client';
+import {Notice, TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION} from '../../../Notice';
 import Roster from '../../../ui/Roster';
+import {Presence} from '../../AbstractConnection'
 
 let PRESERVE_HANDLER = true;
 let REMOVE_HANDLER = false;
 let SUBSCRIPTION = {
    REMOVE: 'remove',
    FROM: 'from',
-   BOTH: 'both'
+   BOTH: 'both',
+   TO: 'to'
 };
 let PRESENCE = {
    ERROR: 'error',
@@ -18,58 +22,63 @@ let PRESENCE = {
    UNSUBSCRIBED: 'unsubscribed'
 };
 
-//@TODO duplicate of AbstractConnection
-enum Status {
-   online,
-   chat,
-   away,
-   xa,
-   dnd,
-   offline
-}
+let account;
 
-export default function(stanza: Element): boolean {
+export default function(stanza: Element): boolean {$.t('from') + ' ' + jid,
    Log.debug('onPresence', stanza);
 
    //@TODO use sid to retrieve the correct account
-   let account = Client.getAccout();
+   account = Client.getAccout();
 
    let presence = {
       type: $(stanza).attr('type'),
       from: new JID($(stanza).attr('from')),
-      show: $(stanza).find('show').text()
+      show: $(stanza).find('show').text(),
+      status: $(stanza).find('status').text()
    }
 
-   let status:Status = determinePresenceStatus(presence);
-console.log(presence, status)
+   let status:Presence = determinePresenceStatus(presence);
+
    if (presence.from.bare === account.getJID().bare) {
-      //@TODO this is not suitable for multi account support
-      //Roster.get().setPresence(status);
+      Log.debug('Ignore own presence notification');
 
       return PRESERVE_HANDLER;
    }
 
-   let xVCard = $(presence).find('x[xmlns="vcard-temp:x:update"]');
-   let contact = account.getContact(presence.from);
-
    if (presence.type === PRESENCE.ERROR) {
-      // $(document).trigger('error.presence.jsxc', [from, presence]);
-
-      var error = $(presence).find('error');
+      var error = $(stanza).find('error');
+      var errorCode = error.attr('code') || '';
+      var errorType = error.attr('type') || '';
+      var errorReason = error.find(">:first-child").prop('tagName');
+      var errorText = error.find('text').text();
 
       //@TODO display error message
-      Log.error('[XMPP] ' + error.attr('code') + ' ' + error.find(">:first-child").prop('tagName'));
+      Log.error('[XMPP] ' + errorType + ', ' + errorCode + ', ' + errorReason + ', ' + errorText);
+
+      return PRESERVE_HANDLER;
+   }
+
+   let xVCard = $(stanza).find('x[xmlns="vcard-temp:x:update"]');
+   let contact = account.getContact(presence.from);
+
+   if (typeof contact === 'undefined') {
+      Log.warn('Could not find contact object for ' + presence.from.full);
+
       return PRESERVE_HANDLER;
    }
 
    // incoming friendship request
    if (presence.type === PRESENCE.SUBSCRIBE) {
-      processSubscribtionRequest(contact);
+      Log.debug('received subscription request');
+
+      processSubscribtionRequest(presence.from, contact);
 
       return PRESERVE_HANDLER;
    }
 
-   contact.setStatus(presence.from.resource, status);
+   contact.setStatus(presence.status);
+   contact.setPresence(presence.from.resource, status);
+   contact.setResource(''); // reset jid, so new messages go to the bare jid
 
    // if (data.type === 'groupchat') {
    //    data.status = status;
@@ -90,64 +99,46 @@ console.log(presence, status)
    //    }
    // }
 
-   // Reset jid
-   // if (jsxc.gui.window.get(bid).length > 0) {
-   //    jsxc.gui.window.get(bid).data('jid', jid);
-   // }
-
-   // jsxc.storage.setUserItem('buddy', bid, data);
-   // jsxc.storage.setUserItem('res', bid, res);
-
-   Log.debug('Presence (' + presence.from.full + '): ' + Status[status]);
-
-   // jsxc.gui.update(bid);
-   // jsxc.gui.roster.reorder(bid);
-
-
-
-   // $(document).trigger('presence.jsxc', [from, status, presence]);
+   Log.debug('Presence (' + presence.from.full + '): ' + Presence[status]);
 
    // preserve handler
    return PRESERVE_HANDLER;
 };
 
-function processSubscribtionRequest(contact:Contact) {
-   var bl = jsxc.storage.getUserItem('buddylist');
-
-   if (bl.indexOf(bid) > -1) {
+function processSubscribtionRequest(jid:JID, contact:Contact) {
+   if (contact) {
       Log.debug('Auto approve contact request, because he is already in our contact list.');
 
-      jsxc.xmpp.resFriendReq(jid, true);
-      if (data.sub !== 'to') {
-         jsxc.xmpp.addBuddy(jid, data.name);
+      account.getConnection().sendSubscriptionAnswer(contact.getJid(), true);
+
+      if (contact.getSubscription() !== SUBSCRIPTION.TO) {
+         Roster.get().add(contact);
       }
 
-      return true;
+      return PRESERVE_HANDLER;
    }
 
-   jsxc.storage.setUserItem('friendReq', {
-      jid: jid,
-      approve: -1
+   account.addNotice({
+      title: 'Friendship_request',
+      description: 'from ' + jid.bare,
+      type: NOTICETYPE.contact,
+      fnName: NOTICEFUNCTION.contactRequest,
+      fnParams: [jid.bare]
    });
-   jsxc.notice.add({
-      msg: $.t('Friendship_request'),
-      description: $.t('from') + ' ' + jid,
-      type: 'contact'
-   }, 'gui.showApproveDialog', [jid]);
 }
 
-function determinePresenceStatus(presence):Status {
+function determinePresenceStatus(presence):Presence {
    let status;
 
    if (presence.type === PRESENCE.UNAVAILABLE || presence.type === PRESENCE.UNSUBSCRIBED) {
-      status = Status['offline'];
+      status = Presence['offline'];
    } else {
       let show = presence.show;
 
       if (show === '') {
-         status = Status['online'];
+         status = Presence['online'];
       } else {
-         status = Status[show];
+         status = Presence[show];
       }
    }
 

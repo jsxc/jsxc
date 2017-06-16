@@ -10,13 +10,13 @@ export default class Avatar {
 
    public static get(contact:Contact) {
       let avatar = Avatar.avatars[contact.getId()];
-if (!window.ava) {window.ava = Avatar; window.con = contact}
+
       if (!avatar) {
          avatar = Avatar.avatars[contact.getId()] = new Avatar(contact);
       }
 
       return avatar;
-   };
+   }
 
    public addElement(element) {
       this.elements.push(element);
@@ -29,10 +29,7 @@ if (!window.ava) {window.ava = Avatar; window.con = contact}
    }
 
    private constructor(private contact:Contact) {
-      //create registerHook in Contact to trace property changes? How could this be DRY?
       this.contact.registerHook('name', (name) => {
-         console.log('name hook', name);
-
          this.reload();
       })
    }

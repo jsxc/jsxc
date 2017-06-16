@@ -4,7 +4,7 @@ import * as NS from './xmpp/namespace'
 import onRoster from './xmpp/handlers/roster'
 import Log from '../util/Log'
 
-enum Status {
+enum Presence {
    online,
    chat,
    away,
@@ -28,6 +28,8 @@ abstract class AbstractConnection {
       }).c('query', {
          xmlns: 'jabber:iq:roster'
       });
+
+      //@TODO use account.getStorage().getItem('roster', 'version'), maybe better as parameter
 
       return this.sendIQ(iq).then(function() {
          return onRoster.apply(this, arguments);
@@ -64,7 +66,7 @@ abstract class AbstractConnection {
       this.send(xmlMsg);
    }
 
-   public sendPresence(status:Status = Status.online) {
+   public sendPresence(presence:Presence = Presence.online) {
       if (this.connection.disco) {
          this.connection.disco.addIdentity('client', 'web', 'JSXC');
          this.connection.disco.addFeature(NS.get('DISCO_INFO'));
@@ -77,8 +79,8 @@ abstract class AbstractConnection {
          presenceStanza.c('c', this.connection.caps.generateCapsAttrs()).up();
       }
 
-      if (status !== Status.online) {
-         presenceStanza.c('show').t(Status[status]).up();
+      if (presence !== Presence.online) {
+         presenceStanza.c('show').t(Presence[presence]).up();
       }
 
       // var priority = Options.get('priority');
@@ -141,6 +143,28 @@ abstract class AbstractConnection {
             }
          });
       });
+   }
+
+   public setDisplayName(jid:JID, displayName:string) {
+      var iq = $iq({
+         type: 'set'
+      }).c('query', {
+         xmlns: 'jabber:iq:roster'
+      }).c('item', {
+         jid: jid.bare,
+         name: displayName
+      });
+
+      this.sendIQ(iq);
+   }
+
+   public sendSubscriptionAnswer(to:JID, accept:boolean) {
+      let presenceStanza = $pres({
+         to: to.bare,
+         type: (accept) ? 'subscribed' : 'unsubscribed'
+      });
+
+      this.send(presenceStanza);
    }
 
    private addContactToRoster(jid:JID, alias:string) {
@@ -214,4 +238,4 @@ abstract class AbstractConnection {
    }
 }
 
-export default AbstractConnection;
+export {AbstractConnection, Presence};

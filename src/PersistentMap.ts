@@ -13,6 +13,10 @@ export default class PersistentMap {
       this.key = storage.generateKey.apply(storage, identifier);
 
       this.map = this.storage.getItem(this.key) || {};
+
+      this.storage.registerHook(this.key, (newValue) => {
+         this.map = newValue;
+      });
    }
 
    public get(id:string) {
@@ -67,7 +71,9 @@ export default class PersistentMap {
          let func = arguments[1];
 
          this.storage.registerHook(this.key, function(newData, oldData) {
-            if (!oldData || newData[id] !== oldData[id]) {
+            if (newData && !oldData) {
+               func(newData[id]);
+            } else if (newData[id] !== oldData[id]) {
                func(newData[id], oldData[id]);
             }
          });

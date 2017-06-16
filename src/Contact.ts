@@ -7,6 +7,8 @@ import Account from './Account'
 import ContactData from './ContactData'
 import PersistentMap from './PersistentMap'
 import IdentifiableInterface from './IdentifiableInterface'
+import Log from './util/Log'
+import {Presence} from './connection/AbstractConnection'
 
 export default class Contact implements IdentifiableInterface {
    private storage: Storage;
@@ -25,7 +27,7 @@ export default class Contact implements IdentifiableInterface {
       this.storage = this.account.getStorage();
 
       if (typeof arguments[1] === 'string') {
-         let id = arguments[1];
+         let id = arguments[1]; console.log('id', id)
          this.data = new PersistentMap(this.storage, 'contact', id);
          this.jid = new JID(this.data.get('jid'));
 
@@ -65,30 +67,63 @@ export default class Contact implements IdentifiableInterface {
       return this.account.openChatWindow(this);
    }
 
-   public setStatus(resource:string, status) {
-      //@TODO fix
-      if (status === 0) {
-         delete this.data.resources[resource];
+   public addResource(resource:string) {
+      let resources = this.data.get('resources') || [];
+
+      if (resource && resources.indexOf(resource) < 0) {
+         resources.push(resource);
+
+         this.data.set('resources', resources);
+      }
+   }
+
+   public removeResource(resource:string) {
+      let resources = this.data.get('resources') || [];
+
+      resources = $.grep(resources, function(r) {
+         return resource !== r;
+      });
+
+      this.data.set('resources', resources);
+   }
+
+   public setResource = (resource:string) => {
+      //this.addResource(resource);
+console.log('setResource', this.jid.bare + '/' + resource)
+      this.jid = new JID(this.jid.bare + '/' + resource);
+
+      this.data.set('jid', this.jid.full);
+   }
+
+   public setPresence(resource:string, presence:Presence) {
+      Log.debug('set presence for ' + this.jid.bare + ' / ' + resource, presence);
+
+      let resources = this.data.get('resources') || {};
+
+      if (presence === Presence.offline) {
+         delete resources[resource];
       } else if (resource) {
-         this.data.resources[resource] = status;
+         resources[resource] = presence;
       }
 
-      let maxStatus = this.getHighestStatus();
+      if (this.getType() === 'groupchat') {
+         // group chat doesn't have a presence
+         return;
+      }
 
-      if (this.data.status === 0 && maxStatus > 0) {
+      presence = this.getHighestPresence();
+console.log('highest presence', presence);
+      if (this.data.get('presence') === Presence.offline && presence !== Presence.offline) {
          // buddy has come online
-         Notification.notify({
-            title: this.data.name,
-            message: Translation.t('has_come_online'),
-            source: this.getId()
-         });
+         // @TODO
+         // Notification.notify({
+         //    title: this.getName(),
+         //    message: Translation.t('has_come_online'),
+         //    source: this.getId()
+         // });
       }
 
-      if (this.data.type === 'groupchat') {
-         this.data.status = status;
-      } else {
-         this.data.status = maxStatus;
-      }
+      this.data.set('presence', presence);
    }
 
    public sendMessage(message:Message) {
@@ -112,7 +147,7 @@ export default class Contact implements IdentifiableInterface {
    }
 
    public getPresence() {
-      return this.data.get('msgstate');
+      return this.data.get('presence');
    }
 
    public getType() {
@@ -127,7 +162,7 @@ export default class Contact implements IdentifiableInterface {
       return this.data.get('name') || this.jid.bare;
    }
 
-   public getAvatar():Promise {
+   public getAvatar():Promise<{}> {
 
    }
 
@@ -148,30 +183,46 @@ export default class Contact implements IdentifiableInterface {
 
    }
 
+   public getStatus():string {
+      return this.data.get('status');
+   }
+
+   public setStatus(status:string) { console.trace(this.getId() + ', setStatus: ' + status)
+      return this.data.set('status', status);
+   }
+
    public setTrust(trust:boolean) {
       this.data.set('trust', trust);
    }
 
    public setName(name:string) {
+      let oldName = this.getName();
+
       this.data.set('name', name);
 
-      //@TODO call connection.setDisplayname
+      if (oldName !== name) {
+         this.account.getConnection().setDisplayName(this.jid, name);
+      }
+   }
+
+   public setSubscription(subscription:string) {
+      this.data.set('subscription', subscription);
    }
 
    public registerHook(property:string, func:(newValue:any, oldValue:any)=>void) {
       this.data.registerHook(property, func);
    }
 
-   private getHighestStatus() {
-      let maxStatus = 0;
+   private getHighestPresence() {
+      let maxPresence = Presence.offline;
       let resources = this.data.get('resources');
 
       for (let resource in resources) {
-         if(resources[resource] > maxStatus) {
-            maxStatus = resources[resource];
+         if(resources[resource] < maxPresence) {
+            maxPresence = resources[resource];
          }
       }
 
-      return maxStatus;
+      return maxPresence;
    }
 }

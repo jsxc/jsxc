@@ -12,19 +12,13 @@ import WindowList from './ChatWindowList'
 import Client from '../Client'
 import Storage from '../Storage'
 import PersistentMap from '../PersistentMap'
+import Account from '../Account'
 import Translation from '../util/Translation'
+import Avatar from './Avatar'
+import {Notice} from '../Notice'
+import {Presence} from '../connection/AbstractConnection'
 //import rosterTemplate from '../../template/roster.hbs'
 let rosterTemplate = require('../../template/roster.hbs')
-
-//@TODO duplicate of AbstractConnection
-enum Status {
-   online,
-   chat,
-   away,
-   xa,
-   dnd,
-   offline
-}
 
 export default class Roster {
 
@@ -73,13 +67,19 @@ export default class Roster {
          this.setVisibility(visibility);
       });
 
-      let presence = this.options.get('presence') || Status.offline;
-      this.setPresence(presence);
+      let presence = this.options.get('presence');
+      presence = typeof presence === 'number' ? presence : Presence.offline;
+      this.updateOwnPresenceIndicator(presence);
       this.options.registerHook('presence', (presence) => {
-         this.setPresence(presence);
+         this.updateOwnPresenceIndicator(presence);
       });
 
       // jsxc.notice.load();
+   }
+
+   public setRosterAvatar(contact:Contact) {
+      let avatar = Avatar.get(contact);
+      avatar.addElement(this.element.find('.jsxc-bottom .jsxc-avatar'));
    }
 
    public add(contact:Contact) {
@@ -91,6 +91,24 @@ export default class Roster {
 
       let rosterItem = new RosterItem(contact);
       this.insert(rosterItem);
+
+      contact.registerHook('presence', () => {
+         rosterItem.getDom().detach();
+
+         this.insert(rosterItem);
+      });
+   }
+
+   public remove(contact:Contact) {
+      let rosterItemElement = this.element.find('.jsxc-roster-item[data-id="'+contact.getId()+'"]');
+
+      if (rosterItemElement.length === 0) {
+         return;
+      }
+
+      rosterItemElement.remove();
+
+      //@TODO check if we are still connected and if we have to display an "your roster is empty" warning
    }
 
    public clearStatus() {
@@ -126,10 +144,54 @@ export default class Roster {
       this.setStatus(statusElement);
    }
 
-   public setPresence(presence:Status) {
-      let label = $('.jsxc-menu-presence .jsxc-' + Status[presence]).text();
+   public setPresence(presence:Presence) {
+      this.options.set('presence', presence);
+   }
 
-      $('.jsxc-menu-presence > span').text(label);
+   public refreshOwnPresenceIndicator() {
+      let presence = this.options.get('presence');
+
+      this.updateOwnPresenceIndicator(presence);
+   }
+
+   public registerHook(property:string, func:(newValue:any, oldValue:any)=>void) {
+      this.options.registerHook(property, func);
+   }
+
+   public addNotice(account:Account, notice:Notice) {
+      let noticeListElement = $('#jsxc-notice ul');
+      let noticeElement = $('<li/>');
+
+      noticeElement.click(function(ev) {
+         ev.stopPropagation();
+         ev.preventDefault();
+
+         notice.callFunction();
+
+         account.removeNotice(notice);
+      });
+
+      noticeElement.addClass('jsxc-icon-' + notice.getType());
+
+      noticeElement.text(notice.getTitle());
+      noticeElement.attr('title', notice.getDescription());
+      noticeElement.attr('data-notice-id', notice.getId());
+      noticeElement.attr('data-account-id', account.getUid());
+      noticeListElement.append(noticeElement);
+
+      $('#jsxc-notice > span').text(noticeListElement.find('li').length);
+   }
+
+   public removeNotice(account:Account, noticeId:string) {
+      let noticeElement = $('#jsxc-notice li').filter(function() {
+         return $(this).attr('data-notice-id') === noticeId &&
+            $(this).attr('data-account-id') === account.getUid();
+      });
+
+      noticeElement.remove();
+
+      let numberOfNotices = $('#jsxc-notice li').length;
+      $('#jsxc-notice > span').text(numberOfNotices > 0 ? numberOfNotices : '');
    }
 
    private insert(rosterItem:RosterItem) {
@@ -138,15 +200,15 @@ export default class Roster {
       let contact = rosterItem.getContact();
 
       // Insert buddy with no mutual friendship to the end
-      let status = (contact.getSubscription() === 'both') ? contact.getPresence() : -1;
+      let presence = (contact.getSubscription() === 'both') ? contact.getPresence() : Presence.offline + 1;
 
       contactList.children().each(function() {
          var pointer = $(this);
          var pointerSubscription = pointer.data('subscription');
-         var pointerStatus = (pointerSubscription === 'both') ? pointer.data('presence') : -1;
+         var pointerPresence = (pointerSubscription === 'both') ? Presence[pointer.data('presence')] : Presence.offline + 1;
          let pointerName = pointer.find('.jsxc-name').text();
 
-         if ((pointerName.toLowerCase() > contact.getName().toLowerCase() && pointerStatus === status) || pointerStatus < status) {
+         if ((pointerName.toLowerCase() > contact.getName().toLowerCase() && pointerPresence === presence) || pointerPresence > presence) {
 
             pointer.before(rosterItem.getDom());
             insert = true;
@@ -158,6 +220,12 @@ export default class Roster {
       if (!insert) {
          rosterItem.getDom().appendTo(contactList);
       }
+   }
+
+   private updateOwnPresenceIndicator(presence:Presence) {
+      let label = $('.jsxc-menu-presence .jsxc-' + Presence[presence]).text();
+
+      $('.jsxc-menu-presence > span').text(label);
    }
 
    private registerMainMenuHandler() {
@@ -180,9 +248,12 @@ export default class Roster {
       this.element.find('.jsxc-menu-presence li').click(function() {
          let presence = $(this).data('presence');
 
-         options.set('presence', Status[presence]);
+         options.set('presence', Presence[presence]);
 
-         Client.getAccout().getConnection().sendPresence(Status[presence]);
+         if (presence !== Presence.offline) {
+            // offline presence needs special handling in XMPPConnection
+            Client.getAccout().getConnection().sendPresence(Presence[presence]);
+         }
       });
    }
 

@@ -25,12 +25,23 @@ $dialog_input_invalid: $red;
 $dialog_input_readonly_bg: $gray90;
 $spot_bg: $white;
 $spot_border: $black;
+
 $state_online: green;
 $state_chat: green;
 $state_away: $orange;
 $state_xa: $orange;
 $state_dnd: $red;
 $state_offline: $gray60;
+
+$presenceColors: (
+   online: green,
+   chat: green,
+   away: $orange,
+   xa: $orange,
+   dnd: $red,
+   offline: $gray60
+);
+
 $notice_bg: $orange;
 $notice_color: $black;
 $window_unread_cycle: $orange;

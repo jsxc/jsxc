@@ -5,6 +5,7 @@ import Storage from './Storage';
 import * as UI from './ui/web'
 import JID from './JID'
 import Roster from './ui/Roster'
+import ChatWindowList from './ui/ChatWindowList'
 import RoleAllocator from './RoleAllocator'
 
 export default class Client {
@@ -24,12 +25,9 @@ export default class Client {
          }).then(function(){
 
          }).catch(function(msg){
-            Roster.get().setNoConnection();
+            Client.accounts[id].remove();
 
             console.warn(msg)
-
-            delete Client.accounts[id];
-            Client.save();
          });
       });
    }
@@ -62,8 +60,8 @@ export default class Client {
       return Client.storage;
    }
 
-   public static getAccout(jid:JID);
-   public static getAccout(uid?:string);
+   public static getAccout(jid:JID):Account;
+   public static getAccout(uid?:string):Account;
    public static getAccout() {
       let uid;
 
@@ -94,6 +92,16 @@ export default class Client {
       return account.connect().then(function(){
          Client.addAccount(account);
       });
+   }
+
+   public static removeAccount(account:Account) {
+      delete Client.accounts[account.getUid()];
+
+      Client.save();
+
+      if (Object.keys(Client.accounts).length === 0) {
+         Roster.get().setNoConnection();
+      }
    }
 
    private static addAccount(account:Account) {

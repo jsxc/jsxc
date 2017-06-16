@@ -3,7 +3,7 @@ import Message from '../../Message';
 import {IConnection} from '../ConnectionInterface';
 import Log from '../../util/Log'
 import Account from '../../Account'
-import AbstractConnection from '../AbstractConnection'
+import {AbstractConnection, Presence} from '../AbstractConnection'
 
 export default class StorageConnection extends AbstractConnection implements IConnection {
 

@@ -8,14 +8,15 @@ import * as NS from './namespace'
 import XMPPHandler from './handler'
 import Log from '../../util/Log'
 import Account from '../../Account'
-import AbstractConnection from '../AbstractConnection'
+import {AbstractConnection, Presence} from '../AbstractConnection'
+import Roster from '../../ui/Roster'
 
 export default class XMPPConnection extends AbstractConnection implements IConnection {
    private handler;
 
    constructor(private account:Account, private connection:Strophe.Connection) {
       super();
-
+window._conn = connection;
       this.handler = new XMPPHandler(connection);
       this.handler.registerHandler();
 
@@ -30,6 +31,12 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       this.account.getStorage().registerHook('stanzaIQ', (newValue, oldValue, key) => {
          if (newValue && !oldValue) {
             this.onIncomingStorageStanzaIQ(key, newValue);
+         }
+      });
+
+      Roster.get().registerHook('presence', (presence) => {
+         if (presence === Presence.offline) {
+            this.connection.disconnect('');
          }
       });
    }
