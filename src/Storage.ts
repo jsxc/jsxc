@@ -94,6 +94,7 @@ export default class Storage {
          value = arguments[2];
       }
 
+      //@REVIEW why do we just stringify objects?
       if (typeof (value) === 'object') {
          // exclude jquery objects, because otherwise safari will fail
          try {

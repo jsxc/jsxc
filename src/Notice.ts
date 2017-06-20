@@ -6,11 +6,11 @@ export const enum TYPE {
    normal, announcement, contact
 }
 
-//@REVIEW binding between FUNCTION and functions could be better
 export const enum FUNCTION {
    contactRequest
 }
-let functions = [ContactDialog]
+let functions = {};
+functions[FUNCTION.contactRequest] = ContactDialog;
 
 export interface NoticeData {
    title:string;

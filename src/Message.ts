@@ -10,18 +10,11 @@ import Translation from './util/Translation'
 import Identifiable from './IdentifiableInterface'
 import Client from './Client'
 import Utils from './util/Utils'
+import {MessageInterface, DIRECTION, MSGTYPE} from './MessageInterface'
 
 const MSGPOSTFIX = ':msg';
 
 const ATREGEX = new RegExp('(xmpp:)?(' + CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i');
-
-enum DIRECTION {
-   IN, OUT, SYS
-};
-
-enum MSGTYPE {
-   CHAT, GROUPCHAT
-};
 
 interface MessagePayload {
    peer:JID,
@@ -37,7 +30,7 @@ interface MessagePayload {
    type?:MSGTYPE,
 }
 
-export default class Message implements Identifiable {
+export default class Message implements Identifiable, MessageInterface {
 
    private uid:string;
 

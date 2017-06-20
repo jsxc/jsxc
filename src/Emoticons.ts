@@ -26,6 +26,7 @@ const EMOTICONS = [
    [':zzz:', 'zzz'],
    [':wait:', 'hand_splayed']
 ]
+import * as emojione from '../lib/emojione/lib/js/emojione.js';
 
 const EMOTICON_LIST = {
    'core': {

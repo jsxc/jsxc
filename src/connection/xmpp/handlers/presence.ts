@@ -1,14 +1,15 @@
 import Log from '../../../util/Log';
 import JID from '../../../JID';
-import Account from '../../../Account';
-import Contact from '../../../Contact';
+import {ContactInterface} from '../../../ContactInterface';
 import Client from '../../../Client';
 import {Notice, TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION} from '../../../Notice';
 import Roster from '../../../ui/Roster';
 import {Presence} from '../../AbstractConnection'
+import 'jquery'
 
 let PRESERVE_HANDLER = true;
 let REMOVE_HANDLER = false;
+let ERROR_RETURN = 1;
 let SUBSCRIPTION = {
    REMOVE: 'remove',
    FROM: 'from',
@@ -24,7 +25,7 @@ let PRESENCE = {
 
 let account;
 
-export default function(stanza: Element): boolean {$.t('from') + ' ' + jid,
+export default function(stanza: Element): boolean {
    Log.debug('onPresence', stanza);
 
    //@TODO use sid to retrieve the correct account
@@ -42,7 +43,7 @@ export default function(stanza: Element): boolean {$.t('from') + ' ' + jid,
    if (presence.from.bare === account.getJID().bare) {
       Log.debug('Ignore own presence notification');
 
-      return PRESERVE_HANDLER;
+      return 1;
    }
 
    if (presence.type === PRESENCE.ERROR) {
@@ -55,7 +56,7 @@ export default function(stanza: Element): boolean {$.t('from') + ' ' + jid,
       //@TODO display error message
       Log.error('[XMPP] ' + errorType + ', ' + errorCode + ', ' + errorReason + ', ' + errorText);
 
-      return PRESERVE_HANDLER;
+      return 2;
    }
 
    let xVCard = $(stanza).find('x[xmlns="vcard-temp:x:update"]');
@@ -66,7 +67,7 @@ export default function(stanza: Element): boolean {$.t('from') + ' ' + jid,
 
       return PRESERVE_HANDLER;
    }
-
+//@REVIEW we can't process a contact request from an unknown contact, because getContact would return undefined
    // incoming friendship request
    if (presence.type === PRESENCE.SUBSCRIBE) {
       Log.debug('received subscription request');
@@ -105,7 +106,7 @@ export default function(stanza: Element): boolean {$.t('from') + ' ' + jid,
    return PRESERVE_HANDLER;
 };
 
-function processSubscribtionRequest(jid:JID, contact:Contact) {
+function processSubscribtionRequest(jid:JID, contact:ContactInterface) {
    if (contact) {
       Log.debug('Auto approve contact request, because he is already in our contact list.');
 

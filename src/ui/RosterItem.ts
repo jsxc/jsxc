@@ -1,4 +1,4 @@
-import Contact from '../Contact'
+import {ContactInterface} from '../ContactInterface'
 import Menu from './util/Menu'
 import Avatar from './Avatar'
 import showVcardDialog from './dialogs/vcard';
@@ -18,7 +18,7 @@ enum Presence {
 export default class RosterItem {
    private element:JQuery;
 
-   constructor(private contact:Contact) {
+   constructor(private contact:ContactInterface) {
       let self = this;
       let template = rosterItemTemplate({
          name: contact.getName(),
@@ -80,7 +80,7 @@ export default class RosterItem {
       return this.element;
    }
 
-   public getContact():Contact {
+   public getContact():ContactInterface {
       return this.contact;
    }
 

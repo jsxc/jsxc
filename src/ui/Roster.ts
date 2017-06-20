@@ -7,7 +7,7 @@ import * as CONST from '../CONST'
 import RosterItem from './RosterItem'
 import showLoginBox from './dialogs/loginBox'
 import Menu from './util/Menu'
-import Contact from '../Contact'
+import {ContactInterface} from '../ContactInterface'
 import WindowList from './ChatWindowList'
 import Client from '../Client'
 import Storage from '../Storage'
@@ -77,12 +77,12 @@ export default class Roster {
       // jsxc.notice.load();
    }
 
-   public setRosterAvatar(contact:Contact) {
+   public setRosterAvatar(contact:ContactInterface) {
       let avatar = Avatar.get(contact);
       avatar.addElement(this.element.find('.jsxc-bottom .jsxc-avatar'));
    }
 
-   public add(contact:Contact) {
+   public add(contact:ContactInterface) {
       this.clearStatus();
 
       if (this.element.find('.jsxc-roster-item[data-id="'+contact.getId()+'"]').length > 0) {
@@ -99,7 +99,7 @@ export default class Roster {
       });
    }
 
-   public remove(contact:Contact) {
+   public remove(contact:ContactInterface) {
       let rosterItemElement = this.element.find('.jsxc-roster-item[data-id="'+contact.getId()+'"]');
 
       if (rosterItemElement.length === 0) {

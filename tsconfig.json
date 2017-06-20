@@ -1,6 +1,11 @@
 {
     "allowSyntheticDefaultImports": true,
     "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+           "emojione": ["lib/emojione/lib/js/emojione.js"],
+           "strophe.js": ["node_modules/strophe.js/strophe.js"]
+        },
         "module": "commonjs",
         "outDir": "./dist",
         "allowJs": true,

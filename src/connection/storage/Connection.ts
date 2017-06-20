@@ -4,6 +4,9 @@ import {IConnection} from '../ConnectionInterface';
 import Log from '../../util/Log'
 import Account from '../../Account'
 import {AbstractConnection, Presence} from '../AbstractConnection'
+import * as StropheLib from 'strophe.js'
+
+let Strophe = StropheLib.Strophe;
 
 export default class StorageConnection extends AbstractConnection implements IConnection {
 

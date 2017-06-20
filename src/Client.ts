@@ -8,7 +8,7 @@ import Roster from './ui/Roster'
 import ChatWindowList from './ui/ChatWindowList'
 import RoleAllocator from './RoleAllocator'
 
-export default class Client {
+export default class Client implements ClientInterface {
    private static storage;
 
    private static accounts = {};

@@ -1,5 +1,6 @@
+import {JIDInterface} from './JIDInterface'
 
-export default class JID {
+export default class JID implements JIDInterface {
    public readonly full:string;
 
    public readonly bare:string;
