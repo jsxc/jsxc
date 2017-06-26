@@ -1113,7 +1113,7 @@ jsxc.gui = {
          dialog.find('.btn-primary').text(opt.primary.label);
       }
 
-      if (opt.primary && opt.option.label) {
+      if (opt.option && opt.option.label) {
          dialog.find('.btn-default').text(opt.option.label);
       }
 
@@ -1121,8 +1121,8 @@ jsxc.gui = {
          dialog.find('.btn-primary').click(opt.primary.cb);
       }
 
-      if (opt.primary && opt.option.cb) {
-         dialog.find('.btn-primary').click(opt.option.cb);
+      if (opt.option && opt.option.cb) {
+         dialog.find('.btn-default').click(opt.option.cb);
       }
    },
 
