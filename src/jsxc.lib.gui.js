@@ -2550,6 +2550,10 @@ jsxc.gui.window = {
          message.htmlMsg = message.msg;
       }
 
+      if (typeof message.msg === 'undefined') {
+         message.msg = '';
+      }
+
       // remove html tags and reencode html tags
       message.msg = jsxc.removeHTML(message.msg);
       message.msg = jsxc.escapeHTML(message.msg);
