@@ -964,5 +964,21 @@ jsxc = {
       jsxc.debug('UI State changed to ' + Object.keys(jsxc.CONST.UISTATE)[state]);
 
       $(document).trigger('stateUIChange.jsxc', state);
+   },
+
+   getLastMsg: function(bid) {
+      var history = jsxc.storage.getUserItem('history', bid) || [];
+      var i = 0;
+
+      while (history.length > i) {
+         var message = new jsxc.Message(history[i]);
+         if (message.direction !== jsxc.Message.SYS) {
+            return {
+               text: message.msg,
+               date: message.stamp
+            };
+         }
+         i++;
+      }
    }
 };
