@@ -295,6 +295,7 @@ jsxc = {
       window.addEventListener('storage', jsxc.storage.onStorage, false);
 
       $(document).on('attached.jsxc', jsxc.registerLogout);
+      $(document).on('disconnected.jsxc', jsxc.relogin);
 
       var isStorageAttachParameters = jsxc.storage.getItem('rid') && jsxc.storage.getItem('sid') && jsxc.storage.getItem('jid');
       var isOptionsAttachParameters = jsxc.options.xmpp.rid && jsxc.options.xmpp.sid && jsxc.options.xmpp.jid;
@@ -302,6 +303,10 @@ jsxc = {
 
       // Check if we have to establish a new connection
       if ((!isStorageAttachParameters && !isOptionsAttachParameters) || isForceLoginForm) {
+
+         if (jsxc.relogin()) {
+            return;
+         }
 
          // clean up rid and sid
          jsxc.storage.removeItem('rid');
@@ -414,8 +419,8 @@ jsxc = {
          return false;
       }
 
-      if (jsxc.xmpp.conn && jsxc.xmpp.connected) {
-         jsxc.debug('We are already connected');
+      if (jsxc.xmpp.conn && jsxc.xmpp.conn.authenticated) {
+         jsxc.debug('We are already connected and authenticated');
 
          return false;
       }
@@ -432,6 +437,47 @@ jsxc = {
       jsxc.checkMaster(function() {
          jsxc.xmpp.login.apply(this, args);
       });
+   },
+
+   relogin: function() {
+      jsxc.debug('Try to relogin');
+
+      var jid = jsxc.storage.getItem('jid');
+      jsxc.bid = jsxc.bid || (jid ? jsxc.jidToBid(jid) : null);
+
+      if (!jsxc.bid || jsxc.storage.getUserItem('forcedLogout')) {
+         jsxc.debug('Logout was forced or I found no valid jid');
+
+         return false;
+      }
+
+      var xmppOptions = jsxc.options.xmpp;
+
+      if (xmppOptions.url && (xmppOptions.jid || (xmppOptions.username && xmppOptions.domain)) && xmppOptions.password) {
+         xmppOptions.jid = xmppOptions.jid || (xmppOptions.username + xmppOptions.domain);
+
+         jsxc.start(xmppOptions.jid, xmppOptions.password);
+
+         return true;
+      }
+
+      var loadSettingsAllKnowing = jsxc.storage.getUserItem('loadSettingsAllKnowing');
+
+      if (xmppOptions.url && loadSettingsAllKnowing) {
+         jsxc.options.loadSettings(null, null, function(settings) {
+            jsxc._prepareLogin(null, null, function(settings) {
+               if (settings !== false) {
+                  jsxc.start(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
+               }
+            }, settings);
+         });
+
+         return true;
+      }
+
+      jsxc.debug('I am not able to relogin');
+
+      return false;
    },
 
    registerLogout: function() {
@@ -570,6 +616,11 @@ jsxc = {
 
       jsxc.options.xmpp.jid = jid;
       jsxc.options.xmpp.password = password;
+
+      var tempBid = jsxc.bid;
+      jsxc.bid = jsxc.jidToBid(jid);
+      jsxc.storage.setUserItem('loadSettingsAllKnowing', !!jid && !!password);
+      jsxc.bid = tempBid;
 
       cb(settings);
    },
