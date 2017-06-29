@@ -1422,7 +1422,7 @@ jsxc.gui = {
             src = jsxc.options.root + '/lib/emojione/assets/svg/' + filename + '.svg';
          }
 
-         var div = $('<div>');
+         var div = $('<span>');
 
          div.addClass('jsxc_emoticon');
          div.css('background-image', 'url(' + src + ')');
