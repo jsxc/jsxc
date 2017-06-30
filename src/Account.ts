@@ -14,7 +14,10 @@ import PersistentMap from './PersistentMap'
 import Log from './util/Log'
 import {Presence} from './connection/AbstractConnection'
 import Client from './Client'
-import {Notice, NoticeData, TYPE as NOTICETYPE} from './Notice'
+import {NoticeManager} from './NoticeManager'
+import * as StropheLib from 'strophe.js'
+
+let Strophe = StropheLib.Strophe;
 
 interface IConnectionParameters {
    url:string,
@@ -44,6 +47,8 @@ export default class Account {
 
    private contact:Contact;
 
+   private noticeManager:NoticeManager;
+
    constructor(boshUrl: string, jid: string, sid: string, rid:string);
    constructor(boshUrl: string, jid: string, password: string);
    constructor(uid:string);
@@ -57,25 +62,16 @@ export default class Account {
 
       this.connection = new StorageConnection(this);
 
+      this.noticeManager = new NoticeManager(this.getStorage());
+
       this.contact = new Contact(this, new ContactData({
          jid: new JID(this.uid),
          name: this.uid
       }));
       Roster.get().setRosterAvatar(this.contact);
 
-      this.restoreContacts();
-      this.initNotices();
+      this.initContacts();
       this.initWindows();
-
-      this.getStorage().registerHook('contact:', (contactData) => {
-         let contact = new Contact(this, contactData.jid);
-
-         if (typeof this.contacts[contact.getId()] === 'undefined') { console.log('add', contactData.jid)
-            this.contacts[contact.getId()] = contact;
-
-            Roster.get().add(contact);
-         }
-      });
    }
 
    public connect() {
@@ -83,14 +79,14 @@ export default class Account {
 
       if (!this.connectionArguments) {
          this.reloadConnectionData();
-      }
 
-      if (self.connectionParameters && self.connectionParameters.inactivity && (new Date()).getTime() - self.connectionParameters.timestamp > self.connectionParameters.inactivity) {
-         Log.warn('Credentials expired')
+         if (self.connectionParameters && self.connectionParameters.inactivity && (new Date()).getTime() - self.connectionParameters.timestamp > self.connectionParameters.inactivity) {
+            Log.warn('Credentials expired')
 
-         this.closeAllChatWindows();
+            this.closeAllChatWindows();
 
-         return Promise.reject('Credentials expired');
+            return Promise.reject('Credentials expired');
+         }
       }
 
       return Connector.login.apply(this, this.connectionArguments).then(this.successfulConnected);
@@ -102,7 +98,6 @@ export default class Account {
 
    public addContact(data:ContactData):Contact {
       let contact = new Contact(this, data);
-      contact.save();
 
       this.contacts[contact.getId()] = contact;
 
@@ -112,7 +107,7 @@ export default class Account {
    }
 
    public removeContact(contact:Contact) {
-      let id = contact.getId();
+      let id = contact.getJid().bare;
 
       if (this.contacts[id]) {
          delete this.contacts[id];
@@ -125,6 +120,8 @@ export default class Account {
          if (chatWindow) {
             this.closeChatWindow(chatWindow);
          }
+
+         this.save();
       }
    }
 
@@ -151,8 +148,6 @@ export default class Account {
    }
 
    public closeChatWindow(chatWindow:ChatWindow) {
-      // let id = chatWindow.getContact().getId();
-console.log('chatWindow', chatWindow)
       ChatWindowList.get().remove(chatWindow);
 
       this.windows.remove(chatWindow);
@@ -166,22 +161,8 @@ console.log('chatWindow', chatWindow)
       });
    }
 
-   public addNotice(noticeData:NoticeData) {
-      let notice = new Notice(this.getStorage(), noticeData);
-
-      if (this.notices.get(notice.getId())) {
-         return;
-      }
-
-      //Roster.get().addNotice(this, notice);
-
-      this.notices.push(notice);
-   }
-
-   public removeNotice(notice:Notice) { console.log('removeNotice', notice);
-      //Roster.get().removeNotice(this, notice);
-
-      this.notices.remove(notice);
+   public getNoticeManager():NoticeManager {
+      return this.noticeManager;
    }
 
    public getStorage() {
@@ -268,27 +249,37 @@ console.log('chatWindow', chatWindow)
    private save() {
       this.getStorage().setItem('account', {
          connectionParameters: this.connectionParameters,
-         contacts: Object.keys(this.contacts),
-         // windows: Object.keys(this.windows)
+         contacts: Object.keys(this.contacts)
       });
    }
 
    private reloadConnectionData() {
       let storedAccountData = this.getStorage().getItem('account') || {};
-console.log('storedAccountData', storedAccountData)
+
       this.connectionParameters = storedAccountData.connectionParameters;
 
       let p = this.connectionParameters;
       this.connectionArguments = [p.url, (new JID(p.jid)).full, p.sid, p.rid];
    }
 
-   private restoreContacts() {
-      let storedAccountData = this.getStorage().getItem('account');
+   private initContacts() {
+      let storedAccountData = this.getStorage().getItem('account') || {};
+      let contacts = storedAccountData.contacts || [];
 
-      storedAccountData.contacts.forEach((id) => {
+      contacts.forEach((id) => {
          this.contacts[id] = new Contact(this, id);
 
          Roster.get().add(this.contacts[id]);
+      });
+
+      this.getStorage().registerHook('contact:', (contactData) => {
+         let contact = new Contact(this, contactData.jid);
+
+         if (typeof this.contacts[contact.getId()] === 'undefined') {
+            this.contacts[contact.getId()] = contact;
+
+            Roster.get().add(contact);
+         }
       });
    }
 
@@ -312,23 +303,5 @@ console.log('storedAccountData', storedAccountData)
       });
 
       this.windows.init();
-   }
-
-   private initNotices() {
-      this.notices = new SortedPersistentMap(this.getStorage(), 'notices');
-
-      this.notices.setRemoveHook((id) => {
-         Roster.get().removeNotice(this, id);
-      });
-
-      this.notices.setPushHook((id) => {
-         let notice = new Notice(this.getStorage(), id);
-
-         Roster.get().addNotice(this, notice);
-
-         return notice;
-      });
-
-      this.notices.init();
    }
 }

@@ -1,8 +1,10 @@
+import Client from './Client'
+
 export default class Options {
 
-   public static get(key) {
-      if (jsxc && jsxc.bid) {
-         var local = jsxc.storage.getUserItem('options') || {};
+   public static get(key, account?) {
+      if (!account) {
+         var local = Client.getStorage().getItem('options') || {};
 
          return (typeof local[key] !== 'undefined') ? local[key] : Options[key];
       }
@@ -11,7 +13,7 @@ export default class Options {
    };
 
    public static set(key, value) {
-      jsxc.storage.updateItem('options', key, value, true);
+      Client.getStorage().updateItem('options', key, value, true);
    };
 
    /** name of container application (e.g. owncloud or SOGo) */
@@ -184,7 +186,7 @@ export default class Options {
     * @this {jQuery} Elements to update with probable .jsxc_avatar elements
     */
    private static defaultAvatar = function(jid) {
-      jsxc.gui.avatarPlaceholder($(this).find('.jsxc_avatar'), jid);
+      // jsxc.gui.avatarPlaceholder($(this).find('.jsxc_avatar'), jid);
    };
 
    /**
@@ -276,9 +278,9 @@ export default class Options {
          var w = $(window).width() - $('#jsxc_windowListSB').width();
          var h = $(window).height();
 
-         if (jsxc.storage.getUserItem('roster') === 'shown') {
-            w -= $('#jsxc_roster').outerWidth(true);
-         }
+         // if (jsxc.storage.getUserItem('roster') === 'shown') {
+         //    w -= $('#jsxc_roster').outerWidth(true);
+         // }
 
          return {
             width: w,

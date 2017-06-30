@@ -15,7 +15,9 @@ export default class Dialog {
       callbacks: {
          beforeClose: this.onBeforeClose,
          afterClose: this.onAfterClose,
-         open: this.onOpened
+         open: () => {
+            this.onOpened();
+         }
       }
    };
 
@@ -36,7 +38,7 @@ export default class Dialog {
    }
 
    public open() {
-      $.magnificPopup.open(this.magnificPopupOptions);
+      (<any>$).magnificPopup.open(this.magnificPopupOptions);
 
       return this.getDom();
    }
@@ -44,7 +46,7 @@ export default class Dialog {
    public close() {
       Log.debug('close dialog');
 
-      $.magnificPopup.close();
+      (<any>$).magnificPopup.close();
    }
 
    public resize() {
@@ -61,16 +63,17 @@ export default class Dialog {
       dom.append(content);
    }
 
-   private onOpened = () => {
+   private onOpened() {
       let self = this;
+      let dom = this.getDom();
 
-      $('#jsxc_dialog .jsxc_close').click(function(ev) {
+      dom.find('.jsxc-close').click(function(ev) {
          ev.preventDefault();
 
          self.close();
       });
 
-      $('#jsxc_dialog form').each(function() {
+      dom.find('form').each(function() {
          var form = $(this);
 
          form.find('button[data-jsxc-loading-text]').each(function() {

@@ -26,6 +26,10 @@ export default class Storage {
       window.addEventListener('storage', this.onStorageEvent, false);
    }
 
+   public getName():string {
+      return this.name;
+   }
+
    public generateKey(...args:string[]):string {
       let key = '';
 

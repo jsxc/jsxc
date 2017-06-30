@@ -202,7 +202,7 @@ export default class Message implements Identifiable, MessageInterface {
 
    private load(uid:string):void {
       var data = this.storage.getItem('msg', uid);
-window._storage = this.storage;
+
       if (!data) {
          Log.debug('Could not load message with uid ' + uid);
 

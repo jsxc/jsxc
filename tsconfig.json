@@ -8,9 +8,8 @@
         },
         "module": "commonjs",
         "outDir": "./dist",
-        "allowJs": true,
         "target": "es5",
-        "lib": ["dom", "es2015.promise", "es5"]
+        "lib": ["DOM", "ES2015", "ES2015.Promise", "ES5", "ScriptHost"]
     },
     "include": [
         "./src/**/*.ts",
@@ -20,5 +19,8 @@
     "exclude": [
        "node_modules",
        "typings"
-     ]
+    ],
+    "files": [
+      "custom.d.ts"
+   ]
 }

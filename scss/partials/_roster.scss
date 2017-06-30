@@ -257,6 +257,16 @@
          background-image: url("../img/bookmark_red.svg");
       }
    }
+
+   &:not([data-subscription="both"]):not(.jsxc-bottom) {
+      .jsxc-name {
+         opacity: 0.7;
+      }
+
+      .jsxc-avatar {
+         filter: grayscale(100%);
+      }
+   }
 }
 
 .jsxc-caption {
@@ -416,7 +426,7 @@
    z-index: 85;
 
    &.jsxc-hide-offline {
-      .jsxc-roster-item[data-status='offline'] {
+      .jsxc-roster-item[data-presence='offline'] {
          display: none;
       }
    }

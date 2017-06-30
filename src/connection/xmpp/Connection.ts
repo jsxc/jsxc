@@ -3,7 +3,7 @@ import Message from '../../Message';
 import Options from '../../Options'
 import * as CONST from '../../CONST';
 import {IConnection} from '../ConnectionInterface';
-import {Strophe} from 'strophe';
+import 'strophe';
 import * as NS from './namespace'
 import XMPPHandler from './handler'
 import Log from '../../util/Log'
@@ -14,9 +14,9 @@ import Roster from '../../ui/Roster'
 export default class XMPPConnection extends AbstractConnection implements IConnection {
    private handler;
 
-   constructor(private account:Account, private connection:Strophe.Connection) {
+   constructor(private account:Account, protected connection:Strophe.Connection) {
       super();
-window._conn = connection;
+
       this.handler = new XMPPHandler(connection);
       this.handler.registerHandler();
 
@@ -48,19 +48,19 @@ window._conn = connection;
    public renameContact(jid:JID, name:string) {
       //@TODO maybe replace jid with contact?
 
-      if (d.type === 'chat') {
-         var iq = $iq({
-            type: 'set'
-         }).c('query', {
-            xmlns: NS.get('roster')
-         }).c('item', {
-            jid: jid.bare,
-            name: name
-         });
-         this.connection.sendIQ(iq);
-      } else if (d.type === 'groupchat') {
-         jsxc.xmpp.bookmarks.add(bid, newname, d.nickname, d.autojoin);
-      }
+      // if (d.type === 'chat') {
+      //    var iq = $iq({
+      //       type: 'set'
+      //    }).c('query', {
+      //       xmlns: NS.get('roster')
+      //    }).c('item', {
+      //       jid: jid.bare,
+      //       name: name
+      //    });
+      //    this.connection.sendIQ(iq);
+      // } else if (d.type === 'groupchat') {
+      //    jsxc.xmpp.bookmarks.add(bid, newname, d.nickname, d.autojoin);
+      // }
    }
 
    public hasFeatureByJid(jid:JID, feature:string);
@@ -109,7 +109,7 @@ window._conn = connection;
          return;
       }
 
-      this.sendIQ(stanzaElement).then((stanza) => {
+      this.sendIQ(stanzaElement).then((stanza:HTMLElement) => {
          this.account.getStorage().setItem(key, {
             type: 'success',
             stanza: stanza.outerHTML

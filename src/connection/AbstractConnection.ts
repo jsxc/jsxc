@@ -3,6 +3,12 @@ import JID from '../JID'
 import * as NS from './xmpp/namespace'
 import onRoster from './xmpp/handlers/roster'
 import Log from '../util/Log'
+import * as StropheLib from 'strophe.js'
+
+let Strophe = StropheLib.Strophe;
+let $iq = StropheLib.$iq;
+let $msg = StropheLib.$msg;
+let $pres = StropheLib.$pres;
 
 enum Presence {
    online,
@@ -66,7 +72,7 @@ abstract class AbstractConnection {
       this.send(xmlMsg);
    }
 
-   public sendPresence(presence:Presence = Presence.online) {
+   public sendPresence(presence?:Presence) {
       if (this.connection.disco) {
          this.connection.disco.addIdentity('client', 'web', 'JSXC');
          this.connection.disco.addFeature(NS.get('DISCO_INFO'));
@@ -100,14 +106,11 @@ abstract class AbstractConnection {
       let iq = $iq({
          type: 'set'
       }).c('query', {
-         xmlns: NS.get('roster')
+         xmlns: NS.get('ROSTER')
       }).c('item', {
          jid: jid.bare,
          subscription: 'remove'
       });
-
-      // @TODO
-      // jsxc.gui.roster.purge(bid);
 
       return this.sendIQ(iq);
    }
@@ -134,7 +137,7 @@ abstract class AbstractConnection {
    }
 
    public getAvatar(jid:JID) {
-      return this.loadVcard(jid).then(function(vcard){
+      return this.loadVcard(jid).then(function(vcard) {
          return new Promise(function(resolve, reject){
             if (vcard.PHOTO && vcard.PHOTO.src) {
                resolve(vcard.PHOTO);

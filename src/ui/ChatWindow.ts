@@ -32,9 +32,9 @@ const ENTER_KEY = 13;
 const ESC_KEY = 27;
 
 export default class ChatWindow {
-   private element:JQuery;
+   private element;
 
-   private inputElement:JQuery;
+   private inputElement;
 
    private inputBlurTimeout:number;
 
@@ -263,7 +263,7 @@ export default class ChatWindow {
             attachmentElement.text(attachment.getName());
          }
 
-         if (message.hasData()) {
+         if (attachment.hasData()) {
             attachmentElement = $('<a>').append(attachmentElement);
             attachmentElement.attr('href', attachment.getData());
             attachmentElement.attr('download', attachment.getName());
@@ -400,7 +400,7 @@ export default class ChatWindow {
    }
 
    private onInputKeyPress = (ev) => {
-      let message = $(ev.target).val();
+      let message:string = <string>$(ev.target).val();
 
       if (ev.which !== ENTER_KEY || ev.shiftKey || !message) {
          return;

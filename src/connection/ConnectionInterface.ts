@@ -1,5 +1,6 @@
 import JID from './../JID';
 import Message from './../Message';
+import {Presence} from './AbstractConnection'
 
 export interface IConnection {
    loadVcard(jid:JID):any;
@@ -12,7 +13,7 @@ export interface IConnection {
 
    sendMessage(message:Message);
 
-   sendPresence();
+   sendPresence(presence?:Presence);
 
    getAvatar(jid:JID);
 

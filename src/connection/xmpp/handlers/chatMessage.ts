@@ -7,6 +7,8 @@ import Utils from '../../../util/Utils'
 import Translation from '../../../util/Translation'
 import Client from '../../../Client'
 import Contact from '../../../Contact'
+import Notification from '../../../Notification'
+import {SOUNDS} from '../../../CONST'
 
 // body.replace(/^\/me /, '<i title="/me">' + Utils.removeHTML(this.sender.getName()) + '</i> ');
 const PRESERVE_HANDLER = true;
@@ -88,6 +90,7 @@ export default function onChatMessage(stanza: Element): boolean {
 
    let contact:Contact = account.getContact(from);
    if (typeof contact === 'undefined') {
+      Log.debug('Sender is not in our contact list')
       // jid not in roster
 
       // var chat = jsxc.storage.getUserItem('chat', bid) || [];
@@ -187,6 +190,14 @@ export default function onChatMessage(stanza: Element): boolean {
    //       attachment: attachment
    //    });
    // }
+
+   //@REVIEW pipes? hooks?
+   Notification.notify({
+      title: Translation.t('New_message_from'),
+      message: message.getProcessedBody(),
+      soundFile: SOUNDS.MSG,
+      source: contact
+   });
 
    return PRESERVE_HANDLER;
 }

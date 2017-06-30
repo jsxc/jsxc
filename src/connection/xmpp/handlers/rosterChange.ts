@@ -51,7 +51,9 @@ export default function onRosterChange(stanza: Element): boolean {
 
    let contact = account.getContact(jid);
 
-   if (contact) {
+   if (!contact && subscription === SUBSCRIPTION.REMOVE) {
+      return PRESERVE_HANDLER;
+   } else if (contact) {
       if (subscription === SUBSCRIPTION.REMOVE) {
          account.removeContact(contact);
       } else {

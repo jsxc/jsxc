@@ -51,16 +51,13 @@ export default class Contact implements IdentifiableInterface {
       this.data.set(data);
    }
 
-   public save() {
-      // if (this.storage.getItem('contact', this.getId())) {
-      //    this.storage.updateItem('contact', this.getId(), this.data);
-      //
-      //    return 'updated';
-      // }
-      //
-      // this.storage.setItem('contact', this.getId(), this.data);
-      //
-      // return 'created';
+   public delete() {
+      this.account.getConnection().removeContact(this.getJid());
+
+      //@TODO add delete method to purge the complete entry
+      this.data.empty();
+
+      //@TODO purge window
    }
 
    public openWindow = () => {
@@ -101,7 +98,11 @@ console.log('setResource', this.jid.bare + '/' + resource)
       let resources = this.data.get('resources') || {};
 
       if (presence === Presence.offline) {
-         delete resources[resource];
+         if (resource) {
+            delete resources[resource];
+         } else {
+            resources = {};
+         }
       } else if (resource) {
          resources[resource] = presence;
       }

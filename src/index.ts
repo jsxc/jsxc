@@ -1,6 +1,11 @@
 import Log from './util/Log';
 import * as UI from './ui/web'
 import Client from './Client'
+import 'magnific-popup'
+import * as StropheLib from 'strophe.js'
+
+// @REVIEW
+$.extend(window, StropheLib)
 
 Client.init();
 

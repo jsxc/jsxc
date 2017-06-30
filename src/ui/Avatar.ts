@@ -1,6 +1,6 @@
 import Options from '../Options'
 import Hash from '../util/Hash'
-import Contact from '../Contact'
+import {ContactInterface} from '../ContactInterface'
 
 export default class Avatar {
 
@@ -8,7 +8,7 @@ export default class Avatar {
 
    private static avatars = {};
 
-   public static get(contact:Contact) {
+   public static get(contact:ContactInterface) {
       let avatar = Avatar.avatars[contact.getId()];
 
       if (!avatar) {
@@ -28,7 +28,7 @@ export default class Avatar {
       this.placeholder(this.elements, this.contact.getName());
    }
 
-   private constructor(private contact:Contact) {
+   private constructor(private contact:ContactInterface) {
       this.contact.registerHook('name', (name) => {
          this.reload();
       })

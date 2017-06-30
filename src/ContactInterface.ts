@@ -3,6 +3,8 @@ import {JIDInterface} from './JIDInterface'
 import {Presence} from './connection/AbstractConnection'
 
 export interface ContactInterface {
+   delete();
+
    openWindow();
 
    addResource(resource:string);

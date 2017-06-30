@@ -3,6 +3,9 @@ import Contact from './Contact'
 import Translation from './util/Translation'
 import Client from './Client'
 import * as CONST from './CONST'
+import {FUNCTION as NOTICEFUNCTION} from './Notice'
+import openConfirmDialog from './ui/dialogs/confirm'
+import Hash from './util/Hash'
 
 interface NotificationSettings {
    title:string,
@@ -11,9 +14,17 @@ interface NotificationSettings {
    force?:boolean,
    soundFile?:string,
    loop?:boolean,
-   source?:string,
+   source?:Contact,
    icon?:string
 };
+
+const enum NotificationState {
+   DISABLED,
+   ENABLED,
+   ASK
+};
+
+let NotificationAPI = (<any> window).Notification;
 
 export default class Notification {
    private static inited = false;
@@ -24,37 +35,16 @@ export default class Notification {
 
    private static audioObject;
 
-   public static init() {
-      if(Notification.inited) {
-         return;
-      }
+   public static askForPermission() {
+      openConfirmDialog(Translation.t('Should_we_notify_you_')).then(() => {
+         // @TODO open dialog to block further actions
 
-      $(document).on('postmessagein.jsxc', function(event, bid, msg) {
-         msg = (msg && msg.match(/^\?OTR/)) ? $.t('Encrypted_message') : msg;
-         var data = jsxc.storage.getUserItem('buddy', bid);
-
-         Notification.notify({
-            title: Translation.t('New_message_from'),
-            message: msg,
-            soundFile: CONST.SOUNDS.MSG,
-            source: bid
-         });
-      });
-
-      $(document).on('callincoming.jingle', function() {
-         Notification.playSound(CONST.SOUNDS.CALL, true, true);
-      });
-
-      $(document).on('accept.call.jsxc reject.call.jsxc', function() {
-         Notification.stopSound();
-      });
-
-      if (!Notice.has('gui.showRequestNotification')) {
-         Notice.add({
-            msg: Translation.t('Notifications') + '?',
-            description: Translation.t('Should_we_notify_you_')
-         }, 'gui.showRequestNotification');
-      }
+         return this.requestPermission();
+      }).then(() => {
+         Client.getStorage().setItem('notificationState', NotificationState.ENABLED);
+      }).catch(() => {
+         Client.getStorage().setItem('notificationState', NotificationState.DISABLED);
+      })
    }
 
    public static muteSound(external?) {
@@ -69,13 +59,28 @@ export default class Notification {
       $('#jsxc-menu .jsxc-muteNotification').text(Translation.t('Mute'));
 
       if (external !== true) {
-         Options.set('muteNotification', false);
+         Options.set('muteNotification', false); // notifications disabled
       }
    }
 
-   public static notify(settings:NotificationSettings) {
-      if (!Options.get('notification') || !Notification.hasPermission()) {
+   public static notify(settings:NotificationSettings) { console.log('notification', $.extend({}, settings))
+      if (!Options.get('notification')) {
          return; // notifications disabled
+      }
+
+      let state = Client.getStorage().getItem('notificationState');
+      state = (typeof state === 'number') ? state : NotificationState.ASK;
+
+      if (state === NotificationState.ASK && !Notification.hasPermission()) {
+         Client.getNoticeManager().addNotice({
+            title: Translation.t('Notifications') + '?',
+            description: Translation.t('Should_we_notify_you_'),
+            fnName: NOTICEFUNCTION.notificationRequest
+         });
+      }
+
+      if (!Notification.hasPermission()) {
+         return;
       }
 
       if (Client.hasFocus() && !settings.force) {
@@ -84,12 +89,34 @@ export default class Notification {
 
       settings.icon = settings.icon || Options.get('root') + '/img/XMPP_logo.png';
 
-      if (typeof settings.source === 'string') {
-         let contact = new Contact(settings.source);
-         let avatar = contact.getAvatar();
+      if (settings.source) {
+         let avatar = settings.source.getAvatar();
 
          if (typeof avatar === 'string' && avatar !== '0') {
             settings.icon = avatar;
+         } else {
+            var hash = Hash.String(settings.source.getName());
+
+            var hue = Math.abs(hash) % 360;
+            var saturation = 90;
+            var lightness = 65;
+
+            let canvas = <HTMLCanvasElement> $('<canvas>').get(0);
+            canvas.height = 100;
+            canvas.width = 100;
+
+            let ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
+            ctx.fillRect(0, 0, 100, 100);
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline= 'middle';
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 50px sans-serif';
+            ctx.fillText(settings.source.getName()[0].toUpperCase(), 50, 50);
+
+            settings.icon = canvas.toDataURL('image/jpeg');
          }
       }
 
@@ -107,47 +134,45 @@ export default class Notification {
          Notification.playSound(settings.soundFile, settings.loop, settings.force);
       }
 
-      var popup = new window.Notification(settings.title, {
+      var popup = new NotificationAPI(settings.title, {
          body: settings.message,
          icon: settings.icon
       });
 
       if (settings.duration > 0) {
-         setTimeout(function() {
+         setTimeout(function() { console.log('close popup')
             popup.close();
          }, settings.duration);
       }
    }
 
    private static hasSupport() {
-      return !!window.Notification;
+      return !!NotificationAPI;
    }
 
    private static requestPermission() {
-      window.Notification.requestPermission(function(status) {
-         if (window.Notification.permission !== status) {
-            window.Notification.permission = status;
-         }
+      return new Promise((resolve, reject) => {
+         NotificationAPI.requestPermission(function(status) {
+            if (NotificationAPI.permission !== status) {
+               NotificationAPI.permission = status;
+            }
 
-         if (Notification.hasPermission()) {
-            $(document).trigger('notificationready.jsxc');
-         } else {
-            $(document).trigger('notificationfailure.jsxc');
-         }
+            if (Notification.hasPermission()) {
+               resolve();
+            } else {
+               reject();
+            }
+         });
       });
    }
 
    private static hasPermission() {
-      return window.Notification.permission === CONST.NOTIFICATION_GRANTED;
+      return NotificationAPI.permission === CONST.NOTIFICATION_GRANTED;
    }
 
    private static playSound(soundFile:string, loop?:boolean, force?:boolean) {
-      if (!jsxc.master) {
-         // only master plays sound
-         return;
-      }
-
-      if (Options.get('muteNotification') || jsxc.storage.getUserItem('presence') === 'dnd') {
+      if (Options.get('muteNotification')) {
+         // @TODO check presence of source account
          // sound mute or own presence is dnd
          return;
       }

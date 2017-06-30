@@ -1,16 +1,19 @@
 import IdentifiableInterface from './IdentifiableInterface'
 import Storage from './Storage'
 import ContactDialog from './ui/dialogs/contact'
+import Notification from './Notification'
 
 export const enum TYPE {
    normal, announcement, contact
 }
 
 export const enum FUNCTION {
-   contactRequest
+   contactRequest,
+   notificationRequest,
 }
 let functions = {};
 functions[FUNCTION.contactRequest] = ContactDialog;
+functions[FUNCTION.notificationRequest] = Notification.askForPermission;
 
 export interface NoticeData {
    title:string;

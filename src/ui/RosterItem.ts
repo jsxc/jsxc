@@ -1,19 +1,11 @@
 import {ContactInterface} from '../ContactInterface'
 import Menu from './util/Menu'
 import Avatar from './Avatar'
-import showVcardDialog from './dialogs/vcard';
+import confirmDialog from './dialogs/confirm';
+import showVcardDialog from './dialogs/vcard'
+import {Presence} from '../connection/AbstractConnection'
 
 let rosterItemTemplate = require('../../template/roster-item.hbs')
-
-//@TODO duplicate of AbstractConnection
-enum Presence {
-   online,
-   chat,
-   away,
-   xa,
-   dnd,
-   offline
-}
 
 export default class RosterItem {
    private element:JQuery;
@@ -47,7 +39,14 @@ export default class RosterItem {
       this.element.find('.jsxc-delete').click(function(ev) {
          ev.stopPropagation();
 
-         // showRemoveDialog(contact);
+         //@TODO translation
+         confirmDialog('Do you like to delete xyz').then((dialog:Dialog) => {
+            contact.delete();
+
+            dialog.close();
+         }).catch(() => {
+
+         });
       });
 
       this.element.find('.jsxc-vcard').click(function(ev) {
@@ -71,6 +70,10 @@ export default class RosterItem {
 
       this.contact.registerHook('status', (status) => {
          this.element.find('.jsxc-last-msg .jsxc-text').text(status);
+      });
+
+      this.contact.registerHook('subscription', () => {
+         this.element.attr('data-subscription', this.contact.getSubscription());
       });
 
       // $(document).trigger('add.roster.jsxc', [bid, data, bud]);

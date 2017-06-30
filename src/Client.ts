@@ -7,15 +7,21 @@ import JID from './JID'
 import Roster from './ui/Roster'
 import ChatWindowList from './ui/ChatWindowList'
 import RoleAllocator from './RoleAllocator'
+import SortedPersistentMap from './SortedPersistentMap'
+import {NoticeManager} from './NoticeManager'
 
-export default class Client implements ClientInterface {
+export default class Client {
    private static storage;
 
    private static accounts = {};
 
+   private static noticeManager;
+
    public static init() {
       let roleAllocator = RoleAllocator.get();
       let accountIds = Client.getStorage().getItem('accounts') || [];
+
+      Client.noticeManager = new NoticeManager(Client.getStorage());
 
       accountIds.forEach(function(id) {
          Client.accounts[id] = new Account(id);
@@ -58,6 +64,10 @@ export default class Client implements ClientInterface {
       }
 
       return Client.storage;
+   }
+
+   public static getNoticeManager():NoticeManager {
+      return Client.noticeManager;
    }
 
    public static getAccout(jid:JID):Account;
@@ -103,6 +113,8 @@ export default class Client implements ClientInterface {
          Roster.get().setNoConnection();
       }
    }
+
+
 
    private static addAccount(account:Account) {
       Client.accounts[account.getUid()] = account;

@@ -7,8 +7,8 @@ import Roster from '../../../ui/Roster';
 import {Presence} from '../../AbstractConnection'
 import 'jquery'
 
-let PRESERVE_HANDLER = true;
-let REMOVE_HANDLER = false;
+let PRESERVE_HANDLER = 999;
+let REMOVE_HANDLER = 0;
 let ERROR_RETURN = 1;
 let SUBSCRIPTION = {
    REMOVE: 'remove',
@@ -25,7 +25,7 @@ let PRESENCE = {
 
 let account;
 
-export default function(stanza: Element): boolean {
+export default function(stanza: Element): number {
    Log.debug('onPresence', stanza);
 
    //@TODO use sid to retrieve the correct account
@@ -62,17 +62,17 @@ export default function(stanza: Element): boolean {
    let xVCard = $(stanza).find('x[xmlns="vcard-temp:x:update"]');
    let contact = account.getContact(presence.from);
 
-   if (typeof contact === 'undefined') {
-      Log.warn('Could not find contact object for ' + presence.from.full);
-
-      return PRESERVE_HANDLER;
-   }
-//@REVIEW we can't process a contact request from an unknown contact, because getContact would return undefined
    // incoming friendship request
    if (presence.type === PRESENCE.SUBSCRIBE) {
       Log.debug('received subscription request');
 
       processSubscribtionRequest(presence.from, contact);
+
+      return PRESERVE_HANDLER;
+   }
+
+   if (typeof contact === 'undefined') {
+      Log.warn('Could not find contact object for ' + presence.from.full);
 
       return PRESERVE_HANDLER;
    }
@@ -119,7 +119,7 @@ function processSubscribtionRequest(jid:JID, contact:ContactInterface) {
       return PRESERVE_HANDLER;
    }
 
-   account.addNotice({
+   account.getNoticeManager().addNotice({
       title: 'Friendship_request',
       description: 'from ' + jid.bare,
       type: NOTICETYPE.contact,

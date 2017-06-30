@@ -39,6 +39,14 @@ export default class Attachment {
       return true;
    }
 
+   public getId() {
+      
+   }
+
+   public getData() {
+      return this.data;
+   }
+
    public getSize():number {
       return this.size;
    }

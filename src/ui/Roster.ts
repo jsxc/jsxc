@@ -17,6 +17,7 @@ import Translation from '../util/Translation'
 import Avatar from './Avatar'
 import {Notice} from '../Notice'
 import {Presence} from '../connection/AbstractConnection'
+import {NoticeManager} from '../NoticeManager'
 //import rosterTemplate from '../../template/roster.hbs'
 let rosterTemplate = require('../../template/roster.hbs')
 
@@ -50,8 +51,6 @@ export default class Roster {
 
       this.contactList = this.element.find('.jsxc-contact-list');
 
-      this.hideOffline(Options.get('hideOffline'));
-
       this.storage = Client.getStorage();
       this.options = new PersistentMap(this.storage, 'roster');
 
@@ -61,20 +60,7 @@ export default class Roster {
 
       Menu.init(this.element.find('.jsxc-menu'));
 
-      let rosterState = this.options.get('visibility') || (Options.get('loginForm').startMinimized ? CONST.HIDDEN : CONST.SHOWN);
-      this.setVisibility(rosterState);
-      this.options.registerHook('visibility', (visibility) => {
-         this.setVisibility(visibility);
-      });
-
-      let presence = this.options.get('presence');
-      presence = typeof presence === 'number' ? presence : Presence.offline;
-      this.updateOwnPresenceIndicator(presence);
-      this.options.registerHook('presence', (presence) => {
-         this.updateOwnPresenceIndicator(presence);
-      });
-
-      // jsxc.notice.load();
+      this.initOptions();
    }
 
    public setRosterAvatar(contact:ContactInterface) {
@@ -93,6 +79,12 @@ export default class Roster {
       this.insert(rosterItem);
 
       contact.registerHook('presence', () => {
+         rosterItem.getDom().detach();
+
+         this.insert(rosterItem);
+      });
+
+      contact.registerHook('subscription', () => {
          rosterItem.getDom().detach();
 
          this.insert(rosterItem);
@@ -126,7 +118,7 @@ export default class Roster {
    public setNoConnection() {
       let linkElement = $('<a>');
       linkElement.text('relogin');
-      linkElement.click(showLoginBox);
+      linkElement.click(<any> showLoginBox);
 
       let statusElement = $('<p>');
       statusElement.text('no_connection');
@@ -138,7 +130,7 @@ export default class Roster {
    public setEmptyContactList() {
       let statusElement = $('<p>');
       statusElement.text(Translation.t('Your_roster_is_empty_add_'));
-      statusElement.find('a').click(showContactDialog);
+      statusElement.find('a').click(<any> showContactDialog);
       statusElement.append('.');
 
       this.setStatus(statusElement);
@@ -158,7 +150,7 @@ export default class Roster {
       this.options.registerHook(property, func);
    }
 
-   public addNotice(account:Account, notice:Notice) {
+   public addNotice(manager:NoticeManager, notice:Notice) {
       let noticeListElement = $('#jsxc-notice ul');
       let noticeElement = $('<li/>');
 
@@ -168,7 +160,7 @@ export default class Roster {
 
          notice.callFunction();
 
-         account.removeNotice(notice);
+         manager.removeNotice(notice);
       });
 
       noticeElement.addClass('jsxc-icon-' + notice.getType());
@@ -176,16 +168,16 @@ export default class Roster {
       noticeElement.text(notice.getTitle());
       noticeElement.attr('title', notice.getDescription());
       noticeElement.attr('data-notice-id', notice.getId());
-      noticeElement.attr('data-account-id', account.getUid());
+      noticeElement.attr('data-manager-id', manager.getId());
       noticeListElement.append(noticeElement);
 
       $('#jsxc-notice > span').text(noticeListElement.find('li').length);
    }
 
-   public removeNotice(account:Account, noticeId:string) {
+   public removeNotice(manager:NoticeManager, noticeId:string) {
       let noticeElement = $('#jsxc-notice li').filter(function() {
          return $(this).attr('data-notice-id') === noticeId &&
-            $(this).attr('data-account-id') === account.getUid();
+            $(this).attr('data-manager-id') === manager.getId();
       });
 
       noticeElement.remove();
@@ -231,15 +223,15 @@ export default class Roster {
    private registerMainMenuHandler() {
       let mainMenu = this.element.find('.jsxc-menu-main');
 
-      mainMenu.find('.jsxc-settings').click(showSettings);
+      mainMenu.find('li.jsxc-settings').click(showSettings);
 
-      mainMenu.find('.jsxc-hide-offline').click(this.toggleOffline);
+      mainMenu.find('li.jsxc-hide-offline').click(this.toggleOffline);
 
-      mainMenu.find('.jsxc-mute-notification').click(this.muteNotification);
+      mainMenu.find('li.jsxc-mute-notification').click(this.muteNotification);
 
-      mainMenu.find('.jsxc-add-contact').click(showContactDialog);
+      mainMenu.find('li.jsxc-add-contact').click(<any> showContactDialog);
 
-      mainMenu.find('.jsxc-about').click(showAboutDialog);
+      mainMenu.find('li.jsxc-about').click(showAboutDialog);
    }
 
    private registerPresenceHandler() {
@@ -252,7 +244,7 @@ export default class Roster {
 
          if (presence !== Presence.offline) {
             // offline presence needs special handling in XMPPConnection
-            Client.getAccout().getConnection().sendPresence(Presence[presence]);
+            Client.getAccout().getConnection().sendPresence(<any> Presence[presence]);
          }
       });
    }
@@ -261,24 +253,21 @@ export default class Roster {
       this.element.find('.jsxc-roster-toggle').click(this.toggle);
    }
 
-   private toggleOffline() {
-      var hideOffline = !Options.get('hideOffline');
+   private toggleOffline = (ev) => {
+      var hideOffline = !this.options.get('hideOffline');
 
-      this.hideOffline(hideOffline);
-
-      Options.set('hideOffline', hideOffline);
+      this.options.set('hideOffline', hideOffline);
    }
 
    private hideOffline(yes:boolean) {
       if (yes) {
-         this.contactList.addClass('jsxc-hideOffline');
+         this.contactList.addClass('jsxc-hide-offline');
       } else {
-         this.contactList.removeClass('jsxc-hideOffline');
+         this.contactList.removeClass('jsxc-hide-offline');
       }
    }
 
-   private muteNotification() {
-
+   private muteNotification = () => {
       // if (jsxc.storage.getUserItem('presence') === 'dnd') {
       //    return;
       // }
@@ -315,5 +304,27 @@ export default class Roster {
       // setTimeout(function() {
       //    jsxc.gui.updateWindowListSB();
       // }, duration);
+   }
+
+   private initOptions() {
+      let hideOffline = this.options.get('hideOffline');console.log('hideOffline', hideOffline, typeof hideOffline)
+      hideOffline = (typeof hideOffline === 'boolean') ? hideOffline : Options.get('hideOffline');
+      this.hideOffline(hideOffline);
+      this.options.registerHook('hideOffline', (hideOffline) => {
+         this.hideOffline(hideOffline);
+      });
+
+      let rosterState = this.options.get('visibility') || (Options.get('loginForm').startMinimized ? CONST.HIDDEN : CONST.SHOWN);
+      this.setVisibility(rosterState);
+      this.options.registerHook('visibility', (visibility) => {
+         this.setVisibility(visibility);
+      });
+
+      let presence = this.options.get('presence');
+      presence = typeof presence === 'number' ? presence : Presence.offline;
+      this.updateOwnPresenceIndicator(presence);
+      this.options.registerHook('presence', (presence) => {
+         this.updateOwnPresenceIndicator(presence);
+      });
    }
 }
