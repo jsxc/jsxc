@@ -4,6 +4,9 @@ import * as NS from './xmpp/namespace'
 import onRoster from './xmpp/handlers/roster'
 import Log from '../util/Log'
 import * as StropheLib from 'strophe.js'
+import JingleHandler from './JingleHandler'
+import {IConnection} from './ConnectionInterface'
+import Account from '../Account'
 
 let Strophe = StropheLib.Strophe;
 let $iq = StropheLib.$iq;
@@ -27,6 +30,17 @@ abstract class AbstractConnection {
 
    protected abstract sendIQ(stanzaElement:Element):Promise<{}>;
    protected abstract sendIQ(stanzaElement:Strophe.Builder):Promise<{}>;
+
+   protected jingleHandler;
+   public abstract getJingleHandler();
+
+   constructor(protected account:Account) {
+
+   }
+
+   public getJID():JID {
+      return this.account.getJID();
+   }
 
    public getRoster() {
       let iq = $iq({

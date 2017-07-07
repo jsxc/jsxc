@@ -15,6 +15,7 @@ import SortedPersistentMap from '../SortedPersistentMap'
 import PersistentMap from '../PersistentMap'
 import Avatar from './Avatar'
 import 'simplebar'
+import {startCall} from './actions/call'
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -352,6 +353,12 @@ export default class ChatWindow {
       this.element.find('.jsxc-clear').click(() => {
          this.clear();
       });
+
+      this.element.find('.jsxc-video').click((ev) => {
+         ev.stopPropagation();
+
+         startCall(contact, this.account);
+      })
 
       this.element.find('.jsxc-sendFile').click(function() {
          $('body').click();

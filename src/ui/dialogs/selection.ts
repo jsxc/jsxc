@@ -12,7 +12,8 @@ interface selectionDialogOptions {
    option?: {
       label?: string,
       cb: ()=>any
-   }
+   },
+   id?:string
 }
 
 export default function(options:selectionDialogOptions) {
@@ -22,6 +23,10 @@ export default function(options:selectionDialogOptions) {
    let dialog = new Dialog(content, true);
    let dom = dialog.open();
 
+   if (options.id) {
+      dom.attr('data-selection-id', options.id);
+   }
+
    dom.find('.btn-primary').click(options.primary.cb);
-   dom.find('.btn-primary').click(options.option.cb);
+   dom.find('.btn-default').click(options.option.cb);
 }

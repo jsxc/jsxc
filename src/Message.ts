@@ -200,6 +200,10 @@ export default class Message implements Identifiable, MessageInterface {
       return this.payload.errorMessage;
    }
 
+   public updateProgress(transfered:number, complete:number) {
+
+   }
+
    private load(uid:string):void {
       var data = this.storage.getItem('msg', uid);
 

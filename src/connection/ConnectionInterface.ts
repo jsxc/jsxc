@@ -3,9 +3,13 @@ import Message from './../Message';
 import {Presence} from './AbstractConnection'
 
 export interface IConnection {
+   getJID():JID;
+
    loadVcard(jid:JID):any;
 
    getCapabilitiesByJid(jid:JID):any;
+
+   getJingleHandler();
 
    addContact(jid:JID, alias:string);
 
@@ -25,4 +29,10 @@ export interface IConnection {
    getRoster();
 
    logout();
+
+   send(stanzaElement:Element);
+   send(stanzaElement:Strophe.Builder);
+
+   sendIQ(stanzaElement:Element):Promise<{}>;
+   sendIQ(stanzaElement:Strophe.Builder):Promise<{}>;
 }

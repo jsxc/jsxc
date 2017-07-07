@@ -1,30 +1,76 @@
 @keyframes bounce {
-    0% {
-        bottom: 0;
-        animation-timing-function: ease-in;
-    }
+   0% {
+      bottom: 0;
+      animation-timing-function: ease-in;
+   }
 
-    12% {
-        bottom: 5px;
-        animation-timing-function: ease-out;
-    }
+   12% {
+      bottom: 5px;
+      animation-timing-function: ease-out;
+   }
 
-    25% {
-        bottom: 0;
-        animation-timing-function: ease-in;
-    }
+   25% {
+      bottom: 0;
+      animation-timing-function: ease-in;
+   }
 
-    37% {
-        bottom: 5px;
-        animation-timing-function: ease-out;
-    }
+   37% {
+      bottom: 5px;
+      animation-timing-function: ease-out;
+   }
 
-    50% {
-        bottom: 0;
-        animation-timing-function: ease-in;
-    }
+   50% {
+      bottom: 0;
+      animation-timing-function: ease-in;
+   }
 
-    100% {
-        bottom: 0;
-    }
+   100% {
+      bottom: 0;
+   }
+}
+@keyframes jsxc-establishing {
+   0% {
+      border-width: 0;
+      background-color: $establishingColor1;
+      width: 40px;
+      margin-left: -20px;
+   }
+
+   50% {
+      background-color: $establishingColor2;
+      width: 80px;
+      margin-left: -40px;
+   }
+
+   100% {
+      border-width: 0;
+      background-color: $establishingColor1;
+      width: 40px;
+      margin-left: -20px;
+   }
+}
+@keyframes jsxc-ringing {
+   0% {
+      background-color: $ringingColor1;
+      width: 20px;
+      height: 20px;
+      margin-left: -10px;
+      margin-top: -10px;
+   }
+
+   50% {
+      background-color: $ringingColor2;
+      width: 80px;
+      height: 80px;
+      margin-left: -40px;
+      margin-top: -40px;
+   }
+
+   100% {
+      background-color: $ringingColor1;
+      width: 20px;
+      height: 20px;
+      margin-left: -10px;
+      margin-top: -10px;
+   }
 }

@@ -10,12 +10,13 @@ import Log from '../../util/Log'
 import Account from '../../Account'
 import {AbstractConnection, Presence} from '../AbstractConnection'
 import Roster from '../../ui/Roster'
+import XMPPJingleHandler from './JingleHandler'
 
 export default class XMPPConnection extends AbstractConnection implements IConnection {
    private handler;
 
-   constructor(private account:Account, protected connection:Strophe.Connection) {
-      super();
+   constructor(account:Account, protected connection:Strophe.Connection) {
+      super(account);
 
       this.handler = new XMPPHandler(connection);
       this.handler.registerHandler();
@@ -39,6 +40,14 @@ export default class XMPPConnection extends AbstractConnection implements IConne
             this.connection.disconnect('');
          }
       });
+   }
+
+   public getJingleHandler() { console.log('getJingleHanderl')
+      if (!this.jingleHandler) {
+         this.jingleHandler = new XMPPJingleHandler(this.account, this);
+      }
+console.log('return')
+      return this.jingleHandler;
    }
 
    public getCapabilitiesByJid(jid:JID):any {
@@ -73,15 +82,15 @@ export default class XMPPConnection extends AbstractConnection implements IConne
 
    }
 
-   protected send(stanzaElement:Element);
-   protected send(stanzaElement:Strophe.Builder);
-   protected send() {
+   public send(stanzaElement:Element);
+   public send(stanzaElement:Strophe.Builder);
+   public send() {
       this.connection.send(arguments[0]);
    }
 
-   protected sendIQ(stanzaElement:Element):Promise<{}>;
-   protected sendIQ(stanzaElement:Strophe.Builder):Promise<{}>;
-   protected sendIQ():Promise<{}> {
+   public sendIQ(stanzaElement:Element):Promise<{}>;
+   public sendIQ(stanzaElement:Strophe.Builder):Promise<{}>;
+   public sendIQ():Promise<{}> {
       let stanzaElement = arguments[0];
 
       return new Promise((resolve, reject) => {

@@ -44,9 +44,11 @@ export default class Dialog {
    }
 
    public close() {
-      Log.debug('close dialog');
+      if ($('#' + this.id).length > 0) {
+         Log.debug('close dialog');
 
-      (<any>$).magnificPopup.close();
+         (<any>$).magnificPopup.close();
+      }
    }
 
    public resize() {

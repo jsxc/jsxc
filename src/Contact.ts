@@ -131,6 +131,25 @@ console.log('highest presence', presence);
       // message.bid = this.getId();
    }
 
+   public getCapableResources(features) {
+      let resources = Object.keys(this.data.get('resources'));
+
+      if (!features) {
+         return resources;
+      } else if (typeof features === 'string') {
+         features = [features];
+      }
+
+      let capableResources = [];
+      $.each(resources, function(i, resource) {
+         if (self.conn.caps.hasFeatureByJid(this.getJID().bare + '/' + resource, features)) {
+            capableResources.push(resource);
+         }
+      });
+
+      return capableResources;
+   }
+
    public getId():string {
       return this.jid.bare;
    }

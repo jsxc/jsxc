@@ -103,7 +103,7 @@ function registerXMPPNamespaces() {
 function prepareConnection(url:string):Strophe.Connection {
    let connection = new Strophe.Connection(url);
 
-   if (Options.get('debug')) {
+   if (Options.get('debug') || true) {
       connection.xmlInput = function(data) {
          Log.debug('<', data);
       };

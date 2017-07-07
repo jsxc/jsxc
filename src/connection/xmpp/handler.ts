@@ -6,6 +6,7 @@ import onRoster from './handlers/roster'
 import onRosterChange from './handlers/rosterChange'
 import onChatMessage from './handlers/chatMessage'
 import onHeadlineMessage from './handlers/headlineMessage'
+import onJingle from './handlers/jingle'
 
 let PRESERVE_HANDLER = true;
 let REMOVE_HANDLER = false;
@@ -27,6 +28,7 @@ export default class XMPPHandler {
       this.connection.addHandler(onChatMessage, null, 'message', 'chat');
       this.connection.addHandler(onHeadlineMessage, null, 'message', 'headline');
       this.connection.addHandler(onPresence, null, 'presence');
+      this.connection.addHandler(onJingle, 'urn:xmpp:jingle:1', 'iq', 'set', null, null);
 
       // this.connection.conn.addHandler(this.onReceived, null, 'message');
    }

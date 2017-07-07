@@ -5,6 +5,7 @@ import Log from '../../util/Log'
 import Account from '../../Account'
 import {AbstractConnection, Presence} from '../AbstractConnection'
 import * as StropheLib from 'strophe.js'
+import JingleHandler from '../JingleHandler'
 
 let Strophe = StropheLib.Strophe;
 
@@ -12,9 +13,9 @@ export default class StorageConnection extends AbstractConnection implements ICo
 
    protected connection:any = {};
 
-   constructor(private account: Account) {
-      super();
-window.storageConnection = this;
+   constructor(protected account: Account) {
+      super(account);
+
       this.connection = {
          jid: account.getJID().full,
          send: this.send,
@@ -34,6 +35,16 @@ window.storageConnection = this;
             this.connection[k].init(this.connection);
          }
       }
+
+      this.account.getStorage().registerHook('stanzaJingle', this.storageJingleHook);
+   }
+
+   public getJingleHandler() {
+      if (!this.jingleHandler) {
+         this.jingleHandler = new JingleHandler(this.account, this);
+      }
+
+      return this.jingleHandler;
    }
 
    public getCapabilitiesByJid(jid: JID): any {
@@ -50,9 +61,9 @@ window.storageConnection = this;
       Log.info('[SC] logout');
    }
 
-   protected send(stanzaElement: Element);
-   protected send(stanzaElement: Strophe.Builder);
-   protected send() {
+   public send(stanzaElement: Element);
+   public send(stanzaElement: Strophe.Builder);
+   public send() {
       let storage = this.account.getStorage();
       let stanzaString = this.stanzaElementToString(arguments[0]);
       let key = storage.generateKey(
@@ -64,9 +75,9 @@ window.storageConnection = this;
       storage.setItem(key, stanzaString);
    }
 
-   protected sendIQ(stanzaElement:Element):Promise<{}>;
-   protected sendIQ(stanzaElement:Strophe.Builder):Promise<{}>;
-   protected sendIQ():Promise<{}> {
+   public sendIQ(stanzaElement:Element):Promise<{}>;
+   public sendIQ(stanzaElement:Strophe.Builder):Promise<{}>;
+   public sendIQ():Promise<{}> {
       let storage = this.account.getStorage();
       let stanzaString = this.stanzaElementToString(arguments[0]);
       let key = storage.generateKey(
@@ -90,18 +101,34 @@ window.storageConnection = this;
       });
    }
 
+   public close() {
+      this.account.getStorage().removeHook('stanzaJingle', this.storageJingleHook);
+   }
+
    private stanzaElementToString(stanzaElement: Element):string;
    private stanzaElementToString(stanzaElement: Strophe.Builder):string;
    private stanzaElementToString() {
       let stanzaString: string;
       let stanzaElement = arguments[0] || {};
 
-      if (typeof stanzaElement.innerHTML === 'string') {
-         stanzaString = stanzaElement.innerHTML;
+      if (typeof stanzaElement.outerHTML === 'string') {
+         stanzaString = stanzaElement.outerHTML;
       } else {
          stanzaString = stanzaElement.toString();
       }
 
       return stanzaString;
+   }
+
+   private storageJingleHook = (newValue, oldValue, key) => {
+      if (newValue && !oldValue) {
+         this.processJingleStanza(newValue);
+      }
+   }
+
+   private processJingleStanza(stanzaString) { console.log('storage jingle stanza')
+      let iqElement = $.parseXML(stanzaString).getElementsByTagName('iq')[0];
+
+      this.getJingleHandler().onJingle(iqElement);
    }
 }

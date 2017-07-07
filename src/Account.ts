@@ -16,6 +16,7 @@ import {Presence} from './connection/AbstractConnection'
 import Client from './Client'
 import {NoticeManager} from './NoticeManager'
 import * as StropheLib from 'strophe.js'
+import JingleController from './JingleController'
 
 let Strophe = StropheLib.Strophe;
 
@@ -48,6 +49,8 @@ export default class Account {
    private contact:Contact;
 
    private noticeManager:NoticeManager;
+
+   private jingleController;
 
    constructor(boshUrl: string, jid: string, sid: string, rid:string);
    constructor(boshUrl: string, jid: string, password: string);
@@ -189,6 +192,14 @@ export default class Account {
       return new JID(jidString);
    }
 
+   public getJingle():JingleController {
+      if (!this.jingleController) {
+         this.jingleController = new JingleController(this);
+      }
+
+      return this.jingleController;
+   }
+
    public remove() {
       this.removeAllContacts();
       this.closeAllChatWindows();
@@ -226,6 +237,7 @@ export default class Account {
          this.save();
       };
 
+      this.connection.close();
       this.connection = new XMPPConnection(this, connection);
 
       if (status === Strophe.Status.CONNECTED) {
