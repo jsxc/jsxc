@@ -31,12 +31,9 @@ export default function(question:string, id?:string) {
       });
    });
 
-   return {
-      getPromise: () => {
-         return promise;
-      },
-      getDialog: () => {
-         return dialog;
-      }
+   dialog.getPromise = () => {
+      return promise;
    };
+
+   return dialog;
 }

@@ -65,6 +65,10 @@ export default class Dialog {
       dom.append(content);
    }
 
+   public getPromise():Promise<{}> {
+      return new Promise(() => {});
+   }
+
    private onOpened() {
       let self = this;
       let dom = this.getDom();

@@ -11,6 +11,8 @@ import Notification from '../Notification'
 import JID from '../JID'
 import {VideoDialog} from '../ui/VideoDialog'
 import UserMedia from '../UserMedia'
+import JingleSession from '../JingleSession'
+import JingleAbstractSession from '../JingleAbstractSession'
 
 let jxt = createRegistry();
 jxt.use(require('jxt-xmpp-types'));
@@ -74,7 +76,9 @@ export default class JingleHandler {
          this.connection.send(iqElement);
       });
 
-      this.manager.on('incoming', this.onIncoming);
+      this.manager.on('incoming', (session) => {
+         this.onIncoming(session);
+      });
 
       JingleHandler.instances.push(this);
 
@@ -131,34 +135,8 @@ export default class JingleHandler {
       return true;
    }
 
-   private onIncoming = (session) => {
-      var sessionType = (session.constructor) ? session.constructor.name : null;
-
-      session.peerJID = new JID(session.peerID);
-      session.peerContact = this.account.getContact(session.peerJID);
-      session.peerChatWindow = this.account.openChatWindow(session.peerContact);
-
-      if (sessionType === 'FileTransferSession') {
-         this.onIncomingFileTransfer(session);
-      } else if (sessionType === 'MediaSession') {
-         var reqMedia = false;
-
-         $.each(session.pc.remoteDescription.contents, function() {
-            if (this.senders === 'both') {
-               reqMedia = true;
-            }
-         });
-
-         session.call = reqMedia;
-
-         if (reqMedia) {
-            this.onIncomingCall(session);
-         } else {
-            this.onIncomingStream(session);
-         }
-      } else {
-         Log.warn('Unknown session type.');
-      }
+   protected onIncoming(session):JingleAbstractSession {
+      return JingleSession.create(this.account, session);
    }
 
    private onIncomingFileTransfer(session) {
@@ -192,39 +170,6 @@ export default class JingleHandler {
       // session.receiver.on('progress', function(sent, size) {
       //    message.updateProgress(sent, size);
       // });
-   }
-
-   protected onIncomingCall(session) {
-      Log.debug('incoming call from ' + session.peerID);
-
-      //@REVIEW videoWindow should maybe static
-      let videoWindow = JingleHandler.getVideoDialog();
-      videoWindow.addSession(session);
-
-      Promise.race([
-         videoWindow.showCallDialog(session).then(() => {
-            return UserMedia.request();
-         }),
-         new Promise((resolve, reject) => {
-            session.on('terminated', () => {
-               reject('terminated')
-            });
-         })
-      ]).then((stream) => {
-         videoWindow.showVideoWindow(stream);
-
-         session.addStream(stream);
-         session.accept();
-      }).catch((reason) => {
-
-         //@TODO user media request overlay
-         Log.warn('Decline call', reason)
-
-         //@TODO post reason to chat window
-         if (reason !== 'terminated') {
-            session.decline();
-         }
-      });
    }
 
    private onIncomingStream(session) {
@@ -286,7 +231,7 @@ export default class JingleHandler {
       });
    }
 
-   protected static getVideoDialog():VideoDialog {
+   public static getVideoDialog():VideoDialog {
       if (!JingleHandler.videoDialog || !JingleHandler.videoDialog.isReady()) {
          JingleHandler.videoDialog = new VideoDialog();
       }

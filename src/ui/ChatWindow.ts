@@ -107,11 +107,7 @@ export default class ChatWindow {
          this.element.attr('data-presence', Presence[newStatus]);
       });
 
-      // let simpleBar = new SimpleBar(this.element.find('.jsxc-message-area')[0]);
-
       this.scrollMessageAreaToBottom();
-
-      $(document).trigger('init.window.jsxc', [this.element]);
    }
 
    public getId() {

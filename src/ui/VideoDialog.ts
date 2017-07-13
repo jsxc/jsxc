@@ -3,6 +3,7 @@ import Dialog from './Dialog'
 import Log from '../util/Log'
 import JingleHandler from '../connection/JingleHandler'
 import VideoWindow from './VideoWindow'
+import JingleCallSession from '../JingleCallSession'
 
 const VideoDialogTemplate = require('../../template/videoDialog.hbs')
 
@@ -35,7 +36,7 @@ export class VideoDialog {
       this.videoWindows.push(videoWindow);
    }
 
-   public showCallDialog(session) {
+   public showCallDialog(session:JingleCallSession) {
       //@TODO add auto accept
       //@TODO translate
       //@TODO use selection dialog, because button labels can be configured
@@ -44,10 +45,16 @@ export class VideoDialog {
       let confirmDialog = ConfirmDialog('Incoming call from ...');
 
       session.on('terminated', () => {
-         confirmDialog.getDialog().close();
+         confirmDialog.close();
       });
 
-      return confirmDialog.getPromise().then((dialog:Dialog) => {
+      session.on('aborted', () => {
+         confirmDialog.close();
+      });
+
+      return confirmDialog.getPromise().then((dialog:Dialog) => { console.log('session.adopt', typeof session.adopt)
+         session.adopt();
+
          dialog.close();
       });
    }
