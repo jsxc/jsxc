@@ -16,7 +16,6 @@ import {Presence} from './connection/AbstractConnection'
 import Client from './Client'
 import {NoticeManager} from './NoticeManager'
 import * as StropheLib from 'strophe.js'
-import JingleController from './JingleController'
 
 let Strophe = StropheLib.Strophe;
 
@@ -49,8 +48,6 @@ export default class Account {
    private contact:Contact;
 
    private noticeManager:NoticeManager;
-
-   private jingleController;
 
    constructor(boshUrl: string, jid: string, sid: string, rid:string);
    constructor(boshUrl: string, jid: string, password: string);
@@ -190,14 +187,6 @@ export default class Account {
 
       //@REVIEW maybe promise?
       return new JID(jidString);
-   }
-
-   public getJingle():JingleController {
-      if (!this.jingleController) {
-         this.jingleController = new JingleController(this);
-      }
-
-      return this.jingleController;
    }
 
    public remove() {

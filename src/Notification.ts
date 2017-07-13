@@ -36,7 +36,7 @@ export default class Notification {
    private static audioObject;
 
    public static askForPermission() {
-      openConfirmDialog(Translation.t('Should_we_notify_you_')).then(() => {
+      openConfirmDialog(Translation.t('Should_we_notify_you_')).getPromise().then(() => {
          // @TODO open dialog to block further actions
 
          return this.requestPermission();

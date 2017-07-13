@@ -30,6 +30,8 @@ export interface IConnection {
 
    logout();
 
+   close();
+
    send(stanzaElement:Element);
    send(stanzaElement:Strophe.Builder);
 

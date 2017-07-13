@@ -16,18 +16,9 @@ import PersistentMap from '../PersistentMap'
 import Avatar from './Avatar'
 import 'simplebar'
 import {startCall} from './actions/call'
+import {Presence} from '../connection/AbstractConnection'
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
-
-//@TODO duplicate of AbstractConnection
-enum Status {
-   online,
-   chat,
-   away,
-   xa,
-   dnd,
-   offline
-}
 
 const ENTER_KEY = 13;
 const ESC_KEY = 27;
@@ -110,13 +101,15 @@ export default class ChatWindow {
       });
       // @TODO init otr
 
-      this.element.attr('data-presence', Status[this.contact.getPresence()]);
+      this.element.attr('data-presence', Presence[this.contact.getPresence()]);
 
       this.contact.registerHook('status', (newStatus) => {
-         this.element.attr('data-presence', Status[newStatus]);
+         this.element.attr('data-presence', Presence[newStatus]);
       });
 
       // let simpleBar = new SimpleBar(this.element.find('.jsxc-message-area')[0]);
+
+      this.scrollMessageAreaToBottom();
 
       $(document).trigger('init.window.jsxc', [this.element]);
    }

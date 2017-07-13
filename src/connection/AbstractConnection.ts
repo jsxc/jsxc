@@ -184,6 +184,10 @@ abstract class AbstractConnection {
       this.send(presenceStanza);
    }
 
+   public close() {
+      
+   }
+
    private addContactToRoster(jid:JID, alias:string) {
       var iq = $iq({
          type: 'set'
