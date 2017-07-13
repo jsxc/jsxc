@@ -1422,7 +1422,7 @@ jsxc.gui = {
             src = jsxc.options.root + '/lib/emojione/assets/svg/' + filename + '.svg';
          }
 
-         var div = $('<div>');
+         var div = $('<span>');
 
          div.addClass('jsxc_emoticon');
          div.css('background-image', 'url(' + src + ')');
@@ -2548,6 +2548,10 @@ jsxc.gui.window = {
 
       if (!message.htmlMsg && message.msg) {
          message.htmlMsg = message.msg;
+      }
+
+      if (typeof message.msg === 'undefined') {
+         message.msg = '';
       }
 
       // remove html tags and reencode html tags
