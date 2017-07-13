@@ -33,7 +33,8 @@ export default class VideoWindow {
       Log.debug('connection state for ' + session.sid, state);
 
       if (state === 'connected') {
-         this.videoElement.show();
+         this.wrapperElement.removeClass('jsxc-establishing');
+         this.wrapperElement.addClass('jsxc-ice-connected');
       } else if (state === 'failed') {
          Log.warn('ICE connection failed');
 
@@ -66,7 +67,6 @@ export default class VideoWindow {
       this.videoDialog.setStatus(isAudioDevice ? 'Use remote audio device.' : 'No remote audio device');
 
       this.videoElement = $('<video autoplay></video>');
-      this.videoElement.hide();
       this.videoElement.appendTo(this.wrapperElement);
 
       VideoDialog.attachMediaStream(this.videoElement, stream);

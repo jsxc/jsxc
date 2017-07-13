@@ -34,7 +34,7 @@
 .jsxc-establishing,
 .jsxc-ringing {
    &:after {
-      content: " ";
+      // content: " ";
       position: absolute;
       top: 0;
       right: 0;
@@ -163,13 +163,31 @@
 }
 
 .jsxc-video-wrapper {
-   background-color: green;
    position: relative;
    float: left;
+   text-align: center;
+   white-space: nowrap;
 
    video {
-      max-height: 100%;
-      max-width: 100%;
+      display: none;
+   }
+
+   &.jsxc-ice-connected {
+      &:before {
+         content: "";
+         display: inline-block;
+         height: 100%;
+         vertical-align: middle;
+         margin-right: -0.25em;
+      }
+
+      video {
+         display: inline-block;
+         vertical-align: middle;
+         width: 100%;
+         max-height: 100%;
+         max-width: 100%;
+      }
    }
 }
 
