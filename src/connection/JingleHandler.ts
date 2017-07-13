@@ -1,8 +1,7 @@
 import {IConnection} from './ConnectionInterface'
-import JingleController from '../JingleController'
 import Account from '../Account'
 import * as JSM from 'jingle'
-// import * as RTC from 'webrtc-adapter'
+import * as RTC from 'webrtc-adapter'
 // import GUM from 'getusermedia'
 // import GSM from 'getscreenmedia'
 import {createRegistry} from 'jxt'
@@ -54,13 +53,7 @@ export default class JingleHandler {
    constructor(protected account:Account, protected connection:IConnection) {
 
       this.manager = new JSM({
-         //@TODO this should be dynamic, see getPeerConstraints
-         peerConnectionConstraints: {
-            mandatory: {
-               'OfferToReceiveAudio': true,
-               'OfferToReceiveVideo': true
-            }
-         },
+         peerConnectionConstraints: this.getPeerConstraints(),
          jid: connection.getJID().full,
          selfID: connection.getJID().full
       });
@@ -251,7 +244,7 @@ export default class JingleHandler {
       let videoWindow = new VideoDialog();
       videoWindow.addSession(session);
 
-      videoWindow.showCallDialog().then(() => {
+      videoWindow.showCallDialog(session).then(() => {
          session.accept();
       }).catch(() => {
          session.decline();
