@@ -8,3 +8,5 @@ Real-time chat app. This app requires an external XMPP server (openfire, ejabber
 You find a full list of features, supported protocols and browsers on [our homepage](http://www.jsxc.org).
 
 If you are looking for install instructions or developer notes, please also checkout our [wiki](https://github.com/jsxc/jsxc/wiki/).
+
+Please note that this project is released with a Contributor Code of Conduct. By participating in this project you agree to abide by its terms.
