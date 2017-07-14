@@ -1851,9 +1851,10 @@ jsxc.gui.roster = {
 
       $('#jsxc_buddylist').empty();
 
-      $('#jsxc_roster').append($('<p>' + $.t('no_connection') + '</p>').append(' <a>' + $.t('relogin') + '</a>').click(function() {
+      $('#jsxc_roster > p').remove();
+      $('<p>' + $.t('no_connection') + '</p>').append(' <a>' + $.t('relogin') + '</a>').click(function() {
          jsxc.gui.showLoginBox();
-      }));
+      }).appendTo('#jsxc_roster');
    },
 
    /**
