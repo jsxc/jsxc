@@ -166,13 +166,11 @@ jsxc.webrtc = {
                   break;
                case 'turn':
                case 'turns':
-                  serverItem.urls = el.attr('type') + ':';
-
                   if (el.attr('username')) {
                      serverItem.username = el.attr('username');
                   }
 
-                  serverItem.urls += el.attr('host');
+                  serverItem.urls = el.attr('type') + ':' + el.attr('host');
 
                   if (el.attr('port') && el.attr('port') !== '3478') {
                      serverItem.urls += ':' + el.attr('port');
