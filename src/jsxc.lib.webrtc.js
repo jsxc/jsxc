@@ -138,8 +138,6 @@ jsxc.webrtc = {
          to: jsxc.xmpp.conn.domain
       }).c('services', {
          xmlns: 'urn:xmpp:extdisco:1'
-      }).c('service', {
-         host: 'turn.' + jsxc.xmpp.conn.domain
       });
 
       jsxc.xmpp.conn.sendIQ(iq, parseExtDiscoResponse, function(err) {
