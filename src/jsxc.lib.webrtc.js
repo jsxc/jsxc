@@ -31,6 +31,12 @@ jsxc.webrtc = {
    /** bare jid to current jid mapping */
    chatJids: {},
 
+   CONST: {
+      NS: {
+         EXTDISCO: 'urn:xmpp:extdisco:2'
+      }
+   },
+
    /**
     * Initialize webrtc plugin.
     *
@@ -78,23 +84,7 @@ jsxc.webrtc = {
          $(document).on('caps.strophe', self.onCaps);
       }
 
-      var url = jsxc.options.get('RTCPeerConfig').url || jsxc.options.turnCredentialsPath;
-      var peerConfig = jsxc.options.get('RTCPeerConfig');
-
-      if (typeof url === 'string' && url.length > 0) {
-         self.getTurnCrendentials(url);
-      } else {
-         if (jsxc.storage.getUserItem('iceValidity')) {
-            // old ice validity found. Clean up.
-            jsxc.storage.removeUserItem('iceValidity');
-
-            // Replace saved servers with the once passed to jsxc
-            peerConfig.iceServers = jsxc.options.RTCPeerConfig.iceServers;
-            jsxc.options.set('RTCPeerConfig', peerConfig);
-         }
-
-         self.conn.jingle.setICEServers(peerConfig.iceServers);
-      }
+      self.setupIceServers();
    },
 
    onConnected: function() {
@@ -113,16 +103,8 @@ jsxc.webrtc = {
       $(document).off('caps.strophe', self.onCaps);
    },
 
-   /**
-    * Checks if cached configuration is valid and if necessary update it.
-    *
-    * @memberOf jsxc.webrtc
-    * @param {string} [url]
-    */
-   getTurnCrendentials: function(url) {
+   setupIceServers: function() {
       var self = jsxc.webrtc;
-
-      url = url || jsxc.options.get('RTCPeerConfig').url || jsxc.options.turnCredentialsPath;
       var ttl = (jsxc.storage.getUserItem('iceValidity') || 0) - (new Date()).getTime();
 
       // validity from jsxc < 2.1.0 is invalid
@@ -131,14 +113,98 @@ jsxc.webrtc = {
          ttl = -1;
       }
 
+      var url = jsxc.options.get('RTCPeerConfig').url || jsxc.options.turnCredentialsPath;
+      var peerConfig = jsxc.options.get('RTCPeerConfig');
+      var domain = self.conn.domain;
+
       if (ttl > 0) {
          // credentials valid
 
-         self.conn.jingle.setICEServers(jsxc.options.get('RTCPeerConfig').iceServers);
+         self.conn.jingle.setICEServers(peerConfig.iceServers);
 
-         window.setTimeout(jsxc.webrtc.getTurnCrendentials, ttl + 500);
-         return;
+         window.setTimeout(jsxc.webrtc.setupIceServers, ttl + 500);
+      } else if (jsxc.xmpp.conn.caps.hasFeatureByJid(domain, self.CONST.NS.EXTDISCO)) {
+         self.getIceServersByExternalDisco();
+      } else if (typeof url === 'string' && url.length > 0) {
+         self.getIceServersByUrl(url);
+      } else {
+         self.conn.jingle.setICEServers(peerConfig.iceServers);
       }
+   },
+
+   getIceServersByExternalDisco: function() {
+      var iq = $iq({
+         type: 'get',
+         to: jsxc.xmpp.conn.domain
+      }).c('services', {
+         xmlns: 'urn:xmpp:extdisco:1'
+      });
+
+      jsxc.xmpp.conn.sendIQ(iq, parseExtDiscoResponse, function(err) {
+         console.warn('getting turn credentials failed', err);
+      });
+
+      function parseExtDiscoResponse(res) {
+         jsxc.debug('ice servers receiving by xmpp extdisco');
+
+         var iceServers = [];
+         var minTtl = 86400;
+
+         $(res).find('>services>service').each(function(idx, el) {
+            el = $(el);
+            var serverItem = {};
+
+            switch (el.attr('type')) {
+               case 'stun':
+               case 'stuns':
+                  serverItem.urls = el.attr('type') + ':' + el.attr('host');
+
+                  if (el.attr('port')) {
+                     serverItem.urls += ':' + el.attr('port');
+                  }
+
+                  break;
+               case 'turn':
+               case 'turns':
+                  if (el.attr('username')) {
+                     serverItem.username = el.attr('username');
+                  }
+
+                  serverItem.urls = el.attr('type') + ':' + el.attr('host');
+
+                  if (el.attr('port') && el.attr('port') !== '3478') {
+                     serverItem.urls += ':' + el.attr('port');
+                  }
+
+                  if (el.attr('transport') && el.attr('transport') !== 'udp') {
+                     serverItem.urls += '?transport=' + el.attr('transport');
+                  }
+
+                  if (el.attr('password')) {
+                     serverItem.credential = el.attr('password');
+                  }
+
+                  if (el.attr('ttl') && el.attr('ttl') < minTtl) {
+                     minTtl = el.attr('ttl');
+                  }
+                  break;
+            }
+
+            if (serverItem.urls) {
+               iceServers.push(serverItem);
+            }
+         });
+
+         if (iceServers.length > 0) {
+            jsxc.webrtc.setIceServers(iceServers, minTtl);
+         } else {
+            jsxc.warn('Found no valid ICE server configuration');
+         }
+      }
+   },
+
+   getIceServersByUrl: function(url) {
+      var self = jsxc.webrtc;
 
       $.ajax(url, {
          async: true,
@@ -172,15 +238,7 @@ jsxc.webrtc = {
                var urls = iceServers[0].urls && iceServers[0].urls.length > 0;
 
                if (urls || url) {
-                  jsxc.debug('ice servers received');
-
-                  var peerConfig = jsxc.options.get('RTCPeerConfig');
-                  peerConfig.iceServers = iceServers;
-                  jsxc.options.set('RTCPeerConfig', peerConfig);
-
-                  self.conn.jingle.setICEServers(iceServers);
-
-                  jsxc.storage.setUserItem('iceValidity', (new Date()).getTime() + 1000 * ttl);
+                  self.setIceServers(iceServers, ttl);
                } else {
                   jsxc.warn('No valid url found in first ice object.');
                }
@@ -188,6 +246,20 @@ jsxc.webrtc = {
          },
          dataType: 'json'
       });
+   },
+
+   setIceServers: function(iceServers, ttl) {
+      jsxc.debug('set ice servers');
+
+      var peerConfig = jsxc.options.get('RTCPeerConfig');
+      peerConfig.iceServers = iceServers;
+      jsxc.options.set('RTCPeerConfig', peerConfig);
+
+      jsxc.webrtc.conn.jingle.setICEServers(iceServers);
+
+      jsxc.storage.setUserItem('iceValidity', (new Date()).getTime() + 1000 * ttl);
+
+      window.setTimeout(jsxc.webrtc.setupIceServers, ttl + 500);
    },
 
    /**
