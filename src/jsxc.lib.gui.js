@@ -1853,7 +1853,11 @@ jsxc.gui.roster = {
 
       $('#jsxc_roster > p').remove();
       $('<p>' + $.t('no_connection') + '</p>').append(' <a>' + $.t('relogin') + '</a>').click(function() {
-         jsxc.gui.showLoginBox();
+         jsxc.storage.removeUserItem('forcedLogout');
+
+         if (!jsxc.relogin()) {
+            jsxc.gui.showLoginBox();
+         }
       }).appendTo('#jsxc_roster');
    },
 
