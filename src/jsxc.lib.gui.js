@@ -1851,9 +1851,14 @@ jsxc.gui.roster = {
 
       $('#jsxc_buddylist').empty();
 
-      $('#jsxc_roster').append($('<p>' + $.t('no_connection') + '</p>').append(' <a>' + $.t('relogin') + '</a>').click(function() {
-         jsxc.gui.showLoginBox();
-      }));
+      $('#jsxc_roster > p').remove();
+      $('<p>' + $.t('no_connection') + '</p>').append(' <a>' + $.t('relogin') + '</a>').click(function() {
+         jsxc.storage.removeUserItem('forcedLogout');
+
+         if (!jsxc.relogin()) {
+            jsxc.gui.showLoginBox();
+         }
+      }).appendTo('#jsxc_roster');
    },
 
    /**

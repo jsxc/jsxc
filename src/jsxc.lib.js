@@ -295,6 +295,7 @@ jsxc = {
       window.addEventListener('storage', jsxc.storage.onStorage, false);
 
       $(document).on('attached.jsxc', jsxc.registerLogout);
+      $(document).on('disconnected.jsxc', jsxc.relogin);
 
       var isStorageAttachParameters = jsxc.storage.getItem('rid') && jsxc.storage.getItem('sid') && jsxc.storage.getItem('jid');
       var isOptionsAttachParameters = jsxc.options.xmpp.rid && jsxc.options.xmpp.sid && jsxc.options.xmpp.jid;
@@ -303,73 +304,11 @@ jsxc = {
       // Check if we have to establish a new connection
       if ((!isStorageAttachParameters && !isOptionsAttachParameters) || isForceLoginForm) {
 
-         // clean up rid and sid
-         jsxc.storage.removeItem('rid');
-         jsxc.storage.removeItem('sid');
-
-         // Looking for a login form
-         if (!jsxc.isLoginForm()) {
-            jsxc.changeState(jsxc.CONST.STATE.SUSPEND);
-
-            if (jsxc.options.displayRosterMinimized()) {
-               // Show minimized roster
-               jsxc.storage.setUserItem('roster', 'hidden');
-               jsxc.gui.roster.init();
-               jsxc.gui.roster.noConnection();
-            }
-
+         if (jsxc.relogin()) {
             return;
          }
 
-         jsxc.changeState(jsxc.CONST.STATE.TRYTOINTERCEPT);
-
-         if (typeof jsxc.options.formFound === 'function') {
-            jsxc.options.formFound.call();
-         }
-
-         // create jquery object
-         var form = jsxc.options.loginForm.form = $(jsxc.options.loginForm.form);
-         var events = form.data('events') || {
-            submit: []
-         };
-         var submits = [];
-
-         // save attached submit events and remove them. Will be reattached
-         // in jsxc.submitLoginForm
-         $.each(events.submit, function(index, val) {
-            submits.push(val.handler);
-         });
-
-         form.data('submits', submits);
-         form.off('submit');
-
-         // Add jsxc login action to form
-         form.submit(function(ev) {
-            ev.preventDefault();
-
-            jsxc.prepareLogin(function(settings) {
-               if (settings !== false) {
-                  // settings.xmpp.onlogin is deprecated since v2.1.0
-                  var enabled = (settings.loginForm && settings.loginForm.enable) || (settings.xmpp && settings.xmpp.onlogin);
-                  enabled = enabled === "true" || enabled === true;
-
-                  if (enabled) {
-                     jsxc.options.loginForm.triggered = true;
-
-                     jsxc.xmpp.login(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
-
-                     return;
-                  }
-               }
-
-               jsxc.submitLoginForm();
-            });
-
-            // Trigger submit in jsxc.xmpp.connected()
-            return false;
-         });
-
-         jsxc.changeState(jsxc.CONST.STATE.INTERCEPTED);
+         jsxc.prepareNewConnection();
 
       } else if (!jsxc.isLoginForm() || (jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'attach')) {
 
@@ -382,6 +321,76 @@ jsxc = {
             jsxc.checkMaster();
          }
       }
+   },
+
+   prepareNewConnection: function() {
+      // clean up rid and sid
+      jsxc.storage.removeItem('rid');
+      jsxc.storage.removeItem('sid');
+
+      // Looking for a login form
+      if (!jsxc.isLoginForm()) {
+         jsxc.changeState(jsxc.CONST.STATE.SUSPEND);
+
+         if (jsxc.options.displayRosterMinimized()) {
+            // Show minimized roster
+            jsxc.storage.setUserItem('roster', 'hidden');
+            jsxc.gui.roster.init();
+            jsxc.gui.roster.noConnection();
+         }
+
+         return;
+      }
+
+      jsxc.changeState(jsxc.CONST.STATE.TRYTOINTERCEPT);
+
+      if (typeof jsxc.options.formFound === 'function') {
+         jsxc.options.formFound.call();
+      }
+
+      // create jquery object
+      var form = jsxc.options.loginForm.form = $(jsxc.options.loginForm.form);
+      var events = form.data('events') || {
+         submit: []
+      };
+      var submits = [];
+
+      // save attached submit events and remove them. Will be reattached
+      // in jsxc.submitLoginForm
+      $.each(events.submit, function(index, val) {
+         submits.push(val.handler);
+      });
+
+      form.data('submits', submits);
+      form.off('submit');
+
+      // Add jsxc login action to form
+      form.submit(function(ev) {
+         ev.preventDefault();
+
+         jsxc.prepareLogin(function(settings) {
+            if (settings !== false) {
+               // settings.xmpp.onlogin is deprecated since v2.1.0
+               var enabled = (settings.loginForm && settings.loginForm.enable) || (settings.xmpp && settings.xmpp.onlogin);
+               enabled = enabled === "true" || enabled === true;
+
+               if (enabled) {
+                  jsxc.options.loginForm.triggered = true;
+
+                  jsxc.xmpp.login(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
+
+                  return;
+               }
+            }
+
+            jsxc.submitLoginForm();
+         });
+
+         // Trigger submit in jsxc.xmpp.connected()
+         return false;
+      });
+
+      jsxc.changeState(jsxc.CONST.STATE.INTERCEPTED);
    },
 
    /**
@@ -414,8 +423,8 @@ jsxc = {
          return false;
       }
 
-      if (jsxc.xmpp.conn && jsxc.xmpp.connected) {
-         jsxc.debug('We are already connected');
+      if (jsxc.xmpp.conn && jsxc.xmpp.conn.authenticated) {
+         jsxc.debug('We are already connected and authenticated');
 
          return false;
       }
@@ -432,6 +441,71 @@ jsxc = {
       jsxc.checkMaster(function() {
          jsxc.xmpp.login.apply(this, args);
       });
+   },
+
+   relogin: function() {
+      jsxc.debug('Try to relogin');
+
+      var jid = jsxc.storage.getItem('jid');
+      jsxc.bid = jsxc.bid || (jid ? jsxc.jidToBid(jid) : null);
+
+      if (!jsxc.bid || jsxc.storage.getUserItem('forcedLogout')) {
+         jsxc.debug('Logout was forced or I found no valid jid');
+
+         return false;
+      }
+
+      var xmppOptions = jsxc.options.get('xmpp');
+
+      if (xmppOptions.url && (xmppOptions.jid || (xmppOptions.username && xmppOptions.domain)) && xmppOptions.password) {
+         xmppOptions.jid = xmppOptions.jid || (xmppOptions.username + '@' + xmppOptions.domain);
+
+         jsxc.start(xmppOptions.jid, xmppOptions.password);
+
+         return true;
+      }
+
+      var loadSettingsAllKnowing = jsxc.storage.getUserItem('loadSettingsAllKnowing');
+
+      if (xmppOptions.url && loadSettingsAllKnowing) {
+         jsxc.options.loadSettings(null, null, function(settings) {
+            jsxc._prepareLogin(null, null, function(settings) {
+               if (settings !== false && jsxc.options.xmpp.jid && jsxc.options.xmpp.password) {
+                  $(document).on('connfail.jsxc', reloginFailed);
+                  $(document).on('authfail.jsxc', reloginFailed);
+                  $(document).on('connected.jsxc', removeReloginHandler);
+
+                  jsxc.start(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
+
+                  delete jsxc.options.xmpp.password;
+               } else {
+                  reloginFailed();
+               }
+
+               function reloginFailed() {
+                  jsxc.debug('Could not relogin.');
+
+                  removeReloginHandler();
+
+                  jsxc.storage.removeUserItem('loadSettingsAllKnowing');
+
+                  jsxc.prepareNewConnection();
+               }
+
+               function removeReloginHandler() {
+                  $(document).off('connfail.jsxc', reloginFailed);
+                  $(document).off('authfail.jsxc', reloginFailed);
+                  $(document).off('connected.jsxc', removeReloginHandler);
+               }
+            }, settings);
+         });
+
+         return true;
+      }
+
+      jsxc.debug('I am not able to relogin');
+
+      return false;
    },
 
    registerLogout: function() {
@@ -532,6 +606,8 @@ jsxc = {
 
       if (typeof settings.xmpp.password === 'string') {
          password = settings.xmpp.password;
+
+         delete settings.xmpp.password;
       }
 
       var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
@@ -558,6 +634,8 @@ jsxc = {
          // force xmpp settings to be saved to storage
          loadedSettings.xmpp = {};
       }
+
+      jsxc.storage.setUserItem('loadSettingsAllKnowing', (!!loadedSettings.xmpp.jid || (!!loadedSettings.xmpp.username && !!loadedSettings.xmpp.domain)) && !!loadedSettings.xmpp.password);
 
       // save loaded settings to storage
       $.each(loadedSettings, function(key) {

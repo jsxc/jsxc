@@ -184,6 +184,8 @@ jsxc.xmpp = {
     */
    logout: function(complete) {
 
+      jsxc.storage.setUserItem('forcedLogout', true);
+
       jsxc.triggeredFromElement = (typeof complete === 'boolean') ? complete : true;
 
       if (!jsxc.master) {
@@ -261,6 +263,8 @@ jsxc.xmpp = {
 
       var rosterVerSupport = $(jsxc.xmpp.conn.features).find('[xmlns="urn:xmpp:features:rosterver"]').length > 0;
       jsxc.storage.setUserItem('rosterVerSupport', rosterVerSupport);
+
+      jsxc.storage.removeUserItem('forcedLogout');
 
       if (jsxc.options.loginForm.triggered) {
          switch (jsxc.options.loginForm.onConnected || 'submit') {
@@ -460,7 +464,7 @@ jsxc.xmpp = {
    disconnected: function() {
       jsxc.debug('disconnected');
 
-      jsxc.storage.removeItem('jid');
+      //jsxc.storage.removeItem('jid');
       jsxc.storage.removeItem('sid');
       jsxc.storage.removeItem('rid');
       jsxc.storage.removeItem('hidden');
