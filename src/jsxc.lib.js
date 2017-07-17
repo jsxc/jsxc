@@ -1058,5 +1058,35 @@ jsxc = {
          }
          i++;
       }
+   },
+
+   enableDebugMode: function() {
+      jsxc.storage.setItem('debug', true);
+   },
+
+   disableDebugMode: function() {
+      jsxc.storage.setItem('debug', false);
+   },
+
+   deleteAllData: function() {
+      if (!jsxc.storage.getItem('debug')) {
+         jsxc.warn('This action is only available in debug mode.');
+
+         return 0;
+      }
+
+      var prefix = jsxc.storage.PREFIX + jsxc.storage.SEP;
+      var prefixRegex = new RegExp('^' + prefix);
+      var keys = Object.keys(localStorage);
+      var count = 0;
+
+      $.each(keys, function(index, key) {
+         if (prefixRegex.test(key) && key !== prefix + 'debug') {
+            localStorage.removeItem(key);
+            count++;
+         }
+      });
+
+      return count;
    }
 };
