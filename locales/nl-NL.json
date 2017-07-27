@@ -95,7 +95,7 @@
     "Remove": "Verwijder",
     "Online_help": "Online hulp",
     "FN": "Volledige naam",
-    "N": " N ",
+    "N": "Naam",
     "FAMILY": "Familienaam",
     "GIVEN": "Voornaam",
     "NICKNAME": "Bijnaam",
@@ -110,7 +110,7 @@
     "TEL": "Telefoon",
     "NUMBER": "Nummer",
     "EMAIL": "E-mail",
-    "USERID": " USERID ",
+    "USERID": "Gebruikers ID",
     "ORG": "Organisatie",
     "ORGNAME": "Naam",
     "ORGUNIT": "Afdeling",
@@ -238,7 +238,7 @@
     "Reason": "Reden",
     "message_not_send": "Je bericht was niet verzonden door een foutmelding",
     "message_not_send_item-not-found": "Je bericht was niet verzonden omdat de kamer niet bestaat",
-    "message_not_send_forbidden": "Je bericht was niet verzonden omdat er geen spraak is in deze kamer",
+    "message_not_send_forbidden": "Je bericht was niet verzonden omdat je geen geen inspraak hebt in deze kamer",
     "message_not_send_not-acceptable": "Je bericht is niet verzonden omdat je geen deelnemer bent van deze kamer",
     "message_not_send_resource-unavailable": "Je bericht was niet verzonden omdat je gesprekspartner niet verbonden is",
     "message_not_send_remote-server-not-found": "Je bericht was niet verzonden omdat de server tot server verbinding faalde",
@@ -307,8 +307,8 @@
     "Load_older_messages": "Oudere berichten laden",
     "Message_history": "Berichten geschiedenis",
     "setting-mam-enable": "Wanneer ingeschakeld ontvang je opgeslagen berichten van de server.",
-    "File_too_large": null,
-    "No_proper_file_transfer_method_available": null,
+    "File_too_large": "Bestand is te groot",
+    "No_proper_file_transfer_method_available": "Geen bestand verzendingsmethode beschikbaar",
     "You_have_to_go_online_": "Je dient online te gaan om deze operatie uit te voeren"
   }
 }
