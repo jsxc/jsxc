@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.2.1 - 2017-06-01
+ * jsxc v3.3.0-beta.1 - 2017-07-27
  * 
  * Copyright (c) 2017 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.2.1
+ * @version 3.3.0-beta.1
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.2.1',
+   version: '3.3.0-beta.1',
 
    /** True if i'm the master */
    master: false,
@@ -315,6 +315,7 @@ jsxc = {
       window.addEventListener('storage', jsxc.storage.onStorage, false);
 
       $(document).on('attached.jsxc', jsxc.registerLogout);
+      $(document).on('disconnected.jsxc', jsxc.relogin);
 
       var isStorageAttachParameters = jsxc.storage.getItem('rid') && jsxc.storage.getItem('sid') && jsxc.storage.getItem('jid');
       var isOptionsAttachParameters = jsxc.options.xmpp.rid && jsxc.options.xmpp.sid && jsxc.options.xmpp.jid;
@@ -323,73 +324,11 @@ jsxc = {
       // Check if we have to establish a new connection
       if ((!isStorageAttachParameters && !isOptionsAttachParameters) || isForceLoginForm) {
 
-         // clean up rid and sid
-         jsxc.storage.removeItem('rid');
-         jsxc.storage.removeItem('sid');
-
-         // Looking for a login form
-         if (!jsxc.isLoginForm()) {
-            jsxc.changeState(jsxc.CONST.STATE.SUSPEND);
-
-            if (jsxc.options.displayRosterMinimized()) {
-               // Show minimized roster
-               jsxc.storage.setUserItem('roster', 'hidden');
-               jsxc.gui.roster.init();
-               jsxc.gui.roster.noConnection();
-            }
-
+         if (jsxc.relogin()) {
             return;
          }
 
-         jsxc.changeState(jsxc.CONST.STATE.TRYTOINTERCEPT);
-
-         if (typeof jsxc.options.formFound === 'function') {
-            jsxc.options.formFound.call();
-         }
-
-         // create jquery object
-         var form = jsxc.options.loginForm.form = $(jsxc.options.loginForm.form);
-         var events = form.data('events') || {
-            submit: []
-         };
-         var submits = [];
-
-         // save attached submit events and remove them. Will be reattached
-         // in jsxc.submitLoginForm
-         $.each(events.submit, function(index, val) {
-            submits.push(val.handler);
-         });
-
-         form.data('submits', submits);
-         form.off('submit');
-
-         // Add jsxc login action to form
-         form.submit(function(ev) {
-            ev.preventDefault();
-
-            jsxc.prepareLogin(function(settings) {
-               if (settings !== false) {
-                  // settings.xmpp.onlogin is deprecated since v2.1.0
-                  var enabled = (settings.loginForm && settings.loginForm.enable) || (settings.xmpp && settings.xmpp.onlogin);
-                  enabled = enabled === "true" || enabled === true;
-
-                  if (enabled) {
-                     jsxc.options.loginForm.triggered = true;
-
-                     jsxc.xmpp.login(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
-
-                     return;
-                  }
-               }
-
-               jsxc.submitLoginForm();
-            });
-
-            // Trigger submit in jsxc.xmpp.connected()
-            return false;
-         });
-
-         jsxc.changeState(jsxc.CONST.STATE.INTERCEPTED);
+         jsxc.prepareNewConnection();
 
       } else if (!jsxc.isLoginForm() || (jsxc.options.loginForm && jsxc.options.loginForm.ifFound === 'attach')) {
 
@@ -402,6 +341,76 @@ jsxc = {
             jsxc.checkMaster();
          }
       }
+   },
+
+   prepareNewConnection: function() {
+      // clean up rid and sid
+      jsxc.storage.removeItem('rid');
+      jsxc.storage.removeItem('sid');
+
+      // Looking for a login form
+      if (!jsxc.isLoginForm()) {
+         jsxc.changeState(jsxc.CONST.STATE.SUSPEND);
+
+         if (jsxc.options.displayRosterMinimized()) {
+            // Show minimized roster
+            jsxc.storage.setUserItem('roster', 'hidden');
+            jsxc.gui.roster.init();
+            jsxc.gui.roster.noConnection();
+         }
+
+         return;
+      }
+
+      jsxc.changeState(jsxc.CONST.STATE.TRYTOINTERCEPT);
+
+      if (typeof jsxc.options.formFound === 'function') {
+         jsxc.options.formFound.call();
+      }
+
+      // create jquery object
+      var form = jsxc.options.loginForm.form = $(jsxc.options.loginForm.form);
+      var events = form.data('events') || {
+         submit: []
+      };
+      var submits = [];
+
+      // save attached submit events and remove them. Will be reattached
+      // in jsxc.submitLoginForm
+      $.each(events.submit, function(index, val) {
+         submits.push(val.handler);
+      });
+
+      form.data('submits', submits);
+      form.off('submit');
+
+      // Add jsxc login action to form
+      form.submit(function(ev) {
+         ev.preventDefault();
+
+         jsxc.prepareLogin(function(settings) {
+            if (settings !== false) {
+               // settings.xmpp.onlogin is deprecated since v2.1.0
+               var enabled = (settings.loginForm && settings.loginForm.enable) || (settings.xmpp && settings.xmpp.onlogin);
+               enabled = enabled === "true" || enabled === true;
+
+               if (enabled) {
+                  jsxc.options.loginForm.triggered = true;
+
+                  jsxc.xmpp.login(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
+
+                  return;
+               }
+            }
+
+            jsxc.submitLoginForm();
+         });
+
+         // Trigger submit in jsxc.xmpp.connected()
+         return false;
+      });
+
+      jsxc.changeState(jsxc.CONST.STATE.INTERCEPTED);
    },
 
    /**
@@ -434,8 +443,8 @@ jsxc = {
          return false;
       }
 
-      if (jsxc.xmpp.conn && jsxc.xmpp.connected) {
-         jsxc.debug('We are already connected');
+      if (jsxc.xmpp.conn && jsxc.xmpp.conn.authenticated) {
+         jsxc.debug('We are already connected and authenticated');
 
          return false;
       }
@@ -452,6 +461,71 @@ jsxc = {
       jsxc.checkMaster(function() {
          jsxc.xmpp.login.apply(this, args);
       });
+   },
+
+   relogin: function() {
+      jsxc.debug('Try to relogin');
+
+      var jid = jsxc.storage.getItem('jid');
+      jsxc.bid = jsxc.bid || (jid ? jsxc.jidToBid(jid) : null);
+
+      if (!jsxc.bid || jsxc.storage.getUserItem('forcedLogout')) {
+         jsxc.debug('Logout was forced or I found no valid jid');
+
+         return false;
+      }
+
+      var xmppOptions = jsxc.options.get('xmpp');
+
+      if (xmppOptions.url && (xmppOptions.jid || (xmppOptions.username && xmppOptions.domain)) && xmppOptions.password) {
+         xmppOptions.jid = xmppOptions.jid || (xmppOptions.username + '@' + xmppOptions.domain);
+
+         jsxc.start(xmppOptions.jid, xmppOptions.password);
+
+         return true;
+      }
+
+      var loadSettingsAllKnowing = jsxc.storage.getUserItem('loadSettingsAllKnowing');
+
+      if (xmppOptions.url && loadSettingsAllKnowing) {
+         jsxc.options.loadSettings(null, null, function(settings) {
+            jsxc._prepareLogin(null, null, function(settings) {
+               if (settings !== false && jsxc.options.xmpp.jid && jsxc.options.xmpp.password) {
+                  $(document).on('connfail.jsxc', reloginFailed);
+                  $(document).on('authfail.jsxc', reloginFailed);
+                  $(document).on('connected.jsxc', removeReloginHandler);
+
+                  jsxc.start(jsxc.options.xmpp.jid, jsxc.options.xmpp.password);
+
+                  delete jsxc.options.xmpp.password;
+               } else {
+                  reloginFailed();
+               }
+
+               function reloginFailed() {
+                  jsxc.debug('Could not relogin.');
+
+                  removeReloginHandler();
+
+                  jsxc.storage.removeUserItem('loadSettingsAllKnowing');
+
+                  jsxc.prepareNewConnection();
+               }
+
+               function removeReloginHandler() {
+                  $(document).off('connfail.jsxc', reloginFailed);
+                  $(document).off('authfail.jsxc', reloginFailed);
+                  $(document).off('connected.jsxc', removeReloginHandler);
+               }
+            }, settings);
+         });
+
+         return true;
+      }
+
+      jsxc.debug('I am not able to relogin');
+
+      return false;
    },
 
    registerLogout: function() {
@@ -552,6 +626,8 @@ jsxc = {
 
       if (typeof settings.xmpp.password === 'string') {
          password = settings.xmpp.password;
+
+         delete settings.xmpp.password;
       }
 
       var resource = (settings.xmpp.resource) ? '/' + settings.xmpp.resource : '';
@@ -578,6 +654,8 @@ jsxc = {
          // force xmpp settings to be saved to storage
          loadedSettings.xmpp = {};
       }
+
+      jsxc.storage.setUserItem('loadSettingsAllKnowing', (!!loadedSettings.xmpp.jid || (!!loadedSettings.xmpp.username && !!loadedSettings.xmpp.domain)) && !!loadedSettings.xmpp.password);
 
       // save loaded settings to storage
       $.each(loadedSettings, function(key) {
@@ -984,6 +1062,52 @@ jsxc = {
       jsxc.debug('UI State changed to ' + Object.keys(jsxc.CONST.UISTATE)[state]);
 
       $(document).trigger('stateUIChange.jsxc', state);
+   },
+
+   getLastMsg: function(bid) {
+      var history = jsxc.storage.getUserItem('history', bid) || [];
+      var i = 0;
+
+      while (history.length > i) {
+         var message = new jsxc.Message(history[i]);
+         if (message.direction !== jsxc.Message.SYS) {
+            return {
+               text: message.msg,
+               date: message.stamp
+            };
+         }
+         i++;
+      }
+   },
+
+   enableDebugMode: function() {
+      jsxc.storage.setItem('debug', true);
+   },
+
+   disableDebugMode: function() {
+      jsxc.storage.setItem('debug', false);
+   },
+
+   deleteAllData: function() {
+      if (!jsxc.storage.getItem('debug')) {
+         jsxc.warn('This action is only available in debug mode.');
+
+         return 0;
+      }
+
+      var prefix = jsxc.storage.PREFIX + jsxc.storage.SEP;
+      var prefixRegex = new RegExp('^' + prefix);
+      var keys = Object.keys(localStorage);
+      var count = 0;
+
+      $.each(keys, function(index, key) {
+         if (prefixRegex.test(key) && key !== prefix + 'debug') {
+            localStorage.removeItem(key);
+            count++;
+         }
+      });
+
+      return count;
    }
 };
 
@@ -1173,6 +1297,8 @@ jsxc.xmpp = {
     */
    logout: function(complete) {
 
+      jsxc.storage.setUserItem('forcedLogout', true);
+
       jsxc.triggeredFromElement = (typeof complete === 'boolean') ? complete : true;
 
       if (!jsxc.master) {
@@ -1250,6 +1376,8 @@ jsxc.xmpp = {
 
       var rosterVerSupport = $(jsxc.xmpp.conn.features).find('[xmlns="urn:xmpp:features:rosterver"]').length > 0;
       jsxc.storage.setUserItem('rosterVerSupport', rosterVerSupport);
+
+      jsxc.storage.removeUserItem('forcedLogout');
 
       if (jsxc.options.loginForm.triggered) {
          switch (jsxc.options.loginForm.onConnected || 'submit') {
@@ -1449,7 +1577,7 @@ jsxc.xmpp = {
    disconnected: function() {
       jsxc.debug('disconnected');
 
-      jsxc.storage.removeItem('jid');
+      //jsxc.storage.removeItem('jid');
       jsxc.storage.removeItem('sid');
       jsxc.storage.removeItem('rid');
       jsxc.storage.removeItem('hidden');
@@ -3629,7 +3757,7 @@ jsxc.gui = {
          dialog.find('.btn-primary').text(opt.primary.label);
       }
 
-      if (opt.primary && opt.option.label) {
+      if (opt.option && opt.option.label) {
          dialog.find('.btn-default').text(opt.option.label);
       }
 
@@ -3637,8 +3765,8 @@ jsxc.gui = {
          dialog.find('.btn-primary').click(opt.primary.cb);
       }
 
-      if (opt.primary && opt.option.cb) {
-         dialog.find('.btn-primary').click(opt.option.cb);
+      if (opt.option && opt.option.cb) {
+         dialog.find('.btn-default').click(opt.option.cb);
       }
    },
 
@@ -3938,7 +4066,7 @@ jsxc.gui = {
             src = jsxc.options.root + '/lib/emojione/assets/svg/' + filename + '.svg';
          }
 
-         var div = $('<div>');
+         var div = $('<span>');
 
          div.addClass('jsxc_emoticon');
          div.css('background-image', 'url(' + src + ')');
@@ -4367,9 +4495,14 @@ jsxc.gui.roster = {
 
       $('#jsxc_buddylist').empty();
 
-      $('#jsxc_roster').append($('<p>' + $.t('no_connection') + '</p>').append(' <a>' + $.t('relogin') + '</a>').click(function() {
-         jsxc.gui.showLoginBox();
-      }));
+      $('#jsxc_roster > p').remove();
+      $('<p>' + $.t('no_connection') + '</p>').append(' <a>' + $.t('relogin') + '</a>').click(function() {
+         jsxc.storage.removeUserItem('forcedLogout');
+
+         if (!jsxc.relogin()) {
+            jsxc.gui.showLoginBox();
+         }
+      }).appendTo('#jsxc_roster');
    },
 
    /**
@@ -5066,6 +5199,10 @@ jsxc.gui.window = {
          message.htmlMsg = message.msg;
       }
 
+      if (typeof message.msg === 'undefined') {
+         message.msg = '';
+      }
+
       // remove html tags and reencode html tags
       message.msg = jsxc.removeHTML(message.msg);
       message.msg = jsxc.escapeHTML(message.msg);
@@ -5755,7 +5892,7 @@ jsxc.fileTransfer.showFileTooLarge = function(bid, file) {
 jsxc.fileTransfer.fileSelected = function(jid, msg, file) {
    var bid = jsxc.jidToBid(jid);
    var httpUploadOptions = jsxc.options.get('httpUpload') || {};
-   var maxSize = httpUploadOptions.maxSize || 0;
+   var maxSize = httpUploadOptions.maxSize || -1;
 
    if (file.transportMethod !== 'webrtc' && jsxc.xmpp.httpUpload.ready && maxSize >= 0 && file.size > maxSize) {
       jsxc.debug('File too large for http upload.');
@@ -9980,6 +10117,12 @@ jsxc.webrtc = {
    /** bare jid to current jid mapping */
    chatJids: {},
 
+   CONST: {
+      NS: {
+         EXTDISCO: 'urn:xmpp:extdisco:2'
+      }
+   },
+
    /**
     * Initialize webrtc plugin.
     *
@@ -10027,23 +10170,7 @@ jsxc.webrtc = {
          $(document).on('caps.strophe', self.onCaps);
       }
 
-      var url = jsxc.options.get('RTCPeerConfig').url || jsxc.options.turnCredentialsPath;
-      var peerConfig = jsxc.options.get('RTCPeerConfig');
-
-      if (typeof url === 'string' && url.length > 0) {
-         self.getTurnCrendentials(url);
-      } else {
-         if (jsxc.storage.getUserItem('iceValidity')) {
-            // old ice validity found. Clean up.
-            jsxc.storage.removeUserItem('iceValidity');
-
-            // Replace saved servers with the once passed to jsxc
-            peerConfig.iceServers = jsxc.options.RTCPeerConfig.iceServers;
-            jsxc.options.set('RTCPeerConfig', peerConfig);
-         }
-
-         self.conn.jingle.setICEServers(peerConfig.iceServers);
-      }
+      self.setupIceServers();
    },
 
    onConnected: function() {
@@ -10062,16 +10189,8 @@ jsxc.webrtc = {
       $(document).off('caps.strophe', self.onCaps);
    },
 
-   /**
-    * Checks if cached configuration is valid and if necessary update it.
-    *
-    * @memberOf jsxc.webrtc
-    * @param {string} [url]
-    */
-   getTurnCrendentials: function(url) {
+   setupIceServers: function() {
       var self = jsxc.webrtc;
-
-      url = url || jsxc.options.get('RTCPeerConfig').url || jsxc.options.turnCredentialsPath;
       var ttl = (jsxc.storage.getUserItem('iceValidity') || 0) - (new Date()).getTime();
 
       // validity from jsxc < 2.1.0 is invalid
@@ -10080,14 +10199,98 @@ jsxc.webrtc = {
          ttl = -1;
       }
 
+      var url = jsxc.options.get('RTCPeerConfig').url || jsxc.options.turnCredentialsPath;
+      var peerConfig = jsxc.options.get('RTCPeerConfig');
+      var domain = self.conn.domain;
+
       if (ttl > 0) {
          // credentials valid
 
-         self.conn.jingle.setICEServers(jsxc.options.get('RTCPeerConfig').iceServers);
+         self.conn.jingle.setICEServers(peerConfig.iceServers);
 
-         window.setTimeout(jsxc.webrtc.getTurnCrendentials, ttl + 500);
-         return;
+         window.setTimeout(jsxc.webrtc.setupIceServers, ttl + 500);
+      } else if (jsxc.xmpp.conn.caps.hasFeatureByJid(domain, self.CONST.NS.EXTDISCO)) {
+         self.getIceServersByExternalDisco();
+      } else if (typeof url === 'string' && url.length > 0) {
+         self.getIceServersByUrl(url);
+      } else {
+         self.conn.jingle.setICEServers(peerConfig.iceServers);
       }
+   },
+
+   getIceServersByExternalDisco: function() {
+      var iq = $iq({
+         type: 'get',
+         to: jsxc.xmpp.conn.domain
+      }).c('services', {
+         xmlns: 'urn:xmpp:extdisco:1'
+      });
+
+      jsxc.xmpp.conn.sendIQ(iq, parseExtDiscoResponse, function(err) {
+         console.warn('getting turn credentials failed', err);
+      });
+
+      function parseExtDiscoResponse(res) {
+         jsxc.debug('ice servers receiving by xmpp extdisco');
+
+         var iceServers = [];
+         var minTtl = 86400;
+
+         $(res).find('>services>service').each(function(idx, el) {
+            el = $(el);
+            var serverItem = {};
+
+            switch (el.attr('type')) {
+               case 'stun':
+               case 'stuns':
+                  serverItem.urls = el.attr('type') + ':' + el.attr('host');
+
+                  if (el.attr('port')) {
+                     serverItem.urls += ':' + el.attr('port');
+                  }
+
+                  break;
+               case 'turn':
+               case 'turns':
+                  if (el.attr('username')) {
+                     serverItem.username = el.attr('username');
+                  }
+
+                  serverItem.urls = el.attr('type') + ':' + el.attr('host');
+
+                  if (el.attr('port') && el.attr('port') !== '3478') {
+                     serverItem.urls += ':' + el.attr('port');
+                  }
+
+                  if (el.attr('transport') && el.attr('transport') !== 'udp') {
+                     serverItem.urls += '?transport=' + el.attr('transport');
+                  }
+
+                  if (el.attr('password')) {
+                     serverItem.credential = el.attr('password');
+                  }
+
+                  if (el.attr('ttl') && el.attr('ttl') < minTtl) {
+                     minTtl = el.attr('ttl');
+                  }
+                  break;
+            }
+
+            if (serverItem.urls) {
+               iceServers.push(serverItem);
+            }
+         });
+
+         if (iceServers.length > 0) {
+            jsxc.webrtc.setIceServers(iceServers, minTtl);
+         } else {
+            jsxc.warn('Found no valid ICE server configuration');
+         }
+      }
+   },
+
+   getIceServersByUrl: function(url) {
+      var self = jsxc.webrtc;
 
       $.ajax(url, {
          async: true,
@@ -10121,15 +10324,7 @@ jsxc.webrtc = {
                var urls = iceServers[0].urls && iceServers[0].urls.length > 0;
 
                if (urls || url) {
-                  jsxc.debug('ice servers received');
-
-                  var peerConfig = jsxc.options.get('RTCPeerConfig');
-                  peerConfig.iceServers = iceServers;
-                  jsxc.options.set('RTCPeerConfig', peerConfig);
-
-                  self.conn.jingle.setICEServers(iceServers);
-
-                  jsxc.storage.setUserItem('iceValidity', (new Date()).getTime() + 1000 * ttl);
+                  self.setIceServers(iceServers, ttl);
                } else {
                   jsxc.warn('No valid url found in first ice object.');
                }
@@ -10137,6 +10332,20 @@ jsxc.webrtc = {
          },
          dataType: 'json'
       });
+   },
+
+   setIceServers: function(iceServers, ttl) {
+      jsxc.debug('set ice servers');
+
+      var peerConfig = jsxc.options.get('RTCPeerConfig');
+      peerConfig.iceServers = iceServers;
+      jsxc.options.set('RTCPeerConfig', peerConfig);
+
+      jsxc.webrtc.conn.jingle.setICEServers(iceServers);
+
+      jsxc.storage.setUserItem('iceValidity', (new Date()).getTime() + 1000 * ttl);
+
+      window.setTimeout(jsxc.webrtc.setupIceServers, ttl + 500);
    },
 
    /**

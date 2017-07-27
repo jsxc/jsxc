@@ -2343,10 +2343,6 @@ fieldset[disabled]
   background-size: contain;
   border: 0;
   vertical-align: bottom; }
-  .jsxc_emoticon.jsxc_large {
-    width: 40px;
-    height: 40px;
-    margin-bottom: 7px; }
 
 #jsxc_roster .jsxc_emoticon.jsxc_large {
   width: 19px;
@@ -2869,14 +2865,14 @@ fieldset[disabled]
         z-index: 1;
         left: 7px;
         top: 100%; }
-    .jsxc_window .jsxc_emoticons li div {
+    .jsxc_window .jsxc_emoticons li span {
       float: left;
       cursor: pointer;
       border-radius: 3px;
       background-size: 30px 30px;
       width: 30px;
       height: 30px; }
-      .jsxc_window .jsxc_emoticons li div:hover {
+      .jsxc_window .jsxc_emoticons li span:hover {
         background-color: rgba(255, 255, 255, 0.8); }
     .jsxc_window .jsxc_emoticons:hover:after {
       opacity: 0.5; }
@@ -3111,6 +3107,10 @@ fieldset[disabled]
       opacity: 1; }
     .jsxc_chatmessage .jsxc_attachment.jsxc_text {
       background-image: url('../img/filetypes/text.svg'); }
+  .jsxc_chatmessage .jsxc_emoticon.jsxc_large {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 7px; }
 
 .jsxc_timestamp {
   font-size: 8px;
