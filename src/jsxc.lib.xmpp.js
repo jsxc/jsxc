@@ -411,7 +411,7 @@ jsxc.xmpp = {
    sendPres: function() {
       // disco stuff
       if (jsxc.xmpp.conn.disco) {
-         jsxc.xmpp.conn.disco.addIdentity('client', 'web', 'JSXC');
+         jsxc.xmpp.conn.disco.addIdentity('client', 'web', 'JSXC', '');
          jsxc.xmpp.conn.disco.addFeature(Strophe.NS.DISCO_INFO);
          jsxc.xmpp.conn.disco.addFeature(Strophe.NS.RECEIPTS);
          jsxc.xmpp.conn.disco.addFeature(Strophe.NS.VERSION);
