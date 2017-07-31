@@ -7,18 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added
 - api to retrieve last message
-- #567 add external service discovery for ice server retrieval
-- #574 add automatic login
+- [#567](https://github.com/jsxc/jsxc/issues/567) add external service discovery for ice server retrieval
+- [#574](https://github.com/jsxc/jsxc/issues/574) add automatic login
 - add debugging api
 - add Japanese
 
 ### Fixed
 - fix unlimited max size for http file upload
-- #552 fix muc selection dialog
-- #569 fix uncaught type error
+- [#552](https://github.com/jsxc/jsxc/issues/552) fix muc selection dialog
+- [#569](https://github.com/jsxc/jsxc/issues/569) fix uncaught type error
 
 ### Changed
-- #555 update strophe.jinglejs
+- [#555](https://github.com/jsxc/jsxc/issues/555) update strophe.jinglejs
 - update jsxc emoticon
 - update locales
 
