@@ -403,6 +403,9 @@ jsxc.xmpp = {
 
       // reset user options
       jsxc.storage.removeUserElement('options', 'RTCPeerConfig');
+
+      // reset http upload settings
+      jsxc.storage.removeUserElement('options', 'httpUpload');
    },
 
    /**
