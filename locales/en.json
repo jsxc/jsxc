@@ -285,7 +285,7 @@
     "Change": "Change",
     "Send_file": "Send file",
     "setting-explanation-carbon": "With carbon copies enabled, for every message addressed to you, your XMPP server will send a copy of it to this client, even if this client was not explicitely listed as a recipient.",
-    "setting-explanation-login": "Should a window for this chat be opened automatically on every login?",
+    "setting-explanation-login": "If this option is enabled, the chat will start on login.",
     "setting-explanation-priority": "If you are logged in multiple times with the same account on different clients, your XMPP server will deliver messages to the client with the highest priority. We suggest newcomers should set all values on all clients to 0 to minimize confusion.",
     "setting-explanation-xmpp": "These options are used to connect to the XMPP server.",
     "_is_composing": " is composing...",
