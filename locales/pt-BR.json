@@ -218,7 +218,7 @@
     "Server": "Servidor",
     "Rooms_are_loaded": "Sala carregada",
     "Could_load_only": "Pode carregar somente __count__ salas para autocompletar",
-    "muc_explanation": "Por favor entre um nome de sala e um nickname opcional e uma senha para entrar no chat",
+    "muc_explanation": "Por favor entre um nome de sala e um nickname opcional para entrar no chat",
     "You_already_joined_this_room": "Você já entrou nesta sala",
     "This_room_will_be_closed": "Esta sala será fechada",
     "Room_not_found_": "Uma nova sala será criada",

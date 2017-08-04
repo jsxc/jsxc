@@ -218,7 +218,7 @@
     "Server": "Server",
     "Rooms_are_loaded": "Kamers zijn geladen",
     "Could_load_only": "Alleen aanvullen voor__count__kamers",
-    "muc_explanation": "Vul de kamernaam, optioneel een bijnaam en wachtwoord in om deel te nemen een chat",
+    "muc_explanation": "Vul de kamernaam, optioneel een bijnaam in om deel te nemen een chat",
     "You_already_joined_this_room": "Je bent al verbonden met deze kamer",
     "This_room_will_be_closed": "De kamer wordt gesloten",
     "Room_not_found_": "Een nieuwe kamer wordt aangemaakt",
