@@ -218,7 +218,7 @@
     "Server": "Server",
     "Rooms_are_loaded": "Camerele sunt încărcate",
     "Could_load_only": "S-au putut încărca doar __count__ camere pentru autocompletare",
-    "muc_explanation": "Vă rugăm introduceţi numele camerei şi opţional o poreclă şi o parolă pentru a vă alătura chat-ului",
+    "muc_explanation": "Vă rugăm introduceţi numele camerei şi opţional o poreclă şi pentru a vă alătura chat-ului",
     "You_already_joined_this_room": "Deja v-aţi alăturat acestei camere",
     "This_room_will_be_closed": "Această cameră va fi închisă",
     "Room_not_found_": "O cameră noua va fi creată",

@@ -218,7 +218,7 @@
     "Server": "Serveur",
     "Rooms_are_loaded": "Les salons sont chargés",
     "Could_load_only": "Ne peut charger que __count__ salons pour l'autocomplétion",
-    "muc_explanation": "Veuillez saisir le nom du salon, un surnom (optionnel) et un mot de passe pour joindre la conversation",
+    "muc_explanation": "Veuillez saisir le nom du salon, un surnom (optionnel) pour joindre la conversation",
     "You_already_joined_this_room": "Vous avez déjà rejoint ce salon",
     "This_room_will_be_closed": "Ce salon va être fermé",
     "Room_not_found_": "Un nouveau salon va être créé",

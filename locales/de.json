@@ -218,7 +218,7 @@
     "Server": "Server",
     "Rooms_are_loaded": "Gruppen werden geladen",
     "Could_load_only": "Es konnten nur __count__ Gruppen für die Autovervollständigung geladen werden",
-    "muc_explanation": "Bitte trage den Gruppennamen und optional ein Nickname und Passwort ein um einer Gruppe beizutreten",
+    "muc_explanation": "Bitte trage den Gruppennamen und optional einen Nickname ein, um einer Gruppe beizutreten",
     "You_already_joined_this_room": "Du bist dieser Gruppe bereits beigetreten",
     "This_room_will_be_closed": "Diese Gruppe wird geschlossen",
     "Room_not_found_": "Es wird eine neue Gruppe erstellt",

@@ -218,7 +218,7 @@
     "Server": "Server",
     "Rooms_are_loaded": "Loading rooms",
     "Could_load_only": "Could load only __count__ rooms for autocomplete",
-    "muc_explanation": "Please enter room name and optionally a nickname and password to join a chat",
+    "muc_explanation": "Please enter room name and optionally a nickname to join a chat",
     "You_already_joined_this_room": "You already joined this room",
     "This_room_will_be_closed": "This room will be closed",
     "Room_not_found_": "A new room will be created",
