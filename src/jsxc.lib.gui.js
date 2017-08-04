@@ -209,7 +209,7 @@ jsxc.gui = {
       jsxc.gui.updatePresence(bid, jsxc.CONST.STATUS[data.status]);
 
       // Change name and add title
-      ue.find('.jsxc_name:first').add(spot).text(data.name).attr('title', $.t('is_', {
+      ue.find('.jsxc_name:first').add(spot).text(data.name).attr('title', bid + " " + $.t('is_', {
          status: $.t(jsxc.CONST.STATUS[data.status])
       }));
 
