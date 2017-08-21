@@ -18,9 +18,14 @@ jsxc.xmpp.mam.isEnabled = function() {
    var mamOptions = jsxc.options.get('mam') || {};
 
    var features = jsxc.storage.getUserItem('features') || [];
-   var hasFeatureMam2 = features.indexOf(Strophe.NS.MAM) >= 0;
+   var hasFeatureMam1 = features.indexOf('urn:xmpp:mam:1') >= 0;
+   var hasFeatureMam2 = features.indexOf('urn:xmpp:mam:2') >= 0;
 
-   return hasFeatureMam2 && mamOptions.enable;
+   if (hasFeatureMam1 && !hasFeatureMam2) {
+      Strophe.addNamespace('MAM', 'urn:xmpp:mam:1');
+   }
+
+   return (hasFeatureMam1 || hasFeatureMam2) && mamOptions.enable;
 };
 
 jsxc.xmpp.mam.nextMessages = function(bid) {
