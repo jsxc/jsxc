@@ -564,6 +564,12 @@ jsxc.xmpp = {
 
       $(iq).find('item').each(function() {
          var jid = $(this).attr('jid');
+
+         if (!/^[^"&'\/:<>@\s]+@[\w-_.]+$/i.test(jid)) {
+            jsxc.warn(jid + ' is no valid JID.');
+            return;
+         }
+
          var name = $(this).attr('name') || jid;
          var bid = jsxc.jidToBid(jid);
          var sub = $(this).attr('subscription');
@@ -625,6 +631,12 @@ jsxc.xmpp = {
       // https://xmpp.org/rfcs/rfc6121.html#roster-syntax-actions-push
       $(iq).find('item').each(function() {
          var jid = $(this).attr('jid');
+
+         if (!/^[^"&'\/:<>@\s]+@[\w-_.]+$/i.test(jid)) {
+            jsxc.warn(jid + ' is no valid JID.');
+            return;
+         }
+
          var name = $(this).attr('name') || jid;
          var bid = jsxc.jidToBid(jid);
          var sub = $(this).attr('subscription');
