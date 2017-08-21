@@ -627,8 +627,11 @@ jsxc.xmpp = {
 
       jsxc.debug('onRosterChanged', iq);
 
-      // @REVIEW there should be only one item, according to RFC6121
-      // https://xmpp.org/rfcs/rfc6121.html#roster-syntax-actions-push
+      if ($(iq).find('item').length !== 1) {
+         jsxc.warn('Roster pushes must contain only one item element');
+         return true;
+      }
+
       $(iq).find('item').each(function() {
          var jid = $(this).attr('jid');
 
