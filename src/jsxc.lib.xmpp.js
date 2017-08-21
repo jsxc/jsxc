@@ -869,8 +869,8 @@ jsxc.xmpp = {
          jsxc.debug('Incoming message', message);
       }
 
-      var body = $(message).find('body:first').text();
-      var htmlBody = $(message).find('body[xmlns="' + Strophe.NS.XHTML + '"]');
+      var htmlBody = $(message).find('body[xmlns="' + Strophe.NS.XHTML + '"]').first();
+      var body = $(message).find('>body').first().text() || htmlBody.text();
 
       if (!body || (body.match(/\?OTR/i) && forwarded)) {
          return true;
