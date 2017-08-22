@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.3.0-beta.1 - 2017-07-27
+ * jsxc v3.3.0-beta.2 - 2017-08-22
  * 
  * Copyright (c) 2017 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see http://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.3.0-beta.1
+ * @version 3.3.0-beta.2
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.3.0-beta.1',
+   version: '3.3.0-beta.2',
 
    /** True if i'm the master */
    master: false,
@@ -1516,6 +1516,9 @@ jsxc.xmpp = {
 
       // reset user options
       jsxc.storage.removeUserElement('options', 'RTCPeerConfig');
+
+      // reset http upload settings
+      jsxc.storage.removeUserElement('options', 'httpUpload');
    },
 
    /**
@@ -1524,7 +1527,7 @@ jsxc.xmpp = {
    sendPres: function() {
       // disco stuff
       if (jsxc.xmpp.conn.disco) {
-         jsxc.xmpp.conn.disco.addIdentity('client', 'web', 'JSXC');
+         jsxc.xmpp.conn.disco.addIdentity('client', 'web', 'JSXC', '');
          jsxc.xmpp.conn.disco.addFeature(Strophe.NS.DISCO_INFO);
          jsxc.xmpp.conn.disco.addFeature(Strophe.NS.RECEIPTS);
          jsxc.xmpp.conn.disco.addFeature(Strophe.NS.VERSION);
@@ -1674,6 +1677,12 @@ jsxc.xmpp = {
 
       $(iq).find('item').each(function() {
          var jid = $(this).attr('jid');
+
+         if (!/^[^"&'\/:<>@\s]+@[\w-_.]+$/i.test(jid)) {
+            jsxc.warn(jid + ' is no valid JID.');
+            return;
+         }
+
          var name = $(this).attr('name') || jid;
          var bid = jsxc.jidToBid(jid);
          var sub = $(this).attr('subscription');
@@ -1731,10 +1740,19 @@ jsxc.xmpp = {
 
       jsxc.debug('onRosterChanged', iq);
 
-      // @REVIEW there should be only one item, according to RFC6121
-      // https://xmpp.org/rfcs/rfc6121.html#roster-syntax-actions-push
+      if ($(iq).find('item').length !== 1) {
+         jsxc.warn('Roster pushes must contain only one item element');
+         return true;
+      }
+
       $(iq).find('item').each(function() {
          var jid = $(this).attr('jid');
+
+         if (!/^[^"&'\/:<>@\s]+@[\w-_.]+$/i.test(jid)) {
+            jsxc.warn(jid + ' is no valid JID.');
+            return;
+         }
+
          var name = $(this).attr('name') || jid;
          var bid = jsxc.jidToBid(jid);
          var sub = $(this).attr('subscription');
@@ -1979,8 +1997,8 @@ jsxc.xmpp = {
          jsxc.debug('Incoming message', message);
       }
 
-      var body = $(message).find('body:first').text();
-      var htmlBody = $(message).find('body[xmlns="' + Strophe.NS.XHTML + '"]');
+      var htmlBody = $(message).find('body[xmlns="' + Strophe.NS.XHTML + '"]').first();
+      var body = $(message).find('>body').first().text() || htmlBody.text();
 
       if (!body || (body.match(/\?OTR/i) && forwarded)) {
          return true;
@@ -2853,7 +2871,7 @@ jsxc.gui = {
       jsxc.gui.updatePresence(bid, jsxc.CONST.STATUS[data.status]);
 
       // Change name and add title
-      ue.find('.jsxc_name:first').add(spot).text(data.name).attr('title', $.t('is_', {
+      ue.find('.jsxc_name:first').add(spot).text(data.name).attr('title', bid + ' ' + $.t('is_', {
          status: $.t(jsxc.CONST.STATUS[data.status])
       }));
 
@@ -12578,9 +12596,14 @@ jsxc.xmpp.mam.isEnabled = function() {
    var mamOptions = jsxc.options.get('mam') || {};
 
    var features = jsxc.storage.getUserItem('features') || [];
-   var hasFeatureMam2 = features.indexOf(Strophe.NS.MAM) >= 0;
+   var hasFeatureMam1 = features.indexOf('urn:xmpp:mam:1') >= 0;
+   var hasFeatureMam2 = features.indexOf('urn:xmpp:mam:2') >= 0;
 
-   return hasFeatureMam2 && mamOptions.enable;
+   if (hasFeatureMam1 && !hasFeatureMam2) {
+      Strophe.addNamespace('MAM', 'urn:xmpp:mam:1');
+   }
+
+   return (hasFeatureMam1 || hasFeatureMam2) && mamOptions.enable;
 };
 
 jsxc.xmpp.mam.nextMessages = function(bid) {
