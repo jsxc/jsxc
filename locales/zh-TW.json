@@ -125,7 +125,7 @@
     "Priority": "優先度",
     "Save": "儲存",
     "User_settings": "使用者設定",
-    "A_fingerprint_": "電子指紋是用來確認跟你說話的是真的那個人。",
+    "A_fingerprint_": "電子指紋是用來確認跟你說話的真的是他們宣稱的那個人。",
     "is": "狀態:",
     "Login_options": "登入選項",
     "BOSH_url": "BOSH 網址",
@@ -180,7 +180,7 @@
     },
     "muc_nonanonymous": {
       "keyword": "禁匿名",
-      "description": "每個參與人都能看到你的 jabber 代碼"
+      "description": "每個參與人都能看到你的 jabber 代碼(聊天位址)"
     },
     "muc_open": {
       "keyword": "開放",
@@ -192,7 +192,7 @@
     },
     "muc_persistent": {
       "keyword": "永久性",
-      "description": "最後一個參與人都離開了也不會結束"
+      "description": "當最後一個參與人都離開時不會結束"
     },
     "muc_public": {
       "keyword": "公開",
@@ -200,7 +200,7 @@
     },
     "muc_semianonymous": {
       "keyword": "半匿名",
-      "description": "只有聊天室管理員才看得到你的 jabber 代碼"
+      "description": "只有聊天室管理員才看得到你的 jabber 代碼(聊天位址)"
     },
     "muc_temporary": {
       "keyword": "暫時性",
@@ -216,9 +216,9 @@
     },
     "Continue": "繼續",
     "Server": "伺服器",
-    "Rooms_are_loaded": "聊天室載入完成",
+    "Rooms_are_loaded": "載入聊天室中",
     "Could_load_only": "只能載入__count__間聊天室供輸入自動完成使用",
-    "muc_explanation": "請輸入要參加的聊天室名稱，綽號和密碼非必要",
+    "muc_explanation": "請輸入要參加的聊天室名稱，綽號非必要",
     "You_already_joined_this_room": "你已經參加這間聊天室了",
     "This_room_will_be_closed": "聊天室即將關閉",
     "Room_not_found_": "新聊天室即將開啟",
@@ -243,7 +243,7 @@
     "message_not_send_resource-unavailable": "訊息沒送出去，因為通訊對象不在或是已經斷線",
     "message_not_send_remote-server-not-found": "訊息沒送出去，因為伺服器間的連線失敗了",
     "This_room_has_been_closed": "聊天室已經關閉了",
-    "Room_logging_is_enabled": "聊天室紀錄打開了",
+    "Room_logging_is_enabled": "聊天室紀錄已經啟用了",
     "A_password_is_required": "需要密碼",
     "You_are_not_on_the_member_list": "你不是會員",
     "You_are_banned_from_this_room": "你被禁止進入聊天室了",
@@ -257,7 +257,7 @@
     "Carbon_copy": "副本",
     "Enable": "打開",
     "jingle_reason_busy": "忙線中",
-    "jingle_reason_decline": "被拒絕",
+    "jingle_reason_decline": "被拒絕了",
     "jingle_reason_success": "被掛斷",
     "Media_failure": "媒體錯誤",
     "No_local_audio_device": "本機沒有音訊設備。",
@@ -269,7 +269,7 @@
     "is_": "狀態: __status__",
     "You_received_a_message_from_an_unknown_sender_": "收到了不明人士(__sender__)傳來的訊息。你要打開來看嗎？",
     "Your_roster_is_empty_add_": "好友清單是空的，請加<a>新的聯絡人</a>",
-    "onsmp_explanation_question": "聯絡人想要確定她/他是在跟真的你說話。要完成你的驗證，請輸入問題的答案，然後按\"回答\"。",
+    "onsmp_explanation_question": "聯絡人想要確定她/他是在跟真的你說話。要完成你的驗證，請輸入問題的答案，然後按「回答」。",
     "onsmp_explanation_secret": "聯絡人想要確定她/他是在跟真的你說話。要完成你的驗證，請輸入你們之間的祕密。",
     "from_sender": "來自：__sender__",
     "Verified_private_conversation_started": "加密且已校驗的對話開始了。",
@@ -277,21 +277,21 @@
     "Bookmark": "書籤",
     "Auto-join": "自動參加",
     "Edit_bookmark": "編輯書籤",
-    "Room_logging_is_disabled": "聊天室紀錄關掉了",
+    "Room_logging_is_disabled": "聊天室紀錄已經關閉了",
     "Room_is_now_non-anoymous": "現在聊天室禁止匿名了",
     "Room_is_now_semi-anonymous": "現在聊天室變半匿名了",
     "Do_you_want_to_change_the_default_room_configuration": "你想要改變聊天室的預設配置嗎？",
     "Default": "預設值",
     "Change": "修改",
     "Send_file": "傳送檔案",
-    "setting-explanation-carbon": "如果打開副本選項的話，XMPP 伺服器會把每一個收到的訊息，都送一份到這個用戶端程式，即使它不是訊息發送的對象。",
+    "setting-explanation-carbon": "如果打開副本選項的話，XMPP 伺服器會把你的帳號每一個收到的訊息，都送一份到這個用戶端程式，即使它不是訊息發送的對象。",
     "setting-explanation-login": "打開這個選項會在登入時同時開啟聊天。",
-    "setting-explanation-priority": "如果你用同一個帳號同時登入好幾次的話，XMPP 伺服器會把訊息送給優先度最高的那個用戶端程式。",
+    "setting-explanation-priority": "如果你同時在多個用戶端程式用同一個帳號重複登入的話，XMPP 伺服器會把訊息送給優先度最高的那個用戶端程式。建議新手將所有用戶端程式的優先度都設為 0 以避免混淆。",
     "setting-explanation-xmpp": "這些是用在 XMPP 伺服器連線的選項。",
     "_is_composing": "正在打字中...",
     "_are_composing": "正在打字中...",
     "Chat_state_notifications": "聊天狀態通知",
-    "setting-explanation-chat-state": "想要傳送以及接收聊天狀態的通知嗎？也就是有人開始或停止寫訊息之類？",
+    "setting-explanation-chat-state": "想要傳送及接收開始或停止寫訊息的通知嗎？",
     "Share_screen": "分享螢幕",
     "Incoming_stream": "有串流來",
     "Stream_started": "串流開始了",
@@ -306,7 +306,7 @@
     "Unreadable_OTR_message": "忽略無法解讀的 OTR 訊息",
     "Load_older_messages": "下載舊訊息",
     "Message_history": "訊息紀錄",
-    "setting-mam-enable": "打開後就可以從伺服器取得儲存訊息",
+    "setting-mam-enable": "想要從伺服器取得之前儲存的訊息嗎？",
     "File_too_large": "檔案太大了",
     "No_proper_file_transfer_method_available": "沒有適合的檔案傳輸方式",
     "You_have_to_go_online_": "必須要上線才能執行這個動作。"
