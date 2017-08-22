@@ -11,16 +11,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - [#574](https://github.com/jsxc/jsxc/issues/574) add automatic login
 - add debugging api
 - add Japanese
+- support mam:1
 
 ### Fixed
 - fix unlimited max size for http file upload
 - [#552](https://github.com/jsxc/jsxc/issues/552) fix muc selection dialog
 - [#569](https://github.com/jsxc/jsxc/issues/569) fix uncaught type error
+- [#588](https://github.com/jsxc/jsxc/issues/588) fix calculation of capability hash
+- reset http upload settings for new connection
+- test for valid jid on roster response
+- ignore roster pushes with no or more than one item element
 
 ### Changed
-- [#555](https://github.com/jsxc/jsxc/issues/555) update strophe.jinglejs
+- [#473](https://github.com/jsxc/jsxc/issues/473),[#555](https://github.com/jsxc/jsxc/issues/555),[#593](https://github.com/jsxc/jsxc/issues/593) update strophe.jinglejs
+- [#591](https://github.com/jsxc/jsxc/issues/591) update strophe.disco.js
 - update jsxc emoticon
 - update locales
+- [#597](https://github.com/jsxc/jsxc/pull/597) include jid in chat window title
+- more restrictive xml body query
 
 ## 3.2.1 - 2017-06-01
 ### Added
