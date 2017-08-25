@@ -1,13 +1,13 @@
 /*!
- * jsxc v3.3.0-beta.2 - 2017-08-22
+ * jsxc v3.3.0 - 2017-08-25
  * 
  * Copyright (c) 2017 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
  * 
- * Please see http://www.jsxc.org/
+ * Please see https://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.3.0-beta.2
+ * @version 3.3.0
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.3.0-beta.2',
+   version: '3.3.0',
 
    /** True if i'm the master */
    master: false,

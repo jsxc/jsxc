@@ -1,8 +1,8 @@
 {
   "name": "jsxc",
-  "version": "3.3.0-beta.2",
+  "version": "3.3.0",
   "description": "Real-time xmpp chat application with video calls, file transfer and encrypted communication",
-  "homepage": "http://www.jsxc.org/",
+  "homepage": "https://www.jsxc.org/",
   "bugs": "https://github.com/jsxc/jsxc/issues",
   "license": "MIT",
   "author": "Klaus Herberth <klaus@jsxc.org>",

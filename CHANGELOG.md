@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## 3.3.0 - 2017-08-25
 ### Added
 - api to retrieve last message
 - [#567](https://github.com/jsxc/jsxc/issues/567) add external service discovery for ice server retrieval
