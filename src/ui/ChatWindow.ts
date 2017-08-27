@@ -17,6 +17,8 @@ import Avatar from './Avatar'
 import 'simplebar'
 import {startCall} from './actions/call'
 import {Presence} from '../connection/AbstractConnection'
+import Pipe from '../Pipe'
+import {EncryptionState} from '../plugin/AbstractPlugin'
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -99,7 +101,20 @@ export default class ChatWindow {
       this.contact.registerHook('name', (newName) => {
          this.element.find('.jsxc-name').text(newName);
       });
-      // @TODO init otr
+
+      this.contact.registerHook('encryptionState', this.updateEncryptionState);
+      this.updateEncryptionState(this.contact.getEncryptionState());
+
+      let pluginRepository = this.account.getPluginRepository();
+      if (pluginRepository.hasEncryptionPlugin()) {
+         let transferElement = this.getDom().find('.jsxc-transfer');
+
+         transferElement.removeClass('jsxc-disabled');
+         transferElement.click(() => {
+            //@TODO create selection
+            pluginRepository.getEncryptionPlugin('otr').toggleTransfer(this.contact);
+         })
+      }
 
       this.element.attr('data-presence', Presence[this.contact.getPresence()]);
 
@@ -107,7 +122,9 @@ export default class ChatWindow {
          this.element.attr('data-presence', Presence[newStatus]);
       });
 
-      this.scrollMessageAreaToBottom();
+      setTimeout(() => {
+         this.scrollMessageAreaToBottom();
+      }, 500);
    }
 
    public getId() {
@@ -438,11 +455,16 @@ export default class ChatWindow {
          direction: Message.DIRECTION.OUT,
          plaintextMessage: messageString
       });
-      message.save();
 
-      this.messages.push(message);
+      let pipe = Pipe.get('preSendMessage');
 
-      this.getAccount().getConnection().sendMessage(message);
+      pipe.run(this.contact, message).then(([contact, message]) => {
+         message.save();
+
+         this.messages.push(message);
+
+         this.getAccount().getConnection().sendMessage(message);
+      });
 
       if (messageString === '?' && Options.get('theAnswerToAnything') !== false) {
          if (typeof Options.get('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) < 1) {
@@ -462,6 +484,27 @@ export default class ChatWindow {
          this.unminimize(ev);
       } else {
          this.minimize(ev);
+      }
+   }
+
+   private updateEncryptionState = (encryptionState) => {
+      let transferElement = this.getDom().find('.jsxc-transfer');
+      transferElement.removeClass('jsxc-fin jsxc-enc jsxc-trust');
+
+      switch(encryptionState) {
+         case EncryptionState.Plaintext:
+            break;
+         case EncryptionState.UnverifiedEncrypted:
+            transferElement.addClass('jsxc-enc');
+            break;
+         case EncryptionState.VerifiedEncrypted:
+            transferElement.addClass('jsxc-enc jsxc-trust');
+            break;
+         case EncryptionState.Ended:
+            transferElement.addClass('jsxc-fin');
+            break;
+         default:
+            Log.warn('Unknown encryption state');
       }
    }
 

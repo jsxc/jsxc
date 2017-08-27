@@ -9,6 +9,7 @@ import Client from '../../../Client'
 import Contact from '../../../Contact'
 import Notification from '../../../Notification'
 import {SOUNDS} from '../../../CONST'
+import Pipe from '../../../Pipe'
 
 // body.replace(/^\/me /, '<i title="/me">' + Utils.removeHTML(this.sender.getName()) + '</i> ');
 const PRESERVE_HANDLER = true;
@@ -124,10 +125,24 @@ export default function onChatMessage(stanza: Element): boolean {
       stamp: stamp.getTime(),
       // attachment:
    });
-   message.save();
 
-   let chatWindow = account.openChatWindow(contact);
-   chatWindow.receiveIncomingMessage(message);
+   let pipe = Pipe.get('afterReceiveMessage');
+
+   pipe.run(contact, message).then(([contact, message]) => {
+      //@REVIEW why is this required at this position
+      message.save();
+
+      //@REVIEW pipes? hooks?
+      Notification.notify({
+         title: Translation.t('New_message_from'),
+         message: message.getProcessedBody(),
+         soundFile: SOUNDS.MSG,
+         source: contact
+      });
+
+      let chatWindow = account.openChatWindow(contact);
+      chatWindow.receiveIncomingMessage(message);
+   });
 
    // create related otr object
    // if (jsxc.master && !jsxc.otr.objects[bid]) {
@@ -190,14 +205,6 @@ export default function onChatMessage(stanza: Element): boolean {
    //       attachment: attachment
    //    });
    // }
-
-   //@REVIEW pipes? hooks?
-   Notification.notify({
-      title: Translation.t('New_message_from'),
-      message: message.getProcessedBody(),
-      soundFile: SOUNDS.MSG,
-      source: contact
-   });
 
    return PRESERVE_HANDLER;
 }

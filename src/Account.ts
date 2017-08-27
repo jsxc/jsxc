@@ -16,6 +16,7 @@ import {Presence} from './connection/AbstractConnection'
 import Client from './Client'
 import {NoticeManager} from './NoticeManager'
 import * as StropheLib from 'strophe.js'
+import PluginRepository from './plugin/PluginRepository'
 
 let Strophe = StropheLib.Strophe;
 
@@ -49,6 +50,8 @@ export default class Account {
 
    private noticeManager:NoticeManager;
 
+   private pluginRepository:PluginRepository;
+
    constructor(boshUrl: string, jid: string, sid: string, rid:string);
    constructor(boshUrl: string, jid: string, password: string);
    constructor(uid:string);
@@ -70,6 +73,8 @@ export default class Account {
       }));
       Roster.get().setRosterAvatar(this.contact);
 
+      this.pluginRepository = new PluginRepository(this);
+
       this.initContacts();
       this.initWindows();
    }
@@ -90,6 +95,10 @@ export default class Account {
       }
 
       return Connector.login.apply(this, this.connectionArguments).then(this.successfulConnected);
+   }
+
+   public getPluginRepository():PluginRepository {
+      return this.pluginRepository;
    }
 
    public getContact(jid:JID):Contact {

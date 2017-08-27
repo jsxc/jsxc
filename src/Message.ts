@@ -28,6 +28,8 @@ interface MessagePayload {
    forwarded?:boolean,
    stamp?:number,
    type?:MSGTYPE,
+   encryptedHtmlMessage?:string,
+   encryptedPlaintextMessage?:string,
 }
 
 export default class Message implements Identifiable, MessageInterface {
@@ -39,7 +41,9 @@ export default class Message implements Identifiable, MessageInterface {
       encrypted: null,
       forwarded: false,
       stamp: new Date().getTime(),
-      type: MSGTYPE.CHAT
+      type: MSGTYPE.CHAT,
+      encryptedHtmlMessage: null,
+      encryptedPlaintextMessage: null
    } as any;
 
    static readonly DIRECTION = DIRECTION;
@@ -146,8 +150,16 @@ export default class Message implements Identifiable, MessageInterface {
       return this.payload.htmlMessage;
    }
 
+   public getEncryptedHtmlMessage():string {
+      return this.payload.encryptedHtmlMessage;
+   }
+
    public getPlaintextMessage():string {
       return this.payload.plaintextMessage;
+   }
+
+   public getEncryptedPlaintextMessage():string {
+      return this.payload.encryptedPlaintextMessage;
    }
 
    public received() {
@@ -175,6 +187,22 @@ export default class Message implements Identifiable, MessageInterface {
 
    public setUnread() {
 
+   }
+
+   public setDirection(direction:DIRECTION) {
+      this.payload.direction = direction;
+   }
+
+   public setPlaintextMessage(plaintextMessage:string) {
+      this.payload.plaintextMessage = plaintextMessage;
+   }
+
+   public setEncryptedPlaintextMessage(encryptedPlaintextMessage:string) {
+      this.payload.encryptedPlaintextMessage = encryptedPlaintextMessage;
+   }
+
+   public setEncrypted(encrypted:boolean = false) {
+      this.payload.encrypted = encrypted;
    }
 
    public getProcessedBody():string {

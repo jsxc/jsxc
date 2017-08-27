@@ -7,6 +7,7 @@ import * as StropheLib from 'strophe.js'
 import JingleHandler from './JingleHandler'
 import {IConnection} from './ConnectionInterface'
 import Account from '../Account'
+import Pipe from '../Pipe'
 
 let Strophe = StropheLib.Strophe;
 let $iq = StropheLib.$iq;
@@ -69,16 +70,41 @@ abstract class AbstractConnection {
          id: message.getId()
       });
 
-      if (message.getHtmlMessage()) {
+      let htmlMessage;
+
+      //@TODO html and plaintext is the same -> dry
+      if (message.isEncrypted() && message.getEncryptedHtmlMessage()) {
+         htmlMessage = message.getEncryptedHtmlMessage();
+      } else if (message.getHtmlMessage()) {
+         if (!message.isEncrypted()) {
+            htmlMessage = message.getHtmlMessage();
+         } else {
+            Log.warn('This Html message should be encrypted');
+         }
+      }
+
+      if (htmlMessage) {
          xmlMsg.c('html', {
             xmlns: Strophe.NS.XHTML_IM
          }).c('body', {
             xmlns: Strophe.NS.XHTML
-         }).h(message.getHtmlMessage()).up();
+         }).h(htmlMessage).up();
       }
 
-      if (message.getPlaintextMessage()) {
-         xmlMsg.c('body').t(message.getPlaintextMessage()).up();
+      let plaintextMessage;
+
+      if (message.isEncrypted() && message.getEncryptedPlaintextMessage()) {
+         plaintextMessage = message.getEncryptedPlaintextMessage();
+      } else if (message.getPlaintextMessage()) {
+         if (!message.isEncrypted()) {
+            plaintextMessage = message.getPlaintextMessage();
+         } else {
+            Log.warn('This plaintext message should be encrypted');
+         }
+      }
+
+      if (plaintextMessage) {
+         xmlMsg.c('body').t(plaintextMessage).up();
       }
 
       // @TODO call pre send hook
@@ -185,7 +211,7 @@ abstract class AbstractConnection {
    }
 
    public close() {
-      
+
    }
 
    private addContactToRoster(jid:JID, alias:string) {

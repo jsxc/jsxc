@@ -1,6 +1,6 @@
 import Account from './Account'
 import Message from './Message'
-import {PluginInterface} from './PluginInterface'
+import {AbstractPlugin, IPlugin} from './plugin/AbstractPlugin'
 import Storage from './Storage';
 import * as UI from './ui/web'
 import JID from './JID'
@@ -9,6 +9,8 @@ import ChatWindowList from './ui/ChatWindowList'
 import RoleAllocator from './RoleAllocator'
 import SortedPersistentMap from './SortedPersistentMap'
 import {NoticeManager} from './NoticeManager'
+import PluginRepository from './plugin/PluginRepository'
+import Log from './util/Log'
 
 export default class Client {
    private static storage;
@@ -38,12 +40,16 @@ export default class Client {
       });
    }
 
-   public static addConnectionPlugin(plugin:PluginInterface) {
-
+   public static getVersion():string {
+      return '4.0.0';
    }
 
-   public static addPreSendMessageHook(hook:(Message, Builder)=>void, position?:number) {
-
+   public static addPlugin(Plugin:IPlugin) {
+      try {
+         PluginRepository.add(Plugin);
+      } catch(err) {
+         Log.warn('Error while adding Plugin: ' + err);
+      }
    }
 
    public static hasFocus() {

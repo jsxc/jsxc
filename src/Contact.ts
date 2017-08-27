@@ -9,6 +9,7 @@ import PersistentMap from './PersistentMap'
 import IdentifiableInterface from './IdentifiableInterface'
 import Log from './util/Log'
 import {Presence} from './connection/AbstractConnection'
+import {EncryptionState} from './plugin/AbstractPlugin'
 
 export default class Contact implements IdentifiableInterface {
    private storage: Storage;
@@ -201,6 +202,14 @@ console.log('highest presence', presence);
 
    public isEncrypted() {
 
+   }
+
+   public setEncryptionState(state:EncryptionState) {
+      this.data.set('encryptionState', state);
+   }
+
+   public getEncryptionState():EncryptionState {
+      return this.data.get('encryptionState');
    }
 
    public getStatus():string {

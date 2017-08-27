@@ -14,7 +14,8 @@
     "include": [
         "./src/**/*.ts",
         "./template/*.hbs",
-        "./*.d.ts"
+        "./*.d.ts",
+        "./test/**/*.ts"
     ],
     "exclude": [
        "node_modules",

@@ -3,9 +3,12 @@ import * as UI from './ui/web'
 import Client from './Client'
 import 'magnific-popup'
 import * as StropheLib from 'strophe.js'
+import OTRPlugin from './plugins/otr/Plugin'
 
 // @REVIEW
 $.extend(window, StropheLib)
+
+Client.addPlugin(OTRPlugin);
 
 Client.init();
 
