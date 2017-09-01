@@ -556,6 +556,16 @@ jsxc.xmpp = {
       if ($(iq).find('query').length === 0) {
          jsxc.debug('Use cached roster');
 
+         var buddylist = jsxc.storage.getUserItem('buddylist') || [];
+
+         $.each(buddylist, function(index, buddy) {
+            jsxc.storage.removeUserItem('res', buddy);
+
+            jsxc.storage.updateUserItem('buddy', buddy, 'status', 0);
+            jsxc.storage.updateUserItem('buddy', buddy, 'res', []);
+            jsxc.storage.updateUserItem('buddy', buddy, 'rnd', Math.random());
+         });
+
          jsxc.restoreRoster();
          return;
       }
