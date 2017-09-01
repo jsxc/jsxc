@@ -166,7 +166,8 @@ export default class Message implements Identifiable, MessageInterface {
       this.payload.received = true;
       this.save();
 
-      this.getDOM().addClass('jsxc_received');
+      //@TODO use PersistentMap für payload and use hooks to update this in all tabs
+      this.getDOM().addClass('jsxc-received');
    }
 
    public isReceived():boolean {

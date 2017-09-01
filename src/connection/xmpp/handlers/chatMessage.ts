@@ -22,22 +22,22 @@ export default function onChatMessage(stanza: Element): boolean {
    let to = new JID(messageElement.attr('to'));
    let account = Client.getAccout(to); //@TODO test if we got an account
 
-   let forwarded = false;
-   let carbonCopy = false;
+   let isForwarded = false;
+   let isCarbonCopy = false;
    let carbonStanza;
 
    if (forwardedStanza.length > 0) {
       messageElement = forwardedStanza.find('> message');
-      forwarded = true;
+      isForwarded = true;
       carbonStanza = $(stanza).find('> ' + NS.getFilter('CARBONS'));
 
       if (carbonStanza.length === 0) {
-         carbonCopy = false;
+         isCarbonCopy = false;
       } else if (from.bare !== to.bare) {
          // ignore this carbon copy
          return PRESERVE_HANDLER;
       } else {
-         carbonCopy = true;
+         isCarbonCopy = true;
       }
 
       Log.debug('Incoming forwarded message', messageElement);
@@ -48,7 +48,7 @@ export default function onChatMessage(stanza: Element): boolean {
    let plaintextBody = Utils.removeHTML(messageElement.find('> body').text());
    let htmlBody = messageElement.find('html body[xmlns="' + Strophe.NS.XHTML + '"]');
 
-   if (!plaintextBody || (plaintextBody.match(/\?OTR/i) && forwarded)) {
+   if (!plaintextBody || (plaintextBody.match(/\?OTR/i) && isForwarded)) {
       return PRESERVE_HANDLER;
    }
 
@@ -63,7 +63,7 @@ export default function onChatMessage(stanza: Element): boolean {
    let stamp = (delayElement.length > 0) ? new Date(delayElement.attr('stamp')) : new Date();
    let peer:JID = from; //@REVIEW do we need peer?
 
-   if (carbonCopy) {
+   if (isCarbonCopy) {
       let direction = (carbonStanza.prop('tagName') === 'sent') ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
       peer = new JID(direction === Message.DIRECTION.OUT ? messageTo : messageFrom);
 
@@ -72,7 +72,7 @@ export default function onChatMessage(stanza: Element): boolean {
          direction: direction,
          plaintextMessage: plaintextBody,
          htmlMessage: htmlBody.html(),
-         forwarded: forwarded,
+         forwarded: isForwarded,
          stamp: stamp.getTime()
       });
       message.save();
@@ -81,7 +81,7 @@ export default function onChatMessage(stanza: Element): boolean {
 
       return PRESERVE_HANDLER;
 
-   } else if (forwarded) {
+   } else if (isForwarded) {
       // Someone forwarded a message to us
 //@REVIEW
       plaintextBody = from + ' ' + Translation.t('to') + ' ' + $(stanza).attr('to') + '"' + plaintextBody + '"';
@@ -121,7 +121,7 @@ export default function onChatMessage(stanza: Element): boolean {
       direction: Message.DIRECTION.IN,
       plaintextMessage: plaintextBody,
       htmlMessage: htmlBody.html(),
-      forwarded: forwarded,
+      forwarded: isForwarded,
       stamp: stamp.getTime(),
       // attachment:
    });
@@ -132,22 +132,9 @@ export default function onChatMessage(stanza: Element): boolean {
       //@REVIEW why is this required at this position
       message.save();
 
-      //@REVIEW pipes? hooks?
-      Notification.notify({
-         title: Translation.t('New_message_from'),
-         message: message.getProcessedBody(),
-         soundFile: SOUNDS.MSG,
-         source: contact
-      });
-
       let chatWindow = account.openChatWindow(contact);
       chatWindow.receiveIncomingMessage(message);
    });
-
-   // create related otr object
-   // if (jsxc.master && !jsxc.otr.objects[bid]) {
-   //    jsxc.otr.create(bid);
-   // }
 
    // if (!forwarded && mid !== null && receiptsRequestElement.length && data !== null && (data.sub === 'both' || data.sub === 'from') && messageType === 'chat') {
    //    // Send received according to XEP-0184

@@ -32,6 +32,8 @@ abstract class AbstractConnection {
    protected abstract sendIQ(stanzaElement:Element):Promise<{}>;
    protected abstract sendIQ(stanzaElement:Strophe.Builder):Promise<{}>;
 
+   public abstract registerHandler(handler:(stanza:string)=>boolean, ns?:string, name?:string, type?:string, id?:string, from?:string);
+
    protected jingleHandler;
    public abstract getJingleHandler();
 
@@ -58,8 +60,6 @@ abstract class AbstractConnection {
    }
 
    public sendMessage(message:Message) {
-      // @TODO pipes
-
       if (message.getDirection() !== Message.DIRECTION.OUT) {
          return;
       }
@@ -107,9 +107,10 @@ abstract class AbstractConnection {
          xmlMsg.c('body').t(plaintextMessage).up();
       }
 
-      // @TODO call pre send hook
-
-      this.send(xmlMsg);
+      let pipe = Pipe.get('preSendMessageStanza');
+      pipe.run(message, xmlMsg).then(([message, xmlMsg]) => {
+         this.send(xmlMsg);
+      });
    }
 
    public sendPresence(presence?:Presence) {
@@ -125,7 +126,7 @@ abstract class AbstractConnection {
          presenceStanza.c('c', this.connection.caps.generateCapsAttrs()).up();
       }
 
-      if (presence !== Presence.online) {
+      if (typeof presence !== 'undefined' && presence !== Presence.online) {
          presenceStanza.c('show').t(Presence[presence]).up();
       }
 

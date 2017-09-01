@@ -42,6 +42,10 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       });
    }
 
+   public registerHandler(handler:(stanza:string)=>boolean, ns?:string, name?:string, type?:string, id?:string, from?:string) {
+      this.connection.addHandler.apply(this.connection, arguments);
+   }
+
    public getJingleHandler() { console.log('getJingleHanderl')
       if (!this.jingleHandler) {
          this.jingleHandler = new XMPPJingleHandler(this.account, this);

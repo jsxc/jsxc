@@ -39,6 +39,10 @@ export default class StorageConnection extends AbstractConnection implements ICo
       this.account.getStorage().registerHook('stanzaJingle', this.storageJingleHook);
    }
 
+   public registerHandler(handler:(stanza:string)=>boolean, ns?:string, name?:string, type?:string, id?:string, from?:string) {
+
+   }
+
    public getJingleHandler() {
       if (!this.jingleHandler) {
          this.jingleHandler = new JingleHandler(this.account, this);

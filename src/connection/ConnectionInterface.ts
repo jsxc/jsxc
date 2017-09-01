@@ -37,4 +37,6 @@ export interface IConnection {
 
    sendIQ(stanzaElement:Element):Promise<{}>;
    sendIQ(stanzaElement:Strophe.Builder):Promise<{}>;
+
+   registerHandler(handler:(stanza:string)=>boolean, ns?:string, name?:string, type?:string, id?:string, from?:string);
 }

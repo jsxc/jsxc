@@ -4,6 +4,7 @@ import Storage from '../Storage'
 import Contact from '../Contact'
 import Message from '../Message'
 import Pipe from '../Pipe'
+import JID from '../JID'
 import {IConnection} from '../connection/ConnectionInterface'
 
 export default class PluginAPI {
@@ -23,6 +24,10 @@ export default class PluginAPI {
 
    public getConnection():IConnection {
       return this.account.getConnection();
+   }
+
+   public getContact(jid:JID):Contact {
+      return this.account.getContact(jid);
    }
 
    public getVersion() {
