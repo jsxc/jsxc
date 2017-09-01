@@ -7,10 +7,13 @@ module.exports = function(grunt) {
    });
    dep_files.push('<%= target %>/lib/translation.js');
 
+   var app = grunt.file.readJSON('package.json');
+
    // Project configuration.
    grunt.initConfig({
       github: grunt.file.readJSON('.github.json'),
-      app: grunt.file.readJSON('package.json'),
+      app: app,
+      version: grunt.option('ver') || app.version,
       meta: {
          banner: grunt.file.read('banner.js')
       },
@@ -65,7 +68,7 @@ module.exports = function(grunt) {
             overwrite: true,
             replacements: [{
                from: '< $ app.version $ >',
-               to: "<%= app.version %>"
+               to: "<%= version %>"
             }]
          },
          libraries: {
@@ -134,7 +137,7 @@ module.exports = function(grunt) {
          dep: {
             options: {
                banner: '/*!\n' +
-                  ' * <%= app.name %> v<%= app.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
+                  ' * <%= app.name %> v<%= version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
                   ' * \n' +
                   ' * This file concatenates all dependencies of <%= app.name %>.\n' +
                   ' * \n' +
@@ -196,11 +199,11 @@ module.exports = function(grunt) {
                src: ['bower.json']
             },
             options: {
-               searchString: "<%= app.version %>",
+               searchString: "<%= version %>",
                logFormat: 'console',
                onComplete: function(m) {
                   if (m.numMatches === 0) {
-                     grunt.fail.fatal('No entry in bower.json for current version found.');
+                     grunt.fail.warn('No entry in bower.json for current version found.');
                   }
                }
             }
@@ -220,7 +223,7 @@ module.exports = function(grunt) {
                src: ['CHANGELOG.md']
             },
             options: {
-               searchString: "<%= app.version %>",
+               searchString: "<%= version %>",
                logFormat: 'console',
                onComplete: function(m) {
                   if (m.numMatches === 0) {
@@ -233,7 +236,7 @@ module.exports = function(grunt) {
       compress: {
          main: {
             options: {
-               archive: "archives/jsxc-<%= app.version %>.zip"
+               archive: "archives/jsxc-<%= version %>.zip"
             },
             files: [{
                src: ['**'],
@@ -362,7 +365,7 @@ module.exports = function(grunt) {
             }
          },
          release: {
-            src: ['archives/jsxc-archives/jsxc-<%= app.version %>.zip', 'archives/jsxc-archives/jsxc-<%= app.version %>.zip.sig']
+            src: ['archives/jsxc-archives/jsxc-<%= version %>.zip', 'archives/jsxc-archives/jsxc-<%= version %>.zip.sig']
          },
          prerelease: {
             options: {
@@ -370,7 +373,7 @@ module.exports = function(grunt) {
                   prerelease: true
                }
             },
-            src: ['archives/jsxc-archives/jsxc-<%= app.version %>.zip', 'archives/jsxc-archives/jsxc-<%= app.version %>.zip.sig']
+            src: ['archives/jsxc-archives/jsxc-<%= version %>.zip', 'archives/jsxc-archives/jsxc-<%= version %>.zip.sig']
          }
       }
    });
