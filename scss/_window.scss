@@ -319,6 +319,7 @@
             line-height: 42px;
             opacity: 0;
             transition: opacity 0.5s, top 0.5s;
+            background-image: linear-gradient(#c1c1c1, transparent);
 
             &.jsxc_show {
                 top: 0;
@@ -331,10 +332,6 @@
         }
 
         &.jsxc_mam-enable {
-            .jsxc_textarea {
-                padding-top: 42px;
-            }
-
             .jsxc_mam-load-more {
                 display: block;
             }
