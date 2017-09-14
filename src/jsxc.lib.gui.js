@@ -397,6 +397,7 @@ jsxc.gui = {
             } else {
                $(document).on('authfail.jsxc', onAuthFail);
                $(document).on('connfail.jsxc', onAuthFail);
+               $(document).on('connected.jsxc', removeHandler);
 
                jsxc.xmpp.login();
             }
@@ -407,12 +408,20 @@ jsxc.gui = {
          alert.show();
          jsxc.gui.dialog.resize();
 
+         removeHandler();
+
          $('#jsxc_dialog').find('button').trigger('btnfinished.jsxc');
 
          $('#jsxc_dialog').find('input').one('keypress', function() {
             alert.hide();
             jsxc.gui.dialog.resize();
          });
+      }
+
+      function removeHandler() {
+         $(document).off('authfail.jsxc', null, onAuthFail);
+         $(document).off('connfail.jsxc', null, onAuthFail);
+         $(document).off('connected.jsxc', null, removeHandler);
       }
    },
 
