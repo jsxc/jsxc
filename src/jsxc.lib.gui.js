@@ -396,6 +396,7 @@ jsxc.gui = {
                onAuthFail();
             } else {
                $(document).on('authfail.jsxc', onAuthFail);
+               $(document).on('connfail.jsxc', onAuthFail);
 
                jsxc.xmpp.login();
             }
