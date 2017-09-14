@@ -308,6 +308,6 @@ jsxc.options = {
     */
    mam: {
       enable: false,
-      max: null
+      max: 30
    }
 };
