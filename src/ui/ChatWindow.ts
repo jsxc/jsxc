@@ -543,7 +543,6 @@ export default class ChatWindow {
    }
 
    private initEmoticonMenu() {
-      let inputElement = this.element.find('.jsxc-textinput');
       let emoticonListElement = this.element.find('.jsxc-menu-emoticons ul');
       let emoticonList = Emoticons.getDefaultEmoticonList();
 
@@ -552,8 +551,21 @@ export default class ChatWindow {
 
          li.append(Emoticons.toImage(emoticon));
          li.find('div').attr('title', emoticon);
-         li.click(function() {
-           inputElement.val(inputElement.val() + emoticon);
+         li.click(() => {
+           let inputElement = this.element.find('.jsxc-message-input');
+           let inputValue = inputElement.val() || '';
+           let selectionStart = inputElement[0].selectionStart;
+           let selectionEnd = inputElement[0].selectionEnd;
+           let inputStart = inputValue.slice(0, selectionStart);
+           let inputEnd = inputValue.slice(selectionEnd);
+
+           let newValue = inputStart;
+           newValue += (inputStart.length && inputStart.slice(-1) !== ' ')? ' ' : '';
+           newValue += emoticon;
+           newValue += (inputEnd.length && inputEnd.slice(0, 1) !== ' ')? ' ' : '';
+           newValue += inputEnd;
+
+           inputElement.val(newValue);
            inputElement.focus();
          });
 
