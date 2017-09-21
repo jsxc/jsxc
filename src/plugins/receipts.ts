@@ -6,7 +6,7 @@ import * as CONST from '../CONST'
 import Message from '../Message'
 import {AbstractPlugin} from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
-import Pipe from '../Pipe'
+import Pipe from '../util/Pipe'
 import * as Namespace from '../connection/xmpp/namespace'
 
 const MIN_VERSION = '4.0.0';

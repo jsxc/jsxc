@@ -1,6 +1,6 @@
-import Identifiable from './IdentifiableInterface'
-import Storage from './Storage'
-import Log from './util/Log'
+import Identifiable from '../IdentifiableInterface'
+import Storage from '../Storage'
+import Log from '../util/Log'
 
 export default class SortedPersistentMap {
 

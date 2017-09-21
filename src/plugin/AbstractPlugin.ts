@@ -3,7 +3,7 @@ import Client from '../Client'
 import Storage from '../Storage'
 import Contact from '../Contact'
 import Message from '../Message'
-import Pipe from '../Pipe'
+import Pipe from '../util/Pipe'
 import PluginAPI from './PluginAPI'
 
 export enum PluginType {

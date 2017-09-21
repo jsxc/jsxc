@@ -9,7 +9,7 @@ import Client from '../../../Client'
 import Contact from '../../../Contact'
 import Notification from '../../../Notification'
 import {SOUNDS} from '../../../CONST'
-import Pipe from '../../../Pipe'
+import Pipe from '../../../util/Pipe'
 
 // body.replace(/^\/me /, '<i title="/me">' + Utils.removeHTML(this.sender.getName()) + '</i> ');
 const PRESERVE_HANDLER = true;

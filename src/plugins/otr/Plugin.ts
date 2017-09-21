@@ -10,7 +10,7 @@ import {DIRECTION} from '../../MessageInterface'
 import Translation from '../../util/Translation'
 import Session from './Session'
 import Options from '../../Options'
-import DSA = require('otr/lib/dsa')
+import DSA from 'otr/lib/dsa'
 
 interface DSA {
    parsePrivate
@@ -40,6 +40,7 @@ export default class OTRPlugin extends EncryptionPlugin {
          this.key = key;
       });
 
+      //@TODO on first message received or send a DSA key is generated, this should be avoided
       pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor);
       pluginAPI.addPreSendMessageProcessor(this.preSendMessageProcessor);
    }
@@ -92,7 +93,7 @@ export default class OTRPlugin extends EncryptionPlugin {
       }
 
       return this.getDSAKey().then((key) => {
-         this.sessions[bareJid] = new Session(contact, this.key, this.pluginAPI.getStorage(), this.pluginAPI.getConnection());
+         this.sessions[bareJid] = new Session(contact, key, this.pluginAPI.getStorage(), this.pluginAPI.getConnection());
 
          //@TODO save session?
 
@@ -126,6 +127,8 @@ export default class OTRPlugin extends EncryptionPlugin {
          return this.generateDSAKey().then((key:DSA) => {
             storage.setItem('key', key.packPrivate());
 
+            this.key = key;
+
             return key;
          });
       } else {
@@ -141,7 +144,7 @@ export default class OTRPlugin extends EncryptionPlugin {
       let worker = null;
 
       if (typeof Worker === 'undefined') {
-
+        //@TODO disable OTR
       }
 
       let root = Options.get('root');
@@ -154,7 +157,7 @@ export default class OTRPlugin extends EncryptionPlugin {
             path: root + '/lib/otr/lib/dsa-webworker.js'
          }, (key) => {
             Log.debug('DSA key generated');
-            console.log(key)
+
             resolve(key);
          });
       });

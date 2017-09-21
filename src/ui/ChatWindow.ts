@@ -11,13 +11,13 @@ import DateTime from './util/DateTime'
 import showVerificationDialog from './dialogs/verification'
 import showFingerprintsDialog from './dialogs/fingerprints'
 import Emoticons from '../Emoticons'
-import SortedPersistentMap from '../SortedPersistentMap'
-import PersistentMap from '../PersistentMap'
+import SortedPersistentMap from '../util/SortedPersistentMap'
+import PersistentMap from '../util/PersistentMap'
 import Avatar from './Avatar'
 import 'simplebar'
 import {startCall} from './actions/call'
 import {Presence} from '../connection/AbstractConnection'
-import Pipe from '../Pipe'
+import Pipe from '../util/Pipe'
 import {EncryptionState} from '../plugin/AbstractPlugin'
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
@@ -488,6 +488,8 @@ export default class ChatWindow {
    }
 
    private updateEncryptionState = (encryptionState) => {
+      Log.debug('update window encryption state');
+
       let transferElement = this.getDom().find('.jsxc-transfer');
       transferElement.removeClass('jsxc-fin jsxc-enc jsxc-trust');
 

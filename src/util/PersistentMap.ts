@@ -1,5 +1,5 @@
-import Identifiable from './IdentifiableInterface'
-import Storage from './Storage'
+import Identifiable from '../IdentifiableInterface'
+import Storage from '../Storage'
 
 export default class PersistentMap {
 

@@ -7,7 +7,7 @@ import * as StropheLib from 'strophe.js'
 import JingleHandler from './JingleHandler'
 import {IConnection} from './ConnectionInterface'
 import Account from '../Account'
-import Pipe from '../Pipe'
+import Pipe from '../util/Pipe'
 
 let Strophe = StropheLib.Strophe;
 let $iq = StropheLib.$iq;

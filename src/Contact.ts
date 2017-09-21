@@ -5,7 +5,7 @@ import Notification from './Notification'
 import Translation from './util/Translation'
 import Account from './Account'
 import ContactData from './ContactData'
-import PersistentMap from './PersistentMap'
+import PersistentMap from './util/PersistentMap'
 import IdentifiableInterface from './IdentifiableInterface'
 import Log from './util/Log'
 import {Presence} from './connection/AbstractConnection'
@@ -216,7 +216,7 @@ console.log('highest presence', presence);
       return this.data.get('status');
    }
 
-   public setStatus(status:string) { console.trace(this.getId() + ', setStatus: ' + status)
+   public setStatus(status:string) {
       return this.data.set('status', status);
    }
 

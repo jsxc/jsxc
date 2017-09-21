@@ -3,11 +3,12 @@ import Contact from '../../Contact'
 import Message from '../../Message'
 import {DIRECTION} from '../../MessageInterface'
 import Translation from '../../util/Translation'
-import OTR = require('otr/lib/otr')
-import DSA = require('otr/lib/dsa')
+import OTR from 'otr/lib/otr'
+import DSA from 'otr/lib/dsa'
 import {EncryptionState} from '../../plugin/AbstractPlugin'
 import Storage from '../../Storage'
 import {IConnection} from '../../connection/ConnectionInterface'
+import PersistentMap from '../../util/PersistentMap'
 
 //@REVIEW
 interface OTR {
@@ -32,10 +33,12 @@ interface DSA {
 
 }
 
-//te
-
 export default class Session {
    private session:OTR;
+
+   private data:PersistentMap;
+
+   private ourPayloadId;
 
    constructor(private peer:Contact, key:DSA, private storage:Storage, private connection:IConnection) {
 
@@ -77,9 +80,14 @@ export default class Session {
          }
       });
 
-      //@TODO add hook to update session
+      this.data = new PersistentMap(this.storage, 'otr', 'session', this.peer.getId());
 
-      this.restoreSession();
+      this.data.registerHook('payload', (newPayload) => {
+        if (this.ourPayloadId !== newPayload.id) {
+          this.restoreSession(newPayload)
+        }
+      });
+      this.restoreSession(this.data.get('payload'));
    }
 
    public goEncrypted() {
@@ -106,7 +114,7 @@ export default class Session {
       return Promise.resolve(message);
    }
 
-   private encryptMessage(message:Message) { console.log('encrypt message')
+   private encryptMessage(message:Message) {
       let self = this;
       let messageId = message.getId();
 
@@ -114,7 +122,7 @@ export default class Session {
          // we need this one-time handler for the promise
          //@REVIEW maybe it's easier to add promises to the OTR lib
          this.session.on('io', function handler(msg, message) {
-            if (message && message.getId() === messageId) { console.log('mid', messageId, msg)
+            if (message && message.getId() === messageId) {
                self.session.off('ui', handler);
 
                self.afterEncryptMessage(msg, message, resolve);
@@ -163,8 +171,6 @@ export default class Session {
    }
 
    private inform(messageString:string) {
-      console.log('OTR Session: ' + messageString)
-
       let message = new Message({
          peer: this.peer.getJid(),
          direction: Message.DIRECTION.SYS,
@@ -177,7 +183,6 @@ export default class Session {
    }
 
    private statusHandler = function(status) {
-      console.log('context', this);
       switch (status) {
          case OTR.CONST.STATUS_SEND_QUERY:
             this.inform('trying_to_start_private_conversation');
@@ -290,9 +295,8 @@ export default class Session {
       Log.error('[OTR] ' + err);
    }
 
-   private restoreSession() {
-      var payload = this.storage.getItem('session', this.peer.getId());
-
+   //@REVIEW optimization possible? Update only altered values. Maybe split this in two payloads (permanent/ephemeral)
+   private restoreSession = (payload) => {
       if (this.session !== null || payload !== null) {
          var key;
          for (key in payload) {
@@ -348,6 +352,8 @@ export default class Session {
          payload.otr_version = JSON.stringify(this.session.ake.otr_version);
       }
 
-      this.storage.setItem('session', this.peer.getId(), payload);
+      this.ourPayloadId = payload.id = Math.random();
+
+      this.data.set('payload', payload);
    }
 }

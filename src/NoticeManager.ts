@@ -1,5 +1,5 @@
 import Storage from './Storage';
-import SortedPersistentMap from './SortedPersistentMap'
+import SortedPersistentMap from './util/SortedPersistentMap'
 import Roster from './ui/Roster'
 import {NoticeData, Notice} from './Notice'
 
