@@ -37,8 +37,16 @@ abstract class AbstractConnection {
    protected jingleHandler;
    public abstract getJingleHandler();
 
-   constructor(protected account:Account) {
+   protected node = 'https://jsxc.org';
 
+   constructor(protected account:Account) {
+      NS.register('CAPS', 'http://jabber.org/protocol/caps');
+
+      let discoInfo = this.account.getDiscoInfo();
+
+      discoInfo.addIdentity('client', 'web', 'JSXC');
+      discoInfo.addFeature(NS.get('DISCO_INFO'));
+      discoInfo.addFeature(NS.get('CAPS'));
    }
 
    public getJID():JID {
@@ -114,17 +122,9 @@ abstract class AbstractConnection {
    }
 
    public sendPresence(presence?:Presence) {
-      if (this.connection.disco) {
-         this.connection.disco.addIdentity('client', 'web', 'JSXC');
-         this.connection.disco.addFeature(NS.get('DISCO_INFO'));
-         this.connection.disco.addFeature(NS.get('RECEIPTS'));
-      }
-
       var presenceStanza = $pres();
 
-      if (this.connection.caps) {
-         presenceStanza.c('c', this.connection.caps.generateCapsAttrs()).up();
-      }
+      presenceStanza.c('c', this.generateCapsAttributes()).up();
 
       if (typeof presence !== 'undefined' && presence !== Presence.online) {
          presenceStanza.c('show').t(Presence[presence]).up();
@@ -211,12 +211,48 @@ abstract class AbstractConnection {
       this.send(presenceStanza);
    }
 
+   public getDiscoInfo(jid:JID, node?:string):Promise<any> {
+      let attrs = {
+        xmlns: NS.get('DISCO_INFO'),
+        node: null
+      };
+
+      if (typeof node === 'string' && node.length > 0) {
+        attrs.node = node;
+      }
+
+      let iq = $iq({
+        to: jid.full,
+        type: 'get'
+      }).c('query', attrs);
+console.log('send disco info request')
+      return this.sendIQ(iq);
+   }
+
+   public getDiscoItems(jid:JID, node?:string):Promise<any> {
+     let attrs = {
+       xmlns: NS.get('DISCO_ITEMS'),
+       node: null
+     };
+
+     if (typeof node === 'string' && node.length > 0) {
+       attrs.node = node;
+     }
+
+     let iq = $iq({
+       to: jid.full,
+       type: 'get'
+     }).c('query', attrs);
+
+     return this.sendIQ(iq);
+   }
+
    public close() {
 
    }
 
    private addContactToRoster(jid:JID, alias:string) {
-      var iq = $iq({
+      let iq = $iq({
          type: 'set'
       }).c('query', {
          xmlns: 'jabber:iq:roster'
@@ -283,6 +319,15 @@ abstract class AbstractConnection {
       });
 
       return data;
+   }
+
+   private generateCapsAttributes() { console.log(this.account.getDiscoInfo())
+     return {
+       'xmlns': NS.get('CAPS'),
+       'hash': 'sha-1',
+       'node': this.node,
+       'ver': this.account.getDiscoInfo().getCapsVersion()
+     }
    }
 }
 

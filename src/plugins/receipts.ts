@@ -25,6 +25,7 @@ export default class ReceiptPlugin extends AbstractPlugin {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       Namespace.register('RECEIPTS', 'urn:xmpp:receipts');
+      pluginAPI.addFeature(Namespace.get('RECEIPTS'));
 
       let preSendMessageStanzaPipe = Pipe.get('preSendMessageStanza');
       preSendMessageStanzaPipe.addProcessor(this.preSendMessageStanzaProcessor);

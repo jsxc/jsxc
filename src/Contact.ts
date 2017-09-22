@@ -10,6 +10,7 @@ import IdentifiableInterface from './IdentifiableInterface'
 import Log from './util/Log'
 import {Presence} from './connection/AbstractConnection'
 import {EncryptionState} from './plugin/AbstractPlugin'
+import Client from './Client'
 
 export default class Contact implements IdentifiableInterface {
    private storage: Storage;
@@ -132,23 +133,24 @@ console.log('highest presence', presence);
       // message.bid = this.getId();
    }
 
-   public getCapableResources(features) {
-      let resources = Object.keys(this.data.get('resources'));
+   public getCapableResources(features:string[]):Promise<Array<string>>
+   public getCapableResources(features:string):Promise<Array<string>>
+   public getCapableResources(features):Promise<Array<string>> {
+      return this.account.getDiscoInfoRepository().getCapableResources(this, features);
+   }
 
-      if (!features) {
-         return resources;
-      } else if (typeof features === 'string') {
-         features = [features];
-      }
+   public hasFeatureByRessource(resource:string, features:string[]):Promise<{}>
+   public hasFeatureByRessource(resource:string, feature:string):Promise<{}>
+   public hasFeatureByRessource(resource, feature) {
+     let jid = new JID(this.jid.bare + '/' + resource);
 
-      let capableResources = [];
-      $.each(resources, function(i, resource) {
-         if (self.conn.caps.hasFeatureByJid(this.getJID().bare + '/' + resource, features)) {
-            capableResources.push(resource);
-         }
-      });
+     return this.account.getDiscoInfoRepository().hasFeature(jid, feature);
+   }
 
-      return capableResources;
+   public getCapabilitiesByRessource(resource:string):Promise<any> {
+      let jid = new JID(this.jid.bare + '/' + resource);
+
+      return this.account.getDiscoInfoRepository().getCapabilities(jid);
    }
 
    public getId():string {
@@ -157,6 +159,10 @@ console.log('highest presence', presence);
 
    public getJid():JID {
       return this.jid;
+   }
+
+   public getResources():Array<string> {
+     return Object.keys(this.data.get('resources'));
    }
 
    public getFingerprint() {
@@ -189,11 +195,6 @@ console.log('highest presence', presence);
 
    public getSubscription() {
       return this.data.get('subscription');
-   }
-
-   public getCapabilitiesByRessource():Promise<{}> {
-      // @TODO
-      return Promise.resolve({});
    }
 
    public getVcard():Promise<{}> {

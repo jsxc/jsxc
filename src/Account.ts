@@ -17,6 +17,8 @@ import Client from './Client'
 import {NoticeManager} from './NoticeManager'
 import * as StropheLib from 'strophe.js'
 import PluginRepository from './plugin/PluginRepository'
+import DiscoInfoRepository from './DiscoInfoRepository'
+import DiscoInfoChangable from './DiscoInfoChangable'
 
 let Strophe = StropheLib.Strophe;
 
@@ -52,6 +54,10 @@ export default class Account {
 
    private pluginRepository:PluginRepository;
 
+   private discoInfoRepository:DiscoInfoRepository;
+
+   private ownDiscoInfo:DiscoInfoChangable;
+
    constructor(boshUrl: string, jid: string, sid: string, rid:string);
    constructor(boshUrl: string, jid: string, password: string);
    constructor(uid:string);
@@ -62,6 +68,9 @@ export default class Account {
          this.uid = (new JID(arguments[1])).bare;
          this.connectionArguments = arguments;
       }
+
+      this.discoInfoRepository = new DiscoInfoRepository(this);
+      this.ownDiscoInfo = new DiscoInfoChangable(this.uid);
 
       this.connection = new StorageConnection(this);
 
@@ -99,6 +108,14 @@ export default class Account {
 
    public getPluginRepository():PluginRepository {
       return this.pluginRepository;
+   }
+
+   public getDiscoInfoRepository():DiscoInfoRepository {
+     return this.discoInfoRepository;
+   }
+
+   public getDiscoInfo():DiscoInfoChangable {
+     return this.ownDiscoInfo;
    }
 
    public getContact(jid:JID):Contact {

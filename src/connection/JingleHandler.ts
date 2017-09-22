@@ -20,7 +20,7 @@ jxt.use(require('jxt-xmpp'));
 
 let IqStanza = jxt.getDefinition('iq', 'jabber:client');
 
-const CAPABILITIES = [
+const FEATURES = [
    'urn:xmpp:jingle:1',
    'urn:xmpp:jingle:apps:rtp:1',
    'urn:xmpp:jingle:apps:rtp:audio',
@@ -38,12 +38,6 @@ const CAPABILITIES = [
    'urn:ietf:rfc:5888'
 ];
 
-//@TODO add jingle features
-// for (let i = 0; i < CAPABILITIES.length; i++) {
-//    //@TODO this works only on xmpp connection
-//    this.connection.disco.addFeature(CAPABILITIES[i]);
-// }
-
 export default class JingleHandler {
 
    protected manager:JSM;
@@ -53,6 +47,10 @@ export default class JingleHandler {
    protected static instances = [];
 
    constructor(protected account:Account, protected connection:IConnection) {
+
+      for (let feature of FEATURES) {
+        account.getDiscoInfo().addFeature(feature);
+      }
 
       this.manager = new JSM({
          peerConnectionConstraints: this.getPeerConstraints(),

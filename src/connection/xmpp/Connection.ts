@@ -55,7 +55,7 @@ console.log('return')
    }
 
    public getCapabilitiesByJid(jid:JID):any {
-
+     Log.error('Deprecated function called: getCapabilitiesByJid');
    };
 
    public renameContact(jid:JID, name:string) {

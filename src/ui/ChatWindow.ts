@@ -363,7 +363,12 @@ export default class ChatWindow {
       this.element.find('.jsxc-video').click((ev) => {
          ev.stopPropagation();
 
-         startCall(contact, this.account);
+         this.contact.getCapableResources('jabber:iq:oob').then((resources) => {
+           console.log('capable resources', resources)
+
+           startCall(contact, this.account);
+         })
+
       })
 
       this.element.find('.jsxc-sendFile').click(function() {

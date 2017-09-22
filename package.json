@@ -67,6 +67,7 @@
     "magnific-popup": "^1.1.0",
     "moment": "^2.18.1",
     "otr": "^0.2.16",
+    "sha1": "^1.1.1",
     "simplebar": "^2.4.3",
     "strophe.js": "^1.2.14",
     "tslib": "^1.7.1",

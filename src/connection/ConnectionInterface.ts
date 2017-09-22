@@ -32,6 +32,9 @@ export interface IConnection {
 
    close();
 
+   getDiscoInfo(jid:JID, node?:string);
+   getDiscoItems(jid:JID, node?:string);
+
    send(stanzaElement:Element);
    send(stanzaElement:Strophe.Builder);
 

@@ -41,4 +41,8 @@ export default class PluginAPI {
    public addAfterReceiveMessageProcessor(processor:(contact:Contact, message:Message)=>Promise<{}>, position?:number) {
       Pipe.get('afterReceiveMessage').addProcessor(processor, position);
    }
+
+   public addFeature(feature:string) {
+     this.account.getDiscoInfo().addFeature(feature);
+   }
 }

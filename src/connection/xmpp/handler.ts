@@ -7,6 +7,9 @@ import onRosterChange from './handlers/rosterChange'
 import onChatMessage from './handlers/chatMessage'
 import onHeadlineMessage from './handlers/headlineMessage'
 import onJingle from './handlers/jingle'
+import {onDiscoInfo, onDiscoItems} from './handlers/disco'
+import onCaps from './handlers/caps'
+import * as NS from './namespace'
 
 let PRESERVE_HANDLER = true;
 let REMOVE_HANDLER = false;
@@ -30,6 +33,10 @@ export default class XMPPHandler {
       this.connection.addHandler(onPresence, null, 'presence');
       this.connection.addHandler(onJingle, 'urn:xmpp:jingle:1', 'iq', 'set', null, null);
 
+      this.connection.addHandler(onDiscoInfo, Strophe.NS.DISCO_INFO, 'iq', 'get', null, null);
+      this.connection.addHandler(onDiscoItems, Strophe.NS.DISCO_ITEMS, 'iq', 'get', null, null);
+
+      this.connection.addHandler(onCaps, NS.get('CAPS'));
       // this.connection.conn.addHandler(this.onReceived, null, 'message');
    }
 }
