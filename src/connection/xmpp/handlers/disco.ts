@@ -18,7 +18,7 @@ export class DiscoInfoHandler extends AbstractHandler {
       let iq = $iq({
          type: 'result',
          id: id,
-         from: from
+         to: from
       }).c('query', {
          xmlns: NS.get('DISCO_INFO'),
          node: (node)? node : undefined
@@ -67,7 +67,7 @@ export class DiscoItemsHandler extends AbstractHandler {
       let iq = $iq({
          type: 'result',
          id: id,
-         from: from
+         to: from
       }).c('query', {
          xmlns: NS.get('DISCO_ITEMS'),
          node: (node)? node : undefined
