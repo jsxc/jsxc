@@ -1,42 +1,45 @@
 import Log from '../../util/Log';
 import JID from '../../JID';
+import Account from '../../Account';
 import Contact from '../../Contact';
-import onPresence from './handlers/presence';
-import onRoster from './handlers/roster'
-import onRosterChange from './handlers/rosterChange'
-import onChatMessage from './handlers/chatMessage'
-import onHeadlineMessage from './handlers/headlineMessage'
-import onJingle from './handlers/jingle'
-import {onDiscoInfo, onDiscoItems} from './handlers/disco'
-import onCaps from './handlers/caps'
+import PresenceHandler from './handlers/presence';
+import RosterChangeHandler from './handlers/rosterChange'
+import ChatMessageHandler from './handlers/chatMessage'
+import HeadlineMessageHandler from './handlers/headlineMessage'
+import JingleHandler from './handlers/jingle'
+import {DiscoInfoHandler, DiscoItemsHandler} from './handlers/disco'
+import CapsHandler from './handlers/caps'
 import * as NS from './namespace'
 
-let PRESERVE_HANDLER = true;
-let REMOVE_HANDLER = false;
-let SUBSCRIPTION = {
-   REMOVE: 'remove',
-   FROM: 'from',
-   BOTH: 'both'
-};
+interface StropheConnection {
+  jid:string,
+  addHandler(Handler, namespace?:string, tagName?:string, type?:string, id?:string, from?:string)
+}
 
 export default class XMPPHandler {
    private connectionJid: JID;
 
-   constructor(private connection: Strophe.Connection) {
+   constructor(private account:Account, private connection: StropheConnection) {
       this.connectionJid = new JID(connection.jid);
    }
 
    private registerHandler() {
-      this.connection.addHandler(onRosterChange, 'jabber:iq:roster', 'iq', 'set');
-      this.connection.addHandler(onChatMessage, null, 'message', 'chat');
-      this.connection.addHandler(onHeadlineMessage, null, 'message', 'headline');
-      this.connection.addHandler(onPresence, null, 'presence');
-      this.connection.addHandler(onJingle, 'urn:xmpp:jingle:1', 'iq', 'set', null, null);
+      this.addHandler(RosterChangeHandler, 'jabber:iq:roster', 'iq', 'set');
+      this.addHandler(ChatMessageHandler, null, 'message', 'chat');
+      this.addHandler(HeadlineMessageHandler, null, 'message', 'headline');
+      this.addHandler(PresenceHandler, null, 'presence');
+      this.addHandler(JingleHandler, 'urn:xmpp:jingle:1', 'iq', 'set');
 
-      this.connection.addHandler(onDiscoInfo, Strophe.NS.DISCO_INFO, 'iq', 'get', null, null);
-      this.connection.addHandler(onDiscoItems, Strophe.NS.DISCO_ITEMS, 'iq', 'get', null, null);
+      this.addHandler(DiscoInfoHandler, Strophe.NS.DISCO_INFO, 'iq', 'get');
+      this.addHandler(DiscoItemsHandler, Strophe.NS.DISCO_ITEMS, 'iq', 'get');
 
-      this.connection.addHandler(onCaps, NS.get('CAPS'));
+      this.addHandler(CapsHandler, CapsHandler.NAMESPACE);
       // this.connection.conn.addHandler(this.onReceived, null, 'message');
+   }
+
+   private addHandler(Handler, namespace?:string, tagName?:string, type?:string, id?:string, from?:string) {
+     let handler = new Handler(this.account);
+
+     this.connection.addHandler(stanza => handler.processStanza(stanza), namespace, tagName, type, id, from);
    }
 }

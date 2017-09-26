@@ -18,7 +18,7 @@ export default class XMPPConnection extends AbstractConnection implements IConne
    constructor(account:Account, protected connection:Strophe.Connection) {
       super(account);
 
-      this.handler = new XMPPHandler(connection);
+      this.handler = new XMPPHandler(account, connection);
       this.handler.registerHandler();
 
       this.account.getStorage().registerHook('stanza', (newValue, oldValue, key) => {

@@ -3,9 +3,8 @@ import JID from '../../../JID';
 import Client from '../../../Client';
 import ContactData from '../../../ContactData'
 import Roster from '../../../ui/Roster'
+import AbstractHandler from '../AbstractHandler'
 
-let PRESERVE_HANDLER = true;
-let REMOVE_HANDLER = false;
 let SUBSCRIPTION = {
    REMOVE: 'remove',
    FROM: 'from',
@@ -18,85 +17,86 @@ let PRESENCE = {
    UNSUBSCRIBED: 'unsubscribed'
 };
 
-export default function onRosterChange(stanza: Element): boolean {
-   let fromString = $(stanza).attr('from');
-   let fromJid;
+export default class extends AbstractHandler {
+   public processStanza(stanza:Element):boolean {
+      let fromString = $(stanza).attr('from');
+      let fromJid;
 
-   if (fromString) {
-       fromJid = new JID(fromString);
-   }
-
-   //@TODO use sid to retrieve the correct account
-   let account = Client.getAccout();
-
-   if (fromJid && fromJid.bare !== account.getJID().bare) {
-      Log.info('Ignore roster change with wrong sender jid.');
-
-      return PRESERVE_HANDLER;
-   }
-
-   Log.debug('Process roster change.');
-
-   let itemElement = $(stanza).find('item');
-
-   if (itemElement.length !== 1) {
-      Log.info('Ignore roster change with more than one item element.');
-
-      return PRESERVE_HANDLER;
-   }
-
-   let jid = new JID($(itemElement).attr('jid'));
-   let name = $(itemElement).attr('name') || jid.bare;
-   let subscription = $(itemElement).attr('subscription');
-
-   let contact = account.getContact(jid);
-
-   if (!contact && subscription === SUBSCRIPTION.REMOVE) {
-      return PRESERVE_HANDLER;
-   } else if (contact) {
-      if (subscription === SUBSCRIPTION.REMOVE) {
-         account.removeContact(contact);
-      } else {
-         contact.setName(name);
-         contact.setSubscription(subscription);
-
-         //@TODO refresh roster position
+      if (fromString) {
+         fromJid = new JID(fromString);
       }
-   } else {
-      //@REVIEW DRY same code as in roster handler
-      contact = account.addContact(new ContactData({
-         jid: jid,
-         name: name,
-         subscription: subscription
-      }));
 
-      Roster.get().add(contact);
+      let account = this.account;
+
+      if (fromJid && fromJid.bare !== account.getJID().bare) {
+         Log.info('Ignore roster change with wrong sender jid.');
+
+         return this.PRESERVE_HANDLER;
+      }
+
+      Log.debug('Process roster change.');
+
+      let itemElement = $(stanza).find('item');
+
+      if (itemElement.length !== 1) {
+         Log.info('Ignore roster change with more than one item element.');
+
+         return this.PRESERVE_HANDLER;
+      }
+
+      let jid = new JID($(itemElement).attr('jid'));
+      let name = $(itemElement).attr('name') || jid.bare;
+      let subscription = $(itemElement).attr('subscription');
+
+      let contact = account.getContact(jid);
+
+      if (!contact && subscription === SUBSCRIPTION.REMOVE) {
+         return this.PRESERVE_HANDLER;
+      } else if (contact) {
+         if (subscription === SUBSCRIPTION.REMOVE) {
+            account.removeContact(contact);
+         } else {
+            contact.setName(name);
+            contact.setSubscription(subscription);
+
+            //@TODO refresh roster position
+         }
+      } else {
+         //@REVIEW DRY same code as in roster handler
+         contact = account.addContact(new ContactData({
+            jid: jid,
+            name: name,
+            subscription: subscription
+         }));
+
+         Roster.get().add(contact);
+      }
+
+
+      // Remove pending friendship request from notice list
+      if (subscription === SUBSCRIPTION.FROM || subscription === SUBSCRIPTION.BOTH) {
+         // var notices = jsxc.storage.getUserItem('notices');
+         // var noticeKey = null,
+         //    notice;
+         //
+         // for (noticeKey in notices) {
+         //    notice = notices[noticeKey];
+         //
+         //    if (notice.fnName === 'gui.showApproveDialog' && notice.fnParams[0] === jid) {
+         //       jsxc.debug('Remove notice with key ' + noticeKey);
+         //
+         //       jsxc.notice.remove(noticeKey);
+         //    }
+         // }
+      }
+
+      //@REVIEW DRY roster handler
+      let rosterVersion = $(stanza).find('query').attr('ver');
+
+      if (rosterVersion) {
+         account.getStorage().setItem('roster', 'version', rosterVersion);
+      }
+
+      return this.PRESERVE_HANDLER;
    }
-
-
-   // Remove pending friendship request from notice list
-   if (subscription === SUBSCRIPTION.FROM || subscription === SUBSCRIPTION.BOTH) {
-      // var notices = jsxc.storage.getUserItem('notices');
-      // var noticeKey = null,
-      //    notice;
-      //
-      // for (noticeKey in notices) {
-      //    notice = notices[noticeKey];
-      //
-      //    if (notice.fnName === 'gui.showApproveDialog' && notice.fnParams[0] === jid) {
-      //       jsxc.debug('Remove notice with key ' + noticeKey);
-      //
-      //       jsxc.notice.remove(noticeKey);
-      //    }
-      // }
-   }
-
-   //@REVIEW DRY roster handler
-   let rosterVersion = $(stanza).find('query').attr('ver');
-
-   if (rosterVersion) {
-      account.getStorage().setItem('roster', 'version', rosterVersion);
-   }
-
-   return PRESERVE_HANDLER;
 }

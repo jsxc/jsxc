@@ -1,7 +1,7 @@
 import Message from '../Message'
 import JID from '../JID'
 import * as NS from './xmpp/namespace'
-import onRoster from './xmpp/handlers/roster'
+import RosterHandler from './xmpp/handlers/roster'
 import Log from '../util/Log'
 import * as StropheLib from 'strophe.js'
 import JingleHandler from './JingleHandler'
@@ -40,13 +40,10 @@ abstract class AbstractConnection {
    protected node = 'https://jsxc.org';
 
    constructor(protected account:Account) {
-      NS.register('CAPS', 'http://jabber.org/protocol/caps');
 
       let discoInfo = this.account.getDiscoInfo();
 
       discoInfo.addIdentity('client', 'web', 'JSXC');
-      discoInfo.addFeature(NS.get('DISCO_INFO'));
-      discoInfo.addFeature(NS.get('CAPS'));
    }
 
    public getJID():JID {
@@ -62,8 +59,9 @@ abstract class AbstractConnection {
 
       //@TODO use account.getStorage().getItem('roster', 'version'), maybe better as parameter
 
-      return this.sendIQ(iq).then(function() {
-         return onRoster.apply(this, arguments);
+      return this.sendIQ(iq).then((stanza:Element) => {
+         let rosterHandler = new RosterHandler(this.account);
+         return rosterHandler.processStanza(stanza);
       });
    }
 

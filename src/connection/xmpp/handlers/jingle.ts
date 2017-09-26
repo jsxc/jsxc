@@ -1,14 +1,42 @@
-import Client from '../../../Client';
+import Account from '../../../Account'
+import AbstractHandler from '../AbstractHandler'
 
-export default function(stanza:Element) {
-   let account = Client.getAccout();
-   let connection = account.getConnection();
-   let storage = account.getStorage();
+const FEATURES = [
+   'urn:xmpp:jingle:1',
+   'urn:xmpp:jingle:apps:rtp:1',
+   'urn:xmpp:jingle:apps:rtp:audio',
+   'urn:xmpp:jingle:apps:rtp:video',
+   'urn:xmpp:jingle:apps:rtp:rtcb-fb:0',
+   'urn:xmpp:jingle:apps:rtp:rtp-hdrext:0',
+   'urn:xmpp:jingle:apps:rtp:ssma:0',
+   'urn:xmpp:jingle:apps:dtls:0',
+   'urn:xmpp:jingle:apps:grouping:0',
+   'urn:xmpp:jingle:apps:file-transfer:3',
+   'urn:xmpp:jingle:transports:ice-udp:1',
+   'urn:xmpp:jingle:transports.dtls-sctp:1',
+   'urn:ietf:rfc:3264',
+   'urn:ietf:rfc:5576',
+   'urn:ietf:rfc:5888'
+];
 
-   storage.setItem('stanzaJingle', stanza.outerHTML);
-   storage.removeItem('stanzaJingle');
+export default class extends AbstractHandler {
+   constructor(account:Account) {
+      super(account);
 
-   connection.getJingleHandler().onJingle(stanza);
+      for (let feature of FEATURES) {
+         account.getDiscoInfo().addFeature(feature);
+      }
+   }
 
-   return true;
+   public processStanza(stanza:Element) {
+      let connection = this.account.getConnection();
+      let storage = this.account.getStorage();
+
+      storage.setItem('stanzaJingle', stanza.outerHTML);
+      storage.removeItem('stanzaJingle');
+
+      connection.getJingleHandler().onJingle(stanza);
+
+      return this.PRESERVE_HANDLER;
+   }
 }
