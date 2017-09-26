@@ -66,29 +66,8 @@ export default class Contact implements IdentifiableInterface {
       return this.account.openChatWindow(this);
    }
 
-   public addResource(resource:string) {
-      let resources = this.data.get('resources') || [];
-
-      if (resource && resources.indexOf(resource) < 0) {
-         resources.push(resource);
-
-         this.data.set('resources', resources);
-      }
-   }
-
-   public removeResource(resource:string) {
-      let resources = this.data.get('resources') || [];
-
-      resources = $.grep(resources, function(r) {
-         return resource !== r;
-      });
-
-      this.data.set('resources', resources);
-   }
-
    public setResource = (resource:string) => {
-      //this.addResource(resource);
-console.log('setResource', this.jid.bare + '/' + resource)
+      console.log('setResource', this.jid.bare + '/' + resource)
       this.jid = new JID(this.jid.bare + '/' + resource);
 
       this.data.set('jid', this.jid.full);
@@ -151,6 +130,21 @@ console.log('highest presence', presence);
       let jid = new JID(this.jid.bare + '/' + resource);
 
       return this.account.getDiscoInfoRepository().getCapabilities(jid);
+   }
+
+   public registerCapableResourcesHook(features:string[], cb:(resources:string[])=>void);
+   public registerCapableResourcesHook(features:string, cb:(resources:string[])=>void);
+   public registerCapableResourcesHook(features, cb:(resources:string[])=>void) {
+      if (typeof features === 'string') {
+         features = [features];
+      }
+
+      this.getCapableResources(features).then(cb);
+
+      this.registerHook('resources', () => { console.log('resources changed')
+         //@REVIEW trigger only on changes
+         this.getCapableResources(features).then(cb);
+      });
    }
 
    public getId():string {

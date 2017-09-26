@@ -19,6 +19,7 @@ import {startCall} from './actions/call'
 import {Presence} from '../connection/AbstractConnection'
 import Pipe from '../util/Pipe'
 import {EncryptionState} from '../plugin/AbstractPlugin'
+import ElementHandler from './util/ElementHandler'
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -335,54 +336,75 @@ export default class ChatWindow {
    private registerHandler() {
       let self = this;
       let contact = this.contact;
+      let elementHandler = new ElementHandler(contact);
 
-      this.element.find('.jsxc-verification').click(function() {
-         showVerificationDialog(contact);
-      });
-
-      this.element.find('.jsxc-fingerprints').click(function() {
-         showFingerprintsDialog(contact);
-      });
-
-      this.element.find('.jsxc-transfer').click(function() {
-         // jsxc.otr.toggleTransfer(bid);
-      });
-
-      this.element.find('.jsxc-window-bar').click(() => {
-         this.toggle();
-      });
-
-      this.element.find('.jsxc-close').click(() => {
-         this.account.closeChatWindow(this);
-      });
-
-      this.element.find('.jsxc-clear').click(() => {
-         this.clear();
-      });
-
-      this.element.find('.jsxc-video').click((ev) => {
-         ev.stopPropagation();
-
-         this.contact.getCapableResources('jabber:iq:oob').then((resources) => {
-           console.log('capable resources', resources)
-
-           startCall(contact, this.account);
-         })
-
-      })
-
-      this.element.find('.jsxc-sendFile').click(function() {
-         $('body').click();
-
-         // jsxc.gui.window.sendFile(bid);
-      });
-
-      this.element.find('.jsxc-message-area').click(function() {
-         // check if user clicks element or selects text
-         if (typeof getSelection === 'function' && !getSelection().toString()) {
-            self.inputElement.focus();
+      elementHandler.add(
+         this.element.find('.jsxc-verification')[0],
+         function() {
+            showVerificationDialog(contact);
          }
-      });
+      );
+
+      elementHandler.add(
+         this.element.find('.jsxc-fingerprints')[0],
+         function() {
+            showFingerprintsDialog(contact);
+         }
+      );
+
+      elementHandler.add(
+         this.element.find('.jsxc-window-bar')[0],
+         () => {
+            this.toggle();
+         }
+      );
+
+      elementHandler.add(
+         this.element.find('.jsxc-close')[0],
+         () => {
+            this.account.closeChatWindow(this);
+         }
+      );
+
+      elementHandler.add(
+         this.element.find('.jsxc-clear')[0],
+         () => {
+            this.clear();
+         }
+      );
+
+      elementHandler.add(
+         this.element.find('.jsxc-video')[0],
+         (ev) => {
+            ev.stopPropagation();
+
+            startCall(contact, this.account);
+         }, [
+            'urn:xmpp:jingle:apps:rtp:video',
+            'urn:xmpp:jingle:apps:rtp:audio',
+            'urn:xmpp:jingle:transports:ice-udp:1',
+            'urn:xmpp:jingle:apps:dtls:0'
+         ]
+      );
+
+      elementHandler.add(
+         this.element.find('.jsxc-sendFile')[0],
+         function() {
+            $('body').click();
+
+            // jsxc.gui.window.sendFile(bid);
+         }
+      );
+
+      elementHandler.add(
+         this.element.find('.jsxc-message-area')[0],
+         function() {
+            // check if user clicks element or selects text
+            if (typeof getSelection === 'function' && !getSelection().toString()) {
+               self.inputElement.focus();
+            }
+         }
+      );
    }
 
    private registerInputHandler() {
