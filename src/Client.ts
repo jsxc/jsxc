@@ -76,9 +76,9 @@ export default class Client {
       return Client.noticeManager;
    }
 
-   public static getAccout(jid:JID):Account;
-   public static getAccout(uid?:string):Account;
-   public static getAccout() {
+   public static getAccount(jid:JID):Account;
+   public static getAccount(uid?:string):Account;
+   public static getAccount() {
       let uid;
 
       if (arguments[0] instanceof JID) {

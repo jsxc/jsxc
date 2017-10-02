@@ -18,7 +18,7 @@ export default abstract class JingleAbstractSession {
 
       this.peerJID = new JID(session.peerID);
       this.peerContact = this.account.getContact(this.peerJID);
-      this.peerChatWindow = this.account.openChatWindow(this.peerContact);
+      this.peerChatWindow = this.peerContact.openChatWindow();
 
       if (!this.session.initiator) {
          this.onIncoming();

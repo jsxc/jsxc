@@ -13,8 +13,10 @@
     cursor: pointer;
     user-select: none;
     background-image: none;
-    border: 1px solid transparent;
-    border-radius: 4px;
+   //  border: 1px solid transparent;
+   //  border-radius: 4px;
+    border: 0;
+    padding: 10px 16px;
     transition: background-color 0.5s;
 
     &.jsxc-btn-default {
@@ -34,6 +36,16 @@
 
         &:hover {
             background-color: #296496;
+        }
+    }
+
+    &.jsxc-btn-success {
+        color: #fff;
+        background-color: #6bad50;
+        border-color: #487735;
+
+        &:hover {
+            background-color: #5a9443;
         }
     }
 

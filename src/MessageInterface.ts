@@ -4,8 +4,9 @@ export enum DIRECTION {
    IN, OUT, SYS
 };
 
-export enum MSGTYPE {
-   CHAT, GROUPCHAT
+export const MSGTYPE = {
+   CHAT: 'chat',
+   GROUPCHAT: 'groupchat'
 };
 
 export interface MessageInterface {

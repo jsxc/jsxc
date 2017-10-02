@@ -4,25 +4,27 @@ import Message from './Message'
 import Notification from './Notification'
 import Translation from './util/Translation'
 import Account from './Account'
-import ContactData from './ContactData'
 import PersistentMap from './util/PersistentMap'
 import IdentifiableInterface from './IdentifiableInterface'
 import Log from './util/Log'
 import {Presence} from './connection/AbstractConnection'
 import {EncryptionState} from './plugin/AbstractPlugin'
 import Client from './Client'
+import ChatWindow from './ui/ChatWindow'
 
 export default class Contact implements IdentifiableInterface {
-   private storage: Storage;
+   protected storage: Storage;
 
-   private readonly account:Account;
+   protected readonly account:Account;
 
    // @REVIEW Data to own object/type?
-   private data:PersistentMap;
+   protected data:PersistentMap;
 
-   private jid:JID;
+   protected jid:JID;
 
-   constructor(account:Account, data: ContactData);
+   protected chatWindow;
+
+   constructor(account:Account, jid:JID, name?:string);
    constructor(account:Account, id:string);
    constructor() {
       this.account = arguments[0];
@@ -36,21 +38,24 @@ export default class Contact implements IdentifiableInterface {
          return;
       }
 
-      let data = arguments[1] || {};
-
-      if (!data.jid) {
-         throw 'Jid missing';
-      } else if (typeof data.jid === 'string') {
-         this.jid = new JID(data.jid);
-      } else {
-         this.jid = data.jid;
-         data.jid = this.jid.full;
+      this.jid = arguments[1];
+      let defaultData = {
+         jid: this.jid.full,
+         name: arguments[2] || this.jid.bare,
+         presence: Presence.offline,
+         status: '',
+         subscription: 'none',
+         msgstate: 0,         //@REVIEW
+         trust: false,        //@REVIEW
+         fingerprint: null,   //@REVIEW
+         resources: {},
+         type: 'chat',
+         rnd: Math.random() // force storage event
       }
 
       this.data = new PersistentMap(this.storage, 'contact', this.jid.bare);
 
-      data.rnd = Math.random() // force storage event
-      this.data.set(data);
+      this.data.set(defaultData);
    }
 
    public delete() {
@@ -62,8 +67,16 @@ export default class Contact implements IdentifiableInterface {
       //@TODO purge window
    }
 
-   public openWindow = () => {
-      return this.account.openChatWindow(this);
+   public openChatWindow = () => {
+      return this.account.addChatWindow(this.getChatWindow());
+   }
+
+   public getChatWindow() {
+      if(!this.chatWindow) {
+         this.chatWindow = new ChatWindow(this.account, this);
+      }
+
+      return this.chatWindow;
    }
 
    public setResource = (resource:string) => {
@@ -88,13 +101,8 @@ export default class Contact implements IdentifiableInterface {
          resources[resource] = presence;
       }
 
-      if (this.getType() === 'groupchat') {
-         // group chat doesn't have a presence
-         return;
-      }
-
       presence = this.getHighestPresence();
-console.log('highest presence', presence);
+
       if (this.data.get('presence') === Presence.offline && presence !== Presence.offline) {
          // buddy has come online
          // @TODO
@@ -147,6 +155,7 @@ console.log('highest presence', presence);
       });
    }
 
+   //@REVIEW this is not unique among accounts, will fail in Avatar.get
    public getId():string {
       return this.jid.bare;
    }

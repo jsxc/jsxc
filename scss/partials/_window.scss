@@ -31,48 +31,7 @@
       padding: 3px;
       z-index: 10;
 
-      &::-webkit-scrollbar {
-         width: 2px;
-         height: 2px;
-      }
-
-      &::-webkit-scrollbar-button {
-         width: 0;
-         height: 0;
-      }
-
-      &::-webkit-scrollbar-thumb {
-         background: #d1d1d1;
-         border: 0;
-         border-right: 3px solid transparent;
-         border-radius: 1px;
-
-         &:hover {
-            background: #c1c1c1;
-         }
-
-         &:active {
-            background: #b1b1b1;
-         }
-      }
-
-      &::-webkit-scrollbar-track {
-         background: transparent;
-         border: 0 none #fff;
-         border-radius: 50px;
-
-         &:hover {
-            background: transparent;
-         }
-
-         &:active {
-            background: transparent;
-         }
-      }
-
-      &::-webkit-scrollbar-corner {
-         background: transparent;
-      }
+      @extend %scrollbar;
    }
    // .slimScrollDiv {
    //    margin: 0 0 6px;

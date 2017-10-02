@@ -2,7 +2,6 @@ import Log from '../../../util/Log'
 import JID from '../../../JID'
 import Client from '../../../Client'
 import Account from '../../../Account'
-import ContactData from '../../../ContactData'
 import Roster from '../../../ui/Roster'
 import AbstractHandler from '../AbstractHandler'
 
@@ -16,7 +15,7 @@ export default class RosterHandler extends AbstractHandler {
 
       if (stanza.find('query').length === 0) {
          Log.debug('Use cached roster');
-         
+
          return this.REMOVE_HANDLER;
       }
 
@@ -26,11 +25,8 @@ export default class RosterHandler extends AbstractHandler {
          let name = item.attr('name') || jid.bare;
          let subscription = item.attr('subscription');
 
-         let contact = account.addContact(new ContactData({
-            jid: jid,
-            name: name,
-            subscription: subscription
-         }));
+         let contact = account.addContact(jid, name);
+         contact.setSubscription(subscription);
 
          Roster.get().add(contact);
       });

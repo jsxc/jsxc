@@ -177,7 +177,7 @@ export default class Session {
          plaintextMessage: messageString
       });
       message.save();
-      this.peer.openWindow().receiveIncomingMessage(message);
+      this.peer.openChatWindow().receiveIncomingMessage(message);
 
       //@REVIEW this is maybe more generic and most of the messages are the same for other encryption plugins
    }

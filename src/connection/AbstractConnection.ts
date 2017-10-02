@@ -72,7 +72,7 @@ abstract class AbstractConnection {
 
       let xmlMsg = $msg({
          to: message.getPeer().full,
-         type: message.getTypeString(),
+         type: message.getType(),
          id: message.getId()
       });
 
@@ -223,7 +223,7 @@ abstract class AbstractConnection {
         to: jid.full,
         type: 'get'
       }).c('query', attrs);
-console.log('send disco info request')
+
       return this.sendIQ(iq);
    }
 
@@ -243,6 +243,101 @@ console.log('send disco info request')
      }).c('query', attrs);
 
      return this.sendIQ(iq);
+   }
+
+   public joinMultiUserRoom(jid:JID, password?:string) {
+      if (jid.isBare()) {
+         return Promise.reject('We need a full jid to join a room');
+      }
+
+      let pres = $pres({
+         to: jid.full
+      }).c('x', {
+         xmlns: Strophe.NS.MUC
+      });
+
+      if (password) {
+         pres.c('password').t(password).up();
+      }
+
+      return this.send(pres);
+   }
+
+   public leaveMultiUserRoom(jid:JID, exitMessage?:string) {
+      let pres = $pres({
+        type: 'unavailable',
+      //   id: presenceid,
+        to: jid.full
+      });
+
+      if (exitMessage) {
+        pres.c('status', exitMessage);
+      }
+
+      return this.send(pres);
+   }
+
+   public destroyMultiUserRoom(jid:JID) {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'set'
+      }).c('query', {
+         xmlns: Strophe.NS.MUC_OWNER
+      }).c('destroy');
+
+      return this.sendIQ(iq);
+   }
+
+   public createInstantRoom(jid:JID) {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'set'
+      }).c('query', {
+         xmlns: Strophe.NS.MUC_OWNER
+      }).c('x', {
+         xmlns: 'jabber:x:data',
+         type: 'submit'
+      });
+
+      return this.sendIQ(iq);
+   }
+
+   public getRoomConfigurationForm(jid:JID) {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'get'
+      }).c('query', {
+         xmlns: Strophe.NS.MUC_OWNER
+      });
+
+      return this.sendIQ(iq);
+   }
+
+   public setRoomConfiguration(jid:JID, configuration) {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'set'
+      }).c('query', {
+         xmlns: Strophe.NS.MUC_OWNER
+      });
+
+      //@TODO 
+      // if (typeof Strophe.x !== 'undefined' && typeof Strophe.x.Form !== 'undefined' && configuration instanceof Strophe.x.Form) {
+      //    configuration.type = 'submit';
+      //    iq.cnode(configuration.toXML());
+      // } else {
+      //    iq.c('x', {
+      //       xmlns: 'jabber:x:data',
+      //       type: 'submit'
+      //    });
+      //    let len = configuration.length;
+      //    for (let i = 0; i < len; i++) {
+      //       conf = config[i];
+      //       iq.cnode(conf).up();
+      //    }
+      // }
+
+      return this.sendIQ(iq);
    }
 
    public close() {

@@ -129,7 +129,7 @@ export default class JingleHandler {
 
       session.accept();
 
-      let chatWindow = this.account.openChatWindow(contact);
+      let chatWindow = contact.openChatWindow();
 
       // let message = new Message({
       //    peer: contact.getJid(),

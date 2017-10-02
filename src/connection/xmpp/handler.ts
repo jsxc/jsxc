@@ -3,8 +3,10 @@ import JID from '../../JID';
 import Account from '../../Account';
 import Contact from '../../Contact';
 import PresenceHandler from './handlers/presence';
+import MultiUserPresenceHandler from './handlers/multiUser/Presence';
 import RosterChangeHandler from './handlers/rosterChange'
 import ChatMessageHandler from './handlers/chatMessage'
+import MultiUserChatMessageHandler from './handlers/multiUser/groupChatMessage'
 import HeadlineMessageHandler from './handlers/headlineMessage'
 import JingleHandler from './handlers/jingle'
 import {DiscoInfoHandler, DiscoItemsHandler} from './handlers/disco'
@@ -26,8 +28,10 @@ export default class XMPPHandler {
    private registerHandler() {
       this.addHandler(RosterChangeHandler, 'jabber:iq:roster', 'iq', 'set');
       this.addHandler(ChatMessageHandler, null, 'message', 'chat');
+      this.addHandler(MultiUserChatMessageHandler, null, 'message', 'groupchat');
       this.addHandler(HeadlineMessageHandler, null, 'message', 'headline');
       this.addHandler(PresenceHandler, null, 'presence');
+      this.addHandler(MultiUserPresenceHandler, 'http://jabber.org/protocol/muc#user', 'presence');
       this.addHandler(JingleHandler, 'urn:xmpp:jingle:1', 'iq', 'set');
 
       this.addHandler(DiscoInfoHandler, Strophe.NS.DISCO_INFO, 'iq', 'get');

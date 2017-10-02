@@ -20,6 +20,7 @@ import {Presence} from '../connection/AbstractConnection'
 import Pipe from '../util/Pipe'
 import {EncryptionState} from '../plugin/AbstractPlugin'
 import ElementHandler from './util/ElementHandler'
+import JID from '../JID'
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -27,7 +28,7 @@ const ENTER_KEY = 13;
 const ESC_KEY = 27;
 
 export default class ChatWindow {
-   private element;
+   protected element;
 
    private inputElement;
 
@@ -43,7 +44,7 @@ export default class ChatWindow {
 
    private messages:SortedPersistentMap;
 
-   constructor(private account:Account, private contact:Contact) {
+   constructor(protected account:Account, protected contact:Contact) {
       let template = chatWindowTemplate({
          accountId: account.getUid(),
          contactId: contact.getId(),
@@ -96,7 +97,7 @@ export default class ChatWindow {
       });
 
       let avatar = Avatar.get(contact);
-      avatar.addElement(this.element.find('.jsxc-avatar'));
+      avatar.addElement(this.element.find('.jsxc-window-bar .jsxc-avatar'));
 
       // @TODO update gui
       this.contact.registerHook('name', (newName) => {
@@ -119,8 +120,8 @@ export default class ChatWindow {
 
       this.element.attr('data-presence', Presence[this.contact.getPresence()]);
 
-      this.contact.registerHook('status', (newStatus) => {
-         this.element.attr('data-presence', Presence[newStatus]);
+      this.contact.registerHook('presence', (newPresence) => {
+         this.element.attr('data-presence', Presence[newPresence]);
       });
 
       setTimeout(() => {
@@ -293,44 +294,51 @@ export default class ChatWindow {
          this.element.find('.jsxc-message-area').append(messageElement);
       }
 
-      // if (typeof message.sender === 'object' && message.sender !== null) {
-      //    var title = '';
-      //    var avatarDiv = $('<div>');
-      //    avatarDiv.addClass('jsxc-avatar').prependTo(messageElement);
-      //
-      //    if (typeof message.sender.jid === 'string') {
-      //       messageElement.attr('data-bid', jsxc.jidToBid(message.sender.jid));
-      //
-      //       var data = jsxc.storage.getUserItem('buddy', jsxc.jidToBid(message.sender.jid)) || {};
-      //       jsxc.gui.updateAvatar(messageElement, jsxc.jidToBid(message.sender.jid), data.avatar);
-      //
-      //       title = jsxc.jidToBid(message.sender.jid);
-      //    }
-      //
-      //    if (typeof message.sender.name === 'string') {
-      //       messageElement.attr('data-name', message.sender.name);
-      //
-      //       if (typeof message.sender.jid !== 'string') {
-      //          jsxc.gui.avatarPlaceholder(avatarDiv, message.sender.name);
-      //       }
-      //
-      //       if (title !== '') {
-      //          title = '\n' + title;
-      //       }
-      //
-      //       title = message.sender.name + title;
-      //
-      //       timestampElement.text(timestampElement.text() + ' ' + message.sender.name);
-      //    }
-      //
-      //    avatarDiv.attr('title', jsxc.escapeHTML(title));
-      //
-      //    if (messageElement.prev().length > 0 && messageElement.prev().find('.jsxc-avatar').attr('title') === avatarDiv.attr('title')) {
-      //       avatarDiv.css('visibility', 'hidden');
-      //    }
-      // }
+      let sender = message.getSender();
+      if (typeof sender.name === 'string') {
+         let title = sender.name;
+
+         if (sender.jid instanceof JID) {
+            messageElement.attr('data-bid', sender.jid.bare); //@REVIEW required?
+
+            title += '\n' + sender.jid.bare;
+         }
+
+         timestampElement.text(sender.name + ': ' + timestampElement.text());
+
+         let avatarElement = $('<div>');
+         avatarElement.addClass('jsxc-avatar');
+         avatarElement.attr('title', title); //@REVIEW escape?
+
+         messageElement.prepend(avatarElement)
+         messageElement.attr('data-name', sender.name);
+
+         if (messageElement.prev().length > 0 && messageElement.prev().find('.jsxc-avatar').attr('title') === avatarElement.attr('title')) {
+            avatarElement.css('visibility', 'hidden');
+         }
+
+         Avatar.setPlaceholder(avatarElement, sender.name);
+      }
 
       this.scrollMessageAreaToBottom();
+   }
+
+   protected addActionEntry(className:string, cb:(ev)=>void) { console.log('addActionEntry')
+      let element = $('<div>');
+      element.addClass(className);
+      element.on('click', cb);
+
+      this.element.find('.jsxc-tools .jsxc-close').before(element);
+   }
+
+   protected addMenuEntry(className:string, label:string, cb:(ev)=>void) { console.log('addMenuEntry')
+      let element = $('<a>');
+      element.attr('href', '#');
+      element.addClass(className);
+      element.text(label);
+      element.on('click', cb);
+
+      this.element.find('.jsxc-tools .jsxc-menu ul').append($('<li>').append(element));
    }
 
    private registerHandler() {
@@ -480,6 +488,7 @@ export default class ChatWindow {
       let message = new Message({
          peer: this.contact.getJid(),
          direction: Message.DIRECTION.OUT,
+         type: this.contact.getType(),
          plaintextMessage: messageString
       });
 

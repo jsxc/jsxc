@@ -1,4 +1,4 @@
-import {ContactInterface} from '../ContactInterface'
+import Contact from '../Contact'
 import Menu from './util/Menu'
 import Avatar from './Avatar'
 import confirmDialog from './dialogs/confirm';
@@ -10,7 +10,7 @@ let rosterItemTemplate = require('../../template/roster-item.hbs')
 export default class RosterItem {
    private element:JQuery;
 
-   constructor(private contact:ContactInterface) {
+   constructor(private contact:Contact) {
       let self = this;
       let template = rosterItemTemplate({
          name: contact.getName(),
@@ -24,7 +24,7 @@ export default class RosterItem {
       this.element.attr('data-subscription', this.contact.getSubscription());
 
       this.element.click(function(){
-         let chatWindow = contact.openWindow();
+         let chatWindow = contact.openChatWindow();
 
          chatWindow.unminimize();
          chatWindow.highlight();
@@ -83,11 +83,11 @@ export default class RosterItem {
       return this.element;
    }
 
-   public getContact():ContactInterface {
+   public getContact():Contact {
       return this.contact;
    }
 
-   public detach():JQuery {
+   public detach() {
       return this.element.detach();
    }
 

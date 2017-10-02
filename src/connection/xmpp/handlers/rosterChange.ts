@@ -63,11 +63,8 @@ export default class extends AbstractHandler {
          }
       } else {
          //@REVIEW DRY same code as in roster handler
-         contact = account.addContact(new ContactData({
-            jid: jid,
-            name: name,
-            subscription: subscription
-         }));
+         contact = account.addContact(jid, name);
+         contact.setSubscription(subscription);
 
          Roster.get().add(contact);
       }

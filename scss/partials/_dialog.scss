@@ -102,16 +102,20 @@
         margin: 0;
     }
 
-    .jsxc-waiting {
-        &:before {
-            content: " ";
-            width: 1em;
-            height: 1em;
-            display: inline-block;
-            background-size: 100%;
-            margin: 0 3px 0 0;
-            background-image: url("../img/loading.gif");
-        }
+    .jsxc-waiting:before {
+        border-radius: 50%;
+        content:'';
+        display: inline-block;
+        vertical-align: sub;
+        animation: jsxc-rotate 1.1s infinite linear;
+        border: 0.15em solid rgba(0,0,0, 0.2);
+        border-left-color: rgba(0,0,0, 0.8);
+        margin-right: 0.8em;
+        position: relative;
+        text-indent: -9999em;
+        transform: translateZ(0);
+        height: 1.2em;
+        width: 1.2em;
     }
 
     .jsxc-libraries, .jsxc-credits {

@@ -133,7 +133,7 @@ export default class extends AbstractHandler {
          //@REVIEW why is this required at this position
          message.save();
 
-         let chatWindow = this.account.openChatWindow(contact);
+         let chatWindow = contact.openChatWindow();
          chatWindow.receiveIncomingMessage(message);
       });
 

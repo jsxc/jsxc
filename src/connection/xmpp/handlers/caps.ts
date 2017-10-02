@@ -40,10 +40,16 @@ export default class CapsHandler extends AbstractHandler {
          */
       }
 
+      let discoInfoRepository = this.account.getDiscoInfoRepository();
+
       if (!DiscoInfo.exists(version)) {
-         this.requestCapabilities(from, node)
-         .then((stanza) => {
-            this.processDiscoInfo(stanza, version);
+         discoInfoRepository.requestDiscoInfo(from, node)
+         .then((discoInfo) => {
+            if (version !== discoInfo.getCapsVersion()) {
+               Log.warn('Caps version doesnt match.');
+            }
+
+            discoInfoRepository.addRelation(from, discoInfo);
          })
          .catch(() => {
             console.log('Something went wrong')
@@ -51,66 +57,9 @@ export default class CapsHandler extends AbstractHandler {
       } else {
          let discoInfo = new DiscoInfo(version);
 
-         this.account.getDiscoInfoRepository().addRelation(from, discoInfo);
+         discoInfoRepository.addRelation(from, discoInfo);
       }
 
       return this.PRESERVE_HANDLER;
-   }
-
-   private requestCapabilities(jid:JID, node?:string) {
-      let connection = this.account.getConnection();
-
-      //@REVIEW why does the request fail if we send a node attribute?
-      return connection.getDiscoInfo(jid);
-   }
-
-   private processDiscoInfo(stanza:Element, ver:string) {
-      let queryElement = stanza.querySelector('query');
-      let node = queryElement.getAttribute('node') || '';
-      let version = node.split('#')[1] || ver; //fix open prosody bug
-      let from = new JID(stanza.getAttribute('from'));
-
-      //@TODO verify response is valid: https://xmpp.org/extensions/xep-0115.html#ver-proc
-
-      let capabilities = {};
-
-      for(let childNode of Array.from(queryElement.childNodes)) {
-         let nodeName = childNode.nodeName;
-
-         if (typeof capabilities[nodeName] === 'undefined') {
-            capabilities[nodeName] = [];
-         }
-
-         if (nodeName === 'feature') {
-            capabilities[nodeName].push(childNode.getAttribute('var'));
-         } else if(nodeName === 'identity') {
-            capabilities[nodeName].push({
-               category: childNode.getAttribute('category') || '',
-               type: childNode.getAttribute('type') || '',
-               name: childNode.getAttribute('name') || '',
-               lang: childNode.getAttribute('xml:lang') || ''
-            });
-            //@TODO test required arguments
-         }
-         //@TODO handle extended information
-      }
-
-      if (typeof capabilities['identity'] === 'undefined' || capabilities['identity'].length === 0) {
-         Log.info('Disco info response is unvalid. Missing identity.');
-         return;
-      }
-
-      if (typeof capabilities['feature'] === 'undefined' || capabilities['feature'].indexOf('http://jabber.org/protocol/disco#info') < 0) {
-         Log.info('Disco info response is unvalid. Doesnt support disco.');
-         return;
-      }
-
-      let discoInfo = new DiscoInfo(capabilities['identity'], capabilities['feature']);
-
-      if (version !== discoInfo.getCapsVersion()) {
-         Log.warn('Caps version doesnt match.');
-      }
-
-      this.account.getDiscoInfoRepository().addRelation(from, discoInfo);
    }
 }

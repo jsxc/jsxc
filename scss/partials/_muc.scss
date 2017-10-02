@@ -1,7 +1,20 @@
 .jsxc-window-item {
     &.jsxc-groupchat.jsxc-normal {
-        .jsxc-fade {
-            padding-top: 44px;
+        &.jsxc-disabled {
+           .jsxc-window-fade:before {
+             background-color: rgba(167, 167, 167, 0.5);
+             bottom: 0;
+             content: '';
+             left: 0;
+             position: absolute;
+             right: 0;
+             top: 0;
+             z-index: 50;
+          }
+
+          .jsxc-destroy, .jsxc-leave, .jsxc-configure {
+             display: none;
+          }
         }
 
         .jsxc-fingerprints, .jsxc-verification, .jsxc-transfer, .jsxc-video, .jsxc-sendFile {
@@ -10,9 +23,19 @@
 
         .jsxc-members {
             background-image: url("../img/group_white.svg");
-            background-size: 15px 15px;
-            background-repeat: no-repeat;
             background-position: center;
+            background-repeat: no-repeat;
+            background-size: 15px 15px;
+            position:relative;
+
+            &:before {
+               content: attr(data-number-of-members);
+               font-size: 12px;
+               line-height: 18px;
+               position:absolute;
+               right: 0;
+               top: 0;
+            }
 
             &:hover {
                 opacity: 1;
@@ -23,11 +46,11 @@
             margin-left: 50px;
 
             .jsxc-avatar {
-                display: block;
-                position: absolute;
-                bottom: 0;
-                left: -50px;
                 background-color: #777;
+                bottom: 0;
+                display: block;
+                left: -50px;
+                position: absolute;
 
                 &:before {
                     display: none;
@@ -43,70 +66,44 @@
     }
 
     .jsxc-memberlist {
-        height: 44px;
-        width: 100%;
         background-color: $window_bar_bg;
-        overflow: hidden;
+        height: 0;
+        overflow: auto;
         position: absolute;
         top: 0;
         transition: height 400ms;
+        width: 100%;
         z-index: 100;
 
+        @extend %scrollbar;
+
+        &.jsxc-expand {
+            height: 120px;
+        }
+
         ul {
-            white-space: nowrap;
-            position: absolute;
-            background-color: $window_bar_bg;
-            color: $window_bar_color;
-            overflow: hidden;
-            transition: left 400ms;
-            padding: 0;
-            padding-left: 6px;
-            padding-right: 6px;
-            padding-top: 3px;
+           padding: 0 2px;
+           color: $window_bar_color;
 
-            > li {
-                display: inline-block;
-                white-space: normal;
-
-                &:last-child {
-                    margin-right: 2px;
-                }
+           > li {
+                display: block;
+                width: 100%;
+                height: 40px;
+                line-height: 40px;
 
                 .jsxc-name {
-                    display: none;
+                    display: block;
+                    cursor: default;
+
+                    &:hover {
+                        color: inherit;
+                    }
                 }
 
                 .jsxc-avatar {
-                    margin-left: 2px;
-                    margin-right: 0;
+                    margin-right: 4px;
                 }
-            }
-        }
-
-        &.jsxc-expand {
-            ul {
-                white-space: normal;
-
-                > li {
-                    display: block;
-                    width: 100%;
-                    height: 40px;
-                    line-height: 40px;
-
-                    .jsxc-name {
-                        display: block;
-                        cursor: default;
-
-                        &:hover {
-                            color: inherit;
-                        }
-                    }
-
-                    .jsxc-avatar {
-                        margin-right: 4px;
-                    }
-                }
-            }
+           }
         }
     }
 }

@@ -16,8 +16,8 @@ export interface ClientInterface {
 
    getStorage();
 
-   getAccout(jid:JIDInterface):Account;
-   getAccout(uid?:string):Account;
+   getAccount(jid:JIDInterface):Account;
+   getAccount(uid?:string):Account;
 
    createAccount(boshUrl: string, jid: string, sid: string, rid:string);
    createAccount(boshUrl: string, jid: string, password: string);

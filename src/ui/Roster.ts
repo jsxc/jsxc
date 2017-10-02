@@ -3,6 +3,7 @@ import Templates from '../util/Templates'
 import showSettings from './dialogs/settings'
 import showContactDialog from './dialogs/contact'
 import showAboutDialog from './dialogs/about'
+import showMultiUserJoinDialog from './dialogs/multiUserJoin'
 import * as CONST from '../CONST'
 import RosterItem from './RosterItem'
 import showLoginBox from './dialogs/loginBox'
@@ -225,6 +226,8 @@ export default class Roster {
 
       mainMenu.find('li.jsxc-settings').click(showSettings);
 
+      mainMenu.find('li.jsxc-join-muc').click(showMultiUserJoinDialog);
+
       mainMenu.find('li.jsxc-hide-offline').click(this.toggleOffline);
 
       mainMenu.find('li.jsxc-mute-notification').click(this.muteNotification);
@@ -244,7 +247,7 @@ export default class Roster {
 
          if (presence !== Presence.offline) {
             // offline presence needs special handling in XMPPConnection
-            Client.getAccout().getConnection().sendPresence(<any> Presence[presence]);
+            Client.getAccount().getConnection().sendPresence(<any> Presence[presence]);
          }
       });
    }

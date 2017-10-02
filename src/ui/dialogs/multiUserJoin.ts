@@ -1,0 +1,348 @@
+import Dialog from '../Dialog';
+import Contact from '../../Contact'
+import StorageSingleton from '../../StorageSingleton'
+import Client from '../../Client'
+import JID from '../../JID'
+import TableElement from '../util/TableElement'
+import Roster from '../../ui/Roster'
+import Translation from '../../util/Translation'
+import Log from '../../util/Log'
+
+var multiUserJoinTemplate = require('../../../template/multiUserJoin.hbs');
+
+export default function() {
+   new MultiUserJoinDialog();
+}
+
+class MultiUserJoinDialog {
+   private account;
+   private connection;
+   private defaultNickname;
+
+   private dialog;
+   private dom;
+   private serverInputElement;
+   private roomInputElement;
+   private passwordInputElement;
+   private autoJoinInputElement;
+   private nicknameInputElement;
+   private bookmarkInputElement;
+
+   constructor() {
+      let content = multiUserJoinTemplate({});
+
+      this.dialog = new Dialog(content);
+      let dom = this.dom = this.dialog.open();
+
+      this.serverInputElement = dom.find('input[name="server"]');
+      this.roomInputElement = dom.find('input[name="room"]');
+      this.passwordInputElement =  dom.find('input[name="password"]');
+      this.autoJoinInputElement = dom.find('input[name="auto-join"]');
+      this.nicknameInputElement = dom.find('input[name="nickname"]');
+      this.bookmarkInputElement = dom.find('input[name="bookmark"]');
+
+      this.account = Client.getAccount();
+      this.connection = this.account.getConnection();
+      this.defaultNickname = this.connection.getJID().node
+
+      this.initializeInputElements();
+   }
+
+   private initializeInputElements() {
+      this.showContinueElements();
+
+      this.serverInputElement.on('change', () => {
+         this.dom.find('.jsxc-inputinfo.jsxc-server').text('').hide();
+
+         let jid = new JID(this.serverInputElement.val(), '');
+
+         this.getMultiUserRooms(jid);
+      })
+
+      this.getMultiUserServices().then((services:JID[]) => {
+         console.log('jids', services)
+
+         this.serverInputElement.val(services[0].full);
+         this.serverInputElement.trigger('change');
+      });
+
+      this.nicknameInputElement.attr('placeholder', this.defaultNickname);
+
+      this.bookmarkInputElement.change(function() {
+         if ($(this).prop('checked')) {
+            this.autoJoinInputElement.prop('disabled', false);
+            this.autoJoinInputElement.parents('.checkbox').removeClass('disabled');
+         } else {
+            this.autoJoinInputElement.prop('disabled', true).prop('checked', false);
+            this.autoJoinInputElement.parents('.checkbox').addClass('disabled');
+         }
+      });
+
+      this.dom.find('input[type="text"], input[type="password"]').keydown(() => {
+         this.emptyStatusElement();
+         this.showContinueElements();
+      });
+
+      this.dom.find('.jsxc-continue').click(this.continueHandler);
+      this.dom.find('.jsxc-join').click(this.joinHandler);
+   }
+
+   private showContinueElements() {
+      this.dom.find('.jsxc-continue').show();
+      this.dom.find('.jsxc-join').hide();
+   }
+
+   private showJoinElements() {
+      this.dom.find('.jsxc-continue').hide();
+      this.dom.find('.jsxc-join').show();
+   }
+
+   private getMultiUserServices() {
+      let ownJid = this.connection.getJID();
+      let serverJid = new JID('', ownJid.domain, '');
+      let discoInfoRepository = this.account.getDiscoInfoRepository();
+
+      return this.connection.getDiscoItems(serverJid).then((stanza) => {
+         let promises = [];
+
+         $(stanza).find('item').each((index, element) => {
+            let jid = new JID('', $(element).attr('jid'), '');
+
+            let promise = discoInfoRepository.requestDiscoInfo(jid).then((discoInfo) => {
+               return discoInfoRepository.hasFeature(discoInfo, 'http://jabber.org/protocol/muc');
+            }).then((hasFeature) => {
+               return hasFeature ? jid : undefined;
+            });
+
+            promises.push(promise);
+         });
+
+         return Promise.all(promises).then((results) => {
+            return results.filter(jid => typeof jid !== 'undefined');
+         });
+      })
+   }
+
+   private getMultiUserRooms(server:JID) {
+      console.log('Load room list for ' + server.bare);
+
+      let roomInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-room');
+      roomInfoElement.show();
+      roomInfoElement.addClass('jsxc-waiting')
+      roomInfoElement.text(Translation.t('Rooms_are_loaded'));
+
+      this.connection.getDiscoItems(server)
+         .then(this.parseRoomList)
+         .catch(this.parseRoomListError)
+         .then(() => {
+            roomInfoElement.removeClass('jsxc-waiting');
+         })
+   }
+
+   private parseRoomList = (stanza) => {
+      // workaround: chrome does not display dropdown arrow for dynamically filled datalists
+      $('#jsxc-roomlist select').empty();
+
+      $(stanza).find('item').each(function() {
+         let optionElement = $('<option>');
+         let jid = new JID($(this).attr('jid'));
+         let name = $(this).attr('name') || jid.node;
+
+         optionElement.text(name);
+         optionElement.attr('data-jid', jid.full);
+         optionElement.attr('value', jid.node);
+
+         $('#jsxc-roomlist select').append(optionElement);
+      });
+
+      let set = $(stanza).find('set[xmlns="http://jabber.org/protocol/rsm"]');
+      let roomInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-room');
+
+      if (set.length > 0) {
+         let count = set.find('count').text() || '?';
+
+         roomInfoElement.text(Translation.t('Could_load_only', {
+            count: count
+         }));
+      } else {
+         roomInfoElement.text('').hide();
+      }
+   }
+
+   private parseRoomListError = (stanza) => {
+      let serverInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-server');
+      let roomInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-room');
+      var errTextMsg = $(stanza).find('error text').text() || null;
+
+      Log.warn('Could not load rooms', errTextMsg);
+
+      if (errTextMsg) {
+         serverInfoElement.show().text(errTextMsg);
+      }
+
+      roomInfoElement.text('').hide();
+      $('#jsxc-roomlist select').empty();
+   }
+
+   private continueHandler = (ev) => {
+      ev.preventDefault();
+
+      this.testInputValues()
+         .then(this.requestRoomInfo)
+         .then(() => {
+            this.showJoinElements();
+         }).catch((msg) => {
+            this.setStatusMessage(msg, 'warning');
+            console.warn(msg)
+         })
+
+      return false;
+   }
+
+   private testInputValues():Promise<JID|void> {
+      let room = this.roomInputElement.val();
+      let nickname = this.nicknameInputElement.val() || this.defaultNickname;
+      let server = this.serverInputElement.val();
+
+      if (!room || !room.match(/^[^"&\'\/:<>@\s]+$/i)) {
+         this.roomInputElement.addClass('jsxc-invalid').keyup(function() {
+            if ($(this).val()) {
+               $(this).removeClass('jsxc-invalid');
+            }
+         });
+
+         return Promise.reject('MUC room JID invalid');
+      }
+
+      if (this.serverInputElement.hasClass('jsxc-invalid')) {
+         return Promise.reject('MUC server invalid');
+      }
+
+      if (!room.match(/@(.*)$/)) {
+         room += '@' + server;
+      }
+
+      //@TODO test if we already joined the room
+      // if () {
+      //    $('<p>').addClass('jsxc_warning').text($.t('You_already_joined_this_room')).appendTo(dialog.find('.jsxc_msg'));
+      // }
+
+      this.dom.find('input[name="room-jid"]').val(room);
+
+      return Promise.resolve(new JID(room));
+   }
+
+   private requestRoomInfo = (room:JID) => {
+      this.setWaitingMessage('Loading_room_information');
+
+      return this.connection.getDiscoInfo(room)
+         .then(this.parseRoomInfo)
+         .then((roomInfoElement) => {
+            this.setStatusElement(roomInfoElement);
+         }).catch((stanza) => {
+            if ($(stanza).find('item-not-found').length > 0) {
+               this.setStatusMessage('Room_not_found_');
+
+               return Promise.resolve();
+            }
+
+            return Promise.reject('I was not able to get any room information.');
+         }).then(() => {
+            return room;
+         });
+   }
+
+   private parseRoomInfo(stanza) {
+      let roomInfoElement = $('<div>');
+      roomInfoElement.append('<p>{{t "This_room_is"}}</p>')
+
+      let tableElement = new TableElement(2);
+
+      $(stanza).find('feature').each(function() {
+         let feature = $(this).attr('var');
+
+         if (feature !== '' && true) {
+            tableElement.appendRow(feature + '.keyword', feature + '.description');
+         }
+
+         if (feature === 'muc_passwordprotected') {
+            this.passwordInputElement.parents('.form-group').removeClass('jsxc_hidden');
+            this.passwordInputElement.attr('required', 'required');
+            this.passwordInputElement.addClass('jsxc_invalid');
+         }
+      });
+
+      let name = $(stanza).find('identity').attr('name');
+      let subject = $(stanza).find('field[var="muc#roominfo_subject"]').attr('label');
+
+      tableElement.appendRow('Name', name);
+      tableElement.appendRow('Subject', subject);
+
+      roomInfoElement.append(tableElement.get());
+
+      roomInfoElement.append($('<input type="hidden" name="room-name">').val(name));
+      roomInfoElement.append($('<input type="hidden" name="room-subject">').val(subject));
+
+      //@TODO display subject, number of occupants, etc.
+
+      return roomInfoElement;
+   }
+
+   private joinHandler = (ev) => {
+      ev.preventDefault();
+
+      //@TODO disable handler, show spinner
+
+      let jid = new JID(this.dom.find('input[name="room-jid"]').val());
+      let name = this.dom.find('input[name="room-name"]').val() || undefined;
+      let nickname = this.nicknameInputElement.val() || this.defaultNickname;
+      let bookmark = this.bookmarkInputElement.prop('checked');
+      let autojoin = this.autoJoinInputElement.prop('checked');
+      let password = this.passwordInputElement.val() || undefined;
+      let subject = this.dom.find('input[name="room-subject"]').val() || undefined;
+
+      let multiUserContact = this.account.addMultiUserContact(jid, name);
+      multiUserContact.setNickname(nickname);
+      multiUserContact.setBookmark(bookmark);
+      multiUserContact.setAutoJoin(autojoin);
+      multiUserContact.setPassword(password);
+      multiUserContact.setSubscription(subject);
+
+      Roster.get().add(multiUserContact);
+
+      multiUserContact.join();
+
+      let chatWindow = multiUserContact.openChatWindow();
+      chatWindow.unminimize();
+      chatWindow.highlight();
+
+      this.dialog.close();
+
+      return false;
+   }
+
+   private setWaitingMessage(msg:string) {
+      this.setStatusMessage(msg, 'waiting');
+   }
+
+   private setStatusMessage(msg:string, level?:'waiting'|'warning') {
+      let textElement = $('<p>').text(msg)
+
+      if (level) {
+         textElement.addClass('jsxc-' + level);
+      }
+
+      this.setStatusElement(textElement);
+   }
+
+   private setStatusElement(element) {
+      let messageElement = this.dom.find('.jsxc-status-container');
+
+      messageElement.empty();
+      messageElement.append(element);
+   }
+
+   private emptyStatusElement() {
+      this.dom.find('.jsxc-status-container').empty();
+   }
+}

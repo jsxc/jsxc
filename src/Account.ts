@@ -5,9 +5,10 @@ import XMPPConnection from './connection/xmpp/Connection'
 import StorageConnection from './connection/storage/Connection'
 import JID from './JID'
 import Contact from './Contact'
-import ContactData from './ContactData'
+import MultiUserContact from './MultiUserContact'
 import Roster from './ui/Roster'
 import ChatWindow from './ui/ChatWindow'
+import MultiUserChatWindow from './ui/MultiUserChatWindow'
 import ChatWindowList from './ui/ChatWindowList'
 import SortedPersistentMap from './util/SortedPersistentMap'
 import PersistentMap from './util/PersistentMap'
@@ -76,10 +77,7 @@ export default class Account {
 
       this.noticeManager = new NoticeManager(this.getStorage());
 
-      this.contact = new Contact(this, new ContactData({
-         jid: new JID(this.uid),
-         name: this.uid
-      }));
+      this.contact = new Contact(this, new JID(this.uid), this.uid);
       Roster.get().setRosterAvatar(this.contact);
 
       this.pluginRepository = new PluginRepository(this);
@@ -122,14 +120,12 @@ export default class Account {
       return this.contacts[jid.bare];
    }
 
-   public addContact(data:ContactData):Contact {
-      let contact = new Contact(this, data);
+   public addMultiUserContact(jid:JID, name?:string) {
+      return this.addContactObject(new MultiUserContact(this, jid, name));
+   }
 
-      this.contacts[contact.getId()] = contact;
-
-      this.save();
-
-      return contact;
+   public addContact(jid:JID, name?:string):Contact {
+      return this.addContactObject(new Contact(this, jid, name));
    }
 
    public removeContact(contact:Contact) {
@@ -139,6 +135,8 @@ export default class Account {
          delete this.contacts[id];
 
          Roster.get().remove(contact);
+
+         //@TODO if MultiUserContact remove from multiUserContacts
 
          //@REVIEW contact.getChatWindow would be nice
          let chatWindow = this.windows.get(id);
@@ -161,9 +159,7 @@ export default class Account {
       }
    }
 
-   public openChatWindow(contact:Contact) {
-      let chatWindow = new ChatWindow(this, contact);
-
+   public addChatWindow(chatWindow:ChatWindow) {
       chatWindow = ChatWindowList.get().add(chatWindow);
 
       this.windows.push(chatWindow);
@@ -222,6 +218,14 @@ export default class Account {
       Client.removeAccount(this);
    }
 
+   private addContactObject(contact) {
+      this.contacts[contact.getId()] = contact;
+
+      this.save();
+
+      return contact;
+   }
+
    private successfulConnected = (data) => {
       let connection = data.connection;
       let status = data.status;
@@ -259,6 +263,8 @@ export default class Account {
          Roster.get().setPresence(Presence.online);
          Roster.get().refreshOwnPresenceIndicator();
 
+         //@TODO remove muc contacts from roster
+
          this.connection.getRoster().then(() => {
             this.connection.sendPresence();
          });
@@ -294,13 +300,24 @@ export default class Account {
       let contacts = storedAccountData.contacts || [];
 
       contacts.forEach((id) => {
-         this.contacts[id] = new Contact(this, id);
+         let contact = new Contact(this, id);
 
-         Roster.get().add(this.contacts[id]);
+         if (contact.getType() === 'groupchat'){
+            contact = new MultiUserContact(this, id);
+         }
+
+         this.contacts[id] = contact;
+
+         Roster.get().add(contact);
       });
 
       this.getStorage().registerHook('contact:', (contactData) => {
+         //@REVIEW duplicate
          let contact = new Contact(this, contactData.jid);
+
+         if (contact.getType() === 'groupchat'){
+            contact = new MultiUserContact(this, contactData.jid);
+         }
 
          if (typeof this.contacts[contact.getId()] === 'undefined') {
             this.contacts[contact.getId()] = contact;
@@ -321,12 +338,11 @@ export default class Account {
       });
 
       this.windows.setPushHook((id) => {
-         let chatWindow = new ChatWindow(this, this.contacts[id]);
-         this.windows[id] = chatWindow;
+         this.windows[id] = this.contacts[id].getChatWindow();
 
-         ChatWindowList.get().add(chatWindow);
+         ChatWindowList.get().add(this.windows[id]);
 
-         return chatWindow;
+         return this.windows[id];
       });
 
       this.windows.init();

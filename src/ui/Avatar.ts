@@ -18,14 +18,18 @@ export default class Avatar {
       return avatar;
    }
 
+   public static setPlaceholder(elements, text:string) {
+      Avatar.placeholder(elements, text);
+   }
+
    public addElement(element) {
       this.elements.push(element);
 
-      this.placeholder(element, this.contact.getName());
+      Avatar.placeholder(element, this.contact.getName());
    }
 
    public reload() {
-      this.placeholder(this.elements, this.contact.getName());
+      Avatar.placeholder(this.elements, this.contact.getName());
    }
 
    private constructor(private contact:ContactInterface) {
@@ -34,7 +38,7 @@ export default class Avatar {
       })
    }
 
-   private placeholder(elements, text) {
+   private static placeholder(elements, text:string) {
       var options = Options.get('avatarPlaceholder') || {};
       var hash = Hash.String(text);
 

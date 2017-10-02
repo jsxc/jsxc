@@ -11,14 +11,27 @@ export default class JID implements JIDInterface {
 
    public readonly resource:string;
 
-   constructor(full:string) {
-      let matches = /([^@]+)@([^/]+)(?:\/(.+))?/.exec(full);
+   constructor(node:string, domain:string, resource:string)
+   constructor(bare:string, resource:string)
+   constructor(full:string)
+   constructor() {
+      let matches = /([^@]+)@([^/]+)(?:\/(.+))?/.exec(arguments[0]);
 
-      this.node = this.unescapeNode(matches[1].toLowerCase());
-      this.domain = matches[2].toLowerCase();
-      this.resource = matches[3];
+      if (matches) {
+         this.node = this.unescapeNode(matches[1].toLowerCase());
+         this.domain = matches[2].toLowerCase();
+         this.resource = this.unescapeNode(arguments[1] || matches[3] || '');
+      } else if(arguments.length === 3) {
+         this.node = this.unescapeNode(arguments[0].toLowerCase());
+         this.domain = arguments[1].toLowerCase();
+         this.resource = this.unescapeNode(arguments[2]);
+      } else if(arguments[0]) {
+         this.node = '';
+         this.domain = arguments[0];
+         this.resource = '';
+      }
 
-      this.bare = this.node + '@' + this.domain;
+      this.bare = this.node + ((this.node) ? '@' : '') + this.domain;
       this.full = this.bare + ((this.resource) ? '/' + this.resource : '');
    }
 
@@ -29,7 +42,7 @@ export default class JID implements JIDInterface {
    public toEscapedString():string {
       let bare = this.escapeNode(this.node) + '@' + this.domain;
 
-      return bare + ((this.resource) ? '/' + this.resource : '');
+      return bare + ((this.resource) ? '/' + this.escapeNode(this.resource) : '');
    }
 
    public isBare():boolean {

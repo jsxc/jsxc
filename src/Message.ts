@@ -30,6 +30,10 @@ interface MessagePayload {
    type?:MSGTYPE,
    encryptedHtmlMessage?:string,
    encryptedPlaintextMessage?:string,
+   sender?: {
+      name:string,
+      jid?:JID
+   }
 }
 
 export default class Message implements Identifiable, MessageInterface {
@@ -160,6 +164,10 @@ export default class Message implements Identifiable, MessageInterface {
 
    public getEncryptedPlaintextMessage():string {
       return this.payload.encryptedPlaintextMessage;
+   }
+
+   public getSender():{name:string, jid?:JID} {
+      return this.payload.sender || {name: null};
    }
 
    public received() {

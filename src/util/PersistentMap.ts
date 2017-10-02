@@ -19,6 +19,10 @@ export default class PersistentMap {
       });
    }
 
+   public getAllKeys():string[] {
+      return Object.keys(this.map);
+   }
+
    public get(id:string) {
       return this.map[id];
    }
@@ -82,6 +86,36 @@ export default class PersistentMap {
 
          this.storage.registerHook(this.key, func);
       }
+   }
+
+   public registerNewHook(func: (value:any, id:string) => void) {
+      this.registerHook((newValue, oldValue) => {
+         let newValueKeys = Object.keys(newValue || {});
+         let oldValueKeys = Object.keys(oldValue || {});
+
+         if (newValueKeys.length > oldValueKeys.length) {
+            let newIds = newValueKeys.filter(id =>oldValueKeys.indexOf(id) < 0);
+
+            for(let newId of newIds) {
+               func(newValue[newId], newId);
+            }
+         }
+      });
+   }
+
+   public registerRemoveHook(func: (id:string) => void) {
+      this.registerHook((newValue, oldValue) => {
+         let newValueKeys = Object.keys(newValue || {});
+         let oldValueKeys = Object.keys(oldValue || {});
+
+         if (newValueKeys.length < oldValueKeys.length) {
+            let removedIds = oldValueKeys.filter(id =>newValueKeys.indexOf(id) < 0);
+
+            for(let removedId of removedIds) {
+               func(removedId);
+            }
+         }
+      });
    }
 
    private save() {
