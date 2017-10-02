@@ -82,6 +82,7 @@
 
     input {
         outline: none;
+        border-radius: 0;
 
         &:invalid {
             border: 1px solid $dialog_input_invalid;
