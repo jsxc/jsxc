@@ -4,6 +4,7 @@ import Account from '../Account'
 import Translation from '../util/Translation'
 import JID from '../JID'
 import Avatar from './Avatar'
+import showRoomConfigurationDialog from './dialogs/multiUserRoomConfiguration'
 
 export default class MultiUserChatWindow extends ChatWindow {
    private memberlistElement;
@@ -106,7 +107,9 @@ export default class MultiUserChatWindow extends ChatWindow {
       this.addMenuEntry(
          'jsxc-configure',
          Translation.t('Configure'),
-         () => {}
+         () => {
+            showRoomConfigurationDialog(this.contact);
+         }
       );
 
       this.addMenuEntry(

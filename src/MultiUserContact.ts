@@ -3,6 +3,7 @@ import JID from './JID'
 import MultiUserChatWindow from './ui/MultiUserChatWindow'
 import PersistentMap from './util/PersistentMap'
 import {Presence} from './connection/AbstractConnection'
+import Form from './connection/Form'
 
 const AFFILIATION = {
    ADMIN: 'admin',
@@ -49,15 +50,25 @@ export default class MultiUserContact extends Contact {
    }
 
    public leave() {
-      this.account.getConnection().leaveMultiUserRoom(this.getJid());
+      return this.account.getConnection().leaveMultiUserRoom(this.getJid());
    }
 
    public destroy() {
-      this.account.getConnection().destroyMultiUserRoom(this.getJid());
+      return this.account.getConnection().destroyMultiUserRoom(this.getJid());
    }
 
    public createInstantRoom() {
       return this.account.getConnection().createInstantRoom(this.jid);
+   }
+
+   public createPreconfiguredRoom() {
+      if (!this.hasRoomConfiguration()) {
+         return Promise.reject('No saved room configuration');
+      }
+
+      let form = Form.fromJSON(this.getRoomConfiguration());
+
+      return this.account.getConnection().submitRoomConfiguration(this.getJid(), form);
    }
 
    public setNickname(nickname:string) {

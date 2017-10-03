@@ -1,8 +1,13 @@
-import Translation from '../../../../util/Translation';
-import Log from '../../../../util/Log';
-import JID from '../../../../JID';
-import MultiUserContact from '../../../../MultiUserContact';
+import Translation from '../../../../util/Translation'
+import Log from '../../../../util/Log'
+import JID from '../../../../JID'
+import MultiUserContact from '../../../../MultiUserContact'
 import MultiUserPresenceProcessor from './PresenceProcessor'
+import showSelectionDialog from '../../../../ui/dialogs/selection'
+import showRoomConfigurationDialog from '../../../../ui/dialogs/multiUserRoomConfiguration'
+
+//@TODO those status codes can also be used inside message stanzas
+// https://xmpp.org/extensions/xep-0045.html#registrar-statuscodes
 
 export default class MultiUserStatusCodeHandler {
    constructor(private presenceHandler:MultiUserPresenceProcessor, private isSelfRefered:boolean) {
@@ -51,42 +56,24 @@ export default class MultiUserStatusCodeHandler {
    /** Inform user that a new room has been created */
    private 201() {
       let multiUserContact = this.presenceHandler.getMultiUserContact();
+      let promise;
 
-      multiUserContact.createInstantRoom();
+      if (multiUserContact.isAutoJoin() && multiUserContact.isInstantRoom()) {
+         promise = multiUserContact.createInstantRoom();
+      } else if (multiUserContact.isAutoJoin() && multiUserContact.hasRoomConfiguration()) {
+         promise = multiUserContact.createPreconfiguredRoom();
+      } else {
+         promise = showInstantOrConfigurationDialog(multiUserContact);
+      }
 
-      //@TODO
-      // if (multiUserContact.isAutoJoin() && multiUserContact.isInstantRoom()) {
-      //    multiUserContact.createInstantRoom();
-      // } else if (multiUserContact.isAutoJoin() && multiUserContact.hasRoomConfiguration()) {
-      //    self.conn.muc.saveConfiguration(room, roomdata.config, function() {
-      //       jsxc.debug('Cached room configuration saved.');
-      //    }, function() {
-      //       jsxc.warn('Could not save cached room configuration.');
-      //
-      //       //@TODO display error
-      //    });
-      // } else {
-      //    jsxc.gui.showSelectionDialog({
-      //       header: Translation.t('Room_creation'),
-      //       msg: Translation.t('Do_you_want_to_change_the_default_room_configuration'),
-      //       primary: {
-      //          label: Translation.t('Default'),
-      //          cb: function() {
-      //             jsxc.gui.dialog.close();
-      //
-      //             self.conn.muc.createInstantRoom(room);
-      //
-      //             jsxc.storage.updateUserItem('buddy', room, 'config', self.CONST.ROOMCONFIG.INSTANT);
-      //          }
-      //       },
-      //       option: {
-      //          label: Translation.t('Change'),
-      //          cb: function() {
-      //             self.showRoomConfiguration(room);
-      //          }
-      //       }
-      //    });
-      // }
+      promise.then((stanza) => {
+         //@TODO use constant
+         if (stanza === 'canceled') {
+            this.presenceHandler.inform(Translation.t('Configuration_canceled')); //@TODO translate
+         }
+      }).catch(() => {
+
+      });
    }
 
    /** Inform user that he or she has been banned */
@@ -147,4 +134,31 @@ export default class MultiUserStatusCodeHandler {
    private 332(room) {
       return Translation.t('muc_removed_shutdown');
    }
+}
+
+function showInstantOrConfigurationDialog(multiUserContact:MultiUserContact) {
+   return new Promise((resolve, reject) => {
+      showSelectionDialog({
+         header: Translation.t('Room_creation'),
+         message: Translation.t('Do_you_want_to_change_the_default_room_configuration'),
+         primary: {
+            label: Translation.t('Default'),
+            cb: function() {
+               multiUserContact.setRoomConfiguration(MultiUserContact.INSTANT_ROOMCONFIG);
+
+               let instantRoomPromise = multiUserContact.createInstantRoom();
+
+               resolve(instantRoomPromise);
+            }
+         },
+         option: {
+            label: Translation.t('Change'),
+            cb: function() {
+               let roomConfigurationPromise = showRoomConfigurationDialog(multiUserContact);
+
+               resolve(roomConfigurationPromise);
+            }
+         }
+      });
+   });
 }

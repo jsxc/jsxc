@@ -27,10 +27,10 @@ export default class NotificationPlugin extends AbstractPlugin {
       pipe.addProcessor(this.afterReceiveMessageProcessor, 90);
    }
 
-   private afterReceiveMessageProcessor = (contact:Contact, message:Message) => { console.log('armp', message)
+   private afterReceiveMessageProcessor = (contact:Contact, message:Message) => {
       Notification.notify({
          title: Translation.t('New_message_from'),
-         message: message.getProcessedBody(),
+         message: message.getProcessedBody(), //@TODO remove or handle HTML
          soundFile: SOUNDS.MSG,
          source: contact
       });

@@ -8,6 +8,7 @@ import JingleHandler from './JingleHandler'
 import {IConnection} from './ConnectionInterface'
 import Account from '../Account'
 import Pipe from '../util/Pipe'
+import Form from './Form'
 
 let Strophe = StropheLib.Strophe;
 let $iq = StropheLib.$iq;
@@ -282,7 +283,7 @@ abstract class AbstractConnection {
          to: jid.bare,
          type: 'set'
       }).c('query', {
-         xmlns: Strophe.NS.MUC_OWNER
+         xmlns: 'http://jabber.org/protocol/muc#owner' //@TODO use namespace object
       }).c('destroy');
 
       return this.sendIQ(iq);
@@ -293,7 +294,7 @@ abstract class AbstractConnection {
          to: jid.bare,
          type: 'set'
       }).c('query', {
-         xmlns: Strophe.NS.MUC_OWNER
+         xmlns: 'http://jabber.org/protocol/muc#owner'
       }).c('x', {
          xmlns: 'jabber:x:data',
          type: 'submit'
@@ -307,35 +308,33 @@ abstract class AbstractConnection {
          to: jid.bare,
          type: 'get'
       }).c('query', {
-         xmlns: Strophe.NS.MUC_OWNER
+         xmlns: 'http://jabber.org/protocol/muc#owner'
       });
 
       return this.sendIQ(iq);
    }
 
-   public setRoomConfiguration(jid:JID, configuration) {
+   public submitRoomConfiguration(jid:JID, form:Form) {
       let iq = $iq({
          to: jid.bare,
          type: 'set'
       }).c('query', {
-         xmlns: Strophe.NS.MUC_OWNER
-      });
+         xmlns: 'http://jabber.org/protocol/muc#owner'
+      }).cnode(form.toXML());
 
-      //@TODO 
-      // if (typeof Strophe.x !== 'undefined' && typeof Strophe.x.Form !== 'undefined' && configuration instanceof Strophe.x.Form) {
-      //    configuration.type = 'submit';
-      //    iq.cnode(configuration.toXML());
-      // } else {
-      //    iq.c('x', {
-      //       xmlns: 'jabber:x:data',
-      //       type: 'submit'
-      //    });
-      //    let len = configuration.length;
-      //    for (let i = 0; i < len; i++) {
-      //       conf = config[i];
-      //       iq.cnode(conf).up();
-      //    }
-      // }
+      return this.sendIQ(iq);
+   }
+
+   public cancelRoomConfiguration(jid:JID) {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'set'
+      }).c('query', {
+         xmlns: 'http://jabber.org/protocol/muc#owner'
+      }).c('x', {
+         xmlns: 'jabber:x:data',
+         type: 'cancel'
+      });
 
       return this.sendIQ(iq);
    }
