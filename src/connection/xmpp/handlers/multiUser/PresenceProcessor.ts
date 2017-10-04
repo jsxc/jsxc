@@ -64,9 +64,9 @@ export default class MultiUserPresenceProcessor {
         this.multiUserContact.addMember(newNickname);
 
         this.inform(Translation.t('is_now_known_as', {
-          oldNickname: this.nickname,
-            newNickname: newNickname,
-            escapeInterpolation: true
+           oldNickname: this.nickname,
+           newNickname: newNickname,
+           escapeInterpolation: true
          }));
       } else {
          this.multiUserContact.removeMember(this.nickname);
@@ -82,7 +82,7 @@ export default class MultiUserPresenceProcessor {
       }
    }
 
-   private processNewMember() { console.log('process new member')
+   private processNewMember() {
       let itemElement = this.xElement.find('item');
       let jid = itemElement.attr('jid');
       let affiliation = itemElement.attr('affiliation');
@@ -90,11 +90,12 @@ export default class MultiUserPresenceProcessor {
 
       let isNew = this.multiUserContact.addMember(this.nickname, affiliation, role, jid);
 
+      //@TODO inform only after first 110 code
       if (isNew) {
          this.inform(Translation.t('entered_the_room', {
             nickname: this.nickname,
             escapeInterpolation: true
-         }))
+         }));
       }
    }
 

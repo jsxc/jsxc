@@ -7,6 +7,7 @@ import Utils from '../../../../util/Utils'
 import Translation from '../../../../util/Translation'
 import Client from '../../../../Client'
 import Contact from '../../../../Contact'
+import MultiUserContact from '../../../../MultiUserContact'
 import Notification from '../../../../Notification'
 import {SOUNDS} from '../../../../CONST'
 import Pipe from '../../../../util/Pipe'
@@ -20,27 +21,43 @@ export default class extends AbstractHandler {
 
       let messageElement = $(stanza);
       let from = new JID(stanza.getAttribute('from'));
-      let body = messageElement.find('body:first').text();
+      let subjectElement = messageElement.find('subject');
+      let bodyElement = messageElement.find('body:first');
+      let body = bodyElement.text();
       let nickname = from.resource;
+
+      let contact = <MultiUserContact> this.account.getContact(from);
+      if (typeof contact === 'undefined') {
+         Log.info('Sender is not in our contact list')
+
+         return this.PRESERVE_HANDLER;
+      }
+
+      if (contact.getType() !== 'groupchat') {
+         Log.info('This groupchat message is not intended for a MultiUserContact');
+
+         return this.PRESERVE_HANDLER;
+      }
+
+      if(subjectElement.length === 1 && bodyElement.length === 0) {
+         contact.setSubject(subjectElement.text());
+
+         let translatedMessage = Translation.t('changed_subject_to', {
+            nickname: nickname,
+            subject: contact.getSubject()
+         });
+
+         contact.getChatWindow().addSystemMessage(translatedMessage);
+
+         return this.PRESERVE_HANDLER;
+      }
 
       if (body !== '') {
          let delay = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
          let sendDate = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
 
-         let contact = this.account.getContact(from);
-         if (typeof contact === 'undefined') {
-            Log.info('Sender is not in our contact list')
-
-            return this.PRESERVE_HANDLER;
-         }
-
-         if (contact.getType() !== 'groupchat') {
-            Log.info('This groupchat message is not intended for a MultiUserContact');
-
-            return this.PRESERVE_HANDLER;
-         }
-
          if (contact.getNickname() === nickname) {
+            //@TODO only after room was created (history)
             Log.debug('Ignore my own groupchat messages');
 
             return this.PRESERVE_HANDLER;

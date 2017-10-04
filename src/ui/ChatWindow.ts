@@ -206,6 +206,16 @@ export default class ChatWindow {
       }
    }
 
+   public addSystemMessage(messageString:string) {
+      let message = new Message({
+         peer: this.contact.getJid(),
+         direction: Message.DIRECTION.SYS,
+         plaintextMessage: messageString
+      });
+      message.save();
+      this.receiveIncomingMessage(message);
+   }
+
    public receiveIncomingMessage(message:Message) {
       this.messages.push(message);
    }

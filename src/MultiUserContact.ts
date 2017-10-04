@@ -113,7 +113,7 @@ export default class MultiUserContact extends Contact {
       this.members.set(nickname, {
          affiliation: affiliation,
          role: role,
-         jid: jid.full
+         jid: jid instanceof JID ? jid.full : undefined
       });
 
       return isNewMember
