@@ -31,6 +31,8 @@ export default class MultiUserStatusCodeHandler {
    /** Inform user that presence refers to itself */
    private 110() {
       this.setNickname(this.presenceHandler.getNickname());
+
+      this.presenceHandler.getMultiUserContact().setMemberListComplete();
    }
 
    /** Inform occupants that room logging is now enabled */

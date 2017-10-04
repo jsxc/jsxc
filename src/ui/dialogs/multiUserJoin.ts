@@ -60,8 +60,6 @@ class MultiUserJoinDialog {
       })
 
       this.getMultiUserServices().then((services:JID[]) => {
-         console.log('jids', services)
-
          this.serverInputElement.val(services[0].full);
          this.serverInputElement.trigger('change');
       });
@@ -124,7 +122,7 @@ class MultiUserJoinDialog {
    }
 
    private getMultiUserRooms(server:JID) {
-      console.log('Load room list for ' + server.bare);
+      Log.debug('Load room list for ' + server.bare);
 
       let roomInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-room');
       roomInfoElement.show();
@@ -252,23 +250,29 @@ class MultiUserJoinDialog {
          });
    }
 
-   private parseRoomInfo(stanza) {
+   private parseRoomInfo = (stanza) => {
       let roomInfoElement = $('<div>');
-      roomInfoElement.append('<p>{{t "This_room_is"}}</p>')
+      roomInfoElement.append(`<p>${Translation.t('This_room_is')}</p>`)
+
+      //@TODO test for feature with muc ns
 
       let tableElement = new TableElement(2);
 
-      $(stanza).find('feature').each(function() {
-         let feature = $(this).attr('var');
+      $(stanza).find('feature').each((index, featureElement) => {
+         let feature = $(featureElement).attr('var');
 
-         if (feature !== '' && true) {
-            tableElement.appendRow(feature + '.keyword', feature + '.description');
+         //@REVIEW true?
+         if (feature !== '' && true && feature !== 'http://jabber.org/protocol/muc') {
+            tableElement.appendRow(
+               Translation.t(`${feature}.keyword`),
+               Translation.t(`${feature}.description`)
+            );
          }
 
          if (feature === 'muc_passwordprotected') {
-            this.passwordInputElement.parents('.form-group').removeClass('jsxc_hidden');
+            this.passwordInputElement.parents('.form-group').removeClass('jsxc-hidden');
             this.passwordInputElement.attr('required', 'required');
-            this.passwordInputElement.addClass('jsxc_invalid');
+            this.passwordInputElement.addClass('jsxc-invalid');
          }
       });
 

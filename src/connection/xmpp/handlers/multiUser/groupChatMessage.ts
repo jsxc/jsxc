@@ -56,8 +56,7 @@ export default class extends AbstractHandler {
          let delay = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
          let sendDate = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
 
-         if (contact.getNickname() === nickname) {
-            //@TODO only after room was created (history)
+         if (contact.getNickname() === nickname && sendDate > contact.getJoinDate()) {
             Log.debug('Ignore my own groupchat messages');
 
             return this.PRESERVE_HANDLER;

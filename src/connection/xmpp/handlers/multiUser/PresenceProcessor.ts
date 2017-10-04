@@ -37,13 +37,7 @@ export default class MultiUserPresenceProcessor {
    public inform(msg:string) {
       Log.debug('[MUC] ' + msg);
 
-      let message = new Message({
-         peer: this.multiUserContact.getJid(),
-         direction: Message.DIRECTION.SYS,
-         plaintextMessage: msg
-      });
-      message.save();
-      this.multiUserContact.openChatWindow().receiveIncomingMessage(message);
+      this.multiUserContact.getChatWindow().addSystemMessage(msg);
    }
 
    private processUnavailable() {
@@ -90,8 +84,7 @@ export default class MultiUserPresenceProcessor {
 
       let isNew = this.multiUserContact.addMember(this.nickname, affiliation, role, jid);
 
-      //@TODO inform only after first 110 code
-      if (isNew) {
+      if (isNew && this.multiUserContact.isMemberListComplete()) {
          this.inform(Translation.t('entered_the_room', {
             nickname: this.nickname,
             escapeInterpolation: true

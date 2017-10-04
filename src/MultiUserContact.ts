@@ -60,6 +60,9 @@ export default class MultiUserContact extends Contact {
    }
 
    public join() {
+      this.data.set('joinDate', new Date());
+      this.data.set('memberListComplete', false);
+
       return this.account.getConnection().joinMultiUserRoom(new JID(this.jid.bare, this.getNickname()), this.data.get('password'));
    }
 
@@ -181,6 +184,20 @@ export default class MultiUserContact extends Contact {
 
    public isInstantRoom():boolean {
       return this.data.get('roomConfig') === ROOMCONFIG.INSTANT;
+   }
+
+   public isMemberListComplete():boolean {
+      return this.data.get('memberListComplete');
+   }
+
+   public setMemberListComplete() {
+      this.data.set('memberListComplete', true);
+   }
+
+   public getJoinDate():Date {
+      let dateString = this.data.get('joinDate');
+
+      return dateString ? new Date(dateString) : undefined;
    }
 
    public registerMemberHook(id:string, func: (newValue: any, oldValue: any, key: string) => void);
