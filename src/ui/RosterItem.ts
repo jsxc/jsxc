@@ -23,6 +23,16 @@ export default class RosterItem {
       this.element.attr('data-presence', Presence[this.contact.getPresence()]);
       this.element.attr('data-subscription', this.contact.getSubscription());
 
+      this.element.on('dragstart', (ev) => {
+         ev.originalEvent.dataTransfer.setData('text/plain', contact.getJid().bare);
+
+         $('.jsxc-droppable').addClass('jsxc-dragactive');
+      });
+
+      this.element.on('dragend', () => {
+         $('.jsxc-droppable').removeClass('jsxc-dragactive');
+      });
+
       this.element.click(function(){
          let chatWindow = contact.openChatWindow();
 

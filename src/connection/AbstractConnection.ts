@@ -339,6 +339,54 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
+   public sendMediatedMultiUserInvitation(receiverJid:JID, roomJid:JID, reason?:string) {
+      //@REVIEW id?
+      let msg = $msg({
+         to: roomJid.bare
+      }).c('x', {
+         xmlns: 'http://jabber.org/protocol/muc#user'
+      }).c('invite', {
+         to: receiverJid.bare
+      });
+
+      if (reason) {
+         msg.c('reason').t(reason);
+      }
+
+      this.send(msg);
+   }
+
+   public declineMediatedMultiUserInvitation(receiverJid:JID, roomJid:JID, reason?:string) {
+      //@REVIEW id?
+      let msg = $msg({
+         to: roomJid.bare
+      }).c('x', {
+         xmlns: 'http://jabber.org/protocol/muc#user'
+      }).c('decline', {
+         to: receiverJid.bare
+      });
+
+      if (reason) {
+         msg.c('reason').t(reason);
+      }
+
+      this.send(msg);
+   }
+
+   public sendDirectMultiUserInvitation(receiverJid:JID, roomJid:JID, reason?:string, password?:string) {
+      //@REVIEW id?
+      let msg = $msg({
+         to: receiverJid.bare
+      }).c('x', {
+         xmlns: 'jabber:x:conference', //@TODO
+         jid: roomJid.bare,
+         reason: reason,
+         password: password
+      });
+
+      this.send(msg);
+   }
+
    public close() {
 
    }

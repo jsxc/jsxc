@@ -6,7 +6,7 @@ import MultiUserPresenceProcessor from './PresenceProcessor'
 import showSelectionDialog from '../../../../ui/dialogs/selection'
 import showRoomConfigurationDialog from '../../../../ui/dialogs/multiUserRoomConfiguration'
 
-//@TODO those status codes can also be used inside message stanzas
+//@TODO those status codes are partially transmitted through message stanzas
 // https://xmpp.org/extensions/xep-0045.html#registrar-statuscodes
 
 export default class MultiUserStatusCodeHandler {

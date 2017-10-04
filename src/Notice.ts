@@ -1,19 +1,22 @@
 import IdentifiableInterface from './IdentifiableInterface'
 import Storage from './Storage'
 import ContactDialog from './ui/dialogs/contact'
+import MultiUserInvitationDialog from './ui/dialogs/multiUserInvitation'
 import Notification from './Notification'
 
 export const enum TYPE {
-   normal, announcement, contact
+   normal, announcement, contact, invitation
 }
 
 export const enum FUNCTION {
    contactRequest,
    notificationRequest,
+   multiUserInvitation
 }
 let functions = {};
 functions[FUNCTION.contactRequest] = ContactDialog;
 functions[FUNCTION.notificationRequest] = Notification.askForPermission;
+functions[FUNCTION.multiUserInvitation] = MultiUserInvitationDialog;
 
 export interface NoticeData {
    title:string;

@@ -5,6 +5,7 @@ import Translation from '../util/Translation'
 import JID from '../JID'
 import Avatar from './Avatar'
 import showRoomConfigurationDialog from './dialogs/multiUserRoomConfiguration'
+import showMultiUserInviteDialog from './dialogs/multiUserInvite'
 
 export default class MultiUserChatWindow extends ChatWindow {
    private memberlistElement;
@@ -17,6 +18,7 @@ export default class MultiUserChatWindow extends ChatWindow {
       this.disable();
       this.element.addClass('jsxc-groupchat');
 
+      this.initDroppable();
       this.addMucElementsToChatWindow();
 
       this.contact.registerNewMemberHook((value, nickname) => {
@@ -91,6 +93,37 @@ export default class MultiUserChatWindow extends ChatWindow {
       this.element.find('.jsxc-members').attr('data-number-of-members', this.memberlistElement.find('li').length || '');
    }
 
+   private initDroppable() {
+      let windowElement = this.element.find('.jsxc-window');
+
+      windowElement.addClass('jsxc-droppable');
+
+      windowElement.on('dragenter', (ev) => {
+         ev.preventDefault();
+
+         windowElement.addClass('jsxc-dragover');
+      });
+
+      windowElement.on('dragleave', (ev) => {
+         ev.preventDefault();
+
+         windowElement.removeClass('jsxc-dragover');
+      });
+
+      windowElement.on('dragover', (ev) => {
+         ev.preventDefault();
+         ev.originalEvent.dataTransfer.dropEffect = 'copy';
+      })
+
+      windowElement.on('drop', (ev) => {
+         ev.preventDefault();
+
+         let jid = new JID(ev.originalEvent.dataTransfer.getData('text'));
+
+         this.contact.invite(jid);
+      });
+   }
+
    private addMucElementsToChatWindow() {
       this.addMemberList();
 
@@ -119,6 +152,14 @@ export default class MultiUserChatWindow extends ChatWindow {
             this.contact.leave();
          }
       );
+
+      this.addMenuEntry(
+         'jsxc-invite',
+         Translation.t('Invite'),
+         () => {
+            showMultiUserInviteDialog(this.contact);
+         }
+      )
    }
 
    private addMemberList() {

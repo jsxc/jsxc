@@ -45,6 +45,20 @@ export default class MultiUserContact extends Contact {
       this.members = new PersistentMap(this.account.getStorage(), 'members', this.getId());
    }
 
+   public invite(jid:JID, reason?:string) {
+      let connection = this.account.getConnection();
+      let isModerated = false; //@TODO
+
+      //@TODO test for support of jabber:x:conference to use direct invitation
+
+      if (isModerated) {
+         connection.sendMediatedMultiUserInvitation(jid, this.getJid(), reason);
+      } else {
+         let password = this.data.get('password');
+         connection.sendDirectMultiUserInvitation(jid, this.getJid(), reason, password);
+      }
+   }
+
    public join() {
       return this.account.getConnection().joinMultiUserRoom(new JID(this.jid.bare, this.getNickname()), this.data.get('password'));
    }
@@ -74,6 +88,7 @@ export default class MultiUserContact extends Contact {
    public setNickname(nickname:string) {
       //@TODO update ui according to affiliation and role
       this.data.set('nickname', nickname);
+      this.setResource(nickname); //@REVIEW do we need the nickname field?
    }
 
    public getNickname():string {

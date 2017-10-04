@@ -11,6 +11,8 @@ import HeadlineMessageHandler from './handlers/headlineMessage'
 import JingleHandler from './handlers/jingle'
 import {DiscoInfoHandler, DiscoItemsHandler} from './handlers/disco'
 import CapsHandler from './handlers/caps'
+import MultiUserDirectInvitationHandler from './handlers/multiUser/DirectInvitation'
+import MultiUserXMessageHandler from './handlers/multiUser/XMessage'
 import * as NS from './namespace'
 
 interface StropheConnection {
@@ -30,12 +32,15 @@ export default class XMPPHandler {
       this.addHandler(ChatMessageHandler, null, 'message', 'chat');
       this.addHandler(MultiUserChatMessageHandler, null, 'message', 'groupchat');
       this.addHandler(HeadlineMessageHandler, null, 'message', 'headline');
+      this.addHandler(MultiUserXMessageHandler, 'http://jabber.org/protocol/muc#user', 'message');
       this.addHandler(PresenceHandler, null, 'presence');
       this.addHandler(MultiUserPresenceHandler, 'http://jabber.org/protocol/muc#user', 'presence');
       this.addHandler(JingleHandler, 'urn:xmpp:jingle:1', 'iq', 'set');
 
       this.addHandler(DiscoInfoHandler, Strophe.NS.DISCO_INFO, 'iq', 'get');
       this.addHandler(DiscoItemsHandler, Strophe.NS.DISCO_ITEMS, 'iq', 'get');
+
+      this.addHandler(MultiUserDirectInvitationHandler, 'jabber:x:conference', 'message');
 
       this.addHandler(CapsHandler, CapsHandler.NAMESPACE);
       // this.connection.conn.addHandler(this.onReceived, null, 'message');

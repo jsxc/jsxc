@@ -1,0 +1,55 @@
+import Dialog from '../Dialog';
+import MultiUserContact from '../../MultiUserContact'
+import JID from '../../JID'
+import Translation from '../../util/Translation'
+import Log from '../../util/Log'
+import Roster from '../Roster'
+import Client from '../../Client'
+
+var multiUserInvitation = require('../../../template/multiUserInvitation.hbs');
+
+export default function(type:'direct'|'mediated', from:string, room:string, reason:string, password:string) {
+   let fromJid = new JID(from);
+   let roomJid = new JID(room);
+   let content = multiUserInvitation({
+      from: from,
+      room: room,
+      reason: reason
+   });
+
+   let dialog = new Dialog(content);
+   let dom = dialog.open();
+   let account = Client.getAccount();
+
+   dom.find('form').on('submit', (ev) => {
+      ev.preventDefault();
+
+      let multiUserContact = <MultiUserContact> account.getContact(roomJid);
+
+      if (!multiUserContact) {
+         multiUserContact = account.addMultiUserContact(roomJid);
+         Roster.get().add(multiUserContact);
+      } else if (multiUserContact.getType() !== 'groupchat') {
+         Log.warn('Got normal contact. Abort.');
+         return;
+      }
+
+      if (!multiUserContact.getNickname()) {
+         multiUserContact.setNickname(account.getJID().node);
+      }
+
+      multiUserContact.join();
+
+      let chatWindow = multiUserContact.openChatWindow();
+      chatWindow.unminimize();
+      chatWindow.highlight();
+
+      dialog.close();
+   });
+
+   dom.find('jsxc-close').click(() => {
+      if (type === 'mediated') {
+         account.getConnection().declineMediatedMultiUserInvitation(fromJid, roomJid);
+      }
+   })
+}

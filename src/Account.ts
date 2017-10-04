@@ -13,7 +13,7 @@ import ChatWindowList from './ui/ChatWindowList'
 import SortedPersistentMap from './util/SortedPersistentMap'
 import PersistentMap from './util/PersistentMap'
 import Log from './util/Log'
-import {Presence} from './connection/AbstractConnection'
+import {Presence, AbstractConnection} from './connection/AbstractConnection'
 import Client from './Client'
 import {NoticeManager} from './NoticeManager'
 import * as StropheLib from 'strophe.js'
@@ -37,7 +37,7 @@ export default class Account {
 
    private uid:string;
 
-   private connection:IConnection;
+   private connection:AbstractConnection;
 
    private connectionArguments;
 
@@ -120,7 +120,7 @@ export default class Account {
       return this.contacts[jid.bare];
    }
 
-   public addMultiUserContact(jid:JID, name?:string) {
+   public addMultiUserContact(jid:JID, name?:string):MultiUserContact {
       return this.addContactObject(new MultiUserContact(this, jid, name));
    }
 
@@ -195,7 +195,7 @@ export default class Account {
       return this.storage;
    }
 
-   public getConnection():IConnection {
+   public getConnection():AbstractConnection {
       return this.connection;
    }
 

@@ -11,6 +11,22 @@
    border: 1px solid $window_border;
    border-bottom: 0;
 
+   &.jsxc-droppable.jsxc-dragactive {
+      &:before {
+         content: '';
+         position: absolute;
+         top: 0;
+         right: 0;
+         bottom: 0;
+         left: 0;
+         background-color: rgba(52, 70, 139, 0.2);
+         z-index: 100;
+      }
+      &.jsxc-dragover:before {
+         background-color: rgba(52, 70, 139, 0.56);
+      }
+   }
+
    .jsxc-showOverlay & {
       .jsxc-overlay {
          display: block !important;
