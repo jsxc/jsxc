@@ -11,7 +11,7 @@ let dialog:Dialog;
 export default function(contact:MultiUserContact) {
 
    //@TODO translate, maybe move to hbs
-   dialog = new Dialog('<p class="jsxc-waiting">We are loading</p>', false);
+   dialog = new Dialog('<p class="jsxc-waiting">We are loading</p>', true);
    dialog.open();
 
    let connection = Client.getAccount().getConnection();

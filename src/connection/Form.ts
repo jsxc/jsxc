@@ -76,6 +76,7 @@ export default class Form {
    public toHTML() {
       let formElement = $('<form>');
       formElement.attr('data-type', this.type);
+      formElement.attr('autocomplete', 'off');
       formElement.addClass('form-horizontal');
 
       if (this.title) {
@@ -152,8 +153,6 @@ class Field {
          default:
             values = formElement.find('input').val();
       }
-
-      console.log(name, type, values)
 
       if (typeof values.length !== 'function') {
          values = [values];
@@ -282,6 +281,7 @@ class Field {
 
    private createInputElement() {
       let element = $('<input>');
+      element.attr('autocomplete', 'off');
 
       if (this.data.values.length > 0) {
          element.attr('value', this.data.values[0]);
@@ -310,6 +310,7 @@ class Field {
             break;
          case 'text-private':
             element.attr('type', 'password');
+            element.attr('autocomplete', 'new-password');
             break;
          case 'text-single':
             element.attr('type', 'text');
