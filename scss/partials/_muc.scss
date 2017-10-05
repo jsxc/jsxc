@@ -67,18 +67,18 @@
 
     .jsxc-memberlist {
         background-color: $window_bar_bg;
-        height: 0;
+        max-height: 0;
         overflow: auto;
         position: absolute;
         top: 0;
-        transition: height 400ms;
+        transition: max-height 400ms;
         width: 100%;
         z-index: 100;
 
         @extend %scrollbar;
 
         &.jsxc-expand {
-            height: 120px;
+            max-height: 120px;
         }
 
         ul {
