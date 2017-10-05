@@ -206,6 +206,10 @@ export default class ChatWindow {
       }
    }
 
+   public setBarText(text:string) {
+      this.element.find('.jsxc-window-bar .jsxc-subcaption').text(text);
+   }
+
    public addSystemMessage(messageString:string) {
       let message = new Message({
          peer: this.contact.getJid(),

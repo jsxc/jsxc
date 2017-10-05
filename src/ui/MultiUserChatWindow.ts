@@ -33,7 +33,7 @@ export default class MultiUserChatWindow extends ChatWindow {
          this.addMember(nickname);
       }
 
-      this.contact.registerHook('nickname', (newValue, oldValue) => { console.log('nickname changed', oldValue, newValue)
+      this.contact.registerHook('nickname', (newValue, oldValue) => {
          if (oldValue && !newValue) {
             this.disable();
          } else if(!oldValue && newValue) {
@@ -42,6 +42,11 @@ export default class MultiUserChatWindow extends ChatWindow {
       });
 
       this.contact.getNickname() ? this.enable() : this.disable();
+
+      this.contact.registerHook('subject', (newSubject) => {
+         this.setBarText(newSubject);
+      })
+      this.setBarText(this.contact.getSubject());
    }
 
    public addMember(nickname, jid?:JID) {
