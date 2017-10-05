@@ -78,32 +78,6 @@
       }
    }
 
-   .jsxc-tools {
-      float: right;
-
-      > .jsxc-disabled {
-         opacity: 0.3;
-         cursor: default !important;
-      }
-
-      > div {
-         width: 25px;
-         height: 40px;
-         display: block;
-         float: left;
-         color: $tools_color;
-         opacity: 0.4;
-         font-family: $font_sans;
-         line-height: 40px;
-         cursor: pointer;
-         text-align: center;
-
-         &.jsxc-menu {
-            opacity: 1;
-         }
-      }
-   }
-
    .jsxc-close {
       font-size: 20px;
 
@@ -142,27 +116,12 @@
 
 .jsxc-window-bar {
    background-color: $window_bar_bg;
-   cursor: pointer;
-   height: 44px;
-   line-height: 26px;
-   padding: 2px;
    color: $window_bar_color;
-   width: 100%;
-   box-sizing: border-box;
-   position: relative;
    transition: background-color 0.3s;
 
    &:hover {
       .jsxc-normal & {
          color: $window_bar_color_hover;
-      }
-   }
-
-   .jsxc-tools {
-      &:hover {
-         .jsxc-normal & {
-            color: #000;
-         }
       }
    }
 

@@ -227,18 +227,9 @@
 .jsxc-roster-item {
    padding: 0;
    margin: 0;
-   height: 44px;
    border-bottom: 1px solid $roster_bottom_border_top;
-   cursor: pointer;
-   width: 100%;
-   position: relative;
    color: $roster_color;
    font-family: $font_sans;
-   line-height: 44px;
-   padding-left: 6px;
-   padding-top: 4px;
-   padding-bottom: 4px;
-   box-sizing: border-box;
 
    &:hover {
       background-color: $roster_bg_hover;
@@ -265,80 +256,6 @@
 
       .jsxc-avatar {
          filter: grayscale(100%);
-      }
-   }
-}
-
-.jsxc-caption {
-   padding-right: 30px;
-   height: 100%;
-   line-height: 100%;
-   // padding-top: 4px;
-   box-sizing: border-box;
-
-   * {
-      cursor: pointer;
-   }
-
-   .jsxc-name {
-      height: 100%;
-      line-height: 40px;
-
-      .jsxc-min & {
-         height: 50%;
-         line-height: 20px;
-      }
-
-      .jsxc-rosteritem & {
-         height: 50%;
-         line-height: 20px;
-      }
-   }
-
-   .jsxc-lastmsg {
-      font-size: 12px;
-      display: none;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
-
-      .jsxc-min & {
-         display: block;
-         height: 50%;
-         line-height: 17.5px;
-      }
-
-      .jsxc-rosteritem & {
-         display: block;
-         height: 50%;
-         line-height: 17.5px;
-      }
-
-      .jsxc-text {
-         opacity: 0.6;
-      }
-
-      .jsxc-unread {
-         line-height: 100%;
-         font-size: 8px;
-         color: #fff;
-         text-align: center;
-         display: none;
-         height: 1em;
-         width: 1em;
-         border-radius: 50%;
-         background-color: orange;
-         vertical-align: top;
-         margin: 0;
-         float: none;
-
-         .jsxc-unreadMsg & {
-            display: inline-block !important;
-         }
-      }
-
-      .jsxc-emoticon {
-         vertical-align: middle;
       }
    }
 }
@@ -461,7 +378,7 @@
       }
    }
 
-   .jsxc-menu {
+   .jsxc-action-entry.jsxc-menu {
       float: right;
       height: 100%;
       width: 42px;

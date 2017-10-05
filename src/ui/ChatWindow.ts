@@ -335,10 +335,11 @@ export default class ChatWindow {
 
    protected addActionEntry(className:string, cb:(ev)=>void) { console.log('addActionEntry')
       let element = $('<div>');
+      element.addClass('jsxc-action-entry')
       element.addClass(className);
       element.on('click', cb);
 
-      this.element.find('.jsxc-tools .jsxc-close').before(element);
+      this.element.find('.jsxc-action-entry.jsxc-close').before(element);
    }
 
    protected addMenuEntry(className:string, label:string, cb:(ev)=>void) { console.log('addMenuEntry')
@@ -348,7 +349,7 @@ export default class ChatWindow {
       element.text(label);
       element.on('click', cb);
 
-      this.element.find('.jsxc-tools .jsxc-menu ul').append($('<li>').append(element));
+      this.element.find('.jsxc-window-bar .jsxc-menu ul').append($('<li>').append(element));
    }
 
    private registerHandler() {

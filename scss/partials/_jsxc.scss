@@ -207,3 +207,83 @@ img.jsxc-vCard {
         width: 25px;
     }
 }
+
+.jsxc-bar {
+   cursor: pointer;
+   height: 44px;
+   padding: 2px;
+   width: 100%;
+   box-sizing: border-box;
+   position: relative;
+   display: flex;
+   align-items: center;
+
+   .jsxc-avatar {
+      flex-shrink: 0;
+   }
+
+   .jsxc-action-entry {
+      width: 25px;
+      height: 40px;
+      display: block;
+      float: left;
+      color: $tools_color;
+      opacity: 0.4;
+      font-family: $font_sans;
+      line-height: 40px;
+      cursor: pointer;
+      text-align: center;
+      flex-shrink: 0;
+
+      &.jsxc-menu {
+         opacity: 1;
+      }
+
+      &.jsxc-disabled {
+         opacity: 0.3;
+         cursor: default !important;
+      }
+
+      .jsxc-minimized & {
+         display: none;
+      }
+   }
+
+   .jsxc-caption {
+      box-sizing: border-box;
+      flex-grow: 1;
+      min-width: 0; //workaround for text ellipsis
+
+      * {
+         cursor: pointer;
+      }
+
+      .jsxc-subcaption {
+         font-size: 12px;
+         text-overflow: ellipsis;
+         white-space: nowrap;
+         overflow: hidden;
+
+         &:before {
+            content: '';
+            line-height: 100%;
+            color: #fff;
+            text-align: center;
+            display: none;
+            height: 0.6em;
+            width: 0.6em;
+            border-radius: 50%;
+            background-color: orange;
+            margin-right: 0.2em;
+
+            .jsxc-unreadMsg & {
+               display: inline-block !important;
+            }
+         }
+
+         .jsxc-emoticon {
+            vertical-align: middle;
+         }
+      }
+   }
+}
