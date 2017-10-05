@@ -246,6 +246,10 @@ export default class Contact implements IdentifiableInterface {
       this.data.registerHook(property, func);
    }
 
+   public isPersistent():boolean {
+      return true;
+   }
+
    private getHighestPresence() {
       let maxPresence = Presence.offline;
       let resources = this.data.get('resources');

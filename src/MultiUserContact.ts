@@ -214,6 +214,10 @@ export default class MultiUserContact extends Contact {
       this.members.registerRemoveHook(func);
    }
 
+   public isPersistent() {
+      return this.isBookmarked();
+   }
+
    private shutdown() {
       this.data.set('resources', {});
       this.data.set('presence', Presence.offline);

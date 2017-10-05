@@ -263,7 +263,7 @@ export default class Account {
          Roster.get().setPresence(Presence.online);
          Roster.get().refreshOwnPresenceIndicator();
 
-         //@TODO remove muc contacts from roster
+         this.removeNonpersistentContacts();
 
          this.connection.getRoster().then(() => {
             this.connection.sendPresence();
@@ -346,5 +346,14 @@ export default class Account {
       });
 
       this.windows.init();
+   }
+
+   private removeNonpersistentContacts() {
+      for(let contactId in this.contacts) {
+         let contact = this.contacts[contactId];
+         if (!contact.isPersistent()) {
+            this.removeContact(contact);
+         }
+      }
    }
 }
