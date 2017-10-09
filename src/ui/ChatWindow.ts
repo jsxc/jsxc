@@ -21,6 +21,9 @@ import Pipe from '../util/Pipe'
 import {EncryptionState} from '../plugin/AbstractPlugin'
 import ElementHandler from './util/ElementHandler'
 import JID from '../JID'
+import HookRepository from '../util/HookRepository'
+import ChatWindowMessage from './ChatWindowMessage'
+import Transcript from '../Transcript'
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -28,6 +31,8 @@ const ENTER_KEY = 13;
 const ESC_KEY = 27;
 
 export default class ChatWindow {
+   public static HookRepository = new HookRepository<(window:ChatWindow, contact:Contact)=>void>();
+
    protected element;
 
    private inputElement;
@@ -42,7 +47,7 @@ export default class ChatWindow {
 
    private properties:PersistentMap;
 
-   private messages:SortedPersistentMap;
+   private chatWindowMessages = {};
 
    constructor(protected account:Account, protected contact:Contact) {
       let template = chatWindowTemplate({
@@ -66,20 +71,6 @@ export default class ChatWindow {
       this.element.find('.jsxc-name').disableSelection();
       this.element.find('.jsxc-window').css('bottom', -1 * this.element.find('.jsxc-window-fade').height());
 
-      this.messages.registerHook((newMessages, oldMessages) => {
-         oldMessages = oldMessages || [];
-
-         if (newMessages.length === 0 && oldMessages.length > 0) {
-            this.clear();
-         } // else if(newMessages.length > oldMessages.length) {
-         //    let diff = $(newMessages).not(oldMessages).get();
-         //
-         //    for (let messageId of diff) {
-         //       this.postMessage(new Message(messageId));
-         //    }
-         // }
-      });
-
       this.properties = new PersistentMap(this.storage, 'chatWindow', this.contact.getId());
 
       if (this.properties.get('minimized') === false) {
@@ -88,12 +79,22 @@ export default class ChatWindow {
          this.minimize();
       }
 
-      this.properties.registerHook('minimized', (minimized) => { console.log('properties.minimized')
+      this.properties.registerHook('minimized', (minimized) => {
          if (minimized) {
             this.minimize();
          } else {
             this.unminimize();
          }
+      });
+
+      this.getTranscript().registerHook('firstMessageId', (firstMessageId) => {
+         if (!firstMessageId) {
+            return;
+         }
+
+         let message = this.getTranscript().getMessage(firstMessageId);
+
+         this.postMessage(message);
       });
 
       let avatar = Avatar.get(contact);
@@ -127,6 +128,22 @@ export default class ChatWindow {
       setTimeout(() => {
          this.scrollMessageAreaToBottom();
       }, 500);
+
+      ChatWindow.HookRepository.trigger('initialized', this, contact);
+   }
+
+   public getTranscript():Transcript {
+      return this.contact.getTranscript();
+   }
+
+   public getChatWindowMessage(message:Message) {
+      let id = message.getId();
+
+      if (!this.chatWindowMessages[id]) {
+         this.chatWindowMessages[id] = new ChatWindowMessage(message, this);
+      }
+
+      return this.chatWindowMessages[id];
    }
 
    public getId() {
@@ -187,10 +204,9 @@ export default class ChatWindow {
    }
 
    public clear() {
-      this.messages.empty(function(id, message){ console.log(id, message)
-         message.delete();
-      })
+      this.getTranscript().clear();
 
+      //@REVIEW required?
       this.element.find('.jsxc-message-area').empty();
    }
 
@@ -216,91 +232,17 @@ export default class ChatWindow {
          direction: Message.DIRECTION.SYS,
          plaintextMessage: messageString
       });
-      message.save();
-      this.receiveIncomingMessage(message);
+
+      this.getTranscript().pushMessage(message);
    }
 
-   public receiveIncomingMessage(message:Message) {
-      this.messages.push(message);
-   }
-
-   public postMessage(message:Message) {
+   public postMessage(message:Message):ChatWindowMessage {
       if (message.getDirection() === Message.DIRECTION.IN && !this.inputElement.is(':focus')) {
          message.setUnread();
       }
 
-      let messageElement = $('<div>');
-      messageElement.addClass('jsxc-chatmessage jsxc-' + message.getDirectionString());
-      messageElement.attr('id', message.getCssId());
-      messageElement.html('<div>' + message.getProcessedBody() + '</div>');
-
-      let timestampElement = $('<div>');
-      timestampElement.addClass('jsxc-timestamp');
-      DateTime.stringify(message.getStamp(), timestampElement);
-      messageElement.append(timestampElement);
-
-      if (message.isReceived()) {
-         messageElement.addClass('jsxc-received');
-      } else {
-         messageElement.removeClass('jsxc-received');
-      }
-
-      if (message.isForwarded()) {
-         messageElement.addClass('jsxc-forwarded');
-      } else {
-         messageElement.removeClass('jsxc-forwarded');
-      }
-
-      if (message.isEncrypted()) {
-         messageElement.addClass('jsxc-encrypted');
-      } else {
-         messageElement.removeClass('jsxc-encrypted');
-      }
-
-      if (message.getErrorMessage()) {
-         messageElement.addClass('jsxc-error');
-         messageElement.attr('title', message.getErrorMessage());
-      } else {
-         messageElement.removeClass('jsxc-error');
-      }
-
-      if (message.hasAttachment()) {
-         let attachment = message.getAttachment();
-         let mimeType = attachment.getMimeType();
-         let attachmentElement = $('<div>');
-         attachmentElement.addClass('jsxc-attachment');
-         attachmentElement.addClass('jsxc-' + mimeType.replace(/\//, '-'));
-         attachmentElement.addClass('jsxc-' + mimeType.replace(/^([^/]+)\/.*/, '$1'));
-
-         if (attachment.isPersistent()) {
-            attachmentElement.addClass('jsxc-persistent');
-         }
-
-         if (attachment.isImage() && attachment.hasThumbnailData()) {
-            $('<img>')
-               .attr('alt', 'preview')
-               .attr('src', attachment.getThumbnailData())
-               // .attr('title', message.getName())
-               .appendTo(attachmentElement);
-         } else {
-            attachmentElement.text(attachment.getName());
-         }
-
-         if (attachment.hasData()) {
-            attachmentElement = $('<a>').append(attachmentElement);
-            attachmentElement.attr('href', attachment.getData());
-            attachmentElement.attr('download', attachment.getName());
-         }
-
-         messageElement.find('div').first().append(attachmentElement);
-      }
-
-      if (message.getDirection() === Message.DIRECTION.SYS) {
-         this.element.find('.jsxc-message-area').append('<div class="jsxc-clear"/>');
-      } else {
-         //@TODO update last message
-         //$('[data-bid="' + bid + '"]').find('.jsxc-lastmsg .jsxc-text').html(msg);
-      }
+      let chatWindowMessage = this.getChatWindowMessage(message);
+      let messageElement = chatWindowMessage.getElement();
 
       if (message.getDOM().length > 0) {
          message.getDOM().replaceWith(messageElement);
@@ -308,36 +250,12 @@ export default class ChatWindow {
          this.element.find('.jsxc-message-area').append(messageElement);
       }
 
-      let sender = message.getSender();
-      if (typeof sender.name === 'string') {
-         let title = sender.name;
-
-         if (sender.jid instanceof JID) {
-            messageElement.attr('data-bid', sender.jid.bare); //@REVIEW required?
-
-            title += '\n' + sender.jid.bare;
-         }
-
-         timestampElement.text(sender.name + ': ' + timestampElement.text());
-
-         let avatarElement = $('<div>');
-         avatarElement.addClass('jsxc-avatar');
-         avatarElement.attr('title', title); //@REVIEW escape?
-
-         messageElement.prepend(avatarElement)
-         messageElement.attr('data-name', sender.name);
-
-         if (messageElement.prev().length > 0 && messageElement.prev().find('.jsxc-avatar').attr('title') === avatarElement.attr('title')) {
-            avatarElement.css('visibility', 'hidden');
-         }
-
-         Avatar.setPlaceholder(avatarElement, sender.name);
-      }
-
       this.scrollMessageAreaToBottom();
+
+      return chatWindowMessage;
    }
 
-   protected addActionEntry(className:string, cb:(ev)=>void) { console.log('addActionEntry')
+   public addActionEntry(className:string, cb:(ev)=>void) {
       let element = $('<div>');
       element.addClass('jsxc-action-entry')
       element.addClass(className);
@@ -346,7 +264,7 @@ export default class ChatWindow {
       this.element.find('.jsxc-action-entry.jsxc-close').before(element);
    }
 
-   protected addMenuEntry(className:string, label:string, cb:(ev)=>void) { console.log('addMenuEntry')
+   public addMenuEntry(className:string, label:string, cb:(ev)=>void) {
       let element = $('<a>');
       element.attr('href', '#');
       element.addClass(className);
@@ -510,9 +428,7 @@ export default class ChatWindow {
       let pipe = Pipe.get('preSendMessage');
 
       pipe.run(this.contact, message).then(([contact, message]) => {
-         message.save();
-
-         this.messages.push(message);
+         this.getTranscript().pushMessage(message);
 
          this.getAccount().getConnection().sendMessage(message);
       });
@@ -521,11 +437,7 @@ export default class ChatWindow {
          if (typeof Options.get('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) < 1) {
             Options.set('theAnswerToAnything', true);
 
-            (new Message({
-               peer: this.contact.getJid(),
-               direction: Message.DIRECTION.SYS,
-               plaintextMessage: '42'
-            })).save();
+            this.addSystemMessage('42');
          }
       }
    }
@@ -625,15 +537,17 @@ export default class ChatWindow {
    }
 
    private restoreLocalHistory() {
-      this.messages = new SortedPersistentMap(this.storage, 'history', this.contact.getId());
-      this.messages.setPushHook(uid => {
-         let message = new Message(uid);
+      let firstMessage = this.getTranscript().getFirstMessage();
 
-         this.postMessage(message);
+      if (!firstMessage) {
+         return;
+      }
 
-         return message;
-      });
-      this.messages.init();
+      let chatWindowMessage = this.getChatWindowMessage(firstMessage);
+
+      this.element.find('.jsxc-message-area').append(chatWindowMessage.getElement());
+
+      chatWindowMessage.restoreNextMessage();
    }
 
    private resizeMessageArea(width?:number, height?:number, outer?) {

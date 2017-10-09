@@ -11,6 +11,7 @@ import Identifiable from './IdentifiableInterface'
 import Client from './Client'
 import Utils from './util/Utils'
 import {MessageInterface, DIRECTION, MSGTYPE} from './MessageInterface'
+import PersistentMap from './util/PersistentMap'
 
 const MSGPOSTFIX = ':msg';
 
@@ -38,17 +39,13 @@ interface MessagePayload {
 
 export default class Message implements Identifiable, MessageInterface {
 
-   private uid:string;
+   private id:string;
 
-   private payload:MessagePayload = {
-      received: false,
-      encrypted: null,
-      forwarded: false,
-      stamp: new Date().getTime(),
-      type: MSGTYPE.CHAT,
-      encryptedHtmlMessage: null,
-      encryptedPlaintextMessage: null
-   } as any;
+   private data:PersistentMap;
+
+   private attachment:Attachment;
+
+   private stamp:Date;
 
    static readonly DIRECTION = DIRECTION;
 
@@ -56,142 +53,167 @@ export default class Message implements Identifiable, MessageInterface {
 
    private storage:Storage;
 
-   constructor(uid:string);
+   constructor(id:string);
    constructor(data:MessagePayload);
    constructor() {
       this.storage = Client.getStorage();
+      let data;
 
       if (typeof arguments[0] === 'string' && arguments[0].length > 0 && arguments.length === 1) {
-         this.uid = arguments[0];
+         this.id = arguments[0];
+      } else if (typeof arguments[0] === 'object' && arguments[0] !== null) {
+         data = arguments[0];
 
-         this.load(this.uid);
-      } else if (typeof arguments[0] === 'object' && arguments[0] !== null) { console.log('arg', arguments[0])
-         $.extend(this.payload, arguments[0]);
+         //@TODO replace uid with id
+         this.id = data.uid ? data.uid : new Date().getTime() + MSGPOSTFIX;
+
+         delete data.uid;
       }
 
-      if (!this.uid) {
-         this.uid = new Date().getTime() + MSGPOSTFIX;
+      this.data = new PersistentMap(this.storage, this.id);
+
+      if (data) {
+         if (data.peer) {
+            data.peer = data.peer.full;
+         }
+
+         this.data.set($.extend({
+            received: false,
+            encrypted: null,
+            forwarded: false,
+            stamp: new Date().getTime(),
+            type: MSGTYPE.CHAT,
+            encryptedHtmlMessage: null,
+            encryptedPlaintextMessage: null
+         }, data));
       }
+   }
+
+   public registerHook(property:string, func:(newValue:any, oldValue:any)=>void) {
+      this.data.registerHook(property, func);
    }
 
    public getId() {
-      return this.uid;
-   }
-
-   public save() {
-      let attachment = this.getAttachment();
-
-      if (attachment) {
-         if (this.getDirection() === DIRECTION.OUT) {
-            // save storage
-            attachment.clearData();
-         }
-
-         let saved = attachment.save();
-
-         if (!saved && this.getDirection() === DIRECTION.IN) {
-            //@TODO inform user
-         }
-      }
-
-      let payloadCopy = $.extend({}, this.payload); //Object.assign
-      if (payloadCopy.attachment) {
-         payloadCopy.attachment = payloadCopy.attachment.getId();
-      }
-
-      this.storage.setItem('msg', this.uid, {
-         payload: payloadCopy
-      });
-
-      return this;
+      return this.id;
    }
 
    public delete() {
-      var data = this.storage.getItem('msg', this.uid);
+      let attachment = this.getAttachment();
 
-      if (data) {
-         this.storage.removeItem('msg', this.uid);
+      if (attachment) {
+         // attachment.delete()
       }
+
+      this.data.delete();
+
+      this.attachment = undefined;
+      this.data = undefined;
+      this.id = undefined;
+   }
+
+   public getNextId():string {
+      return this.data.get('next');
+   }
+
+   public setNext(message:Message|string) {
+      this.data.set('next', typeof message === 'string' ? message : message.getId());
    }
 
    public getCssId() {
-      return this.uid.replace(/:/g, '-');
+      return this.id.replace(/:/g, '-');
    }
 
    public getDOM() {
       return $('#' + this.getCssId());
    }
 
-   public getStamp() {
-      return this.payload.stamp;
+   public getStamp():Date {
+      return new Date(this.data.get('stamp'));
    }
 
    public getDirection():DIRECTION {
-      return this.payload.direction;
+      return this.data.get('direction');
    }
 
    public getDirectionString():string {
-      return DIRECTION[this.payload.direction].toLowerCase();
+      return DIRECTION[this.getDirection()].toLowerCase();
    }
 
    public getAttachment():Attachment {
-      return this.payload.attachment;
+      if (!this.attachment) {
+         this.attachment = new Attachment(this.data.get('attachment'));
+      }
+
+      return this.attachment;
+   }
+
+   public setAttachment(attachment:Attachment) {
+      this.attachment = attachment;
+
+      this.data.set('attachment', attachment.getId());
+
+      // if (this.getDirection() === DIRECTION.OUT) {
+      //    // save storage
+      //    attachment.clearData();
+      // }
+      //
+      // let saved = attachment.save();
+      //
+      // if (!saved && this.getDirection() === DIRECTION.IN) {
+      //    //@TODO inform user
+      // }
    }
 
    public getPeer():JID {
-      return this.payload.peer;
+      return new JID(this.data.get('peer'));
    }
 
    public getType():MSGTYPE {
-      return this.payload.type;
+      return this.data.get('type');
    }
 
    public getTypeString():string {
-      return MSGTYPE[this.payload.type].toLowerCase();
+      return MSGTYPE[this.getType()].toLowerCase();
    }
 
    public getHtmlMessage():string {
-      return this.payload.htmlMessage;
+      return this.data.get('htmlMessage');
    }
 
    public getEncryptedHtmlMessage():string {
-      return this.payload.encryptedHtmlMessage;
+      return this.data.get('encryptedHtmlMessage');
    }
 
    public getPlaintextMessage():string {
-      return this.payload.plaintextMessage;
+      return this.data.get('plaintextMessage');
    }
 
    public getEncryptedPlaintextMessage():string {
-      return this.payload.encryptedPlaintextMessage;
+      return this.data.get('encryptedPlaintextMessage');
    }
 
    public getSender():{name:string, jid?:JID} {
-      return this.payload.sender || {name: null};
+      return this.data.get('sender') || {name: null};
    }
 
    public received() {
-      this.payload.received = true;
-      this.save();
-
-      //@TODO use PersistentMap für payload and use hooks to update this in all tabs
-      this.getDOM().addClass('jsxc-received');
+      this.data.set('received', true);
    }
 
    public isReceived():boolean {
-      return this.payload.received;
+      return !!this.data.get('received');
    }
 
    public isForwarded():boolean {
-      return this.payload.forwarded;
+      return !!this.data.get('forwarded');
    }
 
    public isEncrypted():boolean {
-      return this.payload.encrypted;
+      return !!this.data.get('encrypted');
    }
 
    public hasAttachment():boolean {
-      return !!this.payload.attachment;
+      return !!this.data.get('attachment');
    }
 
    public setUnread() {
@@ -199,28 +221,27 @@ export default class Message implements Identifiable, MessageInterface {
    }
 
    public setDirection(direction:DIRECTION) {
-      this.payload.direction = direction;
+      this.data.set('direction', direction)
    }
 
    public setPlaintextMessage(plaintextMessage:string) {
-      this.payload.plaintextMessage = plaintextMessage;
+      this.data.set('plaintextMessage', plaintextMessage);
    }
 
    public setEncryptedPlaintextMessage(encryptedPlaintextMessage:string) {
-      this.payload.encryptedPlaintextMessage = encryptedPlaintextMessage;
+      this.data.set('encryptedPlaintextMessage', encryptedPlaintextMessage);
    }
 
    public setEncrypted(encrypted:boolean = false) {
-      this.payload.encrypted = encrypted;
+      this.data.set('encrypted', encrypted);
    }
 
    public getProcessedBody():string {
-      let body = this.payload.plaintextMessage;
+      let body = this.getPlaintextMessage();
 
+      //@REVIEW maybe pipes
       body = this.convertUrlToLink(body);
-
       body = this.convertEmailToLink(body);
-
       body = Emoticons.toImage(body);
 
       body = this.replaceLineBreaks(body);
@@ -234,27 +255,11 @@ export default class Message implements Identifiable, MessageInterface {
    }
 
    public getErrorMessage():string {
-      return this.payload.errorMessage;
+      return this.data.get('errorMessage');
    }
 
    public updateProgress(transfered:number, complete:number) {
 
-   }
-
-   private load(uid:string):void {
-      var data = this.storage.getItem('msg', uid);
-
-      if (!data) {
-         Log.debug('Could not load message with uid ' + uid);
-
-         throw new Error('Could not load message with uid ' + uid)
-      }
-
-      $.extend(this.payload, data.payload);
-
-      if (data.attachment) {
-         this.payload.attachment = new Attachment(data.attachment);
-      }
    }
 
    private replaceLineBreaks(text) {

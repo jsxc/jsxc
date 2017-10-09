@@ -176,7 +176,6 @@ export default class Session {
          direction: Message.DIRECTION.SYS,
          plaintextMessage: messageString
       });
-      message.save();
       this.peer.openChatWindow().receiveIncomingMessage(message);
 
       //@REVIEW this is maybe more generic and most of the messages are the same for other encryption plugins
@@ -279,9 +278,6 @@ export default class Session {
          direction: Message.DIRECTION.OUT,
          plaintextMessage: messageString
       });
-
-      //@REVIEW do we have to save this message, because it's never displaied?
-      message.save();
 
       this.connection.sendMessage(message);
    }

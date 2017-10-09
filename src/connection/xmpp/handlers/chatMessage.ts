@@ -12,9 +12,6 @@ import {SOUNDS} from '../../../CONST'
 import Pipe from '../../../util/Pipe'
 import AbstractHandler from '../AbstractHandler'
 
-// body.replace(/^\/me /, '<i title="/me">' + Utils.removeHTML(this.sender.getName()) + '</i> ');
-const PRESERVE_HANDLER = true;
-
 export default class extends AbstractHandler {
    public processStanza(stanza:Element) {
       let messageElement = $(stanza);
@@ -36,7 +33,7 @@ export default class extends AbstractHandler {
             isCarbonCopy = false;
          } else if (from.bare !== to.bare) {
             // ignore this carbon copy
-            return PRESERVE_HANDLER;
+            return this.PRESERVE_HANDLER;
          } else {
             isCarbonCopy = true;
          }
@@ -50,7 +47,7 @@ export default class extends AbstractHandler {
       let htmlBody = messageElement.find('html body[xmlns="' + Strophe.NS.XHTML + '"]');
 
       if (!plaintextBody || (plaintextBody.match(/\?OTR/i) && isForwarded)) {
-         return PRESERVE_HANDLER;
+         return this.PRESERVE_HANDLER;
       }
 
       let messageType = messageElement.attr('type');
@@ -76,11 +73,10 @@ export default class extends AbstractHandler {
             forwarded: isForwarded,
             stamp: stamp.getTime()
          });
-         message.save();
 
          //@TODO
 
-         return PRESERVE_HANDLER;
+         return this.PRESERVE_HANDLER;
 
       } else if (isForwarded) {
          // Someone forwarded a message to us
@@ -109,7 +105,7 @@ export default class extends AbstractHandler {
          //
          // jsxc.storage.saveMessage(bid, 'in', msg, false, forwarded, stamp);
 
-         return PRESERVE_HANDLER;
+         return this.PRESERVE_HANDLER;
       }
 
       // If we now the full jid, we use it
@@ -130,22 +126,8 @@ export default class extends AbstractHandler {
       let pipe = Pipe.get('afterReceiveMessage');
 
       pipe.run(contact, message).then(([contact, message]) => {
-         //@REVIEW why is this required at this position
-         message.save();
-
-         let chatWindow = contact.openChatWindow();
-         chatWindow.receiveIncomingMessage(message);
+         contact.getTranscript().pushMessage(message);
       });
-
-      // if (!forwarded && mid !== null && receiptsRequestElement.length && data !== null && (data.sub === 'both' || data.sub === 'from') && messageType === 'chat') {
-      //    // Send received according to XEP-0184
-      //    jsxc.xmpp.conn.send($msg({
-      //       to: from
-      //    }).c('received', {
-      //       xmlns: 'urn:xmpp:receipts',
-      //       id: mid
-      //    }));
-      // }
 
       // var attachment;
       // if (htmlBody.length === 1) {
@@ -175,25 +157,6 @@ export default class extends AbstractHandler {
       //    }
       // }
 
-      // if (jsxc.otr.objects.hasOwnProperty(bid) && plaintextBody) {
-      //    // @TODO check for file upload url after decryption
-      //    jsxc.otr.objects[bid].receiveMsg(plaintextBody, {
-      //       stamp: stamp,
-      //       forwarded: forwarded,
-      //       attachment: attachment
-      //    });
-      // } else {
-      //    jsxc.gui.window.postMessage({
-      //       bid: bid,
-      //       direction: jsxc.Message.IN,
-      //       msg: plaintextBody,
-      //       encrypted: false,
-      //       forwarded: forwarded,
-      //       stamp: stamp,
-      //       attachment: attachment
-      //    });
-      // }
-
-      return PRESERVE_HANDLER;
+      return this.PRESERVE_HANDLER;
    }
 }

@@ -10,6 +10,7 @@ import Log from './util/Log'
 import {Presence} from './connection/AbstractConnection'
 import {EncryptionState} from './plugin/AbstractPlugin'
 import Client from './Client'
+import Transcript from './Transcript'
 import ChatWindow from './ui/ChatWindow'
 
 export default class Contact implements IdentifiableInterface {
@@ -23,6 +24,8 @@ export default class Contact implements IdentifiableInterface {
    protected jid:JID;
 
    protected chatWindow;
+
+   protected transcript:Transcript;
 
    constructor(account:Account, jid:JID, name?:string);
    constructor(account:Account, id:string);
@@ -214,6 +217,14 @@ export default class Contact implements IdentifiableInterface {
 
    public getEncryptionState():EncryptionState {
       return this.data.get('encryptionState');
+   }
+
+   public getTranscript():Transcript {
+      if (!this.transcript) {
+         this.transcript = new Transcript(this.storage, this);
+      }
+
+      return this.transcript;
    }
 
    public getStatus():string {

@@ -7,7 +7,7 @@ export default class PersistentMap {
 
    private key:string;
 
-   private initialized = false;
+   private initialized = false; //@REVIEW ???
 
    constructor(private storage:Storage, ...identifier:string[]) {
       this.key = storage.generateKey.apply(storage, identifier);
@@ -67,6 +67,13 @@ export default class PersistentMap {
       this.save();
    }
 
+   public delete() {
+      this.initialized = false;
+      this.map = {};
+
+      this.storage.removeItem(this.key);
+   }
+
    public registerHook(id:string, func: (newValue: any, oldValue: any, key: string) => void);
    public registerHook(func: (newValue: any, oldValue: any, key: string) => void);
    public registerHook() {
@@ -92,7 +99,7 @@ export default class PersistentMap {
       this.registerHook((newValue, oldValue) => {
          let newValueKeys = Object.keys(newValue || {});
          let oldValueKeys = Object.keys(oldValue || {});
-
+this.initialized = true;
          if (newValueKeys.length > oldValueKeys.length) {
             let newIds = newValueKeys.filter(id =>oldValueKeys.indexOf(id) < 0);
 

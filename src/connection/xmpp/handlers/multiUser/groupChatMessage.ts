@@ -76,11 +76,7 @@ export default class extends AbstractHandler {
          let pipe = Pipe.get('afterReceiveGroupMessage');
 
          pipe.run(contact, message).then(([contact, message]) => {
-            //@REVIEW why is this required at this position
-            message.save();
-
-            let chatWindow = contact.openChatWindow();
-            chatWindow.receiveIncomingMessage(message);
+            contact.getTranscript().pushMessage(message);
          });
       }
 
