@@ -218,7 +218,7 @@
     "Server": "Serveur",
     "Rooms_are_loaded": "Les salons sont chargés",
     "Could_load_only": "Ne peut charger que __count__ salons pour l'autocomplétion",
-    "muc_explanation": "Veuillez saisir le nom du salon, un surnom (optionnel) et un mot de passe pour joindre la conversation",
+    "muc_explanation": "Veuillez saisir le nom du salon, un surnom (optionnel) pour joindre la conversation",
     "You_already_joined_this_room": "Vous avez déjà rejoint ce salon",
     "This_room_will_be_closed": "Ce salon va être fermé",
     "Room_not_found_": "Un nouveau salon va être créé",
@@ -240,6 +240,8 @@
     "message_not_send_item-not-found": "Votre message n'a pu être envoyé parce que ce salon n'existe pas",
     "message_not_send_forbidden": "Votre message n'a pas été envoyé parce que vous n'avez pas le droit de parler dans ce salon",
     "message_not_send_not-acceptable": "Votre message n'a pas été envoyé car il n'y a personne dans ce salon",
+    "message_not_send_resource-unavailable": "Votre message n'a pas été envoyé parce que votre interlocuteur n'est pas connecté ou disponible",
+    "message_not_send_remote-server-not-found": "Votre message n'a pas été envoyé car la connexion entre serveurs a échouée",
     "This_room_has_been_closed": "Ce salon a été fermé",
     "Room_logging_is_enabled": "L'historique du salon est conservé",
     "A_password_is_required": "Un mot de passe est requis",
@@ -267,7 +269,7 @@
     "is_": "est __status__",
     "You_received_a_message_from_an_unknown_sender_": "Vous avez reçu un message d'un expéditeur inconnu (__sender__) Voulez-vous les afficher ?",
     "Your_roster_is_empty_add_": "Votre liste est vide, ajouter  <a>Nouveau contact</a>",
-    "onsmp_explanation_question": "Votre contact tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre contact, saisissez une réponse et cliquez sur Répondre.",
+    "onsmp_explanation_question": "Votre contact tente de déterminer si il ou elle vous parle vraiment. Pour vous authentifier auprès de votre contact, saisissez une réponse et cliquez sur Répondre.",
     "onsmp_explanation_secret": "Votre contact tente de déterminer si il ou elle parle vraiment à vous. Pour vous authentifier auprès de votre contact, entrez le mot secret",
     "from_sender": "de __sender__",
     "Verified_private_conversation_started": "La conversation privée vérifiée a démarré.",
@@ -300,7 +302,13 @@
     "Connection_accepted": "Connexion acceptée",
     "Stream_terminated": "Flux terminé",
     "Close_all": "Tout fermer",
-    "Notification": null,
-    "Unreadable_OTR_message": null
+    "Notification": "Notification",
+    "Unreadable_OTR_message": "Message OTR illisible omis",
+    "Load_older_messages": "Charger des messages plus anciens",
+    "Message_history": null,
+    "setting-mam-enable": null,
+    "File_too_large": "Fichier trop grand",
+    "No_proper_file_transfer_method_available": "Pas de méthode de transfert de fichier disponible.",
+    "You_have_to_go_online_": "Vous devez être connecté pour exécuter cette opération"
   }
 }

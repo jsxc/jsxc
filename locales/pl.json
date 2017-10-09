@@ -240,6 +240,8 @@
     "message_not_send_item-not-found": "Twoja wiadomość nie została wysłana ponieważ ten pokój nie istnieje",
     "message_not_send_forbidden": "Twoja wiadomość nie została wysłana ponieważ nie masz głosu w tym pokoju",
     "message_not_send_not-acceptable": "Twoja wiadomość nie została wysłana ponieważ nie jesteś właścicielem tego pokoju",
+    "message_not_send_resource-unavailable": null,
+    "message_not_send_remote-server-not-found": null,
     "This_room_has_been_closed": "Ten pokój został zamknięty",
     "Room_logging_is_enabled": "Logowanie do pokoju jest włączone",
     "A_password_is_required": "Hasło jest wymagane",
@@ -301,6 +303,12 @@
     "Stream_terminated": null,
     "Close_all": null,
     "Notification": null,
-    "Unreadable_OTR_message": null
+    "Unreadable_OTR_message": null,
+    "Load_older_messages": null,
+    "Message_history": null,
+    "setting-mam-enable": null,
+    "File_too_large": null,
+    "No_proper_file_transfer_method_available": null,
+    "You_have_to_go_online_": null
   }
 }
