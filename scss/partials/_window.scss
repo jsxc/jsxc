@@ -496,15 +496,16 @@
 }
 
 .jsxc-sys {
-   width: auto;
-   max-width: none;
-   padding-right: 4px;
-   box-sizing: border-box;
-   margin-right: 3px;
-   border-radius: 3px;
    background-color: transparent;
+   border-radius: 3px;
+   box-sizing: border-box;
    font-size: 0.8em;
    font-style: italic;
+   margin-right: 3px;
+   max-width: none;
+   padding-right: 4px;
+   text-align: center;
+   width: auto;
 
    .jsxc-emoticon {
       width: 1.2em;
@@ -587,5 +588,44 @@ div.jsxc-transfer {
       &.jsxc-trust {
          background-image: url("../img/padlock_close_green.svg");
       }
+   }
+}
+
+.jsxc-mam-load-more {
+   display: none;
+   font-size: 0.8em;
+   height: 42px;
+   left: 0;
+   line-height: 42px;
+   position: absolute;
+   right: 0;
+   text-align: center;
+   top: -42px;
+   transition: top 0.5s;
+   z-index: 80;
+
+   span {
+      background-color: #e4e4e4;
+      cursor: pointer;
+      padding: 5px 10px;
+
+      &:hover {
+         background-color: #dfcfcf;
+         opacity: 1;
+      }
+   }
+
+   &.jsxc-show {
+      top: 0;
+   }
+}
+
+.jsxc-mam-enabled {
+   .jsxc-mam-load-more {
+      display: block;
+   }
+
+   .jsxc-message-area {
+      padding-top: 42px;
    }
 }

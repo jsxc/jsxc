@@ -72,6 +72,7 @@ export default class PersistentMap {
       this.map = {};
 
       this.storage.removeItem(this.key);
+      this.storage.removeHook(this.key);
    }
 
    public registerHook(id:string, func: (newValue: any, oldValue: any, key: string) => void);

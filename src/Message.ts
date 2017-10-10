@@ -12,6 +12,7 @@ import Client from './Client'
 import Utils from './util/Utils'
 import {MessageInterface, DIRECTION, MSGTYPE} from './MessageInterface'
 import PersistentMap from './util/PersistentMap'
+import UUID from './util/UUID';
 
 const MSGPOSTFIX = ':msg';
 
@@ -20,6 +21,8 @@ const ATREGEX = new RegExp('(xmpp:)?(' + CONST.REGEX.JID.source + ')(\\?[^\\s]+\
 interface MessagePayload {
    peer:JID,
    direction:DIRECTION,
+   attrId?:string,
+   uid?:string,
    plaintextMessage?:string,
    htmlMessage?:string,
    errorMessage?:string,
@@ -39,7 +42,7 @@ interface MessagePayload {
 
 export default class Message implements Identifiable, MessageInterface {
 
-   private id:string;
+   private uid:string;
 
    private data:PersistentMap;
 
@@ -53,24 +56,24 @@ export default class Message implements Identifiable, MessageInterface {
 
    private storage:Storage;
 
-   constructor(id:string);
+   constructor(uid:string);
    constructor(data:MessagePayload);
-   constructor() {
+   constructor(arg0) {
       this.storage = Client.getStorage();
       let data;
 
-      if (typeof arguments[0] === 'string' && arguments[0].length > 0 && arguments.length === 1) {
-         this.id = arguments[0];
-      } else if (typeof arguments[0] === 'object' && arguments[0] !== null) {
-         data = arguments[0];
+      if (typeof arg0 === 'string' && arg0.length > 0 && arguments.length === 1) {
+         this.uid = arg0;
+      } else if (typeof arg0 === 'object' && arg0 !== null) {
+         data = arg0;
 
-         //@TODO replace uid with id
-         this.id = data.uid ? data.uid : new Date().getTime() + MSGPOSTFIX;
+         this.uid = data.uid || UUID.v4();
+         data.attrId = data.attrId || new Date().getTime() + MSGPOSTFIX;
 
          delete data.uid;
       }
 
-      this.data = new PersistentMap(this.storage, this.id);
+      this.data = new PersistentMap(this.storage, this.uid);
 
       if (data) {
          if (data.peer) {
@@ -86,6 +89,8 @@ export default class Message implements Identifiable, MessageInterface {
             encryptedHtmlMessage: null,
             encryptedPlaintextMessage: null
          }, data));
+      } else if (!this.data.get('attrId')) {
+         throw `Could not load message ${this.uid}`;
       }
    }
 
@@ -94,7 +99,16 @@ export default class Message implements Identifiable, MessageInterface {
    }
 
    public getId() {
-      return this.id;
+      console.trace('Deprecated Message.getId called');
+      return this.getUid();
+   }
+
+   public getUid() {
+      return this.uid;
+   }
+
+   public getAttrId():string {
+      return this.data.get('attrId');
    }
 
    public delete() {
@@ -108,7 +122,7 @@ export default class Message implements Identifiable, MessageInterface {
 
       this.attachment = undefined;
       this.data = undefined;
-      this.id = undefined;
+      this.uid = undefined;
    }
 
    public getNextId():string {
@@ -116,11 +130,19 @@ export default class Message implements Identifiable, MessageInterface {
    }
 
    public setNext(message:Message|string) {
-      this.data.set('next', typeof message === 'string' ? message : message.getId());
+      let nextId = typeof message === 'string' ? message : message.getUid();
+
+      // this.data.set('next', nextId);
+
+      if (this.getNextId() === this.uid) {
+         console.trace('Loop detected ' + this.uid);
+      } else {
+         this.data.set('next', nextId);
+      }
    }
 
    public getCssId() {
-      return this.id.replace(/:/g, '-');
+      return this.uid.replace(/:/g, '-');
    }
 
    public getDOM() {

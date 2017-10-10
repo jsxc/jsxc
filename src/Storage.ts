@@ -234,10 +234,12 @@ export default class Storage {
       this.hooks[eventName].push(func);
    }
 
-   public removeHook(eventName:string, func: (newValue: any, oldValue: any, key: string) => void) {
+   public removeHook(eventName:string, func?: (newValue: any, oldValue: any, key: string) => void) {
       let eventNameList = this.hooks[eventName] || [];
 
-      if (eventNameList.indexOf(func) > -1) {
+      if (typeof func === 'undefined') {
+         eventNameList = [];
+      }else if (eventNameList.indexOf(func) > -1) {
          eventNameList = $.grep(eventNameList, function(i) {
             return func !== i;
          });

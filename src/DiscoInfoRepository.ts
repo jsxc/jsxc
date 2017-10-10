@@ -4,12 +4,15 @@ import PersistentMap from './util/PersistentMap'
 import JID from './JID'
 import Contact from './Contact'
 import Log from './util/Log'
+import Client from './Client'
 
 export default class DiscoInfoRepository {
    private jidIndex:PersistentMap;
+   private serverJidIndex:PersistentMap;
 
    constructor(private account:Account) {
       this.jidIndex = new PersistentMap(account.getStorage(), 'capabilities');
+      this.serverJidIndex = new PersistentMap(Client.getStorage(), 'capabilities');
    }
 
    public addRelation(jid:JID, discoInfo:DiscoInfo) {
@@ -67,7 +70,7 @@ export default class DiscoInfoRepository {
       if (arguments[0] instanceof JID) {
          let jid:JID = arguments[0];
 
-         if (jid.isBare()) {
+         if (jid.isBare() && !jid.isServer()) {
             return Promise.reject('We need a full jid.');
          }
 
@@ -78,29 +81,26 @@ export default class DiscoInfoRepository {
          return Promise.reject('Wrong parameters');
       }
 
-
       return capabilitiesPromise.then((capabilities:DiscoInfo) => {
-         let availableFeatures = capabilities.getFeatures();
-
-         for (let feature of features) {
-            if (availableFeatures.indexOf(feature) < 0) {
-               return false;
-            }
-         }
-
-         return true;
+         return capabilities.hasFeature(features);
       })
    }
 
    public getCapabilities(jid:JID):Promise<DiscoInfo|void> {
       let jidIndex = this.jidIndex;
+      let serverJidIndex = this.serverJidIndex;
 
-      if (jid.isBare()) {
+      if (jid.isBare() && !jid.isServer()) {
          //  return Promise.reject('We need a full jid.');
       }
 
-      if (!jid.node && !jid.resource) {
-         return this.requestDiscoInfo(jid);
+      if (jid.isServer()) {
+         let version = serverJidIndex.get(jid.domain);
+console.log('isServer', version, DiscoInfo.exists(version))
+         if (!version || (version && !DiscoInfo.exists(version))) {
+            return this.requestDiscoInfo(jid);
+            //@TODO verify version
+         }
       }
 
       return new Promise<DiscoInfo>((resolve) => {
@@ -108,9 +108,9 @@ export default class DiscoInfoRepository {
       });
 
       function checkCaps(cb) {
-         let version = jidIndex.get(jid.full);
+         let version = jid.isServer() ? serverJidIndex.get(jid.domain) : jidIndex.get(jid.full);
 
-         if (version) {
+         if (version && DiscoInfo.exists(version)) {
             cb(new DiscoInfo(version));
          } else {
             setTimeout(() => {
@@ -158,7 +158,7 @@ export default class DiscoInfoRepository {
       }
 
       if (typeof capabilities['identity'] === 'undefined' || capabilities['identity'].length === 0) {
-         return Promise.reject('Disco info response is unvalid. Missing identity.');
+         return Promise.reject('Disco info response is invalid. Missing identity.');
       }
 
       //   if (typeof capabilities['feature'] === 'undefined' || capabilities['feature'].indexOf('http://jabber.org/protocol/disco#info') < 0) {

@@ -3,6 +3,7 @@ import Options from '../../Options';
 import Log from '../../util/Log';
 import SM from '../../StateMachine'
 import Client from '../../Client'
+import PersistentMap from '../../util/PersistentMap'
 
 export function login(url:string, jid:string, sid:string, rid:string);
 export function login(url:string, jid:string, password:string);
@@ -112,7 +113,19 @@ function prepareConnection(url:string):Strophe.Connection {
       };
    }
 
-   // connection.nextValidRid = onRidChange;
+   connection._addSysHandler(function(stanza) {
+      if (stanza.nodeName !== 'stream:features') {
+         return;
+      }
+
+      let from = connection.domain;
+      let c = stanza.querySelector('c');
+      let ver = c.getAttribute('ver');
+      let node = c.getAttribute('node');
+
+      let jidIndex = new PersistentMap(Client.getStorage(), 'capabilities');
+      jidIndex.set(from, ver);
+   }, 'http://jabber.org/protocol/caps');
 
    if (connection.caps) {
       connection.caps.node = 'http://jsxc.org/';

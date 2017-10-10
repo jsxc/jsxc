@@ -49,6 +49,10 @@ export default class JID implements JIDInterface {
       return this.full === this.bare;
    }
 
+   public isServer():boolean {
+      return !this.node && this.domain && !this.resource;
+   }
+
    private escapeNode(node:string) {
       return node.replace(/^\s+|\s+$/g, '')
           .replace(/\\/g,  "\\5c")

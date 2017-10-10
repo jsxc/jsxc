@@ -7,6 +7,7 @@ import OTRPlugin from './plugins/otr/Plugin'
 import ReceiptPlugin from './plugins/receipts'
 import NotificationPlugin from './plugins/Notification'
 import MeCommandPlugin from './plugins/MeCommand'
+import MessageArchiveManagementPlugin from './plugins/mam/Plugin'
 
 // @REVIEW
 $.extend(window, StropheLib)
@@ -15,6 +16,7 @@ Client.addPlugin(OTRPlugin);
 Client.addPlugin(ReceiptPlugin);
 Client.addPlugin(NotificationPlugin);
 Client.addPlugin(MeCommandPlugin);
+Client.addPlugin(MessageArchiveManagementPlugin);
 
 Client.init();
 

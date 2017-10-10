@@ -8,8 +8,6 @@ export default class Transcript {
 
    private firstMessage:Message;
 
-   private lastMessage:Message;
-
    private messages = {};
 
    constructor(storage:Storage, contact:Contact) {
@@ -27,7 +25,7 @@ export default class Transcript {
 
       this.addMessage(message);
 
-      this.properties.set('firstMessageId', message.getId());
+      this.properties.set('firstMessageId', message.getUid());
    }
 
    public getFirstMessage():Message {
@@ -38,8 +36,14 @@ export default class Transcript {
       return this.firstMessage;
    }
 
-   public setLastMessage(message:Message) {
-      this.lastMessage = message;
+   public getLastMessage():Message {
+      let lastMessage = this.getFirstMessage();
+
+      while(lastMessage && lastMessage.getNextId()) {
+         lastMessage = this.getMessage(lastMessage.getNextId());
+      }
+
+      return lastMessage;
    }
 
    public getMessage(id:string):Message {
@@ -74,6 +78,6 @@ export default class Transcript {
    }
 
    private addMessage(message:Message) {
-      this.messages[message.getId()] = message;
+      this.messages[message.getUid()] = message;
    }
 }

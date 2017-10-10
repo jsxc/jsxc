@@ -137,7 +137,7 @@ export default class ChatWindow {
    }
 
    public getChatWindowMessage(message:Message) {
-      let id = message.getId();
+      let id = message.getUid();
 
       if (!this.chatWindowMessages[id]) {
          this.chatWindowMessages[id] = new ChatWindowMessage(message, this);
@@ -204,10 +204,13 @@ export default class ChatWindow {
    }
 
    public clear() {
+      this.chatWindowMessages = {};
+
       this.getTranscript().clear();
 
-      //@REVIEW required?
       this.element.find('.jsxc-message-area').empty();
+
+      ChatWindow.HookRepository.trigger('cleared', this, this.contact);
    }
 
    public highlight() {
@@ -249,6 +252,8 @@ export default class ChatWindow {
       } else {
          this.element.find('.jsxc-message-area').append(messageElement);
       }
+
+      chatWindowMessage.restoreNextMessage();
 
       this.scrollMessageAreaToBottom();
 

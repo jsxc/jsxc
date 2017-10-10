@@ -55,6 +55,21 @@ export default class DiscoInfo  {
     return this.generateCapsVersion(this.getIdentities(), this.getFeatures());
   }
 
+  public hasFeature(features:string[]):boolean
+  public hasFeature(feature:string):boolean
+  public hasFeature() {
+     let features = (arguments[0] instanceof Array) ? arguments[0] : [arguments[0]];
+     let availableFeatures = this.getFeatures();
+
+     for (let feature of features) {
+       if (availableFeatures.indexOf(feature) < 0) {
+          return false;
+       }
+     }
+
+     return true;
+ }
+
   protected generateCapsVersion(identities:Identity[], features:string[]):string {
     let version = '';
 

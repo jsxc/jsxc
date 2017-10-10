@@ -11,10 +11,6 @@ export default class ChatWindowMessage {
    constructor(private message:Message, private chatWindow:ChatWindow) {
       this.generateElement();
       this.registerHooks();
-
-      if (!this.message.getNextId()) {
-         chatWindow.getTranscript().setLastMessage(message);
-      }
    }
 
    public getElement() {
@@ -26,6 +22,11 @@ export default class ChatWindowMessage {
 
       if (nextId) {
          let nextMessage = this.chatWindow.getTranscript().getMessage(nextId);
+
+         if (!nextMessage) {
+            console.warn('Couldnt find next message.');
+            return;
+         }
 
          if (nextMessage.getDOM().length === 0) {
             let chatWindowMessage = this.chatWindow.getChatWindowMessage(nextMessage);
@@ -149,8 +150,10 @@ export default class ChatWindowMessage {
          }
       });
 
-      this.message.registerHook('next', () => {
-         this.restoreNextMessage();
+      this.message.registerHook('next', (nextId) => {
+         if (nextId) {
+            this.restoreNextMessage();
+         }
       });
    }
 }

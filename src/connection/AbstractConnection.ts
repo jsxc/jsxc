@@ -9,6 +9,7 @@ import {IConnection} from './ConnectionInterface'
 import Account from '../Account'
 import Pipe from '../util/Pipe'
 import Form from './Form'
+import UUID from '../util/UUID'
 
 let Strophe = StropheLib.Strophe;
 let $iq = StropheLib.$iq;
@@ -74,7 +75,7 @@ abstract class AbstractConnection {
       let xmlMsg = $msg({
          to: message.getPeer().full,
          type: message.getType(),
-         id: message.getId()
+         id: message.getAttrId()
       });
 
       let htmlMessage;
@@ -113,6 +114,11 @@ abstract class AbstractConnection {
       if (plaintextMessage) {
          xmlMsg.c('body').t(plaintextMessage).up();
       }
+
+      xmlMsg.c('origin-id', {
+         xmlns: 'urn:xmpp:sid:0',
+         id: message.getUid()
+      }).up();
 
       let pipe = Pipe.get('preSendMessageStanza');
       pipe.run(message, xmlMsg).then(([message, xmlMsg]) => {
@@ -385,6 +391,49 @@ abstract class AbstractConnection {
       });
 
       this.send(msg);
+   }
+
+   public queryArchive(archive:JID, queryId:string, beforeResultId?:string, end?:Date) {
+      var iq = $iq({
+         type:'set'
+      });
+
+      iq.c('query', {
+         xmlns: NS.get('MAM'),
+         queryid: queryId
+      });
+
+      iq.c('x',{
+         xmlns:'jabber:x:data',
+         type:'submit'
+      });
+
+      iq.c('field',{
+         'var':'FORM_TYPE',
+         type:'hidden'
+      }).c('value').t(NS.get('MAM')).up().up();
+
+      iq.c('field',{
+         'var': 'with'
+      }).c('value').t(archive.bare).up().up();
+
+      if (end) {
+         iq.c('field',{
+            'var': 'end'
+         }).c('value').t(end.toISOString()).up().up();
+      }
+
+      iq.up().c('set', {
+         xmlns: 'http://jabber.org/protocol/rsm'
+      }).c('max').t(20).up();
+
+      if (typeof beforeResultId === 'string') {
+         iq.c('before').t(beforeResultId);
+      }
+
+      iq.up();
+
+      return this.sendIQ(iq);
    }
 
    public close() {

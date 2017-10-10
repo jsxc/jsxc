@@ -55,6 +55,10 @@ export default class extends AbstractHandler {
       let messageTo = messageElement.attr('from');
       let messageId = messageElement.attr('id');
 
+      //@REVIEW "by" attribute ?
+      let stanzaIdElement = messageElement.find('stanza-id[xmlns="urn:xmpp:sid:0"]');
+      let stanzaId = stanzaIdElement.attr('id');
+
       let receiptsRequestElement = messageElement.find("request[xmlns='urn:xmpp:receipts']");
 
       let delayElement = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
@@ -66,6 +70,8 @@ export default class extends AbstractHandler {
          peer = new JID(direction === Message.DIRECTION.OUT ? messageTo : messageFrom);
 
          let message = new Message({
+            uid: stanzaId,
+            attrId: messageId,
             peer: peer,
             direction: direction,
             plaintextMessage: plaintextBody,
@@ -114,6 +120,8 @@ export default class extends AbstractHandler {
       $(document).trigger('message.jsxc', [from, plaintextBody]);
 
       let message = new Message({
+         uid: stanzaId,
+         attrId: messageId,
          peer: peer,
          direction: Message.DIRECTION.IN,
          plaintextMessage: plaintextBody,
