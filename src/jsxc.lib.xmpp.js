@@ -130,7 +130,7 @@ jsxc.xmpp = {
                $(document).trigger('disconnected.jsxc');
                break;
             case Strophe.Status.CONNFAIL:
-               $(document).trigger('connfail.jsxc');
+               $(document).trigger('connfail.jsxc', condition);
                break;
             case Strophe.Status.AUTHFAIL:
                $(document).trigger('authfail.jsxc');
