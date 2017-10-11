@@ -48,6 +48,18 @@ abstract class AbstractConnection {
       discoInfo.addIdentity('client', 'web', 'JSXC');
    }
 
+   public pluginOnlySend(stanzaElement:Element);
+   public pluginOnlySend(stanzaElement:Strophe.Builder);
+   public pluginOnlySend(stanzaElement) {
+      this.send(stanzaElement);
+   }
+
+   public pluginOnlySendIQ(stanzaElement:Element):Promise<{}>;
+   public pluginOnlySendIQ(stanzaElement:Strophe.Builder):Promise<{}>;
+   public pluginOnlySendIQ(stanzaElement) {
+      return this.sendIQ(stanzaElement);
+   }
+
    public getJID():JID {
       return this.account.getJID();
    }

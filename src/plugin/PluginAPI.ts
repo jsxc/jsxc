@@ -6,6 +6,7 @@ import Message from '../Message'
 import Pipe from '../util/Pipe'
 import JID from '../JID'
 import {IConnection} from '../connection/ConnectionInterface'
+import DiscoInfoRepository from '../DiscoInfoRepository'
 
 export default class PluginAPI {
    private storage;
@@ -22,7 +23,19 @@ export default class PluginAPI {
       return this.storage;
    }
 
-   public getConnection():IConnection {
+   public send = (stanzaElement:Element|Strophe.Builder) => {
+      this.getConnection().pluginOnlySend(stanzaElement);
+   }
+
+   public sendIQ = (stanzaElement:Element|Strophe.Builder):Promise<{}> => {
+      return this.getConnection().pluginOnlySendIQ(stanzaElement);
+   }
+
+   public getDiscoInfoRepository():DiscoInfoRepository {
+      return this.account.getDiscoInfoRepository();
+   }
+
+   public getConnection() {
       return this.account.getConnection();
    }
 

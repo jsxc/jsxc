@@ -8,6 +8,7 @@ import ReceiptPlugin from './plugins/receipts'
 import NotificationPlugin from './plugins/Notification'
 import MeCommandPlugin from './plugins/MeCommand'
 import MessageArchiveManagementPlugin from './plugins/mam/Plugin'
+import ChatStatePlugin from './plugins/chatState/ChatStatePlugin'
 
 // @REVIEW
 $.extend(window, StropheLib)
@@ -17,6 +18,7 @@ Client.addPlugin(ReceiptPlugin);
 Client.addPlugin(NotificationPlugin);
 Client.addPlugin(MeCommandPlugin);
 Client.addPlugin(MessageArchiveManagementPlugin);
+Client.addPlugin(ChatStatePlugin);
 
 Client.init();
 

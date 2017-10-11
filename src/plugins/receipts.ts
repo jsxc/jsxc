@@ -45,7 +45,7 @@ export default class ReceiptPlugin extends AbstractPlugin {
          // Add request according to XEP-0184
          xmlStanza.c('request', {
             xmlns: Namespace.get('RECEIPTS')
-         });
+         }).up();
       }
 
       return [message, xmlStanza];

@@ -96,7 +96,7 @@ export default class DiscoInfoRepository {
 
       if (jid.isServer()) {
          let version = serverJidIndex.get(jid.domain);
-console.log('isServer', version, DiscoInfo.exists(version))
+
          if (!version || (version && !DiscoInfo.exists(version))) {
             return this.requestDiscoInfo(jid);
             //@TODO verify version
