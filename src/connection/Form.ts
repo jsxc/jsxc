@@ -49,7 +49,8 @@ export default class Form {
       }
 
       if (type === 'result') {
-         throw 'I don\'t support forms of type result';
+         //@TODO why?
+         // throw 'I don\'t support forms of type result';
       }
    }
 
@@ -98,6 +99,12 @@ export default class Form {
       }
 
       return formElement;
+   }
+
+   public getValues(key:string):string[] {
+      let fields = this.fields.filter(field => field.getName() === key);
+
+      return fields.length > 0 ? fields[0].getValues() : undefined;
    }
 }
 
@@ -195,6 +202,14 @@ class Field {
       }
    }
 
+   public getName():string {
+      return this.data.name;
+   }
+
+   public getValues():string[] {
+      return this.data.values;
+   }
+
    public toJSON() {
       return {
          'type': this.data.type,
@@ -221,7 +236,7 @@ class Field {
 
       switch(this.data.type) {
          case 'fixed':
-            element = $('<div>').append($(this.data.values).map((index, value) => $('<p>').text(value).get();));
+            element = $('<div>').append($(this.data.values).map((index, value) => $('<p>').text(value).get()));
             break;
          case 'boolean':
          case 'hidden':

@@ -1,5 +1,6 @@
 import PersistentMap from './util/PersistentMap'
 import Client from './Client'
+import Form from './connection/Form'
 import * as sha1 from 'sha1'
 
 interface Identity {
@@ -22,7 +23,7 @@ export default class DiscoInfo  {
   /* @TODO support extended information formatted according to XEP-0128
    * consider this information also for generateCapsVersion
    */
-  constructor(identities:Identity[], features:string[])
+  constructor(identities:Identity[], features:string[], forms:Form[])
   constructor(version:string)
   constructor() {
     let storage = Client.getStorage();
@@ -36,9 +37,10 @@ export default class DiscoInfo  {
 
     this.data = new PersistentMap(storage, 'disco', version);
 
-    if(arguments.length === 2) {
+    if(arguments.length === 3) {
       this.data.set('identities', arguments[0]);
       this.data.set('features', arguments[1]);
+      this.data.set('forms', arguments[2].map((form:Form) => form.toJSON()));
     }
   }
 
@@ -49,6 +51,23 @@ export default class DiscoInfo  {
   public getFeatures():Array<string> {
     return this.data.get('features') || [];
   }
+
+  public getForms():Form[] {
+     let serializedForms = this.data.get('forms') || []
+
+     return serializedForms.map(form => Form.fromJSON(form));
+  }
+
+  public getFormByType(type:string):Form {
+     let forms = this.getForms();
+     let form = forms.filter((form) => {
+        let formType = form.getValues('FORM_TYPE') || [];
+
+        return formType.length === 1 && formType[0] === type;
+     });
+
+     return form.length === 1 ? form[0] : undefined;
+ }
 
   public getCapsVersion():String {
     //@REVIEW cache?

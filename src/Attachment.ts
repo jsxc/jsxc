@@ -1,86 +1,169 @@
 import Options from './Options';
 import Log from './util/Log';
+import UUID from './util/UUID';
+import PersistentMap from './util/PersistentMap';
+import Client from './Client'
+import beautifyBytes from './ui/util/ByteBeautifier'
 
 export default class Attachment {
    private mimeType:string;
 
-   private data:any;
+   private data:string;
 
    private thumbnailData:any;
 
-   private size:number;
+   private file:File;
 
-   private persistent:boolean;
+   private uid:string;
 
-   private name:string;
+   private properties;
 
-   constructor(name:string, mimeType:string, data:any);
-   constructor(id:string);
+   constructor(name:string, mimeType:string, data:string);
+   constructor(file:File);
+   constructor(uid:string);
    constructor() {
-      // @TODO
-   }
+      if (arguments.length === 1 && typeof arguments[0] === 'string') {
+         this.uid = arguments[0];
+      }
 
-   public save():boolean {
-      if (this.isImage() && this.data && !this.thumbnailData) {
+      let storage = Client.getStorage();
+      this.properties = new PersistentMap(storage, this.getUid());
+
+      if(arguments[0] instanceof File) {
+         this.file = arguments[0];
+
+         this.properties.set({
+            'mimeType': this.file.type,
+            'name': this.file.name,
+            'size': this.file.size
+         });
+      } else if (arguments.length === 3) {
+         this.properties.set({
+            'mimeType': arguments[1],
+            'name': arguments[0]
+         });
+
+         this.data = arguments[2];
+      }
+
+      if (this.isImage() && this.file && !this.hasThumbnailData()) {
          this.generateThumbnail();
       }
-
-      if (this.size > Options.get('maxStorableSize')) {
-         Log.debug('Attachment to large to store');
-
-         this.persistent = false;
-
-         return false;
-
-         //@TODO delete data and store thumbnailData
-      }
-
-      //@TODO save to storage
-      return true;
    }
 
-   public getId() {
-      
+   public getUid():string {
+      if (!this.uid) {
+         this.uid = UUID.v4();
+      }
+
+      return this.uid;
    }
 
    public getData() {
+      if (!this.data) {
+         this.data = this.properties.get('data');
+      }
+
       return this.data;
    }
 
+   public setData(data:string) {
+      if (typeof data === 'string' && data.length < 1024) {
+         this.properties.set('data', data);
+      } else {
+         //@TODO inform user
+         Log.warn('Data to large to store');
+      }
+
+      this.data = data;
+   }
+
+   public setProcessed(processed:boolean) {
+      this.properties.set('processed', processed);
+   }
+
+   public isProcessed():boolean {
+      return !!this.properties.get('processed');
+   }
+
    public getSize():number {
-      return this.size;
+      return this.properties.get('size');
    }
 
    public getMimeType():string {
-      return this.mimeType;
+      return this.properties.get('mimeType');
    }
 
    public getThumbnailData() {
-      return this.thumbnailData;
+      return this.properties.get('thumbnail');
    }
 
    public getName() {
-      return this.name;
+      return this.properties.get('name');
+   }
+
+   public getFile():File {
+      return this.file;
    }
 
    public isPersistent():boolean {
-      return this.persistent;
+      return !!this.properties.get('data');
    }
 
    public isImage():boolean {
-      return /^image\//i.test(this.mimeType);
+      return /^image\/(jpeg|jpg|gif|png|svg)/i.test(this.getMimeType());
    }
 
    public hasThumbnailData():boolean {
-      return !!this.thumbnailData;
+      return !!this.getThumbnailData();
    }
 
    public hasData():boolean {
-      return !!this.data;
+      return !!this.getData();
    }
 
    public clearData() {
       this.data = null;
+   }
+
+   public getElement() {
+      let type = this.getMimeType();
+      let name = this.getName();
+      let size = beautifyBytes(this.getSize());
+
+      let wrapperElement = $('<div>');
+      wrapperElement.addClass('jsxc-attachment');
+      wrapperElement.addClass('jsxc-' + type.replace(/\//, '-')); //@TODO XSS
+      wrapperElement.addClass('jsxc-' + type.replace(/^([^/]+)\/.*/, '$1'));
+
+      let title = `${name} (${size})`;
+
+      if (FileReader && this.isImage() && this.file) {
+         // show image preview
+         let img = $('<img alt="preview">');
+         img.attr('title', title);
+         // img.attr('src', jsxc.options.get('root') + '/img/loading.gif');
+
+         this.getDataFromFile().then((src) => {
+            img.attr('src', src);
+         });
+
+         return wrapperElement.append(img);
+      } else {
+         return wrapperElement.text(title);
+      }
+   }
+
+   private getDataFromFile():Promise<string> {
+      return new Promise((resolve, reject) => {
+         let reader = new FileReader();
+
+         reader.onload = function() {
+            resolve(reader.result);
+         }
+
+         reader.readAsDataURL(this.file);
+      });
    }
 
    private generateThumbnail():void {
@@ -88,33 +171,49 @@ export default class Attachment {
          return;
       }
 
+      if (!this.hasData()) {
+         if (this.file) {
+            this.getDataFromFile().then((data) => {
+               this.data = data;
+
+               this.generateThumbnail();
+            });
+         }
+
+         return;
+      }
+
       var sHeight, sWidth, sx, sy;
       var dHeight = 100,
          dWidth = 100;
-      var canvas = <HTMLCanvasElement> $("<canvas>").get(0);
+      var canvas = <HTMLCanvasElement> $('<canvas>').get(0);
 
       canvas.width = dWidth;
       canvas.height = dHeight;
 
-      var ctx = canvas.getContext("2d");
+      var ctx = canvas.getContext('2d');
       var img = new Image();
 
-      img.src = this.data;
+      img.onload = () => {
+         if (img.height > img.width) {
+            sHeight = img.width;
+            sWidth = img.width;
+            sx = 0;
+            sy = (img.height - img.width) / 2;
+         } else {
+            sHeight = img.height;
+            sWidth = img.height;
+            sx = (img.width - img.height) / 2;
+            sy = 0;
+         }
 
-      if (img.height > img.width) {
-         sHeight = img.width;
-         sWidth = img.width;
-         sx = 0;
-         sy = (img.height - img.width) / 2;
-      } else {
-         sHeight = img.height;
-         sWidth = img.height;
-         sx = (img.width - img.height) / 2;
-         sy = 0;
+         ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
+
+         let thumbnailData = canvas.toDataURL('image/jpeg', 0.3);
+
+         this.properties.set('thumbnail', thumbnailData);
       }
 
-      ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
-
-      this.thumbnailData = canvas.toDataURL();
+      img.src = this.data;
    }
 }

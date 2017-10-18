@@ -26,11 +26,11 @@ export default class RosterItem {
       this.element.on('dragstart', (ev) => {
          ev.originalEvent.dataTransfer.setData('text/plain', contact.getJid().bare);
 
-         $('.jsxc-droppable').addClass('jsxc-dragactive');
+         $('.jsxc-droppable').addClass('jsxc-dragactive jsxc-drag-rosteritem');
       });
 
       this.element.on('dragend', () => {
-         $('.jsxc-droppable').removeClass('jsxc-dragactive');
+         $('.jsxc-droppable').removeClass('jsxc-dragactive jsxc-drag-rosteritem');
       });
 
       this.element.click(function(){

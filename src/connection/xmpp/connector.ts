@@ -113,6 +113,7 @@ function prepareConnection(url:string):Strophe.Connection {
       };
    }
 
+   //@REVIEW this is probably not needed, because this stanza is also available via conn.features
    connection._addSysHandler(function(stanza) {
       if (stanza.nodeName !== 'stream:features') {
          return;

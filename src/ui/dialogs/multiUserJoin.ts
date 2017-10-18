@@ -106,6 +106,7 @@ class MultiUserJoinDialog {
          $(stanza).find('item').each((index, element) => {
             let jid = new JID('', $(element).attr('jid'), '');
 
+            //@TODO cache
             let promise = discoInfoRepository.requestDiscoInfo(jid).then((discoInfo) => {
                return discoInfoRepository.hasFeature(discoInfo, 'http://jabber.org/protocol/muc');
             }).then((hasFeature) => {

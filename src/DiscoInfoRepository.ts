@@ -5,6 +5,7 @@ import JID from './JID'
 import Contact from './Contact'
 import Log from './util/Log'
 import Client from './Client'
+import Form from './connection/Form'
 
 export default class DiscoInfoRepository {
    private jidIndex:PersistentMap;
@@ -161,11 +162,15 @@ export default class DiscoInfoRepository {
          return Promise.reject('Disco info response is invalid. Missing identity.');
       }
 
+      let forms = queryElement.find('x[xmlns="jabber:x:data"]').map((index, element) => {
+         return Form.fromXML(element);
+      }).get();
+
       //   if (typeof capabilities['feature'] === 'undefined' || capabilities['feature'].indexOf('http://jabber.org/protocol/disco#info') < 0) {
       //      return Promise.reject('Disco info response is unvalid. Doesnt support disco.');
       //   }
 
-      let discoInfo = new DiscoInfo(capabilities['identity'], capabilities['feature']);
+      let discoInfo = new DiscoInfo(capabilities['identity'], capabilities['feature'], forms);
 
       return Promise.resolve(discoInfo);
    }

@@ -111,9 +111,12 @@ export default class ChatWindowMessage {
          attachmentElement = $('<a>').append(attachmentElement);
          attachmentElement.attr('href', attachment.getData());
          attachmentElement.attr('download', attachment.getName());
+
+         //@REVIEW this is a dirty hack
+         this.element.find('.jsxc-content a[href="'+attachment.getData()+'"]').remove();
       }
 
-      this.element.find('div').first().append(attachmentElement);
+      this.element.find('div').first().prepend(attachmentElement);
    }
 
    private addSenderToElement() {

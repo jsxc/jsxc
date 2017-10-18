@@ -101,25 +101,6 @@ export default class MultiUserChatWindow extends ChatWindow {
    private initDroppable() {
       let windowElement = this.element.find('.jsxc-window');
 
-      windowElement.addClass('jsxc-droppable');
-
-      windowElement.on('dragenter', (ev) => {
-         ev.preventDefault();
-
-         windowElement.addClass('jsxc-dragover');
-      });
-
-      windowElement.on('dragleave', (ev) => {
-         ev.preventDefault();
-
-         windowElement.removeClass('jsxc-dragover');
-      });
-
-      windowElement.on('dragover', (ev) => {
-         ev.preventDefault();
-         ev.originalEvent.dataTransfer.dropEffect = 'copy';
-      })
-
       windowElement.on('drop', (ev) => {
          ev.preventDefault();
 

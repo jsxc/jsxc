@@ -31,8 +31,8 @@ abstract class AbstractConnection {
    protected abstract send(stanzaElement:Element);
    protected abstract send(stanzaElement:Strophe.Builder);
 
-   protected abstract sendIQ(stanzaElement:Element):Promise<{}>;
-   protected abstract sendIQ(stanzaElement:Strophe.Builder):Promise<{}>;
+   protected abstract sendIQ(stanzaElement:Element):Promise<Element>;
+   protected abstract sendIQ(stanzaElement:Strophe.Builder):Promise<Element>;
 
    public abstract registerHandler(handler:(stanza:string)=>boolean, ns?:string, name?:string, type?:string, id?:string, from?:string);
 
@@ -54,8 +54,8 @@ abstract class AbstractConnection {
       this.send(stanzaElement);
    }
 
-   public pluginOnlySendIQ(stanzaElement:Element):Promise<{}>;
-   public pluginOnlySendIQ(stanzaElement:Strophe.Builder):Promise<{}>;
+   public pluginOnlySendIQ(stanzaElement:Element):Promise<Element>;
+   public pluginOnlySendIQ(stanzaElement:Strophe.Builder):Promise<Element>;
    public pluginOnlySendIQ(stanzaElement) {
       return this.sendIQ(stanzaElement);
    }
@@ -108,7 +108,7 @@ abstract class AbstractConnection {
             xmlns: Strophe.NS.XHTML_IM
          }).c('body', {
             xmlns: Strophe.NS.XHTML
-         }).h(htmlMessage).up();
+         }).h(htmlMessage).up().up();
       }
 
       let plaintextMessage;
@@ -134,6 +134,11 @@ abstract class AbstractConnection {
 
       let pipe = Pipe.get('preSendMessageStanza');
       pipe.run(message, xmlMsg).then(([message, xmlMsg]) => {
+         if (message.hasAttachment() && !message.getAttachment().isProcessed()) {
+            Log.warn('Attachment was not processed');
+            //@TODO inform user
+         }
+
          this.send(xmlMsg);
       });
    }
@@ -157,7 +162,7 @@ abstract class AbstractConnection {
       this.send(presenceStanza);
    }
 
-   public removeContact(jid:JID) {
+   public removeContact(jid:JID):Promise<Element> {
       let self = this;
 
       // Shortcut to remove buddy from roster and cancle all subscriptions
@@ -206,7 +211,7 @@ abstract class AbstractConnection {
       });
    }
 
-   public setDisplayName(jid:JID, displayName:string) {
+   public setDisplayName(jid:JID, displayName:string):Promise<Element> {
       var iq = $iq({
          type: 'set'
       }).c('query', {
@@ -228,7 +233,7 @@ abstract class AbstractConnection {
       this.send(presenceStanza);
    }
 
-   public getDiscoInfo(jid:JID, node?:string):Promise<any> {
+   public getDiscoInfo(jid:JID, node?:string):Promise<Element> {
       let attrs = {
         xmlns: NS.get('DISCO_INFO'),
         node: null
@@ -246,7 +251,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public getDiscoItems(jid:JID, node?:string):Promise<any> {
+   public getDiscoItems(jid:JID, node?:string):Promise<Element> {
      let attrs = {
        xmlns: NS.get('DISCO_ITEMS'),
        node: null
@@ -296,7 +301,7 @@ abstract class AbstractConnection {
       return this.send(pres);
    }
 
-   public destroyMultiUserRoom(jid:JID) {
+   public destroyMultiUserRoom(jid:JID):Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'set'
@@ -307,7 +312,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public createInstantRoom(jid:JID) {
+   public createInstantRoom(jid:JID):Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'set'
@@ -321,7 +326,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public getRoomConfigurationForm(jid:JID) {
+   public getRoomConfigurationForm(jid:JID):Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'get'
@@ -332,7 +337,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public submitRoomConfiguration(jid:JID, form:Form) {
+   public submitRoomConfiguration(jid:JID, form:Form):Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'set'
@@ -343,7 +348,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public cancelRoomConfiguration(jid:JID) {
+   public cancelRoomConfiguration(jid:JID):Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'set'
@@ -405,7 +410,7 @@ abstract class AbstractConnection {
       this.send(msg);
    }
 
-   public queryArchive(archive:JID, queryId:string, beforeResultId?:string, end?:Date) {
+   public queryArchive(archive:JID, queryId:string, beforeResultId?:string, end?:Date):Promise<Element> {
       var iq = $iq({
          type:'set'
       });

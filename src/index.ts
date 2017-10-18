@@ -9,6 +9,7 @@ import NotificationPlugin from './plugins/Notification'
 import MeCommandPlugin from './plugins/MeCommand'
 import MessageArchiveManagementPlugin from './plugins/mam/Plugin'
 import ChatStatePlugin from './plugins/chatState/ChatStatePlugin'
+import HttpUploadPlugin from './plugins/httpUpload/HttpUploadPlugin'
 
 // @REVIEW
 $.extend(window, StropheLib)
@@ -19,6 +20,7 @@ Client.addPlugin(NotificationPlugin);
 Client.addPlugin(MeCommandPlugin);
 Client.addPlugin(MessageArchiveManagementPlugin);
 Client.addPlugin(ChatStatePlugin);
+Client.addPlugin(HttpUploadPlugin);
 
 Client.init();
 

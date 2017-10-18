@@ -80,6 +80,11 @@ export default class Message implements Identifiable, MessageInterface {
             data.peer = data.peer.full;
          }
 
+         if (data.attachment instanceof Attachment) {
+            this.attachment = data.attachment;
+            data.attachment = data.attachment.getUid();
+         }
+
          this.data.set($.extend({
             received: false,
             encrypted: null,
@@ -172,7 +177,7 @@ export default class Message implements Identifiable, MessageInterface {
    public setAttachment(attachment:Attachment) {
       this.attachment = attachment;
 
-      this.data.set('attachment', attachment.getId());
+      this.data.set('attachment', attachment.getUid());
 
       // if (this.getDirection() === DIRECTION.OUT) {
       //    // save storage
@@ -200,6 +205,10 @@ export default class Message implements Identifiable, MessageInterface {
 
    public getHtmlMessage():string {
       return this.data.get('htmlMessage');
+   }
+
+   public setHtmlMessage(htmlMessage:string) {
+      this.data.set('htmlMessage', htmlMessage);
    }
 
    public getEncryptedHtmlMessage():string {
@@ -273,7 +282,7 @@ export default class Message implements Identifiable, MessageInterface {
          body = '<i title="' + body + '">' + Translation.t('Unreadable_OTR_message') + '</i>';
       }
 
-      return body;
+      return `<p>${body}</p>`;
    }
 
    public getErrorMessage():string {

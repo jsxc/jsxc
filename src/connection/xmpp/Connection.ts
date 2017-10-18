@@ -10,6 +10,7 @@ import Account from '../../Account'
 import {AbstractConnection, Presence} from '../AbstractConnection'
 import Roster from '../../ui/Roster'
 import XMPPJingleHandler from './JingleHandler'
+import * as Strophe from 'strophe'
 
 export default class XMPPConnection extends AbstractConnection implements IConnection {
    private handler;
@@ -91,8 +92,8 @@ console.log('return')
       this.connection.send(arguments[0]);
    }
 
-   public sendIQ(stanzaElement:Element):Promise<{}>;
-   public sendIQ(stanzaElement:Strophe.Builder):Promise<{}>;
+   public sendIQ(stanzaElement:Element):Promise<Element>;
+   public sendIQ(stanzaElement:Strophe.Builder):Promise<Element>;
    public sendIQ():Promise<{}> {
       let stanzaElement = arguments[0];
 

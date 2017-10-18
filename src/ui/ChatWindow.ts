@@ -24,6 +24,9 @@ import JID from '../JID'
 import HookRepository from '../util/HookRepository'
 import ChatWindowMessage from './ChatWindowMessage'
 import Transcript from '../Transcript'
+import FileTransferHandler from './ChatWindowFileTransferHandler'
+import Attachment from '../Attachment'
+import beautifyBytes from './util/ByteBeautifier'
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -49,6 +52,8 @@ export default class ChatWindow {
 
    private chatWindowMessages = {};
 
+   private attachmentDeposition:Attachment;
+
    constructor(protected account:Account, protected contact:Contact) {
       let template = chatWindowTemplate({
          accountId: account.getUid(),
@@ -67,6 +72,9 @@ export default class ChatWindow {
       this.restoreLocalHistory();
       this.registerHandler();
       this.registerInputHandler();
+      this.initDroppable();
+
+      new FileTransferHandler(contact, this);
 
       this.element.find('.jsxc-name').disableSelection();
       this.element.find('.jsxc-window').css('bottom', -1 * this.element.find('.jsxc-window-fade').height());
@@ -279,6 +287,55 @@ export default class ChatWindow {
       this.element.find('.jsxc-window-bar .jsxc-menu ul').append($('<li>').append(element));
    }
 
+   public setAttachment(attachment:Attachment) {
+      this.attachmentDeposition = attachment;
+
+      let previewElement = this.element.find('.jsxc-preview');
+      previewElement.empty();
+      previewElement.append('<p class="jsxc-waiting">Processing...</p>');
+      previewElement.empty().append(attachment.getElement());
+
+      let deleteElement = $('<div>');
+      deleteElement.text('×');
+      deleteElement.addClass('jsxc-delete-handle');
+      deleteElement.click(() => {
+         this.clearAttachment();
+      });
+      previewElement.children().first().append(deleteElement);
+
+      this.scrollMessageAreaToBottom();
+   }
+
+   public clearAttachment() {
+      this.attachmentDeposition = undefined;
+
+      let previewElement = this.element.find('.jsxc-preview');
+      previewElement.empty();
+   }
+
+   private initDroppable() {
+      let windowElement = this.element.find('.jsxc-window');
+
+      windowElement.addClass('jsxc-droppable');
+
+      windowElement.on('dragenter', (ev) => {
+         ev.preventDefault();
+
+         windowElement.addClass('jsxc-dragover');
+      });
+
+      windowElement.on('dragleave', (ev) => {
+         ev.preventDefault();
+
+         windowElement.removeClass('jsxc-dragover');
+      });
+
+      windowElement.on('dragover', (ev) => {
+         ev.preventDefault();
+         ev.originalEvent.dataTransfer.dropEffect = 'copy';
+      });
+   }
+
    private registerHandler() {
       let self = this;
       let contact = this.contact;
@@ -394,8 +451,9 @@ export default class ChatWindow {
 
       this.sendOutgoingMessage(message);
 
-      // reset textarea
-      $(ev.target).css('height', '').val('');
+      $(ev.target).val('');
+
+      this.resizeInputArea();
 
       ev.preventDefault();
    }
@@ -427,8 +485,11 @@ export default class ChatWindow {
          peer: this.contact.getJid(),
          direction: Message.DIRECTION.OUT,
          type: this.contact.getType(),
-         plaintextMessage: messageString
+         plaintextMessage: messageString,
+         attachment: this.attachmentDeposition
       });
+
+      this.clearAttachment();
 
       let pipe = Pipe.get('preSendMessage');
 
@@ -481,13 +542,20 @@ export default class ChatWindow {
    private resizeInputArea() {
       let inputElement = this.inputElement;
 
-      if (!inputElement.data('originalHeight')) {
-         inputElement.data('originalHeight', inputElement.outerHeight());
+      if (!inputElement.data('originalScrollHeight')) {
+         inputElement.data('originalScrollHeight', inputElement[0].scrollHeight);
       }
 
-      // compensate rounding error
-      if (inputElement.outerHeight() < (inputElement[0].scrollHeight - 1) && inputElement.val()) {
-         inputElement.height(inputElement.data('originalHeight') * 1.5);
+      if (inputElement.val()) {
+         inputElement.parent().addClass('jsxc-contains-val');
+      } else {
+         inputElement.parent().removeClass('jsxc-contains-val')
+      }
+
+      this.element.removeClass('jsxc-large-send-area')
+
+      if (inputElement.data('originalScrollHeight') < inputElement[0].scrollHeight && inputElement.val()) {
+         this.element.addClass('jsxc-large-send-area')
       }
    }
 
