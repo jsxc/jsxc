@@ -1,33 +1,53 @@
 import {MessageInterface} from './MessageInterface'
 import {JIDInterface} from './JIDInterface'
 import {Presence} from './connection/AbstractConnection'
+import {EncryptionState} from './plugin/AbstractPlugin'
+import ChatWindow from './ui/ChatWindow'
+import Transcript from './Transcript'
+
+export enum ContactType {
+   CHAT = 'chat',
+   GROUPCHAT = 'groupchat'
+}
+
+export enum ContactSubscription {
+   FROM = 'from',
+   TO = 'to',
+   BOTH = 'both',
+   NONE = 'none'
+}
 
 export interface ContactInterface {
    delete();
 
-   openWindow();
+   openChatWindow():ChatWindow;
 
-   addResource(resource:string);
-
-   removeResource(resource:string);
+   getChatWindow():ChatWindow;
 
    setResource(resource:string);
 
    setPresence(resource:string, presence:Presence);
 
-   sendMessage(message:MessageInterface);
+   getCapableResources(features:string[]):Promise<Array<string>>
+   getCapableResources(features:string):Promise<Array<string>>
+
+   hasFeatureByRessource(resource:string, features:string[]):Promise<{}>
+   hasFeatureByRessource(resource:string, feature:string):Promise<{}>
+
+   getCapabilitiesByRessource(resource:string):Promise<any>;
+
+   registerCapableResourcesHook(features:string[], cb:(resources:string[])=>void);
+   registerCapableResourcesHook(features:string, cb:(resources:string[])=>void);
 
    getId():string;
 
    getJid():JIDInterface;
 
-   getFingerprint();
+   getResources():Array<string>;
 
-   getMsgState();
+   getPresence():Presence;
 
-   getPresence();
-
-   getType();
+   getType():ContactType;
 
    getNumberOfUnreadMessages():number;
 
@@ -35,23 +55,25 @@ export interface ContactInterface {
 
    getAvatar():Promise<{}>;
 
-   getSubscription();
-
-   getCapabilitiesByRessource():Promise<{}>;
+   getSubscription():ContactSubscription;
 
    getVcard():Promise<{}>;
 
-   isEncrypted();
+   setEncryptionState(state:EncryptionState);
+
+   getEncryptionState():EncryptionState;
+
+   getTranscript():Transcript;
 
    getStatus():string;
 
    setStatus(status:string);
 
-   setTrust(trust:boolean);
-
    setName(name:string);
 
-   setSubscription(subscription:string);
+   setSubscription(subscription:ContactSubscription);
 
    registerHook(property:string, func:(newValue:any, oldValue:any)=>void);
+
+   isPersistent():boolean;
 }

@@ -37,7 +37,7 @@ export default class Account {
 
    private uid:string;
 
-   private connection:AbstractConnection;
+   private connection:IConnection;
 
    private connectionArguments;
 
@@ -72,27 +72,27 @@ export default class Account {
 
       this.discoInfoRepository = new DiscoInfoRepository(this);
       this.ownDiscoInfo = new DiscoInfoChangable(this.uid);
-
       this.connection = new StorageConnection(this);
-
       this.noticeManager = new NoticeManager(this.getStorage());
-
       this.contact = new Contact(this, new JID(this.uid), this.uid);
-      Roster.get().setRosterAvatar(this.contact);
-
       this.pluginRepository = new PluginRepository(this);
+
+      Roster.get().setRosterAvatar(this.contact);
 
       this.initContacts();
       this.initWindows();
    }
 
-   public connect() {
-      let self = this;
-
+   public connect = () => {
       if (!this.connectionArguments) {
          this.reloadConnectionData();
+         let isConnectionExpired = false;
 
-         if (self.connectionParameters && self.connectionParameters.inactivity && (new Date()).getTime() - self.connectionParameters.timestamp > self.connectionParameters.inactivity) {
+         if (this.connectionParameters && this.connectionParameters.inactivity) {
+            isConnectionExpired = (new Date()).getTime() - this.connectionParameters.timestamp > this.connectionParameters.inactivity;
+         }
+
+         if (isConnectionExpired) {
             Log.warn('Credentials expired')
 
             this.closeAllChatWindows();
@@ -100,6 +100,8 @@ export default class Account {
             return Promise.reject('Credentials expired');
          }
       }
+
+      Roster.get().startProcessing('Connecting...'); //@TODO remove on error
 
       return Connector.login.apply(this, this.connectionArguments).then(this.successfulConnected);
    }
@@ -136,10 +138,7 @@ export default class Account {
 
          Roster.get().remove(contact);
 
-         //@TODO if MultiUserContact remove from multiUserContacts
-
-         //@REVIEW contact.getChatWindow would be nice
-         let chatWindow = this.windows.get(id);
+         let chatWindow = contact.getChatWindow();
 
          if (chatWindow) {
             this.closeChatWindow(chatWindow);
@@ -153,13 +152,11 @@ export default class Account {
       for(let id in this.contacts) {
          let contact = this.contacts[id];
 
-         delete this.contacts[id];
-
-         Roster.get().remove(contact);
+         this.removeContact(contact);
       }
    }
 
-   public addChatWindow(chatWindow:ChatWindow) {
+   public addChatWindow(chatWindow:ChatWindow):ChatWindow {
       chatWindow = ChatWindowList.get().add(chatWindow);
 
       this.windows.push(chatWindow);
@@ -195,11 +192,11 @@ export default class Account {
       return this.storage;
    }
 
-   public getConnection():AbstractConnection {
+   public getConnection():IConnection {
       return this.connection;
    }
 
-   public getUid() {
+   public getUid():string {
       return this.uid;
    }
 
@@ -226,6 +223,7 @@ export default class Account {
       return contact;
    }
 
+   //@TODO rebase this function
    private successfulConnected = (data) => {
       let connection = data.connection;
       let status = data.status;
@@ -256,8 +254,18 @@ export default class Account {
          this.save();
       };
 
+      let handlers = (<StorageConnection> this.connection).getHandlers();
+
       this.connection.close();
       this.connection = new XMPPConnection(this, connection);
+
+      for (let handler of handlers) {
+         this.connection.registerHandler.apply(this.connection, handler);
+      }
+
+      if (connection.features) {
+         this.storeConnectionFeatures(connection);
+      }
 
       if (status === Strophe.Status.CONNECTED) {
          Roster.get().setPresence(Presence.online);
@@ -271,6 +279,21 @@ export default class Account {
       } else {
          this.connection.sendPresence();
       }
+
+      Log.debug('XMPP connection ready');
+
+      Roster.get().endProcessing();
+   }
+
+   private storeConnectionFeatures(connection) {
+      let from = new JID('', connection.domain, '');
+      let stanza = connection.features;
+
+      let capsElement = stanza.querySelector('c');
+      let ver = capsElement.getAttribute('ver');
+      let node = capsElement.getAttribute('node');
+console.log('### Caps', from.full, ver);
+      this.discoInfoRepository.addRelation(from, ver);
    }
 
    private connectionDisconnected() {
@@ -300,11 +323,7 @@ export default class Account {
       let contacts = storedAccountData.contacts || [];
 
       contacts.forEach((id) => {
-         let contact = new Contact(this, id);
-
-         if (contact.getType() === 'groupchat'){
-            contact = new MultiUserContact(this, id);
-         }
+         let contact = this.createNewContact(id);
 
          this.contacts[id] = contact;
 
@@ -312,12 +331,7 @@ export default class Account {
       });
 
       this.getStorage().registerHook('contact:', (contactData) => {
-         //@REVIEW duplicate
-         let contact = new Contact(this, contactData.jid);
-
-         if (contact.getType() === 'groupchat'){
-            contact = new MultiUserContact(this, contactData.jid);
-         }
+         let contact = this.createNewContact(contactData.jid);
 
          if (typeof this.contacts[contact.getId()] === 'undefined') {
             this.contacts[contact.getId()] = contact;
@@ -327,11 +341,20 @@ export default class Account {
       });
    }
 
+   private createNewContact(id:string):Contact {
+      let contact = new Contact(this, id);
+
+      if (contact.getType() === 'groupchat'){
+         contact = new MultiUserContact(this, id);
+      }
+
+      return contact;
+   }
+
    private initWindows() {
       this.windows = new SortedPersistentMap(this.getStorage(), 'windows');
 
       this.windows.setRemoveHook((id, chatWindow) => {
-         console.log('remove hook', id, chatWindow);
          if (chatWindow) {
             ChatWindowList.get().remove(chatWindow);
          }

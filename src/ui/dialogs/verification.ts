@@ -10,6 +10,7 @@ var verificationTemplate = require('../../../template/verification.hbs');
 let dialog:Dialog;
 let contact:Contact;
 
+//@TODO fix verification dialog
 export default function(c:Contact) {
    contact = c;
    let storage = StorageSingleton.getUserStorage();

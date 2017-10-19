@@ -64,6 +64,31 @@ export default class Roster {
       this.initOptions();
    }
 
+   public startProcessing(msg?:string) {
+      this.element.addClass('jsxc-processing');
+      //@TODO count calls to remove class not too early
+
+      if (msg) {
+         let spanElement = this.element.find('.jsxc-menu-presence > span');
+         spanElement.addClass('jsxc-waiting');
+         spanElement.data('previousText', spanElement.text()); //@TODO don't overwrite previous value
+         spanElement.text(msg);
+      }
+   }
+
+   public endProcessing() {
+      this.element.removeClass('jsxc-processing');
+
+      let spanElement = this.element.find('.jsxc-menu-presence > span');
+      spanElement.removeClass('jsxc-waiting');
+
+      let previousText = spanElement.data('previousText');
+
+      if (previousText) {
+         spanElement.text(previousText);
+      }
+   }
+
    public setRosterAvatar(contact:ContactInterface) {
       let avatar = Avatar.get(contact);
       avatar.addElement(this.element.find('.jsxc-bottom .jsxc-avatar'));
@@ -218,7 +243,7 @@ export default class Roster {
    private updateOwnPresenceIndicator(presence:Presence) {
       let label = $('.jsxc-menu-presence .jsxc-' + Presence[presence]).text();
 
-      $('.jsxc-menu-presence > span').text(label);
+      this.element.find('.jsxc-menu-presence > span').text(label);
    }
 
    private registerMainMenuHandler() {

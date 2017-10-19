@@ -68,8 +68,6 @@ function attachConnection(url:string, jid:string, sid:string, rid:string) {
 
    Log.debug('Try to attach old connection.');
 
-   // jsxc.reconnect = true;
-
    return new Promise(function(resolve, reject) {
       connection.attach(jid, sid, rid, function(status){
          if(status === Strophe.Status.CONNFAIL || status === Strophe.Status.AUTHFAIL) {
@@ -112,21 +110,6 @@ function prepareConnection(url:string):Strophe.Connection {
          Log.debug('>', data);
       };
    }
-
-   //@REVIEW this is probably not needed, because this stanza is also available via conn.features
-   connection._addSysHandler(function(stanza) {
-      if (stanza.nodeName !== 'stream:features') {
-         return;
-      }
-
-      let from = connection.domain;
-      let c = stanza.querySelector('c');
-      let ver = c.getAttribute('ver');
-      let node = c.getAttribute('node');
-
-      let jidIndex = new PersistentMap(Client.getStorage(), 'capabilities');
-      jidIndex.set(from, ver);
-   }, 'http://jabber.org/protocol/caps');
 
    if (connection.caps) {
       connection.caps.node = 'http://jsxc.org/';

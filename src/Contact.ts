@@ -1,3 +1,4 @@
+import {ContactInterface, ContactType, ContactSubscription} from './ContactInterface'
 import Storage from './Storage'
 import JID from './JID'
 import Message from './Message'
@@ -13,7 +14,7 @@ import Client from './Client'
 import Transcript from './Transcript'
 import ChatWindow from './ui/ChatWindow'
 
-export default class Contact implements IdentifiableInterface {
+export default class Contact implements IdentifiableInterface, ContactInterface {
    protected storage: Storage;
 
    protected readonly account:Account;
@@ -34,25 +35,28 @@ export default class Contact implements IdentifiableInterface {
       this.storage = this.account.getStorage();
 
       if (typeof arguments[1] === 'string') {
-         let id = arguments[1]; console.log('id', id)
-         this.data = new PersistentMap(this.storage, 'contact', id);
-         this.jid = new JID(this.data.get('jid'));
-
-         return;
+         this.initExistingContact(arguments[1]);
+      } else {
+         this.initNewContact(arguments[1], arguments[2]);
       }
+   }
 
-      this.jid = arguments[1];
+   private initExistingContact(id:string) {
+      this.data = new PersistentMap(this.storage, 'contact', id);
+      this.jid = new JID(this.data.get('jid'));
+   }
+
+   private initNewContact(jid:JID, name?:string) {
+      this.jid = jid;
+
       let defaultData = {
          jid: this.jid.full,
          name: arguments[2] || this.jid.bare,
          presence: Presence.offline,
          status: '',
-         subscription: 'none',
-         msgstate: 0,         //@REVIEW
-         trust: false,        //@REVIEW
-         fingerprint: null,   //@REVIEW
+         subscription: ContactSubscription.NONE,
          resources: {},
-         type: 'chat',
+         type: ContactType.CHAT,
          rnd: Math.random() // force storage event
       }
 
@@ -70,11 +74,11 @@ export default class Contact implements IdentifiableInterface {
       //@TODO purge window
    }
 
-   public openChatWindow = () => {
+   public openChatWindow = ():ChatWindow => {
       return this.account.addChatWindow(this.getChatWindow());
    }
 
-   public getChatWindow() {
+   public getChatWindow():ChatWindow {
       if(!this.chatWindow) {
          this.chatWindow = new ChatWindow(this.account, this);
       }
@@ -83,7 +87,6 @@ export default class Contact implements IdentifiableInterface {
    }
 
    public setResource = (resource:string) => {
-      console.log('setResource', this.jid.bare + '/' + resource)
       this.jid = new JID(this.jid.bare + '/' + resource);
 
       this.data.set('jid', this.jid.full);
@@ -108,19 +111,15 @@ export default class Contact implements IdentifiableInterface {
 
       if (this.data.get('presence') === Presence.offline && presence !== Presence.offline) {
          // buddy has come online
-         // @TODO
-         // Notification.notify({
-         //    title: this.getName(),
-         //    message: Translation.t('has_come_online'),
-         //    source: this.getId()
-         // });
+         Notification.notify({
+            title: this.getName(),
+            message: Translation.t('has_come_online'),
+            source: this
+         });
+         //@TODO show only on older connections (login)
       }
 
       this.data.set('presence', presence);
-   }
-
-   public sendMessage(message:Message) {
-      // message.bid = this.getId();
    }
 
    public getCapableResources(features:string[]):Promise<Array<string>>
@@ -152,7 +151,7 @@ export default class Contact implements IdentifiableInterface {
 
       this.getCapableResources(features).then(cb);
 
-      this.registerHook('resources', () => { console.log('resources changed')
+      this.registerHook('resources', () => {
          //@REVIEW trigger only on changes
          this.getCapableResources(features).then(cb);
       });
@@ -171,24 +170,17 @@ export default class Contact implements IdentifiableInterface {
      return Object.keys(this.data.get('resources'));
    }
 
-   public getFingerprint() {
-      return this.data.get('fingerprint');
-   }
-
-   public getMsgState() {
-      return this.data.get('msgstate');
-   }
-
-   public getPresence() {
+   public getPresence():Presence {
       return this.data.get('presence');
    }
 
-   public getType() {
+   public getType():ContactType {
       return this.data.get('type');
    }
 
    public getNumberOfUnreadMessages():number {
-
+      //@TODO get number of unread messages
+      return 0;
    }
 
    public getName():string {
@@ -196,19 +188,16 @@ export default class Contact implements IdentifiableInterface {
    }
 
    public getAvatar():Promise<{}> {
-
+      //@TODO avatar
+      return Promise.reject('No avatar available');
    }
 
-   public getSubscription() {
+   public getSubscription():ContactSubscription {
       return this.data.get('subscription');
    }
 
    public getVcard():Promise<{}> {
       return this.account.getConnection().loadVcard(this.getJid());
-   }
-
-   public isEncrypted() {
-
    }
 
    public setEncryptionState(state:EncryptionState) {
@@ -235,10 +224,6 @@ export default class Contact implements IdentifiableInterface {
       return this.data.set('status', status);
    }
 
-   public setTrust(trust:boolean) {
-      this.data.set('trust', trust);
-   }
-
    public setName(name:string) {
       let oldName = this.getName();
 
@@ -249,7 +234,7 @@ export default class Contact implements IdentifiableInterface {
       }
    }
 
-   public setSubscription(subscription:string) {
+   public setSubscription(subscription:ContactSubscription) {
       this.data.set('subscription', subscription);
    }
 
@@ -261,7 +246,7 @@ export default class Contact implements IdentifiableInterface {
       return true;
    }
 
-   private getHighestPresence() {
+   private getHighestPresence():Presence {
       let maxPresence = Presence.offline;
       let resources = this.data.get('resources');
 

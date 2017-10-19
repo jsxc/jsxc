@@ -58,4 +58,6 @@ export interface IConnection {
    sendDirectMultiUserInvitation(receiverJid:JID, roomJid:JID, reason?:string, password?:string)
 
    queryArchive(archive:JID, queryId:string, beforeResultId?:string, end?:Date):Promise<Element>
+
+   close()
 }

@@ -476,11 +476,6 @@ export default class ChatWindow {
    }
 
    private sendOutgoingMessage(messageString:string) {
-      if (this.contact.isEncrypted()) {
-         //@TODO send sys $.t('your_message_wasnt_send_please_end_your_private_conversation');
-         return;
-      }
-//@TODO we need a full jid
       let message = new Message({
          peer: this.contact.getJid(),
          direction: Message.DIRECTION.OUT,

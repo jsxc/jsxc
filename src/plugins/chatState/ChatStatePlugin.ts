@@ -43,12 +43,10 @@ export default class ChatStatePlugin extends AbstractPlugin {
          new ChatStateMachine(this, chatWindow, contact);
       });
 
-      setTimeout(() => {
-         let connection = pluginAPI.getConnection();
+      let connection = pluginAPI.getConnection();
 
-         //@TODO groupchat
-         connection.registerHandler(this.onChatState, Namespace.get('CHATSTATES'), 'message', 'chat');
-      }, 2000);
+      //@TODO groupchat
+      connection.registerHandler(this.onChatState, Namespace.get('CHATSTATES'), 'message', 'chat');
    }
 
    public getStorage():Storage {

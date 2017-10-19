@@ -16,11 +16,17 @@ export default class DiscoInfoRepository {
       this.serverJidIndex = new PersistentMap(Client.getStorage(), 'capabilities');
    }
 
-   public addRelation(jid:JID, discoInfo:DiscoInfo) {
-      if (jid.isBare()) {
+   public addRelation(jid:JID, version:string)
+   public addRelation(jid:JID, discoInfo:DiscoInfo)
+   public addRelation(jid, value) {
+      let index = jid.isServer() ? this.serverJidIndex : this.jidIndex;
+
+      if (jid.isBare() && !jid.isServer) {
          Log.warn('We can only add relations for full jids.')
-      } else {
-         this.jidIndex.set(jid.full, discoInfo.getCapsVersion());
+      } else if (value instanceof DiscoInfo) {
+         index.set(jid.full, value.getCapsVersion());
+      } else if (typeof value === 'string') {
+         index.set(jid.full, value);
       }
    }
 

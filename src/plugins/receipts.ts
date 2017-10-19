@@ -30,13 +30,10 @@ export default class ReceiptPlugin extends AbstractPlugin {
       let preSendMessageStanzaPipe = Pipe.get('preSendMessageStanza');
       preSendMessageStanzaPipe.addProcessor(this.preSendMessageStanzaProcessor);
 
-      //@TODO we need some kind of pluginAPI.getConnectedConnection or some similar hook
-      setTimeout(() => {
-         let connection = pluginAPI.getConnection();
+      let connection = pluginAPI.getConnection();
 
-         connection.registerHandler(this.onReceiptRequest, null, 'message', 'chat');
-         connection.registerHandler(this.onReceipt, null, 'message');
-      }, 2000);
+      connection.registerHandler(this.onReceiptRequest, null, 'message', 'chat');
+      connection.registerHandler(this.onReceipt, null, 'message');
    }
 
    private preSendMessageStanzaProcessor = (message:Message, xmlStanza:Strophe.Builder) => {

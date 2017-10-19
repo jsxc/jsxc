@@ -102,8 +102,10 @@ export default class Client {
       } else if (arguments.length === 3) {
          account = new Account(arguments[0], arguments[1], arguments[2]);
       } else {
-         return Promise.reject(null);
+         return Promise.reject('Wrong number of arguments');
       }
+
+      //@TODO prevent creation of multiple accounts with the same jid
 
       return account.connect().then(function(){
          Client.addAccount(account);
@@ -119,8 +121,6 @@ export default class Client {
          Roster.get().setNoConnection();
       }
    }
-
-
 
    private static addAccount(account:Account) {
       Client.accounts[account.getUid()] = account;

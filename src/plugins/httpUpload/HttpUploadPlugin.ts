@@ -34,11 +34,9 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       let preSendMessageStanzaPipe = Pipe.get('preSendMessageStanza');
       preSendMessageStanzaPipe.addProcessor(this.addBitsOfBinary);
 
-      setTimeout(() => {
-         let connection = pluginAPI.getConnection();
+      let connection = pluginAPI.getConnection();
 
-         connection.registerHandler(this.onBitsOfBinary, 'urn:xmpp:bob', 'iq');
-      }, 2000);
+      connection.registerHandler(this.onBitsOfBinary, 'urn:xmpp:bob', 'iq');
    }
 
    private preSendMessageProcessor = (contact:Contact, message:Message) => {

@@ -27,7 +27,7 @@ Client.init();
 export function start(boshUrl: string, jid: string, sid: string, rid: string);
 export function start(boshUrl: string, jid: string, password: string);
 export function start();
-export function start() { console.log('api.start', arguments)
+export function start() {
    switch (arguments.length) {
       case 0: startUI();
          break;
@@ -48,12 +48,12 @@ function startWithCredentials(boshUrl: string, jid: string, password: string) {
    let connectionPromise = Client.createAccount.apply(this, arguments);
 
    return connectionPromise.then(function() {
-      UI.init();
+      startUI();
    });
 }
 
 function startWithBoshParameters(boshUrl: string, jid: string, sid: string, rid: string) {
-
+   //@TODO start with bosh parameters
 }
 
 export function enableDebugMode() {

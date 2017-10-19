@@ -13,6 +13,8 @@ export default class StorageConnection extends AbstractConnection implements ICo
 
    protected connection:any = {};
 
+   private handlers = [];
+
    constructor(protected account: Account) {
       super(account);
 
@@ -40,7 +42,11 @@ export default class StorageConnection extends AbstractConnection implements ICo
    }
 
    public registerHandler(handler:(stanza:string)=>boolean, ns?:string, name?:string, type?:string, id?:string, from?:string) {
+      this.handlers.push(arguments);
+   }
 
+   public getHandlers() {
+      return this.handlers;
    }
 
    public getJingleHandler() {
