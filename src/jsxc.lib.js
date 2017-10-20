@@ -453,6 +453,22 @@ jsxc = {
          return false;
       }
 
+      if (jsxc.currentState !== jsxc.CONST.STATE.INTERCEPTED && jsxc.currentState !== jsxc.CONST.STATE.SUSPEND) {
+         if (!jsxc.busy) {
+            jsxc.debug('I am currently busy and will try again later. Please be patient.');
+         }
+
+         jsxc.busy = true;
+
+         setTimeout(function() {
+            jsxc.start.apply(jsxc, args);
+         }, 400);
+
+         return;
+      }
+
+      jsxc.busy = false;
+
       if (args.length === 3) {
          $(document).one('attached.jsxc', function() {
             // save rid after first attachment
