@@ -207,6 +207,8 @@ jsxc = {
     * @param {object} options See {@link jsxc.options}
     */
    init: function(options) {
+      jsxc.runMigrations();
+
       jsxc.changeState(jsxc.CONST.STATE.INITIATING);
 
       if (options && options.loginForm && typeof options.loginForm.attachIfFound === 'boolean' && !options.loginForm.ifFound) {
@@ -320,6 +322,28 @@ jsxc = {
          } else {
             jsxc.checkMaster();
          }
+      }
+   },
+
+   runMigrations: function() {
+      var lastUsedVersion = jsxc.storage.getItem('version');
+
+      if (!lastUsedVersion) {
+         var keys = Object.keys(localStorage).filter(function(key) {
+            var isKeepMatch = key.match(/^jsxc:[^:]+:(key|history|msg|priv_fingerprint):?/);
+
+            return (key.match(/^jsxc:/) && !isKeepMatch) || key.match(/^strophe\.caps\./)
+         });
+
+         keys.forEach(function(key) {
+            localStorage.removeItem(key);
+         });
+
+         jsxc.debug('I turned out your storage and deleted ' + keys.length + ' entries.');
+      }
+
+      if (lastUsedVersion !== jsxc.version) {
+         jsxc.storage.setItem('version', jsxc.version);
       }
    },
 
