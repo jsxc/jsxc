@@ -33,7 +33,7 @@
     "Buddy_fingerprint": "Contact vingerafdruk",
     "Close": "Sluiten",
     "Compared": "Vergeleken",
-    "To_authenticate_using_a_question_": "Gebruik een vraag om te verificeeren, neem een antwoord alleen bekend bij Jou en je contact.",
+    "To_authenticate_using_a_question_": "Gebruik een vraag om te verificeeren, neem een antwoord alleen bekend bij jou en je contact.",
     "Ask": "Vraag",
     "To_authenticate_pick_a_secret_": "Voor verificatie, kies een geheim alleen bekend is bij jou en je contact.",
     "Compare": "Vergelijk",
@@ -125,7 +125,7 @@
     "Priority": "Prioriteit",
     "Save": "Opslaan",
     "User_settings": "Gebruikersinstellingen",
-    "A_fingerprint_": "Een vingerafdruk wordt gebruikt om er zeker van te zijn dat uw gesprekspartner ook is wie hij of zij zegt te zijn.",
+    "A_fingerprint_": "Een vingerafdruk wordt gebruikt om er zeker van te zijn dat je gesprekspartner ook is wie hij of zij zegt te zijn.",
     "is": "is",
     "Login_options": "Login options",
     "BOSH_url": "BOSH URL",
@@ -200,7 +200,7 @@
     },
     "muc_semianonymous": {
       "keyword": "semi-anoniem",
-      "description": "je Jabber id is alleen vrijgegeven voor kamer beheerders"
+      "description": "je Jabber ID (chat adres) is alleen vrijgegeven voor kamer beheerders"
     },
     "muc_temporary": {
       "keyword": "tijdelijk",
