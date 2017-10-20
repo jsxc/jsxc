@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.3.1 - 2017-10-20
+### Fixed
+- [#613](https://github.com/jsxc/jsxc/issues/613) fix online status for cached rosters
+- [#616](https://github.com/jsxc/jsxc/issues/616) handle connection failure with login box
+- clean up login box handler
+- [#618](https://github.com/jsxc/jsxc/issues/618) fix scrollable window height
+- [#618](https://github.com/jsxc/jsxc/issues/618) limit number of received mam messages to 30
+- include reason for connection failure on event
+- [#628](https://github.com/jsxc/jsxc/issues/628) fix broken otr submodule entry
+- reset restore state after logout
+- [#615](https://github.com/jsxc/jsxc/issues/615) add storage cleaner migration step
+- [#602](https://github.com/jsxc/jsxc/issues/602) prevent multiple connections with jsxc.start
+
 ## 3.3.0 - 2017-08-25
 ### Added
 - api to retrieve last message
