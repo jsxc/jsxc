@@ -5,11 +5,7 @@
   } else if (typeof module !== 'undefined' && module.exports) {
     module.exports = factory(require('crypto'))
   } else {
-     try {
-        root.BigInt = factory(root.crypto || root.msCrypto)
-     } catch(e) {
-        console.warn(e.message);
-     }
+    root.BigInt = factory(root.crypto || root.msCrypto)
   }
 
 }(this, function (crypto) {

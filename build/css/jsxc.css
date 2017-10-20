@@ -2943,14 +2943,14 @@ fieldset[disabled]
       line-height: 42px;
       opacity: 0;
       -webkit-transition: opacity 0.5s, top 0.5s;
-              transition: opacity 0.5s, top 0.5s; }
+              transition: opacity 0.5s, top 0.5s;
+      background-image: -webkit-linear-gradient(#c1c1c1, transparent);
+      background-image: linear-gradient(#c1c1c1, transparent); }
       .jsxc_window .jsxc_fade .jsxc_mam-load-more.jsxc_show {
         top: 0;
         opacity: 0.7; }
         .jsxc_window .jsxc_fade .jsxc_mam-load-more.jsxc_show:hover {
           opacity: 1; }
-    .jsxc_window .jsxc_fade.jsxc_mam-enable .jsxc_textarea {
-      padding-top: 42px; }
     .jsxc_window .jsxc_fade.jsxc_mam-enable .jsxc_mam-load-more {
       display: block; }
   .jsxc_window .jsxc_avatar {

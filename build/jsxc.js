@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.3.0 - 2017-08-25
+ * jsxc v3.3.1 - 2017-10-20
  * 
  * Copyright (c) 2017 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see https://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.3.0
+ * @version 3.3.1
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.3.0',
+   version: '3.3.1',
 
    /** True if i'm the master */
    master: false,
@@ -227,6 +227,8 @@ jsxc = {
     * @param {object} options See {@link jsxc.options}
     */
    init: function(options) {
+      jsxc.runMigrations();
+
       jsxc.changeState(jsxc.CONST.STATE.INITIATING);
 
       if (options && options.loginForm && typeof options.loginForm.attachIfFound === 'boolean' && !options.loginForm.ifFound) {
@@ -343,6 +345,28 @@ jsxc = {
       }
    },
 
+   runMigrations: function() {
+      var lastUsedVersion = jsxc.storage.getItem('version');
+
+      if (!lastUsedVersion) {
+         var keys = Object.keys(localStorage).filter(function(key) {
+            var isKeepMatch = key.match(/^jsxc:[^:]+:(key|history|msg|priv_fingerprint):?/);
+
+            return (key.match(/^jsxc:/) && !isKeepMatch) || key.match(/^strophe\.caps\./)
+         });
+
+         keys.forEach(function(key) {
+            localStorage.removeItem(key);
+         });
+
+         jsxc.debug('I turned out your storage and deleted ' + keys.length + ' entries.');
+      }
+
+      if (lastUsedVersion !== jsxc.version) {
+         jsxc.storage.setItem('version', jsxc.version);
+      }
+   },
+
    prepareNewConnection: function() {
       // clean up rid and sid
       jsxc.storage.removeItem('rid');
@@ -448,6 +472,22 @@ jsxc = {
 
          return false;
       }
+
+      if (jsxc.currentState !== jsxc.CONST.STATE.INTERCEPTED && jsxc.currentState !== jsxc.CONST.STATE.SUSPEND) {
+         if (!jsxc.busy) {
+            jsxc.debug('I am currently busy and will try again later. Please be patient.');
+         }
+
+         jsxc.busy = true;
+
+         setTimeout(function() {
+            jsxc.start.apply(jsxc, args);
+         }, 400);
+
+         return;
+      }
+
+      jsxc.busy = false;
 
       if (args.length === 3) {
          $(document).one('attached.jsxc', function() {
@@ -1243,7 +1283,7 @@ jsxc.xmpp = {
                $(document).trigger('disconnected.jsxc');
                break;
             case Strophe.Status.CONNFAIL:
-               $(document).trigger('connfail.jsxc');
+               $(document).trigger('connfail.jsxc', condition);
                break;
             case Strophe.Status.AUTHFAIL:
                $(document).trigger('authfail.jsxc');
@@ -1612,6 +1652,7 @@ jsxc.xmpp = {
       }
 
       window.clearInterval(jsxc.keepaliveInterval);
+      jsxc.restoreCompleted = false;
       jsxc.role_allocation = false;
       jsxc.master = false;
       jsxc.storage.removeItem('alive');
@@ -1668,6 +1709,16 @@ jsxc.xmpp = {
 
       if ($(iq).find('query').length === 0) {
          jsxc.debug('Use cached roster');
+
+         var buddylist = jsxc.storage.getUserItem('buddylist') || [];
+
+         $.each(buddylist, function(index, buddy) {
+            jsxc.storage.removeUserItem('res', buddy);
+
+            jsxc.storage.updateUserItem('buddy', buddy, 'status', 0);
+            jsxc.storage.updateUserItem('buddy', buddy, 'res', []);
+            jsxc.storage.updateUserItem('buddy', buddy, 'rnd', Math.random());
+         });
 
          jsxc.restoreRoster();
          return;
@@ -3058,6 +3109,8 @@ jsxc.gui = {
                onAuthFail();
             } else {
                $(document).on('authfail.jsxc', onAuthFail);
+               $(document).on('connfail.jsxc', onAuthFail);
+               $(document).on('connected.jsxc', removeHandler);
 
                jsxc.xmpp.login();
             }
@@ -3068,12 +3121,20 @@ jsxc.gui = {
          alert.show();
          jsxc.gui.dialog.resize();
 
+         removeHandler();
+
          $('#jsxc_dialog').find('button').trigger('btnfinished.jsxc');
 
          $('#jsxc_dialog').find('input').one('keypress', function() {
             alert.hide();
             jsxc.gui.dialog.resize();
          });
+      }
+
+      function removeHandler() {
+         $(document).off('authfail.jsxc', null, onAuthFail);
+         $(document).off('connfail.jsxc', null, onAuthFail);
+         $(document).off('connected.jsxc', null, removeHandler);
       }
    },
 
@@ -8858,7 +8919,7 @@ jsxc.options = {
     */
    mam: {
       enable: false,
-      max: null
+      max: 30
    }
 };
 

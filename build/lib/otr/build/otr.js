@@ -1,8 +1,8 @@
 /*!
 
-  otr.js v0.2.15 - 2015-05-04
+  otr.js v0.2.16 - 2015-12-03
   (c) 2015 - Arlo Breault <arlolra@gmail.com>
-  Freely distributed under the MPL v2.0 license.
+  Freely distributed under the MPL-2.0 license.
 
   This file is concatenated for the browser.
   Please see: https://github.com/arlolra/otr
@@ -29,9 +29,7 @@
   } else {
     root.OTR = {}
     root.DSA = {}
-    if (typeof root.BigInt !== 'undefined') {
-       factory.call(root)
-    }
+    factory.call(root)
   }
 
 }(this, function () {
