@@ -87,51 +87,13 @@ export default class ChatWindow {
          this.minimize();
       }
 
-      this.properties.registerHook('minimized', (minimized) => {
-         if (minimized) {
-            this.minimize();
-         } else {
-            this.unminimize();
-         }
-      });
-
-      this.getTranscript().registerHook('firstMessageId', (firstMessageId) => {
-         if (!firstMessageId) {
-            return;
-         }
-
-         let message = this.getTranscript().getMessage(firstMessageId);
-
-         this.postMessage(message);
-      });
-
       let avatar = Avatar.get(contact);
       avatar.addElement(this.element.find('.jsxc-window-bar .jsxc-avatar'));
 
-      // @TODO update gui
-      this.contact.registerHook('name', (newName) => {
-         this.element.find('.jsxc-name').text(newName);
-      });
-
-      this.contact.registerHook('encryptionState', this.updateEncryptionState);
-      this.updateEncryptionState(this.contact.getEncryptionState());
-
-      let pluginRepository = this.account.getPluginRepository();
-      if (pluginRepository.hasEncryptionPlugin()) {
-         let transferElement = this.getDom().find('.jsxc-transfer');
-
-         transferElement.removeClass('jsxc-disabled');
-         transferElement.click(() => {
-            //@TODO create selection
-            pluginRepository.getEncryptionPlugin('otr').toggleTransfer(this.contact);
-         })
-      }
+      this.initEncryptionIcon();
+      this.registerHooks();
 
       this.element.attr('data-presence', Presence[this.contact.getPresence()]);
-
-      this.contact.registerHook('presence', (newPresence) => {
-         this.element.attr('data-presence', Presence[newPresence]);
-      });
 
       setTimeout(() => {
          this.scrollMessageAreaToBottom();
@@ -664,6 +626,51 @@ export default class ChatWindow {
       let messageArea = this.element.find('.jsxc-message-area');
 
       messageArea[0].scrollTop = messageArea[0].scrollHeight;
+   }
+
+   private registerHooks() {
+      this.contact.registerHook('encryptionState', this.updateEncryptionState);
+
+      this.contact.registerHook('presence', (newPresence) => {
+         this.element.attr('data-presence', Presence[newPresence]);
+      });
+
+      this.contact.registerHook('name', (newName) => {
+         this.element.find('.jsxc-name').text(newName);
+      });
+
+      this.getTranscript().registerHook('firstMessageId', (firstMessageId) => {
+         if (!firstMessageId) {
+            return;
+         }
+
+         let message = this.getTranscript().getMessage(firstMessageId);
+
+         this.postMessage(message);
+      });
+
+      this.properties.registerHook('minimized', (minimized) => {
+         if (minimized) {
+            this.minimize();
+         } else {
+            this.unminimize();
+         }
+      });
+   }
+
+   private initEncryptionIcon() {
+      this.updateEncryptionState(this.contact.getEncryptionState());
+
+      let pluginRepository = this.account.getPluginRepository();
+      if (pluginRepository.hasEncryptionPlugin()) {
+         let transferElement = this.getDom().find('.jsxc-transfer');
+
+         transferElement.removeClass('jsxc-disabled');
+         transferElement.click(() => {
+            //@TODO create selection
+            pluginRepository.getEncryptionPlugin('otr').toggleTransfer(this.contact);
+         })
+      }
    }
 }
 
