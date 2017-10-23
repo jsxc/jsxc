@@ -10,7 +10,7 @@ let dialog:Dialog;
 
 export default function(contact:ContactInterface) {
 
-   let basicData = []; // aggregateBasicUserData(userData);
+   let basicData = [];
 
    let content = vcardTemplate({
       name: contact.getName(),
@@ -34,48 +34,7 @@ export default function(contact:ContactInterface) {
       .catch(vcardErrorCallback);
 }
 
-// @TODO use interface for user data
-function aggregateBasicUserData(userData) {
-   let bid = userData.jid.bare;
-   var identity = null;
-   var basicUserData = [];
-
-   for (let i = 0; i < userData.res.length; i++) {
-      let ressource = userData.res[i];
-
-      let identities = [];
-      let capabilities = Connection.getCapabilitiesByJid(new JID(bid + '/' + ressource));
-
-      if (capabilities !== null && capabilities.identities !== null) {
-         identities = capabilities.identities;
-      }
-
-      let client = '';
-      for (let j = 0; j < identities.length; j++) {
-         let identity = identities[j];
-
-         if (identity.category === 'client') {
-            if (client !== '') {
-               client += ',\n';
-            }
-
-            client += identity.name + ' (' + identity.type + ')';
-         }
-      }
-
-      let status = jsxc.storage.getUserItem('res', bid)[res];
-
-      basicUserData.push({
-         resource: ressource,
-         client: client,
-         status: jsxc.CONST.STATUS[status],
-      });
-   }
-
-   return basicUserData;
-}
-
-function vcardSuccessCallback(vCardData) {
+function vcardSuccessCallback(vCardData):Promise<any> {
    let dialogElement = dialog.getDom();
 
    dialogElement.find('p').remove();
@@ -95,7 +54,7 @@ function vcardSuccessCallback(vCardData) {
 
    delete vCardData.PHOTO;
 
-   return convertToTemplateData(vCardData);
+   return Promise.resolve(convertToTemplateData(vCardData));
 }
 
 function vcardErrorCallback() {
@@ -110,7 +69,7 @@ function vcardErrorCallback() {
    dialogElement.find('.jsxc-dialog').append(content);
 }
 
-function convertToTemplateData(vCardData) {
+function convertToTemplateData(vCardData):any[] {
    let properties = [];
 
    for (let name in vCardData) {

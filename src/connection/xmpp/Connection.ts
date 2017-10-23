@@ -94,7 +94,7 @@ console.log('return')
 
    public sendIQ(stanzaElement:Element):Promise<Element>;
    public sendIQ(stanzaElement:Strophe.Builder):Promise<Element>;
-   public sendIQ():Promise<{}> {
+   public sendIQ() {
       let stanzaElement = arguments[0];
 
       return new Promise((resolve, reject) => {

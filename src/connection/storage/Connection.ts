@@ -85,9 +85,9 @@ export default class StorageConnection extends AbstractConnection implements ICo
       storage.setItem(key, stanzaString);
    }
 
-   public sendIQ(stanzaElement:Element):Promise<{}>;
-   public sendIQ(stanzaElement:Strophe.Builder):Promise<{}>;
-   public sendIQ():Promise<{}> {
+   protected sendIQ(stanzaElement:Element):Promise<Element>;
+   protected sendIQ(stanzaElement:Strophe.Builder):Promise<Element>;
+   protected sendIQ():Promise<{}> {
       let storage = this.account.getStorage();
       let stanzaString = this.stanzaElementToString(arguments[0]);
       let key = storage.generateKey(

@@ -151,13 +151,13 @@ export default class DiscoInfoRepository {
          }
 
          if (nodeName === 'feature') {
-            capabilities[nodeName].push(childNode.getAttribute('var'));
+            capabilities[nodeName].push($(childNode).attr('var'));
          } else if(nodeName === 'identity') {
             capabilities[nodeName].push({
-               category: childNode.getAttribute('category') || '',
-               type: childNode.getAttribute('type') || '',
-               name: childNode.getAttribute('name') || '',
-               lang: childNode.getAttribute('xml:lang') || ''
+               category: $(childNode).attr('category') || '',
+               type: $(childNode).attr('type') || '',
+               name: $(childNode).attr('name') || '',
+               lang: $(childNode).attr('xml:lang') || ''
             });
             //@TODO test required arguments
          }
@@ -168,9 +168,9 @@ export default class DiscoInfoRepository {
          return Promise.reject('Disco info response is invalid. Missing identity.');
       }
 
-      let forms = queryElement.find('x[xmlns="jabber:x:data"]').map((index, element) => {
+      let forms = queryElement.find('x[xmlns="jabber:x:data"]').get().map((element) => {
          return Form.fromXML(element);
-      }).get();
+      });
 
       //   if (typeof capabilities['feature'] === 'undefined' || capabilities['feature'].indexOf('http://jabber.org/protocol/disco#info') < 0) {
       //      return Promise.reject('Disco info response is unvalid. Doesnt support disco.');

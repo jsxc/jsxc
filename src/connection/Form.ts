@@ -14,7 +14,7 @@ export default class Form {
       let title = xElement.find('title').text();
 
       let fieldElements = xElement.find('field');
-      let fields = fieldElements.map((index, element) => Field.fromXML($(element))).get();
+      let fields = fieldElements.get().map((element) => Field.fromXML($(element)));
 
       let reportedElement = xElement.find('reported');
       //@TODO handle reported and item elements
@@ -29,12 +29,12 @@ export default class Form {
       );
    }
 
-   public static fromHTML(element:Element) {
+   public static fromHTML(element:Element):Form {
       let formElements = $(element).find('.jabber-x-data');
 
-      let fields = formElements.map((index, formElement) => {
-         return Field.fromHTML(formElement);
-      }).get();
+      let fields = formElements.get().map((formElement) => {
+         return Field.fromHTML($(formElement));
+      });
 
       if ($(element).attr('data-type') !== 'form') {
          throw 'Can only process forms of type "form".';
@@ -236,7 +236,7 @@ class Field {
 
       switch(this.data.type) {
          case 'fixed':
-            element = $('<div>').append($(this.data.values).map((index, value) => $('<p>').text(value).get()));
+            element = $('<div>').append($(this.data.values).map((index, value) => $('<p>').text(<any> value).get()));
             break;
          case 'boolean':
          case 'hidden':
@@ -362,7 +362,9 @@ class Field {
          return optionElement;
       });
 
-      element.append(options);
+      for (let option of options) {
+         element.append(option);
+      }
 
       return element;
    }

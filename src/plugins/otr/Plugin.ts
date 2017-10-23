@@ -46,7 +46,7 @@ export default class OTRPlugin extends EncryptionPlugin {
    }
 
    //@TODO create contactPluginApi
-   public toggleTransfer(contact:Contact) {
+   public toggleTransfer(contact:Contact):Promise<void> {
       return this.getSession(contact).then((session:Session) => {
          if (session.isEnded()) {
             return session.end();

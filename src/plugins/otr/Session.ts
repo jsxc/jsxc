@@ -90,13 +90,13 @@ export default class Session {
       this.restoreSession(this.data.get('payload'));
    }
 
-   public goEncrypted() {
+   public goEncrypted():Promise<void> {
       this.session.sendQueryMsg();
 
       return Promise.resolve();
    }
 
-   public goPlain() {
+   public goPlain():Promise<void> {
       return this.end();
    }
 
@@ -150,7 +150,7 @@ export default class Session {
       });
    }
 
-   public end() {
+   public end():Promise<void> {
       return new Promise((resolve, reject) => {
          this.session.endOtr(() => {
             this.session.init.call(this.session);

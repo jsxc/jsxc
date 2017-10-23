@@ -1,6 +1,6 @@
 import Options from './Options'
 
-const EMOTICONS = [
+const EMOTICONS:any[] = [
    ['O:-) O:)', 'innocent'],
    ['>:-( >:( &gt;:-( &gt;:(', 'angry'],
    [':-) :)', 'slight_smile'],

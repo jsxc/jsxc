@@ -8,8 +8,8 @@ import Client from '../Client'
 import Account from '../Account'
 import * as CONST from '../CONST'
 import DateTime from './util/DateTime'
-import showVerificationDialog from './dialogs/verification'
-import showFingerprintsDialog from './dialogs/fingerprints'
+// import showVerificationDialog from './dialogs/verification'
+// import showFingerprintsDialog from './dialogs/fingerprints'
 import Emoticons from '../Emoticons'
 import SortedPersistentMap from '../util/SortedPersistentMap'
 import PersistentMap from '../util/PersistentMap'
@@ -306,7 +306,7 @@ export default class ChatWindow {
       elementHandler.add(
          this.element.find('.jsxc-verification')[0],
          function() {
-            showVerificationDialog(contact);
+            // showVerificationDialog(contact);
          }
       );
 
