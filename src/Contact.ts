@@ -197,7 +197,7 @@ export default class Contact implements IdentifiableInterface, ContactInterface 
       return this.data.get('subscription');
    }
 
-   public getVcard():Promise<{}> {
+   public getVcard():Promise<any> {
       return this.account.getConnection().loadVcard(this.getJid());
    }
 

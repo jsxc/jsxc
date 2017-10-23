@@ -313,7 +313,7 @@ export default class ChatWindow {
       elementHandler.add(
          this.element.find('.jsxc-fingerprints')[0],
          function() {
-            showFingerprintsDialog(contact);
+            // showFingerprintsDialog(contact);
          }
       );
 
@@ -432,7 +432,7 @@ export default class ChatWindow {
    }
 
    private onInputBlur = (ev) => {
-      this.inputBlurTimeout = setTimeout(function() {
+      this.inputBlurTimeout = window.setTimeout(function() {
          $(ev.target).css('height', '');
       }, this.INPUT_RESIZE_DELAY);
    }

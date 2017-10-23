@@ -1,6 +1,5 @@
 import Dialog from '../Dialog';
 import Contact from '../../Contact'
-import StorageSingleton from '../../StorageSingleton'
 import showDebugLog from './debugLog'
 
 var aboutTemplate = require('../../../template/about.hbs');

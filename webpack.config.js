@@ -10,6 +10,9 @@ module.exports = {
       libraryTarget: 'var',
       library: 'jsxc'
    },
+   node: {
+      fs: 'empty'
+   },
    module: {
       rules: [{
             test: /\.ts$/,
@@ -50,7 +53,8 @@ module.exports = {
       extensions: [".ts", ".js", ".hbs"]
    },
    externals: {
-      'jquery': 'jQuery'
+      'jquery': 'jQuery',
+      'child_process': 'child_process'
    },
    plugins: [
       new ExtractTextPlugin({

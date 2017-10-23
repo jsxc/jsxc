@@ -44,15 +44,15 @@
 
    <form id="loginForm" style="margin-top: 100px; padding:15px;" class="form-inline">
       <div class="form-group">
-         <input class="form-control" type="text" name="url" placeholder="Bosh url" value="/http-bind/" />
+         <input class="form-control" type="text" name="url" placeholder="Bosh url" value="/http-bind/" required />
       </div>
 
       <div class="form-group">
-         <input class="form-control" type="text" name="jid" placeholder="Jabber Id" value="" />
+         <input class="form-control" type="email" name="jid" placeholder="Jabber Id" value="" required />
       </div>
 
       <div class="form-group">
-         <input class="form-control" type="text" name="password" placeholder="Password" value="" />
+         <input class="form-control" type="password" name="password" placeholder="Password" value="" required />
       </div>
 
       <button class="btn btn-primary">Login</button>
@@ -79,13 +79,15 @@
 
    <script>
    $('#loginForm').submit(function(ev){
-      ev.preventDefault();
+      // ev.preventDefault();
 
       var url = $(this).find('[name="url"]').val();
       var jid = $(this).find('[name="jid"]').val();
       var password = $(this).find('[name="password"]').val();
 
       jsxc.start(url, jid, password);
+
+      return false;
    });
    </script>
 </body>

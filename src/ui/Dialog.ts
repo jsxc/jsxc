@@ -1,6 +1,5 @@
 import Storage from '../Storage';
 import Log from '../util/Log';
-import StorageSingleton from '../StorageSingleton';
 
 let dialogTemplate = require('../../template/dialog.hbs');
 

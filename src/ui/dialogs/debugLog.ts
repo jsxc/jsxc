@@ -1,18 +1,18 @@
 import Dialog from '../Dialog';
 import Contact from '../../Contact'
-import StorageSingleton from '../../StorageSingleton'
 
 let debugLogTemplate = require('../../../template/debugLog.hbs');
 
 export default function() {
-   let storage = StorageSingleton.getUserStorage();
-
-   let content = debugLogTemplate({
-      userInfo: getUserInformation()
-   });
-
-   let dialog = new Dialog(content);
-   let dom = dialog.open();
+   //@TODO
+   // let storage = StorageSingleton.getUserStorage();
+   //
+   // let content = debugLogTemplate({
+   //    userInfo: getUserInformation()
+   // });
+   //
+   // let dialog = new Dialog(content);
+   // let dom = dialog.open();
 }
 
 function getUserInformation() {

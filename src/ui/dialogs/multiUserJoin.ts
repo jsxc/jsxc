@@ -1,6 +1,5 @@
 import Dialog from '../Dialog';
 import Contact from '../../Contact'
-import StorageSingleton from '../../StorageSingleton'
 import Client from '../../Client'
 import JID from '../../JID'
 import TableElement from '../util/TableElement'

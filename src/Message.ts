@@ -2,7 +2,6 @@ import Storage from './Storage';
 import Log from './util/Log';
 import Options from './Options';
 import Attachment from './Attachment';
-import StorageSingleton from './StorageSingleton';
 import JID from './JID'
 import * as CONST from './CONST'
 import Emoticons from './Emoticons'
@@ -10,7 +9,8 @@ import Translation from './util/Translation'
 import Identifiable from './IdentifiableInterface'
 import Client from './Client'
 import Utils from './util/Utils'
-import {MessageInterface, DIRECTION, MSGTYPE} from './MessageInterface'
+import {MessageInterface, DIRECTION} from './MessageInterface'
+import {ContactType} from './ContactInterface'
 import PersistentMap from './util/PersistentMap'
 import UUID from './util/UUID';
 
@@ -31,7 +31,7 @@ interface MessagePayload {
    encrypted?:boolean,
    forwarded?:boolean,
    stamp?:number,
-   type?:MSGTYPE,
+   type?:ContactType,
    encryptedHtmlMessage?:string,
    encryptedPlaintextMessage?:string,
    sender?: {
@@ -52,7 +52,7 @@ export default class Message implements Identifiable, MessageInterface {
 
    static readonly DIRECTION = DIRECTION;
 
-   static readonly MSGTYPE = MSGTYPE;
+   static readonly MSGTYPE = ContactType;
 
    private storage:Storage;
 
@@ -90,7 +90,7 @@ export default class Message implements Identifiable, MessageInterface {
             encrypted: null,
             forwarded: false,
             stamp: new Date().getTime(),
-            type: MSGTYPE.CHAT,
+            type: ContactType.CHAT,
             encryptedHtmlMessage: null,
             encryptedPlaintextMessage: null
          }, data));
@@ -108,7 +108,7 @@ export default class Message implements Identifiable, MessageInterface {
       return this.getUid();
    }
 
-   public getUid() {
+   public getUid():string {
       return this.uid;
    }
 
@@ -146,11 +146,11 @@ export default class Message implements Identifiable, MessageInterface {
       }
    }
 
-   public getCssId() {
+   public getCssId():string {
       return this.uid.replace(/:/g, '-');
    }
 
-   public getDOM() {
+   public getDOM():JQuery<HTMLElement> {
       return $('#' + this.getCssId());
    }
 
@@ -195,12 +195,12 @@ export default class Message implements Identifiable, MessageInterface {
       return new JID(this.data.get('peer'));
    }
 
-   public getType():MSGTYPE {
+   public getType():ContactType {
       return this.data.get('type');
    }
 
    public getTypeString():string {
-      return MSGTYPE[this.getType()].toLowerCase();
+      return ContactType[this.getType()].toLowerCase();
    }
 
    public getHtmlMessage():string {

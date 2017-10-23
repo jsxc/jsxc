@@ -1,42 +1,55 @@
-import {JIDInterface} from './JIDInterface'
+import JID from './JID'
+import Attachment from './Attachment'
+import {ContactType} from './ContactInterface'
 
 export enum DIRECTION {
    IN, OUT, SYS
 };
 
-export const MSGTYPE = {
-   CHAT: 'chat',
-   GROUPCHAT: 'groupchat'
-};
-
 export interface MessageInterface {
-   getId();
+   registerHook(property:string, func:(newValue:any, oldValue:any)=>void)
 
-   save();
+   getUid():string
 
-   delete();
+   getAttrId():string
 
-   getCssId();
+   delete()
 
-   getDOM();
+   getNextId():string
 
-   getStamp();
+   setNext(message:MessageInterface|string)
 
-   getDirection():DIRECTION;
+   getCssId():string
 
-   getDirectionString():string;
+   getDOM():JQuery<HTMLElement>
 
-   getAttachment():Attachment;
+   getStamp():Date
 
-   getPeer():JIDInterface;
+   getDirection():DIRECTION
 
-   getType():MSGTYPE;
+   getDirectionString():string
+
+   getAttachment():Attachment
+
+   setAttachment(attachment:Attachment)
+
+   getPeer():JID
+
+   getType():ContactType;
 
    getTypeString():string;
 
    getHtmlMessage():string;
 
+   setHtmlMessage(htmlMessage:string)
+
+   getEncryptedHtmlMessage():string
+
    getPlaintextMessage():string;
+
+   getEncryptedPlaintextMessage():string
+
+   getSender():{name:string, jid?:JID}
 
    received();
 
@@ -50,7 +63,17 @@ export interface MessageInterface {
 
    setUnread();
 
-   getProcessedBody():string;
+   setDirection(direction:DIRECTION)
 
-   getErrorMessage():string;
+   setPlaintextMessage(plaintextMessage:string)
+
+   setEncryptedPlaintextMessage(encryptedPlaintextMessage:string)
+
+   setEncrypted(encrypted:boolean)
+
+   getProcessedBody():string
+
+   getErrorMessage():string
+
+   updateProgress(transfered:number, complete:number)
 }

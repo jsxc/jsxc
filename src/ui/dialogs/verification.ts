@@ -1,7 +1,6 @@
 import Dialog from '../Dialog';
 import Contact from '../../Contact'
 import Log from '../../util/Log'
-import StorageSingleton from '../../StorageSingleton'
 import Message from '../../Message'
 import Translation from '../../util/Translation'
 
