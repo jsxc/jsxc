@@ -1,6 +1,6 @@
 import Storage from './Storage'
 import {IConnection} from './connection/ConnectionInterface'
-import * as Connector from './connection/xmpp/connector'
+import Connector from './connection/xmpp/Connector'
 import XMPPConnection from './connection/xmpp/Connection'
 import StorageConnection from './connection/storage/Connection'
 import JID from './JID'
@@ -39,9 +39,7 @@ export default class Account {
 
    private connection:IConnection;
 
-   private connectionArguments;
-
-   private connectionParameters:IConnectionParameters;
+   private connector:Connector;
 
    private contacts = {};
 
@@ -67,11 +65,13 @@ export default class Account {
          this.uid = arguments[0];
       } else if (arguments.length === 3 || arguments.length === 4) {
          this.uid = (new JID(arguments[1])).bare;
-         this.connectionArguments = arguments;
+      } else {
+         throw 'Unsupported number of arguments';
       }
 
       this.discoInfoRepository = new DiscoInfoRepository(this);
       this.ownDiscoInfo = new DiscoInfoChangable(this.uid);
+      this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3]);
       this.connection = new StorageConnection(this);
       this.noticeManager = new NoticeManager(this.getStorage());
       this.contact = new Contact(this, new JID(this.uid), this.uid);
@@ -84,26 +84,22 @@ export default class Account {
    }
 
    public connect = () => {
-      if (!this.connectionArguments) {
-         this.reloadConnectionData();
-         let isConnectionExpired = false;
+      return this.connector.connect().then(([status, connection]) => {
+         this.connection = connection;
 
-         if (this.connectionParameters && this.connectionParameters.inactivity) {
-            isConnectionExpired = (new Date()).getTime() - this.connectionParameters.timestamp > this.connectionParameters.inactivity;
+         if (status === Strophe.Status.CONNECTED) {
+            Roster.get().setPresence(Presence.online);
+            Roster.get().refreshOwnPresenceIndicator();
+
+            this.removeNonpersistentContacts();
+
+            this.connection.getRoster().then(() => {
+               this.connection.sendPresence();
+            });
+         } else {
+            this.connection.sendPresence();
          }
-
-         if (isConnectionExpired) {
-            Log.warn('Credentials expired')
-
-            this.closeAllChatWindows();
-
-            return Promise.reject('Credentials expired');
-         }
-      }
-
-      Roster.get().startProcessing('Connecting...'); //@TODO remove on error
-
-      return Connector.login.apply(this, this.connectionArguments).then(this.successfulConnected);
+      });
    }
 
    public getPluginRepository():PluginRepository {
@@ -138,7 +134,8 @@ export default class Account {
 
          Roster.get().remove(contact);
 
-         let chatWindow = contact.getChatWindow();
+         //@REVIEW this only works as long as contact and window id are the same
+         let chatWindow = this.windows.get(id);
 
          if (chatWindow) {
             this.closeChatWindow(chatWindow);
@@ -161,8 +158,6 @@ export default class Account {
 
       this.windows.push(chatWindow);
 
-      this.save();
-
       return chatWindow;
    }
 
@@ -170,8 +165,6 @@ export default class Account {
       ChatWindowList.get().remove(chatWindow);
 
       this.windows.remove(chatWindow);
-
-      this.save();
    }
 
    public closeAllChatWindows() {
@@ -201,11 +194,8 @@ export default class Account {
    }
 
    public getJID():JID {
-      let storedAccountData = this.getStorage().getItem('account') || {};
-      let jidString = (storedAccountData.connectionParameters) ? storedAccountData.connectionParameters.jid : this.getUid();
-
       //@REVIEW maybe promise?
-      return new JID(jidString);
+      return this.connector.getJID() || new JID(this.getUid());
    }
 
    public remove() {
@@ -223,80 +213,7 @@ export default class Account {
       return contact;
    }
 
-   //@TODO rebase this function
-   private successfulConnected = (data) => {
-      let connection = data.connection;
-      let status = data.status;
-
-      this.connectionParameters = $.extend(this.connectionParameters, {
-         url: connection.service,
-         jid: connection.jid,
-         sid: connection._proto.sid,
-         rid: connection._proto.rid,
-         timestamp: (new Date()).getTime()
-      });
-
-      if (connection._proto.inactivity) {
-         this.connectionParameters.inactivity = connection._proto.inactivity * 1000;
-      }
-
-      this.save();
-
-      connection.connect_callback = (status) => {
-         if (status === Strophe.Status.DISCONNECTED) {
-            this.connectionDisconnected();
-         }
-      }
-
-      connection.nextValidRid = (rid) => {
-         this.connectionParameters.timestamp = (new Date()).getTime();
-         this.connectionParameters.rid = rid;
-         this.save();
-      };
-
-      let handlers = (<StorageConnection> this.connection).getHandlers();
-
-      this.connection.close();
-      this.connection = new XMPPConnection(this, connection);
-
-      for (let handler of handlers) {
-         this.connection.registerHandler.apply(this.connection, handler);
-      }
-
-      if (connection.features) {
-         this.storeConnectionFeatures(connection);
-      }
-
-      if (status === Strophe.Status.CONNECTED) {
-         Roster.get().setPresence(Presence.online);
-         Roster.get().refreshOwnPresenceIndicator();
-
-         this.removeNonpersistentContacts();
-
-         this.connection.getRoster().then(() => {
-            this.connection.sendPresence();
-         });
-      } else {
-         this.connection.sendPresence();
-      }
-
-      Log.debug('XMPP connection ready');
-
-      Roster.get().endProcessing();
-   }
-
-   private storeConnectionFeatures(connection) {
-      let from = new JID('', connection.domain, '');
-      let stanza = connection.features;
-
-      let capsElement = stanza.querySelector('c');
-      let ver = capsElement.getAttribute('ver');
-      let node = capsElement.getAttribute('node');
-console.log('### Caps', from.full, ver);
-      this.discoInfoRepository.addRelation(from, ver);
-   }
-
-   private connectionDisconnected() {
+   public connectionDisconnected() {
       console.log('disconnected');
 
       this.remove();
@@ -304,18 +221,8 @@ console.log('### Caps', from.full, ver);
 
    private save() {
       this.getStorage().setItem('account', {
-         connectionParameters: this.connectionParameters,
          contacts: Object.keys(this.contacts)
       });
-   }
-
-   private reloadConnectionData() {
-      let storedAccountData = this.getStorage().getItem('account') || {};
-
-      this.connectionParameters = storedAccountData.connectionParameters;
-
-      let p = this.connectionParameters;
-      this.connectionArguments = [p.url, (new JID(p.jid)).full, p.sid, p.rid];
    }
 
    private initContacts() {

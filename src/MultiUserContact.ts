@@ -4,6 +4,8 @@ import MultiUserChatWindow from './ui/MultiUserChatWindow'
 import PersistentMap from './util/PersistentMap'
 import {Presence} from './connection/AbstractConnection'
 import Form from './connection/Form'
+import Account from './Account'
+import {ContactSubscription} from './ContactInterface'
 
 const AFFILIATION = {
    ADMIN: 'admin',
@@ -134,8 +136,8 @@ export default class MultiUserContact extends Contact {
       return this.members.getAllKeys();
    }
 
-   public getSubscription() {
-      return 'both';
+   public getSubscription():ContactSubscription {
+      return ContactSubscription.BOTH;
    }
 
    public setSubject(subject:string) {

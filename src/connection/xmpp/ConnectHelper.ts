@@ -14,25 +14,6 @@ export function login() {
       return attachConnection(arguments[0], arguments[1], arguments[2], arguments[3]);
    } else {
       Log.warn('This should not happen');
-
-      //@TODO this should be moved to some connection parameter detection method
-      // let jid;
-      // let storage = StorageSingleton.getGlobalStorage();
-      //
-      // let sid = storage.getItem('sid');
-      // let rid = storage.getItem('rid');
-      //
-      // if (sid !== null && rid !== null) {
-      //    jid = storage.getItem('jid');
-      // } else {
-      //    let xmppOptions = Options.get('xmpp') || {};
-      //
-      //    sid = xmppOptions.sid || null;
-      //    rid = xmppOptions.rid || null;
-      //    jid = xmppOptions.jid;
-      // }
-      //
-      // return attachConnection(arguments[0], jid, sid, rid);
    }
 }
 

@@ -68,7 +68,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       //@TODO
       setTimeout(() => {
          let connection = this.pluginAPI.getConnection();
-         let discoInfoRepository = Client.getAccount().getDiscoInfoRepository();
+         let discoInfoRepository = this.pluginAPI.getDiscoInfoRepository();
          let serverJid = new JID('', connection.getJID().domain, '') //@REVIEW
 
          discoInfoRepository.getCapabilities(serverJid).then((discoInfo:DiscoInfo) => {

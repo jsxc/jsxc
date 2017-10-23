@@ -51,12 +51,13 @@ export default class Contact implements IdentifiableInterface, ContactInterface 
 
       let defaultData = {
          jid: this.jid.full,
-         name: arguments[2] || this.jid.bare,
+         name: name || this.jid.bare,
          presence: Presence.offline,
          status: '',
          subscription: ContactSubscription.NONE,
          resources: {},
          type: ContactType.CHAT,
+         encryptionState: EncryptionState.Plaintext,
          rnd: Math.random() // force storage event
       }
 
