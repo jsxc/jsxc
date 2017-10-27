@@ -13,7 +13,7 @@ import DateTime from './util/DateTime'
 import Emoticons from '../Emoticons'
 import SortedPersistentMap from '../util/SortedPersistentMap'
 import PersistentMap from '../util/PersistentMap'
-import Avatar from './Avatar'
+import AvatarSet from './AvatarSet'
 import 'simplebar'
 import {startCall} from './actions/call'
 import {Presence} from '../connection/AbstractConnection'
@@ -87,7 +87,7 @@ export default class ChatWindow {
          this.minimize();
       }
 
-      let avatar = Avatar.get(contact);
+      let avatar = AvatarSet.get(contact);
       avatar.addElement(this.element.find('.jsxc-window-bar .jsxc-avatar'));
 
       this.initEncryptionIcon();

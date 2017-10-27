@@ -1,6 +1,6 @@
 import Contact from '../Contact'
 import Menu from './util/Menu'
-import Avatar from './Avatar'
+import AvatarSet from './AvatarSet'
 import confirmDialog from './dialogs/confirm';
 import showVcardDialog from './dialogs/vcard'
 import {Presence} from '../connection/AbstractConnection'
@@ -69,7 +69,7 @@ export default class RosterItem {
 
       Menu.init(this.element.find('.jsxc-menu'));
 
-      let avatar = Avatar.get(this.contact);
+      let avatar = AvatarSet.get(this.contact);
       avatar.addElement(this.element.find('.jsxc-avatar'));
 
       this.contact.registerHook('name', (newName) => {

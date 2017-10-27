@@ -54,7 +54,6 @@ export default class extends AbstractHandler {
          return this.PRESERVE_HANDLER;
       }
 
-      let xVCard = $(stanza).find('x[xmlns="vcard-temp:x:update"]');
       let contact = this.account.getContact(presence.from);
 
       // incoming friendship request
@@ -75,25 +74,6 @@ export default class extends AbstractHandler {
       contact.setStatus(presence.status);
       contact.setPresence(presence.from.resource, status);
       contact.setResource(''); // reset jid, so new messages go to the bare jid
-
-      // if (data.type === 'groupchat') {
-      //    data.status = status;
-      // } else {
-      //    data.status = max;
-      // }
-      //
-      // data.res = maxVal;
-      // data.jid = jid;
-      //
-      // // Looking for avatar
-      // if (xVCard.length > 0 && data.type !== 'groupchat') {
-      //    var photo = xVCard.find('photo');
-      //
-      //    if (photo.length > 0 && photo.text() !== data.avatar) {
-      //       jsxc.storage.removeUserItem('avatar', data.avatar);
-      //       data.avatar = photo.text();
-      //    }
-      // }
 
       Log.debug('Presence (' + presence.from.full + '): ' + Presence[status]);
 

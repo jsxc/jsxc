@@ -27,8 +27,6 @@ export interface IConnection {
 
    loadVcard(jid:JID)
 
-   getAvatar(jid:JID)
-
    setDisplayName(jid:JID, displayName:string):Promise<Element>
 
    sendSubscriptionAnswer(to:JID, accept:boolean)

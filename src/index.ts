@@ -10,6 +10,7 @@ import MeCommandPlugin from './plugins/MeCommand'
 import MessageArchiveManagementPlugin from './plugins/mam/Plugin'
 import ChatStatePlugin from './plugins/chatState/ChatStatePlugin'
 import HttpUploadPlugin from './plugins/httpUpload/HttpUploadPlugin'
+import AvatarVCardPlugin from './plugins/AvatarVCardPlugin'
 
 // @REVIEW
 $.extend(window, StropheLib)
@@ -21,6 +22,7 @@ Client.addPlugin(MeCommandPlugin);
 Client.addPlugin(MessageArchiveManagementPlugin);
 Client.addPlugin(ChatStatePlugin);
 Client.addPlugin(HttpUploadPlugin);
+Client.addPlugin(AvatarVCardPlugin);
 
 Client.init();
 
@@ -36,7 +38,7 @@ export function start() {
       case 4: startWithBoshParameters(arguments[0], arguments[1], arguments[2], arguments[3]);
          break;
       default:
-         Log.warn('Wrong number of parameters.');
+         throw 'Wrong number of parameters.';
    }
 }
 

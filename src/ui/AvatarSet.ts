@@ -2,40 +2,50 @@ import Options from '../Options'
 import Hash from '../util/Hash'
 import {ContactInterface} from '../ContactInterface'
 
-export default class Avatar {
+export default class AvatarSet {
 
    private elements = [];
 
    private static avatars = {};
 
    public static get(contact:ContactInterface) {
-      let avatar = Avatar.avatars[contact.getId()];
+      let avatar = AvatarSet.avatars[contact.getId()];
 
       if (!avatar) {
-         avatar = Avatar.avatars[contact.getId()] = new Avatar(contact);
+         avatar = AvatarSet.avatars[contact.getId()] = new AvatarSet(contact);
       }
 
       return avatar;
    }
 
    public static setPlaceholder(elements, text:string) {
-      Avatar.placeholder(elements, text);
+      AvatarSet.placeholder(elements, text);
    }
 
    public addElement(element) {
       this.elements.push(element);
 
-      Avatar.placeholder(element, this.contact.getName());
+      this.reload();
    }
 
    public reload() {
-      Avatar.placeholder(this.elements, this.contact.getName());
+      //@TODO spinner?
+      this.contact.getAvatar().then((avatar) => {
+         $(this.elements).each(function(){
+            let element = $(this);
+
+            element.css('background-image', `url(${avatar.getData()})`);
+            element.text('');
+         });
+      }).catch((msg) => {
+         AvatarSet.placeholder(this.elements, this.contact.getName());
+      });
    }
 
    private constructor(private contact:ContactInterface) {
       this.contact.registerHook('name', (name) => {
          this.reload();
-      })
+      });
    }
 
    private static placeholder(elements, text:string) {

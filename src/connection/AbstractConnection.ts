@@ -46,6 +46,8 @@ abstract class AbstractConnection {
       let discoInfo = this.account.getDiscoInfo();
 
       discoInfo.addIdentity('client', 'web', 'JSXC');
+
+      NS.register('VCARD', 'vcard-temp');
    }
 
    public pluginOnlySend(stanzaElement:Element);
@@ -199,18 +201,6 @@ abstract class AbstractConnection {
       return this.sendIQ(iq).then(this.parseVcard);
    }
 
-   public getAvatar(jid:JID) {
-      return this.loadVcard(jid).then(function(vcard) {
-         return new Promise(function(resolve, reject){
-            if (vcard.PHOTO && vcard.PHOTO.src) {
-               resolve(vcard.PHOTO);
-            } else {
-               reject();
-            }
-         });
-      });
-   }
-
    public setDisplayName(jid:JID, displayName:string):Promise<Element> {
       var iq = $iq({
          type: 'set'
@@ -221,7 +211,7 @@ abstract class AbstractConnection {
          name: displayName
       });
 
-      this.sendIQ(iq);
+      return this.sendIQ(iq);
    }
 
    public sendSubscriptionAnswer(to:JID, accept:boolean) {
@@ -502,8 +492,9 @@ abstract class AbstractConnection {
          if (itemName === 'PHOTO') {
             let img = item.find('BINVAL').text();
             let type = item.find('TYPE').text();
-            let src = 'data:' + type + ';base64,' + img;
+            let src = 'data:' + type + ';base64,' + img; //@REVIEW XSS
 
+            //@REVIEW privacy
             if (item.find('EXTVAL').length > 0) {
                src = item.find('EXTVAL').text();
             }

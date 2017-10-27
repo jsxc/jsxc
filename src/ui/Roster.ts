@@ -15,7 +15,7 @@ import Storage from '../Storage'
 import PersistentMap from '../util/PersistentMap'
 import Account from '../Account'
 import Translation from '../util/Translation'
-import Avatar from './Avatar'
+import AvatarSet from './AvatarSet'
 import {Notice} from '../Notice'
 import {Presence} from '../connection/AbstractConnection'
 import {NoticeManager} from '../NoticeManager'
@@ -90,7 +90,7 @@ export default class Roster {
    }
 
    public setRosterAvatar(contact:ContactInterface) {
-      let avatar = Avatar.get(contact);
+      let avatar = AvatarSet.get(contact);
       avatar.addElement(this.element.find('.jsxc-bottom .jsxc-avatar'));
    }
 

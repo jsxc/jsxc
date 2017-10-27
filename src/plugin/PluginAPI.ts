@@ -7,6 +7,7 @@ import Pipe from '../util/Pipe'
 import JID from '../JID'
 import {IConnection} from '../connection/ConnectionInterface'
 import DiscoInfoRepository from '../DiscoInfoRepository'
+import Avatar from '../Avatar'
 
 export default class PluginAPI {
    private storage;
@@ -53,6 +54,10 @@ export default class PluginAPI {
 
    public addAfterReceiveMessageProcessor(processor:(contact:Contact, message:Message)=>Promise<{}>, position?:number) {
       Pipe.get('afterReceiveMessage').addProcessor(processor, position);
+   }
+
+   public addAvatarProcessor(processor:(contact:Contact, avatar:Avatar)=>Promise<[Contact, Avatar]>, position?:number) {
+      Pipe.get('avatar').addProcessor(processor, position);
    }
 
    public addFeature(feature:string) {

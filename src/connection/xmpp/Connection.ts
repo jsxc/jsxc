@@ -20,6 +20,7 @@ export default class XMPPConnection extends AbstractConnection implements IConne
 
       this.handler = new XMPPHandler(account, connection);
       this.handler.registerHandler();
+      NS.register('METADATA_NOTIFY', 'urn:xmpp:avatar:metadata+notify');
 
       this.account.getStorage().registerHook('stanza', (newValue, oldValue, key) => {
          if (newValue && !oldValue) {

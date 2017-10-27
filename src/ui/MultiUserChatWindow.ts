@@ -3,7 +3,7 @@ import MultiUserContact from '../MultiUserContact'
 import Account from '../Account'
 import Translation from '../util/Translation'
 import JID from '../JID'
-import Avatar from './Avatar'
+import AvatarSet from './AvatarSet'
 import showRoomConfigurationDialog from './dialogs/multiUserRoomConfiguration'
 import showMultiUserInviteDialog from './dialogs/multiUserInvite'
 
@@ -71,7 +71,7 @@ export default class MultiUserChatWindow extends ChatWindow {
       } else {
          label = title = nickname;
 
-         Avatar.setPlaceholder(memberElement.find('.jsxc-avatar'), nickname);
+         AvatarSet.setPlaceholder(memberElement.find('.jsxc-avatar'), nickname);
       }
 
       memberElement.find('.jsxc-name').text(nickname);

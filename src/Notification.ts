@@ -63,7 +63,7 @@ export default class Notification {
       }
    }
 
-   public static notify(settings:NotificationSettings) { console.log('notification', $.extend({}, settings))
+   public static async notify(settings:NotificationSettings) {
       if (!Options.get('notification')) {
          return; // notifications disabled
       }
@@ -90,10 +90,15 @@ export default class Notification {
       settings.icon = settings.icon || Options.get('root') + '/img/XMPP_logo.png';
 
       if (settings.source) {
-         let avatar = settings.source.getAvatar();
+         let avatar;
 
-         if (typeof avatar === 'string' && avatar !== '0') {
-            settings.icon = avatar;
+         try {
+            avatar = await settings.source.getAvatar();
+         } catch(err) {}
+
+
+         if (avatar && avatar.src) {
+            settings.icon = avatar.src;
          } else {
             var hash = Hash.String(settings.source.getName());
 

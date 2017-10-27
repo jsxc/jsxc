@@ -4,6 +4,7 @@ import {Presence} from './connection/AbstractConnection'
 import {EncryptionState} from './plugin/AbstractPlugin'
 import ChatWindow from './ui/ChatWindow'
 import Transcript from './Transcript'
+import Avatar from './Avatar'
 
 export enum ContactType {
    CHAT = 'chat',
@@ -53,7 +54,7 @@ export interface ContactInterface {
 
    getName():string;
 
-   getAvatar():Promise<{}>;
+   getAvatar():Promise<Avatar>;
 
    getSubscription():ContactSubscription;
 

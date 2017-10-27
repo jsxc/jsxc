@@ -13,6 +13,8 @@ import {EncryptionState} from './plugin/AbstractPlugin'
 import Client from './Client'
 import Transcript from './Transcript'
 import ChatWindow from './ui/ChatWindow'
+import Avatar from './Avatar'
+import Pipe from './util/Pipe'
 
 export default class Contact implements IdentifiableInterface, ContactInterface {
    protected storage: Storage;
@@ -188,9 +190,15 @@ export default class Contact implements IdentifiableInterface, ContactInterface 
       return this.data.get('name') || this.jid.bare;
    }
 
-   public getAvatar():Promise<{}> {
-      //@TODO avatar
-      return Promise.reject('No avatar available');
+   public getAvatar():Promise<Avatar> {
+      return Pipe.get('avatar').run(this, undefined)
+         .then(([contact, avatar]) => {
+            if (!avatar) {
+               throw 'No avatar available for ' + this.getId();
+            }
+
+            return avatar;
+         });
    }
 
    public getSubscription():ContactSubscription {
