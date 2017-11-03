@@ -1,6 +1,6 @@
 import ChatStatePlugin from './ChatStatePlugin'
 import ChatStateConnection from './ChatStateConnection'
-import {STATE} from './State'
+import { STATE } from './State'
 import Storage from '../../Storage'
 import ChatWindow from '../../ui/ChatWindow'
 import Contact from '../../Contact'
@@ -9,14 +9,14 @@ import * as Namespace from '../../connection/xmpp/namespace'
 const ENTER_KEY = 13;
 
 export default class ChatStateMachine {
-   private storage:Storage;
-   private connection:ChatStateConnection;
+   private storage: Storage;
+   private connection: ChatStateConnection;
 
    private key;
    private composingTimeout;
    private id;
 
-   constructor(private plugin:ChatStatePlugin, private chatWindow:ChatWindow, private contact:Contact) {
+   constructor(private plugin: ChatStatePlugin, private chatWindow: ChatWindow, private contact: Contact) {
       this.storage = plugin.getStorage();
       this.connection = plugin.getChatStateConnection();
       this.key = 'state:' + this.contact.getId();
@@ -43,7 +43,7 @@ export default class ChatStateMachine {
       this.setState(STATE.COMPOSING);
    }
 
-   private isComposing():boolean {
+   private isComposing(): boolean {
       return this.getState() === STATE.COMPOSING;
    }
 
@@ -51,11 +51,11 @@ export default class ChatStateMachine {
       this.setState(STATE.PAUSED);
    }
 
-   private isPaused():boolean {
+   private isPaused(): boolean {
       return this.getState() === STATE.PAUSED;
    }
 
-   private registerHook(func:(newState:STATE, oldState:STATE)=>void) {
+   private registerHook(func: (newState: STATE, oldState: STATE) => void) {
       this.storage.registerHook(this.key, (newValue, oldValue) => {
          let id = newValue.id;
          let newState = newValue.state;
@@ -75,7 +75,7 @@ export default class ChatStateMachine {
       });
    }
 
-   private setState(state:STATE) {
+   private setState(state: STATE) {
       this.id = Math.random();
 
       this.storage.setItem(this.key, {
@@ -84,13 +84,13 @@ export default class ChatStateMachine {
       });
    }
 
-   private getState():STATE {
+   private getState(): STATE {
       let stored = this.storage.getItem(this.key) || {};
 
-      return <STATE> stored.state || STATE.INACTIVE;
+      return <STATE>stored.state || STATE.INACTIVE;
    }
 
-   private stateChange = (newState:STATE, oldState:STATE) => {
+   private stateChange = (newState: STATE, oldState: STATE) => {
       let jid = this.contact.getJid();
 
       new Promise((resolve, reject) => {

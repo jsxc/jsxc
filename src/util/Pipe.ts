@@ -5,7 +5,7 @@ const MIN_PRIORITY = 0;
 export default class Pipe {
    private static instances = {};
 
-   public static get(name:string):Pipe {
+   public static get(name: string): Pipe {
       if (typeof Pipe.instances[name] === 'undefined') {
          Pipe.instances[name] = new Pipe();
       }
@@ -19,8 +19,8 @@ export default class Pipe {
 
    }
 
-   public addProcessor(processor:(...args) => Promise<any>|Array<any>, priority:number = 50) {
-      if(isNaN(priority) || priority < MIN_PRIORITY || priority > MAX_PRIORITY) {
+   public addProcessor(processor: (...args) => Promise<any> | Array<any>, priority: number = 50) {
+      if (isNaN(priority) || priority < MIN_PRIORITY || priority > MAX_PRIORITY) {
          throw 'Priority has to be between 0 and 100';
       }
 
@@ -40,7 +40,7 @@ export default class Pipe {
          }
 
          processors.forEach((processor) => {
-            chain = chain.then((args2:Array<any>) => {
+            chain = chain.then((args2: Array<any>) => {
                return processor.apply(this, args2);
             });
          });

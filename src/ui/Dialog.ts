@@ -5,7 +5,7 @@ let dialogTemplate = require('../../template/dialog.hbs');
 
 export default class Dialog {
 
-   private readonly id:string;
+   private readonly id: string;
 
    private magnificPopupOptions = {
       items: null,
@@ -21,7 +21,7 @@ export default class Dialog {
    };
 
    // @REVIEW name is maybe unnecessary
-   public constructor(content:string, unclosable:boolean = false, readonly name:string = '') {
+   public constructor(content: string, unclosable: boolean = false, readonly name: string = '') {
       this.id = Dialog.generateId();
 
       let src = dialogTemplate({
@@ -55,17 +55,17 @@ export default class Dialog {
    }
 
    public getDom() {
-      return $('.jsxc-dialog[data-name="'+this.name+'"]');
+      return $('.jsxc-dialog[data-name="' + this.name + '"]');
    }
 
-   public append(content:string) {
+   public append(content: string) {
       var dom = this.getDom();
 
       dom.append(content);
    }
 
-   public getPromise():Promise<{}> {
-      return new Promise(() => {});
+   public getPromise(): Promise<{}> {
+      return new Promise(() => { });
    }
 
    private onOpened() {
@@ -117,7 +117,7 @@ export default class Dialog {
       $(document).trigger('cleanup.dialog.jsxc');
    }
 
-   private static generateId():string {
+   private static generateId(): string {
       let random = Math.round(Math.random() * Math.pow(10, 20)).toString();
 
       return 'dialog-' + random;

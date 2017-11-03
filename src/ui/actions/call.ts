@@ -1,11 +1,11 @@
 import Contact from '../../Contact'
 import Log from '../../util/Log'
 import UserMedia from '../../UserMedia'
-import {VideoDialog} from '../VideoDialog'
+import { VideoDialog } from '../VideoDialog'
 import Account from '../../Account'
 import IceServers from '../../IceServers'
 
-export function startCall(contact:Contact, account:Account){
+export function startCall(contact: Contact, account: Account) {
    let peerJID = contact.getJid();
 
    if (!peerJID.resource) {

@@ -1,6 +1,6 @@
 import Options from '../Options'
 import Hash from '../util/Hash'
-import {ContactInterface} from '../ContactInterface'
+import { ContactInterface } from '../ContactInterface'
 
 export default class AvatarSet {
 
@@ -8,7 +8,7 @@ export default class AvatarSet {
 
    private static avatars = {};
 
-   public static get(contact:ContactInterface) {
+   public static get(contact: ContactInterface) {
       let avatar = AvatarSet.avatars[contact.getId()];
 
       if (!avatar) {
@@ -18,7 +18,7 @@ export default class AvatarSet {
       return avatar;
    }
 
-   public static setPlaceholder(elements, text:string) {
+   public static setPlaceholder(elements, text: string) {
       AvatarSet.placeholder(elements, text);
    }
 
@@ -31,7 +31,7 @@ export default class AvatarSet {
    public reload() {
       //@TODO spinner?
       this.contact.getAvatar().then((avatar) => {
-         $(this.elements).each(function(){
+         $(this.elements).each(function() {
             let element = $(this);
 
             element.css('background-image', `url(${avatar.getData()})`);
@@ -42,13 +42,13 @@ export default class AvatarSet {
       });
    }
 
-   private constructor(private contact:ContactInterface) {
+   private constructor(private contact: ContactInterface) {
       this.contact.registerHook('name', (name) => {
          this.reload();
       });
    }
 
-   private static placeholder(elements, text:string) {
+   private static placeholder(elements, text: string) {
       var options = Options.get('avatarPlaceholder') || {};
       var hash = Hash.String(text);
 
@@ -56,7 +56,7 @@ export default class AvatarSet {
       var saturation = options.saturation || 90;
       var lightness = options.lightness || 65;
 
-      $(elements).each(function(){
+      $(elements).each(function() {
          let element = $(this);
 
          element.css({

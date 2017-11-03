@@ -5,7 +5,7 @@ import RosterHandler from './xmpp/handlers/roster'
 import Log from '../util/Log'
 import * as StropheLib from 'strophe.js'
 import JingleHandler from './JingleHandler'
-import {IConnection} from './ConnectionInterface'
+import { IConnection } from './ConnectionInterface'
 import Account from '../Account'
 import Pipe from '../util/Pipe'
 import Form from './Form'
@@ -28,20 +28,20 @@ enum Presence {
 abstract class AbstractConnection {
    protected abstract connection;
 
-   protected abstract send(stanzaElement:Element);
-   protected abstract send(stanzaElement:Strophe.Builder);
+   protected abstract send(stanzaElement: Element);
+   protected abstract send(stanzaElement: Strophe.Builder);
 
-   protected abstract sendIQ(stanzaElement:Element):Promise<Element>;
-   protected abstract sendIQ(stanzaElement:Strophe.Builder):Promise<Element>;
+   protected abstract sendIQ(stanzaElement: Element): Promise<Element>;
+   protected abstract sendIQ(stanzaElement: Strophe.Builder): Promise<Element>;
 
-   public abstract registerHandler(handler:(stanza:string)=>boolean, ns?:string, name?:string, type?:string, id?:string, from?:string);
+   public abstract registerHandler(handler: (stanza: string) => boolean, ns?: string, name?: string, type?: string, id?: string, from?: string);
 
    protected jingleHandler;
    public abstract getJingleHandler();
 
    protected node = 'https://jsxc.org';
 
-   constructor(protected account:Account) {
+   constructor(protected account: Account) {
 
       let discoInfo = this.account.getDiscoInfo();
 
@@ -50,19 +50,19 @@ abstract class AbstractConnection {
       NS.register('VCARD', 'vcard-temp');
    }
 
-   public pluginOnlySend(stanzaElement:Element);
-   public pluginOnlySend(stanzaElement:Strophe.Builder);
+   public pluginOnlySend(stanzaElement: Element);
+   public pluginOnlySend(stanzaElement: Strophe.Builder);
    public pluginOnlySend(stanzaElement) {
       this.send(stanzaElement);
    }
 
-   public pluginOnlySendIQ(stanzaElement:Element):Promise<Element>;
-   public pluginOnlySendIQ(stanzaElement:Strophe.Builder):Promise<Element>;
+   public pluginOnlySendIQ(stanzaElement: Element): Promise<Element>;
+   public pluginOnlySendIQ(stanzaElement: Strophe.Builder): Promise<Element>;
    public pluginOnlySendIQ(stanzaElement) {
       return this.sendIQ(stanzaElement);
    }
 
-   public getJID():JID {
+   public getJID(): JID {
       return this.account.getJID();
    }
 
@@ -75,13 +75,13 @@ abstract class AbstractConnection {
 
       //@TODO use account.getStorage().getItem('roster', 'version'), maybe better as parameter
 
-      return this.sendIQ(iq).then((stanza:Element) => {
+      return this.sendIQ(iq).then((stanza: Element) => {
          let rosterHandler = new RosterHandler(this.account);
          return rosterHandler.processStanza(stanza);
       });
    }
 
-   public sendMessage(message:Message) {
+   public sendMessage(message: Message) {
       if (message.getDirection() !== Message.DIRECTION.OUT) {
          return;
       }
@@ -145,7 +145,7 @@ abstract class AbstractConnection {
       });
    }
 
-   public sendPresence(presence?:Presence) {
+   public sendPresence(presence?: Presence) {
       var presenceStanza = $pres();
 
       presenceStanza.c('c', this.generateCapsAttributes()).up();
@@ -164,7 +164,7 @@ abstract class AbstractConnection {
       this.send(presenceStanza);
    }
 
-   public removeContact(jid:JID):Promise<Element> {
+   public removeContact(jid: JID): Promise<Element> {
       let self = this;
 
       // Shortcut to remove buddy from roster and cancle all subscriptions
@@ -180,7 +180,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public addContact(jid:JID, alias:string) {
+   public addContact(jid: JID, alias: string) {
       let waitForRoster = this.addContactToRoster(jid, alias);
 
       this.sendSubscriptionRequest(jid);
@@ -188,7 +188,7 @@ abstract class AbstractConnection {
       return waitForRoster;
    };
 
-   public loadVcard(jid:JID) {
+   public loadVcard(jid: JID) {
       let iq = $iq({
          type: 'get',
          to: jid.full
@@ -201,7 +201,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq).then(this.parseVcard);
    }
 
-   public setDisplayName(jid:JID, displayName:string):Promise<Element> {
+   public setDisplayName(jid: JID, displayName: string): Promise<Element> {
       var iq = $iq({
          type: 'set'
       }).c('query', {
@@ -214,7 +214,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public sendSubscriptionAnswer(to:JID, accept:boolean) {
+   public sendSubscriptionAnswer(to: JID, accept: boolean) {
       let presenceStanza = $pres({
          to: to.bare,
          type: (accept) ? 'subscribed' : 'unsubscribed'
@@ -223,43 +223,43 @@ abstract class AbstractConnection {
       this.send(presenceStanza);
    }
 
-   public getDiscoInfo(jid:JID, node?:string):Promise<Element> {
+   public getDiscoInfo(jid: JID, node?: string): Promise<Element> {
       let attrs = {
-        xmlns: NS.get('DISCO_INFO'),
-        node: null
+         xmlns: NS.get('DISCO_INFO'),
+         node: null
       };
 
       if (typeof node === 'string' && node.length > 0) {
-        attrs.node = node;
+         attrs.node = node;
       }
 
       let iq = $iq({
-        to: jid.full,
-        type: 'get'
+         to: jid.full,
+         type: 'get'
       }).c('query', attrs);
 
       return this.sendIQ(iq);
    }
 
-   public getDiscoItems(jid:JID, node?:string):Promise<Element> {
-     let attrs = {
-       xmlns: NS.get('DISCO_ITEMS'),
-       node: null
-     };
+   public getDiscoItems(jid: JID, node?: string): Promise<Element> {
+      let attrs = {
+         xmlns: NS.get('DISCO_ITEMS'),
+         node: null
+      };
 
-     if (typeof node === 'string' && node.length > 0) {
-       attrs.node = node;
-     }
+      if (typeof node === 'string' && node.length > 0) {
+         attrs.node = node;
+      }
 
-     let iq = $iq({
-       to: jid.full,
-       type: 'get'
-     }).c('query', attrs);
+      let iq = $iq({
+         to: jid.full,
+         type: 'get'
+      }).c('query', attrs);
 
-     return this.sendIQ(iq);
+      return this.sendIQ(iq);
    }
 
-   public joinMultiUserRoom(jid:JID, password?:string) {
+   public joinMultiUserRoom(jid: JID, password?: string) {
       if (jid.isBare()) {
          return Promise.reject('We need a full jid to join a room');
       }
@@ -277,21 +277,21 @@ abstract class AbstractConnection {
       return this.send(pres);
    }
 
-   public leaveMultiUserRoom(jid:JID, exitMessage?:string) {
+   public leaveMultiUserRoom(jid: JID, exitMessage?: string) {
       let pres = $pres({
-        type: 'unavailable',
-      //   id: presenceid,
-        to: jid.full
+         type: 'unavailable',
+         //   id: presenceid,
+         to: jid.full
       });
 
       if (exitMessage) {
-        pres.c('status', exitMessage);
+         pres.c('status', exitMessage);
       }
 
       return this.send(pres);
    }
 
-   public destroyMultiUserRoom(jid:JID):Promise<Element> {
+   public destroyMultiUserRoom(jid: JID): Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'set'
@@ -302,7 +302,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public createInstantRoom(jid:JID):Promise<Element> {
+   public createInstantRoom(jid: JID): Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'set'
@@ -316,7 +316,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public getRoomConfigurationForm(jid:JID):Promise<Element> {
+   public getRoomConfigurationForm(jid: JID): Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'get'
@@ -327,7 +327,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public submitRoomConfiguration(jid:JID, form:Form):Promise<Element> {
+   public submitRoomConfiguration(jid: JID, form: Form): Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'set'
@@ -338,7 +338,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public cancelRoomConfiguration(jid:JID):Promise<Element> {
+   public cancelRoomConfiguration(jid: JID): Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'set'
@@ -352,7 +352,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public sendMediatedMultiUserInvitation(receiverJid:JID, roomJid:JID, reason?:string) {
+   public sendMediatedMultiUserInvitation(receiverJid: JID, roomJid: JID, reason?: string) {
       //@REVIEW id?
       let msg = $msg({
          to: roomJid.bare
@@ -369,7 +369,7 @@ abstract class AbstractConnection {
       this.send(msg);
    }
 
-   public declineMediatedMultiUserInvitation(receiverJid:JID, roomJid:JID, reason?:string) {
+   public declineMediatedMultiUserInvitation(receiverJid: JID, roomJid: JID, reason?: string) {
       //@REVIEW id?
       let msg = $msg({
          to: roomJid.bare
@@ -386,7 +386,7 @@ abstract class AbstractConnection {
       this.send(msg);
    }
 
-   public sendDirectMultiUserInvitation(receiverJid:JID, roomJid:JID, reason?:string, password?:string) {
+   public sendDirectMultiUserInvitation(receiverJid: JID, roomJid: JID, reason?: string, password?: string) {
       //@REVIEW id?
       let msg = $msg({
          to: receiverJid.bare
@@ -400,9 +400,9 @@ abstract class AbstractConnection {
       this.send(msg);
    }
 
-   public queryArchive(archive:JID, queryId:string, beforeResultId?:string, end?:Date):Promise<Element> {
+   public queryArchive(archive: JID, queryId: string, beforeResultId?: string, end?: Date): Promise<Element> {
       var iq = $iq({
-         type:'set'
+         type: 'set'
       });
 
       iq.c('query', {
@@ -410,22 +410,22 @@ abstract class AbstractConnection {
          queryid: queryId
       });
 
-      iq.c('x',{
-         xmlns:'jabber:x:data',
-         type:'submit'
+      iq.c('x', {
+         xmlns: 'jabber:x:data',
+         type: 'submit'
       });
 
-      iq.c('field',{
-         'var':'FORM_TYPE',
-         type:'hidden'
+      iq.c('field', {
+         'var': 'FORM_TYPE',
+         type: 'hidden'
       }).c('value').t(NS.get('MAM')).up().up();
 
-      iq.c('field',{
+      iq.c('field', {
          'var': 'with'
       }).c('value').t(archive.bare).up().up();
 
       if (end) {
-         iq.c('field',{
+         iq.c('field', {
             'var': 'end'
          }).c('value').t(end.toISOString()).up().up();
       }
@@ -447,7 +447,7 @@ abstract class AbstractConnection {
 
    }
 
-   private addContactToRoster(jid:JID, alias:string) {
+   private addContactToRoster(jid: JID, alias: string) {
       let iq = $iq({
          type: 'set'
       }).c('query', {
@@ -460,7 +460,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   private sendSubscriptionRequest(jid:JID) {
+   private sendSubscriptionRequest(jid: JID) {
       // send subscription request to buddy (trigger onRosterChanged)
       this.send($pres({
          to: jid.full,
@@ -469,7 +469,7 @@ abstract class AbstractConnection {
    }
 
    private parseVcard = (stanza) => {
-      let data:any = {};
+      let data: any = {};
       let vcard = $(stanza).find('vCard');
 
       if (!vcard.length) {
@@ -480,10 +480,10 @@ abstract class AbstractConnection {
    }
 
    private parseVcardChildren(stanza) {
-      let data:any = {};
+      let data: any = {};
       let children = stanza.children();
 
-      children.each(function(){
+      children.each(function() {
          let item = $(this);
          let children = item.children();
          let itemName = item[0].tagName;
@@ -518,14 +518,15 @@ abstract class AbstractConnection {
       return data;
    }
 
-   private generateCapsAttributes() { console.log(this.account.getDiscoInfo())
-     return {
-       'xmlns': NS.get('CAPS'),
-       'hash': 'sha-1',
-       'node': this.node,
-       'ver': this.account.getDiscoInfo().getCapsVersion()
-     }
+   private generateCapsAttributes() {
+      console.log(this.account.getDiscoInfo())
+      return {
+         'xmlns': NS.get('CAPS'),
+         'hash': 'sha-1',
+         'node': this.node,
+         'ver': this.account.getDiscoInfo().getCapsVersion()
+      }
    }
 }
 
-export {AbstractConnection, Presence};
+export { AbstractConnection, Presence };

@@ -2,7 +2,7 @@ import Contact from '../../Contact'
 import Client from '../../Client'
 import * as CONST from '../../CONST'
 import Message from '../../Message'
-import {AbstractPlugin} from '../../plugin/AbstractPlugin'
+import { AbstractPlugin } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
 import Translation from '../../util/Translation'
 import Log from '../../util/Log'
@@ -11,20 +11,20 @@ import JID from '../../JID'
 import * as Namespace from '../../connection/xmpp/namespace'
 import Attachment from '../../Attachment'
 import HttpUploadService from './HttpUploadService'
-import {IConnection} from '../../connection/ConnectionInterface'
+import { IConnection } from '../../connection/ConnectionInterface'
 import Pipe from '../../util/Pipe'
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 export default class HttpUploadPlugin extends AbstractPlugin {
-   public static getName():string {
+   public static getName(): string {
       return 'httpUpload';
    }
 
-   private services:HttpUploadService[];
+   private services: HttpUploadService[];
 
-   constructor(pluginAPI:PluginAPI) {
+   constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       Namespace.register('HTTPUPLOAD', 'urn:xmpp:http:upload');
@@ -39,7 +39,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       connection.registerHandler(this.onBitsOfBinary, 'urn:xmpp:bob', 'iq');
    }
 
-   private preSendMessageProcessor = (contact:Contact, message:Message) => {
+   private preSendMessageProcessor = (contact: Contact, message: Message) => {
       if (!message.hasAttachment()) {
          return Promise.resolve([contact, message]);
       }
@@ -47,7 +47,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       let attachment = message.getAttachment();
 
       return this.getServices().then((services) => {
-         for(let service of services) {
+         for (let service of services) {
             if (service.isSuitable(attachment)) {
                return service;
             }
@@ -67,7 +67,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       });
    }
 
-   private getServices():Promise<HttpUploadService[]> {
+   private getServices(): Promise<HttpUploadService[]> {
       if (this.services) {
          return Promise.resolve(this.services);
       }
@@ -79,7 +79,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       });
    }
 
-   private requestServices():Promise<HttpUploadService[]> {
+   private requestServices(): Promise<HttpUploadService[]> {
       let connection = this.getConnection();
       let ownJid = connection.getJID();
       let serverJid = new JID('', ownJid.domain, '');
@@ -113,17 +113,18 @@ export default class HttpUploadPlugin extends AbstractPlugin {
             promises.push(promise);
          });
 
-         return Promise.all(promises).then((results) => { console.log('Promise all', results)
+         return Promise.all(promises).then((results) => {
+            console.log('Promise all', results)
             return results.filter(service => typeof service !== 'undefined');
          });
       });
    }
 
-   private getConnection():IConnection {
+   private getConnection(): IConnection {
       return this.pluginAPI.getConnection();
    }
 
-   private addUrlToMessage(downloadUrl:string, attachment:Attachment, message:Message) {
+   private addUrlToMessage(downloadUrl: string, attachment: Attachment, message: Message) {
       let plaintext = message.getPlaintextMessage();
 
       message.setPlaintextMessage(downloadUrl + ' ' + plaintext);
@@ -146,9 +147,9 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       message.setHtmlMessage(html.html());
    }
 
-   private onBitsOfBinary = (stanza:string):boolean => {
+   private onBitsOfBinary = (stanza: string): boolean => {
       let stanzaElement = $(stanza);
-      let from = new JID (stanzaElement.attr('from'));
+      let from = new JID(stanzaElement.attr('from'));
       let type = stanzaElement.attr('type');
       let id = stanzaElement.attr('id');
       let cid = stanzaElement.find('data[xmlns="urn:xmpp:bob"]').attr('cid');
@@ -176,7 +177,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       return true;
    }
 
-   private addBitsOfBinary = (message:Message, xmlStanza:Strophe.Builder) => {
+   private addBitsOfBinary = (message: Message, xmlStanza: Strophe.Builder) => {
       //@TODO check if element with cid exists
 
       if (message.hasAttachment() && message.getAttachment().hasThumbnailData()) {

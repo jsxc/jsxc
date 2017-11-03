@@ -1,5 +1,5 @@
 import Storage from './Storage'
-import {IConnection} from './connection/ConnectionInterface'
+import { IConnection } from './connection/ConnectionInterface'
 import Connector from './connection/xmpp/Connector'
 import XMPPConnection from './connection/xmpp/Connection'
 import StorageConnection from './connection/storage/Connection'
@@ -13,9 +13,9 @@ import ChatWindowList from './ui/ChatWindowList'
 import SortedPersistentMap from './util/SortedPersistentMap'
 import PersistentMap from './util/PersistentMap'
 import Log from './util/Log'
-import {Presence, AbstractConnection} from './connection/AbstractConnection'
+import { Presence, AbstractConnection } from './connection/AbstractConnection'
 import Client from './Client'
-import {NoticeManager} from './NoticeManager'
+import { NoticeManager } from './NoticeManager'
 import * as StropheLib from 'strophe.js'
 import PluginRepository from './plugin/PluginRepository'
 import DiscoInfoRepository from './DiscoInfoRepository'
@@ -24,42 +24,42 @@ import DiscoInfoChangable from './DiscoInfoChangable'
 let Strophe = StropheLib.Strophe;
 
 interface IConnectionParameters {
-   url:string,
+   url: string,
    jid: string,
-   sid?:string,
-   rid?:string,
-   timestamp?:number,
-   inactivity?:number
+   sid?: string,
+   rid?: string,
+   timestamp?: number,
+   inactivity?: number
 };
 
 export default class Account {
-   private storage:Storage;
+   private storage: Storage;
 
-   private uid:string;
+   private uid: string;
 
-   private connection:IConnection;
+   private connection: IConnection;
 
-   private connector:Connector;
+   private connector: Connector;
 
    private contacts = {};
 
-   private windows:SortedPersistentMap;
+   private windows: SortedPersistentMap;
 
-   private notices:SortedPersistentMap;
+   private notices: SortedPersistentMap;
 
-   private contact:Contact;
+   private contact: Contact;
 
-   private noticeManager:NoticeManager;
+   private noticeManager: NoticeManager;
 
-   private pluginRepository:PluginRepository;
+   private pluginRepository: PluginRepository;
 
-   private discoInfoRepository:DiscoInfoRepository;
+   private discoInfoRepository: DiscoInfoRepository;
 
-   private ownDiscoInfo:DiscoInfoChangable;
+   private ownDiscoInfo: DiscoInfoChangable;
 
-   constructor(boshUrl: string, jid: string, sid: string, rid:string);
+   constructor(boshUrl: string, jid: string, sid: string, rid: string);
    constructor(boshUrl: string, jid: string, password: string);
-   constructor(uid:string);
+   constructor(uid: string);
    constructor() {
       if (arguments.length === 1) {
          this.uid = arguments[0];
@@ -102,31 +102,31 @@ export default class Account {
       });
    }
 
-   public getPluginRepository():PluginRepository {
+   public getPluginRepository(): PluginRepository {
       return this.pluginRepository;
    }
 
-   public getDiscoInfoRepository():DiscoInfoRepository {
-     return this.discoInfoRepository;
+   public getDiscoInfoRepository(): DiscoInfoRepository {
+      return this.discoInfoRepository;
    }
 
-   public getDiscoInfo():DiscoInfoChangable {
-     return this.ownDiscoInfo;
+   public getDiscoInfo(): DiscoInfoChangable {
+      return this.ownDiscoInfo;
    }
 
-   public getContact(jid:JID):Contact {
+   public getContact(jid: JID): Contact {
       return this.contacts[jid.bare];
    }
 
-   public addMultiUserContact(jid:JID, name?:string):MultiUserContact {
+   public addMultiUserContact(jid: JID, name?: string): MultiUserContact {
       return this.addContactObject(new MultiUserContact(this, jid, name));
    }
 
-   public addContact(jid:JID, name?:string):Contact {
+   public addContact(jid: JID, name?: string): Contact {
       return this.addContactObject(new Contact(this, jid, name));
    }
 
-   public removeContact(contact:Contact) {
+   public removeContact(contact: Contact) {
       let id = contact.getJid().bare;
 
       if (this.contacts[id]) {
@@ -146,14 +146,14 @@ export default class Account {
    }
 
    public removeAllContacts() {
-      for(let id in this.contacts) {
+      for (let id in this.contacts) {
          let contact = this.contacts[id];
 
          this.removeContact(contact);
       }
    }
 
-   public addChatWindow(chatWindow:ChatWindow):ChatWindow {
+   public addChatWindow(chatWindow: ChatWindow): ChatWindow {
       chatWindow = ChatWindowList.get().add(chatWindow);
 
       this.windows.push(chatWindow);
@@ -161,7 +161,7 @@ export default class Account {
       return chatWindow;
    }
 
-   public closeChatWindow(chatWindow:ChatWindow) {
+   public closeChatWindow(chatWindow: ChatWindow) {
       ChatWindowList.get().remove(chatWindow);
 
       this.windows.remove(chatWindow);
@@ -173,27 +173,27 @@ export default class Account {
       });
    }
 
-   public getNoticeManager():NoticeManager {
+   public getNoticeManager(): NoticeManager {
       return this.noticeManager;
    }
 
    public getStorage() {
-      if(!this.storage) {
+      if (!this.storage) {
          this.storage = new Storage(this.uid);
       }
 
       return this.storage;
    }
 
-   public getConnection():IConnection {
+   public getConnection(): IConnection {
       return this.connection;
    }
 
-   public getUid():string {
+   public getUid(): string {
       return this.uid;
    }
 
-   public getJID():JID {
+   public getJID(): JID {
       //@REVIEW maybe promise?
       return this.connector.getJID() || new JID(this.getUid());
    }
@@ -248,10 +248,10 @@ export default class Account {
       });
    }
 
-   private createNewContact(id:string):Contact {
+   private createNewContact(id: string): Contact {
       let contact = new Contact(this, id);
 
-      if (contact.getType() === 'groupchat'){
+      if (contact.getType() === 'groupchat') {
          contact = new MultiUserContact(this, id);
       }
 
@@ -279,7 +279,7 @@ export default class Account {
    }
 
    private removeNonpersistentContacts() {
-      for(let contactId in this.contacts) {
+      for (let contactId in this.contacts) {
          let contact = this.contacts[contactId];
          if (!contact.isPersistent()) {
             this.removeContact(contact);

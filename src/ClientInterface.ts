@@ -1,26 +1,26 @@
-import {JIDInterface} from './JIDInterface'
-import {PluginInterface} from './PluginInterface'
+import { JIDInterface } from './JIDInterface'
+import { PluginInterface } from './PluginInterface'
 
 export interface ClientInterface {
    init();
 
-   addConnectionPlugin(plugin:PluginInterface);
+   addConnectionPlugin(plugin: PluginInterface);
 
-   addPreSendMessageHook(hook:(Message, Builder)=>void, position?:number);
+   addPreSendMessageHook(hook: (Message, Builder) => void, position?: number);
 
    hasFocus();
 
-   isExtraSmallDevice():boolean;
+   isExtraSmallDevice(): boolean;
 
-   isDebugMode():boolean;
+   isDebugMode(): boolean;
 
    getStorage();
 
-   getAccount(jid:JIDInterface):Account;
-   getAccount(uid?:string):Account;
+   getAccount(jid: JIDInterface): Account;
+   getAccount(uid?: string): Account;
 
-   createAccount(boshUrl: string, jid: string, sid: string, rid:string);
+   createAccount(boshUrl: string, jid: string, sid: string, rid: string);
    createAccount(boshUrl: string, jid: string, password: string);
 
-   removeAccount(account:Account);
+   removeAccount(account: Account);
 }

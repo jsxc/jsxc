@@ -9,8 +9,8 @@ import Translation from './util/Translation'
 import Identifiable from './IdentifiableInterface'
 import Client from './Client'
 import Utils from './util/Utils'
-import {MessageInterface, DIRECTION} from './MessageInterface'
-import {ContactType} from './ContactInterface'
+import { MessageInterface, DIRECTION } from './MessageInterface'
+import { ContactType } from './ContactInterface'
 import PersistentMap from './util/PersistentMap'
 import UUID from './util/UUID';
 
@@ -19,45 +19,45 @@ const MSGPOSTFIX = ':msg';
 const ATREGEX = new RegExp('(xmpp:)?(' + CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i');
 
 interface MessagePayload {
-   peer:JID,
-   direction:DIRECTION,
-   attrId?:string,
-   uid?:string,
-   plaintextMessage?:string,
-   htmlMessage?:string,
-   errorMessage?:string,
-   attachment?:Attachment,
-   received?:boolean,
-   encrypted?:boolean,
-   forwarded?:boolean,
-   stamp?:number,
-   type?:ContactType,
-   encryptedHtmlMessage?:string,
-   encryptedPlaintextMessage?:string,
+   peer: JID,
+   direction: DIRECTION,
+   attrId?: string,
+   uid?: string,
+   plaintextMessage?: string,
+   htmlMessage?: string,
+   errorMessage?: string,
+   attachment?: Attachment,
+   received?: boolean,
+   encrypted?: boolean,
+   forwarded?: boolean,
+   stamp?: number,
+   type?: ContactType,
+   encryptedHtmlMessage?: string,
+   encryptedPlaintextMessage?: string,
    sender?: {
-      name:string,
-      jid?:JID
+      name: string,
+      jid?: JID
    }
 }
 
 export default class Message implements Identifiable, MessageInterface {
 
-   private uid:string;
+   private uid: string;
 
-   private data:PersistentMap;
+   private data: PersistentMap;
 
-   private attachment:Attachment;
+   private attachment: Attachment;
 
-   private stamp:Date;
+   private stamp: Date;
 
    static readonly DIRECTION = DIRECTION;
 
    static readonly MSGTYPE = ContactType;
 
-   private storage:Storage;
+   private storage: Storage;
 
-   constructor(uid:string);
-   constructor(data:MessagePayload);
+   constructor(uid: string);
+   constructor(data: MessagePayload);
    constructor(arg0) {
       this.storage = Client.getStorage();
       let data;
@@ -99,7 +99,7 @@ export default class Message implements Identifiable, MessageInterface {
       }
    }
 
-   public registerHook(property:string, func:(newValue:any, oldValue:any)=>void) {
+   public registerHook(property: string, func: (newValue: any, oldValue: any) => void) {
       this.data.registerHook(property, func);
    }
 
@@ -108,11 +108,11 @@ export default class Message implements Identifiable, MessageInterface {
       return this.getUid();
    }
 
-   public getUid():string {
+   public getUid(): string {
       return this.uid;
    }
 
-   public getAttrId():string {
+   public getAttrId(): string {
       return this.data.get('attrId');
    }
 
@@ -130,11 +130,11 @@ export default class Message implements Identifiable, MessageInterface {
       this.uid = undefined;
    }
 
-   public getNextId():string {
+   public getNextId(): string {
       return this.data.get('next');
    }
 
-   public setNext(message:Message|string) {
+   public setNext(message: Message | string) {
       let nextId = typeof message === 'string' ? message : message.getUid();
 
       // this.data.set('next', nextId);
@@ -146,27 +146,27 @@ export default class Message implements Identifiable, MessageInterface {
       }
    }
 
-   public getCssId():string {
+   public getCssId(): string {
       return this.uid.replace(/:/g, '-');
    }
 
-   public getDOM():JQuery<HTMLElement> {
+   public getDOM(): JQuery<HTMLElement> {
       return $('#' + this.getCssId());
    }
 
-   public getStamp():Date {
+   public getStamp(): Date {
       return new Date(this.data.get('stamp'));
    }
 
-   public getDirection():DIRECTION {
+   public getDirection(): DIRECTION {
       return this.data.get('direction');
    }
 
-   public getDirectionString():string {
+   public getDirectionString(): string {
       return DIRECTION[this.getDirection()].toLowerCase();
    }
 
-   public getAttachment():Attachment {
+   public getAttachment(): Attachment {
       if (!this.attachment) {
          this.attachment = new Attachment(this.data.get('attachment'));
       }
@@ -174,7 +174,7 @@ export default class Message implements Identifiable, MessageInterface {
       return this.attachment;
    }
 
-   public setAttachment(attachment:Attachment) {
+   public setAttachment(attachment: Attachment) {
       this.attachment = attachment;
 
       this.data.set('attachment', attachment.getUid());
@@ -191,59 +191,59 @@ export default class Message implements Identifiable, MessageInterface {
       // }
    }
 
-   public getPeer():JID {
+   public getPeer(): JID {
       return new JID(this.data.get('peer'));
    }
 
-   public getType():ContactType {
+   public getType(): ContactType {
       return this.data.get('type');
    }
 
-   public getTypeString():string {
+   public getTypeString(): string {
       return ContactType[this.getType()].toLowerCase();
    }
 
-   public getHtmlMessage():string {
+   public getHtmlMessage(): string {
       return this.data.get('htmlMessage');
    }
 
-   public setHtmlMessage(htmlMessage:string) {
+   public setHtmlMessage(htmlMessage: string) {
       this.data.set('htmlMessage', htmlMessage);
    }
 
-   public getEncryptedHtmlMessage():string {
+   public getEncryptedHtmlMessage(): string {
       return this.data.get('encryptedHtmlMessage');
    }
 
-   public getPlaintextMessage():string {
+   public getPlaintextMessage(): string {
       return this.data.get('plaintextMessage');
    }
 
-   public getEncryptedPlaintextMessage():string {
+   public getEncryptedPlaintextMessage(): string {
       return this.data.get('encryptedPlaintextMessage');
    }
 
-   public getSender():{name:string, jid?:JID} {
-      return this.data.get('sender') || {name: null};
+   public getSender(): { name: string, jid?: JID } {
+      return this.data.get('sender') || { name: null };
    }
 
    public received() {
       this.data.set('received', true);
    }
 
-   public isReceived():boolean {
+   public isReceived(): boolean {
       return !!this.data.get('received');
    }
 
-   public isForwarded():boolean {
+   public isForwarded(): boolean {
       return !!this.data.get('forwarded');
    }
 
-   public isEncrypted():boolean {
+   public isEncrypted(): boolean {
       return !!this.data.get('encrypted');
    }
 
-   public hasAttachment():boolean {
+   public hasAttachment(): boolean {
       return !!this.data.get('attachment');
    }
 
@@ -251,23 +251,23 @@ export default class Message implements Identifiable, MessageInterface {
 
    }
 
-   public setDirection(direction:DIRECTION) {
+   public setDirection(direction: DIRECTION) {
       this.data.set('direction', direction)
    }
 
-   public setPlaintextMessage(plaintextMessage:string) {
+   public setPlaintextMessage(plaintextMessage: string) {
       this.data.set('plaintextMessage', plaintextMessage);
    }
 
-   public setEncryptedPlaintextMessage(encryptedPlaintextMessage:string) {
+   public setEncryptedPlaintextMessage(encryptedPlaintextMessage: string) {
       this.data.set('encryptedPlaintextMessage', encryptedPlaintextMessage);
    }
 
-   public setEncrypted(encrypted:boolean = false) {
+   public setEncrypted(encrypted: boolean = false) {
       this.data.set('encrypted', encrypted);
    }
 
-   public getProcessedBody():string {
+   public getProcessedBody(): string {
       let body = this.getPlaintextMessage();
 
       //@REVIEW maybe pipes
@@ -285,11 +285,11 @@ export default class Message implements Identifiable, MessageInterface {
       return `<p>${body}</p>`;
    }
 
-   public getErrorMessage():string {
+   public getErrorMessage(): string {
       return this.data.get('errorMessage');
    }
 
-   public updateProgress(transfered:number, complete:number) {
+   public updateProgress(transfered: number, complete: number) {
 
    }
 

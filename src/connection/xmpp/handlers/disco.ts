@@ -1,5 +1,5 @@
 import * as NS from '../namespace'
-import {AbstractConnection} from '../../AbstractConnection';
+import { AbstractConnection } from '../../AbstractConnection';
 import Client from '../../../Client'
 import AbstractHandler from '../AbstractHandler'
 
@@ -10,7 +10,7 @@ export class DiscoInfoHandler extends AbstractHandler {
       account.getDiscoInfo().addFeature(NS.get('DISCO_INFO'));
    }
 
-   public processStanza(stanza:Element):boolean {
+   public processStanza(stanza: Element): boolean {
       let id = stanza.getAttribute('id');
       let from = stanza.getAttribute('from');
       let node = stanza.getElementsByTagName('query')[0].getAttribute('node');
@@ -21,7 +21,7 @@ export class DiscoInfoHandler extends AbstractHandler {
          to: from
       }).c('query', {
          xmlns: NS.get('DISCO_INFO'),
-         node: (node)? node : undefined
+         node: (node) ? node : undefined
       });
 
       iq = this.addIdentitiesToStanza(iq);
@@ -33,12 +33,12 @@ export class DiscoInfoHandler extends AbstractHandler {
    }
 
    private addIdentitiesToStanza(iq) {
-      for(let identity of Client.getAccount().getDiscoInfo().getIdentities()) {
+      for (let identity of Client.getAccount().getDiscoInfo().getIdentities()) {
          let attrs = {
             category: identity.category,
             type: identity.type,
-            name: (identity.name)? identity.name : null,
-            'xml:lang': (identity.lang)? identity.lang : null
+            name: (identity.name) ? identity.name : null,
+            'xml:lang': (identity.lang) ? identity.lang : null
          };
 
          iq.c('identity', attrs).up();
@@ -48,7 +48,7 @@ export class DiscoInfoHandler extends AbstractHandler {
    }
 
    private addFeaturesToStanza(iq) {
-      for(let feature of Client.getAccount().getDiscoInfo().getFeatures()) {
+      for (let feature of Client.getAccount().getDiscoInfo().getFeatures()) {
          iq.c('feature', {
             'var': feature
          }).up();
@@ -59,7 +59,7 @@ export class DiscoInfoHandler extends AbstractHandler {
 }
 
 export class DiscoItemsHandler extends AbstractHandler {
-   public processStanza(stanza:Element):boolean {
+   public processStanza(stanza: Element): boolean {
       let id = stanza.getAttribute('id');
       let from = stanza.getAttribute('from');
       let node = stanza.getElementsByTagName('query')[0].getAttribute('node');
@@ -70,7 +70,7 @@ export class DiscoItemsHandler extends AbstractHandler {
          to: from
       }).c('query', {
          xmlns: NS.get('DISCO_ITEMS'),
-         node: (node)? node : undefined
+         node: (node) ? node : undefined
       });
 
       //We return an empty set, because we dont support disco items

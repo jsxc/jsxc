@@ -8,7 +8,7 @@ let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs'
 export default class ChatWindowMessage {
    private element;
 
-   constructor(private message:Message, private chatWindow:ChatWindow) {
+   constructor(private message: Message, private chatWindow: ChatWindow) {
       this.generateElement();
       this.registerHooks();
    }
@@ -113,7 +113,7 @@ export default class ChatWindowMessage {
          attachmentElement.attr('download', attachment.getName());
 
          //@REVIEW this is a dirty hack
-         this.element.find('.jsxc-content a[href="'+attachment.getData()+'"]').remove();
+         this.element.find('.jsxc-content a[href="' + attachment.getData() + '"]').remove();
       }
 
       this.element.find('div').first().prepend(attachmentElement);

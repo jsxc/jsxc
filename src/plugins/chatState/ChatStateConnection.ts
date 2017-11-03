@@ -1,21 +1,21 @@
 import * as Namespace from '../../connection/xmpp/namespace'
 import JID from '../../JID'
-import {STATE} from './State'
+import { STATE } from './State'
 
 export default class ChatStateConnection {
    constructor(private send, private sendIQ) {
 
    }
 
-   public sendPaused(to:JID, type:'chat'|'groupchat' = 'chat') {
+   public sendPaused(to: JID, type: 'chat' | 'groupchat' = 'chat') {
       this.sendState(STATE.PAUSED, to, type);
    }
 
-   public sendComposing(to:JID, type:'chat'|'groupchat' = 'chat') {
+   public sendComposing(to: JID, type: 'chat' | 'groupchat' = 'chat') {
       this.sendState(STATE.COMPOSING, to, type);
    }
 
-   private sendState(state:STATE, to:JID, type:'chat'|'groupchat' = 'chat') {
+   private sendState(state: STATE, to: JID, type: 'chat' | 'groupchat' = 'chat') {
       let msg = $msg({
          to: to.full,
          type: type

@@ -26,11 +26,11 @@ export default class Storage {
       window.addEventListener('storage', this.onStorageEvent, false);
    }
 
-   public getName():string {
+   public getName(): string {
       return this.name;
    }
 
-   public generateKey(...args:string[]):string {
+   public generateKey(...args: string[]): string {
       let key = '';
 
       args.forEach(function(arg) {
@@ -234,12 +234,12 @@ export default class Storage {
       this.hooks[eventName].push(func);
    }
 
-   public removeHook(eventName:string, func?: (newValue: any, oldValue: any, key: string) => void) {
+   public removeHook(eventName: string, func?: (newValue: any, oldValue: any, key: string) => void) {
       let eventNameList = this.hooks[eventName] || [];
 
       if (typeof func === 'undefined') {
          eventNameList = [];
-      }else if (eventNameList.indexOf(func) > -1) {
+      } else if (eventNameList.indexOf(func) > -1) {
          eventNameList = $.grep(eventNameList, function(i) {
             return func !== i;
          });
@@ -269,7 +269,7 @@ export default class Storage {
       });
    }
 
-   private parseValue(value:string) {
+   private parseValue(value: string) {
       try {
          return JSON.parse(value);
       } catch (e) {

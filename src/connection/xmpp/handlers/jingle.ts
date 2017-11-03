@@ -20,7 +20,7 @@ const FEATURES = [
 ];
 
 export default class extends AbstractHandler {
-   constructor(account:Account) {
+   constructor(account: Account) {
       super(account);
 
       for (let feature of FEATURES) {
@@ -28,7 +28,7 @@ export default class extends AbstractHandler {
       }
    }
 
-   public processStanza(stanza:Element) {
+   public processStanza(stanza: Element) {
       let connection = this.account.getConnection();
       let storage = this.account.getStorage();
 

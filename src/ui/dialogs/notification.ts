@@ -2,7 +2,7 @@ import Dialog from '../Dialog';
 
 let notificationTemplate = require('../../../template/notification.hbs');
 
-export default function(subject:string, message:string, from?:string) {
+export default function(subject: string, message: string, from?: string) {
    let content = notificationTemplate({
       subject: subject,
       message: message,

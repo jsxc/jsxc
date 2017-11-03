@@ -1,4 +1,4 @@
-import {PluginState, AbstractPlugin} from '../plugin/AbstractPlugin'
+import { PluginState, AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import Client from '../Client'
 import Account from '../Account'
@@ -12,11 +12,11 @@ const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 export default class AvatarVCardPlugin extends AbstractPlugin {
-   public static getName():string {
+   public static getName(): string {
       return 'vCard-based Avatars';
    }
 
-   constructor(pluginAPI:PluginAPI) {
+   constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       let connection = pluginAPI.getConnection();
@@ -53,7 +53,7 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
       return true;
    }
 
-   private avatarProcessor = (contact:Contact, avatar:Avatar):Promise<any> => {
+   private avatarProcessor = (contact: Contact, avatar: Avatar): Promise<any> => {
       let storage = this.getStorage();
       let hash = storage.getItem(contact.getJid().bare);
 
@@ -63,7 +63,7 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
 
       try {
          avatar = new Avatar(hash);
-      } catch(err) {
+      } catch (err) {
          return this.getAvatar(contact.getJid()).then((avatarObject) => {
             return [contact, new Avatar(hash, avatarObject.type, avatarObject.src)];
          }).catch((err) => {
@@ -74,11 +74,11 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
       return Promise.resolve([contact, avatar]);
    }
 
-   private getAvatar(jid:JID) {
+   private getAvatar(jid: JID) {
       let connection = this.pluginAPI.getConnection();
 
       return connection.loadVcard(jid).then(function(vcard) {
-         return new Promise(function(resolve, reject){
+         return new Promise(function(resolve, reject) {
             if (vcard.PHOTO && vcard.PHOTO.src) {
                resolve(vcard.PHOTO);
             } else {

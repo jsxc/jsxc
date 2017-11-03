@@ -3,7 +3,7 @@ import Client from '../../Client'
 import Options from '../../Options'
 import * as CONST from '../../CONST'
 import Message from '../../Message'
-import {AbstractPlugin} from '../../plugin/AbstractPlugin'
+import { AbstractPlugin } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
 import ChatWindow from '../../ui/ChatWindow'
 import Translation from '../../util/Translation'
@@ -22,24 +22,24 @@ const MAM1 = 'urn:xmpp:mam:1';
 const MAM2 = 'urn:xmpp:mam:2';
 
 export default class MessageArchiveManagementPlugin extends AbstractPlugin {
-   public static getName():string {
+   public static getName(): string {
       return 'mam';
    }
 
    private enabled = false;
    private archives = {};
-   private queryContactRelation:PersistentMap;
+   private queryContactRelation: PersistentMap;
 
-   constructor(pluginAPI:PluginAPI) {
+   constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       this.queryContactRelation = new PersistentMap(pluginAPI.getStorage(), 'mam', 'query');
 
-      ChatWindow.HookRepository.registerHook('initialized', (chatWindow:ChatWindow, contact:Contact) => {
+      ChatWindow.HookRepository.registerHook('initialized', (chatWindow: ChatWindow, contact: Contact) => {
          this.addLoadButtonIfEnabled(chatWindow, contact);
       });
 
-      ChatWindow.HookRepository.registerHook('cleared', (chatWindow:ChatWindow, contact:Contact) => {
+      ChatWindow.HookRepository.registerHook('cleared', (chatWindow: ChatWindow, contact: Contact) => {
          if (this.enabled) {
             this.getArchive(contact.getJid()).clear();
          }
@@ -56,11 +56,11 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       return this.pluginAPI.getConnection();
    }
 
-   public addQueryContactRelation(queryId:string, contact:Contact) {
+   public addQueryContactRelation(queryId: string, contact: Contact) {
       this.queryContactRelation.set(queryId, contact.getJid().bare);
    }
 
-   public removeQueryContactRelation(queryId:string) {
+   public removeQueryContactRelation(queryId: string) {
       this.queryContactRelation.remove(queryId);
    }
 
@@ -71,11 +71,11 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
          let discoInfoRepository = this.pluginAPI.getDiscoInfoRepository();
          let serverJid = new JID('', connection.getJID().domain, '') //@REVIEW
 
-         discoInfoRepository.getCapabilities(serverJid).then((discoInfo:DiscoInfo) => {
+         discoInfoRepository.getCapabilities(serverJid).then((discoInfo: DiscoInfo) => {
             if (discoInfo.hasFeature(MAM2)) {
                Namespace.register('MAM', MAM2);
                return true;
-            } else if(discoInfo.hasFeature(MAM1)) {
+            } else if (discoInfo.hasFeature(MAM1)) {
                Namespace.register('MAM', MAM1);
                return true;
             }
@@ -92,7 +92,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       }, 2000);
    }
 
-   private addLoadButtonIfEnabled(chatWindow:ChatWindow, contact:Contact) {
+   private addLoadButtonIfEnabled(chatWindow: ChatWindow, contact: Contact) {
       if (!this.enabled) {
          let self = this;
 
@@ -109,7 +109,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       }
    }
 
-   private addLoadButton(chatWindowElement:JQuery<HTMLElement>, contact:Contact) {
+   private addLoadButton(chatWindowElement: JQuery<HTMLElement>, contact: Contact) {
       let classNameShow = 'jsxc-show';
       let classNameMamEnable = 'jsxc-mam-enabled';
       let messageAreaElement = chatWindowElement.find('.jsxc-message-area');
@@ -151,7 +151,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       });
    }
 
-   private onMamMessage = (stanza:string):boolean => {
+   private onMamMessage = (stanza: string): boolean => {
       let stanzaElement = $(stanza);
       let resultElement = stanzaElement.find('result' + Namespace.getFilter('MAM'));
       var queryId = resultElement.attr('queryid');
@@ -168,7 +168,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
 
       let bareJid = this.queryContactRelation.get(queryId);
 
-      if(!bareJid) {
+      if (!bareJid) {
          return true;
       }
 
@@ -179,7 +179,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       return true;
    }
 
-   public getArchive(jid:JID) {
+   public getArchive(jid: JID) {
       if (!this.archives[jid.bare]) {
          this.archives[jid.bare] = new Archive(this, this.pluginAPI.getContact(jid));
       }

@@ -2,12 +2,12 @@ import JID from '../../JID';
 import Message from '../../Message';
 import Options from '../../Options'
 import * as CONST from '../../CONST';
-import {IConnection} from '../ConnectionInterface';
+import { IConnection } from '../ConnectionInterface';
 import * as NS from './namespace'
 import XMPPHandler from './handler'
 import Log from '../../util/Log'
 import Account from '../../Account'
-import {AbstractConnection, Presence} from '../AbstractConnection'
+import { AbstractConnection, Presence } from '../AbstractConnection'
 import Roster from '../../ui/Roster'
 import XMPPJingleHandler from './JingleHandler'
 import * as Strophe from 'strophe'
@@ -15,7 +15,7 @@ import * as Strophe from 'strophe'
 export default class XMPPConnection extends AbstractConnection implements IConnection {
    private handler;
 
-   constructor(account:Account, protected connection:Strophe.Connection) {
+   constructor(account: Account, protected connection: Strophe.Connection) {
       super(account);
 
       this.handler = new XMPPHandler(account, connection);
@@ -43,23 +43,24 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       });
    }
 
-   public registerHandler(handler:(stanza:string)=>boolean, ns?:string, name?:string, type?:string, id?:string, from?:string) {
+   public registerHandler(handler: (stanza: string) => boolean, ns?: string, name?: string, type?: string, id?: string, from?: string) {
       this.connection.addHandler.apply(this.connection, arguments);
    }
 
-   public getJingleHandler() { console.log('getJingleHanderl')
+   public getJingleHandler() {
+      console.log('getJingleHanderl')
       if (!this.jingleHandler) {
          this.jingleHandler = new XMPPJingleHandler(this.account, this);
       }
-console.log('return')
+      console.log('return')
       return this.jingleHandler;
    }
 
-   public getCapabilitiesByJid(jid:JID):any {
-     Log.error('Deprecated function called: getCapabilitiesByJid');
+   public getCapabilitiesByJid(jid: JID): any {
+      Log.error('Deprecated function called: getCapabilitiesByJid');
    };
 
-   public renameContact(jid:JID, name:string) {
+   public renameContact(jid: JID, name: string) {
       //@TODO maybe replace jid with contact?
 
       // if (d.type === 'chat') {
@@ -77,8 +78,8 @@ console.log('return')
       // }
    }
 
-   public hasFeatureByJid(jid:JID, feature:string);
-   public hasFeatureByJid(jid:JID, feature:string[]);
+   public hasFeatureByJid(jid: JID, feature: string);
+   public hasFeatureByJid(jid: JID, feature: string[]);
    public hasFeatureByJid() {
 
    }
@@ -87,14 +88,14 @@ console.log('return')
 
    }
 
-   public send(stanzaElement:Element);
-   public send(stanzaElement:Strophe.Builder);
+   public send(stanzaElement: Element);
+   public send(stanzaElement: Strophe.Builder);
    public send() {
       this.connection.send(arguments[0]);
    }
 
-   public sendIQ(stanzaElement:Element):Promise<Element>;
-   public sendIQ(stanzaElement:Strophe.Builder):Promise<Element>;
+   public sendIQ(stanzaElement: Element): Promise<Element>;
+   public sendIQ(stanzaElement: Strophe.Builder): Promise<Element>;
    public sendIQ() {
       let stanzaElement = arguments[0];
 
@@ -103,7 +104,7 @@ console.log('return')
       });
    }
 
-   private onIncomingStorageStanza(stanzaString:string) {
+   private onIncomingStorageStanza(stanzaString: string) {
       let stanzaElement = new DOMParser().parseFromString(stanzaString, 'text/xml').documentElement
 
       if ($(stanzaElement).find('parsererror').length > 0) {
@@ -114,7 +115,7 @@ console.log('return')
       this.send(stanzaElement);
    }
 
-   private onIncomingStorageStanzaIQ(key:string, stanzaString:string) {
+   private onIncomingStorageStanzaIQ(key: string, stanzaString: string) {
       let stanzaElement = new DOMParser().parseFromString(stanzaString, 'text/xml').documentElement
 
       if ($(stanzaElement).find('parsererror').length > 0) {
@@ -123,7 +124,7 @@ console.log('return')
          return;
       }
 
-      this.sendIQ(stanzaElement).then((stanza:HTMLElement) => {
+      this.sendIQ(stanzaElement).then((stanza: HTMLElement) => {
          this.account.getStorage().setItem(key, {
             type: 'success',
             stanza: stanza.outerHTML

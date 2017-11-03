@@ -1,12 +1,12 @@
 import Log from '../util/Log'
-import {VideoDialog} from './VideoDialog'
+import { VideoDialog } from './VideoDialog'
 
 export default class VideoWindow {
    private videoElement;
 
    private wrapperElement;
 
-   constructor(private videoDialog:VideoDialog, private session) {
+   constructor(private videoDialog: VideoDialog, private session) {
       this.registerHooks();
       this.initWrapper();
    }

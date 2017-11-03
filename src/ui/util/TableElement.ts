@@ -1,7 +1,7 @@
 export default class TableElement {
    private tableElement = $('<table>');
 
-   constructor(private numberOfColumns:number) {
+   constructor(private numberOfColumns: number) {
 
    }
 
@@ -17,7 +17,7 @@ export default class TableElement {
       return this.tableElement;
    }
 
-   private addRow(position:'appendTo'|'prependTo', columns) {
+   private addRow(position: 'appendTo' | 'prependTo', columns) {
       if (columns.length !== this.numberOfColumns) {
          console.log('Wrong number of columns');
          return false;
@@ -25,7 +25,7 @@ export default class TableElement {
 
       let rowElement = $('<tr>');
 
-      for(let column of columns) {
+      for (let column of columns) {
          let cellElement = $('<td>');
 
          cellElement.text(column);

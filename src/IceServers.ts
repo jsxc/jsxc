@@ -16,7 +16,7 @@ export default class IceServers {
          // credentials valid
 
          return Promise.resolve(rtcPeerConfig.iceServers);
-      } else if(url) {
+      } else if (url) {
          return IceServers.getFromUrl(url);
       } else {
          Promise.reject(null);

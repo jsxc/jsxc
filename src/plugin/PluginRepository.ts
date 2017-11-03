@@ -1,20 +1,20 @@
 import Client from '../Client'
 import Account from '../Account'
 import Log from '../util/Log'
-import {AbstractPlugin, IPlugin} from './AbstractPlugin'
-import {EncryptionPlugin} from './EncryptionPlugin'
+import { AbstractPlugin, IPlugin } from './AbstractPlugin'
+import { EncryptionPlugin } from './EncryptionPlugin'
 import PluginAPI from './PluginAPI'
 
 export default class PluginRepository {
-   private static instance:PluginRepository;
+   private static instance: PluginRepository;
 
    private static registeredPlugins = [];
 
-   private plugins:Array<AbstractPlugin> = [];
+   private plugins: Array<AbstractPlugin> = [];
 
-   private encryptionPlugins:Array<EncryptionPlugin> = [];
+   private encryptionPlugins: Array<EncryptionPlugin> = [];
 
-   public static add(Plugin:IPlugin) {
+   public static add(Plugin: IPlugin) {
       if (typeof Plugin.getName !== 'function' || typeof Plugin.getName() !== 'string') {
          throw 'This plugin doesn\'t implement static getName():string';
       }
@@ -26,11 +26,11 @@ export default class PluginRepository {
       PluginRepository.registeredPlugins.push(Plugin);
    }
 
-   constructor(private account:Account) {
+   constructor(private account: Account) {
       PluginRepository.registeredPlugins.forEach((Plugin) => {
          try {
             this.instanciatePlugin(Plugin);
-         } catch(err) {
+         } catch (err) {
             Log.warn(err);
          }
       });
@@ -40,17 +40,17 @@ export default class PluginRepository {
 
    }
 
-   public getEncryptionPlugin(pluginName:string):EncryptionPlugin {
+   public getEncryptionPlugin(pluginName: string): EncryptionPlugin {
       //@TODO use dict to get the right plugin
 
       return this.encryptionPlugins[0];
    }
 
-   public hasEncryptionPlugin():boolean {
+   public hasEncryptionPlugin(): boolean {
       return !!this.encryptionPlugins;
    }
 
-   private instanciatePlugin(Plugin:IPlugin) {
+   private instanciatePlugin(Plugin: IPlugin) {
       let plugin;
 
       Log.debug('Instanciate ' + Plugin.getName() + ' for account ' + this.account.getUid())
@@ -61,9 +61,11 @@ export default class PluginRepository {
          throw Plugin.getName() + ' doesn\'t extend AbstractPlugin';
       }
 
-      if (plugin instanceof EncryptionPlugin) { console.log(Plugin.getName() + ' is an encryption plugin');
+      if (plugin instanceof EncryptionPlugin) {
+         console.log(Plugin.getName() + ' is an encryption plugin');
          this.encryptionPlugins.push(plugin);
-      } else { console.log(Plugin.getName() + ' is a normal plugin');
+      } else {
+         console.log(Plugin.getName() + ' is a normal plugin');
          this.plugins.push(plugin);
       }
    }

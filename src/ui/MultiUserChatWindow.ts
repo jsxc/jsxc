@@ -10,9 +10,9 @@ import showMultiUserInviteDialog from './dialogs/multiUserInvite'
 export default class MultiUserChatWindow extends ChatWindow {
    private memberlistElement;
 
-   protected contact:MultiUserContact;
+   protected contact: MultiUserContact;
 
-   constructor(account:Account, contact:MultiUserContact) {
+   constructor(account: Account, contact: MultiUserContact) {
       super(account, contact);
 
       this.disable();
@@ -29,14 +29,14 @@ export default class MultiUserChatWindow extends ChatWindow {
          this.removeMember(nickname);
       });
 
-      for(let nickname of this.contact.getMembers()) {
+      for (let nickname of this.contact.getMembers()) {
          this.addMember(nickname);
       }
 
       this.contact.registerHook('nickname', (newValue, oldValue) => {
          if (oldValue && !newValue) {
             this.disable();
-         } else if(!oldValue && newValue) {
+         } else if (!oldValue && newValue) {
             this.enable();
          }
       });
@@ -49,7 +49,7 @@ export default class MultiUserChatWindow extends ChatWindow {
       this.setBarText(this.contact.getSubject());
    }
 
-   public addMember(nickname, jid?:JID) {
+   public addMember(nickname, jid?: JID) {
       let memberElement = this.getMemberElementByNickname(nickname);
 
       if (memberElement.length > 0) {
@@ -180,7 +180,7 @@ export default class MultiUserChatWindow extends ChatWindow {
       return false;
    }
 
-   private getMemberElementByNickname(nickname:string) {
+   private getMemberElementByNickname(nickname: string) {
       return this.memberlistElement.find('.li[data-nickname="' + nickname + '"]');
    }
 

@@ -18,7 +18,7 @@ let PRESENCE = {
 };
 
 export default class extends AbstractHandler {
-   public processStanza(stanza:Element):boolean {
+   public processStanza(stanza: Element): boolean {
       let fromString = $(stanza).attr('from');
       let fromJid;
 

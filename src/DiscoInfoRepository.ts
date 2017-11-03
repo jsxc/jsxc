@@ -8,16 +8,16 @@ import Client from './Client'
 import Form from './connection/Form'
 
 export default class DiscoInfoRepository {
-   private jidIndex:PersistentMap;
-   private serverJidIndex:PersistentMap;
+   private jidIndex: PersistentMap;
+   private serverJidIndex: PersistentMap;
 
-   constructor(private account:Account) {
+   constructor(private account: Account) {
       this.jidIndex = new PersistentMap(account.getStorage(), 'capabilities');
       this.serverJidIndex = new PersistentMap(Client.getStorage(), 'capabilities');
    }
 
-   public addRelation(jid:JID, version:string)
-   public addRelation(jid:JID, discoInfo:DiscoInfo)
+   public addRelation(jid: JID, version: string)
+   public addRelation(jid: JID, discoInfo: DiscoInfo)
    public addRelation(jid, value) {
       let index = jid.isServer() ? this.serverJidIndex : this.jidIndex;
 
@@ -30,15 +30,15 @@ export default class DiscoInfoRepository {
       }
    }
 
-   public getDiscoInfo(jid:JID) {
+   public getDiscoInfo(jid: JID) {
       let version = this.jidIndex.get(jid.full);
 
       return new DiscoInfo(version);
    }
 
-   public getCapableResources(contact:Contact, features:string[]):Promise<Array<string>>
-   public getCapableResources(contact:Contact, features:string):Promise<Array<string>>
-   public getCapableResources(contact:Contact, features):Promise<Array<string>> {
+   public getCapableResources(contact: Contact, features: string[]): Promise<Array<string>>
+   public getCapableResources(contact: Contact, features: string): Promise<Array<string>>
+   public getCapableResources(contact: Contact, features): Promise<Array<string>> {
       let resources = contact.getResources();
 
       if (!features) {
@@ -48,15 +48,15 @@ export default class DiscoInfoRepository {
       let capableResources = [];
       let promises = [];
 
-      for(let resource of resources) {
+      for (let resource of resources) {
          //@REVIEW
          promises.push(new Promise(resolve => {
             let jid = new JID(contact.getJid().bare + '/' + resource);
 
             this.hasFeature(jid, features)
-            .then((hasSupport) => {
-               resolve(hasSupport? resource : undefined);
-            });
+               .then((hasSupport) => {
+                  resolve(hasSupport ? resource : undefined);
+               });
             //@REVIEW do we need a timer?
          }));
       }
@@ -66,34 +66,34 @@ export default class DiscoInfoRepository {
       });
    }
 
-   public hasFeature(jid:JID, features:string[]):Promise<{}>
-   public hasFeature(jid:JID, feature:string):Promise<{}>
-   public hasFeature(discoInfo:DiscoInfo, features:string[]):Promise<{}>
-   public hasFeature(discoInfo:DiscoInfo, feature:string):Promise<{}>
+   public hasFeature(jid: JID, features: string[]): Promise<{}>
+   public hasFeature(jid: JID, feature: string): Promise<{}>
+   public hasFeature(discoInfo: DiscoInfo, features: string[]): Promise<{}>
+   public hasFeature(discoInfo: DiscoInfo, feature: string): Promise<{}>
    public hasFeature() {
       let features = (arguments[1] instanceof Array) ? arguments[1] : [arguments[1]];
       let capabilitiesPromise;
 
       if (arguments[0] instanceof JID) {
-         let jid:JID = arguments[0];
+         let jid: JID = arguments[0];
 
          if (jid.isBare() && !jid.isServer()) {
             return Promise.reject('We need a full jid.');
          }
 
          capabilitiesPromise = this.getCapabilities(jid)
-      } else if(arguments[0] instanceof DiscoInfo) {
+      } else if (arguments[0] instanceof DiscoInfo) {
          capabilitiesPromise = Promise.resolve(arguments[0])
       } else {
          return Promise.reject('Wrong parameters');
       }
 
-      return capabilitiesPromise.then((capabilities:DiscoInfo) => {
+      return capabilitiesPromise.then((capabilities: DiscoInfo) => {
          return capabilities.hasFeature(features);
       })
    }
 
-   public getCapabilities(jid:JID):Promise<DiscoInfo|void> {
+   public getCapabilities(jid: JID): Promise<DiscoInfo | void> {
       let jidIndex = this.jidIndex;
       let serverJidIndex = this.serverJidIndex;
 
@@ -127,14 +127,14 @@ export default class DiscoInfoRepository {
       }
    }
 
-   public requestDiscoInfo(jid:JID, node?:string) {
+   public requestDiscoInfo(jid: JID, node?: string) {
       let connection = this.account.getConnection();
 
       //@REVIEW why does the request fail if we send a node attribute?
       return connection.getDiscoInfo(jid).then(this.processDiscoInfo);
    }
 
-   private processDiscoInfo(stanza:Element) {
+   private processDiscoInfo(stanza: Element) {
       let queryElement = $(stanza).find('query');
       let node = queryElement.attr('node') || '';
       let from = new JID($(stanza).attr('from'));
@@ -143,7 +143,7 @@ export default class DiscoInfoRepository {
 
       let capabilities = {};
 
-      for(let childNode of Array.from(queryElement.get(0).childNodes)) {
+      for (let childNode of Array.from(queryElement.get(0).childNodes)) {
          let nodeName = childNode.nodeName;
 
          if (typeof capabilities[nodeName] === 'undefined') {
@@ -152,7 +152,7 @@ export default class DiscoInfoRepository {
 
          if (nodeName === 'feature') {
             capabilities[nodeName].push($(childNode).attr('var'));
-         } else if(nodeName === 'identity') {
+         } else if (nodeName === 'identity') {
             capabilities[nodeName].push({
                category: $(childNode).attr('category') || '',
                type: $(childNode).attr('type') || '',

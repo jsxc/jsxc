@@ -6,21 +6,21 @@ import Client from './Client'
 import beautifyBytes from './ui/util/ByteBeautifier'
 
 export default class Attachment {
-   private mimeType:string;
+   private mimeType: string;
 
-   private data:string;
+   private data: string;
 
-   private thumbnailData:any;
+   private thumbnailData: any;
 
-   private file:File;
+   private file: File;
 
-   private uid:string;
+   private uid: string;
 
    private properties;
 
-   constructor(name:string, mimeType:string, data:string);
-   constructor(file:File);
-   constructor(uid:string);
+   constructor(name: string, mimeType: string, data: string);
+   constructor(file: File);
+   constructor(uid: string);
    constructor() {
       if (arguments.length === 1 && typeof arguments[0] === 'string') {
          this.uid = arguments[0];
@@ -29,7 +29,7 @@ export default class Attachment {
       let storage = Client.getStorage();
       this.properties = new PersistentMap(storage, this.getUid());
 
-      if(arguments[0] instanceof File) {
+      if (arguments[0] instanceof File) {
          this.file = arguments[0];
 
          this.properties.set({
@@ -51,7 +51,7 @@ export default class Attachment {
       }
    }
 
-   public getUid():string {
+   public getUid(): string {
       if (!this.uid) {
          this.uid = UUID.v4();
       }
@@ -67,7 +67,7 @@ export default class Attachment {
       return this.data;
    }
 
-   public setData(data:string) {
+   public setData(data: string) {
       if (typeof data === 'string' && data.length < 1024) {
          this.properties.set('data', data);
       } else {
@@ -78,19 +78,19 @@ export default class Attachment {
       this.data = data;
    }
 
-   public setProcessed(processed:boolean) {
+   public setProcessed(processed: boolean) {
       this.properties.set('processed', processed);
    }
 
-   public isProcessed():boolean {
+   public isProcessed(): boolean {
       return !!this.properties.get('processed');
    }
 
-   public getSize():number {
+   public getSize(): number {
       return this.properties.get('size');
    }
 
-   public getMimeType():string {
+   public getMimeType(): string {
       return this.properties.get('mimeType');
    }
 
@@ -102,23 +102,23 @@ export default class Attachment {
       return this.properties.get('name');
    }
 
-   public getFile():File {
+   public getFile(): File {
       return this.file;
    }
 
-   public isPersistent():boolean {
+   public isPersistent(): boolean {
       return !!this.properties.get('data');
    }
 
-   public isImage():boolean {
+   public isImage(): boolean {
       return /^image\/(jpeg|jpg|gif|png|svg)/i.test(this.getMimeType());
    }
 
-   public hasThumbnailData():boolean {
+   public hasThumbnailData(): boolean {
       return !!this.getThumbnailData();
    }
 
-   public hasData():boolean {
+   public hasData(): boolean {
       return !!this.getData();
    }
 
@@ -154,7 +154,7 @@ export default class Attachment {
       }
    }
 
-   private getDataFromFile():Promise<string> {
+   private getDataFromFile(): Promise<string> {
       return new Promise((resolve, reject) => {
          let reader = new FileReader();
 
@@ -166,8 +166,8 @@ export default class Attachment {
       });
    }
 
-   private generateThumbnail():void {
-      if(typeof Image === 'undefined') {
+   private generateThumbnail(): void {
+      if (typeof Image === 'undefined') {
          return;
       }
 
@@ -186,7 +186,7 @@ export default class Attachment {
       var sHeight, sWidth, sx, sy;
       var dHeight = 100,
          dWidth = 100;
-      var canvas = <HTMLCanvasElement> $('<canvas>').get(0);
+      var canvas = <HTMLCanvasElement>$('<canvas>').get(0);
 
       canvas.width = dWidth;
       canvas.height = dHeight;

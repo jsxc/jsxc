@@ -4,14 +4,14 @@ import JingleCallSession from './JingleCallSession'
 
 export default class JingleSession {
 
-   public static create(account:Account, session) {
+   public static create(account: Account, session) {
       let sessionType = JingleSession.getSessionType(session);
 
       if (sessionType === 'FileTransferSession') {
 
-      } else if(sessionType === 'CallSession') {
+      } else if (sessionType === 'CallSession') {
          return new JingleCallSession(account, session);
-      } else if(sessionType === 'StreamSession') {
+      } else if (sessionType === 'StreamSession') {
 
       } else {
          throw new Error('Could not create jingle session. Unknown session type.');

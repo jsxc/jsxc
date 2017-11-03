@@ -1,11 +1,11 @@
 import Identifiable from './IdentifiableInterface'
 
 abstract class Storable implements Identifiable {
-   constructor(data:any) {
+   constructor(data: any) {
       $.extend(this, data);
    }
 
-   public abstract getId():string;
+   public abstract getId(): string;
 
    public abstract save();
 

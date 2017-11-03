@@ -4,7 +4,7 @@ import Contact from '../Contact'
 import JID from '../JID'
 import * as CONST from '../CONST'
 import Message from '../Message'
-import {AbstractPlugin} from '../plugin/AbstractPlugin'
+import { AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import Pipe from '../util/Pipe'
 import * as Namespace from '../connection/xmpp/namespace'
@@ -17,11 +17,11 @@ let REMOVE_HANDLER = false;
 
 export default class ReceiptPlugin extends AbstractPlugin {
 
-   public static getName():string {
+   public static getName(): string {
       return 'receipt';
    }
 
-   constructor(pluginAPI:PluginAPI) {
+   constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       Namespace.register('RECEIPTS', 'urn:xmpp:receipts');
@@ -36,9 +36,9 @@ export default class ReceiptPlugin extends AbstractPlugin {
       connection.registerHandler(this.onReceipt, null, 'message');
    }
 
-   private preSendMessageStanzaProcessor = (message:Message, xmlStanza:Strophe.Builder) => {
+   private preSendMessageStanzaProcessor = (message: Message, xmlStanza: Strophe.Builder) => {
       if (message.getType() === Message.MSGTYPE.CHAT &&
-          (!message.getPeer().resource || true)) { //@TODO this.hasFeatureByJid(message.receiver, Strophe.NS.RECEIPTS)
+         (!message.getPeer().resource || true)) { //@TODO this.hasFeatureByJid(message.receiver, Strophe.NS.RECEIPTS)
          // Add request according to XEP-0184
          xmlStanza.c('request', {
             xmlns: Namespace.get('RECEIPTS')
@@ -67,7 +67,8 @@ export default class ReceiptPlugin extends AbstractPlugin {
       return PRESERVE_HANDLER;
    }
 
-   private onReceiptRequest = (stanza:string) => { console.log('onReceiptRequest')
+   private onReceiptRequest = (stanza: string) => {
+      console.log('onReceiptRequest')
       let messageElement = $(stanza);
       let isReceiptRequest = messageElement.find("request[xmlns='urn:xmpp:receipts']").length > 0;
 

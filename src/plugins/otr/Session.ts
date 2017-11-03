@@ -1,23 +1,23 @@
 import Log from '../../util/Log'
 import Contact from '../../Contact'
 import Message from '../../Message'
-import {DIRECTION} from '../../MessageInterface'
+import { DIRECTION } from '../../MessageInterface'
 import Translation from '../../util/Translation'
 import OTR from 'otr/lib/otr'
 import DSA from 'otr/lib/dsa'
-import {EncryptionState} from '../../plugin/AbstractPlugin'
+import { EncryptionState } from '../../plugin/AbstractPlugin'
 import Storage from '../../Storage'
-import {IConnection} from '../../connection/ConnectionInterface'
+import { IConnection } from '../../connection/ConnectionInterface'
 import PersistentMap from '../../util/PersistentMap'
 
 //@REVIEW
 interface OTR {
-   off:(string, func)=>void
-   on:(string, func)=>void
-   sendQueryMsg:() => void
-   receiveMsg:(string, any)=>void
-   sendMsg:(string, any)=>void
-   endOtr:(func)=>void
+   off: (string, func) => void
+   on: (string, func) => void
+   sendQueryMsg: () => void
+   receiveMsg: (string, any) => void
+   sendMsg: (string, any) => void
+   endOtr: (func) => void
    init
    _smInit
    ake
@@ -34,15 +34,15 @@ interface DSA {
 }
 
 export default class Session {
-   private session:OTR;
+   private session: OTR;
 
-   private data:PersistentMap;
+   private data: PersistentMap;
 
    private ourPayloadId;
 
-   constructor(private peer:Contact, key:DSA, private storage:Storage, private connection:IConnection) {
+   constructor(private peer: Contact, key: DSA, private storage: Storage, private connection: IConnection) {
 
-      let options:any = {
+      let options: any = {
          priv: key,
          debug: true,
          //smw: {} //@TODO enable worker for smp
@@ -83,24 +83,24 @@ export default class Session {
       this.data = new PersistentMap(this.storage, 'otr', 'session', this.peer.getId());
 
       this.data.registerHook('payload', (newPayload) => {
-        if (this.ourPayloadId !== newPayload.id) {
-          this.restoreSession(newPayload)
-        }
+         if (this.ourPayloadId !== newPayload.id) {
+            this.restoreSession(newPayload)
+         }
       });
       this.restoreSession(this.data.get('payload'));
    }
 
-   public goEncrypted():Promise<void> {
+   public goEncrypted(): Promise<void> {
       this.session.sendQueryMsg();
 
       return Promise.resolve();
    }
 
-   public goPlain():Promise<void> {
+   public goPlain(): Promise<void> {
       return this.end();
    }
 
-   public processMessage(message:Message, type:'decryptMessage'|'encryptMessage') {
+   public processMessage(message: Message, type: 'decryptMessage' | 'encryptMessage') {
       let bareJid = message.getPeer().bare;
       let plaintextBody = message.getPlaintextMessage();
 
@@ -114,7 +114,7 @@ export default class Session {
       return Promise.resolve(message);
    }
 
-   private encryptMessage(message:Message) {
+   private encryptMessage(message: Message) {
       let self = this;
       let messageId = message.getId();
 
@@ -133,7 +133,7 @@ export default class Session {
       });
    }
 
-   private decryptMessage(message:Message) {
+   private decryptMessage(message: Message) {
       let self = this;
       let messageId = message.getId();
 
@@ -150,7 +150,7 @@ export default class Session {
       });
    }
 
-   public end():Promise<void> {
+   public end(): Promise<void> {
       return new Promise((resolve, reject) => {
          this.session.endOtr(() => {
             this.session.init.call(this.session);
@@ -162,15 +162,15 @@ export default class Session {
       });
    }
 
-   public isEncrypted():boolean {
+   public isEncrypted(): boolean {
       return this.session.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
    }
 
-   public isEnded():boolean {
+   public isEnded(): boolean {
       return this.session.msgstate === OTR.CONST.MSGSTATE_FINISHED;
    }
 
-   private inform(messageString:string) {
+   private inform(messageString: string) {
       let message = new Message({
          peer: this.peer.getJid(),
          direction: Message.DIRECTION.SYS,
@@ -246,7 +246,7 @@ export default class Session {
       }
    }
 
-   private afterEncryptMessage = function(encryptedMessage:string, message:Message, resolve) {
+   private afterEncryptMessage = function(encryptedMessage: string, message: Message, resolve) {
       if (this.session.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED) {
          message.setEncryptedPlaintextMessage(encryptedMessage);
 
@@ -259,9 +259,9 @@ export default class Session {
       resolve(message);
    }
 
-   private afterDecryptMessage = function(plaintextMessage:string, encrypted:boolean, message:Message, resolve) {
+   private afterDecryptMessage = function(plaintextMessage: string, encrypted: boolean, message: Message, resolve) {
       if (this.session.msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
-         message.setPlaintextMessage(Translation.t('Received_an_unencrypted_message') + '. ['+plaintextMessage+']');
+         message.setPlaintextMessage(Translation.t('Received_an_unencrypted_message') + '. [' + plaintextMessage + ']');
          message.setDirection(DIRECTION.SYS);
       } else {
          message.setPlaintextMessage(plaintextMessage);
@@ -272,7 +272,7 @@ export default class Session {
       resolve(message);
    }
 
-   private sendOutgoingMessage = function(messageString:string) {
+   private sendOutgoingMessage = function(messageString: string) {
       let message = new Message({
          peer: this.peer.getJid(),
          direction: Message.DIRECTION.OUT,
@@ -318,16 +318,16 @@ export default class Session {
 
       //@REVIEW can this be simplified?
       if ((encryptionState === EncryptionState.Plaintext && this.session.msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT) ||
-          (encryptionState === EncryptionState.UnverifiedEncrypted && (this.session.msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED || this.session.trust)) ||
-          (encryptionState === EncryptionState.VerifiedEncrypted && (this.session.msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED || !this.session.trust)) ||
-          (encryptionState === EncryptionState.Ended && this.session.msgstate !== OTR.CONST.MSGSTATE_FINISHED)) {
+         (encryptionState === EncryptionState.UnverifiedEncrypted && (this.session.msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED || this.session.trust)) ||
+         (encryptionState === EncryptionState.VerifiedEncrypted && (this.session.msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED || !this.session.trust)) ||
+         (encryptionState === EncryptionState.Ended && this.session.msgstate !== OTR.CONST.MSGSTATE_FINISHED)) {
 
          Log.warn('Expected encryption state does not match real message state');
       }
    }
 
    private saveSession() {
-      let payload:any = {}; // return value
+      let payload: any = {}; // return value
 
       if (this.session === null) {
          return;

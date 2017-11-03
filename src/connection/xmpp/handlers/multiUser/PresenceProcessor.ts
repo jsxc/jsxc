@@ -6,9 +6,9 @@ import MultiUserStatusCodeHandler from './StatusCodeHandler'
 import Message from '../../../../Message'
 
 export default class MultiUserPresenceProcessor {
-   private codes:string[];
+   private codes: string[];
 
-   constructor(private multiUserContact:MultiUserContact, private xElement, private nickname, type) {
+   constructor(private multiUserContact: MultiUserContact, private xElement, private nickname, type) {
       this.codes = xElement.find('status').map((index, element) => element.getAttribute('code')).get();
 
       this.processCodes();
@@ -34,7 +34,7 @@ export default class MultiUserPresenceProcessor {
       return this.xElement;
    }
 
-   public inform(msg:string) {
+   public inform(msg: string) {
       Log.debug('[MUC] ' + msg);
 
       this.multiUserContact.getChatWindow().addSystemMessage(msg);
@@ -44,23 +44,23 @@ export default class MultiUserPresenceProcessor {
       var newNickname = this.xElement.find('item').attr('nick');
 
       if (this.xElement.find('destroy').length > 0) {
-        //@TODO empty member list
-        //@TODO close room
+         //@TODO empty member list
+         //@TODO close room
 
-        this.inform(Translation.t('This_room_has_been_closed'))
-     } else if (this.codes.indexOf('303') > -1 && newNickname) {
-        // user changed his nickname
+         this.inform(Translation.t('This_room_has_been_closed'))
+      } else if (this.codes.indexOf('303') > -1 && newNickname) {
+         // user changed his nickname
 
-        //@TODO get rid of Strophe
-        newNickname = Strophe.unescapeNode(newNickname);
+         //@TODO get rid of Strophe
+         newNickname = Strophe.unescapeNode(newNickname);
 
-        this.multiUserContact.removeMember(this.nickname);
-        this.multiUserContact.addMember(newNickname);
+         this.multiUserContact.removeMember(this.nickname);
+         this.multiUserContact.addMember(newNickname);
 
-        this.inform(Translation.t('is_now_known_as', {
-           oldNickname: this.nickname,
-           newNickname: newNickname,
-           escapeInterpolation: true
+         this.inform(Translation.t('is_now_known_as', {
+            oldNickname: this.nickname,
+            newNickname: newNickname,
+            escapeInterpolation: true
          }));
       } else {
          this.multiUserContact.removeMember(this.nickname);
@@ -96,7 +96,7 @@ export default class MultiUserPresenceProcessor {
       let msg;
       let statusCodeHandler = new MultiUserStatusCodeHandler(this, this.codes.indexOf('110') > -1);
 
-      for(let code of this.codes) {
+      for (let code of this.codes) {
          msg = statusCodeHandler.processCode(code);
 
          if (msg) {

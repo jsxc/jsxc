@@ -1,12 +1,12 @@
-import {PluginState} from '../../plugin/AbstractPlugin'
+import { PluginState } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
-import {EncryptionPlugin} from '../../plugin/EncryptionPlugin'
+import { EncryptionPlugin } from '../../plugin/EncryptionPlugin'
 import Client from '../../Client'
 import Account from '../../Account'
 import Log from '../../util/Log'
 import Contact from '../../Contact'
 import Message from '../../Message'
-import {DIRECTION} from '../../MessageInterface'
+import { DIRECTION } from '../../MessageInterface'
 import Translation from '../../util/Translation'
 import Session from './Session'
 import Options from '../../Options'
@@ -23,13 +23,13 @@ const MAX_VERSION = '4.0.0';
 
 export default class OTRPlugin extends EncryptionPlugin {
    private sessions = {};
-   private key:DSA;
+   private key: DSA;
 
-   public static getName():string {
+   public static getName(): string {
       return 'otr';
    }
 
-   constructor(pluginAPI:PluginAPI) {
+   constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       pluginAPI.getStorage().registerHook('key', (key) => {
@@ -46,8 +46,8 @@ export default class OTRPlugin extends EncryptionPlugin {
    }
 
    //@TODO create contactPluginApi
-   public toggleTransfer(contact:Contact):Promise<void> {
-      return this.getSession(contact).then((session:Session) => {
+   public toggleTransfer(contact: Contact): Promise<void> {
+      return this.getSession(contact).then((session: Session) => {
          if (session.isEnded()) {
             return session.end();
          } else if (session.isEncrypted()) {
@@ -58,23 +58,23 @@ export default class OTRPlugin extends EncryptionPlugin {
       });
    }
 
-   private afterReceiveMessageProcessor = (contact:Contact, message:Message) => {
-      return this.getSession(contact).then((session:Session) => {
+   private afterReceiveMessageProcessor = (contact: Contact, message: Message) => {
+      return this.getSession(contact).then((session: Session) => {
          return session.processMessage(message, 'decryptMessage');
       }).then((message) => {
          return [contact, message];
       });
    }
 
-   private preSendMessageProcessor = (contact:Contact, message:Message) => {
-      return this.getSession(contact).then((session:Session) => {
+   private preSendMessageProcessor = (contact: Contact, message: Message) => {
+      return this.getSession(contact).then((session: Session) => {
          if (session.isEnded()) {
             //@TODO block this message
             message.setDirection(DIRECTION.SYS);
             message.setPlaintextMessage('This message was not send');
 
             return message;
-         } else if(session.isEncrypted()) {
+         } else if (session.isEncrypted()) {
             return session.processMessage(message, 'encryptMessage');
          } else {
             return message;
@@ -84,7 +84,7 @@ export default class OTRPlugin extends EncryptionPlugin {
       });
    }
 
-   private getSession(contact:Contact):Promise<Session> {
+   private getSession(contact: Contact): Promise<Session> {
       //@TODO only master (sure?)
       let bareJid = contact.getJid().bare;
 
@@ -124,7 +124,7 @@ export default class OTRPlugin extends EncryptionPlugin {
 
       if (storedKey === null) {
          //@TODO we should generate only one key even if there are multiple calls during generation
-         return this.generateDSAKey().then((key:DSA) => {
+         return this.generateDSAKey().then((key: DSA) => {
             storage.setItem('key', key.packPrivate());
 
             this.key = key;
@@ -139,12 +139,12 @@ export default class OTRPlugin extends EncryptionPlugin {
       }
    }
 
-   private generateDSAKey():Promise<{}> {
+   private generateDSAKey(): Promise<{}> {
       let msg = Translation.t('Creating_your_private_key_');
       let worker = null;
 
       if (typeof Worker === 'undefined') {
-        //@TODO disable OTR
+         //@TODO disable OTR
       }
 
       let root = Options.get('root');

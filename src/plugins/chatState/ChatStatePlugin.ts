@@ -9,7 +9,7 @@ import Client from '../../Client'
 import Options from '../../Options'
 import Log from '../../util/Log'
 import JID from '../../JID'
-import {AbstractPlugin} from '../../plugin/AbstractPlugin'
+import { AbstractPlugin } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
 import Message from '../../Message'
 import Contact from '../../Contact'
@@ -25,13 +25,13 @@ const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 export default class ChatStatePlugin extends AbstractPlugin {
-   public static getName():string {
+   public static getName(): string {
       return 'chatState';
    }
 
-   private chatStateConnection:ChatStateConnection;
+   private chatStateConnection: ChatStateConnection;
 
-   constructor(pluginAPI:PluginAPI) {
+   constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       Namespace.register('CHATSTATES', 'http://jabber.org/protocol/chatstates');
@@ -39,7 +39,7 @@ export default class ChatStatePlugin extends AbstractPlugin {
       let preSendMessageStanzaPipe = Pipe.get('preSendMessageStanza');
       preSendMessageStanzaPipe.addProcessor(this.preSendMessageStanzaProcessor);
 
-      ChatWindow.HookRepository.registerHook('initialized', (chatWindow:ChatWindow, contact:Contact) => {
+      ChatWindow.HookRepository.registerHook('initialized', (chatWindow: ChatWindow, contact: Contact) => {
          new ChatStateMachine(this, chatWindow, contact);
       });
 
@@ -49,11 +49,11 @@ export default class ChatStatePlugin extends AbstractPlugin {
       connection.registerHandler(this.onChatState, Namespace.get('CHATSTATES'), 'message', 'chat');
    }
 
-   public getStorage():Storage {
+   public getStorage(): Storage {
       return this.pluginAPI.getStorage();
    }
 
-   public getChatStateConnection():ChatStateConnection {
+   public getChatStateConnection(): ChatStateConnection {
       if (!this.chatStateConnection) {
          this.chatStateConnection = new ChatStateConnection(this.pluginAPI.send, this.pluginAPI.sendIQ);
       }
@@ -64,7 +64,7 @@ export default class ChatStatePlugin extends AbstractPlugin {
       return this.pluginAPI.getDiscoInfoRepository();
    }
 
-   private preSendMessageStanzaProcessor = (message:Message, xmlStanza:Strophe.Builder) => {
+   private preSendMessageStanzaProcessor = (message: Message, xmlStanza: Strophe.Builder) => {
       //@TODO groupchat
       //@TODO is not disabled for jid
       if (message.getType() === Message.MSGTYPE.CHAT && true) {
@@ -76,7 +76,7 @@ export default class ChatStatePlugin extends AbstractPlugin {
       return [message, xmlStanza];
    }
 
-   private onChatState = (stanza):boolean => {
+   private onChatState = (stanza): boolean => {
       stanza = $(stanza);
       let from = new JID(stanza.attr('from'));
       let composingElement = stanza.find('composing' + Namespace.getFilter('CHATSTATES'));
@@ -98,21 +98,21 @@ export default class ChatStatePlugin extends AbstractPlugin {
       return true;
    }
 
-   private onComposing(from:JID) {
+   private onComposing(from: JID) {
       let contact = this.pluginAPI.getContact(from);
       let chatWindow = contact.getChatWindow();
 
       chatWindow.setBarText(Translation.t('_is_composing'));
    }
 
-   private onPaused(from:JID) {
+   private onPaused(from: JID) {
       let contact = this.pluginAPI.getContact(from);
       let chatWindow = contact.getChatWindow();
 
       chatWindow.setBarText('');
    }
 
-   private onActive(from:JID) {
+   private onActive(from: JID) {
       this.onPaused(from);
    }
 }

@@ -9,21 +9,21 @@ import ChatMessageHandler from './handlers/chatMessage'
 import MultiUserChatMessageHandler from './handlers/multiUser/groupChatMessage'
 import HeadlineMessageHandler from './handlers/headlineMessage'
 import JingleHandler from './handlers/jingle'
-import {DiscoInfoHandler, DiscoItemsHandler} from './handlers/disco'
+import { DiscoInfoHandler, DiscoItemsHandler } from './handlers/disco'
 import CapsHandler from './handlers/caps'
 import MultiUserDirectInvitationHandler from './handlers/multiUser/DirectInvitation'
 import MultiUserXMessageHandler from './handlers/multiUser/XMessage'
 import * as NS from './namespace'
 
 interface StropheConnection {
-  jid:string,
-  addHandler(Handler, namespace?:string, tagName?:string, type?:string, id?:string, from?:string)
+   jid: string,
+   addHandler(Handler, namespace?: string, tagName?: string, type?: string, id?: string, from?: string)
 }
 
 export default class XMPPHandler {
    private connectionJid: JID;
 
-   constructor(private account:Account, private connection: StropheConnection) {
+   constructor(private account: Account, private connection: StropheConnection) {
       this.connectionJid = new JID(connection.jid);
    }
 
@@ -46,9 +46,9 @@ export default class XMPPHandler {
       // this.connection.conn.addHandler(this.onReceived, null, 'message');
    }
 
-   private addHandler(Handler, namespace?:string, tagName?:string, type?:string, id?:string, from?:string) {
-     let handler = new Handler(this.account);
+   private addHandler(Handler, namespace?: string, tagName?: string, type?: string, id?: string, from?: string) {
+      let handler = new Handler(this.account);
 
-     this.connection.addHandler(stanza => handler.processStanza(stanza), namespace, tagName, type, id, from);
+      this.connection.addHandler(stanza => handler.processStanza(stanza), namespace, tagName, type, id, from);
    }
 }

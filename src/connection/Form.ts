@@ -22,14 +22,14 @@ export default class Form {
       return new Form(type, fields, instructions, title);
    }
 
-   public static fromJSON(data:{type:string, fields:FieldJSONData[]}) {
+   public static fromJSON(data: { type: string, fields: FieldJSONData[] }) {
       return new Form(
          data.type,
          data.fields.map(fieldData => Field.fromJSON(fieldData))
       );
    }
 
-   public static fromHTML(element:Element):Form {
+   public static fromHTML(element: Element): Form {
       let formElements = $(element).find('.jabber-x-data');
 
       let fields = formElements.get().map((formElement) => {
@@ -43,7 +43,7 @@ export default class Form {
       return new Form('submit', fields);
    }
 
-   private constructor(private type:string, private fields:Field[], private instructions?:string, private title?:string) {
+   private constructor(private type: string, private fields: Field[], private instructions?: string, private title?: string) {
       if (this.ALLOWED_TYPES.indexOf(type) < 0) {
          throw 'Form type not allowed';
       }
@@ -67,7 +67,7 @@ export default class Form {
          type: this.type
       });
 
-      for(let field of this.fields) {
+      for (let field of this.fields) {
          xmlElement.cnode(field.toXML()).up();
       }
 
@@ -94,14 +94,14 @@ export default class Form {
          formElement.append(textElement)
       }
 
-      for(let field of this.fields) {
+      for (let field of this.fields) {
          formElement.append(field.toHTML());
       }
 
       return formElement;
    }
 
-   public getValues(key:string):string[] {
+   public getValues(key: string): string[] {
       let fields = this.fields.filter(field => field.getName() === key);
 
       return fields.length > 0 ? fields[0].getValues() : undefined;
@@ -109,19 +109,19 @@ export default class Form {
 }
 
 interface FieldData {
-   label?:string,
-   type?:string,
-   name:string,
-   description?:string,
-   isRequired?:boolean,
-   values?:string[],
-   options?:Option2[]
+   label?: string,
+   type?: string,
+   name: string,
+   description?: string,
+   isRequired?: boolean,
+   values?: string[],
+   options?: Option2[]
 }
 
 interface FieldJSONData {
-   type:string,
-   name:string,
-   values:string[]
+   type: string,
+   name: string,
+   values: string[]
 }
 
 class Field {
@@ -145,7 +145,7 @@ class Field {
       let name = formElement.attr('data-name');
       let values;
 
-      switch(type) {
+      switch (type) {
          case 'list-multi':
          case 'list-single':
             values = formElement.find('select').val();
@@ -176,11 +176,11 @@ class Field {
       })
    };
 
-   public static fromJSON(data:FieldJSONData) {
+   public static fromJSON(data: FieldJSONData) {
       return new Field(data);
    }
 
-   private constructor(private data:FieldData) {
+   private constructor(private data: FieldData) {
       if (this.ALLOWED_TYPES.indexOf(data.type) < 0) {
          this.data.type = 'text-single'; //default value according to XEP-0004
       }
@@ -189,7 +189,7 @@ class Field {
          this.data.values = [];
       }
 
-      if (this.data.values.length > 1 &&  ['jid-multi', 'list-multi', 'text-multi', 'hidden'].indexOf(this.data.type) < 0) {
+      if (this.data.values.length > 1 && ['jid-multi', 'list-multi', 'text-multi', 'hidden'].indexOf(this.data.type) < 0) {
          throw 'Fields of type ' + data.type + ' are not allowed to have multiple value elements.';
       }
 
@@ -202,11 +202,11 @@ class Field {
       }
    }
 
-   public getName():string {
+   public getName(): string {
       return this.data.name;
    }
 
-   public getValues():string[] {
+   public getValues(): string[] {
       return this.data.values;
    }
 
@@ -225,7 +225,7 @@ class Field {
       });
 
       for (let value of this.data.values) {
-          xmlElement.c('value').t(value).up();
+         xmlElement.c('value').t(value).up();
       }
 
       return xmlElement.tree();
@@ -234,9 +234,9 @@ class Field {
    public toHTML() {
       let element;
 
-      switch(this.data.type) {
+      switch (this.data.type) {
          case 'fixed':
-            element = $('<div>').append($(this.data.values).map((index, value) => $('<p>').text(<any> value).get()));
+            element = $('<div>').append($(this.data.values).map((index, value) => $('<p>').text(<any>value).get()));
             break;
          case 'boolean':
          case 'hidden':
@@ -302,11 +302,11 @@ class Field {
          element.attr('value', this.data.values[0]);
       }
 
-      switch(this.data.type) {
+      switch (this.data.type) {
          case 'boolean':
             element.attr('type', 'checkbox');
             let value = this.data.values.length === 1 ? this.data.values[0] : 0;
-            if(value === 'true' || value === '1') {
+            if (value === 'true' || value === '1') {
                element.attr('checked', 'checked');
             }
             if (this.data.label) {
@@ -378,11 +378,11 @@ class Option2 {
       return new Option2(label, value);
    }
 
-   private constructor(private label:string, private value:string) {
+   private constructor(private label: string, private value: string) {
 
    }
 
-   public getValue():string {
+   public getValue(): string {
       return this.value;
    }
 

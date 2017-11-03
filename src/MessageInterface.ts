@@ -1,79 +1,79 @@
 import JID from './JID'
 import Attachment from './Attachment'
-import {ContactType} from './ContactInterface'
+import { ContactType } from './ContactInterface'
 
 export enum DIRECTION {
    IN, OUT, SYS
 };
 
 export interface MessageInterface {
-   registerHook(property:string, func:(newValue:any, oldValue:any)=>void)
+   registerHook(property: string, func: (newValue: any, oldValue: any) => void)
 
-   getUid():string
+   getUid(): string
 
-   getAttrId():string
+   getAttrId(): string
 
    delete()
 
-   getNextId():string
+   getNextId(): string
 
-   setNext(message:MessageInterface|string)
+   setNext(message: MessageInterface | string)
 
-   getCssId():string
+   getCssId(): string
 
-   getDOM():JQuery<HTMLElement>
+   getDOM(): JQuery<HTMLElement>
 
-   getStamp():Date
+   getStamp(): Date
 
-   getDirection():DIRECTION
+   getDirection(): DIRECTION
 
-   getDirectionString():string
+   getDirectionString(): string
 
-   getAttachment():Attachment
+   getAttachment(): Attachment
 
-   setAttachment(attachment:Attachment)
+   setAttachment(attachment: Attachment)
 
-   getPeer():JID
+   getPeer(): JID
 
-   getType():ContactType;
+   getType(): ContactType;
 
-   getTypeString():string;
+   getTypeString(): string;
 
-   getHtmlMessage():string;
+   getHtmlMessage(): string;
 
-   setHtmlMessage(htmlMessage:string)
+   setHtmlMessage(htmlMessage: string)
 
-   getEncryptedHtmlMessage():string
+   getEncryptedHtmlMessage(): string
 
-   getPlaintextMessage():string;
+   getPlaintextMessage(): string;
 
-   getEncryptedPlaintextMessage():string
+   getEncryptedPlaintextMessage(): string
 
-   getSender():{name:string, jid?:JID}
+   getSender(): { name: string, jid?: JID }
 
    received();
 
-   isReceived():boolean;
+   isReceived(): boolean;
 
-   isForwarded():boolean;
+   isForwarded(): boolean;
 
-   isEncrypted():boolean;
+   isEncrypted(): boolean;
 
-   hasAttachment():boolean;
+   hasAttachment(): boolean;
 
    setUnread();
 
-   setDirection(direction:DIRECTION)
+   setDirection(direction: DIRECTION)
 
-   setPlaintextMessage(plaintextMessage:string)
+   setPlaintextMessage(plaintextMessage: string)
 
-   setEncryptedPlaintextMessage(encryptedPlaintextMessage:string)
+   setEncryptedPlaintextMessage(encryptedPlaintextMessage: string)
 
-   setEncrypted(encrypted:boolean)
+   setEncrypted(encrypted: boolean)
 
-   getProcessedBody():string
+   getProcessedBody(): string
 
-   getErrorMessage():string
+   getErrorMessage(): string
 
-   updateProgress(transfered:number, complete:number)
+   updateProgress(transfered: number, complete: number)
 }

@@ -2,7 +2,7 @@
 export default class HookRepository<T extends Function> {
    private hooks = {};
 
-   public registerHook(eventName: string, func:T) {
+   public registerHook(eventName: string, func: T) {
       if (!this.hooks[eventName]) {
          this.hooks[eventName] = [];
       }
@@ -10,7 +10,7 @@ export default class HookRepository<T extends Function> {
       this.hooks[eventName].push(func);
    }
 
-   public removeHook(eventName:string, func:T) {
+   public removeHook(eventName: string, func: T) {
       let eventNameList = this.hooks[eventName] || [];
 
       if (eventNameList.indexOf(func) > -1) {
@@ -22,7 +22,7 @@ export default class HookRepository<T extends Function> {
       this.hooks[eventName] = eventNameList;
    }
 
-   public trigger(targetEventName:string, ...args) {
+   public trigger(targetEventName: string, ...args) {
       let hooks = this.hooks;
 
       let eventNames = Object.keys(hooks);

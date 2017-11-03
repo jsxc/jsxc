@@ -6,9 +6,9 @@ import Client from '../../Client'
 import Form from '../../connection/Form'
 import Log from '../../util/Log'
 
-let dialog:Dialog;
+let dialog: Dialog;
 
-export default function(contact:MultiUserContact) {
+export default function(contact: MultiUserContact) {
 
    //@TODO translate, maybe move to hbs
    dialog = new Dialog('<p class="jsxc-waiting">We are loading</p>', true);
@@ -18,12 +18,12 @@ export default function(contact:MultiUserContact) {
 
    return connection.getRoomConfigurationForm(contact.getJid())
       .then(stanza => Form.fromXML(stanza))
-      .then((form:Form) => {
+      .then((form: Form) => {
          return showForm(form, contact, connection);
       });
 }
 
-function showForm(form:Form, contact:MultiUserContact, connection) {
+function showForm(form: Form, contact: MultiUserContact, connection) {
    let formElement = form.toHTML();
    //@TODO translate, maybe move to hbs
    let submitButton = $('<div class="form-group">\
@@ -47,11 +47,11 @@ function showForm(form:Form, contact:MultiUserContact, connection) {
          let submitPromise = connection
             .submitRoomConfiguration(contact.getJid(), form)
             .then((stanza) => {
-                Log.debug('Room configuration submitted');
+               Log.debug('Room configuration submitted');
 
-                dialog.close();
+               dialog.close();
 
-                return stanza;
+               return stanza;
             });
 
          resolve(submitPromise);

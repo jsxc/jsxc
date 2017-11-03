@@ -1,14 +1,14 @@
 import Dialog from '../Dialog';
 import JID from '../../JID';
-import {ContactInterface} from '../../ContactInterface';
+import { ContactInterface } from '../../ContactInterface';
 import Templates from '../../util/Templates'
 
 let vcardTemplate = require('../../../template/vcard.hbs');
 let vcardBodyTemplate = require('../../../template/vcard-body.hbs');
 
-let dialog:Dialog;
+let dialog: Dialog;
 
-export default function(contact:ContactInterface) {
+export default function(contact: ContactInterface) {
 
    let basicData = [];
 
@@ -22,7 +22,7 @@ export default function(contact:ContactInterface) {
 
    contact.getVcard()
       .then(vcardSuccessCallback)
-      .then(function(vcardData){
+      .then(function(vcardData) {
          let content = vcardBodyTemplate({
             properties: vcardData
          });
@@ -34,7 +34,7 @@ export default function(contact:ContactInterface) {
       .catch(vcardErrorCallback);
 }
 
-function vcardSuccessCallback(vCardData):Promise<any> {
+function vcardSuccessCallback(vCardData): Promise<any> {
    let dialogElement = dialog.getDom();
 
    dialogElement.find('p').remove();
@@ -69,7 +69,7 @@ function vcardErrorCallback() {
    dialogElement.find('.jsxc-dialog').append(content);
 }
 
-function convertToTemplateData(vCardData):any[] {
+function convertToTemplateData(vCardData): any[] {
    let properties = [];
 
    for (let name in vCardData) {

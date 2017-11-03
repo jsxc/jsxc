@@ -8,7 +8,7 @@ import Client from '../../Client'
 
 var multiUserInvitation = require('../../../template/multiUserInvitation.hbs');
 
-export default function(type:'direct'|'mediated', from:string, room:string, reason:string, password:string) {
+export default function(type: 'direct' | 'mediated', from: string, room: string, reason: string, password: string) {
    let fromJid = new JID(from);
    let roomJid = new JID(room);
    let content = multiUserInvitation({
@@ -24,7 +24,7 @@ export default function(type:'direct'|'mediated', from:string, room:string, reas
    dom.find('form').on('submit', (ev) => {
       ev.preventDefault();
 
-      let multiUserContact = <MultiUserContact> account.getContact(roomJid);
+      let multiUserContact = <MultiUserContact>account.getContact(roomJid);
 
       if (!multiUserContact) {
          multiUserContact = account.addMultiUserContact(roomJid);

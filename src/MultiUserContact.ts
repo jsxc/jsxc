@@ -2,10 +2,10 @@ import Contact from './Contact'
 import JID from './JID'
 import MultiUserChatWindow from './ui/MultiUserChatWindow'
 import PersistentMap from './util/PersistentMap'
-import {Presence} from './connection/AbstractConnection'
+import { Presence } from './connection/AbstractConnection'
 import Form from './connection/Form'
 import Account from './Account'
-import {ContactSubscription} from './ContactInterface'
+import { ContactSubscription } from './ContactInterface'
 
 const AFFILIATION = {
    ADMIN: 'admin',
@@ -14,7 +14,7 @@ const AFFILIATION = {
    OWNER: 'owner',
    NONE: 'none'
 };
-const ROLE =  {
+const ROLE = {
    MODERATOR: 'moderator',
    PARTICIPANT: 'participant',
    VISITOR: 'visitor',
@@ -35,10 +35,10 @@ export default class MultiUserContact extends Contact {
 
    public static INSTANT_ROOMCONFIG = ROOMCONFIG.INSTANT;
 
-   private members:PersistentMap;
+   private members: PersistentMap;
 
-   constructor(account:Account, jid:JID, name?:string);
-   constructor(account:Account, id:string);
+   constructor(account: Account, jid: JID, name?: string);
+   constructor(account: Account, id: string);
    constructor() {
       super(arguments[0], arguments[1], arguments[3]);
 
@@ -47,7 +47,7 @@ export default class MultiUserContact extends Contact {
       this.members = new PersistentMap(this.account.getStorage(), 'members', this.getId());
    }
 
-   public invite(jid:JID, reason?:string) {
+   public invite(jid: JID, reason?: string) {
       let connection = this.account.getConnection();
       let isModerated = false; //@TODO
 
@@ -90,18 +90,18 @@ export default class MultiUserContact extends Contact {
       return this.account.getConnection().submitRoomConfiguration(this.getJid(), form);
    }
 
-   public setNickname(nickname:string) {
+   public setNickname(nickname: string) {
       //@TODO update ui according to affiliation and role
       this.data.set('nickname', nickname);
       this.setResource(nickname); //@REVIEW do we need the nickname field?
    }
 
-   public getNickname():string {
+   public getNickname(): string {
       return this.data.get('nickname');
    }
 
    public getChatWindow() {
-      if(!this.chatWindow) {
+      if (!this.chatWindow) {
          this.chatWindow = new MultiUserChatWindow(this.account, this);
       }
 
@@ -112,7 +112,7 @@ export default class MultiUserContact extends Contact {
 
    }
 
-   public addMember(nickname:string, affiliation?, role?, jid?:JID):boolean {
+   public addMember(nickname: string, affiliation?, role?, jid?: JID): boolean {
       let isNewMember = !this.members.get(nickname);
 
       this.members.set(nickname, {
@@ -124,7 +124,7 @@ export default class MultiUserContact extends Contact {
       return isNewMember
    }
 
-   public removeMember(nickname:string) {
+   public removeMember(nickname: string) {
       this.members.remove(nickname);
 
       if (nickname === this.getNickname()) {
@@ -132,39 +132,39 @@ export default class MultiUserContact extends Contact {
       }
    }
 
-   public getMembers():string[] {
+   public getMembers(): string[] {
       return this.members.getAllKeys();
    }
 
-   public getSubscription():ContactSubscription {
+   public getSubscription(): ContactSubscription {
       return ContactSubscription.BOTH;
    }
 
-   public setSubject(subject:string) {
+   public setSubject(subject: string) {
       this.data.set('subject', subject);
    }
 
-   public getSubject():string {
+   public getSubject(): string {
       return this.data.get('subject');
    }
 
-   public setPassword(password:string) {
+   public setPassword(password: string) {
       this.data.set('password', password);
    }
 
-   public setAutoJoin(autoJoin:boolean) {
+   public setAutoJoin(autoJoin: boolean) {
       this.data.set('autoJoin', autoJoin);
    }
 
-   public isAutoJoin():boolean {
+   public isAutoJoin(): boolean {
       return !!this.data.get('autoJoin');
    }
 
-   public setBookmark(bookmark:boolean) {
+   public setBookmark(bookmark: boolean) {
       this.data.set('bookmark', bookmark);
    }
 
-   public isBookmarked():boolean {
+   public isBookmarked(): boolean {
       return !!this.data.get('bookmark');
    }
 
@@ -184,11 +184,11 @@ export default class MultiUserContact extends Contact {
       return typeof roomConfig === 'object' && roomConfig !== null;
    }
 
-   public isInstantRoom():boolean {
+   public isInstantRoom(): boolean {
       return this.data.get('roomConfig') === ROOMCONFIG.INSTANT;
    }
 
-   public isMemberListComplete():boolean {
+   public isMemberListComplete(): boolean {
       return this.data.get('memberListComplete');
    }
 
@@ -196,23 +196,23 @@ export default class MultiUserContact extends Contact {
       this.data.set('memberListComplete', true);
    }
 
-   public getJoinDate():Date {
+   public getJoinDate(): Date {
       let dateString = this.data.get('joinDate');
 
       return dateString ? new Date(dateString) : undefined;
    }
 
-   public registerMemberHook(id:string, func: (newValue: any, oldValue: any, key: string) => void);
+   public registerMemberHook(id: string, func: (newValue: any, oldValue: any, key: string) => void);
    public registerMemberHook(func: (newValue: any, oldValue: any, key: string) => void);
    public registerMemberHook() {
       this.members.registerHook.apply(this.members, arguments);
    }
 
-   public registerNewMemberHook(func: (value:any, nickname:string) => void) {
+   public registerNewMemberHook(func: (value: any, nickname: string) => void) {
       this.members.registerNewHook(func);
    }
 
-   public registerRemoveMemberHook(func: (nickname:string) => void) {
+   public registerRemoveMemberHook(func: (nickname: string) => void) {
       this.members.registerRemoveHook(func);
    }
 

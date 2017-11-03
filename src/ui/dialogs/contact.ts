@@ -68,8 +68,8 @@ function onUsernameInput() {
 function onSubmit(ev) {
    ev.preventDefault();
 
-   let username = <string> $('#jsxc-username').val();
-   let alias = <string> $('#jsxc-alias').val();
+   let username = <string>$('#jsxc-username').val();
+   let alias = <string>$('#jsxc-alias').val();
    //@TODO if we support multi account, we need an account selection dialog
    let account = Client.getAccount();
 
@@ -81,7 +81,7 @@ function onSubmit(ev) {
    if (!username || !username.match(CONST.REGEX.JID)) {
       // Add notification
       $('#jsxc-username').addClass('jsxc-invalid').keyup(function() {
-         if ((<string> $(this).val()).match(CONST.REGEX.JID)) {
+         if ((<string>$(this).val()).match(CONST.REGEX.JID)) {
             $(this).removeClass('jsxc-invalid');
          }
       });

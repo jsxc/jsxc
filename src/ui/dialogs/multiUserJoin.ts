@@ -35,7 +35,7 @@ class MultiUserJoinDialog {
 
       this.serverInputElement = dom.find('input[name="server"]');
       this.roomInputElement = dom.find('input[name="room"]');
-      this.passwordInputElement =  dom.find('input[name="password"]');
+      this.passwordInputElement = dom.find('input[name="password"]');
       this.autoJoinInputElement = dom.find('input[name="auto-join"]');
       this.nicknameInputElement = dom.find('input[name="nickname"]');
       this.bookmarkInputElement = dom.find('input[name="bookmark"]');
@@ -58,7 +58,7 @@ class MultiUserJoinDialog {
          this.getMultiUserRooms(jid);
       })
 
-      this.getMultiUserServices().then((services:JID[]) => {
+      this.getMultiUserServices().then((services: JID[]) => {
          this.serverInputElement.val(services[0].full);
          this.serverInputElement.trigger('change');
       });
@@ -121,7 +121,7 @@ class MultiUserJoinDialog {
       })
    }
 
-   private getMultiUserRooms(server:JID) {
+   private getMultiUserRooms(server: JID) {
       Log.debug('Load room list for ' + server.bare);
 
       let roomInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-room');
@@ -197,7 +197,7 @@ class MultiUserJoinDialog {
       return false;
    }
 
-   private testInputValues():Promise<JID|void> {
+   private testInputValues(): Promise<JID | void> {
       let room = this.roomInputElement.val();
       let nickname = this.nicknameInputElement.val() || this.defaultNickname;
       let server = this.serverInputElement.val();
@@ -230,7 +230,7 @@ class MultiUserJoinDialog {
       return Promise.resolve(new JID(room));
    }
 
-   private requestRoomInfo = (room:JID) => {
+   private requestRoomInfo = (room: JID) => {
       this.setWaitingMessage('Loading_room_information');
 
       return this.connection.getDiscoInfo(room)
@@ -325,11 +325,11 @@ class MultiUserJoinDialog {
       return false;
    }
 
-   private setWaitingMessage(msg:string) {
+   private setWaitingMessage(msg: string) {
       this.setStatusMessage(msg, 'waiting');
    }
 
-   private setStatusMessage(msg:string, level?:'waiting'|'warning') {
+   private setStatusMessage(msg: string, level?: 'waiting' | 'warning') {
       let textElement = $('<p>').text(msg)
 
       if (level) {

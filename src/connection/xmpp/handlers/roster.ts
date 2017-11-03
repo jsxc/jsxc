@@ -6,7 +6,7 @@ import Roster from '../../../ui/Roster'
 import AbstractHandler from '../AbstractHandler'
 
 export default class RosterHandler extends AbstractHandler {
-   public processStanza(stanzaElement:Element):boolean {
+   public processStanza(stanzaElement: Element): boolean {
       Log.debug('Load roster', stanzaElement);
 
       let account = this.account;

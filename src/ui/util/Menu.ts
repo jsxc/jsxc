@@ -1,7 +1,7 @@
 
 export default class Menu {
-   public static init(elements:JQuery);
-   public static init(query:string);
+   public static init(elements: JQuery);
+   public static init(query: string);
    public static init() {
       let elements = arguments[0];
 
@@ -13,14 +13,14 @@ export default class Menu {
 
       //elements.addClass('jsxc-list');
 
-      elements.each(function(){
+      elements.each(function() {
          new Menu($(this));
       });
    }
 
    private timer;
 
-   private constructor(private element:JQuery) {
+   private constructor(private element: JQuery) {
       var ul = element.find('ul');
 
       element.click(this.onClick);

@@ -6,14 +6,14 @@ import JingleCallSession from './JingleCallSession'
 export default abstract class JingleAbstractSession {
    protected storage;
 
-   protected peerJID:JID;
+   protected peerJID: JID;
    protected peerContact;
    protected peerChatWindow;
 
    public abstract onOnceIncoming();
    protected abstract onIncoming();
 
-   constructor(protected account:Account, protected session) {
+   constructor(protected account: Account, protected session) {
       this.storage = this.account.getStorage();
 
       this.peerJID = new JID(session.peerID);
@@ -29,7 +29,7 @@ export default abstract class JingleAbstractSession {
       return this.session.sid;
    }
 
-   public on(eventName:string, handler) {
+   public on(eventName: string, handler) {
       this.session.on(eventName, handler);
    }
 }

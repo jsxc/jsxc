@@ -6,11 +6,11 @@ import Translation from '../../util/Translation'
 
 var verificationTemplate = require('../../../template/verification.hbs');
 
-let dialog:Dialog;
-let contact:Contact;
+let dialog: Dialog;
+let contact: Contact;
 
 //@TODO fix verification dialog
-export default function(c:Contact) {
+export default function(c: Contact) {
    // contact = c;
    // let storage = StorageSingleton.getUserStorage();
    //

@@ -7,16 +7,16 @@ let chatWindowListTemplate = require('../../template/chatWindowList.hbs');
 export default class ChatWindowList {
    private element;
 
-   private chatWindowList:any = {};
+   private chatWindowList: any = {};
 
-   private static instance:ChatWindowList;
+   private static instance: ChatWindowList;
 
-   public static init():void {
+   public static init(): void {
       ChatWindowList.get();
    }
 
-   public static get():ChatWindowList {
-      if(!ChatWindowList.instance) {
+   public static get(): ChatWindowList {
+      if (!ChatWindowList.instance) {
          ChatWindowList.instance = new ChatWindowList();
       }
 
@@ -49,7 +49,7 @@ export default class ChatWindowList {
 
    public closeAll() {
       for (let chatWindowId in this.chatWindowList) {
-         let chatWindow:ChatWindow = this.chatWindowList[chatWindowId];
+         let chatWindow: ChatWindow = this.chatWindowList[chatWindowId];
 
          chatWindow.close();
       }
@@ -57,13 +57,14 @@ export default class ChatWindowList {
 
    public minimizeAll() {
       for (let chatWindowId in this.chatWindowList) {
-         let chatWindow:ChatWindow = this.chatWindowList[chatWindowId];
+         let chatWindow: ChatWindow = this.chatWindowList[chatWindowId];
 
          chatWindow.minimize();
       }
    }
 
-   public add(chatWindow:ChatWindow) { console.log('add', chatWindow)
+   public add(chatWindow: ChatWindow) {
+      console.log('add', chatWindow)
       let chatWindowIds = this.getChatWindowIds();
 
       if (chatWindowIds.indexOf(chatWindow.getId()) < 0) {
@@ -81,7 +82,7 @@ export default class ChatWindowList {
       return chatWindow;
    }
 
-   public remove(chatWindow:ChatWindow) {
+   public remove(chatWindow: ChatWindow) {
       let chatWindowIds = this.getChatWindowIds();
 
       if (chatWindowIds.indexOf(chatWindow.getId()) > -1) {

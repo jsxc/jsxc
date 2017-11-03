@@ -3,9 +3,9 @@ import PersistentMap from './util/PersistentMap'
 import * as sha1 from 'js-sha1'
 
 export default class Avatar {
-   private properties:PersistentMap;
+   private properties: PersistentMap;
 
-   constructor(private sha1Hash:string, type?:string, data?:string) {
+   constructor(private sha1Hash: string, type?: string, data?: string) {
       let storage = Client.getStorage();
       this.properties = new PersistentMap(storage, sha1Hash);
 
@@ -25,19 +25,19 @@ export default class Avatar {
       }
    }
 
-   public getData():string {
+   public getData(): string {
       return this.properties.get('data');
    }
 
-   public getType():string {
+   public getType(): string {
       return this.properties.get('type');
    }
 
-   public getHash():string {
+   public getHash(): string {
       return this.sha1Hash;
    }
 
-   private calculateHash(data:string):string {
+   private calculateHash(data: string): string {
       let base64 = data.replace(/^.+;base64,/, '');
       let buffer = this.base64ToArrayBuffer(base64);
 
@@ -45,13 +45,13 @@ export default class Avatar {
    }
 
    private base64ToArrayBuffer(base64String) {
-       let binaryString =  window.atob(base64String);
-       let bytes = new Uint8Array(binaryString.length);
+      let binaryString = window.atob(base64String);
+      let bytes = new Uint8Array(binaryString.length);
 
-       for (var i = 0; i < binaryString.length; i++) {
-           bytes[i] = binaryString.charCodeAt(i);
-       }
+      for (var i = 0; i < binaryString.length; i++) {
+         bytes[i] = binaryString.charCodeAt(i);
+      }
 
-       return bytes.buffer;
+      return bytes.buffer;
    }
 }

@@ -12,7 +12,7 @@ export default class UserMedia {
          .catch(UserMedia.onMediaFailure);
    }
 
-   private static filterUserMedia(userMedia:Array<string>) {
+   private static filterUserMedia(userMedia: Array<string>) {
       return navigator.mediaDevices.enumerateDevices()
          .then((devices) => {
             var availableDevices = devices.map(function(device) {
@@ -32,7 +32,7 @@ export default class UserMedia {
    }
 
    private static getUserMedia(um) {
-      var constraints:any = {};
+      var constraints: any = {};
 
       if (um.indexOf('video') > -1) {
          constraints.video = true;
@@ -53,7 +53,7 @@ export default class UserMedia {
       }
    }
 
-   private static onMediaFailure(err:any = {}) {
+   private static onMediaFailure(err: any = {}) {
       let msg;
 
       switch (err.name) {

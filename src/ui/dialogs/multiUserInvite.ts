@@ -6,7 +6,7 @@ import Log from '../../util/Log'
 
 var multiUserInvite = require('../../../template/multiUserInvite.hbs');
 
-export default function(multiUserContact:MultiUserContact) {
+export default function(multiUserContact: MultiUserContact) {
    let content = multiUserInvite({});
 
    let dialog = new Dialog(content);

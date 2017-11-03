@@ -9,7 +9,7 @@ import Attachment from '../Attachment'
 export default class FileTransferHandler {
    private handlerElement;
 
-   constructor(private contact:Contact, private chatWindow:ChatWindow) {
+   constructor(private contact: Contact, private chatWindow: ChatWindow) {
       this.handlerElement = this.chatWindow.getDom().find('.jsxc-file-transfer');
 
       this.handlerElement.on('click', this.showFileSelection);
@@ -44,7 +44,7 @@ export default class FileTransferHandler {
       labelElement.click();
 
       fileElement.off('change').change((ev) => {
-         var file:File = ev.target.files[0]; // FileList object
+         var file: File = ev.target.files[0]; // FileList object
 
          if (!file) {
             return;
@@ -54,7 +54,7 @@ export default class FileTransferHandler {
       });
    }
 
-   private fileSelected(file:File) {
+   private fileSelected(file: File) {
       let attachment = new Attachment(file);
       this.chatWindow.setAttachment(attachment);
    }

@@ -10,11 +10,11 @@ const VideoDialogTemplate = require('../../template/videoDialog.hbs')
 export class VideoDialog {
    private dom;
 
-   private videoWindows:Array<VideoWindow> = [];
+   private videoWindows: Array<VideoWindow> = [];
 
    private localStream;
 
-   private ready:boolean = true;
+   private ready: boolean = true;
 
    constructor() {
       let htmlString = VideoDialogTemplate({});
@@ -36,7 +36,7 @@ export class VideoDialog {
       this.videoWindows.push(videoWindow);
    }
 
-   public showCallDialog(session:JingleCallSession) {
+   public showCallDialog(session: JingleCallSession) {
       //@TODO add auto accept
       //@TODO translate
       //@TODO use selection dialog, because button labels can be configured
@@ -52,7 +52,8 @@ export class VideoDialog {
          confirmDialog.close();
       });
 
-      return confirmDialog.getPromise().then((dialog:Dialog) => { console.log('session.adopt', typeof session.adopt)
+      return confirmDialog.getPromise().then((dialog: Dialog) => {
+         console.log('session.adopt', typeof session.adopt)
          session.adopt();
 
          dialog.close();
@@ -84,7 +85,7 @@ export class VideoDialog {
                localVideoElement.removeAttr('style');
             });
 
-            (<any> $('#jsxc_webrtc .jsxc_videoContainer')).fullscreen();
+            (<any>$('#jsxc_webrtc .jsxc_videoContainer')).fullscreen();
          });
       } else {
          this.dom.find('.jsxc-fullscreen').hide();
@@ -144,7 +145,7 @@ export class VideoDialog {
       status.data('timeout', to);
    }
 
-   public isReady():boolean {
+   public isReady(): boolean {
       return this.ready;
    }
 

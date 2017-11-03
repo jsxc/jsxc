@@ -1,15 +1,15 @@
-import {IConnection} from './ConnectionInterface'
+import { IConnection } from './ConnectionInterface'
 import Account from '../Account'
 import * as JSM from 'jingle'
 import * as RTC from 'webrtc-adapter'
 // import GUM from 'getusermedia'
 // import GSM from 'getscreenmedia'
-import {createRegistry} from 'jxt'
+import { createRegistry } from 'jxt'
 import Log from '../util/Log'
 import Translation from '../util/Translation'
 import Notification from '../Notification'
 import JID from '../JID'
-import {VideoDialog} from '../ui/VideoDialog'
+import { VideoDialog } from '../ui/VideoDialog'
 import UserMedia from '../UserMedia'
 import JingleSession from '../JingleSession'
 import JingleAbstractSession from '../JingleAbstractSession'
@@ -22,13 +22,13 @@ let IqStanza = jxt.getDefinition('iq', 'jabber:client');
 
 export default class JingleHandler {
 
-   protected manager:JSM;
+   protected manager: JSM;
 
    protected static videoDialog;
 
    protected static instances = [];
 
-   constructor(protected account:Account, protected connection:IConnection) {
+   constructor(protected account: Account, protected connection: IConnection) {
 
       this.manager = new JSM({
          peerConnectionConstraints: this.getPeerConstraints(),
@@ -36,7 +36,7 @@ export default class JingleHandler {
          selfID: connection.getJID().full
       });
 
-      this.manager.on('change:connectionState', function(){
+      this.manager.on('change:connectionState', function() {
          console.log('ice', arguments);
       })
 
@@ -48,7 +48,7 @@ export default class JingleHandler {
          var iq = new IqStanza(data);
          var iqElement = $.parseXML(iq.toString()).getElementsByTagName('iq')[0];
 
-//@TODO add id to iq
+         //@TODO add id to iq
          this.connection.send(iqElement);
       });
 
@@ -61,7 +61,7 @@ export default class JingleHandler {
       //@TODO add on client unavilable (this.manager.endPeerSessions(peer_jid_full, true))
    }
 
-   public initiate(peerJID:JID, stream, offerOptions?) {
+   public initiate(peerJID: JID, stream, offerOptions?) {
       var session = this.manager.createMediaSession(peerJID.full);
 
       //@TODO extract onIceConnectionStateChanged from VideoWindow and use here
@@ -100,7 +100,7 @@ export default class JingleHandler {
 
       try {
          req = jxt.parse(iq.outerHTML);
-      } catch(err) {
+      } catch (err) {
          Log.error('Error while parsing jingle: ', err);
          //@TODO abort call
          return;
@@ -111,7 +111,7 @@ export default class JingleHandler {
       return true;
    }
 
-   protected onIncoming(session):JingleAbstractSession {
+   protected onIncoming(session): JingleAbstractSession {
       return JingleSession.create(this.account, session);
    }
 
@@ -201,13 +201,13 @@ export default class JingleHandler {
       return peerConstraints;
    }
 
-   public static terminateAll(reason?:string) {
+   public static terminateAll(reason?: string) {
       JingleHandler.instances.forEach((instance) => {
          instance.terminate(reason);
       });
    }
 
-   public static getVideoDialog():VideoDialog {
+   public static getVideoDialog(): VideoDialog {
       if (!JingleHandler.videoDialog || !JingleHandler.videoDialog.isReady()) {
          JingleHandler.videoDialog = new VideoDialog();
       }

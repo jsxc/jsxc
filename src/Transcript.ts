@@ -4,13 +4,13 @@ import Storage from './Storage';
 import PersistentMap from './util/PersistentMap'
 
 export default class Transcript {
-   private properties:PersistentMap;
+   private properties: PersistentMap;
 
-   private firstMessage:Message;
+   private firstMessage: Message;
 
    private messages = {};
 
-   constructor(storage:Storage, contact:Contact) {
+   constructor(storage: Storage, contact: Contact) {
       this.properties = new PersistentMap(storage, 'transcript', contact.getId());
 
       this.properties.registerHook('firstMessageId', (firstMessageId) => {
@@ -18,7 +18,7 @@ export default class Transcript {
       });
    }
 
-   public pushMessage(message:Message) {
+   public pushMessage(message: Message) {
       if (!message.getNextId() && this.firstMessage) {
          message.setNext(this.firstMessage);
       }
@@ -28,7 +28,7 @@ export default class Transcript {
       this.properties.set('firstMessageId', message.getUid());
    }
 
-   public getFirstMessage():Message {
+   public getFirstMessage(): Message {
       if (!this.firstMessage && this.properties.get('firstMessageId')) {
          this.firstMessage = this.getMessage(this.properties.get('firstMessageId'));
       }
@@ -36,17 +36,17 @@ export default class Transcript {
       return this.firstMessage;
    }
 
-   public getLastMessage():Message {
+   public getLastMessage(): Message {
       let lastMessage = this.getFirstMessage();
 
-      while(lastMessage && lastMessage.getNextId()) {
+      while (lastMessage && lastMessage.getNextId()) {
          lastMessage = this.getMessage(lastMessage.getNextId());
       }
 
       return lastMessage;
    }
 
-   public getMessage(id:string):Message {
+   public getMessage(id: string): Message {
       if (!this.messages[id] && id) {
          this.messages[id] = new Message(id);
       }
@@ -56,9 +56,9 @@ export default class Transcript {
 
    public clear() {
       let message = this.getFirstMessage();
-      let nextMessage:Message;
+      let nextMessage: Message;
 
-      while(message) {
+      while (message) {
          nextMessage = this.getMessage(message.getNextId());
 
          message.delete();
@@ -73,11 +73,11 @@ export default class Transcript {
       this.properties.remove('firstMessageId')
    }
 
-   public registerHook(property:string, func:(newValue:any, oldValue:any)=>void) {
+   public registerHook(property: string, func: (newValue: any, oldValue: any) => void) {
       this.properties.registerHook(property, func);
    }
 
-   private addMessage(message:Message) {
+   private addMessage(message: Message) {
       this.messages[message.getUid()] = message;
    }
 }

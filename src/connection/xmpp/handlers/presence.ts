@@ -1,10 +1,10 @@
 import Log from '../../../util/Log';
 import JID from '../../../JID';
-import {ContactInterface} from '../../../ContactInterface';
+import { ContactInterface } from '../../../ContactInterface';
 import Client from '../../../Client';
-import {Notice, TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION} from '../../../Notice';
+import { Notice, TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../Notice';
 import Roster from '../../../ui/Roster';
-import {Presence} from '../../AbstractConnection'
+import { Presence } from '../../AbstractConnection'
 import 'jquery'
 import AbstractHandler from '../AbstractHandler'
 
@@ -23,7 +23,7 @@ const PRESENCE = {
 
 export default class extends AbstractHandler {
 
-   public processStanza(stanza:Element):boolean {
+   public processStanza(stanza: Element): boolean {
       Log.debug('onPresence', stanza);
 
       let presence = {
@@ -33,7 +33,7 @@ export default class extends AbstractHandler {
          status: $(stanza).find('status').text()
       }
 
-      let status:Presence = this.determinePresenceStatus(presence);
+      let status: Presence = this.determinePresenceStatus(presence);
 
       if (presence.from.bare === this.account.getJID().bare) {
          Log.debug('Ignore own presence notification');
@@ -81,7 +81,7 @@ export default class extends AbstractHandler {
       return this.PRESERVE_HANDLER;
    }
 
-   private processSubscribtionRequest(jid:JID, contact:ContactInterface) {
+   private processSubscribtionRequest(jid: JID, contact: ContactInterface) {
       if (contact) {
          Log.debug('Auto approve contact request, because he is already in our contact list.');
 
@@ -103,7 +103,7 @@ export default class extends AbstractHandler {
       });
    }
 
-   private determinePresenceStatus(presence):Presence {
+   private determinePresenceStatus(presence): Presence {
       let status;
 
       if (presence.type === PRESENCE.UNAVAILABLE || presence.type === PRESENCE.UNSUBSCRIBED) {

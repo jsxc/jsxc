@@ -10,21 +10,21 @@ import showRoomConfigurationDialog from '../../../../ui/dialogs/multiUserRoomCon
 // https://xmpp.org/extensions/xep-0045.html#registrar-statuscodes
 
 export default class MultiUserStatusCodeHandler {
-   constructor(private presenceHandler:MultiUserPresenceProcessor, private isSelfRefered:boolean) {
+   constructor(private presenceHandler: MultiUserPresenceProcessor, private isSelfRefered: boolean) {
 
    }
 
-   public processCode(code):string|void {
+   public processCode(code): string | void {
       if (typeof this[code] === 'function') {
          return this[code].call(this);
       }
    }
 
-   private setNickname(nickname:string) {
+   private setNickname(nickname: string) {
       this.presenceHandler.getMultiUserContact().setNickname(nickname)
    }
 
-   private getNickname():string {
+   private getNickname(): string {
       return this.presenceHandler.getNickname();
    }
 
@@ -138,7 +138,7 @@ export default class MultiUserStatusCodeHandler {
    }
 }
 
-function showInstantOrConfigurationDialog(multiUserContact:MultiUserContact) {
+function showInstantOrConfigurationDialog(multiUserContact: MultiUserContact) {
    return new Promise((resolve, reject) => {
       showSelectionDialog({
          header: Translation.t('Room_creation'),

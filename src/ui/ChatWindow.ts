@@ -15,10 +15,10 @@ import SortedPersistentMap from '../util/SortedPersistentMap'
 import PersistentMap from '../util/PersistentMap'
 import AvatarSet from './AvatarSet'
 import 'simplebar'
-import {startCall} from './actions/call'
-import {Presence} from '../connection/AbstractConnection'
+import { startCall } from './actions/call'
+import { Presence } from '../connection/AbstractConnection'
 import Pipe from '../util/Pipe'
-import {EncryptionState} from '../plugin/AbstractPlugin'
+import { EncryptionState } from '../plugin/AbstractPlugin'
 import ElementHandler from './util/ElementHandler'
 import JID from '../JID'
 import HookRepository from '../util/HookRepository'
@@ -34,13 +34,13 @@ const ENTER_KEY = 13;
 const ESC_KEY = 27;
 
 export default class ChatWindow {
-   public static HookRepository = new HookRepository<(window:ChatWindow, contact:Contact)=>void>();
+   public static HookRepository = new HookRepository<(window: ChatWindow, contact: Contact) => void>();
 
    protected element;
 
    private inputElement;
 
-   private inputBlurTimeout:number;
+   private inputBlurTimeout: number;
 
    private storage;
 
@@ -48,13 +48,13 @@ export default class ChatWindow {
 
    private readonly HIGHTLIGHT_DURATION = 600;
 
-   private properties:PersistentMap;
+   private properties: PersistentMap;
 
    private chatWindowMessages = {};
 
-   private attachmentDeposition:Attachment;
+   private attachmentDeposition: Attachment;
 
-   constructor(protected account:Account, protected contact:Contact) {
+   constructor(protected account: Account, protected contact: Contact) {
       let template = chatWindowTemplate({
          accountId: account.getUid(),
          contactId: contact.getId(),
@@ -102,11 +102,11 @@ export default class ChatWindow {
       ChatWindow.HookRepository.trigger('initialized', this, contact);
    }
 
-   public getTranscript():Transcript {
+   public getTranscript(): Transcript {
       return this.contact.getTranscript();
    }
 
-   public getChatWindowMessage(message:Message) {
+   public getChatWindowMessage(message: Message) {
       let id = message.getUid();
 
       if (!this.chatWindowMessages[id]) {
@@ -189,17 +189,17 @@ export default class ChatWindow {
       if (!element.hasClass('jsxc-highlight')) {
          element.addClass('jsxc-highlight');
 
-         setTimeout(function(){
+         setTimeout(function() {
             element.removeClass('jsxc-highlight');
          }, this.HIGHTLIGHT_DURATION)
       }
    }
 
-   public setBarText(text:string) {
+   public setBarText(text: string) {
       this.element.find('.jsxc-window-bar .jsxc-subcaption').text(text);
    }
 
-   public addSystemMessage(messageString:string) {
+   public addSystemMessage(messageString: string) {
       let message = new Message({
          peer: this.contact.getJid(),
          direction: Message.DIRECTION.SYS,
@@ -209,7 +209,7 @@ export default class ChatWindow {
       this.getTranscript().pushMessage(message);
    }
 
-   public postMessage(message:Message):ChatWindowMessage {
+   public postMessage(message: Message): ChatWindowMessage {
       if (message.getDirection() === Message.DIRECTION.IN && !this.inputElement.is(':focus')) {
          message.setUnread();
       }
@@ -230,7 +230,7 @@ export default class ChatWindow {
       return chatWindowMessage;
    }
 
-   public addActionEntry(className:string, cb:(ev)=>void) {
+   public addActionEntry(className: string, cb: (ev) => void) {
       let element = $('<div>');
       element.addClass('jsxc-action-entry')
       element.addClass(className);
@@ -239,7 +239,7 @@ export default class ChatWindow {
       this.element.find('.jsxc-action-entry.jsxc-close').before(element);
    }
 
-   public addMenuEntry(className:string, label:string, cb:(ev)=>void) {
+   public addMenuEntry(className: string, label: string, cb: (ev) => void) {
       let element = $('<a>');
       element.attr('href', '#');
       element.addClass(className);
@@ -249,7 +249,7 @@ export default class ChatWindow {
       this.element.find('.jsxc-window-bar .jsxc-menu ul').append($('<li>').append(element));
    }
 
-   public setAttachment(attachment:Attachment) {
+   public setAttachment(attachment: Attachment) {
       this.attachmentDeposition = attachment;
 
       let previewElement = this.element.find('.jsxc-preview');
@@ -405,7 +405,7 @@ export default class ChatWindow {
    }
 
    private onInputKeyPress = (ev) => {
-      let message:string = <string>$(ev.target).val();
+      let message: string = <string>$(ev.target).val();
 
       if (ev.which !== ENTER_KEY || ev.shiftKey || !message) {
          return;
@@ -437,7 +437,7 @@ export default class ChatWindow {
       }, this.INPUT_RESIZE_DELAY);
    }
 
-   private sendOutgoingMessage(messageString:string) {
+   private sendOutgoingMessage(messageString: string) {
       let message = new Message({
          peer: this.contact.getJid(),
          direction: Message.DIRECTION.OUT,
@@ -479,7 +479,7 @@ export default class ChatWindow {
       let transferElement = this.getDom().find('.jsxc-transfer');
       transferElement.removeClass('jsxc-fin jsxc-enc jsxc-trust');
 
-      switch(encryptionState) {
+      switch (encryptionState) {
          case EncryptionState.Plaintext:
             break;
          case EncryptionState.UnverifiedEncrypted:
@@ -545,21 +545,21 @@ export default class ChatWindow {
          li.append(Emoticons.toImage(emoticon));
          li.find('div').attr('title', emoticon);
          li.click(() => {
-           let inputElement = this.element.find('.jsxc-message-input');
-           let inputValue = inputElement.val() || '';
-           let selectionStart = inputElement[0].selectionStart;
-           let selectionEnd = inputElement[0].selectionEnd;
-           let inputStart = inputValue.slice(0, selectionStart);
-           let inputEnd = inputValue.slice(selectionEnd);
+            let inputElement = this.element.find('.jsxc-message-input');
+            let inputValue = inputElement.val() || '';
+            let selectionStart = inputElement[0].selectionStart;
+            let selectionEnd = inputElement[0].selectionEnd;
+            let inputStart = inputValue.slice(0, selectionStart);
+            let inputEnd = inputValue.slice(selectionEnd);
 
-           let newValue = inputStart;
-           newValue += (inputStart.length && inputStart.slice(-1) !== ' ')? ' ' : '';
-           newValue += emoticon;
-           newValue += (inputEnd.length && inputEnd.slice(0, 1) !== ' ')? ' ' : '';
-           newValue += inputEnd;
+            let newValue = inputStart;
+            newValue += (inputStart.length && inputStart.slice(-1) !== ' ') ? ' ' : '';
+            newValue += emoticon;
+            newValue += (inputEnd.length && inputEnd.slice(0, 1) !== ' ') ? ' ' : '';
+            newValue += inputEnd;
 
-           inputElement.val(newValue);
-           inputElement.focus();
+            inputElement.val(newValue);
+            inputElement.focus();
          });
 
          emoticonListElement.prepend(li);
@@ -580,7 +580,7 @@ export default class ChatWindow {
       chatWindowMessage.restoreNextMessage();
    }
 
-   private resizeMessageArea(width?:number, height?:number, outer?) {
+   private resizeMessageArea(width?: number, height?: number, outer?) {
       let element = this.element;
 
       if (!element.attr('data-default-height')) {
@@ -612,7 +612,7 @@ export default class ChatWindow {
    }
 
    private fullsizeMessageArea() {
-      let size:{width:number, height:number} = Options.get('viewport').getSize();
+      let size: { width: number, height: number } = Options.get('viewport').getSize();
       let barHeight = this.element.find('.jsxc-window-bar').outerHeight();
       let inputHeight = this.inputElement.outerHeight();
 

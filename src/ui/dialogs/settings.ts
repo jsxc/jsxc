@@ -3,7 +3,7 @@ import Options from '../../Options';
 
 var settingsTemplate = require('../../../template/settings.hbs');
 
-export default function () {
+export default function() {
    let xmppSettingsAlterable = Options.get('xmpp').overwrite !== 'false' && Options.get('xmpp').overwrite !== false;
 
    var content = settingsTemplate({

@@ -10,12 +10,12 @@ import XMPPConnection from './Connection'
 export default class Connector {
    private connectionParameters;
 
-   private connectionArgs:string[];
+   private connectionArgs: string[];
 
-   constructor(account:Account, boshUrl: string, jid: string, sid: string, rid:string);
-   constructor(account:Account, boshUrl: string, jid: string, password: string);
-   constructor(account:Account);
-   constructor(private account:Account, ...connectionArgs:string[]) {
+   constructor(account: Account, boshUrl: string, jid: string, sid: string, rid: string);
+   constructor(account: Account, boshUrl: string, jid: string, password: string);
+   constructor(account: Account);
+   constructor(private account: Account, ...connectionArgs: string[]) {
       let storage = account.getStorage();
       this.connectionParameters = new PersistentMap(storage, 'connection');
 
@@ -57,7 +57,7 @@ export default class Connector {
          .then(this.successfulConnected);
    }
 
-   public getJID():JID {
+   public getJID(): JID {
       return new JID(this.connectionParameters.get('jid'));
    }
 
@@ -70,7 +70,7 @@ export default class Connector {
       this.addRidHandler(stropheConnection);
 
       let accountConnection = this.account.getConnection();
-      let handlers = (<StorageConnection> accountConnection).getHandlers(); //@TODO fix connection interface
+      let handlers = (<StorageConnection>accountConnection).getHandlers(); //@TODO fix connection interface
 
       accountConnection.close();
       accountConnection = new XMPPConnection(this.account, stropheConnection);

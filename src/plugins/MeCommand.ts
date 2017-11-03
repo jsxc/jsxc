@@ -1,4 +1,4 @@
-import {PluginState, AbstractPlugin} from '../plugin/AbstractPlugin'
+import { PluginState, AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import Client from '../Client'
 import Account from '../Account'
@@ -10,17 +10,17 @@ const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 export default class MeCommandPlugin extends AbstractPlugin {
-   public static getName():string {
+   public static getName(): string {
       return 'meCommand';
    }
 
-   constructor(pluginAPI:PluginAPI) {
+   constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor, 80);
    }
 
-   private afterReceiveMessageProcessor = (contact:Contact, message:Message) => {
+   private afterReceiveMessageProcessor = (contact: Contact, message: Message) => {
       let plaintext = message.getPlaintextMessage();
       let meRegex = /^\/me /;
 

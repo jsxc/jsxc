@@ -11,9 +11,9 @@ export default class Templates {
       this.handlebars = Handlebars.noConflict();
 
       this.handlebars.registerHelper('t', function(i18n_key) {
-        let result = i18next.t(i18n_key);
+         let result = i18next.t(i18n_key);
 
-        return new Handlebars.SafeString(result);
+         return new Handlebars.SafeString(result);
       });
 
       this.handlebars.registerHelper('tr', function(context, options) {
@@ -27,9 +27,9 @@ export default class Templates {
       });
    }
 
-   public static get(name:string, context:any = {}, options?:any):string {
+   public static get(name: string, context: any = {}, options?: any): string {
       Templates.setup();
-console.warn('Deprecated? Template.get');
+      console.warn('Deprecated? Template.get');
       // @TODO log or through exception if template does not exist
       return this.handlebars.templates[name](context, options);
    }

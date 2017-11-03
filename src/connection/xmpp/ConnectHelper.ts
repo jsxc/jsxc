@@ -1,12 +1,12 @@
-import {$iq,Strophe} from 'strophe.js';
+import { $iq, Strophe } from 'strophe.js';
 import Options from '../../Options';
 import Log from '../../util/Log';
 import SM from '../../StateMachine'
 import Client from '../../Client'
 import PersistentMap from '../../util/PersistentMap'
 
-export function login(url:string, jid:string, sid:string, rid:string);
-export function login(url:string, jid:string, password:string);
+export function login(url: string, jid: string, sid: string, rid: string);
+export function login(url: string, jid: string, password: string);
 export function login() {
    if (arguments.length === 3) {
       return loginWithPassword(arguments[0], arguments[1], arguments[2]);
@@ -17,7 +17,7 @@ export function login() {
    }
 }
 
-function loginWithPassword(url:string, jid:string, password:string):Promise<{}> {
+function loginWithPassword(url: string, jid: string, password: string): Promise<{}> {
    testBasicConnectionParameters(url, jid);
    let connection = prepareConnection(url);
 
@@ -25,13 +25,13 @@ function loginWithPassword(url:string, jid:string, password:string):Promise<{}> 
 
    return new Promise(function(resolve, reject) {
       //@TODO don't forget password from options
-      connection.connect(jid, password, function(status){
-         if(status === Strophe.Status.CONNFAIL || status === Strophe.Status.AUTHFAIL) {
+      connection.connect(jid, password, function(status) {
+         if (status === Strophe.Status.CONNFAIL || status === Strophe.Status.AUTHFAIL) {
             reject.call(this, {
                connection: connection,
                status: status
             });
-         } else if(status === Strophe.Status.CONNECTED) {
+         } else if (status === Strophe.Status.CONNECTED) {
             resolve.call(this, {
                connection: connection,
                status: status
@@ -43,20 +43,20 @@ function loginWithPassword(url:string, jid:string, password:string):Promise<{}> 
    });
 }
 
-function attachConnection(url:string, jid:string, sid:string, rid:string) {
+function attachConnection(url: string, jid: string, sid: string, rid: string) {
    testBasicConnectionParameters(url, jid);
    let connection = prepareConnection(url);
 
    Log.debug('Try to attach old connection.');
 
    return new Promise(function(resolve, reject) {
-      connection.attach(jid, sid, rid, function(status){
-         if(status === Strophe.Status.CONNFAIL || status === Strophe.Status.AUTHFAIL) {
+      connection.attach(jid, sid, rid, function(status) {
+         if (status === Strophe.Status.CONNFAIL || status === Strophe.Status.AUTHFAIL) {
             reject.call(this, {
                connection: connection,
                status: status
             });
-         } else if(status === Strophe.Status.ATTACHED) {
+         } else if (status === Strophe.Status.ATTACHED) {
             resolve.call(this, {
                connection: connection,
                status: status
@@ -68,7 +68,7 @@ function attachConnection(url:string, jid:string, sid:string, rid:string) {
    })
 }
 
-function testBasicConnectionParameters(url:string, jid:string) {
+function testBasicConnectionParameters(url: string, jid: string) {
    if (!jid)
       throw new Error('I can not log in without a jid.');
 
@@ -80,7 +80,7 @@ function registerXMPPNamespaces() {
    Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
 }
 
-function prepareConnection(url:string):Strophe.Connection {
+function prepareConnection(url: string): Strophe.Connection {
    let connection = new Strophe.Connection(url);
 
    if (Options.get('debug') || true) {

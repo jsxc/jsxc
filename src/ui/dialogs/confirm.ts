@@ -8,7 +8,7 @@ import JID from '../../JID'
 
 let confirmTemplate = require('../../../template/confirm.hbs');
 
-export default function(question:string, id?:string) {
+export default function(question: string, id?: string) {
    let content = confirmTemplate({
       question: question
    });
@@ -21,11 +21,11 @@ export default function(question:string, id?:string) {
    }
 
    let promise = new Promise((resolve, reject) => {
-      dom.find('.jsxc-confirm').click(function(){
+      dom.find('.jsxc-confirm').click(function() {
          resolve(dialog);
       });
 
-      dom.find('.jsxc-dismiss').click(function(){
+      dom.find('.jsxc-dismiss').click(function() {
          reject(dialog);
       });
    });

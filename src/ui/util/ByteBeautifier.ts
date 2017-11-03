@@ -1,4 +1,4 @@
-export default function format(byte:number) {
+export default function format(byte: number) {
    var s = ['', 'KB', 'MB', 'GB', 'TB'];
    var i;
 

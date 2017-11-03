@@ -1,6 +1,6 @@
 
 interface Identifiable {
-   getId():string
+   getId(): string
 }
 
 export default Identifiable;

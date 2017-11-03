@@ -84,7 +84,7 @@ export function deleteAllData() {
    let keys = Object.keys(backend);
    let count = 0;
 
-   for(let key of keys) {
+   for (let key of keys) {
       if (prefixRegex.test(key) && key !== prefix + 'debug') {
          backend.removeItem(key);
          count++;

@@ -1,6 +1,6 @@
 import Dialog from '../Dialog';
 
-export default function(subject:string, message:string, from?:string) {
+export default function(subject: string, message: string, from?: string) {
    // let content = Templates.get('loginBox', {
    //    username: null
    // });

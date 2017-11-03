@@ -1,6 +1,6 @@
 import * as NS from '../namespace'
 import DiscoInfo from '../../../DiscoInfo'
-import {AbstractConnection} from '../../AbstractConnection';
+import { AbstractConnection } from '../../AbstractConnection';
 import Client from '../../../Client'
 import JID from '../../../JID'
 import Account from '../../../Account'
@@ -11,7 +11,7 @@ export default class CapsHandler extends AbstractHandler {
 
    public static NAMESPACE = 'http://jabber.org/protocol/caps';
 
-   constructor(account:Account) {
+   constructor(account: Account) {
       super(account);
 
       NS.register('CAPS', CapsHandler.NAMESPACE);
@@ -19,7 +19,7 @@ export default class CapsHandler extends AbstractHandler {
       account.getDiscoInfo().addFeature(NS.get('CAPS'));
    }
 
-   public processStanza(stanza:Element) {
+   public processStanza(stanza: Element) {
       let from = new JID(stanza.getAttribute('from'));
       let c = stanza.querySelector('c');
       let hash = c.getAttribute('hash');
@@ -29,7 +29,7 @@ export default class CapsHandler extends AbstractHandler {
       if (!hash) {
          Log.info('Drop caps element, because hash attribute is missing.');
          return this.PRESERVE_HANDLER;
-      } else if(hash !== 'sha-1') {
+      } else if (hash !== 'sha-1') {
          Log.info('Drop caps element, because we only support sha-1.');
          return this.PRESERVE_HANDLER;
 
@@ -44,16 +44,16 @@ export default class CapsHandler extends AbstractHandler {
 
       if (!DiscoInfo.exists(version)) {
          discoInfoRepository.requestDiscoInfo(from, node)
-         .then((discoInfo) => {
-            if (version !== discoInfo.getCapsVersion()) {
-               Log.warn('Caps version doesnt match.');
-            }
+            .then((discoInfo) => {
+               if (version !== discoInfo.getCapsVersion()) {
+                  Log.warn('Caps version doesnt match.');
+               }
 
-            discoInfoRepository.addRelation(from, discoInfo);
-         })
-         .catch(() => {
-            console.log('Something went wrong')
-         });
+               discoInfoRepository.addRelation(from, discoInfo);
+            })
+            .catch(() => {
+               console.log('Something went wrong')
+            });
       } else {
          let discoInfo = new DiscoInfo(version);
 

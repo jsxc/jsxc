@@ -8,19 +8,19 @@ import Translation from '../../../../util/Translation'
 import Client from '../../../../Client'
 import Contact from '../../../../Contact'
 import Notification from '../../../../Notification'
-import {SOUNDS} from '../../../../CONST'
+import { SOUNDS } from '../../../../CONST'
 import Pipe from '../../../../util/Pipe'
 import AbstractHandler from '../../AbstractHandler'
-import {Notice, TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION} from '../../../../Notice';
+import { Notice, TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../../Notice';
 
 export default class extends AbstractHandler {
-   public processStanza(stanza:Element) {
+   public processStanza(stanza: Element) {
       let from = new JID($(stanza).attr('from'));
       let xElement = $(stanza).find('x[xmlns="http://jabber.org/protocol/muc#user"]');
 
       let inviteElement = xElement.find('invite');
 
-      if(inviteElement.length === 1) {
+      if (inviteElement.length === 1) {
          let host = new JID(inviteElement.attr('from'));
          let reason = inviteElement.find('reason').text();
          let password = inviteElement.find('password').text();

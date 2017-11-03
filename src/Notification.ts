@@ -3,19 +3,19 @@ import Contact from './Contact'
 import Translation from './util/Translation'
 import Client from './Client'
 import * as CONST from './CONST'
-import {FUNCTION as NOTICEFUNCTION} from './Notice'
+import { FUNCTION as NOTICEFUNCTION } from './Notice'
 import openConfirmDialog from './ui/dialogs/confirm'
 import Hash from './util/Hash'
 
 interface NotificationSettings {
-   title:string,
-   message:string,
-   duration?:number,
-   force?:boolean,
-   soundFile?:string,
-   loop?:boolean,
-   source?:Contact,
-   icon?:string
+   title: string,
+   message: string,
+   duration?: number,
+   force?: boolean,
+   soundFile?: string,
+   loop?: boolean,
+   source?: Contact,
+   icon?: string
 };
 
 const enum NotificationState {
@@ -24,7 +24,7 @@ const enum NotificationState {
    ASK
 };
 
-let NotificationAPI = (<any> window).Notification;
+let NotificationAPI = (<any>window).Notification;
 
 export default class Notification {
    private static inited = false;
@@ -63,7 +63,7 @@ export default class Notification {
       }
    }
 
-   public static async notify(settings:NotificationSettings) {
+   public static async notify(settings: NotificationSettings) {
       if (!Options.get('notification')) {
          return; // notifications disabled
       }
@@ -94,7 +94,7 @@ export default class Notification {
 
          try {
             avatar = await settings.source.getAvatar();
-         } catch(err) {}
+         } catch (err) { }
 
 
          if (avatar && avatar.src) {
@@ -106,7 +106,7 @@ export default class Notification {
             var saturation = 90;
             var lightness = 65;
 
-            let canvas = <HTMLCanvasElement> $('<canvas>').get(0);
+            let canvas = <HTMLCanvasElement>$('<canvas>').get(0);
             canvas.height = 100;
             canvas.width = 100;
 
@@ -116,7 +116,7 @@ export default class Notification {
             ctx.fillRect(0, 0, 100, 100);
 
             ctx.textAlign = 'center';
-            ctx.textBaseline= 'middle';
+            ctx.textBaseline = 'middle';
             ctx.fillStyle = 'white';
             ctx.font = 'bold 50px sans-serif';
             ctx.fillText(settings.source.getName()[0].toUpperCase(), 50, 50);
@@ -134,7 +134,7 @@ export default class Notification {
       }, Notification.popupDelay);
    }
 
-   private static showPopup(settings:NotificationSettings) {
+   private static showPopup(settings: NotificationSettings) {
       if (typeof settings.soundFile === 'string') {
          Notification.playSound(settings.soundFile, settings.loop, settings.force);
       }
@@ -145,7 +145,8 @@ export default class Notification {
       });
 
       if (settings.duration > 0) {
-         setTimeout(function() { console.log('close popup')
+         setTimeout(function() {
+            console.log('close popup')
             popup.close();
          }, settings.duration);
       }
@@ -175,7 +176,7 @@ export default class Notification {
       return NotificationAPI.permission === CONST.NOTIFICATION_GRANTED;
    }
 
-   private static playSound(soundFile:string, loop?:boolean, force?:boolean) {
+   private static playSound(soundFile: string, loop?: boolean, force?: boolean) {
       if (Options.get('muteNotification')) {
          // @TODO check presence of source account
          // sound mute or own presence is dnd

@@ -1,6 +1,6 @@
 import Options from './Options'
 
-const EMOTICONS:any[] = [
+const EMOTICONS: any[] = [
    ['O:-) O:)', 'innocent'],
    ['>:-( >:( &gt;:-( &gt;:(', 'angry'],
    [':-) :)', 'slight_smile'],
@@ -50,13 +50,13 @@ export default class Emoticons {
       let list = [];
 
       EMOTICONS.forEach(emoticon => {
-          list.push(emoticon[0].split(' ')[0]);
+         list.push(emoticon[0].split(' ')[0]);
       });
 
       return list;
    }
 
-   public static toImage(text:string):string {
+   public static toImage(text: string): string {
       Emoticons.init();
 
       text = Emoticons.standardToImage(text);
@@ -80,7 +80,7 @@ export default class Emoticons {
       Emoticons.initialised = true;
    }
 
-   private static standardToImage(text:string):string {
+   private static standardToImage(text: string): string {
       // replace emoticons from XEP-0038 and pidgin with shortnames
       $.each(EMOTICONS, function(i, val) {
          text = text.replace(val[2], ':' + val[1] + ':');
@@ -89,7 +89,7 @@ export default class Emoticons {
       return text;
    }
 
-   private static shortnameToImage(text:string):string {
+   private static shortnameToImage(text: string): string {
       text = text.replace(this.shortRegex, Emoticons.replaceShortnameWithImage);
 
       var wrapper = $('<div>' + text + '</div>');

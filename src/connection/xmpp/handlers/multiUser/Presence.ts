@@ -6,7 +6,7 @@ import * as Namespace from '../../namespace'
 import MultiUserPresenceProcessor from './PresenceProcessor'
 
 export default class extends AbstractHandler {
-   public processStanza(stanza:Element):boolean {
+   public processStanza(stanza: Element): boolean {
       Log.debug('onMultiUserPresence', stanza);
 
       let from = new JID($(stanza).attr('from'));

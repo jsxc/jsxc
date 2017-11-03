@@ -8,7 +8,7 @@ import * as CONST from '../CONST'
 import RosterItem from './RosterItem'
 import showLoginBox from './dialogs/loginBox'
 import Menu from './util/Menu'
-import {ContactInterface} from '../ContactInterface'
+import { ContactInterface } from '../ContactInterface'
 import WindowList from './ChatWindowList'
 import Client from '../Client'
 import Storage from '../Storage'
@@ -16,26 +16,26 @@ import PersistentMap from '../util/PersistentMap'
 import Account from '../Account'
 import Translation from '../util/Translation'
 import AvatarSet from './AvatarSet'
-import {Notice} from '../Notice'
-import {Presence} from '../connection/AbstractConnection'
-import {NoticeManager} from '../NoticeManager'
+import { Notice } from '../Notice'
+import { Presence } from '../connection/AbstractConnection'
+import { NoticeManager } from '../NoticeManager'
 //import rosterTemplate from '../../template/roster.hbs'
 let rosterTemplate = require('../../template/roster.hbs')
 
 export default class Roster {
 
-   private element:JQuery;
-   private contactList:JQuery;
-   private storage:Storage;
-   private options:PersistentMap;
+   private element: JQuery;
+   private contactList: JQuery;
+   private storage: Storage;
+   private options: PersistentMap;
 
-   private static instance:Roster;
+   private static instance: Roster;
 
-   public static init():void {
+   public static init(): void {
       Roster.get();
    }
 
-   public static get():Roster {
+   public static get(): Roster {
       if (!Roster.instance) {
          Roster.instance = new Roster();
       }
@@ -64,7 +64,7 @@ export default class Roster {
       this.initOptions();
    }
 
-   public startProcessing(msg?:string) {
+   public startProcessing(msg?: string) {
       this.element.addClass('jsxc-processing');
       //@TODO count calls to remove class not too early
 
@@ -89,15 +89,15 @@ export default class Roster {
       }
    }
 
-   public setRosterAvatar(contact:ContactInterface) {
+   public setRosterAvatar(contact: ContactInterface) {
       let avatar = AvatarSet.get(contact);
       avatar.addElement(this.element.find('.jsxc-bottom .jsxc-avatar'));
    }
 
-   public add(contact:ContactInterface) {
+   public add(contact: ContactInterface) {
       this.clearStatus();
 
-      if (this.element.find('.jsxc-roster-item[data-id="'+contact.getId()+'"]').length > 0) {
+      if (this.element.find('.jsxc-roster-item[data-id="' + contact.getId() + '"]').length > 0) {
          return;
       }
 
@@ -117,8 +117,8 @@ export default class Roster {
       });
    }
 
-   public remove(contact:ContactInterface) {
-      let rosterItemElement = this.element.find('.jsxc-roster-item[data-id="'+contact.getId()+'"]');
+   public remove(contact: ContactInterface) {
+      let rosterItemElement = this.element.find('.jsxc-roster-item[data-id="' + contact.getId() + '"]');
 
       if (rosterItemElement.length === 0) {
          return;
@@ -135,7 +135,7 @@ export default class Roster {
       this.element.removeClass('jsxc-status-show');
    }
 
-   public setStatus(statusElement:JQuery) {
+   public setStatus(statusElement: JQuery) {
       this.element.find('.jsxc-roster-status').empty().append(statusElement);
 
       this.element.addClass('jsxc-status-show');
@@ -144,7 +144,7 @@ export default class Roster {
    public setNoConnection() {
       let linkElement = $('<a>');
       linkElement.text('relogin');
-      linkElement.click(<any> showLoginBox);
+      linkElement.click(<any>showLoginBox);
 
       let statusElement = $('<p>');
       statusElement.text('no_connection');
@@ -156,13 +156,13 @@ export default class Roster {
    public setEmptyContactList() {
       let statusElement = $('<p>');
       statusElement.text(Translation.t('Your_roster_is_empty_add_'));
-      statusElement.find('a').click(<any> showContactDialog);
+      statusElement.find('a').click(<any>showContactDialog);
       statusElement.append('.');
 
       this.setStatus(statusElement);
    }
 
-   public setPresence(presence:Presence) {
+   public setPresence(presence: Presence) {
       this.options.set('presence', presence);
    }
 
@@ -172,11 +172,11 @@ export default class Roster {
       this.updateOwnPresenceIndicator(presence);
    }
 
-   public registerHook(property:string, func:(newValue:any, oldValue:any)=>void) {
+   public registerHook(property: string, func: (newValue: any, oldValue: any) => void) {
       this.options.registerHook(property, func);
    }
 
-   public addNotice(manager:NoticeManager, notice:Notice) {
+   public addNotice(manager: NoticeManager, notice: Notice) {
       let noticeListElement = $('#jsxc-notice ul');
       let noticeElement = $('<li/>');
 
@@ -200,7 +200,7 @@ export default class Roster {
       $('#jsxc-notice > span').text(noticeListElement.find('li').length);
    }
 
-   public removeNotice(manager:NoticeManager, noticeId:string) {
+   public removeNotice(manager: NoticeManager, noticeId: string) {
       let noticeElement = $('#jsxc-notice li').filter(function() {
          return $(this).attr('data-notice-id') === noticeId &&
             $(this).attr('data-manager-id') === manager.getId();
@@ -212,7 +212,7 @@ export default class Roster {
       $('#jsxc-notice > span').text(numberOfNotices > 0 ? numberOfNotices : '');
    }
 
-   private insert(rosterItem:RosterItem) {
+   private insert(rosterItem: RosterItem) {
       let contactList = this.contactList;
       let insert = false;
       let contact = rosterItem.getContact();
@@ -240,7 +240,7 @@ export default class Roster {
       }
    }
 
-   private updateOwnPresenceIndicator(presence:Presence) {
+   private updateOwnPresenceIndicator(presence: Presence) {
       let label = $('.jsxc-menu-presence .jsxc-' + Presence[presence]).text();
 
       this.element.find('.jsxc-menu-presence > span').text(label);
@@ -257,7 +257,7 @@ export default class Roster {
 
       mainMenu.find('li.jsxc-mute-notification').click(this.muteNotification);
 
-      mainMenu.find('li.jsxc-add-contact').click(<any> showContactDialog);
+      mainMenu.find('li.jsxc-add-contact').click(<any>showContactDialog);
 
       mainMenu.find('li.jsxc-about').click(showAboutDialog);
    }
@@ -272,7 +272,7 @@ export default class Roster {
 
          if (presence !== Presence.offline) {
             // offline presence needs special handling in XMPPConnection
-            Client.getAccount().getConnection().sendPresence(<any> Presence[presence]);
+            Client.getAccount().getConnection().sendPresence(<any>Presence[presence]);
          }
       });
    }
@@ -287,7 +287,7 @@ export default class Roster {
       this.options.set('hideOffline', hideOffline);
    }
 
-   private hideOffline(yes:boolean) {
+   private hideOffline(yes: boolean) {
       if (yes) {
          this.contactList.addClass('jsxc-hide-offline');
       } else {
@@ -318,7 +318,7 @@ export default class Roster {
       this.options.set('visibility', state);
    }
 
-   private setVisibility(state:string) {
+   private setVisibility(state: string) {
       if (state === CONST.SHOWN && Client.isExtraSmallDevice()) {
          WindowList.get().minimizeAll();
       }
@@ -335,7 +335,7 @@ export default class Roster {
    }
 
    private initOptions() {
-      let hideOffline = this.options.get('hideOffline');console.log('hideOffline', hideOffline, typeof hideOffline)
+      let hideOffline = this.options.get('hideOffline'); console.log('hideOffline', hideOffline, typeof hideOffline)
       hideOffline = (typeof hideOffline === 'boolean') ? hideOffline : Options.get('hideOffline');
       this.hideOffline(hideOffline);
       this.options.registerHook('hideOffline', (hideOffline) => {

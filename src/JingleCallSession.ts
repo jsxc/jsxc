@@ -8,7 +8,7 @@ import Notification from './Notification'
 import JID from './JID'
 
 export default class JingleCallSession extends JingleAbstractSession {
-   private adoptee:boolean = false;
+   private adoptee: boolean = false;
 
    constructor(account, session) {
       super(account, session);

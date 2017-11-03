@@ -8,29 +8,29 @@ import Attachment from '../../Attachment'
 export default class HttpUploadService {
    private namespace;
 
-   constructor(private pluginAPI:PluginAPI, private jid:JID, private maxFileSize:number = 0) {
+   constructor(private pluginAPI: PluginAPI, private jid: JID, private maxFileSize: number = 0) {
       this.namespace = Namespace.get('HTTPUPLOAD');
       this.maxFileSize = maxFileSize || 0;
    }
 
-   public isSuitable(attachment:Attachment):boolean {
+   public isSuitable(attachment: Attachment): boolean {
       return this.maxFileSize === 0 || attachment.getSize() <= this.maxFileSize;
    }
 
-   public sendFile(file:File, progress?:(loaded, total)=>void):Promise<string> {
+   public sendFile(file: File, progress?: (loaded, total) => void): Promise<string> {
       return this.requestSlot(file)
          .then((urls) => {
             return this.uploadFile(file, urls.put, progress).then(() => urls.get);
          });
    }
 
-   private requestSlot(file:File) {
+   private requestSlot(file: File) {
       var iq = $iq({
-            to: this.jid.full,
-            type: 'get'
-         }).c('request', {
-            xmlns: this.namespace
-         }).c('filename').t(file.name)
+         to: this.jid.full,
+         type: 'get'
+      }).c('request', {
+         xmlns: this.namespace
+      }).c('filename').t(file.name)
          .up()
          .c('size').t(file.size);
 
@@ -73,7 +73,7 @@ export default class HttpUploadService {
       return Promise.reject(error);
    }
 
-   private uploadFile = (file:File, putUrl, progress?:(loaded, total)=>void) => {
+   private uploadFile = (file: File, putUrl, progress?: (loaded, total) => void) => {
       return new Promise((resolve, reject) => {
          $.ajax({
             url: putUrl,
@@ -82,7 +82,7 @@ export default class HttpUploadService {
             data: file,
             processData: false,
             xhr: function() {
-               var xhr = (<any> $).ajaxSettings.xhr();
+               var xhr = (<any>$).ajaxSettings.xhr();
 
                // track upload progress
                xhr.upload.onprogress = function(ev) {

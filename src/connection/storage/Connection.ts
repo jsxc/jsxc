@@ -1,9 +1,9 @@
 import JID from '../../JID';
 import Message from '../../Message';
-import {IConnection} from '../ConnectionInterface';
+import { IConnection } from '../ConnectionInterface';
 import Log from '../../util/Log'
 import Account from '../../Account'
-import {AbstractConnection, Presence} from '../AbstractConnection'
+import { AbstractConnection, Presence } from '../AbstractConnection'
 import * as StropheLib from 'strophe.js'
 import JingleHandler from '../JingleHandler'
 
@@ -11,7 +11,7 @@ let Strophe = StropheLib.Strophe;
 
 export default class StorageConnection extends AbstractConnection implements IConnection {
 
-   protected connection:any = {};
+   protected connection: any = {};
 
    private handlers = [];
 
@@ -24,7 +24,7 @@ export default class StorageConnection extends AbstractConnection implements ICo
          sendIQ: (elem, success, error) => {
             this.sendIQ(elem).then(success).catch(error);
          },
-         addHandler: () => {}
+         addHandler: () => { }
       }
 
       for (var k in (<any>Strophe)._connectionPlugins) {
@@ -41,7 +41,7 @@ export default class StorageConnection extends AbstractConnection implements ICo
       this.account.getStorage().registerHook('stanzaJingle', this.storageJingleHook);
    }
 
-   public registerHandler(handler:(stanza:string)=>boolean, ns?:string, name?:string, type?:string, id?:string, from?:string) {
+   public registerHandler(handler: (stanza: string) => boolean, ns?: string, name?: string, type?: string, id?: string, from?: string) {
       this.handlers.push(arguments);
    }
 
@@ -85,9 +85,9 @@ export default class StorageConnection extends AbstractConnection implements ICo
       storage.setItem(key, stanzaString);
    }
 
-   protected sendIQ(stanzaElement:Element):Promise<Element>;
-   protected sendIQ(stanzaElement:Strophe.Builder):Promise<Element>;
-   protected sendIQ():Promise<{}> {
+   protected sendIQ(stanzaElement: Element): Promise<Element>;
+   protected sendIQ(stanzaElement: Strophe.Builder): Promise<Element>;
+   protected sendIQ(): Promise<{}> {
       let storage = this.account.getStorage();
       let stanzaString = this.stanzaElementToString(arguments[0]);
       let key = storage.generateKey(
@@ -99,7 +99,8 @@ export default class StorageConnection extends AbstractConnection implements ICo
       storage.setItem(key, stanzaString);
 
       return new Promise(function(resolve, reject) {
-         storage.registerHook(key, function(newValue) { console.log('got an answer', newValue)
+         storage.registerHook(key, function(newValue) {
+            console.log('got an answer', newValue)
             storage.removeItem(key);
 
             if (newValue.type === 'success') {
@@ -115,8 +116,8 @@ export default class StorageConnection extends AbstractConnection implements ICo
       this.account.getStorage().removeHook('stanzaJingle', this.storageJingleHook);
    }
 
-   private stanzaElementToString(stanzaElement: Element):string;
-   private stanzaElementToString(stanzaElement: Strophe.Builder):string;
+   private stanzaElementToString(stanzaElement: Element): string;
+   private stanzaElementToString(stanzaElement: Strophe.Builder): string;
    private stanzaElementToString() {
       let stanzaString: string;
       let stanzaElement = arguments[0] || {};
@@ -136,7 +137,8 @@ export default class StorageConnection extends AbstractConnection implements ICo
       }
    }
 
-   private processJingleStanza(stanzaString) { console.log('storage jingle stanza')
+   private processJingleStanza(stanzaString) {
+      console.log('storage jingle stanza')
       let iqElement = $.parseXML(stanzaString).getElementsByTagName('iq')[0];
 
       this.getJingleHandler().onJingle(iqElement);

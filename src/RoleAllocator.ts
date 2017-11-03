@@ -3,9 +3,9 @@ import Client from './Client'
 import Log from './util/Log'
 
 export default class RoleAllocator {
-   private storage:Storage;
+   private storage: Storage;
 
-   private master:boolean = null;
+   private master: boolean = null;
 
    private keepAliveInterval;
 
@@ -78,10 +78,10 @@ export default class RoleAllocator {
       return new Promise((resolve) => {
          if (this.master === true || typeof this.storage.getItem('master') === 'undefined') {
             resolve();
-         } else  {
+         } else {
             this.resolves.push(resolve);
 
-            if (this.master !== false){
+            if (this.master !== false) {
                this.queryMaster();
             }
          }
@@ -132,7 +132,7 @@ export default class RoleAllocator {
    }
 
    private resolveAll() {
-      for(let resolveIndex in this.resolves) {
+      for (let resolveIndex in this.resolves) {
          this.resolves[resolveIndex]();
 
          delete this.resolves[resolveIndex];

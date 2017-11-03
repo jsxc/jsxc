@@ -19,21 +19,21 @@ functions[FUNCTION.notificationRequest] = Notification.askForPermission;
 functions[FUNCTION.multiUserInvitation] = MultiUserInvitationDialog;
 
 export interface NoticeData {
-   title:string;
-   description:string;
+   title: string;
+   description: string;
    fnName: FUNCTION;
-   fnParams?:Array<string>;
-   type?:TYPE;
+   fnParams?: Array<string>;
+   type?: TYPE;
 }
 
 export class Notice implements IdentifiableInterface {
 
-   private storage:Storage;
+   private storage: Storage;
 
-   private data:NoticeData;
+   private data: NoticeData;
 
-   constructor(storage:Storage, data:NoticeData);
-   constructor(storage:Storage, id:string);
+   constructor(storage: Storage, data: NoticeData);
+   constructor(storage: Storage, id: string);
    constructor() {
       this.storage = arguments[0];
 
@@ -48,23 +48,23 @@ export class Notice implements IdentifiableInterface {
       }
    }
 
-   public getId():string {
+   public getId(): string {
       return this.data.fnName + '|' + this.data.fnParams.toString();
    }
 
-   public getTitle():string {
+   public getTitle(): string {
       return this.data.title;
    }
 
-   public getDescription():string {
+   public getDescription(): string {
       return this.data.description;
    }
 
-   public getFnParams():Array<string> {
+   public getFnParams(): Array<string> {
       return this.data.fnParams;
    }
 
-   public getType():TYPE {
+   public getType(): TYPE {
       return this.data.type;
    }
 

@@ -9,14 +9,14 @@ import Client from '../../../../Client'
 import Contact from '../../../../Contact'
 import MultiUserContact from '../../../../MultiUserContact'
 import Notification from '../../../../Notification'
-import {SOUNDS} from '../../../../CONST'
+import { SOUNDS } from '../../../../CONST'
 import Pipe from '../../../../util/Pipe'
 import AbstractHandler from '../../AbstractHandler'
 
 // body.replace(/^\/me /, '<i title="/me">' + Utils.removeHTML(this.sender.getName()) + '</i> ');
 
 export default class extends AbstractHandler {
-   public processStanza(stanza:Element) {
+   public processStanza(stanza: Element) {
       let messageId = stanza.getAttribute('id');
 
       let messageElement = $(stanza);
@@ -26,7 +26,7 @@ export default class extends AbstractHandler {
       let body = bodyElement.text();
       let nickname = from.resource;
 
-      let contact = <MultiUserContact> this.account.getContact(from);
+      let contact = <MultiUserContact>this.account.getContact(from);
       if (typeof contact === 'undefined') {
          Log.info('Sender is not in our contact list')
 
@@ -39,7 +39,7 @@ export default class extends AbstractHandler {
          return this.PRESERVE_HANDLER;
       }
 
-      if(subjectElement.length === 1 && bodyElement.length === 0) {
+      if (subjectElement.length === 1 && bodyElement.length === 0) {
          contact.setSubject(subjectElement.text());
 
          let translatedMessage = Translation.t('changed_subject_to', {

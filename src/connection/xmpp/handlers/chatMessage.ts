@@ -8,12 +8,12 @@ import Translation from '../../../util/Translation'
 import Client from '../../../Client'
 import Contact from '../../../Contact'
 import Notification from '../../../Notification'
-import {SOUNDS} from '../../../CONST'
+import { SOUNDS } from '../../../CONST'
 import Pipe from '../../../util/Pipe'
 import AbstractHandler from '../AbstractHandler'
 
 export default class extends AbstractHandler {
-   public processStanza(stanza:Element) {
+   public processStanza(stanza: Element) {
       let messageElement = $(stanza);
       let forwardedStanza = $(stanza).find('forwarded' + NS.getFilter('FORWARD'));
 
@@ -63,7 +63,7 @@ export default class extends AbstractHandler {
 
       let delayElement = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
       let stamp = (delayElement.length > 0) ? new Date(delayElement.attr('stamp')) : new Date();
-      let peer:JID = from; //@REVIEW do we need peer?
+      let peer: JID = from; //@REVIEW do we need peer?
 
       if (isCarbonCopy) {
          let direction = (carbonStanza.prop('tagName') === 'sent') ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
@@ -92,7 +92,7 @@ export default class extends AbstractHandler {
          messageFrom = $(stanza).attr('from');
       }
 
-      let contact:Contact = this.account.getContact(from);
+      let contact: Contact = this.account.getContact(from);
       if (typeof contact === 'undefined') {
          Log.debug('Sender is not in our contact list')
          // jid not in roster

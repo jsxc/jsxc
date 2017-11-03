@@ -5,11 +5,11 @@ export default class PersistentMap {
 
    private map = {};
 
-   private key:string;
+   private key: string;
 
    private initialized = false; //@REVIEW ???
 
-   constructor(private storage:Storage, ...identifier:string[]) {
+   constructor(private storage: Storage, ...identifier: string[]) {
       this.key = storage.generateKey.apply(storage, identifier);
 
       this.map = this.storage.getItem(this.key) || {};
@@ -19,23 +19,23 @@ export default class PersistentMap {
       });
    }
 
-   public getAllKeys():string[] {
+   public getAllKeys(): string[] {
       return Object.keys(this.map);
    }
 
-   public get(id:string) {
+   public get(id: string) {
       return this.map[id];
    }
 
-   public set(id:string, value:any);
-   public set(value:any);
+   public set(id: string, value: any);
+   public set(value: any);
    public set() {
-      if (typeof arguments[0] === 'string'){
+      if (typeof arguments[0] === 'string') {
          let id = arguments[0];
          let value = arguments[1];
 
          this.map[id] = value;
-      } else if(typeof arguments[0] === 'object' && arguments[0] !== null) {
+      } else if (typeof arguments[0] === 'object' && arguments[0] !== null) {
          $.extend(this.map, arguments[0]);
       }
 
@@ -48,14 +48,14 @@ export default class PersistentMap {
       this.save();
    }
 
-   public remove(id:Identifiable);
-   public remove(id:string);
+   public remove(id: Identifiable);
+   public remove(id: string);
    public remove() {
       let id;
 
       if (typeof arguments[0] === 'string') {
          id = arguments[0];
-      } else if(typeof arguments[0].getId === 'function') {
+      } else if (typeof arguments[0].getId === 'function') {
          id = arguments[0].getId();
       } else {
          //@TODO error
@@ -75,7 +75,7 @@ export default class PersistentMap {
       this.storage.removeHook(this.key);
    }
 
-   public registerHook(id:string, func: (newValue: any, oldValue: any, key: string) => void);
+   public registerHook(id: string, func: (newValue: any, oldValue: any, key: string) => void);
    public registerHook(func: (newValue: any, oldValue: any, key: string) => void);
    public registerHook() {
       if (typeof arguments[0] === 'string' && typeof arguments[1] === 'function') {
@@ -96,30 +96,30 @@ export default class PersistentMap {
       }
    }
 
-   public registerNewHook(func: (value:any, id:string) => void) {
+   public registerNewHook(func: (value: any, id: string) => void) {
       this.registerHook((newValue, oldValue) => {
          let newValueKeys = Object.keys(newValue || {});
          let oldValueKeys = Object.keys(oldValue || {});
-this.initialized = true;
+         this.initialized = true;
          if (newValueKeys.length > oldValueKeys.length) {
-            let newIds = newValueKeys.filter(id =>oldValueKeys.indexOf(id) < 0);
+            let newIds = newValueKeys.filter(id => oldValueKeys.indexOf(id) < 0);
 
-            for(let newId of newIds) {
+            for (let newId of newIds) {
                func(newValue[newId], newId);
             }
          }
       });
    }
 
-   public registerRemoveHook(func: (id:string) => void) {
+   public registerRemoveHook(func: (id: string) => void) {
       this.registerHook((newValue, oldValue) => {
          let newValueKeys = Object.keys(newValue || {});
          let oldValueKeys = Object.keys(oldValue || {});
 
          if (newValueKeys.length < oldValueKeys.length) {
-            let removedIds = oldValueKeys.filter(id =>newValueKeys.indexOf(id) < 0);
+            let removedIds = oldValueKeys.filter(id => newValueKeys.indexOf(id) < 0);
 
-            for(let removedId of removedIds) {
+            for (let removedId of removedIds) {
                func(removedId);
             }
          }

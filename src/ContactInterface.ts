@@ -1,7 +1,7 @@
-import {MessageInterface} from './MessageInterface'
-import {JIDInterface} from './JIDInterface'
-import {Presence} from './connection/AbstractConnection'
-import {EncryptionState} from './plugin/AbstractPlugin'
+import { MessageInterface } from './MessageInterface'
+import { JIDInterface } from './JIDInterface'
+import { Presence } from './connection/AbstractConnection'
+import { EncryptionState } from './plugin/AbstractPlugin'
 import ChatWindow from './ui/ChatWindow'
 import Transcript from './Transcript'
 import Avatar from './Avatar'
@@ -21,60 +21,60 @@ export enum ContactSubscription {
 export interface ContactInterface {
    delete();
 
-   openChatWindow():ChatWindow;
+   openChatWindow(): ChatWindow;
 
-   getChatWindow():ChatWindow;
+   getChatWindow(): ChatWindow;
 
-   setResource(resource:string);
+   setResource(resource: string);
 
-   setPresence(resource:string, presence:Presence);
+   setPresence(resource: string, presence: Presence);
 
-   getCapableResources(features:string[]):Promise<Array<string>>
-   getCapableResources(features:string):Promise<Array<string>>
+   getCapableResources(features: string[]): Promise<Array<string>>
+   getCapableResources(features: string): Promise<Array<string>>
 
-   hasFeatureByRessource(resource:string, features:string[]):Promise<{}>
-   hasFeatureByRessource(resource:string, feature:string):Promise<{}>
+   hasFeatureByRessource(resource: string, features: string[]): Promise<{}>
+   hasFeatureByRessource(resource: string, feature: string): Promise<{}>
 
-   getCapabilitiesByRessource(resource:string):Promise<any>;
+   getCapabilitiesByRessource(resource: string): Promise<any>;
 
-   registerCapableResourcesHook(features:string[], cb:(resources:string[])=>void);
-   registerCapableResourcesHook(features:string, cb:(resources:string[])=>void);
+   registerCapableResourcesHook(features: string[], cb: (resources: string[]) => void);
+   registerCapableResourcesHook(features: string, cb: (resources: string[]) => void);
 
-   getId():string;
+   getId(): string;
 
-   getJid():JIDInterface;
+   getJid(): JIDInterface;
 
-   getResources():Array<string>;
+   getResources(): Array<string>;
 
-   getPresence():Presence;
+   getPresence(): Presence;
 
-   getType():ContactType;
+   getType(): ContactType;
 
-   getNumberOfUnreadMessages():number;
+   getNumberOfUnreadMessages(): number;
 
-   getName():string;
+   getName(): string;
 
-   getAvatar():Promise<Avatar>;
+   getAvatar(): Promise<Avatar>;
 
-   getSubscription():ContactSubscription;
+   getSubscription(): ContactSubscription;
 
-   getVcard():Promise<{}>;
+   getVcard(): Promise<{}>;
 
-   setEncryptionState(state:EncryptionState);
+   setEncryptionState(state: EncryptionState);
 
-   getEncryptionState():EncryptionState;
+   getEncryptionState(): EncryptionState;
 
-   getTranscript():Transcript;
+   getTranscript(): Transcript;
 
-   getStatus():string;
+   getStatus(): string;
 
-   setStatus(status:string);
+   setStatus(status: string);
 
-   setName(name:string);
+   setName(name: string);
 
-   setSubscription(subscription:ContactSubscription);
+   setSubscription(subscription: ContactSubscription);
 
-   registerHook(property:string, func:(newValue:any, oldValue:any)=>void);
+   registerHook(property: string, func: (newValue: any, oldValue: any) => void);
 
-   isPersistent():boolean;
+   isPersistent(): boolean;
 }

@@ -3,16 +3,16 @@ import Menu from './util/Menu'
 import AvatarSet from './AvatarSet'
 import confirmDialog from './dialogs/confirm';
 import showVcardDialog from './dialogs/vcard'
-import {Presence} from '../connection/AbstractConnection'
+import { Presence } from '../connection/AbstractConnection'
 import Dialog from './Dialog'
-import {ContactInterface} from '../ContactInterface'
+import { ContactInterface } from '../ContactInterface'
 
 let rosterItemTemplate = require('../../template/roster-item.hbs')
 
 export default class RosterItem {
-   private element:JQuery;
+   private element: JQuery;
 
-   constructor(private contact:ContactInterface) {
+   constructor(private contact: ContactInterface) {
       let self = this;
       let template = rosterItemTemplate({
          name: contact.getName(),
@@ -26,7 +26,7 @@ export default class RosterItem {
       this.element.attr('data-subscription', this.contact.getSubscription());
 
       this.element.on('dragstart', (ev) => {
-         (<any> ev.originalEvent).dataTransfer.setData('text/plain', contact.getJid().bare);
+         (<any>ev.originalEvent).dataTransfer.setData('text/plain', contact.getJid().bare);
 
          $('.jsxc-droppable').addClass('jsxc-dragactive jsxc-drag-rosteritem');
       });
@@ -35,7 +35,7 @@ export default class RosterItem {
          $('.jsxc-droppable').removeClass('jsxc-dragactive jsxc-drag-rosteritem');
       });
 
-      this.element.click(function(){
+      this.element.click(function() {
          let chatWindow = contact.openChatWindow();
 
          chatWindow.unminimize();
@@ -52,7 +52,7 @@ export default class RosterItem {
          ev.stopPropagation();
 
          //@TODO translation
-         confirmDialog('Do you like to delete xyz').getPromise().then((dialog:Dialog) => {
+         confirmDialog('Do you like to delete xyz').getPromise().then((dialog: Dialog) => {
             contact.delete();
 
             dialog.close();
@@ -95,7 +95,7 @@ export default class RosterItem {
       return this.element;
    }
 
-   public getContact():ContactInterface {
+   public getContact(): ContactInterface {
       return this.contact;
    }
 
@@ -132,7 +132,7 @@ export default class RosterItem {
       nameElement.hide();
       nameElement.after(inputElement);
 
-      $('html').one('click', function(){
+      $('html').one('click', function() {
          self.endRename();
       });
    }
@@ -142,7 +142,7 @@ export default class RosterItem {
       var optionsElement = this.element.find('.jsxc-last-msg, .jsxc-menu');
       var inputElement = this.element.find('input');
 
-      this.contact.setName(<string> inputElement.val());
+      this.contact.setName(<string>inputElement.val());
 
       inputElement.remove();
       optionsElement.show();

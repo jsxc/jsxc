@@ -3,11 +3,11 @@ import Contact from '../../Contact'
 const CLASS_DISABLED = 'jsxc-disabled';
 
 export default class ElementHandler {
-   constructor(private contact:Contact) {
+   constructor(private contact: Contact) {
 
    }
 
-   public add(element:Element, handler:(ev)=>void, requiredFeatures?:string[]) {
+   public add(element: Element, handler: (ev) => void, requiredFeatures?: string[]) {
       if (requiredFeatures && requiredFeatures.length > 0) {
          this.contact.registerCapableResourcesHook(requiredFeatures, (resources) => {
             this.updateStatus(element, resources);
@@ -22,7 +22,7 @@ export default class ElementHandler {
    }
 
    private updateStatus(element, resources) {
-      if(resources && resources.length > 0) {
+      if (resources && resources.length > 0) {
          element.classList.remove(CLASS_DISABLED);
       } else {
          element.classList.add(CLASS_DISABLED);

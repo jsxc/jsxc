@@ -12,7 +12,7 @@ export default class Archive {
    private lastMessageId;
    private connected;
 
-   constructor(private plugin:MessageArchiveManagementPlugin, private contact:Contact) {
+   constructor(private plugin: MessageArchiveManagementPlugin, private contact: Contact) {
 
    }
 
@@ -25,23 +25,23 @@ export default class Archive {
       return this.contact.getJid().bare;
    }
 
-   private getFirstResultId():string {
+   private getFirstResultId(): string {
       return this.plugin.getStorage().getItem('firstResultId', this.getId()) || '';
    }
 
-   private setFirstResultId(resultId:string) {
+   private setFirstResultId(resultId: string) {
       return this.plugin.getStorage().setItem('firstResultId', this.getId(), resultId);
    }
 
-   private isExhausted():boolean {
+   private isExhausted(): boolean {
       return !!this.plugin.getStorage().getItem('exhausted', this.getId());
    }
 
-   private setExhausted(exhausted:boolean) {
+   private setExhausted(exhausted: boolean) {
       return this.plugin.getStorage().setItem('exhausted', this.getId(), exhausted);
    }
 
-   public registerExhaustedHook(hook:(isExhausted)=>void) {
+   public registerExhaustedHook(hook: (isExhausted) => void) {
       let storage = this.plugin.getStorage();
       let key = storage.generateKey('exhausted', this.getId());
 
@@ -78,7 +78,7 @@ export default class Archive {
          });
    }
 
-   public onForwardedMessage(forwardedElement:JQuery<HTMLElement>) {
+   public onForwardedMessage(forwardedElement: JQuery<HTMLElement>) {
       let messageElement = forwardedElement.find('message');
       let messageId = messageElement.attr('id');
 
@@ -112,9 +112,9 @@ export default class Archive {
       let uid = direction === Message.DIRECTION.OUT && originIdElement.length ? originIdElement.attr('id') : stanzaIdElement.attr('id');
 
       let message
-      try{
+      try {
          message = this.contact.getTranscript().getMessage(uid);
-      }catch(err) {
+      } catch (err) {
          message = new Message({
             uid: uid,
             attrId: messageId,

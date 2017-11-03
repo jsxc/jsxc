@@ -38,7 +38,7 @@ export default class SortedPersistentMap {
       this.list.forEach(id => {
          try {
             this.map[id] = this.pushHook(id);
-         } catch(err) {
+         } catch (err) {
             Log.error('Push hook threw the following error', err);
          }
       });
