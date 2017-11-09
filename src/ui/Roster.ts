@@ -30,6 +30,7 @@ export default class Roster {
    private options: PersistentMap;
 
    private static instance: Roster;
+   private static hidden: boolean;
 
    public static init(): void {
       Roster.get();
@@ -43,11 +44,30 @@ export default class Roster {
       return Roster.instance;
    }
 
+   public static hide() {
+      Roster.hidden = true;
+
+      if (Roster.instance) {
+         Roster.instance.hide();
+      }
+   }
+
+   public static show() {
+      Roster.hidden = false;
+
+      if (Roster.instance) {
+         Roster.instance.show();
+      }
+   }
+
    public constructor() {
       let template = rosterTemplate({
          onlineHelpUrl: Options.get('onlineHelp')
       });
       this.element = $(template);
+      if (Roster.hidden) {
+         this.hide();
+      }
       this.element.appendTo(Options.get('rosterAppend') + ':first');
 
       this.contactList = this.element.find('.jsxc-contact-list');
@@ -62,6 +82,14 @@ export default class Roster {
       Menu.init(this.element.find('.jsxc-menu'));
 
       this.initOptions();
+   }
+
+   public show() {
+      this.element.show();
+   }
+
+   public hide() {
+      this.element.hide();
    }
 
    public startProcessing(msg?: string) {

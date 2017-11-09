@@ -1,6 +1,7 @@
 import Log from './util/Log';
 import * as UI from './ui/web'
 import Client from './Client'
+import Roster from './ui/Roster'
 import 'magnific-popup'
 import * as StropheLib from 'strophe.js'
 import OTRPlugin from './plugins/otr/Plugin'
@@ -27,6 +28,7 @@ Client.addPlugin(AvatarVCardPlugin);
 Client.init();
 
 export async function startAndPause(boshUrl: string, jid: string, password: string) {
+   Roster.hide(); //@TODO hide only if this is the first account
    let account = await Client.createAccount(boshUrl, jid, password);
 
    return account.connect(true).then(() => undefined);
@@ -53,10 +55,16 @@ function startUI() {
 }
 
 async function startWithCredentials(boshUrl: string, jid: string, password: string) {
+   Roster.get().startProcessing('Connecting...');
+
    let account = await Client.createAccount(boshUrl, jid, password);
 
    account.connect().then(function() {
       startUI();
+   }).catch(() => {
+      //@TODO handle error
+   }).then(() => {
+      Roster.get().endProcessing();
    });
 }
 

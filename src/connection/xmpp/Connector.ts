@@ -1,5 +1,4 @@
 import Account from '../../Account'
-import Roster from '../../ui/Roster'
 import PersistentMap from '../../util/PersistentMap'
 import Log from '../../util/Log'
 import JID from '../../JID'
@@ -51,8 +50,6 @@ export default class Connector {
          return Promise.reject('Credentials expired');
       }
 
-      Roster.get().startProcessing('Connecting...'); //@TODO remove on error
-
       return ConnectHelper.login.apply(this, this.connectionArgs)
          .then(this.successfulConnected);
    }
@@ -84,8 +81,6 @@ export default class Connector {
       }
 
       Log.debug('XMPP connection ready');
-
-      Roster.get().endProcessing();
 
       return [status, accountConnection];
    }

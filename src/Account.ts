@@ -77,18 +77,19 @@ export default class Account {
       this.contact = new Contact(this, new JID(this.uid), this.uid);
       this.pluginRepository = new PluginRepository(this);
 
+      //@TODO this doesnt work in a multi account setup
       Roster.get().setRosterAvatar(this.contact);
 
       this.initContacts();
       this.initWindows();
    }
 
-   public connect = (pause:boolean = false) => {
+   public connect = (pause: boolean = false) => {
       return this.connector.connect().then(([status, connection]) => {
          this.connection = connection;
 
          if (pause) {
-            (<any> this.connection).pause(); //@TODO fix
+            (<any>this.connection).pause(); //@TODO fix
          } else {
             this.initConnection(status);
          }
