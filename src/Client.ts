@@ -107,9 +107,9 @@ export default class Client {
 
       //@TODO prevent creation of multiple accounts with the same jid
 
-      return account.connect().then(function() {
-         Client.addAccount(account);
-      });
+      Client.addAccount(account);
+
+      return Promise.resolve(account);
    }
 
    public static removeAccount(account: Account) {

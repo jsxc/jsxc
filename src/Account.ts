@@ -83,23 +83,41 @@ export default class Account {
       this.initWindows();
    }
 
-   public connect = () => {
+   public connect = (pause:boolean = false) => {
       return this.connector.connect().then(([status, connection]) => {
          this.connection = connection;
 
-         if (status === Strophe.Status.CONNECTED) {
-            Roster.get().setPresence(Presence.online);
-            Roster.get().refreshOwnPresenceIndicator();
-
-            this.removeNonpersistentContacts();
-
-            this.connection.getRoster().then(() => {
-               this.connection.sendPresence();
-            });
+         if (pause) {
+            (<any> this.connection).pause(); //@TODO fix
          } else {
-            this.connection.sendPresence();
+            this.initConnection(status);
          }
+
+         let storage = this.getStorage();
+         storage.setItem('connectionStatus', {
+            // @TODO add session id to handle old values
+            status: status
+         });
       });
+   }
+
+   private initConnection(status) {
+      let storage = this.getStorage();
+      let connectionStatusObject = storage.getItem('connectionStatus') || {};
+      let previousStatus = connectionStatusObject.status;
+
+      if (status === Strophe.Status.CONNECTED || previousStatus === Strophe.Status.CONNECTED) {
+         Roster.get().setPresence(Presence.online);
+         Roster.get().refreshOwnPresenceIndicator();
+
+         this.removeNonpersistentContacts();
+
+         this.connection.getRoster().then(() => {
+            this.connection.sendPresence();
+         });
+      } else {
+         this.connection.sendPresence();
+      }
    }
 
    public getPluginRepository(): PluginRepository {

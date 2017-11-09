@@ -47,6 +47,10 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       this.connection.addHandler.apply(this.connection, arguments);
    }
 
+   public pause() {
+      this.connection.pause();
+   }
+
    public getJingleHandler() {
       console.log('getJingleHanderl')
       if (!this.jingleHandler) {

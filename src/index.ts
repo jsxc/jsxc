@@ -26,6 +26,12 @@ Client.addPlugin(AvatarVCardPlugin);
 
 Client.init();
 
+export async function startAndPause(boshUrl: string, jid: string, password: string) {
+   let account = await Client.createAccount(boshUrl, jid, password);
+
+   return account.connect(true).then(() => undefined);
+}
+
 export function start(boshUrl: string, jid: string, sid: string, rid: string);
 export function start(boshUrl: string, jid: string, password: string);
 export function start();
@@ -46,10 +52,10 @@ function startUI() {
    UI.init();
 }
 
-function startWithCredentials(boshUrl: string, jid: string, password: string) {
-   let connectionPromise = Client.createAccount.apply(this, arguments);
+async function startWithCredentials(boshUrl: string, jid: string, password: string) {
+   let account = await Client.createAccount(boshUrl, jid, password);
 
-   return connectionPromise.then(function() {
+   account.connect().then(function() {
       startUI();
    });
 }
