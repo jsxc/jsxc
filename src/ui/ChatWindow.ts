@@ -353,6 +353,19 @@ export default class ChatWindow {
       );
 
       elementHandler.add(
+         this.element.find('.jsxc-audio')[0],
+         (ev) => {
+            ev.stopPropagation();
+
+            startCall(contact, this.account, 'audio');
+         }, [
+            'urn:xmpp:jingle:apps:rtp:audio',
+            'urn:xmpp:jingle:transports:ice-udp:1',
+            'urn:xmpp:jingle:apps:dtls:0'
+         ]
+      );
+
+      elementHandler.add(
          this.element.find('.jsxc-sendFile')[0],
          function() {
             $('body').click();

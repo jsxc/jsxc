@@ -188,6 +188,15 @@
          max-height: 100%;
          max-width: 100%;
       }
+
+      background-image: url("../img/camera_disabled_icon_white.svg");
+      background-size: 10%;
+      background-position: center center;
+      background-repeat: no-repeat;
+
+      &.jsxc-video-available {
+         background-image: url();
+      }
    }
 }
 
@@ -275,21 +284,32 @@ div {
       }
    }
 
-   &.jsxc-video {
-      background-image: url("../img/camera_icon_white.svg");
+   &.jsxc-video, &.jsxc-audio {
       background-repeat: no-repeat;
       background-position: center center;
       background-size: 15px 15px;
       opacity: 0.4;
 
-      &.jsxc-disabled {
-         background-image: url("../img/camera_disabled_icon_white.svg");
-      }
-
       &:not(.jsxc-disabled) {
          &:hover {
             opacity: 1;
          }
+      }
+   }
+
+   &.jsxc-video {
+      background-image: url("../img/camera_icon_white.svg");
+
+      &.jsxc-disabled {
+         background-image: url("../img/camera_disabled_icon_white.svg");
+      }
+   }
+
+   &.jsxc-audio {
+      background-image: url("../img/pick_up_white.svg");
+
+      &.jsxc-disabled {
+         background-image: url("../img/pick_up_white_disabled.svg");
       }
    }
 }

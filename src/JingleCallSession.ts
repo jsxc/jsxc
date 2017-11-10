@@ -53,9 +53,11 @@ export default class JingleCallSession extends JingleAbstractSession {
       let videoWindow = JingleHandler.getVideoDialog();
       videoWindow.addSession(this.session);
 
+      let mediaRequested = this.getMediaRequest();
+
       Promise.race([
          videoWindow.showCallDialog(this).then(() => {
-            return UserMedia.request();
+            return UserMedia.request(mediaRequested);
          }),
          new Promise((resolve, reject) => {
             this.on('terminated', () => {
@@ -82,5 +84,18 @@ export default class JingleCallSession extends JingleAbstractSession {
             this.session.decline();
          }
       });
+   }
+
+   public getMediaRequest() {
+      let mediaRequested = [];
+      let contents = this.session.pc.remoteDescription.contents;
+
+      for (let content of contents) {
+         if (content.senders === 'both' && ['audio', 'video'].indexOf(content.name) > -1) {
+            mediaRequested.push(content.name);
+         }
+      }
+
+      return mediaRequested
    }
 }

@@ -52,11 +52,10 @@ export default class XMPPConnection extends AbstractConnection implements IConne
    }
 
    public getJingleHandler() {
-      console.log('getJingleHanderl')
       if (!this.jingleHandler) {
          this.jingleHandler = new XMPPJingleHandler(this.account, this);
       }
-      console.log('return')
+
       return this.jingleHandler;
    }
 

@@ -5,7 +5,7 @@ import { VideoDialog } from '../VideoDialog'
 import Account from '../../Account'
 import IceServers from '../../IceServers'
 
-export function startCall(contact: Contact, account: Account) {
+export function startCall(contact: Contact, account: Account, type: 'video' | 'audio' = 'video') {
    let peerJID = contact.getJid();
 
    if (!peerJID.resource) {
@@ -15,14 +15,23 @@ export function startCall(contact: Contact, account: Account) {
 
    //@TODO use IceServers.get()
 
-   UserMedia.request().then((stream) => {
+   let reqMedia = type === 'audio' ? ['audio'] : ['audio', 'video'];
+
+   UserMedia.request(reqMedia).then((stream) => {
       let jingleHandler = account.getConnection().getJingleHandler();
       let videoDialog = new VideoDialog();
 
       videoDialog.showVideoWindow(stream);
       videoDialog.setStatus('Initiate call');
 
-      let session = jingleHandler.initiate(peerJID, stream);
+      let constraints = {
+         mandatory: {
+            'OfferToReceiveAudio': true,
+            'OfferToReceiveVideo': type === 'video'
+         }
+      }
+
+      let session = jingleHandler.initiate(peerJID, stream, constraints);
 
       // flag session as call
       session.call = true;

@@ -13,6 +13,8 @@ export interface IConnection {
    pluginOnlySendIQ(stanzaElement: Element): Promise<Element>;
    pluginOnlySendIQ(stanzaElement: Strophe.Builder): Promise<Element>;
 
+   getJingleHandler();
+
    getJID(): JID
 
    getRoster()

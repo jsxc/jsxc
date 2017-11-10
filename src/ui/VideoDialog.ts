@@ -4,6 +4,7 @@ import Log from '../util/Log'
 import JingleHandler from '../connection/JingleHandler'
 import VideoWindow from './VideoWindow'
 import JingleCallSession from '../JingleCallSession'
+import Translation from '../util/Translation'
 
 const VideoDialogTemplate = require('../../template/videoDialog.hbs')
 
@@ -42,7 +43,12 @@ export class VideoDialog {
       //@TODO use selection dialog, because button labels can be configured
       //@TODO confirm dialog is special case of selection dialog
 
-      let confirmDialog = ConfirmDialog('Incoming call from ...');
+      let mediaRequested = session.getMediaRequest();
+      let peerName = session.getPeer().getName();
+      let isVideoCall = mediaRequested.indexOf('video') > -1;
+      let infoText = isVideoCall ? `Incoming video call from ${peerName}` : `Incoming call from ${peerName}`;
+
+      let confirmDialog = ConfirmDialog(infoText);
 
       session.on('terminated', () => {
          confirmDialog.close();
@@ -72,6 +78,12 @@ export class VideoDialog {
       if (localStream) {
          this.localStream = localStream;
          VideoDialog.attachMediaStream(localVideoElement, localStream);
+
+         if (localStream.getVideoTracks().length === 0) {
+            Log.debug('No local video device available');
+
+            localVideoElement.hide();
+         }
       }
 
       this.dom.find('.jsxc-hang-up').click(() => {

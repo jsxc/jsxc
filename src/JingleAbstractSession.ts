@@ -29,6 +29,10 @@ export default abstract class JingleAbstractSession {
       return this.session.sid;
    }
 
+   public getPeer() {
+      return this.peerContact;
+   }
+
    public on(eventName: string, handler) {
       this.session.on(eventName, handler);
    }
