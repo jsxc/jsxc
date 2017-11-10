@@ -100,7 +100,7 @@
       line-height: 34px;
       background-color: $roster_bottom_bg;
       z-index: 50;
-      padding-right: 4px;
+      padding: 5px 4px 2px 0;
 
       &:hover {
          background-color: $roster_bottom_bg_hover;
@@ -269,6 +269,8 @@
       opacity: 0.8;
    }
 
+   @include presenceIndicator("");
+
    li {
       position: relative;
 
@@ -334,7 +336,7 @@
 }
 
 .jsxc-contact-list {
-   @include presenceIndicator(".jsxc-avatar");
+   @include presenceIndicator(" .jsxc-avatar");
 
    list-style: none;
    padding: 0;

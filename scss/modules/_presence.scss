@@ -3,7 +3,7 @@ $presences: online chat away xa dnd;
 @mixin presenceIndicator($target) {
 
     @each $presence in $presences {
-      [data-presence="#{$presence}"] #{$target} {
+      [data-presence="#{$presence}"]#{$target} {
          &:before {
             content: "";
             display: block;
