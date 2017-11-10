@@ -31,6 +31,11 @@
       text-overflow: ellipsis;
       overflow: hidden;
    }
+
+   a {
+      color: inherit;
+      text-decoration: none;
+   }
 }
 
 .jsxc-menu-dropdown {
