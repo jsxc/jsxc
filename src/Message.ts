@@ -12,7 +12,7 @@ import Utils from './util/Utils'
 import { MessageInterface, DIRECTION } from './MessageInterface'
 import { ContactType } from './ContactInterface'
 import PersistentMap from './util/PersistentMap'
-import UUID from './util/UUID';
+import UUID from './util/UUID'
 
 const MSGPOSTFIX = ':msg';
 
@@ -269,6 +269,7 @@ export default class Message implements Identifiable, MessageInterface {
 
    public getProcessedBody(): string {
       let body = this.getPlaintextMessage();
+      body = Utils.escapeHTML(body);
 
       //@REVIEW maybe pipes
       body = this.convertUrlToLink(body);
