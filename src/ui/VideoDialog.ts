@@ -46,7 +46,14 @@ export class VideoDialog {
       let mediaRequested = session.getMediaRequest();
       let peerName = session.getPeer().getName();
       let isVideoCall = mediaRequested.indexOf('video') > -1;
-      let infoText = isVideoCall ? `Incoming video call from ${peerName}` : `Incoming call from ${peerName}`;
+      let isStream = mediaRequested.length === 0;
+      let infoText;
+      if (isStream)
+         infoText = `Incoming_stream from ${peerName}`;
+      else if (isVideoCall)
+         infoText = `Incoming video call from ${peerName}`;
+      else
+         infoText = `Incoming call from ${peerName}`;
 
       let confirmDialog = ConfirmDialog(infoText);
 

@@ -5,7 +5,7 @@ import { VideoDialog } from '../VideoDialog'
 import Account from '../../Account'
 import IceServers from '../../IceServers'
 
-export function startCall(contact: Contact, account: Account, type: 'video' | 'audio' = 'video') {
+export function startCall(contact: Contact, account: Account, type: 'video' | 'audio' | 'screen' = 'video') {
    let peerJID = contact.getJid();
 
    if (!peerJID.resource) {
@@ -15,7 +15,7 @@ export function startCall(contact: Contact, account: Account, type: 'video' | 'a
 
    //@TODO use IceServers.get()
 
-   let reqMedia = type === 'audio' ? ['audio'] : ['audio', 'video'];
+   let reqMedia = type === 'audio' ? ['audio'] : (type === 'screen' ? ['screen'] : ['audio', 'video']);
 
    UserMedia.request(reqMedia).then((stream) => {
       let jingleHandler = account.getConnection().getJingleHandler();
@@ -26,7 +26,7 @@ export function startCall(contact: Contact, account: Account, type: 'video' | 'a
 
       let constraints = {
          mandatory: {
-            'OfferToReceiveAudio': true,
+            'OfferToReceiveAudio': type === 'video' || type === 'audio',
             'OfferToReceiveVideo': type === 'video'
          }
       }
@@ -39,8 +39,8 @@ export function startCall(contact: Contact, account: Account, type: 'video' | 'a
       videoDialog.addSession(session);
 
       //@TODO post $.t('Call_started')
-   }).catch(() => {
-
+   }).catch((err) => {
+      Log.warn('err', err)
    });
 
    //@TODO add timeout (buddy maybe offline)

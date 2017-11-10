@@ -37,6 +37,8 @@ export default class JingleSession {
          }
       });
 
+      //@REVIEW CallSession should also handle StreamSession
+
       return reqMedia ? 'CallSession' : 'StreamSession';
    }
 }
