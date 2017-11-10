@@ -4,6 +4,7 @@ import Client from './Client'
 import Roster from './ui/Roster'
 import 'magnific-popup'
 import * as StropheLib from 'strophe.js'
+import { IPlugin } from './plugin/AbstractPlugin'
 import OTRPlugin from './plugins/otr/Plugin'
 import ReceiptPlugin from './plugins/receipts'
 import NotificationPlugin from './plugins/Notification'
@@ -26,6 +27,10 @@ Client.addPlugin(HttpUploadPlugin);
 Client.addPlugin(AvatarVCardPlugin);
 
 Client.init();
+
+export function addPlugin(Plugin: IPlugin) {
+   Client.addPlugin(Plugin);
+}
 
 export async function startAndPause(boshUrl: string, jid: string, password: string) {
    Roster.hide(); //@TODO hide only if this is the first account
