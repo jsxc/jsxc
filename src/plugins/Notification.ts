@@ -30,7 +30,7 @@ export default class NotificationPlugin extends AbstractPlugin {
    private afterReceiveMessageProcessor = (contact: Contact, message: Message) => {
       Notification.notify({
          title: Translation.t('New_message_from'),
-         message: message.getProcessedBody(), //@TODO remove or handle HTML
+         message: message.getPlaintextMessage(),
          soundFile: SOUNDS.MSG,
          source: contact
       });
