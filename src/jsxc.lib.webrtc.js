@@ -1418,9 +1418,6 @@ jsxc.gui.showMinimizedVideoWindow = function() {
    var videoContainer = $('<div/>');
    videoContainer.addClass('jsxc_videoContainer jsxc_minimized');
    videoContainer.appendTo('body');
-   videoContainer.draggable({
-      containment: "parent"
-   });
 
    var videoElement = $('<video class="jsxc_localvideo" autoplay=""></video>');
    videoElement.appendTo(videoContainer);
@@ -1462,10 +1459,6 @@ jsxc.gui.showVideoWindow = function(jid) {
 
    var rv = $('#jsxc_webrtc .jsxc_remotevideo');
    var lv = $('#jsxc_webrtc .jsxc_localvideo');
-
-   lv.draggable({
-      containment: "parent"
-   });
 
    if (self.localStream) {
       self.attachMediaStream(lv, self.localStream);
