@@ -134,6 +134,25 @@ module.exports = function(grunt) {
          }
       },
       concat: {
+         ww: {
+            options: {
+               banner: '/*! This file is concatenated for the browser. https://github.com/arlolra/otr */\n\n',
+               process: function(src, filepath) {
+                  filepath = filepath.replace(/^[a-z]+\//i, '');
+
+                  if (filepath.match(/crypto\.js$/)) {
+                     src += ';';
+                  }
+
+                  return src;
+               }
+            },
+            src: [
+               'lib/otr/lib/dsa-webworker.js', 'lib/otr/vendor/salsa20.js', 'lib/otr/vendor/bigint.js', 'lib/otr/vendor/crypto.js',
+               'lib/otr/vendor/eventemitter.js', 'lib/otr/lib/const.js', 'lib/otr/lib/helpers.js', 'lib/otr/lib/dsa.js'
+            ],
+            dest: '<%= target %>/lib/jsxc.otr.webworker.js'
+         },
          dep: {
             options: {
                banner: '/*!\n' +

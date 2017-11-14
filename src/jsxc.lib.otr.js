@@ -442,8 +442,26 @@ jsxc.otr = {
          if (Worker) {
             // try to create web-worker
 
+            var scriptPath = $('script').map(function() {
+               var el = $(this);
+               var src = el.attr('src') || '';
+               var matches = src.match(/(.+\/)jsxc\.(min\.)?js$/);
+
+               if (matches) {
+                  return matches[1];
+               }
+            });
+
+            if (scriptPath.length === 0) {
+               jsxc.debug('Could not determine script path for web worker.');
+
+               scriptPath[0] = jsxc.options.root + '/';
+            } else if (scriptPath.length !== 1) {
+               jsxc.debug('We found multiple (' + scriptPath.length + ') script paths.');
+            }
+
             try {
-               worker = new Worker(jsxc.options.root + '/lib/otr/lib/dsa-webworker.js');
+               worker = new Worker(scriptPath[0] + 'lib/jsxc.otr.webworker.js');
             } catch (err) {
                jsxc.warn('Couldn\'t create web-worker.', err);
             }
@@ -469,7 +487,7 @@ jsxc.otr = {
 
             // start worker
             worker.postMessage({
-               imports: [jsxc.options.root + '/lib/otr/vendor/salsa20.js', jsxc.options.root + '/lib/otr/vendor/bigint.js', jsxc.options.root + '/lib/otr/vendor/crypto.js', jsxc.options.root + '/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/lib/otr/lib/const.js', jsxc.options.root + '/lib/otr/lib/helpers.js', jsxc.options.root + '/lib/otr/lib/dsa.js'],
+               imports: [],
                seed: BigInt.getSeed(),
                debug: true
             });
