@@ -250,6 +250,7 @@
    width: 100%;
    padding: 2px 0;
    flex-shrink: 0;
+   align-items: center;
 
    .jsxc-menu-emoticons,.jsxc-file-transfer,.jsxc-transfer {
       flex-shrink: 0;
@@ -269,13 +270,14 @@
 .jsxc-message-input {
    border-radius: 0;
    border: 0;
-   box-sizing: border-box;
+   box-sizing: content-box;
    display: block;
-   font-size: 13px;
-   height: 40px;
+   font-size: 1em;
+   height: 1.4em;
+   line-height: 1.4em;
    margin: 0;
    outline: none;
-   padding: 12px 12px 10px 0;
+   padding: 10px 5px 5px 0;
    resize: none;
    transition: height 0.2s;
 
@@ -295,7 +297,7 @@
    background-image: url("../img/attachment.svg");
    background-position: center;
    background-repeat: no-repeat;
-   background-size: 30px;
+   background-size: 80%;
    cursor: pointer;
    height: 40px;
    opacity: 0.3;
@@ -659,7 +661,7 @@ div.jsxc-transfer {
    background-image: url("../img/padlock_open_black.svg");
    background-repeat: no-repeat;
    background-position: center center;
-   background-size: 14px 14px;
+   background-size: 60%;
    opacity: 0.3;
    height: 40px;
    width: 44px;

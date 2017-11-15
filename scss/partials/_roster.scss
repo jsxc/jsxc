@@ -303,8 +303,8 @@
       height: 100%;
       background-image: url("../img/menu_black.svg");
       background-repeat: no-repeat;
-      background-position: center 10px;
-      background-size: 17px;
+      background-position: center center;
+      background-size: 60%;
    }
 
    @media (min-width: 768px) {
@@ -341,7 +341,7 @@
    list-style: none;
    padding: 0;
    margin: 0;
-   width: 204px;
+   width: 100%;
    z-index: 85;
 
    &.jsxc-hide-offline {

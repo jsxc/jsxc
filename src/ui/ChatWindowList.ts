@@ -67,10 +67,12 @@ export default class ChatWindowList {
       console.log('add', chatWindow)
       let chatWindowIds = this.getChatWindowIds();
 
+      if ($('body').hasClass('jsxc-fullscreen')) {
+         this.minimizeAll();
+      }
+
       if (chatWindowIds.indexOf(chatWindow.getId()) < 0) {
          this.chatWindowList[chatWindow.getId()] = chatWindow;
-
-         // chatWindow.unminimize();
 
          this.element.find('> ul').append(chatWindow.getDom());
       } else {

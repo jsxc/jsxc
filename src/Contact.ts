@@ -81,6 +81,13 @@ export default class Contact implements IdentifiableInterface, ContactInterface 
       return this.account.addChatWindow(this.getChatWindow());
    }
 
+   public closeChatWindow = () => {
+      if (this.chatWindow) {
+         this.account.closeChatWindow(this.chatWindow);
+         this.chatWindow = undefined;
+      }
+   }
+
    public getChatWindow(): ChatWindow {
       if (!this.chatWindow) {
          this.chatWindow = new ChatWindow(this.account, this);

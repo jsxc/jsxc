@@ -7,12 +7,12 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   height="16"
-   width="16"
+   height="44"
+   width="44"
    version="1.1"
-   id="svg2"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="menu_white.svg">
+   id="svg6"
+   sodipodi:docname="menu_white.svg"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)">
   <defs
      id="defs10" />
   <sodipodi:namedview
@@ -24,31 +24,32 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="640"
-     inkscape:window-height="480"
+     inkscape:window-width="1117"
+     inkscape:window-height="900"
      id="namedview8"
      showgrid="false"
-     inkscape:zoom="14.75"
-     inkscape:cx="8"
-     inkscape:cy="8"
-     inkscape:window-x="39"
-     inkscape:window-y="24"
+     inkscape:zoom="5.2149125"
+     inkscape:cx="4.8232544"
+     inkscape:cy="3.0821533"
+     inkscape:window-x="43"
+     inkscape:window-y="0"
      inkscape:window-maximized="0"
-     inkscape:current-layer="svg2" />
+     inkscape:current-layer="svg6" />
   <metadata
-     id="metadata4">
+     id="metadata2">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <path
-     d="m2,2,0,2,12,0,0-2zm0,5,0,2,12,0,0-2zm0,5,0,2,12,0,0-2z"
-     id="path6"
-     style="fill:#ffffff" />
+     d="m 6.0285961,6.028596 v 5.323802 H 37.971404 V 6.028596 Z m 0,13.309504 v 5.323801 H 37.971404 V 19.3381 Z m 0,13.309503 v 5.323801 H 37.971404 v -5.323801 z"
+     id="path4"
+     inkscape:connector-curvature="0"
+     style="stroke-width:1;fill:#ffffff" />
 </svg>

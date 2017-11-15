@@ -327,7 +327,7 @@ export default class ChatWindow {
       elementHandler.add(
          this.element.find('.jsxc-close')[0],
          () => {
-            this.account.closeChatWindow(this);
+            this.contact.closeChatWindow();
          }
       );
 

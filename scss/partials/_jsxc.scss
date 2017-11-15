@@ -265,6 +265,10 @@ img.jsxc-vCard {
       }
    }
 
+   .jsxc-grow {
+      flex-grow: 1;
+   }
+
    .jsxc-caption {
       box-sizing: border-box;
       flex-grow: 1;
@@ -300,6 +304,90 @@ img.jsxc-vCard {
          .jsxc-emoticon {
             vertical-align: middle;
          }
+      }
+   }
+}
+
+body.jsxc-fullscreen {
+   #jsxc-roster {
+      width: 100%;
+      z-index: 50;
+      border: 0;
+      border-top: 8vmin solid #2a4163;
+   }
+   #jsxc-window-list {
+      clip: auto;
+      z-index: 100;
+
+      .jsxc-window-item {
+         position: fixed;
+         top: 0;
+         right: 0;
+         bottom: 0;
+         left: 0;
+         height: auto;
+         width: auto;
+         margin: 0;
+
+         &.jsxc-minimized {
+            display: none;
+         }
+      }
+
+      .jsxc-window {
+         top: 0;
+         border: 0;
+         background-color: #d4d2d2;
+      }
+
+      .jsxc-window-fade {
+         position: absolute;
+         top: 8vmin;
+         right: 0;
+         bottom: 0;
+         left: 0;
+         height: auto;
+      }
+   }
+   .jsxc-bar {
+      height: 8vmin;
+      .jsxc-action-entry {
+         height: 7vmin;
+         width: 5vmin;
+         background-size: 50%;
+         &.jsxc-close {
+            line-height: 7vmin;
+            font-size: 2.5em;
+         }
+         .jsxc-more {
+            width: 100%;
+            background-size: auto 3vmin;
+         }
+         * {
+            font-size: 1em;
+         }
+      }
+   }
+   .jsxc-send-area {
+      padding: 0;
+   }
+   .jsxc-menu-emoticons, .jsxc-file-transfer, .jsxc-transfer {
+      height: 8vmin;
+      width: 8vmin;
+      background-size: 50%;
+   }
+   .jsxc-highlight .jsxc-window-bar {
+      background-color: $window_bar_bg;
+   }
+}
+
+body.jsxc-fullscreen.jsxc-two-columns {
+   #jsxc-roster {
+      width: 33%;
+   }
+   #jsxc-window-list {
+      .jsxc-window-item {
+         right: 33%;
       }
    }
 }
