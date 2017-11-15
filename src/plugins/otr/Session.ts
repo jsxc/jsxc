@@ -174,7 +174,7 @@ export default class Session {
       let message = new Message({
          peer: this.peer.getJid(),
          direction: Message.DIRECTION.SYS,
-         plaintextMessage: messageString
+         plaintextMessage: Translation.t(messageString)
       });
       this.peer.getTranscript().pushMessage(message);
 
