@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.3.1 - 2017-10-20
+ * jsxc v3.3.2 - 2017-11-29
  * 
  * Copyright (c) 2017 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see https://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.3.1
+ * @version 3.3.2
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.3.1',
+   version: '3.3.2',
 
    /** True if i'm the master */
    master: false,
@@ -9367,8 +9367,26 @@ jsxc.otr = {
          if (Worker) {
             // try to create web-worker
 
+            var scriptPath = $('script').map(function() {
+               var el = $(this);
+               var src = el.attr('src') || '';
+               var matches = src.match(/(.+\/)jsxc\.(min\.)?js$/);
+
+               if (matches) {
+                  return matches[1];
+               }
+            });
+
+            if (scriptPath.length === 0) {
+               jsxc.debug('Could not determine script path for web worker.');
+
+               scriptPath[0] = jsxc.options.root + '/';
+            } else if (scriptPath.length !== 1) {
+               jsxc.debug('We found multiple (' + scriptPath.length + ') script paths.');
+            }
+
             try {
-               worker = new Worker(jsxc.options.root + '/lib/otr/lib/dsa-webworker.js');
+               worker = new Worker(scriptPath[0] + 'lib/jsxc.otr.webworker.js');
             } catch (err) {
                jsxc.warn('Couldn\'t create web-worker.', err);
             }
@@ -9394,7 +9412,7 @@ jsxc.otr = {
 
             // start worker
             worker.postMessage({
-               imports: [jsxc.options.root + '/lib/otr/vendor/salsa20.js', jsxc.options.root + '/lib/otr/vendor/bigint.js', jsxc.options.root + '/lib/otr/vendor/crypto.js', jsxc.options.root + '/lib/otr/vendor/eventemitter.js', jsxc.options.root + '/lib/otr/lib/const.js', jsxc.options.root + '/lib/otr/lib/helpers.js', jsxc.options.root + '/lib/otr/lib/dsa.js'],
+               imports: [],
                seed: BigInt.getSeed(),
                debug: true
             });
@@ -10298,11 +10316,13 @@ jsxc.webrtc = {
    },
 
    getIceServersByExternalDisco: function() {
+      var self = jsxc.webrtc;
+
       var iq = $iq({
          type: 'get',
          to: jsxc.xmpp.conn.domain
       }).c('services', {
-         xmlns: 'urn:xmpp:extdisco:1'
+         xmlns: self.CONST.NS.EXTDISCO
       });
 
       jsxc.xmpp.conn.sendIQ(iq, parseExtDiscoResponse, function(err) {
@@ -11583,9 +11603,6 @@ jsxc.gui.showMinimizedVideoWindow = function() {
    var videoContainer = $('<div/>');
    videoContainer.addClass('jsxc_videoContainer jsxc_minimized');
    videoContainer.appendTo('body');
-   videoContainer.draggable({
-      containment: "parent"
-   });
 
    var videoElement = $('<video class="jsxc_localvideo" autoplay=""></video>');
    videoElement.appendTo(videoContainer);
@@ -11627,10 +11644,6 @@ jsxc.gui.showVideoWindow = function(jid) {
 
    var rv = $('#jsxc_webrtc .jsxc_remotevideo');
    var lv = $('#jsxc_webrtc .jsxc_localvideo');
-
-   lv.draggable({
-      containment: "parent"
-   });
 
    if (self.localStream) {
       self.attachMediaStream(lv, self.localStream);

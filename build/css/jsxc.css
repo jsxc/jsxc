@@ -4050,8 +4050,7 @@ img.jsxc_vCard {
   right: 10px;
   bottom: 10px;
   z-index: 9990;
-  background-color: #000;
-  cursor: move; }
+  background-color: #000; }
 
 div:full-screen {
   width: 100%;
