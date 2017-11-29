@@ -133,11 +133,13 @@ jsxc.webrtc = {
    },
 
    getIceServersByExternalDisco: function() {
+      var self = jsxc.webrtc;
+
       var iq = $iq({
          type: 'get',
          to: jsxc.xmpp.conn.domain
       }).c('services', {
-         xmlns: 'urn:xmpp:extdisco:1'
+         xmlns: self.CONST.NS.EXTDISCO
       });
 
       jsxc.xmpp.conn.sendIQ(iq, parseExtDiscoResponse, function(err) {
