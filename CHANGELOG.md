@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.3.2 - 2017-11-29
+### Fixed
+- [#521](https://github.com/jsxc/jsxc/issues/521) concatenate files for dsa webworker to bypass strict csp
+- [#621](https://github.com/jsxc/jsxc/issues/621) disable draggable video element
+- [#644](https://github.com/jsxc/jsxc/issues/644) update strophejs; support utf passwords
+- [#643](https://github.com/jsxc/jsxc/issues/643) fix external service discovery
+
+### Changed
+- Chinese translation
+
 ## 3.3.1 - 2017-10-20
 ### Fixed
 - [#613](https://github.com/jsxc/jsxc/issues/613) fix online status for cached rosters
