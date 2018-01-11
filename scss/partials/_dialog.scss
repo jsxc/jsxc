@@ -1,5 +1,17 @@
+.jsxc-dialog-wrapper {
+   position: fixed;
+   top: 0;
+   right: 0;
+   bottom: 0;
+   left:0;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   background-color: rgba(255,255,255,0.8);
+   z-index: 999;
+}
 .jsxc-dialog {
-    padding: 20px;
+    padding: 4vh 8vw;
     min-width: 320px;
     max-width: 100%;
     display: inline-block;
@@ -7,6 +19,7 @@
     position: relative;
     background: #FFF;
     width: auto;
+    border: 1px solid #d8d8d8;
 
     * {
         box-sizing: border-box;

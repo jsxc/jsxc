@@ -7,6 +7,8 @@ export default class Dialog {
 
    private readonly id: string;
 
+   private src;
+
    private magnificPopupOptions = {
       items: null,
       modal: null,
@@ -24,20 +26,18 @@ export default class Dialog {
    public constructor(content: string, unclosable: boolean = false, readonly name: string = '') {
       this.id = Dialog.generateId();
 
-      let src = dialogTemplate({
+      this.src = dialogTemplate({
          id: this.id,
          name: name,
          content: content
       });
-
-      this.magnificPopupOptions.items = {
-         src: src
-      };
-      this.magnificPopupOptions.modal = unclosable;
    }
 
    public open() {
-      (<any>$).magnificPopup.open(this.magnificPopupOptions);
+      //@TODO append only once
+      $('body').append(this.src);
+
+      this.onOpened();
 
       return this.getDom();
    }
@@ -46,7 +46,7 @@ export default class Dialog {
       if ($('#' + this.id).length > 0) {
          Log.debug('close dialog');
 
-         (<any>$).magnificPopup.close();
+         $('#' + this.id).remove();
       }
    }
 
