@@ -534,6 +534,18 @@
    }
 }
 
+.jsxc-unread {
+   .jsxc-timestamp:before {
+      content: "";
+      display: inline-block;
+      width: 0.8em;
+      height: 0.8em;
+      margin-right: 2px;
+      border-radius: 50%;
+      background-color: $unread_bg;
+   }
+}
+
 .jsxc-in {
    float: left;
    position: relative;

@@ -88,6 +88,33 @@ export default class RosterItem {
          this.element.attr('data-subscription', this.contact.getSubscription());
       });
 
+      this.contact.getTranscript().registerHook('firstMessageId', (firstMessageId) => {
+         if (!firstMessageId) {
+            return;
+         }
+
+         let message = this.contact.getTranscript().getMessage(firstMessageId);
+
+         this.element.find('.jsxc-subcaption').text(message.getPlaintextMessage());
+      });
+
+      let message = this.contact.getTranscript().getFirstMessage();
+      if (message) {
+         this.element.find('.jsxc-subcaption').text(message.getPlaintextMessage());
+      }
+
+      let updateUnreadMessage = () => {
+         let unreadMessages = this.contact.getTranscript().getNumberOfUnreadMessages();
+         if (unreadMessages > 0) {
+            this.element.addClass('jsxc-has-unread-msg');
+         } else {
+            this.element.removeClass('jsxc-has-unread-msg');
+         }
+      };
+
+      this.contact.getTranscript().registerHook('unreadMessageIds', updateUnreadMessage);
+      updateUnreadMessage();
+
       // $(document).trigger('add.roster.jsxc', [bid, data, bud]);
    }
 

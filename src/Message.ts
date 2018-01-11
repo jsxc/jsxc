@@ -32,6 +32,7 @@ interface MessagePayload {
    forwarded?: boolean,
    stamp?: number,
    type?: ContactType,
+   unread?: boolean,
    encryptedHtmlMessage?: string,
    encryptedPlaintextMessage?: string,
    sender?: {
@@ -247,8 +248,12 @@ export default class Message implements Identifiable, MessageInterface {
       return !!this.data.get('attachment');
    }
 
-   public setUnread() {
+   public isUnread(): boolean {
+      return !!this.data.get('unread');
+   }
 
+   public read() {
+      this.data.set('unread', false);
    }
 
    public setDirection(direction: DIRECTION) {

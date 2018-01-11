@@ -77,7 +77,8 @@ export default class extends AbstractHandler {
             plaintextMessage: plaintextBody,
             htmlMessage: htmlBody.html(),
             forwarded: isForwarded,
-            stamp: stamp.getTime()
+            stamp: stamp.getTime(),
+            unread: true
          });
 
          //@TODO
@@ -128,6 +129,7 @@ export default class extends AbstractHandler {
          htmlMessage: htmlBody.html(),
          forwarded: isForwarded,
          stamp: stamp.getTime(),
+         unread: true
          // attachment:
       });
 

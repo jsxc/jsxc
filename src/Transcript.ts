@@ -68,7 +68,6 @@ export default class Transcript {
 
       this.messages = {};
       this.firstMessage = undefined;
-      this.lastMessage = undefined;
 
       this.properties.remove('firstMessageId')
    }
@@ -77,7 +76,35 @@ export default class Transcript {
       this.properties.registerHook(property, func);
    }
 
+   public markAllMessagesAsRead() {
+      let unreadMessageIds = this.properties.get('unreadMessageIds') || [];
+
+      for (let id of unreadMessageIds) {
+         let message = this.messages[id];
+
+         if (message) {
+            message.read();
+         }
+      }
+
+      this.properties.set('unreadMessageIds', []);
+   }
+
+   public getNumberOfUnreadMessages(): number {
+      let unreadMessageIds = this.properties.get('unreadMessageIds') || [];
+
+      return unreadMessageIds.length;
+   }
+
    private addMessage(message: Message) {
-      this.messages[message.getUid()] = message;
+      let id = message.getUid();
+
+      this.messages[id] = message;
+
+      if (message.getDirection() === Message.DIRECTION.IN) {
+         let unreadMessageIds = this.properties.get('unreadMessageIds') || [];
+         unreadMessageIds.push(id); console.log('unreadMessageIds', unreadMessageIds)
+         this.properties.set('unreadMessageIds', unreadMessageIds);
+      }
    }
 }

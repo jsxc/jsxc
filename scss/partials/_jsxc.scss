@@ -127,10 +127,6 @@ ul.jsxc-vCard {
     }
 }
 
-.jsxc-unread {
-    display: none;
-}
-
 .jsxc-unreadMsg {
     .jsxc-name {
         font-style: italic;
@@ -284,26 +280,24 @@ img.jsxc-vCard {
          white-space: nowrap;
          overflow: hidden;
 
-         &:before {
-            content: '';
-            line-height: 100%;
-            color: #fff;
-            text-align: center;
-            display: none;
-            height: 0.6em;
-            width: 0.6em;
-            border-radius: 50%;
-            background-color: orange;
-            margin-right: 0.2em;
-
-            .jsxc-unreadMsg & {
-               display: inline-block !important;
-            }
-         }
-
          .jsxc-emoticon {
             vertical-align: middle;
          }
+      }
+   }
+
+   &.jsxc-has-unread-msg {
+      .jsxc-subcaption:before {
+         content: '';
+         line-height: 100%;
+         color: #fff;
+         text-align: center;
+         display: inline-block;
+         height: 0.8em;
+         width: 0.8em;
+         border-radius: 50%;
+         background-color: orange;
+         margin-right: 0.2em;
       }
    }
 }

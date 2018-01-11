@@ -63,6 +63,10 @@ export default class ChatWindowMessage {
          this.element.addClass('jsxc-encrypted');
       }
 
+      if (this.message.isUnread()) {
+         this.element.addClass('jsxc-unread');
+      }
+
       if (this.message.getErrorMessage()) {
          this.element.addClass('jsxc-error');
          this.element.attr('title', this.message.getErrorMessage());
@@ -145,6 +149,12 @@ export default class ChatWindowMessage {
    }
 
    private registerHooks() {
+      this.message.registerHook('unread', (unread) => {
+         if (!unread) {
+            this.element.removeClass('jsxc-unread');
+         }
+      });
+
       this.message.registerHook('received', (isReceived) => {
          if (isReceived) {
             this.element.addClass('jsxc-received');

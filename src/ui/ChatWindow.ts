@@ -210,8 +210,8 @@ export default class ChatWindow {
    }
 
    public postMessage(message: Message): ChatWindowMessage {
-      if (message.getDirection() === Message.DIRECTION.IN && !this.inputElement.is(':focus')) {
-         message.setUnread();
+      if (message.getDirection() === Message.DIRECTION.IN && this.inputElement.is(':focus')) {
+         message.read();
       }
 
       let chatWindowMessage = this.getChatWindowMessage(message);
@@ -450,8 +450,7 @@ export default class ChatWindow {
          clearTimeout(this.inputBlurTimeout);
       }
 
-      // remove unread flag
-      //jsxc.gui.readMsg(bid);
+      this.getTranscript().markAllMessagesAsRead();
 
       this.resizeInputArea();
    }
