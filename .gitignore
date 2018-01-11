@@ -25,3 +25,4 @@ lib/i18next/
 lib/jquery-i18next/
 lib/magnific-popup/
 .idea
+/bundle.js
