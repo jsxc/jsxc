@@ -13,8 +13,12 @@
   "scripts": {
     "start": "webpack --config webpack.config.js",
     "dev": "webpack --config webpack.config.js --watch",
-    "test": "karma start"
+    "test": "karma start",
+    "checking-format": "node_modules/typescript-formatter/bin/tsfmt --verify"
   },
+  "pre-commit": [
+    "checking-format"
+  ],
   "devDependencies": {
     "@types/chai": "^4.0.2",
     "@types/jquery": "^3.2.10",
@@ -30,6 +34,7 @@
     "handlebars-loader": "^1.5.0",
     "handlebars-runtime": "^1.0.12",
     "i18next": "^9.0.0",
+    "js-beautify": "^1.7.4",
     "karma": "^1.7.0",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^2.2.0",
@@ -43,6 +48,7 @@
     "karma-webpack": "^2.0.4",
     "mocha": "^3.5.0",
     "node-sass": "^4.5.3",
+    "pre-commit": "^1.2.2",
     "precompile-handlebars": "^1.0.5",
     "resolve-url-loader": "^2.1.0",
     "sass-loader": "^6.0.6",
@@ -50,6 +56,7 @@
     "ts-loader": "^2.3.2",
     "ts-node": "^3.3.0",
     "typescript": "^2.4.2",
+    "typescript-formatter": "^7.0.0",
     "webpack": "^3.4.1"
   },
   "dependencies": {
