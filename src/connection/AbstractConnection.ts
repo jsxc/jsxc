@@ -10,6 +10,7 @@ import Account from '../Account'
 import Pipe from '../util/Pipe'
 import Form from './Form'
 import UUID from '../util/UUID'
+import PEPService from './services/PEP'
 
 let Strophe = StropheLib.Strophe;
 let $iq = StropheLib.$iq;
@@ -41,6 +42,8 @@ abstract class AbstractConnection {
 
    protected node = 'https://jsxc.org';
 
+   protected services = { pubSub: null, pep: null };
+
    constructor(protected account: Account) {
 
       let discoInfo = this.account.getDiscoInfo();
@@ -48,6 +51,20 @@ abstract class AbstractConnection {
       discoInfo.addIdentity('client', 'web', 'JSXC');
 
       NS.register('VCARD', 'vcard-temp');
+   }
+
+   public getPEPService = (): PEPService => {
+      if (!this.services.pep) {
+         let self = this;
+
+         this.services.pep = new PEPService(function() {
+            return self.send.apply(self, arguments)
+         }, function() {
+            return self.sendIQ.apply(self, arguments)
+         }, this, this.account);
+      }
+
+      return this.services.pep;
    }
 
    public pluginOnlySend(stanzaElement: Element);

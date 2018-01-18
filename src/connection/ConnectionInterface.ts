@@ -2,6 +2,7 @@ import JID from './../JID';
 import Message from './../Message';
 import { Presence } from './AbstractConnection'
 import Form from './Form'
+import PEPService from './services/PEP'
 import 'Strophe'
 
 export interface IConnection {
@@ -13,7 +14,9 @@ export interface IConnection {
    pluginOnlySendIQ(stanzaElement: Element): Promise<Element>;
    pluginOnlySendIQ(stanzaElement: Strophe.Builder): Promise<Element>;
 
-   getJingleHandler();
+   getPEPService(): PEPService
+
+   getJingleHandler()
 
    getJID(): JID
 
