@@ -56,6 +56,10 @@ export default class PluginAPI {
       Pipe.get('afterReceiveMessage').addProcessor(processor, position);
    }
 
+   public addPreSendMessageStanzaProcessor(processor: (message: Message, xmlMsg: Strophe.Builder) => Promise<any>, position?: number) {
+      Pipe.get('preSendMessageStanza').addProcessor(processor, position);
+   }
+
    public addAvatarProcessor(processor: (contact: Contact, avatar: Avatar) => Promise<[Contact, Avatar]>, position?: number) {
       Pipe.get('avatar').addProcessor(processor, position);
    }
