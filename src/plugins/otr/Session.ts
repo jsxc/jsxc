@@ -116,13 +116,13 @@ export default class Session {
 
    private encryptMessage(message: Message) {
       let self = this;
-      let messageId = message.getId();
+      let messageId = message.getUid();
 
       return new Promise((resolve, reject) => {
          // we need this one-time handler for the promise
          //@REVIEW maybe it's easier to add promises to the OTR lib
          this.session.on('io', function handler(msg, message) {
-            if (message && message.getId() === messageId) {
+            if (message && message.getUid() === messageId) {
                self.session.off('ui', handler);
 
                self.afterEncryptMessage(msg, message, resolve);
@@ -135,11 +135,11 @@ export default class Session {
 
    private decryptMessage(message: Message) {
       let self = this;
-      let messageId = message.getId();
+      let messageId = message.getUid();
 
       return new Promise((resolve, reject) => {
          this.session.on('ui', function handler(msg, encrypted, message) {
-            if (message && message.getId() === messageId) {
+            if (message && message.getUid() === messageId) {
                self.session.off('ui', handler);
 
                self.afterDecryptMessage(msg, encrypted, message, resolve);
