@@ -85,7 +85,12 @@
       var jid = $(this).find('[name="jid"]').val();
       var password = $(this).find('[name="password"]').val();
 
-      jsxc.start(url, jid, password);
+      jsxc.start(url, jid, password)
+         .then(function(){
+            console.log('>>> CONNECTION READY')
+         }).catch(function(err) {
+            console.log('>>> catch', err)
+         })
 
       return false;
    });

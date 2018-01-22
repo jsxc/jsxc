@@ -4,6 +4,9 @@ import Log from '../../util/Log';
 import SM from '../../StateMachine'
 import Client from '../../Client'
 import PersistentMap from '../../util/PersistentMap'
+import InvalidParameterError from '../../errors/InvalidParameterError'
+import ConnectionError from '../../errors/ConnectionError'
+import AuthenticationError from '../../errors/AuthenticationError'
 
 export function login(url: string, jid: string, sid: string, rid: string);
 export function login(url: string, jid: string, password: string);
@@ -25,18 +28,8 @@ function loginWithPassword(url: string, jid: string, password: string): Promise<
 
    return new Promise(function(resolve, reject) {
       //@TODO don't forget password from options
-      connection.connect(jid, password, function(status) {
-         if (status === Strophe.Status.CONNFAIL || status === Strophe.Status.AUTHFAIL) {
-            reject.call(this, {
-               connection: connection,
-               status: status
-            });
-         } else if (status === Strophe.Status.CONNECTED) {
-            resolve.call(this, {
-               connection: connection,
-               status: status
-            });
-         }
+      connection.connect(jid, password, function(status, condition) {
+         resolveConnectionPromise(status, condition, connection, resolve, reject);
 
          connectionCallback.apply(this, arguments);
       });
@@ -50,30 +43,39 @@ function attachConnection(url: string, jid: string, sid: string, rid: string) {
    Log.debug('Try to attach old connection.');
 
    return new Promise(function(resolve, reject) {
-      connection.attach(jid, sid, rid, function(status) {
-         if (status === Strophe.Status.CONNFAIL || status === Strophe.Status.AUTHFAIL) {
-            reject.call(this, {
-               connection: connection,
-               status: status
-            });
-         } else if (status === Strophe.Status.ATTACHED) {
-            resolve.call(this, {
-               connection: connection,
-               status: status
-            });
-         }
+      connection.attach(jid, sid, rid, function(status, condition) {
+         resolveConnectionPromise(status, condition, connection, resolve, reject);
 
          connectionCallback.apply(this, arguments);
       });
    })
 }
 
+function resolveConnectionPromise(status, condition, connection, resolve, reject) {
+   //@REVIEW how can this be removed after the promise resolves
+   switch (status) {
+      case Strophe.Status.CONNFAIL:
+         reject(new ConnectionError(condition));
+         break;
+      case Strophe.Status.AUTHFAIL:
+         reject(new AuthenticationError(condition));
+         break;
+      case Strophe.Status.ATTACHED:
+      case Strophe.Status.CONNECTED:
+         resolve({
+            connection: connection,
+            status: status
+         });
+         break;
+   }
+}
+
 function testBasicConnectionParameters(url: string, jid: string) {
    if (!jid)
-      throw new Error('I can not log in without a jid.');
+      throw new InvalidParameterError('I can not log in without a jid.');
 
    if (!url)
-      throw new Error('I can not log in without an URL.');
+      throw new InvalidParameterError('I can not log in without an URL.');
 }
 
 function registerXMPPNamespaces() {

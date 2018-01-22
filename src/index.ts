@@ -2,8 +2,8 @@ import Log from './util/Log';
 import * as UI from './ui/web'
 import Client from './Client'
 import Roster from './ui/Roster'
-import 'magnific-popup'
 import * as StropheLib from 'strophe.js'
+import InvalidParameterError from './errors/InvalidParameterError'
 import { IPlugin } from './plugin/AbstractPlugin'
 import OTRPlugin from './plugins/otr/Plugin'
 import ReceiptPlugin from './plugins/receipts'
@@ -13,6 +13,7 @@ import MessageArchiveManagementPlugin from './plugins/mam/Plugin'
 import ChatStatePlugin from './plugins/chatState/ChatStatePlugin'
 import HttpUploadPlugin from './plugins/httpUpload/HttpUploadPlugin'
 import AvatarVCardPlugin from './plugins/AvatarVCardPlugin'
+import BaseError from './errors/BaseError'
 
 // @REVIEW
 $.extend(window, StropheLib)
@@ -43,16 +44,20 @@ export function start(boshUrl: string, jid: string, sid: string, rid: string);
 export function start(boshUrl: string, jid: string, password: string);
 export function start();
 export function start() {
+   let promise;
+
    switch (arguments.length) {
-      case 0: startUI();
+      case 0: promise = startUI();
          break;
-      case 3: startWithCredentials(arguments[0], arguments[1], arguments[2]);
+      case 3: promise = startWithCredentials(arguments[0], arguments[1], arguments[2]);
          break;
-      case 4: startWithBoshParameters(arguments[0], arguments[1], arguments[2], arguments[3]);
+      case 4: promise = startWithBoshParameters(arguments[0], arguments[1], arguments[2], arguments[3]);
          break;
       default:
-         throw 'Wrong number of parameters.';
+         promise = Promise.reject(new InvalidParameterError('Wrong number of parameters.'));
    }
+
+   return promise;
 }
 
 function startUI() {
@@ -64,10 +69,19 @@ async function startWithCredentials(boshUrl: string, jid: string, password: stri
 
    let account = await Client.createAccount(boshUrl, jid, password);
 
-   account.connect().then(function() {
+   return account.connect().then(function() {
       startUI();
-   }).catch(() => {
-      //@TODO handle error
+   }).catch((err) => {
+      Client.removeAccount(account);
+      Roster.get().endProcessing();
+
+      if (err instanceof BaseError) {
+         Log.warn('Instance of BaseErrors', err.toString());
+
+         throw err;
+      }
+
+      throw 'Unknown error';
    }).then(() => {
       Roster.get().endProcessing();
    });
