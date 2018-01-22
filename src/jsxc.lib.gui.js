@@ -2599,7 +2599,9 @@ jsxc.gui.window = {
       }
 
       if (message.direction === 'in' && !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
-         jsxc.gui.unreadMsg(message.bid);
+         if(!message.forwarded) {
+          jsxc.gui.unreadMsg(message.bid);
+         }
 
          $(document).trigger('postmessagein.jsxc', [message.bid, message.htmlMsg]);
       }
