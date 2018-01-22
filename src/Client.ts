@@ -97,15 +97,15 @@ export default class Client {
    public static createAccount() {
       let account;
 
-      if (arguments.length === 4) {
+      if (Client.getAccount(arguments[1])) {
+         return Promise.reject('Account with this jid already exists.');
+      } else if (arguments.length === 4) {
          account = new Account(arguments[0], arguments[1], arguments[2], arguments[3]);
       } else if (arguments.length === 3) {
          account = new Account(arguments[0], arguments[1], arguments[2]);
       } else {
          return Promise.reject('Wrong number of arguments');
       }
-
-      //@TODO prevent creation of multiple accounts with the same jid
 
       Client.addAccount(account);
 
