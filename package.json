@@ -64,6 +64,7 @@
     "@types/handlebars": "^4.0.35",
     "@types/strophe": "^1.2.28",
     "bootstrap-sass": "^3.3.7",
+    "consistent-color-generation": "^0.1.0",
     "emojione": "^2.2.7",
     "getscreenmedia": "^4.0.1",
     "getusermedia": "^2.0.1",

@@ -1,6 +1,7 @@
 import Options from '../Options'
 import Hash from '../util/Hash'
 import { ContactInterface } from '../ContactInterface'
+import * as getRGB from 'consistent-color-generation'
 
 export default class AvatarSet {
 
@@ -49,18 +50,25 @@ export default class AvatarSet {
    }
 
    private static placeholder(elements, text: string) {
-      var options = Options.get('avatarPlaceholder') || {};
-      var hash = Hash.String(text);
+      let options = Options.get('avatarPlaceholder') || {};
+      let hash = Hash.String(text);
 
-      var hue = Math.abs(hash) % 360;
-      var saturation = options.saturation || 90;
-      var lightness = options.lightness || 65;
+      let hue = Math.abs(hash) % 360;
+      let saturation = options.saturation || 90;
+      let lightness = options.lightness || 65;
+      let hsl = 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
+
+      let color = getRGB(text);
+      let r = Math.round(color.r * 255);
+      let g = Math.round(color.g * 255);
+      let b = Math.round(color.b * 255);
+      let rgb = `rgb(${r}, ${g}, ${b})`;
 
       $(elements).each(function() {
          let element = $(this);
 
          element.css({
-            'background-color': 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)',
+            'background-color': rgb,
             'color': '#fff',
             'font-weight': 'bold',
             'text-align': 'center',
