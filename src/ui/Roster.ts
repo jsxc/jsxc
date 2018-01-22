@@ -115,6 +115,8 @@ export default class Roster {
       if (previousText) {
          spanElement.text(previousText);
       }
+
+      this.refreshOwnPresenceIndicator(); //@REVIEW previousText???
    }
 
    public setRosterAvatar(contact: ContactInterface) {
