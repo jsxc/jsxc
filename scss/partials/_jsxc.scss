@@ -373,6 +373,9 @@ body.jsxc-fullscreen {
    .jsxc-highlight .jsxc-window-bar {
       background-color: $window_bar_bg;
    }
+   .jsxc-roster-toggle {
+      display: none;
+   }
 }
 
 body.jsxc-fullscreen.jsxc-two-columns {
