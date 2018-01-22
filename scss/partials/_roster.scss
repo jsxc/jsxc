@@ -262,7 +262,9 @@
 .jsxc-menu-presence {
    cursor: pointer;
    padding-left: 2px;
+   white-space: nowrap;
    overflow: hidden;
+   text-overflow: ellipsis;
 
    > span {
       opacity: 0.8;
