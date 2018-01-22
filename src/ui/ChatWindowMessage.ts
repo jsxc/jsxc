@@ -149,6 +149,14 @@ export default class ChatWindowMessage {
    }
 
    private registerHooks() {
+      this.message.registerHook('encrypted', (encrypted) => {
+         if (encrypted) {
+            this.element.addClass('jsxc-encrypted');
+         } else {
+            this.element.removeClass('jsxc-encrypted');
+         }
+      });
+
       this.message.registerHook('unread', (unread) => {
          if (!unread) {
             this.element.removeClass('jsxc-unread');
