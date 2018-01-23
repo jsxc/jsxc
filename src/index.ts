@@ -13,6 +13,7 @@ import MessageArchiveManagementPlugin from './plugins/mam/Plugin'
 import ChatStatePlugin from './plugins/chatState/ChatStatePlugin'
 import HttpUploadPlugin from './plugins/httpUpload/HttpUploadPlugin'
 import AvatarVCardPlugin from './plugins/AvatarVCardPlugin'
+import CarbonsPlugin from './plugins/Carbons'
 import BaseError from './errors/BaseError'
 
 // @REVIEW
@@ -26,6 +27,7 @@ Client.addPlugin(MessageArchiveManagementPlugin);
 Client.addPlugin(ChatStatePlugin);
 Client.addPlugin(HttpUploadPlugin);
 Client.addPlugin(AvatarVCardPlugin);
+Client.addPlugin(CarbonsPlugin);
 
 Client.init();
 
@@ -80,6 +82,8 @@ async function startWithCredentials(boshUrl: string, jid: string, password: stri
 
          throw err;
       }
+
+      console.log('Unknown error:', err);
 
       throw 'Unknown error';
    }).then(() => {
