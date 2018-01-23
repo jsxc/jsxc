@@ -45,7 +45,11 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
          }
       });
 
-      this.determineServerSupport();
+      pluginAPI.registerConnectionHook((status, condition) => {
+         if (status === 5 || status === 8) { //@TODO use constant for status
+            this.determineServerSupport();
+         }
+      });
    }
 
    public getStorage() {
@@ -65,31 +69,36 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
    }
 
    private determineServerSupport() {
-      //@TODO
-      setTimeout(() => {
-         let connection = this.pluginAPI.getConnection();
-         let discoInfoRepository = this.pluginAPI.getDiscoInfoRepository();
-         let serverJid = new JID('', connection.getJID().domain, '') //@REVIEW
+      let connection = this.pluginAPI.getConnection();
+      let discoInfoRepository = this.pluginAPI.getDiscoInfoRepository();
+      let domain = connection.getJID().domain;
 
-         discoInfoRepository.getCapabilities(serverJid).then((discoInfo: DiscoInfo) => {
-            if (discoInfo.hasFeature(MAM2)) {
-               Namespace.register('MAM', MAM2);
-               return true;
-            } else if (discoInfo.hasFeature(MAM1)) {
-               Namespace.register('MAM', MAM1);
-               return true;
-            }
-            return false;
-         }).then((hasSupport) => {
-            if (hasSupport) {
-               Log.debug('Server supports ' + Namespace.get('MAM'));
+      if (!domain) {
+         Log.debug('Could not get connected JID for MAM');
+         return;
+      }
+      let serverJid = new JID('', domain, '') //@REVIEW
 
-               this.enabled = true;
+      discoInfoRepository.getCapabilities(serverJid).then((discoInfo: DiscoInfo) => {
+         if (discoInfo.hasFeature(MAM2)) {
+            Namespace.register('MAM', MAM2);
+            return true;
+         } else if (discoInfo.hasFeature(MAM1)) {
+            Namespace.register('MAM', MAM1);
+            return true;
+         }
+         return false;
+      }).then((hasSupport) => {
+         if (hasSupport) {
+            Log.debug('Server supports ' + Namespace.get('MAM'));
 
-               connection.registerHandler(this.onMamMessage, Namespace.get('MAM'), 'message', null);
-            }
-         });
-      }, 2000);
+            this.enabled = true;
+
+            connection.registerHandler(this.onMamMessage, Namespace.get('MAM'), 'message', null);
+         }
+      }).catch((err) => {
+         Log.warn('Could not determine MAM server support:', err);
+      });
    }
 
    private addLoadButtonIfEnabled(chatWindow: ChatWindow, contact: Contact) {
