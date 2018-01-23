@@ -144,7 +144,7 @@ export default class DiscoInfoRepository {
       let capabilities = {};
 
       for (let childNode of Array.from(queryElement.get(0).childNodes)) {
-         let nodeName = childNode.nodeName;
+         let nodeName = childNode.nodeName.toLowerCase();
 
          if (typeof capabilities[nodeName] === 'undefined') {
             capabilities[nodeName] = [];
