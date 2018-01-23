@@ -4,6 +4,7 @@ import Client from '../../../Client'
 import Account from '../../../Account'
 import Roster from '../../../ui/Roster'
 import AbstractHandler from '../AbstractHandler'
+import { ContactSubscription as SUBSCRIPTION } from '../../../ContactInterface'
 
 export default class RosterHandler extends AbstractHandler {
    public processStanza(stanzaElement: Element): boolean {
@@ -26,7 +27,7 @@ export default class RosterHandler extends AbstractHandler {
          let subscription = item.attr('subscription');
 
          let contact = account.addContact(jid, name);
-         contact.setSubscription(subscription);
+         contact.setSubscription(<SUBSCRIPTION>subscription);
 
          Roster.get().add(contact);
       });

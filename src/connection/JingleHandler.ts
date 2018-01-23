@@ -49,7 +49,7 @@ export default class JingleHandler {
          var iqElement = $.parseXML(iq.toString()).getElementsByTagName('iq')[0];
 
          //@TODO add id to iq
-         this.connection.send(iqElement);
+         (<any>this.connection).send(iqElement); //@REVIEW
       });
 
       this.manager.on('incoming', (session) => {

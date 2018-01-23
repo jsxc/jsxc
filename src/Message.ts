@@ -135,7 +135,7 @@ export default class Message implements Identifiable, MessageInterface {
       return this.data.get('next');
    }
 
-   public setNext(message: Message | string) {
+   public setNext(message: MessageInterface | string): void {
       let nextId = typeof message === 'string' ? message : message.getUid();
 
       // this.data.set('next', nextId);

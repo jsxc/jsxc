@@ -17,8 +17,8 @@ export default function(multiUserContact: MultiUserContact) {
    dom.find('form').on('submit', (ev) => {
       ev.preventDefault();
 
-      let reason = dom.find('input[name="reason"]').val();
-      let jidString = dom.find('input[name="jid"]').val();
+      let reason = <string>dom.find('input[name="reason"]').val();
+      let jidString = <string>dom.find('input[name="jid"]').val();
       let jid = new JID(jidString);
 
       multiUserContact.invite(jid, reason);

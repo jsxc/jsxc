@@ -1,10 +1,7 @@
 import { JIDInterface } from './JIDInterface'
-import { PluginInterface } from './PluginInterface'
 
 export interface ClientInterface {
    init();
-
-   addConnectionPlugin(plugin: PluginInterface);
 
    addPreSendMessageHook(hook: (Message, Builder) => void, position?: number);
 

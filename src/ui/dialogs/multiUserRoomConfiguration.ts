@@ -41,7 +41,7 @@ function showForm(form: Form, contact: MultiUserContact, connection) {
       formElement.submit((ev) => { //@TODO block form
          ev.preventDefault();
 
-         let form = Form.fromHTML(formElement);
+         let form = Form.fromHTML(formElement.get(0));
 
          contact.setRoomConfiguration(form.toJSON());
          let submitPromise = connection

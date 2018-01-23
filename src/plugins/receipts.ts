@@ -105,7 +105,7 @@ export default class ReceiptPlugin extends AbstractPlugin {
 
       if (subscription === 'both' || subscription === 'from') {
          // Send received according to XEP-0184
-         this.pluginAPI.getConnection().send($msg({
+         this.pluginAPI.send($msg({
             to: from
          }).c('received', {
             xmlns: 'urn:xmpp:receipts',

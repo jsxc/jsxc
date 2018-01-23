@@ -98,7 +98,7 @@ export default class MultiUserChatWindow extends ChatWindow {
       this.element.find('.jsxc-members').attr('data-number-of-members', this.memberlistElement.find('li').length || '');
    }
 
-   private initDroppable() {
+   protected initDroppable() {
       let windowElement = this.element.find('.jsxc-window');
 
       windowElement.on('drop', (ev) => {

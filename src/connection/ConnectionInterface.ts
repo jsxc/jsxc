@@ -1,4 +1,4 @@
-import JID from './../JID';
+import { JIDInterface } from './../JIDInterface';
 import Message from './../Message';
 import { Presence } from './AbstractConnection'
 import Form from './Form'
@@ -18,7 +18,7 @@ export interface IConnection {
 
    getJingleHandler()
 
-   getJID(): JID
+   getJID(): JIDInterface
 
    getRoster()
 
@@ -26,41 +26,41 @@ export interface IConnection {
 
    sendPresence(presence?: Presence)
 
-   removeContact(jid: JID): Promise<Element>
+   removeContact(jid: JIDInterface): Promise<Element>
 
-   addContact(jid: JID, alias: string)
+   addContact(jid: JIDInterface, alias: string)
 
-   loadVcard(jid: JID)
+   loadVcard(jid: JIDInterface)
 
-   setDisplayName(jid: JID, displayName: string): Promise<Element>
+   setDisplayName(jid: JIDInterface, displayName: string): Promise<Element>
 
-   sendSubscriptionAnswer(to: JID, accept: boolean)
+   sendSubscriptionAnswer(to: JIDInterface, accept: boolean)
 
-   getDiscoInfo(jid: JID, node?: string): Promise<Element>
+   getDiscoInfo(jid: JIDInterface, node?: string): Promise<Element>
 
-   getDiscoItems(jid: JID, node?: string): Promise<Element>
+   getDiscoItems(jid: JIDInterface, node?: string): Promise<Element>
 
-   joinMultiUserRoom(jid: JID, password?: string)
+   joinMultiUserRoom(jid: JIDInterface, password?: string)
 
-   leaveMultiUserRoom(jid: JID, exitMessage?: string)
+   leaveMultiUserRoom(jid: JIDInterface, exitMessage?: string)
 
-   destroyMultiUserRoom(jid: JID): Promise<Element>
+   destroyMultiUserRoom(jid: JIDInterface): Promise<Element>
 
-   createInstantRoom(jid: JID): Promise<Element>
+   createInstantRoom(jid: JIDInterface): Promise<Element>
 
-   getRoomConfigurationForm(jid: JID): Promise<Element>
+   getRoomConfigurationForm(jid: JIDInterface): Promise<Element>
 
-   submitRoomConfiguration(jid: JID, form: Form): Promise<Element>
+   submitRoomConfiguration(jid: JIDInterface, form: Form): Promise<Element>
 
-   cancelRoomConfiguration(jid: JID): Promise<Element>
+   cancelRoomConfiguration(jid: JIDInterface): Promise<Element>
 
-   sendMediatedMultiUserInvitation(receiverJid: JID, roomJid: JID, reason?: string)
+   sendMediatedMultiUserInvitation(receiverJid: JIDInterface, roomJid: JIDInterface, reason?: string)
 
-   declineMediatedMultiUserInvitation(receiverJid: JID, roomJid: JID, reason?: string)
+   declineMediatedMultiUserInvitation(receiverJid: JIDInterface, roomJid: JIDInterface, reason?: string)
 
-   sendDirectMultiUserInvitation(receiverJid: JID, roomJid: JID, reason?: string, password?: string)
+   sendDirectMultiUserInvitation(receiverJid: JIDInterface, roomJid: JIDInterface, reason?: string, password?: string)
 
-   queryArchive(archive: JID, queryId: string, beforeResultId?: string, end?: Date): Promise<Element>
+   queryArchive(archive: JIDInterface, queryId: string, beforeResultId?: string, end?: Date): Promise<Element>
 
    close()
 }

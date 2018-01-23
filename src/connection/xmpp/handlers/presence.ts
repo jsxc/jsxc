@@ -7,13 +7,8 @@ import Roster from '../../../ui/Roster';
 import { Presence } from '../../AbstractConnection'
 import 'jquery'
 import AbstractHandler from '../AbstractHandler'
+import { ContactSubscription as SUBSCRIPTION } from '../../../ContactInterface'
 
-const SUBSCRIPTION = {
-   REMOVE: 'remove',
-   FROM: 'from',
-   BOTH: 'both',
-   TO: 'to'
-};
 const PRESENCE = {
    ERROR: 'error',
    SUBSCRIBE: 'subscribe',

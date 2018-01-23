@@ -275,7 +275,7 @@ export default class ChatWindow {
       previewElement.empty();
    }
 
-   private initDroppable() {
+   protected initDroppable() {
       let windowElement = this.element.find('.jsxc-window');
 
       windowElement.addClass('jsxc-droppable');

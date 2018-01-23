@@ -89,7 +89,7 @@ export default class Account {
          this.connection = connection;
 
          if (pause) {
-            (<any>this.connection).pause(); //@TODO fix
+            (<any>this.connection).pause(); //@TODO fix ts type
          } else {
             this.initConnection(status);
          }

@@ -1,15 +1,15 @@
-import Log from '../../../util/Log';
-import JID from '../../../JID';
-import Client from '../../../Client';
-import ContactData from '../../../ContactData'
+import Log from '../../../util/Log'
+import JID from '../../../JID'
+import Client from '../../../Client'
 import Roster from '../../../ui/Roster'
 import AbstractHandler from '../AbstractHandler'
+import { ContactSubscription as SUBSCRIPTION } from '../../../ContactInterface'
 
-let SUBSCRIPTION = {
-   REMOVE: 'remove',
-   FROM: 'from',
-   BOTH: 'both'
-};
+// let SUBSCRIPTION = {
+//    REMOVE: 'remove',
+//    FROM: 'from',
+//    BOTH: 'both'
+// };
 let PRESENCE = {
    ERROR: 'error',
    SUBSCRIBE: 'subscribe',
@@ -55,16 +55,16 @@ export default class extends AbstractHandler {
       } else if (contact) {
          if (subscription === SUBSCRIPTION.REMOVE) {
             account.removeContact(contact);
-         } else {
+         } else if (subscription === SUBSCRIPTION.FROM || subscription === SUBSCRIPTION.BOTH) {
             contact.setName(name);
-            contact.setSubscription(subscription);
+            contact.setSubscription(<SUBSCRIPTION>subscription);
 
             //@TODO refresh roster position
          }
       } else {
          //@REVIEW DRY same code as in roster handler
          contact = account.addContact(jid, name);
-         contact.setSubscription(subscription);
+         contact.setSubscription(<SUBSCRIPTION>subscription);
 
          Roster.get().add(contact);
       }

@@ -102,7 +102,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
                   if (form) {
                      let values = form.getValues('max-file-size') || [];
                      if (values.length === 1) {
-                        maxFileSize = values[0];
+                        maxFileSize = parseInt(values[0]);
                      }
                   }
 

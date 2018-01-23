@@ -12,6 +12,7 @@ export enum ContactType {
 }
 
 export enum ContactSubscription {
+   REMOVE = 'remove',
    FROM = 'from',
    TO = 'to',
    BOTH = 'both',

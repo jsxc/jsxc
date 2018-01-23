@@ -85,7 +85,7 @@ describe('Pipe', () => {
         }).to.throw();
 
         expect(() => {
-            pipeA.addProcessor(function(...args) { return Promise.resolve(); }, 'abc');
+            pipeA.addProcessor(function(...args) { return Promise.resolve(); }, <any>'abc');
         }).to.throw();
     })
 });

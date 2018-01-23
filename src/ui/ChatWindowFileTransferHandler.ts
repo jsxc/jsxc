@@ -1,7 +1,6 @@
 import Contact from '../Contact'
 import ChatWindow from '../ui/ChatWindow'
 import Translation from '../util/Translation'
-import HttpUpload from '../HttpUpload'
 import Client from '../Client'
 import ByteBeautifier from './util/ByteBeautifier'
 import Attachment from '../Attachment'

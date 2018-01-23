@@ -12,5 +12,9 @@ export interface JIDInterface {
 
    toString(): string;
 
+   toEscapedString(): string;
+
    isBare(): boolean;
+
+   isServer(): boolean;
 }

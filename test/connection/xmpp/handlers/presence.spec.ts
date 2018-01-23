@@ -8,9 +8,12 @@ import AccountStub from '../../../AccountStub'
 import Log from '../../../../src/util/Log'
 
 describe('Presence handler', () => {
+    let handler;
+
     before(function() {
         let account = new AccountStub;
-        let getAccountStub = sinon.stub(Client, 'getAccout').returns(account);
+        let getAccountStub = sinon.stub(Client, 'getAccount').returns(account);
+        handler = new PresenceHandler(getAccountStub());
 
         // let logStub = sinon.stub(Log, 'log').callsFake(function(level, message:string, data?:any){
         //
@@ -20,10 +23,10 @@ describe('Presence handler', () => {
     it('should ignore own presence notification', function() {
         let pres = $pres({
             type: '',
-            from: Client.getAccout().getJID().bare
+            from: Client.getAccount().getJID().bare
         });
 
-        let presenceHandlerReturn = onPresence(pres.tree());
+        let presenceHandlerReturn = handler.process(pres.tree());
 
         expect(presenceHandlerReturn).to.be.true;
     });
@@ -34,7 +37,7 @@ describe('Presence handler', () => {
             from: 'foo2@bar'
         });
 
-        let presenceHandlerReturn = onPresence(pres.tree());
+        let presenceHandlerReturn = handler.process(pres.tree());
 
         expect(presenceHandlerReturn).to.be.true;
     })

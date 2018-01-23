@@ -1,6 +1,6 @@
 {
   "name": "jsxc",
-  "version": "3.1.1",
+  "version": "4.0.0-alpha",
   "description": "Real-time xmpp chat application with video calls, file transfer and encrypted communication",
   "homepage": "http://www.jsxc.org/",
   "bugs": "https://github.com/jsxc/jsxc/issues",
@@ -14,10 +14,12 @@
     "start": "webpack --config webpack.config.js",
     "dev": "webpack --config webpack.config.js --watch",
     "test": "karma start",
-    "checking-format": "node_modules/typescript-formatter/bin/tsfmt --verify"
+    "checking-format": "node_modules/typescript-formatter/bin/tsfmt --verify",
+    "checking-typescript": "node_modules/typescript/bin/tsc --noEmit"
   },
   "pre-commit": [
-    "checking-format"
+    "checking-format",
+    "checking-typescript"
   ],
   "devDependencies": {
     "@types/chai": "^4.0.2",
@@ -75,7 +77,6 @@
     "jxt": "^3.0.8",
     "jxt-xmpp": "^2.4.0",
     "jxt-xmpp-types": "^3.0.0",
-    "magnific-popup": "^1.1.0",
     "moment": "^2.18.1",
     "otr": "github:sualko/otr#129d6329c006b8b5f919d1ffcb59debdc8bd849f",
     "sha1": "^1.1.1",

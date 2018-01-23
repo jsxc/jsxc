@@ -10,12 +10,11 @@ import Account from '../../Account'
 import { AbstractConnection, Presence } from '../AbstractConnection'
 import Roster from '../../ui/Roster'
 import XMPPJingleHandler from './JingleHandler'
-import * as Strophe from 'strophe'
 
 export default class XMPPConnection extends AbstractConnection implements IConnection {
    private handler;
 
-   constructor(account: Account, protected connection: Strophe.Connection) {
+   constructor(account: Account, protected connection) {
       super(account);
 
       this.handler = new XMPPHandler(account, connection);

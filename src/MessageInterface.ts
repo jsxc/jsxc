@@ -17,7 +17,7 @@ export interface MessageInterface {
 
    getNextId(): string
 
-   setNext(message: MessageInterface | string)
+   setNext(message: MessageInterface | string): void
 
    getCssId(): string
 
@@ -60,8 +60,6 @@ export interface MessageInterface {
    isEncrypted(): boolean;
 
    hasAttachment(): boolean;
-
-   setUnread();
 
    setDirection(direction: DIRECTION)
 

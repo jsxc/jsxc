@@ -27,7 +27,7 @@ export class DiscoInfoHandler extends AbstractHandler {
       iq = this.addIdentitiesToStanza(iq);
       iq = this.addFeaturesToStanza(iq);
 
-      this.account.getConnection().send(iq.tree());
+      (<any>this.account.getConnection()).send(iq.tree()); //@REVIEW
 
       return true;
    }
@@ -75,7 +75,7 @@ export class DiscoItemsHandler extends AbstractHandler {
 
       //We return an empty set, because we dont support disco items
 
-      this.account.getConnection().send(iq.tree());
+      (<any>this.account.getConnection()).send(iq.tree());
 
       return true;
    }
