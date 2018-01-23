@@ -13,7 +13,7 @@
   "scripts": {
     "start": "webpack --config webpack.config.js",
     "dev": "webpack --config webpack.config.js --watch",
-    "test": "karma start",
+    "test": "karma start --single-run",
     "checking-format": "node_modules/typescript-formatter/bin/tsfmt --verify",
     "checking-typescript": "node_modules/typescript/bin/tsc --noEmit"
   },
