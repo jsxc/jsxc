@@ -26,7 +26,9 @@ describe('Presence handler', () => {
             from: Client.getAccount().getJID().bare
         });
 
-        let presenceHandlerReturn = handler.process(pres.tree());
+        //@TODO test return reason
+
+        let presenceHandlerReturn = handler.processStanza(pres.tree());
 
         expect(presenceHandlerReturn).to.be.true;
     });
@@ -37,7 +39,9 @@ describe('Presence handler', () => {
             from: 'foo2@bar'
         });
 
-        let presenceHandlerReturn = handler.process(pres.tree());
+        //@TODO test return reason
+
+        let presenceHandlerReturn = handler.processStanza(pres.tree());
 
         expect(presenceHandlerReturn).to.be.true;
     })

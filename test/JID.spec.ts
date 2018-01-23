@@ -5,7 +5,7 @@ import 'mocha';
 import JID from '../src/JID'
 
 class JIDDummy {
-    constructor(public node: string, public domain: string, public resource?: string) {
+    constructor(public node: string, public domain: string, public resource: string = '') {
 
     }
 

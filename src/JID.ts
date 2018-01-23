@@ -42,7 +42,7 @@ export default class JID implements JIDInterface {
    public toEscapedString(): string {
       let bare = this.escapeNode(this.node) + '@' + this.domain;
 
-      return bare + ((this.resource) ? '/' + this.escapeNode(this.resource) : '');
+      return bare + ((this.resource) ? '/' + this.resource : '');
    }
 
    public isBare(): boolean {
