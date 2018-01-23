@@ -12,6 +12,7 @@ import Pipe from '../util/Pipe'
 import Form from './Form'
 import UUID from '../util/UUID'
 import PEPService from './services/PEP'
+import PersistentMap from '../util/PersistentMap'
 
 let Strophe = StropheLib.Strophe;
 let $iq = StropheLib.$iq;
@@ -82,6 +83,16 @@ abstract class AbstractConnection {
 
    public getJID(): JID {
       return this.account.getJID();
+   }
+
+   public getSessionId() {
+      //@REVIEW this should be handled differently; duplicate Connector
+      let connectionParameters = new PersistentMap(this.account.getStorage(), 'connection');
+      let sessionId = connectionParameters.get('sid') || null;
+
+      //@TODO return session id only if connected
+
+      return sessionId;
    }
 
    public getRoster() {

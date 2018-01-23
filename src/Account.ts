@@ -36,6 +36,8 @@ interface IConnectionParameters {
 export default class Account {
    private storage: Storage;
 
+   private sessionStorage: Storage;
+
    private uid: string;
 
    private connection: IConnection;
@@ -214,6 +216,24 @@ export default class Account {
       }
 
       return this.storage;
+   }
+
+   public getSessionStorage() {
+      if (!this.sessionStorage) {
+         let sid = (<any>this.getConnection()).getSessionId();
+
+         if (!sid) {
+            //@REVIEW maybe use buffer
+            throw 'Session ID not available';
+         }
+
+         let name = this.uid + ':sest:' + sid;
+
+         this.sessionStorage = new Storage(name);
+         //@TODO save name for clean up
+      }
+
+      return this.sessionStorage;
    }
 
    public getConnection(): IConnection {

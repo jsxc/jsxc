@@ -12,9 +12,13 @@ import Avatar from '../Avatar'
 export default class PluginAPI {
    private storage;
 
+   private sessionStorage;
+
    constructor(private name: string, private account: Account) {
 
    }
+
+   //@TODO Log function with name as prefix
 
    public getStorage(): Storage {
       if (typeof this.storage === 'undefined') {
@@ -22,6 +26,15 @@ export default class PluginAPI {
       }
 
       return this.storage;
+   }
+
+   public getSessionStorage(): Storage {
+      if (typeof this.sessionStorage === 'undefined') {
+         //@REVIEW maybe also encapsulate session storage for every plugin
+         this.sessionStorage = this.account.getSessionStorage();
+      }
+
+      return this.sessionStorage;
    }
 
    public send = (stanzaElement: Element | Strophe.Builder) => {
