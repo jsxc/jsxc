@@ -67,4 +67,8 @@ export default class PluginAPI {
    public addFeature(feature: string) {
       this.account.getDiscoInfo().addFeature(feature);
    }
+
+   public registerConnectionHook(func: (status: number, condition?: string) => void) {
+      this.account.registerConnectionHook(func);
+   }
 }

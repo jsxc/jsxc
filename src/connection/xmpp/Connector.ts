@@ -61,6 +61,7 @@ export default class Connector {
    private successfulConnected = (data) => {
       let stropheConnection = data.connection;
       let status = data.status;
+      let condition = data.condition;
 
       this.storeConnectionParameters(stropheConnection);
       this.addDisconnectHandler(stropheConnection);
@@ -82,6 +83,8 @@ export default class Connector {
 
       Log.debug('XMPP connection ready');
 
+      this.account.triggerConnectionHook(status, condition);
+
       return [status, accountConnection];
    }
 
@@ -102,7 +105,9 @@ export default class Connector {
    }
 
    private addDisconnectHandler(connection) {
-      connection.connect_callback = (status) => {
+      connection.connect_callback = (status, condition) => {
+         this.account.triggerConnectionHook(status, condition);
+
          if (status === Strophe.Status.DISCONNECTED) {
             this.account.connectionDisconnected();
          }

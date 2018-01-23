@@ -20,6 +20,7 @@ import * as StropheLib from 'strophe.js'
 import PluginRepository from './plugin/PluginRepository'
 import DiscoInfoRepository from './DiscoInfoRepository'
 import DiscoInfoChangable from './DiscoInfoChangable'
+import HookRepository from './util/HookRepository'
 
 let Strophe = StropheLib.Strophe;
 
@@ -56,6 +57,8 @@ export default class Account {
    private discoInfoRepository: DiscoInfoRepository;
 
    private ownDiscoInfo: DiscoInfoChangable;
+
+   private hookRepository = new HookRepository<any>();
 
    constructor(boshUrl: string, jid: string, sid: string, rid: string);
    constructor(boshUrl: string, jid: string, password: string);
@@ -102,23 +105,32 @@ export default class Account {
       });
    }
 
-   private initConnection(status) {
+   private initConnection(status): Promise<void> {
       let storage = this.getStorage();
       let connectionStatusObject = storage.getItem('connectionStatus') || {};
       let previousStatus = connectionStatusObject.status;
 
-      if (status === Strophe.Status.CONNECTED || previousStatus === Strophe.Status.CONNECTED) {
+      //@REVIEW we have to make sure this is only called once (special case: connection pause)
+      if (status === Strophe.Status.CONNECTED /*|| previousStatus === Strophe.Status.CONNECTED*/) {
          Roster.get().setPresence(Presence.online);
          Roster.get().refreshOwnPresenceIndicator();
 
          this.removeNonpersistentContacts();
 
-         this.connection.getRoster().then(() => {
+         return this.connection.getRoster().then(() => {
             this.connection.sendPresence();
          });
-      } else {
-         this.connection.sendPresence();
       }
+
+      return Promise.resolve();
+   }
+
+   public triggerConnectionHook = (status: number, condition?: string) => {
+      this.hookRepository.trigger('connection', status, condition);
+   }
+
+   public registerConnectionHook = (func: (status: number, condition?: string) => void) => {
+      this.hookRepository.registerHook('connection', func);
    }
 
    public getPluginRepository(): PluginRepository {

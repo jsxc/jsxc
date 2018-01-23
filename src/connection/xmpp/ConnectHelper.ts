@@ -30,8 +30,6 @@ function loginWithPassword(url: string, jid: string, password: string): Promise<
       //@TODO don't forget password from options
       connection.connect(jid, password, function(status, condition) {
          resolveConnectionPromise(status, condition, connection, resolve, reject);
-
-         connectionCallback.apply(this, arguments);
       });
    });
 }
@@ -45,8 +43,6 @@ function attachConnection(url: string, jid: string, sid: string, rid: string) {
    return new Promise(function(resolve, reject) {
       connection.attach(jid, sid, rid, function(status, condition) {
          resolveConnectionPromise(status, condition, connection, resolve, reject);
-
-         connectionCallback.apply(this, arguments);
       });
    })
 }
@@ -61,10 +57,13 @@ function resolveConnectionPromise(status, condition, connection, resolve, reject
          reject(new AuthenticationError(condition));
          break;
       case Strophe.Status.ATTACHED:
+         // flush connection in order we reuse a rid
+         connection.flush();
       case Strophe.Status.CONNECTED:
          resolve({
             connection: connection,
-            status: status
+            status: status,
+            condition: condition
          });
          break;
    }
@@ -101,31 +100,4 @@ function prepareConnection(url: string): Strophe.Connection {
    SM.changeState(SM.STATE.ESTABLISHING);
 
    return connection;
-}
-
-function connectionCallback(status, condition) {
-
-   Log.debug(Object.getOwnPropertyNames(Strophe.Status)[status] + ': ' + condition);
-
-   switch (status) {
-      case Strophe.Status.CONNECTING:
-         $(document).trigger('connecting.jsxc');
-         break;
-      case Strophe.Status.CONNECTED:
-         //jsxc.bid = jsxc.jidToBid(jsxc.xmpp.conn.jid.toLowerCase());
-         $(document).trigger('connected.jsxc');
-         break;
-      case Strophe.Status.ATTACHED:
-         $(document).trigger('attached.jsxc');
-         break;
-      case Strophe.Status.DISCONNECTED:
-         $(document).trigger('disconnected.jsxc');
-         break;
-      case Strophe.Status.CONNFAIL:
-         $(document).trigger('connfail.jsxc');
-         break;
-      case Strophe.Status.AUTHFAIL:
-         $(document).trigger('authfail.jsxc');
-         break;
-   }
 }
