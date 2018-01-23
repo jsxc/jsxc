@@ -302,12 +302,12 @@
     "Connection_accepted": null,
     "Stream_terminated": null,
     "Close_all": null,
-    "Notification": null,
+    "Notification": "Уведомление",
     "Unreadable_OTR_message": null,
-    "Load_older_messages": null,
+    "Load_older_messages": "Показать предыдущие сообщения",
     "Message_history": null,
     "setting-mam-enable": null,
-    "File_too_large": null,
+    "File_too_large": "Файл слишком большой",
     "No_proper_file_transfer_method_available": null,
     "You_have_to_go_online_": null
   }
