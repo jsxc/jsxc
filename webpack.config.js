@@ -54,7 +54,8 @@ module.exports = {
    },
    externals: {
       'jquery': 'jQuery',
-      'child_process': 'child_process'
+      'child_process': 'child_process',
+      'webworker-threads': 'webworker-threads'
    },
    plugins: [
       new ExtractTextPlugin({
