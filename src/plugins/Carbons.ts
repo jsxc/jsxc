@@ -31,7 +31,7 @@ export default class CarbonsPlugin extends AbstractPlugin {
    }
 
    private preSendMessageStanzaProcessor = (message: Message, xmlElement: Strophe.Builder) => {
-      let body = xmlElement.node.textContent;
+      let body = (<any>xmlElement).node.textContent;
 
       if (Options.get('carbons').enabled && body.match(/^\?OTR/)) {
          xmlElement.up().c("private", {

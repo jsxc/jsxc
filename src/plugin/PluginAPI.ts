@@ -37,11 +37,11 @@ export default class PluginAPI {
       return this.sessionStorage;
    }
 
-   public send = (stanzaElement: Element | Strophe.Builder) => {
+   public send = (stanzaElement: Strophe.Builder) => {
       this.getConnection().pluginOnlySend(stanzaElement);
    }
 
-   public sendIQ = (stanzaElement: Element | Strophe.Builder): Promise<{}> => {
+   public sendIQ = (stanzaElement: Strophe.Builder): Promise<{}> => {
       return this.getConnection().pluginOnlySendIQ(stanzaElement);
    }
 

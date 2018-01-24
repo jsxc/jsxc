@@ -32,7 +32,7 @@ export default class HttpUploadService {
          xmlns: this.namespace
       }).c('filename').t(file.name)
          .up()
-         .c('size').t(file.size);
+         .c('size').t(file.size.toString());
 
       return this.pluginAPI.sendIQ(iq)
          .then(this.parseSlotResponse)

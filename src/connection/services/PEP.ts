@@ -1,7 +1,7 @@
 
 export default class PEP {
    constructor(private send: (stanzaElement: Element) => void,
-      private sendIQ: (stanzaElement: Element) => Promise<Element>,
+      private sendIQ: (stanzaElement: Strophe.Builder) => Promise<Element>,
       private connection, private account) {
 
    }

@@ -20,7 +20,8 @@ export default class UserMedia {
             });
 
             userMedia = userMedia.filter(function(el) {
-               return availableDevices.indexOf(el) !== -1 || availableDevices.indexOf(el + 'input') !== -1;
+               //@REVIEW ts type
+               return availableDevices.indexOf(<any>el) !== -1 || availableDevices.indexOf(<any>(el + 'input')) !== -1;
             });
 
             if (userMedia.length) {
