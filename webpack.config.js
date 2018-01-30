@@ -1,12 +1,19 @@
 /* jshint node:true */
-var path = require("path");
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
+const path = require("path");
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+
+const extractSass = new ExtractTextPlugin({
+ filename: 'styles/[name].bundle.css',
+   allChunks: true,
+});
 
 module.exports = {
    entry: ['./scss/main.scss', './src/index.ts'],
    output: {
-      filename: 'bundle.js',
-      path: __dirname,
+      filename: '[name].bundle.js',
+      path: path.resolve(__dirname, './dist/'),
       libraryTarget: 'var',
       library: 'jsxc'
    },
@@ -32,13 +39,13 @@ module.exports = {
          },
          {
             test: /\.css$/,
-            use: ExtractTextPlugin.extract({
+            use: extractSass.extract({
                use: 'css-loader?importLoaders=1',
             }),
          },
          {
            test: /\.(sass|scss)$/,
-           use: ExtractTextPlugin.extract({
+           use: extractSass.extract({
              use: [{
                 loader: 'css-loader',
                 options: {
@@ -58,9 +65,14 @@ module.exports = {
       'webworker-threads': 'webworker-threads'
    },
    plugins: [
-      new ExtractTextPlugin({
-        filename: 'css/bundle.css',
-         allChunks: true,
-      }),
+      extractSass,
+      new CleanWebpackPlugin(['dist']),
+      new CopyWebpackPlugin([{
+         from: 'images/',
+         to: 'images/'
+      }, {
+         from: 'node_modules/emojione/assets/svg/',
+         to: 'images/emojione/'
+      }])
   ],
 };

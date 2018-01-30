@@ -26,6 +26,8 @@
     "@types/mocha": "^2.2.47",
     "@types/sinon": "^2.3.7",
     "chai": "^4.1.0",
+    "clean-webpack-plugin": "^0.1.18",
+    "copy-webpack-plugin": "^4.3.1",
     "js-beautify": "^1.7.5",
     "karma": "^1.7.0",
     "karma-chai": "^0.1.0",

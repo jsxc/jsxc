@@ -28,6 +28,8 @@ const EMOTICONS: any[] = [
 ]
 import * as emojione from 'emojione/lib/js/emojione';
 
+const CUSTOM_EMOTICON_BASE_PATH = '/images/emotions/';
+
 const EMOTICON_LIST = {
    'core': {
       ':klaus:': ['klaus'],
@@ -106,20 +108,21 @@ export default class Emoticons {
          return shortname;
       }
 
-      var src, filename;
+      let filename;
+      let div = $('<div>');
 
       if (EMOTICON_LIST.core[shortname]) {
          filename = EMOTICON_LIST.core[shortname][EMOTICON_LIST.core[shortname].length - 1].replace(/^:([^:]+):$/, '$1');
-         src = Options.get('root') + '/img/emotions/' + filename + '.svg';
+         let src = Options.get('root') + CUSTOM_EMOTICON_BASE_PATH + filename + '.svg';
+
+         div.css('background-image', 'url(' + src + ')'); //@TODO replace with css class
       } else if (EMOTICON_LIST.emojione[shortname]) {
          filename = EMOTICON_LIST.emojione[shortname].fname;
-         src = Options.get('root') + '/lib/emojione/assets/svg/' + filename + '.svg';
+
+         div.addClass('jsxc-emoticon-' + filename);
       }
 
-      var div = $('<div>');
-
       div.addClass('jsxc-emoticon');
-      div.css('background-image', 'url(' + src + ')');
       div.attr('title', shortname);
 
       return div.prop('outerHTML');
