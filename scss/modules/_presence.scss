@@ -18,7 +18,7 @@ $presences: online chat away xa dnd;
             background-position: center;
             background-size: 100%;
             box-sizing: content-box;
-            background-image: url("../images/presence_#{$presence}.svg");
+            background-image: url("../images/presence/#{$presence}.svg");
             background-color: map-get($presenceColors, $presence);
          }
       }
