@@ -189,7 +189,7 @@
          max-width: 100%;
       }
 
-      background-image: url("../img/camera_disabled_icon_white.svg");
+      background-image: url("../images/camera_disabled_icon_white.svg");
       background-size: 10%;
       background-position: center center;
       background-repeat: no-repeat;
@@ -298,18 +298,18 @@ div {
    }
 
    &.jsxc-video {
-      background-image: url("../img/camera_icon_white.svg");
+      background-image: url("../images/camera_icon_white.svg");
 
       &.jsxc-disabled {
-         background-image: url("../img/camera_disabled_icon_white.svg");
+         background-image: url("../images/camera_disabled_icon_white.svg");
       }
    }
 
    &.jsxc-audio {
-      background-image: url("../img/pick_up_white.svg");
+      background-image: url("../images/pick_up_white.svg");
 
       &.jsxc-disabled {
-         background-image: url("../img/pick_up_white_disabled.svg");
+         background-image: url("../images/pick_up_white_disabled.svg");
       }
    }
 }
@@ -358,11 +358,11 @@ div {
    }
 
    .jsxc-hang-up {
-      background-image: url("../img/hang_up_red.svg");
+      background-image: url("../images/hang_up_red.svg");
    }
 
    .jsxc-fullscreen {
-      background-image: url("../img/fullscreen_white.svg");
+      background-image: url("../images/fullscreen_white.svg");
    }
 
    .jsxc-showchat {

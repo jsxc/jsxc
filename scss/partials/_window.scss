@@ -63,7 +63,7 @@
    }
 
    .jsxc-more {
-      background-image: url("../img/more_white.svg");
+      background-image: url("../images/more_white.svg");
       opacity: 0.4;
    }
    // .ui-resizable-w {
@@ -76,7 +76,7 @@
    //    width: 15px;
    //    height: 15px;
    //    z-index: 95 !important;
-   //    background-image: url("../img/resize_gray.svg");
+   //    background-image: url("../images/resize_gray.svg");
    // }
    //
    // .ui-resizable-n {
@@ -294,7 +294,7 @@
 }
 
 .jsxc-file-transfer {
-   background-image: url("../img/attachment.svg");
+   background-image: url("../images/attachment.svg");
    background-position: center;
    background-repeat: no-repeat;
    background-size: 80%;
@@ -331,7 +331,7 @@
 
    &:after {
       content: " ";
-      background-image: url("../img/smiley.svg");
+      background-image: url("../images/smiley.svg");
       background-position: center center;
       background-repeat: no-repeat;
       background-size: 30px 30px;
@@ -438,7 +438,7 @@
          left: 0;
          border-radius: 3px;
          background-color: rgba(255, 255, 255, 0.7);
-         background-image: url("../img/download_icon_black.svg");
+         background-image: url("../images/download_icon_black.svg");
          background-size: contain;
          background-position: center center;
          background-repeat: no-repeat;
@@ -471,7 +471,7 @@
    background-position: 3px center;
    background-size: 25px 25px;
    background-repeat: no-repeat;
-   background-image: url("../img/filetypes/file.svg");
+   background-image: url("../images/filetypes/file.svg");
 
    img {
       border-radius: 3px;
@@ -485,24 +485,24 @@
    }
 
    &.jsxc-application {
-      background-image: url("../img/filetypes/application.svg");
+      background-image: url("../images/filetypes/application.svg");
    }
 
    &.jsxc-application-pdf {
-      background-image: url("../img/filetypes/application-pdf.svg");
+      background-image: url("../images/filetypes/application-pdf.svg");
    }
 
    &.jsxc-audio {
-      background-image: url("../img/filetypes/audio.svg");
+      background-image: url("../images/filetypes/audio.svg");
    }
 
    &.jsxc-video {
-      background-image: url("../img/filetypes/video.svg");
+      background-image: url("../images/filetypes/video.svg");
       opacity: 1;
    }
 
    &.jsxc-text {
-      background-image: url("../img/filetypes/text.svg");
+      background-image: url("../images/filetypes/text.svg");
    }
 }
 
@@ -528,7 +528,7 @@
       width: 10px;
       height: 8px;
       margin-left: 2px;
-      background-image: url("../img/padlock_close_grey.svg");
+      background-image: url("../images/padlock_close_grey.svg");
       background-size: contain;
       background-repeat: no-repeat;
    }
@@ -650,7 +650,7 @@
          background-size: 80%;
          background-repeat: no-repeat;
          margin: 0 3px 0 0;
-         background-image: url("../img/composing.png");
+         background-image: url("../images/composing.png");
       }
 
       &.jsxc-fadein {
@@ -670,7 +670,7 @@
 }
 
 div.jsxc-transfer {
-   background-image: url("../img/padlock_open_black.svg");
+   background-image: url("../images/padlock_open_black.svg");
    background-repeat: no-repeat;
    background-position: center center;
    background-size: 60%;
@@ -689,7 +689,7 @@ div.jsxc-transfer {
    }
 
    &.jsxc-disabled {
-      background-image: url("../img/padlock_open_disabled_black.svg");
+      background-image: url("../images/padlock_open_disabled_black.svg");
       cursor: default;
 
       &:hover {
@@ -699,15 +699,15 @@ div.jsxc-transfer {
 
    &.jsxc-fin {
       opacity: 1;
-      background-image: url("../img/padlock_close_grey.svg");
+      background-image: url("../images/padlock_close_grey.svg");
    }
 
    &.jsxc-enc {
       opacity: 1;
-      background-image: url("../img/padlock_close_orange.svg");
+      background-image: url("../images/padlock_close_orange.svg");
 
       &.jsxc-trust {
-         background-image: url("../img/padlock_close_green.svg");
+         background-image: url("../images/padlock_close_green.svg");
       }
    }
 }
