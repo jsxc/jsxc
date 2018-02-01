@@ -1,13 +1,13 @@
 import Log from '../../util/Log'
 import Contact from '../../Contact'
 import Message from '../../Message'
-import { DIRECTION } from '../../MessageInterface'
+import { DIRECTION } from '../../Message.interface'
 import Translation from '../../util/Translation'
 import OTR from 'otr/lib/otr'
 import DSA from 'otr/lib/dsa'
 import { EncryptionState } from '../../plugin/AbstractPlugin'
 import Storage from '../../Storage'
-import { IConnection } from '../../connection/ConnectionInterface'
+import { IConnection } from '../../connection/Connection.interface'
 import PersistentMap from '../../util/PersistentMap'
 
 //@REVIEW

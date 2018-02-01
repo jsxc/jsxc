@@ -1,13 +1,13 @@
 import Log from '../../../util/Log';
 import JID from '../../../JID';
-import { ContactInterface } from '../../../ContactInterface';
+import { IContact } from '../../../Contact.interface';
 import Client from '../../../Client';
 import { Notice, TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../Notice';
 import Roster from '../../../ui/Roster';
 import { Presence } from '../../AbstractConnection'
 import 'jquery'
 import AbstractHandler from '../AbstractHandler'
-import { ContactSubscription as SUBSCRIPTION } from '../../../ContactInterface'
+import { ContactSubscription as SUBSCRIPTION } from '../../../Contact.interface'
 
 const PRESENCE = {
    ERROR: 'error',
@@ -76,7 +76,7 @@ export default class extends AbstractHandler {
       return this.PRESERVE_HANDLER;
    }
 
-   private processSubscribtionRequest(jid: JID, contact: ContactInterface) {
+   private processSubscribtionRequest(jid: JID, contact: IContact) {
       if (contact) {
          Log.debug('Auto approve contact request, because he is already in our contact list.');
 

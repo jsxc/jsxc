@@ -1,4 +1,4 @@
-import { IConnection } from './ConnectionInterface'
+import { IConnection } from './Connection.interface'
 import Account from '../Account'
 import * as JSM from 'jingle'
 import * as RTC from 'webrtc-adapter'

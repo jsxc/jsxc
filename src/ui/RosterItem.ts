@@ -5,14 +5,14 @@ import confirmDialog from './dialogs/confirm';
 import showVcardDialog from './dialogs/vcard'
 import { Presence } from '../connection/AbstractConnection'
 import Dialog from './Dialog'
-import { ContactInterface } from '../ContactInterface'
+import { IContact } from '../Contact.interface'
 
 let rosterItemTemplate = require('../../template/roster-item.hbs')
 
 export default class RosterItem {
    private element: JQuery;
 
-   constructor(private contact: ContactInterface) {
+   constructor(private contact: IContact) {
       let self = this;
       let template = rosterItemTemplate({
          name: contact.getName(),
@@ -122,7 +122,7 @@ export default class RosterItem {
       return this.element;
    }
 
-   public getContact(): ContactInterface {
+   public getContact(): IContact {
       return this.contact;
    }
 

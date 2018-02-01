@@ -1,5 +1,5 @@
 
-export interface JIDInterface {
+export interface IJID {
    readonly full: string;
 
    readonly bare: string;

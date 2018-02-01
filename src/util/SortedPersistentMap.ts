@@ -1,4 +1,4 @@
-import Identifiable from '../IdentifiableInterface'
+import Identifiable from '../Identifiable.interface'
 import Storage from '../Storage'
 import Log from '../util/Log'
 

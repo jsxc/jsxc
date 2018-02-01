@@ -5,17 +5,32 @@ import Contact from '../Contact'
 import Message from '../Message'
 import Pipe from '../util/Pipe'
 import JID from '../JID'
-import { IConnection } from '../connection/ConnectionInterface'
+import { IConnection } from '../connection/Connection.interface'
 import DiscoInfoRepository from '../DiscoInfoRepository'
 import Avatar from '../Avatar'
+import { MessagePayload } from '../Message.interface'
+import { API as IPluginAPI } from './PluginAPI.interface'
 
-export default class PluginAPI {
+export default class PluginAPI implements IPluginAPI {
    private storage;
 
    private sessionStorage;
 
    constructor(private name: string, private account: Account) {
 
+   }
+
+   public createJID(node: string, domain: string, resource: string): JID
+   public createJID(bare: string, resource: string): JID
+   public createJID(full: string): JID
+   public createJID(): JID {
+      return new JID(arguments[0], arguments[1], arguments[2]);
+   }
+
+   public createMessage(uid: string): Message
+   public createMessage(data: MessagePayload): Message
+   public createMessage() {
+      return new Message(arguments[0]);
    }
 
    //@TODO Log function with name as prefix

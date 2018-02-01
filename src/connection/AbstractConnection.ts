@@ -1,12 +1,12 @@
 import Message from '../Message'
 import JID from '../JID'
-import { JIDInterface } from '../JIDInterface'
+import { IJID } from '../JID.interface'
 import * as NS from './xmpp/namespace'
 import RosterHandler from './xmpp/handlers/roster'
 import Log from '../util/Log'
 import * as StropheLib from 'strophe.js'
 import JingleHandler from './JingleHandler'
-import { IConnection } from './ConnectionInterface'
+import { IConnection } from './Connection.interface'
 import Account from '../Account'
 import Pipe from '../util/Pipe'
 import Form from './Form'
@@ -193,7 +193,7 @@ abstract class AbstractConnection {
       this.send(presenceStanza);
    }
 
-   public removeContact(jid: JIDInterface): Promise<Element> {
+   public removeContact(jid: IJID): Promise<Element> {
       let self = this;
 
       // Shortcut to remove buddy from roster and cancle all subscriptions
@@ -209,7 +209,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public addContact(jid: JIDInterface, alias: string) {
+   public addContact(jid: IJID, alias: string) {
       let waitForRoster = this.addContactToRoster(jid, alias);
 
       this.sendSubscriptionRequest(jid);
@@ -217,7 +217,7 @@ abstract class AbstractConnection {
       return waitForRoster;
    };
 
-   public loadVcard(jid: JIDInterface) {
+   public loadVcard(jid: IJID) {
       let iq = $iq({
          type: 'get',
          to: jid.full
@@ -230,7 +230,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq).then(this.parseVcard);
    }
 
-   public setDisplayName(jid: JIDInterface, displayName: string): Promise<Element> {
+   public setDisplayName(jid: IJID, displayName: string): Promise<Element> {
       var iq = $iq({
          type: 'set'
       }).c('query', {
@@ -243,7 +243,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public sendSubscriptionAnswer(to: JIDInterface, accept: boolean) {
+   public sendSubscriptionAnswer(to: IJID, accept: boolean) {
       let presenceStanza = $pres({
          to: to.bare,
          type: (accept) ? 'subscribed' : 'unsubscribed'
@@ -252,7 +252,7 @@ abstract class AbstractConnection {
       this.send(presenceStanza);
    }
 
-   public getDiscoInfo(jid: JIDInterface, node?: string): Promise<Element> {
+   public getDiscoInfo(jid: IJID, node?: string): Promise<Element> {
       let attrs = {
          xmlns: NS.get('DISCO_INFO'),
          node: null
@@ -270,7 +270,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public getDiscoItems(jid: JIDInterface, node?: string): Promise<Element> {
+   public getDiscoItems(jid: IJID, node?: string): Promise<Element> {
       let attrs = {
          xmlns: NS.get('DISCO_ITEMS'),
          node: null
@@ -288,7 +288,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public joinMultiUserRoom(jid: JIDInterface, password?: string) {
+   public joinMultiUserRoom(jid: IJID, password?: string) {
       if (jid.isBare()) {
          return Promise.reject('We need a full jid to join a room');
       }
@@ -306,7 +306,7 @@ abstract class AbstractConnection {
       return this.send(pres);
    }
 
-   public leaveMultiUserRoom(jid: JIDInterface, exitMessage?: string) {
+   public leaveMultiUserRoom(jid: IJID, exitMessage?: string) {
       let pres = $pres({
          type: 'unavailable',
          //   id: presenceid,
@@ -320,7 +320,7 @@ abstract class AbstractConnection {
       return this.send(pres);
    }
 
-   public destroyMultiUserRoom(jid: JIDInterface): Promise<Element> {
+   public destroyMultiUserRoom(jid: IJID): Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'set'
@@ -331,7 +331,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public createInstantRoom(jid: JIDInterface): Promise<Element> {
+   public createInstantRoom(jid: IJID): Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'set'
@@ -345,7 +345,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public getRoomConfigurationForm(jid: JIDInterface): Promise<Element> {
+   public getRoomConfigurationForm(jid: IJID): Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'get'
@@ -356,7 +356,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public submitRoomConfiguration(jid: JIDInterface, form: Form): Promise<Element> {
+   public submitRoomConfiguration(jid: IJID, form: Form): Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'set'
@@ -367,7 +367,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public cancelRoomConfiguration(jid: JIDInterface): Promise<Element> {
+   public cancelRoomConfiguration(jid: IJID): Promise<Element> {
       let iq = $iq({
          to: jid.bare,
          type: 'set'
@@ -476,7 +476,7 @@ abstract class AbstractConnection {
 
    }
 
-   private addContactToRoster(jid: JIDInterface, alias: string) {
+   private addContactToRoster(jid: IJID, alias: string) {
       let iq = $iq({
          type: 'set'
       }).c('query', {
@@ -489,7 +489,7 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   private sendSubscriptionRequest(jid: JIDInterface) {
+   private sendSubscriptionRequest(jid: IJID) {
       // send subscription request to buddy (trigger onRosterChanged)
       this.send($pres({
          to: jid.full,

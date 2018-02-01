@@ -1,5 +1,5 @@
 import Storable from './StorableAbstract';
-import Identifiable from './IdentifiableInterface'
+import Identifiable from './Identifiable.interface'
 import Storage from './Storage'
 
 const SEP = ':';

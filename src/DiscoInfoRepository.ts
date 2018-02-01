@@ -6,8 +6,9 @@ import Contact from './Contact'
 import Log from './util/Log'
 import Client from './Client'
 import Form from './connection/Form'
+import { DiscoInfoRepository } from './DiscoInfoRepository.interface'
 
-export default class DiscoInfoRepository {
+export default class implements DiscoInfoRepository {
    private jidIndex: PersistentMap;
    private serverJidIndex: PersistentMap;
 

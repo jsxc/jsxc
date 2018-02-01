@@ -1,6 +1,6 @@
 import JID from '../../JID';
 import Message from '../../Message';
-import { IConnection } from '../ConnectionInterface';
+import { IConnection } from '../Connection.interface';
 import Log from '../../util/Log'
 import Account from '../../Account'
 import { AbstractConnection, Presence } from '../AbstractConnection'

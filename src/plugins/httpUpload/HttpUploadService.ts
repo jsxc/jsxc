@@ -2,7 +2,7 @@ import JID from '../../JID'
 import Contact from '../../Contact'
 import * as Namespace from '../../connection/xmpp/namespace'
 import Log from '../../util/Log'
-import PluginAPI from '../../plugin/PluginAPI'
+import { API as PluginAPI } from '../../plugin/PluginAPI.interface'
 import Attachment from '../../Attachment'
 
 export default class HttpUploadService {

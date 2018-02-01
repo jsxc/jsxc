@@ -2,7 +2,7 @@ import JID from '../../JID';
 import Message from '../../Message';
 import Options from '../../Options'
 import * as CONST from '../../CONST';
-import { IConnection } from '../ConnectionInterface';
+import { IConnection } from '../Connection.interface';
 import * as NS from './namespace'
 import XMPPHandler from './handler'
 import Log from '../../util/Log'

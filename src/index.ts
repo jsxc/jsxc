@@ -19,7 +19,7 @@ import BaseError from './errors/BaseError'
 // @REVIEW
 $.extend(window, StropheLib)
 
-Client.addPlugin(OTRPlugin);
+//Client.addPlugin(OTRPlugin);
 Client.addPlugin(ReceiptPlugin);
 Client.addPlugin(NotificationPlugin);
 Client.addPlugin(MeCommandPlugin);

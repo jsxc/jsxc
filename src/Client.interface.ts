@@ -1,6 +1,6 @@
-import { JIDInterface } from './JIDInterface'
+import { IJID } from './JID.interface'
 
-export interface ClientInterface {
+export interface IClient {
    init();
 
    addPreSendMessageHook(hook: (Message, Builder) => void, position?: number);
@@ -13,7 +13,7 @@ export interface ClientInterface {
 
    getStorage();
 
-   getAccount(jid: JIDInterface): Account;
+   getAccount(jid: IJID): Account;
    getAccount(uid?: string): Account;
 
    createAccount(boshUrl: string, jid: string, sid: string, rid: string);

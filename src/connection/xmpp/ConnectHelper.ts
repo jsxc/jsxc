@@ -50,6 +50,7 @@ function attachConnection(url: string, jid: string, sid: string, rid: string) {
 function resolveConnectionPromise(status, condition, connection, resolve, reject) {
    //@REVIEW how can this be removed after the promise resolves
    switch (status) {
+      case Strophe.Status.DISCONNECTED:
       case Strophe.Status.CONNFAIL:
          reject(new ConnectionError(condition));
          break;
@@ -66,6 +67,8 @@ function resolveConnectionPromise(status, condition, connection, resolve, reject
             condition: condition
          });
          break;
+      default:
+         Log.debug('Strophe Connection Status: ', Object.keys(Strophe.Status)[status])
    }
 }
 

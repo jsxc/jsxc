@@ -1,4 +1,4 @@
-import { ContactInterface, ContactType, ContactSubscription } from './ContactInterface'
+import { IContact, ContactType, ContactSubscription } from './Contact.interface'
 import Storage from './Storage'
 import JID from './JID'
 import Message from './Message'
@@ -6,7 +6,7 @@ import Notification from './Notification'
 import Translation from './util/Translation'
 import Account from './Account'
 import PersistentMap from './util/PersistentMap'
-import IdentifiableInterface from './IdentifiableInterface'
+import IIdentifiable from './Identifiable.interface'
 import Log from './util/Log'
 import { Presence } from './connection/AbstractConnection'
 import { EncryptionState } from './plugin/AbstractPlugin'
@@ -16,7 +16,7 @@ import ChatWindow from './ui/ChatWindow'
 import Avatar from './Avatar'
 import Pipe from './util/Pipe'
 
-export default class Contact implements IdentifiableInterface, ContactInterface {
+export default class Contact implements IIdentifiable, IContact {
    protected storage: Storage;
 
    protected readonly account: Account;

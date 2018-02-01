@@ -4,7 +4,7 @@ import Client from '../../../Client'
 import Account from '../../../Account'
 import Roster from '../../../ui/Roster'
 import AbstractHandler from '../AbstractHandler'
-import { ContactSubscription as SUBSCRIPTION } from '../../../ContactInterface'
+import { ContactSubscription as SUBSCRIPTION } from '../../../Contact.interface'
 
 export default class RosterHandler extends AbstractHandler {
    public processStanza(stanzaElement: Element): boolean {

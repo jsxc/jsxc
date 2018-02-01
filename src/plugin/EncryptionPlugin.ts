@@ -1,6 +1,6 @@
 import { AbstractPlugin } from './AbstractPlugin'
-import Contact from '../Contact'
+import { IContact } from '../Contact.interface'
 
 export abstract class EncryptionPlugin extends AbstractPlugin {
-   public abstract toggleTransfer(contact: Contact);
+   public abstract toggleTransfer(contact: IContact);
 }

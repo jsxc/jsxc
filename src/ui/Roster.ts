@@ -8,7 +8,7 @@ import * as CONST from '../CONST'
 import RosterItem from './RosterItem'
 import showLoginBox from './dialogs/loginBox'
 import Menu from './util/Menu'
-import { ContactInterface } from '../ContactInterface'
+import { IContact } from '../Contact.interface'
 import WindowList from './ChatWindowList'
 import Client from '../Client'
 import Storage from '../Storage'
@@ -119,12 +119,12 @@ export default class Roster {
       this.refreshOwnPresenceIndicator(); //@REVIEW previousText???
    }
 
-   public setRosterAvatar(contact: ContactInterface) {
+   public setRosterAvatar(contact: IContact) {
       let avatar = AvatarSet.get(contact);
       avatar.addElement(this.element.find('.jsxc-bottom .jsxc-avatar'));
    }
 
-   public add(contact: ContactInterface) {
+   public add(contact: IContact) {
       this.clearStatus();
 
       if (this.element.find('.jsxc-roster-item[data-id="' + contact.getId() + '"]').length > 0) {
@@ -147,7 +147,7 @@ export default class Roster {
       });
    }
 
-   public remove(contact: ContactInterface) {
+   public remove(contact: IContact) {
       let rosterItemElement = this.element.find('.jsxc-roster-item[data-id="' + contact.getId() + '"]');
 
       if (rosterItemElement.length === 0) {

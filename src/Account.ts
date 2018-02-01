@@ -1,5 +1,5 @@
 import Storage from './Storage'
-import { IConnection } from './connection/ConnectionInterface'
+import { IConnection } from './connection/Connection.interface'
 import Connector from './connection/xmpp/Connector'
 import XMPPConnection from './connection/xmpp/Connection'
 import StorageConnection from './connection/storage/Connection'

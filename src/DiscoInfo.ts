@@ -1,6 +1,7 @@
 import PersistentMap from './util/PersistentMap'
 import Client from './Client'
 import Form from './connection/Form'
+import { DiscoInfo } from './DiscoInfo.interface'
 import * as sha1 from 'sha1'
 
 interface Identity {
@@ -10,7 +11,7 @@ interface Identity {
    lang?: string
 }
 
-export default class DiscoInfo {
+export default class implements DiscoInfo {
    protected data: PersistentMap;
 
    public static exists(version: string) {

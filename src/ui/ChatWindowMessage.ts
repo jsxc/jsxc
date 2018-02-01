@@ -1,4 +1,4 @@
-import Message from '../Message'
+import { IMessage, DIRECTION } from '../Message.interface'
 import DateTime from './util/DateTime'
 import JID from '../JID'
 import ChatWindow from './ChatWindow'
@@ -8,7 +8,7 @@ let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs'
 export default class ChatWindowMessage {
    private element;
 
-   constructor(private message: Message, private chatWindow: ChatWindow) {
+   constructor(private message: IMessage, private chatWindow: ChatWindow) {
       this.generateElement();
       this.registerHooks();
    }
@@ -76,7 +76,7 @@ export default class ChatWindowMessage {
          this.addAttachmentToElement();
       }
 
-      if (this.message.getDirection() === Message.DIRECTION.SYS) {
+      if (this.message.getDirection() === DIRECTION.SYS) {
          this.element.find('.jsxc-message-area').append('<div class="jsxc-clear"/>');
       } else {
          //@TODO update last message

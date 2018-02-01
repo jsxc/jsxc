@@ -1,4 +1,5 @@
 import Message from './Message';
+import { IMessage as IMessage, DIRECTION } from './Message.interface'
 import Contact from './Contact';
 import Storage from './Storage';
 import PersistentMap from './util/PersistentMap'
@@ -6,7 +7,7 @@ import PersistentMap from './util/PersistentMap'
 export default class Transcript {
    private properties: PersistentMap;
 
-   private firstMessage: Message;
+   private firstMessage: IMessage;
 
    private messages = {};
 
@@ -18,7 +19,7 @@ export default class Transcript {
       });
    }
 
-   public pushMessage(message: Message) {
+   public pushMessage(message: IMessage) {
       if (!message.getNextId() && this.firstMessage) {
          message.setNext(this.firstMessage);
       }
@@ -28,7 +29,7 @@ export default class Transcript {
       this.properties.set('firstMessageId', message.getUid());
    }
 
-   public getFirstMessage(): Message {
+   public getFirstMessage(): IMessage {
       if (!this.firstMessage && this.properties.get('firstMessageId')) {
          this.firstMessage = this.getMessage(this.properties.get('firstMessageId'));
       }
@@ -36,7 +37,7 @@ export default class Transcript {
       return this.firstMessage;
    }
 
-   public getLastMessage(): Message {
+   public getLastMessage(): IMessage {
       let lastMessage = this.getFirstMessage();
 
       while (lastMessage && lastMessage.getNextId()) {
@@ -46,7 +47,7 @@ export default class Transcript {
       return lastMessage;
    }
 
-   public getMessage(id: string): Message {
+   public getMessage(id: string): IMessage {
       if (!this.messages[id] && id) {
          this.messages[id] = new Message(id);
       }
@@ -56,7 +57,7 @@ export default class Transcript {
 
    public clear() {
       let message = this.getFirstMessage();
-      let nextMessage: Message;
+      let nextMessage: IMessage;
 
       while (message) {
          nextMessage = this.getMessage(message.getNextId());
@@ -96,12 +97,12 @@ export default class Transcript {
       return unreadMessageIds.length;
    }
 
-   private addMessage(message: Message) {
+   private addMessage(message: IMessage) {
       let id = message.getUid();
 
       this.messages[id] = message;
 
-      if (message.getDirection() === Message.DIRECTION.IN) {
+      if (message.getDirection() === DIRECTION.IN) {
          let unreadMessageIds = this.properties.get('unreadMessageIds') || [];
          unreadMessageIds.push(id); console.log('unreadMessageIds', unreadMessageIds)
          this.properties.set('unreadMessageIds', unreadMessageIds);

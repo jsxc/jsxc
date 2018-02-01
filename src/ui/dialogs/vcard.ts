@@ -1,6 +1,6 @@
 import Dialog from '../Dialog';
 import JID from '../../JID';
-import { ContactInterface } from '../../ContactInterface';
+import { IContact } from '../../Contact.interface';
 import Templates from '../../util/Templates'
 
 let vcardTemplate = require('../../../template/vcard.hbs');
@@ -8,7 +8,7 @@ let vcardBodyTemplate = require('../../../template/vcard-body.hbs');
 
 let dialog: Dialog;
 
-export default function(contact: ContactInterface) {
+export default function(contact: IContact) {
 
    let basicData = [];
 

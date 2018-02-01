@@ -64,7 +64,9 @@ export default class Notification {
    }
 
    public static async notify(settings: NotificationSettings) {
+      console.log('notify')
       if (!Options.get('notification')) {
+         console.log('disabled')
          return; // notifications disabled
       }
 
@@ -80,10 +82,12 @@ export default class Notification {
       }
 
       if (!Notification.hasPermission()) {
+         console.log('No permission')
          return;
       }
 
       if (Client.hasFocus() && !settings.force) {
+         console.log('hasFocus')
          return; // Tab is visible
       }
 
@@ -128,7 +132,7 @@ export default class Notification {
       settings.duration = settings.duration || Options.get('notification').duration;
       settings.title = settings.title;
       settings.message = settings.message;
-
+      console.log('settings', settings)
       Notification.popupTimeout = setTimeout(function() {
          Notification.showPopup(settings);
       }, Notification.popupDelay);
@@ -153,6 +157,7 @@ export default class Notification {
    }
 
    private static hasSupport() {
+      console.log('Notification: hasSupport', !!NotificationAPI)
       return !!NotificationAPI;
    }
 

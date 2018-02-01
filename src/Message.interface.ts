@@ -1,12 +1,36 @@
-import JID from './JID'
+import { IJID as JID } from './JID.interface'
 import Attachment from './Attachment'
-import { ContactType } from './ContactInterface'
+import { ContactType } from './Contact.interface'
 
 export enum DIRECTION {
    IN, OUT, SYS
 };
 
-export interface MessageInterface {
+export interface MessagePayload {
+   peer: JID,
+   direction: DIRECTION,
+   attrId?: string,
+   uid?: string,
+   plaintextMessage?: string,
+   htmlMessage?: string,
+   errorMessage?: string,
+   attachment?: Attachment,
+   received?: boolean,
+   encrypted?: boolean,
+   forwarded?: boolean,
+   stamp?: number,
+   type?: ContactType,
+   unread?: boolean,
+   encryptedHtmlMessage?: string,
+   encryptedPlaintextMessage?: string,
+   sender?: {
+      name: string,
+      jid?: JID
+   }
+}
+
+export interface IMessage {
+
    registerHook(property: string, func: (newValue: any, oldValue: any) => void)
 
    getUid(): string
@@ -17,7 +41,7 @@ export interface MessageInterface {
 
    getNextId(): string
 
-   setNext(message: MessageInterface | string): void
+   setNext(message: IMessage | string): void
 
    getCssId(): string
 
@@ -60,6 +84,10 @@ export interface MessageInterface {
    isEncrypted(): boolean;
 
    hasAttachment(): boolean;
+
+   isUnread(): boolean;
+
+   read();
 
    setDirection(direction: DIRECTION)
 

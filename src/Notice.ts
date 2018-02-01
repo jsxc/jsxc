@@ -1,4 +1,4 @@
-import IdentifiableInterface from './IdentifiableInterface'
+import IIdentifiable from './Identifiable.interface'
 import Storage from './Storage'
 import ContactDialog from './ui/dialogs/contact'
 import MultiUserInvitationDialog from './ui/dialogs/multiUserInvitation'
@@ -26,7 +26,7 @@ export interface NoticeData {
    type?: TYPE;
 }
 
-export class Notice implements IdentifiableInterface {
+export class Notice implements IIdentifiable {
 
    private storage: Storage;
 

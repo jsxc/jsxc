@@ -1,4 +1,4 @@
-import Contact from '../../Contact'
+import { IContact as Contact } from '../../Contact.interface'
 import Client from '../../Client'
 import Options from '../../Options'
 import * as CONST from '../../CONST'
@@ -11,6 +11,7 @@ import Log from '../../util/Log'
 import PersistentMap from '../../util/PersistentMap'
 import Utils from '../../util/Utils'
 import JID from '../../JID'
+import { IJID } from '../../JID.interface'
 import * as Namespace from '../../connection/xmpp/namespace'
 import Archive from './Archive'
 import DiscoInfo from '../../DiscoInfo'
@@ -188,7 +189,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       return true;
    }
 
-   public getArchive(jid: JID) {
+   public getArchive(jid: IJID) {
       if (!this.archives[jid.bare]) {
          this.archives[jid.bare] = new Archive(this, this.pluginAPI.getContact(jid));
       }

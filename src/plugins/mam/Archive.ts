@@ -1,6 +1,6 @@
 import MessageArchiveManagementPlugin from './Plugin'
 import Message from '../../Message'
-import Contact from '../../Contact'
+import { IContact as Contact } from '../../Contact.interface'
 import JID from '../../JID'
 import UUID from '../../util/UUID'
 import Utils from '../../util/Utils'

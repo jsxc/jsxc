@@ -1,5 +1,5 @@
-import { MessageInterface } from './MessageInterface'
-import { JIDInterface } from './JIDInterface'
+import { IMessage } from './Message.interface'
+import { IJID } from './JID.interface'
 import { Presence } from './connection/AbstractConnection'
 import { EncryptionState } from './plugin/AbstractPlugin'
 import ChatWindow from './ui/ChatWindow'
@@ -19,7 +19,7 @@ export enum ContactSubscription {
    NONE = 'none'
 }
 
-export interface ContactInterface {
+export interface IContact {
    delete();
 
    openChatWindow(): ChatWindow;
@@ -43,7 +43,7 @@ export interface ContactInterface {
 
    getId(): string;
 
-   getJid(): JIDInterface;
+   getJid(): IJID;
 
    getResources(): Array<string>;
 

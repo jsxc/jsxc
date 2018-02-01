@@ -5,7 +5,7 @@ import PersistentMap from './util/PersistentMap'
 import { Presence } from './connection/AbstractConnection'
 import Form from './connection/Form'
 import Account from './Account'
-import { ContactSubscription } from './ContactInterface'
+import { ContactSubscription } from './Contact.interface'
 
 const AFFILIATION = {
    ADMIN: 'admin',

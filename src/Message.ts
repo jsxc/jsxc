@@ -6,11 +6,11 @@ import JID from './JID'
 import * as CONST from './CONST'
 import Emoticons from './Emoticons'
 import Translation from './util/Translation'
-import Identifiable from './IdentifiableInterface'
+import Identifiable from './Identifiable.interface'
 import Client from './Client'
 import Utils from './util/Utils'
-import { MessageInterface, DIRECTION } from './MessageInterface'
-import { ContactType } from './ContactInterface'
+import { IMessage, DIRECTION, MessagePayload } from './Message.interface'
+import { ContactType } from './Contact.interface'
 import PersistentMap from './util/PersistentMap'
 import UUID from './util/UUID'
 
@@ -18,30 +18,7 @@ const MSGPOSTFIX = ':msg';
 
 const ATREGEX = new RegExp('(xmpp:)?(' + CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i');
 
-interface MessagePayload {
-   peer: JID,
-   direction: DIRECTION,
-   attrId?: string,
-   uid?: string,
-   plaintextMessage?: string,
-   htmlMessage?: string,
-   errorMessage?: string,
-   attachment?: Attachment,
-   received?: boolean,
-   encrypted?: boolean,
-   forwarded?: boolean,
-   stamp?: number,
-   type?: ContactType,
-   unread?: boolean,
-   encryptedHtmlMessage?: string,
-   encryptedPlaintextMessage?: string,
-   sender?: {
-      name: string,
-      jid?: JID
-   }
-}
-
-export default class Message implements Identifiable, MessageInterface {
+export default class Message implements Identifiable, IMessage {
 
    private uid: string;
 
@@ -135,7 +112,7 @@ export default class Message implements Identifiable, MessageInterface {
       return this.data.get('next');
    }
 
-   public setNext(message: MessageInterface | string): void {
+   public setNext(message: IMessage | string): void {
       let nextId = typeof message === 'string' ? message : message.getUid();
 
       // this.data.set('next', nextId);

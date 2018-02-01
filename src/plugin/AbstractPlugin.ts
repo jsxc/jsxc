@@ -1,10 +1,4 @@
-import Account from '../Account'
-import Client from '../Client'
-import Storage from '../Storage'
-import Contact from '../Contact'
-import Message from '../Message'
-import Pipe from '../util/Pipe'
-import PluginAPI from './PluginAPI'
+import { API as PluginAPI } from './PluginAPI.interface'
 
 export enum PluginType {
    Encryption
@@ -19,7 +13,7 @@ export enum EncryptionState {
    VerifiedEncrypted,
    UnverifiedEncrypted,
    Ended
-};
+}
 
 export interface IPlugin {
    new(pluginAPI: PluginAPI): AbstractPlugin

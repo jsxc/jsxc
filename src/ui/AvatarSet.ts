@@ -1,6 +1,6 @@
 import Options from '../Options'
 import Hash from '../util/Hash'
-import { ContactInterface } from '../ContactInterface'
+import { IContact } from '../Contact.interface'
 import * as getRGB from 'consistent-color-generation'
 
 export default class AvatarSet {
@@ -9,7 +9,7 @@ export default class AvatarSet {
 
    private static avatars = {};
 
-   public static get(contact: ContactInterface) {
+   public static get(contact: IContact) {
       let avatar = AvatarSet.avatars[contact.getId()];
 
       if (!avatar) {
@@ -43,7 +43,7 @@ export default class AvatarSet {
       });
    }
 
-   private constructor(private contact: ContactInterface) {
+   private constructor(private contact: IContact) {
       this.contact.registerHook('name', (name) => {
          this.reload();
       });

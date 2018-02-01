@@ -4,6 +4,7 @@ import Contact from '../Contact'
 import Menu from './util/Menu'
 import Options from '../Options'
 import Message from '../Message'
+import { IMessage } from '../Message.interface'
 import Client from '../Client'
 import Account from '../Account'
 import * as CONST from '../CONST'
@@ -106,7 +107,7 @@ export default class ChatWindow {
       return this.contact.getTranscript();
    }
 
-   public getChatWindowMessage(message: Message) {
+   public getChatWindowMessage(message: IMessage) {
       let id = message.getUid();
 
       if (!this.chatWindowMessages[id]) {
@@ -209,7 +210,7 @@ export default class ChatWindow {
       this.getTranscript().pushMessage(message);
    }
 
-   public postMessage(message: Message): ChatWindowMessage {
+   public postMessage(message: IMessage): ChatWindowMessage {
       if (message.getDirection() === Message.DIRECTION.IN && this.inputElement.is(':focus')) {
          message.read();
       }

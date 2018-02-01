@@ -1,4 +1,4 @@
-import Client from '../Client';
+//import Client from '../Client';
 
 enum LogLevel {
    Debug,
@@ -29,7 +29,7 @@ export default class Log {
    }
 
    private static log(level: LogLevel, message: string, data?: any) {
-      if (Client.isDebugMode() && typeof console !== 'undefined') {
+      if (/*Client.isDebugMode() && */ typeof console !== 'undefined') {
          let logFunction = (level === LogLevel.Warn || level === LogLevel.Error) ? 'warn' : 'log';
 
          console[logFunction](Log.getPrefix(level) + message, data);

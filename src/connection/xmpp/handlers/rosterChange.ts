@@ -3,7 +3,7 @@ import JID from '../../../JID'
 import Client from '../../../Client'
 import Roster from '../../../ui/Roster'
 import AbstractHandler from '../AbstractHandler'
-import { ContactSubscription as SUBSCRIPTION } from '../../../ContactInterface'
+import { ContactSubscription as SUBSCRIPTION } from '../../../Contact.interface'
 
 // let SUBSCRIPTION = {
 //    REMOVE: 'remove',
