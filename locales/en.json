@@ -297,7 +297,7 @@
     "Stream_started": "Stream started",
     "HTTPS_REQUIRED": "This action requires an encrypted connection.",
     "EXTENSION_UNAVAILABLE": "You need a browser extension/addon.",
-    "UNKNOWN_ERROR": "An unknown error occured.",
+    "UNKNOWN_ERROR": "An unknown error occurred.",
     "Install_extension": "Please install the extension in order to use screen sharing: ",
     "Connection_accepted": "Connection accepted",
     "Stream_terminated": "Stream terminated",
