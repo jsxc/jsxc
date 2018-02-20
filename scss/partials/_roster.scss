@@ -328,7 +328,13 @@
       font-size: 80%;
       padding: 2px;
       position: relative;
-      animation: bounce 2s 1s infinite;
+
+      transform-origin: bottom;
+      animation-duration: 2s;
+      animation-iteration-count: infinite;
+      animation-name: jsxc-bounce-6;
+      animation-timing-function: ease;
+      display: inline-block;
    }
 
    > span:empty {

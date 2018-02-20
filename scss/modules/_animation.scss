@@ -1,32 +1,11 @@
-@keyframes bounce {
-   0% {
-      bottom: 0;
-      animation-timing-function: ease-in;
-   }
-
-   12% {
-      bottom: 5px;
-      animation-timing-function: ease-out;
-   }
-
-   25% {
-      bottom: 0;
-      animation-timing-function: ease-in;
-   }
-
-   37% {
-      bottom: 5px;
-      animation-timing-function: ease-out;
-   }
-
-   50% {
-      bottom: 0;
-      animation-timing-function: ease-in;
-   }
-
-   100% {
-      bottom: 0;
-   }
+@keyframes jsxc-bounce-6 {
+   0%   { transform: scale(1,1)      translateY(0); }
+   10%  { transform: scale(1.1,.9)   translateY(0); }
+   30%  { transform: scale(.9,1.1)   translateY(-10px); }
+   50%  { transform: scale(1.05,.95) translateY(0); }
+   57%  { transform: scale(1,1)      translateY(-1px); }
+   64%  { transform: scale(1,1)      translateY(0); }
+   100% { transform: scale(1,1)      translateY(0); }
 }
 @keyframes jsxc-establishing {
    0% {
