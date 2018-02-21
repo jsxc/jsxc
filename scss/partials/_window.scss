@@ -724,6 +724,7 @@ div.jsxc-transfer {
    top: -42px;
    transition: top 0.5s;
    z-index: 80;
+   user-select: none;
 
    span {
       background-color: #e4e4e4;

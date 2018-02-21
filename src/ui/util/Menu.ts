@@ -9,8 +9,6 @@ export default class Menu {
          elements = $(elements);
       }
 
-      elements.disableSelection();
-
       //elements.addClass('jsxc-list');
 
       elements.each(function() {

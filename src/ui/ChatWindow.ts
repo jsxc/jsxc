@@ -77,7 +77,6 @@ export default class ChatWindow {
 
       new FileTransferHandler(contact, this);
 
-      this.element.find('.jsxc-name').disableSelection();
       this.element.find('.jsxc-window').css('bottom', -1 * this.element.find('.jsxc-window-fade').height());
 
       this.properties = new PersistentMap(this.storage, 'chatWindow', this.contact.getId());

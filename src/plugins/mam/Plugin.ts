@@ -135,7 +135,6 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
          archive.nextMessages();
       });
       element.append(spanElement);
-      (<any>element).disableSelection();
 
       messageAreaElement.scroll(function() {
          if (this.scrollTop < 42 && !archive.isExhausted()) {
