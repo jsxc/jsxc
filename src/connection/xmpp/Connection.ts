@@ -37,7 +37,7 @@ export default class XMPPConnection extends AbstractConnection implements IConne
 
       Roster.get().registerHook('presence', (presence) => {
          if (presence === Presence.offline) {
-            this.connection.disconnect('');
+            this.connection.disconnect('forced');
          }
       });
    }
