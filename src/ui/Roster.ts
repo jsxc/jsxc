@@ -302,7 +302,17 @@ export default class Roster {
 
          if (presence !== Presence.offline) {
             // offline presence needs special handling in XMPPConnection
-            Client.getAccount().getConnection().sendPresence(<any>Presence[presence]);
+            let account = Client.getAccount();
+
+            if (account) {
+               account.getConnection().sendPresence(<any>Presence[presence]);
+            }
+         }
+
+         let presenceCallback = Client.getOption('presenceCallback');
+
+         if (typeof presenceCallback === 'function') {
+            presenceCallback(presence);
          }
       });
    }
