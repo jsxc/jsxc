@@ -88,6 +88,14 @@ export default class Account {
       this.contact = new Contact(this, new JID(this.uid), this.uid);
       this.pluginRepository = new PluginRepository(this);
 
+      let connectionCallback = this.getOption('connectionCallback');
+
+      if (typeof connectionCallback === 'function') {
+         this.registerConnectionHook((status, condition) => {
+            connectionCallback(this.uid, status, condition);
+         });
+      }
+
       //@TODO this doesnt work in a multi account setup
       Roster.get().setRosterAvatar(this.contact);
 
