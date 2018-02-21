@@ -2,7 +2,6 @@ import Storage from '../Storage';
 import Log from '../util/Log';
 import Contact from '../Contact'
 import Menu from './util/Menu'
-import Options from '../Options'
 import Message from '../Message'
 import { IMessage } from '../Message.interface'
 import Client from '../Client'
@@ -480,9 +479,9 @@ export default class ChatWindow {
          this.getAccount().getConnection().sendMessage(message);
       });
 
-      if (messageString === '?' && Options.get('theAnswerToAnything') !== false) {
-         if (typeof Options.get('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) < 1) {
-            Options.set('theAnswerToAnything', true);
+      if (messageString === '?' && Client.getOption('theAnswerToAnything') !== false) {
+         if (typeof Client.getOption('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) < 1) {
+            Client.setOption('theAnswerToAnything', true);
 
             this.addSystemMessage('42');
          }
@@ -636,7 +635,7 @@ export default class ChatWindow {
    }
 
    private fullsizeMessageArea() {
-      let size: { width: number, height: number } = Options.get('viewport').getSize();
+      let size: { width: number, height: number } = Client.getOption('viewport').getSize();
       let barHeight = this.element.find('.jsxc-window-bar').outerHeight();
       let inputHeight = this.inputElement.outerHeight();
 

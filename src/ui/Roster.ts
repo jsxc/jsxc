@@ -62,13 +62,13 @@ export default class Roster {
 
    public constructor() {
       let template = rosterTemplate({
-         onlineHelpUrl: Options.get('onlineHelp')
+         onlineHelpUrl: Client.getOption('onlineHelp')
       });
       this.element = $(template);
       if (Roster.hidden) {
          this.hide();
       }
-      this.element.appendTo(Options.get('rosterAppend') + ':first');
+      this.element.appendTo(Client.getOption('rosterAppend') + ':first');
 
       this.contactList = this.element.find('.jsxc-contact-list');
 
@@ -366,13 +366,14 @@ export default class Roster {
 
    private initOptions() {
       let hideOffline = this.options.get('hideOffline'); console.log('hideOffline', hideOffline, typeof hideOffline)
-      hideOffline = (typeof hideOffline === 'boolean') ? hideOffline : Options.get('hideOffline');
+      hideOffline = (typeof hideOffline === 'boolean') ? hideOffline : Client.getOption('hideOffline');
       this.hideOffline(hideOffline);
       this.options.registerHook('hideOffline', (hideOffline) => {
          this.hideOffline(hideOffline);
       });
 
-      let rosterState = this.options.get('visibility') || (Options.get('loginForm').startMinimized ? CONST.HIDDEN : CONST.SHOWN);
+      //@TODO || (Client.getOption('loginForm').startMinimized ? CONST.HIDDEN : CONST.SHOWN
+      let rosterState = this.options.get('visibility');
       this.setVisibility(rosterState);
       this.options.registerHook('visibility', (visibility) => {
          this.setVisibility(visibility);

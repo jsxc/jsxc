@@ -11,6 +11,7 @@ import SortedPersistentMap from './util/SortedPersistentMap'
 import { NoticeManager } from './NoticeManager'
 import PluginRepository from './plugin/PluginRepository'
 import Log from './util/Log'
+import Options from './Options'
 
 export default class Client {
    private static storage;
@@ -19,17 +20,22 @@ export default class Client {
 
    private static noticeManager;
 
-   public static init() {
+   public static init(options?): number {
       let roleAllocator = RoleAllocator.get();
       let accountIds = Client.getStorage().getItem('accounts') || [];
+      let numberOfAccounts = accountIds.length;
+
+      if (typeof options === 'object' && options !== null) {
+         Options.get().overwriteDefaults(options);
+      }
 
       Client.noticeManager = new NoticeManager(Client.getStorage());
 
       accountIds.forEach(function(id) {
-         Client.accounts[id] = new Account(id);
+         let account = Client.accounts[id] = new Account(id);
 
          roleAllocator.waitUntilMaster().then(function() {
-            return Client.accounts[id].connect();
+            return account.connect();
          }).then(function() {
 
          }).catch(function(msg) {
@@ -38,6 +44,8 @@ export default class Client {
             console.warn(msg)
          });
       });
+
+      return numberOfAccounts;
    }
 
    public static getVersion(): string {
@@ -120,6 +128,18 @@ export default class Client {
       if (Object.keys(Client.accounts).length === 0) {
          Roster.get().setNoConnection();
       }
+   }
+
+   public static getOptions(): Options {
+      return Options.get();
+   }
+
+   public static getOption(key: string) {
+      return Client.getOptions().get(key);
+   }
+
+   public static setOption(key: string, value) {
+      Client.getOptions().set(key, value);
    }
 
    private static addAccount(account: Account) {

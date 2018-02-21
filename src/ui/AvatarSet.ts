@@ -1,4 +1,4 @@
-import Options from '../Options'
+import Client from '../Client'
 import Hash from '../util/Hash'
 import { IContact } from '../Contact.interface'
 import * as getRGB from 'consistent-color-generation'
@@ -50,7 +50,7 @@ export default class AvatarSet {
    }
 
    private static placeholder(elements, text: string) {
-      let options = Options.get('avatarPlaceholder') || {};
+      let options = Client.getOption('avatarPlaceholder') || {};
       let hash = Hash.String(text);
 
       let hue = Math.abs(hash) % 360;

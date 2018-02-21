@@ -29,7 +29,9 @@ Client.addPlugin(HttpUploadPlugin);
 Client.addPlugin(AvatarVCardPlugin);
 Client.addPlugin(CarbonsPlugin);
 
-Client.init();
+export function init(options?): number {
+   return Client.init(options);
+}
 
 export function addPlugin(Plugin: IPlugin) {
    Client.addPlugin(Plugin);

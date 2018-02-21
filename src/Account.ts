@@ -21,8 +21,11 @@ import PluginRepository from './plugin/PluginRepository'
 import DiscoInfoRepository from './DiscoInfoRepository'
 import DiscoInfoChangable from './DiscoInfoChangable'
 import HookRepository from './util/HookRepository'
+import Options from './Options'
 
 let Strophe = StropheLib.Strophe;
+
+type ConnectionCallback = (status: number, condition?: string) => void;
 
 interface IConnectionParameters {
    url: string,
@@ -62,6 +65,8 @@ export default class Account {
 
    private hookRepository = new HookRepository<any>();
 
+   private options: Options;
+
    constructor(boshUrl: string, jid: string, sid: string, rid: string);
    constructor(boshUrl: string, jid: string, password: string);
    constructor(uid: string);
@@ -74,6 +79,7 @@ export default class Account {
          throw 'Unsupported number of arguments';
       }
 
+      this.options = Options.get();
       this.discoInfoRepository = new DiscoInfoRepository(this);
       this.ownDiscoInfo = new DiscoInfoChangable(this.uid);
       this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3]);
@@ -89,7 +95,15 @@ export default class Account {
       this.initWindows();
    }
 
-   public connect = (pause: boolean = false) => {
+   public getOption(key) {
+      return this.options.get(key);
+   }
+
+   public setOption(key, value) {
+      this.options.set(key, value);
+   }
+
+   public connect = (pause: boolean = false): Promise<void> => {
       return this.connector.connect().then(([status, connection]) => {
          this.connection = connection;
 
@@ -131,7 +145,7 @@ export default class Account {
       this.hookRepository.trigger('connection', status, condition);
    }
 
-   public registerConnectionHook = (func: (status: number, condition?: string) => void) => {
+   public registerConnectionHook = (func: ConnectionCallback) => {
       this.hookRepository.registerHook('connection', func);
    }
 

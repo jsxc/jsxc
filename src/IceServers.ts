@@ -4,7 +4,7 @@ import Log from './util/Log'
 
 export default class IceServers {
    public static get() {
-      let rtcPeerConfig = Options.get('RTCPeerConfig') || {};
+      let rtcPeerConfig = Client.getOption('RTCPeerConfig') || {};
       let storage = Client.getStorage();
       let url = rtcPeerConfig.url;
 
@@ -29,7 +29,7 @@ export default class IceServers {
             async: true,
             dataType: 'json',
             xhrFields: {
-               withCredentials: Options.get('RTCPeerConfig').withCredentials
+               withCredentials: Client.getOption('RTCPeerConfig').withCredentials
             }
          }).done((data) => {
             var ttl = data.ttl || 3600;
@@ -41,9 +41,9 @@ export default class IceServers {
                if (urls) {
                   Log.debug('ice servers received');
 
-                  var peerConfig = Options.get('RTCPeerConfig');
+                  var peerConfig = Client.getOption('RTCPeerConfig');
                   peerConfig.iceServers = iceServers;
-                  Options.set('RTCPeerConfig', peerConfig);
+                  Client.setOption('RTCPeerConfig', peerConfig);
 
                   Client.getStorage().setItem('iceValidity', (new Date()).getTime() + 1000 * ttl);
 

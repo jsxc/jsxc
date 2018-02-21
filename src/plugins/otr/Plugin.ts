@@ -9,14 +9,23 @@ import Message from '../../Message'
 import { DIRECTION } from '../../Message.interface'
 import Translation from '../../util/Translation'
 import Session from './Session'
-import Options from '../../Options'
 import DSA from 'otr/lib/dsa'
+import Options from '../../Options'
 
 interface DSA {
    parsePrivate
    createInWebWorker
    packPrivate
 }
+
+Options.get().addDefaults({
+   otr: {
+      ERROR_START_AKE: false,
+      debug: false,
+      SEND_WHITESPACE_TAG: false,
+      WHITESPACE_START_AKE: true
+   }
+});
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -147,7 +156,7 @@ export default class OTRPlugin extends EncryptionPlugin {
          //@TODO disable OTR
       }
 
-      let root = Options.get('root');
+      let root = Client.getOption('root');
 
       return new Promise((resolve, reject) => {
          Log.debug('Start DSA key generation');

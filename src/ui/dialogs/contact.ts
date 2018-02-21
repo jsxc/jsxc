@@ -27,7 +27,7 @@ export default function(username?: string) {
 }
 
 function onUsernameKeyUp() {
-   let getUsers = Options.get('getUsers');
+   let getUsers = Client.getOption('getUsers');
 
    if (typeof getUsers !== 'function') {
       return;

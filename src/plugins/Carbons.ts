@@ -1,4 +1,3 @@
-import Options from '../Options'
 import * as CONST from '../CONST'
 import { PluginState, AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
@@ -33,7 +32,7 @@ export default class CarbonsPlugin extends AbstractPlugin {
    private preSendMessageStanzaProcessor = (message: Message, xmlElement: Strophe.Builder) => {
       let body = (<any>xmlElement).node.textContent;
 
-      if (Options.get('carbons').enabled && body.match(/^\?OTR/)) {
+      if (body.match(/^\?OTR/)) {
          xmlElement.up().c("private", {
             xmlns: CONST.NS.CARBONS
          });

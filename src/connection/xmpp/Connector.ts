@@ -47,7 +47,7 @@ export default class Connector {
 
          this.account.closeAllChatWindows();
 
-         return Promise.reject('Credentials expired');
+         throw 'Credentials expired'; //@TODO throw instance of BaseError
       }
 
       return ConnectHelper.login.apply(this, this.connectionArgs)
@@ -64,7 +64,7 @@ export default class Connector {
       let condition = data.condition;
 
       this.storeConnectionParameters(stropheConnection);
-      this.addDisconnectHandler(stropheConnection);
+      this.replaceConnectionHandler(stropheConnection);
       this.addRidHandler(stropheConnection);
 
       let accountConnection = this.account.getConnection();
@@ -104,7 +104,7 @@ export default class Connector {
       }
    }
 
-   private addDisconnectHandler(connection) {
+   private replaceConnectionHandler(connection) {
       connection.connect_callback = (status, condition) => {
          this.account.triggerConnectionHook(status, condition);
 

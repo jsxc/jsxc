@@ -27,7 +27,13 @@ export default class PluginRepository {
    }
 
    constructor(private account: Account) {
+      let disabledPlugins = Client.getOption('disabledPlugins') || [];
+
       PluginRepository.registeredPlugins.forEach((Plugin) => {
+         if (disabledPlugins.indexOf(Plugin.getName()) > -1) {
+            return;
+         }
+
          try {
             this.instanciatePlugin(Plugin);
          } catch (err) {

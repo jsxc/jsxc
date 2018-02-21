@@ -1,10 +1,10 @@
 import Dialog from '../Dialog';
-import Options from '../../Options';
+import Client from '../../Client';
 
 var settingsTemplate = require('../../../template/settings.hbs');
 
 export default function() {
-   let xmppSettingsAlterable = Options.get('xmpp').overwrite !== 'false' && Options.get('xmpp').overwrite !== false;
+   let xmppSettingsAlterable = Client.getOption('xmpp').overwrite !== 'false' && Client.getOption('xmpp').overwrite !== false;
 
    var content = settingsTemplate({
       xmppSettingsAlterable: xmppSettingsAlterable
@@ -30,7 +30,7 @@ function prepareForm(form) {
       var key = id[1];
       var type = this.type;
 
-      var data = Options.get(prop);
+      var data = Client.getOption(prop);
 
       if (data && typeof data[key] !== 'undefined') {
          if (type === 'checkbox') {

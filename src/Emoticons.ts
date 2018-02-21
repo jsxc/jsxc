@@ -1,4 +1,4 @@
-import Options from './Options'
+import Client from './Client'
 
 const EMOTICONS: any[] = [
    ['O:-) O:)', 'innocent'],
@@ -113,7 +113,7 @@ export default class Emoticons {
 
       if (EMOTICON_LIST.core[shortname]) {
          filename = EMOTICON_LIST.core[shortname][EMOTICON_LIST.core[shortname].length - 1].replace(/^:([^:]+):$/, '$1');
-         let src = Options.get('root') + CUSTOM_EMOTICON_BASE_PATH + filename + '.svg';
+         let src = Client.getOption('root') + CUSTOM_EMOTICON_BASE_PATH + filename + '.svg';
 
          div.css('background-image', 'url(' + src + ')'); //@TODO replace with css class
       } else if (EMOTICON_LIST.emojione[shortname]) {

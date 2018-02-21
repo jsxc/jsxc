@@ -51,7 +51,7 @@ export default class Notification {
       $('#jsxc-menu .jsxc-muteNotification').text(Translation.t('Unmute'));
 
       if (external !== true) {
-         Options.set('muteNotification', true);
+         Client.setOption('muteNotification', true);
       }
    }
 
@@ -59,13 +59,13 @@ export default class Notification {
       $('#jsxc-menu .jsxc-muteNotification').text(Translation.t('Mute'));
 
       if (external !== true) {
-         Options.set('muteNotification', false); // notifications disabled
+         Client.setOption('muteNotification', false); // notifications disabled
       }
    }
 
    public static async notify(settings: NotificationSettings) {
       console.log('notify')
-      if (!Options.get('notification')) {
+      if (!Client.getOption('notification')) {
          console.log('disabled')
          return; // notifications disabled
       }
@@ -91,7 +91,7 @@ export default class Notification {
          return; // Tab is visible
       }
 
-      settings.icon = settings.icon || Options.get('root') + '/img/XMPP_logo.png';
+      settings.icon = settings.icon || Client.getOption('root') + '/img/XMPP_logo.png';
 
       if (settings.source) {
          let avatar;
@@ -129,7 +129,7 @@ export default class Notification {
          }
       }
 
-      settings.duration = settings.duration || Options.get('notification').duration;
+      settings.duration = settings.duration || Client.getOption('notification').duration;
       settings.title = settings.title;
       settings.message = settings.message;
       console.log('settings', settings)
@@ -182,7 +182,7 @@ export default class Notification {
    }
 
    private static playSound(soundFile: string, loop?: boolean, force?: boolean) {
-      if (Options.get('muteNotification')) {
+      if (Client.getOption('muteNotification')) {
          // @TODO check presence of source account
          // sound mute or own presence is dnd
          return;
@@ -196,7 +196,7 @@ export default class Notification {
       // stop current audio file
       Notification.stopSound();
 
-      var audio = new Audio(Options.get('root') + '/sound/' + soundFile);
+      var audio = new Audio(Client.getOption('root') + '/sound/' + soundFile); //@REVIEW maybe use webpack to get the path
       audio.loop = loop || false;
       audio.play();
 

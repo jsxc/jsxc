@@ -87,7 +87,7 @@ function registerXMPPNamespaces() {
 function prepareConnection(url: string): Strophe.Connection {
    let connection = new Strophe.Connection(url);
 
-   if (Options.get('debug') || true) {
+   if (true) { //@TODO use option
       connection.xmlInput = function(data) {
          Log.debug('<', data);
       };
