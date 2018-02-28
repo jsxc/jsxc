@@ -13,4 +13,6 @@ If you are looking for install instructions or developer notes, please also chec
 
 Contribution is greatly appreciated. A few hints are in our [Contributor Guide](https://github.com/jsxc/jsxc/wiki/Contributor-Guide).
 
-Please note that this project is released with a Contributor Code of Conduct. By participating in this project you agree to abide by its terms.
+To contribute new or fixed **translations in the localized messages**, please use [WebTranslateIt](https://github.com/jsxc/jsxc/wiki/Contributor-Guide#translate-jsxc-into-your-language).
+
+Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project, you agree to abide by its terms.
