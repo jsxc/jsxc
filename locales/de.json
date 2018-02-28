@@ -286,7 +286,7 @@
     "Send_file": "Datei senden",
     "setting-explanation-carbon": "Wenn Kopien aktiviert sind, werden alle eingehenden Nachrichten zu allen angemeldeten Clients gesendet.",
     "setting-explanation-login": "Soll der Chat beim Anmelden automatisch gestartet werden?",
-    "setting-explanation-priority": "Wenn du mit deinem Chat-Konto bei mehereren Anwendungen angemeldet bist, werden Nachrichten an die Anwendung mit der höchsten Priorität zugestellt. Es passiert am wenigsten Unerwartetes, wenn du anfänglich alle Prioritäten bei allen Anwendungen auf 0 setzt.",
+    "setting-explanation-priority": "Wenn du mit deinem Chat-Konto bei mehreren Anwendungen angemeldet bist, werden Nachrichten an die Anwendung mit der höchsten Priorität zugestellt. Es passiert am wenigsten Unerwartetes, wenn du anfänglich alle Prioritäten bei allen Anwendungen auf 0 setzt.",
     "setting-explanation-xmpp": "Diese Optionen werden für die Verbindung zum XMPP Server genutzt.",
     "_is_composing": " tippt gerade...",
     "_are_composing": " tippen gerade...",
