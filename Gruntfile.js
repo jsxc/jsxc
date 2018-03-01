@@ -95,7 +95,7 @@ module.exports = function(grunt) {
             overwrite: true,
             replacements: [{
                from: /^{/g,
-               to: 'var I18next = {'
+               to: 'var jsxcLanguageResources = {'
             }, {
                from: /}$/g,
                to: '};'

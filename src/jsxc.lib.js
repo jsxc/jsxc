@@ -263,18 +263,36 @@ jsxc = {
       if (jsxc.storage.getItem('lang') !== null) {
          lang = jsxc.storage.getItem('lang');
       } else if (jsxc.options.autoLang && navigator.languages && navigator.languages.length > 0) {
-         lang = navigator.languages[0].substr(0, 2);
+         lang = navigator.languages[0];
       } else if (jsxc.options.autoLang && navigator.language) {
-         lang = navigator.language.substr(0, 2);
+         lang = navigator.language;
       } else {
          lang = jsxc.options.defaultLang;
+      }
+
+      var availableLanguages = Object.keys(window.jsxcLanguageResources);
+
+      if (availableLanguages.indexOf(lang) < 0) {
+         var languagePrefix = lang.slice(0, 2);
+
+         if (availableLanguages.indexOf(languagePrefix) > -1) {
+            lang = languagePrefix;
+         } else {
+            var prefixMatch = availableLanguages.filter(function(l) {
+               return l.slice(0, 2) === languagePrefix;
+            });
+
+            if (prefixMatch.length > 0) {
+               lang = prefixMatch[0];
+            }
+         }
       }
 
       // initialize i18next translator
       window.i18next.init({
          lng: lang,
          fallbackLng: 'en',
-         resources: I18next,
+         resources: window.jsxcLanguageResources,
          returnNull: false,
          debug: jsxc.storage.getItem('debug') === true,
          interpolation: {
