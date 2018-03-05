@@ -115,22 +115,24 @@ export default class Account {
       return this.connector.connect().then(([status, connection]) => {
          this.connection = connection;
 
+         let storage = this.getSessionStorage();
+         storage.setItem('connection', 'created', new Date());
+
          if (pause) {
             (<any>this.connection).pause(); //@TODO fix ts type
          } else {
             this.initConnection(status);
          }
 
-         let storage = this.getStorage();
+
          storage.setItem('connectionStatus', {
-            // @TODO add session id to handle old values
-            status: status
+            status: status,
          });
       });
    }
 
    private initConnection(status): Promise<void> {
-      let storage = this.getStorage();
+      let storage = this.getSessionStorage();
       let connectionStatusObject = storage.getItem('connectionStatus') || {};
       let previousStatus = connectionStatusObject.status;
 
@@ -147,6 +149,14 @@ export default class Account {
       }
 
       return Promise.resolve();
+   }
+
+   public triggerPresenceHook = (contact: Contact, presence, oldPresence) => {
+      this.hookRepository.trigger('presence', contact, presence, oldPresence);
+   }
+
+   public registerPresenceHook = (func) => {
+      this.hookRepository.registerHook('presence', func);
    }
 
    public triggerConnectionHook = (status: number, condition?: string) => {
@@ -249,7 +259,7 @@ export default class Account {
             throw 'Session ID not available';
          }
 
-         let name = this.uid + ':sest:' + sid;
+         let name = this.uid + '@' + sid;
 
          this.sessionStorage = new Storage(name);
          //@TODO save name for clean up

@@ -66,11 +66,15 @@ export default class extends AbstractHandler {
          return this.PRESERVE_HANDLER;
       }
 
+      let oldPresence = contact.getPresence();
+
       contact.setStatus(presence.status);
       contact.setPresence(presence.from.resource, status);
       contact.setResource(''); // reset jid, so new messages go to the bare jid
 
       Log.debug('Presence (' + presence.from.full + '): ' + Presence[status]);
+
+      this.account.triggerPresenceHook(contact, contact.getPresence(), oldPresence);
 
       // preserve handler
       return this.PRESERVE_HANDLER;

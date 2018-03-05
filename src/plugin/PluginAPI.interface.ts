@@ -43,4 +43,8 @@ export interface API {
    addFeature(feature: string)
 
    registerConnectionHook(func: (status: number, condition?: string) => void)
+
+   registerPresenceHook(func)
+
+   getConnectionCreationDate(): Date
 }

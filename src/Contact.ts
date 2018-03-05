@@ -119,16 +119,6 @@ export default class Contact implements IIdentifiable, IContact {
 
       presence = this.getHighestPresence();
 
-      if (this.data.get('presence') === Presence.offline && presence !== Presence.offline) {
-         // buddy has come online
-         Notification.notify({
-            title: this.getName(),
-            message: Translation.t('has_come_online'),
-            source: this
-         });
-         //@TODO show only on older connections (login)
-      }
-
       this.data.set('presence', presence);
    }
 

@@ -99,4 +99,19 @@ export default class PluginAPI implements IPluginAPI {
    public registerConnectionHook(func: (status: number, condition?: string) => void) {
       this.account.registerConnectionHook(func);
    }
+
+   public registerPresenceHook(func) {
+      this.account.registerPresenceHook(func);
+   }
+
+   public getConnectionCreationDate(): Date {
+      let storage = this.account.getSessionStorage();
+      let created = storage.getItem('connection', 'created');
+
+      if (created) {
+         return new Date(created);
+      }
+
+      return null;
+   }
 }
