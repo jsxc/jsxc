@@ -75,7 +75,7 @@ export default class Roster {
       this.storage = Client.getStorage();
       this.options = new PersistentMap(this.storage, 'roster');
 
-      this.registerMainMenuHandler();
+      this.addMainMenuEntries();
       this.registerPresenceHandler();
       this.registerToggleHandler();
 
@@ -242,6 +242,44 @@ export default class Roster {
       $('#jsxc-notice > span').text(numberOfNotices > 0 ? numberOfNotices : '');
    }
 
+   public addMenuEntry(options: { id: string, handler: (ev) => void, label: string | JQuery<HTMLElement>, icon?: string, offlineAvailable?: boolean }) {
+      const { id, handler, label, icon, offlineAvailable } = options;
+      let li = $('<li>');
+
+      if (!id || !handler || !label) {
+         throw 'id, handler and label required for menu entry';
+      }
+
+      if (typeof label === 'string') {
+         li.text(label);
+      } else {
+         li.append(label);
+      }
+
+      li.addClass('jsxc-' + id.toLowerCase().replace(' ', '-'));
+
+      if (offlineAvailable) {
+         li.addClass('jsxc-offline-available');
+      }
+
+      if (icon) {
+         li.addClass('jsxc-icon-' + icon);
+      }
+
+      ((li, handler) => li.click(ev => {
+         let presence = this.options.get('presence');
+
+         if (presence === Presence.offline && !li.hasClass('jsxc-offline-available')) {
+            return;
+         }
+
+         return handler(ev);
+      }))(li, handler);
+
+      let mainMenu = this.element.find('.jsxc-menu-main .jsxc-inner ul');
+      mainMenu.prepend(li);
+   }
+
    private insert(rosterItem: RosterItem) {
       let contactList = this.contactList;
       let insert = false;
@@ -274,22 +312,59 @@ export default class Roster {
       let label = $('.jsxc-menu-presence .jsxc-' + Presence[presence]).text();
 
       this.element.find('.jsxc-menu-presence > span').text(label);
+      this.element.attr('data-presence', Presence[presence]);
    }
 
-   private registerMainMenuHandler() {
-      let mainMenu = this.element.find('.jsxc-menu-main');
+   private addMainMenuEntries() {
+      this.addMenuEntry({
+         id: 'about',
+         handler: showAboutDialog,
+         label: Translation.t("About"),
+         offlineAvailable: true,
+      });
 
-      mainMenu.find('li.jsxc-settings').click(showSettings);
+      this.addMenuEntry({
+         id: 'online-help',
+         handler: function(ev) { },
+         label: $(`<a href="#" target="_blank">${Translation.t("Online_help")}</a>`),
+         offlineAvailable: true,
+         icon: 'help',
+      });
 
-      mainMenu.find('li.jsxc-join-muc').click(showMultiUserJoinDialog);
+      this.addMenuEntry({
+         id: 'add-contact',
+         handler: showContactDialog,
+         label: Translation.t("Add_buddy"),
+         icon: 'contact'
+      });
 
-      mainMenu.find('li.jsxc-hide-offline').click(this.toggleOffline);
+      this.addMenuEntry({
+         id: 'hide-offline',
+         handler: this.toggleOffline,
+         label: $(`<span class="jsxc-hide-offline">${Translation.t("Hide_offline")}</span>
+                   <span class="jsxc-show-offline">${Translation.t("Show_offline")}</span>`),
+      });
 
-      mainMenu.find('li.jsxc-mute-notification').click(this.muteNotification);
+      this.addMenuEntry({
+         id: 'mute-notification',
+         handler: this.muteNotification,
+         label: Translation.t("Mute"),
+      });
 
-      mainMenu.find('li.jsxc-add-contact').click(<any>showContactDialog);
+      this.addMenuEntry({
+         id: 'join-muc',
+         handler: showMultiUserJoinDialog,
+         label: Translation.t("Join_chat"),
+         icon: 'groupcontact'
+      });
 
-      mainMenu.find('li.jsxc-about').click(showAboutDialog);
+      this.addMenuEntry({
+         id: 'settings',
+         handler: showMultiUserJoinDialog,
+         label: Translation.t("Settings"),
+         offlineAvailable: true,
+         icon: 'setting'
+      });
    }
 
    private registerPresenceHandler() {

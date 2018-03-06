@@ -312,6 +312,15 @@
       height: 30px;
       width: 30px;
    }
+
+   #jsxc-roster[data-presence="offline"] & li:not(.jsxc-offline-available) {
+      opacity: 0.5;
+
+      &:hover {
+         background-color: inherit;
+         cursor: auto;
+      }
+   }
 }
 
 #jsxc-notice {
