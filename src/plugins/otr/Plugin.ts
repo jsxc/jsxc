@@ -1,4 +1,4 @@
-import { PluginState } from '../../plugin/AbstractPlugin'
+import { PluginState, EncryptionState } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
 import { EncryptionPlugin } from '../../plugin/EncryptionPlugin'
 import Client from '../../Client'
@@ -68,6 +68,11 @@ export default class OTRPlugin extends EncryptionPlugin {
    }
 
    private afterReceiveMessageProcessor = (contact: Contact, message: Message) => {
+      let plaintextMessage = message.getPlaintextMessage();
+      if (!plaintextMessage || !/^\?OTR/.test(plaintextMessage)) { //@TODO search for whitespace
+         return Promise.resolve([contact, message]);
+      }
+
       return this.getSession(contact).then((session: Session) => {
          return session.processMessage(message, 'decryptMessage');
       }).then((message) => {
@@ -76,6 +81,10 @@ export default class OTRPlugin extends EncryptionPlugin {
    }
 
    private preSendMessageProcessor = (contact: Contact, message: Message) => {
+      if (contact.getEncryptionState() === EncryptionState.Plaintext) {
+         return Promise.resolve([contact, message]);
+      }
+
       return this.getSession(contact).then((session: Session) => {
          if (session.isEnded()) {
             //@TODO block this message
