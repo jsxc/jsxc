@@ -61,9 +61,13 @@ export interface IContact {
 
    getVcard(): Promise<{}>;
 
-   setEncryptionState(state: EncryptionState);
+   setEncryptionState(state: EncryptionState, source: string);
 
    getEncryptionState(): EncryptionState;
+
+   getEncryptionPluginName(): string | null;
+
+   isEncrypted(): boolean;
 
    getTranscript(): Transcript;
 

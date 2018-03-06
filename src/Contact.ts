@@ -206,12 +206,21 @@ export default class Contact implements IIdentifiable, IContact {
       return this.account.getConnection().loadVcard(this.getJid());
    }
 
-   public setEncryptionState(state: EncryptionState) {
+   public setEncryptionState(state: EncryptionState, source: string) {
       this.data.set('encryptionState', state);
+      this.data.set('encryptionPlugin', state === EncryptionState.Plaintext ? null : source);
    }
 
    public getEncryptionState(): EncryptionState {
       return this.data.get('encryptionState');
+   }
+
+   public getEncryptionPluginName(): string | null {
+      return this.data.get('encryptionPlugin');
+   }
+
+   public isEncrypted(): boolean {
+      return this.data.get('encryptionState') !== EncryptionState.Plaintext;
    }
 
    public getTranscript(): Transcript {

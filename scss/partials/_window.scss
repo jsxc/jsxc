@@ -670,44 +670,116 @@
 }
 
 div.jsxc-transfer {
-   background-image: url("../images/padlock_open_black.svg");
-   background-repeat: no-repeat;
-   background-position: center center;
-   background-size: 60%;
-   opacity: 0.3;
-   height: 40px;
-   width: 44px;
-   cursor: pointer;
    z-index: 20;
+   position: relative;
 
    @media (min-width: 768px) {
       width: 34px;
    }
 
    &:hover {
-      opacity: 0.5;
+      .jsxc-transfer-icon {
+         opacity: 0.5;
+      }
+   }
+
+   .jsxc-transfer-icon {
+      background-image: url("../images/padlock_open_black.svg");
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: 60%;
+      opacity: 0.3;
+      height: 40px;
+      width: 100%;
+      display: block;
+      cursor: pointer;
+   }
+
+   &> .jsxc-transfer-icon {
+      display: none;
+   }
+
+   &.jsxc-fin, &.jsxc-enc, &.jsxc-disabled {
+      .jsxc-menu {
+         display: none;
+      }
+
+      &> .jsxc-transfer-icon {
+         display: block;
+      }
    }
 
    &.jsxc-disabled {
-      background-image: url("../images/padlock_open_disabled_black.svg");
-      cursor: default;
+      .jsxc-transfer-icon {
+         background-image: url("../images/padlock_open_disabled_black.svg");
+         cursor: default;
+      }
 
       &:hover {
-         opacity: 0.3;
+         .jsxc-transfer-icon {
+            opacity: 0.3;
+         }
       }
    }
 
    &.jsxc-fin {
-      opacity: 1;
-      background-image: url("../images/padlock_close_grey.svg");
+      .jsxc-transfer-icon {
+         background-image: url("../images/padlock_close_grey.svg");
+         opacity: 1;
+      }
    }
 
    &.jsxc-enc {
-      opacity: 1;
-      background-image: url("../images/padlock_close_orange.svg");
+      .jsxc-transfer-icon {
+         background-image: url("../images/padlock_close_orange.svg");
+         opacity: 1;
+      }
 
       &.jsxc-trust {
-         background-image: url("../images/padlock_close_green.svg");
+         .jsxc-transfer-icon {
+            background-image: url("../images/padlock_close_green.svg");
+         }
+      }
+   }
+
+   .jsxc-inner {
+      left: auto;
+      right: 3px;
+
+      ul {
+         margin-bottom: 8px;
+         background-color: $emoticon_selection_bg;
+         border-radius: 3px;
+         z-index: 200;
+         list-style-type: none;
+         padding: 3px;
+         position: relative;
+
+         &:after {
+            content: " ";
+            position: absolute;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid $emoticon_selection_bg;
+            display: block;
+            width: 0;
+            z-index: 1;
+            right: 7px;
+            top: 100%;
+         }
+      }
+
+      li {
+         padding: 3px 7px;
+         border-radius: 3px;
+         color: white;
+         cursor: pointer;
+         text-align: center;
+
+         &:hover {
+            background-color: $emoticon_selection_hover;
+            color: black;
+         }
       }
    }
 }

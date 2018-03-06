@@ -9,8 +9,6 @@ export default class Menu {
          elements = $(elements);
       }
 
-      //elements.addClass('jsxc-list');
-
       elements.each(function() {
          new Menu($(this));
       });

@@ -43,13 +43,17 @@ export default class PluginRepository {
    }
 
    public getAllEncryptionPlugins() {
-
+      return this.encryptionPlugins;
    }
 
    public getEncryptionPlugin(pluginName: string): EncryptionPlugin {
-      //@TODO use dict to get the right plugin
+      for (let plugin of this.encryptionPlugins) {
+         if ((<IPlugin>plugin.constructor).getName() === pluginName) {
+            return plugin;
+         }
+      }
 
-      return this.encryptionPlugins[0];
+      throw `Couldn't find ${pluginName}`;
    }
 
    public hasEncryptionPlugin(): boolean {

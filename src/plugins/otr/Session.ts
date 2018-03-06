@@ -191,7 +191,7 @@ export default class Session {
 
             this.inform(msg_state + '_private_conversation_started');
 
-            this.peer.setEncryptionState(this.session.trust ? EncryptionState.VerifiedEncrypted : EncryptionState.UnverifiedEncrypted);
+            this.peer.setEncryptionState(this.session.trust ? EncryptionState.VerifiedEncrypted : EncryptionState.UnverifiedEncrypted, 'otr');
             break;
          case OTR.CONST.STATUS_END_OTR:
             if (this.session.msgstate === OTR.CONST.MSGSTATE_PLAINTEXT) {
@@ -199,13 +199,13 @@ export default class Session {
 
                this.inform('private_conversation_aborted');
 
-               this.peer.setEncryptionState(EncryptionState.Plaintext);
+               this.peer.setEncryptionState(EncryptionState.Plaintext, 'otr');
             } else {
                // the buddy abort the private conversation
 
                this.inform('your_buddy_closed_the_private_conversation_you_should_do_the_same');
 
-               this.peer.setEncryptionState(EncryptionState.Ended);
+               this.peer.setEncryptionState(EncryptionState.Ended, 'otr');
             }
             break;
          case OTR.CONST.STATUS_SMP_HANDLE:

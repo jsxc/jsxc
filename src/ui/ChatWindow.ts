@@ -685,15 +685,32 @@ export default class ChatWindow {
       this.updateEncryptionState(this.contact.getEncryptionState());
 
       let pluginRepository = this.account.getPluginRepository();
-      if (pluginRepository.hasEncryptionPlugin()) {
-         let transferElement = this.getDom().find('.jsxc-transfer');
-
-         transferElement.removeClass('jsxc-disabled');
-         transferElement.click(() => {
-            //@TODO create selection
-            pluginRepository.getEncryptionPlugin('otr').toggleTransfer(this.contact);
-         })
+      if (!pluginRepository.hasEncryptionPlugin()) {
+         return;
       }
+
+      let encryptionPlugins = pluginRepository.getAllEncryptionPlugins();
+
+      let transferElement = this.getDom().find('.jsxc-transfer');
+
+      transferElement.find('.jsxc-transfer-state').click(ev => {
+         if (this.contact.isEncrypted()) {
+            let encryptionPluginName = this.contact.getEncryptionPluginName();
+
+            pluginRepository.getEncryptionPlugin(encryptionPluginName).toggleTransfer(this.contact);
+         }
+      });
+
+      for (let plugin of encryptionPlugins) {
+         let li = $('<li>');
+         li.text((<any>plugin.constructor).getName().toUpperCase());
+         li.click(() => {
+            plugin.toggleTransfer(this.contact);
+         });
+         transferElement.find('.jsxc-menu .jsxc-inner>ul').append(li);
+      }
+
+      transferElement.removeClass('jsxc-disabled');
    }
 }
 
