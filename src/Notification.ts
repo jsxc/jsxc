@@ -6,6 +6,7 @@ import * as CONST from './CONST'
 import { FUNCTION as NOTICEFUNCTION } from './Notice'
 import openConfirmDialog from './ui/dialogs/confirm'
 import Hash from './util/Hash'
+import defaultIconFile = require('../images/XMPP_logo.png')
 
 interface NotificationSettings {
    title: string,
@@ -91,7 +92,7 @@ export default class Notification {
          return; // Tab is visible
       }
 
-      settings.icon = settings.icon || Client.getOption('root') + '/img/XMPP_logo.png';
+      settings.icon = settings.icon || <string><any>defaultIconFile;
 
       if (settings.source) {
          let avatar;
@@ -196,7 +197,7 @@ export default class Notification {
       // stop current audio file
       Notification.stopSound();
 
-      var audio = new Audio(Client.getOption('root') + '/sound/' + soundFile); //@REVIEW maybe use webpack to get the path
+      var audio = new Audio(soundFile);
       audio.loop = loop || false;
       audio.play();
 

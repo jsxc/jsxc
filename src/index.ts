@@ -1,3 +1,9 @@
+let scriptElements = document.querySelectorAll('script[src$="jsxc.bundle.js"]');
+if (scriptElements.length) {
+   let src = (<HTMLScriptElement>scriptElements[0]).src;
+   __webpack_public_path__ = src.substr(0, src.lastIndexOf('/') + 1);
+}
+
 import Log from './util/Log';
 import * as UI from './ui/web'
 import Client from './Client'

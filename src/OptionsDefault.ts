@@ -28,9 +28,6 @@ export let rosterAppend = 'body';
 /** duration for notification */
 export let popupDuration = 6000;
 
-/** Absolute path root of JSXC installation */
-export let root = '/jsxc4.0/';
-
 /**
 * This function decides wether the roster will be displayed or not if no
 * connection is found.

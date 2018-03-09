@@ -5,14 +5,22 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 const extractSass = new ExtractTextPlugin({
- filename: 'styles/[name].bundle.css',
+   filename: 'styles/jsxc.bundle.css',
    allChunks: true,
 });
+
+const fileLoader = {
+   loader: 'file-loader',
+   options: {
+      name: '[path][name]-[sha1:hash:hex:8].[ext]',
+      outputPath: 'assets/'
+   }
+};
 
 module.exports = {
    entry: ['./scss/main.scss', './src/index.ts'],
    output: {
-      filename: '[name].bundle.js',
+      filename: 'jsxc.bundle.js',
       path: path.resolve(__dirname, './dist/'),
       libraryTarget: 'var',
       library: 'jsxc'
@@ -31,11 +39,11 @@ module.exports = {
             loader: 'handlebars-loader',
             exclude: /node_modules/,
             query: {
-                helperDirs: [
+               helperDirs: [
                   path.resolve(__dirname, "template", 'helpers')
                ],
                ignorePartials: ['list']
-              }
+            }
          },
          {
             test: /\.css$/,
@@ -44,15 +52,24 @@ module.exports = {
             }),
          },
          {
-           test: /\.(sass|scss)$/,
-           use: extractSass.extract({
-             use: [{
-                loader: 'css-loader',
-                options: {
-                   url: false
-                }
-             }, 'sass-loader']
-          })
+            test: /\.(sass|scss)$/,
+            use: extractSass.extract({
+               use: [{
+                  loader: 'css-loader',
+                  options: {
+                     url: false
+                  }
+               }, 'sass-loader']
+            })
+         },
+         {
+            test: /.*\.(png|jpg|gif|mp3|wav)$/,
+            use: [fileLoader]
+         },
+         {
+            test: /.*\.(js)$/,
+            resourceQuery: /path/,
+            use: [fileLoader]
          }
       ]
    },
@@ -74,5 +91,5 @@ module.exports = {
          from: 'node_modules/emojione/assets/svg/',
          to: 'images/emojione/'
       }])
-  ],
+   ],
 };

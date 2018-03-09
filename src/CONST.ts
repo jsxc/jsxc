@@ -1,12 +1,17 @@
+import incomingMessageSoundFile = require('../sound/incomingMessage.mp3');
+import incomingCallSoundFile = require('../sound/Rotary-Phone6.mp3');
+import noticeSoundFile = require('../sound/Ping1.mp3');
+
+console.log('foo', incomingMessageSoundFile, typeof incomingMessageSoundFile);
 
 export let NOTIFICATION_DEFAULT = 'default';
 export let NOTIFICATION_GRANTED = 'granted';
 export let NOTIFICATION_DENIED = 'denied';
 export let STATUS = ['offline', 'dnd', 'xa', 'away', 'chat', 'online'];
 export let SOUNDS = {
-   MSG: 'incomingMessage.wav',
-   CALL: 'Rotary-Phone6.mp3',
-   NOTICE: 'Ping1.mp3'
+   MSG: <string>(<any>incomingMessageSoundFile),
+   CALL: <string>(<any>incomingCallSoundFile),
+   NOTICE: <string>(<any>noticeSoundFile)
 };
 export let REGEX = {
    JID: new RegExp('\\b[^"&\'\\/:<>@\\s]+@[\\w-_.]+\\b', 'ig'),

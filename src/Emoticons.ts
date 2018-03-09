@@ -28,16 +28,14 @@ const EMOTICONS: any[] = [
 ]
 import * as emojione from 'emojione/lib/js/emojione';
 
-const CUSTOM_EMOTICON_BASE_PATH = '/images/emotions/';
-
 const EMOTICON_LIST = {
    'core': {
-      ':klaus:': ['klaus'],
-      ':jabber:': ['jabber'],
-      ':xmpp:': ['xmpp'],
-      ':jsxc:': ['jsxc'],
-      ':owncloud:': ['owncloud'],
-      ':nextcloud:': ['nextcloud']
+      ':klaus:': 'klaus',
+      ':jabber:': 'jabber',
+      ':xmpp:': 'xmpp',
+      ':jsxc:': 'jsxc',
+      ':owncloud:': 'owncloud',
+      ':nextcloud:': 'nextcloud',
    },
    'emojione': emojione.emojioneList
 }
@@ -95,15 +93,15 @@ export default class Emoticons {
       text = text.replace(this.shortRegex, Emoticons.replaceShortnameWithImage);
 
       var wrapper = $('<div>' + text + '</div>');
-      if (wrapper.find('.jsxc_emoticon').length === 1 && wrapper.text().replace(/ /, '').length === 0 && wrapper.find('*').length === 1) {
-         wrapper.find('.jsxc_emoticon').addClass('jsxc_large');
+      if (wrapper.find('.jsxc-emoticon').length === 1 && wrapper.text().replace(/ /, '').length === 0 && wrapper.find('*').length === 1) {
+         wrapper.find('.jsxc-emoticon').addClass('jsxc-large');
          text = wrapper.html();
       }
 
       return text;
    }
 
-   private static replaceShortnameWithImage = (shortname) => {
+   private static replaceShortnameWithImage = (shortname: string) => {
       if (typeof shortname === 'undefined' || shortname === '' || (!(shortname in EMOTICON_LIST.emojione) && !(shortname in EMOTICON_LIST.core))) {
          return shortname;
       }
@@ -112,16 +110,12 @@ export default class Emoticons {
       let div = $('<div>');
 
       if (EMOTICON_LIST.core[shortname]) {
-         filename = EMOTICON_LIST.core[shortname][EMOTICON_LIST.core[shortname].length - 1].replace(/^:([^:]+):$/, '$1');
-         let src = Client.getOption('root') + CUSTOM_EMOTICON_BASE_PATH + filename + '.svg';
-
-         div.css('background-image', 'url(' + src + ')'); //@TODO replace with css class
+         filename = EMOTICON_LIST.core[shortname];
       } else if (EMOTICON_LIST.emojione[shortname]) {
          filename = EMOTICON_LIST.emojione[shortname].fname;
-
-         div.addClass('jsxc-emoticon-' + filename);
       }
 
+      div.addClass('jsxc-emoticon-' + filename);
       div.addClass('jsxc-emoticon');
       div.attr('title', shortname);
 

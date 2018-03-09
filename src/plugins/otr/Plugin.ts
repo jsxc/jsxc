@@ -12,6 +12,15 @@ import Session from './Session'
 import DSA from 'otr/lib/dsa'
 import Options from '../../Options'
 
+import salsa20File = require('otr/vendor/salsa20.js?path')
+import bigintFile = require('otr/vendor/bigint.js?path')
+import cryptoFile = require('otr/vendor/crypto.js?path')
+import eventemitterFile = require('otr/vendor/eventemitter.js?path')
+import constFile = require('otr/lib/const.js?path')
+import helpersFile = require('otr/lib/helpers.js?path')
+import dsaFile = require('otr/lib/dsa.js?path')
+import dsaWebworkerFile = require('otr/lib/dsa-webworker.js?path')
+
 interface DSA {
    parsePrivate
    createInWebWorker
@@ -165,14 +174,12 @@ export default class OTRPlugin extends EncryptionPlugin {
          //@TODO disable OTR
       }
 
-      let root = Client.getOption('root');
-
       return new Promise((resolve, reject) => {
          Log.debug('Start DSA key generation');
 
          DSA.createInWebWorker({
-            imports: [root + '/lib/otr/vendor/salsa20.js', root + '/lib/otr/vendor/bigint.js', root + '/lib/otr/vendor/crypto.js', root + '/lib/otr/vendor/eventemitter.js', root + '/lib/otr/lib/const.js', root + '/lib/otr/lib/helpers.js', root + '/lib/otr/lib/dsa.js'],
-            path: root + '/lib/otr/lib/dsa-webworker.js'
+            imports: [salsa20File, bigintFile, cryptoFile, eventemitterFile, constFile, helpersFile, dsaFile],
+            path: dsaWebworkerFile
          }, (key) => {
             Log.debug('DSA key generated');
 
