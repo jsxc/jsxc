@@ -431,7 +431,7 @@ export default class ChatWindow {
    private onInputKeyPress = (ev) => {
       let message: string = <string>$(ev.target).val();
 
-      if (ev.which !== ENTER_KEY || ev.shiftKey || !message) {
+      if (ev.which !== ENTER_KEY || ev.shiftKey || (!message && !this.attachmentDeposition)) {
          return;
       }
 
