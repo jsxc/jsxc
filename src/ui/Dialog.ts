@@ -23,7 +23,7 @@ export default class Dialog {
    };
 
    // @REVIEW name is maybe unnecessary
-   public constructor(content: string, unclosable: boolean = false, readonly name: string = '') {
+   public constructor(content: string, private unclosable: boolean = false, readonly name: string = '') {
       this.id = Dialog.generateId();
 
       this.src = dialogTemplate({
@@ -71,6 +71,10 @@ export default class Dialog {
    private onOpened() {
       let self = this;
       let dom = this.getDom();
+
+      if (this.unclosable) {
+         dom.find('.jsxc-dialog-close').hide();
+      }
 
       dom.find('.jsxc-close').click(function(ev) {
          ev.preventDefault();
