@@ -2,8 +2,6 @@ import incomingMessageSoundFile = require('../sound/incomingMessage.mp3');
 import incomingCallSoundFile = require('../sound/Rotary-Phone6.mp3');
 import noticeSoundFile = require('../sound/Ping1.mp3');
 
-console.log('foo', incomingMessageSoundFile, typeof incomingMessageSoundFile);
-
 export let NOTIFICATION_DEFAULT = 'default';
 export let NOTIFICATION_GRANTED = 'granted';
 export let NOTIFICATION_DENIED = 'denied';

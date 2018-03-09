@@ -374,16 +374,8 @@ export default class Roster {
          let presence = $(this).data('presence');
          let oldPresence = Presence[options.get('presence')] || Presence.offline;
 
-         //@REVIEW account could use hook
-         if (presence !== Presence.offline) {
-            // offline presence needs special handling in XMPPConnection
-            let account = Client.getAccount();
-
-            if (account) {
-               options.set('presence', Presence[presence]);
-
-               account.getConnection().sendPresence(<any>Presence[presence]);
-            }
+         if (Client.getAccount()) {
+            options.set('presence', Presence[presence]);
          }
 
          let presenceCallback = Client.getOption('presenceCallback');

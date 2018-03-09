@@ -138,13 +138,12 @@ export default class Account {
 
       //@REVIEW we have to make sure this is only called once (special case: connection pause)
       if (status === Strophe.Status.CONNECTED /*|| previousStatus === Strophe.Status.CONNECTED*/) {
-         Roster.get().setPresence(Presence.online);
-         Roster.get().refreshOwnPresenceIndicator();
-
          this.removeNonpersistentContacts();
 
          return this.connection.getRoster().then(() => {
-            this.connection.sendPresence();
+            //@REVIEW this works only with one account
+            Roster.get().setPresence(Presence.online);
+            Roster.get().refreshOwnPresenceIndicator();
          });
       }
 
