@@ -164,4 +164,4 @@ export let disabledPlugins: Array<string> = [];
 
 export let connectionCallback: (jid: string, status: number, condition?: string) => void = undefined;
 
-export let presenceCallback: (presence: string) => void = undefined;
+export let presenceCallback: (presence: string, oldPresence: string) => void = undefined;

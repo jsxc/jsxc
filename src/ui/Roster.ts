@@ -372,14 +372,16 @@ export default class Roster {
 
       this.element.find('.jsxc-menu-presence li').click(function() {
          let presence = $(this).data('presence');
+         let oldPresence = Presence[options.get('presence')] || Presence.offline;
 
-         options.set('presence', Presence[presence]);
-
+         //@REVIEW account could use hook
          if (presence !== Presence.offline) {
             // offline presence needs special handling in XMPPConnection
             let account = Client.getAccount();
 
             if (account) {
+               options.set('presence', Presence[presence]);
+
                account.getConnection().sendPresence(<any>Presence[presence]);
             }
          }
@@ -387,7 +389,7 @@ export default class Roster {
          let presenceCallback = Client.getOption('presenceCallback');
 
          if (typeof presenceCallback === 'function') {
-            presenceCallback(presence);
+            presenceCallback(presence, oldPresence);
          }
       });
    }
