@@ -6,7 +6,8 @@ var aboutTemplate = require('../../../template/about.hbs');
 
 export default function() {
    let content = aboutTemplate({
-      version: null,
+      version: __VERSION__,
+      date: __BUILD_DATE__,
       appName: null
    });
 

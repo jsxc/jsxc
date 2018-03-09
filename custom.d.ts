@@ -19,3 +19,5 @@ declare module '*.wav' {
 declare module '*.js?path' { }
 
 declare var __webpack_public_path__: string;
+declare var __VERSION__: string;
+declare var __BUILD_DATE__: string;

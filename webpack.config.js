@@ -1,5 +1,6 @@
 /* jshint node:true */
 const path = require("path");
+const webpack = require("webpack");
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
@@ -7,6 +8,11 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const extractSass = new ExtractTextPlugin({
    filename: 'styles/jsxc.bundle.css',
    allChunks: true,
+});
+
+const definePlugin = new webpack.DefinePlugin({
+   __VERSION__: JSON.stringify(require("./package.json").version),
+   __BUILD_DATE__: JSON.stringify((new Date()).toDateString()),
 });
 
 const fileLoader = {
@@ -83,6 +89,7 @@ module.exports = {
    },
    plugins: [
       extractSass,
+      definePlugin,
       new CleanWebpackPlugin(['dist']),
       new CopyWebpackPlugin([{
          from: 'images/',
