@@ -308,7 +308,7 @@ body.jsxc-fullscreen {
       width: 100%;
       z-index: 50;
       border: 0;
-      border-top: 8vmin solid #2a4163;
+      border-top: 62px solid #2a4163;
    }
    #jsxc-window-list {
       clip: auto;
@@ -337,7 +337,7 @@ body.jsxc-fullscreen {
 
       .jsxc-window-fade {
          position: absolute;
-         top: 8vmin;
+         top: 62px;
          right: 0;
          bottom: 0;
          left: 0;
@@ -345,13 +345,13 @@ body.jsxc-fullscreen {
       }
    }
    .jsxc-bar {
-      height: 8vmin;
+      height: 62px;
       .jsxc-action-entry {
-         height: 7vmin;
-         width: 5vmin;
+         height: 62px;
+         width: 42px;
          background-size: 50%;
          &.jsxc-close {
-            line-height: 7vmin;
+            line-height: 62px;
             font-size: 2.5em;
          }
          .jsxc-more {
@@ -367,9 +367,13 @@ body.jsxc-fullscreen {
       padding: 0;
    }
    .jsxc-menu-emoticons, .jsxc-file-transfer, .jsxc-transfer {
-      height: 8vmin;
-      width: 8vmin;
+      height: 62px;
+      width: 62px;
       background-size: 50%;
+   }
+   .jsxc-transfer-icon {
+      background-size: 50%;
+      height: 62px;
    }
    .jsxc-highlight .jsxc-window-bar {
       background-color: $window_bar_bg;
@@ -377,15 +381,21 @@ body.jsxc-fullscreen {
    .jsxc-roster-toggle {
       display: none;
    }
+   #jsxc-roster > .jsxc-bottom li {
+      height: 62px;
+      line-height: 62px;
+   }
 }
 
 body.jsxc-fullscreen.jsxc-two-columns {
-   #jsxc-roster {
-      width: 33%;
-   }
-   #jsxc-window-list {
-      .jsxc-window-item {
-         right: 33%;
+   @media(min-width: 740px) {
+      #jsxc-roster {
+         width: 33%;
+      }
+      #jsxc-window-list {
+         .jsxc-window-item {
+            right: 33%;
+         }
       }
    }
 }
