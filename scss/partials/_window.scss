@@ -1,15 +1,11 @@
 .jsxc-window {
-   position: absolute;
-   bottom: 0;
-   top: auto;
-   left: 0;
-   right: 0;
    height: auto;
    background-color: $window_bg;
    z-index: 80;
    cursor: default;
    border: 1px solid $window_border;
    border-bottom: 0;
+   max-width: 100%;
 
    &.jsxc-droppable.jsxc-dragactive {
       &:before {
@@ -47,11 +43,6 @@
 
       @extend %scrollbar;
    }
-   // .slimScrollDiv {
-   //    margin: 0 0 6px;
-   //    left: auto !important;
-   //    top: auto !important;
-   // }
 
    .jsxc-close {
       font-size: 20px;
@@ -66,27 +57,6 @@
       background-image: url("../images/more_white.svg");
       opacity: 0.4;
    }
-   // .ui-resizable-w {
-   //    left: 0;
-   // }
-   //
-   // .ui-resizable-nw {
-   //    top: 0;
-   //    left: 0;
-   //    width: 15px;
-   //    height: 15px;
-   //    z-index: 95 !important;
-   //    background-image: url("../images/resize_gray.svg");
-   // }
-   //
-   // .ui-resizable-n {
-   //    position: absolute;
-   //    top: 0;
-   //    left: 0;
-   //    right: 0;
-   //    height: 15px;
-   //    z-index: 100;
-   // }
 }
 
 .jsxc-window-bar {
@@ -113,15 +83,22 @@
 .jsxc-window-fade {
    position: relative;
    height: 320px;
+   width: 250px;
+   min-height: 320px;
+   min-width: 250px;
+   max-width: 100%;
    transition: height 0.2s;
    overflow: hidden;
    display: flex;
    flex-direction: column;
+   transform: none !important;
 
    .jsxc-normal & {}
 
    .jsxc-minimized & {
-      height: 0;
+      height: 0 !important;
+      min-height: 0;
+      min-width: 100%;
    }
 
    .jsxc-overlay {
@@ -192,6 +169,25 @@
          }
       }
    }
+
+   .resizable-handle {
+        z-index: 99;
+    }
+
+   .resizable-handle-nw {
+        margin-top: 5px;
+        margin-left: 5px;
+        z-index: 100 !important;
+        background-image: url("../images/resize_gray.svg");
+   }
+
+   .resizable-handle-n {
+        margin-top: 5px;
+    }
+
+    .resizable-handle-w {
+        margin-left: 5px;
+    }
 }
 
 .jsxc-preview {

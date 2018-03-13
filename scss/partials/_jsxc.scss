@@ -330,6 +330,9 @@ body.jsxc-fullscreen {
       }
 
       .jsxc-window {
+         position: absolute;
+         right: 0;
+         left: 0;
          top: 0;
          border: 0;
          background-color: #d4d2d2;
@@ -342,6 +345,7 @@ body.jsxc-fullscreen {
          bottom: 0;
          left: 0;
          height: auto;
+         width: auto;
       }
    }
    .jsxc-bar {

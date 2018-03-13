@@ -27,6 +27,7 @@ import Transcript from '../Transcript'
 import FileTransferHandler from './ChatWindowFileTransferHandler'
 import Attachment from '../Attachment'
 import beautifyBytes from './util/ByteBeautifier'
+import * as Resizable from 'resizable'
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -540,21 +541,10 @@ export default class ChatWindow {
    }
 
    private initResizableWindow() {
-      let element = this.element;
+      let element = this.element; console.count(this.contact.getId())
 
-      element.find('.jsxc-message-area').resizable({
-         handles: 'w, nw, n',
-         minHeight: 234,
-         minWidth: 250,
-         resize: function(ev, ui) {
-            //jsxc.gui.window.resize(element, ui);
-         },
-         start: function() {
-            element.removeClass('jsxc-normal');
-         },
-         stop: function() {
-            element.addClass('jsxc-normal');
-         }
+      new Resizable(element.find('.jsxc-window-fade').get(0), {
+         handles: 'n,nw,w',
       });
    }
 
@@ -601,48 +591,6 @@ export default class ChatWindow {
       this.element.find('.jsxc-message-area').append(chatWindowMessage.getElement());
 
       chatWindowMessage.restoreNextMessage();
-   }
-
-   private resizeMessageArea(width?: number, height?: number, outer?) {
-      let element = this.element;
-
-      if (!element.attr('data-default-height')) {
-         element.attr('data-default-height', element.find('.ui-resizable').height());
-      }
-
-      if (!element.attr('data-default-width')) {
-         element.attr('data-default-width', element.find('.ui-resizable').width());
-      }
-
-      //@REVIEW ???
-      var outerHeightDiff = (outer) ? element.find('.jsxc-window').outerHeight() - element.find('.ui-resizable').height() : 0;
-
-      width = width || parseInt(element.attr('data-default-width'));
-      height = height || parseInt(element.attr('data-default-height')) + outerHeightDiff;
-
-      if (outer) {
-         height -= outerHeightDiff;
-      }
-
-      element.width(width);
-
-      // @TODO we don't use slimscroll anymore
-      element.find('.jsxc-message-area').slimScroll({
-         height: height
-      });
-
-      $(document).trigger('resize.window.jsxc', [this]);
-   }
-
-   private fullsizeMessageArea() {
-      let size: { width: number, height: number } = Client.getOption('viewport').getSize();
-      let barHeight = this.element.find('.jsxc-window-bar').outerHeight();
-      let inputHeight = this.inputElement.outerHeight();
-
-      size.width -= 10;
-      size.height -= barHeight + inputHeight;
-
-      this.resizeMessageArea(size.width, size.height);
    }
 
    private scrollMessageAreaToBottom() {

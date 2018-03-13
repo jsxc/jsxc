@@ -27,11 +27,13 @@
       overflow: visible;
       white-space: nowrap;
       transition: right 0.5s;
+      display: flex;
 
       > li {
          padding: 0;
          margin: 0;
-         display: inline-block;
+         display: flex;
+         align-items: flex-end;
          height: 44px;
          width: 46px;
          position: relative;
@@ -42,7 +44,7 @@
 
          &.jsxc-normal {
             transition: width 0.2s;
-            width: 250px;
+            width: auto;
          }
 
          &.jsxc-minimized {
