@@ -8,13 +8,10 @@ import Client from '../Client'
 import Account from '../Account'
 import * as CONST from '../CONST'
 import DateTime from './util/DateTime'
-// import showVerificationDialog from './dialogs/verification'
-// import showFingerprintsDialog from './dialogs/fingerprints'
 import Emoticons from '../Emoticons'
 import SortedPersistentMap from '../util/SortedPersistentMap'
 import PersistentMap from '../util/PersistentMap'
 import AvatarSet from './AvatarSet'
-import 'simplebar'
 import { startCall } from './actions/call'
 import { Presence } from '../connection/AbstractConnection'
 import Pipe from '../util/Pipe'
@@ -37,9 +34,9 @@ const ESC_KEY = 27;
 export default class ChatWindow {
    public static HookRepository = new HookRepository<(window: ChatWindow, contact: Contact) => void>();
 
-   protected element;
+   protected element: JQuery<HTMLElement>;
 
-   private inputElement;
+   private inputElement: JQuery<HTMLElement>;
 
    private inputBlurTimeout: number;
 
@@ -294,7 +291,7 @@ export default class ChatWindow {
 
       windowElement.on('dragover', (ev) => {
          ev.preventDefault();
-         ev.originalEvent.dataTransfer.dropEffect = 'copy';
+         (<any>ev.originalEvent).dataTransfer.dropEffect = 'copy';
       });
    }
 
@@ -559,9 +556,9 @@ export default class ChatWindow {
          li.find('div').attr('title', emoticon);
          li.click(() => {
             let inputElement = this.element.find('.jsxc-message-input');
-            let inputValue = inputElement.val() || '';
-            let selectionStart = inputElement[0].selectionStart;
-            let selectionEnd = inputElement[0].selectionEnd;
+            let inputValue = <string>inputElement.val() || '';
+            let selectionStart = (<HTMLInputElement>inputElement[0]).selectionStart;
+            let selectionEnd = (<HTMLInputElement>inputElement[0]).selectionEnd;
             let inputStart = inputValue.slice(0, selectionStart);
             let inputEnd = inputValue.slice(selectionEnd);
 

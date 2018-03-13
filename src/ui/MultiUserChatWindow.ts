@@ -104,7 +104,7 @@ export default class MultiUserChatWindow extends ChatWindow {
       windowElement.on('drop', (ev) => {
          ev.preventDefault();
 
-         let jid = new JID(ev.originalEvent.dataTransfer.getData('text'));
+         let jid = new JID((<any>ev.originalEvent).dataTransfer.getData('text'));
 
          this.contact.invite(jid);
       });

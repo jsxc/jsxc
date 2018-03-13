@@ -16,7 +16,7 @@ export default class FileTransferHandler {
       this.chatWindow.getDom().find('.jsxc-window').on('drop', (ev) => {
          ev.preventDefault();
 
-         let files = ev.originalEvent.dataTransfer.files;
+         let files = (<any>ev.originalEvent).dataTransfer.files;
 
          if (files && files.length) {
             this.fileSelected(files[0]);
