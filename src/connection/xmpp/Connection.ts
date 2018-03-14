@@ -10,6 +10,7 @@ import Account from '../../Account'
 import { AbstractConnection, Presence } from '../AbstractConnection'
 import Roster from '../../ui/Roster'
 import XMPPJingleHandler from './JingleHandler'
+import Client from '../../Client'
 
 export default class XMPPConnection extends AbstractConnection implements IConnection {
    private handler;
@@ -35,7 +36,7 @@ export default class XMPPConnection extends AbstractConnection implements IConne
          }
       });
 
-      Roster.get().registerHook('presence', (presence) => {
+      Client.getPresenceController().registerTargetPresenceHook((presence) => {
          if (presence === Presence.offline) {
             this.connection.disconnect('forced');
          } else {

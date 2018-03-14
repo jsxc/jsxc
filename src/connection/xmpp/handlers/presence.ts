@@ -31,7 +31,9 @@ export default class extends AbstractHandler {
       let status: Presence = this.determinePresenceStatus(presence);
 
       if (presence.from.bare === this.account.getJID().bare) {
-         Log.debug('Ignore own presence notification');
+         if (presence.from.resource === this.account.getJID().resource) {
+            this.account.setPresence(status);
+         }
 
          return this.PRESERVE_HANDLER;
       }

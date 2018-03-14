@@ -75,15 +75,12 @@ function startUI() {
 }
 
 async function startWithCredentials(boshUrl: string, jid: string, password: string) {
-   Roster.get().startProcessing('Connecting...');
-
    let account = await Client.createAccount(boshUrl, jid, password);
 
    return account.connect().then(function() {
       startUI();
    }).catch((err) => {
       Client.removeAccount(account);
-      Roster.get().endProcessing();
 
       if (err instanceof BaseError) {
          Log.warn('Instance of BaseErrors', err.toString());
@@ -94,8 +91,6 @@ async function startWithCredentials(boshUrl: string, jid: string, password: stri
       console.log('Unknown error:', err);
 
       throw 'Unknown error';
-   }).then(() => {
-      Roster.get().endProcessing();
    });
 }
 

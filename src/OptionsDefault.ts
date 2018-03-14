@@ -162,6 +162,7 @@ export let storage = window.localStorage;
 
 export let disabledPlugins: Array<string> = [];
 
-export let connectionCallback: (jid: string, status: number, condition?: string) => void = undefined;
+export let connectionCallback: (jid: string, status: number, condition?: string) => void = null;
 
-export let presenceCallback: (presence: string, oldPresence: string) => void = undefined;
+//@TODO show login dialog
+export let onUserRequestsToGoOnline: () => void = null;

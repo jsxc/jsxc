@@ -192,14 +192,22 @@ export default class Roster {
       this.setStatus(statusElement);
    }
 
-   public setPresence(presence: Presence) {
-      this.options.set('presence', presence);
-   }
-
    public refreshOwnPresenceIndicator() {
-      let presence = this.options.get('presence');
+      let confirmedPresence = Client.getPresenceController().getCurrentPresence();
+      let requestedPresence = Client.getPresenceController().getTargetPresence();
+      let presence = typeof requestedPresence === 'number' ? requestedPresence : confirmedPresence;
 
-      this.updateOwnPresenceIndicator(presence);
+      let label = $('.jsxc-menu-presence .jsxc-' + Presence[presence]).text();
+      let labelElement = this.element.find('.jsxc-menu-presence > span');
+
+      labelElement.text(label);
+      this.element.attr('data-presence', Presence[confirmedPresence]);
+
+      if (requestedPresence === confirmedPresence) {
+         labelElement.removeClass('jsxc-waiting');
+      } else {
+         labelElement.addClass('jsxc-waiting');
+      }
    }
 
    public registerHook(property: string, func: (newValue: any, oldValue: any) => void) {
@@ -267,7 +275,7 @@ export default class Roster {
       }
 
       ((li, handler) => li.click(ev => {
-         let presence = this.options.get('presence');
+         let presence = Client.getPresenceController().getCurrentPresence();
 
          if (presence === Presence.offline && !li.hasClass('jsxc-offline-available')) {
             return;
@@ -306,13 +314,6 @@ export default class Roster {
       if (!insert) {
          rosterItem.getDom().appendTo(contactList);
       }
-   }
-
-   private updateOwnPresenceIndicator(presence: Presence) {
-      let label = $('.jsxc-menu-presence .jsxc-' + Presence[presence]).text();
-
-      this.element.find('.jsxc-menu-presence > span').text(label);
-      this.element.attr('data-presence', Presence[presence]);
    }
 
    private addMainMenuEntries() {
@@ -368,20 +369,24 @@ export default class Roster {
    }
 
    private registerPresenceHandler() {
+      let self = this;
       let options = this.options;
 
       this.element.find('.jsxc-menu-presence li').click(function() {
-         let presence = $(this).data('presence');
+         let presenceString = <string>$(this).data('presence');
          let oldPresence = Presence[options.get('presence')] || Presence.offline;
+         let requestedPresence = Presence[presenceString];
 
          if (Client.getAccount()) {
-            options.set('presence', Presence[presence]);
+            Client.getPresenceController().setTargetPresence(requestedPresence);
          }
 
-         let presenceCallback = Client.getOption('presenceCallback');
+         if (oldPresence === Presence.offline && requestedPresence !== Presence.offline) {
+            let onUserRequestsToGoOnline = Client.getOption('onUserRequestsToGoOnline');
 
-         if (typeof presenceCallback === 'function') {
-            presenceCallback(presence, oldPresence);
+            if (typeof onUserRequestsToGoOnline === 'function') {
+               onUserRequestsToGoOnline();
+            }
          }
       });
    }
@@ -458,11 +463,12 @@ export default class Roster {
          this.setVisibility(visibility);
       });
 
-      let presence = this.options.get('presence');
-      presence = typeof presence === 'number' ? presence : Presence.offline;
-      this.updateOwnPresenceIndicator(presence);
-      this.options.registerHook('presence', (presence) => {
-         this.updateOwnPresenceIndicator(presence);
+      this.refreshOwnPresenceIndicator();
+      Client.getPresenceController().registerTargetPresenceHook(() => {
+         this.refreshOwnPresenceIndicator();
+      });
+      Client.getPresenceController().registerCurrentPresenceHook(() => {
+         this.refreshOwnPresenceIndicator();
       });
    }
 }

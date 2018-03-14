@@ -22,6 +22,7 @@ import DiscoInfoRepository from './DiscoInfoRepository'
 import DiscoInfoChangable from './DiscoInfoChangable'
 import HookRepository from './util/HookRepository'
 import Options from './Options'
+import UUID from './util/UUID'
 
 let Strophe = StropheLib.Strophe;
 
@@ -40,6 +41,8 @@ export default class Account {
    private storage: Storage;
 
    private sessionStorage: Storage;
+
+   private sessionId: string;
 
    private uid: string;
 
@@ -73,8 +76,17 @@ export default class Account {
    constructor() {
       if (arguments.length === 1) {
          this.uid = arguments[0];
+         this.sessionId = this.getStorage().getItem('sessionId');
       } else if (arguments.length === 3 || arguments.length === 4) {
          this.uid = (new JID(arguments[1])).bare;
+         this.sessionId = UUID.v4();
+
+         let oldSessionId = this.getStorage().getItem('sessionId');
+         this.getStorage().setItem('sessionId', this.sessionId);
+
+         if (oldSessionId) {
+            Storage.clear(this.uid + '@' + oldSessionId);
+         }
       } else {
          throw 'Unsupported number of arguments';
       }
@@ -112,6 +124,12 @@ export default class Account {
    }
 
    public connect = (pause: boolean = false): Promise<void> => {
+      let targetPresence = Client.getPresenceController().getTargetPresence();
+
+      if (targetPresence === Presence.offline) {
+         Client.getPresenceController().setTargetPresence(Presence.online);
+      }
+
       return this.connector.connect().then(([status, connection]) => {
          this.connection = connection;
 
@@ -123,7 +141,6 @@ export default class Account {
          } else {
             this.initConnection(status);
          }
-
 
          storage.setItem('connectionStatus', {
             status: status,
@@ -141,9 +158,8 @@ export default class Account {
          this.removeNonpersistentContacts();
 
          return this.connection.getRoster().then(() => {
-            //@REVIEW this works only with one account
-            Roster.get().setPresence(Presence.online);
-            Roster.get().refreshOwnPresenceIndicator();
+            let targetPresence = Client.getPresenceController().getTargetPresence();
+            this.connection.sendPresence(targetPresence);
          });
       }
 
@@ -251,20 +267,23 @@ export default class Account {
 
    public getSessionStorage() {
       if (!this.sessionStorage) {
-         let sid = (<any>this.getConnection()).getSessionId();
-
-         if (!sid) {
-            //@REVIEW maybe use buffer
-            throw 'Session ID not available';
-         }
-
-         let name = this.uid + '@' + sid;
+         let name = this.uid + '@' + this.sessionId;
 
          this.sessionStorage = new Storage(name);
-         //@TODO save name for clean up
       }
 
       return this.sessionStorage;
+   }
+
+   public getPresence(): Presence {
+      let sessionStorage = this.getSessionStorage();
+      let presence = sessionStorage.getItem('presence');
+
+      return typeof presence === 'number' ? presence : Presence.offline;
+   }
+
+   public setPresence(presence: Presence) {
+      this.getSessionStorage().setItem('presence', presence);
    }
 
    public getConnection(): IConnection {
@@ -273,6 +292,10 @@ export default class Account {
 
    public getUid(): string {
       return this.uid;
+   }
+
+   public getSessionId(): string {
+      return this.sessionId;
    }
 
    public getJID(): JID {
@@ -296,7 +319,7 @@ export default class Account {
    }
 
    public connectionDisconnected() {
-      console.log('disconnected');
+      this.setPresence(Presence.offline);
 
       this.remove();
    }

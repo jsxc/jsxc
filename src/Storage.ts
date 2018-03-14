@@ -16,6 +16,24 @@ export default class Storage {
 
    static toSNC: number;
 
+   public static clear(name?: string) {
+      let prefix = PREFIX + SEP;
+
+      if (prefix) {
+         prefix = prefix + name + SEP;
+      }
+
+      for (let key in BACKEND) {
+         if (!BACKEND.hasOwnProperty(key)) {
+            continue;
+         }
+
+         if (key.startsWith(prefix)) {
+            BACKEND.removeItem(key);
+         }
+      }
+   }
+
    constructor(private name: string = null) {
       if (!Storage.tested) {
          Storage.tested = true;

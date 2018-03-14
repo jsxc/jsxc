@@ -12,6 +12,7 @@ import { NoticeManager } from './NoticeManager'
 import PluginRepository from './plugin/PluginRepository'
 import Log from './util/Log'
 import Options from './Options'
+import PresenceController from './PresenceController'
 
 export default class Client {
    private static storage;
@@ -20,9 +21,12 @@ export default class Client {
 
    private static noticeManager;
 
+   private static presenceController: PresenceController;
+
    public static init(options?): number {
       let roleAllocator = RoleAllocator.get();
-      let accountIds = Client.getStorage().getItem('accounts') || [];
+      let storage = Client.getStorage();
+      let accountIds = storage.getItem('accounts') || [];
       let numberOfAccounts = accountIds.length;
 
       if (typeof options === 'object' && options !== null) {
@@ -30,9 +34,12 @@ export default class Client {
       }
 
       Client.noticeManager = new NoticeManager(Client.getStorage());
+      Client.presenceController = new PresenceController(storage, Client.getAccounts);
 
       accountIds.forEach(function(id) {
          let account = Client.accounts[id] = new Account(id);
+
+         Client.presenceController.registerAccount(account);
 
          roleAllocator.waitUntilMaster().then(function() {
             return account.connect();
@@ -84,6 +91,10 @@ export default class Client {
       return Client.noticeManager;
    }
 
+   public static getPresenceController(): PresenceController {
+      return Client.presenceController;
+   }
+
    public static getAccount(jid: JID): Account;
    public static getAccount(uid?: string): Account;
    public static getAccount() {
@@ -96,8 +107,19 @@ export default class Client {
       } else {
          uid = Object.keys(Client.accounts)[0];
       }
-
+      console.log('accounts', Client.accounts);
       return Client.accounts[uid];
+   }
+
+   public static getAccounts(): Array<Account> {
+      // @REVIEW use of Object.values()
+      let accounts = [];
+
+      for (let id in Client.accounts) {
+         accounts.push(Client.accounts[id]);
+      }
+
+      return accounts;
    }
 
    public static createAccount(boshUrl: string, jid: string, sid: string, rid: string);
@@ -145,10 +167,18 @@ export default class Client {
    private static addAccount(account: Account) {
       Client.accounts[account.getUid()] = account;
 
+      Client.presenceController.registerAccount(account);
+
       Client.save()
    }
 
    private static save() {
-      Client.getStorage().setItem('accounts', Object.keys(this.accounts));
+      Client.getStorage().setItem('accounts', Object.keys(Client.accounts));
+   }
+
+   private static forEachAccount(callback: (account: Account) => void) {
+      for (let id in Client.accounts) {
+         callback(Client.accounts[id]);
+      }
    }
 }
