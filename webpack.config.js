@@ -28,6 +28,7 @@ module.exports = {
    output: {
       filename: 'jsxc.bundle.js',
       path: path.resolve(__dirname, './dist/'),
+      publicPath: 'dist/',
       libraryTarget: 'var',
       library: 'jsxc'
    },
@@ -97,6 +98,20 @@ module.exports = {
       }, {
          from: 'node_modules/emojione/assets/svg/',
          to: 'images/emojione/'
-      }])
+      }]),
+      new webpack.LoaderOptionsPlugin({
+            options: {
+                  handlebarsLoader: {}
+            }
+      })
    ],
+   devServer: {
+      port: 8091,
+      inline: true,
+      open: true,
+      openPage: 'example/ts.html',
+      proxy: {
+            "/http-bind": "http://localhost:5280"
+      }
+    },
 };
