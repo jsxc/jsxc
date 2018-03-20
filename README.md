@@ -1,4 +1,8 @@
-# JavaScript XMPP Client
+# dinarly xmpp
+
+dinarly-xmpp is a fork of jsxc which is being modified slightly to work with the dinarly frontend. Notably OTR is being removed due to the incompatible Mozilla Public License which cannot be combined with the AGPLv3. Aside from that there are some very minor changes being planned.
+
+## JavaScript XMPP Client
 
 [![Build Status](https://travis-ci.org/jsxc/jsxc.svg?branch=master)](https://travis-ci.org/jsxc/jsxc)
 [![Dependency Status](https://dependencyci.com/github/jsxc/jsxc/badge)](https://dependencyci.com/github/jsxc/jsxc)
