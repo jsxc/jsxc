@@ -141,23 +141,18 @@ export default class Account {
          } else {
             this.initConnection(status);
          }
-
-         storage.setItem('connectionStatus', {
-            status: status,
-         });
       });
    }
 
    private initConnection(status): Promise<void> {
       let storage = this.getSessionStorage();
-      let connectionStatusObject = storage.getItem('connectionStatus') || {};
-      let previousStatus = connectionStatusObject.status;
 
-      //@REVIEW we have to make sure this is only called once (special case: connection pause)
-      if (status === Strophe.Status.CONNECTED /*|| previousStatus === Strophe.Status.CONNECTED*/) {
+      if (!storage.getItem('roster:loaded')) {
          this.removeNonpersistentContacts();
 
          return this.connection.getRoster().then(() => {
+            storage.setItem('roster:loaded', true);
+
             let targetPresence = Client.getPresenceController().getTargetPresence();
             this.connection.sendPresence(targetPresence);
          });
