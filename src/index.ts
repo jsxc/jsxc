@@ -21,6 +21,7 @@ import HttpUploadPlugin from './plugins/httpUpload/HttpUploadPlugin'
 import AvatarVCardPlugin from './plugins/AvatarVCardPlugin'
 import CarbonsPlugin from './plugins/Carbons'
 import BaseError from './errors/BaseError'
+import FormWatcher, { SettingsCallback } from './FormWatcher'
 
 // @REVIEW
 $.extend(window, StropheLib)
@@ -68,6 +69,10 @@ export function start() {
    }
 
    return promise;
+}
+
+export function watchForm(formElement: JQuery, usernameElement: JQuery, passwordElement: JQuery, settingsCallback: SettingsCallback) {
+   new FormWatcher(formElement, usernameElement, passwordElement, settingsCallback);
 }
 
 function startUI() {
