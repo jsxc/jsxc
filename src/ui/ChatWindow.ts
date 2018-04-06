@@ -538,10 +538,16 @@ export default class ChatWindow {
    }
 
    private initResizableWindow() {
-      let element = this.element; console.count(this.contact.getId())
+      let element = this.element;
+      let fadeElement = element.find('.jsxc-window-fade');
 
-      new Resizable(element.find('.jsxc-window-fade').get(0), {
+      new Resizable(fadeElement.get(0), {
          handles: 'n,nw,w',
+         resize: () => {
+            let newWidth = fadeElement.width();
+
+            element.find('.jsxc-window-bar').css('width', newWidth + 'px');
+         }
       });
    }
 

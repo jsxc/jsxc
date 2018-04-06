@@ -1,3 +1,5 @@
+$defaultWindowWidth: 250px;
+
 .jsxc-window {
    height: auto;
    background-color: $window_bg;
@@ -59,10 +61,12 @@
    }
 }
 
-.jsxc-window-bar {
+.jsxc-window-bar.jsxc-bar {
    background-color: $window_bar_bg;
    color: $window_bar_color;
    transition: background-color 0.3s;
+   width: $defaultWindowWidth;
+   max-width: 100%;
 
    &:hover {
       .jsxc-normal & {
@@ -83,9 +87,9 @@
 .jsxc-window-fade {
    position: relative;
    height: 320px;
-   width: 250px;
+   width: $defaultWindowWidth;
    min-height: 320px;
-   min-width: 250px;
+   min-width: $defaultWindowWidth;
    max-width: 100%;
    transition: height 0.2s;
    overflow: hidden;
