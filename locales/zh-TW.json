@@ -309,6 +309,8 @@
     "setting-mam-enable": "想要從伺服器取得之前儲存的訊息嗎？",
     "File_too_large": "檔案太大了",
     "No_proper_file_transfer_method_available": "沒有適合的檔案傳輸方式",
-    "You_have_to_go_online_": "必須要上線才能執行這個動作。"
+    "You_have_to_go_online_": "必須要上線才能執行這個動作。",
+    "error_location_not_provided": null,
+    "Send_location": null
   }
 }

@@ -309,6 +309,8 @@
     "setting-mam-enable": "サーバーに保存されている古いメッセージを取得できるようにしますか？",
     "File_too_large": "ファイルが大きすぎます",
     "No_proper_file_transfer_method_available": "適切なファイル転送方法がありません",
-    "You_have_to_go_online_": "この操作を実行するには、オンラインになる必要があります。"
+    "You_have_to_go_online_": "この操作を実行するには、オンラインになる必要があります。",
+    "error_location_not_provided": null,
+    "Send_location": null
   }
 }

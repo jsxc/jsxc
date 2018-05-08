@@ -157,7 +157,7 @@
     "Local_Fingerprint": "Lokale vingerafdruk",
     "Remote_Fingerprint": "Afstand vingerafdruk",
     "Video_call_not_possible": "Video-gesprek is niet mogelijk. Je contact heeft geen ondersteuning voor video-oproepen.",
-    "Start_video_call": "Video gesprek starten",
+    "Start_video_call": "Videogesprek starten",
     "Join_chat": "Neem deel aan chat",
     "Join": "Meedoen",
     "Room": "Chatroom",
@@ -309,6 +309,8 @@
     "setting-mam-enable": "WIl je oude opgeslagen berichten van de server ophalen?",
     "File_too_large": "Bestand is te groot",
     "No_proper_file_transfer_method_available": "Geen bestand verzendingsmethode beschikbaar",
-    "You_have_to_go_online_": "Je dient online te zijn om deze operatie uit te voeren"
+    "You_have_to_go_online_": "Je dient online te zijn om deze operatie uit te voeren",
+    "error_location_not_provided": null,
+    "Send_location": null
   }
 }
