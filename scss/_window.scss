@@ -501,6 +501,19 @@
         display: none;
     }
 
+    .jsxc_location {
+        border-radius: 3px;
+        display: block;
+        background-color: #fff;
+        padding: 3px;
+        padding-left: 30px;
+        margin-bottom: 5px;
+        background-position: 3px center;
+        background-size: 25px 25px;
+        background-repeat: no-repeat;
+        background-image: image-url("location_icon.svg");
+    }
+
     .jsxc_attachment {
         border-radius: 3px;
         background-color: #fff;

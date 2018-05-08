@@ -1386,6 +1386,57 @@ jsxc.gui = {
       });
    },
 
+   detectGeoUri: function(container) {
+      container = $(container);
+
+      function decimalToDms(deg) {
+         var d = Math.floor(deg);
+         var minfloat = (deg - d) * 60;
+         var m = Math.floor(minfloat);
+         var secfloat = (minfloat - m) * 60;
+         var s = Math.round(secfloat * 10) / 10;
+
+         if (s === 60) {
+            m++;
+            s = 0;
+         }
+
+         if (m === 60) {
+            d++;
+            m = 0;
+         }
+         return d + "°" + m + "'" + s + "\"";
+      }
+
+      function ddToDms(latitude, longitude) {
+         var latDms = decimalToDms(latitude);
+         var lonDms = decimalToDms(longitude);
+         var latPostfix = latitude > 0 ? 'N' : 'S';
+         var lonPostfix = longitude > 0 ? 'E' : 'W';
+
+         return latDms + latPostfix + ' ' + lonDms + lonPostfix;
+      }
+
+      container.find('a[href^="geo:"]').each(function() {
+         var matches = $(this).attr('href').match(jsxc.CONST.REGEX.GEOURI);
+         var latitude = matches[1];
+         var longitude = matches[2];
+         var accuracy = matches[5];
+         var osmUrl = 'https://www.openstreetmap.org/?mlat=' + latitude + '&mlon=' + longitude + '#map=16/' + latitude + '/' + longitude;
+         var label = 'OSM: ' + ddToDms(latitude, longitude);
+
+         if (accuracy) {
+            label += ' (±' + (Math.round(accuracy * 10) / 10) + 'm)';
+         }
+
+         $(this).addClass('jsxc_location');
+         $(this).attr('title', matches[0]);
+         $(this).attr('href', osmUrl);
+         $(this).attr('target', '_blank');
+         $(this).text(label);
+      });
+   },
+
    avatarPlaceholder: function(el, seed, text) {
       text = text || seed;
 
@@ -2077,6 +2128,12 @@ jsxc.gui.window = {
          jsxc.gui.window.sendFile(bid);
       });
 
+      win.find('.jsxc_sendLocation').click(function() {
+         $('body').click();
+
+         jsxc.gui.window.sendLocation(bid);
+      });
+
       win.find('.jsxc_tools').click(function() {
          return false;
       });
@@ -2665,6 +2722,15 @@ jsxc.gui.window = {
          return '<a href="mailto:' + jid + '" target="_blank">mailto:' + jid + '</a>';
       });
 
+      msg = msg.replace(jsxc.CONST.REGEX.GEOURI, function(uri) {
+         var a = $('<a>');
+         a.attr('href', uri);
+         a.attr('target', '_blank');
+         a.text(uri);
+
+         return $('<wrapper>').append(a).html();
+      });
+
       // replace emoticons from XEP-0038 and pidgin with shortnames
       $.each(jsxc.gui.emotions, function(i, val) {
          msg = msg.replace(val[2], ':' + val[1] + ':');
@@ -2814,6 +2880,7 @@ jsxc.gui.window = {
 
       jsxc.gui.detectUriScheme(win);
       jsxc.gui.detectEmail(win);
+      jsxc.gui.detectGeoUri(win);
 
       if (!message.forwarded) {
          jsxc.gui.window.scrollDown(bid);
@@ -3036,6 +3103,31 @@ jsxc.gui.window = {
 
    sendFile: function(jid) {
       jsxc.fileTransfer.startGuiAction(jid);
+   },
+
+   sendLocation: function(bid) {
+      if (!navigator || !navigator.geolocation || !navigator.geolocation.getCurrentPosition) {
+         return;
+      }
+
+      navigator.geolocation.getCurrentPosition(function(position) {
+         var coords = position.coords;
+         var geouri = 'geo:' + coords.latitude + ',' + coords.longitude + ';u=' + coords.accuracy;
+
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.OUT,
+            msg: geouri
+         });
+      }, function(error) {
+         jsxc.debug('Couldnt get location', error);
+
+         jsxc.gui.window.postMessage({
+            bid: bid,
+            direction: jsxc.Message.SYS,
+            msg: $.t('error_location_not_provided')
+         });
+      });
    }
 };
 
