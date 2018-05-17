@@ -70,7 +70,6 @@
 .mfp-arrow,
 .mfp-preloader,
 .mfp-counter {
-  -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
       user-select: none; }
@@ -169,7 +168,7 @@ button::-moz-focus-inner {
   padding: 0;
   width: 90px;
   height: 110px;
-  -webkit-tap-highlight-color: transparent; }
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0); }
   .mfp-arrow:active {
     margin-top: -54px; }
   .mfp-arrow:hover, .mfp-arrow:focus {
@@ -333,13 +332,10 @@ img.mfp-img {
 
 @media all and (max-width: 900px) {
   .mfp-arrow {
-    -webkit-transform: scale(0.75);
     transform: scale(0.75); }
   .mfp-arrow-left {
-    -webkit-transform-origin: 0;
     transform-origin: 0; }
   .mfp-arrow-right {
-    -webkit-transform-origin: 100%;
     transform-origin: 100%; }
   .mfp-container {
     padding-left: 6px;
@@ -363,12 +359,6 @@ img.emojione {
   width: auto; }
 
 @keyframes progress-bar-stripes {
-  from {
-    background-position: 40px 0; }
-  to {
-    background-position: 0 0; } }
-
-@-webkit-keyframes progress-bar-stripes {
   from {
     background-position: 40px 0; }
   to {
@@ -398,42 +388,35 @@ img.emojione {
   text-align: center;
   background-color: #337ab7;
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
-  -webkit-transition: width 0.6s ease;
   transition: width 0.6s ease; }
 
 #jsxc_dialog .progress-striped .progress-bar,
 #jsxc_dialog .progress-bar-striped {
-  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
   background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
   background-size: 40px 40px; }
 
 #jsxc_dialog .progress.active .progress-bar,
 #jsxc_dialog .progress-bar.active {
-  -webkit-animation: progress-bar-stripes 2s linear infinite;
   animation: progress-bar-stripes 2s linear infinite; }
 
 #jsxc_dialog .progress-bar-success {
   background-color: #5cb85c; }
   .progress-striped #jsxc_dialog .progress-bar-success {
-    background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
     background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent); }
 
 #jsxc_dialog .progress-bar-info {
   background-color: #5bc0de; }
   .progress-striped #jsxc_dialog .progress-bar-info {
-    background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
     background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent); }
 
 #jsxc_dialog .progress-bar-warning {
   background-color: #f0ad4e; }
   .progress-striped #jsxc_dialog .progress-bar-warning {
-    background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
     background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent); }
 
 #jsxc_dialog .progress-bar-danger {
   background-color: #d9534f; }
   .progress-striped #jsxc_dialog .progress-bar-danger {
-    background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
     background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent); }
 
 #jsxc_dialog .clearfix:before, #jsxc_dialog .clearfix:after, #jsxc_webrtc .clearfix:before, #jsxc_webrtc .clearfix:after {
@@ -1130,7 +1113,6 @@ img.emojione {
   font-size: 14px;
   line-height: 1.428571429;
   border-radius: 4px;
-  -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none; }
@@ -1672,7 +1654,6 @@ img.emojione {
   border: 1px solid #ccc;
   border-radius: 4px;
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
   transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s; }
   #jsxc_dialog .form-control:focus, #jsxc_webrtc .form-control:focus {
     border-color: #66afe9;
@@ -2180,75 +2161,41 @@ fieldset[disabled]
 .mfp-content {
   text-align: center; }
 
-@-webkit-keyframes bounce {
+@keyframes bounce {
   0% {
     bottom: 0;
-    -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in; }
+    animation-timing-function: ease-in; }
   12% {
     bottom: 5px;
-    -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out; }
+    animation-timing-function: ease-out; }
   25% {
     bottom: 0;
-    -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in; }
+    animation-timing-function: ease-in; }
   37% {
     bottom: 5px;
-    -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out; }
+    animation-timing-function: ease-out; }
   50% {
     bottom: 0;
-    -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in; }
+    animation-timing-function: ease-in; }
   100% {
     bottom: 0; } }
 
 @keyframes bounce {
   0% {
     bottom: 0;
-    -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in; }
+    animation-timing-function: ease-in; }
   12% {
     bottom: 5px;
-    -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out; }
+    animation-timing-function: ease-out; }
   25% {
     bottom: 0;
-    -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in; }
+    animation-timing-function: ease-in; }
   37% {
     bottom: 5px;
-    -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out; }
+    animation-timing-function: ease-out; }
   50% {
     bottom: 0;
-    -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in; }
-  100% {
-    bottom: 0; } }
-
-@keyframes bounce {
-  0% {
-    bottom: 0;
-    -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in; }
-  12% {
-    bottom: 5px;
-    -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out; }
-  25% {
-    bottom: 0;
-    -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in; }
-  37% {
-    bottom: 5px;
-    -webkit-animation-timing-function: ease-out;
-            animation-timing-function: ease-out; }
-  50% {
-    bottom: 0;
-    -webkit-animation-timing-function: ease-in;
-            animation-timing-function: ease-in; }
+    animation-timing-function: ease-in; }
   100% {
     bottom: 0; } }
 
@@ -2484,16 +2431,13 @@ fieldset[disabled]
   #jsxc_roster.jsxc_state_hidden {
     display: block;
     right: -200px;
-    -webkit-transition: right 0.5s;
-            transition: right 0.5s; }
+    transition: right 0.5s; }
     #jsxc_roster.jsxc_state_hidden #jsxc_toggleRoster:before {
-      -webkit-transform: rotate(0deg);
-              transform: rotate(0deg); }
+      transform: rotate(0deg); }
   #jsxc_roster.jsxc_state_shown {
     display: block;
     right: 0;
-    -webkit-transition: right 0.5s;
-            transition: right 0.5s; }
+    transition: right 0.5s; }
   #jsxc_roster > .jsxc_bottom {
     position: absolute;
     left: 0;
@@ -2565,8 +2509,7 @@ fieldset[disabled]
     border-style: solid;
     border-width: 6px 4px 6px 0;
     border-color: transparent whitesmoke;
-    -webkit-transform: rotate(180deg);
-            transform: rotate(180deg); }
+    transform: rotate(180deg); }
 
 .jsxc_rosteritem {
   padding: 0;
@@ -2699,8 +2642,7 @@ fieldset[disabled]
     font-size: 80%;
     padding: 2px;
     position: relative;
-    -webkit-animation: bounce 2s 1s infinite;
-            animation: bounce 2s 1s infinite; }
+    animation: bounce 2s 1s infinite; }
   #jsxc_notice > span:empty {
     display: none; }
 
@@ -2710,8 +2652,7 @@ fieldset[disabled]
   right: 210px;
   left: 0;
   z-index: 50;
-  -webkit-transition: right 0.5s;
-          transition: right 0.5s; }
+  transition: right 0.5s; }
   #jsxc_windowList.jsxc_roster_hidden {
     right: 10px; }
   @media (min-width: 768px) {
@@ -2727,8 +2668,7 @@ fieldset[disabled]
     height: 44px;
     overflow: visible;
     white-space: nowrap;
-    -webkit-transition: right 0.5s;
-            transition: right 0.5s; }
+    transition: right 0.5s; }
     #jsxc_windowList > ul > li {
       padding: 0;
       margin: 0;
@@ -2741,12 +2681,10 @@ fieldset[disabled]
       cursor: pointer;
       white-space: normal; }
       #jsxc_windowList > ul > li.jsxc_normal {
-        -webkit-transition: width 0.2s;
-                transition: width 0.2s;
+        transition: width 0.2s;
         width: 250px; }
       #jsxc_windowList > ul > li.jsxc_min {
-        -webkit-transition: width 0.2s;
-                transition: width 0.2s;
+        transition: width 0.2s;
         width: 46px !important; }
         @media (min-width: 768px) {
           #jsxc_windowList > ul > li.jsxc_min {
@@ -2774,10 +2712,9 @@ fieldset[disabled]
     line-height: 30px;
     float: left;
     cursor: pointer;
-    -webkit-user-select: none;
-       -moz-user-select: none;
-        -ms-user-select: none;
-            user-select: none; }
+    -moz-user-select: none;
+     -ms-user-select: none;
+         user-select: none; }
     #jsxc_windowListSB > div:hover {
       background-color: #b3b2b2; }
   #jsxc_windowListSB > .jsxc_disabled {
@@ -2817,11 +2754,9 @@ fieldset[disabled]
   border: 1px solid #e1e1e1;
   border-bottom: 0; }
   .jsxc_min .jsxc_window {
-    -webkit-transition: bottom 0.2s;
-            transition: bottom 0.2s; }
+    transition: bottom 0.2s; }
   .jsxc_normal .jsxc_window {
-    -webkit-transition: bottom 0.2s;
-            transition: bottom 0.2s; }
+    transition: bottom 0.2s; }
   .jsxc_showOverlay .jsxc_window .jsxc_overlay {
     display: block !important; }
   .jsxc_window .jsxc_emoticons {
@@ -2942,9 +2877,7 @@ fieldset[disabled]
       z-index: 80;
       line-height: 42px;
       opacity: 0;
-      -webkit-transition: opacity 0.5s, top 0.5s;
-              transition: opacity 0.5s, top 0.5s;
-      background-image: -webkit-linear-gradient(#c1c1c1, transparent);
+      transition: opacity 0.5s, top 0.5s;
       background-image: linear-gradient(#c1c1c1, transparent); }
       .jsxc_window .jsxc_fade .jsxc_mam-load-more.jsxc_show {
         top: 0;
@@ -2974,12 +2907,8 @@ fieldset[disabled]
     border: 0;
     display: block;
     resize: none;
-    -webkit-transition: height 0.5s;
-            transition: height 0.5s;
+    transition: height 0.5s;
     font-size: 13px; }
-  .jsxc_window textarea::-webkit-input-placeholder {
-    color: #000;
-    opacity: 0.3; }
   .jsxc_window textarea::-moz-placeholder {
     color: #000;
     opacity: 0.3; }
@@ -3070,14 +2999,24 @@ fieldset[disabled]
       background-position: center center;
       background-repeat: no-repeat;
       opacity: 0;
-      -webkit-transition: opacity 0.5s;
-              transition: opacity 0.5s; }
+      transition: opacity 0.5s; }
     .jsxc_chatmessage a[download]:hover:before {
       opacity: 0.6; }
   .jsxc_chatmessage img {
     max-width: 100%; }
   .jsxc_chatmessage .jsxc_avatar {
     display: none; }
+  .jsxc_chatmessage .jsxc_location {
+    border-radius: 3px;
+    display: block;
+    background-color: #fff;
+    padding: 3px;
+    padding-left: 30px;
+    margin-bottom: 5px;
+    background-position: 3px center;
+    background-size: 25px 25px;
+    background-repeat: no-repeat;
+    background-image: url('../img/location_icon.svg'); }
   .jsxc_chatmessage .jsxc_attachment {
     border-radius: 3px;
     background-color: #fff;
@@ -3305,8 +3244,7 @@ div.jsxc_transfer {
   overflow: hidden;
   position: absolute;
   top: 0;
-  -webkit-transition: height 400ms;
-          transition: height 400ms;
+  transition: height 400ms;
   z-index: 100; }
   .jsxc_windowItem .jsxc_memberlist ul {
     white-space: nowrap;
@@ -3314,8 +3252,7 @@ div.jsxc_transfer {
     background-color: #1d2d44;
     color: #bbb;
     overflow: hidden;
-    -webkit-transition: left 400ms;
-            transition: left 400ms;
+    transition: left 400ms;
     padding: 0;
     padding-left: 6px;
     padding-right: 6px;
@@ -3544,8 +3481,7 @@ ul.jsxc_vCard {
 .jsxc_list .jsxc_inner {
   box-sizing: border-box;
   max-height: 0;
-  -webkit-transition: max-height 0.5s;
-          transition: max-height 0.5s;
+  transition: max-height 0.5s;
   overflow: hidden;
   visibility: hidden;
   position: absolute;
@@ -3582,17 +3518,15 @@ ul.jsxc_vCard {
   cursor: pointer;
   border: 1px solid transparent;
   border-radius: 4px;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+   -ms-user-select: none;
+       user-select: none;
   color: #fff;
   background-color: #5cb85c;
   border-color: #4cae4c; }
 
 .jsxc_oneway .jsxc_avatar {
-  -webkit-filter: grayscale(100%);
-          filter: grayscale(100%); }
+  filter: grayscale(100%); }
 
 img.jsxc_vCard {
   float: right;
@@ -3624,15 +3558,13 @@ img.jsxc_vCard {
   white-space: nowrap;
   vertical-align: middle;
   cursor: pointer;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+   -ms-user-select: none;
+       user-select: none;
   background-image: none;
   border: 1px solid transparent;
   border-radius: 4px;
-  -webkit-transition: background-color 0.5s;
-          transition: background-color 0.5s; }
+  transition: background-color 0.5s; }
   .jsxc_btn.jsxc_btn-default {
     border-color: #ccc;
     color: #555;
@@ -3661,8 +3593,7 @@ img.jsxc_vCard {
   z-index: 110;
   margin: 8px 2px 5px 10px;
   right: 0;
-  -webkit-filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
-          filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
+  filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
   padding: 4px 12px;
   padding-left: 5px; }
   .jsxc_menu:after {
@@ -3812,34 +3743,15 @@ img.jsxc_vCard {
   height: 10px;
   box-sizing: border-box;
   background-color: #a1a1a1;
-  -webkit-animation-name: jsxc_establishing;
-          animation-name: jsxc_establishing;
-  -webkit-animation-duration: 2s;
-          animation-duration: 2s;
-  -webkit-animation-iteration-count: infinite;
-          animation-iteration-count: infinite;
+  animation-name: jsxc_establishing;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
   position: absolute;
   top: 50%;
   left: 50%;
   z-index: 20;
   margin-left: -20px;
   margin-top: -5px; }
-
-@-webkit-keyframes jsxc_establishing {
-  0% {
-    border-width: 0;
-    background-color: #a1a1a1;
-    width: 40px;
-    margin-left: -20px; }
-  50% {
-    background-color: #f1f1f1;
-    width: 80px;
-    margin-left: -40px; }
-  100% {
-    border-width: 0;
-    background-color: #a1a1a1;
-    width: 40px;
-    margin-left: -20px; } }
 
 @keyframes jsxc_establishing {
   0% {
@@ -3865,38 +3777,15 @@ img.jsxc_vCard {
   box-sizing: border-box;
   background-color: #98d48f;
   border-radius: 50%;
-  -webkit-animation-name: jsxc_ringing;
-          animation-name: jsxc_ringing;
-  -webkit-animation-duration: 2s;
-          animation-duration: 2s;
-  -webkit-animation-iteration-count: infinite;
-          animation-iteration-count: infinite;
+  animation-name: jsxc_ringing;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
   position: absolute;
   top: 50%;
   left: 50%;
   z-index: 20;
   margin-left: -10px;
   margin-top: -10px; }
-
-@-webkit-keyframes jsxc_ringing {
-  0% {
-    background-color: #98d48f;
-    width: 20px;
-    height: 20px;
-    margin-left: -10px;
-    margin-top: -10px; }
-  50% {
-    background-color: #76ba6c;
-    width: 80px;
-    height: 80px;
-    margin-left: -40px;
-    margin-top: -40px; }
-  100% {
-    background-color: #98d48f;
-    width: 20px;
-    height: 20px;
-    margin-left: -10px;
-    margin-top: -10px; } }
 
 @keyframes jsxc_ringing {
   0% {
@@ -3928,36 +3817,15 @@ img.jsxc_vCard {
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  -webkit-animation-name: jsxc_ringing;
-          animation-name: jsxc_ringing;
-  -webkit-animation-duration: 1.5s;
-          animation-duration: 1.5s;
-  -webkit-animation-iteration-count: infinite;
-          animation-iteration-count: infinite;
+  animation-name: jsxc_ringing;
+  animation-duration: 1.5s;
+  animation-iteration-count: infinite;
   position: absolute;
   top: 50%;
   left: 50%;
   z-index: 20;
   margin-left: -40px;
   margin-top: -40px; }
-
-@-webkit-keyframes jsxc_bell {
-  0% {
-    margin-left: -50px; }
-  5% {
-    margin-left: -30px; }
-  10% {
-    margin-left: -50px; }
-  15% {
-    margin-left: -30px; }
-  20% {
-    margin-left: -50px; }
-  25% {
-    margin-left: -30px; }
-  30% {
-    margin-left: -50px; }
-  35% {
-    margin-left: -40px; } }
 
 @keyframes jsxc_bell {
   0% {
@@ -4059,11 +3927,6 @@ div:full-screen {
   div:full-screen.jsxc_localvideo {
     border: 1px solid #fff; }
 
-div:-webkit-full-screen {
-  width: 100%;
-  height: 100%;
-  background-color: #000; }
-
 div:-moz-full-screen {
   width: 100%;
   height: 100%;
@@ -4078,8 +3941,6 @@ div:fullscreen {
   width: 100%;
   height: 100%;
   background-color: #000; }
-  div:-webkit-full-screen.jsxc_localvideo {
-    border: 1px solid #fff; }
   div:-moz-full-screen.jsxc_localvideo {
     border: 1px solid #fff; }
   div:-ms-fullscreen.jsxc_localvideo {
@@ -4105,8 +3966,7 @@ div.jsxc_video {
   right: 0;
   text-align: center;
   z-index: 9090;
-  -webkit-transition: 1s opacity;
-          transition: 1s opacity;
+  transition: 1s opacity;
   opacity: 0; }
   @media (min-width: 768px) {
     .jsxc_controlbar {

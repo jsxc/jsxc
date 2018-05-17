@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+### Added
+- add option to send current location
+- add czech translation
+
+### Fixed
+- [#646](https://github.com/jsxc/jsxc/issues/646) fix locales with country code
+- [#672](https://github.com/jsxc/jsxc/issues/672) fix input resize for pasting
+
+### Changed
+- update locales
+- update dependencies
+
 ## 3.3.2 - 2017-11-29
 ### Fixed
 - [#521](https://github.com/jsxc/jsxc/issues/521) concatenate files for dsa webworker to bypass strict csp
