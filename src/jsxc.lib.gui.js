@@ -2142,6 +2142,10 @@ jsxc.gui.window = {
       win.find('.jsxc_textinput').keyup(function(ev) {
          var body = $(this).val();
 
+         if (ev.which !== 13 || ev.shiftKey || !body) {
+            resizeTextarea.call(this);
+         }
+
          // I'm composing a message
          if (ev.which !== 13) {
             jsxc.xmpp.chatState.startComposing(bid);
@@ -2160,7 +2164,6 @@ jsxc.gui.window = {
          }
       }).keypress(function(ev) {
          if (ev.which !== 13 || ev.shiftKey || !$(this).val()) {
-            resizeTextarea.call(this);
             return;
          }
 
