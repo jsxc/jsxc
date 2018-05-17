@@ -310,7 +310,8 @@
     "File_too_large": "Arquivo muito grande",
     "No_proper_file_transfer_method_available": "Nenhum meio de transferência de arquivos disponível",
     "You_have_to_go_online_": "Você precisa estar on-line para executar esta operação.",
-    "error_location_not_provided": null,
-    "Send_location": null
+    "error_location_not_provided": "Não consegui identificar idioma",
+    "Log_in_with_chat": null,
+    "Send_location": "Enviar Idioma"
   }
 }

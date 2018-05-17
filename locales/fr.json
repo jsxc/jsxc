@@ -311,6 +311,7 @@
     "No_proper_file_transfer_method_available": "Aucune méthode de transfert de fichier disponible.",
     "You_have_to_go_online_": "Vous devez être connecté pour exécuter cette opération",
     "error_location_not_provided": null,
+    "Log_in_with_chat": null,
     "Send_location": null
   }
 }

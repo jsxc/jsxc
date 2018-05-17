@@ -311,6 +311,7 @@
     "No_proper_file_transfer_method_available": "No proper file transfer method available",
     "You_have_to_go_online_": "You have to be online to execute this operation.",
     "error_location_not_provided": "Could not get location.",
+    "Log_in_with_chat": "Log in with chat",
     "Send_location": "Send location"
   }
 }

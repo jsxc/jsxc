@@ -310,7 +310,8 @@
     "File_too_large": "ファイルが大きすぎます",
     "No_proper_file_transfer_method_available": "適切なファイル転送方法がありません",
     "You_have_to_go_online_": "この操作を実行するには、オンラインになる必要があります。",
-    "error_location_not_provided": null,
-    "Send_location": null
+    "error_location_not_provided": "位置情報を取得できませんでした。",
+    "Log_in_with_chat": null,
+    "Send_location": "位置情報を送信"
   }
 }

@@ -311,6 +311,7 @@
     "No_proper_file_transfer_method_available": "Geen bestand verzendingsmethode beschikbaar",
     "You_have_to_go_online_": "Je dient online te zijn om deze operatie uit te voeren",
     "error_location_not_provided": null,
+    "Log_in_with_chat": null,
     "Send_location": null
   }
 }

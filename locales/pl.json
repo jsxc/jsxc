@@ -310,7 +310,8 @@
     "File_too_large": "Plik jest zbyt duży",
     "No_proper_file_transfer_method_available": "Brak odpowiedniej metody przesyłania plików",
     "You_have_to_go_online_": "Musisz być online, aby to zrobić.",
-    "error_location_not_provided": null,
-    "Send_location": null
+    "error_location_not_provided": "Nie można pobrać lokalizacji.",
+    "Log_in_with_chat": null,
+    "Send_location": "Wyślij lokalizację."
   }
 }
