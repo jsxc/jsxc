@@ -99,6 +99,8 @@ export interface IMessage {
 
    getProcessedBody(): string
 
+   setErrorMessage(error: string)
+
    getErrorMessage(): string
 
    updateProgress(transfered: number, complete: number)

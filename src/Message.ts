@@ -268,6 +268,10 @@ export default class Message implements Identifiable, IMessage {
       return `<p>${body}</p>`;
    }
 
+   public setErrorMessage(error: string) {
+      return this.data.set('errorMessage', error);
+   }
+
    public getErrorMessage(): string {
       return this.data.get('errorMessage');
    }
