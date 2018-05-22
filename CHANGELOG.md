@@ -5,6 +5,33 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+- OMEMO
+- video calls in all tabs
+- [#328](https://github.com/jsxc/jsxc/issues/328) MUC joining from any tab
+- [#501](https://github.com/jsxc/jsxc/issues/501) support JID escaping (XEP-0106)
+- fix and improve emoticon insertion
+- add muc invitation
+    - [#341](https://github.com/jsxc/jsxc/issues/341) mediated invitation
+    - direct invitation (XEP-0249)
+- display muc subject in window header
+- remove nonpersistent contacts after login
+- [#6](https://github.com/jsxc/jsxc/issues/6) add voice only call
+- add fullscreen layout
+- translate OTR status messages
+- use Consistent Color Generation (XEP-0392)
+- use more naturally bounce animation for notice
+- display presence messages
+
+### Developer notes
+- Typescript, Webpack, Handlebars, Karma, Mocha, Chai and Sinon
+- remove `build` folder, git submodules, bower and grunt
+- share one XMPP connection across all tabs
+- add plugin API
+
+### Removed/Pending
+- jingle file transfer
+- bookmarks
+- screen sharing
 
 ## 3.1.1 - 2017-02-14
 ### Fixed
