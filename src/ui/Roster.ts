@@ -94,12 +94,15 @@ export default class Roster {
 
    public startProcessing(msg?: string) {
       this.element.addClass('jsxc-processing');
-      //@TODO count calls to remove class not too early
 
       if (msg) {
          let spanElement = this.element.find('.jsxc-menu-presence > span');
          spanElement.addClass('jsxc-waiting');
-         spanElement.data('previousText', spanElement.text()); //@TODO don't overwrite previous value
+
+         if (!spanElement.data('previousText')) {
+            spanElement.data('previousText', spanElement.text());
+         }
+
          spanElement.text(msg);
       }
    }
@@ -111,12 +114,13 @@ export default class Roster {
       spanElement.removeClass('jsxc-waiting');
 
       let previousText = spanElement.data('previousText');
+      spanElement.data('previousText', undefined);
 
       if (previousText) {
          spanElement.text(previousText);
       }
 
-      this.refreshOwnPresenceIndicator(); //@REVIEW previousText???
+      this.refreshOwnPresenceIndicator();
    }
 
    public setRosterAvatar(contact: IContact) {
@@ -439,13 +443,6 @@ export default class Roster {
 
       $('body').removeClass('jsxc-roster-hidden jsxc-roster-shown');
       $('body').addClass('jsxc-roster-' + state);
-
-      // @REVIEW via storage hook?
-      // let duration = parseFloat(this.element.css('transitionDuration') || '0') * 1000;
-      //
-      // setTimeout(function() {
-      //    jsxc.gui.updateWindowListSB();
-      // }, duration);
    }
 
    private initOptions() {

@@ -114,7 +114,7 @@ export default class ChatWindow {
    }
 
    public getId() {
-      return /*this.account.getUid() + '@' +*/ this.contact.getId();
+      return this.contact.getId();
    }
 
    public getAccount() {
@@ -137,29 +137,14 @@ export default class ChatWindow {
       this.element.removeClass('jsxc-normal').addClass('jsxc-minimized');
 
       this.properties.set('minimized', true);
-
-      //@TODO replace this with max-height css property
-      //win.find('.jsxc-window').css('bottom', -1 * win.find('.jsxc-window-fade').height());
    }
 
    public unminimize(ev?) {
       let element = this.element;
 
-      if (Client.isExtraSmallDevice()) {
-         if (parseFloat($('#jsxc-roster').css('right')) >= 0) {
-            // duration = jsxc.gui.roster.toggle();
-         }
-
-         //@TODO hide all other windows
-         //@TODO fullscreen this window
-      }
-
       element.removeClass('jsxc-minimized').addClass('jsxc-normal');
 
       this.properties.set('minimized', false);
-
-      // @REVIEW is this still required?
-      //element.find('.jsxc-window').css('bottom', '0');
 
       //@TODO scroll message list, so that this window is in the view port
 
@@ -404,7 +389,6 @@ export default class ChatWindow {
       inputElement.focus(this.onInputFocus);
       inputElement.blur(this.onInputBlur);
 
-      // @REVIEW
       inputElement.mouseenter(function() {
          $('#jsxc-window-list').data('isHover', true);
       }).mouseleave(function() {

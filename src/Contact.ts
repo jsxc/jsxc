@@ -21,7 +21,6 @@ export default class Contact implements IIdentifiable, IContact {
 
    protected readonly account: Account;
 
-   // @REVIEW Data to own object/type?
    protected data: PersistentMap;
 
    protected jid: JID;
@@ -73,8 +72,6 @@ export default class Contact implements IIdentifiable, IContact {
 
       //@TODO add delete method to purge the complete entry
       this.data.empty();
-
-      //@TODO purge window
    }
 
    public openChatWindow = (): ChatWindow => {
@@ -151,7 +148,7 @@ export default class Contact implements IIdentifiable, IContact {
 
       this.getCapableResources(features).then(cb);
 
-      this.registerHook('resources', () => {
+      this.registerHook('resources', (newValue, oldValue) => {
          //@REVIEW trigger only on changes
          this.getCapableResources(features).then(cb);
       });
@@ -159,7 +156,7 @@ export default class Contact implements IIdentifiable, IContact {
 
    //@REVIEW this is not unique among accounts, will fail in Avatar.get
    public getId(): string {
-      return this.jid.bare;
+      return /*this.account.getUid() + '@' +*/ this.jid.bare;
    }
 
    public getJid(): JID {
