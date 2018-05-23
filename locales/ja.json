@@ -285,7 +285,7 @@
     "Change": "変更",
     "Send_file": "ファイル送信",
     "setting-explanation-carbon": "カーボンコピーを有効にした場合、XMPPサーバーはこのクライアントが受信者としてリストされていなくとも、すべての受信メッセージのコピーをこのクライアントに送信します。",
-    "setting-explanation-login": "このオプションを有効にすると、ログイン時にチャットが開始されます。",
+    "setting-explanation-login": "このオプションを有効にすると、ログインと同時にチャットが有効になります。",
     "setting-explanation-priority": "複数のクライアントから同じアカウントでログインしている場合、XMPPサーバーは最も優先度の高いクライアントにメッセージを配信します。新規ユーザーは混乱を最小限にするためにすべてのクライアントの数値を０にすることを推奨します。",
     "setting-explanation-xmpp": "これらのオプションは、XMPPサーバーに接続するために使用されます。",
     "_is_composing": " 作成しています...",
@@ -311,7 +311,7 @@
     "No_proper_file_transfer_method_available": "適切なファイル転送方法がありません",
     "You_have_to_go_online_": "この操作を実行するには、オンラインになる必要があります。",
     "error_location_not_provided": "位置情報を取得できませんでした。",
-    "Log_in_with_chat": null,
+    "Log_in_with_chat": "チャットにもログイン",
     "Send_location": "位置情報を送信"
   }
 }

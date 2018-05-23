@@ -7,7 +7,7 @@
     "start_private": "Inizia connessione privata",
     "close_private": "Chiudi connessione privata",
     "your_buddy_is_verificated": "Il tuo contatto è stato verificato",
-    "you_have_only_a_subscription_in_one_way": "Hai solo una sottoscrizione unidirezionale..",
+    "you_have_only_a_subscription_in_one_way": "Hai solo una sottoscrizione unidirezionale.",
     "authentication_query_sent": "Domanda d'autenticazione inviata.",
     "your_message_wasnt_send_please_end_your_private_conversation": "Il tuo messaggio non è stato inviato. Si prega di chiudere la tua conversazione privata.",
     "unencrypted_message_received": "Messaggio non cifrato ricevuto",
@@ -158,24 +158,24 @@
     "Remote_Fingerprint": "Impronta digitale remota",
     "Video_call_not_possible": "Videochiamata non disponibile. Il tuo contatto non può effettuare videochiamate.",
     "Start_video_call": "Inizia videochiamata",
-    "Join_chat": null,
+    "Join_chat": "Unisciti alla chat",
     "Join": "Unisciti",
-    "Room": null,
+    "Room": "Stanza",
     "Nickname": null,
     "left_the_building": null,
     "entered_the_room": null,
     "is_now_known_as": null,
     "This_room_is": null,
     "muc_hidden": {
-      "keyword": null,
-      "description": null
+      "keyword": "nascosta",
+      "description": "non compare nei risultati delle ricerche"
     },
     "muc_membersonly": {
       "keyword": null,
       "description": "devi essere nella lista dei membri"
     },
     "muc_moderated": {
-      "keyword": "modarata",
+      "keyword": "moderata",
       "description": null
     },
     "muc_nonanonymous": {
@@ -183,40 +183,40 @@
       "description": null
     },
     "muc_open": {
-      "keyword": null,
-      "description": null
+      "keyword": "aperta",
+      "description": "chiunque può unirsi"
     },
     "muc_passwordprotected": {
-      "keyword": null,
-      "description": null
+      "keyword": "protetta da password",
+      "description": "devi fornire la password corretta"
     },
     "muc_persistent": {
-      "keyword": null,
-      "description": null
+      "keyword": "persistente",
+      "description": "non sarà eliminata all'uscita dell'ultimo occupante"
     },
     "muc_public": {
-      "keyword": null,
-      "description": null
+      "keyword": "pubblica",
+      "description": "compare nei risultati delle ricerche"
     },
     "muc_semianonymous": {
-      "keyword": null,
-      "description": null
+      "keyword": "semi-anonimo",
+      "description": "il tuo Jabber ID (indirizzo di chat) verrà mostrato solo agli amministratori della stanza"
     },
     "muc_temporary": {
-      "keyword": null,
-      "description": null
+      "keyword": "temporanea",
+      "description": "sarà eliminata all'uscita dell'ultimo occupante"
     },
     "muc_unmoderated": {
-      "keyword": null,
-      "description": null
+      "keyword": "non moderata",
+      "description": "tutti possono inviare messaggi"
     },
     "muc_unsecured": {
       "keyword": null,
-      "description": null
+      "description": "non è richiesta la password per accedere"
     },
-    "Continue": null,
-    "Server": null,
-    "Rooms_are_loaded": null,
+    "Continue": "Continua",
+    "Server": "Server",
+    "Rooms_are_loaded": "Caricando le stanze",
     "Could_load_only": null,
     "muc_explanation": null,
     "You_already_joined_this_room": null,

@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.4.0-beta.1 - 2018-05-17
+ * jsxc v3.4.0 - 2018-05-23
  * 
  * Copyright (c) 2018 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see https://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.4.0-beta.1
+ * @version 3.4.0
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.4.0-beta.1',
+   version: '3.4.0',
 
    /** True if i'm the master */
    master: false,

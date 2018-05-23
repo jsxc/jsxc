@@ -311,7 +311,7 @@
     "No_proper_file_transfer_method_available": "Uygun dosya aktarma yöntemi yok",
     "You_have_to_go_online_": "Bu işlemi gerçekleştirebilmek için çevrimiçi olmalısınız.",
     "error_location_not_provided": "Yer alınamadı",
-    "Log_in_with_chat": null,
+    "Log_in_with_chat": "Sohbetle giriş yap",
     "Send_location": "Konum gönder"
   }
 }

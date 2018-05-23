@@ -1,6 +1,6 @@
 {
   "name": "jsxc",
-  "version": "3.4.0-beta.1",
+  "version": "3.4.0",
   "description": "Real-time xmpp chat application with video calls, file transfer and encrypted communication",
   "homepage": "https://www.jsxc.org/",
   "bugs": "https://github.com/jsxc/jsxc/issues",
