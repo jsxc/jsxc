@@ -60,7 +60,7 @@ export default class Roster {
       }
    }
 
-   public constructor() {
+   private constructor() {
       let template = rosterTemplate({
          onlineHelpUrl: Client.getOption('onlineHelp')
       });
