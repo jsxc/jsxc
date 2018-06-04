@@ -13,6 +13,7 @@ import { DiscoInfoHandler, DiscoItemsHandler } from './handlers/disco'
 import CapsHandler from './handlers/caps'
 import MultiUserDirectInvitationHandler from './handlers/multiUser/DirectInvitation'
 import MultiUserXMessageHandler from './handlers/multiUser/XMessage'
+import AbstractHandler from './AbstractHandler'
 import * as NS from './namespace'
 
 interface StropheConnection {
@@ -48,6 +49,11 @@ export default class XMPPHandler {
 
    private addHandler(Handler, namespace?: string, tagName?: string, type?: string, id?: string, from?: string) {
       let handler = new Handler(this.account);
+
+      if (!(handler instanceof AbstractHandler)) {
+         Log.warn('Invalid handler');
+         return;
+      }
 
       this.connection.addHandler(stanza => handler.processStanza(stanza), namespace, tagName, type, id, from);
    }
