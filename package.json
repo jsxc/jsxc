@@ -54,6 +54,7 @@
     "@types/strophe": "^1.2.30",
     "autoprefixer-core": "^6.0.1",
     "bootstrap-sass": "^3.3.7",
+    "bytebuffer": "^5.0.1",
     "consistent-color-generation": "^0.2.0",
     "css-loader": "^0.28.9",
     "emojione": "2.2.x",

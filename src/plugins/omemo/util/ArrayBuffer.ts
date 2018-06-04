@@ -1,8 +1,9 @@
 import bufferConcat = require('array-buffer-concat');
 import Base64ArrayBuffer = require('base64-arraybuffer')
+import ByteBuffer = require('bytebuffer')
 
 let decoder = new (<any>window).TextDecoder('utf-8');
-var encoder = new (<any>window).TextEncoder('utf-8');
+let encoder = new (<any>window).TextEncoder('utf-8');
 
 let ArrayBufferUtils = {
    concat: (a: ArrayBuffer, b: ArrayBuffer) => bufferConcat(a, b),
@@ -19,11 +20,11 @@ let ArrayBufferUtils = {
       if (typeof thing === 'string') {
          return thing;
       }
-      return new (<any>window).dcodeIO.ByteBuffer.wrap(thing).toString('binary');
+
+      return ByteBuffer.wrap(thing).toString('binary');
    },
 
    isEqual: function(a: ArrayBuffer | string, b: ArrayBuffer | string) {
-      // TODO: Special-case arraybuffers, etc
       if (a === undefined || b === undefined) {
          return false;
       }
@@ -31,12 +32,11 @@ let ArrayBufferUtils = {
       a = ArrayBufferUtils.toString(a);
       b = ArrayBufferUtils.toString(b);
 
-      let maxLength = Math.max(a.length, b.length);
-      if (maxLength < 5) {
-         throw new Error("a/b compare too short");
+      if (Math.min(a.length, b.length) < 5) {
+         throw new Error('a/b compare too short');
       }
 
-      return a.substring(0, Math.min(maxLength, a.length)) == b.substring(0, Math.min(maxLength, b.length));
+      return a === b;
    },
 
    toArray: (a: ArrayBuffer): Array<any> => Array.apply([], new Uint8Array(a)),
