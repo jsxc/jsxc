@@ -80,7 +80,7 @@ export default class PluginAPI implements IPluginAPI {
       Pipe.get('preSendMessage').addProcessor(processor, position);
    }
 
-   public addAfterReceiveMessageProcessor(processor: (contact: Contact, message: Message) => Promise<{}>, position?: number) {
+   public addAfterReceiveMessageProcessor(processor: (contact: Contact, message: Message, stanza: Element) => Promise<{}>, position?: number) {
       Pipe.get('afterReceiveMessage').addProcessor(processor, position);
    }
 

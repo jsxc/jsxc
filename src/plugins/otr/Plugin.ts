@@ -76,16 +76,16 @@ export default class OTRPlugin extends EncryptionPlugin {
       });
    }
 
-   private afterReceiveMessageProcessor = (contact: Contact, message: Message) => {
+   private afterReceiveMessageProcessor = (contact: Contact, message: Message, stanza: Element) => {
       let plaintextMessage = message.getPlaintextMessage();
       if (!plaintextMessage || !/^\?OTR/.test(plaintextMessage)) { //@TODO search for whitespace
-         return Promise.resolve([contact, message]);
+         return Promise.resolve([contact, message, stanza]);
       }
 
       return this.getSession(contact).then((session: Session) => {
          return session.processMessage(message, 'decryptMessage');
       }).then((message) => {
-         return [contact, message];
+         return [contact, message, stanza];
       });
    }
 

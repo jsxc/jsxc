@@ -20,7 +20,7 @@ export default class MeCommandPlugin extends AbstractPlugin {
       pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor, 80);
    }
 
-   private afterReceiveMessageProcessor = (contact: Contact, message: Message) => {
+   private afterReceiveMessageProcessor = (contact: Contact, message: Message, stanza: Element) => {
       let plaintext = message.getPlaintextMessage();
       let meRegex = /^\/me /;
 
@@ -29,6 +29,6 @@ export default class MeCommandPlugin extends AbstractPlugin {
          message.setPlaintextMessage(plaintext);
       }
 
-      return Promise.resolve([contact, message]);
+      return Promise.resolve([contact, message, stanza]);
    }
 }

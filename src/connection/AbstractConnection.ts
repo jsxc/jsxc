@@ -53,6 +53,7 @@ abstract class AbstractConnection {
       discoInfo.addIdentity('client', 'web', 'JSXC');
 
       NS.register('VCARD', 'vcard-temp');
+      NS.register('FORWARD', 'urn:xmpp:forward:0');
    }
 
    public getPEPService = (): PEPService => {

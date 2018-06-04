@@ -13,160 +13,168 @@ import Pipe from '../../../util/Pipe'
 import AbstractHandler from '../AbstractHandler'
 
 export default class extends AbstractHandler {
+
    public processStanza(stanza: Element) {
-      let messageElement = $(stanza);
-      let forwardedStanza = $(stanza).find('forwarded' + NS.getFilter('FORWARD'));
+      let messageElement;
 
-      let from = new JID(messageElement.attr('from'));
-      let to = new JID(messageElement.attr('to'));
-
-      let isForwarded = false;
-      let isCarbonCopy = false;
-      let carbonStanza;
-
-      if (forwardedStanza.length > 0) {
-         messageElement = forwardedStanza.find('> message');
-         isForwarded = true;
-         carbonStanza = $(stanza).find('> ' + NS.getFilter('CARBONS'));
-
-         if (carbonStanza.length === 0) {
-            isCarbonCopy = false;
-         } else if (from.bare !== to.bare) {
-            // ignore this carbon copy
-            return this.PRESERVE_HANDLER;
-         } else {
-            isCarbonCopy = true;
-         }
-
-         Log.debug('Incoming forwarded message', messageElement);
-      } else {
-         Log.debug('Incoming message', messageElement);
-      }
-
-      let plaintextBody = Utils.removeHTML(messageElement.find('> body').text());
-      let htmlBody = messageElement.find('html body[xmlns="' + Strophe.NS.XHTML + '"]');
-
-      if (!plaintextBody || (plaintextBody.match(/\?OTR/i) && isForwarded)) {
+      try {
+         messageElement = new MessageElement(stanza);
+      } catch (err) {
          return this.PRESERVE_HANDLER;
       }
 
-      let messageType = messageElement.attr('type');
-      let messageFrom = messageElement.attr('from');
-      let messageTo = messageElement.attr('from');
-      let messageId = messageElement.attr('id');
-
-      //@REVIEW "by" attribute ?
-      let stanzaIdElement = messageElement.find('stanza-id[xmlns="urn:xmpp:sid:0"]');
-      let stanzaId = stanzaIdElement.attr('id');
-
-      let receiptsRequestElement = messageElement.find("request[xmlns='urn:xmpp:receipts']");
-
-      let delayElement = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
-      let stamp = (delayElement.length > 0) ? new Date(delayElement.attr('stamp')) : new Date();
-      let peer: JID = from; //@REVIEW do we need peer?
-
-      if (isCarbonCopy) {
-         let direction = (carbonStanza.prop('tagName') === 'sent') ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
-         peer = new JID(direction === Message.DIRECTION.OUT ? messageTo : messageFrom);
-
-         let message = new Message({
-            uid: stanzaId,
-            attrId: messageId,
-            peer: peer,
-            direction: direction,
-            plaintextMessage: plaintextBody,
-            htmlMessage: htmlBody.html(),
-            forwarded: isForwarded,
-            stamp: stamp.getTime(),
-            unread: true
-         });
-
-         //@TODO
-
-         return this.PRESERVE_HANDLER;
-
-      } else if (isForwarded) {
-         // Someone forwarded a message to us
-         //@REVIEW
-         plaintextBody = from + ' ' + Translation.t('to') + ' ' + $(stanza).attr('to') + '"' + plaintextBody + '"';
-
-         messageFrom = $(stanza).attr('from');
-      }
-
-      let contact: Contact = this.account.getContact(from);
-      if (typeof contact === 'undefined') {
-         Log.debug('Sender is not in our contact list')
-         // jid not in roster
-
-         // var chat = jsxc.storage.getUserItem('chat', bid) || [];
-         //
-         // if (chat.length === 0) {
-         //    jsxc.notice.add({
-         //       msg: $.t('Unknown_sender'),
-         //       description: $.t('You_received_a_message_from_an_unknown_sender') + ' (' + bid + ').'
-         //    }, 'gui.showUnknownSender', [bid]);
-         // }
-         //
-         // var msg = jsxc.removeHTML(plaintextBody);
-         // msg = jsxc.escapeHTML(msg);
-         //
-         // jsxc.storage.saveMessage(bid, 'in', msg, false, forwarded, stamp);
+      let peerJid = new JID(messageElement.getOriginalFrom());
+      let peerContact: Contact = this.account.getContact(peerJid);
+      if (typeof peerContact === 'undefined') {
+         this.handleUnknownSender();
 
          return this.PRESERVE_HANDLER;
       }
 
       // If we now the full jid, we use it
-      contact.setResource(from.resource);
-
-      $(document).trigger('message.jsxc', [from, plaintextBody]);
+      peerContact.setResource(peerJid.resource);
 
       let message = new Message({
-         uid: stanzaId,
-         attrId: messageId,
-         peer: peer,
-         direction: Message.DIRECTION.IN,
-         plaintextMessage: plaintextBody,
-         htmlMessage: htmlBody.html(),
-         forwarded: isForwarded,
-         stamp: stamp.getTime(),
-         unread: true
-         // attachment:
+         uid: messageElement.getStanzaId(),
+         attrId: messageElement.getId(),
+         peer: peerJid,
+         direction: messageElement.getDirection(),
+         plaintextMessage: messageElement.getPlaintextBody(),
+         htmlMessage: messageElement.getHtmlBody().html(),
+         forwarded: messageElement.isForwarded(),
+         stamp: messageElement.getTime(),
+         unread: true //@REVIEW carbon copy?
       });
 
       let pipe = Pipe.get('afterReceiveMessage');
 
-      pipe.run(contact, message).then(([contact, message]) => {
+      pipe.run(peerContact, message, messageElement.get(0)).then(([contact, message]) => {
          contact.getTranscript().pushMessage(message);
       });
 
-      // var attachment;
-      // if (htmlBody.length === 1) {
-      //    var httpUploadElement = htmlBody.find('a[data-type][data-name][data-size]');
-      //
-      //    if (httpUploadElement.length === 1) {
-      //       attachment = {
-      //          type: httpUploadElement.attr('data-type'),
-      //          name: httpUploadElement.attr('data-name'),
-      //          size: httpUploadElement.attr('data-size'),
-      //       };
-      //
-      //       if (httpUploadElement.attr('data-thumbnail') && httpUploadElement.attr('data-thumbnail').match(/^\s*data:[a-z]+\/[a-z0-9-+.*]+;base64,[a-z0-9=+/]+$/i)) {
-      //          attachment.thumbnail = httpUploadElement.attr('data-thumbnail');
-      //       }
-      //
-      //       if (httpUploadElement.attr('href') && httpUploadElement.attr('href').match(/^https:\/\//)) {
-      //          attachment.data = httpUploadElement.attr('href');
-      //          plaintextBody = null;
-      //       }
-      //
-      //       if (!attachment.type.match(/^[a-z]+\/[a-z0-9-+.*]+$/i) || !attachment.name.match(/^[\s\w.,-]+$/i) || !attachment.size.match(/^\d+$/i)) {
-      //          attachment = undefined;
-      //
-      //          jsxc.warn('Invalid file type, name or size.');
-      //       }
-      //    }
-      // }
-
       return this.PRESERVE_HANDLER;
+   }
+
+   private handleUnknownSender() {
+      Log.debug('Sender is not in our contact list');
+
+      //@TODO add notice to signal message from unkown sender
+   }
+}
+
+class MessageElement {
+   private element;
+   private originalElement;
+   private forwarded = false;
+   private carbon = false;
+   private direction = Message.DIRECTION.IN;
+
+   constructor(stanza: Element) {
+      this.originalElement = $(stanza);
+
+      this.findMessageElement(stanza);
+   }
+
+   private findMessageElement(stanza: Element) {
+      let forwardedStanza = $(stanza).find('forwarded' + NS.getFilter('FORWARD'));
+
+      let from = new JID($(stanza).attr('from'));
+      let to = new JID($(stanza).attr('to'));
+
+      if (forwardedStanza.length === 0) {
+         this.element = $(stanza);
+
+         return;
+      }
+
+      let carbonStanza = $(stanza).find('> ' + NS.getFilter('CARBONS'));
+
+      this.element = forwardedStanza.find('> message');
+      this.forwarded = true;
+
+      if (carbonStanza.length === 0) {
+         return;
+      }
+
+      if (from.bare === to.bare) {
+         this.carbon = true;
+         this.direction = (carbonStanza.prop('tagName') === 'sent') ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
+
+         return;
+      }
+
+      throw 'No message element found';
+   }
+
+   public isForwarded() {
+      return this.forwarded;
+   }
+
+   public isCarbon() {
+      return this.carbon;
+   }
+
+   public find(selector) {
+      return this.element.find(selector);
+   }
+
+   public get(index?) {
+      return this.element.get(index);
+   }
+
+   public getType() {
+      return this.element.attr('type');
+   }
+
+   public getFrom() {
+      return this.element.attr('from');
+   }
+
+   public getTo() {
+      return this.element.attr('to');
+   }
+
+   public getOriginalFrom() {
+      return this.originalElement.attr('from');
+   }
+
+   public getOriginalTo() {
+      return this.originalElement.attr('to');
+   }
+
+   public getId() {
+      return this.element.attr('id');
+   }
+
+   public getStanzaId() {
+      //@REVIEW "by" attribute ?
+      let stanzaIdElement = this.element.find('stanza-id[xmlns="urn:xmpp:sid:0"]');
+
+      return stanzaIdElement.attr('id');
+   }
+
+   public getTime() {
+      let delayElement = this.element.find('delay[xmlns="urn:xmpp:delay"]');
+      let stamp = (delayElement.length > 0) ? new Date(delayElement.attr('stamp')) : new Date();
+
+      return stamp;
+   }
+
+   public getPlaintextBody() {
+      let body = Utils.removeHTML(this.element.find('> body').text());
+
+      if (this.forwarded && !this.carbon) {
+         return `${this.getOriginalFrom()} ${Translation.t('to')} ${this.getOriginalFrom()} "${body}"`;
+      }
+
+      return body;
+   }
+
+   public getHtmlBody() {
+      return this.element.find('html body[xmlns="' + Strophe.NS.XHTML + '"]');
+   }
+
+   public getDirection() {
+      return this.direction;
    }
 }

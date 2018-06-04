@@ -34,7 +34,7 @@ export interface API {
 
    addPreSendMessageProcessor(processor: (contact: Contact, message: Message) => Promise<{}>, position?: number)
 
-   addAfterReceiveMessageProcessor(processor: (contact: Contact, message: Message) => Promise<{}>, position?: number)
+   addAfterReceiveMessageProcessor(processor: (contact: Contact, message: Message, stanza: Element) => Promise<{}>, position?: number)
 
    addPreSendMessageStanzaProcessor(processor: (message: Message, xmlMsg: Strophe.Builder) => Promise<any>, position?: number)
 
