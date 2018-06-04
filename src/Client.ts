@@ -33,8 +33,8 @@ export default class Client {
          Options.get().overwriteDefaults(options);
       }
 
-      Client.noticeManager = new NoticeManager(Client.getStorage());
       Client.presenceController = new PresenceController(storage, Client.getAccounts);
+      Client.noticeManager = new NoticeManager(Client.getStorage());
 
       accountIds.forEach(function(id) {
          let account = Client.accounts[id] = new Account(id);
