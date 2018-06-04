@@ -1,6 +1,7 @@
 import { IJID } from '../../../JID.interface'
 import { SignalProtocolAddress, SessionBuilder, SessionCipher } from '../vendor/Signal'
 import Store from './Store'
+import ArrayBuffer from '../util/ArrayBuffer'
 
 interface EncryptedDeviceMessage {
    preKey: boolean

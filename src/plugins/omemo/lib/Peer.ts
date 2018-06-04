@@ -21,6 +21,10 @@ export default class Peer {
          return id !== this.store.getDeviceId(); //@REVIEW MAM
       });
 
+      if (remoteDeviceIds.length === 0) {
+         throw 'Your contact does not support OMEMO.';
+      }
+
       let aes = await AES.encrypt(plaintext);
       let promises = [];
 

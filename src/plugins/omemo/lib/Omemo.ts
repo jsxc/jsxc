@@ -28,7 +28,7 @@ export default class Omemo {
       let ownDeviceId = this.store.getDeviceId();
 
       if (this.store.isPublished() && typeof ownDeviceId === 'number'
-         && ownDeviceId !== NaN && deviceList.indexOf(ownDeviceId) < 0) {
+         && !isNaN(ownDeviceId) && deviceList.indexOf(ownDeviceId) < 0) {
          this.getBootstrap().addDeviceIdToDeviceList();
       }
 
@@ -56,6 +56,8 @@ export default class Omemo {
          xmlElement.up().c('store', {
             xmlns: 'urn:xmpp:hints'
          }).up();
+
+         xmlElement.c('body').t('***You received an OMEMO encrypted message***').up();
 
          message.setEncrypted(true);
 

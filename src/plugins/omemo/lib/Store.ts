@@ -105,7 +105,8 @@ export default class Store implements SignalStore {
       this.storage.removeItem(PREFIX, key);
    }
 
-   public isTrustedIdentity(identifier: Identifier, identityKey: IdentityKey): Promise<boolean> {
+   // identifier is only name and not name.deviceId
+   public isTrustedIdentity(identifier, identityKey: IdentityKey): Promise<boolean> {
       if (typeof identifier === 'undefined' || identifier === null) {
          throw new Error('Undefined or null is no valid identifier');
       }
@@ -115,18 +116,21 @@ export default class Store implements SignalStore {
       }
 
       let trusted = this.get(PREFIX_IDENTITYKEY + identifier);
-      if (trusted === undefined) {
+      if (typeof trusted === 'undefined') {
          return Promise.resolve(true);
       }
 
-      return Promise.resolve(ArrayBufferUtils.isEqual(identityKey, trusted));
+      return Promise.resolve(true); //@TODO
+      // return Promise.resolve(ArrayBufferUtils.isEqual(identityKey, trusted));
    }
 
    public loadIdentityKey(identifier: Identifier): Promise<IdentityKey> {
       if (identifier === null || identifier === undefined)
          throw new Error('Tried to get identity key for undefined/null key');
 
-      return Promise.resolve(this.get(PREFIX_IDENTITYKEY + identifier));
+      let address = new SignalProtocolAddress.fromString(identifier);
+
+      return Promise.resolve(this.get(PREFIX_IDENTITYKEY + address.toString()));
    }
 
    public saveIdentity(identifier: Identifier, identityKey: IdentityKey): Promise<boolean> {
@@ -135,8 +139,8 @@ export default class Store implements SignalStore {
 
       let address = new SignalProtocolAddress.fromString(identifier);
 
-      let existing = this.get(PREFIX_IDENTITYKEY + address.getName());
-      this.put(PREFIX_IDENTITYKEY + address.getName(), identityKey); //@REVIEW stupid?
+      let existing = this.get(PREFIX_IDENTITYKEY + address.toString());
+      this.put(PREFIX_IDENTITYKEY + address.toString(), identityKey);
 
       return Promise.resolve(existing && ArrayBufferUtils.isEqual(identityKey, existing));
    }

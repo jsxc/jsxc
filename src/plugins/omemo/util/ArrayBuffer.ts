@@ -24,6 +24,10 @@ let ArrayBufferUtils = {
       return ByteBuffer.wrap(thing).toString('binary');
    },
 
+   toHex: (thing: ArrayBuffer | string): string => {
+      return ByteBuffer.wrap(thing).toString('hex');
+   },
+
    isEqual: function(a: ArrayBuffer | string, b: ArrayBuffer | string) {
       if (a === undefined || b === undefined) {
          return false;

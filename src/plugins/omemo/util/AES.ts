@@ -6,7 +6,6 @@ const ALGO_NAME = 'AES-GCM'
 export async function decrypt(exportedAESKey: ArrayBuffer, iv: Uint8Array, data: ArrayBuffer): Promise<string> {
    let key = await window.crypto.subtle.importKey('raw', exportedAESKey, ALGO_NAME, false, ['decrypt']);
 
-
    let decryptedBuffer = await window.crypto.subtle.decrypt({
       name: ALGO_NAME,
       iv: iv,

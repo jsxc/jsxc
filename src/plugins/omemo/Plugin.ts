@@ -24,11 +24,11 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          throw 'LibSignal is not available'
       }
 
-      pluginAPI.getConnection().getPEPService().subscribe(NS_DEVICELIST, this.onDeviceListUpdate)
+      pluginAPI.getConnection().getPEPService().subscribe(NS_DEVICELIST, this.onDeviceListUpdate);
 
       pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor);
 
-      pluginAPI.getConnection().registerHandler(this.onEncryptedOmemoStanza, NS_BASE, 'message')
+      pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor);
    }
 
    public toggleTransfer(contact: IContact): Promise<void> {
@@ -44,6 +44,8 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          contact.setEncryptionState(EncryptionState.Plaintext, OMEMOPlugin.getName());
          return;
       }
+
+      //@TODO check if contact supports omemo
 
       return this.getOmemo().prepare().then(() => {
          contact.setEncryptionState(EncryptionState.UnverifiedEncrypted, OMEMOPlugin.getName());
@@ -69,6 +71,8 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return parseInt($(deviceElement).attr('id'));
       });
 
+      deviceIds = deviceIds.filter(id => typeof id === 'number' && !isNaN(id));
+
       let ownJid = this.pluginAPI.getConnection().getJID();
 
       if (ownJid.bare === fromJid.bare) {
@@ -80,51 +84,22 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       return true;
    }
 
-   private onEncryptedOmemoStanza = (stanza): boolean => {
-
-      this.getOmemo().decrypt(stanza).then((decrypted) => {
+   private afterReceiveMessageProcessor = (contact: IContact, message: IMessage, stanza: Element): Promise<{}> => {
+      return this.getOmemo().decrypt(stanza).then((decrypted) => {
          if (!decrypted) {
-            return;
+            throw 'No decrypted message found';
          }
 
-         this.createIncomingMessageAndPost(stanza, decrypted);
+         message.setPlaintextMessage(decrypted);
+         message.setEncrypted(true);
+
+         return [contact, message, stanza];
 
       }).catch((msg) => {
          console.warn('OMEMO: ', msg);
+
+         return [contact, message, stanza];
       });
-
-      return true;
-   }
-
-   private createIncomingMessageAndPost(stanza, decrypted: string) {
-      let messageElement = $(stanza);
-      let messageType = messageElement.attr('type');
-      let messageFrom = messageElement.attr('from');
-      let messageTo = messageElement.attr('to');
-      let messageId = messageElement.attr('id');
-
-      let stanzaIdElement = messageElement.find('stanza-id[xmlns="urn:xmpp:sid:0"]');
-      let stanzaId = stanzaIdElement.attr('id');
-
-      let delayElement = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
-      let stamp = (delayElement.length > 0) ? new Date(delayElement.attr('stamp')) : new Date();
-
-      let from = this.pluginAPI.createJID(messageFrom);
-
-      let message = this.pluginAPI.createMessage({
-         uid: stanzaId,
-         attrId: messageId,
-         peer: from,
-         direction: DIRECTION.IN,
-         plaintextMessage: decrypted,
-         stamp: stamp.getTime(),
-         unread: true
-      });
-
-      message.setEncrypted(true);
-
-      let contact = this.pluginAPI.getContact(from);
-      contact.getTranscript().pushMessage(message);
    }
 
    private preSendMessageStanzaProcessor = (message: IMessage, xmlElement: Strophe.Builder) => {
