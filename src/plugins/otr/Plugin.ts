@@ -90,7 +90,7 @@ export default class OTRPlugin extends EncryptionPlugin {
    }
 
    private preSendMessageProcessor = (contact: Contact, message: Message) => {
-      if (contact.getEncryptionState() === EncryptionState.Plaintext) {
+      if (contact.getEncryptionState() === EncryptionState.Plaintext || contact.getEncryptionPluginName() !== OTRPlugin.getName()) {
          return Promise.resolve([contact, message]);
       }
 
