@@ -332,8 +332,9 @@
       border-radius: 11px;
       color: $notice_color;
       font-size: 80%;
-      padding: 2px;
+      padding: 2px 3px;
       position: relative;
+      line-height: 1.5em;
 
       transform-origin: bottom;
       animation-duration: 2s;
