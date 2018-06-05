@@ -135,7 +135,7 @@ class MessageElement {
    }
 
    public getOriginalFrom() {
-      return this.originalElement.attr('from');
+      return this.isCarbon() ? this.getFrom() : this.originalElement.attr('from');
    }
 
    public getOriginalTo() {
