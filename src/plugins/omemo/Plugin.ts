@@ -36,11 +36,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return;
       }
 
-      let storage = this.pluginAPI.getStorage();
-      let enabled = !storage.getItem('enabled', contact.getJid().bare);
-      storage.setItem('enabled', contact.getJid().bare, enabled);
-
-      if (!enabled) {
+      if (contact.getEncryptionPluginName() === OMEMOPlugin.getName()) {
          contact.setEncryptionState(EncryptionState.Plaintext, OMEMOPlugin.getName());
          return;
       }
@@ -110,9 +106,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return Promise.resolve([message, xmlElement]);
       }
 
-      let enabled = !!this.pluginAPI.getStorage().getItem('enabled', contact.getJid().bare);
-
-      if (!enabled) {
+      if (contact.getEncryptionPluginName() !== OMEMOPlugin.getName()) {
          return Promise.resolve([message, xmlElement]);
       }
 
