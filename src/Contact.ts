@@ -58,7 +58,6 @@ export default class Contact implements IIdentifiable, IContact {
          subscription: ContactSubscription.NONE,
          resources: {},
          type: ContactType.CHAT,
-         encryptionState: EncryptionState.Plaintext,
          rnd: Math.random() // force storage event
       }
 
@@ -204,16 +203,20 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public setEncryptionState(state: EncryptionState, source: string) {
+      if (state !== EncryptionState.Plaintext && !source) {
+         throw 'No encryption source provided';
+      }
+
       this.data.set('encryptionState', state);
       this.data.set('encryptionPlugin', state === EncryptionState.Plaintext ? null : source);
    }
 
    public getEncryptionState(): EncryptionState {
-      return this.data.get('encryptionState');
+      return this.data.get('encryptionState') || EncryptionState.Plaintext;
    }
 
    public getEncryptionPluginName(): string | null {
-      return this.data.get('encryptionPlugin');
+      return this.data.get('encryptionPlugin') || null;
    }
 
    public isEncrypted(): boolean {
