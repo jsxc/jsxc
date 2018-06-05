@@ -460,6 +460,15 @@ $defaultWindowWidth: 250px;
    .jsxc-avatar {
       display: none;
    }
+
+   .jsxc-quote {
+      border-left: 3px solid #999;
+      padding: 0px 3px 0px 5px;
+      display: inline-block;
+      width: 100%;
+      opacity: 0.7;
+      // margin-bottom: 5px;
+   }
 }
 
 .jsxc-attachment {

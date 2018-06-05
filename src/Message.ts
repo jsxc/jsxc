@@ -258,6 +258,7 @@ export default class Message implements Identifiable, IMessage {
       body = this.convertEmailToLink(body);
       body = Emoticons.toImage(body);
 
+      body = this.markQuotation(body);
       body = this.replaceLineBreaks(body);
 
       // hide unprocessed otr messages
@@ -278,6 +279,29 @@ export default class Message implements Identifiable, IMessage {
 
    public updateProgress(transfered: number, complete: number) {
 
+   }
+
+   private markQuotation(text) {
+      let lines = text.split(/(?:\n|\r\n|\r)/);
+      let inQuote = false;
+
+      for (let lineNumber in lines) {
+         let line = lines[lineNumber];
+
+         if (line.indexOf('&gt;') === 0) {
+            inQuote = true;
+            line = line.replace(/&gt; ?/, '');
+         } else if (inQuote && line === '') {
+            inQuote = false;
+            lines[lineNumber] = null;
+         }
+
+         if (inQuote) {
+            lines[lineNumber] = '<span class="jsxc-quote">' + line + '</span>';
+         }
+      }
+
+      return lines.filter(line => line !== null).join('\n');
    }
 
    private replaceLineBreaks(text) {
