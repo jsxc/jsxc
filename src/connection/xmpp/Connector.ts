@@ -68,6 +68,7 @@ export default class Connector {
       this.storeConnectionParameters(stropheConnection);
       this.replaceConnectionHandler(stropheConnection);
       this.addRidHandler(stropheConnection);
+      this.addRidUnloadHandler(stropheConnection);
 
       let accountConnection = this.account.getConnection();
       let handlers = (<StorageConnection>accountConnection).getHandlers(); //@TODO fix connection interface
@@ -123,6 +124,12 @@ export default class Connector {
          this.connectionParameters.set('timestamp', timestamp);
          this.connectionParameters.set('rid', rid);
       };
+   }
+
+   private addRidUnloadHandler(connection) {
+      $(window).on('unload', () => {
+         connection.nextValidRid(connection._proto.rid);
+      });
    }
 
    private storeConnectionFeatures(connection) {
