@@ -1,4 +1,3 @@
-import bufferConcat = require('array-buffer-concat');
 import Base64ArrayBuffer = require('base64-arraybuffer')
 import ByteBuffer = require('bytebuffer')
 
@@ -6,7 +5,7 @@ let decoder = new (<any>window).TextDecoder('utf-8');
 let encoder = new (<any>window).TextEncoder('utf-8');
 
 let ArrayBufferUtils = {
-   concat: (a: ArrayBuffer, b: ArrayBuffer) => bufferConcat(a, b),
+   concat: (a: ArrayBuffer, b: ArrayBuffer) => ByteBuffer.concat([a, b]),
 
    decode: (a: ArrayBuffer): string => decoder.decode(a),
 
