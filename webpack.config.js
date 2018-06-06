@@ -112,6 +112,10 @@ module.exports = {
       openPage: 'example/ts.html',
       proxy: {
             "/http-bind": "http://localhost:5280"
+      },
+      watchOptions: {
+            aggregateTimeout: 1300,
+            ignored: "/dist/"
       }
     },
 };
