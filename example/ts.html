@@ -10,27 +10,30 @@
    <link href="css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css" />
 
    <!-- require:dependencies -->
-   <link href="../dist/styles/main.bundle.css" media="all" rel="stylesheet" type="text/css" />
+   <link href="../dist/styles/jsxc.bundle.css" media="all" rel="stylesheet" type="text/css" />
    <!--  endrequire -->
 
    <link href="css/example.css" media="all" rel="stylesheet" type="text/css" />
 
    <style>
-   #jsxc-role {
-      width: 50px;
-      height: 50px;
-      background-color: #a1a1a1;
-      border-radius: 50%;
-      position: absolute;
-      top: 15px;
-      left: 15px;
-   }
-   .jsxc-master #jsxc-role {
-      background-color: green;
-   }
-   .jsxc-slave #jsxc-role {
-      background-color: orange;
-   }
+      #jsxc-role {
+         width: 50px;
+         height: 50px;
+         background-color: #a1a1a1;
+         border-radius: 50%;
+         position: absolute;
+         top: 15px;
+         left: 15px;
+      }
+
+      .jsxc-master #jsxc-role {
+         background-color: green;
+      }
+
+      .jsxc-slave #jsxc-role {
+         background-color: orange;
+      }
+
    </style>
 </head>
 
@@ -38,7 +41,9 @@
 
    <div id="jsxc-role"></div>
 
-   <form id="loginForm" style="margin-top: 100px; padding:15px;" class="form-inline">
+   <form id="loginForm" style="margin-top: 100px; padding:15px;display: inline-block;" class="form-inline">
+      <legend>Instant login</legend>
+
       <div class="form-group">
          <input class="form-control" type="text" name="url" placeholder="Bosh url" value="/http-bind/" required />
       </div>
@@ -52,15 +57,32 @@
       </div>
 
       <button class="btn btn-primary">Login</button>
+
+      <p class="text-muted">Warning: Those credentials are stored in your local storage.</p>
    </form>
 
-   <p style="padding:15px"><a class="btn btn-danger" href="javascript:jsxc.deleteAllData()">Delete all Data</a>
-      <a class="btn btn-default" href="javascript:jsxc.enableDebugMode()">Enable Debug Mode</a>
-      <a class="btn btn-default" href="javascript:jsxc.disableDebugMode()">Disable Debug Mode</a></p>
+   <br />
 
-   <p style="padding:15px"><a class="btn btn-default" href="javascript:$('body').removeClass('jsxc-fullscreen jsxc-two-columns')">Normal</a>
+   <form id="watchForm" class="form-inline" style="padding:15px;display: inline-block;">
+      <legend>Form watcher</legend>
+      <div class="form-group">
+         <input id="watchUsername" placeholder="Node" class="form-control" /> <input id="watchPassword" placeholder="Password" class="form-control" />
+         <button class="btn btn-secondary">Login</button>
+      </div>
+   </form>
+
+   <br />
+
+   <div>
+      <p style="padding:15px"><a class="btn btn-danger" href="javascript:jsxc.deleteAllData()">Delete all Data</a>
+         <a class="btn btn-default" href="javascript:jsxc.enableDebugMode()">Enable Debug Mode</a>
+         <a class="btn btn-default" href="javascript:jsxc.disableDebugMode()">Disable Debug Mode</a></p>
+
+      <p style="padding:15px"><a class="btn btn-default" href="javascript:$('body').removeClass('jsxc-fullscreen jsxc-two-columns')">Normal</a>
          <a class="btn btn-default" href="javascript:$('body').addClass('jsxc-fullscreen jsxc-two-columns')">Two Columns</a>
          <a class="btn btn-default" href="javascript:$('body').removeClass('jsxc-two-columns').addClass('jsxc-fullscreen')">Fullscreen</a></p>
+
+   </div>
 
    <!-- require:dependencies -->
    <script src="js/jquery.min.js"></script>
@@ -68,29 +90,61 @@
    <!--  endrequire -->
 
    <script src="../node_modules/simplebar/dist/simplebar.js"></script>
+   <script src="http://localhost/libsignal/dist/libsignal-protocol.js"></script>
 
    <script src="js/bootstrap.min.js"></script>
 
    <!-- jsxc library -->
-   <script src="../dist/main.bundle.js"></script>
+   <script src="../dist/jsxc.bundle.js"></script>
 
    <script>
-   $('#loginForm').submit(function(ev){
-      // ev.preventDefault();
+      jsxc.init();
+      subscribeToInstantLogin();
+      restoreInstantLoginCredentials();
 
-      var url = $(this).find('[name="url"]').val();
-      var jid = $(this).find('[name="jid"]').val();
-      var password = $(this).find('[name="password"]').val();
+      function subscribeToInstantLogin() {
+         $('#loginForm').submit(function(ev) {
+            // ev.preventDefault();
 
-      jsxc.start(url, jid, password)
-         .then(function(){
-            console.log('>>> CONNECTION READY')
-         }).catch(function(err) {
-            console.log('>>> catch', err)
-         })
+            var url = $(this).find('[name="url"]').val();
+            var jid = $(this).find('[name="jid"]').val();
+            var password = $(this).find('[name="password"]').val();
 
-      return false;
-   });
+            storeInstantLoginCredentials(url, jid, password)
+
+            jsxc.start(url, jid, password)
+               .then(function() {
+                  console.log('>>> CONNECTION READY')
+               }).catch(function(err) {
+                  console.log('>>> catch', err)
+               })
+
+            return false;
+         });
+      }
+
+      function storeInstantLoginCredentials(url, jid, password) {
+         localStorage.setItem('jsxc:example:dev', JSON.stringify({
+            url: url,
+            jid: jid,
+            password: password
+         }));
+      }
+
+      function restoreInstantLoginCredentials() {
+         let formData = localStorage.getItem('jsxc:example:dev');
+
+         try {
+            formData = JSON.parse(formData);
+
+            if (formData !== null) {
+               $('#loginForm').find('[name="url"]').val(formData.url);
+               $('#loginForm').find('[name="jid"]').val(formData.jid);
+               $('#loginForm').find('[name="password"]').val(formData.password);
+            }
+         } catch (err) {}
+      }
    </script>
 </body>
+
 </html>
