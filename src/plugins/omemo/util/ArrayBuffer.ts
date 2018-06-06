@@ -1,19 +1,15 @@
-import Base64ArrayBuffer = require('base64-arraybuffer')
 import ByteBuffer = require('bytebuffer')
 
-let decoder = new (<any>window).TextDecoder('utf-8');
-let encoder = new (<any>window).TextEncoder('utf-8');
-
 let ArrayBufferUtils = {
-   concat: (a: ArrayBuffer, b: ArrayBuffer) => ByteBuffer.concat([a, b]),
+   concat: (a: ArrayBuffer, b: ArrayBuffer) => ByteBuffer.concat([a, b]).toArrayBuffer(),
 
-   decode: (a: ArrayBuffer): string => decoder.decode(a),
+   decode: (a: ArrayBuffer): string => ByteBuffer.wrap(a).toUTF8(),
 
-   encode: (s: string): ArrayBuffer => encoder.encode(s), //@REVIEW returns Uint8Array
+   encode: (s: string): ArrayBuffer => ByteBuffer.fromUTF8(s).toArrayBuffer(),
 
-   toBase64: (a: ArrayBuffer): string => Base64ArrayBuffer.encode(a),
+   toBase64: (a: ArrayBuffer): string => ByteBuffer.wrap(a).toBase64(),
 
-   fromBase64: (s: string): ArrayBuffer => Base64ArrayBuffer.decode(s),
+   fromBase64: (s: string): ArrayBuffer => ByteBuffer.fromBase64(s).toArrayBuffer(),
 
    toString: (thing: ArrayBuffer | string): string => {
       if (typeof thing === 'string') {
