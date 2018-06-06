@@ -176,5 +176,15 @@ export default class ChatWindowMessage {
             this.restoreNextMessage();
          }
       });
+
+      this.message.registerHook('errorMessage', (errorMessage) => {
+         if (errorMessage) {
+            this.element.addClass('jsxc-error');
+            this.element.attr('title', errorMessage);
+         } else {
+            this.element.removeClass('jsxc-error');
+            this.element.attr('title', null);
+         }
+      })
    }
 }
