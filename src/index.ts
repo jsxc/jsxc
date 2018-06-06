@@ -20,13 +20,15 @@ import ChatStatePlugin from './plugins/chatState/ChatStatePlugin'
 import HttpUploadPlugin from './plugins/httpUpload/HttpUploadPlugin'
 import AvatarVCardPlugin from './plugins/AvatarVCardPlugin'
 import CarbonsPlugin from './plugins/Carbons'
+import OMEMOPlugin from './plugins/omemo/Plugin'
 import BaseError from './errors/BaseError'
 import FormWatcher, { SettingsCallback } from './FormWatcher'
 
 // @REVIEW
 $.extend(window, StropheLib)
 
-//Client.addPlugin(OTRPlugin);
+Client.addPlugin(OTRPlugin);
+Client.addPlugin(OMEMOPlugin);
 Client.addPlugin(ReceiptPlugin);
 Client.addPlugin(NotificationPlugin);
 Client.addPlugin(MeCommandPlugin);
