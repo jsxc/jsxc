@@ -158,6 +158,10 @@ export default class Contact implements IIdentifiable, IContact {
       return /*this.account.getUid() + '@' +*/ this.jid.bare;
    }
 
+   public getUid(): string {
+      return this.account.getUid() + '@' + this.jid.bare;
+   }
+
    public getJid(): JID {
       return this.jid;
    }

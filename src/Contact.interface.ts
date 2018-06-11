@@ -43,6 +43,8 @@ export interface IContact {
 
    getId(): string;
 
+   getUid(): string;
+
    getJid(): IJID;
 
    getResources(): Array<string>;

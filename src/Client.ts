@@ -68,7 +68,7 @@ export default class Client {
    }
 
    public static hasFocus() {
-
+      //@TODO has focus
    }
 
    public static isExtraSmallDevice(): boolean {

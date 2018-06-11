@@ -19,6 +19,7 @@ import AvatarSet from './AvatarSet'
 import { Notice } from '../Notice'
 import { Presence } from '../connection/AbstractConnection'
 import { NoticeManager } from '../NoticeManager'
+import ClientAvatar from '../ClientAvatar'
 //import rosterTemplate from '../../template/roster.hbs'
 let rosterTemplate = require('../../template/roster.hbs')
 
@@ -81,6 +82,8 @@ export default class Roster {
 
       Menu.init(this.element.find('.jsxc-menu'));
 
+      ClientAvatar.get().addElement(this.element.find('.jsxc-bottom .jsxc-avatar'));
+
       this.initOptions();
    }
 
@@ -121,11 +124,6 @@ export default class Roster {
       }
 
       this.refreshOwnPresenceIndicator();
-   }
-
-   public setRosterAvatar(contact: IContact) {
-      let avatar = AvatarSet.get(contact);
-      avatar.addElement(this.element.find('.jsxc-bottom .jsxc-avatar'));
    }
 
    public add(contact: IContact) {

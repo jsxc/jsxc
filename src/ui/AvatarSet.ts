@@ -10,10 +10,10 @@ export default class AvatarSet {
    private static avatars = {};
 
    public static get(contact: IContact) {
-      let avatar = AvatarSet.avatars[contact.getId()];
+      let avatar = AvatarSet.avatars[contact.getUid()];
 
       if (!avatar) {
-         avatar = AvatarSet.avatars[contact.getId()] = new AvatarSet(contact);
+         avatar = AvatarSet.avatars[contact.getUid()] = new AvatarSet(contact);
       }
 
       return avatar;
@@ -68,6 +68,7 @@ export default class AvatarSet {
          let element = $(this);
 
          element.css({
+            'background-image': 'url()',
             'background-color': rgb,
             'color': '#fff',
             'font-weight': 'bold',
@@ -77,6 +78,19 @@ export default class AvatarSet {
          });
 
          element.text(text[0].toUpperCase());
+      });
+   }
+
+   public static clear(elements) {
+      $(elements).each(function() {
+         let element = $(this);
+
+         element.css({
+            'background-image': 'url()',
+            'background-color': ''
+         });
+
+         element.text('');
       });
    }
 }

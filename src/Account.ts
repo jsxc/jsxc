@@ -23,6 +23,7 @@ import DiscoInfoChangable from './DiscoInfoChangable'
 import HookRepository from './util/HookRepository'
 import Options from './Options'
 import UUID from './util/UUID'
+import ClientAvatar from './ClientAvatar'
 
 let Strophe = StropheLib.Strophe;
 
@@ -108,8 +109,7 @@ export default class Account {
          });
       }
 
-      //@TODO this doesnt work in a multi account setup
-      Roster.get().setRosterAvatar(this.contact);
+      ClientAvatar.get().registerAccount(this)
 
       this.initContacts();
       this.initWindows();
@@ -189,8 +189,8 @@ export default class Account {
       return this.ownDiscoInfo;
    }
 
-   public getContact(jid: JID): Contact {
-      return this.contacts[jid.bare];
+   public getContact(jid?: JID): Contact {
+      return jid && jid.bare !== this.getJID().bare ? this.contacts[jid.bare] : this.contact;
    }
 
    public addMultiUserContact(jid: JID, name?: string): MultiUserContact {

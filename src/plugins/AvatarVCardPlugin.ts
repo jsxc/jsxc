@@ -42,9 +42,15 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
          if (photo.length > 0) {
             let sha1OfAvatar = photo.text();
 
-            this.getStorage().setItem(from.bare, sha1OfAvatar);
+            this.getStorage().setItem(from.bare, sha1OfAvatar); //@REVIEW use this as trigger for all tabs?
 
             let contact = this.pluginAPI.getContact(from);
+
+            if (!contact) {
+               Log.warn('No contact found for', from);
+               return;
+            }
+
             let avatarUI = AvatarUI.get(contact);
             avatarUI.reload();
          }
