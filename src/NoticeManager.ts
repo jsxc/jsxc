@@ -41,4 +41,10 @@ export class NoticeManager {
    public removeNotice(notice: Notice) {
       this.notices.remove(notice);
    }
+
+   public removeAll() {
+      this.notices.empty((id) => {
+         Roster.get().removeNotice(this, id);
+      });
+   }
 }

@@ -241,9 +241,10 @@ export default class Roster {
    }
 
    public removeNotice(manager: NoticeManager, noticeId: string) {
+      let managerId = manager.getId() || '';
       let noticeElement = $('#jsxc-notice li').filter(function() {
          return $(this).attr('data-notice-id') === noticeId &&
-            $(this).attr('data-manager-id') === manager.getId();
+            ($(this).attr('data-manager-id') || '') === managerId;
       });
 
       noticeElement.remove();

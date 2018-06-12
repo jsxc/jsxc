@@ -64,7 +64,7 @@ export default class SortedPersistentMap {
       this.save();
    }
 
-   public empty(callback) {
+   public empty(callback) { //@REVIEW removeHook
       this.list.forEach(id => {
          callback(id, this.map[id]);
       });
@@ -135,7 +135,7 @@ export default class SortedPersistentMap {
       for (let value of removeDiff) {
          // call remove hook
          if (typeof this.removeHook === 'function') {
-            this.removeHook(value, this.map[value]);
+            this.removeHook(value, this.map[value]); //@REVIEW key is missing
          }
 
          delete this.map[value];

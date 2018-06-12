@@ -149,6 +149,8 @@ export default class Client {
 
       if (Object.keys(Client.accounts).length === 0) {
          Roster.get().setNoConnection();
+
+         this.getNoticeManager().removeAll();
       }
    }
 

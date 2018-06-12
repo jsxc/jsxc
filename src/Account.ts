@@ -302,6 +302,8 @@ export default class Account {
       this.removeAllContacts();
       this.closeAllChatWindows();
 
+      this.getNoticeManager().removeAll();
+
       Client.removeAccount(this);
    }
 
