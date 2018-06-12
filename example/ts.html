@@ -101,6 +101,23 @@
       jsxc.init();
       subscribeToInstantLogin();
       restoreInstantLoginCredentials();
+      watchForm();
+
+      function watchForm() {
+         let formElement = $('#watchForm');
+         let usernameElement = $('#watchUsername');
+         let passwordElement = $('#watchPassword');
+
+         jsxc.watchForm(formElement, usernameElement, passwordElement, getSettings);
+
+         function getSettings(username, password) {
+            return Promise.resolve({
+               xmpp: {
+                  url: '/http-bind/',
+               }
+            })
+         }
+      }
 
       function subscribeToInstantLogin() {
          $('#loginForm').submit(function(ev) {
@@ -144,6 +161,7 @@
             }
          } catch (err) {}
       }
+
    </script>
 </body>
 

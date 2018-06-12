@@ -25,6 +25,22 @@ export default class FormWatcher {
       this.passwordElement = passwordElement;
       this.settingsCallback = settingsCallback;
 
+      if (formElement.length !== 1) {
+         throw `Found ${formElement.length} form elements. I need exactly one.`;
+      }
+
+      if (usernameElement.length !== 1) {
+         throw `Found ${usernameElement.length} username elements. I need exactly one.`;
+      }
+
+      if (passwordElement.length !== 1) {
+         throw `Found ${passwordElement.length} password elements. I need exactly one.`;
+      }
+
+      if (typeof settingsCallback !== 'function') {
+         throw 'I need a settings callback.';
+      }
+
       this.prepareForm();
    }
 
@@ -51,6 +67,8 @@ export default class FormWatcher {
             this.submitForm();
          });
       });
+
+      Log.debug('Form watcher armed');
    }
 
    private async onFormSubmit() {
