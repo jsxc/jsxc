@@ -266,6 +266,10 @@ export default class Storage {
       this.hooks[eventName] = eventNameList;
    }
 
+   public removeAllHooks() {
+      this.hooks = {};
+   }
+
    private onStorageEvent = (ev: any) => {
       let hooks = this.hooks;
       let key = ev.key.replace(new RegExp('^' + this.getPrefix()), '');

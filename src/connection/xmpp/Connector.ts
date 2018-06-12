@@ -43,6 +43,7 @@ export default class Connector {
       let isConnectionExpired = inactivity && timestamp && (new Date()).getTime() - timestamp > inactivity;
 
       if (isConnectionExpired) {
+         console.log(`Inactivity: ${inactivity}, Last timestamp: ${timestamp}, Time diff: ${(new Date()).getTime() - timestamp}`);
          Log.warn('Credentials expired')
 
          this.account.triggerConnectionHook(Strophe.Status.CONNTIMEOUT);

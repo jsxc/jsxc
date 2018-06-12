@@ -36,13 +36,15 @@ export default class XMPPConnection extends AbstractConnection implements IConne
          }
       });
 
-      Client.getPresenceController().registerTargetPresenceHook((presence) => {
-         if (presence === Presence.offline) {
-            this.connection.disconnect('forced');
-         } else {
-            account.getConnection().sendPresence(presence);
-         }
-      });
+      Client.getPresenceController().registerTargetPresenceHook(this.targetPresenceHandler);
+   }
+
+   private targetPresenceHandler = (presence: Presence) => {
+      if (presence === Presence.offline) {
+         this.connection.disconnect('forced');
+      } else {
+         this.account.getConnection().sendPresence(presence);
+      }
    }
 
    public registerHandler(handler: (stanza: string) => boolean, ns?: string, name?: string, type?: string, id?: string, from?: string) {
@@ -51,6 +53,10 @@ export default class XMPPConnection extends AbstractConnection implements IConne
 
    public pause() {
       this.connection.pause();
+   }
+
+   public close() {
+      Client.getPresenceController().unregisterTargetPresenceHook(this.targetPresenceHandler);
    }
 
    public getJingleHandler() {

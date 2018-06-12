@@ -34,6 +34,10 @@ export default class PresenceController {
       this.storage.registerHook(TARGET_KEY, func);
    }
 
+   public unregisterTargetPresenceHook(func: (presence: Presence) => void) {
+      this.storage.removeHook(TARGET_KEY, func);
+   }
+
    public registerCurrentPresenceHook(func: (presence: Presence) => void) {
       this.storage.registerHook(CURRENT_KEY, func);
    }
