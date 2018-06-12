@@ -2,6 +2,8 @@ import { IMessage, DIRECTION } from '../Message.interface'
 import DateTime from './util/DateTime'
 import JID from '../JID'
 import ChatWindow from './ChatWindow'
+import AvatarSet from './AvatarSet'
+import Log from '../util/Log'
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs')
 
@@ -18,24 +20,34 @@ export default class ChatWindowMessage {
    }
 
    public restoreNextMessage() {
+      let nextMessage = this.getNextMessage();
+
+      if (!nextMessage || nextMessage.getDOM().length > 0) {
+         return;
+      }
+
+      let chatWindowMessage = this.chatWindow.getChatWindowMessage(nextMessage);
+      let element = chatWindowMessage.getElement();
+
+      this.getElement().before(element);
+      chatWindowMessage.restoreNextMessage();
+   }
+
+   private getNextMessage() {
       let nextId = this.message.getNextId();
 
-      if (nextId) {
-         let nextMessage = this.chatWindow.getTranscript().getMessage(nextId);
-
-         if (!nextMessage) {
-            console.warn('Couldnt find next message.');
-            return;
-         }
-
-         if (nextMessage.getDOM().length === 0) {
-            let chatWindowMessage = this.chatWindow.getChatWindowMessage(nextMessage);
-            let element = chatWindowMessage.getElement();
-
-            this.getElement().before(element);
-            chatWindowMessage.restoreNextMessage();
-         }
+      if (!nextId) {
+         return;
       }
+
+      let nextMessage = this.chatWindow.getTranscript().getMessage(nextId);
+
+      if (!nextMessage) {
+         Log.warn('Couldnt find next message.');
+         return;
+      }
+
+      return nextMessage;
    }
 
    private generateElement() {
@@ -141,11 +153,13 @@ export default class ChatWindowMessage {
       this.element.prepend(avatarElement)
       this.element.attr('data-name', sender.name);
 
-      if (this.element.prev().length > 0 && this.element.prev().find('.jsxc-avatar').attr('title') === avatarElement.attr('title')) {
-         avatarElement.css('visibility', 'hidden');
-      }
+      let nextMessage = this.getNextMessage();
 
-      this.element.setPlaceholder(avatarElement, sender.name);
+      if (nextMessage && nextMessage.getSender().name === sender.name) {
+         avatarElement.css('visibility', 'hidden');
+      } else {
+         AvatarSet.setPlaceholder(avatarElement, sender.name);
+      }
    }
 
    private registerHooks() {
