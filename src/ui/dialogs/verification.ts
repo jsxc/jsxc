@@ -1,8 +1,5 @@
-import Dialog from '../Dialog';
+import Dialog from '../Dialog'
 import Contact from '../../Contact'
-import Log from '../../util/Log'
-import Message from '../../Message'
-import Translation from '../../util/Translation'
 
 var verificationTemplate = require('../../../template/verification.hbs');
 
@@ -65,7 +62,7 @@ export default function(c: Contact) {
 //
 //    contact.sendMessage(message);
 // };
-// 
+//
 // function submitQuestionVerification() {
 //    var sec = $('#jsxc_secret2').val();
 //    var quest = $('#jsxc_quest').val();

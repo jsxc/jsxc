@@ -1,7 +1,5 @@
-import Log from './util/Log'
 import Account from './Account'
 import JID from './JID'
-import JingleCallSession from './JingleCallSession'
 
 export default abstract class JingleAbstractSession {
    protected storage;

@@ -1,7 +1,6 @@
-import Contact from '../Contact'
 import Menu from './util/Menu'
 import AvatarSet from './AvatarSet'
-import confirmDialog from './dialogs/confirm';
+import confirmDialog from './dialogs/confirm'
 import showVcardDialog from './dialogs/vcard'
 import { Presence } from '../connection/AbstractConnection'
 import Dialog from './Dialog'
@@ -114,8 +113,6 @@ export default class RosterItem {
 
       this.contact.getTranscript().registerHook('unreadMessageIds', updateUnreadMessage);
       updateUnreadMessage();
-
-      // $(document).trigger('add.roster.jsxc', [bid, data, bud]);
    }
 
    public getDom() {

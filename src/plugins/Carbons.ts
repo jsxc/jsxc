@@ -1,9 +1,7 @@
 import * as CONST from '../CONST'
-import { PluginState, AbstractPlugin } from '../plugin/AbstractPlugin'
+import { AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
-import Account from '../Account'
 import Log from '../util/Log'
-import Contact from '../Contact'
 import Message from '../Message'
 import * as Namespace from '../connection/xmpp/namespace'
 

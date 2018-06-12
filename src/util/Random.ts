@@ -1,3 +1,5 @@
+import Log from './Log'
+
 export default class Random {
    public static number(max: number, min: number = 0): number {
       if (crypto && typeof crypto.getRandomValues === 'function') {
@@ -20,6 +22,8 @@ export default class Random {
    }
 
    private static numberWithoutCSPRG(max: number, min: number): number {
+      Log.warn('Random number is generated without CSPRG');
+
       return Math.floor(Math.random() * (max - min)) + min;
    }
 }

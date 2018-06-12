@@ -1,8 +1,5 @@
-import { PluginState, AbstractPlugin } from '../plugin/AbstractPlugin'
+import { AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
-import Client from '../Client'
-import Account from '../Account'
-import Log from '../util/Log'
 import Contact from '../Contact'
 import Message from '../Message'
 

@@ -72,10 +72,8 @@ export default class PluginRepository {
       }
 
       if (plugin instanceof EncryptionPlugin) {
-         console.log(Plugin.getName() + ' is an encryption plugin');
          this.encryptionPlugins.push(plugin);
       } else {
-         console.log(Plugin.getName() + ' is a normal plugin');
          this.plugins.push(plugin);
       }
    }

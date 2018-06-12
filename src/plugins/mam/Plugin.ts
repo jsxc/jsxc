@@ -1,8 +1,4 @@
 import { IContact as Contact } from '../../Contact.interface'
-import Client from '../../Client'
-import Options from '../../Options'
-import * as CONST from '../../CONST'
-import Message from '../../Message'
 import { AbstractPlugin } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
 import ChatWindow from '../../ui/ChatWindow'

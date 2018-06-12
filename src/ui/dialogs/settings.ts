@@ -1,5 +1,5 @@
-import Dialog from '../Dialog';
-import Client from '../../Client';
+import Dialog from '../Dialog'
+import Client from '../../Client'
 
 var settingsTemplate = require('../../../template/settings.hbs');
 

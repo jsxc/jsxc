@@ -1,7 +1,5 @@
-import Dialog from '../Dialog';
-import JID from '../../JID';
-import { IContact } from '../../Contact.interface';
-import Templates from '../../util/Templates'
+import Dialog from '../Dialog'
+import { IContact } from '../../Contact.interface'
 
 let vcardTemplate = require('../../../template/vcard.hbs');
 let vcardBodyTemplate = require('../../../template/vcard-body.hbs');

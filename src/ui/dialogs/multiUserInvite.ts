@@ -1,8 +1,6 @@
-import Dialog from '../Dialog';
+import Dialog from '../Dialog'
 import MultiUserContact from '../../MultiUserContact'
 import JID from '../../JID'
-import Translation from '../../util/Translation'
-import Log from '../../util/Log'
 
 var multiUserInvite = require('../../../template/multiUserInvite.hbs');
 

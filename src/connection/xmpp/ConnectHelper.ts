@@ -1,6 +1,6 @@
-import { $iq, Strophe } from 'strophe.js';
-import Options from '../../Options';
-import Log from '../../util/Log';
+import { $iq, Strophe } from 'strophe.js'
+import Options from '../../Options'
+import Log from '../../util/Log'
 import SM from '../../StateMachine'
 import Client from '../../Client'
 import PersistentMap from '../../util/PersistentMap'

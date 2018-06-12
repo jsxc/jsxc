@@ -1,5 +1,4 @@
-import Storage from '../Storage';
-import Log from '../util/Log';
+import Log from '../util/Log'
 
 let dialogTemplate = require('../../template/dialog.hbs');
 

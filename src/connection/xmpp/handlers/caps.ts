@@ -1,6 +1,6 @@
 import * as NS from '../namespace'
 import DiscoInfo from '../../../DiscoInfo'
-import { AbstractConnection } from '../../AbstractConnection';
+import { AbstractConnection } from '../../AbstractConnection'
 import Client from '../../../Client'
 import JID from '../../../JID'
 import Account from '../../../Account'

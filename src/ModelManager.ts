@@ -1,4 +1,4 @@
-import Storable from './StorableAbstract';
+import Storable from './StorableAbstract'
 import Identifiable from './Identifiable.interface'
 import Storage from './Storage'
 

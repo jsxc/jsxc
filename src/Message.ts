@@ -1,7 +1,5 @@
-import Storage from './Storage';
-import Log from './util/Log';
-import Options from './Options';
-import Attachment from './Attachment';
+import Storage from './Storage'
+import Attachment from './Attachment'
 import JID from './JID'
 import * as CONST from './CONST'
 import Emoticons from './Emoticons'
@@ -98,7 +96,7 @@ export default class Message implements Identifiable, IMessage {
       let attachment = this.getAttachment();
 
       if (attachment) {
-         // attachment.delete()
+         //@TODO attachment.delete()
       }
 
       this.data.delete();
@@ -114,8 +112,6 @@ export default class Message implements Identifiable, IMessage {
 
    public setNext(message: IMessage | string): void {
       let nextId = typeof message === 'string' ? message : message.getUid();
-
-      // this.data.set('next', nextId);
 
       if (this.getNextId() === this.uid) {
          console.trace('Loop detected ' + this.uid);

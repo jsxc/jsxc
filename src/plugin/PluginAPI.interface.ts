@@ -7,8 +7,6 @@ import { DiscoInfoRepository } from '../DiscoInfoRepository.interface'
 
 export interface API {
 
-   //constructor(name: string, account: Account)
-
    createJID(node: string, domain: string, resource: string): JID
    createJID(bare: string, resource: string): JID
    createJID(full: string): JID

@@ -1,5 +1,4 @@
-import Dialog from '../Dialog';
-import Contact from '../../Contact'
+import Dialog from '../Dialog'
 import Client from '../../Client'
 import JID from '../../JID'
 import TableElement from '../util/TableElement'

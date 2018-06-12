@@ -196,7 +196,7 @@ export default class Storage {
 
          $.each(variable, function(key, val) {
             if (typeof (data[key]) === 'undefined') {
-               Log.debug('Variable ' + key + ' doesn\'t exist in ' + variable + '. It was created.');
+               Log.debug('Variable ' + key.toString() + ' doesn\'t exist in ' + variable + '. It was created.');
             }
 
             data[key] = val;

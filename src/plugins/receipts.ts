@@ -1,8 +1,4 @@
-import Client from '../Client'
-import Options from '../Options'
-import Contact from '../Contact'
 import JID from '../JID'
-import * as CONST from '../CONST'
 import Message from '../Message'
 import { AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'

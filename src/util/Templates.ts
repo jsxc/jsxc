@@ -1,5 +1,5 @@
-import * as Handlebars from 'handlebars-runtime';
-import * as i18next from 'i18next';
+import * as Handlebars from 'handlebars-runtime'
+import * as i18next from 'i18next'
 
 export default class Templates {
    private static handlebars = null;

@@ -1,4 +1,3 @@
-import Client from './Client'
 
 const EMOTICONS: any[] = [
    ['O:-) O:)', 'innocent'],
@@ -26,7 +25,7 @@ const EMOTICONS: any[] = [
    [':zzz:', 'zzz'],
    [':wait:', 'hand_splayed']
 ]
-import * as emojione from 'emojione/lib/js/emojione';
+import * as emojione from 'emojione/lib/js/emojione'
 
 const EMOTICON_LIST = {
    'core': {
@@ -82,7 +81,7 @@ export default class Emoticons {
 
    private static standardToImage(text: string): string {
       // replace emoticons from XEP-0038 and pidgin with shortnames
-      $.each(EMOTICONS, function(i, val) {
+      $.each(EMOTICONS, function(val) {
          text = text.replace(val[2], ':' + val[1] + ':');
       });
 

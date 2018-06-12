@@ -1,8 +1,5 @@
 import Contact from '../Contact'
 import ChatWindow from '../ui/ChatWindow'
-import Translation from '../util/Translation'
-import Client from '../Client'
-import ByteBeautifier from './util/ByteBeautifier'
 import Attachment from '../Attachment'
 
 export default class FileTransferHandler {

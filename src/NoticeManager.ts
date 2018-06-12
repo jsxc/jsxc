@@ -1,4 +1,4 @@
-import Storage from './Storage';
+import Storage from './Storage'
 import SortedPersistentMap from './util/SortedPersistentMap'
 import Roster from './ui/Roster'
 import { NoticeData, Notice } from './Notice'

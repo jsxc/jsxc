@@ -1,7 +1,7 @@
-import Message from './Message';
+import Message from './Message'
 import { IMessage as IMessage, DIRECTION } from './Message.interface'
-import Contact from './Contact';
-import Storage from './Storage';
+import Contact from './Contact'
+import Storage from './Storage'
 import PersistentMap from './util/PersistentMap'
 
 export default class Transcript {

@@ -1,16 +1,12 @@
-import Options from './Options';
-import Log from './util/Log';
-import UUID from './util/UUID';
-import PersistentMap from './util/PersistentMap';
+import Log from './util/Log'
+import UUID from './util/UUID'
+import PersistentMap from './util/PersistentMap'
 import Client from './Client'
 import beautifyBytes from './ui/util/ByteBeautifier'
 
 export default class Attachment {
-   private mimeType: string;
 
    private data: string;
-
-   private thumbnailData: any;
 
    private file: File;
 
@@ -161,6 +157,8 @@ export default class Attachment {
          reader.onload = function() {
             resolve(reader.result);
          }
+
+         reader.onerror = reject;
 
          reader.readAsDataURL(this.file);
       });

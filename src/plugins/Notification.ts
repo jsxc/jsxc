@@ -1,6 +1,3 @@
-import Client from '../Client'
-import Options from '../Options'
-import * as CONST from '../CONST'
 import Message from '../Message'
 import { AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
@@ -10,7 +7,6 @@ import Translation from '../util/Translation'
 import Notification from '../Notification'
 import { Presence } from '../connection/AbstractConnection'
 import { SOUNDS } from '../CONST'
-import * as Namespace from '../connection/xmpp/namespace'
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';

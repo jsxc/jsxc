@@ -1,19 +1,15 @@
 import Storage from './Storage'
 import { IConnection } from './connection/Connection.interface'
 import Connector from './connection/xmpp/Connector'
-import XMPPConnection from './connection/xmpp/Connection'
 import StorageConnection from './connection/storage/Connection'
 import JID from './JID'
 import Contact from './Contact'
 import MultiUserContact from './MultiUserContact'
 import Roster from './ui/Roster'
 import ChatWindow from './ui/ChatWindow'
-import MultiUserChatWindow from './ui/MultiUserChatWindow'
 import ChatWindowList from './ui/ChatWindowList'
 import SortedPersistentMap from './util/SortedPersistentMap'
-import PersistentMap from './util/PersistentMap'
-import Log from './util/Log'
-import { Presence, AbstractConnection } from './connection/AbstractConnection'
+import { Presence } from './connection/AbstractConnection'
 import Client from './Client'
 import { NoticeManager } from './NoticeManager'
 import * as StropheLib from 'strophe.js'
@@ -25,18 +21,7 @@ import Options from './Options'
 import UUID from './util/UUID'
 import ClientAvatar from './ClientAvatar'
 
-let Strophe = StropheLib.Strophe;
-
 type ConnectionCallback = (status: number, condition?: string) => void;
-
-interface IConnectionParameters {
-   url: string,
-   jid: string,
-   sid?: string,
-   rid?: string,
-   timestamp?: number,
-   inactivity?: number
-};
 
 export default class Account {
    private storage: Storage;
@@ -55,7 +40,6 @@ export default class Account {
 
    private windows: SortedPersistentMap;
 
-   private notices: SortedPersistentMap;
 
    private contact: Contact;
 

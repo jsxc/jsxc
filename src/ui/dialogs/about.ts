@@ -1,5 +1,4 @@
-import Dialog from '../Dialog';
-import Contact from '../../Contact'
+import Dialog from '../Dialog'
 import showDebugLog from './debugLog'
 
 var aboutTemplate = require('../../../template/about.hbs');
@@ -8,7 +7,7 @@ export default function() {
    let content = aboutTemplate({
       version: __VERSION__,
       date: __BUILD_DATE__,
-      appName: null
+      appName: null //@TODO get app name
    });
 
    let dialog = new Dialog(content);

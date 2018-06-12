@@ -1,5 +1,3 @@
-//import Client from '../Client';
-
 enum LogLevel {
    Debug,
    Info,

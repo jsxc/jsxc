@@ -1,7 +1,7 @@
-import Translation from '../../../../util/Translation';
-import Log from '../../../../util/Log';
-import JID from '../../../../JID';
-import MultiUserContact from '../../../../MultiUserContact';
+import Translation from '../../../../util/Translation'
+import Log from '../../../../util/Log'
+import JID from '../../../../JID'
+import MultiUserContact from '../../../../MultiUserContact'
 import MultiUserStatusCodeHandler from './StatusCodeHandler'
 import Message from '../../../../Message'
 

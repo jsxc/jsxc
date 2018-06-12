@@ -1,11 +1,4 @@
-import Log from './util/Log'
-import Account from './Account'
 import JingleAbstractSession from './JingleAbstractSession'
-import JingleHandler from './connection/JingleHandler'
-import UserMedia from './UserMedia'
-import Translation from './util/Translation'
-import Notification from './Notification'
-import JID from './JID'
 
 export default class JingleStreamSession extends JingleAbstractSession {
    private adoptee: boolean = false;

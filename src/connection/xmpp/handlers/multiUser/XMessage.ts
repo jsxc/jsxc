@@ -11,7 +11,7 @@ import Notification from '../../../../Notification'
 import { SOUNDS } from '../../../../CONST'
 import Pipe from '../../../../util/Pipe'
 import AbstractHandler from '../../AbstractHandler'
-import { Notice, TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../../Notice';
+import { Notice, TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../../Notice'
 
 export default class extends AbstractHandler {
    public processStanza(stanza: Element) {

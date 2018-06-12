@@ -1,5 +1,4 @@
 import Client from './Client'
-import Options from './Options'
 import Log from './util/Log'
 
 export default class IceServers {

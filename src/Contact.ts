@@ -1,16 +1,12 @@
 import { IContact, ContactType, ContactSubscription } from './Contact.interface'
 import Storage from './Storage'
 import JID from './JID'
-import Message from './Message'
-import Notification from './Notification'
-import Translation from './util/Translation'
 import Account from './Account'
 import PersistentMap from './util/PersistentMap'
 import IIdentifiable from './Identifiable.interface'
 import Log from './util/Log'
 import { Presence } from './connection/AbstractConnection'
 import { EncryptionState } from './plugin/AbstractPlugin'
-import Client from './Client'
 import Transcript from './Transcript'
 import ChatWindow from './ui/ChatWindow'
 import Avatar from './Avatar'
@@ -147,7 +143,7 @@ export default class Contact implements IIdentifiable, IContact {
 
       this.getCapableResources(features).then(cb);
 
-      this.registerHook('resources', (newValue, oldValue) => {
+      this.registerHook('resources', () => {
          //@REVIEW trigger only on changes
          this.getCapableResources(features).then(cb);
       });
@@ -189,7 +185,7 @@ export default class Contact implements IIdentifiable, IContact {
 
    public getAvatar(): Promise<Avatar> {
       return Pipe.get('avatar').run(this, undefined)
-         .then(([contact, avatar]) => {
+         .then(([, avatar]) => {
             if (!avatar) {
                throw 'No avatar available for ' + this.getId();
             }

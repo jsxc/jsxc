@@ -15,8 +15,6 @@ export default class RoleAllocator {
 
    private resolves = [];
 
-   // private reject;
-
    private slaveValue;
 
    private masterValue;
@@ -38,10 +36,6 @@ export default class RoleAllocator {
             clearTimeout(this.resolveTimeout);
 
             $('body').addClass('jsxc-slave').removeClass('jsxc-master');
-            // if (typeof this.reject === 'function') {
-            //    //this.reject();
-            //    this.reject = null;
-            // }
          }
 
          if (this.master !== true) {

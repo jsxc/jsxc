@@ -1,4 +1,4 @@
-import Dialog from '../Dialog';
+import Dialog from '../Dialog'
 
 export default function(subject: string, message: string, from?: string) {
    // let content = Templates.get('loginBox', {

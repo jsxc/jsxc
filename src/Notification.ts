@@ -1,4 +1,3 @@
-import Options from './Options'
 import Contact from './Contact'
 import Translation from './util/Translation'
 import Client from './Client'

@@ -1,4 +1,3 @@
-import Templates from "../util/Templates";
 import ChatWindow from "./ChatWindow"
 import Client from "../Client"
 
@@ -64,7 +63,6 @@ export default class ChatWindowList {
    }
 
    public add(chatWindow: ChatWindow) {
-      console.log('add', chatWindow)
       let chatWindowIds = this.getChatWindowIds();
 
       if ($('body').hasClass('jsxc-fullscreen')) {

@@ -4,7 +4,7 @@ if (scriptElements.length) {
    __webpack_public_path__ = src.substr(0, src.lastIndexOf('/') + 1);
 }
 
-import Log from './util/Log';
+import Log from './util/Log'
 import * as UI from './ui/web'
 import Client from './Client'
 import Roster from './ui/Roster'

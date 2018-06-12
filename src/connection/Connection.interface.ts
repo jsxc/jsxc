@@ -1,5 +1,5 @@
-import { IJID } from './../JID.interface';
-import Message from './../Message';
+import { IJID } from './../JID.interface'
+import Message from './../Message'
 import { Presence } from './AbstractConnection'
 import Form from './Form'
 import PEPService from './services/PEP'

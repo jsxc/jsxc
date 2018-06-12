@@ -1,6 +1,3 @@
-import Options from '../Options'
-import Templates from '../util/Templates'
-import showSettings from './dialogs/settings'
 import showContactDialog from './dialogs/contact'
 import showAboutDialog from './dialogs/about'
 import showMultiUserJoinDialog from './dialogs/multiUserJoin'
@@ -13,14 +10,12 @@ import WindowList from './ChatWindowList'
 import Client from '../Client'
 import Storage from '../Storage'
 import PersistentMap from '../util/PersistentMap'
-import Account from '../Account'
 import Translation from '../util/Translation'
-import AvatarSet from './AvatarSet'
 import { Notice } from '../Notice'
 import { Presence } from '../connection/AbstractConnection'
 import { NoticeManager } from '../NoticeManager'
 import ClientAvatar from '../ClientAvatar'
-//import rosterTemplate from '../../template/roster.hbs'
+
 let rosterTemplate = require('../../template/roster.hbs')
 
 export default class Roster {

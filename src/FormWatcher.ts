@@ -1,6 +1,5 @@
 import Log from './util/Log'
 import * as jsxc from './index'
-import settings from './ui/dialogs/settings';
 
 export interface Settings {
    disabled?: boolean,

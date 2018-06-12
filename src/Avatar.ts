@@ -1,5 +1,5 @@
 import { Avatar } from './Avatar.interface'
-import Client from './Client';
+import Client from './Client'
 import PersistentMap from './util/PersistentMap'
 import * as sha1 from 'js-sha1'
 

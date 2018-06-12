@@ -1,4 +1,3 @@
-import Log from './util/Log'
 import Account from './Account'
 import JingleCallSession from './JingleCallSession'
 

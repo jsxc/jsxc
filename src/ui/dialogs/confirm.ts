@@ -1,10 +1,4 @@
-import Dialog from '../Dialog';
-import Contact from '../../Contact'
-import Log from '../../util/Log'
-import Options from '../../Options'
-import * as CONST from '../../CONST'
-import Client from '../../Client'
-import JID from '../../JID'
+import Dialog from '../Dialog'
 
 let confirmTemplate = require('../../../template/confirm.hbs');
 

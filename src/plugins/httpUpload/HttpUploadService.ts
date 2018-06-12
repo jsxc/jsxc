@@ -1,5 +1,4 @@
 import JID from '../../JID'
-import Contact from '../../Contact'
 import * as Namespace from '../../connection/xmpp/namespace'
 import Log from '../../util/Log'
 import { API as PluginAPI } from '../../plugin/PluginAPI.interface'

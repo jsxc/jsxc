@@ -5,12 +5,9 @@ import * as NS from './xmpp/namespace'
 import RosterHandler from './xmpp/handlers/roster'
 import Log from '../util/Log'
 import * as StropheLib from 'strophe.js'
-import JingleHandler from './JingleHandler'
-import { IConnection } from './Connection.interface'
 import Account from '../Account'
 import Pipe from '../util/Pipe'
 import Form from './Form'
-import UUID from '../util/UUID'
 import PEPService from './services/PEP'
 import PersistentMap from '../util/PersistentMap'
 
@@ -549,7 +546,6 @@ abstract class AbstractConnection {
    }
 
    private generateCapsAttributes() {
-      console.log(this.account.getDiscoInfo())
       return {
          'xmlns': NS.get('CAPS'),
          'hash': 'sha-1',

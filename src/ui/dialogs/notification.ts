@@ -1,4 +1,4 @@
-import Dialog from '../Dialog';
+import Dialog from '../Dialog'
 
 let notificationTemplate = require('../../../template/notification.hbs');
 

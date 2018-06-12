@@ -1,5 +1,5 @@
 import * as NS from '../namespace'
-import { AbstractConnection } from '../../AbstractConnection';
+import { AbstractConnection } from '../../AbstractConnection'
 import Client from '../../../Client'
 import AbstractHandler from '../AbstractHandler'
 

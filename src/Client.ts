@@ -1,13 +1,9 @@
 import Account from './Account'
-import Message from './Message'
-import { AbstractPlugin, IPlugin } from './plugin/AbstractPlugin'
-import Storage from './Storage';
-import * as UI from './ui/web'
+import { IPlugin } from './plugin/AbstractPlugin'
+import Storage from './Storage'
 import JID from './JID'
 import Roster from './ui/Roster'
-import ChatWindowList from './ui/ChatWindowList'
 import RoleAllocator from './RoleAllocator'
-import SortedPersistentMap from './util/SortedPersistentMap'
 import { NoticeManager } from './NoticeManager'
 import PluginRepository from './plugin/PluginRepository'
 import Log from './util/Log'
@@ -178,9 +174,4 @@ export default class Client {
       Client.getStorage().setItem('accounts', Object.keys(Client.accounts));
    }
 
-   private static forEachAccount(callback: (account: Account) => void) {
-      for (let id in Client.accounts) {
-         callback(Client.accounts[id]);
-      }
-   }
 }

@@ -1,5 +1,4 @@
-import Dialog from '../Dialog';
-import Contact from '../../Contact'
+import Dialog from '../Dialog'
 
 let debugLogTemplate = require('../../../template/debugLog.hbs');
 

@@ -1,5 +1,4 @@
 import Log from './util/Log'
-import Account from './Account'
 import JingleAbstractSession from './JingleAbstractSession'
 import JingleHandler from './connection/JingleHandler'
 import UserMedia from './UserMedia'
