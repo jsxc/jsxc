@@ -203,6 +203,24 @@
          display: block;
       }
    }
+
+   &.jsxc-hide-offline {
+      .jsxc-roster-item[data-presence='offline'] {
+         display: none;
+      }
+
+      .jsxc-menu-main {
+         li {
+             .jsxc-hide-offline {
+                 display: none;
+             }
+
+             .jsxc-show-offline {
+                 display: inherit;
+             }
+         }
+      }
+   }
 }
 
 .jsxc-roster-toggle {
@@ -318,6 +336,16 @@
          cursor: auto;
       }
    }
+
+   li {
+      .jsxc-hide-offline {
+         display: inherit;
+      }
+
+      .jsxc-show-offline {
+         display: none;
+      }
+   }
 }
 
 #jsxc-notice {
@@ -357,12 +385,6 @@
    margin: 0;
    width: 100%;
    z-index: 85;
-
-   &.jsxc-hide-offline {
-      .jsxc-roster-item[data-presence='offline'] {
-         display: none;
-      }
-   }
 
    .jsxc-unreadMsg {
       .jsxc-name {

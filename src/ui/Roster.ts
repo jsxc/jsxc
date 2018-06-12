@@ -406,9 +406,9 @@ export default class Roster {
 
    private hideOffline(yes: boolean) {
       if (yes) {
-         this.contactList.addClass('jsxc-hide-offline');
+         this.element.addClass('jsxc-hide-offline');
       } else {
-         this.contactList.removeClass('jsxc-hide-offline');
+         this.element.removeClass('jsxc-hide-offline');
       }
    }
 
