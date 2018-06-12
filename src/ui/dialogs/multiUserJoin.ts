@@ -9,6 +9,8 @@ import Log from '../../util/Log'
 
 var multiUserJoinTemplate = require('../../../template/multiUserJoin.hbs');
 
+const ENTER_KEY = 13;
+
 export default function() {
    new MultiUserJoinDialog();
 }
@@ -78,6 +80,10 @@ class MultiUserJoinDialog {
       this.dom.find('input[type="text"], input[type="password"]').keydown(() => {
          this.emptyStatusElement();
          this.showContinueElements();
+      }).keyup((ev) => {
+         if (ev.which === ENTER_KEY) {
+            this.continueHandler(ev);
+         }
       });
 
       this.dom.find('.jsxc-continue').click(this.continueHandler);
@@ -185,6 +191,7 @@ class MultiUserJoinDialog {
    private continueHandler = (ev) => {
       ev.preventDefault();
 
+      //@REVIEW maybe lock inputs
       this.testInputValues()
          .then(this.requestRoomInfo)
          .then(() => {
@@ -239,7 +246,7 @@ class MultiUserJoinDialog {
             this.setStatusElement(roomInfoElement);
          }).catch((stanza) => {
             if ($(stanza).find('item-not-found').length > 0) {
-               this.setStatusMessage('Room_not_found_');
+               this.setStatusMessage(Translation.t('Room_not_found_'));
 
                return Promise.resolve();
             }
