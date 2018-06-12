@@ -46,6 +46,10 @@ export function addPlugin(Plugin: IPlugin) {
    Client.addPlugin(Plugin);
 }
 
+export function addMenuEntry(options: { id: string, handler: (ev) => void, label: string | JQuery<HTMLElement>, icon?: string, offlineAvailable?: boolean }) {
+   Roster.get().addMenuEntry(options);
+}
+
 export async function startAndPause(boshUrl: string, jid: string, password: string) {
    Roster.hide(); //@TODO hide only if this is the first account
    let account = await Client.createAccount(boshUrl, jid, password);
