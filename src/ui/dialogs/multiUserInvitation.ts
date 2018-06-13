@@ -48,7 +48,7 @@ export default function(type: 'direct' | 'mediated', from: string, room: string,
 
    dom.find('jsxc-close').click(() => {
       if (type === 'mediated') {
-         account.getConnection().declineMediatedMultiUserInvitation(fromJid, roomJid);
+         account.getConnection().getMUCService().declineMediatedMultiUserInvitation(fromJid, roomJid);
       }
    })
 }

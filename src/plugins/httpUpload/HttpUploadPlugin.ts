@@ -81,7 +81,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       let serverJid = new JID('', ownJid.domain, '');
       let discoInfoRepository = this.pluginAPI.getDiscoInfoRepository();
 
-      return connection.getDiscoItems(serverJid).then((stanza) => {
+      return connection.getDiscoService().getDiscoItems(serverJid).then((stanza) => {
          let promises = [];
 
          $(stanza).find('item').each((index, element) => {

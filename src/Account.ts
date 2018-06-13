@@ -133,7 +133,7 @@ export default class Account {
       if (!storage.getItem('roster:loaded')) {
          this.removeNonpersistentContacts();
 
-         return this.connection.getRoster().then(() => {
+         return this.connection.getRosterService().getRoster().then(() => {
             storage.setItem('roster:loaded', true);
 
             let targetPresence = Client.getPresenceController().getTargetPresence();

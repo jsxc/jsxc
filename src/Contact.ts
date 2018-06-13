@@ -63,7 +63,7 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public delete() {
-      this.account.getConnection().removeContact(this.getJid());
+      this.account.getConnection().getRosterService().removeContact(this.getJid());
 
       //@TODO add delete method to purge the complete entry
       this.data.empty();
@@ -199,7 +199,7 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getVcard(): Promise<any> {
-      return this.account.getConnection().loadVcard(this.getJid());
+      return this.account.getConnection().getVcardService().loadVcard(this.getJid());
    }
 
    public setEncryptionState(state: EncryptionState, source: string) {
@@ -245,7 +245,7 @@ export default class Contact implements IIdentifiable, IContact {
       this.data.set('name', name);
 
       if (oldName !== name) {
-         this.account.getConnection().setDisplayName(this.jid, name);
+         this.account.getConnection().getRosterService().setDisplayName(this.jid, name);
       }
    }
 

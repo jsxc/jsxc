@@ -132,7 +132,7 @@ export default class implements DiscoInfoRepository {
       let connection = this.account.getConnection();
 
       //@REVIEW why does the request fail if we send a node attribute?
-      return connection.getDiscoInfo(jid).then(this.processDiscoInfo);
+      return connection.getDiscoService().getDiscoInfo(jid).then(this.processDiscoInfo);
    }
 
    private processDiscoInfo(stanza: Element) {

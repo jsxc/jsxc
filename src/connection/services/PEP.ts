@@ -1,10 +1,7 @@
+import AbstractService from './AbstractService'
+import { $iq } from '../../vendor/Strophe'
 
-export default class PEP {
-   constructor(private send: (stanzaElement: Element) => void,
-      private sendIQ: (stanzaElement: Strophe.Builder) => Promise<Element>,
-      private connection, private account) {
-
-   }
+export default class PEP extends AbstractService {
 
    public subscribe(node: string, handler: (stanza: string) => boolean, force: boolean = false) {
       this.account.getDiscoInfo().addFeature(node);

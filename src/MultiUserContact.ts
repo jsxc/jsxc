@@ -47,17 +47,20 @@ export default class MultiUserContact extends Contact {
       this.members = new PersistentMap(this.account.getStorage(), 'members', this.getId());
    }
 
+   private getService() {
+      return this.account.getConnection().getMUCService();
+   }
+
    public invite(jid: JID, reason?: string) {
-      let connection = this.account.getConnection();
       let isModerated = false; //@TODO
 
       //@TODO test for support of jabber:x:conference to use direct invitation
 
       if (isModerated) {
-         connection.sendMediatedMultiUserInvitation(jid, this.getJid(), reason);
+         this.getService().sendMediatedMultiUserInvitation(jid, this.getJid(), reason);
       } else {
          let password = this.data.get('password');
-         connection.sendDirectMultiUserInvitation(jid, this.getJid(), reason, password);
+         this.getService().sendDirectMultiUserInvitation(jid, this.getJid(), reason, password);
       }
    }
 
@@ -65,19 +68,19 @@ export default class MultiUserContact extends Contact {
       this.data.set('joinDate', new Date());
       this.data.set('memberListComplete', false);
 
-      return this.account.getConnection().joinMultiUserRoom(new JID(this.jid.bare, this.getNickname()), this.data.get('password'));
+      return this.getService().joinMultiUserRoom(new JID(this.jid.bare, this.getNickname()), this.data.get('password'));
    }
 
    public leave() {
-      return this.account.getConnection().leaveMultiUserRoom(this.getJid());
+      return this.getService().leaveMultiUserRoom(this.getJid());
    }
 
    public destroy() {
-      return this.account.getConnection().destroyMultiUserRoom(this.getJid());
+      return this.getService().destroyMultiUserRoom(this.getJid());
    }
 
    public createInstantRoom() {
-      return this.account.getConnection().createInstantRoom(this.jid);
+      return this.getService().createInstantRoom(this.jid);
    }
 
    public createPreconfiguredRoom() {
@@ -87,7 +90,7 @@ export default class MultiUserContact extends Contact {
 
       let form = Form.fromJSON(this.getRoomConfiguration());
 
-      return this.account.getConnection().submitRoomConfiguration(this.getJid(), form);
+      return this.getService().submitRoomConfiguration(this.getJid(), form);
    }
 
    public setNickname(nickname: string) {

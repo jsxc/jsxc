@@ -16,30 +16,28 @@ export interface IConnection {
 
    getPEPService(): PEPService
 
+   getMUCService(): MUCService
+
+   getRosterService(): RosterService
+
+   getVcardService(): VcardService
+
+   getDiscoService(): DiscoService
+
    getJingleHandler()
 
    getJID(): IJID
-
-   getRoster()
 
    sendMessage(message: Message)
 
    sendPresence(presence?: Presence)
 
-   removeContact(jid: IJID): Promise<Element>
+   queryArchive(archive: IJID, queryId: string, beforeResultId?: string, end?: Date): Promise<Element>
 
-   addContact(jid: IJID, alias: string)
+   close()
+}
 
-   loadVcard(jid: IJID)
-
-   setDisplayName(jid: IJID, displayName: string): Promise<Element>
-
-   sendSubscriptionAnswer(to: IJID, accept: boolean)
-
-   getDiscoInfo(jid: IJID, node?: string): Promise<Element>
-
-   getDiscoItems(jid: IJID, node?: string): Promise<Element>
-
+export interface MUCService {
    joinMultiUserRoom(jid: IJID, password?: string)
 
    leaveMultiUserRoom(jid: IJID, exitMessage?: string)
@@ -59,8 +57,26 @@ export interface IConnection {
    declineMediatedMultiUserInvitation(receiverJid: IJID, roomJid: IJID, reason?: string)
 
    sendDirectMultiUserInvitation(receiverJid: IJID, roomJid: IJID, reason?: string, password?: string)
+}
 
-   queryArchive(archive: IJID, queryId: string, beforeResultId?: string, end?: Date): Promise<Element>
+export interface RosterService {
+   getRoster()
 
-   close()
+   removeContact(jid: IJID): Promise<Element>
+
+   addContact(jid: IJID, alias: string)
+
+   setDisplayName(jid: IJID, displayName: string): Promise<Element>
+
+   sendSubscriptionAnswer(to: IJID, accept: boolean)
+}
+
+export interface VcardService {
+   loadVcard(jid: IJID)
+}
+
+export interface DiscoService {
+   getDiscoInfo(jid: IJID, node?: string): Promise<Element>
+
+   getDiscoItems(jid: IJID, node?: string): Promise<Element>
 }

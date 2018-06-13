@@ -81,7 +81,7 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
    private getAvatar(jid: JID) {
       let connection = this.pluginAPI.getConnection();
 
-      return connection.loadVcard(jid).then(function(vcard) {
+      return connection.getVcardService().loadVcard(jid).then(function(vcard) {
          return new Promise(function(resolve, reject) {
             if (vcard.PHOTO && vcard.PHOTO.src) {
                resolve(vcard.PHOTO);

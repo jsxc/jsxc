@@ -86,7 +86,7 @@ export default class extends AbstractHandler {
       if (contact) {
          Log.debug('Auto approve contact request, because he is already in our contact list.');
 
-         this.account.getConnection().sendSubscriptionAnswer(contact.getJid(), true);
+         this.account.getConnection().getRosterService().sendSubscriptionAnswer(contact.getJid(), true);
 
          if (contact.getSubscription() !== SUBSCRIPTION.TO) {
             Roster.get().add(contact);

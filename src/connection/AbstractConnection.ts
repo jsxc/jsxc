@@ -2,14 +2,17 @@ import Message from '../Message'
 import JID from '../JID'
 import { IJID } from '../JID.interface'
 import * as NS from './xmpp/namespace'
-import RosterHandler from './xmpp/handlers/roster'
 import Log from '../util/Log'
 import { Strophe, $iq, $msg, $pres } from '../vendor/Strophe'
 import Account from '../Account'
 import Pipe from '../util/Pipe'
-import Form from './Form'
 import PEPService from './services/PEP'
+import MUCService from './services/MUC'
+import RosterService from './services/Roster'
+import VcardService from './services/Vcard'
+import DiscoService from './services/Disco'
 import PersistentMap from '../util/PersistentMap'
+
 
 enum Presence {
    online,
@@ -49,17 +52,41 @@ abstract class AbstractConnection {
    }
 
    public getPEPService = (): PEPService => {
-      if (!this.services.pep) {
+      return this.getService(PEPService);
+   }
+
+   public getMUCService = (): MUCService => {
+      return this.getService(MUCService);
+   }
+
+   public getRosterService = (): RosterService => {
+      return this.getService(RosterService);
+   }
+
+   public getVcardService = (): VcardService => {
+      return this.getService(VcardService);
+   }
+
+   public getDiscoService = (): DiscoService => {
+      return this.getService(DiscoService);
+   }
+
+   private getService(Service) {
+      if (Service.name.match(/^default/)) {
+         Log.debug('Every service needs a unique class name');
+      }
+
+      if (!this.services[Service.name]) {
          let self = this;
 
-         this.services.pep = new PEPService(function() {
+         this.services[Service.name] = new Service(function() {
             return self.send.apply(self, arguments)
          }, function() {
             return self.sendIQ.apply(self, arguments)
          }, this, this.account);
       }
 
-      return this.services.pep;
+      return this.services[Service.name];
    }
 
    public pluginOnlySend(stanzaElement: Element);
@@ -86,21 +113,6 @@ abstract class AbstractConnection {
       //@TODO return session id only if connected
 
       return sessionId;
-   }
-
-   public getRoster() {
-      let iq = $iq({
-         type: 'get'
-      }).c('query', {
-         xmlns: 'jabber:iq:roster'
-      });
-
-      //@TODO use account.getStorage().getItem('roster', 'version'), maybe better as parameter
-
-      return this.sendIQ(iq).then((stanza: Element) => {
-         let rosterHandler = new RosterHandler(this.account);
-         return rosterHandler.processStanza(stanza);
-      });
    }
 
    public sendMessage(message: Message) {
@@ -186,242 +198,6 @@ abstract class AbstractConnection {
       this.send(presenceStanza);
    }
 
-   public removeContact(jid: IJID): Promise<Element> {
-      let self = this;
-
-      // Shortcut to remove buddy from roster and cancle all subscriptions
-      let iq = $iq({
-         type: 'set'
-      }).c('query', {
-         xmlns: NS.get('ROSTER')
-      }).c('item', {
-         jid: jid.bare,
-         subscription: 'remove'
-      });
-
-      return this.sendIQ(iq);
-   }
-
-   public addContact(jid: IJID, alias: string) {
-      let waitForRoster = this.addContactToRoster(jid, alias);
-
-      this.sendSubscriptionRequest(jid);
-
-      return waitForRoster;
-   };
-
-   public loadVcard(jid: IJID) {
-      let iq = $iq({
-         type: 'get',
-         to: jid.full
-      }).c('vCard', {
-         xmlns: NS.get('VCARD')
-      });
-
-      //@TODO register Namespace 'VCARD', 'vcard-temp'
-
-      return this.sendIQ(iq).then(this.parseVcard);
-   }
-
-   public setDisplayName(jid: IJID, displayName: string): Promise<Element> {
-      var iq = $iq({
-         type: 'set'
-      }).c('query', {
-         xmlns: 'jabber:iq:roster'
-      }).c('item', {
-         jid: jid.bare,
-         name: displayName
-      });
-
-      return this.sendIQ(iq);
-   }
-
-   public sendSubscriptionAnswer(to: IJID, accept: boolean) {
-      let presenceStanza = $pres({
-         to: to.bare,
-         type: (accept) ? 'subscribed' : 'unsubscribed'
-      });
-
-      this.send(presenceStanza);
-   }
-
-   public getDiscoInfo(jid: IJID, node?: string): Promise<Element> {
-      let attrs = {
-         xmlns: NS.get('DISCO_INFO'),
-         node: null
-      };
-
-      if (typeof node === 'string' && node.length > 0) {
-         attrs.node = node;
-      }
-
-      let iq = $iq({
-         to: jid.full,
-         type: 'get'
-      }).c('query', attrs);
-
-      return this.sendIQ(iq);
-   }
-
-   public getDiscoItems(jid: IJID, node?: string): Promise<Element> {
-      let attrs = {
-         xmlns: NS.get('DISCO_ITEMS'),
-         node: null
-      };
-
-      if (typeof node === 'string' && node.length > 0) {
-         attrs.node = node;
-      }
-
-      let iq = $iq({
-         to: jid.full,
-         type: 'get'
-      }).c('query', attrs);
-
-      return this.sendIQ(iq);
-   }
-
-   public joinMultiUserRoom(jid: IJID, password?: string) {
-      if (jid.isBare()) {
-         return Promise.reject('We need a full jid to join a room');
-      }
-
-      let pres = $pres({
-         to: jid.full
-      }).c('x', {
-         xmlns: Strophe.NS.MUC
-      });
-
-      if (password) {
-         pres.c('password').t(password).up();
-      }
-
-      return this.send(pres);
-   }
-
-   public leaveMultiUserRoom(jid: IJID, exitMessage?: string) {
-      let pres = $pres({
-         type: 'unavailable',
-         //   id: presenceid,
-         to: jid.full
-      });
-
-      if (exitMessage) {
-         pres.c('status', exitMessage);
-      }
-
-      return this.send(pres);
-   }
-
-   public destroyMultiUserRoom(jid: IJID): Promise<Element> {
-      let iq = $iq({
-         to: jid.bare,
-         type: 'set'
-      }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#owner' //@TODO use namespace object
-      }).c('destroy');
-
-      return this.sendIQ(iq);
-   }
-
-   public createInstantRoom(jid: IJID): Promise<Element> {
-      let iq = $iq({
-         to: jid.bare,
-         type: 'set'
-      }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#owner'
-      }).c('x', {
-         xmlns: 'jabber:x:data',
-         type: 'submit'
-      });
-
-      return this.sendIQ(iq);
-   }
-
-   public getRoomConfigurationForm(jid: IJID): Promise<Element> {
-      let iq = $iq({
-         to: jid.bare,
-         type: 'get'
-      }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#owner'
-      });
-
-      return this.sendIQ(iq);
-   }
-
-   public submitRoomConfiguration(jid: IJID, form: Form): Promise<Element> {
-      let iq = $iq({
-         to: jid.bare,
-         type: 'set'
-      }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#owner'
-      }).cnode(form.toXML());
-
-      return this.sendIQ(iq);
-   }
-
-   public cancelRoomConfiguration(jid: IJID): Promise<Element> {
-      let iq = $iq({
-         to: jid.bare,
-         type: 'set'
-      }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#owner'
-      }).c('x', {
-         xmlns: 'jabber:x:data',
-         type: 'cancel'
-      });
-
-      return this.sendIQ(iq);
-   }
-
-   public sendMediatedMultiUserInvitation(receiverJid: JID, roomJid: JID, reason?: string) {
-      //@REVIEW id?
-      let msg = $msg({
-         to: roomJid.bare
-      }).c('x', {
-         xmlns: 'http://jabber.org/protocol/muc#user'
-      }).c('invite', {
-         to: receiverJid.bare
-      });
-
-      if (reason) {
-         msg.c('reason').t(reason);
-      }
-
-      this.send(msg);
-   }
-
-   public declineMediatedMultiUserInvitation(receiverJid: JID, roomJid: JID, reason?: string) {
-      //@REVIEW id?
-      let msg = $msg({
-         to: roomJid.bare
-      }).c('x', {
-         xmlns: 'http://jabber.org/protocol/muc#user'
-      }).c('decline', {
-         to: receiverJid.bare
-      });
-
-      if (reason) {
-         msg.c('reason').t(reason);
-      }
-
-      this.send(msg);
-   }
-
-   public sendDirectMultiUserInvitation(receiverJid: JID, roomJid: JID, reason?: string, password?: string) {
-      //@REVIEW id?
-      let msg = $msg({
-         to: receiverJid.bare
-      }).c('x', {
-         xmlns: 'jabber:x:conference', //@TODO
-         jid: roomJid.bare,
-         reason: reason,
-         password: password
-      });
-
-      this.send(msg);
-   }
-
    public queryArchive(archive: JID, queryId: string, beforeResultId?: string, end?: Date): Promise<Element> {
       var iq = $iq({
          type: 'set'
@@ -467,77 +243,6 @@ abstract class AbstractConnection {
 
    public close() {
 
-   }
-
-   private addContactToRoster(jid: IJID, alias: string) {
-      let iq = $iq({
-         type: 'set'
-      }).c('query', {
-         xmlns: 'jabber:iq:roster'
-      }).c('item', {
-         jid: jid.full,
-         name: alias || ''
-      });
-
-      return this.sendIQ(iq);
-   }
-
-   private sendSubscriptionRequest(jid: IJID) {
-      // send subscription request to buddy (trigger onRosterChanged)
-      this.send($pres({
-         to: jid.full,
-         type: 'subscribe'
-      }));
-   }
-
-   private parseVcard = (stanza) => {
-      let data: any = {};
-      let vcard = $(stanza).find('vCard');
-
-      if (!vcard.length) {
-         return data;
-      }
-
-      return this.parseVcardChildren(vcard);
-   }
-
-   private parseVcardChildren(stanza) {
-      let data: any = {};
-      let children = stanza.children();
-
-      children.each(function() {
-         let item = $(this);
-         let children = item.children();
-         let itemName = item[0].tagName;
-         let value = null;
-
-         if (itemName === 'PHOTO') {
-            let img = item.find('BINVAL').text();
-            let type = item.find('TYPE').text();
-            let src = 'data:' + type + ';base64,' + img; //@REVIEW XSS
-
-            //@REVIEW privacy
-            if (item.find('EXTVAL').length > 0) {
-               src = item.find('EXTVAL').text();
-            }
-
-            // concat chunks
-            src = src.replace(/[\t\r\n\f]/gi, '');
-
-            value = {
-               type: type,
-               src: src
-            };
-         } else if (children.length > 0) {
-            value = this.parseVcardChildren(children);
-         } else {
-            value = item.text();
-         }
-
-         data[itemName] = value;
-      });
-
-      return data;
    }
 
    private generateCapsAttributes() {

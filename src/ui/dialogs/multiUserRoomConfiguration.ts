@@ -14,7 +14,7 @@ export default function(contact: MultiUserContact) {
 
    let connection = Client.getAccount().getConnection();
 
-   return connection.getRoomConfigurationForm(contact.getJid())
+   return connection.getMUCService().getRoomConfigurationForm(contact.getJid())
       .then(stanza => Form.fromXML(stanza))
       .then((form: Form) => {
          return showForm(form, contact, connection);

@@ -89,7 +89,7 @@ function onSubmit(ev) {
 
    let jid = new JID(username);
 
-   account.getConnection().addContact(jid, alias);
+   account.getConnection().getRosterService().addContact(jid, alias);
 
    dialog.close();
 }
