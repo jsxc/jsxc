@@ -1,4 +1,5 @@
 import Log from '../../util/Log'
+import { Strophe } from '../../vendor/Strophe'
 
 let namespaces = {};
 

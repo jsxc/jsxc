@@ -1,6 +1,7 @@
 import { KeyPairObject, SignedPreKeyObject, PreKeyObject, BundleObject, SignalBundleObject } from './ObjectTypes'
 import Random from '../../../util/Random'
 import ArrayBufferUtils from '../util/ArrayBuffer'
+import { $build } from '../../../vendor/Strophe'
 
 export default class Bundle {
    constructor(private bundle: BundleObject) {

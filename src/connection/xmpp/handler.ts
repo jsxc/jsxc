@@ -38,8 +38,8 @@ export default class XMPPHandler {
       this.addHandler(MultiUserPresenceHandler, 'http://jabber.org/protocol/muc#user', 'presence');
       this.addHandler(JingleHandler, 'urn:xmpp:jingle:1', 'iq', 'set');
 
-      this.addHandler(DiscoInfoHandler, Strophe.NS.DISCO_INFO, 'iq', 'get');
-      this.addHandler(DiscoItemsHandler, Strophe.NS.DISCO_ITEMS, 'iq', 'get');
+      this.addHandler(DiscoInfoHandler, NS.get('DISCO_INFO'), 'iq', 'get');
+      this.addHandler(DiscoItemsHandler, NS.get('DISCO_ITEMS'), 'iq', 'get');
 
       this.addHandler(MultiUserDirectInvitationHandler, 'jabber:x:conference', 'message');
 

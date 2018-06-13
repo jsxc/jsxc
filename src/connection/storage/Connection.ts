@@ -3,10 +3,8 @@ import { IConnection } from '../Connection.interface'
 import Log from '../../util/Log'
 import Account from '../../Account'
 import { AbstractConnection, Presence } from '../AbstractConnection'
-import * as StropheLib from 'strophe.js'
+import { Strophe } from '../../vendor/Strophe'
 import JingleHandler from '../JingleHandler'
-
-let Strophe = StropheLib.Strophe;
 
 export default class StorageConnection extends AbstractConnection implements IConnection {
 

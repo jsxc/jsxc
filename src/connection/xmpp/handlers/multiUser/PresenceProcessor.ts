@@ -4,6 +4,7 @@ import JID from '../../../../JID'
 import MultiUserContact from '../../../../MultiUserContact'
 import MultiUserStatusCodeHandler from './StatusCodeHandler'
 import Message from '../../../../Message'
+import { Strophe } from '../../../../vendor/Strophe'
 
 export default class MultiUserPresenceProcessor {
    private codes: string[];

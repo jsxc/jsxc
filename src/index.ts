@@ -8,7 +8,6 @@ import Log from './util/Log'
 import * as UI from './ui/web'
 import Client from './Client'
 import Roster from './ui/Roster'
-import * as StropheLib from 'strophe.js'
 import InvalidParameterError from './errors/InvalidParameterError'
 import { IPlugin } from './plugin/AbstractPlugin'
 import OTRPlugin from './plugins/otr/Plugin'
@@ -23,9 +22,6 @@ import CarbonsPlugin from './plugins/Carbons'
 import OMEMOPlugin from './plugins/omemo/Plugin'
 import BaseError from './errors/BaseError'
 import FormWatcher, { SettingsCallback } from './FormWatcher'
-
-// @REVIEW
-$.extend(window, StropheLib)
 
 Client.addPlugin(OTRPlugin);
 Client.addPlugin(OMEMOPlugin);

@@ -4,17 +4,12 @@ import { IJID } from '../JID.interface'
 import * as NS from './xmpp/namespace'
 import RosterHandler from './xmpp/handlers/roster'
 import Log from '../util/Log'
-import * as StropheLib from 'strophe.js'
+import { Strophe, $iq, $msg, $pres } from '../vendor/Strophe'
 import Account from '../Account'
 import Pipe from '../util/Pipe'
 import Form from './Form'
 import PEPService from './services/PEP'
 import PersistentMap from '../util/PersistentMap'
-
-let Strophe = StropheLib.Strophe;
-let $iq = StropheLib.$iq;
-let $msg = StropheLib.$msg;
-let $pres = StropheLib.$pres;
 
 enum Presence {
    online,
@@ -459,7 +454,7 @@ abstract class AbstractConnection {
 
       iq.up().c('set', {
          xmlns: 'http://jabber.org/protocol/rsm'
-      }).c('max').t(20).up();
+      }).c('max').t('20').up();
 
       if (typeof beforeResultId === 'string') {
          iq.c('before').t(beforeResultId);

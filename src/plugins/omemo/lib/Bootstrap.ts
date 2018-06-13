@@ -6,6 +6,7 @@ import { IConnection } from '../../../connection/Connection.interface'
 import Bundle from './Bundle'
 import { NS_BASE, NS_DEVICELIST, NS_BUNDLES, NUM_PRE_KEYS } from '../util/Const'
 import { SignedPreKeyObject, KeyPairObject, PreKeyObject } from './ObjectTypes'
+import { $build } from '../../../vendor/Strophe'
 
 export default class Bootstrap {
    constructor(private store: Store, private connection: IConnection) {

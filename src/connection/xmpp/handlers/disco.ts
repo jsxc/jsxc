@@ -2,6 +2,7 @@ import * as NS from '../namespace'
 import { AbstractConnection } from '../../AbstractConnection'
 import Client from '../../../Client'
 import AbstractHandler from '../AbstractHandler'
+import { $iq } from '../../../vendor/Strophe'
 
 export class DiscoInfoHandler extends AbstractHandler {
    constructor(account) {

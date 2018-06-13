@@ -3,6 +3,7 @@ import AvatarSet from './ui/AvatarSet'
 import Client from './Client'
 import Account from './Account'
 import Storage from './Storage'
+import { Strophe } from './vendor/Strophe'
 
 enum TYPE {
    PLACEHOLDER, IMAGE

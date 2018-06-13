@@ -4,6 +4,7 @@ import PluginAPI from '../plugin/PluginAPI'
 import Log from '../util/Log'
 import Message from '../Message'
 import * as Namespace from '../connection/xmpp/namespace'
+import { $iq } from '../vendor/Strophe'
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';

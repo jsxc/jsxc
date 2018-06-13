@@ -130,7 +130,9 @@ export default class OTRPlugin extends EncryptionPlugin {
    private endAllSessions() {
       //@TODO restore all otr objects (?)
 
-      let promiseMap = $.map(this.sessions, (session, bareJid) => {
+      let promiseMap = Object.keys(this.sessions).map((bareJid) => {
+         let session = this.sessions[bareJid];
+
          if (session.isEncrypted()) {
             return session.end();
          }

@@ -40,10 +40,10 @@ function onUsernameKeyUp() {
 
          $.each(list || {}, function(uid, displayname) {
             let option = $('<option>');
-            option.attr('data-username', uid);
+            option.attr('data-username', uid.toString());
             option.attr('data-alias', displayname);
 
-            option.attr('value', uid).appendTo('#jsxc-userlist');
+            option.attr('value', uid.toString()).appendTo('#jsxc-userlist');
 
             if (uid !== displayname) {
                option.clone().attr('value', displayname).appendTo('#jsxc-userlist');
