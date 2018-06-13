@@ -47,7 +47,9 @@ export default class extends AbstractHandler {
       let pipe = Pipe.get('afterReceiveMessage');
 
       pipe.run(peerContact, message, messageElement.get(0)).then(([contact, message]) => {
-         contact.getTranscript().pushMessage(message);
+         if (message.getPlaintextMessage() || message.getHtmlMessage()) {
+            contact.getTranscript().pushMessage(message);
+         }
       });
 
       return this.PRESERVE_HANDLER;
