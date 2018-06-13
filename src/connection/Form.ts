@@ -1,3 +1,4 @@
+import { $build } from '../vendor/Strophe'
 
 const NAMESPACE = 'jabber:x:data';
 

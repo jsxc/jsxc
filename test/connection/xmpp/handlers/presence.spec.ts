@@ -5,7 +5,7 @@ import 'mocha';
 import PresenceHandler from '../../../../src/connection/xmpp/handlers/presence'
 import Client from '../../../../src/Client'
 import AccountStub from '../../../AccountStub'
-import Log from '../../../../src/util/Log'
+import { $pres } from '../../../../src/vendor/Strophe'
 
 describe('Presence handler', () => {
     let handler;

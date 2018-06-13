@@ -9,6 +9,7 @@ import Attachment from '../../Attachment'
 import HttpUploadService from './HttpUploadService'
 import { IConnection } from '../../connection/Connection.interface'
 import Pipe from '../../util/Pipe'
+import { $iq } from '../../vendor/Strophe'
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';

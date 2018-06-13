@@ -5,6 +5,7 @@ import JID from '../../JID'
 import * as ConnectHelper from './ConnectHelper'
 import StorageConnection from '../storage/Connection'
 import XMPPConnection from './Connection'
+import { Strophe } from '../../vendor/Strophe'
 
 export default class Connector {
    private connectionParameters;

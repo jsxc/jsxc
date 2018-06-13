@@ -1,7 +1,6 @@
 import Log from '../../../util/Log'
 import JID from '../../../JID'
 import { IContact } from '../../../Contact.interface'
-import Client from '../../../Client'
 import { Notice, TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../Notice'
 import Roster from '../../../ui/Roster'
 import { Presence } from '../../AbstractConnection'

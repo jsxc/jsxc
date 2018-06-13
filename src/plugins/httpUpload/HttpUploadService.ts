@@ -3,6 +3,7 @@ import * as Namespace from '../../connection/xmpp/namespace'
 import Log from '../../util/Log'
 import { API as PluginAPI } from '../../plugin/PluginAPI.interface'
 import Attachment from '../../Attachment'
+import { $iq } from '../../vendor/Strophe'
 
 export default class HttpUploadService {
    private namespace;

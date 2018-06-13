@@ -5,9 +5,6 @@
  * @see {@link http://xmpp.org/extensions/xep-0085.html}
  */
 
-import Client from '../../Client'
-import Options from '../../Options'
-import Log from '../../util/Log'
 import JID from '../../JID'
 import { AbstractPlugin } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'

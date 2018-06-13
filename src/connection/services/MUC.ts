@@ -1,7 +1,7 @@
 import AbstractService from './AbstractService'
 import { IJID } from '../../JID.interface'
 import Form from '../Form'
-import { $pres, $iq, $msg } from '../../vendor/Strophe'
+import { $pres, $iq, $msg, Strophe } from '../../vendor/Strophe'
 
 export default class MUC extends AbstractService {
    public joinMultiUserRoom(jid: IJID, password?: string) {
