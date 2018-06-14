@@ -9,6 +9,7 @@ import PluginRepository from './plugin/PluginRepository'
 import Log from './util/Log'
 import Options from './Options'
 import PresenceController from './PresenceController'
+import PageVisibility from './PageVisibility'
 
 export default class Client {
    private static storage;
@@ -20,6 +21,8 @@ export default class Client {
    private static presenceController: PresenceController;
 
    public static init(options?): number {
+      PageVisibility.init();
+
       let roleAllocator = RoleAllocator.get();
       let storage = Client.getStorage();
       let accountIds = storage.getItem('accounts') || [];
@@ -63,8 +66,18 @@ export default class Client {
       }
    }
 
-   public static hasFocus() {
-      //@TODO has focus
+   public static hasTabFocus() {
+      let hasFocus = true;
+
+      if (typeof document.hasFocus === 'function') {
+         hasFocus = document.hasFocus();
+      }
+
+      return hasFocus;
+   }
+
+   public static isVisible() {
+      return PageVisibility.isVisible();
    }
 
    public static isExtraSmallDevice(): boolean {

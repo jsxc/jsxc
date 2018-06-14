@@ -5,6 +5,7 @@ import * as CONST from './CONST'
 import { FUNCTION as NOTICEFUNCTION } from './Notice'
 import openConfirmDialog from './ui/dialogs/confirm'
 import Hash from './util/Hash'
+import Log from './util/Log'
 import defaultIconFile = require('../images/XMPP_logo.png')
 
 interface NotificationSettings {
@@ -64,9 +65,9 @@ export default class Notification {
    }
 
    public static async notify(settings: NotificationSettings) {
-      console.log('notify')
       if (!Client.getOption('notification')) {
-         console.log('disabled')
+         Log.debug('Drop notification, because notifications are disabled.');
+
          return; // notifications disabled
       }
 
@@ -82,13 +83,15 @@ export default class Notification {
       }
 
       if (!Notification.hasPermission()) {
-         console.log('No permission')
+         Log.debug('Drop notification, because I have no permission');
+
          return;
       }
 
-      if (Client.hasFocus() && !settings.force) {
-         console.log('hasFocus')
-         return; // Tab is visible
+      if (Client.isVisible() && !settings.force) {
+         Log.debug('Drop notification, because client is visible.');
+
+         return;
       }
 
       settings.icon = settings.icon || <string><any>defaultIconFile;
@@ -132,7 +135,7 @@ export default class Notification {
       settings.duration = settings.duration || Client.getOption('notification').duration;
       settings.title = settings.title;
       settings.message = settings.message;
-      console.log('settings', settings)
+
       Notification.popupTimeout = setTimeout(function() {
          Notification.showPopup(settings);
       }, Notification.popupDelay);
@@ -150,14 +153,12 @@ export default class Notification {
 
       if (settings.duration > 0) {
          setTimeout(function() {
-            console.log('close popup')
             popup.close();
          }, settings.duration);
       }
    }
 
    private static hasSupport() {
-      console.log('Notification: hasSupport', !!NotificationAPI)
       return !!NotificationAPI;
    }
 
@@ -188,7 +189,7 @@ export default class Notification {
          return;
       }
 
-      if (Client.hasFocus() && !force) {
+      if (Client.isVisible() && !force) {
          // tab is visible
          return;
       }
