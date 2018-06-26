@@ -220,6 +220,16 @@
              }
          }
       }
+
+      .jsxc-contact-list:after {
+         content: attr(data-offline-label);
+         text-align: center;
+         display: block;
+         font-style: italic;
+         font-size: 0.8em;
+         opacity: 0.6;
+         line-height: 44px;
+      }
    }
 }
 
