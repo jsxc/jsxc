@@ -1,7 +1,6 @@
 import Client from '../Client'
-import Hash from '../util/Hash'
 import { IContact } from '../Contact.interface'
-import * as getRGB from 'consistent-color-generation'
+import Color from '../util/Color'
 
 export default class AvatarSet {
 
@@ -50,26 +49,16 @@ export default class AvatarSet {
    }
 
    private static placeholder(elements, text: string) {
-      let options = Client.getOption('avatarPlaceholder') || {};
-      let hash = Hash.String(text);
+      // let options = Client.getOption('avatarPlaceholder') || {};
 
-      let hue = Math.abs(hash) % 360;
-      let saturation = options.saturation || 90;
-      let lightness = options.lightness || 65;
-      let hsl = 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
-
-      let color = getRGB(text);
-      let r = Math.round(color.r * 255);
-      let g = Math.round(color.g * 255);
-      let b = Math.round(color.b * 255);
-      let rgb = `rgb(${r}, ${g}, ${b})`;
+      let color = Color.generate(text);
 
       $(elements).each(function() {
          let element = $(this);
 
          element.css({
             'background-image': 'url()',
-            'background-color': rgb,
+            'background-color': color,
             'color': '#fff',
             'font-weight': 'bold',
             'text-align': 'center',
