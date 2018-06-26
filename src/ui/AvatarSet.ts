@@ -29,7 +29,8 @@ export default class AvatarSet {
    }
 
    public reload() {
-      //@TODO spinner?
+      this.showSpinner();
+
       this.contact.getAvatar().then((avatar) => {
          $(this.elements).each(function() {
             let element = $(this);
@@ -39,6 +40,8 @@ export default class AvatarSet {
          });
       }).catch((msg) => {
          AvatarSet.placeholder(this.elements, this.contact.getName());
+      }).then(() => {
+         this.hideSpinner();
       });
    }
 
@@ -80,6 +83,18 @@ export default class AvatarSet {
          });
 
          element.text('');
+      });
+   }
+
+   private showSpinner() {
+      $(this.elements).each(function() {
+         $(this).addClass('jsxc-avatar-loading');
+      });
+   }
+
+   private hideSpinner() {
+      $(this.elements).each(function() {
+         $(this).removeClass('jsxc-avatar-loading');
       });
    }
 }

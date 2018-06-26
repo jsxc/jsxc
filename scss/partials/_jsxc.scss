@@ -91,6 +91,23 @@
         left: -6px;
         border: 2px solid $roster_bg;
     }
+
+    &-loading:after {
+        content: '';
+        width: 20px;
+        height: 20px;
+        display: block;
+        border: 10px solid rgba(255,255,255,0.7);
+        border-right-color: rgba(0,0,0,0.5);
+        border-left-color: rgba(0,0,0,0.5);
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -10px;
+        margin-left: -10px;
+        animation: jsxc-rotate 1s infinite;
+    }
 }
 
 ul.jsxc-vCard {
