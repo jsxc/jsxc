@@ -1,6 +1,7 @@
 import showContactDialog from './dialogs/contact'
 import showAboutDialog from './dialogs/about'
 import showMultiUserJoinDialog from './dialogs/multiUserJoin'
+import showSettingsDialog from './dialogs/settings'
 import * as CONST from '../CONST'
 import RosterItem from './RosterItem'
 import showLoginBox from './dialogs/loginBox'
@@ -359,7 +360,7 @@ export default class Roster {
 
       this.addMenuEntry({
          id: 'settings',
-         handler: showMultiUserJoinDialog,
+         handler: showSettingsDialog,
          label: Translation.t("Settings"),
          offlineAvailable: true,
          icon: 'setting'

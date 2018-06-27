@@ -23,7 +23,11 @@ const MAX_VERSION = '4.0.0';
 
 export default class ChatStatePlugin extends AbstractPlugin {
    public static getName(): string {
-      return 'chatState';
+      return 'Chat State';
+   }
+
+   public static getDescription(): string {
+      return Translation.t('setting-explanation-chat-state');
    }
 
    private chatStateConnection: ChatStateConnection;

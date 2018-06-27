@@ -99,11 +99,11 @@ export default class Account {
    }
 
    public getOption(key) {
-      return this.options.get(key);
+      return this.options.get(key, this);
    }
 
    public setOption(key, value) {
-      this.options.set(key, value);
+      this.options.set(key, value, this);
    }
 
    public connect = (pause: boolean = false): Promise<void> => {
@@ -279,6 +279,10 @@ export default class Account {
    public getJID(): JID {
       //@REVIEW maybe promise?
       return this.connector.getJID() || new JID(this.getUid());
+   }
+
+   public getConnectionUrl(): string {
+      return this.connector.getUrl();
    }
 
    public remove() {

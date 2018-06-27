@@ -27,10 +27,12 @@ export default class PluginRepository {
    }
 
    constructor(private account: Account) {
-      let disabledPlugins = Client.getOption('disabledPlugins') || [];
+      let accountDisabledPlugins = account.getOption('disabledPlugins');
 
-      PluginRepository.registeredPlugins.forEach((Plugin) => {
-         if (disabledPlugins.indexOf(Plugin.getName()) > -1) {
+      this.getAllEnabledRegisteredPlugins().forEach((Plugin) => {
+         if (accountDisabledPlugins.indexOf(Plugin.getName()) > -1) {
+            Log.debug(`${Plugin.getName()} was disabled by the user.`);
+
             return;
          }
 
@@ -40,6 +42,16 @@ export default class PluginRepository {
             Log.warn(err);
          }
       });
+   }
+
+   public getAllRegistredPlugins() {
+      return PluginRepository.registeredPlugins;
+   }
+
+   public getAllEnabledRegisteredPlugins() {
+      let disabledPlugins = Client.getOption('disabledPlugins') || [];
+
+      return this.getAllRegistredPlugins().filter(Plugin => disabledPlugins.indexOf(Plugin.getName()) < 0);
    }
 
    public getAllEncryptionPlugins() {

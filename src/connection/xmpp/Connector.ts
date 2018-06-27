@@ -62,6 +62,10 @@ export default class Connector {
       return new JID(this.connectionParameters.get('jid'));
    }
 
+   public getUrl(): string {
+      return this.connectionParameters.get('url');
+   }
+
    private successfulConnected = (data) => {
       let stropheConnection = data.connection;
       let status = data.status;

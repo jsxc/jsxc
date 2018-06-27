@@ -1,92 +1,153 @@
 import Dialog from '../Dialog'
 import Client from '../../Client'
-
-var settingsTemplate = require('../../../template/settings.hbs');
+import Page from '../DialogPage'
+import Section from '../DialogSection'
+import Navigation from '../DialogNavigation'
+import List from '../DialogList'
+import ListItem from '../DialogListItem'
+import AvatarSet from '../AvatarSet'
+import Translation from '../../util/Translation';
 
 export default function() {
-   let xmppSettingsAlterable = Client.getOption('xmpp').overwrite !== 'false' && Client.getOption('xmpp').overwrite !== false;
+   let dialog = new Dialog('', false, 'settings');
+   let dom = dialog.open();
 
-   var content = settingsTemplate({
-      xmppSettingsAlterable: xmppSettingsAlterable
-   });
-   var dialog = new Dialog(content);
-   var dom = dialog.open();
-
-   dom.find('form').each(function() {
-      prepareForm($(this));
-   });
-
-   dom.find('form').submit(function(ev) {
-      ev.preventDefault();
-
-      processSubmit($(this));
-   });
+   let navigation = new Navigation(dom);
+   navigation.goTo(new StartPage(navigation));
 }
 
-function prepareForm(form) {
-   form.find('input[type!="submit"]').each(function() {
-      var id = this.id.split("-");
-      var prop = id[0];
-      var key = id[1];
-      var type = this.type;
+class StartPage extends Page {
+   constructor(navigation: Navigation) {
+      super(navigation, 'Settings');
+   }
 
-      var data = Client.getOption(prop);
+   //@REVIEW could also return Page or getDOM interface?
+   protected generateContentElement(): JQuery | Array<JQuery> {
+      return [
+         new ClientSection(this.navigation).getDOM(),
+         new AccountOverviewSection(this.navigation).getDOM()
+      ];
+   }
+}
 
-      if (data && typeof data[key] !== 'undefined') {
-         if (type === 'checkbox') {
-            if (data[key] !== 'false' && data[key] !== false) {
-               this.checked = 'checked';
-            }
-         } else {
-            $(this).val(data[key]);
-         }
+class ClientSection extends Section {
+   protected generateContentElement(): JQuery {
+      let contentElement = new List();
+
+      //@REVIEW more generic? See PluginSection.
+      let checkboxElement = $('<input>');
+      checkboxElement.attr('type', 'checkbox');
+      checkboxElement.prop('checked', Client.getOption('on-login'));
+      checkboxElement.on('change', (ev) => {
+         let isEnabled = $(ev.target).prop('checked');
+
+         Client.setOption('on-login', isEnabled);
+      });
+
+      //@TODO only show if form watcher was used
+      contentElement.append(new ListItem(Translation.t('On_login'), Translation.t('setting-explanation-login'), undefined, undefined, checkboxElement));
+
+      return contentElement.getDOM();
+   }
+}
+
+class AccountOverviewSection extends Section {
+   constructor(navigation: Navigation) {
+      super(navigation, 'Accounts');
+   }
+
+   protected generateContentElement(): JQuery {
+      let accounts = Client.getAccounts();
+      let contentElement = new List();
+
+      for (let account of accounts) {
+         let name = account.getJID().bare;
+         let avatarElement = $('<div>');
+         avatarElement.addClass('jsxc-avatar');
+         AvatarSet.setPlaceholder(avatarElement, name);
+
+         let actionHandler = () => this.navigation.goTo(new AccountPage(this.navigation, account));
+         let accountElement = new ListItem(name, undefined, actionHandler, avatarElement);
+
+         contentElement.append(accountElement);
       }
-   });
+
+      return contentElement.getDOM();
+   }
 }
 
-function processSubmit(form) {
-   // var data = {};
-   //
-   // form.find('input[type!="submit"]').each(function() {
-   //    var id = this.id.split("-");
-   //    var prop = id[0];
-   //    var key = id[1];
-   //    var val;
-   //    var type = this.type;
-   //
-   //    if (type === 'checkbox') {
-   //       val = this.checked;
-   //    } else {
-   //       val = $(this).val();
-   //    }
-   //
-   //    if (!data[prop]) {
-   //       data[prop] = {};
-   //    }
-   //
-   //    data[prop][key] = val;
-   // });
-   //
-   // $.each(data, function(key, val) {
-   //    Options.set(key, val);
-   // });
-   //
-   // var cb = function(success) {
-   //    if (typeof form.attr('data-onsubmit') === 'string') {
-   //       jsxc.exec(form.attr('data-onsubmit'), [success]);
-   //    }
-   //
-   //    setTimeout(function() {
-   //       if (success) {
-   //          form.find('button[type="submit"]').switchClass('btn-primary', 'btn-success');
-   //       } else {
-   //          form.find('button[type="submit"]').switchClass('btn-primary', 'btn-danger');
-   //       }
-   //       setTimeout(function() {
-   //          form.find('button[type="submit"]').switchClass('btn-danger btn-success', 'btn-primary');
-   //       }, 2000);
-   //    }, 200);
-   // };
-   //
-   // Options.saveSettinsPermanent.call(this, data, cb);
+class AccountPage extends Page {
+   constructor(navigation: Navigation, private account) {
+      super(navigation, account.getJID().bare);
+   }
+
+   protected generateContentElement(): JQuery {
+      let contentElement = $('<div>');
+
+      contentElement.append(new ConnectionSection(this.navigation, this.account).getDOM());
+      contentElement.append(new PluginSection(this.navigation, this.account).getDOM());
+
+      return contentElement;
+   }
 }
+
+//@TODO priorities? Are they still needed/used?
+class ConnectionSection extends Section {
+   constructor(navigation: Navigation, private account) {
+      super(navigation, 'Connection');
+   }
+
+   protected generateContentElement(): JQuery {
+      let jid = this.account.getJID();
+      let contentElement = new List();
+
+      contentElement.append(new ListItem('Jabber ID', jid.bare));
+      contentElement.append(new ListItem('Resource', jid.resource));
+      contentElement.append(new ListItem('BOSH url', this.account.getConnectionUrl()));
+
+      return contentElement.getDOM();
+   }
+}
+
+class PluginSection extends Section {
+   constructor(navigation: Navigation, private account) {
+      super(navigation, 'Plugins');
+   }
+
+   protected generateContentElement(): JQuery {
+      let contentElement = new List();
+
+      let disabledPlugins = this.account.getOption('disabledPlugins') || [];
+      let pluginRepository = this.account.getPluginRepository();
+
+      for (let plugin of pluginRepository.getAllEnabledRegisteredPlugins()) {
+         let name = plugin.getName();
+         let description = typeof plugin.getDescription === 'function' ? plugin.getDescription() : undefined;
+
+         let checkboxElement = $('<input>');
+         checkboxElement.attr('type', 'checkbox');
+         checkboxElement.attr('name', name);
+         checkboxElement.prop('checked', disabledPlugins.indexOf(name) < 0);
+         checkboxElement.on('change', (ev) => {
+            let isEnabled = $(ev.target).prop('checked');
+            let name = $(ev.target).attr('name');
+            let disabledPlugins = this.account.getOption('disabledPlugins') || [];
+
+            if (isEnabled) {
+               disabledPlugins = disabledPlugins.filter(v => v !== name);
+            } else {
+               disabledPlugins.push(name);
+            }
+
+            this.account.setOption('disabledPlugins', disabledPlugins);
+         });
+
+         let listItem = new ListItem(name, description, undefined, undefined, checkboxElement);
+
+         contentElement.append(listItem);
+      }
+
+      return contentElement.getDOM();
+   }
+}
+

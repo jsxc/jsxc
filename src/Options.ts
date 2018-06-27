@@ -19,7 +19,8 @@ export default class Options {
    }
 
    public get(key, account?) {
-      let local = Client.getStorage().getItem('options') || {};
+      let storage = account ? account.getStorage() : Client.getStorage();
+      let local = storage.getItem('options') || {};
 
       if (typeof local[key] !== 'undefined') {
          return local[key];
@@ -32,8 +33,10 @@ export default class Options {
       return {};
    };
 
-   public set(key, value) {
-      Client.getStorage().updateItem('options', key, value, true);
+   public set(key, value, account?) {
+      let storage = account ? account.getStorage() : Client.getStorage();
+
+      storage.updateItem('options', key, value);
    };
 
    public overwriteDefaults(options) {

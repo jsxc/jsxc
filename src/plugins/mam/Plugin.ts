@@ -20,7 +20,11 @@ const MAM2 = 'urn:xmpp:mam:2';
 
 export default class MessageArchiveManagementPlugin extends AbstractPlugin {
    public static getName(): string {
-      return 'mam';
+      return 'Message Archive Management';
+   }
+
+   public static getDescription(): string {
+      return Translation.t('setting-mam-enable');
    }
 
    private enabled = false;
