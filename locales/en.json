@@ -28,7 +28,7 @@
     "Manual": "Manual",
     "Question": "Question",
     "Secret": "Secret",
-    "To_verify_the_fingerprint_": "To verify the fingerprint, communication with your contact via some trustworthy channel, such as the telephone.",
+    "To_verify_the_fingerprint_": "To verify the fingerprint, communicate with your contact via some trustworthy channel, such as the telephone.",
     "Your_fingerprint": "Your fingerprint",
     "Buddy_fingerprint": "Contact fingerprint",
     "Close": "Close",
@@ -138,7 +138,7 @@
     "Authentication_aborted": "Authentication aborted.",
     "Authentication_request_received": "Authentication request received.",
     "Log_in_without_chat": "Log in without chat",
-    "has_come_online": "has come online",
+    "has_come_online": "is now online",
     "Unknown_sender": "Unknown sender",
     "Please_allow_access_to_microphone_and_camera": "Please click the \"Allow\" button at the top, to allow access to microphone and camera.",
     "Incoming_call": "Incoming call",
@@ -297,7 +297,7 @@
     "Stream_started": "Stream started",
     "HTTPS_REQUIRED": "This action requires an encrypted connection.",
     "EXTENSION_UNAVAILABLE": "You need a browser extension/addon.",
-    "UNKNOWN_ERROR": "An unknown error occured.",
+    "UNKNOWN_ERROR": "An unknown error occurred.",
     "Install_extension": "Please install the extension in order to use screen sharing: ",
     "Connection_accepted": "Connection accepted",
     "Stream_terminated": "Stream terminated",
@@ -309,6 +309,9 @@
     "setting-mam-enable": "Do you want to be able to retrieve stored older messages from the server?",
     "File_too_large": "File too large",
     "No_proper_file_transfer_method_available": "No proper file transfer method available",
-    "You_have_to_go_online_": "You have to be online to execute this operation."
+    "You_have_to_go_online_": "You have to be online to execute this operation.",
+    "error_location_not_provided": "Could not get location.",
+    "Log_in_with_chat": "Log in with chat",
+    "Send_location": "Send location"
   }
 }

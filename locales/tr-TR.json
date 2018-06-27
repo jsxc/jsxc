@@ -307,8 +307,11 @@
     "Load_older_messages": "Eski iletileri yükle",
     "Message_history": "İleti geçmişi",
     "setting-mam-enable": "Etkinleştirdiğiniz takdirde kaydedilmiş iletileri sunucudan alabilirsiniz.",
-    "File_too_large": null,
-    "No_proper_file_transfer_method_available": null,
-    "You_have_to_go_online_": "Bu işlemi gerçekleştirebilmek için çevrimiçi olmalısınız."
+    "File_too_large": "Dosya çok büyük",
+    "No_proper_file_transfer_method_available": "Uygun dosya aktarma yöntemi yok",
+    "You_have_to_go_online_": "Bu işlemi gerçekleştirebilmek için çevrimiçi olmalısınız.",
+    "error_location_not_provided": "Yer alınamadı",
+    "Log_in_with_chat": "Sohbetle giriş yap",
+    "Send_location": "Konum gönder"
   }
 }

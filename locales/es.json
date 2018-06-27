@@ -19,10 +19,10 @@
     "Unverified": "No verificado",
     "private_conversation_aborted": "¡Conversación privada abortada!",
     "your_buddy_closed_the_private_conversation_you_should_do_the_same": "¡Su amigo cerró la conversación privada! Usted debería hacer lo mismo.",
-    "conversation_is_now_verified": "La conversación es ahora verificada.",
+    "conversation_is_now_verified": "La conversación está ahora verificada.",
     "authentication_failed": "Falló la verificación.",
     "Creating_your_private_key_": "Ahora vamos a crear su clave privada. Esto puede tomar algún tiempo.",
-    "Authenticating_a_buddy_helps_": "Autenticación de un amigo ayuda a garantizar que la persona que está hablando es quien él o ella está diciendo.",
+    "Authenticating_a_buddy_helps_": "La autenticación de un amigo ayuda a garantizar que la persona que está hablando es quien él o ella dice ser.",
     "How_do_you_want_to_authenticate_your_buddy": "¿Cómo desea autenticar __bid_name__ (<b>__bid_jid__</b>)?",
     "Select_method": "Escoja un método...",
     "Manual": "Manual",
@@ -309,6 +309,9 @@
     "setting-mam-enable": null,
     "File_too_large": null,
     "No_proper_file_transfer_method_available": null,
-    "You_have_to_go_online_": null
+    "You_have_to_go_online_": null,
+    "error_location_not_provided": null,
+    "Log_in_with_chat": null,
+    "Send_location": null
   }
 }
