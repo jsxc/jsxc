@@ -124,6 +124,12 @@ export default class Account {
          } else {
             this.initConnection(status);
          }
+      }).catch(err => {
+         if (Client.getAccounts().length <= 1) {
+            Client.getPresenceController().setTargetPresence(Presence.offline)
+         }
+
+         throw err;
       });
    }
 
