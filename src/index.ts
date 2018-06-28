@@ -82,8 +82,22 @@ function startUI() {
 }
 
 async function startWithCredentials(boshUrl: string, jid: string, password: string) {
-   let account = await Client.createAccount(boshUrl, jid, password);
+   let account = await Client.createAccount(boshUrl, jid, password.toString());
 
+   return connectAndStartUI(account);
+}
+
+async function startWithBoshParameters(boshUrl: string, jid: string, sid: string, rid: string) {
+   if (!/\/.+$/.test(jid)) {
+      return Promise.reject(new InvalidParameterError('We need a Jabber ID with resource.'));
+   }
+
+   let account = await Client.createAccount(boshUrl, jid, sid.toString(), rid.toString());
+
+   return connectAndStartUI(account);
+}
+
+function connectAndStartUI(account) {
    return account.connect().then(function() {
       startUI();
    }).catch((err) => {
@@ -99,10 +113,6 @@ async function startWithCredentials(boshUrl: string, jid: string, password: stri
 
       throw 'Unknown error';
    });
-}
-
-function startWithBoshParameters(boshUrl: string, jid: string, sid: string, rid: string) {
-   //@TODO start with bosh parameters
 }
 
 export function enableDebugMode() {
