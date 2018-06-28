@@ -10,6 +10,8 @@
    margin-left: 10px;
    background-color: $roster_bg;
    transition: right 0.5s;
+   display: flex;
+   flex-direction: column;
 
    .jsxc-roster-hidden & {
       right: -200px;
@@ -92,9 +94,6 @@
    }
 
    > .jsxc-bottom {
-      position: absolute;
-      left: 0;
-      bottom: 0;
       width: 100%;
       line-height: 34px;
       background-color: $roster_bottom_bg;
@@ -395,6 +394,13 @@
    margin: 0;
    width: 100%;
    z-index: 85;
+
+   &-wrapper {
+       flex-grow: 1;
+       overflow-y: auto;
+
+       @extend %scrollbar;
+   }
 
    .jsxc-unreadMsg {
       .jsxc-name {
