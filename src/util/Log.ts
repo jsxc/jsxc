@@ -1,3 +1,5 @@
+import { ILog } from './Log.interface'
+
 enum LogLevel {
    Debug,
    Info,
@@ -5,32 +7,40 @@ enum LogLevel {
    Error
 };
 
-export default class Log {
-   public static info(message: string, ...data): void {
-      Log.log(LogLevel.Info, message, ...data);
+export class Logger implements ILog {
+   constructor(private prefix: string = '') {
+      if (prefix) {
+         this.prefix = `[${prefix}]`;
+      }
    }
 
-   public static debug(message: string, ...data): void {
-      Log.log(LogLevel.Debug, message, ...data);
+   public info(message: string, ...data): void {
+      this.log(LogLevel.Info, message, ...data);
    }
 
-   public static warn(message: string, ...data): void {
-      Log.log(LogLevel.Warn, message, ...data);
+   public debug(message: string, ...data): void {
+      this.log(LogLevel.Debug, message, ...data);
    }
 
-   public static error(message: string, ...data): void {
-      Log.log(LogLevel.Error, message, ...data);
+   public warn(message: string, ...data): void {
+      this.log(LogLevel.Warn, message, ...data);
    }
 
-   private static getPrefix(level: LogLevel): string {
-      return '[' + LogLevel[level] + '] ';
+   public error(message: string, ...data): void {
+      this.log(LogLevel.Error, message, ...data);
    }
 
-   private static log(level: LogLevel, message: string, ...data) {
+   private getPrefix(level: LogLevel): string {
+      return `${this.prefix}[${LogLevel[level]}] `;
+   }
+
+   private log(level: LogLevel, message: string, ...data) {
       if (/*Client.isDebugMode() && */ typeof console !== 'undefined') {
          let logFunction = (level === LogLevel.Warn || level === LogLevel.Error) ? 'warn' : 'log';
 
-         console[logFunction].apply(this, [Log.getPrefix(level) + message, ...data]);
+         console[logFunction].apply(this, [this.getPrefix(level) + message, ...data]);
       }
    }
 }
+
+export default new Logger();

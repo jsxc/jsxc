@@ -1,7 +1,6 @@
 import { EncryptionState } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
 import { EncryptionPlugin } from '../../plugin/EncryptionPlugin'
-import Log from '../../util/Log'
 import Contact from '../../Contact'
 import Message from '../../Message'
 import { DIRECTION } from '../../Message.interface'
@@ -50,7 +49,7 @@ export default class OTRPlugin extends EncryptionPlugin {
 
       pluginAPI.getStorage().registerHook('key', (key) => {
          if (this.key && this.key !== key) {
-            Log.warn('Something went wrong. We have two different DSA keys.');
+            this.pluginAPI.Log.warn('Something went wrong. We have two different DSA keys.');
          }
 
          this.key = key;
@@ -159,7 +158,7 @@ export default class OTRPlugin extends EncryptionPlugin {
             return key;
          });
       } else {
-         Log.debug('DSA key loaded');
+         this.pluginAPI.Log.debug('DSA key loaded');
          this.key = DSA.parsePrivate(storedKey);
 
          return Promise.resolve(this.key);
@@ -175,13 +174,13 @@ export default class OTRPlugin extends EncryptionPlugin {
       }
 
       return new Promise((resolve, reject) => {
-         Log.debug('Start DSA key generation');
+         this.pluginAPI.Log.debug('Start DSA key generation');
 
          DSA.createInWebWorker({
             imports: [salsa20File, bigintFile, cryptoFile, eventemitterFile, constFile, helpersFile, dsaFile],
             path: dsaWebworkerFile
          }, (key) => {
-            Log.debug('DSA key generated');
+            this.pluginAPI.Log.debug('DSA key generated');
 
             resolve(key);
          });

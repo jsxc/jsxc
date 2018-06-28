@@ -1,6 +1,5 @@
 import { AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
-import Log from '../util/Log'
 import Contact from '../Contact'
 import Avatar from '../Avatar'
 import AvatarUI from '../ui/AvatarSet'
@@ -45,7 +44,7 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
             let contact = this.pluginAPI.getContact(from);
 
             if (!contact) {
-               Log.warn('No contact found for', from);
+               this.pluginAPI.Log.warn('No contact found for', from);
                return;
             }
 

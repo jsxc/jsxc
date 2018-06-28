@@ -3,9 +3,7 @@ import { AbstractPlugin } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
 import ChatWindow from '../../ui/ChatWindow'
 import Translation from '../../util/Translation'
-import Log from '../../util/Log'
 import PersistentMap from '../../util/PersistentMap'
-import Utils from '../../util/Utils'
 import JID from '../../JID'
 import { IJID } from '../../JID.interface'
 import * as Namespace from '../../connection/xmpp/namespace'
@@ -75,7 +73,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       let domain = connection.getJID().domain;
 
       if (!domain) {
-         Log.debug('Could not get connected JID for MAM');
+         this.pluginAPI.Log.debug('Could not get connected JID for MAM');
          return;
       }
       let serverJid = new JID('', domain, '') //@REVIEW
@@ -91,14 +89,14 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
          return false;
       }).then((hasSupport) => {
          if (hasSupport) {
-            Log.debug('Server supports ' + Namespace.get('MAM'));
+            this.pluginAPI.Log.debug('Server supports ' + Namespace.get('MAM'));
 
             this.enabled = true;
 
             connection.registerHandler(this.onMamMessage, Namespace.get('MAM'), 'message', null);
          }
       }).catch((err) => {
-         Log.warn('Could not determine MAM server support:', err);
+         this.pluginAPI.Log.warn('Could not determine MAM server support:', err);
       });
    }
 

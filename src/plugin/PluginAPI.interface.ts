@@ -4,8 +4,11 @@ import { IMessage as Message, MessagePayload } from '../Message.interface'
 import { IJID as JID } from '../JID.interface'
 import { Avatar } from '../Avatar.interface'
 import { DiscoInfoRepository } from '../DiscoInfoRepository.interface'
+import { ILog } from '../util/Log.interface'
 
 export interface API {
+
+   Log: ILog
 
    createJID(node: string, domain: string, resource: string): JID
    createJID(bare: string, resource: string): JID

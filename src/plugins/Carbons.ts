@@ -1,7 +1,6 @@
 import * as CONST from '../CONST'
 import { AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
-import Log from '../util/Log'
 import Message from '../Message'
 import * as Namespace from '../connection/xmpp/namespace'
 import Translation from '../util/Translation'
@@ -66,9 +65,9 @@ export default class CarbonsPlugin extends AbstractPlugin {
       });
 
       return this.pluginAPI.sendIQ(iq).then(() => {
-         Log.debug('Carbons enabled');
+         this.pluginAPI.Log.debug('Carbons enabled');
       }).catch((stanza) => {
-         Log.warn('Could not enable carbons');
+         this.pluginAPI.Log.warn('Could not enable carbons');
       });
    }
 
@@ -80,9 +79,9 @@ export default class CarbonsPlugin extends AbstractPlugin {
       });
 
       return this.pluginAPI.sendIQ(iq).then(() => {
-         Log.debug('Carbons disabled');
+         this.pluginAPI.Log.debug('Carbons disabled');
       }).catch((stanza) => {
-         Log.warn('Could not disable carbons');
+         this.pluginAPI.Log.warn('Could not disable carbons');
       });
    }
 

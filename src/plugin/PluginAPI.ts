@@ -9,14 +9,17 @@ import DiscoInfoRepository from '../DiscoInfoRepository'
 import Avatar from '../Avatar'
 import { MessagePayload } from '../Message.interface'
 import { API as IPluginAPI } from './PluginAPI.interface'
+import { Logger } from '../util/Log'
 
 export default class PluginAPI implements IPluginAPI {
    private storage;
 
    private sessionStorage;
 
-   constructor(private name: string, private account: Account) {
+   public Log;
 
+   constructor(private name: string, private account: Account) {
+      this.Log = new Logger(name);
    }
 
    public createJID(node: string, domain: string, resource: string): JID

@@ -2,7 +2,6 @@ import Contact from '../../Contact'
 import Message from '../../Message'
 import { AbstractPlugin } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
-import Log from '../../util/Log'
 import JID from '../../JID'
 import * as Namespace from '../../connection/xmpp/namespace'
 import Attachment from '../../Attachment'
@@ -58,7 +57,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
          attachment.setData(downloadUrl);
          attachment.setProcessed(true);
       }).catch((err) => {
-         Log.debug(err);
+         this.pluginAPI.Log.debug(err);
       }).then(() => {
          return [contact, message];
       });
@@ -111,7 +110,6 @@ export default class HttpUploadPlugin extends AbstractPlugin {
          });
 
          return Promise.all(promises).then((results) => {
-            console.log('Promise all', results)
             return results.filter(service => typeof service !== 'undefined');
          });
       });

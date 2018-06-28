@@ -1,6 +1,5 @@
 import JID from '../../JID'
 import * as Namespace from '../../connection/xmpp/namespace'
-import Log from '../../util/Log'
 import { API as PluginAPI } from '../../plugin/PluginAPI.interface'
 import Attachment from '../../Attachment'
 import { $iq } from '../../vendor/Strophe'
@@ -94,12 +93,12 @@ export default class HttpUploadService {
                return xhr;
             },
             success: function() {
-               Log.debug('file successful uploaded');
+               this.pluginAPI.Log.debug('file successful uploaded');
 
                resolve();
             },
             error: function() {
-               Log.warn('error while uploading file to ' + putUrl);
+               this.pluginAPI.Log.warn('error while uploading file to ' + putUrl);
 
                reject();
             }
