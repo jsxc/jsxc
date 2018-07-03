@@ -3,6 +3,7 @@ import Log from '../../util/Log'
 import UserMedia from '../../UserMedia'
 import { VideoDialog } from '../VideoDialog'
 import Account from '../../Account'
+import Translation from '../../util/Translation'
 import IceServers from '../../IceServers'
 
 export function startCall(contact: Contact, account: Account, type: 'video' | 'audio' | 'screen' = 'video') {
@@ -39,8 +40,8 @@ export function startCall(contact: Contact, account: Account, type: 'video' | 'a
       videoDialog.addSession(session);
 
       //@TODO post $.t('Call_started')
-   }).catch((err) => {
-      Log.warn('err', err)
+   }).catch(([msg, err]) => {
+      contact.addSystemMessage(`${Translation.t('Media_failure')}: ${msg} (${err.name})`);
    });
 
    //@TODO add timeout (buddy maybe offline)

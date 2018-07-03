@@ -71,13 +71,6 @@ export default class UserMedia {
             msg = (err.name) !== err.name ? (err.name) : ('UNKNOWN_ERROR');
       }
 
-      //@TODO post media failure message
-      // jsxc.gui.window.postMessage({
-      //    bid: jsxc.jidToBid(jsxc.webrtc.last_caller),
-      //    direction: jsxc.Message.SYS,
-      //    msg: $.t('Media_failure') + ': ' + msg + ' (' + err.name + ').'
-      // });
-
       Log.debug('media failure: ' + err.name);
 
       return Promise.reject([msg, err]);
