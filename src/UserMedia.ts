@@ -3,13 +3,23 @@ import Log from './util/Log'
 export default class UserMedia {
    public static request(um = ['video', 'audio']) {
       let self = this;
-
-      //@TODO show allow media access, maybe it's enough to show a black overlay
+      let overlayElement = $('<div>');
+      overlayElement.addClass('jsxc-overlay jsxc-overlay-black');
+      overlayElement.appendTo('body');
 
       return UserMedia
          .filterUserMedia(um)
          .then(UserMedia.getUserMedia)
-         .catch(UserMedia.onMediaFailure);
+         .then(um => {
+            overlayElement.remove();
+
+            return um;
+         })
+         .catch(err => {
+            overlayElement.remove();
+
+            return UserMedia.onMediaFailure(err);
+         });
    }
 
    private static filterUserMedia(userMedia: Array<string>) {
