@@ -81,7 +81,7 @@ export default class Emoticons {
 
    private static standardToImage(text: string): string {
       // replace emoticons from XEP-0038 and pidgin with shortnames
-      $.each(EMOTICONS, function(val) {
+      $.each(EMOTICONS, function(i, val) {
          text = text.replace(val[2], ':' + val[1] + ':');
       });
 
