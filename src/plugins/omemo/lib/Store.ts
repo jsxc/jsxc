@@ -1,16 +1,35 @@
-//import Storage from '../../../Storage'
 import { SignalProtocolAddress } from '../vendor/Signal'
 import SignalStore, { IdentityKeyPair, IdentityKey, Identifier, RegistrationId, PreKeyPair, KeyId, Session } from '../vendor/SignalStore.interface'
 import { SignalBundleObject } from './ObjectTypes'
 import Bundle from './Bundle'
 import ArrayBufferUtils from '../util/ArrayBuffer'
 import { NS_BASE, NS_BUNDLES } from '../util/Const'
+import Device from './Device'
 
 const PREFIX = 'store';
 const PREFIX_SESSION = 'session:';
 const PREFIX_IDENTITYKEY = 'identityKey:';
 const PREFIX_PREKEY = '25519KeypreKey:';
 const PREFIX_SIGNEDPREKEY = '25519KeysignedKey:';
+const PREFIX_TRUST = 'trust:';
+
+//@TODO separate signal store and own store. Wrap keys and stuff into objects.
+
+//@TODO rename
+class IdentityKeyClass {
+   constructor(private pubKey: ArrayBuffer, private privKey?: ArrayBuffer) {
+
+   }
+
+   public getFingerprint(): string {
+      // remove version byte
+      return this.pubKey ? ArrayBufferUtils.toPrettyHex(this.pubKey.slice(1)) : '';
+   }
+
+   public getPublic(): ArrayBuffer {
+      return this.pubKey;
+   }
+}
 
 export default class Store implements SignalStore {
    public Direction = {
@@ -22,14 +41,6 @@ export default class Store implements SignalStore {
 
    }
 
-   public getOwnDeviceList(): number[] {
-      return this.get('deviceList', []);
-   }
-
-   public setOwnDeviceList(deviceList: number[]) {
-      this.put('deviceList', deviceList);
-   }
-
    public getDeviceList(identifier) {
       return this.get('deviceList:' + identifier, []);
    }
@@ -39,7 +50,7 @@ export default class Store implements SignalStore {
    }
 
    public isReady(): boolean {
-      return this.get('deviceId') && this.get('identityKey') && this.get('registrationId');
+      return this.get('deviceId') && this.get('deviceName') && this.get('identityKey') && this.get('registrationId');
    }
 
    public isPublished(): boolean {
@@ -48,6 +59,79 @@ export default class Store implements SignalStore {
 
    public getDeviceId(): number {
       return parseInt(this.get('deviceId'));
+   }
+
+   public getDeviceName(): string {
+      return this.get('deviceName');
+   }
+
+   public getDeviceAddress() {
+      return new SignalProtocolAddress(this.getDeviceName(), this.getDeviceId());
+   }
+
+   public getLocalIdentityKey(): IdentityKey {
+      let identityKey = this.get('identityKey');
+
+      return identityKey ? identityKey.pubKey : undefined;
+   }
+
+   public getTrust(identifier: Identifier) {
+      if (identifier === this.getDeviceAddress().toString()) {
+         return Device.Trust.confirmed;
+      }
+
+      let trustMatrix = this.getTrustMatrix(identifier);
+      let fingerprint = this.getFingerprint(identifier);
+
+      if (fingerprint && trustMatrix[Device.Trust.confirmed].indexOf(fingerprint) >= 0) {
+         return Device.Trust.confirmed;
+      }
+
+      if (fingerprint && trustMatrix[Device.Trust.recognized].indexOf(fingerprint) >= 0) {
+         return Device.Trust.recognized;
+      }
+
+      return Device.Trust.unknown;
+   }
+
+   public setTrust(identifier: Identifier, trust) {
+      let address = new SignalProtocolAddress.fromString(identifier);
+      let trustMatrix = this.getTrustMatrix(identifier);
+      let fingerprint = this.getFingerprint(identifier);
+
+      for (let trustLevel in trustMatrix) {
+         trustMatrix[trustLevel] = trustMatrix[trustLevel].filter(fp => fp !== fingerprint);
+      }
+
+      trustMatrix[trust].push(fingerprint);
+
+      this.put(PREFIX_TRUST + address.getName(), trustMatrix);
+
+      return fingerprint;
+   }
+
+   private getTrustMatrix(identifier: Identifier) {
+      let address = new SignalProtocolAddress.fromString(identifier);
+      let trustMatrix = this.get(PREFIX_TRUST + address.getName()) || {
+         [Device.Trust.confirmed]: [],
+         [Device.Trust.recognized]: [],
+      };
+
+      return trustMatrix;
+   }
+
+   public getFingerprint(identifier: Identifier): string {
+      let identityKey = new IdentityKeyClass(this.get(PREFIX_IDENTITYKEY + identifier));
+
+      return identityKey.getFingerprint();
+   }
+
+   public async loadFingerprint(identifier: Identifier): Promise<string> {
+      let identityKey = new IdentityKeyClass(await this.loadIdentityKey(identifier));
+
+      this.saveIdentity(identifier, identityKey.getPublic());
+
+      return identityKey.getFingerprint();
    }
 
    /**
@@ -68,7 +152,7 @@ export default class Store implements SignalStore {
 
       let stringified = JSON.stringify(value, function(key, value) {
          if (value instanceof ArrayBuffer) {
-            return ArrayBufferUtils.toArray(value)
+            return 'stringifiedArrayBuffer|' + JSON.stringify(ArrayBufferUtils.toArray(value));
          }
 
          return value;
@@ -86,8 +170,10 @@ export default class Store implements SignalStore {
 
       if (data) {
          return JSON.parse(data.v, function(key, value) {
-            if (/Key$/.test(key)) {
-               return ArrayBufferUtils.fromArray(value);
+            if (/^stringifiedArrayBuffer\|/.test(value)) {
+               let cleaned = value.replace(/^stringifiedArrayBuffer\|/, '');
+
+               return ArrayBufferUtils.fromArray(JSON.parse(cleaned));
             }
 
             return value;
@@ -105,9 +191,8 @@ export default class Store implements SignalStore {
       this.storage.removeItem(PREFIX, key);
    }
 
-   // identifier is only name and not name.deviceId
-   public isTrustedIdentity(identifier, identityKey: IdentityKey): Promise<boolean> {
-      if (typeof identifier === 'undefined' || identifier === null) {
+   public isTrustedIdentity(identifierName, identityKey: IdentityKey): Promise<boolean> {
+      if (typeof identifierName === 'undefined' || identifierName === null) {
          throw new Error('Undefined or null is no valid identifier');
       }
 
@@ -115,29 +200,47 @@ export default class Store implements SignalStore {
          throw new Error('Expected identityKey to be an ArrayBuffer');
       }
 
-      let trusted = this.get(PREFIX_IDENTITYKEY + identifier);
-      if (typeof trusted === 'undefined') {
+      let fingerprint = new IdentityKeyClass(identityKey).getFingerprint();
+      let trustMatrix = this.getTrustMatrix(identifierName);
+
+      if (trustMatrix[Device.Trust.confirmed].indexOf(fingerprint) > -1 ||
+         trustMatrix[Device.Trust.recognized].indexOf(fingerprint) > -1) {
          return Promise.resolve(true);
       }
 
-      return Promise.resolve(true); //@TODO
-      // return Promise.resolve(ArrayBufferUtils.isEqual(identityKey, trusted));
+      return Promise.resolve(false);
    }
 
-   public loadIdentityKey(identifier: Identifier): Promise<IdentityKey> {
+   public async loadIdentityKey(identifier: Identifier): Promise<IdentityKey> {
       if (identifier === null || identifier === undefined)
          throw new Error('Tried to get identity key for undefined/null key');
 
       let address = new SignalProtocolAddress.fromString(identifier);
+      let identityKey = this.get(PREFIX_IDENTITYKEY + address.toString());
 
-      return Promise.resolve(this.get(PREFIX_IDENTITYKEY + address.toString()));
+      if (identityKey) {
+         return identityKey;
+      }
+
+      let bundle = await this.getPreKeyBundle(address);
+
+      return bundle.identityKey;
    }
 
    public saveIdentity(identifier: Identifier, identityKey: IdentityKey): Promise<boolean> {
-      if (identifier === null || identifier === undefined)
+      if (identifier === null || identifier === undefined) {
          throw new Error('Tried to put identity key for undefined/null key');
+      }
 
       let address = new SignalProtocolAddress.fromString(identifier);
+
+      if (typeof identityKey === 'string') {
+         identityKey = ArrayBufferUtils.fromString(identityKey);
+      }
+
+      if (identityKey.byteLength !== 33) {
+         console.warn(`Identity key is ${identityKey.byteLength} byte long.`);
+      }
 
       let existing = this.get(PREFIX_IDENTITYKEY + address.toString());
       this.put(PREFIX_IDENTITYKEY + address.toString(), identityKey);
@@ -233,6 +336,6 @@ export default class Store implements SignalStore {
       let bundle = Bundle.fromXML(bundleElement.get());
 
       //@REVIEW registrationId??? Gajim uses probably own registration id.
-      return bundle.toSignalBundle(address.getDeviceId())
+      return bundle.toSignalBundle(address.getDeviceId());
    }
 }

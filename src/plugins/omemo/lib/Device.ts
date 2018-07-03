@@ -1,7 +1,6 @@
 import { IJID } from '../../../JID.interface'
 import { SignalProtocolAddress, SessionBuilder, SessionCipher } from '../vendor/Signal'
 import Store from './Store'
-import ArrayBuffer from '../util/ArrayBuffer'
 
 interface EncryptedDeviceMessage {
    preKey: boolean
@@ -9,12 +8,16 @@ interface EncryptedDeviceMessage {
    deviceId: number
 }
 
+enum Trust { unknown, recognized, confirmed };
+
 export default class Device {
    private session;
 
    private address;
 
-   constructor(jid: IJID, id: number, private store: Store) {
+   public static Trust = Trust;
+
+   constructor(jid: IJID, private id: number, private store: Store) {
       this.address = new SignalProtocolAddress(jid.bare, id);
    }
 
@@ -50,6 +53,36 @@ export default class Device {
 
          return null; // Otherwise Promise.all throws an error
       }
+   }
+
+   public isCurrentDevice(): boolean {
+      let currentDeviceAddress = this.store.getDeviceAddress();
+
+      return currentDeviceAddress.toString() === this.address.toString();
+   }
+
+   public getTrust(): Trust {
+      return this.store.getTrust(this.address.toString());
+   }
+
+   public setTrust(trust: Trust) {
+      this.store.setTrust(this.address.toString(), trust);
+   }
+
+   public getFingerprint(): string {
+      return this.store.getFingerprint(this.address.toString());
+   }
+
+   public loadFingerprint(): Promise<string> {
+      return this.store.loadFingerprint(this.address.toString());
+   }
+
+   public getId(): number {
+      return this.id;
+   }
+
+   public getUid(): string {
+      return this.address.toString();
    }
 
    private processPreKeyMessage = (preKeyBundle) => {

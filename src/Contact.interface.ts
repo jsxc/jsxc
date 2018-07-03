@@ -26,6 +26,8 @@ export interface IContact {
 
    getChatWindow(): ChatWindow;
 
+   addSystemMessage(messageString: string): IMessage;
+
    setResource(resource: string);
 
    setPresence(resource: string, presence: Presence);

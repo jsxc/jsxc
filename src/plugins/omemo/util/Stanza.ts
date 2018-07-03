@@ -1,4 +1,5 @@
 import ArrayBufferUtils from './ArrayBuffer'
+import { $build } from '../../../vendor/Strophe'
 
 export default class Stanza {
    public static buildEncryptedStanza(message, ownDeviceId: number) {

@@ -175,14 +175,8 @@ export default class ChatWindow {
       this.element.find('.jsxc-window-bar .jsxc-subcaption').text(text);
    }
 
-   public addSystemMessage(messageString: string) {
-      let message = new Message({
-         peer: this.contact.getJid(),
-         direction: Message.DIRECTION.SYS,
-         plaintextMessage: messageString
-      });
-
-      this.getTranscript().pushMessage(message);
+   public addSystemMessage(messageString: string): IMessage {
+      return this.contact.addSystemMessage(messageString);
    }
 
    public postMessage(message: IMessage): ChatWindowMessage {
@@ -453,6 +447,8 @@ export default class ChatWindow {
          this.getTranscript().pushMessage(message);
 
          this.getAccount().getConnection().sendMessage(message);
+      }).catch(err => {
+         Log.warn('Error during preSendMessage pipe', err);
       });
 
       if (messageString === '?' && Client.getOption('theAnswerToAnything') !== false) {
@@ -634,7 +630,12 @@ export default class ChatWindow {
          let li = $('<li>');
          li.text((<any>plugin.constructor).getName().toUpperCase());
          li.click(() => {
-            plugin.toggleTransfer(this.contact);
+            //@TODO show spinner
+            try {
+               plugin.toggleTransfer(this.contact);
+            } catch (err) {
+               this.addSystemMessage(err.toString());
+            }
          });
          transferElement.find('.jsxc-menu .jsxc-inner>ul').append(li);
       }

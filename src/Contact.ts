@@ -11,6 +11,7 @@ import Transcript from './Transcript'
 import ChatWindow from './ui/ChatWindow'
 import Avatar from './Avatar'
 import Pipe from './util/Pipe'
+import Message from './Message'
 
 export default class Contact implements IIdentifiable, IContact {
    protected storage: Storage;
@@ -86,6 +87,18 @@ export default class Contact implements IIdentifiable, IContact {
       }
 
       return this.chatWindow;
+   }
+
+   public addSystemMessage(messageString: string): Message {
+      let message = new Message({
+         peer: this.getJid(),
+         direction: Message.DIRECTION.SYS,
+         plaintextMessage: messageString
+      });
+
+      this.getTranscript().pushMessage(message);
+
+      return message;
    }
 
    public setResource = (resource: string) => {

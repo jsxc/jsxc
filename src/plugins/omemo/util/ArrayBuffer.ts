@@ -1,6 +1,7 @@
 import ByteBuffer = require('bytebuffer')
 
 let ArrayBufferUtils = {
+   //@REVIEW do we really need all those functions?
    concat: (a: ArrayBuffer, b: ArrayBuffer) => ByteBuffer.concat([a, b]).toArrayBuffer(),
 
    decode: (a: ArrayBuffer): string => ByteBuffer.wrap(a).toUTF8(),
@@ -19,8 +20,20 @@ let ArrayBufferUtils = {
       return ByteBuffer.wrap(thing).toString('binary');
    },
 
+   fromString: (thing: string): ArrayBuffer => {
+      return ByteBuffer.wrap(thing, 'binary').toArrayBuffer();
+   },
+
    toHex: (thing: ArrayBuffer | string): string => {
+      if (typeof thing === 'undefined') {
+         return '';
+      }
+
       return ByteBuffer.wrap(thing).toString('hex');
+   },
+
+   toPrettyHex: (thing: ArrayBuffer | string): string => {
+      return ArrayBufferUtils.toHex(thing).replace(/(.{8})/g, '$1 ').replace(/ $/, '');
    },
 
    isEqual: function(a: ArrayBuffer | string, b: ArrayBuffer | string) {

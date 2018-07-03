@@ -77,7 +77,7 @@ export default class Bundle {
    }
 
    public static fromXML(xmlElement): Bundle {
-      let targetSelector = 'bundle[xmlns="eu.siacs.conversations.axolotl"]';
+      let targetSelector = 'bundle[xmlns="eu.siacs.conversations.axolotl"]'; //@TODO use constant
       let xmlBundle = $(xmlElement).is(targetSelector) ? $(xmlElement) : $(xmlElement).find(targetSelector);
 
       if (xmlBundle.length !== 1) {

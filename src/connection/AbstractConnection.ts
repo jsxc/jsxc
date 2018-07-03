@@ -176,6 +176,8 @@ abstract class AbstractConnection {
          }
 
          this.send(xmlMsg);
+      }).catch(err => {
+         Log.warn('Error during preSendMessageStanza pipe:', err);
       });
    }
 

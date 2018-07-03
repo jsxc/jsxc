@@ -6,6 +6,7 @@ import { IConnection } from '../../../connection/Connection.interface'
 import Bundle from './Bundle'
 import { NS_BASE, NS_DEVICELIST, NS_BUNDLES, NUM_PRE_KEYS } from '../util/Const'
 import { SignedPreKeyObject, KeyPairObject, PreKeyObject } from './ObjectTypes'
+import ArrayBufferUtils from '../util/ArrayBuffer'
 import { $build } from '../../../vendor/Strophe'
 
 export default class Bootstrap {
@@ -33,7 +34,7 @@ export default class Bootstrap {
 
    public addDeviceIdToDeviceList(): Promise<Element> {
       let jid = this.connection.getJID();
-      let deviceIds = this.store.getOwnDeviceList();
+      let deviceIds = this.store.getDeviceList(jid.bare); //@REVIEW jid.bare
       let ownDeviceId = this.store.getDeviceId();
 
       if (deviceIds.indexOf(ownDeviceId) < 0) {
@@ -55,7 +56,9 @@ export default class Bootstrap {
          KeyHelper.generateIdentityKeyPair(),
          KeyHelper.generateRegistrationId(),
       ]).then(([deviceId, identityKey, registrationId]) => {
+         //@TODO add store setter or initOwnDevice function
          this.store.put('deviceId', deviceId);
+         this.store.put('deviceName', this.connection.getJID().bare);
          this.store.put('identityKey', identityKey);
          this.store.put('registrationId', registrationId);
       });

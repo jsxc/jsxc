@@ -10,6 +10,8 @@ import Stanza from '../util/Stanza'
 import { NS_BASE } from '../util/Const'
 import ArrayBufferUtils from '../util/ArrayBuffer'
 import * as AES from '../util/AES'
+import Device from './Device'
+import { Strophe } from '../../../vendor/Strophe'
 
 export default class Omemo {
    private store: Store;
@@ -21,26 +23,45 @@ export default class Omemo {
    constructor(private storage, private connection: IConnection) {
       this.store = new Store(storage, connection.getPEPService());
 
-      Peer.setOwnJid(connection.getJID());
-   }
-
-   public storeOwnDeviceList(deviceList: number[]) {
-      let ownDeviceId = this.store.getDeviceId();
-
-      if (this.store.isPublished() && typeof ownDeviceId === 'number'
-         && !isNaN(ownDeviceId) && deviceList.indexOf(ownDeviceId) < 0) {
-         this.getBootstrap().addDeviceIdToDeviceList();
-      }
-
-      this.store.setOwnDeviceList(deviceList);
+      Peer.initOwnPeer(connection.getJID(), this.store);
    }
 
    public storeDeviceList(identifier: string, deviceList: number[]) {
+      let ownJid = this.connection.getJID();
+
+      if (ownJid.bare === identifier) {
+         let ownDeviceId = this.store.getDeviceId();
+
+         if ((this.store.isPublished() && typeof ownDeviceId === 'number'
+            && !isNaN(ownDeviceId) && deviceList.indexOf(ownDeviceId) < 0)) {
+            this.getBootstrap().addDeviceIdToDeviceList();
+         }
+      }
+
       this.store.setDeviceList(identifier, deviceList);
    }
 
    public prepare(): Promise<void> {
       return this.getBootstrap().prepare();
+   }
+
+   public isTrusted(contact: Contact) {
+      let peer = this.getPeer(contact.getJid());
+      let ownPeer = Peer.getOwn(); //@REVIEW function name
+
+      return peer.getTrust() && ownPeer.getTrust();
+   }
+
+   public getDevices(contact?: Contact): Array<Device> {
+      let peer;
+
+      if (contact) {
+         peer = this.getPeer(contact.getJid());
+      } else {
+         peer = Peer.getOwn();
+      }
+
+      return peer.getDevices();
    }
 
    public encrypt(contact: Contact, message: Message, xmlElement: Strophe.Builder) {
@@ -63,11 +84,12 @@ export default class Omemo {
 
          return [message, xmlElement];
       }).catch((msg) => {
-         //@TODO abort and don't send message. This should be handled inside the pipe.
-         message.setErrorMessage(msg);
+         message.setErrorMessage('Message was not send');
          message.setEncrypted(false);
 
-         return [message, xmlElement];
+         contact.addSystemMessage(msg);
+
+         throw msg;
       });
    }
 

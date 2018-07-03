@@ -404,16 +404,24 @@ $defaultWindowWidth: 250px;
    clear: both;
 
    &.jsxc-error {
-      opacity: 0.7;
+      .jsxc-content {
+         opacity: 0.7;
+      }
 
       &:before {
-         content: " ";
+         content: "⚠";
          position: absolute;
-         top: 3px;
-         right: 3px;
-         width: 8px;
-         height: 8px;
+         top: -2px;
+         right: -2px;
          background-color: yellow;
+         box-shadow: 0 0 2px black;
+         font-size: 1em;
+         width: 1.2em;
+         height: 1.2em;
+         text-align: center;
+         line-height: 1em;
+         border-radius: 50%;
+         color: red;
       }
    }
 

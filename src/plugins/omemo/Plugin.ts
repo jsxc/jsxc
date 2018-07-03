@@ -1,10 +1,12 @@
 import { API as PluginAPI } from '../../plugin/PluginAPI.interface'
 import { EncryptionPlugin } from '../../plugin/EncryptionPlugin'
 import { EncryptionState } from '../../plugin/AbstractPlugin'
-import { DIRECTION, IMessage } from '../../Message.interface'
+import { IMessage } from '../../Message.interface'
 import { IContact } from '../../Contact.interface'
 import Omemo from './lib/Omemo'
+import ChatWindow from '../../ui/ChatWindow'
 import { NS_BASE, NS_DEVICELIST } from './util/Const'
+import OmemoDevicesDialog from '../../ui/dialogs/omemoDevices'
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -14,7 +16,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
    private omemo: Omemo;
 
    public static getName(): string {
-      return 'omemo';
+      return 'OMEMO';
    }
 
    constructor(pluginAPI: PluginAPI) {
@@ -29,6 +31,19 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor);
 
       pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor);
+
+      //@TODO add to plugin API
+      ChatWindow.HookRepository.registerHook('initialized', (chatWindow: ChatWindow) => {
+         chatWindow.addMenuEntry('omemo-devices', 'OMEMO devices', () => this.openDeviceDialog(chatWindow));
+      });
+   }
+
+   private openDeviceDialog = (chatWindow) => {
+      let peerContact = chatWindow.getContact();
+      let peerDevices = this.getOmemo().getDevices(peerContact);
+      let ownDevices = this.getOmemo().getDevices();
+
+      OmemoDevicesDialog(peerDevices, ownDevices);
    }
 
    public toggleTransfer(contact: IContact): Promise<void> {
@@ -39,6 +54,10 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       if (contact.getEncryptionPluginName() === OMEMOPlugin.getName()) {
          contact.setEncryptionState(EncryptionState.Plaintext, OMEMOPlugin.getName());
          return;
+      }
+
+      if (!this.getOmemo().isTrusted(contact)) {
+         throw 'There are new OMEMO devices';
       }
 
       //@TODO check if contact supports omemo
@@ -69,18 +88,16 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
       deviceIds = deviceIds.filter(id => typeof id === 'number' && !isNaN(id));
 
-      let ownJid = this.pluginAPI.getConnection().getJID();
-
-      if (ownJid.bare === fromJid.bare) {
-         this.getOmemo().storeOwnDeviceList(deviceIds);
-      } else {
-         this.getOmemo().storeDeviceList(fromJid.bare, deviceIds);
-      }
+      this.getOmemo().storeDeviceList(fromJid.bare, deviceIds);
 
       return true;
    }
 
    private afterReceiveMessageProcessor = (contact: IContact, message: IMessage, stanza: Element): Promise<{}> => {
+      if ($(stanza).find(`>encrypted[xmlns="${NS_BASE}"]`).length === 0) {
+         return Promise.resolve([contact, message, stanza]);
+      }
+
       return this.getOmemo().decrypt(stanza).then((decrypted) => {
          if (!decrypted) {
             throw 'No decrypted message found';
@@ -92,7 +109,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return [contact, message, stanza];
 
       }).catch((msg) => {
-         console.warn('OMEMO: ', msg);
+         this.pluginAPI.Log.warn(msg);
 
          return [contact, message, stanza];
       });

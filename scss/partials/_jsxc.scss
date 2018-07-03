@@ -43,6 +43,10 @@
     border: 2px solid $invalid_border !important;
 }
 
+.jsxc-fingerprint {
+    font-family: monospace;
+}
+
 .jsxc-waiting:before {
     border-radius: 50%;
     content:'';
@@ -421,4 +425,36 @@ body.jsxc-fullscreen.jsxc-two-columns {
          }
       }
    }
+}
+
+
+.jsxc-omemo-device {
+    box-shadow: 0 0 2px #a1a1a1;
+    padding: 10px;
+    margin-bottom: 15px;
+
+    &-id {
+        font-size: 0.7em;
+        opacity: 0.7;
+    }
+
+    &-trust {
+        display: inline;
+
+        &[data-trust="unknown"] {
+            color: red;
+        }
+
+        &[data-trust="recognized"] {
+            color: orange;
+        }
+
+        &[data-trust="confirmed"] {
+            color: green;
+        }
+    }
+
+    &-action {
+        float: right;
+    }
 }
