@@ -21,14 +21,13 @@
     width: auto;
     border: 1px solid #d8d8d8;
 
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
-
     ul {
         list-style: none;
+    }
+
+    ul, li {
+        margin: 0;
+        padding: 0;
     }
 
     p {

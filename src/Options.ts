@@ -30,7 +30,7 @@ export default class Options {
 
       Log.debug(`I don't know any "${key}" option.`);
 
-      return {};
+      return undefined;
    };
 
    public set(key, value, account?) {

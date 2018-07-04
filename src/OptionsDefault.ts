@@ -1,3 +1,5 @@
+import loginDialog from './ui/dialogs/loginBox'
+
 /** name of container application (e.g. owncloud or SOGo) */
 export let app_name = 'web applications';
 
@@ -164,5 +166,4 @@ export let disabledPlugins: Array<string> = [];
 
 export let connectionCallback: (jid: string, status: number, condition?: string) => void = null;
 
-//@TODO show login dialog
-export let onUserRequestsToGoOnline: () => void = null;
+export let onUserRequestsToGoOnline: () => void = loginDialog;

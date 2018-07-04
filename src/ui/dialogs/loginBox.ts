@@ -1,62 +1,59 @@
 import Dialog from '../Dialog'
+import Client from '../../Client'
+import { start } from '../../index'
+let loginTemplate = require('../../../template/loginBox.hbs');
 
-export default function(subject: string, message: string, from?: string) {
-   // let content = Templates.get('loginBox', {
-   //    username: null
-   // });
-   //
-   // let dialog = new Dialog(content);
-   // let dom = dialog.open();
-   //
-   // $(document).one('complete.dialog.jsxc', function() {
-   //    setTimeout(setFocus, 50);
-   // });
-   //
-   // dom.find('form').submit(function(ev) {
-   //    ev.preventDefault();
-   //
-   //    submitLoginForm($(this));
-   // });
+export default function(username?: string) {
+   let boshUrl = Client.getOption('xmppBoshUrl');
+
+   let content = loginTemplate({
+      showBoshUrlField: typeof boshUrl !== 'string' || boshUrl.length === 0,
+      username
+   });
+
+   let dialog = new Dialog(content);
+   let dom = dialog.open();
+
+   setTimeout(setFocus, 50);
+
+   dom.find('form').submit(function(ev) {
+      ev.preventDefault();
+
+      submitLoginForm($(this)).then(() => {
+         dialog.close();
+      }).catch((err) => {
+         onAuthFail(dom);
+      });
+   });
 }
 
-// function setFocus(){
-//          if ($("#jsxc_username").val().length === 0) {
-//             $("#jsxc_username").focus();
-//          } else {
-//             $('#jsxc_password').focus();
-//          }
-// }
-//
-// function submitLoginForm(form) {
-//    // @TODO generalize
-//    form.find('button[data-jsxc-loading-text]').trigger('btnloading.jsxc');
-//
-//    jsxc.options.loginForm.form = form;
-//    jsxc.options.loginForm.jid = form.find('#jsxc_username');
-//    jsxc.options.loginForm.pass = form.find('#jsxc_password');
-//
-//    jsxc.triggeredFromBox = true;
-//    jsxc.options.loginForm.triggered = false;
-//
-//    jsxc.prepareLogin(function(settings) {
-//       if (settings === false) {
-//          onAuthFail();
-//       } else {
-//          $(document).on('authfail.jsxc', onAuthFail);
-//
-//          jsxc.xmpp.login();
-//       }
-//    });
-// }
-//
-// function onAuthFail() {
-//    alert.show();
-//    jsxc.gui.dialog.resize();
-//
-//    $('#jsxc_dialog').find('button').trigger('btnfinished.jsxc');
-//
-//    $('#jsxc_dialog').find('input').one('keypress', function() {
-//       alert.hide();
-//       jsxc.gui.dialog.resize();
-//    });
-// }
+function setFocus() {
+   if ($("#jsxc-url").length && !$("#jsxc-url").val()) {
+      $("#jsxc-url").focus();
+   } else if (!$("#jsxc-username").val()) {
+      $("#jsxc-username").focus();
+   } else {
+      $('#jsxc-password').focus();
+   }
+}
+
+function submitLoginForm(form) {
+   form.find('button[data-jsxc-loading-text]').trigger('btnloading.jsxc');
+
+   let boshUrl = Client.getOption('xmppBoshUrl') || form.find('#jsxc-url').val();
+   let username = form.find('#jsxc-username').val();
+   let password = form.find('#jsxc-password').val();
+
+   return start(boshUrl, username, password);
+}
+
+function onAuthFail(dom) {
+   let alert = dom.find('.jsxc-alert');
+   alert.show();
+
+   dom.find('button').trigger('btnfinished.jsxc');
+
+   dom.find('input').one('keypress', function() {
+      alert.hide();
+   });
+}
