@@ -33,10 +33,11 @@ export default class Dialog {
    }
 
    public open() {
-      //@TODO append only once
-      $('body').append(this.src);
+      if (this.getDom().length === 0) {
+         $('body').append(this.src);
 
-      this.onOpened();
+         this.onOpened();
+      }
 
       return this.getDom();
    }

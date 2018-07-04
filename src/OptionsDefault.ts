@@ -167,3 +167,5 @@ export let disabledPlugins: Array<string> = [];
 export let connectionCallback: (jid: string, status: number, condition?: string) => void = null;
 
 export let onUserRequestsToGoOnline: () => void = loginDialog;
+
+export let xmppBoshUrl: string = undefined;
