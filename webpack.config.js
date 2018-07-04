@@ -5,6 +5,8 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
+const JS_BUNDLE_NAME = 'jsxc.bundle.js';
+
 const extractSass = new ExtractTextPlugin({
    filename: 'styles/jsxc.bundle.css',
    allChunks: true,
@@ -13,6 +15,7 @@ const extractSass = new ExtractTextPlugin({
 const definePlugin = new webpack.DefinePlugin({
    __VERSION__: JSON.stringify(require("./package.json").version),
    __BUILD_DATE__: JSON.stringify((new Date()).toDateString()),
+   __BUNDLE_NAME__: JS_BUNDLE_NAME,
 });
 
 const fileLoader = {
@@ -26,7 +29,7 @@ const fileLoader = {
 module.exports = {
    entry: ['./scss/main.scss', './src/index.ts'],
    output: {
-      filename: 'jsxc.bundle.js',
+      filename: JS_BUNDLE_NAME,
       path: path.resolve(__dirname, './dist/'),
       publicPath: 'dist/',
       libraryTarget: 'var',
