@@ -75,7 +75,7 @@ jsxc = {
       REGEX: {
          JID: new RegExp('\\b[^"&\'\\/:<>@\\s]+@[\\w-_.]+\\b', 'ig'),
          URL: new RegExp(/(https?:\/\/|www\.)[^\s<>'"]+/gi),
-         GEOURI: new RegExp(/geo:(\d+\.\d+),(\d+\.\d+)(,\d+\.\d+)?(;u=(\d+(\.\d+)?))?/),
+         GEOURI: new RegExp(/geo:(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)(?:,-?\d+(?:\.\d+)?)?(?:;crs=[\w-]+)?(?:;u=(\d+(?:\.\d+)?))?(?:;[\w-]+=(?:[\w-_.!~*'()]|%[\da-f][\da-f])+)*/)
       },
       NS: {
          CARBONS: 'urn:xmpp:carbons:2',

@@ -1421,7 +1421,7 @@ jsxc.gui = {
          var matches = $(this).attr('href').match(jsxc.CONST.REGEX.GEOURI);
          var latitude = matches[1];
          var longitude = matches[2];
-         var accuracy = matches[5];
+         var accuracy = matches[3];
          var osmUrl = 'https://www.openstreetmap.org/?mlat=' + latitude + '&mlon=' + longitude + '#map=16/' + latitude + '/' + longitude;
          var label = 'OSM: ' + ddToDms(latitude, longitude);
 
