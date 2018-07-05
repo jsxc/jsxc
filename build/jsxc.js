@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.4.0 - 2018-05-23
+ * jsxc v3.4.1 - 2018-07-05
  * 
  * Copyright (c) 2018 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see https://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.4.0
+ * @version 3.4.1
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.4.0',
+   version: '3.4.1',
 
    /** True if i'm the master */
    master: false,
@@ -95,7 +95,7 @@ jsxc = {
       REGEX: {
          JID: new RegExp('\\b[^"&\'\\/:<>@\\s]+@[\\w-_.]+\\b', 'ig'),
          URL: new RegExp(/(https?:\/\/|www\.)[^\s<>'"]+/gi),
-         GEOURI: new RegExp(/geo:(\d+\.\d+),(\d+\.\d+)(,\d+\.\d+)?(;u=(\d+(\.\d+)?))?/),
+         GEOURI: new RegExp(/geo:(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)(?:,-?\d+(?:\.\d+)?)?(?:;crs=[\w-]+)?(?:;u=(\d+(?:\.\d+)?))?(?:;[\w-]+=(?:[\w-_.!~*'()]|%[\da-f][\da-f])+)*/)
       },
       NS: {
          CARBONS: 'urn:xmpp:carbons:2',
@@ -2167,71 +2167,10 @@ jsxc.xmpp = {
          }));
       }
 
-      var attachment;
-      if (htmlBody.length === 1) {
-         var httpUploadElement = htmlBody.find('a[data-type][data-name][data-size]');
+      var attachment = jsxc.xmpp.getAttachmentFromHtmlBody(htmlBody);
 
-         if (httpUploadElement.length === 1) {
-            // deprecated syntax @since 3.2.1
-            attachment = {
-               type: httpUploadElement.attr('data-type'),
-               name: httpUploadElement.attr('data-name'),
-               size: httpUploadElement.attr('data-size'),
-            };
-
-            if (httpUploadElement.attr('data-thumbnail') && httpUploadElement.attr('data-thumbnail').match(/^\s*data:[a-z]+\/[a-z0-9-+.*]+;base64,[a-z0-9=+/]+$/i)) {
-               attachment.thumbnail = httpUploadElement.attr('data-thumbnail');
-            }
-
-            if (httpUploadElement.attr('href') && httpUploadElement.attr('href').match(/^https:\/\//)) {
-               attachment.data = httpUploadElement.attr('href');
-               body = null;
-            }
-
-            if (!attachment.type.match(/^[a-z]+\/[a-z0-9-+.*]+$/i) || !attachment.name.match(/^[\s\w.,-]+$/i) || !attachment.size.match(/^\d+$/i)) {
-               attachment = undefined;
-
-               jsxc.warn('Invalid file type, name or size.');
-            }
-         } else if (htmlBody.find('>a').length === 1) {
-            var linkElement = htmlBody.find('>a');
-            var metaString = '';
-            var thumbnail;
-
-            if (linkElement.find('>img').length === 1) {
-               var imgElement = linkElement.find('>img');
-               var src = imgElement.attr('src') || '';
-               var altString = imgElement.attr('alt') || '';
-               metaString = altString.replace(/^Preview:/, '');
-
-               if (src.match(/^\s*data:[a-z]+\/[a-z0-9-+.*]+;base64,[a-z0-9=+/]+$/i)) {
-                  thumbnail = src;
-               }
-            } else {
-               metaString = linkElement.text();
-            }
-
-            var metaMatch = metaString.match(/^([a-z]+\/[a-z0-9-+.*]+)\|(\d+)\|([\s\w.,-]+)/);
-
-            if (metaMatch) {
-               attachment = {
-                  type: metaMatch[1],
-                  size: metaMatch[2],
-                  name: metaMatch[3],
-               };
-
-               if (thumbnail) {
-                  attachment.thumbnail = thumbnail;
-               }
-
-               if (linkElement.attr('href') && linkElement.attr('href').match(/^https?:\/\//)) {
-                  attachment.data = linkElement.attr('href');
-                  body = null;
-               }
-            } else {
-               jsxc.warn('Invalid file type, name or size.');
-            }
-         }
+      if (attachment) {
+         body = null;
       }
 
       if (jsxc.otr.objects.hasOwnProperty(bid) && body) {
@@ -2374,6 +2313,77 @@ jsxc.xmpp = {
     */
    onRidChange: function(rid) {
       jsxc.storage.setItem('rid', rid);
+   },
+
+   getAttachmentFromHtmlBody: function(htmlBody) {
+      if (htmlBody.length !== 1) {
+         return;
+      }
+
+      var attachment;
+      var httpUploadElement = htmlBody.find('a[data-type][data-name][data-size]');
+
+      if (httpUploadElement.length === 1) {
+         // deprecated syntax @since 3.2.1
+         attachment = {
+            type: httpUploadElement.attr('data-type'),
+            name: httpUploadElement.attr('data-name'),
+            size: httpUploadElement.attr('data-size'),
+         };
+
+         if (httpUploadElement.attr('data-thumbnail') && httpUploadElement.attr('data-thumbnail').match(/^\s*data:[a-z]+\/[a-z0-9-+.*]+;base64,[a-z0-9=+/]+$/i)) {
+            attachment.thumbnail = httpUploadElement.attr('data-thumbnail');
+         }
+
+         if (httpUploadElement.attr('href') && httpUploadElement.attr('href').match(/^https:\/\//)) {
+            attachment.data = httpUploadElement.attr('href');
+         }
+
+         if (!attachment.type.match(/^[a-z]+\/[a-z0-9-+.*]+$/i) || !attachment.name.match(/^[\s\w.,-]+$/i) || !attachment.size.match(/^\d+$/i)) {
+            attachment = undefined;
+
+            jsxc.warn('Invalid file type, name or size.');
+         }
+      } else if (htmlBody.find('>a').length === 1) {
+         var linkElement = htmlBody.find('>a');
+         var metaString = '';
+         var thumbnail;
+
+         if (linkElement.find('>img').length === 1) {
+            var imgElement = linkElement.find('>img');
+            var src = imgElement.attr('src') || '';
+            var altString = imgElement.attr('alt') || '';
+            metaString = altString.replace(/^Preview:/, '');
+
+            if (src.match(/^\s*data:[a-z]+\/[a-z0-9-+.*]+;base64,[a-z0-9=+/]+$/i)) {
+               thumbnail = src;
+            }
+         } else {
+            metaString = linkElement.text();
+         }
+
+         var metaMatch = metaString.match(/^([a-z]+\/[a-z0-9-+.*]+)\|(\d+)\|([\s\w.,-]+)/);
+
+         if (metaMatch) {
+            attachment = {
+               type: metaMatch[1],
+               size: metaMatch[2],
+               name: metaMatch[3],
+            };
+
+            if (thumbnail) {
+               attachment.thumbnail = thumbnail;
+            }
+
+            if (linkElement.attr('href') && linkElement.attr('href').match(/^https?:\/\//)) {
+               attachment.data = linkElement.attr('href');
+            }
+         } else {
+            jsxc.warn('Invalid file type, name or size.');
+         }
+      }
+
+      return attachment;
    },
 
    /**
@@ -4153,7 +4163,7 @@ jsxc.gui = {
          var matches = $(this).attr('href').match(jsxc.CONST.REGEX.GEOURI);
          var latitude = matches[1];
          var longitude = matches[2];
-         var accuracy = matches[5];
+         var accuracy = matches[3];
          var osmUrl = 'https://www.openstreetmap.org/?mlat=' + latitude + '&mlon=' + longitude + '#map=16/' + latitude + '/' + longitude;
          var label = 'OSM: ' + ddToDms(latitude, longitude);
 
@@ -7992,6 +8002,7 @@ jsxc.muc = {
       }
 
       var from = $(message).attr('from');
+      var htmlBodyElement = $(message).find('body[xmlns="' + Strophe.NS.XHTML + '"]').first();
       var body = $(message).find('body:first').text();
       var room = jsxc.jidToBid(from);
       var nickname = Strophe.unescapeNode(Strophe.getResourceFromJid(from));
@@ -8012,12 +8023,19 @@ jsxc.muc = {
 
          jsxc.gui.window.init(room);
 
+         var attachment = jsxc.xmpp.getAttachmentFromHtmlBody(htmlBodyElement);
+
+         if (attachment) {
+            body = null;
+         }
+
          jsxc.gui.window.postMessage({
             bid: room,
             direction: jsxc.Message.IN,
             msg: body,
             stamp: stamp,
-            sender: sender
+            sender: sender,
+            attachment: attachment
          });
       }
 

@@ -70,6 +70,7 @@
 .mfp-arrow,
 .mfp-preloader,
 .mfp-counter {
+  -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
       user-select: none; }
@@ -1113,6 +1114,7 @@ img.emojione {
   font-size: 14px;
   line-height: 1.428571429;
   border-radius: 4px;
+  -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none; }
@@ -2712,9 +2714,10 @@ fieldset[disabled]
     line-height: 30px;
     float: left;
     cursor: pointer;
-    -moz-user-select: none;
-     -ms-user-select: none;
-         user-select: none; }
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
     #jsxc_windowListSB > div:hover {
       background-color: #b3b2b2; }
   #jsxc_windowListSB > .jsxc_disabled {
@@ -2909,6 +2912,9 @@ fieldset[disabled]
     resize: none;
     transition: height 0.5s;
     font-size: 13px; }
+  .jsxc_window textarea::-webkit-input-placeholder {
+    color: #000;
+    opacity: 0.3; }
   .jsxc_window textarea::-moz-placeholder {
     color: #000;
     opacity: 0.3; }
@@ -3518,15 +3524,17 @@ ul.jsxc_vCard {
   cursor: pointer;
   border: 1px solid transparent;
   border-radius: 4px;
-  -moz-user-select: none;
-   -ms-user-select: none;
-       user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
   color: #fff;
   background-color: #5cb85c;
   border-color: #4cae4c; }
 
 .jsxc_oneway .jsxc_avatar {
-  filter: grayscale(100%); }
+  -webkit-filter: grayscale(100%);
+          filter: grayscale(100%); }
 
 img.jsxc_vCard {
   float: right;
@@ -3558,9 +3566,10 @@ img.jsxc_vCard {
   white-space: nowrap;
   vertical-align: middle;
   cursor: pointer;
-  -moz-user-select: none;
-   -ms-user-select: none;
-       user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
   background-image: none;
   border: 1px solid transparent;
   border-radius: 4px;
@@ -3593,7 +3602,8 @@ img.jsxc_vCard {
   z-index: 110;
   margin: 8px 2px 5px 10px;
   right: 0;
-  filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
+  -webkit-filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
+          filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
   padding: 4px 12px;
   padding-left: 5px; }
   .jsxc_menu:after {
@@ -3927,6 +3937,11 @@ div:full-screen {
   div:full-screen.jsxc_localvideo {
     border: 1px solid #fff; }
 
+div:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+  background-color: #000; }
+
 div:-moz-full-screen {
   width: 100%;
   height: 100%;
@@ -3941,6 +3956,8 @@ div:fullscreen {
   width: 100%;
   height: 100%;
   background-color: #000; }
+  div:-webkit-full-screen.jsxc_localvideo {
+    border: 1px solid #fff; }
   div:-moz-full-screen.jsxc_localvideo {
     border: 1px solid #fff; }
   div:-ms-fullscreen.jsxc_localvideo {
