@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.4.1 - 2018-07-05
+### Fixed
+- match all geo urls
+- [#705](https://github.com/jsxc/jsxc/issues/705) display http upload preview in muc
+
 ## 3.4.0 - 2018-05-23
 ### Added
 - add option to send current location
