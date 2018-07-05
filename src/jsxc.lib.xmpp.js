@@ -995,71 +995,10 @@ jsxc.xmpp = {
          }));
       }
 
-      var attachment;
-      if (htmlBody.length === 1) {
-         var httpUploadElement = htmlBody.find('a[data-type][data-name][data-size]');
+      var attachment = jsxc.xmpp.getAttachmentFromHtmlBody(htmlBody);
 
-         if (httpUploadElement.length === 1) {
-            // deprecated syntax @since 3.2.1
-            attachment = {
-               type: httpUploadElement.attr('data-type'),
-               name: httpUploadElement.attr('data-name'),
-               size: httpUploadElement.attr('data-size'),
-            };
-
-            if (httpUploadElement.attr('data-thumbnail') && httpUploadElement.attr('data-thumbnail').match(/^\s*data:[a-z]+\/[a-z0-9-+.*]+;base64,[a-z0-9=+/]+$/i)) {
-               attachment.thumbnail = httpUploadElement.attr('data-thumbnail');
-            }
-
-            if (httpUploadElement.attr('href') && httpUploadElement.attr('href').match(/^https:\/\//)) {
-               attachment.data = httpUploadElement.attr('href');
-               body = null;
-            }
-
-            if (!attachment.type.match(/^[a-z]+\/[a-z0-9-+.*]+$/i) || !attachment.name.match(/^[\s\w.,-]+$/i) || !attachment.size.match(/^\d+$/i)) {
-               attachment = undefined;
-
-               jsxc.warn('Invalid file type, name or size.');
-            }
-         } else if (htmlBody.find('>a').length === 1) {
-            var linkElement = htmlBody.find('>a');
-            var metaString = '';
-            var thumbnail;
-
-            if (linkElement.find('>img').length === 1) {
-               var imgElement = linkElement.find('>img');
-               var src = imgElement.attr('src') || '';
-               var altString = imgElement.attr('alt') || '';
-               metaString = altString.replace(/^Preview:/, '');
-
-               if (src.match(/^\s*data:[a-z]+\/[a-z0-9-+.*]+;base64,[a-z0-9=+/]+$/i)) {
-                  thumbnail = src;
-               }
-            } else {
-               metaString = linkElement.text();
-            }
-
-            var metaMatch = metaString.match(/^([a-z]+\/[a-z0-9-+.*]+)\|(\d+)\|([\s\w.,-]+)/);
-
-            if (metaMatch) {
-               attachment = {
-                  type: metaMatch[1],
-                  size: metaMatch[2],
-                  name: metaMatch[3],
-               };
-
-               if (thumbnail) {
-                  attachment.thumbnail = thumbnail;
-               }
-
-               if (linkElement.attr('href') && linkElement.attr('href').match(/^https?:\/\//)) {
-                  attachment.data = linkElement.attr('href');
-                  body = null;
-               }
-            } else {
-               jsxc.warn('Invalid file type, name or size.');
-            }
-         }
+      if (attachment) {
+         body = null;
       }
 
       if (jsxc.otr.objects.hasOwnProperty(bid) && body) {
@@ -1202,6 +1141,77 @@ jsxc.xmpp = {
     */
    onRidChange: function(rid) {
       jsxc.storage.setItem('rid', rid);
+   },
+
+   getAttachmentFromHtmlBody: function(htmlBody) {
+      if (htmlBody.length !== 1) {
+         return;
+      }
+
+      var attachment;
+      var httpUploadElement = htmlBody.find('a[data-type][data-name][data-size]');
+
+      if (httpUploadElement.length === 1) {
+         // deprecated syntax @since 3.2.1
+         attachment = {
+            type: httpUploadElement.attr('data-type'),
+            name: httpUploadElement.attr('data-name'),
+            size: httpUploadElement.attr('data-size'),
+         };
+
+         if (httpUploadElement.attr('data-thumbnail') && httpUploadElement.attr('data-thumbnail').match(/^\s*data:[a-z]+\/[a-z0-9-+.*]+;base64,[a-z0-9=+/]+$/i)) {
+            attachment.thumbnail = httpUploadElement.attr('data-thumbnail');
+         }
+
+         if (httpUploadElement.attr('href') && httpUploadElement.attr('href').match(/^https:\/\//)) {
+            attachment.data = httpUploadElement.attr('href');
+         }
+
+         if (!attachment.type.match(/^[a-z]+\/[a-z0-9-+.*]+$/i) || !attachment.name.match(/^[\s\w.,-]+$/i) || !attachment.size.match(/^\d+$/i)) {
+            attachment = undefined;
+
+            jsxc.warn('Invalid file type, name or size.');
+         }
+      } else if (htmlBody.find('>a').length === 1) {
+         var linkElement = htmlBody.find('>a');
+         var metaString = '';
+         var thumbnail;
+
+         if (linkElement.find('>img').length === 1) {
+            var imgElement = linkElement.find('>img');
+            var src = imgElement.attr('src') || '';
+            var altString = imgElement.attr('alt') || '';
+            metaString = altString.replace(/^Preview:/, '');
+
+            if (src.match(/^\s*data:[a-z]+\/[a-z0-9-+.*]+;base64,[a-z0-9=+/]+$/i)) {
+               thumbnail = src;
+            }
+         } else {
+            metaString = linkElement.text();
+         }
+
+         var metaMatch = metaString.match(/^([a-z]+\/[a-z0-9-+.*]+)\|(\d+)\|([\s\w.,-]+)/);
+
+         if (metaMatch) {
+            attachment = {
+               type: metaMatch[1],
+               size: metaMatch[2],
+               name: metaMatch[3],
+            };
+
+            if (thumbnail) {
+               attachment.thumbnail = thumbnail;
+            }
+
+            if (linkElement.attr('href') && linkElement.attr('href').match(/^https?:\/\//)) {
+               attachment.data = linkElement.attr('href');
+            }
+         } else {
+            jsxc.warn('Invalid file type, name or size.');
+         }
+      }
+
+      return attachment;
    },
 
    /**

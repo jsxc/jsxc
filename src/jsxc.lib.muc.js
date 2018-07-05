@@ -1340,6 +1340,7 @@ jsxc.muc = {
       }
 
       var from = $(message).attr('from');
+      var htmlBodyElement = $(message).find('body[xmlns="' + Strophe.NS.XHTML + '"]').first();
       var body = $(message).find('body:first').text();
       var room = jsxc.jidToBid(from);
       var nickname = Strophe.unescapeNode(Strophe.getResourceFromJid(from));
@@ -1360,12 +1361,19 @@ jsxc.muc = {
 
          jsxc.gui.window.init(room);
 
+         var attachment = jsxc.xmpp.getAttachmentFromHtmlBody(htmlBodyElement);
+
+         if (attachment) {
+            body = null;
+         }
+
          jsxc.gui.window.postMessage({
             bid: room,
             direction: jsxc.Message.IN,
             msg: body,
             stamp: stamp,
-            sender: sender
+            sender: sender,
+            attachment: attachment
          });
       }
 
