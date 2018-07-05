@@ -1,4 +1,5 @@
 import Log from '../util/Log'
+import Translation from '../util/Translation'
 import { VideoDialog } from './VideoDialog'
 
 export default class VideoWindow {
@@ -40,8 +41,7 @@ export default class VideoWindow {
 
          session.end('failed-transport');
       } else if (state === 'interrupted') {
-         //@TODO translate
-         //this.videoDialog.setStatus('Connection_interrupted');
+         this.videoDialog.setStatus(Translation.t('Connection_interrupted'));
       }
    }
 

@@ -74,7 +74,7 @@ export default class JingleCallSession extends JingleAbstractSession {
          this.session.accept();
       }).catch((reason) => {
 
-         //@TODO user media request overlay
+         //@TODO hide user media request overlay
 
          //@TODO post reason to chat window
          if (reason !== 'aborted') {

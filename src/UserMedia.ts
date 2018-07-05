@@ -1,4 +1,5 @@
 import Log from './util/Log'
+import Translation from './util/Translation'
 
 export default class UserMedia {
    public static request(um = ['video', 'audio']) {
@@ -70,15 +71,14 @@ export default class UserMedia {
       switch (err.name) {
          case 'NotAllowedError':
          case 'PERMISSION_DENIED':
-            //@TODO translate
-            msg = ('PermissionDeniedError');
+            msg = Translation.t('PermissionDeniedError');
             break;
          case 'HTTPS_REQUIRED':
          case 'EXTENSION_UNAVAILABLE':
-            msg = (err.name);
+            msg = Translation.t(err.name);
             break;
          default:
-            msg = (err.name) !== err.name ? (err.name) : ('UNKNOWN_ERROR');
+            msg = Translation.t(err.name) !== err.name ? Translation.t(err.name) : Translation.t('UNKNOWN_ERROR');
       }
 
       Log.debug('media failure: ' + err.name);

@@ -5,6 +5,7 @@ import JID from '../../JID'
 import UUID from '../../util/UUID'
 import Utils from '../../util/Utils'
 import Log from '../../util/Log'
+import Translation from '../../util/Translation'
 import * as Namespace from '../../connection/xmpp/namespace'
 
 export default class Archive {
@@ -164,7 +165,7 @@ export default class Archive {
             let archiveExhaustedMessage = new Message({
                peer: this.contact.getJid(),
                direction: Message.DIRECTION.SYS,
-               plaintextMessage: 'Archive_exhausted' //@TODO translate
+               plaintextMessage: Translation.t('Archive_exhausted')
             });
 
             transcript.getLastMessage().setNext(archiveExhaustedMessage);

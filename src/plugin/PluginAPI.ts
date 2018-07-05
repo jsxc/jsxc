@@ -35,8 +35,6 @@ export default class PluginAPI implements IPluginAPI {
       return new Message(arguments[0]);
    }
 
-   //@TODO Log function with name as prefix
-
    public getStorage(): Storage {
       if (typeof this.storage === 'undefined') {
          this.storage = new Storage(this.account.getUid() + ':plugin:' + this.name);
