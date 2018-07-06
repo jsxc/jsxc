@@ -1,473 +1,473 @@
 #jsxc-roster {
-   position: fixed;
-   top: 0;
-   bottom: 0;
-   right: 0;
-   width: 200px;
-   overflow: visible;
-   border-left: 1px solid #e1e1e1;
-   z-index: 80;
-   margin-left: 10px;
-   background-color: $roster_bg;
-   transition: right 0.5s;
-   display: flex;
-   flex-direction: column;
+  background-color: $roster-bg;
+  border-left: 1px solid #e1e1e1;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+  overflow: visible;
+  position: fixed;
+  right: 0;
+  top: 0;
+  transition: right 0.5s;
+  width: 200px;
+  z-index: 80;
 
-   .jsxc-roster-hidden & {
-      right: -200px;
-   }
+  .jsxc-roster-hidden & {
+    right: -200px;
+  }
 
-   a {
+  a {
+    cursor: pointer;
+  }
+
+  .jsxc-avatar {
+    cursor: pointer;
+    position: relative;
+
+    img {
       cursor: pointer;
-   }
+    }
+  }
 
-   .jsxc-avatar {
-      position: relative;
-      cursor: pointer;
+  .jsxc-wait {
+    background-color: $white;
+    bottom: 0;
+    left: 0;
+    padding: 20px;
+    position: absolute;
+    top: 0;
+    width: 160px;
+    z-index: 60;
 
-      img {
-         cursor: pointer;
-      }
-   }
+    img {
+      padding: 5px;
+    }
 
-   .jsxc-wait {
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 160px;
-      padding: 20px;
-      background-color: $white;
-      z-index: 60;
+    h3 {
+      font-size: 1.13em;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+  }
 
-      img {
-         padding: 5px;
-      }
+  input {
+    background-color: $roster-input-bg;
+    background-image: none;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    box-shadow: inner 0 0 5px $roster-input-shadow;
+    box-sizing: border-box;
+    font-size: 13px;
+    height: 35px;
+    margin: 0;
+    outline: none;
+    padding: 7px 6px 5px;
+    width: 100%;
+  }
 
-      h3 {
-         margin-bottom: 5px;
-         font-size: 1.13em;
-         font-weight: bold;
-      }
-   }
+  p {
+    color: $roster-color;
+    padding: 10px;
 
-   input {
+    a {
+      color: $roster-a;
+      text-decoration: underline;
+    }
+  }
+
+  .jsxc-expand input {
+    left: 51px;
+    width: 137px;
+  }
+
+  &.jsxc-state-hidden {
+    display: block;
+    right: -200px;
+    transition: right 0.5s;
+  }
+
+  &.jsxc-state-shown {
+    display: block;
+    right: 0;
+    transition: right 0.5s;
+  }
+
+  > .jsxc-bottom {
+    background-color: $roster-bottom-bg;
+    line-height: 34px;
+    padding: 5px 4px 2px 0;
+    width: 100%;
+    z-index: 50;
+
+    &:hover {
+      background-color: $roster-bottom-bg-hover;
+    }
+
+    .jsxc-inner {
+      box-shadow: 0 -5px 5px -5px #a1a1a1;
+      width: 100%;
+    }
+
+    ul {
+      background-color: $roster-bottom-bg;
+      border-top: 1px solid $roster-bottom-border-top;
       margin: 0;
-      height: 35px;
-      padding: 7px 6px 5px;
-      font-size: 13px;
+      padding: 0;
       width: 100%;
-      border: 1px solid #ddd;
-      box-sizing: border-box;
-      background-image: none;
-      background-color: $roster_input_bg;
-      border-radius: 3px;
-      box-shadow: inner 0 0 5px $roster_input_shadow;
-      outline: none;
-   }
 
-   p {
-      color: $roster_color;
-      padding: 10px;
-
-      a {
-         color: $roster_a;
-         text-decoration: underline;
+      li:last-child {
+        border-bottom: 1px solid $roster-bottom-border-top;
       }
-   }
+    }
 
-   .jsxc-expand input {
-      left: 51px;
-      width: 137px;
-   }
-
-   &.jsxc-state_hidden {
-      display: block;
-      right: -200px;
-      transition: right 0.5s;
-   }
-
-   &.jsxc-state_shown {
-      display: block;
-      right: 0;
-      transition: right 0.5s;
-   }
-
-   > .jsxc-bottom {
+    li {
+      background-color: $roster-bottom-bg;
+      background-position: 15px center;
+      background-repeat: no-repeat;
+      background-size: 16px 16px;
+      color: $roster-bottom-color;
+      cursor: pointer;
+      height: 44px;
+      line-height: 44px;
+      opacity: 0.8;
+      overflow: hidden;
+      padding-left: 44px;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       width: 100%;
-      line-height: 34px;
-      background-color: $roster_bottom_bg;
-      z-index: 50;
-      padding: 5px 4px 2px 0;
+
+      &.jsxc-disabled {
+        color: $roster-bottom-disabled;
+        cursor: default;
+      }
+
+      &:hover:not(.jsxc-disabled) {
+        background-color: $roster-bottom-bg-hover;
+        color: $roster-bottom-color-hover;
+      }
+
+      &.jsxc-warning {
+        background-color: $warning-bg;
+
+        &:hover {
+          background-color: $warning-bg-hover;
+        }
+      }
+    }
+
+    > div > span {
+      cursor: pointer;
+    }
+  }
+
+  form {
+    padding: 15px;
+
+    button,
+    input {
+      border-radius: 0;
+      margin: 0 0 5px;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background-color: #dadada;
+      border-color: #c1c1c1;
+      transition: background-color 0.5s;
 
       &:hover {
-         background-color: $roster_bottom_bg_hover;
+        background-color: #a2a2a2;
       }
+    }
 
-      .jsxc-inner {
-         width: 100%;
-         box-shadow: 0 -5px 5px -5px #a1a1a1;
-      }
+    label {
+      display: block;
+    }
 
-      ul {
-         padding: 0;
-         margin: 0;
-         width: 100%;
-         border-top: 1px solid $roster_bottom_border_top;
-         background-color: $roster_bottom_bg;
+    input {
+      position: static;
+    }
+  }
 
-         li:last-child {
-            border-bottom: 1px solid $roster_bottom_border_top;
-         }
-      }
+  .jsxc-roster-status {
+    bottom: 0;
+    display: none;
+    position: absolute;
+  }
 
-      li {
-         height: 44px;
-         background-color: $roster_bottom_bg;
-         color: $roster_bottom_color;
-         cursor: pointer;
-         width: 100%;
-         padding-left: 44px;
-         line-height: 44px;
-         text-align: left;
-         overflow: hidden;
-         text-overflow: ellipsis;
-         white-space: nowrap;
-         background-repeat: no-repeat;
-         background-position: 15px center;
-         background-size: 16px 16px;
-         opacity: 0.8;
+  &.jsxc-status-show {
+    .jsxc-roster-status {
+      display: block;
+    }
+  }
 
-         &.jsxc-disabled {
-            color: $roster_bottom_disabled;
-            cursor: default;
-         }
-
-         &:hover:not(.jsxc-disabled) {
-            color: $roster_bottom_color_hover;
-            background-color: $roster_bottom_bg_hover;
-         }
-
-         &.jsxc-warning {
-            background-color: $warning_bg;
-
-            &:hover {
-               background-color: $warning_bg_hover;
-            }
-         }
-      }
-
-      > div > span {
-         cursor: pointer;
-      }
-   }
-
-   form {
-      padding: 15px;
-
-      button,
-      input {
-         width: 100%;
-         margin: 0 0 5px;
-         border-radius: 0;
-      }
-
-      .btn-primary {
-         background-color: #dadada;
-         border-color: #c1c1c1;
-         transition: background-color 0.5s;
-
-         &:hover {
-            background-color: #a2a2a2;
-         }
-      }
-
-      label {
-         display: block;
-      }
-
-      input {
-         position: static;
-      }
-   }
-
-   .jsxc-roster-status {
+  &.jsxc-hide-offline {
+    .jsxc-roster-item[data-presence="offline"] {
       display: none;
-      position: absolute;
-      bottom: 0;
-   }
+    }
 
-   &.jsxc-status-show {
-      .jsxc-roster-status {
-         display: block;
+    .jsxc-menu-main {
+      li {
+        .jsxc-hide-offline {
+          display: none;
+        }
+
+        .jsxc-show-offline {
+          display: inherit;
+        }
       }
-   }
+    }
 
-   &.jsxc-hide-offline {
-      .jsxc-roster-item[data-presence='offline'] {
-         display: none;
-      }
-
-      .jsxc-menu-main {
-         li {
-             .jsxc-hide-offline {
-                 display: none;
-             }
-
-             .jsxc-show-offline {
-                 display: inherit;
-             }
-         }
-      }
-
-      .jsxc-contact-list:after {
-         content: attr(data-offline-label);
-         text-align: center;
-         display: block;
-         font-style: italic;
-         font-size: 0.8em;
-         opacity: 0.6;
-         line-height: 44px;
-      }
-   }
+    .jsxc-contact-list::after {
+      content: attr(data-offline-label);
+      display: block;
+      font-size: 0.8em;
+      font-style: italic;
+      line-height: 44px;
+      opacity: 0.6;
+      text-align: center;
+    }
+  }
 }
 
 .jsxc-roster-toggle {
-   width: 14px;
-   height: 100%;
-   position: absolute;
-   left: -14px;
-   top: 0;
-   z-index: 110;
-   background-color: transparent;
-   cursor: pointer;
+  background-color: transparent;
+  cursor: pointer;
+  height: 100%;
+  left: -14px;
+  position: absolute;
+  top: 0;
+  width: 14px;
+  z-index: 110;
 
-   &:hover {
-      background-color: $roster_toggle_hover;
-   }
+  &:hover {
+    background-color: $roster-toggle-hover;
+  }
 }
 
 .jsxc-roster-item {
-   padding: 0;
-   margin: 0;
-   border-bottom: 1px solid $roster_bottom_border_top;
-   color: $roster_color;
-   font-family: $font_sans;
+  border-bottom: 1px solid $roster-bottom-border-top;
+  color: $roster-color;
+  font-family: $font-sans;
+  margin: 0;
+  padding: 0;
 
-   &:hover {
-      background-color: $roster_bg_hover;
-   }
+  &:hover {
+    background-color: $roster-bg-hover;
+  }
 
-   &.jsxc-bookmarked {
-      .jsxc-avatar:after {
-         content: " ";
-         width: 20%;
-         height: 30%;
-         position: absolute;
-         top: 0;
-         right: 2px;
-         background-size: contain;
-         background-repeat: no-repeat;
-         background-image: url("../images/bookmark_red.svg");
-      }
-   }
+  &.jsxc-bookmarked {
+    .jsxc-avatar::after {
+      background-image: url("../images/bookmark_red.svg");
+      background-repeat: no-repeat;
+      background-size: contain;
+      content: " ";
+      height: 30%;
+      position: absolute;
+      right: 2px;
+      top: 0;
+      width: 20%;
+    }
+  }
 
-   &:not([data-subscription="both"]):not(.jsxc-bottom) {
-      .jsxc-name {
-         opacity: 0.7;
-      }
+  &:not([data-subscription="both"]):not(.jsxc-bottom) {
+    .jsxc-name {
+      opacity: 0.7;
+    }
 
-      .jsxc-avatar {
-         filter: grayscale(100%);
-      }
-   }
+    .jsxc-avatar {
+      filter: grayscale(100%);
+    }
+  }
 }
 
 .jsxc-menu-presence {
-   cursor: pointer;
-   padding-left: 2px;
-   white-space: nowrap;
-   overflow: hidden;
-   text-overflow: ellipsis;
 
-   > span {
-      opacity: 0.8;
-   }
+  @include presence-indicator("");
+  cursor: pointer;
+  overflow: hidden;
+  padding-left: 2px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
-   @include presenceIndicator("");
+  > span {
+    opacity: 0.8;
+  }
 
-   li {
-      position: relative;
+  li {
+    position: relative;
 
-      &:before {
-         //  Presence indicator
-         position: absolute;
-         top: 50%;
-         left: 10px;
-         margin-top: -8px;
-         border: 2px solid whitesmoke;
-      }
-   }
+    &::before {
+      border: 2px solid #f5f5f5;
+      left: 10px;
+      margin-top: -8px;
+      //  Presence indicator
+      position: absolute;
+      top: 50%;
+    }
+  }
 }
 
 .jsxc-menu-main {
-   height: 44px;
-   width: 44px;
-   cursor: pointer;
-   float: right;
-   text-align: center;
+  cursor: pointer;
+  float: right;
+  height: 44px;
+  text-align: center;
+  width: 44px;
 
-   &:hover > span {
-      opacity: 1;
-   }
+  &:hover > span {
+    opacity: 1;
+  }
 
-   > span {
-      opacity: 0.5;
-      display: block;
-      width: 100%;
-      height: 100%;
-      background-image: url("../images/menu_black.svg");
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: 60%;
-   }
+  > span {
+    background-image: url("../images/menu_black.svg");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 60%;
+    display: block;
+    height: 100%;
+    opacity: 0.5;
+    width: 100%;
+  }
 
-   @media (min-width: 768px) {
-      height: 30px;
-      width: 30px;
-   }
+  #jsxc-roster[data-presence="offline"] & li:not(.jsxc-offline-available) {
+    opacity: 0.5;
 
-   #jsxc-roster[data-presence="offline"] & li:not(.jsxc-offline-available) {
-      opacity: 0.5;
+    &:hover {
+      background-color: inherit;
+      cursor: auto;
+    }
+  }
 
-      &:hover {
-         background-color: inherit;
-         cursor: auto;
-      }
-   }
+  li {
+    .jsxc-hide-offline {
+      display: inherit;
+    }
 
-   li {
-      .jsxc-hide-offline {
-         display: inherit;
-      }
+    .jsxc-show-offline {
+      display: none;
+    }
+  }
 
-      .jsxc-show-offline {
-         display: none;
-      }
-   }
+  @media (min-width: 768px) {
+    height: 30px;
+    width: 30px;
+  }
 }
 
 #jsxc-notice {
-   height: 30px;
-   width: 30px;
-   float: right;
-   text-align: center;
-   line-height: 30px;
+  float: right;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  width: 30px;
 
-   span {
-      background-color: $notice_bg;
-      border-radius: 11px;
-      color: $notice_color;
-      font-size: 80%;
-      padding: 2px 3px;
-      position: relative;
-      line-height: 1.5em;
+  span {
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-name: jsxc-bounce-6;
+    animation-timing-function: ease;
+    background-color: $notice-bg;
+    border-radius: 11px;
+    color: $notice-color;
+    display: inline-block;
+    font-size: 80%;
+    line-height: 1.5em;
+    padding: 2px 3px;
+    position: relative;
 
-      transform-origin: bottom;
-      animation-duration: 2s;
-      animation-iteration-count: infinite;
-      animation-name: jsxc-bounce-6;
-      animation-timing-function: ease;
-      display: inline-block;
-   }
+    transform-origin: bottom;
+  }
 
-   > span:empty {
-      display: none;
-   }
+  > span:empty {
+    display: none;
+  }
 }
 
 .jsxc-contact-list {
-   @include presenceIndicator(" .jsxc-avatar");
+  @include presence-indicator(" .jsxc-avatar");
 
-   list-style: none;
-   padding: 0;
-   margin: 0;
-   width: 100%;
-   z-index: 85;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  z-index: 85;
 
-   &-wrapper {
-       flex-grow: 1;
-       overflow-y: auto;
+  &-wrapper {
 
-       @extend %scrollbar;
-   }
+    @extend %scrollbar;
+    flex-grow: 1;
+    overflow-y: auto;
+  }
 
-   .jsxc-unreadMsg {
-      .jsxc-name {
-         padding-right: 0;
+  .jsxc-unread-msg {
+    .jsxc-name {
+      padding-right: 0;
+    }
+  }
+
+  .jsxc-oneway {
+    .jsxc-avatar,
+    .jsxc-caption {
+      opacity: 0.7;
+    }
+  }
+
+  .jsxc-right {
+    float: right;
+    margin-right: 6px;
+
+    div {
+      color: $white;
+      font-size: 13px;
+      font-weight: bold;
+      line-height: 20px;
+      text-align: center;
+
+      &:hover {
+        opacity: 1;
       }
-   }
+    }
+  }
 
-   .jsxc-oneway {
-      .jsxc-avatar,
-      .jsxc-caption {
-         opacity: 0.7;
-      }
-   }
+  .jsxc-action-entry.jsxc-menu {
+    float: right;
+    height: 100%;
+    width: 42px;
 
-   .jsxc-right {
-      float: right;
-      margin-right: 6px;
-
-      div {
-         font-weight: bold;
-         text-align: center;
-         font-size: 13px;
-         line-height: 20px;
-         color: $white;
-
-         &:hover {
-            opacity: 1;
-         }
-      }
-   }
-
-   .jsxc-action-entry.jsxc-menu {
-      float: right;
+    > span {
+      background-image: url("../images/more_black.svg");
+      background-position: center center;
+      background-repeat: no-repeat;
+      cursor: pointer;
+      display: block;
       height: 100%;
-      width: 42px;
+      opacity: 0.6;
+      width: 100%;
 
-      > span {
-         display: block;
-         height: 100%;
-         width: 100%;
-         background-image: url("../images/more_black.svg");
-         background-repeat: no-repeat;
-         background-position: center center;
-         opacity: 0.6;
-         cursor: pointer;
-
-         &:hover {
-            opacity: 1;
-         }
+      &:hover {
+        opacity: 1;
       }
+    }
 
-      .jsxc-inner {
-         left: auto;
-         right: 5px;
-         padding: 4px;
-         overflow: visible;
+    .jsxc-inner {
+      left: auto;
+      overflow: visible;
+      padding: 4px;
+      right: 5px;
 
-         a {
-            display: block;
-            line-height: 42px;
-            width: 42px;
-            text-align: center;
+      a {
+        display: block;
+        line-height: 42px;
+        text-align: center;
+        width: 42px;
 
-            span {
-               margin: 0;
-            }
-         }
+        span {
+          margin: 0;
+        }
       }
-   }
+    }
+  }
 }

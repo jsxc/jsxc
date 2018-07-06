@@ -336,7 +336,7 @@ export default class ChatWindow {
       );
 
       elementHandler.add(
-         this.element.find('.jsxc-sendFile')[0],
+         this.element.find('.jsxc-send-file')[0],
          function() {
             $('body').click();
 

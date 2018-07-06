@@ -1,842 +1,845 @@
-$defaultWindowWidth: 250px;
+$default-window-width: 250px;
 
 .jsxc-window {
-   height: auto;
-   background-color: $window_bg;
-   z-index: 80;
-   cursor: default;
-   border: 1px solid $window_border;
-   border-bottom: 0;
-   max-width: 100%;
+  background-color: $window-bg;
+  border: 1px solid $window-border;
+  border-bottom: 0;
+  cursor: default;
+  height: auto;
+  max-width: 100%;
+  z-index: 80;
 
-   &.jsxc-droppable.jsxc-dragactive {
-      &:before {
-         content: '';
-         position: absolute;
-         top: 0;
-         right: 0;
-         bottom: 0;
-         left: 0;
-         background-color: rgba(52, 70, 139, 0.2);
-         z-index: 100;
-      }
-      &.jsxc-dragover:before {
-         background-color: rgba(52, 70, 139, 0.56);
-      }
-   }
-
-   .jsxc-showOverlay & {
-      .jsxc-overlay {
-         display: block !important;
-      }
-   }
-
-   .jsxc-avatar {
-      margin-top: 1px;
-   }
-
-   .jsxc-message-area {
-      width: 100%;
+  &.jsxc-droppable.jsxc-dragactive {
+    &::before {
+      background-color: rgba(52, 70, 139, 0.2);
+      bottom: 0;
+      content: "";
       left: 0;
-      overflow: auto;
-      padding: 3px;
-      z-index: 10;
-      flex-grow: 1;
+      position: absolute;
+      right: 0;
+      top: 0;
+      z-index: 100;
+    }
 
-      @extend %scrollbar;
-   }
+    &.jsxc-dragover::before {
+      background-color: rgba(52, 70, 139, 0.56);
+    }
+  }
 
-   .jsxc-close {
-      font-size: 20px;
+  .jsxc-show-overlay & {
+    .jsxc-overlay {
+      display: block !important;
+    }
+  }
 
-      &:hover {
-         color: $window_close_hover;
-         opacity: 1;
-      }
-   }
+  .jsxc-avatar {
+    margin-top: 1px;
+  }
 
-   .jsxc-more {
-      background-image: url("../images/more_white.svg");
-      opacity: 0.4;
-   }
+  .jsxc-message-area {
+    @extend %scrollbar;
+    flex-grow: 1;
+    left: 0;
+    overflow: auto;
+    padding: 3px;
+    width: 100%;
+    z-index: 10;
+  }
+
+  .jsxc-close {
+    font-size: 20px;
+
+    &:hover {
+      color: $window-close-hover;
+      opacity: 1;
+    }
+  }
+
+  .jsxc-more {
+    background-image: url("../images/more_white.svg");
+    opacity: 0.4;
+  }
 }
 
 .jsxc-window-bar.jsxc-bar {
-   background-color: $window_bar_bg;
-   color: $window_bar_color;
-   transition: background-color 0.3s;
-   width: $defaultWindowWidth;
-   max-width: 100%;
+  background-color: $window-bar-bg;
+  color: $window-bar-color;
+  max-width: 100%;
+  transition: background-color 0.3s;
+  width: $default-window-width;
 
-   &:hover {
-      .jsxc-normal & {
-         color: $window_bar_color_hover;
-      }
-   }
+  &:hover {
+    .jsxc-normal & {
+      color: $window-bar-color-hover;
+    }
+  }
 
-   .jsxc-minimized & {
-      background-color: $window_min_bar_bg;
-      color: $window_min_bar_color;
-   }
+  .jsxc-minimized & {
+    background-color: $window-min-bar-bg;
+    color: $window-min-bar-color;
+  }
 
-   .jsxc-highlight & {
-      background-color: orange;
-   }
+  .jsxc-highlight & {
+    background-color: #ffa500;
+  }
 }
 
 .jsxc-window-fade {
-   position: relative;
-   height: 320px;
-   width: $defaultWindowWidth;
-   min-height: 320px;
-   min-width: $defaultWindowWidth;
-   max-width: 100%;
-   transition: height 0.2s;
-   overflow: hidden;
-   display: flex;
-   flex-direction: column;
-   transform: none !important;
+  display: flex;
+  flex-direction: column;
+  height: 320px;
+  max-width: 100%;
+  min-height: 320px;
+  min-width: $default-window-width;
+  overflow: hidden;
+  position: relative;
+  transform: none !important;
+  transition: height 0.2s;
+  width: $default-window-width;
 
-   .jsxc-normal & {}
+  .jsxc-minimized & {
+    height: 0 !important;
+    min-height: 0;
+    min-width: 100%;
+  }
 
-   .jsxc-minimized & {
-      height: 0 !important;
-      min-height: 0;
-      min-width: 100%;
-   }
+  .jsxc-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    bottom: 0;
+    display: none;
+    left: 0;
+    overflow-y: scroll;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 100;
 
-   .jsxc-overlay {
-      display: none;
-      background-color: rgba(0, 0, 0, 0.5);
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      z-index: 100;
-      overflow-y: scroll;
-
-      > div {
-         background-color: #fff;
-         margin: 30px 10px;
-         padding: 5px;
-         border-radius: 3px;
-         text-align: center;
-         position: relative;
-
-         .jsxc-close {
-            position: absolute;
-            top: 0;
-            right: 0;
-            height: 44px;
-            width: 44px;
-
-            &:after {
-               content: "×";
-               position: absolute;
-               top: 4px;
-               right: 4px;
-               font-size: 20px;
-               font-family: Arial, sans-serif;
-               cursor: pointer;
-               color: #000;
-               opacity: 0.4;
-            }
-
-            &:hover {
-               &:after {
-                  opacity: 1;
-               }
-            }
-            @media (min-width: 768px) {
-               width: 30px;
-               height: 30px;
-            }
-         }
-
-         .jsxc-body {
-            margin-top: 20px;
-         }
-
-         p {
-            margin-bottom: 10px;
-         }
-
-         li {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-         }
-
-         a:hover {
-            text-decoration: underline;
-         }
-      }
-   }
-
-   .resizable-handle {
-        z-index: 99;
-    }
-
-   .resizable-handle-nw {
-        margin-top: 5px;
-        margin-left: 5px;
-        z-index: 100 !important;
-        background-image: url("../images/resize_gray.svg");
-   }
-
-   .resizable-handle-n {
-        margin-top: 5px;
-    }
-
-    .resizable-handle-w {
-        margin-left: 5px;
-    }
-}
-
-.jsxc-preview {
-   max-height: 130px;
-   overflow: hidden;
-   flex-shrink: 0;
-   text-align: center;
-   font-size: 0.8em;
-
-   .jsxc-attachment {
-      position: relative;
-      margin: 10px;
-   }
-
-   .jsxc-image {
-      border-radius: 5px;
-      max-width: 100%;
-      max-height: 100%;
-      display: inline-block;
-
-      img {
-         max-width: 100%;
-         max-height: 100%;
-         height: auto;
-         width: auto;
-      }
-   }
-}
-
-.jsxc-delete-handle {
-   line-height: 0.65em;
-   position: absolute;
-   right: 0;
-   top: 0;
-   width: 1em;
-   background-color: #dc4c4c;
-   height: 1em;
-   font-size: 3em;
-   border-radius: 50%;
-   margin-right: -10px;
-   margin-top: -10px;
-   color: white;
-   z-index: 100;
-   border: 3px solid whitesmoke;
-   cursor: pointer;
-
-   &:hover {
-      background-color: red;
-   }
-}
-
-.jsxc-send-area {
-   align-items: flex-end;
-   background-color: #fff;
-   display: flex;
-   width: 100%;
-   padding: 2px 0;
-   flex-shrink: 0;
-   align-items: center;
-
-   .jsxc-menu-emoticons,.jsxc-file-transfer,.jsxc-transfer {
-      flex-shrink: 0;
-   }
-
-   .jsxc-message-input{
-      flex-grow: 1;
-   }
-
-   &.jsxc-contains-val {
-      .jsxc-file-transfer,.jsxc-transfer {
-         display: none;
-      }
-   }
-}
-
-.jsxc-message-input {
-   border-radius: 0;
-   border: 0;
-   box-sizing: content-box;
-   display: block;
-   font-size: 1em;
-   height: 1.4em;
-   line-height: 1.4em;
-   margin: 0;
-   outline: none;
-   padding: 10px 5px 5px 0;
-   resize: none;
-   transition: height 0.2s;
-
-   &::placeholder {
-      color: $window_placeholder;
-      opacity: 0.3;
-   }
-
-   @extend %scrollbar;
-
-   .jsxc-large-send-area & {
-      height: 100px;
-   }
-}
-
-.jsxc-file-transfer {
-   background-image: url("../images/attachment.svg");
-   background-position: center;
-   background-repeat: no-repeat;
-   background-size: 80%;
-   cursor: pointer;
-   height: 40px;
-   opacity: 0.3;
-   overflow: hidden;
-   position: relative;
-   width: 44px;
-
-   @media (min-width: 768px) {
-      width: 34px;
-   }
-
-   label {
-      height: 0;
-      overflow: hidden;
-      position: absolute;
-      top: 100%;
-      width: 0;
-   }
-
-   &:hover {
-      opacity: 0.5;
-   }
-}
-
-.jsxc-menu-emoticons {
-   height: 40px;
-   width: 44px;
-   cursor: pointer;
-   z-index: 30;
-   position: relative;
-
-   &:after {
-      content: " ";
-      background-image: url("../images/smiley.svg");
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-size: 30px 30px;
-      opacity: 0.3;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-   }
-
-   .jsxc-inner {
-      left: 5px;
-   }
-
-   ul {
-      width: 217px;
-      margin-bottom: 8px;
-      background-color: $emoticon_selection_bg;
+    >div {
+      background-color: #fff;
       border-radius: 3px;
-      z-index: 200;
-      list-style-type: none;
-      padding: 3px;
+      margin: 30px 10px;
+      padding: 5px;
       position: relative;
-
-      &:after {
-         content: " ";
-         position: absolute;
-         border-left: 8px solid transparent;
-         border-right: 8px solid transparent;
-         border-top: 8px solid $emoticon_selection_bg;
-         display: block;
-         width: 0;
-         z-index: 1;
-         left: 7px;
-         top: 100%;
-      }
-   }
-
-   li {
-      display: inline-block;
-      cursor: pointer;
-      border-radius: 3px;
-      width: 30px;
-      height: 30px;
-
-      &:hover {
-         background-color: $emoticon_selection_hover;
-      }
-
-      .jsxc-emoticon {
-         width: 100%;
-         height: 100%;
-         background-size: contain;
-      }
-   }
-
-   &:hover:after {
-      opacity: 0.5;
-   }
-}
-
-.jsxc-chatmessage {
-   margin: 3px;
-   padding: 4px;
-   word-wrap: break-word;
-   background-color: $chatmessage_bg;
-   position: relative;
-   outline: none;
-   clear: both;
-
-   &.jsxc-error {
-      .jsxc-content {
-         opacity: 0.7;
-      }
-
-      &:before {
-         content: "⚠";
-         position: absolute;
-         top: -2px;
-         right: -2px;
-         background-color: yellow;
-         box-shadow: 0 0 2px black;
-         font-size: 1em;
-         width: 1.2em;
-         height: 1.2em;
-         text-align: center;
-         line-height: 1em;
-         border-radius: 50%;
-         color: red;
-      }
-   }
-
-   p {
-      margin: 0;
-      clear: both;
-   }
-
-   a {
-      color: $chatmessage_a;
-      text-decoration: underline;
-      display: inline-block;
-      max-width: 100%;
-      position: relative;
-
-      &[download]:before {
-         content: " ";
-         position: absolute;
-         top: 0;
-         right: 0;
-         bottom: 5px;
-         left: 0;
-         border-radius: 3px;
-         background-color: rgba(255, 255, 255, 0.7);
-         background-image: url("../images/download_icon_black.svg");
-         background-size: contain;
-         background-position: center center;
-         background-repeat: no-repeat;
-         opacity: 0;
-         transition: opacity 0.5s;
-      }
-
-      &[download]:hover {
-         &:before {
-            opacity: 0.6;
-         }
-      }
-   }
-
-   img {
-      max-width: 100%;
-   }
-
-   .jsxc-avatar {
-      display: none;
-   }
-
-   .jsxc-quote {
-      border-left: 3px solid #999;
-      padding: 0px 3px 0px 5px;
-      display: inline-block;
-      width: 100%;
-      opacity: 0.7;
-      // margin-bottom: 5px;
-   }
-}
-
-.jsxc-attachment {
-   border-radius: 3px;
-   background-color: #fff;
-   padding: 3px 3px 3px 30px;
-   min-height: 30px;
-   margin-bottom: 5px;
-   background-position: 3px center;
-   background-size: 25px 25px;
-   background-repeat: no-repeat;
-   background-image: url("../images/filetypes/file.svg");
-
-   img {
-      border-radius: 3px;
-   }
-
-   &.jsxc-image-jpeg,&.jsxc-image-jpg,&.jsxc-image-svg,&.jsxc-image-gif,&.jsxc-image-png {
-      line-height: 0;
-      padding: 0;
-      background-image: url("");
-      display: inline-block;
-   }
-
-   &.jsxc-application {
-      background-image: url("../images/filetypes/application.svg");
-   }
-
-   &.jsxc-application-pdf {
-      background-image: url("../images/filetypes/application-pdf.svg");
-   }
-
-   &.jsxc-audio {
-      background-image: url("../images/filetypes/audio.svg");
-   }
-
-   &.jsxc-video {
-      background-image: url("../images/filetypes/video.svg");
-      opacity: 1;
-   }
-
-   &.jsxc-text {
-      background-image: url("../images/filetypes/text.svg");
-   }
-}
-
-.jsxc-timestamp {
-   font-size: 8px;
-   color: $chatmessage_timestamp;
-   line-height: 8px;
-   overflow: hidden;
-   white-space: nowrap;
-   max-width: 100%;
-   text-overflow: ellipsis;
-   clear: both;
-}
-
-.jsxc-encrypted {
-   &.jsxc-received.jsxc-out .jsxc-timestamp {
-      margin-right: 1px;
-   }
-
-   .jsxc-timestamp:after {
-      content: " ";
-      display: inline-block;
-      width: 10px;
-      height: 8px;
-      margin-left: 2px;
-      background-image: url("../images/padlock_close_grey.svg");
-      background-size: contain;
-      background-repeat: no-repeat;
-   }
-}
-
-.jsxc-unread {
-   .jsxc-timestamp:before {
-      content: "";
-      display: inline-block;
-      width: 0.8em;
-      height: 0.8em;
-      margin-right: 2px;
-      border-radius: 50%;
-      background-color: $unread_bg;
-   }
-}
-
-.jsxc-in {
-   float: left;
-   position: relative;
-   max-width: 76%;
-   margin-left: 10px;
-   border-radius: 3px;
-   background-color: $chatmessage_in_bg;
-
-   &:after {
-      content: " ";
-      position: absolute;
-      border-style: solid;
-      border-width: 5px 6px 5px 0;
-      border-color: transparent $chatmessage_in_bg;
-      display: block;
-      width: 0;
-      z-index: 1;
-      left: -6px;
-      bottom: 10px;
-   }
-
-   .jsxc-timestamp {
-      float: left;
-   }
-}
-
-.jsxc-out {
-   float: right;
-   position: relative;
-   max-width: 76%;
-   margin-right: 10px;
-   padding-right: 10px;
-   border-radius: 3px;
-   background-color: $chatmessage_out_bg;
-
-   &:after {
-      content: " ";
-      position: absolute;
-      border-style: solid;
-      border-width: 5px 0 5px 6px;
-      border-color: transparent $chatmessage_out_bg;
-      display: block;
-      width: 0;
-      z-index: 1;
-      right: -6px;
-      bottom: 10px;
-   }
-
-   &.jsxc-received {
-      &:before {
-         content: "✓";
-         position: absolute;
-         bottom: 2px;
-         right: 2px;
-         font-size: 12px;
-         line-height: 12px;
-         color: $chatmessage_received;
-      }
-
-      .jsxc-timestamp {
-         margin-right: 4px;
-      }
-   }
-
-   .jsxc-timestamp {
-      float: right;
-   }
-}
-
-.jsxc-sys {
-   background-color: transparent;
-   border-radius: 3px;
-   box-sizing: border-box;
-   font-size: 0.8em;
-   font-style: italic;
-   margin-right: 3px;
-   max-width: none;
-   padding-right: 4px;
-   text-align: center;
-   width: auto;
-
-   .jsxc-emoticon {
-      width: 1.2em;
-      height: 1.2em;
-      vertical-align: middle;
-   }
-
-   &.jsxc-composing {
       text-align: center;
-      font-size: 0.9em;
-      font-style: italic;
-      display: block;
-      opacity: 0;
-      overflow: hidden;
-      transition: opacity 0.6s;
 
-      &:before {
-         content: " ";
-         width: 1.5em;
-         height: 1em;
-         display: inline-block;
-         background-size: 80%;
-         background-repeat: no-repeat;
-         margin: 0 3px 0 0;
-         background-image: url("../images/composing.png");
+      .jsxc-close {
+        height: 44px;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 44px;
+
+        &::after {
+          color: #000;
+          content: "×";
+          cursor: pointer;
+          font-family: Arial, sans-serif;
+          font-size: 20px;
+          opacity: 0.4;
+          position: absolute;
+          right: 4px;
+          top: 4px;
+        }
+
+        &:hover {
+          &::after {
+            opacity: 1;
+          }
+        }
+        @media (min-width: 768px) {
+          height: 30px;
+          width: 30px;
+        }
       }
 
-      &.jsxc-fadein {
-         opacity: 1;
-      }
-   }
-}
-
-.jsxc-menu-settings {
-   position: relative;
-
-   .jsxc-inner {
-      left: auto;
-      top: 100%;
-      right: -6px;
-   }
-}
-
-div.jsxc-transfer {
-   z-index: 20;
-   position: relative;
-
-   @media (min-width: 768px) {
-      width: 34px;
-   }
-
-   &:hover {
-      .jsxc-transfer-icon {
-         opacity: 0.5;
-      }
-   }
-
-   .jsxc-transfer-icon {
-      background-image: url("../images/padlock_open_black.svg");
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: 60%;
-      opacity: 0.3;
-      height: 40px;
-      width: 100%;
-      display: block;
-      cursor: pointer;
-   }
-
-   &> .jsxc-transfer-icon {
-      display: none;
-   }
-
-   &.jsxc-fin, &.jsxc-enc, &.jsxc-disabled {
-      .jsxc-menu {
-         display: none;
+      .jsxc-body {
+        margin-top: 20px;
       }
 
-      &> .jsxc-transfer-icon {
-         display: block;
-      }
-   }
-
-   &.jsxc-disabled {
-      .jsxc-transfer-icon {
-         background-image: url("../images/padlock_open_disabled_black.svg");
-         cursor: default;
-      }
-
-      &:hover {
-         .jsxc-transfer-icon {
-            opacity: 0.3;
-         }
-      }
-   }
-
-   &.jsxc-fin {
-      .jsxc-transfer-icon {
-         background-image: url("../images/padlock_close_grey.svg");
-         opacity: 1;
-      }
-   }
-
-   &.jsxc-enc {
-      .jsxc-transfer-icon {
-         background-image: url("../images/padlock_close_orange.svg");
-         opacity: 1;
-      }
-
-      &.jsxc-trust {
-         .jsxc-transfer-icon {
-            background-image: url("../images/padlock_close_green.svg");
-         }
-      }
-   }
-
-   .jsxc-inner {
-      left: auto;
-      right: 3px;
-
-      ul {
-         margin-bottom: 8px;
-         background-color: $emoticon_selection_bg;
-         border-radius: 3px;
-         z-index: 200;
-         list-style-type: none;
-         padding: 3px;
-         position: relative;
-
-         &:after {
-            content: " ";
-            position: absolute;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 8px solid $emoticon_selection_bg;
-            display: block;
-            width: 0;
-            z-index: 1;
-            right: 7px;
-            top: 100%;
-         }
+      p {
+        margin-bottom: 10px;
       }
 
       li {
-         padding: 3px 7px;
-         border-radius: 3px;
-         color: white;
-         cursor: pointer;
-         text-align: center;
-
-         &:hover {
-            background-color: $emoticon_selection_hover;
-            color: black;
-         }
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
-   }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .resizable-handle {
+    z-index: 99;
+  }
+
+  .resizable-handle-nw {
+    background-image: url("../images/resize_gray.svg");
+    margin-left: 5px;
+    margin-top: 5px;
+    z-index: 100 !important;
+  }
+
+  .resizable-handle-n {
+    margin-top: 5px;
+  }
+
+  .resizable-handle-w {
+    margin-left: 5px;
+  }
+}
+
+.jsxc-preview {
+  flex-shrink: 0;
+  font-size: 0.8em;
+  max-height: 130px;
+  overflow: hidden;
+  text-align: center;
+
+  .jsxc-attachment {
+    margin: 10px;
+    position: relative;
+  }
+
+  .jsxc-image {
+    border-radius: 5px;
+    display: inline-block;
+    max-height: 100%;
+    max-width: 100%;
+
+    img {
+      height: auto;
+      max-height: 100%;
+      max-width: 100%;
+      width: auto;
+    }
+  }
+}
+
+.jsxc-delete-handle {
+  background-color: #dc4c4c;
+  border: 3px solid #f5f5f5;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  font-size: 3em;
+  height: 1em;
+  line-height: 0.65em;
+  margin-right: -10px;
+  margin-top: -10px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 1em;
+  z-index: 100;
+
+  &:hover {
+    background-color: #f00;
+  }
+}
+
+.jsxc-send-area {
+  align-items: flex-end;
+  align-items: center;
+  background-color: #fff;
+  display: flex;
+  flex-shrink: 0;
+  padding: 2px 0;
+  width: 100%;
+
+  .jsxc-menu-emoticons,
+  .jsxc-file-transfer,
+  .jsxc-transfer {
+    flex-shrink: 0;
+  }
+
+  .jsxc-message-input {
+    flex-grow: 1;
+  }
+
+  &.jsxc-contains-val {
+    .jsxc-file-transfer,
+    .jsxc-transfer {
+      display: none;
+    }
+  }
+}
+
+.jsxc-message-input {
+  @extend %scrollbar;
+  border: 0;
+  border-radius: 0;
+  box-sizing: content-box;
+  display: block;
+  font-size: 1em;
+  height: 1.4em;
+  line-height: 1.4em;
+  margin: 0;
+  outline: none;
+  padding: 10px 5px 5px 0;
+  resize: none;
+  transition: height 0.2s;
+
+  &::placeholder {
+    color: $window-placeholder;
+    opacity: 0.3;
+  }
+
+  .jsxc-large-send-area & {
+    height: 100px;
+  }
+}
+
+.jsxc-file-transfer {
+  background-image: url("../images/attachment.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 80%;
+  cursor: pointer;
+  height: 40px;
+  opacity: 0.3;
+  overflow: hidden;
+  position: relative;
+  width: 44px;
+
+  label {
+    height: 0;
+    overflow: hidden;
+    position: absolute;
+    top: 100%;
+    width: 0;
+  }
+
+  &:hover {
+    opacity: 0.5;
+  }
+  @media (min-width: 768px) {
+    width: 34px;
+  }
+}
+
+.jsxc-menu-emoticons {
+  cursor: pointer;
+  height: 40px;
+  position: relative;
+  width: 44px;
+  z-index: 30;
+
+  &::after {
+    background-image: url("../images/smiley.svg");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 30px 30px;
+    bottom: 0;
+    content: " ";
+    left: 0;
+    opacity: 0.3;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+
+  .jsxc-inner {
+    left: 5px;
+  }
+
+  ul {
+    background-color: $emoticon-selection-bg;
+    border-radius: 3px;
+    list-style-type: none;
+    margin-bottom: 8px;
+    padding: 3px;
+    position: relative;
+    width: 217px;
+    z-index: 200;
+
+    &::after {
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid $emoticon-selection-bg;
+      content: " ";
+      display: block;
+      left: 7px;
+      position: absolute;
+      top: 100%;
+      width: 0;
+      z-index: 1;
+    }
+  }
+
+  li {
+    border-radius: 3px;
+    cursor: pointer;
+    display: inline-block;
+    height: 30px;
+    width: 30px;
+
+    &:hover {
+      background-color: $emoticon-selection-hover;
+    }
+
+    .jsxc-emoticon {
+      background-size: contain;
+      height: 100%;
+      width: 100%;
+    }
+  }
+
+  &:hover::after {
+    opacity: 0.5;
+  }
+}
+
+.jsxc-chatmessage {
+  background-color: $chatmessage-bg;
+  clear: both;
+  margin: 3px;
+  outline: none;
+  padding: 4px;
+  position: relative;
+  word-wrap: break-word;
+
+  &.jsxc-error {
+    .jsxc-content {
+      opacity: 0.7;
+    }
+
+    &::before {
+      background-color: #ff0;
+      border-radius: 50%;
+      box-shadow: 0 0 2px #000;
+      color: #f00;
+      content: "⚠";
+      font-size: 1em;
+      height: 1.2em;
+      line-height: 1em;
+      position: absolute;
+      right: -2px;
+      text-align: center;
+      top: -2px;
+      width: 1.2em;
+    }
+  }
+
+  p {
+    clear: both;
+    margin: 0;
+  }
+
+  a {
+    color: $chatmessage-a;
+    display: inline-block;
+    max-width: 100%;
+    position: relative;
+    text-decoration: underline;
+
+    &[download]::before {
+      background-color: rgba(255, 255, 255, 0.7);
+      background-image: url("../images/download_icon_black.svg");
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      border-radius: 3px;
+      bottom: 5px;
+      content: " ";
+      left: 0;
+      opacity: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+      transition: opacity 0.5s;
+    }
+
+    &[download]:hover {
+      &::before {
+        opacity: 0.6;
+      }
+    }
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  .jsxc-avatar {
+    display: none;
+  }
+
+  .jsxc-quote {
+    border-left: 3px solid #999;
+    display: inline-block;
+    opacity: 0.7;
+    padding: 0 3px 0 5px;
+    width: 100%; // margin-bottom: 5px;
+  }
+}
+
+.jsxc-attachment {
+  background-color: #fff;
+  background-image: url("../images/filetypes/file.svg");
+  background-position: 3px center;
+  background-repeat: no-repeat;
+  background-size: 25px 25px;
+  border-radius: 3px;
+  margin-bottom: 5px;
+  min-height: 30px;
+  padding: 3px 3px 3px 30px;
+
+  img {
+    border-radius: 3px;
+  }
+
+  &.jsxc-image-jpeg,
+  &.jsxc-image-jpg,
+  &.jsxc-image-svg,
+  &.jsxc-image-gif,
+  &.jsxc-image-png {
+    background-image: url("");
+    display: inline-block;
+    line-height: 0;
+    padding: 0;
+  }
+
+  &.jsxc-application {
+    background-image: url("../images/filetypes/application.svg");
+  }
+
+  &.jsxc-application-pdf {
+    background-image: url("../images/filetypes/application-pdf.svg");
+  }
+
+  &.jsxc-audio {
+    background-image: url("../images/filetypes/audio.svg");
+  }
+
+  &.jsxc-video {
+    background-image: url("../images/filetypes/video.svg");
+    opacity: 1;
+  }
+
+  &.jsxc-text {
+    background-image: url("../images/filetypes/text.svg");
+  }
+}
+
+.jsxc-timestamp {
+  clear: both;
+  color: $chatmessage-timestamp;
+  font-size: 8px;
+  line-height: 8px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jsxc-encrypted {
+  &.jsxc-received.jsxc-out .jsxc-timestamp {
+    margin-right: 1px;
+  }
+
+  .jsxc-timestamp::after {
+    background-image: url("../images/padlock_close_grey.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    content: " ";
+    display: inline-block;
+    height: 8px;
+    margin-left: 2px;
+    width: 10px;
+  }
+}
+
+.jsxc-unread {
+  .jsxc-timestamp::before {
+    background-color: $unread-bg;
+    border-radius: 50%;
+    content: "";
+    display: inline-block;
+    height: 0.8em;
+    margin-right: 2px;
+    width: 0.8em;
+  }
+}
+
+.jsxc-in {
+  background-color: $chatmessage-in-bg;
+  border-radius: 3px;
+  float: left;
+  margin-left: 10px;
+  max-width: 76%;
+  position: relative;
+
+  &::after {
+    border-color: transparent $chatmessage-in-bg;
+    border-style: solid;
+    border-width: 5px 6px 5px 0;
+    bottom: 10px;
+    content: " ";
+    display: block;
+    left: -6px;
+    position: absolute;
+    width: 0;
+    z-index: 1;
+  }
+
+  .jsxc-timestamp {
+    float: left;
+  }
+}
+
+.jsxc-out {
+  background-color: $chatmessage-out-bg;
+  border-radius: 3px;
+  float: right;
+  margin-right: 10px;
+  max-width: 76%;
+  padding-right: 10px;
+  position: relative;
+
+  &::after {
+    border-color: transparent $chatmessage-out-bg;
+    border-style: solid;
+    border-width: 5px 0 5px 6px;
+    bottom: 10px;
+    content: " ";
+    display: block;
+    position: absolute;
+    right: -6px;
+    width: 0;
+    z-index: 1;
+  }
+
+  &.jsxc-received {
+    &::before {
+      bottom: 2px;
+      color: $chatmessage-received;
+      content: "✓";
+      font-size: 12px;
+      line-height: 12px;
+      position: absolute;
+      right: 2px;
+    }
+
+    .jsxc-timestamp {
+      margin-right: 4px;
+    }
+  }
+
+  .jsxc-timestamp {
+    float: right;
+  }
+}
+
+.jsxc-sys {
+  background-color: transparent;
+  border-radius: 3px;
+  box-sizing: border-box;
+  font-size: 0.8em;
+  font-style: italic;
+  margin-right: 3px;
+  max-width: none;
+  padding-right: 4px;
+  text-align: center;
+  width: auto;
+
+  .jsxc-emoticon {
+    height: 1.2em;
+    vertical-align: middle;
+    width: 1.2em;
+  }
+
+  &.jsxc-composing {
+    display: block;
+    font-size: 0.9em;
+    font-style: italic;
+    opacity: 0;
+    overflow: hidden;
+    text-align: center;
+    transition: opacity 0.6s;
+
+    &::before {
+      background-image: url("../images/composing.png");
+      background-repeat: no-repeat;
+      background-size: 80%;
+      content: " ";
+      display: inline-block;
+      height: 1em;
+      margin: 0 3px 0 0;
+      width: 1.5em;
+    }
+
+    &.jsxc-fadein {
+      opacity: 1;
+    }
+  }
+}
+
+.jsxc-menu-settings {
+  position: relative;
+
+  .jsxc-inner {
+    left: auto;
+    right: -6px;
+    top: 100%;
+  }
+}
+
+div.jsxc-transfer {
+  position: relative;
+  z-index: 20;
+
+  &:hover {
+    .jsxc-transfer-icon {
+      opacity: 0.5;
+    }
+  }
+
+  .jsxc-transfer-icon {
+    background-image: url("../images/padlock_open_black.svg");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 60%;
+    cursor: pointer;
+    display: block;
+    height: 40px;
+    opacity: 0.3;
+    width: 100%;
+  }
+
+  >.jsxc-transfer-icon {
+    display: none;
+  }
+
+  &.jsxc-fin,
+  &.jsxc-enc,
+  &.jsxc-disabled {
+    .jsxc-menu {
+      display: none;
+    }
+
+    >.jsxc-transfer-icon {
+      display: block;
+    }
+  }
+
+  &.jsxc-disabled {
+    .jsxc-transfer-icon {
+      background-image: url("../images/padlock_open_disabled_black.svg");
+      cursor: default;
+    }
+
+    &:hover {
+      .jsxc-transfer-icon {
+        opacity: 0.3;
+      }
+    }
+  }
+
+  &.jsxc-fin {
+    .jsxc-transfer-icon {
+      background-image: url("../images/padlock_close_grey.svg");
+      opacity: 1;
+    }
+  }
+
+  &.jsxc-enc {
+    .jsxc-transfer-icon {
+      background-image: url("../images/padlock_close_orange.svg");
+      opacity: 1;
+    }
+
+    &.jsxc-trust {
+      .jsxc-transfer-icon {
+        background-image: url("../images/padlock_close_green.svg");
+      }
+    }
+  }
+
+  .jsxc-inner {
+    left: auto;
+    right: 3px;
+
+    ul {
+      background-color: $emoticon-selection-bg;
+      border-radius: 3px;
+      list-style-type: none;
+      margin-bottom: 8px;
+      padding: 3px;
+      position: relative;
+      z-index: 200;
+
+      &::after {
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 8px solid $emoticon-selection-bg;
+        content: " ";
+        display: block;
+        position: absolute;
+        right: 7px;
+        top: 100%;
+        width: 0;
+        z-index: 1;
+      }
+    }
+
+    li {
+      border-radius: 3px;
+      color: #fff;
+      cursor: pointer;
+      padding: 3px 7px;
+      text-align: center;
+
+      &:hover {
+        background-color: $emoticon-selection-hover;
+        color: #000;
+      }
+    }
+  }
+  @media (min-width: 768px) {
+    width: 34px;
+  }
 }
 
 .jsxc-mam-load-more {
-   display: none;
-   font-size: 0.8em;
-   height: 42px;
-   left: 0;
-   line-height: 42px;
-   position: absolute;
-   right: 0;
-   text-align: center;
-   top: -42px;
-   transition: top 0.5s;
-   z-index: 80;
-   user-select: none;
+  display: none;
+  font-size: 0.8em;
+  height: 42px;
+  left: 0;
+  line-height: 42px;
+  position: absolute;
+  right: 0;
+  text-align: center;
+  top: -42px;
+  transition: top 0.5s;
+  user-select: none;
+  z-index: 80;
 
-   span {
-      background-color: #e4e4e4;
-      cursor: pointer;
-      padding: 5px 10px;
+  span {
+    background-color: #e4e4e4;
+    cursor: pointer;
+    padding: 5px 10px;
 
-      &:hover {
-         background-color: #dfcfcf;
-         opacity: 1;
-      }
-   }
+    &:hover {
+      background-color: #dfcfcf;
+      opacity: 1;
+    }
+  }
 
-   &.jsxc-show {
-      top: 0;
-   }
+  &.jsxc-show {
+    top: 0;
+  }
 }
 
 .jsxc-mam-enabled {
-   .jsxc-mam-load-more {
-      display: block;
-   }
+  .jsxc-mam-load-more {
+    display: block;
+  }
 
-   .jsxc-message-area {
-      padding-top: 42px;
-   }
+  .jsxc-message-area {
+    padding-top: 42px;
+  }
 }

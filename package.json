@@ -15,10 +15,13 @@
     "dev": "webpack-dev-server --mode development",
     "test": "karma start --single-run",
     "fix-format": "node_modules/typescript-formatter/bin/tsfmt  -r",
+    "fix-style-format": "node_modules/.bin/stylelint \"scss/**/*.scss\" --fix",
+    "checking-style-format": "node_modules/.bin/stylelint \"scss/**/*.scss\"",
     "checking-format": "node_modules/typescript-formatter/bin/tsfmt --verify",
     "checking-typescript": "node_modules/typescript/bin/tsc --noEmit"
   },
   "pre-commit": [
+    "checking-style-format",
     "checking-format",
     "checking-typescript"
   ],
@@ -85,6 +88,8 @@
     "sha1": "^1.1.1",
     "simplebar": "^2.5.1",
     "strophe.js": "^1.2.14",
+    "stylelint": "^9.3.0",
+    "stylelint-config-sass-guidelines": "^5.0.0",
     "ts-loader": "^4.0.1",
     "ts-node": "^5.0.1",
     "tslib": "^1.9.0",

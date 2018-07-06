@@ -1,59 +1,60 @@
 .jsxc-btn {
-    width: auto;
-    min-width: 25px;
-    display: inline-block;
-    padding: 6px 12px;
-    margin: 0 2px;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.42857143;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: middle;
-    cursor: pointer;
-    user-select: none;
-    background-image: none;
-   //  border: 1px solid transparent;
-   //  border-radius: 4px;
-    border: 0;
-    padding: 10px 16px;
-    transition: background-color 0.5s;
+  background-image: none;
+  //  border: 1px solid transparent;
+  //  border-radius: 4px;
+  border: 0;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  margin: 0 2px;
+  min-width: 25px;
+  padding: 6px 12px;
+  padding: 10px 16px;
+  text-align: center;
+  transition: background-color 0.5s;
+  user-select: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  width: auto;
 
-    &.jsxc-btn-default {
-        border-color: #ccc;
-        color: #555;
-        background-color: rgba(240, 240, 240, 0.9);
+  &.jsxc-btn-default {
+    background-color: rgba(240, 240, 240, 0.9);
+    border-color: #ccc;
+    color: #555;
 
-        &:hover {
-            background-color: #d6d6d6;
-        }
+    &:hover {
+      background-color: #d6d6d6;
     }
+  }
 
-    &.jsxc-btn-primary {
-        color: #fff;
-        background-color: #337ab7;
-        border-color: #2e6da4;
+  &.jsxc-btn-primary {
+    background-color: #337ab7;
+    border-color: #2e6da4;
+    color: #fff;
 
-        &:hover {
-            background-color: #296496;
-        }
+    &:hover {
+      background-color: #296496;
     }
+  }
 
-    &.jsxc-btn-success {
-        color: #fff;
-        background-color: #6bad50;
-        border-color: #487735;
+  &.jsxc-btn-success {
+    background-color: #6bad50;
+    border-color: #487735;
+    color: #fff;
 
-        &:hover {
-            background-color: #5a9443;
-        }
+    &:hover {
+      background-color: #5a9443;
     }
+  }
 
-    &[disabled], &[disabled]:hover {
-        opacity: 0.65;
-        cursor: not-allowed;
-        color: #fff;
-        background-color: #337ab7;
-        border-color: #2e6da4;
-    }
+  &[disabled],
+  &[disabled]:hover {
+    background-color: #337ab7;
+    border-color: #2e6da4;
+    color: #fff;
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
 }

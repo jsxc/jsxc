@@ -1,106 +1,106 @@
 #jsxc-window-list {
-   @include presenceIndicator(" .jsxc-window-bar .jsxc-avatar");
+  @include presence-indicator(" .jsxc-window-bar .jsxc-avatar");
+  bottom: 0;
+  left: 0;
 
-   position: fixed;
-   bottom: 0;
-   right: 210px;
-   left: 0;
-   z-index: 50;
-   transition: right 0.5s;
+  position: fixed;
+  right: 210px;
+  transition: right 0.5s;
+  z-index: 50;
 
-   .jsxc-roster-hidden & {
-      right: 10px;
-   }
+  .jsxc-roster-hidden & {
+    right: 10px;
+  }
 
-   @media (min-width: 768px) {
-      clip: rect(-10000px, 10000px, 30px, 30px);
-   }
+  @media (min-width: 768px) {
+    clip: rect(-10000px, 10000px, 30px, 30px);
+  }
 
-   > ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      height: 44px;
-      overflow: visible;
-      white-space: nowrap;
-      transition: right 0.5s;
+  > ul {
+    bottom: 0;
+    display: flex;
+    height: 44px;
+    list-style: none;
+    margin: 0;
+    overflow: visible;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    transition: right 0.5s;
+    white-space: nowrap;
+
+    > li {
+      align-items: flex-end;
+      cursor: pointer;
       display: flex;
+      height: 44px;
+      margin: 0;
+      margin-right: 5px;
+      overflow: visible;
+      padding: 0;
+      position: relative;
+      white-space: normal;
+      width: 46px;
 
-      > li {
-         padding: 0;
-         margin: 0;
-         display: flex;
-         align-items: flex-end;
-         height: 44px;
-         width: 46px;
-         position: relative;
-         overflow: visible;
-         margin-right: 5px;
-         cursor: pointer;
-         white-space: normal;
-
-         &.jsxc-normal {
-            transition: width 0.2s;
-            width: auto;
-         }
-
-         &.jsxc-minimized {
-            transition: width 0.2s;
-            width: 46px !important;
-            //  overwrite resizeable width
-            @media (min-width: 768px) {
-               width: 200px !important;
-            }
-
-            .jsxc-emoticons {
-               display: none;
-            }
-
-            .jsxc-tools {
-               display: none;
-            }
-         }
+      &.jsxc-normal {
+        transition: width 0.2s;
+        width: auto;
       }
-   }
+
+      &.jsxc-minimized {
+        transition: width 0.2s;
+        width: 46px !important;
+        //  overwrite resizeable width
+        @media (min-width: 768px) {
+          width: 200px !important;
+        }
+
+        .jsxc-emoticons {
+          display: none;
+        }
+
+        .jsxc-tools {
+          display: none;
+        }
+      }
+    }
+  }
 }
 
 #jsxc-window-list-handler {
-   position: fixed;
-   left: 0;
-   bottom: 0;
-   width: 30px;
-   height: 30px;
+  bottom: 0;
+  height: 30px;
+  left: 0;
+  position: fixed;
+  width: 30px;
 
-   @media (max-width: 768px) {
+  @media (max-width: 768px) {
+    display: none;
+  }
+
+  > {
+    div {
+      background-color: $scrollbar-bg;
+      box-sizing: border-box;
+      color: $scrollbar-color;
+      cursor: pointer;
+      float: left;
+      height: 100%;
+      line-height: 30px;
+      text-align: center;
+      user-select: none;
+      width: 14px;
+
+      &:hover {
+        background-color: $scrollbar-bg-hover;
+      }
+    }
+
+    .jsxc-disabled {
+      background-color: $scrollbar-bg-disabled !important;
+      color: $scrollbar-color-disabled;
+      cursor: default !important;
       display: none;
-   }
-
-   > {
-      div {
-         box-sizing: border-box;
-         width: 14px;
-         height: 100%;
-         background-color: $windowListSB_bg;
-         color: $windowListSB_color;
-         text-align: center;
-         line-height: 30px;
-         float: left;
-         cursor: pointer;
-         user-select: none;
-
-         &:hover {
-            background-color: $windowListSB_bg_hover;
-         }
-      }
-
-      .jsxc-disabled {
-         background-color: $windowListSB_bg_disabled !important;
-         color: $windowListSB_color_disabled;
-         cursor: default !important;
-         display: none;
-      }
-   }
+    }
+  }
 }

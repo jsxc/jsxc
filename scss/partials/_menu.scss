@@ -1,108 +1,108 @@
 .jsxc-menu {
-   .jsxc-inner {
-      box-sizing: border-box;
-      max-height: 0;
-      transition: max-height 0.5s;
-      overflow: hidden;
-      visibility: hidden;
-      position: absolute;
-      bottom: 100%;
-      left: 0;
-   }
+  .jsxc-inner {
+    bottom: 100%;
+    box-sizing: border-box;
+    left: 0;
+    max-height: 0;
+    overflow: hidden;
+    position: absolute;
+    transition: max-height 0.5s;
+    visibility: hidden;
+  }
 
-   &.jsxc-opened {
-      .jsxc-inner {
-         max-height: 1000px;
-         visibility: visible;
-         display: block;
-      }
-   }
+  &.jsxc-opened {
+    .jsxc-inner {
+      display: block;
+      max-height: 1000px;
+      visibility: visible;
+    }
+  }
 
-   ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-   }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
 
-   li {
-      border: 0;
-      cursor: auto;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      user-select: none;
-   }
+  li {
+    border: 0;
+    cursor: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+    white-space: nowrap;
+  }
 
-   a {
-      color: inherit;
-      text-decoration: none;
-   }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 .jsxc-menu-dropdown {
-   .jsxc-inner {
-      display: none;
+  .jsxc-inner {
+    background-color: #fff;
+    border-radius: 3px;
+    bottom: auto;
+    color: #333;
+    display: none;
+    filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
+    margin: 8px 2px 5px 10px;
+    overflow: visible;
+    padding: 4px 12px 4px 5px;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 110;
+
+    &::after {
+      border: solid transparent;
+      border-bottom-color: #fff;
+      border-color: rgba(238, 238, 238, 0);
+      border-width: 10px;
+      bottom: 100%;
+      content: " ";
+      height: 0;
+      pointer-events: none;
       position: absolute;
-      background-color: #FFF;
-      color: #333;
-      border-radius: 3px;
-      z-index: 110;
-      margin: 8px 2px 5px 10px;
-      right: 0;
-      filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
-      padding: 4px 12px 4px 5px;
-      top: 100%;
-      bottom: auto;
-      overflow: visible;
+      right: 6px;
+      width: 0;
+    }
+  }
 
-      &:after {
-         bottom: 100%;
-         right: 6px;
-         border: solid transparent;
-         content: " ";
-         height: 0;
-         width: 0;
-         position: absolute;
-         pointer-events: none;
-         border-color: rgba(238, 238, 238, 0);
-         border-bottom-color: #fff;
-         border-width: 10px;
-      }
-   }
+  a {
+    color: #000;
+    opacity: 0.5;
+    white-space: nowrap;
 
-   a {
-      color: #000;
+    &:hover {
+      opacity: 1;
+      text-decoration: none;
+    }
+
+    &.jsxc-disabled {
       opacity: 0.5;
-      white-space: nowrap;
+      text-decoration: line-through;
 
       &:hover {
-         text-decoration: none;
-         opacity: 1;
+        opacity: 0.5;
+        text-decoration: line-through;
       }
 
-      &.jsxc-disabled {
-         text-decoration: line-through;
-         opacity: 0.5;
-
-         &:hover {
-            text-decoration: line-through;
-            opacity: 0.5;
-         }
-
-         span {
-            cursor: default;
-         }
+      span {
+        cursor: default;
       }
-   }
+    }
+  }
 
-   .jsxc-icon {
-      width: 16px;
-      height: 16px;
-      margin-right: 8px;
-      display: inline-block;
-      background-repeat: no-repeat;
-      background-size: contain;
-      background-position: center;
-      vertical-align: sub;
-   }
+  .jsxc-icon {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    display: inline-block;
+    height: 16px;
+    margin-right: 8px;
+    vertical-align: sub;
+    width: 16px;
+  }
 }

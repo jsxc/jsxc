@@ -38,7 +38,7 @@ function vcardSuccessCallback(vCardData): Promise<any> {
    dialogElement.find('p').remove();
 
    if (vCardData.PHOTO) {
-      var img_el = $('<img class="jsxc-vCard" alt="avatar" />');
+      var img_el = $('<img class="jsxc-vcard" alt="avatar" />');
       img_el.attr('src', vCardData.PHOTO.src);
 
       dialogElement.find('h3').before(img_el);

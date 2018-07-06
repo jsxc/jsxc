@@ -1,36 +1,36 @@
-//@import "../../node_modules/emojione/assets/css/emojione";
-@import "../../node_modules/emojione/lib/emojione-awesome/_emojione-awesome.map";
+@import "../../node_modules/emojione/lib/emojione-awesome/emojione-awesome.map";
+
 [class*=jsxc-emoticon-] { //@REVIEW vs jsxc-emoticon
-	display: inline-block;
-	width: 1em;
-	height: 1em;
-	margin: -.2ex .05em 0 .1em;
-	line-height: normal;
-	vertical-align: middle;
-	background-repeat: no-repeat;
-	background-position: center center;
-	background-size: 1em 1em;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 1em 1em;
+  display: inline-block;
+  height: 1em;
+  line-height: normal;
+  margin: -0.2ex 0.05em 0 0.1em;
+  vertical-align: middle;
+  width: 1em;
 }
 
 $size-map: (
-	"sm": 1,
-	"med": 2,
-	"lg": 4
+  "sm": 1,
+  "med": 2,
+  "lg": 4
 );
 
 @each $name, $size in $size-map {
-	.jsxc-emoticon-#{$name} {
-		width: 32px * $size;
-		height: 32px * $size;
-		margin: -.2ex * $size .05em * $size 0 .1em * $size;
-		background-size: 1em * $size 1em * $size;
-	}
+  .jsxc-emoticon-#{$name} {
+    background-size: 1em * $size 1em * $size;
+    height: 32px * $size;
+    margin: -0.2ex * $size 0.05em * $size 0 0.1em * $size;
+    width: 32px * $size;
+  }
 }
 
 @each $code, $name in $emoji-map {
-	.jsxc-emoticon-#{$code} {
-		background-image: url("../images/emojione/#{$code}.svg");
-	}
+  .jsxc-emoticon-#{$code} {
+    background-image: url("../images/emojione/#{$code}.svg");
+  }
 }
 
 // BEGIN: bootstrap
@@ -39,57 +39,58 @@ $size-map: (
 
 // Spec and IE10+
 @keyframes progress-bar-stripes {
-    from {
-        background-position: 40px 0;
-    }
+  from {
+    background-position: 40px 0;
+  }
 
-    to {
-        background-position: 0 0;
-    }
+  to {
+    background-position: 0 0;
+  }
 }
 
 #jsxc-dialog {
-    @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/progress-bars";
+  @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/progress-bars";
 }
 
-#jsxc-dialog, #jsxc-webrtc {
-    @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/utilities";
-    @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/code";
-    @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/grid";
-    @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/alerts";
-    @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/buttons";
-    @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/button-groups";
-    @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/forms";
+#jsxc-dialog,
+#jsxc-webrtc {
+  @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/utilities";
+  @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/code";
+  @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/grid";
+  @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/alerts";
+  @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/buttons";
+  @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/button-groups";
+  @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/forms";
 
-    .progress {
-        margin-bottom: 0;
+  .progress {
+    margin-bottom: 0;
 
-        .progress-bar {
-            width: 100%;
-        }
+    .progress-bar {
+      width: 100%;
     }
+  }
 
-    .mfp-close {
-        font-size: 23px;
-    }
+  .mfp-close {
+    font-size: 23px;
+  }
 }
 
 .mfp-bg {
-    z-index: 9000;
-    opacity: 1;
-    background-color: #fff;
+  background-color: #fff;
+  opacity: 1;
+  z-index: 9000;
 }
 
 .mfp-wrap {
-    z-index: 9010;
+  z-index: 9010;
 }
 
 .mfp-content {
-    text-align: center;
+  text-align: center;
 }
 
 //  END: bootstrap
 
 #cboxWrapper {
-    outline: none;
+  outline: none;
 }

@@ -1,27 +1,27 @@
 $emoticons: jabber, jsxc, klaus, nextcloud, xmpp, owncloud;
 
 .jsxc-emoticon {
-    display: inline-block;
-    width: 19px;
-    height: 19px;
-    background-size: contain;
-    border: 0;
-    vertical-align: bottom;
+  background-size: contain;
+  border: 0;
+  display: inline-block;
+  height: 19px;
+  vertical-align: bottom;
+  width: 19px;
 
-    &.jsxc-large {
-        width: 40px;
-        height: 40px;
-        margin-bottom: 7px;
+  &.jsxc-large {
+    height: 40px;
+    margin-bottom: 7px;
+    width: 40px;
 
-        #jsxc-roster & {
-            width: 19px;
-            height: 19px;
-        }
+    #jsxc-roster & {
+      height: 19px;
+      width: 19px;
     }
+  }
 
-    @each $emoticon in $emoticons {
-        &-#{$emoticon} {
-            background: url("../images/emoticons/#{$emoticon}.svg");
-        }
+  @each $emoticon in $emoticons {
+    &-#{$emoticon} {
+      background: url("../images/emoticons/#{$emoticon}.svg");
     }
+  }
 }

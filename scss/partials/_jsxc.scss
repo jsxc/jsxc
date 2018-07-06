@@ -1,473 +1,489 @@
 .jsxc-right {
-    text-align: right;
+  text-align: right;
 }
 
 .jsxc-center {
-    text-align: center;
+  text-align: center;
 }
 
 .jsxc-hidden {
-    display: none;
+  display: none;
 }
 
 .jsxc-clear {
-    clear: both;
+  clear: both;
 }
 
 .jsxc-uppercase {
-    text-transform: uppercase;
+  text-transform: uppercase;
 }
 
 .jsxc-separator {
-    border-top: 1px solid $separator;
+  border-top: 1px solid $separator;
 }
 
 .jsxc-name {
-    overflow: hidden;
-    cursor: pointer;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    user-select: none;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+  white-space: nowrap;
 }
 
 .jsxc-max-width {
-    max-width: 500px;
+  max-width: 500px;
 }
 
 .jsxc-meta {
-    text-align: right;
-    font-style: italic;
+  font-style: italic;
+  text-align: right;
 }
 
 .jsxc-invalid {
-    border: 2px solid $invalid_border !important;
+  border: 2px solid $invalid-border !important;
 }
 
 .jsxc-fingerprint {
-    font-family: monospace;
+  font-family: monospace;
 }
 
 .jsxc-overlay {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 9999;
+  bottom: 0;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 9999;
 
-    &-black {
-        background-color: rgba(0,0,0, 0.8);
-    }
+  &-black {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
 }
 
-.jsxc-waiting:before {
-    border-radius: 50%;
-    content:'';
-    display: inline-block;
-    vertical-align: sub;
-    animation: jsxc-rotate 1.1s infinite linear;
-    border: 0.15em solid rgba(0,0,0, 0.2);
-    border-left-color: rgba(0,0,0, 0.8);
-    margin-right: 0.8em;
-    position: relative;
-    text-indent: -9999em;
-    transform: translateZ(0);
-    height: 1.2em;
-    width: 1.2em;
+.jsxc-waiting::before {
+  animation: jsxc-rotate 1.1s infinite linear;
+  border: 0.15em solid rgba(0, 0, 0, 0.2);
+  border-left-color: rgba(0, 0, 0, 0.8);
+  border-radius: 50%;
+  content: "";
+  display: inline-block;
+  height: 1.2em;
+  margin-right: 0.8em;
+  position: relative;
+  text-indent: -9999em;
+  transform: translateZ(0);
+  vertical-align: sub;
+  width: 1.2em;
 }
 
 .jsxc-avatar {
-    width: 36px;
-    height: 36px;
-    line-height: 36px;
-    margin: 0 5px;
-    background-color: $avatar_bg;
+  background-color: $avatar-bg;
+  background-position: center center;
+  background-size: cover;
+  border-radius: 50%;
+  color: $avatar-color;
+  float: left;
+  font-family: $font-sans;
+  font-size: 30px;
+  font-weight: bold;
+  height: 36px;
+  line-height: 36px;
+  margin: 0 5px;
+  position: relative;
+  text-align: center;
+  width: 36px;
+
+  img {
+    display: block;
+    height: 25px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 25px;
+  }
+
+  &::before {
+    border: 2px solid $roster-bg;
+    left: -6px;
+    position: absolute;
+    top: -2px;
+  }
+
+  &-loading::after {
+    animation: jsxc-rotate 1s infinite;
+    border: 10px solid rgba(255, 255, 255, 0.7);
+    border-left-color: rgba(0, 0, 0, 0.5);
     border-radius: 50%;
-    float: left;
-    text-align: center;
-    font-weight: bold;
-    font-size: 30px;
-    color: $avatar_color;
-    position: relative;
-    font-family: $font_sans;
-    background-size: cover;
-    background-position: center center;
-
-    img {
-        display: block;
-        width: 25px;
-        height: 25px;
-        position: absolute;
-        top: 0;
-        left: 0;
-    }
-
-    &:before {
-        position: absolute;
-        top: -2px;
-        left: -6px;
-        border: 2px solid $roster_bg;
-    }
-
-    &-loading:after {
-        content: '';
-        width: 20px;
-        height: 20px;
-        display: block;
-        border: 10px solid rgba(255,255,255,0.7);
-        border-right-color: rgba(0,0,0,0.5);
-        border-left-color: rgba(0,0,0,0.5);
-        border-radius: 50%;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-top: -10px;
-        margin-left: -10px;
-        animation: jsxc-rotate 1s infinite;
-    }
+    border-right-color: rgba(0, 0, 0, 0.5);
+    content: "";
+    display: block;
+    height: 20px;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    position: absolute;
+    top: 50%;
+    width: 20px;
+  }
 }
 
-ul.jsxc-vCard {
-    min-width: 400px;
+ul.jsxc-vcard {
+  min-width: 400px;
 
-    ul {
-        margin-left: 20px;
-    }
+  ul {
+    margin-left: 20px;
+  }
 
-    li {
-        cursor: default !important;
-    }
+  li {
+    cursor: default !important;
+  }
 }
 
 //  Spot which is attached to xmpp: uris
 .jsxc-spot {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    text-indent: -99999em;
-    margin-top: 3px;
-    margin-right: 5px;
-    line-height: 100%;
-    cursor: pointer;
-    border: 1px solid $spot_border;
-    background-color: $white;
+  background-color: $white;
+  border: 1px solid $spot-border;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-block;
+  height: 12px;
+  line-height: 100%;
+  margin-right: 5px;
+  margin-top: 3px;
+  text-indent: -99999em;
+  width: 12px;
 
-    &:before {
-        position: absolute;
-    }
+  &::before {
+    position: absolute;
+  }
 
-    &.jsxc-online, &.jsxc-chat, &.jsxc-away, &.jsxc-xa, &.jsxc-dnd, &.jsxc-offline {
-        border: 0;
-    }
+  &.jsxc-online,
+  &.jsxc-chat,
+  &.jsxc-away,
+  &.jsxc-xa,
+  &.jsxc-dnd,
+  &.jsxc-offline {
+    border: 0;
+  }
 }
 
-.jsxc-unreadMsg {
-    .jsxc-name {
-        font-style: italic;
-    }
+.jsxc-unread-msg {
+  .jsxc-name {
+    font-style: italic;
+  }
 
-    .jsxc-unread {
-        display: block;
-        background-color: $unread_bg;
-        border-radius: 11px;
-        color: $unread_color;
-        font-size: 80%;
-        padding: 2px;
-        line-height: 15px;
-        float: right;
-        margin-right: 3px;
-        margin-top: 4px;
-    }
+  .jsxc-unread {
+    background-color: $unread-bg;
+    border-radius: 11px;
+    color: $unread-color;
+    display: block;
+    float: right;
+    font-size: 80%;
+    line-height: 15px;
+    margin-right: 3px;
+    margin-top: 4px;
+    padding: 2px;
+  }
 }
 
 .jsxc-loading {
-    margin: 0 auto;
-    width: 32px;
-    height: 32px;
-    border: 0;
-    background-size: 32px 32px !important;
-    background: url("../images/loading.gif");
+  background: url("../images/loading.gif");
+  background-size: 32px 32px !important;
+  border: 0;
+  height: 32px;
+  margin: 0 auto;
+  width: 32px;
 }
 
 //  @TODO: check
-#jsxc-login-form input[type='submit'] {
-    height: 34px;
-    display: inline-block;
-    padding: 6px 12px;
-    margin-bottom: 0;
-    font-size: 14px;
-    font-weight: normal;
-    line-height: 1.428571429;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: middle;
-    cursor: pointer;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    user-select: none;
-    color: $white;
-    background-color: $loginForm_bg;
-    border-color: $loginForm_border;
+#jsxc-login-form input[type="submit"] {
+  background-color: $login-form-bg;
+  border: 1px solid transparent;
+  border-color: $login-form-border;
+  border-radius: 4px;
+  color: $white;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: normal;
+  height: 34px;
+  line-height: 1.428571429;
+  margin-bottom: 0;
+  padding: 6px 12px;
+  text-align: center;
+  user-select: none;
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
 .jsxc-oneway .jsxc-avatar {
-    filter: grayscale(100%);
+  filter: grayscale(100%);
 }
 
-img.jsxc-vCard {
-    float: right;
-    max-width: 200px;
-    max-height: 200px;
-    border: 5px solid $white;
-    border-radius: 2px;
+img.jsxc-vcard {
+  border: 5px solid $white;
+  border-radius: 2px;
+  float: right;
+  max-height: 200px;
+  max-width: 200px;
 }
 
 .jsxc-alert {
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  padding: 15px;
 
-    &.jsxc-alert-warning {
-        color: #8a6d3b;
-        background-color: #fcf8e3;
-        border-color: #faebcc;
-    }
+  &.jsxc-alert-warning {
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+    color: #8a6d3b;
+  }
 }
 
 .jsxc-more {
-    float: right;
-    width: 44px;
-    height: 100%;
-    cursor: pointer;
-    background-image: url("../images/more_black.svg");
-    background-repeat: no-repeat;
-    background-position: center;
-    opacity: 0.4;
+  background-image: url("../images/more_black.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  float: right;
+  height: 100%;
+  opacity: 0.4;
+  width: 44px;
 
-    &:hover {
-        opacity: 1;
-    }
-
-    @media (min-width: 768px) {
-        width: 25px;
-    }
+  &:hover {
+    opacity: 1;
+  }
+  @media (min-width: 768px) {
+    width: 25px;
+  }
 }
 
 .jsxc-bar {
-   cursor: pointer;
-   height: 44px;
-   padding: 2px;
-   width: 100%;
-   box-sizing: border-box;
-   position: relative;
-   display: flex;
-   align-items: center;
+  align-items: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  height: 44px;
+  padding: 2px;
+  position: relative;
+  width: 100%;
 
-   .jsxc-avatar {
-      flex-shrink: 0;
-   }
+  .jsxc-avatar {
+    flex-shrink: 0;
+  }
 
-   .jsxc-action-entry {
-      width: 25px;
-      height: 40px;
-      display: block;
-      float: left;
-      color: $tools_color;
-      opacity: 0.4;
-      font-family: $font_sans;
-      line-height: 40px;
+  .jsxc-action-entry {
+    color: $tools-color;
+    cursor: pointer;
+    display: block;
+    flex-shrink: 0;
+    float: left;
+    font-family: $font-sans;
+    height: 40px;
+    line-height: 40px;
+    opacity: 0.4;
+    text-align: center;
+    width: 25px;
+
+    &.jsxc-menu {
+      opacity: 1;
+    }
+
+    &.jsxc-disabled {
+      cursor: default !important;
+      opacity: 0.3;
+    }
+
+    .jsxc-minimized & {
+      display: none;
+    }
+  }
+
+  .jsxc-grow {
+    flex-grow: 1;
+  }
+
+  .jsxc-caption {
+    box-sizing: border-box;
+    flex-grow: 1;
+    min-width: 0; //workaround for text ellipsis
+    * {
       cursor: pointer;
+    }
+
+    .jsxc-subcaption {
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      .jsxc-emoticon {
+        vertical-align: middle;
+      }
+    }
+  }
+
+  &.jsxc-has-unread-msg {
+    .jsxc-subcaption::before {
+      background-color: #ffa500;
+      border-radius: 50%;
+      color: #fff;
+      content: "";
+      display: inline-block;
+      height: 0.8em;
+      line-height: 100%;
+      margin-right: 0.2em;
       text-align: center;
-      flex-shrink: 0;
-
-      &.jsxc-menu {
-         opacity: 1;
-      }
-
-      &.jsxc-disabled {
-         opacity: 0.3;
-         cursor: default !important;
-      }
-
-      .jsxc-minimized & {
-         display: none;
-      }
-   }
-
-   .jsxc-grow {
-      flex-grow: 1;
-   }
-
-   .jsxc-caption {
-      box-sizing: border-box;
-      flex-grow: 1;
-      min-width: 0; //workaround for text ellipsis
-
-      * {
-         cursor: pointer;
-      }
-
-      .jsxc-subcaption {
-         font-size: 12px;
-         text-overflow: ellipsis;
-         white-space: nowrap;
-         overflow: hidden;
-
-         .jsxc-emoticon {
-            vertical-align: middle;
-         }
-      }
-   }
-
-   &.jsxc-has-unread-msg {
-      .jsxc-subcaption:before {
-         content: '';
-         line-height: 100%;
-         color: #fff;
-         text-align: center;
-         display: inline-block;
-         height: 0.8em;
-         width: 0.8em;
-         border-radius: 50%;
-         background-color: orange;
-         margin-right: 0.2em;
-      }
-   }
+      width: 0.8em;
+    }
+  }
 }
 
 body.jsxc-fullscreen {
-   #jsxc-roster {
-      width: 100%;
-      z-index: 50;
-      border: 0;
-      border-top: 62px solid #2a4163;
-   }
-   #jsxc-window-list {
-      clip: auto;
-      z-index: 100;
+  #jsxc-roster {
+    border: 0;
+    border-top: 62px solid #2a4163;
+    width: 100%;
+    z-index: 50;
+  }
 
-      .jsxc-window-item {
-         position: fixed;
-         top: 0;
-         right: 0;
-         bottom: 0;
-         left: 0;
-         height: auto;
-         width: auto;
-         margin: 0;
+  #jsxc-window-list {
+    clip: auto;
+    z-index: 100;
 
-         &.jsxc-minimized {
-            display: none;
-         }
-      }
-
-      .jsxc-window {
-         position: absolute;
-         right: 0;
-         left: 0;
-         top: 0;
-         border: 0;
-         background-color: #d4d2d2;
-      }
-
-      .jsxc-window-fade {
-         position: absolute;
-         top: 62px;
-         right: 0;
-         bottom: 0;
-         left: 0;
-         height: auto;
-         width: auto;
-      }
-   }
-   .jsxc-bar {
-      height: 62px;
+    .jsxc-window-item {
+      bottom: 0;
+      height: auto;
+      left: 0;
+      margin: 0;
+      position: fixed;
+      right: 0;
+      top: 0;
       width: auto;
 
-      .jsxc-action-entry {
-         height: 62px;
-         width: 42px;
-         background-size: 50%;
-         &.jsxc-close {
-            line-height: 62px;
-            font-size: 2.5em;
-         }
-         .jsxc-more {
-            width: 100%;
-            background-size: auto 3vmin;
-         }
-         * {
-            font-size: 1em;
-         }
+      &.jsxc-minimized {
+        display: none;
       }
-   }
-   .jsxc-send-area {
-      padding: 0;
-   }
-   .jsxc-menu-emoticons, .jsxc-file-transfer, .jsxc-transfer {
-      height: 62px;
-      width: 62px;
+    }
+
+    .jsxc-window {
+      background-color: #d4d2d2;
+      border: 0;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+
+    .jsxc-window-fade {
+      bottom: 0;
+      height: auto;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 62px;
+      width: auto;
+    }
+  }
+
+  .jsxc-bar {
+    height: 62px;
+    width: auto;
+
+    .jsxc-action-entry {
       background-size: 50%;
-   }
-   .jsxc-transfer-icon {
-      background-size: 50%;
       height: 62px;
-   }
-   .jsxc-highlight .jsxc-window-bar {
-      background-color: $window_bar_bg;
-   }
-   .jsxc-roster-toggle {
-      display: none;
-   }
-   #jsxc-roster > .jsxc-bottom li {
-      height: 62px;
-      line-height: 62px;
-   }
+      width: 42px;
+
+      &.jsxc-close {
+        font-size: 2.5em;
+        line-height: 62px;
+      }
+
+      .jsxc-more {
+        background-size: auto 3vmin;
+        width: 100%;
+      }
+
+      * {
+        font-size: 1em;
+      }
+    }
+  }
+
+  .jsxc-send-area {
+    padding: 0;
+  }
+
+  .jsxc-menu-emoticons,
+  .jsxc-file-transfer,
+  .jsxc-transfer {
+    background-size: 50%;
+    height: 62px;
+    width: 62px;
+  }
+
+  .jsxc-transfer-icon {
+    background-size: 50%;
+    height: 62px;
+  }
+
+  .jsxc-highlight .jsxc-window-bar {
+    background-color: $window-bar-bg;
+  }
+
+  .jsxc-roster-toggle {
+    display: none;
+  }
+
+  #jsxc-roster>.jsxc-bottom li {
+    height: 62px;
+    line-height: 62px;
+  }
 }
 
 body.jsxc-fullscreen.jsxc-two-columns {
-   @media(min-width: 740px) {
-      #jsxc-roster {
-         width: 33%;
+  @media(min-width: 740px) {
+    #jsxc-roster {
+      width: 33%;
+    }
+
+    #jsxc-window-list {
+      .jsxc-window-item {
+        right: 33%;
       }
-      #jsxc-window-list {
-         .jsxc-window-item {
-            right: 33%;
-         }
-      }
-   }
+    }
+  }
 }
 
-
 .jsxc-omemo-device {
-    box-shadow: 0 0 2px #a1a1a1;
-    padding: 10px;
-    margin-bottom: 15px;
+  box-shadow: 0 0 2px #a1a1a1;
+  margin-bottom: 15px;
+  padding: 10px;
 
-    &-id {
-        font-size: 0.7em;
-        opacity: 0.7;
+  &-id {
+    font-size: 0.7em;
+    opacity: 0.7;
+  }
+
+  &-trust {
+    display: inline;
+
+    &[data-trust="unknown"] {
+      color: #f00;
     }
 
-    &-trust {
-        display: inline;
-
-        &[data-trust="unknown"] {
-            color: red;
-        }
-
-        &[data-trust="recognized"] {
-            color: orange;
-        }
-
-        &[data-trust="confirmed"] {
-            color: green;
-        }
+    &[data-trust="recognized"] {
+      color: #ffa500;
     }
 
-    &-action {
-        float: right;
+    &[data-trust="confirmed"] {
+      color: #008000;
     }
+  }
+
+  &-action {
+    float: right;
+  }
 }
