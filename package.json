@@ -14,15 +14,15 @@
     "start": "webpack --config webpack.config.js --mode production",
     "dev": "webpack-dev-server --mode development",
     "test": "karma start --single-run",
-    "fix-format": "node_modules/typescript-formatter/bin/tsfmt  -r",
+    "fix-typescript-format": "node_modules/typescript-formatter/bin/tsfmt  -r",
     "fix-style-format": "node_modules/.bin/stylelint \"scss/**/*.scss\" --fix",
     "checking-style-format": "node_modules/.bin/stylelint \"scss/**/*.scss\"",
-    "checking-format": "node_modules/typescript-formatter/bin/tsfmt --verify",
+    "checking-typescript-format": "node_modules/typescript-formatter/bin/tsfmt --verify",
     "checking-typescript": "node_modules/typescript/bin/tsc --noEmit"
   },
   "pre-commit": [
     "checking-style-format",
-    "checking-format",
+    "checking-typescript-format",
     "checking-typescript"
   ],
   "devDependencies": {
