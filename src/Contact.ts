@@ -233,7 +233,7 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public isEncrypted(): boolean {
-      return this.data.get('encryptionState') !== EncryptionState.Plaintext;
+      return this.getEncryptionState() !== EncryptionState.Plaintext && !!this.getEncryptionPluginName();
    }
 
    public getTranscript(): Transcript {

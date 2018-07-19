@@ -98,20 +98,20 @@ export default class RosterItem {
 
          let message = this.contact.getTranscript().getMessage(firstMessageId);
 
-         this.element.find('.jsxc-subcaption').text(message.getPlaintextMessage());
+         this.element.find('.jsxc-bar__caption__secondary').text(message.getPlaintextMessage());
       });
 
       let message = this.contact.getTranscript().getFirstMessage();
       if (message) {
-         this.element.find('.jsxc-subcaption').text(message.getPlaintextMessage());
+         this.element.find('.jsxc-bar__caption__secondary').text(message.getPlaintextMessage());
       }
 
       let updateUnreadMessage = () => {
          let unreadMessages = this.contact.getTranscript().getNumberOfUnreadMessages();
          if (unreadMessages > 0) {
-            this.element.addClass('jsxc-has-unread-msg');
+            this.element.addClass('jsxc-bar--has-unread-msg');
          } else {
-            this.element.removeClass('jsxc-has-unread-msg');
+            this.element.removeClass('jsxc-bar--has-unread-msg');
          }
       };
 

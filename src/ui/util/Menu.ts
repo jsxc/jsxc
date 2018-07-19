@@ -1,3 +1,4 @@
+const CLASSNAME_OPENED = 'jsxc-menu--opened';
 
 export default class Menu {
    public static init(elements: JQuery);
@@ -15,13 +16,43 @@ export default class Menu {
    }
 
    private timer;
+   private listElement;
 
-   private constructor(private element: JQuery) {
-      var ul = element.find('ul');
+   constructor(private element: JQuery) {
+      if (element.length !== 1) {
+         throw 'Found 0 or more than 1 root elements';
+      }
+
+      this.listElement = element.find('ul');
+
+      if (this.listElement.length !== 1) {
+         throw 'Found 0 or more than 1 list elements';
+      }
 
       element.click(this.onClick);
       element.mouseleave(this.onMouseLeave);
       element.mouseenter(this.onMouseEnter);
+
+      element.data('object', this);
+   }
+
+   public addEntry(label: string, handler: (ev?) => void, className?: string): JQuery {
+      let itemElement = $('<li>');
+
+      itemElement.addClass(className);
+      itemElement.text(label);
+      itemElement.click(handler);
+      itemElement.appendTo(this.listElement);
+
+      return itemElement;
+   }
+
+   public getElement(): JQuery {
+      return this.element;
+   }
+
+   public getButtonElement(): JQuery {
+      return this.element.find('.jsxc-menu__button');
    }
 
    private onClick = (ev) => {
@@ -35,16 +66,16 @@ export default class Menu {
 
       window.clearTimeout(this.timer);
 
-      this.element.toggleClass('jsxc-opened');
+      this.element.toggleClass(CLASSNAME_OPENED);
 
-      if (this.element.hasClass('jsxc-opened')) {
+      if (this.element.hasClass(CLASSNAME_OPENED)) {
          $('body').on('click', this.closeMenu);
       }
    }
 
    private onMouseLeave = () => {
-      if (this.element.hasClass('jsxc-opened')) {
-         this.timer = window.setTimeout(this.closeMenu, 2000);
+      if (this.element.hasClass(CLASSNAME_OPENED)) {
+         this.timer = 0; //window.setTimeout(this.closeMenu, 2000);
       }
    }
 
@@ -53,7 +84,7 @@ export default class Menu {
    }
 
    private closeMenu = () => {
-      this.element.removeClass('jsxc-opened');
+      this.element.removeClass(CLASSNAME_OPENED);
 
       $('body').off('click', null, this.closeMenu);
    }

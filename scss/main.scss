@@ -5,7 +5,11 @@
 $font-sans: Arial, sans-serif;
 $font-serif: serif;
 
+$default-window-width: 250px;
+
+@import "partials/avatar";
 @import "partials/button";
+@import "partials/bar";
 @import "partials/dialog";
 @import "partials/emoticons";
 @import "partials/icon";
@@ -16,4 +20,5 @@ $font-serif: serif;
 @import "partials/window";
 
 @import "partials/jsxc";
+@import "partials/layout";
 @import "partials/webrtc";

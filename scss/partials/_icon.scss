@@ -1,43 +1,70 @@
-.jsxc-icon-edit {
-  background-image: url("../images/edit_black.svg");
-}
+.jsxc-icon {
+  &--clickable {
+    opacity: 0.4;
 
-.jsxc-icon-delete {
-  background-image: url("../images/delete_black.svg");
-}
+    &:hover {
+      opacity: 1;
+    }
+  }
 
-.jsxc-icon-chat {
-  background-image: url("../images/speech_balloon_black.svg");
-}
+  &--edit {
+    background-image: url("../images/edit_black.svg");
+  }
 
-.jsxc-icon-video {
-  background-image: url("../images/camera_icon_black.svg");
-}
+  &--delete {
+    background-image: url("../images/delete_black.svg");
+  }
 
-.jsxc-icon-info {
-  background-image: url("../images/info_black.svg");
-}
+  &--chat {
+    background-image: url("../images/speech_balloon_black.svg");
+  }
 
-.jsxc-icon-setting {
-  background-image: url("../images/gear_black.svg");
-}
+  &--video {
+    background-image: url("../images/camera_icon_black.svg");
+  }
 
-.jsxc-icon-help {
-  background-image: url("../images/help_black.svg");
-}
+  &--info {
+    background-image: url("../images/info_black.svg");
+  }
 
-.jsxc-icon-contact {
-  background-image: url("../images/contact_black.svg");
-}
+  &--setting {
+    background-image: url("../images/gear_black.svg");
+  }
 
-.jsxc-icon-groupcontact {
-  background-image: url("../images/groupcontact_black.svg");
-}
+  &--help {
+    background-image: url("../images/help_black.svg");
+  }
 
-.jsxc-icon-bookmark {
-  background-image: url("../images/bookmark_black.svg");
-}
+  &--contact {
+    background-image: url("../images/contact_black.svg");
+  }
 
-.jsxc-icon-announcement {
-  background-image: url("../images/megaphone_icon_black.svg");
+  &--groupcontact {
+    background-image: url("../images/groupcontact_black.svg");
+  }
+
+  &--bookmark {
+    background-image: url("../images/bookmark_black.svg");
+  }
+
+  &--announcement {
+    background-image: url("../images/megaphone_icon_black.svg");
+  }
+
+  &--emoticon {
+    background-image: url("../images/smiley.svg");
+  }
+
+  &--more-dark {
+    background-image: url("../images/more_black.svg");
+  }
+
+  &--more-light {
+    background-image: url("../images/more_white.svg");
+  }
+
+  &--menu-dark {
+    background-image: url("../images/menu_black.svg");
+    background-size: 60%;
+  }
 }

@@ -1,17 +1,5 @@
 @import "../../node_modules/emojione/lib/emojione-awesome/emojione-awesome.map";
 
-[class*=jsxc-emoticon-] { //@REVIEW vs jsxc-emoticon
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: 1em 1em;
-  display: inline-block;
-  height: 1em;
-  line-height: normal;
-  margin: -0.2ex 0.05em 0 0.1em;
-  vertical-align: middle;
-  width: 1em;
-}
-
 $size-map: (
   "sm": 1,
   "med": 2,
@@ -19,7 +7,7 @@ $size-map: (
 );
 
 @each $name, $size in $size-map {
-  .jsxc-emoticon-#{$name} {
+  .jsxc-emoticon--#{$name} {
     background-size: 1em * $size 1em * $size;
     height: 32px * $size;
     margin: -0.2ex * $size 0.05em * $size 0 0.1em * $size;
@@ -28,7 +16,7 @@ $size-map: (
 }
 
 @each $code, $name in $emoji-map {
-  .jsxc-emoticon-#{$code} {
+  .jsxc-emoticon--#{$code} {
     background-image: url("../images/emojione/#{$code}.svg");
   }
 }

@@ -1,19 +1,14 @@
 <li class="jsxc-roster-item jsxc-bar" draggable="true">
-   <div class="jsxc-avatar"></div>
+   <div class="jsxc-avatar jsxc-shrink--no"></div>
 
-   <div class="jsxc-caption">
-      <div class="jsxc-name">{{name}}</div>
-      <div class="jsxc-subcaption">{{lastMessage}}</div>
+   <div class="jsxc-bar__caption jsxc-grow">
+      <div class="jsxc-bar__caption__primary">{{name}}</div>
+      <div class="jsxc-bar__caption__secondary">{{lastMessage}}</div>
    </div>
 
-   <div class="jsxc-action-entry jsxc-menu jsxc-menu-dropdown">
-      <span></span>
-      <div class="jsxc-inner">
-         <ul>
-            <li><a href="#" class="jsxc-rename" title="{{t "rename_buddy"}}"><span class="jsxc-icon jsxc-icon-edit"></span></a></li>
-            <li><a href="#" class="jsxc-vcard" title="{{t "get_info"}}"><span class="jsxc-icon jsxc-icon-info"></span></a></li>
-            <li><a href="#" class="jsxc-delete" title="{{t "delete_buddy"}}"><span class="jsxc-icon jsxc-icon-delete"></span></a></li>
-         </ul>
-      </div>
-   </div>
+   {{#> menu classes="jsxc-bar__action-entry jsxc-menu--drop-top-right jsxc-menu--light" button-classes="jsxc-icon--more-dark jsxc-icon--clickable"}}
+        <li class="jsxc-rename" title="{{t "rename_buddy"}}"><span class="jsxc-icon jsxc-icon--edit"></span></li>
+        <li class="jsxc-vcard" title="{{t "get_info"}}"><span class="jsxc-icon jsxc-icon--info"></span></li>
+        <li class="jsxc-delete" title="{{t "delete_buddy"}}"><span class="jsxc-icon jsxc-icon--delete"></span></li>
+   {{/menu}}
 </li>

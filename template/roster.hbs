@@ -4,33 +4,21 @@
    </div>
    <div class="jsxc-roster-status"></div>
    <div class="jsxc-bottom jsxc-presence jsxc-roster-item jsxc-bar" data-bid="own">
-      <div class="jsxc-avatar" />
-      <div class="jsxc-menu jsxc-menu-presence jsxc-grow">
-         <span>{{t "Offline"}}</span>
-         <div class="jsxc-inner">
-            <ul>
-               <li data-presence="online" class="jsxc-online">{{t "Online"}}</li>
-               <li data-presence="chat" class="jsxc-chat">{{t "Chatty"}}</li>
-               <li data-presence="away" class="jsxc-away">{{t "Away"}}</li>
-               <li data-presence="xa" class="jsxc-xa">{{t "Extended_away"}}</li>
-               <li data-presence="dnd" class="jsxc-dnd">{{t "dnd"}}</li>
-               <li data-presence="offline" class="jsxc-offline">{{t "Offline"}}</li>
-            </ul>
-         </div>
-      </div>
-      <div class="jsxc-menu" id="jsxc-notice">
-         <span></span>
-         <div class="jsxc-inner">
-            <ul></ul>
-         </div>
-      </div>
-      <div class="jsxc-menu jsxc-menu-main">
-         <span></span>
-         <div class="jsxc-inner">
-            <ul>
-            </ul>
-         </div>
-      </div>
+      <div class="jsxc-avatar jsxc-shrink--no" />
+      {{#> menu
+        classes="jsxc-menu--pushup jsxc-grow jsxc-js-presence-menu"
+        button-label=(t "Offline")}}
+            <li data-presence="online" class="jsxc-online">{{t "Online"}}</li>
+            <li data-presence="chat" class="jsxc-chat">{{t "Chatty"}}</li>
+            <li data-presence="away" class="jsxc-away">{{t "Away"}}</li>
+            <li data-presence="xa" class="jsxc-xa">{{t "Extended_away"}}</li>
+            <li data-presence="dnd" class="jsxc-dnd">{{t "dnd"}}</li>
+            <li data-presence="offline" class="jsxc-offline">{{t "Offline"}}</li>
+      {{/menu}}
+
+      {{> menu class="jsxc-js-notice-menu"}}
+
+      {{> menu classes="jsxc-menu--pushup jsxc-js-main-menu" button-classes="jsxc-icon--menu-dark jsxc-icon--clickable"}}
    </div>
    <div class="jsxc-roster-toggle"></div>
 </div>

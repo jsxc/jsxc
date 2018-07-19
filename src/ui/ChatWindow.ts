@@ -46,6 +46,10 @@ export default class ChatWindow {
 
    private attachmentDeposition: Attachment;
 
+   private settingsMenu: Menu;
+
+   private encryptionMenu: Menu;
+
    constructor(protected account: Account, protected contact: Contact) {
       let template = chatWindowTemplate({
          accountId: account.getUid(),
@@ -58,6 +62,8 @@ export default class ChatWindow {
       this.storage = account.getStorage();
 
       Menu.init(this.element.find('.jsxc-menu'));
+      this.settingsMenu = this.element.find('.jsxc-menu-settings').data('object');
+      this.encryptionMenu = this.element.find('.jsxc-menu.jsxc-transfer').data('object');
 
       this.initResizableWindow();
       this.initEmoticonMenu();
@@ -79,7 +85,7 @@ export default class ChatWindow {
       }
 
       let avatar = AvatarSet.get(contact);
-      avatar.addElement(this.element.find('.jsxc-window-bar .jsxc-avatar'));
+      avatar.addElement(this.element.find('.jsxc-bar--window .jsxc-avatar'));
 
       this.initEncryptionIcon();
       this.registerHooks();
@@ -172,7 +178,7 @@ export default class ChatWindow {
    }
 
    public setBarText(text: string) {
-      this.element.find('.jsxc-window-bar .jsxc-subcaption').text(text);
+      this.element.find('.jsxc-bar__caption__secondary').text(text);
    }
 
    public addSystemMessage(messageString: string): IMessage {
@@ -206,17 +212,11 @@ export default class ChatWindow {
       element.addClass(className);
       element.on('click', cb);
 
-      this.element.find('.jsxc-action-entry.jsxc-close').before(element);
+      this.element.find('.jsxc-action-entry.jsxc-js-close').before(element);
    }
 
    public addMenuEntry(className: string, label: string, cb: (ev) => void) {
-      let element = $('<a>');
-      element.attr('href', '#');
-      element.addClass(className);
-      element.text(label);
-      element.on('click', cb);
-
-      this.element.find('.jsxc-window-bar .jsxc-menu ul').append($('<li>').append(element));
+      this.settingsMenu.addEntry(label, cb, className);
    }
 
    public setAttachment(attachment: Attachment) {
@@ -288,14 +288,14 @@ export default class ChatWindow {
       );
 
       elementHandler.add(
-         this.element.find('.jsxc-window-bar')[0],
+         this.element.find('.jsxc-bar--window')[0],
          () => {
             this.toggle();
          }
       );
 
       elementHandler.add(
-         this.element.find('.jsxc-close')[0],
+         this.element.find('.jsxc-js-close')[0],
          () => {
             this.contact.closeChatWindow();
          }
@@ -385,7 +385,7 @@ export default class ChatWindow {
    }
 
    private onInputKeyUp = (ev) => {
-      var message = $(ev.target).val();
+      let message = <string>$(ev.target).val();
 
       if (ev.which === ENTER_KEY && !ev.shiftKey) {
          message = '';
@@ -469,9 +469,10 @@ export default class ChatWindow {
    }
 
    private updateEncryptionState = (encryptionState) => {
-      Log.debug('update window encryption state');
+      Log.debug('update window encryption state to ' + EncryptionState[encryptionState]);
 
-      let transferElement = this.getDom().find('.jsxc-transfer');
+      let transferElement = this.encryptionMenu.getElement();
+
       transferElement.removeClass('jsxc-fin jsxc-enc jsxc-trust');
 
       switch (encryptionState) {
@@ -526,7 +527,7 @@ export default class ChatWindow {
    }
 
    private initEmoticonMenu() {
-      let emoticonListElement = this.element.find('.jsxc-menu-emoticons ul');
+      let emoticonListElement = this.element.find('.jsxc-menu--emoticons ul');
       let emoticonList = Emoticons.getDefaultEmoticonList();
 
       emoticonList.forEach(emoticon => {
@@ -616,20 +617,27 @@ export default class ChatWindow {
 
       let encryptionPlugins = pluginRepository.getAllEncryptionPlugins();
 
-      let transferElement = this.getDom().find('.jsxc-transfer');
-
-      transferElement.find('.jsxc-transfer-state').click(ev => {
-         if (this.contact.isEncrypted()) {
-            let encryptionPluginName = this.contact.getEncryptionPluginName();
-
-            pluginRepository.getEncryptionPlugin(encryptionPluginName).toggleTransfer(this.contact);
+      this.encryptionMenu.getButtonElement().click(ev => {
+         if (!this.contact.isEncrypted()) {
+            return;
          }
+
+         let encryptionPluginName = this.contact.getEncryptionPluginName();
+
+         pluginRepository.getEncryptionPlugin(encryptionPluginName).toggleTransfer(this.contact);
+
+         ev.preventDefault();
+         ev.stopPropagation();
+
+         return false;
       });
 
+      let menu = this.encryptionMenu;
+
       for (let plugin of encryptionPlugins) {
-         let li = $('<li>');
-         li.text((<any>plugin.constructor).getName().toUpperCase());
-         li.click(() => {
+         let label = (<any>plugin.constructor).getName().toUpperCase();
+
+         menu.addEntry(label, () => {
             //@TODO show spinner
             try {
                plugin.toggleTransfer(this.contact);
@@ -637,10 +645,13 @@ export default class ChatWindow {
                this.addSystemMessage(err.toString());
             }
          });
-         transferElement.find('.jsxc-menu .jsxc-inner>ul').append(li);
       }
 
-      transferElement.removeClass('jsxc-disabled');
+      let menuElement = this.encryptionMenu.getElement();
+
+      if (menuElement.find('li').length > 0) {
+         menuElement.removeClass('jsxc-disabled');
+      }
    }
 }
 
@@ -666,14 +677,14 @@ export default class ChatWindow {
 //       var win = jsxc.gui.window.get(bid);
 //
 //       win.find('.jsxc-overlay .jsxc-body').empty().append(content);
-//       win.find('.jsxc-overlay .jsxc-close').off('click').click(function() {
+//       win.find('.jsxc-overlay .jsxc-js-close').off('click').click(function() {
 //          jsxc.gui.window.hideOverlay(bid);
 //       });
 //
 //       if (allowClose !== true) {
-//          win.find('.jsxc-overlay .jsxc-close').hide();
+//          win.find('.jsxc-overlay .jsxc-js-close').hide();
 //       } else {
-//          win.find('.jsxc-overlay .jsxc-close').show();
+//          win.find('.jsxc-overlay .jsxc-js-close').show();
 //       }
 //
 //       win.addClass('jsxc-showOverlay');
@@ -747,7 +758,7 @@ export default class ChatWindow {
 //
 //       var verify = $('<button>');
 //       verify.text($.t('Verify'));
-//       verify.addClass('jsxc-btn jsxc-btn-primary');
+//       verify.addClass('jsxc-button jsxc-button---primary');
 //       verify.click(function() {
 //          jsxc.gui.window.hideOverlay(bid);
 //

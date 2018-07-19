@@ -1,5 +1,3 @@
-$default-window-width: 250px;
-
 .jsxc-window {
   background-color: $window-bg;
   border: 1px solid $window-border;
@@ -53,34 +51,6 @@ $default-window-width: 250px;
       color: $window-close-hover;
       opacity: 1;
     }
-  }
-
-  .jsxc-more {
-    background-image: url("../images/more_white.svg");
-    opacity: 0.4;
-  }
-}
-
-.jsxc-window-bar.jsxc-bar {
-  background-color: $window-bar-bg;
-  color: $window-bar-color;
-  max-width: 100%;
-  transition: background-color 0.3s;
-  width: $default-window-width;
-
-  &:hover {
-    .jsxc-normal & {
-      color: $window-bar-color-hover;
-    }
-  }
-
-  .jsxc-minimized & {
-    background-color: $window-min-bar-bg;
-    color: $window-min-bar-color;
-  }
-
-  .jsxc-highlight & {
-    background-color: #ffa500;
   }
 }
 
@@ -340,56 +310,6 @@ $default-window-width: 250px;
     position: absolute;
     right: 0;
     top: 0;
-  }
-
-  .jsxc-inner {
-    left: 5px;
-  }
-
-  ul {
-    background-color: $emoticon-selection-bg;
-    border-radius: 3px;
-    list-style-type: none;
-    margin-bottom: 8px;
-    padding: 3px;
-    position: relative;
-    width: 217px;
-    z-index: 200;
-
-    &::after {
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-top: 8px solid $emoticon-selection-bg;
-      content: " ";
-      display: block;
-      left: 7px;
-      position: absolute;
-      top: 100%;
-      width: 0;
-      z-index: 1;
-    }
-  }
-
-  li {
-    border-radius: 3px;
-    cursor: pointer;
-    display: inline-block;
-    height: 30px;
-    width: 30px;
-
-    &:hover {
-      background-color: $emoticon-selection-hover;
-    }
-
-    .jsxc-emoticon {
-      background-size: contain;
-      height: 100%;
-      width: 100%;
-    }
-  }
-
-  &:hover::after {
-    opacity: 0.5;
   }
 }
 
@@ -678,16 +598,6 @@ $default-window-width: 250px;
   }
 }
 
-.jsxc-menu-settings {
-  position: relative;
-
-  .jsxc-inner {
-    left: auto;
-    right: -6px;
-    top: 100%;
-  }
-}
-
 div.jsxc-transfer {
   position: relative;
   z-index: 20;
@@ -708,22 +618,6 @@ div.jsxc-transfer {
     height: 40px;
     opacity: 0.3;
     width: 100%;
-  }
-
-  >.jsxc-transfer-icon {
-    display: none;
-  }
-
-  &.jsxc-fin,
-  &.jsxc-enc,
-  &.jsxc-disabled {
-    .jsxc-menu {
-      display: none;
-    }
-
-    >.jsxc-transfer-icon {
-      display: block;
-    }
   }
 
   &.jsxc-disabled {
@@ -759,46 +653,6 @@ div.jsxc-transfer {
     }
   }
 
-  .jsxc-inner {
-    left: auto;
-    right: 3px;
-
-    ul {
-      background-color: $emoticon-selection-bg;
-      border-radius: 3px;
-      list-style-type: none;
-      margin-bottom: 8px;
-      padding: 3px;
-      position: relative;
-      z-index: 200;
-
-      &::after {
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
-        border-top: 8px solid $emoticon-selection-bg;
-        content: " ";
-        display: block;
-        position: absolute;
-        right: 7px;
-        top: 100%;
-        width: 0;
-        z-index: 1;
-      }
-    }
-
-    li {
-      border-radius: 3px;
-      color: #fff;
-      cursor: pointer;
-      padding: 3px 7px;
-      text-align: center;
-
-      &:hover {
-        background-color: $emoticon-selection-hover;
-        color: #000;
-      }
-    }
-  }
   @media (min-width: 768px) {
     width: 34px;
   }

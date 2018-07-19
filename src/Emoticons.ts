@@ -93,7 +93,7 @@ export default class Emoticons {
 
       var wrapper = $('<div>' + text + '</div>');
       if (wrapper.find('.jsxc-emoticon').length === 1 && wrapper.text().replace(/ /, '').length === 0 && wrapper.find('*').length === 1) {
-         wrapper.find('.jsxc-emoticon').addClass('jsxc-large');
+         wrapper.find('.jsxc-emoticon').addClass('jsxc-emoticon--large');
          text = wrapper.html();
       }
 
@@ -114,7 +114,7 @@ export default class Emoticons {
          filename = EMOTICON_LIST.emojione[shortname].fname;
       }
 
-      div.addClass('jsxc-emoticon-' + filename);
+      div.addClass('jsxc-emoticon--' + filename);
       div.addClass('jsxc-emoticon');
       div.attr('title', shortname);
 

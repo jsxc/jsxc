@@ -103,63 +103,6 @@
     &:hover {
       background-color: $roster-bottom-bg-hover;
     }
-
-    .jsxc-inner {
-      box-shadow: 0 -5px 5px -5px #a1a1a1;
-      width: 100%;
-    }
-
-    ul {
-      background-color: $roster-bottom-bg;
-      border-top: 1px solid $roster-bottom-border-top;
-      margin: 0;
-      padding: 0;
-      width: 100%;
-
-      li:last-child {
-        border-bottom: 1px solid $roster-bottom-border-top;
-      }
-    }
-
-    li {
-      background-color: $roster-bottom-bg;
-      background-position: 15px center;
-      background-repeat: no-repeat;
-      background-size: 16px 16px;
-      color: $roster-bottom-color;
-      cursor: pointer;
-      height: 44px;
-      line-height: 44px;
-      opacity: 0.8;
-      overflow: hidden;
-      padding-left: 44px;
-      text-align: left;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      width: 100%;
-
-      &.jsxc-disabled {
-        color: $roster-bottom-disabled;
-        cursor: default;
-      }
-
-      &:hover:not(.jsxc-disabled) {
-        background-color: $roster-bottom-bg-hover;
-        color: $roster-bottom-color-hover;
-      }
-
-      &.jsxc-warning {
-        background-color: $warning-bg;
-
-        &:hover {
-          background-color: $warning-bg-hover;
-        }
-      }
-    }
-
-    > div > span {
-      cursor: pointer;
-    }
   }
 
   form {
@@ -208,15 +151,13 @@
       display: none;
     }
 
-    .jsxc-menu-main {
-      li {
-        .jsxc-hide-offline {
-          display: none;
-        }
+    li.jsxc-hide-offline {
+      .jsxc-hide-offline {
+        display: none;
+      }
 
-        .jsxc-show-offline {
-          display: inherit;
-        }
+      .jsxc-show-offline {
+        display: inherit;
       }
     }
 
@@ -273,7 +214,7 @@
   }
 
   &:not([data-subscription="both"]):not(.jsxc-bottom) {
-    .jsxc-name {
+    .jsxc-bar__caption {
       opacity: 0.7;
     }
 
@@ -283,77 +224,22 @@
   }
 }
 
-.jsxc-menu-presence {
+#jsxc-roster[data-presence="offline"] li:not(.jsxc-offline-available) {
+  opacity: 0.5;
 
-  @include presence-indicator("");
-  cursor: pointer;
-  overflow: hidden;
-  padding-left: 2px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  > span {
-    opacity: 0.8;
-  }
-
-  li {
-    position: relative;
-
-    &::before {
-      border: 2px solid #f5f5f5;
-      left: 10px;
-      margin-top: -8px;
-      //  Presence indicator
-      position: absolute;
-      top: 50%;
-    }
+  &:hover {
+    background-color: inherit;
+    cursor: auto;
   }
 }
 
-.jsxc-menu-main {
-  cursor: pointer;
-  float: right;
-  height: 44px;
-  text-align: center;
-  width: 44px;
-
-  &:hover > span {
-    opacity: 1;
+li.jsxc-hide-offline {
+  .jsxc-hide-offline {
+    display: inherit;
   }
 
-  > span {
-    background-image: url("../images/menu_black.svg");
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: 60%;
-    display: block;
-    height: 100%;
-    opacity: 0.5;
-    width: 100%;
-  }
-
-  #jsxc-roster[data-presence="offline"] & li:not(.jsxc-offline-available) {
-    opacity: 0.5;
-
-    &:hover {
-      background-color: inherit;
-      cursor: auto;
-    }
-  }
-
-  li {
-    .jsxc-hide-offline {
-      display: inherit;
-    }
-
-    .jsxc-show-offline {
-      display: none;
-    }
-  }
-
-  @media (min-width: 768px) {
-    height: 30px;
-    width: 30px;
+  .jsxc-show-offline {
+    display: none;
   }
 }
 

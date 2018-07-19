@@ -26,8 +26,8 @@ function showForm(form: Form, contact: MultiUserContact, connection) {
    //@TODO translate, maybe move to hbs
    let submitButton = $('<div class="form-group">\
       <div class="col-sm-offset-4 col-sm-8">\
-         <button class="jsxc-btn jsxc-btn-default jsxc-close" type="button">{{t "Cancel"}}</button>\
-         <button class="jsxc-btn jsxc-btn-primary" type="submit">{{t "Submit"}}</button>\
+         <button class="jsxc-button jsxc-button---default jsxc-js-close" type="button">{{t "Cancel"}}</button>\
+         <button class="jsxc-button jsxc-button---primary" type="submit">{{t "Submit"}}</button>\
       </div>\
    </div>');
 
@@ -55,7 +55,7 @@ function showForm(form: Form, contact: MultiUserContact, connection) {
          resolve(submitPromise);
       });
 
-      formElement.find('.jsxc-close').click((ev) => {
+      formElement.find('.jsxc-js-close').click((ev) => {
          ev.preventDefault();
 
          let cancelRoomPromise = connection

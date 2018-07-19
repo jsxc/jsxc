@@ -14,6 +14,14 @@
   clear: both;
 }
 
+.jsxc-grow {
+  flex-grow: 1;
+}
+
+.jsxc-shrink--no {
+  flex-shrink: 0;
+}
+
 .jsxc-uppercase {
   text-transform: uppercase;
 }
@@ -74,57 +82,6 @@
   transform: translateZ(0);
   vertical-align: sub;
   width: 1.2em;
-}
-
-.jsxc-avatar {
-  background-color: $avatar-bg;
-  background-position: center center;
-  background-size: cover;
-  border-radius: 50%;
-  color: $avatar-color;
-  float: left;
-  font-family: $font-sans;
-  font-size: 30px;
-  font-weight: bold;
-  height: 36px;
-  line-height: 36px;
-  margin: 0 5px;
-  position: relative;
-  text-align: center;
-  width: 36px;
-
-  img {
-    display: block;
-    height: 25px;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: 25px;
-  }
-
-  &::before {
-    border: 2px solid $roster-bg;
-    left: -6px;
-    position: absolute;
-    top: -2px;
-  }
-
-  &-loading::after {
-    animation: jsxc-rotate 1s infinite;
-    border: 10px solid rgba(255, 255, 255, 0.7);
-    border-left-color: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    border-right-color: rgba(0, 0, 0, 0.5);
-    content: "";
-    display: block;
-    height: 20px;
-    left: 50%;
-    margin-left: -10px;
-    margin-top: -10px;
-    position: absolute;
-    top: 50%;
-    width: 20px;
-  }
 }
 
 ul.jsxc-vcard {
@@ -195,27 +152,6 @@ ul.jsxc-vcard {
   width: 32px;
 }
 
-//  @TODO: check
-#jsxc-login-form input[type="submit"] {
-  background-color: $login-form-bg;
-  border: 1px solid transparent;
-  border-color: $login-form-border;
-  border-radius: 4px;
-  color: $white;
-  cursor: pointer;
-  display: inline-block;
-  font-size: 14px;
-  font-weight: normal;
-  height: 34px;
-  line-height: 1.428571429;
-  margin-bottom: 0;
-  padding: 6px 12px;
-  text-align: center;
-  user-select: none;
-  vertical-align: middle;
-  white-space: nowrap;
-}
-
 .jsxc-oneway .jsxc-avatar {
   filter: grayscale(100%);
 }
@@ -234,256 +170,9 @@ img.jsxc-vcard {
   margin-bottom: 20px;
   padding: 15px;
 
-  &.jsxc-alert-warning {
+  &.jsxc-alert--warning {
     background-color: #fcf8e3;
     border-color: #faebcc;
     color: #8a6d3b;
-  }
-}
-
-.jsxc-more {
-  background-image: url("../images/more_black.svg");
-  background-position: center;
-  background-repeat: no-repeat;
-  cursor: pointer;
-  float: right;
-  height: 100%;
-  opacity: 0.4;
-  width: 44px;
-
-  &:hover {
-    opacity: 1;
-  }
-  @media (min-width: 768px) {
-    width: 25px;
-  }
-}
-
-.jsxc-bar {
-  align-items: center;
-  box-sizing: border-box;
-  cursor: pointer;
-  display: flex;
-  height: 44px;
-  padding: 2px;
-  position: relative;
-  width: 100%;
-
-  .jsxc-avatar {
-    flex-shrink: 0;
-  }
-
-  .jsxc-action-entry {
-    color: $tools-color;
-    cursor: pointer;
-    display: block;
-    flex-shrink: 0;
-    float: left;
-    font-family: $font-sans;
-    height: 40px;
-    line-height: 40px;
-    opacity: 0.4;
-    text-align: center;
-    width: 25px;
-
-    &.jsxc-menu {
-      opacity: 1;
-    }
-
-    &.jsxc-disabled {
-      cursor: default !important;
-      opacity: 0.3;
-    }
-
-    .jsxc-minimized & {
-      display: none;
-    }
-  }
-
-  .jsxc-grow {
-    flex-grow: 1;
-  }
-
-  .jsxc-caption {
-    box-sizing: border-box;
-    flex-grow: 1;
-    min-width: 0; //workaround for text ellipsis
-    * {
-      cursor: pointer;
-    }
-
-    .jsxc-subcaption {
-      font-size: 12px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-
-      .jsxc-emoticon {
-        vertical-align: middle;
-      }
-    }
-  }
-
-  &.jsxc-has-unread-msg {
-    .jsxc-subcaption::before {
-      background-color: #ffa500;
-      border-radius: 50%;
-      color: #fff;
-      content: "";
-      display: inline-block;
-      height: 0.8em;
-      line-height: 100%;
-      margin-right: 0.2em;
-      text-align: center;
-      width: 0.8em;
-    }
-  }
-}
-
-body.jsxc-fullscreen {
-  #jsxc-roster {
-    border: 0;
-    border-top: 62px solid #2a4163;
-    width: 100%;
-    z-index: 50;
-  }
-
-  #jsxc-window-list {
-    clip: auto;
-    z-index: 100;
-
-    .jsxc-window-item {
-      bottom: 0;
-      height: auto;
-      left: 0;
-      margin: 0;
-      position: fixed;
-      right: 0;
-      top: 0;
-      width: auto;
-
-      &.jsxc-minimized {
-        display: none;
-      }
-    }
-
-    .jsxc-window {
-      background-color: #d4d2d2;
-      border: 0;
-      left: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
-
-    .jsxc-window-fade {
-      bottom: 0;
-      height: auto;
-      left: 0;
-      position: absolute;
-      right: 0;
-      top: 62px;
-      width: auto;
-    }
-  }
-
-  .jsxc-bar {
-    height: 62px;
-    width: auto;
-
-    .jsxc-action-entry {
-      background-size: 50%;
-      height: 62px;
-      width: 42px;
-
-      &.jsxc-close {
-        font-size: 2.5em;
-        line-height: 62px;
-      }
-
-      .jsxc-more {
-        background-size: auto 3vmin;
-        width: 100%;
-      }
-
-      * {
-        font-size: 1em;
-      }
-    }
-  }
-
-  .jsxc-send-area {
-    padding: 0;
-  }
-
-  .jsxc-menu-emoticons,
-  .jsxc-file-transfer,
-  .jsxc-transfer {
-    background-size: 50%;
-    height: 62px;
-    width: 62px;
-  }
-
-  .jsxc-transfer-icon {
-    background-size: 50%;
-    height: 62px;
-  }
-
-  .jsxc-highlight .jsxc-window-bar {
-    background-color: $window-bar-bg;
-  }
-
-  .jsxc-roster-toggle {
-    display: none;
-  }
-
-  #jsxc-roster>.jsxc-bottom li {
-    height: 62px;
-    line-height: 62px;
-  }
-}
-
-body.jsxc-fullscreen.jsxc-two-columns {
-  @media(min-width: 740px) {
-    #jsxc-roster {
-      width: 33%;
-    }
-
-    #jsxc-window-list {
-      .jsxc-window-item {
-        right: 33%;
-      }
-    }
-  }
-}
-
-.jsxc-omemo-device {
-  box-shadow: 0 0 2px #a1a1a1;
-  margin-bottom: 15px;
-  padding: 10px;
-
-  &-id {
-    font-size: 0.7em;
-    opacity: 0.7;
-  }
-
-  &-trust {
-    display: inline;
-
-    &[data-trust="unknown"] {
-      color: #f00;
-    }
-
-    &[data-trust="recognized"] {
-      color: #ffa500;
-    }
-
-    &[data-trust="confirmed"] {
-      color: #008000;
-    }
-  }
-
-  &-action {
-    float: right;
   }
 }

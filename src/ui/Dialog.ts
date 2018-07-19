@@ -76,7 +76,7 @@ export default class Dialog {
          dom.find('.jsxc-dialog-close').hide();
       }
 
-      dom.find('.jsxc-close').click(function(ev) {
+      dom.find('.jsxc-js-close').click(function(ev) {
          ev.preventDefault();
 
          self.close();

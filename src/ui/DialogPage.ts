@@ -20,6 +20,7 @@ export default abstract class Page {
       this.element.addClass('jsxc-page');
 
       let legendElement = $('<h1>');
+      legendElement.addClass('jsxc-page__headline')
       legendElement.text(this.title);
 
       if (this.navigation.canGoBack()) {

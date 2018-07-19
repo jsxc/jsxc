@@ -88,13 +88,13 @@ export default class AvatarSet {
 
    private showSpinner() {
       $(this.elements).each(function() {
-         $(this).addClass('jsxc-avatar-loading');
+         $(this).addClass('jsxc-avatar--loading');
       });
    }
 
    private hideSpinner() {
       $(this.elements).each(function() {
-         $(this).removeClass('jsxc-avatar-loading');
+         $(this).removeClass('jsxc-avatar--loading');
       });
    }
 }

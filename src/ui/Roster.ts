@@ -95,7 +95,7 @@ export default class Roster {
       this.element.addClass('jsxc-processing');
 
       if (msg) {
-         let spanElement = this.element.find('.jsxc-menu-presence > span');
+         let spanElement = this.element.find('.jsxc-js-presence-menu > span');
          spanElement.addClass('jsxc-waiting');
 
          if (!spanElement.data('previousText')) {
@@ -109,7 +109,7 @@ export default class Roster {
    public endProcessing() {
       this.element.removeClass('jsxc-processing');
 
-      let spanElement = this.element.find('.jsxc-menu-presence > span');
+      let spanElement = this.element.find('.jsxc-js-presence-menu > span');
       spanElement.removeClass('jsxc-waiting');
 
       let previousText = spanElement.data('previousText');
@@ -195,8 +195,8 @@ export default class Roster {
       let requestedPresence = Client.getPresenceController().getTargetPresence();
       let presence = typeof requestedPresence === 'number' ? requestedPresence : confirmedPresence;
 
-      let label = $('.jsxc-menu-presence .jsxc-' + Presence[presence]).text();
-      let labelElement = this.element.find('.jsxc-menu-presence > span');
+      let label = $('.jsxc-js-presence-menu .jsxc-' + Presence[presence]).text();
+      let labelElement = this.element.find('.jsxc-js-presence-menu .jsxc-menu__button');
 
       labelElement.text(label);
       this.element.attr('data-presence', Presence[confirmedPresence]);
@@ -213,7 +213,7 @@ export default class Roster {
    }
 
    public addNotice(manager: NoticeManager, notice: Notice) {
-      let noticeListElement = $('#jsxc-notice ul');
+      let noticeListElement = $('.jsxc-js-notice-menu ul');
       let noticeElement = $('<li/>');
 
       noticeElement.click(function(ev) {
@@ -225,7 +225,7 @@ export default class Roster {
          manager.removeNotice(notice);
       });
 
-      noticeElement.addClass('jsxc-icon-' + notice.getType());
+      noticeElement.addClass('jsxc-icon--' + notice.getType());
 
       noticeElement.text(notice.getTitle());
       noticeElement.attr('title', notice.getDescription());
@@ -233,20 +233,20 @@ export default class Roster {
       noticeElement.attr('data-manager-id', manager.getId());
       noticeListElement.append(noticeElement);
 
-      $('#jsxc-notice > span').text(noticeListElement.find('li').length);
+      $('.jsxc-js-notice-menu > span').text(noticeListElement.find('li').length);
    }
 
    public removeNotice(manager: NoticeManager, noticeId: string) {
       let managerId = manager.getId() || '';
-      let noticeElement = $('#jsxc-notice li').filter(function() {
+      let noticeElement = $('.jsxc-js-notice-menu li').filter(function() {
          return $(this).attr('data-notice-id') === noticeId &&
             ($(this).attr('data-manager-id') || '') === managerId;
       });
 
       noticeElement.remove();
 
-      let numberOfNotices = $('#jsxc-notice li').length;
-      $('#jsxc-notice > span').text(numberOfNotices > 0 ? numberOfNotices : '');
+      let numberOfNotices = $('.jsxc-js-notice-menu li').length;
+      $('.jsxc-js-notice-menu > span').text(numberOfNotices > 0 ? numberOfNotices : '');
    }
 
    public addMenuEntry(options: { id: string, handler: (ev) => void, label: string | JQuery<HTMLElement>, icon?: string, offlineAvailable?: boolean }) {
@@ -270,7 +270,7 @@ export default class Roster {
       }
 
       if (icon) {
-         li.addClass('jsxc-icon-' + icon);
+         li.addClass('jsxc-icon--' + icon);
       }
 
       ((li, handler) => li.click(ev => {
@@ -283,7 +283,7 @@ export default class Roster {
          return handler(ev);
       }))(li, handler);
 
-      let mainMenu = this.element.find('.jsxc-menu-main .jsxc-inner ul');
+      let mainMenu = this.element.find('.jsxc-js-main-menu .jsxc-menu__content ul');
       mainMenu.prepend(li);
    }
 
@@ -371,7 +371,7 @@ export default class Roster {
       let self = this;
       let options = this.options;
 
-      this.element.find('.jsxc-menu-presence li').click(function() {
+      this.element.find('.jsxc-js-presence-menu li').click(function() {
          let presenceString = <string>$(this).data('presence');
          let oldPresence = Presence[options.get('presence')] || Presence.offline;
          let requestedPresence = Presence[presenceString];

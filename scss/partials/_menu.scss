@@ -1,19 +1,33 @@
 .jsxc-menu {
-  .jsxc-inner {
-    bottom: 100%;
+  height: 100%;
+  position: relative;
+
+  &__button {
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    height: 100%;
+    width: 44px;
+
+    &--light {
+      opacity: 0.4;
+    }
+
+    @media (min-width: 768px) {
+      width: 25px;
+    }
+  }
+
+  &__content {
     box-sizing: border-box;
-    left: 0;
     max-height: 0;
-    overflow: hidden;
     position: absolute;
     transition: max-height 0.5s;
     visibility: hidden;
-  }
 
-  &.jsxc-opened {
-    .jsxc-inner {
-      display: block;
-      max-height: 1000px;
+    .jsxc-menu--opened & {
+      display: inline-block;
+      max-height: 9999px;
       visibility: visible;
     }
   }
@@ -21,12 +35,13 @@
   ul {
     list-style: none;
     margin: 0;
+    overflow: hidden;
     padding: 0;
   }
 
   li {
     border: 0;
-    cursor: auto;
+    cursor: pointer;
     overflow: hidden;
     text-overflow: ellipsis;
     user-select: none;
@@ -37,72 +52,241 @@
     color: inherit;
     text-decoration: none;
   }
-}
 
-.jsxc-menu-dropdown {
-  .jsxc-inner {
-    background-color: #fff;
-    border-radius: 3px;
-    bottom: auto;
-    color: #333;
-    display: none;
-    filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
-    margin: 8px 2px 5px 10px;
-    overflow: visible;
-    padding: 4px 12px 4px 5px;
-    position: absolute;
-    right: 0;
-    top: 100%;
-    z-index: 110;
+  &--drop-top-right,
+  &--drop-bottom-left,
+  &--drop-bottom-right,
+  &--drop-right-top {
+    .jsxc-menu__content {
+      border-radius: 3px;
+      max-height: 9999px;
+      padding: 3px;
+      z-index: 200;
 
-    &::after {
-      border: solid transparent;
-      border-bottom-color: #fff;
-      border-color: rgba(238, 238, 238, 0);
-      border-width: 10px;
-      bottom: 100%;
-      content: " ";
-      height: 0;
-      pointer-events: none;
-      position: absolute;
-      right: 6px;
-      width: 0;
+      &::after {
+        border: 8px solid;
+        border-bottom-color: transparent;
+        border-left-color: transparent;
+        border-right-color: transparent;
+        content: " ";
+        height: 0;
+        pointer-events: none;
+        position: absolute;
+        width: 0;
+      }
+    }
+
+    li {
+      border-radius: 3px;
+      text-align: center;
+    }
+
+    .jsxc-icon {
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 16px 16px;
+      display: inline-block;
+      height: 40px;
+      vertical-align: sub;
+      width: 40px;
     }
   }
 
-  a {
-    color: #000;
-    opacity: 0.5;
-    white-space: nowrap;
+  &--drop-bottom-left {
+    .jsxc-menu__content {
+      bottom: 100%;
+      left: 5px;
+      margin-bottom: 8px;
 
-    &:hover {
-      opacity: 1;
-      text-decoration: none;
+      &::after {
+        left: 7px;
+        top: 100%;
+      }
+    }
+  }
+
+  &--drop-bottom-right {
+    .jsxc-menu__content {
+      bottom: 100%;
+      margin-bottom: 8px;
+      right: 5px;
+
+      &::after {
+        right: 7px;
+        top: 100%;
+      }
+    }
+  }
+
+  &--drop-top-right {
+    .jsxc-menu__content {
+      margin-top: 8px;
+      right: 0;
+      top: 100%;
+
+      &::after {
+        bottom: 100%;
+        right: 7px;
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  &--drop-right-top {
+    .jsxc-menu__content {
+      margin-right: 8px;
+      right: 100%;
+      top: 5px;
+
+      &::after {
+        left: 100%;
+        top: 7px;
+        transform: rotate(270deg);
+      }
+    }
+  }
+
+  &--dark {
+    .jsxc-menu__content {
+      background-color: $emoticon-selection-bg;
+      color: $emoticon-selection-bg;
+
+      &::after {
+        color: $emoticon-selection-bg;
+      }
     }
 
-    &.jsxc-disabled {
-      opacity: 0.5;
-      text-decoration: line-through;
+    li {
+      color: #fff;
+      padding: 3px 7px;
 
       &:hover {
-        opacity: 0.5;
-        text-decoration: line-through;
-      }
-
-      span {
-        cursor: default;
+        background-color: $emoticon-selection-hover;
+        color: #000;
       }
     }
   }
 
-  .jsxc-icon {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
-    display: inline-block;
-    height: 16px;
-    margin-right: 8px;
-    vertical-align: sub;
-    width: 16px;
+  &--light {
+    .jsxc-menu__content {
+      background-color: #fff;
+      filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
+
+      &::after {
+        color: #fff;
+      }
+    }
+
+    li {
+      color: #000;
+      opacity: 0.5;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  &--pushup {
+    @include presence-indicator("");
+
+    position: static;
+
+    li {
+      position: relative;
+
+      &::before {
+        border: 2px solid #f5f5f5;
+        left: 10px;
+        margin-top: -8px;
+        //  Presence indicator
+        position: absolute;
+        top: 50%;
+      }
+    }
+
+    .jsxc-menu__content {
+      bottom: 100%;
+      box-shadow: 0 -5px 5px -5px #a1a1a1;
+      left: 0;
+      overflow: hidden;
+      right: 0;
+    }
+
+    ul {
+      background-color: $roster-bottom-bg;
+      border-top: 1px solid $roster-bottom-border-top;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+
+      li:last-child {
+        border-bottom: 1px solid $roster-bottom-border-top;
+      }
+    }
+
+    li {
+      background-position: 15px center;
+      background-repeat: no-repeat;
+      background-size: 16px 16px;
+      color: $roster-bottom-color;
+      height: 44px;
+      line-height: 44px;
+      opacity: 0.8;
+      overflow: hidden;
+      padding-left: 44px;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+
+      &.jsxc-disabled {
+        color: $roster-bottom-disabled;
+        cursor: default;
+      }
+
+      &:hover:not(.jsxc-disabled) {
+        background-color: $roster-bottom-bg-hover;
+        color: $roster-bottom-color-hover;
+      }
+
+      &.jsxc-warning {
+        background-color: $warning-bg;
+
+        &:hover {
+          background-color: $warning-bg-hover;
+        }
+      }
+    }
+  }
+
+  &--emoticons {
+    height: 40px;
+
+    .jsxc-menu__button {
+      background-size: 80%;
+      width: 42px;
+    }
+
+    .jsxc-menu__content {
+      width: 217px;
+    }
+
+    li {
+      display: inline-block;
+      height: 30px;
+      padding: 0;
+      width: 30px;
+
+      .jsxc-emoticon {
+        background-size: contain;
+        height: 100%;
+        width: 100%;
+      }
+    }
+
+    &:hover::after {
+      opacity: 0.5;
+    }
   }
 }

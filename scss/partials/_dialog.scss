@@ -68,22 +68,6 @@
     margin-top: 20px;
   }
 
-  form {
-    fieldset {
-      border: 1px solid #d9d9d9;
-      margin-bottom: 30px;
-      padding: 0 30px;
-
-      h3 {
-        background-color: #f2f2f2;
-        color: #000;
-        font-size: 15px;
-        margin: 0 -30px 10px;
-        padding: 10px;
-      }
-    }
-  }
-
   legend {
     border: 0;
     font-size: 20px;
@@ -98,7 +82,7 @@
     }
   }
 
-  .btn-group button {
+  .jsxc-button-group button {
     margin-right: 0;
   }
 
