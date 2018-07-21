@@ -48,11 +48,13 @@ module.exports = {
             test: /\.hbs$/,
             loader: 'handlebars-loader',
             exclude: /node_modules/,
-            query: {
+            options: {
                helperDirs: [
-                  path.resolve(__dirname, "template", 'helpers')
+                  path.resolve(__dirname, 'template', 'helpers')
                ],
-               ignorePartials: ['list']
+               partialDirs: [
+                  path.resolve(__dirname, 'template', 'partials')
+               ]
             }
          },
          {
