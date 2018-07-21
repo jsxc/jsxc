@@ -62,16 +62,18 @@ export default class MultiUserChatWindow extends ChatWindow {
       this.memberlistElement.find('ul').append(memberElement);
 
       let title, label;
+      let avatarElement = memberElement.find('.jsxc-avatar');
 
       if (jid && typeof jid !== 'undefined') {
          label = jid.bare;
          title = title + '\n' + jid.bare;
 
-         //@TODO avatar
+         let contact = this.account.getContact(jid);
+         AvatarSet.get(contact).addElement(avatarElement);
       } else {
          label = title = nickname;
 
-         AvatarSet.setPlaceholder(memberElement.find('.jsxc-avatar'), nickname);
+         AvatarSet.setPlaceholder(avatarElement, nickname);
       }
 
       memberElement.find('.jsxc-name').text(nickname);

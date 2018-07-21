@@ -14,7 +14,7 @@ import Client from './Client'
 import { NoticeManager } from './NoticeManager'
 import PluginRepository from './plugin/PluginRepository'
 import DiscoInfoRepository from './DiscoInfoRepository'
-import DiscoInfoChangable from './DiscoInfoChangable'
+import DiscoInfoChangeable from './DiscoInfoChangeable'
 import HookRepository from './util/HookRepository'
 import Options from './Options'
 import UUID from './util/UUID'
@@ -48,7 +48,7 @@ export default class Account {
 
    private discoInfoRepository: DiscoInfoRepository;
 
-   private ownDiscoInfo: DiscoInfoChangable;
+   private ownDiscoInfo: DiscoInfoChangeable;
 
    private hookRepository = new HookRepository<any>();
 
@@ -77,7 +77,7 @@ export default class Account {
 
       this.options = Options.get();
       this.discoInfoRepository = new DiscoInfoRepository(this);
-      this.ownDiscoInfo = new DiscoInfoChangable(this.uid);
+      this.ownDiscoInfo = new DiscoInfoChangeable(this.uid);
       this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3]);
       this.connection = new StorageConnection(this);
       this.noticeManager = new NoticeManager(this.getStorage());
@@ -120,7 +120,7 @@ export default class Account {
          storage.setItem('connection', 'created', new Date());
 
          if (pause) {
-            (<any>this.connection).pause(); //@TODO fix ts type
+            connection.pause();
          } else {
             this.initConnection(status);
          }
@@ -174,7 +174,7 @@ export default class Account {
       return this.discoInfoRepository;
    }
 
-   public getDiscoInfo(): DiscoInfoChangable {
+   public getDiscoInfo(): DiscoInfoChangeable {
       return this.ownDiscoInfo;
    }
 

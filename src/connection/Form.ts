@@ -11,7 +11,7 @@ export default class Form {
       let stanzaElement = $(stanza);
       let xElement = stanzaElement.attr('xmlns') === NAMESPACE && stanzaElement[0].tagName === 'x' ? stanzaElement : stanzaElement.find('x[xmlns="jabber:x:data"]');
       let type = xElement.attr('type');
-      let instructions = xElement.find('instructions').text(); //@TODO multiple instructions elements possible
+      let instructions = xElement.find('instructions').text();
       let title = xElement.find('title').text();
 
       let fieldElements = xElement.find('field');
@@ -23,10 +23,12 @@ export default class Form {
       return new Form(type, fields, instructions, title);
    }
 
-   public static fromJSON(data: { type: string, fields: FieldJSONData[] }) {
+   public static fromJSON(data: { type: string, fields: FieldJSONData[], instructions?: string, title?: string }) {
       return new Form(
          data.type,
-         data.fields.map(fieldData => Field.fromJSON(fieldData))
+         data.fields.map(fieldData => Field.fromJSON(fieldData)),
+         data.instructions,
+         data.title,
       );
    }
 

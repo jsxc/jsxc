@@ -3,6 +3,12 @@ import { IJID } from '../../JID.interface'
 import Form from '../Form'
 import { $pres, $iq, $msg, Strophe } from '../../vendor/Strophe'
 
+//@REVIEW this will not be reflected in caps and disco
+const NS_CONFERENCE = 'jabber:x:conference';
+const NS_BASE = 'http://jabber.org/protocol/muc';
+const NS_OWNER = NS_BASE + '#owner';
+const NS_USER = NS_BASE + '#user';
+
 export default class MUC extends AbstractService {
    public joinMultiUserRoom(jid: IJID, password?: string) {
       if (jid.isBare()) {
@@ -41,7 +47,7 @@ export default class MUC extends AbstractService {
          to: jid.bare,
          type: 'set'
       }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#owner' //@TODO use namespace object
+         xmlns: NS_OWNER
       }).c('destroy');
 
       return this.sendIQ(iq);
@@ -52,7 +58,7 @@ export default class MUC extends AbstractService {
          to: jid.bare,
          type: 'set'
       }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#owner'
+         xmlns: NS_OWNER
       }).c('x', {
          xmlns: 'jabber:x:data',
          type: 'submit'
@@ -66,7 +72,7 @@ export default class MUC extends AbstractService {
          to: jid.bare,
          type: 'get'
       }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#owner'
+         xmlns: NS_OWNER
       });
 
       return this.sendIQ(iq);
@@ -77,7 +83,7 @@ export default class MUC extends AbstractService {
          to: jid.bare,
          type: 'set'
       }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#owner'
+         xmlns: NS_OWNER
       }).cnode(form.toXML());
 
       return this.sendIQ(iq);
@@ -88,7 +94,7 @@ export default class MUC extends AbstractService {
          to: jid.bare,
          type: 'set'
       }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#owner'
+         xmlns: NS_OWNER
       }).c('x', {
          xmlns: 'jabber:x:data',
          type: 'cancel'
@@ -102,7 +108,7 @@ export default class MUC extends AbstractService {
       let msg = $msg({
          to: roomJid.bare
       }).c('x', {
-         xmlns: 'http://jabber.org/protocol/muc#user'
+         xmlns: NS_USER
       }).c('invite', {
          to: receiverJid.bare
       });
@@ -119,7 +125,7 @@ export default class MUC extends AbstractService {
       let msg = $msg({
          to: roomJid.bare
       }).c('x', {
-         xmlns: 'http://jabber.org/protocol/muc#user'
+         xmlns: NS_USER
       }).c('decline', {
          to: receiverJid.bare
       });
@@ -136,7 +142,7 @@ export default class MUC extends AbstractService {
       let msg = $msg({
          to: receiverJid.bare
       }).c('x', {
-         xmlns: 'jabber:x:conference', //@TODO
+         xmlns: NS_CONFERENCE,
          jid: roomJid.bare,
          reason: reason,
          password: password

@@ -6,6 +6,7 @@ import * as ConnectHelper from './ConnectHelper'
 import StorageConnection from '../storage/Connection'
 import XMPPConnection from './Connection'
 import { Strophe } from '../../vendor/Strophe'
+import BaseError from '../../errors/BaseError'
 
 export default class Connector {
    private connectionParameters;
@@ -34,7 +35,7 @@ export default class Connector {
          this.connectionParameters.remove('inactivity');
          this.connectionParameters.remove('timestamp');
       } else {
-         throw 'Unsupported number of arguments';
+         throw new BaseError('Unsupported number of arguments');
       }
    }
 
@@ -51,7 +52,7 @@ export default class Connector {
          this.account.triggerConnectionHook(Strophe.Status.DISCONNECTED, 'timeout');
          this.account.closeAllChatWindows();
 
-         throw 'Credentials expired'; //@TODO throw instance of BaseError
+         throw new BaseError('Credentials expired');
       }
 
       return ConnectHelper.login.apply(this, this.connectionArgs)
@@ -77,7 +78,7 @@ export default class Connector {
       this.addRidUnloadHandler(stropheConnection);
 
       let accountConnection = this.account.getConnection();
-      let handlers = (<StorageConnection>accountConnection).getHandlers(); //@TODO fix connection interface
+      let handlers = (<StorageConnection>accountConnection).getHandlers();
 
       accountConnection.close();
       accountConnection = new XMPPConnection(this.account, stropheConnection);

@@ -1,5 +1,6 @@
 import Identifiable from '../Identifiable.interface'
 import Storage from '../Storage'
+import InvalidParameterError from '../errors/InvalidParameterError';
 
 export default class PersistentMap {
 
@@ -58,8 +59,7 @@ export default class PersistentMap {
       } else if (typeof arguments[0].getId === 'function') {
          id = arguments[0].getId();
       } else {
-         //@TODO error
-         return;
+         throw new InvalidParameterError('I need to know which id do you want to remove');
       }
 
       delete this.map[id];

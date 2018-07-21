@@ -1,6 +1,7 @@
 import Dialog from '../Dialog'
 import Client from '../../Client'
 import JID from '../../JID'
+import { IConnection } from '../../connection/Connection.interface'
 import TableElement from '../util/TableElement'
 import Roster from '../../ui/Roster'
 import Translation from '../../util/Translation'
@@ -16,7 +17,7 @@ export default function() {
 
 class MultiUserJoinDialog {
    private account;
-   private connection;
+   private connection: IConnection;
    private defaultNickname;
 
    private dialog;
@@ -104,7 +105,7 @@ class MultiUserJoinDialog {
       let serverJid = new JID('', ownJid.domain, '');
       let discoInfoRepository = this.account.getDiscoInfoRepository();
 
-      return this.connection.getDiscoItems(serverJid).then((stanza) => {
+      return this.connection.getDiscoService().getDiscoItems(serverJid).then((stanza) => {
          let promises = [];
 
          $(stanza).find('item').each((index, element) => {
@@ -134,7 +135,7 @@ class MultiUserJoinDialog {
       roomInfoElement.addClass('jsxc-waiting')
       roomInfoElement.text(Translation.t('Rooms_are_loaded'));
 
-      this.connection.getDiscoItems(server)
+      this.connection.getDiscoService().getDiscoItems(server)
          .then(this.parseRoomList)
          .catch(this.parseRoomListError)
          .then(() => {
@@ -239,7 +240,7 @@ class MultiUserJoinDialog {
    private requestRoomInfo = (room: JID) => {
       this.setWaitingMessage('Loading_room_information');
 
-      return this.connection.getDiscoInfo(room)
+      return this.connection.getDiscoService().getDiscoInfo(room)
          .then(this.parseRoomInfo)
          .then((roomInfoElement) => {
             this.setStatusElement(roomInfoElement);

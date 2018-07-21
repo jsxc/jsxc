@@ -1,6 +1,7 @@
 import Identifiable from '../Identifiable.interface'
 import Storage from '../Storage'
 import Log from '../util/Log'
+import InvalidParameterError from '../errors/InvalidParameterError'
 
 export default class SortedPersistentMap {
 
@@ -54,8 +55,7 @@ export default class SortedPersistentMap {
       let id = element.getId();
 
       if (typeof this.map[id] !== 'undefined') {
-         //@TODO error reporting
-         return;
+         throw 'Element with the same id already exists';
       }
 
       this.map[id] = element;
@@ -85,8 +85,7 @@ export default class SortedPersistentMap {
       } else if (typeof arguments[0].getId === 'function') {
          id = arguments[0].getId();
       } else {
-         //@TODO error
-         return;
+         throw new InvalidParameterError('I need to know which id do you want to remove');
       }
 
       this.list = $.grep(this.list, function(i) {

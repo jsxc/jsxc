@@ -8,7 +8,7 @@ export default class AvatarSet {
 
    private static avatars = {};
 
-   public static get(contact: IContact) {
+   public static get(contact: IContact): AvatarSet {
       let avatar = AvatarSet.avatars[contact.getUid()];
 
       if (!avatar) {

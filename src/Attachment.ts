@@ -12,7 +12,7 @@ export default class Attachment {
 
    private uid: string;
 
-   private properties;
+   private properties: PersistentMap;
 
    constructor(name: string, mimeType: string, data: string);
    constructor(file: File);
@@ -47,6 +47,10 @@ export default class Attachment {
       }
    }
 
+   public delete() {
+      this.properties.delete();
+   }
+
    public getUid(): string {
       if (!this.uid) {
          this.uid = UUID.v4();
@@ -63,15 +67,18 @@ export default class Attachment {
       return this.data;
    }
 
-   public setData(data: string) {
+   public setData(data: string): boolean {
+      this.data = data;
+
       if (typeof data === 'string' && data.length < 1024) {
          this.properties.set('data', data);
-      } else {
-         //@TODO inform user
-         Log.warn('Data to large to store');
+
+         return true;
       }
 
-      this.data = data;
+      Log.warn('Data to large to store');
+
+      return false;
    }
 
    public setProcessed(processed: boolean) {
@@ -129,7 +136,7 @@ export default class Attachment {
 
       let wrapperElement = $('<div>');
       wrapperElement.addClass('jsxc-attachment');
-      wrapperElement.addClass('jsxc-' + type.replace(/\//, '-')); //@TODO XSS
+      wrapperElement.addClass('jsxc-' + type.replace(/\//, '-'));
       wrapperElement.addClass('jsxc-' + type.replace(/^([^/]+)\/.*/, '$1'));
 
       let title = `${name} (${size})`;

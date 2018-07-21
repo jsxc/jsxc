@@ -5,6 +5,7 @@ import * as RTC from 'webrtc-adapter'
 import { createRegistry } from 'jxt'
 import Log from '../util/Log'
 import Translation from '../util/Translation'
+import UUID from '../util/UUID'
 import Notification from '../Notification'
 import JID from '../JID'
 import { VideoDialog } from '../ui/VideoDialog'
@@ -42,10 +43,13 @@ export default class JingleHandler {
       });
 
       this.manager.on('send', (data) => {
-         var iq = new IqStanza(data);
-         var iqElement = $.parseXML(iq.toString()).getElementsByTagName('iq')[0];
+         let iq = new IqStanza(data);
+         let iqElement = $.parseXML(iq.toString()).getElementsByTagName('iq')[0];
 
-         //@TODO add id to iq
+         if (!iqElement.getAttribute('id')) {
+            iqElement.setAttribute('id', UUID.v4() + ':sendIQ');
+         }
+
          (<any>this.connection).send(iqElement); //@REVIEW
       });
 

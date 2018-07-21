@@ -18,6 +18,8 @@ import helpersFile = require('otr/lib/helpers.js?path')
 import dsaFile = require('otr/lib/dsa.js?path')
 import dsaWebworkerFile = require('otr/lib/dsa-webworker.js?path')
 
+const WHITESPACE_TAG = '\x20\x09\x20\x20\x09\x09\x09\x09\x20\x09\x20\x09\x20\x09\x20\x20';
+
 interface DSA {
    parsePrivate
    createInWebWorker
@@ -55,12 +57,10 @@ export default class OTRPlugin extends EncryptionPlugin {
          this.key = key;
       });
 
-      //@TODO on first message received or send a DSA key is generated, this should be avoided
       pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor);
       pluginAPI.addPreSendMessageProcessor(this.preSendMessageProcessor);
    }
 
-   //@TODO create contactPluginApi
    public toggleTransfer(contact: Contact): Promise<void> {
       return this.getSession(contact).then((session: Session) => {
          if (session.isEnded()) {
@@ -75,7 +75,7 @@ export default class OTRPlugin extends EncryptionPlugin {
 
    private afterReceiveMessageProcessor = (contact: Contact, message: Message, stanza: Element) => {
       let plaintextMessage = message.getPlaintextMessage();
-      if (!plaintextMessage || !/^\?OTR/.test(plaintextMessage)) { //@TODO search for whitespace
+      if (!plaintextMessage || (!/^\?OTR/.test(plaintextMessage) && plaintextMessage.indexOf(WHITESPACE_TAG) < 0)) {
          return Promise.resolve([contact, message, stanza]);
       }
 

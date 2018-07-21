@@ -208,11 +208,11 @@ export default class ChatWindow {
 
    public addActionEntry(className: string, cb: (ev) => void) {
       let element = $('<div>');
-      element.addClass('jsxc-action-entry')
+      element.addClass('jsxc-bar__action-entry')
       element.addClass(className);
       element.on('click', cb);
 
-      this.element.find('.jsxc-action-entry.jsxc-js-close').before(element);
+      this.element.find('.jsxc-bar__action-entry.jsxc-js-close').before(element);
    }
 
    public addMenuEntry(className: string, label: string, cb: (ev) => void) {
@@ -395,6 +395,17 @@ export default class ChatWindow {
 
       if (ev.which === ESC_KEY) {
          this.close();
+      }
+
+      let selectionStart = ev.target.selectionStart;
+      let selectionEnd = ev.target.selectionEnd;
+
+      if (selectionStart === selectionEnd) {
+         let lastSpaceIndex = message.lastIndexOf(' ') + 1;
+         let lastNewlineIndex = message.lastIndexOf('\n') + 1;
+         let lastWord = message.slice(Math.max(lastSpaceIndex, lastNewlineIndex), selectionStart);
+
+         //@TODO auto complete
       }
    }
 

@@ -41,6 +41,10 @@
 
     * {
       cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      user-select: none;
+      white-space: nowrap;
     }
 
     &__secondary {

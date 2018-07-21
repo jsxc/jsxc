@@ -27,7 +27,6 @@ function loginWithPassword(url: string, jid: string, password: string): Promise<
    Log.debug('Try to establish a new connection.');
 
    return new Promise(function(resolve, reject) {
-      //@TODO don't forget password from options
       connection.connect(jid, password, function(status, condition) {
          resolveConnectionPromise(status, condition, connection, resolve, reject);
       });
@@ -87,7 +86,7 @@ function registerXMPPNamespaces() {
 function prepareConnection(url: string): Strophe.Connection {
    let connection = new Strophe.Connection(url);
 
-   if (true) { //@TODO use option
+   if (Client.isDebugMode()) {
       connection.xmlInput = function(data) {
          Log.debug('<', data);
       };

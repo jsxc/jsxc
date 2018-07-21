@@ -67,24 +67,6 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       Log.error('Deprecated function called: getCapabilitiesByJid');
    };
 
-   public renameContact(jid: JID, name: string) {
-      //@TODO maybe replace jid with contact?
-
-      // if (d.type === 'chat') {
-      //    var iq = $iq({
-      //       type: 'set'
-      //    }).c('query', {
-      //       xmlns: NS.get('roster')
-      //    }).c('item', {
-      //       jid: jid.bare,
-      //       name: name
-      //    });
-      //    this.connection.sendIQ(iq);
-      // } else if (d.type === 'groupchat') {
-      //    jsxc.xmpp.bookmarks.add(bid, newname, d.nickname, d.autojoin);
-      // }
-   }
-
    public hasFeatureByJid(jid: JID, feature: string);
    public hasFeatureByJid(jid: JID, feature: string[]);
    public hasFeatureByJid() {

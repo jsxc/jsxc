@@ -1,6 +1,6 @@
 import DiscoInfo from './DiscoInfo'
 
-export default class DiscoInfoChangable extends DiscoInfo {
+export default class DiscoInfoChangeable extends DiscoInfo {
 
    constructor(id: string) {
       super(id);

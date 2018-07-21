@@ -3,6 +3,8 @@ import { IJID } from '../../JID.interface'
 import * as NS from '../xmpp/namespace'
 import { $iq } from '../../vendor/Strophe'
 
+NS.register('VCARD', 'vcard-temp');
+
 export default class Vcard extends AbstractService {
    public loadVcard(jid: IJID) {
       let iq = $iq({
@@ -11,8 +13,6 @@ export default class Vcard extends AbstractService {
       }).c('vCard', {
          xmlns: NS.get('VCARD')
       });
-
-      //@TODO register Namespace 'VCARD', 'vcard-temp'
 
       return this.sendIQ(iq).then(this.parseVcard);
    }

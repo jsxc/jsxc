@@ -1,23 +1,23 @@
 import Log from './util/Log'
 import Translation from './util/Translation'
+import Overlay from './ui/Overlay'
 
 export default class UserMedia {
    public static request(um = ['video', 'audio']) {
       let self = this;
-      let overlayElement = $('<div>');
-      overlayElement.addClass('jsxc-overlay jsxc-overlay-black');
-      overlayElement.appendTo('body');
+      let overlay = new Overlay();
+      overlay.open();
 
       return UserMedia
          .filterUserMedia(um)
          .then(UserMedia.getUserMedia)
          .then(um => {
-            overlayElement.remove();
+            overlay.close();
 
             return um;
          })
          .catch(err => {
-            overlayElement.remove();
+            overlay.close();
 
             return UserMedia.onMediaFailure(err);
          });

@@ -9,6 +9,7 @@ import HttpUploadService from './HttpUploadService'
 import { IConnection } from '../../connection/Connection.interface'
 import Pipe from '../../util/Pipe'
 import { $iq } from '../../vendor/Strophe'
+import Translation from '../../util/Translation';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -54,8 +55,11 @@ export default class HttpUploadPlugin extends AbstractPlugin {
          return service.sendFile(attachment.getFile());
       }).then((downloadUrl) => {
          this.addUrlToMessage(downloadUrl, attachment, message);
-         attachment.setData(downloadUrl);
          attachment.setProcessed(true);
+
+         if (!attachment.setData(downloadUrl)) {
+            message.setErrorMessage(Translation.t('Attachment_too_large_to_store'));
+         }
       }).catch((err) => {
          this.pluginAPI.Log.debug(err);
       }).then(() => {

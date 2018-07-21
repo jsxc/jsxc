@@ -9,6 +9,7 @@ import { IJID } from '../../JID.interface'
 import * as Namespace from '../../connection/xmpp/namespace'
 import Archive from './Archive'
 import DiscoInfo from '../../DiscoInfo'
+import { Status } from '../../vendor/Strophe'
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -45,7 +46,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       });
 
       pluginAPI.registerConnectionHook((status, condition) => {
-         if (status === 5 || status === 8) { //@TODO use constant for status
+         if (status === Status.CONNECTED || status === Status.ATTACHED) {
             this.determineServerSupport();
          }
       });

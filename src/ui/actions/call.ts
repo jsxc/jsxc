@@ -39,7 +39,7 @@ export function startCall(contact: Contact, account: Account, type: 'video' | 'a
 
       videoDialog.addSession(session);
 
-      //@TODO post $.t('Call_started')
+      contact.addSystemMessage(Translation.t('Call_started'));
    }).catch(([msg, err]) => {
       contact.addSystemMessage(`${Translation.t('Media_failure')}: ${msg} (${err.name})`);
    });

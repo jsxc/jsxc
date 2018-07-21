@@ -19,9 +19,13 @@ export default class PluginRepository {
          throw 'This plugin doesn\'t implement static getName():string';
       }
 
-      //@TODO check distinct name
+      let name = Plugin.getName();
 
-      Log.debug('Add ' + Plugin.getName() + ' to plugin repository');
+      if (PluginRepository.registeredPlugins.indexOf(name) > -1) {
+         throw `There is already a plugin with the name ${name}.`
+      }
+
+      Log.debug(`Add ${name} to plugin repository`);
 
       PluginRepository.registeredPlugins.push(Plugin);
    }

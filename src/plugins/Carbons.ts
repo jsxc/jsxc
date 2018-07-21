@@ -2,6 +2,7 @@ import * as CONST from '../CONST'
 import { AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import Message from '../Message'
+import { Status } from '../vendor/Strophe'
 import * as Namespace from '../connection/xmpp/namespace'
 import Translation from '../util/Translation'
 import { $iq } from '../vendor/Strophe'
@@ -26,7 +27,7 @@ export default class CarbonsPlugin extends AbstractPlugin {
       pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor);
 
       pluginAPI.registerConnectionHook((status, condition) => {
-         if (status === 5 || status === 8) { //@TODO use constant for status
+         if (status === Status.CONNECTED || status === Status.ATTACHED) {
             this.init();
          }
       });

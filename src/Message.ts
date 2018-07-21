@@ -96,7 +96,7 @@ export default class Message implements Identifiable, IMessage {
       let attachment = this.getAttachment();
 
       if (attachment) {
-         //@TODO attachment.delete()
+         attachment.delete();
       }
 
       this.data.delete();
@@ -152,17 +152,6 @@ export default class Message implements Identifiable, IMessage {
       this.attachment = attachment;
 
       this.data.set('attachment', attachment.getUid());
-
-      // if (this.getDirection() === DIRECTION.OUT) {
-      //    // save storage
-      //    attachment.clearData();
-      // }
-      //
-      // let saved = attachment.save();
-      //
-      // if (!saved && this.getDirection() === DIRECTION.IN) {
-      //    //@TODO inform user
-      // }
    }
 
    public getPeer(): JID {

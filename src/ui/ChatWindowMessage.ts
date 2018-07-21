@@ -4,6 +4,7 @@ import JID from '../JID'
 import ChatWindow from './ChatWindow'
 import AvatarSet from './AvatarSet'
 import Log from '../util/Log'
+import Color from '../util/Color'
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs')
 
@@ -90,9 +91,9 @@ export default class ChatWindowMessage {
 
       if (this.message.getDirection() === DIRECTION.SYS) {
          this.element.find('.jsxc-message-area').append('<div class="jsxc-clear"/>');
-      } else {
-         //@TODO update last message
-         //$('[data-bid="' + bid + '"]').find('.jsxc-lastmsg .jsxc-text').html(msg);
+      } else if (this.message.getDirection() === DIRECTION.IN) {
+         // @REVIEW maybe set background color to avatar color; use source color if available
+         // this.element.css('background-color', Color.generate(this.message.getPeer().bare));
       }
 
       let sender = this.message.getSender();
@@ -148,7 +149,7 @@ export default class ChatWindowMessage {
 
       let avatarElement = $('<div>');
       avatarElement.addClass('jsxc-avatar');
-      avatarElement.attr('title', title); //@REVIEW escape?
+      avatarElement.attr('title', title);
 
       this.element.prepend(avatarElement)
       this.element.attr('data-name', sender.name);

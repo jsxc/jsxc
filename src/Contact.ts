@@ -66,7 +66,6 @@ export default class Contact implements IIdentifiable, IContact {
    public delete() {
       this.account.getConnection().getRosterService().removeContact(this.getJid());
 
-      //@TODO add delete method to purge the complete entry
       this.data.empty();
    }
 
@@ -188,8 +187,7 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getNumberOfUnreadMessages(): number {
-      //@TODO get number of unread messages
-      return 0;
+      return this.transcript.getNumberOfUnreadMessages();
    }
 
    public getName(): string {

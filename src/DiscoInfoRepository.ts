@@ -99,7 +99,7 @@ export default class implements DiscoInfoRepository {
       let serverJidIndex = this.serverJidIndex;
 
       if (jid.isBare() && !jid.isServer()) {
-         //  return Promise.reject('We need a full jid.');
+         return Promise.reject('We need a full jid.');
       }
 
       if (jid.isServer()) {

@@ -172,7 +172,8 @@ abstract class AbstractConnection {
       pipe.run(message, xmlMsg).then(([message, xmlMsg]) => {
          if (message.hasAttachment() && !message.getAttachment().isProcessed()) {
             Log.warn('Attachment was not processed');
-            //@TODO inform user
+
+            message.setErrorMessage('Attachment was not processed')
          }
 
          this.send(xmlMsg);

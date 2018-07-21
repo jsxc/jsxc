@@ -4,9 +4,11 @@ import Client from './Client'
 import * as CONST from './CONST'
 import { FUNCTION as NOTICEFUNCTION } from './Notice'
 import openConfirmDialog from './ui/dialogs/confirm'
+import Overlay from './ui/Overlay'
 import Hash from './util/Hash'
 import Log from './util/Log'
 import defaultIconFile = require('../images/XMPP_logo.png')
+import { Presence } from 'connection/AbstractConnection';
 
 interface NotificationSettings {
    title: string,
@@ -37,15 +39,18 @@ export default class Notification {
    private static audioObject;
 
    public static askForPermission() {
+      let overlay = new Overlay();
       openConfirmDialog(Translation.t('Should_we_notify_you_')).getPromise().then(() => {
-         // @TODO open dialog to block further actions
+         overlay.open();
 
          return this.requestPermission();
       }).then(() => {
          Client.getStorage().setItem('notificationState', NotificationState.ENABLED);
       }).catch(() => {
          Client.getStorage().setItem('notificationState', NotificationState.DISABLED);
-      })
+      }).then(() => {
+         overlay.close();
+      });
    }
 
    public static muteSound(external?) {
@@ -183,18 +188,16 @@ export default class Notification {
    }
 
    private static playSound(soundFile: string, loop?: boolean, force?: boolean) {
-      if (Client.getOption('muteNotification')) {
-         // @TODO check presence of source account
-         // sound mute or own presence is dnd
+      if (Client.getOption('muteNotification') || Client.getPresenceController().getCurrentPresence() === Presence.dnd) {
+         Log.debug('Sound is muted or presence is DND');
+
          return;
       }
 
       if (Client.isVisible() && !force) {
-         // tab is visible
          return;
       }
 
-      // stop current audio file
       Notification.stopSound();
 
       var audio = new Audio(soundFile);
