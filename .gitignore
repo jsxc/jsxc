@@ -11,3 +11,4 @@ dev/
 .idea
 /bundle.js
 /dist/
+yarn-error.log
