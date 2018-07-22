@@ -15,8 +15,10 @@
   background: #fff;
   border: 1px solid #d8d8d8;
   display: inline-block;
+  max-height: 100%;
   max-width: 100%;
   min-width: 320px;
+  overflow-y: auto;
   padding: 4vh 8vw;
   position: relative;
   text-align: left;
@@ -156,12 +158,22 @@
   }
 }
 
-.jsxc-list-item {
-  align-items: center;
-  display: flex;
-  padding: 0.5em 1.5em;
+.jsxc-list {
+  &__item {
+    align-items: center;
+    display: flex;
+    padding: 0.5em 1.5em !important;
 
-  &-avatar {
+    &--clickable {
+      cursor: pointer;
+
+      &:hover {
+        background-color: #f2f2f2;
+      }
+    }
+  }
+
+  &__avatar {
     align-self: flex-start;
     margin-right: 0.5em;
 
@@ -172,23 +184,15 @@
     }
   }
 
-  &-text {
+  &__text {
     flex-grow: 1;
   }
 
-  &-secondary-text {
+  &__text__secondary {
     opacity: 0.7;
   }
 
-  &-secondary-action {
+  &__secondary-action {
     align-self: flex-start;
-  }
-
-  &-clickable {
-    cursor: pointer;
-
-    &:hover {
-      background-color: #f2f2f2;
-    }
   }
 }
