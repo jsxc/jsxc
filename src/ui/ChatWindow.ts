@@ -532,7 +532,7 @@ export default class ChatWindow {
          resize: () => {
             let newWidth = fadeElement.width();
 
-            element.find('.jsxc-window-bar').css('width', newWidth + 'px');
+            element.find('.jsxc-bar--window').css('width', newWidth + 'px');
          }
       });
    }
