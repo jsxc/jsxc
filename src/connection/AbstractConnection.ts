@@ -202,7 +202,7 @@ abstract class AbstractConnection {
    }
 
    public queryArchive(archive: JID, queryId: string, beforeResultId?: string, end?: Date): Promise<Element> {
-      var iq = $iq({
+      let iq = $iq({
          type: 'set'
       });
 
@@ -240,6 +240,22 @@ abstract class AbstractConnection {
       }
 
       iq.up();
+
+      return this.sendIQ(iq);
+   }
+
+   public changePassword(newPassword: string): Promise<Element> {
+      let iq = $iq({
+         type: 'set'
+      });
+
+      iq.c('query', {
+         xmlns: 'jabber:iq:register'
+      });
+
+      iq.c('username').t(this.getJID().node).up();
+
+      iq.c('password').t(newPassword);
 
       return this.sendIQ(iq);
    }
