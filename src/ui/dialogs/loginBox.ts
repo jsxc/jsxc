@@ -1,6 +1,6 @@
 import Dialog from '../Dialog'
 import Client from '../../Client'
-import { start } from '../../index'
+import { start } from '../../api/v1'
 let loginTemplate = require('../../../template/loginBox.hbs');
 
 export default function(username?: string) {

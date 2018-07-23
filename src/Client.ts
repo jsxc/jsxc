@@ -45,7 +45,7 @@ export default class Client {
          }).then(function() {
 
          }).catch(function(msg) {
-            Client.accounts[id].remove();
+            Client.accounts[id].connectionDisconnected();
 
             console.warn(msg)
          });

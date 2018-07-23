@@ -373,14 +373,14 @@ export default class Roster {
 
       this.element.find('.jsxc-js-presence-menu li').click(function() {
          let presenceString = <string>$(this).data('presence');
-         let oldPresence = Presence[options.get('presence')] || Presence.offline;
+         let oldPresence = Client.getPresenceController().getTargetPresence() || Presence.offline;
          let requestedPresence = Presence[presenceString];
 
          if (Client.getAccount()) {
             Client.getPresenceController().setTargetPresence(requestedPresence);
          }
 
-         if (oldPresence === Presence.offline && requestedPresence !== Presence.offline) {
+         if (oldPresence === Presence.offline && requestedPresence === Presence.online) {
             let onUserRequestsToGoOnline = Client.getOption('onUserRequestsToGoOnline');
 
             if (typeof onUserRequestsToGoOnline === 'function') {

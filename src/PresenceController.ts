@@ -1,4 +1,5 @@
 import { Presence } from './connection/AbstractConnection'
+import { Strophe } from './vendor/Strophe'
 import Account from './Account'
 import Storage from './Storage'
 
@@ -47,12 +48,19 @@ export default class PresenceController {
 
       this.updateCurrentPresence();
 
+      //@REVIEW account.registerPresenceHook ???
       sessionStorage.registerHook('presence', () => {
          if (this.updateTimeout) {
             clearTimeout(this.updateTimeout);
          }
 
          this.updateTimeout = setTimeout(() => this.updateCurrentPresence(), AGGREGATE);
+      });
+
+      account.registerConnectionHook((status) => {
+         if (status === Strophe.Status.DISCONNECTED) {
+            console.log('Presence Controller: account disconnected')
+         }
       });
    }
 
@@ -68,6 +76,13 @@ export default class PresenceController {
       let isSamePresence = true;
       let commonPresence;
       let accounts = this.getAccounts();
+
+      //@REVIEW refactor
+      if (accounts.length === 0) {
+         this.setTargetPresence(Presence.offline);
+
+         return Presence.offline;
+      }
 
       accounts.forEach((account) => {
          let presence = account.getPresence();
