@@ -2,10 +2,26 @@ import Storage from './Storage'
 import Client from './Client'
 import Log from './util/Log'
 
+const MASTER_KEY = 'master';
+const SLAVE_KEY = 'slave';
+
+const MASTER_CLASS = 'jsxc-master';
+const SLAVE_CLASS = 'jsxc-slave';
+
+const CLAIM_PREFIX = 'claim';
+const CLAIM_SEP = '|';
+
+const TIMEOUT_QUERY = 600;
+const TIMEOUT_CLAIM = 600;
+const TIMEOUT_MIN_OBSERVATION = 2000;
+const INTERVAL_KEEPALIVE = 1000;
+
+enum Role { Master, Slave, Master_Pending, Unknown };
+
 export default class RoleAllocator {
    private storage: Storage;
 
-   private master: boolean = null;
+   private role: Role = Role.Unknown;
 
    private keepAliveInterval;
 
@@ -13,47 +29,25 @@ export default class RoleAllocator {
 
    private observationTimeout;
 
-   private resolves = [];
+   private claimTimeout;
+
+   private masterResolves = [];
+
+   private slaveResolves = [];
 
    private slaveValue;
 
    private masterValue;
+
+   private claim: number;
 
    private static instance;
 
    private constructor() {
       this.storage = Client.getStorage();
 
-      this.storage.registerHook('master', (value) => {
-         if (this.masterValue === value) {
-            return;
-         }
-
-         if (this.master === null) {
-            Log.debug('i am slave');
-
-            this.master = false;
-            clearTimeout(this.resolveTimeout);
-
-            $('body').addClass('jsxc-slave').removeClass('jsxc-master');
-         }
-
-         if (this.master !== true) {
-            this.masterIsStillAlive();
-         } else {
-            Log.error('Something went wrong. We have another master.');
-         }
-      });
-
-      this.storage.registerHook('slave', (value) => {
-         if (this.slaveValue === value) {
-            return;
-         }
-
-         if (this.master === true) {
-            this.stillAlive();
-         }
-      });
+      this.storage.registerHook(MASTER_KEY, this.onMaster);
+      this.storage.registerHook(SLAVE_KEY, this.onSlave);
    }
 
    public static get() {
@@ -65,75 +59,162 @@ export default class RoleAllocator {
    }
 
    public isMaster() {
-      return this.master;
+      return this.role === Role.Master;
    }
 
    public waitUntilMaster() {
       return new Promise((resolve) => {
-         if (this.master === true || typeof this.storage.getItem('master') === 'undefined') {
+         if (this.role === Role.Master || typeof this.storage.getItem(MASTER_KEY) === 'undefined') {
             resolve();
          } else {
-            this.resolves.push(resolve);
+            this.masterResolves.push(resolve);
 
-            if (this.master !== false) {
+            if (this.role !== Role.Slave) {
                this.queryMaster();
             }
          }
       });
    }
 
+   public waitUntilSlave() {
+      return new Promise((resolve) => {
+         if (this.role === Role.Slave) {
+            resolve();
+         } else {
+            this.slaveResolves.push(resolve);
+         }
+      });
+   }
+
+   private onMaster = (value) => {
+      if (this.masterValue === value) {
+         return;
+      }
+
+      if (this.role === Role.Master_Pending && value.indexOf(CLAIM_PREFIX) === 0) {
+         this.thereIsAnotherPotentialMaster(value);
+      }
+
+      if (this.role === Role.Unknown) {
+         this.thereIsAMaster();
+      }
+
+      if (this.role === Role.Slave) {
+         this.masterIsStillAlive();
+      } else if (this.role === Role.Master) {
+         Log.error('Something went wrong. We have another master.');
+      }
+   }
+
+   private thereIsAnotherPotentialMaster(value) {
+      let foreignClaim = parseFloat(value.split(CLAIM_SEP)[1]);
+
+      if (foreignClaim > this.claim) {
+         clearTimeout(this.claimTimeout);
+
+         this.role = Role.Unknown;
+         this.claim = undefined;
+      }
+   }
+
+   private thereIsAMaster() {
+      Log.debug('I am slave');
+
+      this.role = Role.Slave;
+      clearTimeout(this.resolveTimeout);
+
+      this.resolveAllSlave();
+
+      $('body').addClass(SLAVE_CLASS).removeClass(MASTER_CLASS);
+   }
+
+   private onSlave = (value) => {
+      if (this.slaveValue === value) {
+         return;
+      }
+
+      if (this.role === Role.Master) {
+         this.stillAlive();
+      }
+   }
+
    private queryMaster() {
       Log.debug('query master');
 
-      let self = this;
-
       this.resolveTimeout = setTimeout(() => {
-         this.master = true;
+         if (this.role === Role.Unknown) {
+            this.claimMaster();
+         }
+      }, TIMEOUT_QUERY);
 
-         Log.debug('no one responded, i am master')
+      this.storage.setItem(SLAVE_KEY, this.slaveValue = Math.random());
+   }
 
-         $('body').addClass('jsxc-master').removeClass('jsxc-slave');
+   private claimMaster = () => {
+      this.claimTimeout = setTimeout(() => {
+         if (this.role === Role.Master_Pending) {
+            this.startMaster();
+         }
+      }, TIMEOUT_CLAIM);
 
-         this.startKeepAliveSignal();
+      this.role = Role.Master_Pending;
+      this.claim = Math.random();
 
-         this.resolveAll();
-      }, 1000);
+      this.storage.setItem(MASTER_KEY, this.masterValue = `${CLAIM_PREFIX}${CLAIM_SEP}${this.claim}`);
+   }
 
-      this.storage.setItem('slave', this.slaveValue = Math.random());
+   private startMaster() {
+      this.role = Role.Master;
+
+      Log.debug('I am master')
+
+      $('body').addClass(MASTER_CLASS).removeClass(SLAVE_CLASS);
+
+      this.startKeepAliveSignal();
+
+      this.resolveAllMaster();
    }
 
    private masterIsStillAlive() {
       clearTimeout(this.observationTimeout);
 
-      let randomTime = (Math.random() * 1000) % 500;
+      let randomTime = Math.random() * 500;
 
-      this.observationTimeout = setTimeout(this.masterProbablyDied, 2000 + randomTime)
+      this.observationTimeout = setTimeout(this.masterProbablyDied, TIMEOUT_MIN_OBSERVATION + randomTime)
    }
 
    private masterProbablyDied = () => {
-      this.master = null;
+      this.role = Role.Unknown;
       this.queryMaster();
    }
 
    private startKeepAliveSignal() {
       this.stillAlive();
 
-      this.keepAliveInterval = window.setInterval(this.stillAlive, 1000);
+      this.keepAliveInterval = window.setInterval(this.stillAlive, INTERVAL_KEEPALIVE);
    }
 
    private stopKeepAliveSignal() {
       window.clearInterval(this.keepAliveInterval);
    }
 
-   private resolveAll() {
-      for (let resolveIndex in this.resolves) {
-         this.resolves[resolveIndex]();
+   private resolveAllMaster() {
+      this.resolveAll(this.masterResolves);
+   }
 
-         delete this.resolves[resolveIndex];
+   private resolveAllSlave() {
+      this.resolveAll(this.slaveResolves);
+   }
+
+   private resolveAll(resolves) {
+      for (let resolveIndex in resolves) {
+         resolves[resolveIndex]();
+
+         delete resolves[resolveIndex];
       }
    }
 
    private stillAlive = () => {
-      this.storage.setItem('master', this.masterValue = Math.random());
+      this.storage.setItem(MASTER_KEY, this.masterValue = Math.random());
    }
 }
