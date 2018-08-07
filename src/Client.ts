@@ -20,10 +20,17 @@ export default class Client {
 
    private static presenceController: PresenceController;
 
+   private static initialized = false;
+
    public static init(options?): number {
+      if (Client.initialized) {
+         return;
+      }
+
+      Client.initialized = true;
+
       PageVisibility.init();
 
-      let roleAllocator = RoleAllocator.get();
       let storage = Client.getStorage();
       let accountIds = storage.getItem('accounts') || [];
       let numberOfAccounts = accountIds.length;
@@ -35,23 +42,44 @@ export default class Client {
       Client.presenceController = new PresenceController(storage, Client.getAccounts);
       Client.noticeManager = new NoticeManager(Client.getStorage());
 
-      accountIds.forEach(function(id) {
-         let account = Client.accounts[id] = new Account(id);
+      accountIds.forEach(Client.initAccount);
 
-         Client.presenceController.registerAccount(account);
+      storage.registerHook('accounts', (newValue, oldValue) => {
+         //@REVIEW this is maybe more generic
+         let newAccountIds = newValue.filter(id => oldValue.indexOf(id) < 0);
+         let deletedAccountIds = oldValue.filter(id => newValue.indexOf(id) < 0);
 
-         roleAllocator.waitUntilMaster().then(function() {
-            return account.connect();
-         }).then(function() {
+         //@TODO jsxc.startAndPause
+         newAccountIds.forEach(Client.initAccount);
 
-         }).catch(function(msg) {
-            Client.accounts[id].connectionDisconnected();
+         deletedAccountIds.forEach(id => {
+            let account: Account = Client.accounts[id];
 
-            console.warn(msg)
+            if (account) {
+               delete Client.accounts[account.getUid()];
+
+               account.remove();
+            }
          });
       });
 
       return numberOfAccounts;
+   }
+
+   private static initAccount = (id) => {
+      let account = Client.accounts[id] = new Account(id);
+
+      Client.presenceController.registerAccount(account);
+
+      RoleAllocator.get().waitUntilMaster().then(function() {
+         return account.connect();
+      }).then(function() {
+
+      }).catch(function(msg) {
+         Client.accounts[id].connectionDisconnected();
+
+         Log.warn(msg)
+      });
    }
 
    public static getVersion(): string {
@@ -88,7 +116,7 @@ export default class Client {
       return Client.getStorage().getItem('debug') === true;
    }
 
-   public static getStorage() {
+   public static getStorage(): Storage {
       if (!Client.storage) {
          Client.storage = new Storage();
       }
@@ -146,8 +174,6 @@ export default class Client {
          return Promise.reject('Wrong number of arguments');
       }
 
-      Client.addAccount(account);
-
       return Promise.resolve(account);
    }
 
@@ -175,7 +201,11 @@ export default class Client {
       Client.getOptions().set(key, value);
    }
 
-   private static addAccount(account: Account) {
+   public static addAccount(account: Account) {
+      if (Client.getAccount(account.getUid())) {
+         throw 'Account with this jid already exists.';
+      }
+
       Client.accounts[account.getUid()] = account;
 
       Client.presenceController.registerAccount(account);

@@ -6,6 +6,8 @@ import BaseError from '../../errors/BaseError'
 import InvalidParameterError from '../../errors/InvalidParameterError'
 
 export async function startAndPause(boshUrl: string, jid: string, password: string) {
+   testMaxOneAccount();
+
    if (Client.getAccounts().length === 0) {
       Roster.hide();
    }
@@ -19,6 +21,8 @@ export function start(boshUrl: string, jid: string, sid: string, rid: string);
 export function start(boshUrl: string, jid: string, password: string);
 export function start();
 export function start() {
+   testMaxOneAccount();
+
    let promise;
 
    switch (arguments.length) {
@@ -56,7 +60,9 @@ async function startWithBoshParameters(boshUrl: string, jid: string, sid: string
 }
 
 function connectAndStartUI(account) {
-   return account.connect().then(function() {
+   return account.connect(true).then(function() {
+      Client.addAccount(account);
+
       startUI();
    }).catch((err) => {
       Client.removeAccount(account);
@@ -71,4 +77,12 @@ function connectAndStartUI(account) {
 
       throw 'Unknown error';
    });
+}
+
+function testMaxOneAccount() {
+   let accounts = Client.getAccounts();
+
+   if (accounts.length > 0 && !Client.isDebugMode()) {
+      throw 'Currently we only support one account at a time. If you like to test the experimental multi account feature, please enable debug mode.';
+   }
 }

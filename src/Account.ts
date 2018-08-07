@@ -39,7 +39,6 @@ export default class Account {
 
    private windows: SortedPersistentMap;
 
-
    private contact: Contact;
 
    private noticeManager: NoticeManager;
@@ -334,7 +333,7 @@ export default class Account {
          Roster.get().add(contact);
       });
 
-      this.getStorage().registerHook('contact:', (contactData) => {
+      this.getStorage().registerHook('contact', (contactData) => {
          let contact = this.createNewContact(contactData.jid);
 
          if (typeof this.contacts[contact.getId()] === 'undefined') {

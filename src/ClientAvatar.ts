@@ -27,7 +27,7 @@ export default class ClientAvatar {
    private elements = [];
    private contact;
 
-   constructor(private storage: Storage) {
+   private constructor(private storage: Storage) {
       let accountIds = storage.getItem('accounts') || []; //@REVIEW maybe client function?
 
       if (accountIds.length === 0) {
@@ -36,6 +36,20 @@ export default class ClientAvatar {
 
       storage.registerHook('accounts', (newValue) => {
          if ((newValue || []).length === 0) {
+            this.reset();
+         }
+      });
+
+      storage.registerHook(KEY_SOURCE_ACCOUNT, (sourceAccountUid, oldValue) => {
+         if (sourceAccountUid) {
+            let account = Client.getAccount(sourceAccountUid);
+
+            if (account.getSessionStorage().getItem(KEY_SESSION_FLAG)) {
+               this.setSourceContact(account.getContact());
+            } else {
+               this.reset();
+            }
+         } else if (oldValue) {
             this.reset();
          }
       });
@@ -79,8 +93,6 @@ export default class ClientAvatar {
       this.storage.getItem(KEY_TYPE, type + '');
 
       account.getSessionStorage().setItem(KEY_SESSION_FLAG, true);
-
-      this.setSourceContact(account.getContact());
    }
 
    private getSourceAccountUid(): string {

@@ -62,6 +62,10 @@ export default class RoleAllocator {
       return this.role === Role.Master;
    }
 
+   public masterExists() {
+      return this.role !== Role.Unknown;
+   }
+
    public waitUntilMaster() {
       return new Promise((resolve) => {
          if (this.role === Role.Master || typeof this.storage.getItem(MASTER_KEY) === 'undefined') {
