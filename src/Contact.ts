@@ -70,7 +70,11 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public openChatWindow = (): ChatWindow => {
-      return this.account.addChatWindow(this.getChatWindow());
+      let chatWindow = this.getChatWindow();
+
+      chatWindow.unminimize();
+
+      return chatWindow;
    }
 
    public closeChatWindow = () => {

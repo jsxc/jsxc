@@ -96,6 +96,8 @@ export default class ChatWindow {
          this.scrollMessageAreaToBottom();
       }, 500);
 
+      account.addChatWindow(this);
+
       ChatWindow.HookRepository.trigger('initialized', this, contact);
    }
 
