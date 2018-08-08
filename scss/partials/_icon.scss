@@ -1,10 +1,30 @@
 .jsxc-icon {
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 60%;
+  display: block;
+  min-height: 44px;
+  width: 44px;
+
+  @media (min-width: 768px) {
+    width: 25px;
+  }
+
   &--clickable {
+    cursor: pointer;
     opacity: 0.4;
 
     &:hover {
       opacity: 1;
     }
+  }
+
+  &--close {
+    background-image: url("../images/close_black.svg");
+  }
+
+  &--close-light {
+    background-image: url("../images/close_white.svg");
   }
 
   &--edit {
@@ -65,6 +85,5 @@
 
   &--menu-dark {
     background-image: url("../images/menu_black.svg");
-    background-size: 60%;
   }
 }

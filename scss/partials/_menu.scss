@@ -3,19 +3,12 @@
   position: relative;
 
   &__button {
-    background-position: center;
-    background-repeat: no-repeat;
     cursor: pointer;
     height: 100%;
     white-space: nowrap;
-    width: 44px;
 
     &--light {
       opacity: 0.4;
-    }
-
-    @media (min-width: 768px) {
-      width: 25px;
     }
   }
 
@@ -82,22 +75,23 @@
       text-align: center;
     }
 
-    .jsxc-icon {
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 16px 16px;
-      display: inline-block;
-      height: 40px;
-      vertical-align: sub;
-      width: 40px;
-    }
+    // .jsxc-icon {
+    // background-position: center;
+    // background-repeat: no-repeat;
+    // background-size: 16px 16px;
+    // display: inline-block;
+    // height: 40px;
+    // vertical-align: sub;
+    // width: 40px;
+    // }
   }
 
   &--drop-bottom-left {
     .jsxc-menu__content {
       bottom: 100%;
-      left: 5px;
+      left: 50%;
       margin-bottom: 8px;
+      margin-left: -14px;
 
       &::after {
         left: 7px;
@@ -110,7 +104,8 @@
     .jsxc-menu__content {
       bottom: 100%;
       margin-bottom: 8px;
-      right: 5px;
+      margin-right: -14px;
+      right: 50%;
 
       &::after {
         right: 7px;
@@ -121,8 +116,9 @@
 
   &--drop-top-right {
     .jsxc-menu__content {
+      margin-right: -14px;
       margin-top: 8px;
-      right: 0;
+      right: 50%;
       top: 100%;
 
       &::after {
@@ -191,6 +187,7 @@
   &--pushup {
     @include presence-indicator("");
 
+    height: auto;
     position: static;
 
     li {

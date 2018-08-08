@@ -7,11 +7,11 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   height="14"
-   width="4"
+   height="16"
+   width="16"
    version="1.0"
    id="svg2"
-   inkscape:version="0.48.4 r9939"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
    sodipodi:docname="more_white.svg">
   <metadata
      id="metadata12">
@@ -21,6 +21,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -35,8 +36,8 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="640"
-     inkscape:window-height="480"
+     inkscape:window-width="1328"
+     inkscape:window-height="890"
      id="namedview8"
      showgrid="false"
      fit-margin-top="0"
@@ -44,22 +45,22 @@
      fit-margin-right="0"
      fit-margin-left="0"
      inkscape:zoom="14.75"
-     inkscape:cx="-1.2870381"
+     inkscape:cx="3.7214545"
      inkscape:cy="9.8372905"
-     inkscape:window-x="39"
-     inkscape:window-y="24"
+     inkscape:window-x="1607"
+     inkscape:window-y="108"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg2" />
   <rect
      style="color:#000000;fill-opacity:0"
      height="97.986"
      width="163.31"
-     y="-33.857407"
+     y="-31.857407"
      x="-69.574966"
      id="rect4" />
   <path
-     d="M 4,2 C 4,0.8954 3.1046,0 2,0 0.8954,0 0,0.8954 0,2 0,3.1046 0.8954,4 2,4 3.1046,4 4,3.1046 4,2 z M 4,7 C 4,5.8954 3.1046,5 2,5 0.8954,5 0,5.8954 0,7 0,8.1046 0.8954,9 2,9 3.1046,9 4,8.1046 4,7 z m 0,5 c 0,-1.105 -0.8954,-2 -2,-2 -1.1046,0 -2,0.895 -2,2 0,1.105 0.8954,2 2,2 1.1046,0 2,-0.895 2,-2 z"
+     d="M 10.285714,2.2857143 C 10.285714,1.0233143 9.2624,0 8,0 6.7376,0 5.7142857,1.0233143 5.7142857,2.2857143 c 0,1.2624 1.0233143,2.2857143 2.2857143,2.2857143 1.2624,0 2.285714,-1.0233143 2.285714,-2.2857143 z M 10.285714,8 C 10.285714,6.7376 9.2624,5.7142857 8,5.7142857 6.7376,5.7142857 5.7142857,6.7376 5.7142857,8 5.7142857,9.2624 6.7376,10.285714 8,10.285714 9.2624,10.285714 10.285714,9.2624 10.285714,8 Z m 0,5.714286 C 10.285714,12.451429 9.2624,11.428571 8,11.428571 c -1.2624,0 -2.2857143,1.022858 -2.2857143,2.285715 C 5.7142857,14.977143 6.7376,16 8,16 c 1.2624,0 2.285714,-1.022857 2.285714,-2.285714 z"
      id="path6"
      inkscape:connector-curvature="0"
-     style="fill-rule:evenodd;fill:#ffffff" />
+     style="fill-rule:evenodd;stroke-width:1.14285719;fill:#ffffff" />
 </svg>

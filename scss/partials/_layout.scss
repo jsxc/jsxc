@@ -1,4 +1,6 @@
 body.jsxc-fullscreen {
+  overflow: hidden;
+
   #jsxc-roster {
     border: 0;
     border-top: 62px solid #2a4163;
@@ -98,6 +100,21 @@ body.jsxc-fullscreen {
   #jsxc-roster>.jsxc-bottom li {
     height: 62px;
     line-height: 62px;
+  }
+
+  .jsxc-bar__action-entry {
+    margin: 0 3px;
+  }
+
+  .jsxc-dialog-wrapper {
+    background-color: #fff;
+    display: block;
+  }
+
+  .jsxc-dialog {
+    border: 0;
+    min-width: auto;
+    padding-top: 45px;
   }
 }
 

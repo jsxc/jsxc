@@ -285,6 +285,7 @@ li.jsxc-hide-offline {
 
     @extend %scrollbar;
     flex-grow: 1;
+    overflow-x: hidden;
     overflow-y: auto;
   }
 

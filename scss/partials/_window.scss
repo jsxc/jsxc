@@ -316,6 +316,7 @@
 .jsxc-chatmessage {
   background-color: $chatmessage-bg;
   clear: both;
+  font-size: 14px;
   margin: 3px;
   outline: none;
   padding: 4px;
@@ -346,6 +347,7 @@
 
   p {
     clear: both;
+    font-size: 1em;
     margin: 0;
   }
 
@@ -448,8 +450,8 @@
 .jsxc-timestamp {
   clear: both;
   color: $chatmessage-timestamp;
-  font-size: 8px;
-  line-height: 8px;
+  font-size: 0.5em;
+  line-height: 1.2em;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -515,7 +517,7 @@
   background-color: $chatmessage-out-bg;
   border-radius: 3px;
   float: right;
-  margin-right: 10px;
+  margin-right: 0.8em;
   max-width: 76%;
   padding-right: 10px;
   position: relative;
@@ -523,12 +525,12 @@
   &::after {
     border-color: transparent $chatmessage-out-bg;
     border-style: solid;
-    border-width: 5px 0 5px 6px;
-    bottom: 10px;
+    border-width: 0.7em 0 0.7em 0.7em;
+    bottom: 0.5em;
     content: " ";
     display: block;
+    left: 100%;
     position: absolute;
-    right: -6px;
     width: 0;
     z-index: 1;
   }

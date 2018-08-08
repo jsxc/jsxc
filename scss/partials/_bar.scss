@@ -4,7 +4,7 @@
   cursor: pointer;
   display: flex;
   height: 44px;
-  padding: 2px;
+  padding: 0 3px;
   position: relative;
   width: 100%;
 
@@ -17,9 +17,9 @@
     font-family: $font-sans;
     height: 40px;
     line-height: 40px;
+    min-width: 25px;
     opacity: 0.4;
     text-align: center;
-    width: 25px;
 
     &.jsxc-menu {
       opacity: 1;
