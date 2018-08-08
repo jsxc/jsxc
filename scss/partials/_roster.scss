@@ -174,17 +174,42 @@
 }
 
 .jsxc-roster-toggle {
-  background-color: transparent;
+  background-color: rgba(225, 225, 225, 1);
+  border-radius: 14px 0 0 14px;
   cursor: pointer;
-  height: 100%;
-  left: -14px;
+  height: 44px;
+  margin-top: -22px;
   position: absolute;
-  top: 0;
+  right: 100%;
+  top: 50%;
+  transition: width 0.5s, background-color 0.5s;
   width: 14px;
   z-index: 110;
 
+  &::after {
+    border: 8px solid rgba(0, 0, 0, 0.2);
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    border-left-width: 0;
+    border-top-color: transparent;
+    content: " ";
+    height: 0;
+    left: 50%;
+    margin-left: -4px;
+    margin-top: -7px;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    width: 0;
+
+    .jsxc-roster-shown & {
+      transform: rotate(180deg);
+    }
+  }
+
   &:hover {
-    background-color: $roster-toggle-hover;
+    background-color: rgba(200, 200, 200, 1);
+    width: 28px;
   }
 }
 
