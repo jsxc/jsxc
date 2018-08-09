@@ -9,6 +9,7 @@ import Contact from '../../../Contact'
 import Pipe from '../../../util/Pipe'
 import AbstractHandler from '../AbstractHandler'
 import { Strophe } from '../../../vendor/Strophe'
+import { FUNCTION } from '../../../Notice'
 
 export default class extends AbstractHandler {
 
@@ -24,7 +25,7 @@ export default class extends AbstractHandler {
       let peerJid = new JID(messageElement.getOriginalFrom());
       let peerContact: Contact = this.account.getContact(peerJid);
       if (typeof peerContact === 'undefined') {
-         this.handleUnknownSender();
+         this.handleUnknownSender(messageElement);
 
          return this.PRESERVE_HANDLER;
       }
@@ -55,10 +56,19 @@ export default class extends AbstractHandler {
       return this.PRESERVE_HANDLER;
    }
 
-   private handleUnknownSender() {
+   private handleUnknownSender(messageElement: MessageElement) {
       Log.debug('Sender is not in our contact list');
 
-      //@TODO add notice to signal message from unkown sender
+      let title = Translation.t('Unknown_sender');
+      let description = Translation.t('You_received_a_message_from_an_unknown_sender_') + ` (${messageElement.getFrom().bare})`;
+
+      //@REVIEW maybe improve the dialog
+      this.account.getNoticeManager().addNotice({
+         title: title,
+         description: description,
+         fnName: FUNCTION.notification,
+         fnParams: [title, description],
+      });
    }
 }
 
