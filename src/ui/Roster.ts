@@ -12,7 +12,7 @@ import Client from '../Client'
 import Storage from '../Storage'
 import PersistentMap from '../util/PersistentMap'
 import Translation from '../util/Translation'
-import { Notice } from '../Notice'
+import { Notice, TYPE } from '../Notice'
 import { Presence } from '../connection/AbstractConnection'
 import { NoticeManager } from '../NoticeManager'
 import ClientAvatar from '../ClientAvatar'
@@ -66,6 +66,9 @@ export default class Roster {
          this.hide();
       }
       this.element.appendTo(Client.getOption('rosterAppend') + ':first');
+
+      //make sure css empty selector works
+      $('.jsxc-js-notice-menu .jsxc-menu__button').text('');
 
       this.contactList = this.element.find('.jsxc-contact-list');
 
@@ -225,7 +228,7 @@ export default class Roster {
          manager.removeNotice(notice);
       });
 
-      noticeElement.addClass('jsxc-icon--' + notice.getType());
+      noticeElement.addClass('jsxc-icon--' + TYPE[notice.getType()].toLowerCase());
 
       noticeElement.text(notice.getTitle());
       noticeElement.attr('title', notice.getDescription());
@@ -233,7 +236,7 @@ export default class Roster {
       noticeElement.attr('data-manager-id', manager.getId());
       noticeListElement.append(noticeElement);
 
-      $('.jsxc-js-notice-menu > span').text(noticeListElement.find('li').length);
+      $('.jsxc-js-notice-menu .jsxc-menu__button').text(noticeListElement.find('li').length);
    }
 
    public removeNotice(manager: NoticeManager, noticeId: string) {
@@ -246,7 +249,7 @@ export default class Roster {
       noticeElement.remove();
 
       let numberOfNotices = $('.jsxc-js-notice-menu li').length;
-      $('.jsxc-js-notice-menu > span').text(numberOfNotices > 0 ? numberOfNotices : '');
+      $('.jsxc-js-notice-menu .jsxc-menu__button').text(numberOfNotices > 0 ? numberOfNotices : '');
    }
 
    public addMenuEntry(options: { id: string, handler: (ev) => void, label: string | JQuery<HTMLElement>, icon?: string, offlineAvailable?: boolean }) {

@@ -105,16 +105,6 @@ abstract class AbstractConnection {
       return this.account.getJID();
    }
 
-   public getSessionId() {
-      //@REVIEW this should be handled differently; duplicate Connector
-      let connectionParameters = new PersistentMap(this.account.getStorage(), 'connection');
-      let sessionId = connectionParameters.get('sid') || null;
-
-      //@TODO return session id only if connected
-
-      return sessionId;
-   }
-
    public sendMessage(message: Message) {
       if (message.getDirection() !== Message.DIRECTION.OUT) {
          return;

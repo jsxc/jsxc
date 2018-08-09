@@ -3,15 +3,12 @@ import Dialog from '../Dialog'
 let debugLogTemplate = require('../../../template/debugLog.hbs');
 
 export default function() {
-   //@TODO
-   // let storage = StorageSingleton.getUserStorage();
-   //
-   // let content = debugLogTemplate({
-   //    userInfo: getUserInformation()
-   // });
-   //
-   // let dialog = new Dialog(content);
-   // let dom = dialog.open();
+   let content = debugLogTemplate({
+      userInfo: getUserInformation()
+   });
+
+   let dialog = new Dialog(content);
+   let dom = dialog.open();
 }
 
 function getUserInformation() {
@@ -49,7 +46,7 @@ function getUserInformation() {
 
    userInfo.push({
       key: 'JSXC',
-      value: null
+      value: __VERSION__
    });
 
    return userInfo;

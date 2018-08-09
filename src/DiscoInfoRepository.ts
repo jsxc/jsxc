@@ -67,10 +67,10 @@ export default class implements DiscoInfoRepository {
       });
    }
 
-   public hasFeature(jid: JID, features: string[]): Promise<{}>
-   public hasFeature(jid: JID, feature: string): Promise<{}>
-   public hasFeature(discoInfo: DiscoInfo, features: string[]): Promise<{}>
-   public hasFeature(discoInfo: DiscoInfo, feature: string): Promise<{}>
+   public hasFeature(jid: JID, features: string[]): Promise<boolean>
+   public hasFeature(jid: JID, feature: string): Promise<boolean>
+   public hasFeature(discoInfo: DiscoInfo, features: string[]): Promise<boolean>
+   public hasFeature(discoInfo: DiscoInfo, feature: string): Promise<boolean>
    public hasFeature() {
       let features = (arguments[1] instanceof Array) ? arguments[1] : [arguments[1]];
       let capabilitiesPromise;

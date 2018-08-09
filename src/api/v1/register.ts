@@ -19,7 +19,7 @@ function defaultCallback(form: Form): Promise<Form> {
    let dom = dialog.open();
    let buttonElement = $('<button>');
    buttonElement.addClass('jsxc-button jsxc-button--primary');
-   buttonElement.text('Register'); //@TODO translate
+   buttonElement.text(Translation.t('Register'));
    buttonElement.appendTo(dom.find('form'));
 
    return new Promise(resolve => {

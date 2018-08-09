@@ -34,15 +34,32 @@ export default class ReceiptPlugin extends AbstractPlugin {
    }
 
    private preSendMessageStanzaProcessor = (message: Message, xmlStanza: Strophe.Builder) => {
-      if (message.getType() === Message.MSGTYPE.CHAT &&
-         (!message.getPeer().resource || true)) { //@TODO this.hasFeatureByJid(message.receiver, Strophe.NS.RECEIPTS)
+      if (message.getType() !== Message.MSGTYPE.CHAT) {
+         return [message, xmlStanza];
+      }
+
+      if (message.getPeer().isBare) {
+         addRequest();
+
+         return [message, xmlStanza];
+      }
+
+      let discoRepository = this.pluginAPI.getDiscoInfoRepository();
+
+      return discoRepository.hasFeature(message.getPeer(), [Namespace.get('RECEIPTS')]).then(hasFeature => {
+         if (hasFeature) {
+            addRequest();
+         }
+
+         return [message, xmlStanza];
+      });
+
+      function addRequest() {
          // Add request according to XEP-0184
          xmlStanza.c('request', {
             xmlns: Namespace.get('RECEIPTS')
          }).up();
       }
-
-      return [message, xmlStanza];
    }
 
    private onReceipt = (stanza) => {

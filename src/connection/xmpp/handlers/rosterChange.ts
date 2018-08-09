@@ -58,8 +58,6 @@ export default class extends AbstractHandler {
          } else if (subscription === SUBSCRIPTION.FROM || subscription === SUBSCRIPTION.BOTH) {
             contact.setName(name);
             contact.setSubscription(<SUBSCRIPTION>subscription);
-
-            //@TODO refresh roster position
          }
       } else {
          //@REVIEW DRY same code as in roster handler
@@ -69,22 +67,8 @@ export default class extends AbstractHandler {
          Roster.get().add(contact);
       }
 
-
-      // Remove pending friendship request from notice list
       if (subscription === SUBSCRIPTION.FROM || subscription === SUBSCRIPTION.BOTH) {
-         // var notices = jsxc.storage.getUserItem('notices');
-         // var noticeKey = null,
-         //    notice;
-         //
-         // for (noticeKey in notices) {
-         //    notice = notices[noticeKey];
-         //
-         //    if (notice.fnName === 'gui.showApproveDialog' && notice.fnParams[0] === jid) {
-         //       jsxc.debug('Remove notice with key ' + noticeKey);
-         //
-         //       jsxc.notice.remove(noticeKey);
-         //    }
-         // }
+         //@TODO Remove pending friendship request from notice list
       }
 
       //@REVIEW DRY roster handler

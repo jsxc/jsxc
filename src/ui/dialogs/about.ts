@@ -14,7 +14,7 @@ export default function() {
    let dialog = new Dialog(content);
    let dom = dialog.open();
 
-   dom.find('.show-debug-log').click(() => {
+   dom.find('.jsxc-debug-log').click(() => {
       dialog.close();
 
       showDebugLog();

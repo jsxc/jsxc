@@ -141,7 +141,7 @@ export default class Message implements Identifiable, IMessage {
    }
 
    public getAttachment(): Attachment {
-      if (!this.attachment) {
+      if (!this.attachment && this.data.get('attachment')) {
          this.attachment = new Attachment(this.data.get('attachment'));
       }
 

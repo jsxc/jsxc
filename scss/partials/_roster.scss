@@ -268,31 +268,23 @@ li.jsxc-hide-offline {
   }
 }
 
-#jsxc-notice {
-  float: right;
-  height: 30px;
-  line-height: 30px;
-  text-align: center;
-  width: 30px;
+.jsxc-bounce {
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-name: jsxc-bounce-6;
+  animation-timing-function: ease;
+  background-color: $notice-bg;
+  border-radius: 11px;
+  color: $notice-color;
+  display: inline-block;
+  font-size: 80%;
+  line-height: 1.5em;
+  padding: 2px 3px;
+  position: relative;
 
-  span {
-    animation-duration: 2s;
-    animation-iteration-count: infinite;
-    animation-name: jsxc-bounce-6;
-    animation-timing-function: ease;
-    background-color: $notice-bg;
-    border-radius: 11px;
-    color: $notice-color;
-    display: inline-block;
-    font-size: 80%;
-    line-height: 1.5em;
-    padding: 2px 3px;
-    position: relative;
+  transform-origin: bottom;
 
-    transform-origin: bottom;
-  }
-
-  > span:empty {
+  &:empty {
     display: none;
   }
 }

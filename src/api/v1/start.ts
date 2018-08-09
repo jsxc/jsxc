@@ -6,6 +6,8 @@ import BaseError from '../../errors/BaseError'
 import InvalidParameterError from '../../errors/InvalidParameterError'
 
 export async function startAndPause(boshUrl: string, jid: string, password: string) {
+   throw 'startAndPause is currently not available';
+
    testMaxOneAccount();
 
    if (Client.getAccounts().length === 0) {

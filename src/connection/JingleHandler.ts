@@ -59,7 +59,7 @@ export default class JingleHandler {
 
       JingleHandler.instances.push(this);
 
-      //@TODO add on client unavilable (this.manager.endPeerSessions(peer_jid_full, true))
+      //@TODO add on client unavailable (this.manager.endPeerSessions(peer_jid_full, true))
    }
 
    public initiate(peerJID: JID, stream, offerOptions?) {
