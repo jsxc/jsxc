@@ -27,12 +27,14 @@ export default class NotificationPlugin extends AbstractPlugin {
    }
 
    private afterReceiveMessageProcessor = (contact: Contact, message: Message) => {
-      Notification.notify({
-         title: Translation.t('New_message_from'),
-         message: message.getPlaintextMessage(),
-         soundFile: SOUNDS.MSG,
-         source: contact
-      });
+      if (message.getPlaintextMessage() || message.getAttachment()) {
+         Notification.notify({
+            title: Translation.t('New_message_from') + ' ' + contact.getName(),
+            message: message.getPlaintextMessage(),
+            soundFile: SOUNDS.MSG,
+            source: contact
+         });
+      }
 
       return [contact, message];
    }

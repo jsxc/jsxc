@@ -27,9 +27,6 @@ export let autoLang = true;
 /** Place for roster */
 export let rosterAppend = 'body';
 
-/** duration for notification */
-export let popupDuration = 6000;
-
 /**
 * This function decides wether the roster will be displayed or not if no
 * connection is found.
@@ -157,8 +154,15 @@ export let screenMediaExtension = {
    chrome: ''
 };
 
-/** Mute notification sound? */
-export let muteNotification = false;
+export let notification = {
+   enable: true,
+
+   /** duration for notification */
+   popupDuration: 6000,
+
+   /** Mute notification sound? */
+   mute: false,
+}
 
 export let storage = window.localStorage;
 

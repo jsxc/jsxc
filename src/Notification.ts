@@ -21,7 +21,7 @@ interface NotificationSettings {
    icon?: string
 };
 
-const enum NotificationState {
+enum NotificationState {
    DISABLED,
    ENABLED,
    ASK
@@ -40,13 +40,13 @@ export default class Notification {
 
    public static askForPermission() {
       let overlay = new Overlay();
-      openConfirmDialog(Translation.t('Should_we_notify_you_')).getPromise().then(() => {
+      openConfirmDialog(Translation.t('Should_we_notify_you_')).getPromise().then((a) => {
          overlay.open();
 
-         return this.requestPermission();
+         return Notification.requestPermission();
       }).then(() => {
          Client.getStorage().setItem('notificationState', NotificationState.ENABLED);
-      }).catch(() => {
+      }).catch((err) => {
          Client.getStorage().setItem('notificationState', NotificationState.DISABLED);
       }).then(() => {
          overlay.close();
@@ -70,7 +70,7 @@ export default class Notification {
    }
 
    public static async notify(settings: NotificationSettings) {
-      if (!Client.getOption('notification')) {
+      if (!Notification.getOption('enable')) {
          Log.debug('Drop notification, because notifications are disabled.');
 
          return; // notifications disabled
@@ -137,7 +137,7 @@ export default class Notification {
          }
       }
 
-      settings.duration = settings.duration || Client.getOption('notification').duration;
+      settings.duration = settings.duration || Notification.getOption('duration');
       settings.title = settings.title;
       settings.message = settings.message;
 
@@ -188,7 +188,7 @@ export default class Notification {
    }
 
    private static playSound(soundFile: string, loop?: boolean, force?: boolean) {
-      if (Client.getOption('muteNotification') || Client.getPresenceController().getCurrentPresence() === Presence.dnd) {
+      if (Notification.getOption('mute') || Client.getPresenceController().getCurrentPresence() === Presence.dnd) {
          Log.debug('Sound is muted or presence is DND');
 
          return;
@@ -202,9 +202,11 @@ export default class Notification {
 
       var audio = new Audio(soundFile);
       audio.loop = loop || false;
-      audio.play();
-
-      Notification.audioObject = audio;
+      audio.play().then(() => {
+         Notification.audioObject = audio;
+      }).catch((err) => {
+         Log.debug('Audio error', err);
+      });
    }
 
    private static stopSound() {
@@ -214,5 +216,11 @@ export default class Notification {
          audio.pause();
          Notification.audioObject = null;
       }
+   }
+
+   private static getOption(name: string): any {
+      let options = Client.getOption('notification') || {};
+
+      return options[name];
    }
 }
