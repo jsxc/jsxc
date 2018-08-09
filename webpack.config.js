@@ -15,7 +15,7 @@ const extractSass = new ExtractTextPlugin({
 const definePlugin = new webpack.DefinePlugin({
    __VERSION__: JSON.stringify(require("./package.json").version),
    __BUILD_DATE__: JSON.stringify((new Date()).toDateString()),
-   __BUNDLE_NAME__: JS_BUNDLE_NAME,
+   __BUNDLE_NAME__: JSON.stringify(JS_BUNDLE_NAME),
 });
 
 const fileLoader = {
