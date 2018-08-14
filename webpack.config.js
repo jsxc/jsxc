@@ -12,10 +12,18 @@ const extractSass = new ExtractTextPlugin({
    allChunks: true,
 });
 
+const packageJson = require('./package.json');
+const dependencies = Object.keys(packageJson.dependencies).map(function(name) {
+      let package = require('./node_modules/' + name + '/package.json');
+
+      return `${package.name}@${package.version} (${package.license})`;
+});
+
 const definePlugin = new webpack.DefinePlugin({
-   __VERSION__: JSON.stringify(require("./package.json").version),
+   __VERSION__: JSON.stringify(packageJson.version),
    __BUILD_DATE__: JSON.stringify((new Date()).toDateString()),
    __BUNDLE_NAME__: JSON.stringify(JS_BUNDLE_NAME),
+   __DEPENDENCIES__: JSON.stringify(dependencies.join(', ')),
 });
 
 const fileLoader = {

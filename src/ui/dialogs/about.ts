@@ -2,13 +2,14 @@ import Dialog from '../Dialog'
 import showDebugLog from './debugLog'
 import Client from '../../Client'
 
-var aboutTemplate = require('../../../template/about.hbs');
+const aboutTemplate = require('../../../template/about.hbs');
 
 export default function() {
    let content = aboutTemplate({
       version: __VERSION__,
       date: __BUILD_DATE__,
       appName: Client.getOption('app_name'),
+      dependencies: __DEPENDENCIES__,
    });
 
    let dialog = new Dialog(content);
