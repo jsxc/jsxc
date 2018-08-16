@@ -30,11 +30,13 @@ module.exports = function(config) {
 
       // webpack configuration
       webpack: {
+         mode: 'development',
          devtool: 'eval-source-map',
          module: webpackConfig.module,
          resolve: webpackConfig.resolve,
-         //externals: webpackConfig.externals,
-         // target: 'node',
+         plugins: [
+             webpackConfig.plugins[1]
+         ],
          node: {
             fs: 'empty'
          }
@@ -87,7 +89,7 @@ module.exports = function(config) {
 
       // start these browsers
       // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-      browsers: ['ChromeHeadless'],
+      browsers: ['Chrome'],
 
       // Continuous Integration mode
       // if true, Karma captures browsers, runs the tests and exits
