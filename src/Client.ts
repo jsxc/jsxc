@@ -10,6 +10,7 @@ import Log from './util/Log'
 import Options from './Options'
 import PresenceController from './PresenceController'
 import PageVisibility from './PageVisibility'
+import ChatWindowList from './ui/ChatWindowList';
 
 export default class Client {
    private static storage;
@@ -130,6 +131,10 @@ export default class Client {
 
    public static getPresenceController(): PresenceController {
       return Client.presenceController;
+   }
+
+   public static getChatWindowList(): ChatWindowList {
+      return ChatWindowList.get();
    }
 
    public static getAccount(jid: JID): Account;

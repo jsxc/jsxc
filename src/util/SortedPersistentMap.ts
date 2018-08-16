@@ -101,6 +101,7 @@ export default class SortedPersistentMap {
       this.storage.registerHook(this.key, func);
    }
 
+   //@REVIEW for init it is important that the push hook has a return value
    public setPushHook(func: (newValue: any, oldValue: any, key: string) => void) {
       this.pushHook = func;
    }

@@ -103,9 +103,9 @@ export default class MultiUserContact extends Contact {
       return this.data.get('nickname');
    }
 
-   public getChatWindow() {
+   public getChatWindow(): MultiUserChatWindow {
       if (!this.chatWindow) {
-         this.chatWindow = new MultiUserChatWindow(this.account, this);
+         this.chatWindow = new MultiUserChatWindow(this);
       }
 
       return this.chatWindow;

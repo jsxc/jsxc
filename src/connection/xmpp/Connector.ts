@@ -50,7 +50,6 @@ export default class Connector {
 
          this.account.triggerConnectionHook(Strophe.Status.CONNTIMEOUT);
          this.account.triggerConnectionHook(Strophe.Status.DISCONNECTED, 'timeout');
-         this.account.closeAllChatWindows();
 
          throw new BaseError('Credentials expired');
       }

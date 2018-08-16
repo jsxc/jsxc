@@ -2,7 +2,7 @@ import { IMessage } from './Message.interface'
 import { IJID } from './JID.interface'
 import { Presence } from './connection/AbstractConnection'
 import { EncryptionState } from './plugin/AbstractPlugin'
-import ChatWindow from './ui/ChatWindow'
+import ChatWindowController from './ChatWindowController'
 import Transcript from './Transcript'
 import Avatar from './Avatar'
 
@@ -22,9 +22,7 @@ export enum ContactSubscription {
 export interface IContact {
    delete();
 
-   openChatWindow(): ChatWindow;
-
-   getChatWindow(): ChatWindow;
+   getChatWindowController(): ChatWindowController;
 
    addSystemMessage(messageString: string): IMessage;
 

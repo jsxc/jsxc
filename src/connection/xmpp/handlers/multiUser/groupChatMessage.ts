@@ -47,7 +47,7 @@ export default class extends AbstractHandler {
             subject: contact.getSubject()
          });
 
-         contact.getChatWindow().addSystemMessage(translatedMessage);
+         contact.addSystemMessage(translatedMessage);
 
          return this.PRESERVE_HANDLER;
       }

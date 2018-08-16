@@ -8,10 +8,11 @@ import Log from './util/Log'
 import { Presence } from './connection/AbstractConnection'
 import { EncryptionState } from './plugin/AbstractPlugin'
 import Transcript from './Transcript'
-import ChatWindow from './ui/ChatWindow'
+import ChatWindowController from './ChatWindowController'
 import Avatar from './Avatar'
 import Pipe from './util/Pipe'
 import Message from './Message'
+import ChatWindow from './ui/ChatWindow';
 
 export default class Contact implements IIdentifiable, IContact {
    protected storage: Storage;
@@ -23,6 +24,8 @@ export default class Contact implements IIdentifiable, IContact {
    protected jid: JID;
 
    protected chatWindow;
+
+   protected chatWindowController;
 
    protected transcript: Transcript;
 
@@ -37,6 +40,8 @@ export default class Contact implements IIdentifiable, IContact {
       } else {
          this.initNewContact(arguments[1], arguments[2]);
       }
+
+      this.chatWindowController = new ChatWindowController(this, this.data);
    }
 
    private initExistingContact(id: string) {
@@ -69,27 +74,20 @@ export default class Contact implements IIdentifiable, IContact {
       this.data.empty();
    }
 
-   public openChatWindow = (): ChatWindow => {
-      let chatWindow = this.getChatWindow();
-
-      chatWindow.unminimize();
-
-      return chatWindow;
-   }
-
-   public closeChatWindow = () => {
-      if (this.chatWindow) {
-         this.account.closeChatWindow(this.chatWindow);
-         this.chatWindow = undefined;
-      }
-   }
-
    public getChatWindow(): ChatWindow {
       if (!this.chatWindow) {
-         this.chatWindow = new ChatWindow(this.account, this);
+         this.chatWindow = new ChatWindow(this);
       }
 
       return this.chatWindow;
+   }
+
+   public getChatWindowController(): ChatWindowController {
+      return this.chatWindowController;
+   }
+
+   public getAccount(): Account {
+      return this.account;
    }
 
    public addSystemMessage(messageString: string): Message {

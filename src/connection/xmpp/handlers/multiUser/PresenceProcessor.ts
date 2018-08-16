@@ -38,7 +38,7 @@ export default class MultiUserPresenceProcessor {
    public inform(msg: string) {
       Log.debug('[MUC] ' + msg);
 
-      this.multiUserContact.getChatWindow().addSystemMessage(msg);
+      this.multiUserContact.addSystemMessage(msg);
    }
 
    private processUnavailable() {

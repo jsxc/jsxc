@@ -101,14 +101,15 @@ export default class ChatStatePlugin extends AbstractPlugin {
 
    private onComposing(from: JID) {
       let contact = this.pluginAPI.getContact(from);
-      let chatWindow = contact.getChatWindow();
+      let chatWindow = contact.getChatWindowController();
 
+      //@TODO this doesn't work in all tabs
       chatWindow.setBarText(Translation.t('_is_composing'));
    }
 
    private onPaused(from: JID) {
       let contact = this.pluginAPI.getContact(from);
-      let chatWindow = contact.getChatWindow();
+      let chatWindow = contact.getChatWindowController();
 
       chatWindow.setBarText('');
    }

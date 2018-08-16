@@ -6,7 +6,7 @@ let chatWindowListTemplate = require('../../template/chatWindowList.hbs');
 export default class ChatWindowList {
    private element;
 
-   private chatWindowList: any = {};
+   private windows: any = {};
 
    private static instance: ChatWindowList;
 
@@ -47,16 +47,16 @@ export default class ChatWindowList {
    }
 
    public closeAll() {
-      for (let chatWindowId in this.chatWindowList) {
-         let chatWindow: ChatWindow = this.chatWindowList[chatWindowId];
+      for (let chatWindowId in this.windows) {
+         let chatWindow: ChatWindow = this.windows[chatWindowId];
 
          chatWindow.close();
       }
    }
 
    public minimizeAll() {
-      for (let chatWindowId in this.chatWindowList) {
-         let chatWindow: ChatWindow = this.chatWindowList[chatWindowId];
+      for (let chatWindowId in this.windows) {
+         let chatWindow: ChatWindow = this.windows[chatWindowId];
 
          chatWindow.minimize();
       }
@@ -70,14 +70,14 @@ export default class ChatWindowList {
       }
 
       if (chatWindowIds.indexOf(chatWindow.getId()) < 0) {
-         this.chatWindowList[chatWindow.getId()] = chatWindow;
+         this.windows[chatWindow.getId()] = chatWindow;
 
          this.element.find('> ul').append(chatWindow.getDom());
       } else {
-         chatWindow = this.chatWindowList[chatWindow.getId()];
+         chatWindow = this.windows[chatWindow.getId()];
       }
 
-      this.updateWindowListSB();
+      this.updateScrollbar();
 
       return chatWindow;
    }
@@ -88,13 +88,13 @@ export default class ChatWindowList {
       if (chatWindowIds.indexOf(chatWindow.getId()) > -1) {
          chatWindow.close();
 
-         delete this.chatWindowList[chatWindow.getId()];
+         delete this.windows[chatWindow.getId()];
       }
 
-      this.updateWindowListSB();
+      this.updateScrollbar();
    }
 
-   private updateWindowListSB() {
+   private updateScrollbar() {
 
       if ($('#jsxc_windowList>ul').width() > $('#jsxc_windowList').width()) {
          $('#jsxc_windowListSB > div').removeClass('jsxc_disabled');
@@ -128,6 +128,6 @@ export default class ChatWindowList {
    }
 
    private getChatWindowIds() {
-      return Object.keys(this.chatWindowList || {});
+      return Object.keys(this.windows || {});
    }
 }

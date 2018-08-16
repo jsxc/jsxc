@@ -36,10 +36,9 @@ export default class RosterItem {
       });
 
       this.element.click(function() {
-         let chatWindow = contact.openChatWindow();
+         let chatWindow = contact.getChatWindowController();
 
-         chatWindow.unminimize();
-         chatWindow.highlight();
+         chatWindow.openProminently();
       });
 
       this.element.find('.jsxc-rename').click(function(ev) {

@@ -12,8 +12,8 @@ export default class MultiUserChatWindow extends ChatWindow {
 
    protected contact: MultiUserContact;
 
-   constructor(account: Account, contact: MultiUserContact) {
-      super(account, contact);
+   constructor(contact: MultiUserContact) {
+      super(contact);
 
       this.disable();
       this.element.addClass('jsxc-groupchat');
@@ -68,7 +68,7 @@ export default class MultiUserChatWindow extends ChatWindow {
          label = jid.bare;
          title = title + '\n' + jid.bare;
 
-         let contact = this.account.getContact(jid);
+         let contact = this.getAccount().getContact(jid);
          AvatarSet.get(contact).addElement(avatarElement);
       } else {
          label = title = nickname;

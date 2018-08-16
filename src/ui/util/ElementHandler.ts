@@ -15,6 +15,9 @@ export default class ElementHandler {
       }
 
       $(element).on('click', function(ev) {
+         ev.stopPropagation();
+         ev.preventDefault();
+
          if (!element.classList.contains(CLASS_DISABLED)) {
             handler.apply(this, arguments);
          }

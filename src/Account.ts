@@ -6,9 +6,6 @@ import JID from './JID'
 import Contact from './Contact'
 import MultiUserContact from './MultiUserContact'
 import Roster from './ui/Roster'
-import ChatWindow from './ui/ChatWindow'
-import ChatWindowList from './ui/ChatWindowList'
-import SortedPersistentMap from './util/SortedPersistentMap'
 import { Presence } from './connection/AbstractConnection'
 import Client from './Client'
 import { NoticeManager } from './NoticeManager'
@@ -36,8 +33,6 @@ export default class Account {
    private connector: Connector;
 
    private contacts = {};
-
-   private windows: SortedPersistentMap;
 
    private contact: Contact;
 
@@ -80,8 +75,8 @@ export default class Account {
       this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3]);
       this.connection = new StorageConnection(this);
       this.noticeManager = new NoticeManager(this.getStorage());
-      this.contact = new Contact(this, new JID(this.uid), this.uid);
       this.pluginRepository = new PluginRepository(this);
+      this.contact = new Contact(this, new JID(this.uid), this.uid);
 
       let connectionCallback = this.getOption('connectionCallback');
 
@@ -94,7 +89,6 @@ export default class Account {
       ClientAvatar.get().registerAccount(this)
 
       this.initContacts();
-      this.initWindows();
    }
 
    public getOption(key) {
@@ -197,12 +191,7 @@ export default class Account {
 
          Roster.get().remove(contact);
 
-         //@REVIEW this only works as long as contact and window id are the same
-         let chatWindow = this.windows.get(id);
-
-         if (chatWindow) {
-            this.closeChatWindow(chatWindow);
-         }
+         contact.getChatWindowController().close();
 
          this.save();
       }
@@ -214,26 +203,6 @@ export default class Account {
 
          this.removeContact(contact);
       }
-   }
-
-   public addChatWindow(chatWindow: ChatWindow): ChatWindow {
-      chatWindow = ChatWindowList.get().add(chatWindow);
-
-      this.windows.push(chatWindow);
-
-      return chatWindow;
-   }
-
-   public closeChatWindow(chatWindow: ChatWindow) {
-      ChatWindowList.get().remove(chatWindow);
-
-      this.windows.remove(chatWindow);
-   }
-
-   public closeAllChatWindows() {
-      this.windows.empty((id, chatWindow) => {
-         ChatWindowList.get().remove(chatWindow);
-      });
    }
 
    public getNoticeManager(): NoticeManager {
@@ -292,7 +261,6 @@ export default class Account {
 
    public remove() {
       this.removeAllContacts();
-      this.closeAllChatWindows();
 
       this.getConnection().close();
       this.getStorage().removeAllHooks();
@@ -352,26 +320,6 @@ export default class Account {
       }
 
       return contact;
-   }
-
-   private initWindows() {
-      this.windows = new SortedPersistentMap(this.getStorage(), 'windows');
-
-      this.windows.setRemoveHook((id, chatWindow) => {
-         if (chatWindow) {
-            ChatWindowList.get().remove(chatWindow);
-         }
-      });
-
-      this.windows.setPushHook((id) => {
-         this.windows[id] = this.contacts[id].getChatWindow();
-
-         ChatWindowList.get().add(this.windows[id]);
-
-         return this.windows[id];
-      });
-
-      this.windows.init();
    }
 
    private removeNonpersistentContacts() {

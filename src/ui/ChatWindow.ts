@@ -6,7 +6,6 @@ import { IMessage } from '../Message.interface'
 import Client from '../Client'
 import Account from '../Account'
 import Emoticons from '../Emoticons'
-import PersistentMap from '../util/PersistentMap'
 import AvatarSet from './AvatarSet'
 import { startCall } from './actions/call'
 import { Presence } from '../connection/AbstractConnection'
@@ -25,6 +24,8 @@ let chatWindowTemplate = require('../../template/chatWindow.hbs');
 const ENTER_KEY = 13;
 const ESC_KEY = 27;
 
+export enum State { Open, Minimized, Closed };
+
 export default class ChatWindow {
    public static HookRepository = new HookRepository<(window: ChatWindow, contact: Contact) => void>();
 
@@ -34,13 +35,9 @@ export default class ChatWindow {
 
    private inputBlurTimeout: number;
 
-   private storage;
-
    private readonly INPUT_RESIZE_DELAY = 1200;
 
    private readonly HIGHTLIGHT_DURATION = 600;
-
-   private properties: PersistentMap;
 
    private chatWindowMessages = {};
 
@@ -50,16 +47,14 @@ export default class ChatWindow {
 
    private encryptionMenu: Menu;
 
-   constructor(protected account: Account, protected contact: Contact) {
+   constructor(protected contact: Contact) {
       let template = chatWindowTemplate({
-         accountId: account.getUid(),
+         accountId: this.getAccount().getUid(),
          contactId: contact.getId(),
          name: contact.getName()
       });
       this.element = $(template);
       this.inputElement = this.element.find('.jsxc-message-input');
-
-      this.storage = account.getStorage();
 
       Menu.init(this.element.find('.jsxc-menu'));
       this.settingsMenu = this.element.find('.jsxc-menu-settings').data('object');
@@ -76,14 +71,6 @@ export default class ChatWindow {
 
       this.element.find('.jsxc-window').css('bottom', -1 * this.element.find('.jsxc-window-fade').height());
 
-      this.properties = new PersistentMap(this.storage, 'chatWindow', this.contact.getId());
-
-      if (this.properties.get('minimized') === false) {
-         this.unminimize();
-      } else {
-         this.minimize();
-      }
-
       let avatar = AvatarSet.get(contact);
       avatar.addElement(this.element.find('.jsxc-bar--window .jsxc-avatar'));
 
@@ -95,8 +82,6 @@ export default class ChatWindow {
       setTimeout(() => {
          this.scrollMessageAreaToBottom();
       }, 500);
-
-      account.addChatWindow(this);
 
       ChatWindow.HookRepository.trigger('initialized', this, contact);
    }
@@ -119,8 +104,8 @@ export default class ChatWindow {
       return this.contact.getId();
    }
 
-   public getAccount() {
-      return this.account;
+   public getAccount(): Account {
+      return this.contact.getAccount();
    }
 
    public getContact() {
@@ -132,29 +117,23 @@ export default class ChatWindow {
    }
 
    public close() {
-      this.element.remove();
+      this.element.detach();
    }
 
-   public minimize(ev?) {
+   public minimize() {
       this.element.removeClass('jsxc-normal').addClass('jsxc-minimized');
-
-      this.properties.set('minimized', true);
    }
 
-   public unminimize(ev?) {
-      let element = this.element;
-
-      element.removeClass('jsxc-minimized').addClass('jsxc-normal');
-
-      this.properties.set('minimized', false);
-
-      //@TODO scroll message list, so that this window is in the view port
+   public open() {
+      this.element.removeClass('jsxc-minimized').addClass('jsxc-normal');
 
       this.scrollMessageAreaToBottom();
 
-      if (ev && ev.target) {
-         element.find('.jsxc-textinput').focus();
-      }
+      //@TODO scroll message list, so that this window is in the view port
+   }
+
+   public focus() {
+      this.element.find('.jsxc-message-input').focus();
    }
 
    public clear() {
@@ -181,10 +160,6 @@ export default class ChatWindow {
 
    public setBarText(text: string) {
       this.element.find('.jsxc-bar__caption__secondary').text(text);
-   }
-
-   public addSystemMessage(messageString: string): IMessage {
-      return this.contact.addSystemMessage(messageString);
    }
 
    public postMessage(message: IMessage): ChatWindowMessage {
@@ -270,6 +245,10 @@ export default class ChatWindow {
       });
    }
 
+   private getController() {
+      return this.contact.getChatWindowController();
+   }
+
    private registerHandler() {
       let self = this;
       let contact = this.contact;
@@ -299,7 +278,7 @@ export default class ChatWindow {
       elementHandler.add(
          this.element.find('.jsxc-js-close')[0],
          () => {
-            this.contact.closeChatWindow();
+            this.getController().close();
          }
       );
 
@@ -315,7 +294,7 @@ export default class ChatWindow {
          (ev) => {
             ev.stopPropagation();
 
-            startCall(contact, this.account);
+            startCall(contact, this.getAccount());
          }, [
             'urn:xmpp:jingle:apps:rtp:video',
             'urn:xmpp:jingle:apps:rtp:audio',
@@ -329,7 +308,7 @@ export default class ChatWindow {
          (ev) => {
             ev.stopPropagation();
 
-            startCall(contact, this.account, 'audio');
+            startCall(contact, this.getAccount(), 'audio');
          }, [
             'urn:xmpp:jingle:apps:rtp:audio',
             'urn:xmpp:jingle:transports:ice-udp:1',
@@ -396,7 +375,7 @@ export default class ChatWindow {
       }
 
       if (ev.which === ESC_KEY) {
-         this.close();
+         this.getController().close();
       }
 
       let selectionStart = ev.target.selectionStart;
@@ -468,16 +447,16 @@ export default class ChatWindow {
          if (typeof Client.getOption('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) < 1) {
             Client.setOption('theAnswerToAnything', true);
 
-            this.addSystemMessage('42');
+            this.getContact().addSystemMessage('42');
          }
       }
    }
 
    private toggle = (ev?) => {
       if (this.element.hasClass('jsxc-minimized')) {
-         this.unminimize(ev);
+         this.getController().open();
       } else {
-         this.minimize(ev);
+         this.getController().minimize();
       }
    }
 
@@ -610,20 +589,12 @@ export default class ChatWindow {
 
          this.postMessage(message);
       });
-
-      this.properties.registerHook('minimized', (minimized) => {
-         if (minimized) {
-            this.minimize();
-         } else {
-            this.unminimize();
-         }
-      });
    }
 
    private initEncryptionIcon() {
       this.updateEncryptionState(this.contact.getEncryptionState());
 
-      let pluginRepository = this.account.getPluginRepository();
+      let pluginRepository = this.getAccount().getPluginRepository();
       if (!pluginRepository.hasEncryptionPlugin()) {
          return;
       }
@@ -655,7 +626,7 @@ export default class ChatWindow {
             try {
                plugin.toggleTransfer(this.contact);
             } catch (err) {
-               this.addSystemMessage(err.toString());
+               this.getContact().addSystemMessage(err.toString());
             }
          });
       }

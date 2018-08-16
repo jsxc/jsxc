@@ -39,9 +39,8 @@ export default function(type: 'direct' | 'mediated', from: string, room: string,
 
       multiUserContact.join();
 
-      let chatWindow = multiUserContact.openChatWindow();
-      chatWindow.unminimize();
-      chatWindow.highlight();
+      let chatWindow = multiUserContact.getChatWindowController();
+      chatWindow.openProminently();
 
       dialog.close();
    });

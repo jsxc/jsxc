@@ -32,8 +32,7 @@ export default class JingleCallSession extends JingleAbstractSession {
       let peerJID = new JID(this.session.peerID);
       let contact = this.account.getContact(peerJID);
 
-      let chatWindow = contact.openChatWindow();
-
+      // let chatWindow = contact.getChatWindow();
       // chatWindow.postScreenMessage(Translation.t('Incoming_call'), session.sid);
 
       Notification.notify({
