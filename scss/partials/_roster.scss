@@ -95,6 +95,7 @@
 
   > .jsxc-bottom {
     background-color: $roster-bottom-bg;
+    flex-shrink: 0;
     line-height: 34px;
     padding: 5px 4px 2px 0;
     width: 100%;
