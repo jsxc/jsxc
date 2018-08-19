@@ -297,6 +297,12 @@ export default class Storage {
       this.hooks = {};
    }
 
+   public destroy() {
+      this.removeAllHooks();
+
+      window.removeEventListener('storage', this.onStorageEvent);
+   }
+
    private onStorageEvent = (ev: any) => {
       let hooks = this.hooks;
       let key = ev.key.replace(new RegExp('^' + this.getPrefix()), '');

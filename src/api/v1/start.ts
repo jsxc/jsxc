@@ -63,6 +63,9 @@ async function startWithBoshParameters(boshUrl: string, jid: string, sid: string
 
 function connectAndStartUI(account) {
    return account.connect(true).then(function() {
+      //@REVIEW we can destroy the contact at this moment, because the account hook will create a new account.
+      account.destroy();
+
       Client.addAccount(account);
 
       startUI();

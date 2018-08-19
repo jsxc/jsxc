@@ -39,4 +39,8 @@ export default class Pipe {
 
       return chain;
    }
+
+   public destroy() {
+      this.pipe = [];
+   }
 }

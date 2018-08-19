@@ -190,13 +190,13 @@ export default class Account {
       let id = contact.getJid().bare;
 
       if (this.contacts[id]) {
-         delete this.contacts[id];
-
          Roster.get().remove(contact);
 
          contact.getChatWindowController().close();
 
          this.save();
+
+         delete this.contacts[id];
       }
    }
 
@@ -271,13 +271,23 @@ export default class Account {
    }
 
    public remove() {
+      this.destroy();
+
+      Client.removeAccount(this);
+   }
+
+   public destroy() {
       this.removeAllContacts();
 
       this.getConnection().close();
-      this.getStorage().removeAllHooks();
+      this.getStorage().destroy();
       this.getNoticeManager().removeAll();
 
-      Client.removeAccount(this);
+      for (const name in this.pipes) {
+         this.pipes[name].destroy();
+      }
+
+      //@TODO destroy plugins
    }
 
    private addContactObject(contact) {
