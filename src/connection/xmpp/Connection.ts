@@ -4,7 +4,7 @@ import * as NS from './namespace'
 import XMPPHandler from './handler'
 import Log from '../../util/Log'
 import Account from '../../Account'
-import { AbstractConnection, Presence } from '../AbstractConnection'
+import { AbstractConnection, Presence, STANZA_IQ_KEY, STANZA_KEY } from '../AbstractConnection'
 import XMPPJingleHandler from './JingleHandler'
 import Client from '../../Client'
 
@@ -18,21 +18,38 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       this.handler.registerHandler();
       NS.register('METADATA_NOTIFY', 'urn:xmpp:avatar:metadata+notify');
 
-      this.account.getStorage().registerHook('stanza', (newValue, oldValue, key) => {
-         if (newValue && !oldValue) {
-            this.onIncomingStorageStanza(newValue);
+      this.processPendingStorageConnections();
+      this.listenToStorageConnections();
 
-            this.account.getStorage().removeItem(key);
+      Client.getPresenceController().registerTargetPresenceHook(this.targetPresenceHandler);
+   }
+
+   private processPendingStorageConnections() {
+      let storage = this.getStorage();
+      let pendingStanzaItems = storage.getItemsWithKeyPrefix(STANZA_KEY);
+      let pendingStanzaIQItems = storage.getItemsWithKeyPrefix(STANZA_IQ_KEY);
+
+      for (let key in pendingStanzaItems) {
+         this.onIncomingStorageStanza(key, pendingStanzaItems[key]);
+      }
+
+      for (let key in pendingStanzaIQItems) {
+         this.onIncomingStorageStanzaIQ(key, pendingStanzaIQItems[key]);
+      }
+   }
+
+   private listenToStorageConnections() {
+      this.getStorage().registerHook(STANZA_KEY, (newValue, oldValue, key) => {
+         if (newValue && !oldValue) {
+            this.onIncomingStorageStanza(key, newValue);
          }
       });
 
-      this.account.getStorage().registerHook('stanzaIQ', (newValue, oldValue, key) => {
+      this.getStorage().registerHook(STANZA_IQ_KEY, (newValue, oldValue, key) => {
          if (newValue && !oldValue) {
             this.onIncomingStorageStanzaIQ(key, newValue);
          }
       });
-
-      Client.getPresenceController().registerTargetPresenceHook(this.targetPresenceHandler);
    }
 
    private targetPresenceHandler = (presence: Presence) => {
@@ -93,7 +110,7 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       });
    }
 
-   private onIncomingStorageStanza(stanzaString: string) {
+   private onIncomingStorageStanza(key: string, stanzaString: string) {
       let stanzaElement = new DOMParser().parseFromString(stanzaString, 'text/xml').documentElement
 
       if ($(stanzaElement).find('parsererror').length > 0) {
@@ -102,6 +119,8 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       }
 
       this.send(stanzaElement);
+
+      this.getStorage().removeItem(key);
    }
 
    private onIncomingStorageStanzaIQ(key: string, stanzaString: string) {
@@ -114,15 +133,17 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       }
 
       this.sendIQ(stanzaElement).then((stanza: HTMLElement) => {
-         this.account.getStorage().setItem(key, {
+         this.getStorage().setItem(key, {
             type: 'success',
             stanza: stanza.outerHTML
          });
       }).catch((stanza) => {
-         this.account.getStorage().setItem(key, {
+         this.getStorage().setItem(key, {
             type: 'error',
             stanza: stanza.outerHTML
          });
+      }).then(() => {
+         this.getStorage().removeItem(key);
       });
    }
 }

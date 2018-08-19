@@ -1,5 +1,6 @@
 import Account from '../../../Account'
 import AbstractHandler from '../AbstractHandler'
+import { STANZA_JINGLE_KEY } from '../../AbstractConnection'
 
 const FEATURES = [
    'urn:xmpp:jingle:1',
@@ -32,8 +33,8 @@ export default class extends AbstractHandler {
       let connection = this.account.getConnection();
       let storage = this.account.getStorage();
 
-      storage.setItem('stanzaJingle', stanza.outerHTML);
-      storage.removeItem('stanzaJingle');
+      storage.setItem(STANZA_JINGLE_KEY, stanza.outerHTML);
+      storage.removeItem(STANZA_JINGLE_KEY);
 
       connection.getJingleHandler().onJingle(stanza);
 

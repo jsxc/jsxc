@@ -76,15 +76,7 @@ export default class Connector {
       this.addRidHandler(stropheConnection);
       this.addRidUnloadHandler(stropheConnection);
 
-      let accountConnection = this.account.getConnection();
-      let handlers = (<StorageConnection>accountConnection).getHandlers();
-
-      accountConnection.close();
-      accountConnection = new XMPPConnection(this.account, stropheConnection);
-
-      for (let handler of handlers) {
-         accountConnection.registerHandler.apply(accountConnection, handler);
-      }
+      let accountConnection = this.replaceStorageConnectionWithXMPPConnection(stropheConnection);
 
       if (stropheConnection.features) {
          this.storeConnectionFeatures(stropheConnection);
@@ -136,6 +128,20 @@ export default class Connector {
       $(window).on('unload', () => {
          connection.nextValidRid(connection._proto.rid);
       });
+   }
+
+   private replaceStorageConnectionWithXMPPConnection(stropheConnection) {
+      let accountConnection = this.account.getConnection();
+      let handlers = (<StorageConnection>accountConnection).getHandlers();
+
+      accountConnection.close();
+      accountConnection = new XMPPConnection(this.account, stropheConnection);
+
+      for (let handler of handlers) {
+         accountConnection.registerHandler.apply(accountConnection, handler);
+      }
+
+      return accountConnection;
    }
 
    private storeConnectionFeatures(connection) {

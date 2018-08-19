@@ -17,11 +17,21 @@ export default class Storage {
    static toSNC: number;
 
    public static clear(name?: string) {
-      let prefix = PREFIX + SEP;
+      Storage.getKeysWithPrefix(name).forEach(key => BACKEND.removeItem(key));
+   }
 
-      if (prefix) {
+   public static getKeysWithPrefix(name?: string): string[] {
+      let prefix = '';
+
+      if (!name.startsWith(PREFIX)) {
+         prefix = PREFIX + SEP;
+      }
+
+      if (name) {
          prefix = prefix + name + SEP;
       }
+
+      let keys = [];
 
       for (let key in BACKEND) {
          if (!BACKEND.hasOwnProperty(key)) {
@@ -29,9 +39,11 @@ export default class Storage {
          }
 
          if (key.startsWith(prefix)) {
-            BACKEND.removeItem(key);
+            keys.push(key);
          }
       }
+
+      return keys;
    }
 
    constructor(private name: string = null) {
@@ -242,6 +254,21 @@ export default class Storage {
       }
 
       this.setItem(key, item);
+   }
+
+   public getItemsWithKeyPrefix(keyPrefix: string) {
+      let prefix = this.getPrefix() + keyPrefix;
+
+      let fullKeys = Storage.getKeysWithPrefix(prefix);
+      let items = {};
+
+      for (const fullKey of fullKeys) {
+         let key = fullKey.replace(new RegExp('^' + this.getPrefix()), '');
+
+         items[key] = this.getItem(key);
+      }
+
+      return items;
    }
 
    public registerHook(eventName: string, func: (newValue: any, oldValue: any, key: string) => void) {

@@ -11,8 +11,10 @@ import MUCService from './services/MUC'
 import RosterService from './services/Roster'
 import VcardService from './services/Vcard'
 import DiscoService from './services/Disco'
-import PersistentMap from '../util/PersistentMap'
 
+export const STANZA_KEY = 'stanza';
+export const STANZA_IQ_KEY = 'stanzaIQ';
+export const STANZA_JINGLE_KEY = 'stanzaJingle';
 
 enum Presence {
    online,
@@ -252,6 +254,10 @@ abstract class AbstractConnection {
 
    public close() {
 
+   }
+
+   protected getStorage() {
+      return this.account.getSessionStorage();
    }
 
    private generateCapsAttributes() {
