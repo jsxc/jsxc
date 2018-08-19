@@ -1,6 +1,14 @@
 import { $build } from '../vendor/Strophe'
 
+/**
+ * XEP-0004: Data Forms
+ *
+ * @url https://xmpp.org/extensions/xep-0004.html
+ */
+
 const NAMESPACE = 'jabber:x:data';
+
+type TYPE = 'cancel' | 'form' | 'result' | 'submit';
 
 //@REVIEW xss
 
@@ -48,7 +56,7 @@ export default class Form {
 
    private constructor(private type: string, private fields: Field[], private instructions?: string, private title?: string) {
       if (this.ALLOWED_TYPES.indexOf(type) < 0) {
-         throw 'Form type not allowed';
+         throw `Form type not allowed! Instead of "${type}" try one of these: ${this.ALLOWED_TYPES.join(', ')}.`;
       }
 
       if (type === 'result') {
@@ -109,6 +117,18 @@ export default class Form {
 
       return fields.length > 0 ? fields[0].getValues() : undefined;
    }
+
+   public getType(): TYPE {
+      return <TYPE>this.type;
+   }
+
+   public getTitle(): string | undefined {
+      return this.title;
+   }
+
+   public getInstructions(): string | undefined {
+      return this.instructions;
+   }
 }
 
 interface FieldData {
@@ -164,7 +184,7 @@ class Field {
             values = formElement.find('input').val();
       }
 
-      if (typeof values.length !== 'function') {
+      if (!(values instanceof Array)) {
          values = [values];
       }
 
