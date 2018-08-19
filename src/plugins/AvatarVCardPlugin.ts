@@ -4,6 +4,7 @@ import Contact from '../Contact'
 import Avatar from '../Avatar'
 import AvatarUI from '../ui/AvatarSet'
 import JID from '../JID'
+import Log from '../util/Log';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -70,6 +71,8 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
          return this.getAvatar(contact.getJid()).then((avatarObject) => {
             return [contact, new Avatar(hash, avatarObject.type, avatarObject.src)];
          }).catch((err) => {
+            Log.warn('Error during avatar retrieval', err)
+
             return [contact, avatar];
          });
       }

@@ -28,7 +28,8 @@ export default class Vcard extends AbstractService {
       return this.parseVcardChildren(vcard);
    }
 
-   private parseVcardChildren(stanza) {
+   private parseVcardChildren = (stanza) => {
+      let self = this;
       let data: any = {};
       let children = stanza.children();
 
@@ -56,7 +57,7 @@ export default class Vcard extends AbstractService {
                src: src
             };
          } else if (children.length > 0) {
-            value = this.parseVcardChildren(children);
+            value = self.parseVcardChildren(children);
          } else {
             value = item.text();
          }

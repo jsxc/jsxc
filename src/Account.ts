@@ -302,6 +302,10 @@ export default class Account {
       });
 
       this.getStorage().registerHook('contact', (contactData) => {
+         if (contactData.jid === this.contact.getJid().bare) {
+            return;
+         }
+
          let contact = this.createNewContact(contactData.jid);
 
          if (typeof this.contacts[contact.getId()] === 'undefined') {

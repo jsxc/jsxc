@@ -46,8 +46,9 @@ export default class Client {
       accountIds.forEach(Client.initAccount);
 
       storage.registerHook('accounts', (newValue, oldValue) => {
+         oldValue = oldValue || [];
          //@REVIEW this is maybe more generic
-         let newAccountIds = newValue.filter(id => oldValue.indexOf(id) < 0);
+         let newAccountIds = newValue.filter(id => (oldValue).indexOf(id) < 0);
          let deletedAccountIds = oldValue.filter(id => newValue.indexOf(id) < 0);
 
          //@TODO jsxc.startAndPause
