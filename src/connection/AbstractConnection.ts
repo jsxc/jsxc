@@ -160,7 +160,7 @@ abstract class AbstractConnection {
          id: message.getUid()
       }).up();
 
-      let pipe = Pipe.get('preSendMessageStanza');
+      let pipe = this.account.getPipe('preSendMessageStanza');
       pipe.run(message, xmlMsg).then(([message, xmlMsg]) => {
          if (message.hasAttachment() && !message.getAttachment().isProcessed()) {
             Log.warn('Attachment was not processed');

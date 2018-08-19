@@ -37,8 +37,7 @@ export default class ChatStatePlugin extends AbstractPlugin {
 
       Namespace.register('CHATSTATES', 'http://jabber.org/protocol/chatstates');
 
-      let preSendMessageStanzaPipe = Pipe.get('preSendMessageStanza');
-      preSendMessageStanzaPipe.addProcessor(this.preSendMessageStanzaProcessor);
+      pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor)
 
       ChatWindow.HookRepository.registerHook('initialized', (chatWindow: ChatWindow, contact: Contact) => {
          new ChatStateMachine(this, chatWindow, contact);
@@ -65,7 +64,7 @@ export default class ChatStatePlugin extends AbstractPlugin {
       return this.pluginAPI.getDiscoInfoRepository();
    }
 
-   private preSendMessageStanzaProcessor = (message: Message, xmlStanza: Strophe.Builder) => {
+   private preSendMessageStanzaProcessor = (message: Message, xmlStanza: Strophe.Builder): Promise<any> => {
       //@TODO groupchat
       //@TODO is not disabled for jid
       if (message.getType() === Message.MSGTYPE.CHAT && true) {
@@ -74,7 +73,7 @@ export default class ChatStatePlugin extends AbstractPlugin {
          });
       }
 
-      return [message, xmlStanza];
+      return Promise.resolve([message, xmlStanza]);
    }
 
    private onChatState = (stanza): boolean => {

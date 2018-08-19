@@ -3,15 +3,6 @@ const MAX_PRIORITY = 100;
 const MIN_PRIORITY = 0;
 
 export default class Pipe {
-   private static instances = {};
-
-   public static get(name: string): Pipe {
-      if (typeof Pipe.instances[name] === 'undefined') {
-         Pipe.instances[name] = new Pipe();
-      }
-
-      return Pipe.instances[name];
-   }
 
    private pipe = [];
 

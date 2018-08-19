@@ -24,8 +24,7 @@ export default class ReceiptPlugin extends AbstractPlugin {
       Namespace.register('RECEIPTS', 'urn:xmpp:receipts');
       pluginAPI.addFeature(Namespace.get('RECEIPTS'));
 
-      let preSendMessageStanzaPipe = Pipe.get('preSendMessageStanza');
-      preSendMessageStanzaPipe.addProcessor(this.preSendMessageStanzaProcessor);
+      pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor);
 
       let connection = pluginAPI.getConnection();
 
@@ -33,15 +32,15 @@ export default class ReceiptPlugin extends AbstractPlugin {
       connection.registerHandler(this.onReceipt, null, 'message');
    }
 
-   private preSendMessageStanzaProcessor = (message: Message, xmlStanza: Strophe.Builder) => {
+   private preSendMessageStanzaProcessor = (message: Message, xmlStanza: Strophe.Builder): Promise<any> => {
       if (message.getType() !== Message.MSGTYPE.CHAT) {
-         return [message, xmlStanza];
+         return Promise.resolve([message, xmlStanza]);
       }
 
       if (message.getPeer().isBare) {
          addRequest();
 
-         return [message, xmlStanza];
+         return Promise.resolve([message, xmlStanza]);
       }
 
       let discoRepository = this.pluginAPI.getDiscoInfoRepository();

@@ -20,13 +20,12 @@ export default class NotificationPlugin extends AbstractPlugin {
    constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
-      let pipe = Pipe.get('afterReceiveMessage');
-      pipe.addProcessor(this.afterReceiveMessageProcessor, 90);
+      pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor, 90);
 
       pluginAPI.registerPresenceHook(this.onPresence);
    }
 
-   private afterReceiveMessageProcessor = (contact: Contact, message: Message) => {
+   private afterReceiveMessageProcessor = (contact: Contact, message: Message): Promise<any> => {
       if (message.getPlaintextMessage() || message.getAttachment()) {
          Notification.notify({
             title: Translation.t('New_message_from') + ' ' + contact.getName(),
@@ -36,7 +35,7 @@ export default class NotificationPlugin extends AbstractPlugin {
          });
       }
 
-      return [contact, message];
+      return Promise.resolve([contact, message]);
    }
 
    private onPresence = (contact: Contact, newPresence, oldPresence) => {

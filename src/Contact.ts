@@ -197,7 +197,7 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getAvatar(): Promise<Avatar> {
-      return Pipe.get('avatar').run(this, undefined)
+      return this.account.getPipe('avatar').run(this, undefined)
          .then(([, avatar]) => {
             if (!avatar) {
                throw 'No avatar available for ' + this.getId();

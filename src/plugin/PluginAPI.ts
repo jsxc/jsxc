@@ -77,19 +77,19 @@ export default class PluginAPI implements IPluginAPI {
    }
 
    public addPreSendMessageProcessor(processor: (contact: Contact, message: Message) => Promise<{}>, position?: number) {
-      Pipe.get('preSendMessage').addProcessor(processor, position);
+      this.account.getPipe('preSendMessage').addProcessor(processor, position);
    }
 
    public addAfterReceiveMessageProcessor(processor: (contact: Contact, message: Message, stanza: Element) => Promise<{}>, position?: number) {
-      Pipe.get('afterReceiveMessage').addProcessor(processor, position);
+      this.account.getPipe('afterReceiveMessage').addProcessor(processor, position);
    }
 
    public addPreSendMessageStanzaProcessor(processor: (message: Message, xmlMsg: Strophe.Builder) => Promise<any>, position?: number) {
-      Pipe.get('preSendMessageStanza').addProcessor(processor, position);
+      this.account.getPipe('preSendMessageStanza').addProcessor(processor, position);
    }
 
    public addAvatarProcessor(processor: (contact: Contact, avatar: Avatar) => Promise<[Contact, Avatar]>, position?: number) {
-      Pipe.get('avatar').addProcessor(processor, position);
+      this.account.getPipe('avatar').addProcessor(processor, position);
    }
 
    public addFeature(feature: string) {

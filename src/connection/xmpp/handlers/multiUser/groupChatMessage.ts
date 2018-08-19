@@ -73,7 +73,7 @@ export default class extends AbstractHandler {
             }
          });
 
-         let pipe = Pipe.get('afterReceiveGroupMessage');
+         let pipe = this.account.getPipe('afterReceiveGroupMessage');
 
          pipe.run(contact, message).then(([contact, message]) => {
             contact.getTranscript().pushMessage(message);

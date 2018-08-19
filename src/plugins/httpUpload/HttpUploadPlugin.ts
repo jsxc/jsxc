@@ -28,8 +28,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
 
       pluginAPI.addPreSendMessageProcessor(this.preSendMessageProcessor, 20);
 
-      let preSendMessageStanzaPipe = Pipe.get('preSendMessageStanza');
-      preSendMessageStanzaPipe.addProcessor(this.addBitsOfBinary);
+      pluginAPI.addPreSendMessageStanzaProcessor(this.addBitsOfBinary)
 
       let connection = pluginAPI.getConnection();
 
@@ -176,7 +175,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       return true;
    }
 
-   private addBitsOfBinary = (message: Message, xmlStanza: Strophe.Builder) => {
+   private addBitsOfBinary = (message: Message, xmlStanza: Strophe.Builder): Promise<any> => {
       //@TODO check if element with cid exists
 
       if (message.hasAttachment() && message.getAttachment().hasThumbnailData()) {
@@ -189,6 +188,6 @@ export default class HttpUploadPlugin extends AbstractPlugin {
          }).t(attachment.getThumbnailData().replace(/^[^,],+/, '')).up();
       }
 
-      return [message, xmlStanza]
+      return Promise.resolve([message, xmlStanza]);
    }
 }

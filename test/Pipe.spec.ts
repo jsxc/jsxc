@@ -5,22 +5,8 @@ import 'mocha';
 import Pipe from '../src/util/Pipe'
 
 describe('Pipe', () => {
-    it('should return the same pipe for the same name', () => {
-        let pipeA = Pipe.get('dummy');
-        let pipeB = Pipe.get('dummy');
-
-        expect(pipeA).equals(pipeB);
-    })
-
-    it('should return different pipes for different names', () => {
-        let pipeA = Pipe.get('dummyA');
-        let pipeB = Pipe.get('dummyB');
-
-        expect(pipeA).not.equals(pipeB);
-    })
-
     it('should run an empty pipe', () => {
-        let pipeA = Pipe.get('dummy_empty');
+        let pipeA = new Pipe();
 
         return pipeA.run('A', 'B', 1234).then(([arg1, arg2, arg3]) => {
             expect(arg1).equals('A');
@@ -30,7 +16,7 @@ describe('Pipe', () => {
     })
 
     it('should progress in order with distinct priority', () => {
-        let pipeA = Pipe.get('dummy_distinct');
+        let pipeA = new Pipe();
 
         pipeA.addProcessor(function(a, b, c) {
             return Promise.resolve([a + 'a', b + 'b', c * 2]);
@@ -52,7 +38,7 @@ describe('Pipe', () => {
     })
 
     it('should progress in order with multiple priority', () => {
-        let pipeA = Pipe.get('dummy_multiple');
+        let pipeA = new Pipe();
 
         pipeA.addProcessor(function(a, b, c) {
             return [a + 'a', b + 'b', c * 2];
@@ -74,7 +60,7 @@ describe('Pipe', () => {
     })
 
     it('should reject processor with invalid priority', () => {
-        let pipeA = Pipe.get('dummy_invalid');
+        let pipeA = new Pipe();
 
         expect(() => {
             pipeA.addProcessor(function(...args) { return Promise.resolve(); }, -1);

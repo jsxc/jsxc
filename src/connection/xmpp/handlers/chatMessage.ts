@@ -45,7 +45,7 @@ export default class extends AbstractHandler {
          unread: true //@REVIEW carbon copy?
       });
 
-      let pipe = Pipe.get('afterReceiveMessage');
+      let pipe = this.account.getPipe('afterReceiveMessage');
 
       pipe.run(peerContact, message, messageElement.get(0)).then(([contact, message]) => {
          if (message.getPlaintextMessage() || message.getHtmlMessage()) {

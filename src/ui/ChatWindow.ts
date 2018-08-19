@@ -433,7 +433,7 @@ export default class ChatWindow {
 
       this.clearAttachment();
 
-      let pipe = Pipe.get('preSendMessage');
+      let pipe = this.getAccount().getPipe('preSendMessage');
 
       pipe.run(this.contact, message).then(([contact, message]) => {
          this.getTranscript().pushMessage(message);

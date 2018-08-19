@@ -16,6 +16,7 @@ import HookRepository from './util/HookRepository'
 import Options from './Options'
 import UUID from './util/UUID'
 import ClientAvatar from './ClientAvatar'
+import Pipe from './util/Pipe'
 
 type ConnectionCallback = (status: number, condition?: string) => void;
 
@@ -47,6 +48,8 @@ export default class Account {
    private hookRepository = new HookRepository<any>();
 
    private options: Options;
+
+   private pipes = {};
 
    constructor(boshUrl: string, jid: string, sid: string, rid: string);
    constructor(boshUrl: string, jid: string, password: string);
@@ -257,6 +260,14 @@ export default class Account {
 
    public getConnectionUrl(): string {
       return this.connector.getUrl();
+   }
+
+   public getPipe(name: string): Pipe {
+      if (!this.pipes[name]) {
+         this.pipes[name] = new Pipe();
+      }
+
+      return this.pipes[name];
    }
 
    public remove() {
