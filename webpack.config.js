@@ -94,7 +94,10 @@ module.exports = {
       ]
    },
    resolve: {
-      extensions: [".ts", ".js", ".hbs"]
+      extensions: [".ts", ".js", ".hbs"],
+      alias: {
+         '@src': path.resolve(__dirname, 'src/'),
+      }
    },
    externals: {
       'jquery': 'jQuery',

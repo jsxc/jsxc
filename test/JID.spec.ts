@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import 'mocha';
 
-import JID from '../src/JID'
+import JID from '@src/JID'
 
 class JIDDummy {
     constructor(public node: string, public domain: string, public resource: string = '') {

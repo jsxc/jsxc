@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import 'mocha';
 
-import HookRepository from '../src/util/HookRepository'
+import HookRepository from '@src/util/HookRepository'
 
 const NOT_EXPECTED_TO_BE_CALLED = 1000;
 

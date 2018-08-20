@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import 'mocha';
 
-import Storage from '../src/Storage'
+import Storage from '@src/Storage'
 
 describe('Storage', function() {
     let storage;

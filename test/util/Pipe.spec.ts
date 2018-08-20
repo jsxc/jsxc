@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import 'mocha';
 
-import Pipe from '../src/util/Pipe'
+import Pipe from '@src/util/Pipe'
 
 describe('Pipe', () => {
     it('should run an empty pipe', () => {

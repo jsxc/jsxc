@@ -5,8 +5,10 @@
         "baseUrl": "src",
         "paths": {
            "emojione": ["lib/emojione/lib/js/emojione.js"],
-           "strophe.js": ["node_modules/strophe.js/strophe.js"]
+           "strophe.js": ["node_modules/strophe.js/strophe.js"],
+           "@src/*": ["./*"],
         },
+        "moduleResolution": "node",
         "module": "commonjs",
         "outDir": "./dist",
         "target": "es5",

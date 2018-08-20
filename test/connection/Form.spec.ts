@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import 'mocha'
 
-import Form from '../../src/connection/Form'
+import Form from '@src/connection/Form'
 
 const formType = 'form';
 const title = 'Bot Configuration';
