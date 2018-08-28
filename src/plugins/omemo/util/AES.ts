@@ -15,7 +15,7 @@ export async function decrypt(exportedAESKey: ArrayBuffer, iv: Uint8Array, data:
    return ArrayBufferUtils.decode(decryptedBuffer);
 }
 
-export async function encrypt(plaintext) {
+export async function encrypt(plaintext): Promise<{ keydata: ArrayBuffer, iv: BufferSource, payload: ArrayBuffer }> {
    let iv = window.crypto.getRandomValues(new Uint8Array(12));
    let key = await generateAESKey();
    let encrypted = await generateAESencryptedMessage(iv, key, plaintext);

@@ -12,7 +12,6 @@ const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 export default class OMEMOPlugin extends EncryptionPlugin {
-   private sessions = {};
    private omemo: Omemo;
 
    public static getName(): string {
@@ -32,8 +31,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
       pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor);
 
-      //@TODO add to plugin API
-      ChatWindow.HookRepository.registerHook('initialized', (chatWindow: ChatWindow) => {
+      pluginAPI.registerChatWindowInitializedHook((chatWindow: ChatWindow) => {
          chatWindow.addMenuEntry('omemo-devices', 'OMEMO devices', () => this.openDeviceDialog(chatWindow));
       });
    }
@@ -43,7 +41,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       let peerDevices = this.getOmemo().getDevices(peerContact);
       let ownDevices = this.getOmemo().getDevices();
 
-      OmemoDevicesDialog(peerDevices, ownDevices);
+      OmemoDevicesDialog(peerDevices, ownDevices, this.getOmemo().getIdentityManager());
    }
 
    public toggleTransfer(contact: IContact): Promise<void> {
@@ -56,13 +54,13 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return;
       }
 
-      if (!this.getOmemo().isTrusted(contact)) {
-         throw 'There are new OMEMO devices';
-      }
-
       //@TODO check if contact supports omemo
 
       return this.getOmemo().prepare().then(() => {
+         if (!this.getOmemo().isTrusted(contact)) {
+            throw 'There are new OMEMO devices';
+         }
+
          contact.setEncryptionState(EncryptionState.UnverifiedEncrypted, OMEMOPlugin.getName());
       });
    }
@@ -119,7 +117,6 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       let contact = this.pluginAPI.getContact(message.getPeer());
 
       if (!contact) {
-         console.warn('Could not find contact');
          return Promise.resolve([message, xmlElement]);
       }
 

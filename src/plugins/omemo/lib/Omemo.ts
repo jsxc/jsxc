@@ -1,3 +1,4 @@
+import IStorage from '../../../Storage.interface'
 import { IContact as Contact } from '../../../Contact.interface'
 import { IMessage as Message } from '../../../Message.interface'
 import { IConnection } from '../../../connection/Connection.interface'
@@ -10,8 +11,10 @@ import Stanza from '../util/Stanza'
 import { NS_BASE } from '../util/Const'
 import ArrayBufferUtils from '../util/ArrayBuffer'
 import * as AES from '../util/AES'
-import Device from './Device'
+import Device, { Trust } from './Device'
 import { Strophe } from '../../../vendor/Strophe'
+import BundleManager from './BundleManager';
+import IdentityManager from './IdentityManager';
 
 export default class Omemo {
    private store: Store;
@@ -20,36 +23,56 @@ export default class Omemo {
 
    private bootstrap: Bootstrap;
 
-   constructor(private storage, private connection: IConnection) {
-      this.store = new Store(storage, connection.getPEPService());
+   private bundleManager: BundleManager;
 
-      Peer.initOwnPeer(connection.getJID(), this.store);
+   private identityManager: IdentityManager;
+
+   private deviceName: string;
+
+   constructor(storage: IStorage, private connection: IConnection) {
+      this.deviceName = connection.getJID().bare;
+      this.store = new Store(storage);
+      this.bundleManager = new BundleManager(connection.getPEPService(), this.store);
+
+      Peer.initOwnPeer(this.deviceName, this.store, this.bundleManager);
+   }
+
+   public getIdentityManager(): IdentityManager {
+      if (!this.identityManager) {
+         this.identityManager = new IdentityManager(this.store, this.bundleManager);
+      }
+
+      return this.identityManager;
    }
 
    public storeDeviceList(identifier: string, deviceList: number[]) {
       let ownJid = this.connection.getJID();
 
       if (ownJid.bare === identifier) {
-         let ownDeviceId = this.store.getDeviceId();
-
-         if ((this.store.isPublished() && typeof ownDeviceId === 'number'
-            && !isNaN(ownDeviceId) && deviceList.indexOf(ownDeviceId) < 0)) {
-            this.getBootstrap().addDeviceIdToDeviceList();
-         }
+         this.makeSureOwnDeviceIdIsInList(deviceList);
       }
 
       this.store.setDeviceList(identifier, deviceList);
+   }
+
+   private makeSureOwnDeviceIdIsInList(deviceList: number[]) {
+      let ownDeviceId = this.store.getLocalDeviceId();
+
+      if (this.store.isPublished() && typeof ownDeviceId === 'number'
+         && !isNaN(ownDeviceId) && deviceList.indexOf(ownDeviceId) < 0) {
+         this.bundleManager.publishDeviceId(ownDeviceId);
+      }
    }
 
    public prepare(): Promise<void> {
       return this.getBootstrap().prepare();
    }
 
-   public isTrusted(contact: Contact) {
+   public isTrusted(contact: Contact): boolean {
       let peer = this.getPeer(contact.getJid());
-      let ownPeer = Peer.getOwn(); //@REVIEW function name
+      let ownPeer = Peer.getOwn();
 
-      return peer.getTrust() && ownPeer.getTrust();
+      return peer.getTrust() !== Trust.unknown && ownPeer.getTrust() !== Trust.unknown;
    }
 
    public getDevices(contact?: Contact): Array<Device> {
@@ -68,7 +91,7 @@ export default class Omemo {
       let peer = this.getPeer(contact.getJid());
 
       return peer.encrypt(message.getPlaintextMessage()).then((encryptedMessages) => {
-         let stanza = Stanza.buildEncryptedStanza(encryptedMessages, this.store.getDeviceId());
+         let stanza = Stanza.buildEncryptedStanza(encryptedMessages, this.store.getLocalDeviceId());
 
          $(xmlElement.tree()).find(`html[xmlns="${Strophe.NS.XHTML_IM}"]`).remove();
          $(xmlElement.tree()).find('>body').remove();
@@ -113,7 +136,7 @@ export default class Omemo {
          throw 'Could not parse encrypted stanza';
       }
 
-      let ownDeviceId = this.store.getDeviceId();
+      let ownDeviceId = this.store.getLocalDeviceId();
       let ownPreKeyFiltered = encryptedData.keys.filter(function(preKey) {
          return ownDeviceId === preKey.deviceId;
       });
@@ -149,7 +172,7 @@ export default class Omemo {
 
    private getPeer(jid: IJID): Peer {
       if (!this.peers[jid.bare]) {
-         this.peers[jid.bare] = new Peer(jid, this.store);
+         this.peers[jid.bare] = new Peer(jid.bare, this.store, this.bundleManager);
       }
 
       return this.peers[jid.bare];
@@ -157,7 +180,7 @@ export default class Omemo {
 
    private getBootstrap(): Bootstrap {
       if (!this.bootstrap) {
-         this.bootstrap = new Bootstrap(this.store, this.connection);
+         this.bootstrap = new Bootstrap(this.deviceName, this.store, this.bundleManager);
       }
 
       return this.bootstrap;

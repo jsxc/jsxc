@@ -1,48 +1,28 @@
 
 export type IdentityKeyPair = { privKey?: ArrayBuffer, pubKey: ArrayBuffer };
-export type IdentityKey = ArrayBuffer;
-export type Identifier = string;
-export type RegistrationId = number;
 export type PreKeyPair = { pubKey, privKey };
-export type KeyId = number;
-export type Session = any;
+export type SignedPreKeyPair = { signature, pubKey, privKey }
 
 interface SignalStore {
+   Direction: { SENDING: number, RECEIVING: number }
+
    getIdentityKeyPair(): Promise<IdentityKeyPair>;
 
-   getLocalRegistrationId(): Promise<RegistrationId>;
+   getLocalRegistrationId(): Promise<number>;
 
-   put(key: string, value: any): void;
+   isTrustedIdentity(addressName: string, identityKey: ArrayBuffer, direction: number): Promise<boolean>;
 
-   get(key: string, defaultValue?: any): any;
+   saveIdentity(address: string, identityKey: ArrayBuffer): Promise<boolean>;
 
-   remove(key: string): void;
+   loadPreKey(keyId: number): Promise<undefined | PreKeyPair>;
 
-   isTrustedIdentity(identifier: Identifier, identityKey: IdentityKey): Promise<boolean>;
+   removePreKey(keyId: number): Promise<void>;
 
-   loadIdentityKey(identifier: Identifier): Promise<IdentityKey>;
+   loadSignedPreKey(keyId: number): Promise<undefined | PreKeyPair>;
 
-   saveIdentity(identifier: Identifier, identityKey: IdentityKey): Promise<boolean>;
+   loadSession(address: string): Promise<string | undefined>;
 
-   loadPreKey(keyId: KeyId): Promise<undefined | PreKeyPair>;
-
-   storePreKey(keyId: KeyId, keyPair: PreKeyPair): Promise<void>;
-
-   removePreKey(keyId: KeyId): Promise<void>;
-
-   loadSignedPreKey(keyId: KeyId): Promise<undefined | PreKeyPair>;
-
-   storeSignedPreKey(keyId: KeyId, keyPair: PreKeyPair): Promise<void>;
-
-   removeSignedPreKey(keyId: KeyId): Promise<void>;
-
-   loadSession(identifier: Identifier): Promise<Session | undefined>;
-
-   storeSession(identifier: Identifier, session: Session): Promise<void>;
-
-   removeSession(identifier: Identifier): Promise<void>;
-
-   removeAllSessions(identifier: Identifier): Promise<void>;
+   storeSession(identifier: string, session: string): Promise<void>;
 }
 
 export default SignalStore;

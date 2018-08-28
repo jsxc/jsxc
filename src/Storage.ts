@@ -1,4 +1,5 @@
 import Log from './util/Log'
+import IStorage from './Storage.interface'
 
 const PREFIX = 'jsxc2';
 
@@ -8,7 +9,7 @@ const IGNORE_KEY = ['rid'];
 
 const BACKEND = localStorage;
 
-export default class Storage {
+export default class Storage implements IStorage {
    static storageNotConform: boolean = false;
    static tested: boolean = false;
 

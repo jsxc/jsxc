@@ -5,6 +5,7 @@ import { IJID as JID } from '../JID.interface'
 import { Avatar } from '../Avatar.interface'
 import { DiscoInfoRepository } from '../DiscoInfoRepository.interface'
 import { ILog } from '../util/Log.interface'
+import ChatWindow from '@ui/ChatWindow';
 
 export interface API {
 
@@ -48,4 +49,6 @@ export interface API {
    registerPresenceHook(func)
 
    getConnectionCreationDate(): Date
+
+   registerChatWindowInitializedHook(hook: (chatWindow: ChatWindow) => void)
 }

@@ -1,31 +1,45 @@
 import Store from './Store'
-import Device from './Device'
-import { IJID } from '../../../JID.interface'
-import { KeyHelper, SignalProtocolAddress, SessionBuilder, SessionCipher } from '../vendor/Signal'
-import ArrayBufferUtils from '../util/ArrayBuffer'
+import Device, { Trust } from './Device'
 import * as AES from '../util/AES'
+import Address from '../vendor/Address';
+import BundleManager from './BundleManager';
+import Session from './Session';
+import EncryptedDeviceMessage from '../model/EncryptedDeviceMessage';
+
+const MAX_PADDING = 10;
+const PADDING_CHARACTER = '​\u200B';
+
+export type EncryptedPeerMessage = {
+   keys: EncryptedDeviceMessage[],
+   iv: BufferSource,
+   payload: ArrayBuffer,
+};
 
 export default class Peer {
    private static own: Peer;
 
    private devices: any = {};
 
-   constructor(private jid: IJID, private store: Store) {
+   constructor(private deviceName: string, private store: Store, private bundleManager: BundleManager) {
    }
 
-   public async encrypt(plaintext: string) {
-      let remoteDeviceIds = this.store.getDeviceList(this.jid.bare);
+   public async encrypt(plaintext: string): Promise<EncryptedPeerMessage> {
+      let remoteDeviceIds = this.store.getDeviceList(this.deviceName);
 
       if (remoteDeviceIds.length === 0) {
          throw 'Your contact does not support OMEMO.';
       }
 
-      if (this.getTrust() === Device.Trust.unknown) {
+      if (this.getTrust() === Trust.unknown) {
          throw 'There are new devices for your contact.';
       }
 
-      if (Peer.getOwn().getTrust() === Device.Trust.unknown) {
+      if (Peer.getOwn().getTrust() === Trust.unknown) {
          throw 'I found new devices from you.';
+      }
+
+      while (plaintext.length < MAX_PADDING) {
+         plaintext += PADDING_CHARACTER;
       }
 
       let aes = await AES.encrypt(plaintext);
@@ -41,47 +55,50 @@ export default class Peer {
       }
 
       return {
-         keys: keys,
+         keys: <EncryptedDeviceMessage[]>keys,
          iv: aes.iv,
          payload: aes.payload
       };
    }
 
-   public decrypt(deviceId: number, ciphertext, preKey: boolean = false) {
+   public decrypt(deviceId: number, ciphertext, preKey: boolean = false): Promise<ArrayBuffer> {
       let device = this.getDevice(deviceId);
 
       return device.decrypt(ciphertext, preKey);
    }
 
-   public getTrust() {
+   public getTrust(): Trust {
       let trust = this.getDevices().map(device => device.getTrust());
 
-      if (trust.indexOf(Device.Trust.unknown) >= 0) {
-         return Device.Trust.unknown;
+      if (trust.indexOf(Trust.unknown) >= 0) {
+         return Trust.unknown;
       }
 
-      if (trust.indexOf(Device.Trust.recognized) >= 0) {
-         return Device.Trust.recognized;
+      if (trust.indexOf(Trust.recognized) >= 0) {
+         return Trust.recognized;
       }
 
-      return Device.Trust.confirmed;
+      return Trust.confirmed;
    }
 
    public getDevices(): Device[] {
-      let deviceIds = this.store.getDeviceList(this.jid.bare);
+      let deviceIds = this.store.getDeviceList(this.deviceName);
 
       return deviceIds.map(id => this.getDevice(id));
    }
 
    private getDevice(id: number): Device {
       if (!this.devices[id]) {
-         this.devices[id] = new Device(this.jid, id, this.store);
+         let address = new Address(this.deviceName, id);
+         let session = new Session(address, this.store, this.bundleManager);
+
+         this.devices[id] = new Device(address, session, this.store);
       }
 
       return this.devices[id];
    }
 
-   public static getOwn() {
+   public static getOwn(): Peer {
       if (!Peer.own) {
          throw 'Could not find own peer object.';
       }
@@ -89,11 +106,12 @@ export default class Peer {
       return Peer.own;
    }
 
-   public static initOwnPeer(jid: IJID, store: Store) {
+   public static initOwnPeer(deviceName: string, store: Store, bundleManager: BundleManager) {
       if (Peer.own) {
          throw 'There is already my own peer object.';
       }
+
       //@REVIEW maybe set trust here
-      Peer.own = new Peer(jid, store);
+      Peer.own = new Peer(deviceName, store, bundleManager);
    }
 }

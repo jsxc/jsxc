@@ -1,15 +1,49 @@
-interface ISignalProtocolAddress {
-   constructor(name, deviceId)
-   getName: () => string
-   getDeviceId: () => number
-   toString: () => string
-   equals: (ISignalProtocolAddress) => boolean
+
+export interface SignalBundleObject {
+   identityKey: ArrayBuffer,
+   registrationId: number,
+   preKey: {
+      keyId: number
+      publicKey: ArrayBuffer
+   },
+   signedPreKey: {
+      keyId: number
+      publicKey: ArrayBuffer
+      signature: string | ArrayBuffer
+   }
+}
+
+interface ISignalPreKey {
+   keyId: number
+
+   keyPair: ISignalKeyPair
+}
+
+interface ISignalSignedPreKey extends ISignalPreKey {
+   signature: ArrayBuffer
+}
+
+
+interface ISignalKeyPair {
+   privKey?: ArrayBuffer
+
+   pubKey: ArrayBuffer
+}
+
+interface ISignalKeyHelper {
+   generatePreKey: (keyId: number) => Promise<ISignalPreKey>
+
+   generateSignedPreKey: (identityKeyPair: ISignalKeyPair, signedKeyId: number) => Promise<ISignalSignedPreKey>
+
+   generateIdentityKeyPair: () => Promise<ISignalKeyPair>
+
+   generateRegistrationId: () => number
 }
 
 let libsignal = (<any>window).libsignal || {};
 
-export let KeyHelper = libsignal.KeyHelper;
-export let SignalProtocolAddress = libsignal.SignalProtocolAddress;
-export let SessionBuilder = libsignal.SessionBuilder;
-export let SessionCipher = libsignal.SessionCipher;
-export let FingerprintGenerator = libsignal.FingerprintGenerator;
+export let SignalAddress = libsignal.SignalProtocolAddress;
+export let SignalKeyHelper: ISignalKeyHelper = libsignal.KeyHelper;
+export let SignalSessionBuilder = libsignal.SessionBuilder;
+export let SignalSessionCipher = libsignal.SessionCipher;
+export let SignalFingerprintGenerator = libsignal.FingerprintGenerator;

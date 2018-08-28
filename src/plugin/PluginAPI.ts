@@ -10,6 +10,7 @@ import Avatar from '../Avatar'
 import { MessagePayload } from '../Message.interface'
 import { API as IPluginAPI } from './PluginAPI.interface'
 import { Logger } from '../util/Log'
+import ChatWindow from '@ui/ChatWindow';
 
 export default class PluginAPI implements IPluginAPI {
    private storage;
@@ -113,5 +114,9 @@ export default class PluginAPI implements IPluginAPI {
       }
 
       return null;
+   }
+
+   public registerChatWindowInitializedHook(hook: (chatWindow: ChatWindow) => void) {
+      ChatWindow.HookRepository.registerHook('initialized', hook);
    }
 }

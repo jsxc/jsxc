@@ -1,151 +1,37 @@
-import { SignalProtocolAddress } from '../vendor/Signal'
-import SignalStore, { IdentityKeyPair, IdentityKey, Identifier, RegistrationId, PreKeyPair, KeyId, Session } from '../vendor/SignalStore.interface'
-import { SignalBundleObject } from './ObjectTypes'
-import Bundle from './Bundle'
+import IStorage from '../../../Storage.interface'
 import ArrayBufferUtils from '../util/ArrayBuffer'
-import { NS_BASE, NS_BUNDLES } from '../util/Const'
-import Device from './Device'
+import { Trust } from './Device'
+import IdentityKey from '../model/IdentityKey';
+import SignedPreKey from '../model/SignedPreKey';
+import PreKey from '../model/PreKey';
+import Address from '../vendor/Address';
+import SignalStore from '../vendor/SignalStore';
 
 const PREFIX = 'store';
 const PREFIX_SESSION = 'session:';
-const PREFIX_IDENTITYKEY = 'identityKey:';
+const PREFIX_IDENTITY_KEY = 'identityKey:';
 const PREFIX_PREKEY = '25519KeypreKey:';
-const PREFIX_SIGNEDPREKEY = '25519KeysignedKey:';
+const PREFIX_SIGNED_PREKEY = '25519KeysignedKey:';
 const PREFIX_TRUST = 'trust:';
+const PREFIX_DEVICE_LIST = 'deviceList:';
 
-//@TODO separate signal store and own store. Wrap keys and stuff into objects.
+export default class Store {
 
-//@TODO rename
-class IdentityKeyClass {
-   constructor(private pubKey: ArrayBuffer, private privKey?: ArrayBuffer) {
+   private signalStore: SignalStore;
 
-   }
-
-   public getFingerprint(): string {
-      // remove version byte
-      return this.pubKey ? ArrayBufferUtils.toPrettyHex(this.pubKey.slice(1)) : '';
-   }
-
-   public getPublic(): ArrayBuffer {
-      return this.pubKey;
-   }
-}
-
-export default class Store implements SignalStore {
-   public Direction = {
-      SENDING: 1,
-      RECEIVING: 2
-   };
-
-   constructor(private storage, private pepService) { //@TODO add ts type
+   constructor(private storage: IStorage) {
 
    }
 
-   public getDeviceList(identifier) {
-      return this.get('deviceList:' + identifier, []);
-   }
-
-   public setDeviceList(identifier, deviceList: number[]) {
-      this.put('deviceList:' + identifier, deviceList);
-   }
-
-   public isReady(): boolean {
-      return this.get('deviceId') && this.get('deviceName') && this.get('identityKey') && this.get('registrationId');
-   }
-
-   public isPublished(): boolean {
-      return this.get('published') === 'true' || this.get('published') === true;
-   }
-
-   public getDeviceId(): number {
-      return parseInt(this.get('deviceId'));
-   }
-
-   public getDeviceName(): string {
-      return this.get('deviceName');
-   }
-
-   public getDeviceAddress() {
-      return new SignalProtocolAddress(this.getDeviceName(), this.getDeviceId());
-   }
-
-   public getLocalIdentityKey(): IdentityKey {
-      let identityKey = this.get('identityKey');
-
-      return identityKey ? identityKey.pubKey : undefined;
-   }
-
-   public getTrust(identifier: Identifier) {
-      if (identifier === this.getDeviceAddress().toString()) {
-         return Device.Trust.confirmed;
+   public getSignalStore(): SignalStore {
+      if (!this.signalStore) {
+         this.signalStore = new SignalStore(this);
       }
 
-      let trustMatrix = this.getTrustMatrix(identifier);
-      let fingerprint = this.getFingerprint(identifier);
-
-      if (fingerprint && trustMatrix[Device.Trust.confirmed].indexOf(fingerprint) >= 0) {
-         return Device.Trust.confirmed;
-      }
-
-      if (fingerprint && trustMatrix[Device.Trust.recognized].indexOf(fingerprint) >= 0) {
-         return Device.Trust.recognized;
-      }
-
-      return Device.Trust.unknown;
+      return this.signalStore;
    }
 
-   public setTrust(identifier: Identifier, trust) {
-      let address = new SignalProtocolAddress.fromString(identifier);
-      let trustMatrix = this.getTrustMatrix(identifier);
-      let fingerprint = this.getFingerprint(identifier);
-
-      for (let trustLevel in trustMatrix) {
-         trustMatrix[trustLevel] = trustMatrix[trustLevel].filter(fp => fp !== fingerprint);
-      }
-
-      trustMatrix[trust].push(fingerprint);
-
-      this.put(PREFIX_TRUST + address.getName(), trustMatrix);
-
-      return fingerprint;
-   }
-
-   private getTrustMatrix(identifier: Identifier) {
-      let address = new SignalProtocolAddress.fromString(identifier);
-      let trustMatrix = this.get(PREFIX_TRUST + address.getName()) || {
-         [Device.Trust.confirmed]: [],
-         [Device.Trust.recognized]: [],
-      };
-
-      return trustMatrix;
-   }
-
-   public getFingerprint(identifier: Identifier): string {
-      let identityKey = new IdentityKeyClass(this.get(PREFIX_IDENTITYKEY + identifier));
-
-      return identityKey.getFingerprint();
-   }
-
-   public async loadFingerprint(identifier: Identifier): Promise<string> {
-      let identityKey = new IdentityKeyClass(await this.loadIdentityKey(identifier));
-
-      this.saveIdentity(identifier, identityKey.getPublic());
-
-      return identityKey.getFingerprint();
-   }
-
-   /**
-    * Methods required by libsignal
-    */
-   public getIdentityKeyPair(): Promise<IdentityKeyPair> {
-      return Promise.resolve(this.get('identityKey'));
-   }
-
-   public getLocalRegistrationId(): Promise<RegistrationId> {
-      return Promise.resolve(this.get('registrationId'));
-   }
-
-   public put(key: string, value: any): void {
+   private put(key: string, value: any): void {
       if (typeof key === 'undefined' || typeof value === 'undefined' || key === null || value === null) {
          throw new Error('I will not store undefined or null');
       }
@@ -161,7 +47,7 @@ export default class Store implements SignalStore {
       this.storage.setItem(PREFIX, key, { v: stringified });
    }
 
-   public get(key: string, defaultValue?: any): any {
+   private get(key: string, defaultValue?: any): any {
       if (typeof key === 'undefined' || key === null) {
          throw new Error('I cant get a value for a undefined or null key');
       }
@@ -183,7 +69,7 @@ export default class Store implements SignalStore {
       return defaultValue;
    }
 
-   public remove(key: string): void {
+   private remove(key: string): void {
       if (typeof key === 'undefined' || key === null) {
          throw new Error('I cant remove null or undefined key');
       }
@@ -191,151 +77,211 @@ export default class Store implements SignalStore {
       this.storage.removeItem(PREFIX, key);
    }
 
-   public isTrustedIdentity(identifierName, identityKey: IdentityKey): Promise<boolean> {
-      if (typeof identifierName === 'undefined' || identifierName === null) {
-         throw new Error('Undefined or null is no valid identifier');
+   public isReady(): boolean {
+      return this.get('deviceId') && this.get('deviceName') && this.get('identityKey') && this.get('registrationId');
+   }
+
+   public isPublished(): boolean {
+      return this.get('published') === 'true' || this.get('published') === true;
+   }
+
+   public setPublished(published: boolean) {
+      return this.put('published', published);
+   }
+
+   public getDeviceList(deviceName: string) {
+      return this.get(PREFIX_DEVICE_LIST + deviceName, []);
+   }
+
+   public setDeviceList(deviceName: string, deviceList: number[]) {
+      this.put(PREFIX_DEVICE_LIST + deviceName, deviceList);
+   }
+
+   public setLocalDeviceId(id: number) {
+      this.put('deviceId', id);
+   }
+
+   public getLocalDeviceId(): number {
+      return parseInt(this.get('deviceId'));
+   }
+
+   public setLocalDeviceName(name: string) {
+      this.put('deviceName', name);
+   }
+
+   public getLocalDeviceName(): string {
+      return this.get('deviceName');
+   }
+
+   public getLocalDeviceAddress(): Address {
+      let name = this.getLocalDeviceName();
+      let id = this.getLocalDeviceId();
+
+      if (!name || !id) {
+         throw 'Local device address not generated yet';
       }
 
-      if (!(identityKey instanceof ArrayBuffer)) {
-         throw new Error('Expected identityKey to be an ArrayBuffer');
+      return new Address(name, id);
+   }
+
+   public setLocalRegistrationId(id: number) {
+      this.put('registrationId', id);
+   }
+
+   public getLocalRegistrationId(): number {
+      return parseInt(this.get('registrationId'));
+   }
+
+   public setLocalIdentityKey(identityKey: IdentityKey) {
+      let address = this.getLocalDeviceAddress();
+
+      this.saveIdentity(address, identityKey);
+      this.setTrust(address, Trust.confirmed);
+   }
+
+   public getLocalIdentityKey(): IdentityKey {
+      let address = this.getLocalDeviceAddress();
+
+      return this.getIdentityKey(address);
+   }
+
+   public getTrust(identifier: Address): Trust {
+      let trustMatrix = this.getTrustMatrix(identifier);
+      let fingerprint = this.getFingerprint(identifier);
+
+      if (fingerprint && trustMatrix[Trust.confirmed].indexOf(fingerprint) >= 0) {
+         return Trust.confirmed;
       }
 
-      let fingerprint = new IdentityKeyClass(identityKey).getFingerprint();
-      let trustMatrix = this.getTrustMatrix(identifierName);
+      if (fingerprint && trustMatrix[Trust.recognized].indexOf(fingerprint) >= 0) {
+         return Trust.recognized;
+      }
 
-      if (trustMatrix[Device.Trust.confirmed].indexOf(fingerprint) > -1 ||
-         trustMatrix[Device.Trust.recognized].indexOf(fingerprint) > -1) {
+      return Trust.unknown;
+   }
+
+   public setTrust(identifier: Address, trust: Trust) {
+      let trustMatrix = this.getTrustMatrix(identifier);
+      let fingerprint = this.getFingerprint(identifier);
+
+      for (let trustLevel in trustMatrix) {
+         trustMatrix[trustLevel] = trustMatrix[trustLevel].filter(fp => fp !== fingerprint);
+      }
+
+      trustMatrix[trust].push(fingerprint);
+
+      this.put(PREFIX_TRUST + identifier.getName(), trustMatrix);
+
+      return fingerprint;
+   }
+
+   private getTrustMatrix(identifier: Address) {
+      let trustMatrix = this.get(PREFIX_TRUST + identifier.getName()) || {
+         [Trust.confirmed]: [],
+         [Trust.recognized]: [],
+      };
+
+      return trustMatrix;
+   }
+
+   public getFingerprint(identifier: Address): string | undefined {
+      let identityKey = this.getIdentityKey(identifier);
+
+      return identityKey ? identityKey.getFingerprint() : undefined;
+   }
+
+   public isTrustedIdentity(identifier: Address, identityKey: IdentityKey): Promise<boolean> {
+      let fingerprint = identityKey.getFingerprint();
+      let trustMatrix = this.getTrustMatrix(identifier);
+
+      if (trustMatrix[Trust.confirmed].indexOf(fingerprint) > -1 ||
+         trustMatrix[Trust.recognized].indexOf(fingerprint) > -1) {
          return Promise.resolve(true);
       }
 
       return Promise.resolve(false);
    }
 
-   public async loadIdentityKey(identifier: Identifier): Promise<IdentityKey> {
-      if (identifier === null || identifier === undefined)
-         throw new Error('Tried to get identity key for undefined/null key');
+   public saveIdentity(identifier: Address, identityKey: IdentityKey): Promise<boolean> {
+      let existing = this.getIdentityKey(identifier);
+      this.setIdentityKey(identifier, identityKey);
 
-      let address = new SignalProtocolAddress.fromString(identifier);
-      let identityKey = this.get(PREFIX_IDENTITYKEY + address.toString());
-
-      if (identityKey) {
-         return identityKey;
-      }
-
-      let bundle = await this.getPreKeyBundle(address);
-
-      return bundle.identityKey;
+      return Promise.resolve(existing && ArrayBufferUtils.isEqual(identityKey.getPublic(), existing.getPublic()));
    }
 
-   public saveIdentity(identifier: Identifier, identityKey: IdentityKey): Promise<boolean> {
-      if (identifier === null || identifier === undefined) {
-         throw new Error('Tried to put identity key for undefined/null key');
+   public getIdentityKey(identifier: Address): IdentityKey | undefined {
+      let data = this.get(PREFIX_IDENTITY_KEY + identifier.toString());
+
+      if (data) {
+         return new IdentityKey(data);
       }
-
-      let address = new SignalProtocolAddress.fromString(identifier);
-
-      if (typeof identityKey === 'string') {
-         identityKey = ArrayBufferUtils.fromString(identityKey);
-      }
-
-      if (identityKey.byteLength !== 33) {
-         console.warn(`Identity key is ${identityKey.byteLength} byte long.`);
-      }
-
-      let existing = this.get(PREFIX_IDENTITYKEY + address.toString());
-      this.put(PREFIX_IDENTITYKEY + address.toString(), identityKey);
-
-      return Promise.resolve(existing && ArrayBufferUtils.isEqual(identityKey, existing));
    }
 
-   public loadPreKey(keyId: KeyId): Promise<undefined | PreKeyPair> {
-      let res = this.get(PREFIX_PREKEY + keyId);
-      if (res !== undefined) {
-         res = { pubKey: res.pubKey, privKey: res.privKey };
+   private setIdentityKey(identifier: Address, identityKey: IdentityKey) {
+      this.put(PREFIX_IDENTITY_KEY + identifier.toString(), identityKey.export());
+   }
+
+   public getPreKey(keyId: number): undefined | PreKey {
+      let preKey;
+      let data = this.get(PREFIX_PREKEY + keyId);
+
+      if (data !== undefined) {
+         preKey = new PreKey(data);
       }
 
-      return Promise.resolve(res);
+      return preKey;
    }
 
-   public storePreKey(keyId: KeyId, keyPair: PreKeyPair): Promise<void> {
-      return Promise.resolve(this.put(PREFIX_PREKEY + keyId, keyPair));
+   public storePreKey(preKey: PreKey) {
+      this.put(PREFIX_PREKEY + preKey.getId(), preKey.export());
    }
 
-   public removePreKey(keyId: KeyId): Promise<void> {
+   public removePreKey(keyId: number): Promise<void> {
       //@TODO publish new bundle
 
       return Promise.resolve(this.remove(PREFIX_PREKEY + keyId));
    }
 
-   public loadSignedPreKey(keyId: KeyId): Promise<undefined | PreKeyPair> {
-      let res = this.get(PREFIX_SIGNEDPREKEY + keyId);
-      if (res !== undefined) {
-         res = { pubKey: res.pubKey, privKey: res.privKey };
+   public getSignedPreKey(keyId: number): undefined | SignedPreKey {
+      let signedPreKey;
+      let data = this.get(PREFIX_SIGNED_PREKEY + keyId);
+      if (data !== undefined) {
+         signedPreKey = new SignedPreKey(data);
       }
 
-      return Promise.resolve(res);
+      return signedPreKey;
    }
 
-   public storeSignedPreKey(keyId: KeyId, keyPair: PreKeyPair): Promise<void> {
-      return Promise.resolve(this.put(PREFIX_SIGNEDPREKEY + keyId, keyPair));
+   public storeSignedPreKey(signedPreKey: SignedPreKey) {
+      this.put(PREFIX_SIGNED_PREKEY + signedPreKey.getId(), signedPreKey.export())
    }
 
-   public removeSignedPreKey(keyId: KeyId): Promise<void> {
-      return Promise.resolve(this.remove(PREFIX_SIGNEDPREKEY + keyId));
+   public removeSignedPreKey(keyId: number): Promise<void> {
+      return Promise.resolve(this.remove(PREFIX_SIGNED_PREKEY + keyId));
    }
 
-   public loadSession(identifier: Identifier): Promise<Session | undefined> {
+   public loadSession(identifier: string): Promise<string | undefined> {
       return Promise.resolve(this.get(PREFIX_SESSION + identifier));
    }
 
-   public storeSession(identifier: Identifier, session: Session): Promise<void> {
+   public storeSession(identifier: string, session: string): Promise<void> {
       return Promise.resolve(this.put(PREFIX_SESSION + identifier, session));
    }
 
-   public removeSession(identifier: Identifier): Promise<void> {
+   public removeSession(identifier: string): Promise<void> {
       return Promise.resolve(this.remove(PREFIX_SESSION + identifier));
    }
 
-   public removeAllSessions(identifier: Identifier) {
+   public removeAllSessions(identifier: string) {
       //@TODO implement removeAllSessions
-      // for (var id in this.store) {
-      //    if (id.startsWith(this.prefix + ':' + 'session' + identifier)) {
-      //       localStorage.removeItem(this.prefix + ':' + id);
-      //    }
-      // }
+
       return Promise.resolve();
    }
 
    /**
     * Helper functions
     */
-   public hasSession(identifier: Identifier): boolean {
+   public hasSession(identifier: string): boolean {
       return !!this.get(PREFIX_SESSION + identifier)
-   }
-
-   public async getPreKeyBundle(address): Promise<SignalBundleObject> {
-      let node = NS_BUNDLES + address.getDeviceId();
-      let stanza;
-
-      try {
-         stanza = await this.pepService.retrieveItems(node, address.getName());
-      } catch (errorStanza) {
-         console.log('Error while retrieving bundle', errorStanza);
-
-         throw 'Could not retrieve bundle';
-      }
-
-
-      let itemsElement = $(stanza).find(`items[node='${node}']`);
-      let bundleElement = itemsElement.find(`bundle[xmlns='${NS_BASE}']`);
-
-      if (bundleElement.length !== 1) {
-         return Promise.reject('Found no bundle');
-      }
-
-      let bundle = Bundle.fromXML(bundleElement.get());
-
-      //@REVIEW registrationId??? Gajim uses probably own registration id.
-      return bundle.toSignalBundle(address.getDeviceId());
    }
 }

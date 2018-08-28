@@ -1,75 +1,65 @@
-import { KeyPairObject, SignedPreKeyObject, PreKeyObject, BundleObject, SignalBundleObject } from './ObjectTypes'
 import Random from '../../../util/Random'
 import ArrayBufferUtils from '../util/ArrayBuffer'
+import { NS_BASE } from '../util/Const'
 import { $build } from '../../../vendor/Strophe'
+import IdentityKey from '../model/IdentityKey';
+import SignedPreKey from '../model/SignedPreKey';
+import PreKey from '../model/PreKey';
+
+export interface BundleObject {
+   identityKey: IdentityKey,
+   signedPreKey: SignedPreKey,
+   preKeys: PreKey[],
+}
 
 export default class Bundle {
    constructor(private bundle: BundleObject) {
 
    }
 
-   public getIdentityKey(): KeyPairObject {
+   public getIdentityKey(): IdentityKey {
       return this.bundle.identityKey;
    }
 
-   public getSignedPreKey(): SignedPreKeyObject {
+   public getSignedPreKey(): SignedPreKey {
       return this.bundle.signedPreKey;
    }
 
-   public getRandomPreKey(): PreKeyObject {
+   public getRandomPreKey(): PreKey {
       let numberOfPreKeys = this.bundle.preKeys.length;
       let candidateNumber = Random.number(numberOfPreKeys - 1);
 
       return this.bundle.preKeys[candidateNumber];
    }
 
-   public toSignalBundle(registrationId: number): SignalBundleObject {
-      let preKey = this.getRandomPreKey();
-      let signedPreKey = this.getSignedPreKey();
-
-      return {
-         identityKey: this.getIdentityKey().pubKey,
-         registrationId: registrationId,
-         preKey: {
-            keyId: preKey.keyId,
-            publicKey: preKey.keyPair.pubKey
-         },
-         signedPreKey: {
-            keyId: signedPreKey.keyId,
-            publicKey: signedPreKey.keyPair.pubKey,
-            signature: signedPreKey.signature
-         }
-      };
-   }
-
-   public toXML() {
+   public toXML(): Strophe.Builder {
       let xmlBundle = $build('bundle', {
-         xmlns: 'eu.siacs.conversations.axolotl'
+         xmlns: NS_BASE
       });
 
       xmlBundle
          .c('signedPreKeyPublic', {
-            signedPreKeyId: this.bundle.signedPreKey.keyId
+            signedPreKeyId: this.bundle.signedPreKey.getId()
          })
-         .t(ArrayBufferUtils.toBase64(this.bundle.signedPreKey.keyPair.pubKey))
+         .t(ArrayBufferUtils.toBase64(this.bundle.signedPreKey.getPublic()))
          .up();
 
       xmlBundle
          .c('signedPreKeySignature')
-         .t(ArrayBufferUtils.toBase64(<ArrayBuffer>this.bundle.signedPreKey.signature)) //@REVIEW
+         .t(ArrayBufferUtils.toBase64(this.bundle.signedPreKey.getSignature()))
          .up();
 
       xmlBundle
          .c('identityKey')
-         .t(ArrayBufferUtils.toBase64(this.bundle.identityKey.pubKey))
+         .t(ArrayBufferUtils.toBase64(this.bundle.identityKey.getPublic()))
          .up();
 
       for (let preKey of this.bundle.preKeys) {
          xmlBundle
             .c('preKeyPublic', {
-               preKeyId: preKey.keyId
+               preKeyId: preKey.getId()
             })
-            .t(ArrayBufferUtils.toBase64(preKey.keyPair.pubKey))
+            .t(ArrayBufferUtils.toBase64(preKey.getPublic()))
             .up();
       }
 
@@ -77,7 +67,7 @@ export default class Bundle {
    }
 
    public static fromXML(xmlElement): Bundle {
-      let targetSelector = 'bundle[xmlns="eu.siacs.conversations.axolotl"]'; //@TODO use constant
+      let targetSelector = `bundle[xmlns="${NS_BASE}"]`;
       let xmlBundle = $(xmlElement).is(targetSelector) ? $(xmlElement) : $(xmlElement).find(targetSelector);
 
       if (xmlBundle.length !== 1) {
@@ -89,25 +79,31 @@ export default class Bundle {
       let xmlSignedPreKeySignature = xmlBundle.find('signedPreKeySignature');
       let xmlPreKeys = xmlBundle.find('preKeyPublic');
 
-      return new Bundle({
-         identityKey: {
-            pubKey: ArrayBufferUtils.fromBase64(xmlIdentityKey.text())
+      let identityKey = new IdentityKey({
+         publicKey: ArrayBufferUtils.fromBase64(xmlIdentityKey.text()),
+      });
+
+      let signedPreKey = new SignedPreKey({
+         keyPair: {
+            publicKey: ArrayBufferUtils.fromBase64(xmlSignedPreKeyPublic.text())
          },
-         signedPreKey: {
+         signature: ArrayBufferUtils.fromBase64(xmlSignedPreKeySignature.text()),
+         keyId: parseInt(xmlSignedPreKeyPublic.attr('signedPreKeyId'))
+      });
+
+      let preKeys = xmlPreKeys.get().map(function(element) {
+         return new PreKey({
             keyPair: {
-               pubKey: ArrayBufferUtils.fromBase64(xmlSignedPreKeyPublic.text())
+               publicKey: ArrayBufferUtils.fromBase64($(element).text())
             },
-            signature: ArrayBufferUtils.fromBase64(xmlSignedPreKeySignature.text()),
-            keyId: parseInt(xmlSignedPreKeyPublic.attr('signedPreKeyId'))
-         },
-         preKeys: <PreKeyObject[]>xmlPreKeys.get().map(function(element) {
-            return {
-               keyPair: {
-                  pubKey: ArrayBufferUtils.fromBase64($(element).text())
-               },
-               keyId: parseInt($(element).attr('preKeyId'))
-            }
-         }),
+            keyId: parseInt($(element).attr('preKeyId'))
+         });
+      })
+
+      return new Bundle({
+         identityKey,
+         signedPreKey,
+         preKeys,
       });
    }
 }

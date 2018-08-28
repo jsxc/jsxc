@@ -1,7 +1,6 @@
 import ByteBuffer = require('bytebuffer')
 
 let ArrayBufferUtils = {
-   //@REVIEW do we really need all those functions?
    concat: (a: ArrayBuffer, b: ArrayBuffer) => ByteBuffer.concat([a, b]).toArrayBuffer(),
 
    decode: (a: ArrayBuffer): string => ByteBuffer.wrap(a).toUTF8(),
