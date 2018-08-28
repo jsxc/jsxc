@@ -6,6 +6,10 @@
         "paths": {
            "emojione": ["lib/emojione/lib/js/emojione.js"],
            "strophe.js": ["node_modules/strophe.js/strophe.js"],
+           "@connection/*": ["connection/*"],
+           "@ui/*": ["ui/*"],
+           "@util/*": ["util/*"],
+           "@vendor/*": ["vendor/*"],
            "@src/*": ["./*"],
         },
         "moduleResolution": "node",

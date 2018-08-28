@@ -96,6 +96,10 @@ module.exports = {
    resolve: {
       extensions: [".ts", ".js", ".hbs"],
       alias: {
+         '@connection': path.resolve(__dirname, 'src/connection/'),
+         '@ui': path.resolve(__dirname, 'src/ui/'),
+         '@util': path.resolve(__dirname, 'src/util/'),
+         '@vendor': path.resolve(__dirname, 'src/vendor/'),
          '@src': path.resolve(__dirname, 'src/'),
       }
    },
