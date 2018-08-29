@@ -327,10 +327,12 @@ export default class Account {
             return;
          }
 
-         let contact = this.createNewContact(contactData.jid);
+         let id = contactData.jid; //@REVIEW maybe add id property
 
-         if (typeof this.contacts[contact.getId()] === 'undefined') {
-            this.contacts[contact.getId()] = contact;
+         if (typeof this.contacts[id] === 'undefined') {
+            let contact = this.createNewContact(id);
+
+            this.contacts[id] = contact;
 
             Roster.get().add(contact);
          }
