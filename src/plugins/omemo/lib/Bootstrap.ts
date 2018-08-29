@@ -3,6 +3,7 @@ import { KeyHelper } from "../vendor/KeyHelper";
 import Random from '../../../util/Random'
 import Log from '../../../util/Log'
 import BundleManager from './BundleManager';
+import { MAX_REGISTRATION_ID } from '../util/Const';
 
 export default class Bootstrap {
    constructor(private deviceName: string, private store: Store, private bundleManager: BundleManager) {
@@ -19,7 +20,8 @@ export default class Bootstrap {
          let bundle = await this.bundleManager.generateBundle(identityKey);
          let deviceId = this.store.getLocalDeviceId();
 
-         await this.bundleManager.publishBundle(deviceId, bundle);
+         await this.bundleManager.publishBundle(bundle);
+         await this.bundleManager.publishDeviceId(deviceId);
       }
 
       Log.debug('Local device prepared.');
@@ -40,7 +42,7 @@ export default class Bootstrap {
    }
 
    private generateDeviceId(): Promise<number> {
-      return Promise.resolve(Random.number(Math.pow(2, 31) - 1, 1));
+      return Promise.resolve(Random.number(MAX_REGISTRATION_ID, 1));
    }
 
    private getDeviceName(): Promise<string> {

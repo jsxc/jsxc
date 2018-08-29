@@ -8,7 +8,7 @@ import Bootstrap from './Bootstrap'
 import JID from '../../../JID'
 import { IJID } from '../../../JID.interface'
 import Stanza from '../util/Stanza'
-import { NS_BASE, MIN_NUM_PRE_KEYS } from '../util/Const'
+import { NS_BASE } from '../util/Const'
 import ArrayBufferUtils from '../util/ArrayBuffer'
 import * as AES from '../util/AES'
 import Device, { Trust } from './Device'
@@ -165,6 +165,12 @@ export default class Omemo {
 
       if (!encryptedData.payload) {
          throw 'We received a KeyTransportElement';
+      }
+
+      if (ownPreKey.preKey) {
+         this.bundleManager.refreshBundle().then(bundle => {
+            this.bundleManager.publishBundle(bundle);
+         });
       }
 
       let iv = (<any>encryptedData).iv;

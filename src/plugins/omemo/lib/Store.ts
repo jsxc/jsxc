@@ -229,6 +229,16 @@ export default class Store {
       this.put(PREFIX_IDENTITY_KEY + identifier.toString(), identityKey.export());
    }
 
+   public getPreKeyIds(): number[] {
+      return this.get('preKeyIds') || [];
+   }
+
+   public getAllPreKeys(): PreKey[] {
+      let preKeyIds = this.get('preKeyIds') || [];
+
+      return preKeyIds.map(id => this.getPreKey(id));
+   }
+
    public getNumberOfPreKeys(): number {
       let preKeyIds = this.get('preKeyIds') || [];
 
@@ -266,6 +276,10 @@ export default class Store {
       return Promise.resolve(this.remove(PREFIX_PREKEY + keyId));
    }
 
+   public getSignedPreKeyIds(): number[] {
+      return this.get('signedPreKeyIds') || [];
+   }
+
    public getSignedPreKey(keyId: number): undefined | SignedPreKey {
       let signedPreKey;
       let data = this.get(PREFIX_SIGNED_PREKEY + keyId);
@@ -277,10 +291,22 @@ export default class Store {
    }
 
    public storeSignedPreKey(signedPreKey: SignedPreKey) {
+      let ids = this.get('signedPreKeyIds') || [];
+
+      if (ids.indexOf(signedPreKey.getId()) < 0) {
+         ids.push(signedPreKey.getId());
+
+         this.put('signedPreKeyIds', ids);
+      }
+
       this.put(PREFIX_SIGNED_PREKEY + signedPreKey.getId(), signedPreKey.export())
    }
 
    public removeSignedPreKey(keyId: number): Promise<void> {
+      let ids: number[] = this.get('signedPreKeyIds') || [];
+
+      this.put('signedPreKeyIds', ids.filter(id => id !== keyId));
+
       return Promise.resolve(this.remove(PREFIX_SIGNED_PREKEY + keyId));
    }
 
