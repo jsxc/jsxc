@@ -61,10 +61,15 @@ export default class Peer {
       };
    }
 
-   public decrypt(deviceId: number, ciphertext, preKey: boolean = false): Promise<ArrayBuffer> {
+   public decrypt(deviceId: number, ciphertext, preKey: boolean = false): Promise<{ plaintextKey: ArrayBuffer, deviceTrust: Trust }> {
       let device = this.getDevice(deviceId);
 
-      return device.decrypt(ciphertext, preKey);
+      return device.decrypt(ciphertext, preKey).then(plaintextKey => {
+         return {
+            plaintextKey: plaintextKey,
+            deviceTrust: device.getTrust(),
+         };
+      });
    }
 
    public getTrust(): Trust {

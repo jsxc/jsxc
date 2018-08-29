@@ -8,7 +8,7 @@ import Bootstrap from './Bootstrap'
 import JID from '../../../JID'
 import { IJID } from '../../../JID.interface'
 import Stanza from '../util/Stanza'
-import { NS_BASE } from '../util/Const'
+import { NS_BASE, MIN_NUM_PRE_KEYS } from '../util/Const'
 import ArrayBufferUtils from '../util/ArrayBuffer'
 import * as AES from '../util/AES'
 import Device, { Trust } from './Device'
@@ -116,7 +116,7 @@ export default class Omemo {
       });
    }
 
-   public async decrypt(stanza): Promise<string | void> {
+   public async decrypt(stanza): Promise<{ plaintext: string, trust: Trust } | void> {
       let messageElement = $(stanza);
 
       if (messageElement.prop('tagName') !== 'message') {
@@ -145,29 +145,35 @@ export default class Omemo {
          return Promise.reject(`Found ${ownPreKeyFiltered.length} PreKeys which match my device id (${ownDeviceId}).`);
       }
 
-      //@TODO remove own prekey id from bundle???
-
       let ownPreKey = ownPreKeyFiltered[0];
       let peer = this.getPeer(from);
-      let exportedKey;
+      let deviceDecryptionResult;
 
       try {
-         exportedKey = await peer.decrypt(encryptedData.sourceDeviceId, ownPreKey.ciphertext, ownPreKey.preKey);
+         deviceDecryptionResult = await peer.decrypt(encryptedData.sourceDeviceId, ownPreKey.ciphertext, ownPreKey.preKey);
       } catch (err) {
          throw 'Error during decryption: ' + err;
       }
 
+      let exportedKey = deviceDecryptionResult.plaintextKey;
       let exportedAESKey = exportedKey.slice(0, 16);
       let authenticationTag = exportedKey.slice(16);
 
       if (authenticationTag.byteLength < 16) {
-         throw "Authentication tag too short";
+         throw 'Authentication tag too short';
+      }
+
+      if (!encryptedData.payload) {
+         throw 'We received a KeyTransportElement';
       }
 
       let iv = (<any>encryptedData).iv;
-      let ciphertextAndAuthenticationTag = ArrayBufferUtils.concat((<any>encryptedData).payload, authenticationTag);
+      let ciphertextAndAuthenticationTag = ArrayBufferUtils.concat(encryptedData.payload, authenticationTag);
 
-      return AES.decrypt(exportedAESKey, iv, ciphertextAndAuthenticationTag);
+      return {
+         plaintext: await AES.decrypt(exportedAESKey, iv, ciphertextAndAuthenticationTag),
+         trust: deviceDecryptionResult.deviceTrust,
+      };
    }
 
    private getPeer(jid: IJID): Peer {

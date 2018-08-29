@@ -7,6 +7,7 @@ import Omemo from './lib/Omemo'
 import ChatWindow from '../../ui/ChatWindow'
 import { NS_BASE, NS_DEVICELIST } from './util/Const'
 import OmemoDevicesDialog from '../../ui/dialogs/omemoDevices'
+import { Trust } from './lib/Device';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -97,11 +98,15 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       }
 
       return this.getOmemo().decrypt(stanza).then((decrypted) => {
-         if (!decrypted) {
+         if (!decrypted || !decrypted.plaintext) {
             throw 'No decrypted message found';
          }
 
-         message.setPlaintextMessage(decrypted);
+         if (decrypted.trust === Trust.unknown) {
+            message.setErrorMessage('Message received from unknown OMEMO device');
+         }
+
+         message.setPlaintextMessage(decrypted.plaintext);
          message.setEncrypted(true);
 
          return [contact, message, stanza];

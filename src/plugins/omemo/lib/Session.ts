@@ -46,7 +46,7 @@ export default class Session {
    private async establishSession() {
       let bundle = await this.bundleManager.requestBundle(this.address);
 
-      this.processPreKeyMessage(bundle);
+      await this.processPreKeyMessage(bundle);
    }
 
    private processPreKeyMessage = (bundle: Bundle): Promise<void> => {

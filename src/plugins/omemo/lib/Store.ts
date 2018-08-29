@@ -5,7 +5,7 @@ import IdentityKey from '../model/IdentityKey';
 import SignedPreKey from '../model/SignedPreKey';
 import PreKey from '../model/PreKey';
 import Address from '../vendor/Address';
-import SignalStore from '../vendor/SignalStore';
+import SignalStore, { DIRECTION } from '../vendor/SignalStore';
 
 const PREFIX = 'store';
 const PREFIX_SESSION = 'session:';
@@ -135,14 +135,21 @@ export default class Store {
    public setLocalIdentityKey(identityKey: IdentityKey) {
       let address = this.getLocalDeviceAddress();
 
+      // we have to save it twice to not loose the private key part
+      this.put('identityKey', identityKey.export());
+
       this.saveIdentity(address, identityKey);
       this.setTrust(address, Trust.confirmed);
    }
 
    public getLocalIdentityKey(): IdentityKey {
-      let address = this.getLocalDeviceAddress();
+      let data = this.get('identityKey');
 
-      return this.getIdentityKey(address);
+      if (!data) {
+         throw 'Found no local identity key';
+      }
+
+      return new IdentityKey(data);
    }
 
    public getTrust(identifier: Address): Trust {
@@ -190,12 +197,13 @@ export default class Store {
       return identityKey ? identityKey.getFingerprint() : undefined;
    }
 
-   public isTrustedIdentity(identifier: Address, identityKey: IdentityKey): Promise<boolean> {
+   public isTrustedIdentity(identifier: Address, identityKey: IdentityKey, direction: number): Promise<boolean> {
       let fingerprint = identityKey.getFingerprint();
       let trustMatrix = this.getTrustMatrix(identifier);
 
       if (trustMatrix[Trust.confirmed].indexOf(fingerprint) > -1 ||
-         trustMatrix[Trust.recognized].indexOf(fingerprint) > -1) {
+         trustMatrix[Trust.recognized].indexOf(fingerprint) > -1 ||
+         direction === DIRECTION.RECEIVING) {
          return Promise.resolve(true);
       }
 
@@ -221,6 +229,12 @@ export default class Store {
       this.put(PREFIX_IDENTITY_KEY + identifier.toString(), identityKey.export());
    }
 
+   public getNumberOfPreKeys(): number {
+      let preKeyIds = this.get('preKeyIds') || [];
+
+      return preKeyIds.length;
+   }
+
    public getPreKey(keyId: number): undefined | PreKey {
       let preKey;
       let data = this.get(PREFIX_PREKEY + keyId);
@@ -233,11 +247,21 @@ export default class Store {
    }
 
    public storePreKey(preKey: PreKey) {
+      let preKeyIds = this.get('preKeyIds') || [];
+
+      if (preKeyIds.indexOf(preKey.getId()) < 0) {
+         preKeyIds.push(preKey.getId());
+
+         this.put('preKeyIds', preKeyIds);
+      }
+
       this.put(PREFIX_PREKEY + preKey.getId(), preKey.export());
    }
 
    public removePreKey(keyId: number): Promise<void> {
-      //@TODO publish new bundle
+      let preKeyIds: number[] = this.get('preKeyIds') || [];
+
+      this.put('preKeyIds', preKeyIds.filter(id => id !== keyId));
 
       return Promise.resolve(this.remove(PREFIX_PREKEY + keyId));
    }

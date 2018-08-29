@@ -4,12 +4,14 @@ import Store from '../lib/Store';
 import Address from './Address';
 import IdentityKey from '../model/IdentityKey'
 
+export const DIRECTION = {
+   SENDING: 1,
+   RECEIVING: 2
+};
+
 export default class implements SignalStore {
 
-   public Direction = {
-      SENDING: 1,
-      RECEIVING: 2
-   };
+   public Direction = DIRECTION;
 
    constructor(private store: Store) {
 
@@ -40,7 +42,7 @@ export default class implements SignalStore {
       let address = Address.fromString(identifier);
       let identityKey = new IdentityKey({ publicKey: publicIdentityKey });
 
-      return this.store.isTrustedIdentity(address, identityKey);
+      return this.store.isTrustedIdentity(address, identityKey, direction);
    }
 
    public saveIdentity(identifier: string, publicIdentityKey: string | ArrayBuffer): Promise<boolean> {
@@ -78,8 +80,6 @@ export default class implements SignalStore {
    }
 
    public removePreKey(keyId: number): Promise<void> {
-      //@TODO publish new bundle
-
       return this.store.removePreKey(keyId);
    }
 
