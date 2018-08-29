@@ -17,6 +17,7 @@ import Options from './Options'
 import UUID from './util/UUID'
 import ClientAvatar from './ClientAvatar'
 import Pipe from './util/Pipe'
+import ChatWindow from '@ui/ChatWindow';
 
 type ConnectionCallback = (status: number, condition?: string) => void;
 
@@ -160,6 +161,22 @@ export default class Account {
 
    public registerConnectionHook = (func: ConnectionCallback) => {
       this.hookRepository.registerHook('connection', func);
+   }
+
+   public triggerChatWindowInitializedHook = (chatWindow: ChatWindow, contact: Contact) => {
+      this.hookRepository.trigger('chatWindowInitialized', chatWindow, contact);
+   }
+
+   public registerChatWindowInitializedHook = (func: (chatWindow?: ChatWindow, contact?: Contact) => void) => {
+      this.hookRepository.registerHook('chatWindowInitialized', func);
+   }
+
+   public triggerChatWindowClearedHook = (chatWindow: ChatWindow, contact: Contact) => {
+      this.hookRepository.trigger('chatWindowCleared', chatWindow, contact);
+   }
+
+   public registerChatWindowClearedHook = (func: (chatWindow?: ChatWindow, contact?: Contact) => void) => {
+      this.hookRepository.registerHook('chatWindowCleared', func);
    }
 
    public getPluginRepository(): PluginRepository {

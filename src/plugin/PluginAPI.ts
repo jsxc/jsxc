@@ -116,7 +116,11 @@ export default class PluginAPI implements IPluginAPI {
       return null;
    }
 
-   public registerChatWindowInitializedHook(hook: (chatWindow: ChatWindow) => void) {
-      ChatWindow.HookRepository.registerHook('initialized', hook);
+   public registerChatWindowInitializedHook(hook: (chatWindow?: ChatWindow, contact?: Contact) => void) {
+      this.account.registerChatWindowInitializedHook(hook);
+   }
+
+   public registerChatWindowClearedHook(hook: (chatWindow?: ChatWindow, contact?: Contact) => void) {
+      this.account.registerChatWindowClearedHook(hook);
    }
 }

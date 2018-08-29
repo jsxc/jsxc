@@ -8,7 +8,7 @@ import Overlay from './ui/Overlay'
 import Hash from './util/Hash'
 import Log from './util/Log'
 import defaultIconFile = require('../images/XMPP_logo.png')
-import { Presence } from './connection/AbstractConnection';
+import { Presence } from './connection/AbstractConnection'
 
 interface NotificationSettings {
    title: string,

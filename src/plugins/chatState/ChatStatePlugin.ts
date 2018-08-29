@@ -39,7 +39,7 @@ export default class ChatStatePlugin extends AbstractPlugin {
 
       pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor)
 
-      ChatWindow.HookRepository.registerHook('initialized', (chatWindow: ChatWindow, contact: Contact) => {
+      pluginAPI.registerChatWindowInitializedHook((chatWindow: ChatWindow, contact: Contact) => {
          new ChatStateMachine(this, chatWindow, contact);
       });
 

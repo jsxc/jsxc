@@ -9,10 +9,8 @@ import Emoticons from '../Emoticons'
 import AvatarSet from './AvatarSet'
 import { startCall } from './actions/call'
 import { Presence } from '../connection/AbstractConnection'
-import Pipe from '../util/Pipe'
 import { EncryptionState } from '../plugin/AbstractPlugin'
 import ElementHandler from './util/ElementHandler'
-import HookRepository from '../util/HookRepository'
 import ChatWindowMessage from './ChatWindowMessage'
 import Transcript from '../Transcript'
 import FileTransferHandler from './ChatWindowFileTransferHandler'
@@ -27,8 +25,6 @@ const ESC_KEY = 27;
 export enum State { Open, Minimized, Closed };
 
 export default class ChatWindow {
-   public static HookRepository = new HookRepository<(window: ChatWindow, contact: Contact) => void>();
-
    protected element: JQuery<HTMLElement>;
 
    private inputElement: JQuery<HTMLElement>;
@@ -83,7 +79,7 @@ export default class ChatWindow {
          this.scrollMessageAreaToBottom();
       }, 500);
 
-      ChatWindow.HookRepository.trigger('initialized', this, contact);
+      this.getAccount().triggerChatWindowInitializedHook(this, contact);
    }
 
    public getTranscript(): Transcript {
@@ -143,7 +139,7 @@ export default class ChatWindow {
 
       this.element.find('.jsxc-message-area').empty();
 
-      ChatWindow.HookRepository.trigger('cleared', this, this.contact);
+      this.getAccount().triggerChatWindowClearedHook(this, this.contact);
    }
 
    public highlight() {
@@ -626,6 +622,8 @@ export default class ChatWindow {
             try {
                plugin.toggleTransfer(this.contact);
             } catch (err) {
+               Log.warn('Toggle transfer error:', err);
+
                this.getContact().addSystemMessage(err.toString());
             }
          });

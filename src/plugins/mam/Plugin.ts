@@ -35,11 +35,11 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
 
       this.queryContactRelation = new PersistentMap(pluginAPI.getStorage(), 'mam', 'query');
 
-      ChatWindow.HookRepository.registerHook('initialized', (chatWindow: ChatWindow, contact: Contact) => {
+      pluginAPI.registerChatWindowInitializedHook((chatWindow: ChatWindow, contact: Contact) => {
          this.addLoadButtonIfEnabled(chatWindow, contact);
       });
 
-      ChatWindow.HookRepository.registerHook('cleared', (chatWindow: ChatWindow, contact: Contact) => {
+      pluginAPI.registerChatWindowClearedHook((chatWindow: ChatWindow, contact: Contact) => {
          if (this.enabled) {
             this.getArchive(contact.getJid()).clear();
          }

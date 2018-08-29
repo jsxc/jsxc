@@ -306,7 +306,7 @@ export default class Roster {
 
          if ((pointerName.toLowerCase() > contact.getName().toLowerCase() && pointerPresence === presence) || pointerPresence > presence) {
 
-            pointer.before(rosterItem.getDom());
+            pointer.before(rosterItem.getDom().detach());
             insert = true;
 
             return false;
@@ -444,7 +444,7 @@ export default class Roster {
    }
 
    private initOptions() {
-      let hideOffline = this.options.get('hideOffline'); console.log('hideOffline', hideOffline, typeof hideOffline)
+      let hideOffline = this.options.get('hideOffline');
       hideOffline = (typeof hideOffline === 'boolean') ? hideOffline : Client.getOption('hideOffline');
       this.hideOffline(hideOffline);
       this.options.registerHook('hideOffline', (hideOffline) => {

@@ -10,7 +10,6 @@ import { EncryptionState } from './plugin/AbstractPlugin'
 import Transcript from './Transcript'
 import ChatWindowController from './ChatWindowController'
 import Avatar from './Avatar'
-import Pipe from './util/Pipe'
 import Message from './Message'
 import ChatWindow from './ui/ChatWindow';
 
