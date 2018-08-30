@@ -43,7 +43,7 @@ export default class ChatWindowController {
    }
 
    private stateHandler = (state: State, oldState: State) => {
-      oldState = typeof state !== 'undefined' ? oldState : State.Closed;
+      oldState = typeof oldState !== 'undefined' ? oldState : State.Closed;
       state = typeof state !== 'undefined' ? state : State.Closed;
 
       if (oldState === state) {
