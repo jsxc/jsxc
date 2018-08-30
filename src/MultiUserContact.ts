@@ -56,7 +56,7 @@ export default class MultiUserContact extends Contact {
 
       if (isModerated) {
          this.getService().sendMediatedMultiUserInvitation(jid, this.getJid(), reason);
-      } else if (this.hasFeatureByRessource(jid.resource, 'jabber:x:conference')) {
+      } else if (this.hasFeatureByResource(jid.resource, 'jabber:x:conference')) {
          let password = this.data.get('password');
          this.getService().sendDirectMultiUserInvitation(jid, this.getJid(), reason, password);
       } else {

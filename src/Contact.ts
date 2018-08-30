@@ -135,15 +135,15 @@ export default class Contact implements IIdentifiable, IContact {
       return this.account.getDiscoInfoRepository().getCapableResources(this, features);
    }
 
-   public hasFeatureByRessource(resource: string, features: string[]): Promise<{}>
-   public hasFeatureByRessource(resource: string, feature: string): Promise<{}>
-   public hasFeatureByRessource(resource, feature) {
+   public hasFeatureByResource(resource: string, features: string[]): Promise<{}>
+   public hasFeatureByResource(resource: string, feature: string): Promise<{}>
+   public hasFeatureByResource(resource, feature) {
       let jid = new JID(this.jid.bare + '/' + resource);
 
       return this.account.getDiscoInfoRepository().hasFeature(jid, feature);
    }
 
-   public getCapabilitiesByRessource(resource: string): Promise<any> {
+   public getCapabilitiesByResource(resource: string): Promise<any> {
       let jid = new JID(this.jid.bare + '/' + resource);
 
       return this.account.getDiscoInfoRepository().getCapabilities(jid);

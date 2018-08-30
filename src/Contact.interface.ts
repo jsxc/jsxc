@@ -33,10 +33,10 @@ export interface IContact {
    getCapableResources(features: string[]): Promise<Array<string>>
    getCapableResources(features: string): Promise<Array<string>>
 
-   hasFeatureByRessource(resource: string, features: string[]): Promise<{}>
-   hasFeatureByRessource(resource: string, feature: string): Promise<{}>
+   hasFeatureByResource(resource: string, features: string[]): Promise<{}>
+   hasFeatureByResource(resource: string, feature: string): Promise<{}>
 
-   getCapabilitiesByRessource(resource: string): Promise<any>;
+   getCapabilitiesByResource(resource: string): Promise<any>;
 
    registerCapableResourcesHook(features: string[], cb: (resources: string[]) => void);
    registerCapableResourcesHook(features: string, cb: (resources: string[]) => void);
