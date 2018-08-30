@@ -23,7 +23,7 @@ export default class Peer {
    constructor(private deviceName: string, private store: Store, private bundleManager: BundleManager) {
    }
 
-   public async encrypt(plaintext: string): Promise<EncryptedPeerMessage> {
+   public async encrypt(localPeer: Peer, plaintext: string): Promise<EncryptedPeerMessage> {
       let remoteDeviceIds = this.store.getDeviceList(this.deviceName);
 
       if (remoteDeviceIds.length === 0) {
@@ -34,7 +34,7 @@ export default class Peer {
          throw 'There are new devices for your contact.';
       }
 
-      if (Peer.getOwn().getTrust() === Trust.unknown) {
+      if (localPeer.getTrust() === Trust.unknown) {
          throw 'I found new devices from you.';
       }
 
@@ -43,7 +43,7 @@ export default class Peer {
       }
 
       let aes = await AES.encrypt(plaintext);
-      let devices = [...this.getDevices(), ...Peer.getOwn().getDevices()];
+      let devices = [...this.getDevices(), ...localPeer.getDevices()];
       let promises = devices.map(device => device.encrypt(aes.keydata));
 
       let keys = await Promise.all(promises);
@@ -101,22 +101,5 @@ export default class Peer {
       }
 
       return this.devices[id];
-   }
-
-   public static getOwn(): Peer {
-      if (!Peer.own) {
-         throw 'Could not find own peer object.';
-      }
-
-      return Peer.own;
-   }
-
-   public static initOwnPeer(deviceName: string, store: Store, bundleManager: BundleManager) {
-      if (Peer.own) {
-         throw 'There is already my own peer object.';
-      }
-
-      //@REVIEW maybe set trust here
-      Peer.own = new Peer(deviceName, store, bundleManager);
    }
 }

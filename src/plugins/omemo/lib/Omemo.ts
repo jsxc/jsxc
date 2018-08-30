@@ -29,12 +29,14 @@ export default class Omemo {
 
    private deviceName: string;
 
+   private localPeer: Peer;
+
    constructor(storage: IStorage, private connection: IConnection) {
       this.deviceName = connection.getJID().bare;
       this.store = new Store(storage);
       this.bundleManager = new BundleManager(connection.getPEPService(), this.store);
 
-      Peer.initOwnPeer(this.deviceName, this.store, this.bundleManager);
+      this.localPeer = new Peer(this.deviceName, this.store, this.bundleManager);
    }
 
    public getIdentityManager(): IdentityManager {
@@ -70,9 +72,8 @@ export default class Omemo {
 
    public isTrusted(contact: Contact): boolean {
       let peer = this.getPeer(contact.getJid());
-      let ownPeer = Peer.getOwn();
 
-      return peer.getTrust() !== Trust.unknown && ownPeer.getTrust() !== Trust.unknown;
+      return peer.getTrust() !== Trust.unknown && this.localPeer.getTrust() !== Trust.unknown;
    }
 
    public getDevices(contact?: Contact): Array<Device> {
@@ -81,7 +82,7 @@ export default class Omemo {
       if (contact) {
          peer = this.getPeer(contact.getJid());
       } else {
-         peer = Peer.getOwn();
+         peer = this.localPeer;
       }
 
       return peer.getDevices();
@@ -90,7 +91,7 @@ export default class Omemo {
    public encrypt(contact: Contact, message: Message, xmlElement: Strophe.Builder) {
       let peer = this.getPeer(contact.getJid());
 
-      return peer.encrypt(message.getPlaintextMessage()).then((encryptedMessages) => {
+      return peer.encrypt(this.localPeer, message.getPlaintextMessage()).then((encryptedMessages) => {
          let stanza = Stanza.buildEncryptedStanza(encryptedMessages, this.store.getLocalDeviceId());
 
          $(xmlElement.tree()).find(`html[xmlns="${Strophe.NS.XHTML_IM}"]`).remove();
