@@ -49,9 +49,11 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    private initNewContact(jid: JID, name?: string) {
+      let id = jid.bare;
       this.jid = jid;
 
       let defaultData = {
+         id: id,
          jid: this.jid.full,
          name: name || this.jid.bare,
          presence: Presence.offline,
@@ -62,7 +64,7 @@ export default class Contact implements IIdentifiable, IContact {
          rnd: Math.random() // force storage event
       }
 
-      this.data = new PersistentMap(this.storage, 'contact', this.jid.bare);
+      this.data = new PersistentMap(this.storage, 'contact', id);
 
       this.data.set(defaultData);
    }
@@ -162,13 +164,12 @@ export default class Contact implements IIdentifiable, IContact {
       });
    }
 
-   //@REVIEW this is not unique among accounts, will fail in Avatar.get
    public getId(): string {
-      return /*this.account.getUid() + '@' +*/ this.jid.bare;
+      return this.data.get('id');
    }
 
    public getUid(): string {
-      return this.account.getUid() + '@' + this.jid.bare;
+      return this.account.getUid() + '@' + this.getId();
    }
 
    public getJid(): JID {

@@ -340,11 +340,11 @@ export default class Account {
       });
 
       this.getStorage().registerHook('contact', (contactData) => {
-         if (contactData.jid === this.contact.getJid().bare) {
+         if (contactData.id === this.contact.getId()) {
             return;
          }
 
-         let id = contactData.jid; //@REVIEW maybe add id property
+         let id = contactData.id;
 
          if (typeof this.contacts[id] === 'undefined') {
             let contact = this.createNewContact(id);
