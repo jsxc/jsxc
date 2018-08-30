@@ -6,6 +6,7 @@ import FormWatcher, { SettingsCallback } from '../../FormWatcher'
 
 export { start, startAndPause } from './start'
 export { register } from './register'
+export { testBOSHServer } from './testBOSHServer'
 
 export function init(options?): number {
    return Client.init(options);
