@@ -11,6 +11,7 @@ import Options from './Options'
 import PresenceController from './PresenceController'
 import PageVisibility from './PageVisibility'
 import ChatWindowList from './ui/ChatWindowList';
+import Utils from '@util/Utils';
 
 export default class Client {
    private static storage;
@@ -46,10 +47,9 @@ export default class Client {
       accountIds.forEach(Client.initAccount);
 
       storage.registerHook('accounts', (newValue, oldValue) => {
-         oldValue = oldValue || [];
-         //@REVIEW this is maybe more generic
-         let newAccountIds = newValue.filter(id => (oldValue).indexOf(id) < 0);
-         let deletedAccountIds = oldValue.filter(id => newValue.indexOf(id) < 0);
+         let diff = Utils.diffArray(newValue, oldValue);
+         let newAccountIds = diff.newValues;
+         let deletedAccountIds = diff.deletedValues;
 
          //@TODO jsxc.startAndPause
          newAccountIds.forEach(Client.initAccount);

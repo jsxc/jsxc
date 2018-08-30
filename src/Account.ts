@@ -18,6 +18,7 @@ import UUID from './util/UUID'
 import ClientAvatar from './ClientAvatar'
 import Pipe from './util/Pipe'
 import ChatWindow from '@ui/ChatWindow';
+import Utils from '@util/Utils';
 
 type ConnectionCallback = (status: number, condition?: string) => void;
 
@@ -298,6 +299,7 @@ export default class Account {
 
       this.getConnection().close();
       this.getStorage().destroy();
+      this.getSessionStorage().destroy();
       this.getNoticeManager().removeAll();
 
       for (const name in this.pipes) {
@@ -322,38 +324,31 @@ export default class Account {
    }
 
    private save() {
-      this.getStorage().setItem('account', {
-         contacts: Object.keys(this.contacts)
-      });
+      this.getStorage().setItem('contacts', Object.keys(this.contacts));
    }
 
    private initContacts() {
-      let storedAccountData = this.getStorage().getItem('account') || {};
-      let contacts = storedAccountData.contacts || [];
+      let contacts = this.getStorage().getItem('contacts') || [];
 
-      contacts.forEach((id) => {
-         let contact = this.createNewContact(id);
+      contacts.forEach((id) => this.initContact(id));
 
-         this.contacts[id] = contact;
+      this.getStorage().registerHook('contacts', (newValue, oldValue) => {
+         let diff = Utils.diffArray(newValue, oldValue);
+         let newContactIds = diff.newValues;
+         let deletedContactIds = diff.deletedValues;
 
-         Roster.get().add(contact);
+         newContactIds.forEach(id => !this.contacts[id] && this.initContact(id));
+
+         deletedContactIds.forEach(id => this.contacts[id] && this.removeContact(this.contacts[id]));
       });
+   }
 
-      this.getStorage().registerHook('contact', (contactData) => {
-         if (contactData.id === this.contact.getId()) {
-            return;
-         }
+   private initContact(id: string) {
+      let contact = this.createNewContact(id);
 
-         let id = contactData.id;
+      this.contacts[id] = contact;
 
-         if (typeof this.contacts[id] === 'undefined') {
-            let contact = this.createNewContact(id);
-
-            this.contacts[id] = contact;
-
-            Roster.get().add(contact);
-         }
-      });
+      Roster.get().add(contact);
    }
 
    private createNewContact(id: string): Contact {

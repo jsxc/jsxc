@@ -301,7 +301,7 @@ export default class Storage implements IStorage {
    public destroy() {
       this.removeAllHooks();
 
-      window.removeEventListener('storage', this.onStorageEvent);
+      window.removeEventListener('storage', this.onStorageEvent, false);
    }
 
    private onStorageEvent = (ev: any) => {
