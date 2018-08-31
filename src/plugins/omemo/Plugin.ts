@@ -38,11 +38,11 @@ export default class OMEMOPlugin extends EncryptionPlugin {
    }
 
    private openDeviceDialog = (chatWindow) => {
-      let peerContact = chatWindow.getContact();
-      let peerDevices = this.getOmemo().getDevices(peerContact);
-      let ownDevices = this.getOmemo().getDevices();
+      this.getOmemo().prepare().then(() => {
+         let peerContact = chatWindow.getContact();
 
-      OmemoDevicesDialog(peerDevices, ownDevices, this.getOmemo().getIdentityManager());
+         OmemoDevicesDialog(peerContact, this.getOmemo());
+      });
    }
 
    public toggleTransfer(contact: IContact): Promise<void> {

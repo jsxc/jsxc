@@ -1,19 +1,28 @@
 import Dialog from '../Dialog'
 import Device, { Trust } from '../../plugins/omemo/lib/Device'
-import IdentityManager from '../../plugins/omemo/lib/IdentityManager';
+import { IContact } from '../../Contact.interface'
+import Omemo from '../../plugins/omemo/lib/Omemo';
+import IdentityManager from 'plugins/omemo/lib/IdentityManager';
 
 let omemoDeviceListTemplate = require('../../../template/dialogOmemoDeviceList.hbs');
 let omemoDeviceItemTemplate = require('../../../template/dialogOmemoDeviceItem.hbs');
 
-export default function(peerDevices: Device[], ownDevices: Device[], identityManager: IdentityManager) {
+export default function(contact: IContact, omemo: Omemo) {
    let content = omemoDeviceListTemplate();
 
    let dialog = new Dialog(content);
    let dom = dialog.open();
 
-   insertDevices(peerDevices, identityManager, dom.find('.jsxc-omemo-peerdevices'));
-   insertDevices(ownDevices, identityManager, dom.find('.jsxc-omemo-owndevices'));
+   omemo.prepare().then(() => {
+      let identityManager = omemo.getIdentityManager();
+      let peerDevices = omemo.getDevices(contact);
+      let ownDevices = omemo.getDevices();
 
+      dom.find('.jsxc-omemo-peerdevices, .jsxc-omemo-owndevices').empty();
+
+      insertDevices(peerDevices, identityManager, dom.find('.jsxc-omemo-peerdevices'));
+      insertDevices(ownDevices, identityManager, dom.find('.jsxc-omemo-owndevices'));
+   });
 }
 
 async function insertDevices(devices: Device[], identityManager: IdentityManager, listElement) {
