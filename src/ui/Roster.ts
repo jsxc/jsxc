@@ -452,7 +452,7 @@ export default class Roster {
       });
 
       //@TODO || (Client.getOption('loginForm').startMinimized ? CONST.HIDDEN : CONST.SHOWN
-      let rosterState = this.options.get('visibility');
+      let rosterState = this.options.get('visibility') || CONST.SHOWN;
       this.setVisibility(rosterState);
       this.options.registerHook('visibility', (visibility) => {
          this.setVisibility(visibility);
