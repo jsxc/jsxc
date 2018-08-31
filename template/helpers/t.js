@@ -19,5 +19,9 @@ i18next.init({
 module.exports = function(i18n_key) {
    var result = i18next.t(i18n_key);
 
+   if (!result || result === i18n_key) {
+        console.warn('[i18n] Untranslated:', i18n_key);
+   }
+
    return new Handlebars.SafeString(result || i18n_key);
 };
