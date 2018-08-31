@@ -12,8 +12,6 @@ import { ContactType } from './Contact.interface'
 import PersistentMap from './util/PersistentMap'
 import UUID from './util/UUID'
 
-const MSGPOSTFIX = ':msg';
-
 const ATREGEX = new RegExp('(xmpp:)?(' + CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i');
 
 export default class Message implements Identifiable, IMessage {
@@ -44,7 +42,7 @@ export default class Message implements Identifiable, IMessage {
          data = arg0;
 
          this.uid = data.uid || UUID.v4();
-         data.attrId = data.attrId || new Date().getTime() + MSGPOSTFIX;
+         data.attrId = data.attrId || this.uid;
 
          delete data.uid;
       }

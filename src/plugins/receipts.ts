@@ -6,6 +6,13 @@ import Pipe from '../util/Pipe'
 import * as Namespace from '../connection/xmpp/namespace'
 import { $msg } from '../vendor/Strophe'
 
+/**
+ * XEP-0184: Message Delivery Receipts
+ *
+ * @version 1.2
+ * @url https://xmpp.org/extensions/xep-0184.html
+ */
+
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
@@ -72,9 +79,13 @@ export default class ReceiptPlugin extends AbstractPlugin {
       let receivedId = receivedElement.attr('id');
 
       if (receivedId) {
-         let message = new Message(receivedId);
+         try {
+            let message = new Message(receivedId);
 
-         message.received();
+            message.received();
+         } catch (err) {
+            this.pluginAPI.Log.info('I received an ACK and got the following problem: ', err);
+         }
       }
 
       return PRESERVE_HANDLER;
