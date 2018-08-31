@@ -3,6 +3,13 @@ import PluginAPI from '../plugin/PluginAPI'
 import Contact from '../Contact'
 import Message from '../Message'
 
+/**
+ * XEP-0245: The /me Command
+ *
+ * @version 1.0
+ * @see https://xmpp.org/extensions/xep-0245.html
+ */
+
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 

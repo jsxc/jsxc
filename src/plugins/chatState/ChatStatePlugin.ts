@@ -1,10 +1,3 @@
-/**
- * Implements XEP-0085: Chat State Notifications.
- *
- * @namespace chatState
- * @see {@link http://xmpp.org/extensions/xep-0085.html}
- */
-
 import JID from '../../JID'
 import { AbstractPlugin } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
@@ -17,6 +10,13 @@ import Translation from '../../util/Translation'
 import * as Namespace from '../../connection/xmpp/namespace'
 import ChatStateConnection from './ChatStateConnection'
 import ChatStateMachine from './ChatStateMachine'
+
+/**
+ * XEP-0085: Chat State Notifications
+ *
+ * @version
+ * @see http://xmpp.org/extensions/xep-0085.html
+ */
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';

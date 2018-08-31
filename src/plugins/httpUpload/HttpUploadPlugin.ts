@@ -11,6 +11,13 @@ import Pipe from '../../util/Pipe'
 import { $iq } from '../../vendor/Strophe'
 import Translation from '../../util/Translation';
 
+/**
+ * XEP-0363: HTTP File Upload
+ *
+ * @version 0.7.0
+ * @see https://xmpp.org/extensions/xep-0363.html
+ */
+
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 

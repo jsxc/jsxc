@@ -11,6 +11,13 @@ import Archive from './Archive'
 import DiscoInfo from '../../DiscoInfo'
 import { Status } from '../../vendor/Strophe'
 
+/**
+ * XEP-0313: Message Archive Management
+ *
+ * @version 0.6.3
+ * @see https://xmpp.org/extensions/xep-0313.html
+ */
+
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 

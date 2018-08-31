@@ -7,6 +7,13 @@ import * as Namespace from '../connection/xmpp/namespace'
 import Translation from '../util/Translation'
 import { $iq } from '../vendor/Strophe'
 
+/**
+ * XEP-0280: Message Carbons
+ *
+ * @version 0.12.0
+ * @see https://xmpp.org/extensions/xep-0280.html
+ */
+
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 

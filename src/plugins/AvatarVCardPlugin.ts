@@ -6,6 +6,13 @@ import AvatarUI from '../ui/AvatarSet'
 import JID from '../JID'
 import Log from '../util/Log';
 
+/**
+ * XEP-0153: vCard-Based Avatars
+ *
+ * @version 1.1
+ * @see https://xmpp.org/extensions/xep-0153.html
+ */
+
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 

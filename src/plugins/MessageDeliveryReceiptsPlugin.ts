@@ -2,7 +2,6 @@ import JID from '../JID'
 import Message from '../Message'
 import { AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
-import Pipe from '../util/Pipe'
 import * as Namespace from '../connection/xmpp/namespace'
 import { $msg } from '../vendor/Strophe'
 
@@ -10,7 +9,7 @@ import { $msg } from '../vendor/Strophe'
  * XEP-0184: Message Delivery Receipts
  *
  * @version 1.2
- * @url https://xmpp.org/extensions/xep-0184.html
+ * @see https://xmpp.org/extensions/xep-0184.html
  */
 
 const MIN_VERSION = '4.0.0';
