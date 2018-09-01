@@ -15,7 +15,6 @@ import DiscoInfoChangeable from './DiscoInfoChangeable'
 import HookRepository from './util/HookRepository'
 import Options from './Options'
 import UUID from './util/UUID'
-import ClientAvatar from './ClientAvatar'
 import Pipe from './util/Pipe'
 import ChatWindow from '@ui/ChatWindow';
 import Utils from '@util/Utils';
@@ -90,8 +89,6 @@ export default class Account {
             connectionCallback(this.uid, status, condition);
          });
       }
-
-      ClientAvatar.get().registerAccount(this)
 
       this.initContacts();
    }

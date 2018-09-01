@@ -12,6 +12,7 @@ import PresenceController from './PresenceController'
 import PageVisibility from './PageVisibility'
 import ChatWindowList from './ui/ChatWindowList';
 import Utils from '@util/Utils';
+import ClientAvatar from './ClientAvatar';
 
 export default class Client {
    private static storage;
@@ -35,7 +36,8 @@ export default class Client {
 
       let storage = Client.getStorage();
       let accountIds = storage.getItem('accounts') || [];
-      let numberOfAccounts = accountIds.length;
+      let pendingAccountIds = Client.getPendingAccountIds();
+      let numberOfAccounts = accountIds.length + pendingAccountIds.length;
 
       if (typeof options === 'object' && options !== null) {
          Options.get().overwriteDefaults(options);
@@ -46,12 +48,20 @@ export default class Client {
 
       accountIds.forEach(Client.initAccount);
 
+      pendingAccountIds.forEach(Client.initAccount);
+      storage.setItem('pendingAccounts', []);
+
+      Client.save();
+
       storage.registerHook('accounts', (newValue, oldValue) => {
          let diff = Utils.diffArray(newValue, oldValue);
          let newAccountIds = diff.newValues;
          let deletedAccountIds = diff.deletedValues;
 
-         //@TODO jsxc.startAndPause
+         if (!oldValue || oldValue.length === 0) {
+            Roster.show();
+         }
+
          newAccountIds.forEach(Client.initAccount);
 
          deletedAccountIds.forEach(id => {
@@ -72,6 +82,7 @@ export default class Client {
       let account = Client.accounts[id] = new Account(id);
 
       Client.presenceController.registerAccount(account);
+      ClientAvatar.get().registerAccount(account);
 
       RoleAllocator.get().waitUntilMaster().then(function() {
          return account.connect();
@@ -150,7 +161,7 @@ export default class Client {
       } else {
          uid = Object.keys(Client.accounts)[0];
       }
-      console.log('accounts', Client.accounts);
+
       return Client.accounts[uid];
    }
 
@@ -165,8 +176,8 @@ export default class Client {
       return accounts;
    }
 
-   public static createAccount(boshUrl: string, jid: string, sid: string, rid: string);
-   public static createAccount(boshUrl: string, jid: string, password: string);
+   public static createAccount(boshUrl: string, jid: string, sid: string, rid: string): Promise<Account>;
+   public static createAccount(boshUrl: string, jid: string, password: string): Promise<Account>;
    public static createAccount() {
       let account;
 
@@ -217,6 +228,24 @@ export default class Client {
       Client.presenceController.registerAccount(account);
 
       Client.save()
+   }
+
+   public static addPendingAccount(account: Account) {
+      let uid = account.getUid();
+      let storage = Client.getStorage();
+      let pendingAccounts = Client.getPendingAccountIds();
+
+      if (pendingAccounts.indexOf(uid) < 0) {
+         pendingAccounts.push(uid);
+
+         storage.setItem('pendingAccounts', pendingAccounts);
+      }
+   }
+
+   private static getPendingAccountIds(): string[] {
+      let storage = Client.getStorage();
+
+      return storage.getItem('pendingAccounts') || []
    }
 
    private static save() {

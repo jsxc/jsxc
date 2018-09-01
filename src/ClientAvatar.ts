@@ -89,10 +89,10 @@ export default class ClientAvatar {
    }
 
    private setSourceAccount(account, type = TYPE.PLACEHOLDER) {
+      account.getSessionStorage().setItem(KEY_SESSION_FLAG, true);
+
       this.storage.setItem(KEY_SOURCE_ACCOUNT, account.getUid());
       this.storage.getItem(KEY_TYPE, type + '');
-
-      account.getSessionStorage().setItem(KEY_SESSION_FLAG, true);
    }
 
    private getSourceAccountUid(): string {

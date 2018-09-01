@@ -6,8 +6,6 @@ import BaseError from '../../errors/BaseError'
 import InvalidParameterError from '../../errors/InvalidParameterError'
 
 export async function startAndPause(boshUrl: string, jid: string, password: string) {
-   throw 'startAndPause is currently not available';
-
    testMaxOneAccount();
 
    if (Client.getAccounts().length === 0) {
@@ -16,7 +14,11 @@ export async function startAndPause(boshUrl: string, jid: string, password: stri
 
    let account = await Client.createAccount(boshUrl, jid, password);
 
-   return account.connect(true).then(() => undefined);
+   return account.connect(true).then(() => {
+      Client.addPendingAccount(account);
+
+      account.destroy();
+   });
 }
 
 export function start(boshUrl: string, jid: string, sid: string, rid: string);
@@ -63,7 +65,7 @@ async function startWithBoshParameters(boshUrl: string, jid: string, sid: string
 
 function connectAndStartUI(account) {
    return account.connect(true).then(function() {
-      //@REVIEW we can destroy the contact at this moment, because the account hook will create a new account.
+      //@REVIEW we can destroy the account at this moment, because the account hook will create a new account.
       account.destroy();
 
       Client.addAccount(account);
