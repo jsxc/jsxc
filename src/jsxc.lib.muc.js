@@ -248,10 +248,10 @@ jsxc.muc = {
       dialog.find('#jsxc_bookmark').change(function() {
          if ($(this).prop('checked')) {
             $('#jsxc_autojoin').prop('disabled', false);
-            $('#jsxc_autojoin').parent('.checkbox').removeClass('disabled');
+            $('#jsxc_autojoin').parents('.checkbox').removeClass('disabled');
          } else {
             $('#jsxc_autojoin').prop('disabled', true).prop('checked', false);
-            $('#jsxc_autojoin').parent('.checkbox').addClass('disabled');
+            $('#jsxc_autojoin').parents('.checkbox').addClass('disabled');
          }
       });
 
