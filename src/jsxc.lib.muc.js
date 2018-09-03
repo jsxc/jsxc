@@ -34,6 +34,10 @@ jsxc.muc = {
       }
    },
 
+   initialized: false,
+
+   onGroupchatMessageHandlerRef: undefined,
+
    /**
     * Initialize muc plugin.
     *
@@ -43,50 +47,25 @@ jsxc.muc = {
     */
    init: function(o) {
       var self = jsxc.muc;
+
+      if (self.initialized) {
+         return;
+      }
+
+      self.initialized = true;
       self.conn = jsxc.xmpp.conn;
 
       var options = o || jsxc.options.get('muc');
 
       if (!options || typeof options.server !== 'string') {
-         jsxc.debug('Discover muc service');
-
          // prosody does not respond, if we send query before initial presence was sent
-         setTimeout(function() {
-            self.conn.disco.items(Strophe.getDomainFromJid(self.conn.jid), null, function(items) {
-               $(items).find('item').each(function() {
-                  var jid = $(this).attr('jid');
-                  var discovered = false;
-
-                  self.conn.disco.info(jid, null, function(info) {
-                     var mucFeature = $(info).find('feature[var="' + Strophe.NS.MUC + '"]');
-                     var mucIdentity = $(info).find('identity[category="conference"][type="text"]');
-
-                     if (mucFeature.length > 0 && mucIdentity.length > 0) {
-                        jsxc.debug('muc service found', jid);
-
-                        jsxc.options.set('muc', {
-                           server: jid,
-                           name: $(info).find('identity').attr('name')
-                        });
-
-                        discovered = true;
-
-                        self.init();
-                     }
-                  });
-
-                  return !discovered;
-               });
-            });
-         }, 1000);
-
-         return;
-      }
-
-      if (jsxc.gui.roster.ready) {
-         self.initMenu();
+         setTimeout(self.discoverMUCService, 1000);
       } else {
-         $(document).one('ready.roster.jsxc', jsxc.muc.initMenu);
+         if (jsxc.gui.roster.ready) {
+            self.initMenu();
+         } else {
+            $(document).one('ready.roster.jsxc', jsxc.muc.initMenu);
+         }
       }
 
       // remove maybe previously attached handlers
@@ -96,8 +75,47 @@ jsxc.muc = {
       $(document).on('presence.jsxc', jsxc.muc.onPresence);
       $(document).on('error.presence.jsxc', jsxc.muc.onPresenceError);
 
-      self.conn.addHandler(self.onGroupchatMessage, null, 'message', 'groupchat');
-      self.conn.muc.roomNames = jsxc.storage.getUserItem('roomNames') || [];
+      if (self.onGroupchatMessageHandlerRef) {
+         self.conn.deleteHandler(self.onGroupchatMessageHandlerRef);
+      }
+
+      self.onGroupchatMessageHandlerRef = self.conn.addHandler(self.onGroupchatMessage, null, 'message', 'groupchat');
+
+      self.conn.muc.roomNames = jsxc.storage.getUserItem('roomNames') || self.conn.muc.roomNames || [];
+   },
+
+   discoverMUCService: function() {
+      jsxc.debug('Discover muc service');
+
+      var self = jsxc.muc;
+      var discoService = self.conn.disco;
+
+      discoService.items(Strophe.getDomainFromJid(self.conn.jid), null, function(items) {
+         $(items).find('item').each(function() {
+            var jid = $(this).attr('jid');
+            var discovered = false;
+
+            discoService.info(jid, null, function(info) {
+               var mucFeature = $(info).find('feature[var="' + Strophe.NS.MUC + '"]');
+               var mucIdentity = $(info).find('identity[category="conference"][type="text"]');
+
+               if (mucFeature.length > 0 && mucIdentity.length > 0) {
+                  jsxc.debug('muc service found', jid);
+
+                  jsxc.options.set('muc', {
+                     server: jid,
+                     name: $(info).find('identity').attr('name')
+                  });
+
+                  discovered = true;
+
+                  jsxc.muc.initMenu();
+               }
+            });
+
+            return !discovered;
+         });
+      });
    },
 
    /**
@@ -106,6 +124,12 @@ jsxc.muc = {
     * @memberOf jsxc.muc
     */
    initMenu: function() {
+      var options = jsxc.options.get('muc');
+
+      if (!options || typeof options.server !== 'string') {
+         return;
+      }
+
       var li = $('<li>').attr('class', 'jsxc_joinChat jsxc_groupcontacticon').text($.t('Join_chat'));
 
       li.click(jsxc.muc.showJoinChat);
@@ -1645,4 +1669,8 @@ $(document).on('attached.jsxc', function() {
 $(document).one('connected.jsxc', function() {
    jsxc.storage.removeUserItem('roomNames');
    jsxc.storage.removeUserItem('ownNicknames');
+});
+
+$(document).on('disconnected.jsxc', function() {
+   jsxc.muc.initialized = false;
 });
