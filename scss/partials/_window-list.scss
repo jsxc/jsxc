@@ -1,5 +1,5 @@
 #jsxc-window-list {
-  @include presence-indicator(" .jsxc-window-bar .jsxc-avatar");
+  @include presence-indicator(" .jsxc-bar--window .jsxc-avatar");
   bottom: 0;
   left: 0;
 
