@@ -312,6 +312,11 @@
     "You_have_to_go_online_": "You have to be online to execute this operation.",
     "error_location_not_provided": "Could not get location.",
     "Log_in_with_chat": "Log in with chat",
-    "Send_location": "Send location"
+    "Offline_contacts_are_hidden": "Offline contacts are hidden",
+    "OMEMO_devices": "OMEMO devices",
+    "OMEMO_own_devices": "Your own OMEMO devices",
+    "OMEMO_peer_devices": "OMEMO devices of your contact",
+    "Send_location": "Send location",
+    "You_are_currently_offline": "You are currently offline"
   }
 }

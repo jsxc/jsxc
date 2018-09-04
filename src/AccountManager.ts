@@ -48,7 +48,7 @@ export default class AccountManager {
       }).then(function() {
 
       }).catch(function(msg) {
-         this.accounts[id].connectionDisconnected();
+         account.connectionDisconnected();
 
          Log.warn(msg)
       });

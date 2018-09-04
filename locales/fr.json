@@ -312,6 +312,11 @@
     "You_have_to_go_online_": "Vous devez être connecté pour exécuter cette opération",
     "error_location_not_provided": "Impossible d'obtenir votre emplacement.",
     "Log_in_with_chat": "Connectez-vous avec la messagerie instantanée",
-    "Send_location": "Envoyer votre emplacement"
+    "Offline_contacts_are_hidden": null,
+    "OMEMO_devices": null,
+    "OMEMO_own_devices": null,
+    "OMEMO_peer_devices": null,
+    "Send_location": "Envoyer votre emplacement",
+    "You_are_currently_offline": null
   }
 }

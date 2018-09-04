@@ -312,6 +312,11 @@
     "You_have_to_go_online_": "この操作を実行するには、オンラインになる必要があります。",
     "error_location_not_provided": "位置情報を取得できませんでした。",
     "Log_in_with_chat": "チャットにもログイン",
-    "Send_location": "位置情報を送信"
+    "Offline_contacts_are_hidden": null,
+    "OMEMO_devices": null,
+    "OMEMO_own_devices": null,
+    "OMEMO_peer_devices": null,
+    "Send_location": "位置情報を送信",
+    "You_are_currently_offline": null
   }
 }

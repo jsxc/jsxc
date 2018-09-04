@@ -312,6 +312,11 @@
     "You_have_to_go_online_": "Du musst online sein um diese Aktion auszuführen.",
     "error_location_not_provided": "Konnte Position nicht ermitteln.",
     "Log_in_with_chat": "Anmelden mit Chat",
-    "Send_location": "Sende Position"
+    "Offline_contacts_are_hidden": null,
+    "OMEMO_devices": null,
+    "OMEMO_own_devices": null,
+    "OMEMO_peer_devices": null,
+    "Send_location": "Sende Position",
+    "You_are_currently_offline": null
   }
 }

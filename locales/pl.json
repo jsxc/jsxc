@@ -312,6 +312,11 @@
     "You_have_to_go_online_": "Musisz być online, aby to zrobić.",
     "error_location_not_provided": "Nie można pobrać lokalizacji.",
     "Log_in_with_chat": null,
-    "Send_location": "Wyślij lokalizację."
+    "Offline_contacts_are_hidden": null,
+    "OMEMO_devices": null,
+    "OMEMO_own_devices": null,
+    "OMEMO_peer_devices": null,
+    "Send_location": "Wyślij lokalizację.",
+    "You_are_currently_offline": null
   }
 }

@@ -312,6 +312,11 @@
     "You_have_to_go_online_": "必須要上線才能執行這個動作。",
     "error_location_not_provided": "無法取得目前位置。",
     "Log_in_with_chat": "登入並啟用聊天",
-    "Send_location": "發送位置資訊"
+    "Offline_contacts_are_hidden": null,
+    "OMEMO_devices": null,
+    "OMEMO_own_devices": null,
+    "OMEMO_peer_devices": null,
+    "Send_location": "發送位置資訊",
+    "You_are_currently_offline": null
   }
 }

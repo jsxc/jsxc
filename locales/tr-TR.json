@@ -312,6 +312,11 @@
     "You_have_to_go_online_": "Bu işlemi gerçekleştirebilmek için çevrimiçi olmalısınız.",
     "error_location_not_provided": "Yer alınamadı",
     "Log_in_with_chat": "Sohbetle giriş yap",
-    "Send_location": "Konum gönder"
+    "Offline_contacts_are_hidden": null,
+    "OMEMO_devices": null,
+    "OMEMO_own_devices": null,
+    "OMEMO_peer_devices": null,
+    "Send_location": "Konum gönder",
+    "You_are_currently_offline": null
   }
 }
