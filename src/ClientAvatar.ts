@@ -42,7 +42,7 @@ export default class ClientAvatar {
 
       storage.registerHook(KEY_SOURCE_ACCOUNT, (sourceAccountUid, oldValue) => {
          if (sourceAccountUid) {
-            let account = Client.getAccount(sourceAccountUid);
+            let account = Client.getAccountManager().getAccount(sourceAccountUid);
 
             if (account.getSessionStorage().getItem(KEY_SESSION_FLAG)) {
                this.setSourceContact(account.getContact());

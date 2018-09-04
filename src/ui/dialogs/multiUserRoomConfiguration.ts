@@ -12,7 +12,8 @@ export default function(contact: MultiUserContact) {
    dialog = new Dialog('<p class="jsxc-waiting">We are loading</p>', true);
    dialog.open();
 
-   let connection = Client.getAccount().getConnection();
+   //@TODO multi account: selection dialog
+   let connection = Client.getAccountManager().getAccount().getConnection();
 
    return connection.getMUCService().getRoomConfigurationForm(contact.getJid())
       .then(stanza => Form.fromXML(stanza))

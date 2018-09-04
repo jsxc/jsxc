@@ -42,7 +42,7 @@ class MultiUserJoinDialog {
       this.nicknameInputElement = dom.find('input[name="nickname"]');
       this.bookmarkInputElement = dom.find('input[name="bookmark"]');
 
-      this.account = Client.getAccount();
+      this.account = Client.getAccountManager().getAccount();
       this.connection = this.account.getConnection();
       this.defaultNickname = this.connection.getJID().node
 

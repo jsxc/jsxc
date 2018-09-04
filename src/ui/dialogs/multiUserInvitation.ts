@@ -18,7 +18,7 @@ export default function(type: 'direct' | 'mediated', from: string, room: string,
 
    let dialog = new Dialog(content);
    let dom = dialog.open();
-   let account = Client.getAccount();
+   let account = Client.getAccountManager().getAccount();
 
    dom.find('form').on('submit', (ev) => {
       ev.preventDefault();

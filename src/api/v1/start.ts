@@ -1,6 +1,5 @@
 import Log from '../../util/Log'
 import Client from '../../Client'
-import Roster from '../../ui/Roster'
 import * as UI from '../../ui/web'
 import BaseError from '../../errors/BaseError'
 import InvalidParameterError from '../../errors/InvalidParameterError'
@@ -8,16 +7,11 @@ import InvalidParameterError from '../../errors/InvalidParameterError'
 export async function startAndPause(boshUrl: string, jid: string, password: string) {
    testMaxOneAccount();
 
-   if (Client.getAccounts().length === 0) {
-      Roster.hide();
-   }
-
-   let account = await Client.createAccount(boshUrl, jid, password);
+   let accountManager = Client.getAccountManager();
+   let account = await accountManager.createAccount(boshUrl, jid, password);
 
    return account.connect(true).then(() => {
-      Client.addPendingAccount(account);
-
-      account.destroy();
+      accountManager.addPendingAccount(account);
    });
 }
 
@@ -48,7 +42,7 @@ function startUI() {
 }
 
 async function startWithCredentials(boshUrl: string, jid: string, password: string) {
-   let account = await Client.createAccount(boshUrl, jid, password.toString());
+   let account = await Client.getAccountManager().createAccount(boshUrl, jid, password.toString());
 
    return connectAndStartUI(account);
 }
@@ -58,21 +52,20 @@ async function startWithBoshParameters(boshUrl: string, jid: string, sid: string
       return Promise.reject(new InvalidParameterError('We need a Jabber ID with resource.'));
    }
 
-   let account = await Client.createAccount(boshUrl, jid, sid.toString(), rid.toString());
+   let account = await Client.getAccountManager().createAccount(boshUrl, jid, sid.toString(), rid.toString());
 
    return connectAndStartUI(account);
 }
 
 function connectAndStartUI(account) {
-   return account.connect(true).then(function() {
-      //@REVIEW we can destroy the account at this moment, because the account hook will create a new account.
-      account.destroy();
+   let accountManager = Client.getAccountManager();
 
-      Client.addAccount(account);
+   return account.connect(true).then(function() {
+      accountManager.addAccount(account);
 
       startUI();
    }).catch((err) => {
-      Client.removeAccount(account);
+      accountManager.removeAccount(account);
 
       if (err instanceof BaseError) {
          Log.warn('Instance of BaseErrors', err.toString());
@@ -87,7 +80,7 @@ function connectAndStartUI(account) {
 }
 
 function testMaxOneAccount() {
-   let accounts = Client.getAccounts();
+   let accounts = Client.getAccountManager().getAccounts();
 
    if (accounts.length > 0 && !Client.isDebugMode()) {
       throw 'Currently we only support one account at a time. If you like to test the experimental multi account feature, please enable debug mode.';

@@ -34,7 +34,7 @@ export class DiscoInfoHandler extends AbstractHandler {
    }
 
    private addIdentitiesToStanza(iq) {
-      for (let identity of Client.getAccount().getDiscoInfo().getIdentities()) {
+      for (let identity of this.account.getDiscoInfo().getIdentities()) {
          let attrs = {
             category: identity.category,
             type: identity.type,
@@ -49,7 +49,7 @@ export class DiscoInfoHandler extends AbstractHandler {
    }
 
    private addFeaturesToStanza(iq) {
-      for (let feature of Client.getAccount().getDiscoInfo().getFeatures()) {
+      for (let feature of this.account.getDiscoInfo().getFeatures()) {
          iq.c('feature', {
             'var': feature
          }).up();

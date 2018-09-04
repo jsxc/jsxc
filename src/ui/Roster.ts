@@ -379,7 +379,7 @@ export default class Roster {
          let oldPresence = Client.getPresenceController().getTargetPresence() || Presence.offline;
          let requestedPresence = Presence[presenceString];
 
-         if (Client.getAccount()) {
+         if (Client.getAccountManager().getAccount()) {
             Client.getPresenceController().setTargetPresence(requestedPresence);
          }
 

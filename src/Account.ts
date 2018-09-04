@@ -56,10 +56,13 @@ export default class Account {
    constructor(boshUrl: string, jid: string, password: string);
    constructor(uid: string);
    constructor() {
+      let newSession = false;
+
       if (arguments.length === 1) {
          this.uid = arguments[0];
          this.sessionId = this.getStorage().getItem('sessionId');
       } else if (arguments.length === 3 || arguments.length === 4) {
+         newSession = true;
          this.uid = (new JID(arguments[1])).bare;
          this.sessionId = UUID.v4();
 
@@ -74,11 +77,9 @@ export default class Account {
       }
 
       this.options = Options.get();
-      this.discoInfoRepository = new DiscoInfoRepository(this);
-      this.ownDiscoInfo = new DiscoInfoChangeable(this.uid);
+
       this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3]);
       this.connection = new StorageConnection(this);
-      this.noticeManager = new NoticeManager(this.getStorage());
       this.pluginRepository = new PluginRepository(this);
       this.contact = new Contact(this, new JID(this.uid), this.uid);
 
@@ -90,7 +91,9 @@ export default class Account {
          });
       }
 
-      this.initContacts();
+      if (!newSession) {
+         this.initContacts();
+      }
    }
 
    public getOption(key) {
@@ -120,7 +123,7 @@ export default class Account {
             this.initConnection(status);
          }
       }).catch(err => {
-         if (Client.getAccounts().length <= 1) {
+         if (Client.getAccountManager().getAccounts().length <= 1) {
             Client.getPresenceController().setTargetPresence(Presence.offline)
          }
 
@@ -182,10 +185,18 @@ export default class Account {
    }
 
    public getDiscoInfoRepository(): DiscoInfoRepository {
+      if (!this.discoInfoRepository) {
+         this.discoInfoRepository = new DiscoInfoRepository(this);
+      }
+
       return this.discoInfoRepository;
    }
 
    public getDiscoInfo(): DiscoInfoChangeable {
+      if (!this.ownDiscoInfo) {
+         this.ownDiscoInfo = new DiscoInfoChangeable(this.uid);
+      }
+
       return this.ownDiscoInfo;
    }
 
@@ -224,6 +235,10 @@ export default class Account {
    }
 
    public getNoticeManager(): NoticeManager {
+      if (!this.noticeManager) {
+         this.noticeManager = new NoticeManager(this.getStorage());
+      }
+
       return this.noticeManager;
    }
 
@@ -288,7 +303,7 @@ export default class Account {
    public remove() {
       this.destroy();
 
-      Client.removeAccount(this);
+      Client.getAccountManager().removeAccount(this);
    }
 
    public destroy() {

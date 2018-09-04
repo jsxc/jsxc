@@ -60,7 +60,7 @@ class AccountOverviewSection extends Section {
    }
 
    protected generateContentElement(): JQuery {
-      let accounts = Client.getAccounts();
+      let accounts = Client.getAccountManager().getAccounts();
       let contentElement = new List();
 
       for (let account of accounts) {
