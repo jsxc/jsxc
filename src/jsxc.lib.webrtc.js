@@ -568,6 +568,8 @@ jsxc.webrtc = {
 
          session.call = reqMedia;
 
+         $(document).trigger('incoming.call.jsxc');
+
          if (reqMedia) {
             self.onIncomingCall(session);
          } else {

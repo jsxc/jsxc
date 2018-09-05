@@ -28,7 +28,7 @@ jsxc.notification = {
          });
       });
 
-      $(document).on('callincoming.jingle', function() {
+      $(document).on('incoming.call.jsxc', function() {
          jsxc.notification.playSound(jsxc.CONST.SOUNDS.CALL, true, true);
       });
 
