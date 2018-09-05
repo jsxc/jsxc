@@ -310,8 +310,16 @@
     "File_too_large": "Arquivo muito grande",
     "No_proper_file_transfer_method_available": "Nenhum meio de transferência de arquivos disponível",
     "You_have_to_go_online_": "Você precisa estar on-line para executar esta operação.",
+    "Credits": null,
     "error_location_not_provided": "Não consegui identificar idioma",
+    "Libraries": null,
     "Log_in_with_chat": "Logar com chat",
-    "Send_location": "Enviar Idioma"
+    "Offline_contacts_are_hidden": null,
+    "OMEMO_devices": null,
+    "OMEMO_own_devices": null,
+    "OMEMO_peer_devices": null,
+    "Send_location": "Enviar Idioma",
+    "Show_debug_log": null,
+    "You_are_currently_offline": null
   }
 }
