@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.4.2 - 2018-09-05
+### Fixed
+- fix thumbnail generation
+- [#667](https://github.com/jsxc/jsxc/issues/667) fix sound on incoming file transfer
+- fix MUC auto join dialog
+- [#720](https://github.com/jsxc/jsxc/issues/720) fix MUC auto join
+
 ## 3.4.1 - 2018-07-05
 ### Fixed
 - match all geo urls
