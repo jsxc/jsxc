@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.4.1 - 2018-07-05
+ * jsxc v3.4.2 - 2018-09-05
  * 
  * Copyright (c) 2018 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see https://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.4.1
+ * @version 3.4.2
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.4.1',
+   version: '3.4.2',
 
    /** True if i'm the master */
    master: false,
@@ -5547,8 +5547,10 @@ jsxc.gui.window = {
             attachment.addClass('jsxc_data');
          }
 
-         if (message.attachment.type.match(/^image\//) && message.attachment.thumbnail) {
-            $('<img alt="preview">').attr('src', message.attachment.thumbnail).attr('title', message.attachment.name).appendTo(attachment);
+         if (message.attachment.type.match(/^image\//)) {
+            attachment.text('Loading thumbnail');
+
+            showThumbnail(1);
          } else {
             attachment.text(message.attachment.name);
          }
@@ -5630,6 +5632,24 @@ jsxc.gui.window = {
       if (!message.forwarded) {
          jsxc.gui.window.scrollDown(bid);
       }
+
+      function showThumbnail(i) {
+            var thumbnail = jsxc.storage.getUserItem('msg:thumbnail', uid) || message.attachment.thumbnail;
+
+            if (thumbnail) {
+               attachment.empty();
+
+               $('<img alt="preview">').attr('src', thumbnail).attr('title', message.attachment.name).appendTo(attachment);
+            } else if (i > 3) {
+               attachment.text('No thumbnail available');
+
+               return;
+            }
+
+            setTimeout(function() {
+               showThumbnail(i + 1);
+            }, i * 200);
+         }
    },
 
    /**
@@ -6474,6 +6494,7 @@ jsxc.Message.prototype.load = function(uid) {
  * @return {Message} this object
  */
 jsxc.Message.prototype.save = function() {
+   var self = this;
    var history;
 
    if (this.bid) {
@@ -6500,23 +6521,27 @@ jsxc.Message.prototype.save = function() {
       var ctx = canvas.getContext("2d");
       var img = new Image();
 
-      img.src = this.attachment.data;
+      img.onload = function() {
+         if (img.height > img.width) {
+            sHeight = img.width;
+            sWidth = img.width;
+            sx = 0;
+            sy = (img.height - img.width) / 2;
+         } else {
+            sHeight = img.height;
+            sWidth = img.height;
+            sx = (img.width - img.height) / 2;
+            sy = 0;
+         }
 
-      if (img.height > img.width) {
-         sHeight = img.width;
-         sWidth = img.width;
-         sx = 0;
-         sy = (img.height - img.width) / 2;
-      } else {
-         sHeight = img.height;
-         sWidth = img.height;
-         sx = (img.width - img.height) / 2;
-         sy = 0;
-      }
+         ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
 
-      ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
+         var thumbnailData = canvas.toDataURL('image/jpeg', 0.3);
 
-      this.attachment.thumbnail = canvas.toDataURL('image/jpeg', 0.3);
+         jsxc.storage.setUserItem('msg:thumbnail', self._uid, thumbnailData);
+      };
+
+      img.src = self.attachment.data;
 
       if (this.direction === 'out') {
          // save storage
@@ -6696,6 +6721,10 @@ jsxc.muc = {
       }
    },
 
+   initialized: false,
+
+   onGroupchatMessageHandlerRef: undefined,
+
    /**
     * Initialize muc plugin.
     *
@@ -6705,50 +6734,25 @@ jsxc.muc = {
     */
    init: function(o) {
       var self = jsxc.muc;
+
+      if (self.initialized) {
+         return;
+      }
+
+      self.initialized = true;
       self.conn = jsxc.xmpp.conn;
 
       var options = o || jsxc.options.get('muc');
 
       if (!options || typeof options.server !== 'string') {
-         jsxc.debug('Discover muc service');
-
          // prosody does not respond, if we send query before initial presence was sent
-         setTimeout(function() {
-            self.conn.disco.items(Strophe.getDomainFromJid(self.conn.jid), null, function(items) {
-               $(items).find('item').each(function() {
-                  var jid = $(this).attr('jid');
-                  var discovered = false;
-
-                  self.conn.disco.info(jid, null, function(info) {
-                     var mucFeature = $(info).find('feature[var="' + Strophe.NS.MUC + '"]');
-                     var mucIdentity = $(info).find('identity[category="conference"][type="text"]');
-
-                     if (mucFeature.length > 0 && mucIdentity.length > 0) {
-                        jsxc.debug('muc service found', jid);
-
-                        jsxc.options.set('muc', {
-                           server: jid,
-                           name: $(info).find('identity').attr('name')
-                        });
-
-                        discovered = true;
-
-                        self.init();
-                     }
-                  });
-
-                  return !discovered;
-               });
-            });
-         }, 1000);
-
-         return;
-      }
-
-      if (jsxc.gui.roster.ready) {
-         self.initMenu();
+         setTimeout(self.discoverMUCService, 1000);
       } else {
-         $(document).one('ready.roster.jsxc', jsxc.muc.initMenu);
+         if (jsxc.gui.roster.ready) {
+            self.initMenu();
+         } else {
+            $(document).one('ready.roster.jsxc', jsxc.muc.initMenu);
+         }
       }
 
       // remove maybe previously attached handlers
@@ -6758,8 +6762,47 @@ jsxc.muc = {
       $(document).on('presence.jsxc', jsxc.muc.onPresence);
       $(document).on('error.presence.jsxc', jsxc.muc.onPresenceError);
 
-      self.conn.addHandler(self.onGroupchatMessage, null, 'message', 'groupchat');
-      self.conn.muc.roomNames = jsxc.storage.getUserItem('roomNames') || [];
+      if (self.onGroupchatMessageHandlerRef) {
+         self.conn.deleteHandler(self.onGroupchatMessageHandlerRef);
+      }
+
+      self.onGroupchatMessageHandlerRef = self.conn.addHandler(self.onGroupchatMessage, null, 'message', 'groupchat');
+
+      self.conn.muc.roomNames = jsxc.storage.getUserItem('roomNames') || self.conn.muc.roomNames || [];
+   },
+
+   discoverMUCService: function() {
+      jsxc.debug('Discover muc service');
+
+      var self = jsxc.muc;
+      var discoService = self.conn.disco;
+
+      discoService.items(Strophe.getDomainFromJid(self.conn.jid), null, function(items) {
+         $(items).find('item').each(function() {
+            var jid = $(this).attr('jid');
+            var discovered = false;
+
+            discoService.info(jid, null, function(info) {
+               var mucFeature = $(info).find('feature[var="' + Strophe.NS.MUC + '"]');
+               var mucIdentity = $(info).find('identity[category="conference"][type="text"]');
+
+               if (mucFeature.length > 0 && mucIdentity.length > 0) {
+                  jsxc.debug('muc service found', jid);
+
+                  jsxc.options.set('muc', {
+                     server: jid,
+                     name: $(info).find('identity').attr('name')
+                  });
+
+                  discovered = true;
+
+                  jsxc.muc.initMenu();
+               }
+            });
+
+            return !discovered;
+         });
+      });
    },
 
    /**
@@ -6768,6 +6811,12 @@ jsxc.muc = {
     * @memberOf jsxc.muc
     */
    initMenu: function() {
+      var options = jsxc.options.get('muc');
+
+      if (!options || typeof options.server !== 'string') {
+         return;
+      }
+
       var li = $('<li>').attr('class', 'jsxc_joinChat jsxc_groupcontacticon').text($.t('Join_chat'));
 
       li.click(jsxc.muc.showJoinChat);
@@ -6886,10 +6935,10 @@ jsxc.muc = {
       dialog.find('#jsxc_bookmark').change(function() {
          if ($(this).prop('checked')) {
             $('#jsxc_autojoin').prop('disabled', false);
-            $('#jsxc_autojoin').parent('.checkbox').removeClass('disabled');
+            $('#jsxc_autojoin').parents('.checkbox').removeClass('disabled');
          } else {
             $('#jsxc_autojoin').prop('disabled', true).prop('checked', false);
-            $('#jsxc_autojoin').parent('.checkbox').addClass('disabled');
+            $('#jsxc_autojoin').parents('.checkbox').addClass('disabled');
          }
       });
 
@@ -8309,6 +8358,10 @@ $(document).one('connected.jsxc', function() {
    jsxc.storage.removeUserItem('ownNicknames');
 });
 
+$(document).on('disconnected.jsxc', function() {
+   jsxc.muc.initialized = false;
+});
+
 /**
  * This namespace handle the notice system.
  *
@@ -8493,7 +8546,7 @@ jsxc.notification = {
          });
       });
 
-      $(document).on('callincoming.jingle', function() {
+      $(document).on('incoming.call.jsxc', function() {
          jsxc.notification.playSound(jsxc.CONST.SOUNDS.CALL, true, true);
       });
 
@@ -10882,6 +10935,8 @@ jsxc.webrtc = {
          });
 
          session.call = reqMedia;
+
+         $(document).trigger('incoming.call.jsxc');
 
          if (reqMedia) {
             self.onIncomingCall(session);

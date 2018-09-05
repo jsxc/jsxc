@@ -125,7 +125,7 @@ jsxc.Message.prototype.save = function() {
          var thumbnailData = canvas.toDataURL('image/jpeg', 0.3);
 
          jsxc.storage.setUserItem('msg:thumbnail', self._uid, thumbnailData);
-      }
+      };
 
       img.src = self.attachment.data;
 
