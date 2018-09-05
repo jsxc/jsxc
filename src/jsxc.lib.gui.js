@@ -2805,8 +2805,27 @@ jsxc.gui.window = {
             attachment.addClass('jsxc_data');
          }
 
-         if (message.attachment.type.match(/^image\//) && message.attachment.thumbnail) {
-            $('<img alt="preview">').attr('src', message.attachment.thumbnail).attr('title', message.attachment.name).appendTo(attachment);
+         if (message.attachment.type.match(/^image\//)) {
+            function showThumbnail(i) {
+               var thumbnail = jsxc.storage.getUserItem('msg:thumbnail', uid) || message.attachment.thumbnail;
+
+               if (thumbnail) {
+                  attachment.empty();
+
+                  $('<img alt="preview">').attr('src', thumbnail).attr('title', message.attachment.name).appendTo(attachment);
+               } else if (i > 3) {
+                  attachment.text('No thumbnail available');
+
+                  return;
+               }
+
+               setTimeout(function() {
+                  showThumbnail(i + 1)
+               }, i * 200);
+            }
+
+            attachment.text('Loading thumbnail');
+            showThumbnail(1);
          } else {
             attachment.text(message.attachment.name);
          }

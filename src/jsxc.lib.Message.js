@@ -80,6 +80,7 @@ jsxc.Message.prototype.load = function(uid) {
  * @return {Message} this object
  */
 jsxc.Message.prototype.save = function() {
+   var self = this;
    var history;
 
    if (this.bid) {
@@ -106,23 +107,27 @@ jsxc.Message.prototype.save = function() {
       var ctx = canvas.getContext("2d");
       var img = new Image();
 
-      img.src = this.attachment.data;
+      img.onload = function() {
+         if (img.height > img.width) {
+            sHeight = img.width;
+            sWidth = img.width;
+            sx = 0;
+            sy = (img.height - img.width) / 2;
+         } else {
+            sHeight = img.height;
+            sWidth = img.height;
+            sx = (img.width - img.height) / 2;
+            sy = 0;
+         }
 
-      if (img.height > img.width) {
-         sHeight = img.width;
-         sWidth = img.width;
-         sx = 0;
-         sy = (img.height - img.width) / 2;
-      } else {
-         sHeight = img.height;
-         sWidth = img.height;
-         sx = (img.width - img.height) / 2;
-         sy = 0;
+         ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
+
+         var thumbnailData = canvas.toDataURL('image/jpeg', 0.3);
+
+         jsxc.storage.setUserItem('msg:thumbnail', self._uid, thumbnailData);
       }
 
-      ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
-
-      this.attachment.thumbnail = canvas.toDataURL('image/jpeg', 0.3);
+      img.src = self.attachment.data;
 
       if (this.direction === 'out') {
          // save storage
