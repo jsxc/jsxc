@@ -5,7 +5,10 @@ export default class Address {
    private address;
 
    public static fromString(text: string): Address {
-      return SignalAddress.fromString(text);
+      let index = text.lastIndexOf('.');
+      let [name, deviceId] = [text.slice(0, index), text.slice(index)];
+
+      return new SignalAddress(name, deviceId);
    }
 
    constructor(name: string, deviceId: number) {
