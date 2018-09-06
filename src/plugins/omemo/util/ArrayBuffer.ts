@@ -9,7 +9,7 @@ let ArrayBufferUtils = {
 
    toBase64: (a: ArrayBuffer): string => ByteBuffer.wrap(a).toBase64(),
 
-   fromBase64: (s: string): ArrayBuffer => ByteBuffer.fromBase64(s).toArrayBuffer(),
+   fromBase64: (s: string): ArrayBuffer => ByteBuffer.fromBase64(s.replace(/\s/g, '')).toArrayBuffer(),
 
    toString: (thing: ArrayBuffer | string): string => {
       if (typeof thing === 'string') {
