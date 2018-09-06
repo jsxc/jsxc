@@ -1,5 +1,5 @@
 import Log from './util/Log'
-import * as jsxc from './index'
+import * as jsxc from './api/v1'
 
 export interface Settings {
    disabled?: boolean,
@@ -133,6 +133,8 @@ export default class FormWatcher {
       submitEvents.forEach((handler) => {
          formElement.submit(handler);
       });
+
+      this.enableForm();
 
       if (formElement.find('#submit').length > 0) {
          formElement.find('#submit').click();
