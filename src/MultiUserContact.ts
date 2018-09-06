@@ -43,8 +43,14 @@ export default class MultiUserContact extends Contact {
       super(arguments[0], arguments[1], arguments[3]);
 
       this.data.set('type', 'groupchat');
+   }
 
-      this.members = new PersistentMap(this.account.getStorage(), 'members', this.getId());
+   private getMembers(): PersistentMap {
+      if (!this.members) {
+         this.members = new PersistentMap(this.account.getStorage(), 'members', this.getId());
+      }
+
+      return this.members
    }
 
    private getService() {
@@ -116,9 +122,9 @@ export default class MultiUserContact extends Contact {
    }
 
    public addMember(nickname: string, affiliation?, role?, jid?: JID): boolean {
-      let isNewMember = !this.members.get(nickname);
+      let isNewMember = !this.getMembers().get(nickname);
 
-      this.members.set(nickname, {
+      this.getMembers().set(nickname, {
          affiliation: affiliation,
          role: role,
          jid: jid instanceof JID ? jid.full : undefined
@@ -128,15 +134,15 @@ export default class MultiUserContact extends Contact {
    }
 
    public removeMember(nickname: string) {
-      this.members.remove(nickname);
+      this.getMembers().remove(nickname);
 
       if (nickname === this.getNickname()) {
          this.shutdown();
       }
    }
 
-   public getMembers(): string[] {
-      return this.members.getAllKeys();
+   public getMemberIds(): string[] {
+      return this.getMembers().getAllKeys();
    }
 
    public getSubscription(): ContactSubscription {
@@ -208,15 +214,15 @@ export default class MultiUserContact extends Contact {
    public registerMemberHook(id: string, func: (newValue: any, oldValue: any, key: string) => void);
    public registerMemberHook(func: (newValue: any, oldValue: any, key: string) => void);
    public registerMemberHook() {
-      this.members.registerHook.apply(this.members, arguments);
+      this.getMembers().registerHook.apply(this.getMembers(), arguments);
    }
 
    public registerNewMemberHook(func: (value: any, nickname: string) => void) {
-      this.members.registerNewHook(func);
+      this.getMembers().registerNewHook(func);
    }
 
    public registerRemoveMemberHook(func: (nickname: string) => void) {
-      this.members.registerRemoveHook(func);
+      this.getMembers().registerRemoveHook(func);
    }
 
    public isPersistent() {
@@ -232,6 +238,6 @@ export default class MultiUserContact extends Contact {
    }
 
    private removeAllMembers() {
-      this.members.empty();
+      this.getMembers().empty();
    }
 }

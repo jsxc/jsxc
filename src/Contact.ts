@@ -39,8 +39,6 @@ export default class Contact implements IIdentifiable, IContact {
       } else {
          this.initNewContact(arguments[1], arguments[2]);
       }
-
-      this.chatWindowController = new ChatWindowController(this, this.data);
    }
 
    private initExistingContact(id: string) {
@@ -84,6 +82,10 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getChatWindowController(): ChatWindowController {
+      if (!this.chatWindowController) {
+         this.chatWindowController = new ChatWindowController(this, this.data);
+      }
+
       return this.chatWindowController;
    }
 

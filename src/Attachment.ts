@@ -162,7 +162,7 @@ export default class Attachment {
          let reader = new FileReader();
 
          reader.onload = function() {
-            resolve(reader.result);
+            resolve(<string>reader.result);
          }
 
          reader.onerror = reject;

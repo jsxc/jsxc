@@ -358,6 +358,8 @@ export default class Account {
    private initContact(id: string) {
       let contact = this.createNewContact(id);
 
+      contact.getChatWindowController();
+
       this.contacts[id] = contact;
 
       Roster.get().add(contact);

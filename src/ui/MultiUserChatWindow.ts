@@ -29,7 +29,7 @@ export default class MultiUserChatWindow extends ChatWindow {
          this.removeMember(nickname);
       });
 
-      for (let nickname of this.contact.getMembers()) {
+      for (let nickname of this.contact.getMemberIds()) {
          this.addMember(nickname);
       }
 
