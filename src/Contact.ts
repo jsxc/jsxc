@@ -43,6 +43,11 @@ export default class Contact implements IIdentifiable, IContact {
 
    private initExistingContact(id: string) {
       this.data = new PersistentMap(this.storage, 'contact', id);
+
+      if (!this.data.get('id')) {
+         throw `Could not find existing contact with id "${id}".`;
+      }
+
       this.jid = new JID(this.data.get('jid'));
    }
 

@@ -137,7 +137,9 @@ export default class Account {
       if (!storage.getItem('roster:loaded')) {
          this.removeNonpersistentContacts();
 
-         return this.connection.getRosterService().getRoster().then(() => {
+         let rosterVersion = this.getStorage().getItem('roster', 'version') || '';
+
+         return this.connection.getRosterService().getRoster(rosterVersion).then(() => {
             storage.setItem('roster:loaded', true);
 
             let targetPresence = Client.getPresenceController().getTargetPresence();
@@ -204,25 +206,33 @@ export default class Account {
       return jid && jid.bare !== this.getJID().bare ? this.contacts[jid.bare] : this.contact;
    }
 
-   public addMultiUserContact(jid: JID, name?: string): MultiUserContact {
-      return this.addContactObject(new MultiUserContact(this, jid, name));
+   public addMultiUserContact(jid: JID, name?: string): MultiUserContact
+   public addMultiUserContact(id: string): MultiUserContact
+   public addMultiUserContact() {
+      let contact = new MultiUserContact(this, arguments[0], arguments[1]);
+
+      return this.addContactObject(contact);
    }
 
-   public addContact(jid: JID, name?: string): Contact {
-      return this.addContactObject(new Contact(this, jid, name));
+   public addContact(jid: JID, name?: string): Contact
+   public addContact(id: string): Contact
+   public addContact() {
+      let contact = new Contact(this, arguments[0], arguments[1]);
+
+      return this.addContactObject(contact);
    }
 
    public removeContact(contact: Contact) {
-      let id = contact.getJid().bare;
+      let id = contact.getId();
 
       if (this.contacts[id]) {
          Roster.get().remove(contact);
 
          contact.getChatWindowController().close();
 
-         this.save();
-
          delete this.contacts[id];
+
+         this.save();
       }
    }
 

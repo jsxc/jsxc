@@ -75,7 +75,17 @@ export default class extends AbstractHandler {
       let rosterVersion = $(stanza).find('query').attr('ver');
 
       if (rosterVersion) {
-         account.getStorage().setItem('roster', 'version', rosterVersion);
+         let storage = account.getStorage();
+
+         storage.setItem('roster', 'version', rosterVersion);
+
+         let cache = storage.getItem('roster', 'cache') || [];
+
+         if (cache.indexOf(contact.getId()) < 0) {
+            cache.push(contact.getId());
+
+            storage.setItem('roster', 'cache', cache);
+         }
       }
 
       return this.PRESERVE_HANDLER;

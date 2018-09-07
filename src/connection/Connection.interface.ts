@@ -60,7 +60,7 @@ export interface MUCService {
 }
 
 export interface RosterService {
-   getRoster()
+   getRoster(verstion?: string)
 
    removeContact(jid: IJID): Promise<Element>
 

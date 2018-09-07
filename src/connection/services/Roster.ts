@@ -5,14 +5,18 @@ import * as NS from '../xmpp/namespace'
 import { $pres, $iq } from '../../vendor/Strophe'
 
 export default class Roster extends AbstractService {
-   public getRoster() {
+   public getRoster(version?: string) {
       let iq = $iq({
          type: 'get'
       }).c('query', {
          xmlns: 'jabber:iq:roster'
       });
 
-      //@TODO use account.getStorage().getItem('roster', 'version'), maybe better as parameter
+      if (typeof version === 'string' || (typeof version === 'number' && !isNaN(version))) {
+         iq.attrs({
+            ver: version,
+         });
+      }
 
       return this.sendIQ(iq).then((stanza: Element) => {
          let rosterHandler = new RosterHandler(this.account);
