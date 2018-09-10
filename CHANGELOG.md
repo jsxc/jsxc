@@ -21,12 +21,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - use Consistent Color Generation (XEP-0392)
 - use more naturally bounce animation for notice
 - display presence messages
+- allow to disable all plugins
+- highlight quotations
+- show notice if offline contacts are hidden
+- [#178](https://github.com/jsxc/jsxc/issues/178) add inband password change (XEP-0077)
+- prepare multi account support (still alpha)
 
 ### Developer notes
 - Typescript, Webpack, Handlebars, Karma, Mocha, Chai and Sinon
-- remove `build` folder, git submodules, bower and grunt
+- remove `build` and `doc` folder, git submodules, bower and grunt
 - share one XMPP connection across all tabs
 - add plugin API
+- form watcher instead of form option
+- API to add roster menu entries
+- use SASS guidelines and BEM-like style syntax
 
 ### Removed/Pending
 - jingle file transfer
