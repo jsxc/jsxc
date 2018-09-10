@@ -34,7 +34,7 @@ export default class CarbonsPlugin extends AbstractPlugin {
       pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor);
 
       pluginAPI.registerConnectionHook((status, condition) => {
-         if (status === Status.CONNECTED || status === Status.ATTACHED) {
+         if (status === Status.ATTACHED) {
             this.init();
          }
       });
