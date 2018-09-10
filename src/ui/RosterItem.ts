@@ -83,7 +83,7 @@ export default class RosterItem {
       });
 
       this.contact.registerHook('status', (status) => {
-         this.element.find('.jsxc-last-msg .jsxc-text').text(status);
+         this.element.find('.jsxc-bar__caption__secondary').text(status);
       });
 
       this.contact.registerHook('subscription', () => {
@@ -92,6 +92,10 @@ export default class RosterItem {
 
       this.contact.getTranscript().registerHook('firstMessageId', (firstMessageId) => {
          if (!firstMessageId) {
+            return;
+         }
+
+         if (this.contact.getStatus()) {
             return;
          }
 
