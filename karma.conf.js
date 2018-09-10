@@ -1,7 +1,6 @@
 // jshint node:true
 
-// var path = require('path');
-var webpackConfig = require('./webpack.config.js');
+const webpackConfig = require('./webpack.config.js');
 
 module.exports = function(config) {
    config.set({
@@ -89,7 +88,7 @@ module.exports = function(config) {
 
       // start these browsers
       // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-      browsers: ['Chrome'],
+      browsers: ['ChromeHeadless'],
 
       // Continuous Integration mode
       // if true, Karma captures browsers, runs the tests and exits

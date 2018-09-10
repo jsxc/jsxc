@@ -3,13 +3,19 @@ language: node_js
 node_js:
   - "node"
 
-before_install:
-  - rvm install 2.3.1
-  - gem install scss_lint
+dist: trusty
+
+sudo: required
+
+addons:
+  chrome: stable
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
 
 script:
-  - ./node_modules/.bin/grunt pre-commit
-
-branches:
-   except:
-      - refactoring
+  - yarn checking-style-format
+  - yarn checking-typescript-format
+  - yarn test
