@@ -12,3 +12,4 @@ trim_trailing_whitespace = true
 charset = utf-8
 indent_style = space
 indent_size = 3
+quote_type = single
