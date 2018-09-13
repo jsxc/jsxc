@@ -39,7 +39,15 @@ async function insertDevices(devices: Device[], identityManager: IdentityManager
 
 async function getDeviceProperties(device: Device, identityManager: IdentityManager) {
    let trust = device.getTrust();
-   let fingerprint = await identityManager.loadFingerprint(device.getAddress());
+   let fingerprint;
+
+   try {
+      fingerprint = await identityManager.loadFingerprint(device.getAddress());
+   } catch (err) {
+      //@TODO device should be removed from list
+
+      fingerprint = 'Error';
+   }
 
    return {
       id: device.getId(),
