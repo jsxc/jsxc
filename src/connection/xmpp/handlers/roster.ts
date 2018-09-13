@@ -58,6 +58,7 @@ function restoreRosterFromCache(account: Account, storage: Storage) {
    for (let id of cachedRoster) {
       try {
          let contact = account.addContact(id);
+         contact.clearResources();
 
          Roster.get().add(contact);
       } catch (err) {

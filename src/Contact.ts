@@ -116,6 +116,10 @@ export default class Contact implements IIdentifiable, IContact {
       this.data.set('jid', this.jid.full);
    }
 
+   public clearResources() {
+      this.data.set('resources', {});
+   }
+
    public setPresence(resource: string, presence: Presence) {
       Log.debug('set presence for ' + this.jid.bare + ' / ' + resource, presence);
 

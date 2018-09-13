@@ -5,6 +5,7 @@ import { EncryptionState } from './plugin/AbstractPlugin'
 import ChatWindowController from './ChatWindowController'
 import Transcript from './Transcript'
 import Avatar from './Avatar'
+import ChatWindow from '@ui/ChatWindow';
 
 export enum ContactType {
    CHAT = 'chat',
@@ -22,9 +23,13 @@ export enum ContactSubscription {
 export interface IContact {
    delete();
 
+   getChatWindow(): ChatWindow;
+
    getChatWindowController(): ChatWindowController;
 
    addSystemMessage(messageString: string): IMessage;
+
+   clearResources();
 
    setResource(resource: string);
 
