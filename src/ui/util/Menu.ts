@@ -75,7 +75,7 @@ export default class Menu {
 
    private onMouseLeave = () => {
       if (this.element.hasClass(CLASSNAME_OPENED)) {
-         window.setTimeout(this.closeMenu, 2000);
+         this.timer = window.setTimeout(this.closeMenu, 2000);
       }
    }
 
