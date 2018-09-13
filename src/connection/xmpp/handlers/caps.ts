@@ -52,7 +52,7 @@ export default class CapsHandler extends AbstractHandler {
                discoInfoRepository.addRelation(from, discoInfo);
             })
             .catch(() => {
-               console.log('Something went wrong')
+               Log.warn('Something went wrong')
             });
       } else {
          let discoInfo = new DiscoInfo(version);

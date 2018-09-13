@@ -5,6 +5,7 @@ import EncryptedDeviceMessage from "../model/EncryptedDeviceMessage";
 import { SessionCipher } from "../vendor/SessionCipher";
 import { SessionBuilder } from "../vendor/SessionBuilder";
 import Bundle from "./Bundle";
+import Log from "@util/Log";
 
 export default class Session {
    private sessionCipher;
@@ -36,8 +37,7 @@ export default class Session {
 
          return new EncryptedDeviceMessage(this.address, ciphertext);
       } catch (err) {
-         console.log('Error:', err)
-         console.warn('Could not encrypt data for device with id ' + this.address.getDeviceId());
+         Log.warn('Could not encrypt data for device with id ' + this.address.getDeviceId(), err);
 
          return null; // Otherwise Promise.all throws an error
       }

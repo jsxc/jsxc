@@ -96,7 +96,7 @@ export default class BundleManager {
       try {
          stanza = await this.pepService.retrieveItems(node, address.getName());
       } catch (errorStanza) {
-         console.log('Error while retrieving bundle', errorStanza);
+         Log.warn('Error while retrieving bundle', errorStanza);
 
          throw 'Could not retrieve bundle';
       }

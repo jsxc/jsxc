@@ -2,6 +2,7 @@ import { Presence } from './connection/AbstractConnection'
 import { Strophe } from './vendor/Strophe'
 import Account from './Account'
 import Storage from './Storage'
+import Log from '@util/Log';
 
 const TARGET_KEY = 'targetPresence';
 const CURRENT_KEY = 'currentPresence';
@@ -59,7 +60,7 @@ export default class PresenceController {
 
       account.registerConnectionHook((status) => {
          if (status === Strophe.Status.DISCONNECTED) {
-            console.log('Presence Controller: account disconnected')
+            Log.info('Presence Controller: account disconnected')
          }
       });
    }

@@ -324,7 +324,6 @@ export default class ChatWindow {
       elementHandler.add(
          this.element.find('.jsxc-share-screen')[0],
          (ev) => {
-            console.log('share screen')
             ev.stopPropagation();
 
             startCall(contact, this.getAccount(), 'screen');

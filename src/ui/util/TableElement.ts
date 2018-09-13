@@ -1,3 +1,5 @@
+import Log from "@util/Log";
+
 export default class TableElement {
    private tableElement = $('<table>');
 
@@ -19,7 +21,8 @@ export default class TableElement {
 
    private addRow(position: 'appendTo' | 'prependTo', columns) {
       if (columns.length !== this.numberOfColumns) {
-         console.log('Wrong number of columns');
+         Log.warn('Wrong number of columns');
+
          return false;
       }
 

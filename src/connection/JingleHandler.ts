@@ -4,9 +4,7 @@ import * as JSM from 'jingle'
 import * as RTC from 'webrtc-adapter'
 import { createRegistry } from 'jxt'
 import Log from '../util/Log'
-import Translation from '../util/Translation'
 import UUID from '../util/UUID'
-import Notification from '../Notification'
 import JID from '../JID'
 import { VideoDialog } from '../ui/VideoDialog'
 import JingleSession from '../JingleSession'
@@ -35,7 +33,7 @@ export default class JingleHandler {
       });
 
       this.manager.on('change:connectionState', function() {
-         console.log('ice', arguments);
+         Log.info('change:connectionState', arguments);
       })
 
       this.manager.on('log:*', function(level, msg) {

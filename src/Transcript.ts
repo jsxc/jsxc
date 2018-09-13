@@ -104,7 +104,7 @@ export default class Transcript {
 
       if (message.getDirection() === DIRECTION.IN) {
          let unreadMessageIds = this.properties.get('unreadMessageIds') || [];
-         unreadMessageIds.push(id); console.log('unreadMessageIds', unreadMessageIds)
+         unreadMessageIds.push(id);
          this.properties.set('unreadMessageIds', unreadMessageIds);
       }
    }

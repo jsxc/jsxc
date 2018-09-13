@@ -116,7 +116,6 @@ export class VideoDialog {
    }
 
    public minimize() {
-      console.log('minimize', this.dom.find('.jsxc-video-container').length)
       this.dom.find('.jsxc-video-container').addClass('jsxc-minimized');
    }
 
