@@ -3,6 +3,8 @@ import Device, { Trust } from '../../plugins/omemo/lib/Device'
 import { IContact } from '../../Contact.interface'
 import Omemo from '../../plugins/omemo/lib/Omemo';
 import IdentityManager from 'plugins/omemo/lib/IdentityManager';
+import DateTime from '@ui/util/DateTime';
+import Translation from '@util/Translation';
 
 let omemoDeviceListTemplate = require('../../../template/dialogOmemoDeviceList.hbs');
 let omemoDeviceItemTemplate = require('../../../template/dialogOmemoDeviceItem.hbs');
@@ -31,6 +33,14 @@ async function insertDevices(devices: Device[], identityManager: IdentityManager
       let properties = await getDeviceProperties(device, identityManager);
       let element = $(omemoDeviceItemTemplate(properties));
 
+      let lastUsedElement = element.find('.jsxc-omemo-device-last-used');
+
+      if (properties.lastUsed) {
+         DateTime.stringify(properties.lastUsed.getTime(), lastUsedElement);
+      } else {
+         lastUsedElement.text(Translation.t('never'));
+      }
+
       attachActionHandler(element, device);
 
       listElement.append(element);
@@ -56,6 +66,7 @@ async function getDeviceProperties(device: Device, identityManager: IdentityMana
       trust: Trust[trust],
       trustIsUnknownOrRecognized: trust === Trust.unknown || trust === Trust.recognized,
       trustIsUnknown: trust === Trust.unknown,
+      lastUsed: device.getLastUsed(),
    };
 };
 

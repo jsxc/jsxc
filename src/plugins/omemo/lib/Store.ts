@@ -328,6 +328,15 @@ export default class Store {
       return Promise.resolve();
    }
 
+   public setLastUsed(identifier: Address) {
+      this.put('lastUsed:' + identifier.toString(), new Date());
+   }
+
+   public getLastUsed(identifier: Address) {
+      let used = this.get('lastUsed:' + identifier.toString());
+      return used ? new Date(used) : undefined;
+   }
+
    /**
     * Helper functions
     */

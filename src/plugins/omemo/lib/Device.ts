@@ -12,7 +12,11 @@ export default class Device {
    }
 
    public async decrypt(ciphertext, preKey: boolean = false): Promise<ArrayBuffer> {
-      return this.session.decrypt(ciphertext, preKey);
+      return this.session.decrypt(ciphertext, preKey).then(plaintext => {
+         this.store.setLastUsed(this.address);
+
+         return plaintext;
+      });
    }
 
    public async encrypt(plaintext): Promise<EncryptedDeviceMessage | null> {
@@ -47,5 +51,9 @@ export default class Device {
 
    public getAddress(): Address {
       return this.address;
+   }
+
+   public getLastUsed(): Date | undefined {
+      return this.store.getLastUsed(this.address);
    }
 }
