@@ -4,6 +4,7 @@ import Log from '../util/Log'
 import JingleHandler from '../connection/JingleHandler'
 import VideoWindow from './VideoWindow'
 import JingleCallSession from '../JingleCallSession'
+import JingleAbstractSession from 'JingleAbstractSession';
 
 const VideoDialogTemplate = require('../../template/videoDialog.hbs')
 
@@ -36,7 +37,7 @@ export class VideoDialog {
       this.videoWindows.push(videoWindow);
    }
 
-   public showCallDialog(session: JingleCallSession) {
+   public showCallDialog(session: JingleAbstractSession) {
       //@TODO add auto accept
       //@TODO translate
       //@TODO use selection dialog, because button labels can be configured
@@ -47,6 +48,7 @@ export class VideoDialog {
       let isVideoCall = mediaRequested.indexOf('video') > -1;
       let isStream = mediaRequested.length === 0;
       let infoText;
+
       if (isStream)
          infoText = `Incoming_stream from ${peerName}`;
       else if (isVideoCall)
@@ -65,7 +67,6 @@ export class VideoDialog {
       });
 
       return confirmDialog.getPromise().then((dialog: Dialog) => {
-         console.log('session.adopt', typeof session.adopt)
          session.adopt();
 
          dialog.close();
@@ -103,7 +104,7 @@ export class VideoDialog {
                localVideoElement.removeAttr('style');
             });
 
-            (<any>$('#jsxc_webrtc .jsxc_videoContainer')).fullscreen();
+            // (<any>$('#jsxc_webrtc .jsxc_videoContainer')).fullscreen();
          });
       } else {
          this.dom.find('.jsxc-fullscreen').hide();
@@ -112,6 +113,15 @@ export class VideoDialog {
       this.dom.find('.jsxc-video-container').click(() => {
          this.dom.find('.jsxc-controlbar').toggleClass('jsxc-visible');
       });
+   }
+
+   public minimize() {
+      console.log('minimize', this.dom.find('.jsxc-video-container').length)
+      this.dom.find('.jsxc-video-container').addClass('jsxc-minimized');
+   }
+
+   public maximize() {
+      this.dom.find('.jsxc-video-container').removeClass('jsxc-minimized');
    }
 
    public addContainer(containerElement) {
@@ -225,6 +235,10 @@ export class VideoDialog {
 
    public static dettachMediaStream = (element) => {
       let el = (element instanceof jQuery) ? element.get(0) : element;
+
+      if (!el) {
+         return;
+      }
 
       VideoDialog.stopStream(el.srcObject);
       el.srcObject = null;

@@ -73,6 +73,16 @@
     li {
       border-radius: 3px;
       text-align: center;
+
+      &.jsxc-disabled {
+        cursor: default;
+        opacity: 0.3;
+        // text-decoration: line-through;
+
+        &:hover {
+          opacity: 0.3;
+        }
+      }
     }
 
     // .jsxc-icon {

@@ -1,5 +1,4 @@
 #jsxc-video-dialog {
-  background-color: #000;
   bottom: 0;
   left: 0;
   position: fixed;
@@ -99,9 +98,13 @@
     top: 10px;
     z-index: 99;
 
-    .jsxc-localvideo {
+    .jsxc-local-video {
       display: block;
       position: static;
+    }
+
+    .jsxc-video-wrapper {
+      display: none;
     }
   }
 
@@ -269,7 +272,7 @@ div {
     height: 100%;
     width: 100%;
 
-    &.jsxc-localvideo {
+    &.jsxc-local-video {
       border: 1px solid $white;
     }
   }
@@ -323,7 +326,7 @@ div {
   text-align: center;
   top: 50px;
   transition: 1s opacity;
-  z-index: 9090;
+  z-index: 9995;
 
   &.jsxc-visible {
     opacity: 1;

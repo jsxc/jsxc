@@ -7,26 +7,6 @@ import Notification from './Notification'
 import JID from './JID'
 
 export default class JingleCallSession extends JingleAbstractSession {
-   private adoptee: boolean = false;
-
-   constructor(account, session) {
-      super(account, session);
-
-      this.storage.registerHook(this.session.sid, (newValue) => {
-         if (newValue === 'adobted' && !this.adoptee) {
-            console.log('session got adopted')
-
-            session.emit('aborted');
-         }
-      });
-   }
-
-   public adopt() {
-      this.adoptee = true;
-
-      this.storage.setItem(this.getId(), 'adobted');
-      this.storage.removeItem(this.getId());
-   }
 
    public onOnceIncoming() {
       let peerJID = new JID(this.session.peerID);
@@ -48,13 +28,13 @@ export default class JingleCallSession extends JingleAbstractSession {
    protected onIncoming() {
       Log.debug('incoming call from ' + this.session.peerID);
 
-      let videoWindow = JingleHandler.getVideoDialog();
-      videoWindow.addSession(this.session);
+      let videoDialog = JingleHandler.getVideoDialog();
+      videoDialog.addSession(this.session);
 
       let mediaRequested = this.getMediaRequest();
 
       Promise.race([
-         videoWindow.showCallDialog(this).then(() => {
+         videoDialog.showCallDialog(this).then(() => {
             return UserMedia.request(mediaRequested);
          }),
          new Promise((resolve, reject) => {
@@ -67,7 +47,7 @@ export default class JingleCallSession extends JingleAbstractSession {
             });
          })
       ]).then((stream) => {
-         videoWindow.showVideoWindow(stream);
+         videoDialog.showVideoWindow(stream);
 
          this.session.addStream(stream);
          this.session.accept();
@@ -84,12 +64,12 @@ export default class JingleCallSession extends JingleAbstractSession {
       });
    }
 
-   public getMediaRequest() {
+   public getMediaRequest(): Array<'audio' | 'video'> {
       let mediaRequested = [];
       let contents = this.session.pc.remoteDescription.contents;
 
       for (let content of contents) {
-         if (content.senders === 'both' && ['audio', 'video'].indexOf(content.name) > -1) {
+         if (content.senders === 'both' && ['audio', 'video'].indexOf(content.application.media) > -1) {
             mediaRequested.push(content.name);
          }
       }

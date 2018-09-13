@@ -36,6 +36,12 @@ export default class VideoWindow {
       if (state === 'connected') {
          this.wrapperElement.removeClass('jsxc-establishing');
          this.wrapperElement.addClass('jsxc-ice-connected');
+
+         let remoteStreams = this.session.pc.getRemoteStreams();
+
+         if (remoteStreams.length > 0) {
+            this.addStream(this.session, this.session.pc.getRemoteStreams()[0]);
+         }
       } else if (state === 'failed') {
          Log.warn('ICE connection failed');
 

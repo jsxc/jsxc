@@ -68,7 +68,7 @@ export default class JingleHandler {
       //@TODO extract onIceConnectionStateChanged from VideoWindow and use here
 
       session.addStream(stream);
-      session.start(offerOptions);
+      session.start(offerOptions); //@TODO use this.getPeerConstraints; Review peer constraints vs offer options
 
       return session;
    }
@@ -149,39 +149,15 @@ export default class JingleHandler {
       // });
    }
 
-   private onIncomingStream(session) {
-      Log.debug('incoming stream from ' + session.peerID);
-
-      session.chatWindow.postScreenMessage(Translation.t('Incoming_stream'), session.sid);
-
-      Notification.notify({
-         title: Translation.t('Incoming_stream'),
-         message: Translation.t('from_sender') + session.peerContact.getName(),
-         source: session.peerContact
-      });
-
-      // send signal to partner
-      session.ring();
-
-      let videoWindow = new VideoDialog();
-      videoWindow.addSession(session);
-
-      videoWindow.showCallDialog(session).then(() => {
-         session.accept();
-      }).catch(() => {
-         session.decline();
-      });
-   }
-
-   private getPeerConstraints() {
+   private getPeerConstraints(offerToReceiveAudio = false, offerToReceiveVideo = false) {
       var browserDetails = RTC.browserDetails;
       let peerConstraints;
 
       if ((browserDetails.version < 33 && browserDetails.browser === 'firefox') || browserDetails.browser === 'chrome') {
          peerConstraints = {
             mandatory: {
-               'OfferToReceiveAudio': true,
-               'OfferToReceiveVideo': true
+               'OfferToReceiveAudio': offerToReceiveAudio,
+               'OfferToReceiveVideo': offerToReceiveVideo,
             }
          };
 
@@ -190,8 +166,8 @@ export default class JingleHandler {
          }
       } else {
          peerConstraints = {
-            'offerToReceiveAudio': true,
-            'offerToReceiveVideo': true
+            'offerToReceiveAudio': offerToReceiveAudio,
+            'offerToReceiveVideo': offerToReceiveVideo,
          };
 
          if (browserDetails.browser === 'firefox') {

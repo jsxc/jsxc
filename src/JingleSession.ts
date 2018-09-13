@@ -1,5 +1,6 @@
 import Account from './Account'
 import JingleCallSession from './JingleCallSession'
+import JingleStreamSession from './JingleStreamSession';
 
 export default class JingleSession {
 
@@ -7,11 +8,11 @@ export default class JingleSession {
       let sessionType = JingleSession.getSessionType(session);
 
       if (sessionType === 'FileTransferSession') {
-
+         throw new Error('We are currently not supporting file transfer sessions.');
       } else if (sessionType === 'CallSession') {
          return new JingleCallSession(account, session);
       } else if (sessionType === 'StreamSession') {
-
+         return new JingleStreamSession(account, session);
       } else {
          throw new Error('Could not create jingle session. Unknown session type.');
       }
@@ -31,12 +32,10 @@ export default class JingleSession {
       let reqMedia = false;
 
       $.each(session.pc.remoteDescription.contents, function() {
-         if (this.senders === 'both') {
+         if (this.senders === 'both' && ['audio', 'video'].indexOf(this.name) > -1) {
             reqMedia = true;
          }
       });
-
-      //@REVIEW CallSession should also handle StreamSession
 
       return reqMedia ? 'CallSession' : 'StreamSession';
    }

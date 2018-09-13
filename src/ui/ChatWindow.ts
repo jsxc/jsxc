@@ -321,17 +321,18 @@ export default class ChatWindow {
          }
       );
 
-      // elementHandler.add(
-      //    this.element.find('.jsxc-share-screen')[0],
-      //    (ev) => {
-      //       ev.stopPropagation();
-      //
-      //       startCall(contact, this.account, 'screen');
-      //    }, [
-      //       'urn:xmpp:jingle:transports:ice-udp:1',
-      //       'urn:xmpp:jingle:apps:dtls:0'
-      //    ]
-      // );
+      elementHandler.add(
+         this.element.find('.jsxc-share-screen')[0],
+         (ev) => {
+            console.log('share screen')
+            ev.stopPropagation();
+
+            startCall(contact, this.getAccount(), 'screen');
+         }, [
+            'urn:xmpp:jingle:transports:ice-udp:1',
+            'urn:xmpp:jingle:apps:dtls:0'
+         ]
+      );
 
       elementHandler.add(
          this.element.find('.jsxc-message-area')[0],

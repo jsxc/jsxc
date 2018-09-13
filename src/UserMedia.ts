@@ -1,20 +1,28 @@
 import Log from './util/Log'
 import Translation from './util/Translation'
 import Overlay from './ui/Overlay'
+import * as getScreenMedia from 'getscreenmedia'
 
 export default class UserMedia {
    public static request(um = ['video', 'audio']) {
-      let self = this;
       let overlay = new Overlay();
       overlay.open();
 
-      return UserMedia
-         .filterUserMedia(um)
-         .then(UserMedia.getUserMedia)
-         .then(um => {
+      let mediaPromise;
+
+      if (um.indexOf('screen') > -1) {
+         mediaPromise = UserMedia.getScreenMedia();
+      } else {
+         mediaPromise = UserMedia
+            .filterUserMedia(um)
+            .then(UserMedia.getUserMedia);
+      }
+
+      return mediaPromise
+         .then(stream => {
             overlay.close();
 
-            return um;
+            return stream;
          })
          .catch(err => {
             overlay.close();
@@ -27,20 +35,32 @@ export default class UserMedia {
       return navigator.mediaDevices.enumerateDevices()
          .then((devices) => {
             var availableDevices = devices.map(function(device) {
-               return device.kind;
+               //@REVIEW MediaDeviceKind === string?
+               return <string>device.kind;
             });
 
             userMedia = userMedia.filter(function(el) {
-               //@REVIEW ts type
-               return availableDevices.indexOf(<any>el) !== -1 || availableDevices.indexOf(<any>(el + 'input')) !== -1;
+               return availableDevices.indexOf(el) !== -1 || availableDevices.indexOf(el + 'input') !== -1;
             });
 
-            if (userMedia.length) {
-               return Promise.resolve(userMedia);
-            } else {
-               return Promise.reject('No audio/video device available.');
+            if (userMedia.length === 0) {
+               throw 'No audio/video device available.';
             }
+
+            return userMedia;
          });
+   }
+
+   private static getScreenMedia() {
+      return new Promise((resolve, reject) => {
+         getScreenMedia((error, stream) => {
+            if (!error && stream) {
+               resolve(stream);
+            }
+
+            reject(error);
+         });
+      })
    }
 
    private static getUserMedia(um) {
@@ -53,8 +73,6 @@ export default class UserMedia {
       if (um.indexOf('audio') > -1) {
          constraints.audio = true;
       }
-
-      //@TODO screen media
 
       try {
          return navigator.mediaDevices.getUserMedia(constraints);
@@ -76,6 +94,9 @@ export default class UserMedia {
          case 'HTTPS_REQUIRED':
          case 'EXTENSION_UNAVAILABLE':
             msg = Translation.t(err.name);
+            break;
+         case 'NotSupportedError':
+            msg = Translation.t('NotSupportedError');
             break;
          default:
             msg = Translation.t(err.name) !== err.name ? Translation.t(err.name) : Translation.t('UNKNOWN_ERROR');
