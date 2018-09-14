@@ -20,6 +20,10 @@ export function addMenuEntry(options: { id: string, handler: (ev) => void, label
    Roster.get().addMenuEntry(options);
 }
 
+export function toggleRoster() {
+   Roster.get().toggle();
+}
+
 export function watchForm(formElement: JQuery, usernameElement: JQuery, passwordElement: JQuery, settingsCallback: SettingsCallback) {
    new FormWatcher(formElement, usernameElement, passwordElement, settingsCallback);
 }

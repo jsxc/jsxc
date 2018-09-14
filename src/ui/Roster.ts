@@ -426,7 +426,7 @@ export default class Roster {
       // }
    }
 
-   private toggle = () => {
+   public toggle = () => {
       let state = this.options.get('visibility');
 
       state = (state === CONST.HIDDEN) ? CONST.SHOWN : CONST.HIDDEN;
