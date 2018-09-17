@@ -4,28 +4,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
-- OMEMO
-- video calls in all tabs
-- [#328](https://github.com/jsxc/jsxc/issues/328) MUC joining from any tab
-- [#501](https://github.com/jsxc/jsxc/issues/501) support JID escaping (XEP-0106)
-- fix and improve emoticon insertion
-- add muc invitation
+## [Unreleased 4.0]
+### Added
+- OMEMO (XEP-0384)
+- MUC invitation
     - [#341](https://github.com/jsxc/jsxc/issues/341) mediated invitation
     - direct invitation (XEP-0249)
-- display muc subject in window header
-- remove nonpersistent contacts after login
-- [#6](https://github.com/jsxc/jsxc/issues/6) add voice only call
-- add fullscreen layout
-- translate OTR status messages
-- use Consistent Color Generation (XEP-0392)
-- use more naturally bounce animation for notice
+- [#6](https://github.com/jsxc/jsxc/issues/6) voice only call
+- [#501](https://github.com/jsxc/jsxc/issues/501) JID escaping (XEP-0106)
+- [#178](https://github.com/jsxc/jsxc/issues/178) add inband password change (XEP-0077)
+- insert emoticon at cursor position
+- MUC subject in window header
+- fullscreen layouts
 - display presence messages
 - allow to disable all plugins
 - highlight quotations
 - show notice if offline contacts are hidden
-- [#178](https://github.com/jsxc/jsxc/issues/178) add inband password change (XEP-0077)
 - prepare multi account support (still alpha)
+
+### Fixed
+- video calls in all tabs
+- [#328](https://github.com/jsxc/jsxc/issues/328) MUC joining from any tab
+- fix and improve emoticon insertion
+- remove nonpersistent contacts after login
+- translate OTR status messages
+
+### Changed
+- use Consistent Color Generation (XEP-0392)
+- use more naturally bounce animation for notice
 
 ### Developer notes
 - Typescript, Webpack, Handlebars, Karma, Mocha, Chai and Sinon
@@ -39,7 +45,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed/Pending
 - jingle file transfer
 - bookmarks
-- screen sharing
 
 ## 3.1.1 - 2017-02-14
 ### Fixed
