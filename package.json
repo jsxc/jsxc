@@ -6,6 +6,7 @@
   "bugs": "https://github.com/jsxc/jsxc/issues",
   "license": "MIT",
   "author": "Klaus Herberth <klaus@jsxc.org>",
+  "main": "src/index.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/jsxc/jsxc"
@@ -66,7 +67,7 @@
     "typescript": "^3.0.3",
     "typescript-formatter": "^7.0.1",
     "webpack": "^4.1.1",
-    "webpack-bundle-analyzer": "^2.13.1",
+    "webpack-bundle-analyzer": "^3.0.2",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.1"
   },
