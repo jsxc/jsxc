@@ -1,10 +1,16 @@
 /* jshint node:true */
-const path = require("path");
-const webpack = require("webpack");
+const path = require('path');
+const webpack = require('webpack');
+const packageJson = require('./package.json');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const GitRevisionPlugin = new(require('git-revision-webpack-plugin'))();
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
+const DEVELOPMENT_MODE = 'development';
+const PRODUCTION_MODE = 'production';
+const MOMENTJS_LOCALES = ['de', 'jp', 'nl', 'fr', 'zh', 'tr', 'pt', 'el', 'ro', 'pl', 'es', 'ru', 'it', 'hu'];
 const JS_BUNDLE_NAME = 'jsxc.bundle.js';
 
 const extractSass = new ExtractTextPlugin({
@@ -12,19 +18,18 @@ const extractSass = new ExtractTextPlugin({
    allChunks: true,
 });
 
-const packageJson = require('./package.json');
 const dependencies = Object.keys(packageJson.dependencies).map(function(name) {
-      let package = require('./node_modules/' + name + '/package.json');
+   let package = require('./node_modules/' + name + '/package.json');
 
-      return `${package.name}@${package.version} (${package.license})`;
+   return `${package.name}@${package.version} (${package.license})`;
 });
 
-const definePlugin = new webpack.DefinePlugin({
-   __VERSION__: JSON.stringify(packageJson.version),
+let definePluginConfig = {
+   __VERSION__: JSON.stringify(packageJson.version + '-git.' + GitRevisionPlugin.version()),
    __BUILD_DATE__: JSON.stringify((new Date()).toDateString()),
    __BUNDLE_NAME__: JSON.stringify(JS_BUNDLE_NAME),
    __DEPENDENCIES__: JSON.stringify(dependencies.join(', ')),
-});
+};
 
 const fileLoader = {
    loader: 'file-loader',
@@ -34,14 +39,20 @@ const fileLoader = {
    }
 };
 
-module.exports = {
+let config = {
    entry: ['./scss/main.scss', './src/index.ts'],
    output: {
       filename: JS_BUNDLE_NAME,
+      chunkFilename: "[name].chunk.js",
       path: path.resolve(__dirname, './dist/'),
       publicPath: 'dist/',
       libraryTarget: 'var',
       library: 'jsxc'
+   },
+   optimization: {
+      splitChunks: {
+         minSize: 10,
+      },
    },
    node: {
       fs: 'empty'
@@ -110,7 +121,6 @@ module.exports = {
    },
    plugins: [
       extractSass,
-      definePlugin,
       new CleanWebpackPlugin(['dist']),
       new CopyWebpackPlugin([{
          from: 'images/',
@@ -118,12 +128,17 @@ module.exports = {
       }, {
          from: 'node_modules/emojione/assets/svg/',
          to: 'images/emojione/'
+      }, {
+         from: 'LICENSE',
+         to: 'LICENSE',
+         toType: 'file',
       }]),
       new webpack.LoaderOptionsPlugin({
-            options: {
-                  handlebarsLoader: {}
-            }
-      })
+         options: {
+            handlebarsLoader: {}
+         }
+      }),
+      new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, new RegExp(MOMENTJS_LOCALES.join('|'))),
    ],
    devServer: {
       port: 8091,
@@ -131,11 +146,26 @@ module.exports = {
       open: true,
       openPage: 'example/ts.html',
       proxy: {
-            "/http-bind": "http://localhost:5280"
+         "/http-bind": "http://localhost:5280"
       },
       watchOptions: {
-            aggregateTimeout: 1300,
-            ignored: "/dist/"
+         aggregateTimeout: 1300,
+         ignored: "/dist/"
       }
-    },
+   },
+};
+
+module.exports = (env, argv) => {
+
+   if (argv.release) {
+      definePluginConfig['__VERSION__'] = JSON.stringify(packageJson.version);
+   }
+
+   if (argv.bundleAnalyzer) {
+      config.plugins.push(new BundleAnalyzerPlugin());
+   }
+
+   config.plugins.push(new webpack.DefinePlugin(definePluginConfig));
+
+   return config;
 };
