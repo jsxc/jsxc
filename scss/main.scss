@@ -1,9 +1,17 @@
+.jsxc-window-list,
+.jsxc-window-list-handler,
+.jsxc-dialog,
+#jsxc-roster {
+  * {
+    box-sizing: border-box;
+  }
+}
+
 @import "modules/all";
 @import "vendor/all";
 
 //fonts
 $font-sans: Arial, sans-serif;
-$font-serif: serif;
 
 $default-window-width: 250px;
 

@@ -36,18 +36,18 @@ $size-map: (
   }
 }
 
-#jsxc-dialog {
+.jsxc-dialog {
   @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/progress-bars";
 }
 
-#jsxc-dialog,
-#jsxc-webrtc {
+.jsxc-dialog,
+#jsxc-video-dialog {
   @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/utilities";
   @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/code";
   @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/grid";
   @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/alerts";
-  @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/buttons";
-  @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/button-groups";
+  // @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/buttons";
+  // @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/button-groups";
   @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/forms";
 
   .progress {
