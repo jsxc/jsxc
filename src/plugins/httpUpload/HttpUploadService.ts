@@ -92,12 +92,12 @@ export default class HttpUploadService {
 
                return xhr;
             },
-            success: function() {
+            success: () => {
                this.pluginAPI.Log.debug('file successful uploaded');
 
                resolve();
             },
-            error: function() {
+            error: () => {
                this.pluginAPI.Log.warn('error while uploading file to ' + putUrl);
 
                reject();
