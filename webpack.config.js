@@ -24,9 +24,10 @@ const dependencies = Object.keys(packageJson.dependencies).map(function(name) {
    return `${package.name}@${package.version} (${package.license})`;
 });
 
+let version = packageJson.version + '-git.' + GitRevisionPlugin.version();
+let buildDate = (new Date()).toDateString();
 let definePluginConfig = {
-   __VERSION__: JSON.stringify(packageJson.version + '-git.' + GitRevisionPlugin.version()),
-   __BUILD_DATE__: JSON.stringify((new Date()).toDateString()),
+   __BUILD_DATE__: JSON.stringify(buildDate),
    __BUNDLE_NAME__: JSON.stringify(JS_BUNDLE_NAME),
    __DEPENDENCIES__: JSON.stringify(dependencies.join(', ')),
 };
@@ -158,14 +159,26 @@ let config = {
 module.exports = (env, argv) => {
 
    if (argv.release) {
-      definePluginConfig['__VERSION__'] = JSON.stringify(packageJson.version);
+      version = packageJson.version;
    }
 
    if (argv.bundleAnalyzer) {
       config.plugins.push(new BundleAnalyzerPlugin());
    }
 
+   definePluginConfig['__VERSION__'] = JSON.stringify(version);
    config.plugins.push(new webpack.DefinePlugin(definePluginConfig));
+
+   config.plugins.push(new webpack.BannerPlugin({
+      banner: `JavaScript XMPP Client - the open chat
+
+Version: ${version}
+Build date: ${buildDate}
+${packageJson.homepage}
+
+JSXC is released under the MIT license, but this file also contains
+dependencies which are released under a different license.`
+   }));
 
    return config;
 };
