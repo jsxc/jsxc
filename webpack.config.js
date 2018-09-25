@@ -145,7 +145,7 @@ let config = {
       port: 8091,
       inline: true,
       open: true,
-      openPage: 'example/ts.html',
+      openPage: 'example/index.html',
       proxy: {
          "/http-bind": "http://localhost:5280"
       },

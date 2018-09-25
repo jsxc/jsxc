@@ -10,28 +10,10 @@
    <link href="css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css" />
 
    <!-- require:dependencies -->
-   <link href="../build/css/jquery-ui.min.css" media="all" rel="stylesheet" type="text/css" />
-   <link href="../build/css/jsxc.css" media="all" rel="stylesheet" type="text/css" />
+   <link href="../dist/styles/jsxc.bundle.css" media="all" rel="stylesheet" type="text/css" />
    <!--  endrequire -->
 
    <link href="css/example.css" media="all" rel="stylesheet" type="text/css" />
-
-   <!-- require:dependencies -->
-   <script src="js/jquery.min.js"></script>
-   <script src="js/jquery-ui.min.js"></script>
-   <script src="../build/lib/jquery.slimscroll.js"></script>
-   <script src="../build/lib/jquery.fullscreen.js"></script>
-   <script src="../build/lib/jsxc.dep.js"></script>
-   <!--  endrequire -->
-
-   <script src="js/bootstrap.min.js"></script>
-
-   <!-- jsxc library -->
-   <script src="../build/jsxc.min.js"></script>
-
-   <!-- init script -->
-   <script src="js/example.js"></script>
-
 </head>
 
 <body>
@@ -46,7 +28,17 @@
                   <p>This example demonstrates different types of login methods for <a href="https://www.jsxc.org/">JSXC</a>. You find further information in our <a href="https://github.com/jsxc/jsxc/wiki">wiki</a>.</p>
 
                   <p class="jsxc-org">You can use demo1 to demo5 with password demo to test JSXC (XMPP domain: jsxc.org, BOSH url: /http-bind/).</p>
-               </div>
+
+                  <div class="localhost">
+                     <p><a class="btn btn-danger" href="javascript:jsxc.deleteAllData()">Delete all Data</a>
+                        <a class="btn btn-default" href="javascript:jsxc.enableDebugMode()">Enable Debug Mode</a>
+                        <a class="btn btn-default" href="javascript:jsxc.disableDebugMode()">Disable Debug Mode</a></p>
+
+                     <p><a class="btn btn-default" href="javascript:$('body').removeClass('jsxc-fullscreen jsxc-two-columns')">Normal</a>
+                        <a class="btn btn-default" href="javascript:$('body').addClass('jsxc-fullscreen jsxc-two-columns')">Two Columns</a>
+                        <a class="btn btn-default" href="javascript:$('body').removeClass('jsxc-two-columns').addClass('jsxc-fullscreen')">Fullscreen</a></p>
+                  </div>
+                </div>
 
                <div class="form form-horizontal col-md-6">
                   <div class="form-group">
@@ -74,19 +66,19 @@
 
             <p>You should use this method if you have already a login in your website.</p>
 
-            <form id="form" method="post" action="login.html" class="form form-horizontal">
+            <form id="watch-form" method="post" action="?" class="form form-horizontal">
                <fieldset>
                   <div class="form-group">
-                     <label for="username" class="col-xs-4 control-label">Username:</label>
+                     <label for="watch-username" class="col-xs-4 control-label">Username:</label>
                      <div class="col-xs-8">
-                        <input type="text" id="username" name="username" class="form-control" />
+                        <input type="text" id="watch-username" name="username" class="form-control" />
                      </div>
                   </div>
 
                   <div class="form-group">
-                     <label for="password" class="col-xs-4 control-label">Password:</label>
+                     <label for="watch-password" class="col-xs-4 control-label">Password:</label>
                      <div class="col-xs-8">
-                        <input type="password" id="password" name="password" class="form-control" />
+                        <input type="password" id="watch-password" name="password" class="form-control" />
                      </div>
                   </div>
 
@@ -108,33 +100,31 @@
 
 &lt;button id="logout"&gt;Logout&lt;/button&gt;</pre>
 
-            <pre>jsxc.init({
-  loginForm: {
-    form: '#form',
-    jid: '#username',
-    pass: '#password'
-  },
-  logoutElement: $('#logout'),
-  loadSettings: function() {
-    return xmpp: {
+            <pre>jsxc.init();
+
+let formElement = $('#form');
+let usernameElement = $('#username');
+let passwordElement = $('#password');
+
+function getSettings(username, password) {
+  return Promise.resolve({
+    xmpp: {
       url: '/http-bind/',
       domain: 'localhost',
-      resource: 'example',
-      overwrite: true,
-      onlogin: true
-    };
-  },
-  root: '/jsxc/'
-});</pre>
+    }
+  });
+}
+
+jsxc.watchForm(formElement, usernameElement, passwordElement, getSettings);</pre>
 
          </div>
 
          <div class="col-xs-12 col-md-4">
-            <h3>AJAX Login</h3>
+            <h3>Instant Login</h3>
 
             <p>Do you want to login directly within your script? Choose this type.
 
-               <form id="form2" class="form form-horizontal">
+               <form id="instant-login-form" class="form form-horizontal">
                   <fieldset>
                      <div class="alert alert-warning col-xs-12" role="alert">
                         <strong>Warning!</strong> Your username or password is wrong!
@@ -143,14 +133,14 @@
                      <div class="form-group">
                         <label for="username2" class="col-xs-4 control-label">Username:</label>
                         <div class="col-xs-8">
-                           <input type="text" id="username2" class="form-control" />
+                           <input type="text" name="username" id="username2" class="form-control" />
                         </div>
                      </div>
 
                      <div class="form-group">
                         <label for="password2" class="col-xs-4 control-label">Password:</label>
                         <div class="col-xs-8">
-                           <input type="password" id="password2" class="form-control" />
+                           <input type="password" name="password" id="password2" class="form-control" />
                         </div>
                      </div>
 
@@ -167,89 +157,54 @@
 &lt;input type="password" id="password" /&gt;
 &lt;button id="submit"&gt;Log in&lt;/button&gt;</pre>
 
-               <pre>jsxc.init({
-  xmpp: {
-    url: '/http-bind/'
-  },
-  root: '/jsxc/'
-});
+               <pre>jsxc.init();
 
 $('#submit').click(function(){
-  var username = $('#username').val();
-  var password = $('#password').val();
+  let username = $('#username').val();
+  let password = $('#password').val();
 
-  var jid = username + '@localhost';
+  let url = '/http-bind/';
+  let jid = username + '@localhost';
 
-  jsxc.start(jid , password);
+  jsxc.start(url, jid , password);
 });
 </pre>
          </div>
 
          <div class="col-xs-12 col-md-4">
-            <h3>Box Login</h3>
+          <h3>Prelogin</h3>
 
-            <p>Do you look for a discrete login method? Choose this.</p>
+          <p>Attach to existing BOSH connection after JSXC was initialized.</p>
 
-            <div class="form" id="form3">
-               <button class="submit btn btn-primary">Open Box</button>
-               <button class="logout btn btn-default">Log out</button>
-            </div>
+          <pre>jsxc.init();
 
-            <pre>&lt;button id="button"&gt;Open Box&lt;/button&gt;</pre>
+let url = '/http-bind/';
+let jid = 'username@localhost';
+let sid = 'YOUR_SID';
+let rid = 'YOUR_RID';
 
-            <pre>jsxc.init({
-  loadSettings: function() {
-    return xmpp: {
-      url: '/http-bind/',
-      domain: 'localhost',
-      resource: 'example',
-      overwrite: true,
-      onlogin: true
-    };
-  },
-  root: '/jsxc/'
-});
+jsxc.start(url, jid, sid, rid);</pre>
+       </div>
 
-$('#button').click(jsxc.gui.showLoginBox);</pre>
-         </div>
-
-      </div>
-
-      <div class="row">
-         <div class="col-xs-12 col-md-4">
-            <h3>Prelogin</h3>
-
-            <p>Attach to existing BOSH connection. Helpful if you login server side.</p>
-
-            <pre>jsxc.init({
-  xmpp: {
-    url: '/http-bind/',
-    jid: 'username@localhost',
-    sid: 'SID',
-    rid: 'RID'
-  },
-  root: '/jsxc/'
-});</pre>
-         </div>
-
-         <div class="col-xs-12 col-md-4">
-            <h3>AJAX Prelogin</h3>
-
-            <p>Attach to existing BOSH connection after JSXC was initialized.</p>
-
-            <pre>jsxc.init({
-  xmpp: {
-    url: '/http-bind/'
-  },
-  root: '/jsxc/'
-});
-
-function callback() {
-   jsxc.start('username@localhost', 'SID', 'RID');
-}</pre>
-         </div>
       </div>
    </div>
+
+
+   <!-- require:dependencies -->
+   <script src="js/jquery.min.js"></script>
+   <!-- endrequire -->
+
+   <!-- require:optional -->
+   <script src="http://localhost/libsignal/dist/libsignal-protocol.js"></script>
+   <!--  endrequire -->
+
+   <script src="js/bootstrap.min.js"></script>
+
+   <!-- jsxc library -->
+   <script src="../dist/jsxc.bundle.js"></script>
+
+   <script src="js/example.js"></script>
+   <script src="js/helper.js"></script>
 </body>
 
 </html>
