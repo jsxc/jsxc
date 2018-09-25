@@ -1,6 +1,6 @@
 // jshint node:true
 
-const webpackConfig = require('./webpack.config.js');
+const webpackConfig = require('./webpack.config.js')({}, {});
 
 module.exports = function(config) {
    config.set({
