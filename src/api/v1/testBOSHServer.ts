@@ -13,14 +13,24 @@ export function testBOSHServer(url, domain): Promise<string> {
    let rid = '123456';
    let requestString = `<body rid='${rid}' xmlns='http://jabber.org/protocol/httpbind' to='${domain}' xml:lang='en' wait='60' hold='1' content='text/xml; charset=utf-8' ver='1.6' xmpp:version='1.0' xmlns:xmpp='urn:xmpp:xbosh'/>`;
 
-   return new Promise((resolve) => {
+   return new Promise((resolve, reject) => {
       $.ajax({
          type: 'POST',
          url: url,
          data: requestString,
          global: false,
          dataType: 'xml'
-      }).done(stanza => resolve(processResponse(stanza))).fail((xhr, textStatus) => processErrorResponse(xhr, textStatus, url));
+      }).done(stanza => {
+         try {
+            let result = processResponse(stanza);
+
+            resolve(result);
+         } catch (err) {
+            reject(err);
+         }
+      }).fail((xhr, textStatus) => {
+         reject(processErrorResponse(xhr, textStatus, url));
+      });
    });
 }
 
@@ -67,15 +77,15 @@ function processErrorResponse(xhr, textStatus, url) {
 
    if (xhr.status === 0) {
       // cross-side
-      throw new ConnectionError('Cross domain request was not possible. Either your BOSH server does not send any ' +
+      return new ConnectionError('Cross domain request was not possible. Either your BOSH server does not send any ' +
          'Access-Control-Allow-Origin header or the content-security-policy (CSP) blocks your request. ' +
          'The savest way is still to use Apache ProxyRequest or Nginx proxy_pass.', 'cross-domain');
    } else if (xhr.status === 404) {
       // not found
-      throw new ConnectionError('Your server responded with "404 Not Found". Please check if your BOSH server is running and reachable via ' + urlWithProtocol + '.', 'not-found');
+      return new ConnectionError('Your server responded with "404 Not Found". Please check if your BOSH server is running and reachable via ' + urlWithProtocol + '.', 'not-found');
    } else if (textStatus === 'parsererror') {
-      throw new ConnectionError('Invalid XML received. Maybe ' + urlWithProtocol + ' was redirected. You should use an absolute url.', 'invalid-xml');
+      return new ConnectionError('Invalid XML received. Maybe ' + urlWithProtocol + ' was redirected. You should use an absolute url.', 'invalid-xml');
    } else {
-      throw new ConnectionError(xhr.status + ' ' + xhr.statusText, 'misc');
+      return new ConnectionError(xhr.status + ' ' + xhr.statusText, 'misc');
    }
 }
