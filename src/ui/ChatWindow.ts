@@ -219,24 +219,28 @@ export default class ChatWindow {
    }
 
    protected initDroppable() {
+      let enterCounter = 0;
       let windowElement = this.element.find('.jsxc-window');
 
       windowElement.addClass('jsxc-droppable');
 
       windowElement.on('dragenter', (ev) => {
-         ev.preventDefault();
+         enterCounter++;
 
          windowElement.addClass('jsxc-dragover');
       });
 
       windowElement.on('dragleave', (ev) => {
-         ev.preventDefault();
+         enterCounter--;
 
-         windowElement.removeClass('jsxc-dragover');
+         if (enterCounter === 0) {
+            windowElement.removeClass('jsxc-dragover');
+         }
       });
 
       windowElement.on('dragover', (ev) => {
          ev.preventDefault();
+
          (<any>ev.originalEvent).dataTransfer.dropEffect = 'copy';
       });
    }

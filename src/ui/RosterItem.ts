@@ -26,13 +26,13 @@ export default class RosterItem {
       this.element.attr('data-subscription', this.contact.getSubscription());
 
       this.element.on('dragstart', (ev) => {
-         (<any>ev.originalEvent).dataTransfer.setData('text/plain', contact.getJid().bare);
+         (<any>ev.originalEvent).dataTransfer.setData('text/plain', contact.getJid().full);
 
-         $('.jsxc-droppable').addClass('jsxc-dragactive jsxc-drag-rosteritem');
+         $('.jsxc-droppable').addClass('jsxc-drag-rosteritem');
       });
 
       this.element.on('dragend', () => {
-         $('.jsxc-droppable').removeClass('jsxc-dragactive jsxc-drag-rosteritem');
+         $('.jsxc-droppable').removeClass('jsxc-drag-rosteritem');
       });
 
       this.element.click(function() {

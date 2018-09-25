@@ -41,6 +41,8 @@ export default class Client {
       Client.presenceController = new PresenceController(storage, () => Client.accountManager.getAccounts());
       Client.noticeManager = new NoticeManager(storage);
 
+      Client.watchFileDrag();
+
       return Client.accountManager.restoreAccounts();
    }
 
@@ -112,5 +114,37 @@ export default class Client {
 
    public static setOption(key: string, value) {
       Client.getOptions().set(key, value);
+   }
+
+   private static watchFileDrag() {
+      let enterCounter = 0;
+
+      $(document).on('dragenter', (ev) => {
+         enterCounter++;
+
+         if (enterCounter === 1) {
+            $('.jsxc-droppable').addClass('jsxc-dragactive');
+         }
+      });
+
+      $(document).on('dragleave', (ev) => {
+         enterCounter--;
+
+         if (enterCounter === 0) {
+            $('.jsxc-droppable').removeClass('jsxc-dragactive');
+         }
+      });
+
+      $(document).on('dragover', (ev) => {
+         ev.preventDefault();
+
+         (<any>ev.originalEvent).dataTransfer.dropEffect = 'copy';
+      });
+
+      $(document).on('drop', () => {
+         enterCounter = 0;
+
+         $('.jsxc-droppable').removeClass('jsxc-dragactive jsxc-dragover');
+      });
    }
 }

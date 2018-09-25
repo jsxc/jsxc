@@ -149,6 +149,10 @@ export default class Contact implements IIdentifiable, IContact {
    public hasFeatureByResource(resource: string, features: string[]): Promise<{}>
    public hasFeatureByResource(resource: string, feature: string): Promise<{}>
    public hasFeatureByResource(resource, feature) {
+      if (!resource) {
+         throw 'I can not lookup a feature without resource';
+      }
+
       let jid = new JID(this.jid.bare + '/' + resource);
 
       return this.account.getDiscoInfoRepository().hasFeature(jid, feature);

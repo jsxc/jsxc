@@ -5,11 +5,16 @@
   cursor: default;
   height: auto;
   max-width: 100%;
+  position: relative;
   z-index: 80;
 
-  &.jsxc-droppable.jsxc-dragactive {
+  &.jsxc-droppable.jsxc-dragactive,
+  &.jsxc-dragover {
     &::before {
-      background-color: rgba(52, 70, 139, 0.2);
+      background-color: rgb(52, 70, 139);
+      background-image: url("../images/drop_white.svg");
+      background-position: center center;
+      background-repeat: no-repeat;
       bottom: 0;
       content: "";
       left: 0;
@@ -18,10 +23,15 @@
       top: 0;
       z-index: 100;
     }
+  }
 
-    &.jsxc-dragover::before {
-      background-color: rgba(52, 70, 139, 0.56);
-    }
+  &.jsxc-droppable.jsxc-dragactive::before {
+    opacity: 0.2;
+  }
+
+  &.jsxc-dragover::before {
+    background-image: url("../images/dragover_white.svg") !important;
+    opacity: 0.56 !important;
   }
 
   .jsxc-show-overlay & {

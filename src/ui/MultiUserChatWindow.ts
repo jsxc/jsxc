@@ -18,7 +18,6 @@ export default class MultiUserChatWindow extends ChatWindow {
       this.disable();
       this.element.addClass('jsxc-groupchat');
 
-      this.initDroppable();
       this.addMucElementsToChatWindow();
 
       this.contact.registerNewMemberHook((value, nickname) => {
@@ -101,9 +100,15 @@ export default class MultiUserChatWindow extends ChatWindow {
    }
 
    protected initDroppable() {
+      super.initDroppable();
+
       let windowElement = this.element.find('.jsxc-window');
 
       windowElement.on('drop', (ev) => {
+         if ((<any>ev.originalEvent).dataTransfer.files.length) {
+            return;
+         }
+
          ev.preventDefault();
 
          let jid = new JID((<any>ev.originalEvent).dataTransfer.getData('text'));
