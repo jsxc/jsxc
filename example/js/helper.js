@@ -1,5 +1,7 @@
 armConnectionParameterForm();
 
+$('.version').text(jsxc.version);
+
 // special setup on localhost
 if (window.location.hostname === 'localhost') {
    watchLoginCredentials();
