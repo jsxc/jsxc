@@ -6,45 +6,62 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased 4.0]
 ### Added
-- OMEMO (XEP-0384)
+- OMEMO ([XEP-0384])
 - MUC invitation
     - [#341](https://github.com/jsxc/jsxc/issues/341) mediated invitation
-    - direct invitation (XEP-0249)
-- [#6](https://github.com/jsxc/jsxc/issues/6) voice only call
-- [#501](https://github.com/jsxc/jsxc/issues/501) JID escaping (XEP-0106)
-- [#178](https://github.com/jsxc/jsxc/issues/178) add inband password change (XEP-0077)
+    - direct invitation ([XEP-0249])
+    - both also via contact drag and drop
+- [#6](https://github.com/jsxc/jsxc/issues/6) voice-only call
+- [#501](https://github.com/jsxc/jsxc/issues/501) JID escaping ([XEP-0106])
+- [#178](https://github.com/jsxc/jsxc/issues/178) add in-band password change ([XEP-0077])
+- [#178](https://github.com/jsxc/jsxc/issues/178) add in-band registration ([XEP-0077])
+- send file via file drop
 - insert emoticon at cursor position
 - MUC subject in window header
-- fullscreen layouts
+- full screen layout
 - display presence messages
-- allow to disable all plugins
+- option to disable all plugins
 - highlight quotations
 - show notice if offline contacts are hidden
-- prepare multi account support (still alpha)
+- prepared multi account support (still experimental)
 
 ### Fixed
-- video calls in all tabs
+- video calls can now be initiated from any tab
 - [#328](https://github.com/jsxc/jsxc/issues/328) MUC joining from any tab
 - fix and improve emoticon insertion
-- remove nonpersistent contacts after login
+- remove non-persistent contacts after login
 - translate OTR status messages
 
 ### Changed
-- use Consistent Color Generation (XEP-0392)
-- use more naturally bounce animation for notice
+- use Consistent Color Generation ([XEP-0392])
+- use more natural bounce animation for notice icon
 
 ### Developer notes
-- Typescript, Webpack, Handlebars, Karma, Mocha, Chai and Sinon
-- remove `build` and `doc` folder, git submodules, bower and grunt
+- [Typescript], [Webpack], [Handlebars], [Karma], [Mocha], [Chai] and [Sinon]
+- removed `build` and `doc` folder, git submodules, bower and grunt
 - share one XMPP connection across all tabs
 - add plugin API
 - form watcher instead of form option
-- API to add roster menu entries
-- use SASS guidelines and BEM-like style syntax
+- API to add roster menu entries (`jsxc.addMenuEntry()`)
+- API to test BOSH server (`jsxc.testBOSHServer()`)
+- use [SASS guidelines] and [BEM]-like style syntax
 
 ### Removed/Pending
-- jingle file transfer
+- Jingle file transfer
 - bookmarks
+
+[Typescript]: http://www.typescriptlang.org
+[Webpack]: https://webpack.js.org
+[Handlebars]: https://handlebarsjs.com
+[Karma]: http://karma-runner.github.io/2.0/index.html
+[Mocha]: https://mochajs.org
+[Chai]: https://www.chaijs.com
+[Sinon]: https://sinonjs.org
+[XEP-0392]: https://xmpp.org/extensions/xep-0392.html
+[XEP-0077]: https://xmpp.org/extensions/xep-0077.html
+[XEP-0106]: https://xmpp.org/extensions/xep-0106.html
+[XEP-0249]: https://xmpp.org/extensions/xep-0249.html
+[XEP-0384]: https://xmpp.org/extensions/xep-0384.html
 
 ## 3.1.1 - 2017-02-14
 ### Fixed
