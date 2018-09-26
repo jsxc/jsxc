@@ -1,4 +1,5 @@
 import { ILog } from './Log.interface'
+import Client from '../Client';
 
 enum LogLevel {
    Debug,
@@ -35,7 +36,11 @@ export class Logger implements ILog {
    }
 
    private log(level: LogLevel, message: string, ...data) {
-      if (/*Client.isDebugMode() && */ typeof console !== 'undefined') {
+      if (typeof console !== 'undefined') {
+         if (!Client.isDebugMode() && level === LogLevel.Debug) {
+            return;
+         }
+
          let logFunction = (level === LogLevel.Warn || level === LogLevel.Error) ? 'warn' : 'log';
 
          console[logFunction].apply(this, [this.getPrefix(level) + message, ...data]);
