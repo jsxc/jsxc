@@ -147,7 +147,8 @@ let config = {
       open: true,
       openPage: 'example/index.html',
       proxy: {
-         "/http-bind": "http://localhost:5280"
+         "/http-bind": "http://localhost:5280",
+         "/libsignal": "http://localhost",
       },
       watchOptions: {
          aggregateTimeout: 1300,
