@@ -54,41 +54,37 @@ abstract class AbstractConnection {
    }
 
    public getPEPService = (): PEPService => {
-      return this.getService(PEPService);
+      return this.getService('pep', PEPService);
    }
 
    public getMUCService = (): MUCService => {
-      return this.getService(MUCService);
+      return this.getService('roster', MUCService);
    }
 
    public getRosterService = (): RosterService => {
-      return this.getService(RosterService);
+      return this.getService('roster', RosterService);
    }
 
    public getVcardService = (): VcardService => {
-      return this.getService(VcardService);
+      return this.getService('vcard', VcardService);
    }
 
    public getDiscoService = (): DiscoService => {
-      return this.getService(DiscoService);
+      return this.getService('disco', DiscoService);
    }
 
-   private getService(Service) {
-      if (Service.name.match(/^default/)) {
-         Log.debug('Every service needs a unique class name');
-      }
-
-      if (!this.services[Service.name]) {
+   private getService(key: string, Service) {
+      if (!this.services[key]) {
          let self = this;
 
-         this.services[Service.name] = new Service(function() {
+         this.services[key] = new Service(function() {
             return self.send.apply(self, arguments)
          }, function() {
             return self.sendIQ.apply(self, arguments)
          }, this, this.account);
       }
 
-      return this.services[Service.name];
+      return this.services[key];
    }
 
    public pluginOnlySend(stanzaElement: Element);
