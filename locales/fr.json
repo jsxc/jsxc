@@ -310,13 +310,16 @@
     "File_too_large": "Fichier trop grand",
     "No_proper_file_transfer_method_available": "Aucune méthode de transfert de fichier disponible.",
     "You_have_to_go_online_": "Vous devez être connecté pour exécuter cette opération",
+    "Credits": null,
     "error_location_not_provided": "Impossible d'obtenir votre emplacement.",
+    "Libraries": null,
     "Log_in_with_chat": "Connectez-vous avec la messagerie instantanée",
     "Offline_contacts_are_hidden": null,
     "OMEMO_devices": null,
     "OMEMO_own_devices": null,
     "OMEMO_peer_devices": null,
     "Send_location": "Envoyer votre emplacement",
+    "Show_debug_log": null,
     "You_are_currently_offline": null
   }
 }

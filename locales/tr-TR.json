@@ -310,13 +310,16 @@
     "File_too_large": "Dosya çok büyük",
     "No_proper_file_transfer_method_available": "Uygun dosya aktarma yöntemi yok",
     "You_have_to_go_online_": "Bu işlemi gerçekleştirebilmek için çevrimiçi olmalısınız.",
+    "Credits": null,
     "error_location_not_provided": "Yer alınamadı",
+    "Libraries": null,
     "Log_in_with_chat": "Sohbetle giriş yap",
     "Offline_contacts_are_hidden": null,
     "OMEMO_devices": null,
     "OMEMO_own_devices": null,
     "OMEMO_peer_devices": null,
     "Send_location": "Konum gönder",
+    "Show_debug_log": null,
     "You_are_currently_offline": null
   }
 }

@@ -310,13 +310,16 @@
     "File_too_large": "Bestand is te groot",
     "No_proper_file_transfer_method_available": "Geen bestand verzendingsmethode beschikbaar",
     "You_have_to_go_online_": "Je dient online te zijn om deze operatie uit te voeren",
+    "Credits": null,
     "error_location_not_provided": "Kon geen locatie verkrijgen.",
+    "Libraries": null,
     "Log_in_with_chat": "Log in bij chat",
     "Offline_contacts_are_hidden": null,
     "OMEMO_devices": null,
     "OMEMO_own_devices": null,
     "OMEMO_peer_devices": null,
     "Send_location": "Locatie verzenden",
+    "Show_debug_log": null,
     "You_are_currently_offline": null
   }
 }

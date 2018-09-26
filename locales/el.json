@@ -310,13 +310,16 @@
     "File_too_large": "Το αρχείο είναι πολύ μεγάλο",
     "No_proper_file_transfer_method_available": "Δεν υπάρχει διαθέσιμη κατάλληλη μέθοδος μεταφοράς αρχείων",
     "You_have_to_go_online_": "Πρέπει να είστε σε σύνδεση για να εκτελέσετε αυτήν τη λειτουργία.",
+    "Credits": null,
     "error_location_not_provided": null,
+    "Libraries": null,
     "Log_in_with_chat": null,
     "Offline_contacts_are_hidden": null,
     "OMEMO_devices": null,
     "OMEMO_own_devices": null,
     "OMEMO_peer_devices": null,
     "Send_location": null,
+    "Show_debug_log": null,
     "You_are_currently_offline": null
   }
 }
