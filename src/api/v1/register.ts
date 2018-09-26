@@ -51,6 +51,8 @@ class Registration {
          return callback(form);
       }).then(this.submitForm).catch(err => {
          Log.info('Error during registration callback', err);
+
+         throw err;
       });
    }
 
