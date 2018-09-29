@@ -1,5 +1,3 @@
-armConnectionParameterForm();
-
 $('.version').text(jsxc.version);
 
 // special setup on localhost
@@ -19,6 +17,8 @@ if (window.location.hostname === 'www.jsxc.org') {
 
     $('.jsxc-org').show();
  }
+
+armConnectionParameterForm();
 
 function watchLoginCredentials() {
    $('#instant-login-form').submit(function(ev) {
