@@ -14,7 +14,7 @@ if (window.location.hostname === 'localhost') {
 if (window.location.hostname === 'www.jsxc.org') {
     if (!localStorage.getItem('bosh-url') && !localStorage.getItem('xmpp-domain')) {
        $('#bosh-url').val('/http-bind/');
-       $('#xmpp-domain').val('jsxc.org');
+       $('#xmpp-domain').val('demo.jsxc.ch');
     }
 
     $('.jsxc-org').show();
