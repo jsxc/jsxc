@@ -59,6 +59,16 @@ body {
    color: red;
 }
 
+details {
+    padding: 1em;
+    margin-bottom: 1em;
+}
+
+summary {
+    margin: -1em -1em 1em -1em;
+    cursor: pointer;
+}
+
 body {
     border-top: 5px solid transparent;
 }
