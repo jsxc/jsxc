@@ -13,6 +13,7 @@
   },
   "scripts": {
     "start": "webpack --config webpack.config.js --mode production",
+    "watch": "webpack --config webpack.config.js --mode production --watch",
     "dev": "webpack-dev-server --mode development",
     "test": "karma start --single-run",
     "fix-typescript-format": "node_modules/typescript-formatter/bin/tsfmt  -r",
@@ -35,6 +36,7 @@
     "@types/node": "^10.9.4",
     "@types/sinon": "^5.0.2",
     "@types/strophe": "^1.2.30",
+    "archiver": "^3.0.0",
     "chai": "^4.1.0",
     "clean-webpack-plugin": "^0.1.18",
     "copy-webpack-plugin": "^4.3.1",

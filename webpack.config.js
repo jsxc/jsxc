@@ -24,7 +24,7 @@ const dependencies = Object.keys(packageJson.dependencies).map(function(name) {
    return `${package.name}@${package.version} (${package.license})`;
 });
 
-let version = packageJson.version + '-git.' + GitRevisionPlugin.version();
+let version = packageJson.version.replace(/-.+$/, '') + '-git.' + GitRevisionPlugin.version();
 let buildDate = (new Date()).toDateString();
 let definePluginConfig = {
    __BUILD_DATE__: JSON.stringify(buildDate),
@@ -54,6 +54,10 @@ let config = {
       splitChunks: {
          minSize: 10,
       },
+   },
+   performance: {
+      maxEntrypointSize: 1024 * 1000 * 1000 * 3,
+      maxAssetSize: 1024 * 1000 * 1000 * 3,
    },
    node: {
       fs: 'empty'
@@ -158,6 +162,10 @@ let config = {
 };
 
 module.exports = (env, argv) => {
+
+   if (typeof argv.mode === 'string') {
+      config.mode = argv.mode;
+   }
 
    if (argv.release) {
       version = packageJson.version;
