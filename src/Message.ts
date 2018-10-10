@@ -269,6 +269,11 @@ export default class Message implements Identifiable, IMessage {
       let inQuote = false;
 
       for (let lineNumber in lines) {
+         if (!lines.hasOwnProperty(lineNumber)) {
+            //This value comes from Array prototype
+            continue;
+         }
+
          let line = lines[lineNumber];
 
          if (line.indexOf('&gt;') === 0) {
