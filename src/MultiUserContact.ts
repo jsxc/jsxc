@@ -229,7 +229,7 @@ export default class MultiUserContact extends Contact {
       return this.isBookmarked();
    }
 
-   private shutdown() {
+   public shutdown() {
       this.data.set('resources', {});
       this.data.set('presence', Presence.offline);
 

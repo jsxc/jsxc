@@ -45,8 +45,7 @@ export default class MultiUserPresenceProcessor {
       var newNickname = this.xElement.find('item').attr('nick');
 
       if (this.xElement.find('destroy').length > 0) {
-         //@TODO empty member list
-         //@TODO close room
+         this.getMultiUserContact().shutdown();
 
          this.inform(Translation.t('This_room_has_been_closed'))
       } else if (this.codes.indexOf('303') > -1 && newNickname) {
