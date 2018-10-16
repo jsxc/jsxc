@@ -18,5 +18,5 @@ cache:
 script:
   - yarn checking-style-format
   - yarn checking-typescript-format
-  - commitlint-travis || true
+  - commitlint-travis
   - yarn test
