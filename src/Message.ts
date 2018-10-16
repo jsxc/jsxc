@@ -108,8 +108,8 @@ export default class Message implements Identifiable, IMessage {
       return this.data.get('next');
    }
 
-   public setNext(message: IMessage | string): void {
-      let nextId = typeof message === 'string' ? message : message.getUid();
+   public setNext(message: IMessage | string | undefined): void {
+      let nextId = typeof message === 'string' || typeof message === 'undefined' ? message : message.getUid();
 
       if (this.getNextId() === this.uid) {
          console.trace('Loop detected ' + this.uid);

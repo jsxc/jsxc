@@ -3,8 +3,8 @@ import loginDialog from './ui/dialogs/loginBox'
 /** name of container application (e.g. Nextcloud or SOGo) */
 export let app_name = 'web applications';
 
-/** @TODO How many messages should be logged? (UNUSED) */
-export let numberOfMsg = 10;
+/** How many messages should be logged? */
+export let numberOfMessages = 100;
 
 /** Default language */
 export let defaultLang = 'en';

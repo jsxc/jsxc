@@ -3,13 +3,15 @@ import { IMessage as IMessage, DIRECTION } from './Message.interface'
 import Contact from './Contact'
 import Storage from './Storage'
 import PersistentMap from './util/PersistentMap'
+import Options from './Options';
+import Log from '@util/Log';
 
 export default class Transcript {
    private properties: PersistentMap;
 
    private firstMessage: IMessage;
 
-   private messages = {};
+   private messages: { [index: string]: IMessage } = {};
 
    constructor(storage: Storage, contact: Contact) {
       this.properties = new PersistentMap(storage, 'transcript', contact.getId());
@@ -27,6 +29,8 @@ export default class Transcript {
       this.addMessage(message);
 
       this.properties.set('firstMessageId', message.getUid());
+
+      this.deleteLastMessages();
    }
 
    public getFirstMessage(): IMessage {
@@ -49,10 +53,42 @@ export default class Transcript {
 
    public getMessage(id: string): IMessage {
       if (!this.messages[id] && id) {
-         this.messages[id] = new Message(id);
+         try {
+            this.messages[id] = new Message(id);
+         } catch (err) {
+            Log.warn(err);
+
+            return undefined;
+         }
       }
 
       return this.messages[id];
+   }
+
+   private deleteLastMessages() {
+      let allowedNumberOfMessages = parseInt(Options.get().get('numberOfMessages'));
+      let numberOfMessages = 0;
+
+      if (allowedNumberOfMessages <= 0 || isNaN(allowedNumberOfMessages)) {
+         return;
+      }
+
+      let message = this.getFirstMessage();
+      let nextMessage: IMessage;
+
+      while (message) {
+         nextMessage = this.getMessage(message.getNextId());
+
+         numberOfMessages++;
+
+         if (numberOfMessages === allowedNumberOfMessages) {
+            message.setNext(undefined);
+         } else if (numberOfMessages > allowedNumberOfMessages) {
+            message.delete();
+         }
+
+         message = nextMessage;
+      }
    }
 
    public clear() {
