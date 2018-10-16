@@ -1,6 +1,4 @@
 import Translation from '../../../../util/Translation'
-import Log from '../../../../util/Log'
-import JID from '../../../../JID'
 import MultiUserContact from '../../../../MultiUserContact'
 import MultiUserPresenceProcessor from './PresenceProcessor'
 import showSelectionDialog from '../../../../ui/dialogs/selection'
@@ -10,7 +8,7 @@ import showRoomConfigurationDialog from '../../../../ui/dialogs/multiUserRoomCon
 // https://xmpp.org/extensions/xep-0045.html#registrar-statuscodes
 
 export default class MultiUserStatusCodeHandler {
-   constructor(private presenceHandler: MultiUserPresenceProcessor, private isSelfRefered: boolean) {
+   constructor(private presenceHandler: MultiUserPresenceProcessor, private isSelfReferred: boolean) {
 
    }
 
@@ -80,7 +78,7 @@ export default class MultiUserStatusCodeHandler {
 
    /** Inform user that he or she has been banned */
    private 301() {
-      if (this.isSelfRefered) {
+      if (this.isSelfReferred) {
          return Translation.t('muc_removed_banned');
       }
 
@@ -92,7 +90,7 @@ export default class MultiUserStatusCodeHandler {
 
    /** Inform user that he or she has been kicked */
    private 307(room, nickname, data, xdata) {
-      if (this.isSelfRefered) {
+      if (this.isSelfReferred) {
          return Translation.t('muc_removed_kicked');
       }
 
@@ -104,7 +102,7 @@ export default class MultiUserStatusCodeHandler {
 
    /** Inform user that he or she is beeing removed from the room because of an affiliation change */
    private 321(room, nickname) {
-      if (this.isSelfRefered) {
+      if (this.isSelfReferred) {
          return Translation.t('muc_removed_affiliation');
       }
 
@@ -119,7 +117,7 @@ export default class MultiUserStatusCodeHandler {
     * changed to members-only and the user is not a member
     */
    private 322(room, nickname) {
-      if (this.isSelfRefered) {
+      if (this.isSelfReferred) {
          return Translation.t('muc_removed_membersonly');
       }
 

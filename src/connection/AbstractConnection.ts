@@ -11,6 +11,7 @@ import MUCService from './services/MUC'
 import RosterService from './services/Roster'
 import VcardService from './services/Vcard'
 import DiscoService from './services/Disco'
+import { IMessage } from '@src/Message.interface';
 
 export const STANZA_KEY = 'stanza';
 export const STANZA_IQ_KEY = 'stanzaIQ';
@@ -114,18 +115,7 @@ abstract class AbstractConnection {
          id: message.getAttrId()
       });
 
-      let htmlMessage;
-
-      //@TODO html and plaintext is the same -> dry
-      if (message.isEncrypted() && message.getEncryptedHtmlMessage()) {
-         htmlMessage = message.getEncryptedHtmlMessage();
-      } else if (message.getHtmlMessage()) {
-         if (!message.isEncrypted()) {
-            htmlMessage = message.getHtmlMessage();
-         } else {
-            Log.warn('This Html message should be encrypted');
-         }
-      }
+      let htmlMessage = this.getMessage(message, message.getEncryptedHtmlMessage, message.getHtmlMessage);
 
       if (htmlMessage) {
          xmlMsg.c('html', {
@@ -135,17 +125,7 @@ abstract class AbstractConnection {
          }).h(htmlMessage).up().up();
       }
 
-      let plaintextMessage;
-
-      if (message.isEncrypted() && message.getEncryptedPlaintextMessage()) {
-         plaintextMessage = message.getEncryptedPlaintextMessage();
-      } else if (message.getPlaintextMessage()) {
-         if (!message.isEncrypted()) {
-            plaintextMessage = message.getPlaintextMessage();
-         } else {
-            Log.warn('This plaintext message should be encrypted');
-         }
-      }
+      let plaintextMessage = this.getMessage(message, message.getEncryptedPlaintextMessage, message.getPlaintextMessage);
 
       if (plaintextMessage) {
          xmlMsg.c('body').t(plaintextMessage).up();
@@ -168,6 +148,18 @@ abstract class AbstractConnection {
       }).catch(err => {
          Log.warn('Error during preSendMessageStanza pipe:', err);
       });
+   }
+
+   private getMessage(message: Message, getEncryptedMessage: () => string, getMessage: () => string) {
+      if (message.isEncrypted() && getEncryptedMessage.call(message)) {
+         return getEncryptedMessage.call(message);
+      } else if (getMessage.call(message)) {
+         if (!message.isEncrypted()) {
+            return getMessage.call(message);
+         }
+
+         Log.warn('This message should be encrypted');
+      }
    }
 
    public sendPresence(presence?: Presence) {

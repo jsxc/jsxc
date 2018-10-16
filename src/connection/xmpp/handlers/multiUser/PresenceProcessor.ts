@@ -1,9 +1,7 @@
 import Translation from '../../../../util/Translation'
-import Log from '../../../../util/Log'
-import JID from '../../../../JID'
+import Log from '@util/Log'
 import MultiUserContact from '../../../../MultiUserContact'
 import MultiUserStatusCodeHandler from './StatusCodeHandler'
-import Message from '../../../../Message'
 import { Strophe } from '../../../../vendor/Strophe'
 
 export default class MultiUserPresenceProcessor {
@@ -51,7 +49,6 @@ export default class MultiUserPresenceProcessor {
       } else if (this.codes.indexOf('303') > -1 && newNickname) {
          // user changed his nickname
 
-         //@TODO get rid of Strophe
          newNickname = Strophe.unescapeNode(newNickname);
 
          this.multiUserContact.removeMember(this.nickname);

@@ -44,7 +44,6 @@ export default class extends AbstractHandler {
          var errorReason = error.find(">:first-child").prop('tagName');
          var errorText = error.find('text').text();
 
-         //@TODO display error message
          Log.error('[XMPP] ' + errorType + ', ' + errorCode + ', ' + errorReason + ', ' + errorText);
 
          return this.PRESERVE_HANDLER;

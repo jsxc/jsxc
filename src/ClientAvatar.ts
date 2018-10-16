@@ -28,9 +28,9 @@ export default class ClientAvatar {
    private contact;
 
    private constructor(private storage: Storage) {
-      let accountIds = storage.getItem('accounts') || []; //@REVIEW maybe client function?
+      let accounts = Client.getAccountManager().getAccounts();
 
-      if (accountIds.length === 0) {
+      if (accounts.length === 0) {
          this.reset();
       }
 
@@ -83,7 +83,6 @@ export default class ClientAvatar {
                }
             })
          }
-
          //@TODO update avatar if account goes offline (multi account setup)
       });
    }

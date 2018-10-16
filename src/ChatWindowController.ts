@@ -1,4 +1,4 @@
-import ChatWindow, { State } from './ui/ChatWindow'
+import { State } from './ui/ChatWindow'
 import Client from './Client'
 import Contact from './Contact'
 import PersistentMap from './util/PersistentMap'
@@ -6,7 +6,6 @@ import PersistentMap from './util/PersistentMap'
 const KEY = 'chatWindowState'
 
 export default class ChatWindowController {
-   private chatWindow: ChatWindow;
 
    constructor(private contact: Contact, private properties: PersistentMap) {
       this.properties.registerHook(KEY, this.stateHandler);

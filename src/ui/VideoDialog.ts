@@ -3,7 +3,6 @@ import Dialog from './Dialog'
 import Log from '../util/Log'
 import JingleHandler from '../connection/JingleHandler'
 import VideoWindow from './VideoWindow'
-import JingleCallSession from '../JingleCallSession'
 import JingleAbstractSession from 'JingleAbstractSession';
 
 const VideoDialogTemplate = require('../../template/videoDialog.hbs')
