@@ -6,6 +6,7 @@ import { Presence } from './connection/AbstractConnection'
 import Form from './connection/Form'
 import Account from './Account'
 import { ContactSubscription } from './Contact.interface'
+import { MUCService } from '@connection/Connection.interface';
 
 const AFFILIATION = {
    ADMIN: 'admin',
@@ -53,7 +54,7 @@ export default class MultiUserContact extends Contact {
       return this.members
    }
 
-   private getService() {
+   private getService(): MUCService {
       return this.account.getConnection().getMUCService();
    }
 

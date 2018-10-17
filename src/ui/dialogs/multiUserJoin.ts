@@ -6,6 +6,7 @@ import TableElement from '../util/TableElement'
 import Roster from '../../ui/Roster'
 import Translation from '../../util/Translation'
 import Log from '../../util/Log'
+import Account from '@src/Account';
 
 var multiUserJoinTemplate = require('../../../template/multiUserJoin.hbs');
 
@@ -16,7 +17,7 @@ export default function() {
 }
 
 class MultiUserJoinDialog {
-   private account;
+   private account: Account;
    private connection: IConnection;
    private defaultNickname;
 
@@ -322,10 +323,7 @@ class MultiUserJoinDialog {
       Roster.get().add(multiUserContact);
 
       multiUserContact.join();
-
-      let chatWindow = multiUserContact.openChatWindow();
-      chatWindow.unminimize();
-      chatWindow.highlight();
+      multiUserContact.getChatWindowController().openProminently();
 
       this.dialog.close();
 
