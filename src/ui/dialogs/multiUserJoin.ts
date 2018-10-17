@@ -206,7 +206,7 @@ class MultiUserJoinDialog {
    }
 
    private testInputValues(): Promise<JID | void> {
-      let room = this.roomInputElement.val();
+      let room = <string>this.roomInputElement.val();
       let nickname = this.nicknameInputElement.val() || this.defaultNickname;
       let server = this.serverInputElement.val();
 
@@ -228,14 +228,15 @@ class MultiUserJoinDialog {
          room += '@' + server;
       }
 
-      //@TODO test if we already joined the room
-      // if () {
-      //    $('<p>').addClass('jsxc_warning').text($.t('You_already_joined_this_room')).appendTo(dialog.find('.jsxc_msg'));
-      // }
+      let roomJid = new JID(room);
+
+      if (this.account.getContact(roomJid)) {
+         return Promise.reject('You_already_joined_this_room');
+      }
 
       this.dom.find('input[name="room-jid"]').val(room);
 
-      return Promise.resolve(new JID(room));
+      return Promise.resolve(roomJid);
    }
 
    private requestRoomInfo = (room: JID) => {
