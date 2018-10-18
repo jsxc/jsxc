@@ -52,8 +52,8 @@ export default class Account {
 
    private pipes = {};
 
-   constructor(boshUrl: string, jid: string, sid: string, rid: string);
-   constructor(boshUrl: string, jid: string, password: string);
+   constructor(url: string, jid: string, sid: string, rid: string);
+   constructor(url: string, jid: string, password: string);
    constructor(uid: string);
    constructor() {
       let newSession = false;

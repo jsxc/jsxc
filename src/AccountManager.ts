@@ -72,8 +72,8 @@ export default class AccountManager {
       });
    }
 
-   public createAccount(boshUrl: string, jid: string, sid: string, rid: string): Promise<Account>;
-   public createAccount(boshUrl: string, jid: string, password: string): Promise<Account>;
+   public createAccount(url: string, jid: string, sid: string, rid: string): Promise<Account>;
+   public createAccount(url: string, jid: string, password: string): Promise<Account>;
    public createAccount() {
       let account;
 

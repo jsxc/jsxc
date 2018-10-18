@@ -15,8 +15,8 @@ export async function startAndPause(boshUrl: string, jid: string, password: stri
    });
 }
 
-export function start(boshUrl: string, jid: string, sid: string, rid: string);
-export function start(boshUrl: string, jid: string, password: string);
+export function start(url: string, jid: string, sid: string, rid: string);
+export function start(url: string, jid: string, password: string);
 export function start();
 export function start() {
    testMaxOneAccount();
@@ -41,18 +41,18 @@ function startUI() {
    UI.init();
 }
 
-async function startWithCredentials(boshUrl: string, jid: string, password: string) {
-   let account = await Client.getAccountManager().createAccount(boshUrl, jid, password.toString());
+async function startWithCredentials(url: string, jid: string, password: string) {
+   let account = await Client.getAccountManager().createAccount(url, jid, password.toString());
 
    return connectAndStartUI(account);
 }
 
-async function startWithBoshParameters(boshUrl: string, jid: string, sid: string, rid: string) {
+async function startWithBoshParameters(url: string, jid: string, sid: string, rid: string) {
    if (!/\/.+$/.test(jid)) {
       return Promise.reject(new InvalidParameterError('We need a Jabber ID with resource.'));
    }
 
-   let account = await Client.getAccountManager().createAccount(boshUrl, jid, sid.toString(), rid.toString());
+   let account = await Client.getAccountManager().createAccount(url, jid, sid.toString(), rid.toString());
 
    return connectAndStartUI(account);
 }
