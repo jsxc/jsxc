@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/jsxc/jsxc.svg?branch=master)](https://travis-ci.org/jsxc/jsxc)
 [![Dependency Status](https://dependencyci.com/github/jsxc/jsxc/badge)](https://dependencyci.com/github/jsxc/jsxc)
+[![Code Quality: Javascript](https://img.shields.io/lgtm/grade/javascript/g/jsxc/jsxc.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jsxc/jsxc/context:javascript)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/jsxc/jsxc.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jsxc/jsxc/alerts)
 
 Real-time chat app. This app requires an external XMPP server (openfire, ejabberd etc.).
 
