@@ -6,4 +6,4 @@ extraction:
         - "lib/"
       filters:
         - exclude: "jsxc.intro.js"
-        - exlcude: "jsxc.outro.js"
+        - exclude: "jsxc.outro.js"
