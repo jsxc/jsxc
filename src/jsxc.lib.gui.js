@@ -1432,6 +1432,7 @@ jsxc.gui = {
          $(this).addClass('jsxc_location');
          $(this).attr('title', matches[0]);
          $(this).attr('href', osmUrl);
+         $(this).attr('rel', 'noopener noreferrer');
          $(this).attr('target', '_blank');
          $(this).text(label);
       });
@@ -2708,7 +2709,7 @@ jsxc.gui.window = {
          var href = (url.match(/^https?:\/\//i)) ? url : 'http://' + url;
 
          // @TODO use jquery element builder
-         return '<a href="' + href + '" target="_blank">' + url + '</a>';
+         return '<a href="' + href + '" rel="noopener noreferrer" target="_blank">' + url + '</a>';
       });
 
       msg = msg.replace(new RegExp('(xmpp:)?(' + jsxc.CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i'), function(match, protocol, jid, action) {
@@ -2728,6 +2729,7 @@ jsxc.gui.window = {
       msg = msg.replace(jsxc.CONST.REGEX.GEOURI, function(uri) {
          var a = $('<a>');
          a.attr('href', uri);
+         a.attr('rel', 'noopener noreferrer');
          a.attr('target', '_blank');
          a.text(uri);
 

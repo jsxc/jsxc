@@ -811,7 +811,7 @@ jsxc.muc = {
                destroy.show();
             }
 
-            if (nickname === ownNickname && (val.affiliation === self.CONST.AFFILIATION.OWNER || val.affiliation === self.CONST.AFFILIATION.OWNER)) {
+            if (nickname === ownNickname && (val.affiliation === self.CONST.AFFILIATION.OWNER || val.affiliation === self.CONST.AFFILIATION.ADMIN)) {
                configure.show();
             }
          });
