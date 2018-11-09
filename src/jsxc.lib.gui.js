@@ -2659,7 +2659,7 @@ jsxc.gui.window = {
          });
       }
 
-      if (message.direction === 'in' && !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
+      if (message.direction === jsxc.Message.IN && !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
          jsxc.gui.unreadMsg(message.bid);
 
          $(document).trigger('postmessagein.jsxc', [message.bid, message.htmlMsg]);
@@ -2669,9 +2669,9 @@ jsxc.gui.window = {
          jsxc.xmpp.sendMessage(message);
       }
 
-      jsxc.gui.window._postMessage(message);
+      jsxc.gui.window.renderMessage(message);
 
-      if (message.direction === 'out' && message.msg === '?' && jsxc.options.get('theAnswerToAnything') !== false) {
+      if (message.direction === jsxc.Message.OUT && message.msg === '?' && jsxc.options.get('theAnswerToAnything') !== false) {
          if (typeof jsxc.options.get('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) < 1) {
             jsxc.options.set('theAnswerToAnything', true);
 
@@ -2693,7 +2693,7 @@ jsxc.gui.window = {
     * @param {Object} post Post object with direction, msg, uid, received
     * @param {Bool} restore If true no highlights are used
     */
-   _postMessage: function(message, restore) {
+   renderMessage: function(message, restore) {
       var bid = message.bid;
       var win = jsxc.gui.window.get(bid);
       var msg = message.msg;
@@ -2953,7 +2953,7 @@ jsxc.gui.window = {
             var message = new jsxc.Message(c);
             message.save();
 
-            jsxc.gui.window._postMessage(message, true);
+            jsxc.gui.window.renderMessage(message, true);
          }
 
          jsxc.storage.removeUserItem('chat', bid);
@@ -2964,7 +2964,7 @@ jsxc.gui.window = {
       while (history !== null && history.length > 0) {
          var uid = history.pop();
 
-         jsxc.gui.window._postMessage(new jsxc.Message(uid), true);
+         jsxc.gui.window.renderMessage(new jsxc.Message(uid), true);
       }
    },
 

@@ -1391,14 +1391,31 @@ jsxc.muc = {
             body = null;
          }
 
-         jsxc.gui.window.postMessage({
-            bid: room,
-            direction: jsxc.Message.IN,
-            msg: body,
-            stamp: stamp,
-            sender: sender,
-            attachment: attachment
-         });
+         if (id && $(message).find('delay').length > 0) {
+            // we are in a groupchat messages restoring
+            var direction = jsxc.Message.IN;
+            if (sender.jid && jsxc.jidToBid(sender.jid) === jsxc.bid) {
+               direction = jsxc.Message.OUT;
+            }
+            jsxc.gui.window.renderMessage(new jsxc.Message({
+               bid: room,
+               direction: direction,
+               msg: body,
+               stamp: stamp,
+               sender: sender,
+               attachment: attachment
+            }));
+         } else {
+            // we receive an incoming message
+            jsxc.gui.window.postMessage({
+               bid: room,
+               direction: jsxc.Message.IN,
+               msg: body,
+               stamp: stamp,
+               sender: sender,
+               attachment: attachment
+            });
+         }
       }
 
       var subject = $(message).find('subject');
