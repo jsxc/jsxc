@@ -430,7 +430,7 @@ jsxc.storage = {
                   jsxc.xmpp.sendMessage(message);
                }
 
-               jsxc.gui.window._postMessage(message, true);
+               jsxc.gui.window.renderMessage(message, true);
             } else if (message.isReceived()) {
                el.addClass('jsxc_received');
             }
