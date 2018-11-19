@@ -620,14 +620,13 @@
     }
 }
 
-.jsxc_out {
+.jsxc_out, .jsxc_probably_out {
     float: right;
     position: relative;
     max-width: 76%;
     margin-right: 10px;
     padding-right: 10px;
     border-radius: 3px;
-    background-color: $chatmessage_out_bg;
 
     &:after {
         content: " ";
@@ -661,6 +660,10 @@
     .jsxc_timestamp {
         float: right;
     }
+}
+
+.jsxc_out {
+    background-color: $chatmessage_out_bg;
 }
 
 .jsxc_sys {

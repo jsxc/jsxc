@@ -265,6 +265,13 @@ jsxc.Message.OUT = 'out';
  * @type {string}
  * @default
  */
+jsxc.Message.PROBABLY_OUT = 'probably_out';
+
+/**
+ * @constant
+ * @type {string}
+ * @default
+ */
 jsxc.Message.SYS = 'sys';
 
 jsxc.Message.HTML = 'html';

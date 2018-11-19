@@ -1026,6 +1026,7 @@ jsxc.muc = {
 
          if (roomdata.state === self.CONST.ROOMSTATE.INIT) {
             roomdata.state = self.CONST.ROOMSTATE.ENTERED;
+            roomdata.joinedAt = new Date();
 
             jsxc.storage.setUserItem('buddy', room, roomdata);
          }
@@ -1368,19 +1369,29 @@ jsxc.muc = {
       var body = $(message).find('body:first').text();
       var room = jsxc.jidToBid(from);
       var nickname = Strophe.unescapeNode(Strophe.getResourceFromJid(from));
+      var roomdata = jsxc.storage.getUserItem('buddy', room);
 
       if (body !== '') {
          var delay = $(message).find('delay[xmlns="urn:xmpp:delay"]');
-         var stamp = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
-         stamp = stamp.getTime();
+         var stampDate = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
+         var stamp = stampDate.getTime();
 
          var member = jsxc.storage.getUserItem('member', room) || {};
 
-         var sender = {};
-         sender.name = nickname;
+         var sender = {
+            name: nickname,
+         };
+         var direction = jsxc.Message.IN;
+         var joinedAtDate = roomdata.joinedAt ? new Date(roomdata.joinedAt) : 0;
 
-         if (member[nickname] && typeof member[nickname].jid === 'string') {
-            sender.jid = member[nickname].jid;
+         if (stampDate < joinedAtDate) {
+            if (roomdata.nickname === nickname) {
+               direction = jsxc.Message.PROBABLY_OUT;
+            }
+         } else {
+            if (member[nickname] && typeof member[nickname].jid === 'string') {
+               sender.jid = member[nickname].jid;
+            }
          }
 
          jsxc.gui.window.init(room);
@@ -1393,7 +1404,7 @@ jsxc.muc = {
 
          jsxc.gui.window.postMessage({
             bid: room,
-            direction: jsxc.Message.IN,
+            direction: direction,
             msg: body,
             stamp: stamp,
             sender: sender,
@@ -1404,8 +1415,6 @@ jsxc.muc = {
       var subject = $(message).find('subject');
 
       if (subject.length > 0) {
-         var roomdata = jsxc.storage.getUserItem('buddy', room);
-
          roomdata.subject = subject.text();
 
          jsxc.storage.setUserItem('buddy', room, roomdata);
