@@ -36,6 +36,6 @@
     "magnific-popup": "^1.1.0",
     "strophejs-plugin-mam": "strophe/strophejs-plugin-mam#d7b9a8a0b404e3dd9c83dd9cc4bf28aec2e5f329",
     "strophejs-plugin-rsm": "strophe/strophejs-plugin-rsm#fa16b3b",
-    "strophejs": "^1.2.14"
+    "strophejs": "~1.2.14"
   }
 }
