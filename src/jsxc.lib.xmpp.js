@@ -914,7 +914,7 @@ jsxc.xmpp = {
 
       if (carbon) {
          var direction = (carbon.prop("tagName") === 'sent') ? jsxc.Message.OUT : jsxc.Message.IN;
-         bid = jsxc.jidToBid((direction === 'out') ? $(message).attr('to') : from);
+         bid = jsxc.jidToBid((direction === jsxc.Message.OUT) ? $(message).attr('to') : from);
 
          jsxc.gui.window.postMessage({
             bid: bid,

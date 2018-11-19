@@ -2659,7 +2659,7 @@ jsxc.gui.window = {
          });
       }
 
-      if (message.direction === 'in' && !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
+      if (message.direction === jsxc.Message.IN && !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
          jsxc.gui.unreadMsg(message.bid);
 
          $(document).trigger('postmessagein.jsxc', [message.bid, message.htmlMsg]);
@@ -2671,7 +2671,7 @@ jsxc.gui.window = {
 
       jsxc.gui.window._postMessage(message);
 
-      if (message.direction === 'out' && message.msg === '?' && jsxc.options.get('theAnswerToAnything') !== false) {
+      if (message.direction === jsxc.Message.OUT && message.msg === '?' && jsxc.options.get('theAnswerToAnything') !== false) {
          if (typeof jsxc.options.get('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) < 1) {
             jsxc.options.set('theAnswerToAnything', true);
 
@@ -2749,7 +2749,7 @@ jsxc.gui.window = {
 
       // replace /me command (XEP-0245)
       var bidData = jsxc.storage.getUserItem('buddy', bid) || {};
-      if (direction === 'in') {
+      if (direction === jsxc.Message.IN) {
          msg = msg.replace(/^\/me /, '<i title="/me">' + jsxc.removeHTML(bidData.name || bid) + '</i> ');
       }
 

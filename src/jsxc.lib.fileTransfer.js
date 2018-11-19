@@ -199,7 +199,7 @@ jsxc.fileTransfer.fileSelected = function(jid, msg, file) {
 
       var message = jsxc.gui.window.postMessage({
          bid: bid,
-         direction: 'out',
+         direction: jsxc.Message.OUT,
          attachment: {
             name: file.name,
             size: file.size,

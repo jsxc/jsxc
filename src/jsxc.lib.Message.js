@@ -129,7 +129,7 @@ jsxc.Message.prototype.save = function() {
 
       img.src = self.attachment.data;
 
-      if (this.direction === 'out') {
+      if (this.direction === jsxc.Message.OUT) {
          // save storage
          this.attachment.data = null;
       }
@@ -137,7 +137,7 @@ jsxc.Message.prototype.save = function() {
 
    var data;
 
-   if (this.attachment && this.attachment.size > jsxc.options.maxStorableSize && this.direction === 'in') {
+   if (this.attachment && this.attachment.size > jsxc.options.maxStorableSize && this.direction === jsxc.Message.IN) {
       jsxc.debug('Attachment to large to store');
 
       data = this.attachment.data;
