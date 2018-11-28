@@ -8,13 +8,15 @@ import XMPPConnection from './Connection'
 import { Strophe } from '../../vendor/Strophe'
 import BaseError from '../../errors/BaseError'
 
+export enum TYPE { BOSH, WEBSOCKET };
+
 export default class Connector {
    private connectionParameters;
 
    private connectionArgs: string[];
 
-   constructor(account: Account, boshUrl: string, jid: string, sid: string, rid: string);
-   constructor(account: Account, boshUrl: string, jid: string, password: string);
+   constructor(account: Account, url: string, jid: string, sid: string, rid: string);
+   constructor(account: Account, url: string, jid: string, password: string);
    constructor(account: Account);
    constructor(private account: Account, ...connectionArgs: string[]) {
       let storage = account.getStorage();
@@ -23,6 +25,12 @@ export default class Connector {
       connectionArgs = connectionArgs.filter(arg => typeof arg === 'string');
 
       if (connectionArgs.length < 3) {
+         let type = this.connectionParameters.get('type');
+
+         if (type === TYPE.WEBSOCKET) {
+            throw 'Cannt attach to websocket connection.';
+         }
+
          this.connectionArgs = [
             this.connectionParameters.get('url'),
             this.connectionParameters.get('jid'),
@@ -32,6 +40,9 @@ export default class Connector {
       } else if (connectionArgs.length === 3 || connectionArgs.length === 4) {
          this.connectionArgs = connectionArgs;
 
+         let type = /^wss?:/.test(connectionArgs[1]) ? TYPE.WEBSOCKET : TYPE.BOSH;
+
+         this.connectionParameters.set('type', type);
          this.connectionParameters.remove('inactivity');
          this.connectionParameters.remove('timestamp');
       } else {

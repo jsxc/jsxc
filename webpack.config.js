@@ -165,6 +165,7 @@ let config = {
       proxy: {
          "/http-bind": "http://localhost:5280",
          "/libsignal": "http://localhost",
+         "/xmpp-websocket": "ws://localhost:5280"
       },
       watchOptions: {
          aggregateTimeout: 1300,
