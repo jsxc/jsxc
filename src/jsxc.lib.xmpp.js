@@ -985,7 +985,7 @@ jsxc.xmpp = {
          jsxc.otr.create(bid);
       }
 
-      if (!forwarded && mid !== null && request.length && data !== null && (data.sub === 'both' || data.sub === 'from') && type === 'chat') {
+      if (!forwarded && mid !== null && request.length && (data.sub === 'both' || data.sub === 'from') && type === 'chat') {
          // Send received according to XEP-0184
          jsxc.xmpp.conn.send($msg({
             to: from

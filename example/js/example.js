@@ -221,7 +221,7 @@ function testBoshServer(url, domain, cb) {
          fail('Cross domain request was not possible. Either your BOSH server does not send any ' +
             'Access-Control-Allow-Origin header or the content-security-policy (CSP) blocks your request. ' +
             'Starting from Owncloud 9.0 your CSP will be updated in any app which uses the appframework (e.g. files) ' +
-            'after you save these settings and reload.' +
+            'after you save these settings and reload. ' +
             'The savest way is still to use Apache ProxyRequest or Nginx proxy_pass.');
       } else if (xhr.status === 404) {
          // not found

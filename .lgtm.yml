@@ -5,5 +5,5 @@ extraction:
         - "build/"
         - "lib/"
       filters:
-        - exclude: "jsxc.intro.js"
-        - exclude: "jsxc.outro.js"
+        - exclude: "src/jsxc.intro.js"
+        - exclude: "src/jsxc.outro.js"

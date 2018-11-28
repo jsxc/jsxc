@@ -87,7 +87,7 @@ jsxc.gui = {
       subscribe: function(jid, params) {
          jsxc.gui.showContactDialog(jid);
 
-         if (params && typeof params.name) {
+         if (params && typeof params.name === 'string') {
             $('#jsxc_alias').val(params.name);
          }
       },
@@ -157,7 +157,7 @@ jsxc.gui = {
       // prepare regexp for emotions
       $.each(jsxc.gui.emotions, function(i, val) {
          // escape characters
-         var reg = val[0].replace(/(\/|\||\*|\.|\+|\?|\^|\$|\(|\)|\[|\]|\{|\})/g, '\\$1');
+         var reg = val[0].replace(/(\/|\||\*|\.|\+|\?|\^|\$|\(|\)|\[|\]|\{|\})/g, '\\$1'); //lgtm [js/incomplete-sanitization]
          reg = '(' + reg.split(' ').join('|') + ')';
          jsxc.gui.emotions[i][2] = new RegExp(reg, 'g');
       });
@@ -2943,7 +2943,7 @@ jsxc.gui.window = {
 
       // convert legacy storage structure introduced in v3.0.0
       if (chat) {
-         while (chat !== null && chat.length > 0) {
+         while (chat.length > 0) {
             var c = chat.pop();
 
             c.bid = bid;
