@@ -1,5 +1,5 @@
 /*!
- * jsxc v3.4.2 - 2018-09-05
+ * jsxc v3.4.3 - 2018-12-05
  * 
  * Copyright (c) 2018 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
@@ -7,7 +7,7 @@
  * Please see https://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.4.2
+ * @version 3.4.3
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.4.2',
+   version: '3.4.3',
 
    /** True if i'm the master */
    master: false,
@@ -2086,7 +2086,7 @@ jsxc.xmpp = {
 
       if (carbon) {
          var direction = (carbon.prop("tagName") === 'sent') ? jsxc.Message.OUT : jsxc.Message.IN;
-         bid = jsxc.jidToBid((direction === 'out') ? $(message).attr('to') : from);
+         bid = jsxc.jidToBid((direction === jsxc.Message.OUT) ? $(message).attr('to') : from);
 
          jsxc.gui.window.postMessage({
             bid: bid,
@@ -2157,7 +2157,7 @@ jsxc.xmpp = {
          jsxc.otr.create(bid);
       }
 
-      if (!forwarded && mid !== null && request.length && data !== null && (data.sub === 'both' || data.sub === 'from') && type === 'chat') {
+      if (!forwarded && mid !== null && request.length && (data.sub === 'both' || data.sub === 'from') && type === 'chat') {
          // Send received according to XEP-0184
          jsxc.xmpp.conn.send($msg({
             to: from
@@ -2829,7 +2829,7 @@ jsxc.gui = {
       subscribe: function(jid, params) {
          jsxc.gui.showContactDialog(jid);
 
-         if (params && typeof params.name) {
+         if (params && typeof params.name === 'string') {
             $('#jsxc_alias').val(params.name);
          }
       },
@@ -2899,7 +2899,7 @@ jsxc.gui = {
       // prepare regexp for emotions
       $.each(jsxc.gui.emotions, function(i, val) {
          // escape characters
-         var reg = val[0].replace(/(\/|\||\*|\.|\+|\?|\^|\$|\(|\)|\[|\]|\{|\})/g, '\\$1');
+         var reg = val[0].replace(/(\/|\||\*|\.|\+|\?|\^|\$|\(|\)|\[|\]|\{|\})/g, '\\$1'); //lgtm [js/incomplete-sanitization]
          reg = '(' + reg.split(' ').join('|') + ')';
          jsxc.gui.emotions[i][2] = new RegExp(reg, 'g');
       });
@@ -4174,6 +4174,7 @@ jsxc.gui = {
          $(this).addClass('jsxc_location');
          $(this).attr('title', matches[0]);
          $(this).attr('href', osmUrl);
+         $(this).attr('rel', 'noopener noreferrer');
          $(this).attr('target', '_blank');
          $(this).text(label);
       });
@@ -5400,7 +5401,7 @@ jsxc.gui.window = {
          });
       }
 
-      if (message.direction === 'in' && !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
+      if (message.direction === jsxc.Message.IN && !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
          jsxc.gui.unreadMsg(message.bid);
 
          $(document).trigger('postmessagein.jsxc', [message.bid, message.htmlMsg]);
@@ -5410,9 +5411,9 @@ jsxc.gui.window = {
          jsxc.xmpp.sendMessage(message);
       }
 
-      jsxc.gui.window._postMessage(message);
+      jsxc.gui.window.renderMessage(message);
 
-      if (message.direction === 'out' && message.msg === '?' && jsxc.options.get('theAnswerToAnything') !== false) {
+      if (message.direction === jsxc.Message.OUT && message.msg === '?' && jsxc.options.get('theAnswerToAnything') !== false) {
          if (typeof jsxc.options.get('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) < 1) {
             jsxc.options.set('theAnswerToAnything', true);
 
@@ -5434,7 +5435,7 @@ jsxc.gui.window = {
     * @param {Object} post Post object with direction, msg, uid, received
     * @param {Bool} restore If true no highlights are used
     */
-   _postMessage: function(message, restore) {
+   renderMessage: function(message, restore) {
       var bid = message.bid;
       var win = jsxc.gui.window.get(bid);
       var msg = message.msg;
@@ -5450,7 +5451,7 @@ jsxc.gui.window = {
          var href = (url.match(/^https?:\/\//i)) ? url : 'http://' + url;
 
          // @TODO use jquery element builder
-         return '<a href="' + href + '" target="_blank">' + url + '</a>';
+         return '<a href="' + href + '" rel="noopener noreferrer" target="_blank">' + url + '</a>';
       });
 
       msg = msg.replace(new RegExp('(xmpp:)?(' + jsxc.CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i'), function(match, protocol, jid, action) {
@@ -5470,6 +5471,7 @@ jsxc.gui.window = {
       msg = msg.replace(jsxc.CONST.REGEX.GEOURI, function(uri) {
          var a = $('<a>');
          a.attr('href', uri);
+         a.attr('rel', 'noopener noreferrer');
          a.attr('target', '_blank');
          a.text(uri);
 
@@ -5489,7 +5491,7 @@ jsxc.gui.window = {
 
       // replace /me command (XEP-0245)
       var bidData = jsxc.storage.getUserItem('buddy', bid) || {};
-      if (direction === 'in') {
+      if (direction === jsxc.Message.IN) {
          msg = msg.replace(/^\/me /, '<i title="/me">' + jsxc.removeHTML(bidData.name || bid) + '</i> ');
       }
 
@@ -5634,22 +5636,22 @@ jsxc.gui.window = {
       }
 
       function showThumbnail(i) {
-            var thumbnail = jsxc.storage.getUserItem('msg:thumbnail', uid) || message.attachment.thumbnail;
+         var thumbnail = jsxc.storage.getUserItem('msg:thumbnail', uid) || message.attachment.thumbnail;
 
-            if (thumbnail) {
-               attachment.empty();
+         if (thumbnail) {
+            attachment.empty();
 
-               $('<img alt="preview">').attr('src', thumbnail).attr('title', message.attachment.name).appendTo(attachment);
-            } else if (i > 3) {
-               attachment.text('No thumbnail available');
+            $('<img alt="preview">').attr('src', thumbnail).attr('title', message.attachment.name).appendTo(attachment);
+         } else if (i > 3) {
+            attachment.text('No thumbnail available');
 
-               return;
-            }
-
-            setTimeout(function() {
-               showThumbnail(i + 1);
-            }, i * 200);
+            return;
          }
+
+         setTimeout(function() {
+            showThumbnail(i + 1);
+         }, i * 200);
+      }
    },
 
    /**
@@ -5683,7 +5685,7 @@ jsxc.gui.window = {
 
       // convert legacy storage structure introduced in v3.0.0
       if (chat) {
-         while (chat !== null && chat.length > 0) {
+         while (chat.length > 0) {
             var c = chat.pop();
 
             c.bid = bid;
@@ -5693,7 +5695,7 @@ jsxc.gui.window = {
             var message = new jsxc.Message(c);
             message.save();
 
-            jsxc.gui.window._postMessage(message, true);
+            jsxc.gui.window.renderMessage(message, true);
          }
 
          jsxc.storage.removeUserItem('chat', bid);
@@ -5704,7 +5706,7 @@ jsxc.gui.window = {
       while (history !== null && history.length > 0) {
          var uid = history.pop();
 
-         jsxc.gui.window._postMessage(new jsxc.Message(uid), true);
+         jsxc.gui.window.renderMessage(new jsxc.Message(uid), true);
       }
    },
 
@@ -6170,7 +6172,7 @@ jsxc.fileTransfer.fileSelected = function(jid, msg, file) {
 
       var message = jsxc.gui.window.postMessage({
          bid: bid,
-         direction: 'out',
+         direction: jsxc.Message.OUT,
          attachment: {
             name: file.name,
             size: file.size,
@@ -6543,7 +6545,7 @@ jsxc.Message.prototype.save = function() {
 
       img.src = self.attachment.data;
 
-      if (this.direction === 'out') {
+      if (this.direction === jsxc.Message.OUT) {
          // save storage
          this.attachment.data = null;
       }
@@ -6551,7 +6553,7 @@ jsxc.Message.prototype.save = function() {
 
    var data;
 
-   if (this.attachment && this.attachment.size > jsxc.options.maxStorableSize && this.direction === 'in') {
+   if (this.attachment && this.attachment.size > jsxc.options.maxStorableSize && this.direction === jsxc.Message.IN) {
       jsxc.debug('Attachment to large to store');
 
       data = this.attachment.data;
@@ -6673,6 +6675,13 @@ jsxc.Message.IN = 'in';
  * @default
  */
 jsxc.Message.OUT = 'out';
+
+/**
+ * @constant
+ * @type {string}
+ * @default
+ */
+jsxc.Message.PROBABLY_OUT = 'probably_out';
 
 /**
  * @constant
@@ -7498,7 +7507,7 @@ jsxc.muc = {
                destroy.show();
             }
 
-            if (nickname === ownNickname && (val.affiliation === self.CONST.AFFILIATION.OWNER || val.affiliation === self.CONST.AFFILIATION.OWNER)) {
+            if (nickname === ownNickname && (val.affiliation === self.CONST.AFFILIATION.OWNER || val.affiliation === self.CONST.AFFILIATION.ADMIN)) {
                configure.show();
             }
          });
@@ -7713,6 +7722,7 @@ jsxc.muc = {
 
          if (roomdata.state === self.CONST.ROOMSTATE.INIT) {
             roomdata.state = self.CONST.ROOMSTATE.ENTERED;
+            roomdata.joinedAt = new Date();
 
             jsxc.storage.setUserItem('buddy', room, roomdata);
          }
@@ -8055,19 +8065,29 @@ jsxc.muc = {
       var body = $(message).find('body:first').text();
       var room = jsxc.jidToBid(from);
       var nickname = Strophe.unescapeNode(Strophe.getResourceFromJid(from));
+      var roomdata = jsxc.storage.getUserItem('buddy', room);
 
       if (body !== '') {
          var delay = $(message).find('delay[xmlns="urn:xmpp:delay"]');
-         var stamp = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
-         stamp = stamp.getTime();
+         var stampDate = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
+         var stamp = stampDate.getTime();
 
          var member = jsxc.storage.getUserItem('member', room) || {};
 
-         var sender = {};
-         sender.name = nickname;
+         var sender = {
+            name: nickname,
+         };
+         var direction = jsxc.Message.IN;
+         var joinedAtDate = roomdata.joinedAt ? new Date(roomdata.joinedAt) : 0;
 
-         if (member[nickname] && typeof member[nickname].jid === 'string') {
-            sender.jid = member[nickname].jid;
+         if (stampDate < joinedAtDate) {
+            if (roomdata.nickname === nickname) {
+               direction = jsxc.Message.PROBABLY_OUT;
+            }
+         } else {
+            if (member[nickname] && typeof member[nickname].jid === 'string') {
+               sender.jid = member[nickname].jid;
+            }
          }
 
          jsxc.gui.window.init(room);
@@ -8080,7 +8100,7 @@ jsxc.muc = {
 
          jsxc.gui.window.postMessage({
             bid: room,
-            direction: jsxc.Message.IN,
+            direction: direction,
             msg: body,
             stamp: stamp,
             sender: sender,
@@ -8091,8 +8111,6 @@ jsxc.muc = {
       var subject = $(message).find('subject');
 
       if (subject.length > 0) {
-         var roomdata = jsxc.storage.getUserItem('buddy', room);
-
          roomdata.subject = subject.text();
 
          jsxc.storage.setUserItem('buddy', room, roomdata);
@@ -10093,7 +10111,7 @@ jsxc.storage = {
                   jsxc.xmpp.sendMessage(message);
                }
 
-               jsxc.gui.window._postMessage(message, true);
+               jsxc.gui.window.renderMessage(message, true);
             } else if (message.isReceived()) {
                el.addClass('jsxc_received');
             }
@@ -13537,7 +13555,7 @@ jsxc.gui.template['settings'] = '<form class="form-horizontal col-sm-6">\n' +
 '      <div class="form-group">\n' +
 '         <label class="col-sm-6 control-label" for="xmpp-resource" data-i18n="Resource"></label>\n' +
 '         <div class="col-sm-6">\n' +
-'            <input class="form-control" type="text" id="xmpp-resource" class="form-control" />\n' +
+'            <input type="text" id="xmpp-resource" class="form-control" />\n' +
 '         </div>\n' +
 '      </div>\n' +
 '      <div class="form-group">\n' +

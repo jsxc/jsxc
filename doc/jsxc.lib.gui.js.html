@@ -115,7 +115,7 @@ jsxc.gui = {
       subscribe: function(jid, params) {
          jsxc.gui.showContactDialog(jid);
 
-         if (params &amp;&amp; typeof params.name) {
+         if (params &amp;&amp; typeof params.name === 'string') {
             $('#jsxc_alias').val(params.name);
          }
       },
@@ -185,7 +185,7 @@ jsxc.gui = {
       // prepare regexp for emotions
       $.each(jsxc.gui.emotions, function(i, val) {
          // escape characters
-         var reg = val[0].replace(/(\/|\||\*|\.|\+|\?|\^|\$|\(|\)|\[|\]|\{|\})/g, '\\$1');
+         var reg = val[0].replace(/(\/|\||\*|\.|\+|\?|\^|\$|\(|\)|\[|\]|\{|\})/g, '\\$1'); //lgtm [js/incomplete-sanitization]
          reg = '(' + reg.split(' ').join('|') + ')';
          jsxc.gui.emotions[i][2] = new RegExp(reg, 'g');
       });
@@ -1460,6 +1460,7 @@ jsxc.gui = {
          $(this).addClass('jsxc_location');
          $(this).attr('title', matches[0]);
          $(this).attr('href', osmUrl);
+         $(this).attr('rel', 'noopener noreferrer');
          $(this).attr('target', '_blank');
          $(this).text(label);
       });
@@ -2686,7 +2687,7 @@ jsxc.gui.window = {
          });
       }
 
-      if (message.direction === 'in' &amp;&amp; !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
+      if (message.direction === jsxc.Message.IN &amp;&amp; !jsxc.gui.window.get(message.bid).find('.jsxc_textinput').is(":focus")) {
          jsxc.gui.unreadMsg(message.bid);
 
          $(document).trigger('postmessagein.jsxc', [message.bid, message.htmlMsg]);
@@ -2696,9 +2697,9 @@ jsxc.gui.window = {
          jsxc.xmpp.sendMessage(message);
       }
 
-      jsxc.gui.window._postMessage(message);
+      jsxc.gui.window.renderMessage(message);
 
-      if (message.direction === 'out' &amp;&amp; message.msg === '?' &amp;&amp; jsxc.options.get('theAnswerToAnything') !== false) {
+      if (message.direction === jsxc.Message.OUT &amp;&amp; message.msg === '?' &amp;&amp; jsxc.options.get('theAnswerToAnything') !== false) {
          if (typeof jsxc.options.get('theAnswerToAnything') === 'undefined' || (Math.random() * 100 % 42) &lt; 1) {
             jsxc.options.set('theAnswerToAnything', true);
 
@@ -2720,7 +2721,7 @@ jsxc.gui.window = {
     * @param {Object} post Post object with direction, msg, uid, received
     * @param {Bool} restore If true no highlights are used
     */
-   _postMessage: function(message, restore) {
+   renderMessage: function(message, restore) {
       var bid = message.bid;
       var win = jsxc.gui.window.get(bid);
       var msg = message.msg;
@@ -2736,7 +2737,7 @@ jsxc.gui.window = {
          var href = (url.match(/^https?:\/\//i)) ? url : 'http://' + url;
 
          // @TODO use jquery element builder
-         return '&lt;a href="' + href + '" target="_blank">' + url + '&lt;/a>';
+         return '&lt;a href="' + href + '" rel="noopener noreferrer" target="_blank">' + url + '&lt;/a>';
       });
 
       msg = msg.replace(new RegExp('(xmpp:)?(' + jsxc.CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i'), function(match, protocol, jid, action) {
@@ -2756,6 +2757,7 @@ jsxc.gui.window = {
       msg = msg.replace(jsxc.CONST.REGEX.GEOURI, function(uri) {
          var a = $('&lt;a>');
          a.attr('href', uri);
+         a.attr('rel', 'noopener noreferrer');
          a.attr('target', '_blank');
          a.text(uri);
 
@@ -2775,7 +2777,7 @@ jsxc.gui.window = {
 
       // replace /me command (XEP-0245)
       var bidData = jsxc.storage.getUserItem('buddy', bid) || {};
-      if (direction === 'in') {
+      if (direction === jsxc.Message.IN) {
          msg = msg.replace(/^\/me /, '&lt;i title="/me">' + jsxc.removeHTML(bidData.name || bid) + '&lt;/i> ');
       }
 
@@ -2920,22 +2922,22 @@ jsxc.gui.window = {
       }
 
       function showThumbnail(i) {
-            var thumbnail = jsxc.storage.getUserItem('msg:thumbnail', uid) || message.attachment.thumbnail;
+         var thumbnail = jsxc.storage.getUserItem('msg:thumbnail', uid) || message.attachment.thumbnail;
 
-            if (thumbnail) {
-               attachment.empty();
+         if (thumbnail) {
+            attachment.empty();
 
-               $('&lt;img alt="preview">').attr('src', thumbnail).attr('title', message.attachment.name).appendTo(attachment);
-            } else if (i > 3) {
-               attachment.text('No thumbnail available');
+            $('&lt;img alt="preview">').attr('src', thumbnail).attr('title', message.attachment.name).appendTo(attachment);
+         } else if (i > 3) {
+            attachment.text('No thumbnail available');
 
-               return;
-            }
-
-            setTimeout(function() {
-               showThumbnail(i + 1);
-            }, i * 200);
+            return;
          }
+
+         setTimeout(function() {
+            showThumbnail(i + 1);
+         }, i * 200);
+      }
    },
 
    /**
@@ -2969,7 +2971,7 @@ jsxc.gui.window = {
 
       // convert legacy storage structure introduced in v3.0.0
       if (chat) {
-         while (chat !== null &amp;&amp; chat.length > 0) {
+         while (chat.length > 0) {
             var c = chat.pop();
 
             c.bid = bid;
@@ -2979,7 +2981,7 @@ jsxc.gui.window = {
             var message = new jsxc.Message(c);
             message.save();
 
-            jsxc.gui.window._postMessage(message, true);
+            jsxc.gui.window.renderMessage(message, true);
          }
 
          jsxc.storage.removeUserItem('chat', bid);
@@ -2990,7 +2992,7 @@ jsxc.gui.window = {
       while (history !== null &amp;&amp; history.length > 0) {
          var uid = history.pop();
 
-         jsxc.gui.window._postMessage(new jsxc.Message(uid), true);
+         jsxc.gui.window.renderMessage(new jsxc.Message(uid), true);
       }
    },
 
@@ -3270,7 +3272,7 @@ jsxc.gui.template.get = function(name, bid, msg) {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Sep 05 2018 10:38:41 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Dec 05 2018 09:51:20 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>

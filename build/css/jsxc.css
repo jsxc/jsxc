@@ -2912,9 +2912,6 @@ fieldset[disabled]
     resize: none;
     transition: height 0.5s;
     font-size: 13px; }
-  .jsxc_window textarea::-webkit-input-placeholder {
-    color: #000;
-    opacity: 0.3; }
   .jsxc_window textarea::-moz-placeholder {
     color: #000;
     opacity: 0.3; }
@@ -3101,15 +3098,14 @@ fieldset[disabled]
   .jsxc_in .jsxc_timestamp {
     float: left; }
 
-.jsxc_out {
+.jsxc_out, .jsxc_probably_out {
   float: right;
   position: relative;
   max-width: 76%;
   margin-right: 10px;
   padding-right: 10px;
-  border-radius: 3px;
-  background-color: #e6ffd1; }
-  .jsxc_out:after {
+  border-radius: 3px; }
+  .jsxc_out:after, .jsxc_probably_out:after {
     content: " ";
     position: absolute;
     border-style: solid;
@@ -3120,7 +3116,7 @@ fieldset[disabled]
     z-index: 1;
     right: -6px;
     bottom: 10px; }
-  .jsxc_out.jsxc_received:before {
+  .jsxc_out.jsxc_received:before, .jsxc_probably_out.jsxc_received:before {
     content: "✓";
     position: absolute;
     bottom: 2px;
@@ -3128,10 +3124,13 @@ fieldset[disabled]
     font-size: 12px;
     line-height: 12px;
     color: #008000; }
-  .jsxc_out.jsxc_received .jsxc_timestamp {
+  .jsxc_out.jsxc_received .jsxc_timestamp, .jsxc_probably_out.jsxc_received .jsxc_timestamp {
     margin-right: 4px; }
-  .jsxc_out .jsxc_timestamp {
+  .jsxc_out .jsxc_timestamp, .jsxc_probably_out .jsxc_timestamp {
     float: right; }
+
+.jsxc_out {
+  background-color: #e6ffd1; }
 
 .jsxc_sys {
   width: auto;
@@ -3533,8 +3532,7 @@ ul.jsxc_vCard {
   border-color: #4cae4c; }
 
 .jsxc_oneway .jsxc_avatar {
-  -webkit-filter: grayscale(100%);
-          filter: grayscale(100%); }
+  filter: grayscale(100%); }
 
 img.jsxc_vCard {
   float: right;
@@ -3602,8 +3600,7 @@ img.jsxc_vCard {
   z-index: 110;
   margin: 8px 2px 5px 10px;
   right: 0;
-  -webkit-filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
-          filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
+  filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
   padding: 4px 12px;
   padding-left: 5px; }
   .jsxc_menu:after {
