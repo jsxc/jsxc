@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.4.3 - 2018-12-05
+### Fixed
+- show MUC configuration also for MUC admins
+- [#738](https://github.com/jsxc/jsxc/issues/738) display old MUC messages from same nickname as probably from you
+- fix links which open in a new tab (add noopener/noreferrer)
+
+## Changed
+- update strophejs
+
 ## 3.4.2 - 2018-09-05
 ### Fixed
 - fix thumbnail generation
