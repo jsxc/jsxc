@@ -75,7 +75,7 @@ export default class RosterItem {
       avatar.addElement(this.element.find('.jsxc-avatar'));
 
       this.contact.registerHook('name', (newName) => {
-         this.element.find('.jsxc-name').text(newName);
+         this.element.find('.jsxc-bar__caption__primary').text(newName);
       });
 
       this.contact.registerHook('presence', () => {
@@ -136,14 +136,13 @@ export default class RosterItem {
 
    private rename() {
       let self = this;
-      let nameElement = this.element.find('.jsxc-name');
-      let optionsElement = this.element.find('.jsxc-last-msg, .jsxc-menu');
       let inputElement = $('<input type="text" name="name"/>');
 
       // hide more menu
       $('body').click();
 
-      inputElement.val(nameElement.text());
+      inputElement.addClass('jsxc-grow');
+      inputElement.val(this.contact.getName());
       inputElement.keypress(function(ev) {
          if (ev.which !== 13) {
             return;
@@ -159,9 +158,8 @@ export default class RosterItem {
          ev.stopPropagation();
       });
 
-      optionsElement.hide();
-      nameElement.hide();
-      nameElement.after(inputElement);
+      this.element.find('.jsxc-bar__caption, .jsxc-menu').hide();
+      this.element.find('.jsxc-avatar').after(inputElement);
 
       $('html').one('click', function() {
          self.endRename();
@@ -169,14 +167,11 @@ export default class RosterItem {
    }
 
    private endRename() {
-      var nameElement = this.element.find('.jsxc-name');
-      var optionsElement = this.element.find('.jsxc-last-msg, .jsxc-menu');
-      var inputElement = this.element.find('input');
+      let inputElement = this.element.find('input');
 
       this.contact.setName(<string>inputElement.val());
 
       inputElement.remove();
-      optionsElement.show();
-      nameElement.show();
+      this.element.find('.jsxc-bar__caption, .jsxc-menu').show();
    }
 }
