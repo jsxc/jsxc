@@ -12,24 +12,26 @@ import ChatWindowController from './ChatWindowController'
 import Avatar from './Avatar'
 import Message from './Message'
 import ChatWindow from './ui/ChatWindow';
+import NullLiteral = hbs.AST.NullLiteral;
 
 export default class Contact implements IIdentifiable, IContact {
+   public setResource = (resource: string) => {
+      this.jid = new JID(this.jid.bare + '/' + resource);
+
+      this.data.set('jid', this.jid.full);
+   }
    protected storage: Storage;
-
    protected readonly account: Account;
-
    protected data: PersistentMap;
-
    protected jid: JID;
-
    protected chatWindow;
-
    protected chatWindowController;
-
    protected transcript: Transcript;
 
    constructor(account: Account, jid: JID, name?: string);
+
    constructor(account: Account, id: string);
+
    constructor() {
       this.account = arguments[0];
       this.storage = this.account.getStorage();
@@ -39,37 +41,6 @@ export default class Contact implements IIdentifiable, IContact {
       } else {
          this.initNewContact(arguments[1], arguments[2]);
       }
-   }
-
-   private initExistingContact(id: string) {
-      this.data = new PersistentMap(this.storage, 'contact', id);
-
-      if (!this.data.get('id')) {
-         throw `Could not find existing contact with id "${id}".`;
-      }
-
-      this.jid = new JID(this.data.get('jid'));
-   }
-
-   private initNewContact(jid: JID, name?: string) {
-      let id = jid.bare;
-      this.jid = jid;
-
-      let defaultData = {
-         id: id,
-         jid: this.jid.full,
-         name: name || this.jid.bare,
-         presence: Presence.offline,
-         status: '',
-         subscription: ContactSubscription.NONE,
-         resources: {},
-         type: ContactType.CHAT,
-         rnd: Math.random() // force storage event
-      }
-
-      this.data = new PersistentMap(this.storage, 'contact', id);
-
-      this.data.set(defaultData);
    }
 
    public delete() {
@@ -110,12 +81,6 @@ export default class Contact implements IIdentifiable, IContact {
       return message;
    }
 
-   public setResource = (resource: string) => {
-      this.jid = new JID(this.jid.bare + '/' + resource);
-
-      this.data.set('jid', this.jid.full);
-   }
-
    public clearResources() {
       this.data.set('resources', {});
    }
@@ -141,13 +106,17 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getCapableResources(features: string[]): Promise<Array<string>>
+
    public getCapableResources(features: string): Promise<Array<string>>
+
    public getCapableResources(features): Promise<Array<string>> {
       return this.account.getDiscoInfoRepository().getCapableResources(this, features);
    }
 
    public hasFeatureByResource(resource: string, features: string[]): Promise<{}>
+
    public hasFeatureByResource(resource: string, feature: string): Promise<{}>
+
    public hasFeatureByResource(resource, feature) {
       if (!resource) {
          throw 'I can not lookup a feature without resource';
@@ -165,7 +134,9 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public registerCapableResourcesHook(features: string[], cb: (resources: string[]) => void);
+
    public registerCapableResourcesHook(features: string, cb: (resources: string[]) => void);
+
    public registerCapableResourcesHook(features, cb: (resources: string[]) => void) {
       if (typeof features === 'string') {
          features = [features];
@@ -208,8 +179,14 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getName(): string {
-      return this.data.get('name') || this.jid.bare;
+      if (this.data.get('name') == this.jid.bare) {
+         return this.data.get('nickname') || this.jid.bare;
+      }
+      else {
+         return this.data.get('name');
+      }
    }
+
 
    public getAvatar(): Promise<Avatar> {
       return this.account.getPipe('avatar').run(this, undefined)
@@ -274,8 +251,10 @@ export default class Contact implements IIdentifiable, IContact {
 
       if (oldName !== name) {
          this.account.getConnection().getRosterService().setDisplayName(this.jid, name);
+         this.account.getConnection().getRosterService().setDisplayName(this.jid, name);
       }
    }
+
 
    public setSubscription(subscription: ContactSubscription) {
       this.data.set('subscription', subscription);
@@ -287,6 +266,38 @@ export default class Contact implements IIdentifiable, IContact {
 
    public isPersistent(): boolean {
       return true;
+   }
+
+   private initExistingContact(id: string) {
+      this.data = new PersistentMap(this.storage, 'contact', id);
+
+      if (!this.data.get('id')) {
+         throw `Could not find existing contact with id "${id}".`;
+      }
+
+      this.jid = new JID(this.data.get('jid'));
+   }
+
+   private initNewContact(jid: JID, name?: string, nickname?: string) {
+      let id = jid.bare;
+      this.jid = jid;
+
+      let defaultData = {
+         id: id,
+         jid: this.jid.full,
+         name: name || this.jid.bare,
+         nickname: nickname || <string>'',
+         presence: Presence.offline,
+         status: '',
+         subscription: ContactSubscription.NONE,
+         resources: {},
+         type: ContactType.CHAT,
+         rnd: Math.random() // force storage event
+      }
+
+      this.data = new PersistentMap(this.storage, 'contact', id);
+
+      this.data.set(defaultData);
    }
 
    private getHighestPresence(): Presence {
