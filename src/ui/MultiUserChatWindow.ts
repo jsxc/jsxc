@@ -60,7 +60,8 @@ export default class MultiUserChatWindow extends ChatWindow {
 
       this.memberlistElement.find('ul').append(memberElement);
 
-      let title, label;
+      let title;
+      let label;
       let avatarElement = memberElement.find('.jsxc-avatar');
 
       if (jid && typeof jid !== 'undefined') {
@@ -75,7 +76,7 @@ export default class MultiUserChatWindow extends ChatWindow {
          AvatarSet.setPlaceholder(avatarElement, nickname);
       }
 
-      memberElement.find('.jsxc-name').text(nickname);
+      memberElement.find('.jsxc-name').text(label);
       memberElement.attr('title', title);
 
       this.refreshMemberCount();
@@ -105,13 +106,13 @@ export default class MultiUserChatWindow extends ChatWindow {
       let windowElement = this.element.find('.jsxc-window');
 
       windowElement.on('drop', (ev) => {
-         if ((<any>ev.originalEvent).dataTransfer.files.length) {
+         if ((<any> ev.originalEvent).dataTransfer.files.length) {
             return;
          }
 
          ev.preventDefault();
 
-         let jid = new JID((<any>ev.originalEvent).dataTransfer.getData('text'));
+         let jid = new JID((<any> ev.originalEvent).dataTransfer.getData('text'));
 
          this.contact.invite(jid);
       });

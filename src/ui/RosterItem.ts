@@ -26,7 +26,7 @@ export default class RosterItem {
       this.element.attr('data-subscription', this.contact.getSubscription());
 
       this.element.on('dragstart', (ev) => {
-         (<any>ev.originalEvent).dataTransfer.setData('text/plain', contact.getJid().full);
+         (<any> ev.originalEvent).dataTransfer.setData('text/plain', contact.getJid().full);
 
          $('.jsxc-droppable').addClass('jsxc-drag-rosteritem');
       });
@@ -169,7 +169,7 @@ export default class RosterItem {
    private endRename() {
       let inputElement = this.element.find('input');
 
-      this.contact.setName(<string>inputElement.val());
+      this.contact.setName(<string> inputElement.val());
 
       inputElement.remove();
       this.element.find('.jsxc-bar__caption, .jsxc-menu').show();

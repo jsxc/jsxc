@@ -82,13 +82,13 @@ export default class FormField {
       }
 
       if (type === 'list-single' && values.length > 1) {
-         throw 'list-single should have only one selected option.';
+         throw new Error('list-single should have only one selected option.');
       }
 
       return new FormField({
-         type: type,
-         name: name,
-         values: values,
+         type,
+         name,
+         values,
       })
    };
 
@@ -106,7 +106,7 @@ export default class FormField {
       }
 
       if (this.data.values.length > 1 && ['jid-multi', 'list-multi', 'text-multi', 'hidden'].indexOf(this.data.type) < 0) {
-         throw 'Fields of type ' + data.type + ' are not allowed to have multiple value elements.';
+         throw new Error('Fields of type ' + data.type + ' are not allowed to have multiple value elements.');
       }
 
       if (!this.data.options) {
@@ -114,7 +114,7 @@ export default class FormField {
       }
 
       if (this.data.options.length > 0 && ['list-multi', 'list-single'].indexOf(this.data.type) < 0) {
-         throw 'Only fields of type list-multi or list-single are allowed to have option elements.';
+         throw new Error('Only fields of type list-multi or list-single are allowed to have option elements.');
       }
    }
 
@@ -128,16 +128,16 @@ export default class FormField {
 
    public toJSON() {
       return {
-         'type': this.data.type,
-         'name': this.data.name,
-         'values': this.data.values
+         type: this.data.type,
+         name: this.data.name,
+         values: this.data.values
       };
    }
 
    public toXML() {
       let xmlElement = $build('field', {
-         'type': this.data.type,
-         'var': this.data.name
+         type: this.data.type,
+         var: this.data.name
       });
 
       for (let value of this.data.values) {
@@ -152,7 +152,7 @@ export default class FormField {
 
       switch (this.data.type) {
          case 'fixed':
-            element = $('<div>').append($(this.data.values).map((index, value) => $('<p>').text(<any>value).get()));
+            element = $('<div>').append($(this.data.values).map((index, value) => $('<p>').text(<any> value).get()));
             break;
          case 'boolean':
          case 'hidden':

@@ -163,7 +163,7 @@ abstract class AbstractConnection {
    }
 
    public sendPresence(presence?: Presence) {
-      var presenceStanza = $pres();
+      let presenceStanza = $pres();
 
       presenceStanza.c('c', this.generateCapsAttributes()).up();
 
@@ -197,17 +197,17 @@ abstract class AbstractConnection {
       });
 
       iq.c('field', {
-         'var': 'FORM_TYPE',
+         var: 'FORM_TYPE',
          type: 'hidden'
       }).c('value').t(NS.get('MAM')).up().up();
 
       iq.c('field', {
-         'var': 'with'
+         var: 'with'
       }).c('value').t(archive.bare).up().up();
 
       if (end) {
          iq.c('field', {
-            'var': 'end'
+            var: 'end'
          }).c('value').t(end.toISOString()).up().up();
       }
 
@@ -241,7 +241,7 @@ abstract class AbstractConnection {
    }
 
    public close() {
-
+      // @TODO this has to be removed
    }
 
    protected getStorage() {
@@ -250,10 +250,10 @@ abstract class AbstractConnection {
 
    private generateCapsAttributes() {
       return {
-         'xmlns': NS.get('CAPS'),
-         'hash': 'sha-1',
-         'node': this.node,
-         'ver': this.account.getDiscoInfo().getCapsVersion()
+         xmlns: NS.get('CAPS'),
+         hash: 'sha-1',
+         node: this.node,
+         ver: this.account.getDiscoInfo().getCapsVersion()
       }
    }
 }

@@ -10,9 +10,9 @@ export default class Pipe {
 
    }
 
-   public addProcessor(processor: (...args) => Promise<any> | Array<any>, priority: number = 50) {
+   public addProcessor(processor: (...args) => Promise<any> | any[], priority: number = 50) {
       if (isNaN(priority) || priority < MIN_PRIORITY || priority > MAX_PRIORITY) {
-         throw 'Priority has to be between 0 and 100';
+         throw new Error('Priority has to be between 0 and 100');
       }
 
       if (typeof this.pipe[priority] === 'undefined') {
@@ -31,7 +31,7 @@ export default class Pipe {
          }
 
          processors.forEach((processor) => {
-            chain = chain.then((args2: Array<any>) => {
+            chain = chain.then((args2: any[]) => {
                return processor.apply(this, args2);
             });
          });

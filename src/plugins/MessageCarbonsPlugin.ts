@@ -41,10 +41,10 @@ export default class CarbonsPlugin extends AbstractPlugin {
    }
 
    private preSendMessageStanzaProcessor = (message: Message, xmlElement: Strophe.Builder) => {
-      let body = (<any>xmlElement).node.textContent;
+      let body = (<any> xmlElement).node.textContent;
 
       if (body.match(/^\?OTR/)) {
-         xmlElement.up().c("private", {
+         xmlElement.up().c('private', {
             xmlns: CONST.NS.CARBONS
          });
       }
@@ -66,7 +66,7 @@ export default class CarbonsPlugin extends AbstractPlugin {
    }
 
    private enable() {
-      var iq = $iq({
+      let iq = $iq({
          type: 'set'
       }).c('enable', {
          xmlns: Namespace.get('CARBONS')
@@ -80,7 +80,7 @@ export default class CarbonsPlugin extends AbstractPlugin {
    }
 
    private disable(cb) {
-      var iq = $iq({
+      let iq = $iq({
          type: 'set'
       }).c('disable', {
          xmlns: Namespace.get('CARBONS')
@@ -91,9 +91,5 @@ export default class CarbonsPlugin extends AbstractPlugin {
       }).catch((stanza) => {
          this.pluginAPI.Log.warn('Could not disable carbons');
       });
-   }
-
-   private refresh(err) {
-
    }
 }

@@ -1,7 +1,7 @@
 
 export default class Hash {
    public static String(value: string) {
-      var hash = 0;
+      let hash = 0;
 
       if (value.length === 0) {
          return hash;

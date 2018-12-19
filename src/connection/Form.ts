@@ -61,7 +61,7 @@ export default class Form {
       });
 
       if ($(element).attr('data-type') !== 'form') {
-         throw 'Can only process forms of type "form".';
+         throw new Error('Can only process forms of type "form".');
       }
 
       return new Form('submit', fields);
@@ -92,7 +92,7 @@ export default class Form {
             throw new InvalidParameterError(`Item ${itemIndex} does not contain all "reported" fields.`);
          }
 
-         this.reportedFields.forEach((undefined, index) => {
+         this.reportedFields.forEach((field, index) => {
             if (this.reportedFields[index].getName() !== fields[index].getName()) {
                throw new InvalidParameterError(`Item ${itemIndex} does not contain all "reported" fields.`);
             }
@@ -154,7 +154,7 @@ export default class Form {
    }
 
    public getType(): TYPE {
-      return <TYPE>this.type;
+      return <TYPE> this.type;
    }
 
    public getTitle(): string | undefined {

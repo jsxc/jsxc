@@ -1,5 +1,5 @@
-import ChatWindow from "./ChatWindow"
-import Client from "../Client"
+import ChatWindow from './ChatWindow'
+import Client from '../Client'
 
 let chatWindowListTemplate = require('../../template/chatWindowList.hbs');
 
@@ -106,11 +106,11 @@ export default class ChatWindowList {
 
    private scrollWindowListBy(offset) {
 
-      var scrollWidth = $('#jsxc_windowList>ul').width();
-      var width = $('#jsxc_windowList').width();
-      var el = $('#jsxc_windowList>ul');
-      var right = parseInt(el.css('right')) - offset;
-      var padding = $("#jsxc_windowListSB").width();
+      let scrollWidth = $('#jsxc_windowList>ul').width();
+      let width = $('#jsxc_windowList').width();
+      let el = $('#jsxc_windowList>ul');
+      let right = parseInt(el.css('right'), 10) - offset;
+      let padding = $('#jsxc_windowListSB').width();
 
       if (scrollWidth < width) {
          return;

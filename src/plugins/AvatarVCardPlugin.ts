@@ -42,7 +42,7 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
       // @REVIEW groupchat? error?
 
       if (xVCard.length > 0) {
-         var photo = xVCard.find('photo');
+         let photo = xVCard.find('photo');
 
          if (photo.length > 0) {
             let sha1OfAvatar = photo.text();

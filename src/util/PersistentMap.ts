@@ -22,7 +22,7 @@ export default class PersistentMap {
       return Object.keys(this.map);
    }
 
-   public get(id: string, defaultValue: any = undefined) {
+   public get(id: string, defaultValue?: any) {
       let value = this.map[id];
 
       return typeof value !== 'undefined' ? value : defaultValue;

@@ -2,8 +2,8 @@ import i18next from 'i18next'
 import Log from '@util/Log';
 import Options from '../Options'
 
-var en = require('../../locales/en.json');
-var de = require('../../locales/de.json');
+let en = require('../../locales/en.json');
+let de = require('../../locales/de.json');
 
 function detectLanguage() {
    let lang;
@@ -27,8 +27,8 @@ i18next.init({
    fallbackLng: 'en',
    returnNull: false,
    resources: {
-      en: en,
-      de: de
+      en,
+      de
    },
    interpolation: {
       prefix: '__',

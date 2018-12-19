@@ -35,5 +35,5 @@ export default abstract class Page {
       this.element.append(this.generateContentElement());
    }
 
-   protected abstract generateContentElement(): JQuery | Array<JQuery>
+   protected abstract generateContentElement(): JQuery | JQuery[]
 }

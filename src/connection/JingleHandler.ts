@@ -48,7 +48,7 @@ export default class JingleHandler {
             iqElement.setAttribute('id', UUID.v4() + ':sendIQ');
          }
 
-         (<any>this.connection).send(iqElement); //@REVIEW
+         (<any> this.connection).send(iqElement); //@REVIEW
       });
 
       this.manager.on('incoming', (session) => {
@@ -61,7 +61,7 @@ export default class JingleHandler {
    }
 
    public initiate(peerJID: JID, stream, offerOptions?) {
-      var session = this.manager.createMediaSession(peerJID.full);
+      let session = this.manager.createMediaSession(peerJID.full);
 
       //@TODO extract onIceConnectionStateChanged from VideoWindow and use here
 
@@ -95,7 +95,7 @@ export default class JingleHandler {
    }
 
    public onJingle = (iq) => {
-      var req;
+      let req;
 
       try {
          req = jxt.parse(iq.outerHTML);
@@ -148,14 +148,14 @@ export default class JingleHandler {
    }
 
    private getPeerConstraints(offerToReceiveAudio = false, offerToReceiveVideo = false) {
-      var browserDetails = RTC.browserDetails;
+      let browserDetails = RTC.browserDetails;
       let peerConstraints;
 
       if ((browserDetails.version < 33 && browserDetails.browser === 'firefox') || browserDetails.browser === 'chrome') {
          peerConstraints = {
             mandatory: {
-               'OfferToReceiveAudio': offerToReceiveAudio,
-               'OfferToReceiveVideo': offerToReceiveVideo,
+               OfferToReceiveAudio: offerToReceiveAudio,
+               OfferToReceiveVideo: offerToReceiveVideo,
             }
          };
 
@@ -164,8 +164,8 @@ export default class JingleHandler {
          }
       } else {
          peerConstraints = {
-            'offerToReceiveAudio': offerToReceiveAudio,
-            'offerToReceiveVideo': offerToReceiveVideo,
+            offerToReceiveAudio,
+            offerToReceiveVideo,
          };
 
          if (browserDetails.browser === 'firefox') {
@@ -190,9 +190,6 @@ export default class JingleHandler {
       return JingleHandler.videoDialog;
    }
 }
-
-
-
 
 /** required disco features for video call */
 // reqVideoFeatures: ['urn:xmpp:jingle:apps:rtp:video', 'urn:xmpp:jingle:apps:rtp:audio', 'urn:xmpp:jingle:transports:ice-udp:1', 'urn:xmpp:jingle:apps:dtls:0'],

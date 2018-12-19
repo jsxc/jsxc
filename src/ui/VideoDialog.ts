@@ -10,7 +10,7 @@ const VideoDialogTemplate = require('../../template/videoDialog.hbs')
 export class VideoDialog {
    private dom;
 
-   private videoWindows: Array<VideoWindow> = [];
+   private videoWindows: VideoWindow[] = [];
 
    private localStream;
 
@@ -48,12 +48,13 @@ export class VideoDialog {
       let isStream = mediaRequested.length === 0;
       let infoText;
 
-      if (isStream)
+      if (isStream) {
          infoText = `Incoming_stream from ${peerName}`;
-      else if (isVideoCall)
+      } else if (isVideoCall) {
          infoText = `Incoming video call from ${peerName}`;
-      else
+      } else {
          infoText = `Incoming call from ${peerName}`;
+      }
 
       let confirmDialog = ConfirmDialog(infoText);
 
@@ -146,8 +147,8 @@ export class VideoDialog {
 
       status.css({
          'margin-left': '-' + (status.width() / 2) + 'px',
-         opacity: 0,
-         display: 'block'
+         'opacity': 0,
+         'display': 'block'
       });
 
       status.stop().animate({
@@ -195,7 +196,7 @@ export class VideoDialog {
 
    private removeSession = (session, reason?) => {
       //@TODO translate
-      var msg = (reason && reason.condition ? (': ' + ('jingle_reason_' + reason.condition)) : '') + '.';
+      let msg = (reason && reason.condition ? (': ' + ('jingle_reason_' + reason.condition)) : '') + '.';
 
       if (session.call) {
          msg = ('Call_terminated') + msg;
@@ -225,14 +226,14 @@ export class VideoDialog {
    }
 
    public static attachMediaStream = (element, stream) => {
-      let el = (element instanceof jQuery) ? element.get(0) : element;
+      let el = (element instanceof jQuery) ? (<JQuery> element).get(0) : element;
       el.srcObject = stream;
 
       $(element).show();
    }
 
    public static dettachMediaStream = (element) => {
-      let el = (element instanceof jQuery) ? element.get(0) : element;
+      let el = (element instanceof jQuery) ? (<JQuery> element).get(0) : element;
 
       if (!el) {
          return;
@@ -246,7 +247,7 @@ export class VideoDialog {
 
    private static stopStream(stream) {
       if (typeof stream.getTracks === 'function') {
-         var tracks = stream.getTracks();
+         let tracks = stream.getTracks();
          tracks.forEach(function(track) {
             track.stop();
          });

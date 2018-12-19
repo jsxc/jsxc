@@ -27,8 +27,8 @@ export default class Dialog {
 
       this.src = dialogTemplate({
          id: this.id,
-         name: name,
-         content: content
+         name,
+         content
       });
    }
 
@@ -59,7 +59,7 @@ export default class Dialog {
    }
 
    public append(content: string) {
-      var dom = this.getDom();
+      let dom = this.getDom();
 
       dom.append(content);
    }
@@ -83,10 +83,10 @@ export default class Dialog {
       });
 
       dom.find('form').each(function() {
-         var form = $(this);
+         let form = $(this);
 
          form.find('button[data-jsxc-loading-text]').each(function() {
-            var btn = $(this);
+            let btn = $(this);
 
             btn.on('btnloading.jsxc', function() {
                if (!btn.prop('disabled')) {

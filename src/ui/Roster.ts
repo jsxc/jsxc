@@ -175,7 +175,7 @@ export default class Roster {
    public setNoConnection() {
       let linkElement = $('<a>');
       linkElement.text('relogin');
-      linkElement.click(<any>showLoginBox);
+      linkElement.click(<any> showLoginBox);
 
       let statusElement = $('<p>');
       statusElement.text('no_connection');
@@ -187,7 +187,7 @@ export default class Roster {
    public setEmptyContactList() {
       let statusElement = $('<p>');
       statusElement.text(Translation.t('Your_roster_is_empty_add_'));
-      statusElement.find('a').click(<any>showContactDialog);
+      statusElement.find('a').click(<any> showContactDialog);
       statusElement.append('.');
 
       this.setStatus(statusElement);
@@ -257,7 +257,7 @@ export default class Roster {
       let li = $('<li>');
 
       if (!id || !handler || !label) {
-         throw 'id, handler and label required for menu entry';
+         throw new Error('id, handler and label required for menu entry');
       }
 
       if (typeof label === 'string') {
@@ -299,9 +299,9 @@ export default class Roster {
       let presence = (contact.getSubscription() === 'both') ? contact.getPresence() : Presence.offline + 1;
 
       contactList.children().each(function() {
-         var pointer = $(this);
-         var pointerSubscription = pointer.data('subscription');
-         var pointerPresence = (pointerSubscription === 'both') ? Presence[pointer.data('presence')] : Presence.offline + 1;
+         let pointer = $(this);
+         let pointerSubscription = pointer.data('subscription');
+         let pointerPresence = (pointerSubscription === 'both') ? Presence[pointer.data('presence')] : Presence.offline + 1;
          let pointerName = pointer.find('.jsxc-name').text();
 
          if ((pointerName.toLowerCase() > contact.getName().toLowerCase() && pointerPresence === presence) || pointerPresence > presence) {
@@ -322,14 +322,14 @@ export default class Roster {
       this.addMenuEntry({
          id: 'about',
          handler: showAboutDialog,
-         label: Translation.t("About"),
+         label: Translation.t('About'),
          offlineAvailable: true,
       });
 
       this.addMenuEntry({
          id: 'online-help',
-         handler: function(ev) { },
-         label: $(`<a href="#" target="_blank">${Translation.t("Online_help")}</a>`),
+         handler(ev) { },
+         label: $(`<a href="#" target="_blank">${Translation.t('Online_help')}</a>`),
          offlineAvailable: true,
          icon: 'help',
       });
@@ -337,34 +337,34 @@ export default class Roster {
       this.addMenuEntry({
          id: 'add-contact',
          handler: showContactDialog,
-         label: Translation.t("Add_buddy"),
+         label: Translation.t('Add_buddy'),
          icon: 'contact'
       });
 
       this.addMenuEntry({
          id: 'hide-offline',
          handler: this.toggleOffline,
-         label: $(`<span class="jsxc-hide-offline">${Translation.t("Hide_offline")}</span>
-                   <span class="jsxc-show-offline">${Translation.t("Show_offline")}</span>`),
+         label: $(`<span class="jsxc-hide-offline">${Translation.t('Hide_offline')}</span>
+                   <span class="jsxc-show-offline">${Translation.t('Show_offline')}</span>`),
       });
 
       this.addMenuEntry({
          id: 'mute-notification',
          handler: this.muteNotification,
-         label: Translation.t("Mute"),
+         label: Translation.t('Mute'),
       });
 
       this.addMenuEntry({
          id: 'join-muc',
          handler: showMultiUserJoinDialog,
-         label: Translation.t("Join_chat"),
+         label: Translation.t('Join_chat'),
          icon: 'groupcontact'
       });
 
       this.addMenuEntry({
          id: 'settings',
          handler: showSettingsDialog,
-         label: Translation.t("Settings"),
+         label: Translation.t('Settings'),
          offlineAvailable: true,
          icon: 'setting'
       });
@@ -375,7 +375,7 @@ export default class Roster {
       let options = this.options;
 
       this.element.find('.jsxc-js-presence-menu li').click(function() {
-         let presenceString = <string>$(this).data('presence');
+         let presenceString = <string> $(this).data('presence');
          let oldPresence = Client.getPresenceController().getTargetPresence() || Presence.offline;
          let requestedPresence = Presence[presenceString];
 
@@ -398,7 +398,7 @@ export default class Roster {
    }
 
    private toggleOffline = (ev) => {
-      var hideOffline = !this.options.get('hideOffline');
+      let hideOffline = !this.options.get('hideOffline');
 
       this.options.set('hideOffline', hideOffline);
    }
