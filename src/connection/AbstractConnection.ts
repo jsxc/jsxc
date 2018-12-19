@@ -1,17 +1,15 @@
 import Message from '../Message'
 import JID from '../JID'
-import { IJID } from '../JID.interface'
 import * as NS from './xmpp/namespace'
 import Log from '../util/Log'
 import { Strophe, $iq, $msg, $pres } from '../vendor/Strophe'
 import Account from '../Account'
-import Pipe from '../util/Pipe'
 import PEPService from './services/PEP'
+import PubSubService from './services/PubSub'
 import MUCService from './services/MUC'
 import RosterService from './services/Roster'
 import VcardService from './services/Vcard'
 import DiscoService from './services/Disco'
-import { IMessage } from '@src/Message.interface';
 
 export const STANZA_KEY = 'stanza';
 export const STANZA_IQ_KEY = 'stanzaIQ';
@@ -52,6 +50,10 @@ abstract class AbstractConnection {
 
       NS.register('VCARD', 'vcard-temp');
       NS.register('FORWARD', 'urn:xmpp:forward:0');
+   }
+
+   public getPubSubService = (): PubSubService => {
+      return this.getService('pubsub', PubSubService);
    }
 
    public getPEPService = (): PEPService => {

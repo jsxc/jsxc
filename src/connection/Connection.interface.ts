@@ -3,6 +3,7 @@ import Message from './../Message'
 import { Presence } from './AbstractConnection'
 import Form from './Form'
 import PEPService from './services/PEP'
+import PubSubService from './services/PubSub'
 import 'Strophe'
 
 export interface IConnection {
@@ -13,6 +14,8 @@ export interface IConnection {
 
    pluginOnlySendIQ(stanzaElement: Element): Promise<Element>;
    pluginOnlySendIQ(stanzaElement: Strophe.Builder): Promise<Element>;
+
+   getPubSubService(): PubSubService
 
    getPEPService(): PEPService
 
