@@ -4,7 +4,7 @@ let confirmTemplate = require('../../../template/confirm.hbs');
 
 export default function(question: string, id?: string) {
    let content = confirmTemplate({
-      question: question
+      question
    });
 
    let dialog = new Dialog(content);

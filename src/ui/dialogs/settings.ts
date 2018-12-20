@@ -25,7 +25,7 @@ class StartPage extends Page {
    }
 
    //@REVIEW could also return Page or getDOM interface?
-   protected generateContentElement(): JQuery | Array<JQuery> {
+   protected generateContentElement(): JQuery | JQuery[] {
       return [
          new ClientSection(this.navigation).getDOM(),
          new AccountOverviewSection(this.navigation).getDOM()
@@ -159,7 +159,7 @@ class PasswordPage extends Page {
       contentElement.append(errorElement);
 
       passwordAElement.find('input').on('input', function() {
-         let value = <string>$(this).val();
+         let value = <string> $(this).val();
          let numberOfPossibleCharacters = 0;
 
          if (/[a-z]/.test(value)) {
@@ -257,4 +257,3 @@ class PluginSection extends Section {
       return contentElement.getDOM();
    }
 }
-

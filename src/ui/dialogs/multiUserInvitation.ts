@@ -5,15 +5,15 @@ import Log from '../../util/Log'
 import Roster from '../Roster'
 import Client from '../../Client'
 
-var multiUserInvitation = require('../../../template/multiUserInvitation.hbs');
+let multiUserInvitation = require('../../../template/multiUserInvitation.hbs');
 
 export default function(type: 'direct' | 'mediated', from: string, room: string, reason: string, password: string) {
    let fromJid = new JID(from);
    let roomJid = new JID(room);
    let content = multiUserInvitation({
-      from: from,
-      room: room,
-      reason: reason
+      from,
+      room,
+      reason
    });
 
    let dialog = new Dialog(content);
@@ -23,7 +23,7 @@ export default function(type: 'direct' | 'mediated', from: string, room: string,
    dom.find('form').on('submit', (ev) => {
       ev.preventDefault();
 
-      let multiUserContact = <MultiUserContact>account.getContact(roomJid);
+      let multiUserContact = <MultiUserContact> account.getContact(roomJid);
 
       if (!multiUserContact) {
          multiUserContact = account.addMultiUserContact(roomJid);

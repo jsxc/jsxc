@@ -57,12 +57,12 @@ export default class extends AbstractHandler {
             account.removeContact(contact);
          } else if (subscription === SUBSCRIPTION.FROM || subscription === SUBSCRIPTION.BOTH) {
             contact.setName(name);
-            contact.setSubscription(<SUBSCRIPTION>subscription);
+            contact.setSubscription(<SUBSCRIPTION> subscription);
          }
       } else {
          //@REVIEW DRY same code as in roster handler
          contact = account.addContact(jid, name);
-         contact.setSubscription(<SUBSCRIPTION>subscription);
+         contact.setSubscription(<SUBSCRIPTION> subscription);
 
          Roster.get().add(contact);
       }

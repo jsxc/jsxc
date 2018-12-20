@@ -20,13 +20,13 @@ export default class Menu {
 
    constructor(private element: JQuery) {
       if (element.length !== 1) {
-         throw 'Found 0 or more than 1 root elements';
+         throw new Error('Found 0 or more than 1 root elements');
       }
 
       this.listElement = element.find('ul');
 
       if (this.listElement.length !== 1) {
-         throw 'Found 0 or more than 1 list elements';
+         throw new Error('Found 0 or more than 1 list elements');
       }
 
       element.click(this.onClick);

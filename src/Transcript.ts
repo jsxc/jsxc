@@ -66,7 +66,7 @@ export default class Transcript {
    }
 
    private deleteLastMessages() {
-      let allowedNumberOfMessages = parseInt(Options.get().get('numberOfMessages'));
+      let allowedNumberOfMessages = parseInt(Options.get().get('numberOfMessages'), 10);
       let numberOfMessages = 0;
 
       if (allowedNumberOfMessages <= 0 || isNaN(allowedNumberOfMessages)) {

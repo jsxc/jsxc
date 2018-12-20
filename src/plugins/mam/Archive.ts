@@ -117,10 +117,10 @@ export default class Archive {
          message = this.contact.getTranscript().getMessage(uid);
       } catch (err) {
          message = new Message({
-            uid: uid,
+            uid,
             attrId: messageId,
             peer: this.contact.getJid(),
-            direction: direction,
+            direction,
             plaintextMessage: plaintextBody,
             htmlMessage: htmlBody.html(),
             stamp: stamp.getTime()

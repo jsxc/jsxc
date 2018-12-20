@@ -1,7 +1,7 @@
-import { SignalSessionCipher, SignalAddress } from "./Signal";
-import Address from "./Address";
-import Store from "../lib/Store";
-import { Ciphertext } from "../model/EncryptedDeviceMessage";
+import { SignalSessionCipher, SignalAddress } from './Signal';
+import Address from './Address';
+import Store from '../lib/Store';
+import { Ciphertext } from '../model/EncryptedDeviceMessage';
 
 export class SessionCipher {
    private signalSessionCipher;

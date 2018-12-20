@@ -24,7 +24,7 @@ export default class HttpUploadService {
    }
 
    private requestSlot(file: File) {
-      var iq = $iq({
+      let iq = $iq({
          to: this.jid.full,
          type: 'get'
       }).c('request', {
@@ -42,12 +42,12 @@ export default class HttpUploadService {
       let slot = $(stanza).find(`slot[xmlns="${this.namespace}"]`);
 
       if (slot.length > 0) {
-         var put = slot.find('put').text();
-         var get = slot.find('get').text();
+         let put = slot.find('put').text();
+         let get = slot.find('get').text();
 
          return Promise.resolve({
-            put: put,
-            get: get
+            put,
+            get
          });
       }
 
@@ -80,8 +80,8 @@ export default class HttpUploadService {
             contentType: 'application/octet-stream',
             data: file,
             processData: false,
-            xhr: function() {
-               var xhr = (<any>$).ajaxSettings.xhr();
+            xhr() {
+               let xhr = (<any> $).ajaxSettings.xhr();
 
                // track upload progress
                xhr.upload.onprogress = function(ev) {

@@ -1,4 +1,4 @@
-import Exportable from "./Exportable";
+import Exportable from './Exportable';
 
 export interface PreKeyObject {
    keyId: number

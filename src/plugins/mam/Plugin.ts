@@ -169,7 +169,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
    private onMamMessage = (stanza: string): boolean => {
       let stanzaElement = $(stanza);
       let resultElement = stanzaElement.find('result' + Namespace.getFilter('MAM'));
-      var queryId = resultElement.attr('queryid');
+      let queryId = resultElement.attr('queryid');
 
       if (resultElement.length !== 1 || !queryId) {
          return true;

@@ -8,7 +8,7 @@ export async function decrypt(exportedAESKey: ArrayBuffer, iv: Uint8Array, data:
 
    let decryptedBuffer = await window.crypto.subtle.decrypt({
       name: ALGO_NAME,
-      iv: iv,
+      iv,
       tagLength: AES_TAG_LENGTH
    }, key, data);
 
@@ -23,11 +23,11 @@ export async function encrypt(plaintext): Promise<{ keydata: ArrayBuffer, iv: Bu
    let ciphertext = encrypted.ciphertext;
    let authenticationTag = encrypted.authenticationTag;
 
-   let keydata = await window.crypto.subtle.exportKey('raw', <CryptoKey>key)
+   let keydata = await window.crypto.subtle.exportKey('raw', <CryptoKey> key)
 
    return {
-      keydata: ArrayBufferUtils.concat(keydata, <ArrayBuffer>authenticationTag),
-      iv: iv,
+      keydata: ArrayBufferUtils.concat(keydata, <ArrayBuffer> authenticationTag),
+      iv,
       payload: ciphertext
    }
 }
@@ -47,7 +47,7 @@ async function generateAESKey(): Promise<CryptoKey> {
 async function generateAESencryptedMessage(iv, key, plaintext): Promise<{ ciphertext: ArrayBuffer, authenticationTag: ArrayBuffer }> {
    let encryptOptions = {
       name: ALGO_NAME,
-      iv: iv,
+      iv,
       tagLength: AES_TAG_LENGTH
    };
    let encodedPlaintext = ArrayBufferUtils.encode(plaintext);
@@ -58,7 +58,7 @@ async function generateAESencryptedMessage(iv, key, plaintext): Promise<{ cipher
    let authenticationTag = encrypted.slice(ciphertextLength);
 
    return {
-      ciphertext: ciphertext,
-      authenticationTag: authenticationTag
+      ciphertext,
+      authenticationTag
    };
 }

@@ -12,7 +12,7 @@ export default class PresenceController {
    private currentPresence: Presence;
    private updateTimeout;
 
-   constructor(private storage: Storage, private getAccounts: () => Array<Account>) {
+   constructor(private storage: Storage, private getAccounts: () => Account[]) {
 
    }
 

@@ -26,19 +26,19 @@ export default class FormWatcher {
       this.settingsCallback = settingsCallback;
 
       if (formElement.length !== 1) {
-         throw `Found ${formElement.length} form elements. I need exactly one.`;
+         throw new Error(`Found ${formElement.length} form elements. I need exactly one.`);
       }
 
       if (usernameElement.length !== 1) {
-         throw `Found ${usernameElement.length} username elements. I need exactly one.`;
+         throw new Error(`Found ${usernameElement.length} username elements. I need exactly one.`);
       }
 
       if (passwordElement.length !== 1) {
-         throw `Found ${passwordElement.length} password elements. I need exactly one.`;
+         throw new Error(`Found ${passwordElement.length} password elements. I need exactly one.`);
       }
 
       if (typeof settingsCallback !== 'function') {
-         throw 'I need a settings callback.';
+         throw new Error('I need a settings callback.');
       }
 
       this.prepareForm();
@@ -72,21 +72,21 @@ export default class FormWatcher {
    }
 
    private async onFormSubmit() {
-      let username = <string>this.usernameElement.val();
-      let password = <string>this.passwordElement.val();
+      let username = <string> this.usernameElement.val();
+      let password = <string> this.passwordElement.val();
 
       let settings = await this.getSettings(username, password);
 
       if (typeof settings !== 'object' || settings === null) {
-         throw 'No settings provided';
+         throw new Error('No settings provided');
       }
 
       if (settings.disabled) {
-         throw 'Duplex login disabled';
+         throw new Error('Duplex login disabled');
       }
 
       if (!settings.xmpp || !settings.xmpp.url) {
-         throw 'I found no connection url';
+         throw new Error('I found no connection url');
       }
 
       //@TODO merge settings
@@ -99,7 +99,7 @@ export default class FormWatcher {
       } else if (settings.xmpp.domain) {
          jid = username + '@' + settings.xmpp.domain;
       } else {
-         throw 'Could not find any jid.';
+         throw new Error('Could not find any jid.');
       }
 
       if (settings.xmpp.resource && !/@(.+)\/(.+)^/.test(jid)) {
@@ -129,7 +129,7 @@ export default class FormWatcher {
       formElement.off('submit');
 
       // Attach original events
-      var submitEvents = formElement.data('submits') || [];
+      let submitEvents = formElement.data('submits') || [];
       submitEvents.forEach((handler) => {
          formElement.submit(handler);
       });
@@ -138,12 +138,12 @@ export default class FormWatcher {
 
       if (formElement.find('#submit').length > 0) {
          formElement.find('#submit').click();
-      } else if (formElement.get(0) && typeof (<HTMLFormElement>formElement.get(0)).submit === 'function') {
+      } else if (formElement.get(0) && typeof (<HTMLFormElement> formElement.get(0)).submit === 'function') {
          formElement.submit();
       } else if (formElement.find('[type="submit"]').length > 0) {
          formElement.find('[type="submit"]').click();
       } else {
-         throw 'Could not submit login form.';
+         throw new Error('Could not submit login form.');
       }
    }
 

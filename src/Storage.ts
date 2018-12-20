@@ -10,12 +10,12 @@ const IGNORE_KEY = ['rid'];
 const BACKEND = localStorage;
 
 export default class Storage implements IStorage {
-   static storageNotConform: boolean = false;
-   static tested: boolean = false;
+   public static storageNotConform: boolean = false;
+   public static tested: boolean = false;
 
    private hooks: any = {};
 
-   static toSNC: number;
+   public static toSNC: number;
 
    public static clear(name?: string) {
       Storage.getKeysWithPrefix(name).forEach(key => BACKEND.removeItem(key));
@@ -119,7 +119,8 @@ export default class Storage implements IStorage {
    public setItem(type: string, key: string, value: any): void;
    public setItem(key: string, value: any): void
    public setItem(): void {
-      let key, value;
+      let key;
+      let value;
 
       if (arguments.length === 2) {
          key = arguments[0];
@@ -150,7 +151,7 @@ export default class Storage implements IStorage {
       if (!Storage.storageNotConform && oldValue !== value) {
          this.onStorageEvent({
             key: this.getPrefix() + key,
-            oldValue: oldValue,
+            oldValue,
             newValue: value
          });
       }
@@ -169,7 +170,7 @@ export default class Storage implements IStorage {
 
       key = this.getPrefix() + key;
 
-      var value = BACKEND.getItem(key);
+      let value = BACKEND.getItem(key);
 
       return this.parseValue(value);
    }
@@ -191,7 +192,9 @@ export default class Storage implements IStorage {
    public updateItem(type, key, variable, value): void;
    public updateItem(key, variable, value): void;
    public updateItem(): void {
-      let key, variable, value;
+      let key;
+      let variable;
+      let value;
 
       if (arguments.length === 4 || (arguments.length === 3 && typeof variable === 'object')) {
          key = arguments[0] + SEP + arguments[1];
@@ -203,7 +206,7 @@ export default class Storage implements IStorage {
          value = arguments[2];
       }
 
-      var data = this.getItem(key) || {};
+      let data = this.getItem(key) || {};
 
       if (typeof (variable) === 'object') {
 
@@ -234,7 +237,8 @@ export default class Storage implements IStorage {
    public removeElement(type, key, name): void;
    public removeElement(key, name): void;
    public removeElement(): void {
-      let key, name;
+      let key;
+      let name;
 
       if (arguments.length === 2) {
          key = arguments[0];
@@ -244,7 +248,7 @@ export default class Storage implements IStorage {
          name = arguments[2];
       }
 
-      var item = this.getItem(key);
+      let item = this.getItem(key);
 
       if ($.isArray(item)) {
          item = $.grep(item, function(e) {

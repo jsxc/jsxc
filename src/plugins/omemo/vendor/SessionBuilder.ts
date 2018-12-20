@@ -1,7 +1,7 @@
-import { SignalSessionBuilder, SignalBundleObject, SignalAddress } from "./Signal";
-import Address from "./Address";
-import Store from "../lib/Store";
-import Bundle from "../lib/Bundle";
+import { SignalSessionBuilder, SignalBundleObject, SignalAddress } from './Signal';
+import Address from './Address';
+import Store from '../lib/Store';
+import Bundle from '../lib/Bundle';
 
 export class SessionBuilder {
    private signalSessionBuilder;

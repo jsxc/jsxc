@@ -79,7 +79,7 @@ export default class ChatStateMachine {
       this.id = Math.random();
 
       this.storage.setItem(this.key, {
-         state: state,
+         state,
          id: this.id
       });
    }
@@ -87,7 +87,7 @@ export default class ChatStateMachine {
    private getState(): STATE {
       let stored = this.storage.getItem(this.key) || {};
 
-      return <STATE>stored.state || STATE.INACTIVE;
+      return <STATE> stored.state || STATE.INACTIVE;
    }
 
    private stateChange = (newState: STATE, oldState: STATE) => {

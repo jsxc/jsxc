@@ -49,7 +49,7 @@ export default class implements DiscoInfo {
       return this.data.get('identities') || []
    }
 
-   public getFeatures(): Array<string> {
+   public getFeatures(): string[] {
       return this.data.get('features') || [];
    }
 

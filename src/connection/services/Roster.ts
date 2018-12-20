@@ -49,7 +49,7 @@ export default class Roster extends AbstractService {
    }
 
    public setDisplayName(jid: IJID, displayName: string): Promise<Element> {
-      var iq = $iq({
+      let iq = $iq({
          type: 'set'
       }).c('query', {
          xmlns: 'jabber:iq:roster'

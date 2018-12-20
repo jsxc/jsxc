@@ -40,7 +40,7 @@ export default class MultiUserPresenceProcessor {
    }
 
    private processUnavailable() {
-      var newNickname = this.xElement.find('item').attr('nick');
+      let newNickname = this.xElement.find('item').attr('nick');
 
       if (this.xElement.find('destroy').length > 0) {
          this.getMultiUserContact().shutdown();
@@ -56,7 +56,7 @@ export default class MultiUserPresenceProcessor {
 
          this.inform(Translation.t('is_now_known_as', {
             oldNickname: this.nickname,
-            newNickname: newNickname,
+            newNickname,
             escapeInterpolation: true
          }));
       } else {
@@ -103,11 +103,11 @@ export default class MultiUserPresenceProcessor {
    }
 
    private postReason() {
-      var actor = {
+      let actor = {
          name: this.getXElement().find('actor').attr('nick'),
          jid: this.getXElement().find('actor').attr('jid')
       };
-      var reason = this.getXElement().find('reason').text();
+      let reason = this.getXElement().find('reason').text();
 
       if (reason !== '') {
          reason = Translation.t('Reason') + ': ' + reason;

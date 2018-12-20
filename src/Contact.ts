@@ -45,7 +45,7 @@ export default class Contact implements IIdentifiable, IContact {
       this.data = new PersistentMap(this.storage, 'contact', id);
 
       if (!this.data.get('id')) {
-         throw `Could not find existing contact with id "${id}".`;
+         throw new Error(`Could not find existing contact with id "${id}".`);
       }
 
       this.jid = new JID(this.data.get('jid'));
@@ -56,7 +56,7 @@ export default class Contact implements IIdentifiable, IContact {
       this.jid = jid;
 
       let defaultData = {
-         id: id,
+         id,
          jid: this.jid.full,
          name: name || this.jid.bare,
          presence: Presence.offline,
@@ -140,9 +140,9 @@ export default class Contact implements IIdentifiable, IContact {
       this.data.set('presence', presence);
    }
 
-   public getCapableResources(features: string[]): Promise<Array<string>>
-   public getCapableResources(features: string): Promise<Array<string>>
-   public getCapableResources(features): Promise<Array<string>> {
+   public getCapableResources(features: string[]): Promise<string[]>
+   public getCapableResources(features: string): Promise<string[]>
+   public getCapableResources(features): Promise<string[]> {
       return this.account.getDiscoInfoRepository().getCapableResources(this, features);
    }
 
@@ -150,7 +150,7 @@ export default class Contact implements IIdentifiable, IContact {
    public hasFeatureByResource(resource: string, feature: string): Promise<{}>
    public hasFeatureByResource(resource, feature) {
       if (!resource) {
-         throw 'I can not lookup a feature without resource';
+         throw new Error('I can not lookup a feature without resource');
       }
 
       let jid = new JID(this.jid.bare + '/' + resource);
@@ -191,7 +191,7 @@ export default class Contact implements IIdentifiable, IContact {
       return this.jid;
    }
 
-   public getResources(): Array<string> {
+   public getResources(): string[] {
       return Object.keys(this.data.get('resources'));
    }
 
@@ -215,7 +215,7 @@ export default class Contact implements IIdentifiable, IContact {
       return this.account.getPipe('avatar').run(this, undefined)
          .then(([, avatar]) => {
             if (!avatar) {
-               throw 'No avatar available for ' + this.getId();
+               throw new Error('No avatar available for ' + this.getId());
             }
 
             return avatar;
@@ -232,7 +232,7 @@ export default class Contact implements IIdentifiable, IContact {
 
    public setEncryptionState(state: EncryptionState, source: string) {
       if (state !== EncryptionState.Plaintext && !source) {
-         throw 'No encryption source provided';
+         throw new Error('No encryption source provided');
       }
 
       this.data.set('encryptionState', state);

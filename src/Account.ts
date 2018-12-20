@@ -73,7 +73,7 @@ export default class Account {
             Storage.clear(this.uid + '@' + oldSessionId);
          }
       } else {
-         throw 'Unsupported number of arguments';
+         throw new Error('Unsupported number of arguments');
       }
 
       this.options = Options.get();

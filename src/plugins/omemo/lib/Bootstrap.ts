@@ -1,5 +1,5 @@
 import Store from './Store'
-import { KeyHelper } from "../vendor/KeyHelper";
+import { KeyHelper } from '../vendor/KeyHelper';
 import Random from '../../../util/Random'
 import Log from '../../../util/Log'
 import BundleManager from './BundleManager';

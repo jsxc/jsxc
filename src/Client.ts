@@ -138,7 +138,7 @@ export default class Client {
       $(document).on('dragover', (ev) => {
          ev.preventDefault();
 
-         (<any>ev.originalEvent).dataTransfer.dropEffect = 'copy';
+         (<any> ev.originalEvent).dataTransfer.dropEffect = 'copy';
       });
 
       $(document).on('drop', () => {

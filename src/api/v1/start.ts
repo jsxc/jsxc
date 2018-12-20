@@ -25,11 +25,11 @@ export function start() {
 
    switch (arguments.length) {
       case 0: promise = startUI();
-         break;
+              break;
       case 3: promise = startWithCredentials(arguments[0], arguments[1], arguments[2]);
-         break;
+              break;
       case 4: promise = startWithBoshParameters(arguments[0], arguments[1], arguments[2], arguments[3]);
-         break;
+              break;
       default:
          promise = Promise.reject(new InvalidParameterError('Wrong number of parameters.'));
    }
@@ -75,7 +75,7 @@ function connectAndStartUI(account) {
 
       Log.warn('Unknown error:', err);
 
-      throw 'Unknown error';
+      throw new Error('Unknown error');
    });
 }
 
@@ -83,6 +83,6 @@ function testMaxOneAccount() {
    let accounts = Client.getAccountManager().getAccounts();
 
    if (accounts.length > 0 && !Client.isDebugMode()) {
-      throw 'Currently we only support one account at a time. If you like to test the experimental multi account feature, please enable debug mode.';
+      throw new Error('Currently we only support one account at a time. If you like to test the experimental multi account feature, please enable debug mode.');
    }
 }

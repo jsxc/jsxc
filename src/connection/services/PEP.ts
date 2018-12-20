@@ -9,16 +9,18 @@ export default class PEP extends AbstractService {
 
       this.connection.registerHandler(handler, 'http://jabber.org/protocol/pubsub#event', 'message', null, null, null);
 
-      if (force)
+      if (force) {
          return this.connection.sendPresence();
+      }
    }
 
    public unsubscribe(node: string, force: boolean = false) {
       this.account.getDiscoInfo().removeFeature(node)
       this.account.getDiscoInfo().removeFeature(`${node}+notify`)
 
-      if (force)
+      if (force) {
          return this.connection.sendPresence();
+      }
    }
 
    public publish(node: string, element: Element): Promise<Element> {
@@ -27,7 +29,7 @@ export default class PEP extends AbstractService {
       }).c('pubsub', {
          xmlns: 'http://jabber.org/protocol/pubsub'
       }).c('publish', {
-         node: node
+         node
       }).c('item').cnode(element);
 
       return this.sendIQ(iqStanza);
@@ -43,7 +45,7 @@ export default class PEP extends AbstractService {
          xmlns: 'http://jabber.org/protocol/pubsub'
       });
       iq.c('items', {
-         node: node
+         node
       });
 
       return this.sendIQ(iq);

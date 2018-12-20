@@ -1,6 +1,6 @@
 export default function format(byte: number) {
-   var s = ['', 'KB', 'MB', 'GB', 'TB'];
-   var i;
+   let s = ['', 'KB', 'MB', 'GB', 'TB'];
+   let i;
 
    for (i = 1; i < s.length; i++) {
       if (byte < 1024) {

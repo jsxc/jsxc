@@ -35,7 +35,7 @@ let ArrayBufferUtils = {
       return ArrayBufferUtils.toHex(thing).replace(/(.{8})/g, '$1 ').replace(/ $/, '');
    },
 
-   isEqual: function(a: ArrayBuffer | string, b: ArrayBuffer | string) {
+   isEqual(a: ArrayBuffer | string, b: ArrayBuffer | string) {
       if (a === undefined || b === undefined) {
          return false;
       }
@@ -50,9 +50,9 @@ let ArrayBufferUtils = {
       return a === b;
    },
 
-   toArray: (a: ArrayBuffer): Array<any> => Array.apply([], new Uint8Array(a)),
+   toArray: (a: ArrayBuffer): any[] => Array.apply([], new Uint8Array(a)),
 
-   fromArray: (a: Array<any>): ArrayBuffer => new Uint8Array(a).buffer,
+   fromArray: (a: any[]): ArrayBuffer => new Uint8Array(a).buffer,
 }
 
 export default ArrayBufferUtils;

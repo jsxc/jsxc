@@ -2,7 +2,7 @@ import Dialog from '../Dialog'
 import MultiUserContact from '../../MultiUserContact'
 import JID from '../../JID'
 
-var multiUserInvite = require('../../../template/multiUserInvite.hbs');
+let multiUserInvite = require('../../../template/multiUserInvite.hbs');
 
 export default function(multiUserContact: MultiUserContact) {
    let content = multiUserInvite({});
@@ -15,8 +15,8 @@ export default function(multiUserContact: MultiUserContact) {
    dom.find('form').on('submit', (ev) => {
       ev.preventDefault();
 
-      let reason = <string>dom.find('input[name="reason"]').val();
-      let jidString = <string>dom.find('input[name="jid"]').val();
+      let reason = <string> dom.find('input[name="reason"]').val();
+      let jidString = <string> dom.find('input[name="jid"]').val();
       let jid = new JID(jidString);
 
       multiUserContact.invite(jid, reason);

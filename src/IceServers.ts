@@ -31,16 +31,16 @@ export default class IceServers {
                withCredentials: Client.getOption('RTCPeerConfig').withCredentials
             }
          }).done((data) => {
-            var ttl = data.ttl || 3600;
-            var iceServers = data.iceServers;
+            let ttl = data.ttl || 3600;
+            let iceServers = data.iceServers;
 
             if (iceServers && iceServers.length > 0) {
-               var urls = iceServers[0].urls && iceServers[0].urls.length > 0;
+               let urls = iceServers[0].urls && iceServers[0].urls.length > 0;
 
                if (urls) {
                   Log.debug('ice servers received');
 
-                  var peerConfig = Client.getOption('RTCPeerConfig');
+                  let peerConfig = Client.getOption('RTCPeerConfig');
                   peerConfig.iceServers = iceServers;
                   Client.setOption('RTCPeerConfig', peerConfig);
 

@@ -24,11 +24,11 @@ export default class StorageConnection extends AbstractConnection implements ICo
          addHandler: () => { }
       }
 
-      for (var k in (<any>Strophe)._connectionPlugins) {
-         if ((<any>Strophe)._connectionPlugins.hasOwnProperty(k)) {
-            var ptype = (<any>Strophe)._connectionPlugins[k];
+      for (let k in (<any> Strophe)._connectionPlugins) {
+         if ((<any> Strophe)._connectionPlugins.hasOwnProperty(k)) {
+            let ptype = (<any> Strophe)._connectionPlugins[k];
             // jslint complaints about the below line, but this is fine
-            var F = function() { }; // jshint ignore:line
+            let F = function() { }; // jshint ignore:line
             F.prototype = ptype;
             this.connection[k] = new F();
             this.connection[k].init(this.connection);

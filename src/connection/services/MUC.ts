@@ -144,8 +144,8 @@ export default class MUC extends AbstractService {
       }).c('x', {
          xmlns: NS_CONFERENCE,
          jid: roomJid.bare,
-         reason: reason,
-         password: password
+         reason,
+         password
       });
 
       this.send(msg);

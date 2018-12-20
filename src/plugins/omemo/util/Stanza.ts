@@ -12,7 +12,7 @@ export default class Stanza {
          sid: ownDeviceId
       });
 
-      for (let key of <EncryptedDeviceMessage[]>message.keys) {
+      for (let key of <EncryptedDeviceMessage[]> message.keys) {
          let attrs = {
             rid: key.getDeviceId(),
             prekey: undefined
@@ -49,15 +49,15 @@ export default class Stanza {
          return {
             preKey: $(keyElement).attr('prekey') === 'true',
             ciphertext: atob($(keyElement).text()),
-            deviceId: parseInt($(keyElement).attr('rid'))
+            deviceId: parseInt($(keyElement).attr('rid'), 10)
          };
       }); //@REVIEW maybe index would be better
 
       return {
-         sourceDeviceId: sourceDeviceId,
-         keys: keys,
-         iv: iv,
-         payload: payload
+         sourceDeviceId,
+         keys,
+         iv,
+         payload
       };
    }
 }

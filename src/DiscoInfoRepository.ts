@@ -37,9 +37,9 @@ export default class implements DiscoInfoRepository {
       return new DiscoInfo(version);
    }
 
-   public getCapableResources(contact: Contact, features: string[]): Promise<Array<string>>
-   public getCapableResources(contact: Contact, features: string): Promise<Array<string>>
-   public getCapableResources(contact: Contact, features): Promise<Array<string>> {
+   public getCapableResources(contact: Contact, features: string[]): Promise<string[]>
+   public getCapableResources(contact: Contact, features: string): Promise<string[]>
+   public getCapableResources(contact: Contact, features): Promise<string[]> {
       let resources = contact.getResources();
 
       if (!features) {
@@ -142,7 +142,7 @@ export default class implements DiscoInfoRepository {
 
       //@TODO verify response is valid: https://xmpp.org/extensions/xep-0115.html#ver-proc
 
-      let capabilities = {};
+      let capabilities: {[name: string]: any} = {};
 
       for (let childNode of Array.from(queryElement.get(0).childNodes)) {
          let nodeName = childNode.nodeName.toLowerCase();
@@ -165,7 +165,7 @@ export default class implements DiscoInfoRepository {
          //@TODO handle extended information
       }
 
-      if (typeof capabilities['identity'] === 'undefined' || capabilities['identity'].length === 0) {
+      if (typeof capabilities.identity === 'undefined' || capabilities.identity.length === 0) {
          return Promise.reject('Disco info response is invalid. Missing identity.');
       }
 
@@ -177,7 +177,7 @@ export default class implements DiscoInfoRepository {
       //      return Promise.reject('Disco info response is unvalid. Doesnt support disco.');
       //   }
 
-      let discoInfo = new DiscoInfo(capabilities['identity'], capabilities['feature'], forms);
+      let discoInfo = new DiscoInfo(capabilities.identity, capabilities.feature, forms);
 
       return Promise.resolve(discoInfo);
    }

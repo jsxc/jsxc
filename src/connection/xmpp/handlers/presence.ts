@@ -38,11 +38,11 @@ export default class extends AbstractHandler {
       }
 
       if (presence.type === PRESENCE.ERROR) {
-         var error = $(stanza).find('error');
-         var errorCode = error.attr('code') || '';
-         var errorType = error.attr('type') || '';
-         var errorReason = error.find(">:first-child").prop('tagName');
-         var errorText = error.find('text').text();
+         let error = $(stanza).find('error');
+         let errorCode = error.attr('code') || '';
+         let errorType = error.attr('type') || '';
+         let errorReason = error.find('>:first-child').prop('tagName');
+         let errorText = error.find('text').text();
 
          Log.error('[XMPP] ' + errorType + ', ' + errorCode + ', ' + errorReason + ', ' + errorText);
 
@@ -106,12 +106,12 @@ export default class extends AbstractHandler {
       let status;
 
       if (presence.type === PRESENCE.UNAVAILABLE || presence.type === PRESENCE.UNSUBSCRIBED) {
-         status = Presence['offline'];
+         status = Presence.offline;
       } else {
          let show = presence.show;
 
          if (show === '') {
-            status = Presence['online'];
+            status = Presence.online;
          } else {
             status = Presence[show];
          }

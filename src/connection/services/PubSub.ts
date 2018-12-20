@@ -6,18 +6,18 @@ import { IJID } from '@src/JID.interface'
 let baseNamespace = 'http://jabber.org/protocol/pubsub';
 
 NS.register('PUBSUB', baseNamespace);
-NS.register('PUBSUB_SUBSCRIBE_OPTIONS', baseNamespace + "#subscribe_options");
-NS.register('PUBSUB_ERRORS', baseNamespace + "#errors");
-NS.register('PUBSUB_EVENT', baseNamespace + "#event");
-NS.register('PUBSUB_OWNER', baseNamespace + "#owner");
-NS.register('PUBSUB_AUTO_CREATE', baseNamespace + "#auto-create");
-NS.register('PUBSUB_PUBLISH_OPTIONS', baseNamespace + "#publish-options");
-NS.register('PUBSUB_NODE_CONFIG', baseNamespace + "#node_config");
-NS.register('PUBSUB_CREATE_AND_CONFIGURE', baseNamespace + "#create-and-configure");
-NS.register('PUBSUB_SUBSCRIBE_AUTHORIZATION', baseNamespace + "#subscribe_authorization");
-NS.register('PUBSUB_GET_PENDING', baseNamespace + "#get-pending");
-NS.register('PUBSUB_MANAGE_SUBSCRIPTIONS', baseNamespace + "#manage-subscriptions");
-NS.register('PUBSUB_META_DATA', baseNamespace + "#meta-data");
+NS.register('PUBSUB_SUBSCRIBE_OPTIONS', baseNamespace + '#subscribe_options');
+NS.register('PUBSUB_ERRORS', baseNamespace + '#errors');
+NS.register('PUBSUB_EVENT', baseNamespace + '#event');
+NS.register('PUBSUB_OWNER', baseNamespace + '#owner');
+NS.register('PUBSUB_AUTO_CREATE', baseNamespace + '#auto-create');
+NS.register('PUBSUB_PUBLISH_OPTIONS', baseNamespace + '#publish-options');
+NS.register('PUBSUB_NODE_CONFIG', baseNamespace + '#node_config');
+NS.register('PUBSUB_CREATE_AND_CONFIGURE', baseNamespace + '#create-and-configure');
+NS.register('PUBSUB_SUBSCRIBE_AUTHORIZATION', baseNamespace + '#subscribe_authorization');
+NS.register('PUBSUB_GET_PENDING', baseNamespace + '#get-pending');
+NS.register('PUBSUB_MANAGE_SUBSCRIPTIONS', baseNamespace + '#manage-subscriptions');
+NS.register('PUBSUB_META_DATA', baseNamespace + '#meta-data');
 
 export default class PubSub extends AbstractService {
    private jid: IJID;
@@ -35,7 +35,7 @@ export default class PubSub extends AbstractService {
       }).c('pubsub', {
          xmlns: NS.get('PUBSUB')
       }).c('create', {
-         node: node
+         node
       });
 
       if (options) {
@@ -52,7 +52,7 @@ export default class PubSub extends AbstractService {
       }).c('pubsub', {
          xmlns: NS.get('PUBSUB_OWNER')
       }).c('delete', {
-         node: node
+         node
       });
 
       return this.sendIQ(iq);
@@ -76,7 +76,7 @@ export default class PubSub extends AbstractService {
       }).c('pubsub', {
          xmlns: NS.get('PUBSUB_OWNER')
       }).c('configure', {
-         node: node
+         node
       });
 
       return this.sendIQ(iq);
@@ -87,7 +87,7 @@ export default class PubSub extends AbstractService {
          to: this.service,
          type: 'get'
       }).c('pubsub', {
-         'xmlns': NS.get('PUBSUB_OWNER')
+         xmlns: NS.get('PUBSUB_OWNER')
       });
       iq.c('default');
 
@@ -103,8 +103,8 @@ export default class PubSub extends AbstractService {
       }).c('pubsub', {
          xmlns: NS.get('PUBSUB')
       }).c('subscribe', {
-         'node': node,
-         'jid': jid
+         node,
+         jid
       });
 
       if (options) {
@@ -124,8 +124,8 @@ export default class PubSub extends AbstractService {
       }).c('pubsub', {
          xmlns: NS.get('PUBSUB')
       }).c('unsubscribe', {
-         'node': node,
-         'jid': jid.full
+         node,
+         jid: jid.full
       });
 
       if (subId) {
@@ -144,7 +144,7 @@ export default class PubSub extends AbstractService {
       }).c('pubsub', {
          xmlns: NS.get('PUBSUB')
       }).c('publish', {
-         node: node
+         node
       }).cnode(item.tree());
 
       if (options) {
@@ -161,7 +161,7 @@ export default class PubSub extends AbstractService {
       }).c('pubsub', {
          xmlns: NS.get('PUBSUB')
       }).c('items', {
-         node: node
+         node
       });
 
       return this.sendIQ(iq);
@@ -174,7 +174,7 @@ export default class PubSub extends AbstractService {
       }).c('pubsub', {
          xmlns: NS.get('PUBSUB')
       }).c('items', {
-         node: node
+         node
       });
 
       return this.sendIQ(iq);
@@ -185,7 +185,7 @@ export default class PubSub extends AbstractService {
          to: this.service,
          type: 'get'
       }).c('pubsub', {
-         'xmlns': NS.get('PUBSUB')
+         xmlns: NS.get('PUBSUB')
       }).c('subscriptions');
 
       return this.sendIQ(iq);
@@ -196,9 +196,9 @@ export default class PubSub extends AbstractService {
          to: this.service,
          type: 'get'
       }).c('pubsub', {
-         'xmlns': NS.get('PUBSUB_OWNER')
+         xmlns: NS.get('PUBSUB_OWNER')
       }).c('subscriptions', {
-         'node': node
+         node
       });
 
       return this.sendIQ(iq);
@@ -211,7 +211,7 @@ export default class PubSub extends AbstractService {
       }).c('pubsub', {
          xmlns: NS.get('PUBSUB')
       }).c('options', {
-         node: node,
+         node,
          jid: this.jid
       });
 
@@ -224,7 +224,7 @@ export default class PubSub extends AbstractService {
 
    public getAffiliations(node?: string): Promise<Element> {
       let attrs: { node?: string } = {};
-      let xmlns = { 'xmlns': NS.get('PUBSUB') };
+      let xmlns = { xmlns: NS.get('PUBSUB') };
 
       if (node) {
          attrs.node = node;
@@ -246,12 +246,12 @@ export default class PubSub extends AbstractService {
          to: this.service,
          type: 'set'
       }).c('pubsub', {
-         'xmlns': NS.get('PUBSUB_OWNER')
+         xmlns: NS.get('PUBSUB_OWNER')
       }).c('affiliations', {
-         'node': node
+         node
       }).c('affiliation', {
-         'jid': jid,
-         'affiliation': affiliation
+         jid,
+         affiliation
       });
 
       return this.sendIQ(iq);

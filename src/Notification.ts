@@ -27,7 +27,7 @@ enum NotificationState {
    ASK
 };
 
-let NotificationAPI = (<any>window).Notification;
+let NotificationAPI = (<any> window).Notification;
 
 export default class Notification {
    private static inited = false;
@@ -99,7 +99,7 @@ export default class Notification {
          return;
       }
 
-      settings.icon = settings.icon || <string><any>defaultIconFile;
+      settings.icon = settings.icon || <string> <any> defaultIconFile;
 
       if (settings.source) {
          let avatar;
@@ -108,17 +108,16 @@ export default class Notification {
             avatar = await settings.source.getAvatar();
          } catch (err) { }
 
-
          if (avatar && avatar.src) {
             settings.icon = avatar.src;
          } else {
-            var hash = Hash.String(settings.source.getName());
+            let hash = Hash.String(settings.source.getName());
 
-            var hue = Math.abs(hash) % 360;
-            var saturation = 90;
-            var lightness = 65;
+            let hue = Math.abs(hash) % 360;
+            let saturation = 90;
+            let lightness = 65;
 
-            let canvas = <HTMLCanvasElement>$('<canvas>').get(0);
+            let canvas = <HTMLCanvasElement> $('<canvas>').get(0);
             canvas.height = 100;
             canvas.width = 100;
 
@@ -151,7 +150,7 @@ export default class Notification {
          Notification.playSound(settings.soundFile, settings.loop, settings.force);
       }
 
-      var popup = new NotificationAPI(settings.title, {
+      let popup = new NotificationAPI(settings.title, {
          body: settings.message,
          icon: settings.icon
       });
@@ -200,7 +199,7 @@ export default class Notification {
 
       Notification.stopSound();
 
-      var audio = new Audio(soundFile);
+      let audio = new Audio(soundFile);
       audio.loop = loop || false;
       audio.play().then(() => {
          Notification.audioObject = audio;
@@ -210,7 +209,7 @@ export default class Notification {
    }
 
    private static stopSound() {
-      var audio = Notification.audioObject;
+      let audio = Notification.audioObject;
 
       if (typeof audio !== 'undefined' && audio !== null) {
          audio.pause();

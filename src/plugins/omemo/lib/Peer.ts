@@ -9,11 +9,11 @@ import EncryptedDeviceMessage from '../model/EncryptedDeviceMessage';
 const MAX_PADDING = 10;
 const PADDING_CHARACTER = '​\u200B';
 
-export type EncryptedPeerMessage = {
+export interface EncryptedPeerMessage {
    keys: EncryptedDeviceMessage[],
    iv: BufferSource,
    payload: ArrayBuffer,
-};
+}
 
 export default class Peer {
    private static own: Peer;
@@ -27,15 +27,15 @@ export default class Peer {
       let remoteDeviceIds = this.store.getDeviceList(this.deviceName);
 
       if (remoteDeviceIds.length === 0) {
-         throw 'Your contact does not support OMEMO.';
+         throw new Error('Your contact does not support OMEMO.');
       }
 
       if (this.getTrust() === Trust.unknown) {
-         throw 'There are new devices for your contact.';
+         throw new Error('There are new devices for your contact.');
       }
 
       if (localPeer.getTrust() === Trust.unknown) {
-         throw 'I found new devices from you.';
+         throw new Error('I found new devices from you.');
       }
 
       while (plaintext.length < MAX_PADDING) {
@@ -51,11 +51,11 @@ export default class Peer {
       keys = keys.filter(key => key !== null);
 
       if (keys.length === 0) {
-         throw 'Could not encrypt data with any Signal session';
+         throw new Error('Could not encrypt data with any Signal session');
       }
 
       return {
-         keys: <EncryptedDeviceMessage[]>keys,
+         keys: <EncryptedDeviceMessage[]> keys,
          iv: aes.iv,
          payload: aes.payload
       };
@@ -66,7 +66,7 @@ export default class Peer {
 
       return device.decrypt(ciphertext, preKey).then(plaintextKey => {
          return {
-            plaintextKey: plaintextKey,
+            plaintextKey,
             deviceTrust: device.getTrust(),
          };
       });

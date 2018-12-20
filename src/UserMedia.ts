@@ -31,12 +31,12 @@ export default class UserMedia {
          });
    }
 
-   private static filterUserMedia(userMedia: Array<string>) {
+   private static filterUserMedia(userMedia: string[]) {
       return navigator.mediaDevices.enumerateDevices()
          .then((devices) => {
-            var availableDevices = devices.map(function(device) {
+            let availableDevices = devices.map(function(device) {
                //@REVIEW MediaDeviceKind === string?
-               return <string>device.kind;
+               return <string> device.kind;
             });
 
             userMedia = userMedia.filter(function(el) {
@@ -44,7 +44,7 @@ export default class UserMedia {
             });
 
             if (userMedia.length === 0) {
-               throw 'No audio/video device available.';
+               throw new Error('No audio/video device available.');
             }
 
             return userMedia;
@@ -64,7 +64,7 @@ export default class UserMedia {
    }
 
    private static getUserMedia(um) {
-      var constraints: any = {};
+      let constraints: any = {};
 
       if (um.indexOf('video') > -1) {
          constraints.video = true;

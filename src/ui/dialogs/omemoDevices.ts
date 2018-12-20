@@ -62,7 +62,7 @@ async function getDeviceProperties(device: Device, identityManager: IdentityMana
    return {
       id: device.getId(),
       isCurrentDevice: device.isCurrentDevice(),
-      fingerprint: fingerprint,
+      fingerprint,
       trust: Trust[trust],
       trustIsUnknownOrRecognized: trust === Trust.unknown || trust === Trust.recognized,
       trustIsUnknown: trust === Trust.unknown,

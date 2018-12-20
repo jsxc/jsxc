@@ -1,6 +1,6 @@
-import Address from "../vendor/Address";
+import Address from '../vendor/Address';
 
-export type Ciphertext = {
+export interface Ciphertext {
    type: number,
    body: string,
    registrationId: number,

@@ -64,8 +64,8 @@ export default class extends AbstractHandler {
 
       //@REVIEW maybe improve the dialog
       this.account.getNoticeManager().addNotice({
-         title: title,
-         description: description,
+         title,
+         description,
          fnName: FUNCTION.notification,
          fnParams: [title, description],
       });
@@ -113,7 +113,7 @@ class MessageElement {
          return;
       }
 
-      throw 'No message element found';
+      throw new Error('No message element found');
    }
 
    public isForwarded() {

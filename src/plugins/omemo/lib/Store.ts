@@ -102,7 +102,7 @@ export default class Store {
    }
 
    public getLocalDeviceId(): number {
-      return parseInt(this.get('deviceId'));
+      return parseInt(this.get('deviceId'), 10);
    }
 
    public setLocalDeviceName(name: string) {
@@ -118,7 +118,7 @@ export default class Store {
       let id = this.getLocalDeviceId();
 
       if (!name || !id) {
-         throw 'Local device address not generated yet';
+         throw new Error('Local device address not generated yet');
       }
 
       return new Address(name, id);
@@ -129,7 +129,7 @@ export default class Store {
    }
 
    public getLocalRegistrationId(): number {
-      return parseInt(this.get('registrationId'));
+      return parseInt(this.get('registrationId'), 10);
    }
 
    public setLocalIdentityKey(identityKey: IdentityKey) {
@@ -146,7 +146,7 @@ export default class Store {
       let data = this.get('identityKey');
 
       if (!data) {
-         throw 'Found no local identity key';
+         throw new Error('Found no local identity key');
       }
 
       return new IdentityKey(data);

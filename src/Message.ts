@@ -24,9 +24,9 @@ export default class Message implements Identifiable, IMessage {
 
    private stamp: Date;
 
-   static readonly DIRECTION = DIRECTION;
+   public static readonly DIRECTION = DIRECTION;
 
-   static readonly MSGTYPE = ContactType;
+   public static readonly MSGTYPE = ContactType;
 
    private storage: Storage;
 
@@ -69,7 +69,7 @@ export default class Message implements Identifiable, IMessage {
             encryptedPlaintextMessage: null
          }, data));
       } else if (!this.data.get('attrId')) {
-         throw `Could not load message ${this.uid}`;
+         throw new Error(`Could not load message ${this.uid}`);
       }
    }
 
@@ -305,7 +305,7 @@ export default class Message implements Identifiable, IMessage {
    }
 
    private convertEmailToLink(text) {
-      return text.replace(ATREGEX, function(undefined, protocol, jid, action) {
+      return text.replace(ATREGEX, function(str, protocol, jid, action) {
          if (protocol === 'xmpp:') {
             if (typeof action === 'string') {
                jid += action;

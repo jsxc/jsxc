@@ -1,15 +1,15 @@
-import PEP from "@connection/services/PEP";
-import Address from "../vendor/Address";
-import { NS_BUNDLES, NS_BASE, NS_DEVICELIST, NUM_PRE_KEYS, MAX_PRE_KEY_ID } from "../util/Const"
-import Bundle from "./Bundle";
-import Log from "@util/Log";
-import IdentityKey from "../model/IdentityKey";
-import PreKey from "../model/PreKey";
-import SignedPreKey from "../model/SignedPreKey";
-import { KeyHelper } from "../vendor/KeyHelper";
-import Store from "./Store";
+import PEP from '@connection/services/PEP';
+import Address from '../vendor/Address';
+import { NS_BUNDLES, NS_BASE, NS_DEVICELIST, NUM_PRE_KEYS, MAX_PRE_KEY_ID } from '../util/Const'
+import Bundle from './Bundle';
+import Log from '@util/Log';
+import IdentityKey from '../model/IdentityKey';
+import PreKey from '../model/PreKey';
+import SignedPreKey from '../model/SignedPreKey';
+import { KeyHelper } from '../vendor/KeyHelper';
+import Store from './Store';
 import { $build } from '../../../vendor/Strophe'
-import Random from "@util/Random";
+import Random from '@util/Random';
 
 export default class BundleManager {
    constructor(private pepService: PEP, private store: Store) {
@@ -29,11 +29,11 @@ export default class BundleManager {
       await Promise.all(newKeyIds.map(id => this.generatePreKey(id)));
 
       if (signedPreKeyIds.length !== 1) {
-         throw `Could not refresh local device bundle, because we have ${signedPreKeyIds.length} signed prekeys.`;
+         throw new Error(`Could not refresh local device bundle, because we have ${signedPreKeyIds.length} signed prekeys.`);
       }
 
       return new Bundle({
-         identityKey: identityKey,
+         identityKey,
          signedPreKey: this.store.getSignedPreKey(signedPreKeyIds[0]),
          preKeys: this.store.getAllPreKeys(),
       });
@@ -42,7 +42,7 @@ export default class BundleManager {
    public async generateBundle(identityKey: IdentityKey): Promise<Bundle> {
       Log.debug('Generate local device bundle.');
 
-      let preKeyPromises: Promise<PreKey>[];
+      let preKeyPromises: Array<Promise<PreKey>>;
       let ids = this.generateUniqueKeyIds(NUM_PRE_KEYS);
       let signedPreKeyId = ids.pop();
 
@@ -53,9 +53,9 @@ export default class BundleManager {
       let preKeys = await Promise.all(preKeyPromises);
 
       return new Bundle({
-         identityKey: identityKey,
-         signedPreKey: <SignedPreKey>preKeys.pop(),
-         preKeys: preKeys
+         identityKey,
+         signedPreKey: <SignedPreKey> preKeys.pop(),
+         preKeys
       });
    }
 
@@ -98,7 +98,7 @@ export default class BundleManager {
       } catch (errorStanza) {
          Log.warn('Error while retrieving bundle', errorStanza);
 
-         throw 'Could not retrieve bundle';
+         throw new Error('Could not retrieve bundle');
       }
 
       let itemsElement = $(stanza).find(`items[node='${node}']`);
@@ -131,7 +131,7 @@ export default class BundleManager {
       let xmlList = $build('list', { xmlns: NS_BASE });
 
       for (let id of deviceIds) {
-         xmlList.c('device', { id: id }).up();
+         xmlList.c('device', { id }).up();
       }
 
       return this.pepService.publish(NS_DEVICELIST, xmlList.tree());

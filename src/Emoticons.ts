@@ -28,7 +28,7 @@ const EMOTICONS: any[] = [
 import * as emojione from 'emojione/lib/js/emojione'
 
 const EMOTICON_LIST = {
-   'core': {
+   core: {
       ':klaus:': 'klaus',
       ':jabber:': 'jabber',
       ':xmpp:': 'xmpp',
@@ -36,7 +36,7 @@ const EMOTICON_LIST = {
       ':owncloud:': 'owncloud',
       ':nextcloud:': 'nextcloud',
    },
-   'emojione': emojione.emojioneList
+   emojione: emojione.emojioneList
 }
 
 export default class Emoticons {
@@ -71,7 +71,7 @@ export default class Emoticons {
 
       $.each(EMOTICONS, function(i, val) {
          // escape characters
-         var reg = val[0].replace(/(\/|\||\*|\.|\+|\?|\^|\$|\(|\)|\[|\]|\{|\})/g, '\\$1');
+         let reg = val[0].replace(/(\/|\||\*|\.|\+|\?|\^|\$|\(|\)|\[|\]|\{|\})/g, '\\$1');
          reg = '(' + reg.split(' ').join('|') + ')';
          EMOTICONS[i][2] = new RegExp(reg, 'g');
       });
@@ -91,7 +91,7 @@ export default class Emoticons {
    private static shortnameToImage(text: string): string {
       text = text.replace(this.shortRegex, Emoticons.replaceShortnameWithImage);
 
-      var wrapper = $('<div>' + text + '</div>');
+      let wrapper = $('<div>' + text + '</div>');
       if (wrapper.find('.jsxc-emoticon').length === 1 && wrapper.text().replace(/ /, '').length === 0 && wrapper.find('*').length === 1) {
          wrapper.find('.jsxc-emoticon').addClass('jsxc-emoticon--large');
          text = wrapper.html();

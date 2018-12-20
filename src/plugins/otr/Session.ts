@@ -12,11 +12,11 @@ import PersistentMap from '../../util/PersistentMap'
 
 //@REVIEW
 interface OTR {
-   off: (string, func) => void
-   on: (string, func) => void
+   off: (name: string, func) => void
+   on: (name: string, func) => void
    sendQueryMsg: () => void
-   receiveMsg: (string, any) => void
-   sendMsg: (string, any) => void
+   receiveMsg: (message: string, meta: any) => void
+   sendMsg: (message: string, meta: any) => void
    endOtr: (func) => void
    init
    _smInit
@@ -27,10 +27,6 @@ interface OTR {
    SEND_WHITESPACE_TAG
    WHITESPACE_START_AKE
    trust
-}
-
-interface DSA {
-
 }
 
 export default class Session {
@@ -187,9 +183,9 @@ export default class Session {
             this.inform('trying_to_start_private_conversation');
             break;
          case OTR.CONST.STATUS_AKE_SUCCESS:
-            var msg_state = this.session.trust ? 'Verified' : 'Unverified';
+            let msgState = this.session.trust ? 'Verified' : 'Unverified';
 
-            this.inform(msg_state + '_private_conversation_started');
+            this.inform(msgState + '_private_conversation_started');
 
             this.peer.setEncryptionState(this.session.trust ? EncryptionState.VerifiedEncrypted : EncryptionState.UnverifiedEncrypted, 'otr');
             break;
@@ -294,10 +290,10 @@ export default class Session {
    //@REVIEW optimization possible? Update only altered values. Maybe split this in two payloads (permanent/ephemeral)
    private restoreSession = (payload) => {
       if (this.session !== null || payload !== null) {
-         var key;
+         let key;
          for (key in payload) {
             if (payload.hasOwnProperty(key)) {
-               var val = JSON.parse(payload[key]);
+               let val = JSON.parse(payload[key]);
                if (key === 'their_priv_pk' && val !== null) {
                   val = DSA.parsePublic(val);
                }
@@ -334,10 +330,10 @@ export default class Session {
       }
 
       // all variables which should be saved
-      let savekey = ['jid', 'our_instance_tag', 'msgstate', 'authstate', 'fragment', 'their_y', 'their_old_y', 'their_keyid', 'their_instance_tag', 'our_dh', 'our_old_dh', 'our_keyid', 'sessKeys', 'storedMgs', 'oldMacKeys', 'trust', 'transmittedRS', 'ssid', 'receivedPlaintext', 'authstate', 'send_interval'];
+      let exportableKeys = ['jid', 'our_instance_tag', 'msgstate', 'authstate', 'fragment', 'their_y', 'their_old_y', 'their_keyid', 'their_instance_tag', 'our_dh', 'our_old_dh', 'our_keyid', 'sessKeys', 'storedMgs', 'oldMacKeys', 'trust', 'transmittedRS', 'ssid', 'receivedPlaintext', 'authstate', 'send_interval'];
 
-      for (let i = 0; i < savekey.length; i++) {
-         payload[savekey[i]] = JSON.stringify(this.session[savekey[i]]);
+      for (let key of exportableKeys) {
+         payload[key] = JSON.stringify(this.session[key]);
       }
 
       if (this.session.their_priv_pk !== null) {

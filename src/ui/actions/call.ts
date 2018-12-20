@@ -36,8 +36,8 @@ export function startCall(contact: Contact, account: Account, type: 'video' | 'a
       videoDialog.setStatus('Initiate call');
 
       let constraints = {
-         'offerToReceiveAudio': type === 'video' || type === 'audio',
-         'offerToReceiveVideo': type === 'video' || type === 'screen',
+         offerToReceiveAudio: type === 'video' || type === 'audio',
+         offerToReceiveVideo: type === 'video' || type === 'screen',
       }
 
       let session = jingleHandler.initiate(peerJID, stream, constraints);

@@ -35,8 +35,8 @@ export interface IContact {
 
    setPresence(resource: string, presence: Presence);
 
-   getCapableResources(features: string[]): Promise<Array<string>>
-   getCapableResources(features: string): Promise<Array<string>>
+   getCapableResources(features: string[]): Promise<string[]>
+   getCapableResources(features: string): Promise<string[]>
 
    hasFeatureByResource(resource: string, features: string[]): Promise<{}>
    hasFeatureByResource(resource: string, feature: string): Promise<{}>
@@ -52,7 +52,7 @@ export interface IContact {
 
    getJid(): IJID;
 
-   getResources(): Array<string>;
+   getResources(): string[];
 
    getPresence(): Presence;
 

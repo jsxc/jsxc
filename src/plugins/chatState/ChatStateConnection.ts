@@ -19,7 +19,7 @@ export default class ChatStateConnection {
    private sendState(state: STATE, to: JID, type: 'chat' | 'groupchat' = 'chat') {
       let msg = $msg({
          to: to.full,
-         type: type
+         type
       }).c(state, {
          xmlns: Namespace.get('CHATSTATES')
       });

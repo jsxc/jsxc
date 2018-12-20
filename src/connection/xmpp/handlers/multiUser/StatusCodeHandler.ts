@@ -143,7 +143,7 @@ function showInstantOrConfigurationDialog(multiUserContact: MultiUserContact) {
          message: Translation.t('Do_you_want_to_change_the_default_room_configuration'),
          primary: {
             label: Translation.t('Default'),
-            cb: function() {
+            cb() {
                multiUserContact.setRoomConfiguration(MultiUserContact.INSTANT_ROOMCONFIG);
 
                let instantRoomPromise = multiUserContact.createInstantRoom();
@@ -153,7 +153,7 @@ function showInstantOrConfigurationDialog(multiUserContact: MultiUserContact) {
          },
          option: {
             label: Translation.t('Change'),
-            cb: function() {
+            cb() {
                let roomConfigurationPromise = showRoomConfigurationDialog(multiUserContact);
 
                resolve(roomConfigurationPromise);

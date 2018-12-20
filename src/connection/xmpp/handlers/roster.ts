@@ -32,7 +32,7 @@ export default class RosterHandler extends AbstractHandler {
          let subscription = item.attr('subscription');
 
          let contact = account.addContact(jid, name);
-         contact.setSubscription(<SUBSCRIPTION>subscription);
+         contact.setSubscription(<SUBSCRIPTION> subscription);
 
          cache.push(contact.getId());
 

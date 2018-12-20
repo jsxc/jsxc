@@ -67,7 +67,7 @@ export default class MultiUserContact extends Contact {
          let password = this.data.get('password');
          this.getService().sendDirectMultiUserInvitation(jid, this.getJid(), reason, password);
       } else {
-         throw 'No invitation method available';
+         throw new Error('No invitation method available');
       }
    }
 
@@ -126,8 +126,8 @@ export default class MultiUserContact extends Contact {
       let isNewMember = !this.getMembers().get(nickname);
 
       this.getMembers().set(nickname, {
-         affiliation: affiliation,
-         role: role,
+         affiliation,
+         role,
          jid: jid instanceof JID ? jid.full : undefined
       });
 

@@ -15,13 +15,13 @@ export default class implements Avatar {
             let expectedHash = this.calculateHash(data);
 
             if (expectedHash !== sha1Hash) {
-               throw 'SHA-1 hash doesnt match';
+               throw new Error('SHA-1 hash doesnt match');
             }
 
             this.properties.set('data', data);
             this.properties.set('type', type);
          } else {
-            throw 'Avatar not found';
+            throw new Error('Avatar not found');
          }
       }
    }
@@ -49,7 +49,7 @@ export default class implements Avatar {
       let binaryString = window.atob(base64String);
       let bytes = new Uint8Array(binaryString.length);
 
-      for (var i = 0; i < binaryString.length; i++) {
+      for (let i = 0; i < binaryString.length; i++) {
          bytes[i] = binaryString.charCodeAt(i);
       }
 

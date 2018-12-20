@@ -1,12 +1,12 @@
-import Account from "./Account";
-import JID from "./JID";
-import Storage from "./Storage.interface";
-import Client from "./Client";
-import ClientAvatar from "./ClientAvatar";
-import RoleAllocator from "./RoleAllocator";
-import Log from "@util/Log";
-import Utils from "@util/Utils";
-import Roster from "@ui/Roster";
+import Account from './Account';
+import JID from './JID';
+import Storage from './Storage.interface';
+import Client from './Client';
+import ClientAvatar from './ClientAvatar';
+import RoleAllocator from './RoleAllocator';
+import Log from '@util/Log';
+import Utils from '@util/Utils';
+import Roster from '@ui/Roster';
 
 export default class AccountManager {
    private accounts = {};
@@ -106,7 +106,7 @@ export default class AccountManager {
       return this.accounts[uid];
    }
 
-   public getAccounts(): Array<Account> {
+   public getAccounts(): Account[] {
       // @REVIEW use of Object.values()
       let accounts = [];
 
@@ -119,7 +119,7 @@ export default class AccountManager {
 
    public addAccount(account: Account) {
       if (this.getAccount(account.getUid())) {
-         throw 'Account with this jid already exists.';
+         throw new Error('Account with this jid already exists.');
       }
 
       this.accounts[account.getUid()] = account;

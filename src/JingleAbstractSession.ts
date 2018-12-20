@@ -14,7 +14,7 @@ export default abstract class JingleAbstractSession {
    protected peerContact: IContact;
    protected peerChatWindow: ChatWindow;
 
-   public abstract getMediaRequest(): Array<string>;
+   public abstract getMediaRequest(): string[];
    public abstract onOnceIncoming();
    protected abstract onIncoming();
 

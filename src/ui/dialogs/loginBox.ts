@@ -28,10 +28,10 @@ export default function(username?: string) {
 }
 
 function setFocus() {
-   if ($("#jsxc-url").length && !$("#jsxc-url").val()) {
-      $("#jsxc-url").focus();
-   } else if (!$("#jsxc-username").val()) {
-      $("#jsxc-username").focus();
+   if ($('#jsxc-url').length && !$('#jsxc-url').val()) {
+      $('#jsxc-url').focus();
+   } else if (!$('#jsxc-username').val()) {
+      $('#jsxc-username').focus();
    } else {
       $('#jsxc-password').focus();
    }
