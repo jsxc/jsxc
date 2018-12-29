@@ -59,6 +59,7 @@ export default class Contact implements IIdentifiable, IContact {
          id: id,
          jid: this.jid.full,
          name: name || this.jid.bare,
+         nickname: <String>'',
          presence: Presence.offline,
          status: '',
          subscription: ContactSubscription.NONE,
@@ -205,6 +206,10 @@ export default class Contact implements IIdentifiable, IContact {
 
    public getNumberOfUnreadMessages(): number {
       return this.transcript.getNumberOfUnreadMessages();
+   }
+
+   public getNickname(): string {
+      return this.data.get('nickname');
    }
 
    public getName(): string {
