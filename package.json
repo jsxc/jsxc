@@ -13,7 +13,7 @@
   },
   "scripts": {
     "start": "webpack --config webpack.config.js --mode production",
-    "watch": "webpack --config webpack.config.js --mode production --watch",
+    "watch": "webpack --config webpack.config.js --mode development --watch",
     "dev": "webpack-dev-server --mode development",
     "test": "karma start --single-run",
     "fix-typescript-format": "node_modules/typescript-formatter/bin/tsfmt  -r",
@@ -106,6 +106,6 @@
     "precompile-handlebars": "^1.0.5",
     "resizable": "^1.2.0",
     "sha1": "^1.1.1",
-    "strophe.js": "^1.2.14"
+    "strophe.js": "1.2.16"
   }
 }

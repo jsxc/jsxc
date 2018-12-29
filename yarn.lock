@@ -8143,7 +8143,7 @@ strip-json-comments@~2.0.1:
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
   integrity sha1-PFMZQukIwml8DsNEhYwobHygpgo=
 
-strophe.js@^1.2.14:
+strophe.js@1.2.16:
   version "1.2.16"
   resolved "https://registry.yarnpkg.com/strophe.js/-/strophe.js-1.2.16.tgz#2ac837c9838f364821213a4cd7748789c13912f6"
   integrity sha512-r/Uq7aqrusg25Y0qHwV48cFnMY6K/CuZdGt3EggRx3kY4sMv8lG+AFoMlrmTcYVMG1BaJvQfv9Cthw4Ll8z7fQ==
