@@ -8,6 +8,7 @@ import ListItem from '../DialogListItem'
 import AvatarSet from '../AvatarSet'
 import Translation from '../../util/Translation';
 import Log from '../../util/Log'
+import Contact from "@src/Contact";
 
 const ENOUGH_BITS_OF_ENTROPY = 50;
 
@@ -104,14 +105,80 @@ class ConnectionSection extends Section {
       let jid = this.account.getJID();
       let contentElement = new List();
 
+      let changeNicknameActionHandler = () => this.navigation.goTo(new NicknamePage(this.navigation, this.account));
       let changePasswordActionHandler = () => this.navigation.goTo(new PasswordPage(this.navigation, this.account));
 
       contentElement.append(new ListItem('Jabber ID', jid.bare));
       contentElement.append(new ListItem('Resource', jid.resource));
       contentElement.append(new ListItem('BOSH url', this.account.getConnectionUrl()));
+      contentElement.append(new ListItem('Edit Nickname', this.account.getContact().getName(), changeNicknameActionHandler));
       contentElement.append(new ListItem('Change password', undefined, changePasswordActionHandler));
 
       return contentElement.getDOM();
+   }
+}
+
+
+class NicknamePage extends Page {
+
+   constructor(navigation: Navigation, private account) {
+      super(navigation, 'Nickname');
+
+   }
+
+   protected generateContentElement(): JQuery {
+      //@REVIEW maybe template
+      let contentElement = $('<form>');
+      contentElement.addClass('form-horizontal');
+      contentElement.css('marginTop', '30px'); //@REVIEW
+
+      let explanationElement = $(`<p class="jsxc-explanation">{{t "nickname_explanation"}}</p>`)
+
+      let nicknameElement = $(`<div class="form-group">
+         <label class="col-sm-4 control-label" for="jsxc-nickname">Nickname</label>
+         <div class="col-sm-8">
+            <input type="text" name="nickname" id="jsxc-nickname" class="form-control" required="required">
+            <p class="jsxc-inputinfo"></p>
+         </div>
+      </div>`);
+
+      let submitElement = $(`<div class="form-group">
+         <div class="col-sm-offset-4 col-sm-8">
+            <button disabled="disabled" class="jsxc-button jsxc-button--primary">Submit</button>
+         </div>
+      </div>`);
+
+      let errorElement = $(`<div class="jsxc-alert jsxc-alert--warning jsxc-hidden"></div>`);
+
+      contentElement.append(explanationElement);
+      contentElement.append(nicknameElement);
+      contentElement.append(submitElement);
+      contentElement.append(errorElement);
+
+      contentElement.find('input').on('input', function() {
+         let nickname = nicknameElement.find('input').val();
+
+         submitElement.find('button').prop('disabled', false);
+      });
+
+      contentElement.submit((ev) => {
+         ev.preventDefault();
+
+         let nickname = nicknameElement.find('input').val();
+         let contact = this.account.getContact();
+         contact.setName(nickname).catch((errStanza) => {
+
+            errorElement.removeClass('jsxc-hidden');
+            errorElement.text('Server error. Nickname was not changed.');
+
+         });
+
+         /*this.account.getConnection().changeNickname(nickname).then(() => {
+            Log.debug('Nickname was changed');
+         })*/
+      });
+
+      return contentElement;
    }
 }
 

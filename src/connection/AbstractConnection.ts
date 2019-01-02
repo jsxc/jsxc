@@ -224,6 +224,21 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
+   public changeNickname(newNickname: string): Promise<Element> {
+      let iq = $iq({
+         type: 'set'
+      });
+
+      iq.c('query', {
+         xmlns: 'jabber:iq:register'
+      });
+
+      iq.c('nickname').t(newNickname);
+
+      return this.sendIQ(iq);
+   }
+
+
    public changePassword(newPassword: string): Promise<Element> {
       let iq = $iq({
          type: 'set'
