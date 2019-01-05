@@ -224,18 +224,49 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public changeNickname(newNickname: string): Promise<Element> {
+   public changeNickname(newNickname: string) {
+
       let iq = $iq({
-         type: 'set'
+         type: 'set',
+         to: this.getJID().full
       });
 
-      iq.c('query', {
-         xmlns: 'jabber:iq:register'
+      iq.c('vcard', {
+         xmlns: NS.get('VCARD')
       });
 
-      iq.c('nickname').t(newNickname);
+      iq.c('FN').t('Daniel Seidl').up();
+      iq.c('N').t('');
+      iq.c('FAMILY').t('').up();
+      iq.c('GIVEN').t('').up();
+      iq.c('MIDDLE').t('').up()
+      iq.c('PREFIX').t('').up();
+      iq.c('SUFFIX').t('').up();;
+      iq.up();
+      iq.c('EMAIL').t('');
+      iq.c('INTERNET').t('').up();
+      iq.c('PREF').t('').up();
+      iq.c('USERID').t('').up();
+      iq.up();
+      iq.c('TEL').t('');
+      iq.c('NUMBER').t('').up();
+      iq.up();
+      iq.c('ADR').t('');
+      iq.c('WORK').t('').up();
+      iq.c('EXTADD').t('').up();
+      iq.c('STREET').t('').up();
+      iq.c('LOCALITY').t('').up();
+      iq.c('REGION').t('').up();
+      iq.c('PCODE').t('').up();
+      iq.c('CTRY').t('').up();
+      iq.up();
+      iq.c('ORGUNIT').t('').up();
+      iq.c('NICKNAME').t(newNickname).up();
+
+      Log.info(this.account.getContact().getVcard()['NICKNAME']);
 
       return this.sendIQ(iq);
+
    }
 
 
