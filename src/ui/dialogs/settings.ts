@@ -165,17 +165,15 @@ class NicknamePage extends Page {
          ev.preventDefault();
 
          let nickname = nicknameElement.find('input').val();
-         let contact = this.account.getContact();
-         contact.setName(nickname).catch((errStanza) => {
+
+         this.account.getConnection().changeNickname(nickname).then(() => {
+            Log.debug('Nickname was changed');
+         }).catch((errStanza) => {
 
             errorElement.removeClass('jsxc-hidden');
             errorElement.text('Server error. Nickname was not changed.');
 
          });
-
-         /*this.account.getConnection().changeNickname(nickname).then(() => {
-            Log.debug('Nickname was changed');
-         })*/
       });
 
       return contentElement;

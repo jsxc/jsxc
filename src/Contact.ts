@@ -59,7 +59,7 @@ export default class Contact implements IIdentifiable, IContact {
          id: id,
          jid: this.jid.full,
          name: name || this.jid.bare,
-         nickname: <String>'',
+         nickname: this.getVcard()['NICKNAME'],
          presence: Presence.offline,
          status: '',
          subscription: ContactSubscription.NONE,
@@ -274,7 +274,6 @@ export default class Contact implements IIdentifiable, IContact {
 
    public setName(name: string) {
       let oldName = this.getName();
-
       this.data.set('name', name);
 
       if (oldName !== name) {

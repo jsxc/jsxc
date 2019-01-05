@@ -227,11 +227,10 @@ abstract class AbstractConnection {
    public changeNickname(newNickname: string) {
 
       let iq = $iq({
-         type: 'set',
-         to: this.getJID().full
+         type: 'set'
       });
 
-      iq.c('vcard', {
+      iq.c('vCard', {
          xmlns: NS.get('VCARD')
       });
 
@@ -262,8 +261,6 @@ abstract class AbstractConnection {
       iq.up();
       iq.c('ORGUNIT').t('').up();
       iq.c('NICKNAME').t(newNickname).up();
-
-      Log.info(this.account.getContact().getVcard()['NICKNAME']);
 
       return this.sendIQ(iq);
 
