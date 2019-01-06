@@ -88,6 +88,8 @@ export default class Roster extends AbstractService {
       this.send($pres({
          to: jid.full,
          type: 'subscribe'
-      }));
+      }).c('nick', {
+         xmlns: 'http://jabber.org/protocol/nick'
+      }).t(this.account.getContact().data.get('name')));
    }
 }

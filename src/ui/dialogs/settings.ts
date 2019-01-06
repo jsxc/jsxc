@@ -8,7 +8,7 @@ import ListItem from '../DialogListItem'
 import AvatarSet from '../AvatarSet'
 import Translation from '../../util/Translation';
 import Log from '../../util/Log'
-import Contact from "@src/Contact";
+import Contact from '@src/Contact';
 
 const ENOUGH_BITS_OF_ENTROPY = 50;
 
@@ -117,7 +117,6 @@ class ConnectionSection extends Section {
       return contentElement.getDOM();
    }
 }
-
 
 class NicknamePage extends Page {
 

@@ -12,6 +12,7 @@ import RosterService from './services/Roster'
 import VcardService from './services/Vcard'
 import DiscoService from './services/Disco'
 import { IMessage } from '@src/Message.interface';
+import Vcard from "@connection/services/Vcard";
 
 export const STANZA_KEY = 'stanza';
 export const STANZA_IQ_KEY = 'stanzaIQ';
@@ -238,9 +239,9 @@ abstract class AbstractConnection {
       iq.c('N').t('');
       iq.c('FAMILY').t('').up();
       iq.c('GIVEN').t('').up();
-      iq.c('MIDDLE').t('').up()
+      iq.c('MIDDLE').t('').up();
       iq.c('PREFIX').t('').up();
-      iq.c('SUFFIX').t('').up();;
+      iq.c('SUFFIX').t('').up();
       iq.up();
       iq.c('EMAIL').t('');
       iq.c('INTERNET').t('').up();
@@ -262,10 +263,11 @@ abstract class AbstractConnection {
       iq.c('ORGUNIT').t('').up();
       iq.c('NICKNAME').t(newNickname).up();
 
+      Log.info(this.account.getContact().getVcard()['NICKNAME']);
+
       return this.sendIQ(iq);
 
    }
-
 
    public changePassword(newPassword: string): Promise<Element> {
       let iq = $iq({

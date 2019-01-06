@@ -59,7 +59,6 @@ export default class Contact implements IIdentifiable, IContact {
          id: id,
          jid: this.jid.full,
          name: name || this.jid.bare,
-         nickname: this.getVcard()['NICKNAME'],
          presence: Presence.offline,
          status: '',
          subscription: ContactSubscription.NONE,
@@ -214,6 +213,7 @@ export default class Contact implements IIdentifiable, IContact {
 
    public getName(): string {
       return this.data.get('name') || this.jid.bare;
+
    }
 
    public getAvatar(): Promise<Avatar> {
