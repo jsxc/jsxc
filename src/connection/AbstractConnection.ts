@@ -227,50 +227,48 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
+   // @ts-ignore
+   // @ts-ignore
    public changeNickname(newNickname: string) {
-
       let iq = $iq({
          type: 'set'
       });
 
-      iq.c('vCard', {
-         xmlns: NS.get('VCARD')
-      });
+      this.account.getContact().getVcard().then(
+         function(vCardData) {
 
-      this.account.getContact().getVcard().then(function(vCardData) {
-         iq.c('FN').t(vCardData['FN']).up();
-         iq.c('N').t(vCardData['N']);
-         iq.c('FAMILY').t(vCardData['FAMILY']).up();
-         iq.c('GIVEN').t(vCardData['GIVEN']).up();
-         iq.c('MIDDLE').t(vCardData['MIDDLE']).up();
-         iq.c('PREFIX').t(vCardData['PREFIX']).up();
-         iq.c('SUFFIX').t(vCardData['SUFFIX']).up();
-         iq.up();
-         iq.c('EMAIL').t(vCardData['EMAIL']);
-         iq.c('INTERNET').t(vCardData['INTERNET']).up();
-         iq.c('PREF').t(vCardData['PREF']).up();
-         iq.c('USERID').t(vCardData['USERID']).up();
-         iq.up();
-         iq.c('TEL').t(vCardData['TEL']);
-         iq.c('NUMBER').t(vCardData['NUMBER']).up();
-         iq.up();
-         iq.c('ADR').t(vCardData['ADR']);
-         iq.c('WORK').t(vCardData['WORK']).up();
-         iq.c('EXTADD').t(vCardData['EXTADD']).up();
-         iq.c('STREET').t(vCardData['STREET']).up();
-         iq.c('LOCALITY').t(vCardData['LOCALITY']).up();
-         iq.c('REGION').t(vCardData['REGION']).up();
-         iq.c('PCODE').t(vCardData['PCODE']).up();
-         iq.c('CTRY').t(vCardData['CTRY']).up();
-         iq.up();
-         iq.c('ORGUNIT').t(vCardData['ORGUNIT']).up();
-         iq.c('NICKNAME').t(newNickname);
-      }).catch(function(error) {
-         Log.error('Vcard could not be loaded');
-      });
+            iq.c('vCard', {
+               xmlns: NS.get('VCARD')
+            });
 
-      return this.sendIQ(iq);
-
+            iq.c('FN').t(vCardData['FN']).up();
+            iq.c('N').t(vCardData['N']);
+            iq.c('FAMILY').t(vCardData['FAMILY']).up();
+            iq.c('GIVEN').t(vCardData['GIVEN']).up();
+            iq.c('MIDDLE').t(vCardData['MIDDLE']).up();
+            iq.c('PREFIX').t(vCardData['PREFIX']).up();
+            iq.c('SUFFIX').t(vCardData['SUFFIX']).up();
+            iq.up();
+            iq.c('EMAIL').t(vCardData['EMAIL']);
+            iq.c('INTERNET').t(vCardData['INTERNET']).up();
+            iq.c('PREF').t(vCardData['PREF']).up();
+            iq.c('USERID').t(vCardData['USERID']).up();
+            iq.up();
+            iq.c('TEL').t(vCardData['TEL']);
+            iq.c('NUMBER').t(vCardData['NUMBER']).up();
+            iq.up();
+            iq.c('ADR').t(vCardData['ADR']);
+            iq.c('WORK').t(vCardData['WORK']).up();
+            iq.c('EXTADD').t(vCardData['EXTADD']).up();
+            iq.c('STREET').t(vCardData['STREET']).up();
+            iq.c('LOCALITY').t(vCardData['LOCALITY']).up();
+            iq.c('REGION').t(vCardData['REGION']).up();
+            iq.c('PCODE').t(vCardData['PCODE']).up();
+            iq.c('CTRY').t(vCardData['CTRY']).up();
+            iq.up();
+            iq.c('ORGUNIT').t(vCardData['ORGUNIT']).up();
+            iq.c('NICKNAME').t(newNickname).up();
+         }).then(() => { return this.sendIQ(iq); });
    }
 
    public changePassword(newPassword: string): Promise<Element> {
