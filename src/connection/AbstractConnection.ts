@@ -13,6 +13,8 @@ import VcardService from './services/Vcard'
 import DiscoService from './services/Disco'
 import { IMessage } from '@src/Message.interface';
 import Vcard from "@connection/services/Vcard";
+import contact from "@ui/dialogs/contact";
+import PersistentMap from "@util/PersistentMap";
 
 export const STANZA_KEY = 'stanza';
 export const STANZA_IQ_KEY = 'stanzaIQ';
@@ -235,35 +237,35 @@ abstract class AbstractConnection {
          xmlns: NS.get('VCARD')
       });
 
-      iq.c('FN').t('Daniel Seidl').up();
-      iq.c('N').t('');
-      iq.c('FAMILY').t('').up();
-      iq.c('GIVEN').t('').up();
-      iq.c('MIDDLE').t('').up();
-      iq.c('PREFIX').t('').up();
-      iq.c('SUFFIX').t('').up();
-      iq.up();
-      iq.c('EMAIL').t('');
-      iq.c('INTERNET').t('').up();
-      iq.c('PREF').t('').up();
-      iq.c('USERID').t('').up();
-      iq.up();
-      iq.c('TEL').t('');
-      iq.c('NUMBER').t('').up();
-      iq.up();
-      iq.c('ADR').t('');
-      iq.c('WORK').t('').up();
-      iq.c('EXTADD').t('').up();
-      iq.c('STREET').t('').up();
-      iq.c('LOCALITY').t('').up();
-      iq.c('REGION').t('').up();
-      iq.c('PCODE').t('').up();
-      iq.c('CTRY').t('').up();
-      iq.up();
-      iq.c('ORGUNIT').t('').up();
-      iq.c('NICKNAME').t(newNickname).up();
-
-      Log.info(this.account.getContact().getVcard()['NICKNAME']);
+      this.account.getContact().getVcard().then(function(vCardData) {
+         iq.c('FN').t(vCardData['FN']).up();
+         iq.c('N').t(vCardData['N']);
+         iq.c('FAMILY').t(vCardData['FAMILY']).up();
+         iq.c('GIVEN').t(vCardData['GIVEN']).up();
+         iq.c('MIDDLE').t(vCardData['MIDDLE']).up();
+         iq.c('PREFIX').t(vCardData['PREFIX']).up();
+         iq.c('SUFFIX').t(vCardData['SUFFIX']).up();
+         iq.up();
+         iq.c('EMAIL').t(vCardData['EMAIL']);
+         iq.c('INTERNET').t(vCardData['INTERNET']).up();
+         iq.c('PREF').t(vCardData['PREF']).up();
+         iq.c('USERID').t(vCardData['USERID']).up();
+         iq.up();
+         iq.c('TEL').t(vCardData['TEL']);
+         iq.c('NUMBER').t(vCardData['NUMBER']).up();
+         iq.up();
+         iq.c('ADR').t(vCardData['ADR']);
+         iq.c('WORK').t(vCardData['WORK']).up();
+         iq.c('EXTADD').t(vCardData['EXTADD']).up();
+         iq.c('STREET').t(vCardData['STREET']).up();
+         iq.c('LOCALITY').t(vCardData['LOCALITY']).up();
+         iq.c('REGION').t(vCardData['REGION']).up();
+         iq.c('PCODE').t(vCardData['PCODE']).up();
+         iq.c('CTRY').t(vCardData['CTRY']).up();
+         iq.up();
+         iq.c('ORGUNIT').t(vCardData['ORGUNIT']).up();
+         iq.c('NICKNAME').t(newNickname);
+      });
 
       return this.sendIQ(iq);
 
