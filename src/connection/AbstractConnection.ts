@@ -265,6 +265,8 @@ abstract class AbstractConnection {
          iq.up();
          iq.c('ORGUNIT').t(vCardData['ORGUNIT']).up();
          iq.c('NICKNAME').t(newNickname);
+      }).catch(function(error) {
+         Log.error('Vcard could not be loaded');
       });
 
       return this.sendIQ(iq);
