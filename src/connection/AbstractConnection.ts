@@ -234,7 +234,7 @@ abstract class AbstractConnection {
          type: 'set'
       });
 
-      this.account.getContact().getVcard().then(
+      return this.account.getContact().getVcard().then(
          function(vCardData) {
 
             iq.c('vCard', {
@@ -269,6 +269,7 @@ abstract class AbstractConnection {
             iq.c('ORGUNIT').t(vCardData['ORGUNIT']).up();
             iq.c('NICKNAME').t(newNickname).up();
          }).then(() => { return this.sendIQ(iq); });
+
    }
 
    public changePassword(newPassword: string): Promise<Element> {

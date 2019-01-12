@@ -59,6 +59,7 @@ export default class Contact implements IIdentifiable, IContact {
          id: id,
          jid: this.jid.full,
          name: name || this.jid.bare,
+         nickname: this.jid.bare,
          presence: Presence.offline,
          status: '',
          subscription: ContactSubscription.NONE,
@@ -212,8 +213,12 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getName(): string {
-      return this.data.get('name') || this.jid.bare;
-
+      if (this.data.get('name') === this.jid.bare) {
+         return this.getNickname() || this.jid.bare;
+      }
+      else {
+         return this.data.get('name');
+      }
    }
 
    public getAvatar(): Promise<Avatar> {
@@ -279,6 +284,10 @@ export default class Contact implements IIdentifiable, IContact {
       if (oldName !== name) {
          this.account.getConnection().getRosterService().setDisplayName(this.jid, name);
       }
+   }
+
+   public setNickname(nickname: string) {
+      this.data.set('nickname', nickname);
    }
 
    public setSubscription(subscription: ContactSubscription) {

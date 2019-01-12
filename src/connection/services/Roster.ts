@@ -90,6 +90,6 @@ export default class Roster extends AbstractService {
          type: 'subscribe'
       }).c('nick', {
          xmlns: 'http://jabber.org/protocol/nick'
-      }).t(this.account.getContact().data.get('name')));
+      }).t(this.account.getContact().getNickname()));
    }
 }

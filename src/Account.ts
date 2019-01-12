@@ -68,6 +68,7 @@ export default class Account {
 
          let oldSessionId = this.getStorage().getItem('sessionId');
          this.getStorage().setItem('sessionId', this.sessionId);
+         this.getStorage().generateKey('nickname');
 
          if (oldSessionId) {
             Storage.clear(this.uid + '@' + oldSessionId);
@@ -98,6 +99,19 @@ export default class Account {
 
    public getOption(key) {
       return this.options.get(key, this);
+   }
+
+   public setNickname(nickname: string) {
+      this.getStorage().setItem('nickname', nickname);
+   }
+
+   public getNickname(): string {
+      let nickname = this.getStorage().getItem('nickname');
+      if (nickname == null) {
+         nickname = this.getJID().bare;
+      }
+
+      return nickname;
    }
 
    public setOption(key, value) {
