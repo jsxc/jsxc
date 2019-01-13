@@ -229,7 +229,7 @@ abstract class AbstractConnection {
 
    // @ts-ignore
    // @ts-ignore
-   public changeNickname(newNickname: string) {
+   public changeNickname(newNickname: string): Promise<Element> {
       let iq = $iq({
          type: 'set'
       });

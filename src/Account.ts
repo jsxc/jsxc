@@ -101,8 +101,15 @@ export default class Account {
       return this.options.get(key, this);
    }
 
-   public setNickname(nickname: string) {
+   public setNickname(nickname: string): Promise<Element> {
+      let element = document.createElement('nick');
+      let attr = document.createAttribute('xmlns');
+      let content = document.createTextNode(nickname);
+      attr.value = 'http://jabber.org/protocol/nick';
+      element.setAttributeNode(attr);
+      element.appendChild(content);
       this.getStorage().setItem('nickname', nickname);
+      return this.getConnection().getPEPService().publish('http://jabber.org/protocol/nick', element);
    }
 
    public getNickname(): string {
