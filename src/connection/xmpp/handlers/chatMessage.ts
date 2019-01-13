@@ -24,13 +24,19 @@ export default class extends AbstractHandler {
 
       let peerJid = new JID(messageElement.getOriginalFrom());
       let peerContact: Contact = this.account.getContact(peerJid);
+      let nickname: string = $(stanza).find('nick').text();
+
+      if (nickname) {
+         peerContact.setNickname(nickname);
+      }
+
       if (typeof peerContact === 'undefined') {
          this.handleUnknownSender(messageElement);
 
          return this.PRESERVE_HANDLER;
       }
 
-      // If we now the full jid, we use it
+      // If we know the full jid, we use it
       peerContact.setResource(peerJid.resource);
 
       let message = new Message({

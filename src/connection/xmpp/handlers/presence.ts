@@ -56,6 +56,8 @@ export default class extends AbstractHandler {
          Log.debug('received subscription request');
 
          this.processSubscriptionRequest(presence.from, contact);
+         let nickname = $(stanza).find('nick').text();
+         contact.setNickname(nickname);
 
          return this.PRESERVE_HANDLER;
       }

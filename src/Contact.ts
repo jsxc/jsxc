@@ -59,7 +59,7 @@ export default class Contact implements IIdentifiable, IContact {
          id: id,
          jid: this.jid.full,
          name: name || this.jid.bare,
-         nickname: this.jid.bare,
+         nickname: this.account.getNickname(),
          presence: Presence.offline,
          status: '',
          subscription: ContactSubscription.NONE,
