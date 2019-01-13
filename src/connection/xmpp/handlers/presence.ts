@@ -55,7 +55,7 @@ export default class extends AbstractHandler {
       if (presence.type === PRESENCE.SUBSCRIBE) {
          Log.debug('received subscription request');
 
-         this.processSubscribtionRequest(presence.from, contact);
+         this.processSubscriptionRequest(presence.from, contact);
 
          return this.PRESERVE_HANDLER;
       }
@@ -80,7 +80,7 @@ export default class extends AbstractHandler {
       return this.PRESERVE_HANDLER;
    }
 
-   private processSubscribtionRequest(jid: JID, contact: IContact) {
+   private processSubscriptionRequest(jid: JID, contact: IContact) {
       if (contact) {
          Log.debug('Auto approve contact request, because he is already in our contact list.');
 
