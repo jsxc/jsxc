@@ -61,7 +61,7 @@ abstract class AbstractConnection {
    }
 
    public getMUCService = (): MUCService => {
-      return this.getService('roster', MUCService);
+      return this.getService('muc', MUCService);
    }
 
    public getRosterService = (): RosterService => {
