@@ -22,19 +22,17 @@ armConnectionParameterForm();
 
 function watchLoginCredentials() {
    $('#instant-login-form').submit(function(ev) {
-      var url = $(this).find('[name="url"]').val();
-      var jid = $(this).find('[name="jid"]').val();
+      var username = $(this).find('[name="username"]').val();
       var password = $(this).find('[name="password"]').val();
 
-      storeInstantLoginCredentials(url, jid, password)
+      storeInstantLoginCredentials(username, password)
    });
 }
 
 // store instant login credentials just for convenience
-function storeInstantLoginCredentials(url, jid, password) {
+function storeInstantLoginCredentials(username, password) {
    localStorage.setItem('jsxc:example:dev', JSON.stringify({
-      url: url,
-      jid: jid,
+      username: username,
       password: password
    }));
 }
@@ -47,8 +45,7 @@ function restoreInstantLoginCredentials() {
       formData = JSON.parse(formData);
 
       if (formData !== null) {
-         $('#instant-login-form').find('[name="url"]').val(formData.url);
-         $('#instant-login-form').find('[name="jid"]').val(formData.jid);
+         $('#instant-login-form').find('[name="username"]').val(formData.username);
          $('#instant-login-form').find('[name="password"]').val(formData.password);
       }
    } catch (err) {}
