@@ -19,6 +19,9 @@ import Pipe from './util/Pipe'
 import ChatWindow from '@ui/ChatWindow';
 import Utils from '@util/Utils';
 
+import { IJID } from './JID.interface';
+import { IContact } from './Contact.interface';
+
 type ConnectionCallback = (status: number, condition?: string) => void;
 
 export default class Account {
@@ -150,7 +153,7 @@ export default class Account {
       return Promise.resolve();
    }
 
-   public triggerPresenceHook = (contact: Contact, presence, oldPresence) => {
+   public triggerPresenceHook = (contact: IContact, presence, oldPresence) => {
       this.hookRepository.trigger('presence', contact, presence, oldPresence);
    }
 
@@ -202,7 +205,7 @@ export default class Account {
       return this.ownDiscoInfo;
    }
 
-   public getContact(jid?: JID): Contact {
+   public getContact(jid?: IJID): IContact {
       return jid && jid.bare !== this.getJID().bare ? this.contacts[jid.bare] : this.contact;
    }
 
@@ -222,7 +225,7 @@ export default class Account {
       return this.addContactObject(contact);
    }
 
-   public removeContact(contact: Contact) {
+   public removeContact(contact: IContact) {
       let id = contact.getId();
 
       if (this.contacts[id]) {

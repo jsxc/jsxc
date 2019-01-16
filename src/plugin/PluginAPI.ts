@@ -11,6 +11,8 @@ import { MessagePayload } from '../Message.interface'
 import { API as IPluginAPI } from './PluginAPI.interface'
 import { Logger } from '../util/Log'
 import ChatWindow from '@ui/ChatWindow';
+import { IContact } from '@src/Contact.interface';
+import { IJID } from '@src/JID.interface';
 
 export default class PluginAPI implements IPluginAPI {
    private storage;
@@ -23,10 +25,10 @@ export default class PluginAPI implements IPluginAPI {
       this.Log = new Logger(name);
    }
 
-   public createJID(node: string, domain: string, resource: string): JID
-   public createJID(bare: string, resource: string): JID
-   public createJID(full: string): JID
-   public createJID(): JID {
+   public createJID(node: string, domain: string, resource: string): IJID
+   public createJID(bare: string, resource: string): IJID
+   public createJID(full: string): IJID
+   public createJID(): IJID {
       return new JID(arguments[0], arguments[1], arguments[2]);
    }
 
@@ -69,7 +71,7 @@ export default class PluginAPI implements IPluginAPI {
       return this.account.getConnection();
    }
 
-   public getContact(jid: JID): Contact {
+   public getContact(jid: IJID): IContact {
       return this.account.getContact(jid);
    }
 

@@ -40,7 +40,7 @@ export default class Roster extends AbstractService {
       return this.sendIQ(iq);
    }
 
-   public addContact(jid: IJID, alias: string) {
+   public addContact(jid: IJID, alias: string): Promise<Element> {
       let waitForRoster = this.addContactToRoster(jid, alias);
 
       this.sendSubscriptionRequest(jid);

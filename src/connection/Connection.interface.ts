@@ -67,7 +67,7 @@ export interface RosterService {
 
    removeContact(jid: IJID): Promise<Element>
 
-   addContact(jid: IJID, alias: string)
+   addContact(jid: IJID, alias: string): Promise<Element>
 
    setDisplayName(jid: IJID, displayName: string): Promise<Element>
 

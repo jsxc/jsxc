@@ -1,4 +1,4 @@
-import Contact from './Contact'
+import { IContact } from './Contact.interface';
 import Translation from './util/Translation'
 import Client from './Client'
 import * as CONST from './CONST'
@@ -17,7 +17,7 @@ interface NotificationSettings {
    force?: boolean,
    soundFile?: string,
    loop?: boolean,
-   source?: Contact,
+   source?: IContact,
    icon?: string
 };
 

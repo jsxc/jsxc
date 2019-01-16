@@ -23,7 +23,7 @@ export default class extends AbstractHandler {
       }
 
       let peerJid = new JID(messageElement.getOriginalFrom());
-      let peerContact: Contact = this.account.getContact(peerJid);
+      let peerContact = this.account.getContact(peerJid);
       if (typeof peerContact === 'undefined') {
          this.handleUnknownSender(messageElement);
 
