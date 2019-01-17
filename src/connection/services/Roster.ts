@@ -1,11 +1,10 @@
 import AbstractService from './AbstractService'
 import { IJID } from '../../JID.interface'
-import RosterHandler from '../xmpp/handlers/roster'
 import * as NS from '../xmpp/namespace'
 import { $pres, $iq } from '../../vendor/Strophe'
 
 export default class Roster extends AbstractService {
-   public getRoster(version?: string) {
+   public getRoster(version?: string): Promise<Element> {
       let iq = $iq({
          type: 'get'
       }).c('query', {
@@ -18,15 +17,10 @@ export default class Roster extends AbstractService {
          });
       }
 
-      return this.sendIQ(iq).then((stanza: Element) => {
-         let rosterHandler = new RosterHandler(this.account);
-         return rosterHandler.processStanza(stanza);
-      });
+      return this.sendIQ(iq);
    }
 
    public removeContact(jid: IJID): Promise<Element> {
-      let self = this;
-
       // Shortcut to remove buddy from roster and cancle all subscriptions
       let iq = $iq({
          type: 'set'

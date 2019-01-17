@@ -1,10 +1,8 @@
 import Log from '../../util/Log'
 import JID from '../../JID'
 import Account from '../../Account'
-import Contact from '../../Contact'
 import PresenceHandler from './handlers/presence'
 import MultiUserPresenceHandler from './handlers/multiUser/Presence'
-import RosterChangeHandler from './handlers/rosterChange'
 import ChatMessageHandler from './handlers/chatMessage'
 import MultiUserChatMessageHandler from './handlers/multiUser/groupChatMessage'
 import HeadlineMessageHandler from './handlers/headlineMessage'
@@ -22,14 +20,11 @@ interface StropheConnection {
 }
 
 export default class XMPPHandler {
-   private connectionJid: JID;
-
    constructor(private account: Account, private connection: StropheConnection) {
-      this.connectionJid = new JID(connection.jid);
+
    }
 
-   private registerHandler() {
-      this.addHandler(RosterChangeHandler, 'jabber:iq:roster', 'iq', 'set');
+   public registerHandler() {
       this.addHandler(ChatMessageHandler, null, 'message', 'chat');
       this.addHandler(MultiUserChatMessageHandler, null, 'message', 'groupchat');
       this.addHandler(HeadlineMessageHandler, null, 'message', 'headline');
@@ -47,7 +42,7 @@ export default class XMPPHandler {
       // this.connection.conn.addHandler(this.onReceived, null, 'message');
    }
 
-   private addHandler(Handler, namespace?: string, tagName?: string, type?: string, id?: string, from?: string) {
+   public addHandler(Handler, namespace?: string, tagName?: string, type?: string, id?: string, from?: string) {
       let handler = new Handler(this.account);
 
       if (!(handler instanceof AbstractHandler)) {

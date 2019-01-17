@@ -1,3 +1,5 @@
+import { $build } from '../vendor/Strophe'
+
 export interface FormFieldData {
    label?: string,
    type?: string,
@@ -9,7 +11,7 @@ export interface FormFieldData {
 }
 
 export interface FormFieldJSONData {
-   type: string,
+   type?: string,
    name: string,
    values: string[]
 }

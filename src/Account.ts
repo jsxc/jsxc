@@ -4,8 +4,6 @@ import Connector from './connection/xmpp/Connector'
 import StorageConnection from './connection/storage/Connection'
 import JID from './JID'
 import Contact from './Contact'
-import MultiUserContact from './MultiUserContact'
-import Roster from './ui/Roster'
 import { Presence } from './connection/AbstractConnection'
 import Client from './Client'
 import { NoticeManager } from './NoticeManager'
@@ -17,10 +15,10 @@ import Options from './Options'
 import UUID from './util/UUID'
 import Pipe from './util/Pipe'
 import ChatWindow from '@ui/ChatWindow';
-import Utils from '@util/Utils';
-
 import { IJID } from './JID.interface';
 import { IContact } from './Contact.interface';
+import RosterContactProvider from './RosterContactProvider';
+import ContactManager from './ContactManager';
 
 type ConnectionCallback = (status: number, condition?: string) => void;
 
@@ -37,8 +35,6 @@ export default class Account {
 
    private connector: Connector;
 
-   private contacts = {};
-
    private contact: Contact;
 
    private noticeManager: NoticeManager;
@@ -51,6 +47,8 @@ export default class Account {
 
    private hookRepository = new HookRepository<any>();
 
+   private contactManager: ContactManager;
+
    private options: Options;
 
    private pipes = {};
@@ -59,13 +57,10 @@ export default class Account {
    constructor(url: string, jid: string, password: string);
    constructor(uid: string);
    constructor() {
-      let newSession = false;
-
       if (arguments.length === 1) {
          this.uid = arguments[0];
          this.sessionId = this.getStorage().getItem('sessionId');
       } else if (arguments.length === 3 || arguments.length === 4) {
-         newSession = true;
          this.uid = (new JID(arguments[1])).bare;
          this.sessionId = UUID.v4();
 
@@ -86,6 +81,8 @@ export default class Account {
       this.pluginRepository = new PluginRepository(this);
       this.contact = new Contact(this, new JID(this.uid), this.uid);
 
+      this.getContactManager().registerContactProvider(new RosterContactProvider(this));
+
       let connectionCallback = this.getOption('connectionCallback');
 
       if (typeof connectionCallback === 'function') {
@@ -94,9 +91,7 @@ export default class Account {
          });
       }
 
-      if (!newSession) {
-         this.initContacts();
-      }
+      this.getContactManager().restoreCache();
    }
 
    public getOption(key) {
@@ -134,23 +129,19 @@ export default class Account {
       });
    }
 
-   private initConnection(status): Promise<void> {
+   private async initConnection(status): Promise<void> {
       let storage = this.getSessionStorage();
 
-      if (!storage.getItem('roster:loaded')) {
-         this.removeNonpersistentContacts();
-
-         let rosterVersion = this.getStorage().getItem('roster', 'version') || '';
-
-         return this.connection.getRosterService().getRoster(rosterVersion).then(() => {
-            storage.setItem('roster:loaded', true);
-
-            let targetPresence = Client.getPresenceController().getTargetPresence();
-            this.connection.sendPresence(targetPresence);
-         });
+      if (storage.getItem('connection', 'inited')) {
+         return;
       }
 
-      return Promise.resolve();
+      await this.getContactManager().loadContacts();
+
+      let targetPresence = Client.getPresenceController().getTargetPresence();
+      this.getConnection().sendPresence(targetPresence);
+
+      storage.setItem('connectionInited', 'inited', true);
    }
 
    public triggerPresenceHook = (contact: IContact, presence, oldPresence) => {
@@ -185,6 +176,14 @@ export default class Account {
       this.hookRepository.registerHook('chatWindowCleared', func);
    }
 
+   public getContactManager(): ContactManager {
+      if (!this.contactManager) {
+         this.contactManager = new ContactManager(this);
+      }
+
+      return this.contactManager;
+   }
+
    public getPluginRepository(): PluginRepository {
       return this.pluginRepository;
    }
@@ -206,45 +205,7 @@ export default class Account {
    }
 
    public getContact(jid?: IJID): IContact {
-      return jid && jid.bare !== this.getJID().bare ? this.contacts[jid.bare] : this.contact;
-   }
-
-   public addMultiUserContact(jid: JID, name?: string): MultiUserContact
-   public addMultiUserContact(id: string): MultiUserContact
-   public addMultiUserContact() {
-      let contact = new MultiUserContact(this, arguments[0], arguments[1]);
-
-      return this.addContactObject(contact);
-   }
-
-   public addContact(jid: JID, name?: string): Contact
-   public addContact(id: string): Contact
-   public addContact() {
-      let contact = new Contact(this, arguments[0], arguments[1]);
-
-      return this.addContactObject(contact);
-   }
-
-   public removeContact(contact: IContact) {
-      let id = contact.getId();
-
-      if (this.contacts[id]) {
-         Roster.get().remove(contact);
-
-         contact.getChatWindowController().close();
-
-         delete this.contacts[id];
-
-         this.save();
-      }
-   }
-
-   public removeAllContacts() {
-      for (let id in this.contacts) {
-         let contact = this.contacts[id];
-
-         this.removeContact(contact);
-      }
+      return jid && jid.bare !== this.getJID().bare ? this.getContactManager().getContact(jid) : this.contact;
    }
 
    public getNoticeManager(): NoticeManager {
@@ -320,7 +281,7 @@ export default class Account {
    }
 
    public destroy() {
-      this.removeAllContacts();
+      this.getContactManager().removeAllContactsFromCache();
 
       this.getConnection().close();
       this.getStorage().destroy();
@@ -334,66 +295,9 @@ export default class Account {
       //@TODO destroy plugins
    }
 
-   private addContactObject(contact) {
-      this.contacts[contact.getId()] = contact;
-
-      this.save();
-
-      return contact;
-   }
-
    public connectionDisconnected() {
       this.setPresence(Presence.offline);
 
       this.remove();
-   }
-
-   private save() {
-      this.getStorage().setItem('contacts', Object.keys(this.contacts));
-   }
-
-   private initContacts() {
-      let contacts = this.getStorage().getItem('contacts') || [];
-
-      contacts.forEach((id) => this.initContact(id));
-
-      this.getStorage().registerHook('contacts', (newValue, oldValue) => {
-         let diff = Utils.diffArray(newValue, oldValue);
-         let newContactIds = diff.newValues;
-         let deletedContactIds = diff.deletedValues;
-
-         newContactIds.forEach(id => !this.contacts[id] && this.initContact(id));
-
-         deletedContactIds.forEach(id => this.contacts[id] && this.removeContact(this.contacts[id]));
-      });
-   }
-
-   private initContact(id: string) {
-      let contact = this.createNewContact(id);
-
-      contact.getChatWindowController();
-
-      this.contacts[id] = contact;
-
-      Roster.get().add(contact);
-   }
-
-   private createNewContact(id: string): Contact {
-      let contact = new Contact(this, id);
-
-      if (contact.getType() === 'groupchat') {
-         contact = new MultiUserContact(this, id);
-      }
-
-      return contact;
-   }
-
-   private removeNonpersistentContacts() {
-      for (let contactId in this.contacts) {
-         let contact = this.contacts[contactId];
-         if (!contact.isPersistent()) {
-            this.removeContact(contact);
-         }
-      }
    }
 }

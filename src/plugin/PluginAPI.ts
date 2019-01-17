@@ -3,7 +3,6 @@ import Client from '../Client'
 import Storage from '../Storage'
 import Contact from '../Contact'
 import Message from '../Message'
-import Pipe from '../util/Pipe'
 import JID from '../JID'
 import DiscoInfoRepository from '../DiscoInfoRepository'
 import Avatar from '../Avatar'
@@ -11,8 +10,10 @@ import { MessagePayload } from '../Message.interface'
 import { API as IPluginAPI } from './PluginAPI.interface'
 import { Logger } from '../util/Log'
 import ChatWindow from '@ui/ChatWindow';
+import ContactProvider from '@src/ContactProvider';
 import { IContact } from '@src/Contact.interface';
 import { IJID } from '@src/JID.interface';
+import MultiUserContact from '@src/MultiUserContact';
 
 export default class PluginAPI implements IPluginAPI {
    private storage;
@@ -36,6 +37,12 @@ export default class PluginAPI implements IPluginAPI {
    public createMessage(data: MessagePayload): Message
    public createMessage() {
       return new Message(arguments[0]);
+   }
+
+   public createMultiUserContact(jid: IJID, name?: string): MultiUserContact
+   public createMultiUserContact(id: string): MultiUserContact
+   public createMultiUserContact(): MultiUserContact {
+      return new MultiUserContact(this.account, arguments[0], arguments[1]);
    }
 
    public getStorage(): Storage {
@@ -124,5 +131,13 @@ export default class PluginAPI implements IPluginAPI {
 
    public registerChatWindowClearedHook(hook: (chatWindow?: ChatWindow, contact?: Contact) => void) {
       this.account.registerChatWindowClearedHook(hook);
+   }
+
+   public registerContactProvider(source: ContactProvider) {
+      this.account.getContactManager().registerContactProvider(source);
+   }
+
+   public addContact(contact: IContact): Promise<void> {
+      return this.account.getContactManager().add(contact);
    }
 }

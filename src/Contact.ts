@@ -12,6 +12,7 @@ import ChatWindowController from './ChatWindowController'
 import Avatar from './Avatar'
 import Message from './Message'
 import ChatWindow from './ui/ChatWindow';
+import ContactProvider from './ContactProvider';
 
 export default class Contact implements IIdentifiable, IContact {
    protected storage: Storage;
@@ -20,6 +21,8 @@ export default class Contact implements IIdentifiable, IContact {
 
    protected data: PersistentMap;
 
+   protected id: string;
+
    protected jid: JID;
 
    protected chatWindow;
@@ -27,6 +30,12 @@ export default class Contact implements IIdentifiable, IContact {
    protected chatWindowController;
 
    protected transcript: Transcript;
+
+   public static getProviderId(account: Account, id: string) {
+      let data = new PersistentMap(account.getStorage(), 'contact', id);
+
+      return data.get('provider');
+   }
 
    constructor(account: Account, jid: JID, name?: string);
    constructor(account: Account, id: string);
@@ -39,6 +48,8 @@ export default class Contact implements IIdentifiable, IContact {
       } else {
          this.initNewContact(arguments[1], arguments[2]);
       }
+
+      this.id = this.data.get('id');
    }
 
    private initExistingContact(id: string) {
@@ -72,10 +83,8 @@ export default class Contact implements IIdentifiable, IContact {
       this.data.set(defaultData);
    }
 
-   public delete() {
-      this.account.getConnection().getRosterService().removeContact(this.getJid());
-
-      this.data.empty();
+   public async delete() {
+      this.data.delete();
    }
 
    public getChatWindow(): ChatWindow {
@@ -180,7 +189,7 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getId(): string {
-      return this.data.get('id');
+      return this.id;
    }
 
    public getUid(): string {
@@ -192,7 +201,7 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getResources(): string[] {
-      return Object.keys(this.data.get('resources'));
+      return Object.keys(this.data.get('resources') || {});
    }
 
    public getPresence(): Presence {
@@ -207,8 +216,16 @@ export default class Contact implements IIdentifiable, IContact {
       return this.transcript.getNumberOfUnreadMessages();
    }
 
+   public hasName(): boolean {
+      return !!this.data.get('name');
+   }
+
    public getName(): string {
       return this.data.get('name') || this.jid.bare;
+   }
+
+   public getProviderId(): string {
+      return this.data.get('provider');
    }
 
    public getAvatar(): Promise<Avatar> {
@@ -268,13 +285,11 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public setName(name: string) {
-      let oldName = this.getName();
-
       this.data.set('name', name);
+   }
 
-      if (oldName !== name) {
-         this.account.getConnection().getRosterService().setDisplayName(this.jid, name);
-      }
+   public setProvider(provider: ContactProvider) {
+      this.data.set('provider', provider.getUid());
    }
 
    public setSubscription(subscription: ContactSubscription) {

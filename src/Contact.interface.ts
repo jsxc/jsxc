@@ -6,6 +6,8 @@ import ChatWindowController from './ChatWindowController'
 import Transcript from './Transcript'
 import Avatar from './Avatar'
 import ChatWindow from '@ui/ChatWindow';
+import ContactProvider from './ContactProvider';
+import Account from './Account';
 
 export enum ContactType {
    CHAT = 'chat',
@@ -26,6 +28,8 @@ export interface IContact {
    getChatWindow(): ChatWindow;
 
    getChatWindowController(): ChatWindowController;
+
+   getAccount(): Account;
 
    addSystemMessage(messageString: string): IMessage;
 
@@ -60,7 +64,11 @@ export interface IContact {
 
    getNumberOfUnreadMessages(): number;
 
+   hasName(): boolean;
+
    getName(): string;
+
+   getProviderId(): string;
 
    getAvatar(): Promise<Avatar>;
 
@@ -83,6 +91,8 @@ export interface IContact {
    setStatus(status: string);
 
    setName(name: string);
+
+   setProvider(provider: ContactProvider);
 
    setSubscription(subscription: ContactSubscription);
 

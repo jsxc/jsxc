@@ -7,7 +7,6 @@ import JID from '../../JID'
 let contactTemplate = require('../../../template/contact.hbs');
 
 let dialog: Dialog;
-let contact: Contact;
 
 export default function(username?: string) {
    username = (typeof username === 'string') ? username : undefined;
@@ -88,8 +87,11 @@ function onSubmit(ev) {
    }
 
    let jid = new JID(username);
+   let contact = new Contact(account, jid, alias);
 
-   account.getConnection().getRosterService().addContact(jid, alias);
+   account.getContactManager().add(contact);
+
+   //@TODO show spinner
 
    dialog.close();
 }

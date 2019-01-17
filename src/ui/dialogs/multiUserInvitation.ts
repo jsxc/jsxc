@@ -26,8 +26,7 @@ export default function(type: 'direct' | 'mediated', from: string, room: string,
       let multiUserContact = <MultiUserContact> account.getContact(roomJid);
 
       if (!multiUserContact) {
-         multiUserContact = account.addMultiUserContact(roomJid);
-         Roster.get().add(multiUserContact);
+         multiUserContact = new MultiUserContact(account, roomJid);
       } else if (multiUserContact.getType() !== 'groupchat') {
          Log.warn('Got normal contact. Abort.');
          return;

@@ -9,7 +9,7 @@ import XMPPJingleHandler from './JingleHandler'
 import Client from '../../Client'
 
 export default class XMPPConnection extends AbstractConnection implements IConnection {
-   private handler;
+   private handler: XMPPHandler;
 
    constructor(account: Account, protected connection) {
       super(account);

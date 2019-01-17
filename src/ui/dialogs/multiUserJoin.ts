@@ -7,6 +7,7 @@ import Roster from '../../ui/Roster'
 import Translation from '../../util/Translation'
 import Log from '../../util/Log'
 import Account from '@src/Account';
+import MultiUserContact from '@src/MultiUserContact';
 
 let multiUserJoinTemplate = require('../../../template/multiUserJoin.hbs');
 
@@ -314,14 +315,14 @@ class MultiUserJoinDialog {
       let password = this.passwordInputElement.val() || undefined;
       let subject = this.dom.find('input[name="room-subject"]').val() || undefined;
 
-      let multiUserContact = this.account.addMultiUserContact(jid, name);
+      let multiUserContact = new MultiUserContact(this.account, jid, name);
       multiUserContact.setNickname(nickname);
       multiUserContact.setBookmark(bookmark);
       multiUserContact.setAutoJoin(autojoin);
       multiUserContact.setPassword(password);
       multiUserContact.setSubscription(subject);
 
-      Roster.get().add(multiUserContact);
+      this.account.getContactManager().add(multiUserContact);
 
       multiUserContact.join();
       multiUserContact.getChatWindowController().openProminently();

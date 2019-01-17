@@ -55,7 +55,9 @@ export default class RosterItem {
             bid_jid: this.contact.getJid().bare,
          });
          confirmDialog(questionString).getPromise().then((dialog: Dialog) => {
-            contact.delete();
+            contact.getAccount().getContactManager().delete(contact);
+
+            //@TODO show spinner
 
             dialog.close();
          }).catch(() => {

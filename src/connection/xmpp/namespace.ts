@@ -17,6 +17,6 @@ export function get(name: string) {
    return value;
 }
 
-export function getFilter(name: string) {
-   return '[xmlns="' + get(name) + '"]';
+export function getFilter(name: string, tagName: string = '') {
+   return tagName + '[xmlns="' + get(name) + '"]';
 }
