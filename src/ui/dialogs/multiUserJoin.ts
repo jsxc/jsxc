@@ -310,15 +310,15 @@ class MultiUserJoinDialog {
       let jid = new JID(this.dom.find('input[name="room-jid"]').val());
       let name = this.dom.find('input[name="room-name"]').val() || undefined;
       let nickname = this.nicknameInputElement.val() || this.defaultNickname;
-      let bookmark = this.bookmarkInputElement.prop('checked');
-      let autojoin = this.autoJoinInputElement.prop('checked');
+      // let bookmark = this.bookmarkInputElement.prop('checked');
+      // let autojoin = this.autoJoinInputElement.prop('checked');
       let password = this.passwordInputElement.val() || undefined;
       let subject = this.dom.find('input[name="room-subject"]').val() || undefined;
 
       let multiUserContact = new MultiUserContact(this.account, jid, name);
       multiUserContact.setNickname(nickname);
-      multiUserContact.setBookmark(bookmark);
-      multiUserContact.setAutoJoin(autojoin);
+      multiUserContact.setBookmark(true);
+      multiUserContact.setAutoJoin(true);
       multiUserContact.setPassword(password);
       multiUserContact.setSubscription(subject);
 

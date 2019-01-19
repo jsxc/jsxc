@@ -53,6 +53,7 @@ abstract class AbstractConnection {
    }
 
    public getPubSubService = (): PubSubService => {
+      //@TODO connect? supported?
       return this.getService('pubsub', PubSubService);
    }
 

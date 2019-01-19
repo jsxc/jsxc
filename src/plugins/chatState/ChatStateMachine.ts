@@ -23,6 +23,8 @@ export default class ChatStateMachine {
 
       this.addInputHandler();
       this.registerHook(this.stateChange);
+
+      //@REVIEW is this also supported by MUC?
    }
 
    private addInputHandler() {

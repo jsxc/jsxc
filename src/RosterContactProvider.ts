@@ -5,10 +5,11 @@ import JID from './JID';
 import Account from './Account';
 import Contact from './Contact';
 import { IJID } from './JID.interface';
+import ContactManager from './ContactManager';
 
 export default class RosterContactProvider extends ContactProvider {
-   constructor(private account: Account) {
-      super();
+   constructor(contactManager: ContactManager, private account: Account) {
+      super(contactManager);
 
       account.getConnection().registerHandler(stanza => {
          this.processUpdateStanza(stanza);
@@ -193,14 +194,14 @@ export default class RosterContactProvider extends ContactProvider {
       }
 
       if (subscription === SUBSCRIPTION.REMOVE) {
-         account.getContactManager().deleteFromCache(contact.getId());
+         this.contactManager.deleteFromCache(contact.getId());
 
          contact.delete();
       } else {
          contact.setName(name);
          contact.setSubscription(<SUBSCRIPTION> subscription);
 
-         account.getContactManager().addToCache(contact);
+         this.contactManager.addToCache(contact);
       }
 
       if (subscription === SUBSCRIPTION.FROM || subscription === SUBSCRIPTION.BOTH) {

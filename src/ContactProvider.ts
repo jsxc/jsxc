@@ -1,5 +1,6 @@
 import { IContact } from './Contact.interface';
 import { IJID } from './JID.interface';
+import ContactManager from './ContactManager';
 
 export default abstract class ContactProvider {
    public abstract getUid(): string
@@ -12,4 +13,8 @@ export default abstract class ContactProvider {
    public abstract createContact(id: string): IContact
 
    public abstract deleteContact(jid: IJID): Promise<void>
+
+   constructor(protected contactManager: ContactManager) {
+
+   }
 }

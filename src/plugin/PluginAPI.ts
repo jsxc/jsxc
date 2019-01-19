@@ -14,6 +14,7 @@ import ContactProvider from '@src/ContactProvider';
 import { IContact } from '@src/Contact.interface';
 import { IJID } from '@src/JID.interface';
 import MultiUserContact from '@src/MultiUserContact';
+import ContactManager from '@src/ContactManager';
 
 export default class PluginAPI implements IPluginAPI {
    private storage;
@@ -137,7 +138,7 @@ export default class PluginAPI implements IPluginAPI {
       this.account.getContactManager().registerContactProvider(source);
    }
 
-   public addContact(contact: IContact): Promise<void> {
-      return this.account.getContactManager().add(contact);
+   public getContactManager(): ContactManager {
+      return this.account.getContactManager();
    }
 }

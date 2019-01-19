@@ -6,6 +6,8 @@ import { Avatar } from '../Avatar.interface'
 import { DiscoInfoRepository } from '../DiscoInfoRepository.interface'
 import { ILog } from '../util/Log.interface'
 import ChatWindow from '@ui/ChatWindow';
+import ContactManager from '@src/ContactManager';
+import ContactProvider from '@src/ContactProvider';
 
 export interface API {
 
@@ -51,4 +53,8 @@ export interface API {
    getConnectionCreationDate(): Date
 
    registerChatWindowInitializedHook(hook: (chatWindow: ChatWindow) => void)
+
+   registerContactProvider(source: ContactProvider)
+
+   getContactManager(): ContactManager
 }

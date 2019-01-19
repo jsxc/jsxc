@@ -18,7 +18,7 @@ export default function(type: 'direct' | 'mediated', from: string, room: string,
 
    let dialog = new Dialog(content);
    let dom = dialog.open();
-   let account = Client.getAccountManager().getAccount();
+   let account = Client.getAccountManager().getAccount(); //@TODO multi account support
 
    dom.find('form').on('submit', (ev) => {
       ev.preventDefault();
@@ -27,6 +27,9 @@ export default function(type: 'direct' | 'mediated', from: string, room: string,
 
       if (!multiUserContact) {
          multiUserContact = new MultiUserContact(account, roomJid);
+         multiUserContact.setAutoJoin(true);
+
+         //@TODO add to roster
       } else if (multiUserContact.getType() !== 'groupchat') {
          Log.warn('Got normal contact. Abort.');
          return;

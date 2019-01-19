@@ -154,6 +154,7 @@ export default class ContactManager {
       return provider.deleteContact(contact.getJid());
    }
 
+   //@REVIEW id could also be jid
    public deleteFromCache(id: string) {
       let contactIds = Object.keys(this.contacts);
 
