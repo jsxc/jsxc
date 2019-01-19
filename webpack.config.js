@@ -169,7 +169,12 @@ let config = {
       },
       watchOptions: {
          aggregateTimeout: 1300,
-         ignored: "/dist/"
+         ignored: [
+            path.resolve(__dirname, 'dist'),
+            path.resolve(__dirname, 'node_modules'),
+            path.resolve(__dirname, '.git'),
+            '**/*.swp',
+         ]
       }
    },
 };
