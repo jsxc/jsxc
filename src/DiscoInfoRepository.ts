@@ -7,6 +7,7 @@ import Log from './util/Log'
 import Client from './Client'
 import Form from './connection/Form'
 import { DiscoInfoRepository } from './DiscoInfoRepository.interface'
+import { IJID } from './JID.interface';
 
 export default class implements DiscoInfoRepository {
    private jidIndex: PersistentMap;
@@ -17,12 +18,12 @@ export default class implements DiscoInfoRepository {
       this.serverJidIndex = new PersistentMap(Client.getStorage(), 'capabilities');
    }
 
-   public addRelation(jid: JID, version: string)
-   public addRelation(jid: JID, discoInfo: DiscoInfo)
-   public addRelation(jid, value) {
+   public addRelation(jid: IJID, version: string)
+   public addRelation(jid: IJID, discoInfo: DiscoInfo)
+   public addRelation(jid: IJID, value) {
       let index = jid.isServer() ? this.serverJidIndex : this.jidIndex;
 
-      if (jid.isBare() && !jid.isServer) {
+      if (jid.isBare() && !jid.isServer()) {
          Log.warn('We can only add relations for full jids.')
       } else if (value instanceof DiscoInfo) {
          index.set(jid.full, value.getCapsVersion());
@@ -31,7 +32,7 @@ export default class implements DiscoInfoRepository {
       }
    }
 
-   public getDiscoInfo(jid: JID) {
+   public getDiscoInfo(jid: IJID) {
       let version = this.jidIndex.get(jid.full);
 
       return new DiscoInfo(version);
@@ -67,8 +68,8 @@ export default class implements DiscoInfoRepository {
       });
    }
 
-   public hasFeature(jid: JID, features: string[]): Promise<boolean>
-   public hasFeature(jid: JID, feature: string): Promise<boolean>
+   public hasFeature(jid: IJID, features: string[]): Promise<boolean>
+   public hasFeature(jid: IJID, feature: string): Promise<boolean>
    public hasFeature(discoInfo: DiscoInfo, features: string[]): Promise<boolean>
    public hasFeature(discoInfo: DiscoInfo, feature: string): Promise<boolean>
    public hasFeature() {
@@ -94,7 +95,7 @@ export default class implements DiscoInfoRepository {
       })
    }
 
-   public getCapabilities(jid: JID): Promise<DiscoInfo | void> {
+   public getCapabilities(jid: IJID): Promise<DiscoInfo | void> {
       let jidIndex = this.jidIndex;
       let serverJidIndex = this.serverJidIndex;
 
@@ -128,7 +129,7 @@ export default class implements DiscoInfoRepository {
       }
    }
 
-   public requestDiscoInfo(jid: JID, node?: string) {
+   public requestDiscoInfo(jid: IJID, node?: string) {
       let connection = this.account.getConnection();
 
       //@REVIEW why does the request fail if we send a node attribute?
