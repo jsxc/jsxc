@@ -1,5 +1,6 @@
 import Log from './util/Log'
 import IStorage from './Storage.interface'
+import Options from './Options'
 
 const PREFIX = 'jsxc2';
 
@@ -7,18 +8,18 @@ const SEP = ':';
 
 const IGNORE_KEY = ['rid'];
 
-const BACKEND = localStorage;
-
 export default class Storage implements IStorage {
    public static storageNotConform: boolean = false;
    public static tested: boolean = false;
 
    private hooks: any = {};
 
+   private static backend;
+
    public static toSNC: number;
 
    public static clear(name?: string) {
-      Storage.getKeysWithPrefix(name).forEach(key => BACKEND.removeItem(key));
+      Storage.getKeysWithPrefix(name).forEach(key => Storage.backend.removeItem(key));
    }
 
    public static getKeysWithPrefix(name?: string): string[] {
@@ -34,8 +35,8 @@ export default class Storage implements IStorage {
 
       let keys = [];
 
-      for (let key in BACKEND) {
-         if (!BACKEND.hasOwnProperty(key)) {
+      for (let key in Storage.backend) {
+         if (!Storage.backend.hasOwnProperty(key)) {
             continue;
          }
 
@@ -48,6 +49,10 @@ export default class Storage implements IStorage {
    }
 
    constructor(private name: string = null) {
+      if (!Storage.backend) {
+         Storage.backend = Options.getDefault('storage');
+      }
+
       if (!Storage.tested) {
          Storage.tested = true;
 
@@ -90,7 +95,7 @@ export default class Storage implements IStorage {
 
       let cleanup = function() {
          window.removeEventListener('storage', listenerFunction, false);
-         BACKEND.removeItem(key)
+         Storage.backend.removeItem(key)
       }
 
       window.addEventListener('storage', listenerFunction, false);
@@ -99,7 +104,7 @@ export default class Storage implements IStorage {
          cleanup();
       }, 20);
 
-      BACKEND.setItem(key, randomNumber);
+      Storage.backend.setItem(key, randomNumber);
    }
 
    public getPrefix(): string {
@@ -113,7 +118,7 @@ export default class Storage implements IStorage {
    }
 
    public getBackend() {
-      return BACKEND;
+      return Storage.backend;
    }
 
    public setItem(type: string, key: string, value: any): void;
@@ -144,9 +149,9 @@ export default class Storage implements IStorage {
          }
       }
 
-      let oldValue = BACKEND.getItem(this.getPrefix() + key);
+      let oldValue = Storage.backend.getItem(this.getPrefix() + key);
 
-      BACKEND.setItem(this.getPrefix() + key, value);
+      Storage.backend.setItem(this.getPrefix() + key, value);
 
       if (!Storage.storageNotConform && oldValue !== value) {
          this.onStorageEvent({
@@ -170,7 +175,7 @@ export default class Storage implements IStorage {
 
       key = this.getPrefix() + key;
 
-      let value = BACKEND.getItem(key);
+      let value = Storage.backend.getItem(key);
 
       return this.parseValue(value);
    }
@@ -186,7 +191,7 @@ export default class Storage implements IStorage {
          key = arguments[0] + SEP + arguments[1];
       }
 
-      BACKEND.removeItem(this.getPrefix() + key);
+      Storage.backend.removeItem(this.getPrefix() + key);
    }
 
    public updateItem(type, key, variable, value): void;
