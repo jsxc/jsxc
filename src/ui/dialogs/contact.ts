@@ -23,7 +23,7 @@ export default function(username?: string) {
    dom.find('form').submit(onSubmit);
 }
 
-function onUsernameKeyUp() {
+async function onUsernameKeyUp() {
    let getUsers = Client.getOption('getUsers');
 
    if (typeof getUsers !== 'function') {
@@ -33,22 +33,27 @@ function onUsernameKeyUp() {
    let val = $(this).val();
    $('#jsxc-userlist').empty();
 
-   if (val !== '') {
-      getUsers.call(this, val, function(list) {
-         $('#jsxc-userlist').empty();
+   if (val === '') {
+      return;
+   }
 
-         $.each(list || {}, function(uid, displayname) {
-            let option = $('<option>');
-            option.attr('data-username', uid.toString());
-            option.attr('data-alias', displayname);
+   //@TODO delay execution
+   let list = await getUsers(val);
 
-            option.attr('value', uid.toString()).appendTo('#jsxc-userlist');
+   $('#jsxc-userlist').empty();
 
-            if (uid !== displayname) {
-               option.clone().attr('value', displayname).appendTo('#jsxc-userlist');
-            }
-         });
-      });
+   for (let uid in list) {
+      let displayName = list[uid];
+
+      let option = $('<option>');
+      option.attr('data-username', uid.toString());
+      option.attr('data-alias', displayName);
+
+      option.attr('value', uid.toString()).appendTo('#jsxc-userlist');
+
+      if (uid !== displayName) {
+         option.clone().attr('value', displayName).appendTo('#jsxc-userlist');
+      }
    }
 }
 

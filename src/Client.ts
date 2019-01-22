@@ -22,20 +22,24 @@ export default class Client {
 
    private static initialized = false;
 
+   private static options: Options;
+
    public static init(options?): number {
       if (Client.initialized) {
+         Log.warn('JSXC was already initialized');
+
          return;
       }
 
       Client.initialized = true;
 
+      if (typeof options === 'object' && options !== null) {
+         Options.overwriteDefaults(options);
+      }
+
       PageVisibility.init();
 
       let storage = Client.getStorage();
-
-      if (typeof options === 'object' && options !== null) {
-         Options.get().overwriteDefaults(options);
-      }
 
       Client.accountManager = new AccountManager(storage);
       Client.presenceController = new PresenceController(storage, () => Client.accountManager.getAccounts());
@@ -105,7 +109,11 @@ export default class Client {
    }
 
    public static getOptions(): Options {
-      return Options.get();
+      if (!Client.options) {
+         Client.options = new Options(Client.getStorage());
+      }
+
+      return Client.options;
    }
 
    public static getOption(key: string) {

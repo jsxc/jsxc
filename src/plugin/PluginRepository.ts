@@ -25,8 +25,6 @@ export default class PluginRepository {
          throw new Error(`There is already a plugin with the name ${name}.`)
       }
 
-      Log.debug(`Add ${name} to plugin repository`);
-
       PluginRepository.registeredPlugins.push(Plugin);
    }
 

@@ -40,11 +40,11 @@ class ClientSection extends Section {
       //@REVIEW more generic? See PluginSection.
       let checkboxElement = $('<input>');
       checkboxElement.attr('type', 'checkbox');
-      checkboxElement.prop('checked', Client.getOption('on-login'));
+      checkboxElement.prop('checked', Client.getOption('onLogin'));
       checkboxElement.on('change', (ev) => {
          let isEnabled = $(ev.target).prop('checked');
 
-         Client.setOption('on-login', isEnabled);
+         Client.setOption('onLogin', isEnabled);
       });
 
       //@TODO only show if form watcher was used

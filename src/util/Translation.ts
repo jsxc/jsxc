@@ -1,6 +1,6 @@
 import i18next from 'i18next'
 import Log from '@util/Log';
-import Options from '../Options'
+import Client from '@src/Client';
 
 let en = require('../../locales/en.json');
 let de = require('../../locales/de.json');
@@ -16,7 +16,7 @@ function detectLanguage() {
    } else if (navigator.language) {
       lang = navigator.language;
    } else {
-      lang = Options.get().get('defaultLang');
+      lang = Client.getOption('defaultLang');
    }
 
    return lang;

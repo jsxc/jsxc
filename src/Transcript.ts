@@ -3,8 +3,8 @@ import { IMessage as IMessage, DIRECTION } from './Message.interface'
 import Contact from './Contact'
 import Storage from './Storage'
 import PersistentMap from './util/PersistentMap'
-import Options from './Options';
 import Log from '@util/Log';
+import Client from './Client';
 
 export default class Transcript {
    private properties: PersistentMap;
@@ -66,7 +66,7 @@ export default class Transcript {
    }
 
    private deleteLastMessages() {
-      let allowedNumberOfMessages = parseInt(Options.get().get('numberOfMessages'), 10);
+      let allowedNumberOfMessages = parseInt(Client.getOption('numberOfMessages'), 10);
       let numberOfMessages = 0;
 
       if (allowedNumberOfMessages <= 0 || isNaN(allowedNumberOfMessages)) {

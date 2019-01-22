@@ -9,8 +9,6 @@ import Menu from './util/Menu'
 import { IContact } from '../Contact.interface'
 import WindowList from './ChatWindowList'
 import Client from '../Client'
-import Storage from '../Storage'
-import PersistentMap from '../util/PersistentMap'
 import Translation from '../util/Translation'
 import { Notice, TYPE } from '../Notice'
 import { Presence } from '../connection/AbstractConnection'
@@ -19,12 +17,15 @@ import ClientAvatar from '../ClientAvatar'
 
 let rosterTemplate = require('../../template/roster.hbs')
 
+const APPEND_KEY = 'rosterAppend';
+const VISIBILITY_KEY = 'rosterVisibility';
+const HELP_KEY = 'onlineHelp';
+const HIDE_OFFLINE_KEY = 'hideOfflineContacts';
+
 export default class Roster {
 
    private element: JQuery;
    private contactList: JQuery;
-   private storage: Storage;
-   private options: PersistentMap;
 
    private static instance: Roster;
    private static hidden: boolean;
@@ -59,21 +60,18 @@ export default class Roster {
 
    private constructor() {
       let template = rosterTemplate({
-         onlineHelpUrl: Client.getOption('onlineHelp')
+         onlineHelpUrl: Client.getOption(HELP_KEY)
       });
       this.element = $(template);
       if (Roster.hidden) {
          this.hide();
       }
-      this.element.appendTo(Client.getOption('rosterAppend') + ':first');
+      this.element.appendTo(Client.getOption(APPEND_KEY) + ':first');
 
       //make sure css empty selector works
       $('.jsxc-js-notice-menu .jsxc-menu__button').text('');
 
       this.contactList = this.element.find('.jsxc-contact-list');
-
-      this.storage = Client.getStorage();
-      this.options = new PersistentMap(this.storage, 'roster');
 
       this.addMainMenuEntries();
       this.registerPresenceHandler();
@@ -212,7 +210,7 @@ export default class Roster {
    }
 
    public registerHook(property: string, func: (newValue: any, oldValue: any) => void) {
-      this.options.registerHook(property, func);
+      Client.getOptions().registerHook(property, func);
    }
 
    public addNotice(manager: NoticeManager, notice: Notice) {
@@ -371,9 +369,6 @@ export default class Roster {
    }
 
    private registerPresenceHandler() {
-      let self = this;
-      let options = this.options;
-
       this.element.find('.jsxc-js-presence-menu li').click(function() {
          let presenceString = <string> $(this).data('presence');
          let oldPresence = Client.getPresenceController().getTargetPresence() || Presence.offline;
@@ -398,9 +393,9 @@ export default class Roster {
    }
 
    private toggleOffline = (ev) => {
-      let hideOffline = !this.options.get('hideOffline');
+      let hideOffline = !Client.getOption(HIDE_OFFLINE_KEY);
 
-      this.options.set('hideOffline', hideOffline);
+      Client.setOption(HIDE_OFFLINE_KEY, hideOffline);
    }
 
    private hideOffline(yes: boolean) {
@@ -427,11 +422,11 @@ export default class Roster {
    }
 
    public toggle = () => {
-      let state = this.options.get('visibility');
+      let state = Client.getOption(VISIBILITY_KEY);
 
       state = (state === CONST.HIDDEN) ? CONST.SHOWN : CONST.HIDDEN;
 
-      this.options.set('visibility', state);
+      Client.setOption(VISIBILITY_KEY, state);
    }
 
    private setVisibility(state: string) {
@@ -444,17 +439,15 @@ export default class Roster {
    }
 
    private initOptions() {
-      let hideOffline = this.options.get('hideOffline');
-      hideOffline = (typeof hideOffline === 'boolean') ? hideOffline : Client.getOption('hideOffline');
+      let hideOffline = Client.getOption(HIDE_OFFLINE_KEY);
       this.hideOffline(hideOffline);
-      this.options.registerHook('hideOffline', (hideOffline) => {
+      Client.getOptions().registerHook(HIDE_OFFLINE_KEY, (hideOffline) => {
          this.hideOffline(hideOffline);
       });
 
-      //@TODO || (Client.getOption('loginForm').startMinimized ? CONST.HIDDEN : CONST.SHOWN
-      let rosterState = this.options.get('visibility') || CONST.SHOWN;
-      this.setVisibility(rosterState);
-      this.options.registerHook('visibility', (visibility) => {
+      let visibility = Client.getOption(VISIBILITY_KEY);
+      this.setVisibility([CONST.HIDDEN, CONST.SHOWN].indexOf(visibility) > -1 ? visibility : CONST.SHOWN);
+      Client.getOptions().registerHook(VISIBILITY_KEY, (visibility) => {
          this.setVisibility(visibility);
       });
 

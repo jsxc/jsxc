@@ -74,7 +74,7 @@ export default class Account {
          throw new Error('Unsupported number of arguments');
       }
 
-      this.options = Options.get();
+      this.options = new Options(this.getStorage());
 
       this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3]);
       this.connection = new StorageConnection(this);
@@ -95,12 +95,16 @@ export default class Account {
       this.getContactManager().restoreCache();
    }
 
-   public getOption(key) {
-      return this.options.get(key, this);
+   public getOptions(): Options {
+      return this.options;
    }
 
-   public setOption(key, value) {
-      this.options.set(key, value, this);
+   public getOption(key: string) {
+      return this.options.get(key);
+   }
+
+   public setOption(key: string, value: any) {
+      this.options.set(key, value);
    }
 
    public connect = (pause: boolean = false): Promise<void> => {
