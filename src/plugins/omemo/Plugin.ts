@@ -2,7 +2,7 @@ import { API as PluginAPI } from '../../plugin/PluginAPI.interface'
 import { EncryptionPlugin } from '../../plugin/EncryptionPlugin'
 import { EncryptionState } from '../../plugin/AbstractPlugin'
 import { IMessage } from '../../Message.interface'
-import { IContact } from '../../Contact.interface'
+import { IContact, ContactType } from '../../Contact.interface'
 import Omemo from './lib/Omemo'
 import ChatWindow from '../../ui/ChatWindow'
 import { NS_BASE, NS_DEVICELIST } from './util/Const'
@@ -33,6 +33,10 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor);
 
       pluginAPI.registerChatWindowInitializedHook((chatWindow: ChatWindow) => {
+         if (chatWindow.getContact().getType() !== ContactType.CHAT) {
+            return;
+         }
+
          chatWindow.addMenuEntry('omemo-devices', 'OMEMO devices', () => this.openDeviceDialog(chatWindow));
       });
    }
