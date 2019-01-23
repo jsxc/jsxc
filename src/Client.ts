@@ -10,11 +10,9 @@ import ChatWindowList from './ui/ChatWindowList';
 import AccountManager from './AccountManager';
 
 export default class Client {
-   private static storage;
+   private static storage: Storage;
 
-   private static accounts = {};
-
-   private static noticeManager;
+   private static noticeManager: NoticeManager;
 
    private static presenceController: PresenceController;
 

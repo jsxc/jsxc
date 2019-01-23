@@ -2,9 +2,30 @@ import Storage from './Storage'
 import SortedPersistentMap from './util/SortedPersistentMap'
 import Roster from './ui/Roster'
 import { NoticeData, Notice } from './Notice'
+import Client from './Client';
+
+(<any> window).removeNotice = function(notice) {
+   Client.getNoticeManager().removeNotice(notice);
+};
+
+(<any> window).addNotice = function(title, description, fnName) {
+   return Client.getNoticeManager().addNotice({
+      title,
+      description,
+      fnName,
+   });
+}
 
 export class NoticeManager {
-   private notices;
+   private notices: SortedPersistentMap;
+
+   public static removeAll() {
+      Client.getNoticeManager().removeAll();
+
+      Client.getAccountManager().getAccounts().forEach((account) => {
+         account.getNoticeManager().removeAll();
+      });
+   }
 
    constructor(private storage: Storage) {
       this.notices = new SortedPersistentMap(this.storage, 'notices');
@@ -36,6 +57,8 @@ export class NoticeManager {
       }
 
       this.notices.push(notice);
+
+      return notice;
    }
 
    public removeNotice(notice: Notice) {

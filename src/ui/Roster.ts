@@ -14,6 +14,7 @@ import { Notice, TYPE } from '../Notice'
 import { Presence } from '../connection/AbstractConnection'
 import { NoticeManager } from '../NoticeManager'
 import ClientAvatar from '../ClientAvatar'
+import confirmDialog from './dialogs/confirm'
 
 let rosterTemplate = require('../../template/roster.hbs')
 
@@ -154,8 +155,6 @@ export default class Roster {
       }
 
       rosterItemElement.remove();
-
-      //@TODO check if we are still connected and if we have to display an "your roster is empty" warning
    }
 
    public clearStatus() {
@@ -234,7 +233,25 @@ export default class Roster {
       noticeElement.attr('data-manager-id', manager.getId());
       noticeListElement.append(noticeElement);
 
-      $('.jsxc-js-notice-menu .jsxc-menu__button').text(noticeListElement.find('li').length);
+      let numberOfNotices = noticeListElement.find('li').not('.jsxc-js-delete-all').length;
+      $('.jsxc-js-notice-menu .jsxc-menu__button').text(numberOfNotices);
+
+      if (numberOfNotices > 2 && noticeListElement.find('.jsxc-js-delete-all').length === 0) {
+         let deleteAllElement = $('<li>');
+         deleteAllElement.addClass('jsxc-js-delete-all jsxc-menu__item--danger jsxc-icon--delete');
+         deleteAllElement.text(Translation.t('Close_all'));
+         deleteAllElement.prependTo(noticeListElement);
+
+         deleteAllElement.click((ev) => {
+            ev.stopPropagation();
+            ev.preventDefault();
+
+            let dialog = confirmDialog(Translation.t('Do_you_really_want_to_dismiss_all_notices'));
+            dialog.getPromise().then(() => {
+               NoticeManager.removeAll();
+            }).catch(() => {});
+         })
+      }
    }
 
    public removeNotice(manager: NoticeManager, noticeId: string) {
@@ -246,8 +263,12 @@ export default class Roster {
 
       noticeElement.remove();
 
-      let numberOfNotices = $('.jsxc-js-notice-menu li').length;
+      let numberOfNotices = $('.jsxc-js-notice-menu li').not('.jsxc-js-delete-all').length;
       $('.jsxc-js-notice-menu .jsxc-menu__button').text(numberOfNotices > 0 ? numberOfNotices : '');
+
+      if (numberOfNotices < 3) {
+         $('.jsxc-js-notice-menu .jsxc-js-delete-all').remove();
+      }
    }
 
    public addMenuEntry(options: { id: string, handler: (ev) => void, label: string | JQuery<HTMLElement>, icon?: string, offlineAvailable?: boolean }) {
@@ -407,6 +428,7 @@ export default class Roster {
    }
 
    private muteNotification = () => {
+      //@TODO mute notification
       // if (jsxc.storage.getUserItem('presence') === 'dnd') {
       //    return;
       // }
