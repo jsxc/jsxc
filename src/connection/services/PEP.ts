@@ -23,14 +23,16 @@ export default class PEP extends AbstractService {
       }
    }
 
-   public publish(node: string, element: Element): Promise<Element> {
+   public publish(node: string, element: Element, id?: string): Promise<Element> {
       let iqStanza = $iq({
          type: 'set',
       }).c('pubsub', {
          xmlns: 'http://jabber.org/protocol/pubsub'
       }).c('publish', {
          node
-      }).c('item').cnode(element);
+      }).c('item', {
+         id
+      }).cnode(element);
 
       return this.sendIQ(iqStanza);
    }

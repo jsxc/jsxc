@@ -116,7 +116,7 @@ export default class BundleManager {
    public async publishBundle(bundle: Bundle): Promise<void> {
       let node = NS_BUNDLES + this.store.getLocalDeviceId();
 
-      await this.pepService.publish(node, bundle.toXML().tree());
+      await this.pepService.publish(node, bundle.toXML().tree(), 'current');
       this.store.setPublished(true);
    }
 
@@ -134,6 +134,6 @@ export default class BundleManager {
          xmlList.c('device', { id }).up();
       }
 
-      return this.pepService.publish(NS_DEVICELIST, xmlList.tree());
+      return this.pepService.publish(NS_DEVICELIST, xmlList.tree(), 'current');
    }
 }
