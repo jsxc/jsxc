@@ -100,7 +100,6 @@ export default class BookmarkProvider extends ContactProvider {
    }
 
    public async load(): Promise<IContact[]> {
-      console.log('#### BookmarkProvider.load')
       let bookmarks = await this.getReducedBookmarksFromServices();
       let contacts = [];
 
