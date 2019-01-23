@@ -39,7 +39,7 @@ export default class PluginRepository {
          }
 
          try {
-            this.instanciatePlugin(Plugin);
+            this.instantiatePlugin(Plugin);
          } catch (err) {
             Log.warn(err);
          }
@@ -74,7 +74,7 @@ export default class PluginRepository {
       return !!this.encryptionPlugins;
    }
 
-   private instanciatePlugin(Plugin: IPlugin) {
+   private instantiatePlugin(Plugin: IPlugin) {
       let plugin;
 
       Log.debug('Instanciate ' + Plugin.getName() + ' for account ' + this.account.getUid())
