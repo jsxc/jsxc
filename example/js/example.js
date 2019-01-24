@@ -1,4 +1,4 @@
-jsxc.init();
+let jsxc = new JSXC();
 
 subscribeToInstantLogin();
 watchForm();

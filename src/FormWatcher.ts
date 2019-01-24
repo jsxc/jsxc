@@ -1,5 +1,5 @@
 import Log from './util/Log'
-import * as jsxc from './api/v1'
+import * as jsxc from './api/v1/index'
 
 export interface Settings {
    disabled?: boolean,

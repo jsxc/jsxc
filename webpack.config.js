@@ -45,7 +45,7 @@ let config = {
       path: OUTPUT_PATH,
       publicPath: 'dist/',
       libraryTarget: 'var',
-      library: 'jsxc'
+      library: 'JSXC'
    },
    optimization: {
       splitChunks: {

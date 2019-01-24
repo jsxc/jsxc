@@ -1,10 +1,5 @@
 import './bootstrap/webpackPublicPath'
 import './bootstrap/plugins'
-import * as v1 from './api/v1'
+import JSXC from './api/'
 
-let defaultApi = {
-   ...v1,
-   version: __VERSION__,
-};
-
-export = defaultApi;
+export = JSXC
