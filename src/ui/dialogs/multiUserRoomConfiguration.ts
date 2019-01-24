@@ -6,6 +6,8 @@ import Log from '../../util/Log'
 
 let dialog: Dialog;
 
+export const CANCELED = 'canceled';
+
 export default function(contact: MultiUserContact) {
 
    //@TODO translate, maybe move to hbs
@@ -66,7 +68,7 @@ function showForm(form: Form, contact: MultiUserContact, connection) {
 
                dialog.close();
 
-               return 'canceled';
+               return CANCELED;
             });
 
          resolve(cancelRoomPromise);

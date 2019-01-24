@@ -75,11 +75,6 @@ export default class Form {
       if (items && items.length > 0) {
          this.checkItems();
       }
-
-      if (type === 'result') {
-         //@TODO why?
-         // throw 'I don\'t support forms of type result';
-      }
    }
 
    private checkItems() {

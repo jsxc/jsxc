@@ -2,7 +2,6 @@ import Dialog from '../Dialog'
 import MultiUserContact from '../../MultiUserContact'
 import JID from '../../JID'
 import Log from '../../util/Log'
-import Roster from '../Roster'
 import Client from '../../Client'
 
 let multiUserInvitation = require('../../../template/multiUserInvitation.hbs');
@@ -29,8 +28,8 @@ export default function(type: 'direct' | 'mediated', from: string, room: string,
          multiUserContact = new MultiUserContact(account, roomJid);
          multiUserContact.setAutoJoin(true);
 
-         //@TODO add to roster
-      } else if (multiUserContact.getType() !== 'groupchat') {
+         account.getContactManager().add(multiUserContact);
+      } else if (multiUserContact.getType() !== MultiUserContact.TYPE) {
          Log.warn('Got normal contact. Abort.');
          return;
       }

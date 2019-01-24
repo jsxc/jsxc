@@ -57,8 +57,6 @@ export default class CarbonsPlugin extends AbstractPlugin {
       let inited = sessionStorage.getItem('carbons', 'inited') || false;
 
       if (!inited) {
-         //@TODO enable carbons only if enabled by user
-
          this.enable().then(() => {
             sessionStorage.setItem('carbons', 'inited', true);
          });
