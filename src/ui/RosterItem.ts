@@ -103,12 +103,12 @@ export default class RosterItem {
 
          let message = this.contact.getTranscript().getMessage(firstMessageId);
 
-         this.element.find('.jsxc-bar__caption__secondary').text(message.getPlaintextMessage());
+         this.element.find('.jsxc-bar__caption__secondary').html(message.getPlaintextEmoticonMessage());
       });
 
       let message = this.contact.getTranscript().getFirstMessage();
       if (message) {
-         this.element.find('.jsxc-bar__caption__secondary').text(message.getPlaintextMessage());
+         this.element.find('.jsxc-bar__caption__secondary').html(message.getPlaintextEmoticonMessage());
       }
 
       let updateUnreadMessage = () => {

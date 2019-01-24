@@ -73,6 +73,8 @@ export interface IMessage {
 
    getEncryptedPlaintextMessage(): string
 
+   getPlaintextEmoticonMessage(): string
+
    getSender(): { name: string, jid?: JID }
 
    received();

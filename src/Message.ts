@@ -252,6 +252,15 @@ export default class Message implements Identifiable, IMessage {
       return `<p>${body}</p>`;
    }
 
+   public getPlaintextEmoticonMessage(): string {
+      let body = this.getPlaintextMessage();
+
+      body = Utils.escapeHTML(body);
+      body = Emoticons.toImage(body);
+
+      return body;
+   }
+
    public setErrorMessage(error: string) {
       return this.data.set('errorMessage', error);
    }
