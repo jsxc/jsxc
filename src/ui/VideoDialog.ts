@@ -199,10 +199,10 @@ export class VideoDialog {
       let msg = (reason && reason.condition ? (': ' + ('jingle_reason_' + reason.condition)) : '') + '.';
 
       if (session.call) {
-         msg = ('Call_terminated') + msg;
+         msg = (':checkered_flag: Call_terminated') + msg;
          this.postCallMessage(msg, session.sid);
       } else {
-         msg = ('Stream_terminated') + msg;
+         msg = (':checkered_flag: Stream_terminated') + msg;
          this.postScreenMessage(msg, session.sid);
       }
 

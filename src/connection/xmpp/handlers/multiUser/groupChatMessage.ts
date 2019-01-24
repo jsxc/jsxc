@@ -47,7 +47,7 @@ export default class extends AbstractHandler {
             subject: contact.getSubject()
          });
 
-         contact.addSystemMessage(translatedMessage);
+         contact.addSystemMessage(':page_with_curl: ' + translatedMessage);
 
          return this.PRESERVE_HANDLER;
       }

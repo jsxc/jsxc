@@ -53,7 +53,7 @@ export function startCall(contact: Contact, account: Account, type: 'video' | 'a
 
       videoDialog.addSession(session);
 
-      contact.addSystemMessage(Translation.t('Call_started'));
+      contact.addSystemMessage(':telephone_receiver: ' + Translation.t('Call_started'));
    }).catch(([msg, err]) => {
       contact.addSystemMessage(`${Translation.t('Media_failure')}: ${msg} (${err.name})`);
    });
