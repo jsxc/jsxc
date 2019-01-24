@@ -3,6 +3,7 @@ import MultiUserContact from '../../MultiUserContact'
 import Client from '../../Client'
 import Form from '../../connection/Form'
 import Log from '../../util/Log'
+import { IConnection } from '@connection/Connection.interface';
 
 let dialog: Dialog;
 
@@ -24,7 +25,7 @@ export default function(contact: MultiUserContact) {
       });
 }
 
-function showForm(form: Form, contact: MultiUserContact, connection) {
+function showForm(form: Form, contact: MultiUserContact, connection: IConnection) {
    let formElement = form.toHTML();
    //@TODO translate, maybe move to hbs
    let submitButton = $('<div class="form-group">\
@@ -45,7 +46,7 @@ function showForm(form: Form, contact: MultiUserContact, connection) {
          let form = Form.fromHTML(formElement.get(0));
 
          contact.setRoomConfiguration(form.toJSON());
-         let submitPromise = connection
+         let submitPromise = connection.getMUCService()
             .submitRoomConfiguration(contact.getJid(), form)
             .then((stanza) => {
                Log.debug('Room configuration submitted');
@@ -61,7 +62,7 @@ function showForm(form: Form, contact: MultiUserContact, connection) {
       formElement.find('.jsxc-js-close').click((ev) => {
          ev.preventDefault();
 
-         let cancelRoomPromise = connection
+         let cancelRoomPromise = connection.getMUCService()
             .cancelRoomConfiguration(contact.getJid())
             .then(() => {
                Log.debug('Room configuration canceled');
