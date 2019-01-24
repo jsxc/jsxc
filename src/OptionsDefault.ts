@@ -1,6 +1,9 @@
 import loginDialog from './ui/dialogs/loginBox'
 import { SHOWN } from './CONST';
 
+/* tslint:disable:no-unnecessary-initializer */
+// We need to initialize options with undefined, otherwise they will not be exported.
+
 /** name of container application (e.g. Nextcloud or SOGo) */
 export let appName = 'web applications';
 
@@ -23,13 +26,13 @@ export let hideOfflineContacts = false;
 export let onLogin = true;
 
 /** @TODO Returns permanent saved settings and overwrite default jsxc.options. (UNUSED) */
-export let loadOptions: (username: string, password: string) => {[key: string]: {[key: string]: any}};
+export let loadOptions: (username: string, password: string) => {[key: string]: {[key: string]: any}} = undefined;
 
 /** This function is called if an option gets changed. */
-export let onOptionChange: (id: string, key: string, value: any, exportId: () => any) => void;
+export let onOptionChange: (id: string, key: string, value: any, exportId: () => any) => void = undefined;
 
 /** Returns a list of usernames and aliases */
-export let getUsers: (search: string) => Promise<{[uid: string]: string}>;
+export let getUsers: (search: string) => Promise<{[uid: string]: string}> = undefined;
 
 /** @TODO Options for info in favicon (UNUSED) */
 export let favicon = {
@@ -110,6 +113,6 @@ export let connectionCallback: (jid: string, status: number, condition?: string)
 
 export let onUserRequestsToGoOnline: () => void = loginDialog;
 
-export let xmppBoshUrl: string;
+export let xmppBoshUrl: string = undefined;
 
 //@TODO logoutElement

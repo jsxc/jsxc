@@ -1,6 +1,6 @@
 import Log from './util/Log'
 import * as defaultOptions from './OptionsDefault'
-import Storage from './Storage';
+import IStorage from './Storage.interface';
 
 const KEY = 'options';
 
@@ -53,7 +53,7 @@ export default class Options {
       return Options.defaults[key];
    }
 
-   constructor(private storage: Storage) {
+   constructor(private storage: IStorage) {
 
    }
 
@@ -86,7 +86,7 @@ export default class Options {
    public registerHook(key: string, func: (newValue: any, oldValue?: any) => void) {
       this.storage.registerHook(KEY, (newData, oldData) => {
          let n = newData[key];
-         let o = typeof oldData[key] !== 'undefined' ? oldData[key] : Options.defaults[key];
+         let o = oldData && typeof oldData[key] !== 'undefined' ? oldData[key] : Options.defaults[key];
 
          if (n !== o) {
             func(n, o);
