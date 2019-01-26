@@ -2,13 +2,15 @@ import Account from './Account'
 import JID from './JID'
 import { IContact } from 'Contact.interface';
 import ChatWindow from '@ui/ChatWindow';
+import IStorage from './Storage.interface';
+import { OTalkJingleSession, OTalkEventNames, EndReason } from '@vendor/Jingle.interface';
 
 const ADOPTED = 'adopted';
 
 export default abstract class JingleAbstractSession {
    private adoptee: boolean = false;
 
-   protected storage;
+   protected storage: IStorage;
 
    protected peerJID: JID;
    protected peerContact: IContact;
@@ -18,7 +20,7 @@ export default abstract class JingleAbstractSession {
    public abstract onOnceIncoming();
    protected abstract onIncoming();
 
-   constructor(protected account: Account, protected session) {
+   constructor(protected account: Account, protected session: OTalkJingleSession) {
       this.storage = this.account.getStorage();
 
       this.peerJID = new JID(session.peerID);
@@ -31,7 +33,7 @@ export default abstract class JingleAbstractSession {
          }
       });
 
-      if (!this.session.initiator) {
+      if (!this.session.isInitiator) {
          this.onIncoming();
       }
    }
@@ -51,7 +53,19 @@ export default abstract class JingleAbstractSession {
       return this.peerContact;
    }
 
-   public on(eventName: string, handler) {
-      this.session.on(eventName, handler);
+   public on(eventName: OTalkEventNames, handler: (data: any) => void) {
+      this.session.on(eventName, (session, data) => handler(data));
+   }
+
+   public cancel(): void {
+      this.session.cancel();
+   }
+
+   public decline(): void {
+      this.session.decline();
+   }
+
+   public end(reason?: string | EndReason, silent?: boolean): void {
+      this.session.end(reason, silent);
    }
 }

@@ -4,54 +4,50 @@ import Overlay from './ui/Overlay'
 import * as getScreenMedia from 'getscreenmedia'
 
 export default class UserMedia {
-   public static request(um = ['video', 'audio']) {
+   public static async request(um = ['video', 'audio']): Promise<MediaStream> {
       let overlay = new Overlay();
       overlay.open();
 
-      let mediaPromise;
+      let stream: MediaStream;
 
-      if (um.indexOf('screen') > -1) {
-         mediaPromise = UserMedia.getScreenMedia();
-      } else {
-         mediaPromise = UserMedia
-            .filterUserMedia(um)
-            .then(UserMedia.getUserMedia);
+      try {
+         if (um.indexOf('screen') > -1) {
+            stream = await UserMedia.getScreenMedia();
+         } else {
+            stream = await UserMedia
+               .filterUserMedia(um)
+               .then(UserMedia.getUserMedia);
+         }
+      } catch (err) {
+         overlay.close();
+
+         throw UserMedia.onMediaFailure(err);
       }
 
-      return mediaPromise
-         .then(stream => {
-            overlay.close();
+      overlay.close();
 
-            return stream;
-         })
-         .catch(err => {
-            overlay.close();
-
-            return UserMedia.onMediaFailure(err);
-         });
+      return stream;
    }
 
-   private static filterUserMedia(userMedia: string[]) {
-      return navigator.mediaDevices.enumerateDevices()
-         .then((devices) => {
-            let availableDevices = devices.map(function(device) {
-               //@REVIEW MediaDeviceKind === string?
-               return <string> device.kind;
-            });
+   private static async filterUserMedia(userMedia: string[]): Promise<string[]> {
+      let devices = await navigator.mediaDevices.enumerateDevices()
+      let availableDevices = devices.map(function(device) {
+         //@REVIEW MediaDeviceKind === string?
+         return <string> device.kind;
+      });
 
-            userMedia = userMedia.filter(function(el) {
-               return availableDevices.indexOf(el) !== -1 || availableDevices.indexOf(el + 'input') !== -1;
-            });
+      userMedia = userMedia.filter(function(el) {
+         return availableDevices.indexOf(el) !== -1 || availableDevices.indexOf(el + 'input') !== -1;
+      });
 
-            if (userMedia.length === 0) {
-               throw new Error('No audio/video device available.');
-            }
+      if (userMedia.length === 0) {
+         throw new Error('No audio/video device available.');
+      }
 
-            return userMedia;
-         });
+      return userMedia;
    }
 
-   private static getScreenMedia() {
+   private static getScreenMedia(): Promise<MediaStream> {
       return new Promise((resolve, reject) => {
          getScreenMedia((error, stream) => {
             if (!error && stream) {
@@ -83,8 +79,8 @@ export default class UserMedia {
       }
    }
 
-   private static onMediaFailure(err: any = {}) {
-      let msg;
+   private static onMediaFailure(err: Error) {
+      let msg: string;
 
       switch (err.name) {
          case 'NotAllowedError':
@@ -104,6 +100,6 @@ export default class UserMedia {
 
       Log.debug('media failure: ' + err.name);
 
-      return Promise.reject([msg, err]);
+      return [msg, err];
    }
 }

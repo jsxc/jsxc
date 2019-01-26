@@ -5,6 +5,7 @@ import Form from './Form'
 import PEPService from './services/PEP'
 import PubSubService from './services/PubSub'
 import 'Strophe'
+import JingleHandler from './JingleHandler';
 
 export interface IConnection {
    registerHandler(handler: (stanza: string) => boolean, ns?: string, name?: string, type?: string, id?: string, from?: string);
@@ -27,7 +28,7 @@ export interface IConnection {
 
    getDiscoService(): DiscoService
 
-   getJingleHandler()
+   getJingleHandler(): JingleHandler
 
    getJID(): IJID
 

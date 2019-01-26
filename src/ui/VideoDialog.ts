@@ -3,16 +3,18 @@ import Dialog from './Dialog'
 import Log from '../util/Log'
 import JingleHandler from '../connection/JingleHandler'
 import VideoWindow from './VideoWindow'
-import JingleAbstractSession from 'JingleAbstractSession';
+import JingleMediaSession from '../JingleMediaSession';
+import Translation from '@util/Translation';
+import JingleCallSession from '@src/JingleCallSession';
 
 const VideoDialogTemplate = require('../../template/videoDialog.hbs')
 
 export class VideoDialog {
-   private dom;
+   private dom: JQuery;
 
-   private videoWindows: VideoWindow[] = [];
+   private videoWindows: {[sessionId: string]: VideoWindow} = {};
 
-   private localStream;
+   private localStream: MediaStream;
 
    private ready: boolean = true;
 
@@ -26,17 +28,27 @@ export class VideoDialog {
       return this.dom;
    }
 
-   public addSession(session) {
-      session.on('terminated', this.removeSession);
+   public addSession(session: JingleMediaSession) {
+      session.on('terminated', (reason) => {
+         this.removeSession(session, reason);
+      });
+
+      let msg: string;
+
+      if (session instanceof JingleCallSession) {
+         msg = ':telephone_receiver: ' + Translation.t('Call_started');
+      } else {
+         msg = ':screen: ' + Translation.t('Stream_started');
+      }
+
+      session.getPeer().addSystemMessage(msg);
 
       let videoWindow = new VideoWindow(this, session);
 
-      session.videoWindow = videoWindow;
-
-      this.videoWindows.push(videoWindow);
+      this.videoWindows[session.getId()] = videoWindow;
    }
 
-   public showCallDialog(session: JingleAbstractSession) {
+   public showCallDialog(session: JingleMediaSession) {
       //@TODO add auto accept
       //@TODO translate
       //@TODO use selection dialog, because button labels can be configured
@@ -46,7 +58,7 @@ export class VideoDialog {
       let peerName = session.getPeer().getName();
       let isVideoCall = mediaRequested.indexOf('video') > -1;
       let isStream = mediaRequested.length === 0;
-      let infoText;
+      let infoText: string;
 
       if (isStream) {
          infoText = `Incoming_stream from ${peerName}`;
@@ -73,14 +85,16 @@ export class VideoDialog {
       });
    }
 
-   public showVideoWindow(localStream?) {
+   public showVideoWindow(localStream?: MediaStream) {
       this.dom.appendTo('body');
 
       let localVideoElement = this.dom.find('.jsxc-local-video');
 
-      localVideoElement.draggable({
-         containment: 'parent'
-      });
+      if (typeof (<any> localVideoElement).draggable === 'function') {
+         (<any> localVideoElement).draggable({
+            containment: 'parent'
+         });
+      }
 
       if (localStream) {
          this.localStream = localStream;
@@ -132,6 +146,7 @@ export class VideoDialog {
       this.dom.find('.jsxc-video-container').attr('data-videos', numberOfContainer);
    }
 
+   //@REVIEW still used?
    public setStatus(txt, d?) {
       let status = $('.jsxc_webrtc .jsxc_status');
       let duration = (typeof d === 'undefined' || d === null) ? 4000 : d;
@@ -141,6 +156,7 @@ export class VideoDialog {
       if (status.html()) {
          // attach old messages
          txt = status.html() + '<br />' + txt;
+         //@TODO escape html; maybe use p element
       }
 
       status.html(txt);
@@ -151,6 +167,7 @@ export class VideoDialog {
          'display': 'block'
       });
 
+      //@TODO use css animation
       status.stop().animate({
          opacity: 1
       });
@@ -176,41 +193,22 @@ export class VideoDialog {
       return this.ready;
    }
 
-   private postCallMessage(msg, uid) {
-      // jsxc.gui.window.postMessage({
-      //    _uid: uid,
-      //    bid: bid,
-      //    direction: jsxc.Message.SYS,
-      //    msg: ':telephone_receiver: ' + msg
-      // });
-   }
+   private removeSession = (session: JingleMediaSession, reason?) => {
+      let msg = (reason && reason.condition ? (': ' + Translation.t('jingle_reason_' + reason.condition)) : '') + '.';
 
-   private postScreenMessage(msg, uid) {
-      // jsxc.gui.window.postMessage({
-      //    _uid: uid,
-      //    bid: bid,
-      //    direction: jsxc.Message.SYS,
-      //    msg: ':computer: ' + msg
-      // });
-   }
-
-   private removeSession = (session, reason?) => {
-      //@TODO translate
-      let msg = (reason && reason.condition ? (': ' + ('jingle_reason_' + reason.condition)) : '') + '.';
-
-      if (session.call) {
-         msg = (':checkered_flag: Call_terminated') + msg;
-         this.postCallMessage(msg, session.sid);
+      if (session instanceof JingleCallSession) {
+         msg = Translation.t('Call_terminated') + msg;
       } else {
-         msg = (':checkered_flag: Stream_terminated') + msg;
-         this.postScreenMessage(msg, session.sid);
+         msg = Translation.t('Stream_terminated') + msg;
       }
 
-      Log.debug('Session ' + session.sid + ' was removed. Reason: ' + msg);
+      session.getPeer().addSystemMessage(':checkered_flag: ' + msg);
 
-      this.videoWindows.splice(this.videoWindows.indexOf(session.videoWindow), 1);
+      Log.debug('Session ' + session.getId() + ' was removed. Reason: ' + msg);
 
-      if (this.videoWindows.length === 0) {
+      delete this.videoWindows[session.getId()];
+
+      if (Object.keys(this.videoWindows).length === 0) {
          this.close();
       }
    }
@@ -225,15 +223,15 @@ export class VideoDialog {
       }
    }
 
-   public static attachMediaStream = (element, stream) => {
-      let el = (element instanceof jQuery) ? (<JQuery> element).get(0) : element;
+   public static attachMediaStream = (element: JQuery|HTMLMediaElement, stream: MediaStream) => {
+      let el = <HTMLMediaElement> ((element instanceof jQuery) ? (<JQuery> element).get(0) : element);
       el.srcObject = stream;
 
       $(element).show();
    }
 
-   public static dettachMediaStream = (element) => {
-      let el = (element instanceof jQuery) ? (<JQuery> element).get(0) : element;
+   public static detachMediaStream = (element: JQuery|HTMLMediaElement) => {
+      let el = <HTMLMediaElement> ((element instanceof jQuery) ? (<JQuery> element).get(0) : element);
 
       if (!el) {
          return;
