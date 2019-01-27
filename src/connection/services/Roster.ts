@@ -3,6 +3,9 @@ import { IJID } from '../../JID.interface'
 import RosterHandler from '../xmpp/handlers/roster'
 import * as NS from '../xmpp/namespace'
 import { $pres, $iq } from '../../vendor/Strophe'
+import rosterChange from "@connection/xmpp/handlers/rosterChange";
+import contact from "@ui/dialogs/contact";
+import PEP from "@connection/services/PEP";
 
 export default class Roster extends AbstractService {
    public getRoster(version?: string) {
@@ -27,7 +30,7 @@ export default class Roster extends AbstractService {
    public removeContact(jid: IJID): Promise<Element> {
       let self = this;
 
-      // Shortcut to remove buddy from roster and cancle all subscriptions
+      // Shortcut to remove buddy from roster and cancel all subscriptions
       let iq = $iq({
          type: 'set'
       }).c('query', {
@@ -44,6 +47,7 @@ export default class Roster extends AbstractService {
       let waitForRoster = this.addContactToRoster(jid, alias);
 
       this.sendSubscriptionRequest(jid);
+      this.account.getConnection().getPEPService().subscribe('http://jabber.org/protocol/nick', undefined);
 
       return waitForRoster;
    }
@@ -66,6 +70,10 @@ export default class Roster extends AbstractService {
          to: to.bare,
          type: (accept) ? 'subscribed' : 'unsubscribed'
       });
+
+      if (accept) {
+         this.account.getConnection().getPEPService().subscribe('http://jabber.org/protocol/nick', this.account.getContact(to).setNickname);
+      }
 
       this.send(presenceStanza);
    }
@@ -90,6 +98,6 @@ export default class Roster extends AbstractService {
          type: 'subscribe'
       }).c('nick', {
          xmlns: 'http://jabber.org/protocol/nick'
-      }).t(this.account.getContact().getNickname()));
+      }).t(this.account.getNickname()));
    }
 }

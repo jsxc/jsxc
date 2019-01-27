@@ -15,6 +15,7 @@ import { IMessage } from '@src/Message.interface';
 import Vcard from "@connection/services/Vcard";
 import contact from "@ui/dialogs/contact";
 import PersistentMap from "@util/PersistentMap";
+import { isString } from "util";
 
 export const STANZA_KEY = 'stanza';
 export const STANZA_IQ_KEY = 'stanzaIQ';
@@ -240,6 +241,25 @@ abstract class AbstractConnection {
             iq.c('vCard', {
                xmlns: NS.get('VCARD')
             });
+
+            let vCardKeys = Object.keys(vCardData);
+
+            /*while(vCardKeys.length > 0){
+               let currentKey = vCardKeys[0];
+
+               if(isString(vCardData[currentKey])) {
+                  if (currentKey !== 'NICKNAME') {
+                     iq.c(currentKey).t(vCardData[currentKey]).up();
+                 }
+                  else {
+                     iq.c(currentKey).t(newNickname).up();
+                  }
+               }
+               else{
+                  iq.c(currentKey).t(vCardData[currentKey]);
+               }
+               vCardKeys.shift();
+            }*/
 
             iq.c('FN').t(vCardData['FN']).up();
             iq.c('N').t(vCardData['N']);

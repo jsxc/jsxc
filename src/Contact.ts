@@ -59,7 +59,7 @@ export default class Contact implements IIdentifiable, IContact {
          id: id,
          jid: this.jid.full,
          name: name || this.jid.bare,
-         nickname: this.account.getNickname(),
+         nickname: this.jid.bare,
          presence: Presence.offline,
          status: '',
          subscription: ContactSubscription.NONE,
@@ -213,12 +213,13 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getName(): string {
-      if (this.data.get('name') === this.jid.bare) {
+      /*if (this.data.get('name') === this.jid.bare) {
          return this.getNickname() || this.jid.bare;
       }
       else {
          return this.data.get('name');
-      }
+      }*/
+      return this.getNickname();
    }
 
    public getAvatar(): Promise<Avatar> {
