@@ -1,4 +1,5 @@
 import { API as PluginAPI } from './PluginAPI.interface'
+import DiscoInfoRepository from '@src/DiscoInfoRepository';
 
 export enum PluginType {
    Encryption
@@ -29,6 +30,10 @@ export abstract class AbstractPlugin {
       if (!this.isSupportingClientVersion()) {
          throw new Error('This plugin doesn\'t support this client version');
       }
+   }
+
+   public destroy() {
+
    }
 
    private isSupportingClientVersion(): boolean {

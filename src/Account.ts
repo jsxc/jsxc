@@ -297,7 +297,7 @@ export default class Account {
          this.pipes[name].destroy();
       }
 
-      //@TODO destroy plugins
+      this.getPluginRepository().destroyAllPlugins();
    }
 
    public connectionDisconnected() {

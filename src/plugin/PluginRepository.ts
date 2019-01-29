@@ -74,6 +74,12 @@ export default class PluginRepository {
       return !!this.encryptionPlugins;
    }
 
+   public destroyAllPlugins() {
+      this.plugins.forEach(plugin => plugin.destroy());
+
+      this.encryptionPlugins.forEach(plugin => plugin.destroy());
+   }
+
    private instantiatePlugin(Plugin: IPlugin) {
       let plugin;
 
