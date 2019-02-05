@@ -49,7 +49,6 @@ export class VideoDialog {
    }
 
    public showCallDialog(session: JingleMediaSession) {
-      //@TODO add auto accept
       //@TODO translate
       //@TODO use selection dialog, because button labels can be configured
       //@TODO confirm dialog is special case of selection dialog
