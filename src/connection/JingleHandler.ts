@@ -12,12 +12,19 @@ import JingleSession from '../JingleSession'
 import JingleAbstractSession from '../JingleAbstractSession'
 import JingleMediaSession from '@src/JingleMediaSession';
 import { OTalkJingleMediaSession } from '@vendor/Jingle.interface';
+import IceServers, { ICEServer } from '@src/IceServers';
+import Client from '@src/Client';
 
 let jxt = createRegistry();
 jxt.use(require('jxt-xmpp-types'));
 jxt.use(require('jxt-xmpp'));
 
 let IqStanza = jxt.getDefinition('iq', 'jabber:client');
+
+interface OfferOptions {
+   offerToReceiveAudio?: boolean
+   offerToReceiveVideo?: boolean
+}
 
 export default class JingleHandler {
 
@@ -30,9 +37,10 @@ export default class JingleHandler {
    constructor(protected account: Account, protected connection: IConnection) {
 
       this.manager = new JSM({
-         peerConnectionConstraints: this.getPeerConstraints(),
+         // peerConnectionConstraints: this.getPeerConstraints(),
          jid: connection.getJID().full,
-         selfID: connection.getJID().full
+         selfID: connection.getJID().full,
+         iceServers: Client.getOption('RTCPeerConfig').iceServers
       });
 
       this.manager.on('change:connectionState', function() {
@@ -58,18 +66,17 @@ export default class JingleHandler {
          this.onIncoming(session);
       });
 
+      IceServers.registerUpdateHook((iceSevers) => {
+         this.setICEServers(iceSevers);
+      });
+
       JingleHandler.instances.push(this);
    }
 
-   public initiate(peerJID: IJID, stream: MediaStream, offerOptions?): Promise<JingleMediaSession> {
-      let session: OTalkJingleMediaSession = this.manager.createMediaSession(peerJID.full);
+   public async initiate(peerJID: IJID, stream: MediaStream, offerOptions?: OfferOptions): Promise<JingleMediaSession> {
+      let session: OTalkJingleMediaSession = this.manager.createMediaSession(peerJID.full, undefined, stream);
 
-      //@TODO extract onIceConnectionStateChanged from VideoWindow and use here
-
-      session.addStream(stream);
-
-      return new Promise(resolve => {
-         //@TODO use this.getPeerConstraints; Review peer constraints vs offer options
+      return new Promise<JingleMediaSession>(resolve => {
          session.start(offerOptions, () => {
             let jingleSession = JingleSession.create(this.account, session);
 
@@ -88,12 +95,11 @@ export default class JingleHandler {
       }
    }
 
-   //@TODO add ice server interface
-   public addICEServer(server) {
+   public addICEServer(server: ICEServer | string) {
       this.manager.addICEServer(server);
    }
 
-   public setICEServers(servers) {
+   public setICEServers(servers: ICEServer[]) {
       this.manager.iceServers = servers;
    }
 
@@ -108,7 +114,7 @@ export default class JingleHandler {
          req = jxt.parse(iq.outerHTML);
       } catch (err) {
          Log.error('Error while parsing jingle: ', err);
-         //@TODO abort call
+
          return;
       }
 
@@ -156,7 +162,12 @@ export default class JingleHandler {
 
    private getPeerConstraints(offerToReceiveAudio = false, offerToReceiveVideo = false) {
       let browserDetails = RTC.browserDetails;
-      let peerConstraints;
+      let peerConstraints: any = {
+         optional: [
+            {DtlsSrtpKeyAgreement: true},
+            {RtpDataChannels: false}
+        ]
+      };
 
       if ((browserDetails.version < 33 && browserDetails.browser === 'firefox') || browserDetails.browser === 'chrome') {
          peerConstraints = {

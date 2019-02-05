@@ -1,18 +1,37 @@
 import Client from './Client'
 import Log from './util/Log'
+import { IRTCPeerConfig } from './OptionsDefault';
+
+export interface ICEServer {
+   urls: string|string[]
+   username?: string
+   password?: string
+}
 
 export default class IceServers {
-   public static get() {
-      let rtcPeerConfig = Client.getOption('RTCPeerConfig') || {};
+   public static isExpiring(): boolean {
+      let rtcPeerConfig = Client.getOption<IRTCPeerConfig>('RTCPeerConfig') || <IRTCPeerConfig> {};
+
+      return !!rtcPeerConfig.url;
+   }
+
+   public static registerUpdateHook(hook: (iceServers: ICEServer[]) => void) {
+      Client.getOptions().registerHook('RTCPeerConfig', (rtcPeerConfig: IRTCPeerConfig) => {
+         hook(rtcPeerConfig.iceServers);
+      });
+   }
+
+   public static get(): Promise<ICEServer[]> {
+      let rtcPeerConfig = Client.getOption<IRTCPeerConfig>('RTCPeerConfig') || <IRTCPeerConfig> {};
       let storage = Client.getStorage();
       let url = rtcPeerConfig.url;
 
       let ttl = (storage.getItem('iceValidity') || 0) - (new Date()).getTime();
 
-      //@REVIEW ttl and ice servers from config object
-
-      if (ttl > 0 && rtcPeerConfig.iceServers) {
+      if ((ttl > 0 || !rtcPeerConfig.url) && rtcPeerConfig.iceServers) {
          // credentials valid
+
+         IceServers.startRenewalTimeout();
 
          return Promise.resolve(rtcPeerConfig.iceServers);
       } else if (url) {
@@ -22,7 +41,7 @@ export default class IceServers {
       }
    }
 
-   private static getFromUrl(url) {
+   private static getFromUrl(url: string): Promise<ICEServer[]> {
       return new Promise((resolve, reject) => {
          $.ajax(url, {
             async: true,
@@ -30,8 +49,9 @@ export default class IceServers {
             xhrFields: {
                withCredentials: Client.getOption('RTCPeerConfig').withCredentials
             }
-         }).done((data) => {
-            let ttl = data.ttl || 3600;
+         }).done((data: IRTCPeerConfig) => {
+            let peerConfig: IRTCPeerConfig = Client.getOption('RTCPeerConfig');
+            let ttl = data.ttl || peerConfig.ttl || 3600;
             let iceServers = data.iceServers;
 
             if (iceServers && iceServers.length > 0) {
@@ -40,20 +60,35 @@ export default class IceServers {
                if (urls) {
                   Log.debug('ice servers received');
 
-                  let peerConfig = Client.getOption('RTCPeerConfig');
                   peerConfig.iceServers = iceServers;
                   Client.setOption('RTCPeerConfig', peerConfig);
 
                   Client.getStorage().setItem('iceValidity', (new Date()).getTime() + 1000 * ttl);
 
-                  resolve(iceServers);
-               } else {
-                  Log.warn('No valid url found in first ice object.');
+                  IceServers.startRenewalTimeout();
 
-                  reject();
+                  resolve(iceServers);
                }
+            } else {
+               Log.warn('Found no valid ICE server');
+
+               reject();
             }
          });
       });
+   }
+
+   private static startRenewalTimeout() {
+      let validity = Client.getStorage().getItem('iceValidity');
+
+      if (!validity) {
+         return;
+      }
+
+      let ttl = validity - (new Date()).getTime();
+
+      setTimeout(() => {
+         IceServers.get();
+      }, ttl * 1000);
    }
 }
