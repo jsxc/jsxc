@@ -23,6 +23,8 @@ export enum ContactSubscription {
 }
 
 export interface IContact {
+   setNickname(newNickname: string);
+
    delete();
 
    getChatWindow(): ChatWindow;

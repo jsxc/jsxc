@@ -171,7 +171,7 @@ class NicknamePage extends Page {
             Log.debug('Nickname was changed');
          }).catch((errStanza) => {
 
-            if (errStanza == TypeError) {
+            if (errStanza === TypeError) {
                throw errStanza;
             }
 

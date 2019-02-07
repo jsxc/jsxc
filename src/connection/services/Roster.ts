@@ -2,9 +2,8 @@ import AbstractService from './AbstractService'
 import { IJID } from '../../JID.interface'
 import * as NS from '../xmpp/namespace'
 import { $pres, $iq } from '../../vendor/Strophe'
-import rosterChange from "@connection/xmpp/handlers/rosterChange";
-import contact from "@ui/dialogs/contact";
-import PEP from "@connection/services/PEP";
+import contact from '@ui/dialogs/contact';
+import PEP from '@connection/services/PEP';
 
 export default class Roster extends AbstractService {
    public getRoster(version?: string): Promise<Element> {
@@ -24,13 +23,9 @@ export default class Roster extends AbstractService {
    }
 
    public removeContact(jid: IJID): Promise<Element> {
-<<<<<<< HEAD
       let self = this;
 
       // Shortcut to remove buddy from roster and cancel all subscriptions
-=======
-      // Shortcut to remove buddy from roster and cancle all subscriptions
->>>>>>> upstream/refactoring
       let iq = $iq({
          type: 'set'
       }).c('query', {
@@ -70,10 +65,6 @@ export default class Roster extends AbstractService {
          to: to.bare,
          type: (accept) ? 'subscribed' : 'unsubscribed'
       });
-
-      if (accept) {
-         this.account.getConnection().getPEPService().subscribe('http://jabber.org/protocol/nick', this.account.getContact(to).setNickname);
-      }
 
       this.send(presenceStanza);
    }

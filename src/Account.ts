@@ -127,7 +127,6 @@ export default class Account {
       this.options.set(key, value);
    }
 
-
    public connect = (pause: boolean = false): Promise<void> => {
       let targetPresence = Client.getPresenceController().getTargetPresence();
 

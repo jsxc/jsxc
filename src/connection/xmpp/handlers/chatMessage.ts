@@ -21,17 +21,13 @@ export default class extends AbstractHandler {
       }
 
       let peerJid = new JID(messageElement.getOriginalFrom());
-<<<<<<< HEAD
-      let peerContact: Contact = this.account.getContact(peerJid);
+      let peerContact = this.account.getContact(peerJid);
       let nickname: string = $(stanza).find('nick').text();
 
-      if (nickname != undefined) {
+      if (nickname !== undefined) {
          peerContact.setNickname(nickname);
       }
 
-=======
-      let peerContact = this.account.getContact(peerJid);
->>>>>>> upstream/refactoring
       if (typeof peerContact === 'undefined') {
          this.handleUnknownSender(messageElement);
 

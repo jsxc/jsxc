@@ -296,10 +296,6 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public setName(name: string) {
-<<<<<<< HEAD
-      let oldName = this.getName();
-=======
->>>>>>> upstream/refactoring
       this.data.set('name', name);
    }
 
