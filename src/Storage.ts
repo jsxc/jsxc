@@ -165,7 +165,7 @@ export default class Storage implements IStorage {
    public getItem(type: string, key: string): any;
    public getItem(key: string): any;
    public getItem(): any {
-      let key;
+      let key: string;
 
       if (arguments.length === 1) {
          key = arguments[0];
@@ -174,6 +174,10 @@ export default class Storage implements IStorage {
       }
 
       key = this.getPrefix() + key;
+
+      if (!Storage.backend.hasOwnProperty(key)) {
+         return undefined;
+      }
 
       let value = Storage.backend.getItem(key);
 
