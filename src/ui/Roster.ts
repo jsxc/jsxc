@@ -369,7 +369,7 @@ export default class Roster {
 
       this.addMenuEntry({
          id: 'mute-notification',
-         handler: this.muteNotification,
+         handler: this.toggleMuteNotification,
          label: Translation.t('Mute'),
       });
 
@@ -427,20 +427,16 @@ export default class Roster {
       }
    }
 
-   private muteNotification = () => {
-      //@TODO mute notification
-      // if (jsxc.storage.getUserItem('presence') === 'dnd') {
-      //    return;
-      // }
-      //
-      // // invert current choice
-      // var mute = !jsxc.options.get('muteNotification');
-      //
-      // if (mute) {
-      //    jsxc.notification.muteSound();
-      // } else {
-      //    jsxc.notification.unmuteSound();
-      // }
+   private toggleMuteNotification = () => {
+      let muteNotification = !Client.getOption('notification.mute');
+      console.log('muteNotification', muteNotification, Client.getOption('notification.mute'));
+      Client.setOption('notification.mute', muteNotification);
+   }
+
+   private muteNotification(yes: boolean) {
+      let element = this.element.find('.jsxc-mute-notification');
+
+      element.text(yes ? Translation.t('Unmute') : Translation.t('Mute'));
    }
 
    public toggle = () => {
@@ -461,6 +457,14 @@ export default class Roster {
    }
 
    private initOptions() {
+      let muteNotification = Client.getOption('notification.mute');
+      this.muteNotification(muteNotification);
+      Client.getOptions().registerHook('notification', (newValue, oldValue) => {
+         if (newValue.mute !== oldValue.mute) {
+            this.muteNotification(newValue.mute);
+         }
+      });
+
       let hideOffline = Client.getOption(HIDE_OFFLINE_KEY);
       this.hideOffline(hideOffline);
       Client.getOptions().registerHook(HIDE_OFFLINE_KEY, (hideOffline) => {

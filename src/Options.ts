@@ -68,7 +68,7 @@ export default class Options {
          if (keys.length) {
             return get(keys, primary[key], secondary[key]);
          } else if (typeof primary[key] !== 'undefined') {
-            return primary[key]
+            return typeof primary[key] === 'object' && primary[key] !== null ? {...secondary[key], ...primary[key]} : primary[key];
          } else if (typeof secondary[key] !== 'undefined') {
             return secondary[key];
          }
