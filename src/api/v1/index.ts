@@ -3,7 +3,9 @@ import Client from '../../Client'
 import Roster from '../../ui/Roster'
 import { IPlugin } from '../../plugin/AbstractPlugin'
 import FormWatcher, { SettingsCallback } from '../../FormWatcher'
+import { end } from './end';
 
+export { end };
 export { start, startAndPause } from './start'
 export { register } from './register'
 export { testBOSHServer } from './testBOSHServer'
