@@ -226,13 +226,12 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getName(): string {
-      /*if (this.data.get('name') === this.jid.bare) {
-         return this.getNickname() || this.jid.bare;
+      if (this.data.get('name') === this.jid.bare) {
+         return this.getNickname()
       }
       else {
          return this.data.get('name');
-      }*/
-      return this.getNickname();
+      }
    }
 
    public getProviderId(): string {

@@ -10,7 +10,7 @@ export default class extends AbstractHandler {
       let myJid = connection.getJID();
       let nickname: string = $(stanza).find('nick').text();
 
-      if(nickname !== undefined){
+      if (nickname !== undefined) {
          this.account.getContact(fromJid).setNickname(nickname);
       }
 
