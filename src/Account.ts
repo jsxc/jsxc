@@ -123,6 +123,7 @@ export default class Account {
 
       return nickname;
    }
+
    public setOption(key: string, value: any) {
       this.options.set(key, value);
    }

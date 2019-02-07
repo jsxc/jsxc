@@ -139,6 +139,8 @@ abstract class AbstractConnection {
          xmlMsg.c('body').t(plaintextMessage).up();
       }
 
+      xmlMsg.c('nick').t(this.account.getNickname());
+
       xmlMsg.c('origin-id', {
          xmlns: 'urn:xmpp:sid:0',
          id: message.getUid()
@@ -247,6 +249,7 @@ abstract class AbstractConnection {
             });
 
             let vCardKeys = Object.keys(vCardData);
+
             /* tslint:disable:no-string-literal */
             iq.c('FN').t(vCardData['FN']).up();
             iq.c('N').t(vCardData['N']);

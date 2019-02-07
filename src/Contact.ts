@@ -77,7 +77,7 @@ export default class Contact implements IIdentifiable, IContact {
          resources: {},
          type: ContactType.CHAT,
          rnd: Math.random() // force storage event
-      }
+      };
 
       this.data = new PersistentMap(this.storage, 'contact', id);
 
