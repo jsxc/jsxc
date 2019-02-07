@@ -7,13 +7,12 @@ import JID from '../../JID'
 let contactTemplate = require('../../../template/contact.hbs');
 
 let dialog: Dialog;
-let contact: Contact;
 
 export default function(username?: string) {
    username = (typeof username === 'string') ? username : undefined;
 
    let content = contactTemplate({
-      username: username
+      username
    });
 
    dialog = new Dialog(content);
@@ -24,7 +23,7 @@ export default function(username?: string) {
    dom.find('form').submit(onSubmit);
 }
 
-function onUsernameKeyUp() {
+async function onUsernameKeyUp() {
    let getUsers = Client.getOption('getUsers');
 
    if (typeof getUsers !== 'function') {
@@ -34,22 +33,27 @@ function onUsernameKeyUp() {
    let val = $(this).val();
    $('#jsxc-userlist').empty();
 
-   if (val !== '') {
-      getUsers.call(this, val, function(list) {
-         $('#jsxc-userlist').empty();
+   if (val === '') {
+      return;
+   }
 
-         $.each(list || {}, function(uid, displayname) {
-            let option = $('<option>');
-            option.attr('data-username', uid.toString());
-            option.attr('data-alias', displayname);
+   //@TODO delay execution
+   let list = await getUsers(val);
 
-            option.attr('value', uid.toString()).appendTo('#jsxc-userlist');
+   $('#jsxc-userlist').empty();
 
-            if (uid !== displayname) {
-               option.clone().attr('value', displayname).appendTo('#jsxc-userlist');
-            }
-         });
-      });
+   for (let uid in list) {
+      let displayName = list[uid];
+
+      let option = $('<option>');
+      option.attr('data-username', uid.toString());
+      option.attr('data-alias', displayName);
+
+      option.attr('value', uid.toString()).appendTo('#jsxc-userlist');
+
+      if (uid !== displayName) {
+         option.clone().attr('value', displayName).appendTo('#jsxc-userlist');
+      }
    }
 }
 
@@ -66,8 +70,8 @@ function onUsernameInput() {
 function onSubmit(ev) {
    ev.preventDefault();
 
-   let username = <string>$('#jsxc-username').val();
-   let alias = <string>$('#jsxc-alias').val();
+   let username = <string> $('#jsxc-username').val();
+   let alias = <string> $('#jsxc-alias').val();
    //@TODO if we support multi account, we need an account selection dialog
    let account = Client.getAccountManager().getAccount();
 
@@ -79,7 +83,7 @@ function onSubmit(ev) {
    if (!username || !username.match(CONST.REGEX.JID)) {
       // Add notification
       $('#jsxc-username').addClass('jsxc-invalid').keyup(function() {
-         if ((<string>$(this).val()).match(CONST.REGEX.JID)) {
+         if ((<string> $(this).val()).match(CONST.REGEX.JID)) {
             $(this).removeClass('jsxc-invalid');
          }
       });
@@ -88,8 +92,11 @@ function onSubmit(ev) {
    }
 
    let jid = new JID(username);
+   let contact = new Contact(account, jid, alias);
 
-   account.getConnection().getRosterService().addContact(jid, alias);
+   account.getContactManager().add(contact);
+
+   //@TODO show spinner
 
    dialog.close();
 }

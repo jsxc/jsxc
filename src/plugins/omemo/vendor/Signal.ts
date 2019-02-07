@@ -23,7 +23,6 @@ interface ISignalSignedPreKey extends ISignalPreKey {
    signature: ArrayBuffer
 }
 
-
 interface ISignalKeyPair {
    privKey?: ArrayBuffer
 
@@ -40,7 +39,7 @@ interface ISignalKeyHelper {
    generateRegistrationId: () => number
 }
 
-let libsignal = (<any>window).libsignal || {};
+let libsignal = (<any> window).libsignal || {};
 
 export let SignalAddress = libsignal.SignalProtocolAddress;
 export let SignalKeyHelper: ISignalKeyHelper = libsignal.KeyHelper;

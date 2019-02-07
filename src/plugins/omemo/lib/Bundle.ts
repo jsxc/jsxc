@@ -88,7 +88,7 @@ export default class Bundle {
             publicKey: ArrayBufferUtils.fromBase64(xmlSignedPreKeyPublic.text())
          },
          signature: ArrayBufferUtils.fromBase64(xmlSignedPreKeySignature.text()),
-         keyId: parseInt(xmlSignedPreKeyPublic.attr('signedPreKeyId'))
+         keyId: parseInt(xmlSignedPreKeyPublic.attr('signedPreKeyId'), 10)
       });
 
       let preKeys = xmlPreKeys.get().map(function(element) {
@@ -96,7 +96,7 @@ export default class Bundle {
             keyPair: {
                publicKey: ArrayBufferUtils.fromBase64($(element).text())
             },
-            keyId: parseInt($(element).attr('preKeyId'))
+            keyId: parseInt($(element).attr('preKeyId'), 10)
          });
       })
 

@@ -4,7 +4,7 @@ import InvalidParameterError from '../errors/InvalidParameterError';
 
 export default class PersistentArray {
 
-   private array: Array<any>;
+   private array: any[];
 
    private key: string;
 

@@ -1,8 +1,8 @@
 import Dialog from '../Dialog'
 
-var selectionTemplate = require('../../../template/selection.hbs');
+let selectionTemplate = require('../../../template/selection.hbs');
 
-interface selectionDialogOptions {
+interface SelectionDialogOptions {
    header?: string,
    message?: string,
    primary?: {
@@ -16,7 +16,7 @@ interface selectionDialogOptions {
    id?: string
 }
 
-export default function(options: selectionDialogOptions) {
+export default function(options: SelectionDialogOptions) {
 
    let content = selectionTemplate(options);
 

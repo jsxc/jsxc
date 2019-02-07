@@ -1,4 +1,4 @@
-import Log from "@util/Log";
+import Log from '@util/Log';
 
 export default class TableElement {
    private tableElement = $('<table>');

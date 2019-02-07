@@ -15,11 +15,11 @@ function getUserInformation() {
    let userInfo = [];
 
    if (typeof navigator !== 'undefined') {
-      var key;
+      let key;
       for (key in navigator) {
          if (typeof navigator[key] === 'string') {
             userInfo.push({
-               key: key,
+               key,
                value: navigator[key]
             });
          }

@@ -1,13 +1,14 @@
 import Log from '../util/Log'
 import Translation from '../util/Translation'
 import { VideoDialog } from './VideoDialog'
+import JingleMediaSession from '@src/JingleMediaSession';
 
 export default class VideoWindow {
-   private videoElement;
+   private videoElement: JQuery;
 
-   private wrapperElement;
+   private wrapperElement: JQuery;
 
-   constructor(private videoDialog: VideoDialog, private session) {
+   constructor(private videoDialog: VideoDialog, private session: JingleMediaSession) {
       this.registerHooks();
       this.initWrapper();
    }
@@ -25,27 +26,27 @@ export default class VideoWindow {
    private initWrapper() {
       this.wrapperElement = $('<div>');
       this.wrapperElement.addClass('jsxc-video-wrapper jsxc-establishing');
-      this.wrapperElement.attr('data-sid', this.session.sid);
+      this.wrapperElement.attr('data-sid', this.session.getId());
 
       this.videoDialog.addContainer(this.wrapperElement);
    }
 
-   private onIceConnectionStateChanged = (session, state) => {
-      Log.debug('connection state for ' + session.sid, state);
+   private onIceConnectionStateChanged = (state: string) => {
+      Log.debug('connection state for ' + this.session.getId(), state);
 
       if (state === 'connected') {
          this.wrapperElement.removeClass('jsxc-establishing');
          this.wrapperElement.addClass('jsxc-ice-connected');
 
-         let remoteStreams = this.session.pc.getRemoteStreams();
+         let remoteStreams = this.session.getRemoteStreams();
 
          if (remoteStreams.length > 0) {
-            this.addStream(this.session, this.session.pc.getRemoteStreams()[0]);
+            this.addStream(remoteStreams[0]);
          }
       } else if (state === 'failed') {
          Log.warn('ICE connection failed');
 
-         session.end('failed-transport');
+         this.session.end('failed-transport');
       } else if (state === 'interrupted') {
          this.videoDialog.setStatus(Translation.t('Connection_interrupted'));
       }
@@ -62,9 +63,9 @@ export default class VideoWindow {
       this.wrapperElement.addClass('jsxc-ringing');
    }
 
-   private addStream = (session, stream) => {
+   private addStream = (stream: MediaStream) => {
       //@REVIEW can a session contain multiple streams?
-      Log.debug('Remote stream for session ' + session.sid + ' added.');
+      Log.debug('Remote stream for session ' + this.session.getId() + ' added.');
 
       let isVideoDevice = stream.getVideoTracks().length > 0;
       let isAudioDevice = stream.getAudioTracks().length > 0;
@@ -86,9 +87,9 @@ export default class VideoWindow {
       }
    }
 
-   private removeStream = (session) => {
-      Log.debug('Remote stream for ' + session.jid + ' removed.');
+   private removeStream = () => {
+      Log.debug('Remote stream for ' + this.session.getId() + ' removed.');
 
-      VideoDialog.dettachMediaStream(this.videoElement);
+      VideoDialog.detachMediaStream(this.videoElement);
    }
 }

@@ -25,7 +25,7 @@ export interface NoticeData {
    title: string;
    description: string;
    fnName: FUNCTION;
-   fnParams?: Array<string>;
+   fnParams?: string[];
    type?: TYPE;
 }
 
@@ -63,7 +63,7 @@ export class Notice implements IIdentifiable {
       return this.data.description;
    }
 
-   public getFnParams(): Array<string> {
+   public getFnParams(): string[] {
       return this.data.fnParams;
    }
 

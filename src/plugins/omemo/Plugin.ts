@@ -2,7 +2,7 @@ import { API as PluginAPI } from '../../plugin/PluginAPI.interface'
 import { EncryptionPlugin } from '../../plugin/EncryptionPlugin'
 import { EncryptionState } from '../../plugin/AbstractPlugin'
 import { IMessage } from '../../Message.interface'
-import { IContact } from '../../Contact.interface'
+import { IContact, ContactType } from '../../Contact.interface'
 import Omemo from './lib/Omemo'
 import ChatWindow from '../../ui/ChatWindow'
 import { NS_BASE, NS_DEVICELIST } from './util/Const'
@@ -23,7 +23,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       if (!this.isLibSignalAvailable()) {
-         throw 'LibSignal is not available'
+         throw new Error('LibSignal is not available')
       }
 
       pluginAPI.getConnection().getPEPService().subscribe(NS_DEVICELIST, this.onDeviceListUpdate);
@@ -33,6 +33,10 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor);
 
       pluginAPI.registerChatWindowInitializedHook((chatWindow: ChatWindow) => {
+         if (chatWindow.getContact().getType() !== ContactType.CHAT) {
+            return;
+         }
+
          chatWindow.addMenuEntry('omemo-devices', 'OMEMO devices', () => this.openDeviceDialog(chatWindow));
       });
    }
@@ -59,7 +63,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
       return this.getOmemo().prepare().then(() => {
          if (!this.getOmemo().isTrusted(contact)) {
-            throw 'There are new OMEMO devices';
+            throw new Error('There are new OMEMO devices');
          }
 
          contact.setEncryptionState(EncryptionState.UnverifiedEncrypted, OMEMOPlugin.getName());
@@ -82,7 +86,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
       let fromJid = this.pluginAPI.createJID(fromString);
       let deviceIds = listElement.find('device').get().map(function(deviceElement) {
-         return parseInt($(deviceElement).attr('id'));
+         return parseInt($(deviceElement).attr('id'), 10);
       });
 
       deviceIds = deviceIds.filter(id => typeof id === 'number' && !isNaN(id));
@@ -99,7 +103,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
       return this.getOmemo().decrypt(stanza).then((decrypted) => {
          if (!decrypted || !decrypted.plaintext) {
-            throw 'No decrypted message found';
+            throw new Error('No decrypted message found');
          }
 
          if (decrypted.trust === Trust.unknown) {
@@ -141,6 +145,6 @@ export default class OMEMOPlugin extends EncryptionPlugin {
    }
 
    private isLibSignalAvailable() {
-      return typeof (<any>window).libsignal !== 'undefined';
+      return typeof (<any> window).libsignal !== 'undefined';
    }
 }

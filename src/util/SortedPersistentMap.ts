@@ -55,7 +55,7 @@ export default class SortedPersistentMap {
       let id = element.getId();
 
       if (typeof this.map[id] !== 'undefined') {
-         throw 'Element with the same id already exists';
+         throw new Error('Element with the same id already exists');
       }
 
       this.map[id] = element;

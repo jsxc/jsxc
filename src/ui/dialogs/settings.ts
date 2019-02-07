@@ -26,7 +26,7 @@ class StartPage extends Page {
    }
 
    //@REVIEW could also return Page or getDOM interface?
-   protected generateContentElement(): JQuery | Array<JQuery> {
+   protected generateContentElement(): JQuery | JQuery[] {
       return [
          new ClientSection(this.navigation).getDOM(),
          new AccountOverviewSection(this.navigation).getDOM()
@@ -41,11 +41,11 @@ class ClientSection extends Section {
       //@REVIEW more generic? See PluginSection.
       let checkboxElement = $('<input>');
       checkboxElement.attr('type', 'checkbox');
-      checkboxElement.prop('checked', Client.getOption('on-login'));
+      checkboxElement.prop('checked', Client.getOption('onLogin'));
       checkboxElement.on('change', (ev) => {
          let isEnabled = $(ev.target).prop('checked');
 
-         Client.setOption('on-login', isEnabled);
+         Client.setOption('onLogin', isEnabled);
       });
 
       //@TODO only show if form watcher was used
@@ -229,7 +229,7 @@ class PasswordPage extends Page {
       contentElement.append(errorElement);
 
       passwordAElement.find('input').on('input', function() {
-         let value = <string>$(this).val();
+         let value = <string> $(this).val();
          let numberOfPossibleCharacters = 0;
 
          if (/[a-z]/.test(value)) {
@@ -327,4 +327,3 @@ class PluginSection extends Section {
       return contentElement.getDOM();
    }
 }
-

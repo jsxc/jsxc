@@ -16,7 +16,7 @@ export function testBOSHServer(url, domain): Promise<string> {
    return new Promise((resolve, reject) => {
       $.ajax({
          type: 'POST',
-         url: url,
+         url,
          data: requestString,
          global: false,
          dataType: 'xml'
@@ -71,7 +71,7 @@ function processErrorResponse(xhr, textStatus, url) {
       if (url.match(/^\//)) {
          urlWithProtocol += url;
       } else {
-         urlWithProtocol += window.location.pathname.replace(/[^/]+$/, "") + url;
+         urlWithProtocol += window.location.pathname.replace(/[^/]+$/, '') + url;
       }
    }
 

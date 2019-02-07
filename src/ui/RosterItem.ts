@@ -26,7 +26,7 @@ export default class RosterItem {
       this.element.attr('data-subscription', this.contact.getSubscription());
 
       this.element.on('dragstart', (ev) => {
-         (<any>ev.originalEvent).dataTransfer.setData('text/plain', contact.getJid().full);
+         (<any> ev.originalEvent).dataTransfer.setData('text/plain', contact.getJid().full);
 
          $('.jsxc-droppable').addClass('jsxc-drag-rosteritem');
       });
@@ -55,7 +55,9 @@ export default class RosterItem {
             bid_jid: this.contact.getJid().bare,
          });
          confirmDialog(questionString).getPromise().then((dialog: Dialog) => {
-            contact.delete();
+            contact.getAccount().getContactManager().delete(contact);
+
+            //@TODO show spinner
 
             dialog.close();
          }).catch(() => {
@@ -101,12 +103,12 @@ export default class RosterItem {
 
          let message = this.contact.getTranscript().getMessage(firstMessageId);
 
-         this.element.find('.jsxc-bar__caption__secondary').text(message.getPlaintextMessage());
+         this.element.find('.jsxc-bar__caption__secondary').html(message.getPlaintextEmoticonMessage());
       });
 
       let message = this.contact.getTranscript().getFirstMessage();
       if (message) {
-         this.element.find('.jsxc-bar__caption__secondary').text(message.getPlaintextMessage());
+         this.element.find('.jsxc-bar__caption__secondary').html(message.getPlaintextEmoticonMessage());
       }
 
       let updateUnreadMessage = () => {
@@ -169,7 +171,7 @@ export default class RosterItem {
    private endRename() {
       let inputElement = this.element.find('input');
 
-      this.contact.setName(<string>inputElement.val());
+      this.contact.setName(<string> inputElement.val());
 
       inputElement.remove();
       this.element.find('.jsxc-bar__caption, .jsxc-menu').show();

@@ -7,8 +7,9 @@ import Roster from '../../ui/Roster'
 import Translation from '../../util/Translation'
 import Log from '../../util/Log'
 import Account from '@src/Account';
+import MultiUserContact from '@src/MultiUserContact';
 
-var multiUserJoinTemplate = require('../../../template/multiUserJoin.hbs');
+let multiUserJoinTemplate = require('../../../template/multiUserJoin.hbs');
 
 const ENTER_KEY = 13;
 
@@ -167,7 +168,7 @@ class MultiUserJoinDialog {
          let count = set.find('count').text() || '?';
 
          roomInfoElement.text(Translation.t('Could_load_only', {
-            count: count
+            count
          }));
       } else {
          roomInfoElement.text('').hide();
@@ -177,7 +178,7 @@ class MultiUserJoinDialog {
    private parseRoomListError = (stanza) => {
       let serverInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-server');
       let roomInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-room');
-      var errTextMsg = $(stanza).find('error text').text() || null;
+      let errTextMsg = $(stanza).find('error text').text() || null;
 
       Log.warn('Could not load rooms', errTextMsg);
 
@@ -206,7 +207,7 @@ class MultiUserJoinDialog {
    }
 
    private testInputValues(): Promise<JID | void> {
-      let room = <string>this.roomInputElement.val();
+      let room = <string> this.roomInputElement.val();
       let nickname = this.nicknameInputElement.val() || this.defaultNickname;
       let server = this.serverInputElement.val();
 
@@ -309,19 +310,19 @@ class MultiUserJoinDialog {
       let jid = new JID(this.dom.find('input[name="room-jid"]').val());
       let name = this.dom.find('input[name="room-name"]').val() || undefined;
       let nickname = this.nicknameInputElement.val() || this.defaultNickname;
-      let bookmark = this.bookmarkInputElement.prop('checked');
-      let autojoin = this.autoJoinInputElement.prop('checked');
+      // let bookmark = this.bookmarkInputElement.prop('checked');
+      // let autojoin = this.autoJoinInputElement.prop('checked');
       let password = this.passwordInputElement.val() || undefined;
       let subject = this.dom.find('input[name="room-subject"]').val() || undefined;
 
-      let multiUserContact = this.account.addMultiUserContact(jid, name);
+      let multiUserContact = new MultiUserContact(this.account, jid, name);
       multiUserContact.setNickname(nickname);
-      multiUserContact.setBookmark(bookmark);
-      multiUserContact.setAutoJoin(autojoin);
+      multiUserContact.setBookmark(true);
+      multiUserContact.setAutoJoin(true);
       multiUserContact.setPassword(password);
       multiUserContact.setSubscription(subject);
 
-      Roster.get().add(multiUserContact);
+      this.account.getContactManager().add(multiUserContact);
 
       multiUserContact.join();
       multiUserContact.getChatWindowController().openProminently();

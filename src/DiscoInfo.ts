@@ -49,7 +49,7 @@ export default class implements DiscoInfo {
       return this.data.get('identities') || []
    }
 
-   public getFeatures(): Array<string> {
+   public getFeatures(): string[] {
       return this.data.get('features') || [];
    }
 
@@ -75,10 +75,8 @@ export default class implements DiscoInfo {
       return this.generateCapsVersion(this.getIdentities(), this.getFeatures());
    }
 
-   public hasFeature(features: string[]): boolean
-   public hasFeature(feature: string): boolean
-   public hasFeature() {
-      let features = (arguments[0] instanceof Array) ? arguments[0] : [arguments[0]];
+   public hasFeature(features: string[] | string) {
+      features = (arguments[0] instanceof Array) ? arguments[0] : [arguments[0]];
       let availableFeatures = this.getFeatures();
 
       for (let feature of features) {

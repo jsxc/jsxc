@@ -7,9 +7,9 @@ interface Identity {
 }
 
 export interface DiscoInfo {
-   getIdentities(): Array<string>
+   getIdentities(): string[]
 
-   getFeatures(): Array<string>
+   getFeatures(): string[]
 
    getForms()
 

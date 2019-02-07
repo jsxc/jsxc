@@ -56,7 +56,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
             }
          }
 
-         throw 'Found no suitable http upload service';
+         throw new Error('Found no suitable http upload service');
       }).then((service) => {
          return service.sendFile(attachment.getFile());
       }).then((downloadUrl) => {
@@ -108,7 +108,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
                   if (form) {
                      let values = form.getValues('max-file-size') || [];
                      if (values.length === 1) {
-                        maxFileSize = parseInt(values[0]);
+                        maxFileSize = parseInt(values[0], 10);
                      }
                   }
 
@@ -168,7 +168,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       if (attachment.hasThumbnailData()) {
          let iq = $iq({
             to: from.full,
-            id: id,
+            id,
             type: 'result'
          }).c('data', {
             xmlns: 'urn:xmpp:bob',

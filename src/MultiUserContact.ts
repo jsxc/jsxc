@@ -7,6 +7,7 @@ import Form from './connection/Form'
 import Account from './Account'
 import { ContactSubscription } from './Contact.interface'
 import { MUCService } from '@connection/Connection.interface';
+import { IJID } from './JID.interface';
 
 const AFFILIATION = {
    ADMIN: 'admin',
@@ -36,14 +37,16 @@ export default class MultiUserContact extends Contact {
 
    public static INSTANT_ROOMCONFIG = ROOMCONFIG.INSTANT;
 
+   public static TYPE = 'groupchat';
+
    private members: PersistentMap;
 
-   constructor(account: Account, jid: JID, name?: string);
+   constructor(account: Account, jid: IJID, name?: string);
    constructor(account: Account, id: string);
    constructor() {
       super(arguments[0], arguments[1], arguments[3]);
 
-      this.data.set('type', 'groupchat');
+      this.data.set('type', MultiUserContact.TYPE);
    }
 
    private getMembers(): PersistentMap {
@@ -67,7 +70,7 @@ export default class MultiUserContact extends Contact {
          let password = this.data.get('password');
          this.getService().sendDirectMultiUserInvitation(jid, this.getJid(), reason, password);
       } else {
-         throw 'No invitation method available';
+         throw new Error('No invitation method available');
       }
    }
 
@@ -118,16 +121,12 @@ export default class MultiUserContact extends Contact {
       return this.chatWindow;
    }
 
-   public delete() {
-
-   }
-
    public addMember(nickname: string, affiliation?, role?, jid?: JID): boolean {
       let isNewMember = !this.getMembers().get(nickname);
 
       this.getMembers().set(nickname, {
-         affiliation: affiliation,
-         role: role,
+         affiliation,
+         role,
          jid: jid instanceof JID ? jid.full : undefined
       });
 

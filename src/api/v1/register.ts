@@ -60,7 +60,7 @@ class Registration {
       let queryStanza = iqStanza.find(`query[xmlns="${NS_REGISTER}"]`);
 
       if (queryStanza.length !== 1) {
-         throw 'Error'
+         throw new Error('Error')
       }
 
       if (queryStanza.find('registered').length > 0) {
@@ -129,7 +129,7 @@ class Registration {
 
 class Connection {
    private sid: string;
-   private rid = parseInt((Math.random() * 100000).toString());
+   private rid = parseInt((Math.random() * 100000).toString(), 10);
 
    constructor(private service: string, private domain: string) {
 
@@ -161,8 +161,8 @@ class Connection {
       let id = UUID.v4();
 
       let iq = $iq({
-         id: id,
-         type: type,
+         id,
+         type,
          xmlns: Strophe.NS.CLIENT,
       }).cnode(childStanza.tree());
 
@@ -187,16 +187,16 @@ class Connection {
       }
 
       return {
-         to: this.domain,
+          'to ': this.domain,
          'xml:lang': 'en',
-         wait: 60,
-         hold: 1,
-         content: 'text/xml; charset=utf-8',
-         ver: '1.6',
-         rid: this.rid,
+          'wait ': 60,
+          'hold ': 1,
+          'content ': 'text/xml; charset=utf-8',
+          'ver ': '1.6',
+          'rid ': this.rid,
          'xmpp:version': '1.0',
          'xmlns:xmpp': Strophe.NS.BOSH,
-         xmlns: Strophe.NS.HTTPBIND,
+         'xmlns': Strophe.NS.HTTPBIND,
       }
    }
 }

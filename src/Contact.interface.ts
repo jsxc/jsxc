@@ -6,6 +6,8 @@ import ChatWindowController from './ChatWindowController'
 import Transcript from './Transcript'
 import Avatar from './Avatar'
 import ChatWindow from '@ui/ChatWindow';
+import ContactProvider from './ContactProvider';
+import Account from './Account';
 
 export enum ContactType {
    CHAT = 'chat',
@@ -27,6 +29,8 @@ export interface IContact {
 
    getChatWindowController(): ChatWindowController;
 
+   getAccount(): Account;
+
    addSystemMessage(messageString: string): IMessage;
 
    clearResources();
@@ -35,8 +39,8 @@ export interface IContact {
 
    setPresence(resource: string, presence: Presence);
 
-   getCapableResources(features: string[]): Promise<Array<string>>
-   getCapableResources(features: string): Promise<Array<string>>
+   getCapableResources(features: string[]): Promise<string[]>
+   getCapableResources(features: string): Promise<string[]>
 
    hasFeatureByResource(resource: string, features: string[]): Promise<{}>
    hasFeatureByResource(resource: string, feature: string): Promise<{}>
@@ -52,7 +56,7 @@ export interface IContact {
 
    getJid(): IJID;
 
-   getResources(): Array<string>;
+   getResources(): string[];
 
    getPresence(): Presence;
 
@@ -60,7 +64,11 @@ export interface IContact {
 
    getNumberOfUnreadMessages(): number;
 
+   hasName(): boolean;
+
    getName(): string;
+
+   getProviderId(): string;
 
    getAvatar(): Promise<Avatar>;
 
@@ -83,6 +91,8 @@ export interface IContact {
    setStatus(status: string);
 
    setName(name: string);
+
+   setProvider(provider: ContactProvider);
 
    setSubscription(subscription: ContactSubscription);
 

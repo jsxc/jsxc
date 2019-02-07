@@ -1,49 +1,26 @@
-import Client from './Client'
 import Log from './util/Log'
 import * as defaultOptions from './OptionsDefault'
+import IStorage from './Storage.interface';
+
+const KEY = 'options';
+
+interface OptionData {
+   [key: string]: any
+}
 
 export default class Options {
 
-   private static instance: Options;
+   private static defaults: OptionData = defaultOptions;
 
-   private constructor(private defaults) {
-
-   }
-
-   public static get(): Options {
-      if (!Options.instance) {
-         Options.instance = new Options(defaultOptions);
-      }
-
-      return Options.instance;
-   }
-
-   public get(key, account?) {
-      let storage = account ? account.getStorage() : Client.getStorage();
-      let local = storage.getItem('options') || {};
-
-      if (typeof local[key] !== 'undefined') {
-         return local[key];
-      } else if (typeof this.defaults[key] !== 'undefined') {
-         return this.defaults[key];
-      }
-
-      Log.debug(`I don't know any "${key}" option.`);
-
-      return undefined;
-   };
-
-   public set(key, value, account?) {
-      let storage = account ? account.getStorage() : Client.getStorage();
-
-      storage.updateItem('options', key, value);
-   };
-
-   public overwriteDefaults(options) {
+   public static overwriteDefaults(options: OptionData) {
       let optionKeys = Object.keys(options);
-      let defaultKeys = Object.keys(this.defaults);
+      let defaultKeys = Object.keys(Options.defaults);
       let unknownOptionKeys = optionKeys.filter(e => defaultKeys.indexOf(e) < 0);
-      let knownOptionKeys = optionKeys.filter(e => defaultKeys.indexOf(e) > -1);
+
+      if (optionKeys.indexOf('storage') > -1) {
+         // We have to make sure the storage is already set before we call e.g. Log.warn.
+         Options.defaults.storage = options.storage;
+      }
 
       if (unknownOptionKeys.length > 0) {
          Log.warn('I don\'t know the following options and therefore I will ignore them.', unknownOptionKeys);
@@ -53,13 +30,12 @@ export default class Options {
          }
       }
 
-      Object.assign(this.defaults, options);
+      Object.assign(Options.defaults, options);
    }
 
-   public addDefaults(options) {
+   public static addDefaults(options: OptionData) {
       let optionKeys = Object.keys(options);
-      let defaultKeys = Object.keys(this.defaults);
-      let unknownOptionKeys = optionKeys.filter(e => defaultKeys.indexOf(e) < 0);
+      let defaultKeys = Object.keys(Options.defaults);
       let knownOptionKeys = optionKeys.filter(e => defaultKeys.indexOf(e) > -1);
 
       if (knownOptionKeys.length > 0) {
@@ -70,6 +46,55 @@ export default class Options {
          }
       }
 
-      Object.assign(this.defaults, options);
+      Object.assign(Options.defaults, options);
+   }
+
+   public static getDefault(key: string) {
+      return Options.defaults[key];
+   }
+
+   constructor(private storage: IStorage) {
+
+   }
+
+   public getId(): string {
+      return this.storage.getName() || 'client';
+   }
+
+   public get(key: string): any {
+      let local = this.storage.getItem(KEY) || {};
+
+      if (typeof local[key] !== 'undefined') {
+         return local[key];
+      } else if (typeof Options.defaults[key] !== 'undefined') {
+         return Options.defaults[key];
+      }
+
+      Log.debug(`I don't know any "${key}" option.`);
+
+      return undefined;
+   };
+
+   public set(key: string, value: any) {
+      this.storage.updateItem(KEY, key, value);
+
+      if (typeof Options.defaults.onOptionChange === 'function') {
+         Options.defaults.onOptionChange(this.getId(), key, value, () => this.export());
+      }
+   };
+
+   public registerHook(key: string, func: (newValue: any, oldValue?: any) => void) {
+      this.storage.registerHook(KEY, (newData, oldData) => {
+         let n = newData[key];
+         let o = oldData && typeof oldData[key] !== 'undefined' ? oldData[key] : Options.defaults[key];
+
+         if (n !== o) {
+            func(n, o);
+         }
+      });
+   }
+
+   public export(): OptionData {
+      return this.storage.getItem(KEY) || {};
    }
 };

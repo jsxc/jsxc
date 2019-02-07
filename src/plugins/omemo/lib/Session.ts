@@ -1,11 +1,11 @@
-import Address from "../vendor/Address";
-import Store from "./Store";
-import BundleManager from "./BundleManager";
-import EncryptedDeviceMessage from "../model/EncryptedDeviceMessage";
-import { SessionCipher } from "../vendor/SessionCipher";
-import { SessionBuilder } from "../vendor/SessionBuilder";
-import Bundle from "./Bundle";
-import Log from "@util/Log";
+import Address from '../vendor/Address';
+import Store from './Store';
+import BundleManager from './BundleManager';
+import EncryptedDeviceMessage from '../model/EncryptedDeviceMessage';
+import { SessionCipher } from '../vendor/SessionCipher';
+import { SessionBuilder } from '../vendor/SessionBuilder';
+import Bundle from './Bundle';
+import Log from '@util/Log';
 
 export default class Session {
    private sessionCipher;
@@ -18,10 +18,11 @@ export default class Session {
       let sessionCipher = this.getSessionCipher();
       let plaintextBuffer;
 
-      if (preKey)
+      if (preKey) {
          plaintextBuffer = await sessionCipher.decryptPreKeyMessage(ciphertext);
-      else
+      } else {
          plaintextBuffer = await sessionCipher.decryptMessage(ciphertext);
+      }
 
       return plaintextBuffer;
    }

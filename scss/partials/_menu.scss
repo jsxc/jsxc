@@ -42,6 +42,14 @@
     white-space: nowrap;
   }
 
+  &__item--danger {
+    background-color: #ce7357;
+
+    &:hover {
+      background-color: #ee5f4c !important;
+    }
+  }
+
   a {
     color: inherit;
     text-decoration: none;

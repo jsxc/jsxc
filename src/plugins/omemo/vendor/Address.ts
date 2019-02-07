@@ -1,5 +1,4 @@
-import { SignalAddress } from "./Signal";
-
+import { SignalAddress } from './Signal';
 
 export default class Address {
    private address;
@@ -23,11 +22,11 @@ export default class Address {
       return this.address.getDeviceId();
    }
 
-   toString(): string {
+   public toString(): string {
       return this.address.toString();
    }
 
-   equals(address: Address): boolean {
+   public equals(address: Address): boolean {
       return this.address.toString() === address.toString();
    }
 }

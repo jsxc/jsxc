@@ -1,7 +1,7 @@
 import Page from './DialogPage'
 
 export default class Navigation {
-   private history: Array<JQuery> = [];
+   private history: JQuery[] = [];
 
    constructor(private rootElement: JQuery) {
 

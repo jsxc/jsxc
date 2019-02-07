@@ -5,8 +5,6 @@ import JID from '../../../JID'
 import Message from '../../../Message'
 import Utils from '../../../util/Utils'
 import Translation from '../../../util/Translation'
-import Contact from '../../../Contact'
-import Pipe from '../../../util/Pipe'
 import AbstractHandler from '../AbstractHandler'
 import { Strophe } from '../../../vendor/Strophe'
 import { FUNCTION } from '../../../Notice'
@@ -23,6 +21,7 @@ export default class extends AbstractHandler {
       }
 
       let peerJid = new JID(messageElement.getOriginalFrom());
+<<<<<<< HEAD
       let peerContact: Contact = this.account.getContact(peerJid);
       let nickname: string = $(stanza).find('nick').text();
 
@@ -30,6 +29,9 @@ export default class extends AbstractHandler {
          peerContact.setNickname(nickname);
       }
 
+=======
+      let peerContact = this.account.getContact(peerJid);
+>>>>>>> upstream/refactoring
       if (typeof peerContact === 'undefined') {
          this.handleUnknownSender(messageElement);
 
@@ -70,8 +72,8 @@ export default class extends AbstractHandler {
 
       //@REVIEW maybe improve the dialog
       this.account.getNoticeManager().addNotice({
-         title: title,
-         description: description,
+         title,
+         description,
          fnName: FUNCTION.notification,
          fnParams: [title, description],
       });
@@ -119,7 +121,7 @@ class MessageElement {
          return;
       }
 
-      throw 'No message element found';
+      throw new Error('No message element found');
    }
 
    public isForwarded() {

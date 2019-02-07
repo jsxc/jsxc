@@ -1,7 +1,7 @@
 
-export type IdentityKeyPair = { privKey?: ArrayBuffer, pubKey: ArrayBuffer };
-export type PreKeyPair = { pubKey, privKey };
-export type SignedPreKeyPair = { signature, pubKey, privKey }
+export interface IdentityKeyPair { privKey?: ArrayBuffer, pubKey: ArrayBuffer }
+export interface PreKeyPair { pubKey, privKey }
+export interface SignedPreKeyPair { signature, pubKey, privKey }
 
 interface SignalStore {
    Direction: { SENDING: number, RECEIVING: number }

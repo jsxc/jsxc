@@ -38,16 +38,16 @@ function vcardSuccessCallback(vCardData): Promise<any> {
    dialogElement.find('p').remove();
 
    if (vCardData.PHOTO) {
-      var img_el = $('<img class="jsxc-vcard" alt="avatar" />');
-      img_el.attr('src', vCardData.PHOTO.src);
+      let imageElement = $('<img class="jsxc-vcard" alt="avatar" />');
+      imageElement.attr('src', vCardData.PHOTO.src);
 
-      dialogElement.find('h3').before(img_el);
+      dialogElement.find('h3').before(imageElement);
    }
 
    let numberOfProperties = Object.keys(vCardData).length;
 
    if (numberOfProperties === 0 || (numberOfProperties === 1 && vCardData.PHOTO)) {
-      return Promise.reject({});;
+      return Promise.reject({}); ;
    }
 
    delete vCardData.PHOTO;
@@ -60,7 +60,7 @@ function vcardErrorCallback() {
 
    dialogElement.find('.jsxc-dialog p').remove();
 
-   var content = '<p>';
+   let content = '<p>';
    content += 'Sorry_your_buddy_doesnt_provide_any_information';
    content += '</p>';
 
@@ -80,8 +80,8 @@ function convertToTemplateData(vCardData): any[] {
       }
 
       properties.push({
-         name: name,
-         value: value,
+         name,
+         value,
          properties: childProperties
       });
    }

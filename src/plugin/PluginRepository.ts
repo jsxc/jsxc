@@ -10,22 +10,20 @@ export default class PluginRepository {
 
    private static registeredPlugins = [];
 
-   private plugins: Array<AbstractPlugin> = [];
+   private plugins: AbstractPlugin[] = [];
 
-   private encryptionPlugins: Array<EncryptionPlugin> = [];
+   private encryptionPlugins: EncryptionPlugin[] = [];
 
    public static add(Plugin: IPlugin) {
       if (typeof Plugin.getName !== 'function' || typeof Plugin.getName() !== 'string') {
-         throw 'This plugin doesn\'t implement static getName():string';
+         throw new Error('This plugin doesn\'t implement static getName():string');
       }
 
       let name = Plugin.getName();
 
       if (PluginRepository.registeredPlugins.indexOf(name) > -1) {
-         throw `There is already a plugin with the name ${name}.`
+         throw new Error(`There is already a plugin with the name ${name}.`)
       }
-
-      Log.debug(`Add ${name} to plugin repository`);
 
       PluginRepository.registeredPlugins.push(Plugin);
    }
@@ -41,7 +39,7 @@ export default class PluginRepository {
          }
 
          try {
-            this.instanciatePlugin(Plugin);
+            this.instantiatePlugin(Plugin);
          } catch (err) {
             Log.warn(err);
          }
@@ -64,19 +62,25 @@ export default class PluginRepository {
 
    public getEncryptionPlugin(pluginName: string): EncryptionPlugin {
       for (let plugin of this.encryptionPlugins) {
-         if ((<IPlugin>plugin.constructor).getName() === pluginName) {
+         if ((<IPlugin> plugin.constructor).getName() === pluginName) {
             return plugin;
          }
       }
 
-      throw `Couldn't find ${pluginName}`;
+      throw new Error(`Couldn't find ${pluginName}`);
    }
 
    public hasEncryptionPlugin(): boolean {
       return !!this.encryptionPlugins;
    }
 
-   private instanciatePlugin(Plugin: IPlugin) {
+   public destroyAllPlugins() {
+      this.plugins.forEach(plugin => plugin.destroy());
+
+      this.encryptionPlugins.forEach(plugin => plugin.destroy());
+   }
+
+   private instantiatePlugin(Plugin: IPlugin) {
       let plugin;
 
       Log.debug('Instanciate ' + Plugin.getName() + ' for account ' + this.account.getUid())
@@ -84,7 +88,7 @@ export default class PluginRepository {
       plugin = new Plugin(new PluginAPI(Plugin.getName(), this.account));
 
       if (!(plugin instanceof AbstractPlugin)) {
-         throw Plugin.getName() + ' doesn\'t extend AbstractPlugin';
+         throw new Error(Plugin.getName() + ' doesn\'t extend AbstractPlugin');
       }
 
       if (plugin instanceof EncryptionPlugin) {

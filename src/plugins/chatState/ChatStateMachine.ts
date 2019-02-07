@@ -23,6 +23,8 @@ export default class ChatStateMachine {
 
       this.addInputHandler();
       this.registerHook(this.stateChange);
+
+      //@REVIEW is this also supported by MUC?
    }
 
    private addInputHandler() {
@@ -79,7 +81,7 @@ export default class ChatStateMachine {
       this.id = Math.random();
 
       this.storage.setItem(this.key, {
-         state: state,
+         state,
          id: this.id
       });
    }
@@ -87,7 +89,7 @@ export default class ChatStateMachine {
    private getState(): STATE {
       let stored = this.storage.getItem(this.key) || {};
 
-      return <STATE>stored.state || STATE.INACTIVE;
+      return <STATE> stored.state || STATE.INACTIVE;
    }
 
    private stateChange = (newState: STATE, oldState: STATE) => {

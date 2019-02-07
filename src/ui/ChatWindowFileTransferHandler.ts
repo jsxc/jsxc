@@ -13,7 +13,7 @@ export default class FileTransferHandler {
       this.chatWindow.getDom().find('.jsxc-window').on('drop', (ev) => {
          ev.preventDefault();
 
-         let files = (<any>ev.originalEvent).dataTransfer.files;
+         let files = (<any> ev.originalEvent).dataTransfer.files;
 
          if (files && files.length) {
             this.fileSelected(files[0]);
@@ -40,7 +40,7 @@ export default class FileTransferHandler {
       labelElement.click();
 
       fileElement.off('change').change((ev) => {
-         var file: File = ev.target.files[0]; // FileList object
+         let file: File = ev.target.files[0]; // FileList object
 
          if (!file) {
             return;

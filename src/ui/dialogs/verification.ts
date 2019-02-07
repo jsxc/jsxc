@@ -1,7 +1,7 @@
 import Dialog from '../Dialog'
 import Contact from '../../Contact'
 
-var verificationTemplate = require('../../../template/verification.hbs');
+let verificationTemplate = require('../../../template/verification.hbs');
 
 let dialog: Dialog;
 let contact: Contact;

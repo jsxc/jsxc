@@ -22,5 +22,5 @@ interface Status {
    REDIRECT
 }
 
-(<any>window).Strophe = Strophe;
-(<any>window).$iq = $iq;
+(<any> window).Strophe = Strophe;
+(<any> window).$iq = $iq;

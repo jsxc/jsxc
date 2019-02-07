@@ -8,8 +8,8 @@ export interface DiscoInfoRepository {
 
    getDiscoInfo(jid: JID)
 
-   getCapableResources(contact: Contact, features: string[]): Promise<Array<string>>
-   getCapableResources(contact: Contact, features: string): Promise<Array<string>>
+   getCapableResources(contact: Contact, features: string[]): Promise<string[]>
+   getCapableResources(contact: Contact, features: string): Promise<string[]>
 
    hasFeature(jid: JID, features: string[]): Promise<{}>
    hasFeature(jid: JID, feature: string): Promise<{}>

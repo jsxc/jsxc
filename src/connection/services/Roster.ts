@@ -1,6 +1,5 @@
 import AbstractService from './AbstractService'
 import { IJID } from '../../JID.interface'
-import RosterHandler from '../xmpp/handlers/roster'
 import * as NS from '../xmpp/namespace'
 import { $pres, $iq } from '../../vendor/Strophe'
 import rosterChange from "@connection/xmpp/handlers/rosterChange";
@@ -8,7 +7,7 @@ import contact from "@ui/dialogs/contact";
 import PEP from "@connection/services/PEP";
 
 export default class Roster extends AbstractService {
-   public getRoster(version?: string) {
+   public getRoster(version?: string): Promise<Element> {
       let iq = $iq({
          type: 'get'
       }).c('query', {
@@ -21,16 +20,17 @@ export default class Roster extends AbstractService {
          });
       }
 
-      return this.sendIQ(iq).then((stanza: Element) => {
-         let rosterHandler = new RosterHandler(this.account);
-         return rosterHandler.processStanza(stanza);
-      });
+      return this.sendIQ(iq);
    }
 
    public removeContact(jid: IJID): Promise<Element> {
+<<<<<<< HEAD
       let self = this;
 
       // Shortcut to remove buddy from roster and cancel all subscriptions
+=======
+      // Shortcut to remove buddy from roster and cancle all subscriptions
+>>>>>>> upstream/refactoring
       let iq = $iq({
          type: 'set'
       }).c('query', {
@@ -43,7 +43,7 @@ export default class Roster extends AbstractService {
       return this.sendIQ(iq);
    }
 
-   public addContact(jid: IJID, alias: string) {
+   public addContact(jid: IJID, alias: string): Promise<Element> {
       let waitForRoster = this.addContactToRoster(jid, alias);
 
       this.sendSubscriptionRequest(jid);
@@ -53,7 +53,7 @@ export default class Roster extends AbstractService {
    }
 
    public setDisplayName(jid: IJID, displayName: string): Promise<Element> {
-      var iq = $iq({
+      let iq = $iq({
          type: 'set'
       }).c('query', {
          xmlns: 'jabber:iq:roster'

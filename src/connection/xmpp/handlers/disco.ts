@@ -18,7 +18,7 @@ export class DiscoInfoHandler extends AbstractHandler {
 
       let iq = $iq({
          type: 'result',
-         id: id,
+         id,
          to: from
       }).c('query', {
          xmlns: NS.get('DISCO_INFO'),
@@ -28,7 +28,7 @@ export class DiscoInfoHandler extends AbstractHandler {
       iq = this.addIdentitiesToStanza(iq);
       iq = this.addFeaturesToStanza(iq);
 
-      (<any>this.account.getConnection()).send(iq.tree()); //@REVIEW
+      (<any> this.account.getConnection()).send(iq.tree()); //@REVIEW
 
       return true;
    }
@@ -36,9 +36,9 @@ export class DiscoInfoHandler extends AbstractHandler {
    private addIdentitiesToStanza(iq) {
       for (let identity of this.account.getDiscoInfo().getIdentities()) {
          let attrs = {
-            category: identity.category,
-            type: identity.type,
-            name: (identity.name) ? identity.name : null,
+            'category': identity.category,
+            'type': identity.type,
+            'name': (identity.name) ? identity.name : null,
             'xml:lang': (identity.lang) ? identity.lang : null
          };
 
@@ -51,7 +51,7 @@ export class DiscoInfoHandler extends AbstractHandler {
    private addFeaturesToStanza(iq) {
       for (let feature of this.account.getDiscoInfo().getFeatures()) {
          iq.c('feature', {
-            'var': feature
+            var: feature
          }).up();
       }
 
@@ -67,7 +67,7 @@ export class DiscoItemsHandler extends AbstractHandler {
 
       let iq = $iq({
          type: 'result',
-         id: id,
+         id,
          to: from
       }).c('query', {
          xmlns: NS.get('DISCO_ITEMS'),
@@ -76,7 +76,7 @@ export class DiscoItemsHandler extends AbstractHandler {
 
       //We return an empty set, because we dont support disco items
 
-      (<any>this.account.getConnection()).send(iq.tree());
+      (<any> this.account.getConnection()).send(iq.tree());
 
       return true;
    }

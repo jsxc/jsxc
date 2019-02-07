@@ -19,10 +19,10 @@ export default class DiscoInfoChangeable extends DiscoInfo {
       }
 
       identities.push({
-         category: category,
-         type: type,
-         name: name,
-         lang: lang
+         category,
+         type,
+         name,
+         lang
       });
       this.data.set('identities', identities);
 

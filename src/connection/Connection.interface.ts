@@ -3,7 +3,9 @@ import Message from './../Message'
 import { Presence } from './AbstractConnection'
 import Form from './Form'
 import PEPService from './services/PEP'
+import PubSubService from './services/PubSub'
 import 'Strophe'
+import JingleHandler from './JingleHandler';
 
 export interface IConnection {
    registerHandler(handler: (stanza: string) => boolean, ns?: string, name?: string, type?: string, id?: string, from?: string);
@@ -13,6 +15,8 @@ export interface IConnection {
 
    pluginOnlySendIQ(stanzaElement: Element): Promise<Element>;
    pluginOnlySendIQ(stanzaElement: Strophe.Builder): Promise<Element>;
+
+   getPubSubService(): PubSubService
 
    getPEPService(): PEPService
 
@@ -24,7 +28,7 @@ export interface IConnection {
 
    getDiscoService(): DiscoService
 
-   getJingleHandler()
+   getJingleHandler(): JingleHandler
 
    getJID(): IJID
 
@@ -64,7 +68,7 @@ export interface RosterService {
 
    removeContact(jid: IJID): Promise<Element>
 
-   addContact(jid: IJID, alias: string)
+   addContact(jid: IJID, alias: string): Promise<Element>
 
    setDisplayName(jid: IJID, displayName: string): Promise<Element>
 

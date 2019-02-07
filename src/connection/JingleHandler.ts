@@ -5,10 +5,13 @@ import * as RTC from 'webrtc-adapter'
 import { createRegistry } from 'jxt'
 import Log from '../util/Log'
 import UUID from '../util/UUID'
-import JID from '../JID'
+import JID from '@src/JID';
+import { IJID } from '../JID.interface'
 import { VideoDialog } from '../ui/VideoDialog'
 import JingleSession from '../JingleSession'
 import JingleAbstractSession from '../JingleAbstractSession'
+import JingleMediaSession from '@src/JingleMediaSession';
+import { OTalkJingleMediaSession } from '@vendor/Jingle.interface';
 
 let jxt = createRegistry();
 jxt.use(require('jxt-xmpp-types'));
@@ -20,9 +23,9 @@ export default class JingleHandler {
 
    protected manager: JSM;
 
-   protected static videoDialog;
+   protected static videoDialog: VideoDialog;
 
-   protected static instances = [];
+   protected static instances: JingleHandler[] = [];
 
    constructor(protected account: Account, protected connection: IConnection) {
 
@@ -48,7 +51,7 @@ export default class JingleHandler {
             iqElement.setAttribute('id', UUID.v4() + ':sendIQ');
          }
 
-         (<any>this.connection).send(iqElement); //@REVIEW
+         (<any> this.connection).send(iqElement); //@REVIEW
       });
 
       this.manager.on('incoming', (session) => {
@@ -56,26 +59,30 @@ export default class JingleHandler {
       });
 
       JingleHandler.instances.push(this);
-
-      //@TODO add on client unavailable (this.manager.endPeerSessions(peer_jid_full, true))
    }
 
-   public initiate(peerJID: JID, stream, offerOptions?) {
-      var session = this.manager.createMediaSession(peerJID.full);
+   public initiate(peerJID: IJID, stream: MediaStream, offerOptions?): Promise<JingleMediaSession> {
+      let session: OTalkJingleMediaSession = this.manager.createMediaSession(peerJID.full);
 
       //@TODO extract onIceConnectionStateChanged from VideoWindow and use here
 
       session.addStream(stream);
-      session.start(offerOptions); //@TODO use this.getPeerConstraints; Review peer constraints vs offer options
 
-      return session;
+      return new Promise(resolve => {
+         //@TODO use this.getPeerConstraints; Review peer constraints vs offer options
+         session.start(offerOptions, () => {
+            let jingleSession = JingleSession.create(this.account, session);
+
+            resolve(jingleSession);
+         });
+      });
    }
 
-   public terminate(jid, reason?, silent?);
-   public terminate(reason?, silent?);
+   public terminate(jid: IJID, reason?: string, silent?: boolean);
+   public terminate(reason?: string, silent?: boolean);
    public terminate() {
-      if (arguments.length === 3) {
-         this.manager.endPeerSessions(arguments[0], arguments[1], arguments[2]);
+      if (arguments[0] instanceof JID) {
+         this.manager.endPeerSessions(arguments[0].full, arguments[1], arguments[2]);
       } else {
          this.manager.endAllSessions(arguments[0], arguments[1]);
       }
@@ -94,8 +101,8 @@ export default class JingleHandler {
       this.manager.config.peerConnectionConstraints = constraints;
    }
 
-   public onJingle = (iq) => {
-      var req;
+   public onJingle = (iq: Element) => {
+      let req;
 
       try {
          req = jxt.parse(iq.outerHTML);
@@ -110,11 +117,11 @@ export default class JingleHandler {
       return true;
    }
 
-   protected onIncoming(session): JingleAbstractSession {
+   protected onIncoming(session: OTalkJingleMediaSession): JingleAbstractSession {
       return JingleSession.create(this.account, session);
    }
 
-   private onIncomingFileTransfer(session) {
+   private onIncomingFileTransfer(session: OTalkJingleMediaSession) {
       Log.debug('incoming file transfer from ' + session.peerID);
 
       let peerJID = new JID(session.peerID);
@@ -148,14 +155,14 @@ export default class JingleHandler {
    }
 
    private getPeerConstraints(offerToReceiveAudio = false, offerToReceiveVideo = false) {
-      var browserDetails = RTC.browserDetails;
+      let browserDetails = RTC.browserDetails;
       let peerConstraints;
 
       if ((browserDetails.version < 33 && browserDetails.browser === 'firefox') || browserDetails.browser === 'chrome') {
          peerConstraints = {
             mandatory: {
-               'OfferToReceiveAudio': offerToReceiveAudio,
-               'OfferToReceiveVideo': offerToReceiveVideo,
+               OfferToReceiveAudio: offerToReceiveAudio,
+               OfferToReceiveVideo: offerToReceiveVideo,
             }
          };
 
@@ -164,8 +171,8 @@ export default class JingleHandler {
          }
       } else {
          peerConstraints = {
-            'offerToReceiveAudio': offerToReceiveAudio,
-            'offerToReceiveVideo': offerToReceiveVideo,
+            offerToReceiveAudio,
+            offerToReceiveVideo,
          };
 
          if (browserDetails.browser === 'firefox') {
@@ -190,9 +197,6 @@ export default class JingleHandler {
       return JingleHandler.videoDialog;
    }
 }
-
-
-
 
 /** required disco features for video call */
 // reqVideoFeatures: ['urn:xmpp:jingle:apps:rtp:video', 'urn:xmpp:jingle:apps:rtp:audio', 'urn:xmpp:jingle:transports:ice-udp:1', 'urn:xmpp:jingle:apps:dtls:0'],

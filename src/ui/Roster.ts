@@ -9,22 +9,24 @@ import Menu from './util/Menu'
 import { IContact } from '../Contact.interface'
 import WindowList from './ChatWindowList'
 import Client from '../Client'
-import Storage from '../Storage'
-import PersistentMap from '../util/PersistentMap'
 import Translation from '../util/Translation'
 import { Notice, TYPE } from '../Notice'
 import { Presence } from '../connection/AbstractConnection'
 import { NoticeManager } from '../NoticeManager'
 import ClientAvatar from '../ClientAvatar'
+import confirmDialog from './dialogs/confirm'
 
 let rosterTemplate = require('../../template/roster.hbs')
+
+const APPEND_KEY = 'rosterAppend';
+const VISIBILITY_KEY = 'rosterVisibility';
+const HELP_KEY = 'onlineHelp';
+const HIDE_OFFLINE_KEY = 'hideOfflineContacts';
 
 export default class Roster {
 
    private element: JQuery;
    private contactList: JQuery;
-   private storage: Storage;
-   private options: PersistentMap;
 
    private static instance: Roster;
    private static hidden: boolean;
@@ -59,21 +61,18 @@ export default class Roster {
 
    private constructor() {
       let template = rosterTemplate({
-         onlineHelpUrl: Client.getOption('onlineHelp')
+         onlineHelpUrl: Client.getOption(HELP_KEY)
       });
       this.element = $(template);
       if (Roster.hidden) {
          this.hide();
       }
-      this.element.appendTo(Client.getOption('rosterAppend') + ':first');
+      this.element.appendTo(Client.getOption(APPEND_KEY) + ':first');
 
       //make sure css empty selector works
       $('.jsxc-js-notice-menu .jsxc-menu__button').text('');
 
       this.contactList = this.element.find('.jsxc-contact-list');
-
-      this.storage = Client.getStorage();
-      this.options = new PersistentMap(this.storage, 'roster');
 
       this.addMainMenuEntries();
       this.registerPresenceHandler();
@@ -156,8 +155,6 @@ export default class Roster {
       }
 
       rosterItemElement.remove();
-
-      //@TODO check if we are still connected and if we have to display an "your roster is empty" warning
    }
 
    public clearStatus() {
@@ -175,7 +172,7 @@ export default class Roster {
    public setNoConnection() {
       let linkElement = $('<a>');
       linkElement.text('relogin');
-      linkElement.click(<any>showLoginBox);
+      linkElement.click(<any> showLoginBox);
 
       let statusElement = $('<p>');
       statusElement.text('no_connection');
@@ -187,7 +184,7 @@ export default class Roster {
    public setEmptyContactList() {
       let statusElement = $('<p>');
       statusElement.text(Translation.t('Your_roster_is_empty_add_'));
-      statusElement.find('a').click(<any>showContactDialog);
+      statusElement.find('a').click(<any> showContactDialog);
       statusElement.append('.');
 
       this.setStatus(statusElement);
@@ -212,7 +209,7 @@ export default class Roster {
    }
 
    public registerHook(property: string, func: (newValue: any, oldValue: any) => void) {
-      this.options.registerHook(property, func);
+      Client.getOptions().registerHook(property, func);
    }
 
    public addNotice(manager: NoticeManager, notice: Notice) {
@@ -236,7 +233,25 @@ export default class Roster {
       noticeElement.attr('data-manager-id', manager.getId());
       noticeListElement.append(noticeElement);
 
-      $('.jsxc-js-notice-menu .jsxc-menu__button').text(noticeListElement.find('li').length);
+      let numberOfNotices = noticeListElement.find('li').not('.jsxc-js-delete-all').length;
+      $('.jsxc-js-notice-menu .jsxc-menu__button').text(numberOfNotices);
+
+      if (numberOfNotices > 2 && noticeListElement.find('.jsxc-js-delete-all').length === 0) {
+         let deleteAllElement = $('<li>');
+         deleteAllElement.addClass('jsxc-js-delete-all jsxc-menu__item--danger jsxc-icon--delete');
+         deleteAllElement.text(Translation.t('Close_all'));
+         deleteAllElement.prependTo(noticeListElement);
+
+         deleteAllElement.click((ev) => {
+            ev.stopPropagation();
+            ev.preventDefault();
+
+            let dialog = confirmDialog(Translation.t('Do_you_really_want_to_dismiss_all_notices'));
+            dialog.getPromise().then(() => {
+               NoticeManager.removeAll();
+            }).catch(() => {});
+         })
+      }
    }
 
    public removeNotice(manager: NoticeManager, noticeId: string) {
@@ -248,8 +263,12 @@ export default class Roster {
 
       noticeElement.remove();
 
-      let numberOfNotices = $('.jsxc-js-notice-menu li').length;
+      let numberOfNotices = $('.jsxc-js-notice-menu li').not('.jsxc-js-delete-all').length;
       $('.jsxc-js-notice-menu .jsxc-menu__button').text(numberOfNotices > 0 ? numberOfNotices : '');
+
+      if (numberOfNotices < 3) {
+         $('.jsxc-js-notice-menu .jsxc-js-delete-all').remove();
+      }
    }
 
    public addMenuEntry(options: { id: string, handler: (ev) => void, label: string | JQuery<HTMLElement>, icon?: string, offlineAvailable?: boolean }) {
@@ -257,7 +276,7 @@ export default class Roster {
       let li = $('<li>');
 
       if (!id || !handler || !label) {
-         throw 'id, handler and label required for menu entry';
+         throw new Error('id, handler and label required for menu entry');
       }
 
       if (typeof label === 'string') {
@@ -299,9 +318,9 @@ export default class Roster {
       let presence = (contact.getSubscription() === 'both') ? contact.getPresence() : Presence.offline + 1;
 
       contactList.children().each(function() {
-         var pointer = $(this);
-         var pointerSubscription = pointer.data('subscription');
-         var pointerPresence = (pointerSubscription === 'both') ? Presence[pointer.data('presence')] : Presence.offline + 1;
+         let pointer = $(this);
+         let pointerSubscription = pointer.data('subscription');
+         let pointerPresence = (pointerSubscription === 'both') ? Presence[pointer.data('presence')] : Presence.offline + 1;
          let pointerName = pointer.find('.jsxc-name').text();
 
          if ((pointerName.toLowerCase() > contact.getName().toLowerCase() && pointerPresence === presence) || pointerPresence > presence) {
@@ -322,14 +341,14 @@ export default class Roster {
       this.addMenuEntry({
          id: 'about',
          handler: showAboutDialog,
-         label: Translation.t("About"),
+         label: Translation.t('About'),
          offlineAvailable: true,
       });
 
       this.addMenuEntry({
          id: 'online-help',
-         handler: function(ev) { },
-         label: $(`<a href="#" target="_blank">${Translation.t("Online_help")}</a>`),
+         handler(ev) { },
+         label: $(`<a href="#" target="_blank">${Translation.t('Online_help')}</a>`),
          offlineAvailable: true,
          icon: 'help',
       });
@@ -337,45 +356,42 @@ export default class Roster {
       this.addMenuEntry({
          id: 'add-contact',
          handler: showContactDialog,
-         label: Translation.t("Add_buddy"),
+         label: Translation.t('Add_buddy'),
          icon: 'contact'
       });
 
       this.addMenuEntry({
          id: 'hide-offline',
          handler: this.toggleOffline,
-         label: $(`<span class="jsxc-hide-offline">${Translation.t("Hide_offline")}</span>
-                   <span class="jsxc-show-offline">${Translation.t("Show_offline")}</span>`),
+         label: $(`<span class="jsxc-hide-offline">${Translation.t('Hide_offline')}</span>
+                   <span class="jsxc-show-offline">${Translation.t('Show_offline')}</span>`),
       });
 
       this.addMenuEntry({
          id: 'mute-notification',
          handler: this.muteNotification,
-         label: Translation.t("Mute"),
+         label: Translation.t('Mute'),
       });
 
       this.addMenuEntry({
          id: 'join-muc',
          handler: showMultiUserJoinDialog,
-         label: Translation.t("Join_chat"),
+         label: Translation.t('Join_chat'),
          icon: 'groupcontact'
       });
 
       this.addMenuEntry({
          id: 'settings',
          handler: showSettingsDialog,
-         label: Translation.t("Settings"),
+         label: Translation.t('Settings'),
          offlineAvailable: true,
          icon: 'setting'
       });
    }
 
    private registerPresenceHandler() {
-      let self = this;
-      let options = this.options;
-
       this.element.find('.jsxc-js-presence-menu li').click(function() {
-         let presenceString = <string>$(this).data('presence');
+         let presenceString = <string> $(this).data('presence');
          let oldPresence = Client.getPresenceController().getTargetPresence() || Presence.offline;
          let requestedPresence = Presence[presenceString];
 
@@ -398,9 +414,9 @@ export default class Roster {
    }
 
    private toggleOffline = (ev) => {
-      var hideOffline = !this.options.get('hideOffline');
+      let hideOffline = !Client.getOption(HIDE_OFFLINE_KEY);
 
-      this.options.set('hideOffline', hideOffline);
+      Client.setOption(HIDE_OFFLINE_KEY, hideOffline);
    }
 
    private hideOffline(yes: boolean) {
@@ -412,6 +428,7 @@ export default class Roster {
    }
 
    private muteNotification = () => {
+      //@TODO mute notification
       // if (jsxc.storage.getUserItem('presence') === 'dnd') {
       //    return;
       // }
@@ -427,11 +444,11 @@ export default class Roster {
    }
 
    public toggle = () => {
-      let state = this.options.get('visibility');
+      let state = Client.getOption(VISIBILITY_KEY);
 
       state = (state === CONST.HIDDEN) ? CONST.SHOWN : CONST.HIDDEN;
 
-      this.options.set('visibility', state);
+      Client.setOption(VISIBILITY_KEY, state);
    }
 
    private setVisibility(state: string) {
@@ -444,17 +461,15 @@ export default class Roster {
    }
 
    private initOptions() {
-      let hideOffline = this.options.get('hideOffline');
-      hideOffline = (typeof hideOffline === 'boolean') ? hideOffline : Client.getOption('hideOffline');
+      let hideOffline = Client.getOption(HIDE_OFFLINE_KEY);
       this.hideOffline(hideOffline);
-      this.options.registerHook('hideOffline', (hideOffline) => {
+      Client.getOptions().registerHook(HIDE_OFFLINE_KEY, (hideOffline) => {
          this.hideOffline(hideOffline);
       });
 
-      //@TODO || (Client.getOption('loginForm').startMinimized ? CONST.HIDDEN : CONST.SHOWN
-      let rosterState = this.options.get('visibility') || CONST.SHOWN;
-      this.setVisibility(rosterState);
-      this.options.registerHook('visibility', (visibility) => {
+      let visibility = Client.getOption(VISIBILITY_KEY);
+      this.setVisibility([CONST.HIDDEN, CONST.SHOWN].indexOf(visibility) > -1 ? visibility : CONST.SHOWN);
+      Client.getOptions().registerHook(VISIBILITY_KEY, (visibility) => {
          this.setVisibility(visibility);
       });
 

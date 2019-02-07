@@ -53,8 +53,8 @@ export default class Vcard extends AbstractService {
             src = src.replace(/[\t\r\n\f]/gi, '');
 
             value = {
-               type: type,
-               src: src
+               type,
+               src
             };
          } else if (children.length > 0) {
             value = self.parseVcardChildren(children);

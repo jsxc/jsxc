@@ -1,7 +1,7 @@
 import ArrayBufferUtils from '../util/ArrayBuffer'
 import Exportable from './Exportable';
 
-type IdentityKeyObject = { publicKey: ArrayBuffer, privateKey?: ArrayBuffer }
+interface IdentityKeyObject { publicKey: ArrayBuffer, privateKey?: ArrayBuffer }
 
 export default class IdentityKey implements Exportable {
    constructor(private data: IdentityKeyObject) {

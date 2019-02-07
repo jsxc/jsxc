@@ -4,7 +4,9 @@
         "jsxc",
         "omemo",
         "xmlns",
-        "XMPP"
+        "XMPP",
+        "IJID",
+        "JID"
     ],
     "todohighlight.include": [
         "src/**/*.ts"

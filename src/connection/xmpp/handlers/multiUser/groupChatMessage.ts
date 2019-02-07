@@ -26,7 +26,7 @@ export default class extends AbstractHandler {
       let body = bodyElement.text();
       let nickname = from.resource;
 
-      let contact = <MultiUserContact>this.account.getContact(from);
+      let contact = <MultiUserContact> this.account.getContact(from);
       if (typeof contact === 'undefined') {
          Log.info('Sender is not in our contact list')
 
@@ -43,11 +43,11 @@ export default class extends AbstractHandler {
          contact.setSubject(subjectElement.text());
 
          let translatedMessage = Translation.t('changed_subject_to', {
-            nickname: nickname,
+            nickname,
             subject: contact.getSubject()
          });
 
-         contact.addSystemMessage(translatedMessage);
+         contact.addSystemMessage(':page_with_curl: ' + translatedMessage);
 
          return this.PRESERVE_HANDLER;
       }

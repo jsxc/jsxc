@@ -76,7 +76,7 @@ export default class Omemo {
       return peer.getTrust() !== Trust.unknown && this.localPeer.getTrust() !== Trust.unknown;
    }
 
-   public getDevices(contact?: Contact): Array<Device> {
+   public getDevices(contact?: Contact): Device[] {
       let peer;
 
       if (contact) {
@@ -121,20 +121,20 @@ export default class Omemo {
       let messageElement = $(stanza);
 
       if (messageElement.prop('tagName') !== 'message') {
-         throw 'Root element is no message element';
+         throw new Error('Root element is no message element');
       }
 
       let encryptedElement = $(stanza).find(`>encrypted[xmlns="${NS_BASE}"]`);
 
       if (encryptedElement.length === 0) {
-         throw 'No encrypted stanza found';
+         throw new Error('No encrypted stanza found');
       }
 
       let from = new JID(messageElement.attr('from'));
       let encryptedData = Stanza.parseEncryptedStanza(encryptedElement);
 
       if (!encryptedData) {
-         throw 'Could not parse encrypted stanza';
+         throw new Error('Could not parse encrypted stanza');
       }
 
       let ownDeviceId = this.store.getLocalDeviceId();
@@ -153,7 +153,7 @@ export default class Omemo {
       try {
          deviceDecryptionResult = await peer.decrypt(encryptedData.sourceDeviceId, ownPreKey.ciphertext, ownPreKey.preKey);
       } catch (err) {
-         throw 'Error during decryption: ' + err;
+         throw new Error('Error during decryption: ' + err);
       }
 
       let exportedKey = deviceDecryptionResult.plaintextKey;
@@ -161,11 +161,11 @@ export default class Omemo {
       let authenticationTag = exportedKey.slice(16);
 
       if (authenticationTag.byteLength < 16) {
-         throw 'Authentication tag too short';
+         throw new Error('Authentication tag too short');
       }
 
       if (!encryptedData.payload) {
-         throw 'We received a KeyTransportElement';
+         throw new Error('We received a KeyTransportElement');
       }
 
       if (ownPreKey.preKey) {
@@ -174,7 +174,7 @@ export default class Omemo {
          });
       }
 
-      let iv = (<any>encryptedData).iv;
+      let iv = (<any> encryptedData).iv;
       let ciphertextAndAuthenticationTag = ArrayBufferUtils.concat(encryptedData.payload, authenticationTag);
 
       return {

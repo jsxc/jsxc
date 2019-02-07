@@ -28,7 +28,7 @@ export default class Connector {
          let type = this.connectionParameters.get('type');
 
          if (type === TYPE.WEBSOCKET) {
-            throw 'Cannt attach to websocket connection.';
+            throw new Error('Cannt attach to websocket connection.');
          }
 
          this.connectionArgs = [
@@ -143,7 +143,7 @@ export default class Connector {
 
    private replaceStorageConnectionWithXMPPConnection(stropheConnection) {
       let accountConnection = this.account.getConnection();
-      let handlers = (<StorageConnection>accountConnection).getHandlers();
+      let handlers = (<StorageConnection> accountConnection).getHandlers();
 
       accountConnection.close();
       accountConnection = new XMPPConnection(this.account, stropheConnection);

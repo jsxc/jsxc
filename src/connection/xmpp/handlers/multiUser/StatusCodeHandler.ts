@@ -2,7 +2,7 @@ import Translation from '../../../../util/Translation'
 import MultiUserContact from '../../../../MultiUserContact'
 import MultiUserPresenceProcessor from './PresenceProcessor'
 import showSelectionDialog from '../../../../ui/dialogs/selection'
-import showRoomConfigurationDialog from '../../../../ui/dialogs/multiUserRoomConfiguration'
+import showRoomConfigurationDialog, { CANCELED } from '../../../../ui/dialogs/multiUserRoomConfiguration'
 
 //@TODO those status codes are partially transmitted through message stanzas
 // https://xmpp.org/extensions/xep-0045.html#registrar-statuscodes
@@ -67,9 +67,8 @@ export default class MultiUserStatusCodeHandler {
       }
 
       promise.then((stanza) => {
-         //@TODO use constant
-         if (stanza === 'canceled') {
-            this.presenceHandler.inform(Translation.t('Configuration_canceled')); //@TODO translate
+         if (stanza === CANCELED) {
+            this.presenceHandler.inform(Translation.t('Configuration_canceled'));
          }
       }).catch(() => {
 
@@ -143,7 +142,7 @@ function showInstantOrConfigurationDialog(multiUserContact: MultiUserContact) {
          message: Translation.t('Do_you_want_to_change_the_default_room_configuration'),
          primary: {
             label: Translation.t('Default'),
-            cb: function() {
+            cb() {
                multiUserContact.setRoomConfiguration(MultiUserContact.INSTANT_ROOMCONFIG);
 
                let instantRoomPromise = multiUserContact.createInstantRoom();
@@ -153,7 +152,7 @@ function showInstantOrConfigurationDialog(multiUserContact: MultiUserContact) {
          },
          option: {
             label: Translation.t('Change'),
-            cb: function() {
+            cb() {
                let roomConfigurationPromise = showRoomConfigurationDialog(multiUserContact);
 
                resolve(roomConfigurationPromise);

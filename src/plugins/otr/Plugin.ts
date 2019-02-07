@@ -26,7 +26,7 @@ interface DSA {
    packPrivate
 }
 
-Options.get().addDefaults({
+Options.addDefaults({
    otr: {
       ERROR_START_AKE: false,
       debug: false,

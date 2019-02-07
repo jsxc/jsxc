@@ -1,23 +1,17 @@
 import JingleHandler from '@connection/JingleHandler';
 import Log from '@util/Log';
-import JingleAbstractSession from './JingleAbstractSession';
+import JingleMediaSession from './JingleMediaSession';
 import Notification from './Notification';
 import Translation from '@util/Translation';
 import JID from './JID';
 
-export default class JingleStreamSession extends JingleAbstractSession {
+export default class JingleStreamSession extends JingleMediaSession {
 
    public onOnceIncoming() {
-      let peerJID = new JID(this.session.peerID);
-      let contact = this.account.getContact(peerJID);
-
-      // let chatWindow = contact.getChatWindow();
-      // chatWindow.postScreenMessage(Translation.t('Incoming_stream'), session.sid);
-
       Notification.notify({
          title: Translation.t('Incoming_stream'),
-         message: Translation.t('from_sender') + contact.getName(),
-         source: contact
+         message: Translation.t('from_sender') + this.peerContact.getName(),
+         source: this.peerContact
       });
 
       // send signal to partner
@@ -28,9 +22,9 @@ export default class JingleStreamSession extends JingleAbstractSession {
       Log.debug('incoming stream from ' + this.session.peerID);
 
       let videoDialog = JingleHandler.getVideoDialog();
-      videoDialog.addSession(this.session);
 
       videoDialog.showCallDialog(this).then(() => {
+         videoDialog.addSession(this);
          videoDialog.showVideoWindow();
 
          this.session.accept();

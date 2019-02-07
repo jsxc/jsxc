@@ -99,7 +99,7 @@ export default class ClientAvatar {
    }
 
    private getCurrentType(): TYPE {
-      return parseInt(this.storage.getItem(KEY_TYPE));
+      return parseInt(this.storage.getItem(KEY_TYPE), 10);
    }
 
    private setSourceContact(contact: IContact) {

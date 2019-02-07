@@ -241,7 +241,7 @@ export default class ChatWindow {
       windowElement.on('dragover', (ev) => {
          ev.preventDefault();
 
-         (<any>ev.originalEvent).dataTransfer.dropEffect = 'copy';
+         (<any> ev.originalEvent).dataTransfer.dropEffect = 'copy';
       });
    }
 
@@ -350,7 +350,7 @@ export default class ChatWindow {
 
    private registerInputHandler() {
       let self = this;
-      var textinputBlurTimeout;
+      let textinputBlurTimeout;
       let inputElement = this.inputElement;
 
       inputElement.keyup(self.onInputKeyUp);
@@ -366,7 +366,7 @@ export default class ChatWindow {
    }
 
    private onInputKeyUp = (ev) => {
-      let message = <string>$(ev.target).val();
+      let message = <string> $(ev.target).val();
 
       if (ev.which === ENTER_KEY && !ev.shiftKey) {
          message = '';
@@ -391,7 +391,7 @@ export default class ChatWindow {
    }
 
    private onInputKeyPress = (ev) => {
-      let message: string = <string>$(ev.target).val();
+      let message: string = <string> $(ev.target).val();
 
       if (ev.which !== ENTER_KEY || ev.shiftKey || (!message && !this.attachmentDeposition)) {
          return;
@@ -523,15 +523,15 @@ export default class ChatWindow {
       let emoticonList = Emoticons.getDefaultEmoticonList();
 
       emoticonList.forEach(emoticon => {
-         var li = $('<li>');
+         let li = $('<li>');
 
          li.append(Emoticons.toImage(emoticon));
          li.find('div').attr('title', emoticon);
          li.click(() => {
             let inputElement = this.element.find('.jsxc-message-input');
-            let inputValue = <string>inputElement.val() || '';
-            let selectionStart = (<HTMLInputElement>inputElement[0]).selectionStart;
-            let selectionEnd = (<HTMLInputElement>inputElement[0]).selectionEnd;
+            let inputValue = <string> inputElement.val() || '';
+            let selectionStart = (<HTMLInputElement> inputElement[0]).selectionStart;
+            let selectionEnd = (<HTMLInputElement> inputElement[0]).selectionEnd;
             let inputStart = inputValue.slice(0, selectionStart);
             let inputEnd = inputValue.slice(selectionEnd);
 
@@ -619,7 +619,7 @@ export default class ChatWindow {
       let menu = this.encryptionMenu;
 
       for (let plugin of encryptionPlugins) {
-         let label = (<any>plugin.constructor).getName().toUpperCase();
+         let label = (<any> plugin.constructor).getName().toUpperCase();
 
          menu.addEntry(label, () => {
             //@TODO show spinner

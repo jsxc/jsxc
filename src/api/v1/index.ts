@@ -63,3 +63,18 @@ export function deleteAllData() {
 
    return count;
 }
+
+export function exportAllOptions() {
+   let accounts = Client.getAccountManager().getAccounts();
+
+   return {
+      ...accounts.reduce((previous, account) => {
+         let option = account.getOptions();
+
+         previous[option.getId()] = option.export();
+
+         return previous;
+      }, {}),
+      [Client.getOptions().getId()]: Client.getOptions().export()
+   };
+}

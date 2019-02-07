@@ -1,4 +1,5 @@
 import { API as PluginAPI } from './PluginAPI.interface'
+import DiscoInfoRepository from '@src/DiscoInfoRepository';
 
 export enum PluginType {
    Encryption
@@ -27,8 +28,12 @@ export abstract class AbstractPlugin {
 
    constructor(protected minVersion: string, protected maxVersion: string, protected pluginAPI: PluginAPI) {
       if (!this.isSupportingClientVersion()) {
-         throw 'This plugin doesn\'t support this client version';
+         throw new Error('This plugin doesn\'t support this client version');
       }
+   }
+
+   public destroy() {
+
    }
 
    private isSupportingClientVersion(): boolean {
@@ -40,7 +45,7 @@ export abstract class AbstractPlugin {
    }
 
    private getVersionNumber(version: string): number {
-      let versions = version.split('.').map(function(v) { return parseInt(v); });
+      let versions = version.split('.').map(function(v) { return parseInt(v, 10); });
 
       return versions[0] * 1000000 + versions[1] * 1000 + versions[2];
    }

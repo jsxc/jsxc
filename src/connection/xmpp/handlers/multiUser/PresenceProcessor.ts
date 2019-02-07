@@ -40,7 +40,7 @@ export default class MultiUserPresenceProcessor {
    }
 
    private processUnavailable() {
-      var newNickname = this.xElement.find('item').attr('nick');
+      let newNickname = this.xElement.find('item').attr('nick');
 
       if (this.xElement.find('destroy').length > 0) {
          this.getMultiUserContact().shutdown();
@@ -56,16 +56,16 @@ export default class MultiUserPresenceProcessor {
 
          this.inform(Translation.t('is_now_known_as', {
             oldNickname: this.nickname,
-            newNickname: newNickname,
+            newNickname,
             escapeInterpolation: true
          }));
       } else {
          this.multiUserContact.removeMember(this.nickname);
 
          if (this.codes.length === 1 && this.codes.indexOf('110') > -1) {
-            this.inform(Translation.t('You_left_the_building'));
+            this.inform(':door:' + Translation.t('You_left_the_building'));
          } else if (this.codes.length === 0) {
-            this.inform(Translation.t('left_the_building', {
+            this.inform(':door:' + Translation.t('left_the_building', {
                nickname: this.nickname,
                escapeInterpolation: true
             }));
@@ -82,7 +82,7 @@ export default class MultiUserPresenceProcessor {
       let isNew = this.multiUserContact.addMember(this.nickname, affiliation, role, jid);
 
       if (isNew && this.multiUserContact.isMemberListComplete()) {
-         this.inform(Translation.t('entered_the_room', {
+         this.inform(':footprints: ' + Translation.t('entered_the_room', {
             nickname: this.nickname,
             escapeInterpolation: true
          }));
@@ -103,11 +103,11 @@ export default class MultiUserPresenceProcessor {
    }
 
    private postReason() {
-      var actor = {
+      let actor = {
          name: this.getXElement().find('actor').attr('nick'),
          jid: this.getXElement().find('actor').attr('jid')
       };
-      var reason = this.getXElement().find('reason').text();
+      let reason = this.getXElement().find('reason').text();
 
       if (reason !== '') {
          reason = Translation.t('Reason') + ': ' + reason;

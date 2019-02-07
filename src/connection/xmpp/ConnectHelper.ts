@@ -61,9 +61,9 @@ function resolveConnectionPromise(status, condition, connection, resolve, reject
          connection.flush();
       case Strophe.Status.CONNECTED:
          resolve({
-            connection: connection,
-            status: status,
-            condition: condition
+            connection,
+            status,
+            condition
          });
          break;
       default:
@@ -72,11 +72,13 @@ function resolveConnectionPromise(status, condition, connection, resolve, reject
 }
 
 function testBasicConnectionParameters(url: string, jid: string) {
-   if (!jid)
+   if (!jid) {
       throw new InvalidParameterError('I can not log in without a jid.');
+   }
 
-   if (!url)
+   if (!url) {
       throw new InvalidParameterError('I can not log in without an URL.');
+   }
 }
 
 function registerXMPPNamespaces() {

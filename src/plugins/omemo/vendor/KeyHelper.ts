@@ -1,7 +1,7 @@
-import PreKey from "../model/PreKey";
-import SignedPreKey from "../model/SignedPreKey";
-import IdentityKey from "../model/IdentityKey";
-import { SignalKeyHelper } from "./Signal";
+import PreKey from '../model/PreKey';
+import SignedPreKey from '../model/SignedPreKey';
+import IdentityKey from '../model/IdentityKey';
+import { SignalKeyHelper } from './Signal';
 
 export class KeyHelper {
    public static async generatePreKey(keyId: number): Promise<PreKey> {

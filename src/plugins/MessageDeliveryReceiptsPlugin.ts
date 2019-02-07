@@ -92,7 +92,7 @@ export default class ReceiptPlugin extends AbstractPlugin {
 
    private onReceiptRequest = (stanza: string) => {
       let messageElement = $(stanza);
-      let isReceiptRequest = messageElement.find("request[xmlns='urn:xmpp:receipts']").length > 0;
+      let isReceiptRequest = messageElement.find('request[xmlns=\'urn:xmpp:receipts\']').length > 0;
 
       if (!isReceiptRequest) {
          return PRESERVE_HANDLER;

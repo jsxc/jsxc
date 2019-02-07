@@ -1,42 +1,49 @@
 import Account from './Account'
 import JingleCallSession from './JingleCallSession'
 import JingleStreamSession from './JingleStreamSession';
+import { OTalkJingleSession } from '@vendor/Jingle.interface';
+
+const MEDIA_SESSION = 'MediaSession';
+const CALL_SESSION = 'CallSession';
+const FILE_TRANSFER_SESSION = 'FileTransferSession';
+const STREAM_SESSION = 'StreamSession';
 
 export default class JingleSession {
 
-   public static create(account: Account, session) {
+   public static create(account: Account, session: OTalkJingleSession) {
       let sessionType = JingleSession.getSessionType(session);
 
-      if (sessionType === 'FileTransferSession') {
+      if (sessionType === FILE_TRANSFER_SESSION) {
          throw new Error('We are currently not supporting file transfer sessions.');
-      } else if (sessionType === 'CallSession') {
+      } else if (sessionType === CALL_SESSION) {
          return new JingleCallSession(account, session);
-      } else if (sessionType === 'StreamSession') {
+      } else if (sessionType === STREAM_SESSION) {
          return new JingleStreamSession(account, session);
       } else {
          throw new Error('Could not create jingle session. Unknown session type.');
       }
    }
 
-   private static getSessionType(session) {
+   private static getSessionType(session: OTalkJingleSession) {
       let sessionType = (session.constructor) ? session.constructor.name : null;
 
-      if (sessionType === 'MediaSession') {
+      if (sessionType === MEDIA_SESSION) {
          sessionType = JingleSession.determineMediaSessionType(session);
       }
 
       return sessionType;
    }
 
-   private static determineMediaSessionType(session) {
+   private static determineMediaSessionType(session: OTalkJingleSession) {
       let reqMedia = false;
+      let description = session.isInitiator ? session.pc.localDescription : session.pc.remoteDescription;
 
-      $.each(session.pc.remoteDescription.contents, function() {
-         if (this.senders === 'both' && ['audio', 'video'].indexOf(this.name) > -1) {
+      description.contents.forEach(content => {
+         if (content.senders === 'both' && ['audio', 'video'].indexOf(content.name) > -1) {
             reqMedia = true;
          }
       });
 
-      return reqMedia ? 'CallSession' : 'StreamSession';
+      return reqMedia ? CALL_SESSION : STREAM_SESSION;
    }
 }

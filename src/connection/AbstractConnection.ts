@@ -1,21 +1,23 @@
 import Message from '../Message'
 import JID from '../JID'
-import { IJID } from '../JID.interface'
 import * as NS from './xmpp/namespace'
 import Log from '../util/Log'
 import { Strophe, $iq, $msg, $pres } from '../vendor/Strophe'
 import Account from '../Account'
-import Pipe from '../util/Pipe'
 import PEPService from './services/PEP'
+import PubSubService from './services/PubSub'
 import MUCService from './services/MUC'
 import RosterService from './services/Roster'
 import VcardService from './services/Vcard'
 import DiscoService from './services/Disco'
+<<<<<<< HEAD
 import { IMessage } from '@src/Message.interface';
 import Vcard from "@connection/services/Vcard";
 import contact from "@ui/dialogs/contact";
 import PersistentMap from "@util/PersistentMap";
 import { isString } from "util";
+=======
+>>>>>>> upstream/refactoring
 
 export const STANZA_KEY = 'stanza';
 export const STANZA_IQ_KEY = 'stanzaIQ';
@@ -58,12 +60,17 @@ abstract class AbstractConnection {
       NS.register('FORWARD', 'urn:xmpp:forward:0');
    }
 
+   public getPubSubService = (): PubSubService => {
+      //@TODO connect? supported?
+      return this.getService('pubsub', PubSubService);
+   }
+
    public getPEPService = (): PEPService => {
       return this.getService('pep', PEPService);
    }
 
    public getMUCService = (): MUCService => {
-      return this.getService('roster', MUCService);
+      return this.getService('muc', MUCService);
    }
 
    public getRosterService = (): RosterService => {
@@ -167,7 +174,7 @@ abstract class AbstractConnection {
    }
 
    public sendPresence(presence?: Presence) {
-      var presenceStanza = $pres();
+      let presenceStanza = $pres();
 
       presenceStanza.c('c', this.generateCapsAttributes()).up();
 
@@ -201,17 +208,17 @@ abstract class AbstractConnection {
       });
 
       iq.c('field', {
-         'var': 'FORM_TYPE',
+         var: 'FORM_TYPE',
          type: 'hidden'
       }).c('value').t(NS.get('MAM')).up().up();
 
       iq.c('field', {
-         'var': 'with'
+         var: 'with'
       }).c('value').t(archive.bare).up().up();
 
       if (end) {
          iq.c('field', {
-            'var': 'end'
+            var: 'end'
          }).c('value').t(end.toISOString()).up().up();
       }
 
@@ -308,20 +315,16 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public close() {
-
-   }
-
    protected getStorage() {
       return this.account.getSessionStorage();
    }
 
    private generateCapsAttributes() {
       return {
-         'xmlns': NS.get('CAPS'),
-         'hash': 'sha-1',
-         'node': this.node,
-         'ver': this.account.getDiscoInfo().getCapsVersion()
+         xmlns: NS.get('CAPS'),
+         hash: 'sha-1',
+         node: this.node,
+         ver: this.account.getDiscoInfo().getCapsVersion()
       }
    }
 }

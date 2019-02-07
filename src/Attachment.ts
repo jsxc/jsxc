@@ -29,14 +29,14 @@ export default class Attachment {
          this.file = arguments[0];
 
          this.properties.set({
-            'mimeType': this.file.type,
-            'name': this.file.name,
-            'size': this.file.size
+            mimeType: this.file.type,
+            name: this.file.name,
+            size: this.file.size
          });
       } else if (arguments.length === 3) {
          this.properties.set({
-            'mimeType': arguments[1],
-            'name': arguments[0]
+            mimeType: arguments[1],
+            name: arguments[0]
          });
 
          this.data = arguments[2];
@@ -162,7 +162,7 @@ export default class Attachment {
          let reader = new FileReader();
 
          reader.onload = function() {
-            resolve(<string>reader.result);
+            resolve(<string> reader.result);
          }
 
          reader.onerror = reject;
@@ -188,16 +188,19 @@ export default class Attachment {
          return;
       }
 
-      var sHeight, sWidth, sx, sy;
-      var dHeight = 100,
-         dWidth = 100;
-      var canvas = <HTMLCanvasElement>$('<canvas>').get(0);
+      let sHeight;
+      let sWidth;
+      let sx;
+      let sy;
+      let dHeight = 100;
+      let dWidth = 100;
+      let canvas = <HTMLCanvasElement> $('<canvas>').get(0);
 
       canvas.width = dWidth;
       canvas.height = dHeight;
 
-      var ctx = canvas.getContext('2d');
-      var img = new Image();
+      let ctx = canvas.getContext('2d');
+      let img = new Image();
 
       img.onload = () => {
          if (img.height > img.width) {

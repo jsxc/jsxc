@@ -12,6 +12,7 @@ import ChatWindowController from './ChatWindowController'
 import Avatar from './Avatar'
 import Message from './Message'
 import ChatWindow from './ui/ChatWindow';
+import ContactProvider from './ContactProvider';
 
 export default class Contact implements IIdentifiable, IContact {
    protected storage: Storage;
@@ -20,6 +21,8 @@ export default class Contact implements IIdentifiable, IContact {
 
    protected data: PersistentMap;
 
+   protected id: string;
+
    protected jid: JID;
 
    protected chatWindow;
@@ -27,6 +30,12 @@ export default class Contact implements IIdentifiable, IContact {
    protected chatWindowController;
 
    protected transcript: Transcript;
+
+   public static getProviderId(account: Account, id: string) {
+      let data = new PersistentMap(account.getStorage(), 'contact', id);
+
+      return data.get('provider');
+   }
 
    constructor(account: Account, jid: JID, name?: string);
    constructor(account: Account, id: string);
@@ -39,13 +48,15 @@ export default class Contact implements IIdentifiable, IContact {
       } else {
          this.initNewContact(arguments[1], arguments[2]);
       }
+
+      this.id = this.data.get('id');
    }
 
    private initExistingContact(id: string) {
       this.data = new PersistentMap(this.storage, 'contact', id);
 
       if (!this.data.get('id')) {
-         throw `Could not find existing contact with id "${id}".`;
+         throw new Error(`Could not find existing contact with id "${id}".`);
       }
 
       this.jid = new JID(this.data.get('jid'));
@@ -56,7 +67,7 @@ export default class Contact implements IIdentifiable, IContact {
       this.jid = jid;
 
       let defaultData = {
-         id: id,
+         id,
          jid: this.jid.full,
          name: name || this.jid.bare,
          nickname: this.jid.bare,
@@ -73,10 +84,8 @@ export default class Contact implements IIdentifiable, IContact {
       this.data.set(defaultData);
    }
 
-   public delete() {
-      this.account.getConnection().getRosterService().removeContact(this.getJid());
-
-      this.data.empty();
+   public async delete() {
+      this.data.delete();
    }
 
    public getChatWindow(): ChatWindow {
@@ -141,9 +150,9 @@ export default class Contact implements IIdentifiable, IContact {
       this.data.set('presence', presence);
    }
 
-   public getCapableResources(features: string[]): Promise<Array<string>>
-   public getCapableResources(features: string): Promise<Array<string>>
-   public getCapableResources(features): Promise<Array<string>> {
+   public getCapableResources(features: string[]): Promise<string[]>
+   public getCapableResources(features: string): Promise<string[]>
+   public getCapableResources(features): Promise<string[]> {
       return this.account.getDiscoInfoRepository().getCapableResources(this, features);
    }
 
@@ -151,7 +160,7 @@ export default class Contact implements IIdentifiable, IContact {
    public hasFeatureByResource(resource: string, feature: string): Promise<{}>
    public hasFeatureByResource(resource, feature) {
       if (!resource) {
-         throw 'I can not lookup a feature without resource';
+         throw new Error('I can not lookup a feature without resource');
       }
 
       let jid = new JID(this.jid.bare + '/' + resource);
@@ -181,7 +190,7 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getId(): string {
-      return this.data.get('id');
+      return this.id;
    }
 
    public getUid(): string {
@@ -192,8 +201,8 @@ export default class Contact implements IIdentifiable, IContact {
       return this.jid;
    }
 
-   public getResources(): Array<string> {
-      return Object.keys(this.data.get('resources'));
+   public getResources(): string[] {
+      return Object.keys(this.data.get('resources') || {});
    }
 
    public getPresence(): Presence {
@@ -212,6 +221,10 @@ export default class Contact implements IIdentifiable, IContact {
       return this.data.get('nickname');
    }
 
+   public hasName(): boolean {
+      return !!this.data.get('name');
+   }
+
    public getName(): string {
       /*if (this.data.get('name') === this.jid.bare) {
          return this.getNickname() || this.jid.bare;
@@ -222,11 +235,15 @@ export default class Contact implements IIdentifiable, IContact {
       return this.getNickname();
    }
 
+   public getProviderId(): string {
+      return this.data.get('provider');
+   }
+
    public getAvatar(): Promise<Avatar> {
       return this.account.getPipe('avatar').run(this, undefined)
          .then(([, avatar]) => {
             if (!avatar) {
-               throw 'No avatar available for ' + this.getId();
+               throw new Error('No avatar available for ' + this.getId());
             }
 
             return avatar;
@@ -243,7 +260,7 @@ export default class Contact implements IIdentifiable, IContact {
 
    public setEncryptionState(state: EncryptionState, source: string) {
       if (state !== EncryptionState.Plaintext && !source) {
-         throw 'No encryption source provided';
+         throw new Error('No encryption source provided');
       }
 
       this.data.set('encryptionState', state);
@@ -279,12 +296,15 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public setName(name: string) {
+<<<<<<< HEAD
       let oldName = this.getName();
+=======
+>>>>>>> upstream/refactoring
       this.data.set('name', name);
+   }
 
-      if (oldName !== name) {
-         this.account.getConnection().getRosterService().setDisplayName(this.jid, name);
-      }
+   public setProvider(provider: ContactProvider) {
+      this.data.set('provider', provider.getUid());
    }
 
    public setNickname(nickname: string) {

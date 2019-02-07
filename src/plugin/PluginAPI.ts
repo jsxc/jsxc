@@ -3,7 +3,6 @@ import Client from '../Client'
 import Storage from '../Storage'
 import Contact from '../Contact'
 import Message from '../Message'
-import Pipe from '../util/Pipe'
 import JID from '../JID'
 import DiscoInfoRepository from '../DiscoInfoRepository'
 import Avatar from '../Avatar'
@@ -11,6 +10,11 @@ import { MessagePayload } from '../Message.interface'
 import { API as IPluginAPI } from './PluginAPI.interface'
 import { Logger } from '../util/Log'
 import ChatWindow from '@ui/ChatWindow';
+import ContactProvider from '@src/ContactProvider';
+import { IContact } from '@src/Contact.interface';
+import { IJID } from '@src/JID.interface';
+import MultiUserContact from '@src/MultiUserContact';
+import ContactManager from '@src/ContactManager';
 
 export default class PluginAPI implements IPluginAPI {
    private storage;
@@ -23,10 +27,10 @@ export default class PluginAPI implements IPluginAPI {
       this.Log = new Logger(name);
    }
 
-   public createJID(node: string, domain: string, resource: string): JID
-   public createJID(bare: string, resource: string): JID
-   public createJID(full: string): JID
-   public createJID(): JID {
+   public createJID(node: string, domain: string, resource: string): IJID
+   public createJID(bare: string, resource: string): IJID
+   public createJID(full: string): IJID
+   public createJID(): IJID {
       return new JID(arguments[0], arguments[1], arguments[2]);
    }
 
@@ -34,6 +38,12 @@ export default class PluginAPI implements IPluginAPI {
    public createMessage(data: MessagePayload): Message
    public createMessage() {
       return new Message(arguments[0]);
+   }
+
+   public createMultiUserContact(jid: IJID, name?: string): MultiUserContact
+   public createMultiUserContact(id: string): MultiUserContact
+   public createMultiUserContact(): MultiUserContact {
+      return new MultiUserContact(this.account, arguments[0], arguments[1]);
    }
 
    public getStorage(): Storage {
@@ -69,7 +79,7 @@ export default class PluginAPI implements IPluginAPI {
       return this.account.getConnection();
    }
 
-   public getContact(jid: JID): Contact {
+   public getContact(jid: IJID): IContact {
       return this.account.getContact(jid);
    }
 
@@ -122,5 +132,13 @@ export default class PluginAPI implements IPluginAPI {
 
    public registerChatWindowClearedHook(hook: (chatWindow?: ChatWindow, contact?: Contact) => void) {
       this.account.registerChatWindowClearedHook(hook);
+   }
+
+   public registerContactProvider(source: ContactProvider) {
+      this.account.getContactManager().registerContactProvider(source);
+   }
+
+   public getContactManager(): ContactManager {
+      return this.account.getContactManager();
    }
 }

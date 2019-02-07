@@ -1,7 +1,7 @@
-import Store from "./Store";
-import Address from "../vendor/Address";
-import BundleManager from "./BundleManager";
-import IdentityKey from "../model/IdentityKey";
+import Store from './Store';
+import Address from '../vendor/Address';
+import BundleManager from './BundleManager';
+import IdentityKey from '../model/IdentityKey';
 
 export default class {
    constructor(private store: Store, private bundleManager: BundleManager) {
