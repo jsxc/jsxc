@@ -40,7 +40,7 @@ describe('Options', function() {
     });
 
     it('should return stored options', function() {
-        const STORED_VALUE = 'foo';
+        const STORED_VALUE = new Date();
         let store = {};
 
         for (let name in defaultOptions) {
@@ -50,9 +50,27 @@ describe('Options', function() {
         storage.getItem = sinon.stub().returns(store);
 
         for (let name in defaultOptions) {
-            expect(options.get(name)).equals(STORED_VALUE);
+            expect(options.get(name), `Option name: ${name}`).equals(STORED_VALUE);
         }
     });
+
+    it('should return merged objects, if only single values were changed', function() {
+        storage.getItem = sinon.stub().returns({
+            notification: {
+                mute: 'foobar'
+            }
+        });
+
+        let notificationOptions = options.get('notification');
+
+        for (let name in defaultOptions.notification) {
+            if (name === 'mute') {
+                expect(notificationOptions[name]).equals('foobar');
+            } else {
+                expect(notificationOptions[name]).equals(defaultOptions.notification[name]);
+            }
+        }
+    })
 
     it('should return correct values for chained keys', function() {
         const STORED_VALUE = 'foo';
@@ -77,7 +95,7 @@ describe('Options', function() {
 
     it('should return overwritten defaults', function() {
         storage.getItem = sinon.stub().returns({});
-        const KEY = 'onLogin';
+        const KEY = 'rosterAppend';
         const VALUE = 'foo';
 
         Options.overwriteDefaults({
@@ -102,11 +120,11 @@ describe('Options', function() {
 
         Options.overwriteDefaults({
             newOption: 'new',
-            onLogin: 'foobar',
+            rosterAppend: 'div',
         });
 
         expect(options.get('newOption')).equals(undefined);
-        expect(options.get('onLogin')).equals(defaultOptions.onLogin);
+        expect(options.get('rosterAppend')).equals(defaultOptions.rosterAppend);
     });
 
     it('should update the value in the store', function() {
@@ -145,7 +163,7 @@ describe('Options', function() {
     })
 
     it('should trigger registered hooks', function() {
-        const KEY = 'onLogin';
+        const KEY = 'rosterAppend';
         const VALUE = 'foobar';
         const OLD_VALUE = 'old_foobar';
 

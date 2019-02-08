@@ -18,4 +18,34 @@ export default class Utils {
          deletedValues: oldArray.filter(id => newArray.indexOf(id) < 0),
       }
    }
+
+   public static isObject(candidate: any) {
+      return !!candidate && candidate.constructor === Object;
+   }
+
+   public static mergeDeep(target: Object, ...sources: Object[]): Object {
+      if (!sources.length) {
+         return target;
+      }
+      if (!Utils.isObject(target)) {
+         throw new Error('Target has to be an object');
+      }
+      const source = sources.shift();
+
+      if (Utils.isObject(source)) {
+         for (const key in source) {
+            if (Utils.isObject(source[key])) {
+               if (!target[key]) {
+                  Object.assign(target, { [key]: {} });
+               }
+
+               Utils.mergeDeep(target[key], source[key]);
+            } else {
+               Object.assign(target, { [key]: source[key] });
+            }
+         }
+      }
+
+      return Utils.mergeDeep(target, ...sources);
+   }
 }
