@@ -23,8 +23,8 @@ export default class extends AbstractHandler {
       let peerJid = new JID(messageElement.getOriginalFrom());
       let peerContact = this.account.getContact(peerJid);
       let nickname: string = $(stanza).find('nick').text();
-
-      if (nickname !== undefined) {
+      let oldName: string = peerContact.getNickname();
+      if ((nickname !== undefined) && (oldName !== nickname)) {
          peerContact.setNickname(nickname);
       }
 

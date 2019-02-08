@@ -227,9 +227,8 @@ export default class Contact implements IIdentifiable, IContact {
 
    public getName(): string {
       if (this.data.get('name') === this.jid.bare) {
-         return this.getNickname()
-      }
-      else {
+         return this.getNickname() || this.jid.bare;
+      } else {
          return this.data.get('name');
       }
    }

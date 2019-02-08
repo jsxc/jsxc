@@ -250,36 +250,14 @@ abstract class AbstractConnection {
 
             let vCardKeys = Object.keys(vCardData);
 
-            /* tslint:disable:no-string-literal */
-            iq.c('FN').t(vCardData['FN']).up();
-            iq.c('N').t(vCardData['N']);
-            iq.c('FAMILY').t(vCardData['FAMILY']).up();
-            iq.c('GIVEN').t(vCardData['GIVEN']).up();
-            iq.c('MIDDLE').t(vCardData['MIDDLE']).up();
-            iq.c('PREFIX').t(vCardData['PREFIX']).up();
-            iq.c('SUFFIX').t(vCardData['SUFFIX']).up();
-            iq.up();
-            iq.c('EMAIL').t(vCardData['EMAIL']);
-            iq.c('INTERNET').t(vCardData['INTERNET']).up();
-            iq.c('PREF').t(vCardData['PREF']).up();
-            iq.c('USERID').t(vCardData['USERID']).up();
-            iq.up();
-            iq.c('TEL').t(vCardData['TEL']);
-            iq.c('NUMBER').t(vCardData['NUMBER']).up();
-            iq.up();
-            iq.c('ADR').t(vCardData['ADR']);
-            iq.c('WORK').t(vCardData['WORK']).up();
-            iq.c('EXTADD').t(vCardData['EXTADD']).up();
-            iq.c('STREET').t(vCardData['STREET']).up();
-            iq.c('LOCALITY').t(vCardData['LOCALITY']).up();
-            iq.c('REGION').t(vCardData['REGION']).up();
-            iq.c('PCODE').t(vCardData['PCODE']).up();
-            iq.c('CTRY').t(vCardData['CTRY']).up();
-            iq.up();
-            iq.c('ORGUNIT').t(vCardData['ORGUNIT']).up();
+            for(let key in vCardData){
+               if(key !== 'NICKNAME') {
+                  iq.c(key).t(vCardData[key]).up();
+               }
+            }
             iq.c('NICKNAME').t(newNickname).up();
+
          }).then(() => this.sendIQ(iq));
-      /* tslint:enable:no-string-literal */
 
    }
 
