@@ -46,7 +46,7 @@ export default class FormWatcher {
 
    private prepareForm() {
       let formElement = this.formElement;
-      let events = formElement.data('events') || {
+      let events = (<any> $)._data(formElement.get(0), 'events') || {
          submit: []
       };
       let submitEvents = [].concat(events.submit);
