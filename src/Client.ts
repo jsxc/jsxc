@@ -114,8 +114,10 @@ export default class Client {
       return Client.options;
    }
 
-   public static getOption(key: string) {
-      return Client.getOptions().get(key);
+   public static getOption<IOption = any>(key: string, defaultValue?: IOption): IOption {
+      let value = Client.getOptions().get(key);
+
+      return <IOption> (typeof value !== 'undefined' ? value : defaultValue);
    }
 
    public static setOption(key: string, value) {

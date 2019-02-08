@@ -54,6 +54,21 @@ describe('Options', function() {
         }
     });
 
+    it('should return correct values for chained keys', function() {
+        const STORED_VALUE = 'foo';
+        let store = {
+            a: {
+                b: {
+                    c: STORED_VALUE
+                }
+            }
+        };
+
+        storage.getItem = sinon.stub().returns(store);
+
+        expect(options.get('a.b.c')).equals(STORED_VALUE);
+    });
+
     it('should return "undefined" if the option is unknown', function() {
         storage.getItem = sinon.stub().returns({});
 
@@ -97,12 +112,21 @@ describe('Options', function() {
     it('should update the value in the store', function() {
         const KEY = 'foo';
         const VALUE = 'bar';
-        storage.updateItem = sinon.stub();
+        storage.setItem = sinon.stub();
 
         options.set(KEY, VALUE);
 
-        expect((<sinon.SinonSpy> storage.updateItem).args[0][1]).equals(KEY);
-        expect((<sinon.SinonSpy> storage.updateItem).args[0][2]).equals(VALUE);
+        expect((<sinon.SinonSpy> storage.setItem).args[0][1][KEY]).equals(VALUE);
+    });
+
+    it('should store key chains', function() {
+        const KEY = 'fo.ob.ar';
+        const VALUE = 'bar';
+        storage.setItem = sinon.stub();
+
+        options.set(KEY, VALUE);
+
+        expect((<sinon.SinonSpy> storage.setItem).args[0][1].fo.ob.ar).equals(VALUE);
     });
 
     it('should trigger onOptionChange', function() {

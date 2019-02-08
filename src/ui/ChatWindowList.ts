@@ -1,10 +1,18 @@
 import ChatWindow from './ChatWindow'
-import Client from '../Client'
 
 let chatWindowListTemplate = require('../../template/chatWindowList.hbs');
 
+const SCROLL_REFRESH = 500;
+const SCROLL_OFFSET = 200;
+
 export default class ChatWindowList {
-   private element;
+   private element: JQuery;
+
+   private listElement: JQuery;
+
+   private elementWidth: number;
+
+   private listWidth: number;
 
    private windows: any = {};
 
@@ -24,26 +32,19 @@ export default class ChatWindowList {
 
    private constructor() {
       let template = chatWindowListTemplate();
-      this.element = $(template);
+      $('body').append(template);
 
-      $('body').append(this.element);
+      this.element = $('#jsxc-window-list');
+      this.listElement = this.element.find('>ul');
 
-      let storage = Client.getStorage();
+      setInterval(() => this.updateScrollbar(), SCROLL_REFRESH);
 
-      // $(window).resize(jsxc.gui.updateWindowListSB);
-      // $('#jsxc_windowList').resize(jsxc.gui.updateWindowListSB);
-
-      // $('#jsxc_windowListSB .jsxc_scrollLeft').click(function() {
-      //    jsxc.gui.scrollWindowListBy(-200);
-      // });
-      // $('#jsxc_windowListSB .jsxc_scrollRight').click(function() {
-      //    jsxc.gui.scrollWindowListBy(200);
-      // });
-      // $('#jsxc_windowList').on('wheel', function(ev) {
-      //    if ($('#jsxc_windowList').data('isOver')) {
-      //       jsxc.gui.scrollWindowListBy((ev.originalEvent.wheelDelta > 0) ? 200 : -200);
-      //    }
-      // });
+      $('#jsxc-window-list-handler .jsxc-scrollLeft').click(() => {
+         this.scrollWindowListBy(-1 * SCROLL_OFFSET);
+      });
+      $('#jsxc-window-list-handler .jsxc-scrollRight').click(() => {
+         this.scrollWindowListBy(SCROLL_OFFSET);
+      });
    }
 
    public closeAll() {
@@ -72,12 +73,10 @@ export default class ChatWindowList {
       if (chatWindowIds.indexOf(chatWindow.getId()) < 0) {
          this.windows[chatWindow.getId()] = chatWindow;
 
-         this.element.find('> ul').append(chatWindow.getDom());
+         this.listElement.append(chatWindow.getDom());
       } else {
          chatWindow = this.windows[chatWindow.getId()];
       }
-
-      this.updateScrollbar();
 
       return chatWindow;
    }
@@ -90,27 +89,59 @@ export default class ChatWindowList {
 
          delete this.windows[chatWindow.getId()];
       }
-
-      this.updateScrollbar();
    }
 
-   private updateScrollbar() {
+   public moveIntoViewport(chatWindow: ChatWindow) {
+      let padding = $('#jsxc-window-list-handler').width() || 0;
+      let scrollWidth = this.listElement.width() - padding;
+      let width = this.element.width() - padding;
 
-      if ($('#jsxc_windowList>ul').width() > $('#jsxc_windowList').width()) {
-         $('#jsxc_windowListSB > div').removeClass('jsxc_disabled');
-      } else {
-         $('#jsxc_windowListSB > div').addClass('jsxc_disabled');
-         $('#jsxc_windowList>ul').css('right', '0px');
+      if (scrollWidth <= width) {
+         return;
+      }
+
+      let offset = parseInt(this.listElement.css('right'), 10);
+      let windowElement = chatWindow.getDom();
+      let windowWidth = windowElement.outerWidth();
+      let positionLeft = windowElement.position().left - padding;
+
+      let right = - offset - scrollWidth + positionLeft + windowWidth;
+      let left = scrollWidth - width + offset - positionLeft;
+
+      if (left > 0) {
+         this.scrollWindowListBy(left);
+      }
+
+      if (right > 0) {
+         this.scrollWindowListBy(-right);
       }
    }
 
-   private scrollWindowListBy(offset) {
+   private updateScrollbar() {
+      let elementWidth = this.element.width();
+      let listWidth = this.listElement.width();
 
-      let scrollWidth = $('#jsxc_windowList>ul').width();
-      let width = $('#jsxc_windowList').width();
-      let el = $('#jsxc_windowList>ul');
-      let right = parseInt(el.css('right'), 10) - offset;
-      let padding = $('#jsxc_windowListSB').width();
+      if (this.elementWidth === elementWidth && this.listWidth === listWidth) {
+         return;
+      }
+
+      this.elementWidth = elementWidth;
+      this.listWidth = listWidth;
+
+      if (listWidth > elementWidth) {
+         $('#jsxc-window-list-handler > div').removeClass('jsxc-disabled');
+      } else {
+         $('#jsxc-window-list-handler > div').addClass('jsxc-disabled');
+
+         this.listElement.css('right', '0px');
+      }
+   }
+
+   private scrollWindowListBy(offset: number) {
+      let scrollWidth = this.listElement.width();
+      let width = this.element.width();
+      let right = parseInt(this.listElement.css('right'), 10) - offset;
+      let padding = $('#jsxc-window-list-handler').width() || 0;
 
       if (scrollWidth < width) {
          return;
@@ -124,7 +155,7 @@ export default class ChatWindowList {
          right = width - scrollWidth - padding;
       }
 
-      el.css('right', right + 'px');
+      this.listElement.css('right', right + 'px');
    }
 
    private getChatWindowIds() {

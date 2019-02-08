@@ -62,7 +62,7 @@ export default class MultiUserContact extends Contact {
    }
 
    public invite(jid: JID, reason?: string) {
-      let isModerated = false; //@TODO
+      let isModerated = false; //@TODO isModerated
 
       if (isModerated) {
          this.getService().sendMediatedMultiUserInvitation(jid, this.getJid(), reason);

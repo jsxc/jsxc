@@ -53,22 +53,6 @@ export default class Notification {
       });
    }
 
-   public static muteSound(external?) {
-      $('#jsxc-menu .jsxc-muteNotification').text(Translation.t('Unmute'));
-
-      if (external !== true) {
-         Client.setOption('muteNotification', true);
-      }
-   }
-
-   public static unmuteSound(external?) {
-      $('#jsxc-menu .jsxc-muteNotification').text(Translation.t('Mute'));
-
-      if (external !== true) {
-         Client.setOption('muteNotification', false); // notifications disabled
-      }
-   }
-
    public static async notify(settings: NotificationSettings) {
       if (!Notification.getOption('enable')) {
          Log.debug('Drop notification, because notifications are disabled.');
@@ -136,7 +120,7 @@ export default class Notification {
          }
       }
 
-      settings.duration = settings.duration || Notification.getOption('duration');
+      settings.duration = settings.duration || Notification.getOption('popupDuration');
       settings.title = settings.title;
       settings.message = settings.message;
 

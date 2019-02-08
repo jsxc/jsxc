@@ -17,7 +17,7 @@ export default function(type: 'direct' | 'mediated', from: string, room: string,
 
    let dialog = new Dialog(content);
    let dom = dialog.open();
-   let account = Client.getAccountManager().getAccount(); //@TODO multi account support
+   let account = Client.getAccountManager().getAccount(); //@TODO [MA] multi account support
 
    dom.find('form').on('submit', (ev) => {
       ev.preventDefault();

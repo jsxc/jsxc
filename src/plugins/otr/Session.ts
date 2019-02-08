@@ -1,5 +1,5 @@
 import Log from '../../util/Log'
-import Contact from '../../Contact'
+import { IContact } from '@src/Contact.interface';
 import Message from '../../Message'
 import { DIRECTION } from '../../Message.interface'
 import Translation from '../../util/Translation'
@@ -9,6 +9,7 @@ import { EncryptionState } from '../../plugin/AbstractPlugin'
 import Storage from '../../Storage'
 import { IConnection } from '../../connection/Connection.interface'
 import PersistentMap from '../../util/PersistentMap'
+import OTRPlugin from './Plugin';
 
 //@REVIEW
 interface OTR {
@@ -36,7 +37,7 @@ export default class Session {
 
    private ourPayloadId;
 
-   constructor(private peer: Contact, key: DSA, private storage: Storage, private connection: IConnection) {
+   constructor(private peer: IContact, key: DSA, private storage: Storage, private connection: IConnection) {
 
       let options: any = {
          priv: key,
@@ -221,7 +222,7 @@ export default class Session {
          case 'trust': // verification completed
             this.session.trust = result;
 
-            //@TODO mark as verified
+            this.peer.setEncryptionState(EncryptionState.VerifiedEncrypted, OTRPlugin.getName());
             this.saveSession();
 
             if (result) {

@@ -28,9 +28,13 @@ export default class ChatWindowController {
    public openProminently() {
       this.open();
 
+      let chatWindow = this.contact.getChatWindow();
+
       //@TODO will not work in all tabs
-      this.contact.getChatWindow().highlight();
-      this.contact.getChatWindow().focus();
+      chatWindow.highlight();
+      chatWindow.focus();
+
+      Client.getChatWindowList().moveIntoViewport(chatWindow);
    }
 
    public setBarText(text: string) {

@@ -1,5 +1,6 @@
 import loginDialog from './ui/dialogs/loginBox'
 import { SHOWN } from './CONST';
+import { ICEServer } from './IceServers';
 
 /* tslint:disable:no-unnecessary-initializer */
 // We need to initialize options with undefined, otherwise they will not be exported.
@@ -45,8 +46,15 @@ export let favicon = {
    textColor: '#fff'
 };
 
+export interface IRTCPeerConfig {
+   ttl: number
+   url?: string
+   withCredentials: boolean
+   iceServers: ICEServer[]
+}
+
 /** RTCPeerConfiguration used for audio/video calls. */
-export let RTCPeerConfig = {
+export let RTCPeerConfig: IRTCPeerConfig = {
    /** Time-to-live for config from url */
    ttl: 3600,
 
@@ -104,7 +112,6 @@ export let notification = {
    mute: false,
 }
 
-/** @TODO (UNUSED) */
 export let storage = window.localStorage;
 
 export let disabledPlugins: string[] = [];

@@ -61,25 +61,46 @@ export default class Options {
       return this.storage.getName() || 'client';
    }
 
-   public get(key: string): any {
-      let local = this.storage.getItem(KEY) || {};
+   public get(keyChain: string): any {
+      function get(keys: string[], primary: any = {}, secondary: any = {}) {
+         let key = keys.shift();
 
-      if (typeof local[key] !== 'undefined') {
-         return local[key];
-      } else if (typeof Options.defaults[key] !== 'undefined') {
-         return Options.defaults[key];
+         if (keys.length) {
+            return get(keys, primary[key], secondary[key]);
+         } else if (typeof primary[key] !== 'undefined') {
+            return typeof primary[key] === 'object' && primary[key] !== null ? {...secondary[key], ...primary[key]} : primary[key];
+         } else if (typeof secondary[key] !== 'undefined') {
+            return secondary[key];
+         }
+
+         Log.debug(`I don't know any "${keyChain}" option.`);
+
+         return undefined;
       }
 
-      Log.debug(`I don't know any "${key}" option.`);
-
-      return undefined;
+      return get(keyChain.split('.'), this.storage.getItem(KEY), Options.defaults);
    };
 
-   public set(key: string, value: any) {
-      this.storage.updateItem(KEY, key, value);
+   public set(keyChain: string, value: any) {
+      let subKeys = keyChain.split('.');
+      let options = this.storage.getItem(KEY) || {};
+
+      function set(keys: string[], data: any = {}) {
+         let key = keys.shift();
+
+         if (keys.length) {
+            data[key] = set(keys, data[key]);
+         } else {
+            data[key] = value;
+         }
+
+         return data;
+      }
+
+      this.storage.setItem(KEY, set(subKeys, options));
 
       if (typeof Options.defaults.onOptionChange === 'function') {
-         Options.defaults.onOptionChange(this.getId(), key, value, () => this.export());
+         Options.defaults.onOptionChange(this.getId(), keyChain, value, () => this.export());
       }
    };
 

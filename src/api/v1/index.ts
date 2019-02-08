@@ -3,7 +3,9 @@ import Client from '../../Client'
 import Roster from '../../ui/Roster'
 import { IPlugin } from '../../plugin/AbstractPlugin'
 import FormWatcher, { SettingsCallback } from '../../FormWatcher'
+import { end } from './end';
 
+export { end };
 export { start, startAndPause } from './start'
 export { register } from './register'
 export { testBOSHServer } from './testBOSHServer'
@@ -26,6 +28,27 @@ export function toggleRoster() {
 
 export function watchForm(formElement: JQuery, usernameElement: JQuery, passwordElement: JQuery, settingsCallback: SettingsCallback) {
    new FormWatcher(formElement, usernameElement, passwordElement, settingsCallback);
+}
+
+export function watchLogoutClick(element: JQuery) {
+   if (element.length === 0) {
+      throw new Error('I found no logout element.');
+   }
+
+   Log.debug('Logout watcher armed');
+
+   function logout(ev) {
+      ev.stopPropagation();
+      ev.preventDefault();
+
+      end().then(() => {
+         $(this).off('click', null, logout);
+
+         $(this).get(0).click();
+      });
+   }
+
+   element.off('click', null, logout).click(logout);
 }
 
 export function enableDebugMode() {

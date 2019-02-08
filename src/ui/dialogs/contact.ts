@@ -72,7 +72,7 @@ function onSubmit(ev) {
 
    let username = <string> $('#jsxc-username').val();
    let alias = <string> $('#jsxc-alias').val();
-   //@TODO if we support multi account, we need an account selection dialog
+   //@TODO [MA] if we support multi account, we need an account selection dialog
    let account = Client.getAccountManager().getAccount();
 
    if (!username.match(/@(.*)$/)) {
