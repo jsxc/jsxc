@@ -75,9 +75,11 @@ export default class AccountManager {
    public createAccount(url: string, jid: string, sid: string, rid: string): Promise<Account>;
    public createAccount(url: string, jid: string, password: string): Promise<Account>;
    public createAccount() {
-      let account;
+      let account: Account;
 
-      if (this.getAccount(arguments[1])) {
+      if (!arguments[0]) {
+         return Promise.reject('We need an url to create an account');
+      } else if (this.getAccount(arguments[1])) {
          return Promise.reject('Account with this jid already exists.');
       } else if (arguments.length === 4) {
          account = new Account(arguments[0], arguments[1], arguments[2], arguments[3]);
