@@ -77,6 +77,18 @@ export default class Connector {
       return this.connectionParameters.get('url');
    }
 
+   public getPassword(): string {
+      if (this.connectionArgs.length === 3) {
+         return this.connectionArgs[2];
+      }
+   }
+
+   public clearPassword() {
+      if (this.connectionArgs.length === 3) {
+         delete this.connectionArgs[2];
+      }
+   }
+
    private successfulConnected = (data) => {
       let stropheConnection = data.connection;
       let status = data.status;

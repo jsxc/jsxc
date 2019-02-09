@@ -1,4 +1,13 @@
-jsxc.init();
+jsxc.init({
+   loadConnectionOptions: (username, password) => {
+      return Promise.resolve({
+         xmpp: {
+            url: $('#bosh-url').val(),
+            domain: $('#xmpp-domain').val(),
+         }
+      });
+   }
+});
 
 subscribeToInstantLogin();
 watchForm();
@@ -8,16 +17,7 @@ function watchForm() {
    let usernameElement = $('#watch-username');
    let passwordElement = $('#watch-password');
 
-   jsxc.watchForm(formElement, usernameElement, passwordElement, getSettings);
-
-   function getSettings(username, password) {
-      return Promise.resolve({
-         xmpp: {
-            url: $('#bosh-url').val(),
-            domain: $('#xmpp-domain').val(),
-         }
-      });
-   }
+   jsxc.watchForm(formElement, usernameElement, passwordElement);
 }
 
 function subscribeToInstantLogin() {

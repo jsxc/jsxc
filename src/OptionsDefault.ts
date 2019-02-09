@@ -1,6 +1,7 @@
 import loginDialog from './ui/dialogs/loginBox'
 import { SHOWN } from './CONST';
 import { ICEServer } from './IceServers';
+import { SettingsCallback } from './FormWatcher';
 
 /* tslint:disable:no-unnecessary-initializer */
 // We need to initialize options with undefined, otherwise they will not be exported.
@@ -23,11 +24,11 @@ export let rosterVisibility = SHOWN;
 /** Set to true if you want to hide offline contacts */
 export let hideOfflineContacts = false;
 
-/** (UNUSED) */
-export let onLogin = true;
+/** Returns permanent saved settings. */
+export let loadOptions: (jid: string, password: string) => Promise<{[id: string]: {[key: string]: any}}> = undefined;
 
-/** @TODO Returns permanent saved settings and overwrite default jsxc.options. (UNUSED) */
-export let loadOptions: (username: string, password: string) => {[key: string]: {[key: string]: any}} = undefined;
+/** This function is called after a watched form or the login box is submitted. */
+export let loadConnectionOptions: SettingsCallback = undefined;
 
 /** This function is called if an option gets changed. */
 export let onOptionChange: (id: string, key: string, value: any, exportId: () => any) => void = undefined;
@@ -119,7 +120,3 @@ export let disabledPlugins: string[] = [];
 export let connectionCallback: (jid: string, status: number, condition?: string) => void = null;
 
 export let onUserRequestsToGoOnline: () => void = loginDialog;
-
-export let xmppBoshUrl: string = undefined;
-
-//@TODO logoutElement

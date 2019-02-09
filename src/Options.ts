@@ -2,6 +2,9 @@ import Log from './util/Log'
 import * as defaultOptions from './OptionsDefault'
 import IStorage from './Storage.interface';
 import Utils from '@util/Utils';
+import Storage from './Storage';
+import { IJID } from './JID.interface';
+import Client from './Client';
 
 const KEY = 'options';
 
@@ -48,6 +51,29 @@ export default class Options {
       }
 
       Object.assign(Options.defaults, options);
+   }
+
+   public static async load(username: string, password: string, jid?: IJID) {
+      if (typeof Options.defaults.loadOptions !== 'function') {
+         return;
+      }
+
+      let optionData = await Options.defaults.loadOptions(username, password);
+
+      for (let id in optionData) {
+         if (id !== 'client' && ((jid && id !== jid.bare) || !Client.getAccountManager().getAccount(id))) {
+            continue;
+         }
+
+         let storage = new Storage(id);
+         let options = new Options(storage);
+
+         for (let key in optionData[id]) {
+            options.set(key, optionData[id][key]);
+         }
+
+         storage.destroy();
+      }
    }
 
    public static getDefault(key: string) {

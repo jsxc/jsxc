@@ -3,8 +3,9 @@ import Client from '../../Client'
 import * as UI from '../../ui/web'
 import BaseError from '../../errors/BaseError'
 import InvalidParameterError from '../../errors/InvalidParameterError'
+import Account from '@src/Account';
 
-export async function startAndPause(boshUrl: string, jid: string, password: string) {
+export async function startAndPause(boshUrl: string, jid: string, password: string): Promise<void> {
    testMaxOneAccount();
 
    let accountManager = Client.getAccountManager();
@@ -15,13 +16,13 @@ export async function startAndPause(boshUrl: string, jid: string, password: stri
    });
 }
 
-export function start(url: string, jid: string, sid: string, rid: string);
-export function start(url: string, jid: string, password: string);
-export function start();
+export function start(url: string, jid: string, sid: string, rid: string): Promise<void>;
+export function start(url: string, jid: string, password: string): Promise<void>;
+export function start(): Promise<any>;
 export function start() {
    testMaxOneAccount();
 
-   let promise;
+   let promise: Promise<any>;
 
    switch (arguments.length) {
       case 0: promise = startUI();
@@ -39,6 +40,8 @@ export function start() {
 
 function startUI() {
    UI.init();
+
+   return Promise.resolve();
 }
 
 async function startWithCredentials(url: string, jid: string, password: string) {
@@ -57,7 +60,7 @@ async function startWithBoshParameters(url: string, jid: string, sid: string, ri
    return connectAndStartUI(account);
 }
 
-function connectAndStartUI(account) {
+function connectAndStartUI(account: Account): Promise<void> {
    let accountManager = Client.getAccountManager();
 
    return account.connect(true).then(function() {
