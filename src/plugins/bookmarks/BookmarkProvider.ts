@@ -5,6 +5,7 @@ import MultiUserContact from '@src/MultiUserContact';
 import { IJID } from '@src/JID.interface';
 import { IContact, ContactType } from '@src/Contact.interface';
 import ContactManager from '@src/ContactManager';
+import RoleAllocator from '@src/RoleAllocator';
 
 export default class BookmarkProvider extends ContactProvider {
    private services: {[name: string]: AbstractService} = {};
@@ -71,7 +72,9 @@ export default class BookmarkProvider extends ContactProvider {
       //@TODO add hooks for more settings
       //@TODO delay update to aggregate changes
       contact.registerHook('name', () => {
-         this.updateContact(contact);
+         if (RoleAllocator.get().isMaster()) {
+            this.updateContact(contact);
+         }
       });
    }
 
