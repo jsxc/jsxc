@@ -25,7 +25,7 @@
   "husky": {
     "hooks": {
       "prepare-commit-msg": "node scripts/prepare-commit-msg.js HUSKY_GIT_PARAMS",
-      "pre-commit": "yarn checking-style-format && yarn checking-typescript-format && yarn checking-typescript",
+      "pre-commit": "node scripts/search-blacklist.js && yarn checking-style-format && yarn checking-typescript-format && yarn checking-typescript",
       "commit-msg": "node_modules/.bin/commitlint -E HUSKY_GIT_PARAMS || node scripts/print-commitlint-info.js"
     }
   },

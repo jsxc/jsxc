@@ -1,6 +1,10 @@
 import Log from './util/Log'
 import * as defaultOptions from './OptionsDefault'
 import IStorage from './Storage.interface';
+import Utils from '@util/Utils';
+import Storage from './Storage';
+import { IJID } from './JID.interface';
+import Client from './Client';
 
 const KEY = 'options';
 
@@ -49,6 +53,29 @@ export default class Options {
       Object.assign(Options.defaults, options);
    }
 
+   public static async load(username: string, password: string, jid?: IJID) {
+      if (typeof Options.defaults.loadOptions !== 'function') {
+         return;
+      }
+
+      let optionData = await Options.defaults.loadOptions(username, password);
+
+      for (let id in optionData) {
+         if (id !== 'client' && ((jid && id !== jid.bare) || !Client.getAccountManager().getAccount(id))) {
+            continue;
+         }
+
+         let storage = new Storage(id);
+         let options = new Options(storage);
+
+         for (let key in optionData[id]) {
+            options.set(key, optionData[id][key]);
+         }
+
+         storage.destroy();
+      }
+   }
+
    public static getDefault(key: string) {
       return Options.defaults[key];
    }
@@ -68,7 +95,7 @@ export default class Options {
          if (keys.length) {
             return get(keys, primary[key], secondary[key]);
          } else if (typeof primary[key] !== 'undefined') {
-            return typeof primary[key] === 'object' && primary[key] !== null ? {...secondary[key], ...primary[key]} : primary[key];
+            return Utils.isObject(primary[key]) && Utils.isObject(secondary[key]) ? { ...secondary[key], ...primary[key] } : primary[key];
          } else if (typeof secondary[key] !== 'undefined') {
             return secondary[key];
          }
@@ -91,7 +118,11 @@ export default class Options {
          if (keys.length) {
             data[key] = set(keys, data[key]);
          } else {
-            data[key] = value;
+            if (Utils.isObject(data[key]) && Utils.isObject(value)) {
+               Utils.mergeDeep(data[key], value);
+            } else {
+               data[key] = value;
+            }
          }
 
          return data;

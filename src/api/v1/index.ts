@@ -26,7 +26,7 @@ export function toggleRoster() {
    Roster.get().toggle();
 }
 
-export function watchForm(formElement: JQuery, usernameElement: JQuery, passwordElement: JQuery, settingsCallback: SettingsCallback) {
+export function watchForm(formElement: JQuery, usernameElement: JQuery, passwordElement: JQuery, settingsCallback?: SettingsCallback) {
    new FormWatcher(formElement, usernameElement, passwordElement, settingsCallback);
 }
 

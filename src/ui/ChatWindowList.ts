@@ -118,7 +118,8 @@ export default class ChatWindowList {
    }
 
    private updateScrollbar() {
-      let elementWidth = this.element.width();
+      let padding = $('#jsxc-window-list-handler').width() || 0;
+      let elementWidth = this.element.width() - padding;
       let listWidth = this.listElement.width();
 
       if (this.elementWidth === elementWidth && this.listWidth === listWidth) {

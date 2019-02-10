@@ -135,11 +135,22 @@ export default class Account {
          Client.getPresenceController().setTargetPresence(Presence.online);
       }
 
-      return this.connector.connect().then(([status, connection]) => {
+      return this.connector.connect().then(async ([status, connection]) => {
          this.connection = connection;
 
          let storage = this.getSessionStorage();
-         storage.setItem('connection', 'created', new Date());
+
+         if (!storage.getItem('connection', 'created')) {
+            storage.setItem('connection', 'created', new Date());
+         }
+
+         if (!storage.getItem('options', 'loaded')) {
+            let jid = this.connector.getJID();
+            await Options.load(jid.bare, this.connector.getPassword(), jid);
+            this.connector.clearPassword();
+
+            storage.setItem('options', 'loaded', true);
+         }
 
          if (pause) {
             connection.pause();
