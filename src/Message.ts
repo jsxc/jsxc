@@ -22,8 +22,6 @@ export default class Message implements Identifiable, IMessage {
 
    private attachment: Attachment;
 
-   private stamp: Date;
-
    public static readonly DIRECTION = DIRECTION;
 
    public static readonly MSGTYPE = ContactType;

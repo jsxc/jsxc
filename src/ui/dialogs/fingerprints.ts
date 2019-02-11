@@ -9,5 +9,5 @@ export default function(ownFingerprint: string, theirFingerprint: string) {
    });
 
    let dialog = new Dialog(content);
-   let dom = dialog.open();
+   dialog.open();
 }

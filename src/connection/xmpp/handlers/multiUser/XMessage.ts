@@ -1,17 +1,6 @@
-//import {} from '../handler'
-import * as NS from '../../namespace'
-import Log from '../../../../util/Log'
 import JID from '../../../../JID'
-import Message from '../../../../Message'
-import Utils from '../../../../util/Utils'
-import Translation from '../../../../util/Translation'
-import Client from '../../../../Client'
-import Contact from '../../../../Contact'
-import Notification from '../../../../Notification'
-import { SOUNDS } from '../../../../CONST'
-import Pipe from '../../../../util/Pipe'
 import AbstractHandler from '../../AbstractHandler'
-import { Notice, TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../../Notice'
+import { TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../../Notice'
 
 export default class extends AbstractHandler {
    public processStanza(stanza: Element) {

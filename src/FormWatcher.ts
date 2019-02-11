@@ -1,6 +1,5 @@
 import Log from './util/Log'
 import * as jsxc from './api/v1'
-import Account from './Account';
 import Client from './Client';
 
 export interface ISettings {

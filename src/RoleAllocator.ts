@@ -23,8 +23,6 @@ export default class RoleAllocator {
 
    private role: Role = Role.Unknown;
 
-   private keepAliveInterval;
-
    private resolveTimeout;
 
    private observationTimeout;
@@ -195,11 +193,7 @@ export default class RoleAllocator {
    private startKeepAliveSignal() {
       this.stillAlive();
 
-      this.keepAliveInterval = window.setInterval(this.stillAlive, INTERVAL_KEEPALIVE);
-   }
-
-   private stopKeepAliveSignal() {
-      window.clearInterval(this.keepAliveInterval);
+      window.setInterval(this.stillAlive, INTERVAL_KEEPALIVE);
    }
 
    private resolveAllMaster() {

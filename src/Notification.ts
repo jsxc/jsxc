@@ -30,9 +30,6 @@ enum NotificationState {
 let NotificationAPI = (<any> window).Notification;
 
 export default class Notification {
-   private static inited = false;
-
-   private static popupTimeout;
 
    private static popupDelay = 1000;
 
@@ -124,7 +121,7 @@ export default class Notification {
       settings.title = settings.title;
       settings.message = settings.message;
 
-      Notification.popupTimeout = setTimeout(function() {
+      setTimeout(function() {
          Notification.showPopup(settings);
       }, Notification.popupDelay);
    }
@@ -144,10 +141,6 @@ export default class Notification {
             popup.close();
          }, settings.duration);
       }
-   }
-
-   private static hasSupport() {
-      return !!NotificationAPI;
    }
 
    private static requestPermission() {

@@ -1,7 +1,6 @@
 import { IConnection } from './Connection.interface'
 import Account from '../Account'
 import * as JSM from 'jingle'
-import * as RTC from 'webrtc-adapter'
 import { createRegistry } from 'jxt'
 import Log from '../util/Log'
 import UUID from '../util/UUID'
@@ -127,72 +126,38 @@ export default class JingleHandler {
       return JingleSession.create(this.account, session);
    }
 
-   private onIncomingFileTransfer(session: IOTalkJingleMediaSession) {
-      Log.debug('incoming file transfer from ' + session.peerID);
+   // private onIncomingFileTransfer(session: IOTalkJingleMediaSession) {
+   //    Log.debug('incoming file transfer from ' + session.peerID);
 
-      let peerJID = new JID(session.peerID);
-      let contact = this.account.getContact(peerJID);
+   //    let peerJID = new JID(session.peerID);
+   //    let contact = this.account.getContact(peerJID);
 
-      if (!contact) {
-         Log.warn('Reject file transfer, because the contact is not in your contact list');
+   //    if (!contact) {
+   //       Log.warn('Reject file transfer, because the contact is not in your contact list');
 
-         return;
-      }
+   //       return;
+   //    }
 
-      session.accept();
+   //    session.accept();
 
-      // let chatWindow = contact.getChatWindow();
+   //    // let chatWindow = contact.getChatWindow();
 
-      // let message = new Message({
-      //    peer: contact.getJid(),
-      //    direction: Message.DIRECTION.IN,
-      //    attachment: new Attachment({
-      //       name: session.receiver.metadata.name,
-      //       type: session.receiver.metadata.type || 'application/octet-stream'
-      //    })
-      // });
-      // message.save();
+   //    // let message = new Message({
+   //    //    peer: contact.getJid(),
+   //    //    direction: Message.DIRECTION.IN,
+   //    //    attachment: new Attachment({
+   //    //       name: session.receiver.metadata.name,
+   //    //       type: session.receiver.metadata.type || 'application/octet-stream'
+   //    //    })
+   //    // });
+   //    // message.save();
 
-      // chatWindow.receiveIncomingMessage(message);
-      //
-      // session.receiver.on('progress', function(sent, size) {
-      //    message.updateProgress(sent, size);
-      // });
-   }
-
-   private getPeerConstraints(offerToReceiveAudio = false, offerToReceiveVideo = false) {
-      let browserDetails = RTC.browserDetails;
-      let peerConstraints: any = {
-         optional: [
-            {DtlsSrtpKeyAgreement: true},
-            {RtpDataChannels: false}
-        ]
-      };
-
-      if ((browserDetails.version < 33 && browserDetails.browser === 'firefox') || browserDetails.browser === 'chrome') {
-         peerConstraints = {
-            mandatory: {
-               OfferToReceiveAudio: offerToReceiveAudio,
-               OfferToReceiveVideo: offerToReceiveVideo,
-            }
-         };
-
-         if (browserDetails.browser === 'firefox') {
-            peerConstraints.mandatory.MozDontOfferDataChannel = true;
-         }
-      } else {
-         peerConstraints = {
-            offerToReceiveAudio,
-            offerToReceiveVideo,
-         };
-
-         if (browserDetails.browser === 'firefox') {
-            peerConstraints.mozDontOfferDataChannel = true;
-         }
-      }
-
-      return peerConstraints;
-   }
+   //    // chatWindow.receiveIncomingMessage(message);
+   //    //
+   //    // session.receiver.on('progress', function(sent, size) {
+   //    //    message.updateProgress(sent, size);
+   //    // });
+   // }
 
    public static terminateAll(reason?: string) {
       JingleHandler.instances.forEach((instance) => {

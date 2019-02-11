@@ -1,5 +1,3 @@
-import Log from './util/Log'
-
 export default interface IStorage {
 
    getName(): string

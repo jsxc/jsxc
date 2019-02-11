@@ -45,16 +45,8 @@ export default class ChatStateMachine {
       this.setState(STATE.COMPOSING);
    }
 
-   private isComposing(): boolean {
-      return this.getState() === STATE.COMPOSING;
-   }
-
    private paused = () => {
       this.setState(STATE.PAUSED);
-   }
-
-   private isPaused(): boolean {
-      return this.getState() === STATE.PAUSED;
    }
 
    private registerHook(func: (newState: STATE, oldState: STATE) => void) {
@@ -84,12 +76,6 @@ export default class ChatStateMachine {
          state,
          id: this.id
       });
-   }
-
-   private getState(): STATE {
-      let stored = this.storage.getItem(this.key) || {};
-
-      return <STATE> stored.state || STATE.INACTIVE;
    }
 
    private stateChange = (newState: STATE, oldState: STATE) => {

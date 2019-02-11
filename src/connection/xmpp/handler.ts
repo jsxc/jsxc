@@ -1,5 +1,4 @@
 import Log from '../../util/Log'
-import JID from '../../JID'
 import Account from '../../Account'
 import PresenceHandler from './handlers/presence'
 import MultiUserPresenceHandler from './handlers/multiUser/Presence'

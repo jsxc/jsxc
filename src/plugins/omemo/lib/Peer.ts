@@ -16,8 +16,6 @@ export interface IEncryptedPeerMessage {
 }
 
 export default class Peer {
-   private static own: Peer;
-
    private devices: any = {};
 
    constructor(private deviceName: string, private store: Store, private bundleManager: BundleManager) {

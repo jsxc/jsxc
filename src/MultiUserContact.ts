@@ -9,26 +9,26 @@ import { ContactSubscription } from './Contact.interface'
 import { IMUCService } from '@connection/Connection.interface';
 import { IJID } from './JID.interface';
 
-const AFFILIATION = {
-   ADMIN: 'admin',
-   MEMBER: 'member',
-   OUTCAST: 'outcast',
-   OWNER: 'owner',
-   NONE: 'none'
-};
-const ROLE = {
-   MODERATOR: 'moderator',
-   PARTICIPANT: 'participant',
-   VISITOR: 'visitor',
-   NONE: 'none'
-};
-const ROOMSTATE = {
-   INIT: 0,
-   ENTERED: 1,
-   EXITED: 2,
-   AWAIT_DESTRUCTION: 3,
-   DESTROYED: 4
-};
+// const AFFILIATION = {
+//    ADMIN: 'admin',
+//    MEMBER: 'member',
+//    OUTCAST: 'outcast',
+//    OWNER: 'owner',
+//    NONE: 'none'
+// };
+// const ROLE = {
+//    MODERATOR: 'moderator',
+//    PARTICIPANT: 'participant',
+//    VISITOR: 'visitor',
+//    NONE: 'none'
+// };
+// const ROOMSTATE = {
+//    INIT: 0,
+//    ENTERED: 1,
+//    EXITED: 2,
+//    AWAIT_DESTRUCTION: 3,
+//    DESTROYED: 4
+// };
 const ROOMCONFIG = {
    INSTANT: 'instant'
 };

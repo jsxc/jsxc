@@ -1,4 +1,4 @@
-import { $iq, Strophe } from 'strophe.js'
+import { Strophe } from 'strophe.js'
 import Log from '../../util/Log'
 import SM from '../../StateMachine'
 import Client from '../../Client'
@@ -77,10 +77,6 @@ function testBasicConnectionParameters(url: string, jid: string) {
    if (!url) {
       throw new InvalidParameterError('I can not log in without an URL.');
    }
-}
-
-function registerXMPPNamespaces() {
-   Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
 }
 
 function prepareConnection(url: string): Strophe.Connection {

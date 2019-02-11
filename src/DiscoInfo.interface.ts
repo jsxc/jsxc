@@ -1,11 +1,4 @@
 
-interface IIdentity {
-   category: string
-   type: string,
-   name?: string,
-   lang?: string
-}
-
 export interface IDiscoInfo {
    getIdentities(): string[]
 

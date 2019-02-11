@@ -1,10 +1,6 @@
-import Log from '../../../../util/Log'
 import JID from '../../../../JID'
-import MultiUserContact from '../../../../MultiUserContact'
 import AbstractHandler from '../../AbstractHandler'
-import * as Namespace from '../../namespace'
-import MultiUserPresenceProcessor from './PresenceProcessor'
-import { Notice, TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../../Notice'
+import { TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../../Notice'
 
 export default class extends AbstractHandler {
    public processStanza(stanza: Element): boolean {

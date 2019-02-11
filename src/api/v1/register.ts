@@ -36,7 +36,7 @@ class Registration {
 
    private connection: Connection;
 
-   constructor(private service: string, private domain: string) {
+   constructor(service: string, domain: string) {
       this.connection = new Connection(service, domain);
    }
 

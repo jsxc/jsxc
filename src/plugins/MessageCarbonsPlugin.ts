@@ -77,17 +77,17 @@ export default class CarbonsPlugin extends AbstractPlugin {
       });
    }
 
-   private disable(cb) {
-      let iq = $iq({
-         type: 'set'
-      }).c('disable', {
-         xmlns: Namespace.get('CARBONS')
-      });
+   // private disable(cb) {
+   //    let iq = $iq({
+   //       type: 'set'
+   //    }).c('disable', {
+   //       xmlns: Namespace.get('CARBONS')
+   //    });
 
-      return this.pluginAPI.sendIQ(iq).then(() => {
-         this.pluginAPI.Log.debug('Carbons disabled');
-      }).catch((stanza) => {
-         this.pluginAPI.Log.warn('Could not disable carbons');
-      });
-   }
+   //    return this.pluginAPI.sendIQ(iq).then(() => {
+   //       this.pluginAPI.Log.debug('Carbons disabled');
+   //    }).catch((stanza) => {
+   //       this.pluginAPI.Log.warn('Could not disable carbons');
+   //    });
+   // }
 }

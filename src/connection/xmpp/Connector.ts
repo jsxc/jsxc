@@ -173,7 +173,6 @@ export default class Connector {
 
       let capsElement = stanza.querySelector('c');
       let ver = capsElement.getAttribute('ver');
-      let node = capsElement.getAttribute('node');
 
       let discoInfoRepository = this.account.getDiscoInfoRepository();
       discoInfoRepository.addRelation(from, ver);

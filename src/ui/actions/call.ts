@@ -4,7 +4,6 @@ import UserMedia from '../../UserMedia'
 import { VideoDialog } from '../VideoDialog'
 import Account from '../../Account'
 import Translation from '../../util/Translation'
-import IceServers from '../../IceServers'
 import JID from '../../JID';
 import JingleCallSession from '@src/JingleCallSession';
 

@@ -47,7 +47,6 @@ export default class implements IDiscoInfoRepository {
          return Promise.resolve(resources);
       }
 
-      let capableResources = [];
       let promises = [];
 
       for (let resource of resources) {
@@ -138,8 +137,8 @@ export default class implements IDiscoInfoRepository {
 
    private processDiscoInfo(stanza: Element) {
       let queryElement = $(stanza).find('query');
-      let node = queryElement.attr('node') || '';
-      let from = new JID($(stanza).attr('from'));
+      // let node = queryElement.attr('node') || '';
+      // let from = new JID($(stanza).attr('from'));
 
       //@TODO verify response is valid: https://xmpp.org/extensions/xep-0115.html#ver-proc
 

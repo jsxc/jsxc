@@ -4,7 +4,6 @@ import JID from '../JID'
 import ChatWindow from './ChatWindow'
 import AvatarSet from './AvatarSet'
 import Log from '../util/Log'
-import Color from '../util/Color'
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs')
 

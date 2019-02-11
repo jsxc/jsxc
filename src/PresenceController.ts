@@ -9,7 +9,6 @@ const CURRENT_KEY = 'currentPresence';
 const AGGREGATE = 500;
 
 export default class PresenceController {
-   private currentPresence: Presence;
    private updateTimeout;
 
    constructor(private storage: Storage, private getAccounts: () => Account[]) {

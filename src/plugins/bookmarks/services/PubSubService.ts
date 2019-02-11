@@ -58,12 +58,12 @@ export class PubSubService extends AbstractService {
       return new RoomBookmark(jid, alias, nickname, autoJoin);
    }
 
-   private createBookmarksNode() {
-      let pubSubService = this.connection.getPubSubService();
-      let options = this.getOptionForm();
+   // private createBookmarksNode() {
+   //    let pubSubService = this.connection.getPubSubService();
+   //    let options = this.getOptionForm();
 
-      return pubSubService.createNode(NS.get('BOOKMARKS'), options);
-   }
+   //    return pubSubService.createNode(NS.get('BOOKMARKS'), options);
+   // }
 
    private async getBookmarks(): Promise<JQuery<Element>> {
       let pubSubService = this.connection.getPubSubService();

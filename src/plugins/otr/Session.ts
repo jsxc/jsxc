@@ -7,7 +7,6 @@ import IOTR from 'otr/lib/otr'
 import DSA from 'otr/lib/dsa'
 import { EncryptionState } from '../../plugin/AbstractPlugin'
 import Storage from '../../Storage'
-import { IConnection } from '../../connection/Connection.interface'
 import PersistentMap from '../../util/PersistentMap'
 import OTRPlugin from './Plugin';
 
@@ -37,7 +36,7 @@ export default class Session {
 
    private ourPayloadId;
 
-   constructor(private peer: IContact, key: DSA, private storage: Storage, private connection: IConnection) {
+   constructor(private peer: IContact, key: DSA, private storage: Storage) {
 
       let options: any = {
          priv: key,
@@ -98,7 +97,6 @@ export default class Session {
    }
 
    public processMessage(message: Message, type: 'decryptMessage' | 'encryptMessage') {
-      let bareJid = message.getPeer().bare;
       let plaintextBody = message.getPlaintextMessage();
 
       //@TODO test muc
@@ -178,7 +176,7 @@ export default class Session {
       //@REVIEW this is maybe more generic and most of the messages are the same for other encryption plugins
    }
 
-   private statusHandler = function(status) {
+   private statusHandler = (status) => {
       switch (status) {
          case IOTR.CONST.STATUS_SEND_QUERY:
             this.inform('trying_to_start_private_conversation');

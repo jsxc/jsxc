@@ -1,4 +1,3 @@
-import Client from '../Client'
 import { IContact } from '../Contact.interface'
 import Color from '../util/Color'
 

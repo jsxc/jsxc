@@ -1,6 +1,5 @@
 import ChatWindow from './ChatWindow'
 import MultiUserContact from '../MultiUserContact'
-import Account from '../Account'
 import Translation from '../util/Translation'
 import JID from '../JID'
 import AvatarSet from './AvatarSet'

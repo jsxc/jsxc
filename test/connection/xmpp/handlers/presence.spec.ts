@@ -1,15 +1,6 @@
-import { expect } from 'chai';
-import * as sinon from 'sinon';
 import 'mocha';
 
-import PresenceHandler from '@src/connection/xmpp/handlers/presence'
-import Client from '@src/Client'
-import AccountStub from '../../../AccountStub'
-import { $pres } from '@src/vendor/Strophe'
-
 describe('Presence handler', () => {
-    let handler;
-
     before(function() {
         // let account = new AccountStub;
         // let getAccountStub = sinon.stub(Client, 'getAccount').returns(account);

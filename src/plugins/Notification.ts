@@ -1,7 +1,6 @@
 import Message from '../Message'
 import { AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
-import Pipe from '../util/Pipe'
 import Contact from '../Contact'
 import Translation from '../util/Translation'
 import Notification from '../Notification'

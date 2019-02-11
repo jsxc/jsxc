@@ -1,5 +1,4 @@
 import { IPluginAPI } from './PluginAPI.interface'
-import DiscoInfoRepository from '@src/DiscoInfoRepository';
 
 export enum PluginType {
    Encryption
