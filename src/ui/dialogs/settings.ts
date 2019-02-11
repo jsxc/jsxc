@@ -6,7 +6,6 @@ import Navigation from '../DialogNavigation'
 import List from '../DialogList'
 import ListItem from '../DialogListItem'
 import AvatarSet from '../AvatarSet'
-import Translation from '../../util/Translation';
 import Log from '../../util/Log'
 
 const ENOUGH_BITS_OF_ENTROPY = 50;
@@ -27,7 +26,6 @@ class StartPage extends Page {
    //@REVIEW could also return Page or getDOM interface?
    protected generateContentElement(): JQuery | JQuery[] {
       return [
-         new ClientSection(this.navigation).getDOM(),
          new AccountOverviewSection(this.navigation).getDOM()
       ];
    }
@@ -36,19 +34,6 @@ class StartPage extends Page {
 class ClientSection extends Section {
    protected generateContentElement(): JQuery {
       let contentElement = new List();
-
-      //@REVIEW more generic? See PluginSection.
-      let checkboxElement = $('<input>');
-      checkboxElement.attr('type', 'checkbox');
-      checkboxElement.prop('checked', Client.getOption('onLogin'));
-      checkboxElement.on('change', (ev) => {
-         let isEnabled = $(ev.target).prop('checked');
-
-         Client.setOption('onLogin', isEnabled);
-      });
-
-      //@TODO only show if form watcher was used
-      contentElement.append(new ListItem(Translation.t('On_login'), Translation.t('setting-explanation-login'), undefined, undefined, checkboxElement));
 
       return contentElement.getDOM();
    }
