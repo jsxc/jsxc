@@ -3,7 +3,7 @@ import * as jsxc from './api/v1'
 import Account from './Account';
 import Client from './Client';
 
-export interface Settings {
+export interface ISettings {
    disabled?: boolean,
    xmpp?: {
       url?: string,
@@ -13,9 +13,9 @@ export interface Settings {
    }
 }
 
-export type SettingsCallback = (username: string, password: string) => Promise<Settings>;
+export type SettingsCallback = (username: string, password: string) => Promise<ISettings>;
 
-export function usernameToJabberId(username: string, settings: Settings) {
+export function usernameToJabberId(username: string, settings: ISettings) {
    let jid: string;
 
    if (settings.xmpp.node && settings.xmpp.domain) {
@@ -116,7 +116,7 @@ export default class FormWatcher {
       return await jsxc.startAndPause(settings.xmpp.url, jid, password);
    }
 
-   private getSettings(username: string, password: string): Promise<Settings> {
+   private getSettings(username: string, password: string): Promise<ISettings> {
       if (typeof this.settingsCallback !== 'function') {
          return Promise.resolve({});
       }

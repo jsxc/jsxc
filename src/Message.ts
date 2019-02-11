@@ -7,7 +7,7 @@ import Translation from './util/Translation'
 import Identifiable from './Identifiable.interface'
 import Client from './Client'
 import Utils from './util/Utils'
-import { IMessage, DIRECTION, MessagePayload } from './Message.interface'
+import { IMessage, DIRECTION, IMessagePayload } from './Message.interface'
 import { ContactType } from './Contact.interface'
 import PersistentMap from './util/PersistentMap'
 import UUID from './util/UUID'
@@ -31,7 +31,7 @@ export default class Message implements Identifiable, IMessage {
    private storage: Storage;
 
    constructor(uid: string);
-   constructor(data: MessagePayload);
+   constructor(data: IMessagePayload);
    constructor(arg0) {
       this.storage = Client.getStorage();
       let data;

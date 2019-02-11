@@ -1,5 +1,5 @@
 
-export interface SignalBundleObject {
+export interface ISignalBundleObject {
    identityKey: ArrayBuffer,
    registrationId: number,
    preKey: {

@@ -6,7 +6,7 @@ import Message from '../../Message'
 import { DIRECTION } from '../../Message.interface'
 import Translation from '../../util/Translation'
 import Session from './Session'
-import DSA from 'otr/lib/dsa'
+import IDSA from 'otr/lib/dsa'
 import Options from '../../Options'
 
 import salsa20File = require('otr/vendor/salsa20.js?path')
@@ -20,7 +20,7 @@ import dsaWebworkerFile = require('otr/lib/dsa-webworker.js?path')
 
 const WHITESPACE_TAG = '\x20\x09\x20\x20\x09\x09\x09\x09\x20\x09\x20\x09\x20\x09\x20\x20';
 
-interface DSA {
+interface IDSA {
    parsePrivate
    createInWebWorker
    packPrivate
@@ -40,7 +40,7 @@ const MAX_VERSION = '4.0.0';
 
 export default class OTRPlugin extends EncryptionPlugin {
    private sessions = {};
-   private key: DSA;
+   private key: IDSA;
 
    public static getName(): string {
       return 'otr';
@@ -150,7 +150,7 @@ export default class OTRPlugin extends EncryptionPlugin {
 
       if (storedKey === null) {
          //@TODO we should generate only one key even if there are multiple calls during generation
-         return this.generateDSAKey().then((key: DSA) => {
+         return this.generateDSAKey().then((key: IDSA) => {
             storage.setItem('key', key.packPrivate());
 
             this.key = key;
@@ -159,7 +159,7 @@ export default class OTRPlugin extends EncryptionPlugin {
          });
       } else {
          this.pluginAPI.Log.debug('DSA key loaded');
-         this.key = DSA.parsePrivate(storedKey);
+         this.key = IDSA.parsePrivate(storedKey);
 
          return Promise.resolve(this.key);
       }
@@ -176,7 +176,7 @@ export default class OTRPlugin extends EncryptionPlugin {
       return new Promise((resolve, reject) => {
          this.pluginAPI.Log.debug('Start DSA key generation');
 
-         DSA.createInWebWorker({
+         IDSA.createInWebWorker({
             imports: [salsa20File, bigintFile, cryptoFile, eventemitterFile, constFile, helpersFile, dsaFile],
             path: dsaWebworkerFile
          }, (key) => {

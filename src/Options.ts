@@ -8,15 +8,15 @@ import Client from './Client';
 
 const KEY = 'options';
 
-interface OptionData {
+interface IOptionData {
    [key: string]: any
 }
 
 export default class Options {
 
-   private static defaults: OptionData = defaultOptions;
+   private static defaults: IOptionData = defaultOptions;
 
-   public static overwriteDefaults(options: OptionData) {
+   public static overwriteDefaults(options: IOptionData) {
       let optionKeys = Object.keys(options);
       let defaultKeys = Object.keys(Options.defaults);
       let unknownOptionKeys = optionKeys.filter(e => defaultKeys.indexOf(e) < 0);
@@ -37,7 +37,7 @@ export default class Options {
       Object.assign(Options.defaults, options);
    }
 
-   public static addDefaults(options: OptionData) {
+   public static addDefaults(options: IOptionData) {
       let optionKeys = Object.keys(options);
       let defaultKeys = Object.keys(Options.defaults);
       let knownOptionKeys = optionKeys.filter(e => defaultKeys.indexOf(e) > -1);
@@ -146,7 +146,7 @@ export default class Options {
       });
    }
 
-   public export(): OptionData {
+   public export(): IOptionData {
       return this.storage.getItem(KEY) || {};
    }
 };

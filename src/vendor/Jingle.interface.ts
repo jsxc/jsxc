@@ -1,6 +1,6 @@
 type Condition = 'alternative-session' | 'busy' | 'cancel' | 'connectivity-error' | 'decline' | 'expired' | 'failed-application' | 'failed-transport' | 'general-error' | 'gone' | 'incompatible-parameters' | 'media-error' | 'security-error' | 'success' | 'timeout' | 'unsupported-applications' | 'unsupported-transports';
 
-interface Reason {
+interface IReason {
    condition: Condition
    text: string
    alternativeSession: string
@@ -30,21 +30,21 @@ interface IJingleSessionProperties {
    on(eventName: OTalkEventNames, cb): void
 }
 
-export interface OTalkJingleSession extends IJingleSessionProperties {
+export interface IOTalkJingleSession extends IJingleSessionProperties {
    accept(): void
    cancel(): void
    decline(): void
-   end(reason?: string | Reason, silent?: boolean): void
+   end(reason?: string | IReason, silent?: boolean): void
 }
 
 export type OTalkEventNames = 'aborted'|'peerStreamAdded'|'peerStreamRemoved'|'peerTrackAdded'|'peerTrackRemoved'|'accepted'|'ringing'|'hold'|'resumed'|'mute'|'unmute'|'addChannel'|'change:sessionState'|'change:connectionState'|'send'|'terminated'|'';
 
-export interface OTalkJingleMediaSession extends IJingleSessionProperties {
+export interface IOTalkJingleMediaSession extends IJingleSessionProperties {
    start(offerOptions: {}, next: () => void): void
    accept(): void
    cancel(): void
    decline(): void
-   end(reason?: string | Reason, silent?: boolean): void
+   end(reason?: string | IReason, silent?: boolean): void
    ring(): void
    mute(): void
    unmute(): void
@@ -57,7 +57,7 @@ export interface OTalkJingleMediaSession extends IJingleSessionProperties {
 
 type EndCondition = 'alternative-session' | 'busy' | 'cancel' | 'connectivity-error' | 'decline' | 'expired' | 'failed-application' | 'failed-transport' | 'general-error' | 'gone' | 'incompatible-parameters' | 'media-error' | 'security-error' | 'success' | 'timeout' | 'unsupported-applications' | 'unsupported-transports';
 
-export interface EndReason {
+export interface IEndReason {
    condition: EndCondition
    text: string
    alternativeSession: string

@@ -1,13 +1,13 @@
 import JID from '../../JID'
 import * as Namespace from '../../connection/xmpp/namespace'
-import { API as PluginAPI } from '../../plugin/PluginAPI.interface'
+import { IPluginAPI } from '../../plugin/PluginAPI.interface'
 import Attachment from '../../Attachment'
 import { $iq } from '../../vendor/Strophe'
 
 export default class HttpUploadService {
    private namespace;
 
-   constructor(private pluginAPI: PluginAPI, private jid: JID, private maxFileSize: number = 0) {
+   constructor(private pluginAPI: IPluginAPI, private jid: JID, private maxFileSize: number = 0) {
       this.namespace = Namespace.get('HTTPUPLOAD');
       this.maxFileSize = maxFileSize || 0;
    }

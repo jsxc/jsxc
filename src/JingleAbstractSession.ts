@@ -3,7 +3,7 @@ import JID from './JID'
 import { IContact } from 'Contact.interface';
 import ChatWindow from '@ui/ChatWindow';
 import IStorage from './Storage.interface';
-import { OTalkJingleSession, OTalkEventNames, EndReason } from '@vendor/Jingle.interface';
+import { IOTalkJingleSession, OTalkEventNames, IEndReason } from '@vendor/Jingle.interface';
 
 const ADOPTED = 'adopted';
 
@@ -20,7 +20,7 @@ export default abstract class JingleAbstractSession {
    public abstract onOnceIncoming();
    protected abstract onIncoming();
 
-   constructor(protected account: Account, protected session: OTalkJingleSession) {
+   constructor(protected account: Account, protected session: IOTalkJingleSession) {
       this.storage = this.account.getStorage();
 
       this.peerJID = new JID(session.peerID);
@@ -65,7 +65,7 @@ export default abstract class JingleAbstractSession {
       this.session.decline();
    }
 
-   public end(reason?: string | EndReason, silent?: boolean): void {
+   public end(reason?: string | IEndReason, silent?: boolean): void {
       this.session.end(reason, silent);
    }
 }

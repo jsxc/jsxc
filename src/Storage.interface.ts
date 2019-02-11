@@ -1,6 +1,6 @@
 import Log from './util/Log'
 
-export default interface Storage {
+export default interface IStorage {
 
    getName(): string
    generateKey(...args: string[]): string

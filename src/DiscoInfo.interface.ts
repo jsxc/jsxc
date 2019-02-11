@@ -1,12 +1,12 @@
 
-interface Identity {
+interface IIdentity {
    category: string
    type: string,
    name?: string,
    lang?: string
 }
 
-export interface DiscoInfo {
+export interface IDiscoInfo {
    getIdentities(): string[]
 
    getFeatures(): string[]

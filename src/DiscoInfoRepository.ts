@@ -6,10 +6,10 @@ import Contact from './Contact'
 import Log from './util/Log'
 import Client from './Client'
 import Form from './connection/Form'
-import { DiscoInfoRepository } from './DiscoInfoRepository.interface'
+import { IDiscoInfoRepository } from './DiscoInfoRepository.interface'
 import { IJID } from './JID.interface';
 
-export default class implements DiscoInfoRepository {
+export default class implements IDiscoInfoRepository {
    private jidIndex: PersistentMap;
    private serverJidIndex: PersistentMap;
 

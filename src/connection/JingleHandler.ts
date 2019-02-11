@@ -11,7 +11,7 @@ import { VideoDialog } from '../ui/VideoDialog'
 import JingleSession from '../JingleSession'
 import JingleAbstractSession from '../JingleAbstractSession'
 import JingleMediaSession from '@src/JingleMediaSession';
-import { OTalkJingleMediaSession } from '@vendor/Jingle.interface';
+import { IOTalkJingleMediaSession } from '@vendor/Jingle.interface';
 import IceServers, { ICEServer } from '@src/IceServers';
 import Client from '@src/Client';
 
@@ -21,7 +21,7 @@ jxt.use(require('jxt-xmpp'));
 
 let IqStanza = jxt.getDefinition('iq', 'jabber:client');
 
-interface OfferOptions {
+interface IOfferOptions {
    offerToReceiveAudio?: boolean
    offerToReceiveVideo?: boolean
 }
@@ -73,8 +73,8 @@ export default class JingleHandler {
       JingleHandler.instances.push(this);
    }
 
-   public async initiate(peerJID: IJID, stream: MediaStream, offerOptions?: OfferOptions): Promise<JingleMediaSession> {
-      let session: OTalkJingleMediaSession = this.manager.createMediaSession(peerJID.full, undefined, stream);
+   public async initiate(peerJID: IJID, stream: MediaStream, offerOptions?: IOfferOptions): Promise<JingleMediaSession> {
+      let session: IOTalkJingleMediaSession = this.manager.createMediaSession(peerJID.full, undefined, stream);
 
       return new Promise<JingleMediaSession>(resolve => {
          session.start(offerOptions, () => {
@@ -123,11 +123,11 @@ export default class JingleHandler {
       return true;
    }
 
-   protected onIncoming(session: OTalkJingleMediaSession): JingleAbstractSession {
+   protected onIncoming(session: IOTalkJingleMediaSession): JingleAbstractSession {
       return JingleSession.create(this.account, session);
    }
 
-   private onIncomingFileTransfer(session: OTalkJingleMediaSession) {
+   private onIncomingFileTransfer(session: IOTalkJingleMediaSession) {
       Log.debug('incoming file transfer from ' + session.peerID);
 
       let peerJID = new JID(session.peerID);

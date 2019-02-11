@@ -1,4 +1,4 @@
-import { API as PluginAPI } from './PluginAPI.interface'
+import { IPluginAPI } from './PluginAPI.interface'
 import DiscoInfoRepository from '@src/DiscoInfoRepository';
 
 export enum PluginType {
@@ -17,7 +17,7 @@ export enum EncryptionState {
 }
 
 export interface IPlugin {
-   new(pluginAPI: PluginAPI): AbstractPlugin
+   new(pluginAPI: IPluginAPI): AbstractPlugin
    getName(): string
 }
 
@@ -26,7 +26,7 @@ export abstract class AbstractPlugin {
       return null;
    }
 
-   constructor(protected minVersion: string, protected maxVersion: string, protected pluginAPI: PluginAPI) {
+   constructor(protected minVersion: string, protected maxVersion: string, protected pluginAPI: IPluginAPI) {
       if (!this.isSupportingClientVersion()) {
          throw new Error('This plugin doesn\'t support this client version');
       }

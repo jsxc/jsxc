@@ -6,14 +6,14 @@ import IdentityKey from '../model/IdentityKey';
 import SignedPreKey from '../model/SignedPreKey';
 import PreKey from '../model/PreKey';
 
-export interface BundleObject {
+export interface IBundleObject {
    identityKey: IdentityKey,
    signedPreKey: SignedPreKey,
    preKeys: PreKey[],
 }
 
 export default class Bundle {
-   constructor(private bundle: BundleObject) {
+   constructor(private bundle: IBundleObject) {
 
    }
 

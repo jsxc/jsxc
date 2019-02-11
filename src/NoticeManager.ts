@@ -1,7 +1,7 @@
 import Storage from './Storage'
 import SortedPersistentMap from './util/SortedPersistentMap'
 import Roster from './ui/Roster'
-import { NoticeData, Notice } from './Notice'
+import { INoticeData, Notice } from './Notice'
 import Client from './Client';
 
 (<any> window).removeNotice = function(notice) {
@@ -49,7 +49,7 @@ export class NoticeManager {
       return this.storage.getName();
    }
 
-   public addNotice(noticeData: NoticeData) {
+   public addNotice(noticeData: INoticeData) {
       let notice = new Notice(this.storage, noticeData);
 
       if (this.notices.get(notice.getId())) {

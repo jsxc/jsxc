@@ -9,7 +9,7 @@ import EncryptedDeviceMessage from '../model/EncryptedDeviceMessage';
 const MAX_PADDING = 10;
 const PADDING_CHARACTER = '​\u200B';
 
-export interface EncryptedPeerMessage {
+export interface IEncryptedPeerMessage {
    keys: EncryptedDeviceMessage[],
    iv: BufferSource,
    payload: ArrayBuffer,
@@ -23,7 +23,7 @@ export default class Peer {
    constructor(private deviceName: string, private store: Store, private bundleManager: BundleManager) {
    }
 
-   public async encrypt(localPeer: Peer, plaintext: string): Promise<EncryptedPeerMessage> {
+   public async encrypt(localPeer: Peer, plaintext: string): Promise<IEncryptedPeerMessage> {
       let remoteDeviceIds = this.store.getDeviceList(this.deviceName);
 
       if (remoteDeviceIds.length === 0) {

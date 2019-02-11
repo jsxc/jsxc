@@ -1,12 +1,12 @@
 
-export interface IdentityKeyPair { privKey?: ArrayBuffer, pubKey: ArrayBuffer }
-export interface PreKeyPair { pubKey, privKey }
-export interface SignedPreKeyPair { signature, pubKey, privKey }
+export interface IIdentityKeyPair { privKey?: ArrayBuffer, pubKey: ArrayBuffer }
+export interface IPreKeyPair { pubKey, privKey }
+export interface ISignedPreKeyPair { signature, pubKey, privKey }
 
-interface SignalStore {
+interface ISignalStore {
    Direction: { SENDING: number, RECEIVING: number }
 
-   getIdentityKeyPair(): Promise<IdentityKeyPair>;
+   getIdentityKeyPair(): Promise<IIdentityKeyPair>;
 
    getLocalRegistrationId(): Promise<number>;
 
@@ -14,15 +14,15 @@ interface SignalStore {
 
    saveIdentity(address: string, identityKey: ArrayBuffer): Promise<boolean>;
 
-   loadPreKey(keyId: number): Promise<undefined | PreKeyPair>;
+   loadPreKey(keyId: number): Promise<undefined | IPreKeyPair>;
 
    removePreKey(keyId: number): Promise<void>;
 
-   loadSignedPreKey(keyId: number): Promise<undefined | PreKeyPair>;
+   loadSignedPreKey(keyId: number): Promise<undefined | IPreKeyPair>;
 
    loadSession(address: string): Promise<string | undefined>;
 
    storeSession(identifier: string, session: string): Promise<void>;
 }
 
-export default SignalStore;
+export default ISignalStore;

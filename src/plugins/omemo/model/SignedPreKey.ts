@@ -1,15 +1,15 @@
-import PreKey, { PreKeyObject } from './PreKey';
+import PreKey, { IPreKeyObject } from './PreKey';
 
-interface SignedPreKeyObject extends PreKeyObject {
+interface ISignedPreKeyObject extends IPreKeyObject {
    signature: ArrayBuffer
 }
 
 export default class SignedPreKey extends PreKey {
-   constructor(data: SignedPreKeyObject) {
+   constructor(data: ISignedPreKeyObject) {
       super(data);
    }
 
    public getSignature(): ArrayBuffer {
-      return (<SignedPreKeyObject> this.data).signature;
+      return (<ISignedPreKeyObject> this.data).signature;
    }
 }

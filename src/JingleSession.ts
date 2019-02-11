@@ -1,7 +1,7 @@
 import Account from './Account'
 import JingleCallSession from './JingleCallSession'
 import JingleStreamSession from './JingleStreamSession';
-import { OTalkJingleSession } from '@vendor/Jingle.interface';
+import { IOTalkJingleSession } from '@vendor/Jingle.interface';
 
 const MEDIA_SESSION = 'MediaSession';
 const CALL_SESSION = 'CallSession';
@@ -10,7 +10,7 @@ const STREAM_SESSION = 'StreamSession';
 
 export default class JingleSession {
 
-   public static create(account: Account, session: OTalkJingleSession) {
+   public static create(account: Account, session: IOTalkJingleSession) {
       let sessionType = JingleSession.getSessionType(session);
 
       if (sessionType === FILE_TRANSFER_SESSION) {
@@ -24,7 +24,7 @@ export default class JingleSession {
       }
    }
 
-   private static getSessionType(session: OTalkJingleSession) {
+   private static getSessionType(session: IOTalkJingleSession) {
       let sessionType = (session.constructor) ? session.constructor.name : null;
 
       if (sessionType === MEDIA_SESSION) {
@@ -34,7 +34,7 @@ export default class JingleSession {
       return sessionType;
    }
 
-   private static determineMediaSessionType(session: OTalkJingleSession) {
+   private static determineMediaSessionType(session: IOTalkJingleSession) {
       let reqMedia = false;
       let description = session.isInitiator ? session.pc.localDescription : session.pc.remoteDescription;
 
