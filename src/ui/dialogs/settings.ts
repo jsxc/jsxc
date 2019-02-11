@@ -6,9 +6,12 @@ import Navigation from '../DialogNavigation'
 import List from '../DialogList'
 import ListItem from '../DialogListItem'
 import AvatarSet from '../AvatarSet'
-import Translation from '../../util/Translation';
 import Log from '../../util/Log'
+<<<<<<< HEAD
 import Contact from '@src/Contact';
+=======
+import Translation from '@util/Translation';
+>>>>>>> upstream/refactoring
 
 const ENOUGH_BITS_OF_ENTROPY = 50;
 
@@ -38,20 +41,42 @@ class ClientSection extends Section {
    protected generateContentElement(): JQuery {
       let contentElement = new List();
 
-      //@REVIEW more generic? See PluginSection.
-      let checkboxElement = $('<input>');
-      checkboxElement.attr('type', 'checkbox');
-      checkboxElement.prop('checked', Client.getOption('onLogin'));
-      checkboxElement.on('change', (ev) => {
-         let isEnabled = $(ev.target).prop('checked');
-
-         Client.setOption('onLogin', isEnabled);
-      });
-
-      //@TODO only show if form watcher was used
-      contentElement.append(new ListItem(Translation.t('On_login'), Translation.t('setting-explanation-login'), undefined, undefined, checkboxElement));
+      contentElement.append(new ListItem(
+         Translation.t('Language'),
+         Translation.t('After_changing_this_option_you_have_to_reload_the_page'),
+         undefined,
+         undefined,
+         this.getLanguageSelectionElement()
+      ));
 
       return contentElement.getDOM();
+   }
+
+   private getLanguageSelectionElement() {
+      let currentLang = Client.getOption('lang');
+      let element = $('<select>');
+      element.append('<option value=""></option>');
+      __LANGS__.forEach((lang) => {
+         let optionElement = $('<option>');
+         optionElement.text(lang);
+         optionElement.appendTo(element);
+
+         if (lang === currentLang) {
+            optionElement.attr('selected', 'selected');
+         }
+      });
+
+      element.on('change', (ev) => {
+         let value = $(ev.target).val();
+
+         Client.setOption('lang', value ? value : undefined);
+      });
+
+      if (element.find('[selected]').length === 0) {
+         element.find('option:eq(0)').attr('selected', 'selected');
+      }
+
+      return element;
    }
 }
 

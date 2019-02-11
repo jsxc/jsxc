@@ -41,7 +41,7 @@ export default class RoleAllocator {
 
    private claim: number;
 
-   private static instance;
+   private static instance: RoleAllocator;
 
    private constructor() {
       this.storage = Client.getStorage();
@@ -50,7 +50,7 @@ export default class RoleAllocator {
       this.storage.registerHook(SLAVE_KEY, this.onSlave);
    }
 
-   public static get() {
+   public static get(): RoleAllocator {
       if (!RoleAllocator.instance) {
          RoleAllocator.instance = new RoleAllocator();
       }

@@ -1,5 +1,6 @@
 /* jshint node:true */
 const path = require('path');
+const fs = require('fs');
 const webpack = require('webpack');
 const packageJson = require('./package.json');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -8,9 +9,25 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const GitRevisionPlugin = new(require('git-revision-webpack-plugin'))();
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
+let supportedLangs = fs.readdirSync('./locales/').filter(filename => {
+   if (!/\.json$/.test(filename)) {
+      return false;
+   }
+
+   let file = require(`./locales/${filename}`);
+
+   for (let key in file.translation) {
+      if (typeof file.translation[key] === 'string') {
+         return true;
+      }
+   }
+
+   return false;
+}).map(filename => filename.replace(/\.json$/, ''));
+
 const DEVELOPMENT_MODE = 'development';
 const PRODUCTION_MODE = 'production';
-const MOMENTJS_LOCALES = ['de', 'jp', 'nl', 'fr', 'zh', 'tr', 'pt', 'el', 'ro', 'pl', 'es', 'ru', 'it', 'hu'];
+const MOMENTJS_LOCALES = supportedLangs.map(lang => lang.replace(/-.+/, ''));
 const JS_BUNDLE_NAME = 'jsxc.bundle.js';
 
 const dependencies = Object.keys(packageJson.dependencies).map(function(name) {
@@ -25,6 +42,7 @@ let definePluginConfig = {
    __BUILD_DATE__: JSON.stringify(buildDate),
    __BUNDLE_NAME__: JSON.stringify(JS_BUNDLE_NAME),
    __DEPENDENCIES__: JSON.stringify(dependencies.join(', ')),
+   __LANGS__: JSON.stringify(supportedLangs),
 };
 
 const fileLoader = {

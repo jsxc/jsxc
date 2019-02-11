@@ -6,6 +6,7 @@ import Account from './Account';
 import Contact from './Contact';
 import { IJID } from './JID.interface';
 import ContactManager from './ContactManager';
+import RoleAllocator from './RoleAllocator';
 
 export default class RosterContactProvider extends ContactProvider {
    constructor(contactManager: ContactManager, private account: Account) {
@@ -62,8 +63,11 @@ export default class RosterContactProvider extends ContactProvider {
    private registerContact(contact: IContact) {
       contact.setProvider(this);
 
-      //@TODO this hook is executed in every tab
-      contact.registerHook('name', (displayName) => this.renameContact(contact.getJid(), displayName));
+      contact.registerHook('name', (displayName) => {
+         if (RoleAllocator.get().isMaster()) {
+            this.renameContact(contact.getJid(), displayName);
+         }
+      });
    }
 
    public deleteContact(jid: IJID): Promise<void> {
