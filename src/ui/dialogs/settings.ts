@@ -7,6 +7,7 @@ import List from '../DialogList'
 import ListItem from '../DialogListItem'
 import AvatarSet from '../AvatarSet'
 import Log from '../../util/Log'
+import Translation from '@util/Translation';
 
 const ENOUGH_BITS_OF_ENTROPY = 50;
 
@@ -26,6 +27,7 @@ class StartPage extends Page {
    //@REVIEW could also return Page or getDOM interface?
    protected generateContentElement(): JQuery | JQuery[] {
       return [
+         new ClientSection(this.navigation).getDOM(),
          new AccountOverviewSection(this.navigation).getDOM()
       ];
    }
@@ -35,7 +37,42 @@ class ClientSection extends Section {
    protected generateContentElement(): JQuery {
       let contentElement = new List();
 
+      contentElement.append(new ListItem(
+         Translation.t('Language'),
+         Translation.t('After_changing_this_option_you_have_to_reload_the_page'),
+         undefined,
+         undefined,
+         this.getLanguageSelectionElement()
+      ));
+
       return contentElement.getDOM();
+   }
+
+   private getLanguageSelectionElement() {
+      let currentLang = Client.getOption('lang');
+      let element = $('<select>');
+      element.append('<option value=""></option>');
+      __LANGS__.forEach((lang) => {
+         let optionElement = $('<option>');
+         optionElement.text(lang);
+         optionElement.appendTo(element);
+
+         if (lang === currentLang) {
+            optionElement.attr('selected', 'selected');
+         }
+      });
+
+      element.on('change', (ev) => {
+         let value = $(ev.target).val();
+
+         Client.setOption('lang', value ? value : undefined);
+      });
+
+      if (element.find('[selected]').length === 0) {
+         element.find('option:eq(0)').attr('selected', 'selected');
+      }
+
+      return element;
    }
 }
 

@@ -3911,6 +3911,11 @@ husky@^1.1.0:
     run-node "^1.0.0"
     slash "^2.0.0"
 
+i18next-browser-languagedetector@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/i18next-browser-languagedetector/-/i18next-browser-languagedetector-3.0.0.tgz#bdcce9e3f40162cdefc7db469a972c34f224250b"
+  integrity sha512-WI+XaZ94+WDp7HhIVykTwZUQsyCqpNDGWTIKG4PAeekZ4UVeMX6sN4gQj+Ad5g5PPwwENiynbW8x9TFFStoYPg==
+
 i18next@^15.0.1:
   version "15.0.1"
   resolved "https://registry.yarnpkg.com/i18next/-/i18next-15.0.1.tgz#214057bd6cdc774e4c2f87f96f1c3d05d3eeafeb"

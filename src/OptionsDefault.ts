@@ -12,8 +12,11 @@ export let appName = 'web applications';
 /** How many messages should be logged? */
 export let numberOfMessages = 100;
 
-/** Default language */
-export let defaultLang = 'en';
+/** Language as IETF language tag (e.g. en, de, es) */
+export let lang = '';
+
+/** Auto language detection */
+export let autoLang = true;
 
 /** Place for roster */
 export let rosterAppend = 'body';
@@ -102,7 +105,7 @@ export let screenMediaExtension = {
    chrome: ''
 };
 
-/** @TODO (UNUSED) */
+/** Options for native browser notifications */
 export let notification = {
    enable: true,
 

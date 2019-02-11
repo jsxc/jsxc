@@ -23,3 +23,4 @@ declare var __VERSION__: string;
 declare var __BUILD_DATE__: string;
 declare var __BUNDLE_NAME__: string;
 declare var __DEPENDENCIES__: string;
+declare let __LANGS__: string[];

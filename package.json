@@ -91,6 +91,7 @@
     "handlebars-loader": "^1.5.0",
     "handlebars-runtime": "^1.0.12",
     "i18next": "^15.0.1",
+    "i18next-browser-languagedetector": "^3.0.0",
     "jingle": "^3.0.3",
     "jingle-session": "^2.0.3",
     "jquery": "^3.3.1",
