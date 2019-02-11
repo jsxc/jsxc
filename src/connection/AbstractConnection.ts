@@ -250,8 +250,8 @@ abstract class AbstractConnection {
 
             let vCardKeys = Object.keys(vCardData);
 
-            for(let key in vCardData){
-               if(key !== 'NICKNAME') {
+            for (let key in vCardData) {
+               if (key !== 'NICKNAME') {
                   iq.c(key).t(vCardData[key]).up();
                }
             }

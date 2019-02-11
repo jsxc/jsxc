@@ -7,11 +7,8 @@ import List from '../DialogList'
 import ListItem from '../DialogListItem'
 import AvatarSet from '../AvatarSet'
 import Log from '../../util/Log'
-<<<<<<< HEAD
 import Contact from '@src/Contact';
-=======
 import Translation from '@util/Translation';
->>>>>>> upstream/refactoring
 
 const ENOUGH_BITS_OF_ENTROPY = 50;
 
