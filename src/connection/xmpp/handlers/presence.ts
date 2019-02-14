@@ -55,7 +55,8 @@ export default class extends AbstractHandler {
       if (presence.type === PRESENCE.SUBSCRIBE) {
          Log.debug('received subscription request');
 
-         this.processSubscriptionRequest(presence.from, contact);
+         let nickname: string = $(stanza).find('nick').text();
+         this.processSubscriptionRequest(presence.from, contact, nickname);
 
          return this.PRESERVE_HANDLER;
       }
@@ -67,8 +68,7 @@ export default class extends AbstractHandler {
       }
 
       let oldPresence = contact.getPresence();
-      let nickname: string = $(stanza).find('nick').text();
-      contact.setNickname(nickname);
+
       contact.setStatus(presence.status);
       contact.setPresence(presence.from.resource, status);
       contact.setResource(''); // reset jid, so new messages go to the bare jid
@@ -81,11 +81,13 @@ export default class extends AbstractHandler {
       return this.PRESERVE_HANDLER;
    }
 
-   private processSubscriptionRequest(jid: JID, contact: IContact) {
+   private processSubscriptionRequest(jid: JID, contact: IContact, nickname?: string) {
       if (contact) {
          Log.debug('Auto approve contact request, because he is already in our contact list.');
 
          this.account.getConnection().getRosterService().sendSubscriptionAnswer(contact.getJid(), true);
+
+         contact.setNickname(nickname);
 
          if (contact.getSubscription() !== SUBSCRIPTION.TO) {
             Roster.get().add(contact);

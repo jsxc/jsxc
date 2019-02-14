@@ -59,13 +59,10 @@ export default class Roster extends AbstractService {
    }
 
    public sendSubscriptionAnswer(to: IJID, accept: boolean) {
-      let nickname: string = this.account.getNickname();
       let presenceStanza = $pres({
          to: to.bare,
          type: (accept) ? 'subscribed' : 'unsubscribed'
-      }).c('nick', {
-         xmlns: 'http://jabber.org/protocol/nick'
-      }).t(nickname);
+      });
 
       this.send(presenceStanza);
    }
@@ -84,10 +81,13 @@ export default class Roster extends AbstractService {
    }
 
    private sendSubscriptionRequest(jid: IJID) {
+      let nickname: string = this.account.getNickname();
       // send subscription request to buddy (trigger onRosterChanged)
       this.send($pres({
          to: jid.full,
          type: 'subscribe'
-      }));
+      }).c('nick', {
+         xmlns: 'http://jabber.org/protocol/nick'
+      }).t(nickname));
    }
 }
