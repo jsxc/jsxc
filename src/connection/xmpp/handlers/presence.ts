@@ -25,7 +25,7 @@ export default class extends AbstractHandler {
          from: new JID($(stanza).attr('from')),
          show: $(stanza).find('show').text(),
          status: $(stanza).find('status').text()
-      }
+      };
 
       let status: Presence = this.determinePresenceStatus(presence);
 
@@ -67,7 +67,8 @@ export default class extends AbstractHandler {
       }
 
       let oldPresence = contact.getPresence();
-
+      let nickname: string = $(stanza).find('nick').text();
+      contact.setNickname(nickname);
       contact.setStatus(presence.status);
       contact.setPresence(presence.from.resource, status);
       contact.setResource(''); // reset jid, so new messages go to the bare jid

@@ -7,19 +7,28 @@ import Account from '../../Account'
 import { AbstractConnection, Presence, STANZA_IQ_KEY, STANZA_KEY } from '../AbstractConnection'
 import XMPPJingleHandler from './JingleHandler'
 import Client from '../../Client'
+import Contact from '@src/Contact';
 
 export default class XMPPConnection extends AbstractConnection implements IConnection {
    private handler: XMPPHandler;
-
    constructor(account: Account, protected connection) {
       super(account);
-
       this.handler = new XMPPHandler(account, connection);
       this.handler.registerHandler();
       NS.register('METADATA_NOTIFY', 'urn:xmpp:avatar:metadata+notify');
 
+      this.getPEPService().subscribe('http://jabber.org/protocol/nick', nickHandler);
+
       this.processPendingStorageConnections();
       this.listenToStorageConnections();
+
+      function nickHandler(stanza): boolean {
+         let nickname: string = $(stanza).find('nick').text();
+         let peerJID = new JID($(stanza).attr('from'));
+         let peer = account.getContact(peerJID);
+         peer.setNickname(nickname);
+         return true;
+      }
 
       Client.getPresenceController().registerTargetPresenceHook(this.targetPresenceHandler);
    }

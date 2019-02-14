@@ -42,8 +42,6 @@ export default class Roster extends AbstractService {
       let waitForRoster = this.addContactToRoster(jid, alias);
 
       this.sendSubscriptionRequest(jid);
-      this.account.getConnection().getPEPService().subscribe('http://jabber.org/protocol/nick', undefined);
-
       return waitForRoster;
    }
 
@@ -61,10 +59,13 @@ export default class Roster extends AbstractService {
    }
 
    public sendSubscriptionAnswer(to: IJID, accept: boolean) {
+      let nickname: string = this.account.getNickname();
       let presenceStanza = $pres({
          to: to.bare,
          type: (accept) ? 'subscribed' : 'unsubscribed'
-      });
+      }).c('nick', {
+         xmlns: 'http://jabber.org/protocol/nick'
+      }).t(nickname);
 
       this.send(presenceStanza);
    }
@@ -87,8 +88,6 @@ export default class Roster extends AbstractService {
       this.send($pres({
          to: jid.full,
          type: 'subscribe'
-      }).c('nick', {
-         xmlns: 'http://jabber.org/protocol/nick'
-      }).t(this.account.getNickname()));
+      }));
    }
 }
