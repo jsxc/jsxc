@@ -101,7 +101,7 @@ export default class extends AbstractHandler {
          description: 'from ' + jid.bare,
          type: NOTICETYPE.contact,
          fnName: NOTICEFUNCTION.contactRequest,
-         fnParams: [jid.bare]
+         fnParams: [jid.bare, nickname]
       });
    }
 

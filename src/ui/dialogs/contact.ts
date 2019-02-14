@@ -5,14 +5,15 @@ import Client from '../../Client'
 import JID from '../../JID'
 
 let contactTemplate = require('../../../template/contact.hbs');
-
+let nick : string;
 let dialog: Dialog;
 
-export default function(username?: string) {
+export default function(username?: string, nickname?: string) {
    username = (typeof username === 'string') ? username : undefined;
-
+   nickname = (typeof nickname === 'string') ? nickname : undefined;
+   nick = nickname;
    let content = contactTemplate({
-      username
+      username,
    });
 
    dialog = new Dialog(content);
@@ -93,8 +94,9 @@ function onSubmit(ev) {
 
    let jid = new JID(username);
    let contact = new Contact(account, jid, alias);
-
+   contact.setNickname(nick);
    account.getContactManager().add(contact);
+
 
    //@TODO show spinner
 

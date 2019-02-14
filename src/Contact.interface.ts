@@ -23,6 +23,10 @@ export enum ContactSubscription {
 }
 
 export interface IContact {
+   setShowNick(value: boolean);
+
+   getShowNick(): boolean;
+
    getNickname(): string;
 
    setNickname(newNickname: string);
