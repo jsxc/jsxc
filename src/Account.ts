@@ -22,6 +22,8 @@ import ContactManager from './ContactManager';
 
 type ConnectionCallback = (status: number, condition?: string) => void;
 
+const nickRef = 'http://jabber.org/protocol/nick';
+
 export default class Account {
    private storage: Storage;
 
@@ -106,18 +108,18 @@ export default class Account {
 
    public setNickname(nickname: string): Promise<Element> {
       let element = document.createElement('nick');
-      let attr = document.createAttribute('xmlns');
-      let content = document.createTextNode(nickname);
-      attr.value = 'http://jabber.org/protocol/nick';
-      element.setAttributeNode(attr);
-      element.appendChild(content);
+
+      $(element)
+          .attr('xmlns', nickRef)
+          .text(nickname);
+
       this.getStorage().setItem('nickname', nickname);
-      return this.getConnection().getPEPService().publish('http://jabber.org/protocol/nick', element);
+      return this.getConnection().getPEPService().publish(nickRef, element);
    }
 
    public getNickname(): string {
       let nickname = this.getStorage().getItem('nickname');
-      if (nickname == null) {
+      if (!nickname) {
          nickname = this.getJID().bare;
       }
 

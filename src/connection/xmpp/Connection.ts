@@ -11,6 +11,7 @@ import Contact from '@src/Contact';
 
 export default class XMPPConnection extends AbstractConnection implements IConnection {
    private handler: XMPPHandler;
+
    constructor(account: Account, protected connection) {
       super(account);
       this.handler = new XMPPHandler(account, connection);

@@ -10,12 +10,6 @@ import MUCService from './services/MUC'
 import RosterService from './services/Roster'
 import VcardService from './services/Vcard'
 import DiscoService from './services/Disco'
-import { IMessage } from '@src/Message.interface';
-import Vcard from '@connection/services/Vcard';
-import contact from '@ui/dialogs/contact';
-import PersistentMap from '@util/PersistentMap';
-import { isString } from 'util';
-import headlineMessage from '@connection/xmpp/handlers/headlineMessage';
 
 export const STANZA_KEY = 'stanza';
 export const STANZA_IQ_KEY = 'stanzaIQ';
