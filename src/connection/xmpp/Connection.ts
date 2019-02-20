@@ -9,31 +9,33 @@ import XMPPJingleHandler from './JingleHandler'
 import Client from '../../Client'
 
 const nickRef = 'http://jabber.org/protocol/nick';
+let acc;
 
 export default class XMPPConnection extends AbstractConnection implements IConnection {
    private handler: XMPPHandler;
 
    constructor(account: Account, protected connection) {
       super(account);
+      acc = account;
       this.handler = new XMPPHandler(account, connection);
       this.handler.registerHandler();
       NS.register('METADATA_NOTIFY', 'urn:xmpp:avatar:metadata+notify');
 
-      this.getPEPService().subscribe(nickRef, nickHandler);
+      this.getPEPService().subscribe(nickRef, this.nickHandler);
 
       this.processPendingStorageConnections();
       this.listenToStorageConnections();
 
-      function nickHandler(stanza): boolean {
-         let element = $(stanza);
-         let nickname: string = element.find('nick[xmlns="' + nickRef + '"]').text();
-         let peerJID = new JID(element.attr('from'));
-         let peer = account.getContact(peerJID);
-         peer.setNickname(nickname);
-         return true;
-      }
-
       Client.getPresenceController().registerTargetPresenceHook(this.targetPresenceHandler);
+   }
+
+   private nickHandler(stanza): boolean {
+      let element = $(stanza);
+      let nickname: string = element.find('nick[xmlns="' + nickRef + '"]').text();
+      let peerJID = new JID(element.attr('from'));
+      let peer = acc.getContact(peerJID);
+      peer.setNickname(nickname);
+      return true;
    }
 
    private processPendingStorageConnections() {
