@@ -177,8 +177,6 @@ class NicknamePage extends Page {
       contentElement.append(errorElement);
 
       contentElement.find('input').on('input', function() {
-         let nickname = nicknameElement.find('input').val();
-
          submitElement.find('button').prop('disabled', false);
       });
 

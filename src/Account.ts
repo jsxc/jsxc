@@ -68,7 +68,6 @@ export default class Account {
 
          let oldSessionId = this.getStorage().getItem('sessionId');
          this.getStorage().setItem('sessionId', this.sessionId);
-         this.getStorage().generateKey('nickname');
 
          if (oldSessionId) {
             Storage.clear(this.uid + '@' + oldSessionId);

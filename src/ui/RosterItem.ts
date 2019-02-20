@@ -172,7 +172,7 @@ export default class RosterItem {
       let inputElement = this.element.find('input');
 
       this.contact.setName(<string> inputElement.val());
-      this.contact.setShowNick(false);
+      this.contact.setNickVisible(false);
 
       inputElement.remove();
       this.element.find('.jsxc-bar__caption, .jsxc-menu').show();

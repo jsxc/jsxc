@@ -77,7 +77,7 @@ export default class Contact implements IIdentifiable, IContact {
          resources: {},
          type: ContactType.CHAT,
          rnd: Math.random(), // force storage event
-         showNick: true
+         nickVisible: true
       };
 
       this.data = new PersistentMap(this.storage, 'contact', id);
@@ -226,12 +226,12 @@ export default class Contact implements IIdentifiable, IContact {
       return !!this.data.get('name');
    }
 
-   public getShowNick(): boolean {
-      return this.data.get('showNick');
+   public isNickVisible(): boolean {
+      return this.data.get('nickVisible');
    }
 
    public getName(): string {
-      if (this.getShowNick()) {
+      if (this.isNickVisible()) {
          return this.getNickname() || this.jid.bare;
       } else {
          return this.data.get('name');
@@ -310,8 +310,8 @@ export default class Contact implements IIdentifiable, IContact {
       this.data.set('nickname', nickname);
    }
 
-   public setShowNick(value: boolean) {
-      this.data.set('showNick', value);
+   public setNickVisible(value: boolean) {
+      this.data.set('nickVisible', value);
    }
 
    public setSubscription(subscription: ContactSubscription) {
