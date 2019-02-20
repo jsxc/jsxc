@@ -25,8 +25,9 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       this.listenToStorageConnections();
 
       function nickHandler(stanza): boolean {
-         let nickname: string = $(stanza).find('nick[xmlns="' + nickRef + '"]').text();
-         let peerJID = new JID($(stanza).attr('from'));
+         let element = $(stanza);
+         let nickname: string = element.find('nick[xmlns="' + nickRef + '"]').text();
+         let peerJID = new JID(element.attr('from'));
          let peer = account.getContact(peerJID);
          peer.setNickname(nickname);
          return true;
