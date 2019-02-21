@@ -237,6 +237,7 @@ export default class Message implements Identifiable, IMessage {
       //@REVIEW maybe pipes
       body = this.convertUrlToLink(body);
       body = this.convertEmailToLink(body);
+      body = this.convertGeoToLink(body);
       body = Emoticons.toImage(body);
 
       body = this.markQuotation(body);
@@ -303,15 +304,15 @@ export default class Message implements Identifiable, IMessage {
       return text.replace(/(\r\n|\r|\n)/g, '<br />');
    }
 
-   private convertUrlToLink(text) {
+   private convertUrlToLink(text: string) {
       return text.replace(CONST.REGEX.URL, function(url) {
          let href = (url.match(/^https?:\/\//i)) ? url : 'http://' + url;
 
-         return '<a href="' + href + '" target="_blank">' + url + '</a>';
+         return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
       });
    }
 
-   private convertEmailToLink(text) {
+   private convertEmailToLink(text: string) {
       return text.replace(ATREGEX, function(str, protocol, jid, action) {
          if (protocol === 'xmpp:') {
             if (typeof action === 'string') {
@@ -323,5 +324,11 @@ export default class Message implements Identifiable, IMessage {
 
          return '<a href="mailto:' + jid + '" target="_blank">mailto:' + jid + '</a>';
       });
+   }
+
+   private convertGeoToLink(text: string) {
+      return text.replace(CONST.REGEX.GEOURI, (url) => {
+         return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+      })
    }
 }
