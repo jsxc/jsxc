@@ -459,7 +459,7 @@ export default class Roster {
    private initOptions() {
       let muteNotification = Client.getOption('notification.mute');
       this.muteNotification(muteNotification);
-      Client.getOptions().registerHook('notification', (newValue, oldValue) => {
+      Client.getOptions().registerHook('notification', (newValue = {}, oldValue = {}) => {
          if (newValue.mute !== oldValue.mute) {
             this.muteNotification(newValue.mute);
          }
