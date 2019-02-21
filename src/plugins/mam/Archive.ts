@@ -75,7 +75,7 @@ export default class Archive {
       connection.queryArchive(this.contact.getJid(), queryId, firstResultId, endDate)
          .then(this.onComplete)
          .catch((stanza) => {
-            console.warn('Error while requesting archive', stanza);
+            Log.warn('Error while requesting archive', stanza);
          });
    }
 

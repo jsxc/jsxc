@@ -197,7 +197,8 @@ class MultiUserJoinDialog {
             this.showJoinElements();
          }).catch((msg) => {
             this.setStatusMessage(msg, 'warning');
-            console.warn(msg)
+
+            Log.warn(msg)
          })
 
       return false;

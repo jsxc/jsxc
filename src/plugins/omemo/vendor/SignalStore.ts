@@ -3,6 +3,7 @@ import ArrayBufferUtils from '../util/ArrayBuffer'
 import Store from '../lib/Store';
 import Address from './Address';
 import IdentityKey from '../model/IdentityKey'
+import Log from '@util/Log';
 
 export const DIRECTION = {
    SENDING: 1,
@@ -57,7 +58,7 @@ export default class implements ISignalStore {
       }
 
       if (publicIdentityKey.byteLength !== 33) {
-         console.warn(`Identity key is ${publicIdentityKey.byteLength} byte long.`);
+         Log.warn(`Identity key is ${publicIdentityKey.byteLength} byte long.`);
       }
 
       let identityKey = new IdentityKey({ publicKey: publicIdentityKey });

@@ -429,7 +429,7 @@ export default class Roster {
 
    private toggleMuteNotification = () => {
       let muteNotification = !Client.getOption('notification.mute');
-      console.log('muteNotification', muteNotification, Client.getOption('notification.mute'));
+
       Client.setOption('notification.mute', muteNotification);
    }
 
