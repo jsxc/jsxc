@@ -3,9 +3,9 @@ import Client from '../../Client'
 import Roster from '../../ui/Roster'
 import { IPlugin } from '../../plugin/AbstractPlugin'
 import FormWatcher, { SettingsCallback } from '../../FormWatcher'
-import { end } from './end';
+import { disconnect } from './disconnect';
 
-export { end };
+export { disconnect };
 export { start, startAndPause } from './start'
 export { register } from './register'
 export { testBOSHServer } from './testBOSHServer'
@@ -41,7 +41,7 @@ export function watchLogoutClick(element: JQuery) {
       ev.stopPropagation();
       ev.preventDefault();
 
-      end().then(() => {
+      disconnect().then(() => {
          $(this).off('click', null, logout);
 
          $(this).get(0).click();
