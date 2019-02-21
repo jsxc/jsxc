@@ -8,6 +8,7 @@ export interface ISettings {
       url?: string,
       node?: string,
       domain?: string,
+      password?: string,
       resource?: string,
    }
 }
@@ -108,6 +109,10 @@ export default class FormWatcher {
 
       if (!settings.xmpp || !settings.xmpp.url) {
          throw new Error('I found no connection url');
+      }
+
+      if (settings.xmpp.password) {
+         password = settings.xmpp.password;
       }
 
       let jid = usernameToJabberId(username, settings);
