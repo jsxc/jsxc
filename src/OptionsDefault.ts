@@ -50,6 +50,20 @@ export let favicon = {
    textColor: '#fff'
 };
 
+/** This function is called for every avatar element without a user defined avatar. */
+export let avatarPlaceholder: (element: JQuery, name: string, color: string) => void = ((element: JQuery, text: string, color: string) => {
+   element.css({
+      'background-color': color,
+      'color': '#fff',
+      'font-weight': 'bold',
+      'text-align': 'center',
+      'line-height': '36px', // element.height() + 'px',
+      'font-size': '22px', //element.height() * 0.6 + 'px'
+   });
+
+   element.text(text[0].toUpperCase());
+});
+
 export interface IRTCPeerConfig {
    ttl: number
    url?: string

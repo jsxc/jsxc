@@ -86,10 +86,11 @@ class AccountOverviewSection extends Section {
       let contentElement = new List();
 
       for (let account of accounts) {
-         let name = account.getJID().bare;
+         let jid = account.getJID();
+         let name = jid.bare;
          let avatarElement = $('<div>');
          avatarElement.addClass('jsxc-avatar');
-         AvatarSet.setPlaceholder(avatarElement, name);
+         AvatarSet.setPlaceholder(avatarElement, name, jid);
 
          let actionHandler = () => this.navigation.goTo(new AccountPage(this.navigation, account));
          let accountElement = new ListItem(name, undefined, actionHandler, avatarElement);

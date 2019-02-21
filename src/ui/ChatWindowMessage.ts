@@ -158,7 +158,7 @@ export default class ChatWindowMessage {
       if (nextMessage && nextMessage.getSender().name === sender.name) {
          avatarElement.css('visibility', 'hidden');
       } else {
-         AvatarSet.setPlaceholder(avatarElement, sender.name);
+         AvatarSet.setPlaceholder(avatarElement, sender.name, sender.jid);
       }
    }
 

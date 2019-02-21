@@ -72,7 +72,7 @@ export default class MultiUserChatWindow extends ChatWindow {
       } else {
          label = title = nickname;
 
-         AvatarSet.setPlaceholder(avatarElement, nickname);
+         AvatarSet.setPlaceholder(avatarElement, nickname, jid);
       }
 
       memberElement.find('.jsxc-name').text(label);
