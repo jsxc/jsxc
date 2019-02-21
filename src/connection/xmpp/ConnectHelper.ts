@@ -5,6 +5,7 @@ import Client from '../../Client'
 import InvalidParameterError from '../../errors/InvalidParameterError'
 import ConnectionError from '../../errors/ConnectionError'
 import AuthenticationError from '../../errors/AuthenticationError'
+import UUID from '@util/UUID';
 
 export function login(url: string, jid: string, sid: string, rid: string);
 export function login(url: string, jid: string, password: string);
@@ -23,6 +24,10 @@ function loginWithPassword(url: string, jid: string, password: string): Promise<
    let connection = prepareConnection(url);
 
    Log.debug('Try to establish a new connection.');
+
+   if (jid.indexOf('/') < 0) {
+      jid += '/jsxc-' + UUID.v4().slice(0, 8);
+   }
 
    return new Promise(function(resolve, reject) {
       connection.connect(jid, password, function(status, condition) {
