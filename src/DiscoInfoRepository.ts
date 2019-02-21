@@ -6,10 +6,10 @@ import Contact from './Contact'
 import Log from './util/Log'
 import Client from './Client'
 import Form from './connection/Form'
-import { DiscoInfoRepository } from './DiscoInfoRepository.interface'
+import { IDiscoInfoRepository } from './DiscoInfoRepository.interface'
 import { IJID } from './JID.interface';
 
-export default class implements DiscoInfoRepository {
+export default class implements IDiscoInfoRepository {
    private jidIndex: PersistentMap;
    private serverJidIndex: PersistentMap;
 
@@ -47,7 +47,6 @@ export default class implements DiscoInfoRepository {
          return Promise.resolve(resources);
       }
 
-      let capableResources = [];
       let promises = [];
 
       for (let resource of resources) {
@@ -138,8 +137,8 @@ export default class implements DiscoInfoRepository {
 
    private processDiscoInfo(stanza: Element) {
       let queryElement = $(stanza).find('query');
-      let node = queryElement.attr('node') || '';
-      let from = new JID($(stanza).attr('from'));
+      // let node = queryElement.attr('node') || '';
+      // let from = new JID($(stanza).attr('from'));
 
       //@TODO verify response is valid: https://xmpp.org/extensions/xep-0115.html#ver-proc
 

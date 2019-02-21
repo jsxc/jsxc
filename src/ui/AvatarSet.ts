@@ -1,10 +1,11 @@
-import Client from '../Client'
 import { IContact } from '../Contact.interface'
 import Color from '../util/Color'
+import Client from '@src/Client';
+import { IJID } from '@src/JID.interface';
 
 export default class AvatarSet {
 
-   private elements = [];
+   private elements: JQuery[] = [];
 
    private static avatars = {};
 
@@ -18,8 +19,8 @@ export default class AvatarSet {
       return avatar;
    }
 
-   public static setPlaceholder(elements, text: string) {
-      AvatarSet.placeholder(elements, text);
+   public static setPlaceholder(elements: JQuery, text: string, jid: IJID) {
+      AvatarSet.placeholder(elements, text, jid);
    }
 
    public addElement(element) {
@@ -39,7 +40,7 @@ export default class AvatarSet {
             element.text('');
          });
       }).catch((msg) => {
-         AvatarSet.placeholder(this.elements, this.contact.getName());
+         AvatarSet.placeholder(this.elements, this.contact.getName(), this.contact.getJid());
       }).then(() => {
          this.hideSpinner();
       });
@@ -51,24 +52,13 @@ export default class AvatarSet {
       });
    }
 
-   private static placeholder(elements, text: string) {
-      // let options = Client.getOption('avatarPlaceholder') || {};
+   private static placeholder(elements: JQuery|JQuery[], text: string, jid: IJID) {
+      let avatarPlaceholder = Client.getOption('avatarPlaceholder');
 
       let color = Color.generate(text);
 
       $(elements).each(function() {
-         let element = $(this);
-
-         element.css({
-            'background-color': color,
-            'color': '#fff',
-            'font-weight': 'bold',
-            'text-align': 'center',
-            'line-height': '36px', // element.height() + 'px',
-            'font-size': '22px', //element.height() * 0.6 + 'px'
-         });
-
-         element.text(text[0].toUpperCase());
+         avatarPlaceholder($(this), text, color, jid);
       });
    }
 

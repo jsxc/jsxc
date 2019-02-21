@@ -7,7 +7,6 @@ import * as Namespace from '../../connection/xmpp/namespace'
 import Attachment from '../../Attachment'
 import HttpUploadService from './HttpUploadService'
 import { IConnection } from '../../connection/Connection.interface'
-import Pipe from '../../util/Pipe'
 import { $iq } from '../../vendor/Strophe'
 import Translation from '../../util/Translation';
 

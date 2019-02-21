@@ -1,6 +1,6 @@
-import Exportable from './Exportable';
+import IExportable from './Exportable';
 
-export interface PreKeyObject {
+export interface IPreKeyObject {
    keyId: number
    keyPair: {
       publicKey: ArrayBuffer,
@@ -8,8 +8,8 @@ export interface PreKeyObject {
    }
 }
 
-export default class PreKey implements Exportable {
-   constructor(protected data: PreKeyObject) {
+export default class PreKey implements IExportable {
+   constructor(protected data: IPreKeyObject) {
 
    }
 
@@ -25,7 +25,7 @@ export default class PreKey implements Exportable {
       return this.data.keyPair.privateKey;
    }
 
-   public export(): PreKeyObject {
+   public export(): IPreKeyObject {
       return this.data;
    }
 }

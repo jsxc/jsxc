@@ -1,6 +1,6 @@
 import Account from './Account';
 import JID from './JID';
-import Storage from './Storage.interface';
+import IStorage from './Storage.interface';
 import Client from './Client';
 import ClientAvatar from './ClientAvatar';
 import RoleAllocator from './RoleAllocator';
@@ -11,7 +11,7 @@ import Roster from '@ui/Roster';
 export default class AccountManager {
    private accounts = {};
 
-   constructor(private storage: Storage) {
+   constructor(private storage: IStorage) {
 
    }
 

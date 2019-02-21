@@ -1,15 +1,15 @@
 import { IConnection } from '../connection/Connection.interface'
 import { IContact as Contact } from '../Contact.interface'
-import { IMessage as Message, MessagePayload } from '../Message.interface'
+import { IMessage, IMessagePayload } from '../Message.interface'
 import { IJID as JID } from '../JID.interface'
-import { Avatar } from '../Avatar.interface'
-import { DiscoInfoRepository } from '../DiscoInfoRepository.interface'
+import { IDiscoInfoRepository } from '../DiscoInfoRepository.interface'
 import { ILog } from '../util/Log.interface'
 import ChatWindow from '@ui/ChatWindow';
 import ContactManager from '@src/ContactManager';
 import ContactProvider from '@src/ContactProvider';
+import { IAvatar } from '@src/Avatar.interface';
 
-export interface API {
+export interface IPluginAPI {
 
    Log: ILog
 
@@ -17,8 +17,8 @@ export interface API {
    createJID(bare: string, resource: string): JID
    createJID(full: string): JID
 
-   createMessage(uid: string): Message
-   createMessage(data: MessagePayload): Message
+   createMessage(uid: string): IMessage
+   createMessage(data: IMessagePayload): IMessage
 
    getStorage()
 
@@ -28,7 +28,7 @@ export interface API {
 
    sendIQ(stanzaElement: Strophe.Builder): Promise<{}>
 
-   getDiscoInfoRepository(): DiscoInfoRepository
+   getDiscoInfoRepository(): IDiscoInfoRepository
 
    getConnection(): IConnection
 
@@ -36,13 +36,13 @@ export interface API {
 
    getVersion(): string
 
-   addPreSendMessageProcessor(processor: (contact: Contact, message: Message) => Promise<{}>, position?: number)
+   addPreSendMessageProcessor(processor: (contact: Contact, message: IMessage) => Promise<{}>, position?: number)
 
-   addAfterReceiveMessageProcessor(processor: (contact: Contact, message: Message, stanza: Element) => Promise<{}>, position?: number)
+   addAfterReceiveMessageProcessor(processor: (contact: Contact, message: IMessage, stanza: Element) => Promise<{}>, position?: number)
 
-   addPreSendMessageStanzaProcessor(processor: (message: Message, xmlMsg: Strophe.Builder) => Promise<any>, position?: number)
+   addPreSendMessageStanzaProcessor(processor: (message: IMessage, xmlMsg: Strophe.Builder) => Promise<any>, position?: number)
 
-   addAvatarProcessor(processor: (contact: Contact, avatar: Avatar) => Promise<[Contact, Avatar]>, position?: number)
+   addAvatarProcessor(processor: (contact: Contact, avatar: IAvatar) => Promise<[Contact, IAvatar]>, position?: number)
 
    addFeature(feature: string)
 

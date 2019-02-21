@@ -8,7 +8,7 @@ export default function() {
    let content = aboutTemplate({
       version: __VERSION__,
       date: __BUILD_DATE__,
-      appName: Client.getOption('app_name'),
+      appName: Client.getOption('appName'),
       dependencies: __DEPENDENCIES__,
    });
 

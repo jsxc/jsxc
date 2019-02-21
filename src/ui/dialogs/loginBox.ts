@@ -42,7 +42,7 @@ function setFocus() {
 async function submitLoginForm(form) {
    form.find('button[data-jsxc-loading-text]').trigger('btnloading.jsxc');
 
-   let boshUrl = Client.getOption('xmpp.url') || form.find('#jsxc-url').val();
+   let url = Client.getOption('xmpp.url') || form.find('#jsxc-url').val();
    let username = form.find('#jsxc-username').val();
    let password = form.find('#jsxc-password').val();
    let jid = username;
@@ -56,15 +56,19 @@ async function submitLoginForm(form) {
          throw new Error('No connection options provided');
       }
 
-      if ((!options.xmpp || !options.xmpp.url) && !boshUrl) {
+      if ((!options.xmpp || !options.xmpp.url) && !url) {
          throw new Error('I found no connection url');
       }
 
-      boshUrl = (options.xmpp && options.xmpp.url) ? options.xmpp.url : boshUrl;
+      url = (options.xmpp && options.xmpp.url) ? options.xmpp.url : url;
       jid = usernameToJabberId(username, options);
+
+      if (options.xmpp && options.xmpp.password) {
+         password = options.xmpp.password;
+      }
    }
 
-   return await start(boshUrl, jid, password);
+   return await start(url, jid, password);
 }
 
 function onAuthFail(dom) {

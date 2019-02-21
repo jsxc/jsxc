@@ -1,9 +1,9 @@
-import { Avatar } from './Avatar.interface'
+import { IAvatar } from './Avatar.interface'
 import Client from './Client'
 import PersistentMap from './util/PersistentMap'
 import * as sha1 from 'js-sha1'
 
-export default class implements Avatar {
+export default class implements IAvatar {
    private properties: PersistentMap;
 
    constructor(private sha1Hash: string, type?: string, data?: string) {

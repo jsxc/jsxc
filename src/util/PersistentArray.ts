@@ -1,6 +1,4 @@
-import Identifiable from '../Identifiable.interface'
 import Storage from '../Storage'
-import InvalidParameterError from '../errors/InvalidParameterError';
 
 export default class PersistentArray {
 

@@ -3,7 +3,6 @@ import Client from '../../Client'
 import JID from '../../JID'
 import { IConnection } from '../../connection/Connection.interface'
 import TableElement from '../util/TableElement'
-import Roster from '../../ui/Roster'
 import Translation from '../../util/Translation'
 import Log from '../../util/Log'
 import Account from '@src/Account';
@@ -27,7 +26,6 @@ class MultiUserJoinDialog {
    private serverInputElement;
    private roomInputElement;
    private passwordInputElement;
-   private autoJoinInputElement;
    private nicknameInputElement;
    private bookmarkInputElement;
 
@@ -40,7 +38,6 @@ class MultiUserJoinDialog {
       this.serverInputElement = dom.find('input[name="server"]');
       this.roomInputElement = dom.find('input[name="room"]');
       this.passwordInputElement = dom.find('input[name="password"]');
-      this.autoJoinInputElement = dom.find('input[name="auto-join"]');
       this.nicknameInputElement = dom.find('input[name="nickname"]');
       this.bookmarkInputElement = dom.find('input[name="bookmark"]');
 
@@ -200,7 +197,8 @@ class MultiUserJoinDialog {
             this.showJoinElements();
          }).catch((msg) => {
             this.setStatusMessage(msg, 'warning');
-            console.warn(msg)
+
+            Log.warn(msg)
          })
 
       return false;
@@ -208,7 +206,6 @@ class MultiUserJoinDialog {
 
    private testInputValues(): Promise<JID | void> {
       let room = <string> this.roomInputElement.val();
-      let nickname = this.nicknameInputElement.val() || this.defaultNickname;
       let server = this.serverInputElement.val();
 
       if (!room || !room.match(/^[^"&\'\/:<>@\s]+$/i)) {

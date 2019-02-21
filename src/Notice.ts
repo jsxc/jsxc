@@ -21,7 +21,7 @@ functions[FUNCTION.notificationRequest] = Notification.askForPermission;
 functions[FUNCTION.multiUserInvitation] = MultiUserInvitationDialog;
 functions[FUNCTION.notification] = NotificationDialog;
 
-export interface NoticeData {
+export interface INoticeData {
    title: string;
    description: string;
    fnName: FUNCTION;
@@ -33,9 +33,9 @@ export class Notice implements IIdentifiable {
 
    private storage: Storage;
 
-   private data: NoticeData;
+   private data: INoticeData;
 
-   constructor(storage: Storage, data: NoticeData);
+   constructor(storage: Storage, data: INoticeData);
    constructor(storage: Storage, id: string);
    constructor() {
       this.storage = arguments[0];

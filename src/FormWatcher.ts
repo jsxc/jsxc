@@ -1,21 +1,21 @@
 import Log from './util/Log'
 import * as jsxc from './api/v1'
-import Account from './Account';
 import Client from './Client';
 
-export interface Settings {
+export interface ISettings {
    disabled?: boolean,
    xmpp?: {
       url?: string,
       node?: string,
       domain?: string,
+      password?: string,
       resource?: string,
    }
 }
 
-export type SettingsCallback = (username: string, password: string) => Promise<Settings>;
+export type SettingsCallback = (username: string, password: string) => Promise<ISettings>;
 
-export function usernameToJabberId(username: string, settings: Settings) {
+export function usernameToJabberId(username: string, settings: ISettings) {
    let jid: string;
 
    if (settings.xmpp.node && settings.xmpp.domain) {
@@ -111,12 +111,16 @@ export default class FormWatcher {
          throw new Error('I found no connection url');
       }
 
+      if (settings.xmpp.password) {
+         password = settings.xmpp.password;
+      }
+
       let jid = usernameToJabberId(username, settings);
 
       return await jsxc.startAndPause(settings.xmpp.url, jid, password);
    }
 
-   private getSettings(username: string, password: string): Promise<Settings> {
+   private getSettings(username: string, password: string): Promise<ISettings> {
       if (typeof this.settingsCallback !== 'function') {
          return Promise.resolve({});
       }

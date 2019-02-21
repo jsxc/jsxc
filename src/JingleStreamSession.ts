@@ -3,7 +3,6 @@ import Log from '@util/Log';
 import JingleMediaSession from './JingleMediaSession';
 import Notification from './Notification';
 import Translation from '@util/Translation';
-import JID from './JID';
 
 export default class JingleStreamSession extends JingleMediaSession {
 

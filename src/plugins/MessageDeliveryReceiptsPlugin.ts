@@ -16,7 +16,6 @@ const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 let PRESERVE_HANDLER = true;
-let REMOVE_HANDLER = false;
 
 export default class ReceiptPlugin extends AbstractPlugin {
 

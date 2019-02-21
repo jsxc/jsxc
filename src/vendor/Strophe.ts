@@ -6,20 +6,20 @@ export let $msg: (attrs?: any) => Strophe.Builder = StropheLib.$msg;
 export let $pres: (attrs?: any) => Strophe.Builder = StropheLib.$pres;
 export let Strophe = StropheLib.Strophe;
 export let NS = StropheLib.Strophe.NS;
-export let Status: Status = StropheLib.Strophe.Status;
+export let Status: IStatus = StropheLib.Strophe.Status;
 
-interface Status {
-   ATTACHED
-   AUTHENTICATING
-   AUTHFAIL
-   CONNECTED
-   CONNECTING
-   CONNFAIL
-   CONNTIMEOUT
-   DISCONNECTED
-   DISCONNECTING
-   ERROR
-   REDIRECT
+interface IStatus {
+   ATTACHED: number
+   AUTHENTICATING: number
+   AUTHFAIL: number
+   CONNECTED: number
+   CONNECTING: number
+   CONNFAIL: number
+   CONNTIMEOUT: number
+   DISCONNECTED: number
+   DISCONNECTING: number
+   ERROR: number
+   REDIRECT: number
 }
 
 (<any> window).Strophe = Strophe;

@@ -4,7 +4,7 @@ import { STATE } from './State'
 import { $msg } from '../../vendor/Strophe'
 
 export default class ChatStateConnection {
-   constructor(private send, private sendIQ) {
+   constructor(private send) {
 
    }
 

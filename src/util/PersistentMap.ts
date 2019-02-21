@@ -1,6 +1,6 @@
 import Identifiable from '../Identifiable.interface'
-import Storage from '../Storage'
 import InvalidParameterError from '../errors/InvalidParameterError';
+import IStorage from '@src/Storage.interface';
 
 export default class PersistentMap {
 
@@ -8,7 +8,7 @@ export default class PersistentMap {
 
    private key: string;
 
-   constructor(private storage: Storage, ...identifier: string[]) {
+   constructor(private storage: IStorage, ...identifier: string[]) {
       this.key = storage.generateKey.apply(storage, identifier);
 
       this.map = this.storage.getItem(this.key) || {};

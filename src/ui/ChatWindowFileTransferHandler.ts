@@ -1,11 +1,10 @@
-import Contact from '../Contact'
 import ChatWindow from '../ui/ChatWindow'
 import Attachment from '../Attachment'
 
 export default class FileTransferHandler {
    private handlerElement;
 
-   constructor(private contact: Contact, private chatWindow: ChatWindow) {
+   constructor(private chatWindow: ChatWindow) {
       this.handlerElement = this.chatWindow.getDom().find('.jsxc-file-transfer');
 
       this.handlerElement.on('click', this.showFileSelection);
@@ -22,8 +21,6 @@ export default class FileTransferHandler {
    }
 
    private showFileSelection = (ev) => {
-      let jid = this.contact.getJid();
-
       if (ev.target !== this.handlerElement.get(0)) {
          // prevent bubbled event
          return;

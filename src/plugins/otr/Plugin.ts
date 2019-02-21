@@ -4,7 +4,6 @@ import { EncryptionPlugin } from '../../plugin/EncryptionPlugin'
 import Contact from '../../Contact'
 import Message from '../../Message'
 import { DIRECTION } from '../../Message.interface'
-import Translation from '../../util/Translation'
 import Session from './Session'
 import DSA from 'otr/lib/dsa'
 import Options from '../../Options'
@@ -20,7 +19,7 @@ import dsaWebworkerFile = require('otr/lib/dsa-webworker.js?path')
 
 const WHITESPACE_TAG = '\x20\x09\x20\x20\x09\x09\x09\x09\x20\x09\x20\x09\x20\x09\x20\x20';
 
-interface DSA {
+interface IDSA {
    parsePrivate
    createInWebWorker
    packPrivate
@@ -40,7 +39,7 @@ const MAX_VERSION = '4.0.0';
 
 export default class OTRPlugin extends EncryptionPlugin {
    private sessions = {};
-   private key: DSA;
+   private key: IDSA;
 
    public static getName(): string {
       return 'otr';
@@ -117,7 +116,7 @@ export default class OTRPlugin extends EncryptionPlugin {
       }
 
       return this.getDSAKey().then((key) => {
-         this.sessions[bareJid] = new Session(contact, key, this.pluginAPI.getStorage(), this.pluginAPI.getConnection());
+         this.sessions[bareJid] = new Session(contact, key, this.pluginAPI.getStorage());
 
          //@TODO save session?
 
@@ -126,19 +125,19 @@ export default class OTRPlugin extends EncryptionPlugin {
    }
 
    //@TODO call this before logout
-   private endAllSessions() {
-      //@TODO restore all otr objects (?)
+   // private endAllSessions() {
+   //    //@TODO restore all otr objects (?)
 
-      let promiseMap = Object.keys(this.sessions).map((bareJid) => {
-         let session = this.sessions[bareJid];
+   //    let promiseMap = Object.keys(this.sessions).map((bareJid) => {
+   //       let session = this.sessions[bareJid];
 
-         if (session.isEncrypted()) {
-            return session.end();
-         }
-      });
+   //       if (session.isEncrypted()) {
+   //          return session.end();
+   //       }
+   //    });
 
-      return Promise.all(promiseMap);
-   }
+   //    return Promise.all(promiseMap);
+   // }
 
    private getDSAKey() {
       if (this.key) {
@@ -150,7 +149,7 @@ export default class OTRPlugin extends EncryptionPlugin {
 
       if (storedKey === null) {
          //@TODO we should generate only one key even if there are multiple calls during generation
-         return this.generateDSAKey().then((key: DSA) => {
+         return this.generateDSAKey().then((key: IDSA) => {
             storage.setItem('key', key.packPrivate());
 
             this.key = key;
@@ -159,16 +158,13 @@ export default class OTRPlugin extends EncryptionPlugin {
          });
       } else {
          this.pluginAPI.Log.debug('DSA key loaded');
-         this.key = DSA.parsePrivate(storedKey);
+         this.key = (<IDSA> DSA).parsePrivate(storedKey);
 
          return Promise.resolve(this.key);
       }
    }
 
    private generateDSAKey(): Promise<{}> {
-      let msg = Translation.t('Creating_your_private_key_');
-      let worker = null;
-
       if (typeof Worker === 'undefined') {
          //@TODO disable OTR
       }
@@ -176,7 +172,7 @@ export default class OTRPlugin extends EncryptionPlugin {
       return new Promise((resolve, reject) => {
          this.pluginAPI.Log.debug('Start DSA key generation');
 
-         DSA.createInWebWorker({
+         (<IDSA> DSA).createInWebWorker({
             imports: [salsa20File, bigintFile, cryptoFile, eventemitterFile, constFile, helpersFile, dsaFile],
             path: dsaWebworkerFile
          }, (key) => {

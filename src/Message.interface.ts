@@ -6,7 +6,7 @@ export enum DIRECTION {
    IN, OUT, SYS
 };
 
-export interface MessagePayload {
+export interface IMessagePayload {
    peer: JID,
    direction: DIRECTION,
    attrId?: string,

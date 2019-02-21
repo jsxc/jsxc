@@ -1,3 +1,3 @@
-export default interface Exportable {
+export default interface IExportable {
    export(): any
 }

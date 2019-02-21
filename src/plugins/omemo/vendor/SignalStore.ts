@@ -1,15 +1,16 @@
-import SignalStore, { IdentityKeyPair, PreKeyPair, SignedPreKeyPair } from '../vendor/SignalStore.interface'
+import ISignalStore, { IIdentityKeyPair, IPreKeyPair, ISignedPreKeyPair } from '../vendor/SignalStore.interface'
 import ArrayBufferUtils from '../util/ArrayBuffer'
 import Store from '../lib/Store';
 import Address from './Address';
 import IdentityKey from '../model/IdentityKey'
+import Log from '@util/Log';
 
 export const DIRECTION = {
    SENDING: 1,
    RECEIVING: 2
 };
 
-export default class implements SignalStore {
+export default class implements ISignalStore {
 
    public Direction = DIRECTION;
 
@@ -17,7 +18,7 @@ export default class implements SignalStore {
 
    }
 
-   public getIdentityKeyPair(): Promise<IdentityKeyPair> {
+   public getIdentityKeyPair(): Promise<IIdentityKeyPair> {
       let identityKey = this.store.getLocalIdentityKey();
 
       return Promise.resolve({
@@ -57,7 +58,7 @@ export default class implements SignalStore {
       }
 
       if (publicIdentityKey.byteLength !== 33) {
-         console.warn(`Identity key is ${publicIdentityKey.byteLength} byte long.`);
+         Log.warn(`Identity key is ${publicIdentityKey.byteLength} byte long.`);
       }
 
       let identityKey = new IdentityKey({ publicKey: publicIdentityKey });
@@ -65,7 +66,7 @@ export default class implements SignalStore {
       return this.store.saveIdentity(address, identityKey);
    }
 
-   public loadPreKey(keyId: number): Promise<undefined | PreKeyPair> {
+   public loadPreKey(keyId: number): Promise<undefined | IPreKeyPair> {
       let preKey = this.store.getPreKey(keyId);
       let preKeyPair;
 
@@ -83,7 +84,7 @@ export default class implements SignalStore {
       return this.store.removePreKey(keyId);
    }
 
-   public loadSignedPreKey(keyId: number): Promise<undefined | SignedPreKeyPair> {
+   public loadSignedPreKey(keyId: number): Promise<undefined | ISignedPreKeyPair> {
       let signedPreKey = this.store.getSignedPreKey(keyId);
       let signedPreKeyPair;
 

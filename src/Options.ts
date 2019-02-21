@@ -8,15 +8,15 @@ import Client from './Client';
 
 const KEY = 'options';
 
-interface OptionData {
+interface IOptionData {
    [key: string]: any
 }
 
 export default class Options {
 
-   private static defaults: OptionData = defaultOptions;
+   private static defaults: IOptionData = defaultOptions;
 
-   public static overwriteDefaults(options: OptionData) {
+   public static overwriteDefaults(options: IOptionData) {
       let optionKeys = Object.keys(options);
       let defaultKeys = Object.keys(Options.defaults);
       let unknownOptionKeys = optionKeys.filter(e => defaultKeys.indexOf(e) < 0);
@@ -37,7 +37,7 @@ export default class Options {
       Object.assign(Options.defaults, options);
    }
 
-   public static addDefaults(options: OptionData) {
+   public static addDefaults(options: IOptionData) {
       let optionKeys = Object.keys(options);
       let defaultKeys = Object.keys(Options.defaults);
       let knownOptionKeys = optionKeys.filter(e => defaultKeys.indexOf(e) > -1);
@@ -61,15 +61,29 @@ export default class Options {
       let optionData = await Options.defaults.loadOptions(username, password);
 
       for (let id in optionData) {
-         if (id !== 'client' && ((jid && id !== jid.bare) || !Client.getAccountManager().getAccount(id))) {
+         if (id !== 'client' && id !== 'current' && (jid && id !== jid.bare) && !Client.getAccountManager().getAccount(id)) {
+            Log.info(`Skip option block with id "${id}"`);
+
             continue;
+         }
+
+         if (id === 'current') {
+            if (!jid) {
+               Log.info(`Skip option block with id "current", because no jid is provided`);
+
+               continue;
+            }
+
+            id = jid.bare;
          }
 
          let storage = new Storage(id);
          let options = new Options(storage);
 
          for (let key in optionData[id]) {
-            options.set(key, optionData[id][key]);
+            Log.debug(`Set option "${key}"`, optionData[id][key]);
+
+            options.set(key, optionData[id][key], true);
          }
 
          storage.destroy();
@@ -108,7 +122,7 @@ export default class Options {
       return get(keyChain.split('.'), this.storage.getItem(KEY), Options.defaults);
    };
 
-   public set(keyChain: string, value: any) {
+   public set(keyChain: string, value: any, preventOnChange: boolean = false) {
       let subKeys = keyChain.split('.');
       let options = this.storage.getItem(KEY) || {};
 
@@ -130,7 +144,7 @@ export default class Options {
 
       this.storage.setItem(KEY, set(subKeys, options));
 
-      if (typeof Options.defaults.onOptionChange === 'function') {
+      if (typeof Options.defaults.onOptionChange === 'function' && !preventOnChange) {
          Options.defaults.onOptionChange(this.getId(), keyChain, value, () => this.export());
       }
    };
@@ -146,7 +160,7 @@ export default class Options {
       });
    }
 
-   public export(): OptionData {
+   public export(): IOptionData {
       return this.storage.getItem(KEY) || {};
    }
 };

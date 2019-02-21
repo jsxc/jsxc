@@ -1,5 +1,4 @@
 import Log from '../../util/Log'
-import JID from '../../JID'
 import Account from '../../Account'
 import PresenceHandler from './handlers/presence'
 import MultiUserPresenceHandler from './handlers/multiUser/Presence'
@@ -14,13 +13,13 @@ import MultiUserXMessageHandler from './handlers/multiUser/XMessage'
 import AbstractHandler from './AbstractHandler'
 import * as NS from './namespace'
 
-interface StropheConnection {
+interface IStropheConnection {
    jid: string,
    addHandler(Handler, namespace?: string, tagName?: string, type?: string, id?: string, from?: string)
 }
 
 export default class XMPPHandler {
-   constructor(private account: Account, private connection: StropheConnection) {
+   constructor(private account: Account, private connection: IStropheConnection) {
 
    }
 

@@ -15,6 +15,7 @@ export default class RosterItem {
    constructor(private contact: IContact) {
       let self = this;
       let template = rosterItemTemplate({
+         jid: contact.getJid().bare,
          name: contact.getName(),
          lastMessage: contact.getStatus()
       });
@@ -104,6 +105,7 @@ export default class RosterItem {
          let message = this.contact.getTranscript().getMessage(firstMessageId);
 
          this.element.find('.jsxc-bar__caption__secondary').html(message.getPlaintextEmoticonMessage());
+         this.element.find('.jsxc-bar__caption__secondary').attr('title', message.getPlaintextMessage());
       });
 
       let message = this.contact.getTranscript().getFirstMessage();

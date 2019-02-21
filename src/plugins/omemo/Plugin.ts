@@ -1,4 +1,4 @@
-import { API as PluginAPI } from '../../plugin/PluginAPI.interface'
+import { IPluginAPI } from '../../plugin/PluginAPI.interface'
 import { EncryptionPlugin } from '../../plugin/EncryptionPlugin'
 import { EncryptionState } from '../../plugin/AbstractPlugin'
 import { IMessage } from '../../Message.interface'
@@ -19,7 +19,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       return 'OMEMO';
    }
 
-   constructor(pluginAPI: PluginAPI) {
+   constructor(pluginAPI: IPluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       if (!this.isLibSignalAvailable()) {

@@ -1,4 +1,4 @@
-import { SignalSessionBuilder, SignalBundleObject, SignalAddress } from './Signal';
+import { SignalSessionBuilder, ISignalBundleObject, SignalAddress } from './Signal';
 import Address from './Address';
 import Store from '../lib/Store';
 import Bundle from '../lib/Bundle';
@@ -15,7 +15,7 @@ export class SessionBuilder {
       let preKey = bundle.getRandomPreKey();
       let signedPreKey = bundle.getSignedPreKey();
 
-      let signalBundle: SignalBundleObject = {
+      let signalBundle: ISignalBundleObject = {
          identityKey: bundle.getIdentityKey().getPublic(),
          registrationId: 0,
          preKey: {

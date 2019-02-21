@@ -6,8 +6,6 @@ import { EncryptionPlugin } from './EncryptionPlugin'
 import PluginAPI from './PluginAPI'
 
 export default class PluginRepository {
-   private static instance: PluginRepository;
-
    private static registeredPlugins = [];
 
    private plugins: AbstractPlugin[] = [];

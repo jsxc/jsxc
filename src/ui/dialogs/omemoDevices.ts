@@ -5,6 +5,7 @@ import Omemo from '../../plugins/omemo/lib/Omemo';
 import IdentityManager from 'plugins/omemo/lib/IdentityManager';
 import DateTime from '@ui/util/DateTime';
 import Translation from '@util/Translation';
+import Log from '@util/Log';
 
 let omemoDeviceListTemplate = require('../../../template/dialogOmemoDeviceList.hbs');
 let omemoDeviceItemTemplate = require('../../../template/dialogOmemoDeviceItem.hbs');
@@ -84,7 +85,8 @@ function actionHandler(deviceElement, actionElement, device: Device) {
    } else if (action === 'recognize') {
       device.setTrust(Trust.recognized);
    } else {
-      console.warn('Unknown action');
+      Log.warn('Unknown action');
+
       return;
    }
 

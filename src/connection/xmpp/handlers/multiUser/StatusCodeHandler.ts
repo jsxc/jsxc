@@ -14,7 +14,7 @@ export default class MultiUserStatusCodeHandler {
 
    public processCode(code): string | void {
       if (typeof this[code] === 'function') {
-         return this[code].call(this);
+         return this[code as 110|170|171|172|173|201|301|307|321|322|332].call(this);
       }
    }
 

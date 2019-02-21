@@ -8,9 +8,11 @@ let dialog: Dialog;
 
 export default function(contact: IContact) {
 
+   //@TODO add basic information about clients
    let basicData = [];
 
    let content = vcardTemplate({
+      jid: contact.getJid().bare,
       name: contact.getName(),
       basic: basicData
    });

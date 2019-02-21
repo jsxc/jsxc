@@ -1,6 +1,5 @@
 import ChatWindow from './ChatWindow'
 import MultiUserContact from '../MultiUserContact'
-import Account from '../Account'
 import Translation from '../util/Translation'
 import JID from '../JID'
 import AvatarSet from './AvatarSet'
@@ -73,7 +72,7 @@ export default class MultiUserChatWindow extends ChatWindow {
       } else {
          label = title = nickname;
 
-         AvatarSet.setPlaceholder(avatarElement, nickname);
+         AvatarSet.setPlaceholder(avatarElement, nickname, jid);
       }
 
       memberElement.find('.jsxc-name').text(label);
