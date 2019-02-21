@@ -4,6 +4,7 @@ import JID from '../JID'
 import ChatWindow from './ChatWindow'
 import AvatarSet from './AvatarSet'
 import Log from '../util/Log'
+import LinkHandlerGeo from '@src/LinkHandlerGeo';
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs')
 
@@ -58,7 +59,11 @@ export default class ChatWindowMessage {
 
       this.element = $(template);
 
-      this.element.find('.jsxc-content').html(this.message.getProcessedBody());
+      let bodyElement = $(this.message.getProcessedBody());
+
+      LinkHandlerGeo.get().detect(bodyElement);
+
+      this.element.find('.jsxc-content').html(bodyElement);
 
       let timestampElement = this.element.find('.jsxc-timestamp');
       DateTime.stringify(this.message.getStamp().getTime(), timestampElement);
