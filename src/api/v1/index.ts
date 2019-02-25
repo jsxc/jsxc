@@ -4,6 +4,7 @@ import Roster from '../../ui/Roster'
 import { IPlugin } from '../../plugin/AbstractPlugin'
 import FormWatcher, { SettingsCallback } from '../../FormWatcher'
 import { disconnect } from './disconnect';
+import Translation from '@util/Translation';
 import loginBox from '@ui/dialogs/loginBox';
 
 export { disconnect };
@@ -101,6 +102,10 @@ export function exportAllOptions() {
       }, {}),
       [Client.getOptions().getId()]: Client.getOptions().export()
    };
+}
+
+export function translate(str: string, param) {
+   return Translation.t(str, param);
 }
 
 export function showLoginBox(username?: string) {
