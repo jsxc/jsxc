@@ -437,6 +437,8 @@ export default class Roster {
       let element = this.element.find('.jsxc-mute-notification');
 
       element.text(yes ? Translation.t('Unmute') : Translation.t('Mute'));
+
+      this.element.attr('data-mute', yes ? 'yes' : 'no');
    }
 
    public toggle = () => {
