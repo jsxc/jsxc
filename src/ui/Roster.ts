@@ -60,9 +60,7 @@ export default class Roster {
    }
 
    private constructor() {
-      let template = rosterTemplate({
-         onlineHelpUrl: Client.getOption(HELP_KEY)
-      });
+      let template = rosterTemplate();
       this.element = $(template);
       if (Roster.hidden) {
          this.hide();
@@ -345,13 +343,19 @@ export default class Roster {
          offlineAvailable: true,
       });
 
-      this.addMenuEntry({
-         id: 'online-help',
-         handler(ev) { },
-         label: $(`<a href="#" target="_blank">${Translation.t('Online_help')}</a>`),
-         offlineAvailable: true,
-         icon: 'help',
-      });
+      let onlineHelpUrl = Client.getOption(HELP_KEY);
+
+      if (onlineHelpUrl) {
+         this.addMenuEntry({
+            id: 'online-help',
+            handler(ev) {
+               window.location = onlineHelpUrl;
+            },
+            label: $(`<a href="${onlineHelpUrl}">${Translation.t('Online_help')}</a>`),
+            offlineAvailable: true,
+            icon: 'help',
+         });
+      }
 
       this.addMenuEntry({
          id: 'add-contact',
