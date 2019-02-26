@@ -8,11 +8,19 @@ enum LogLevel {
    Error
 };
 
+const MAX_LOG_SIZE = 100;
+
 export class Logger implements ILog {
+   private logs: string[] = [];
+
    constructor(private prefix: string = '') {
       if (prefix) {
          this.prefix = `[${prefix}]`;
       }
+   }
+
+   public getLogs(): string[] {
+      return this.logs;
    }
 
    public info(message: string, ...data): void {
@@ -36,6 +44,22 @@ export class Logger implements ILog {
    }
 
    private log(level: LogLevel, message: string, ...data) {
+      let args = [this.getPrefix(level) + message, ...data];
+
+      this.logs.push(args.map(arg => {
+         if (typeof arg === 'string') {
+            return arg;
+         } else if (arg && arg.tagName && arg.outerHTML) {
+            return arg.outerHTML;
+         } else {
+            return JSON.stringify(arg);
+         }
+      }).join(' '));
+
+      if (this.logs.length > MAX_LOG_SIZE) {
+         this.logs.shift();
+      }
+
       if (typeof console !== 'undefined') {
          if (!Client.isDebugMode() && level === LogLevel.Debug) {
             return;
@@ -43,7 +67,7 @@ export class Logger implements ILog {
 
          let logFunction = (level === LogLevel.Warn || level === LogLevel.Error) ? 'warn' : 'log';
 
-         console[logFunction].apply(this, [this.getPrefix(level) + message, ...data]);
+         console[logFunction].apply(this, args);
       }
    }
 }
