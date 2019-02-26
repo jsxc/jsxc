@@ -117,6 +117,10 @@ export default class Account {
       return this.connector.connect().then(async ([status, connection]) => {
          this.connection = connection;
 
+         if (pause) {
+            connection.pause();
+         }
+
          let storage = this.getSessionStorage();
 
          if (!storage.getItem('connection', 'created')) {
@@ -131,9 +135,7 @@ export default class Account {
             storage.setItem('options', 'loaded', true);
          }
 
-         if (pause) {
-            connection.pause();
-         } else {
+         if (!pause) {
             this.initConnection(status);
          }
       }).catch(err => {
