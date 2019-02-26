@@ -9,7 +9,7 @@ export default class JSXC {
 
    private static initialized = false;
 
-   public numberOfAccounts: number;
+   public numberOfCachedAccounts: number;
 
    public version: string = __VERSION__;
 
@@ -20,7 +20,7 @@ export default class JSXC {
 
       JSXC.initialized = true;
 
-      this.numberOfAccounts = Client.init(options);
+      this.numberOfCachedAccounts = Client.init(options);
 
       Object.assign(this, v1);
    }
