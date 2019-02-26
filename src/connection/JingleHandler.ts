@@ -1,14 +1,18 @@
 import { IConnection } from './Connection.interface'
 import Account from '../Account'
 import * as JSM from 'jingle'
-import * as RTC from 'webrtc-adapter'
 import { createRegistry } from 'jxt'
 import Log from '../util/Log'
 import UUID from '../util/UUID'
-import JID from '../JID'
+import JID from '@src/JID';
+import { IJID } from '../JID.interface'
 import { VideoDialog } from '../ui/VideoDialog'
 import JingleSession from '../JingleSession'
 import JingleAbstractSession from '../JingleAbstractSession'
+import JingleMediaSession from '@src/JingleMediaSession';
+import { IOTalkJingleMediaSession } from '@vendor/Jingle.interface';
+import IceServers, { ICEServer } from '@src/IceServers';
+import Client from '@src/Client';
 
 let jxt = createRegistry();
 jxt.use(require('jxt-xmpp-types'));
@@ -16,20 +20,26 @@ jxt.use(require('jxt-xmpp'));
 
 let IqStanza = jxt.getDefinition('iq', 'jabber:client');
 
+interface IOfferOptions {
+   offerToReceiveAudio?: boolean
+   offerToReceiveVideo?: boolean
+}
+
 export default class JingleHandler {
 
    protected manager: JSM;
 
-   protected static videoDialog;
+   protected static videoDialog: VideoDialog;
 
-   protected static instances = [];
+   protected static instances: JingleHandler[] = [];
 
    constructor(protected account: Account, protected connection: IConnection) {
 
       this.manager = new JSM({
-         peerConnectionConstraints: this.getPeerConstraints(),
+         // peerConnectionConstraints: this.getPeerConstraints(),
          jid: connection.getJID().full,
-         selfID: connection.getJID().full
+         selfID: connection.getJID().full,
+         iceServers: Client.getOption('RTCPeerConfig').iceServers
       });
 
       this.manager.on('change:connectionState', function() {
@@ -55,38 +65,40 @@ export default class JingleHandler {
          this.onIncoming(session);
       });
 
+      IceServers.registerUpdateHook((iceSevers) => {
+         this.setICEServers(iceSevers);
+      });
+
       JingleHandler.instances.push(this);
-
-      //@TODO add on client unavailable (this.manager.endPeerSessions(peer_jid_full, true))
    }
 
-   public initiate(peerJID: JID, stream, offerOptions?) {
-      let session = this.manager.createMediaSession(peerJID.full);
+   public async initiate(peerJID: IJID, stream: MediaStream, offerOptions?: IOfferOptions): Promise<JingleMediaSession> {
+      let session: IOTalkJingleMediaSession = this.manager.createMediaSession(peerJID.full, undefined, stream);
 
-      //@TODO extract onIceConnectionStateChanged from VideoWindow and use here
+      return new Promise<JingleMediaSession>(resolve => {
+         session.start(offerOptions, () => {
+            let jingleSession = JingleSession.create(this.account, session);
 
-      session.addStream(stream);
-      session.start(offerOptions); //@TODO use this.getPeerConstraints; Review peer constraints vs offer options
-
-      return session;
+            resolve(jingleSession);
+         });
+      });
    }
 
-   public terminate(jid, reason?, silent?);
-   public terminate(reason?, silent?);
+   public terminate(jid: IJID, reason?: string, silent?: boolean);
+   public terminate(reason?: string, silent?: boolean);
    public terminate() {
-      if (arguments.length === 3) {
-         this.manager.endPeerSessions(arguments[0], arguments[1], arguments[2]);
+      if (arguments[0] instanceof JID) {
+         this.manager.endPeerSessions(arguments[0].full, arguments[1], arguments[2]);
       } else {
          this.manager.endAllSessions(arguments[0], arguments[1]);
       }
    }
 
-   //@TODO add ice server interface
-   public addICEServer(server) {
+   public addICEServer(server: ICEServer | string) {
       this.manager.addICEServer(server);
    }
 
-   public setICEServers(servers) {
+   public setICEServers(servers: ICEServer[]) {
       this.manager.iceServers = servers;
    }
 
@@ -94,14 +106,14 @@ export default class JingleHandler {
       this.manager.config.peerConnectionConstraints = constraints;
    }
 
-   public onJingle = (iq) => {
+   public onJingle = (iq: Element) => {
       let req;
 
       try {
          req = jxt.parse(iq.outerHTML);
       } catch (err) {
          Log.error('Error while parsing jingle: ', err);
-         //@TODO abort call
+
          return;
       }
 
@@ -110,71 +122,42 @@ export default class JingleHandler {
       return true;
    }
 
-   protected onIncoming(session): JingleAbstractSession {
+   protected onIncoming(session: IOTalkJingleMediaSession): JingleAbstractSession {
       return JingleSession.create(this.account, session);
    }
 
-   private onIncomingFileTransfer(session) {
-      Log.debug('incoming file transfer from ' + session.peerID);
+   // private onIncomingFileTransfer(session: IOTalkJingleMediaSession) {
+   //    Log.debug('incoming file transfer from ' + session.peerID);
 
-      let peerJID = new JID(session.peerID);
-      let contact = this.account.getContact(peerJID);
+   //    let peerJID = new JID(session.peerID);
+   //    let contact = this.account.getContact(peerJID);
 
-      if (!contact) {
-         Log.warn('Reject file transfer, because the contact is not in your contact list');
+   //    if (!contact) {
+   //       Log.warn('Reject file transfer, because the contact is not in your contact list');
 
-         return;
-      }
+   //       return;
+   //    }
 
-      session.accept();
+   //    session.accept();
 
-      // let chatWindow = contact.getChatWindow();
+   //    // let chatWindow = contact.getChatWindow();
 
-      // let message = new Message({
-      //    peer: contact.getJid(),
-      //    direction: Message.DIRECTION.IN,
-      //    attachment: new Attachment({
-      //       name: session.receiver.metadata.name,
-      //       type: session.receiver.metadata.type || 'application/octet-stream'
-      //    })
-      // });
-      // message.save();
+   //    // let message = new Message({
+   //    //    peer: contact.getJid(),
+   //    //    direction: Message.DIRECTION.IN,
+   //    //    attachment: new Attachment({
+   //    //       name: session.receiver.metadata.name,
+   //    //       type: session.receiver.metadata.type || 'application/octet-stream'
+   //    //    })
+   //    // });
+   //    // message.save();
 
-      // chatWindow.receiveIncomingMessage(message);
-      //
-      // session.receiver.on('progress', function(sent, size) {
-      //    message.updateProgress(sent, size);
-      // });
-   }
-
-   private getPeerConstraints(offerToReceiveAudio = false, offerToReceiveVideo = false) {
-      let browserDetails = RTC.browserDetails;
-      let peerConstraints;
-
-      if ((browserDetails.version < 33 && browserDetails.browser === 'firefox') || browserDetails.browser === 'chrome') {
-         peerConstraints = {
-            mandatory: {
-               OfferToReceiveAudio: offerToReceiveAudio,
-               OfferToReceiveVideo: offerToReceiveVideo,
-            }
-         };
-
-         if (browserDetails.browser === 'firefox') {
-            peerConstraints.mandatory.MozDontOfferDataChannel = true;
-         }
-      } else {
-         peerConstraints = {
-            offerToReceiveAudio,
-            offerToReceiveVideo,
-         };
-
-         if (browserDetails.browser === 'firefox') {
-            peerConstraints.mozDontOfferDataChannel = true;
-         }
-      }
-
-      return peerConstraints;
-   }
+   //    // chatWindow.receiveIncomingMessage(message);
+   //    //
+   //    // session.receiver.on('progress', function(sent, size) {
+   //    //    message.updateProgress(sent, size);
+   //    // });
+   // }
 
    public static terminateAll(reason?: string) {
       JingleHandler.instances.forEach((instance) => {

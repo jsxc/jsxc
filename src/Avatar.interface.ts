@@ -1,5 +1,5 @@
 
-export interface Avatar {
+export interface IAvatar {
    getData(): string
 
    getType(): string

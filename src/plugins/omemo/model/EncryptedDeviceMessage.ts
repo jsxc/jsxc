@@ -1,13 +1,13 @@
 import Address from '../vendor/Address';
 
-export interface Ciphertext {
+export interface ICiphertext {
    type: number,
    body: string,
    registrationId: number,
 }
 
 export default class {
-   constructor(private address: Address, private ciphertext: Ciphertext) {
+   constructor(private address: Address, private ciphertext: ICiphertext) {
 
    }
 
@@ -19,7 +19,7 @@ export default class {
       return this.ciphertext.type === 3;
    }
 
-   public getCiphertext(): Ciphertext {
+   public getCiphertext(): ICiphertext {
       return this.ciphertext;
    }
 }

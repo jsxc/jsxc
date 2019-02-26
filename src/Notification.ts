@@ -10,7 +10,7 @@ import Log from './util/Log'
 import defaultIconFile = require('../images/XMPP_logo.png')
 import { Presence } from './connection/AbstractConnection'
 
-interface NotificationSettings {
+interface INotificationSettings {
    title: string,
    message: string,
    duration?: number,
@@ -30,9 +30,6 @@ enum NotificationState {
 let NotificationAPI = (<any> window).Notification;
 
 export default class Notification {
-   private static inited = false;
-
-   private static popupTimeout;
 
    private static popupDelay = 1000;
 
@@ -53,23 +50,7 @@ export default class Notification {
       });
    }
 
-   public static muteSound(external?) {
-      $('#jsxc-menu .jsxc-muteNotification').text(Translation.t('Unmute'));
-
-      if (external !== true) {
-         Client.setOption('muteNotification', true);
-      }
-   }
-
-   public static unmuteSound(external?) {
-      $('#jsxc-menu .jsxc-muteNotification').text(Translation.t('Mute'));
-
-      if (external !== true) {
-         Client.setOption('muteNotification', false); // notifications disabled
-      }
-   }
-
-   public static async notify(settings: NotificationSettings) {
+   public static async notify(settings: INotificationSettings) {
       if (!Notification.getOption('enable')) {
          Log.debug('Drop notification, because notifications are disabled.');
 
@@ -136,16 +117,16 @@ export default class Notification {
          }
       }
 
-      settings.duration = settings.duration || Notification.getOption('duration');
+      settings.duration = settings.duration || Notification.getOption('popupDuration');
       settings.title = settings.title;
       settings.message = settings.message;
 
-      Notification.popupTimeout = setTimeout(function() {
+      setTimeout(function() {
          Notification.showPopup(settings);
       }, Notification.popupDelay);
    }
 
-   private static showPopup(settings: NotificationSettings) {
+   private static showPopup(settings: INotificationSettings) {
       if (typeof settings.soundFile === 'string') {
          Notification.playSound(settings.soundFile, settings.loop, settings.force);
       }
@@ -160,10 +141,6 @@ export default class Notification {
             popup.close();
          }, settings.duration);
       }
-   }
-
-   private static hasSupport() {
-      return !!NotificationAPI;
    }
 
    private static requestPermission() {

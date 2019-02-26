@@ -145,7 +145,7 @@ export default class Storage implements IStorage {
                }
             });
          } catch (err) {
-            console.warn('Could not stringify value', err);
+            Log.warn('Could not stringify value', err);
          }
       }
 
@@ -165,7 +165,7 @@ export default class Storage implements IStorage {
    public getItem(type: string, key: string): any;
    public getItem(key: string): any;
    public getItem(): any {
-      let key;
+      let key: string;
 
       if (arguments.length === 1) {
          key = arguments[0];
@@ -174,6 +174,10 @@ export default class Storage implements IStorage {
       }
 
       key = this.getPrefix() + key;
+
+      if (!Storage.backend.hasOwnProperty(key)) {
+         return undefined;
+      }
 
       let value = Storage.backend.getItem(key);
 
@@ -314,14 +318,21 @@ export default class Storage implements IStorage {
    }
 
    private onStorageEvent = (ev: any) => {
-      let hooks = this.hooks;
-      let key = ev.key.replace(new RegExp('^' + this.getPrefix()), '');
-      let oldValue = this.parseValue(ev.oldValue);
-      let newValue = this.parseValue(ev.newValue);
+      let prefix = this.getPrefix();
+
+      if (!ev.key || ev.key.indexOf(prefix) !== 0) {
+         return;
+      }
+
+      let key = ev.key.slice(prefix.length);
 
       if (IGNORE_KEY.indexOf(key) > -1) {
          return;
       }
+
+      let hooks = this.hooks;
+      let oldValue = this.parseValue(ev.oldValue);
+      let newValue = this.parseValue(ev.newValue);
 
       let eventNames = Object.keys(hooks);
       eventNames.forEach(function(eventName) {

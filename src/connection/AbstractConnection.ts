@@ -243,10 +243,6 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
-   public close() {
-      // @TODO this has to be removed
-   }
-
    protected getStorage() {
       return this.account.getSessionStorage();
    }

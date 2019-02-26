@@ -1,18 +1,22 @@
 import Log from './util/Log'
 import * as defaultOptions from './OptionsDefault'
+import IStorage from './Storage.interface';
+import Utils from '@util/Utils';
 import Storage from './Storage';
+import { IJID } from './JID.interface';
+import Client from './Client';
 
 const KEY = 'options';
 
-interface OptionData {
+interface IOptionData {
    [key: string]: any
 }
 
 export default class Options {
 
-   private static defaults: OptionData = defaultOptions;
+   private static defaults: IOptionData = defaultOptions;
 
-   public static overwriteDefaults(options: OptionData) {
+   public static overwriteDefaults(options: IOptionData) {
       let optionKeys = Object.keys(options);
       let defaultKeys = Object.keys(Options.defaults);
       let unknownOptionKeys = optionKeys.filter(e => defaultKeys.indexOf(e) < 0);
@@ -33,7 +37,7 @@ export default class Options {
       Object.assign(Options.defaults, options);
    }
 
-   public static addDefaults(options: OptionData) {
+   public static addDefaults(options: IOptionData) {
       let optionKeys = Object.keys(options);
       let defaultKeys = Object.keys(Options.defaults);
       let knownOptionKeys = optionKeys.filter(e => defaultKeys.indexOf(e) > -1);
@@ -49,11 +53,48 @@ export default class Options {
       Object.assign(Options.defaults, options);
    }
 
+   public static async load(username: string, password: string, jid?: IJID) {
+      if (typeof Options.defaults.loadOptions !== 'function') {
+         return;
+      }
+
+      let optionData = await Options.defaults.loadOptions(username, password);
+
+      for (let id in optionData) {
+         if (id !== 'client' && id !== 'current' && (jid && id !== jid.bare) && !Client.getAccountManager().getAccount(id)) {
+            Log.info(`Skip option block with id "${id}"`);
+
+            continue;
+         }
+
+         if (id === 'current') {
+            if (!jid) {
+               Log.info(`Skip option block with id "current", because no jid is provided`);
+
+               continue;
+            }
+
+            id = jid.bare;
+         }
+
+         let storage = new Storage(id);
+         let options = new Options(storage);
+
+         for (let key in optionData[id]) {
+            Log.debug(`Set option "${key}"`, optionData[id][key]);
+
+            options.set(key, optionData[id][key], true);
+         }
+
+         storage.destroy();
+      }
+   }
+
    public static getDefault(key: string) {
       return Options.defaults[key];
    }
 
-   constructor(private storage: Storage) {
+   constructor(private storage: IStorage) {
 
    }
 
@@ -61,32 +102,57 @@ export default class Options {
       return this.storage.getName() || 'client';
    }
 
-   public get(key: string): any {
-      let local = this.storage.getItem(KEY) || {};
+   public get(keyChain: string): any {
+      function get(keys: string[], primary: any = {}, secondary: any = {}) {
+         let key = keys.shift();
 
-      if (typeof local[key] !== 'undefined') {
-         return local[key];
-      } else if (typeof Options.defaults[key] !== 'undefined') {
-         return Options.defaults[key];
+         if (keys.length) {
+            return get(keys, primary[key], secondary[key]);
+         } else if (typeof primary[key] !== 'undefined') {
+            return Utils.isObject(primary[key]) && Utils.isObject(secondary[key]) ? { ...secondary[key], ...primary[key] } : primary[key];
+         } else if (typeof secondary[key] !== 'undefined') {
+            return secondary[key];
+         }
+
+         Log.debug(`I don't know any "${keyChain}" option.`);
+
+         return undefined;
       }
 
-      Log.debug(`I don't know any "${key}" option.`);
-
-      return undefined;
+      return get(keyChain.split('.'), this.storage.getItem(KEY), Options.defaults);
    };
 
-   public set(key: string, value: any) {
-      this.storage.updateItem(KEY, key, value);
+   public set(keyChain: string, value: any, preventOnChange: boolean = false) {
+      let subKeys = keyChain.split('.');
+      let options = this.storage.getItem(KEY) || {};
 
-      if (typeof Options.defaults.onOptionChange === 'function') {
-         Options.defaults.onOptionChange(this.getId(), key, value, () => this.export());
+      function set(keys: string[], data: any = {}) {
+         let key = keys.shift();
+
+         if (keys.length) {
+            data[key] = set(keys, data[key]);
+         } else {
+            if (Utils.isObject(data[key]) && Utils.isObject(value)) {
+               Utils.mergeDeep(data[key], value);
+            } else {
+               data[key] = value;
+            }
+         }
+
+         return data;
+      }
+
+      this.storage.setItem(KEY, set(subKeys, options));
+
+      if (typeof Options.defaults.onOptionChange === 'function' && !preventOnChange) {
+         Options.defaults.onOptionChange(this.getId(), keyChain, value, () => this.export());
       }
    };
 
    public registerHook(key: string, func: (newValue: any, oldValue?: any) => void) {
       this.storage.registerHook(KEY, (newData, oldData) => {
          let n = newData[key];
-         let o = typeof oldData[key] !== 'undefined' ? oldData[key] : Options.defaults[key];
+         let o = oldData && typeof oldData[key] !== 'undefined' ? oldData[key] : Options.defaults[key];
 
          if (n !== o) {
             func(n, o);
@@ -94,7 +160,7 @@ export default class Options {
       });
    }
 
-   public export(): OptionData {
+   public export(): IOptionData {
       return this.storage.getItem(KEY) || {};
    }
 };

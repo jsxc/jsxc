@@ -63,7 +63,7 @@ export default class ChatWindow {
       this.registerInputHandler();
       this.initDroppable();
 
-      new FileTransferHandler(contact, this);
+      new FileTransferHandler(this);
 
       this.element.find('.jsxc-window').css('bottom', -1 * this.element.find('.jsxc-window-fade').height());
 
@@ -350,7 +350,6 @@ export default class ChatWindow {
 
    private registerInputHandler() {
       let self = this;
-      let textinputBlurTimeout;
       let inputElement = this.inputElement;
 
       inputElement.keyup(self.onInputKeyUp);
@@ -366,10 +365,10 @@ export default class ChatWindow {
    }
 
    private onInputKeyUp = (ev) => {
-      let message = <string> $(ev.target).val();
+      // let message = <string> $(ev.target).val();
 
       if (ev.which === ENTER_KEY && !ev.shiftKey) {
-         message = '';
+         // message = '';
       } else {
          this.resizeInputArea();
       }
@@ -382,9 +381,9 @@ export default class ChatWindow {
       let selectionEnd = ev.target.selectionEnd;
 
       if (selectionStart === selectionEnd) {
-         let lastSpaceIndex = message.lastIndexOf(' ') + 1;
-         let lastNewlineIndex = message.lastIndexOf('\n') + 1;
-         let lastWord = message.slice(Math.max(lastSpaceIndex, lastNewlineIndex), selectionStart);
+         // let lastSpaceIndex = message.lastIndexOf(' ') + 1;
+         // let lastNewlineIndex = message.lastIndexOf('\n') + 1;
+         // let lastWord = message.slice(Math.max(lastSpaceIndex, lastNewlineIndex), selectionStart);
 
          //@TODO auto complete
       }

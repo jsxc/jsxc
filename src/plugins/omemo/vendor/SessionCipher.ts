@@ -1,7 +1,7 @@
 import { SignalSessionCipher, SignalAddress } from './Signal';
 import Address from './Address';
 import Store from '../lib/Store';
-import { Ciphertext } from '../model/EncryptedDeviceMessage';
+import { ICiphertext } from '../model/EncryptedDeviceMessage';
 
 export class SessionCipher {
    private signalSessionCipher;
@@ -20,7 +20,7 @@ export class SessionCipher {
       return this.signalSessionCipher.decryptWhisperMessage(ciphertext, 'binary');
    }
 
-   public encryptMessage(plaintext): Promise<Ciphertext> {
+   public encryptMessage(plaintext): Promise<ICiphertext> {
       return this.signalSessionCipher.encrypt(plaintext, 'binary');
    }
 }

@@ -6,8 +6,6 @@ import { EncryptionPlugin } from './EncryptionPlugin'
 import PluginAPI from './PluginAPI'
 
 export default class PluginRepository {
-   private static instance: PluginRepository;
-
    private static registeredPlugins = [];
 
    private plugins: AbstractPlugin[] = [];
@@ -72,6 +70,12 @@ export default class PluginRepository {
 
    public hasEncryptionPlugin(): boolean {
       return !!this.encryptionPlugins;
+   }
+
+   public destroyAllPlugins() {
+      this.plugins.forEach(plugin => plugin.destroy());
+
+      this.encryptionPlugins.forEach(plugin => plugin.destroy());
    }
 
    private instantiatePlugin(Plugin: IPlugin) {

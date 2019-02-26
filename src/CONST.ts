@@ -13,7 +13,8 @@ export let SOUNDS = {
 };
 export let REGEX = {
    JID: new RegExp('\\b[^"&\'\\/:<>@\\s]+@[\\w-_.]+\\b', 'ig'),
-   URL: new RegExp(/(https?:\/\/|www\.)[^\s<>'"]+/gi)
+   URL: new RegExp(/(https?:\/\/|www\.)[^\s<>'"]+/gi),
+   GEOURI: new RegExp(/geo:(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)(?:,-?\d+(?:\.\d+)?)?(?:;crs=[\w-]+)?(?:;u=(\d+(?:\.\d+)?))?(?:;[\w-]+=(?:[\w-_.!~*'()]|%[\da-f][\da-f])+)*/, 'g'),
 };
 export let NS = {
    CARBONS: 'urn:xmpp:carbons:2',

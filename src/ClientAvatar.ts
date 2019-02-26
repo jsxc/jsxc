@@ -83,7 +83,7 @@ export default class ClientAvatar {
                }
             })
          }
-         //@TODO update avatar if account goes offline (multi account setup)
+         //@TODO [MA] update avatar if account goes offline
       });
    }
 

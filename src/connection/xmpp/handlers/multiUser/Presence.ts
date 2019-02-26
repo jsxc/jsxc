@@ -2,7 +2,6 @@ import Log from '../../../../util/Log'
 import JID from '../../../../JID'
 import MultiUserContact from '../../../../MultiUserContact'
 import AbstractHandler from '../../AbstractHandler'
-import * as Namespace from '../../namespace'
 import MultiUserPresenceProcessor from './PresenceProcessor'
 
 export default class extends AbstractHandler {

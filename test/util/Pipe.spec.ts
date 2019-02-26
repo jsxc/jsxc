@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 import 'mocha';
 
 import Pipe from '@src/util/Pipe'

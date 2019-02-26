@@ -1,10 +1,7 @@
-import Dialog from '../Dialog'
+// import Dialog from '../Dialog'
 import Contact from '../../Contact'
 
-let verificationTemplate = require('../../../template/verification.hbs');
-
-let dialog: Dialog;
-let contact: Contact;
+// let verificationTemplate = require('../../../template/verification.hbs');
 
 //@TODO fix verification dialog
 export default function(c: Contact) {

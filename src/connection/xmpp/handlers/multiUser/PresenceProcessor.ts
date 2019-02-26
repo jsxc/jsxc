@@ -63,9 +63,9 @@ export default class MultiUserPresenceProcessor {
          this.multiUserContact.removeMember(this.nickname);
 
          if (this.codes.length === 1 && this.codes.indexOf('110') > -1) {
-            this.inform(Translation.t('You_left_the_building'));
+            this.inform(':door:' + Translation.t('You_left_the_building'));
          } else if (this.codes.length === 0) {
-            this.inform(Translation.t('left_the_building', {
+            this.inform(':door:' + Translation.t('left_the_building', {
                nickname: this.nickname,
                escapeInterpolation: true
             }));
@@ -82,7 +82,7 @@ export default class MultiUserPresenceProcessor {
       let isNew = this.multiUserContact.addMember(this.nickname, affiliation, role, jid);
 
       if (isNew && this.multiUserContact.isMemberListComplete()) {
-         this.inform(Translation.t('entered_the_room', {
+         this.inform(':footprints: ' + Translation.t('entered_the_room', {
             nickname: this.nickname,
             escapeInterpolation: true
          }));

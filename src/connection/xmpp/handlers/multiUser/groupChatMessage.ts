@@ -1,23 +1,15 @@
-//import {} from '../handler'
-import * as NS from '../../namespace'
 import Log from '../../../../util/Log'
 import JID from '../../../../JID'
 import Message from '../../../../Message'
-import Utils from '../../../../util/Utils'
 import Translation from '../../../../util/Translation'
-import Client from '../../../../Client'
-import Contact from '../../../../Contact'
 import MultiUserContact from '../../../../MultiUserContact'
-import Notification from '../../../../Notification'
-import { SOUNDS } from '../../../../CONST'
-import Pipe from '../../../../util/Pipe'
 import AbstractHandler from '../../AbstractHandler'
 
 // body.replace(/^\/me /, '<i title="/me">' + Utils.removeHTML(this.sender.getName()) + '</i> ');
 
 export default class extends AbstractHandler {
    public processStanza(stanza: Element) {
-      let messageId = stanza.getAttribute('id');
+      // let messageId = stanza.getAttribute('id');
 
       let messageElement = $(stanza);
       let from = new JID(stanza.getAttribute('from'));
@@ -47,7 +39,7 @@ export default class extends AbstractHandler {
             subject: contact.getSubject()
          });
 
-         contact.addSystemMessage(translatedMessage);
+         contact.addSystemMessage(':page_with_curl: ' + translatedMessage);
 
          return this.PRESERVE_HANDLER;
       }

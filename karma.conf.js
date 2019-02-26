@@ -34,7 +34,8 @@ module.exports = function(config) {
          module: webpackConfig.module,
          resolve: webpackConfig.resolve,
          plugins: [
-             webpackConfig.plugins[1]
+             webpackConfig.plugins[1],
+             webpackConfig.plugins[webpackConfig.plugins.length - 2],
          ],
          node: {
             fs: 'empty'

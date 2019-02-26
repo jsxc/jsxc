@@ -3,7 +3,6 @@ import { AbstractPlugin } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
 import Message from '../../Message'
 import Contact from '../../Contact'
-import Pipe from '../../util/Pipe'
 import ChatWindow from '../../ui/ChatWindow'
 import Storage from '../../Storage'
 import Translation from '../../util/Translation'
@@ -55,7 +54,7 @@ export default class ChatStatePlugin extends AbstractPlugin {
 
    public getChatStateConnection(): ChatStateConnection {
       if (!this.chatStateConnection) {
-         this.chatStateConnection = new ChatStateConnection(this.pluginAPI.send, this.pluginAPI.sendIQ);
+         this.chatStateConnection = new ChatStateConnection(this.pluginAPI.send);
       }
       return this.chatStateConnection;
    }

@@ -8,19 +8,6 @@ export default class Dialog {
 
    private src;
 
-   private magnificPopupOptions = {
-      items: null,
-      modal: null,
-      type: 'inline',
-      callbacks: {
-         beforeClose: this.onBeforeClose,
-         afterClose: this.onAfterClose,
-         open: () => {
-            this.onOpened();
-         }
-      }
-   };
-
    // @REVIEW name is maybe unnecessary
    public constructor(content: string, private unclosable: boolean = false, readonly name: string = '') {
       this.id = Dialog.generateId();
@@ -111,14 +98,6 @@ export default class Dialog {
       self.resize();
 
       $(document).trigger('complete.dialog.jsxc');
-   }
-
-   private onAfterClose() {
-      $(document).trigger('close.dialog.jsxc');
-   }
-
-   private onBeforeClose() {
-      $(document).trigger('cleanup.dialog.jsxc');
    }
 
    private static generateId(): string {

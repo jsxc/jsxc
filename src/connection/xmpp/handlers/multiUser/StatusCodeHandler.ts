@@ -2,7 +2,7 @@ import Translation from '../../../../util/Translation'
 import MultiUserContact from '../../../../MultiUserContact'
 import MultiUserPresenceProcessor from './PresenceProcessor'
 import showSelectionDialog from '../../../../ui/dialogs/selection'
-import showRoomConfigurationDialog from '../../../../ui/dialogs/multiUserRoomConfiguration'
+import showRoomConfigurationDialog, { CANCELED } from '../../../../ui/dialogs/multiUserRoomConfiguration'
 
 //@TODO those status codes are partially transmitted through message stanzas
 // https://xmpp.org/extensions/xep-0045.html#registrar-statuscodes
@@ -14,7 +14,7 @@ export default class MultiUserStatusCodeHandler {
 
    public processCode(code): string | void {
       if (typeof this[code] === 'function') {
-         return this[code].call(this);
+         return this[code as 110|170|171|172|173|201|301|307|321|322|332].call(this);
       }
    }
 
@@ -67,9 +67,8 @@ export default class MultiUserStatusCodeHandler {
       }
 
       promise.then((stanza) => {
-         //@TODO use constant
-         if (stanza === 'canceled') {
-            this.presenceHandler.inform(Translation.t('Configuration_canceled')); //@TODO translate
+         if (stanza === CANCELED) {
+            this.presenceHandler.inform(Translation.t('Configuration_canceled'));
          }
       }).catch(() => {
 

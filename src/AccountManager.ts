@@ -1,6 +1,6 @@
 import Account from './Account';
 import JID from './JID';
-import Storage from './Storage.interface';
+import IStorage from './Storage.interface';
 import Client from './Client';
 import ClientAvatar from './ClientAvatar';
 import RoleAllocator from './RoleAllocator';
@@ -11,7 +11,7 @@ import Roster from '@ui/Roster';
 export default class AccountManager {
    private accounts = {};
 
-   constructor(private storage: Storage) {
+   constructor(private storage: IStorage) {
 
    }
 
@@ -75,9 +75,11 @@ export default class AccountManager {
    public createAccount(url: string, jid: string, sid: string, rid: string): Promise<Account>;
    public createAccount(url: string, jid: string, password: string): Promise<Account>;
    public createAccount() {
-      let account;
+      let account: Account;
 
-      if (this.getAccount(arguments[1])) {
+      if (!arguments[0]) {
+         return Promise.reject('We need an url to create an account');
+      } else if (this.getAccount(arguments[1])) {
          return Promise.reject('Account with this jid already exists.');
       } else if (arguments.length === 4) {
          account = new Account(arguments[0], arguments[1], arguments[2], arguments[3]);

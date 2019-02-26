@@ -5,6 +5,7 @@ import Form from './Form'
 import PEPService from './services/PEP'
 import PubSubService from './services/PubSub'
 import 'Strophe'
+import JingleHandler from './JingleHandler';
 
 export interface IConnection {
    registerHandler(handler: (stanza: string) => boolean, ns?: string, name?: string, type?: string, id?: string, from?: string);
@@ -19,15 +20,15 @@ export interface IConnection {
 
    getPEPService(): PEPService
 
-   getMUCService(): MUCService
+   getMUCService(): IMUCService
 
-   getRosterService(): RosterService
+   getRosterService(): IRosterService
 
-   getVcardService(): VcardService
+   getVcardService(): IVcardService
 
-   getDiscoService(): DiscoService
+   getDiscoService(): IDiscoService
 
-   getJingleHandler()
+   getJingleHandler(): JingleHandler
 
    getJID(): IJID
 
@@ -40,7 +41,7 @@ export interface IConnection {
    close()
 }
 
-export interface MUCService {
+export interface IMUCService {
    joinMultiUserRoom(jid: IJID, password?: string)
 
    leaveMultiUserRoom(jid: IJID, exitMessage?: string)
@@ -62,7 +63,7 @@ export interface MUCService {
    sendDirectMultiUserInvitation(receiverJid: IJID, roomJid: IJID, reason?: string, password?: string)
 }
 
-export interface RosterService {
+export interface IRosterService {
    getRoster(verstion?: string)
 
    removeContact(jid: IJID): Promise<Element>
@@ -74,11 +75,11 @@ export interface RosterService {
    sendSubscriptionAnswer(to: IJID, accept: boolean)
 }
 
-export interface VcardService {
+export interface IVcardService {
    loadVcard(jid: IJID)
 }
 
-export interface DiscoService {
+export interface IDiscoService {
    getDiscoInfo(jid: IJID, node?: string): Promise<Element>
 
    getDiscoItems(jid: IJID, node?: string): Promise<Element>

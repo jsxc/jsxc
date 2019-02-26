@@ -1,17 +1,39 @@
 import Log from './util/Log'
 import * as jsxc from './api/v1/index'
+import Client from './Client';
 
-export interface Settings {
+export interface ISettings {
    disabled?: boolean,
    xmpp?: {
       url?: string,
       node?: string,
       domain?: string,
+      password?: string,
       resource?: string,
    }
 }
 
-export type SettingsCallback = (username: string, password: string, cb?: (settings: Settings) => void) => Promise<Settings>;
+export type SettingsCallback = (username: string, password: string) => Promise<ISettings>;
+
+export function usernameToJabberId(username: string, settings: ISettings) {
+   let jid: string;
+
+   if (settings.xmpp.node && settings.xmpp.domain) {
+      jid = settings.xmpp.node + '@' + settings.xmpp.domain;
+   } else if (username.indexOf('@') > -1) {
+      jid = username;
+   } else if (settings.xmpp.domain) {
+      jid = username + '@' + settings.xmpp.domain;
+   } else {
+      throw new Error('Could not find any jid.');
+   }
+
+   if (settings.xmpp.resource && !/@(.+)\/(.+)^/.test(jid)) {
+      jid = jid + '/' + settings.xmpp.resource;
+   }
+
+   return jid;
+}
 
 export default class FormWatcher {
    private formElement: JQuery;
@@ -19,11 +41,11 @@ export default class FormWatcher {
    private passwordElement: JQuery;
    private settingsCallback: SettingsCallback;
 
-   constructor(formElement: JQuery, usernameElement: JQuery, passwordElement: JQuery, settingsCallback: SettingsCallback) {
+   constructor(formElement: JQuery, usernameElement: JQuery, passwordElement: JQuery, settingsCallback?: SettingsCallback) {
       this.formElement = formElement;
       this.usernameElement = usernameElement;
       this.passwordElement = passwordElement;
-      this.settingsCallback = settingsCallback;
+      this.settingsCallback = settingsCallback || Client.getOption('loadConnectionOptions');
 
       if (formElement.length !== 1) {
          throw new Error(`Found ${formElement.length} form elements. I need exactly one.`);
@@ -37,7 +59,7 @@ export default class FormWatcher {
          throw new Error(`Found ${passwordElement.length} password elements. I need exactly one.`);
       }
 
-      if (typeof settingsCallback !== 'function') {
+      if (typeof this.settingsCallback !== 'function') {
          throw new Error('I need a settings callback.');
       }
 
@@ -46,7 +68,7 @@ export default class FormWatcher {
 
    private prepareForm() {
       let formElement = this.formElement;
-      let events = formElement.data('events') || {
+      let events = (<any> $)._data(formElement.get(0), 'events') || {
          submit: []
       };
       let submitEvents = [].concat(events.submit);
@@ -89,36 +111,27 @@ export default class FormWatcher {
          throw new Error('I found no connection url');
       }
 
-      //@TODO merge settings
-
-      let jid;
-      if (settings.xmpp.node && settings.xmpp.domain) {
-         jid = settings.xmpp.node + '@' + settings.xmpp.domain;
-      } else if (username.indexOf('@') > -1) {
-         jid = username;
-      } else if (settings.xmpp.domain) {
-         jid = username + '@' + settings.xmpp.domain;
-      } else {
-         throw new Error('Could not find any jid.');
+      if (settings.xmpp.password) {
+         password = settings.xmpp.password;
       }
 
-      if (settings.xmpp.resource && !/@(.+)\/(.+)^/.test(jid)) {
-         jid = jid + '/' + settings.xmpp.resource;
-      }
+      let jid = usernameToJabberId(username, settings);
 
-      return jsxc.startAndPause(settings.xmpp.url, jid, password);
+      return await jsxc.startAndPause(settings.xmpp.url, jid, password);
    }
 
-   private getSettings(username: string, password: string): Promise<Settings> {
+   private getSettings(username: string, password: string): Promise<ISettings> {
       if (typeof this.settingsCallback !== 'function') {
          return Promise.resolve({});
       }
 
       return new Promise((resolve) => {
-         let returnPromise = this.settingsCallback(username, password, resolve);
+         let returnPromise = this.settingsCallback(username, password);
 
          if (returnPromise && typeof returnPromise.then === 'function') {
             resolve(returnPromise);
+         } else {
+            throw new Error('The settings callback isn\'t returning a promise');
          }
       });
    }

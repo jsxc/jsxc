@@ -27,11 +27,19 @@ export default class StateMachine {
       $(document).trigger('stateChange.jsxc', state);
    }
 
+   public static getState(): number {
+      return StateMachine.currentState;
+   }
+
    public static changeUIState(state: number) {
       StateMachine.currentUIState = state;
 
       Log.debug('UI State changed to ' + Object.keys(StateMachine.UISTATE)[state]);
 
       $(document).trigger('stateUIChange.jsxc', state);
+   }
+
+   public static getUIState(): number {
+      return StateMachine.currentUIState;
    }
 }

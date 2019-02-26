@@ -1,10 +1,7 @@
-import Log from '../../../../util/Log'
 import JID from '../../../../JID'
-import MultiUserContact from '../../../../MultiUserContact'
 import AbstractHandler from '../../AbstractHandler'
-import * as Namespace from '../../namespace'
-import MultiUserPresenceProcessor from './PresenceProcessor'
-import { Notice, TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../../Notice'
+import { TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../../Notice'
+import Log from '@util/Log';
 
 export default class extends AbstractHandler {
    public processStanza(stanza: Element): boolean {
@@ -12,9 +9,9 @@ export default class extends AbstractHandler {
       let contact = this.account.getContact(from);
 
       if (!contact) {
-         console.warn('Got invitation from stranger. Ignore silently.');
+         Log.warn('Got invitation from stranger. Ignore silently.');
       } else if (contact.getType() === 'groupchat') {
-         console.warn('I don\'t accept direct invitations from MUC rooms.');
+         Log.warn('I don\'t accept direct invitations from MUC rooms.');
       }
 
       let xElement = $(stanza).find('x[xmlns="jabber:x:conference"]');

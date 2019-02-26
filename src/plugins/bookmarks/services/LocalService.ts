@@ -1,11 +1,11 @@
 import AbstractService from './AbstractService';
 import RoomBookmark from '../RoomBookmark';
-import Storage from '@src/Storage.interface';
+import IStorage from '@src/Storage.interface';
 import JID from '@src/JID';
 import { IJID } from '@src/JID.interface';
 
 export default class LocalService extends AbstractService {
-   constructor(private storage: Storage) {
+   constructor(private storage: IStorage) {
       super();
    }
 

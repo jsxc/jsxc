@@ -6,8 +6,8 @@ import Message from '../Message'
 import JID from '../JID'
 import DiscoInfoRepository from '../DiscoInfoRepository'
 import Avatar from '../Avatar'
-import { MessagePayload } from '../Message.interface'
-import { API as IPluginAPI } from './PluginAPI.interface'
+import { IMessagePayload } from '../Message.interface'
+import { IPluginAPI } from './PluginAPI.interface'
 import { Logger } from '../util/Log'
 import ChatWindow from '@ui/ChatWindow';
 import ContactProvider from '@src/ContactProvider';
@@ -15,9 +15,10 @@ import { IContact } from '@src/Contact.interface';
 import { IJID } from '@src/JID.interface';
 import MultiUserContact from '@src/MultiUserContact';
 import ContactManager from '@src/ContactManager';
+import IStorage from '@src/Storage.interface';
 
 export default class PluginAPI implements IPluginAPI {
-   private storage;
+   private storage: IStorage;
 
    private sessionStorage;
 
@@ -35,7 +36,7 @@ export default class PluginAPI implements IPluginAPI {
    }
 
    public createMessage(uid: string): Message
-   public createMessage(data: MessagePayload): Message
+   public createMessage(data: IMessagePayload): Message
    public createMessage() {
       return new Message(arguments[0]);
    }
@@ -46,7 +47,7 @@ export default class PluginAPI implements IPluginAPI {
       return new MultiUserContact(this.account, arguments[0], arguments[1]);
    }
 
-   public getStorage(): Storage {
+   public getStorage(): IStorage {
       if (typeof this.storage === 'undefined') {
          this.storage = new Storage(this.account.getUid() + ':plugin:' + this.name);
       }
@@ -54,7 +55,7 @@ export default class PluginAPI implements IPluginAPI {
       return this.storage;
    }
 
-   public getSessionStorage(): Storage {
+   public getSessionStorage(): IStorage {
       if (typeof this.sessionStorage === 'undefined') {
          //@REVIEW maybe also encapsulate session storage for every plugin
          this.sessionStorage = this.account.getSessionStorage();

@@ -1,7 +1,7 @@
 import { $build } from '../vendor/Strophe'
 import InvalidParameterError from '../errors/InvalidParameterError';
 import Field from './FormField';
-import { FormFieldJSONData } from './FormField';
+import { IFormFieldJSONData } from './FormField';
 import ItemField from './FormItemField';
 import ReportField from './FormReportedField';
 
@@ -44,7 +44,7 @@ export default class Form {
       return new Form(type, fields, instructions, title, reportedFields, items);
    }
 
-   public static fromJSON(data: { type: string, fields: FormFieldJSONData[], instructions?: string, title?: string }) {
+   public static fromJSON(data: { type: string, fields: IFormFieldJSONData[], instructions?: string, title?: string }) {
       return new Form(
          data.type,
          data.fields.map(fieldData => Field.fromJSON(fieldData)),
@@ -74,11 +74,6 @@ export default class Form {
 
       if (items && items.length > 0) {
          this.checkItems();
-      }
-
-      if (type === 'result') {
-         //@TODO why?
-         // throw 'I don\'t support forms of type result';
       }
    }
 

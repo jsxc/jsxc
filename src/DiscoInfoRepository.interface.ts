@@ -1,10 +1,10 @@
 import { IContact as Contact } from './Contact.interface'
 import { IJID as JID } from './JID.interface'
-import { DiscoInfo } from './DiscoInfo.interface'
+import { IDiscoInfo } from './DiscoInfo.interface'
 
-export interface DiscoInfoRepository {
+export interface IDiscoInfoRepository {
    addRelation(jid: JID, version: string)
-   addRelation(jid: JID, discoInfo: DiscoInfo)
+   addRelation(jid: JID, discoInfo: IDiscoInfo)
 
    getDiscoInfo(jid: JID)
 
@@ -13,10 +13,10 @@ export interface DiscoInfoRepository {
 
    hasFeature(jid: JID, features: string[]): Promise<{}>
    hasFeature(jid: JID, feature: string): Promise<{}>
-   hasFeature(discoInfo: DiscoInfo, features: string[]): Promise<{}>
-   hasFeature(discoInfo: DiscoInfo, feature: string): Promise<{}>
+   hasFeature(discoInfo: IDiscoInfo, features: string[]): Promise<{}>
+   hasFeature(discoInfo: IDiscoInfo, feature: string): Promise<{}>
 
-   getCapabilities(jid: JID): Promise<DiscoInfo | void>
+   getCapabilities(jid: JID): Promise<IDiscoInfo | void>
 
    requestDiscoInfo(jid: JID, node?: string)
 }

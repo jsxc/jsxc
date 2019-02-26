@@ -93,7 +93,7 @@
     transition: right 0.5s;
   }
 
-  > .jsxc-bottom {
+  >.jsxc-bottom {
     background-color: $roster-bottom-bg;
     flex-shrink: 0;
     line-height: 34px;
@@ -170,6 +170,23 @@
   &[data-presence="offline"] {
     .jsxc-contact-list::after {
       content: attr(data-presence-offline-label);
+    }
+  }
+
+  &[data-mute="yes"] {
+    .jsxc-js-presence-menu .jsxc-menu__button::after {
+      background-image: url("../images/mute_black.svg");
+      background-position: center right;
+      background-repeat: no-repeat;
+      background-size: contain;
+      content: "";
+      display: inline-block;
+      height: 1em;
+      opacity: 0.4;
+      padding-left: 0.5em;
+      position: relative;
+      top: 2px;
+      width: 1em;
     }
   }
 }
@@ -354,7 +371,7 @@ li.jsxc-hide-offline {
     height: 100%;
     width: 42px;
 
-    > span {
+    >span {
       background-image: url("../images/more_black.svg");
       background-position: center center;
       background-repeat: no-repeat;

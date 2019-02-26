@@ -6,29 +6,29 @@ import { Presence } from './connection/AbstractConnection'
 import Form from './connection/Form'
 import Account from './Account'
 import { ContactSubscription } from './Contact.interface'
-import { MUCService } from '@connection/Connection.interface';
+import { IMUCService } from '@connection/Connection.interface';
 import { IJID } from './JID.interface';
 
-const AFFILIATION = {
-   ADMIN: 'admin',
-   MEMBER: 'member',
-   OUTCAST: 'outcast',
-   OWNER: 'owner',
-   NONE: 'none'
-};
-const ROLE = {
-   MODERATOR: 'moderator',
-   PARTICIPANT: 'participant',
-   VISITOR: 'visitor',
-   NONE: 'none'
-};
-const ROOMSTATE = {
-   INIT: 0,
-   ENTERED: 1,
-   EXITED: 2,
-   AWAIT_DESTRUCTION: 3,
-   DESTROYED: 4
-};
+// const AFFILIATION = {
+//    ADMIN: 'admin',
+//    MEMBER: 'member',
+//    OUTCAST: 'outcast',
+//    OWNER: 'owner',
+//    NONE: 'none'
+// };
+// const ROLE = {
+//    MODERATOR: 'moderator',
+//    PARTICIPANT: 'participant',
+//    VISITOR: 'visitor',
+//    NONE: 'none'
+// };
+// const ROOMSTATE = {
+//    INIT: 0,
+//    ENTERED: 1,
+//    EXITED: 2,
+//    AWAIT_DESTRUCTION: 3,
+//    DESTROYED: 4
+// };
 const ROOMCONFIG = {
    INSTANT: 'instant'
 };
@@ -57,12 +57,12 @@ export default class MultiUserContact extends Contact {
       return this.members
    }
 
-   private getService(): MUCService {
+   private getService(): IMUCService {
       return this.account.getConnection().getMUCService();
    }
 
    public invite(jid: JID, reason?: string) {
-      let isModerated = false; //@TODO
+      let isModerated = false; //@TODO isModerated
 
       if (isModerated) {
          this.getService().sendMediatedMultiUserInvitation(jid, this.getJid(), reason);

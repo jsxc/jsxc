@@ -5,6 +5,7 @@
   &__button {
     cursor: pointer;
     height: 100%;
+    user-select: none;
     white-space: nowrap;
 
     &--light {

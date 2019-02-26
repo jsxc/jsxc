@@ -8,7 +8,7 @@ export default function() {
    });
 
    let dialog = new Dialog(content);
-   let dom = dialog.open();
+   dialog.open();
 }
 
 function getUserInformation() {

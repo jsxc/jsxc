@@ -1,9 +1,8 @@
-import Hash from './Hash'
 import * as getRGB from 'consistent-color-generation'
 
 export default class Color {
    public static generate(text: string /*, saturation: number = 90, lightness: number = 65*/) {
-      let hash = Hash.String(text);
+      // let hash = Hash.String(text);
 
       // let hue = Math.abs(hash) % 360;
       // let hsl = 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';

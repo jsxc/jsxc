@@ -8,6 +8,7 @@ import PresenceController from './PresenceController'
 import PageVisibility from './PageVisibility'
 import ChatWindowList from './ui/ChatWindowList';
 import AccountManager from './AccountManager';
+import Translation from '@util/Translation';
 
 export default class Client {
    private static storage: Storage;
@@ -35,6 +36,7 @@ export default class Client {
          Options.overwriteDefaults(options);
       }
 
+      Translation.initialize();
       PageVisibility.init();
 
       let storage = Client.getStorage();
@@ -114,8 +116,10 @@ export default class Client {
       return Client.options;
    }
 
-   public static getOption(key: string) {
-      return Client.getOptions().get(key);
+   public static getOption<IOption = any>(key: string, defaultValue?: IOption): IOption {
+      let value = Client.getOptions().get(key);
+
+      return <IOption> (typeof value !== 'undefined' ? value : defaultValue);
    }
 
    public static setOption(key: string, value) {

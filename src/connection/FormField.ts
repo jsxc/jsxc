@@ -1,6 +1,6 @@
 import { $build } from '../vendor/Strophe'
 
-export interface FormFieldData {
+export interface IFormFieldData {
    label?: string,
    type?: string,
    name: string,
@@ -10,7 +10,7 @@ export interface FormFieldData {
    options?: Option2[]
 }
 
-export interface FormFieldJSONData {
+export interface IFormFieldJSONData {
    type?: string,
    name: string,
    values: string[]
@@ -94,11 +94,11 @@ export default class FormField {
       })
    };
 
-   public static fromJSON(data: FormFieldJSONData) {
+   public static fromJSON(data: IFormFieldJSONData) {
       return new FormField(data);
    }
 
-   constructor(private data: FormFieldData) {
+   constructor(private data: IFormFieldData) {
       if (this.ALLOWED_TYPES.indexOf(data.type) < 0) {
          this.data.type = 'text-single'; //default value according to XEP-0004
       }

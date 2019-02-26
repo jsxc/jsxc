@@ -6,7 +6,7 @@ export enum DIRECTION {
    IN, OUT, SYS
 };
 
-export interface MessagePayload {
+export interface IMessagePayload {
    peer: JID,
    direction: DIRECTION,
    attrId?: string,
@@ -72,6 +72,8 @@ export interface IMessage {
    getPlaintextMessage(): string;
 
    getEncryptedPlaintextMessage(): string
+
+   getPlaintextEmoticonMessage(): string
 
    getSender(): { name: string, jid?: JID }
 
