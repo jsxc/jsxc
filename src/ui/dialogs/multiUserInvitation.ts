@@ -34,8 +34,8 @@ export default function(type: 'direct' | 'mediated', from: string, room: string,
          return;
       }
 
-      if (!multiUserContact.getNickname()) {
-         multiUserContact.setNickname(account.getJID().node);
+      if (!multiUserContact.getNicknameObject().getContactNickname()) {
+         multiUserContact.getNicknameObject().setContactNickname(account.getJID().node);
       }
 
       multiUserContact.join();

@@ -19,7 +19,7 @@ export default class MultiUserStatusCodeHandler {
    }
 
    private setNickname(nickname: string) {
-      this.presenceHandler.getMultiUserContact().setNickname(nickname)
+      this.presenceHandler.getMultiUserContact().getNicknameObject().setContactNickname(nickname)
    }
 
    private getNickname(): string {

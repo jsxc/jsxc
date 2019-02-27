@@ -94,7 +94,7 @@ function onSubmit(ev) {
 
    let jid = new JID(username);
    let contact = new Contact(account, jid, alias);
-   contact.setNickname(nick);
+   contact.getNicknameObject().setContactNickname(nick);
    account.getContactManager().add(contact);
 
    //@TODO show spinner

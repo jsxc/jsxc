@@ -13,6 +13,7 @@ import Avatar from './Avatar'
 import Message from './Message'
 import ChatWindow from './ui/ChatWindow';
 import ContactProvider from './ContactProvider';
+import Nickname from '@src/Nickname';
 
 export default class Contact implements IIdentifiable, IContact {
    protected storage: Storage;
@@ -30,6 +31,8 @@ export default class Contact implements IIdentifiable, IContact {
    protected chatWindowController;
 
    protected transcript: Transcript;
+
+   protected nickname: Nickname;
 
    public static getProviderId(account: Account, id: string) {
       let data = new PersistentMap(account.getStorage(), 'contact', id);
@@ -54,6 +57,7 @@ export default class Contact implements IIdentifiable, IContact {
 
    private initExistingContact(id: string) {
       this.data = new PersistentMap(this.storage, 'contact', id);
+      this.nickname = new Nickname(this.account, this.data);
 
       if (!this.data.get('id')) {
          throw new Error(`Could not find existing contact with id "${id}".`);
@@ -81,6 +85,7 @@ export default class Contact implements IIdentifiable, IContact {
       };
 
       this.data = new PersistentMap(this.storage, 'contact', id);
+      this.nickname = new Nickname(this.account, this.data);
 
       this.data.set(defaultData);
    }
@@ -218,21 +223,18 @@ export default class Contact implements IIdentifiable, IContact {
       return this.transcript.getNumberOfUnreadMessages();
    }
 
-   public getNickname(): string {
-      return this.data.get('nickname');
+   //
+   public getNicknameObject(): Nickname {
+      return this.nickname;
    }
 
    public hasName(): boolean {
       return !!this.data.get('name');
    }
 
-   public isNickVisible(): boolean {
-      return this.data.get('nickVisible');
-   }
-
    public getName(): string {
-      if (this.isNickVisible()) {
-         return this.getNickname() || this.jid.bare;
+      if (this.nickname.isNickVisible()) {
+         return this.nickname.getContactNickname() || this.jid.bare;
       } else {
          return this.data.get('name');
       }
@@ -306,13 +308,13 @@ export default class Contact implements IIdentifiable, IContact {
       this.data.set('provider', provider.getUid());
    }
 
-   public setNickname(nickname: string) {
+   /*public setNickname(nickname: string) {
       this.data.set('nickname', nickname);
    }
 
    public setNickVisible(value: boolean) {
       this.data.set('nickVisible', value);
-   }
+   }*/
 
    public setSubscription(subscription: ContactSubscription) {
       this.data.set('subscription', subscription);

@@ -78,7 +78,7 @@ export default class MultiUserContact extends Contact {
       this.data.set('joinDate', new Date());
       this.data.set('memberListComplete', false);
 
-      return this.getService().joinMultiUserRoom(new JID(this.jid.bare, this.getNickname()), this.data.get('password'));
+      return this.getService().joinMultiUserRoom(new JID(this.jid.bare, this.nickname.getContactNickname()), this.data.get('password'));
    }
 
    public leave() {
@@ -136,7 +136,7 @@ export default class MultiUserContact extends Contact {
    public removeMember(nickname: string) {
       this.getMembers().remove(nickname);
 
-      if (nickname === this.getNickname()) {
+      if (nickname === this.nickname.getContactNickname()) {
          this.shutdown();
       }
    }
@@ -233,7 +233,7 @@ export default class MultiUserContact extends Contact {
       this.data.set('resources', {});
       this.data.set('presence', Presence.offline);
 
-      this.setNickname(null);
+      this.nickname.setContactNickname(null);
       this.removeAllMembers();
    }
 

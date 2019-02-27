@@ -7,21 +7,28 @@ import Account from '../../Account'
 import { AbstractConnection, Presence, STANZA_IQ_KEY, STANZA_KEY } from '../AbstractConnection'
 import XMPPJingleHandler from './JingleHandler'
 import Client from '../../Client'
+import Nickname from '@src/Nickname';
 
-const nickRef = 'http://jabber.org/protocol/nick';
 let acc;
 
 export default class XMPPConnection extends AbstractConnection implements IConnection {
    private handler: XMPPHandler;
+
+   private nickObject: Nickname;
+
+   protected nickRef: string;
 
    constructor(account: Account, protected connection) {
       super(account);
       acc = account;
       this.handler = new XMPPHandler(account, connection);
       this.handler.registerHandler();
+      this.nickObject = acc.getContact().getNicknameObject();
+      this.nickRef = this.nickObject.getNickRef();
+
       NS.register('METADATA_NOTIFY', 'urn:xmpp:avatar:metadata+notify');
 
-      this.getPEPService().subscribe(nickRef, this.nickHandler);
+      this.getPEPService().subscribe(this.nickRef, this.nickHandler);
 
       this.processPendingStorageConnections();
       this.listenToStorageConnections();
@@ -31,10 +38,10 @@ export default class XMPPConnection extends AbstractConnection implements IConne
 
    private nickHandler(stanza): boolean {
       let element = $(stanza);
-      let nickname: string = element.find('nick[xmlns="' + nickRef + '"]').text();
+      let nickname: string = element.find('nick[xmlns="' + this.nickRef + '"]').text();
       let peerJID = new JID(element.attr('from'));
       let peer = acc.getContact(peerJID);
-      peer.setNickname(nickname);
+      peer.acc.getContact().getNicknameObject().setContactNickname(nickname);
       return true;
    }
 

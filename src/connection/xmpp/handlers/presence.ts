@@ -87,7 +87,7 @@ export default class extends AbstractHandler {
 
          this.account.getConnection().getRosterService().sendSubscriptionAnswer(contact.getJid(), true);
 
-         contact.setNickname(nickname);
+         contact.getNicknameObject().setContactNickname(nickname);
 
          if (contact.getSubscription() !== SUBSCRIPTION.TO) {
             Roster.get().add(contact);

@@ -1,16 +1,15 @@
 import Account from './Account'
-import JID from "@src/JID";
-import PersistentMap from "@util/PersistentMap";
+import PersistentMap from '@util/PersistentMap';
 
 const nickRef = 'http://jabber.org/protocol/nick';
 
-export default class Nickname{
+export default class Nickname {
 
    protected account: Account;
 
    protected data: PersistentMap;
 
-   constructor(accountData: Account, contactData: PersistentMap){
+   constructor(accountData: Account, contactData: PersistentMap) {
       this.account = accountData;
       this.data = contactData;
 
@@ -23,11 +22,9 @@ export default class Nickname{
          .attr('xmlns', nickRef)
          .text(nickname);
 
-
       this.account.getStorage().setItem('nickname', nickname);
       return this.account.getConnection().getPEPService().publish(nickRef, element);
    }
-
 
    public getNickname(): string {
       let nickname = this.account.getStorage().getItem('nickname');
@@ -38,7 +35,7 @@ export default class Nickname{
       return nickname;
    }
 
-   public getContactNickname(): string{
+   public getContactNickname(): string {
       return this.data.get('nickname');
    }
 
@@ -54,20 +51,19 @@ export default class Nickname{
       this.data.set('nickVisible', value);
    }
 
-   public getNickRef(): string{
+   public getNickRef(): string {
       return nickRef;
    }
 
-   public nickHandler(stanza): boolean {
-      let element = $(stanza);
-      let nickname: string = element.find('nick[xmlns="' + nickRef + '"]').text();
-      let peerJID = new JID(element.attr('from'));
-      let peer = this.account.getContact(peerJID); // why undefinded??
-      peer.getNicknameObject().setContactNickname(nickname);
-      return true;
+   public setAccount(account: Account) {
+      this.account = account;
    }
 
-   public getNickFromStanza(stanza): string{
+   public getAccount(): Account {
+      return this.account;
+   }
+
+   public getNickFromStanza(stanza): string {
       return $(stanza).find('nick').text();
    }
 

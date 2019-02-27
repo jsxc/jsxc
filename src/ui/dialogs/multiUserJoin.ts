@@ -313,7 +313,7 @@ class MultiUserJoinDialog {
       let subject = this.dom.find('input[name="room-subject"]').val() || undefined;
 
       let multiUserContact = new MultiUserContact(this.account, jid, name);
-      multiUserContact.setNickname(nickname);
+      multiUserContact.getNicknameObject().setContactNickname(nickname);
       multiUserContact.setBookmark(true);
       multiUserContact.setAutoJoin(true);
       multiUserContact.setPassword(password);

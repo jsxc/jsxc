@@ -3,7 +3,7 @@ import { IJID } from '../../JID.interface'
 import * as NS from '../xmpp/namespace'
 import { $pres, $iq } from '../../vendor/Strophe'
 
-const nickRef = 'http://jabber.org/protocol/nick';
+//const nickRef = 'http://jabber.org/protocol/nick';
 
 export default class Roster extends AbstractService {
    public getRoster(version?: string): Promise<Element> {
@@ -79,13 +79,15 @@ export default class Roster extends AbstractService {
    }
 
    private sendSubscriptionRequest(jid: IJID) {
-      let nickname = this.account.getNickname();
+      let nicknameObject = this.account.getContact().getNicknameObject();
+      let nickname = nicknameObject.getNickname();
+      let reference = nicknameObject.getNickRef();
       // send subscription request to buddy (trigger onRosterChanged)
       this.send($pres({
          to: jid.full,
          type: 'subscribe'
       }).c('nick', {
-         xmlns: nickRef
+         xmlns: reference
       }).t(nickname));
    }
 }

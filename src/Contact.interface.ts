@@ -8,6 +8,7 @@ import Avatar from './Avatar'
 import ChatWindow from '@ui/ChatWindow';
 import ContactProvider from './ContactProvider';
 import Account from './Account';
+import Nickname from '@src/Nickname';
 
 export enum ContactType {
    CHAT = 'chat',
@@ -24,13 +25,7 @@ export enum ContactSubscription {
 
 export interface IContact {
 
-   setNickVisible(value: boolean);
-
-   isNickVisible(): boolean;
-
-   getNickname(): string;
-
-   setNickname(newNickname: string);
+   getNicknameObject(): Nickname;
 
    delete();
 

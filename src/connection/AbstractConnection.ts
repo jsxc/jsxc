@@ -134,7 +134,7 @@ abstract class AbstractConnection {
          xmlMsg.c('body').t(plaintextMessage).up();
       }
 
-      xmlMsg.c('nick').t(this.account.getNickname());
+      xmlMsg.c('nick').t(this.account.getContact().getNicknameObject().getNickname());
 
       xmlMsg.c('origin-id', {
          xmlns: 'urn:xmpp:sid:0',
@@ -229,19 +229,24 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
+   private async vCardPromise() {
+      return this.account.getContact().getVcard();
+   }
+
+   //How do i get this into the Nickname class???
    public changeNickname(newNickname: string): Promise<Element> {
       let iq = $iq({
          type: 'set'
       });
 
-      return this.account.getContact().getVcard().then(
+      return this.vCardPromise().then(
          function(vCardData) {
 
             iq.c('vCard', {
                xmlns: NS.get('VCARD')
             });
 
-            let vCardKeys = Object.keys(vCardData);
+            //let vCardKeys = Object.keys(vCardData);
 
             for (let key in vCardData) {
                if (key !== 'NICKNAME') {
