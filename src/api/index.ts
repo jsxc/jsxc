@@ -7,6 +7,8 @@ export default class JSXC {
 
    public static readonly testBOSHServer = testBOSHServer;
 
+   public static readonly register = v1.register;
+
    private static initialized = false;
 
    public numberOfCachedAccounts: number;
