@@ -19,7 +19,7 @@ export default class AvatarSet {
       return avatar;
    }
 
-   public static setPlaceholder(elements: JQuery, text: string, jid: IJID) {
+   public static setPlaceholder(elements: JQuery, text: string, jid?: IJID) {
       AvatarSet.placeholder(elements, text, jid);
    }
 

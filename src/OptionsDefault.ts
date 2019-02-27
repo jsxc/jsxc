@@ -2,6 +2,7 @@ import loginDialog from './ui/dialogs/loginBox'
 import { SHOWN } from './CONST';
 import { ICEServer } from './IceServers';
 import { SettingsCallback } from './FormWatcher';
+import { IJID } from './JID.interface';
 
 /* tslint:disable:no-unnecessary-initializer */
 // We need to initialize options with undefined, otherwise they will not be exported.
@@ -51,7 +52,7 @@ export let favicon = {
 };
 
 /** This function is called for every avatar element without a user defined avatar. */
-export let avatarPlaceholder: (element: JQuery, name: string, color: string) => void = ((element: JQuery, text: string, color: string) => {
+export let avatarPlaceholder: (element: JQuery, name: string, color: string, jid?: IJID) => void = ((element: JQuery, text: string, color: string) => {
    element.css({
       'background-color': color,
       'color': '#fff',
