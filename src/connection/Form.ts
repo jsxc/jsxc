@@ -13,12 +13,12 @@ import ReportField from './FormReportedField';
 
 const NAMESPACE = 'jabber:x:data';
 
-type TYPE = 'cancel' | 'form' | 'result' | 'submit';
+type TYPE = 'cancel' | 'form' | 'result' | 'submit' | 'hidden';
 
 //@REVIEW xss
 
 export default class Form {
-   private ALLOWED_TYPES = ['cancel', 'form', 'result', 'submit'];
+   private ALLOWED_TYPES = ['cancel', 'form', 'result', 'submit', 'hidden'];
 
    public static fromXML(stanza) {
       let stanzaElement = $(stanza);
