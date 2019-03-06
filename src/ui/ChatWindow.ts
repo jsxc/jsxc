@@ -317,15 +317,6 @@ export default class ChatWindow {
       );
 
       elementHandler.add(
-         this.element.find('.jsxc-send-file')[0],
-         function() {
-            $('body').click();
-
-            // jsxc.gui.window.sendFile(bid);
-         }
-      );
-
-      elementHandler.add(
          this.element.find('.jsxc-share-screen')[0],
          (ev) => {
             ev.stopPropagation();
