@@ -613,13 +613,11 @@ export default class ChatWindow {
 
          menu.addEntry(label, () => {
             //@TODO show spinner
-            try {
-               plugin.toggleTransfer(this.contact);
-            } catch (err) {
+            plugin.toggleTransfer(this.contact).catch(err => {
                Log.warn('Toggle transfer error:', err);
 
                this.getContact().addSystemMessage(err.toString());
-            }
+            });
          });
       }
 
