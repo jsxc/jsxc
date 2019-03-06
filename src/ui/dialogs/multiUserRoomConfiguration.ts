@@ -4,6 +4,7 @@ import Client from '../../Client'
 import Form from '../../connection/Form'
 import Log from '../../util/Log'
 import { IConnection } from '@connection/Connection.interface';
+import Translation from '@util/Translation';
 
 let dialog: Dialog;
 
@@ -27,13 +28,13 @@ export default function(contact: MultiUserContact) {
 
 function showForm(form: Form, contact: MultiUserContact, connection: IConnection) {
    let formElement = form.toHTML();
-   //@TODO translate, maybe move to hbs
-   let submitButton = $('<div class="form-group">\
-      <div class="col-sm-offset-4 col-sm-8">\
-         <button class="jsxc-button jsxc-button---default jsxc-js-close" type="button">{{t "Cancel"}}</button>\
-         <button class="jsxc-button jsxc-button---primary" type="submit">{{t "Submit"}}</button>\
-      </div>\
-   </div>');
+
+   let submitButton = $(`<div class="form-group">
+      <div class="col-sm-offset-4 col-sm-8">
+         <button class="jsxc-button jsxc-button--default jsxc-js-close" type="button">${Translation.t('Cancel')}</button>
+         <button class="jsxc-button jsxc-button--primary" type="submit">${Translation.t('Save')}</button>
+      </div>
+   </div>`);
 
    formElement.append(submitButton);
 
