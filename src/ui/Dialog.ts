@@ -42,7 +42,7 @@ export default class Dialog {
    }
 
    public getDom() {
-      return $('.jsxc-dialog[data-name="' + this.name + '"]');
+      return $('.jsxc-dialog[data-name="' + this.name + '"]').find('.jsxc-dialog__content');
    }
 
    public append(content: string) {
