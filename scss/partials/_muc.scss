@@ -110,6 +110,10 @@
         .jsxc-name {
           cursor: default;
           display: block;
+          overflow: hidden;
+          padding-right: 0.5em;
+          text-overflow: ellipsis;
+          white-space: nowrap;
 
           &:hover {
             color: inherit;
