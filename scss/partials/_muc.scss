@@ -24,8 +24,17 @@
     .jsxc-transfer,
     .jsxc-video,
     .jsxc-audio,
-    .jsxc-send-file {
+    .jsxc-share-screen,
+    .jsxc-destroy,
+    .jsxc-configure {
       display: none;
+    }
+
+    &[data-affiliation="owner"] {
+      .jsxc-destroy,
+      .jsxc-configure {
+        display: inherit;
+      }
     }
 
     .jsxc-members {

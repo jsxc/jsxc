@@ -9,28 +9,28 @@ import { ContactSubscription } from './Contact.interface'
 import { IMUCService } from '@connection/Connection.interface';
 import { IJID } from './JID.interface';
 
-// const AFFILIATION = {
-//    ADMIN: 'admin',
-//    MEMBER: 'member',
-//    OUTCAST: 'outcast',
-//    OWNER: 'owner',
-//    NONE: 'none'
+export const enum AFFILIATION {
+   ADMIN = 'admin',
+   MEMBER = 'member',
+   OUTCAST = 'outcast',
+   OWNER = 'owner',
+   NONE = 'none'
+};
+export const enum ROLE {
+   MODERATOR = 'moderator',
+   PARTICIPANT = 'participant',
+   VISITOR = 'visitor',
+   NONE = 'none'
+};
+// const enum ROOMSTATE {
+//    INIT,
+//    ENTERED,
+//    EXITED,
+//    AWAIT_DESTRUCTION,
+//    DESTROYED,
 // };
-// const ROLE = {
-//    MODERATOR: 'moderator',
-//    PARTICIPANT: 'participant',
-//    VISITOR: 'visitor',
-//    NONE: 'none'
-// };
-// const ROOMSTATE = {
-//    INIT: 0,
-//    ENTERED: 1,
-//    EXITED: 2,
-//    AWAIT_DESTRUCTION: 3,
-//    DESTROYED: 4
-// };
-const ROOMCONFIG = {
-   INSTANT: 'instant'
+export const enum ROOMCONFIG {
+   INSTANT = 'instant'
 };
 
 export default class MultiUserContact extends Contact {
@@ -121,7 +121,15 @@ export default class MultiUserContact extends Contact {
       return this.chatWindow;
    }
 
-   public addMember(nickname: string, affiliation?, role?, jid?: JID): boolean {
+   public getMember(nickname: string): {affiliation?: AFFILIATION, role?: ROLE, jid?: JID} {
+      let data = this.getMembers().get(nickname);
+
+      data.jid = data.jid ? new JID(data.jid) : undefined;
+
+      return data;
+   }
+
+   public addMember(nickname: string, affiliation?: AFFILIATION, role?: ROLE, jid?: JID): boolean {
       let isNewMember = !this.getMembers().get(nickname);
 
       this.getMembers().set(nickname, {

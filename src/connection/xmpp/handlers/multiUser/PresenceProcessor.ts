@@ -3,6 +3,7 @@ import Log from '@util/Log'
 import MultiUserContact from '../../../../MultiUserContact'
 import MultiUserStatusCodeHandler from './StatusCodeHandler'
 import { Strophe } from '../../../../vendor/Strophe'
+import JID from '@src/JID';
 
 export default class MultiUserPresenceProcessor {
    private codes: string[];
@@ -75,9 +76,11 @@ export default class MultiUserPresenceProcessor {
 
    private processNewMember() {
       let itemElement = this.xElement.find('item');
-      let jid = itemElement.attr('jid');
+      let jidString = itemElement.attr('jid');
       let affiliation = itemElement.attr('affiliation');
       let role = itemElement.attr('role');
+
+      let jid = jidString ? new JID(jidString) : undefined;
 
       let isNew = this.multiUserContact.addMember(this.nickname, affiliation, role, jid);
 
