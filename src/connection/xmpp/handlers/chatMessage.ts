@@ -12,7 +12,7 @@ import { FUNCTION } from '../../../Notice'
 export default class extends AbstractHandler {
 
    public processStanza(stanza: Element) {
-      let messageElement;
+      let messageElement: MessageElement;
 
       try {
          messageElement = new MessageElement(stanza);
@@ -39,7 +39,7 @@ export default class extends AbstractHandler {
          plaintextMessage: messageElement.getPlaintextBody(),
          htmlMessage: messageElement.getHtmlBody().html(),
          forwarded: messageElement.isForwarded(),
-         stamp: messageElement.getTime(),
+         stamp: messageElement.getTime().getTime(),
          unread: true //@REVIEW carbon copy?
       });
 

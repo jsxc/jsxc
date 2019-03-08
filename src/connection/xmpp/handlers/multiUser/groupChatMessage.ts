@@ -72,25 +72,6 @@ export default class extends AbstractHandler {
          });
       }
 
-      // var subjectElement = messageElement.find('subject');
-      //
-      // if (subjectElement.length > 0) {
-      //    var roomdata = jsxc.storage.getUserItem('buddy', room);
-      //
-      //    roomdata.subject = subjectElement.text();
-      //
-      //    jsxc.storage.setUserItem('buddy', room, roomdata);
-      //
-      //    jsxc.gui.window.postMessage({
-      //       bid: room,
-      //       direction: jsxc.Message.SYS,
-      //       msg: $.t('changed_subject_to', {
-      //          nickname: nickname,
-      //          subject: roomdata.subject
-      //       })
-      //    });
-      // }
-
       return this.PRESERVE_HANDLER;
    }
 }
