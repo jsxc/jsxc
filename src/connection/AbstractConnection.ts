@@ -233,7 +233,6 @@ abstract class AbstractConnection {
       return this.account.getContact().getVcard();
    }
 
-   //How do i get this into the Nickname class???
    public changeNickname(newNickname: string): Promise<Element> {
       let iq = $iq({
          type: 'set'

@@ -223,7 +223,6 @@ export default class Contact implements IIdentifiable, IContact {
       return this.transcript.getNumberOfUnreadMessages();
    }
 
-   //
    public getNicknameObject(): Nickname {
       return this.nickname;
    }
@@ -307,14 +306,6 @@ export default class Contact implements IIdentifiable, IContact {
    public setProvider(provider: ContactProvider) {
       this.data.set('provider', provider.getUid());
    }
-
-   /*public setNickname(nickname: string) {
-      this.data.set('nickname', nickname);
-   }
-
-   public setNickVisible(value: boolean) {
-      this.data.set('nickVisible', value);
-   }*/
 
    public setSubscription(subscription: ContactSubscription) {
       this.data.set('subscription', subscription);

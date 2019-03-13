@@ -3,8 +3,6 @@ import { IJID } from '../../JID.interface'
 import * as NS from '../xmpp/namespace'
 import { $pres, $iq } from '../../vendor/Strophe'
 
-//const nickRef = 'http://jabber.org/protocol/nick';
-
 export default class Roster extends AbstractService {
    public getRoster(version?: string): Promise<Element> {
       let iq = $iq({

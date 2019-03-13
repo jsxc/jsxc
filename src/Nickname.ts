@@ -55,14 +55,6 @@ export default class Nickname {
       return nickRef;
    }
 
-   public setAccount(account: Account) {
-      this.account = account;
-   }
-
-   public getAccount(): Account {
-      return this.account;
-   }
-
    public getNickFromStanza(stanza): string {
       return $(stanza).find('nick').text();
    }
