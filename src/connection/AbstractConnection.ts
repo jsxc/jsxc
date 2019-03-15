@@ -134,7 +134,11 @@ abstract class AbstractConnection {
          xmlMsg.c('body').t(plaintextMessage).up();
       }
 
-      xmlMsg.c('nick').t(this.account.getContact().getNicknameObject().getNickname());
+      let nickname = this.account.getContact().getNicknameObject().getNickname();
+
+      if (nickname) {
+         xmlMsg.c('nick').t(nickname);
+      }
 
       xmlMsg.c('origin-id', {
          xmlns: 'urn:xmpp:sid:0',

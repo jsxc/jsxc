@@ -41,7 +41,7 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       let nickname: string = element.find('nick[xmlns="' + this.nickRef + '"]').text();
       let peerJID = new JID(element.attr('from'));
       let peer = acc.getContact(peerJID);
-      peer.acc.getContact().getNicknameObject().setContactNickname(nickname);
+      peer.getNicknameObject().setContactNickname(nickname);
       return true;
    }
 
