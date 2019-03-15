@@ -232,10 +232,13 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getName(): string {
+      let handle = this.data.get('name');
       if (this.nickname.isNickVisible()) {
          return this.nickname.getContactNickname() || this.jid.bare;
+      } else if (handle) {
+         return handle;
       } else {
-         return this.data.get('name');
+         return this.jid.bare;
       }
    }
 

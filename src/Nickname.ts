@@ -4,14 +4,12 @@ import PersistentMap from '@util/PersistentMap';
 const nickRef = 'http://jabber.org/protocol/nick';
 
 export default class Nickname {
-
+/*
    protected account: Account;
 
    protected data: PersistentMap;
-
-   constructor(accountData: Account, contactData: PersistentMap) {
-      this.account = accountData;
-      this.data = contactData;
+*/
+   constructor(private account: Account, private data: PersistentMap) {
 
    }
 

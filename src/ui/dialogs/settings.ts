@@ -7,7 +7,6 @@ import List from '../DialogList'
 import ListItem from '../DialogListItem'
 import AvatarSet from '../AvatarSet'
 import Log from '../../util/Log'
-//import Contact from '@src/Contact';
 import Translation from '@util/Translation';
 
 const ENOUGH_BITS_OF_ENTROPY = 50;

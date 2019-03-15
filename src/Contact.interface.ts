@@ -1,6 +1,6 @@
 import { IMessage } from './Message.interface'
 import { IJID } from './JID.interface'
-import { Presence } from './connection/AbstractConnection'
+import { Presence } from '@connection/AbstractConnection'
 import { EncryptionState } from './plugin/AbstractPlugin'
 import ChatWindowController from './ChatWindowController'
 import Transcript from './Transcript'
