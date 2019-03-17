@@ -50,14 +50,21 @@ async function insertDevices(devices: Device[], identityManager: IdentityManager
 
 async function getDeviceProperties(device: Device, identityManager: IdentityManager) {
    let trust = device.getTrust();
-   let fingerprint;
+   let fingerprint: string;
 
    try {
       fingerprint = await identityManager.loadFingerprint(device.getAddress());
-   } catch (err) {
-      //@TODO device should be removed from list
 
-      fingerprint = 'Error';
+      if (device.isDisabled()) {
+         device.enable();
+      }
+   } catch (err) {
+      Log.warn('Error while retrieving fingerprint', err);
+
+      device.disable();
+
+      trust = Trust.ignored;
+      fingerprint = 'Not available';
    }
 
    return {

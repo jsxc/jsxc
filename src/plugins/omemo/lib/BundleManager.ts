@@ -105,7 +105,7 @@ export default class BundleManager {
       let bundleElement = itemsElement.find(`bundle[xmlns='${NS_BASE}']`);
 
       if (bundleElement.length !== 1) {
-         return Promise.reject('Found no bundle');
+         throw new Error(`Expected to find one bundle, but there are actually ${bundleElement.length} bundles.`);
       }
 
       let bundle = Bundle.fromXML(bundleElement.get());

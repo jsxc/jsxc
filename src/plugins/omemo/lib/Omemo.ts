@@ -77,7 +77,7 @@ export default class Omemo {
    }
 
    public getDevices(contact?: Contact): Device[] {
-      let peer;
+      let peer: Peer;
 
       if (contact) {
          peer = this.getPeer(contact.getJid());

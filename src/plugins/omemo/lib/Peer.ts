@@ -42,7 +42,7 @@ export default class Peer {
 
       let aes = await AES.encrypt(plaintext);
       let devices = [...this.getDevices(), ...localPeer.getDevices()];
-      let promises = devices.map(device => device.encrypt(aes.keydata));
+      let promises = devices.filter(device => device.getTrust() !== Trust.ignored).map(device => device.encrypt(aes.keydata));
 
       let keys = await Promise.all(promises);
 

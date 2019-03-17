@@ -162,6 +162,10 @@ body.jsxc-fullscreen.jsxc-two-columns {
     &[data-trust="confirmed"] {
       color: #008000;
     }
+
+    &[data-trust="ignored"] {
+      color: #999;
+    }
   }
 
   &-action {
