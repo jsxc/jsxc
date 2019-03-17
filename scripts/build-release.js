@@ -19,7 +19,7 @@ async function createRelease() {
    console.log(`I'm now building JSXC version ${version}.`.verbose);
 
    await createBuild();
-   let filePath = await createArchive(version);
+   let filePath = await createArchive('jsxc-' + version);
    await createSignature(filePath);
 }
 
