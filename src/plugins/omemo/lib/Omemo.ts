@@ -111,7 +111,7 @@ export default class Omemo {
          message.setErrorMessage('Message was not send');
          message.setEncrypted(false);
 
-         contact.addSystemMessage(msg);
+         contact.addSystemMessage(typeof msg === 'string' ? msg : msg.toString());
 
          throw msg;
       });
