@@ -29,6 +29,12 @@ export default function(contact: IContact, omemo: Omemo) {
 }
 
 async function insertDevices(devices: Device[], identityManager: IdentityManager, listElement) {
+   if (devices.length === 0) {
+      listElement.empty().append($('<p>').text(Translation.t('No_devices_available')));
+
+      return;
+   }
+
    for (let device of devices) {
       //@TODO show spinner
       let properties = await getDeviceProperties(device, identityManager);

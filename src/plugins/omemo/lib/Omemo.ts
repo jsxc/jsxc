@@ -70,6 +70,12 @@ export default class Omemo {
       return this.getBootstrap().prepare();
    }
 
+   public isSupported(contact: Contact): boolean {
+      let devices = this.getDevices(contact);
+
+      return devices.length > 0;
+   }
+
    public isTrusted(contact: Contact): boolean {
       let peer = this.getPeer(contact.getJid());
 

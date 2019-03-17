@@ -59,9 +59,11 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return;
       }
 
-      //@TODO check if contact supports omemo
-
       return this.getOmemo().prepare().then(() => {
+         if (!this.getOmemo().isSupported(contact)) {
+            throw new Error('Your contact does not support OMEMO');
+         }
+
          if (!this.getOmemo().isTrusted(contact)) {
             throw new Error('There are new OMEMO devices');
          }
