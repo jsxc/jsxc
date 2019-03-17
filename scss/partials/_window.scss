@@ -523,8 +523,8 @@
   }
 }
 
-.jsxc-out {
-  background-color: $chatmessage-out-bg;
+.jsxc-out,
+.jsxc-probably_out {
   border-radius: 3px;
   float: right;
   margin-right: 0.8em;
@@ -533,7 +533,7 @@
   position: relative;
 
   &::after {
-    border-color: transparent $chatmessage-out-bg;
+    border-color: transparent #fff;
     border-style: solid;
     border-width: 0.7em 0 0.7em 0.7em;
     bottom: 0.5em;
@@ -563,6 +563,14 @@
 
   .jsxc-timestamp {
     float: right;
+  }
+}
+
+.jsxc-out {
+  background-color: $chatmessage-out-bg;
+
+  &::after {
+    border-color: transparent $chatmessage-out-bg;
   }
 }
 

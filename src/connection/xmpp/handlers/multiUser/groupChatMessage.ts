@@ -49,11 +49,16 @@ export default class extends AbstractHandler {
          let delay = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
          let sendDate = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
          let afterJoin = sendDate > contact.getJoinDate();
+         let direction = Message.DIRECTION.IN;
 
-         if (contact.getNickname() === nickname && afterJoin) {
-            Log.debug('Ignore my own groupchat messages');
+         if (contact.getNickname() === nickname) {
+            if (afterJoin) {
+               Log.debug('Ignore my own groupchat messages');
 
-            return this.PRESERVE_HANDLER;
+               return this.PRESERVE_HANDLER;
+            }
+
+            direction = Message.DIRECTION.PROBABLY_OUT;
          }
 
          let transcript = contact.getTranscript();
@@ -74,7 +79,7 @@ export default class extends AbstractHandler {
             uid: stanzaId || originId,
             attrId,
             peer: from,
-            direction: Message.DIRECTION.IN,
+            direction,
             plaintextMessage: body,
             // htmlMessage: htmlBody.html(),
             stamp: sendDate.getTime(),
