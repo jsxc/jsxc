@@ -111,7 +111,8 @@ export default class Contact implements IIdentifiable, IContact {
       let message = new Message({
          peer: this.getJid(),
          direction: Message.DIRECTION.SYS,
-         plaintextMessage: messageString
+         plaintextMessage: messageString,
+         unread: false,
       });
 
       this.getTranscript().pushMessage(message);

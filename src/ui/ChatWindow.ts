@@ -418,7 +418,8 @@ export default class ChatWindow {
          direction: Message.DIRECTION.OUT,
          type: this.contact.getType(),
          plaintextMessage: messageString,
-         attachment: this.attachmentDeposition
+         attachment: this.attachmentDeposition,
+         unread: false,
       });
 
       this.clearAttachment();

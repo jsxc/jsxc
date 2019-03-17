@@ -16,6 +16,12 @@ const ATREGEX = new RegExp('(xmpp:)?(' + CONST.REGEX.JID.source + ')(\\?[^\\s]+\
 
 export default class Message implements Identifiable, IMessage {
 
+   public static exists(uid: string) {
+      let data = PersistentMap.getData(Client.getStorage(), uid);
+
+      return !!(data && data.attrId);
+   }
+
    private uid: string;
 
    private data: PersistentMap;
@@ -58,6 +64,7 @@ export default class Message implements Identifiable, IMessage {
          }
 
          this.data.set($.extend({
+            unread: true,
             received: false,
             encrypted: null,
             forwarded: false,

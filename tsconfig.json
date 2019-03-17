@@ -17,7 +17,8 @@
         "outDir": "./dist",
         "target": "es5",
         "lib": ["dom", "es2015", "es2015.promise", "es5"],
-        "noUnusedLocals": true
+        "noUnusedLocals": true,
+        "downlevelIteration": true
     },
     "include": [
         "./src/**/*.ts",

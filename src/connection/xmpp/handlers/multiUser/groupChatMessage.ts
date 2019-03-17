@@ -9,12 +9,13 @@ import AbstractHandler from '../../AbstractHandler'
 
 export default class extends AbstractHandler {
    public processStanza(stanza: Element) {
-      // let messageId = stanza.getAttribute('id');
-
       let messageElement = $(stanza);
       let from = new JID(stanza.getAttribute('from'));
       let subjectElement = messageElement.find('subject');
       let bodyElement = messageElement.find('body:first');
+      let originId = messageElement.find('origin-id[xmlns="urn:xmpp:sid:0"]').attr('id');
+      let stanzaId = messageElement.find('stanza-id[xmlns="urn:xmpp:sid:0"]').attr('id');
+      let attrId = messageElement.attr('id');
       let body = bodyElement.text();
       let nickname = from.resource;
 
@@ -47,14 +48,31 @@ export default class extends AbstractHandler {
       if (body !== '') {
          let delay = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
          let sendDate = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
+         let afterJoin = sendDate > contact.getJoinDate();
 
-         if (contact.getNickname() === nickname && sendDate > contact.getJoinDate()) {
+         if (contact.getNickname() === nickname && afterJoin) {
             Log.debug('Ignore my own groupchat messages');
 
             return this.PRESERVE_HANDLER;
          }
 
+         let transcript = contact.getTranscript();
+
+         if (!afterJoin) {
+            if (Message.exists(originId) || Message.exists(stanzaId)) {
+               return this.PRESERVE_HANDLER;
+            }
+
+            for (let message of transcript.getGenerator()) {
+               if (message.getAttrId() === attrId && message.getPlaintextMessage() === body) {
+                  return this.PRESERVE_HANDLER;
+               }
+            }
+         }
+
          let message = new Message({
+            uid: stanzaId || originId,
+            attrId,
             peer: from,
             direction: Message.DIRECTION.IN,
             plaintextMessage: body,
@@ -62,7 +80,8 @@ export default class extends AbstractHandler {
             stamp: sendDate.getTime(),
             sender: {
                name: nickname
-            }
+            },
+            unread: afterJoin,
          });
 
          let pipe = this.account.getPipe('afterReceiveGroupMessage');
