@@ -61,8 +61,9 @@ export default class MultiUserContact extends Contact {
       return this.account.getConnection().getMUCService();
    }
 
-   public invite(jid: JID, reason?: string) {
-      let isModerated = false; //@TODO isModerated
+   public async invite(jid: JID, reason?: string) {
+      let discoInfo = await this.account.getDiscoInfoRepository().requestDiscoInfo(this.getJid());
+      let isModerated = discoInfo.hasFeature('muc_moderated');
 
       if (isModerated) {
          this.getService().sendMediatedMultiUserInvitation(jid, this.getJid(), reason);
