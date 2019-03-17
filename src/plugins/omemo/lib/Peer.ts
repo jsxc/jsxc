@@ -32,6 +32,10 @@ export default class Peer {
          throw new Error('There are new devices for your contact.');
       }
 
+      if (this.getTrust() === Trust.ignored) {
+         throw new Error('You ignore all devices of your contact.');
+      }
+
       if (localPeer.getTrust() === Trust.unknown) {
          throw new Error('I found new devices from you.');
       }
@@ -81,7 +85,11 @@ export default class Peer {
          return Trust.recognized;
       }
 
-      return Trust.confirmed;
+      if (trust.indexOf(Trust.confirmed) >= 0) {
+         return Trust.confirmed;
+      }
+
+      return Trust.ignored;
    }
 
    public getDevices(): Device[] {

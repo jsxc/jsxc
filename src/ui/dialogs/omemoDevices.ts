@@ -51,6 +51,7 @@ async function insertDevices(devices: Device[], identityManager: IdentityManager
 async function getDeviceProperties(device: Device, identityManager: IdentityManager) {
    let trust = device.getTrust();
    let fingerprint: string;
+   let showControls = !device.isCurrentDevice();
 
    try {
       fingerprint = await identityManager.loadFingerprint(device.getAddress());
@@ -65,6 +66,7 @@ async function getDeviceProperties(device: Device, identityManager: IdentityMana
 
       trust = Trust.ignored;
       fingerprint = 'Not available';
+      showControls = false;
    }
 
    return {
@@ -72,9 +74,8 @@ async function getDeviceProperties(device: Device, identityManager: IdentityMana
       isCurrentDevice: device.isCurrentDevice(),
       fingerprint,
       trust: Trust[trust],
-      trustIsUnknownOrRecognized: trust === Trust.unknown || trust === Trust.recognized,
-      trustIsUnknown: trust === Trust.unknown,
       lastUsed: device.getLastUsed(),
+      showControls
    };
 };
 
@@ -91,6 +92,8 @@ function actionHandler(deviceElement, actionElement, device: Device) {
       device.setTrust(Trust.confirmed);
    } else if (action === 'recognize') {
       device.setTrust(Trust.recognized);
+   } else if (action === 'ignore') {
+      device.setTrust(Trust.ignored);
    } else {
       Log.warn('Unknown action');
 
@@ -102,14 +105,6 @@ function actionHandler(deviceElement, actionElement, device: Device) {
    let trustString = Trust[trust];
 
    trustElement.attr('data-trust', trustString);
-
-   if (trust === Trust.confirmed) {
-      deviceElement.find('.jsxc-omemo-device-action a').hide();
-   } else if (trust === Trust.recognized) {
-      deviceElement.find('.jsxc-omemo-device-action [data-action="recognize"]').hide();
-   } else {
-      deviceElement.find('.jsxc-omemo-device-action a').show();
-   }
 
    trustElement.text(trustString);
 }

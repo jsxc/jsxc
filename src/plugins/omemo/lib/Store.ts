@@ -193,6 +193,10 @@ export default class Store {
          return Trust.recognized;
       }
 
+      if (fingerprint && trustMatrix[Trust.ignored].indexOf(fingerprint) >= 0) {
+         return Trust.ignored;
+      }
+
       return Trust.unknown;
    }
 
@@ -215,6 +219,7 @@ export default class Store {
       let trustMatrix = this.get(PREFIX_TRUST + identifier.getName()) || {
          [Trust.confirmed]: [],
          [Trust.recognized]: [],
+         [Trust.ignored]: [],
       };
 
       return trustMatrix;
