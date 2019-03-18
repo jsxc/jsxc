@@ -22,7 +22,7 @@ export default class Form {
 
    public static fromXML(stanza) {
       let stanzaElement = $(stanza);
-      let xElement = stanzaElement.attr('xmlns') === NAMESPACE && stanzaElement[0].tagName === 'X' ? stanzaElement : stanzaElement.find('x[xmlns="jabber:x:data"]');
+      let xElement = stanzaElement.attr('xmlns') === NAMESPACE && stanzaElement[0].tagName.toUpperCase() === 'X' ? stanzaElement : stanzaElement.find('x[xmlns="jabber:x:data"]');
       let type = xElement.attr('type');
       let instructions = xElement.find('>instructions').text();
       let title = xElement.find('>title').text();
