@@ -67,12 +67,25 @@ export default class MultiUserContact extends Contact {
 
       if (isModerated) {
          this.getService().sendMediatedMultiUserInvitation(jid, this.getJid(), reason);
-      } else if (jid.resource && this.hasFeatureByResource(jid.resource, 'jabber:x:conference')) {
-         let password = this.data.get('password');
-         this.getService().sendDirectMultiUserInvitation(jid, this.getJid(), reason, password);
-      } else {
-         throw new Error('No invitation method available');
+
+         return;
       }
+
+      let contact = this.account.getContact(jid);
+      let resources = jid.resource ? [jid.resource] : contact.getResources();
+
+      if (resources.length > 0) {
+         for (let resource of resources) {
+            if (contact.hasFeatureByResource(resource, 'jabber:x:conference')) {
+               let password = this.data.get('password');
+               this.getService().sendDirectMultiUserInvitation(jid, this.getJid(), reason, password);
+            }
+         }
+
+         return;
+      }
+
+      throw new Error('No invitation method available');
    }
 
    public join() {
