@@ -26,10 +26,6 @@
   text-transform: uppercase;
 }
 
-.jsxc-separator {
-  border-top: 1px solid $separator;
-}
-
 .jsxc-max-width {
   max-width: 500px;
 }
@@ -77,6 +73,7 @@
 }
 
 ul.jsxc-vcard {
+  clear: both;
   min-width: 400px;
 
   ul {
@@ -85,7 +82,17 @@ ul.jsxc-vcard {
 
   li {
     cursor: default !important;
+
+    &.jsxc-separator {
+      margin-bottom: 1em;
+    }
   }
+}
+
+.jsxc-avatar.jsxc-vcard {
+  height: 100px;
+  margin-bottom: 10px;
+  width: 100px;
 }
 
 //  Spot which is attached to xmpp: uris
@@ -146,14 +153,6 @@ ul.jsxc-vcard {
 
 .jsxc-oneway .jsxc-avatar {
   filter: grayscale(100%);
-}
-
-img.jsxc-vcard {
-  border: 5px solid $white;
-  border-radius: 2px;
-  float: right;
-  max-height: 200px;
-  max-width: 200px;
 }
 
 .jsxc-alert {

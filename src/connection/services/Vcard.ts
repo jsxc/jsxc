@@ -56,6 +56,8 @@ export default class Vcard extends AbstractService {
                type,
                src
             };
+         } else if (itemName === 'EMAIL') {
+            value = item.find('USERID').text();
          } else if (children.length > 0) {
             value = self.parseVcardChildren(children);
          } else {

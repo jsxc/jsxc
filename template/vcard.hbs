@@ -4,11 +4,11 @@
    <li>
       <strong>{{t "Resource"}}</strong> {{resource}}
    </li>
-   <li>
-      <strong>{{t "Client"}}</strong> {{client}}
+   <li data-resource="{{resource}}">
+      <strong>{{t "Client"}}</strong> <span class="jsxc-client">{{client}}</span>
    </li>
-   <li class="jsxc-seperator">
-      <strong>{{t "Status"}}</strong> {{status}}
+   <li class="jsxc-separator">
+      <strong>{{t "Status"}}</strong> {{presence}}
    </li>
    {{/each}}
 </ul>

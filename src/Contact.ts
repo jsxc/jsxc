@@ -13,6 +13,7 @@ import Avatar from './Avatar'
 import Message from './Message'
 import ChatWindow from './ui/ChatWindow';
 import ContactProvider from './ContactProvider';
+import DiscoInfo from './DiscoInfo';
 
 export default class Contact implements IIdentifiable, IContact {
    protected storage: Storage;
@@ -168,7 +169,7 @@ export default class Contact implements IIdentifiable, IContact {
       return this.account.getDiscoInfoRepository().hasFeature(jid, feature);
    }
 
-   public getCapabilitiesByResource(resource: string): Promise<any> {
+   public getCapabilitiesByResource(resource: string): Promise<DiscoInfo | void> {
       let jid = new JID(this.jid.bare + '/' + resource);
 
       return this.account.getDiscoInfoRepository().getCapabilities(jid);
@@ -205,7 +206,13 @@ export default class Contact implements IIdentifiable, IContact {
       return Object.keys(this.data.get('resources') || {});
    }
 
-   public getPresence(): Presence {
+   public getPresence(resource?: string): Presence {
+      if (resource) {
+         let resources = this.data.get('resources') || {};
+
+         return resources[resource];
+      }
+
       return this.data.get('presence');
    }
 
