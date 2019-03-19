@@ -109,7 +109,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
             throw new Error('No decrypted message found');
          }
 
-         if (decrypted.trust === Trust.unknown) {
+         if (decrypted.trust !== Trust.recognized && decrypted.trust !== Trust.confirmed) {
             message.setErrorMessage(Translation.t('Message_received_from_unknown_OMEMO_device'));
          }
 
