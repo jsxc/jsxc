@@ -75,6 +75,8 @@ export default class extends AbstractHandler {
             }
          }
 
+         let member = contact.getMember(nickname);
+
          let message = new Message({
             uid: stanzaId || originId,
             attrId,
@@ -84,7 +86,8 @@ export default class extends AbstractHandler {
             // htmlMessage: htmlBody.html(),
             stamp: sendDate.getTime(),
             sender: {
-               name: nickname
+               name: nickname,
+               jid: member && member.jid,
             },
             unread: afterJoin,
          });

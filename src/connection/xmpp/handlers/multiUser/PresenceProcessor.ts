@@ -11,13 +11,13 @@ export default class MultiUserPresenceProcessor {
    constructor(private multiUserContact: MultiUserContact, private xElement, private nickname, type) {
       this.codes = xElement.find('status').map((index, element) => element.getAttribute('code')).get();
 
-      this.processCodes();
-
       if (type === 'unavailable') {
          this.processUnavailable();
       } else {
          this.processNewMember();
       }
+
+      this.processCodes();
 
       this.postReason();
    }

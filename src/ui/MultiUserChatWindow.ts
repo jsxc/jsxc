@@ -78,11 +78,16 @@ export default class MultiUserChatWindow extends ChatWindow {
       let avatarElement = memberElement.find('.jsxc-avatar');
 
       if (jid) {
-         label = jid.bare;
+         label = `${nickname} (${jid.bare})`;
          title = nickname + '\n' + jid.bare;
 
          let contact = this.getAccount().getContact(jid);
-         AvatarSet.get(contact).addElement(avatarElement);
+
+         if (contact) {
+            AvatarSet.get(contact).addElement(avatarElement);
+         } else {
+            AvatarSet.setPlaceholder(avatarElement, nickname);
+         }
       } else {
          label = title = nickname;
 

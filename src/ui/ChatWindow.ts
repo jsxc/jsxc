@@ -16,6 +16,7 @@ import Transcript from '../Transcript'
 import FileTransferHandler from './ChatWindowFileTransferHandler'
 import Attachment from '../Attachment'
 import * as Resizable from 'resizable'
+import { IJID } from '@src/JID.interface';
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -35,7 +36,7 @@ export default class ChatWindow {
 
    private readonly HIGHTLIGHT_DURATION = 600;
 
-   private chatWindowMessages = {};
+   private chatWindowMessages: {[id: string]: ChatWindowMessage} = {};
 
    private attachmentDeposition: Attachment;
 
@@ -104,8 +105,8 @@ export default class ChatWindow {
       return this.contact.getAccount();
    }
 
-   public getContact() {
-      return this.contact;
+   public getContact(jid?: IJID) {
+      return jid ? this.getAccount().getContact(jid) : this.contact;
    }
 
    public getDom() {
