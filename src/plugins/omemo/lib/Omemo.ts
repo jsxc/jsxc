@@ -16,6 +16,7 @@ import { Strophe } from '../../../vendor/Strophe'
 import BundleManager from './BundleManager';
 import IdentityManager from './IdentityManager';
 import Translation from '@util/Translation';
+import Log from '@util/Log';
 
 export default class Omemo {
    private store: Store;
@@ -179,7 +180,11 @@ export default class Omemo {
       let authenticationTag = exportedKey.slice(16);
 
       if (authenticationTag.byteLength < 16) {
-         throw new Error('Authentication tag too short');
+         if (authenticationTag.byteLength > 0) {
+            throw new Error('Authentication tag too short');
+         }
+
+         Log.info(`Authentication tag is only ${authenticationTag.byteLength} byte long`);
       }
 
       if (!encryptedData.payload) {
