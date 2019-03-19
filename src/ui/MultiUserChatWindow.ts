@@ -94,6 +94,10 @@ export default class MultiUserChatWindow extends ChatWindow {
          AvatarSet.setPlaceholder(avatarElement, nickname);
       }
 
+      if (nickname === this.contact.getNickname()) {
+         label = `${nickname} (${Translation.t('you')})`;
+      }
+
       memberElement.find('.jsxc-name').text(label);
       memberElement.attr('title', title);
 
