@@ -6,7 +6,6 @@ import ClientAvatar from './ClientAvatar';
 import RoleAllocator from './RoleAllocator';
 import Log from '@util/Log';
 import Utils from '@util/Utils';
-import Roster from '@ui/Roster';
 
 export default class AccountManager {
    private accounts = {};
@@ -154,8 +153,6 @@ export default class AccountManager {
       this.storage.setItem('accounts', ids);
 
       if (ids.length === 0) {
-         Roster.get().setNoConnection();
-
          Client.getNoticeManager().removeAll();
       }
    }

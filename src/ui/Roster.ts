@@ -4,7 +4,6 @@ import showMultiUserJoinDialog from './dialogs/multiUserJoin'
 import showSettingsDialog from './dialogs/settings'
 import * as CONST from '../CONST'
 import RosterItem from './RosterItem'
-import showLoginBox from './dialogs/loginBox'
 import Menu from './util/Menu'
 import { IContact } from '../Contact.interface'
 import WindowList from './ChatWindowList'
@@ -167,18 +166,6 @@ export default class Roster {
       this.element.addClass('jsxc-status-show');
    }
 
-   public setNoConnection() {
-      let linkElement = $('<a>');
-      linkElement.text('relogin');
-      linkElement.click(<any> showLoginBox);
-
-      let statusElement = $('<p>');
-      statusElement.text('no_connection');
-      statusElement.append(linkElement);
-
-      this.setStatus(statusElement);
-   }
-
    public setEmptyContactList() {
       let statusElement = $('<p>');
       statusElement.text(Translation.t('Your_roster_is_empty_add_'));
@@ -319,7 +306,7 @@ export default class Roster {
          let pointer = $(this);
          let pointerSubscription = pointer.data('subscription');
          let pointerPresence = (pointerSubscription === 'both') ? Presence[pointer.data('presence')] : Presence.offline + 1;
-         let pointerName = pointer.find('.jsxc-name').text();
+         let pointerName = pointer.find('.jsxc-bar__caption__primary').text();
 
          if ((pointerName.toLowerCase() > contact.getName().toLowerCase() && pointerPresence === presence) || pointerPresence > presence) {
 
