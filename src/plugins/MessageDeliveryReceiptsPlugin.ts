@@ -4,6 +4,8 @@ import { AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import * as Namespace from '../connection/xmpp/namespace'
 import { $msg } from '../vendor/Strophe'
+import { IContact } from '@src/Contact.interface';
+import { IMessage } from '@src/Message.interface';
 
 /**
  * XEP-0184: Message Delivery Receipts
@@ -30,11 +32,11 @@ export default class ReceiptPlugin extends AbstractPlugin {
       pluginAPI.addFeature(Namespace.get('RECEIPTS'));
 
       pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor);
+      pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor);
 
       let connection = pluginAPI.getConnection();
 
       connection.registerHandler(this.onReceiptRequest, null, 'message', 'chat');
-      connection.registerHandler(this.onReceipt, null, 'message');
    }
 
    private preSendMessageStanzaProcessor = (message: Message, xmlStanza: Strophe.Builder): Promise<any> => {
@@ -66,27 +68,32 @@ export default class ReceiptPlugin extends AbstractPlugin {
       }
    }
 
-   private onReceipt = (stanza) => {
-      //@REVIEW why are we not able to register a handler with those params?
+   private afterReceiveMessageProcessor = (contact: IContact, message: IMessage, stanza: Element): Promise<{}> => {
       let receivedElement = $(stanza).find('received[xmlns="urn:xmpp:receipts"]');
 
-      if (receivedElement.length !== 1) {
-         return PRESERVE_HANDLER;
+      if (receivedElement.length === 1) {
+         this.onReceipt(contact, receivedElement);
       }
 
-      let receivedId = receivedElement.attr('id');
+      return Promise.resolve([contact, message, stanza]);
+   }
 
-      if (receivedId) {
-         try {
-            let message = new Message(receivedId);
+   private onReceipt = (contact: IContact, receivedElement: JQuery<Element>, tries = 0) => {
+      let receivedAttrId = receivedElement.attr('id');
 
-            message.received();
-         } catch (err) {
-            this.pluginAPI.Log.info('I received an ACK and got the following problem: ', err);
-         }
+      if (!receivedAttrId) {
+         return;
       }
 
-      return PRESERVE_HANDLER;
+      let message = contact.getTranscript().findMessageByAttrId(receivedAttrId);
+
+      if (message) {
+         message.received();
+      } else if (tries < 5) {
+         setTimeout(() => {
+            this.onReceipt(contact, receivedElement, ++tries);
+         }, tries * 200);
+      }
    }
 
    private onReceiptRequest = (stanza: string) => {

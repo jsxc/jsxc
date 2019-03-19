@@ -77,6 +77,14 @@ export default class Transcript {
       }
    }
 
+   public findMessageByAttrId(attrId: string): IMessage {
+      for (let message of this.getGenerator()) {
+         if (message.getAttrId() === attrId) {
+            return message;
+         }
+      }
+   }
+
    private deleteLastMessages() {
       let allowedNumberOfMessages = parseInt(Client.getOption('numberOfMessages'), 10);
       let numberOfMessages = 0;
