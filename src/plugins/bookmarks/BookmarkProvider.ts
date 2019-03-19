@@ -52,7 +52,7 @@ export default class BookmarkProvider extends ContactProvider {
    private contactToBookmark(contact: MultiUserContact): RoomBookmark {
       let id = contact.getJid();
       let alias = contact.hasName() ? contact.getName() : undefined;
-      let nickname = contact.getNicknameObject().getContactNickname();
+      let nickname = contact.getNickname().getContactNickname();
       let autoJoin = contact.isAutoJoin();
 
       return new RoomBookmark(id, alias, nickname, autoJoin);
@@ -134,7 +134,7 @@ export default class BookmarkProvider extends ContactProvider {
 
    private initBookmarkContact(bookmark: RoomBookmark, service: AbstractService): IContact {
       let contact = this.createContact(bookmark.getJid());
-      contact.getNicknameObject().setContactNickname(bookmark.getNickname());
+      contact.getNickname().setContactNickname(bookmark.getNickname());
       contact.setBookmark(true);
       contact.setAutoJoin(bookmark.isAutoJoin());
       contact.setProvider(this);

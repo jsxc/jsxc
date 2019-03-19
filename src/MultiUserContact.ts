@@ -109,7 +109,7 @@ export default class MultiUserContact extends Contact {
       this.setResource(nickname); //@REVIEW do we need the nickname field?
    }
 
-   public getNickname(): string {
+   public getNicknameString(): string {
       return this.data.get('nickname');
    }
 

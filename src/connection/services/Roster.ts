@@ -77,8 +77,8 @@ export default class Roster extends AbstractService {
    }
 
    private sendSubscriptionRequest(jid: IJID) {
-      let nicknameObject = this.account.getContact().getNicknameObject();
-      let nickname = nicknameObject.getNickname();
+      let nicknameObject = this.account.getContact().getNickname();
+      let nickname = nicknameObject.getString();
       let reference = nicknameObject.getNickRef();
       // send subscription request to buddy (trigger onRosterChanged)
       this.send($pres({

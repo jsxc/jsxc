@@ -20,6 +20,8 @@ import { IContact } from './Contact.interface';
 import RosterContactProvider from './RosterContactProvider';
 import ContactManager from './ContactManager';
 
+const nickRef = 'http://jabber.org/protocol/nick';
+
 type ConnectionCallback = (status: number, condition?: string) => void;
 
 export default class Account {
@@ -93,6 +95,17 @@ export default class Account {
       }
 
       this.getContactManager().restoreCache();
+   }
+
+   public setNickname(nickname: string): Promise<Element> {
+      let element = document.createElement('nick');
+
+      $(element)
+          .attr('xmlns', nickRef)
+          .text(nickname);
+
+      this.getStorage().setItem('nickname', nickname);
+      return this.getConnection().getPEPService().publish(nickRef, element);
    }
 
    public getOptions(): Options {

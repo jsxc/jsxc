@@ -39,7 +39,7 @@ export default class MultiUserChatWindow extends ChatWindow {
          }
       });
 
-      this.contact.getNicknameObject().getContactNickname() ? this.enable() : this.disable();
+      this.contact.getNickname().getContactNickname() ? this.enable() : this.disable();
 
       this.contact.registerHook('subject', (newSubject) => {
          this.setBarText(newSubject);

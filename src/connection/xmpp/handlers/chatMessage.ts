@@ -22,10 +22,10 @@ export default class extends AbstractHandler {
 
       let peerJid = new JID(messageElement.getOriginalFrom());
       let peerContact = this.account.getContact(peerJid);
-      let nickname: string = peerContact.getNicknameObject().getNickFromStanza(stanza);
-      let oldName: string = peerContact.getNicknameObject().getNickname();
+      let nickname: string = peerContact.getNickname().getNickFromStanza(stanza);
+      let oldName: string = peerContact.getNickname().getString();
       if ((nickname !== undefined) && (oldName !== nickname)) {
-         peerContact.getNicknameObject().setContactNickname(nickname);
+         peerContact.getNickname().setContactNickname(nickname);
       }
 
       if (typeof peerContact === 'undefined') {

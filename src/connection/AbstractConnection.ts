@@ -134,7 +134,7 @@ abstract class AbstractConnection {
          xmlMsg.c('body').t(plaintextMessage).up();
       }
 
-      let nickname = this.account.getContact().getNicknameObject().getNickname();
+      let nickname = this.account.getContact().getNickname().getString();
 
       if (nickname) {
          xmlMsg.c('nick').t(nickname);

@@ -223,7 +223,7 @@ export default class Contact implements IIdentifiable, IContact {
       return this.transcript.getNumberOfUnreadMessages();
    }
 
-   public getNicknameObject(): Nickname {
+   public getNickname(): Nickname {
       return this.nickname;
    }
 

@@ -8,12 +8,12 @@ export default class extends AbstractHandler {
       let fromJid = new JID(stanza.getAttribute('from'));
       let connection = this.account.getConnection();
       let myJid = connection.getJID();
-      let nicknameObject = this.account.getContact(myJid).getNicknameObject();
+      let nicknameObject = this.account.getContact(myJid).getNickname();
       let nickname: string = nicknameObject.getNickFromStanza(stanza);
-      let oldName: string = nicknameObject.getNickname();
+      let oldName: string = nicknameObject.getString();
 
       if ((nickname !== undefined) && (oldName !== nickname)) {
-         this.account.getContact(fromJid).getNicknameObject().setContactNickname(nickname);
+         this.account.getContact(fromJid).getNickname().setContactNickname(nickname);
       }
 
       if (!fromJid.isServer) {

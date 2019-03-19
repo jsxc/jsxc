@@ -13,18 +13,7 @@ export default class Nickname {
 
    }
 
-   public setNickname(nickname: string): Promise<Element> {
-      let element = document.createElement('nick');
-
-      $(element)
-         .attr('xmlns', nickRef)
-         .text(nickname);
-
-      this.account.getStorage().setItem('nickname', nickname);
-      return this.account.getConnection().getPEPService().publish(nickRef, element);
-   }
-
-   public getNickname(): string {
+   public getString(): string {
       let nickname = this.account.getStorage().getItem('nickname');
       if (!nickname) {
          nickname = this.account.getJID().bare;

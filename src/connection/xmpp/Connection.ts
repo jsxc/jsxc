@@ -16,14 +16,14 @@ export default class XMPPConnection extends AbstractConnection implements IConne
 
    private nickObject: Nickname;
 
-   protected nickRef: string;
+   private nickRef: string;
 
    constructor(account: Account, protected connection) {
       super(account);
       acc = account;
       this.handler = new XMPPHandler(account, connection);
       this.handler.registerHandler();
-      this.nickObject = acc.getContact().getNicknameObject();
+      this.nickObject = acc.getContact().getNickname();
       this.nickRef = this.nickObject.getNickRef();
 
       NS.register('METADATA_NOTIFY', 'urn:xmpp:avatar:metadata+notify');
@@ -41,7 +41,7 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       let nickname: string = element.find('nick[xmlns="' + this.nickRef + '"]').text();
       let peerJID = new JID(element.attr('from'));
       let peer = acc.getContact(peerJID);
-      peer.getNicknameObject().setContactNickname(nickname);
+      peer.getNickname().setContactNickname(nickname);
       return true;
    }
 

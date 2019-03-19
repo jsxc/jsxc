@@ -25,7 +25,7 @@ export enum ContactSubscription {
 
 export interface IContact {
 
-   getNicknameObject(): Nickname;
+   getNickname(): Nickname;
 
    delete();
 

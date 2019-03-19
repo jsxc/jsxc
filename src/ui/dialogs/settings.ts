@@ -133,7 +133,7 @@ class ConnectionSection extends Section {
       contentElement.append(new ListItem('Jabber ID', jid.bare));
       contentElement.append(new ListItem('Resource', jid.resource));
       contentElement.append(new ListItem('BOSH url', this.account.getConnectionUrl()));
-      contentElement.append(new ListItem('Edit Nickname', this.account.getContact().getNicknameObject().getNickname(), changeNicknameActionHandler));
+      contentElement.append(new ListItem('Edit Nickname', this.account.getContact().getNickname().getString(), changeNicknameActionHandler));
       contentElement.append(new ListItem('Change password', undefined, changePasswordActionHandler));
 
       return contentElement.getDOM();
@@ -185,7 +185,7 @@ class NicknamePage extends Page {
 
          let nickname = nicknameElement.find('input').val();
 
-         this.account.getContact().getNicknameObject().setNickname(nickname);
+         this.account.setNickname(nickname);
 
          this.account.getConnection().changeNickname(nickname).then(() => {
             Log.debug('Nickname was changed');
