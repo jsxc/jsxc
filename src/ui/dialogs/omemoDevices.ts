@@ -25,7 +25,30 @@ export default function(contact: IContact, omemo: Omemo) {
 
       insertDevices(peerDevices, identityManager, dom.find('.jsxc-omemo-peerdevices'));
       insertDevices(ownDevices, identityManager, dom.find('.jsxc-omemo-owndevices'));
+
+      if (ownDevices.length > 1) {
+         addCleanUpAction(omemo, dom);
+      }
    });
+}
+
+function addCleanUpAction(omemo: Omemo, dom: JQuery) {
+   let buttonElement = $('<button>');
+   buttonElement.addClass('jsxc-button jsxc-button--default')
+   buttonElement.text(Translation.t('Clean_up_own_devices'));
+   buttonElement.click((ev) => {
+      ev.preventDefault();
+
+      omemo.cleanUpDeviceList().then(localDeviceId => {
+         dom.find('.jsxc-omemo-owndevices').children().not(`[data-device-id="${localDeviceId}"]`).remove();
+      });
+   });
+   buttonElement.appendTo(dom);
+
+   let explanationElement = $('<p>');
+   explanationElement.addClass('jsxc-hint');
+   explanationElement.text(Translation.t('omemo-clean-up-explanation'));
+   explanationElement.appendTo(dom);
 }
 
 async function insertDevices(devices: Device[], identityManager: IdentityManager, listElement) {

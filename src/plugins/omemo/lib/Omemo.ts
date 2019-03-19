@@ -48,6 +48,17 @@ export default class Omemo {
       return this.identityManager;
    }
 
+   public async cleanUpDeviceList() {
+      let localIdentifier = this.store.getLocalDeviceName();
+      let localDeviceId = this.store.getLocalDeviceId();
+
+      this.store.setDeviceList(localIdentifier, [localDeviceId]);
+
+      await this.bundleManager.publishDeviceId(localDeviceId);
+
+      return localDeviceId;
+   }
+
    public storeDeviceList(identifier: string, deviceList: number[]) {
       let ownJid = this.connection.getJID();
 
