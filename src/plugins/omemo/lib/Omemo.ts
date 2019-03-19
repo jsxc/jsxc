@@ -15,6 +15,7 @@ import Device, { Trust } from './Device'
 import { Strophe } from '../../../vendor/Strophe'
 import BundleManager from './BundleManager';
 import IdentityManager from './IdentityManager';
+import Translation from '@util/Translation';
 
 export default class Omemo {
    private store: Store;
@@ -108,13 +109,13 @@ export default class Omemo {
             xmlns: 'urn:xmpp:hints'
          }).up();
 
-         xmlElement.c('body').t('***You received an OMEMO encrypted message***').up();
+         xmlElement.c('body').t('***' + Translation.t('You_received_an_OMEMO_encrypted_message') + '***').up();
 
          message.setEncrypted(true);
 
          return [message, xmlElement];
       }).catch((msg) => {
-         message.setErrorMessage('Message was not send');
+         message.setErrorMessage(Translation.t('Message_was_not_sent'));
          message.setEncrypted(false);
 
          contact.addSystemMessage(typeof msg === 'string' ? msg : msg.toString());

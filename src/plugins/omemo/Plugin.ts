@@ -8,6 +8,7 @@ import ChatWindow from '../../ui/ChatWindow'
 import { NS_BASE, NS_DEVICELIST } from './util/Const'
 import OmemoDevicesDialog from '../../ui/dialogs/omemoDevices'
 import { Trust } from './lib/Device';
+import Translation from '@util/Translation';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -61,11 +62,11 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
       return this.getOmemo().prepare().then(() => {
          if (!this.getOmemo().isSupported(contact)) {
-            throw new Error('Your contact does not support OMEMO');
+            throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
          }
 
          if (!this.getOmemo().isTrusted(contact)) {
-            throw new Error('There are new OMEMO devices');
+            throw new Error(Translation.t('There_are_new_OMEMO_devices'));
          }
 
          contact.setEncryptionState(EncryptionState.UnverifiedEncrypted, OMEMOPlugin.getName());
@@ -109,7 +110,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          }
 
          if (decrypted.trust === Trust.unknown) {
-            message.setErrorMessage('Message received from unknown OMEMO device');
+            message.setErrorMessage(Translation.t('Message_received_from_unknown_OMEMO_device'));
          }
 
          message.setPlaintextMessage(decrypted.plaintext);
