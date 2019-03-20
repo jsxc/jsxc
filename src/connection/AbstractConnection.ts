@@ -14,6 +14,7 @@ import DiscoService from './services/Disco'
 export const STANZA_KEY = 'stanza';
 export const STANZA_IQ_KEY = 'stanzaIQ';
 export const STANZA_JINGLE_KEY = 'stanzaJingle';
+const nickRef = 'http://jabber.org/protocol/nick';
 
 enum Presence {
    online,
@@ -241,6 +242,14 @@ abstract class AbstractConnection {
       let iq = $iq({
          type: 'set'
       });
+
+      let element = document.createElement('nick');
+
+      $(element)
+         .attr('xmlns', nickRef)
+         .text(newNickname);
+
+      this.getPEPService().publish(nickRef, element);
 
       return this.vCardPromise().then(
          function(vCardData) {

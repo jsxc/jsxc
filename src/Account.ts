@@ -97,15 +97,8 @@ export default class Account {
       this.getContactManager().restoreCache();
    }
 
-   public setNickname(nickname: string): Promise<Element> {
-      let element = document.createElement('nick');
-
-      $(element)
-          .attr('xmlns', nickRef)
-          .text(nickname);
-
+   public setNickname(nickname: string) {
       this.getStorage().setItem('nickname', nickname);
-      return this.getConnection().getPEPService().publish(nickRef, element);
    }
 
    public getOptions(): Options {
