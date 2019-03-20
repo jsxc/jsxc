@@ -8,8 +8,7 @@ import { AbstractConnection, Presence, STANZA_IQ_KEY, STANZA_KEY } from '../Abst
 import XMPPJingleHandler from './JingleHandler'
 import Client from '../../Client'
 import Nickname from '@src/Nickname';
-
-let acc;
+import {Strophe} from "@vendor/Strophe";
 
 export default class XMPPConnection extends AbstractConnection implements IConnection {
    private handler: XMPPHandler;
@@ -18,12 +17,14 @@ export default class XMPPConnection extends AbstractConnection implements IConne
 
    private nickRef: string;
 
+   private account: Account;
+
    constructor(account: Account, protected connection) {
       super(account);
-      acc = account;
+      this.account = account;
       this.handler = new XMPPHandler(account, connection);
       this.handler.registerHandler();
-      this.nickObject = acc.getContact().getNickname();
+      this.nickObject = account.getContact().getNickname();
       this.nickRef = this.nickObject.getNickRef();
 
       NS.register('METADATA_NOTIFY', 'urn:xmpp:avatar:metadata+notify');
@@ -40,7 +41,7 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       let element = $(stanza);
       let nickname: string = element.find('nick[xmlns="' + this.nickRef + '"]').text();
       let peerJID = new JID(element.attr('from'));
-      let peer = acc.getContact(peerJID);
+      let peer = this.account.getContact(peerJID);
       peer.getNickname().setContactNickname(nickname);
       return true;
    }
@@ -132,7 +133,7 @@ export default class XMPPConnection extends AbstractConnection implements IConne
    }
 
    private onIncomingStorageStanza(key: string, stanzaString: string) {
-      let stanzaElement = new DOMParser().parseFromString(stanzaString, 'text/xml').documentElement
+      let stanzaElement = new DOMParser().parseFromString(stanzaString, 'text/xml').documentElement;
 
       if ($(stanzaElement).find('parsererror').length > 0) {
          Log.error('Could not parse stanza string from storage.');
@@ -145,7 +146,7 @@ export default class XMPPConnection extends AbstractConnection implements IConne
    }
 
    private onIncomingStorageStanzaIQ(key: string, stanzaString: string) {
-      let stanzaElement = new DOMParser().parseFromString(stanzaString, 'text/xml').documentElement
+      let stanzaElement = new DOMParser().parseFromString(stanzaString, 'text/xml').documentElement;
 
       if ($(stanzaElement).find('parsererror').length > 0) {
          Log.error('Could not parse stanza string from storage.');

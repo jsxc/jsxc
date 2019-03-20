@@ -1,7 +1,10 @@
 import AbstractService from './AbstractService'
-import { IJID } from '../../JID.interface'
+import { IJID } from '@src/JID.interface'
 import * as NS from '../xmpp/namespace'
-import { $pres, $iq } from '../../vendor/Strophe'
+import { $pres, $iq } from '@vendor/Strophe'
+
+let nicknameObject = this.account.getContact().getNickname();
+NS.register('NICK', nicknameObject.getNickRef());
 
 export default class Roster extends AbstractService {
    public getRoster(version?: string): Promise<Element> {
@@ -77,15 +80,13 @@ export default class Roster extends AbstractService {
    }
 
    private sendSubscriptionRequest(jid: IJID) {
-      let nicknameObject = this.account.getContact().getNickname();
       let nickname = nicknameObject.getString();
-      let reference = nicknameObject.getNickRef();
       // send subscription request to buddy (trigger onRosterChanged)
       this.send($pres({
          to: jid.full,
          type: 'subscribe'
       }).c('nick', {
-         xmlns: reference
+         xmlns: NS.get('NICK')
       }).t(nickname));
    }
 }
