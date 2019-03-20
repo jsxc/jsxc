@@ -49,8 +49,8 @@ export default class CapsHandler extends AbstractHandler {
 
                discoInfoRepository.addRelation(from, discoInfo);
             })
-            .catch(() => {
-               Log.warn('Something went wrong')
+            .catch((err) => {
+               Log.warn('Something went wrong during disco retrieval: ', err)
             });
       } else {
          let discoInfo = new DiscoInfo(version);
