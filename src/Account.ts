@@ -20,8 +20,6 @@ import { IContact } from './Contact.interface';
 import RosterContactProvider from './RosterContactProvider';
 import ContactManager from './ContactManager';
 
-const nickRef = 'http://jabber.org/protocol/nick';
-
 type ConnectionCallback = (status: number, condition?: string) => void;
 
 export default class Account {

@@ -46,10 +46,10 @@ export default class MultiUserChatWindow extends ChatWindow {
       })
       this.setBarText(this.contact.getSubject());
 
-      this.contact.registerMemberHook(this.contact.getNickname(), (data) => {
+      this.contact.registerMemberHook(this.contact.getNickname().getString, (data) => {
          this.updatePermissionAttributes(data);
       });
-      this.updatePermissionAttributes(this.contact.getMember(this.contact.getNickname()));
+      this.updatePermissionAttributes(this.contact.getMember(this.contact.getNickname().getString()));
    }
 
    private updatePermissionAttributes(data: {affiliation?: AFFILIATION, role?: ROLE, jid?: JID} = {}) {
@@ -94,7 +94,7 @@ export default class MultiUserChatWindow extends ChatWindow {
          AvatarSet.setPlaceholder(avatarElement, nickname);
       }
 
-      if (nickname === this.contact.getNickname()) {
+      if (nickname === this.contact.getNickname().getString()) {
          label = `${nickname} (${Translation.t('you')})`;
       }
 
