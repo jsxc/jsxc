@@ -3,10 +3,8 @@ import { IJID } from '@src/JID.interface'
 import * as NS from '../xmpp/namespace'
 import { $pres, $iq } from '@vendor/Strophe'
 
-let nicknameObject = this.account.getContact().getNickname();
-NS.register('NICK', nicknameObject.getNickRef());
-
 export default class Roster extends AbstractService {
+
    public getRoster(version?: string): Promise<Element> {
       let iq = $iq({
          type: 'get'
@@ -80,6 +78,9 @@ export default class Roster extends AbstractService {
    }
 
    private sendSubscriptionRequest(jid: IJID) {
+      let nicknameObject = this.account.getContact().getNickname();
+      NS.register('NICK', nicknameObject.getNickRef());
+
       let nickname = nicknameObject.getString();
       // send subscription request to buddy (trigger onRosterChanged)
       this.send($pres({
