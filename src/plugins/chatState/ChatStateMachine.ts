@@ -92,9 +92,9 @@ export default class ChatStateMachine {
       }).then((hasSupport) => {
          if (hasSupport) {
             if (oldState === STATE.COMPOSING && newState === STATE.PAUSED) {
-               this.connection.sendPaused(jid);
+               this.connection.sendPaused(jid, this.contact.getType());
             } else if (oldState !== STATE.COMPOSING && newState === STATE.COMPOSING) {
-               this.connection.sendComposing(jid);
+               this.connection.sendComposing(jid, this.contact.getType());
             }
          }
       });

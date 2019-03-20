@@ -9,6 +9,7 @@ import Translation from '../../util/Translation'
 import * as Namespace from '../../connection/xmpp/namespace'
 import ChatStateConnection from './ChatStateConnection'
 import ChatStateMachine from './ChatStateMachine'
+import { ContactType } from '@src/Contact.interface';
 
 /**
  * XEP-0085: Chat State Notifications
@@ -39,12 +40,13 @@ export default class ChatStatePlugin extends AbstractPlugin {
       pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor)
 
       pluginAPI.registerChatWindowInitializedHook((chatWindow: ChatWindow, contact: Contact) => {
-         new ChatStateMachine(this, chatWindow, contact);
+         if (contact.getType() === ContactType.CHAT) {
+            new ChatStateMachine(this, chatWindow, contact);
+         }
       });
 
       let connection = pluginAPI.getConnection();
 
-      //@TODO groupchat
       connection.registerHandler(this.onChatState, Namespace.get('CHATSTATES'), 'message', 'chat');
    }
 
@@ -64,9 +66,7 @@ export default class ChatStatePlugin extends AbstractPlugin {
    }
 
    private preSendMessageStanzaProcessor = (message: Message, xmlStanza: Strophe.Builder): Promise<any> => {
-      //@TODO groupchat
-      //@TODO is not disabled for jid
-      if (message.getType() === Message.MSGTYPE.CHAT && true) {
+      if (message.getType() === Message.MSGTYPE.CHAT) {
          xmlStanza.c('active', {
             xmlns: Namespace.get('CHATSTATES')
          });
