@@ -65,6 +65,26 @@ export default class Transcript {
       return this.messages[id];
    }
 
+   public *getGenerator() {
+      let message = this.getFirstMessage();
+
+      while (message) {
+         yield message;
+
+         let nextId = message.getNextId();
+
+         message = nextId ? this.getMessage(nextId) : undefined;
+      }
+   }
+
+   public findMessageByAttrId(attrId: string): IMessage {
+      for (let message of this.getGenerator()) {
+         if (message.getAttrId() === attrId) {
+            return message;
+         }
+      }
+   }
+
    private deleteLastMessages() {
       let allowedNumberOfMessages = parseInt(Client.getOption('numberOfMessages'), 10);
       let numberOfMessages = 0;
@@ -138,7 +158,7 @@ export default class Transcript {
 
       this.messages[id] = message;
 
-      if (message.getDirection() === DIRECTION.IN) {
+      if (message.getDirection() !== DIRECTION.OUT && message.isUnread()) {
          let unreadMessageIds = this.properties.get('unreadMessageIds') || [];
          unreadMessageIds.push(id);
          this.properties.set('unreadMessageIds', unreadMessageIds);

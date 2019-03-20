@@ -6,7 +6,7 @@
 <p>{{message}}</p>
 {{/if}}
 
-{{#if primary.cb}}
+{{#if hasPrimary}}
 <button class="jsxc-button jsxc-button--primary jsxc-pull-right">
    {{#if primary.label}}
       {{primary.label}}
@@ -16,7 +16,7 @@
 </button>
 {{/if}}
 
-{{#if option.cb}}
+{{#if hasOption}}
 <button class="jsxc-button jsxc-button--default jsxc-pull-right">
    {{#if option.label}}
       {{option.label}}

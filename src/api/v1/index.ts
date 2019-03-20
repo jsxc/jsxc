@@ -4,16 +4,14 @@ import Roster from '../../ui/Roster'
 import { IPlugin } from '../../plugin/AbstractPlugin'
 import FormWatcher, { SettingsCallback } from '../../FormWatcher'
 import { disconnect } from './disconnect';
+import Translation from '@util/Translation';
 import loginBox from '@ui/dialogs/loginBox';
 
 export { disconnect };
 export { start, startAndPause } from './start'
 export { register } from './register'
+export { enableDebugMode, disableDebugMode, deleteAllData } from './debug'
 export { testBOSHServer } from './testBOSHServer'
-
-export function init(options?): number {
-   return Client.init(options);
-}
 
 export function addPlugin(Plugin: IPlugin) {
    Client.addPlugin(Plugin);
@@ -52,42 +50,6 @@ export function watchLogoutClick(element: JQuery) {
    element.off('click', null, logout).click(logout);
 }
 
-export function enableDebugMode() {
-   let storage = Client.getStorage();
-
-   storage.setItem('debug', true);
-}
-
-export function disableDebugMode() {
-   let storage = Client.getStorage();
-
-   storage.setItem('debug', false);
-}
-
-export function deleteAllData() {
-   if (!Client.isDebugMode()) {
-      Log.warn('This action is only available in debug mode.');
-
-      return 0;
-   }
-
-   let storage = Client.getStorage();
-   let prefix = storage.getPrefix();
-   let prefixRegex = new RegExp('^' + prefix);
-   let backend = storage.getBackend();
-   let keys = Object.keys(backend);
-   let count = 0;
-
-   for (let key of keys) {
-      if (prefixRegex.test(key) && key !== prefix + 'debug') {
-         backend.removeItem(key);
-         count++;
-      }
-   }
-
-   return count;
-}
-
 export function exportAllOptions() {
    let accounts = Client.getAccountManager().getAccounts();
 
@@ -101,6 +63,10 @@ export function exportAllOptions() {
       }, {}),
       [Client.getOptions().getId()]: Client.getOptions().export()
    };
+}
+
+export function translate(str: string, param) {
+   return Translation.t(str, param);
 }
 
 export function showLoginBox(username?: string) {

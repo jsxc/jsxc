@@ -15,6 +15,8 @@ import Device, { Trust } from './Device'
 import { Strophe } from '../../../vendor/Strophe'
 import BundleManager from './BundleManager';
 import IdentityManager from './IdentityManager';
+import Translation from '@util/Translation';
+import Log from '@util/Log';
 
 export default class Omemo {
    private store: Store;
@@ -47,6 +49,17 @@ export default class Omemo {
       return this.identityManager;
    }
 
+   public async cleanUpDeviceList() {
+      let localIdentifier = this.store.getLocalDeviceName();
+      let localDeviceId = this.store.getLocalDeviceId();
+
+      this.store.setDeviceList(localIdentifier, [localDeviceId]);
+
+      await this.bundleManager.publishDeviceId(localDeviceId);
+
+      return localDeviceId;
+   }
+
    public storeDeviceList(identifier: string, deviceList: number[]) {
       let ownJid = this.connection.getJID();
 
@@ -70,6 +83,12 @@ export default class Omemo {
       return this.getBootstrap().prepare();
    }
 
+   public isSupported(contact: Contact): boolean {
+      let devices = this.getDevices(contact);
+
+      return devices.length > 0;
+   }
+
    public isTrusted(contact: Contact): boolean {
       let peer = this.getPeer(contact.getJid());
 
@@ -77,7 +96,7 @@ export default class Omemo {
    }
 
    public getDevices(contact?: Contact): Device[] {
-      let peer;
+      let peer: Peer;
 
       if (contact) {
          peer = this.getPeer(contact.getJid());
@@ -102,16 +121,16 @@ export default class Omemo {
             xmlns: 'urn:xmpp:hints'
          }).up();
 
-         xmlElement.c('body').t('***You received an OMEMO encrypted message***').up();
+         xmlElement.c('body').t('***' + Translation.t('You_received_an_OMEMO_encrypted_message') + '***').up();
 
          message.setEncrypted(true);
 
          return [message, xmlElement];
       }).catch((msg) => {
-         message.setErrorMessage('Message was not send');
+         message.setErrorMessage(Translation.t('Message_was_not_sent'));
          message.setEncrypted(false);
 
-         contact.addSystemMessage(msg);
+         contact.addSystemMessage(typeof msg === 'string' ? msg : msg.toString());
 
          throw msg;
       });
@@ -161,7 +180,11 @@ export default class Omemo {
       let authenticationTag = exportedKey.slice(16);
 
       if (authenticationTag.byteLength < 16) {
-         throw new Error('Authentication tag too short');
+         if (authenticationTag.byteLength > 0) {
+            throw new Error('Authentication tag too short');
+         }
+
+         Log.info(`Authentication tag is only ${authenticationTag.byteLength} byte long`);
       }
 
       if (!encryptedData.payload) {

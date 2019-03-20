@@ -5,6 +5,7 @@ import Avatar from '../Avatar'
 import AvatarUI from '../ui/AvatarSet'
 import JID from '../JID'
 import Log from '../util/Log';
+import { ContactType } from '@src/Contact.interface';
 
 /**
  * XEP-0153: vCard-Based Avatars
@@ -39,21 +40,23 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
       let from = new JID($(stanza).attr('from'));
       let xVCard = $(stanza).find('x[xmlns="vcard-temp:x:update"]');
 
-      // @REVIEW groupchat? error?
-
       if (xVCard.length > 0) {
          let photo = xVCard.find('photo');
 
          if (photo.length > 0) {
+            let contact = this.pluginAPI.getContact(from);
+
+            if (contact && contact.getType() === ContactType.GROUPCHAT && from.resource) {
+               return true;
+            }
+
             let sha1OfAvatar = photo.text();
 
             this.getStorage().setItem(from.bare, sha1OfAvatar); //@REVIEW use this as trigger for all tabs?
 
-            let contact = this.pluginAPI.getContact(from);
-
             if (!contact) {
                this.pluginAPI.Log.warn('No contact found for', from);
-               return;
+               return true;
             }
 
             let avatarUI = AvatarUI.get(contact);

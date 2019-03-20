@@ -1,6 +1,6 @@
 import Dialog from '../Dialog'
 import Client from '../../Client'
-import { start } from '../../api/v1'
+import { start } from '../../api/v1/index'
 import { usernameToJabberId } from '@src/FormWatcher';
 let loginTemplate = require('../../../template/loginBox.hbs');
 

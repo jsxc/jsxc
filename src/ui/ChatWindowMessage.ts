@@ -1,6 +1,5 @@
 import { IMessage, DIRECTION } from '../Message.interface'
 import DateTime from './util/DateTime'
-import JID from '../JID'
 import ChatWindow from './ChatWindow'
 import AvatarSet from './AvatarSet'
 import Log from '../util/Log'
@@ -144,7 +143,7 @@ export default class ChatWindowMessage {
       let sender = this.message.getSender();
       let title = sender.name;
 
-      if (sender.jid instanceof JID) {
+      if (sender.jid && sender.jid.bare) {
          title += '\n' + sender.jid.bare;
       }
 
@@ -162,6 +161,14 @@ export default class ChatWindowMessage {
 
       if (nextMessage && nextMessage.getSender().name === sender.name) {
          avatarElement.css('visibility', 'hidden');
+
+         return;
+      }
+
+      let contact = sender.jid && this.chatWindow.getContact(sender.jid);
+
+      if (contact) {
+         AvatarSet.get(contact).addElement(avatarElement);
       } else {
          AvatarSet.setPlaceholder(avatarElement, sender.name, sender.jid);
       }

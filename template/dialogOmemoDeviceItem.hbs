@@ -1,4 +1,4 @@
-<div class="jsxc-omemo-device">
+<div class="jsxc-omemo-device" data-device-id="{{id}}">
     {{#unless isCurrentDevice}}
     <div class="jsxc-omemo-device-last-used"></div>
     {{/unless}}
@@ -6,10 +6,9 @@
     <div class="jsxc-omemo-device-fingerprint jsxc-fingerprint">{{fingerprint}}</div>
     <div class="jsxc-omemo-device-trust" data-trust="{{trust}}">{{trust}}</div>
     <div class="jsxc-omemo-device-action">
-        {{#if trustIsUnknown}}
-            <a href="#" data-action="recognize">{{t "Recognized"}}</a>&nbsp;
-        {{/if}}
-        {{#if trustIsUnknownOrRecognized}}
+        {{#if showControls}}
+            <a href="#" data-action="ignore">{{t "Ignore"}}</a>&nbsp;
+            <a href="#" data-action="recognize">{{t "Recognize"}}</a>&nbsp;
             <a href="#" data-action="verify">{{t "Verify"}}</a>
         {{/if}}
     </div>

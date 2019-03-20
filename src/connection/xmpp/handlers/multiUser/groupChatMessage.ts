@@ -9,12 +9,13 @@ import AbstractHandler from '../../AbstractHandler'
 
 export default class extends AbstractHandler {
    public processStanza(stanza: Element) {
-      // let messageId = stanza.getAttribute('id');
-
       let messageElement = $(stanza);
       let from = new JID(stanza.getAttribute('from'));
       let subjectElement = messageElement.find('subject');
       let bodyElement = messageElement.find('body:first');
+      let originId = messageElement.find('origin-id[xmlns="urn:xmpp:sid:0"]').attr('id');
+      let stanzaId = messageElement.find('stanza-id[xmlns="urn:xmpp:sid:0"]').attr('id');
+      let attrId = messageElement.attr('id');
       let body = bodyElement.text();
       let nickname = from.resource;
 
@@ -47,22 +48,50 @@ export default class extends AbstractHandler {
       if (body !== '') {
          let delay = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
          let sendDate = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
+         let afterJoin = sendDate > contact.getJoinDate();
+         let direction = Message.DIRECTION.IN;
+
+         if (contact.getNickname() === nickname) {
+            if (afterJoin) {
+               Log.debug('Ignore my own groupchat messages');
+
+               return this.PRESERVE_HANDLER;
+            }
+
+            direction = Message.DIRECTION.PROBABLY_OUT;
+         }
 
          if (contact.getNickname().getContactNickname() === nickname && sendDate > contact.getJoinDate()) {
             Log.debug('Ignore my own groupchat messages');
+         let transcript = contact.getTranscript();
 
-            return this.PRESERVE_HANDLER;
+         if (!afterJoin) {
+            if (Message.exists(originId) || Message.exists(stanzaId)) {
+               return this.PRESERVE_HANDLER;
+            }
+
+            for (let message of transcript.getGenerator()) {
+               if (message.getAttrId() === attrId && message.getPlaintextMessage() === body) {
+                  return this.PRESERVE_HANDLER;
+               }
+            }
          }
 
+         let member = contact.getMember(nickname);
+
          let message = new Message({
+            uid: stanzaId || originId,
+            attrId,
             peer: from,
-            direction: Message.DIRECTION.IN,
+            direction,
             plaintextMessage: body,
             // htmlMessage: htmlBody.html(),
             stamp: sendDate.getTime(),
             sender: {
-               name: nickname
-            }
+               name: nickname,
+               jid: member && member.jid,
+            },
+            unread: afterJoin,
          });
 
          let pipe = this.account.getPipe('afterReceiveGroupMessage');
@@ -71,25 +100,6 @@ export default class extends AbstractHandler {
             contact.getTranscript().pushMessage(message);
          });
       }
-
-      // var subjectElement = messageElement.find('subject');
-      //
-      // if (subjectElement.length > 0) {
-      //    var roomdata = jsxc.storage.getUserItem('buddy', room);
-      //
-      //    roomdata.subject = subjectElement.text();
-      //
-      //    jsxc.storage.setUserItem('buddy', room, roomdata);
-      //
-      //    jsxc.gui.window.postMessage({
-      //       bid: room,
-      //       direction: jsxc.Message.SYS,
-      //       msg: $.t('changed_subject_to', {
-      //          nickname: nickname,
-      //          subject: roomdata.subject
-      //       })
-      //    });
-      // }
 
       return this.PRESERVE_HANDLER;
    }

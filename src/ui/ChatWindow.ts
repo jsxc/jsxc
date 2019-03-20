@@ -16,6 +16,7 @@ import Transcript from '../Transcript'
 import FileTransferHandler from './ChatWindowFileTransferHandler'
 import Attachment from '../Attachment'
 import * as Resizable from 'resizable'
+import { IJID } from '@src/JID.interface';
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -35,7 +36,7 @@ export default class ChatWindow {
 
    private readonly HIGHTLIGHT_DURATION = 600;
 
-   private chatWindowMessages = {};
+   private chatWindowMessages: {[id: string]: ChatWindowMessage} = {};
 
    private attachmentDeposition: Attachment;
 
@@ -104,8 +105,8 @@ export default class ChatWindow {
       return this.contact.getAccount();
    }
 
-   public getContact() {
-      return this.contact;
+   public getContact(jid?: IJID) {
+      return jid ? this.getAccount().getContact(jid) : this.contact;
    }
 
    public getDom() {
@@ -317,15 +318,6 @@ export default class ChatWindow {
       );
 
       elementHandler.add(
-         this.element.find('.jsxc-send-file')[0],
-         function() {
-            $('body').click();
-
-            // jsxc.gui.window.sendFile(bid);
-         }
-      );
-
-      elementHandler.add(
          this.element.find('.jsxc-share-screen')[0],
          (ev) => {
             ev.stopPropagation();
@@ -427,7 +419,8 @@ export default class ChatWindow {
          direction: Message.DIRECTION.OUT,
          type: this.contact.getType(),
          plaintextMessage: messageString,
-         attachment: this.attachmentDeposition
+         attachment: this.attachmentDeposition,
+         unread: false,
       });
 
       this.clearAttachment();
@@ -622,13 +615,11 @@ export default class ChatWindow {
 
          menu.addEntry(label, () => {
             //@TODO show spinner
-            try {
-               plugin.toggleTransfer(this.contact);
-            } catch (err) {
+            plugin.toggleTransfer(this.contact).catch(err => {
                Log.warn('Toggle transfer error:', err);
 
                this.getContact().addSystemMessage(err.toString());
-            }
+            });
          });
       }
 

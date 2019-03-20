@@ -141,7 +141,7 @@ export class PubSubService extends AbstractService {
          fields: [{
             type: 'hidden',
             name: 'FORM_TYPE',
-            values: [NS.get('PUBSUB_NODE_CONFIG')]
+            values: [NS.get('PUBSUB_PUBLISH_OPTIONS')]
          }, {
             name: 'pubsub#persist_items',
             values: ['1']

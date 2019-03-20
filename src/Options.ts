@@ -58,7 +58,15 @@ export default class Options {
          return;
       }
 
-      let optionData = await Options.defaults.loadOptions(username, password);
+      let optionData;
+
+      try {
+         optionData = await Options.defaults.loadOptions(username, password);
+      } catch (err) {
+         Log.warn('Error while loading options', err);
+
+         return;
+      }
 
       for (let id in optionData) {
          if (id !== 'client' && id !== 'current' && (jid && id !== jid.bare) && !Client.getAccountManager().getAccount(id)) {

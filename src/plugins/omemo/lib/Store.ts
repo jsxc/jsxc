@@ -15,6 +15,8 @@ const PREFIX_SIGNED_PREKEY = '25519KeysignedKey:';
 const PREFIX_TRUST = 'trust:';
 const PREFIX_DEVICE_LIST = 'deviceList:';
 
+const KEY_DISABLED_DEVICES = 'disabledDevices';
+
 export default class Store {
 
    private signalStore: SignalStore;
@@ -89,7 +91,7 @@ export default class Store {
       return this.put('published', published);
    }
 
-   public getDeviceList(deviceName: string) {
+   public getDeviceList(deviceName: string): number[] {
       return this.get(PREFIX_DEVICE_LIST + deviceName, []);
    }
 
@@ -152,6 +154,33 @@ export default class Store {
       return new IdentityKey(data);
    }
 
+   public disable(identifier: Address) {
+      let disabledDevices: number[] = this.storage.getItem(KEY_DISABLED_DEVICES, identifier.getName()) || [];
+
+      if (disabledDevices.indexOf(identifier.getDeviceId()) < 0) {
+         disabledDevices.push(identifier.getDeviceId());
+
+         this.storage.setItem(KEY_DISABLED_DEVICES, identifier.getName(), disabledDevices);
+      }
+   }
+
+   public enable(identifier: Address) {
+      let disabledDevices: number[] = this.storage.getItem(KEY_DISABLED_DEVICES, identifier.getName()) || [];
+      let index = disabledDevices.indexOf(identifier.getDeviceId());
+
+      if (index > -1) {
+         disabledDevices.slice(index, 1);
+
+         this.storage.setItem(KEY_DISABLED_DEVICES, identifier.getName(), disabledDevices);
+      }
+   }
+
+   public isDisabled(identifier: Address) {
+      let disabledDevices: number[] = this.storage.getItem(KEY_DISABLED_DEVICES, identifier.getName()) || [];
+
+      return disabledDevices.indexOf(identifier.getDeviceId()) > -1;
+   }
+
    public getTrust(identifier: Address): Trust {
       let trustMatrix = this.getTrustMatrix(identifier);
       let fingerprint = this.getFingerprint(identifier);
@@ -162,6 +191,10 @@ export default class Store {
 
       if (fingerprint && trustMatrix[Trust.recognized].indexOf(fingerprint) >= 0) {
          return Trust.recognized;
+      }
+
+      if (fingerprint && trustMatrix[Trust.ignored].indexOf(fingerprint) >= 0) {
+         return Trust.ignored;
       }
 
       return Trust.unknown;
@@ -186,6 +219,7 @@ export default class Store {
       let trustMatrix = this.get(PREFIX_TRUST + identifier.getName()) || {
          [Trust.confirmed]: [],
          [Trust.recognized]: [],
+         [Trust.ignored]: [],
       };
 
       return trustMatrix;

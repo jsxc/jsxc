@@ -138,11 +138,11 @@ export default class MultiUserStatusCodeHandler {
 function showInstantOrConfigurationDialog(multiUserContact: MultiUserContact) {
    return new Promise((resolve, reject) => {
       showSelectionDialog({
-         header: Translation.t('Room_creation'),
+         header: Translation.t('Room_creation') + ` (${multiUserContact.getName()})`,
          message: Translation.t('Do_you_want_to_change_the_default_room_configuration'),
          primary: {
             label: Translation.t('Default'),
-            cb() {
+            cb: () => {
                multiUserContact.setRoomConfiguration(MultiUserContact.INSTANT_ROOMCONFIG);
 
                let instantRoomPromise = multiUserContact.createInstantRoom();
@@ -152,7 +152,7 @@ function showInstantOrConfigurationDialog(multiUserContact: MultiUserContact) {
          },
          option: {
             label: Translation.t('Change'),
-            cb() {
+            cb: () => {
                let roomConfigurationPromise = showRoomConfigurationDialog(multiUserContact);
 
                resolve(roomConfigurationPromise);

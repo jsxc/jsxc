@@ -3,7 +3,7 @@ import Session from './Session';
 import EncryptedDeviceMessage from '../model/EncryptedDeviceMessage';
 import Store from './Store';
 
-export enum Trust { unknown, recognized, confirmed };
+export enum Trust { unknown, recognized, confirmed, ignored };
 
 export default class Device {
 
@@ -29,8 +29,20 @@ export default class Device {
       return currentDeviceAddress.equals(this.address);
    }
 
+   public enable() {
+      this.store.enable(this.address);
+   }
+
+   public disable() {
+      this.store.disable(this.address);
+   }
+
+   public isDisabled() {
+      return this.store.isDisabled(this.address);
+   }
+
    public getTrust(): Trust {
-      return this.store.getTrust(this.address);
+      return this.isDisabled() ? Trust.ignored : this.store.getTrust(this.address);
    }
 
    public setTrust(trust: Trust) {

@@ -1,4 +1,3 @@
-//import {} from '../handler'
 import * as NS from '../namespace'
 import Log from '../../../util/Log'
 import JID from '../../../JID'
@@ -12,7 +11,7 @@ import { FUNCTION } from '../../../Notice'
 export default class extends AbstractHandler {
 
    public processStanza(stanza: Element) {
-      let messageElement;
+      let messageElement: MessageElement;
 
       try {
          messageElement = new MessageElement(stanza);
@@ -20,7 +19,7 @@ export default class extends AbstractHandler {
          return this.PRESERVE_HANDLER;
       }
 
-      let peerJid = new JID(messageElement.getOriginalFrom());
+      let peerJid = new JID(messageElement.getPeer());
       let peerContact = this.account.getContact(peerJid);
       let nickname: string = peerContact.getNickname().getNickFromStanza(stanza);
       let oldName: string = peerContact.getNickname().getString();
@@ -45,8 +44,8 @@ export default class extends AbstractHandler {
          plaintextMessage: messageElement.getPlaintextBody(),
          htmlMessage: messageElement.getHtmlBody().html(),
          forwarded: messageElement.isForwarded(),
-         stamp: messageElement.getTime(),
-         unread: true //@REVIEW carbon copy?
+         stamp: messageElement.getTime().getTime(),
+         unread: messageElement.isIncoming(),
       });
 
       let pipe = this.account.getPipe('afterReceiveMessage');
@@ -54,6 +53,8 @@ export default class extends AbstractHandler {
       pipe.run(peerContact, message, messageElement.get(0)).then(([contact, message]) => {
          if (message.getPlaintextMessage() || message.getHtmlMessage()) {
             contact.getTranscript().pushMessage(message);
+         } else {
+            message.delete();
          }
       });
 
@@ -103,6 +104,10 @@ class MessageElement {
 
       let carbonStanza = $(stanza).find('> ' + NS.getFilter('CARBONS'));
 
+      if (carbonStanza.get(0) !== forwardedStanza.parent().get(0)) {
+         throw new Error('Forwarded message is not part of carbon copy');
+      }
+
       this.element = forwardedStanza.find('> message');
       this.forwarded = true;
 
@@ -128,6 +133,10 @@ class MessageElement {
       return this.carbon;
    }
 
+   public isIncoming() {
+      return this.direction === Message.DIRECTION.IN;
+   }
+
    public find(selector) {
       return this.element.find(selector);
    }
@@ -148,8 +157,16 @@ class MessageElement {
       return this.element.attr('to');
    }
 
+   public getPeer() {
+      if (this.isCarbon() && this.getDirection() === Message.DIRECTION.OUT) {
+         return this.getTo();
+      } else {
+         return this.getFrom();
+      }
+   }
+
    public getOriginalFrom() {
-      return this.isCarbon() ? this.getFrom() : this.originalElement.attr('from');
+      return this.originalElement.attr('from');
    }
 
    public getOriginalTo() {
@@ -178,7 +195,7 @@ class MessageElement {
       let body = Utils.removeHTML(this.element.find('> body').text());
 
       if (this.forwarded && !this.carbon) {
-         return `${this.getOriginalFrom()} ${Translation.t('to')} ${this.getOriginalFrom()} "${body}"`;
+         return `${this.getOriginalFrom()} ${Translation.t('to')} ${this.getOriginalTo()} "${body}"`;
       }
 
       return body;

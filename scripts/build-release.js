@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const args = {
    mode: 'production',
+   release: process.argv.indexOf('--release') > 1,
 };
 const config = require('../webpack.config.js')(undefined, args);
 const version = JSON.parse(config.plugins[config.plugins.length - 2].definitions['__VERSION__']);
@@ -18,7 +19,7 @@ async function createRelease() {
    console.log(`I'm now building JSXC version ${version}.`.verbose);
 
    await createBuild();
-   let filePath = await createArchive(version);
+   let filePath = await createArchive('jsxc-' + version);
    await createSignature(filePath);
 }
 

@@ -27,7 +27,9 @@ export default class NotificationPlugin extends AbstractPlugin {
    private afterReceiveMessageProcessor = (contact: Contact, message: Message): Promise<any> => {
       if (message.getPlaintextMessage() || message.getAttachment()) {
          Notification.notify({
-            title: Translation.t('New_message_from') + ' ' + contact.getName(),
+            title: Translation.t('New_message_from', {
+               name: contact.getName(),
+            }),
             message: message.getPlaintextMessage(),
             soundFile: SOUNDS.MSG,
             source: contact

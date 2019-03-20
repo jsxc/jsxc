@@ -12,7 +12,6 @@
             classes="jsxc-bar__action-entry jsxc-menu--drop-top-right jsxc-menu--light jsxc-menu-settings"
             button-classes="jsxc-menu__more--light jsxc-icon jsxc-icon--more-light jsxc-icon--clickable"}}
             <li class="jsxc-clear">{{t "clear_history"}}</li>
-            <li class="jsxc-send-file">{{t "Send_file"}}</li>
             <li class="jsxc-share-screen">{{t "Share_screen"}}</li>
          {{/menu}}
 
@@ -34,7 +33,7 @@
                     classes="jsxc-menu--emoticons jsxc-shrink--no jsxc-menu--dark jsxc-menu--drop-bottom-left"
                     button-classes="jsxc-icon jsxc-icon--emoticon jsxc-icon--clickable"}}
             <textarea class="jsxc-message-input" placeholder="{{t "Message"}}"></textarea>
-            <div class="jsxc-file-transfer">
+            <div class="jsxc-file-transfer" title="{{t "Send_file"}}">
                <label><input type="file" name="files" /><label>
             </div>
             {{> menu

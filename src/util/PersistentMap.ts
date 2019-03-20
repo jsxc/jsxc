@@ -4,6 +4,12 @@ import IStorage from '@src/Storage.interface';
 
 export default class PersistentMap {
 
+   public static getData(storage: IStorage, ...identifier: string[]) {
+      let key = storage.generateKey.apply(storage, identifier);
+
+      return storage.getItem(key) || {};
+   }
+
    private map = {};
 
    private key: string;

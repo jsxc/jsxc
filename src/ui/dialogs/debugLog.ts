@@ -1,4 +1,6 @@
 import Dialog from '../Dialog'
+import Log from '@util/Log';
+import Utils from '@util/Utils';
 
 let debugLogTemplate = require('../../../template/debugLog.hbs');
 
@@ -9,15 +11,18 @@ export default function() {
 
    let dialog = new Dialog(content);
    dialog.open();
+
+   let logs = Log.getLogs();
+
+   dialog.getDom().find('.jsxc-log').append(`<p>${logs.map(log => Utils.escapeHTML(log)).join('<br>')}</p>`);
 }
 
 function getUserInformation() {
    let userInfo = [];
 
    if (typeof navigator !== 'undefined') {
-      let key;
-      for (key in navigator) {
-         if (typeof navigator[key] === 'string') {
+      for (let key in navigator) {
+         if (typeof navigator[key] === 'string' && navigator[key]) {
             userInfo.push({
                key,
                value: navigator[key]
@@ -26,12 +31,15 @@ function getUserInformation() {
       }
    }
 
-   if ($.fn && $.fn.jquery) {
-      userInfo.push({
-         key: 'jQuery',
-         value: $.fn.jquery
-      });
-   }
+   userInfo.push({
+      key: 'jQuery',
+      value: ($.fn && $.fn.jquery) ? $.fn.jquery : 'none'
+   });
+
+   userInfo.push({
+      key: 'jQuery UI',
+      value: ((<any> $).ui && (<any> $).ui.version) ? (<any> $).ui.version : 'none'
+   });
 
    if (window.screen) {
       userInfo.push({

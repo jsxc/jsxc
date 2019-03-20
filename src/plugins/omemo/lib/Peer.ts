@@ -5,6 +5,7 @@ import Address from '../vendor/Address';
 import BundleManager from './BundleManager';
 import Session from './Session';
 import EncryptedDeviceMessage from '../model/EncryptedDeviceMessage';
+import Translation from '@util/Translation';
 
 const MAX_PADDING = 10;
 const PADDING_CHARACTER = '​\u200B';
@@ -25,15 +26,19 @@ export default class Peer {
       let remoteDeviceIds = this.store.getDeviceList(this.deviceName);
 
       if (remoteDeviceIds.length === 0) {
-         throw new Error('Your contact does not support OMEMO.');
+         throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
       }
 
       if (this.getTrust() === Trust.unknown) {
-         throw new Error('There are new devices for your contact.');
+         throw new Error(Translation.t('There_are_new_devices_for_your_contact'));
+      }
+
+      if (this.getTrust() === Trust.ignored) {
+         throw new Error(Translation.t('You_ignore_all_devices_of_your_contact'));
       }
 
       if (localPeer.getTrust() === Trust.unknown) {
-         throw new Error('I found new devices from you.');
+         throw new Error(Translation.t('I_found_new_devices_from_you'));
       }
 
       while (plaintext.length < MAX_PADDING) {
@@ -42,7 +47,7 @@ export default class Peer {
 
       let aes = await AES.encrypt(plaintext);
       let devices = [...this.getDevices(), ...localPeer.getDevices()];
-      let promises = devices.map(device => device.encrypt(aes.keydata));
+      let promises = devices.filter(device => device.getTrust() !== Trust.ignored).map(device => device.encrypt(aes.keydata));
 
       let keys = await Promise.all(promises);
 
@@ -81,7 +86,11 @@ export default class Peer {
          return Trust.recognized;
       }
 
-      return Trust.confirmed;
+      if (trust.indexOf(Trust.confirmed) >= 0) {
+         return Trust.confirmed;
+      }
+
+      return Trust.ignored;
    }
 
    public getDevices(): Device[] {

@@ -23,7 +23,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - option to disable all plugins
 - highlight quotations
 - show notice if offline contacts are hidden
+- show notice if contact list is empty
 - prepared multi account support (still experimental)
+- [#512](https://github.com/jsxc/jsxc/issues/512) add option to specify storage backend
+- show MUC avatars
+- show mute icon in roster if notifications are muted
 
 ### Fixed
 - video calls can now be initiated from any tab
@@ -35,6 +39,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - use Consistent Color Generation ([XEP-0392])
 - use more natural bounce animation for notice icon
+- use object based public API
+- use custom resource with jsxc prefix as default resource
 
 ### Developer notes
 - [Typescript], [Webpack], [Handlebars], [Karma], [Mocha], [Chai] and [Sinon]
@@ -45,6 +51,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - API to add roster menu entries (`jsxc.addMenuEntry()`)
 - API to test BOSH server (`jsxc.testBOSHServer()`)
 - use [SASS guidelines] and [BEM]-like style syntax
+- add commit lint and require [Conventional Commits]
 
 ### Removed/Pending
 - Jingle file transfer
@@ -62,6 +69,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 [XEP-0106]: https://xmpp.org/extensions/xep-0106.html
 [XEP-0249]: https://xmpp.org/extensions/xep-0249.html
 [XEP-0384]: https://xmpp.org/extensions/xep-0384.html
+[Conventional Commits]: https://www.conventionalcommits.org
 
 ## 3.1.1 - 2017-02-14
 ### Fixed

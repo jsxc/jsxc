@@ -26,8 +26,8 @@
   text-transform: uppercase;
 }
 
-.jsxc-separator {
-  border-top: 1px solid $separator;
+.jsxc-hint {
+  opacity: 0.7;
 }
 
 .jsxc-max-width {
@@ -77,6 +77,7 @@
 }
 
 ul.jsxc-vcard {
+  clear: both;
   min-width: 400px;
 
   ul {
@@ -85,7 +86,17 @@ ul.jsxc-vcard {
 
   li {
     cursor: default !important;
+
+    &.jsxc-separator {
+      margin-bottom: 1em;
+    }
   }
+}
+
+.jsxc-avatar.jsxc-vcard {
+  height: 100px;
+  margin-bottom: 10px;
+  width: 100px;
 }
 
 //  Spot which is attached to xmpp: uris
@@ -148,14 +159,6 @@ ul.jsxc-vcard {
   filter: grayscale(100%);
 }
 
-img.jsxc-vcard {
-  border: 5px solid $white;
-  border-radius: 2px;
-  float: right;
-  max-height: 200px;
-  max-width: 200px;
-}
-
 .jsxc-alert {
   border: 1px solid transparent;
   border-radius: 4px;
@@ -167,4 +170,35 @@ img.jsxc-vcard {
     border-color: #faebcc;
     color: #8a6d3b;
   }
+}
+
+.jsxc-user-information {
+  dl {
+    display: flex;
+    flex-flow: row wrap;
+    max-width: 500px;
+  }
+
+  dt {
+    flex-basis: 30%;
+    font-weight: bold;
+    padding: 0.3em 1em;
+
+    &::after {
+      content: ":";
+    }
+  }
+
+  dd {
+    flex-basis: 70%;
+    flex-grow: 1;
+    margin: 0;
+    padding: 0.3em 1em;
+  }
+}
+
+.jsxc-log {
+  height: 300px;
+  overflow: auto;
+  width: 500px;
 }

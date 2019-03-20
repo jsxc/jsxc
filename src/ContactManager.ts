@@ -39,6 +39,7 @@ export default class ContactManager {
       let cachedIds: string[] = session.getItem(KEY_CONTACTS) || [];
 
       cachedIds.forEach((id) => this.added(id));
+      cachedIds.forEach((id) => this.triggerAddedHook(id));
 
       session.registerHook(KEY_CONTACTS, (newValue, oldValue, key) => {
          if (key !== KEY_CONTACTS) {
@@ -50,6 +51,7 @@ export default class ContactManager {
          let deletedContactIds = diff.deletedValues;
 
          newContactIds.forEach(id => this.added(id));
+         newContactIds.forEach(id => this.triggerAddedHook(id));
 
          deletedContactIds.forEach(id => this.deleted(id));
       });
@@ -134,8 +136,22 @@ export default class ContactManager {
       }
 
       this.contacts[contact.getId()] = contact;
+   }
 
-      this.hookRepository.trigger(EVENT_NEW, contact);
+   /**
+    * This function should always be called after a contact was added (this.added).
+    * It can't be part of the added function, because if multiple contacts are restored,
+    * it could result into failing dependencies. E.g. in a muc room you need the contact
+    * object of every member.
+    *
+    * @param id contact id
+    */
+   private triggerAddedHook(id: string) {
+      let contact = this.contacts[id];
+
+      if (contact) {
+         this.hookRepository.trigger(EVENT_NEW, contact);
+      }
    }
 
    private getProviderById(id: string): ContactProvider {

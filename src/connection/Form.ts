@@ -13,16 +13,16 @@ import ReportField from './FormReportedField';
 
 const NAMESPACE = 'jabber:x:data';
 
-type TYPE = 'cancel' | 'form' | 'result' | 'submit';
+type TYPE = 'cancel' | 'form' | 'result' | 'submit' | 'hidden';
 
 //@REVIEW xss
 
 export default class Form {
-   private ALLOWED_TYPES = ['cancel', 'form', 'result', 'submit'];
+   private ALLOWED_TYPES = ['cancel', 'form', 'result', 'submit', 'hidden'];
 
    public static fromXML(stanza) {
       let stanzaElement = $(stanza);
-      let xElement = stanzaElement.attr('xmlns') === NAMESPACE && stanzaElement[0].tagName === 'x' ? stanzaElement : stanzaElement.find('x[xmlns="jabber:x:data"]');
+      let xElement = stanzaElement.attr('xmlns') === NAMESPACE && stanzaElement[0].tagName.toUpperCase() === 'X' ? stanzaElement : stanzaElement.find('x[xmlns="jabber:x:data"]');
       let type = xElement.attr('type');
       let instructions = xElement.find('>instructions').text();
       let title = xElement.find('>title').text();

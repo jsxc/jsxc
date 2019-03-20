@@ -1,4 +1,4 @@
-jsxc.init({
+let jsxc = new JSXC({
    loadConnectionOptions: (username, password) => {
       return Promise.resolve({
          xmpp: {

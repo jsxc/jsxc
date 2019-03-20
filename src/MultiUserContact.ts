@@ -9,28 +9,28 @@ import { ContactSubscription } from './Contact.interface'
 import { IMUCService } from '@connection/Connection.interface';
 import { IJID } from './JID.interface';
 
-// const AFFILIATION = {
-//    ADMIN: 'admin',
-//    MEMBER: 'member',
-//    OUTCAST: 'outcast',
-//    OWNER: 'owner',
-//    NONE: 'none'
+export const enum AFFILIATION {
+   ADMIN = 'admin',
+   MEMBER = 'member',
+   OUTCAST = 'outcast',
+   OWNER = 'owner',
+   NONE = 'none'
+};
+export const enum ROLE {
+   MODERATOR = 'moderator',
+   PARTICIPANT = 'participant',
+   VISITOR = 'visitor',
+   NONE = 'none'
+};
+// const enum ROOMSTATE {
+//    INIT,
+//    ENTERED,
+//    EXITED,
+//    AWAIT_DESTRUCTION,
+//    DESTROYED,
 // };
-// const ROLE = {
-//    MODERATOR: 'moderator',
-//    PARTICIPANT: 'participant',
-//    VISITOR: 'visitor',
-//    NONE: 'none'
-// };
-// const ROOMSTATE = {
-//    INIT: 0,
-//    ENTERED: 1,
-//    EXITED: 2,
-//    AWAIT_DESTRUCTION: 3,
-//    DESTROYED: 4
-// };
-const ROOMCONFIG = {
-   INSTANT: 'instant'
+export const enum ROOMCONFIG {
+   INSTANT = 'instant'
 };
 
 export default class MultiUserContact extends Contact {
@@ -61,17 +61,31 @@ export default class MultiUserContact extends Contact {
       return this.account.getConnection().getMUCService();
    }
 
-   public invite(jid: JID, reason?: string) {
-      let isModerated = false; //@TODO isModerated
+   public async invite(jid: JID, reason?: string) {
+      let discoInfo = await this.account.getDiscoInfoRepository().requestDiscoInfo(this.getJid());
+      let isModerated = discoInfo.hasFeature('muc_moderated');
 
       if (isModerated) {
          this.getService().sendMediatedMultiUserInvitation(jid, this.getJid(), reason);
-      } else if (jid.resource && this.hasFeatureByResource(jid.resource, 'jabber:x:conference')) {
-         let password = this.data.get('password');
-         this.getService().sendDirectMultiUserInvitation(jid, this.getJid(), reason, password);
-      } else {
-         throw new Error('No invitation method available');
+
+         return;
       }
+
+      let contact = this.account.getContact(jid);
+      let resources = jid.resource ? [jid.resource] : contact.getResources();
+
+      if (resources.length > 0) {
+         for (let resource of resources) {
+            if (contact.hasFeatureByResource(resource, 'jabber:x:conference')) {
+               let password = this.data.get('password');
+               this.getService().sendDirectMultiUserInvitation(jid, this.getJid(), reason, password);
+            }
+         }
+
+         return;
+      }
+
+      throw new Error('No invitation method available');
    }
 
    public join() {
@@ -121,13 +135,21 @@ export default class MultiUserContact extends Contact {
       return this.chatWindow;
    }
 
-   public addMember(nickname: string, affiliation?, role?, jid?: JID): boolean {
+   public getMember(nickname: string): {affiliation?: AFFILIATION, role?: ROLE, jid?: JID} {
+      let data = this.getMembers().get(nickname) || {};
+
+      data.jid = data.jid ? new JID(data.jid) : undefined;
+
+      return data;
+   }
+
+   public addMember(nickname: string, affiliation?: AFFILIATION, role?: ROLE, jid?: JID): boolean {
       let isNewMember = !this.getMembers().get(nickname);
 
       this.getMembers().set(nickname, {
          affiliation,
          role,
-         jid: jid instanceof JID ? jid.full : undefined
+         jid: jid ? jid.full : undefined
       });
 
       return isNewMember

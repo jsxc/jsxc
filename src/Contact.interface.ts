@@ -9,6 +9,7 @@ import ChatWindow from '@ui/ChatWindow';
 import ContactProvider from './ContactProvider';
 import Account from './Account';
 import Nickname from '@src/Nickname';
+import DiscoInfo from './DiscoInfo';
 
 export enum ContactType {
    CHAT = 'chat',
@@ -49,7 +50,7 @@ export interface IContact {
    hasFeatureByResource(resource: string, features: string[]): Promise<{}>
    hasFeatureByResource(resource: string, feature: string): Promise<{}>
 
-   getCapabilitiesByResource(resource: string): Promise<any>;
+   getCapabilitiesByResource(resource: string): Promise<DiscoInfo | void>;
 
    registerCapableResourcesHook(features: string[], cb: (resources: string[]) => void);
    registerCapableResourcesHook(features: string, cb: (resources: string[]) => void);
@@ -62,7 +63,7 @@ export interface IContact {
 
    getResources(): string[];
 
-   getPresence(): Presence;
+   getPresence(resource?: string): Presence;
 
    getType(): ContactType;
 

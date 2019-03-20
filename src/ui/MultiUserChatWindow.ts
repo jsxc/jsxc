@@ -1,5 +1,5 @@
 import ChatWindow from './ChatWindow'
-import MultiUserContact from '../MultiUserContact'
+import MultiUserContact, { AFFILIATION, ROLE } from '../MultiUserContact'
 import Translation from '../util/Translation'
 import JID from '../JID'
 import AvatarSet from './AvatarSet'
@@ -45,34 +45,57 @@ export default class MultiUserChatWindow extends ChatWindow {
          this.setBarText(newSubject);
       })
       this.setBarText(this.contact.getSubject());
+
+      this.contact.registerMemberHook(this.contact.getNickname(), (data) => {
+         this.updatePermissionAttributes(data);
+      });
+      this.updatePermissionAttributes(this.contact.getMember(this.contact.getNickname()));
    }
 
-   public addMember(nickname, jid?: JID) {
+   private updatePermissionAttributes(data: {affiliation?: AFFILIATION, role?: ROLE, jid?: JID} = {}) {
+      this.getDom().attr('data-role', data.role);
+      this.getDom().attr('data-affiliation', data.affiliation);
+   }
+
+   public addMember(nickname: string) {
       let memberElement = this.getMemberElementByNickname(nickname);
 
       if (memberElement.length > 0) {
          return;
       }
 
+      let { jid, affiliation, role } = this.contact.getMember(nickname);
+
       memberElement = $('<li><div class="jsxc-avatar"></div><div class="jsxc-name"/></li>');
       memberElement.attr('data-nickname', nickname);
+      memberElement.attr('data-affiliation', affiliation);
+      memberElement.attr('data-role', role);
 
       this.memberlistElement.find('ul').append(memberElement);
 
-      let title;
-      let label;
+      let title: string;
+      let label: string;
       let avatarElement = memberElement.find('.jsxc-avatar');
 
-      if (jid && typeof jid !== 'undefined') {
-         label = jid.bare;
-         title = title + '\n' + jid.bare;
+      if (jid) {
+         label = `${nickname} (${jid.bare})`;
+         title = nickname + '\n' + jid.bare;
 
          let contact = this.getAccount().getContact(jid);
-         AvatarSet.get(contact).addElement(avatarElement);
+
+         if (contact) {
+            AvatarSet.get(contact).addElement(avatarElement);
+         } else {
+            AvatarSet.setPlaceholder(avatarElement, nickname);
+         }
       } else {
          label = title = nickname;
 
-         AvatarSet.setPlaceholder(avatarElement, nickname, jid);
+         AvatarSet.setPlaceholder(avatarElement, nickname);
+      }
+
+      if (nickname === this.contact.getNickname()) {
+         label = `${nickname} (${Translation.t('you')})`;
       }
 
       memberElement.find('.jsxc-name').text(label);
@@ -81,7 +104,7 @@ export default class MultiUserChatWindow extends ChatWindow {
       this.refreshMemberCount();
    }
 
-   public removeMember(nickname) {
+   public removeMember(nickname: string) {
       let m = this.memberlistElement.find('li[data-nickname="' + nickname + '"]');
 
       if (m.length > 0) {
