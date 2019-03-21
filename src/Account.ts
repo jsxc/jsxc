@@ -159,7 +159,7 @@ export default class Account {
       let targetPresence = Client.getPresenceController().getTargetPresence();
       this.getConnection().sendPresence(targetPresence);
 
-      storage.setItem('connectionInited', 'inited', true);
+      storage.setItem('connection', 'inited', true);
    }
 
    public triggerPresenceHook = (contact: IContact, presence, oldPresence) => {
