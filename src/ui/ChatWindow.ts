@@ -190,7 +190,7 @@ export default class ChatWindow {
    }
 
    public addMenuEntry(className: string, label: string, cb: (ev) => void) {
-      this.settingsMenu.addEntry(label, cb, className);
+      return this.settingsMenu.addEntry(label, cb, className);
    }
 
    public setAttachment(attachment: Attachment) {

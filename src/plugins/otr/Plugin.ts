@@ -62,8 +62,12 @@ export default class OTRPlugin extends EncryptionPlugin {
             return;
          }
 
-         //@TODO enable/disable according to encryption state
-         chatWindow.addMenuEntry('otr-verification', 'OTR ' + Translation.t('Verification'), () => this.openVerificationDialog(contact));
+         let menuEntry = chatWindow.addMenuEntry('otr-verification', 'OTR ' + Translation.t('Verification'), () => this.openVerificationDialog(contact));
+         this.updateMenuEntry(contact, menuEntry);
+
+         contact.registerHook('encryptionState', () => {
+            this.updateMenuEntry(contact, menuEntry);
+         })
       });
    }
 
@@ -77,6 +81,14 @@ export default class OTRPlugin extends EncryptionPlugin {
             return session.goEncrypted();
          }
       });
+   }
+
+   private updateMenuEntry(contact: IContact, menuEntry: JQuery) {
+      if (contact.isEncrypted() && contact.getEncryptionPluginName() === OTRPlugin.getName()) {
+         menuEntry.removeClass('jsxc-disabled');
+      } else {
+         menuEntry.addClass('jsxc-disabled');
+      }
    }
 
    private afterReceiveMessageProcessor = (contact: Contact, message: Message, stanza: Element) => {
@@ -119,7 +131,6 @@ export default class OTRPlugin extends EncryptionPlugin {
    }
 
    private getSession(contact: IContact): Promise<Session> {
-      //@TODO only master (sure?)
       let bareJid = contact.getJid().bare;
 
       if (this.sessions.hasOwnProperty(bareJid)) {
@@ -128,8 +139,6 @@ export default class OTRPlugin extends EncryptionPlugin {
 
       return this.getDSAKey().then((key) => {
          this.sessions[bareJid] = new Session(contact, key, this.pluginAPI.getStorage(), this.pluginAPI.getConnection());
-
-         //@TODO save session?
 
          return this.sessions[bareJid];
       });
@@ -177,7 +186,7 @@ export default class OTRPlugin extends EncryptionPlugin {
 
    private generateDSAKey(): Promise<{}> {
       if (typeof Worker === 'undefined') {
-         //@TODO disable OTR
+         throw new Error('No worker available');
       }
 
       return new Promise((resolve, reject) => {

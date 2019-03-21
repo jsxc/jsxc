@@ -260,8 +260,8 @@ export default class Contact implements IIdentifiable, IContact {
          throw new Error('No encryption source provided');
       }
 
-      this.data.set('encryptionState', state);
       this.data.set('encryptionPlugin', state === EncryptionState.Plaintext ? null : source);
+      this.data.set('encryptionState', state);
    }
 
    public getEncryptionState(): EncryptionState {
