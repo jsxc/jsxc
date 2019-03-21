@@ -3,7 +3,6 @@ import PluginAPI from '../../plugin/PluginAPI'
 import { EncryptionPlugin } from '../../plugin/EncryptionPlugin'
 import Contact from '../../Contact'
 import Message from '../../Message'
-import { DIRECTION } from '../../Message.interface'
 import Session from './Session'
 import DSA from 'otr/lib/dsa'
 import Options from '../../Options'
@@ -100,11 +99,9 @@ export default class OTRPlugin extends EncryptionPlugin {
 
       return this.getSession(contact).then((session: Session) => {
          if (session.isEnded()) {
-            //@TODO block this message
-            message.setDirection(DIRECTION.SYS);
-            message.setPlaintextMessage('This message was not send');
+            contact.addSystemMessage(Translation.t('your_message_wasnt_send_please_end_your_private_conversation'));
 
-            return message;
+            throw new Error('OTR session is ended');
          } else if (session.isEncrypted()) {
             return session.processMessage(message, 'encryptMessage');
          } else {
