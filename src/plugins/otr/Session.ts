@@ -3,12 +3,14 @@ import { IContact } from '@src/Contact.interface';
 import Message from '../../Message'
 import { DIRECTION } from '../../Message.interface'
 import Translation from '../../util/Translation'
-import IOTR from 'otr/lib/otr'
+import OTR from 'otr/lib/otr'
 import DSA from 'otr/lib/dsa'
 import { EncryptionState } from '../../plugin/AbstractPlugin'
 import Storage from '../../Storage'
 import PersistentMap from '../../util/PersistentMap'
 import OTRPlugin from './Plugin';
+import { IConnection } from '@connection/Connection.interface';
+import VerificationDialog from '@ui/dialogs/verification';
 
 //@REVIEW
 interface IOTR {
@@ -18,6 +20,7 @@ interface IOTR {
    receiveMsg: (message: string, meta: any) => void
    sendMsg: (message: string, meta: any) => void
    endOtr: (func) => void
+   smpSecret: (secret: string, question?: string) => void
    init
    _smInit
    ake
@@ -34,9 +37,11 @@ export default class Session {
 
    private data: PersistentMap;
 
-   private ourPayloadId;
+   private ourPayloadId: number;
 
-   constructor(private peer: IContact, key: DSA, private storage: Storage) {
+   private verificationDialog: VerificationDialog;
+
+   constructor(private peer: IContact, private key: DSA, private storage: Storage, private connection: IConnection) {
 
       let options: any = {
          priv: key,
@@ -44,7 +49,7 @@ export default class Session {
          //smw: {} //@TODO enable worker for smp
       };
 
-      this.session = new IOTR(options);
+      this.session = new OTR(options);
 
       if (options.SEND_WHITESPACE_TAG) {
          this.session.SEND_WHITESPACE_TAG = true;
@@ -158,38 +163,59 @@ export default class Session {
    }
 
    public isEncrypted(): boolean {
-      return this.session.msgstate === IOTR.CONST.MSGSTATE_ENCRYPTED;
+      return this.session.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED;
    }
 
    public isEnded(): boolean {
-      return this.session.msgstate === IOTR.CONST.MSGSTATE_FINISHED;
+      return this.session.msgstate === OTR.CONST.MSGSTATE_FINISHED;
+   }
+
+   public getOwnFingerprint(): string {
+      return this.key.fingerprint();
+   }
+
+   public getTheirFingerprint(): string {
+      return this.session.their_priv_pk && this.session.their_priv_pk.fingerprint();
+   }
+
+   public isVerified(): boolean {
+      return !!this.session.trust;
+   }
+
+   public setVerified(verified: boolean) {
+      this.session.trust = verified;
+
+      this.saveSession();
+
+      if (verified) {
+         this.peer.setEncryptionState(EncryptionState.VerifiedEncrypted, OTRPlugin.getName());
+      } else {
+         this.peer.setEncryptionState(EncryptionState.UnverifiedEncrypted, OTRPlugin.getName());
+      }
+   }
+
+   public sendSMPRequest(secret: string, question?: string) {
+      this.session.smpSecret(secret, question);
    }
 
    private inform(messageString: string) {
-      let message = new Message({
-         peer: this.peer.getJid(),
-         direction: Message.DIRECTION.SYS,
-         plaintextMessage: Translation.t(messageString)
-      });
-      this.peer.getTranscript().pushMessage(message);
-
-      //@REVIEW this is maybe more generic and most of the messages are the same for other encryption plugins
+      this.peer.addSystemMessage(Translation.t(messageString));
    }
 
    private statusHandler = (status) => {
       switch (status) {
-         case IOTR.CONST.STATUS_SEND_QUERY:
+         case OTR.CONST.STATUS_SEND_QUERY:
             this.inform('trying_to_start_private_conversation');
             break;
-         case IOTR.CONST.STATUS_AKE_SUCCESS:
+         case OTR.CONST.STATUS_AKE_SUCCESS:
             let msgState = this.session.trust ? 'Verified' : 'Unverified';
 
             this.inform(msgState + '_private_conversation_started');
 
             this.peer.setEncryptionState(this.session.trust ? EncryptionState.VerifiedEncrypted : EncryptionState.UnverifiedEncrypted, 'otr');
             break;
-         case IOTR.CONST.STATUS_END_OTR:
-            if (this.session.msgstate === IOTR.CONST.MSGSTATE_PLAINTEXT) {
+         case OTR.CONST.STATUS_END_OTR:
+            if (this.session.msgstate === OTR.CONST.MSGSTATE_PLAINTEXT) {
                // we aborted the private conversation
 
                this.inform('private_conversation_aborted');
@@ -203,37 +229,35 @@ export default class Session {
                this.peer.setEncryptionState(EncryptionState.Ended, 'otr');
             }
             break;
-         case IOTR.CONST.STATUS_SMP_HANDLE:
+         case OTR.CONST.STATUS_SMP_HANDLE:
             // jsxc.keepBusyAlive();
             break;
       }
    }
 
-   private smpHandler = function(type, result) {
+   private smpHandler = (type: string, data: boolean | string) => {
       switch (type) {
          case 'question': // verification request received
             this.inform('Authentication_request_received');
 
             //@TODO add link to above message which opens the verification dialog
+            let dialog = this.openVerificationDialog();
+            dialog.preFill(typeof data === 'string' ? data : undefined);
 
             break;
          case 'trust': // verification completed
-            this.session.trust = result;
+            this.setVerified(!!data);
 
-            this.peer.setEncryptionState(EncryptionState.VerifiedEncrypted, OTRPlugin.getName());
-            this.saveSession();
-
-            if (result) {
+            if (data) {
                this.inform('conversation_is_now_verified');
             } else {
                this.inform('authentication_failed');
             }
 
-            //@TODO close dialog
-
             break;
          case 'abort':
-            //@TODO close dialog
+            this.closeVerificationDialog();
+
             this.inform('Authentication_aborted');
             break;
          default:
@@ -242,20 +266,21 @@ export default class Session {
    }
 
    private afterEncryptMessage = function(encryptedMessage: string, message: Message, resolve) {
-      if (this.session.msgstate === IOTR.CONST.MSGSTATE_ENCRYPTED) {
+      if (this.session.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED) {
          message.setEncryptedPlaintextMessage(encryptedMessage);
 
          message.setEncrypted(true);
       } else if (this.peer.isEncrypted()) {
+         message.setErrorMessage(Translation.t('Message_was_not_encrypted'));
+
          Log.warn('This message had to be encrypted.');
-         //@TODO make this warning more visible
       }
 
       resolve(message);
    }
 
    private afterDecryptMessage = function(plaintextMessage: string, encrypted: boolean, message: Message, resolve) {
-      if (this.session.msgstate !== IOTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
+      if (this.session.msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
          message.setPlaintextMessage(Translation.t('Received_an_unencrypted_message') + '. [' + plaintextMessage + ']');
          message.setDirection(DIRECTION.SYS);
       } else {
@@ -267,7 +292,7 @@ export default class Session {
       resolve(message);
    }
 
-   private sendOutgoingMessage = function(messageString: string) {
+   private sendOutgoingMessage(messageString: string) {
       let message = new Message({
          peer: this.peer.getJid(),
          direction: Message.DIRECTION.OUT,
@@ -312,10 +337,10 @@ export default class Session {
       let encryptionState = this.peer.getEncryptionState();
 
       //@REVIEW can this be simplified?
-      if ((encryptionState === EncryptionState.Plaintext && this.session.msgstate !== IOTR.CONST.MSGSTATE_PLAINTEXT) ||
-         (encryptionState === EncryptionState.UnverifiedEncrypted && (this.session.msgstate !== IOTR.CONST.MSGSTATE_ENCRYPTED || this.session.trust)) ||
-         (encryptionState === EncryptionState.VerifiedEncrypted && (this.session.msgstate !== IOTR.CONST.MSGSTATE_ENCRYPTED || !this.session.trust)) ||
-         (encryptionState === EncryptionState.Ended && this.session.msgstate !== IOTR.CONST.MSGSTATE_FINISHED)) {
+      if ((encryptionState === EncryptionState.Plaintext && this.session.msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT) ||
+         (encryptionState === EncryptionState.UnverifiedEncrypted && (this.session.msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED || this.session.trust)) ||
+         (encryptionState === EncryptionState.VerifiedEncrypted && (this.session.msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED || !this.session.trust)) ||
+         (encryptionState === EncryptionState.Ended && this.session.msgstate !== OTR.CONST.MSGSTATE_FINISHED)) {
 
          Log.warn('Expected encryption state does not match real message state');
       }
@@ -346,5 +371,20 @@ export default class Session {
       this.ourPayloadId = payload.id = Math.random();
 
       this.data.set('payload', payload);
+   }
+
+   private openVerificationDialog() {
+      this.closeVerificationDialog();
+
+      this.verificationDialog = new VerificationDialog(this.peer, this);
+
+      return this.verificationDialog;
+   }
+
+   private closeVerificationDialog() {
+      if (this.verificationDialog) {
+         this.verificationDialog.close();
+         this.verificationDialog = undefined;
+      }
    }
 }

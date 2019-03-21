@@ -256,13 +256,6 @@ export default class ChatWindow {
       let elementHandler = new ElementHandler(contact);
 
       elementHandler.add(
-         this.element.find('.jsxc-verification')[0],
-         function() {
-            // showVerificationDialog(contact);
-         }
-      );
-
-      elementHandler.add(
          this.element.find('.jsxc-fingerprints')[0],
          function() {
             // showFingerprintsDialog(contact);

@@ -48,4 +48,8 @@ export default class Utils {
 
       return Utils.mergeDeep(target, ...sources);
    }
+
+   public static prettifyHex(hex: string) {
+      return hex.replace(/(.{8})/g, '$1 ').replace(/ $/, '');
+   }
 }
