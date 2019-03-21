@@ -9,7 +9,7 @@ export default class Vcard extends AbstractService {
    public loadVcard(jid: IJID) {
       let iq = $iq({
          type: 'get',
-         to: jid.full
+         to: jid.bare
       }).c('vCard', {
          xmlns: NS.get('VCARD')
       });
