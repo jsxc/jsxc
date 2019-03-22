@@ -7,11 +7,12 @@ import Utils from '../../util/Utils'
 import Log from '../../util/Log'
 import Translation from '../../util/Translation'
 import * as Namespace from '../../connection/xmpp/namespace'
+import { IMessage } from '@src/Message.interface';
 
 export default class Archive {
-   private previousMessage;
-   private lastMessageId;
-   private connected;
+   private previousMessage: IMessage;
+   private lastMessageId: string;
+   private connected: boolean;
 
    constructor(private plugin: MessageArchiveManagementPlugin, private contact: Contact) {
 
@@ -34,7 +35,7 @@ export default class Archive {
       return this.plugin.getStorage().setItem('firstResultId', this.getId(), resultId);
    }
 
-   private isExhausted(): boolean {
+   public isExhausted(): boolean {
       return !!this.plugin.getStorage().getItem('exhausted', this.getId());
    }
 
@@ -101,8 +102,7 @@ export default class Archive {
       let plaintextBody = Utils.removeHTML(messageElement.find('> body').text());
       let htmlBody = messageElement.find('html body' + Namespace.getFilter('XHTML'));
 
-      if (!plaintextBody || plaintextBody.match(/\?OTR/i)) {
-         //@TODO show summary of number of encrypted messages
+      if (!plaintextBody) {
          return;
       }
 
@@ -112,10 +112,11 @@ export default class Archive {
       let originIdElement = messageElement.find('origin-id[xmlns="urn:xmpp:sid:0"]');
       let uid = direction === Message.DIRECTION.OUT && originIdElement.length ? originIdElement.attr('id') : stanzaIdElement.attr('id');
 
-      let message
-      try {
-         message = this.contact.getTranscript().getMessage(uid);
-      } catch (err) {
+      let message: IMessage;
+
+      if (Message.exists(uid)) {
+         message = new Message(uid);
+      } else {
          message = new Message({
             uid,
             attrId: messageId,
@@ -123,7 +124,8 @@ export default class Archive {
             direction,
             plaintextMessage: plaintextBody,
             htmlMessage: htmlBody.html(),
-            stamp: stamp.getTime()
+            stamp: stamp.getTime(),
+            unread: false,
          });
       }
 
@@ -165,7 +167,8 @@ export default class Archive {
             let archiveExhaustedMessage = new Message({
                peer: this.contact.getJid(),
                direction: Message.DIRECTION.SYS,
-               plaintextMessage: Translation.t('Archive_exhausted')
+               plaintextMessage: Translation.t('Archive_exhausted'),
+               unread: false,
             });
 
             transcript.getLastMessage().setNext(archiveExhaustedMessage);

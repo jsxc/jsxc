@@ -1,6 +1,4 @@
-import { IContact as Contact } from '../../Contact.interface'
 import { AbstractPlugin } from '../../plugin/AbstractPlugin'
-import PluginAPI from '../../plugin/PluginAPI'
 import ChatWindow from '../../ui/ChatWindow'
 import Translation from '../../util/Translation'
 import PersistentMap from '../../util/PersistentMap'
@@ -10,6 +8,9 @@ import * as Namespace from '../../connection/xmpp/namespace'
 import Archive from './Archive'
 import DiscoInfo from '../../DiscoInfo'
 import { Status } from '../../vendor/Strophe'
+import Contact from '@src/Contact';
+import PluginAPI from '@src/plugin/PluginAPI';
+import { IContact } from '@src/Contact.interface';
 
 /**
  * XEP-0313: Message Archive Management
@@ -34,7 +35,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
    }
 
    private enabled = false;
-   private archives = {};
+   private archives: {[key: string]: Archive} = {};
    private queryContactRelation: PersistentMap;
 
    constructor(pluginAPI: PluginAPI) {
@@ -67,7 +68,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       return this.pluginAPI.getConnection();
    }
 
-   public addQueryContactRelation(queryId: string, contact: Contact) {
+   public addQueryContactRelation(queryId: string, contact: IContact) {
       this.queryContactRelation.set(queryId, contact.getJid().bare);
    }
 
@@ -101,7 +102,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
 
             this.enabled = true;
 
-            connection.registerHandler(this.onMamMessage, Namespace.get('MAM'), 'message', null);
+            this.pluginAPI.getConnection().registerHandler(this.onMamMessage, null, 'message', null);
          }
       }).catch((err) => {
          this.pluginAPI.Log.warn('Could not determine MAM server support:', err);
