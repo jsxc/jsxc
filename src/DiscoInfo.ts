@@ -3,6 +3,7 @@ import Client from './Client'
 import Form from './connection/Form'
 import { IDiscoInfo } from './DiscoInfo.interface'
 import * as sha1 from 'sha1'
+import FormField from '@connection/FormField';
 
 interface Identity {
    category: string
@@ -21,22 +22,20 @@ export default class implements IDiscoInfo {
       return identities && identities.length;
    }
 
-   /* @TODO support extended information formatted according to XEP-0128
-    * consider this information also for generateCapsVersion
-    */
+   protected version: string;
+
    constructor(identities: Identity[], features: string[], forms: Form[])
    constructor(version: string)
    constructor() {
       let storage = Client.getStorage();
-      let version;
 
       if (arguments.length === 1 && typeof arguments[0] === 'string') {
-         version = arguments[0];
+         this.version = arguments[0];
       } else {
-         version = this.generateCapsVersion(arguments[0], arguments[1]);
+         this.version = this.generateCapsVersion(arguments[0], arguments[1], arguments[2]);
       }
 
-      this.data = new PersistentMap(storage, 'disco', version);
+      this.data = new PersistentMap(storage, 'disco', this.version);
 
       if (arguments.length === 3) {
          this.data.set('identities', arguments[0]);
@@ -71,8 +70,7 @@ export default class implements IDiscoInfo {
    }
 
    public getCapsVersion(): String {
-      //@REVIEW cache?
-      return this.generateCapsVersion(this.getIdentities(), this.getFeatures());
+      return this.version;
    }
 
    public hasFeature(features: string[] | string) {
@@ -88,11 +86,12 @@ export default class implements IDiscoInfo {
       return true;
    }
 
-   protected generateCapsVersion(identities: Identity[], features: string[]): string {
+   protected generateCapsVersion(identities: Identity[], features: string[], forms: Form[]): string {
       let version = '';
 
       identities = identities.sort(this.sortIdentities);
       features = features.sort();
+      forms = forms.sort(this.sortForms);
 
       for (let identity of identities) {
          version += identity.category + '/';
@@ -103,6 +102,19 @@ export default class implements IDiscoInfo {
 
       for (let feature of features) {
          version += feature + '<';
+      }
+
+      for (let form of forms) {
+         let fields = form.getFields().sort(this.sortFields);
+
+         for (let field of fields) {
+            if (field.getName() === 'FORM_TYPE') {
+               version += field.getValues()[0] + '<';
+            } else {
+               version += field.getName() + '<';
+               version += field.getValues().sort().join('<') + '<';
+            }
+         }
       }
 
       return btoa(sha1(version, { asString: true }));
@@ -127,6 +139,30 @@ export default class implements IDiscoInfo {
       if (a.lang < b.lang) {
          return -1;
       }
+      return 0;
+   }
+
+   protected sortForms(a: Form, b: Form) {
+      if (a.getType() > b.getType()) {
+         return 1;
+      }
+
+      if (a.getType() < b.getType()) {
+         return -1;
+      }
+
+      return 0;
+   }
+
+   protected sortFields(a: FormField, b: FormField) {
+      if (a.getName() > b.getName()) {
+         return 1;
+      }
+
+      if (a.getName() < b.getName()) {
+         return -1;
+      }
+
       return 0;
    }
 }

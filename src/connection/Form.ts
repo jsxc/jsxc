@@ -148,6 +148,10 @@ export default class Form {
       return fields.length > 0 ? fields[0].getValues() : undefined;
    }
 
+   public getFields(): Field[] {
+      return this.fields;
+   }
+
    public getType(): TYPE {
       return <TYPE> this.type;
    }
