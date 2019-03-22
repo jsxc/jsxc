@@ -334,19 +334,22 @@
     "Are_you_sure": "Bist du sicher?",
     "Invite_user": "Lade Benutzer ein",
     "muc_invite_explanation": "Bitte gebe Benutzername oder Jabber ID des Kontaktes ein den du einladen möchtest.",
-    "omemo-device-list-explanation": "Mit OMEMO kannst du verschlüsselte Nachrichten an alle OMEMO fähigen Geräte von dir und deinem Kontakt senden. Um sicher zu gehen, dass diese Geräte wirklich dir oder deinem Kontakt gehören, solltest du die untenstehenden Id's über einen anderen Kommunikationskanal vergleichen. Wenn du sie nicht vergleichen möchtest, kannst du auch auf \"Anerkennen\" klicken. Beachte nun aber, dass ggf. fremde Personen mitlesen können.",
+    "omemo-device-list-explanation": "Mit OMEMO kannst du verschlüsselte Nachrichten an alle OMEMO-fähigen Geräte von dir und deinem Kontakt senden. Um sicher zu gehen, dass diese Geräte wirklich dir oder deinem Kontakt gehören, solltest du die untenstehenden Identitäten über einen anderen Kommunikationskanal vergleichen. Wenn du sie nicht vergleichen möchtest, kannst du trotzdem auf \"Anerkennen\" klicken; ggf. können dann aber fremde Personen mitlesen.",
     "No_devices_available": "Keine Geräte verfügbar",
     "Ignore": "Ignorieren",
     "Recognize": "Anerkennen",
     "Verify": "Verifizieren",
     "never": "nie",
-    "You_received_an_OMEMO_encrypted_message": "Du hast eine mit OMEMO verschlüsselte Nachricht erhalten",
+    "You_received_an_OMEMO_encrypted_message": "Du hast eine mit OMEMO-verschlüsselte Nachricht erhalten",
     "Message_was_not_sent": "Nachricht wurde nicht gesendet",
     "Your_contact_does_not_support_OMEMO": "Dein Kontakt unterstützt keine Verschlüsselung mit OMEMO",
     "There_are_new_devices_for_your_contact": "Dein Kontakt hat neue Geräte hinzugefügt",
     "You_ignore_all_devices_of_your_contact": "Du ignorierst alle Geräte deines Kontaktes",
     "I_found_new_devices_from_you": "Ich habe neue Geräte von dir gefunden",
-    "Message_received_from_unknown_OMEMO_device": "Nachricht von unbekanntem OMEMO Gerät erhalten",
-    "There_are_new_OMEMO_devices": "Es gibt neue OMEMO Geräte"
+    "Message_received_from_unknown_OMEMO_device": "Nachricht von unbekanntem OMEMO-Gerät erhalten",
+    "There_are_new_OMEMO_devices": "Es gibt neue OMEMO-Geräte",
+    "you": null,
+    "Clean_up_own_devices": null,
+    "omemo-clean-up-explanation": null
   }
 }

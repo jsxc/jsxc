@@ -327,14 +327,14 @@
     "User_information": "User information",
     "Log": "Log",
     "Language": "Language",
-    "After_changing_this_option_you_have_to_reload_the_page": "After changing this option you have to reload the page",
+    "After_changing_this_option_you_have_to_reload_the_page": "After changing this option, you have to reload the page",
     "password_explanation": "Enter a new password.",
     "loading": "loading",
     "Client": "Client",
     "Are_you_sure": "Are you sure?",
     "Invite_user": "Invite user",
     "muc_invite_explanation": "Enter username or Jabber ID of the contact you like to invite.",
-    "omemo-device-list-explanation": "With OMEMO you can send an encrypted message to all OMEMO capable devices of you and your contact. To ensure that those are really belonging to you or your contact you should compare those key ids and you should use another communication channel to do so. If you don't want to compare those id's just click \"Recognize\", but please beware that in this case someone could read along.",
+    "omemo-device-list-explanation": "With OMEMO you can send an encrypted message to all OMEMO capable devices of you and your contact. To ensure that those devices really belong to you or your contact, you should compare their key IDs over another communication channel. If you don't want to compare those IDs, just click \"Recognize\", but please be aware that in this case someone could read along.",
     "No_devices_available": "No devices available",
     "Ignore": "Ignore",
     "Recognize": "Recognize",
@@ -347,6 +347,9 @@
     "You_ignore_all_devices_of_your_contact": "You ignore all devices of your contact",
     "I_found_new_devices_from_you": "I found new devices from you",
     "Message_received_from_unknown_OMEMO_device": "Message received from unknown OMEMO device",
-    "There_are_new_OMEMO_devices": "There are new OMEMO devices"
+    "There_are_new_OMEMO_devices": "There are new OMEMO devices",
+    "you": "you",
+    "Clean_up_own_devices": "Clean up own devices",
+    "omemo-clean-up-explanation": "If you clean up your own devices, all devices will be removed from your device list. Next time you use your other devices they will added to the list again. Therefore only your active devices will be on the list and used by your contacts to encrypt messages."
   }
 }
