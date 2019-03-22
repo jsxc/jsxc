@@ -46,7 +46,7 @@ function addCleanUpAction(omemo: Omemo, dom: JQuery) {
    buttonElement.appendTo(dom);
 
    let explanationElement = $('<p>');
-   explanationElement.addClass('jsxc-hint');
+   explanationElement.addClass('jsxc-hint jsxc-max-width');
    explanationElement.text(Translation.t('omemo-clean-up-explanation'));
    explanationElement.appendTo(dom);
 }
