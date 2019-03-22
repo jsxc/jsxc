@@ -3,7 +3,7 @@ import DiscoInfo from './DiscoInfo'
 import PersistentMap from './util/PersistentMap'
 import JID from './JID'
 import Contact from './Contact'
-import Log from './util/Log'
+import Log from '@util/Log';
 import Client from './Client'
 import Form from './connection/Form'
 import { IDiscoInfoRepository } from './DiscoInfoRepository.interface'
@@ -18,14 +18,12 @@ export default class implements IDiscoInfoRepository {
       this.serverJidIndex = new PersistentMap(Client.getStorage(), 'capabilities');
    }
 
-   public addRelation(jid: IJID, version: string)
-   public addRelation(jid: IJID, discoInfo: DiscoInfo)
-   public addRelation(jid: IJID, value) {
+   public addRelation(jid: IJID, version: string): void
+   public addRelation(jid: IJID, discoInfo: DiscoInfo): void
+   public addRelation(jid: IJID, value: string|DiscoInfo) {
       let index = jid.isServer() ? this.serverJidIndex : this.jidIndex;
 
-      if (jid.isBare() && !jid.isServer()) {
-         Log.warn('We can only add relations for full jids.')
-      } else if (value instanceof DiscoInfo) {
+      if (value instanceof DiscoInfo) {
          index.set(jid.full, value.getCapsVersion());
       } else if (typeof value === 'string') {
          index.set(jid.full, value);
@@ -106,8 +104,13 @@ export default class implements IDiscoInfoRepository {
          let version = serverJidIndex.get(jid.domain);
 
          if (!version || (version && !DiscoInfo.exists(version))) {
-            return this.requestDiscoInfo(jid);
-            //@TODO verify version
+            return this.requestDiscoInfo(jid).then(discoInfo => {
+               if (version !== discoInfo.getCapsVersion()) {
+                  Log.warn(`Caps version doesn't match for ${jid.full}. Expected: ${version}. Actual: ${discoInfo.getCapsVersion()}.`);
+               }
+
+               return discoInfo;
+            });
          }
       }
 
