@@ -44,7 +44,7 @@ export default class CapsHandler extends AbstractHandler {
          discoInfoRepository.requestDiscoInfo(from, node)
             .then((discoInfo) => {
                if (version !== discoInfo.getCapsVersion()) {
-                  Log.warn('Caps version doesnt match.');
+                  Log.warn(`Caps version from ${from.full} doesn't match. Expected: ${discoInfo.getCapsVersion()}. Actual: ${version}.`);
                }
 
                discoInfoRepository.addRelation(from, discoInfo);
