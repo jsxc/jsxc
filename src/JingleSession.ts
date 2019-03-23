@@ -20,7 +20,7 @@ export default class JingleSession {
       } else if (sessionType === STREAM_SESSION) {
          return new JingleStreamSession(account, session);
       } else {
-         throw new Error('Could not create jingle session. Unknown session type.');
+         throw new Error('Could not create jingle session. Unknown session type: ' + sessionType);
       }
    }
 
