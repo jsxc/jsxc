@@ -129,11 +129,11 @@ export class VideoDialog {
    }
 
    public minimize() {
-      this.dom.find('.jsxc-video-container').addClass('jsxc-minimized');
+      this.dom.addClass('jsxc-minimized');
    }
 
    public maximize() {
-      this.dom.find('.jsxc-video-container').removeClass('jsxc-minimized');
+      this.dom.removeClass('jsxc-minimized');
    }
 
    public addContainer(containerElement) {

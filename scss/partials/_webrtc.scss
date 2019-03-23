@@ -27,6 +27,29 @@
       color: $window-bar-color;
     }
   }
+
+  &.jsxc-minimized {
+    bottom: auto;
+    left: 10px;
+    right: auto;
+    top: 10px;
+
+    .jsxc-video-container {
+      background-color: transparent;
+      box-shadow: 0 0 10px #a1a1a1;
+      position: static;
+      z-index: 99;
+    }
+
+    .jsxc-local-video {
+      display: block;
+      position: static;
+    }
+
+    .jsxc-video-wrapper {
+      display: none;
+    }
+  }
 }
 
 .jsxc-establishing,
@@ -87,26 +110,6 @@
   position: absolute;
   right: 0;
   top: 0;
-
-  &.jsxc-minimized {
-    background-color: transparent;
-    bottom: auto;
-    box-shadow: 0 0 10px #a1a1a1;
-    left: 10px;
-    position: fixed;
-    right: auto;
-    top: 10px;
-    z-index: 99;
-
-    .jsxc-local-video {
-      display: block;
-      position: static;
-    }
-
-    .jsxc-video-wrapper {
-      display: none;
-    }
-  }
 
   video {
     display: none;
