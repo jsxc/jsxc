@@ -49,7 +49,6 @@ export class VideoDialog {
    }
 
    public showCallDialog(session: JingleMediaSession) {
-      //@TODO translate
       //@TODO use selection dialog, because button labels can be configured
       //@TODO confirm dialog is special case of selection dialog
 
@@ -60,11 +59,11 @@ export class VideoDialog {
       let infoText: string;
 
       if (isStream) {
-         infoText = `Incoming_stream from ${peerName}`;
+         infoText = `${Translation.t('Incoming_stream')} ${Translation.t('from')} ${peerName}`;
       } else if (isVideoCall) {
-         infoText = `Incoming video call from ${peerName}`;
+         infoText = `${Translation.t('Incoming_video_call')} ${Translation.t('from')} ${peerName}`;
       } else {
-         infoText = `Incoming call from ${peerName}`;
+         infoText = `${Translation.t('Incoming_call')} ${Translation.t('from')} ${peerName}`;
       }
 
       let confirmDialog = ConfirmDialog(infoText);
