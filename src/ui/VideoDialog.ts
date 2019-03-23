@@ -38,7 +38,7 @@ export class VideoDialog {
       if (session instanceof JingleCallSession) {
          msg = ':telephone_receiver: ' + Translation.t('Call_started');
       } else {
-         msg = ':screen: ' + Translation.t('Stream_started');
+         msg = ':tv: ' + Translation.t('Stream_started');
       }
 
       session.getPeer().addSystemMessage(msg);
