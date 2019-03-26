@@ -59,6 +59,7 @@ export default class Emoticons {
       Emoticons.init();
 
       text = Emoticons.standardToImage(text);
+      text = Emoticons.unicodeToShortname(text);
       text = Emoticons.shortnameToImage(text);
 
       return text;
@@ -86,6 +87,10 @@ export default class Emoticons {
       });
 
       return text;
+   }
+
+   private static unicodeToShortname(text: string): string {
+      return emojione.toShort(text);
    }
 
    private static shortnameToImage(text: string): string {
