@@ -176,6 +176,10 @@ export default class Attachment {
          return;
       }
 
+      if (/^image\/svg/i.test(this.getMimeType())) {
+         return;
+      }
+
       if (!this.hasData()) {
          if (this.file) {
             this.getDataFromFile().then((data) => {
