@@ -111,7 +111,7 @@ export default class Emoticons {
       }
 
       let filename;
-      let div = $('<div>');
+      let element = $('<span>');
 
       if (EMOTICON_LIST.core[shortname]) {
          filename = EMOTICON_LIST.core[shortname];
@@ -119,10 +119,10 @@ export default class Emoticons {
          filename = EMOTICON_LIST.emojione[shortname].fname;
       }
 
-      div.addClass('jsxc-emoticon--' + filename);
-      div.addClass('jsxc-emoticon');
-      div.attr('title', shortname);
+      element.addClass('jsxc-emoticon--' + filename);
+      element.addClass('jsxc-emoticon');
+      element.attr('title', shortname);
 
-      return div.prop('outerHTML');
+      return element.prop('outerHTML');
    }
 }
