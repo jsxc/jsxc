@@ -8,6 +8,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const GitRevisionPlugin = new(require('git-revision-webpack-plugin'))();
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const TerserPlugin = require('terser-webpack-plugin');
 
 let supportedLangs = fs.readdirSync('./locales/').filter(filename => {
    if (!/\.json$/.test(filename)) {
@@ -30,7 +31,7 @@ const PRODUCTION_MODE = 'production';
 const MOMENTJS_LOCALES = supportedLangs.map(lang => lang.replace(/-.+/, ''));
 const JS_BUNDLE_NAME = 'jsxc.bundle.js';
 
-const dependencies = Object.keys(packageJson.dependencies).map(function(name) {
+const dependencies = Object.keys(packageJson.dependencies).map(function (name) {
    let package = require('./node_modules/' + name + '/package.json');
 
    return `${package.name}@${package.version} (${package.license})`;
@@ -77,6 +78,13 @@ let config = {
             }
          }
       },
+      minimizer: [
+         new TerserPlugin({
+            terserOptions: {
+               keep_fnames: /Session$/,
+            },
+         }),
+      ],
    },
    performance: {
       maxEntrypointSize: 1024 * 1000 * 1000 * 3,
