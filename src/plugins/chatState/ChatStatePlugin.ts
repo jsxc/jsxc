@@ -69,7 +69,7 @@ export default class ChatStatePlugin extends AbstractPlugin {
       if (message.getType() === Message.MSGTYPE.CHAT) {
          xmlStanza.c('active', {
             xmlns: Namespace.get('CHATSTATES')
-         });
+         }).up();
       }
 
       return Promise.resolve([message, xmlStanza]);
