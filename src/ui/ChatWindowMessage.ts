@@ -64,6 +64,10 @@ export default class ChatWindowMessage {
 
       this.element.find('.jsxc-content').html(bodyElement);
 
+      this.element.find('a').click((ev: Event) => {
+         ev.stopPropagation();
+      });
+
       let timestampElement = this.element.find('.jsxc-timestamp');
       DateTime.stringify(this.message.getStamp().getTime(), timestampElement);
 
