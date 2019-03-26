@@ -6,6 +6,10 @@ export default class DiscoInfoChangeable extends DiscoInfo {
       super(id);
    }
 
+   public getCapsVersion(): String {
+      return this.generateCapsVersion(this.getIdentities(), this.getFeatures(), []);
+   }
+
    public addIdentity(category: string, type: string, name: string = '', lang: string = ''): boolean {
       let identities = this.getIdentities();
 

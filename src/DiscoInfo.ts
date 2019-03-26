@@ -1,16 +1,9 @@
 import PersistentMap from './util/PersistentMap'
 import Client from './Client'
 import Form from './connection/Form'
-import { IDiscoInfo } from './DiscoInfo.interface'
+import { IDiscoInfo, IIdentity } from './DiscoInfo.interface'
 import * as sha1 from 'sha1'
 import FormField from '@connection/FormField';
-
-interface Identity {
-   category: string
-   type: string,
-   name?: string,
-   lang?: string
-}
 
 export default class implements IDiscoInfo {
    protected data: PersistentMap;
@@ -24,7 +17,7 @@ export default class implements IDiscoInfo {
 
    protected version: string;
 
-   constructor(identities: Identity[], features: string[], forms: Form[])
+   constructor(identities: IIdentity[], features: string[], forms: Form[])
    constructor(version: string)
    constructor() {
       let storage = Client.getStorage();
@@ -44,7 +37,7 @@ export default class implements IDiscoInfo {
       }
    }
 
-   public getIdentities() {
+   public getIdentities(): IIdentity[] {
       return this.data.get('identities') || []
    }
 
@@ -86,7 +79,7 @@ export default class implements IDiscoInfo {
       return true;
    }
 
-   protected generateCapsVersion(identities: Identity[], features: string[], forms: Form[]): string {
+   protected generateCapsVersion(identities: IIdentity[], features: string[], forms: Form[]): string {
       let version = '';
 
       identities = identities.sort(this.sortIdentities);
