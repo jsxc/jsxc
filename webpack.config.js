@@ -132,7 +132,7 @@ let config = {
             ]
          },
          {
-            test: /.*\.(png|jpg|gif|mp3|wav)$/,
+            test: /.*\.(png|jpg|gif|mp3|wav|svg)$/,
             use: [fileLoader]
          },
          {

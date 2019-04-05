@@ -26,7 +26,10 @@ export interface IMessagePayload {
    sender?: {
       name: string,
       jid?: JID
-   }
+   },
+   chatMarkersReceived?: boolean,
+   chatMarkersDisplayed?: boolean
+   chatMarkersAcknowledged?: boolean
 }
 
 export interface IMessage {
@@ -106,4 +109,16 @@ export interface IMessage {
    getErrorMessage(): string
 
    updateProgress(transfered: number, complete: number)
+
+   chatMarkersReceived();
+
+   isChatMarkersReceived(): boolean;
+
+   chatMarkersDisplayed();
+
+   isChatMarkersDisplayed(): boolean;
+
+   chatMarkersAcknowledged();
+
+   isChatMarkersAcknowledged(): boolean;
 }

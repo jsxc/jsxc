@@ -338,4 +338,28 @@ export default class Message implements Identifiable, IMessage {
          return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
       })
    }
+
+   public chatMarkersReceived() {
+      this.data.set('chatMarkersReceived', true);
+   }
+
+   public isChatMarkersReceived(): boolean {
+      return !!this.data.get('chatMarkersReceived');
+   }
+
+   public chatMarkersDisplayed() {
+      this.data.set('chatMarkersDisplayed', true);
+   }
+
+   public isChatMarkersDisplayed(): boolean {
+      return !!this.data.get('chatMarkersDisplayed');
+   }
+
+   public chatMarkersAcknowledged() {
+      this.data.set('chatMarkersAcknowledged', true);
+   }
+
+   public isChatMarkersAcknowledged(): boolean {
+      return !!this.data.get('chatMarkersAcknowledged');
+   }
 }

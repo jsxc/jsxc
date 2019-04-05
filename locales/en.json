@@ -350,6 +350,11 @@
     "There_are_new_OMEMO_devices": "There are new OMEMO devices",
     "you": "you",
     "Clean_up_own_devices": "Clean up own devices",
-    "omemo-clean-up-explanation": "If you clean up your own devices, all devices will be removed from your device list. Next time you use your other devices they will added to the list again. Therefore only your active devices will be on the list and used by your contacts to encrypt messages."
+    "omemo-clean-up-explanation": "If you clean up your own devices, all devices will be removed from your device list. Next time you use your other devices they will added to the list again. Therefore only your active devices will be on the list and used by your contacts to encrypt messages.",
+    "chatmarkers-description": "Do you want to see when your contact has received or read your messages?",
+    "chatmarkers-received": "received",
+    "chatmarkers-displayed": "desiplayed",
+    "chatmarkers-acknowledged": "acknowledged",
+    "chatmarkers-acknowledge": "acknowledge"
   }
 }

@@ -522,6 +522,21 @@
   .jsxc-timestamp {
     float: left;
   }
+
+  .jsxc-chatmarkers {
+    bottom: 2px;
+    float: right;
+    margin-left: 2px;
+    position: relative;
+  }
+
+  &.jsxc-chatmarkers-acknowledged {
+    .jsxc-chatmarkers {
+      .jsxc-chatmarkers-acknowledge {
+        color: $chatmessage-chatmarkers-true;
+      }
+    }
+  }
 }
 
 .jsxc-out,
@@ -548,7 +563,7 @@
 
   &.jsxc-received {
     &::before {
-      bottom: 2px;
+      bottom: 6px;
       color: $chatmessage-received;
       content: "✓";
       font-size: 12px;
@@ -558,13 +573,32 @@
     }
 
     .jsxc-timestamp {
+      float: left;
+    }
+
+    .jsxc-chatmarkers {
       margin-right: 4px;
     }
   }
-
+  
   .jsxc-timestamp {
-    float: right;
+    float: left;
   }
+
+  .jsxc-chatmarkers {
+    bottom: 4px;
+    float: right;
+    margin-left: 4px;
+    position: relative;
+  }
+}
+
+.jsxc-chatmarkers {
+  color: $chatmessage-chatmarkers-false;
+  font-size: 12px;
+  line-height: 12px;
+  max-height: 12px;
+  max-width: 10px;
 }
 
 .jsxc-out {
