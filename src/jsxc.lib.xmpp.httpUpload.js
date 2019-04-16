@@ -43,6 +43,10 @@ jsxc.xmpp.httpUpload.init = function(o) {
       return;
    }
 
+   if (!jsxc.xmpp.conn) {
+      return;
+   }
+
    var caps = jsxc.xmpp.conn.caps;
    var domain = jsxc.xmpp.conn.domain;
 
