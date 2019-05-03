@@ -12,6 +12,7 @@ export function init() {
 
    Roster.init();
 
+   SM.changeUIState(SM.UISTATE.READY);
    // if (Options.get('muteNotification')) {
    //    Notification.muteSound();
    // }
