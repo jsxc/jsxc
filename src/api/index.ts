@@ -1,6 +1,8 @@
 import { testBOSHServer } from './v1/testBOSHServer';
 import Client from '../Client';
 import * as v1 from './v1'
+import { AbstractPlugin } from '@src/plugin/AbstractPlugin';
+import { EncryptionPlugin } from '@src/plugin/EncryptionPlugin';
 
 export default class JSXC {
    public static readonly version = __VERSION__;
@@ -8,6 +10,10 @@ export default class JSXC {
    public static readonly testBOSHServer = testBOSHServer;
 
    public static readonly register = v1.register;
+
+   public static readonly AbstractPlugin = AbstractPlugin;
+
+   public static readonly AbstractEncryptionPlugin = EncryptionPlugin;
 
    private static initialized = false;
 
