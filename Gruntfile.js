@@ -1,4 +1,7 @@
 /* global module:false */
+/* jshint node: true */
+var sass = require('node-sass');
+
 module.exports = function(grunt) {
 
    var dep = grunt.file.readJSON('dep.json');
@@ -296,6 +299,9 @@ module.exports = function(grunt) {
          },
       },
       sass: {
+         options: {
+            implementation: sass
+         },
          dist: {
             files: {
                '<%= target %>/css/jsxc.css': 'scss/jsxc.scss',
