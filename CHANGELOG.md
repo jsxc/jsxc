@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.4.4 - 2019-05-10
+### Added
+- add swedish translation (thanks to Stefan)
+
+### Fixed
+- [#769](https://github.com/jsxc/jsxc/issues/769) fix http upload initialization
+- remove jquery-ui from build
+
 ## 3.4.3 - 2018-12-05
 ### Fixed
 - show MUC configuration also for MUC admins
