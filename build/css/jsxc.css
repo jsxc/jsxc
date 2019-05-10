@@ -2912,6 +2912,9 @@ fieldset[disabled]
     resize: none;
     transition: height 0.5s;
     font-size: 13px; }
+  .jsxc_window textarea::-webkit-input-placeholder {
+    color: #000;
+    opacity: 0.3; }
   .jsxc_window textarea::-moz-placeholder {
     color: #000;
     opacity: 0.3; }
@@ -3532,7 +3535,8 @@ ul.jsxc_vCard {
   border-color: #4cae4c; }
 
 .jsxc_oneway .jsxc_avatar {
-  filter: grayscale(100%); }
+  -webkit-filter: grayscale(100%);
+          filter: grayscale(100%); }
 
 img.jsxc_vCard {
   float: right;
@@ -3600,7 +3604,8 @@ img.jsxc_vCard {
   z-index: 110;
   margin: 8px 2px 5px 10px;
   right: 0;
-  filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
+  -webkit-filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
+          filter: drop-shadow(0 0 5px rgba(150, 150, 150, 0.75));
   padding: 4px 12px;
   padding-left: 5px; }
   .jsxc_menu:after {

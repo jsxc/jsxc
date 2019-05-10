@@ -1,13 +1,13 @@
 /*!
- * jsxc v3.4.3 - 2018-12-05
+ * jsxc v3.4.4 - 2019-05-10
  * 
- * Copyright (c) 2018 Klaus Herberth <klaus@jsxc.org> <br>
+ * Copyright (c) 2019 Klaus Herberth <klaus@jsxc.org> <br>
  * Released under the MIT license
  * 
  * Please see https://www.jsxc.org/
  * 
  * @author Klaus Herberth <klaus@jsxc.org>
- * @version 3.4.3
+ * @version 3.4.4
  * @license MIT
  */
 
@@ -25,7 +25,7 @@ var jsxc = null, RTC = null, RTCPeerconnection = null;
  */
 jsxc = {
    /** Version of jsxc */
-   version: '3.4.3',
+   version: '3.4.4',
 
    /** True if i'm the master */
    master: false,
@@ -12562,6 +12562,10 @@ jsxc.xmpp.httpUpload.init = function(o) {
    if (options && options.server) {
       self.ready = true;
 
+      return;
+   }
+
+   if (!jsxc.xmpp.conn) {
       return;
    }
 
