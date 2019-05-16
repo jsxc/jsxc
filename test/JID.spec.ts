@@ -10,16 +10,16 @@ class JIDDummy {
 
     public toEscapedString() {
         let node = this.node.replace(/^\s+|\s+$/g, '')
-            .replace(/\\/g, "\\5c")
-            .replace(/ /g, "\\20")
-            .replace(/\"/g, "\\22")
-            .replace(/\&/g, "\\26")
-            .replace(/\'/g, "\\27")
-            .replace(/\//g, "\\2f")
-            .replace(/:/g, "\\3a")
-            .replace(/</g, "\\3c")
-            .replace(/>/g, "\\3e")
-            .replace(/@/g, "\\40");
+            .replace(/\\/g, '\\5c')
+            .replace(/ /g, '\\20')
+            .replace(/\"/g, '\\22')
+            .replace(/\&/g, '\\26')
+            .replace(/\'/g, '\\27')
+            .replace(/\//g, '\\2f')
+            .replace(/:/g, '\\3a')
+            .replace(/</g, '\\3c')
+            .replace(/>/g, '\\3e')
+            .replace(/@/g, '\\40');
 
         return node + '@' + this.domain + ((this.resource) ? '/' + this.resource : '');
     }

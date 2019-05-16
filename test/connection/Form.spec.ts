@@ -63,8 +63,8 @@ const exampleXMLForm = $.parseXML(`<x xmlns='jabber:x:data' type='${formType}'>
 
 const exampleJSONForm = {
     type: formType,
-    title: title,
-    instructions: instructions,
+    title,
+    instructions,
     fields: [{
         type: 'hidden',
         name: 'FORM_TYPE',
@@ -138,7 +138,6 @@ const exampleHTMLForm = $.parseHTML(`<form data-type="${formType}" autocomplete=
     </div>
 </form>`)[0];
 
-
 describe('XEP-0004: Data Forms', function() {
     it('should parse a XML form', function() {
         let form = Form.fromXML(exampleXMLForm);
@@ -161,7 +160,7 @@ describe('XEP-0004: Data Forms', function() {
     });
 
     it('should parse a HTML form', function() {
-        let form = Form.fromHTML(<Element>exampleHTMLForm);
+        let form = Form.fromHTML(<Element> exampleHTMLForm);
 
         expect(form.getType()).equals('submit');
         expect(form.getValues('features')[0]).equals('news');

@@ -102,8 +102,8 @@ describe('HookRepository', () => {
     })
 
     it('should not crash if you remove unregistered hooks', () => {
-        this.hookRepository.registerHook('foo', () => { return 1; })
+        this.hookRepository.registerHook('foo', () => 1)
 
-        this.hookRepository.removeHook('foo', () => { return 2; })
+        this.hookRepository.removeHook('foo', () => 2)
     })
 });
