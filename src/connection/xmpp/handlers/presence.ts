@@ -38,13 +38,18 @@ export default class extends AbstractHandler {
       }
 
       if (presence.type === PRESENCE.ERROR) {
-         let error = $(stanza).find('error');
-         let errorCode = error.attr('code') || '';
-         let errorType = error.attr('type') || '';
-         let errorReason = error.find('>:first-child').prop('tagName');
-         let errorText = error.find('text').text();
+         let errorStanza = $(stanza).find('error');
+         let errorCode = errorStanza.attr('code') || '';
+         let errorType = errorStanza.attr('type') || '';
+         let errorBy = errorStanza.attr('by') || 'unkown';
+         let errorReason = errorStanza.find('>:first-child').prop('tagName');
+         let errorText = errorStanza.find('text').text();
 
-         Log.error('[XMPP] ' + errorType + ', ' + errorCode + ', ' + errorReason + ', ' + errorText);
+         if (errorStanza.find('remote-server-not-found').length > 0) {
+            Log.info(`You have an invalid contact (${presence.from.toString()}) in your contact list. The error message from ${errorBy} is: ${errorText}`);
+         } else {
+            Log.error('[XMPP] ' + errorType + ', ' + errorCode + ', ' + errorReason + ', ' + errorText);
+         }
 
          return this.PRESERVE_HANDLER;
       }
