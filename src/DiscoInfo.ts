@@ -2,8 +2,7 @@ import PersistentMap from './util/PersistentMap'
 import Client from './Client'
 import Form from './connection/Form'
 import { IDiscoInfo, IIdentity } from './DiscoInfo.interface'
-import * as sha1 from 'sha1'
-import FormField from '@connection/FormField';
+import DiscoInfoVersion from './DiscoInfoVersion';
 
 export default class implements IDiscoInfo {
    protected data: PersistentMap;
@@ -25,7 +24,7 @@ export default class implements IDiscoInfo {
       if (arguments.length === 1 && typeof arguments[0] === 'string') {
          this.version = arguments[0];
       } else {
-         this.version = this.generateCapsVersion(arguments[0], arguments[1], arguments[2]);
+         this.version = DiscoInfoVersion.generate(arguments[0], arguments[1], arguments[2]);
       }
 
       this.data = new PersistentMap(storage, 'disco', this.version);
@@ -77,85 +76,5 @@ export default class implements IDiscoInfo {
       }
 
       return true;
-   }
-
-   protected generateCapsVersion(identities: IIdentity[], features: string[], forms: Form[]): string {
-      let version = '';
-
-      identities = identities.sort(this.sortIdentities);
-      features = features.sort();
-      forms = forms.sort(this.sortForms);
-
-      for (let identity of identities) {
-         version += identity.category + '/';
-         version += identity.type + '/';
-         version += identity.lang + '/';
-         version += identity.name + '<';
-      }
-
-      for (let feature of features) {
-         version += feature + '<';
-      }
-
-      for (let form of forms) {
-         let fields = form.getFields().sort(this.sortFields);
-
-         for (let field of fields) {
-            if (field.getName() === 'FORM_TYPE') {
-               version += field.getValues()[0] + '<';
-            } else {
-               version += field.getName() + '<';
-               version += field.getValues().sort().join('<') + '<';
-            }
-         }
-      }
-
-      return btoa(sha1(version, { asString: true }));
-   }
-
-   protected sortIdentities(a, b) {
-      if (a.category > b.category) {
-         return 1;
-      }
-      if (a.category < b.category) {
-         return -1;
-      }
-      if (a.type > b.type) {
-         return 1;
-      }
-      if (a.type < b.type) {
-         return -1;
-      }
-      if (a.lang > b.lang) {
-         return 1;
-      }
-      if (a.lang < b.lang) {
-         return -1;
-      }
-      return 0;
-   }
-
-   protected sortForms(a: Form, b: Form) {
-      if (a.getType() > b.getType()) {
-         return 1;
-      }
-
-      if (a.getType() < b.getType()) {
-         return -1;
-      }
-
-      return 0;
-   }
-
-   protected sortFields(a: FormField, b: FormField) {
-      if (a.getName() > b.getName()) {
-         return 1;
-      }
-
-      if (a.getName() < b.getName()) {
-         return -1;
-      }
-
-      return 0;
    }
 }

@@ -1,4 +1,5 @@
 import DiscoInfo from './DiscoInfo'
+import DiscoInfoVersion from './DiscoInfoVersion';
 
 export default class DiscoInfoChangeable extends DiscoInfo {
 
@@ -7,7 +8,7 @@ export default class DiscoInfoChangeable extends DiscoInfo {
    }
 
    public getCapsVersion(): String {
-      return this.generateCapsVersion(this.getIdentities(), this.getFeatures(), []);
+      return DiscoInfoVersion.generate(this.getIdentities(), this.getFeatures(), []);
    }
 
    public addIdentity(category: string, type: string, name: string = '', lang: string = ''): boolean {
