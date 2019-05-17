@@ -629,6 +629,24 @@ div.jsxc-transfer {
     }
   }
 
+  &--loading::after {
+    animation: jsxc-rotate 1s infinite;
+    border: 10px solid rgba(255, 255, 255, 0.7);
+    border-left-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    border-right-color: rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    content: "";
+    display: block;
+    height: 20px;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    position: absolute;
+    top: 50%;
+    width: 20px;
+  }
+
   .jsxc-transfer-icon {
     background-image: url("../images/padlock_open_black.svg");
     background-position: center center;

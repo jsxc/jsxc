@@ -607,11 +607,15 @@ export default class ChatWindow {
          let label = (<any> plugin.constructor).getName().toUpperCase();
 
          menu.addEntry(label, () => {
-            //@TODO show spinner
+            let buttonElement = this.encryptionMenu.getButtonElement();
+            buttonElement.addClass('jsxc-transfer--loading');
+
             plugin.toggleTransfer(this.contact).catch(err => {
                Log.warn('Toggle transfer error:', err);
 
                this.getContact().addSystemMessage(err.toString());
+            }).then(() => {
+               buttonElement.removeClass('jsxc-transfer--loading');
             });
          });
       }
