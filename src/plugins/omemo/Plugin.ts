@@ -65,7 +65,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
             throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
          }
 
-         if (!this.getOmemo().isTrusted(contact)) {
+         if (!this.getOmemo().isTrusted(contact) && !this.getOmemo().trustOnFirstUse(contact)) {
             throw new Error(Translation.t('There_are_new_OMEMO_devices'));
          }
 

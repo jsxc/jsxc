@@ -38,7 +38,7 @@ export default class Omemo {
       this.store = new Store(storage);
       this.bundleManager = new BundleManager(connection.getPEPService(), this.store);
 
-      this.localPeer = new Peer(this.deviceName, this.store, this.bundleManager);
+      this.localPeer = new Peer(this.deviceName, this);
    }
 
    public getIdentityManager(): IdentityManager {
@@ -47,6 +47,14 @@ export default class Omemo {
       }
 
       return this.identityManager;
+   }
+
+   public getStore(): Store {
+      return this.store;
+   }
+
+   public getBundleManager(): BundleManager {
+      return this.bundleManager;
    }
 
    public async cleanUpDeviceList() {
@@ -93,6 +101,21 @@ export default class Omemo {
       let peer = this.getPeer(contact.getJid());
 
       return peer.getTrust() !== Trust.unknown && this.localPeer.getTrust() !== Trust.unknown;
+   }
+
+   public async trustOnFirstUse(contact: Contact): Promise<boolean> {
+      let peer = this.getPeer(contact.getJid());
+      let [peerTrustedOnFirstUse, localPeerTrustedOnFirstUse] = await Promise.all([peer.trustOnFirstUse(), this.localPeer.trustOnFirstUse()]);
+
+      if (peerTrustedOnFirstUse) {
+         contact.addSystemMessage(Translation.t('Blindly_trusted_peer_on_first_use'));
+      }
+
+      if (localPeerTrustedOnFirstUse) {
+         contact.addSystemMessage(Translation.t('Blindly_trusted_all_your_own_devices_on_first_use'));
+      }
+
+      return peerTrustedOnFirstUse && localPeerTrustedOnFirstUse;
    }
 
    public getDevices(contact?: Contact): Device[] {
@@ -208,7 +231,7 @@ export default class Omemo {
 
    private getPeer(jid: IJID): Peer {
       if (!this.peers[jid.bare]) {
-         this.peers[jid.bare] = new Peer(jid.bare, this.store, this.bundleManager);
+         this.peers[jid.bare] = new Peer(jid.bare, this);
       }
 
       return this.peers[jid.bare];

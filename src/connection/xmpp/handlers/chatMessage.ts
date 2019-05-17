@@ -19,6 +19,10 @@ export default class extends AbstractHandler {
          return this.PRESERVE_HANDLER;
       }
 
+      if (!messageElement.getPeer()) {
+         return this.PRESERVE_HANDLER;
+      }
+
       let peerJid = new JID(messageElement.getPeer());
       let peerContact = this.account.getContact(peerJid);
       if (typeof peerContact === 'undefined') {
@@ -110,8 +114,10 @@ class MessageElement {
       }
 
       if (from.bare === to.bare) {
+         let carbonTagName = <string> carbonStanza.prop('tagName') || '';
+
          this.carbon = true;
-         this.direction = (carbonStanza.prop('tagName') === 'sent') ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
+         this.direction = (carbonTagName.toLowerCase() === 'sent') ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
 
          return;
       }
