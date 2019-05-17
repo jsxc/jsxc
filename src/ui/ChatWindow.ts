@@ -562,7 +562,7 @@ export default class ChatWindow {
       });
 
       this.contact.registerHook('name', (newName) => {
-         this.element.find('.jsxc-name').text(newName);
+         this.element.find('.jsxc-bar__caption__primary').text(newName);
       });
 
       this.getTranscript().registerHook('firstMessageId', (firstMessageId) => {
