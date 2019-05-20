@@ -296,30 +296,31 @@ export default class Roster {
 
    private insert(rosterItem: RosterItem) {
       let contactList = this.contactList;
-      let insert = false;
       let contact = rosterItem.getContact();
+      let contactName = contact.getName().toLowerCase();
 
       // Insert buddy with no mutual friendship to the end
-      let presence = (contact.getSubscription() === 'both') ? contact.getPresence() : Presence.offline + 1;
+      let contactPresence = (contact.getSubscription() === 'both') ? contact.getPresence() : Presence.offline + 1;
 
-      contactList.children().each(function() {
-         let pointer = $(this);
+      let pointer = contactList.find(`[data-presence="${Presence[contact.getPresence()]}"]`);
+      pointer = pointer.length > 0 ? pointer.first() : contactList.children().first();
+
+      while (pointer.length > 0) {
          let pointerSubscription = pointer.data('subscription');
          let pointerPresence = (pointerSubscription === 'both') ? Presence[pointer.data('presence')] : Presence.offline + 1;
          let pointerName = pointer.find('.jsxc-bar__caption__primary').text();
 
-         if ((pointerName.toLowerCase() > contact.getName().toLowerCase() && pointerPresence === presence) || pointerPresence > presence) {
+         if ((pointerName.toLowerCase() > contactName && pointerPresence === contactPresence) || pointerPresence > contactPresence) {
 
             pointer.before(rosterItem.getDom().detach());
-            insert = true;
 
-            return false;
+            return;
          }
-      });
 
-      if (!insert) {
-         rosterItem.getDom().appendTo(contactList);
+         pointer = pointer.next();
       }
+
+      rosterItem.getDom().appendTo(contactList);
    }
 
    private addMainMenuEntries() {
