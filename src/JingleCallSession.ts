@@ -62,7 +62,7 @@ export default class JingleCallSession extends JingleMediaSession {
 
       for (let content of contents) {
          if (content.senders === 'both' && ['audio', 'video'].indexOf(content.application.media) > -1) {
-            mediaRequested.push(content.name);
+            mediaRequested.push(content.application.media);
          }
       }
 
