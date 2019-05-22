@@ -1,6 +1,8 @@
 import Dialog from '../Dialog'
 import Log from '@util/Log';
 import Utils from '@util/Utils';
+import UserMedia from '@src/UserMedia';
+import { VideoDialog } from '@ui/VideoDialog';
 
 let debugLogTemplate = require('../../../template/debugLog.hbs');
 
@@ -12,9 +14,34 @@ export default function() {
    let dialog = new Dialog(content);
    dialog.open();
 
+   let dom = dialog.getDom();
    let logs = Log.getLogs();
 
-   dialog.getDom().find('.jsxc-log').append(`<p>${logs.map(log => Utils.escapeHTML(log)).join('<br>')}</p>`);
+   dom.find('.jsxc-log').append(`<p>${logs.map(log => Utils.escapeHTML(log)).join('<br>')}</p>`);
+
+   dom.find('.jsxc-webcam button').on('click', function() {
+      $(this).remove();
+
+      let videoElement = $('<video autoplay></video>');
+      videoElement.css('width', '150px');
+      videoElement.appendTo(dom.find('.jsxc-webcam'));
+
+      UserMedia.request(['video']).then(stream => {
+         VideoDialog.attachMediaStream(videoElement, stream);
+      }).catch(err => {
+         videoElement.remove();
+
+         dom.find('.jsxc-webcam').append(err);
+      })
+   });
+
+   dialog.registerOnClosedHook(() => {
+      let videoElement = dom.find('.jsxc-webcam video');
+
+      if (videoElement.length > 0) {
+         VideoDialog.detachMediaStream(videoElement);
+      }
+   })
 }
 
 function getUserInformation() {
