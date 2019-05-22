@@ -98,7 +98,7 @@ export class VideoDialog {
          this.localStream = localStream;
          VideoDialog.attachMediaStream(localVideoElement, localStream);
 
-         if (localStream.getVideoTracks().length === 0) {
+         if (!localStream || localStream.getVideoTracks().length === 0) {
             Log.debug('No local video device available');
 
             localVideoElement.hide();
