@@ -1,4 +1,4 @@
-import Identifiable from '../Identifiable.interface'
+import IIdentifiable from '../Identifiable.interface'
 import InvalidParameterError from '../errors/InvalidParameterError';
 import IStorage from '@src/Storage.interface';
 
@@ -55,7 +55,7 @@ export default class PersistentMap {
       this.save();
    }
 
-   public remove(id: Identifiable);
+   public remove(id: IIdentifiable);
    public remove(id: string);
    public remove() {
       let id;

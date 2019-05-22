@@ -1,6 +1,6 @@
-import Identifiable from './Identifiable.interface'
+import IIdentifiable from './Identifiable.interface'
 
-abstract class Storable implements Identifiable {
+abstract class Storable implements IIdentifiable {
    constructor(data: any) {
       $.extend(this, data);
    }

@@ -1,4 +1,4 @@
-import Identifiable from '../Identifiable.interface'
+import IIdentifiable from '../Identifiable.interface'
 import Storage from '../Storage'
 import Log from '../util/Log'
 import InvalidParameterError from '../errors/InvalidParameterError'
@@ -51,7 +51,7 @@ export default class SortedPersistentMap {
       return this.map[id];
    }
 
-   public push(element: Identifiable) {
+   public push(element: IIdentifiable) {
       let id = element.getId();
 
       if (typeof this.map[id] !== 'undefined') {
@@ -75,7 +75,7 @@ export default class SortedPersistentMap {
       this.save();
    }
 
-   public remove(id: Identifiable);
+   public remove(id: IIdentifiable);
    public remove(id: string);
    public remove() {
       let id;

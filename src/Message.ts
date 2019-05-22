@@ -4,7 +4,7 @@ import JID from './JID'
 import * as CONST from './CONST'
 import Emoticons from './Emoticons'
 import Translation from './util/Translation'
-import Identifiable from './Identifiable.interface'
+import IIdentifiable from './Identifiable.interface'
 import Client from './Client'
 import Utils from './util/Utils'
 import { IMessage, DIRECTION, IMessagePayload } from './Message.interface'
@@ -14,7 +14,7 @@ import UUID from './util/UUID'
 
 const ATREGEX = new RegExp('(xmpp:)?(' + CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i');
 
-export default class Message implements Identifiable, IMessage {
+export default class Message implements IIdentifiable, IMessage {
 
    public static exists(uid: string) {
       let data = PersistentMap.getData(Client.getStorage(), uid);

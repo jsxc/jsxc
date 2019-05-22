@@ -162,9 +162,7 @@ let config = {
          filename: 'styles/jsxc.bundle.css',
 
       }),
-      new CleanWebpackPlugin([OUTPUT_PATH], {
-         verbose: false,
-      }),
+      new CleanWebpackPlugin(),
       new CopyWebpackPlugin([{
          from: 'images/',
          to: 'images/'

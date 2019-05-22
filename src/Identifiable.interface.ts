@@ -1,6 +1,6 @@
 
-interface Identifiable {
+interface IIdentifiable {
    getId(): string
 }
 
-export default Identifiable;
+export default IIdentifiable;

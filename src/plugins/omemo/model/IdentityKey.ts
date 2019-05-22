@@ -1,10 +1,10 @@
 import ArrayBufferUtils from '../util/ArrayBuffer'
 import IExportable from './Exportable';
 
-interface IdentityKeyObject { publicKey: ArrayBuffer, privateKey?: ArrayBuffer }
+interface IIdentityKeyObject { publicKey: ArrayBuffer, privateKey?: ArrayBuffer }
 
 export default class IdentityKey implements IExportable {
-   constructor(private data: IdentityKeyObject) {
+   constructor(private data: IIdentityKeyObject) {
 
    }
 
@@ -24,7 +24,7 @@ export default class IdentityKey implements IExportable {
       return this.data.publicKey.slice(1);
    }
 
-   public export(): IdentityKeyObject {
+   public export(): IIdentityKeyObject {
       return this.data;
    }
 }
