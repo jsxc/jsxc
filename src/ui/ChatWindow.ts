@@ -17,6 +17,7 @@ import FileTransferHandler from './ChatWindowFileTransferHandler'
 import Attachment from '../Attachment'
 import * as Resizable from 'resizable'
 import { IJID } from '@src/JID.interface';
+import { JINGLE_FEATURES } from '@src/JingleAbstractSession';
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -289,12 +290,7 @@ export default class ChatWindow {
             ev.stopPropagation();
 
             startCall(contact, this.getAccount());
-         }, [
-            'urn:xmpp:jingle:apps:rtp:video',
-            'urn:xmpp:jingle:apps:rtp:audio',
-            'urn:xmpp:jingle:transports:ice-udp:1',
-            'urn:xmpp:jingle:apps:dtls:0'
-         ]
+         }, JINGLE_FEATURES.video
       );
 
       elementHandler.add(
@@ -303,11 +299,7 @@ export default class ChatWindow {
             ev.stopPropagation();
 
             startCall(contact, this.getAccount(), 'audio');
-         }, [
-            'urn:xmpp:jingle:apps:rtp:audio',
-            'urn:xmpp:jingle:transports:ice-udp:1',
-            'urn:xmpp:jingle:apps:dtls:0'
-         ]
+         }, JINGLE_FEATURES.audio
       );
 
       elementHandler.add(
@@ -316,10 +308,7 @@ export default class ChatWindow {
             ev.stopPropagation();
 
             startCall(contact, this.getAccount(), 'screen');
-         }, [
-            'urn:xmpp:jingle:transports:ice-udp:1',
-            'urn:xmpp:jingle:apps:dtls:0'
-         ]
+         }, JINGLE_FEATURES.screen
       );
 
       elementHandler.add(

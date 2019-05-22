@@ -8,6 +8,12 @@ export default class UserMedia {
       let overlay = new Overlay();
       overlay.open();
 
+      um.forEach(element => {
+         if (['video', 'audio', 'screen'].indexOf(element) < 0) {
+            Log.warn('Requested invalid user media: ' + element);
+         }
+      });
+
       let stream: MediaStream;
 
       try {
