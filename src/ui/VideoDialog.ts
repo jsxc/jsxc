@@ -30,6 +30,8 @@ export class VideoDialog {
 
    public addSession(session: JingleMediaSession) {
       session.on('terminated', (reason) => {
+         this.removeContainer(session.getId());
+
          this.removeSession(session, reason);
       });
 
@@ -144,6 +146,16 @@ export class VideoDialog {
       this.dom.find('.jsxc-video-container').addClass('jsxc-device-available');
       this.dom.find('.jsxc-video-container').append(containerElement);
 
+      this.updateNumberOfContainer();
+   }
+
+   private removeContainer(sessionId: string) {
+      this.dom.find(`[data-sid="${sessionId}"]`).remove();
+
+      this.updateNumberOfContainer();
+   }
+
+   private updateNumberOfContainer() {
       let numberOfContainer = this.dom.find('.jsxc-video-container > .jsxc-video-wrapper').length;
 
       this.dom.find('.jsxc-video-container').attr('data-videos', numberOfContainer);

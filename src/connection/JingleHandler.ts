@@ -173,9 +173,3 @@ export default class JingleHandler {
       return JingleHandler.videoDialog;
    }
 }
-
-/** required disco features for video call */
-// reqVideoFeatures: ['urn:xmpp:jingle:apps:rtp:video', 'urn:xmpp:jingle:apps:rtp:audio', 'urn:xmpp:jingle:transports:ice-udp:1', 'urn:xmpp:jingle:apps:dtls:0'],
-
-/** required disco features for file transfer */
-// reqFileFeatures: ['urn:xmpp:jingle:1', 'urn:xmpp:jingle:apps:file-transfer:3'],

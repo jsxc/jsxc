@@ -4,7 +4,7 @@
   position: fixed;
   right: 0;
   top: 0;
-  z-index: 9999;
+  z-index: 998;
 
   .jsxc-status {
     background-color: $video-status-bg;
@@ -129,7 +129,7 @@
   &[data-videos="2"] {
     .jsxc-video-wrapper {
       height: 100%;
-      width: 100%;
+      width: 50%;
     }
   }
 
