@@ -1,0 +1,406 @@
+#jsxc-roster {
+  background-color: $roster-bg;
+  border-left: 1px solid #e1e1e1;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+  overflow: visible;
+  position: fixed;
+  right: 0;
+  top: 0;
+  transition: right 0.5s;
+  width: 200px;
+  z-index: 80;
+
+  .jsxc-roster-hidden & {
+    right: -200px;
+  }
+
+  a {
+    cursor: pointer;
+  }
+
+  .jsxc-avatar {
+    cursor: pointer;
+    position: relative;
+
+    img {
+      cursor: pointer;
+    }
+  }
+
+  .jsxc-wait {
+    background-color: $white;
+    bottom: 0;
+    left: 0;
+    padding: 20px;
+    position: absolute;
+    top: 0;
+    width: 160px;
+    z-index: 60;
+
+    img {
+      padding: 5px;
+    }
+
+    h3 {
+      font-size: 1.13em;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+  }
+
+  input {
+    background-color: $roster-input-bg;
+    background-image: none;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    box-shadow: inner 0 0 5px $roster-input-shadow;
+    box-sizing: border-box;
+    font-size: 13px;
+    height: 35px;
+    margin: 0;
+    outline: none;
+    padding: 7px 6px 5px;
+    width: 100%;
+  }
+
+  p {
+    color: $roster-color;
+    padding: 10px;
+
+    a {
+      color: $roster-a;
+      text-decoration: underline;
+    }
+  }
+
+  .jsxc-expand input {
+    left: 51px;
+    width: 137px;
+  }
+
+  &.jsxc-state-hidden {
+    display: block;
+    right: -200px;
+    transition: right 0.5s;
+  }
+
+  &.jsxc-state-shown {
+    display: block;
+    right: 0;
+    transition: right 0.5s;
+  }
+
+  >.jsxc-bottom {
+    background-color: $roster-bottom-bg;
+    flex-shrink: 0;
+    line-height: 34px;
+    padding: 5px 4px 2px 0;
+    width: 100%;
+
+    &:hover {
+      background-color: $roster-bottom-bg-hover;
+    }
+  }
+
+  form {
+    padding: 15px;
+
+    button,
+    input {
+      border-radius: 0;
+      margin: 0 0 5px;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background-color: #dadada;
+      border-color: #c1c1c1;
+      transition: background-color 0.5s;
+
+      &:hover {
+        background-color: #a2a2a2;
+      }
+    }
+
+    label {
+      display: block;
+    }
+
+    input {
+      position: static;
+    }
+  }
+
+  .jsxc-roster-status {
+    bottom: 0;
+    display: none;
+    position: absolute;
+  }
+
+  &.jsxc-status-show {
+    .jsxc-roster-status {
+      display: block;
+    }
+  }
+
+  &.jsxc-hide-offline {
+    .jsxc-roster-item[data-presence="offline"] {
+      display: none;
+    }
+
+    li.jsxc-hide-offline {
+      .jsxc-hide-offline {
+        display: none;
+      }
+
+      .jsxc-show-offline {
+        display: inherit;
+      }
+    }
+
+    .jsxc-contact-list::after {
+      content: attr(data-offline-hidden-label);
+    }
+  }
+
+  &[data-presence="offline"] {
+    .jsxc-contact-list::after {
+      content: attr(data-presence-offline-label);
+    }
+  }
+
+  &[data-mute="yes"] {
+    .jsxc-js-presence-menu .jsxc-menu__button::after {
+      background-image: url("../images/mute_black.svg");
+      background-position: center right;
+      background-repeat: no-repeat;
+      background-size: contain;
+      content: "";
+      display: inline-block;
+      height: 1em;
+      opacity: 0.4;
+      padding-left: 0.5em;
+      position: relative;
+      top: 2px;
+      width: 1em;
+    }
+  }
+}
+
+.jsxc-roster-toggle {
+  background-color: rgba(225, 225, 225, 1);
+  border-radius: 14px 0 0 14px;
+  cursor: pointer;
+  height: 44px;
+  margin-top: -22px;
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transition: width 0.5s, background-color 0.5s;
+  width: 14px;
+  z-index: 110;
+
+  &::after {
+    border: 8px solid rgba(0, 0, 0, 0.2);
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    border-left-width: 0;
+    border-top-color: transparent;
+    content: " ";
+    height: 0;
+    left: 50%;
+    margin-left: -4px;
+    margin-top: -7px;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    width: 0;
+
+    .jsxc-roster-shown & {
+      transform: rotate(180deg);
+    }
+  }
+
+  &:hover {
+    background-color: rgba(200, 200, 200, 1);
+    width: 28px;
+  }
+}
+
+.jsxc-roster-item {
+  border-bottom: 1px solid $roster-bottom-border-top;
+  color: $roster-color;
+  margin: 0;
+  padding: 0;
+
+  &:hover {
+    background-color: $roster-bg-hover;
+  }
+
+  &.jsxc-bookmarked {
+    .jsxc-avatar::after {
+      background-image: url("../images/bookmark_red.svg");
+      background-repeat: no-repeat;
+      background-size: contain;
+      content: " ";
+      height: 30%;
+      position: absolute;
+      right: 2px;
+      top: 0;
+      width: 20%;
+    }
+  }
+
+  &:not([data-subscription="both"]):not(.jsxc-bottom) {
+    .jsxc-bar__caption {
+      opacity: 0.7;
+    }
+
+    .jsxc-avatar {
+      filter: grayscale(100%);
+    }
+  }
+}
+
+#jsxc-roster[data-presence="offline"] li:not(.jsxc-offline-available) {
+  opacity: 0.5;
+
+  &:hover {
+    background-color: inherit;
+    cursor: auto;
+  }
+}
+
+li.jsxc-hide-offline {
+  .jsxc-hide-offline {
+    display: inherit;
+  }
+
+  .jsxc-show-offline {
+    display: none;
+  }
+}
+
+.jsxc-bounce {
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-name: jsxc-bounce-6;
+  animation-timing-function: ease;
+  background-color: $notice-bg;
+  border-radius: 11px;
+  color: $notice-color;
+  display: inline-block;
+  font-size: 80%;
+  line-height: 1.5em;
+  padding: 2px 3px;
+  position: relative;
+
+  transform-origin: bottom;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.jsxc-contact-list {
+  @include presence-indicator(" .jsxc-avatar");
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  z-index: 85;
+
+  &::after {
+    display: block;
+    font-size: 0.8em;
+    font-style: italic;
+    line-height: 44px;
+    opacity: 0.6;
+    text-align: center;
+  }
+
+  &:empty::after {
+    content: attr(data-empty-list-label);
+  }
+
+  &-wrapper {
+
+    @extend %scrollbar;
+    flex-grow: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .jsxc-unread-msg {
+    .jsxc-name {
+      padding-right: 0;
+    }
+  }
+
+  .jsxc-oneway {
+    .jsxc-avatar,
+    .jsxc-caption {
+      opacity: 0.7;
+    }
+  }
+
+  .jsxc-right {
+    float: right;
+    margin-right: 6px;
+
+    div {
+      color: $white;
+      font-size: 13px;
+      font-weight: bold;
+      line-height: 20px;
+      text-align: center;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .jsxc-action-entry.jsxc-menu {
+    float: right;
+    height: 100%;
+    width: 42px;
+
+    >span {
+      background-image: url("../images/more_black.svg");
+      background-position: center center;
+      background-repeat: no-repeat;
+      cursor: pointer;
+      display: block;
+      height: 100%;
+      opacity: 0.6;
+      width: 100%;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .jsxc-inner {
+      left: auto;
+      overflow: visible;
+      padding: 4px;
+      right: 5px;
+
+      a {
+        display: block;
+        line-height: 42px;
+        text-align: center;
+        width: 42px;
+
+        span {
+          margin: 0;
+        }
+      }
+    }
+  }
+}

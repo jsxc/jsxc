@@ -1,0 +1,19 @@
+{
+  "extends": "stylelint-config-sass-guidelines",
+  "rules": {
+    "string-quotes": "double",
+    "selector-max-id": 1,
+    "max-nesting-depth": 5,
+    "selector-max-compound-selectors": 5,
+    "selector-no-qualifying-type": [true, {
+      "ignore": ["attribute", "class", "id"]
+    }],
+    "selector-class-pattern": [
+      "^[a-z0-9_\\-]+$",
+      {
+        "message":
+          "Selector should be written in lowercase with hyphens and underscores (selector-class-pattern)"
+      }
+    ]
+  }
+}

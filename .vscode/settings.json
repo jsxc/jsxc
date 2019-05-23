@@ -1,0 +1,28 @@
+{
+    "cSpell.words": [
+        "ciphertext",
+        "jsxc",
+        "omemo",
+        "xmlns",
+        "XMPP",
+        "IJID",
+        "JID"
+    ],
+    "todohighlight.include": [
+        "src/**/*.ts"
+    ],
+    "todohighlight.keywords": [{
+            "text": "@TODO",
+            "backgroundColor": "blue",
+            "color": "white"
+        }, {
+            "text": "@REVIEW",
+            "backgroundColor": "green",
+            "color": "white"
+        }, {
+            "text": "@FIX",
+            "backgroundColor": "red",
+            "color": "white"
+        }
+    ]
+}

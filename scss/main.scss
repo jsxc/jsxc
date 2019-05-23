@@ -1,0 +1,32 @@
+.jsxc-window-list,
+.jsxc-window-list-handler,
+.jsxc-dialog,
+#jsxc-roster {
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@import "modules/all";
+@import "vendor/all";
+
+//fonts
+$font-sans: Arial, sans-serif;
+
+$default-window-width: 250px;
+
+@import "partials/avatar";
+@import "partials/button";
+@import "partials/bar";
+@import "partials/dialog";
+@import "partials/emoticons";
+@import "partials/icon";
+@import "partials/menu";
+@import "partials/muc";
+@import "partials/roster";
+@import "partials/window-list";
+@import "partials/window";
+
+@import "partials/jsxc";
+@import "partials/layout";
+@import "partials/webrtc";

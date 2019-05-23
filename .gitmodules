@@ -1,9 +1,0 @@
-[submodule "lib/otr"]
-	path = lib/otr
-	url = https://github.com/sualko/otr.git
-[submodule "lib/bootstrap"]
-	path = lib/bootstrap
-	url = https://github.com/twbs/bootstrap-sass/
-[submodule "lib/strophe.jinglejs"]
-	path = lib/strophe.jinglejs
-	url = https://github.com/jsxc/strophe.jinglejs

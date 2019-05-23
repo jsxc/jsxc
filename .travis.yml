@@ -5,10 +5,20 @@ dist: trusty
 node_js:
   - "node"
 
-before_install:
-  - rvm install 2.4.6
-  - gem install scss_lint
+dist: trusty
+
+sudo: required
+
+addons:
+  chrome: stable
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
 
 script:
-  - echo {} > .github.json
-  - ./node_modules/.bin/grunt pre-commit
+  - yarn checking-style-format
+  - yarn checking-typescript-format
+  - commitlint-travis
+  - yarn test

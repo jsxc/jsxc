@@ -1,0 +1,204 @@
+.jsxc-right {
+  text-align: right;
+}
+
+.jsxc-center {
+  text-align: center;
+}
+
+.jsxc-hidden {
+  display: none;
+}
+
+.jsxc-clear {
+  clear: both;
+}
+
+.jsxc-grow {
+  flex-grow: 1;
+}
+
+.jsxc-shrink--no {
+  flex-shrink: 0;
+}
+
+.jsxc-uppercase {
+  text-transform: uppercase;
+}
+
+.jsxc-hint {
+  opacity: 0.7;
+}
+
+.jsxc-max-width {
+  max-width: 500px;
+}
+
+.jsxc-meta {
+  font-style: italic;
+  text-align: right;
+}
+
+.jsxc-invalid {
+  border: 2px solid $invalid-border !important;
+}
+
+.jsxc-fingerprint {
+  font-family: monospace;
+}
+
+.jsxc-overlay {
+  bottom: 0;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 9999;
+
+  &-black {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+.jsxc-waiting::before {
+  animation: jsxc-rotate 1.1s infinite linear;
+  border: 0.15em solid rgba(0, 0, 0, 0.2);
+  border-left-color: rgba(0, 0, 0, 0.8);
+  border-radius: 50%;
+  content: "";
+  display: inline-block;
+  height: 1.2em;
+  margin-right: 0.8em;
+  position: relative;
+  text-indent: -9999em;
+  transform: translateZ(0);
+  vertical-align: sub;
+  width: 1.2em;
+}
+
+ul.jsxc-vcard {
+  clear: both;
+  min-width: 400px;
+
+  ul {
+    margin-left: 20px;
+  }
+
+  li {
+    cursor: default !important;
+
+    &.jsxc-separator {
+      margin-bottom: 1em;
+    }
+  }
+}
+
+.jsxc-avatar.jsxc-vcard {
+  height: 100px;
+  margin-bottom: 10px;
+  width: 100px;
+}
+
+//  Spot which is attached to xmpp: uris
+.jsxc-spot {
+  background-color: $white;
+  border: 1px solid $spot-border;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-block;
+  height: 12px;
+  line-height: 100%;
+  margin-right: 5px;
+  margin-top: 3px;
+  text-indent: -99999em;
+  width: 12px;
+
+  &::before {
+    position: absolute;
+  }
+
+  &.jsxc-online,
+  &.jsxc-chat,
+  &.jsxc-away,
+  &.jsxc-xa,
+  &.jsxc-dnd,
+  &.jsxc-offline {
+    border: 0;
+  }
+}
+
+.jsxc-unread-msg {
+  .jsxc-name {
+    font-style: italic;
+  }
+
+  .jsxc-unread {
+    background-color: $unread-bg;
+    border-radius: 11px;
+    color: $unread-color;
+    display: block;
+    float: right;
+    font-size: 80%;
+    line-height: 15px;
+    margin-right: 3px;
+    margin-top: 4px;
+    padding: 2px;
+  }
+}
+
+.jsxc-loading {
+  background: url("../images/loading.gif");
+  background-size: 32px 32px !important;
+  border: 0;
+  height: 32px;
+  margin: 0 auto;
+  width: 32px;
+}
+
+.jsxc-oneway .jsxc-avatar {
+  filter: grayscale(100%);
+}
+
+.jsxc-alert {
+  border: 1px solid transparent;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  padding: 15px;
+
+  &.jsxc-alert--warning {
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+    color: #8a6d3b;
+  }
+}
+
+.jsxc-user-information {
+  dl {
+    display: flex;
+    flex-flow: row wrap;
+    max-width: 500px;
+  }
+
+  dt {
+    flex-basis: 30%;
+    font-weight: bold;
+    padding: 0.3em 1em;
+
+    &::after {
+      content: ":";
+    }
+  }
+
+  dd {
+    flex-basis: 70%;
+    flex-grow: 1;
+    margin: 0;
+    padding: 0.3em 1em;
+  }
+}
+
+.jsxc-log {
+  height: 300px;
+  overflow: auto;
+  width: 500px;
+}

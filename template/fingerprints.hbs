@@ -1,0 +1,21 @@
+<div>
+   <p class="jsxc-max-width">{{t "A_fingerprint_"}}</p>
+   <p>
+      <strong>{{t "Your_fingerprint"}}</strong>
+      <br />
+      {{#if ownFingerprint}}
+         <span class="jsxc-uppercase">{{ownFingerprint}}</span>
+      {{else}}
+         {{t "not_available"}}
+      {{/if}}
+   </p>
+   <p>
+      <strong data-i18n="Buddy_fingerprint"></strong>
+      <br />
+      {{#if theirFingerprint}}
+         <span class="jsxc-uppercase">{{theirFingerprint}}</span>
+      {{else}}
+         {{t "not_available"}}
+      {{/if}}
+   </p>
+</div>

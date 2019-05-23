@@ -1,0 +1,24 @@
+<div id="jsxc-roster">
+   <div class="jsxc-contact-list-wrapper">
+      <ul class="jsxc-contact-list" data-empty-list-label="{{t "Your_contact_list_is_empty"}}" data-offline-hidden-label="{{t "Offline_contacts_are_hidden"}}" data-presence-offline-label="{{t "You_are_currently_offline"}}"></ul>
+   </div>
+   <div class="jsxc-roster-status"></div>
+   <div class="jsxc-bottom jsxc-presence jsxc-roster-item jsxc-bar" data-bid="own">
+      <div class="jsxc-avatar jsxc-shrink--no" />
+      {{#> menu
+        classes="jsxc-menu--pushup jsxc-grow jsxc-js-presence-menu"
+        button-label=(t "Offline")}}
+            <li data-presence="online" class="jsxc-online jsxc-offline-available">{{t "Online"}}</li>
+            <li data-presence="chat" class="jsxc-chat">{{t "Chatty"}}</li>
+            <li data-presence="away" class="jsxc-away">{{t "Away"}}</li>
+            <li data-presence="xa" class="jsxc-xa">{{t "Extended_away"}}</li>
+            <li data-presence="dnd" class="jsxc-dnd">{{t "dnd"}}</li>
+            <li data-presence="offline" class="jsxc-offline">{{t "Offline"}}</li>
+      {{/menu}}
+
+      {{> menu classes="jsxc-menu--pushup jsxc-js-notice-menu" button-classes="jsxc-bounce"}}
+
+      {{> menu classes="jsxc-menu--pushup jsxc-js-main-menu" button-classes="jsxc-icon jsxc-icon--menu-dark jsxc-icon--clickable"}}
+   </div>
+   <div class="jsxc-roster-toggle"></div>
+</div>

@@ -1,0 +1,26 @@
+$presences: online chat away xa dnd;
+
+@mixin presence-indicator($target) {
+
+  @each $presence in $presences {
+    [data-presence="#{$presence}"]#{$target} {
+      &::before {
+        background-color: map-get($presence-colors, $presence);
+        background-image: url("../images/presence/#{$presence}.svg");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 100%;
+        border-radius: 100%;
+        box-sizing: content-box;
+        color: #fff;
+        content: "";
+        display: block;
+        height: 12px;
+        line-height: 12px;
+        text-align: center;
+        width: 12px;
+        z-index: 99;
+      }
+    }
+  }
+}

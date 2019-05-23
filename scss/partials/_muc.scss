@@ -1,0 +1,139 @@
+.jsxc-window-item {
+  &.jsxc-groupchat.jsxc-normal {
+    &.jsxc-disabled {
+      .jsxc-window-fade::before {
+        background-color: rgba(167, 167, 167, 0.5);
+        bottom: 0;
+        content: "";
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 50;
+      }
+
+      .jsxc-destroy,
+      .jsxc-leave,
+      .jsxc-configure {
+        display: none;
+      }
+    }
+
+    .jsxc-fingerprints,
+    .jsxc-verification,
+    .jsxc-transfer,
+    .jsxc-video,
+    .jsxc-audio,
+    .jsxc-share-screen,
+    .jsxc-destroy,
+    .jsxc-configure {
+      display: none;
+    }
+
+    &[data-affiliation="owner"] {
+      .jsxc-destroy,
+      .jsxc-configure {
+        display: inherit;
+      }
+    }
+
+    .jsxc-members {
+      background-image: url("../images/group_white.svg");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 22px 22px;
+      position: relative;
+
+      &::before {
+        content: attr(data-number-of-members);
+        font-size: 12px;
+        line-height: 18px;
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .jsxc-chatmessage.jsxc-in {
+      margin-left: 50px;
+
+      .jsxc-avatar {
+        background-color: #777;
+        bottom: 0;
+        display: block;
+        left: -50px;
+        position: absolute;
+
+        &::before {
+          display: none;
+        }
+      }
+    }
+
+    .jsxc-bar {
+      .jsxc-avatar {
+        @extend %muc-avatar-icon;
+      }
+    }
+  }
+
+  .jsxc-memberlist {
+
+    @extend %scrollbar;
+    background-color: $window-bar-bg;
+    max-height: 0;
+    overflow: auto;
+    position: absolute;
+    top: 0;
+    transition: max-height 400ms;
+    width: 100%;
+    z-index: 200;
+
+    &.jsxc-expand {
+      max-height: 120px;
+    }
+
+    ul {
+      color: $window-bar-color;
+      padding: 0 2px;
+
+      > li {
+        display: block;
+        height: 40px;
+        line-height: 40px;
+        width: 100%;
+
+        .jsxc-name {
+          cursor: default;
+          display: block;
+          overflow: hidden;
+          padding-right: 0.5em;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+
+          &:hover {
+            color: inherit;
+          }
+        }
+
+        .jsxc-avatar {
+          margin-right: 4px;
+        }
+      }
+    }
+  }
+}
+
+li[data-type="groupchat"] {
+  .jsxc-avatar {
+    @extend %muc-avatar-icon;
+  }
+
+  .jsxc-video {
+    display: none;
+  }
+}

@@ -1,0 +1,31 @@
+<h3>{{t "Login"}}</h3>
+
+<form class="form-horizontal">
+   {{#if showBoshUrlField}}
+   <div class="form-group">
+      <label class="col-sm-4 control-label" for="jsxc-url">{{t "BOSH_url"}}</label>
+      <div class="col-sm-8">
+         <input type="text" name="username" id="jsxc-url" class="form-control" required="required" value="{{url}}" />
+      </div>
+   </div>
+   {{/if}}
+   <div class="form-group">
+      <label class="col-sm-4 control-label" for="jsxc-username">{{t "Username"}}</label>
+      <div class="col-sm-8">
+         <input type="text" name="username" id="jsxc-username" class="form-control" required="required" value="{{username}}" />
+      </div>
+   </div>
+   <div class="form-group">
+      <label class="col-sm-4 control-label" for="jsxc-password">{{t "Password"}}</label>
+      <div class="col-sm-8">
+         <input type="password" name="password" required="required" class="form-control" id="jsxc-password" />
+      </div>
+   </div>
+   <div class="jsxc-alert jsxc-alert--warning jsxc-hidden">{{t "Sorry_we_cant_authentikate_"}}</div>
+   <div class="form-group">
+      <div class="col-sm-offset-4 col-sm-9">
+         <button type="submit" class="jsxc-button jsxc-button--primary" name="commit" data-jsxc-loading-text="{{t "Connecting..."}}">{{t "Connect"}}</button>
+         <button type="reset" class="jsxc-button jsxc-button--default jsxc-js-close" name="clear">{{t "Cancel"}}</button>
+      </div>
+   </div>
+</form>

@@ -1,0 +1,60 @@
+.jsxc-button {
+  background-image: none;
+  //  border: 1px solid transparent;
+  //  border-radius: 4px;
+  border: 0;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  margin: 0 2px;
+  min-width: 25px;
+  padding: 6px 12px;
+  padding: 10px 16px;
+  text-align: center;
+  transition: background-color 0.5s;
+  user-select: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  width: auto;
+
+  &--default {
+    background-color: rgba(240, 240, 240, 0.9);
+    border-color: #ccc;
+    color: #555;
+
+    &:hover {
+      background-color: #d6d6d6;
+    }
+  }
+
+  &--primary {
+    background-color: #337ab7;
+    border-color: #2e6da4;
+    color: #fff;
+
+    &:hover {
+      background-color: #296496;
+    }
+  }
+
+  &--success {
+    background-color: #6bad50;
+    border-color: #487735;
+    color: #fff;
+
+    &:hover {
+      background-color: #5a9443;
+    }
+  }
+
+  &[disabled],
+  &[disabled]:hover {
+    background-color: #337ab7;
+    border-color: #2e6da4;
+    color: #fff;
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+}

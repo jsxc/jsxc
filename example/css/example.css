@@ -1,12 +1,12 @@
 body {
-   margin-top: 30px;
+   padding-top: 30px;
 }
 
 .logout {
    display: none;
 }
 
-.jsxc-org {
+.jsxc-org, .localhost {
    display: none;
 }
 
@@ -57,4 +57,26 @@ body {
 #server-flash.fail:before {
    content: "\e088";
    color: red;
+}
+
+details {
+    padding: 1em;
+    margin-bottom: 1em;
+}
+
+summary {
+    margin: -1em -1em 1em -1em;
+    cursor: pointer;
+}
+
+body {
+    border-top: 5px solid transparent;
+}
+
+body.jsxc-master {
+   border-top: 5px solid green;
+}
+
+body.jsxc-slave {
+   border-top: 5px solid orange;
 }

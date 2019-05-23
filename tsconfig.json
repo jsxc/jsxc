@@ -1,0 +1,36 @@
+{
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "compilerOptions": {
+        "baseUrl": "src",
+        "paths": {
+           "emojione": ["lib/emojione/lib/js/emojione.js"],
+           "strophe.js": ["node_modules/strophe.js/strophe.js"],
+           "@connection/*": ["connection/*"],
+           "@ui/*": ["ui/*"],
+           "@util/*": ["util/*"],
+           "@vendor/*": ["vendor/*"],
+           "@src/*": ["./*"],
+        },
+        "moduleResolution": "node",
+        "module": "commonjs",
+        "outDir": "./dist",
+        "target": "es5",
+        "lib": ["dom", "es2015", "es2015.promise", "es5"],
+        "noUnusedLocals": true,
+        "downlevelIteration": true
+    },
+    "include": [
+        "./src/**/*.ts",
+        "./template/*.hbs",
+        "./*.d.ts",
+        "./test/**/*.ts"
+    ],
+    "exclude": [
+       "node_modules",
+       "typings"
+    ],
+    "files": [
+      "custom.d.ts"
+   ]
+}

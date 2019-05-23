@@ -348,8 +348,8 @@
     "I_found_new_devices_from_you": "Jag har hittat nya enheter",
     "Message_received_from_unknown_OMEMO_device": "Ett meddelande har mottagits från en okänd OMEMO kontakt",
     "There_are_new_OMEMO_devices": "Det finns nya OMEMO enhter",
-    "you": "du",
-    "Clean_up_own_devices": "Rensa egna enheter",
-    "omemo-clean-up-explanation": "Alla sparade enheter kommer att tas bort från listan över enheter om du väljer att rensa egna enheter. Endast aktiva enheter kommer efter detta att finnas tillgängliga för dina kontakter. Enheterna kommer att läggas till i listan igen när du använder dem."
+    "you": null,
+    "Clean_up_own_devices": null,
+    "omemo-clean-up-explanation": null
   }
 }

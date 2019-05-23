@@ -1,0 +1,174 @@
+body.jsxc-fullscreen {
+  overflow: hidden;
+
+  #jsxc-roster {
+    border: 0;
+    border-top: 62px solid #2a4163;
+    width: 100%;
+    z-index: 50;
+  }
+
+  #jsxc-window-list {
+    clip: auto;
+    z-index: 100;
+
+    .jsxc-window-item {
+      bottom: 0;
+      height: auto;
+      left: 0;
+      margin: 0;
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: auto;
+
+      &.jsxc-minimized {
+        display: none;
+      }
+    }
+
+    .jsxc-window {
+      background-color: #d4d2d2;
+      border: 0;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+
+    .jsxc-window-fade {
+      bottom: 0;
+      height: auto;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 62px;
+      width: auto;
+    }
+  }
+
+  .jsxc-bar {
+    height: 62px;
+    width: auto;
+
+    .jsxc-action-entry {
+      background-size: 50%;
+      height: 62px;
+      width: 42px;
+
+      &.jsxc-close {
+        font-size: 2.5em;
+        line-height: 62px;
+      }
+
+      .jsxc-more {
+        background-size: auto 3vmin;
+        width: 100%;
+      }
+
+      * {
+        font-size: 1em;
+      }
+    }
+  }
+
+  .jsxc-send-area {
+    padding: 0;
+  }
+
+  .jsxc-menu-emoticons,
+  .jsxc-file-transfer,
+  .jsxc-transfer {
+    background-size: 50%;
+    height: 62px;
+    width: 62px;
+  }
+
+  .jsxc-transfer-icon {
+    background-size: 50%;
+    height: 62px;
+  }
+
+  .jsxc-highlight .jsxc-window-bar {
+    background-color: $window-bar-bg;
+  }
+
+  .jsxc-roster-toggle {
+    display: none;
+  }
+
+  #jsxc-roster>.jsxc-bottom li {
+    height: 62px;
+    line-height: 62px;
+  }
+
+  .jsxc-bar__action-entry {
+    margin: 0 3px;
+  }
+
+  .jsxc-dialog-wrapper {
+    background-color: #fff;
+    display: block;
+  }
+
+  .jsxc-dialog {
+    border: 0;
+    min-width: auto;
+    padding-top: 45px;
+  }
+}
+
+body.jsxc-fullscreen.jsxc-two-columns {
+  @media(min-width: 740px) {
+    #jsxc-roster {
+      width: 33%;
+    }
+
+    #jsxc-window-list {
+      .jsxc-window-item {
+        right: 33%;
+      }
+    }
+  }
+}
+
+.jsxc-omemo-device {
+  box-shadow: 0 0 2px #a1a1a1;
+  margin-bottom: 15px;
+  padding: 10px;
+
+  &-id {
+    font-size: 0.7em;
+    opacity: 0.7;
+  }
+
+  &-last-used {
+    float: right;
+    font-size: 0.7em;
+    opacity: 0.7;
+  }
+
+  &-trust {
+    display: inline;
+
+    &[data-trust="unknown"] {
+      color: #f00;
+    }
+
+    &[data-trust="recognized"] {
+      color: #ffa500;
+    }
+
+    &[data-trust="confirmed"] {
+      color: #008000;
+    }
+
+    &[data-trust="ignored"] {
+      color: #999;
+    }
+  }
+
+  &-action {
+    float: right;
+  }
+}

@@ -1,0 +1,201 @@
+.jsxc-dialog-wrapper {
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 999;
+}
+
+.jsxc-dialog {
+  background: #fff;
+  border: 1px solid #d8d8d8;
+  display: inline-block;
+  max-height: 100%;
+  max-width: 100%;
+  overflow-y: auto;
+  position: relative;
+  text-align: left;
+  width: auto;
+
+  &__content {
+    min-width: 320px;
+    padding: 4vh 4vw;
+  }
+
+  ul {
+    list-style: none;
+  }
+
+  ul,
+  li {
+    margin: 0;
+    padding: 0;
+  }
+
+  p {
+    margin-bottom: 1em;
+
+    input {
+      margin-bottom: 5px;
+      outline: none;
+      width: 60%;
+    }
+
+    input[type="submit"] {
+      width: auto;
+    }
+  }
+
+  table {
+    margin-bottom: 1em;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin-bottom: 20px;
+    margin-top: 20px;
+  }
+
+  h3 {
+    font-size: 120%;
+    font-weight: bold;
+    margin-bottom: 10px;
+    margin-top: 20px;
+  }
+
+  .jsxc-right {
+    margin-top: 20px;
+  }
+
+  legend {
+    border: 0;
+    font-size: 20px;
+  }
+
+  input {
+    border-radius: 0;
+    outline: none;
+
+    &:invalid {
+      border: 1px solid $dialog-input-invalid;
+    }
+  }
+
+  .jsxc-button-group button {
+    margin-right: 0;
+  }
+
+  input[readonly] {
+    background-color: $dialog-input-readonly-bg;
+  }
+
+  .jsxc-inputinfo {
+    font-style: italic;
+    margin: 0;
+    padding: 0;
+  }
+
+  .jsxc-libraries,
+  .jsxc-credits {
+    max-width: 300px;
+  }
+
+  .jsxc-warning {
+    background-color: #fbfe7a;
+    border-radius: 3px;
+    display: block;
+    padding: 3px 10px;
+  }
+
+  &-close {
+    cursor: pointer;
+    font-size: 42px;
+    height: 42px;
+    line-height: 33px;
+    opacity: 0.5;
+    position: absolute;
+    right: 10px;
+    text-align: center;
+    top: 10px;
+    width: 42px;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.jsxc-page {
+  font-size: 1em;
+
+  h1 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0;
+
+    &.jsxc-clickable {
+      cursor: pointer;
+
+      &::before {
+        content: "◄ ";
+      }
+    }
+  }
+
+  h2 {
+    color: #787878;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin: 0.5em 0 1.5em;
+  }
+
+  section {
+    border-top: 1px solid #b1b1b1;
+    margin-top: 1em;
+  }
+}
+
+.jsxc-list {
+  &__item {
+    align-items: center;
+    display: flex;
+    padding: 0.5em 1.5em !important;
+
+    &--clickable {
+      cursor: pointer;
+
+      &:hover {
+        background-color: #f2f2f2;
+      }
+    }
+  }
+
+  &__avatar {
+    align-self: flex-start;
+    margin-right: 0.5em;
+
+    &.jsxc-avatar {
+      margin: 0;
+      margin-left: -0.5em;
+      margin-right: 0.5em;
+    }
+  }
+
+  &__text {
+    flex-grow: 1;
+  }
+
+  &__text__secondary {
+    opacity: 0.7;
+  }
+
+  &__secondary-action {
+    align-self: flex-start;
+  }
+}

@@ -348,8 +348,8 @@
     "I_found_new_devices_from_you": null,
     "Message_received_from_unknown_OMEMO_device": null,
     "There_are_new_OMEMO_devices": null,
-    "you": "tu",
-    "Clean_up_own_devices": "Pulisci la tua lista dispositivi",
-    "omemo-clean-up-explanation": "Se pulisci la tua lista dispositivi, tutti i dispositivi saranno rimossi dalla tua lista. I tuoi altri dispositivi saranno riaggiunti alla lista la prossima volta che li userai. Cosicché che la lista utilizzata dai tuoi contatti per cifrare i messaggi conterrà solo i tuoi dispositivi attivi."
+    "you": null,
+    "Clean_up_own_devices": null,
+    "omemo-clean-up-explanation": null
   }
 }

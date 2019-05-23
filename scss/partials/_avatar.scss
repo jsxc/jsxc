@@ -1,0 +1,52 @@
+.jsxc-avatar {
+  background-color: $avatar-bg;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-radius: 50%;
+  color: $avatar-color;
+  float: left;
+  font-family: inherit;
+  font-size: 30px;
+  font-weight: bold;
+  height: 36px;
+  line-height: 36px;
+  margin: 0 5px;
+  position: relative;
+  text-align: center;
+  width: 36px;
+
+  img {
+    display: block;
+    height: 25px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 25px;
+  }
+
+  &::before {
+    border: 2px solid $roster-bg;
+    left: -6px;
+    position: absolute;
+    top: -2px;
+  }
+
+  &--loading::after {
+    animation: jsxc-rotate 1s infinite;
+    border: 10px solid rgba(255, 255, 255, 0.7);
+    border-left-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    border-right-color: rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    content: "";
+    display: block;
+    height: 20px;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    position: absolute;
+    top: 50%;
+    width: 20px;
+  }
+}
