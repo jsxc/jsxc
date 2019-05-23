@@ -49,7 +49,9 @@ export default class JingleCallSession extends JingleMediaSession {
 
          //@TODO post reason to chat window
          if (reason !== 'aborted') {
-            Log.warn('Decline call', reason)
+            if (reason !== 'decline') {
+               Log.warn('Error on incoming call', reason);
+            }
 
             this.session.decline();
          }

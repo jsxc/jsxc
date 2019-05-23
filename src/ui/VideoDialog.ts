@@ -80,6 +80,11 @@ export class VideoDialog {
          session.adopt();
 
          dialog.close();
+      }).catch(() => {
+         session.adopt();
+
+         // tslint:disable-next-line:no-string-throw
+         throw 'decline';
       });
    }
 
