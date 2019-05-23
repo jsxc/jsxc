@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - [#512](https://github.com/jsxc/jsxc/issues/512) add option to specify storage backend
 - show MUC avatars
 - show mute icon in roster if notifications are muted
+- support unicode emoticons
+- show spinner while enabling encrypted transfer
+- call all available resources at once
+- add simple webcam test
+- [#656](https://github.com/jsxc/jsxc/issues/656) support multiple incoming calls at once
 
 ### Fixed
 - video calls can now be initiated from any tab
@@ -35,6 +40,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - fix and improve emoticon insertion
 - remove non-persistent contacts after login
 - translate OTR status messages
+- enhance roster insertion
 
 ### Changed
 - use Consistent Color Generation ([XEP-0392])
