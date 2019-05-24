@@ -63,6 +63,10 @@ export interface IContact {
 
    getType(): ContactType;
 
+   isGroupChat(): boolean;
+
+   isChat(): boolean;
+
    getNumberOfUnreadMessages(): number;
 
    hasName(): boolean;

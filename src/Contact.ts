@@ -220,6 +220,14 @@ export default class Contact implements IIdentifiable, IContact {
       return this.data.get('type');
    }
 
+   public isGroupChat() {
+      return this.getType() === ContactType.GROUPCHAT;
+   }
+
+   public isChat() {
+      return this.getType() === ContactType.CHAT;
+   }
+
    public getNumberOfUnreadMessages(): number {
       return this.transcript.getNumberOfUnreadMessages();
    }

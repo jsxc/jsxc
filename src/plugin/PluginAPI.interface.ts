@@ -8,6 +8,7 @@ import ChatWindow from '@ui/ChatWindow';
 import ContactManager from '@src/ContactManager';
 import ContactProvider from '@src/ContactProvider';
 import { IAvatar } from '@src/Avatar.interface';
+import Pipe from '@util/Pipe';
 
 export interface IPluginAPI {
 
@@ -57,4 +58,8 @@ export interface IPluginAPI {
    registerContactProvider(source: ContactProvider)
 
    getContactManager(): ContactManager
+
+   getAfterReceiveGroupMessagePipe(): Pipe
+
+   getAfterReceiveMessagePipe(): Pipe
 }
