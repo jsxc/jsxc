@@ -142,4 +142,12 @@ export default class PluginAPI implements IPluginAPI {
    public getContactManager(): ContactManager {
       return this.account.getContactManager();
    }
+
+   public getAfterReceiveGroupMessagePipe() {
+      return this.account.getPipe('afterReceiveGroupMessage');
+   }
+
+   public getAfterReceiveMessagePipe() {
+      return this.account.getPipe('afterReceiveMessage');
+   }
 }

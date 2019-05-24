@@ -8,14 +8,19 @@ import Log from '../../util/Log'
 import Translation from '../../util/Translation'
 import * as Namespace from '../../connection/xmpp/namespace'
 import { IMessage } from '@src/Message.interface';
+import { IJID } from '@src/JID.interface';
+import MultiUserContact from '@src/MultiUserContact';
 
 export default class Archive {
    private previousMessage: IMessage;
    private lastMessageId: string;
    private connected: boolean;
+   private archiveJid: IJID;
 
    constructor(private plugin: MessageArchiveManagementPlugin, private contact: Contact) {
+      let jid = contact.isGroupChat() ? contact.getJid() : plugin.getConnection().getJID();
 
+      this.archiveJid = new JID(jid.bare);
    }
 
    public clear() {
@@ -73,8 +78,13 @@ export default class Archive {
       }
 
       let connection = this.plugin.getConnection();
-      connection.queryArchive(this.contact.getJid(), queryId, firstResultId, endDate)
-         .then(this.onComplete)
+      this.plugin.determineServerSupport(this.archiveJid).then(version => {
+         if (!version) {
+            throw new Error(`Archive JID ${this.archiveJid.full} has no support for MAM.`);
+         }
+
+         return connection.queryArchive(this.archiveJid, <string> version, this.contact.getJid(), queryId, firstResultId, endDate);
+      }).then(this.onComplete)
          .catch((stanza) => {
             Log.warn('Error while requesting archive', stanza);
          });
@@ -88,11 +98,10 @@ export default class Archive {
          return;
       }
 
-      let ownJid = this.plugin.getConnection().getJID();
       let from = new JID(messageElement.attr('from'));
       let to = new JID(messageElement.attr('to'));
 
-      if (ownJid.bare !== from.bare && ownJid.bare !== to.bare) {
+      if (this.archiveJid.bare !== from.bare && this.archiveJid.bare !== to.bare) {
          return;
       }
 
@@ -117,7 +126,7 @@ export default class Archive {
       if (Message.exists(uid)) {
          message = new Message(uid);
       } else {
-         message = new Message({
+         let messageProperties = {
             uid,
             attrId: messageId,
             peer: this.contact.getJid(),
@@ -126,7 +135,26 @@ export default class Archive {
             htmlMessage: htmlBody.html(),
             stamp: stamp.getTime(),
             unread: false,
-         });
+            sender: undefined,
+         };
+
+         if (this.contact.isGroupChat()) {
+            messageProperties.sender = {
+               name: from.resource,
+            };
+
+            let contact = <MultiUserContact> this.contact;
+
+            messageProperties.direction = contact.getNickname() === from.resource ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
+         }
+
+         message = new Message(messageProperties);
+
+         if (this.contact.isChat()) {
+            this.plugin.runAfterReceiveMessagePipe(this.contact, message, messageElement);
+         } else if (this.contact.isGroupChat()) {
+            this.plugin.runAfterReceiveGroupMessagePipe(this.contact, message);
+         }
       }
 
       if (this.previousMessage) {
@@ -142,7 +170,7 @@ export default class Archive {
 
    public onComplete = (stanza) => {
       let stanzaElement = $(stanza);
-      let finElement = stanzaElement.find(`fin` + Namespace.getFilter('MAM'));
+      let finElement = stanzaElement.find(`fin[xmlns^="urn:xmpp:mam:"]`);
 
       if (finElement.length !== 1) {
          Log.warn('No fin element found');
