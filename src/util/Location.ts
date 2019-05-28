@@ -1,10 +1,16 @@
 import { REGEX } from '@src/CONST';
 
 export default class Location {
-   public static getCurrentLocation(): Promise<any> {
+   public static getCurrentLocation(): Promise<{coords: {latitude: number, longitude: number, accuracy: number}}> {
       return new Promise((resolve, reject) => {
          navigator.geolocation.getCurrentPosition(position => resolve(position), error => reject(error));
       })
+   }
+
+   public static async getCurrentLocationAsGeoUri(): Promise<string> {
+      let {coords} = await Location.getCurrentLocation();
+
+      return `geo:${coords.latitude},${coords.longitude};u=${coords.accuracy}`;
    }
 
    public static getCurrentLocationAsLink(zoom: number = 16) {

@@ -18,6 +18,7 @@ import Attachment from '../Attachment'
 import * as Resizable from 'resizable'
 import { IJID } from '@src/JID.interface';
 import { JINGLE_FEATURES } from '@src/JingleAbstractSession';
+import Location from '@util/Location';
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -309,6 +310,15 @@ export default class ChatWindow {
 
             startCall(contact, this.getAccount(), 'screen');
          }, JINGLE_FEATURES.screen
+      );
+
+      elementHandler.add(
+         this.element.find('.jsxc-send-location')[0],
+         (ev) => {
+            Location.getCurrentLocationAsGeoUri().then(uri => {
+               this.sendOutgoingMessage(uri);
+            });
+         }
       );
 
       elementHandler.add(
