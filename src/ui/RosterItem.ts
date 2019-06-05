@@ -6,6 +6,7 @@ import { Presence } from '../connection/AbstractConnection'
 import Dialog from './Dialog'
 import { IContact } from '../Contact.interface'
 import Translation from '../util/Translation'
+import Client from '@src/Client';
 
 let rosterItemTemplate = require('../../template/roster-item.hbs')
 
@@ -38,6 +39,10 @@ export default class RosterItem {
 
       this.element.click(function() {
          let chatWindow = contact.getChatWindowController();
+
+         if ($('body').hasClass('jsxc-fullscreen') || Client.isExtraSmallDevice()) {
+            Client.getChatWindowList().minimizeAll();
+         }
 
          chatWindow.openProminently();
       });

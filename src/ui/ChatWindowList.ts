@@ -59,16 +59,12 @@ export default class ChatWindowList {
       for (let chatWindowId in this.windows) {
          let chatWindow: ChatWindow = this.windows[chatWindowId];
 
-         chatWindow.minimize();
+         chatWindow.getContact().getChatWindowController().minimize();
       }
    }
 
    public add(chatWindow: ChatWindow) {
       let chatWindowIds = this.getChatWindowIds();
-
-      if ($('body').hasClass('jsxc-fullscreen')) {
-         this.minimizeAll();
-      }
 
       if (chatWindowIds.indexOf(chatWindow.getId()) < 0) {
          this.windows[chatWindow.getId()] = chatWindow;
