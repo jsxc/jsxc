@@ -15,10 +15,10 @@ import ChatWindowMessage from './ChatWindowMessage'
 import Transcript from '../Transcript'
 import FileTransferHandler from './ChatWindowFileTransferHandler'
 import Attachment from '../Attachment'
-import * as Resizable from 'resizable'
 import { IJID } from '@src/JID.interface';
 import { JINGLE_FEATURES } from '@src/JingleAbstractSession';
 import Location from '@util/Location';
+import interact from 'interactjs';
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -492,13 +492,29 @@ export default class ChatWindow {
       let element = this.element;
       let fadeElement = element.find('.jsxc-window-fade');
 
-      new Resizable(fadeElement.get(0), {
-         handles: 'n,nw,w',
-         resize: () => {
-            let newWidth = fadeElement.width();
+      interact(fadeElement.get(0)).resizable({
+         edges: {
+            top: true,
+            left: true,
+            bottom: false,
+            right: false,
+         },
+      }).on('resizestart', () => {
+         fadeElement.addClass('jsxc-window-fade--resizing');
+      }).on('resizemove', ev => {
+         let barHeight = element.find('.jsxc-bar--window').height();
+         let windowHeight = $(window).height();
 
-            element.find('.jsxc-bar--window').css('width', newWidth + 'px');
-         }
+         let newHeight = Math.min(windowHeight - barHeight, ev.rect.height);
+
+         fadeElement.css({
+            width: ev.rect.width + 'px',
+            height: newHeight + 'px',
+         });
+
+         element.find('.jsxc-bar--window').css('width',  fadeElement.width() + 'px');
+      }).on('resizeend', () => {
+         fadeElement.removeClass('jsxc-window-fade--resizing');
       });
    }
 

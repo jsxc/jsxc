@@ -46,6 +46,9 @@
 
   .jsxc-message-area {
     @extend %scrollbar;
+    background-image: url("../images/resize_gray.svg");
+    background-position: top left;
+    background-repeat: no-repeat;
     flex-grow: 1;
     left: 0;
     overflow: auto;
@@ -74,8 +77,11 @@
   overflow: hidden;
   position: relative;
   transform: none !important;
-  transition: height 0.2s;
   width: $default-window-width;
+
+  &:not(&--resizing) {
+    transition: height 0.2s;
+  }
 
   .jsxc-minimized & {
     height: 0 !important;
@@ -150,25 +156,6 @@
         text-decoration: underline;
       }
     }
-  }
-
-  .resizable-handle {
-    z-index: 99;
-  }
-
-  .resizable-handle-nw {
-    background-image: url("../images/resize_gray.svg");
-    margin-left: 5px;
-    margin-top: 5px;
-    z-index: 100 !important;
-  }
-
-  .resizable-handle-n {
-    margin-top: 5px;
-  }
-
-  .resizable-handle-w {
-    margin-left: 5px;
   }
 }
 
