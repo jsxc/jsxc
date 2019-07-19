@@ -5,7 +5,6 @@ import PluginAPI from '../plugin/PluginAPI'
 import * as Namespace from '../connection/xmpp/namespace'
 import { $msg } from '../vendor/Strophe'
 import { IContact } from '@src/Contact.interface';
-import { IMessage } from '@src/Message.interface';
 
 /**
  * XEP-0184: Message Delivery Receipts
@@ -22,7 +21,7 @@ let PRESERVE_HANDLER = true;
 export default class ReceiptPlugin extends AbstractPlugin {
 
    public static getName(): string {
-      return 'receipt';
+      return 'Message Delivery Receipts';
    }
 
    constructor(pluginAPI: PluginAPI) {
@@ -32,10 +31,10 @@ export default class ReceiptPlugin extends AbstractPlugin {
       pluginAPI.addFeature(Namespace.get('RECEIPTS'));
 
       pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor);
-      pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor);
 
       let connection = pluginAPI.getConnection();
 
+      connection.registerHandler(this.onMessage, null, 'message');
       connection.registerHandler(this.onReceiptRequest, null, 'message', 'chat');
    }
 
@@ -68,14 +67,17 @@ export default class ReceiptPlugin extends AbstractPlugin {
       }
    }
 
-   private afterReceiveMessageProcessor = (contact: IContact, message: IMessage, stanza: Element): Promise<{}> => {
-      let receivedElement = $(stanza).find('received[xmlns="urn:xmpp:receipts"]');
+   private onMessage = (stanza) => {
+      let stanzaElement = $(stanza);
+      let from = stanzaElement.attr('from');
+      let contact = from ? this.pluginAPI.getContact(new JID(from)) : undefined;
+      let receivedElement = stanzaElement.find('received[xmlns="urn:xmpp:receipts"]');
 
-      if (receivedElement.length === 1) {
+      if (contact && receivedElement.length === 1) {
          this.onReceipt(contact, receivedElement);
       }
 
-      return Promise.resolve([contact, message, stanza]);
+      return PRESERVE_HANDLER;
    }
 
    private onReceipt = (contact: IContact, receivedElement: JQuery<Element>, tries = 0) => {
