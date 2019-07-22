@@ -382,6 +382,27 @@
         opacity: 0.6;
       }
     }
+
+    &.jsxc-geo {
+      background-color: #fff;
+      border-radius: 0.8em;
+      display: block;
+      padding: 1em 1em 1em 3em;
+
+      &::before {
+        background-color: #fff;
+        background-image: url("../images/location_icon.svg");
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        content: "";
+        display: inline-block;
+        height: 2em;
+        margin-left: -2em;
+        vertical-align: bottom;
+        width: 2em;
+      }
+    }
   }
 
   img {

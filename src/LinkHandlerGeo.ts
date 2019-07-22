@@ -25,6 +25,7 @@ export default class LinkHandlerGeo implements ILinkHandler {
 
          $(this).attr('href', link);
          $(this).text(label);
+         $(this).addClass('jsxc-geo');
       })
    }
 }
