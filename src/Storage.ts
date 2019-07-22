@@ -346,6 +346,10 @@ export default class Storage implements IStorage {
    }
 
    private parseValue(value: string) {
+      if (value === 'undefined') {
+         return;
+      }
+
       try {
          return JSON.parse(value);
       } catch (e) {
