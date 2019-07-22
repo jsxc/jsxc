@@ -63,10 +63,10 @@
 
       .jsxc-avatar {
         background-color: #777;
-        bottom: 0;
         display: block;
         left: -50px;
         position: absolute;
+        top: 0;
 
         &::before {
           display: none;
