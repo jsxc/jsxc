@@ -125,6 +125,27 @@ body.jsxc-fullscreen.jsxc-two-columns {
     }
 
     #jsxc-window-list {
+      background-color: #e1e1e1;
+      bottom: 0;
+      left: 0;
+      right: 33%;
+      top: 0;
+
+      &::after {
+        background-image: url("../images/jsxc_white.svg");
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        bottom: 0;
+        content: "";
+        left: 0;
+        opacity: 0.3;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: -1;
+      }
+
       .jsxc-window-item {
         right: 33%;
       }
