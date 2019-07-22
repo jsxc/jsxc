@@ -273,7 +273,9 @@ export default class ChatWindow {
 
       elementHandler.add(
          this.element.find('.jsxc-js-close')[0],
-         () => {
+         (ev) => {
+            ev.stopPropagation();
+
             this.getController().close();
          }
       );

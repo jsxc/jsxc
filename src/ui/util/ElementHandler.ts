@@ -7,17 +7,14 @@ export default class ElementHandler {
 
    }
 
-   public add(element: Element, handler: (ev) => void, requiredFeatures?: string[]) {
+   public add(element: Element, handler: (ev: Event) => void, requiredFeatures?: string[]) {
       if (requiredFeatures && requiredFeatures.length > 0) {
          this.contact.registerCapableResourcesHook(requiredFeatures, (resources) => {
             this.updateStatus(element, resources);
          });
       }
 
-      $(element).on('click', function(ev) {
-         ev.stopPropagation();
-         ev.preventDefault();
-
+      $(element).on('click', function() {
          if (!element.classList.contains(CLASS_DISABLED)) {
             handler.apply(this, arguments);
          }
