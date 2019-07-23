@@ -92,7 +92,7 @@ export default class implements IDiscoInfoRepository {
       let jidVersionMap = this.jidVersionMap;
       let version = jidVersionMap.get(jid.full);
 
-      if (!version || (version && !DiscoInfo.exists(version))) {
+      if (!version || !DiscoInfo.exists(version)) {
          return this.requestDiscoInfo(jid).then(discoInfo => {
             if (version && version !== discoInfo.getCapsVersion()) {
                Log.warn(`Caps version doesn't match for ${jid.full}. Expected: ${version}. Actual: ${discoInfo.getCapsVersion()}.`);
