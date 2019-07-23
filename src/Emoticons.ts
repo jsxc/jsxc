@@ -72,7 +72,7 @@ export default class Emoticons {
 
       $.each(EMOTICONS, function(i, val) {
          // escape characters
-         let reg = val[0].replace(/(\/|\||\*|\.|\+|\?|\^|\$|\(|\)|\[|\]|\{|\})/g, '\\$1');
+         let reg = val[0].replace(/(\\|\/|\||\*|\.|\+|\?|\^|\$|\(|\)|\[|\]|\{|\})/g, '\\$1');
          reg = '(' + reg.split(' ').join('|') + ')';
          EMOTICONS[i][2] = new RegExp(reg, 'g');
       });
