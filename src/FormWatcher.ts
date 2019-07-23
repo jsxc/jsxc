@@ -28,7 +28,7 @@ export function usernameToJabberId(username: string, settings: ISettings) {
       throw new Error('Could not find any jid.');
    }
 
-   if (settings.xmpp.resource && !/@(.+)\/(.+)^/.test(jid)) {
+   if (settings.xmpp.resource && !/@(.+)\/(.+)$/.test(jid)) {
       jid = jid + '/' + settings.xmpp.resource;
    }
 
