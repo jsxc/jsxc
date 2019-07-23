@@ -21,7 +21,7 @@ export default class extends AbstractHandler {
 
       let contact = <MultiUserContact> this.account.getContact(from);
       if (typeof contact === 'undefined') {
-         Log.info('Sender is not in our contact list')
+         Log.info('Sender is not in our contact list');
 
          return this.PRESERVE_HANDLER;
       }

@@ -43,7 +43,7 @@ class MultiUserJoinDialog {
 
       this.account = Client.getAccountManager().getAccount();
       this.connection = this.account.getConnection();
-      this.defaultNickname = this.connection.getJID().node
+      this.defaultNickname = this.connection.getJID().node;
 
       this.initializeInputElements();
    }
@@ -259,7 +259,7 @@ class MultiUserJoinDialog {
 
    private parseRoomInfo = (stanza) => {
       let roomInfoElement = $('<div>');
-      roomInfoElement.append(`<p>${Translation.t('This_room_is')}</p>`)
+      roomInfoElement.append(`<p>${Translation.t('This_room_is')}</p>`);
 
       //@TODO test for feature with muc ns
 

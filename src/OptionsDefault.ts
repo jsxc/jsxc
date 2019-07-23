@@ -129,7 +129,7 @@ export let notification = {
 
    /** Mute notification sound? */
    mute: false,
-}
+};
 
 export let storage = window.localStorage;
 

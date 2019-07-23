@@ -149,7 +149,7 @@ class PasswordPage extends Page {
       contentElement.addClass('form-horizontal');
       contentElement.css('marginTop', '30px'); //@REVIEW
 
-      let explanationElement = $(`<p class="jsxc-explanation">${Translation.t('password_explanation')}</p>`)
+      let explanationElement = $(`<p class="jsxc-explanation">${Translation.t('password_explanation')}</p>`);
 
       let passwordAElement = $(`<div class="form-group">
          <label class="col-sm-4 control-label" for="jsxc-password-A">Password</label>

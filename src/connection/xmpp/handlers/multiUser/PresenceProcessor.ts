@@ -46,7 +46,7 @@ export default class MultiUserPresenceProcessor {
       if (this.xElement.find('destroy').length > 0) {
          this.getMultiUserContact().shutdown();
 
-         this.inform(Translation.t('This_room_has_been_closed'))
+         this.inform(Translation.t('This_room_has_been_closed'));
       } else if (this.codes.indexOf('303') > -1 && newNickname) {
          // user changed his nickname
 

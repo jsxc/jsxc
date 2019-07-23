@@ -60,7 +60,7 @@ class Registration {
       let queryStanza = iqStanza.find(`query[xmlns="${NS_REGISTER}"]`);
 
       if (queryStanza.length !== 1) {
-         throw new Error('Error')
+         throw new Error('Error');
       }
 
       if (queryStanza.find('registered').length > 0) {

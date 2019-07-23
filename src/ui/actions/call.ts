@@ -62,7 +62,7 @@ export async function startCall(contact: IContact, account: Account, type: 'vide
          if (condition === 'decline') {
             cancelAllOtherSessions(sessions, session);
          }
-      })
+      });
    }
 }
 

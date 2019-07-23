@@ -169,7 +169,7 @@ export default class ChatWindowMessage {
       avatarElement.addClass('jsxc-avatar');
       avatarElement.attr('title', title);
 
-      this.element.prepend(avatarElement)
+      this.element.prepend(avatarElement);
       this.element.attr('data-name', sender.name);
 
       let nextMessage = this.getNextMessage();

@@ -81,7 +81,7 @@ export default class Account {
       this.pluginRepository = new PluginRepository(this);
       this.contact = new Contact(this, new JID(this.uid), this.uid);
 
-      let rosterContactProvider = new RosterContactProvider(this.getContactManager(), this)
+      let rosterContactProvider = new RosterContactProvider(this.getContactManager(), this);
       this.getContactManager().registerContactProvider(rosterContactProvider);
 
       let connectionCallback = this.getOption('connectionCallback');

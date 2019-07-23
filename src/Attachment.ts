@@ -224,7 +224,7 @@ export default class Attachment {
          let thumbnailData = canvas.toDataURL('image/jpeg', 0.3);
 
          this.properties.set('thumbnail', thumbnailData);
-      }
+      };
 
       img.src = this.data;
    }

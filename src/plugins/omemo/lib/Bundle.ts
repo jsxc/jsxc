@@ -98,7 +98,7 @@ export default class Bundle {
             },
             keyId: parseInt($(element).attr('preKeyId'), 10)
          });
-      })
+      });
 
       return new Bundle({
          identityKey,

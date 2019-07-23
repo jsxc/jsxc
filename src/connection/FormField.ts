@@ -91,7 +91,7 @@ export default class FormField {
          type,
          name,
          values,
-      })
+      });
    };
 
    public static fromJSON(data: IFormFieldJSONData) {

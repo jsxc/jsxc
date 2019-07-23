@@ -25,7 +25,7 @@ export default class extends AbstractHandler {
          from: new JID($(stanza).attr('from')),
          show: $(stanza).find('show').text(),
          status: $(stanza).find('status').text()
-      }
+      };
 
       let status: Presence = this.determinePresenceStatus(presence);
 

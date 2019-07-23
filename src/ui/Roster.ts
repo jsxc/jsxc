@@ -235,7 +235,7 @@ export default class Roster {
             dialog.getPromise().then(() => {
                NoticeManager.removeAll();
             }).catch(() => {});
-         })
+         });
       }
    }
 
