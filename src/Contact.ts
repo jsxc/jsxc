@@ -134,16 +134,16 @@ export default class Contact implements IIdentifiable, IContact {
    public setPresence(resource: string, presence: Presence) {
       Log.debug('set presence for ' + this.jid.bare + ' / ' + resource, presence);
 
-      let resources = this.data.get('resources') || {};
+      if (resource) {
+         let resources = this.data.get('resources') || {};
 
-      if (presence === Presence.offline) {
-         if (resource) {
+         if (presence === Presence.offline) {
             delete resources[resource];
          } else {
-            resources = {};
+            resources[resource] = presence;
          }
-      } else if (resource) {
-         resources[resource] = presence;
+
+         this.data.set('resources', resources);
       }
 
       presence = this.getHighestPresence();
