@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - call all available resources at once
 - add simple webcam test
 - [#656](https://github.com/jsxc/jsxc/issues/656) support multiple incoming calls at once
+- use sender avatar color as background color for group chat messages
 
 ### Fixed
 - video calls can now be initiated from any tab
