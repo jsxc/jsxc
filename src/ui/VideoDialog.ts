@@ -104,12 +104,12 @@ export class VideoDialog {
       if (localStream) {
          this.localStream = localStream;
          VideoDialog.attachMediaStream(localVideoElement, localStream);
+      }
 
-         if (!localStream || localStream.getVideoTracks().length === 0) {
-            Log.debug('No local video device available');
+      if (!localStream || localStream.getVideoTracks().length === 0) {
+         Log.debug('No local video device available');
 
-            localVideoElement.hide();
-         }
+         localVideoElement.hide();
       }
 
       this.dom.find('.jsxc-hang-up').click(() => {
