@@ -350,6 +350,26 @@
     "There_are_new_OMEMO_devices": "Há novos dispositivos OMEMO",
     "you": null,
     "Clean_up_own_devices": null,
-    "omemo-clean-up-explanation": null
+    "omemo-clean-up-explanation": null,
+    "Accounts": null,
+    "Archive_exhausted": null,
+    "Blindly_trusted_all_your_own_devices_on_first_use": null,
+    "Blindly_trusted_peer_on_first_use": null,
+    "Change_password": null,
+    "Connection": null,
+    "Control": null,
+    "Plugins": null,
+    "setting-bookmarks-enable": null,
+    "setting-http-upload-enable": null,
+    "setting-meCommand-enable": null,
+    "setting-notification-enable": null,
+    "setting-omemo-enable": null,
+    "setting-otr-enable": null,
+    "setting-receipts-enable": null,
+    "setting-vcard-avatar-enable": null,
+    "Test": null,
+    "this_device": null,
+    "Verification": null,
+    "Webcam": null
   }
 }
