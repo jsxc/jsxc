@@ -28,6 +28,10 @@ Namespace.register('MAM1', MAM1);
 Namespace.register('MAM2', MAM2);
 
 export default class MessageArchiveManagementPlugin extends AbstractPlugin {
+   public static getId(): string {
+      return 'mam';
+   }
+
    public static getName(): string {
       return 'Message Archive Management';
    }

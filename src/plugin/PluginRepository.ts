@@ -13,14 +13,22 @@ export default class PluginRepository {
    private encryptionPlugins: EncryptionPlugin[] = [];
 
    public static add(Plugin: IPlugin) {
+      if (typeof Plugin.getId !== 'function' || typeof Plugin.getId() !== 'string') {
+         throw new Error('This plugin doesn\'t implement static getId():string');
+      }
+
       if (typeof Plugin.getName !== 'function' || typeof Plugin.getName() !== 'string') {
          throw new Error('This plugin doesn\'t implement static getName():string');
       }
 
-      let name = Plugin.getName();
+      let id = Plugin.getId();
 
-      if (PluginRepository.registeredPlugins.indexOf(name) > -1) {
-         throw new Error(`There is already a plugin with the name ${name}.`)
+      if (!/^[a-z0-9_\-]+$/.test(id)) {
+         throw new Error(`This plugin has an invalid id (${id}). Only [a-z0-9_-] is allowed.`);
+      }
+
+      if (PluginRepository.registeredPlugins.indexOf(id) > -1) {
+         throw new Error(`There is already a plugin with the id ${id}.`)
       }
 
       PluginRepository.registeredPlugins.push(Plugin);
@@ -30,8 +38,8 @@ export default class PluginRepository {
       let accountDisabledPlugins = account.getOption('disabledPlugins');
 
       this.getAllEnabledRegisteredPlugins().forEach((Plugin) => {
-         if (accountDisabledPlugins.indexOf(Plugin.getName()) > -1) {
-            Log.debug(`${Plugin.getName()} was disabled by the user.`);
+         if (accountDisabledPlugins.indexOf(Plugin.getId()) > -1) {
+            Log.debug(`${Plugin.getId()} was disabled by the user.`);
 
             return;
          }
@@ -44,28 +52,28 @@ export default class PluginRepository {
       });
    }
 
-   public getAllRegistredPlugins() {
+   public getAllRegisteredPlugins() {
       return PluginRepository.registeredPlugins;
    }
 
    public getAllEnabledRegisteredPlugins() {
       let disabledPlugins = Client.getOption('disabledPlugins') || [];
 
-      return this.getAllRegistredPlugins().filter(Plugin => disabledPlugins.indexOf(Plugin.getName()) < 0);
+      return this.getAllRegisteredPlugins().filter(Plugin => disabledPlugins.indexOf(Plugin.getId()) < 0);
    }
 
    public getAllEncryptionPlugins() {
       return this.encryptionPlugins;
    }
 
-   public getEncryptionPlugin(pluginName: string): EncryptionPlugin {
+   public getEncryptionPlugin(pluginId: string): EncryptionPlugin {
       for (let plugin of this.encryptionPlugins) {
-         if ((<IPlugin> plugin.constructor).getName() === pluginName) {
+         if ((<IPlugin> plugin.constructor).getId() === pluginId) {
             return plugin;
          }
       }
 
-      throw new Error(`Couldn't find ${pluginName}`);
+      throw new Error(`Couldn't find ${pluginId}`);
    }
 
    public hasEncryptionPlugin(): boolean {
@@ -81,12 +89,12 @@ export default class PluginRepository {
    private instantiatePlugin(Plugin: IPlugin) {
       let plugin;
 
-      Log.debug('Instanciate ' + Plugin.getName() + ' for account ' + this.account.getUid())
+      Log.debug('Instanciate ' + Plugin.getId() + ' for account ' + this.account.getUid())
 
-      plugin = new Plugin(new PluginAPI(Plugin.getName(), this.account));
+      plugin = new Plugin(new PluginAPI(Plugin.getId(), this.account));
 
       if (!(plugin instanceof AbstractPlugin)) {
-         throw new Error(Plugin.getName() + ' doesn\'t extend AbstractPlugin');
+         throw new Error(Plugin.getId() + ' doesn\'t extend AbstractPlugin');
       }
 
       if (plugin instanceof EncryptionPlugin) {

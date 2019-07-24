@@ -37,8 +37,16 @@ export default class OTRPlugin extends EncryptionPlugin {
    private sessions = {};
    private key: IDSA;
 
-   public static getName(): string {
+   public static getId(): string {
       return 'otr';
+   }
+
+   public static getName(): string {
+      return 'OTR';
+   }
+
+   public static getDescription(): string {
+      return Translation.t('setting-otr-enable');
    }
 
    constructor(pluginAPI: PluginAPI) {

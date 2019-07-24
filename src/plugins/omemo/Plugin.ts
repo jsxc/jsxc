@@ -16,8 +16,16 @@ const MAX_VERSION = '4.0.0';
 export default class OMEMOPlugin extends EncryptionPlugin {
    private omemo: Omemo;
 
+   public static getId(): string {
+      return 'omemo';
+   }
+
    public static getName(): string {
       return 'OMEMO';
+   }
+
+   public static getDescription(): string {
+      return Translation.t('setting-omemo-enable');
    }
 
    constructor(pluginAPI: IPluginAPI) {

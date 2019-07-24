@@ -2,6 +2,7 @@ import { AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import Contact from '../Contact'
 import Message from '../Message'
+import Translation from '@util/Translation';
 
 /**
  * XEP-0245: The /me Command
@@ -14,8 +15,16 @@ const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 export default class MeCommandPlugin extends AbstractPlugin {
+   public static getId(): string {
+      return 'me-command';
+   }
+
    public static getName(): string {
-      return 'meCommand';
+      return 'The /me Command';
+   }
+
+   public static getDescription(): string {
+      return Translation.t('setting-meCommand-enable');
    }
 
    constructor(pluginAPI: PluginAPI) {

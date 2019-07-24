@@ -21,8 +21,16 @@ const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 export default class HttpUploadPlugin extends AbstractPlugin {
+   public static getId(): string {
+      return 'http-upload';
+   }
+
    public static getName(): string {
-      return 'httpUpload';
+      return 'HTTP File Upload';
+   }
+
+   public static getDescription(): string {
+      return Translation.t('setting-http-upload-enable');
    }
 
    private services: HttpUploadService[];

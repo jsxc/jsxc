@@ -18,6 +18,10 @@ const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 export default class CarbonsPlugin extends AbstractPlugin {
+   public static getId(): string {
+      return 'carbon';
+   }
+
    public static getName(): string {
       return 'Carbon Copy';
    }

@@ -8,6 +8,7 @@ import ListItem from '../DialogListItem'
 import AvatarSet from '../AvatarSet'
 import Log from '../../util/Log'
 import Translation from '@util/Translation';
+import Account from '@src/Account';
 
 const ENOUGH_BITS_OF_ENTROPY = 50;
 
@@ -103,7 +104,7 @@ class AccountOverviewSection extends Section {
 }
 
 class AccountPage extends Page {
-   constructor(navigation: Navigation, private account) {
+   constructor(navigation: Navigation, private account: Account) {
       super(navigation, account.getJID().bare);
    }
 
@@ -119,7 +120,7 @@ class AccountPage extends Page {
 
 //@REVIEW priorities? Are they still needed/used?
 class ConnectionSection extends Section {
-   constructor(navigation: Navigation, private account) {
+   constructor(navigation: Navigation, private account: Account) {
       super(navigation, Translation.t('Connection'));
    }
 
@@ -139,7 +140,7 @@ class ConnectionSection extends Section {
 }
 
 class PasswordPage extends Page {
-   constructor(navigation: Navigation, private account) {
+   constructor(navigation: Navigation, private account: Account) {
       super(navigation, Translation.t('Password'));
    }
 
@@ -218,8 +219,8 @@ class PasswordPage extends Page {
       contentElement.submit((ev) => {
          ev.preventDefault();
 
-         let passwordA = passwordAElement.find('input').val();
-         let passwordB = passwordBElement.find('input').val();
+         let passwordA = passwordAElement.find('input').val() as string;
+         let passwordB = passwordBElement.find('input').val() as string;
 
          if (passwordA !== passwordB) {
             return;
@@ -240,7 +241,7 @@ class PasswordPage extends Page {
 }
 
 class PluginSection extends Section {
-   constructor(navigation: Navigation, private account) {
+   constructor(navigation: Navigation, private account: Account) {
       super(navigation, Translation.t('Plugins'));
    }
 
@@ -250,23 +251,25 @@ class PluginSection extends Section {
       let disabledPlugins = this.account.getOption('disabledPlugins') || [];
       let pluginRepository = this.account.getPluginRepository();
 
-      for (let plugin of pluginRepository.getAllEnabledRegisteredPlugins()) {
+      for (let plugin of pluginRepository.getAllRegisteredPlugins()) {
+         let id = plugin.getId();
          let name = plugin.getName();
          let description = typeof plugin.getDescription === 'function' ? plugin.getDescription() : undefined;
 
          let checkboxElement = $('<input>');
          checkboxElement.attr('type', 'checkbox');
+         checkboxElement.attr('id', id);
          checkboxElement.attr('name', name);
-         checkboxElement.prop('checked', disabledPlugins.indexOf(name) < 0);
+         checkboxElement.prop('checked', disabledPlugins.indexOf(id) < 0);
          checkboxElement.on('change', (ev) => {
             let isEnabled = $(ev.target).prop('checked');
-            let name = $(ev.target).attr('name');
+            let id = $(ev.target).attr('id');
             let disabledPlugins = this.account.getOption('disabledPlugins') || [];
 
             if (isEnabled) {
-               disabledPlugins = disabledPlugins.filter(v => v !== name);
+               disabledPlugins = disabledPlugins.filter(v => v !== id);
             } else {
-               disabledPlugins.push(name);
+               disabledPlugins.push(id);
             }
 
             this.account.setOption('disabledPlugins', disabledPlugins);

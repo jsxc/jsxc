@@ -38,6 +38,8 @@ export interface IConnection {
 
    queryArchive(archive: IJID, version: string, contact: IJID, queryId: string, beforeResultId?: string, end?: Date): Promise<Element>
 
+   changePassword(newPassword: string): Promise<Element>
+
    close()
 }
 

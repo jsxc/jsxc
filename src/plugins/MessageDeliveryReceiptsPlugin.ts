@@ -5,6 +5,7 @@ import PluginAPI from '../plugin/PluginAPI'
 import * as Namespace from '../connection/xmpp/namespace'
 import { $msg } from '../vendor/Strophe'
 import { IContact } from '@src/Contact.interface';
+import Translation from '@util/Translation';
 
 /**
  * XEP-0184: Message Delivery Receipts
@@ -19,9 +20,16 @@ const MAX_VERSION = '4.0.0';
 let PRESERVE_HANDLER = true;
 
 export default class ReceiptPlugin extends AbstractPlugin {
+   public static getId(): string {
+      return 'receipts';
+   }
 
    public static getName(): string {
       return 'Message Delivery Receipts';
+   }
+
+   public static getDescription(): string {
+      return Translation.t('setting-receipts-enable');
    }
 
    constructor(pluginAPI: PluginAPI) {
