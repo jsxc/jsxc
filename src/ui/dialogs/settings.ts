@@ -21,7 +21,7 @@ export default function() {
 
 class StartPage extends Page {
    constructor(navigation: Navigation) {
-      super(navigation, 'Settings');
+      super(navigation, Translation.t('Settings'));
    }
 
    //@REVIEW could also return Page or getDOM interface?
@@ -78,7 +78,7 @@ class ClientSection extends Section {
 
 class AccountOverviewSection extends Section {
    constructor(navigation: Navigation) {
-      super(navigation, 'Accounts');
+      super(navigation, Translation.t('Accounts'));
    }
 
    protected generateContentElement(): JQuery {
@@ -120,7 +120,7 @@ class AccountPage extends Page {
 //@REVIEW priorities? Are they still needed/used?
 class ConnectionSection extends Section {
    constructor(navigation: Navigation, private account) {
-      super(navigation, 'Connection');
+      super(navigation, Translation.t('Connection'));
    }
 
    protected generateContentElement(): JQuery {
@@ -130,9 +130,9 @@ class ConnectionSection extends Section {
       let changePasswordActionHandler = () => this.navigation.goTo(new PasswordPage(this.navigation, this.account));
 
       contentElement.append(new ListItem('Jabber ID', jid.bare));
-      contentElement.append(new ListItem('Resource', jid.resource));
+      contentElement.append(new ListItem(Translation.t('Resource'), jid.resource));
       contentElement.append(new ListItem('BOSH url', this.account.getConnectionUrl()));
-      contentElement.append(new ListItem('Change password', undefined, changePasswordActionHandler));
+      contentElement.append(new ListItem(Translation.t('Change_password'), undefined, changePasswordActionHandler));
 
       return contentElement.getDOM();
    }
@@ -140,7 +140,7 @@ class ConnectionSection extends Section {
 
 class PasswordPage extends Page {
    constructor(navigation: Navigation, private account) {
-      super(navigation, 'Password');
+      super(navigation, Translation.t('Password'));
    }
 
    protected generateContentElement(): JQuery {
@@ -152,7 +152,7 @@ class PasswordPage extends Page {
       let explanationElement = $(`<p class="jsxc-explanation">${Translation.t('password_explanation')}</p>`);
 
       let passwordAElement = $(`<div class="form-group">
-         <label class="col-sm-4 control-label" for="jsxc-password-A">Password</label>
+         <label class="col-sm-4 control-label" for="jsxc-password-A">${Translation.t('Password')}</label>
          <div class="col-sm-8">
             <input type="password" name="password-A" id="jsxc-password-A" class="form-control" required="required">
             <p class="jsxc-inputinfo"></p>
@@ -160,7 +160,7 @@ class PasswordPage extends Page {
       </div>`);
 
       let passwordBElement = $(`<div class="form-group">
-         <label class="col-sm-4 control-label" for="jsxc-password-B">Control</label>
+         <label class="col-sm-4 control-label" for="jsxc-password-B">${Translation.t('Control')}</label>
          <div class="col-sm-8">
             <input type="password" name="password-B" id="jsxc-password-B" class="form-control" required="required">
             <p class="jsxc-inputinfo jsxc-hidden"></p>
@@ -169,7 +169,7 @@ class PasswordPage extends Page {
 
       let submitElement = $(`<div class="form-group">
          <div class="col-sm-offset-4 col-sm-8">
-            <button disabled="disabled" class="jsxc-button jsxc-button--primary">Change password</button>
+            <button disabled="disabled" class="jsxc-button jsxc-button--primary">${Translation.t('Change_password')}</button>
          </div>
       </div>`);
 
@@ -205,7 +205,7 @@ class PasswordPage extends Page {
          let bitsOfEntropy = Math.log2(entropy);
          let strength = Math.min(100, Math.round(bitsOfEntropy / ENOUGH_BITS_OF_ENTROPY * 100));
 
-         passwordAElement.find('.jsxc-inputinfo').text(`Strength: ${strength}%`);
+         passwordAElement.find('.jsxc-inputinfo').text(`${Translation.t('Strength')}: ${strength}%`);
       });
 
       contentElement.find('input').on('input', function() {
@@ -241,7 +241,7 @@ class PasswordPage extends Page {
 
 class PluginSection extends Section {
    constructor(navigation: Navigation, private account) {
-      super(navigation, 'Plugins');
+      super(navigation, Translation.t('Plugins'));
    }
 
    protected generateContentElement(): JQuery {
