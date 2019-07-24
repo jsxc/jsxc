@@ -38,7 +38,13 @@ export default class MeCommandPlugin extends AbstractPlugin {
       let meRegex = /^\/me /;
 
       if (meRegex.test(plaintext)) {
-         plaintext = plaintext.replace(meRegex, contact.getName() + ' ');
+         let name = contact.getName();
+
+         if (name.indexOf('@') > -1) {
+            name = name.slice(0, name.indexOf('@'));
+         }
+
+         plaintext = plaintext.replace(meRegex, `***${name} `);
          message.setPlaintextMessage(plaintext);
       }
 
