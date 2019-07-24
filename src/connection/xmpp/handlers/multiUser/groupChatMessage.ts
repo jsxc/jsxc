@@ -45,59 +45,77 @@ export default class extends AbstractHandler {
          return this.PRESERVE_HANDLER;
       }
 
-      if (body !== '') {
-         let delay = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
-         let sendDate = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
-         let afterJoin = sendDate > contact.getJoinDate();
-         let direction = Message.DIRECTION.IN;
+      if (body === '') {
+         return this.PRESERVE_HANDLER;
+      }
 
-         if (contact.getNickname() === nickname) {
-            if (afterJoin) {
-               Log.debug('Ignore my own groupchat messages');
+      let delay = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
+      let sendDate = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
+      let afterJoin = sendDate > contact.getJoinDate();
+      let direction = Message.DIRECTION.IN;
+
+      let transcript = contact.getTranscript();
+
+      if (!afterJoin) {
+         if (Message.exists(originId) || Message.exists(stanzaId)) {
+            return this.PRESERVE_HANDLER;
+         }
+
+         for (let message of transcript.getGenerator()) {
+            if (message.getAttrId() === attrId && message.getPlaintextMessage() === body) {
+               return this.PRESERVE_HANDLER;
+            }
+         }
+      }
+
+      let member = contact.getMember(nickname);
+      let uid = stanzaId || originId;
+      let unread = afterJoin;
+      let sender = {
+         name: nickname,
+         jid: member && member.jid,
+      };
+
+      if (contact.getNickname() === nickname) {
+         if (afterJoin) {
+            if (Message.exists(originId)) {
+               let message = new Message(originId);
+
+               message.received();
 
                return this.PRESERVE_HANDLER;
             }
 
+            direction = Message.DIRECTION.OUT;
+            uid = originId;
+            unread = false;
+            sender = undefined;
+         } else {
             direction = Message.DIRECTION.PROBABLY_OUT;
          }
-
-         let transcript = contact.getTranscript();
-
-         if (!afterJoin) {
-            if (Message.exists(originId) || Message.exists(stanzaId)) {
-               return this.PRESERVE_HANDLER;
-            }
-
-            for (let message of transcript.getGenerator()) {
-               if (message.getAttrId() === attrId && message.getPlaintextMessage() === body) {
-                  return this.PRESERVE_HANDLER;
-               }
-            }
-         }
-
-         let member = contact.getMember(nickname);
-
-         let message = new Message({
-            uid: stanzaId || originId,
-            attrId,
-            peer: from,
-            direction,
-            plaintextMessage: body,
-            // htmlMessage: htmlBody.html(),
-            stamp: sendDate.getTime(),
-            sender: {
-               name: nickname,
-               jid: member && member.jid,
-            },
-            unread: afterJoin,
-         });
-
-         let pipe = this.account.getPipe('afterReceiveGroupMessage');
-
-         pipe.run(contact, message).then(([contact, message]) => {
-            contact.getTranscript().pushMessage(message);
-         });
       }
+
+      let message = new Message({
+         uid,
+         attrId,
+         peer: from,
+         direction,
+         plaintextMessage: body,
+         // htmlMessage: htmlBody.html(),
+         stamp: sendDate.getTime(),
+         sender,
+         unread,
+      });
+
+      if (direction === Message.DIRECTION.OUT) {
+         message.received();
+      }
+
+      let pipe = this.account.getPipe('afterReceiveGroupMessage');
+
+      pipe.run(contact, message).then(([contact, message]) => {
+         contact.getTranscript().pushMessage(message);
+      });
 
       return this.PRESERVE_HANDLER;
    }
