@@ -72,7 +72,7 @@ export interface IRosterService {
 
    addContact(jid: IJID, alias: string): Promise<Element>
 
-   setDisplayName(jid: IJID, displayName: string): Promise<Element>
+   setDisplayName(jid: IJID, displayName: string, groups: string[]): Promise<Element>
 
    sendSubscriptionAnswer(to: IJID, accept: boolean)
 }

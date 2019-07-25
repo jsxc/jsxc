@@ -65,7 +65,7 @@ export default class RosterContactProvider extends ContactProvider {
 
       contact.registerHook('name', (displayName) => {
          if (RoleAllocator.get().isMaster()) {
-            this.renameContact(contact.getJid(), displayName);
+            this.renameContact(contact.getJid(), displayName, contact.getGroups());
          }
       });
    }
@@ -74,8 +74,8 @@ export default class RosterContactProvider extends ContactProvider {
       return this.getService().removeContact(jid).then(() => undefined);
    }
 
-   private renameContact(jid: IJID, displayName: string) {
-      this.getService().setDisplayName(jid, displayName);
+   private renameContact(jid: IJID, displayName: string, groups: string[]) {
+      this.getService().setDisplayName(jid, displayName, groups);
    }
 
    private getStorage() {
@@ -111,9 +111,11 @@ export default class RosterContactProvider extends ContactProvider {
          let jid = new JID(item.attr('jid'));
          let name = item.attr('name') || jid.bare;
          let subscription = item.attr('subscription');
+         let groups = item.find('>group').map((index, groupElement) => $(groupElement).text()).get();
 
          let contact = self.createContact(jid, name);
          contact.setSubscription(<SUBSCRIPTION> subscription);
+         contact.setGroups(groups);
 
          cache.push(contact.getId());
          contacts.push(contact);
@@ -186,6 +188,7 @@ export default class RosterContactProvider extends ContactProvider {
       let jid = new JID($(itemElement).attr('jid'));
       let name = $(itemElement).attr('name');
       let subscription = $(itemElement).attr('subscription') || 'none';
+      let groups = $(itemElement).find('>group').map((index, groupElement) => $(groupElement).text()).get();
 
       let contact = account.getContact(jid);
 
@@ -204,6 +207,7 @@ export default class RosterContactProvider extends ContactProvider {
       } else {
          contact.setName(name);
          contact.setSubscription(<SUBSCRIPTION> subscription);
+         contact.setGroups(groups);
 
          this.contactManager.addToCache(contact);
       }

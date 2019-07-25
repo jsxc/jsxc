@@ -101,6 +101,10 @@ export interface IContact {
 
    setSubscription(subscription: ContactSubscription);
 
+   setGroups(groups: string[]);
+
+   getGroups(): string[]
+
    registerHook(property: string, func: (newValue: any, oldValue: any) => void);
 
    isPersistent(): boolean;
