@@ -60,7 +60,8 @@
   &--drop-top-right,
   &--drop-bottom-left,
   &--drop-bottom-right,
-  &--drop-right-top {
+  &--drop-right-top,
+  &--vertical-left {
     .jsxc-menu__content {
       border-radius: 3px;
       max-height: 9999px;
@@ -104,6 +105,24 @@
     // vertical-align: sub;
     // width: 40px;
     // }
+  }
+
+  &--vertical-left {
+    .jsxc-menu__content {
+      right: 100%;
+      top: 0;
+
+      &::after {
+        left: 100%;
+        top: 14px;
+        transform: rotate(-90deg);
+      }
+    }
+
+    ul {
+      display: flex;
+      padding: 0;
+    }
   }
 
   &--drop-bottom-left {
