@@ -33,11 +33,18 @@ export default class extends AbstractHandler {
       }
 
       if (subjectElement.length === 1 && bodyElement.length === 0) {
-         contact.setSubject(subjectElement.text());
+         let subject = subjectElement.text();
+         let oldSubject = contact.getSubject();
+
+         if (subject === oldSubject) {
+            return this.PRESERVE_HANDLER;
+         }
+
+         contact.setSubject(subject);
 
          let translatedMessage = Translation.t('changed_subject_to', {
             nickname,
-            subject: contact.getSubject()
+            subject,
          });
 
          contact.addSystemMessage(':page_with_curl: ' + translatedMessage);
