@@ -8,7 +8,7 @@
 
   .jsxc-status {
     background-color: $video-status-bg;
-    border-radius: 20px;
+    border-radius: 0.5em;
     color: $video-status-color;
     display: none;
     font-weight: bold;
@@ -17,7 +17,20 @@
     position: absolute;
     text-align: center;
     top: 30px;
+    transform: translateX(-50%);
     z-index: 9999;
+
+    &--visible {
+      display: block;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    p + p {
+      margin-top: 0.5em;
+    }
   }
 
   li .jsxc-name {

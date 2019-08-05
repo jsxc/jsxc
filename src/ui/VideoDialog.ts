@@ -162,46 +162,34 @@ export class VideoDialog {
    }
 
    //@REVIEW still used?
-   public setStatus(txt, d?) {
-      let status = $('.jsxc_webrtc .jsxc_status');
-      let duration = (typeof d === 'undefined' || d === null) ? 4000 : d;
+   public setStatus(message, duration = 4000) {
+      let statusElement = this.dom.find('.jsxc-status');
 
-      Log.debug('[Webrtc]', txt);
+      Log.debug('[Webrtc]', message);
 
-      if (status.html()) {
-         // attach old messages
-         txt = status.html() + '<br />' + txt;
-         //@TODO escape html; maybe use p element
-      }
+      let messageElement = $('<p>').text(message);
+      messageElement.appendTo(statusElement);
 
-      status.html(txt);
-
-      status.css({
-         'margin-left': '-' + (status.width() / 2) + 'px',
-         'opacity': 0,
-         'display': 'block'
-      });
-
-      //@TODO use css animation
-      status.stop().animate({
-         opacity: 1
-      });
-
-      clearTimeout(status.data('timeout'));
+      statusElement.addClass('jsxc-status--visible');
 
       if (duration === 0) {
          return;
       }
 
-      let to = setTimeout(function() {
-         status.stop().animate({
-            opacity: 0
-         }, function() {
-            status.html('');
-         });
-      }, duration);
+      setTimeout(() => {
+         messageElement.remove();
 
-      status.data('timeout', to);
+         if (statusElement.children().length === 0) {
+            statusElement.removeClass('jsxc-status--visible');
+         }
+      }, duration);
+   }
+
+   public clearStatus() {
+      let statusElement = this.dom.find('.jsxc-status');
+
+      statusElement.empty();
+      statusElement.removeClass('jsxc-status--visible');
    }
 
    public isReady(): boolean {

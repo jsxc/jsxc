@@ -54,6 +54,8 @@ export default class VideoWindow {
 
    private callAccepted = () => {
       this.wrapperElement.removeClass('jsxc-ringing');
+
+      this.videoDialog.clearStatus();
    }
 
    private callRinging = () => {
