@@ -127,8 +127,6 @@ export default class ChatWindow {
       this.element.removeClass('jsxc-minimized').addClass('jsxc-normal');
 
       this.scrollMessageAreaToBottom();
-
-      //@TODO scroll message list, so that this window is in the view port
    }
 
    public focus() {
