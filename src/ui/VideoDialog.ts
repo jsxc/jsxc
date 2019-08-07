@@ -118,12 +118,7 @@ export class VideoDialog {
 
       if ($.support.fullscreen) {
          this.dom.find('.jsxc-fullscreen').click(() => {
-            $(document).one('disabled.fullscreen', function() {
-               // Reset position of localvideo
-               localVideoElement.removeAttr('style');
-            });
-
-            // (<any>$('#jsxc_webrtc .jsxc_videoContainer')).fullscreen();
+            (<any> this.dom).fullscreen();
          });
       } else {
          this.dom.find('.jsxc-fullscreen').hide();
