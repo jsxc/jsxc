@@ -219,7 +219,7 @@ abstract class AbstractConnection {
          xmlns: 'http://jabber.org/protocol/rsm'
       }).c('max').t('20').up();
 
-      if (typeof beforeResultId === 'string') {
+      if (typeof beforeResultId === 'string' || typeof beforeResultId === 'number') {
          iq.c('before').t(beforeResultId);
       }
 
