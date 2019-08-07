@@ -99,7 +99,7 @@ export interface IMessage {
 
    setEncrypted(encrypted: boolean)
 
-   getProcessedBody(): string
+   getProcessedBody(): Promise<string>
 
    setErrorMessage(error: string)
 

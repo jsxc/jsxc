@@ -6,7 +6,7 @@ import Message from '../Message'
 import JID from '../JID'
 import DiscoInfoRepository from '../DiscoInfoRepository'
 import Avatar from '../Avatar'
-import { IMessagePayload } from '../Message.interface'
+import { IMessagePayload, DIRECTION } from '../Message.interface'
 import { IPluginAPI } from './PluginAPI.interface'
 import { Logger } from '../util/Log'
 import ChatWindow from '@ui/ChatWindow';
@@ -137,6 +137,12 @@ export default class PluginAPI implements IPluginAPI {
 
    public registerContactProvider(source: ContactProvider) {
       this.account.getContactManager().registerContactProvider(source);
+   }
+
+   public registerTextFormatter(formatter: (text: string, direction: DIRECTION, contact: IContact) => Promise<string> | string, priority?: number) {
+      Message.addFormatter((text: string, direction: DIRECTION, peer: IJID) => {
+         return Promise.resolve(formatter(text, direction, this.account.getContact(peer))).then(text => [text, direction, peer]);
+      }, priority);
    }
 
    public getContactManager(): ContactManager {

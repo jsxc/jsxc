@@ -175,7 +175,7 @@ export default class ChatWindow {
 
       chatWindowMessage.restoreNextMessage();
 
-      this.scrollMessageAreaToBottom();
+      setTimeout(() => this.scrollMessageAreaToBottom(), 500);
 
       return chatWindowMessage;
    }
