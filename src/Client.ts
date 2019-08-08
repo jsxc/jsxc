@@ -58,7 +58,9 @@ export default class Client {
       try {
          PluginRepository.add(Plugin);
          if (defaultOptions) {
-            Options.addDefaults(defaultOptions);
+            let options = {};
+            options[Plugin.getName()] = defaultOptions;
+            Options.addDefaults(options);
          }
       } catch (err) {
          Log.warn('Error while adding Plugin: ' + err);
