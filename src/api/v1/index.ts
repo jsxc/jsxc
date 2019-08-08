@@ -6,6 +6,7 @@ import FormWatcher, { SettingsCallback } from '../../FormWatcher'
 import { disconnect } from './disconnect';
 import Translation from '@util/Translation';
 import loginBox from '@ui/dialogs/loginBox';
+import {IOptionData} from '@src/Options';
 
 export { disconnect };
 export { start, startAndPause } from './start'
@@ -13,8 +14,8 @@ export { register } from './register'
 export { enableDebugMode, disableDebugMode, deleteAllData } from './debug'
 export { testBOSHServer } from './testBOSHServer'
 
-export function addPlugin(Plugin: IPlugin) {
-   Client.addPlugin(Plugin);
+export function addPlugin(Plugin: IPlugin, defaultOptions?: IOptionData) {
+   Client.addPlugin(Plugin, defaultOptions);
 }
 
 export function addMenuEntry(options: { id: string, handler: (ev) => void, label: string | JQuery<HTMLElement>, icon?: string, offlineAvailable?: boolean }) {

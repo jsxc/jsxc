@@ -8,7 +8,7 @@ import Client from './Client';
 
 const KEY = 'options';
 
-interface IOptionData {
+export interface IOptionData {
    [key: string]: any
 }
 

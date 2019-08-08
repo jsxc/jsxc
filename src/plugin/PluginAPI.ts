@@ -88,6 +88,10 @@ export default class PluginAPI implements IPluginAPI {
       return Client.getVersion();
    }
 
+   public getOption(key: string) {
+      return this.account.getOption(key);
+   }
+
    public addPreSendMessageProcessor(processor: (contact: Contact, message: Message) => Promise<{}>, position?: number) {
       this.account.getPipe('preSendMessage').addProcessor(processor, position);
    }

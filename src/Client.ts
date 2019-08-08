@@ -3,7 +3,7 @@ import Storage from './Storage'
 import { NoticeManager } from './NoticeManager'
 import PluginRepository from './plugin/PluginRepository'
 import Log from './util/Log'
-import Options from './Options'
+import Options, {IOptionData} from './Options'
 import PresenceController from './PresenceController'
 import PageVisibility from './PageVisibility'
 import ChatWindowList from './ui/ChatWindowList';
@@ -54,9 +54,12 @@ export default class Client {
       return '4.0.0';
    }
 
-   public static addPlugin(Plugin: IPlugin) {
+   public static addPlugin(Plugin: IPlugin, defaultOptions?: IOptionData) {
       try {
          PluginRepository.add(Plugin);
+         if (defaultOptions) {
+            Options.addDefaults(defaultOptions);
+         }
       } catch (err) {
          Log.warn('Error while adding Plugin: ' + err);
       }
