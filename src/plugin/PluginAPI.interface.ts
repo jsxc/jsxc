@@ -37,6 +37,8 @@ export interface IPluginAPI {
 
    getVersion(): string
 
+   getOption(key: string)
+
    addPreSendMessageProcessor(processor: (contact: Contact, message: IMessage) => Promise<{}>, position?: number)
 
    addAfterReceiveMessageProcessor(processor: (contact: Contact, message: IMessage, stanza: Element) => Promise<{}>, position?: number)
