@@ -376,6 +376,14 @@ div {
     background-image: url("../images/hang_up_red.svg");
   }
 
+  .jsxc-microphone {
+    background-image: url("../images/microphone_white.svg");
+
+    &.jsxc-disabled {
+      background-image: url("../images/microphone_disabled_white.svg");
+    }
+  }
+
   .jsxc-fullscreen {
     background-image: url("../images/fullscreen_white.svg");
   }

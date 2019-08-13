@@ -12,7 +12,7 @@ const VideoDialogTemplate = require('../../template/videoDialog.hbs')
 export class VideoDialog {
    private dom: JQuery;
 
-   private videoWindows: {[sessionId: string]: VideoWindow} = {};
+   private videoWindows: { [sessionId: string]: VideoWindow } = {};
 
    private localStream: MediaStream;
 
@@ -94,6 +94,8 @@ export class VideoDialog {
       this.dom.appendTo('body');
 
       let localVideoElement = this.dom.find('.jsxc-local-video');
+      let localCameraControl = this.dom.find('.jsxc-video');
+      let localMicrophoneControl = this.dom.find('.jsxc-microphone');
 
       if (typeof (<any> localVideoElement).draggable === 'function') {
          (<any> localVideoElement).draggable({
@@ -104,13 +106,38 @@ export class VideoDialog {
       if (localStream) {
          this.localStream = localStream;
          VideoDialog.attachMediaStream(localVideoElement, localStream);
-      }
 
-      if (!localStream || localStream.getVideoTracks().length === 0) {
-         Log.debug('No local video device available');
+         if (localStream.getVideoTracks().length === 0) {
+            Log.debug('No local video device available');
+            localCameraControl.hide();
+            localVideoElement.hide();
+         } else if (localStream.getVideoTracks().filter((track: MediaStreamTrack) => track.enabled).length === 0) {
+            Log.debug('There are no video tracks enabled');
+            localCameraControl.addClass('jsxc-disabled')
+         }
 
+         if (localStream.getAudioTracks().length === 0) {
+            Log.debug('No local audio device available');
+            localMicrophoneControl.hide();
+         } else if (localStream.getAudioTracks().filter((track: MediaStreamTrack) => track.enabled).length === 0) {
+            Log.debug('There are no audio tracks enabled');
+            localMicrophoneControl.addClass('jsxc-disabled')
+         }
+      } else {
+         Log.debug('No local stream available');
+
+         localCameraControl.hide();
          localVideoElement.hide();
+         localMicrophoneControl.hide();
       }
+
+      localMicrophoneControl.click(() => {
+         VideoDialog.changeStreamMediaState(localMicrophoneControl, localStream.getAudioTracks());
+      });
+
+      localCameraControl.click(() => {
+         VideoDialog.changeStreamMediaState(localCameraControl, localStream.getVideoTracks());
+      });
 
       this.dom.find('.jsxc-hang-up').click(() => {
          JingleHandler.terminateAll('success');
@@ -224,6 +251,12 @@ export class VideoDialog {
       if (this.localStream) {
          VideoDialog.stopStream(this.localStream);
       }
+   }
+
+   private static changeStreamMediaState = (element: JQuery, tracks: MediaStreamTrack[]) => {
+      element.toggleClass('jsxc-disabled');
+      let streamEnabled = !element.hasClass('jsxc-disabled');
+      tracks.forEach((track: MediaStreamTrack) => track.enabled = streamEnabled);
    }
 
    public static attachMediaStream = (element: JQuery|HTMLMediaElement, stream: MediaStream) => {
