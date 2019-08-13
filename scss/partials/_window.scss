@@ -268,7 +268,7 @@
   background-image: url("../images/attachment.svg");
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 80%;
+  background-size: 1.3em;
   cursor: pointer;
   height: 40px;
   opacity: 0.3;
@@ -289,28 +289,6 @@
   }
   @media (min-width: 768px) {
     width: 34px;
-  }
-}
-
-.jsxc-menu-emoticons {
-  cursor: pointer;
-  height: 40px;
-  position: relative;
-  width: 44px;
-  z-index: 30;
-
-  &::after {
-    background-image: url("../images/smiley.svg");
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: 30px 30px;
-    bottom: 0;
-    content: " ";
-    left: 0;
-    opacity: 0.3;
-    position: absolute;
-    right: 0;
-    top: 0;
   }
 }
 
@@ -659,7 +637,7 @@ div.jsxc-transfer {
     background-image: url("../images/padlock_open_black.svg");
     background-position: center center;
     background-repeat: no-repeat;
-    background-size: 60%;
+    background-size: 1.3em;
     cursor: pointer;
     display: block;
     height: 40px;

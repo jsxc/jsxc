@@ -7,12 +7,12 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   height="16"
-   width="16"
+   height="44"
+   width="44"
    version="1.1"
-   id="svg2"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="delete_black.svg">
+   id="svg4"
+   sodipodi:docname="delete_white.svg"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
   <metadata
      id="metadata10">
     <rdf:RDF>
@@ -36,20 +36,20 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="640"
-     inkscape:window-height="480"
+     inkscape:window-width="1874"
+     inkscape:window-height="1136"
      id="namedview6"
      showgrid="false"
      inkscape:zoom="14.75"
-     inkscape:cx="8"
-     inkscape:cy="8"
-     inkscape:window-x="39"
-     inkscape:window-y="24"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="svg2" />
+     inkscape:cx="9.3281601"
+     inkscape:cy="18.542373"
+     inkscape:window-x="1246"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4" />
   <path
-     d="m6.5 1-0.5 1h-3c-0.554 0-1 0.446-1 1v1h12v-1c0-0.554-0.446-1-1-1h-3l-0.5-1zm-3.5 4 0.875 9c0.061 0.549 0.5729 1 1.125 1h6c0.55232 0 1.064-0.45102 1.125-1l0.875-9z"
-     fill-rule="evenodd"
-     id="path4"
-     style="fill:#ffffff" />
+     d="M 17.285714,0 15.714286,3.1428571 H 6.2857141 c -1.7411428,0 -3.1428571,1.4017143 -3.1428571,3.1428572 V 9.4285714 H 40.857143 V 6.2857143 c 0,-1.7411429 -1.401715,-3.1428572 -3.142857,-3.1428572 H 28.285714 L 26.714286,0 Z m -10.9999999,12.571429 2.75,28.285714 C 9.2274284,42.582571 10.836257,44 12.571428,44 h 18.857143 c 1.735863,0 3.344,-1.417491 3.535715,-3.142857 l 2.75,-28.285714 z"
+     id="path2"
+     inkscape:connector-curvature="0"
+     style="fill-rule:evenodd;stroke-width:3.14285707;fill:#ffffff" />
 </svg>

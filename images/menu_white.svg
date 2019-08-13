@@ -12,7 +12,7 @@
    version="1.1"
    id="svg6"
    sodipodi:docname="menu_white.svg"
-   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)">
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
   <defs
      id="defs10" />
   <sodipodi:namedview
@@ -24,15 +24,15 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1117"
+     inkscape:window-width="1482"
      inkscape:window-height="900"
      id="namedview8"
      showgrid="false"
      inkscape:zoom="5.2149125"
-     inkscape:cx="4.8232544"
+     inkscape:cx="-32.377753"
      inkscape:cy="3.0821533"
-     inkscape:window-x="43"
-     inkscape:window-y="0"
+     inkscape:window-x="1505"
+     inkscape:window-y="206"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg6" />
   <metadata
@@ -48,8 +48,8 @@
     </rdf:RDF>
   </metadata>
   <path
-     d="m 6.0285961,6.028596 v 5.323802 H 37.971404 V 6.028596 Z m 0,13.309504 v 5.323801 H 37.971404 V 19.3381 Z m 0,13.309503 v 5.323801 H 37.971404 v -5.323801 z"
+     d="M 4.9999999e-8,0 V 7.3333343 H 44 V 0 Z m 0,18.333334 v 7.333333 H 44 v -7.333333 z m 0,18.333333 V 44 H 44 v -7.333333 z"
      id="path4"
      inkscape:connector-curvature="0"
-     style="stroke-width:1;fill:#ffffff" />
+     style="stroke-width:1.37746191;fill:#ffffff" />
 </svg>
