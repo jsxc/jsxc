@@ -6,6 +6,9 @@ import VideoWindow from './VideoWindow'
 import JingleMediaSession from '../JingleMediaSession';
 import Translation from '@util/Translation';
 import JingleCallSession from '@src/JingleCallSession';
+import * as screenfull from 'screenfull';
+
+const screen = screenfull as screenfull.Screenfull;
 
 const VideoDialogTemplate = require('../../template/videoDialog.hbs')
 
@@ -143,14 +146,17 @@ export class VideoDialog {
          JingleHandler.terminateAll('success');
       });
 
-      if ($.support.fullscreen) {
-         this.dom.find('.jsxc-fullscreen').click(() => {
-            $(document).one('disabled.fullscreen', function() {
-               // Reset position of localvideo
-               localVideoElement.removeAttr('style');
-            });
+      if (screen) {
+         screen.on('change', () => {
+            this.resetPositionOfLocalVideoElement();
+         });
 
-            // (<any>$('#jsxc_webrtc .jsxc_videoContainer')).fullscreen();
+         this.dom.find('.jsxc-fullscreen').click(() => {
+            if (screen.isFullscreen) {
+               screen.exit();
+            } else {
+               screen.request(this.dom.get(0));
+            }
          });
       } else {
          this.dom.find('.jsxc-fullscreen').hide();
@@ -174,6 +180,17 @@ export class VideoDialog {
       this.dom.find('.jsxc-video-container').append(containerElement);
 
       this.updateNumberOfContainer();
+   }
+
+   private resetPositionOfLocalVideoElement() {
+      let localVideoElement = this.dom.find('.jsxc-local-video');
+
+      localVideoElement.css({
+         top: '',
+         left: '',
+         bottom: '',
+         right: '',
+      });
    }
 
    private removeContainer(sessionId: string) {
