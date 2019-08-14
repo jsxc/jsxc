@@ -3,7 +3,6 @@ import Attachment from './Attachment'
 import JID from './JID'
 import * as CONST from './CONST'
 import Emoticons from './Emoticons'
-import Translation from './util/Translation'
 import IIdentifiable from './Identifiable.interface'
 import Client from './Client'
 import Utils from './util/Utils'
@@ -11,6 +10,8 @@ import { IMessage, DIRECTION, IMessagePayload } from './Message.interface'
 import { ContactType } from './Contact.interface'
 import PersistentMap from './util/PersistentMap'
 import UUID from './util/UUID'
+import Pipe from '@util/Pipe';
+import { IJID } from './JID.interface';
 
 const ATREGEX = new RegExp('(xmpp:)?(' + CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i');
 
@@ -20,6 +21,24 @@ export default class Message implements IIdentifiable, IMessage {
       let data = PersistentMap.getData(Client.getStorage(), uid);
 
       return !!(data && data.attrId);
+   }
+
+   private static formattingPipe = new Pipe();
+
+   private static formatText(text: string, direction: DIRECTION, peer: IJID): Promise<string> {
+      return Message.formattingPipe.run(text, direction, peer).then(args => args[0]);
+   }
+
+   public static addFormatter(formatter: (text: string, direction: DIRECTION, peer?: IJID) => Promise<[string, DIRECTION, IJID]> | string, priority?: number) {
+      Message.formattingPipe.addProcessor((text: string, direction: DIRECTION, peer: IJID) => {
+         let returnValue = formatter(text, direction, peer);
+
+         if (typeof returnValue === 'string') {
+            return Promise.resolve([returnValue, direction, peer]);
+         }
+
+         return returnValue;
+      }, priority);
    }
 
    private uid: string;
@@ -237,23 +256,11 @@ export default class Message implements IIdentifiable, IMessage {
       this.data.set('encrypted', encrypted);
    }
 
-   public getProcessedBody(): string {
+   public async getProcessedBody(): Promise<string> {
       let body = this.getPlaintextMessage();
+
       body = Utils.escapeHTML(body);
-
-      //@REVIEW maybe pipes
-      body = this.convertUrlToLink(body);
-      body = this.convertEmailToLink(body);
-      body = this.convertGeoToLink(body);
-      body = Emoticons.toImage(body);
-
-      body = this.markQuotation(body);
-      body = this.replaceLineBreaks(body);
-
-      // hide unprocessed otr messages
-      if (body.match(/^\?OTR([:,|?]|[?v0-9x]+)/)) {
-         body = '<i title="' + body + '">' + Translation.t('Unreadable_OTR_message') + '</i>';
-      }
+      body = await Message.formatText(body, this.getDirection(), this.getPeer());
 
       return `<p>${body}</p>`;
    }
@@ -278,64 +285,71 @@ export default class Message implements IIdentifiable, IMessage {
    public updateProgress(transfered: number, complete: number) {
 
    }
+}
 
-   private markQuotation(text) {
-      let lines = text.split(/(?:\n|\r\n|\r)/);
-      let inQuote = false;
+function convertUrlToLink(text: string) {
+   return text.replace(CONST.REGEX.URL, function(url) {
+      let href = (url.match(/^https?:\/\//i)) ? url : 'http://' + url;
 
-      for (let lineNumber in lines) {
-         if (!lines.hasOwnProperty(lineNumber)) {
-            //This value comes from Array prototype
-            continue;
+      return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
+   });
+}
+
+function convertEmailToLink(text: string) {
+   return text.replace(ATREGEX, function(str, protocol, jid, action) {
+      if (protocol === 'xmpp:') {
+         if (typeof action === 'string') {
+            jid += action;
          }
 
-         let line = lines[lineNumber];
-
-         if (line.indexOf('&gt;') === 0) {
-            inQuote = true;
-            line = line.replace(/&gt; ?/, '');
-         } else if (inQuote && line === '') {
-            inQuote = false;
-            lines[lineNumber] = null;
-         }
-
-         if (inQuote) {
-            lines[lineNumber] = '<span class="jsxc-quote">' + line + '</span>';
-         }
+         return '<a href="xmpp:' + jid + '">xmpp:' + jid + '</a>';
       }
 
-      return lines.filter(line => line !== null).join('\n');
-   }
-
-   private replaceLineBreaks(text) {
-      return text.replace(/(\r\n|\r|\n)/g, '<br />');
-   }
-
-   private convertUrlToLink(text: string) {
-      return text.replace(CONST.REGEX.URL, function(url) {
-         let href = (url.match(/^https?:\/\//i)) ? url : 'http://' + url;
-
-         return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
-      });
-   }
-
-   private convertEmailToLink(text: string) {
-      return text.replace(ATREGEX, function(str, protocol, jid, action) {
-         if (protocol === 'xmpp:') {
-            if (typeof action === 'string') {
-               jid += action;
-            }
-
-            return '<a href="xmpp:' + jid + '">xmpp:' + jid + '</a>';
-         }
-
-         return '<a href="mailto:' + jid + '" target="_blank">mailto:' + jid + '</a>';
-      });
-   }
-
-   private convertGeoToLink(text: string) {
-      return text.replace(CONST.REGEX.GEOURI, (url) => {
-         return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-      })
-   }
+      return '<a href="mailto:' + jid + '" target="_blank">mailto:' + jid + '</a>';
+   });
 }
+
+function convertGeoToLink(text: string) {
+   return text.replace(CONST.REGEX.GEOURI, (url) => {
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+   })
+}
+
+function markQuotation(text: string) {
+   let lines = text.split(/(?:\n|\r\n|\r)/);
+   let inQuote = false;
+
+   for (let lineNumber in lines) {
+      if (!lines.hasOwnProperty(lineNumber)) {
+         //This value comes from Array prototype
+         continue;
+      }
+
+      let line = lines[lineNumber];
+
+      if (line.indexOf('&gt;') === 0) {
+         inQuote = true;
+         line = line.replace(/&gt; ?/, '');
+      } else if (inQuote && line === '') {
+         inQuote = false;
+         lines[lineNumber] = null;
+      }
+
+      if (inQuote) {
+         lines[lineNumber] = '<span class="jsxc-quote">' + line + '</span>';
+      }
+   }
+
+   return lines.filter(line => line !== null).join('\n');
+}
+
+function replaceLineBreaks(text: string) {
+   return text.replace(/(\r\n|\r|\n)/g, '<br />');
+}
+
+Message.addFormatter(convertUrlToLink);
+Message.addFormatter(convertEmailToLink);
+Message.addFormatter(convertGeoToLink);
+Message.addFormatter(Emoticons.toImage.bind(Emoticons));
+Message.addFormatter(markQuotation);
+Message.addFormatter(replaceLineBreaks);

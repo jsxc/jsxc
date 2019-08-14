@@ -1,6 +1,6 @@
 import { IConnection } from '../connection/Connection.interface'
 import { IContact as Contact } from '../Contact.interface'
-import { IMessage, IMessagePayload } from '../Message.interface'
+import { IMessage, IMessagePayload, DIRECTION } from '../Message.interface'
 import { IJID as JID } from '../JID.interface'
 import { IDiscoInfoRepository } from '../DiscoInfoRepository.interface'
 import { ILog } from '../util/Log.interface'
@@ -56,6 +56,8 @@ export interface IPluginAPI {
    registerChatWindowInitializedHook(hook: (chatWindow: ChatWindow) => void)
 
    registerContactProvider(source: ContactProvider)
+
+   registerTextFormatter(formatter: (text: string, direction: DIRECTION, contact: Contact) => Promise<string> | string, priority?: number)
 
    getContactManager(): ContactManager
 

@@ -1,8 +1,8 @@
 import { AbstractPlugin } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import Contact from '../Contact'
-import Message from '../Message'
 import Translation from '@util/Translation';
+import { DIRECTION } from '@src/Message.interface';
 
 /**
  * XEP-0245: The /me Command
@@ -30,12 +30,15 @@ export default class MeCommandPlugin extends AbstractPlugin {
    constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
-      pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor, 80);
+      pluginAPI.registerTextFormatter(this.textFormatter);
    }
 
-   private afterReceiveMessageProcessor = (contact: Contact, message: Message, stanza: Element) => {
-      let plaintext = message.getPlaintextMessage();
+   private textFormatter = (plaintext: string, direction: DIRECTION, contact: Contact) => {
       let meRegex = /^\/me /;
+
+      if (direction !== DIRECTION.IN) {
+         return plaintext;
+      }
 
       if (meRegex.test(plaintext)) {
          let name = contact.getName();
@@ -44,10 +47,9 @@ export default class MeCommandPlugin extends AbstractPlugin {
             name = name.slice(0, name.indexOf('@'));
          }
 
-         plaintext = plaintext.replace(meRegex, `***${name} `);
-         message.setPlaintextMessage(plaintext);
+         plaintext = plaintext.replace(meRegex, `<i title="/me">${name}</i> `);
       }
 
-      return Promise.resolve([contact, message, stanza]);
+      return plaintext;
    }
 }

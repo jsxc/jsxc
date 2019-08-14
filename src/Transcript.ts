@@ -11,6 +11,8 @@ export default class Transcript {
 
    private firstMessage: IMessage;
 
+   private lastMessage: IMessage;
+
    private messages: { [index: string]: IMessage } = {};
 
    constructor(storage: Storage, contact: Contact) {
@@ -19,6 +21,20 @@ export default class Transcript {
       this.properties.registerHook('firstMessageId', (firstMessageId) => {
          this.firstMessage = this.getMessage(firstMessageId);
       });
+   }
+
+   public unshiftMessage(message: IMessage) {
+      let lastMessage = this.getLastMessage();
+
+      if (lastMessage) {
+         lastMessage.setNext(message);
+      } else {
+         this.pushMessage(message);
+      }
+
+      message.setNext(undefined);
+
+      this.lastMessage = message;
    }
 
    public pushMessage(message: IMessage) {
@@ -42,13 +58,27 @@ export default class Transcript {
    }
 
    public getLastMessage(): IMessage {
+      if (this.lastMessage) {
+         return this.lastMessage;
+      }
+
+      let ids = []
       let lastMessage = this.getFirstMessage();
 
       while (lastMessage && lastMessage.getNextId()) {
-         lastMessage = this.getMessage(lastMessage.getNextId());
+         let id = lastMessage.getNextId();
+
+         if (ids.indexOf(id) > -1) {
+            Log.debug('Loop detected');
+            break;
+         }
+
+         ids.push(id);
+
+         lastMessage = this.getMessage(id);
       }
 
-      return lastMessage;
+      return this.lastMessage = lastMessage;
    }
 
    public getMessage(id: string): IMessage {
@@ -125,6 +155,7 @@ export default class Transcript {
 
       this.messages = {};
       this.firstMessage = undefined;
+      this.lastMessage = undefined;
 
       this.properties.remove('firstMessageId')
    }

@@ -9,7 +9,6 @@ import Archive from './Archive'
 import Contact from '@src/Contact';
 import PluginAPI from '@src/plugin/PluginAPI';
 import { IContact } from '@src/Contact.interface';
-import { IMessage } from '@src/Message.interface';
 
 /**
  * XEP-0313: Message Archive Management
@@ -70,22 +69,6 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
 
    public getConnection() {
       return this.pluginAPI.getConnection();
-   }
-
-   public runAfterReceiveMessagePipe(contact: IContact, message: IMessage, messageElement) {
-      let pipe = this.pluginAPI.getAfterReceiveMessagePipe();
-
-      pipe.run(contact, message, messageElement.get(0)).then(([contact, message]) => {
-         return message;
-      });
-   }
-
-   public runAfterReceiveGroupMessagePipe(contact: IContact, message: IMessage) {
-      let pipe = this.pluginAPI.getAfterReceiveGroupMessagePipe();
-
-      return pipe.run(contact, message).then(([contact, message]) => {
-         return message;
-      });
    }
 
    public addQueryContactRelation(queryId: string, contact: IContact) {
