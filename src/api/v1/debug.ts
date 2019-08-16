@@ -36,3 +36,19 @@ export function deleteAllData() {
 
    return count;
 }
+
+export function deleteObsoleteData() {
+   let storage = Client.getStorage();
+   let backend = storage.getBackend();
+   let keys = Object.keys(backend);
+   let count = 0;
+
+   for (let key of keys) {
+      if (/^jsxc:/.test(key)) {
+         backend.removeItem(key);
+         count++;
+      }
+   }
+
+   return count;
+}
