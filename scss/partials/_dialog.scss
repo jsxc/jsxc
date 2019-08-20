@@ -1,10 +1,9 @@
 .jsxc-dialog-wrapper {
-  align-items: center;
   background-color: rgba(255, 255, 255, 0.8);
   bottom: 0;
   display: flex;
-  justify-content: center;
   left: 0;
+  overflow-y: auto;
   position: fixed;
   right: 0;
   top: 0;
@@ -15,9 +14,8 @@
   background: #fff;
   border: 1px solid #d8d8d8;
   display: inline-block;
-  max-height: 100%;
+  margin: auto;
   max-width: 100%;
-  overflow-y: auto;
   position: relative;
   text-align: left;
   width: auto;
