@@ -34,7 +34,6 @@ export default class JingleHandler {
    protected static instances: JingleHandler[] = [];
 
    constructor(protected account: Account, protected connection: IConnection) {
-
       this.manager = new JSM({
          // peerConnectionConstraints: this.getPeerConstraints(),
          jid: connection.getJID().full,
@@ -65,14 +64,17 @@ export default class JingleHandler {
          this.onIncoming(session);
       });
 
-      IceServers.registerUpdateHook((iceSevers) => {
-         this.setICEServers(iceSevers);
+      IceServers.registerUpdateHook((iceServers) => {
+         this.setICEServers(iceServers);
       });
 
       JingleHandler.instances.push(this);
    }
 
    public async initiate(peerJID: IJID, stream: MediaStream, offerOptions?: IOfferOptions): Promise<JingleMediaSession> {
+      let iceServers = await IceServers.get();
+      this.setICEServers(iceServers);
+
       let session: IOTalkJingleMediaSession = this.manager.createMediaSession(peerJID.full, undefined, stream);
 
       return new Promise<JingleMediaSession>(resolve => {

@@ -20,8 +20,6 @@ export async function startCall(contact: IContact, account: Account, type: 'vide
       return;
    }
 
-   //@TODO use IceServers.get()
-
    let reqMedia = type === 'audio' ? ['audio'] : (type === 'screen' ? ['screen'] : ['audio', 'video']);
 
    let stream: MediaStream;
