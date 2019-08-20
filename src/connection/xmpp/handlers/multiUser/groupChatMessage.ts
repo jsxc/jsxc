@@ -59,7 +59,7 @@ export default class extends AbstractHandler {
       let delay = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
       let sendDate = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
       let afterJoin = sendDate > contact.getJoinDate();
-      let direction = Message.DIRECTION.IN;
+      let direction = afterJoin ? Message.DIRECTION.IN : Message.DIRECTION.PROBABLY_IN;
 
       let transcript = contact.getTranscript();
 

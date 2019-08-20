@@ -502,8 +502,8 @@
   }
 }
 
-.jsxc-in {
-  background-color: $chatmessage-in-bg;
+.jsxc-in,
+.jsxc-probably_in {
   float: left;
   margin-left: 0.5em;
   max-width: 76%;
@@ -525,6 +525,10 @@
   .jsxc-timestamp {
     float: left;
   }
+}
+
+.jsxc-in {
+  background-color: $chatmessage-in-bg;
 }
 
 .jsxc-out,

@@ -5,7 +5,6 @@ import AvatarSet from './AvatarSet'
 import Log from '../util/Log'
 import LinkHandlerGeo from '@src/LinkHandlerGeo';
 import Color from '@util/Color';
-import MultiUserContact from '@src/MultiUserContact';
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs')
 
@@ -98,16 +97,9 @@ export default class ChatWindowMessage {
          this.element.find('.jsxc-message-area').append('<div class="jsxc-clear"/>');
       } else if (this.message.getDirection() === DIRECTION.IN && this.chatWindow.getContact().isGroupChat()) {
          let text = this.message.getSender().name || this.message.getPeer().bare;
-
          let color = Color.generate(text, undefined, 40, 90);
 
          this.element.css('background-color', color);
-      }
-
-      if (this.chatWindow.getContact().isGroupChat() &&
-            (<MultiUserContact> this.chatWindow.getContact()).getJoinDate() > this.message.getStamp() &&
-            this.message.getDirection() !== DIRECTION.SYS) {
-         this.element.css('background-color', 'white');
       }
 
       let sender = this.message.getSender();

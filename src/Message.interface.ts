@@ -3,7 +3,7 @@ import Attachment from './Attachment'
 import { ContactType } from './Contact.interface'
 
 export enum DIRECTION {
-   IN, OUT, SYS, PROBABLY_OUT
+   IN, OUT, SYS, PROBABLY_OUT, PROBABLY_IN
 };
 
 export interface IMessagePayload {
