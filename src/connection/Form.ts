@@ -15,6 +15,13 @@ const NAMESPACE = 'jabber:x:data';
 
 type TYPE = 'cancel' | 'form' | 'result' | 'submit' | 'hidden';
 
+export interface IFormJSONData {
+   type: string,
+   fields: IFormFieldJSONData[],
+   instructions?: string,
+   title?: string
+}
+
 //@REVIEW xss
 
 export default class Form {
@@ -44,7 +51,7 @@ export default class Form {
       return new Form(type, fields, instructions, title, reportedFields, items);
    }
 
-   public static fromJSON(data: { type: string, fields: IFormFieldJSONData[], instructions?: string, title?: string }) {
+   public static fromJSON(data: IFormJSONData) {
       return new Form(
          data.type,
          data.fields.map(fieldData => Field.fromJSON(fieldData)),

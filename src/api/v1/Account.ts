@@ -3,6 +3,7 @@ import Client from '@src/Client';
 import MultiUserContact, { ROOMCONFIG } from '@src/MultiUserContact';
 import JID from '@src/JID';
 import { IContact } from '@src/Contact.interface';
+import Form, { IFormJSONData } from '@connection/Form';
 
 class ContactWrapper {
    constructor(protected contact: IContact, protected account: Account) {
@@ -43,6 +44,22 @@ class MultiUserContactWrapper extends ContactWrapper {
 
    public destroy() {
       return this.contact.destroy();
+   }
+
+   public async getRoomConfigurationForm() {
+      let service = this.account.getConnection().getMUCService();
+      let stanza = await service.getRoomConfigurationForm(this.getJid());
+
+      return Form.fromXML(stanza).toJSON();
+   }
+
+   public submitRoomConfigurationForm(data: IFormJSONData) {
+      let form = Form.fromJSON(data);
+      this.contact.setRoomConfiguration(form.toJSON());
+
+      let service = this.account.getConnection().getMUCService();
+
+      return service.submitRoomConfiguration(this.getJid(), form)
    }
 }
 
