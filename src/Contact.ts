@@ -77,6 +77,7 @@ export default class Contact implements IIdentifiable, IContact {
          resources: {},
          groups: [],
          type: ContactType.CHAT,
+         provider: 'fallback',
          rnd: Math.random() // force storage event
       }
 

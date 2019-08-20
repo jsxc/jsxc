@@ -19,6 +19,7 @@ import { IJID } from './JID.interface';
 import { IContact } from './Contact.interface';
 import RosterContactProvider from './RosterContactProvider';
 import ContactManager from './ContactManager';
+import FallbackContactProvider from './FallbackContactProvider';
 
 type ConnectionCallback = (status: number, condition?: string) => void;
 
@@ -83,6 +84,9 @@ export default class Account {
 
       let rosterContactProvider = new RosterContactProvider(this.getContactManager(), this);
       this.getContactManager().registerContactProvider(rosterContactProvider);
+
+      let fallbackContactProvider = new FallbackContactProvider(this.getContactManager(), this);
+      this.getContactManager().registerContactProvider(fallbackContactProvider);
 
       let connectionCallback = this.getOption('connectionCallback');
 
