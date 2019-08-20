@@ -88,7 +88,7 @@
                   <div class="form-group">
                      <div class="col-xs-offset-4 col-xs-8">
                         <button type="submit" class="submit btn btn-primary">Log in chat and submit</button>
-                        <button class="logout btn btn-default" style="display:none;">Log out</button>
+                        <button type="button" class="logout btn btn-default" style="display:none;">Log out</button>
                      </div>
                   </div>
 
@@ -103,11 +103,12 @@
 
 &lt;button id="logout"&gt;Logout&lt;/button&gt;</pre>
 
-            <pre>jsxc.init();
+            <pre>let jsxc = new JSXC();
 
 let formElement = $('#form');
 let usernameElement = $('#username');
 let passwordElement = $('#password');
+let logoutElement = $('#logout');
 
 function getSettings(username, password) {
   return Promise.resolve({
@@ -118,7 +119,9 @@ function getSettings(username, password) {
   });
 }
 
-jsxc.watchForm(formElement, usernameElement, passwordElement, getSettings);</pre>
+jsxc.watchForm(formElement, usernameElement, passwordElement, getSettings);
+
+jsxc.watchLogoutClick(logoutElement);</pre>
 
          </div>
 
@@ -150,7 +153,7 @@ jsxc.watchForm(formElement, usernameElement, passwordElement, getSettings);</pre
                      <div class="form-group">
                         <div class="col-xs-offset-4 col-xs-8">
                            <button type="submit" id="submit2" class="submit btn btn-primary" data-loading-text="Logging in...">Log in chat</button>
-                           <button class="logout btn btn-default">Log out</button>
+                           <button type="button" class="logout btn btn-default">Log out</button>
                         </div>
                      </div>
                   </fieldset>
@@ -160,7 +163,7 @@ jsxc.watchForm(formElement, usernameElement, passwordElement, getSettings);</pre
 &lt;input type="password" id="password" /&gt;
 &lt;button id="submit"&gt;Log in&lt;/button&gt;</pre>
 
-               <pre>jsxc.init();
+               <pre>let jsxc = new JSXC();
 
 $('#submit').click(function(){
   let username = $('#username').val();
@@ -179,7 +182,7 @@ $('#submit').click(function(){
 
           <p>Attach to existing BOSH connection after JSXC was initialized.</p>
 
-          <pre>jsxc.init();
+          <pre>let jsxc = new JSXC();
 
 let url = '/http-bind/';
 let jid = 'username@localhost';
@@ -195,14 +198,11 @@ jsxc.start(url, jid, sid, rid);</pre>
 
    <!-- require:dependencies -->
    <script src="js/jquery.min.js"></script>
-   <script src="js/jquery-ui.min.js"></script>
    <!-- endrequire -->
 
    <!-- require:optional -->
    <script src="/libsignal/dist/libsignal-protocol.js"></script>
    <!--  endrequire -->
-
-   <script src="js/bootstrap.min.js"></script>
 
    <!-- jsxc library -->
    <script src="../dist/jsxc.bundle.js"></script>
