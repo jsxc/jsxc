@@ -53,9 +53,11 @@ export class PubSubService extends AbstractService {
       let alias = element.getAttribute('name');
       let nickElement = element.getElementsByTagName('nick');
       let nickname = nickElement.length === 1 ? nickElement[0].textContent : undefined;
+      let passwordElement = element.getElementsByTagName('password');
+      let password = passwordElement.length === 1 ? passwordElement[0].textContent : undefined;
       let autoJoin = element.getAttribute('autojoin') === 'true';
 
-      return new RoomBookmark(jid, alias, nickname, autoJoin);
+      return new RoomBookmark(jid, alias, nickname, autoJoin, password);
    }
 
    // private createBookmarksNode() {
@@ -100,6 +102,12 @@ export class PubSubService extends AbstractService {
          let nickElement = $('<nick>');
          nickElement.text(room.getNickname());
          nickElement.appendTo(conferenceElement);
+      }
+
+      if (room.hasPassword()) {
+         let passwordElement = $('<password>');
+         passwordElement.text(room.getPassword());
+         passwordElement.appendTo(conferenceElement);
       }
 
       storageElement.append(conferenceElement);

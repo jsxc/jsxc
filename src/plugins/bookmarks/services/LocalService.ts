@@ -20,7 +20,7 @@ export default class LocalService extends AbstractService {
       for (let id in data) {
          let roomData = data[id];
 
-         rooms.push(new RoomBookmark(new JID(id), roomData.alias, roomData.nickname, roomData.autoJoin));
+         rooms.push(new RoomBookmark(new JID(id), roomData.alias, roomData.nickname, roomData.autoJoin, roomData.password));
       }
 
       return rooms;
@@ -34,6 +34,7 @@ export default class LocalService extends AbstractService {
          alias: room.getAlias(),
          nickname: room.getNickname(),
          autoJoin: room.isAutoJoin(),
+         password: room.getPassword(),
       };
 
       this.storage.setItem('rooms', data);

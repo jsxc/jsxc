@@ -179,6 +179,10 @@ export default class MultiUserContact extends Contact {
       return this.data.get('subject');
    }
 
+   public getPassword(): string {
+      return this.data.get('password');
+   }
+
    public setPassword(password: string) {
       this.data.set('password', password);
    }
