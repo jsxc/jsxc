@@ -44,7 +44,7 @@ export default class MultiUserContact extends Contact {
    constructor(account: Account, jid: IJID, name?: string);
    constructor(account: Account, id: string);
    constructor() {
-      super(arguments[0], arguments[1], arguments[3]);
+      super(arguments[0], arguments[1], arguments[2]);
 
       this.data.set('type', MultiUserContact.TYPE);
    }
