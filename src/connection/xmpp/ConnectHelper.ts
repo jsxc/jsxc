@@ -96,10 +96,6 @@ function prepareConnection(url: string): Strophe.Connection {
       };
    }
 
-   if (connection.caps) {
-      connection.caps.node = 'http://jsxc.org/';
-   }
-
    SM.changeState(SM.STATE.ESTABLISHING);
 
    return connection;
