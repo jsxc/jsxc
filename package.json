@@ -1,7 +1,8 @@
 {
-  "name": "jsxc",
+  "name": "@jsxc/jsxc",
   "version": "4.0.0-rc.1",
-  "description": "Real-time xmpp chat application with video calls, file transfer and encrypted communication",
+  "description": "Real-time XMPP chat application with video calls, file transfer and encrypted communication",
+  "keywords": ["XMPP", "client", "browser", "video", "file transfer", "real-time"],
   "homepage": "https://www.jsxc.org/",
   "bugs": "https://github.com/jsxc/jsxc/issues",
   "license": "MIT",
