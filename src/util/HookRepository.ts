@@ -27,7 +27,7 @@ export default class HookRepository<T extends Function> {
 
       let eventNames = Object.keys(hooks);
       eventNames.forEach(function(eventName) {
-         if (targetEventName.match(new RegExp('^' + eventName + '(:.+)?$'))) {
+         if (targetEventName === eventName || targetEventName.indexOf(eventName + ':') === 0) {
             let eventNameHooks = hooks[eventName] || [];
             eventNameHooks.forEach(function(hook) {
                hook.apply({}, args);
