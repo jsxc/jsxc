@@ -468,10 +468,10 @@
   resolved "https://registry.yarnpkg.com/@types/sizzle/-/sizzle-2.3.2.tgz#a811b8c18e2babab7d542b3365887ae2e4d9de47"
   integrity sha512-7EJYyKTL7tFR8+gDbB6Wwz/arpGa0Mywk1TJbNzKzHtzbwVmY4HR9WqS5VV7dsBUKQmPNr192jHr/VpBluj/hg==
 
-"@types/strophe@^1.2.30":
-  version "1.2.30"
-  resolved "https://registry.yarnpkg.com/@types/strophe/-/strophe-1.2.30.tgz#f3dd1dbae0059fb251b51a23cd40327ea6cb6f22"
-  integrity sha512-NQStxF/xDl8p6BAMCD8CB5nFt/Br0lb5Wz4+52p8F2yWeNG+jNjgfxy1aSyysTq48n42uQPpPGiRz4S2Klzocw==
+"@types/strophe.js@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@types/strophe.js/-/strophe.js-1.2.0.tgz#50164d452b64cf0a3e7ad763a237841dcf43d091"
+  integrity sha512-WyxBEXQ4vpLGGFDSYf4qOJiMcO/T/F93OiWj9kzyShYDe+mc2quIMNlSpZnhsipf5xe+I9egzA3pgg8xomlN9A==
 
 "@types/tapable@*":
   version "1.0.4"
