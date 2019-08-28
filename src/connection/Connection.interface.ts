@@ -36,7 +36,7 @@ export interface IConnection {
 
    sendPresence(presence?: Presence)
 
-   queryArchive(archive: IJID, version: string, contact: IJID, queryId: string, beforeResultId?: string, end?: Date): Promise<Element>
+   queryArchive(archive: IJID, version: string, queryId: string, contact?: IJID, beforeResultId?: string, end?: Date): Promise<Element>
 
    changePassword(newPassword: string): Promise<Element>
 

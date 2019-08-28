@@ -184,7 +184,7 @@ abstract class AbstractConnection {
       this.send(presenceStanza);
    }
 
-   public queryArchive(archive: JID, version: string, contact: JID, queryId: string, beforeResultId?: string, end?: Date): Promise<Element> {
+   public queryArchive(archive: JID, version: string, queryId: string, contact?: JID, beforeResultId?: string, end?: Date): Promise<Element> {
       let iq = $iq({
          type: 'set',
          to: archive.bare,
@@ -205,9 +205,11 @@ abstract class AbstractConnection {
          type: 'hidden'
       }).c('value').t(version).up().up();
 
-      iq.c('field', {
-         var: 'with'
-      }).c('value').t(contact.bare).up().up();
+      if (contact) {
+         iq.c('field', {
+            var: 'with'
+         }).c('value').t(contact.bare).up().up();
+      }
 
       if (end) {
          iq.c('field', {

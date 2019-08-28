@@ -82,7 +82,9 @@ export default class Archive {
             throw new Error(`Archive JID ${this.archiveJid.full} has no support for MAM.`);
          }
 
-         return connection.queryArchive(this.archiveJid, <string> version, this.contact.getJid(), queryId, firstResultId, endDate);
+         let jid = !this.contact.isGroupChat() ? this.contact.getJid() : undefined;
+
+         return connection.queryArchive(this.archiveJid, <string> version, queryId, jid, firstResultId, endDate);
       }).then(this.onComplete)
          .catch((stanza) => {
             Log.warn('Error while requesting archive', stanza);
