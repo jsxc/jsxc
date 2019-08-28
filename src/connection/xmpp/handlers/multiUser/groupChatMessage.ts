@@ -12,7 +12,7 @@ export default class extends AbstractHandler {
       let messageElement = $(stanza);
       let from = new JID(stanza.getAttribute('from'));
       let subjectElement = messageElement.find('subject');
-      let bodyElement = messageElement.find('body:first');
+      let bodyElement = messageElement.find('>body:first');
       let originId = messageElement.find('origin-id[xmlns="urn:xmpp:sid:0"]').attr('id');
       let stanzaId = messageElement.find('stanza-id[xmlns="urn:xmpp:sid:0"]').attr('id');
       let attrId = messageElement.attr('id');
