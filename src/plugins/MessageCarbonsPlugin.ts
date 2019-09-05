@@ -44,7 +44,7 @@ export default class CarbonsPlugin extends AbstractPlugin {
       });
    }
 
-   private preSendMessageStanzaProcessor = (message: Message, xmlElement: Strophe.Builder) => {
+   private preSendMessageStanzaProcessor = (message: Message, xmlElement: Strophe.Builder): Promise<[Message, Strophe.Builder]> => {
       let body = (<any> xmlElement).node.textContent;
 
       if (body.match(/^\?OTR/)) {

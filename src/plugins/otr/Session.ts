@@ -101,7 +101,7 @@ export default class Session {
       return this.end();
    }
 
-   public processMessage(message: Message, type: 'decryptMessage' | 'encryptMessage') {
+   public processMessage(message: Message, type: 'decryptMessage' | 'encryptMessage'): Promise<Message> {
       let plaintextBody = message.getPlaintextMessage();
 
       //@TODO test muc
@@ -114,7 +114,7 @@ export default class Session {
       return Promise.resolve(message);
    }
 
-   private encryptMessage(message: Message) {
+   private encryptMessage(message: Message): Promise<Message> {
       let self = this;
       let messageId = message.getUid();
 
@@ -133,7 +133,7 @@ export default class Session {
       });
    }
 
-   private decryptMessage(message: Message) {
+   private decryptMessage(message: Message): Promise<Message> {
       let self = this;
       let messageId = message.getUid();
 

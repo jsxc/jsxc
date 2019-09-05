@@ -62,15 +62,15 @@ describe('Pipe', () => {
         let pipeA = new Pipe();
 
         expect(() => {
-            pipeA.addProcessor(function(...args) { return Promise.resolve(); }, -1);
+            pipeA.addProcessor(function(...args) { return Promise.resolve([]); }, -1);
         }).to.throw();
 
         expect(() => {
-            pipeA.addProcessor(function(...args) { return Promise.resolve(); }, 101);
+            pipeA.addProcessor(function(...args) { return Promise.resolve([]); }, 101);
         }).to.throw();
 
         expect(() => {
-            pipeA.addProcessor(function(...args) { return Promise.resolve(); }, <any> 'abc');
+            pipeA.addProcessor(function(...args) { return Promise.resolve([]); }, <any> 'abc');
         }).to.throw();
     })
 });

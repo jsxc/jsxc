@@ -9,6 +9,8 @@ import HttpUploadService from './HttpUploadService'
 import { IConnection } from '../../connection/Connection.interface'
 import { $iq } from '../../vendor/Strophe'
 import Translation from '../../util/Translation';
+import { IContact } from '@src/Contact.interface';
+import { IMessage } from '@src/Message.interface';
 
 /**
  * XEP-0363: HTTP File Upload
@@ -42,14 +44,14 @@ export default class HttpUploadPlugin extends AbstractPlugin {
 
       pluginAPI.addPreSendMessageProcessor(this.preSendMessageProcessor, 20);
 
-      pluginAPI.addPreSendMessageStanzaProcessor(this.addBitsOfBinary)
+      pluginAPI.addPreSendMessageStanzaProcessor(this.addBitsOfBinary);
 
       let connection = pluginAPI.getConnection();
 
       connection.registerHandler(this.onBitsOfBinary, 'urn:xmpp:bob', 'iq');
    }
 
-   private preSendMessageProcessor = (contact: Contact, message: Message) => {
+   private preSendMessageProcessor = (contact: Contact, message: Message): Promise<[Contact, Message]> => {
       if (!message.hasAttachment()) {
          return Promise.resolve([contact, message]);
       }

@@ -6,7 +6,7 @@ import Message from '../Message'
 import JID from '../JID'
 import DiscoInfoRepository from '../DiscoInfoRepository'
 import Avatar from '../Avatar'
-import { IMessagePayload, DIRECTION } from '../Message.interface'
+import { IMessagePayload, DIRECTION, IMessage } from '../Message.interface'
 import { IPluginAPI } from './PluginAPI.interface'
 import { Logger } from '../util/Log'
 import ChatWindow from '@ui/ChatWindow';
@@ -88,19 +88,19 @@ export default class PluginAPI implements IPluginAPI {
       return Client.getVersion();
    }
 
-   public addPreSendMessageProcessor(processor: (contact: Contact, message: Message) => Promise<{}>, position?: number) {
+   public addPreSendMessageProcessor(processor: (contact: IContact, message: Message) => Promise<[IContact, Message]>, position?: number) {
       this.account.getPipe('preSendMessage').addProcessor(processor, position);
    }
 
-   public addAfterReceiveMessageProcessor(processor: (contact: Contact, message: Message, stanza: Element) => Promise<{}>, position?: number) {
+   public addAfterReceiveMessageProcessor(processor: (contact: IContact, message: IMessage, stanza: Element) => Promise<[IContact, IMessage, Element]>, position?: number) {
       this.account.getPipe('afterReceiveMessage').addProcessor(processor, position);
    }
 
-   public addPreSendMessageStanzaProcessor(processor: (message: Message, xmlMsg: Strophe.Builder) => Promise<any>, position?: number) {
+   public addPreSendMessageStanzaProcessor(processor: (message: Message, xmlMsg: Strophe.Builder) => Promise<[Message, Strophe.Builder]>, position?: number) {
       this.account.getPipe('preSendMessageStanza').addProcessor(processor, position);
    }
 
-   public addAvatarProcessor(processor: (contact: Contact, avatar: Avatar) => Promise<[Contact, Avatar]>, position?: number) {
+   public addAvatarProcessor(processor: (contact: IContact, avatar: Avatar) => Promise<[IContact, Avatar]>, position?: number) {
       this.account.getPipe('avatar').addProcessor(processor, position);
    }
 

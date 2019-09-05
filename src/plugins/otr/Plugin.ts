@@ -111,7 +111,7 @@ export default class OTRPlugin extends EncryptionPlugin {
       }
    }
 
-   private afterReceiveMessageProcessor = (contact: Contact, message: Message, stanza: Element) => {
+   private afterReceiveMessageProcessor = (contact: Contact, message: Message, stanza: Element): Promise<[Contact, Message, Element]> => {
       let plaintextMessage = message.getPlaintextMessage();
       if (!plaintextMessage || (!/^\?OTR/.test(plaintextMessage) && plaintextMessage.indexOf(WHITESPACE_TAG) < 0)) {
          return Promise.resolve([contact, message, stanza]);
@@ -124,7 +124,7 @@ export default class OTRPlugin extends EncryptionPlugin {
       });
    }
 
-   private preSendMessageProcessor = (contact: Contact, message: Message) => {
+   private preSendMessageProcessor = (contact: Contact, message: Message): Promise<[Contact, Message]> => {
       if (contact.getEncryptionState() === EncryptionState.Plaintext || contact.getEncryptionPluginName() !== OTRPlugin.getName()) {
          return Promise.resolve([contact, message]);
       }
