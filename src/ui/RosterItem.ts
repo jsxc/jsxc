@@ -56,7 +56,7 @@ export default class RosterItem {
       this.element.find('.jsxc-delete').click((ev) => {
          ev.stopPropagation();
 
-         let questionString = Translation.t('You_are_about_to_remove_', {
+         let questionString = Translation.t('You_are_about_to_remove', {
             bid_name: this.contact.getName(),
             bid_jid: this.contact.getJid().bare,
          });

@@ -63,7 +63,7 @@ export default class extends AbstractHandler {
       Log.debug('Sender is not in our contact list');
 
       let title = Translation.t('Unknown_sender');
-      let description = Translation.t('You_received_a_message_from_an_unknown_sender_') + ` (${messageElement.getFrom().bare})`;
+      let description = Translation.t('You_received_a_message_from_an_unknown_sender') + ` (${messageElement.getFrom().bare})`;
 
       //@REVIEW maybe improve the dialog
       this.account.getNoticeManager().addNotice({

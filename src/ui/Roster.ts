@@ -168,7 +168,7 @@ export default class Roster {
 
    public setEmptyContactList() {
       let statusElement = $('<p>');
-      statusElement.text(Translation.t('Your_roster_is_empty_add_'));
+      statusElement.text(Translation.t('Your_roster_is_empty_add'));
       statusElement.find('a').click(<any> showContactDialog);
       statusElement.append('.');
 

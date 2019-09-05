@@ -246,7 +246,7 @@ class MultiUserJoinDialog {
             this.setStatusElement(roomInfoElement);
          }).catch((stanza) => {
             if ($(stanza).find('item-not-found').length > 0) {
-               this.setStatusMessage(Translation.t('Room_not_found_'));
+               this.setStatusMessage(Translation.t('Room_not_found'));
 
                return Promise.resolve();
             }

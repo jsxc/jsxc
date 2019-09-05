@@ -37,7 +37,7 @@ export default class Notification {
 
    public static askForPermission() {
       let overlay = new Overlay();
-      openConfirmDialog(Translation.t('Should_we_notify_you_')).getPromise().then((a) => {
+      openConfirmDialog(Translation.t('Should_we_notify_you')).getPromise().then((a) => {
          overlay.open();
 
          return Notification.requestPermission();
@@ -63,7 +63,7 @@ export default class Notification {
       if (state === NotificationState.ASK && !Notification.hasPermission()) {
          Client.getNoticeManager().addNotice({
             title: Translation.t('Notifications') + '?',
-            description: Translation.t('Should_we_notify_you_'),
+            description: Translation.t('Should_we_notify_you'),
             fnName: NOTICEFUNCTION.notificationRequest
          });
       }
