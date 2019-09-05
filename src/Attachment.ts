@@ -97,6 +97,10 @@ export default class Attachment {
       return this.properties.get('mimeType');
    }
 
+   public setThumbnailData(thumbnail: string) {
+      this.properties.set('thumbnail', thumbnail);
+   }
+
    public getThumbnailData() {
       return this.properties.get('thumbnail');
    }

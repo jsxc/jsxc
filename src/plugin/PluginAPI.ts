@@ -96,6 +96,10 @@ export default class PluginAPI implements IPluginAPI {
       this.account.getPipe('afterReceiveMessage').addProcessor(processor, position);
    }
 
+   public addAfterReceiveGroupMessageProcessor(processor: (contact: IContact, message: IMessage, stanza: Element) => Promise<[IContact, IMessage, Element]>, position?: number) {
+      this.account.getPipe('afterReceiveGroupMessage').addProcessor(processor, position);
+   }
+
    public addPreSendMessageStanzaProcessor(processor: (message: Message, xmlMsg: Strophe.Builder) => Promise<[Message, Strophe.Builder]>, position?: number) {
       this.account.getPipe('preSendMessageStanza').addProcessor(processor, position);
    }
