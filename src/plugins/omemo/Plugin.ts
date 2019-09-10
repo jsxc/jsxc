@@ -63,8 +63,8 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return;
       }
 
-      if (contact.getEncryptionPluginName() === OMEMOPlugin.getName()) {
-         contact.setEncryptionState(EncryptionState.Plaintext, OMEMOPlugin.getName());
+      if (contact.getEncryptionPluginName() === OMEMOPlugin.getId()) {
+         contact.setEncryptionState(EncryptionState.Plaintext, OMEMOPlugin.getId());
          return;
       }
 
@@ -77,7 +77,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
             throw new Error(Translation.t('There_are_new_OMEMO_devices'));
          }
 
-         contact.setEncryptionState(EncryptionState.UnverifiedEncrypted, OMEMOPlugin.getName());
+         contact.setEncryptionState(EncryptionState.UnverifiedEncrypted, OMEMOPlugin.getId());
       });
    }
 
@@ -140,7 +140,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return Promise.resolve([message, xmlElement]);
       }
 
-      if (contact.getEncryptionPluginName() !== OMEMOPlugin.getName()) {
+      if (contact.getEncryptionPluginName() !== OMEMOPlugin.getId()) {
          return Promise.resolve([message, xmlElement]);
       }
 
