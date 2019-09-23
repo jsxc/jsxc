@@ -116,14 +116,10 @@ class MultiUserJoinDialog {
             }).then((hasFeature) => {
                return hasFeature ? jid : undefined;
             }).catch((stanza) => {
-            const from = $(stanza).attr('from') || '';
-            if ($(stanza).find('service-unavailable').length > 0) {
-               Log.warn(`Service unavailable for ${from}`, stanza);
-            } else {
-               Log.error(`Could not load get DiscoInfo for ${from}`, stanza);
-               throw stanza;
-            }
-         });
+               const from = $(stanza).attr('from') || '';
+            
+               Log.info(`Ignore ${from} as MUC provider, because could not load disco info.`);
+            });
 
             promises.push(promise);
          });
