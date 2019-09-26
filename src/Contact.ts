@@ -265,11 +265,11 @@ export default class Contact implements IIdentifiable, IContact {
       return this.account.getConnection().getVcardService().loadVcard(this.getJid());
    }
 
-   public setEncryptionState(state: EncryptionState, source: string) {
-      if (state !== EncryptionState.Plaintext && !source) {
+   public setEncryptionState(state: EncryptionState, sourceId: string) {
+      if (state !== EncryptionState.Plaintext && !sourceId) {
          throw new Error('No encryption source provided');
       }
-      this.data.set('encryptionPlugin', state === EncryptionState.Plaintext ? null : source);
+      this.data.set('encryptionPlugin', state === EncryptionState.Plaintext ? null : sourceId);
       this.data.set('encryptionState', state);
    }
 
@@ -277,12 +277,12 @@ export default class Contact implements IIdentifiable, IContact {
       return this.data.get('encryptionState') || EncryptionState.Plaintext;
    }
 
-   public getEncryptionPluginName(): string | null {
+   public getEncryptionPluginId(): string | null {
       return this.data.get('encryptionPlugin') || null;
    }
 
    public isEncrypted(): boolean {
-      return this.getEncryptionState() !== EncryptionState.Plaintext && !!this.getEncryptionPluginName();
+      return this.getEncryptionState() !== EncryptionState.Plaintext && !!this.getEncryptionPluginId();
    }
 
    public getTranscript(): Transcript {

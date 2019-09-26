@@ -104,7 +104,7 @@ export default class OTRPlugin extends EncryptionPlugin {
    }
 
    private updateMenuEntry(contact: IContact, menuEntry: JQuery) {
-      if (contact.isEncrypted() && contact.getEncryptionPluginName() === OTRPlugin.getId()) {
+      if (contact.isEncrypted() && contact.getEncryptionPluginId() === OTRPlugin.getId()) {
          menuEntry.removeClass('jsxc-disabled');
       } else {
          menuEntry.addClass('jsxc-disabled');
@@ -125,7 +125,7 @@ export default class OTRPlugin extends EncryptionPlugin {
    }
 
    private preSendMessageProcessor = (contact: Contact, message: Message): Promise<[Contact, Message]> => {
-      if (contact.getEncryptionState() === EncryptionState.Plaintext || contact.getEncryptionPluginName() !== OTRPlugin.getId()) {
+      if (contact.getEncryptionState() === EncryptionState.Plaintext || contact.getEncryptionPluginId() !== OTRPlugin.getId()) {
          return Promise.resolve([contact, message]);
       }
 

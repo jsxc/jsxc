@@ -606,7 +606,7 @@ export default class ChatWindow {
             return;
          }
 
-         let encryptionPluginName = this.contact.getEncryptionPluginName();
+         let encryptionPluginName = this.contact.getEncryptionPluginId();
 
          pluginRepository.getEncryptionPlugin(encryptionPluginName).toggleTransfer(this.contact);
 

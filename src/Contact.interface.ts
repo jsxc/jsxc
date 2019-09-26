@@ -85,7 +85,7 @@ export interface IContact {
 
    getEncryptionState(): EncryptionState;
 
-   getEncryptionPluginName(): string | null;
+   getEncryptionPluginId(): string | null;
 
    isEncrypted(): boolean;
 

@@ -63,7 +63,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return;
       }
 
-      if (contact.getEncryptionPluginName() === OMEMOPlugin.getId()) {
+      if (contact.getEncryptionPluginId() === OMEMOPlugin.getId()) {
          contact.setEncryptionState(EncryptionState.Plaintext, OMEMOPlugin.getId());
          return;
       }
@@ -140,7 +140,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return Promise.resolve([message, xmlElement]);
       }
 
-      if (contact.getEncryptionPluginName() !== OMEMOPlugin.getId()) {
+      if (contact.getEncryptionPluginId() !== OMEMOPlugin.getId()) {
          return Promise.resolve([message, xmlElement]);
       }
 
