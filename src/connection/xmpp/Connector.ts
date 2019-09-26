@@ -172,6 +172,11 @@ export default class Connector {
       let stanza = connection.features;
 
       let capsElement = stanza.querySelector('c');
+
+      if (!capsElement) {
+         return;
+      }
+
       let ver = capsElement.getAttribute('ver');
 
       let discoInfoRepository = this.account.getDiscoInfoRepository();
