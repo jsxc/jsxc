@@ -366,7 +366,7 @@
     "setting-omemo-enable": "OMEMO is the modern way to send end-to-end encrypted messages between contacts. It supports message synchronization between multiple devices.",
     "setting-otr-enable": "Off-the-Record Messaging (OTR) enables you to send end-to-end encrypted messages from one device to another.",
     "setting-receipts-enable": "Enable this plugin if you like to use delivery receipts. If your contact supports this too, both of you will see if a message arrived.",
-    "setting-vcard-avatar-enable": "Uses vCard to get nice and shiny avatars from your contacts.",
+    "setting-vcard-avatar-enable": "Use vCard to get nice and shiny avatars from your contacts.",
     "Test": "Test",
     "this_device": "this device",
     "Verification": "Verification",
