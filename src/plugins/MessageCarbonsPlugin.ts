@@ -48,9 +48,9 @@ export default class CarbonsPlugin extends AbstractPlugin {
       let body = (<any> xmlElement).node.textContent;
 
       if (body.match(/^\?OTR/)) {
-         xmlElement.up().c('private', {
+         xmlElement.c('private', {
             xmlns: CONST.NS.CARBONS
-         });
+         }).up();
       }
 
       return Promise.resolve([message, xmlElement]);
