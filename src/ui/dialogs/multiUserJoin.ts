@@ -117,7 +117,7 @@ class MultiUserJoinDialog {
                return hasFeature ? jid : undefined;
             }).catch((stanza) => {
                const from = $(stanza).attr('from') || '';
-            
+
                Log.info(`Ignore ${from} as MUC provider, because could not load disco info.`);
             });
 
