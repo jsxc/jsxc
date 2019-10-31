@@ -262,7 +262,7 @@ export default class Message implements IIdentifiable, IMessage {
       body = Utils.escapeHTML(body);
       body = await Message.formatText(body, this.getDirection(), this.getPeer());
 
-      return `<p>${body}</p>`;
+      return `<p dir="auto">${body}</p>`;
    }
 
    public getPlaintextEmoticonMessage(): string {
@@ -344,7 +344,7 @@ function markQuotation(text: string) {
 }
 
 function replaceLineBreaks(text: string) {
-   return text.replace(/(\r\n|\r|\n)/g, '<br />');
+   return text.replace(/(\r\n|\r|\n)/g, '</p><p dir="auto">');
 }
 
 Message.addFormatter(convertUrlToLink);
