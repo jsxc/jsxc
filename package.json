@@ -87,7 +87,7 @@
     "es6-promise": "^4.2.8",
     "file-loader": "^4.0.0",
     "getscreenmedia": "^5.1.2",
-    "handlebars": "^4.1.2",
+    "handlebars": "^4.3.0",
     "handlebars-loader": "^1.7.1",
     "handlebars-runtime": "^1.0.12",
     "i18next": "^17.0.6",
