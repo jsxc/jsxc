@@ -27,6 +27,8 @@ export default class RoleAllocator {
 
    private observationTimeout;
 
+   private keepAliveInterval: number;
+
    private claimTimeout;
 
    private masterResolves = [];
@@ -111,6 +113,10 @@ export default class RoleAllocator {
          this.masterIsStillAlive();
       } else if (this.role === Role.Master) {
          Log.error('Something went wrong. We have another master.');
+
+         this.stopKeepAliveSignal();
+
+         window.location.reload();
       }
    }
 
@@ -203,7 +209,11 @@ export default class RoleAllocator {
    private startKeepAliveSignal() {
       this.stillAlive();
 
-      window.setInterval(this.stillAlive, INTERVAL_KEEPALIVE);
+      this.keepAliveInterval = window.setInterval(this.stillAlive, INTERVAL_KEEPALIVE);
+   }
+
+   private stopKeepAliveSignal() {
+      window.clearInterval(this.keepAliveInterval);
    }
 
    private resolveAllMaster() {
