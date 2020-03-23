@@ -116,7 +116,7 @@ export class VideoDialog {
             localVideoElement.hide();
          } else if (localStream.getVideoTracks().filter((track: MediaStreamTrack) => track.enabled).length === 0) {
             Log.debug('There are no video tracks enabled');
-            localCameraControl.addClass('jsxc-disabled')
+            localCameraControl.addClass('jsxc-disabled');
          }
 
          if (localStream.getAudioTracks().length === 0) {
@@ -124,7 +124,7 @@ export class VideoDialog {
             localMicrophoneControl.hide();
          } else if (localStream.getAudioTracks().filter((track: MediaStreamTrack) => track.enabled).length === 0) {
             Log.debug('There are no audio tracks enabled');
-            localMicrophoneControl.addClass('jsxc-disabled')
+            localMicrophoneControl.addClass('jsxc-disabled');
          }
       } else {
          Log.debug('No local stream available');

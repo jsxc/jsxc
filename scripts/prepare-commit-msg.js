@@ -25,7 +25,7 @@ const getCommitMessage = () => {
 # to the description.
 #
 # See https://www.conventionalcommits.org/ for more details.`;
-}
+};
 
 // only apply custom messages when run as a standalone `git commit`
 // i.e. ignore `--amend` commits, merges, or commits with `-m`

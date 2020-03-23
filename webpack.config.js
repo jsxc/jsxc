@@ -26,8 +26,6 @@ let supportedLangs = fs.readdirSync('./locales/').filter(filename => {
    return false;
 }).map(filename => filename.replace(/\.json$/, ''));
 
-const DEVELOPMENT_MODE = 'development';
-const PRODUCTION_MODE = 'production';
 const MOMENTJS_LOCALES = supportedLangs.map(lang => lang.replace(/-.+/, ''));
 const JS_BUNDLE_NAME = 'jsxc.bundle.js';
 
