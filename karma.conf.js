@@ -17,7 +17,6 @@ module.exports = function(config) {
       // list of files / patterns to load in the browser
       files: [
          './node_modules/jquery/dist/jquery.min.js',
-         './node_modules/strophe.js/strophe.js',
          './node_modules/es6-promise/dist/es6-promise.js',
          'test/*.spec.ts',
          'test/**/*.spec.ts'
