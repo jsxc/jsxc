@@ -516,6 +516,15 @@ export default class ChatWindow {
       }).on('resizeend', () => {
          fadeElement.removeClass('jsxc-window-fade--resizing');
       });
+
+      $(window).on('resize', () => {
+         fadeElement.css({
+            width: '',
+            height: '',
+         });
+
+         element.find('.jsxc-bar--window').css('width', '');
+      });
    }
 
    private initEmoticonMenu() {
