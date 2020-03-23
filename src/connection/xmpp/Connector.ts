@@ -171,6 +171,10 @@ export default class Connector {
       let from = new JID('', connection.domain, '');
       let stanza = connection.features;
 
+      if (!stanza) {
+         return;
+      }
+
       let capsElement = stanza.querySelector('c');
 
       if (!capsElement) {
