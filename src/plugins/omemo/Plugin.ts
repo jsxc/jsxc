@@ -68,12 +68,12 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return;
       }
 
-      return this.getOmemo().prepare().then(() => {
+      return this.getOmemo().prepare().then(async () => {
          if (!this.getOmemo().isSupported(contact)) {
             throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
          }
 
-         if (!this.getOmemo().isTrusted(contact) && !this.getOmemo().trustOnFirstUse(contact)) {
+         if (!this.getOmemo().isTrusted(contact) && !await this.getOmemo().trustOnFirstUse(contact)) {
             throw new Error(Translation.t('There_are_new_OMEMO_devices'));
          }
 
