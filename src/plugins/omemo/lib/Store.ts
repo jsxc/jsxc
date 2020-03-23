@@ -180,7 +180,7 @@ export default class Store {
       let index = disabledDevices.indexOf(identifier.getDeviceId());
 
       if (index > -1) {
-         disabledDevices.slice(index, 1);
+         disabledDevices.splice(index, 1);
 
          this.storage.setItem(KEY_DISABLED_DEVICES, identifier.getName(), disabledDevices);
       }
