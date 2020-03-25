@@ -140,11 +140,13 @@ abstract class AbstractConnection {
       }).up();
 
       let pipe = this.account.getPipe('preSendMessageStanza');
-      pipe.run(message, xmlMsg).then(([message, xmlMsg]) => {
+      pipe.run(message, xmlMsg).then(([message, xmlMsg]: [Message, Element]) => {
          if (message.hasAttachment() && !message.getAttachment().isProcessed()) {
             Log.warn('Attachment was not processed');
 
-            message.setErrorMessage('Attachment was not processed')
+            if (!message.getErrorMessage()) {
+               message.setErrorMessage('Attachment was not processed');
+            }
          }
 
          this.send(xmlMsg);
