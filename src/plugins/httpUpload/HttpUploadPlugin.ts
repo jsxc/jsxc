@@ -66,9 +66,11 @@ export default class HttpUploadPlugin extends AbstractPlugin {
             if (service.isSuitable(attachment)) {
                return service;
             }
+
+            this.pluginAPI.Log.debug(`${service.getJid()} only supports files up to ${service.getMaxFileSize()} bytes`);
          }
 
-         throw new Error('Found no suitable http upload service');
+         throw new Error('Found no suitable http upload service. File probably too large.');
       }).then((service) => {
          return service.sendFile(attachment.getFile());
       }).then((downloadUrl) => {
@@ -80,6 +82,12 @@ export default class HttpUploadPlugin extends AbstractPlugin {
          }
       }).catch((err) => {
          this.pluginAPI.Log.debug(err);
+
+         if (err) {
+            setTimeout(() => {
+               contact.addSystemMessage(err.toString());
+            }, 500);
+         }
       }).then(() => {
          return [contact, message];
       });

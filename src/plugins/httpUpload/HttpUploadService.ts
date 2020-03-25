@@ -12,6 +12,14 @@ export default class HttpUploadService {
       this.maxFileSize = maxFileSize || 0;
    }
 
+   public getJid(): JID {
+      return this.jid;
+   }
+
+   public getMaxFileSize(): number {
+      return this.maxFileSize;
+   }
+
    public isSuitable(attachment: Attachment): boolean {
       return this.maxFileSize === 0 || attachment.getSize() <= this.maxFileSize;
    }
@@ -97,10 +105,10 @@ export default class HttpUploadService {
 
                resolve();
             },
-            error: () => {
+            error: (jqXHR) => {
                this.pluginAPI.Log.warn('error while uploading file to ' + putUrl);
 
-               reject();
+               reject(new Error(jqXHR && jqXHR.readyState === 0 ? 'Upload was probably blocked by your browser' : 'Could not upload file'));
             }
          });
       });
