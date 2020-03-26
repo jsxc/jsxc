@@ -4,6 +4,8 @@ import { IPluginAPI } from '../../plugin/PluginAPI.interface'
 import Attachment from '../../Attachment'
 import { $iq } from '../../vendor/Strophe'
 
+const ALLOWED_HEADERS = ['Authorization', 'Cookie', 'Expires'];
+
 export default class HttpUploadService {
    private namespace;
 
@@ -27,7 +29,7 @@ export default class HttpUploadService {
    public sendFile(file: File, progress?: (loaded, total) => void): Promise<string> {
       return this.requestSlot(file)
          .then((urls) => {
-            return this.uploadFile(file, urls.put, progress).then(() => urls.get);
+            return this.uploadFile(file, urls.put, urls.putHeaders, progress).then(() => urls.get);
          });
    }
 
@@ -36,10 +38,11 @@ export default class HttpUploadService {
          to: this.jid.full,
          type: 'get'
       }).c('request', {
-         xmlns: this.namespace
-      }).c('filename').t(file.name)
-         .up()
-         .c('size').t(file.size.toString());
+         'xmlns': this.namespace,
+         'filename': file.name,
+         'size': file.size,
+         'content-type': file.type,
+      });
 
       return this.pluginAPI.sendIQ(iq)
          .then(this.parseSlotResponse)
@@ -50,12 +53,22 @@ export default class HttpUploadService {
       let slot = $(stanza).find(`slot[xmlns="${this.namespace}"]`);
 
       if (slot.length > 0) {
-         let put = slot.find('put').text();
-         let get = slot.find('get').text();
+         let put = slot.find('put').attr('url');
+         let get = slot.find('get').attr('url');
+
+         let putHeaders = {};
+
+         slot.find('put').find('header').map((index, header) => {
+            return {
+               name: header.attr('name').replace(/\n/g, ''),
+               value: header.text().replace(/\n/g, ''),
+            }
+         }).get().filter(header => ALLOWED_HEADERS.indexOf(header.name) > -1).forEach(header => putHeaders[header.name] = header.value);
 
          return Promise.resolve({
             put,
-            get
+            get,
+            putHeaders,
          });
       }
 
@@ -75,19 +88,22 @@ export default class HttpUploadService {
          error.reason = 'resource-constraint';
       } else if ($(stanza).find('error not-allowed')) {
          error.reason = 'not-allowed';
+      } else if ($(stanza).find('error forbidden')) {
+         error.reason = 'forbidden';
       }
 
       return Promise.reject(error);
    }
 
-   private uploadFile = (file: File, putUrl, progress?: (loaded, total) => void) => {
+   private uploadFile = (file: File, putUrl, headers, progress?: (loaded, total) => void) => {
       return new Promise((resolve, reject) => {
          $.ajax({
             url: putUrl,
             type: 'PUT',
-            contentType: 'application/octet-stream',
+            contentType: file.type,
             data: file,
             processData: false,
+            headers,
             xhr() {
                let xhr = (<any> $).ajaxSettings.xhr();
 

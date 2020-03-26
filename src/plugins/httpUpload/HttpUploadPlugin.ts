@@ -15,7 +15,7 @@ import { IMessage } from '@src/Message.interface';
 /**
  * XEP-0363: HTTP File Upload
  *
- * @version 0.7.0
+ * @version 1.0.0
  * @see https://xmpp.org/extensions/xep-0363.html
  */
 
@@ -40,7 +40,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
    constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
-      Namespace.register('HTTPUPLOAD', 'urn:xmpp:http:upload');
+      Namespace.register('HTTPUPLOAD', 'urn:xmpp:http:upload:0');
 
       pluginAPI.addPreSendMessageProcessor(this.preSendMessageProcessor, 20);
 
