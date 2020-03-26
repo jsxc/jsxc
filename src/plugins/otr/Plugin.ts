@@ -213,7 +213,7 @@ export default class OTRPlugin extends EncryptionPlugin {
          this.pluginAPI.Log.debug('Start DSA key generation');
 
          (<IDSA> DSA).createInWebWorker({
-            path: dsaWebworkerFile
+            path: typeof dsaWebworkerFile === 'string' ? dsaWebworkerFile : (dsaWebworkerFile && (<any> dsaWebworkerFile).default)
          }, (key) => {
             this.pluginAPI.Log.debug('DSA key generated');
 
