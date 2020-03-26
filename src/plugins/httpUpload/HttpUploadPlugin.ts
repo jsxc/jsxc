@@ -209,12 +209,13 @@ export default class HttpUploadPlugin extends AbstractPlugin {
 
       if (message.hasAttachment() && message.getAttachment().hasThumbnailData()) {
          let attachment = message.getAttachment();
+         let thumbnailData = attachment.getThumbnailData();
 
          xmlStanza.c('data', {
             xmlns: 'urn:xmpp:bob',
             cid: attachment.getUid(),
-            type: attachment.getMimeType()
-         }).t(attachment.getThumbnailData().replace(/^[^,],+/, '')).up();
+            type: thumbnailData.match(/data:(\w+\/[\w-+\d.]+)(?=;|,)/)[1],
+         }).t(thumbnailData.replace(/^[^,],+/, '')).up();
       }
 
       return Promise.resolve([message, xmlStanza]);
