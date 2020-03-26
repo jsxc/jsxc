@@ -329,6 +329,10 @@
     clear: both;
     font-size: 1em;
     margin: 0;
+
+    + p {
+      margin-top: 0.7em;
+    }
   }
 
   a {
