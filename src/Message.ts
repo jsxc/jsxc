@@ -332,7 +332,7 @@ function markQuotation(text: string) {
          line = line.replace(/&gt; ?/, '');
       } else if (inQuote && line === '') {
          inQuote = false;
-         lines[lineNumber] = null;
+         lines[lineNumber] = '';
       }
 
       if (inQuote) {
@@ -344,7 +344,7 @@ function markQuotation(text: string) {
 }
 
 function replaceLineBreaks(text: string) {
-   return text.replace(/(\r\n|\r|\n)/g, '</p><p dir="auto">');
+   return text.replace(/(\r\n|\r|\n){2}/g, '</p><p dir="auto">').replace(/(\r\n|\r|\n)/g, '<br/>');
 }
 
 Message.addFormatter(convertUrlToLink);
