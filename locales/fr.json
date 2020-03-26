@@ -353,12 +353,16 @@
     "omemo-clean-up-explanation": "Si vous effacez vos périphériques, tous les périphériques seront retirés de votre liste. La prochaine fois que vous utiliserez vos propres périphériques, ils seront de nouveau ajoutés à votre liste. Néanmoins, seuls vos périphériques actifs seront listés et pourront être utilisés par vos contacts pour chiffrer des messages.",
     "Accounts": "Comptes",
     "Archive_exhausted": "Archive épuisée",
+    "Attachment_was_not_processed": null,
     "Blindly_trusted_all_your_own_devices_on_first_use": "Désactiver la vérification de vos périphériques",
     "Blindly_trusted_peer_on_first_use": "Vérification désactivée",
     "Change_password": "Changer le mot de passe",
+    "Connecting": null,
     "Connection": "Connexion",
     "Control": "Vérification",
+    "Incoming_video_call": null,
     "Plugins": "Extensions",
+    "Room_creation": null,
     "setting-bookmarks-enable": "Laissez activé pour stocker vos conversations de groupe dans votre liste de contacts.",
     "setting-http-upload-enable": "Autorise l'envoi de fichiers aux discussions de groupe et autorise vos contacts à recevoir les fichiers transférés sur leurs périphériques.",
     "setting-meCommand-enable": "Remplace /me au début de votre message par le nom de ce contact.",
@@ -371,5 +375,6 @@
     "this_device": "ce périphérique",
     "Verification": "Vérification",
     "Webcam": "Caméra"
-  }
+  },
+  "Notifications": null
 }

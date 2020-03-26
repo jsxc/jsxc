@@ -332,7 +332,7 @@
     "loading": "φόρτωση",
     "Client": "Πελάτης",
     "Are_you_sure": "Είσαι σίγουρος?",
-    "Invite_user": null,
+    "Invite_user": "Πρόσκληση χρήστη",
     "muc_invite_explanation": null,
     "omemo-device-list-explanation": null,
     "No_devices_available": "Δεν υπάρχουν διαθέσιμες συσκευές",
@@ -353,12 +353,16 @@
     "omemo-clean-up-explanation": null,
     "Accounts": "Λογαριασμοί",
     "Archive_exhausted": null,
+    "Attachment_was_not_processed": null,
     "Blindly_trusted_all_your_own_devices_on_first_use": "Εμπιστευτείτε τυφλά όλες τις συσκευές σας κατά την πρώτη χρήση",
     "Blindly_trusted_peer_on_first_use": "Εμπιστευτείτε τυφλά την σύνδεση κατά την πρώτη χρήση",
     "Change_password": "Αλλαγή κωδικού",
+    "Connecting": "Σύνδεση",
     "Connection": "Σύνδεση",
     "Control": "Έλεγχος",
+    "Incoming_video_call": "Εισερχόμενη κλήση βίντεο",
     "Plugins": "Πρόσθετα",
+    "Room_creation": "Δημιουργία δωματίου",
     "setting-bookmarks-enable": "Αν θέλετε να αποθηκεύσετε τις συνομιλίες ομάδας στη λίστα επαφών σας, αφήστε το ενεργοποιημένο.",
     "setting-http-upload-enable": "Επιτρέπει την αποστολή αρχείων σε συνομιλίες ομάδας και επιτρέπει στην επαφή σας να λαμβάνει ένα αρχείο που έχει μεταφερθεί σε όλες τις συσκευές του.",
     "setting-meCommand-enable": "Αντικατάσταση /τον ίδιο στην αρχή ενός μηνύματος με το εμφανιζόμενο όνομα αυτής της επαφής.",
@@ -371,5 +375,6 @@
     "this_device": "αυτή η συσκευή",
     "Verification": "Επαλήθευση",
     "Webcam": "Κάμερα Web"
-  }
+  },
+  "Notifications": "Ειδοποιήσεις"
 }

@@ -353,12 +353,16 @@
     "omemo-clean-up-explanation": null,
     "Accounts": "Contas",
     "Archive_exhausted": null,
+    "Attachment_was_not_processed": null,
     "Blindly_trusted_all_your_own_devices_on_first_use": null,
     "Blindly_trusted_peer_on_first_use": null,
     "Change_password": "Mudar senha",
+    "Connecting": null,
     "Connection": "Conexão",
     "Control": "Controle",
+    "Incoming_video_call": null,
     "Plugins": "Plugins",
+    "Room_creation": null,
     "setting-bookmarks-enable": "Se você quiser armazenar os seus chats em grupo na sua lista de contatos, deixe isso habilitado.",
     "setting-http-upload-enable": null,
     "setting-meCommand-enable": null,
@@ -371,5 +375,6 @@
     "this_device": "esse dispositivo",
     "Verification": "Verificação",
     "Webcam": "Webcam"
-  }
+  },
+  "Notifications": "Notificações"
 }

@@ -353,12 +353,16 @@
     "omemo-clean-up-explanation": null,
     "Accounts": null,
     "Archive_exhausted": null,
+    "Attachment_was_not_processed": null,
     "Blindly_trusted_all_your_own_devices_on_first_use": null,
     "Blindly_trusted_peer_on_first_use": null,
     "Change_password": null,
+    "Connecting": null,
     "Connection": null,
     "Control": null,
+    "Incoming_video_call": null,
     "Plugins": null,
+    "Room_creation": null,
     "setting-bookmarks-enable": null,
     "setting-http-upload-enable": null,
     "setting-meCommand-enable": null,
@@ -371,5 +375,6 @@
     "this_device": null,
     "Verification": null,
     "Webcam": null
-  }
+  },
+  "Notifications": null
 }

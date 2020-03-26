@@ -353,12 +353,16 @@
     "omemo-clean-up-explanation": "Nëse pastroni pajisjet tuaja, krejt pajisjet do të hiqen nga lista juaj e pajisjeve. Herës pasuese që përdorni pajisje të tjera, ato do të shtohen sërish te lista. Kështu që vetëm pajisjet tuaja aktive do të gjenden në listë dhe do të përdoren nga kontaktet tuaja për të fshehtëzuar mesazhe.",
     "Accounts": "Llogari",
     "Archive_exhausted": "Arkiv i ngopur",
+    "Attachment_was_not_processed": "Bashkëngjitja s’u përpunuar",
     "Blindly_trusted_all_your_own_devices_on_first_use": "U besuan verbërisht krejt pajisjet tuaja gjatë përdorimit të parë",
     "Blindly_trusted_peer_on_first_use": "U besua verbërisht ortak gjatë përdorimit të parë",
     "Change_password": "Ndryshoni fjalëkalimin",
+    "Connecting": "Lidhje",
     "Connection": "Lidhje",
     "Control": "Kontroll",
+    "Incoming_video_call": "Thirrje video ardhëse",
     "Plugins": "Shtojca",
+    "Room_creation": "Krijim dhome",
     "setting-bookmarks-enable": "Nëse doni t’i depozitoni bisedat tuaja të grupit te lista juaj e kontakteve, lëreni të aktivizuar.",
     "setting-http-upload-enable": "Lejon të dërgohen kartela te biseda grupi dhe i bën të mundur kontaktit tuaj ta marrë kartelën e shpërngulur në krejt pajisjet e tij.",
     "setting-meCommand-enable": "Zëvendëson /me në fillim të një mesazhi me emrin në ekran të atij kontakti.",
@@ -371,5 +375,6 @@
     "this_device": "këtë pajisje",
     "Verification": "Verifikim",
     "Webcam": "Kamerë Web"
-  }
+  },
+  "Notifications": "Njoftime"
 }

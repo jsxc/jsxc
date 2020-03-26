@@ -353,12 +353,16 @@
     "omemo-clean-up-explanation": "Se pulisci la tua lista dispositivi, tutti i dispositivi saranno rimossi dalla tua lista. I tuoi altri dispositivi saranno riaggiunti alla lista la prossima volta che li userai. Cosicché che la lista utilizzata dai tuoi contatti per cifrare i messaggi conterrà solo i tuoi dispositivi attivi.",
     "Accounts": null,
     "Archive_exhausted": null,
+    "Attachment_was_not_processed": null,
     "Blindly_trusted_all_your_own_devices_on_first_use": null,
     "Blindly_trusted_peer_on_first_use": null,
     "Change_password": null,
+    "Connecting": null,
     "Connection": null,
     "Control": null,
+    "Incoming_video_call": null,
     "Plugins": null,
+    "Room_creation": null,
     "setting-bookmarks-enable": null,
     "setting-http-upload-enable": null,
     "setting-meCommand-enable": null,
@@ -371,5 +375,6 @@
     "this_device": null,
     "Verification": null,
     "Webcam": null
-  }
+  },
+  "Notifications": null
 }

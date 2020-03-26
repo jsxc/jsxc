@@ -353,12 +353,16 @@
     "omemo-clean-up-explanation": "Wenn du deine eigenen Geräte entfernst, werden alle deine Geräte von deiner Geräteliste gelöscht. Sobald du aber eines dieser Geräte wieder verwendest, wird es wieder zu der Liste hinzugefügt. Hiermit stellst du sicher, dass nur aktive Geräte von deinen Kontakten zur Verschlüsselung genutzt werden.",
     "Accounts": "Konten",
     "Archive_exhausted": "Keine weiteren Nachrichten",
+    "Attachment_was_not_processed": null,
     "Blindly_trusted_all_your_own_devices_on_first_use": "Allen deinen eigenen Geräten blind vertraut",
     "Blindly_trusted_peer_on_first_use": "Kontakt blind vertraut",
     "Change_password": "Ändere Passwort",
+    "Connecting": "Verbinde",
     "Connection": "Verbindung",
     "Control": "Kontrolle",
+    "Incoming_video_call": "Eingehender Videoanruf",
     "Plugins": "Plugins",
+    "Room_creation": "Neuer Raum",
     "setting-bookmarks-enable": null,
     "setting-http-upload-enable": null,
     "setting-meCommand-enable": null,
@@ -371,5 +375,6 @@
     "this_device": "dieses Gerät",
     "Verification": "Verifikation",
     "Webcam": "Webcam"
-  }
+  },
+  "Notifications": "Benachrichtigungen"
 }

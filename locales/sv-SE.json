@@ -353,12 +353,16 @@
     "omemo-clean-up-explanation": "Alla sparade enheter kommer att tas bort från listan över enheter om du väljer att rensa egna enheter. Endast aktiva enheter kommer efter detta att finnas tillgängliga för dina kontakter. Enheterna kommer att läggas till i listan igen när du använder dem.",
     "Accounts": "Konton",
     "Archive_exhausted": "Arkivet är uttömt",
+    "Attachment_was_not_processed": null,
     "Blindly_trusted_all_your_own_devices_on_first_use": "Lita helt på dina egna enheter vid första användningen",
     "Blindly_trusted_peer_on_first_use": "Lita helt på kontakten vid första användningen",
     "Change_password": "Byt lösenord",
+    "Connecting": null,
     "Connection": "Anslutning",
     "Control": "Kontroll",
+    "Incoming_video_call": null,
     "Plugins": "Tillägg",
+    "Room_creation": null,
     "setting-bookmarks-enable": "Aktivera för att spara \"gruppchattar\" i din kontaktlista.",
     "setting-http-upload-enable": "Tillåter att skicka filer till \"gruppchattar\" och gör det möjligt för din kontakt att ta emot den överförande filen på alla sina enheter.",
     "setting-meCommand-enable": "Ersätter \"/me\" i början av ett meddelande med kontaktens visningsnamn.",
@@ -371,5 +375,6 @@
     "this_device": "denna enhet",
     "Verification": "Verifiering",
     "Webcam": "Webbkamera"
-  }
+  },
+  "Notifications": null
 }
