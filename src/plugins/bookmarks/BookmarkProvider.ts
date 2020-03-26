@@ -1,7 +1,7 @@
 import ContactProvider from '@src/ContactProvider';
 import AbstractService from './services/AbstractService';
 import RoomBookmark from './RoomBookmark';
-import MultiUserContact from '@src/MultiUserContact';
+import MultiUserContact, { ROOMCONFIG } from '@src/MultiUserContact';
 import { IJID } from '@src/JID.interface';
 import { IContact, ContactType } from '@src/Contact.interface';
 import ContactManager from '@src/ContactManager';
@@ -146,6 +146,7 @@ export default class BookmarkProvider extends ContactProvider {
       }
 
       if (bookmark.isAutoJoin()) {
+         contact.setRoomConfiguration(ROOMCONFIG.INSTANT);
          contact.join();
       }
 
