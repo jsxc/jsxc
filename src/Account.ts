@@ -79,7 +79,11 @@ export default class Account {
 
       this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3]);
       this.connection = new StorageConnection(this);
-      this.pluginRepository = new PluginRepository(this);
+
+      if (arguments.length === 1) {
+         this.pluginRepository = new PluginRepository(this);
+      }
+
       this.contact = new Contact(this, new JID(this.uid), this.uid);
 
       let rosterContactProvider = new RosterContactProvider(this.getContactManager(), this);
@@ -314,7 +318,9 @@ export default class Account {
          this.pipes[name].destroy();
       }
 
-      this.getPluginRepository().destroyAllPlugins();
+      if (this.getPluginRepository()) {
+         this.getPluginRepository().destroyAllPlugins();
+      }
    }
 
    public connectionDisconnected() {
