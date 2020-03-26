@@ -317,6 +317,10 @@ export default class ChatWindow {
          (ev) => {
             Location.getCurrentLocationAsGeoUri().then(uri => {
                this.sendOutgoingMessage(uri);
+            }).catch(err => {
+               Log.warn('Could not get current location', err);
+
+               this.getContact().addSystemMessage('Could not get your current location.');
             });
          }
       );
