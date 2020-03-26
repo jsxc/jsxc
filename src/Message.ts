@@ -25,16 +25,16 @@ export default class Message implements IIdentifiable, IMessage {
 
    private static formattingPipe = new Pipe();
 
-   private static formatText(text: string, direction: DIRECTION, peer: IJID): Promise<string> {
-      return Message.formattingPipe.run(text, direction, peer).then(args => args[0]);
+   private static formatText(text: string, direction: DIRECTION, peer: IJID, senderName: string): Promise<string> {
+      return Message.formattingPipe.run(text, direction, peer, senderName).then(args => args[0]);
    }
 
-   public static addFormatter(formatter: (text: string, direction: DIRECTION, peer?: IJID) => Promise<[string, DIRECTION, IJID]> | string, priority?: number) {
-      Message.formattingPipe.addProcessor((text: string, direction: DIRECTION, peer: IJID) => {
-         let returnValue = formatter(text, direction, peer);
+   public static addFormatter(formatter: (text: string, direction: DIRECTION, peer?: IJID, senderName?: string) => Promise<[string, DIRECTION, IJID, string]> | string, priority?: number) {
+      Message.formattingPipe.addProcessor((text: string, direction: DIRECTION, peer: IJID, senderName: string) => {
+         let returnValue = formatter(text, direction, peer, senderName);
 
          if (typeof returnValue === 'string') {
-            return Promise.resolve([returnValue, direction, peer]);
+            return Promise.resolve([returnValue, direction, peer, senderName]);
          }
 
          return returnValue;
@@ -260,7 +260,7 @@ export default class Message implements IIdentifiable, IMessage {
       let body = this.getPlaintextMessage();
 
       body = Utils.escapeHTML(body);
-      body = await Message.formatText(body, this.getDirection(), this.getPeer());
+      body = await Message.formatText(body, this.getDirection(), this.getPeer(), this.getSender().name);
 
       return `<p dir="auto">${body}</p>`;
    }

@@ -143,9 +143,9 @@ export default class PluginAPI implements IPluginAPI {
       this.account.getContactManager().registerContactProvider(source);
    }
 
-   public registerTextFormatter(formatter: (text: string, direction: DIRECTION, contact: IContact) => Promise<string> | string, priority?: number) {
-      Message.addFormatter((text: string, direction: DIRECTION, peer: IJID) => {
-         return Promise.resolve(formatter(text, direction, this.account.getContact(peer))).then(text => [text, direction, peer]);
+   public registerTextFormatter(formatter: (text: string, direction: DIRECTION, contact: IContact, senderName: string) => Promise<string> | string, priority?: number) {
+      Message.addFormatter((text: string, direction: DIRECTION, peer: IJID, senderName: string) => {
+         return Promise.resolve(formatter(text, direction, this.account.getContact(peer), senderName)).then(text => [text, direction, peer, senderName]);
       }, priority);
    }
 

@@ -33,15 +33,15 @@ export default class MeCommandPlugin extends AbstractPlugin {
       pluginAPI.registerTextFormatter(this.textFormatter);
    }
 
-   private textFormatter = (plaintext: string, direction: DIRECTION, contact: Contact) => {
+   private textFormatter = (plaintext: string, direction: DIRECTION, contact: Contact, senderName: string) => {
       let meRegex = /^\/me /;
 
       if (direction !== DIRECTION.IN) {
-         return plaintext;
+         return plaintext.replace(meRegex, `<i>/me</i> `);
       }
 
       if (meRegex.test(plaintext)) {
-         let name = contact.getName();
+         let name = senderName || contact.getName();
 
          if (name.indexOf('@') > -1) {
             name = name.slice(0, name.indexOf('@'));
