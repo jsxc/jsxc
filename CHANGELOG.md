@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - add simple webcam test
 - [#656](https://github.com/jsxc/jsxc/issues/656) support multiple incoming calls at once
 - use sender avatar color as background color for group chat messages
+- [#841](https://github.com/jsxc/jsxc/issues/841) add support for RTL messages
 
 ### Fixed
 - video calls can now be initiated from any tab
@@ -42,6 +43,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - remove non-persistent contacts after login
 - translate OTR status messages
 - enhance roster insertion
+- [#608](https://github.com/jsxc/jsxc/issues/608) reset window size if browser gets resized
 
 ### Changed
 - use Consistent Color Generation ([XEP-0392])
