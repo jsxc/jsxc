@@ -353,7 +353,7 @@
     "omemo-clean-up-explanation": null,
     "Accounts": "Облікові записи",
     "Archive_exhausted": null,
-    "Attachment_was_not_processed": null,
+    "Attachment_was_not_processed": "Долучений файл не опрацьовано",
     "Blindly_trusted_all_your_own_devices_on_first_use": null,
     "Blindly_trusted_peer_on_first_use": null,
     "Change_password": "Змінити пароль",
