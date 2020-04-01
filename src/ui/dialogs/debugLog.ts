@@ -29,9 +29,11 @@ export default function() {
       UserMedia.request(['video']).then(stream => {
          VideoDialog.attachMediaStream(videoElement, stream);
       }).catch(err => {
+         Log.warn('Video request failed.', err);
+
          videoElement.remove();
 
-         dom.find('.jsxc-webcam').append(err);
+         dom.find('.jsxc-webcam').append(err.toString());
       })
    });
 
