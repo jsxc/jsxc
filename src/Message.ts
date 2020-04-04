@@ -316,31 +316,9 @@ function convertGeoToLink(text: string) {
 }
 
 function markQuotation(text: string) {
-   let lines = text.split(/(?:\n|\r\n|\r)/);
-   let inQuote = false;
-
-   for (let lineNumber in lines) {
-      if (!lines.hasOwnProperty(lineNumber)) {
-         //This value comes from Array prototype
-         continue;
-      }
-
-      let line = lines[lineNumber];
-
-      if (line.indexOf('&gt;') === 0) {
-         inQuote = true;
-         line = line.replace(/&gt; ?/, '');
-      } else if (inQuote && line === '') {
-         inQuote = false;
-         lines[lineNumber] = '';
-      }
-
-      if (inQuote) {
-         lines[lineNumber] = '<span class="jsxc-quote">' + line + '</span>';
-      }
-   }
-
-   return lines.filter(line => line !== null).join('\n');
+   return text.split(/(?:\n|\r\n|\r)/).map(line => {
+      return line.indexOf('&gt;') === 0 ? '<span class="jsxc-quote">' + line.replace(/^&gt; ?/, '') + '</span>' : line;
+   }).join('\n');
 }
 
 function replaceLineBreaks(text: string) {
