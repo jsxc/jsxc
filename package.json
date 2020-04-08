@@ -1,6 +1,6 @@
 {
   "name": "@jsxc/jsxc",
-  "version": "4.0.0-rc.2",
+  "version": "4.0.0",
   "description": "Real-time XMPP chat application with video calls, file transfer and encrypted communication",
   "keywords": [
     "XMPP",
