@@ -49,6 +49,16 @@ export async function startCall(contact: IContact, account: Account, type: 'vide
       }
    }
 
+   if (sessions.length === 0) {
+      Log.warn('Could not establish a single session');
+
+      videoDialog.setStatus('No connection possible');
+
+      setTimeout(() => {
+         videoDialog.close();
+      }, 2000);
+   }
+
    for (let session of sessions) {
       session.on('accepted', () => {
          cancelAllOtherSessions(sessions, session);

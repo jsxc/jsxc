@@ -260,7 +260,7 @@ export class VideoDialog {
       }
    }
 
-   private close() {
+   public close() {
       this.ready = false;
 
       this.dom.remove();
