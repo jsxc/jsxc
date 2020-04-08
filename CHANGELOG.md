@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased 4.0]
+## [Unreleased]
+
+## 4.0.0 - 2020-04-08
 ### Added
 - OMEMO ([XEP-0384])
 - MUC invitation
