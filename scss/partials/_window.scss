@@ -303,6 +303,19 @@
   position: relative;
   word-wrap: break-word;
 
+  &__footer {
+    clear: both;
+    color: $chatmessage-footer;
+    display: flex;
+    font-size: 0.8em;
+    line-height: 1.2em;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+    white-space: nowrap;
+  }
+
   &.jsxc-error {
     .jsxc-content {
       opacity: 0.7;
@@ -452,18 +465,6 @@
   }
 }
 
-.jsxc-timestamp {
-  clear: both;
-  color: $chatmessage-timestamp;
-  font-size: 0.8em;
-  line-height: 1.2em;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  user-select: none;
-  white-space: nowrap;
-}
-
 .jsxc-encrypted {
   &.jsxc-received {
     .jsxc-timestamp::after {
@@ -512,10 +513,6 @@
   margin-left: 0.5em;
   max-width: 76%;
   position: relative;
-
-  .jsxc-timestamp {
-    float: left;
-  }
 }
 
 .jsxc-in {
@@ -529,8 +526,8 @@
   max-width: 76%;
   position: relative;
 
-  .jsxc-timestamp {
-    float: right;
+  .jsxc-chatmessage__footer {
+    justify-content: flex-end;
   }
 }
 
@@ -558,6 +555,10 @@
     height: 1.2em;
     vertical-align: middle;
     width: 1.2em;
+  }
+
+  .jsxc-chatmessage__footer {
+    justify-content: center;
   }
 
   &.jsxc-composing {

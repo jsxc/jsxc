@@ -150,8 +150,8 @@ export default class ChatWindowMessage {
          title += '\n' + sender.jid.bare;
       }
 
-      let timestampElement = this.element.find('.jsxc-timestamp');
-      timestampElement.text(sender.name + ': ' + timestampElement.text());
+      let senderElement = this.element.find('.jsxc-sender');
+      senderElement.text(sender.name + ': ');
 
       let avatarElement = $('<div>');
       avatarElement.addClass('jsxc-avatar');
