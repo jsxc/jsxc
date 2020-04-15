@@ -58,7 +58,8 @@
       }
     }
 
-    .jsxc-chatmessage.jsxc-in {
+    .jsxc-chatmessage.jsxc-in,
+    .jsxc-chatmessage.jsxc-probably_in {
       margin-left: 50px;
 
       .jsxc-avatar {
@@ -71,6 +72,12 @@
         &::before {
           display: none;
         }
+      }
+    }
+
+    .jsxc-chatmessage.jsxc-probably_in {
+      .jsxc-avatar {
+        filter: grayscale(1);
       }
     }
 
