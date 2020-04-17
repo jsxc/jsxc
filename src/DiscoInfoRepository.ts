@@ -10,28 +10,28 @@ import { IDiscoInfoRepository } from './DiscoInfoRepository.interface'
 import { IJID } from './JID.interface';
 
 export default class implements IDiscoInfoRepository {
-   private jidIndex: PersistentMap;
-   private serverJidIndex: PersistentMap;
+   private jidVersionMap: PersistentMap;
 
    constructor(private account: Account) {
-      this.jidIndex = new PersistentMap(account.getStorage(), 'capabilities');
-      this.serverJidIndex = new PersistentMap(Client.getStorage(), 'capabilities');
+      this.jidVersionMap = new PersistentMap(Client.getStorage(), 'capabilities');
    }
 
    public addRelation(jid: IJID, version: string): void
    public addRelation(jid: IJID, discoInfo: DiscoInfo): void
-   public addRelation(jid: IJID, value: string|DiscoInfo) {
-      let index = jid.isServer() ? this.serverJidIndex : this.jidIndex;
-
+   public addRelation(jid: IJID, value: string | DiscoInfo) {
       if (value instanceof DiscoInfo) {
-         index.set(jid.full, value.getCapsVersion());
+         this.jidVersionMap.set(jid.full, value.getCapsVersion());
       } else if (typeof value === 'string') {
-         index.set(jid.full, value);
+         this.jidVersionMap.set(jid.full, value);
       }
    }
 
    public getDiscoInfo(jid: IJID) {
-      let version = this.jidIndex.get(jid.full);
+      let version = this.jidVersionMap.get(jid.full);
+
+      if (!version) {
+         throw new Error('Found no disco version');
+      }
 
       return new DiscoInfo(version);
    }
@@ -76,10 +76,6 @@ export default class implements IDiscoInfoRepository {
       if (arguments[0] instanceof JID) {
          let jid: JID = arguments[0];
 
-         if (jid.isBare() && !jid.isServer()) {
-            return Promise.reject('We need a full jid.');
-         }
-
          capabilitiesPromise = this.getCapabilities(jid)
       } else if (arguments[0] instanceof DiscoInfo) {
          capabilitiesPromise = Promise.resolve(arguments[0])
@@ -93,25 +89,19 @@ export default class implements IDiscoInfoRepository {
    }
 
    public getCapabilities(jid: IJID): Promise<DiscoInfo | void> {
-      let jidIndex = this.jidIndex;
-      let serverJidIndex = this.serverJidIndex;
+      let jidVersionMap = this.jidVersionMap;
+      let version = jidVersionMap.get(jid.full);
 
-      if (jid.isBare() && !jid.isServer()) {
-         return Promise.reject('We need a full jid.');
-      }
+      if (!version || !DiscoInfo.exists(version)) {
+         return this.requestDiscoInfo(jid).then(discoInfo => {
+            if (version && version !== discoInfo.getCapsVersion()) {
+               Log.warn(`Caps version doesn't match for ${jid.full}. Expected: ${version}. Actual: ${discoInfo.getCapsVersion()}.`);
+            } else if (!version) {
+               this.addRelation(jid, discoInfo);
+            }
 
-      if (jid.isServer()) {
-         let version = serverJidIndex.get(jid.domain);
-
-         if (!version || (version && !DiscoInfo.exists(version))) {
-            return this.requestDiscoInfo(jid).then(discoInfo => {
-               if (version !== discoInfo.getCapsVersion()) {
-                  Log.warn(`Caps version doesn't match for ${jid.full}. Expected: ${version}. Actual: ${discoInfo.getCapsVersion()}.`);
-               }
-
-               return discoInfo;
-            });
-         }
+            return discoInfo;
+         });
       }
 
       return new Promise<DiscoInfo>((resolve) => {
@@ -119,7 +109,7 @@ export default class implements IDiscoInfoRepository {
       });
 
       function checkCaps(cb) {
-         let version = jid.isServer() ? serverJidIndex.get(jid.domain) : jidIndex.get(jid.full);
+         let version = jidVersionMap.get(jid.full);
 
          if (version && DiscoInfo.exists(version)) {
             cb(new DiscoInfo(version));
@@ -145,7 +135,7 @@ export default class implements IDiscoInfoRepository {
 
       //@TODO verify response is valid: https://xmpp.org/extensions/xep-0115.html#ver-proc
 
-      let capabilities: {[name: string]: any} = {};
+      let capabilities: { [name: string]: any } = {};
 
       for (let childNode of Array.from(queryElement.get(0).childNodes)) {
          let nodeName = childNode.nodeName.toLowerCase();

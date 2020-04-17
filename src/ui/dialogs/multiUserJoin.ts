@@ -43,7 +43,7 @@ class MultiUserJoinDialog {
 
       this.account = Client.getAccountManager().getAccount();
       this.connection = this.account.getConnection();
-      this.defaultNickname = this.connection.getJID().node
+      this.defaultNickname = this.connection.getJID().node;
 
       this.initializeInputElements();
    }
@@ -115,6 +115,10 @@ class MultiUserJoinDialog {
                return discoInfoRepository.hasFeature(discoInfo, 'http://jabber.org/protocol/muc');
             }).then((hasFeature) => {
                return hasFeature ? jid : undefined;
+            }).catch((stanza) => {
+               const from = $(stanza).attr('from') || '';
+
+               Log.info(`Ignore ${from} as MUC provider, because could not load disco info.`);
             });
 
             promises.push(promise);
@@ -259,7 +263,7 @@ class MultiUserJoinDialog {
 
    private parseRoomInfo = (stanza) => {
       let roomInfoElement = $('<div>');
-      roomInfoElement.append(`<p>${Translation.t('This_room_is')}</p>`)
+      roomInfoElement.append(`<p>${Translation.t('This_room_is')}</p>`);
 
       //@TODO test for feature with muc ns
 

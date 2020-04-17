@@ -17,10 +17,15 @@ export enum EncryptionState {
 
 export interface IPlugin {
    new(pluginAPI: IPluginAPI): AbstractPlugin
+   getId(): string
    getName(): string
 }
 
 export abstract class AbstractPlugin {
+   public static getId(): string {
+      return null;
+   }
+
    public static getName(): string {
       return null;
    }

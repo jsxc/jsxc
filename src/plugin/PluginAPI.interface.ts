@@ -1,6 +1,6 @@
 import { IConnection } from '../connection/Connection.interface'
 import { IContact as Contact } from '../Contact.interface'
-import { IMessage, IMessagePayload } from '../Message.interface'
+import { IMessage, IMessagePayload, DIRECTION } from '../Message.interface'
 import { IJID as JID } from '../JID.interface'
 import { IDiscoInfoRepository } from '../DiscoInfoRepository.interface'
 import { ILog } from '../util/Log.interface'
@@ -8,6 +8,7 @@ import ChatWindow from '@ui/ChatWindow';
 import ContactManager from '@src/ContactManager';
 import ContactProvider from '@src/ContactProvider';
 import { IAvatar } from '@src/Avatar.interface';
+import Pipe from '@util/Pipe';
 
 export interface IPluginAPI {
 
@@ -40,6 +41,8 @@ export interface IPluginAPI {
 
    addAfterReceiveMessageProcessor(processor: (contact: Contact, message: IMessage, stanza: Element) => Promise<{}>, position?: number)
 
+   addAfterReceiveGroupMessageProcessor(processor: (contact: Contact, message: IMessage, stanza: Element) => Promise<[Contact, IMessage, Element]>, position?: number)
+
    addPreSendMessageStanzaProcessor(processor: (message: IMessage, xmlMsg: Strophe.Builder) => Promise<any>, position?: number)
 
    addAvatarProcessor(processor: (contact: Contact, avatar: IAvatar) => Promise<[Contact, IAvatar]>, position?: number)
@@ -56,5 +59,11 @@ export interface IPluginAPI {
 
    registerContactProvider(source: ContactProvider)
 
+   registerTextFormatter(formatter: (text: string, direction: DIRECTION, contact: Contact) => Promise<string> | string, priority?: number)
+
    getContactManager(): ContactManager
+
+   getAfterReceiveGroupMessagePipe(): Pipe
+
+   getAfterReceiveMessagePipe(): Pipe
 }

@@ -6,13 +6,16 @@ import VideoWindow from './VideoWindow'
 import JingleMediaSession from '../JingleMediaSession';
 import Translation from '@util/Translation';
 import JingleCallSession from '@src/JingleCallSession';
+import * as screenfull from 'screenfull';
+
+const screen = screenfull as screenfull.Screenfull;
 
 const VideoDialogTemplate = require('../../template/videoDialog.hbs')
 
 export class VideoDialog {
    private dom: JQuery;
 
-   private videoWindows: {[sessionId: string]: VideoWindow} = {};
+   private videoWindows: { [sessionId: string]: VideoWindow } = {};
 
    private localStream: MediaStream;
 
@@ -30,6 +33,8 @@ export class VideoDialog {
 
    public addSession(session: JingleMediaSession) {
       session.on('terminated', (reason) => {
+         this.removeContainer(session.getId());
+
          this.removeSession(session, reason);
       });
 
@@ -80,6 +85,11 @@ export class VideoDialog {
          session.adopt();
 
          dialog.close();
+      }).catch(() => {
+         session.adopt();
+
+         // tslint:disable-next-line:no-string-throw
+         throw 'decline';
       });
    }
 
@@ -87,6 +97,8 @@ export class VideoDialog {
       this.dom.appendTo('body');
 
       let localVideoElement = this.dom.find('.jsxc-local-video');
+      let localCameraControl = this.dom.find('.jsxc-video');
+      let localMicrophoneControl = this.dom.find('.jsxc-microphone');
 
       if (typeof (<any> localVideoElement).draggable === 'function') {
          (<any> localVideoElement).draggable({
@@ -100,23 +112,51 @@ export class VideoDialog {
 
          if (localStream.getVideoTracks().length === 0) {
             Log.debug('No local video device available');
-
+            localCameraControl.hide();
             localVideoElement.hide();
+         } else if (localStream.getVideoTracks().filter((track: MediaStreamTrack) => track.enabled).length === 0) {
+            Log.debug('There are no video tracks enabled');
+            localCameraControl.addClass('jsxc-disabled');
          }
+
+         if (localStream.getAudioTracks().length === 0) {
+            Log.debug('No local audio device available');
+            localMicrophoneControl.hide();
+         } else if (localStream.getAudioTracks().filter((track: MediaStreamTrack) => track.enabled).length === 0) {
+            Log.debug('There are no audio tracks enabled');
+            localMicrophoneControl.addClass('jsxc-disabled');
+         }
+      } else {
+         Log.debug('No local stream available');
+
+         localCameraControl.hide();
+         localVideoElement.hide();
+         localMicrophoneControl.hide();
       }
+
+      localMicrophoneControl.click(() => {
+         VideoDialog.changeStreamMediaState(localMicrophoneControl, localStream.getAudioTracks());
+      });
+
+      localCameraControl.click(() => {
+         VideoDialog.changeStreamMediaState(localCameraControl, localStream.getVideoTracks());
+      });
 
       this.dom.find('.jsxc-hang-up').click(() => {
          JingleHandler.terminateAll('success');
       });
 
-      if ($.support.fullscreen) {
-         this.dom.find('.jsxc-fullscreen').click(() => {
-            $(document).one('disabled.fullscreen', function() {
-               // Reset position of localvideo
-               localVideoElement.removeAttr('style');
-            });
+      if (screen) {
+         screen.on('change', () => {
+            this.resetPositionOfLocalVideoElement();
+         });
 
-            // (<any>$('#jsxc_webrtc .jsxc_videoContainer')).fullscreen();
+         this.dom.find('.jsxc-fullscreen').click(() => {
+            if (screen.isFullscreen) {
+               screen.exit();
+            } else {
+               screen.request(this.dom.get(0));
+            }
          });
       } else {
          this.dom.find('.jsxc-fullscreen').hide();
@@ -139,52 +179,61 @@ export class VideoDialog {
       this.dom.find('.jsxc-video-container').addClass('jsxc-device-available');
       this.dom.find('.jsxc-video-container').append(containerElement);
 
+      this.updateNumberOfContainer();
+   }
+
+   private resetPositionOfLocalVideoElement() {
+      let localVideoElement = this.dom.find('.jsxc-local-video');
+
+      localVideoElement.css({
+         top: '',
+         left: '',
+         bottom: '',
+         right: '',
+      });
+   }
+
+   private removeContainer(sessionId: string) {
+      this.dom.find(`[data-sid="${sessionId}"]`).remove();
+
+      this.updateNumberOfContainer();
+   }
+
+   private updateNumberOfContainer() {
       let numberOfContainer = this.dom.find('.jsxc-video-container > .jsxc-video-wrapper').length;
 
       this.dom.find('.jsxc-video-container').attr('data-videos', numberOfContainer);
    }
 
    //@REVIEW still used?
-   public setStatus(txt, d?) {
-      let status = $('.jsxc_webrtc .jsxc_status');
-      let duration = (typeof d === 'undefined' || d === null) ? 4000 : d;
+   public setStatus(message, duration = 4000) {
+      let statusElement = this.dom.find('.jsxc-status');
 
-      Log.debug('[Webrtc]', txt);
+      Log.debug('[Webrtc]', message);
 
-      if (status.html()) {
-         // attach old messages
-         txt = status.html() + '<br />' + txt;
-         //@TODO escape html; maybe use p element
-      }
+      let messageElement = $('<p>').text(message);
+      messageElement.appendTo(statusElement);
 
-      status.html(txt);
-
-      status.css({
-         'margin-left': '-' + (status.width() / 2) + 'px',
-         'opacity': 0,
-         'display': 'block'
-      });
-
-      //@TODO use css animation
-      status.stop().animate({
-         opacity: 1
-      });
-
-      clearTimeout(status.data('timeout'));
+      statusElement.addClass('jsxc-status--visible');
 
       if (duration === 0) {
          return;
       }
 
-      let to = setTimeout(function() {
-         status.stop().animate({
-            opacity: 0
-         }, function() {
-            status.html('');
-         });
-      }, duration);
+      setTimeout(() => {
+         messageElement.remove();
 
-      status.data('timeout', to);
+         if (statusElement.children().length === 0) {
+            statusElement.removeClass('jsxc-status--visible');
+         }
+      }, duration);
+   }
+
+   public clearStatus() {
+      let statusElement = this.dom.find('.jsxc-status');
+
+      statusElement.empty();
+      statusElement.removeClass('jsxc-status--visible');
    }
 
    public isReady(): boolean {
@@ -211,7 +260,7 @@ export class VideoDialog {
       }
    }
 
-   private close() {
+   public close() {
       this.ready = false;
 
       this.dom.remove();
@@ -219,6 +268,12 @@ export class VideoDialog {
       if (this.localStream) {
          VideoDialog.stopStream(this.localStream);
       }
+   }
+
+   private static changeStreamMediaState = (element: JQuery, tracks: MediaStreamTrack[]) => {
+      element.toggleClass('jsxc-disabled');
+      let streamEnabled = !element.hasClass('jsxc-disabled');
+      tracks.forEach((track: MediaStreamTrack) => track.enabled = streamEnabled);
    }
 
    public static attachMediaStream = (element: JQuery|HTMLMediaElement, stream: MediaStream) => {
@@ -242,6 +297,12 @@ export class VideoDialog {
    }
 
    private static stopStream(stream) {
+
+      if (!stream) {
+         Log.warn('Could not stop stream. Stream is null.');
+         return;
+      }
+
       if (typeof stream.getTracks === 'function') {
          let tracks = stream.getTracks();
          tracks.forEach(function(track) {

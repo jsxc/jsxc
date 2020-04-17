@@ -31,7 +31,7 @@ export default class extends AbstractHandler {
 
    public processStanza(stanza: Element) {
       let connection = this.account.getConnection();
-      let storage = this.account.getStorage();
+      let storage = this.account.getSessionStorage();
 
       storage.setItem(STANZA_JINGLE_KEY, stanza.outerHTML);
       storage.removeItem(STANZA_JINGLE_KEY);

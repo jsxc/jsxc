@@ -101,7 +101,7 @@ export default class Session {
       return this.end();
    }
 
-   public processMessage(message: Message, type: 'decryptMessage' | 'encryptMessage') {
+   public processMessage(message: Message, type: 'decryptMessage' | 'encryptMessage'): Promise<Message> {
       let plaintextBody = message.getPlaintextMessage();
 
       //@TODO test muc
@@ -114,7 +114,7 @@ export default class Session {
       return Promise.resolve(message);
    }
 
-   private encryptMessage(message: Message) {
+   private encryptMessage(message: Message): Promise<Message> {
       let self = this;
       let messageId = message.getUid();
 
@@ -133,7 +133,7 @@ export default class Session {
       });
    }
 
-   private decryptMessage(message: Message) {
+   private decryptMessage(message: Message): Promise<Message> {
       let self = this;
       let messageId = message.getUid();
 
@@ -188,9 +188,9 @@ export default class Session {
       this.saveSession();
 
       if (verified) {
-         this.peer.setEncryptionState(EncryptionState.VerifiedEncrypted, OTRPlugin.getName());
+         this.peer.setEncryptionState(EncryptionState.VerifiedEncrypted, OTRPlugin.getId());
       } else {
-         this.peer.setEncryptionState(EncryptionState.UnverifiedEncrypted, OTRPlugin.getName());
+         this.peer.setEncryptionState(EncryptionState.UnverifiedEncrypted, OTRPlugin.getId());
       }
    }
 
@@ -212,7 +212,7 @@ export default class Session {
 
             this.inform(msgState + '_private_conversation_started');
 
-            this.peer.setEncryptionState(this.session.trust ? EncryptionState.VerifiedEncrypted : EncryptionState.UnverifiedEncrypted, 'otr');
+            this.peer.setEncryptionState(this.session.trust ? EncryptionState.VerifiedEncrypted : EncryptionState.UnverifiedEncrypted, OTRPlugin.getId());
             break;
          case OTR.CONST.STATUS_END_OTR:
             if (this.session.msgstate === OTR.CONST.MSGSTATE_PLAINTEXT) {
@@ -220,13 +220,13 @@ export default class Session {
 
                this.inform('private_conversation_aborted');
 
-               this.peer.setEncryptionState(EncryptionState.Plaintext, 'otr');
+               this.peer.setEncryptionState(EncryptionState.Plaintext, OTRPlugin.getId());
             } else {
                // the buddy abort the private conversation
 
                this.inform('your_buddy_closed_the_private_conversation_you_should_do_the_same');
 
-               this.peer.setEncryptionState(EncryptionState.Ended, 'otr');
+               this.peer.setEncryptionState(EncryptionState.Ended, OTRPlugin.getId());
             }
             break;
          case OTR.CONST.STATUS_SMP_HANDLE:

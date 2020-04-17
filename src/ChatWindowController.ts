@@ -23,6 +23,10 @@ export default class ChatWindowController {
 
    public open() {
       this.setState(State.Open);
+
+      let chatWindow = this.contact.getChatWindow();
+
+      Client.getChatWindowList().moveIntoViewport(chatWindow);
    }
 
    public openProminently() {
@@ -33,8 +37,6 @@ export default class ChatWindowController {
       //@TODO will not work in all tabs
       chatWindow.highlight();
       chatWindow.focus();
-
-      Client.getChatWindowList().moveIntoViewport(chatWindow);
    }
 
    public setBarText(text: string) {

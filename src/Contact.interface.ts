@@ -63,6 +63,10 @@ export interface IContact {
 
    getType(): ContactType;
 
+   isGroupChat(): boolean;
+
+   isChat(): boolean;
+
    getNumberOfUnreadMessages(): number;
 
    hasName(): boolean;
@@ -81,7 +85,7 @@ export interface IContact {
 
    getEncryptionState(): EncryptionState;
 
-   getEncryptionPluginName(): string | null;
+   getEncryptionPluginId(): string | null;
 
    isEncrypted(): boolean;
 
@@ -96,6 +100,10 @@ export interface IContact {
    setProvider(provider: ContactProvider);
 
    setSubscription(subscription: ContactSubscription);
+
+   setGroups(groups: string[]);
+
+   getGroups(): string[]
 
    registerHook(property: string, func: (newValue: any, oldValue: any) => void);
 

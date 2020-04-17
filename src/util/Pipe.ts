@@ -2,7 +2,9 @@
 const MAX_PRIORITY = 100;
 const MIN_PRIORITY = 0;
 
-export default class Pipe {
+type Params = any[];
+
+export default class Pipe<params extends Params = any[]> {
 
    private pipe = [];
 
@@ -10,7 +12,7 @@ export default class Pipe {
 
    }
 
-   public addProcessor(processor: (...args) => Promise<any> | any[], priority: number = 50) {
+   public addProcessor(processor: (...args: params) => Promise<params> | params, priority: number = 50) {
       if (isNaN(priority) || priority < MIN_PRIORITY || priority > MAX_PRIORITY) {
          throw new Error('Priority has to be between 0 and 100');
       }
@@ -22,7 +24,7 @@ export default class Pipe {
       this.pipe[priority].push(processor);
    }
 
-   public run(...args) {
+   public run(...args: params): Promise<params> {
       let chain = Promise.resolve(args);
 
       this.pipe.forEach((processors) => {

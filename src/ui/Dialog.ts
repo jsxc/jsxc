@@ -1,8 +1,11 @@
 import Log from '../util/Log'
+import HookRepository from '@util/HookRepository';
 
 let dialogTemplate = require('../../template/dialog.hbs');
 
 export default class Dialog {
+
+   private hookRepository = new HookRepository();
 
    private readonly id: string;
 
@@ -34,6 +37,8 @@ export default class Dialog {
          Log.debug('close dialog');
 
          $('#' + this.id).remove();
+
+         this.hookRepository.trigger('closed');
       }
    }
 
@@ -53,6 +58,10 @@ export default class Dialog {
 
    public getPromise(): Promise<{}> {
       return new Promise(() => { });
+   }
+
+   public registerOnClosedHook(hook: () => void) {
+      this.hookRepository.registerHook('closed', hook);
    }
 
    private onOpened() {

@@ -36,7 +36,9 @@ export interface IConnection {
 
    sendPresence(presence?: Presence)
 
-   queryArchive(archive: IJID, queryId: string, beforeResultId?: string, end?: Date): Promise<Element>
+   queryArchive(archive: IJID, version: string, queryId: string, contact?: IJID, beforeResultId?: string, end?: Date): Promise<Element>
+
+   changePassword(newPassword: string): Promise<Element>
 
    close()
 }
@@ -70,7 +72,7 @@ export interface IRosterService {
 
    addContact(jid: IJID, alias: string): Promise<Element>
 
-   setDisplayName(jid: IJID, displayName: string): Promise<Element>
+   setDisplayName(jid: IJID, displayName: string, groups: string[]): Promise<Element>
 
    sendSubscriptionAnswer(to: IJID, accept: boolean)
 }

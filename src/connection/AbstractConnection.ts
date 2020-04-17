@@ -140,11 +140,13 @@ abstract class AbstractConnection {
       }).up();
 
       let pipe = this.account.getPipe('preSendMessageStanza');
-      pipe.run(message, xmlMsg).then(([message, xmlMsg]) => {
+      pipe.run(message, xmlMsg).then(([message, xmlMsg]: [Message, Element]) => {
          if (message.hasAttachment() && !message.getAttachment().isProcessed()) {
             Log.warn('Attachment was not processed');
 
-            message.setErrorMessage('Attachment was not processed')
+            if (!message.getErrorMessage()) {
+               message.setErrorMessage('Attachment was not processed');
+            }
          }
 
          this.send(xmlMsg);
@@ -184,13 +186,14 @@ abstract class AbstractConnection {
       this.send(presenceStanza);
    }
 
-   public queryArchive(archive: JID, queryId: string, beforeResultId?: string, end?: Date): Promise<Element> {
+   public queryArchive(archive: JID, version: string, queryId: string, contact?: JID, beforeResultId?: string, end?: Date): Promise<Element> {
       let iq = $iq({
-         type: 'set'
+         type: 'set',
+         to: archive.bare,
       });
 
       iq.c('query', {
-         xmlns: NS.get('MAM'),
+         xmlns: version,
          queryid: queryId
       });
 
@@ -202,11 +205,13 @@ abstract class AbstractConnection {
       iq.c('field', {
          var: 'FORM_TYPE',
          type: 'hidden'
-      }).c('value').t(NS.get('MAM')).up().up();
+      }).c('value').t(version).up().up();
 
-      iq.c('field', {
-         var: 'with'
-      }).c('value').t(archive.bare).up().up();
+      if (contact) {
+         iq.c('field', {
+            var: 'with'
+         }).c('value').t(contact.bare).up().up();
+      }
 
       if (end) {
          iq.c('field', {
@@ -218,7 +223,7 @@ abstract class AbstractConnection {
          xmlns: 'http://jabber.org/protocol/rsm'
       }).c('max').t('20').up();
 
-      if (typeof beforeResultId === 'string') {
+      if (typeof beforeResultId === 'string' || typeof beforeResultId === 'number') {
          iq.c('before').t(beforeResultId);
       }
 

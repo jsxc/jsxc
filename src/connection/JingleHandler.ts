@@ -34,7 +34,6 @@ export default class JingleHandler {
    protected static instances: JingleHandler[] = [];
 
    constructor(protected account: Account, protected connection: IConnection) {
-
       this.manager = new JSM({
          // peerConnectionConstraints: this.getPeerConstraints(),
          jid: connection.getJID().full,
@@ -65,14 +64,17 @@ export default class JingleHandler {
          this.onIncoming(session);
       });
 
-      IceServers.registerUpdateHook((iceSevers) => {
-         this.setICEServers(iceSevers);
+      IceServers.registerUpdateHook((iceServers) => {
+         this.setICEServers(iceServers);
       });
 
       JingleHandler.instances.push(this);
    }
 
    public async initiate(peerJID: IJID, stream: MediaStream, offerOptions?: IOfferOptions): Promise<JingleMediaSession> {
+      let iceServers = await IceServers.get();
+      this.setICEServers(iceServers);
+
       let session: IOTalkJingleMediaSession = this.manager.createMediaSession(peerJID.full, undefined, stream);
 
       return new Promise<JingleMediaSession>(resolve => {
@@ -173,9 +175,3 @@ export default class JingleHandler {
       return JingleHandler.videoDialog;
    }
 }
-
-/** required disco features for video call */
-// reqVideoFeatures: ['urn:xmpp:jingle:apps:rtp:video', 'urn:xmpp:jingle:apps:rtp:audio', 'urn:xmpp:jingle:transports:ice-udp:1', 'urn:xmpp:jingle:apps:dtls:0'],
-
-/** required disco features for file transfer */
-// reqFileFeatures: ['urn:xmpp:jingle:1', 'urn:xmpp:jingle:apps:file-transfer:3'],

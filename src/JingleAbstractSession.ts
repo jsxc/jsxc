@@ -5,6 +5,17 @@ import ChatWindow from '@ui/ChatWindow';
 import IStorage from './Storage.interface';
 import { IOTalkJingleSession, OTalkEventNames, IEndReason } from '@vendor/Jingle.interface';
 
+export const JINGLE_FEATURES = {
+   screen: [
+      'urn:xmpp:jingle:transports:ice-udp:1',
+      'urn:xmpp:jingle:apps:dtls:0'
+   ],
+   audio: [],
+   video: [],
+};
+JINGLE_FEATURES.audio = [...JINGLE_FEATURES.screen, 'urn:xmpp:jingle:apps:rtp:audio'];
+JINGLE_FEATURES.video = [...JINGLE_FEATURES.audio, 'urn:xmpp:jingle:apps:rtp:video'];
+
 const ADOPTED = 'adopted';
 
 export default abstract class JingleAbstractSession {

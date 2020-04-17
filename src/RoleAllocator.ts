@@ -27,6 +27,8 @@ export default class RoleAllocator {
 
    private observationTimeout;
 
+   private keepAliveInterval: number;
+
    private claimTimeout;
 
    private masterResolves = [];
@@ -99,9 +101,11 @@ export default class RoleAllocator {
 
       if (this.role === Role.Master_Pending && value.indexOf(CLAIM_PREFIX) === 0) {
          this.thereIsAnotherPotentialMaster(value);
+
+         return;
       }
 
-      if (this.role === Role.Unknown) {
+      if (this.role === Role.Unknown || this.role === Role.Master_Pending) {
          this.thereIsAMaster();
       }
 
@@ -109,10 +113,16 @@ export default class RoleAllocator {
          this.masterIsStillAlive();
       } else if (this.role === Role.Master) {
          Log.error('Something went wrong. We have another master.');
+
+         this.stopKeepAliveSignal();
+
+         window.location.reload();
       }
    }
 
    private thereIsAnotherPotentialMaster(value) {
+      Log.debug('There is another potential master');
+
       let foreignClaim = parseFloat(value.split(CLAIM_SEP)[1]);
 
       if (foreignClaim > this.claim) {
@@ -157,6 +167,8 @@ export default class RoleAllocator {
    }
 
    private claimMaster = () => {
+      Log.debug('Claim master');
+
       this.claimTimeout = setTimeout(() => {
          if (this.role === Role.Master_Pending) {
             this.startMaster();
@@ -197,7 +209,11 @@ export default class RoleAllocator {
    private startKeepAliveSignal() {
       this.stillAlive();
 
-      window.setInterval(this.stillAlive, INTERVAL_KEEPALIVE);
+      this.keepAliveInterval = window.setInterval(this.stillAlive, INTERVAL_KEEPALIVE);
+   }
+
+   private stopKeepAliveSignal() {
+      window.clearInterval(this.keepAliveInterval);
    }
 
    private resolveAllMaster() {

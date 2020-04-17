@@ -13,10 +13,11 @@
             button-classes="jsxc-menu__more--light jsxc-icon jsxc-icon--more-light jsxc-icon--clickable"}}
             <li class="jsxc-clear">{{t "clear_history"}}</li>
             <li class="jsxc-share-screen">{{t "Share_screen"}}</li>
+            <li class="jsxc-send-location">{{t "Send_location"}}</li>
          {{/menu}}
 
-         <div class="jsxc-bar__action-entry jsxc-bar__action-entry--disabled jsxc-audio"></div>
-         <div class="jsxc-bar__action-entry jsxc-bar__action-entry--disabled jsxc-video"></div>
+         <div class="jsxc-bar__action-entry jsxc-disabled jsxc-audio"></div>
+         <div class="jsxc-bar__action-entry jsxc-disabled jsxc-video"></div>
          <div class="jsxc-bar__action-entry jsxc-icon jsxc-icon--close-light jsxc-icon--clickable jsxc-js-close"></div>
       </div>
       <div class="jsxc-window-fade">
@@ -32,7 +33,7 @@
              {{> menu
                     classes="jsxc-menu--emoticons jsxc-shrink--no jsxc-menu--dark jsxc-menu--drop-bottom-left"
                     button-classes="jsxc-icon jsxc-icon--emoticon jsxc-icon--clickable"}}
-            <textarea class="jsxc-message-input" placeholder="{{t "Message"}}"></textarea>
+            <textarea class="jsxc-message-input" placeholder="{{t "Message"}}" dir="auto"></textarea>
             <div class="jsxc-file-transfer" title="{{t "Send_file"}}">
                <label><input type="file" name="files" /><label>
             </div>

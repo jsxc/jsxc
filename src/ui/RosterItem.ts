@@ -6,6 +6,7 @@ import { Presence } from '../connection/AbstractConnection'
 import Dialog from './Dialog'
 import { IContact } from '../Contact.interface'
 import Translation from '../util/Translation'
+import Client from '@src/Client';
 
 let rosterItemTemplate = require('../../template/roster-item.hbs')
 
@@ -39,6 +40,10 @@ export default class RosterItem {
       this.element.click(function() {
          let chatWindow = contact.getChatWindowController();
 
+         if ($('body').hasClass('jsxc-fullscreen') || Client.isExtraSmallDevice()) {
+            Client.getChatWindowList().minimizeAll();
+         }
+
          chatWindow.openProminently();
       });
 
@@ -55,7 +60,7 @@ export default class RosterItem {
             bid_name: this.contact.getName(),
             bid_jid: this.contact.getJid().bare,
          });
-         confirmDialog(questionString).getPromise().then((dialog: Dialog) => {
+         confirmDialog(questionString, true).getPromise().then((dialog: Dialog) => {
             contact.getAccount().getContactManager().delete(contact);
 
             //@TODO show spinner

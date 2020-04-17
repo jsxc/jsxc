@@ -14,6 +14,7 @@ const PREFIX_PREKEY = '25519KeypreKey:';
 const PREFIX_SIGNED_PREKEY = '25519KeysignedKey:';
 const PREFIX_TRUST = 'trust:';
 const PREFIX_DEVICE_LIST = 'deviceList:';
+const PREFIX_DEVICE_USED = 'deviceUsed:';
 
 const KEY_DISABLED_DEVICES = 'disabledDevices';
 
@@ -99,6 +100,16 @@ export default class Store {
       this.put(PREFIX_DEVICE_LIST + deviceName, deviceList);
    }
 
+   public setPeerUsed(deviceName: string) {
+      this.put(PREFIX_DEVICE_USED + deviceName, true);
+   }
+
+   public isPeerUsed(deviceName: string): boolean {
+      let value = this.get(PREFIX_DEVICE_USED + deviceName);
+
+      return typeof value === 'boolean' ? value : false;
+   }
+
    public setLocalDeviceId(id: number) {
       this.put('deviceId', id);
    }
@@ -169,7 +180,7 @@ export default class Store {
       let index = disabledDevices.indexOf(identifier.getDeviceId());
 
       if (index > -1) {
-         disabledDevices.slice(index, 1);
+         disabledDevices.splice(index, 1);
 
          this.storage.setItem(KEY_DISABLED_DEVICES, identifier.getName(), disabledDevices);
       }
@@ -203,6 +214,10 @@ export default class Store {
    public setTrust(identifier: Address, trust: Trust) {
       let trustMatrix = this.getTrustMatrix(identifier);
       let fingerprint = this.getFingerprint(identifier);
+
+      if (!fingerprint) {
+         throw new Error('Can not trust without a fingerprint')
+      }
 
       for (let trustLevel in trustMatrix) {
          trustMatrix[trustLevel] = trustMatrix[trustLevel].filter(fp => fp !== fingerprint);

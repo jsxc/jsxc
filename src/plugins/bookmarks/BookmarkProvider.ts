@@ -1,7 +1,7 @@
 import ContactProvider from '@src/ContactProvider';
 import AbstractService from './services/AbstractService';
 import RoomBookmark from './RoomBookmark';
-import MultiUserContact from '@src/MultiUserContact';
+import MultiUserContact, { ROOMCONFIG } from '@src/MultiUserContact';
 import { IJID } from '@src/JID.interface';
 import { IContact, ContactType } from '@src/Contact.interface';
 import ContactManager from '@src/ContactManager';
@@ -54,8 +54,9 @@ export default class BookmarkProvider extends ContactProvider {
       let alias = contact.hasName() ? contact.getName() : undefined;
       let nickname = contact.getNickname();
       let autoJoin = contact.isAutoJoin();
+      let password = contact.getPassword();
 
-      return new RoomBookmark(id, alias, nickname, autoJoin);
+      return new RoomBookmark(id, alias, nickname, autoJoin, password);
    }
 
    public createContact(jid: IJID, name?: string): MultiUserContact;
@@ -135,6 +136,7 @@ export default class BookmarkProvider extends ContactProvider {
    private initBookmarkContact(bookmark: RoomBookmark, service: AbstractService): IContact {
       let contact = this.createContact(bookmark.getJid());
       contact.setNickname(bookmark.getNickname());
+      contact.setPassword(bookmark.getPassword());
       contact.setBookmark(true);
       contact.setAutoJoin(bookmark.isAutoJoin());
       contact.setProvider(this);
@@ -144,6 +146,7 @@ export default class BookmarkProvider extends ContactProvider {
       }
 
       if (bookmark.isAutoJoin()) {
+         contact.setRoomConfiguration(ROOMCONFIG.INSTANT);
          contact.join();
       }
 

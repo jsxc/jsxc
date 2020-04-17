@@ -4,8 +4,9 @@ export default class Address {
    private address;
 
    public static fromString(text: string): Address {
-      let index = text.lastIndexOf('.');
-      let [name, deviceId] = [text.slice(0, index), text.slice(index)];
+      let matches = text.match(/^(.+?)(?:\.(\d+))?$/);
+      let name = matches[1];
+      let deviceId = matches[2];
 
       return new SignalAddress(name, deviceId);
    }

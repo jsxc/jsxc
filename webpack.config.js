@@ -5,7 +5,7 @@ const webpack = require('webpack');
 const packageJson = require('./package.json');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const GitRevisionPlugin = new(require('git-revision-webpack-plugin'))();
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const TerserPlugin = require('terser-webpack-plugin');
@@ -26,8 +26,6 @@ let supportedLangs = fs.readdirSync('./locales/').filter(filename => {
    return false;
 }).map(filename => filename.replace(/\.json$/, ''));
 
-const DEVELOPMENT_MODE = 'development';
-const PRODUCTION_MODE = 'production';
 const MOMENTJS_LOCALES = supportedLangs.map(lang => lang.replace(/-.+/, ''));
 const JS_BUNDLE_NAME = 'jsxc.bundle.js';
 
@@ -162,9 +160,7 @@ let config = {
          filename: 'styles/jsxc.bundle.css',
 
       }),
-      new CleanWebpackPlugin([OUTPUT_PATH], {
-         verbose: false,
-      }),
+      new CleanWebpackPlugin(),
       new CopyWebpackPlugin([{
          from: 'images/',
          to: 'images/'

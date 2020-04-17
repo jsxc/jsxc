@@ -30,6 +30,7 @@ body.jsxc-fullscreen {
     .jsxc-window {
       background-color: #d4d2d2;
       border: 0;
+      border-radius: 0;
       left: 0;
       position: absolute;
       right: 0;
@@ -76,7 +77,7 @@ body.jsxc-fullscreen {
     padding: 0;
   }
 
-  .jsxc-menu-emoticons,
+  .jsxc-menu--emoticons,
   .jsxc-file-transfer,
   .jsxc-transfer {
     background-size: 50%;
@@ -108,7 +109,6 @@ body.jsxc-fullscreen {
 
   .jsxc-dialog-wrapper {
     background-color: #fff;
-    display: block;
   }
 
   .jsxc-dialog {
@@ -125,6 +125,27 @@ body.jsxc-fullscreen.jsxc-two-columns {
     }
 
     #jsxc-window-list {
+      background-color: #e1e1e1;
+      bottom: 0;
+      left: 0;
+      right: 33%;
+      top: 0;
+
+      &::after {
+        background-image: url("../images/jsxc_white.svg");
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        bottom: 0;
+        content: "";
+        left: 0;
+        opacity: 0.3;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: -1;
+      }
+
       .jsxc-window-item {
         right: 33%;
       }

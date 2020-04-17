@@ -3,7 +3,7 @@ import Attachment from './Attachment'
 import { ContactType } from './Contact.interface'
 
 export enum DIRECTION {
-   IN, OUT, SYS, PROBABLY_OUT
+   IN, OUT, SYS, PROBABLY_OUT, PROBABLY_IN
 };
 
 export interface IMessagePayload {
@@ -102,7 +102,7 @@ export interface IMessage {
 
    setEncrypted(encrypted: boolean)
 
-   getProcessedBody(): string
+   getProcessedBody(): Promise<string>
 
    setErrorMessage(error: string)
 

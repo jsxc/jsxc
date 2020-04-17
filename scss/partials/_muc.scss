@@ -41,7 +41,7 @@
       background-image: url("../images/group_white.svg");
       background-position: center;
       background-repeat: no-repeat;
-      background-size: 22px 22px;
+      background-size: 1.3em;
       position: relative;
 
       &::before {
@@ -58,19 +58,26 @@
       }
     }
 
-    .jsxc-chatmessage.jsxc-in {
+    .jsxc-chatmessage.jsxc-in,
+    .jsxc-chatmessage.jsxc-probably_in {
       margin-left: 50px;
 
       .jsxc-avatar {
         background-color: #777;
-        bottom: 0;
         display: block;
         left: -50px;
         position: absolute;
+        top: 0;
 
         &::before {
           display: none;
         }
+      }
+    }
+
+    .jsxc-chatmessage.jsxc-probably_in {
+      .jsxc-avatar {
+        filter: grayscale(1);
       }
     }
 

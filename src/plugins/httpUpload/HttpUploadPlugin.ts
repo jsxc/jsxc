@@ -9,11 +9,13 @@ import HttpUploadService from './HttpUploadService'
 import { IConnection } from '../../connection/Connection.interface'
 import { $iq } from '../../vendor/Strophe'
 import Translation from '../../util/Translation';
+import { IContact } from '@src/Contact.interface';
+import { IMessage } from '@src/Message.interface';
 
 /**
  * XEP-0363: HTTP File Upload
  *
- * @version 0.7.0
+ * @version 1.0.0
  * @see https://xmpp.org/extensions/xep-0363.html
  */
 
@@ -21,8 +23,16 @@ const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 export default class HttpUploadPlugin extends AbstractPlugin {
+   public static getId(): string {
+      return 'http-upload';
+   }
+
    public static getName(): string {
-      return 'httpUpload';
+      return 'HTTP File Upload';
+   }
+
+   public static getDescription(): string {
+      return Translation.t('setting-http-upload-enable');
    }
 
    private services: HttpUploadService[];
@@ -30,18 +40,21 @@ export default class HttpUploadPlugin extends AbstractPlugin {
    constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
-      Namespace.register('HTTPUPLOAD', 'urn:xmpp:http:upload');
+      Namespace.register('HTTPUPLOAD', 'urn:xmpp:http:upload:0');
 
       pluginAPI.addPreSendMessageProcessor(this.preSendMessageProcessor, 20);
 
-      pluginAPI.addPreSendMessageStanzaProcessor(this.addBitsOfBinary)
+      pluginAPI.addPreSendMessageStanzaProcessor(this.addBitsOfBinary);
+
+      pluginAPI.addAfterReceiveMessageProcessor(this.extractAttachmentFromStanza);
+      pluginAPI.addAfterReceiveGroupMessageProcessor(this.extractAttachmentFromStanza);
 
       let connection = pluginAPI.getConnection();
 
       connection.registerHandler(this.onBitsOfBinary, 'urn:xmpp:bob', 'iq');
    }
 
-   private preSendMessageProcessor = (contact: Contact, message: Message) => {
+   private preSendMessageProcessor = (contact: Contact, message: Message): Promise<[Contact, Message]> => {
       if (!message.hasAttachment()) {
          return Promise.resolve([contact, message]);
       }
@@ -53,9 +66,11 @@ export default class HttpUploadPlugin extends AbstractPlugin {
             if (service.isSuitable(attachment)) {
                return service;
             }
+
+            this.pluginAPI.Log.debug(`${service.getJid()} only supports files up to ${service.getMaxFileSize()} bytes`);
          }
 
-         throw new Error('Found no suitable http upload service');
+         throw new Error('Found no suitable http upload service. File probably too large.');
       }).then((service) => {
          return service.sendFile(attachment.getFile());
       }).then((downloadUrl) => {
@@ -67,6 +82,12 @@ export default class HttpUploadPlugin extends AbstractPlugin {
          }
       }).catch((err) => {
          this.pluginAPI.Log.debug(err);
+
+         if (err) {
+            setTimeout(() => {
+               contact.addSystemMessage(err.toString());
+            }, 500);
+         }
       }).then(() => {
          return [contact, message];
       });
@@ -146,7 +167,9 @@ export default class HttpUploadPlugin extends AbstractPlugin {
 
       html.append($('<p>').append(linkElement));
       //@TODO html !== empty ???
-      html.append($('<p>').text(plaintext));
+      if (plaintext) {
+         html.append($('<p>').text(plaintext));
+      }
 
       message.setHtmlMessage(html.html());
    }
@@ -186,14 +209,50 @@ export default class HttpUploadPlugin extends AbstractPlugin {
 
       if (message.hasAttachment() && message.getAttachment().hasThumbnailData()) {
          let attachment = message.getAttachment();
+         let thumbnailData = attachment.getThumbnailData();
 
          xmlStanza.c('data', {
             xmlns: 'urn:xmpp:bob',
             cid: attachment.getUid(),
-            type: attachment.getMimeType()
-         }).t(attachment.getThumbnailData().replace(/^[^,],+/, '')).up();
+            type: thumbnailData.match(/data:(\w+\/[\w-+\d.]+)(?=;|,)/)[1],
+         }).t(thumbnailData.replace(/^[^,],+/, '')).up();
       }
 
       return Promise.resolve([message, xmlStanza]);
    }
+
+   private extractAttachmentFromStanza = (contact: IContact, message: IMessage, stanza: Element): Promise<[IContact, IMessage, Element]> => {
+      let element = $(stanza);
+      let bodyElement = element.find('html body[xmlns="' + Strophe.NS.XHTML + '"]').first();
+      let dataElement = element.find('data[xmlns="urn:xmpp:bob"]');
+
+      if (bodyElement.length && dataElement.length === 1) {
+         let cid = dataElement.attr('cid');
+         let mimeType = dataElement.attr('type');
+
+         if (!/^[a-z]+\/[a-z0-9.\-+]+$/.test(mimeType)) {
+            return Promise.resolve([contact, message, stanza]);
+         }
+
+         let linkElement = bodyElement.find('a');
+         let imageElement = linkElement.find('img[src^="cid:"]');
+
+         if (imageElement.length === 1 && ('cid:' + cid) === imageElement.attr('src')) {
+            let url = linkElement.attr('href');
+            let name = imageElement.attr('alt');
+            let thumbnailData = dataElement.text();
+
+            if (/^data:image\/(jpeg|jpg|gif|png|svg);base64,[/+=a-z0-9]+$/i.test(thumbnailData) && /^https?:\/\//.test(url)) {
+               let attachment = new Attachment(name, mimeType, url);
+               attachment.setThumbnailData(thumbnailData);
+               attachment.setData(url);
+
+               message.setAttachment(attachment);
+               message.setPlaintextMessage(bodyElement.text());
+            }
+         }
+      }
+
+      return Promise.resolve([contact, message, stanza]);
+   };
 }

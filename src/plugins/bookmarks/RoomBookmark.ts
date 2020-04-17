@@ -1,7 +1,7 @@
 import { IJID } from '@src/JID.interface';
 
 export default class RoomBookmark {
-   constructor(private id: IJID, private alias?: string, private nickname?: string, private autoJoin: boolean = false) {
+   constructor(private id: IJID, private alias?: string, private nickname?: string, private autoJoin: boolean = false, private password?: string) {
 
    }
 
@@ -27,6 +27,14 @@ export default class RoomBookmark {
 
    public getNickname(): string {
       return this.nickname;
+   }
+
+   public hasPassword(): boolean {
+      return !!this.password;
+   }
+
+   public getPassword(): string {
+      return this.password;
    }
 
    public isAutoJoin(): boolean {

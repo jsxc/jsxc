@@ -97,6 +97,10 @@ export default class Attachment {
       return this.properties.get('mimeType');
    }
 
+   public setThumbnailData(thumbnail: string) {
+      this.properties.set('thumbnail', thumbnail);
+   }
+
    public getThumbnailData() {
       return this.properties.get('thumbnail');
    }
@@ -224,7 +228,7 @@ export default class Attachment {
          let thumbnailData = canvas.toDataURL('image/jpeg', 0.3);
 
          this.properties.set('thumbnail', thumbnailData);
-      }
+      };
 
       img.src = this.data;
    }

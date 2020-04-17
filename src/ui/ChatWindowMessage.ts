@@ -4,6 +4,7 @@ import ChatWindow from './ChatWindow'
 import AvatarSet from './AvatarSet'
 import Log from '../util/Log'
 import LinkHandlerGeo from '@src/LinkHandlerGeo';
+import Color from '@util/Color';
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs')
 
@@ -50,7 +51,7 @@ export default class ChatWindowMessage {
       return nextMessage;
    }
 
-   private generateElement() {
+   private async generateElement() {
       let template = chatWindowMessageTemplate({
          id: this.message.getCssId(),
          direction: this.message.getDirectionString()
@@ -58,15 +59,11 @@ export default class ChatWindowMessage {
 
       this.element = $(template);
 
-      let bodyElement = $(this.message.getProcessedBody());
+      let bodyElement = $(await this.message.getProcessedBody());
 
       LinkHandlerGeo.get().detect(bodyElement);
 
       this.element.find('.jsxc-content').html(bodyElement);
-
-      this.element.find('a').click((ev: Event) => {
-         ev.stopPropagation();
-      });
 
       let timestampElement = this.element.find('.jsxc-timestamp');
       DateTime.stringify(this.message.getStamp().getTime(), timestampElement);
@@ -98,9 +95,11 @@ export default class ChatWindowMessage {
 
       if (this.message.getDirection() === DIRECTION.SYS) {
          this.element.find('.jsxc-message-area').append('<div class="jsxc-clear"/>');
-      } else if (this.message.getDirection() === DIRECTION.IN) {
-         // @REVIEW maybe set background color to avatar color; use source color if available
-         // this.element.css('background-color', Color.generate(this.message.getPeer().bare));
+      } else if (this.message.getDirection() === DIRECTION.IN && this.chatWindow.getContact().isGroupChat()) {
+         let text = this.message.getSender().name || this.message.getPeer().bare;
+         let color = Color.generate(text, undefined, 40, 90);
+
+         this.element.css('background-color', color);
       }
 
       let sender = this.message.getSender();
@@ -151,14 +150,14 @@ export default class ChatWindowMessage {
          title += '\n' + sender.jid.bare;
       }
 
-      let timestampElement = this.element.find('.jsxc-timestamp');
-      timestampElement.text(sender.name + ': ' + timestampElement.text());
+      let senderElement = this.element.find('.jsxc-sender');
+      senderElement.text(sender.name + ': ');
 
       let avatarElement = $('<div>');
       avatarElement.addClass('jsxc-avatar');
       avatarElement.attr('title', title);
 
-      this.element.prepend(avatarElement)
+      this.element.prepend(avatarElement);
       this.element.attr('data-name', sender.name);
 
       let nextMessage = this.getNextMessage();

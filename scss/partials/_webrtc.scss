@@ -4,11 +4,11 @@
   position: fixed;
   right: 0;
   top: 0;
-  z-index: 9999;
+  z-index: 998;
 
   .jsxc-status {
     background-color: $video-status-bg;
-    border-radius: 20px;
+    border-radius: 0.5em;
     color: $video-status-color;
     display: none;
     font-weight: bold;
@@ -17,7 +17,20 @@
     position: absolute;
     text-align: center;
     top: 30px;
+    transform: translateX(-50%);
     z-index: 9999;
+
+    &--visible {
+      display: block;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    p + p {
+      margin-top: 0.5em;
+    }
   }
 
   li .jsxc-name {
@@ -129,7 +142,7 @@
   &[data-videos="2"] {
     .jsxc-video-wrapper {
       height: 100%;
-      width: 100%;
+      width: 50%;
     }
   }
 
@@ -346,7 +359,7 @@ div {
   .jsxc-video-control {
     background-position: center;
     background-repeat: no-repeat;
-    background-size: 90%;
+    background-size: 1.3em;
     cursor: pointer;
     display: inline-block;
     height: 44px;
@@ -361,6 +374,14 @@ div {
 
   .jsxc-hang-up {
     background-image: url("../images/hang_up_red.svg");
+  }
+
+  .jsxc-microphone {
+    background-image: url("../images/microphone_white.svg");
+
+    &.jsxc-disabled {
+      background-image: url("../images/microphone_disabled_white.svg");
+    }
   }
 
   .jsxc-fullscreen {

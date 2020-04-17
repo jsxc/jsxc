@@ -8,6 +8,7 @@ import ListItem from '../DialogListItem'
 import AvatarSet from '../AvatarSet'
 import Log from '../../util/Log'
 import Translation from '@util/Translation';
+import Account from '@src/Account';
 
 const ENOUGH_BITS_OF_ENTROPY = 50;
 
@@ -21,7 +22,7 @@ export default function() {
 
 class StartPage extends Page {
    constructor(navigation: Navigation) {
-      super(navigation, 'Settings');
+      super(navigation, Translation.t('Settings'));
    }
 
    //@REVIEW could also return Page or getDOM interface?
@@ -78,7 +79,7 @@ class ClientSection extends Section {
 
 class AccountOverviewSection extends Section {
    constructor(navigation: Navigation) {
-      super(navigation, 'Accounts');
+      super(navigation, Translation.t('Accounts'));
    }
 
    protected generateContentElement(): JQuery {
@@ -103,7 +104,7 @@ class AccountOverviewSection extends Section {
 }
 
 class AccountPage extends Page {
-   constructor(navigation: Navigation, private account) {
+   constructor(navigation: Navigation, private account: Account) {
       super(navigation, account.getJID().bare);
    }
 
@@ -119,8 +120,8 @@ class AccountPage extends Page {
 
 //@REVIEW priorities? Are they still needed/used?
 class ConnectionSection extends Section {
-   constructor(navigation: Navigation, private account) {
-      super(navigation, 'Connection');
+   constructor(navigation: Navigation, private account: Account) {
+      super(navigation, Translation.t('Connection'));
    }
 
    protected generateContentElement(): JQuery {
@@ -130,17 +131,17 @@ class ConnectionSection extends Section {
       let changePasswordActionHandler = () => this.navigation.goTo(new PasswordPage(this.navigation, this.account));
 
       contentElement.append(new ListItem('Jabber ID', jid.bare));
-      contentElement.append(new ListItem('Resource', jid.resource));
+      contentElement.append(new ListItem(Translation.t('Resource'), jid.resource));
       contentElement.append(new ListItem('BOSH url', this.account.getConnectionUrl()));
-      contentElement.append(new ListItem('Change password', undefined, changePasswordActionHandler));
+      contentElement.append(new ListItem(Translation.t('Change_password'), undefined, changePasswordActionHandler));
 
       return contentElement.getDOM();
    }
 }
 
 class PasswordPage extends Page {
-   constructor(navigation: Navigation, private account) {
-      super(navigation, 'Password');
+   constructor(navigation: Navigation, private account: Account) {
+      super(navigation, Translation.t('Password'));
    }
 
    protected generateContentElement(): JQuery {
@@ -149,10 +150,10 @@ class PasswordPage extends Page {
       contentElement.addClass('form-horizontal');
       contentElement.css('marginTop', '30px'); //@REVIEW
 
-      let explanationElement = $(`<p class="jsxc-explanation">${Translation.t('password_explanation')}</p>`)
+      let explanationElement = $(`<p class="jsxc-explanation">${Translation.t('password_explanation')}</p>`);
 
       let passwordAElement = $(`<div class="form-group">
-         <label class="col-sm-4 control-label" for="jsxc-password-A">Password</label>
+         <label class="col-sm-4 control-label" for="jsxc-password-A">${Translation.t('Password')}</label>
          <div class="col-sm-8">
             <input type="password" name="password-A" id="jsxc-password-A" class="form-control" required="required">
             <p class="jsxc-inputinfo"></p>
@@ -160,7 +161,7 @@ class PasswordPage extends Page {
       </div>`);
 
       let passwordBElement = $(`<div class="form-group">
-         <label class="col-sm-4 control-label" for="jsxc-password-B">Control</label>
+         <label class="col-sm-4 control-label" for="jsxc-password-B">${Translation.t('Control')}</label>
          <div class="col-sm-8">
             <input type="password" name="password-B" id="jsxc-password-B" class="form-control" required="required">
             <p class="jsxc-inputinfo jsxc-hidden"></p>
@@ -169,7 +170,7 @@ class PasswordPage extends Page {
 
       let submitElement = $(`<div class="form-group">
          <div class="col-sm-offset-4 col-sm-8">
-            <button disabled="disabled" class="jsxc-button jsxc-button--primary">Change password</button>
+            <button disabled="disabled" class="jsxc-button jsxc-button--primary">${Translation.t('Change_password')}</button>
          </div>
       </div>`);
 
@@ -205,7 +206,7 @@ class PasswordPage extends Page {
          let bitsOfEntropy = Math.log2(entropy);
          let strength = Math.min(100, Math.round(bitsOfEntropy / ENOUGH_BITS_OF_ENTROPY * 100));
 
-         passwordAElement.find('.jsxc-inputinfo').text(`Strength: ${strength}%`);
+         passwordAElement.find('.jsxc-inputinfo').text(`${Translation.t('Strength')}: ${strength}%`);
       });
 
       contentElement.find('input').on('input', function() {
@@ -218,8 +219,8 @@ class PasswordPage extends Page {
       contentElement.submit((ev) => {
          ev.preventDefault();
 
-         let passwordA = passwordAElement.find('input').val();
-         let passwordB = passwordBElement.find('input').val();
+         let passwordA = passwordAElement.find('input').val() as string;
+         let passwordB = passwordBElement.find('input').val() as string;
 
          if (passwordA !== passwordB) {
             return;
@@ -240,8 +241,8 @@ class PasswordPage extends Page {
 }
 
 class PluginSection extends Section {
-   constructor(navigation: Navigation, private account) {
-      super(navigation, 'Plugins');
+   constructor(navigation: Navigation, private account: Account) {
+      super(navigation, Translation.t('Plugins'));
    }
 
    protected generateContentElement(): JQuery {
@@ -250,23 +251,25 @@ class PluginSection extends Section {
       let disabledPlugins = this.account.getOption('disabledPlugins') || [];
       let pluginRepository = this.account.getPluginRepository();
 
-      for (let plugin of pluginRepository.getAllEnabledRegisteredPlugins()) {
+      for (let plugin of pluginRepository.getAllRegisteredPlugins()) {
+         let id = plugin.getId();
          let name = plugin.getName();
          let description = typeof plugin.getDescription === 'function' ? plugin.getDescription() : undefined;
 
          let checkboxElement = $('<input>');
          checkboxElement.attr('type', 'checkbox');
+         checkboxElement.attr('id', id);
          checkboxElement.attr('name', name);
-         checkboxElement.prop('checked', disabledPlugins.indexOf(name) < 0);
+         checkboxElement.prop('checked', disabledPlugins.indexOf(id) < 0);
          checkboxElement.on('change', (ev) => {
             let isEnabled = $(ev.target).prop('checked');
-            let name = $(ev.target).attr('name');
+            let id = $(ev.target).attr('id');
             let disabledPlugins = this.account.getOption('disabledPlugins') || [];
 
             if (isEnabled) {
-               disabledPlugins = disabledPlugins.filter(v => v !== name);
+               disabledPlugins = disabledPlugins.filter(v => v !== id);
             } else {
-               disabledPlugins.push(name);
+               disabledPlugins.push(id);
             }
 
             this.account.setOption('disabledPlugins', disabledPlugins);

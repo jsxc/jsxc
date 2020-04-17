@@ -118,8 +118,6 @@ export default class Notification {
       }
 
       settings.duration = settings.duration || Notification.getOption('popupDuration');
-      settings.title = settings.title;
-      settings.message = settings.message;
 
       setTimeout(function() {
          Notification.showPopup(settings);

@@ -22,8 +22,12 @@ const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 export default class ChatStatePlugin extends AbstractPlugin {
+   public static getId(): string {
+      return 'chat-state';
+   }
+
    public static getName(): string {
-      return 'Chat State';
+      return 'Chat State Notifications';
    }
 
    public static getDescription(): string {

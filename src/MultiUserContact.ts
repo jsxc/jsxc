@@ -44,7 +44,7 @@ export default class MultiUserContact extends Contact {
    constructor(account: Account, jid: IJID, name?: string);
    constructor(account: Account, id: string);
    constructor() {
-      super(arguments[0], arguments[1], arguments[3]);
+      super(arguments[0], arguments[1], arguments[2]);
 
       this.data.set('type', MultiUserContact.TYPE);
    }
@@ -63,9 +63,9 @@ export default class MultiUserContact extends Contact {
 
    public async invite(jid: JID, reason?: string) {
       let discoInfo = await this.account.getDiscoInfoRepository().requestDiscoInfo(this.getJid());
-      let isModerated = discoInfo.hasFeature('muc_moderated');
+      let isMembersOnly = discoInfo.hasFeature('muc_membersonly');
 
-      if (isModerated) {
+      if (isMembersOnly) {
          this.getService().sendMediatedMultiUserInvitation(jid, this.getJid(), reason);
 
          return;
@@ -177,6 +177,10 @@ export default class MultiUserContact extends Contact {
 
    public getSubject(): string {
       return this.data.get('subject');
+   }
+
+   public getPassword(): string {
+      return this.data.get('password');
    }
 
    public setPassword(password: string) {

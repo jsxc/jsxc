@@ -15,8 +15,10 @@ import ChatWindowMessage from './ChatWindowMessage'
 import Transcript from '../Transcript'
 import FileTransferHandler from './ChatWindowFileTransferHandler'
 import Attachment from '../Attachment'
-import * as Resizable from 'resizable'
 import { IJID } from '@src/JID.interface';
+import { JINGLE_FEATURES } from '@src/JingleAbstractSession';
+import Location from '@util/Location';
+import interact from 'interactjs';
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -125,8 +127,6 @@ export default class ChatWindow {
       this.element.removeClass('jsxc-minimized').addClass('jsxc-normal');
 
       this.scrollMessageAreaToBottom();
-
-      //@TODO scroll message list, so that this window is in the view port
    }
 
    public focus() {
@@ -175,7 +175,7 @@ export default class ChatWindow {
 
       chatWindowMessage.restoreNextMessage();
 
-      this.scrollMessageAreaToBottom();
+      setTimeout(() => this.scrollMessageAreaToBottom(), 500);
 
       return chatWindowMessage;
    }
@@ -271,7 +271,9 @@ export default class ChatWindow {
 
       elementHandler.add(
          this.element.find('.jsxc-js-close')[0],
-         () => {
+         (ev) => {
+            ev.stopPropagation();
+
             this.getController().close();
          }
       );
@@ -289,12 +291,7 @@ export default class ChatWindow {
             ev.stopPropagation();
 
             startCall(contact, this.getAccount());
-         }, [
-            'urn:xmpp:jingle:apps:rtp:video',
-            'urn:xmpp:jingle:apps:rtp:audio',
-            'urn:xmpp:jingle:transports:ice-udp:1',
-            'urn:xmpp:jingle:apps:dtls:0'
-         ]
+         }, JINGLE_FEATURES.video
       );
 
       elementHandler.add(
@@ -303,11 +300,7 @@ export default class ChatWindow {
             ev.stopPropagation();
 
             startCall(contact, this.getAccount(), 'audio');
-         }, [
-            'urn:xmpp:jingle:apps:rtp:audio',
-            'urn:xmpp:jingle:transports:ice-udp:1',
-            'urn:xmpp:jingle:apps:dtls:0'
-         ]
+         }, JINGLE_FEATURES.audio
       );
 
       elementHandler.add(
@@ -316,10 +309,20 @@ export default class ChatWindow {
             ev.stopPropagation();
 
             startCall(contact, this.getAccount(), 'screen');
-         }, [
-            'urn:xmpp:jingle:transports:ice-udp:1',
-            'urn:xmpp:jingle:apps:dtls:0'
-         ]
+         }, JINGLE_FEATURES.screen
+      );
+
+      elementHandler.add(
+         this.element.find('.jsxc-send-location')[0],
+         (ev) => {
+            Location.getCurrentLocationAsGeoUri().then(uri => {
+               this.sendOutgoingMessage(uri);
+            }).catch(err => {
+               Log.warn('Could not get current location', err);
+
+               this.getContact().addSystemMessage('Could not get your current location.');
+            });
+         }
       );
 
       elementHandler.add(
@@ -493,13 +496,38 @@ export default class ChatWindow {
       let element = this.element;
       let fadeElement = element.find('.jsxc-window-fade');
 
-      new Resizable(fadeElement.get(0), {
-         handles: 'n,nw,w',
-         resize: () => {
-            let newWidth = fadeElement.width();
+      interact(fadeElement.get(0)).resizable({
+         edges: {
+            top: true,
+            left: true,
+            bottom: false,
+            right: false,
+         },
+      }).on('resizestart', () => {
+         fadeElement.addClass('jsxc-window-fade--resizing');
+      }).on('resizemove', ev => {
+         let barHeight = element.find('.jsxc-bar--window').height();
+         let windowHeight = $(window).height();
 
-            element.find('.jsxc-bar--window').css('width', newWidth + 'px');
-         }
+         let newHeight = Math.min(windowHeight - barHeight, ev.rect.height);
+
+         fadeElement.css({
+            width: ev.rect.width + 'px',
+            height: newHeight + 'px',
+         });
+
+         element.find('.jsxc-bar--window').css('width',  fadeElement.width() + 'px');
+      }).on('resizeend', () => {
+         fadeElement.removeClass('jsxc-window-fade--resizing');
+      });
+
+      $(window).on('resize', () => {
+         fadeElement.css({
+            width: '',
+            height: '',
+         });
+
+         element.find('.jsxc-bar--window').css('width', '');
       });
    }
 
@@ -562,7 +590,7 @@ export default class ChatWindow {
       });
 
       this.contact.registerHook('name', (newName) => {
-         this.element.find('.jsxc-name').text(newName);
+         this.element.find('.jsxc-bar__caption__primary').text(newName);
       });
 
       this.getTranscript().registerHook('firstMessageId', (firstMessageId) => {
@@ -591,7 +619,7 @@ export default class ChatWindow {
             return;
          }
 
-         let encryptionPluginName = this.contact.getEncryptionPluginName();
+         let encryptionPluginName = this.contact.getEncryptionPluginId();
 
          pluginRepository.getEncryptionPlugin(encryptionPluginName).toggleTransfer(this.contact);
 
@@ -607,11 +635,15 @@ export default class ChatWindow {
          let label = (<any> plugin.constructor).getName().toUpperCase();
 
          menu.addEntry(label, () => {
-            //@TODO show spinner
+            let buttonElement = this.encryptionMenu.getButtonElement();
+            buttonElement.addClass('jsxc-transfer--loading');
+
             plugin.toggleTransfer(this.contact).catch(err => {
                Log.warn('Toggle transfer error:', err);
 
                this.getContact().addSystemMessage(err.toString());
+            }).then(() => {
+               buttonElement.removeClass('jsxc-transfer--loading');
             });
          });
       }
@@ -623,122 +655,3 @@ export default class ChatWindow {
       }
    }
 }
-
-// w = {
-//
-//    updateProgress: function(message, sent, size) {
-//       var div = message.getDOM();
-//       var span = div.find('.jsxc-timestamp span');
-//
-//       if (span.length === 0) {
-//          div.find('.jsxc-timestamp').append('<span>');
-//          span = div.find('.jsxc-timestamp span');
-//       }
-//
-//       span.text(' ' + Math.round(sent / size * 100) + '%');
-//
-//       if (sent === size) {
-//          span.remove();
-//       }
-//    },
-//
-//    showOverlay: function(bid, content, allowClose) {
-//       var win = jsxc.gui.window.get(bid);
-//
-//       win.find('.jsxc-overlay .jsxc-body').empty().append(content);
-//       win.find('.jsxc-overlay .jsxc-js-close').off('click').click(function() {
-//          jsxc.gui.window.hideOverlay(bid);
-//       });
-//
-//       if (allowClose !== true) {
-//          win.find('.jsxc-overlay .jsxc-js-close').hide();
-//       } else {
-//          win.find('.jsxc-overlay .jsxc-js-close').show();
-//       }
-//
-//       win.addClass('jsxc-showOverlay');
-//    },
-//
-//    hideOverlay: function(bid) {
-//       var win = jsxc.gui.window.get(bid);
-//
-//       win.removeClass('jsxc-showOverlay');
-//    },
-//
-//    selectResource: function(bid, text, cb, res) {
-//       res = res || jsxc.storage.getUserItem('res', bid) || [];
-//       cb = cb || function() {};
-//
-//       if (res.length > 0) {
-//          var content = $('<div>');
-//          var list = $('<ul>'),
-//             i, li;
-//
-//          for (i = 0; i < res.length; i++) {
-//             li = $('<li>');
-//
-//             li.append($('<a>').text(res[i]));
-//             li.appendTo(list);
-//          }
-//
-//          list.find('a').click(function(ev) {
-//             ev.preventDefault();
-//
-//             jsxc.gui.window.hideOverlay(bid);
-//
-//             cb({
-//                status: 'selected',
-//                result: $(this).text()
-//             });
-//          });
-//
-//          if (text) {
-//             $('<p>').text(text).appendTo(content);
-//          }
-//
-//          list.appendTo(content);
-//
-//          jsxc.gui.window.showOverlay(bid, content);
-//       } else {
-//          cb({
-//             status: 'unavailable'
-//          });
-//       }
-//    },
-//
-//    smpRequest: function(bid, question) {
-//       var content = $('<div>');
-//
-//       var p = $('<p>');
-//       p.text($.t('smpRequestReceived'));
-//       p.appendTo(content);
-//
-//       var abort = $('<button>');
-//       abort.text($.t('Abort'));
-//       abort.click(function() {
-//          jsxc.gui.window.hideOverlay(bid);
-//          jsxc.storage.removeUserItem('smp', bid);
-//
-//          if (jsxc.master && jsxc.otr.objects[bid]) {
-//             jsxc.otr.objects[bid].sm.abort();
-//          }
-//       });
-//       abort.appendTo(content);
-//
-//       var verify = $('<button>');
-//       verify.text($.t('Verify'));
-//       verify.addClass('jsxc-button jsxc-button---primary');
-//       verify.click(function() {
-//          jsxc.gui.window.hideOverlay(bid);
-//
-//          jsxc.otr.onSmpQuestion(bid, question);
-//       });
-//       verify.appendTo(content);
-//
-//       jsxc.gui.window.showOverlay(bid, content);
-//    },
-//
-//    sendFile: function(jid) {
-//       jsxc.fileTransfer.startGuiAction(jid);
-//    }
-// };

@@ -6,8 +6,6 @@ import JID from '../../JID'
 import { IJID } from '../../JID.interface'
 import * as Namespace from '../../connection/xmpp/namespace'
 import Archive from './Archive'
-import DiscoInfo from '../../DiscoInfo'
-import { Status } from '../../vendor/Strophe'
 import Contact from '@src/Contact';
 import PluginAPI from '@src/plugin/PluginAPI';
 import { IContact } from '@src/Contact.interface';
@@ -25,7 +23,14 @@ const MAX_VERSION = '4.0.0';
 const MAM1 = 'urn:xmpp:mam:1';
 const MAM2 = 'urn:xmpp:mam:2';
 
+Namespace.register('MAM1', MAM1);
+Namespace.register('MAM2', MAM2);
+
 export default class MessageArchiveManagementPlugin extends AbstractPlugin {
+   public static getId(): string {
+      return 'mam';
+   }
+
    public static getName(): string {
       return 'Message Archive Management';
    }
@@ -34,9 +39,9 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       return Translation.t('setting-mam-enable');
    }
 
-   private enabled = false;
    private archives: {[key: string]: Archive} = {};
    private queryContactRelation: PersistentMap;
+   private supportCache: {[archiveJid: string]: string | boolean} = {};
 
    constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
@@ -48,16 +53,14 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       });
 
       pluginAPI.registerChatWindowClearedHook((chatWindow: ChatWindow, contact: Contact) => {
-         if (this.enabled) {
+         let archiveJid = this.getArchiveJid(contact);
+
+         if (this.supportCache[archiveJid.bare]) {
             this.getArchive(contact.getJid()).clear();
          }
       });
 
-      pluginAPI.registerConnectionHook((status, condition) => {
-         if (status === Status.CONNECTED || status === Status.ATTACHED) {
-            this.determineServerSupport();
-         }
-      });
+      this.pluginAPI.getConnection().registerHandler(this.onMamMessage, null, 'message', null);
    }
 
    public getStorage() {
@@ -76,54 +79,51 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       this.queryContactRelation.remove(queryId);
    }
 
-   private determineServerSupport() {
-      let connection = this.pluginAPI.getConnection();
-      let discoInfoRepository = this.pluginAPI.getDiscoInfoRepository();
-      let domain = connection.getJID().domain;
-
-      if (!domain) {
-         this.pluginAPI.Log.debug('Could not get connected JID for MAM');
-         return;
+   public async determineServerSupport(archivingJid: IJID) {
+      if (typeof this.supportCache[archivingJid.bare] !== 'undefined') {
+         return this.supportCache[archivingJid.bare];
       }
-      let serverJid = new JID('', domain, '') //@REVIEW
 
-      discoInfoRepository.getCapabilities(serverJid).then((discoInfo: DiscoInfo) => {
-         if (discoInfo.hasFeature(MAM2)) {
-            Namespace.register('MAM', MAM2);
-            return true;
-         } else if (discoInfo.hasFeature(MAM1)) {
-            Namespace.register('MAM', MAM1);
-            return true;
+      let discoInfoRepository = this.pluginAPI.getDiscoInfoRepository();
+
+      let version: string | boolean = false;
+      try {
+         let discoInfo = await discoInfoRepository.getCapabilities(archivingJid);
+
+         if (discoInfo && discoInfo.hasFeature(MAM2)) {
+            version = MAM2;
+         } else if (discoInfo && discoInfo.hasFeature(MAM1)) {
+            version = MAM1;
          }
-         return false;
-      }).then((hasSupport) => {
-         if (hasSupport) {
-            this.pluginAPI.Log.debug('Server supports ' + Namespace.get('MAM'));
-
-            this.enabled = true;
-
-            this.pluginAPI.getConnection().registerHandler(this.onMamMessage, null, 'message', null);
-         }
-      }).catch((err) => {
+      } catch (err) {
          this.pluginAPI.Log.warn('Could not determine MAM server support:', err);
-      });
+      }
+
+      if (version) {
+         this.pluginAPI.Log.debug(archivingJid.bare + ' supports ' + version);
+      } else {
+         this.pluginAPI.Log.debug(archivingJid.bare + ' has no support for MAM');
+      }
+
+      this.supportCache[archivingJid.bare] = version;
+
+      return version;
+   }
+
+   private getArchiveJid(contact: Contact) {
+      let jid = contact.isGroupChat() ? contact.getJid() : this.getConnection().getJID();
+
+      return new JID(jid.bare);
    }
 
    private addLoadButtonIfEnabled(chatWindow: ChatWindow, contact: Contact) {
-      if (!this.enabled) {
-         let self = this;
+      let archivingJid = this.getArchiveJid(contact);
 
-         //@REVIEW event based?
-         setTimeout(function check() {
-            if (self.enabled) {
-               self.addLoadButton(chatWindow.getDom(), contact);
-            } else {
-               setTimeout(check, 200);
-            }
-         }, 200);
-      } else {
-         this.addLoadButton(chatWindow.getDom(), contact);
-      }
+      this.determineServerSupport(archivingJid).then((version) => {
+         if (version) {
+            this.addLoadButton(chatWindow.getDom(), contact);
+         }
+      });
    }
 
    private addLoadButton(chatWindowElement: JQuery<HTMLElement>, contact: Contact) {
@@ -169,7 +169,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
 
    private onMamMessage = (stanza: string): boolean => {
       let stanzaElement = $(stanza);
-      let resultElement = stanzaElement.find('result' + Namespace.getFilter('MAM'));
+      let resultElement = stanzaElement.find(`result[xmlns^="urn:xmpp:mam:"]`);
       let queryId = resultElement.attr('queryid');
 
       if (resultElement.length !== 1 || !queryId) {

@@ -33,7 +33,7 @@ $emoticons: jabber, jsxc, klaus, nextcloud, xmpp, owncloud;
 
   @each $emoticon in $emoticons {
     &--#{$emoticon} {
-      background: url("../images/emoticons/#{$emoticon}.svg");
+      background-image: url("../images/emoticons/#{$emoticon}.svg");
     }
   }
 }

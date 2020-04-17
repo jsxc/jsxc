@@ -43,7 +43,7 @@ export default class MultiUserChatWindow extends ChatWindow {
 
       this.contact.registerHook('subject', (newSubject) => {
          this.setBarText(newSubject);
-      })
+      });
       this.setBarText(this.contact.getSubject());
 
       this.contact.registerMemberHook(this.contact.getNickname(), (data) => {

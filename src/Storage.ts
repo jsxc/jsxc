@@ -336,7 +336,7 @@ export default class Storage implements IStorage {
 
       let eventNames = Object.keys(hooks);
       eventNames.forEach(function(eventName) {
-         if (key.match(new RegExp('^' + eventName + '(:.+)?$'))) {
+         if (key === eventName || key.indexOf(eventName + ':') === 0) {
             let eventNameHooks = hooks[eventName] || [];
             eventNameHooks.forEach(function(hook) {
                hook(newValue, oldValue, key);
@@ -346,6 +346,10 @@ export default class Storage implements IStorage {
    }
 
    private parseValue(value: string) {
+      if (value === 'undefined') {
+         return;
+      }
+
       try {
          return JSON.parse(value);
       } catch (e) {

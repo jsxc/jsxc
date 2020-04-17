@@ -72,7 +72,7 @@ export default class IceServers {
             } else {
                Log.warn('Found no valid ICE server');
 
-               reject();
+               reject('ice-servers-not-found');
             }
          });
       });

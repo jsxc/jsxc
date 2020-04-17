@@ -6,27 +6,19 @@ import Account from '../../Account'
 import Translation from '../../util/Translation'
 import JID from '../../JID';
 import JingleCallSession from '@src/JingleCallSession';
+import JingleHandler from '@connection/JingleHandler';
+import { JINGLE_FEATURES } from '@src/JingleAbstractSession';
 
 export async function startCall(contact: IContact, account: Account, type: 'video' | 'audio' | 'screen' = 'video') {
-   let peerJID = contact.getJid();
+   let resources = await contact.getCapableResources(JINGLE_FEATURES[type]);
 
-   if (!peerJID.resource) {
-      //@REVIEW call all resources
+   if (resources.length === 0) {
+      Log.debug('We need a full jid');
 
-      let resources = contact.getResources();
+      contact.addSystemMessage(`No distinct JID available.`);
 
-      if (resources.length === 1) {
-         peerJID = new JID(peerJID.bare + '/' + resources[0]);
-      } else {
-         Log.debug('We need a full jid');
-
-         contact.addSystemMessage(`No distinct JID available.`);
-
-         return;
-      }
+      return;
    }
-
-   //@TODO use IceServers.get()
 
    let reqMedia = type === 'audio' ? ['audio'] : (type === 'screen' ? ['screen'] : ['audio', 'video']);
 
@@ -46,29 +38,80 @@ export async function startCall(contact: IContact, account: Account, type: 'vide
    videoDialog.showVideoWindow(stream);
    videoDialog.setStatus('Initiate call');
 
+   let initiateCall = CallFactory(jingleHandler, stream, type, contact, videoDialog);
+   let sessions: JingleCallSession[] = [];
+
+   for (let resource of resources) {
+      try {
+         sessions.push(await initiateCall(resource));
+      } catch (err) {
+         Log.warn(`Error while calling ${resource}`, err);
+      }
+   }
+
+   if (sessions.length === 0) {
+      Log.warn('Could not establish a single session');
+
+      videoDialog.setStatus('No connection possible');
+
+      setTimeout(() => {
+         videoDialog.close();
+      }, 2000);
+   }
+
+   for (let session of sessions) {
+      session.on('accepted', () => {
+         cancelAllOtherSessions(sessions, session);
+
+         sessions = [];
+      });
+
+      session.on('terminated', ({condition}) => {
+         if (condition === 'decline') {
+            cancelAllOtherSessions(sessions, session);
+         }
+      });
+   }
+}
+
+function cancelAllOtherSessions(sessions: JingleCallSession[], exception: JingleCallSession) {
+   sessions.forEach((session, index) => {
+      if (index !== sessions.indexOf(exception)) {
+         session.cancel();
+      }
+   });
+}
+
+function CallFactory(jingleHandler: JingleHandler, stream: MediaStream, type, contact: IContact, videoDialog: VideoDialog) {
    let constraints = {
       offerToReceiveAudio: type === 'video' || type === 'audio',
       offerToReceiveVideo: type === 'video' || type === 'screen',
    }
 
-   let session = <JingleCallSession> await jingleHandler.initiate(peerJID, stream, constraints);
-   let contactOfflineTimeout = setTimeout(() => {
-      session.cancel();
+   return async function(resource: string) {
+      let peerJID = new JID(contact.getJid().bare + '/' + resource);
 
-      contact.addSystemMessage(Translation.t('Couldnt_establish_connection'));
-   }, 30000);
+      let session = <JingleCallSession> await jingleHandler.initiate(peerJID, stream, constraints);
+      let contactOfflineTimeout = setTimeout(() => {
+         session.cancel();
 
-   session.on('accepted', () => {
-      clearTimeout(contactOfflineTimeout);
+         contact.addSystemMessage(Translation.t('Couldnt_establish_connection'));
+      }, 30000);
 
-      if (type === 'screen') {
-         videoDialog.minimize();
-      }
-   });
+      session.on('accepted', () => {
+         clearTimeout(contactOfflineTimeout);
 
-   session.on('terminated', () => {
-      clearTimeout(contactOfflineTimeout);
-   });
+         if (type === 'screen') {
+            videoDialog.minimize();
+         }
+      });
 
-   videoDialog.addSession(session);
+      session.on('terminated', () => {
+         clearTimeout(contactOfflineTimeout);
+      });
+
+      videoDialog.addSession(session);
+
+      return session;
+   }
 }

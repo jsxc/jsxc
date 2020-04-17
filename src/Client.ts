@@ -9,6 +9,7 @@ import PageVisibility from './PageVisibility'
 import ChatWindowList from './ui/ChatWindowList';
 import AccountManager from './AccountManager';
 import Translation from '@util/Translation';
+import Migration from './Migration';
 
 export default class Client {
    private static storage: Storage;
@@ -47,11 +48,13 @@ export default class Client {
 
       Client.watchFileDrag();
 
+      Migration.run(Client.getVersion(), storage);
+
       return Client.accountManager.restoreAccounts();
    }
 
    public static getVersion(): string {
-      return '4.0.0';
+      return __VERSION__;
    }
 
    public static addPlugin(Plugin: IPlugin) {

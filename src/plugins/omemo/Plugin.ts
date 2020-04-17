@@ -16,8 +16,16 @@ const MAX_VERSION = '4.0.0';
 export default class OMEMOPlugin extends EncryptionPlugin {
    private omemo: Omemo;
 
+   public static getId(): string {
+      return 'omemo';
+   }
+
    public static getName(): string {
       return 'OMEMO';
+   }
+
+   public static getDescription(): string {
+      return Translation.t('setting-omemo-enable');
    }
 
    constructor(pluginAPI: IPluginAPI) {
@@ -55,21 +63,21 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return;
       }
 
-      if (contact.getEncryptionPluginName() === OMEMOPlugin.getName()) {
-         contact.setEncryptionState(EncryptionState.Plaintext, OMEMOPlugin.getName());
+      if (contact.getEncryptionPluginId() === OMEMOPlugin.getId()) {
+         contact.setEncryptionState(EncryptionState.Plaintext, OMEMOPlugin.getId());
          return;
       }
 
-      return this.getOmemo().prepare().then(() => {
+      return this.getOmemo().prepare().then(async () => {
          if (!this.getOmemo().isSupported(contact)) {
             throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
          }
 
-         if (!this.getOmemo().isTrusted(contact)) {
+         if (!this.getOmemo().isTrusted(contact) && !await this.getOmemo().trustOnFirstUse(contact)) {
             throw new Error(Translation.t('There_are_new_OMEMO_devices'));
          }
 
-         contact.setEncryptionState(EncryptionState.UnverifiedEncrypted, OMEMOPlugin.getName());
+         contact.setEncryptionState(EncryptionState.UnverifiedEncrypted, OMEMOPlugin.getId());
       });
    }
 
@@ -132,7 +140,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return Promise.resolve([message, xmlElement]);
       }
 
-      if (contact.getEncryptionPluginName() !== OMEMOPlugin.getName()) {
+      if (contact.getEncryptionPluginId() !== OMEMOPlugin.getId()) {
          return Promise.resolve([message, xmlElement]);
       }
 

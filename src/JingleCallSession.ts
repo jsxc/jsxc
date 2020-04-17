@@ -49,7 +49,9 @@ export default class JingleCallSession extends JingleMediaSession {
 
          //@TODO post reason to chat window
          if (reason !== 'aborted') {
-            Log.warn('Decline call', reason)
+            if (reason !== 'decline') {
+               Log.warn('Error on incoming call', reason);
+            }
 
             this.session.decline();
          }
@@ -62,7 +64,7 @@ export default class JingleCallSession extends JingleMediaSession {
 
       for (let content of contents) {
          if (content.senders === 'both' && ['audio', 'video'].indexOf(content.application.media) > -1) {
-            mediaRequested.push(content.name);
+            mediaRequested.push(content.application.media);
          }
       }
 

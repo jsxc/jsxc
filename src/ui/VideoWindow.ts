@@ -54,6 +54,8 @@ export default class VideoWindow {
 
    private callAccepted = () => {
       this.wrapperElement.removeClass('jsxc-ringing');
+
+      this.videoDialog.clearStatus();
    }
 
    private callRinging = () => {
@@ -64,6 +66,10 @@ export default class VideoWindow {
    }
 
    private addStream = (stream: MediaStream) => {
+      if (this.videoElement) {
+         return;
+      }
+
       //@REVIEW can a session contain multiple streams?
       Log.debug('Remote stream for session ' + this.session.getId() + ' added.');
 
@@ -91,5 +97,8 @@ export default class VideoWindow {
       Log.debug('Remote stream for ' + this.session.getId() + ' removed.');
 
       VideoDialog.detachMediaStream(this.videoElement);
+
+      this.videoElement.remove();
+      this.videoElement = undefined;
    }
 }

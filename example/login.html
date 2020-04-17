@@ -9,19 +9,11 @@
 
    <link href="css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css" />
 
-   <link href="../build/css/jquery-ui.min.css" media="all" rel="stylesheet" type="text/css" />
-   <link href="../build/css/jsxc.css" media="all" rel="stylesheet" type="text/css" />
+   <!-- require:dependencies -->
+   <link href="../dist/styles/jsxc.bundle.css" media="all" rel="stylesheet" type="text/css" />
+   <!--  endrequire -->
 
-   <script src="js/jquery.min.js"></script>
-   <script src="js/jquery-ui.min.js"></script>
-   <script src="../build/lib/jquery.slimscroll.js"></script>
-   <script src="../build/lib/jquery.fullscreen.js"></script>
-
-   <script src="../build/lib/jsxc.dep.js"></script>
-   <script src="../build/jsxc.min.js"></script>
-
-   <script src="js/example.js"></script>
-
+   <link href="css/example.css" media="all" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
@@ -30,38 +22,30 @@
 
       <p>This page simulates your protected area or your login target.</p>
 
-      <div class="alert alert-info col-xs-6">
-         <p>Checking status...</p>
-      </div>
-
-      <div class="alert alert-warning col-xs-6" style="display: none;">
+      <div class="submit alert alert-warning col-xs-6">
          <p>You are not logged in! Maybe your password was wrong. <a href="index.html">Back</a></p>
       </div>
 
-      <div class="alert alert-success col-xs-6" style="display: none;">
+      <div class="logout alert alert-success col-xs-6" style="display: none;">
          <p>The following link has the <code>id</code> which was passed to jsxc as <code>logoutElement</code>:</p>
 
-         <p><a href="index.html" id="logout" class="btn btn-default">Log out</a> and redirect to <code>index.html</code></p>
+         <p><a href="index.html" class="logout btn btn-default">Log out</a> and redirect to <code>index.html</code></p>
       </div>
    </div>
 
-   <script>
-      $(function() {
-         var to = setTimeout(function() {
-            $('.alert-warning').show('slow');
-            $('.alert-info').hide();
-         }, 1000);
+   <!-- require:dependencies -->
+   <script src="js/jquery.min.js"></script>
+   <!-- endrequire -->
 
-         $(document).on('attached.jsxc', function() {
-            clearTimeout(to);
+   <!-- require:optional -->
+   <script src="/libsignal/dist/libsignal-protocol.js"></script>
+   <!--  endrequire -->
 
-            $('.alert-warning').hide();
-            $('.alert-info').hide();
-            $('.alert-success').show('slow');
-         });
-      });
+   <!-- jsxc library -->
+   <script src="../dist/jsxc.bundle.js"></script>
 
-   </script>
+   <script src="js/example.js"></script>
+   <script src="js/helper.js"></script>
 </body>
 
 </html>

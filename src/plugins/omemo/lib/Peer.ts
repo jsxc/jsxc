@@ -6,6 +6,8 @@ import BundleManager from './BundleManager';
 import Session from './Session';
 import EncryptedDeviceMessage from '../model/EncryptedDeviceMessage';
 import Translation from '@util/Translation';
+import Omemo from './Omemo';
+import Log from '@util/Log';
 
 const MAX_PADDING = 10;
 const PADDING_CHARACTER = '​\u200B';
@@ -18,8 +20,16 @@ export interface IEncryptedPeerMessage {
 
 export default class Peer {
    private devices: any = {};
+   private store: Store;
+   private bundleManager: BundleManager;
 
-   constructor(private deviceName: string, private store: Store, private bundleManager: BundleManager) {
+   constructor(private deviceName: string, private omemo: Omemo) {
+      this.store = omemo.getStore();
+      this.bundleManager = omemo.getBundleManager();
+   }
+
+   public getDeviceName(): string {
+      return this.deviceName;
    }
 
    public async encrypt(localPeer: Peer, plaintext: string): Promise<IEncryptedPeerMessage> {
@@ -57,6 +67,9 @@ export default class Peer {
          throw new Error('Could not encrypt data with any Signal session');
       }
 
+      this.store.setPeerUsed(this.getDeviceName());
+      this.store.setPeerUsed(localPeer.getDeviceName());
+
       return {
          keys: <EncryptedDeviceMessage[]> keys,
          iv: aes.iv,
@@ -91,6 +104,43 @@ export default class Peer {
       }
 
       return Trust.ignored;
+   }
+
+   public async trustOnFirstUse(): Promise<boolean> {
+      if (this.store.isPeerUsed(this.deviceName)) {
+         return false;
+      }
+
+      let identityManager = this.omemo.getIdentityManager();
+
+      let promises = this.getDevices().map(async device => {
+         try {
+            let address = device.getAddress();
+            let fingerprint = await identityManager.loadFingerprint(address);
+
+            if (!fingerprint) {
+               throw new Error(`Can not trust on first use, because no fingerprint for ${address} is available`);
+            }
+
+            device.setTrust(Trust.recognized);
+
+            if (device.isDisabled()) {
+               device.enable();
+            }
+         } catch (err) {
+            Log.warn('Error while retrieving fingerprint', err);
+
+            device.disable();
+
+            return false;
+         }
+
+         return true;
+      });
+
+      let results = await Promise.all(promises)
+
+      return results.indexOf(false) < 0;
    }
 
    public getDevices(): Device[] {

@@ -42,7 +42,7 @@ export default class Roster extends AbstractService {
       return waitForRoster;
    }
 
-   public setDisplayName(jid: IJID, displayName: string): Promise<Element> {
+   public setDisplayName(jid: IJID, displayName: string, groups: string[]): Promise<Element> {
       let iq = $iq({
          type: 'set'
       }).c('query', {
@@ -51,6 +51,8 @@ export default class Roster extends AbstractService {
          jid: jid.bare,
          name: displayName
       });
+
+      groups.forEach((group) => iq.c('group').t(group).up());
 
       return this.sendIQ(iq);
    }

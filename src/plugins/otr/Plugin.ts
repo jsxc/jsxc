@@ -12,6 +12,7 @@ import ChatWindow from '@ui/ChatWindow';
 import { ContactType, IContact } from '@src/Contact.interface';
 import Translation from '@util/Translation';
 import VerificationDialog from '@ui/dialogs/verification';
+import { DIRECTION } from '@src/Message.interface';
 
 const WHITESPACE_TAG = '\x20\x09\x20\x20\x09\x09\x09\x09\x20\x09\x20\x09\x20\x09\x20\x20';
 
@@ -37,8 +38,16 @@ export default class OTRPlugin extends EncryptionPlugin {
    private sessions = {};
    private key: IDSA;
 
-   public static getName(): string {
+   public static getId(): string {
       return 'otr';
+   }
+
+   public static getName(): string {
+      return 'OTR';
+   }
+
+   public static getDescription(): string {
+      return Translation.t('setting-otr-enable');
    }
 
    constructor(pluginAPI: PluginAPI) {
@@ -69,6 +78,8 @@ export default class OTRPlugin extends EncryptionPlugin {
             this.updateMenuEntry(contact, menuEntry);
          })
       });
+
+      pluginAPI.registerTextFormatter(this.textFormatter);
    }
 
    public toggleTransfer(contact: Contact): Promise<void> {
@@ -83,15 +94,24 @@ export default class OTRPlugin extends EncryptionPlugin {
       });
    }
 
+   private textFormatter = (plaintext: string, direction: DIRECTION, contact: Contact) => {
+      // hide unprocessed otr messages
+      if (plaintext.match(/^\?OTR([:,|?]|[?v0-9x]+)/)) {
+         plaintext = '<i title="' + plaintext + '">' + Translation.t('Unreadable_OTR_message') + '</i>';
+      }
+
+      return plaintext;
+   }
+
    private updateMenuEntry(contact: IContact, menuEntry: JQuery) {
-      if (contact.isEncrypted() && contact.getEncryptionPluginName() === OTRPlugin.getName()) {
+      if (contact.isEncrypted() && contact.getEncryptionPluginId() === OTRPlugin.getId()) {
          menuEntry.removeClass('jsxc-disabled');
       } else {
          menuEntry.addClass('jsxc-disabled');
       }
    }
 
-   private afterReceiveMessageProcessor = (contact: Contact, message: Message, stanza: Element) => {
+   private afterReceiveMessageProcessor = (contact: Contact, message: Message, stanza: Element): Promise<[Contact, Message, Element]> => {
       let plaintextMessage = message.getPlaintextMessage();
       if (!plaintextMessage || (!/^\?OTR/.test(plaintextMessage) && plaintextMessage.indexOf(WHITESPACE_TAG) < 0)) {
          return Promise.resolve([contact, message, stanza]);
@@ -104,8 +124,8 @@ export default class OTRPlugin extends EncryptionPlugin {
       });
    }
 
-   private preSendMessageProcessor = (contact: Contact, message: Message) => {
-      if (contact.getEncryptionState() === EncryptionState.Plaintext || contact.getEncryptionPluginName() !== OTRPlugin.getName()) {
+   private preSendMessageProcessor = (contact: Contact, message: Message): Promise<[Contact, Message]> => {
+      if (contact.getEncryptionState() === EncryptionState.Plaintext || contact.getEncryptionPluginId() !== OTRPlugin.getId()) {
          return Promise.resolve([contact, message]);
       }
 
@@ -193,7 +213,7 @@ export default class OTRPlugin extends EncryptionPlugin {
          this.pluginAPI.Log.debug('Start DSA key generation');
 
          (<IDSA> DSA).createInWebWorker({
-            path: dsaWebworkerFile
+            path: typeof dsaWebworkerFile === 'string' ? dsaWebworkerFile : (dsaWebworkerFile && (<any> dsaWebworkerFile).default)
          }, (key) => {
             this.pluginAPI.Log.debug('DSA key generated');
 

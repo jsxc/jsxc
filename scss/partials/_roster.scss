@@ -310,7 +310,9 @@ li.jsxc-hide-offline {
 
   list-style: none;
   margin: 0;
+  overflow: hidden;
   padding: 0;
+  padding-bottom: 15px;
   width: 100%;
   z-index: 85;
 

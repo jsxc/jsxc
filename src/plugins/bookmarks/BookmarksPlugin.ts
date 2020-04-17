@@ -3,13 +3,22 @@ import PluginAPI from '../../plugin/PluginAPI'
 import { PubSubService } from './services/PubSubService';
 import LocalService from './services/LocalService';
 import BookmarkProvider from './BookmarkProvider';
+import Translation from '@util/Translation';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 export default class BookmarksPlugin extends AbstractPlugin {
-   public static getName(): string {
+   public static getId(): string {
       return 'bookmarks';
+   }
+
+   public static getName(): string {
+      return 'Bookmarks';
+   }
+
+   public static getDescription(): string {
+      return Translation.t('setting-bookmarks-enable');
    }
 
    constructor(pluginAPI: PluginAPI) {

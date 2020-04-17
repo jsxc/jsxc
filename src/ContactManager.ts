@@ -84,7 +84,9 @@ export default class ContactManager {
          });
       });
 
-      this.account.getSessionStorage().setItem(KEY_CONTACTS, Object.keys(this.contacts));
+      let contactIds = Object.keys(this.contacts).sort((a, b) => a < b ? 1 : -1);
+
+      this.account.getSessionStorage().setItem(KEY_CONTACTS, contactIds);
 
       storage.setItem('contacts', 'loaded', true);
    }
@@ -115,7 +117,9 @@ export default class ContactManager {
       }
 
       if (cache.indexOf(id) < 0) {
-         storage.setItem(KEY_CONTACTS, Object.keys(this.contacts));
+         let contactIds = Object.keys(this.contacts).sort((a, b) => a < b ? 1 : -1);
+
+         storage.setItem(KEY_CONTACTS, contactIds);
       }
    }
 

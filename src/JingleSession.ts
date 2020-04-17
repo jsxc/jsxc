@@ -39,7 +39,9 @@ export default class JingleSession {
       let description = session.isInitiator ? session.pc.localDescription : session.pc.remoteDescription;
 
       description.contents.forEach(content => {
-         if (content.senders === 'both' && ['audio', 'video'].indexOf(content.name) > -1) {
+         let audioOrVideoRequested = ['audio', 'video'].indexOf(content.name) > -1 || ['audio', 'video'].indexOf(content.application.media) > -1;
+
+         if (content.senders === 'both' && audioOrVideoRequested) {
             reqMedia = true;
          }
       });

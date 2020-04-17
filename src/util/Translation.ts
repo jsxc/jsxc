@@ -1,7 +1,7 @@
 import i18next from 'i18next'
 import Log from '@util/Log';
 import Client from '@src/Client';
-import * as LanguageDetector from 'i18next-browser-languagedetector'
+import LanguageDetector from 'i18next-browser-languagedetector'
 
 let resources = __LANGS__.reduce((resources, lang) => {
    resources[lang] = require(`../../locales/${lang}.json`);

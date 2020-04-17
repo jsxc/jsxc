@@ -19,6 +19,7 @@ import { IJID } from './JID.interface';
 import { IContact } from './Contact.interface';
 import RosterContactProvider from './RosterContactProvider';
 import ContactManager from './ContactManager';
+import FallbackContactProvider from './FallbackContactProvider';
 
 type ConnectionCallback = (status: number, condition?: string) => void;
 
@@ -78,11 +79,18 @@ export default class Account {
 
       this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3]);
       this.connection = new StorageConnection(this);
-      this.pluginRepository = new PluginRepository(this);
+
+      if (arguments.length === 1) {
+         this.pluginRepository = new PluginRepository(this);
+      }
+
       this.contact = new Contact(this, new JID(this.uid), this.uid);
 
-      let rosterContactProvider = new RosterContactProvider(this.getContactManager(), this)
+      let rosterContactProvider = new RosterContactProvider(this.getContactManager(), this);
       this.getContactManager().registerContactProvider(rosterContactProvider);
+
+      let fallbackContactProvider = new FallbackContactProvider(this.getContactManager(), this);
+      this.getContactManager().registerContactProvider(fallbackContactProvider);
 
       let connectionCallback = this.getOption('connectionCallback');
 
@@ -310,7 +318,9 @@ export default class Account {
          this.pipes[name].destroy();
       }
 
-      this.getPluginRepository().destroyAllPlugins();
+      if (this.getPluginRepository()) {
+         this.getPluginRepository().destroyAllPlugins();
+      }
    }
 
    public connectionDisconnected() {

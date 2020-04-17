@@ -1,0 +1,9 @@
+extraction:
+  javascript:
+    index:
+      exclude:
+        - "build/"
+        - "lib/"
+      filters:
+        - exclude: "src/jsxc.intro.js"
+        - exclude: "src/jsxc.outro.js"

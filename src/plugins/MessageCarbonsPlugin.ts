@@ -18,6 +18,10 @@ const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 export default class CarbonsPlugin extends AbstractPlugin {
+   public static getId(): string {
+      return 'carbon';
+   }
+
    public static getName(): string {
       return 'Carbon Copy';
    }
@@ -40,13 +44,13 @@ export default class CarbonsPlugin extends AbstractPlugin {
       });
    }
 
-   private preSendMessageStanzaProcessor = (message: Message, xmlElement: Strophe.Builder) => {
+   private preSendMessageStanzaProcessor = (message: Message, xmlElement: Strophe.Builder): Promise<[Message, Strophe.Builder]> => {
       let body = (<any> xmlElement).node.textContent;
 
       if (body.match(/^\?OTR/)) {
-         xmlElement.up().c('private', {
+         xmlElement.c('private', {
             xmlns: CONST.NS.CARBONS
-         });
+         }).up();
       }
 
       return Promise.resolve([message, xmlElement]);

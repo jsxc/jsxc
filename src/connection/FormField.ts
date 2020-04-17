@@ -48,7 +48,7 @@ export default class FormField {
    public static fromXML(fieldElement) {
       return new FormField({
          label: fieldElement.attr('label'), // MAY
-         type: fieldElement.attr('type').toLowerCase() || 'text-single',
+         type: (fieldElement.attr('type') || 'text-single').toLowerCase(),
          name: fieldElement.attr('var'), // MUST, if type != fixed. Unique, if form != result
          description: fieldElement.find('desc').text(), // MAY
          isRequired: fieldElement.find('required').length > 0, // MAY
@@ -91,7 +91,7 @@ export default class FormField {
          type,
          name,
          values,
-      })
+      });
    };
 
    public static fromJSON(data: IFormFieldJSONData) {

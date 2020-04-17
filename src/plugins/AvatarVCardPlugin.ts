@@ -6,6 +6,7 @@ import AvatarUI from '../ui/AvatarSet'
 import JID from '../JID'
 import Log from '../util/Log';
 import { ContactType } from '@src/Contact.interface';
+import Translation from '@util/Translation';
 
 /**
  * XEP-0153: vCard-Based Avatars
@@ -18,8 +19,16 @@ const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
 
 export default class AvatarVCardPlugin extends AbstractPlugin {
+   public static getId(): string {
+      return 'vcard-avatars';
+   }
+
    public static getName(): string {
       return 'vCard-based Avatars';
+   }
+
+   public static getDescription(): string {
+      return Translation.t('setting-vcard-avatar-enable');
    }
 
    constructor(pluginAPI: PluginAPI) {
