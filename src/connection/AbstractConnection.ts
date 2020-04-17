@@ -150,6 +150,8 @@ abstract class AbstractConnection {
          }
 
          this.send(xmlMsg);
+
+         message.transferred();
       }).catch(err => {
          Log.warn('Error during preSendMessageStanza pipe:', err);
       });

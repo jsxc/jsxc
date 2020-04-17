@@ -1,4 +1,4 @@
-import { IMessage, DIRECTION } from '../Message.interface'
+import { IMessage, DIRECTION, MessageMark } from '../Message.interface'
 import DateTime from './util/DateTime'
 import ChatWindow from './ChatWindow'
 import AvatarSet from './AvatarSet'
@@ -68,8 +68,8 @@ export default class ChatWindowMessage {
       let timestampElement = this.element.find('.jsxc-timestamp');
       DateTime.stringify(this.message.getStamp().getTime(), timestampElement);
 
-      if (this.message.isReceived()) {
-         this.element.addClass('jsxc-received');
+      if (this.message.getDirection() === DIRECTION.OUT || this.message.getDirection() === DIRECTION.PROBABLY_OUT) {
+         this.element.attr('data-mark', MessageMark[this.message.getMark()]);
       }
 
       if (this.message.isForwarded()) {
@@ -192,12 +192,8 @@ export default class ChatWindowMessage {
          }
       });
 
-      this.message.registerHook('received', (isReceived) => {
-         if (isReceived) {
-            this.element.addClass('jsxc-received');
-         } else {
-            this.element.removeClass('jsxc-received');
-         }
+      this.message.registerHook('mark', (mark) => {
+         this.element.attr('data-mark', MessageMark[mark]);
       });
 
       this.message.registerHook('next', (nextId) => {

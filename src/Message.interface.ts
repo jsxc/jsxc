@@ -6,6 +6,14 @@ export enum DIRECTION {
    IN, OUT, SYS, PROBABLY_OUT, PROBABLY_IN
 };
 
+export enum MessageMark {
+   pending,
+   transferred,
+   received,
+   displayed,
+   acknowledged
+};
+
 export interface IMessagePayload {
    peer: JID,
    direction: DIRECTION,
@@ -15,7 +23,7 @@ export interface IMessagePayload {
    htmlMessage?: string,
    errorMessage?: string,
    attachment?: Attachment,
-   received?: boolean,
+   mark?: MessageMark,
    encrypted?: boolean,
    forwarded?: boolean,
    stamp?: number,
@@ -80,9 +88,23 @@ export interface IMessage {
 
    getSender(): { name: string, jid?: JID }
 
+   getMark(): MessageMark
+
+   transferred();
+
+   isTransferred(): boolean;
+
    received();
 
    isReceived(): boolean;
+
+   displayed();
+
+   isDisplayed(): boolean;
+
+   acknowledged();
+
+   isAcknowledged(): boolean;
 
    isForwarded(): boolean;
 
@@ -109,16 +131,4 @@ export interface IMessage {
    getErrorMessage(): string
 
    updateProgress(transfered: number, complete: number)
-
-   chatMarkersReceived();
-
-   isChatMarkersReceived(): boolean;
-
-   chatMarkersDisplayed();
-
-   isChatMarkersDisplayed(): boolean;
-
-   chatMarkersAcknowledged();
-
-   isChatMarkersAcknowledged(): boolean;
 }

@@ -465,24 +465,67 @@
   }
 }
 
-.jsxc-encrypted {
-  &.jsxc-received {
-    .jsxc-timestamp::after {
-      padding-left: 10px;
-      width: 20px;
-    }
-  }
-
-  .jsxc-timestamp::after {
+.jsxc-chatmessage.jsxc-encrypted {
+  .jsxc-transfer {
     background-image: url("../images/padlock_close_grey.svg");
     background-position: center left;
     background-repeat: no-repeat;
-    background-size: 10px;
+    background-size: 1em;
     content: " ";
     display: inline-block;
     height: 1em;
     margin-left: 2px;
-    width: 10px;
+    width: 1em;
+  }
+}
+
+.jsxc-mark::before {
+  height: 1em;
+
+  [data-mark="pending"] & {
+    animation: jsxc-rotate 1.1s infinite linear;
+    border: 0.15em solid rgba(0, 0, 0, 0.2);
+    border-left-color: rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+    content: "";
+    display: inline-block;
+    position: relative;
+    text-indent: -9999em;
+    transform: translateZ(0);
+    vertical-align: sub;
+    width: 1em;
+  }
+
+  [data-mark="transferred"] & {
+    color: $chatmessage-received;
+    content: "✓";
+    filter: grayscale(1);
+    font-size: 12px;
+    line-height: 12px;
+    opacity: 0.6;
+  }
+
+  [data-mark="received"] & {
+    color: $chatmessage-received;
+    content: "✓✓";
+    font-size: 12px;
+    letter-spacing: -0.5em;
+    line-height: 12px;
+    padding-right: 0.5em;
+  }
+
+  [data-mark="displayed"] & {
+    color: $chatmessage-received;
+    content: "👁️";
+    font-size: 12px;
+    line-height: 12px;
+  }
+
+  [data-mark="acknowledged"] & {
+    color: $chatmessage-received;
+    content: "☑️";
+    font-size: 12px;
+    line-height: 12px;
   }
 }
 
@@ -513,7 +556,7 @@
   margin-left: 0.5em;
   max-width: 76%;
   position: relative;
-  
+
   &::after {
     border-color: transparent $chatmessage-in-bg;
     border-style: solid;
@@ -529,21 +572,6 @@
 
   .jsxc-timestamp {
     float: left;
-  }
-
-  .jsxc-chatmarkers {
-    bottom: 2px;
-    float: right;
-    margin-left: 2px;
-    position: relative;
-  }
-
-  &.jsxc-chatmarkers-acknowledged {
-    .jsxc-chatmarkers {
-      .jsxc-chatmarkers-acknowledge {
-        color: $chatmessage-chatmarkers-true;
-      }
-    }
   }
 }
 
@@ -585,34 +613,15 @@
     .jsxc-timestamp {
       float: left;
     }
-
-    .jsxc-chatmarkers {
-      margin-right: 4px;
-    }
   }
-  
+
   .jsxc-timestamp {
     float: left;
-  }
-
-  .jsxc-chatmarkers {
-    bottom: 4px;
-    float: right;
-    margin-left: 4px;
-    position: relative;
   }
 
   .jsxc-chatmessage__footer {
     justify-content: flex-end;
   }
-}
-
-.jsxc-chatmarkers {
-  color: $chatmessage-chatmarkers-false;
-  font-size: 12px;
-  line-height: 12px;
-  max-height: 12px;
-  max-width: 10px;
 }
 
 .jsxc-out {
@@ -671,7 +680,7 @@
   }
 }
 
-div.jsxc-transfer {
+.jsxc-menu.jsxc-transfer {
   position: relative;
   width: 44px;
   z-index: 20;
