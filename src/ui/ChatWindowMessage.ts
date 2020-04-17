@@ -192,9 +192,11 @@ export default class ChatWindowMessage {
          }
       });
 
-      this.message.registerHook('mark', (mark) => {
-         this.element.attr('data-mark', MessageMark[mark]);
-      });
+      if (this.message.getDirection() === DIRECTION.OUT || this.message.getDirection() === DIRECTION.PROBABLY_OUT) {
+         this.message.registerHook('mark', (mark) => {
+            this.element.attr('data-mark', MessageMark[mark]);
+         });
+      }
 
       this.message.registerHook('next', (nextId) => {
          if (nextId) {

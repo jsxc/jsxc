@@ -7,7 +7,6 @@ import * as Namespace from '@src/connection/xmpp/namespace'
 import { AbstractPlugin } from '@src/plugin/AbstractPlugin'
 import PluginAPI from '@src/plugin/PluginAPI'
 import ChatWindow from '@src/ui/ChatWindow'
-import PersistentMap from '@src/util/PersistentMap'
 import Translation from '@src/util/Translation'
 import { $msg } from '@src/vendor/Strophe'
 
@@ -38,8 +37,6 @@ enum ChatMarkerStatus {
 
 export default class ChatMarkersPlugin extends AbstractPlugin {
 
-   private data: PersistentMap;
-
    public static getId(): string {
       return 'chat-markers';
    }
@@ -58,8 +55,6 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
       Namespace.register(CHATMARKERS, 'urn:xmpp:chat-markers:0');
 
       this.pluginAPI.addFeature(Namespace.get(CHATMARKERS));
-
-      this.data = new PersistentMap(this.pluginAPI.getStorage(), 'chatmarkers');
 
       this.pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor);
 
@@ -308,15 +303,16 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
 
       while (!!msg) {
          if (msg.getDirection() === DIRECTION.IN && msg.getType() !== Message.MSGTYPE.GROUPCHAT) {
-            if (msg.getAttrId() !== this.data.get('lastDisplayedMsgId')) {
-               this.data.set('lastDisplayedMsgId', msg.getAttrId());
-
+            if (!msg.isDisplayed()) {
                this.supportsChatMarkers(msg.getPeer()).then((hasFeature) => {
                   if (hasFeature && this.hasSubscription(msg.getPeer())) {
                      this.sendDisplayed(msg.getAttrId(), msg.getPeer());
                   }
                });
+
+               msg.displayed();
             }
+
             break;
          } else {
             msg = transcript.getMessage(msg.getNextId());
