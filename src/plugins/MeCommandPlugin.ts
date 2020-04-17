@@ -40,6 +40,10 @@ export default class MeCommandPlugin extends AbstractPlugin {
          return plaintext.replace(meRegex, `<i>/me</i> `);
       }
 
+      if (!senderName && !contact) {
+         return plaintext;
+      }
+
       if (meRegex.test(plaintext)) {
          let name = senderName || contact.getName();
 
