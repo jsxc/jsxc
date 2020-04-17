@@ -67,7 +67,7 @@ export default class AvatarSet {
          let element = $(this);
 
          element.css({
-            'background-image': 'url()',
+            'background-image': '',
             'background-color': ''
          });
 
