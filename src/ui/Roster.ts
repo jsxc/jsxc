@@ -28,7 +28,6 @@ export default class Roster {
    private contactList: JQuery;
 
    private static instance: Roster;
-   private static hidden: boolean;
 
    public static init(): void {
       Roster.get();
@@ -42,28 +41,10 @@ export default class Roster {
       return Roster.instance;
    }
 
-   public static hide() {
-      Roster.hidden = true;
-
-      if (Roster.instance) {
-         Roster.instance.hide();
-      }
-   }
-
-   public static show() {
-      Roster.hidden = false;
-
-      if (Roster.instance) {
-         Roster.instance.show();
-      }
-   }
-
    private constructor() {
       let template = rosterTemplate();
       this.element = $(template);
-      if (Roster.hidden) {
-         this.hide();
-      }
+
       this.element.appendTo(Client.getOption(APPEND_KEY) + ':first');
 
       //make sure css empty selector works
@@ -80,14 +61,6 @@ export default class Roster {
       ClientAvatar.get().addElement(this.element.find('.jsxc-bottom .jsxc-avatar'));
 
       this.initOptions();
-   }
-
-   public show() {
-      this.element.show();
-   }
-
-   public hide() {
-      this.element.hide();
    }
 
    public startProcessing(msg?: string) {
@@ -439,6 +412,14 @@ export default class Roster {
       state = (state === CONST.HIDDEN) ? CONST.SHOWN : CONST.HIDDEN;
 
       Client.setOption(VISIBILITY_KEY, state);
+   }
+
+   public hide = () => {
+      Client.setOption(VISIBILITY_KEY, CONST.HIDDEN);
+   }
+
+   public show = () => {
+      Client.setOption(VISIBILITY_KEY, CONST.SHOWN);
    }
 
    private setVisibility(state: string) {
