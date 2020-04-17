@@ -17,6 +17,10 @@ declare module '*.wav' {
     export default content;
 }
 declare module '*.js?path' { }
+declare module '*.svg' {
+    const content: string;
+    export default content;
+}
 
 declare var __webpack_public_path__: string;
 declare var __VERSION__: string;

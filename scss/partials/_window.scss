@@ -513,6 +513,38 @@
   margin-left: 0.5em;
   max-width: 76%;
   position: relative;
+  
+  &::after {
+    border-color: transparent $chatmessage-in-bg;
+    border-style: solid;
+    border-width: 5px 6px 5px 0;
+    bottom: 10px;
+    content: " ";
+    display: block;
+    left: -6px;
+    position: absolute;
+    width: 0;
+    z-index: 1;
+  }
+
+  .jsxc-timestamp {
+    float: left;
+  }
+
+  .jsxc-chatmarkers {
+    bottom: 2px;
+    float: right;
+    margin-left: 2px;
+    position: relative;
+  }
+
+  &.jsxc-chatmarkers-acknowledged {
+    .jsxc-chatmarkers {
+      .jsxc-chatmarkers-acknowledge {
+        color: $chatmessage-chatmarkers-true;
+      }
+    }
+  }
 }
 
 .jsxc-in {
@@ -526,9 +558,61 @@
   max-width: 76%;
   position: relative;
 
+  &::after {
+    border-color: transparent #fff;
+    border-style: solid;
+    border-width: 0.7em 0 0.7em 0.7em;
+    bottom: 0.5em;
+    content: " ";
+    display: block;
+    left: 100%;
+    position: absolute;
+    width: 0;
+    z-index: 1;
+  }
+
+  &.jsxc-received {
+    &::before {
+      bottom: 6px;
+      color: $chatmessage-received;
+      content: "✓";
+      font-size: 12px;
+      line-height: 12px;
+      position: absolute;
+      right: 2px;
+    }
+
+    .jsxc-timestamp {
+      float: left;
+    }
+
+    .jsxc-chatmarkers {
+      margin-right: 4px;
+    }
+  }
+  
+  .jsxc-timestamp {
+    float: left;
+  }
+
+  .jsxc-chatmarkers {
+    bottom: 4px;
+    float: right;
+    margin-left: 4px;
+    position: relative;
+  }
+
   .jsxc-chatmessage__footer {
     justify-content: flex-end;
   }
+}
+
+.jsxc-chatmarkers {
+  color: $chatmessage-chatmarkers-false;
+  font-size: 12px;
+  line-height: 12px;
+  max-height: 12px;
+  max-width: 10px;
 }
 
 .jsxc-out {

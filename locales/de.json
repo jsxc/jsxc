@@ -348,6 +348,9 @@
     "I_found_new_devices_from_you": "Ich habe neue Geräte von dir gefunden",
     "Message_received_from_unknown_OMEMO_device": "Nachricht von unbekanntem OMEMO-Gerät erhalten",
     "There_are_new_OMEMO_devices": "Es gibt neue OMEMO-Geräte",
+    "you": null,
+    "Clean_up_own_devices": null,
+    "omemo-clean-up-explanation": null,
     "you": "du",
     "Clean_up_own_devices": "Eigene Geräte entfernen",
     "omemo-clean-up-explanation": "Wenn du deine eigenen Geräte entfernst, werden alle deine Geräte von deiner Geräteliste gelöscht. Sobald du aber eines dieser Geräte wieder verwendest, wird es wieder zu der Liste hinzugefügt. Hiermit stellst du sicher, dass nur aktive Geräte von deinen Kontakten zur Verschlüsselung genutzt werden.",
@@ -374,7 +377,12 @@
     "Test": "Test",
     "this_device": "dieses Gerät",
     "Verification": "Verifikation",
-    "Webcam": "Webcam"
+    "Webcam": "Webcam",
+    "chatmarkers-description": "Möchtest du sehen, wenn dein Kontakt deine Nachrichten erhalten oder gelesen hat?",
+    "chatmarkers-received": "erhalten",
+    "chatmarkers-displayed": "gesehen",
+    "chatmarkers-acknowledged": "bestätigt",
+    "chatmarkers-acknowledge": "bestätigen"
   },
   "Notifications": "Benachrichtigungen"
 }

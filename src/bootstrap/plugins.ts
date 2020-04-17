@@ -10,6 +10,7 @@ import AvatarVCardPlugin from '../plugins/AvatarVCardPlugin'
 import CarbonsPlugin from '../plugins/MessageCarbonsPlugin'
 import OMEMOPlugin from '../plugins/omemo/Plugin'
 import BookmarksPlugin from '@src/plugins/bookmarks/BookmarksPlugin';
+import ChatMarkersPlugin from '@src/plugins/chatMarkers/ChatMarkersPlugin'
 
 Client.addPlugin(OTRPlugin);
 Client.addPlugin(OMEMOPlugin);
@@ -22,3 +23,4 @@ Client.addPlugin(HttpUploadPlugin);
 Client.addPlugin(AvatarVCardPlugin);
 Client.addPlugin(CarbonsPlugin);
 Client.addPlugin(BookmarksPlugin);
+Client.addPlugin(ChatMarkersPlugin);

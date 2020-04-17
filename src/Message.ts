@@ -285,6 +285,30 @@ export default class Message implements IIdentifiable, IMessage {
    public updateProgress(transfered: number, complete: number) {
 
    }
+  
+   public chatMarkersReceived() {
+      this.data.set('chatMarkersReceived', true);
+   }
+
+   public isChatMarkersReceived(): boolean {
+      return !!this.data.get('chatMarkersReceived');
+   }
+
+   public chatMarkersDisplayed() {
+      this.data.set('chatMarkersDisplayed', true);
+   }
+
+   public isChatMarkersDisplayed(): boolean {
+      return !!this.data.get('chatMarkersDisplayed');
+   }
+
+   public chatMarkersAcknowledged() {
+      this.data.set('chatMarkersAcknowledged', true);
+   }
+
+   public isChatMarkersAcknowledged(): boolean {
+      return !!this.data.get('chatMarkersAcknowledged');
+   }
 }
 
 function convertUrlToLink(text: string) {
