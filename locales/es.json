@@ -374,7 +374,12 @@
     "Test": null,
     "this_device": null,
     "Verification": null,
-    "Webcam": null
+    "Webcam": null,
+    "chatmarkers-description": null,
+    "chatmarkers-received": null,
+    "chatmarkers-displayed": null,
+    "chatmarkers-acknowledged": null,
+    "chatmarkers-acknowledge": null
   },
   "Notifications": null
 }

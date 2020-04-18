@@ -374,7 +374,12 @@
     "Test": "Provë",
     "this_device": "këtë pajisje",
     "Verification": "Verifikim",
-    "Webcam": "Kamerë Web"
+    "Webcam": "Kamerë Web",
+    "chatmarkers-description": null,
+    "chatmarkers-received": null,
+    "chatmarkers-displayed": null,
+    "chatmarkers-acknowledged": null,
+    "chatmarkers-acknowledge": null
   },
   "Notifications": "Njoftime"
 }

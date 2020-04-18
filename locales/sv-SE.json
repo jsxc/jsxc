@@ -374,7 +374,12 @@
     "Test": "Testa",
     "this_device": "denna enhet",
     "Verification": "Verifiering",
-    "Webcam": "Webbkamera"
+    "Webcam": "Webbkamera",
+    "chatmarkers-description": null,
+    "chatmarkers-received": null,
+    "chatmarkers-displayed": null,
+    "chatmarkers-acknowledged": null,
+    "chatmarkers-acknowledge": null
   },
   "Notifications": null
 }

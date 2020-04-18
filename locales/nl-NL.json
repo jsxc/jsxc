@@ -374,7 +374,12 @@
     "Test": "Test",
     "this_device": "Dit apparaat",
     "Verification": "Verificatie",
-    "Webcam": "Webcam"
+    "Webcam": "Webcam",
+    "chatmarkers-description": null,
+    "chatmarkers-received": null,
+    "chatmarkers-displayed": null,
+    "chatmarkers-acknowledged": null,
+    "chatmarkers-acknowledge": null
   },
   "Notifications": null
 }
