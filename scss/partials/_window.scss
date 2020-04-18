@@ -449,15 +449,19 @@
     content: none;
   }
 
-  &.jsxc-image-jpeg,
-  &.jsxc-image-jpg,
-  &.jsxc-image-svg,
-  &.jsxc-image-gif,
-  &.jsxc-image-png {
-    background-image: url("");
-    display: inline-block;
-    line-height: 0;
-    padding: 0;
+  &.jsxc-image {
+    background-image: url("../images/filetypes/image.svg");
+
+    &.jsxc-image-jpeg,
+    &.jsxc-image-jpg,
+    &.jsxc-image-svg,
+    &.jsxc-image-gif,
+    &.jsxc-image-png {
+      background-image: url("");
+      display: inline-block;
+      line-height: 0;
+      padding: 0;
+    }
   }
 
   &.jsxc-application {

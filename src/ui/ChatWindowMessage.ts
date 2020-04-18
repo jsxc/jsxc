@@ -128,6 +128,8 @@ export default class ChatWindowMessage {
             .appendTo(attachmentElement);
       } else {
          attachmentElement.text(attachment.getName());
+
+         attachmentElement.removeClass('jsxc-' + mimeType.replace(/\//, '-'));
       }
 
       if (attachment.hasData()) {
@@ -136,7 +138,11 @@ export default class ChatWindowMessage {
          attachmentElement.attr('download', attachment.getName());
 
          //@REVIEW this is a dirty hack
-         this.element.find('.jsxc-content a[href="' + attachment.getData() + '"]').remove();
+         let linkElement = this.element.find('.jsxc-content a:eq(0)');
+         if (linkElement.next().is('br')) {
+            linkElement.next().remove();
+         }
+         this.element.find('.jsxc-content a:eq(0)').remove();
       }
 
       this.element.find('div').first().prepend(attachmentElement);

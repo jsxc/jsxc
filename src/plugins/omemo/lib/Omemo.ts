@@ -132,12 +132,21 @@ export default class Omemo {
 
    public encrypt(contact: Contact, message: Message, xmlElement: Strophe.Builder) {
       let peer = this.getPeer(contact.getJid());
+      let plaintextMessage = message.getPlaintextMessage();
+      let attachment = message.getAttachment();
 
-      return peer.encrypt(this.localPeer, message.getPlaintextMessage()).then((encryptedMessages) => {
+      if (plaintextMessage.indexOf('aesgcm://') === 0 && attachment && attachment.hasThumbnailData()) {
+         let thumbnailData = attachment.getThumbnailData().replace(/^[^,],+/, '');
+
+         plaintextMessage = plaintextMessage.replace(/^(aesgcm:[^\n]+)/, '$1\n' + thumbnailData);
+      }
+
+      return peer.encrypt(this.localPeer, plaintextMessage).then((encryptedMessages) => {
          let stanza = Stanza.buildEncryptedStanza(encryptedMessages, this.store.getLocalDeviceId());
 
          $(xmlElement.tree()).find(`html[xmlns="${Strophe.NS.XHTML_IM}"]`).remove();
          $(xmlElement.tree()).find('>body').remove();
+         $(xmlElement.tree()).find('>data[xmlns="urn:xmpp:bob"]').remove();
 
          xmlElement.cnode(stanza.tree());
          xmlElement.up().c('store', {

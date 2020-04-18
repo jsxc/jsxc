@@ -31,6 +31,10 @@ export default class HttpUploadService {
 
       await this.uploadFile(file, urls.put, urls.putHeaders, progress);
 
+      if ((<any> file).aesgcm) {
+         return urls.get.replace(/^https?:/, 'aesgcm:') + '#' + (<any> file).aesgcm;
+      }
+
       return urls.get;
    }
 

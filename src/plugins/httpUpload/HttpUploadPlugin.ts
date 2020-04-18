@@ -154,7 +154,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
    private addUrlToMessage(downloadUrl: string, attachment: Attachment, message: Message) {
       let plaintext = message.getPlaintextMessage();
 
-      message.setPlaintextMessage(downloadUrl + ' ' + plaintext);
+      message.setPlaintextMessage(downloadUrl + '\n' + plaintext);
 
       let html = $('<div>').append(message.getHtmlMessage());
 
@@ -228,7 +228,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       let bodyElement = element.find('html body[xmlns="' + Strophe.NS.XHTML + '"]').first();
       let dataElement = element.find('data[xmlns="urn:xmpp:bob"]');
 
-      if (bodyElement.length && dataElement.length === 1) {
+      if (bodyElement.length && dataElement.length === 1 && !message.isEncrypted()) {
          let cid = dataElement.attr('cid');
          let mimeType = dataElement.attr('type');
 

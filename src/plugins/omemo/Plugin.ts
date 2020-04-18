@@ -9,6 +9,8 @@ import { NS_BASE, NS_DEVICELIST } from './util/Const'
 import OmemoDevicesDialog from '../../ui/dialogs/omemoDevices'
 import { Trust } from './lib/Device';
 import Translation from '@util/Translation';
+import ArrayBufferUtils from './util/ArrayBuffer'
+import Attachment from '@src/Attachment'
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -44,7 +46,9 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
       pluginAPI.getConnection().getPEPService().subscribe(NS_DEVICELIST, this.onDeviceListUpdate);
 
-      pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor);
+      pluginAPI.addPreSendMessageProcessor(this.preSendMessageProcessor, 10);
+
+      pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor, 90);
 
       pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor);
 
@@ -128,6 +132,10 @@ export default class OMEMOPlugin extends EncryptionPlugin {
             message.setErrorMessage(Translation.t('Message_received_from_unknown_OMEMO_device'));
          }
 
+         if (decrypted.plaintext.indexOf('aesgcm://') === 0) {
+            decrypted.plaintext = this.processEncryptedAttachment(decrypted.plaintext, message);
+         }
+
          message.setPlaintextMessage(decrypted.plaintext);
          message.setEncrypted(true);
 
@@ -138,6 +146,69 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
          return [contact, message, stanza];
       });
+   }
+
+   private processEncryptedAttachment(plaintext: string, message: IMessage) {
+      let lines = plaintext.split('\n');
+      let matches = lines[0].match(/^aesgcm:\/\/([^#]+\/([^\/]+\.([a-z0-9]+)))#([a-z0-9]+)/i);
+
+      if (!matches) {
+         return plaintext;
+      }
+
+      let [match, , filename, extension] = matches;
+      let mime = /^(jpeg|jpg|gif|png|svg)$/.test(extension) ? `image/${extension}` : 'application/octet-stream';
+      let attachment = new Attachment(filename, mime, match);
+      attachment.setData(match);
+
+      if (lines[1] && lines[1].indexOf('data:') === 0) {
+         if (/^data:image\/(jpeg|jpg|gif|png|svg);base64,[/+=a-z0-9]+$/i.test(lines[1])) {
+            attachment.setThumbnailData(lines[1]);
+         }
+
+         lines[1] = undefined;
+      }
+
+      message.setAttachment(attachment);
+
+      return lines.filter(line => line !== undefined).join('\n');
+   }
+
+   private preSendMessageProcessor = async (contact, message) => {
+      let attachment = message.getAttachment();
+
+      if (!attachment || contact.getEncryptionPluginId() !== OMEMOPlugin.getId() || contact.getEncryptionState() === EncryptionState.Plaintext) {
+         return [contact, message];
+      }
+
+      let encryptedFile = await this.encryptFile(attachment.getFile());
+
+      attachment.setFile(encryptedFile);
+
+      return [contact, message];
+   }
+
+   private async encryptFile(file: File) {
+      let iv = crypto.getRandomValues(new Uint8Array(12));
+      let key = await crypto.subtle.generateKey({
+         name: 'AES-GCM',
+         length: 256
+      }, true, ['encrypt', 'decrypt'])
+      let encrypted = await crypto.subtle.encrypt({
+         name: 'AES-GCM',
+         iv
+      }, key, await file.arrayBuffer());
+
+      let keydata = await window.crypto.subtle.exportKey('raw', <CryptoKey> key)
+
+      let encryptedFile = new File([encrypted], file.name, {
+         type: file.type,
+         lastModified: file.lastModified,
+      });
+
+      (<any> encryptedFile).aesgcm = ArrayBufferUtils.toHex(iv) + ArrayBufferUtils.toHex(keydata);
+
+      return encryptedFile
    }
 
    private preSendMessageStanzaProcessor = (message: IMessage, xmlElement: Strophe.Builder) => {
