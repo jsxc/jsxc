@@ -11,10 +11,10 @@ export interface IDiscoInfoRepository {
    getCapableResources(contact: Contact, features: string[]): Promise<string[]>
    getCapableResources(contact: Contact, features: string): Promise<string[]>
 
-   hasFeature(jid: JID, features: string[]): Promise<{}>
-   hasFeature(jid: JID, feature: string): Promise<{}>
-   hasFeature(discoInfo: IDiscoInfo, features: string[]): Promise<{}>
-   hasFeature(discoInfo: IDiscoInfo, feature: string): Promise<{}>
+   hasFeature(jid: JID, features: string[]): Promise<boolean>
+   hasFeature(jid: JID, feature: string): Promise<boolean>
+   hasFeature(discoInfo: IDiscoInfo, features: string[]): Promise<boolean>
+   hasFeature(discoInfo: IDiscoInfo, feature: string): Promise<boolean>
 
    getCapabilities(jid: JID): Promise<IDiscoInfo | void>
 
