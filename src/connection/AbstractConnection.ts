@@ -147,12 +147,20 @@ abstract class AbstractConnection {
             if (!message.getErrorMessage()) {
                message.setErrorMessage('Attachment was not processed');
             }
+
+            if (!message.getPlaintextMessage()) {
+               message.aborted();
+
+               return;
+            }
          }
 
          this.send(xmlMsg);
 
          message.transferred();
       }).catch(err => {
+         message.aborted();
+
          Log.warn('Error during preSendMessageStanza pipe:', err);
       });
    }

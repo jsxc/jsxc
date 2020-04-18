@@ -502,6 +502,13 @@
 .jsxc-mark::before {
   height: 1em;
 
+  [data-mark="aborted"] & {
+    color: rgb(255, 0, 0);
+    content: "✖";
+    font-size: 12px;
+    line-height: 12px;
+  }
+
   [data-mark="pending"] & {
     animation: jsxc-rotate 1.1s infinite linear;
     border: 0.15em solid rgba(0, 0, 0, 0.2);

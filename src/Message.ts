@@ -216,6 +216,18 @@ export default class Message implements IIdentifiable, IMessage {
       return this.data.get('mark');
    }
 
+   public aborted() {
+      let currentMark = this.data.get('mark', MessageMark.pending);
+
+      if (currentMark === MessageMark.pending) {
+         this.data.set('mark', MessageMark.aborted);
+      }
+   }
+
+   public isAborted(): boolean {
+      return this.data.get('mark', MessageMark.aborted) === MessageMark.aborted;
+   }
+
    public transferred() {
       let currentMark = this.data.get('mark', MessageMark.pending);
 

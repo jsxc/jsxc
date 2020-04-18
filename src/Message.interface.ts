@@ -7,6 +7,7 @@ export enum DIRECTION {
 };
 
 export enum MessageMark {
+   aborted,
    pending,
    transferred,
    received,
@@ -89,6 +90,10 @@ export interface IMessage {
    getSender(): { name: string, jid?: JID }
 
    getMark(): MessageMark
+
+   aborted();
+
+   isAborted(): boolean;
 
    transferred();
 
