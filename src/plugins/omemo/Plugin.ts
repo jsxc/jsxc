@@ -1,6 +1,6 @@
 import { IPluginAPI } from '../../plugin/PluginAPI.interface'
 import { EncryptionPlugin } from '../../plugin/EncryptionPlugin'
-import { EncryptionState } from '../../plugin/AbstractPlugin'
+import { EncryptionState, IMetaData } from '../../plugin/AbstractPlugin'
 import { IMessage } from '../../Message.interface'
 import { IContact, ContactType } from '../../Contact.interface'
 import Omemo from './lib/Omemo'
@@ -24,8 +24,15 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       return 'OMEMO';
    }
 
-   public static getDescription(): string {
-      return Translation.t('setting-omemo-enable');
+   public static getMetaData(): IMetaData {
+      return {
+         description: Translation.t('setting-omemo-enable'),
+         xeps: [{
+            id: 'XEP-0384',
+            name: 'OMEMO Encryption',
+            version: '0.3.0',
+         }]
+      }
    }
 
    constructor(pluginAPI: IPluginAPI) {

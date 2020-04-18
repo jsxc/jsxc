@@ -4,18 +4,11 @@ import JID from '@src/JID'
 import { IJID } from '@src/JID.interface'
 import Message from '@src/Message'
 import { DIRECTION } from '@src/Message.interface'
-import { AbstractPlugin } from '@src/plugin/AbstractPlugin'
+import { AbstractPlugin, IMetaData } from '@src/plugin/AbstractPlugin'
 import PluginAPI from '@src/plugin/PluginAPI'
 import ChatWindow from '@src/ui/ChatWindow'
 import Translation from '@src/util/Translation'
 import { $msg } from '@src/vendor/Strophe'
-
-/**
- * XEP-0333: Chat Markers
- *
- * @version 0.3
- * @see http://xmpp.org/extensions/xep-0333.html
- */
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -39,8 +32,15 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
       return 'Chat Markers';
    }
 
-   public static getDescription(): string {
-      return Translation.t('chatmarkers-description');
+   public static getMetaData(): IMetaData {
+      return {
+         description: Translation.t('chatmarkers-description'),
+         xeps: [{
+            id: 'XEP-0333',
+            name: 'Chat Markers',
+            version: '0.3',
+         }]
+      }
    }
 
    constructor(pluginAPI: PluginAPI) {

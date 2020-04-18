@@ -1,5 +1,5 @@
 import JID from '../../JID'
-import { AbstractPlugin } from '../../plugin/AbstractPlugin'
+import { AbstractPlugin, IMetaData } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
 import Message from '../../Message'
 import Contact from '../../Contact'
@@ -30,8 +30,15 @@ export default class ChatStatePlugin extends AbstractPlugin {
       return 'Chat State Notifications';
    }
 
-   public static getDescription(): string {
-      return Translation.t('setting-explanation-chat-state');
+   public static getMetaData(): IMetaData {
+      return {
+         description: Translation.t('setting-explanation-chat-state'),
+         xeps: [{
+            id: 'XEP-0085',
+            name: 'Chat State Notifications',
+            version: '2.1',
+         }]
+      }
    }
 
    private chatStateConnection: ChatStateConnection;

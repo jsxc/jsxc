@@ -1,18 +1,11 @@
 import * as CONST from '../CONST'
-import { AbstractPlugin } from '../plugin/AbstractPlugin'
+import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import Message from '../Message'
 import { Status } from '../vendor/Strophe'
 import * as Namespace from '../connection/xmpp/namespace'
 import Translation from '../util/Translation'
 import { $iq } from '../vendor/Strophe'
-
-/**
- * XEP-0280: Message Carbons
- *
- * @version 0.12.0
- * @see https://xmpp.org/extensions/xep-0280.html
- */
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -26,8 +19,15 @@ export default class CarbonsPlugin extends AbstractPlugin {
       return 'Carbon Copy';
    }
 
-   public static getDescription(): string {
-      return Translation.t('setting-explanation-carbon');
+   public static getMetaData(): IMetaData {
+      return {
+         description: Translation.t('setting-explanation-carbon'),
+         xeps: [{
+            id: 'XEP-0280',
+            name: 'Message Carbons',
+            version: '0.12.0',
+         }]
+      }
    }
 
    constructor(pluginAPI: PluginAPI) {

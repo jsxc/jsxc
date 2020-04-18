@@ -1,4 +1,4 @@
-import { AbstractPlugin } from '../../plugin/AbstractPlugin'
+import { AbstractPlugin, IMetaData } from '../../plugin/AbstractPlugin'
 import ChatWindow from '../../ui/ChatWindow'
 import Translation from '../../util/Translation'
 import PersistentMap from '../../util/PersistentMap'
@@ -9,13 +9,6 @@ import Archive from './Archive'
 import Contact from '@src/Contact';
 import PluginAPI from '@src/plugin/PluginAPI';
 import { IContact } from '@src/Contact.interface';
-
-/**
- * XEP-0313: Message Archive Management
- *
- * @version 0.6.3
- * @see https://xmpp.org/extensions/xep-0313.html
- */
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -36,7 +29,18 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
    }
 
    public static getDescription(): string {
-      return Translation.t('setting-mam-enable');
+      return ;
+   }
+
+   public static getMetaData(): IMetaData {
+      return {
+         description: Translation.t('setting-mam-enable'),
+         xeps: [{
+            id: 'XEP-0313',
+            name: 'Message Archive Management',
+            version: '0.6.3',
+         }]
+      }
    }
 
    private archives: {[key: string]: Archive} = {};

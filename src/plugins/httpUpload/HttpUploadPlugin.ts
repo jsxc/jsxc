@@ -1,6 +1,6 @@
 import Contact from '../../Contact'
 import Message from '../../Message'
-import { AbstractPlugin } from '../../plugin/AbstractPlugin'
+import { AbstractPlugin, IMetaData } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
 import JID from '../../JID'
 import * as Namespace from '../../connection/xmpp/namespace'
@@ -11,13 +11,6 @@ import { $iq } from '../../vendor/Strophe'
 import Translation from '../../util/Translation';
 import { IContact } from '@src/Contact.interface';
 import { IMessage } from '@src/Message.interface';
-
-/**
- * XEP-0363: HTTP File Upload
- *
- * @version 1.0.0
- * @see https://xmpp.org/extensions/xep-0363.html
- */
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -31,8 +24,15 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       return 'HTTP File Upload';
    }
 
-   public static getDescription(): string {
-      return Translation.t('setting-http-upload-enable');
+   public static getMetaData(): IMetaData {
+      return {
+         description: Translation.t('setting-http-upload-enable'),
+         xeps: [{
+            id: 'XEP-0363',
+            name: 'HTTP File Upload',
+            version: '1.0.0',
+         }]
+      }
    }
 
    private services: HttpUploadService[];

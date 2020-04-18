@@ -1,4 +1,4 @@
-import { AbstractPlugin } from '../plugin/AbstractPlugin'
+import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import Contact from '../Contact'
 import Avatar from '../Avatar'
@@ -7,13 +7,6 @@ import JID from '../JID'
 import Log from '../util/Log';
 import { ContactType } from '@src/Contact.interface';
 import Translation from '@util/Translation';
-
-/**
- * XEP-0153: vCard-Based Avatars
- *
- * @version 1.1
- * @see https://xmpp.org/extensions/xep-0153.html
- */
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -27,8 +20,15 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
       return 'vCard-based Avatars';
    }
 
-   public static getDescription(): string {
-      return Translation.t('setting-vcard-avatar-enable');
+   public static getMetaData(): IMetaData {
+      return {
+         description: Translation.t('setting-vcard-avatar-enable'),
+         xeps: [{
+            id: 'XEP-0153',
+            name: 'vCard-Based Avatars',
+            version: '1.1',
+         }]
+      }
    }
 
    constructor(pluginAPI: PluginAPI) {

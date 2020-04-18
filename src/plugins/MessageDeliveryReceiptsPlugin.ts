@@ -1,18 +1,11 @@
 import JID from '../JID'
 import Message from '../Message'
-import { AbstractPlugin } from '../plugin/AbstractPlugin'
+import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import * as Namespace from '../connection/xmpp/namespace'
 import { $msg } from '../vendor/Strophe'
 import { IContact } from '@src/Contact.interface';
 import Translation from '@util/Translation';
-
-/**
- * XEP-0184: Message Delivery Receipts
- *
- * @version 1.2
- * @see https://xmpp.org/extensions/xep-0184.html
- */
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '4.0.0';
@@ -28,8 +21,15 @@ export default class ReceiptPlugin extends AbstractPlugin {
       return 'Message Delivery Receipts';
    }
 
-   public static getDescription(): string {
-      return Translation.t('setting-receipts-enable');
+   public static getMetaData(): IMetaData {
+      return {
+         description: Translation.t('setting-receipts-enable'),
+         xeps: [{
+            id: 'XEP-0184',
+            name: 'Message Delivery Receipts',
+            version: '1.2',
+         }]
+      }
    }
 
    constructor(pluginAPI: PluginAPI) {
