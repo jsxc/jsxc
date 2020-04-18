@@ -130,5 +130,5 @@ export interface IMessage {
 
    getErrorMessage(): string
 
-   updateProgress(transfered: number, complete: number)
+   updateProgress(transferred: number, complete: number)
 }

@@ -26,11 +26,12 @@ export default class HttpUploadService {
       return this.maxFileSize === 0 || attachment.getSize() <= this.maxFileSize;
    }
 
-   public sendFile(file: File, progress?: (loaded, total) => void): Promise<string> {
-      return this.requestSlot(file)
-         .then((urls) => {
-            return this.uploadFile(file, urls.put, urls.putHeaders, progress).then(() => urls.get);
-         });
+   public async sendFile(file: File, progress?: (loaded, total) => void): Promise<string> {
+      let urls = await this.requestSlot(file)
+
+      await this.uploadFile(file, urls.put, urls.putHeaders, progress);
+
+      return urls.get;
    }
 
    private requestSlot(file: File) {

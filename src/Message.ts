@@ -317,8 +317,8 @@ export default class Message implements IIdentifiable, IMessage {
       return this.data.get('errorMessage');
    }
 
-   public updateProgress(transfered: number, complete: number) {
-
+   public updateProgress(transferred: number, size: number) {
+      this.data.set('progress', transferred / size);
    }
 }
 

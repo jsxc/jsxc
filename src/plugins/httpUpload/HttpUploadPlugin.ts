@@ -72,7 +72,9 @@ export default class HttpUploadPlugin extends AbstractPlugin {
 
          throw new Error('Found no suitable http upload service. File probably too large.');
       }).then((service) => {
-         return service.sendFile(attachment.getFile());
+         return service.sendFile(attachment.getFile(), (transferred, total) => {
+            message.updateProgress(transferred, total);
+         });
       }).then((downloadUrl) => {
          this.addUrlToMessage(downloadUrl, attachment, message);
          attachment.setProcessed(true);

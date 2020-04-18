@@ -192,6 +192,10 @@ export default class ChatWindowMessage {
          }
       });
 
+      this.message.registerHook('progress', (progress) => {
+         this.element.find('.jsxc-attachment').attr('data-progress', Math.round(progress * 100) + '%');
+      })
+
       if (this.message.getDirection() === DIRECTION.OUT || this.message.getDirection() === DIRECTION.PROBABLY_OUT) {
          this.message.registerHook('mark', (mark) => {
             this.element.attr('data-mark', MessageMark[mark]);

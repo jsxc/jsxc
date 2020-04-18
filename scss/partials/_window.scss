@@ -436,6 +436,19 @@
     border-radius: 3px;
   }
 
+  &[data-progress]::after {
+    content: attr(data-progress);
+    display: block;
+    font-size: 0.7em;
+    line-height: 1;
+    opacity: 0.5;
+    text-align: right;
+  }
+
+  &[data-progress="100%"]::after {
+    content: none;
+  }
+
   &.jsxc-image-jpeg,
   &.jsxc-image-jpg,
   &.jsxc-image-svg,
