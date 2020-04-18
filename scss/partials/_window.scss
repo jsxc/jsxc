@@ -314,6 +314,10 @@
     text-overflow: ellipsis;
     user-select: none;
     white-space: nowrap;
+
+    .jsxc-timestamp {
+      margin-right: 0.3em;
+    }
   }
 
   &.jsxc-error {
@@ -474,7 +478,6 @@
     content: " ";
     display: inline-block;
     height: 1em;
-    margin-left: 2px;
     width: 1em;
   }
 }

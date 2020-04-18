@@ -1,9 +1,9 @@
-import { ContactSubscription } from '@src/Contact.interface'
-import { IJID } from '@src/JID.interface'
-import JID from '@src/JID'
-import { DIRECTION } from '@src/Message.interface'
-import Message from '@src/Message'
 import * as Namespace from '@src/connection/xmpp/namespace'
+import { ContactSubscription } from '@src/Contact.interface'
+import JID from '@src/JID'
+import { IJID } from '@src/JID.interface'
+import Message from '@src/Message'
+import { DIRECTION } from '@src/Message.interface'
 import { AbstractPlugin } from '@src/plugin/AbstractPlugin'
 import PluginAPI from '@src/plugin/PluginAPI'
 import ChatWindow from '@src/ui/ChatWindow'
@@ -29,12 +29,6 @@ const ACKNOWLEDGED = 'acknowledged';
 const ID = 'id';
 const FROM = 'from';
 
-enum ChatMarkerStatus {
-   RECEIVED,
-   DISPLAYED,
-   ACKNOWLEDGED
-}
-
 export default class ChatMarkersPlugin extends AbstractPlugin {
 
    public static getId(): string {
@@ -58,7 +52,6 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
 
       this.pluginAPI.addPreSendMessageStanzaProcessor(this.preSendMessageStanzaProcessor);
 
-      this.pluginAPI.getConnection().registerHandler(this.onMarkableMessage, null, 'message');
       this.pluginAPI.getConnection().registerHandler(this.onChatMarkersMessage, null, 'message');
 
       this.pluginAPI.registerChatWindowInitializedHook((chatWindow: ChatWindow) => {
@@ -66,27 +59,20 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
       });
    }
 
-   private supportsChatMarkers(jid: IJID) {
+   private async supportsChatMarkers(jid: IJID) {
       if (jid.isBare()) {
          // if bare JID, sender MAY send chat markers
-         this.pluginAPI.Log.debug(`${jid.full} supports chat markers. Yaay! =)`);
 
-         return Promise.resolve(true);
-      } else {
-         // if full JID, sender SHOULD try to determine if recipient supports chat markers
-         return this.pluginAPI.getDiscoInfoRepository().hasFeature(jid, [Namespace.get(CHATMARKERS)]).then((hasFeature) => {
-            if (hasFeature) {
-               this.pluginAPI.Log.debug(`${jid.full} supports chat markers. Yaay! =)`);
-            } else {
-               this.pluginAPI.Log.debug(`${jid.full} doesn't support chat markers. =(`);
-            }
+         return true;
+      }
 
-            return hasFeature;
-         }).catch(() => {
-            this.pluginAPI.Log.debug(`${jid.full} doesn't support chat markers. =(`);
+      // if full JID, sender SHOULD try to determine if recipient supports chat markers
+      let repository = this.pluginAPI.getDiscoInfoRepository();
 
-            return false;
-         });
+      try {
+         return repository.hasFeature(jid, [Namespace.get(CHATMARKERS)]);
+      } catch (err) {
+         return false;
       }
    }
 
@@ -95,19 +81,15 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
       if (!contact) {
          return false;
       }
+
       let subscription = contact.getSubscription();
-      if (subscription === ContactSubscription.FROM
-         || subscription === ContactSubscription.BOTH) {
-         return true;
-      } else {
-         return false;
-      }
+
+      return subscription === ContactSubscription.FROM
+      || subscription === ContactSubscription.BOTH;
    }
 
    // add "markable" element according to XEP-0333
-   private addMarkable(xmlStanza: Strophe.Builder, msg: Message) {
-      this.pluginAPI.Log.debug(`adding ${MARKABLE} tag. Yaay! =)`);
-
+   private addMarkable(xmlStanza: Strophe.Builder) {
       xmlStanza.c(MARKABLE, {
          xmlns: Namespace.get(CHATMARKERS)
       }).up();
@@ -118,7 +100,8 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
       this.pluginAPI.Log.debug(`sending ${RECEIVED} message. Yaay! =)`);
 
       this.pluginAPI.send($msg({
-         to: to.full
+         to: to.full,
+         type: 'chat',
       }).c(RECEIVED, {
          xmlns: Namespace.get(CHATMARKERS),
          id: lastReceivedMsgId
@@ -132,7 +115,8 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
       this.pluginAPI.Log.debug(`sending ${DISPLAYED} message. Yaay! =)`);
 
       this.pluginAPI.send($msg({
-         to: to.full
+         to: to.full,
+         type: 'chat',
       }).c(DISPLAYED, {
          xmlns: Namespace.get(CHATMARKERS),
          id: lastDisplayedMsgId
@@ -151,17 +135,15 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
    //       xmlns: Namespace.get(CHATMARKERS),
    //       id: lastAcknowledgedMsgId
    //    }).up().c('store', {
-      //    xmlns: 'urn:xmpp:hints'
-      // }));
+   //    xmlns: 'urn:xmpp:hints'
+   // }));
    // }
 
    private preSendMessageStanzaProcessor = (msg: Message, stanza: Strophe.Builder): Promise<any> => {
-      this.pluginAPI.Log.debug('pre send message stanza processor. Yaay! =)');
-
       if (msg.getType() === Message.MSGTYPE.CHAT) {
          return this.supportsChatMarkers(msg.getPeer()).then((hasFeature) => {
             if (hasFeature) {
-               this.addMarkable(stanza, msg);
+               this.addMarkable(stanza);
             }
 
             return [msg, stanza];
@@ -171,110 +153,125 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
       return Promise.resolve([msg, stanza]);
    }
 
-   // send "received" on "markable" message according to XEP-0333
-   private onMarkableMessage = (stanza: string) => {
-      this.pluginAPI.Log.debug('onMarkableMessage');
-
-      let element = $(stanza).find(MARKABLE + Namespace.getFilter(CHATMARKERS));
-
-      if (element.length <= 0) {
-         return;
-      }
-
-      this.pluginAPI.Log.debug(`message has "${MARKABLE}" element. Yaay! =)`);
-
-      let msgId = $(stanza).attr(ID);
-      if (!msgId) {
-         return;
-      }
-
-      this.pluginAPI.Log.debug(`message has "${ID}" attribute (${ID}: ${msgId}). Yaay! =)`);
-
-      let from = $(stanza).attr(FROM);
-
-      if (!from) {
-         return;
-      }
-
-      this.pluginAPI.Log.debug(`message has "${FROM}" attribute (${FROM}: ${from}). Yaay! =)`);
-
-      if ($(stanza).attr('type') !== Message.MSGTYPE.GROUPCHAT) {
-         let peer = new JID(from);
-
-         this.sendReceived(msgId, peer);
-      }
-
-      return true;
-   }
-
-   // get chat marker type
    private onChatMarkersMessage = (stanza: string) => {
-      let element = $(stanza).find(RECEIVED + Namespace.getFilter(CHATMARKERS));
-      if (element.length !== 0) {
-         this.pluginAPI.Log.debug(`message has "${RECEIVED}" element. Yaay! =)`);
-         this.setMessagesChatMarkers(element.attr(ID), $(stanza).attr(FROM), $(stanza).attr('type'), ChatMarkerStatus.RECEIVED);
+      let stanzaElement = $(stanza);
+      let markerElement = stanzaElement.find(Namespace.getFilter(CHATMARKERS));
+
+      if (markerElement.length === 0) {
+         return true;
+      }
+
+      let mamResultElement = stanzaElement.find(Namespace.getFilter('MAM2', 'result')) ||
+         stanzaElement.find(Namespace.getFilter('MAM1', 'result'));
+      let isMam = mamResultElement.length > 0;
+
+      let carbonReceivedElement = stanzaElement.find(Namespace.getFilter('CARBONS', 'received'));
+      let carbonSentElement = stanzaElement.find(Namespace.getFilter('CARBONS', 'sent'));
+      let isCarbon = carbonReceivedElement.length > 0 || carbonSentElement.length > 0;
+
+      if (isCarbon && stanzaElement.attr('from') !== this.pluginAPI.getConnection().getJID().bare) {
+         this.pluginAPI.Log.warn(`Received carbon copy from "${stanzaElement.attr('from')}". Ignoring.`);
+
+         return true;
+      }
+
+      let messageElement: JQuery<HTMLElement>;
+
+      if (carbonReceivedElement.length > 0) {
+         messageElement = carbonReceivedElement.find('message');
+      } else if (carbonSentElement.length > 0) {
+         messageElement = carbonSentElement.find('message');
+      } else if (mamResultElement.length > 0) {
+         messageElement = mamResultElement.find('message');
       } else {
-         element = $(stanza).find(DISPLAYED + Namespace.getFilter(CHATMARKERS));
-         if (element.length !== 0) {
-            this.pluginAPI.Log.debug(`message has "${DISPLAYED}" element. Yaay! =)`);
-            this.setMessagesChatMarkers(element.attr(ID), $(stanza).attr(FROM), $(stanza).attr('type'), ChatMarkerStatus.DISPLAYED);
-         } else {
-            element = $(stanza).find(ACKNOWLEDGED + Namespace.getFilter(CHATMARKERS));
-            if (element.length !== 0) {
-               this.pluginAPI.Log.debug(`message has "${ACKNOWLEDGED}" element. Yaay! =)`);
-               this.setMessagesChatMarkers(element.attr(ID), $(stanza).attr(FROM), $(stanza).attr('type'), ChatMarkerStatus.ACKNOWLEDGED);
-            }
+         messageElement = stanzaElement;
+      }
+
+      let idAttr = messageElement.attr(ID);
+      let fromAttr = messageElement.attr(FROM);
+      let toAttr = messageElement.attr('to');
+      let typeAttr = stanzaElement.attr('type');
+
+      let markableMessageId = markerElement.attr(ID);
+      let marker = markerElement.prop('tagName').toLowerCase() as string;
+
+      this.pluginAPI.Log.debug(`"${marker}" marker received from "${fromAttr}" to "${toAttr}"`);
+
+      if ([MARKABLE, RECEIVED, DISPLAYED, ACKNOWLEDGED].indexOf(marker) < 0) {
+         this.pluginAPI.Log.info(`"${marker}" is no valid marker`);
+
+         return true;
+      }
+
+      if (marker === MARKABLE) {
+         if (!idAttr || !fromAttr) {
+            return true;
+         }
+
+         if ($(stanza).attr('type') !== Message.MSGTYPE.GROUPCHAT && !isCarbon && !isMam) {
+            let peer = new JID(fromAttr);
+
+            this.sendReceived(idAttr, peer);
+         }
+      } else {
+         if (!markableMessageId || !fromAttr) {
+            return true;
+         }
+
+         if (typeAttr !== Message.MSGTYPE.GROUPCHAT) {
+            let peerJid = new JID(carbonSentElement.length > 0 ? toAttr : fromAttr);
+            let direction = carbonSentElement.length > 0 ? DIRECTION.IN : DIRECTION.OUT;
+
+            this.markMessages(markableMessageId, peerJid, marker, direction);
          }
       }
+
       return true;
    }
 
-   // mark messages, depending on the chat marker we get, according to XEP-0333
-   private setMessagesChatMarkers(msgId: string, from: string, msgType: string, status: ChatMarkerStatus) {
-      if (!msgId) {
-         return;
-      }
-      this.pluginAPI.Log.debug(`message has "${ID}" attribute (${ID}: ${msgId}). Yaay! =)`);
-      if (!from) {
-         return;
-      }
-      this.pluginAPI.Log.debug(`message has "${FROM}" attribute (${FROM}: ${from}). Yaay! =)`);
-      if (msgType !== Message.MSGTYPE.GROUPCHAT) {
-         this.markMessages(msgId, new JID(from), DIRECTION.OUT, status);
-      }
-   }
-
-   private markMessages(msgId: string, from: IJID, msgDirection: DIRECTION, status: ChatMarkerStatus) {
-      let contact = this.pluginAPI.getContact(from);
+   private markMessages(markableMessageId: string, peer: IJID, status: string, direction: DIRECTION) {
+      let contact = this.pluginAPI.getContact(peer);
 
       if (!contact) {
          return;
       }
 
-      let transcript = contact.getChatWindow().getTranscript();
-      let msg = transcript.getMessage(msgId);
+      let transcript = contact.getTranscript();
+      let msg = transcript.getFirstMessage();
+
+      while (msg && msg.getAttrId() !== markableMessageId) {
+         try {
+            msg = transcript.getMessage(msg.getNextId());
+         } catch (error) {
+            msg = undefined;
+
+            break;
+         }
+      }
 
       // @REVIEW spec is not clear if only markable message from the same resource should be marked
       while (!!msg) {
-         if (msg.getDirection() === msgDirection) {
-            if (status === ChatMarkerStatus.RECEIVED) {
+         if (msg.getDirection() === direction) {
+            if (status === RECEIVED) {
                if (msg.isReceived()) {
                   // no need to traverse all messages
                   break;
                }
 
                msg.received();
-            } else if (status === ChatMarkerStatus.DISPLAYED) {
+            } else if (status === DISPLAYED) {
                if (msg.isDisplayed()) {
                   break;
                }
 
+               msg.read();
                msg.displayed();
-            } else if (status === ChatMarkerStatus.ACKNOWLEDGED) {
+            } else if (status === ACKNOWLEDGED) {
                if (msg.isAcknowledged()) {
                   break;
                }
 
+               msg.read();
                msg.acknowledged();
             }
          }
