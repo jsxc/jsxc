@@ -95,11 +95,13 @@ export default class ChatWindowMessage {
 
       if (this.message.getDirection() === DIRECTION.SYS) {
          this.element.find('.jsxc-message-area').append('<div class="jsxc-clear"/>');
-      } else if (this.message.getDirection() === DIRECTION.IN && this.chatWindow.getContact().isGroupChat()) {
+      } else if (this.message.getDirection() === DIRECTION.IN) {
          let text = this.message.getSender().name || this.message.getPeer().bare;
-         let color = Color.generate(text, undefined, 40, 90);
+         let lightness = 90;
+         let color = Color.generate(text, undefined, 40, lightness);
 
-         this.element.css('background-color', color);
+         this.element.addClass(lightness < 60 ? 'jsxc-dark' : 'jsxc-light');
+         this.element.css('--jsxc-message-bg', color);
       }
 
       let sender = this.message.getSender();

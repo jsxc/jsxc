@@ -584,26 +584,21 @@
   max-width: 76%;
   position: relative;
 
-  &::after {
-    border-color: transparent $chatmessage-in-bg;
-    border-style: solid;
-    border-width: 5px 6px 5px 0;
-    bottom: 10px;
-    content: " ";
-    display: block;
-    left: -6px;
-    position: absolute;
-    width: 0;
-    z-index: 1;
-  }
-
   .jsxc-timestamp {
     float: left;
   }
 }
 
 .jsxc-in {
-  background-color: $chatmessage-in-bg;
+  background-color: var(--jsxc-message-bg);
+
+  &.jsxc-light .jsxc-chatmessage__footer {
+    color: #5d5d5d;
+  }
+
+  &.jsxc-dark .jsxc-chatmessage__footer {
+    color: #ececec;
+  }
 }
 
 .jsxc-out,
@@ -612,19 +607,6 @@
   margin-right: 0.5em;
   max-width: 76%;
   position: relative;
-
-  &::after {
-    border-color: transparent #fff;
-    border-style: solid;
-    border-width: 0.7em 0 0.7em 0.7em;
-    bottom: 0.5em;
-    content: " ";
-    display: block;
-    left: 100%;
-    position: absolute;
-    width: 0;
-    z-index: 1;
-  }
 
   &.jsxc-received {
     &::before {
