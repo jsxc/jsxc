@@ -12,6 +12,7 @@ export default function(username?: string) {
    username = (typeof username === 'string') ? username : undefined;
 
    let content = contactTemplate({
+      accounts: Client.getAccountManager().getAccounts().map(account => account.getJID().bare),
       username
    });
 
@@ -72,8 +73,9 @@ function onSubmit(ev) {
 
    let username = <string> $('#jsxc-username').val();
    let alias = <string> $('#jsxc-alias').val();
-   //@TODO [MA] if we support multi account, we need an account selection dialog
-   let account = Client.getAccountManager().getAccount();
+   let accountId = <string> $('#jsxc-account').val();
+
+   let account = Client.getAccountManager().getAccount(accountId);
 
    if (!username.match(/@(.*)$/)) {
       username += '@' + account.getJID().domain;

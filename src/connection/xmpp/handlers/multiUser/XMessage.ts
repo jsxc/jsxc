@@ -19,7 +19,7 @@ export default class extends AbstractHandler {
             description: `for ${from.bare}`,
             type: NOTICETYPE.invitation,
             fnName: NOTICEFUNCTION.multiUserInvitation,
-            fnParams: ['direct', host.bare, from.bare, reason, password]
+            fnParams: ['direct', host.bare, from.bare, reason, password, this.account.getUid()]
          });
       }
 

@@ -6,7 +6,7 @@ import Client from '../../Client'
 
 let multiUserInvitation = require('../../../template/multiUserInvitation.hbs');
 
-export default function(type: 'direct' | 'mediated', from: string, room: string, reason: string, password: string) {
+export default function(type: 'direct' | 'mediated', from: string, room: string, reason: string, password: string, accountId: string) {
    let fromJid = new JID(from);
    let roomJid = new JID(room);
    let content = multiUserInvitation({
@@ -17,7 +17,7 @@ export default function(type: 'direct' | 'mediated', from: string, room: string,
 
    let dialog = new Dialog(content);
    let dom = dialog.open();
-   let account = Client.getAccountManager().getAccount(); //@TODO [MA] multi account support
+   let account = Client.getAccountManager().getAccount(accountId);
 
    dom.find('form').on('submit', (ev) => {
       ev.preventDefault();

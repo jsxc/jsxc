@@ -19,62 +19,65 @@ export default function() {
 class MultiUserJoinDialog {
    private account: Account;
    private connection: IConnection;
-   private defaultNickname;
+   private defaultNickname: string;
 
-   private dialog;
-   private dom;
-   private serverInputElement;
-   private roomInputElement;
-   private passwordInputElement;
-   private nicknameInputElement;
-   private bookmarkInputElement;
+   private dialog: Dialog;
+   private dom: JQuery<HTMLElement>;
+   private accountElement: JQuery<HTMLElement>;
+   private serverInputElement: JQuery<HTMLElement>;
+   private roomInputElement: JQuery<HTMLElement>;
+   private passwordInputElement: JQuery<HTMLElement>;
+   private nicknameInputElement: JQuery<HTMLElement>;
 
    constructor() {
-      let content = multiUserJoinTemplate({});
+      let content = multiUserJoinTemplate({
+         accounts: Client.getAccountManager().getAccounts().map(account => account.getUid()),
+      });
 
       this.dialog = new Dialog(content);
       let dom = this.dom = this.dialog.open();
 
+      this.accountElement = dom.find('select[name="account"]');
       this.serverInputElement = dom.find('input[name="server"]');
       this.roomInputElement = dom.find('input[name="room"]');
       this.passwordInputElement = dom.find('input[name="password"]');
       this.nicknameInputElement = dom.find('input[name="nickname"]');
-      this.bookmarkInputElement = dom.find('input[name="bookmark"]');
 
-      this.account = Client.getAccountManager().getAccount();
-      this.connection = this.account.getConnection();
-      this.defaultNickname = this.connection.getJID().node;
+      this.updateAccount(Client.getAccountManager().getAccount().getUid());
 
       this.initializeInputElements();
    }
 
-   private initializeInputElements() {
-      this.showContinueElements();
+   private updateAccount(id: string) {
+      this.account = Client.getAccountManager().getAccount(id);
 
-      this.serverInputElement.on('change', () => {
-         this.dom.find('.jsxc-inputinfo.jsxc-server').text('').hide();
+      this.connection = this.account.getConnection();
+      this.defaultNickname = this.connection.getJID().node;
 
-         let jid = new JID(this.serverInputElement.val(), '');
-
-         this.getMultiUserRooms(jid);
-      })
+      this.nicknameInputElement.attr('placeholder', this.defaultNickname);
 
       this.getMultiUserServices().then((services: JID[]) => {
          this.serverInputElement.val(services[0].full);
          this.serverInputElement.trigger('change');
       });
+   }
 
-      this.nicknameInputElement.attr('placeholder', this.defaultNickname);
+   private initializeInputElements() {
+      this.showContinueElements();
 
-      this.bookmarkInputElement.change(function() {
-         if ($(this).prop('checked')) {
-            this.autoJoinInputElement.prop('disabled', false);
-            this.autoJoinInputElement.parents('.checkbox').removeClass('disabled');
-         } else {
-            this.autoJoinInputElement.prop('disabled', true).prop('checked', false);
-            this.autoJoinInputElement.parents('.checkbox').addClass('disabled');
-         }
+      this.accountElement.on('change', () => {
+         let accountId = <string> this.accountElement.val();
+
+         this.updateAccount(accountId);
       });
+
+      this.serverInputElement.on('change', () => {
+         this.dom.find('.jsxc-inputinfo.jsxc-server').text('').hide();
+
+         let jid = new JID(<string> this.serverInputElement.val(), '');
+
+         this.getMultiUserRooms(jid);
+      })
 
       this.dom.find('input[type="text"], input[type="password"]').keydown(() => {
          this.emptyStatusElement();
@@ -194,12 +197,13 @@ class MultiUserJoinDialog {
    private continueHandler = (ev) => {
       ev.preventDefault();
 
-      //@REVIEW maybe lock inputs
+      this.dom.find('input, select').prop('disabled', true);
       this.testInputValues()
          .then(this.requestRoomInfo)
          .then(() => {
             this.showJoinElements();
          }).catch((msg) => {
+            this.dom.find('input, select').prop('disabled', false);
             this.setStatusMessage(msg, 'warning');
 
             Log.warn(msg)
@@ -308,20 +312,18 @@ class MultiUserJoinDialog {
 
       //@TODO disable handler, show spinner
 
-      let jid = new JID(this.dom.find('input[name="room-jid"]').val());
-      let name = this.dom.find('input[name="room-name"]').val() || undefined;
-      let nickname = this.nicknameInputElement.val() || this.defaultNickname;
-      // let bookmark = this.bookmarkInputElement.prop('checked');
-      // let autojoin = this.autoJoinInputElement.prop('checked');
-      let password = this.passwordInputElement.val() || undefined;
-      let subject = this.dom.find('input[name="room-subject"]').val() || undefined;
+      let jid = new JID(<string> this.dom.find('input[name="room-jid"]').val());
+      let name = <string> this.dom.find('input[name="room-name"]').val() || undefined;
+      let nickname = <string> this.nicknameInputElement.val() || this.defaultNickname;
+      let password = <string> this.passwordInputElement.val() || undefined;
+      let subject = <string> this.dom.find('input[name="room-subject"]').val() || undefined;
 
       let multiUserContact = new MultiUserContact(this.account, jid, name);
       multiUserContact.setNickname(nickname);
       multiUserContact.setBookmark(true);
       multiUserContact.setAutoJoin(true);
       multiUserContact.setPassword(password);
-      multiUserContact.setSubscription(subject);
+      multiUserContact.setSubject(subject);
 
       this.account.getContactManager().add(multiUserContact);
 
