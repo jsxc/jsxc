@@ -30,7 +30,7 @@ export default class ChatWindowMessage {
       let chatWindowMessage = this.chatWindow.getChatWindowMessage(nextMessage);
       let element = chatWindowMessage.getElement();
 
-      this.getElement().before(element);
+      this.getElement().after(element);
       chatWindowMessage.restoreNextMessage();
    }
 

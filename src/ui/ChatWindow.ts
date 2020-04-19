@@ -78,10 +78,6 @@ export default class ChatWindow {
 
       this.element.attr('data-presence', Presence[this.contact.getPresence()]);
 
-      setTimeout(() => {
-         this.scrollMessageAreaToBottom();
-      }, 500);
-
       this.getAccount().triggerChatWindowInitializedHook(this, contact);
    }
 
@@ -170,7 +166,7 @@ export default class ChatWindow {
       if (message.getDOM().length > 0) {
          message.getDOM().replaceWith(messageElement);
       } else {
-         this.element.find('.jsxc-message-area').append(messageElement);
+         this.element.find('.jsxc-message-area').prepend(messageElement);
       }
 
       chatWindowMessage.restoreNextMessage();

@@ -51,6 +51,8 @@
     background-image: url("../images/resize_gray.svg");
     background-position: top left;
     background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column-reverse;
     flex-grow: 1;
     left: 0;
     overflow: auto;
@@ -579,7 +581,7 @@
 
 .jsxc-in,
 .jsxc-probably_in {
-  float: left;
+  align-self: flex-start;
   margin-left: 0.5em;
   max-width: 76%;
   position: relative;
@@ -608,7 +610,7 @@
 
 .jsxc-out,
 .jsxc-probably_out {
-  float: right;
+  align-self: flex-end;
   margin-right: 0.5em;
   max-width: 76%;
   position: relative;
@@ -660,6 +662,7 @@
 }
 
 .jsxc-sys {
+  align-self: center;
   background-color: transparent;
   border-radius: 3px;
   box-sizing: border-box;
@@ -821,7 +824,9 @@
     display: block;
   }
 
-  .jsxc-message-area {
+  .jsxc-message-area::after {
+    content: "";
+    display: block;
     padding-top: 42px;
   }
 }
