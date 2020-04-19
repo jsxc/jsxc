@@ -215,6 +215,19 @@ export default class ChatWindow {
       previewElement.empty();
    }
 
+   public getOverlay(): JQuery<HTMLElement> {
+      return this.getDom().find('.jsxc-window__overlay__content');
+   }
+
+   public showOverlay() {
+      this.getDom().find('.jsxc-window__overlay').addClass('jsxc-window__overlay--show');
+   }
+
+   public hideOverlay() {
+      this.getDom().find('.jsxc-window__overlay__content').empty();
+      this.getDom().find('.jsxc-window__overlay').removeClass('jsxc-window__overlay--show');
+   }
+
    protected initDroppable() {
       let enterCounter = 0;
       let windowElement = this.element.find('.jsxc-window');

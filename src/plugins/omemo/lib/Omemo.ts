@@ -130,6 +130,14 @@ export default class Omemo {
       return peer.getDevices();
    }
 
+   public isTrustUnknown(contact: Contact): boolean {
+      let peer = this.getPeer(contact.getJid());
+      let peerNewDevices = peer.getTrust() === Trust.unknown;
+      let localPeerNewDevices = this.localPeer.getTrust() === Trust.unknown;
+
+      return peerNewDevices || localPeerNewDevices;
+   }
+
    public encrypt(contact: Contact, message: Message, xmlElement: Strophe.Builder) {
       let peer = this.getPeer(contact.getJid());
       let plaintextMessage = message.getPlaintextMessage();

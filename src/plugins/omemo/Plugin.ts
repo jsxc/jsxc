@@ -61,12 +61,12 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       });
    }
 
-   private openDeviceDialog = (chatWindow) => {
-      this.getOmemo().prepare().then(() => {
-         let peerContact = chatWindow.getContact();
+   private openDeviceDialog = async (chatWindow: ChatWindow) => {
+      await this.getOmemo().prepare();
 
-         OmemoDevicesDialog(peerContact, this.getOmemo());
-      });
+      let peerContact = chatWindow.getContact();
+
+      return OmemoDevicesDialog(peerContact, this.getOmemo());
    }
 
    public toggleTransfer(contact: IContact): Promise<void> {
@@ -211,18 +211,61 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       return encryptedFile
    }
 
-   private preSendMessageStanzaProcessor = (message: IMessage, xmlElement: Strophe.Builder) => {
+   private preSendMessageStanzaProcessor = async (message: IMessage, xmlElement: Strophe.Builder) => {
       let contact = this.pluginAPI.getContact(message.getPeer());
 
       if (!contact) {
-         return Promise.resolve([message, xmlElement]);
+         return [message, xmlElement];
       }
 
       if (contact.getEncryptionPluginId() !== OMEMOPlugin.getId()) {
-         return Promise.resolve([message, xmlElement]);
+         return [message, xmlElement];
+      }
+
+      let isTrustUnknown = this.getOmemo().isTrustUnknown(contact);
+
+      if (isTrustUnknown) {
+         await this.handleNewDevice(contact);
       }
 
       return this.getOmemo().encrypt(contact, message, xmlElement);
+   }
+
+   private handleNewDevice(contact: IContact) {
+      let chatWindow = contact.getChatWindow();
+      let overlayElement = chatWindow.getOverlay();
+
+      overlayElement.append('<p>' + Translation.t('There_are_new_devices') + '</p>');
+
+      let continueButton = $('<button class="jsxc-button jsxc-button--block jsxc-button--primary" />');
+      continueButton.text(Translation.t('Configure'));
+      overlayElement.append(continueButton);
+
+      let cancelButton = $('<a href="#" class="jsxc-button jsxc-button--block" />');
+      cancelButton.text(Translation.t('Cancel'));
+      overlayElement.append(cancelButton);
+
+      chatWindow.showOverlay();
+
+      return new Promise(resolve => {
+         continueButton.click(async ev => {
+            ev.preventDefault();
+
+            chatWindow.hideOverlay();
+
+            await this.openDeviceDialog(chatWindow);
+
+            resolve();
+         })
+
+         cancelButton.click(ev => {
+            ev.preventDefault();
+
+            chatWindow.hideOverlay();
+
+            resolve();
+         })
+      });
    }
 
    private getOmemo() {

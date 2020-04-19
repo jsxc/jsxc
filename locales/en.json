@@ -379,7 +379,7 @@
     "chatmarkers-received": "received",
     "chatmarkers-displayed": "desiplayed",
     "chatmarkers-acknowledged": "acknowledged",
-    "chatmarkers-acknowledge": "acknowledge"
+    "There_are_new_devices": "There are new devices"
   },
   "Notifications": "Notifications"
 }

@@ -21,12 +21,6 @@
          <div class="jsxc-bar__action-entry jsxc-icon jsxc-icon--close-light jsxc-icon--clickable jsxc-js-close"></div>
       </div>
       <div class="jsxc-window-fade">
-         <div class="jsxc-overlay">
-            <div>
-               <div class="jsxc-body" />
-               <div class="jsxc-js-close" />
-            </div>
-         </div>
          <div class="jsxc-message-area" />
          <div class="jsxc-preview"></div>
          <div class="jsxc-send-area">
@@ -40,6 +34,12 @@
             {{> menu
                     classes="jsxc-transfer jsxc-menu--dark jsxc-menu--drop-bottom-right"
                     button-classes="jsxc-transfer-state jsxc-transfer-icon jsxc-icon--clickable"}}
+         </div>
+      </div>
+      <div class="jsxc-window__overlay">
+         <div class="jsxc-window__overlay__inner">
+            <div class="jsxc-window__overlay__content" />
+            <div class="jsxc-window__overlay__close" />
          </div>
       </div>
    </div>

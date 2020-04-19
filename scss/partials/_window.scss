@@ -36,12 +36,6 @@
     opacity: 0.56 !important;
   }
 
-  .jsxc-show-overlay & {
-    .jsxc-overlay {
-      display: block !important;
-    }
-  }
-
   .jsxc-avatar {
     margin-top: 1px;
   }
@@ -69,6 +63,79 @@
       opacity: 1;
     }
   }
+
+  &__overlay {
+    @extend %scrollbar;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    bottom: 0;
+    display: none;
+    justify-content: center;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 100;
+
+    &--show {
+      display: flex;
+    }
+
+    &__inner {
+      background-color: #fff;
+      border-radius: 3px;
+      padding: 5px;
+      text-align: center;
+    }
+
+    &__content {
+      margin-top: 20px;
+
+      p {
+        margin-bottom: 10px;
+      }
+
+      li {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    }
+
+    &__close {
+      height: 44px;
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 44px;
+
+      &::after {
+        color: #000;
+        content: "×";
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        font-size: 20px;
+        opacity: 0.4;
+        position: absolute;
+        right: 4px;
+        top: 4px;
+      }
+
+      &:hover {
+        &::after {
+          opacity: 1;
+        }
+      }
+      @media (min-width: 768px) {
+        height: 30px;
+        width: 30px;
+      }
+    }
+  }
 }
 
 .jsxc-window-fade {
@@ -91,75 +158,6 @@
     height: 0 !important;
     min-height: 0;
     min-width: 100%;
-  }
-
-  .jsxc-overlay {
-    background-color: rgba(0, 0, 0, 0.5);
-    bottom: 0;
-    display: none;
-    left: 0;
-    overflow-y: scroll;
-    position: absolute;
-    right: 0;
-    top: 0;
-    z-index: 100;
-
-    >div {
-      background-color: #fff;
-      border-radius: 3px;
-      margin: 30px 10px;
-      padding: 5px;
-      position: relative;
-      text-align: center;
-
-      .jsxc-close {
-        height: 44px;
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: 44px;
-
-        &::after {
-          color: #000;
-          content: "×";
-          cursor: pointer;
-          font-family: Arial, sans-serif;
-          font-size: 20px;
-          opacity: 0.4;
-          position: absolute;
-          right: 4px;
-          top: 4px;
-        }
-
-        &:hover {
-          &::after {
-            opacity: 1;
-          }
-        }
-        @media (min-width: 768px) {
-          height: 30px;
-          width: 30px;
-        }
-      }
-
-      .jsxc-body {
-        margin-top: 20px;
-      }
-
-      p {
-        margin-bottom: 10px;
-      }
-
-      li {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      a:hover {
-        text-decoration: underline;
-      }
-    }
   }
 }
 

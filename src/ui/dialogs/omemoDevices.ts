@@ -30,6 +30,10 @@ export default function(contact: IContact, omemo: Omemo) {
          addCleanUpAction(omemo, dom);
       }
    });
+
+   return new Promise<void>(resolve => {
+      dialog.registerOnClosedHook(() => resolve());
+   });
 }
 
 function addCleanUpAction(omemo: Omemo, dom: JQuery) {
