@@ -13,3 +13,4 @@ dev/
 /dist/
 yarn-error.log
 .stylelintcache
+.env

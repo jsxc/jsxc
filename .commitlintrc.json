@@ -16,7 +16,8 @@
             "revert",
             "style",
             "test",
-            "example"
+            "example",
+            "release"
          ]
       ],
       "body-max-line-length": [
