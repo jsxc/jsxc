@@ -20,9 +20,9 @@
     "url": "https://github.com/jsxc/jsxc"
   },
   "scripts": {
-    "start": "webpack --config webpack.config.js --mode production",
-    "watch": "webpack --config webpack.config.js --mode development --watch",
-    "dev": "webpack-dev-server --mode development",
+    "start": "webpack --progress --config webpack.config.js --mode production",
+    "watch": "webpack --progress --config webpack.config.js --mode development --watch",
+    "dev": "webpack-dev-server --progress --mode development",
     "test": "karma start --single-run",
     "fix-typescript-format": "tslint -c tslint.json \"src/**/*.ts\" --fix",
     "fix-style-format": "stylelint \"scss/**/*.scss\" --fix",
