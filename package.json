@@ -26,15 +26,17 @@
     "test": "karma start --single-run",
     "fix-typescript-format": "tslint -c tslint.json \"src/**/*.ts\" --fix",
     "fix-style-format": "stylelint \"scss/**/*.scss\" --fix",
-    "checking-style-format": "stylelint \"scss/**/*.scss\"",
+    "checking": "run-p --continue-on-error --print-label checking-*",
+    "checking-style-format": "stylelint --cache \"scss/**/*.scss\"",
     "checking-typescript-format": "tslint -c tslint.json \"src/**/*.ts\"",
-    "checking-typescript": "tsc --noEmit"
+    "checking-typescript": "tsc --noEmit",
+    "checking-blacklist": "node scripts/search-blacklist.js"
   },
   "husky": {
     "hooks": {
       "prepare-commit-msg": "node scripts/prepare-commit-msg.js HUSKY_GIT_PARAMS",
-      "pre-commit": "node scripts/search-blacklist.js && yarn checking-style-format && yarn checking-typescript-format && yarn checking-typescript",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS || node scripts/print-commitlint-info.js"
+      "pre-commit": "yarn checking",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
   "devDependencies": {
@@ -71,6 +73,7 @@
     "karma-typescript": "^5.0.1",
     "karma-webpack": "^4.0.2",
     "mocha": "^7.1.1",
+    "npm-run-all": "^4.1.5",
     "sass-loader": "^8.0.2",
     "sinon": "^9.0.1",
     "stylelint": "^13.2.1",

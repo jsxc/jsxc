@@ -12,3 +12,4 @@ dev/
 /bundle.js
 /dist/
 yarn-error.log
+.stylelintcache
