@@ -77,6 +77,10 @@ export default class Message implements IIdentifiable, IMessage {
             data.peer = data.peer.full;
          }
 
+         if (data.sender?.jid) {
+            data.sender.jid = data.sender.jid?.toString();
+         }
+
          if (data.attachment instanceof Attachment) {
             this.attachment = data.attachment;
             data.attachment = data.attachment.getUid();
@@ -209,7 +213,12 @@ export default class Message implements IIdentifiable, IMessage {
    }
 
    public getSender(): { name: string, jid?: JID } {
-      return this.data.get('sender') || { name: null };
+      let sender = this.data.get('sender');
+
+      return {
+         name: sender?.name,
+         jid: sender?.jid ? new JID(sender.jid) : undefined,
+      };
    }
 
    public getMark(): MessageMark {
