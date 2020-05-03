@@ -45,12 +45,18 @@
       position: relative;
 
       &::before {
+        background-color: #fff;
+        border-radius: 6px;
+        color: #000;
         content: attr(data-number-of-members);
         font-size: 12px;
-        line-height: 18px;
+        line-height: 1;
+        margin-right: -1.3em;
+        margin-top: -1.6em;
+        padding: 0.1em;
         position: absolute;
-        right: 0;
-        top: 0;
+        right: 50%;
+        top: 50%;
       }
 
       &:hover {
