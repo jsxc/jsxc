@@ -12,12 +12,13 @@ export default class StateMachine {
    };
 
    public static UISTATE = {
-      INITIATING: 0,
-      READY: 1
+      STANDBY: 0,
+      INITIATING: 1,
+      READY: 2,
    }
 
    private static currentState;
-   private static currentUIState;
+   private static currentUIState = StateMachine.UISTATE.STANDBY;
 
    public static changeState(state: number) {
       StateMachine.currentState = state;
