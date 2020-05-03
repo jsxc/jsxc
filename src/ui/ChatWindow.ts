@@ -301,32 +301,34 @@ export default class ChatWindow {
          }
       );
 
-      elementHandler.add(
-         this.element.find('.jsxc-video')[0],
-         (ev) => {
-            ev.stopPropagation();
+      if (this.contact.isChat()) {
+         elementHandler.add(
+            this.element.find('.jsxc-video')[0],
+            (ev) => {
+               ev.stopPropagation();
 
-            startCall(contact, this.getAccount());
-         }, JINGLE_FEATURES.video
-      );
+               startCall(contact, this.getAccount());
+            }, JINGLE_FEATURES.video
+         );
 
-      elementHandler.add(
-         this.element.find('.jsxc-audio')[0],
-         (ev) => {
-            ev.stopPropagation();
+         elementHandler.add(
+            this.element.find('.jsxc-audio')[0],
+            (ev) => {
+               ev.stopPropagation();
 
-            startCall(contact, this.getAccount(), 'audio');
-         }, JINGLE_FEATURES.audio
-      );
+               startCall(contact, this.getAccount(), 'audio');
+            }, JINGLE_FEATURES.audio
+         );
 
-      elementHandler.add(
-         this.element.find('.jsxc-share-screen')[0],
-         (ev) => {
-            ev.stopPropagation();
+         elementHandler.add(
+            this.element.find('.jsxc-share-screen')[0],
+            (ev) => {
+               ev.stopPropagation();
 
-            startCall(contact, this.getAccount(), 'screen');
-         }, JINGLE_FEATURES.screen
-      );
+               startCall(contact, this.getAccount(), 'screen');
+            }, JINGLE_FEATURES.screen
+         );
+      }
 
       elementHandler.add(
          this.element.find('.jsxc-send-location')[0],
