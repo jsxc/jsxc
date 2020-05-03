@@ -31,7 +31,10 @@ class MultiUserJoinDialog {
 
    constructor(private server?: string, private room?: string) {
       let content = multiUserJoinTemplate({
-         accounts: Client.getAccountManager().getAccounts().map(account => account.getUid()),
+         accounts: Client.getAccountManager().getAccounts().map(account => ({
+            uid: account.getUid(),
+            jid: account.getJID().bare,
+         })),
       });
 
       this.dialog = new Dialog(content);

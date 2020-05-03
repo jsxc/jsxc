@@ -12,7 +12,10 @@ export default function(username?: string) {
    username = (typeof username === 'string') ? username : undefined;
 
    let content = contactTemplate({
-      accounts: Client.getAccountManager().getAccounts().map(account => account.getJID().bare),
+      accounts: Client.getAccountManager().getAccounts().map(account => ({
+         uid: account.getUid(),
+         jid: account.getJID().bare,
+      })),
       username
    });
 

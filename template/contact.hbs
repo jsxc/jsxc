@@ -7,7 +7,7 @@
       <label class="col-sm-4 control-label" for="jsxc-account">{{t "Account"}}</label>
       <div class="col-sm-8">
          <select class="form-control" name="account" id="jsxc-account">
-            {{#each accounts}}<option>{{this}}</option>{{/each}}
+            {{#each accounts}}<option value="{{this.uid}}">{{this.jid}}</option>{{/each}}
          </select>
       </div>
    </div>
