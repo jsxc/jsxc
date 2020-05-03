@@ -53,6 +53,14 @@ export default class Transcript {
       this.deleteLastMessages();
    }
 
+   public getFirstChatMessage(): IMessage {
+      for (let message of this.getGenerator()) {
+         if (!message.isSystem()) {
+            return message;
+         }
+      }
+   }
+
    public getFirstMessage(): IMessage {
       if (!this.firstMessage && this.properties.get('firstMessageId')) {
          this.firstMessage = this.getMessage(this.properties.get('firstMessageId'));

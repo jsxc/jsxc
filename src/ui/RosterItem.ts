@@ -104,7 +104,7 @@ export default class RosterItem {
          this.element.attr('data-date', this.contact.getLastMessageDate()?.toISOString());
       });
 
-      this.contact.getTranscript().registerHook('firstMessageId', (firstMessageId) => {
+      this.contact.getTranscript().registerNewMessageHook((firstMessageId) => {
          if (!firstMessageId) {
             return;
          }
@@ -115,11 +115,15 @@ export default class RosterItem {
 
          let message = this.contact.getTranscript().getMessage(firstMessageId);
 
+         if (message.isSystem()) {
+            return;
+         }
+
          this.element.find('.jsxc-bar__caption__secondary').html(message.getPlaintextEmoticonMessage());
          this.element.find('.jsxc-bar__caption__secondary').attr('title', message.getPlaintextMessage());
       });
 
-      let message = this.contact.getTranscript().getFirstMessage();
+      let message = this.contact.getTranscript().getFirstChatMessage();
       if (message) {
          this.element.find('.jsxc-bar__caption__secondary').html(message.getPlaintextEmoticonMessage());
       }

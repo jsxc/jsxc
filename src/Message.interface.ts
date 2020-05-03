@@ -65,6 +65,8 @@ export interface IMessage {
 
    getDirectionString(): string
 
+   isSystem(): boolean
+
    getAttachment(): Attachment
 
    setAttachment(attachment: Attachment)
