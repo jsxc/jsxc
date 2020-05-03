@@ -12,8 +12,8 @@ let multiUserJoinTemplate = require('../../../template/multiUserJoin.hbs');
 
 const ENTER_KEY = 13;
 
-export default function() {
-   new MultiUserJoinDialog();
+export default function(server?: string, room?: string) {
+   new MultiUserJoinDialog(server, room);
 }
 
 class MultiUserJoinDialog {
@@ -29,7 +29,7 @@ class MultiUserJoinDialog {
    private passwordInputElement: JQuery<HTMLElement>;
    private nicknameInputElement: JQuery<HTMLElement>;
 
-   constructor() {
+   constructor(private server?: string, private room?: string) {
       let content = multiUserJoinTemplate({
          accounts: Client.getAccountManager().getAccounts().map(account => account.getUid()),
       });
@@ -43,7 +43,12 @@ class MultiUserJoinDialog {
       this.passwordInputElement = dom.find('input[name="password"]');
       this.nicknameInputElement = dom.find('input[name="nickname"]');
 
-      this.updateAccount(Client.getAccountManager().getAccount().getUid());
+      if (server && room) {
+         this.serverInputElement.val(server);
+         this.roomInputElement.val(room);
+      } else {
+         this.updateAccount(Client.getAccountManager().getAccount().getUid());
+      }
 
       this.initializeInputElements();
    }
@@ -68,7 +73,9 @@ class MultiUserJoinDialog {
       this.accountElement.on('change', () => {
          let accountId = <string> this.accountElement.val();
 
-         this.updateAccount(accountId);
+         if (!this.server || !this.room) {
+            this.updateAccount(accountId);
+         }
       });
 
       this.serverInputElement.on('change', () => {

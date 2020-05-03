@@ -155,6 +155,13 @@ export default class ChatWindow {
       this.element.find('.jsxc-bar__caption__secondary').text(text);
    }
 
+   public appendTextToInput(text: string = '') {
+      let value = this.inputElement.val();
+
+      this.inputElement.val((value + ' ' + text).trim());
+      this.inputElement.focus();
+   }
+
    public postMessage(message: IMessage): ChatWindowMessage {
       if (message.getDirection() === Message.DIRECTION.IN && this.inputElement.is(':focus')) {
          message.read();
