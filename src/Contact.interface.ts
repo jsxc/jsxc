@@ -103,7 +103,11 @@ export interface IContact {
 
    setGroups(groups: string[]);
 
-   getGroups(): string[]
+   getGroups(): string[];
+
+   getLastMessageDate(): Date;
+
+   setLastMessageDate(lastMessage: Date): void;
 
    registerHook(property: string, func: (newValue: any, oldValue: any) => void);
 

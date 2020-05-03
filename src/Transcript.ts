@@ -15,7 +15,7 @@ export default class Transcript {
 
    private messages: { [index: string]: IMessage } = {};
 
-   constructor(storage: Storage, contact: Contact) {
+   constructor(storage: Storage, private contact: Contact) {
       this.properties = new PersistentMap(storage, 'transcript', contact.getId());
 
       this.properties.registerHook('firstMessageId', (firstMessageId) => {
@@ -43,6 +43,10 @@ export default class Transcript {
       }
 
       this.addMessage(message);
+
+      if (message.getDirection() !== DIRECTION.SYS) {
+         this.contact.setLastMessageDate(message.getStamp());
+      }
 
       this.properties.set('firstMessageId', message.getUid());
 
@@ -158,6 +162,10 @@ export default class Transcript {
       this.lastMessage = undefined;
 
       this.properties.remove('firstMessageId')
+   }
+
+   public registerNewMessageHook(func: (newValue: any, oldValue: any) => void) {
+      this.registerHook('firstMessageId', func);
    }
 
    public registerHook(property: string, func: (newValue: any, oldValue: any) => void) {
