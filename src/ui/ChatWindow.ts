@@ -77,6 +77,7 @@ export default class ChatWindow {
       this.registerHooks();
 
       this.element.attr('data-presence', Presence[this.contact.getPresence()]);
+      this.element.attr('data-subscription', this.contact.getSubscription());
 
       this.getAccount().triggerChatWindowInitializedHook(this, contact);
    }
@@ -605,6 +606,10 @@ export default class ChatWindow {
 
       this.contact.registerHook('presence', (newPresence) => {
          this.element.attr('data-presence', Presence[newPresence]);
+      });
+
+      this.contact.registerHook('subscription', () => {
+         this.element.attr('data-subscription', this.contact.getSubscription());
       });
 
       this.contact.registerHook('name', (newName) => {

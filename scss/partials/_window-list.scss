@@ -63,6 +63,16 @@
           display: none;
         }
       }
+
+      &:not([data-subscription="both"]):not(.jsxc-bottom) {
+        .jsxc-bar__caption {
+          opacity: 0.7;
+        }
+
+        .jsxc-avatar {
+          filter: grayscale(100%);
+        }
+      }
     }
   }
 }
