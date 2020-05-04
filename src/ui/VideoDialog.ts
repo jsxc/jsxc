@@ -146,6 +146,10 @@ export class VideoDialog {
          JingleHandler.terminateAll('success');
       });
 
+      this.dom.find('.jsxc-video-control.jsxc-minmax').click(() => {
+         this.dom.toggleClass('jsxc-minimized');
+      });
+
       if (screen) {
          screen.on('change', () => {
             this.resetPositionOfLocalVideoElement();
