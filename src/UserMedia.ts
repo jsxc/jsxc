@@ -19,6 +19,8 @@ export default class UserMedia {
       try {
          if (um.indexOf('screen') > -1) {
             stream = await UserMedia.getScreenMedia();
+            const userStream = await UserMedia.filterUserMedia(um).then(UserMedia.getUserMedia);
+            stream.addTrack(userStream.getAudioTracks()[0]);
          } else {
             stream = await UserMedia
                .filterUserMedia(um)
