@@ -19,6 +19,21 @@ export default class UserMedia {
       try {
          if (um.indexOf('screen') > -1) {
             stream = await UserMedia.getScreenMedia();
+            const userStream = await UserMedia
+               .filterUserMedia(um)
+               .then(UserMedia.getUserMedia)
+               .catch((err) => {
+                  Log.info('Could not get other user streams.');
+               });
+
+            if (userStream) {
+               if (um.includes('audio')) {
+                  stream.addTrack(userStream.getAudioTracks()[0]);
+               }
+               if (um.includes('video')) {
+                  stream.addTrack(userStream.getVideoTracks()[0]);
+               }
+            }
          } else {
             stream = await UserMedia
                .filterUserMedia(um)
