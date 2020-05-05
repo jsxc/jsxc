@@ -71,11 +71,11 @@ export default class Omemo {
    public storeDeviceList(identifier: string, deviceList: number[]) {
       let ownJid = this.connection.getJID();
 
+      this.store.setDeviceList(identifier, deviceList);
+
       if (ownJid.bare === identifier) {
          this.makeSureOwnDeviceIdIsInList(deviceList);
       }
-
-      this.store.setDeviceList(identifier, deviceList);
    }
 
    private makeSureOwnDeviceIdIsInList(deviceList: number[]) {
