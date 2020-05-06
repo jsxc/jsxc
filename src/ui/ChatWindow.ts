@@ -164,7 +164,7 @@ export default class ChatWindow {
    }
 
    public postMessage(message: IMessage): ChatWindowMessage {
-      if (message.getDirection() === Message.DIRECTION.IN && this.inputElement.is(':focus')) {
+      if (message.getDirection() === Message.DIRECTION.IN && this.inputElement.is(':focus') && Client.isVisible()) {
          message.read();
       }
 
