@@ -285,16 +285,12 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
    }
 
    private chatWindowInitializedHook(chatWindow: ChatWindow) {
-      this.pluginAPI.Log.debug('chat window initialized hook. Yaay! =)');
-
       let windowElement = chatWindow.getDom().find('.jsxc-message-input');
 
       windowElement.on('focus', () => this.onChatWindowFocus(chatWindow));
    }
 
    private onChatWindowFocus = (chatWindow: ChatWindow) => {
-      this.pluginAPI.Log.debug(`"on" handler on jsxc-window with event ${event.type}. Yaay! =)`);
-
       let transcript = chatWindow.getTranscript();
       let msg = transcript.getFirstMessage();
 
