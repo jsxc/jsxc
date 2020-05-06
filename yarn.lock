@@ -4710,7 +4710,7 @@ inquirer@^7.1.0:
     strip-ansi "^6.0.0"
     through "^2.3.6"
 
-interactjs@^1.8.0:
+interactjs@^1.9.13:
   version "1.9.13"
   resolved "https://registry.yarnpkg.com/interactjs/-/interactjs-1.9.13.tgz#18c1639d55e827de47a778ddcafa82033ce17d84"
   integrity sha512-Oto+fQO4Su0K4Qg35gk5o6GMq7P2VHHxmYpoiNGoNmDQ/NtaqZrygry1u48VBUD7IyiB9zScORb2dXmskDtZfg==
