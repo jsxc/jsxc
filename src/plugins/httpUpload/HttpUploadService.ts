@@ -65,8 +65,8 @@ export default class HttpUploadService {
 
          slot.find('put').find('header').map((index, header) => {
             return {
-               name: header.attr('name').replace(/\n/g, ''),
-               value: header.text().replace(/\n/g, ''),
+               name: $(header).attr('name').replace(/\n/g, ''),
+               value: $(header).text().replace(/\n/g, ''),
             }
          }).get().filter(header => ALLOWED_HEADERS.indexOf(header.name) > -1).forEach(header => putHeaders[header.name] = header.value);
 

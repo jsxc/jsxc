@@ -13,7 +13,7 @@ import MultiUserContact from '@src/MultiUserContact';
 
 export default class Archive {
    private archiveJid: IJID;
-   private messageCache: Array<JQuery<HTMLElement>> = [];
+   private messageCache: JQuery<HTMLElement>[] = [];
 
    constructor(private plugin: MessageArchiveManagementPlugin, private contact: Contact) {
       let jid = contact.isGroupChat() ? contact.getJid() : plugin.getConnection().getJID();

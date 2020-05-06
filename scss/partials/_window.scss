@@ -147,6 +147,7 @@
   min-width: $default-window-width;
   overflow: hidden;
   position: relative;
+  touch-action: none;
   transform: none !important;
   width: $default-window-width;
 
