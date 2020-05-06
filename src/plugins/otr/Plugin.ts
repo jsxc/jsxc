@@ -1,4 +1,4 @@
-import { EncryptionState } from '../../plugin/AbstractPlugin'
+import { EncryptionState, IMetaData } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
 import { EncryptionPlugin } from '../../plugin/EncryptionPlugin'
 import Contact from '../../Contact'
@@ -32,7 +32,7 @@ Options.addDefaults({
 });
 
 const MIN_VERSION = '4.0.0';
-const MAX_VERSION = '4.0.0';
+const MAX_VERSION = '99.0.0';
 
 export default class OTRPlugin extends EncryptionPlugin {
    private sessions = {};
@@ -46,8 +46,10 @@ export default class OTRPlugin extends EncryptionPlugin {
       return 'OTR';
    }
 
-   public static getDescription(): string {
-      return Translation.t('setting-otr-enable');
+   public static getMetaData(): IMetaData {
+      return {
+         description: Translation.t('setting-otr-enable'),
+      }
    }
 
    constructor(pluginAPI: PluginAPI) {

@@ -6,7 +6,7 @@ import Emoticons from './Emoticons'
 import IIdentifiable from './Identifiable.interface'
 import Client from './Client'
 import Utils from './util/Utils'
-import { IMessage, DIRECTION, IMessagePayload } from './Message.interface'
+import { IMessage, DIRECTION, IMessagePayload, MessageMark } from './Message.interface'
 import { ContactType } from './Contact.interface'
 import PersistentMap from './util/PersistentMap'
 import UUID from './util/UUID'
@@ -77,6 +77,10 @@ export default class Message implements IIdentifiable, IMessage {
             data.peer = data.peer.full;
          }
 
+         if (data.sender?.jid) {
+            data.sender.jid = data.sender.jid?.toString();
+         }
+
          if (data.attachment instanceof Attachment) {
             this.attachment = data.attachment;
             data.attachment = data.attachment.getUid();
@@ -84,7 +88,7 @@ export default class Message implements IIdentifiable, IMessage {
 
          this.data.set($.extend({
             unread: true,
-            received: false,
+            mark: MessageMark.pending,
             encrypted: null,
             forwarded: false,
             stamp: new Date().getTime(),
@@ -162,6 +166,10 @@ export default class Message implements IIdentifiable, IMessage {
       return DIRECTION[this.getDirection()].toLowerCase();
    }
 
+   public isSystem(): boolean {
+      return this.getDirection() === DIRECTION.SYS;
+   }
+
    public getAttachment(): Attachment {
       if (!this.attachment && this.data.get('attachment')) {
          this.attachment = new Attachment(this.data.get('attachment'));
@@ -209,15 +217,67 @@ export default class Message implements IIdentifiable, IMessage {
    }
 
    public getSender(): { name: string, jid?: JID } {
-      return this.data.get('sender') || { name: null };
+      let sender = this.data.get('sender');
+
+      return {
+         name: sender?.name,
+         jid: sender?.jid ? new JID(sender.jid) : undefined,
+      };
+   }
+
+   public getMark(): MessageMark {
+      return this.data.get('mark');
+   }
+
+   public aborted() {
+      let currentMark = this.data.get('mark', MessageMark.pending);
+
+      if (currentMark === MessageMark.pending) {
+         this.data.set('mark', MessageMark.aborted);
+      }
+   }
+
+   public isAborted(): boolean {
+      return this.data.get('mark', MessageMark.aborted) === MessageMark.aborted;
+   }
+
+   public transferred() {
+      let currentMark = this.data.get('mark', MessageMark.pending);
+
+      this.data.set('mark', Math.max(currentMark, MessageMark.transferred));
+   }
+
+   public isTransferred(): boolean {
+      return this.data.get('mark', MessageMark.pending) >= MessageMark.transferred;
    }
 
    public received() {
-      this.data.set('received', true);
+      let currentMark = this.data.get('mark', MessageMark.pending);
+
+      this.data.set('mark', Math.max(currentMark, MessageMark.received));
    }
 
    public isReceived(): boolean {
-      return !!this.data.get('received');
+      //this.data.get('received') is deprecated since 4.0.x
+      return this.data.get('mark', MessageMark.pending) >= MessageMark.received || !!this.data.get('received');
+   }
+
+   public displayed() {
+      let currentMark = this.data.get('mark', MessageMark.pending);
+
+      this.data.set('mark', Math.max(currentMark, MessageMark.displayed));
+   }
+
+   public isDisplayed(): boolean {
+      return this.data.get('mark', MessageMark.pending) >= MessageMark.displayed;
+   }
+
+   public acknowledged() {
+      this.data.set('mark', MessageMark.acknowledged);
+   }
+
+   public isAcknowledged(): boolean {
+      return this.data.get('mark', MessageMark.pending) >= MessageMark.acknowledged;
    }
 
    public isForwarded(): boolean {
@@ -282,8 +342,8 @@ export default class Message implements IIdentifiable, IMessage {
       return this.data.get('errorMessage');
    }
 
-   public updateProgress(transfered: number, complete: number) {
-
+   public updateProgress(transferred: number, size: number) {
+      this.data.set('progress', transferred / size);
    }
 }
 

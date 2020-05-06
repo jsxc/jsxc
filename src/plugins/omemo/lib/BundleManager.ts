@@ -42,7 +42,7 @@ export default class BundleManager {
    public async generateBundle(identityKey: IdentityKey): Promise<Bundle> {
       Log.debug('Generate local device bundle.');
 
-      let preKeyPromises: Array<Promise<PreKey>>;
+      let preKeyPromises: Promise<PreKey>[];
       let ids = this.generateUniqueKeyIds(NUM_PRE_KEYS);
       let signedPreKeyId = ids.pop();
 

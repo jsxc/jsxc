@@ -254,7 +254,8 @@ class PluginSection extends Section {
       for (let plugin of pluginRepository.getAllRegisteredPlugins()) {
          let id = plugin.getId();
          let name = plugin.getName();
-         let description = typeof plugin.getDescription === 'function' ? plugin.getDescription() : undefined;
+         let metaData = typeof plugin.getMetaData === 'function' ? plugin.getMetaData() : {};
+         let description = typeof (<any> plugin).getDescription === 'function' ? (<any> plugin).getDescription() : metaData.description;
 
          let checkboxElement = $('<input>');
          checkboxElement.attr('type', 'checkbox');
@@ -276,6 +277,18 @@ class PluginSection extends Section {
          });
 
          let listItem = new ListItem(name, description, undefined, undefined, checkboxElement);
+         let listItemElement = listItem.getDOM();
+
+         if (Array.isArray(metaData.xeps)) {
+            metaData.xeps.forEach(xep => {
+               let xepElement = $('<a>');
+               xepElement.addClass('jsxc-badge');
+               xepElement.text(xep.id + '@' + xep.version);
+               xepElement.attr('title', xep.name);
+               xepElement.attr('href', `https://xmpp.org/extensions/${xep.version.toLowerCase()}.html`);
+               xepElement.appendTo(listItemElement.find('.jsxc-list__text__primary'));
+            });
+         }
 
          contentElement.append(listItem);
       }

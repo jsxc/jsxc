@@ -20,7 +20,7 @@ export async function startCall(contact: IContact, account: Account, type: 'vide
       return;
    }
 
-   let reqMedia = type === 'audio' ? ['audio'] : (type === 'screen' ? ['screen'] : ['audio', 'video']);
+   let reqMedia = type === 'audio' ? ['audio'] : (type === 'screen' ? ['screen', 'audio'] : ['audio', 'video']);
 
    let stream: MediaStream;
 
@@ -84,7 +84,7 @@ function cancelAllOtherSessions(sessions: JingleCallSession[], exception: Jingle
 
 function CallFactory(jingleHandler: JingleHandler, stream: MediaStream, type, contact: IContact, videoDialog: VideoDialog) {
    let constraints = {
-      offerToReceiveAudio: type === 'video' || type === 'audio',
+      offerToReceiveAudio: type === 'video' || type === 'audio' || type === 'screen',
       offerToReceiveVideo: type === 'video' || type === 'screen',
    }
 

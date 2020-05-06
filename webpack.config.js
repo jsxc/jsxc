@@ -130,7 +130,7 @@ let config = {
             ]
          },
          {
-            test: /.*\.(png|jpg|gif|mp3|wav)$/,
+            test: /.*\.(png|jpg|gif|mp3|wav|svg)$/,
             use: [fileLoader]
          },
          {
@@ -151,11 +151,14 @@ let config = {
       }
    },
    externals: {
-      'jquery': 'jQuery',
       'child_process': 'child_process',
       'webworker-threads': 'webworker-threads'
    },
    plugins: [
+      new webpack.ProvidePlugin({
+         $: 'jquery',
+         jQuery: 'jquery'
+      }),
       new MiniCssExtractPlugin({
          filename: 'styles/jsxc.bundle.css',
 
@@ -206,6 +209,10 @@ module.exports = (env, argv) => {
 
    if (typeof argv.mode === 'string') {
       config.mode = argv.mode;
+   }
+
+   if (config.mode === 'development') {
+      config.devtool = 'eval-source-map';
    }
 
    if (argv.release) {

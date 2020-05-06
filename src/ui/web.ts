@@ -3,11 +3,13 @@ import ChatWindowList from './ChatWindowList'
 import Roster from './Roster'
 
 export function init() {
-   SM.changeUIState(SM.UISTATE.INITIATING);
+   if (SM.getUIState() === SM.UISTATE.STANDBY) {
+      SM.changeUIState(SM.UISTATE.INITIATING);
 
-   ChatWindowList.init();
+      ChatWindowList.init();
 
-   Roster.init();
+      Roster.init();
+   }
 
    // if (Options.get('muteNotification')) {
    //    Notification.muteSound();

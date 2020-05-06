@@ -8,7 +8,7 @@ import { Presence } from '../connection/AbstractConnection'
 import { SOUNDS } from '../CONST'
 
 const MIN_VERSION = '4.0.0';
-const MAX_VERSION = '4.0.0';
+const MAX_VERSION = '99.0.0';
 
 export default class NotificationPlugin extends AbstractPlugin {
    public static getId(): string {

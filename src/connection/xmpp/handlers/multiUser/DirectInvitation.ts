@@ -24,7 +24,7 @@ export default class extends AbstractHandler {
          description: `for ${roomJid.bare}`,
          type: NOTICETYPE.invitation,
          fnName: NOTICEFUNCTION.multiUserInvitation,
-         fnParams: ['direct', from.bare, roomJid.bare, reason, password]
+         fnParams: ['direct', from.bare, roomJid.bare, reason, password, this.account.getUid()]
       });
 
       return this.PRESERVE_HANDLER;

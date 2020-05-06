@@ -1,4 +1,4 @@
-import { IMessage, DIRECTION } from '../Message.interface'
+import { IMessage, DIRECTION, MessageMark } from '../Message.interface'
 import DateTime from './util/DateTime'
 import ChatWindow from './ChatWindow'
 import AvatarSet from './AvatarSet'
@@ -30,7 +30,7 @@ export default class ChatWindowMessage {
       let chatWindowMessage = this.chatWindow.getChatWindowMessage(nextMessage);
       let element = chatWindowMessage.getElement();
 
-      this.getElement().before(element);
+      this.getElement().after(element);
       chatWindowMessage.restoreNextMessage();
    }
 
@@ -68,8 +68,8 @@ export default class ChatWindowMessage {
       let timestampElement = this.element.find('.jsxc-timestamp');
       DateTime.stringify(this.message.getStamp().getTime(), timestampElement);
 
-      if (this.message.isReceived()) {
-         this.element.addClass('jsxc-received');
+      if (this.message.getDirection() === DIRECTION.OUT || this.message.getDirection() === DIRECTION.PROBABLY_OUT) {
+         this.element.attr('data-mark', MessageMark[this.message.getMark()]);
       }
 
       if (this.message.isForwarded()) {
@@ -95,11 +95,13 @@ export default class ChatWindowMessage {
 
       if (this.message.getDirection() === DIRECTION.SYS) {
          this.element.find('.jsxc-message-area').append('<div class="jsxc-clear"/>');
-      } else if (this.message.getDirection() === DIRECTION.IN && this.chatWindow.getContact().isGroupChat()) {
+      } else if (this.message.getDirection() === DIRECTION.IN) {
          let text = this.message.getSender().name || this.message.getPeer().bare;
-         let color = Color.generate(text, undefined, 40, 90);
+         let lightness = 90;
+         let color = Color.generate(text, undefined, 40, lightness);
 
-         this.element.css('background-color', color);
+         this.element.addClass(lightness < 60 ? 'jsxc-dark' : 'jsxc-light');
+         this.element.css('--jsxc-message-bg', color);
       }
 
       let sender = this.message.getSender();
@@ -128,6 +130,8 @@ export default class ChatWindowMessage {
             .appendTo(attachmentElement);
       } else {
          attachmentElement.text(attachment.getName());
+
+         attachmentElement.removeClass('jsxc-' + mimeType.replace(/\//, '-'));
       }
 
       if (attachment.hasData()) {
@@ -136,7 +140,11 @@ export default class ChatWindowMessage {
          attachmentElement.attr('download', attachment.getName());
 
          //@REVIEW this is a dirty hack
-         this.element.find('.jsxc-content a[href="' + attachment.getData() + '"]').remove();
+         let linkElement = this.element.find('.jsxc-content a:eq(0)');
+         if (linkElement.next().is('br')) {
+            linkElement.next().remove();
+         }
+         this.element.find('.jsxc-content a:eq(0)').remove();
       }
 
       this.element.find('div').first().prepend(attachmentElement);
@@ -150,8 +158,8 @@ export default class ChatWindowMessage {
          title += '\n' + sender.jid.bare;
       }
 
-      let timestampElement = this.element.find('.jsxc-timestamp');
-      timestampElement.text(sender.name + ': ' + timestampElement.text());
+      let senderElement = this.element.find('.jsxc-sender');
+      senderElement.text(sender.name + ': ');
 
       let avatarElement = $('<div>');
       avatarElement.addClass('jsxc-avatar');
@@ -192,13 +200,15 @@ export default class ChatWindowMessage {
          }
       });
 
-      this.message.registerHook('received', (isReceived) => {
-         if (isReceived) {
-            this.element.addClass('jsxc-received');
-         } else {
-            this.element.removeClass('jsxc-received');
-         }
-      });
+      this.message.registerHook('progress', (progress) => {
+         this.element.find('.jsxc-attachment').attr('data-progress', Math.round(progress * 100) + '%');
+      })
+
+      if (this.message.getDirection() === DIRECTION.OUT || this.message.getDirection() === DIRECTION.PROBABLY_OUT) {
+         this.message.registerHook('mark', (mark) => {
+            this.element.attr('data-mark', MessageMark[mark]);
+         });
+      }
 
       this.message.registerHook('next', (nextId) => {
          if (nextId) {

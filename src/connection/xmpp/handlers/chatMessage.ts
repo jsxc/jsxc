@@ -7,6 +7,7 @@ import Translation from '../../../util/Translation'
 import AbstractHandler from '../AbstractHandler'
 import { Strophe } from '../../../vendor/Strophe'
 import { FUNCTION } from '../../../Notice'
+import { MessageMark } from '@src/Message.interface'
 
 export default class extends AbstractHandler {
 
@@ -44,6 +45,7 @@ export default class extends AbstractHandler {
          forwarded: messageElement.isForwarded(),
          stamp: messageElement.getTime().getTime(),
          unread: messageElement.isIncoming(),
+         mark: MessageMark.transferred,
       });
 
       let pipe = this.account.getPipe('afterReceiveMessage');

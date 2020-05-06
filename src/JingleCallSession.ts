@@ -58,7 +58,7 @@ export default class JingleCallSession extends JingleMediaSession {
       });
    }
 
-   public getMediaRequest(): Array<'audio' | 'video'> {
+   public getMediaRequest(): ('audio' | 'video')[] {
       let mediaRequested = [];
       let contents = this.session.pc.remoteDescription.contents;
 

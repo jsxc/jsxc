@@ -56,10 +56,24 @@
 
     .jsxc-local-video {
       display: block;
+      float: left;
       position: static;
     }
 
     .jsxc-video-wrapper {
+      display: none;
+    }
+
+
+    .jsxc-video-control {
+      width: 22px;
+    }
+
+    .jsxc-minmax {
+      background-image: url("../images/maximize_white.svg");
+    }
+
+    .jsxc-fullscreen {
       display: none;
     }
   }
@@ -388,6 +402,10 @@ div {
     background-image: url("../images/fullscreen_white.svg");
   }
 
+  .jsxc-minmax {
+    background-image: url("../images/minimize_white.svg");
+  }
+
   .jsxc-showchat {
     float: right;
   }
@@ -450,7 +468,7 @@ div {
   }
 
   @media (min-width: 768px) {
-    display: block;
+    // display: block;
   }
 }
 

@@ -15,10 +15,23 @@ export enum EncryptionState {
    Ended
 }
 
+export interface IMetaData {
+   author?: string
+   description?: string
+   xeps?: IXEP[]
+}
+
+export interface IXEP {
+   id: string
+   name: string
+   version: string
+}
+
 export interface IPlugin {
    new(pluginAPI: IPluginAPI): AbstractPlugin
    getId(): string
    getName(): string
+   getMetaData(): IMetaData
 }
 
 export abstract class AbstractPlugin {
@@ -28,6 +41,10 @@ export abstract class AbstractPlugin {
 
    public static getName(): string {
       return null;
+   }
+
+   public static getMetaData(): IMetaData {
+      return {}
    }
 
    constructor(protected minVersion: string, protected maxVersion: string, protected pluginAPI: IPluginAPI) {

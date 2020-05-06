@@ -1,6 +1,6 @@
 import Contact from '../../Contact'
 import Message from '../../Message'
-import { AbstractPlugin } from '../../plugin/AbstractPlugin'
+import { AbstractPlugin, IMetaData } from '../../plugin/AbstractPlugin'
 import PluginAPI from '../../plugin/PluginAPI'
 import JID from '../../JID'
 import * as Namespace from '../../connection/xmpp/namespace'
@@ -12,15 +12,8 @@ import Translation from '../../util/Translation';
 import { IContact } from '@src/Contact.interface';
 import { IMessage } from '@src/Message.interface';
 
-/**
- * XEP-0363: HTTP File Upload
- *
- * @version 1.0.0
- * @see https://xmpp.org/extensions/xep-0363.html
- */
-
 const MIN_VERSION = '4.0.0';
-const MAX_VERSION = '4.0.0';
+const MAX_VERSION = '99.0.0';
 
 export default class HttpUploadPlugin extends AbstractPlugin {
    public static getId(): string {
@@ -31,8 +24,15 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       return 'HTTP File Upload';
    }
 
-   public static getDescription(): string {
-      return Translation.t('setting-http-upload-enable');
+   public static getMetaData(): IMetaData {
+      return {
+         description: Translation.t('setting-http-upload-enable'),
+         xeps: [{
+            id: 'XEP-0363',
+            name: 'HTTP File Upload',
+            version: '1.0.0',
+         }]
+      }
    }
 
    private services: HttpUploadService[];
@@ -72,7 +72,9 @@ export default class HttpUploadPlugin extends AbstractPlugin {
 
          throw new Error('Found no suitable http upload service. File probably too large.');
       }).then((service) => {
-         return service.sendFile(attachment.getFile());
+         return service.sendFile(attachment.getFile(), (transferred, total) => {
+            message.updateProgress(transferred, total);
+         });
       }).then((downloadUrl) => {
          this.addUrlToMessage(downloadUrl, attachment, message);
          attachment.setProcessed(true);
@@ -152,7 +154,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
    private addUrlToMessage(downloadUrl: string, attachment: Attachment, message: Message) {
       let plaintext = message.getPlaintextMessage();
 
-      message.setPlaintextMessage(downloadUrl + ' ' + plaintext);
+      message.setPlaintextMessage(downloadUrl + '\n' + plaintext);
 
       let html = $('<div>').append(message.getHtmlMessage());
 
@@ -226,7 +228,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       let bodyElement = element.find('html body[xmlns="' + Strophe.NS.XHTML + '"]').first();
       let dataElement = element.find('data[xmlns="urn:xmpp:bob"]');
 
-      if (bodyElement.length && dataElement.length === 1) {
+      if (bodyElement.length && dataElement.length === 1 && !message.isEncrypted()) {
          let cid = dataElement.attr('cid');
          let mimeType = dataElement.attr('type');
 

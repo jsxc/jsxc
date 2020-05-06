@@ -30,6 +30,10 @@ export default function(contact: IContact, omemo: Omemo) {
          addCleanUpAction(omemo, dom);
       }
    });
+
+   return new Promise<void>(resolve => {
+      dialog.registerOnClosedHook(() => resolve());
+   });
 }
 
 function addCleanUpAction(omemo: Omemo, dom: JQuery) {
@@ -108,13 +112,13 @@ async function getDeviceProperties(device: Device, identityManager: IdentityMana
    };
 };
 
-function attachActionHandler(deviceElement, device: Device) {
+function attachActionHandler(deviceElement: JQuery<HTMLElement>, device: Device) {
    deviceElement.find('.jsxc-omemo-device-action a').click(function() {
       actionHandler(deviceElement, $(this), device);
    });
 }
 
-function actionHandler(deviceElement, actionElement, device: Device) {
+function actionHandler(deviceElement: JQuery<HTMLElement>, actionElement: JQuery<HTMLElement>, device: Device) {
    let action = actionElement.attr('data-action');
 
    if (action === 'verify') {
@@ -133,6 +137,7 @@ function actionHandler(deviceElement, actionElement, device: Device) {
    let trust = device.getTrust();
    let trustString = Trust[trust];
 
+   deviceElement.attr('data-trust', trustString);
    trustElement.attr('data-trust', trustString);
 
    trustElement.text(trustString);

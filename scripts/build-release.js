@@ -6,21 +6,37 @@ require('colors').setTheme({
 
 const fs = require('fs');
 const path = require('path');
+const execa = require('execa');
 const args = {
    mode: 'production',
-   release: process.argv.indexOf('--release') > 1,
+   release: process.argv.indexOf('--stable') > 1,
 };
 const config = require('../webpack.config.js')(undefined, args);
 const version = JSON.parse(config.plugins[config.plugins.length - 2].definitions['__VERSION__']);
 
-createRelease();
+createRelease().catch(err => {
+	console.log(`✘ ${err.toString()}`.error);
+});
 
 async function createRelease() {
    console.log(`I'm now building JSXC version ${version}.`.verbose);
 
+   await execa('yarn', ['checking']);
+   console.log('✔ all code checks passed'.green);
+
+   await execa('yarn', ['test']);
+   console.log('✔ all tests passed'.green);
+
    await createBuild();
+   console.log('✔ build created'.green);
+
    let filePath = await createArchive('jsxc-' + version);
-   await createSignature(filePath);
+
+   await createGPGSignature(filePath);
+   console.log(`✔ created detached signature: ${path.basename(filePath)}`.green);
+
+   await createGPGArmorSignature(filePath);
+   console.log(`✔ created detached signature: ${path.basename(filePath)}.asc`.green);
 }
 
 function createBuild() {
@@ -48,7 +64,7 @@ function createArchive(fileBaseName) {
       gzip: true,
    });
 
-   archive.on('warning', function(err) {
+   archive.on('warning', function (err) {
       if (err.code === 'ENOENT') {
          console.warn('Archive warning: '.warn, err);
       } else {
@@ -56,7 +72,7 @@ function createArchive(fileBaseName) {
       }
    });
 
-   archive.on('error', function(err) {
+   archive.on('error', function (err) {
       throw err;
    });
 
@@ -65,8 +81,8 @@ function createArchive(fileBaseName) {
    archive.directory('dist/', 'jsxc');
 
    return new Promise(resolve => {
-      output.on('close', function() {
-         console.log(`Wrote ${archive.pointer()} bytes to ${fileName}`.verbose);
+      output.on('close', function () {
+         console.log(`✔ wrote ${archive.pointer()} bytes to ${fileName}`.green);
 
          resolve(filePath);
       });
@@ -75,28 +91,10 @@ function createArchive(fileBaseName) {
    });
 }
 
-function createSignature(filePath) {
-   const {
-      exec
-   } = require('child_process');
+function createGPGSignature(filePath) {
+   return execa('gpg', ['--yes', '--detach-sign', filePath]);
+}
 
-   return new Promise((resolve, reject) => {
-      exec(`gpg --yes --detach-sign "${filePath}"`, (error, stdout, stderr) => {
-         if (error) {
-            throw error;
-         }
-
-         if (stdout) {
-            console.log(`stdout: ${stdout}`);
-         }
-
-         if (stderr) {
-            console.log(`stderr: ${stderr}`);
-         }
-
-         console.log(`Created detached signature: ${path.basename(filePath)}`.verbose);
-
-         resolve();
-      });
-   });
+function createGPGArmorSignature(filePath) {
+   return execa('gpg', ['--yes', '--detach-sign', '--armor', filePath]);
 }

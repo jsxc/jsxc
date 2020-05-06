@@ -1,6 +1,5 @@
 import Dialog from '../Dialog'
 import MultiUserContact from '../../MultiUserContact'
-import Client from '../../Client'
 import Form from '../../connection/Form'
 import Log from '../../util/Log'
 import { IConnection } from '@connection/Connection.interface';
@@ -16,8 +15,7 @@ export default function(contact: MultiUserContact) {
    dialog = new Dialog('<p class="jsxc-waiting">We are loading</p>', true);
    dialog.open();
 
-   //@TODO [MA] selection dialog
-   let connection = Client.getAccountManager().getAccount().getConnection();
+   let connection = contact.getAccount().getConnection();
 
    return connection.getMUCService().getRoomConfigurationForm(contact.getJid())
       .then(stanza => Form.fromXML(stanza))

@@ -125,7 +125,7 @@ abstract class AbstractConnection {
             xmlns: Strophe.NS.XHTML_IM
          }).c('body', {
             xmlns: Strophe.NS.XHTML
-         }).h(htmlMessage).up().up();
+         }).cnode($(htmlMessage).get(0)).up().up().up();
       }
 
       let plaintextMessage = this.getMessage(message, message.getEncryptedPlaintextMessage, message.getPlaintextMessage);
@@ -147,10 +147,20 @@ abstract class AbstractConnection {
             if (!message.getErrorMessage()) {
                message.setErrorMessage('Attachment was not processed');
             }
+
+            if (!message.getPlaintextMessage()) {
+               message.aborted();
+
+               return;
+            }
          }
 
          this.send(xmlMsg);
+
+         message.transferred();
       }).catch(err => {
+         message.aborted();
+
          Log.warn('Error during preSendMessageStanza pipe:', err);
       });
    }

@@ -374,7 +374,12 @@
     "Test": "Test",
     "this_device": "ce périphérique",
     "Verification": "Vérification",
-    "Webcam": "Caméra"
+    "Webcam": "Caméra",
+    "chatmarkers-description": null,
+    "chatmarkers-received": null,
+    "chatmarkers-displayed": null,
+    "chatmarkers-acknowledged": null,
+    "There_are_new_devices": null
   },
   "Notifications": null
 }

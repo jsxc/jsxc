@@ -109,6 +109,10 @@ export default class Attachment {
       return this.properties.get('name');
    }
 
+   public setFile(file: File) {
+      this.file = file;
+   }
+
    public getFile(): File {
       return this.file;
    }

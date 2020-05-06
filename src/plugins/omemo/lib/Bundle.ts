@@ -54,6 +54,9 @@ export default class Bundle {
          .t(ArrayBufferUtils.toBase64(this.bundle.identityKey.getPublic()))
          .up();
 
+      xmlBundle
+         .c('prekeys');
+
       for (let preKey of this.bundle.preKeys) {
          xmlBundle
             .c('preKeyPublic', {
@@ -62,6 +65,8 @@ export default class Bundle {
             .t(ArrayBufferUtils.toBase64(preKey.getPublic()))
             .up();
       }
+
+      xmlBundle.up();
 
       return xmlBundle;
    }

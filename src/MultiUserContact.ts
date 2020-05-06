@@ -91,6 +91,7 @@ export default class MultiUserContact extends Contact {
    public join() {
       this.data.set('joinDate', new Date());
       this.data.set('memberListComplete', false);
+      this.removeAllMembers();
 
       return this.getService().joinMultiUserRoom(new JID(this.jid.bare, this.getNickname()), this.data.get('password'));
    }

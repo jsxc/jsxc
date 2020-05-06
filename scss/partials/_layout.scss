@@ -28,7 +28,7 @@ body.jsxc-fullscreen {
     }
 
     .jsxc-window {
-      background-color: #d4d2d2;
+      background-color: #fff;
       border: 0;
       border-radius: 0;
       left: 0;
@@ -48,12 +48,18 @@ body.jsxc-fullscreen {
     }
   }
 
+  .jsxc-menu__button {
+    min-width: 42px;
+    width: auto;
+  }
+
   .jsxc-bar {
     height: 62px;
+    padding-left: 0.5em;
     width: auto;
 
-    .jsxc-action-entry {
-      background-size: 50%;
+    &__action-entry {
+      background-size: 1.4em;
       height: 62px;
       width: 42px;
 
@@ -62,9 +68,12 @@ body.jsxc-fullscreen {
         line-height: 62px;
       }
 
-      .jsxc-more {
-        background-size: auto 3vmin;
-        width: 100%;
+      .jsxc-menu__more--light {
+        background-size: 1.2em;
+      }
+
+      .jsxc-icon {
+        min-width: 42px;
       }
 
       * {
@@ -73,21 +82,68 @@ body.jsxc-fullscreen {
     }
   }
 
+  .jsxc-chatmessage {
+    margin: 0.2em 1.5em;
+
+    &:first-child {
+      margin-bottom: 2em;
+    }
+
+    &::after {
+      content: none;
+    }
+
+    &__footer {
+      padding-top: 0.8em;
+    }
+
+    &.jsxc-out {
+      background-color: #ececec;
+    }
+
+    &.jsxc-in {
+      background-color: var(--jsxc-message-bg);
+
+      &.jsxc-light .jsxc-chatmessage__footer {
+        color: #5d5d5d;
+      }
+
+      &.jsxc-dark .jsxc-chatmessage__footer {
+        color: #ececec;
+      }
+    }
+
+    &.jsxc-probably_out,
+    &.jsxc-probably_in {
+      border: 1px solid #dadada;
+    }
+  }
+
   .jsxc-send-area {
     padding: 0;
   }
 
-  .jsxc-menu--emoticons,
-  .jsxc-file-transfer,
-  .jsxc-transfer {
-    background-size: 50%;
-    height: 62px;
-    width: 62px;
+  .jsxc-send-area {
+    .jsxc-menu--emoticons,
+    .jsxc-file-transfer,
+    .jsxc-transfer {
+      background-size: 1.8em;
+      height: 62px;
+      width: 62px;
+    }
+
+    .jsxc-transfer-icon {
+      background-size: 1.8em;
+      height: 62px;
+    }
   }
 
-  .jsxc-transfer-icon {
-    background-size: 50%;
-    height: 62px;
+  .jsxc-message-input {
+    background-color: #ececec;
+    border-radius: 2em;
+    line-height: 1.4em;
+    margin-right: 1em;
+    padding: 0.6em 2em 0.4em;
   }
 
   .jsxc-highlight .jsxc-window-bar {
@@ -157,6 +213,10 @@ body.jsxc-fullscreen.jsxc-two-columns {
   box-shadow: 0 0 2px #a1a1a1;
   margin-bottom: 15px;
   padding: 10px;
+
+  &[data-trust="unknown"] {
+    border: 3px solid #f00;
+  }
 
   &-id {
     font-size: 0.7em;

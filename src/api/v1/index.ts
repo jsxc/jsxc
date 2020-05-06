@@ -7,6 +7,7 @@ import { disconnect } from './disconnect';
 import Translation from '@util/Translation';
 import loginBox from '@ui/dialogs/loginBox';
 import Account from './Account';
+import LinkHandlerXMPP from '@src/LinkHandlerXMPP'
 
 export { disconnect };
 export { start, startAndPause } from './start'
@@ -49,6 +50,14 @@ export function watchLogoutClick(element: JQuery) {
    }
 
    element.off('click', null, logout).click(logout);
+}
+
+export function addHandlerToXMPPUri(container: JQuery = $('body')) {
+   LinkHandlerXMPP.get().detect(container);
+}
+
+export function executeXMPPUri(uri: string) {
+   return LinkHandlerXMPP.get().execute(uri);
 }
 
 export function exportAllOptions() {

@@ -170,6 +170,10 @@
     .jsxc-contact-list::after {
       content: attr(data-presence-offline-label);
     }
+
+    .jsxc-bottom .jsxc-avatar {
+      background-image: url("../images/avatar_placeholder.svg");
+    }
   }
 
   &[data-mute="yes"] {

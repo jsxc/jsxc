@@ -13,11 +13,17 @@
   padding: 6px 12px;
   padding: 10px 16px;
   text-align: center;
+  text-decoration: none;
   transition: background-color 0.5s;
   user-select: none;
   vertical-align: middle;
   white-space: nowrap;
   width: auto;
+
+  &--block {
+    display: block;
+    width: 100%;
+  }
 
   &--default {
     background-color: rgba(240, 240, 240, 0.9);
@@ -36,6 +42,16 @@
 
     &:hover {
       background-color: #296496;
+    }
+  }
+
+  &--secondary {
+    background-color: #7daad2;
+    border-color: #658caf;
+    color: #fff;
+
+    &:hover {
+      background-color: #6b99c1;
     }
   }
 

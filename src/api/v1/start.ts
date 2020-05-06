@@ -6,8 +6,6 @@ import InvalidParameterError from '../../errors/InvalidParameterError'
 import Account from '@src/Account';
 
 export async function startAndPause(boshUrl: string, jid: string, password: string): Promise<void> {
-   testMaxOneAccount();
-
    let accountManager = Client.getAccountManager();
    let account = await accountManager.createAccount(boshUrl, jid, password);
 
@@ -20,8 +18,6 @@ export function start(url: string, jid: string, sid: string, rid: string): Promi
 export function start(url: string, jid: string, password: string): Promise<void>;
 export function start(): Promise<any>;
 export function start() {
-   testMaxOneAccount();
-
    let promise: Promise<any>;
 
    switch (arguments.length) {
@@ -80,12 +76,4 @@ function connectAndStartUI(account: Account): Promise<void> {
 
       throw new Error('Unknown error');
    });
-}
-
-function testMaxOneAccount() {
-   let accounts = Client.getAccountManager().getAccounts();
-
-   if (accounts.length > 0 && !Client.isDebugMode()) {
-      throw new Error('Currently we only support one account at a time. If you like to test the experimental multi account feature, please enable debug mode.');
-   }
 }

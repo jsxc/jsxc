@@ -26,11 +26,16 @@ export default class HttpUploadService {
       return this.maxFileSize === 0 || attachment.getSize() <= this.maxFileSize;
    }
 
-   public sendFile(file: File, progress?: (loaded, total) => void): Promise<string> {
-      return this.requestSlot(file)
-         .then((urls) => {
-            return this.uploadFile(file, urls.put, urls.putHeaders, progress).then(() => urls.get);
-         });
+   public async sendFile(file: File, progress?: (loaded, total) => void): Promise<string> {
+      let urls = await this.requestSlot(file)
+
+      await this.uploadFile(file, urls.put, urls.putHeaders, progress);
+
+      if ((<any> file).aesgcm) {
+         return urls.get.replace(/^https?:/, 'aesgcm:') + '#' + (<any> file).aesgcm;
+      }
+
+      return urls.get;
    }
 
    private requestSlot(file: File) {
@@ -60,8 +65,8 @@ export default class HttpUploadService {
 
          slot.find('put').find('header').map((index, header) => {
             return {
-               name: header.attr('name').replace(/\n/g, ''),
-               value: header.text().replace(/\n/g, ''),
+               name: $(header).attr('name').replace(/\n/g, ''),
+               value: $(header).text().replace(/\n/g, ''),
             }
          }).get().filter(header => ALLOWED_HEADERS.indexOf(header.name) > -1).forEach(header => putHeaders[header.name] = header.value);
 

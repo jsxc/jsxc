@@ -1,18 +1,11 @@
-import { AbstractPlugin } from '../plugin/AbstractPlugin'
+import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import Contact from '../Contact'
 import Translation from '@util/Translation';
 import { DIRECTION } from '@src/Message.interface';
 
-/**
- * XEP-0245: The /me Command
- *
- * @version 1.0
- * @see https://xmpp.org/extensions/xep-0245.html
- */
-
 const MIN_VERSION = '4.0.0';
-const MAX_VERSION = '4.0.0';
+const MAX_VERSION = '99.0.0';
 
 export default class MeCommandPlugin extends AbstractPlugin {
    public static getId(): string {
@@ -23,8 +16,15 @@ export default class MeCommandPlugin extends AbstractPlugin {
       return 'The /me Command';
    }
 
-   public static getDescription(): string {
-      return Translation.t('setting-meCommand-enable');
+   public static getMetaData(): IMetaData {
+      return {
+         description: Translation.t('setting-meCommand-enable'),
+         xeps: [{
+            id: 'XEP-0245',
+            name: 'The /me Command',
+            version: '1.0',
+         }]
+      }
    }
 
    constructor(pluginAPI: PluginAPI) {
@@ -38,6 +38,10 @@ export default class MeCommandPlugin extends AbstractPlugin {
 
       if (direction !== DIRECTION.IN) {
          return plaintext.replace(meRegex, `<i>/me</i> `);
+      }
+
+      if (!senderName && !contact) {
+         return plaintext;
       }
 
       if (meRegex.test(plaintext)) {

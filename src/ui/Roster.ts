@@ -28,7 +28,6 @@ export default class Roster {
    private contactList: JQuery;
 
    private static instance: Roster;
-   private static hidden: boolean;
 
    public static init(): void {
       Roster.get();
@@ -42,28 +41,10 @@ export default class Roster {
       return Roster.instance;
    }
 
-   public static hide() {
-      Roster.hidden = true;
-
-      if (Roster.instance) {
-         Roster.instance.hide();
-      }
-   }
-
-   public static show() {
-      Roster.hidden = false;
-
-      if (Roster.instance) {
-         Roster.instance.show();
-      }
-   }
-
    private constructor() {
       let template = rosterTemplate();
       this.element = $(template);
-      if (Roster.hidden) {
-         this.hide();
-      }
+
       this.element.appendTo(Client.getOption(APPEND_KEY) + ':first');
 
       //make sure css empty selector works
@@ -80,14 +61,6 @@ export default class Roster {
       ClientAvatar.get().addElement(this.element.find('.jsxc-bottom .jsxc-avatar'));
 
       this.initOptions();
-   }
-
-   public show() {
-      this.element.show();
-   }
-
-   public hide() {
-      this.element.hide();
    }
 
    public startProcessing(msg?: string) {
@@ -131,13 +104,13 @@ export default class Roster {
       let rosterItem = new RosterItem(contact);
       this.insert(rosterItem);
 
-      contact.registerHook('presence', () => {
+      contact.registerHook('name', () => {
          rosterItem.getDom().detach();
 
          this.insert(rosterItem);
       });
 
-      contact.registerHook('subscription', () => {
+      contact.registerHook('lastMessage', () => {
          rosterItem.getDom().detach();
 
          this.insert(rosterItem);
@@ -297,20 +270,20 @@ export default class Roster {
    private insert(rosterItem: RosterItem) {
       let contactList = this.contactList;
       let contact = rosterItem.getContact();
-      let contactName = contact.getName().toLowerCase();
+      let contactName = contact.getName();
 
-      // Insert buddy with no mutual friendship to the end
-      let contactPresence = (contact.getSubscription() === 'both') ? contact.getPresence() : Presence.offline + 1;
+      let lastMessageDate = contact.getLastMessageDate();
 
-      let pointer = contactList.find(`[data-presence="${Presence[contact.getPresence()]}"]`);
+      let pointer = lastMessageDate ? contactList.find('[data-date]') : contactList.children().first();
       pointer = pointer.length > 0 ? pointer.first() : contactList.children().first();
 
       while (pointer.length > 0) {
-         let pointerSubscription = pointer.data('subscription');
-         let pointerPresence = (pointerSubscription === 'both') ? Presence[pointer.data('presence')] : Presence.offline + 1;
+         let pointerDate = pointer.data('date') ? new Date(pointer.data('date')) : undefined;
          let pointerName = pointer.find('.jsxc-bar__caption__primary').text();
 
-         if ((pointerName.toLowerCase() > contactName && pointerPresence === contactPresence) || pointerPresence > contactPresence) {
+         if ((lastMessageDate && pointerDate && lastMessageDate > pointerDate) ||
+            (lastMessageDate && !pointerDate) ||
+            (!lastMessageDate && !pointerDate && contactName.localeCompare(pointerName) === -1)) {
 
             pointer.before(rosterItem.getDom().detach());
 
@@ -439,6 +412,14 @@ export default class Roster {
       state = (state === CONST.HIDDEN) ? CONST.SHOWN : CONST.HIDDEN;
 
       Client.setOption(VISIBILITY_KEY, state);
+   }
+
+   public hide = () => {
+      Client.setOption(VISIBILITY_KEY, CONST.HIDDEN);
+   }
+
+   public show = () => {
+      Client.setOption(VISIBILITY_KEY, CONST.SHOWN);
    }
 
    private setVisibility(state: string) {

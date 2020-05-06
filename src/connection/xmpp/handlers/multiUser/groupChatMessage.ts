@@ -4,6 +4,7 @@ import Message from '../../../../Message'
 import Translation from '../../../../util/Translation'
 import MultiUserContact from '../../../../MultiUserContact'
 import AbstractHandler from '../../AbstractHandler'
+import { MessageMark } from '@src/Message.interface'
 
 // body.replace(/^\/me /, '<i title="/me">' + Utils.removeHTML(this.sender.getName()) + '</i> ');
 
@@ -112,6 +113,7 @@ export default class extends AbstractHandler {
          stamp: sendDate.getTime(),
          sender,
          unread,
+         mark: MessageMark.transferred,
       });
 
       if (direction === Message.DIRECTION.OUT) {

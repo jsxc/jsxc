@@ -50,7 +50,6 @@ function attachConnection(url: string, jid: string, sid: string, rid: string) {
 }
 
 function resolveConnectionPromise(status, condition, connection, resolve, reject) {
-   //@REVIEW how can this be removed after the promise resolves
    switch (status) {
       case Strophe.Status.DISCONNECTED:
       case Strophe.Status.CONNFAIL:
@@ -62,6 +61,16 @@ function resolveConnectionPromise(status, condition, connection, resolve, reject
       case Strophe.Status.ATTACHED:
          // flush connection in order we reuse a rid
          connection.flush();
+         setTimeout(() => {
+            // attached doesn't mean the connection is working, but if something
+            // is wrong the server will immediately response with a connection failure.
+            resolve({
+               connection,
+               status,
+               condition
+            });
+         }, 1000);
+         break;
       case Strophe.Status.CONNECTED:
          resolve({
             connection,

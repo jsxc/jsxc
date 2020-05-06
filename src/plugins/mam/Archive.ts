@@ -7,13 +7,13 @@ import Utils from '../../util/Utils'
 import Log from '../../util/Log'
 import Translation from '../../util/Translation'
 import * as Namespace from '../../connection/xmpp/namespace'
-import { IMessage } from '@src/Message.interface';
+import { IMessage, MessageMark } from '@src/Message.interface';
 import { IJID } from '@src/JID.interface';
 import MultiUserContact from '@src/MultiUserContact';
 
 export default class Archive {
    private archiveJid: IJID;
-   private messageCache: Array<JQuery<HTMLElement>> = [];
+   private messageCache: JQuery<HTMLElement>[] = [];
 
    constructor(private plugin: MessageArchiveManagementPlugin, private contact: Contact) {
       let jid = contact.isGroupChat() ? contact.getJid() : plugin.getConnection().getJID();
@@ -138,6 +138,7 @@ export default class Archive {
          plaintextMessage: plaintextBody,
          htmlMessage: htmlBody.html(),
          stamp: stamp.getTime(),
+         mark: MessageMark.transferred,
          unread: false,
          sender: undefined,
       };
@@ -187,6 +188,7 @@ export default class Archive {
             peer: this.contact.getJid(),
             direction: Message.DIRECTION.SYS,
             plaintextMessage: Translation.t('Archive_exhausted'),
+            mark: MessageMark.transferred,
             unread: false,
          });
 

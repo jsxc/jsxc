@@ -36,12 +36,6 @@
     opacity: 0.56 !important;
   }
 
-  .jsxc-show-overlay & {
-    .jsxc-overlay {
-      display: block !important;
-    }
-  }
-
   .jsxc-avatar {
     margin-top: 1px;
   }
@@ -51,6 +45,8 @@
     background-image: url("../images/resize_gray.svg");
     background-position: top left;
     background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column-reverse;
     flex-grow: 1;
     left: 0;
     overflow: auto;
@@ -67,82 +63,33 @@
       opacity: 1;
     }
   }
-}
 
-.jsxc-window-fade {
-  display: flex;
-  flex-direction: column;
-  height: 320px;
-  max-width: 100%;
-  min-height: 320px;
-  min-width: $default-window-width;
-  overflow: hidden;
-  position: relative;
-  transform: none !important;
-  width: $default-window-width;
-
-  &:not(&--resizing) {
-    transition: height 0.2s;
-  }
-
-  .jsxc-minimized & {
-    height: 0 !important;
-    min-height: 0;
-    min-width: 100%;
-  }
-
-  .jsxc-overlay {
+  &__overlay {
+    @extend %scrollbar;
+    align-items: center;
     background-color: rgba(0, 0, 0, 0.5);
     bottom: 0;
     display: none;
+    justify-content: center;
     left: 0;
-    overflow-y: scroll;
     position: absolute;
     right: 0;
     top: 0;
     z-index: 100;
 
-    >div {
+    &--show {
+      display: flex;
+    }
+
+    &__inner {
       background-color: #fff;
       border-radius: 3px;
-      margin: 30px 10px;
       padding: 5px;
-      position: relative;
       text-align: center;
+    }
 
-      .jsxc-close {
-        height: 44px;
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: 44px;
-
-        &::after {
-          color: #000;
-          content: "×";
-          cursor: pointer;
-          font-family: Arial, sans-serif;
-          font-size: 20px;
-          opacity: 0.4;
-          position: absolute;
-          right: 4px;
-          top: 4px;
-        }
-
-        &:hover {
-          &::after {
-            opacity: 1;
-          }
-        }
-        @media (min-width: 768px) {
-          height: 30px;
-          width: 30px;
-        }
-      }
-
-      .jsxc-body {
-        margin-top: 20px;
-      }
+    &__content {
+      margin-top: 20px;
 
       p {
         margin-bottom: 10px;
@@ -158,6 +105,60 @@
         text-decoration: underline;
       }
     }
+
+    &__close {
+      height: 44px;
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 44px;
+
+      &::after {
+        color: #000;
+        content: "×";
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        font-size: 20px;
+        opacity: 0.4;
+        position: absolute;
+        right: 4px;
+        top: 4px;
+      }
+
+      &:hover {
+        &::after {
+          opacity: 1;
+        }
+      }
+      @media (min-width: 768px) {
+        height: 30px;
+        width: 30px;
+      }
+    }
+  }
+}
+
+.jsxc-window-fade {
+  display: flex;
+  flex-direction: column;
+  height: 320px;
+  max-width: 100%;
+  min-height: 320px;
+  min-width: $default-window-width;
+  overflow: hidden;
+  position: relative;
+  touch-action: none;
+  transform: none !important;
+  width: $default-window-width;
+
+  &:not(&--resizing) {
+    transition: height 0.2s;
+  }
+
+  .jsxc-minimized & {
+    height: 0 !important;
+    min-height: 0;
+    min-width: 100%;
   }
 }
 
@@ -303,6 +304,23 @@
   position: relative;
   word-wrap: break-word;
 
+  &__footer {
+    clear: both;
+    color: $chatmessage-footer;
+    display: flex;
+    font-size: 0.8em;
+    line-height: 1.2em;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+    white-space: nowrap;
+
+    .jsxc-timestamp {
+      margin-right: 0.3em;
+    }
+  }
+
   &.jsxc-error {
     .jsxc-content {
       opacity: 0.7;
@@ -419,15 +437,32 @@
     border-radius: 3px;
   }
 
-  &.jsxc-image-jpeg,
-  &.jsxc-image-jpg,
-  &.jsxc-image-svg,
-  &.jsxc-image-gif,
-  &.jsxc-image-png {
-    background-image: url("");
-    display: inline-block;
-    line-height: 0;
-    padding: 0;
+  &[data-progress]::after {
+    content: attr(data-progress);
+    display: block;
+    font-size: 0.7em;
+    line-height: 1;
+    opacity: 0.5;
+    text-align: right;
+  }
+
+  &[data-progress="100%"]::after {
+    content: none;
+  }
+
+  &.jsxc-image {
+    background-image: url("../images/filetypes/image.svg");
+
+    &.jsxc-image-jpeg,
+    &.jsxc-image-jpg,
+    &.jsxc-image-svg,
+    &.jsxc-image-gif,
+    &.jsxc-image-png {
+      background-image: url("");
+      display: inline-block;
+      line-height: 0;
+      padding: 0;
+    }
   }
 
   &.jsxc-application {
@@ -452,36 +487,73 @@
   }
 }
 
-.jsxc-timestamp {
-  clear: both;
-  color: $chatmessage-timestamp;
-  font-size: 0.8em;
-  line-height: 1.2em;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  user-select: none;
-  white-space: nowrap;
-}
-
-.jsxc-encrypted {
-  &.jsxc-received {
-    .jsxc-timestamp::after {
-      padding-left: 10px;
-      width: 20px;
-    }
-  }
-
-  .jsxc-timestamp::after {
+.jsxc-chatmessage.jsxc-encrypted {
+  .jsxc-transfer {
     background-image: url("../images/padlock_close_grey.svg");
     background-position: center left;
     background-repeat: no-repeat;
-    background-size: 10px;
+    background-size: 1em;
     content: " ";
     display: inline-block;
     height: 1em;
-    margin-left: 2px;
-    width: 10px;
+    width: 1em;
+  }
+}
+
+.jsxc-mark::before {
+  height: 1em;
+
+  [data-mark="aborted"] & {
+    color: rgb(255, 0, 0);
+    content: "✖";
+    font-size: 12px;
+    line-height: 12px;
+  }
+
+  [data-mark="pending"] & {
+    animation: jsxc-rotate 1.1s infinite linear;
+    border: 0.15em solid rgba(0, 0, 0, 0.2);
+    border-left-color: rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+    content: "";
+    display: inline-block;
+    position: relative;
+    text-indent: -9999em;
+    transform: translateZ(0);
+    vertical-align: sub;
+    width: 1em;
+  }
+
+  [data-mark="transferred"] & {
+    color: $chatmessage-received;
+    content: "✓";
+    filter: grayscale(1);
+    font-size: 12px;
+    line-height: 12px;
+    opacity: 0.6;
+  }
+
+  [data-mark="received"] & {
+    color: $chatmessage-received;
+    content: "✓✓";
+    font-size: 12px;
+    letter-spacing: -0.5em;
+    line-height: 12px;
+    padding-right: 0.5em;
+  }
+
+  [data-mark="displayed"] & {
+    color: $chatmessage-received;
+    content: "👁️";
+    font-size: 12px;
+    line-height: 12px;
+  }
+
+  [data-mark="acknowledged"] & {
+    color: $chatmessage-received;
+    content: "☑️";
+    font-size: 12px;
+    line-height: 12px;
   }
 }
 
@@ -508,7 +580,7 @@
 
 .jsxc-in,
 .jsxc-probably_in {
-  float: left;
+  align-self: flex-start;
   margin-left: 0.5em;
   max-width: 76%;
   position: relative;
@@ -519,18 +591,46 @@
 }
 
 .jsxc-in {
-  background-color: $chatmessage-in-bg;
+  background-color: var(--jsxc-message-bg);
+
+  &.jsxc-light .jsxc-chatmessage__footer {
+    color: #5d5d5d;
+  }
+
+  &.jsxc-dark .jsxc-chatmessage__footer {
+    color: #ececec;
+  }
 }
 
 .jsxc-out,
 .jsxc-probably_out {
-  float: right;
+  align-self: flex-end;
   margin-right: 0.5em;
   max-width: 76%;
   position: relative;
 
+  &.jsxc-received {
+    &::before {
+      bottom: 6px;
+      color: $chatmessage-received;
+      content: "✓";
+      font-size: 12px;
+      line-height: 12px;
+      position: absolute;
+      right: 2px;
+    }
+
+    .jsxc-timestamp {
+      float: left;
+    }
+  }
+
   .jsxc-timestamp {
-    float: right;
+    float: left;
+  }
+
+  .jsxc-chatmessage__footer {
+    justify-content: flex-end;
   }
 }
 
@@ -543,6 +643,7 @@
 }
 
 .jsxc-sys {
+  align-self: center;
   background-color: transparent;
   border-radius: 3px;
   box-sizing: border-box;
@@ -558,6 +659,10 @@
     height: 1.2em;
     vertical-align: middle;
     width: 1.2em;
+  }
+
+  .jsxc-chatmessage__footer {
+    justify-content: center;
   }
 
   &.jsxc-composing {
@@ -586,7 +691,7 @@
   }
 }
 
-div.jsxc-transfer {
+.jsxc-menu.jsxc-transfer {
   position: relative;
   width: 44px;
   z-index: 20;
@@ -622,7 +727,7 @@ div.jsxc-transfer {
     background-size: 1.3em;
     cursor: pointer;
     display: block;
-    height: 40px;
+    height: 100%;
     opacity: 0.3;
     width: 100%;
   }
@@ -700,7 +805,9 @@ div.jsxc-transfer {
     display: block;
   }
 
-  .jsxc-message-area {
+  .jsxc-message-area::after {
+    content: "";
+    display: block;
     padding-top: 42px;
   }
 }

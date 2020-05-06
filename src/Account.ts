@@ -20,6 +20,7 @@ import { IContact } from './Contact.interface';
 import RosterContactProvider from './RosterContactProvider';
 import ContactManager from './ContactManager';
 import FallbackContactProvider from './FallbackContactProvider';
+import Log from '@util/Log'
 
 type ConnectionCallback = (status: number, condition?: string) => void;
 
@@ -62,7 +63,10 @@ export default class Account {
          this.uid = arguments[0];
          this.sessionId = this.getStorage().getItem('sessionId');
       } else if (arguments.length === 3 || arguments.length === 4) {
-         this.uid = (new JID(arguments[1])).bare;
+         let jid = new JID(arguments[1]);
+
+         // anonymous accounts start without node
+         this.uid = jid.node ? jid.bare : UUID.v4().slice(0, 8) + '=' + jid.domain;
          this.sessionId = UUID.v4();
 
          let oldSessionId = this.getStorage().getItem('sessionId');
@@ -284,8 +288,13 @@ export default class Account {
    }
 
    public getJID(): JID {
-      //@REVIEW maybe promise?
-      return this.connector.getJID() || new JID(this.getUid());
+      let jid = this.connector.getJID();
+
+      if (!jid) {
+         Log.warn('Empty JID for account', this.getUid());
+      }
+
+      return jid;
    }
 
    public getConnectionUrl(): string {

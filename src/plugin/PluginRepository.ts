@@ -6,7 +6,8 @@ import { EncryptionPlugin } from './EncryptionPlugin'
 import PluginAPI from './PluginAPI'
 
 export default class PluginRepository {
-   private static registeredPlugins = [];
+   private static registeredPluginIds: string[] = [];
+   private static registeredPlugins: IPlugin[] = [];
 
    private plugins: AbstractPlugin[] = [];
 
@@ -27,10 +28,11 @@ export default class PluginRepository {
          throw new Error(`This plugin has an invalid id (${id}). Only [a-z0-9_-] is allowed.`);
       }
 
-      if (PluginRepository.registeredPlugins.indexOf(id) > -1) {
+      if (PluginRepository.registeredPluginIds.indexOf(id) > -1) {
          throw new Error(`There is already a plugin with the id ${id}.`)
       }
 
+      PluginRepository.registeredPluginIds.push(id);
       PluginRepository.registeredPlugins.push(Plugin);
    }
 

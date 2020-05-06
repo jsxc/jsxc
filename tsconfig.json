@@ -10,6 +10,7 @@
            "@util/*": ["util/*"],
            "@vendor/*": ["vendor/*"],
            "@src/*": ["./*"],
+           "@interactjs/interactjs/*": ["../node_modules/@interactjs/interact/*"]
         },
         "moduleResolution": "node",
         "module": "commonjs",

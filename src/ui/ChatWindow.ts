@@ -34,9 +34,13 @@ export default class ChatWindow {
 
    private inputBlurTimeout: number;
 
+   private readTimeout: number;
+
    private readonly INPUT_RESIZE_DELAY = 1200;
 
    private readonly HIGHTLIGHT_DURATION = 600;
+
+   private readonly READ_DELAY = 2000;
 
    private chatWindowMessages: {[id: string]: ChatWindowMessage} = {};
 
@@ -77,10 +81,7 @@ export default class ChatWindow {
       this.registerHooks();
 
       this.element.attr('data-presence', Presence[this.contact.getPresence()]);
-
-      setTimeout(() => {
-         this.scrollMessageAreaToBottom();
-      }, 500);
+      this.element.attr('data-subscription', this.contact.getSubscription());
 
       this.getAccount().triggerChatWindowInitializedHook(this, contact);
    }
@@ -159,8 +160,15 @@ export default class ChatWindow {
       this.element.find('.jsxc-bar__caption__secondary').text(text);
    }
 
+   public appendTextToInput(text: string = '') {
+      let value = this.inputElement.val();
+
+      this.inputElement.val((value + ' ' + text).trim());
+      this.inputElement.focus();
+   }
+
    public postMessage(message: IMessage): ChatWindowMessage {
-      if (message.getDirection() === Message.DIRECTION.IN && this.inputElement.is(':focus')) {
+      if (message.getDirection() === Message.DIRECTION.IN && this.inputElement.is(':focus') && Client.isVisible()) {
          message.read();
       }
 
@@ -170,7 +178,7 @@ export default class ChatWindow {
       if (message.getDOM().length > 0) {
          message.getDOM().replaceWith(messageElement);
       } else {
-         this.element.find('.jsxc-message-area').append(messageElement);
+         this.element.find('.jsxc-message-area').prepend(messageElement);
       }
 
       chatWindowMessage.restoreNextMessage();
@@ -217,6 +225,19 @@ export default class ChatWindow {
 
       let previewElement = this.element.find('.jsxc-preview');
       previewElement.empty();
+   }
+
+   public getOverlay(): JQuery<HTMLElement> {
+      return this.getDom().find('.jsxc-window__overlay__content');
+   }
+
+   public showOverlay() {
+      this.getDom().find('.jsxc-window__overlay').addClass('jsxc-window__overlay--show');
+   }
+
+   public hideOverlay() {
+      this.getDom().find('.jsxc-window__overlay__content').empty();
+      this.getDom().find('.jsxc-window__overlay').removeClass('jsxc-window__overlay--show');
    }
 
    protected initDroppable() {
@@ -285,32 +306,34 @@ export default class ChatWindow {
          }
       );
 
-      elementHandler.add(
-         this.element.find('.jsxc-video')[0],
-         (ev) => {
-            ev.stopPropagation();
+      if (this.contact.isChat()) {
+         elementHandler.add(
+            this.element.find('.jsxc-video')[0],
+            (ev) => {
+               ev.stopPropagation();
 
-            startCall(contact, this.getAccount());
-         }, JINGLE_FEATURES.video
-      );
+               startCall(contact, this.getAccount());
+            }, JINGLE_FEATURES.video
+         );
 
-      elementHandler.add(
-         this.element.find('.jsxc-audio')[0],
-         (ev) => {
-            ev.stopPropagation();
+         elementHandler.add(
+            this.element.find('.jsxc-audio')[0],
+            (ev) => {
+               ev.stopPropagation();
 
-            startCall(contact, this.getAccount(), 'audio');
-         }, JINGLE_FEATURES.audio
-      );
+               startCall(contact, this.getAccount(), 'audio');
+            }, JINGLE_FEATURES.audio
+         );
 
-      elementHandler.add(
-         this.element.find('.jsxc-share-screen')[0],
-         (ev) => {
-            ev.stopPropagation();
+         elementHandler.add(
+            this.element.find('.jsxc-share-screen')[0],
+            (ev) => {
+               ev.stopPropagation();
 
-            startCall(contact, this.getAccount(), 'screen');
-         }, JINGLE_FEATURES.screen
-      );
+               startCall(contact, this.getAccount(), 'screen');
+            }, JINGLE_FEATURES.screen
+         );
+      }
 
       elementHandler.add(
          this.element.find('.jsxc-send-location')[0],
@@ -398,12 +421,18 @@ export default class ChatWindow {
          clearTimeout(this.inputBlurTimeout);
       }
 
-      this.getTranscript().markAllMessagesAsRead();
+      this.readTimeout = window.setTimeout(() => {
+         this.getTranscript().markAllMessagesAsRead();
+      }, this.READ_DELAY);
 
       this.resizeInputArea();
    }
 
    private onInputBlur = (ev) => {
+      if (this.readTimeout) {
+         clearTimeout(this.readTimeout);
+      }
+
       this.inputBlurTimeout = window.setTimeout(function() {
          $(ev.target).css('height', '');
       }, this.INPUT_RESIZE_DELAY);
@@ -419,13 +448,13 @@ export default class ChatWindow {
          unread: false,
       });
 
+      this.getTranscript().pushMessage(message);
+
       this.clearAttachment();
 
       let pipe = this.getAccount().getPipe('preSendMessage');
 
       pipe.run(this.contact, message).then(([contact, message]) => {
-         this.getTranscript().pushMessage(message);
-
          this.getAccount().getConnection().sendMessage(message);
       }).catch(err => {
          Log.warn('Error during preSendMessage pipe', err);
@@ -587,6 +616,10 @@ export default class ChatWindow {
 
       this.contact.registerHook('presence', (newPresence) => {
          this.element.attr('data-presence', Presence[newPresence]);
+      });
+
+      this.contact.registerHook('subscription', () => {
+         this.element.attr('data-subscription', this.contact.getSubscription());
       });
 
       this.contact.registerHook('name', (newName) => {

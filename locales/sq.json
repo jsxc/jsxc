@@ -374,7 +374,12 @@
     "Test": "Provë",
     "this_device": "këtë pajisje",
     "Verification": "Verifikim",
-    "Webcam": "Kamerë Web"
+    "Webcam": "Kamerë Web",
+    "chatmarkers-description": "Doni të shihni se kur i mori apo i lexoi mesazhet tuaj kontakti juaj?",
+    "chatmarkers-received": "marrë",
+    "chatmarkers-displayed": "shfaqur",
+    "chatmarkers-acknowledged": null,
+    "There_are_new_devices": "Ka pajisje të reja"
   },
   "Notifications": "Njoftime"
 }

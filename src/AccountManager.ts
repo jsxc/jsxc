@@ -6,6 +6,7 @@ import ClientAvatar from './ClientAvatar';
 import RoleAllocator from './RoleAllocator';
 import Log from '@util/Log';
 import Utils from '@util/Utils';
+import * as UI from './ui/web';
 
 export default class AccountManager {
    private accounts = {};
@@ -41,6 +42,7 @@ export default class AccountManager {
 
       Client.getPresenceController().registerAccount(account);
       ClientAvatar.get().registerAccount(account);
+      UI.init();
 
       RoleAllocator.get().waitUntilMaster().then(function() {
          return account.connect();

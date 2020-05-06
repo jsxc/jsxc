@@ -7,6 +7,7 @@ import Dialog from './Dialog'
 import { IContact } from '../Contact.interface'
 import Translation from '../util/Translation'
 import Client from '@src/Client';
+import Log from '@util/Log'
 
 let rosterItemTemplate = require('../../template/roster-item.hbs')
 
@@ -26,6 +27,7 @@ export default class RosterItem {
       this.element.attr('data-type', this.contact.getType());
       this.element.attr('data-presence', Presence[this.contact.getPresence()]);
       this.element.attr('data-subscription', this.contact.getSubscription());
+      this.element.attr('data-date', this.contact.getLastMessageDate()?.toISOString());
 
       this.element.on('dragstart', (ev) => {
          (<any> ev.originalEvent).dataTransfer.setData('text/plain', contact.getJid().full);
@@ -60,14 +62,14 @@ export default class RosterItem {
             bid_name: this.contact.getName(),
             bid_jid: this.contact.getJid().bare,
          });
-         confirmDialog(questionString).getPromise().then((dialog: Dialog) => {
+         confirmDialog(questionString, true).getPromise().then((dialog: Dialog) => {
             contact.getAccount().getContactManager().delete(contact);
 
             //@TODO show spinner
 
             dialog.close();
-         }).catch(() => {
-
+         }).catch((err) => {
+            Log.warn('Could not delete roster entry', err);
          });
       });
 
@@ -98,7 +100,11 @@ export default class RosterItem {
          this.element.attr('data-subscription', this.contact.getSubscription());
       });
 
-      this.contact.getTranscript().registerHook('firstMessageId', (firstMessageId) => {
+      this.contact.registerHook('lastMessage', () => {
+         this.element.attr('data-date', this.contact.getLastMessageDate()?.toISOString());
+      });
+
+      this.contact.getTranscript().registerNewMessageHook((firstMessageId) => {
          if (!firstMessageId) {
             return;
          }
@@ -109,11 +115,15 @@ export default class RosterItem {
 
          let message = this.contact.getTranscript().getMessage(firstMessageId);
 
+         if (message.isSystem()) {
+            return;
+         }
+
          this.element.find('.jsxc-bar__caption__secondary').html(message.getPlaintextEmoticonMessage());
          this.element.find('.jsxc-bar__caption__secondary').attr('title', message.getPlaintextMessage());
       });
 
-      let message = this.contact.getTranscript().getFirstMessage();
+      let message = this.contact.getTranscript().getFirstChatMessage();
       if (message) {
          this.element.find('.jsxc-bar__caption__secondary').html(message.getPlaintextEmoticonMessage());
       }

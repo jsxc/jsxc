@@ -14,6 +14,7 @@ import Message from './Message'
 import ChatWindow from './ui/ChatWindow';
 import ContactProvider from './ContactProvider';
 import DiscoInfo from './DiscoInfo';
+import { IJID } from './JID.interface'
 
 export default class Contact implements IIdentifiable, IContact {
    protected storage: Storage;
@@ -38,7 +39,7 @@ export default class Contact implements IIdentifiable, IContact {
       return data.get('provider');
    }
 
-   constructor(account: Account, jid: JID, name?: string);
+   constructor(account: Account, jid: IJID, name?: string);
    constructor(account: Account, id: string);
    constructor() {
       this.account = arguments[0];
@@ -319,6 +320,16 @@ export default class Contact implements IIdentifiable, IContact {
 
    public getGroups(): string[] {
       return this.data.get('groups') || [];
+   }
+
+   public getLastMessageDate(): Date {
+      let lastMessage = this.data.get('lastMessage');
+
+      return lastMessage ? new Date(lastMessage) : undefined;
+   }
+
+   public setLastMessageDate(lastMessage: Date) {
+      this.data.set('lastMessage', lastMessage.toISOString());
    }
 
    public registerHook(property: string, func: (newValue: any, oldValue: any) => void) {
