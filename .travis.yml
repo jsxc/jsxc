@@ -1,13 +1,9 @@
+dist: bionic
+
 language: node_js
 
-dist: trusty
-
 node_js:
-  - "node"
-
-dist: trusty
-
-sudo: required
+  - 10
 
 addons:
   chrome: stable
