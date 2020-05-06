@@ -125,7 +125,7 @@ abstract class AbstractConnection {
             xmlns: Strophe.NS.XHTML_IM
          }).c('body', {
             xmlns: Strophe.NS.XHTML
-         }).h(htmlMessage).up().up();
+         }).cnode($(htmlMessage).get(0)).up().up().up();
       }
 
       let plaintextMessage = this.getMessage(message, message.getEncryptedPlaintextMessage, message.getPlaintextMessage);
