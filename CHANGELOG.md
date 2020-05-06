@@ -5,6 +5,57 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- wait 2 sec before marking msg as read
+- mark message only as read if client is visible
+- include jquery in build
+- [#871](https://github.com/jsxc/jsxc/issues/871) add minimize button to video dialog
+- show only chat messages in roster, so system messages
+- sort roster by last message
+- implement partially xmpp uri scheme, message and join
+- multi account support
+- improve new device handling (omemo)
+- mark messages as not transferred
+- encrypt file transfer (omemo)
+- show file transfer progress
+- [#683](https://github.com/jsxc/jsxc/issues/683) add plugin meta data
+- show avatar placeholder while offline
+- add audio stream to screen sharing call
+- [#745](https://github.com/jsxc/jsxc/issues/745) implemented chat markers (XEP-0333)
+
+### Fixed
+- fix republishing of lost device id (omemo)
+- fix bundle structure (omemo)
+- xmpp attach failure results in start failure
+- disable video handler for rooms
+- fix support for anonymous accounts
+- ui init for accounts without contacts
+- room member list (muc)
+- sound imports
+- chat history flickering
+- fix interface for disco info repo
+- fix undefined error (me-command)
+- fix some custom emoticons
+- html escaping in remove dialog
+- [#865](https://github.com/jsxc/jsxc/issues/865) disappearing muc sender name
+- show avatar for historical muc msg
+- mark chat windows with partial subscription
+- fix fullscreen button
+
+### Misc
+- show webpack progress
+- update locales
+- use eval source map for dev
+- update dependencies
+- enhance release process
+- improve pre commit hook
+- remove unused code
+- remove unused roster functions
+- update travis script
+- enhance muc member badge
+- change color of messages
+- improve fullscreen layout
+- highlight unknown device in list (omemo)
 
 ## 4.0.0 - 2020-04-08
 ### Added
