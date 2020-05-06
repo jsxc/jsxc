@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - show avatar for historical muc msg
 - mark chat windows with partial subscription
 - fix fullscreen button
+- bump max supported version for all plugins
 
 ### Misc
 - show webpack progress
