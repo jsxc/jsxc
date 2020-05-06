@@ -23,6 +23,8 @@ const files = [
     path.join(__dirname, '..', 'archives', `jsxc-${package.version}.tar.gz.sig`),
 ];
 
+git.addConfig('versionsort.suffix', '-');
+
 function pull() {
     return git.pull('origin', 'master');
 }
@@ -58,8 +60,10 @@ async function isMasterBranch() {
 }
 
 async function generateChangelog() {
-    const latestTag = (await git.tags()).latest;
+    const latestTag = (await git.tags(['--sort=-version:refname'])).latest;
     const title = `v${package.version}` === latestTag ? '[Unreleased]' : `${package.version} (${new Date().toISOString().split('T')[0]})`;
+
+    console.log(`use log between ${latestTag} and HEAD`.verbose);
 
     const logs = await git.log({
         from: latestTag,
@@ -86,6 +90,10 @@ async function generateChangelog() {
         const [, type, scope, description] = messageMatches;
         const entry = { type, scope, description, issues: [] };
 
+        if (['docs'].includes(type)) {
+            return;
+        }
+
         if (log.body) {
             const matches = log.body.match(/(?:fix|fixes|closes?|refs?) #(\d+)/g) || [];
 
@@ -110,7 +118,7 @@ async function generateChangelog() {
             return `[#${issue}](https://github.com/jsxc/jsxc/issues/${issue})`;
         }).join('');
 
-        return `- ${issues}${issues.length > 0 ? ' ' : ''}${entry.description}\n`;
+        return `- ${issues}${issues.length > 0 ? ' ' : ''}${entry.description}${entry.scope ? ` (${entry.scope})`: ''}\n`;
     }
 
     sections.forEach(section => {
