@@ -151,11 +151,14 @@ let config = {
       }
    },
    externals: {
-      'jquery': 'jQuery',
       'child_process': 'child_process',
       'webworker-threads': 'webworker-threads'
    },
    plugins: [
+      new webpack.ProvidePlugin({
+         $: 'jquery',
+         jQuery: 'jquery'
+      }),
       new MiniCssExtractPlugin({
          filename: 'styles/jsxc.bundle.css',
 
