@@ -139,6 +139,7 @@ export default class Archive {
          htmlMessage: htmlBody.html(),
          stamp: stamp.getTime(),
          mark: MessageMark.transferred,
+         unread: false,
          sender: undefined,
       };
 
@@ -188,6 +189,7 @@ export default class Archive {
             direction: Message.DIRECTION.SYS,
             plaintextMessage: Translation.t('Archive_exhausted'),
             mark: MessageMark.transferred,
+            unread: false,
          });
 
          transcript.unshiftMessage(archiveExhaustedMessage);
