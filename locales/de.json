@@ -375,11 +375,11 @@
     "this_device": "dieses Gerät",
     "Verification": "Verifikation",
     "Webcam": "Webcam",
-    "chatmarkers-description": null,
-    "chatmarkers-received": null,
+    "chatmarkers-description": "Möchtest du es sehen wenn dein Kontakt deine Nachrichten erhalten oder gelesen hat?",
+    "chatmarkers-received": "Erhalten",
     "chatmarkers-displayed": null,
     "chatmarkers-acknowledged": null,
-    "There_are_new_devices": null
+    "There_are_new_devices": "Es gibt neue Geräte"
   },
   "Notifications": "Benachrichtigungen"
 }
