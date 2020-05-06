@@ -211,6 +211,10 @@ module.exports = (env, argv) => {
       config.mode = argv.mode;
    }
 
+   if (config.mode === 'development') {
+      config.devtool = 'eval-source-map';
+   }
+
    if (argv.release) {
       version = packageJson.version;
    }
