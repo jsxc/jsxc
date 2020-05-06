@@ -34,9 +34,13 @@ export default class ChatWindow {
 
    private inputBlurTimeout: number;
 
+   private readTimeout: number;
+
    private readonly INPUT_RESIZE_DELAY = 1200;
 
    private readonly HIGHTLIGHT_DURATION = 600;
+
+   private readonly READ_DELAY = 2000;
 
    private chatWindowMessages: {[id: string]: ChatWindowMessage} = {};
 
@@ -417,12 +421,18 @@ export default class ChatWindow {
          clearTimeout(this.inputBlurTimeout);
       }
 
-      this.getTranscript().markAllMessagesAsRead();
+      this.readTimeout = window.setTimeout(() => {
+         this.getTranscript().markAllMessagesAsRead();
+      }, this.READ_DELAY);
 
       this.resizeInputArea();
    }
 
    private onInputBlur = (ev) => {
+      if (this.readTimeout) {
+         clearTimeout(this.readTimeout);
+      }
+
       this.inputBlurTimeout = window.setTimeout(function() {
          $(ev.target).css('height', '');
       }, this.INPUT_RESIZE_DELAY);
