@@ -8,7 +8,7 @@ import Translation from '../util/Translation'
 import { $iq } from '../vendor/Strophe'
 
 const MIN_VERSION = '4.0.0';
-const MAX_VERSION = '4.0.0';
+const MAX_VERSION = '99.0.0';
 
 export default class CarbonsPlugin extends AbstractPlugin {
    public static getId(): string {

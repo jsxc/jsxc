@@ -11,7 +11,7 @@ import PluginAPI from '@src/plugin/PluginAPI';
 import { IContact } from '@src/Contact.interface';
 
 const MIN_VERSION = '4.0.0';
-const MAX_VERSION = '4.0.0';
+const MAX_VERSION = '99.0.0';
 
 const MAM1 = 'urn:xmpp:mam:1';
 const MAM2 = 'urn:xmpp:mam:2';

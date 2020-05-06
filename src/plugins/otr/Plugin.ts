@@ -32,7 +32,7 @@ Options.addDefaults({
 });
 
 const MIN_VERSION = '4.0.0';
-const MAX_VERSION = '4.0.0';
+const MAX_VERSION = '99.0.0';
 
 export default class OTRPlugin extends EncryptionPlugin {
    private sessions = {};

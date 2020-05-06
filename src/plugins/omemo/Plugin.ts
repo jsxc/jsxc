@@ -13,7 +13,7 @@ import ArrayBufferUtils from './util/ArrayBuffer'
 import Attachment from '@src/Attachment'
 
 const MIN_VERSION = '4.0.0';
-const MAX_VERSION = '4.0.0';
+const MAX_VERSION = '99.0.0';
 
 export default class OMEMOPlugin extends EncryptionPlugin {
    private omemo: Omemo;

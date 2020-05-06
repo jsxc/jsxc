@@ -5,7 +5,7 @@ import Translation from '@util/Translation';
 import { DIRECTION } from '@src/Message.interface';
 
 const MIN_VERSION = '4.0.0';
-const MAX_VERSION = '4.0.0';
+const MAX_VERSION = '99.0.0';
 
 export default class MeCommandPlugin extends AbstractPlugin {
    public static getId(): string {

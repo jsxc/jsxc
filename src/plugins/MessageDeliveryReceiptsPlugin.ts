@@ -8,7 +8,7 @@ import { IContact } from '@src/Contact.interface';
 import Translation from '@util/Translation';
 
 const MIN_VERSION = '4.0.0';
-const MAX_VERSION = '4.0.0';
+const MAX_VERSION = '99.0.0';
 
 let PRESERVE_HANDLER = true;
 

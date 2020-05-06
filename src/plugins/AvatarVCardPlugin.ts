@@ -9,7 +9,7 @@ import { ContactType } from '@src/Contact.interface';
 import Translation from '@util/Translation';
 
 const MIN_VERSION = '4.0.0';
-const MAX_VERSION = '4.0.0';
+const MAX_VERSION = '99.0.0';
 
 export default class AvatarVCardPlugin extends AbstractPlugin {
    public static getId(): string {

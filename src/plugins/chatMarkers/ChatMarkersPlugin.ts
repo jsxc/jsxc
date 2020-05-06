@@ -11,7 +11,7 @@ import Translation from '@src/util/Translation'
 import { $msg } from '@src/vendor/Strophe'
 
 const MIN_VERSION = '4.0.0';
-const MAX_VERSION = '4.0.0';
+const MAX_VERSION = '99.0.0';
 
 // frequently used strings
 const CHATMARKERS = 'CHATMARKERS';
