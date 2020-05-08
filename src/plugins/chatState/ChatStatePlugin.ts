@@ -110,6 +110,11 @@ export default class ChatStatePlugin extends AbstractPlugin {
 
    private onComposing(from: JID) {
       let contact = this.pluginAPI.getContact(from);
+
+      if (!contact) {
+         return;
+      }
+
       let chatWindow = contact.getChatWindowController();
 
       //@TODO this doesn't work in all tabs
@@ -118,6 +123,11 @@ export default class ChatStatePlugin extends AbstractPlugin {
 
    private onPaused(from: JID) {
       let contact = this.pluginAPI.getContact(from);
+
+      if (!contact) {
+         return;
+      }
+
       let chatWindow = contact.getChatWindowController();
 
       chatWindow.setBarText('');
