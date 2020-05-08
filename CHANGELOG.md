@@ -42,6 +42,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - mark chat windows with partial subscription
 - fix fullscreen button
 - bump max supported version for all plugins
+- suppress chat state msg for unknown sender
+- fix dialog for message from unknown sender
+- restore notices on reload
+- unread message sync
+- remove mailto prefix from mail link
+- fix roster badge on fullscreen
 
 ### Misc
 - show webpack progress
