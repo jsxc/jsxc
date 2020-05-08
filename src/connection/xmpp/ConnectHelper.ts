@@ -79,7 +79,7 @@ function resolveConnectionPromise(status, condition, connection, resolve, reject
          });
          break;
       default:
-         Log.debug('Strophe Connection Status: ', Object.keys(Strophe.Status)[status])
+         Log.debug('Strophe Connection Status: ', Object.keys(Strophe.Status)[status]);
    }
 }
 

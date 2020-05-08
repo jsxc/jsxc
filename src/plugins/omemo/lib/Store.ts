@@ -84,11 +84,19 @@ export default class Store {
       return this.get('deviceId') && this.get('deviceName') && this.get('identityKey') && this.get('registrationId');
    }
 
+   public getPublishedVersion(): number {
+      return parseInt(this.get('publishedVersion', 0), 10);
+   }
+
    public isPublished(): boolean {
       return this.get('published') === 'true' || this.get('published') === true;
    }
 
    public setPublished(published: boolean) {
+      if (published) {
+         this.put('publishedVersion', 1);
+      }
+
       return this.put('published', published);
    }
 

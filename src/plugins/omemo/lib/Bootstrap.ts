@@ -16,12 +16,17 @@ export default class Bootstrap {
             await this.setup();
          }
 
-         let identityKey = await this.store.getLocalIdentityKey();
+         let identityKey = this.store.getLocalIdentityKey();
          let bundle = await this.bundleManager.generateBundle(identityKey);
          let deviceId = this.store.getLocalDeviceId();
 
          await this.bundleManager.publishBundle(bundle);
          await this.bundleManager.publishDeviceId(deviceId);
+      } else if (this.store.getPublishedVersion() === 0) {
+         Log.info('Refresh broken bundle');
+
+         let bundle = await this.bundleManager.refreshBundle();
+         await this.bundleManager.publishBundle(bundle);
       }
 
       Log.debug('Local device prepared.');

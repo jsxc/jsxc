@@ -100,7 +100,7 @@ export default class ChatWindowMessage {
          let lightness = 90;
          let color = Color.generate(text, undefined, 40, lightness);
 
-         this.element.addClass(lightness < 60 ? 'jsxc-dark' : 'jsxc-light');
+         this.element.addClass(lightness < 60 ? 'jsxc-dark' : 'jsxc-light'); //lgtm [js/useless-comparison-test]
          this.element.css('--jsxc-message-bg', color);
       }
 
