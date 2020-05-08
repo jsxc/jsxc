@@ -365,7 +365,7 @@ function convertEmailToLink(text: string) {
          return '<a href="xmpp:' + jid + '">xmpp:' + jid + '</a>';
       }
 
-      return '<a href="mailto:' + jid + '" target="_blank">mailto:' + jid + '</a>';
+      return '<a href="mailto:' + jid + '" target="_blank">' + jid + '</a>';
    });
 }
 
