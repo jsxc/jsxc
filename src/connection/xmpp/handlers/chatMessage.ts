@@ -64,22 +64,28 @@ export default class extends AbstractHandler {
    private handleUnknownSender(messageElement: MessageElement) {
       Log.debug('Sender is not in our contact list');
 
+      let fromJid = new JID(messageElement.getFrom());
+
       let title = Translation.t('Unknown_sender');
-      let description = Translation.t('You_received_a_message_from_an_unknown_sender_') + ` (${messageElement.getFrom().bare})`;
+      let description = Translation.t('You_received_a_message_from_an_unknown_sender_', {
+         sender: fromJid.bare,
+      });
+
+      description += `\n\n>>>${Utils.escapeHTML(messageElement.getPlaintextBody())}<<<`;
 
       //@REVIEW maybe improve the dialog
       this.account.getNoticeManager().addNotice({
          title,
          description,
-         fnName: FUNCTION.notification,
-         fnParams: [title, description],
+         fnName: FUNCTION.unknownSender,
+         fnParams: [this.account.getUid(), title, description, fromJid.full],
       });
    }
 }
 
 class MessageElement {
-   private element;
-   private originalElement;
+   private element: JQuery<Element>;
+   private originalElement: JQuery<Element>;
    private forwarded = false;
    private carbon = false;
    private direction = Message.DIRECTION.IN;
