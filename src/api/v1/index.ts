@@ -43,7 +43,7 @@ export function watchLogoutClick(element: JQuery) {
       ev.preventDefault();
 
       disconnect().then(() => {
-         $(this).off('click', null, logout);
+         element.off('click', null, logout);
 
          $(this).get(0).click();
       });
