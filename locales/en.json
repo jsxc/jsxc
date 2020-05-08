@@ -371,6 +371,7 @@
     "setting-otr-enable": "Off-the-Record Messaging (OTR) enables you to send end-to-end encrypted messages from one device to another.",
     "setting-receipts-enable": "Enable this plugin if you like to use delivery receipts. If your contact supports this too, both of you will see if a message arrived.",
     "setting-vcard-avatar-enable": "Use vCard to get nice and shiny avatars from your contacts.",
+    "setting-ping-enable": "Reply to server pings. May help if you keep getting disconnected from the server.",
     "Test": "Test",
     "this_device": "this device",
     "Verification": "Verification",
