@@ -105,6 +105,7 @@ export default class Account {
       }
 
       this.getContactManager().restoreCache();
+      this.getNoticeManager();
    }
 
    public getOptions(): Options {
