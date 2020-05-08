@@ -44,7 +44,6 @@ export default class Client {
 
       Client.accountManager = new AccountManager(storage);
       Client.presenceController = new PresenceController(storage, () => Client.accountManager.getAccounts());
-      Client.noticeManager = new NoticeManager(storage);
 
       Client.watchFileDrag();
 
@@ -100,6 +99,10 @@ export default class Client {
    }
 
    public static getNoticeManager(): NoticeManager {
+      if (!Client.noticeManager) {
+         Client.noticeManager = new NoticeManager(Client.getStorage());
+      }
+
       return Client.noticeManager;
    }
 
