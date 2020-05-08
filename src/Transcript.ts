@@ -97,6 +97,12 @@ export default class Transcript {
       if (!this.messages[id] && id) {
          try {
             this.messages[id] = new Message(id);
+
+            this.messages[id].registerHook('unread', (unread) => {
+               if (!unread) {
+                  this.removeMessageFromUnreadMessages(this.messages[id]);
+               }
+            });
          } catch (err) {
             Log.warn(err);
 
@@ -200,6 +206,14 @@ export default class Transcript {
       return unreadMessageIds.length;
    }
 
+   private removeMessageFromUnreadMessages(message: IMessage) {
+      let unreadMessageIds: string[] = this.properties.get('unreadMessageIds') || [];
+
+      if (message && unreadMessageIds.includes(message.getUid())) {
+         this.properties.set('unreadMessageIds', unreadMessageIds.filter(id => id !== message.getUid()));
+      }
+   }
+
    private addMessage(message: IMessage) {
       let id = message.getUid();
 
@@ -209,6 +223,12 @@ export default class Transcript {
          let unreadMessageIds = this.properties.get('unreadMessageIds') || [];
          unreadMessageIds.push(id);
          this.properties.set('unreadMessageIds', unreadMessageIds);
+
+         message.registerHook('unread', (unread) => {
+            if (!unread) {
+               this.removeMessageFromUnreadMessages(message);
+            }
+         });
       }
    }
 }

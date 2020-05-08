@@ -36,6 +36,8 @@ export default class Roster {
    public static get(): Roster {
       if (!Roster.instance) {
          Roster.instance = new Roster();
+
+         Client.getNoticeManager();
       }
 
       return Roster.instance;
