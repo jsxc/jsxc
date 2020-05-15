@@ -114,6 +114,10 @@ export default class Peer {
       let identityManager = this.omemo.getIdentityManager();
 
       let promises = this.getDevices().map(async device => {
+         if ([Trust.confirmed, Trust.recognized].includes(device.getTrust())) {
+            return true;
+         }
+
          try {
             let address = device.getAddress();
             let fingerprint = await identityManager.loadFingerprint(address);
