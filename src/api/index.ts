@@ -15,6 +15,8 @@ export default class JSXC {
 
    public static readonly AbstractEncryptionPlugin = EncryptionPlugin;
 
+   public static readonly jQuery = $;
+
    private static initialized = false;
 
    public numberOfCachedAccounts: number;
