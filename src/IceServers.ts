@@ -74,6 +74,10 @@ export default class IceServers {
 
                reject('ice-servers-not-found');
             }
+         }).fail((xhr, textStatus, error) => {
+            Log.warn('RTC peer config request failed with status: ' + textStatus, error);
+
+            reject('request-not-possible');
          });
       });
    }

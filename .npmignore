@@ -21,3 +21,6 @@ yarn-error.log
 /ISSUE_TEMPLATE.md
 /karma.conf.js
 /tslint.json
+/.editorconfig
+/.env
+/.stylelintcache

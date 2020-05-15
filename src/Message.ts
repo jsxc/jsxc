@@ -170,6 +170,14 @@ export default class Message implements IIdentifiable, IMessage {
       return this.getDirection() === DIRECTION.SYS;
    }
 
+   public isIncoming(): boolean {
+      return this.getDirection() === DIRECTION.IN || this.getDirection() === DIRECTION.PROBABLY_IN;
+   }
+
+   public isOutgoing(): boolean {
+      return this.getDirection() === DIRECTION.OUT || this.getDirection() === DIRECTION.PROBABLY_OUT;
+   }
+
    public getAttachment(): Attachment {
       if (!this.attachment && this.data.get('attachment')) {
          this.attachment = new Attachment(this.data.get('attachment'));

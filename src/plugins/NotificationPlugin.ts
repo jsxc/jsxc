@@ -27,12 +27,13 @@ export default class NotificationPlugin extends AbstractPlugin {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor, 90);
+      pluginAPI.addAfterReceiveGroupMessageProcessor(this.afterReceiveMessageProcessor, 90);
 
       pluginAPI.registerPresenceHook(this.onPresence);
    }
 
    private afterReceiveMessageProcessor = (contact: Contact, message: Message): Promise<any> => {
-      if (message.getPlaintextMessage() || message.getAttachment()) {
+      if ((message.getPlaintextMessage() || message.getAttachment()) && message.isIncoming()) {
          Notification.notify({
             title: Translation.t('New_message_from', {
                name: contact.getName(),

@@ -14,7 +14,7 @@ const KEY_TYPE = 'clientAvatarType';
 const KEY_SESSION_FLAG = 'clientAvatar';
 
 export default class ClientAvatar {
-   private static instance;
+   private static instance: ClientAvatar;
 
    public static get(): ClientAvatar {
       if (!ClientAvatar.instance) {
@@ -25,7 +25,7 @@ export default class ClientAvatar {
    }
 
    private elements = [];
-   private contact;
+   private contact: IContact;
 
    private constructor(private storage: Storage) {
       let accounts = Client.getAccountManager().getAccounts();
