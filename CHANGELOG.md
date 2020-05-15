@@ -5,12 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## 4.1.0 (2020-05-15)
 ### Added
 - wait 2 sec before marking msg as read
 - mark message only as read if client is visible
 - include jquery in build
 - [#871](https://github.com/jsxc/jsxc/issues/871) add minimize button to video dialog
-- show only chat messages in roster, so system messages
+- show only chat messages in roster, no system messages
 - sort roster by last message
 - implement partially xmpp uri scheme, message and join
 - multi account support
@@ -48,6 +50,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - unread message sync
 - remove mailto prefix from mail link
 - fix roster badge on fullscreen
+- handle failed RTC peer config request
+- show notifications only for incoming messages
+- show notifications for group messages
+- do not overwrite trust level (omemo)
 
 ### Misc
 - show webpack progress
