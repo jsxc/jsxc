@@ -27,6 +27,7 @@ export default class NotificationPlugin extends AbstractPlugin {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       pluginAPI.addAfterReceiveMessageProcessor(this.afterReceiveMessageProcessor, 90);
+      pluginAPI.addAfterReceiveGroupMessageProcessor(this.afterReceiveMessageProcessor, 90);
 
       pluginAPI.registerPresenceHook(this.onPresence);
    }
