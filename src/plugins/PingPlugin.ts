@@ -43,7 +43,7 @@ export default class PingPlugin extends AbstractPlugin {
          description: Translation.t('setting-ping-enable'),
          xeps: [{
             id: 'XEP-0199',
-            name: 'XMPP Ping',
+            name: 'Ping',
             version: '0.1',
          }]
       }
