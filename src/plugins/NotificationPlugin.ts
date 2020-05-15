@@ -33,7 +33,7 @@ export default class NotificationPlugin extends AbstractPlugin {
    }
 
    private afterReceiveMessageProcessor = (contact: Contact, message: Message): Promise<any> => {
-      if (message.getPlaintextMessage() || message.getAttachment()) {
+      if ((message.getPlaintextMessage() || message.getAttachment()) && message.isIncoming()) {
          Notification.notify({
             title: Translation.t('New_message_from', {
                name: contact.getName(),

@@ -67,6 +67,10 @@ export interface IMessage {
 
    isSystem(): boolean
 
+   isIncoming(): boolean
+
+   isOutgoing(): boolean
+
    getAttachment(): Attachment
 
    setAttachment(attachment: Attachment)
