@@ -53,6 +53,8 @@ export default class JingleHandler {
          let iq = new IqStanza(data);
          let iqElement = $.parseXML(iq.toString()).getElementsByTagName('iq')[0];
 
+         iqElement.querySelectorAll('payload-type[name="telephone-event"]').forEach(el => el.remove());
+
          if (!iqElement.getAttribute('id')) {
             iqElement.setAttribute('id', UUID.v4() + ':sendIQ');
          }
