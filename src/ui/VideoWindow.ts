@@ -79,7 +79,7 @@ export default class VideoWindow {
       this.videoDialog.setStatus(isVideoDevice ? 'Use remote video device.' : 'No remote video device');
       this.videoDialog.setStatus(isAudioDevice ? 'Use remote audio device.' : 'No remote audio device');
 
-      this.videoElement = $('<video autoplay></video>');
+      this.videoElement = $('<video autoplay playsinline></video>');
       this.videoElement.appendTo(this.wrapperElement);
 
       VideoDialog.attachMediaStream(this.videoElement, stream);
