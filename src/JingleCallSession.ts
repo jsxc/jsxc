@@ -4,6 +4,7 @@ import UserMedia from './UserMedia'
 import Translation from './util/Translation'
 import Notification from './Notification'
 import JingleMediaSession from './JingleMediaSession';
+import { SOUNDS } from './CONST'
 
 export default class JingleCallSession extends JingleMediaSession {
 
@@ -11,7 +12,21 @@ export default class JingleCallSession extends JingleMediaSession {
       Notification.notify({
          title: Translation.t('Incoming_call'),
          message: Translation.t('from_sender') + this.peerContact.getName(),
-         source: this.peerContact
+         source: this.peerContact,
+      });
+
+      Notification.playSound(SOUNDS.CALL, true, true);
+
+      this.on('terminated', () => {
+         Notification.stopSound();
+      });
+
+      this.on('aborted', () => {
+         Notification.stopSound();
+      });
+
+      this.on('adopt', () => {
+         Notification.stopSound();
       });
 
       // send signal to partner

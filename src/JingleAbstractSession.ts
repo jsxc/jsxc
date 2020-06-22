@@ -39,8 +39,12 @@ export default abstract class JingleAbstractSession {
       this.peerChatWindow = this.peerContact.getChatWindow();
 
       this.storage.registerHook(this.session.sid, (newValue) => {
-         if (newValue === ADOPTED && !this.adoptee) {
-            session.emit('aborted');
+         if (newValue === ADOPTED) {
+            if (!this.adoptee) {
+               session.emit('aborted');
+            } else {
+               session.emit(<any> 'adopt');
+            }
          }
       });
 
@@ -64,8 +68,8 @@ export default abstract class JingleAbstractSession {
       return this.peerContact;
    }
 
-   public on(eventName: OTalkEventNames, handler: (data: any) => void) {
-      this.session.on(eventName, (session, data) => handler(data));
+   public on(eventName: OTalkEventNames | 'adopt', handler: (data: any) => void) {
+      this.session.on(<any> eventName, (session, data) => handler(data));
    }
 
    public cancel(): void {

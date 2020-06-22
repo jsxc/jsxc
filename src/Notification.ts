@@ -161,7 +161,7 @@ export default class Notification {
       return NotificationAPI.permission === CONST.NOTIFICATION_GRANTED;
    }
 
-   private static playSound(soundFile: string, loop?: boolean, force?: boolean) {
+   public static playSound(soundFile: string, loop?: boolean, force?: boolean) {
       if (Notification.getOption('mute') || Client.getPresenceController().getCurrentPresence() === Presence.dnd) {
          Log.debug('Sound is muted or presence is DND');
 
@@ -183,7 +183,7 @@ export default class Notification {
       });
    }
 
-   private static stopSound() {
+   public static stopSound() {
       let audio = Notification.audioObject;
 
       if (typeof audio !== 'undefined' && audio !== null) {

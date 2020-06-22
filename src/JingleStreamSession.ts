@@ -3,6 +3,7 @@ import Log from '@util/Log';
 import JingleMediaSession from './JingleMediaSession';
 import Notification from './Notification';
 import Translation from '@util/Translation';
+import { SOUNDS } from './CONST';
 
 export default class JingleStreamSession extends JingleMediaSession {
 
@@ -10,7 +11,21 @@ export default class JingleStreamSession extends JingleMediaSession {
       Notification.notify({
          title: Translation.t('Incoming_stream'),
          message: Translation.t('from_sender') + this.peerContact.getName(),
-         source: this.peerContact
+         source: this.peerContact,
+      });
+
+      Notification.playSound(SOUNDS.CALL, true, true);
+
+      this.on('terminated', () => {
+         Notification.stopSound();
+      });
+
+      this.on('aborted', () => {
+         Notification.stopSound();
+      });
+
+      this.on('adopt', () => {
+         Notification.stopSound();
       });
 
       // send signal to partner
