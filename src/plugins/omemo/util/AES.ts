@@ -32,12 +32,12 @@ export async function encrypt(plaintext): Promise<{ keydata: ArrayBuffer, iv: Bu
    }
 }
 
-async function generateAESKey(): Promise<CryptoKey> {
+async function generateAESKey(): Promise<CryptoKey | CryptoKeyPair> {
    let algo = {
       name: ALGO_NAME,
       length: AES_KEY_LENGTH,
    };
-   let keyUsage = ['encrypt', 'decrypt'];
+   let keyUsage: KeyUsage[] = ['encrypt', 'decrypt'];
 
    let key = await window.crypto.subtle.generateKey(algo, AES_EXTRACTABLE, keyUsage);
 
