@@ -359,7 +359,7 @@ export default class Roster {
    private registerPresenceHandler() {
       this.element.find('.jsxc-js-presence-menu li').click(function() {
          let presenceString = <string> $(this).data('presence');
-         let oldPresence = Client.getPresenceController().getTargetPresence() || Presence.offline;
+         let oldPresence = Client.getPresenceController().getTargetPresence();
          let requestedPresence = Presence[presenceString];
 
          if (Client.getAccountManager().getAccount()) {
