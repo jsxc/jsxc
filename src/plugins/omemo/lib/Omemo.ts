@@ -97,6 +97,14 @@ export default class Omemo {
       return devices.length > 0;
    }
 
+   public getTrust(contact: Contact): Trust {
+      let peer = this.getPeer(contact.getJid());
+      let peerTrust = peer.getTrust();
+      let localPeerTrust = this.localPeer.getTrust();
+
+      return Math.min(peerTrust, localPeerTrust);
+   }
+
    public isTrusted(contact: Contact): boolean {
       let peer = this.getPeer(contact.getJid());
 

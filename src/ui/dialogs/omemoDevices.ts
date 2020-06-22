@@ -6,139 +6,163 @@ import IdentityManager from 'plugins/omemo/lib/IdentityManager';
 import DateTime from '@ui/util/DateTime';
 import Translation from '@util/Translation';
 import Log from '@util/Log';
+import OMEMOPlugin from '@src/plugins/omemo/Plugin';
 
 let omemoDeviceListTemplate = require('../../../template/dialogOmemoDeviceList.hbs');
 let omemoDeviceItemTemplate = require('../../../template/dialogOmemoDeviceItem.hbs');
 
-export default function(contact: IContact, omemo: Omemo) {
-   let content = omemoDeviceListTemplate();
+export default function (contact: IContact, omemo: Omemo) {
+   let omemoDialog = new OmemoDeviceDialog(contact, omemo);
 
-   let dialog = new Dialog(content);
-   let dom = dialog.open();
-
-   omemo.prepare().then(() => {
-      let identityManager = omemo.getIdentityManager();
-      let peerDevices = omemo.getDevices(contact);
-      let ownDevices = omemo.getDevices();
-
-      dom.find('.jsxc-omemo-peerdevices, .jsxc-omemo-owndevices').empty();
-
-      insertDevices(peerDevices, identityManager, dom.find('.jsxc-omemo-peerdevices'));
-      insertDevices(ownDevices, identityManager, dom.find('.jsxc-omemo-owndevices'));
-
-      if (ownDevices.length > 1) {
-         addCleanUpAction(omemo, dom);
-      }
-   });
-
-   return new Promise<void>(resolve => {
-      dialog.registerOnClosedHook(() => resolve());
-   });
+   return omemoDialog.getPromise();
 }
 
-function addCleanUpAction(omemo: Omemo, dom: JQuery) {
-   let buttonElement = $('<button>');
-   buttonElement.addClass('jsxc-button jsxc-button--default')
-   buttonElement.text(Translation.t('Clean_up_own_devices'));
-   buttonElement.click((ev) => {
-      ev.preventDefault();
+class OmemoDeviceDialog {
+   private promise: Promise<void>;
 
-      omemo.cleanUpDeviceList().then(localDeviceId => {
-         dom.find('.jsxc-omemo-owndevices').children().not(`[data-device-id="${localDeviceId}"]`).remove();
+   private dialog: Dialog;
+
+   constructor(private contact: IContact, private omemo: Omemo) {
+      let content = omemoDeviceListTemplate();
+
+      this.dialog = new Dialog(content);
+      let dom = this.dialog.open();
+
+      this.promise = new Promise<void>(resolve => {
+         this.dialog.registerOnClosedHook(() => resolve());
       });
-   });
-   buttonElement.appendTo(dom);
 
-   let explanationElement = $('<p>');
-   explanationElement.addClass('jsxc-hint jsxc-max-width');
-   explanationElement.text(Translation.t('omemo-clean-up-explanation'));
-   explanationElement.appendTo(dom);
-}
+      omemo.prepare().then(() => {
+         let identityManager = omemo.getIdentityManager();
+         let peerDevices = omemo.getDevices(contact);
+         let ownDevices = omemo.getDevices();
 
-async function insertDevices(devices: Device[], identityManager: IdentityManager, listElement) {
-   if (devices.length === 0) {
-      listElement.empty().append($('<p>').text(Translation.t('No_devices_available')));
+         dom.find('.jsxc-omemo-peerdevices, .jsxc-omemo-owndevices').empty();
 
-      return;
+         this.insertDevices(peerDevices, identityManager, dom.find('.jsxc-omemo-peerdevices'));
+         this.insertDevices(ownDevices, identityManager, dom.find('.jsxc-omemo-owndevices'));
+
+         if (ownDevices.length > 1) {
+            this.addCleanUpAction();
+         }
+      });
    }
 
-   for (let device of devices) {
-      //@TODO show spinner
-      let properties = await getDeviceProperties(device, identityManager);
-      let element = $(omemoDeviceItemTemplate(properties));
+   public getPromise() {
+      return this.promise;
+   }
 
-      let lastUsedElement = element.find('.jsxc-omemo-device-last-used');
+   private addCleanUpAction() {
+      let dom = this.dialog.getDom();
+      let buttonElement = $('<button>');
+      buttonElement.addClass('jsxc-button jsxc-button--default')
+      buttonElement.text(Translation.t('Clean_up_own_devices'));
+      buttonElement.click((ev) => {
+         ev.preventDefault();
 
-      if (properties.lastUsed) {
-         DateTime.stringify(properties.lastUsed.getTime(), lastUsedElement);
+         this.omemo.cleanUpDeviceList().then(localDeviceId => {
+            dom.find('.jsxc-omemo-owndevices').children().not(`[data-device-id="${localDeviceId}"]`).remove();
+         });
+      });
+      buttonElement.appendTo(dom);
+
+      let explanationElement = $('<p>');
+      explanationElement.addClass('jsxc-hint jsxc-max-width');
+      explanationElement.text(Translation.t('omemo-clean-up-explanation'));
+      explanationElement.appendTo(dom);
+   }
+
+   private async insertDevices(devices: Device[], identityManager: IdentityManager, listElement) {
+      if (devices.length === 0) {
+         listElement.empty().append($('<p>').text(Translation.t('No_devices_available')));
+
+         return;
+      }
+
+      for (let device of devices) {
+         //@TODO show spinner
+         let properties = await this.getDeviceProperties(device, identityManager);
+         let element = $(omemoDeviceItemTemplate(properties));
+
+         let lastUsedElement = element.find('.jsxc-omemo-device-last-used');
+
+         if (properties.lastUsed) {
+            DateTime.stringify(properties.lastUsed.getTime(), lastUsedElement);
+         } else {
+            lastUsedElement.text(Translation.t('never'));
+         }
+
+         this.attachActionHandler(element, device);
+
+         listElement.append(element);
+      }
+   }
+
+   private async getDeviceProperties(device: Device, identityManager: IdentityManager) {
+      let trust = device.getTrust();
+      let fingerprint: string;
+      let showControls = !device.isCurrentDevice();
+
+      try {
+         fingerprint = await identityManager.loadFingerprint(device.getAddress());
+
+         if (device.isDisabled()) {
+            device.enable();
+         }
+      } catch (err) {
+         Log.warn('Error while retrieving fingerprint', err);
+
+         device.disable();
+
+         trust = Trust.ignored;
+         fingerprint = 'Not available';
+         showControls = false;
+      }
+
+      return {
+         id: device.getId(),
+         isCurrentDevice: device.isCurrentDevice(),
+         fingerprint,
+         trust: Trust[trust],
+         lastUsed: device.getLastUsed(),
+         showControls
+      };
+   }
+
+   private attachActionHandler(deviceElement: JQuery<HTMLElement>, device: Device) {
+      const self = this;
+
+      deviceElement.find('.jsxc-omemo-device-action a').click(function(ev) {
+         ev.preventDefault();
+
+         self.actionHandler(deviceElement, $(this), device);
+
+         OMEMOPlugin.updateEncryptionState(self.contact, self.omemo.getTrust(self.contact));
+      });
+   }
+
+   private actionHandler(deviceElement: JQuery<HTMLElement>, actionElement: JQuery<HTMLElement>, device: Device) {
+      let action = actionElement.attr('data-action');
+
+      if (action === 'verify') {
+         device.setTrust(Trust.confirmed);
+      } else if (action === 'recognize') {
+         device.setTrust(Trust.recognized);
+      } else if (action === 'ignore') {
+         device.setTrust(Trust.ignored);
       } else {
-         lastUsedElement.text(Translation.t('never'));
+         Log.warn('Unknown action');
+
+         return;
       }
 
-      attachActionHandler(element, device);
+      let trustElement = deviceElement.find('.jsxc-omemo-device-trust');
+      let trust = device.getTrust();
+      let trustString = Trust[trust];
 
-      listElement.append(element);
+      deviceElement.attr('data-trust', trustString);
+      trustElement.attr('data-trust', trustString);
+
+      trustElement.text(trustString);
    }
-}
-
-async function getDeviceProperties(device: Device, identityManager: IdentityManager) {
-   let trust = device.getTrust();
-   let fingerprint: string;
-   let showControls = !device.isCurrentDevice();
-
-   try {
-      fingerprint = await identityManager.loadFingerprint(device.getAddress());
-
-      if (device.isDisabled()) {
-         device.enable();
-      }
-   } catch (err) {
-      Log.warn('Error while retrieving fingerprint', err);
-
-      device.disable();
-
-      trust = Trust.ignored;
-      fingerprint = 'Not available';
-      showControls = false;
-   }
-
-   return {
-      id: device.getId(),
-      isCurrentDevice: device.isCurrentDevice(),
-      fingerprint,
-      trust: Trust[trust],
-      lastUsed: device.getLastUsed(),
-      showControls
-   };
-};
-
-function attachActionHandler(deviceElement: JQuery<HTMLElement>, device: Device) {
-   deviceElement.find('.jsxc-omemo-device-action a').click(function() {
-      actionHandler(deviceElement, $(this), device);
-   });
-}
-
-function actionHandler(deviceElement: JQuery<HTMLElement>, actionElement: JQuery<HTMLElement>, device: Device) {
-   let action = actionElement.attr('data-action');
-
-   if (action === 'verify') {
-      device.setTrust(Trust.confirmed);
-   } else if (action === 'recognize') {
-      device.setTrust(Trust.recognized);
-   } else if (action === 'ignore') {
-      device.setTrust(Trust.ignored);
-   } else {
-      Log.warn('Unknown action');
-
-      return;
-   }
-
-   let trustElement = deviceElement.find('.jsxc-omemo-device-trust');
-   let trust = device.getTrust();
-   let trustString = Trust[trust];
-
-   deviceElement.attr('data-trust', trustString);
-   trustElement.attr('data-trust', trustString);
-
-   trustElement.text(trustString);
 }

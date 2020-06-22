@@ -37,6 +37,12 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       }
    }
 
+   public static updateEncryptionState(contact: IContact, trust: Trust) {
+      let state = trust === Trust.confirmed ? EncryptionState.VerifiedEncrypted : EncryptionState.UnverifiedEncrypted;
+
+      contact.setEncryptionState(state, OMEMOPlugin.getId());
+   }
+
    constructor(pluginAPI: IPluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
@@ -88,7 +94,9 @@ export default class OMEMOPlugin extends EncryptionPlugin {
             throw new Error(Translation.t('There_are_new_OMEMO_devices'));
          }
 
-         contact.setEncryptionState(EncryptionState.UnverifiedEncrypted, OMEMOPlugin.getId());
+         let trust = this.getOmemo().getTrust(contact);
+
+         OMEMOPlugin.updateEncryptionState(contact, trust);
       });
    }
 
