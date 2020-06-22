@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## 4.1.1 (2020-06-22)
+### Fixed
+- [#897](https://github.com/jsxc/jsxc/issues/897) switching from online to online
+- [#901](https://github.com/jsxc/jsxc/issues/901) stop propagation for key events
+- [#894](https://github.com/jsxc/jsxc/issues/894) define sasl mechanisms
+- [#896](https://github.com/jsxc/jsxc/issues/896) minimized audio call
+- [#904](https://github.com/jsxc/jsxc/issues/904) call freeze on iphone
+- [nextcloud/jsxc.nextcloud#148](https://github.com/nextcloud/jsxc.nextcloud/issues/148) turn lock green if all omemo devices are verified
+- [#909](https://github.com/jsxc/jsxc/issues/909) play ringtone on incoming calls
+- [#915](https://github.com/jsxc/jsxc/issues/915) remove DTMF jingle messages
+
+### Misc
+- update dependencies
+
 ## 4.1.0 (2020-05-15)
 ### Added
 - wait 2 sec before marking msg as read
