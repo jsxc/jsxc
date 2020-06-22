@@ -4,6 +4,8 @@
 [![Code Quality: Javascript](https://img.shields.io/lgtm/grade/javascript/g/jsxc/jsxc.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jsxc/jsxc/context:javascript)
 [![Total Alerts](https://img.shields.io/lgtm/alerts/g/jsxc/jsxc.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jsxc/jsxc/alerts)
 
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/sualko)
+
 Real-time chat app. This app requires an external XMPP server (openfire, ejabberd etc.).
 
 ## :heart_eyes: Features
