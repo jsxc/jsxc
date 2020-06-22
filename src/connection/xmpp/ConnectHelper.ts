@@ -94,7 +94,14 @@ function testBasicConnectionParameters(url: string, jid: string) {
 }
 
 function prepareConnection(url: string): Strophe.Connection {
-   let connection = new Strophe.Connection(url);
+   let connection = new Strophe.Connection(url, <any> {
+      mechanisms: [
+         (<any> Strophe).SASLAnonymous,
+         (<any> Strophe).SASLExternal,
+         (<any> Strophe).SASLPlain,
+         (<any> Strophe).SASLSHA1
+      ]
+   });
 
    if (Client.isDebugMode()) {
       connection.xmlInput = function(data) {
