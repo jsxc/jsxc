@@ -43,27 +43,22 @@
 
   &.jsxc-minimized {
     bottom: auto;
+    box-shadow: 0 0 10px -5px #000;
     left: 10px;
+    min-height: 120px;
+    min-width: 160px;
     right: auto;
     top: 10px;
 
     .jsxc-video-container {
-      background-color: transparent;
-      box-shadow: 0 0 10px #a1a1a1;
-      position: static;
       z-index: 99;
     }
 
     .jsxc-local-video {
+      bottom: 0;
       display: block;
-      float: left;
-      position: static;
+      right: 0;
     }
-
-    .jsxc-video-wrapper {
-      display: none;
-    }
-
 
     .jsxc-video-control {
       width: 22px;
