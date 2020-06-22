@@ -376,6 +376,7 @@ export default class ChatWindow {
    }
 
    private onInputKeyUp = (ev) => {
+      ev.stopPropagation();
       // let message = <string> $(ev.target).val();
 
       if (ev.which === ENTER_KEY && !ev.shiftKey) {
@@ -401,6 +402,8 @@ export default class ChatWindow {
    }
 
    private onInputKeyPress = (ev) => {
+      ev.stopPropagation();
+
       let message: string = <string> $(ev.target).val();
 
       if (ev.which !== ENTER_KEY || ev.shiftKey || (!message && !this.attachmentDeposition)) {
