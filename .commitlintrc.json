@@ -1,29 +1,25 @@
 {
-   "extends": ["@commitlint/config-conventional"],
-   "rules": {
-      "type-enum": [
-         2,
-         "always",
-         [
-            "build",
-            "ci",
-            "chore",
-            "docs",
-            "feat",
-            "fix",
-            "perf",
-            "refactor",
-            "revert",
-            "style",
-            "test",
-            "example",
-            "release"
-         ]
-      ],
-      "body-max-line-length": [
-          1,
-          "always",
-          100
+  "extends": ["@commitlint/config-conventional"],
+  "rules": {
+    "type-enum": [
+      2,
+      "always",
+      [
+        "build",
+        "ci",
+        "chore",
+        "docs",
+        "feat",
+        "fix",
+        "perf",
+        "refactor",
+        "revert",
+        "style",
+        "test",
+        "example",
+        "release"
       ]
-   }
+    ],
+    "body-max-line-length": [1, "always", 100]
+  }
 }
