@@ -2,7 +2,6 @@
   "name": "@jsxc/jsxc",
   "version": "4.1.1",
   "description": "Real-time XMPP chat application with video calls, file transfer and encrypted communication",
-  "main": "src/index.ts",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -14,6 +13,8 @@
     "react-dom": "^16.13.1"
   },
   "devDependencies": {
+    "@commitlint/cli": "^9.1.1",
+    "@commitlint/config-conventional": "^9.1.1",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
@@ -21,8 +22,20 @@
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.11",
+    "prettier": "^2.0.5",
     "react-scripts": "3.4.1",
     "typescript": "^3.9.7"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,html,css,md}": "prettier --write"
   },
   "eslintConfig": {
     "extends": "react-app"
