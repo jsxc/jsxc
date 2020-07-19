@@ -7,12 +7,15 @@ import RoleAllocator from './RoleAllocator';
 import Log from '@util/Log';
 import Utils from '@util/Utils';
 import * as UI from './ui/web';
+import HookRepository from '@util/HookRepository';
 
 export default class AccountManager {
    private accounts = {};
 
-   constructor(private storage: IStorage) {
+   private hookRepository: HookRepository<(accountId: string) => void>;
 
+   constructor(private storage: IStorage) {
+      this.hookRepository = new HookRepository();
    }
 
    public restoreAccounts(): number {
@@ -43,6 +46,7 @@ export default class AccountManager {
       Client.getPresenceController().registerAccount(account);
       ClientAvatar.get().registerAccount(account);
       UI.init();
+      this.hookRepository.trigger('added', [id]);
 
       RoleAllocator.get().waitUntilMaster().then(function() {
          return account.connect();
@@ -69,6 +73,8 @@ export default class AccountManager {
             delete this.accounts[account.getUid()];
 
             account.remove();
+
+            this.hookRepository.trigger('removed', [id]);
          }
       });
    }
@@ -157,5 +163,13 @@ export default class AccountManager {
       if (ids.length === 0) {
          Client.getNoticeManager().removeAll();
       }
+   }
+
+   public registerAddedAccountHook(hook: (accountId: string) => void) {
+      this.hookRepository.registerHook('added', hook);
+   }
+
+   public registerRemovedAccountHook(hook: (accountId: string) => void) {
+      this.hookRepository.registerHook('removed', hook);
    }
 }

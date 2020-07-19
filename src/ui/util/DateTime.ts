@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+import moment from 'moment'
 
 export default class DateTime {
    public static stringify(stamp: number, elements?: JQuery) {

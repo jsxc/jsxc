@@ -14,6 +14,9 @@ import { Presence } from '../connection/AbstractConnection'
 import { NoticeManager } from '../NoticeManager'
 import ClientAvatar from '../ClientAvatar'
 import confirmDialog from './dialogs/confirm'
+import renderer from './Roster2'
+
+(<any> window).renderer = renderer;
 
 let rosterTemplate = require('../../template/roster.hbs')
 

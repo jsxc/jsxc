@@ -1,4 +1,4 @@
-import * as getRGB from 'consistent-color-generation'
+import getRGB from 'consistent-color-generation'
 
 export default class Color {
    public static generate(text: string, correction?: 'redgreen' | 'blue', saturation?: number, lightness?: number) {

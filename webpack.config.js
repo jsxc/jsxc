@@ -93,7 +93,7 @@ let config = {
    },
    module: {
       rules: [{
-            test: /\.ts$/,
+            test: /\.tsx?$/,
             loader: 'ts-loader',
             exclude: /node_modules/,
          },
@@ -141,7 +141,7 @@ let config = {
       ]
    },
    resolve: {
-      extensions: [".ts", ".js", ".hbs"],
+      extensions: [".ts", ".tsx", ".js", ".hbs"],
       alias: {
          '@connection': path.resolve(__dirname, 'src/connection/'),
          '@ui': path.resolve(__dirname, 'src/ui/'),

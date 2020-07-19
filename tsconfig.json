@@ -16,6 +16,8 @@
         "module": "commonjs",
         "outDir": "./dist",
         "target": "es5",
+        "jsx": "react",
+        "esModuleInterop": true,
         "lib": ["dom", "es2015", "es2015.promise", "es5"],
         "noUnusedLocals": true,
         "downlevelIteration": true

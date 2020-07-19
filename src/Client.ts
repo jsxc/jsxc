@@ -10,6 +10,8 @@ import ChatWindowList from './ui/ChatWindowList';
 import AccountManager from './AccountManager';
 import Translation from '@util/Translation';
 import Migration from './Migration';
+import MenuPresence from './MenuPresence'
+import MenuMain from './MenuMain'
 
 export default class Client {
    private static storage: Storage;
@@ -23,6 +25,10 @@ export default class Client {
    private static initialized = false;
 
    private static options: Options;
+
+   private static presenceMenu: MenuPresence;
+
+   private static mainMenu: MenuMain;
 
    public static init(options?): number {
       if (Client.initialized) {
@@ -130,6 +136,22 @@ export default class Client {
 
    public static setOption(key: string, value) {
       Client.getOptions().set(key, value);
+   }
+
+   public static getPresenceMenu() {
+      if (!Client.presenceMenu) {
+         Client.presenceMenu = new MenuPresence();
+      }
+
+      return Client.presenceMenu;
+   }
+
+   public static getMainMenu() {
+      if (!Client.mainMenu) {
+         Client.mainMenu = new MenuMain();
+      }
+
+      return Client.mainMenu;
    }
 
    private static watchFileDrag() {
