@@ -12,6 +12,7 @@ import Translation from '@util/Translation';
 import Migration from './Migration';
 import MenuPresence from './MenuPresence'
 import MenuMain from './MenuMain'
+import Roster from './Roster'
 
 export default class Client {
    private static storage: Storage;
@@ -25,6 +26,8 @@ export default class Client {
    private static initialized = false;
 
    private static options: Options;
+
+   private static roster: Roster;
 
    private static presenceMenu: MenuPresence;
 
@@ -152,6 +155,14 @@ export default class Client {
       }
 
       return Client.mainMenu;
+   }
+
+   public static getRoster() {
+      if (!Client.roster) {
+         Client.roster = new Roster();
+      }
+
+      return Client.roster;
    }
 
    private static watchFileDrag() {

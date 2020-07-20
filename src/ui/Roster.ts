@@ -3,9 +3,7 @@ import showAboutDialog from './dialogs/about'
 import showMultiUserJoinDialog from './dialogs/multiUserJoin'
 import showSettingsDialog from './dialogs/settings'
 import * as CONST from '../CONST'
-import RosterItem from './RosterItem'
 import Menu from './util/Menu'
-import { IContact } from '../Contact.interface'
 import WindowList from './ChatWindowList'
 import Client from '../Client'
 import Translation from '../util/Translation'
@@ -20,7 +18,7 @@ import renderer from './Roster2'
 
 let rosterTemplate = require('../../template/roster.hbs')
 
-const APPEND_KEY = 'rosterAppend';
+// const APPEND_KEY = 'rosterAppend';
 const VISIBILITY_KEY = 'rosterVisibility';
 const HELP_KEY = 'onlineHelp';
 const HIDE_OFFLINE_KEY = 'hideOfflineContacts';
@@ -28,7 +26,6 @@ const HIDE_OFFLINE_KEY = 'hideOfflineContacts';
 export default class Roster {
 
    private element: JQuery;
-   private contactList: JQuery;
 
    private static instance: Roster;
 
@@ -50,12 +47,10 @@ export default class Roster {
       let template = rosterTemplate();
       this.element = $(template);
 
-      this.element.appendTo(Client.getOption(APPEND_KEY) + ':first');
+      // this.element.appendTo(Client.getOption(APPEND_KEY) + ':first');
 
       //make sure css empty selector works
       $('.jsxc-js-notice-menu .jsxc-menu__button').text('');
-
-      this.contactList = this.element.find('.jsxc-contact-list');
 
       this.addMainMenuEntries();
       this.registerPresenceHandler();
@@ -97,39 +92,6 @@ export default class Roster {
       }
 
       this.refreshOwnPresenceIndicator();
-   }
-
-   public add(contact: IContact) {
-      this.clearStatus();
-
-      if (this.element.find('.jsxc-roster-item[data-id="' + contact.getId() + '"]').length > 0) {
-         return;
-      }
-
-      let rosterItem = new RosterItem(contact);
-      this.insert(rosterItem);
-
-      contact.registerHook('name', () => {
-         rosterItem.getDom().detach();
-
-         this.insert(rosterItem);
-      });
-
-      contact.registerHook('lastMessage', () => {
-         rosterItem.getDom().detach();
-
-         this.insert(rosterItem);
-      });
-   }
-
-   public remove(contact: IContact) {
-      let rosterItemElement = this.element.find('.jsxc-roster-item[data-id="' + contact.getId() + '"]');
-
-      if (rosterItemElement.length === 0) {
-         return;
-      }
-
-      rosterItemElement.remove();
    }
 
    public clearStatus() {
@@ -270,35 +232,6 @@ export default class Roster {
 
       let mainMenu = this.element.find('.jsxc-js-main-menu .jsxc-menu__content ul');
       mainMenu.prepend(li);
-   }
-
-   private insert(rosterItem: RosterItem) {
-      let contactList = this.contactList;
-      let contact = rosterItem.getContact();
-      let contactName = contact.getName();
-
-      let lastMessageDate = contact.getLastMessageDate();
-
-      let pointer = lastMessageDate ? contactList.find('[data-date]') : contactList.children().first();
-      pointer = pointer.length > 0 ? pointer.first() : contactList.children().first();
-
-      while (pointer.length > 0) {
-         let pointerDate = pointer.data('date') ? new Date(pointer.data('date')) : undefined;
-         let pointerName = pointer.find('.jsxc-bar__caption__primary').text();
-
-         if ((lastMessageDate && pointerDate && lastMessageDate > pointerDate) ||
-            (lastMessageDate && !pointerDate) ||
-            (!lastMessageDate && !pointerDate && contactName.localeCompare(pointerName) === -1)) {
-
-            pointer.before(rosterItem.getDom().detach());
-
-            return;
-         }
-
-         pointer = pointer.next();
-      }
-
-      rosterItem.getDom().appendTo(contactList);
    }
 
    private addMainMenuEntries() {

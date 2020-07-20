@@ -2,11 +2,11 @@ import Log from '../../../util/Log'
 import JID from '../../../JID'
 import { IContact } from '../../../Contact.interface'
 import { TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../Notice'
-import Roster from '../../../ui/Roster'
 import { Presence } from '../../AbstractConnection'
 import 'jquery'
 import AbstractHandler from '../AbstractHandler'
 import { ContactSubscription as SUBSCRIPTION } from '../../../Contact.interface'
+import Client from '@src/Client'
 
 const PRESENCE = {
    ERROR: 'error',
@@ -92,7 +92,7 @@ export default class extends AbstractHandler {
          this.account.getConnection().getRosterService().sendSubscriptionAnswer(contact.getJid(), true);
 
          if (contact.getSubscription() !== SUBSCRIPTION.TO) {
-            Roster.get().add(contact);
+            Client.getRoster().addContact(contact);
          }
 
          return this.PRESERVE_HANDLER;
