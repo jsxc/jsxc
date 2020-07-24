@@ -15,7 +15,10 @@
     "emotion-theming": "^10.0.27",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-router-dom": "^5.2.0"
+    "react-hook-form": "^6.0.8",
+    "react-router-dom": "^5.2.0",
+    "ts-pattern": "^1.1.0",
+    "validator": "^13.1.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^9.1.1",
@@ -28,6 +31,7 @@
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
     "@types/react-router-dom": "^5.1.5",
+    "@types/validator": "^13.1.0",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.11",
     "prettier": "^2.0.5",
