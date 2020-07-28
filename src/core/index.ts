@@ -1,2 +1,3 @@
-export { connect } from './connection';
-export { sendMessage } from './message';
+export * from './connection';
+export * from './message';
+export * from './types';

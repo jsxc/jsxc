@@ -9,9 +9,11 @@ import {
   Button,
 } from '@chakra-ui/core';
 import { useForm } from 'react-hook-form';
+import { useXmpp, Credentials } from '../hooks';
 import { match, isValidUrl } from '../utilities';
 
 const Login: React.FC = () => {
+  const [, globalDispatch] = useXmpp();
   const { formState, errors, register, handleSubmit } = useForm();
 
   const validateUrl = (value: string) => {
@@ -45,8 +47,17 @@ const Login: React.FC = () => {
       .otherwise(() => true);
   };
 
-  const handleFormSubmit = (values: any) => {
-    alert(JSON.stringify(values, null, 2));
+  const handleFormSubmit = (values: Credentials) => {
+    const { url, username, password } = values;
+
+    globalDispatch({
+      type: 'CONNECT',
+      credentials: {
+        url,
+        username,
+        password,
+      },
+    });
   };
 
   return (

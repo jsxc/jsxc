@@ -3,6 +3,7 @@ import { ThemeProvider, CSSReset } from '@chakra-ui/core';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { Landing, Login } from './pages';
 import { Header, FullFlex } from './components';
+import { XmppProvider } from './hooks';
 
 const App: React.FC = () => {
   return (
@@ -10,14 +11,16 @@ const App: React.FC = () => {
       <CSSReset />
 
       <FullFlex background="black">
-        <BrowserRouter>
-          <Header />
+        <XmppProvider>
+          <BrowserRouter>
+            <Header />
 
-          <Switch>
-            <Route path="/" exact={true} component={Landing} />
-            <Route path="/login" component={Login} />
-          </Switch>
-        </BrowserRouter>
+            <Switch>
+              <Route path="/" exact={true} component={Landing} />
+              <Route path="/login" component={Login} />
+            </Switch>
+          </BrowserRouter>
+        </XmppProvider>
       </FullFlex>
     </ThemeProvider>
   );
