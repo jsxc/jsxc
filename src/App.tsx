@@ -1,8 +1,8 @@
 import React from 'react';
 import { ThemeProvider, CSSReset } from '@chakra-ui/core';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
-import { Landing, Login } from './pages';
-import { Header, FullFlex } from './components';
+import { Landing, Login, Chats } from './pages';
+import { FullFlex } from './components';
 import { XmppProvider } from './hooks';
 
 const App: React.FC = () => {
@@ -13,11 +13,10 @@ const App: React.FC = () => {
       <FullFlex background="black">
         <XmppProvider>
           <BrowserRouter>
-            <Header />
-
             <Switch>
               <Route path="/" exact={true} component={Landing} />
               <Route path="/login" component={Login} />
+              <Route path="/chats" component={Chats} />
             </Switch>
           </BrowserRouter>
         </XmppProvider>

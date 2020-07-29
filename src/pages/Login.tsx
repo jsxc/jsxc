@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Flex,
   Stack,
+  Image,
   FormControl,
   FormLabel,
   FormErrorMessage,
@@ -9,12 +10,20 @@ import {
   Button,
 } from '@chakra-ui/core';
 import { useForm } from 'react-hook-form';
+import { useHistory } from 'react-router-dom';
 import { useXmpp, Credentials } from '../hooks';
 import { match, isValidUrl } from '../utilities';
 
 const Login: React.FC = () => {
-  const [, globalDispatch] = useXmpp();
+  const [globalState, globalDispatch] = useXmpp();
   const { formState, errors, register, handleSubmit } = useForm();
+  const history = useHistory();
+
+  useEffect(() => {
+    if (globalState.connection.status === 'CONNECTED') {
+      history.push('/chats');
+    }
+  }, [globalState.connection.status, history]);
 
   const validateUrl = (value: string) => {
     return match<string, string | boolean>(value)
@@ -70,6 +79,12 @@ const Login: React.FC = () => {
     >
       <form onSubmit={handleSubmit(handleFormSubmit)}>
         <Stack align="center" spacing={4}>
+          <Image
+            src={require('../assets/images/logo.svg')}
+            size="8rem"
+            alt="JSXC logo"
+          />
+
           <FormControl isInvalid={errors.url}>
             <FormLabel htmlFor="url" color="white">
               URL

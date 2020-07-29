@@ -11,7 +11,6 @@ const Landing: React.FC = () => {
       justify="center"
       align="center"
       textAlign="center"
-      marginBottom="4rem"
       padding="3rem"
     >
       <Stack align="center" spacing={8}>
