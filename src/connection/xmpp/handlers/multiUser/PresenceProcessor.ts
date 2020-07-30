@@ -64,9 +64,9 @@ export default class MultiUserPresenceProcessor {
          this.multiUserContact.removeMember(this.nickname);
 
          if (this.codes.length === 1 && this.codes.indexOf('110') > -1) {
-            this.inform(':door:' + Translation.t('You_left_the_building'));
+            this.inform(':door: ' + Translation.t('You_left_the_building'));
          } else if (this.codes.length === 0) {
-            this.inform(':door:' + Translation.t('left_the_building', {
+            this.inform(':door: ' + Translation.t('left_the_building', {
                nickname: this.nickname,
                escapeInterpolation: true
             }));
