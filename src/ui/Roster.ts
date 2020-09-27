@@ -1,7 +1,7 @@
 import showContactDialog from './dialogs/contact'
-import showAboutDialog from './dialogs/about'
-import showMultiUserJoinDialog from './dialogs/multiUserJoin'
-import showSettingsDialog from './dialogs/settings'
+// import showAboutDialog from './dialogs/about'
+// import showMultiUserJoinDialog from './dialogs/multiUserJoin'
+// import showSettingsDialog from './dialogs/settings'
 import * as CONST from '../CONST'
 import RosterItem from './RosterItem'
 import Menu from './util/Menu'
@@ -19,7 +19,7 @@ let rosterTemplate = require('../../template/roster.hbs')
 
 const APPEND_KEY = 'rosterAppend';
 const VISIBILITY_KEY = 'rosterVisibility';
-const HELP_KEY = 'onlineHelp';
+// const HELP_KEY = 'onlineHelp';
 const HIDE_OFFLINE_KEY = 'hideOfflineContacts';
 
 export default class Roster {
@@ -144,7 +144,7 @@ export default class Roster {
    public setEmptyContactList() {
       let statusElement = $('<p>');
       statusElement.text(Translation.t('Your_roster_is_empty_add_'));
-      statusElement.find('a').click(<any> showContactDialog);
+      statusElement.find('a').click(<any>showContactDialog);
       statusElement.append('.');
 
       this.setStatus(statusElement);
@@ -176,7 +176,7 @@ export default class Roster {
       let noticeListElement = $('.jsxc-js-notice-menu ul');
       let noticeElement = $('<li/>');
 
-      noticeElement.click(function(ev) {
+      noticeElement.click(function (ev) {
          ev.stopPropagation();
          ev.preventDefault();
 
@@ -209,14 +209,14 @@ export default class Roster {
             let dialog = confirmDialog(Translation.t('Do_you_really_want_to_dismiss_all_notices'));
             dialog.getPromise().then(() => {
                NoticeManager.removeAll();
-            }).catch(() => {});
+            }).catch(() => { });
          });
       }
    }
 
    public removeNotice(manager: NoticeManager, noticeId: string) {
       let managerId = manager.getId() || '';
-      let noticeElement = $('.jsxc-js-notice-menu li').filter(function() {
+      let noticeElement = $('.jsxc-js-notice-menu li').filter(function () {
          return $(this).attr('data-notice-id') === noticeId &&
             ($(this).attr('data-manager-id') || '') === managerId;
       });
@@ -299,7 +299,7 @@ export default class Roster {
    }
 
    private addMainMenuEntries() {
-      this.addMenuEntry({
+      /*this.addMenuEntry({
          id: 'about',
          handler: showAboutDialog,
          label: Translation.t('About'),
@@ -353,12 +353,12 @@ export default class Roster {
          label: Translation.t('Settings'),
          offlineAvailable: true,
          icon: 'setting'
-      });
+      });*/
    }
 
    private registerPresenceHandler() {
-      this.element.find('.jsxc-js-presence-menu li').click(function() {
-         let presenceString = <string> $(this).data('presence');
+      this.element.find('.jsxc-js-presence-menu li').click(function () {
+         let presenceString = <string>$(this).data('presence');
          let oldPresence = Client.getPresenceController().getTargetPresence();
          let requestedPresence = Presence[presenceString];
 
@@ -380,11 +380,11 @@ export default class Roster {
       this.element.find('.jsxc-roster-toggle').click(this.toggle);
    }
 
-   private toggleOffline = (ev) => {
-      let hideOffline = !Client.getOption(HIDE_OFFLINE_KEY);
+   // private toggleOffline = (ev) => {
+   //    let hideOffline = !Client.getOption(HIDE_OFFLINE_KEY);
 
-      Client.setOption(HIDE_OFFLINE_KEY, hideOffline);
-   }
+   //    Client.setOption(HIDE_OFFLINE_KEY, hideOffline);
+   // }
 
    private hideOffline(yes: boolean) {
       if (yes) {
@@ -394,11 +394,11 @@ export default class Roster {
       }
    }
 
-   private toggleMuteNotification = () => {
-      let muteNotification = !Client.getOption('notification.mute');
+   // private toggleMuteNotification = () => {
+   //    let muteNotification = !Client.getOption('notification.mute');
 
-      Client.setOption('notification.mute', muteNotification);
-   }
+   //    Client.setOption('notification.mute', muteNotification);
+   // }
 
    private muteNotification(yes: boolean) {
       let element = this.element.find('.jsxc-mute-notification');
