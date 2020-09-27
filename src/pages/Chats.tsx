@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  PseudoBox,
   Flex,
   Stack,
   Heading,
@@ -81,20 +82,28 @@ const Chats: React.FC = () => {
             const contactName = contact.name ?? contact.jid;
 
             return (
-              <Flex
-                flex={1}
-                align="center"
+              <PseudoBox
+                rounded="md"
+                cursor="pointer"
+                _hover={{ backgroundColor: '#333' }}
+                padding={2}
                 key={contact.jid}
-                onClick={handleThreadClick(thread)}
               >
-                <Avatar marginRight="1em" size="sm" name={contactName}>
-                  <AvatarBadge size="1em" bg="green.500" borderWidth={2} />
-                </Avatar>
+                <Flex align="center" onClick={handleThreadClick(thread)}>
+                  <Avatar marginRight="1em" size="sm" name={contactName}>
+                    <AvatarBadge size="1em" bg="green.500" borderWidth={2} />
+                  </Avatar>
 
-                <Text fontSize="1em" color="#747577">
-                  {contactName}
-                </Text>
-              </Flex>
+                  <Text
+                    fontSize="1em"
+                    color="#747577"
+                    maxWidth="12em"
+                    isTruncated={true}
+                  >
+                    {contactName}
+                  </Text>
+                </Flex>
+              </PseudoBox>
             );
           })}
         </Stack>
