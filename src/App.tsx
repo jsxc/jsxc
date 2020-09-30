@@ -1,5 +1,9 @@
 import React from 'react';
-import { ThemeProvider, CSSReset } from '@chakra-ui/core';
+import {
+  theme as defaultTheme,
+  ThemeProvider,
+  CSSReset,
+} from '@chakra-ui/core';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { Landing, Login, Chats } from './pages';
 import { FullFlex } from './components';
@@ -7,7 +11,7 @@ import { XmppProvider } from './hooks';
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider>
+    <ThemeProvider theme={theme}>
       <CSSReset />
 
       <FullFlex background="black">
@@ -23,6 +27,15 @@ const App: React.FC = () => {
       </FullFlex>
     </ThemeProvider>
   );
+};
+
+const theme = {
+  ...defaultTheme,
+  fonts: {
+    heading: 'Space Mono, sans-serif',
+    body: 'Space Mono, sans-serif',
+    mono: 'Space Mono, sans-serif',
+  },
 };
 
 export default App;
