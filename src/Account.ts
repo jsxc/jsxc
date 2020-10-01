@@ -55,14 +55,14 @@ export default class Account {
 
    private pipes = {};
 
-   constructor(url: string, jid: string, sid: string, rid: string);
-   constructor(url: string, jid: string, password: string);
+   constructor(url: string, jid: string, sid: string, rid: string, customHeader?: object);
+   constructor(url: string, jid: string, password: string, customHeaders?: object);
    constructor(uid: string);
    constructor() {
       if (arguments.length === 1) {
          this.uid = arguments[0];
          this.sessionId = this.getStorage().getItem('sessionId');
-      } else if (arguments.length === 3 || arguments.length === 4) {
+      } else if (arguments.length === 3 || arguments.length === 4 || arguments.length === 5) {
          let jid = new JID(arguments[1]);
 
          // anonymous accounts start without node
@@ -81,7 +81,13 @@ export default class Account {
 
       this.options = new Options(this.getStorage());
 
-      this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3]);
+      if (arguments.length === 4) {
+         this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3]);
+      } else if (arguments.length === 5) {
+         this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);
+      } else if (arguments.length === 1) {
+         this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3]);
+      }
       this.connection = new StorageConnection(this);
 
       if (arguments.length === 1) {

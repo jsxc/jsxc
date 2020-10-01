@@ -7,9 +7,11 @@ export interface ISettings {
    xmpp?: {
       url?: string,
       node?: string,
+      username?: string,
       domain?: string,
       password?: string,
       resource?: string,
+      customHeaders?: JSON,
    }
 }
 
@@ -39,12 +41,14 @@ export default class FormWatcher {
    private formElement: JQuery;
    private usernameElement: JQuery;
    private passwordElement: JQuery;
+   private customHeaders: object;
    private settingsCallback: SettingsCallback;
 
-   constructor(formElement: JQuery, usernameElement: JQuery, passwordElement: JQuery, settingsCallback?: SettingsCallback) {
+   constructor(formElement: JQuery, usernameElement: JQuery, passwordElement: JQuery, customHeaders?: object, settingsCallback?: SettingsCallback) {
       this.formElement = formElement;
       this.usernameElement = usernameElement;
       this.passwordElement = passwordElement;
+      this.customHeaders = customHeaders;
       this.settingsCallback = settingsCallback || Client.getOption('loadConnectionOptions');
 
       if (formElement.length !== 1) {
@@ -59,6 +63,10 @@ export default class FormWatcher {
          throw new Error(`Found ${passwordElement.length} password elements. I need exactly one.`);
       }
 
+      if (this.customHeaders === undefined) {
+         this.customHeaders = null;
+         Log.debug("Custom headers are empty");
+      }
       if (typeof this.settingsCallback !== 'function') {
          throw new Error('I need a settings callback.');
       }
@@ -68,7 +76,7 @@ export default class FormWatcher {
 
    private prepareForm() {
       let formElement = this.formElement;
-      let events = (<any> $)._data(formElement.get(0), 'events') || {
+      let events = (<any>$)._data(formElement.get(0), 'events') || {
          submit: []
       };
       let submitEvents = [].concat(events.submit);
@@ -94,8 +102,8 @@ export default class FormWatcher {
    }
 
    private async onFormSubmit() {
-      let username = <string> this.usernameElement.val();
-      let password = <string> this.passwordElement.val();
+      let username = <string>this.usernameElement.val();
+      let password = <string>this.passwordElement.val();
 
       let settings = await this.getSettings(username, password);
 
@@ -115,9 +123,13 @@ export default class FormWatcher {
          password = settings.xmpp.password;
       }
 
+      if (settings.xmpp.username) {
+         username = settings.xmpp.username;
+      }
+
       let jid = usernameToJabberId(username, settings);
 
-      return await jsxc.startAndPause(settings.xmpp.url, jid, password);
+      return await jsxc.startAndPause(settings.xmpp.url, jid, password, this.customHeaders);
    }
 
    private getSettings(username: string, password: string): Promise<ISettings> {
@@ -151,7 +163,7 @@ export default class FormWatcher {
 
       if (formElement.find('#submit').length > 0) {
          formElement.find('#submit').click();
-      } else if (formElement.get(0) && typeof (<HTMLFormElement> formElement.get(0)).submit === 'function') {
+      } else if (formElement.get(0) && typeof (<HTMLFormElement>formElement.get(0)).submit === 'function') {
          formElement.submit();
       } else if (formElement.find('[type="submit"]').length > 0) {
          formElement.find('[type="submit"]').click();
@@ -163,7 +175,7 @@ export default class FormWatcher {
    private disableForm() {
       let formElement = this.formElement;
 
-      formElement.find(':input').each(function() {
+      formElement.find(':input').each(function () {
          let inputElement = $(this);
 
          if (inputElement.not(':disabled')) {

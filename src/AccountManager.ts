@@ -44,11 +44,11 @@ export default class AccountManager {
       ClientAvatar.get().registerAccount(account);
       UI.init();
 
-      RoleAllocator.get().waitUntilMaster().then(function() {
+      RoleAllocator.get().waitUntilMaster().then(function () {
          return account.connect();
-      }).then(function() {
+      }).then(function () {
 
-      }).catch(function(msg) {
+      }).catch(function (msg) {
          account.connectionDisconnected();
 
          Log.warn(msg)
@@ -73,8 +73,8 @@ export default class AccountManager {
       });
    }
 
-   public createAccount(url: string, jid: string, sid: string, rid: string): Promise<Account>;
-   public createAccount(url: string, jid: string, password: string): Promise<Account>;
+   public createAccount(url: string, jid: string, sid: string, rid: string, customHeaders?: object): Promise<Account>;
+   public createAccount(url: string, jid: string, password: string, customHeaders?: object): Promise<Account>;
    public createAccount() {
       let account: Account;
 
