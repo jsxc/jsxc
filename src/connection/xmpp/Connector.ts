@@ -12,19 +12,25 @@ export enum TYPE { BOSH, WEBSOCKET };
 
 export default class Connector {
    private connectionParameters;
+   private account: Account;
 
    private connectionArgs: string[];
+   private customHeaders: object;
 
-   constructor(account: Account, url: string, jid: string, sid: string, rid: string);
-   constructor(account: Account, url: string, jid: string, password: string);
+   constructor(account: Account, url: string, jid: string, sid: string, rid: string, customHeaders?: object);
+   constructor(account: Account, url: string, jid: string, password: string, customHeaders?: object);
    constructor(account: Account);
-   constructor(private account: Account, ...connectionArgs: string[]) {
-      let storage = account.getStorage();
+   constructor() {
+      let storage = arguments[0].getStorage();
+      this.account = arguments[0];
       this.connectionParameters = new PersistentMap(storage, 'connection');
+      if (typeof arguments[4] === 'object') {
+         this.customHeaders = arguments[4];
+      }
+      this.connectionArgs = [arguments[1], arguments[2], arguments[3]];
+      this.connectionArgs = this.connectionArgs.filter(arg => typeof arg === 'string');
 
-      connectionArgs = connectionArgs.filter(arg => typeof arg === 'string');
-
-      if (connectionArgs.length < 3) {
+      if (this.connectionArgs.length < 3) {
          let type = this.connectionParameters.get('type');
 
          if (type === TYPE.WEBSOCKET) {
@@ -37,10 +43,10 @@ export default class Connector {
             this.connectionParameters.get('sid'),
             this.connectionParameters.get('rid')
          ];
-      } else if (connectionArgs.length === 3 || connectionArgs.length === 4) {
-         this.connectionArgs = connectionArgs;
+      } else if (this.connectionArgs.length === 3 || this.connectionArgs.length === 4) {
+         this.connectionArgs = this.connectionArgs;
 
-         let type = /^wss?:/.test(connectionArgs[1]) ? TYPE.WEBSOCKET : TYPE.BOSH;
+         let type = /^wss?:/.test(this.connectionArgs[1]) ? TYPE.WEBSOCKET : TYPE.BOSH;
 
          this.connectionParameters.set('type', type);
          this.connectionParameters.remove('inactivity');
@@ -65,8 +71,13 @@ export default class Connector {
          throw new BaseError('Credentials expired');
       }
 
-      return ConnectHelper.login.apply(this, this.connectionArgs)
-         .then(this.successfulConnected);
+      if (this.connectionArgs.length === 3) {
+         return ConnectHelper.login(this.connectionArgs[0], this.connectionArgs[1], this.connectionArgs[2], this.customHeaders)
+            .then(this.successfulConnected);
+      } else if (this.connectionArgs.length === 4) {
+         return ConnectHelper.login(this.connectionArgs[0], this.connectionArgs[1], this.connectionArgs[2], this.connectionArgs[3], this.customHeaders)
+            .then(this.successfulConnected);
+      }
    }
 
    public getJID(): JID {
@@ -155,7 +166,7 @@ export default class Connector {
 
    private replaceStorageConnectionWithXMPPConnection(stropheConnection) {
       let accountConnection = this.account.getConnection();
-      let handlers = (<StorageConnection> accountConnection).getHandlers();
+      let handlers = (<StorageConnection>accountConnection).getHandlers();
 
       accountConnection.close();
       accountConnection = new XMPPConnection(this.account, stropheConnection);
