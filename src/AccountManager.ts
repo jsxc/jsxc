@@ -10,9 +10,10 @@ import * as UI from './ui/web';
 
 export default class AccountManager {
    private accounts = {};
+   private options;
 
-   constructor(private storage: IStorage) {
-
+   constructor(private storage: IStorage, options) {
+      this.options = options;
    }
 
    public restoreAccounts(): number {
@@ -38,7 +39,14 @@ export default class AccountManager {
          this.accounts[id].destroy();
       }
 
-      let account = this.accounts[id] = new Account(id);
+      let keys = Object.keys(this.options);
+      let account;
+
+      if (keys.includes('customHeaders')) {
+         account = this.accounts[id] = new Account(id, this.options.customHeaders);
+      } else {
+         account = this.accounts[id] = new Account(id);
+      }
 
       Client.getPresenceController().registerAccount(account);
       ClientAvatar.get().registerAccount(account);
@@ -82,6 +90,8 @@ export default class AccountManager {
          return Promise.reject('We need an url to create an account');
       } else if (this.getAccount(arguments[1])) {
          return Promise.reject('Account with this jid already exists.');
+      } else if (arguments.length === 5) {
+         account = new Account(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);
       } else if (arguments.length === 4) {
          account = new Account(arguments[0], arguments[1], arguments[2], arguments[3]);
       } else if (arguments.length === 3) {
@@ -105,7 +115,6 @@ export default class AccountManager {
       } else {
          uid = Object.keys(this.accounts)[0];
       }
-
       return this.accounts[uid];
    }
 

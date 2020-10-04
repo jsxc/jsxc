@@ -42,7 +42,7 @@ export default class Client {
 
       let storage = Client.getStorage();
 
-      Client.accountManager = new AccountManager(storage);
+      Client.accountManager = new AccountManager(storage, options);
       Client.presenceController = new PresenceController(storage, () => Client.accountManager.getAccounts());
 
       Client.watchFileDrag();
@@ -125,7 +125,7 @@ export default class Client {
    public static getOption<IOption = any>(key: string, defaultValue?: IOption): IOption {
       let value = Client.getOptions().get(key);
 
-      return <IOption> (typeof value !== 'undefined' ? value : defaultValue);
+      return <IOption>(typeof value !== 'undefined' ? value : defaultValue);
    }
 
    public static setOption(key: string, value) {
@@ -154,7 +154,7 @@ export default class Client {
       $(document).on('dragover', (ev) => {
          ev.preventDefault();
 
-         (<any> ev.originalEvent).dataTransfer.dropEffect = 'copy';
+         (<any>ev.originalEvent).dataTransfer.dropEffect = 'copy';
       });
 
       $(document).on('drop', () => {

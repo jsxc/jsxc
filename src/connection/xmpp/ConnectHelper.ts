@@ -50,7 +50,13 @@ function loginWithPassword(url: string, jid: string, password: string, customHea
 
 function attachConnection(url: string, jid: string, sid: string, rid: string, customHeaders?: object) {
    testBasicConnectionParameters(url, jid);
-   let connection = prepareConnection(url, customHeaders);
+   let connection;
+
+   if (arguments.length === 4) {
+      connection = prepareConnection(url);
+   } else if (arguments.length === 5) {
+      connection = prepareConnection(url, customHeaders);
+   }
 
    Log.debug('Try to attach old connection.');
 

@@ -19,13 +19,17 @@ export default class Connector {
 
    constructor(account: Account, url: string, jid: string, sid: string, rid: string, customHeaders?: object);
    constructor(account: Account, url: string, jid: string, password: string, customHeaders?: object);
-   constructor(account: Account);
+   constructor(account: Account, customHeaders?: object);
    constructor() {
       let storage = arguments[0].getStorage();
       this.account = arguments[0];
       this.connectionParameters = new PersistentMap(storage, 'connection');
       if (typeof arguments[4] === 'object') {
          this.customHeaders = arguments[4];
+      } else if (typeof arguments[5] === 'object') {
+         this.customHeaders = arguments[5];
+      } else if (typeof arguments[1] === 'object') {
+         this.customHeaders = arguments[1];
       }
       this.connectionArgs = [arguments[1], arguments[2], arguments[3]];
       this.connectionArgs = this.connectionArgs.filter(arg => typeof arg === 'string');
