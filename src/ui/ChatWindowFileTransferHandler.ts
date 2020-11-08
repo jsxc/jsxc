@@ -3,10 +3,11 @@ import Attachment from '../Attachment'
 
 export default class FileTransferHandler {
    private handlerElement;
-   private inputElement;
+   private inputElement: JQuery<HTMLElement>;
 
    constructor(private chatWindow: ChatWindow) {
       this.handlerElement = this.chatWindow.getDom().find('.jsxc-file-transfer');
+      this.inputElement = this.chatWindow.getDom().find('.jsxc-message-input');
 
       this.handlerElement.on('click', this.showFileSelection);
 
