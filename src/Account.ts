@@ -57,7 +57,11 @@ export default class Account {
 
    constructor(url: string, jid: string, sid: string, rid: string, customHeader?: object);
    constructor(url: string, jid: string, password: string, customHeaders?: object);
+<<<<<<< HEAD
    constructor(uid: string, customeHeaders?: object);
+=======
+   constructor(uid: string);
+>>>>>>> d01ec68b6bcca1adfa32e5b384d06b524fd82e5b
    constructor() {
       if (arguments.length === 1 || arguments.length === 2) {
          this.uid = arguments[0];
@@ -86,9 +90,13 @@ export default class Account {
       } else if (arguments.length === 5) {
          this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);
       } else if (arguments.length === 1) {
+<<<<<<< HEAD
          this.connector = new Connector(this);
       } else if (arguments.length === 2) {
          this.connector = new Connector(this, arguments[1]);
+=======
+         this.connector = new Connector(this, arguments[0], arguments[1], arguments[2], arguments[3]);
+>>>>>>> d01ec68b6bcca1adfa32e5b384d06b524fd82e5b
       }
       this.connection = new StorageConnection(this);
 

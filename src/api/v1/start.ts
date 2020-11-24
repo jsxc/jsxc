@@ -26,12 +26,12 @@ export function start() {
       case 3:
          if (arguments.length === 3) {
             promise = startWithCredentials(arguments[0], arguments[1], arguments[2]);
+         } else if (arguments.length === 4 && typeof arguments[3] === "object") {
+            promise = startWithCredentials(arguments[0], arguments[1], arguments[2], arguments[3]);
          }
          break;
       case 4:
-         if (arguments.length === 4 && typeof arguments[3] === 'object') {
-            promise = startWithCredentials(arguments[0], arguments[1], arguments[2], arguments[3]);
-         } else if (arguments.length === 4) {
+         if (arguments.length === 4) {
             promise = startWithBoshParameters(arguments[0], arguments[1], arguments[2], arguments[3]);
          } else if (arguments.length === 5) {
             promise = startWithBoshParameters(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);

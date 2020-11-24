@@ -13,7 +13,11 @@ export function login(url: string, jid: string, password: string, customHeaders:
 export function login() {
    if (arguments.length === 3) {
       return loginWithPassword(arguments[0], arguments[1], arguments[2]);
+<<<<<<< HEAD
    } else if (arguments.length === 4 && typeof arguments[3] === 'object') {
+=======
+   } else if (arguments.length === 4 && typeof arguments[3] === "object") {
+>>>>>>> d01ec68b6bcca1adfa32e5b384d06b524fd82e5b
       return loginWithPassword(arguments[0], arguments[1], arguments[2], arguments[3]);
    } else if (arguments.length === 4) {
       return attachConnection(arguments[0], arguments[1], arguments[2], arguments[3]);
@@ -50,6 +54,7 @@ function loginWithPassword(url: string, jid: string, password: string, customHea
 
 function attachConnection(url: string, jid: string, sid: string, rid: string, customHeaders?: object) {
    testBasicConnectionParameters(url, jid);
+<<<<<<< HEAD
    let connection;
 
    if (arguments.length === 4) {
@@ -57,6 +62,9 @@ function attachConnection(url: string, jid: string, sid: string, rid: string, cu
    } else if (arguments.length === 5) {
       connection = prepareConnection(url, customHeaders);
    }
+=======
+   let connection = prepareConnection(url, customHeaders);
+>>>>>>> d01ec68b6bcca1adfa32e5b384d06b524fd82e5b
 
    Log.debug('Try to attach old connection.');
 
@@ -113,7 +121,7 @@ function testBasicConnectionParameters(url: string, jid: string) {
 
 function prepareConnection(url: string, customHeaders?: object): Strophe.Connection {
    let connection = new Strophe.Connection(url, <any>{
-      customHeaders,
+      customHeaders: customHeaders,
       mechanisms: [
          (<any>Strophe).SASLAnonymous,
          (<any>Strophe).SASLExternal,
