@@ -3,11 +3,15 @@ import Attachment from '../Attachment'
 
 export default class FileTransferHandler {
    private handlerElement;
+   private inputElement: JQuery<HTMLElement>;
 
    constructor(private chatWindow: ChatWindow) {
       this.handlerElement = this.chatWindow.getDom().find('.jsxc-file-transfer');
+      this.inputElement = this.chatWindow.getDom().find('.jsxc-message-input');
 
       this.handlerElement.on('click', this.showFileSelection);
+
+      this.inputElement.on('paste', this.pasteImageAsFile);
 
       this.chatWindow.getDom().find('.jsxc-window').on('drop', (ev) => {
          ev.preventDefault();
@@ -51,4 +55,18 @@ export default class FileTransferHandler {
       let attachment = new Attachment(file);
       this.chatWindow.setAttachment(attachment);
    }
+
+   private pasteImageAsFile = (ev: any) => {
+      // this handles older browsers
+      let items = (ev.clipboardData  || ev.originalEvent.clipboardData).items;
+      for (let i in items) {
+         // poormans check if opbject is an image
+         if (items[i].type !== undefined && items[i].type.indexOf('image') === 0) {
+            const blob = items[i].getAsFile();
+            // load pasted blob as file if present
+            this.fileSelected(blob);
+            break;
+         }
+      }
+  };
 }
