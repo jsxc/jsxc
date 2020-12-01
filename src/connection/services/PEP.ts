@@ -37,6 +37,18 @@ export default class PEP extends AbstractService {
       return this.sendIQ(iqStanza);
    }
 
+   public delete(node: string): Promise<Element> {
+      let iqStanza = $iq({
+         type: 'set',
+      }).c('pubsub', {
+         xmlns: 'http://jabber.org/protocol/pubsub#owner'
+      }).c('delete', {
+         node
+      });
+
+      return this.sendIQ(iqStanza);
+   }
+
    public retrieveItems(node: string, jid?: string) {
       let iq = $iq({
          to: jid,

@@ -63,6 +63,7 @@ export default class Omemo {
 
       this.store.setDeviceList(localIdentifier, [localDeviceId]);
 
+      await this.bundleManager.deleteDeviceList();
       await this.bundleManager.publishDeviceId(localDeviceId);
 
       return localDeviceId;

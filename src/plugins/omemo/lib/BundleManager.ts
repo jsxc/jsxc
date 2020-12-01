@@ -136,4 +136,8 @@ export default class BundleManager {
 
       return this.pepService.publish(NS_DEVICELIST, xmlList.tree(), 'current');
    }
+
+   public deleteDeviceList(): Promise<Element> {
+      return this.pepService.delete(NS_DEVICELIST);
+   }
 }
