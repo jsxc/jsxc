@@ -2,7 +2,7 @@ import Client from '@src/Client';
 import { Presence } from '@connection/AbstractConnection';
 
 export function disconnect() {
-   return new Promise(resolve => {
+   return new Promise<void>(resolve => {
       Client.getPresenceController().registerCurrentPresenceHook((presence) => {
          if (presence === Presence.offline) {
             resolve();

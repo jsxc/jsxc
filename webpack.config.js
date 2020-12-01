@@ -88,9 +88,6 @@ let config = {
       maxEntrypointSize: 1024 * 1000 * 1000 * 3,
       maxAssetSize: 1024 * 1000 * 1000 * 3,
    },
-   node: {
-      fs: 'empty'
-   },
    module: {
       rules: [{
             test: /\.ts$/,
@@ -141,14 +138,21 @@ let config = {
       ]
    },
    resolve: {
-      extensions: [".ts", ".js", ".hbs"],
+      extensions: [".ts", ".js", ".hbs", ".json"],
       alias: {
          '@connection': path.resolve(__dirname, 'src/connection/'),
          '@ui': path.resolve(__dirname, 'src/ui/'),
          '@util': path.resolve(__dirname, 'src/util/'),
          '@vendor': path.resolve(__dirname, 'src/vendor/'),
          '@src': path.resolve(__dirname, 'src/'),
-      }
+      },
+      // prep for Webpack 5
+      // fallback: {
+      //    fs: false,
+      //    stream: false,
+      //    path: false,
+      //    crypto: false,
+      // }
    },
    externals: {
       'child_process': 'child_process',
@@ -166,17 +170,19 @@ let config = {
       new CleanWebpackPlugin({
          cleanStaleWebpackAssets: false,
       }),
-      new CopyWebpackPlugin([{
-         from: 'images/',
-         to: 'images/'
-      }, {
-         from: 'node_modules/emojione/assets/svg/',
-         to: 'images/emojione/'
-      }, {
-         from: 'LICENSE',
-         to: 'LICENSE',
-         toType: 'file',
-      }]),
+      new CopyWebpackPlugin({
+         patterns: [{
+            from: 'images/',
+            to: 'images/'
+         }, {
+            from: 'node_modules/emojione/assets/svg/',
+            to: 'images/emojione/'
+         }, {
+            from: 'LICENSE',
+            to: 'LICENSE',
+            toType: 'file',
+         }],
+      }),
       new webpack.LoaderOptionsPlugin({
          options: {
             handlebarsLoader: {}
@@ -185,8 +191,11 @@ let config = {
       new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, new RegExp(MOMENTJS_LOCALES.join('|'))),
    ],
    devServer: {
+      // https://github.com/webpack/webpack-dev-server/issues/2484
+      injectClient: false,
       port: 8091,
       inline: true,
+      publicPath: '/dist/',
       open: true,
       openPage: 'example/index.html',
       proxy: {
@@ -226,6 +235,11 @@ module.exports = (env, argv) => {
    }
 
    definePluginConfig['__VERSION__'] = JSON.stringify(version);
+
+   // prep for Webpack 5
+   // definePluginConfig['process'] = JSON.stringify({});
+   // definePluginConfig['process.env.NODE_DEBUG'] = JSON.stringify(process.env.NODE_DEBUG || false);
+
    config.plugins.push(new webpack.DefinePlugin(definePluginConfig));
 
    config.plugins.push(new webpack.BannerPlugin({

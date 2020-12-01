@@ -142,7 +142,7 @@ export default class Notification {
    }
 
    private static requestPermission() {
-      return new Promise((resolve, reject) => {
+      return new Promise<void>((resolve, reject) => {
          NotificationAPI.requestPermission(function(status) {
             if (NotificationAPI.permission !== status) {
                NotificationAPI.permission = status;

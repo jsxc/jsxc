@@ -239,7 +239,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       return this.getOmemo().encrypt(contact, message, xmlElement);
    }
 
-   private handleNewDevice(contact: IContact) {
+   private handleNewDevice(contact: IContact): Promise<void> {
       let chatWindow = contact.getChatWindow();
       let overlayElement = chatWindow.getOverlay();
 
@@ -256,7 +256,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       chatWindow.showOverlay();
 
       return new Promise(resolve => {
-         continueButton.click(async ev => {
+         continueButton.on('click', async ev => {
             ev.preventDefault();
 
             chatWindow.hideOverlay();
@@ -266,7 +266,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
             resolve();
          })
 
-         cancelButton.click(ev => {
+         cancelButton.on('click', ev => {
             ev.preventDefault();
 
             chatWindow.hideOverlay();

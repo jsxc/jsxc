@@ -67,7 +67,7 @@ export default class RoleAllocator {
    }
 
    public waitUntilMaster() {
-      return new Promise((resolve) => {
+      return new Promise<void>((resolve) => {
          if (this.role === Role.Master) {
             resolve();
          } else if (typeof this.storage.getItem(MASTER_KEY) === 'undefined') {
@@ -85,7 +85,7 @@ export default class RoleAllocator {
    }
 
    public waitUntilSlave() {
-      return new Promise((resolve) => {
+      return new Promise<void>((resolve) => {
          if (this.role === Role.Slave) {
             resolve();
          } else {

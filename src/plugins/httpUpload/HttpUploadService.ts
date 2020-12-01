@@ -101,7 +101,7 @@ export default class HttpUploadService {
    }
 
    private uploadFile = (file: File, putUrl, headers, progress?: (loaded, total) => void) => {
-      return new Promise((resolve, reject) => {
+      return new Promise<void>((resolve, reject) => {
          $.ajax({
             url: putUrl,
             type: 'PUT',

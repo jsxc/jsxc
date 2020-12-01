@@ -4,9 +4,9 @@ import RoomBookmark from '../RoomBookmark';
 export default abstract class AbstractService {
    public abstract getName(): string
 
-   public abstract async getRooms(): Promise<RoomBookmark[]>
+   public abstract getRooms(): Promise<RoomBookmark[]>
 
-   public abstract async addRoom(room: RoomBookmark)
+   public abstract addRoom(room: RoomBookmark): Promise<void>
 
-   public abstract async removeRoom(id: IJID)
+   public abstract removeRoom(id: IJID): Promise<void>
 }

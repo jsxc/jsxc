@@ -40,4 +40,6 @@ export default function(options: ISelectionDialogOptions) {
 
       dialog.close();
    });
+
+   return dialog;
 }

@@ -29,16 +29,12 @@ module.exports = function(config) {
       // webpack configuration
       webpack: {
          mode: 'development',
-         devtool: 'eval-source-map',
          module: webpackConfig.module,
          resolve: webpackConfig.resolve,
          plugins: [
              webpackConfig.plugins[1],
              webpackConfig.plugins[webpackConfig.plugins.length - 2],
          ],
-         node: {
-            fs: 'empty'
-         }
       },
 
       webpackMiddleware: {
