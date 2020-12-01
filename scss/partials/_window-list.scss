@@ -64,7 +64,7 @@
         }
       }
 
-      &:not([data-subscription="both"]):not(.jsxc-bottom) {
+      &[data-subscription="from"] {
         .jsxc-bar__caption {
           opacity: 0.7;
         }
