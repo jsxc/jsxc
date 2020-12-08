@@ -61,11 +61,12 @@
     }
 
     .jsxc-video-control {
+      font-size: 16px;
       width: 22px;
     }
 
-    .jsxc-minmax {
-      background-image: url("../images/maximize_white.svg");
+    .jsxc-minmax::before {
+      content: map-get($jsxc-icons-map, "maximize");
     }
 
     .jsxc-fullscreen {
@@ -327,28 +328,46 @@ div {
   }
 
   &.jsxc-video {
-    background-image: url("../images/camera_icon_white.svg");
+    align-items: center;
+    display: flex;
+    justify-content: center;
 
-    &.jsxc-disabled {
-      background-image: url("../images/camera_disabled_icon_white.svg");
+    &::before {
+      @extend %jsxc-icon-font;
+      content: map-get($jsxc-icons-map, "camera");
+    }
+
+    &.jsxc-disabled::before {
+      @extend %jsxc-icon-font;
+      content: map-get($jsxc-icons-map, "camera-disabled");
     }
   }
 
   &.jsxc-audio {
-    background-image: url("../images/pick_up_white.svg");
+    align-items: center;
+    display: flex;
+    justify-content: center;
 
-    &.jsxc-disabled {
-      background-image: url("../images/pick_up_white_disabled.svg");
+    &::before {
+      @extend %jsxc-icon-font;
+      content: map-get($jsxc-icons-map, "pick-up");
+    }
+
+    &.jsxc-disabled::before {
+      @extend %jsxc-icon-font;
+      content: map-get($jsxc-icons-map, "pick-up-disabled");
     }
   }
 }
 
 .jsxc-controlbar {
+  align-items: center;
+  display: flex;
+  justify-content: center;
   left: 0;
   opacity: 0;
   position: absolute;
   right: 0;
-  text-align: center;
   top: 50px;
   transition: 1s opacity;
   z-index: 9995;
@@ -358,22 +377,24 @@ div {
   }
 
   > div {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--jsxc-color-background-dark-translucent);
     border-radius: 22px;
-    display: inline-block;
+    display: flex;
     height: 44px;
     padding: 0 5px;
   }
 
   .jsxc-video-control {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 1.3em;
+    @extend %jsxc-icon-font;
+    align-items: center;
+    color: var(--jsxc-color-main-background);
     cursor: pointer;
-    display: inline-block;
+    display: flex;
+    font-size: 23px;
     height: 44px;
+    justify-content: center;
     margin: 0 5px;
-    opacity: 0.8;
+    opacity: 0.6;
     width: 44px;
 
     &:hover {
@@ -381,24 +402,27 @@ div {
     }
   }
 
-  .jsxc-hang-up {
-    background-image: url("../images/hang_up_red.svg");
+  .jsxc-hang-up::before {
+    color: var(--jsxc-color-error);
+    content: map-get($jsxc-icons-map, "hang-up");
   }
 
   .jsxc-microphone {
-    background-image: url("../images/microphone_white.svg");
+    &::before {
+      content: map-get($jsxc-icons-map, "microphone");
+    }
 
-    &.jsxc-disabled {
-      background-image: url("../images/microphone_disabled_white.svg");
+    &.jsxc-disabled::before {
+      content: map-get($jsxc-icons-map, "microphone-disabled");
     }
   }
 
-  .jsxc-fullscreen {
-    background-image: url("../images/fullscreen_white.svg");
+  .jsxc-fullscreen::before {
+    content: map-get($jsxc-icons-map, "fullscreen");
   }
 
-  .jsxc-minmax {
-    background-image: url("../images/minimize_white.svg");
+  .jsxc-minmax::before {
+    content: map-get($jsxc-icons-map, "minimize");
   }
 
   .jsxc-showchat {

@@ -188,11 +188,15 @@ export default class ChatWindow {
       return chatWindowMessage;
    }
 
-   public addActionEntry(className: string, cb: (ev) => void) {
+   public addActionEntry(className: string, cb: (ev) => void, child?: JQuery<HTMLElement>) {
       let element = $('<div>');
       element.addClass('jsxc-bar__action-entry')
       element.addClass(className);
       element.on('click', cb);
+
+      if (child) {
+         element.append(child);
+      }
 
       this.element.find('.jsxc-bar__action-entry.jsxc-js-close').before(element);
    }
@@ -650,7 +654,7 @@ export default class ChatWindow {
 
       let encryptionPlugins = pluginRepository.getAllEncryptionPlugins();
 
-      this.encryptionMenu.getButtonElement().click(ev => {
+      this.encryptionMenu.getButtonElement().on('click', ev => {
          if (!this.contact.isEncrypted()) {
             return;
          }

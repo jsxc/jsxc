@@ -38,13 +38,9 @@
     }
 
     .jsxc-members {
-      background-image: url("../images/group_white.svg");
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 1.3em;
       position: relative;
 
-      &::before {
+      &::after {
         background-color: #fff;
         border-radius: 6px;
         color: #000;

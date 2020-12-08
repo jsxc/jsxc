@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="16"
+   height="16"
+   version="1.1"
+   id="svg6"
+   sodipodi:docname="info_black.svg"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+  <metadata
+     id="metadata12">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs10" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="998"
+     inkscape:window-height="681"
+     id="namedview8"
+     showgrid="false"
+     inkscape:zoom="14.75"
+     inkscape:cx="-2"
+     inkscape:cy="8"
+     inkscape:window-x="1019"
+     inkscape:window-y="588"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg6" />
+  <g
+     aria-label="i"
+     transform="matrix(1.00004 0 0 .99996 -5.714 -566.799)"
+     style="font-weight:400;font-size:0.38699999px;line-height:0%;font-family:sans-serif;letter-spacing:0;word-spacing:0;stroke-width:0.032"
+     id="text4">
+    <path
+       d="m 15.208679,568.20044 q 0,0.57383 -0.397265,0.99316 -0.397266,0.4083 -0.971094,0.4083 -0.573828,0 -0.993164,-0.4083 -0.408301,-0.41933 -0.408301,-0.99316 0,-0.58486 0.408301,-0.98213 0.419336,-0.39727 0.993164,-0.39727 0.573828,0 0.971094,0.39727 0.397265,0.39727 0.397265,0.98213 z m 1.158692,14.62158 h -5.30791 v -0.88281 l 1.103515,-0.0662 q 0.474512,-0.0331 0.474512,-0.49658 v -8.0667 h -1.555957 v -0.79453 l 2.758789,-0.86075 h 0.893848 v 9.72198 q 0,0.20966 0.132422,0.34209 0.143457,0.13242 0.342089,0.15449 l 1.158692,0.0662 z"
+       style="font-size:22.60000038px;line-height:1.25;font-family:'Abyssinica SIL';-inkscape-font-specification:'Abyssinica SIL'"
+       id="path822" />
+  </g>
+</svg>

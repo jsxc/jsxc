@@ -1,6 +1,8 @@
 <div id="jsxc-roster">
    <div class="jsxc-contact-list-wrapper">
-      <ul class="jsxc-contact-list" data-empty-list-label="{{t "Your_contact_list_is_empty"}}" data-offline-hidden-label="{{t "Offline_contacts_are_hidden"}}" data-presence-offline-label="{{t "You_are_currently_offline"}}"></ul>
+      <ul class="jsxc-contact-list" data-empty-list-label="{{t "Your_contact_list_is_empty"}}"
+         data-offline-hidden-label="{{t "Offline_contacts_are_hidden"}}"
+         data-presence-offline-label="{{t "You_are_currently_offline"}}"></ul>
    </div>
    <div class="jsxc-roster-status"></div>
    <div class="jsxc-bottom jsxc-presence jsxc-roster-item jsxc-bar" data-bid="own">
@@ -18,7 +20,14 @@
 
       {{> menu classes="jsxc-menu--pushup jsxc-js-notice-menu" button-classes="jsxc-bounce"}}
 
-      {{> menu classes="jsxc-menu--pushup jsxc-js-main-menu" button-classes="jsxc-icon jsxc-icon--menu-dark jsxc-icon--clickable"}}
+      <div class="jsxc-menu jsxc-menu--pushup jsxc-js-main-menu">
+         <div class="jsxc-menu__button jsxc-icon--clickable">
+            <i class="jsxc-icon-menu jsxc-icon--center"></i>
+         </div>
+         <div class="jsxc-menu__content">
+            <ul></ul>
+         </div>
+      </div>
    </div>
    <div class="jsxc-roster-toggle"></div>
 </div>

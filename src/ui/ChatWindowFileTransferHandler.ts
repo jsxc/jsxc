@@ -25,7 +25,7 @@ export default class FileTransferHandler {
    }
 
    private showFileSelection = (ev) => {
-      if (ev.target !== this.handlerElement.get(0)) {
+      if (ev.target !== this.handlerElement.find('i').get(0)) {
          // prevent bubbled event
          return;
       }

@@ -6,9 +6,17 @@
       <div title="{{lastMessage}}" class="jsxc-bar__caption__secondary">{{lastMessage}}</div>
    </div>
 
-   {{#> menu classes="jsxc-bar__action-entry jsxc-menu--vertical-left jsxc-menu--light" button-classes="jsxc-icon jsxc-icon--more-dark jsxc-icon--clickable"}}
-        <li class="jsxc-rename" title="{{t "rename_buddy"}}"><span class="jsxc-icon jsxc-icon--edit"></span></li>
-        <li class="jsxc-vcard" title="{{t "get_info"}}"><span class="jsxc-icon jsxc-icon--info"></span></li>
-        <li class="jsxc-delete" title="{{t "delete_buddy"}}"><span class="jsxc-icon jsxc-icon--delete"></span></li>
-   {{/menu}}
+   <div class="jsxc-menu jsxc-bar__action-entry jsxc-menu--vertical-left jsxc-menu--light">
+      <div class="jsxc-menu__button jsxc-icon--clickable">
+         <i class="jsxc-icon-more jsxc-icon--center"></i>
+      </div>
+      <div class="jsxc-menu__content">
+         <ul>
+            <li class="jsxc-rename" title="{{t "rename_buddy"}}"><i class="jsxc-icon-edit jsxc-icon--center"></i></li>
+            <li class="jsxc-vcard" title="{{t "get_info"}}"><i class="jsxc-icon-info jsxc-icon--center"></i></li>
+            <li class="jsxc-delete" title="{{t "delete_buddy"}}"><i class="jsxc-icon-delete jsxc-icon--center"></i></li>
+         </ul>
+      </div>
+   </div>
+
 </li>

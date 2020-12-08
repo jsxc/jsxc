@@ -1,7 +1,8 @@
 #jsxc-roster {
   background-color: $roster-bg;
-  border-left: 1px solid #e1e1e1;
+  border-left: 1px solid $roster-border-left;
   bottom: 0;
+  color: var(--jsxc-color-main-text);
   display: flex;
   flex-direction: column;
   margin-left: 10px;
@@ -103,6 +104,10 @@
     &:hover {
       background-color: $roster-bottom-bg-hover;
     }
+
+    >div {
+      height: 100%;
+    }
   }
 
   form {
@@ -172,33 +177,34 @@
     }
 
     .jsxc-bottom .jsxc-avatar {
-      background-image: url("../images/avatar_placeholder.svg");
+      background-image: url("../images/icons/placeholder.svg");
     }
   }
 
   &[data-mute="yes"] {
     .jsxc-js-presence-menu .jsxc-menu__button::after {
-      background-image: url("../images/mute_black.svg");
-      background-position: center right;
-      background-repeat: no-repeat;
-      background-size: contain;
-      content: "";
-      display: inline-block;
-      height: 1em;
+      content: map-get($jsxc-icons-map, "mute");
+      font-family: jsxc-icons !important;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-font-smoothing: antialiased;
+      font-style: normal;
+      font-variant: normal;
+      font-weight: normal !important;
+      line-height: 1;
       opacity: 0.4;
-      padding-left: 0.5em;
-      position: relative;
-      top: 2px;
-      width: 1em;
+      padding-left: 0.2em;
+      text-transform: none;
+      vertical-align: text-top;
     }
   }
 }
 
 .jsxc-roster-toggle {
-  background-color: rgba(225, 225, 225, 1);
+  background-color: var(--jsxc-color-background-dark);
   border-radius: 14px 0 0 14px;
   cursor: pointer;
   height: 44px;
+  margin-right: 1px;
   margin-top: -22px;
   position: absolute;
   right: 100%;
@@ -208,7 +214,7 @@
   z-index: 110;
 
   &::after {
-    border: 8px solid rgba(0, 0, 0, 0.2);
+    border: 8px solid var(--jsxc-color-text-lighter);
     border-bottom-color: transparent;
     border-left-color: transparent;
     border-left-width: 0;
@@ -229,33 +235,18 @@
   }
 
   &:hover {
-    background-color: rgba(200, 200, 200, 1);
+    background-color: var(--jsxc-color-background-darker);
     width: 28px;
   }
 }
 
 .jsxc-roster-item {
-  border-bottom: 1px solid $roster-bottom-border-top;
   color: $roster-color;
   margin: 0;
   padding: 0;
 
   &:hover {
     background-color: $roster-bg-hover;
-  }
-
-  &.jsxc-bookmarked {
-    .jsxc-avatar::after {
-      background-image: url("../images/bookmark_red.svg");
-      background-repeat: no-repeat;
-      background-size: contain;
-      content: " ";
-      height: 30%;
-      position: absolute;
-      right: 2px;
-      top: 0;
-      width: 20%;
-    }
   }
 
   &[data-subscription="from"] {
@@ -298,6 +289,7 @@ li.jsxc-hide-offline {
   color: $notice-color;
   display: inline-block;
   font-size: 80%;
+  height: auto;
   line-height: 1.5em;
   padding: 2px 3px;
   position: relative;
@@ -367,45 +359,6 @@ li.jsxc-hide-offline {
 
       &:hover {
         opacity: 1;
-      }
-    }
-  }
-
-  .jsxc-action-entry.jsxc-menu {
-    float: right;
-    height: 100%;
-    width: 42px;
-
-    >span {
-      background-image: url("../images/more_black.svg");
-      background-position: center center;
-      background-repeat: no-repeat;
-      cursor: pointer;
-      display: block;
-      height: 100%;
-      opacity: 0.6;
-      width: 100%;
-
-      &:hover {
-        opacity: 1;
-      }
-    }
-
-    .jsxc-inner {
-      left: auto;
-      overflow: visible;
-      padding: 4px;
-      right: 5px;
-
-      a {
-        display: block;
-        line-height: 42px;
-        text-align: center;
-        width: 42px;
-
-        span {
-          margin: 0;
-        }
       }
     }
   }

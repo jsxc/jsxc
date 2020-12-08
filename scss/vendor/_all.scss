@@ -1,3 +1,4 @@
+@import "../../fonts/jsxc-icons";
 @import "../../node_modules/emojione/lib/emojione-awesome/emojione-awesome.map";
 
 $size-map: (
@@ -24,6 +25,11 @@ $size-map: (
 // BEGIN: bootstrap
 @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/variables";
 @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/mixins";
+
+$input-bg: var(--jsxc-color-background-main);
+$input-bg-disabled: var(--jsxc-color-background-darker);
+$input-color: var(--jsxc-color-main-text);
+$input-border: var(--jsxc-color-border);
 
 // Spec and IE10+
 @keyframes progress-bar-stripes {

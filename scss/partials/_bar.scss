@@ -9,12 +9,10 @@
   width: 100%;
 
   &__action-entry {
-    color: $tools-color;
     cursor: pointer;
     display: block;
     flex-shrink: 0;
     float: left;
-    font-family: $font-sans;
     height: 40px;
     line-height: 40px;
     min-width: 25px;
@@ -61,9 +59,9 @@
 
   &--has-unread-msg {
     .jsxc-bar__caption__secondary::before {
-      background-color: #ffa500;
+      background-color: $unread-bg;
       border-radius: 50%;
-      color: #fff;
+      color: $unread-color;
       content: "";
       display: inline-block;
       height: 0.8em;
@@ -89,11 +87,13 @@
 
     .jsxc-minimized & {
       background-color: $window-min-bar-bg;
+      border: 1px solid $window-border;
+      border-bottom: 0;
       color: $window-min-bar-color;
     }
 
     .jsxc-highlight & {
-      background-color: #ffa500;
+      background-color: $warning-bg;
     }
   }
 }

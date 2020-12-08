@@ -1,8 +1,64 @@
+:root {
+  --jsxc-color-main-text: #222;
+  --jsxc-color-main-background: #fff;
+  --jsxc-color-main-background-translucent: rgba(255, 255, 255, 0.8);
+  --jsxc-color-background-hover: #f5f5f5;
+  --jsxc-color-background-dark: #ededed;
+  --jsxc-color-background-dark-translucent: rgba(70, 70, 70, 0.8);
+  --jsxc-color-background-darker: #dbdbdb;
+  --jsxc-color-placeholder-light: #e6e6e6;
+  --jsxc-color-placeholder-dark: #ccc;
+  --jsxc-color-primary: #1d2d44;
+  --jsxc-color-primary-light: #e6f3fa;
+  --jsxc-color-primary-text: #fff;
+  --jsxc-color-primary-text-dark: #ededed;
+  --jsxc-color-error: #e9322d;
+  --jsxc-color-warning: #eca700;
+  --jsxc-color-success: #46ba61;
+  --jsxc-color-text-maxcontrast: #767676;
+  --jsxc-color-text-light: #222;
+  --jsxc-color-text-lighter: #767676;
+  --jsxc-color-loading-light: #ccc;
+  --jsxc-color-loading-dark: #444;
+  --jsxc-color-box-shadow: rgba(77, 77, 77, 0.5);
+  --jsxc-color-border: #ededed;
+  --jsxc-color-border-dark: #dbdbdb;
+}
+
+body.jsxc-dark {
+  .jsxc-dialog-wrapper,
+  #jsxc-window-list,
+  #jsxc-roster {
+    --jsxc-color-main-text: #d8d8d8;
+    --jsxc-color-main-background: #181818;
+    --jsxc-color-main-background-translucent: rgba(24, 24, 24, 1);
+    --jsxc-color-background-hover: #0e0e0e;
+    --jsxc-color-background-dark: #222;
+    --jsxc-color-background-dark-translucent: rgba(51, 51, 51, 0.8);
+    --jsxc-color-background-darker: #2c2c2c;
+    --jsxc-color-placeholder-light: #323232;
+    --jsxc-color-placeholder-dark: #4b4b4b;
+    --jsxc-color-primary: #1d2d44;
+    --jsxc-color-primary-light: #16232a;
+    --jsxc-color-primary-text: #fff;
+    --jsxc-color-primary-text-dark: #ededed;
+    --jsxc-color-error: #e9322d;
+    --jsxc-color-warning: #eca700;
+    --jsxc-color-success: #46ba61;
+    --jsxc-color-text-maxcontrast: #8c8c8c;
+    --jsxc-color-text-light: #d8d8d8;
+    --jsxc-color-text-lighter: #8c8c8c;
+    --jsxc-color-loading-light: #777;
+    --jsxc-color-loading-dark: #ccc;
+    --jsxc-color-box-shadow: rgba(0, 0, 0, 0.5);
+    --jsxc-color-border: #2a2a2a;
+    --jsxc-color-border-dark: #3c3c3c;
+  }
+}
+
 $black: #000;
-$gray10: lighten($black, 10%);
 $gray20: lighten($black, 20%);
 $gray30: lighten($black, 30%);
-$gray40: lighten($black, 40%);
 $gray50: lighten($black, 50%);
 $gray60: lighten($black, 60%);
 $gray70: lighten($black, 70%);
@@ -13,67 +69,46 @@ $orange: #ffa500;
 $red: #f00;
 $blue: #00f;
 
-$warning-bg: #f5e876;
-$warning-bg-hover: #f2e35d;
+$success-bg: var(--jsxc-color-success);
+$error-bg: var(--jsxc-color-error);
+$warning-bg: var(--jsxc-color-warning);
+$main-bg: var(--jsxc-color-main-background);
+$main-bg-translucent: var(--jsxc-color-main-background-translucent);
+$bg-hover: var(--jsxc-color-background-hover);
+$bg-dark: var(--jsxc-color-background-dark);
+$bg-darker: var(--jsxc-color-background-darker);
 
-$shadow: $black;
-$separator: $black;
-$invalid-border: $red;
-$name-hover: #333;
-$dialog-fieldset-border: $gray80;
-$dialog-input-invalid: $red;
-$dialog-input-readonly-bg: $gray90;
-$spot-bg: $white;
-$spot-border: $black;
+$invalid-border: var(--jsxc-color-error);
+$dialog-input-invalid: var(--jsxc-color-error);
+$dialog-input-readonly-bg: var(--jsxc-color-background-dark);
+$spot-border: var(--jsxc-color-border);
 
-$state-online: #008000;
-$state-chat: #008000;
-$state-away: $orange;
-$state-xa: $orange;
-$state-dnd: $red;
-$state-offline: $gray60;
+$presence-colors: (online: #008000,
+chat: #008000,
+away: $orange,
+xa: $orange,
+dnd: $red,
+offline: $gray60);
 
-$presence-colors: (
-  online: #008000,
-  chat: #008000,
-  away: $orange,
-  xa: $orange,
-  dnd: $red,
-  offline: $gray60
-);
+$notice-bg: var(--jsxc-color-warning);
+$notice-color: var(--jsxc-color-main-text);
+$window-bar-bg: var(--jsxc-color-primary);
+$window-bar-color: var(--jsxc-color-primary-text);
+$window-bar-color-hover: var(--jsxc-color-primary-text-dark);
+$window-min-bar-bg: var(--jsxc-color-background-dark);
+$window-min-bar-color: var(--jsxc-color-main-text);
+$window-bg: var(--jsxc-color-background-dark);
+$window-border: var(--jsxc-color-background-darker);
+$window-placeholder: var(--jsxc-color-main-text);
 
-$notice-bg: $orange;
-$notice-color: $black;
-$window-unread-cycle: $orange;
-$window-bar-bg: #1d2d44;
-$window-bar-color: #bbb;
-$window-bar-color-hover: #fff;
-$window-min-bar-bg: #eee;
-$window-min-bar-color: #000;
-$window-bg: rgb(245, 245, 245);
-$window-border: #e1e1e1;
-$window-gradient: $gray60;
-$window-placeholder: $black;
+$tools-color: var(--jsxc-color-primary-text);
+$window-close-hover: var(--jsxc-color-primary-text);
 
-$tools-color: #fff;
-$window-close-hover: #fff;
-
-$chatmessage-bg: $white;
+$chatmessage-bg: var(--jsxc-color-main-background);
 $chatmessage-a: $blue;
 $chatmessage-footer: $gray60;
-$chatmessage-in-bg: #dbedff;
-$chatmessage-in-border: #a6b8c9;
-$chatmessage-out-bg: #ececec;
-$chatmessage-out-border: #c2c2c2;
-$chatmessage-received: #008000;
-$chatmessage-chatmarkers-false: #000;
-$chatmessage-chatmarkers-true: #008000;
-
-$window-settings-bg: $gray10;
-$window-settings-border-top: $gray80;
-$window-settings-disabled: $gray30;
-$window-settings-bg-hover: #3f8fba;
-$window-settings-color-hover: $white;
+$chatmessage-out-bg: var(--jsxc-color-background-darker);
+$chatmessage-received: var(--jsxc-color-success);
 
 $scrollbar-bg: $gray80;
 $scrollbar-color: $gray50;
@@ -81,27 +116,22 @@ $scrollbar-bg-hover: $gray70;
 $scrollbar-bg-disabled: $gray90;
 $scrollbar-color-disabled: $gray80;
 
-$emoticon-selection-bg: rgba($gray20, 0.8);
-$emoticon-selection-hover: rgba($white, 0.8);
+$emoticon-selection-bg: var(--jsxc-color-background-dark-translucent);
+$emoticon-selection-hover: var(--jsxc-color-main-background);
 
-$roster-bg: rgb(245, 245, 245);
-$roster-bg-hover: #ddd;
-$roster-input-bg: $white;
-$roster-input-shadow: $gray40;
-$roster-color: #333;
-$roster-a: $gray70;
-$roster-icon-bg: rgba($gray40, 0.5);
-$roster-icon-color: $gray70;
+$roster-bg: var(--jsxc-color-background-dark);
+$roster-bg-hover: var(--jsxc-color-background-hover);
+$roster-input-bg: var(--jsxc-color-main-background);
+$roster-input-shadow: var(--jsxc-color-background-darker);
+$roster-color: var(--jsxc-color-main-text);
+$roster-a: var(--jsxc-color-text-light);
 
-$roster-toggle-hover: rgba($gray60, 0.5);
-
-$roster-border-left: #d7d7d7;
-$roster-bottom-border-top: transparent;
-$roster-bottom-bg: rgb(238, 238, 238);
-$roster-bottom-color: #000;
-$roster-bottom-disabled: $gray20;
-$roster-bottom-bg-hover: #ddd;
-$roster-bottom-color-hover: #000;
+$roster-border-left: var(--jsxc-color-background-darker);
+$roster-bottom-bg: var(--jsxc-color-background-darker);
+$roster-bottom-color: var(--jsxc-color-main-text);
+$roster-bottom-disabled: var(--jsxc-color-text-lighter);
+$roster-bottom-bg-hover: var(--jsxc-color-background-hover);
+$roster-bottom-color-hover: var(--jsxc-color-main-text);
 
 $fullscreen-bg: $gray60;
 $video-status-bg: rgba($black, 0.5);
@@ -119,8 +149,5 @@ $ringing-color2: #76ba6c;
 $avatar-bg: $gray60;
 $avatar-color: $gray70;
 
-$login-form-bg: #5cb85c;
-$login-form-border: #4cae4c;
-
-$unread-bg: $orange;
-$unread-color: $black;
+$unread-bg: var(--jsxc-color-warning);
+$unread-color: var(--jsxc-color-main-text);

@@ -1,0 +1,175 @@
+$jsxc-icons-font: "jsxc-icons";
+
+@font-face {
+    font-family: $jsxc-icons-font;
+    src: url("../fonts/jsxc-icons.eot?11fcc5d1c26f53c70feb78f3d4d961ab#iefix") format("embedded-opentype"),
+url("../fonts/jsxc-icons.woff2?11fcc5d1c26f53c70feb78f3d4d961ab") format("woff2"),
+url("../fonts/jsxc-icons.woff?11fcc5d1c26f53c70feb78f3d4d961ab") format("woff");
+}
+
+[class^="jsxc-icon-"]:before, [class*=" jsxc-icon-"]:before {
+    font-family: jsxc-icons !important;
+    font-style: normal;
+    font-weight: normal !important;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+$jsxc-icons-map: (
+    "attachment": "\f101",
+    "bell": "\f102",
+    "bookmark": "\f103",
+    "camera-disabled": "\f104",
+    "camera": "\f105",
+    "close": "\f106",
+    "contact": "\f107",
+    "delete": "\f108",
+    "download": "\f109",
+    "dragover": "\f10a",
+    "drop": "\f10b",
+    "edit": "\f10c",
+    "fullscreen": "\f10d",
+    "gear": "\f10e",
+    "group": "\f10f",
+    "groupcontact": "\f110",
+    "hang-up": "\f111",
+    "help": "\f112",
+    "info": "\f113",
+    "jsxc": "\f114",
+    "location": "\f115",
+    "maximize": "\f116",
+    "megaphone": "\f117",
+    "menu": "\f118",
+    "microphone-disabled": "\f119",
+    "microphone": "\f11a",
+    "minimize": "\f11b",
+    "more": "\f11c",
+    "mute": "\f11d",
+    "padlock-close": "\f11e",
+    "padlock-open-disabled": "\f11f",
+    "padlock-open": "\f120",
+    "pick-up-disabled": "\f121",
+    "pick-up": "\f122",
+    "placeholder": "\f123",
+    "resize": "\f124",
+    "smiley": "\f125",
+    "speech-balloon": "\f126",
+);
+
+.jsxc-icon-attachment:before {
+    content: map-get($jsxc-icons-map, "attachment");
+}
+.jsxc-icon-bell:before {
+    content: map-get($jsxc-icons-map, "bell");
+}
+.jsxc-icon-bookmark:before {
+    content: map-get($jsxc-icons-map, "bookmark");
+}
+.jsxc-icon-camera-disabled:before {
+    content: map-get($jsxc-icons-map, "camera-disabled");
+}
+.jsxc-icon-camera:before {
+    content: map-get($jsxc-icons-map, "camera");
+}
+.jsxc-icon-close:before {
+    content: map-get($jsxc-icons-map, "close");
+}
+.jsxc-icon-contact:before {
+    content: map-get($jsxc-icons-map, "contact");
+}
+.jsxc-icon-delete:before {
+    content: map-get($jsxc-icons-map, "delete");
+}
+.jsxc-icon-download:before {
+    content: map-get($jsxc-icons-map, "download");
+}
+.jsxc-icon-dragover:before {
+    content: map-get($jsxc-icons-map, "dragover");
+}
+.jsxc-icon-drop:before {
+    content: map-get($jsxc-icons-map, "drop");
+}
+.jsxc-icon-edit:before {
+    content: map-get($jsxc-icons-map, "edit");
+}
+.jsxc-icon-fullscreen:before {
+    content: map-get($jsxc-icons-map, "fullscreen");
+}
+.jsxc-icon-gear:before {
+    content: map-get($jsxc-icons-map, "gear");
+}
+.jsxc-icon-group:before {
+    content: map-get($jsxc-icons-map, "group");
+}
+.jsxc-icon-groupcontact:before {
+    content: map-get($jsxc-icons-map, "groupcontact");
+}
+.jsxc-icon-hang-up:before {
+    content: map-get($jsxc-icons-map, "hang-up");
+}
+.jsxc-icon-help:before {
+    content: map-get($jsxc-icons-map, "help");
+}
+.jsxc-icon-info:before {
+    content: map-get($jsxc-icons-map, "info");
+}
+.jsxc-icon-jsxc:before {
+    content: map-get($jsxc-icons-map, "jsxc");
+}
+.jsxc-icon-location:before {
+    content: map-get($jsxc-icons-map, "location");
+}
+.jsxc-icon-maximize:before {
+    content: map-get($jsxc-icons-map, "maximize");
+}
+.jsxc-icon-megaphone:before {
+    content: map-get($jsxc-icons-map, "megaphone");
+}
+.jsxc-icon-menu:before {
+    content: map-get($jsxc-icons-map, "menu");
+}
+.jsxc-icon-microphone-disabled:before {
+    content: map-get($jsxc-icons-map, "microphone-disabled");
+}
+.jsxc-icon-microphone:before {
+    content: map-get($jsxc-icons-map, "microphone");
+}
+.jsxc-icon-minimize:before {
+    content: map-get($jsxc-icons-map, "minimize");
+}
+.jsxc-icon-more:before {
+    content: map-get($jsxc-icons-map, "more");
+}
+.jsxc-icon-mute:before {
+    content: map-get($jsxc-icons-map, "mute");
+}
+.jsxc-icon-padlock-close:before {
+    content: map-get($jsxc-icons-map, "padlock-close");
+}
+.jsxc-icon-padlock-open-disabled:before {
+    content: map-get($jsxc-icons-map, "padlock-open-disabled");
+}
+.jsxc-icon-padlock-open:before {
+    content: map-get($jsxc-icons-map, "padlock-open");
+}
+.jsxc-icon-pick-up-disabled:before {
+    content: map-get($jsxc-icons-map, "pick-up-disabled");
+}
+.jsxc-icon-pick-up:before {
+    content: map-get($jsxc-icons-map, "pick-up");
+}
+.jsxc-icon-placeholder:before {
+    content: map-get($jsxc-icons-map, "placeholder");
+}
+.jsxc-icon-resize:before {
+    content: map-get($jsxc-icons-map, "resize");
+}
+.jsxc-icon-smiley:before {
+    content: map-get($jsxc-icons-map, "smiley");
+}
+.jsxc-icon-speech-balloon:before {
+    content: map-get($jsxc-icons-map, "speech-balloon");
+}

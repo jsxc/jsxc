@@ -26,32 +26,24 @@
   }
 
   &--default {
-    background-color: rgba(240, 240, 240, 0.9);
-    border-color: #ccc;
-    color: #555;
+    background-color: var(--jsxc-color-background-dark);
+    border-color: var(--jsxc-color-background-darker);
+    color: var(--jsxc-color-main-text);
+    opacity: 0.8;
 
     &:hover {
-      background-color: #d6d6d6;
+      opacity: 1;
     }
   }
 
   &--primary {
-    background-color: #337ab7;
-    border-color: #2e6da4;
-    color: #fff;
+    background-color: var(--jsxc-color-primary);
+    border-color: var(--jsxc-color-primary-light);
+    color: var(--jsxc-color-primary-text);
+    opacity: 0.8;
 
     &:hover {
-      background-color: #296496;
-    }
-  }
-
-  &--secondary {
-    background-color: #7daad2;
-    border-color: #658caf;
-    color: #fff;
-
-    &:hover {
-      background-color: #6b99c1;
+      opacity: 1;
     }
   }
 
@@ -67,10 +59,7 @@
 
   &[disabled],
   &[disabled]:hover {
-    background-color: #337ab7;
-    border-color: #2e6da4;
-    color: #fff;
     cursor: not-allowed;
-    opacity: 0.65;
+    opacity: 0.6;
   }
 }

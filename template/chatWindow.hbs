@@ -8,32 +8,50 @@
             <div class="jsxc-bar__caption__secondary"></div>
          </div>
 
-         {{#> menu
-            classes="jsxc-bar__action-entry jsxc-menu--drop-top-right jsxc-menu--light jsxc-menu-settings"
-            button-classes="jsxc-menu__more--light jsxc-icon jsxc-icon--more-light jsxc-icon--clickable"}}
-            <li class="jsxc-clear">{{t "clear_history"}}</li>
-            <li class="jsxc-share-screen">{{t "Share_screen"}}</li>
-            <li class="jsxc-send-location">{{t "Send_location"}}</li>
-         {{/menu}}
+         <div class="jsxc-menu jsxc-bar__action-entry jsxc-menu--drop-top-right jsxc-menu--light jsxc-menu-settings">
+            <div class="jsxc-menu__button jsxc-menu__more--light jsxc-icon--clickable">
+               <i class="jsxc-icon-more jsxc-icon--center"></i>
+            </div>
+            <div class="jsxc-menu__content">
+               <ul>
+                  <li class="jsxc-clear">{{t "clear_history"}}</li>
+                  <li class="jsxc-share-screen">{{t "Share_screen"}}</li>
+                  <li class="jsxc-send-location">{{t "Send_location"}}</li>
+               </ul>
+            </div>
+         </div>
 
          <div class="jsxc-bar__action-entry jsxc-disabled jsxc-audio"></div>
-         <div class="jsxc-bar__action-entry jsxc-disabled jsxc-video"></div>
-         <div class="jsxc-bar__action-entry jsxc-icon jsxc-icon--close-light jsxc-icon--clickable jsxc-js-close"></div>
+         <div class="jsxc-bar__action-entry jsxc-video"></div>
+         <div class="jsxc-bar__action-entry jsxc-icon--clickable jsxc-js-close">
+            <i class="jsxc-icon-close jsxc-icon--center"></i>
+         </div>
       </div>
       <div class="jsxc-window-fade">
          <div class="jsxc-message-area"></div>
          <div class="jsxc-preview"></div>
          <div class="jsxc-send-area">
-             {{> menu
-                    classes="jsxc-menu--emoticons jsxc-shrink--no jsxc-menu--dark jsxc-menu--drop-bottom-left"
-                    button-classes="jsxc-icon jsxc-icon--emoticon jsxc-icon--clickable"}}
+            <div class="jsxc-menu jsxc-menu--emoticons jsxc-shrink--no jsxc-menu--dark jsxc-menu--drop-bottom-left">
+               <div class="jsxc-menu__button jsxc-icon--clickable">
+                  <i class="jsxc-icon-smiley jsxc-icon--center"></i>
+               </div>
+               <div class="jsxc-menu__content">
+                  <ul></ul>
+               </div>
+            </div>
             <textarea class="jsxc-message-input" placeholder="{{t "Message"}}" dir="auto"></textarea>
             <div class="jsxc-file-transfer" title="{{t "Send_file"}}">
-               <label><input type="file" name="files" /><label>
+               <i class="jsxc-icon-attachment jsxc-icon--center"></i>
+               <label><input type="file" name="files" /></label>
             </div>
-            {{> menu
-                    classes="jsxc-transfer jsxc-menu--dark jsxc-menu--drop-bottom-right"
-                    button-classes="jsxc-transfer-state jsxc-transfer-icon jsxc-icon--clickable"}}
+            <div class="jsxc-menu jsxc-transfer jsxc-menu--dark jsxc-menu--drop-bottom-right">
+               <div class="jsxc-menu__button jsxc-transfer-state jsxc-icon--clickable">
+                  <i class="jsxc-icon--center"></i>
+               </div>
+               <div class="jsxc-menu__content">
+                  <ul></ul>
+               </div>
+            </div>
          </div>
       </div>
       <div class="jsxc-window__overlay">

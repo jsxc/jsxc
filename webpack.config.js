@@ -175,6 +175,9 @@ let config = {
             from: 'images/',
             to: 'images/'
          }, {
+            from: 'fonts/',
+            to: 'fonts/'
+         }, {
             from: 'node_modules/emojione/assets/svg/',
             to: 'images/emojione/'
          }, {

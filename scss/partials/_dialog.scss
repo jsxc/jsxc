@@ -1,5 +1,5 @@
 .jsxc-dialog-wrapper {
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: $main-bg-translucent;
   bottom: 0;
   display: flex;
   left: 0;
@@ -11,8 +11,9 @@
 }
 
 .jsxc-dialog {
-  background: #fff;
-  border: 1px solid #d8d8d8;
+  background: $main-bg;
+  border: 1px solid $bg-darker;
+  color: var(--jsxc-color-main-text);
   display: inline-block;
   margin: auto;
   max-width: 100%;
@@ -55,7 +56,7 @@
 
   hr {
     border: 0;
-    border-top: 1px solid #eee;
+    border-top: 1px solid $bg-darker;
     margin-bottom: 20px;
     margin-top: 20px;
   }
@@ -105,7 +106,7 @@
   }
 
   .jsxc-warning {
-    background-color: #fbfe7a;
+    background-color: $warning-bg;
     border-radius: 3px;
     display: block;
     padding: 3px 10px;
@@ -147,14 +148,14 @@
   }
 
   h2 {
-    color: #787878;
     font-size: 0.8em;
     font-weight: bold;
     margin: 0.5em 0 1.5em;
+    opacity: 0.8;
   }
 
   section {
-    border-top: 1px solid #b1b1b1;
+    border-top: 1px solid $bg-darker;
     margin-top: 1em;
   }
 }
@@ -169,7 +170,7 @@
       cursor: pointer;
 
       &:hover {
-        background-color: #f2f2f2;
+        background-color: $bg-hover;
       }
     }
 

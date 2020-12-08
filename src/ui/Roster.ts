@@ -252,7 +252,7 @@ export default class Roster {
       }
 
       if (icon) {
-         li.addClass('jsxc-icon--' + icon);
+         li.addClass('jsxc-icon-' + icon);
       }
 
       ((li, handler) => li.click(ev => {
@@ -352,7 +352,7 @@ export default class Roster {
          handler: showSettingsDialog,
          label: Translation.t('Settings'),
          offlineAvailable: true,
-         icon: 'setting'
+         icon: 'gear'
       });
    }
 

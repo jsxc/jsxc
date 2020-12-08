@@ -28,7 +28,7 @@ body.jsxc-fullscreen {
     }
 
     .jsxc-window {
-      background-color: #fff;
+      background-color: $main-bg;
       border: 0;
       border-radius: 0;
       left: 0;
@@ -98,24 +98,24 @@ body.jsxc-fullscreen {
     }
 
     &.jsxc-out {
-      background-color: #ececec;
+      background-color: $chatmessage-out-bg;
     }
 
     &.jsxc-in {
       background-color: var(--jsxc-message-bg);
 
       &.jsxc-light .jsxc-chatmessage__footer {
-        color: #5d5d5d;
+        color: $bg-darker;
       }
 
       &.jsxc-dark .jsxc-chatmessage__footer {
-        color: #ececec;
+        color: $bg-dark;
       }
     }
 
     &.jsxc-probably_out,
     &.jsxc-probably_in {
-      border: 1px solid #dadada;
+      border: 1px solid $bg-dark;
     }
   }
 
@@ -164,7 +164,7 @@ body.jsxc-fullscreen {
   }
 
   .jsxc-dialog-wrapper {
-    background-color: #fff;
+    background-color: $main-bg-translucent;
   }
 
   .jsxc-dialog {
@@ -181,7 +181,7 @@ body.jsxc-fullscreen.jsxc-two-columns {
     }
 
     #jsxc-window-list {
-      background-color: #e1e1e1;
+      background-color: $bg-darker;
       bottom: 0;
       left: 0;
       right: 33%;
@@ -215,7 +215,7 @@ body.jsxc-fullscreen.jsxc-two-columns {
   padding: 10px;
 
   &[data-trust="unknown"] {
-    border: 3px solid #f00;
+    border: 3px solid $error-bg;
   }
 
   &-id {
@@ -233,15 +233,15 @@ body.jsxc-fullscreen.jsxc-two-columns {
     display: inline;
 
     &[data-trust="unknown"] {
-      color: #f00;
+      color: $error-bg;
     }
 
     &[data-trust="recognized"] {
-      color: #ffa500;
+      color: $warning-bg;
     }
 
     &[data-trust="confirmed"] {
-      color: #008000;
+      color: $success-bg;
     }
 
     &[data-trust="ignored"] {

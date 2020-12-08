@@ -1,7 +1,5 @@
 .jsxc-window {
   background-color: $window-bg;
-  border: 1px solid $window-border;
-  border-bottom: 0;
   border-radius: 0.8em 0.8em 0 0;
   box-sizing: border-box;
   cursor: default;
@@ -131,6 +129,7 @@
           opacity: 1;
         }
       }
+
       @media (min-width: 768px) {
         height: 30px;
         width: 30px;
@@ -140,6 +139,10 @@
 }
 
 .jsxc-window-fade {
+  border: 1px solid $window-border;
+  border-bottom: 0;
+  border-top: 0;
+  color: var(--jsxc-color-main-text);
   display: flex;
   flex-direction: column;
   height: 320px;
@@ -215,7 +218,7 @@
 .jsxc-send-area {
   align-items: flex-end;
   align-items: center;
-  background-color: #fff;
+  background-color: $chatmessage-bg;
   display: flex;
   flex-shrink: 0;
   padding: 2px 0;
@@ -225,6 +228,10 @@
   .jsxc-file-transfer,
   .jsxc-transfer {
     flex-shrink: 0;
+
+    [class^="jsxc-icon-"] {
+      font-size: 23px;
+    }
   }
 
   .jsxc-message-input {
@@ -241,6 +248,7 @@
 
 .jsxc-message-input {
   @extend %scrollbar;
+  background-color: transparent;
   border: 0;
   border-radius: 0;
   box-sizing: content-box;
@@ -267,10 +275,6 @@
 }
 
 .jsxc-file-transfer {
-  background-image: url("../images/attachment.svg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 1.3em;
   cursor: pointer;
   height: 40px;
   opacity: 0.3;
@@ -289,6 +293,7 @@
   &:hover {
     opacity: 0.5;
   }
+
   @media (min-width: 768px) {
     width: 34px;
   }
@@ -349,7 +354,7 @@
     font-size: 1em;
     margin: 0;
 
-    + p {
+    +p {
       margin-top: 0.7em;
     }
   }
@@ -489,15 +494,9 @@
 }
 
 .jsxc-chatmessage.jsxc-encrypted {
-  .jsxc-transfer {
-    background-image: url("../images/padlock_close_grey.svg");
-    background-position: center left;
-    background-repeat: no-repeat;
-    background-size: 1em;
-    content: " ";
-    display: inline-block;
-    height: 1em;
-    width: 1em;
+  .jsxc-transfer::before {
+    @extend %jsxc-icon-font;
+    content: map-get($jsxc-icons-map, "padlock-close");
   }
 }
 
@@ -593,6 +592,7 @@
 
 .jsxc-in {
   background-color: var(--jsxc-message-bg);
+  color: #222;
 
   &.jsxc-light .jsxc-chatmessage__footer {
     color: #5d5d5d;
@@ -721,47 +721,36 @@
     width: 20px;
   }
 
-  .jsxc-transfer-icon {
-    background-image: url("../images/padlock_open_black.svg");
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: 1.3em;
-    cursor: pointer;
-    display: block;
-    height: 100%;
-    opacity: 0.3;
-    width: 100%;
+  i::before {
+    content: map-get($jsxc-icons-map, "padlock-open");
   }
 
   &.jsxc-disabled {
-    .jsxc-transfer-icon {
-      background-image: url("../images/padlock_open_disabled_black.svg");
+    .jsxc-icon--clickable {
       cursor: default;
     }
 
-    &:hover {
-      .jsxc-transfer-icon {
-        opacity: 0.3;
-      }
+    i::before {
+      content: map-get($jsxc-icons-map, "padlock-open-disabled");
     }
   }
 
   &.jsxc-fin {
-    .jsxc-transfer-icon {
-      background-image: url("../images/padlock_close_grey.svg");
-      opacity: 1;
+    i::before {
+      content: map-get($jsxc-icons-map, "padlock-close");
     }
   }
 
   &.jsxc-enc {
-    .jsxc-transfer-icon {
-      background-image: url("../images/padlock_close_orange.svg");
-      opacity: 1;
+    i::before {
+      color: var(--jsxc-color-warning);
+      content: map-get($jsxc-icons-map, "padlock-close");
     }
 
     &.jsxc-trust {
-      .jsxc-transfer-icon {
-        background-image: url("../images/padlock_close_green.svg");
+      i::before {
+        color: var(--jsxc-color-success);
+        content: map-get($jsxc-icons-map, "padlock-close");
       }
     }
   }
@@ -786,12 +775,12 @@
   z-index: 80;
 
   span {
-    background-color: #e4e4e4;
+    background-color: $main-bg;
     cursor: pointer;
     padding: 5px 10px;
 
     &:hover {
-      background-color: #dfcfcf;
+      background-color: $bg-hover;
       opacity: 1;
     }
   }

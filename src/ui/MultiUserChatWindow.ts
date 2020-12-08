@@ -143,7 +143,7 @@ export default class MultiUserChatWindow extends ChatWindow {
    private addMucElementsToChatWindow() {
       this.addMemberList();
 
-      this.addActionEntry('jsxc-members', this.toggleMemberList);
+      this.addActionEntry('jsxc-members', this.toggleMemberList, $('<i class="jsxc-icon-group jsxc-icon--center"></i>'));
 
       this.addMenuEntry(
          'jsxc-destroy',
