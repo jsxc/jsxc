@@ -74,6 +74,7 @@ export default class Archive {
       if (!firstResultId) {
          let lastMessage = this.contact.getTranscript().getLastMessage();
          endDate = lastMessage ? lastMessage.getStamp() : undefined;
+         endDate.setSeconds(endDate.getSeconds() - 1);
       }
 
       let connection = this.plugin.getConnection();
