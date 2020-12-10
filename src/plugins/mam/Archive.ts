@@ -73,7 +73,12 @@ export default class Archive {
 
       if (!firstResultId) {
          let lastMessage = this.contact.getTranscript().getLastMessage();
-         endDate = lastMessage ? lastMessage.getStamp() : undefined;
+         if (lastMessage) {
+            endDate = lastMessage.getStamp();
+            endDate.setSeconds(endDate.getSeconds() - 1);
+         } else {
+            endDate = undefined;
+         }
       }
 
       let connection = this.plugin.getConnection();
