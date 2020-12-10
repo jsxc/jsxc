@@ -6,6 +6,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## 4.2.0-beta.1 (2020-12-10)
+### Added
+- add option to disable automatic reconnect on page load
+- [#889](https://github.com/jsxc/jsxc/issues/889) add xmpp ping (server-to-client) plugin
+- [#771](https://github.com/jsxc/jsxc/issues/771) add dark theme and css vars
+- [#856](https://github.com/jsxc/jsxc/issues/856) add image paste feature (#948)
+
+### Fixed
+- [#955](https://github.com/jsxc/jsxc/issues/955) duplicate message when load mam (#955)
+- delete device list on refresh (omemo)
+- [#933](https://github.com/jsxc/jsxc/issues/933) fix icon if someone leaves a muc room
+- [#873](https://github.com/jsxc/jsxc/issues/873) fix chat window width
+
+### Misc
+- update lang
+- update dependencies
+- highlight only contacts without subscription
+- upgrade to node 12
+
 ## 4.1.1 (2020-06-22)
 ### Fixed
 - [#897](https://github.com/jsxc/jsxc/issues/897) switching from online to online
