@@ -202,7 +202,7 @@
 
       &:hover {
         background-color: $emoticon-selection-hover;
-        color: #000;
+        color: var(--jsxc-color-main-text);
       }
     }
   }
@@ -310,6 +310,7 @@
 
       .jsxc-emoticon {
         background-size: contain;
+        cursor: pointer;
         float: left;
         height: 100%;
         margin: 0;
