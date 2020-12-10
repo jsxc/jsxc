@@ -371,6 +371,7 @@
     "setting-otr-enable": "Off-the-Record Messaging (OTR) gör det möjligt att skicka krypterade \"end-to-end\" meddelanden från en enhet till en annan.",
     "setting-receipts-enable": "Aktivera denna plugin om du vill använda leveranskvitton.",
     "setting-vcard-avatar-enable": "Använder vCard för att få \"avatars\" från sina kontakter.",
+    "setting-ping-enable": null,
     "Test": "Testa",
     "this_device": "denna enhet",
     "Verification": "Verifiering",

@@ -371,6 +371,7 @@
     "setting-otr-enable": "Shkëmbimi Off-the-Record i Mesazheve (OTR) ju bën të mundur të dërgoni mesazhe të fshehtëzuar skaj-më-skaj nga një pajisje në një tjetër.",
     "setting-receipts-enable": "Aktivizojeni këtë shtojcë nëse doni të përdorni dëftesa dërgimesh. Nëse kjo mbulohet edhe nga kontakti juaj, do të shihni që të dy kur mbërrin një mesazh.",
     "setting-vcard-avatar-enable": "Përdor vCard për të marrë avatarë të ndritshëm dhe të hijshëm prej kontakteve tuaj.",
+    "setting-ping-enable": null,
     "Test": "Provë",
     "this_device": "këtë pajisje",
     "Verification": "Verifikim",

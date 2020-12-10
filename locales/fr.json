@@ -371,6 +371,7 @@
     "setting-otr-enable": "Les messages Off-The-Record (OTR) vous permettent d'envoyer des messages chiffrés d'un de vos périphériques vers un autre sans intermédiaire.",
     "setting-receipts-enable": "Activez cette extension si vous souhaitez recevoir des accusés de réception. Si votre contact le supporte également, vous verrez tous les deux si un message est arrivé.",
     "setting-vcard-avatar-enable": "Utilisez vCard pour recevoir les avatars de vos contacts.",
+    "setting-ping-enable": null,
     "Test": "Test",
     "this_device": "ce périphérique",
     "Verification": "Vérification",

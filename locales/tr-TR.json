@@ -371,6 +371,7 @@
     "setting-otr-enable": null,
     "setting-receipts-enable": null,
     "setting-vcard-avatar-enable": null,
+    "setting-ping-enable": null,
     "Test": null,
     "this_device": null,
     "Verification": null,
