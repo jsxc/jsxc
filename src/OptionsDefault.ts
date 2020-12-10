@@ -138,3 +138,5 @@ export let disabledPlugins: string[] = [];
 export let connectionCallback: (jid: string, status: number, condition?: string) => void = null;
 
 export let onUserRequestsToGoOnline: () => void = loginDialog;
+
+export let automaticallyRestoreAccounts = true;

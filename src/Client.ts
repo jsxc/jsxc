@@ -49,7 +49,8 @@ export default class Client {
 
       Migration.run(Client.getVersion(), storage);
 
-      return Client.accountManager.restoreAccounts();
+      return Options.getDefault('automaticallyRestoreAccounts') ?
+          Client.accountManager.restoreAccounts() : 0;
    }
 
    public static getVersion(): string {

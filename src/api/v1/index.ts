@@ -86,3 +86,7 @@ export function showLoginBox(username?: string) {
 export function getAccount(uid: string) {
    return new Account(uid);
 }
+
+export function restoreAccounts(): number {
+   return Client.getAccountManager().restoreAccounts();
+}
