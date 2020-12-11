@@ -2,6 +2,7 @@ import {
   Action,
   ConnectAction,
   SetConnectionStatusAction,
+  SetContactsStatusAction,
   SetThreadsAction,
 } from './actions';
 
@@ -13,6 +14,12 @@ export const isSetConnectionStatusAction = (
   action: Action,
 ): action is SetConnectionStatusAction => {
   return action.type === 'SET_CONNECTION_STATUS';
+};
+
+export const isSetContactsAction = (
+  action: Action,
+): action is SetContactsStatusAction => {
+  return action.type === 'SET_CONTACTS';
 };
 
 export const isSetThreadsAction = (

@@ -21,6 +21,8 @@
     "react-icons": "^3.10.0",
     "react-router-dom": "^5.2.0",
     "strophe.js": "^1.3.6",
+    "strophejs-plugin-mam": "^0.0.3",
+    "strophejs-plugin-rsm": "^0.0.2",
     "ts-pattern": "^1.1.0",
     "validator": "^13.1.1",
     "xml-js": "^1.6.11"

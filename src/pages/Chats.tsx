@@ -17,22 +17,24 @@ import {
 } from '@chakra-ui/core';
 import * as IonIcons from 'react-icons/io';
 import * as FeatherIcons from 'react-icons/fi';
-import { useXmpp, Thread } from '../hooks';
+import { useXmpp, Contact } from '../hooks';
 
 const Chats: React.FC = () => {
-  const [globalState, globalDispatch] = useXmpp();
-  const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
+  const [globalState] = useXmpp();
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
-  const {
-    data: { threads },
-  } = globalState;
-
-  const handleThreadClick = (thread: Thread | null) => () => {
-    setSelectedThread(thread);
+  const handleContactClick = (contact: Contact) => () => {
+    setSelectedContact(contact);
   };
 
+  const {
+    data: { contacts, threads },
+  } = globalState;
+
+  const selectedThread = selectedContact ? threads[selectedContact.jid] : null;
+
   return (
-    <Flex flex={1}>
+    <Flex flex={1} overflow="hidden">
       <Stack
         flex={0.025}
         justify="space-between"
@@ -76,9 +78,7 @@ const Chats: React.FC = () => {
         </Text>
 
         <Stack spacing="0.75em">
-          {threads.map((thread) => {
-            const { contact } = thread;
-
+          {contacts.map((contact) => {
             const contactName = contact.name ?? contact.jid;
 
             return (
@@ -89,7 +89,7 @@ const Chats: React.FC = () => {
                 padding={2}
                 key={contact.jid}
               >
-                <Flex align="center" onClick={handleThreadClick(thread)}>
+                <Flex align="center" onClick={handleContactClick(contact)}>
                   <Avatar marginRight="1em" size="sm" name={contactName}>
                     <AvatarBadge size="1em" bg="green.500" borderWidth={2} />
                   </Avatar>
@@ -109,12 +109,12 @@ const Chats: React.FC = () => {
         </Stack>
       </Stack>
 
-      {selectedThread ? (
+      {selectedContact ? (
         <Stack flex={0.8} justify="space-between" background="#212328">
           <Stack>
             <Flex
               align="center"
-              paddingX="1em"
+              paddingX="2em"
               paddingY="1.5em"
               borderColor="gray.700"
               borderBottomWidth={1}
@@ -122,18 +122,47 @@ const Chats: React.FC = () => {
               <Avatar
                 marginRight="1em"
                 size="sm"
-                name={selectedThread.contact.name || selectedThread.contact.jid}
+                name={selectedContact.name ?? selectedContact.jid}
               >
                 <AvatarBadge size="1em" bg="green.500" borderWidth={2} />
               </Avatar>
 
               <Text fontSize="lg" fontWeight="bold" color="gray.200">
-                {selectedThread.contact.name || selectedThread.contact.jid}
+                {selectedContact.name ?? selectedContact.jid}
               </Text>
             </Flex>
           </Stack>
 
-          <Flex align="flex-end" padding="1em">
+          <Stack paddingX="2em" overflow="auto">
+            {selectedThread?.map((message) => {
+              const { from, text } = message;
+
+              return (
+                <Flex
+                  flex={1}
+                  paddingY="1em"
+                  borderBottom="1px"
+                  borderColor="gray.600"
+                >
+                  <Flex paddingRight="0.5em">
+                    <Avatar marginRight="1em" size="sm" name={from} />
+                  </Flex>
+
+                  <Stack>
+                    <Text fontSize="md" fontWeight="bold" color="gray.200">
+                      {from}
+                    </Text>
+
+                    <Text fontSize="md" color="gray.400">
+                      {text}
+                    </Text>
+                  </Stack>
+                </Flex>
+              );
+            })}
+          </Stack>
+
+          <Flex flex={1} align="flex-end" padding="1em">
             <Textarea
               marginRight="0.5em"
               placeholder="Write a new message"

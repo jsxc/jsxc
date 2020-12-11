@@ -1,8 +1,15 @@
-import { ConnectionStatus, Credentials, Thread } from './types';
+import {
+  Dictionary,
+  ConnectionStatus,
+  Contact,
+  Credentials,
+  Thread,
+} from './types';
 
 export type Action =
   | ConnectAction
   | SetConnectionStatusAction
+  | SetContactsStatusAction
   | SetThreadsAction;
 
 export type ConnectAction = {
@@ -15,7 +22,12 @@ export type SetConnectionStatusAction = {
   status: ConnectionStatus;
 };
 
+export type SetContactsStatusAction = {
+  type: 'SET_CONTACTS';
+  contacts: Contact[];
+};
+
 export type SetThreadsAction = {
   type: 'SET_THREADS';
-  threads: Thread[];
+  threads: Dictionary<Thread>;
 };

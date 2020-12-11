@@ -20,7 +20,8 @@ const XmppContext = createContext<[State, DispatchAction]>([
       status: 'DISCONNECTED',
     },
     data: {
-      threads: [],
+      contacts: [],
+      threads: {},
     },
   },
   () => {},
@@ -41,11 +42,13 @@ export const XmppProvider: React.FC<ProviderProps> = (props) => {
       status: 'DISCONNECTED',
     },
     data: {
-      threads: [],
+      contacts: [],
+      threads: {},
     },
   });
 
-  const { credentials } = state;
+  const { credentials, data } = state;
+  const { contacts } = data;
 
   useEffect(() => {
     const { url, username, password } = credentials;
@@ -67,14 +70,9 @@ export const XmppProvider: React.FC<ProviderProps> = (props) => {
     };
 
     const handleContactsLoaded = (contacts: Contact[]) => {
-      const threads = contacts.map((contact) => ({
-        contact,
-        messages: [],
-      }));
-
       dispatch({
-        type: 'SET_THREADS',
-        threads,
+        type: 'SET_CONTACTS',
+        contacts,
       });
 
       if (log) {
@@ -107,11 +105,54 @@ export const XmppProvider: React.FC<ProviderProps> = (props) => {
     }
 
     return () => {
-      if (connectionRef.current) {
-        core.disconnect({ connection: connectionRef.current });
+      const connection = connectionRef.current;
+
+      if (connection) {
+        core.disconnect({ connection });
       }
     };
-  }, [log, credentials, dispatch]);
+  }, [credentials, dispatch, log]);
+
+  useEffect(() => {
+    (async () => {
+      const connection = connectionRef.current;
+
+      if (!connection) {
+        return;
+      }
+
+      const archivedMessages = await core.loadArchivedMessages({
+        connection,
+        contacts,
+      });
+
+      const populatedThreads = contacts.reduce(
+        (populatedThreadsSoFar, contact) => {
+          const threadMessages = archivedMessages.filter((archivedMessage) => {
+            return (
+              archivedMessage.from === contact.jid ||
+              archivedMessage.to === contact.jid
+            );
+          });
+
+          return {
+            ...populatedThreadsSoFar,
+            [contact.jid]: threadMessages,
+          };
+        },
+        {},
+      );
+
+      dispatch({
+        type: 'SET_THREADS',
+        threads: populatedThreads,
+      });
+
+      if (log) {
+        consola.info('Archived messages loaded:', archivedMessages.length);
+      }
+    })();
+  }, [contacts, dispatch, log]);
 
   return (
     <XmppContext.Provider value={[state, dispatch]}>

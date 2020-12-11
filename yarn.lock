@@ -11068,6 +11068,16 @@ strophe.js@^1.3.6:
     ws "^7.0.0"
     xmldom "^0.1.27"
 
+strophejs-plugin-mam@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/strophejs-plugin-mam/-/strophejs-plugin-mam-0.0.3.tgz#b98d6837e0011e645531a68047a3998cfb0c1f3d"
+  integrity sha512-S8AFNb7I0nrzWW8uopN5SYnYfNTcJ7D37SMqqhJLHg2A1PC2zuRX0zKouilFdGxzv9dDN6mygQljD47oL24y7Q==
+
+strophejs-plugin-rsm@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/strophejs-plugin-rsm/-/strophejs-plugin-rsm-0.0.2.tgz#c624fb0b2a7edeeaebf0986722224477cb9f74e6"
+  integrity sha512-Yn/VpxNz3Gkb790rJkwMyjlwHWCjWA9UxIl5kwGnsr7Ofo1MHztgyQ8XwQF1DGFp3Y4oiXbjZ/whG3S/cIgIew==
+
 style-loader@0.23.1:
   version "0.23.1"
   resolved "https://registry.yarnpkg.com/style-loader/-/style-loader-0.23.1.tgz#cb9154606f3e771ab6c4ab637026a1049174d925"

@@ -4,6 +4,7 @@ import { Action } from './actions';
 import {
   isConnectAction,
   isSetConnectionStatusAction,
+  isSetContactsAction,
   isSetThreadsAction,
 } from './typeGuards';
 import { Credentials, Connection, Data } from './types';
@@ -28,6 +29,12 @@ const reducer: Reducer = (state, action) => {
   if (isSetConnectionStatusAction(action)) {
     return produce(state, (draftState) => {
       draftState.connection.status = action.status;
+    });
+  }
+
+  if (isSetContactsAction(action)) {
+    return produce(state, (draftState) => {
+      draftState.data.contacts = action.contacts;
     });
   }
 
