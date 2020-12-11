@@ -24,4 +24,5 @@ export type Message = {
   from: string;
   to: string;
   text: string;
+  createdAt: number;
 };

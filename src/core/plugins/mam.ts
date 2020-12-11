@@ -1,4 +1,5 @@
 import { extractBareJid, parseStanza } from '../utilities';
+import { isoStringToMillis } from '../../utilities';
 import { Contact, Message } from '../types';
 
 /**
@@ -63,16 +64,20 @@ const loadArchivedMessagesWithContact = ({
 const parseMessageStanza = (messageStanza: Element): Message => {
   const parsedStanza = parseStanza(messageStanza);
 
-  const { from, to, text } = {
+  const { from, to, text, createdAt } = {
     from: parsedStanza.message?.result?.forwarded?.message?.attributes?.from,
     to: parsedStanza.message?.result?.forwarded?.message?.attributes?.to,
     text: parsedStanza.message?.result?.forwarded?.message?.body?._text,
+    createdAt: isoStringToMillis(
+      parsedStanza.message?.result?.forwarded?.delay?.attributes?.stamp,
+    ),
   };
 
   return {
     from: extractBareJid(from),
     to: extractBareJid(to),
     text,
+    createdAt,
   };
 };
 

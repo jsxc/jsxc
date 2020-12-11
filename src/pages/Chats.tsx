@@ -18,6 +18,7 @@ import {
 import * as IonIcons from 'react-icons/io';
 import * as FeatherIcons from 'react-icons/fi';
 import { useXmpp, Contact } from '../hooks';
+import { formatTimestamp } from '../utilities';
 
 const Chats: React.FC = () => {
   const [globalState] = useXmpp();
@@ -135,7 +136,7 @@ const Chats: React.FC = () => {
 
           <Stack paddingX="2em" overflow="auto">
             {selectedThread?.map((message) => {
-              const { from, text } = message;
+              const { from, text, createdAt } = message;
 
               return (
                 <Flex
@@ -149,9 +150,15 @@ const Chats: React.FC = () => {
                   </Flex>
 
                   <Stack>
-                    <Text fontSize="md" fontWeight="bold" color="gray.200">
-                      {from}
-                    </Text>
+                    <Flex align="center">
+                      <Text fontSize="md" fontWeight="bold" color="gray.200">
+                        {from}
+                      </Text>
+
+                      <Text marginX="1em" fontSize="sm" color="gray.500">
+                        {formatTimestamp('LT')(createdAt)}
+                      </Text>
+                    </Flex>
 
                     <Text fontSize="md" color="gray.400">
                       {text}

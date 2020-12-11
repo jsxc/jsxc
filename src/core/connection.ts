@@ -6,6 +6,7 @@ import {
   extractBareJid,
   decodeConnectionStatus,
 } from './utilities';
+import { nowMillis } from '../utilities';
 import { ConnectionStatus, Contact, Message } from './types';
 
 const { Connection } = Strophe;
@@ -70,6 +71,7 @@ export const connect = ({
               from: extractBareJid(parsedStanza.message.attributes.from),
               to: parsedStanza.message.attributes.to,
               text: parsedStanza.message.body._text,
+              createdAt: nowMillis(),
             });
           }
 
