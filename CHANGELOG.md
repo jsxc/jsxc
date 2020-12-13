@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## 4.2.0-beta.1 (2020-12-10)
+## 4.2.0 (2020-12-13)
 ### Added
 - add option to disable automatic reconnect on page load
 - [#889](https://github.com/jsxc/jsxc/issues/889) add xmpp ping (server-to-client) plugin
@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - update dependencies
 - highlight only contacts without subscription
 - upgrade to node 12
+
+### Deprecated
+- SASS variables will be removed in one of the next releases. Use css variables instead.
 
 ## 4.1.1 (2020-06-22)
 ### Fixed
