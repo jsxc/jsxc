@@ -371,7 +371,7 @@
     "setting-otr-enable": "Met Off-the-Record Messaging (OTR) kun je end-to-end gecodeerde berichten van het ene apparaat naar het andere verzenden.",
     "setting-receipts-enable": "Schakel deze plug-in in als u afleverbonnen wilt gebruiken. Als uw contactpersoon dit ook ondersteunt, zullen jullie beiden zien of er een bericht is aangekomen.",
     "setting-vcard-avatar-enable": "Gebruik vCard om mooie avatars van je contacten te krijgen.",
-    "setting-ping-enable": null,
+    "setting-ping-enable": "Bentwoord de pings van de server. Het kan helpen wanneer de verbinding met de server steeds verbroken wordt.",
     "Test": "Test",
     "this_device": "Dit apparaat",
     "Verification": "Verificatie",

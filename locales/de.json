@@ -371,15 +371,15 @@
     "setting-otr-enable": "Off-the Record Messaging (OTR) erlaubt es ende-zu-ende verschlüsselte Nachrichten von einem Gerät zu einem anderen zu senden.",
     "setting-receipts-enable": "Wenn dieses Plugin aktiviert ist und der Empfänger diese Erweiterung ebenfalls unterstützt, werden Empfangsbenachrichtigungen ausgetauscht.",
     "setting-vcard-avatar-enable": "vCard wird genutzt um Avatare der Kontakte zu laden.",
-    "setting-ping-enable": null,
+    "setting-ping-enable": "Antworte auf Ping Anfragen des Servers. Hilft in manchen Situationen bei einer unstabilen Verbindung.",
     "Test": "Test",
     "this_device": "dieses Gerät",
     "Verification": "Verifikation",
     "Webcam": "Webcam",
     "chatmarkers-description": "Möchtest du es sehen wenn dein Kontakt deine Nachrichten erhalten oder gelesen hat?",
     "chatmarkers-received": "Erhalten",
-    "chatmarkers-displayed": null,
-    "chatmarkers-acknowledged": null,
+    "chatmarkers-displayed": "angezeigt",
+    "chatmarkers-acknowledged": "quittiert",
     "There_are_new_devices": "Es gibt neue Geräte"
   },
   "Notifications": "Benachrichtigungen"
