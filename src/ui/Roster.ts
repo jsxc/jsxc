@@ -26,19 +26,23 @@ export default class Roster {
 
    private element: JQuery;
    private contactList: JQuery;
+   private groupList: JQuery;
 
    private static instance: Roster;
 
    public static init(): void {
       Roster.get();
    }
-
+  
+  
    public static get(): Roster {
       if (!Roster.instance) {
          Roster.instance = new Roster();
 
          Client.getNoticeManager();
       }
+	  
+	  Roster.instance.addContactFilter();	  
 
       return Roster.instance;
    }
@@ -53,6 +57,7 @@ export default class Roster {
       $('.jsxc-js-notice-menu .jsxc-menu__button').text('');
 
       this.contactList = this.element.find('.jsxc-contact-list');
+	  this.groupList = this.element.find('.jsxc-group-list');
 
       this.addMainMenuEntries();
       this.registerPresenceHandler();
@@ -79,6 +84,81 @@ export default class Roster {
          spanElement.text(msg);
       }
    }
+   
+   private initCollapisible()
+   {
+	    var coll = $(".jsxc-collapsible");
+		var i;
+
+		for (i = 0; i < coll.length; i++) 
+		{
+		    $(coll[i]).off("click").on("click", function() 
+			{
+				this.classList.toggle("jsxc-active");
+				var content = $(this).next();
+				if ($(content)[0].style.maxHeight){
+				  $(content)[0].style.maxHeight = null;
+				  $(content)[0].style.display="none";
+				} else {
+					$(content)[0].style.display="";
+				    $(content)[0].style.maxHeight = $(content)[0].scrollHeight + "px";				 
+				} 				
+		    });
+		}
+		
+		if (this.contactList[0].style.maxHeight){
+		  this.contactList[0].style.maxHeight = null;
+		  this.contactList[0].style.display="none";
+		} else {
+			if (this.contactList[0].childNodes.length>0)
+			{
+				this.contactList[0].style.display="";
+				this.contactList[0].style.maxHeight = this.contactList[0].scrollHeight + "px";				
+			}
+		} 
+   }
+   
+   private addContactFilter()
+   {
+		$("#filterlist").off("keyup").on("keyup",function(e)
+		{
+			$.each( $(".jsxc-contact-list").children("li"), function( key, value )
+			{
+				 $(this).css({"display":""});
+			});
+			$.each( $(".jsxc-group-list").children("li"), function( key, value )
+			{
+				 $(this).css({"display":""});
+			});
+			
+			var val = null;
+			
+			if ($(this).val())
+				val = new String($(this).val());
+			
+			if (val!=null&&val.length>0)
+			{			
+				val=val.toLowerCase();
+				$.each( $(".jsxc-contact-list").children("li"), function( key, value )
+				{
+					var text = $(this).children("div.jsxc-bar__caption.jsxc-grow").text().trim().toLowerCase();
+					if (text.indexOf(val)==-1&&$(this).attr("data-id").substring(0,$(this).attr("data-id").indexOf("@")).toLowerCase().indexOf(val)==-1)
+					{
+						$(this).css({"display":"none"});
+					}
+				});
+				$.each( $(".jsxc-group-list").children("li"), function( key, value )
+				{
+					var text = $(this).children("div.jsxc-bar__caption.jsxc-grow").text().trim().toLowerCase();
+					if (text.indexOf(val)==-1&&$(this).attr("data-id").substring(0,$(this).attr("data-id").indexOf("@")).toLowerCase().indexOf(val)==-1)
+					{
+						$(this).css({"display":"none"});
+					}
+				});
+			}
+			
+		});
+   }
 
    public endProcessing() {
       this.element.removeClass('jsxc-processing');
@@ -93,7 +173,7 @@ export default class Roster {
          spanElement.text(previousText);
       }
 
-      this.refreshOwnPresenceIndicator();
+      this.refreshOwnPresenceIndicator();	  
    }
 
    public add(contact: IContact) {
@@ -117,6 +197,23 @@ export default class Roster {
 
          this.insert(rosterItem);
       });
+	 
+	  let contactType = contact.getType();
+      let list = contactType=="chat"?this.contactList:this.groupList;
+	  	  
+	  if (!$($(list).parent()[0]).prev().hasClass("jsxc-active"))
+	  {
+		  $(list).parent()[0].style.maxHeight = null;
+		  $(list).parent()[0].style.display="none";
+	  }
+	  else 
+	  {
+		  if ($($(list).parent()[0]).prev().hasClass("jsxc-active"))
+		  {
+			  $(list).parent()[0].style.display="";
+			  $(list).parent()[0].style.maxHeight = $(list).parent()[0].scrollHeight + "px";			
+		  }
+	  } 
    }
 
    public remove(contact: IContact) {
@@ -270,14 +367,16 @@ export default class Roster {
    }
 
    private insert(rosterItem: RosterItem) {
-      let contactList = this.contactList;
-      let contact = rosterItem.getContact();
+	  let contact = rosterItem.getContact();
+	  let contactType = contact.getType();
+      let list = contactType=="chat"?this.contactList:this.groupList;
+      
       let contactName = contact.getName();
 
       let lastMessageDate = contact.getLastMessageDate();
 
-      let pointer = lastMessageDate ? contactList.find('[data-date]') : contactList.children().first();
-      pointer = pointer.length > 0 ? pointer.first() : contactList.children().first();
+      let pointer = lastMessageDate ? list.find('[data-date]') : list.children().first();
+      pointer = pointer.length > 0 ? pointer.first() : list.children().first();
 
       while (pointer.length > 0) {
          let pointerDate = pointer.data('date') ? new Date(pointer.data('date')) : undefined;
@@ -295,7 +394,21 @@ export default class Roster {
          pointer = pointer.next();
       }
 
-      rosterItem.getDom().appendTo(contactList);
+      rosterItem.getDom().appendTo(list);
+	 
+	  if (!$($(list).parent()[0]).prev().hasClass("jsxc-active"))
+	  {
+		  $(list).parent()[0].style.maxHeight = null;
+		  $(list).parent()[0].style.display="none";
+	  }
+	  else 
+	  {
+		  if ($($(list).parent()[0]).prev().hasClass("jsxc-active"))
+		  {
+			 $(list).parent()[0].style.display="";
+			 $(list).parent()[0].style.maxHeight = $(list).parent()[0].scrollHeight + "px";			 
+		  }
+	  } 
    }
 
    private addMainMenuEntries() {
@@ -461,5 +574,7 @@ export default class Roster {
       Client.getPresenceController().registerCurrentPresenceHook(() => {
          this.refreshOwnPresenceIndicator();
       });
+	  
+	  this.initCollapisible();
    }
 }

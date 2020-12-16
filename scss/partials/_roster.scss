@@ -1,3 +1,52 @@
+.jsxc-collapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 5px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 12px;
+}
+
+.jsxc-active, .jsxc-collapsible:hover {
+  background-color: #555;
+}
+
+.jsxc-filterinput
+{
+	height: 30px;
+	max-height: 30px;
+	min-height: 30px;
+}
+
+.jsxc-collapsible:after {
+  content: '\002B';
+  color: white;
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
+
+.jsxc-active:after {
+  content: "\2212";
+}
+
+.jsxc-collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: #f1f1f1;
+  padding-bottom: 15px;
+}
+
+.jsxc-real-bottom
+{
+	margin-bottom: 0px;
+	margin-top: auto;
+}
+
 #jsxc-roster {
   background-color: $roster-bg;
   border-left: 1px solid $roster-border-left;
@@ -301,14 +350,14 @@ li.jsxc-hide-offline {
   }
 }
 
-.jsxc-contact-list {
+.jsxc-contact-list, .jsxc-group-list{
   @include presence-indicator(" .jsxc-avatar");
 
   list-style: none;
   margin: 0;
   overflow: hidden;
   padding: 0;
-  padding-bottom: 15px;
+ /* padding-bottom: 15px;*/
   width: 100%;
   z-index: 85;
 
