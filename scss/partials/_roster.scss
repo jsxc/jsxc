@@ -1,3 +1,53 @@
+.jsxc-collapsible {
+  background-color: var(--jsxc-color-background-darker) !important;
+  border: 0;
+  color: var(--jsxc-color-main-text);
+  cursor: pointer;
+  font-size: 12px;
+  outline: none;
+  padding: 5px;
+  text-align: left;
+  width: 100%;
+}
+
+.jsxc-collapsible:hover {
+  background-color: var(--jsxc-color-background-hover) !important;
+}
+
+.jsxc-filterinput {
+  height: 30px;
+  max-height: 30px;
+  min-height: 30px;
+}
+
+.jsxc-roster-item-filtered {
+  display: none !important;
+}
+
+.jsxc-collapsible:after {
+  color: var(--jsxc-color-main-text);
+  content: "\002B";
+  float: right;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.jsxc-active:after {
+  content: "\2212";
+}
+
+.jsxc-collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  padding-bottom: 15px;
+  transition: max-height 0.2s ease-out;
+}
+
+.jsxc-real-bottom {
+  margin-bottom: 0;
+  margin-top: auto;
+}
+
 #jsxc-roster {
   background-color: $roster-bg;
   border-left: 1px solid $roster-border-left;
@@ -301,14 +351,13 @@ li.jsxc-hide-offline {
   }
 }
 
-.jsxc-contact-list {
+.jsxc-contact-list,
+.jsxc-group-list {
   @include presence-indicator(" .jsxc-avatar");
-
   list-style: none;
   margin: 0;
   overflow: hidden;
   padding: 0;
-  padding-bottom: 15px;
   width: 100%;
   z-index: 85;
 

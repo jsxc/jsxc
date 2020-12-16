@@ -26,6 +26,7 @@ export default class Roster {
 
    private element: JQuery;
    private contactList: JQuery;
+   private groupList: JQuery;
 
    private static instance: Roster;
 
@@ -40,6 +41,8 @@ export default class Roster {
          Client.getNoticeManager();
       }
 
+      Roster.instance.addContactFilter();
+
       return Roster.instance;
    }
 
@@ -53,6 +56,7 @@ export default class Roster {
       $('.jsxc-js-notice-menu .jsxc-menu__button').text('');
 
       this.contactList = this.element.find('.jsxc-contact-list');
+      this.groupList = this.element.find('.jsxc-group-list');
 
       this.addMainMenuEntries();
       this.registerPresenceHandler();
@@ -80,6 +84,78 @@ export default class Roster {
       }
    }
 
+   private initCollapisible()
+   {
+      let collapsibleElement = $('.jsxc-collapsible');
+
+      for(let i = 0; i < collapsibleElement.length; i++)
+      {
+         $(collapsibleElement[i]).off('click').on('click', function()
+         {
+            this.classList.toggle('jsxc-active');
+            let content = $(this).next();
+            if (content.first().css('display')!=='none'){
+                content.first().css('display','none');
+                content.first().css('max-height','');
+            } else {
+                content.first().css('display','');
+                content.first().css('max-height','100%');
+            }
+         });
+
+         $(collapsibleElement[i]).next().css('flex-grow', 'unset');
+      }
+
+      if (this.contactList[0].childNodes.length>0)
+      {
+          $(this.contactList[0]).css('display','');
+          $(this.contactList[0]).css('max-height','100%');
+      }
+   }
+
+   private addContactFilter()
+   {
+      $('#jsxc-filterlist').off('keyup').on('keyup',function(e)
+      {
+         //Re init all items to visible, in case of key press is backspace...
+         $('.jsxc-contact-list > li').each(function( key, value )
+         {
+             $(this).removeClass('jsxc-roster-item-filtered');
+         });
+         $('.jsxc-group-list > li').each(function( key, value )
+         {
+             $(this).removeClass('jsxc-roster-item-filtered');
+         });
+
+         let val = null;
+
+         if ($(this).val())
+            val = $(this).val().toString();
+
+         if (val!==null&&val.trim().length>0) //minimum of one char
+         {
+            val=val.toLowerCase();
+            $('.jsxc-contact-list > li').each(function( key, value )
+            {
+               let text = $(this).children('div.jsxc-bar__caption.jsxc-grow').text().trim().toLowerCase();
+               if (text.indexOf(val)===-1&&$(this).attr('data-id').substring(0,$(this).attr('data-id').indexOf('@')).toLowerCase().indexOf(val)===-1)
+               {
+                  $(this).addClass('jsxc-roster-item-filtered');
+               }
+            });
+            $('.jsxc-group-list > li').each(function( key, value )
+            {
+               let text = $(this).children('div.jsxc-bar__caption.jsxc-grow').text().trim().toLowerCase();
+               if (text.indexOf(val)===-1&&$(this).attr('data-id').substring(0,$(this).attr('data-id').indexOf('@')).toLowerCase().indexOf(val)===-1)
+               {
+                  $(this).addClass('jsxc-roster-item-filtered');
+               }
+            });
+         }
+
+      });
+   }
+
    public endProcessing() {
       this.element.removeClass('jsxc-processing');
 
@@ -103,6 +179,24 @@ export default class Roster {
          return;
       }
 
+      let contactType = contact.getType();
+      let list = (contactType==='chat'?this.contactList:this.groupList);
+
+      let parentElement = $(list).parent();
+      let previousParent = $(parentElement).prev();
+
+      if (!previousParent.hasClass('jsxc-active'))
+      {
+         parentElement.css('max-height','');
+         parentElement.addClass('jsxc-roster-item-filtered');
+      }
+      else
+          if ($($(list).parent()[0]).prev().hasClass('jsxc-active'))
+          {
+              parentElement.removeClass('jsxc-roster-item-filtered');
+              parentElement.css('max-height','100%');
+          }
+
       let rosterItem = new RosterItem(contact);
       this.insert(rosterItem);
 
@@ -117,6 +211,7 @@ export default class Roster {
 
          this.insert(rosterItem);
       });
+
    }
 
    public remove(contact: IContact) {
@@ -127,6 +222,24 @@ export default class Roster {
       }
 
       rosterItemElement.remove();
+
+      let contactType = contact.getType();
+      let list = (contactType==='chat'?this.contactList:this.groupList);
+
+      let parentElement = $(list).parent();
+      let previousParent = $(parentElement).prev();
+
+      if (!previousParent.hasClass('jsxc-active'))
+      {
+         parentElement.css('max-height','');
+         parentElement.addClass('jsxc-roster-item-filtered');
+      }
+      else
+          if ($($(list).parent()[0]).prev().hasClass('jsxc-active'))
+          {
+              parentElement.removeClass('jsxc-roster-item-filtered');
+              parentElement.css('max-height','100%');
+          }
    }
 
    public clearStatus() {
@@ -270,14 +383,29 @@ export default class Roster {
    }
 
    private insert(rosterItem: RosterItem) {
-      let contactList = this.contactList;
       let contact = rosterItem.getContact();
+      let contactType = contact.getType();
+      let list = (contactType==='chat'?this.contactList:this.groupList);
       let contactName = contact.getName();
 
-      let lastMessageDate = contact.getLastMessageDate();
+      let parentElement = $(list).parent();
+      let previousParent = $(parentElement).prev();
 
-      let pointer = lastMessageDate ? contactList.find('[data-date]') : contactList.children().first();
-      pointer = pointer.length > 0 ? pointer.first() : contactList.children().first();
+      if (!previousParent.hasClass('jsxc-active'))
+      {
+         parentElement.css('max-height','');
+         parentElement.addClass('jsxc-roster-item-filtered');
+      }
+      else
+          if ($($(list).parent()[0]).prev().hasClass('jsxc-active'))
+          {
+              parentElement.removeClass('jsxc-roster-item-filtered');
+              parentElement.css('max-height','100%');
+          }
+
+      let lastMessageDate = contact.getLastMessageDate();
+      let pointer = lastMessageDate ? list.find('[data-date]') : list.children().first();
+      pointer = pointer.length > 0 ? pointer.first() : list.children().first();
 
       while (pointer.length > 0) {
          let pointerDate = pointer.data('date') ? new Date(pointer.data('date')) : undefined;
@@ -295,7 +423,7 @@ export default class Roster {
          pointer = pointer.next();
       }
 
-      rosterItem.getDom().appendTo(contactList);
+      rosterItem.getDom().appendTo(list);
    }
 
    private addMainMenuEntries() {
@@ -461,5 +589,7 @@ export default class Roster {
       Client.getPresenceController().registerCurrentPresenceHook(() => {
          this.refreshOwnPresenceIndicator();
       });
+
+     this.initCollapisible();
    }
 }

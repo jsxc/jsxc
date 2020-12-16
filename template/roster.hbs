@@ -1,33 +1,43 @@
-<div id="jsxc-roster">
-   <div class="jsxc-contact-list-wrapper">
+<div id="jsxc-roster">   
+   <input type='text' class="jsxc-filterinput" id='jsxc-filterlist' placeholder='{{t "contactfilter"}}' />
+   <button class="jsxc-collapsible jsxc-active">{{t "groups"}}</button>
+   <div class="jsxc-group-list-wrapper jsxc-collapsible-content">
+      <ul class="jsxc-group-list" data-empty-list-label="{{t "Your_group_list_is_empty"}}"
+         data-offline-hidden-label="{{t "Offline_contacts_are_hidden"}}"
+         data-presence-offline-label="{{t "You_are_currently_offline"}}"></ul>
+   </div>
+   <button class="jsxc-collapsible jsxc-active">{{t "contacts"}}</button>
+   <div class="jsxc-contact-list-wrapper jsxc-collapsible-content">
       <ul class="jsxc-contact-list" data-empty-list-label="{{t "Your_contact_list_is_empty"}}"
          data-offline-hidden-label="{{t "Offline_contacts_are_hidden"}}"
          data-presence-offline-label="{{t "You_are_currently_offline"}}"></ul>
    </div>
    <div class="jsxc-roster-status"></div>
-   <div class="jsxc-bottom jsxc-presence jsxc-roster-item jsxc-bar" data-bid="own">
-      <div class="jsxc-avatar jsxc-shrink--no"></div>
-      {{#> menu
-        classes="jsxc-menu--pushup jsxc-grow jsxc-js-presence-menu"
-        button-label=(t "Offline")}}
-            <li data-presence="online" class="jsxc-online jsxc-offline-available">{{t "Online"}}</li>
-            <li data-presence="chat" class="jsxc-chat">{{t "Chatty"}}</li>
-            <li data-presence="away" class="jsxc-away">{{t "Away"}}</li>
-            <li data-presence="xa" class="jsxc-xa">{{t "Extended_away"}}</li>
-            <li data-presence="dnd" class="jsxc-dnd">{{t "dnd"}}</li>
-            <li data-presence="offline" class="jsxc-offline">{{t "Offline"}}</li>
-      {{/menu}}
+   <div class="jsxc-real-bottom">
+	   <div class="jsxc-bottom jsxc-presence jsxc-roster-item jsxc-bar" data-bid="own">
+		  <div class="jsxc-avatar jsxc-shrink--no"></div>
+		  {{#> menu
+			classes="jsxc-menu--pushup jsxc-grow jsxc-js-presence-menu"
+			button-label=(t "Offline")}}
+				<li data-presence="online" class="jsxc-online jsxc-offline-available">{{t "Online"}}</li>
+				<li data-presence="chat" class="jsxc-chat">{{t "Chatty"}}</li>
+				<li data-presence="away" class="jsxc-away">{{t "Away"}}</li>
+				<li data-presence="xa" class="jsxc-xa">{{t "Extended_away"}}</li>
+				<li data-presence="dnd" class="jsxc-dnd">{{t "dnd"}}</li>
+				<li data-presence="offline" class="jsxc-offline">{{t "Offline"}}</li>
+		  {{/menu}}
 
-      {{> menu classes="jsxc-menu--pushup jsxc-js-notice-menu" button-classes="jsxc-bounce"}}
+		  {{> menu classes="jsxc-menu--pushup jsxc-js-notice-menu" button-classes="jsxc-bounce"}}
 
-      <div class="jsxc-menu jsxc-menu--pushup jsxc-js-main-menu">
-         <div class="jsxc-menu__button jsxc-icon--clickable">
-            <i class="jsxc-icon-menu jsxc-icon--center"></i>
-         </div>
-         <div class="jsxc-menu__content">
-            <ul></ul>
-         </div>
-      </div>
+		  <div class="jsxc-menu jsxc-menu--pushup jsxc-js-main-menu">
+			 <div class="jsxc-menu__button jsxc-icon--clickable">
+				<i class="jsxc-icon-menu jsxc-icon--center"></i>
+			 </div>
+			 <div class="jsxc-menu__content">
+				<ul></ul>
+			 </div>
+		  </div>
+	   </div>
    </div>
    <div class="jsxc-roster-toggle"></div>
 </div>
