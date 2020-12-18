@@ -12,10 +12,19 @@
    <div class="form-group">
       <label class="col-sm-4 control-label" for="jsxc-server">{{t "Server"}}</label>
       <div class="col-sm-8">
-         <input type="text" name="server" id="jsxc-server" class="form-control" required="required" pattern="^[.-0-9a-zA-Z]+" />
+         <input type="text" name="server" id="jsxc-server" class="form-control" required="required" pattern="^[.-0-9a-zA-Z]+" list="jsxc-serverlist" />
          <p class="jsxc-inputinfo jsxc-server jsxc-hidden"></p>
       </div>
    </div>
+   <datalist id="jsxc-serverlist">
+      <p>
+         <label for="jsxc-serverlist-selection"></label>
+         <select id="jsxc-serverlist-selection">
+            <option></option>
+            <option>workaround</option>
+         </select>
+      </p>
+   </datalist>
    <div class="form-group">
       <label class="col-sm-4 control-label" for="jsxc-room">{{t "Room"}}</label>
       <div class="col-sm-8">

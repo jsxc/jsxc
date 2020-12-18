@@ -28,6 +28,7 @@ class MultiUserJoinDialog {
    private roomInputElement: JQuery<HTMLElement>;
    private passwordInputElement: JQuery<HTMLElement>;
    private nicknameInputElement: JQuery<HTMLElement>;
+   private serverInputList: JQuery<HTMLElement>;
 
    constructor(private server?: string, private room?: string) {
       let content = multiUserJoinTemplate({
@@ -42,6 +43,7 @@ class MultiUserJoinDialog {
 
       this.accountElement = dom.find('select[name="account"]');
       this.serverInputElement = dom.find('input[name="server"]');
+      this.serverInputList = dom.find('#jsxc-serverlist');
       this.roomInputElement = dom.find('input[name="room"]');
       this.passwordInputElement = dom.find('input[name="password"]');
       this.nicknameInputElement = dom.find('input[name="nickname"]');
@@ -66,7 +68,10 @@ class MultiUserJoinDialog {
 
       this.getMultiUserServices().then((services: JID[]) => {
          this.serverInputElement.val(services[0].full);
+         this.serverInputElement.attr('placeholder',services[0].full);
+         this.serverInputElement.focus();
          this.serverInputElement.trigger('change');
+         this.serverInputElement.val('');
       });
    }
 
@@ -138,7 +143,27 @@ class MultiUserJoinDialog {
          });
 
          return Promise.all(promises).then((results) => {
-            return results.filter(jid => typeof jid !== 'undefined');
+            results=results.filter(jid => typeof jid !== 'undefined');
+            results.sort(  function compare( a, b ) {
+              if (!a.domain||!b.domain)
+                  return 0;
+              if ( a.domain.startsWith('conference') && !b.domain.startsWith('conference')){
+                return -1;
+              }
+              if ( !a.domain.startsWith('conference') && b.domain.startsWith('conference')){
+                return +1;
+              }
+              return a.domain.localeCompare(b.domain);
+            });
+            this.serverInputList.empty();
+            $('#jsxc-serverlist select').empty();
+
+            let i=0;
+            for (;i<results.length;i++) {
+                this.serverInputList.append('<option>'+results[i].domain+'</option>');
+                $('#jsxc-serverlist select').append('<option>'+results[i].domain+'</option>');
+            }
+            return results;
          });
       })
    }
@@ -224,7 +249,7 @@ class MultiUserJoinDialog {
 
    private testInputValues(): Promise<JID | void> {
       let room = <string> this.roomInputElement.val();
-      let server = this.serverInputElement.val();
+      let server = this.serverInputElement.val()?this.serverInputElement.val():this.serverInputElement.attr('placeholder');
 
       if (!room || !room.match(/^[^"&\'\/:<>@\s]+$/i)) {
          this.roomInputElement.addClass('jsxc-invalid').keyup(function() {
