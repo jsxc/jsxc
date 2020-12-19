@@ -312,7 +312,8 @@ export default class Roster {
          this.addMenuEntry({
             id: 'online-help',
             handler(ev) {
-               window.location = onlineHelpUrl;
+               let win = window.open(onlineHelpUrl, '_blank');
+               win.focus();
             },
             label: $(`<a href="${onlineHelpUrl}">${Translation.t('Online_help')}</a>`),
             offlineAvailable: true,
