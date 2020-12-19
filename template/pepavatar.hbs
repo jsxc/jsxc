@@ -1,0 +1,23 @@
+<h3>{{t "Add_PEPAvatar"}}</h3>
+<canvas id="canvas"  style="display:none; min-height:192px !important; width:unset !important;">
+     </canvas>
+      <div >
+         <img name="avatarimage" id="avatarimage" src="" class="form-control"  style="min-height:192px !important; width:unset !important;" alt="x"/>
+      </div>
+<form class="form-horizontal">
+   
+   <div class="form-group">
+      <label class="col-sm-2 control-label" for="avatarupload">{{t "Avatar"}}</label>
+      <div >
+         <input type="file" name="avatarupload" id="avatarupload" value="{{avatar}}" class="form-control" required="required" />
+      </div>
+   </div>
+
+   <div class="form-group">
+      <div >
+         <button class="jsxc-button jsxc-button--default jsxc-js-close" type="button">{{t "Cancel"}}</button>
+         <button class="jsxc-button jsxc-button--primary" type="submit" value="add">{{t "Save"}}</button>
+         <button class="jsxc-button jsxc-button--primary jsxc-js-clear" type="button" value="remove">{{t "Remove"}}</button>
+      </div>
+   </div>
+</form>

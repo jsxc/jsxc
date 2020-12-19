@@ -35,8 +35,9 @@ export default class AvatarSet {
       this.contact.getAvatar().then((avatar) => {
          $(this.elements).each(function() {
             let element = $(this);
-
-            element.css('background-image', `url(${avatar.getData()})`);
+            //old method call was buggy and sometimes the property was not set
+			//with background-size: contain; chrome does not complain about invalid property anymore!
+            element.attr('style','background: url(\'' + avatar.getData() + '\'); background-size: contain;');
             element.text('');
          });
       }).catch((msg) => {
