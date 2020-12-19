@@ -323,6 +323,8 @@
     "You_are_currently_offline": null,
     "Your_contact_list_is_empty": null,
     "Configure": null,
+    "Memberlist": null,
+    "muc_one_jid_per_line": null,
     "Invite": null,
     "User_information": null,
     "Log": null,

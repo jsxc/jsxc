@@ -54,6 +54,10 @@ export interface IMUCService {
 
    getRoomConfigurationForm(jid: IJID): Promise<Element>
 
+   getMemberlistMultiUserRoom(jid: IJID): Promise<Element>
+
+   setMemberlistMultiUserRoom(jid: IJID, items:Element[]): Promise<Element>
+
    submitRoomConfiguration(jid: IJID, form: Form): Promise<Element>
 
    cancelRoomConfiguration(jid: IJID): Promise<Element>

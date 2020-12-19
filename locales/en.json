@@ -323,6 +323,8 @@
     "You_are_currently_offline": "You are currently offline",
     "Your_contact_list_is_empty": "Your contact list is empty",
     "Configure": "Configure",
+    "Memberlist": "Manage members",
+    "muc_one_jid_per_line": "One JID per line.",
     "Invite": "Invite",
     "User_information": "User information",
     "Log": "Log",
