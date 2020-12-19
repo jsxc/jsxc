@@ -327,6 +327,8 @@
 	"groups": null,
 	"contacts": null,
     "Configure": null,
+    "Memberlist": null,
+    "muc_one_jid_per_line": null,
     "Invite": null,
     "User_information": null,
     "Log": null,

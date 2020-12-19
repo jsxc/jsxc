@@ -14,7 +14,8 @@
 
       .jsxc-destroy,
       .jsxc-leave,
-      .jsxc-configure {
+      .jsxc-configure,
+      .jsxc-managememberlist {
         display: none;
       }
     }
@@ -26,13 +27,21 @@
     .jsxc-audio,
     .jsxc-share-screen,
     .jsxc-destroy,
-    .jsxc-configure {
+    .jsxc-configure,
+    .jsxc-managememberlist {
       display: none;
     }
 
     &[data-affiliation="owner"] {
       .jsxc-destroy,
-      .jsxc-configure {
+      .jsxc-configure,
+      .jsxc-managememberlist {
+        display: inherit;
+      }
+    }
+
+    &[data-affiliation="admin"] {
+      .jsxc-managememberlist {
         display: inherit;
       }
     }

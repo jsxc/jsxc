@@ -327,6 +327,8 @@
 	"groups": "Groups",
 	"contacts": "Contacts",
     "Configure": "Configure",
+    "Memberlist": "Manage members",
+    "muc_one_jid_per_line": "One JID per line.",
     "Invite": "Invite",
     "User_information": "User information",
     "Log": "Log",
