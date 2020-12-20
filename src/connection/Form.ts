@@ -46,7 +46,6 @@ export default class Form {
          let itemFieldElements = $(itemElement).find('>field');
          return itemFieldElements.get().map((itemFieldElement) => ItemField.fromXML($(itemFieldElement)));
       });
-      //@TODO toHTML for reported and item elements
 
       return new Form(type, fields, instructions, title, reportedFields, items);
    }
@@ -74,7 +73,7 @@ export default class Form {
       return new Form('submit', fields);
    }
 
-   private constructor(private type: string, private fields: Field[], private instructions?: string, private title?: string, private reportedFields?: Field[], private items?: Field[][]) {
+   private constructor(private type: string, private fields: Field[], private instructions?: string, private title?: string, private reportedFields?: ReportField[], private items?: Field[][]) {
       if (this.ALLOWED_TYPES.indexOf(type) < 0) {
          throw new InvalidParameterError(`Form type not allowed! Instead of "${type}" try one of these: ${this.ALLOWED_TYPES.join(', ')}.`);
       }
@@ -95,10 +94,13 @@ export default class Form {
          }
 
          this.reportedFields.forEach((field, index) => {
-            if (this.reportedFields[index].getName() !== fields[index].getName()) {
+            //because the order of reported fields must not be equal with the fields order we have to search the field name in reportedFields array
+            //and cant simply use the same index here
+            let reportedFieldsArray = this.reportedFields.map(rfield => rfield.getName());
+            if (reportedFieldsArray.indexOf(fields[index].getName()) === -1) {
                throw new InvalidParameterError(`Item ${itemIndex} does not contain all "reported" fields.`);
             }
-         })
+         });
       });
    }
 
@@ -123,6 +125,14 @@ export default class Form {
    }
 
    public toHTML() {
+      if (this.type === 'form') {
+         return this.toHTMLForm();
+      } else if (this.type === 'result') {
+         return this.toHTMLResult();
+      }
+   }
+
+   private toHTMLForm() {
       let formElement = $('<form>');
       formElement.attr('data-type', this.type);
       formElement.attr('autocomplete', 'off');
@@ -147,6 +157,33 @@ export default class Form {
       }
 
       return formElement;
+   }
+
+   private toHTMLResult() {
+      let tableElement = $('<table>');
+      let tableHeader = $('<thead>');
+      let headerRow = $('<tr>');
+      let tableBody = $('<tbody>');
+
+      this.reportedFields.forEach(field => {
+         headerRow.append($('<th>').text(field.getName()));
+      });
+
+      tableHeader.append(headerRow).appendTo(tableElement);
+
+      this.items.forEach(fieldRow => {
+         let tableRow = $('<tr>');
+
+         fieldRow.forEach(field => {
+            $('<td>').text(field.getValues()[0]).appendTo(tableRow);
+         });
+
+         tableRow.appendTo(tableBody);
+      });
+
+      tableBody.appendTo(tableElement);
+
+      return tableElement;
    }
 
    public getValues(key: string): string[] {

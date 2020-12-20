@@ -1,4 +1,5 @@
 import showContactDialog from './dialogs/contact'
+import showContactSearchDialog from './dialogs/contactsearch'
 import showAboutDialog from './dialogs/about'
 import showMultiUserJoinDialog from './dialogs/multiUserJoin'
 import showSettingsDialog from './dialogs/settings'
@@ -326,6 +327,13 @@ export default class Roster {
             icon: 'help',
          });
       }
+
+      this.addMenuEntry({
+         id: 'search-contact',
+         handler: showContactSearchDialog,
+         label: Translation.t('contact_search'),
+         icon: 'search'
+      });
 
       this.addMenuEntry({
          id: 'add-contact',

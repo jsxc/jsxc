@@ -224,3 +224,33 @@
     align-self: flex-start;
   }
 }
+
+.jsxc-content {
+  h1 {
+    font-size: 1.5em;
+    margin-top: 3em;
+  }
+}
+
+.jsxc-searchresults-table {
+  max-height: 600px;
+  overflow: auto;
+  width: 100%;
+
+  thead {
+    background-color: var(--jsxc-color-background-darker);
+  }
+
+  tr:nth-child(even) {
+    background-color: var(--jsxc-color-background-dark);
+  }
+
+  th {
+    text-align: center;
+  }
+
+  td {
+    padding: 5px;
+    text-align: center;
+  }
+}

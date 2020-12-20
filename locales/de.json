@@ -395,7 +395,14 @@
     "muc_not-acceptable": "Sie müssen Ihren reservierten Nicknamen nutzen.",
     "muc_registration-required": "Sie können dem Raum nicht beitreten, da Sie kein Mitglied sind.",
     "muc_conflict": "Ihr ausgewählter Nickname ist nicht verfügbar.",
-    "muc_service-unavailable": "Die maximale Kapazität an Teilnehmern wurde erreicht."
+    "muc_service-unavailable": "Die maximale Kapazität an Teilnehmern wurde erreicht.",
+    "contact_search": "Kontakt suchen",
+    "Search": "Suchen",
+    "First": "Vorname",
+    "Last": "Nachname",
+    "Nick": "Spitzname",
+    "Email": "E-Mail",
+    "no_results": "Die Suche ergab keine Ergebnisse."
   },
   "Notifications": "Benachrichtigungen"
 }
