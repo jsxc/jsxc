@@ -384,7 +384,14 @@
     "chatmarkers-received": "Erhalten",
     "chatmarkers-displayed": "angezeigt",
     "chatmarkers-acknowledged": "quittiert",
-    "There_are_new_devices": "Es gibt neue Geräte"
-  },
+    "There_are_new_devices": "Es gibt neue Geräte",
+    "contact_search": "Kontakt suchen",
+    "Search": "Suchen",
+    "First": "Vorname",
+    "Last": "Nachname",
+    "Nick": "Spitzname",
+    "Email": "E-Mail",
+    "no_results": "Die Suche ergab keine Ergebnisse."
+},
   "Notifications": "Benachrichtigungen"
 }

@@ -384,7 +384,14 @@
     "chatmarkers-received": null,
     "chatmarkers-displayed": null,
     "chatmarkers-acknowledged": null,
-    "There_are_new_devices": null
+    "There_are_new_devices": null,
+    "contact_search": null,
+    "Search": null,
+    "First":  null,
+    "Last":  null,
+    "Nick":  null,
+    "Email":  null,
+    "no_results": null
   },
   "Notifications": null
 }
