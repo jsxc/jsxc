@@ -6,6 +6,7 @@ import MeCommandPlugin from '../plugins/MeCommandPlugin'
 import MessageArchiveManagementPlugin from '../plugins/mam/Plugin'
 import ChatStatePlugin from '../plugins/chatState/ChatStatePlugin'
 import HttpUploadPlugin from '../plugins/httpUpload/HttpUploadPlugin'
+import AvatarPEPPlugin from '../plugins/AvatarPEPPlugin'
 import AvatarVCardPlugin from '../plugins/AvatarVCardPlugin'
 import CarbonsPlugin from '../plugins/MessageCarbonsPlugin'
 import OMEMOPlugin from '../plugins/omemo/Plugin'
@@ -21,6 +22,7 @@ Client.addPlugin(MeCommandPlugin);
 Client.addPlugin(MessageArchiveManagementPlugin);
 Client.addPlugin(ChatStatePlugin);
 Client.addPlugin(HttpUploadPlugin);
+Client.addPlugin(AvatarPEPPlugin);
 Client.addPlugin(AvatarVCardPlugin);
 Client.addPlugin(CarbonsPlugin);
 Client.addPlugin(BookmarksPlugin);

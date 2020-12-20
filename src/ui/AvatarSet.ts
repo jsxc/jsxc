@@ -35,8 +35,8 @@ export default class AvatarSet {
       this.contact.getAvatar().then((avatar) => {
          $(this.elements).each(function() {
             let element = $(this);
-
-            element.css('background-image', `url(${avatar.getData()})`);
+            //old method call was buggy and sometimes the property was not set
+            element.attr('style',"background: url('" + avatar.getData() + "')");
             element.text('');
          });
       }).catch((msg) => {
