@@ -380,7 +380,14 @@
     "chatmarkers-received": "received",
     "chatmarkers-displayed": "displayed",
     "chatmarkers-acknowledged": "acknowledged",
-    "There_are_new_devices": "There are new devices"
+    "There_are_new_devices": "There are new devices",
+    "contact_search": "Search Contact",
+    "Search": "Search",
+    "First": "Given Name",
+    "Last": "Surname",
+    "Nick": "Nickname",
+    "Email": "E-Mail",
+    "no_results": "No results were found."
   },
   "Notifications": "Notifications"
 }

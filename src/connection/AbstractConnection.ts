@@ -5,6 +5,7 @@ import Log from '../util/Log'
 import { Strophe, $iq, $msg, $pres } from '../vendor/Strophe'
 import Account from '../Account'
 import PEPService from './services/PEP'
+import SearchService from './services/Search'
 import PubSubService from './services/PubSub'
 import MUCService from './services/MUC'
 import RosterService from './services/Roster'
@@ -59,6 +60,10 @@ abstract class AbstractConnection {
 
    public getPEPService = (): PEPService => {
       return this.getService('pep', PEPService);
+   }
+
+   public getSearchService = (): SearchService => {
+      return this.getService('search', SearchService);
    }
 
    public getMUCService = (): MUCService => {
