@@ -203,7 +203,7 @@ let config = {
       openPage: 'example/index.html',
       proxy: {
          "/http-bind": "http://localhost:5280",
-         "/libsignal": "http://localhost",
+        // "/libsignal": "http://localhost",
          "/xmpp-websocket": "ws://localhost:5280"
       },
       watchOptions: {
