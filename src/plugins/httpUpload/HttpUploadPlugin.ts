@@ -158,7 +158,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
 
       let html = $('<div>').append(message.getHtmlMessage());
 
-      let linkElement = $('<a>');
+      let linkElement = $('<a target="_blank">');
       linkElement.attr('href', downloadUrl);
 
       let imageElement = $('<img>');
@@ -227,6 +227,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       let element = $(stanza);
       let bodyElement = element.find('html body[xmlns="' + Strophe.NS.XHTML + '"]').first();
       let dataElement = element.find('data[xmlns="urn:xmpp:bob"]');
+      let body = element.find('body');
 
       if (bodyElement.length && dataElement.length === 1 && !message.isEncrypted()) {
          let cid = dataElement.attr('cid');
@@ -254,6 +255,32 @@ export default class HttpUploadPlugin extends AbstractPlugin {
             }
          }
       }
+      else
+          if (body.length===1 && !message.isEncrypted())
+          {
+              let link = body.text();
+
+              let pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+                '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+                '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+                '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+                '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+                '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+              if (!!pattern.test(link)&&link.lastIndexOf('.')>0)
+              {
+                   let suffix = link.substring(link.lastIndexOf('.')+1).toLowerCase();
+
+                   if (link.endsWith('.jpeg')||link.endsWith('.jpg')||link.endsWith('.png')||link.endsWith('.gif')||link.endsWith('.svg'))
+                   {
+                       let attachment = new Attachment('image', 'image/'+suffix, link);
+                       attachment.setThumbnailData(link);
+                       attachment.setData(link);
+
+                       message.setAttachment(attachment);
+                       message.setPlaintextMessage(body.text());
+                   }
+              }
+          }
 
       return Promise.resolve([contact, message, stanza]);
    };
