@@ -109,19 +109,107 @@ class AccountPage extends Page {
    }
 
    protected generateContentElement(): JQuery {
-      let contentElement = $('<div>');
 
-      contentElement.append(new ConnectionSection(this.navigation, this.account).getDOM());
-      contentElement.append(new PluginSection(this.navigation, this.account).getDOM());
+      let contentElement = $('<div class="jsxc-tabbed-area">');
+
+      let tabconnection = $('<input checked="checked" id="jsxc-tabbed-area-tab1" type="radio" name="tabs" />');
+      let tabmainapp = $('<input  id="jsxc-tabbed-area-tab2" type="radio" name="tabs" />');
+      let tabplugins = $('<input  id="jsxc-tabbed-area-tab3" type="radio" name="tabs" />');
+      contentElement.append(tabconnection);
+      contentElement.append(tabmainapp);
+      contentElement.append(tabplugins);
+
+      let nav= $('<nav>');
+      contentElement.append(nav);
+
+      let labelconnection= $('<label for="jsxc-tabbed-area-tab1">'+Translation.t('Connection')+'</label>');
+      let labelmainapp= $('<label for="jsxc-tabbed-area-tab2">'+Translation.t('General')+'</label>');
+      let labelplugins= $('<label for="jsxc-tabbed-area-tab3">'+Translation.t('Plugins')+'</label>');
+      nav.append(labelconnection);
+      nav.append(labelmainapp);
+      nav.append(labelplugins);
+
+      let figure= $('<figure>');
+      contentElement.append(figure);
+
+      let sectionconnection = $(new ConnectionSection(this.navigation, this.account).getDOM());
+      let sectionmainapp = $(new MainAppSection(this.navigation).getDOM());
+      let sectionplugins = $(new PluginSection(this.navigation, this.account).getDOM());
+
+      sectionconnection.addClass('jsxc-tabbed-area-content-tab1');
+      sectionmainapp.addClass('jsxc-tabbed-area-content-tab2');
+      sectionplugins.addClass('jsxc-tabbed-area-content-tab3');
+
+      figure.append(sectionconnection);
+      figure.append(sectionmainapp);
+      figure.append(sectionplugins);
 
       return contentElement;
+   }
+}
+
+class MainAppSection extends Section {
+   constructor(navigation: Navigation) {
+      super(navigation);
+   }
+
+   protected generateContentElement(): JQuery {
+
+      let contentElement = new List();
+
+      contentElement.append(this.getListItemForData( 'RFC6120', 'XMPP Core', '', ''));
+      contentElement.append(this.getListItemForData( 'RFC6121', 'XMPP IM', '', ''));
+      contentElement.append(this.getListItemForData( '', 'Off-the-Record Messaging', '', ''));
+      contentElement.append(this.getListItemForData( '', 'Data Forms', '0030', ''));
+      contentElement.append(this.getListItemForData( '', 'Service Discovery', '0163', '1.2.1'));
+      contentElement.append(this.getListItemForData( '', 'vcard-temp', '0054', ''));
+      contentElement.append(this.getListItemForData( '', 'Software Version', '0115', ''));
+      contentElement.append(this.getListItemForData( '', 'Entity Capabilities', '0163', '1.2.1'));
+      contentElement.append(this.getListItemForData( '', 'URI Scheme Query', '0147', ''));
+      contentElement.append(this.getListItemForData( '', 'Jingle', '166', ''));
+      contentElement.append(this.getListItemForData( '', 'Jingle RTP Sessions', '0167', ''));
+      contentElement.append(this.getListItemForData( '', 'Jingle File Transfer', '0234', ''));
+      contentElement.append(this.getListItemForData( '', 'Delayed Delivery', '0203', ''));
+      contentElement.append(this.getListItemForData( '', 'XMPP Over BOSH', '0206', ''));
+      contentElement.append(this.getListItemForData( '', 'Bidirectional-streams Over Synchronous HTTP', '0124', ''));
+      contentElement.append(this.getListItemForData( '', 'Stanza Forwarding', '0297', ''));
+      contentElement.append(this.getListItemForData( '', 'Multi-User Chat', '0045', ''));
+      contentElement.append(this.getListItemForData( '', 'Jabber Search', '0055', '1.3'));
+      contentElement.append(this.getListItemForData( '', 'Publish-Subscribe', '0060', '1.2.1'));
+      contentElement.append(this.getListItemForData( '', 'Personal Eventing Protocol', '0163', '1.2.1'));
+
+      return contentElement.getDOM();
+   }
+
+   private getListItemForData( description, xepname, xepid, xepversion)
+   {
+      let checkboxElement = $('<input>');
+      checkboxElement.attr('type', 'checkbox');
+
+      checkboxElement.prop('checked', true);
+      checkboxElement.prop('disabled', true);
+
+      let listItem = new ListItem(xepname, description, undefined, undefined, checkboxElement);
+      let listItemElement = listItem.getDOM();
+
+      if (xepid&&xepid.length)
+      {
+          let xepElement = $('<a target="_blank">');
+             xepElement.addClass('jsxc-badge');
+             xepElement.text('XEP-'+xepid + (xepversion&&xepversion.length>0?('@' + xepversion):''));
+             xepElement.attr('title', xepname);
+             xepElement.attr('href', 'https://xmpp.org/extensions/xep-'+xepid+'.html');
+             xepElement.appendTo(listItemElement.find('.jsxc-list__text__primary'));
+      }
+
+      return listItem;
    }
 }
 
 //@REVIEW priorities? Are they still needed/used?
 class ConnectionSection extends Section {
    constructor(navigation: Navigation, private account: Account) {
-      super(navigation, Translation.t('Connection'));
+      super(navigation);
    }
 
    protected generateContentElement(): JQuery {
@@ -243,7 +331,7 @@ class PasswordPage extends Page {
 
 class PluginSection extends Section {
    constructor(navigation: Navigation, private account: Account) {
-      super(navigation, Translation.t('Plugins'));
+      super(navigation);
    }
 
    protected generateContentElement(): JQuery {
@@ -262,7 +350,15 @@ class PluginSection extends Section {
          checkboxElement.attr('type', 'checkbox');
          checkboxElement.attr('id', id);
          checkboxElement.attr('name', name);
+
          checkboxElement.prop('checked', disabledPlugins.indexOf(id) < 0);
+
+         if (id==='omemo'&&typeof (<any> window).libsignal === 'undefined')
+         {
+          checkboxElement.prop('checked',false);
+          checkboxElement.prop('disabled',true);
+         }
+
          checkboxElement.on('change', (ev) => {
             let isEnabled = $(ev.target).prop('checked');
             let id = $(ev.target).attr('id');
@@ -282,11 +378,11 @@ class PluginSection extends Section {
 
          if (Array.isArray(metaData.xeps)) {
             metaData.xeps.forEach(xep => {
-               let xepElement = $('<a>');
+               let xepElement = $('<a target="_blank">');
                xepElement.addClass('jsxc-badge');
                xepElement.text(xep.id + '@' + xep.version);
                xepElement.attr('title', xep.name);
-               xepElement.attr('href', `https://xmpp.org/extensions/${xep.version.toLowerCase()}.html`);
+               xepElement.attr('href', `https://xmpp.org/extensions/${xep.id.toLowerCase()}.html`);
                xepElement.appendTo(listItemElement.find('.jsxc-list__text__primary'));
             });
          }
@@ -294,6 +390,9 @@ class PluginSection extends Section {
          contentElement.append(listItem);
       }
 
-      return contentElement.getDOM();
+      let ul = $(contentElement.getDOM());
+      ul.addClass('jsxc-plugins-overview-list');
+
+      return ul;
    }
 }
