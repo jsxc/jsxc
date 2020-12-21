@@ -135,7 +135,7 @@ export default class ChatWindowMessage {
       }
 
       if (attachment.hasData()) {
-         attachmentElement = $('<a>').append(attachmentElement);
+         attachmentElement = $('<a target="_blank">').append(attachmentElement);
          attachmentElement.attr('href', attachment.getData());
          attachmentElement.attr('download', attachment.getName());
 
