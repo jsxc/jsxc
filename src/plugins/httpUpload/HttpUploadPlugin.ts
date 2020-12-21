@@ -258,9 +258,10 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       else
           if (body.length===1 && !message.isEncrypted())
           {
-              var link = body.text();
+              let link = body.text();
 
-              var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+              let pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+
                 '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
                 '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
                 '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
