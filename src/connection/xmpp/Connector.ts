@@ -140,27 +140,22 @@ export default class Connector {
           stropheConnection.pause();
           stropheConnection.resume();
           stropheConnection.flush();
-
-		  accountConnection = this.replaceStorageConnectionWithXMPPConnection(stropheConnection);
-
-		  this.account.triggerConnectionHook(status, condition);
       }
-      else
-	  {
-		  this.storeConnectionParameters(stropheConnection);
-		  this.replaceConnectionHandler(stropheConnection);
-		  this.addRidHandler(stropheConnection);
-		  this.addRidUnloadHandler(stropheConnection);
 
-		  accountConnection = this.replaceStorageConnectionWithXMPPConnection(stropheConnection);
+      this.storeConnectionParameters(stropheConnection);
+      this.replaceConnectionHandler(stropheConnection);
+      this.addRidHandler(stropheConnection);
+      this.addRidUnloadHandler(stropheConnection);
 
-		  if (stropheConnection.features) {
-			 this.storeConnectionFeatures(stropheConnection);
-		  }
+      accountConnection = this.replaceStorageConnectionWithXMPPConnection(stropheConnection);
 
-		  this.account.triggerConnectionHook(status, condition);
-	  }
-	  Log.debug('XMPP connection ready');
+      if (stropheConnection.features) {
+         this.storeConnectionFeatures(stropheConnection);
+      }
+
+      this.account.triggerConnectionHook(status, condition);
+
+      Log.debug('XMPP connection ready');
       return [status, accountConnection];
    }
 

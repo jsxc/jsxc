@@ -512,6 +512,11 @@ export default class Roster {
                onUserRequestsToGoOnline();
             }
          }
+/*
+         if (oldPresence !== Presence.offline && requestedPresence === Presence.offline) {
+             let labelElement = $('.jsxc-js-presence-menu .jsxc-menu__button');
+             labelElement.removeClass('jsxc-waiting');
+		 }*/
       });
    }
 
