@@ -160,6 +160,73 @@
   }
 }
 
+.jsxc-tabbed-area figure {
+  clear: both;
+  display: block;
+  margin-left: 0;
+  max-height: 500px;
+  max-width: 500px;
+  min-height: 500px;
+  min-width: 500px;
+  overflow: auto;
+}
+
+.jsxc-tabbed-area > input,
+.jsxc-tabbed-area figure > section { display: none; }
+
+.jsxc-tabbed-area figure>section {
+  background: var(--jsxc-color-main-background);
+  border: 1px solid var(--jsxc-color-border);
+  color: var(--jsxc-color-text-light);
+  letter-spacing: 0.3px;
+  line-height: 1.5em;
+  margin-top: 0 !important;
+  padding: 10px;
+  padding-top: 0 !important;
+  width: 100%;
+}
+
+#jsxc-tabbed-area-tab1:checked ~ figure .jsxc-tabbed-area-content-tab1,
+#jsxc-tabbed-area-tab2:checked ~ figure .jsxc-tabbed-area-content-tab2,
+#jsxc-tabbed-area-tab3:checked ~ figure .jsxc-tabbed-area-content-tab3 { display: block; }
+
+nav label {
+  background: var(--jsxc-color-background-dark);
+  border-right: 1px solid var(--jsxc-color-border);
+  border-top: 1px solid var(--jsxc-color-border);
+  color: var(--jsxc-color-main-text);
+  float: left;
+  margin-bottom: 0 !important;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+nav label:nth-child(1) { border-left: 1px solid var(--jsxc-color-border); }
+nav label:hover { background: var(--jsxc-color-background-hover); }
+nav label:active { background: var(--jsxc-color-main-background); }
+
+#jsxc-tabbed-area-tab1:checked ~ nav label[for="jsxc-tabbed-area-tab1"],
+#jsxc-tabbed-area-tab2:checked ~ nav label[for="jsxc-tabbed-area-tab2"],
+#jsxc-tabbed-area-tab3:checked ~ nav label[for="jsxc-tabbed-area-tab3"] {
+  background: var(--jsxc-color-main-background);
+  border-bottom: 0;
+  color: var(--jsxc-color-main-text);
+  position: relative;
+}
+
+#jsxc-tabbed-area-tab1:checked ~ nav label[for="jsxc-tabbed-area-tab1"]::after,
+#jsxc-tabbed-area-tab2:checked ~ nav label[for="jsxc-tabbed-area-tab2"]::after,
+#jsxc-tabbed-area-tab3:checked ~ nav label[for="jsxc-tabbed-area-tab3"]::after {
+  background: var(--jsxc-color-main-background);
+  bottom: -1px;
+  content: "";
+  display: block;
+  height: 2px;
+  left: 0;
+  position: absolute;
+  width: 100%;
+}
+
 .jsxc-list {
   &__item {
     align-items: center;
