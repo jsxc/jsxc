@@ -217,6 +217,7 @@
   }
 }
 
+
 .jsxc-tabbed-area figure {
   clear: both;
   display: block;
@@ -282,4 +283,23 @@ nav label:active { background: #fff; }
   left: 0;
   position: absolute;
   width: 100%;
+
+.jsxc-searchresults-table {
+  max-height: 600px;
+  min-width: 400px;
+  overflow: scroll;
+  width: 400px;
+}
+
+.jsxc-searchresults-table thead tr th {
+  text-align: center;
+}
+
+.jsxc-searchresults-table tbody tr td {
+  text-align: center;
+}
+
+.jsxc-searchresults-odd {
+  background-color: #ddd;
+
 }

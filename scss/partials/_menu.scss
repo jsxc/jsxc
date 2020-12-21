@@ -19,6 +19,7 @@
     position: absolute;
     transition: max-height 0.5s;
     visibility: hidden;
+    background: var(--jsxc-color-primary) !important;
 
     .jsxc-menu--opened & {
       display: inline-block;
@@ -42,6 +43,15 @@
     text-overflow: ellipsis;
     user-select: none;
     white-space: nowrap;
+    opacity: 1 !important;
+    background: var(--jsxc-color-primary) !important;
+    color: white !important;
+  }
+  
+    li:hover
+  {  
+    background: lightgray !important;
+    color: black  !important;
   }
 
   &__item--danger {
@@ -193,6 +203,7 @@
 
       &::after {
         color: $emoticon-selection-bg;
+    color: var(--jsxc-color-primary) !important;  
       }
     }
 
@@ -214,6 +225,7 @@
 
       &::after {
         color: var(--jsxc-color-main-background);
+    color: var(--jsxc-color-primary) !important;  
       }
     }
 

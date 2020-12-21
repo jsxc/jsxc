@@ -19,9 +19,18 @@ export function login() {
    }
 }
 
-function loginWithPassword(url: string, jid: string, password: string): Promise<{}> {
+export function websocket(connection: Strophe.Connection,url:string) {
+    setTimeout(function(){
+        connection.flush();
+        SM.changeState(SM.STATE.READY);
+        connection.flush();
+    },1000);
+    return loginWithPassword(url,connection.jid,connection.pass,connection);
+}
+
+function loginWithPassword(url: string, jid: string, password: string,oldconnection?: Strophe.Connection): Promise<{}> {
    testBasicConnectionParameters(url, jid);
-   let connection = prepareConnection(url);
+   let connection = oldconnection?oldconnection:prepareConnection(url);
 
    Log.debug('Try to establish a new connection.');
 
@@ -30,9 +39,19 @@ function loginWithPassword(url: string, jid: string, password: string): Promise<
    }
 
    return new Promise(function(resolve, reject) {
-      connection.connect(jid, password, function(status, condition) {
-         resolveConnectionPromise(status, condition, connection, resolve, reject);
-      });
+       if (oldconnection) {
+            resolve({
+                connection: oldconnection,
+                status:Strophe.Status.ATTACHED,
+                conditition:null,
+                wss:true
+            });
+       }
+       else {
+           connection.connect(jid, password, function(status, condition) {
+               resolveConnectionPromise(status, condition, connection, resolve, reject);
+           });
+       }
    });
 }
 
@@ -100,7 +119,8 @@ function prepareConnection(url: string): Strophe.Connection {
          (<any> Strophe).SASLExternal,
          (<any> Strophe).SASLPlain,
          (<any> Strophe).SASLSHA1
-      ]
+      ],
+      protocol: (/^ws?:/.test(url)?'ws':(/^wss?:/.test(url)?'wss':url.substring(0,url.indexOf(':'))))
    });
 
    if (Client.isDebugMode()) {
