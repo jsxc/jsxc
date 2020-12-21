@@ -216,3 +216,22 @@
     align-self: flex-start;
   }
 }
+
+.jsxc-searchresults-table {
+  max-height: 600px;
+  min-width: 400px;
+  overflow: scroll;
+  width: 400px;
+}
+
+.jsxc-searchresults-table thead tr th {
+  text-align: center;
+}
+
+.jsxc-searchresults-table tbody tr td {
+  text-align: center;
+}
+
+.jsxc-searchresults-odd {
+  background-color: #ddd;
+}

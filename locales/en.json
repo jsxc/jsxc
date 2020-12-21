@@ -322,6 +322,10 @@
     "Show_debug_log": "Show debug log",
     "You_are_currently_offline": "You are currently offline",
     "Your_contact_list_is_empty": "Your contact list is empty",
+	"Your_group_list_is_empty": "Your group list is empty",
+	"contactfilter": "Filter",
+	"groups": "Groups",
+	"contacts": "Contacts",
     "Configure": "Configure",
     "Invite": "Invite",
     "User_information": "User information",
@@ -380,7 +384,14 @@
     "chatmarkers-received": "received",
     "chatmarkers-displayed": "displayed",
     "chatmarkers-acknowledged": "acknowledged",
-    "There_are_new_devices": "There are new devices"
+    "There_are_new_devices": "There are new devices",
+    "contact_search": "Search Contact",
+    "Search": "Search",
+    "First": "Given Name",
+    "Last": "Surname",
+    "Nick": "Nickname",
+    "Email": "E-Mail",
+    "no_results": "No results were found."
   },
   "Notifications": "Notifications"
 }

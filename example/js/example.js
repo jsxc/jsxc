@@ -18,7 +18,8 @@ let jsxc = new JSXC({
          $('.logout').hide();
          $('.submit').show();
       }
-   }
+   },
+   disabledPlugins:['otr']
 });
 
 subscribeToInstantLogin();
