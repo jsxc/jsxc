@@ -362,6 +362,7 @@
     "Control": "Control",
     "Incoming_video_call": "Incoming video call",
     "Plugins": "Plugins",
+    "General": "General",
     "Room_creation": "Room creation",
     "setting-bookmarks-enable": "If you like to store your group chats in your contact list, let it enabled.",
     "setting-http-upload-enable": "Allows to send files to group chats and enables your contact to receive a transferred file on all his devices.",
