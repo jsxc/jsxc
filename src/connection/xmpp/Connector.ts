@@ -10,6 +10,8 @@ import BaseError from '../../errors/BaseError'
 
 export enum TYPE { BOSH, WEBSOCKET };
 
+let websocketStropheConnection: Strophe.Connection;
+
 export default class Connector {
    private connectionParameters;
 
@@ -28,9 +30,9 @@ export default class Connector {
          let type = this.connectionParameters.get('type');
 
          if (type === TYPE.WEBSOCKET) {
-            throw new Error('Cannt attach to websocket connection.');
+            console.error('Can not attach to websocket connection.');
          }
-
+         else
          this.connectionArgs = [
             this.connectionParameters.get('url'),
             this.connectionParameters.get('jid'),
@@ -40,7 +42,7 @@ export default class Connector {
       } else if (connectionArgs.length === 3 || connectionArgs.length === 4) {
          this.connectionArgs = connectionArgs;
 
-         let type = /^wss?:/.test(connectionArgs[1]) ? TYPE.WEBSOCKET : TYPE.BOSH;
+         let type = this.checkForWebsocketUrl(connectionArgs) ? TYPE.WEBSOCKET : TYPE.BOSH;
 
          this.connectionParameters.set('type', type);
          this.connectionParameters.remove('inactivity');
@@ -48,6 +50,29 @@ export default class Connector {
       } else {
          throw new BaseError('Unsupported number of arguments');
       }
+   }
+
+   public isWebsocketUrl(url?: string)
+   {
+        if (/^ws?:/.test(url?url:this.connectionParameters.get('url'))||/^wss?:/.test(url?url:this.connectionParameters.get('url')))
+        {
+            return true;
+        }
+        else
+            return false;
+   }
+
+   public checkForWebsocketUrl(connectionArgs : string[])
+   {
+        for (let i in connectionArgs)
+        {
+            if (this.isWebsocketUrl(connectionArgs[i]))
+            {
+                return true;
+                break;
+            }
+        }
+        return false;
    }
 
    public connect() {
@@ -64,9 +89,24 @@ export default class Connector {
 
          throw new BaseError('Credentials expired');
       }
+      if (websocketStropheConnection)
+      {
+         return ConnectHelper.websocket(websocketStropheConnection,this.getUrl())
+         .then(this.successfulConnectedWebsocket);
+      }
+      else
+      {
+          return ConnectHelper.login.apply(this, this.connectionArgs)
+             .then((data) =>{
+                 let url = data.connection.service;
 
-      return ConnectHelper.login.apply(this, this.connectionArgs)
-         .then(this.successfulConnected);
+                 if (/^ws?:/.test(url)||/^wss?:/.test(url))
+                 {
+                    websocketStropheConnection = data.connection;
+                 }
+                 return this.successfulConnected(data);
+             });
+      }
    }
 
    public getJID(): JID {
@@ -93,23 +133,41 @@ export default class Connector {
       let stropheConnection = data.connection;
       let status = data.status;
       let condition = data.condition;
+      let accountConnection = null;
+      if (data.wss)
+      {
+          stropheConnection.flush();
+          stropheConnection.pause();
+          stropheConnection.resume();
+          stropheConnection.flush();
 
-      this.storeConnectionParameters(stropheConnection);
-      this.replaceConnectionHandler(stropheConnection);
-      this.addRidHandler(stropheConnection);
-      this.addRidUnloadHandler(stropheConnection);
+		  accountConnection = this.replaceStorageConnectionWithXMPPConnection(stropheConnection);
 
-      let accountConnection = this.replaceStorageConnectionWithXMPPConnection(stropheConnection);
-
-      if (stropheConnection.features) {
-         this.storeConnectionFeatures(stropheConnection);
+		  this.account.triggerConnectionHook(status, condition);
       }
+      else
+	  {
+		  this.storeConnectionParameters(stropheConnection);
+		  this.replaceConnectionHandler(stropheConnection);
+		  this.addRidHandler(stropheConnection);
+		  this.addRidUnloadHandler(stropheConnection);
 
-      Log.debug('XMPP connection ready');
+		  accountConnection = this.replaceStorageConnectionWithXMPPConnection(stropheConnection);
 
-      this.account.triggerConnectionHook(status, condition);
+		  if (stropheConnection.features) {
+			 this.storeConnectionFeatures(stropheConnection);
+		  }
 
+		  this.account.triggerConnectionHook(status, condition);
+	  }
+	  Log.debug('XMPP connection ready');
       return [status, accountConnection];
+   }
+
+   private successfulConnectedWebsocket = (data) => {
+      websocketStropheConnection = null;
+      this.account.triggerConnectionHook(5, null);
+      return this.successfulConnected(data);
    }
 
    private storeConnectionParameters(connection) {
