@@ -363,6 +363,7 @@
     "Change_password": null,
     "Connecting": null,
     "Connection": null,
+    "Connectiontype": null,
     "Control": null,
     "Incoming_video_call": null,
     "Plugins": null,
