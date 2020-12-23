@@ -3,6 +3,7 @@ import Message from './../Message'
 import { Presence } from './AbstractConnection'
 import Form from './Form'
 import PEPService from './services/PEP'
+import SearchService from './services/Search'
 import PubSubService from './services/PubSub'
 import 'Strophe'
 import JingleHandler from './JingleHandler';
@@ -25,6 +26,8 @@ export interface IConnection {
    getRosterService(): IRosterService
 
    getVcardService(): IVcardService
+
+   getSearchService(): SearchService
 
    getDiscoService(): IDiscoService
 

@@ -87,7 +87,10 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
       return this.getOmemo().prepare().then(async () => {
          if (!this.getOmemo().isSupported(contact)) {
-            throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
+            if(!this.getDeviceListFromContact(contact))
+            {
+                throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
+            }
          }
 
          if (!this.getOmemo().isTrusted(contact) && !await this.getOmemo().trustOnFirstUse(contact)) {
@@ -97,6 +100,42 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          let trust = this.getOmemo().getTrust(contact);
 
          OMEMOPlugin.updateEncryptionState(contact, trust);
+      });
+   }
+
+   private getDeviceListFromContact(contact: IContact)
+   {
+      let connection = this.pluginAPI.getConnection();
+      let _self = this;
+      return connection.getPEPService().retrieveItems('eu.siacs.conversations.axolotl.devicelist',contact.getJid().bare).then(function(data) {
+
+            return new Promise(function(resolve, reject) {
+                if (_self.onDeviceListUpdate(data))
+                {
+                    const promises = [];
+                    let arr = $(data).find("device");
+                    let i=0;
+                    for (; i < arr.length; i++) {
+                       promises.push(connection.getPEPService().retrieveItems('eu.siacs.conversations.axolotl.bundles:'+$(arr[i]).attr('id'),contact.getJid().bare).then(function(data) {
+                            return new Promise(function(resolve, reject) {
+                                resolve(true);
+                            });
+                      }));
+                    }
+                    Promise.all(promises).then((results) => {
+                           resolve(true);
+                       })
+                       .catch((e) => {
+                           console.log(e);
+                           reject();
+                    });
+                    resolve(true);
+                }
+                else
+                {
+                    reject();
+                }
+            });
       });
    }
 

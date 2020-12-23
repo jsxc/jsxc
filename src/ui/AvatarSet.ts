@@ -36,7 +36,7 @@ export default class AvatarSet {
          $(this.elements).each(function() {
             let element = $(this);
             //old method call was buggy and sometimes the property was not set
-			//with background-size: contain; chrome does not complain about invalid property anymore!
+      			//with background-size: contain; chrome does not complain about invalid property anymore!
             element.attr('style','background: url(\'' + avatar.getData() + '\'); background-size: contain;');
             element.text('');
          });

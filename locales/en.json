@@ -322,6 +322,10 @@
     "Show_debug_log": "Show debug log",
     "You_are_currently_offline": "You are currently offline",
     "Your_contact_list_is_empty": "Your contact list is empty",
+	"Your_group_list_is_empty": "Your group list is empty",
+	"contactfilter": "Filter",
+	"groups": "Groups",
+	"contacts": "Contacts",
     "Configure": "Configure",
     "Invite": "Invite",
     "User_information": "User information",
@@ -360,8 +364,10 @@
     "Connecting": "Connecting",
     "Connection": "Connection",
     "Control": "Control",
+    "Connectiontype": "Connectiontype",
     "Incoming_video_call": "Incoming video call",
     "Plugins": "Plugins",
+    "General": "General",
     "Room_creation": "Room creation",
     "setting-bookmarks-enable": "If you like to store your group chats in your contact list, let it enabled.",
     "setting-http-upload-enable": "Allows to send files to group chats and enables your contact to receive a transferred file on all his devices.",
@@ -382,7 +388,14 @@
     "chatmarkers-received": "received",
     "chatmarkers-displayed": "displayed",
     "chatmarkers-acknowledged": "acknowledged",
-    "There_are_new_devices": "There are new devices"
+    "There_are_new_devices": "There are new devices",
+    "contact_search": "Search Contact",
+    "Search": "Search",
+    "First": "Given Name",
+    "Last": "Surname",
+    "Nick": "Nickname",
+    "Email": "E-Mail",
+    "no_results": "No results were found."
   },
   "Notifications": "Notifications"
 }

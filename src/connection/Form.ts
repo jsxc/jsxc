@@ -91,14 +91,34 @@ export default class Form {
 
       this.items.forEach((fields, itemIndex) => {
          if (fields.length !== this.reportedFields.length) {
-            throw new InvalidParameterError(`Item ${itemIndex} does not contain all "reported" fields.`);
-         }
+             try{
+                 this.reportedFields.forEach((field, index) => {
+                    let i=0;
+                    let found=false;
+                    for (;i<fields.length;i++)
+                    {
+                        if (this.reportedFields[index].getName() === fields[i].getName()) {
+                            found=true;
+                            break;
+                        }
+                    }
 
+                    if (!found) {
+                       throw new InvalidParameterError(`Item ${itemIndex} does not contain all "reported" fields.`);
+                    }
+                 });
+             }
+             catch (e)
+             {
+                throw new InvalidParameterError(`Item ${itemIndex} does not contain all "reported" fields.`);
+             }
+         }
+         else
          this.reportedFields.forEach((field, index) => {
             if (this.reportedFields[index].getName() !== fields[index].getName()) {
                throw new InvalidParameterError(`Item ${itemIndex} does not contain all "reported" fields.`);
             }
-         })
+         });
       });
    }
 

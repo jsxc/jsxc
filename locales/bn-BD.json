@@ -322,6 +322,10 @@
     "Show_debug_log": null,
     "You_are_currently_offline": null,
     "Your_contact_list_is_empty": null,
+	"Your_group_list_is_empty": null,
+	"contactfilter": null,
+	"groups": null,
+	"contacts": null,
     "Configure": null,
     "Invite": null,
     "User_information": null,
@@ -359,9 +363,11 @@
     "Change_password": null,
     "Connecting": null,
     "Connection": null,
+    "Connectiontype": null,
     "Control": null,
     "Incoming_video_call": null,
     "Plugins": null,
+    "General": null,
     "Room_creation": null,
     "setting-bookmarks-enable": null,
     "setting-http-upload-enable": null,
@@ -382,7 +388,14 @@
     "chatmarkers-received": null,
     "chatmarkers-displayed": null,
     "chatmarkers-acknowledged": null,
-    "There_are_new_devices": null
+    "There_are_new_devices": null,
+    "contact_search": null,
+    "Search": null,
+    "First":  null,
+    "Last":  null,
+    "Nick":  null,
+    "Email":  null,
+    "no_results": null
   },
   "Notifications": null
 }
