@@ -75,6 +75,7 @@
     "Subscription": null,
     "both": null,
     "Status": null,
+    "extended-status": null,
     "online": null,
     "chat": null,
     "away": null,

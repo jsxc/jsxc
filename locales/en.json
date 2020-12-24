@@ -75,6 +75,7 @@
     "Subscription": "Subscription",
     "both": "both",
     "Status": "Status",
+    "extended-status": "Statustext",
     "online": "online",
     "chat": "chat",
     "away": "away",

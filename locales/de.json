@@ -75,6 +75,7 @@
     "Subscription": "Bezug",
     "both": "beidseitig",
     "Status": "Status",
+    "extended-status": "Statustext",
     "online": "online",
     "chat": "chat",
     "away": "abwesend",
