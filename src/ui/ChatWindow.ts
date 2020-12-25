@@ -405,6 +405,10 @@ export default class ChatWindow {
       }
    }
 
+   protected onInputCommand(message){
+       console.log('We are not in a muc, so ignore this call');
+   }
+
    private onInputKeyPress = (ev) => {
       ev.stopPropagation();
 
@@ -414,7 +418,14 @@ export default class ChatWindow {
          return;
       }
 
-      this.sendOutgoingMessage(message);
+      if (message!==''&&message[0]==='/')
+      {
+        this.onInputCommand(message)
+      }
+      else
+      {
+        this.sendOutgoingMessage(message);
+      }
 
       $(ev.target).val('');
 
