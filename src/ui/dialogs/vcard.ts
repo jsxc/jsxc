@@ -60,6 +60,7 @@ export default function(contact: IContact) {
          });
 
          dialog.getDom().append(content);
+         dialog.getDom().find('strong:empty').css('display','none');
 
          dialog.getDom().find('.jsxc-waiting').remove();
       })
@@ -113,11 +114,17 @@ function convertToTemplateData(vCardData): any[] {
       }
 
       properties.push({
-         name: Translation.t(name),
+         name: isNumeric(name) ? '' : Translation.t(name), //if it is a number, then we are in an Array, so dont write index!
          value,
          properties: childProperties
       });
    }
 
    return properties;
+}
+
+function isNumeric(str) {
+  if (typeof str !== 'string')
+     return false; // we only process strings!
+  return !isNaN(Number(str));
 }

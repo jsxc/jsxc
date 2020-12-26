@@ -10,6 +10,19 @@
   z-index: 999;
 }
 
+.jsxc-vcard-result {
+
+  margin-bottom:10px !important;
+
+  li > strong {
+    min-width: 150px;
+    display: inline-block;
+  }
+
+  li:nth-child(even) {background: var(--jsxc-color-background)}
+  li:nth-child(odd) {background: var(--jsxc-color-background-darker)}
+}
+
 .jsxc-dialog {
   background: $main-bg;
   border: 1px solid $bg-darker;
