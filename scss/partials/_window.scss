@@ -801,3 +801,39 @@
     padding-top: 42px;
   }
 }
+
+.jsxc-custom-menu {
+  background: var(--jsxc-color-background-dark);
+  border: 1px solid var(--jsxc-color-border);
+  border-radius: 5px;
+  color: var(--jsxc-color-main-text);
+  display: none;
+  font-family: sans-serif;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  z-index: 1000;
+
+  li
+  {
+    cursor: pointer;
+    list-style-type: none;
+    padding: 8px 12px;
+    transition: all 0.3s ease;
+    user-select: none;
+  }
+
+  div {
+    background: var(--jsxc-color-primary) !important;
+    color: var(--jsxc-color-primary-text);
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px;
+    text-align: center;
+  }
+
+  li:hover {
+    background-color: var(--jsxc-color-background-hover);
+  }
+}

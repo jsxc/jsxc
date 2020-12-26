@@ -199,7 +199,7 @@ export default class MUC extends AbstractService {
 
       let msg = $msg({
          to: roomJid.bare,
-         type:"groupchat"
+         type:'groupchat'
       }).c('subject').t(topic);
 
       this.send(msg);

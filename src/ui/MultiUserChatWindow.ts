@@ -5,26 +5,26 @@ import JID from '../JID'
 import AvatarSet from './AvatarSet'
 import showRoomConfigurationDialog from './dialogs/multiUserRoomConfiguration'
 import showMultiUserInviteDialog from './dialogs/multiUserInvite'
-import showMucHelp from './dialogs/muchelp';
+import showMucHelp from './dialogs/mucHelpDialog';
 
 enum Command
 {
-    admin,// Zugehörigkeit des Benutzers zu Administrator ändern - wird über UI geregelt
-    ban,// Sperren Sie Benutzer, indem Sie ihre Zugehörigkeit zu ausgeschlossenen Personen ändern
-    kick,// Kicken Sie Benutzer
-    clear,// Löschen des Chatbereichs  - wird über UI geregelt
-    deop,// Rolle zu Teilnehmer ändern
-    destroy,// Diesen Gruppenchat entfernen - wird über UI geregelt
-    help,// Dieses Menü anzeigen
-    me,// In der dritten Person schreiben - über extra Plugin
-    member,// Einem Benutzer die Mitgliedschaft gewähren  - wird über UI geregelt
-    nick,// Eigenen Spitznamen ändern
-    op,// Benutzer Moderatorenrechte gewähren
-    owner,// Besitzrechte an diesem Gruppenchat vergeben  - wird über UI geregelt
-    revoke,// Widerrufen der aktuellen Zugehörigkeit des Benutzers
-    subject,// Thema des Gruppenchats festlegen  - wird über UI geregelt
-    topic,// Gruppenchatthema (alias für /subject) festlegen  - wird über UI geregelt
-    invite,// Einen User einladen - wird über UI geregelt
+    admin,// change affiliation to admin - also in context menu
+    ban,// ban a occupant by setting his affiliation to outcast - also in context menu
+    kick,// kick a user by setting its role to none
+    clear,// clears the chat history  - calling the clear method of the base class
+    deop,// changes role to member
+    destroy,// destroy the room
+    help,// show this menu
+    me,// write in third person style - plugin
+    member,// grant membership to occupant
+    nick,// change own nickname
+    op,// grant moderator privilegs
+    owner,// grant owner privilegs
+    revoke,// revoke membership
+    subject,// set theme of muc room
+    topic,// alias for subject
+    invite,// invite a user to this room
 }
 
 export default class MultiUserChatWindow extends ChatWindow {
@@ -79,7 +79,79 @@ export default class MultiUserChatWindow extends ChatWindow {
       this.contact.registerMemberHook(this.contact.getNickname(), (data) => {
          this.updatePermissionAttributes(data);
       });
-      this.updatePermissionAttributes(this.contact.getMember(this.contact.getNickname()));
+
+      this.updatePermissionAttributes(this.contact.getMember(this.contact.getNickname()));   this.element.find('div.jsxc-message-area').on('contextmenu',{ref:this},this.openMUCContextMenu);
+   }
+
+   private openMUCContextMenu(event)
+   {
+        let ref = event.data.ref;
+        ref.openContextMenu(event);
+
+        let nick = ref.getContact().data.get('nickname');
+        if (!nick)
+            nick = ref.getContact().data.get('jid').substring(ref.getContact().data.get('jid').lastIndexOf('/')+1);
+        if (!ref.getContact().getMembers().get(nick))
+            return;
+
+        let affiliation = ref.getContact().getMembers().get(nick).affiliation;
+        let role = ref.getContact().getMembers().get(nick).role;
+        let targetnick = $(event.target).closest('div.jsxc-chatmessage').attr('data-name');
+        let targetjid = ref.getContact().getMembers().get(targetnick)?ref.getContact().getMembers().get(targetnick).jid:false;
+        $(this).closest('.jsxc-window').find('.jsxc-context-menu-contact').text(targetnick);
+        if (targetjid&&role==='moderator')
+        {
+            let liKick = $('<li data-action="jsxc-context-menu-kick" data-target="'+targetnick+'">'+Translation.t('Kick')+'</li>');
+            $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append(liKick);
+
+            liKick.on('click',{'ref':ref},function(e)
+            {
+                let ref = e.data.ref;
+                $('.jsxc-custom-menu').hide(100);
+                let nick = $(this).attr('data-target');
+                ref.kickedUser=nick;
+                ref.contact.kick(ref.kickedUser);
+                setTimeout(() => ref.scrollMessageAreaToBottom(), 500);
+            });
+        }
+
+        if (targetjid&&(affiliation==='admin'||affiliation==='owner'))
+        {
+            let liBan = $('<li data-action="jsxc-context-menu-ban" data-target="'+targetjid+'">'+Translation.t('Ban')+'</li>');
+            $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append(liBan);
+
+            liBan.on('click',{'ref':ref},function(e)
+            {
+                let ref = e.data.ref;
+                $('.jsxc-custom-menu').hide(100);
+                let jid = $(this).attr('data-target');
+                ref.kickedUser=jid;
+                ref.contact.ban(new JID(ref.kickedUser));
+                setTimeout(() => ref.scrollMessageAreaToBottom(), 500);
+            });
+
+            let liOp = $('<li data-action="jsxc-context-menu-op" data-target="'+targetjid+'">'+Translation.t('Op')+'</li>');
+            $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append(liOp);
+
+            liOp.on('click',{'ref':ref},function(e)
+            {
+                let ref = e.data.ref;
+                $('.jsxc-custom-menu').hide(100);
+                ref.contact.sendChangeRole(targetnick, 'moderator');
+                setTimeout(() => ref.scrollMessageAreaToBottom(), 500);
+            });
+
+            let liDeop = $('<li data-action="jsxc-context-menu-deop" data-target="'+targetjid+'">'+Translation.t('Deop')+'</li>');
+            $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append(liDeop);
+
+            liDeop.on('click',{'ref':ref},function(e)
+            {
+                let ref = e.data.ref;
+                $('.jsxc-custom-menu').hide(100);
+                ref.contact.sendChangeRole(targetnick, 'member');
+                setTimeout(() => ref.scrollMessageAreaToBottom(), 500);
+            });
+        }
    }
 
    private updatePermissionAttributes(data: {affiliation?: AFFILIATION, role?: ROLE, jid?: JID} = {}) {
@@ -210,7 +282,7 @@ export default class MultiUserChatWindow extends ChatWindow {
 
    protected onInputCommand(message)
    {
-       console.log(this.contact);
+
        let command = message.substring(1,message.indexOf(' ')!==-1?message.indexOf(' '):message.length).toLowerCase();
        if (command === Command[Command.help])
        {
