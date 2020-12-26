@@ -1,9 +1,9 @@
 import Dialog from '../Dialog'
 
-const muchelpTemplate = require('../../../template/muchelp.hbs');
+const mucHelpDialogTemplate = require('../../../template/mucHelpDialog.hbs');
 
 export default function() {
-   let content = muchelpTemplate({});
+   let content = mucHelpDialogTemplate({});
 
    let dialog = new Dialog(content);
    let dom = dialog.open();
