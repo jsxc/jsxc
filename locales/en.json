@@ -380,7 +380,15 @@
     "chatmarkers-received": "received",
     "chatmarkers-displayed": "displayed",
     "chatmarkers-acknowledged": "acknowledged",
-    "There_are_new_devices": "There are new devices"
+    "There_are_new_devices": "There are new devices",
+    "muc_not-authorized": "A password ist required to join this room.",
+    "muc_forbidden": "You are not allowed to join this room, because you are banned.",
+    "muc_item-not-found": "This room does not exist.",
+    "muc_not-allowed": "Room creation is restricted.",
+    "muc_not-acceptable": "You have to use the reserved nickname.",
+    "muc_registration-required": "You are not allowed to join this room, because you are not on the member list.",
+    "muc_conflict": "Your nickname was already taken.",
+    "muc_service-unavailable": "You are not able to join, because the maximum number of users has been reached."
   },
   "Notifications": "Notifications"
 }
