@@ -285,6 +285,10 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
    }
 
    private chatWindowInitializedHook(chatWindow: ChatWindow) {
+      if (chatWindow.getContact().isGroupChat()) {
+         return;
+      }
+
       let windowElement = chatWindow.getDom().find('.jsxc-message-input');
 
       windowElement.on('focus', () => this.onChatWindowFocus(chatWindow));
