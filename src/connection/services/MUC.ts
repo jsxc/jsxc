@@ -9,6 +9,7 @@ const NS_CONFERENCE = 'jabber:x:conference';
 const NS_BASE = 'http://jabber.org/protocol/muc';
 const NS_OWNER = NS_BASE + '#owner';
 const NS_USER = NS_BASE + '#user';
+const NS_ADMIN = NS_BASE + '#admin';
 
 export default class MUC extends AbstractService implements IMUCService {
    public joinMultiUserRoom(jid: IJID, password?: string) {
@@ -47,7 +48,7 @@ export default class MUC extends AbstractService implements IMUCService {
          to: jid.bare,
          type: 'set'
       }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#admin'
+         xmlns: NS_ADMIN
       }).c('item',{nick:nickname, role:'none'});
 
       if (reason&&reason.trim().length>0)
@@ -74,7 +75,7 @@ export default class MUC extends AbstractService implements IMUCService {
          to: jid.bare,
          type: 'set'
       }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#admin'
+         xmlns: NS_ADMIN
       }).c('item',{role:rolestr, nick:nickname});
 
       if (reason&&reason.trim().length>0)
@@ -91,7 +92,7 @@ export default class MUC extends AbstractService implements IMUCService {
          to: jid.bare,
          type: 'set'
       }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#admin'
+         xmlns: NS_ADMIN
       }).c('item',{affiliation:affiliationstr, jid:targetjid.bare});
 
       return this.sendIQ(iq);
@@ -103,7 +104,7 @@ export default class MUC extends AbstractService implements IMUCService {
          to: jid.bare,
          type: 'set'
       }).c('query', {
-         xmlns: 'http://jabber.org/protocol/muc#admin'
+         xmlns: NS_ADMIN
       }).c('item',{affiliation:'outcast', jid:targetjid.bare});
 
       if (reason&&reason.trim().length>0)
