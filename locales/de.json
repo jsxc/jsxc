@@ -380,7 +380,15 @@
     "chatmarkers-received": "Erhalten",
     "chatmarkers-displayed": "angezeigt",
     "chatmarkers-acknowledged": "quittiert",
-    "There_are_new_devices": "Es gibt neue Geräte"
+    "There_are_new_devices": "Es gibt neue Geräte",
+    "muc_not-authorized": "Um dem Raum beizutreten wird ein Kennwort benötigt.",
+    "muc_forbidden": "Sie wurden aus dem Raum verbannt.",
+    "muc_item-not-found": "Der gewünschte Raum existiert nicht.",
+    "muc_not-allowed": "Das Erstellen von Räumen ist eingeschränkt.",
+    "muc_not-acceptable": "Sie müssen Ihren reservierten Nicknamen nutzen.",
+    "muc_registration-required": "Sie können dem Raum nicht beitreten, da Sie kein Mitglied sind.",
+    "muc_conflict": "Ihr ausgewählter Nickname ist nicht verfügbar.",
+    "muc_service-unavailable": "Die maximale Kapazität an Teilnehmern wurde erreicht."
   },
   "Notifications": "Benachrichtigungen"
 }
