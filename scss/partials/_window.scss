@@ -814,25 +814,25 @@
   position: absolute;
   white-space: nowrap;
   z-index: 1000;
-}
 
-.jsxc-custom-menu li {
-  cursor: pointer;
-  list-style-type: none;
-  padding: 8px 12px;
-  transition: all 0.3s ease;
-  user-select: none;
-}
+  li {
+    cursor: pointer;
+    list-style-type: none;
+    padding: 8px 12px;
+    transition: all 0.3s ease;
+    user-select: none;
 
-.jsxc-custom-menu div {
-  background: var(--jsxc-color-primary) !important;
-  color: var(--jsxc-color-primary-text);
-  font-size: 10px;
-  font-weight: bold;
-  padding: 3px;
-  text-align: center;
-}
+    &:hover {
+      background-color: var(--jsxc-color-background-hover);
+    }
+  }
 
-.jsxc-custom-menu li:hover {
-  background-color: var(--jsxc-color-background-hover);
+  div {
+    background: var(--jsxc-color-primary) !important;
+    color: var(--jsxc-color-primary-text);
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px;
+    text-align: center;
+  }
 }
