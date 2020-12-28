@@ -380,7 +380,15 @@
     "chatmarkers-received": "recebido",
     "chatmarkers-displayed": "exibida",
     "chatmarkers-acknowledged": null,
-    "There_are_new_devices": "Há novos dispositivos"
+    "There_are_new_devices": "Há novos dispositivos",
+    "muc_not-authorized": null,
+    "muc_forbidden": null,
+    "muc_item-not-found": null,
+    "muc_not-allowed": null,
+    "muc_not-acceptable": null,
+    "muc_registration-required": null,
+    "muc_conflict": null,
+    "muc_service-unavailable": null
   },
   "Notifications": "Notificações"
 }
