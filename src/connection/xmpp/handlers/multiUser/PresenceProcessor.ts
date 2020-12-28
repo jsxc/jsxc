@@ -60,20 +60,7 @@ export default class MultiUserPresenceProcessor {
             newNickname,
             escapeInterpolation: true
          }));
-      }
-      else
-      if (this.codes.indexOf('307') > -1) {
-         // user was kicked out of a room
-
-         this.multiUserContact.removeMember(this.nickname);
-
-         this.inform(':door: ' + Translation.t('left_the_building', {
-           nickname: this.nickname,
-           escapeInterpolation: true
-         }));
-      }
-      else
-      {
+      } else {
          this.multiUserContact.removeMember(this.nickname);
 
          if (this.codes.length === 1 && this.codes.indexOf('110') > -1) {
