@@ -28,6 +28,81 @@ export default class MUC extends AbstractService {
       return this.send(pres);
    }
 
+   public sendNicknameChange(jid: IJID, nickname: string) {
+      let newjid=jid.bare+'/'+nickname;
+
+      let pres = $pres({
+         to: newjid
+      }).c('x', {
+         xmlns: Strophe.NS.MUC
+      });
+
+      return this.send(pres);
+   }
+
+   public sendKickUser(jid: IJID, nickname: string,reason?:string)
+   {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'set'
+      }).c('query', {
+         xmlns: 'http://jabber.org/protocol/muc#admin'
+      }).c('item',{nick:nickname, role:'none'});
+
+      if (reason&&reason.trim().length>0)
+      {
+          iq.c('reason').t(reason);
+      }
+
+      return this.sendIQ(iq);
+   }
+
+   public sendChangeRole(jid: IJID, nickname: string, rolestr: string, reason?:string)
+   {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'set'
+      }).c('query', {
+         xmlns: 'http://jabber.org/protocol/muc#admin'
+      }).c('item',{role:rolestr, nick:nickname});
+
+      if (reason&&reason.trim().length>0)
+      {
+          iq.c('reason').t(reason);
+      }
+
+      return this.sendIQ(iq);
+   }
+
+   public sendChangeAffiliation(jid: IJID, targetjid: IJID, affiliationstr: string)
+   {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'set'
+      }).c('query', {
+         xmlns: 'http://jabber.org/protocol/muc#admin'
+      }).c('item',{affiliation:affiliationstr, jid:targetjid.bare});
+
+      return this.sendIQ(iq);
+   }
+
+   public sendBanUser(jid: IJID, targetjid: IJID,reason?:string)
+   {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'set'
+      }).c('query', {
+         xmlns: 'http://jabber.org/protocol/muc#admin'
+      }).c('item',{affiliation:'outcast', jid:targetjid.bare});
+
+      if (reason&&reason.trim().length>0)
+      {
+          iq.c('reason').t(reason);
+      }
+
+      return this.sendIQ(iq);
+   }
+
    public leaveMultiUserRoom(jid: IJID, exitMessage?: string) {
       let pres = $pres({
          type: 'unavailable',
@@ -116,6 +191,16 @@ export default class MUC extends AbstractService {
       if (reason) {
          msg.c('reason').t(reason);
       }
+
+      this.send(msg);
+   }
+
+   public sendTopicChange(roomJid: IJID, topic?: string) {
+
+      let msg = $msg({
+         to: roomJid.bare,
+         type:'groupchat'
+      }).c('subject').t(topic);
 
       this.send(msg);
    }

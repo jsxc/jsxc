@@ -19,6 +19,7 @@ import { IJID } from '@src/JID.interface';
 import { JINGLE_FEATURES } from '@src/JingleAbstractSession';
 import Location from '@util/Location';
 import interact from 'interactjs';
+import Translation from '../util/Translation'
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -84,6 +85,65 @@ export default class ChatWindow {
       this.element.attr('data-subscription', this.contact.getSubscription());
 
       this.getAccount().triggerChatWindowInitializedHook(this, contact);
+      this.element.find('div.jsxc-message-area').on('contextmenu',{ref:this},this.openContextMenu);
+
+      this.element.on('mousedown', function (e) {
+          // If the clicked element is not the menu
+          // Hide it
+          if (!($(e.target).parents('.jsxc-custom-menu').length > 0)) {
+            $('.jsxc-custom-menu').hide(100);
+          }
+      });
+   }
+
+   private openContextMenu(event)
+   {
+        // Avoid the real one
+        event.preventDefault();
+        if (
+            !$(event.target).closest('div.jsxc-chatmessage').hasClass('jsxc-probably_in')&&
+            !$(event.target).closest('div.jsxc-chatmessage').hasClass('jsxc-in'))
+            return;
+
+        // Show contextmenu
+        let yoffset =  (event.pageY-$(event.target).closest('div.jsxc-message-area').offset().top+40);
+        let xoffset =  $(event.target).closest('div.jsxc-chatmessage').find('.jsxc-avatar').length>0?event.offsetX+60:event.offsetX+20;
+
+        let contact = $(event.target).closest('div.jsxc-chatmessage').attr('data-name');
+        if (!contact)
+            contact = $(event.target).closest('li.jsxc-window-item').attr('data-contact-id');
+
+        $(this).closest('.jsxc-window').find('.jsxc-custom-menu').finish().toggle(100).
+        // In the right position (the mouse)
+        css({
+            top: yoffset + 'px',
+            left: xoffset  + 'px'
+        });
+
+        let refmessage = $(event.target).closest('div.jsxc-chatmessage').attr('id');
+        $(this).closest('.jsxc-window').find('.jsxc-custom-menu').empty();
+        $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append('<div class="jsxc-context-menu-contact">'+contact+'</div>');
+
+        let liQuote = $('<li data-action="jsxc-context-menu-quote" data-refmessage="'+refmessage+'">'+Translation.t('Quote')+'</li>');
+        $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append(liQuote);
+
+        liQuote.on('click',{ref:event.data.ref},function(e)
+        {
+            $('.jsxc-custom-menu').hide(100);
+            let p = $(e.target).closest('li.jsxc-window-item').find('#' + $(e.target).attr('data-refmessage')).find('p');
+            p.find('span').remove();
+            let message = p.text().trim();
+
+            setTimeout(() => e.data.ref.scrollMessageAreaToBottom(), 500);
+
+            $(e.target).closest('li.jsxc-window-item').find('.jsxc-message-input').empty().val('> '+message+'\n');
+            $(e.target).closest('li.jsxc-window-item').find('.jsxc-message-input').focus();
+            let keyup = jQuery.Event('keyup');
+            keyup.ctrlKey = false;
+            keyup.shiftKey = true;
+            keyup.which = ENTER_KEY;
+            $(e.target).closest('li.jsxc-window-item').find('.jsxc-message-input').trigger(keyup);
+        });
    }
 
    public getTranscript(): Transcript {
@@ -117,6 +177,7 @@ export default class ChatWindow {
    }
 
    public close() {
+      this.element.off('mousedown');
       this.element.detach();
    }
 
@@ -405,6 +466,10 @@ export default class ChatWindow {
       }
    }
 
+   protected onInputCommand(message){
+       Log.warn('We are not in a muc, so ignore this call');
+   }
+
    private onInputKeyPress = (ev) => {
       ev.stopPropagation();
 
@@ -414,7 +479,14 @@ export default class ChatWindow {
          return;
       }
 
-      this.sendOutgoingMessage(message);
+      if (message!==''&&message[0]==='/')
+      {
+        this.onInputCommand(message)
+      }
+      else
+      {
+        this.sendOutgoingMessage(message);
+      }
 
       $(ev.target).val('');
 

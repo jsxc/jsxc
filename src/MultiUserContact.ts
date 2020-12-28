@@ -88,6 +88,30 @@ export default class MultiUserContact extends Contact {
       throw new Error('No invitation method available');
    }
 
+   public async setTopic(topic: string) {
+        this.getService().sendTopicChange(this.getJid(), topic);
+   }
+
+   public async setNewNickname(nickname: string) {
+        this.getService().sendNicknameChange(this.getJid(), nickname);
+   }
+
+   public async kick(nickname: string, reason?:string) {
+        this.getService().sendKickUser(this.getJid(), nickname,reason);
+   }
+
+   public async ban(targetjid: IJID, reason?:string) {
+        this.getService().sendBanUser(this.getJid(), targetjid,reason);
+   }
+
+   public async sendChangeAffiliation(targetjid: IJID, affiliation: string) {
+        this.getService().sendChangeAffiliation(this.getJid(), targetjid, affiliation);
+   }
+
+   public async sendChangeRole(nickname: string, role: string) {
+        this.getService().sendChangeRole(this.getJid(), nickname, role);
+   }
+
    public join() {
       this.data.set('joinDate', new Date());
       this.data.set('memberListComplete', false);
