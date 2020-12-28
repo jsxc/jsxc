@@ -336,7 +336,7 @@ export default class MultiUserChatWindow extends ChatWindow {
            let parts = message.split(' ');
            if (parts.length===2)
            {
-                this.contact.setNewNickname(parts[1]);
+                this.contact.changeNickname(parts[1]);
            }
        }
        else
@@ -375,7 +375,7 @@ export default class MultiUserChatWindow extends ChatWindow {
        let parts = message.split(' ');
        if (parts.length===2)
        {
-           this.contact.sendChangeRole(parts[1], role);
+           this.contact.changeRole(parts[1], role);
        }
    }
 
@@ -384,7 +384,7 @@ export default class MultiUserChatWindow extends ChatWindow {
        let parts = message.split(' ');
        if (parts.length===2)
        {
-           this.contact.sendChangeAffiliation(new JID(parts[1]), affiliation);
+           this.contact.changeAffiliation(new JID(parts[1]), affiliation);
        }
    }
 
@@ -427,7 +427,7 @@ export default class MultiUserChatWindow extends ChatWindow {
 
    private processCommandSubjectChange(subject)
    {
-       this.contact.setTopic(subject);
+       this.contact.changeTopic(subject);
    }
 
    private processCommandInvite(message)

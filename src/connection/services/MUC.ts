@@ -2,6 +2,7 @@ import AbstractService from './AbstractService'
 import { IJID } from '../../JID.interface'
 import Form from '../Form'
 import { $pres, $iq, $msg, Strophe } from '../../vendor/Strophe'
+import { IMUCService } from '@connection/Connection.interface';
 
 //@REVIEW this will not be reflected in caps and disco
 const NS_CONFERENCE = 'jabber:x:conference';
@@ -9,7 +10,7 @@ const NS_BASE = 'http://jabber.org/protocol/muc';
 const NS_OWNER = NS_BASE + '#owner';
 const NS_USER = NS_BASE + '#user';
 
-export default class MUC extends AbstractService {
+export default class MUC extends AbstractService implements IMUCService {
    public joinMultiUserRoom(jid: IJID, password?: string) {
       if (jid.isBare()) {
          return Promise.reject('We need a full jid to join a room');
@@ -28,7 +29,7 @@ export default class MUC extends AbstractService {
       return this.send(pres);
    }
 
-   public sendNicknameChange(jid: IJID, nickname: string) {
+   public changeNickname(jid: IJID, nickname: string) {
       let newjid=jid.bare+'/'+nickname;
 
       let pres = $pres({
@@ -40,7 +41,7 @@ export default class MUC extends AbstractService {
       return this.send(pres);
    }
 
-   public sendKickUser(jid: IJID, nickname: string,reason?:string)
+   public kickUser(jid: IJID, nickname: string,reason?:string)
    {
       let iq = $iq({
          to: jid.bare,
@@ -57,7 +58,17 @@ export default class MUC extends AbstractService {
       return this.sendIQ(iq);
    }
 
-   public sendChangeRole(jid: IJID, nickname: string, rolestr: string, reason?:string)
+   public changeTopic(roomJid: IJID, topic?: string) {
+
+      let msg = $msg({
+         to: roomJid.bare,
+         type:'groupchat'
+      }).c('subject').t(topic);
+
+      this.send(msg);
+   }
+
+   public changeRole(jid: IJID, nickname: string, rolestr: string, reason?:string)
    {
       let iq = $iq({
          to: jid.bare,
@@ -74,7 +85,7 @@ export default class MUC extends AbstractService {
       return this.sendIQ(iq);
    }
 
-   public sendChangeAffiliation(jid: IJID, targetjid: IJID, affiliationstr: string)
+   public changeAffiliation(jid: IJID, targetjid: IJID, affiliationstr: string)
    {
       let iq = $iq({
          to: jid.bare,
@@ -86,7 +97,7 @@ export default class MUC extends AbstractService {
       return this.sendIQ(iq);
    }
 
-   public sendBanUser(jid: IJID, targetjid: IJID,reason?:string)
+   public banUser(jid: IJID, targetjid: IJID,reason?:string)
    {
       let iq = $iq({
          to: jid.bare,
@@ -191,16 +202,6 @@ export default class MUC extends AbstractService {
       if (reason) {
          msg.c('reason').t(reason);
       }
-
-      this.send(msg);
-   }
-
-   public sendTopicChange(roomJid: IJID, topic?: string) {
-
-      let msg = $msg({
-         to: roomJid.bare,
-         type:'groupchat'
-      }).c('subject').t(topic);
 
       this.send(msg);
    }

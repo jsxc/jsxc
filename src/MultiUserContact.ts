@@ -88,28 +88,28 @@ export default class MultiUserContact extends Contact {
       throw new Error('No invitation method available');
    }
 
-   public setTopic(topic: string) {
-      return this.getService().sendTopicChange(this.getJid(), topic);
+   public changeTopic(topic: string) {
+      return this.getService().changeTopic(this.getJid(), topic);
    }
 
-   public setNewNickname(nickname: string) {
-      return this.getService().sendNicknameChange(this.getJid(), nickname);
+   public changeNickname(nickname: string) {
+      return this.getService().changeNickname(this.getJid(), nickname);
    }
 
    public kick(nickname: string, reason?:string) {
-      return this.getService().sendKickUser(this.getJid(), nickname,reason);
+      return this.getService().kickUser(this.getJid(), nickname,reason);
    }
 
-   public ban(targetjid: IJID, reason?:string) {
-      return this.getService().sendBanUser(this.getJid(), targetjid,reason);
+   public ban(target: IJID, reason?:string) {
+      return this.getService().banUser(this.getJid(), target,reason);
    }
 
-   public sendChangeAffiliation(targetjid: IJID, affiliation: string) {
-      return this.getService().sendChangeAffiliation(this.getJid(), targetjid, affiliation);
+   public changeAffiliation(target: IJID, affiliation: string) {
+      return this.getService().changeAffiliation(this.getJid(), target, affiliation);
    }
 
-   public sendChangeRole(nickname: string, role: string) {
-      return this.getService().sendChangeRole(this.getJid(), nickname, role);
+   public changeRole(nickname: string, role: string) {
+      return this.getService().changeRole(this.getJid(), nickname, role);
    }
 
    public join() {

@@ -60,17 +60,17 @@ export interface IMUCService {
 
    sendMediatedMultiUserInvitation(receiverJid: IJID, roomJid: IJID, reason?: string)
 
-   sendTopicChange(roomJid: IJID, topic: string)
+   changeTopic(roomJid: IJID, topic: string): void
 
-   sendNicknameChange(roomJid: IJID, nickname: string)
+   changeNickname(roomJid: IJID, nickname: string): void
 
-   sendKickUser(jid: IJID, nickname: string,reason?:string)
+   kickUser(jid: IJID, nickname: string,reason?:string): void
 
-   sendBanUser(jid: IJID, targetjid: IJID,reason?:string)
+   banUser(jid: IJID, targetjid: IJID,reason?:string): void
 
-   sendChangeAffiliation(jid: IJID, targetjid: IJID, affiliation: string)
+   changeAffiliation(jid: IJID, targetjid: IJID, affiliation: string): void
 
-   sendChangeRole(jid: IJID, nickname: string, rolestr: string, reason?:string)
+   changeRole(jid: IJID, nickname: string, rolestr: string, reason?:string): void
 
    declineMediatedMultiUserInvitation(receiverJid: IJID, roomJid: IJID, reason?: string)
 
