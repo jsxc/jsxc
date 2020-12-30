@@ -9,6 +9,7 @@ import ContactManager from '@src/ContactManager';
 import ContactProvider from '@src/ContactProvider';
 import { IAvatar } from '@src/Avatar.interface';
 import Pipe from '@util/Pipe';
+import CommandRepository, { CommandAction } from '@src/CommandRepository'
 
 export interface IPluginAPI {
 
@@ -66,4 +67,8 @@ export interface IPluginAPI {
    getAfterReceiveGroupMessagePipe(): Pipe
 
    getAfterReceiveMessagePipe(): Pipe
+
+   registerCommand(command: string, action: CommandAction, description: string, category?: string): void
+
+   getCommandRepository(): CommandRepository
 }

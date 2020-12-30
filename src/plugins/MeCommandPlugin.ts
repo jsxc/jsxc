@@ -31,6 +31,8 @@ export default class MeCommandPlugin extends AbstractPlugin {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       pluginAPI.registerTextFormatter(this.textFormatter);
+
+      pluginAPI.registerCommand('/me', async () => false, 'cmd_me');
    }
 
    private textFormatter = (plaintext: string, direction: DIRECTION, contact: Contact, senderName: string) => {

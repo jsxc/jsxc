@@ -5,34 +5,11 @@ import JID from '../JID'
 import AvatarSet from './AvatarSet'
 import showRoomConfigurationDialog from './dialogs/multiUserRoomConfiguration'
 import showMultiUserInviteDialog from './dialogs/multiUserInvite'
-import showMucHelp from './dialogs/mucHelpDialog';
-
-enum Command
-{
-    admin,// change affiliation to admin - also in context menu
-    ban,// ban a occupant by setting his affiliation to outcast - also in context menu
-    kick,// kick a user by setting its role to none
-    clear,// clears the chat history  - calling the clear method of the base class
-    deop,// changes role to member
-    destroy,// destroy the room
-    help,// show this menu
-    me,// write in third person style - plugin
-    member,// grant membership to occupant
-    nick,// change own nickname
-    op,// grant moderator privilegs
-    owner,// grant owner privilegs
-    revoke,// revoke membership
-    subject,// set theme of muc room
-    topic,// alias for subject
-    invite,// invite a user to this room
-}
 
 export default class MultiUserChatWindow extends ChatWindow {
    private memberlistElement;
 
    protected contact: MultiUserContact;
-
-   protected kickedUser : string;
 
    constructor(contact: MultiUserContact) {
       super(contact);
@@ -56,14 +33,7 @@ export default class MultiUserChatWindow extends ChatWindow {
 
       this.contact.registerHook('nickname', (newValue, oldValue) => {
          if (oldValue && !newValue) {
-             if (oldValue!==this.kickedUser)
-             {
-                this.disable();
-             }
-             else
-             {
-                 this.refreshMemberCount();
-             }
+            this.disable();
          } else if (!oldValue && newValue) {
             this.enable();
          }
@@ -278,173 +248,6 @@ export default class MultiUserChatWindow extends ChatWindow {
             showMultiUserInviteDialog(this.contact);
          }
       )
-   }
-
-   protected onInputCommand(message)
-   {
-
-       let command = message.substring(1,message.indexOf(' ')!==-1?message.indexOf(' '):message.length).toLowerCase();
-       if (command === Command[Command.help])
-       {
-           showMucHelp();
-       }
-       else
-           if (command === Command[Command.subject]||command === Command[Command.topic])
-       {
-           let parts = message.split(' ');
-           parts[0]='';
-           this.processCommandSubjectChange(parts.join(' ').trim());
-       }
-       else
-           if (command === Command[Command.clear])
-       {
-           this.clear();
-       }
-       else
-           if (command === Command[Command.invite])
-       {
-           this.processCommandInvite(message);
-       }
-       else
-           if (command === Command[Command.ban])
-       {
-           this.processCommandKickBan(message,false);
-       }
-       else
-           if (command === Command[Command.kick])
-       {
-           this.processCommandKickBan(message,true);
-       }
-       else
-           if (command === Command[Command.admin])
-       {
-           this.processCommandAffiliation(message,'admin');
-       }
-       else
-           if (command === Command[Command.op])
-       {
-           this.processCommandRole(message,'moderator');
-       }
-       else
-           if (command === Command[Command.deop])
-       {
-           this.processCommandRole(message,'participant');
-       }
-       else
-           if (command === Command[Command.nick])
-       {
-           let parts = message.split(' ');
-           if (parts.length===2)
-           {
-                this.contact.changeNickname(parts[1]);
-           }
-       }
-       else
-           if (command === Command[Command.me])
-       {
-           console.error('should never be happen because of if clause before function call...');
-       }
-       else
-           if (command === Command[Command.destroy])
-       {
-           this.contact.destroy();
-       }
-       else
-           if (command === Command[Command.member])
-       {
-           this.processCommandAffiliation(message,'member');
-       }
-       else
-           if (command === Command[Command.owner])
-       {
-           this.processCommandAffiliation(message,'owner');
-       }
-       else
-           if (command === Command[Command.revoke])
-       {
-           this.processCommandAffiliation(message,'none');
-       }
-       else
-       {
-           console.error('UNKNOWN COMMAND, IGNORE...');
-       }
-   }
-
-    private processCommandRole(message: string, role: string)
-   {
-       let parts = message.split(' ');
-       if (parts.length===2)
-       {
-           this.contact.changeRole(parts[1], role);
-       }
-   }
-
-   private processCommandAffiliation(message: string, affiliation: string)
-   {
-       let parts = message.split(' ');
-       if (parts.length===2)
-       {
-           this.contact.changeAffiliation(new JID(parts[1]), affiliation);
-       }
-   }
-
-   private processCommandKickBan(message, onlykick: Boolean)
-   {
-       let parts = message.split(' ');
-       if (parts.length===2)
-       {
-           this.kickedUser=parts[1];
-           if (onlykick)
-           {
-               this.contact.kick(this.kickedUser);
-           }
-           else
-           {
-               this.contact.ban(new JID(this.kickedUser));
-           }
-       }
-       else
-       if (parts.length>2)
-       {
-           this.kickedUser=parts[1];
-           parts[0]='';
-           parts[1]='';
-           let reason = parts.join(' ').trim();
-           if (onlykick)
-           {
-               this.contact.kick(this.kickedUser,reason);
-           }
-           else
-           {
-               this.contact.ban(new JID(this.kickedUser),reason);
-           }
-       }
-       else
-       {
-           this.kickedUser=null;
-       }
-   }
-
-   private processCommandSubjectChange(subject)
-   {
-       this.contact.changeTopic(subject);
-   }
-
-   private processCommandInvite(message)
-   {
-       let parts = message.split('\\s');
-       if (parts.length>1&&parts.length<4)
-       {
-           let reason='';
-           let jid = new JID(parts[1]);
-           if (parts.length===3)
-           {
-               reason = parts[2];
-           }
-           this.contact.invite(jid, reason);
-       }
-       else
-           console.error('Wrong syntax for invite command');
    }
 
    private addMemberList() {

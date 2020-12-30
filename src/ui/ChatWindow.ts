@@ -85,25 +85,18 @@ export default class ChatWindow {
       this.element.attr('data-subscription', this.contact.getSubscription());
 
       this.getAccount().triggerChatWindowInitializedHook(this, contact);
-      this.element.find('div.jsxc-message-area').on('contextmenu',{ref:this},this.openContextMenu);
 
-      this.element.on('mousedown', function (e) {
-          // If the clicked element is not the menu
-          // Hide it
-          if (!($(e.target).parents('.jsxc-custom-menu').length > 0)) {
-            $('.jsxc-custom-menu').hide(100);
+      this.element.find('.jsxc-probably_in, .jsxc-in').on('contextmenu',{ref:this},this.openContextMenu);
+      this.element.on('mousedown', (ev) => {
+          if (!($(ev.target).parents('.jsxc-custom-menu').length > 0)) {
+            $('.jsxc-custom-menu').hide();
           }
       });
    }
 
    private openContextMenu(event)
    {
-        // Avoid the real one
         event.preventDefault();
-        if (
-            !$(event.target).closest('div.jsxc-chatmessage').hasClass('jsxc-probably_in')&&
-            !$(event.target).closest('div.jsxc-chatmessage').hasClass('jsxc-in'))
-            return;
 
         // Show contextmenu
         let yoffset =  (event.pageY-$(event.target).closest('div.jsxc-message-area').offset().top+40);
@@ -113,7 +106,7 @@ export default class ChatWindow {
         if (!contact)
             contact = $(event.target).closest('li.jsxc-window-item').attr('data-contact-id');
 
-        $(this).closest('.jsxc-window').find('.jsxc-custom-menu').finish().toggle(100).
+        $(this).closest('.jsxc-window').find('.jsxc-custom-menu').finish().toggle().
         // In the right position (the mouse)
         css({
             top: yoffset + 'px',
@@ -466,10 +459,6 @@ export default class ChatWindow {
       }
    }
 
-   protected onInputCommand(message){
-       Log.warn('We are not in a muc, so ignore this call');
-   }
-
    private onInputKeyPress = (ev) => {
       ev.stopPropagation();
 
@@ -479,14 +468,13 @@ export default class ChatWindow {
          return;
       }
 
-      if (message!==''&&message[0]==='/')
-      {
-        this.onInputCommand(message)
-      }
-      else
-      {
-        this.sendOutgoingMessage(message);
-      }
+      this.getAccount().getCommandRepository().execute(message, this.contact).then(result => {
+         if (result === false) {
+            this.sendOutgoingMessage(message);
+         }
+      }).catch(err => {
+         this.contact.addSystemMessage(err.message || Translation.t('Command_failed'));
+      });
 
       $(ev.target).val('');
 
