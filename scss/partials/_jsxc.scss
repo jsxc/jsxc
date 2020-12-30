@@ -88,8 +88,15 @@ ul.jsxc-vcard {
     cursor: default !important;
 
     &.jsxc-separator {
+      padding-bottom: 1em;
+      border-bottom: 1px dashed var(--jsxc-color-border);
       margin-bottom: 1em;
     }
+  }
+  
+  li > strong {
+    min-width: 135px !important;
+    display: inline-block;
   }
 }
 

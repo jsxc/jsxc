@@ -11,16 +11,35 @@
 }
 
 .jsxc-vcard-result {
+  margin-bottom: 2px !important;
 
-  margin-bottom:10px !important;
-
-  li > strong {
-    min-width: 150px;
-    display: inline-block;
+  li > ul {
+    padding-left:10px !important;
   }
 
-  li:nth-child(even) {background: var(--jsxc-color-background)}
-  li:nth-child(odd) {background: var(--jsxc-color-background-darker)}
+  ul > li > ul > li {
+    display: table-row;
+  }
+
+  ul > li > ul > li > div:nth-child(1) {
+    font-weight:bold;
+    min-width: 130px;
+    display: table-cell;
+  }
+
+  ul > li > ul > li > div:nth-child(2) {
+    display: table-cell;
+  }
+
+  ul > li > div:nth-child(1) {
+    min-width: 140px;
+    font-weight:bold;
+    display: table-cell;
+  }
+
+  ul > li > div:nth-child(2) {
+    display: table-cell;
+  }
 }
 
 .jsxc-dialog {
@@ -41,10 +60,6 @@
 
   ul {
     list-style: none;
-  }
-
-  li > ul {
-    padding-left: 1em;
   }
 
   ul,

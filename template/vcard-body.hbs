@@ -1,14 +1,15 @@
+<div class="jsxc-vcard-result">
 {{#*inline "list"}}
-<ul class="jsxc-vcard-result">
+   <ul>
    {{#each properties}}
       <li>
-         <strong>{{name}}</strong> {{value}}
+         <div>{{name}}</div><div>{{value}}</div>
          {{#if properties}}
             {{> list}}
          {{/if}}
       </li>
    {{/each}}
-</ul>
+   </ul>
 {{/inline}}
-
 {{> list}}
+</div>
