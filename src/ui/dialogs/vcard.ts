@@ -106,25 +106,29 @@ function convertToTemplateData(vCardData): any[] {
 
    for (let name in vCardData) {
       let value = vCardData[name];
-      let childProperties;
+      let childProperties = [];
 
       if (typeof value === 'object' && value !== null) {
          childProperties = convertToTemplateData(value);
          value = undefined;
       }
 
+      let nameLabel: string;
+
+      if (Array.isArray(vCardData)) {
+         let firstChildProperty = childProperties.shift();
+
+         nameLabel = firstChildProperty?.name;
+      } else {
+         nameLabel = Translation.t(name);
+      }
+
       properties.push({
-         name: isNumeric(name) ? '' : Translation.t(name), //if it is a number, then we are in an Array, so dont write index!
+         name: nameLabel,
          value,
-         properties: childProperties
+         properties: childProperties.filter(property => property.value || property.properties.length > 0),
       });
    }
 
    return properties;
-}
-
-function isNumeric(str) {
-  if (typeof str !== 'string')
-     return false; // we only process strings!
-  return !isNaN(Number(str));
 }
