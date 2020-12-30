@@ -380,7 +380,15 @@
     "chatmarkers-received": "marrë",
     "chatmarkers-displayed": "shfaqur",
     "chatmarkers-acknowledged": null,
-    "There_are_new_devices": "Ka pajisje të reja"
+    "There_are_new_devices": "Ka pajisje të reja",
+    "muc_not-authorized": null,
+    "muc_forbidden": null,
+    "muc_item-not-found": null,
+    "muc_not-allowed": null,
+    "muc_not-acceptable": null,
+    "muc_registration-required": null,
+    "muc_conflict": null,
+    "muc_service-unavailable": null
   },
   "Notifications": "Njoftime"
 }

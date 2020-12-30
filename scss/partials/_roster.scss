@@ -249,7 +249,8 @@
     background-color: $roster-bg-hover;
   }
 
-  &[data-subscription="from"] {
+  &[data-subscription="from"],
+  &[data-subscription="none"] {
     .jsxc-bar__caption {
       opacity: 0.7;
     }

@@ -169,7 +169,7 @@ export default class MultiUserContact extends Contact {
    }
 
    public getSubscription(): ContactSubscription {
-      return ContactSubscription.BOTH;
+      return this.isMemberListComplete() ? ContactSubscription.BOTH : ContactSubscription.NONE;
    }
 
    public setSubject(subject: string) {

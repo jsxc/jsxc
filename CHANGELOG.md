@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## 4.2.1 (2020-12-28)
+### Fixed
+- [#962](https://github.com/jsxc/jsxc/issues/962) handle muc presence errors
+- send displayed marker only for private chats
+- [#959](https://github.com/jsxc/jsxc/issues/959) use full jid only for private chats
+- [#958](https://github.com/jsxc/jsxc/issues/958)[#961](https://github.com/jsxc/jsxc/issues/961) transparent roster menu
+
+### Misc
+- update language files
+
 ## 4.2.0 (2020-12-13)
 ### Added
 - add option to disable automatic reconnect on page load
