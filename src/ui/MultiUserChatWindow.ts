@@ -50,78 +50,7 @@ export default class MultiUserChatWindow extends ChatWindow {
          this.updatePermissionAttributes(data);
       });
 
-      this.updatePermissionAttributes(this.contact.getMember(this.contact.getNickname()));   this.element.find('div.jsxc-message-area').on('contextmenu',{ref:this},this.openMUCContextMenu);
-   }
-
-   private openMUCContextMenu(event)
-   {
-        let ref = event.data.ref;
-        ref.openContextMenu(event);
-
-        let nick = ref.getContact().data.get('nickname');
-        if (!nick)
-            nick = ref.getContact().data.get('jid').substring(ref.getContact().data.get('jid').lastIndexOf('/')+1);
-        if (!ref.getContact().getMembers().get(nick))
-            return;
-
-        let affiliation = ref.getContact().getMembers().get(nick).affiliation;
-        let role = ref.getContact().getMembers().get(nick).role;
-        let targetnick = $(event.target).closest('div.jsxc-chatmessage').attr('data-name');
-        let targetjid = ref.getContact().getMembers().get(targetnick)?ref.getContact().getMembers().get(targetnick).jid:false;
-        $(this).closest('.jsxc-window').find('.jsxc-context-menu-contact').text(targetnick);
-        if (targetjid&&role==='moderator')
-        {
-            let liKick = $('<li data-action="jsxc-context-menu-kick" data-target="'+targetnick+'">'+Translation.t('Kick')+'</li>');
-            $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append(liKick);
-
-            liKick.on('click',{'ref':ref},function(e)
-            {
-                let ref = e.data.ref;
-                $('.jsxc-custom-menu').hide(100);
-                let nick = $(this).attr('data-target');
-                ref.kickedUser=nick;
-                ref.contact.kick(ref.kickedUser);
-                setTimeout(() => ref.scrollMessageAreaToBottom(), 500);
-            });
-        }
-
-        if (targetjid&&(affiliation==='admin'||affiliation==='owner'))
-        {
-            let liBan = $('<li data-action="jsxc-context-menu-ban" data-target="'+targetjid+'">'+Translation.t('Ban')+'</li>');
-            $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append(liBan);
-
-            liBan.on('click',{'ref':ref},function(e)
-            {
-                let ref = e.data.ref;
-                $('.jsxc-custom-menu').hide(100);
-                let jid = $(this).attr('data-target');
-                ref.kickedUser=jid;
-                ref.contact.ban(new JID(ref.kickedUser));
-                setTimeout(() => ref.scrollMessageAreaToBottom(), 500);
-            });
-
-            let liOp = $('<li data-action="jsxc-context-menu-op" data-target="'+targetjid+'">'+Translation.t('Op')+'</li>');
-            $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append(liOp);
-
-            liOp.on('click',{'ref':ref},function(e)
-            {
-                let ref = e.data.ref;
-                $('.jsxc-custom-menu').hide(100);
-                ref.contact.sendChangeRole(targetnick, 'moderator');
-                setTimeout(() => ref.scrollMessageAreaToBottom(), 500);
-            });
-
-            let liDeop = $('<li data-action="jsxc-context-menu-deop" data-target="'+targetjid+'">'+Translation.t('Deop')+'</li>');
-            $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append(liDeop);
-
-            liDeop.on('click',{'ref':ref},function(e)
-            {
-                let ref = e.data.ref;
-                $('.jsxc-custom-menu').hide(100);
-                ref.contact.sendChangeRole(targetnick, 'member');
-                setTimeout(() => ref.scrollMessageAreaToBottom(), 500);
-            });
-        }
+      this.updatePermissionAttributes(this.contact.getMember(this.contact.getNickname()));
    }
 
    private updatePermissionAttributes(data: {affiliation?: AFFILIATION, role?: ROLE, jid?: JID} = {}) {

@@ -118,7 +118,6 @@ export default class ChatWindow {
    }
 
    public close() {
-      this.element.off('mousedown');
       this.element.detach();
    }
 
