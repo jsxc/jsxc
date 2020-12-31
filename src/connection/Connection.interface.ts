@@ -6,6 +6,7 @@ import PEPService from './services/PEP'
 import PubSubService from './services/PubSub'
 import 'Strophe'
 import JingleHandler from './JingleHandler';
+import { MultiUserAffiliation } from './services/MUC'
 
 export interface IConnection {
    registerHandler(handler: (stanza: string) => boolean, ns?: string, name?: string, type?: string, id?: string, from?: string);
@@ -54,9 +55,9 @@ export interface IMUCService {
 
    getRoomConfigurationForm(jid: IJID): Promise<Element>
 
-   getMemberlistMultiUserRoom(jid: IJID): Promise<Element>
+   getMemberList(jid: IJID): Promise<Element>
 
-   setMemberlistMultiUserRoom(jid: IJID, items:Element[]): Promise<Element>
+   setMemberList(jid: IJID, items: { jid: IJID, affiliation: MultiUserAffiliation }[]): Promise<Element>
 
    submitRoomConfiguration(jid: IJID, form: Form): Promise<Element>
 

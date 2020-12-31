@@ -1,96 +1,63 @@
 import Dialog from '../Dialog'
 import MultiUserContact from '../../MultiUserContact'
-import Translation from '../../util/Translation'
-
+import { REGEX } from '@src/CONST';
+import { MultiUserAffiliation } from '@connection/services/MUC';
+import { IJID } from '@src/JID.interface';
+import JID from '@src/JID';
 
 let multiUserMemberlist = require('../../../template/multiUserMemberlist.hbs');
 
-export default function(multiUserContact: MultiUserContact) {
+export default function (multiUserContact: MultiUserContact) {
    let content = multiUserMemberlist({});
 
    let dialog = new Dialog(content);
 
-   let connection = multiUserContact.getAccount().getConnection();
-   let items;
+   let service = multiUserContact.getAccount().getConnection().getMUCService();
+   let dom = dialog.open();
 
-   connection.getMUCService().getMemberlistMultiUserRoom(multiUserContact.getJid())
-      .then(function(stanza){
-
-          if ($(stanza).attr('type')==='result')
-          {
-              dialog.open();
-              initSubmit(multiUserContact, dialog,items,connection);
-              items = $(stanza).find('item');
-              let textfield = $('#jsxc-memberlist-textarea');
-              let memberJids = items.map((_, item) => $(item).attr('jid')).get();
-              textfield.val(memberJids.join('\n'));
-          }
-          else
-          {
-              alert(Translation.t('UNKNOWN_ERROR'));
-          }
-    });
-}
-
-function initSubmit(multiUserContact: MultiUserContact, dialog: Dialog, items, connection)
-{
-    dialog.getDom().find('form').on('submit', (ev) => {
+   dom.find('form').on('submit', (ev) => {
       ev.preventDefault();
-      let saveitems = $('.jsxc-memberlist-textarea').val().toString().split('\n').map(item => item.trim());
 
-      //check old items if there were deleted
-      for (let i=0;i<items.length;i++)
-      {
+      let lines = $(ev.target).find('textarea').val().toString().split('\n').map(line => line.trim());
 
-          let found=false;
-          for (let n=0;n<saveitems.length;n++)
-          {
-              if (saveitems[n].length>0&&$(items[i]).attr('jid')===saveitems[n])
-              {
-                  found=true;
-                  break;
-              }
-          }
-          if (!found)
-          {
-              $(items[i]).attr('affiliation','none');
-          }
-      }
+      let oldMemberList = $(ev.target).find('[type="hidden"]').val().toString().split('\n').filter(line => !!line);
+      let newMemberList = lines.filter((line, index, arr) => line && index === arr.indexOf(line) && REGEX.JID.test(line));
 
-      //check for new items which were added
+      let deltaList: { jid: IJID, affiliation: MultiUserAffiliation }[] = [];
 
-      for (let i=0;i<saveitems.length;i++)
-      {
-          if (saveitems[i].trim().length===0)
-              continue;
+      let removedJids: string[] = <any>$(oldMemberList).not(newMemberList as any).get();
+      let addedJids: string[] = <any>$(newMemberList).not(oldMemberList as any).get();
 
-          let found=false;
-          for (let n=0;n<items.length;n++)
-          {
-              if ($(items[n]).attr('jid')===saveitems[i].trim())
-              {
-                  found=true;
-                  break;
-              }
-          }
-          if (!found)
-          {
-              items.push($('<item affiliation="member" jid="'+saveitems[i].trim()+'" />')[0]);
-          }
-      }
-
-      connection.getMUCService().setMemberlistMultiUserRoom(multiUserContact.getJid(),items).then(function(stanza){
-
-          if ($(stanza).attr('type')==='result')
-          {
-//add some result info?
-          }
-          else
-          {
-              alert(Translation.t('UNKNOWN_ERROR'));
-          }
+      removedJids.forEach(jidString => {
+         deltaList.push({
+            jid: new JID(jidString),
+            affiliation: 'none',
+         });
       });
 
-      dialog.close();
+      addedJids.forEach(jidString => {
+         deltaList.push({
+            jid: new JID(jidString),
+            affiliation: 'member',
+         });
+      });
+
+      dom.find('button, textarea').prop('disabled', true);
+
+      if (deltaList.length === 0) {
+         dialog.close();
+         return;
+      }
+
+      service.setMemberList(multiUserContact.getJid(), deltaList).then(function () {
+         dialog.close();
+      });
    });
+
+   service.getMemberList(multiUserContact.getJid())
+      .then(function (stanza) {
+         let memberList = $(stanza).find('item').map((_, item) => $(item).attr('jid')).get();
+
+         dom.find('textarea, [type="hidden"]').val(memberList.join('\n'));
+      });
 }
