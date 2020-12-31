@@ -41,8 +41,6 @@ export default class Roster {
          Client.getNoticeManager();
       }
 
-      Roster.instance.addContactFilter();
-
       return Roster.instance;
    }
 
@@ -67,6 +65,7 @@ export default class Roster {
       ClientAvatar.get().addElement(this.element.find('.jsxc-bottom .jsxc-avatar'));
 
       this.initOptions();
+      this.initHandler();
    }
 
    public startProcessing(msg?: string) {
@@ -82,78 +81,6 @@ export default class Roster {
 
          spanElement.text(msg);
       }
-   }
-
-   private initCollapisible()
-   {
-      let collapsibleElement = $('.jsxc-collapsible');
-
-      for(let i = 0; i < collapsibleElement.length; i++)
-      {
-         $(collapsibleElement[i]).off('click').on('click', function()
-         {
-            this.classList.toggle('jsxc-active');
-            let content = $(this).next();
-            if (content.first().css('display')!=='none'){
-                content.first().css('display','none');
-                content.first().css('max-height','');
-            } else {
-                content.first().css('display','');
-                content.first().css('max-height','100%');
-            }
-         });
-
-         $(collapsibleElement[i]).next().css('flex-grow', 'unset');
-      }
-
-      if (this.contactList[0].childNodes.length>0)
-      {
-          $(this.contactList[0]).css('display','');
-          $(this.contactList[0]).css('max-height','100%');
-      }
-   }
-
-   private addContactFilter()
-   {
-      $('#jsxc-filterlist').off('keyup').on('keyup',function(e)
-      {
-         //Re init all items to visible, in case of key press is backspace...
-         $('.jsxc-contact-list > li').each(function( key, value )
-         {
-             $(this).removeClass('jsxc-roster-item-filtered');
-         });
-         $('.jsxc-group-list > li').each(function( key, value )
-         {
-             $(this).removeClass('jsxc-roster-item-filtered');
-         });
-
-         let val = null;
-
-         if ($(this).val())
-            val = $(this).val().toString();
-
-         if (val!==null&&val.trim().length>0) //minimum of one char
-         {
-            val=val.toLowerCase();
-            $('.jsxc-contact-list > li').each(function( key, value )
-            {
-               let text = $(this).children('div.jsxc-bar__caption.jsxc-grow').text().trim().toLowerCase();
-               if (text.indexOf(val)===-1&&$(this).attr('data-id').substring(0,$(this).attr('data-id').indexOf('@')).toLowerCase().indexOf(val)===-1)
-               {
-                  $(this).addClass('jsxc-roster-item-filtered');
-               }
-            });
-            $('.jsxc-group-list > li').each(function( key, value )
-            {
-               let text = $(this).children('div.jsxc-bar__caption.jsxc-grow').text().trim().toLowerCase();
-               if (text.indexOf(val)===-1&&$(this).attr('data-id').substring(0,$(this).attr('data-id').indexOf('@')).toLowerCase().indexOf(val)===-1)
-               {
-                  $(this).addClass('jsxc-roster-item-filtered');
-               }
-            });
-         }
-
-      });
    }
 
    public endProcessing() {
@@ -178,24 +105,6 @@ export default class Roster {
       if (this.element.find('.jsxc-roster-item[data-id="' + contact.getId() + '"]').length > 0) {
          return;
       }
-
-      let contactType = contact.getType();
-      let list = (contactType==='chat'?this.contactList:this.groupList);
-
-      let parentElement = $(list).parent();
-      let previousParent = $(parentElement).prev();
-
-      if (!previousParent.hasClass('jsxc-active'))
-      {
-         parentElement.css('max-height','');
-         parentElement.addClass('jsxc-roster-item-filtered');
-      }
-      else
-          if ($($(list).parent()[0]).prev().hasClass('jsxc-active'))
-          {
-              parentElement.removeClass('jsxc-roster-item-filtered');
-              parentElement.css('max-height','100%');
-          }
 
       let rosterItem = new RosterItem(contact);
       this.insert(rosterItem);
@@ -222,24 +131,6 @@ export default class Roster {
       }
 
       rosterItemElement.remove();
-
-      let contactType = contact.getType();
-      let list = (contactType==='chat'?this.contactList:this.groupList);
-
-      let parentElement = $(list).parent();
-      let previousParent = $(parentElement).prev();
-
-      if (!previousParent.hasClass('jsxc-active'))
-      {
-         parentElement.css('max-height','');
-         parentElement.addClass('jsxc-roster-item-filtered');
-      }
-      else
-          if ($($(list).parent()[0]).prev().hasClass('jsxc-active'))
-          {
-              parentElement.removeClass('jsxc-roster-item-filtered');
-              parentElement.css('max-height','100%');
-          }
    }
 
    public clearStatus() {
@@ -257,7 +148,7 @@ export default class Roster {
    public setEmptyContactList() {
       let statusElement = $('<p>');
       statusElement.text(Translation.t('Your_roster_is_empty_add_'));
-      statusElement.find('a').click(<any> showContactDialog);
+      statusElement.find('a').click(<any>showContactDialog);
       statusElement.append('.');
 
       this.setStatus(statusElement);
@@ -289,7 +180,7 @@ export default class Roster {
       let noticeListElement = $('.jsxc-js-notice-menu ul');
       let noticeElement = $('<li/>');
 
-      noticeElement.click(function(ev) {
+      noticeElement.click(function (ev) {
          ev.stopPropagation();
          ev.preventDefault();
 
@@ -322,14 +213,14 @@ export default class Roster {
             let dialog = confirmDialog(Translation.t('Do_you_really_want_to_dismiss_all_notices'));
             dialog.getPromise().then(() => {
                NoticeManager.removeAll();
-            }).catch(() => {});
+            }).catch(() => { });
          });
       }
    }
 
    public removeNotice(manager: NoticeManager, noticeId: string) {
       let managerId = manager.getId() || '';
-      let noticeElement = $('.jsxc-js-notice-menu li').filter(function() {
+      let noticeElement = $('.jsxc-js-notice-menu li').filter(function () {
          return $(this).attr('data-notice-id') === noticeId &&
             ($(this).attr('data-manager-id') || '') === managerId;
       });
@@ -384,24 +275,8 @@ export default class Roster {
 
    private insert(rosterItem: RosterItem) {
       let contact = rosterItem.getContact();
-      let contactType = contact.getType();
-      let list = (contactType==='chat'?this.contactList:this.groupList);
+      let list = contact.isChat() ? this.contactList : this.groupList;
       let contactName = contact.getName();
-
-      let parentElement = $(list).parent();
-      let previousParent = $(parentElement).prev();
-
-      if (!previousParent.hasClass('jsxc-active'))
-      {
-         parentElement.css('max-height','');
-         parentElement.addClass('jsxc-roster-item-filtered');
-      }
-      else
-          if ($($(list).parent()[0]).prev().hasClass('jsxc-active'))
-          {
-              parentElement.removeClass('jsxc-roster-item-filtered');
-              parentElement.css('max-height','100%');
-          }
 
       let lastMessageDate = contact.getLastMessageDate();
       let pointer = lastMessageDate ? list.find('[data-date]') : list.children().first();
@@ -485,8 +360,8 @@ export default class Roster {
    }
 
    private registerPresenceHandler() {
-      this.element.find('.jsxc-js-presence-menu li').click(function() {
-         let presenceString = <string> $(this).data('presence');
+      this.element.find('.jsxc-js-presence-menu li').click(function () {
+         let presenceString = <string>$(this).data('presence');
          let oldPresence = Client.getPresenceController().getTargetPresence();
          let requestedPresence = Presence[presenceString];
 
@@ -589,7 +464,32 @@ export default class Roster {
       Client.getPresenceController().registerCurrentPresenceHook(() => {
          this.refreshOwnPresenceIndicator();
       });
+   }
 
-     this.initCollapisible();
+   private initHandler() {
+      this.element.find('.jsxc-filter-input').on('keyup', (ev) => {
+         let filterValue = $(ev.target).val().toString().trim().toLowerCase();
+         let listElements = this.element.find('.jsxc-contact-list-wrapper .jsxc-roster-item');
+
+         if (!filterValue) {
+            listElements.removeClass('jsxc-roster-item--filtered');
+
+            return;
+         }
+
+         listElements.not(`[data-jid*="${filterValue}"]`).not(`[data-name*="${filterValue}"]`).addClass('jsxc-roster-item--filtered');
+         listElements.filter(`[data-jid*="${filterValue}"]`).removeClass('jsxc-roster-item--filtered');
+         listElements.filter(`[data-name*="${filterValue}"]`).removeClass('jsxc-roster-item--filtered');
+      });
+
+      this.element.find('.jsxc-filter-wrapper .jsxc-clear').on('mousedown', (ev) => {
+         ev.preventDefault();
+
+         this.element.find('.jsxc-filter-input').val('').trigger('keyup');
+      });
+
+      this.element.find('.jsxc-collapsible').on('click', function () {
+         $(this).toggleClass('jsxc-active');
+      });
    }
 }
