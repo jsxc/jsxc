@@ -11,6 +11,8 @@ const NS_OWNER = NS_BASE + '#owner';
 const NS_USER = NS_BASE + '#user';
 const NS_ADMIN = NS_BASE + '#admin';
 
+export type MultiUserAffiliation = 'admin' | 'member' | 'none' | 'outcast' | 'owner';
+
 export default class MUC extends AbstractService implements IMUCService {
    public joinMultiUserRoom(jid: IJID, password?: string) {
       if (jid.isBare()) {
@@ -136,6 +138,36 @@ export default class MUC extends AbstractService implements IMUCService {
       }).c('query', {
          xmlns: NS_OWNER
       }).c('destroy');
+
+      return this.sendIQ(iq);
+   }
+
+   public getMemberList(jid: IJID): Promise<Element> {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'get'
+      }).c('query', {
+         xmlns: NS_ADMIN
+      }).c('item', { 'affiliation': 'member' });
+
+      return this.sendIQ(iq);
+   }
+
+   public setMemberList(jid: IJID, items: { jid: IJID, affiliation: MultiUserAffiliation }[]): Promise<Element> {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'set'
+      });
+      let query = iq.c('query', {
+         xmlns: NS_ADMIN
+      });
+
+      items.forEach(item => {
+         query.c('item', {
+            affiliation: item.affiliation,
+            jid: item.jid.bare,
+         }).up();
+      })
 
       return this.sendIQ(iq);
    }

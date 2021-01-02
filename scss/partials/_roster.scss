@@ -1,3 +1,96 @@
+button.jsxc-collapsible {
+  background-color: var(--jsxc-color-background-darker);
+  border: 0;
+  color: var(--jsxc-color-main-text);
+  cursor: pointer;
+  font-size: 12px;
+  outline: none;
+  padding: 5px;
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    background-color: var(--jsxc-color-background-hover);
+  }
+
+  &::after {
+    color: var(--jsxc-color-main-text);
+    content: "\002B";
+    float: right;
+    font-weight: bold;
+    margin-left: 5px;
+  }
+
+  + ul {
+    max-height: 0;
+  }
+
+  &.jsxc-active {
+    &::after {
+      content: "\2212";
+    }
+
+    + ul {
+      max-height: none;
+    }
+  }
+}
+
+.jsxc-filter-wrapper {
+  position: relative;
+
+  .jsxc-clear {
+    background-color: $roster-input-bg;
+    border: 0;
+    bottom: 0;
+    display: none;
+    opacity: 0.4;
+    outline: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+
+  >i {
+    bottom: 0;
+    left: 0;
+    opacity: 0.4;
+    position: absolute;
+    top: 0;
+    width: 28px;
+  }
+}
+
+.jsxc-filter-input {
+  background-color: $roster-input-bg;
+  background-image: none;
+  border: 0;
+  height: 30px;
+  outline: none;
+  padding: 7px 28px 5px;
+  transition: height 0.5s;
+  width: 100%;
+
+  &:focus {
+    height: 42px;
+
+    + .jsxc-clear {
+      display: block;
+    }
+  }
+}
+
+.jsxc-collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  padding-bottom: 15px;
+  transition: max-height 0.2s ease-out;
+}
+
 #jsxc-roster {
   background-color: $roster-bg;
   border-left: 1px solid $roster-border-left;
@@ -52,7 +145,7 @@
     }
   }
 
-  input {
+  .jsxc-roster-item input {
     background-color: $roster-input-bg;
     background-image: none;
     border: 1px solid #ddd;
@@ -166,18 +259,26 @@
       }
     }
 
-    .jsxc-contact-list::after {
+    .jsxc-contact-list::after,
+    .jsxc-group-list::after {
       content: attr(data-offline-hidden-label);
     }
   }
 
   &[data-presence="offline"] {
-    .jsxc-contact-list::after {
+    .jsxc-contact-list::after,
+    .jsxc-group-list::after {
       content: attr(data-presence-offline-label);
     }
 
     .jsxc-bottom .jsxc-avatar {
       background-image: url("../images/icons/placeholder.svg");
+    }
+
+    .jsxc-filter-wrapper,
+    .jsxc-collapsible,
+    .jsxc-group-list {
+      display: none;
     }
   }
 
@@ -259,6 +360,10 @@
       filter: grayscale(100%);
     }
   }
+
+  &--filtered {
+    display: none;
+  }
 }
 
 #jsxc-roster[data-presence="offline"] li:not(.jsxc-offline-available) {
@@ -302,14 +407,14 @@ li.jsxc-hide-offline {
   }
 }
 
-.jsxc-contact-list {
+.jsxc-contact-list,
+.jsxc-group-list {
   @include presence-indicator(" .jsxc-avatar");
-
   list-style: none;
   margin: 0;
+  margin-bottom: 1em;
   overflow: hidden;
   padding: 0;
-  padding-bottom: 15px;
   width: 100%;
   z-index: 85;
 

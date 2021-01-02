@@ -10,6 +10,14 @@
   z-index: 999;
 }
 
+.jsxc-memberlist-textarea {
+  margin-left: 15px;
+  min-height: 300px !important;
+  min-width: 500px !important;
+  padding: 5px !important;
+  width: 100% !important;
+}
+
 .jsxc-dialog {
   background: $main-bg;
   border: 1px solid $bg-darker;
