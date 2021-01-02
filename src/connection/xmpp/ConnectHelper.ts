@@ -1,4 +1,4 @@
-import { Strophe } from 'strophe.js'
+import { Strophe } from '../../vendor/Strophe'
 import Log from '../../util/Log'
 import SM from '../../StateMachine'
 import Client from '../../Client'
@@ -19,16 +19,53 @@ export function login() {
    }
 }
 
-export function websocket(connection: Strophe.Connection,url:string) {
-    setTimeout(function(){
-        connection.flush();
-        SM.changeState(SM.STATE.READY);
-        connection.flush();
-    },1000);
-    return loginWithPassword(url,connection.jid,connection.pass,connection);
+export function websocket(connection,url:string) {
+
+    connection.resume();
+    connection.flush();
+    SM.changeState(SM.STATE.READY);
+    connection.resume();
+    connection.flush();
+
+    if (connection.connected!==false)
+    {
+
+        try
+        {
+            if (connection.streamManagement.isSupported())
+            {
+                connection.streamManagement.enable(true);
+            }
+            else
+            {
+                connection.streamManagement.enable(false);
+            }
+            connection.streamManagement.autoSendCountOnEveryIncomingStanza = true;
+            connection.streamManagement.returnWholeStanza = true;
+            //TODO:
+            //connection.streamManagement.addAcknowledgedStanzaListener(acknowledgedStanzaListener);
+            connection.streamManagement.logging = true;
+        }
+        catch(msg)
+        {
+            console.error(msg);
+        }
+    }
+
+    if (connection.connected===false||connection.authenticated===false)
+    {
+        return loginWithPassword(url,connection.jid,connection.pass,connection);
+    }
+    else
+    {
+        return Promise.resolve({'connection': connection,
+                status:Strophe.Status.ATTACHED,
+                conditition:null,
+                wss:true});
+    }
 }
 
-function loginWithPassword(url: string, jid: string, password: string,oldconnection?: Strophe.Connection): Promise<{}> {
+export function loginWithPassword(url: string, jid: string, password: string,oldconnection?: Strophe.Connection): Promise<{}> {
    testBasicConnectionParameters(url, jid);
    let connection = oldconnection?oldconnection:prepareConnection(url);
 

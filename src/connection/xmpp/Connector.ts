@@ -10,12 +10,12 @@ import BaseError from '../../errors/BaseError'
 
 export enum TYPE { BOSH, WEBSOCKET };
 
-let websocketStropheConnection: Strophe.Connection;
-
 export default class Connector {
    private connectionParameters;
 
    private connectionArgs: string[];
+
+   public static websocketStropheConnection;
 
    constructor(account: Account, url: string, jid: string, sid: string, rid: string);
    constructor(account: Account, url: string, jid: string, password: string);
@@ -89,9 +89,9 @@ export default class Connector {
 
          throw new BaseError('Credentials expired');
       }
-      if (websocketStropheConnection)
+      if (Connector.websocketStropheConnection)
       {
-         return ConnectHelper.websocket(websocketStropheConnection,this.getUrl())
+         return ConnectHelper.websocket(Connector.websocketStropheConnection,this.getUrl())
          .then(this.successfulConnectedWebsocket);
       }
       else
@@ -102,7 +102,13 @@ export default class Connector {
 
                  if (/^ws?:/.test(url)||/^wss?:/.test(url))
                  {
-                    websocketStropheConnection = data.connection;
+                    Connector.websocketStropheConnection = data.connection;
+                    data.wss=true;
+                 }
+                 else
+                 {
+                    Connector.websocketStropheConnection = null;
+                    data.wss=false;
                  }
                  return this.successfulConnected(data);
              });
@@ -136,10 +142,10 @@ export default class Connector {
       let accountConnection = null;
       if (data.wss)
       {
-          stropheConnection.flush();
-          stropheConnection.pause();
-          stropheConnection.resume();
-          stropheConnection.flush();
+          Connector.websocketStropheConnection.flush();
+          Connector.websocketStropheConnection.pause();
+          Connector.websocketStropheConnection.resume();
+          Connector.websocketStropheConnection.flush();
       }
 
       this.storeConnectionParameters(stropheConnection);
@@ -160,7 +166,6 @@ export default class Connector {
    }
 
    private successfulConnectedWebsocket = (data) => {
-      websocketStropheConnection = null;
       this.account.triggerConnectionHook(5, null);
       return this.successfulConnected(data);
    }
@@ -183,6 +188,15 @@ export default class Connector {
 
    private replaceConnectionHandler(connection) {
       connection.connect_callback = (status, condition) => {
+
+         if (status === Strophe.Status.DISCONNECTING)
+         {
+             if (condition==='forced'&&status ===Strophe.Status.DISCONNECTING)
+             {
+                 Connector.websocketStropheConnection=null;
+             }
+         }
+
          this.account.triggerConnectionHook(status, condition);
 
          if (status === Strophe.Status.DISCONNECTED) {

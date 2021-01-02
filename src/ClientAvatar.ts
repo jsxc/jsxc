@@ -44,7 +44,7 @@ export default class ClientAvatar {
          if (sourceAccountUid) {
             let account = Client.getAccountManager().getAccount(sourceAccountUid);
 
-            if (account&&account.getSessionStorage().getItem(KEY_SESSION_FLAG)) {
+            if (account.getSessionStorage().getItem(KEY_SESSION_FLAG)) {
                this.setSourceContact(account.getContact());
             } else {
                this.reset();
