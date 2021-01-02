@@ -327,6 +327,8 @@
 	"groups": "Gruppen",
 	"contacts": "Kontakte",
     "Configure": "Konfigurieren",
+    "Memberlist": "Mitglieder verwalten",
+    "muc_one_jid_per_line": "Eine JID pro Zeile angeben.",
     "Invite": "Einladen",
     "User_information": "Benutzerinformation",
     "Log": "Protokoll",
