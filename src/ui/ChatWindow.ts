@@ -19,6 +19,7 @@ import { IJID } from '@src/JID.interface';
 import { JINGLE_FEATURES } from '@src/JingleAbstractSession';
 import Location from '@util/Location';
 import interact from 'interactjs';
+import Translation from '../util/Translation'
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -414,7 +415,13 @@ export default class ChatWindow {
          return;
       }
 
-      this.sendOutgoingMessage(message);
+      this.getAccount().getCommandRepository().execute(message, this.contact).then(result => {
+         if (result === false) {
+            this.sendOutgoingMessage(message);
+         }
+      }).catch(err => {
+         this.contact.addSystemMessage(err.message || Translation.t('Command_failed'));
+      });
 
       $(ev.target).val('');
 

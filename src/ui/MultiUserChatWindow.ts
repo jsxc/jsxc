@@ -50,6 +50,7 @@ export default class MultiUserChatWindow extends ChatWindow {
       this.contact.registerMemberHook(this.contact.getNickname(), (data) => {
          this.updatePermissionAttributes(data);
       });
+
       this.updatePermissionAttributes(this.contact.getMember(this.contact.getNickname()));
    }
 

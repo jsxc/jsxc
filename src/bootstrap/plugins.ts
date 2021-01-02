@@ -12,6 +12,7 @@ import OMEMOPlugin from '../plugins/omemo/Plugin'
 import BookmarksPlugin from '@src/plugins/bookmarks/BookmarksPlugin';
 import ChatMarkersPlugin from '@src/plugins/chatMarkers/ChatMarkersPlugin'
 import PingPlugin from '@src/plugins/PingPlugin'
+import CommandPlugin from '@src/plugins/CommandPlugin'
 
 Client.addPlugin(OTRPlugin);
 Client.addPlugin(OMEMOPlugin);
@@ -26,3 +27,4 @@ Client.addPlugin(CarbonsPlugin);
 Client.addPlugin(BookmarksPlugin);
 Client.addPlugin(ChatMarkersPlugin);
 Client.addPlugin(PingPlugin);
+Client.addPlugin(CommandPlugin);

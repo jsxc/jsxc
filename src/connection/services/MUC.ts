@@ -2,6 +2,7 @@ import AbstractService from './AbstractService'
 import { IJID } from '../../JID.interface'
 import Form from '../Form'
 import { $pres, $iq, $msg, Strophe } from '../../vendor/Strophe'
+import { IMUCService } from '@connection/Connection.interface';
 
 //@REVIEW this will not be reflected in caps and disco
 const NS_CONFERENCE = 'jabber:x:conference';
@@ -12,7 +13,7 @@ const NS_ADMIN = NS_BASE + '#admin';
 
 export type MultiUserAffiliation = 'admin' | 'member' | 'none' | 'outcast' | 'owner';
 
-export default class MUC extends AbstractService {
+export default class MUC extends AbstractService implements IMUCService {
    public joinMultiUserRoom(jid: IJID, password?: string) {
       if (jid.isBare()) {
          return Promise.reject('We need a full jid to join a room');
@@ -29,6 +30,91 @@ export default class MUC extends AbstractService {
       }
 
       return this.send(pres);
+   }
+
+   public changeNickname(jid: IJID, nickname: string) {
+      let newjid=jid.bare+'/'+nickname;
+
+      let pres = $pres({
+         to: newjid
+      }).c('x', {
+         xmlns: Strophe.NS.MUC
+      });
+
+      return this.send(pres);
+   }
+
+   public kickUser(jid: IJID, nickname: string,reason?:string)
+   {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'set'
+      }).c('query', {
+         xmlns: NS_ADMIN
+      }).c('item',{nick:nickname, role:'none'});
+
+      if (reason&&reason.trim().length>0)
+      {
+          iq.c('reason').t(reason);
+      }
+
+      return this.sendIQ(iq);
+   }
+
+   public changeTopic(roomJid: IJID, topic?: string) {
+
+      let msg = $msg({
+         to: roomJid.bare,
+         type:'groupchat'
+      }).c('subject').t(topic);
+
+      this.send(msg);
+   }
+
+   public changeRole(jid: IJID, nickname: string, rolestr: string, reason?:string)
+   {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'set'
+      }).c('query', {
+         xmlns: NS_ADMIN
+      }).c('item',{role:rolestr, nick:nickname});
+
+      if (reason&&reason.trim().length>0)
+      {
+          iq.c('reason').t(reason);
+      }
+
+      return this.sendIQ(iq);
+   }
+
+   public changeAffiliation(jid: IJID, targetjid: IJID, affiliationstr: string)
+   {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'set'
+      }).c('query', {
+         xmlns: NS_ADMIN
+      }).c('item',{affiliation:affiliationstr, jid:targetjid.bare});
+
+      return this.sendIQ(iq);
+   }
+
+   public banUser(jid: IJID, targetjid: IJID,reason?:string)
+   {
+      let iq = $iq({
+         to: jid.bare,
+         type: 'set'
+      }).c('query', {
+         xmlns: NS_ADMIN
+      }).c('item',{affiliation:'outcast', jid:targetjid.bare});
+
+      if (reason&&reason.trim().length>0)
+      {
+          iq.c('reason').t(reason);
+      }
+
+      return this.sendIQ(iq);
    }
 
    public leaveMultiUserRoom(jid: IJID, exitMessage?: string) {

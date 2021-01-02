@@ -1,0 +1,11 @@
+<h3>{{t "cmd_title"}}</h3>
+<p>{{t "cmd_description"}}</p>
+
+{{#each categories}}
+   <h4>{{t label}}</h4>
+   {{#each commands}}
+      <p><strong>{{command}}</strong> {{t description}}</p>
+   {{/each}}
+{{/each}}
+
+<button class="jsxc-button jsxc-button--default pull-right jsxc-js-close">{{t "Close"}}</button>
