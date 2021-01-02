@@ -42,7 +42,7 @@ export default class Connector {
       } else if (connectionArgs.length === 3 || connectionArgs.length === 4) {
          this.connectionArgs = connectionArgs;
 
-         let type = this.checkForWebsocketUrl(connectionArgs) ? TYPE.WEBSOCKET : TYPE.BOSH;
+         let type = this.isWebsocketUrl(connectionArgs[0]) ? TYPE.WEBSOCKET : TYPE.BOSH;
 
          this.connectionParameters.set('type', type);
          this.connectionParameters.remove('inactivity');
@@ -54,25 +54,12 @@ export default class Connector {
 
    public isWebsocketUrl(url?: string)
    {
-        if (/^ws?:/.test(url?url:this.connectionParameters.get('url'))||/^wss?:/.test(url?url:this.connectionParameters.get('url')))
+        if (/^ws?:/.test(url)||/^wss?:/.test(url))
         {
             return true;
         }
         else
             return false;
-   }
-
-   public checkForWebsocketUrl(connectionArgs : string[])
-   {
-        for (let i in connectionArgs)
-        {
-            if (this.isWebsocketUrl(connectionArgs[i]))
-            {
-                return true;
-                break;
-            }
-        }
-        return false;
    }
 
    public connect() {
@@ -91,7 +78,7 @@ export default class Connector {
       }
       if (Connector.websocketStropheConnection)
       {
-         return ConnectHelper.websocket(Connector.websocketStropheConnection,this.getUrl())
+         return ConnectHelper.websocketConnectionInitHelper(Connector.websocketStropheConnection,this.getUrl())
          .then(this.successfulConnectedWebsocket);
       }
       else
@@ -100,7 +87,7 @@ export default class Connector {
              .then((data) =>{
                  let url = data.connection.service;
 
-                 if (/^ws?:/.test(url)||/^wss?:/.test(url))
+                 if (this.isWebsocketUrl(url))
                  {
                     Connector.websocketStropheConnection = data.connection;
                     data.wss=true;

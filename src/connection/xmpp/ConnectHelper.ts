@@ -19,7 +19,7 @@ export function login() {
    }
 }
 
-export function websocket(connection,url:string) {
+export function websocketConnectionInitHelper(connection,url:string) {
 
     connection.resume();
     connection.flush();
