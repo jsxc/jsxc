@@ -2,9 +2,9 @@ $jsxc-icons-font: "jsxc-icons";
 
 @font-face {
     font-family: $jsxc-icons-font;
-    src: url("../fonts/jsxc-icons.eot?11fcc5d1c26f53c70feb78f3d4d961ab#iefix") format("embedded-opentype"),
-url("../fonts/jsxc-icons.woff2?11fcc5d1c26f53c70feb78f3d4d961ab") format("woff2"),
-url("../fonts/jsxc-icons.woff?11fcc5d1c26f53c70feb78f3d4d961ab") format("woff");
+    src: url("../fonts/jsxc-icons.eot?35faf2bd298bc9584ee660e778a87e18#iefix") format("embedded-opentype"),
+url("../fonts/jsxc-icons.woff2?35faf2bd298bc9584ee660e778a87e18") format("woff2"),
+url("../fonts/jsxc-icons.woff?35faf2bd298bc9584ee660e778a87e18") format("woff");
 }
 
 [class^="jsxc-icon-"]:before, [class*=" jsxc-icon-"]:before {
@@ -55,8 +55,9 @@ $jsxc-icons-map: (
     "pick-up": "\f122",
     "placeholder": "\f123",
     "resize": "\f124",
-    "smiley": "\f125",
-    "speech-balloon": "\f126",
+    "search": "\f125",
+    "smiley": "\f126",
+    "speech-balloon": "\f127",
 );
 
 .jsxc-icon-attachment:before {
@@ -166,6 +167,9 @@ $jsxc-icons-map: (
 }
 .jsxc-icon-resize:before {
     content: map-get($jsxc-icons-map, "resize");
+}
+.jsxc-icon-search:before {
+    content: map-get($jsxc-icons-map, "search");
 }
 .jsxc-icon-smiley:before {
     content: map-get($jsxc-icons-map, "smiley");

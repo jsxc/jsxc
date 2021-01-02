@@ -26,6 +26,7 @@ export default class Roster {
 
    private element: JQuery;
    private contactList: JQuery;
+   private groupList: JQuery;
 
    private static instance: Roster;
 
@@ -53,6 +54,7 @@ export default class Roster {
       $('.jsxc-js-notice-menu .jsxc-menu__button').text('');
 
       this.contactList = this.element.find('.jsxc-contact-list');
+      this.groupList = this.element.find('.jsxc-group-list');
 
       this.addMainMenuEntries();
       this.registerPresenceHandler();
@@ -63,6 +65,7 @@ export default class Roster {
       ClientAvatar.get().addElement(this.element.find('.jsxc-bottom .jsxc-avatar'));
 
       this.initOptions();
+      this.initHandler();
    }
 
    public startProcessing(msg?: string) {
@@ -117,6 +120,7 @@ export default class Roster {
 
          this.insert(rosterItem);
       });
+
    }
 
    public remove(contact: IContact) {
@@ -144,7 +148,7 @@ export default class Roster {
    public setEmptyContactList() {
       let statusElement = $('<p>');
       statusElement.text(Translation.t('Your_roster_is_empty_add_'));
-      statusElement.find('a').click(<any> showContactDialog);
+      statusElement.find('a').click(<any>showContactDialog);
       statusElement.append('.');
 
       this.setStatus(statusElement);
@@ -176,7 +180,7 @@ export default class Roster {
       let noticeListElement = $('.jsxc-js-notice-menu ul');
       let noticeElement = $('<li/>');
 
-      noticeElement.click(function(ev) {
+      noticeElement.click(function (ev) {
          ev.stopPropagation();
          ev.preventDefault();
 
@@ -209,14 +213,14 @@ export default class Roster {
             let dialog = confirmDialog(Translation.t('Do_you_really_want_to_dismiss_all_notices'));
             dialog.getPromise().then(() => {
                NoticeManager.removeAll();
-            }).catch(() => {});
+            }).catch(() => { });
          });
       }
    }
 
    public removeNotice(manager: NoticeManager, noticeId: string) {
       let managerId = manager.getId() || '';
-      let noticeElement = $('.jsxc-js-notice-menu li').filter(function() {
+      let noticeElement = $('.jsxc-js-notice-menu li').filter(function () {
          return $(this).attr('data-notice-id') === noticeId &&
             ($(this).attr('data-manager-id') || '') === managerId;
       });
@@ -270,14 +274,13 @@ export default class Roster {
    }
 
    private insert(rosterItem: RosterItem) {
-      let contactList = this.contactList;
       let contact = rosterItem.getContact();
+      let list = contact.isChat() ? this.contactList : this.groupList;
       let contactName = contact.getName();
 
       let lastMessageDate = contact.getLastMessageDate();
-
-      let pointer = lastMessageDate ? contactList.find('[data-date]') : contactList.children().first();
-      pointer = pointer.length > 0 ? pointer.first() : contactList.children().first();
+      let pointer = lastMessageDate ? list.find('[data-date]') : list.children().first();
+      pointer = pointer.length > 0 ? pointer.first() : list.children().first();
 
       while (pointer.length > 0) {
          let pointerDate = pointer.data('date') ? new Date(pointer.data('date')) : undefined;
@@ -295,7 +298,7 @@ export default class Roster {
          pointer = pointer.next();
       }
 
-      rosterItem.getDom().appendTo(contactList);
+      rosterItem.getDom().appendTo(list);
    }
 
    private addMainMenuEntries() {
@@ -357,8 +360,8 @@ export default class Roster {
    }
 
    private registerPresenceHandler() {
-      this.element.find('.jsxc-js-presence-menu li').click(function() {
-         let presenceString = <string> $(this).data('presence');
+      this.element.find('.jsxc-js-presence-menu li').click(function () {
+         let presenceString = <string>$(this).data('presence');
          let oldPresence = Client.getPresenceController().getTargetPresence();
          let requestedPresence = Presence[presenceString];
 
@@ -460,6 +463,33 @@ export default class Roster {
       });
       Client.getPresenceController().registerCurrentPresenceHook(() => {
          this.refreshOwnPresenceIndicator();
+      });
+   }
+
+   private initHandler() {
+      this.element.find('.jsxc-filter-input').on('keyup', (ev) => {
+         let filterValue = $(ev.target).val().toString().trim().toLowerCase();
+         let listElements = this.element.find('.jsxc-contact-list-wrapper .jsxc-roster-item');
+
+         if (!filterValue) {
+            listElements.removeClass('jsxc-roster-item--filtered');
+
+            return;
+         }
+
+         listElements.not(`[data-jid*="${filterValue}"]`).not(`[data-name*="${filterValue}"]`).addClass('jsxc-roster-item--filtered');
+         listElements.filter(`[data-jid*="${filterValue}"]`).removeClass('jsxc-roster-item--filtered');
+         listElements.filter(`[data-name*="${filterValue}"]`).removeClass('jsxc-roster-item--filtered');
+      });
+
+      this.element.find('.jsxc-filter-wrapper .jsxc-clear').on('mousedown', (ev) => {
+         ev.preventDefault();
+
+         this.element.find('.jsxc-filter-input').val('').trigger('keyup');
+      });
+
+      this.element.find('.jsxc-collapsible').on('click', function () {
+         $(this).toggleClass('jsxc-active');
       });
    }
 }

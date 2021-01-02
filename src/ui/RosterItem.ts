@@ -24,6 +24,8 @@ export default class RosterItem {
 
       this.element = $(template);
       this.element.attr('data-id', this.contact.getId());
+      this.element.attr('data-jid', this.contact.getJid().bare);
+      this.element.attr('data-name', this.contact.getName().toLowerCase());
       this.element.attr('data-type', this.contact.getType());
       this.element.attr('data-presence', Presence[this.contact.getPresence()]);
       this.element.attr('data-subscription', this.contact.getSubscription());
@@ -85,6 +87,8 @@ export default class RosterItem {
       avatar.addElement(this.element.find('.jsxc-avatar'));
 
       this.contact.registerHook('name', (newName) => {
+         this.element.attr('data-name', newName.toLowerCase());
+
          this.element.find('.jsxc-bar__caption__primary').text(newName);
       });
 
