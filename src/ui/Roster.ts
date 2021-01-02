@@ -235,7 +235,7 @@ export default class Roster {
       }
    }
 
-   public addMenuEntry(options: { id: string, handler: (ev) => void, label: string | JQuery<HTMLElement>, icon?: string, offlineAvailable?: boolean }) {
+   public addMenuEntry(options: { id: string, handler: (ev: JQuery.ClickEvent<HTMLElement>) => void, label: string | JQuery<HTMLElement>, icon?: string, offlineAvailable?: boolean }) {
       const { id, handler, label, icon, offlineAvailable } = options;
       let li = $('<li>');
 
@@ -315,9 +315,13 @@ export default class Roster {
          this.addMenuEntry({
             id: 'online-help',
             handler(ev) {
-               window.location = onlineHelpUrl;
+               ev.stopPropagation();
+
+               if (ev.currentTarget === ev.target) {
+                  $(ev.target).find('a').get(0).click();
+               }
             },
-            label: $(`<a href="${onlineHelpUrl}">${Translation.t('Online_help')}</a>`),
+            label: $(`<a href="${onlineHelpUrl}" target="_blank" rel="noopener noreferrer">${Translation.t('Online_help')}</a>`),
             offlineAvailable: true,
             icon: 'help',
          });
@@ -325,7 +329,7 @@ export default class Roster {
 
       this.addMenuEntry({
          id: 'add-contact',
-         handler: showContactDialog,
+         handler: () => showContactDialog(),
          label: Translation.t('Add_buddy'),
          icon: 'contact'
       });
@@ -345,7 +349,7 @@ export default class Roster {
 
       this.addMenuEntry({
          id: 'join-muc',
-         handler: showMultiUserJoinDialog,
+         handler: () => showMultiUserJoinDialog(),
          label: Translation.t('Join_chat'),
          icon: 'groupcontact'
       });
