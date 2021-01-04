@@ -67,6 +67,12 @@ class MultiUserJoinDialog {
       this.getMultiUserServices().then((services: JID[]) => {
          this.serverInputElement.val(services[0].full);
          this.serverInputElement.trigger('change');
+
+         $('#jsxc-serverlist select').empty();
+
+         services.forEach(service => {
+            $('#jsxc-serverlist select').append($('<option>').text(service.domain));
+         })
       });
    }
 
@@ -138,7 +144,23 @@ class MultiUserJoinDialog {
          });
 
          return Promise.all(promises).then((results) => {
-            return results.filter(jid => typeof jid !== 'undefined');
+            return results
+               .filter(jid => typeof jid !== 'undefined')
+               .sort(function compare(a, b) {
+                  if (!a.domain || !b.domain) {
+                     return 0;
+                  }
+
+                  if (a.domain.startsWith('conference') && !b.domain.startsWith('conference')) {
+                     return -1;
+                  }
+
+                  if (!a.domain.startsWith('conference') && b.domain.startsWith('conference')) {
+                     return +1;
+                  }
+
+                  return a.domain.localeCompare(b.domain);
+               });
          });
       })
    }
@@ -224,7 +246,7 @@ class MultiUserJoinDialog {
 
    private testInputValues(): Promise<JID | void> {
       let room = <string> this.roomInputElement.val();
-      let server = this.serverInputElement.val();
+      let server = this.serverInputElement.val()?this.serverInputElement.val():this.serverInputElement.attr('placeholder');
 
       if (!room || !room.match(/^[^"&\'\/:<>@\s]+$/i)) {
          this.roomInputElement.addClass('jsxc-invalid').keyup(function() {
