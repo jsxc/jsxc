@@ -389,7 +389,6 @@
     "muc_registration-required": "You are not allowed to join this room, because you are not on the member list.",
     "muc_conflict": "Your nickname was already taken.",
     "muc_service-unavailable": "You are not able to join, because the maximum number of users has been reached.",
-    "broadcast" : "Broadcast",
     "Open_window": "Open window",
     "Do_you_really_want_to_dismiss_all_notices": "Do you really want to dismiss all notices?"
   },

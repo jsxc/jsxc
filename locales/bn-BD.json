@@ -389,8 +389,8 @@
     "muc_registration-required": null,
     "muc_conflict": null,
     "muc_service-unavailable": null,
-    "broadcast":null,
-    "Open_window": null
+    "Open_window": null,
+    "Do_you_really_want_to_dismiss_all_notices": null
   },
   "Notifications": null
 }
