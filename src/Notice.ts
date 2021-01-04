@@ -4,6 +4,7 @@ import ContactDialog from './ui/dialogs/contact'
 import MultiUserInvitationDialog from './ui/dialogs/multiUserInvitation'
 import NotificationDialog from './ui/dialogs/notification'
 import UnknownSenderDialog from './ui/dialogs/unknownSender'
+import BroadcastDialog from './ui/dialogs/broadcastDialog'
 import Notification from './Notification'
 
 export enum TYPE {
@@ -16,6 +17,7 @@ export const enum FUNCTION {
    multiUserInvitation,
    notification,
    unknownSender,
+   broadcast
 }
 let functions = {};
 functions[FUNCTION.contactRequest] = ContactDialog;
@@ -23,6 +25,7 @@ functions[FUNCTION.notificationRequest] = Notification.askForPermission;
 functions[FUNCTION.multiUserInvitation] = MultiUserInvitationDialog;
 functions[FUNCTION.notification] = NotificationDialog;
 functions[FUNCTION.unknownSender] = UnknownSenderDialog;
+functions[FUNCTION.broadcast] = BroadcastDialog;
 
 export interface INoticeData {
    title: string;

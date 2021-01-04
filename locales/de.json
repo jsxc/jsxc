@@ -388,7 +388,10 @@
     "muc_not-acceptable": "Sie müssen Ihren reservierten Nicknamen nutzen.",
     "muc_registration-required": "Sie können dem Raum nicht beitreten, da Sie kein Mitglied sind.",
     "muc_conflict": "Ihr ausgewählter Nickname ist nicht verfügbar.",
-    "muc_service-unavailable": "Die maximale Kapazität an Teilnehmern wurde erreicht."
+    "muc_service-unavailable": "Die maximale Kapazität an Teilnehmern wurde erreicht.",
+    "broadcast" : "Systemnachricht",
+    "Open_window": "Chatfenster öffnen",
+    "Do_you_really_want_to_dismiss_all_notices": "Wollen sie wirklich alle Benachrichtigungen löschen?"
   },
   "Notifications": "Benachrichtigungen"
 }

@@ -388,7 +388,9 @@
     "muc_not-acceptable": null,
     "muc_registration-required": null,
     "muc_conflict": null,
-    "muc_service-unavailable": null
+    "muc_service-unavailable": null,
+    "broadcast":null,
+    "Open_window": null
   },
   "Notifications": null
 }

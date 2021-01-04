@@ -3,6 +3,7 @@ import Account from '../../Account'
 import PresenceHandler from './handlers/presence'
 import MultiUserPresenceHandler from './handlers/multiUser/Presence'
 import ChatMessageHandler from './handlers/chatMessage'
+import BroadcastMessageHandler from './handlers/broadcastMessage'
 import MultiUserChatMessageHandler from './handlers/multiUser/groupChatMessage'
 import HeadlineMessageHandler from './handlers/headlineMessage'
 import JingleHandler from './handlers/jingle'
@@ -40,7 +41,7 @@ export default class XMPPHandler {
       this.addHandler(MultiUserDirectInvitationHandler, 'jabber:x:conference', 'message');
 
       this.addHandler(CapsHandler, CapsHandler.NAMESPACE);
-      // this.connection.conn.addHandler(this.onReceived, null, 'message');
+      this.addHandler(BroadcastMessageHandler,null,'message');
    }
 
    public addHandler(Handler, namespace?: string, tagName?: string, type?: string, id?: string, from?: string, options?: StropheHandlerOptions) {
