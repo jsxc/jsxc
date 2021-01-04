@@ -69,10 +69,20 @@ function armConnectionParameterForm() {
    $('#bosh-url').trigger('input');
 
    $('#connectiontype_bosh').click((()=>{
-      $('#bosh-url').val('/http-bind');
+      let val = $('#bosh-url').val();
+      val=val.replace('wss://','https://');
+      val=val.replace('ws://','http://');
+      val=val.replace('/ws','/http-bind');
+      $('#bosh-url').val(val);
+      $('#bosh-url').trigger('input');
    }));
    $('#connectiontype_websocket').click((()=>{
-      $('#bosh-url').val('/ws');
+      let val = $('#bosh-url').val();
+      val=val.replace('https://','wss://');
+      val=val.replace('http://','ws://');
+      val=val.replace('/http-bind','/ws');
+      $('#bosh-url').val(val);
+      $('#bosh-url').trigger('input');
    }));
 }
 
