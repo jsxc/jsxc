@@ -14,6 +14,7 @@ export { start, startAndPause } from './start'
 export { register } from './register'
 export { enableDebugMode, disableDebugMode, deleteAllData } from './debug'
 export { testBOSHServer } from './testBOSHServer'
+export { testWEBSOCKETServer } from './testBOSHServer'
 
 export function addPlugin(Plugin: IPlugin) {
    Client.addPlugin(Plugin);

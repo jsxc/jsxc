@@ -12,7 +12,6 @@
    <!-- require:dependencies -->
    <link href="../dist/styles/jsxc.bundle.css" media="all" rel="stylesheet" type="text/css" />
    <!--  endrequire -->
-
    <link href="css/example.css" media="all" rel="stylesheet" type="text/css" />
 </head>
 
@@ -54,8 +53,14 @@
                      </div>
                   </div>
                   <div class="form-group">
-                     <label for="bosh-url" class="col-xs-4 control-label">BOSH url:</label>
+                     <label for="bosh-url" class="col-xs-4 control-label">BOSH / Websocket url:</label>
                      <div class="col-xs-8">
+                        <fieldset>
+                            <input type="radio" id="connectiontype_bosh" name="connectiontype" value="BOSH" checked>
+                            <label for="connectiontype_bosh"> BOSH</label><br/>
+                            <input type="radio" id="connectiontype_websocket" name="connectiontype" value="WEBSOCKET">
+                            <label for="connectiontype_websocket"> WEBSOCKET</label>
+                        </fieldset>
                         <input type="text" id="bosh-url" name="bosh-url" class="form-control" value="/http-bind/" />
                         <p id="server-flash"></p>
                      </div>

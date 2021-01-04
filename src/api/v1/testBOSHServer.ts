@@ -1,6 +1,48 @@
 import ConnectionError from '../../errors/ConnectionError'
 import InvalidParameterError from '../../errors/InvalidParameterError';
 
+export function testWEBSOCKETServer(url, domain): Promise<string> {
+   if (typeof url !== 'string') {
+      throw new InvalidParameterError('You have to provide an URL as string.', 'invalid-url');
+   }
+
+   if (typeof domain !== 'string') {
+      throw new InvalidParameterError('You have to provide a domain as string.', 'invalid-domain');
+   }
+
+   let websocketConntectionFactory = {
+      tryCounter: 0,
+      testConnection: function(url) {
+        let context = this;
+        let ws = new WebSocket(url,'xmpp');
+
+        return new Promise<string>(function(resolve,reject){
+           ws.onerror   = e => {
+                                 console.log('WS connection attempt '+(context.tryCounter+1)+' Unsuccessful');
+                                 if ((<any>e.target).readyState === 3)
+                                 {
+                                     context.tryCounter++;
+                                     if (context.tryCounter > 2)
+                                     {
+                                         reject(new Error(context.tryCounter+' unsuccessfull connection attempts'));
+                                         return;
+                                     }
+                                     setTimeout(() => {resolve(context.testConnection(url));},500);
+                                 }
+                               };
+           ws.onopen    = e => {
+                                  let statestring = 'WebSocket connection Status: '+(<any>e.target).readyState+' (available)';
+                                  console.log(statestring);
+                                  resolve(statestring);
+                               };
+           ws.onmessage = m => console.log(m.data);
+        });
+      }
+   };
+
+   return websocketConntectionFactory.testConnection(url);
+}
+
 export function testBOSHServer(url, domain): Promise<string> {
    if (typeof url !== 'string') {
       throw new InvalidParameterError('You have to provide an URL as string.', 'invalid-url');

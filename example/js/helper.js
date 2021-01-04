@@ -67,6 +67,13 @@ function armConnectionParameterForm() {
 
    // check initial bosh url
    $('#bosh-url').trigger('input');
+
+   $('#connectiontype_bosh').click((()=>{
+      $('#bosh-url').val('/http-bind');
+   }));
+   $('#connectiontype_websocket').click((()=>{
+      $('#bosh-url').val('/ws');
+   }));
 }
 
 function inputHandler() {
@@ -86,6 +93,17 @@ function inputHandler() {
    }
 
    localStorage.setItem('bosh-url', url);
+   if (url.startsWith('ws'))
+   {
+      $('#connectiontype_websocket').prop('checked',true);
+      $('#connectiontype_bosh').prop('checked',false);
+   }
+   else
+   {
+      $('#connectiontype_bosh').prop('checked',true);
+      $('#connectiontype_websocket').prop('checked',false);
+   }
+
    localStorage.setItem('xmpp-domain', domain);
 
    $('#server-flash').removeClass('success fail').text('Testing...');
@@ -97,11 +115,22 @@ function inputHandler() {
 
       $('#server-flash').removeClass('success fail');
 
-      jsxc.testBOSHServer(url, domain).then(function(message) {
-         $('#server-flash').addClass('success').html(message);
-      }).catch(function(error) {
-         $('#server-flash').addClass('fail').html(error.message);
-      });
+      if (url.startsWith('ws'))
+      {
+          jsxc.testWEBSOCKETServer(url, domain).then(function(message) {
+             $('#server-flash').addClass('success').html(message);
+          }).catch(function(error) {
+             $('#server-flash').addClass('fail').html(error.message);
+          });
+      }
+      else
+      {
+          jsxc.testBOSHServer(url, domain).then(function(message) {
+             $('#server-flash').addClass('success').html(message);
+          }).catch(function(error) {
+             $('#server-flash').addClass('fail').html(error.message);
+          });
+      }
    }, 2000);
 
    self.data('timeout', timeout);
