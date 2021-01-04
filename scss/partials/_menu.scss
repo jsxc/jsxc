@@ -252,6 +252,15 @@
       left: 0;
       overflow: hidden;
       right: 0;
+
+      ul {
+        display: flex;
+        flex-direction: column;
+
+        .jsxc-js-delete-all {
+          order: 1;
+        }
+      }
     }
 
     ul {
