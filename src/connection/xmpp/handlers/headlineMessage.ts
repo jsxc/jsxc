@@ -5,6 +5,11 @@ import { TYPE, FUNCTION } from '../../../Notice'
 
 export default class extends AbstractHandler {
    public processStanza(stanza: Element) {
+      let type = stanza.getAttribute('type');
+      if (type!==null&&type!=='headline')
+      {
+          return this.PRESERVE_HANDLER;
+      }
       let fromJid = new JID(stanza.getAttribute('from'));
       let connection = this.account.getConnection();
       let myJid = connection.getJID();
