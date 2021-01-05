@@ -79,7 +79,7 @@ function processErrorResponse(xhr, textStatus, url) {
       // cross-side
       return new ConnectionError('Cross domain request was not possible. Either your BOSH server does not send any ' +
          'Access-Control-Allow-Origin header or the content-security-policy (CSP) blocks your request. ' +
-         'The savest way is still to use Apache ProxyRequest or Nginx proxy_pass.', 'cross-domain');
+         'The safest way is still to use Apache ProxyRequest or Nginx proxy_pass.', 'cross-domain');
    } else if (xhr.status === 404) {
       // not found
       return new ConnectionError('Your server responded with "404 Not Found". Please check if your BOSH server is running and reachable via ' + urlWithProtocol + '.', 'not-found');
