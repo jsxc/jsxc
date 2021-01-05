@@ -21,11 +21,15 @@ export default class Vcard extends AbstractService {
       let data: any = {};
       let vcard = $(stanza).find('vCard');
 
+      vcard = $($.parseXML(vcard.get(0).outerHTML)).find('>vCard');
+
       if (!vcard.length) {
          return data;
       }
 
-      return this.parseVcardChildren(vcard);
+      data = this.parseVcardChildren(vcard);
+
+      return data;
    }
 
    private parseVcardChildren = (stanza) => {
@@ -50,7 +54,7 @@ export default class Vcard extends AbstractService {
             }
 
             // concat chunks
-            src = src.replace(/[\t\r\n\f]/gi, '');
+            src = src.replace(/[\t\r\n\f ]/gi, '');
 
             value = {
                type,
@@ -59,12 +63,18 @@ export default class Vcard extends AbstractService {
          } else if (itemName === 'EMAIL') {
             value = item.find('USERID').text();
          } else if (children.length > 0) {
-            value = self.parseVcardChildren(children);
+            value = self.parseVcardChildren(item);
          } else {
-            value = item.text();
+            value = item.text().trim();
          }
 
-         data[itemName] = value;
+         if (Array.isArray(data[itemName])) {
+            data[itemName].push(value);
+         } else if (data[itemName]) {
+            data[itemName] = [data[itemName], value];
+         } else {
+            data[itemName] = value;
+         }
       });
 
       return data;

@@ -105,17 +105,27 @@ function convertToTemplateData(vCardData): any[] {
 
    for (let name in vCardData) {
       let value = vCardData[name];
-      let childProperties;
+      let childProperties = [];
 
       if (typeof value === 'object' && value !== null) {
          childProperties = convertToTemplateData(value);
          value = undefined;
       }
 
+      let nameLabel: string;
+
+      if (Array.isArray(vCardData)) {
+         let firstChildProperty = childProperties.shift();
+
+         nameLabel = firstChildProperty?.name;
+      } else {
+         nameLabel = Translation.t(name);
+      }
+
       properties.push({
-         name: Translation.t(name),
+         name: nameLabel,
          value,
-         properties: childProperties
+         properties: childProperties.filter(property => property.value || property.properties.length > 0),
       });
    }
 

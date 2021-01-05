@@ -38,6 +38,10 @@
     list-style: none;
   }
 
+  li > ul {
+    padding-left: 1em;
+  }
+
   ul,
   li {
     margin: 0;
