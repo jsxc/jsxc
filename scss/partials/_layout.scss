@@ -211,8 +211,14 @@ body.jsxc-fullscreen.jsxc-two-columns {
 
 .jsxc-omemo-device {
   box-shadow: 0 0 2px #a1a1a1;
-  margin-bottom: 15px;
-  padding: 10px;
+  display: flow-root;
+  margin-bottom: 10px;
+  padding: 5px;
+
+  &-fingerprint {
+    display: inline-block;
+    max-width: 20em;
+  }
 
   &[data-trust="unknown"] {
     border: 3px solid $error-bg;
@@ -223,14 +229,19 @@ body.jsxc-fullscreen.jsxc-two-columns {
     opacity: 0.7;
   }
 
+   &-id-current {
+    font-size: 0.7em;
+    opacity: unset;
+  }
+
   &-last-used {
-    float: right;
     font-size: 0.7em;
     opacity: 0.7;
   }
 
   &-trust {
     display: inline;
+    float: right;
 
     &[data-trust="unknown"] {
       color: $error-bg;
@@ -250,6 +261,6 @@ body.jsxc-fullscreen.jsxc-two-columns {
   }
 
   &-action {
-    float: right;
+    text-align: right;
   }
 }

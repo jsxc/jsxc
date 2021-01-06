@@ -118,6 +118,7 @@
     "node-sass": "^5.0.0",
     "otr": "github:sualko/otr#es6-modules",
     "precompile-handlebars": "^1.0.5",
+    "qrcode-generator-ts": "^0.0.4",
     "screenfull": "^5.0.2",
     "sha1": "^1.1.1",
     "strophe.js": "^1.4.0",

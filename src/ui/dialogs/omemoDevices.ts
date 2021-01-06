@@ -7,6 +7,7 @@ import DateTime from '@ui/util/DateTime';
 import Translation from '@util/Translation';
 import Log from '@util/Log';
 import OMEMOPlugin from '@src/plugins/omemo/Plugin';
+import { QRCode, ErrorCorrectLevel } from 'qrcode-generator-ts/js';
 
 let omemoDeviceListTemplate = require('../../../template/dialogOmemoDeviceList.hbs');
 let omemoDeviceItemTemplate = require('../../../template/dialogOmemoDeviceItem.hbs');
@@ -39,13 +40,24 @@ class OmemoDeviceDialog {
 
          dom.find('.jsxc-omemo-peerdevices, .jsxc-omemo-owndevices').empty();
 
-         this.insertDevices(peerDevices, identityManager, dom.find('.jsxc-omemo-peerdevices'));
-         this.insertDevices(ownDevices, identityManager, dom.find('.jsxc-omemo-owndevices'));
-
+         this.insertDevices(contact.getJid().bare, peerDevices, identityManager, dom.find('.jsxc-omemo-peerdevices'));
+         this.insertDevices(contact.getAccount().getJID().bare, ownDevices, identityManager, dom.find('.jsxc-omemo-owndevices'));
          if (ownDevices.length > 1) {
             this.addCleanUpAction();
          }
+
       });
+   }
+
+   private buildQRCode(jid: string, deviceid: string, key: string)
+   {
+        let qr = new QRCode();
+        qr.setTypeNumber(5);
+        qr.setErrorCorrectLevel(ErrorCorrectLevel.L);
+        qr.addData('xmpp:'+jid+'?omemo-sid-'+deviceid+'='+key.split(' ').join(''));
+        qr.make();
+
+        return qr.toDataURL();
    }
 
    public getPromise() {
@@ -72,7 +84,7 @@ class OmemoDeviceDialog {
       explanationElement.appendTo(dom);
    }
 
-   private async insertDevices(devices: Device[], identityManager: IdentityManager, listElement) {
+   private async insertDevices(jid: string, devices: Device[], identityManager: IdentityManager, listElement) {
       if (devices.length === 0) {
          listElement.empty().append($('<p>').text(Translation.t('No_devices_available')));
 
@@ -81,7 +93,7 @@ class OmemoDeviceDialog {
 
       for (let device of devices) {
          //@TODO show spinner
-         let properties = await this.getDeviceProperties(device, identityManager);
+         let properties = await this.getDeviceProperties(jid, device, identityManager);
          let element = $(omemoDeviceItemTemplate(properties));
 
          let lastUsedElement = element.find('.jsxc-omemo-device-last-used');
@@ -98,14 +110,15 @@ class OmemoDeviceDialog {
       }
    }
 
-   private async getDeviceProperties(device: Device, identityManager: IdentityManager) {
+   private async getDeviceProperties(jid: string, device: Device, identityManager: IdentityManager) {
       let trust = device.getTrust();
       let fingerprint: string;
       let showControls = !device.isCurrentDevice();
+      let qrcodedatauri;
 
       try {
          fingerprint = await identityManager.loadFingerprint(device.getAddress());
-
+         qrcodedatauri=this.buildQRCode(jid,device.getId().toString(),fingerprint);
          if (device.isDisabled()) {
             device.enable();
          }
@@ -125,7 +138,8 @@ class OmemoDeviceDialog {
          fingerprint,
          trust: Trust[trust],
          lastUsed: device.getLastUsed(),
-         showControls
+         showControls,
+         qrcodedatauri
       };
    }
 
