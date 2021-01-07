@@ -211,14 +211,8 @@ body.jsxc-fullscreen.jsxc-two-columns {
 
 .jsxc-omemo-device {
   box-shadow: 0 0 2px #a1a1a1;
-  display: flow-root;
-  margin-bottom: 10px;
-  padding: 5px;
-
-  &-fingerprint {
-    display: inline-block;
-    max-width: 20em;
-  }
+  margin-bottom: 15px;
+  padding: 10px;
 
   &[data-trust="unknown"] {
     border: 3px solid $error-bg;
@@ -229,19 +223,14 @@ body.jsxc-fullscreen.jsxc-two-columns {
     opacity: 0.7;
   }
 
-   &-id-current {
-    font-size: 0.7em;
-    opacity: unset;
-  }
-
   &-last-used {
+    float: right;
     font-size: 0.7em;
     opacity: 0.7;
   }
 
   &-trust {
     display: inline;
-    float: right;
 
     &[data-trust="unknown"] {
       color: $error-bg;
@@ -261,6 +250,27 @@ body.jsxc-fullscreen.jsxc-two-columns {
   }
 
   &-action {
-    text-align: right;
+    float: right;
+  }
+}
+
+.jsxc-own-device-qrcode {
+  img {
+    color: var(--jsxc-color-error);
+    font-size: 0.7em;
+    border: 1px solid var(--jsxc-color-border-dark);
+  }
+
+  &-own,
+  &-peer {
+    margin-bottom: 1em;
+  }
+
+  &-desc-own,
+  &-desc-peer {
+    display: inline-block;
+    font-size: 0.7em;
+    margin-left: 2em;
+    opacity: 0.7;
   }
 }

@@ -395,7 +395,9 @@
     "muc_not-acceptable": "Sie müssen Ihren reservierten Nicknamen nutzen.",
     "muc_registration-required": "Sie können dem Raum nicht beitreten, da Sie kein Mitglied sind.",
     "muc_conflict": "Ihr ausgewählter Nickname ist nicht verfügbar.",
-    "muc_service-unavailable": "Die maximale Kapazität an Teilnehmern wurde erreicht."
+    "muc_service-unavailable": "Die maximale Kapazität an Teilnehmern wurde erreicht.",
+    "QRCode_description": "Scannen sie den Code mit einer anderen App, um die Keys zu verifizieren.",
+    "QRCode_noqrcode" : "Kein QRCode vorhanden"
   },
   "Notifications": "Benachrichtigungen"
 }
