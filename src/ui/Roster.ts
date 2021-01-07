@@ -195,7 +195,7 @@ export default class Roster {
       noticeElement.attr('title', notice.getDescription());
       noticeElement.attr('data-notice-id', notice.getId());
       noticeElement.attr('data-manager-id', manager.getId());
-      noticeListElement.append(noticeElement);
+      noticeListElement.prepend(noticeElement);
 
       let numberOfNotices = noticeListElement.find('li').not('.jsxc-js-delete-all').length;
       $('.jsxc-js-notice-menu .jsxc-menu__button').text(numberOfNotices);
@@ -204,7 +204,7 @@ export default class Roster {
          let deleteAllElement = $('<li>');
          deleteAllElement.addClass('jsxc-js-delete-all jsxc-menu__item--danger jsxc-icon--delete');
          deleteAllElement.text(Translation.t('Close_all'));
-         deleteAllElement.prependTo(noticeListElement);
+         deleteAllElement.appendTo(noticeListElement);
 
          deleteAllElement.click((ev) => {
             ev.stopPropagation();
