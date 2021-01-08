@@ -13,6 +13,7 @@ import BookmarksPlugin from '@src/plugins/bookmarks/BookmarksPlugin';
 import ChatMarkersPlugin from '@src/plugins/chatMarkers/ChatMarkersPlugin'
 import PingPlugin from '@src/plugins/PingPlugin'
 import CommandPlugin from '@src/plugins/CommandPlugin'
+import TimePlugin from '../plugins/TimePlugin'
 
 Client.addPlugin(OTRPlugin);
 Client.addPlugin(OMEMOPlugin);
@@ -28,3 +29,4 @@ Client.addPlugin(BookmarksPlugin);
 Client.addPlugin(ChatMarkersPlugin);
 Client.addPlugin(PingPlugin);
 Client.addPlugin(CommandPlugin);
+Client.addPlugin(TimePlugin);
