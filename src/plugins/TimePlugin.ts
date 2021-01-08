@@ -1,6 +1,8 @@
 import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import Translation from '@util/Translation';
+import Contact from '../Contact'
+import JID from '../JID'
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
@@ -8,6 +10,8 @@ const MAX_VERSION = '99.0.0';
 const NAMESPACE_TIME = 'urn:xmpp:time'
 
 export default class TimePlugin extends AbstractPlugin {
+
+   protected pluginAPI: PluginAPI;
 
    public static getId(): string {
       return 'time';
@@ -32,22 +36,36 @@ export default class TimePlugin extends AbstractPlugin {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       let connection = pluginAPI.getConnection();
-
+      this.pluginAPI=pluginAPI;
       pluginAPI.addFeature(NAMESPACE_TIME);
 
       connection.registerHandler(this.onReceiveQuery, NAMESPACE_TIME, 'iq');
 
    }
 
-   //if tzo, utc are empty it will be used as query for retrieve informations
-   public sendTime(idstr: string, jid: string, tzo?: string, utc?: string): Promise<{}>
+   //query information from contact
+   public query(contact: Contact): Promise<{}>
    {
       let iq = $iq({
-         type: (!tzo&&!tzo?'get':'result'),
+         type: 'get',
+         to: contact.getJid().full,
+         xmlns: 'jabber:client'
+      }).c('query', {
+         'xmlns': NAMESPACE_TIME
+      });
+
+      return this.pluginAPI.sendIQ(iq);
+   }
+
+   //send information response
+   public sendResponse(idstr: string, jid: string, tzo?: string, utc?: string): Promise<{}>
+   {
+      let iq = $iq({
+         type: 'result',
          to: jid,
          id: idstr,
          xmlns: 'jabber:client'
-      }).c('time', {
+      }).c('query', {
          'xmlns': NAMESPACE_TIME
       });
 
@@ -65,13 +83,18 @@ export default class TimePlugin extends AbstractPlugin {
    }
 
    private onReceiveQuery = (stanza) => {
+        let fromjid = new JID($(stanza).attr('from'));
+        let tojid = new JID($(stanza).attr('to'));
+        if (this.pluginAPI.getContact(fromjid)|| //only send to contacts
+            tojid.domain===fromjid.bare) //or own domain server
+        {
+            let time = new Date();
+            let utc = time.toISOString();
+            let tzo = ((time.getTimezoneOffset()*-1)/60).toString();
+            tzo = tzo[0]==='0'?tzo+':00':'0'+tzo+':00';
 
-        let time = new Date();
-        let utc = time.toISOString();
-        let tzo = ((time.getTimezoneOffset()*-1)/60).toString();
-        tzo = tzo[0]==='0'?tzo+':00':'0'+tzo+':00';
-
-        this.sendTime($(stanza).attr('id'),$(stanza).attr('from'),tzo.toString(),utc);
+            this.sendResponse($(stanza).attr('id'),$(stanza).attr('from'),tzo.toString(),utc);
+        }
       return true;
    }
 }
