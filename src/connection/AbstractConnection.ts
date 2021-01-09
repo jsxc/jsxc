@@ -10,6 +10,7 @@ import MUCService from './services/MUC'
 import RosterService from './services/Roster'
 import VcardService from './services/Vcard'
 import DiscoService from './services/Disco'
+import calculateHash from '../util/SHA1Hash'
 
 export const STANZA_KEY = 'stanza';
 export const STANZA_IQ_KEY = 'stanzaIQ';
@@ -186,14 +187,26 @@ abstract class AbstractConnection {
          presenceStanza.c('show').t(Presence[presence]).up();
       }
 
-      // var priority = Options.get('priority');
-      // if (priority && typeof priority[status] !== 'undefined' && parseInt(priority[status]) !== 0) {
-      //    presenceStanza.c('priority').t(priority[status]).up();
-      // }
+      this.account.getContact().getAvatar().then((avatar)=>{
 
-      Log.debug('Send presence', presenceStanza.toString());
+          let hash = calculateHash(avatar);
+          presenceStanza.c('x',{xmlns: 'vcard-temp:x:update'}).c('photo').t(hash).up();
+          this.send(presenceStanza);
 
-      this.send(presenceStanza);
+      }).catch((err)=>{
+
+          // var priority = Options.get('priority');
+          // if (priority && typeof priority[status] !== 'undefined' && parseInt(priority[status]) !== 0) {
+          //    presenceStanza.c('priority').t(priority[status]).up();
+          // }
+
+          //we dont have an avatar
+          presenceStanza.c('x',{xmlns: 'vcard-temp:x:update'}).c('photo').up();
+          Log.debug('Send presence', presenceStanza.toString());
+
+          this.send(presenceStanza);
+      });
+
    }
 
    public queryArchive(archive: JID, version: string, queryId: string, contact?: JID, beforeResultId?: string, end?: Date): Promise<Element> {

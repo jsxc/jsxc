@@ -228,3 +228,31 @@
     align-self: flex-start;
   }
 }
+
+.jsxc-account-choice {
+  height: 30px;
+}
+
+.jsxc-avatarimage {
+  margin-top: 2em;
+
+  img {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin-left: auto;
+    margin-right: auto;
+    min-height: 192px;
+    width: unset !important;
+  }
+}
+
+.jsxc-avatarupload {
+  margin-top: 2em;
+}
+
+.jsxc-canvas {
+  display: none;
+  min-height: 192px !important;
+  width: unset !important;
+}

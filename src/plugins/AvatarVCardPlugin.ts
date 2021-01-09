@@ -60,6 +60,10 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
             }
 
             let sha1OfAvatar = photo.text();
+            if (sha1OfAvatar!==null&&sha1OfAvatar.trim().length===0)
+            {
+                sha1OfAvatar=null;
+            }
 
             this.getStorage().setItem(from.bare, sha1OfAvatar); //@REVIEW use this as trigger for all tabs?
 

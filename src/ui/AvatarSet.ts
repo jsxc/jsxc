@@ -37,6 +37,9 @@ export default class AvatarSet {
             let element = $(this);
 
             element.css('background-image', `url(${avatar.getData()})`);
+            element.css('background-size', 'contain');
+            element.css('background-repeat', 'no-repeat');
+            element.css('background-position', 'center');
             element.text('');
          });
       }).catch((msg) => {

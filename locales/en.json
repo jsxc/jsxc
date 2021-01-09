@@ -416,7 +416,9 @@
     "muc_not-acceptable": "You have to use the reserved nickname.",
     "muc_registration-required": "You are not allowed to join this room, because you are not on the member list.",
     "muc_conflict": "Your nickname was already taken.",
-    "muc_service-unavailable": "You are not able to join, because the maximum number of users has been reached."
+    "muc_service-unavailable": "You are not able to join, because the maximum number of users has been reached.",
+    "no_avatar": "No avatar available",
+    "Add_Avatar": "Avatar Upload"
   },
   "Notifications": "Notifications"
 }
