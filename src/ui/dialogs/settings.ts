@@ -46,6 +46,14 @@ class ClientSection extends Section {
          this.getLanguageSelectionElement()
       ));
 
+      contentElement.append(new ListItem(
+         Translation.t('trusted_domains'),
+         Translation.t('one_domain_per_line'),
+         undefined,
+         undefined,
+         this.getTrustedDomainsElement()
+      ));
+
       return contentElement.getDOM();
    }
 
@@ -72,6 +80,21 @@ class ClientSection extends Section {
       if (element.find('[selected]').length === 0) {
          element.find('option:eq(0)').attr('selected', 'selected');
       }
+
+      return element;
+   }
+
+   private getTrustedDomainsElement(): JQuery {
+
+      let element = $('<textarea style="margin-left:10px;">');
+
+      element.on('change', () => {
+         let value = element.val().toString().split('\n').map(line => line.trim());
+         Client.setOption('trustedDomains',value ? value : undefined);
+      });
+
+      let trustedDomains = Client.getOption('trustedDomains', []);
+      element.val(trustedDomains.join('\n'));
 
       return element;
    }

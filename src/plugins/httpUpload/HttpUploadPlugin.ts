@@ -11,9 +11,12 @@ import { $iq } from '../../vendor/Strophe'
 import Translation from '../../util/Translation';
 import { IContact } from '@src/Contact.interface';
 import { IMessage } from '@src/Message.interface';
+import Client from '@src/Client';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
+
+const IMAGE_SUFFIXES = ['jpeg', 'jpg', 'png', 'svg', 'gif'];
 
 export default class HttpUploadPlugin extends AbstractPlugin {
    public static getId(): string {
@@ -223,6 +226,21 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       return Promise.resolve([message, xmlStanza]);
    }
 
+   private isTrustedDomain(url: URL): boolean {
+      let trustedDomains = Client.getOption<string[]>('trustedDomains', []);
+
+      return trustedDomains.filter(domain => {
+         let result = url.hostname === (domain);
+
+         if (!result && domain.indexOf('*.') > -1) {
+            let wildcardtestdomain = domain.substring(domain.lastIndexOf('*.') + 2);
+            result = url.hostname.endsWith(wildcardtestdomain);
+         }
+
+         return result;
+      }).length > 0;
+   }
+
    private extractAttachmentFromStanza = (contact: IContact, message: IMessage, stanza: Element): Promise<[IContact, IMessage, Element]> => {
       let element = $(stanza);
       let bodyElement = element.find('html body[xmlns="' + Strophe.NS.XHTML + '"]').first();
@@ -248,13 +266,48 @@ export default class HttpUploadPlugin extends AbstractPlugin {
                let attachment = new Attachment(name, mimeType, url);
                attachment.setThumbnailData(thumbnailData);
                attachment.setData(url);
-
                message.setAttachment(attachment);
                message.setPlaintextMessage(bodyElement.text());
             }
          }
+      } else {
+         this.processLinks(message);
       }
 
       return Promise.resolve([contact, message, stanza]);
-   };
+   }
+
+   private processLinks(message: IMessage) {
+      let plaintext = message.getPlaintextMessage();
+
+      if (!plaintext) {
+         return;
+      }
+
+      let pattern = new RegExp(/^(https?:\/\/[^\s]+)/);
+      let match = plaintext.match(pattern);
+
+      if (match) {
+         let url = match[0];
+         let extension = this.getFileExtensionFromUrl(url);
+
+         if (IMAGE_SUFFIXES.includes(extension)) {
+            let attachment = new Attachment('image', 'image/' + extension, url);
+            attachment.setData(url);
+
+            if (this.isTrustedDomain(new URL(url))) {
+               attachment.setThumbnailData(url);
+            } else {
+               attachment.setThumbnailData('../images/placeholder_image.svg');
+            }
+
+            message.setAttachment(attachment);
+            message.setPlaintextMessage(plaintext.replace(url, ''));
+         }
+      }
+   }
+
+   private getFileExtensionFromUrl(url: string): string {
+      return url.split(/[#?]/)[0].split('.').pop().trim().toLowerCase();
+   }
 }

@@ -423,7 +423,9 @@
     "Last": "Nachname",
     "Nick": "Spitzname",
     "Email": "E-Mail",
-    "no_results": "Die Suche ergab keine Ergebnisse."
+    "no_results": "Die Suche ergab keine Ergebnisse.",
+    "trusted_domains": "Vertrauenswürdige Domänen",
+    "one_domain_per_line": "Dies sind Domänen, von denen Anhänge automatisch geladen werden. (Eine Domäne pro Zeile)"
   },
   "Notifications": "Benachrichtigungen"
 }
