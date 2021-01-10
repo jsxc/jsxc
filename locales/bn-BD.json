@@ -416,7 +416,14 @@
     "muc_not-acceptable": null,
     "muc_registration-required": null,
     "muc_conflict": null,
-    "muc_service-unavailable": null
+    "muc_service-unavailable": null,
+    "contact_search": null,
+    "Search": null,
+    "First":  null,
+    "Last":  null,
+    "Nick":  null,
+    "Email":  null,
+    "no_results": null
   },
   "Notifications": null
 }
