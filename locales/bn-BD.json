@@ -394,8 +394,7 @@
     "muc_not-acceptable": null,
     "muc_registration-required": null,
     "muc_conflict": null,
-    "muc_service-unavailable": null,
-    "setting-time": null
+    "muc_service-unavailable": null
   },
   "Notifications": null
 }

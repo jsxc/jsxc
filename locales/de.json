@@ -395,8 +395,7 @@
     "muc_not-acceptable": "Sie müssen Ihren reservierten Nicknamen nutzen.",
     "muc_registration-required": "Sie können dem Raum nicht beitreten, da Sie kein Mitglied sind.",
     "muc_conflict": "Ihr ausgewählter Nickname ist nicht verfügbar.",
-    "muc_service-unavailable": "Die maximale Kapazität an Teilnehmern wurde erreicht.",
-    "setting-time": "Gibt auf Anfrage die Zeit des Clients zurück."
+    "muc_service-unavailable": "Die maximale Kapazität an Teilnehmern wurde erreicht."
   },
   "Notifications": "Benachrichtigungen"
 }
