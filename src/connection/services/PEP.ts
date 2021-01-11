@@ -23,16 +23,6 @@ export default class PEP extends AbstractService {
       }
    }
 
-   public publisStatus(statustext:string)
-   {
-      let item = $build('status',{xmlns:'http://jabber.org/protocol/status'});
-      if (statustext.length>0)
-      {
-          item.c('text').t(statustext);
-      }
-      return this.publish('http://jabber.org/protocol/status',item.tree(),'current');
-   }
-
    public publish(node: string, element: Element, id?: string): Promise<Element> {
       let iqStanza = $iq({
          type: 'set',

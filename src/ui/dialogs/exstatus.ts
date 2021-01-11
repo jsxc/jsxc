@@ -1,5 +1,7 @@
 import Dialog from '../Dialog'
 import Client from '../../Client'
+import Account from '../../Account'
+import { Presence } from '../../connection/AbstractConnection'
 
 let exstatusTemplate = require('../../../template/exstatus.hbs');
 
@@ -12,8 +14,18 @@ export default function() {
    dialog = new Dialog(content);
    let dom = dialog.open();
 
-   $(dom).ready(function(){
-      getStatus();
+   let accounts = Client.getAccountManager().getAccounts();
+   accounts.forEach(account => {
+      let accountoption = $('<option>').text(account.getJID().bare).val(account.getUid());
+      dom.find('select[name="account"]').append(accountoption);
+   })
+
+   getStatus(accounts[0]);
+
+   dom.find('select[name="account"]').on('change', (ev) => {
+      let uid = $(ev.target).val().toString();
+
+       getStatus(Client.getAccountManager().getAccount(uid));
    });
 
    $('.jsxc-js-save').on('click',sendStatus);
@@ -22,45 +34,42 @@ export default function() {
 
 function sendStatus()
 {
+   let account = Client.getAccountManager().getAccount(dialog.getDom().find('select[name="account"]').val().toString());
+   let val = dialog.getDom().find('select[name="presence"]').val();
+   let presence;
+   switch (val)
+   {
+       case 'away':
+          presence = Presence.away;
+       break;
 
-   let account = Client.getAccountManager().getAccounts()[0];
+       case 'xa':
+          presence = Presence.xa;
+       break;
+
+       case 'dnd':
+          presence = Presence.dnd;
+       break;
+   }
+
    let statustext = dialog.getDom().find('textarea[name="extended_status_text"]').val().toString();
-
+   Client.getPresenceController().setTargetPresence(presence);
    account.getContact().setStatus(statustext);
-   let targetPresence = Client.getPresenceController().getTargetPresence();
-   let con = account.getConnection();
-   con.sendPresence(targetPresence,statustext);
-
-   account.getConnection().getPEPService().publisStatus(statustext).then(function(result) {
-         dialog.close();
-   }).catch(function (msg){
-         dialog.close();
-   });
+   account.getConnection().sendPresence(presence,statustext);
+   dialog.close();
 }
 
-function getStatus()
+function getStatus(account: Account)
 {
-     let account = Client.getAccountManager().getAccounts()[0];
-     let contact = account.getContact();
-     let jid = contact.getJid();
-     account.getConnection().getPEPService().retrieveItems('http://jabber.org/protocol/status',jid.bare).then(function(data) {
-         dialog.getDom().find('textarea[name="extended_status_text"]').val($(data).text());
-     });
+   let text = account.getContact().getStatus();
+   dialog.getDom().find('textarea[name="extended_status_text"]').val(text);
 }
 
 function removeStatus(ev) {
    ev.preventDefault();
 
-   let account = Client.getAccountManager().getAccounts()[0];
-
-   let targetPresence = Client.getPresenceController().getTargetPresence();
-   let con = account.getConnection();
-   con.sendPresence(targetPresence,'');
-
-   account.getConnection().getPEPService().publisStatus('').then(function(result) {
-         dialog.close();
-   }).catch(function (msg){
-         dialog.close();
-   });
-
+   let account = Client.getAccountManager().getAccount(dialog.getDom().find('select[name="account"]').val().toString());
+   let currentPresence = Client.getPresenceController().getCurrentPresence();
+   account.getConnection().sendPresence(currentPresence,'');
+   dialog.getDom().find('textarea[name="extended_status_text"]').val('');
 }
