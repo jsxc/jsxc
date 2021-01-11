@@ -68,9 +68,10 @@ export default class OMEMOPlugin extends EncryptionPlugin {
    }
 
    private openDeviceDialog = async (chatWindow: ChatWindow) => {
-      await this.getOmemo().prepare();
-
       let peerContact = chatWindow.getContact();
+
+      await this.getOmemo().prepare();
+      await this.refreshDeviceList(peerContact);
 
       return OmemoDevicesDialog(peerContact, this.getOmemo());
    }
@@ -87,7 +88,9 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
       return this.getOmemo().prepare().then(async () => {
          if (!this.getOmemo().isSupported(contact)) {
-            throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
+            if (!this.refreshDeviceList(contact)) {
+               throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
+            }
          }
 
          if (!this.getOmemo().isTrusted(contact) && !await this.getOmemo().trustOnFirstUse(contact)) {
@@ -98,6 +101,15 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
          OMEMOPlugin.updateEncryptionState(contact, trust);
       });
+   }
+
+   private async refreshDeviceList(contact: IContact) {
+      let pepService = this.pluginAPI.getConnection().getPEPService();
+      let stanza = await pepService.retrieveItems(NS_DEVICELIST, contact.getJid().bare);
+
+      this.onDeviceListUpdate(stanza);
+
+      return this.getOmemo().isSupported(contact);
    }
 
    private onDeviceListUpdate = (stanza) => {
