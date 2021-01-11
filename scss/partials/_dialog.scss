@@ -38,7 +38,7 @@
     list-style: none;
   }
 
-  li > ul {
+  li>ul {
     padding-left: 1em;
   }
 
@@ -256,5 +256,41 @@
   td {
     padding: 5px;
     text-align: center;
+  }
+}
+
+.jsxc-collapsible-settings-button {
+  background-color: var(--jsxc-color-main-background) !important;
+  border: 0;
+  color: var(--jsxc-color-main-text);
+  cursor: pointer;
+  font-size: 0.8em;
+  font-weight: bold;
+  opacity: 0.8;
+  outline: none;
+  padding: 0.5em 0.5em 1.5em 0;
+  text-align: left;
+  width: 100%;
+
+  &-active+ul {
+    display: block;
+  }
+
+  +ul {
+    display: none;
+  }
+
+  &-active::after {
+    content: "\2212" !important;
+  }
+
+  &::after {
+    content: "\002B";
+    float: right;
+    margin-left: 5px;
+  }
+
+  &:hover {
+    background-color: var(--jsxc-color-background-hover);
   }
 }
