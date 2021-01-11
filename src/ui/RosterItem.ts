@@ -9,6 +9,7 @@ import Translation from '../util/Translation'
 import Client from '@src/Client';
 import Log from '@util/Log'
 import Color from '../util/Color'
+import Roster from '@ui/Roster'
 
 let rosterItemTemplate = require('../../template/roster-item.hbs')
 
@@ -31,8 +32,9 @@ export default class RosterItem {
       this.element.attr('data-presence', Presence[this.contact.getPresence()]);
       this.element.attr('data-subscription', this.contact.getSubscription());
       this.element.attr('data-date', this.contact.getLastMessageDate()?.toISOString());
+      this.element.attr('data-groups', this.contact.getGroups().join(',').toLowerCase());
 
-     this.appendTags();
+      this.appendTags();
 
       this.element.on('dragstart', (ev) => {
          (<any> ev.originalEvent).dataTransfer.setData('text/plain', contact.getJid().full);
@@ -151,11 +153,16 @@ export default class RosterItem {
    private appendTags() {
       let groups = this.contact.getGroups();
       let tagElements = groups.map(group => {
-         let element = $('<span>');
+         let element = $('<button>');
 
          element.text(group);
          element.addClass('jsxc-bar__tag');
          element.css('background-color', Color.generate(group));
+         element.on('click', ev => {
+            ev.preventDefault();
+
+            Roster.get().setFilter(group);
+         })
 
          return element;
       });

@@ -274,6 +274,10 @@ export default class Roster {
       mainMenu.prepend(li);
    }
 
+   public setFilter(filter: string = '') {
+      this.element.find('.jsxc-filter-input').val(filter).trigger('keyup');
+   }
+
    private insert(rosterItem: RosterItem) {
       let contact = rosterItem.getContact();
       let list = contact.isChat() ? this.contactList : this.groupList;
@@ -489,15 +493,16 @@ export default class Roster {
             return;
          }
 
-         listElements.not(`[data-jid*="${filterValue}"]`).not(`[data-name*="${filterValue}"]`).addClass('jsxc-roster-item--filtered');
+         listElements.not(`[data-jid*="${filterValue}"]`).not(`[data-name*="${filterValue}"]`).not(`[data-groups*="${filterValue}"]`).addClass('jsxc-roster-item--filtered');
          listElements.filter(`[data-jid*="${filterValue}"]`).removeClass('jsxc-roster-item--filtered');
          listElements.filter(`[data-name*="${filterValue}"]`).removeClass('jsxc-roster-item--filtered');
+         listElements.filter(`[data-groups*="${filterValue}"]`).removeClass('jsxc-roster-item--filtered');
       });
 
       this.element.find('.jsxc-filter-wrapper .jsxc-clear').on('mousedown', (ev) => {
          ev.preventDefault();
 
-         this.element.find('.jsxc-filter-input').val('').trigger('keyup');
+         this.setFilter('');
       });
 
       this.element.find('.jsxc-collapsible').on('click', function () {
