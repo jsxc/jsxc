@@ -89,17 +89,25 @@
   }
 
   &--has-unread-msg {
-    .jsxc-bar__caption__secondary::before {
-      background-color: $unread-bg;
-      border-radius: 50%;
-      color: $unread-color;
-      content: "";
-      display: inline-block;
-      height: 0.8em;
-      line-height: 100%;
-      margin-right: 0.2em;
-      text-align: center;
-      width: 0.8em;
+    .jsxc-bar__caption {
+      font-weight: bold;
+    }
+
+    .jsxc-bar__caption__secondary {
+      font-style: italic;
+
+      &::before {
+        background-color: $unread-bg;
+        border-radius: 50%;
+        color: $unread-color;
+        content: "";
+        display: inline-block;
+        height: 0.8em;
+        line-height: 100%;
+        margin-right: 0.2em;
+        text-align: center;
+        width: 0.8em;
+      }
     }
   }
 
