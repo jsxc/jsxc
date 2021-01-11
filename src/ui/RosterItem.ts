@@ -160,6 +160,7 @@ export default class RosterItem {
          element.css('background-color', Color.generate(group));
          element.on('click', ev => {
             ev.preventDefault();
+            ev.stopPropagation();
 
             Roster.get().setFilter(group);
          })
