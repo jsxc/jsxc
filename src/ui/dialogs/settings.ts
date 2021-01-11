@@ -311,7 +311,7 @@ class PluginSection extends Section {
 
          if (Array.isArray(metaData.xeps)) {
             metaData.xeps.forEach(xep => {
-               let xepElement = $('<a>');
+               let xepElement = $('<a target="_blank" rel="noreferrer noopener">');
                xepElement.addClass('jsxc-badge');
                xepElement.text(xep.id + '@' + xep.version);
                xepElement.attr('title', xep.name);
