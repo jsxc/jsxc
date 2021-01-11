@@ -265,7 +265,7 @@ class PasswordPage extends Page {
 
 class PluginSection extends Section {
    constructor(navigation: Navigation, private account: Account) {
-      super(navigation, Translation.t('Plugins'));
+      super(navigation, Translation.t('Plugins'), true);
    }
 
    protected generateContentElement(): JQuery {
