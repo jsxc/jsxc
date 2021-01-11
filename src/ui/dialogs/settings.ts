@@ -285,6 +285,13 @@ class PluginSection extends Section {
          checkboxElement.attr('id', id);
          checkboxElement.attr('name', name);
          checkboxElement.prop('checked', disabledPlugins.indexOf(id) < 0);
+
+         //check if libsignal is available
+         if (id === 'omemo' && typeof (<any>window).libsignal === 'undefined') {
+            checkboxElement.prop('checked', false);
+            checkboxElement.prop('disabled', true);
+         }
+
          checkboxElement.on('change', (ev) => {
             let isEnabled = $(ev.target).prop('checked');
             let id = $(ev.target).attr('id');
