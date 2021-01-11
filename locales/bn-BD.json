@@ -394,9 +394,7 @@
     "muc_not-acceptable": null,
     "muc_registration-required": null,
     "muc_conflict": null,
-    "muc_service-unavailable": null,
-    "QRCode_description": null,
-    "QRCode_noqrcode" :null
+    "muc_service-unavailable": null
   },
   "Notifications": null
 }
