@@ -315,7 +315,7 @@ class PluginSection extends Section {
                xepElement.addClass('jsxc-badge');
                xepElement.text(xep.id + '@' + xep.version);
                xepElement.attr('title', xep.name);
-               xepElement.attr('href', `https://xmpp.org/extensions/${xep.version.toLowerCase()}.html`);
+               xepElement.attr('href', `https://xmpp.org/extensions/${xep.id.toLowerCase()}.html`);
                xepElement.appendTo(listItemElement.find('.jsxc-list__text__primary'));
             });
          }
