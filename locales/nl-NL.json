@@ -390,6 +390,7 @@
     "Control": "Controle",
     "Incoming_video_call": "Inkomende videogesprek",
     "Plugins": "Plugins",
+    "General": null,
     "Room_creation": "Kamer creatie",
     "setting-bookmarks-enable": "Als je je groepschats wilt opslaan in je contactenlijst, laat het aanstaan.",
     "setting-http-upload-enable": "Bestanden naar groepsgespreken verzenden toestaan geeft je contacten de mogelijkheid bestanden op al hun apparaten te ontvangen.",
@@ -416,7 +417,17 @@
     "muc_not-acceptable": null,
     "muc_registration-required": null,
     "muc_conflict": null,
-    "muc_service-unavailable": null
+    "muc_service-unavailable": null,
+    "contact_search": null,
+    "Search": null,
+    "First": null,
+    "Last": null,
+    "Nick": null,
+    "Email": null,
+    "no_results": null,
+    "trusted_domains": null,
+    "one_domain_per_line": null,
+    "setting-command-enable": null
   },
   "Notifications": "Notificatie"
 }

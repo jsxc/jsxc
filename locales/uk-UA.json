@@ -390,6 +390,7 @@
     "Control": "Контроль",
     "Incoming_video_call": "Вхідний відеовиклик",
     "Plugins": "Додатки",
+    "General": null,
     "Room_creation": "Створити групу",
     "setting-bookmarks-enable": "Активуйте для збереження групових чатів у вашому списку контактів.",
     "setting-http-upload-enable": "Дозволяє надсилати файли до групових чатів, а також дозволяє вашому контакту отримувати надіслані файли на усіх пристроях.",
@@ -416,7 +417,17 @@
     "muc_not-acceptable": null,
     "muc_registration-required": null,
     "muc_conflict": null,
-    "muc_service-unavailable": null
+    "muc_service-unavailable": null,
+    "contact_search": null,
+    "Search": null,
+    "First": null,
+    "Last": null,
+    "Nick": null,
+    "Email": null,
+    "no_results": null,
+    "trusted_domains": null,
+    "one_domain_per_line": null,
+    "setting-command-enable": null
   },
   "Notifications": "Сповіщення"
 }

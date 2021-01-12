@@ -390,6 +390,7 @@
     "Control": "Controle",
     "Incoming_video_call": "Recebendo chamada de vídeo",
     "Plugins": "Plugins",
+    "General": null,
     "Room_creation": "Criação de sala",
     "setting-bookmarks-enable": "Se você quiser armazenar os seus chats em grupo na sua lista de contatos, deixe isso habilitado.",
     "setting-http-upload-enable": "permite enviar arquivos para grupos de conversa e permite que seus contatos recebam um arquivo transferido em todos os seus dispositivos.",
@@ -416,7 +417,17 @@
     "muc_not-acceptable": null,
     "muc_registration-required": null,
     "muc_conflict": null,
-    "muc_service-unavailable": null
+    "muc_service-unavailable": null,
+    "contact_search": null,
+    "Search": null,
+    "First": null,
+    "Last": null,
+    "Nick": null,
+    "Email": null,
+    "no_results": null,
+    "trusted_domains": null,
+    "one_domain_per_line": null,
+    "setting-command-enable": null
   },
   "Notifications": "Notificações"
 }

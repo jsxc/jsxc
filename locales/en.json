@@ -344,10 +344,10 @@
     "Show_debug_log": "Show debug log",
     "You_are_currently_offline": "You are currently offline",
     "Your_contact_list_is_empty": "Your contact list is empty",
-	"Your_group_list_is_empty": "Your group list is empty",
-	"contactfilter": "Filter",
-	"groups": "Groups",
-	"contacts": "Contacts",
+    "Your_group_list_is_empty": "Your group list is empty",
+    "contactfilter": "Filter",
+    "groups": "Groups",
+    "contacts": "Contacts",
     "Configure": "Configure",
     "Memberlist": "Manage members",
     "muc_one_jid_per_line": "One JID per line.",
@@ -426,7 +426,8 @@
     "Email": "E-Mail",
     "no_results": "No results were found.",
     "trusted_domains": "Trusted domains",
-    "one_domain_per_line": "Theese are domains from which attachments will be loaded automatically. (One domain per line)"
+    "one_domain_per_line": "Theese are domains from which attachments will be loaded automatically. (One domain per line)",
+    "setting-command-enable": "Allows to control different settings via text commands."
   },
   "Notifications": "Notifications"
 }

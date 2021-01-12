@@ -390,6 +390,7 @@
     "Control": "Kontroll",
     "Incoming_video_call": null,
     "Plugins": "Tillägg",
+    "General": null,
     "Room_creation": null,
     "setting-bookmarks-enable": "Aktivera för att spara \"gruppchattar\" i din kontaktlista.",
     "setting-http-upload-enable": "Tillåter att skicka filer till \"gruppchattar\" och gör det möjligt för din kontakt att ta emot den överförande filen på alla sina enheter.",
@@ -416,7 +417,17 @@
     "muc_not-acceptable": "Du måste använda det alias som är reserverat",
     "muc_registration-required": "Du saknar behörighet till detta rum så du inte finns med i medlemslistan.",
     "muc_conflict": "Ditt alias existerar redan.",
-    "muc_service-unavailable": "Du kan inte ansluta till valt rum då maximalt antal deltagare redan är uppnått."
+    "muc_service-unavailable": "Du kan inte ansluta till valt rum då maximalt antal deltagare redan är uppnått.",
+    "contact_search": null,
+    "Search": null,
+    "First": null,
+    "Last": null,
+    "Nick": null,
+    "Email": null,
+    "no_results": null,
+    "trusted_domains": null,
+    "one_domain_per_line": null,
+    "setting-command-enable": null
   },
   "Notifications": null
 }

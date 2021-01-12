@@ -390,6 +390,7 @@
     "Control": "Kontrolle",
     "Incoming_video_call": "Eingehender Videoanruf",
     "Plugins": "Plugins",
+    "General": null,
     "Room_creation": "Neuer Raum",
     "setting-bookmarks-enable": "Dieses Plugin wird benötigt um Gruppenchats in der Kontaktliste zu speichern.",
     "setting-http-upload-enable": "Mit diesem Plugin können Dateien in Gruppenchats geteilt werden und es ermöglicht dem Empfänger eine Datei auf allen seinen Endgeräten zu empfangen.",
@@ -417,15 +418,16 @@
     "muc_registration-required": "Sie können dem Raum nicht beitreten, da Sie kein Mitglied sind.",
     "muc_conflict": "Ihr ausgewählter Nickname ist nicht verfügbar.",
     "muc_service-unavailable": "Die maximale Kapazität an Teilnehmern wurde erreicht.",
-    "contact_search": "Kontakt suchen",
-    "Search": "Suchen",
-    "First": "Vorname",
-    "Last": "Nachname",
-    "Nick": "Spitzname",
-    "Email": "E-Mail",
-    "no_results": "Die Suche ergab keine Ergebnisse.",
-    "trusted_domains": "Vertrauenswürdige Domänen",
-    "one_domain_per_line": "Dies sind Domänen, von denen Anhänge automatisch geladen werden. (Eine Domäne pro Zeile)"
+    "contact_search": null,
+    "Search": null,
+    "First": null,
+    "Last": null,
+    "Nick": null,
+    "Email": null,
+    "no_results": null,
+    "trusted_domains": null,
+    "one_domain_per_line": null,
+    "setting-command-enable": null
   },
   "Notifications": "Benachrichtigungen"
 }

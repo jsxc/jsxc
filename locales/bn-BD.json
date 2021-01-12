@@ -390,6 +390,7 @@
     "Control": null,
     "Incoming_video_call": null,
     "Plugins": null,
+    "General": null,
     "Room_creation": null,
     "setting-bookmarks-enable": null,
     "setting-http-upload-enable": null,
@@ -419,11 +420,14 @@
     "muc_service-unavailable": null,
     "contact_search": null,
     "Search": null,
-    "First":  null,
-    "Last":  null,
-    "Nick":  null,
-    "Email":  null,
-    "no_results": null
+    "First": null,
+    "Last": null,
+    "Nick": null,
+    "Email": null,
+    "no_results": null,
+    "trusted_domains": null,
+    "one_domain_per_line": null,
+    "setting-command-enable": null
   },
   "Notifications": null
 }

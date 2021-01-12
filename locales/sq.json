@@ -390,6 +390,7 @@
     "Control": "Kontroll",
     "Incoming_video_call": "Thirrje video ardhëse",
     "Plugins": "Shtojca",
+    "General": null,
     "Room_creation": "Krijim dhome",
     "setting-bookmarks-enable": "Nëse doni t’i depozitoni bisedat tuaja të grupit te lista juaj e kontakteve, lëreni të aktivizuar.",
     "setting-http-upload-enable": "Lejon të dërgohen kartela te biseda grupi dhe i bën të mundur kontaktit tuaj ta marrë kartelën e shpërngulur në krejt pajisjet e tij.",
@@ -416,7 +417,17 @@
     "muc_not-acceptable": "Duhet të përdorni nofkën e rezervuar.",
     "muc_registration-required": "S’lejohet të hyni në këtë dhomë, ngaqë s’gjendeni te lista e anëtarëve.",
     "muc_conflict": "Nofka juaj qe e zënë tashmë.",
-    "muc_service-unavailable": "S’jeni në gjendje të hyni, ngaqë është mbërritur në numrin maksimum të përdoruesve."
+    "muc_service-unavailable": "S’jeni në gjendje të hyni, ngaqë është mbërritur në numrin maksimum të përdoruesve.",
+    "contact_search": null,
+    "Search": null,
+    "First": null,
+    "Last": null,
+    "Nick": null,
+    "Email": null,
+    "no_results": null,
+    "trusted_domains": null,
+    "one_domain_per_line": null,
+    "setting-command-enable": null
   },
   "Notifications": "Njoftime"
 }
