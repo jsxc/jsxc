@@ -1,7 +1,6 @@
 import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import Translation from '@util/Translation';
-import Contact from '../Contact'
 import JID from '../JID'
 
 const MIN_VERSION = '4.0.0';
@@ -44,11 +43,11 @@ export default class TimePlugin extends AbstractPlugin {
    }
 
    //query information from contact
-   public query(contact: Contact): Promise<{}>
+   public query(jid: JID): Promise<{}>
    {
       let iq = $iq({
          type: 'get',
-         to: contact.getJid().full,
+         to: jid.full,
          xmlns: 'jabber:client'
       }).c('query', {
          'xmlns': NAMESPACE_TIME
@@ -85,8 +84,11 @@ export default class TimePlugin extends AbstractPlugin {
    private onReceiveQuery = (stanza) => {
         let fromjid = new JID($(stanza).attr('from'));
         let tojid = new JID($(stanza).attr('to'));
-        if (this.pluginAPI.getContact(fromjid)|| //only send to contacts
-            tojid.domain===fromjid.bare) //or own domain server
+        let type = $(stanza).attr('type');
+
+        if (type==='get'&&
+           (this.pluginAPI.getContact(fromjid)|| //only send to contacts
+            tojid.domain===fromjid.bare)) //or own domain server
         {
             let time = new Date();
             let utc = time.toISOString();
@@ -95,6 +97,6 @@ export default class TimePlugin extends AbstractPlugin {
 
             this.sendResponse($(stanza).attr('id'),$(stanza).attr('from'),tzo.toString(),utc);
         }
-      return true;
+        return true;
    }
 }
