@@ -88,7 +88,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
       return this.getOmemo().prepare().then(async () => {
          if (!this.getOmemo().isSupported(contact)) {
-            if (!this.refreshDeviceList(contact)) {
+            if (!(await this.refreshDeviceList(contact))) {
                throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
             }
          }
