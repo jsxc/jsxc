@@ -13,7 +13,7 @@ import MultiUserContact from '@src/MultiUserContact';
 
 export default class Archive {
    private archiveJid: IJID;
-   private messageCache: JQuery<HTMLElement>[] = [];
+   private messageCache: any[] = [];
 
    constructor(private plugin: MessageArchiveManagementPlugin, private contact: Contact) {
       let jid = contact.isGroupChat() ? contact.getJid() : plugin.getConnection().getJID();
@@ -96,8 +96,9 @@ export default class Archive {
          });
    }
 
-   public onForwardedMessage(forwardedElement: JQuery<HTMLElement>) {
-      this.messageCache.push(forwardedElement);
+   public onForwardedMessage(forwardedElement: JQuery<HTMLElement>, messageid : string) {
+       let item = {'element': forwardedElement, 'id': messageid};
+       this.messageCache.push(item);
    }
 
    public async parseForwardedMessage(forwardedElement: JQuery<HTMLElement>): Promise<IMessage> {
@@ -176,17 +177,25 @@ export default class Archive {
       let queryId = finElement.attr('queryid');
 
       let firstResultId = finElement.find('first').text();
-      let lastResultId = finElement.find('last').text();
-      if (Number(firstResultId)>Number(lastResultId))
+
+      if (this.messageCache.length > 0)
       {
-          let temp = firstResultId;
-          firstResultId = lastResultId;
-          lastResultId = temp;
-          this.messageCache.reverse();
+          let lastResultId = finElement.find('last').text();
+
+          let firstItem = this.messageCache[0];
+          let lastItem = this.messageCache[this.messageCache.length-1];
+
+          if (firstItem.id===firstResultId&&lastItem.id===lastResultId)
+          {
+              let temp = firstResultId;
+              firstResultId = lastResultId;
+              lastResultId = temp;
+              this.messageCache.reverse();
+          }
       }
 
       while (this.messageCache.length > 0) {
-         let messageElement = this.messageCache.pop();
+         let messageElement = (<any>this.messageCache.pop()).element;
 
          try {
             let message = await this.parseForwardedMessage(messageElement);

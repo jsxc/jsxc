@@ -174,6 +174,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
    private onMamMessage = (stanza: string): boolean => {
       let stanzaElement = $(stanza);
       let resultElement = stanzaElement.find(`result[xmlns^="urn:xmpp:mam:"]`);
+      let id = resultElement.attr('id');
       let queryId = resultElement.attr('queryid');
 
       if (resultElement.length !== 1 || !queryId) {
@@ -194,7 +195,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
 
       let jid = new JID(bareJid);
 
-      this.getArchive(jid).onForwardedMessage(forwardedElement);
+      this.getArchive(jid).onForwardedMessage(forwardedElement,id);
 
       return true;
    }
