@@ -172,6 +172,19 @@ export default class Archive {
 
       let transcript = this.contact.getTranscript();
 
+      let isArchiveExhausted = finElement.attr('complete') === 'true';
+      let queryId = finElement.attr('queryid');
+
+      let firstResultId = finElement.find('first').text();
+      let lastResultId = finElement.find('last').text();
+      if (Number(firstResultId)>Number(lastResultId))
+      {
+          let temp = firstResultId;
+          firstResultId = lastResultId;
+          lastResultId = temp;
+          this.messageCache.reverse();
+      }
+
       while (this.messageCache.length > 0) {
          let messageElement = this.messageCache.pop();
 
@@ -183,10 +196,6 @@ export default class Archive {
             continue;
          }
       }
-
-      let isArchiveExhausted = finElement.attr('complete') === 'true';
-      let firstResultId = finElement.find('first').text();
-      let queryId = finElement.attr('queryid');
 
       if (isArchiveExhausted) {
          let archiveExhaustedMessage = new Message({
