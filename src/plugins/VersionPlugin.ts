@@ -40,7 +40,7 @@ export default class VersionPlugin extends AbstractPlugin {
    }
 
    //query information from contact
-   public queryVersion(jid: JID): Promise<{}> {
+   public queryVersion(jid: JID): Promise<Element> {
       let iq = $iq({
          type: 'get',
          to: jid.full,
@@ -53,7 +53,7 @@ export default class VersionPlugin extends AbstractPlugin {
    }
 
    //send information response
-   private sendResponse(idstr: string, jid: string, name?: string, version?: string, os?: string): Promise<{}> {
+   private sendResponse(idstr: string, jid: string, name?: string, version?: string, os?: string): Promise<Element> {
       let iq = $iq({
          type: 'result',
          to: jid,
