@@ -427,7 +427,8 @@
     "no_results": "No results were found.",
     "trusted_domains": "Trusted domains",
     "one_domain_per_line": "Theese are domains from which attachments will be loaded automatically. (One domain per line)",
-    "setting-command-enable": "Allows to control different settings via text commands."
+    "setting-command-enable": "Allows to control different settings via text commands.",
+    "setting-version": "Returns version information about the software running this Client."
   },
   "Notifications": "Notifications"
 }

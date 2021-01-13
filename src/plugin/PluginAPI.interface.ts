@@ -28,7 +28,7 @@ export interface IPluginAPI {
 
    send(stanzaElement: Strophe.Builder)
 
-   sendIQ(stanzaElement: Strophe.Builder): Promise<{}>
+   sendIQ(stanzaElement: Strophe.Builder): Promise<Element>
 
    getDiscoInfoRepository(): IDiscoInfoRepository
 

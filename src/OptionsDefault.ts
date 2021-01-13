@@ -143,3 +143,5 @@ export let automaticallyRestoreAccounts = true;
 
 /** Images are automatically loaded from trusted domains. To trust all subdomains, use a asterix as wildcard. */
 export let trustedDomains: string[] = [];
+
+export let includeOSInVersionResponse = false;

@@ -69,7 +69,7 @@ export default class PluginAPI implements IPluginAPI {
       this.getConnection().pluginOnlySend(stanzaElement);
    }
 
-   public sendIQ = (stanzaElement: Strophe.Builder): Promise<{}> => {
+   public sendIQ = (stanzaElement: Strophe.Builder): Promise<Element> => {
       return this.getConnection().pluginOnlySendIQ(stanzaElement);
    }
 
