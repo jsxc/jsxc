@@ -25,6 +25,8 @@ enum Presence {
    offline
 }
 
+type ExtensivePresence = {presence: Presence, status: string};
+
 abstract class AbstractConnection {
    protected abstract connection;
 
@@ -182,13 +184,17 @@ abstract class AbstractConnection {
       }
    }
 
-   public sendPresence(presence?: Presence) {
+   public sendPresence(presence?: Presence, statusText?: string) {
       let presenceStanza = $pres();
 
       presenceStanza.c('c', this.generateCapsAttributes()).up();
 
       if (typeof presence !== 'undefined' && presence !== Presence.online) {
          presenceStanza.c('show').t(Presence[presence]).up();
+      }
+
+      if (statusText) {
+         presenceStanza.c('status').t(statusText).up();
       }
 
       // var priority = Options.get('priority');
@@ -277,4 +283,4 @@ abstract class AbstractConnection {
    }
 }
 
-export { AbstractConnection, Presence };
+export { AbstractConnection, Presence, ExtensivePresence };

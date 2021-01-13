@@ -10,11 +10,14 @@ import { IContact } from '../Contact.interface'
 import WindowList from './ChatWindowList'
 import Client from '../Client'
 import Translation from '../util/Translation'
+import showSetExStatusDialog from './dialogs/exstatus'
 import { Notice, TYPE } from '../Notice'
 import { Presence } from '../connection/AbstractConnection'
 import { NoticeManager } from '../NoticeManager'
 import ClientAvatar from '../ClientAvatar'
 import confirmDialog from './dialogs/confirm'
+import Utils from '@util/Utils'
+import Emoticons from '@src/Emoticons'
 
 let rosterTemplate = require('../../template/roster.hbs')
 
@@ -156,12 +159,16 @@ export default class Roster {
    }
 
    public refreshOwnPresenceIndicator() {
+      let status = Client.getPresenceController().getStatus();
       let confirmedPresence = Client.getPresenceController().getCurrentPresence();
       let requestedPresence = Client.getPresenceController().getTargetPresence();
       let presence = typeof requestedPresence === 'number' ? requestedPresence : confirmedPresence;
 
+      let htmlStatus = Emoticons.toImage(Utils.escapeHTML(status));
+      this.element.find('.jsxc-js-presence-menu .jsxc-bar__caption__secondary').html(htmlStatus);
+
       let label = $('.jsxc-js-presence-menu .jsxc-' + Presence[presence]).text();
-      let labelElement = this.element.find('.jsxc-js-presence-menu .jsxc-menu__button');
+      let labelElement = this.element.find('.jsxc-js-presence-menu .jsxc-bar__caption__primary');
 
       labelElement.text(label);
       this.element.attr('data-presence', Presence[confirmedPresence]);
@@ -378,6 +385,12 @@ export default class Roster {
    private registerPresenceHandler() {
       this.element.find('.jsxc-js-presence-menu li').click(function () {
          let presenceString = <string>$(this).data('presence');
+
+         if (presenceString === 'extended-status') {
+            showSetExStatusDialog();
+            return;
+         }
+
          let oldPresence = Client.getPresenceController().getTargetPresence();
          let requestedPresence = Presence[presenceString];
 
