@@ -53,6 +53,12 @@ class MultiUserJoinDialog {
          this.updateAccount(Client.getAccountManager().getAccount().getUid());
       }
 
+      $('.jsxc-memberlist-show').on('click',(e)=>
+      {
+        $('.jsxc-memberlist').toggleClass('jsxc-invisible');
+        $(e.target).toggleClass('jsxc-memberlist-show-active');
+      });
+
       this.initializeInputElements();
    }
 
@@ -102,37 +108,6 @@ class MultiUserJoinDialog {
          if (ev.which === ENTER_KEY) {
             this.continueHandler(ev);
          }
-      });
-
-      this.roomInputElement.on('change keyup',(e)=>{
-          let room = $(e.target).val().toString();
-          if (room.length>0&&$('#jsxc-roomlist-selection option[data-jid="'+room+'@'+this.serverInputElement.val().toString()+'"]').length>0)
-          {
-            let roomJid = new JID(room+'@'+this.serverInputElement.val().toString());
-            let ul = this.dom.find('.jsxc-memberlist');
-            ul.empty();
-            this.account.getConnection().getDiscoService().getDiscoItems(roomJid).then((stanza) => {
-
-                 $(stanza).find('item').each((index, element) => {
-                    if ($('.jsxc-memberlist-show').hasClass('jsxc-invisible'))
-                    {
-                        $('.jsxc-memberlist-show').removeClass('jsxc-invisible');
-                    }
-                    let li = $('<li>');
-                    let strjid = $(element).attr('jid');
-                    strjid = strjid.substring(strjid.lastIndexOf('/')+1);
-                    li.append(strjid); // JID API did not work... no resource on private room jids
-                    ul.append(li);
-                 });
-            });
-          }
-          else
-          {
-            if (!$('.jsxc-memberlist-show').hasClass('jsxc-invisible'))
-            {
-                $('.jsxc-memberlist-show').addClass('jsxc-invisible');
-            }
-          }
       });
 
       this.dom.find('.jsxc-continue').click(this.continueHandler);
@@ -259,6 +234,35 @@ class MultiUserJoinDialog {
 
    private continueHandler = (ev) => {
       ev.preventDefault();
+
+      let room = this.roomInputElement.val().toString();
+      if ($('#jsxc-roomlist-selection option[data-jid="'+room+'@'+this.serverInputElement.val().toString()+'"]').length>0)
+      {
+        let roomJid = new JID(room+'@'+this.serverInputElement.val().toString());
+        let ul = this.dom.find('.jsxc-memberlist');
+        ul.empty();
+        this.account.getConnection().getDiscoService().getDiscoItems(roomJid).then((stanza) => {
+
+             $(stanza).find('item').each((index, element) => {
+                if ($('.jsxc-memberlist-show').hasClass('jsxc-invisible'))
+                {
+                    $('.jsxc-memberlist-show').removeClass('jsxc-invisible');
+                }
+                let li = $('<li>');
+                let strjid = $(element).attr('jid');
+                strjid = strjid.substring(strjid.lastIndexOf('/')+1);
+                li.append(strjid); // JID API did not work... no resource on private room jids
+                ul.append(li);
+             });
+        });
+      }
+      else
+      {
+        if (!$('.jsxc-memberlist-show').hasClass('jsxc-invisible'))
+        {
+            $('.jsxc-memberlist-show').addClass('jsxc-invisible');
+        }
+      }
 
       this.dom.find('input, select').prop('disabled', true);
       this.testInputValues()
