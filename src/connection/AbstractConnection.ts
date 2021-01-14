@@ -114,6 +114,10 @@ abstract class AbstractConnection {
       return this.account.getJID();
    }
 
+   public getServerJID(): JID {
+      return new JID('', this.getJID().domain, '');
+   }
+
    public sendMessage(message: Message) {
       if (message.getDirection() !== Message.DIRECTION.OUT) {
          return;

@@ -25,6 +25,7 @@ export default class RosterItem {
       });
 
       this.element = $(template);
+      this.element.attr('data-account-uid', this.contact.getAccount().getUid());
       this.element.attr('data-id', this.contact.getId());
       this.element.attr('data-jid', this.contact.getJid().bare);
       this.element.attr('data-name', this.contact.getName().toLowerCase());
@@ -47,6 +48,10 @@ export default class RosterItem {
       });
 
       this.element.click(function() {
+         if ($(this).hasClass('jsxc-blocked')) {
+            return;
+         }
+
          let chatWindow = contact.getChatWindowController();
 
          if ($('body').hasClass('jsxc-fullscreen') || Client.isExtraSmallDevice()) {

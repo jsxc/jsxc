@@ -15,7 +15,8 @@
   z-index: 999;
 }
 
-.jsxc-memberlist-textarea {
+.jsxc-memberlist-textarea,
+.jsxc-blocklist-textarea {
   margin-left: 15px;
   min-height: 300px !important;
   min-width: 500px !important;
@@ -296,4 +297,9 @@ button.jsxc-page__subheadline {
     padding: 5px;
     text-align: center;
   }
+}
+
+.jsxc-account-choice-block {
+  height: 30px;
+  margin-bottom: 2em;
 }

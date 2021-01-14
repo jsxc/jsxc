@@ -4,12 +4,12 @@ import PluginAPI from '../../plugin/PluginAPI'
 import Message from '../../Message'
 import Contact from '../../Contact'
 import ChatWindow from '../../ui/ChatWindow'
-import Storage from '../../Storage'
 import Translation from '../../util/Translation'
 import * as Namespace from '../../connection/xmpp/namespace'
 import ChatStateConnection from './ChatStateConnection'
 import ChatStateMachine from './ChatStateMachine'
 import { ContactType } from '@src/Contact.interface';
+import IStorage from '@src/Storage.interface'
 
 /**
  * XEP-0085: Chat State Notifications
@@ -61,7 +61,7 @@ export default class ChatStatePlugin extends AbstractPlugin {
       connection.registerHandler(this.onChatState, Namespace.get('CHATSTATES'), 'message', 'chat');
    }
 
-   public getStorage(): Storage {
+   public getStorage(): IStorage {
       return this.pluginAPI.getStorage();
    }
 
