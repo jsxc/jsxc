@@ -92,7 +92,7 @@ export default class RosterItem {
       avatar.addElement(this.element.find('.jsxc-avatar'));
 
       this.contact.registerHook('name', (newName) => {
-         this.element.attr('data-name', newName.toLowerCase());
+         this.element.attr('data-name', newName?.toLowerCase());
 
          this.element.find('.jsxc-bar__caption__primary').text(newName);
       });
