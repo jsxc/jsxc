@@ -7,6 +7,7 @@ import Translation from '../../util/Translation'
 import Log from '../../util/Log'
 import Account from '@src/Account';
 import MultiUserContact from '@src/MultiUserContact';
+import Form from '@connection/Form'
 
 let multiUserJoinTemplate = require('../../../template/multiUserJoin.hbs');
 
@@ -326,6 +327,22 @@ class MultiUserJoinDialog {
 
       let name = $(stanza).find('identity').attr('name');
       let subject = $(stanza).find('field[var="muc#roominfo_subject"]').attr('label');
+
+      let form = Form.fromXML(stanza);
+      let fields = form.getFields();
+
+      fields.forEach(field => {
+         if (!field.getLabel()) {
+            return;
+         }
+
+         let value = field.getType() === 'boolean' ?
+            (field.getValues()[0] === '1' ? Translation.t('Yes') : Translation.t('No'))
+            :
+            field.getValues().join(', ');
+
+         tableElement.appendRow(field.getLabel(), value);
+      });
 
       tableElement.appendRow('Name', name);
       tableElement.appendRow('Subject', subject);

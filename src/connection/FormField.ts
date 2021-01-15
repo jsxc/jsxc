@@ -124,6 +124,14 @@ export default class FormField {
       return this.data.name;
    }
 
+   public getType(): string {
+      return this.data.type;
+   }
+
+   public getLabel(): string {
+      return this.data.label;
+   }
+
    public getValues(): string[] {
       return this.data.values;
    }
