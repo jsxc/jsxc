@@ -10,6 +10,7 @@ import ContactProvider from '@src/ContactProvider';
 import { IAvatar } from '@src/Avatar.interface';
 import Pipe from '@util/Pipe';
 import CommandRepository, { CommandAction } from '@src/CommandRepository'
+import IStorage from '@src/Storage.interface'
 
 export interface IPluginAPI {
 
@@ -22,9 +23,9 @@ export interface IPluginAPI {
    createMessage(uid: string): IMessage
    createMessage(data: IMessagePayload): IMessage
 
-   getStorage()
+   getStorage(): IStorage
 
-   getSessionStorage()
+   getSessionStorage(): IStorage
 
    send(stanzaElement: Strophe.Builder)
 
@@ -71,4 +72,6 @@ export interface IPluginAPI {
    registerCommand(command: string, action: CommandAction, description: string, category?: string): void
 
    getCommandRepository(): CommandRepository
+
+   getAccountUid(): string
 }

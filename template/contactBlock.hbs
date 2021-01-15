@@ -1,0 +1,21 @@
+<h3>{{t "Blocking_users"}}</h3>
+
+<div class="jsxc-account-choice-block">
+    <label class="col-sm-4 control-label" for="jsxc-account">{{t "Account"}}</label>
+    <div class="col-sm-8">
+       <select class="form-control" name="account"></select>
+    </div>
+</div>
+
+<form class="form-horizontal" data-type="form">
+   <div class="form-group" data-type="jid-multi" data-name="blocklist" style="padding-right: 30px;">
+      <label for="jsxc-blocklist-textarea" class="col-sm-8">{{t "muc_one_jid_per_line"}}</label>
+      <textarea name="jsxc-blocklist-textarea" class="jsxc-blocklist-textarea col-sm-8"></textarea>
+   </div>
+   <div class="form-group">
+      <div class="col-sm-offset-4 col-sm-8">
+         <button class="jsxc-button jsxc-button--default jsxc-js-close" type="button">{{t "Close"}}</button>
+         <button class="jsxc-button jsxc-button--primary" type="submit">{{t "Save"}}</button>
+      </div>
+   </div>
+</form>

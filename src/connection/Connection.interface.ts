@@ -36,6 +36,8 @@ export interface IConnection {
 
    getJID(): IJID
 
+   getServerJID(): IJID
+
    sendMessage(message: Message)
 
    sendPresence(presence?: Presence, statusText?: string)

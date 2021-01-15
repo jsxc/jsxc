@@ -169,4 +169,8 @@ export default class PluginAPI implements IPluginAPI {
    public getCommandRepository(): CommandRepository {
       return this.account.getCommandRepository();
    }
+
+   public getAccountUid(): string {
+      return this.account.getUid();
+   }
 }
