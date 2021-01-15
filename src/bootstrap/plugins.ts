@@ -15,6 +15,7 @@ import ChatMarkersPlugin from '@src/plugins/chatMarkers/ChatMarkersPlugin'
 import PingPlugin from '@src/plugins/PingPlugin'
 import CommandPlugin from '@src/plugins/CommandPlugin'
 import VersionPlugin from '@src/plugins/VersionPlugin'
+import TimePlugin from '../plugins/TimePlugin'
 
 Client.addPlugin(OTRPlugin);
 Client.addPlugin(OMEMOPlugin);
@@ -32,3 +33,4 @@ Client.addPlugin(ChatMarkersPlugin);
 Client.addPlugin(PingPlugin);
 Client.addPlugin(CommandPlugin);
 Client.addPlugin(VersionPlugin);
+Client.addPlugin(TimePlugin);
