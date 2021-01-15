@@ -17,14 +17,30 @@ export default function () {
       let accountoption = $('<option>').text(account.getJID().bare).val(account.getUid());
       dialog.getDom().find('select[name="account"]').append(accountoption);
    });
-   //@TODO check support
 
    dialog.getDom().find('select[name="account"]').on('change', (ev) => {
+
       let uid = $(ev.target).val().toString();
       let account = Client.getAccountManager().getAccount(uid);
-      let blockPlugin = account.getPluginRepository().getPlugin(BlockingCommandPlugin.getId()) as BlockingCommandPlugin;
 
-      getBlockList(blockPlugin);
+      //Check Support
+      account.getDiscoInfoRepository().hasFeature(undefined, BlockingCommandPlugin.getNS()).then((result)=>{
+          if (result)
+          {
+              $('.jsxc-block-error').empty();
+              let blockPlugin = account.getPluginRepository().getPlugin(BlockingCommandPlugin.getId()) as BlockingCommandPlugin;
+              getBlockList(blockPlugin);
+          }
+          else
+          {
+              dialog.getDom().find('textarea[name="jsxc-blocklist-textarea"]').val('');
+              $('.jsxc-block-error').text(Translation.t('blocking_cmd_not_supported'));
+          }
+      }).catch((err)=>{
+          dialog.getDom().find('textarea[name="jsxc-blocklist-textarea"]').val('');
+          Log.warn(Translation.t('blocking_cmd_not_supported'), err)
+          $('.jsxc-block-error').text(Translation.t('blocking_cmd_not_supported'));
+      });
    });
 
    dialog.getDom().find('select[name="account"]').trigger('change');
@@ -41,9 +57,9 @@ function getBlockList(blockPlugin: BlockingCommandPlugin) {
 
          initSubmit(dialog, blockPlugin, blocklist);
       }).catch((err) => {
-         Log.warn('Can not get block list', err)
+         Log.warn(Translation.t('error_receiving_blocklist'), err)
 
-         $('<div>').addClass('jsxc-warning').text(Translation.t('UNKNOWN_ERROR')).appendTo(dom);
+         $('<div>').addClass('jsxc-warning').text(Translation.t('error_receiving_blocklist')).appendTo(dom);
       });
 }
 

@@ -146,10 +146,32 @@ export default class BlockingCommandPlugin extends AbstractPlugin {
       unblockedJids.forEach(jid => {
          if (!newList.includes(jid)) {
             getElements(jid).removeClass('jsxc-blocked');
+
+            let contact = this.pluginAPI.getContact(new JID(jid));
+            if (contact)
+            {
+                let chatwindow =  contact.getChatWindow();
+                if (chatwindow)
+                {
+                   chatwindow.getElement().removeClass('jsxc-blocked');
+                }
+            }
          }
       });
 
-      blockedJids.forEach(jid => getElements(jid).addClass('jsxc-blocked'));
+      blockedJids.forEach((jid) => {
+          getElements(jid).addClass('jsxc-blocked');
+
+        let contact = this.pluginAPI.getContact(new JID(jid));
+        if (contact)
+        {
+            let chatwindow =  contact.getChatWindow();
+            if (chatwindow)
+            {
+               chatwindow.getController().close();
+            }
+        }
+      });
    }
 
    private onBlocklistUpdate = (stanza: string) => {

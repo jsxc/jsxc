@@ -273,7 +273,11 @@ export default class ChatWindow {
       });
    }
 
-   private getController() {
+   public getElement() {
+      return this.element;
+   }
+
+   public getController() {
       return this.contact.getChatWindowController();
    }
 
