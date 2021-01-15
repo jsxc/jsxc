@@ -84,8 +84,8 @@ export default class Form {
    }
 
    private checkItems() {
-      if (!this.reportedFields) {
-         throw new InvalidParameterError('Items must have corresponding reported Fields.');
+      if (!this.reportedFields || this.reportedFields.length === 0) {
+         return;
       }
 
       this.items.forEach((fields, itemIndex) => {
