@@ -85,7 +85,7 @@ export default class BlockingCommandPlugin extends AbstractPlugin {
          xmlns: NAMESPACE_BLOCKING_COMMAND
       });
 
-      if (!await this.pluginAPI.getDiscoInfoRepository().hasFeature(undefined, NAMESPACE_BLOCKING_COMMAND)) {
+      if (!await this.hasSupport()) {
          this.pluginAPI.Log.info('This server does not support blocking command');
 
          return [];
@@ -97,6 +97,10 @@ export default class BlockingCommandPlugin extends AbstractPlugin {
       return blocklistElement.find('> item').map(function (index, item) {
          return $(item).attr('jid').toLowerCase();
       }).get();
+   }
+
+   public hasSupport(): Promise<boolean> {
+      return this.pluginAPI.getDiscoInfoRepository().hasFeature(undefined, NAMESPACE_BLOCKING_COMMAND);
    }
 
    public block(items: string[]): Promise<Element> {

@@ -24,7 +24,20 @@ export default function () {
       let account = Client.getAccountManager().getAccount(uid);
       let blockPlugin = account.getPluginRepository().getPlugin(BlockingCommandPlugin.getId()) as BlockingCommandPlugin;
 
-      getBlockList(blockPlugin);
+      removeWarnings();
+      dialog.getDom().find('textarea[name="jsxc-blocklist-textarea"]').val('');
+
+      blockPlugin.hasSupport().then(hasSupport => {
+         if (hasSupport) {
+            getBlockList(blockPlugin);
+         } else {
+            appendWarning(Translation.t('blocking_cmd_not_supported'));
+         }
+      }).catch(err => {
+         Log.warn('Can not check support for blocking command', err);
+
+         appendWarning(Translation.t('UNKNOWN_ERROR'));
+      });
    });
 
    dialog.getDom().find('select[name="account"]').trigger('change');
@@ -43,7 +56,7 @@ function getBlockList(blockPlugin: BlockingCommandPlugin) {
       }).catch((err) => {
          Log.warn('Can not get block list', err)
 
-         $('<div>').addClass('jsxc-warning').text(Translation.t('UNKNOWN_ERROR')).appendTo(dom);
+         appendWarning(Translation.t('UNKNOWN_ERROR'));
       });
 }
 
@@ -77,4 +90,16 @@ function initSubmit(dialog: Dialog, blockPlugin: BlockingCommandPlugin, oldBlock
          dialog.close();
       });
    });
+}
+
+function appendWarning(text: string) {
+   let dom = dialog.getDom();
+
+   $('<div>').addClass('jsxc-warning').text(text).appendTo(dom);
+}
+
+function removeWarnings() {
+   let dom = dialog.getDom();
+
+   dom.find('.jsxc-warning').remove();
 }
