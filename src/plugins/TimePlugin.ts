@@ -1,6 +1,7 @@
 import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
 import Translation from '@util/Translation';
+import * as moment from 'moment';
 import JID from '../JID'
 
 const MIN_VERSION = '4.0.0';
@@ -9,8 +10,6 @@ const MAX_VERSION = '99.0.0';
 const NAMESPACE_TIME = 'urn:xmpp:time'
 
 export default class TimePlugin extends AbstractPlugin {
-
-   protected pluginAPI: PluginAPI;
 
    public static getId(): string {
       return 'time';
@@ -34,69 +33,56 @@ export default class TimePlugin extends AbstractPlugin {
    constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
-      let connection = pluginAPI.getConnection();
-      this.pluginAPI=pluginAPI;
       pluginAPI.addFeature(NAMESPACE_TIME);
 
-      connection.registerHandler(this.onReceiveQuery, NAMESPACE_TIME, 'iq');
+      let connection = pluginAPI.getConnection();
 
+      connection.registerHandler(this.onReceiveQuery, NAMESPACE_TIME, 'iq', 'get');
    }
 
-   //query information from contact
-   public query(jid: JID): Promise<{}>
-   {
+   public query(jid: JID): Promise<{ tzo?: string, utc?: string }> {
       let iq = $iq({
          type: 'get',
          to: jid.full,
          xmlns: 'jabber:client'
-      }).c('query', {
+      }).c('time', {
          'xmlns': NAMESPACE_TIME
       });
 
-      return this.pluginAPI.sendIQ(iq);
+      return this.pluginAPI.sendIQ(iq).then(stanza => {
+         let timeElement = $(stanza).find(`time[xmlns="${NAMESPACE_TIME}"]`);
+
+         return {
+            utc: timeElement.find('>utc').text(),
+            tzo: timeElement.find('>tzo').text(),
+         }
+      });
    }
 
-   //send information response
-   public sendResponse(idstr: string, jid: string, tzo?: string, utc?: string): Promise<{}>
-   {
+   private onReceiveQuery = (stanza: string) => {
+      let fromJid = new JID($(stanza).attr('from'));
+      let toJid = new JID($(stanza).attr('to'));
+
+      if (this.pluginAPI.getContact(fromJid) || toJid.domain === fromJid.bare) {
+         this.sendResponse($(stanza).attr('id'), $(stanza).attr('from'));
+      }
+
+      return true;
+   }
+
+   private sendResponse(id: string, jid: string): Promise<Element> {
       let iq = $iq({
          type: 'result',
          to: jid,
-         id: idstr,
+         id,
          xmlns: 'jabber:client'
-      }).c('query', {
+      }).c('time', {
          'xmlns': NAMESPACE_TIME
       });
 
-      if (tzo)
-      {
-          iq.c('tzo').t(tzo).up();
-      }
-
-      if (utc)
-      {
-          iq.c('utc').t(utc).up();
-      }
+      iq.c('tzo').t(moment().format('Z')).up();
+      iq.c('utc').t(moment().toISOString()).up();
 
       return this.pluginAPI.sendIQ(iq);
-   }
-
-   private onReceiveQuery = (stanza) => {
-        let fromjid = new JID($(stanza).attr('from'));
-        let tojid = new JID($(stanza).attr('to'));
-        let type = $(stanza).attr('type');
-
-        if (type==='get'&&
-           (this.pluginAPI.getContact(fromjid)|| //only send to contacts
-            tojid.domain===fromjid.bare)) //or own domain server
-        {
-            let time = new Date();
-            let utc = time.toISOString();
-            let tzo = ((time.getTimezoneOffset()*-1)/60).toString();
-            tzo = tzo[0]==='0'?tzo+':00':'0'+tzo+':00';
-
-            this.sendResponse($(stanza).attr('id'),$(stanza).attr('from'),tzo.toString(),utc);
-        }
-        return true;
    }
 }
