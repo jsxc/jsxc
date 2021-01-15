@@ -232,6 +232,7 @@ class MultiUserJoinDialog {
       this.dom.find('input, select').prop('disabled', true);
       this.testInputValues()
          .then(this.requestRoomInfo)
+         .then(this.requestMemberList)
          .then(() => {
             this.showJoinElements();
          }).catch((msg) => {
@@ -334,9 +335,19 @@ class MultiUserJoinDialog {
       roomInfoElement.append($('<input type="hidden" name="room-name">').val(name));
       roomInfoElement.append($('<input type="hidden" name="room-subject">').val(subject));
 
-      //@TODO display subject, number of occupants, etc.
-
       return roomInfoElement;
+   }
+
+   private requestMemberList = (room: JID) => {
+      return this.connection.getDiscoService().getDiscoItems(room).then((stanza) => {
+         let memberJids = $(stanza).find('item').map((index, element) => $(element).attr('jid')).get();
+
+         let row = $('<tr>');
+         row.append($('<td>').text(Translation.t('Occupants')));
+         row.append($('<td>').text(memberJids.length > 0 ? memberJids.join(', ') : Translation.t('Occupants_not_provided')));
+
+         this.dom.find('.jsxc-status-container table').append(row);
+      });
    }
 
    private joinHandler = (ev) => {
