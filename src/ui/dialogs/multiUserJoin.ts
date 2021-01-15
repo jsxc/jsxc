@@ -310,7 +310,7 @@ class MultiUserJoinDialog {
          let feature = $(featureElement).attr('var');
 
          //@REVIEW true?
-         if (feature !== '' && true && feature !== 'http://jabber.org/protocol/muc') {
+         if (feature !== '' && true && feature.indexOf('muc_') === 0) {
             tableElement.appendRow(
                Translation.t(`${feature}.keyword`),
                Translation.t(`${feature}.description`)
