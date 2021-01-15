@@ -1,4 +1,4 @@
-import { Presence } from './connection/AbstractConnection'
+import { ExtensivePresence, Presence } from './connection/AbstractConnection'
 import { Strophe } from './vendor/Strophe'
 import Account from './Account'
 import Storage from './Storage'
@@ -15,14 +15,25 @@ export default class PresenceController {
 
    }
 
-   public setTargetPresence(presence: Presence) {
-      this.storage.setItem(TARGET_KEY, presence);
+   public setTargetPresence(presence: Presence, status: string = '') {
+      this.storage.setItem(TARGET_KEY, {presence, status});
    }
 
    public getTargetPresence(): Presence {
-      let presence = this.storage.getItem(TARGET_KEY);
+      let extPresence = this.storage.getItem(TARGET_KEY);
+      let presence = (extPresence && typeof extPresence === 'object') ? extPresence.presence : extPresence;
 
       return typeof presence === 'number' ? presence : Presence.offline;
+   }
+
+   public getStatus(): string {
+      let extPresence = this.storage.getItem(TARGET_KEY);
+
+      if (!extPresence || typeof extPresence !== 'object') {
+         return '';
+      }
+
+      return extPresence.status;
    }
 
    public getCurrentPresence(): Presence {
@@ -31,11 +42,11 @@ export default class PresenceController {
       return typeof presence === 'number' ? presence : Presence.offline;
    }
 
-   public registerTargetPresenceHook(func: (presence: Presence) => void) {
+   public registerTargetPresenceHook(func: (extPresence: ExtensivePresence) => void) {
       this.storage.registerHook(TARGET_KEY, func);
    }
 
-   public unregisterTargetPresenceHook(func: (presence: Presence) => void) {
+   public unregisterTargetPresenceHook(func: (extPresence: ExtensivePresence) => void) {
       this.storage.removeHook(TARGET_KEY, func);
    }
 

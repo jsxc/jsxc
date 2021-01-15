@@ -78,6 +78,16 @@ export default class PluginRepository {
       throw new Error(`Couldn't find ${pluginId}`);
    }
 
+   public getPlugin(pluginId: string): AbstractPlugin {
+      for (let plugin of this.plugins) {
+         if ((<IPlugin> plugin.constructor).getId() === pluginId) {
+            return plugin;
+         }
+      }
+
+      throw new Error(`Couldn't find ${pluginId}`);
+   }
+
    public hasEncryptionPlugin(): boolean {
       return !!this.encryptionPlugins;
    }

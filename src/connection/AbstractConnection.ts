@@ -5,6 +5,7 @@ import Log from '../util/Log'
 import { Strophe, $iq, $msg, $pres } from '../vendor/Strophe'
 import Account from '../Account'
 import PEPService from './services/PEP'
+import SearchService from './services/Search'
 import PubSubService from './services/PubSub'
 import MUCService from './services/MUC'
 import RosterService from './services/Roster'
@@ -23,6 +24,8 @@ enum Presence {
    dnd,
    offline
 }
+
+type ExtensivePresence = {presence: Presence, status: string};
 
 abstract class AbstractConnection {
    protected abstract connection;
@@ -59,6 +62,10 @@ abstract class AbstractConnection {
 
    public getPEPService = (): PEPService => {
       return this.getService('pep', PEPService);
+   }
+
+   public getSearchService = (): SearchService => {
+      return this.getService('search', SearchService);
    }
 
    public getMUCService = (): MUCService => {
@@ -105,6 +112,10 @@ abstract class AbstractConnection {
 
    public getJID(): JID {
       return this.account.getJID();
+   }
+
+   public getServerJID(): JID {
+      return new JID('', this.getJID().domain, '');
    }
 
    public sendMessage(message: Message) {
@@ -177,13 +188,17 @@ abstract class AbstractConnection {
       }
    }
 
-   public sendPresence(presence?: Presence) {
+   public sendPresence(presence?: Presence, statusText?: string) {
       let presenceStanza = $pres();
 
       presenceStanza.c('c', this.generateCapsAttributes()).up();
 
       if (typeof presence !== 'undefined' && presence !== Presence.online) {
          presenceStanza.c('show').t(Presence[presence]).up();
+      }
+
+      if (statusText) {
+         presenceStanza.c('status').t(statusText).up();
       }
 
       // var priority = Options.get('priority');
@@ -272,4 +287,4 @@ abstract class AbstractConnection {
    }
 }
 
-export { AbstractConnection, Presence };
+export { AbstractConnection, Presence, ExtensivePresence };

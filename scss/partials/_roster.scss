@@ -21,7 +21,7 @@ button.jsxc-collapsible {
     margin-left: 5px;
   }
 
-  + ul {
+  +ul {
     max-height: 0;
   }
 
@@ -30,7 +30,7 @@ button.jsxc-collapsible {
       content: "\2212";
     }
 
-    + ul {
+    +ul {
       max-height: none;
     }
   }
@@ -78,7 +78,7 @@ button.jsxc-collapsible {
   &:focus {
     height: 42px;
 
-    + .jsxc-clear {
+    +.jsxc-clear {
       display: block;
     }
   }
@@ -190,7 +190,6 @@ button.jsxc-collapsible {
   >.jsxc-bottom {
     background-color: $roster-bottom-bg;
     flex-shrink: 0;
-    line-height: 34px;
     padding: 5px 4px 2px 0;
     width: 100%;
 
@@ -467,5 +466,18 @@ li.jsxc-hide-offline {
         opacity: 1;
       }
     }
+  }
+}
+
+.jsxc-blocked {
+  cursor: default !important;
+
+  .jsxc-bar__caption {
+    color: var(--jsxc-color-error);
+    text-decoration: line-through;
+  }
+
+  .jsxc-menu {
+    display: none;
   }
 }

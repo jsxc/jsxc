@@ -1,15 +1,15 @@
 import ChatStatePlugin from './ChatStatePlugin'
 import ChatStateConnection from './ChatStateConnection'
 import { STATE } from './State'
-import Storage from '../../Storage'
 import ChatWindow from '../../ui/ChatWindow'
 import Contact from '../../Contact'
 import * as Namespace from '../../connection/xmpp/namespace'
+import IStorage from '@src/Storage.interface'
 
 const ENTER_KEY = 13;
 
 export default class ChatStateMachine {
-   private storage: Storage;
+   private storage: IStorage;
    private connection: ChatStateConnection;
 
    private key;

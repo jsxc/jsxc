@@ -1,3 +1,8 @@
+.jsxc-exstatus-textarea {
+  resize: none;
+  width: 100%;
+}
+
 .jsxc-dialog-wrapper {
   background-color: $main-bg-translucent;
   bottom: 0;
@@ -10,7 +15,8 @@
   z-index: 999;
 }
 
-.jsxc-memberlist-textarea {
+.jsxc-memberlist-textarea,
+.jsxc-blocklist-textarea {
   margin-left: 15px;
   min-height: 300px !important;
   min-width: 500px !important;
@@ -38,7 +44,7 @@
     list-style: none;
   }
 
-  li > ul {
+  li>ul {
     padding-left: 1em;
   }
 
@@ -159,16 +165,50 @@
     }
   }
 
-  h2 {
+  h2,
+  &__subheadline {
+    background-color: transparent;
+    border: 0;
+    color: var(--jsxc-color-main-text);
     font-size: 0.8em;
     font-weight: bold;
-    margin: 0.5em 0 1.5em;
+    margin: 0;
     opacity: 0.8;
+    outline: none;
+    padding: 0.5em 0.5em 1.5em 0;
+    text-align: left;
+    width: 100%;
   }
 
   section {
     border-top: 1px solid $bg-darker;
     margin-top: 1em;
+  }
+}
+
+button.jsxc-page__subheadline {
+  &::after {
+    content: "\002B";
+    float: right;
+    padding: 0 0.5em;
+  }
+
+  &:hover {
+    background-color: var(--jsxc-color-background-hover);
+  }
+
+  + .jsxc-section__body {
+    display: none;
+  }
+
+  &.jsxc-show-sibling {
+    + .jsxc-section__body {
+      display: initial;
+    }
+
+    &::after {
+      content: "\2212";
+    }
   }
 }
 
@@ -227,4 +267,39 @@
   &__secondary-action {
     align-self: flex-start;
   }
+}
+
+.jsxc-content {
+  h1 {
+    font-size: 1.5em;
+    margin-top: 3em;
+  }
+}
+
+.jsxc-searchresults-table {
+  max-height: 600px;
+  overflow: auto;
+  width: 100%;
+
+  thead {
+    background-color: var(--jsxc-color-background-darker);
+  }
+
+  tr:nth-child(even) {
+    background-color: var(--jsxc-color-background-dark);
+  }
+
+  th {
+    text-align: center;
+  }
+
+  td {
+    padding: 5px;
+    text-align: center;
+  }
+}
+
+.jsxc-account-choice-block {
+  height: 30px;
+  margin-bottom: 2em;
 }

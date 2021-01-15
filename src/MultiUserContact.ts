@@ -193,7 +193,7 @@ export default class MultiUserContact extends Contact {
    }
 
    public getSubscription(): ContactSubscription {
-      return this.isMemberListComplete() ? ContactSubscription.BOTH : ContactSubscription.NONE;
+      return ContactSubscription.BOTH;;
    }
 
    public setSubject(subject: string) {

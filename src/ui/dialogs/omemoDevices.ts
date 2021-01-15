@@ -55,7 +55,7 @@ class OmemoDeviceDialog {
    private addCleanUpAction() {
       let dom = this.dialog.getDom();
       let buttonElement = $('<button>');
-      buttonElement.addClass('jsxc-button jsxc-button--default')
+      buttonElement.addClass('jsxc-button jsxc-button--default');
       buttonElement.text(Translation.t('Clean_up_own_devices'));
       buttonElement.click((ev) => {
          ev.preventDefault();
