@@ -41,6 +41,9 @@
     "Authentication": "驗證",
     "Message": "訊息",
     "Add_buddy": "加聯絡人",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "重新命名聯絡人",
     "delete_buddy": "刪掉聯絡人",
     "Login": "登入",
@@ -76,6 +79,7 @@
     "Subscription": "訂閱狀態",
     "both": "雙向",
     "Status": "狀態",
+    "extended-status": null,
     "online": "上線",
     "chat": "聊天",
     "away": "離開",
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": null
 }

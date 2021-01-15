@@ -41,6 +41,9 @@
     "Authentication": "Verificatie",
     "Message": "Bericht",
     "Add_buddy": "Contact toevoegen",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "contact hernoemen",
     "delete_buddy": "contact verwijderen",
     "Login": "Login",
@@ -76,6 +79,7 @@
     "Subscription": "Abonnement",
     "both": "Beide",
     "Status": "Status",
+    "extended-status": null,
     "online": "online",
     "chat": "chat",
     "away": "afwezig",
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": "Notificatie"
 }

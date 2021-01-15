@@ -41,6 +41,9 @@
     "Authentication": "Azonosítás",
     "Message": "Üzenet",
     "Add_buddy": "Partner hozzáadása",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "Partner átnevezése",
     "delete_buddy": "Partner törlése",
     "Login": "Belépés",
@@ -76,6 +79,7 @@
     "Subscription": null,
     "both": "mindkettő",
     "Status": "Állapot",
+    "extended-status": null,
     "online": "elérhető",
     "chat": null,
     "away": "távol",
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": null
 }

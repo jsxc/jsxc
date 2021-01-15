@@ -41,6 +41,9 @@
     "Authentication": "Authentification",
     "Message": "Message",
     "Add_buddy": "Ajouter un contact",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "Renommer le contact",
     "delete_buddy": "Supprimer le contact",
     "Login": "Connexion",
@@ -76,6 +79,7 @@
     "Subscription": "Abonnement",
     "both": "Les deux",
     "Status": "Statut",
+    "extended-status": null,
     "online": "En ligne",
     "chat": "tchat",
     "away": "Absent",
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": null
 }

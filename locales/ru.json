@@ -41,6 +41,9 @@
     "Authentication": "Авторизация",
     "Message": "Сообщение",
     "Add_buddy": "Добавить контакт",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "переименовать контакт",
     "delete_buddy": "удалить контакт",
     "Login": "Вход",
@@ -76,6 +79,7 @@
     "Subscription": "Подписка",
     "both": "оба",
     "Status": "Статус",
+    "extended-status": null,
     "online": "в сети",
     "chat": "готов общаться",
     "away": "отошел",
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": null
 }

@@ -41,6 +41,9 @@
     "Authentication": "Authentifizierung",
     "Message": "Nachricht",
     "Add_buddy": "Kontakt hinzufügen",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "Kontakt umbenennen",
     "delete_buddy": "Kontakt löschen",
     "Login": "Anmeldung",
@@ -76,6 +79,7 @@
     "Subscription": "Bezug",
     "both": "beidseitig",
     "Status": "Status",
+    "extended-status": null,
     "online": "online",
     "chat": "chat",
     "away": "abwesend",
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": "Benachrichtigungen"
 }

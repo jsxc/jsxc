@@ -41,6 +41,9 @@
     "Authentication": "Autentificare",
     "Message": "Mesaj",
     "Add_buddy": "Adaugă contact",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "redenumește contact",
     "delete_buddy": "șterge contact",
     "Login": "Logare",
@@ -76,6 +79,7 @@
     "Subscription": "Subscriere",
     "both": "amândouă",
     "Status": "Status",
+    "extended-status": null,
     "online": "Conectat",
     "chat": "chat",
     "away": "plecat",
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": null
 }

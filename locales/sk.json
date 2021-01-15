@@ -41,6 +41,9 @@
     "Authentication": "Autentizácia",
     "Message": "Správa",
     "Add_buddy": "Pridať kontakt",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "premenovať kontakt",
     "delete_buddy": "zmazať kontakt",
     "Login": "Prihlásiť sa",
@@ -76,6 +79,7 @@
     "Subscription": null,
     "both": null,
     "Status": "Stav",
+    "extended-status": null,
     "online": "online",
     "chat": "chat",
     "away": "preč",
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": null
 }

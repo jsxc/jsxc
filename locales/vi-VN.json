@@ -41,6 +41,9 @@
     "Authentication": "Chứng thực",
     "Message": "Thông điệp",
     "Add_buddy": "Thêm liên hệ",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "đổi tên liên hệ",
     "delete_buddy": "xóa liên hệ",
     "Login": "Đăng nhập",
@@ -76,6 +79,7 @@
     "Subscription": null,
     "both": "cả hai",
     "Status": "Trạng thái",
+    "extended-status": null,
     "online": "trực tuyến",
     "chat": null,
     "away": null,
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": null
 }

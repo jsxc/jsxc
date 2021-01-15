@@ -41,6 +41,9 @@
     "Authentication": null,
     "Message": null,
     "Add_buddy": "أضف جهة اتصال",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "أعد تسمية جهة الاتصال",
     "delete_buddy": "إحدف جهة الاتصال",
     "Login": "تسجيل الدخول",
@@ -76,6 +79,7 @@
     "Subscription": null,
     "both": "كلاهما",
     "Status": "الحالة",
+    "extended-status": null,
     "online": "متصل",
     "chat": "محادثة",
     "away": null,
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": null
 }

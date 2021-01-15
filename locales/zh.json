@@ -41,6 +41,9 @@
     "Authentication": "认证",
     "Message": "消息",
     "Add_buddy": "添加联系人",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "重命名联系人",
     "delete_buddy": "删除联系人",
     "Login": "登录",
@@ -76,6 +79,7 @@
     "Subscription": "订阅",
     "both": null,
     "Status": "状态",
+    "extended-status": null,
     "online": "在线",
     "chat": "聊天",
     "away": null,
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": null
 }

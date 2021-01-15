@@ -41,6 +41,9 @@
     "Authentication": "Kimlik doğrulama",
     "Message": "İleti",
     "Add_buddy": "Kişi ekle",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "Kişiyi yeniden adlandır",
     "delete_buddy": "Kişiyi sil",
     "Login": "Giriş",
@@ -76,6 +79,7 @@
     "Subscription": "Üyelik",
     "both": "her ikisi de",
     "Status": "Durum",
+    "extended-status": null,
     "online": "çevrimiçi",
     "chat": "sohbet",
     "away": "uzakta",
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": null
 }

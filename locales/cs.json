@@ -41,6 +41,9 @@
     "Authentication": "Ověření",
     "Message": "Zpráva",
     "Add_buddy": "Přidat kontakt",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "přejmenovat konakt",
     "delete_buddy": "odstranit kontakt",
     "Login": "Přihlášení",
@@ -76,6 +79,7 @@
     "Subscription": null,
     "both": "oba",
     "Status": "Status",
+    "extended-status": null,
     "online": "online",
     "chat": "chat",
     "away": "pryč",
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": null
 }

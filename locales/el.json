@@ -41,6 +41,9 @@
     "Authentication": "Αυθεντικοποίηση",
     "Message": "Μήνυμα",
     "Add_buddy": "Πρόσθεσε επαφή",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "Μετονομασία επαφής",
     "delete_buddy": "Διαγραφή επαφής",
     "Login": "Είσοδος",
@@ -76,6 +79,7 @@
     "Subscription": "Εγγραφή",
     "both": "μαζί",
     "Status": "Κατάσταση",
+    "extended-status": null,
     "online": "ενεργός",
     "chat": "συνομιλία",
     "away": "απών",
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": "Ειδοποιήσεις"
 }

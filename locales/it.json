@@ -41,6 +41,9 @@
     "Authentication": "Autenticazione",
     "Message": "Messaggio",
     "Add_buddy": "Aggiungi un contatto",
+    "Blocking_users": null,
+    "setting-blocking-command-enable": null,
+    "blocking_cmd_not_supported": null,
     "rename_buddy": "Rinomina contatto",
     "delete_buddy": "Elimina contatto",
     "Login": "Login",
@@ -76,6 +79,7 @@
     "Subscription": "Sottoscrizione",
     "both": "entrambi",
     "Status": "Status",
+    "extended-status": null,
     "online": "In linea",
     "chat": "chat",
     "away": "inattivo",
@@ -427,7 +431,8 @@
     "no_results": null,
     "trusted_domains": null,
     "one_domain_per_line": null,
-    "setting-command-enable": null
+    "setting-command-enable": null,
+    "setting-version": null
   },
   "Notifications": null
 }
