@@ -180,7 +180,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
       let [match, , filename, extension] = matches;
       let mime = /^(jpeg|jpg|gif|png|svg)$/i.test(extension) ? `image/${extension.toLowerCase()}` : 'application/octet-stream';
-      let attachment = new Attachment(filename, mime, match);
+      let attachment = new Attachment(decodeURIComponent(filename), mime, match);
       attachment.setData(match);
 
       if (lines[1] && lines[1].indexOf('data:') === 0) {
