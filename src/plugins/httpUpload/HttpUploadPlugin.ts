@@ -226,21 +226,6 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       return Promise.resolve([message, xmlStanza]);
    }
 
-   private isTrustedDomain(url: URL): boolean {
-      let trustedDomains = Client.getOption<string[]>('trustedDomains', []);
-
-      return trustedDomains.filter(domain => {
-         let result = url.hostname === (domain);
-
-         if (!result && domain.indexOf('*.') > -1) {
-            let wildcardtestdomain = domain.substring(domain.lastIndexOf('*.') + 2);
-            result = url.hostname.endsWith(wildcardtestdomain);
-         }
-
-         return result;
-      }).length > 0;
-   }
-
    private extractAttachmentFromStanza = (contact: IContact, message: IMessage, stanza: Element): Promise<[IContact, IMessage, Element]> => {
       let element = $(stanza);
       let bodyElement = element.find('html body[xmlns="' + Strophe.NS.XHTML + '"]').first();
@@ -296,10 +281,8 @@ export default class HttpUploadPlugin extends AbstractPlugin {
             let attachment = new Attachment(decodeURIComponent(fileName), 'image/' + extension, url);
             attachment.setData(url);
 
-            if (this.isTrustedDomain(new URL(url))) {
+            if (Client.isTrustedDomain(new URL(url))) {
                attachment.generateThumbnail();
-            } else {
-               attachment.setThumbnailData('../images/placeholder_image.svg');
             }
 
             message.setAttachment(attachment);

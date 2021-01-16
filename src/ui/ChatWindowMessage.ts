@@ -122,12 +122,26 @@ export default class ChatWindowMessage {
          attachmentElement.addClass('jsxc-persistent');
       }
 
-      if (attachment.isImage() && attachment.hasThumbnailData()) {
-         $('<img>')
+      if (attachment.isImage()) {
+         let imgElement = $('<img>')
             .attr('alt', 'preview')
-            .attr('src', attachment.getThumbnailData())
-            // .attr('title', message.getName())
+            .attr('src', attachment.getThumbnailData() || '../images/placeholder_image.svg')
+            .attr('title', attachment.getName())
             .appendTo(attachmentElement);
+
+         if (!attachment.hasThumbnailData()) {
+            attachmentElement.addClass('jsxc-no-thumbnail');
+         }
+
+         attachment.registerThumbnailHook((thumbnail) => {
+            imgElement.attr('src', thumbnail || '../images/placeholder_image.svg');
+
+            if (thumbnail) {
+               this.element.find('.jsxc-attachment').removeClass('jsxc-no-thumbnail');
+            } else {
+               this.element.find('.jsxc-attachment').addClass('jsxc-no-thumbnail');
+            }
+         });
       } else {
          attachmentElement.text(attachment.getName());
 
@@ -138,6 +152,20 @@ export default class ChatWindowMessage {
          attachmentElement = $('<a target="_blank" rel="noopener noreferrer">').append(attachmentElement);
          attachmentElement.attr('href', attachment.getData());
          attachmentElement.attr('download', attachment.getName());
+
+         if (attachment.getHandler()) {
+            attachmentElement.on('click', (ev) => {
+               ev.preventDefault();
+
+               attachmentElement.find('.jsxc-attachment').addClass('jsxc-attachment--loading');
+
+               attachment.getHandler().call(undefined, attachment, true).catch(err => {
+                  this.message.setErrorMessage(err.toString());
+               }).then(() => {
+                  attachmentElement.find('.jsxc-attachment').removeClass('jsxc-attachment--loading');
+               });
+            });
+         }
 
          //@REVIEW this is a dirty hack
          let linkElement = this.element.find('.jsxc-content a:eq(0)');
