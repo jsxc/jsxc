@@ -292,7 +292,8 @@ export default class HttpUploadPlugin extends AbstractPlugin {
          let extension = this.getFileExtensionFromUrl(url);
 
          if (IMAGE_SUFFIXES.includes(extension)) {
-            let attachment = new Attachment('image', 'image/' + extension, url);
+            let fileName = this.getFileNameFromUrl(url) || 'image';
+            let attachment = new Attachment(fileName, 'image/' + extension, url);
             attachment.setData(url);
 
             if (this.isTrustedDomain(new URL(url))) {
@@ -309,5 +310,11 @@ export default class HttpUploadPlugin extends AbstractPlugin {
 
    private getFileExtensionFromUrl(url: string): string {
       return url.split(/[#?]/)[0].split('.').pop().trim().toLowerCase();
+   }
+
+   private getFileNameFromUrl(url: string): string {
+      let parsedUrl = new URL(url);
+
+      return parsedUrl.pathname.substring(parsedUrl.pathname.lastIndexOf('/')+1);
    }
 }
