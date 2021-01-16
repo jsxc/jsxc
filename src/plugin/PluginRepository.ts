@@ -39,7 +39,7 @@ export default class PluginRepository {
    constructor(private account: Account) {
       let accountDisabledPlugins = account.getOption('disabledPlugins');
 
-      this.getAllEnabledRegisteredPlugins().forEach((Plugin) => {
+      this.getAllRegisteredPlugins().forEach((Plugin) => {
          if (accountDisabledPlugins.indexOf(Plugin.getId()) > -1) {
             Log.debug(`${Plugin.getId()} was disabled by the user.`);
 
