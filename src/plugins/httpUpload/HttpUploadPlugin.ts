@@ -293,7 +293,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
 
          if (IMAGE_SUFFIXES.includes(extension)) {
             let fileName = this.getFileNameFromUrl(url) || 'image';
-            let attachment = new Attachment(fileName, 'image/' + extension, url);
+            let attachment = new Attachment(decodeURIComponent(fileName), 'image/' + extension, url);
             attachment.setData(url);
 
             if (this.isTrustedDomain(new URL(url))) {
