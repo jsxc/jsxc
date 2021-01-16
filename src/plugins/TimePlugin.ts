@@ -45,7 +45,7 @@ export default class TimePlugin extends AbstractPlugin {
          type: 'get',
          to: jid.full,
          xmlns: 'jabber:client'
-      }).c('query', {
+      }).c('time', {
          'xmlns': NAMESPACE_TIME
       });
 
@@ -76,7 +76,7 @@ export default class TimePlugin extends AbstractPlugin {
          to: jid,
          id,
          xmlns: 'jabber:client'
-      }).c('query', {
+      }).c('time', {
          'xmlns': NAMESPACE_TIME
       });
 
