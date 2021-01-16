@@ -176,6 +176,8 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return plaintext;
       }
 
+      lines[0] = undefined;
+
       let [match, , filename, extension] = matches;
       let mime = /^(jpeg|jpg|gif|png|svg)$/.test(extension) ? `image/${extension}` : 'application/octet-stream';
       let attachment = new Attachment(filename, mime, match);
