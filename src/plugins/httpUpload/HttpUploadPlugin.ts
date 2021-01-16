@@ -297,7 +297,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
             attachment.setData(url);
 
             if (this.isTrustedDomain(new URL(url))) {
-               attachment.setThumbnailData(url);
+               attachment.generateThumbnail();
             } else {
                attachment.setThumbnailData('../images/placeholder_image.svg');
             }

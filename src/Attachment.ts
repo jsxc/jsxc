@@ -179,16 +179,16 @@ export default class Attachment {
       });
    }
 
-   private generateThumbnail(): void {
+   public generateThumbnail(force: boolean = false): void {
       if (typeof Image === 'undefined') {
          return;
       }
 
-      if (/^image\/svg/i.test(this.getMimeType())) {
+      if (!this.isImage() || /^image\/svg/i.test(this.getMimeType())) {
          return;
       }
 
-      if (!this.hasData()) {
+      if (force || !this.hasData()) {
          if (this.file) {
             this.getDataFromFile().then((data) => {
                this.data = data;
