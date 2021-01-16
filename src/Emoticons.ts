@@ -58,9 +58,18 @@ export default class Emoticons {
    public static toImage(text: string): string {
       Emoticons.init();
 
-      text = Emoticons.standardToImage(text);
+      text = Emoticons.standardToShortname(text);
       text = Emoticons.unicodeToShortname(text);
       text = Emoticons.shortnameToImage(text);
+
+      return text;
+   }
+
+   public static toUnicode(text: string): string {
+      Emoticons.init();
+
+      text = Emoticons.standardToShortname(text);
+      text = Emoticons.shortnameToUnicode(text);
 
       return text;
    }
@@ -80,7 +89,7 @@ export default class Emoticons {
       Emoticons.initialised = true;
    }
 
-   private static standardToImage(text: string): string {
+   private static standardToShortname(text: string): string {
       // replace emoticons from XEP-0038 and pidgin with shortnames
       $.each(EMOTICONS, function(i, val) {
          text = text.replace(val[2], ':' + val[1] + ':');
@@ -91,6 +100,10 @@ export default class Emoticons {
 
    private static unicodeToShortname(text: string): string {
       return emojione.toShort(text);
+   }
+
+   private static shortnameToUnicode(text: string): string {
+      return emojione.shortnameToUnicode(text);
    }
 
    private static shortnameToImage(text: string): string {
