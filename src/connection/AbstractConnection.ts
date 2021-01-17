@@ -153,13 +153,11 @@ abstract class AbstractConnection {
              id: message.getReplaceId()
           }).up();
       }
-	  else
-	  {
-		  xmlMsg.c('origin-id', {
-			 xmlns: 'urn:xmpp:sid:0',
-			 id: message.getUid()
-		  }).up();
-	  }
+
+      xmlMsg.c('origin-id', {
+         xmlns: 'urn:xmpp:sid:0',
+         id: message.getUid()
+      }).up();
 
       let pipe = this.account.getPipe('preSendMessageStanza');
       pipe.run(message, xmlMsg).then(([message, xmlMsg]: [Message, Element]) => {
