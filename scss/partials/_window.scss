@@ -323,6 +323,15 @@
     user-select: none;
     white-space: nowrap;
 
+    .jsxc-replace-icon {
+       background-image: url('../images/icons/edit.svg');
+       background-size: contain;
+       background-repeat: no-repeat;
+       background-position: center;
+       height: 15px;
+       width: 15px;
+    }
+
     .jsxc-timestamp {
       margin-right: 0.3em;
     }

@@ -20,6 +20,8 @@ export default class extends AbstractHandler {
       let attrId = messageElement.attr('id');
       let body = bodyElement.text();
       let nickname = from.resource;
+      let replaceId = messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id');
+      let occupantId = messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id');
 
       let contact = <MultiUserContact>this.account.getContact(from);
       if (typeof contact === 'undefined') {
@@ -126,6 +128,9 @@ export default class extends AbstractHandler {
          unread,
          mark: MessageMark.transferred,
       });
+
+      message.setReplaceId(typeof replaceId ==='string'?replaceId:null);
+      message.setOccupantId(typeof occupantId ==='string'?occupantId:null);
 
       if (direction === Message.DIRECTION.OUT) {
          message.received();

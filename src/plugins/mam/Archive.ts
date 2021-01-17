@@ -53,6 +53,42 @@ export default class Archive {
       storage.registerHook(key, hook);
    }
 
+   public lastMessages() {
+
+      if (this.messageCache.length > 0) {
+         Log.debug('Ongoing message retrieval');
+         return false;
+      }
+
+      let queryId = UUID.v4();
+
+      this.plugin.addQueryContactRelation(queryId, this.contact);
+      let connection = this.plugin.getConnection();
+
+      let firstMessage = this.contact.getTranscript().getFirstMessage();
+      if (firstMessage)
+      {
+         let startDate = firstMessage.getStamp();
+         startDate.setSeconds(startDate.getSeconds() + 1);
+         this.plugin
+            .determineServerSupport(this.archiveJid)
+            .then(version => {
+               if (!version) {
+                  throw new Error(`Archive JID ${this.archiveJid.full} has no support for MAM.`);
+               }
+
+               return connection.queryArchiveSync(startDate, this.archiveJid, <string>version, queryId,this.contact.getJid().bare );
+            })
+            .then(this.onCompleteSync)
+            .catch(stanza => {
+               Log.warn('Error while requesting archive', stanza);
+            });
+      }
+      else {
+         this.nextMessages();
+      }
+   }
+
    public nextMessages() {
       if (this.isExhausted()) {
          Log.debug('No more archived messages.');
@@ -132,6 +168,10 @@ export default class Archive {
 
       let stanzaIdElement = messageElement.find('stanza-id[xmlns="urn:xmpp:sid:0"]');
       let originIdElement = messageElement.find('origin-id[xmlns="urn:xmpp:sid:0"]');
+
+      let replaceId = messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').length>0?messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id'):null;
+      let occupantId = messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').length>0?messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id'):null;
+
       let uid =
          direction === Message.DIRECTION.OUT && originIdElement.length
             ? originIdElement.attr('id')
@@ -151,7 +191,7 @@ export default class Archive {
          stamp: stamp.getTime(),
          mark: MessageMark.transferred,
          unread: false,
-         sender: undefined,
+         sender: undefined
       };
 
       if (this.contact.isGroupChat()) {
@@ -165,7 +205,10 @@ export default class Archive {
             contact.getNickname() === from.resource ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
       }
 
-      return new Message(messageProperties);
+      let result = new Message(messageProperties);
+      result.setReplaceId(replaceId);
+      result.setOccupantId(occupantId);
+      return result;
    }
 
    public onComplete = async (stanza: Element) => {
@@ -178,12 +221,18 @@ export default class Archive {
       }
 
       let transcript = this.contact.getTranscript();
+      let replaceMessagesKeys = new Array();
 
       while (this.messageCache.length > 0) {
          let messageElement = this.messageCache.pop();
 
          try {
             let message = await this.parseForwardedMessage(messageElement);
+
+            if (message.getReplaceId()!==null)
+            {
+               replaceMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
+            }
 
             transcript.unshiftMessage(message);
          } catch (err) {
@@ -207,8 +256,91 @@ export default class Archive {
          transcript.unshiftMessage(archiveExhaustedMessage);
       }
 
+      if (replaceMessagesKeys.length>0)
+      {
+         let arr : {[key: string]: IMessage} = {};
+        
+         for (let key of replaceMessagesKeys)
+         {
+            let tmp = transcript.getMessage(key.uid);
+            let keystr=key.uid;
+            if (tmp===undefined||tmp===null)
+            {
+               tmp = transcript.getMessage(key.attrid);
+               keystr=key.uid;
+            }
+          
+            if (tmp!==undefined&&tmp!==null)
+            {
+               arr[keystr]=tmp;
+            }
+         }
+         let indexedArr = transcript.convertToIndexArray(arr);
+         for (let i=0;i<indexedArr.length;i++)
+         {
+            transcript.processReplace(indexedArr[i]);
+         }
+      }
+
       this.setExhausted(isArchiveExhausted);
       this.setFirstResultId(firstResultId);
+      this.plugin.removeQueryContactRelation(queryId);
+   };
+
+   public onCompleteSync = async (stanza: Element) => {
+      let stanzaElement = $(stanza);
+      let finElement = stanzaElement.find(`fin[xmlns^="urn:xmpp:mam:"]`);
+
+      if (finElement.length !== 1) {
+         Log.warn('No fin element found');
+         return;
+      }
+
+      let transcript = this.contact.getTranscript();
+      let replaceMessagesKeys = new Array();
+      while (this.messageCache.length > 0) {
+         let messageElement = this.messageCache.pop();
+
+         try {
+            let message = await this.parseForwardedMessage(messageElement);
+
+            if (message.getReplaceId()!==null)
+            {
+               replaceMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
+            }
+
+            transcript.insertMessage(message);
+         } catch (err) {
+            continue;
+         }
+      }
+
+      if (replaceMessagesKeys.length>0)
+      {
+         let arr : {[key: string]: IMessage} = {};
+         for (let key of replaceMessagesKeys)
+         {
+            let tmp = transcript.getMessage(key.uid);
+            let keystr=key.uid;
+            if (tmp===undefined||tmp===null)
+            {
+               tmp = transcript.getMessage(key.attrid);
+               keystr=key.uid;
+            }
+          
+            if (tmp!==undefined&&tmp!==null)
+            {
+               arr[keystr]=tmp;
+            }
+         }
+         let indexedArr = transcript.convertToIndexArray(arr);
+         for (let i=0;i<indexedArr.length;i++)
+         {
+            transcript.processReplace(indexedArr[i]);
+         }
+      }
+
+      let queryId = finElement.attr('queryid');
       this.plugin.removeQueryContactRelation(queryId);
    };
 }

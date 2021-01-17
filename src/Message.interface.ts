@@ -20,6 +20,7 @@ export enum MessageMark {
 }
 
 export interface IMessagePayload {
+
    peer: JID;
    direction: DIRECTION;
    attrId?: string;
@@ -36,6 +37,8 @@ export interface IMessagePayload {
    unread?: boolean;
    encryptedHtmlMessage?: string;
    encryptedPlaintextMessage?: string;
+   replaceId?: string;
+   occupantId?: string;
    sender?: {
       name: string;
       jid?: JID;
@@ -144,5 +147,20 @@ export interface IMessage {
 
    getErrorMessage(): string;
 
-   updateProgress(transferred: number, complete: number);
+   updateProgress(transferred: number, complete: number)
+
+   setReplaceBody(val: string)//XEP - 0308
+
+   getReplaceBody(): string//XEP - 0308
+
+   setReplaceTime(date: number)//XEP - 0308
+   getReplaceTime() : number//XEP - 0308
+
+   getReplaceId(): string//XEP - 0308
+
+   setReplaceId(id: string)//XEP - 0308
+
+   getOccupantId(): string//XEP - 0421
+
+   setOccupantId(id: string)//XEP - 0421
 }

@@ -6,11 +6,16 @@ import Log from '../util/Log';
 import LinkHandlerGeo from '@src/LinkHandlerGeo';
 import Color from '@util/Color';
 import Translation from '@util/Translation';
+import showLogDialog from './dialogs/xep308log';
 
-let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs');
+let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs')
+const LONGPRESS_TIME = 600; //how long is a long press in millis
 
 export default class ChatWindowMessage {
    private element;
+
+   // holds the start time for long press
+   private longpress_start;
 
    constructor(private message: IMessage, private chatWindow: ChatWindow) {
       this.generateElement();
@@ -60,14 +65,14 @@ export default class ChatWindowMessage {
 
       this.element = $(template);
 
-      let bodyElement = $(await this.message.getProcessedBody());
+      let bodyElement= $ (await this.message.getProcessedBody());
 
       LinkHandlerGeo.get().detect(bodyElement);
 
       this.element.find('.jsxc-content').html(bodyElement);
 
       let timestampElement = this.element.find('.jsxc-timestamp');
-      DateTime.stringify(this.message.getStamp().getTime(), timestampElement);
+      DateTime.stringify(this.message.getStamp().getTime(),timestampElement);
 
       if (this.message.getDirection() === DIRECTION.OUT || this.message.getDirection() === DIRECTION.PROBABLY_OUT) {
          this.element.attr('data-mark', MessageMark[this.message.getMark()]);
@@ -109,6 +114,41 @@ export default class ChatWindowMessage {
       if (typeof sender.name === 'string') {
          this.addSenderToElement();
       }
+
+      if (this.message.getDirection()!==DIRECTION.SYS)
+      {
+         if (this.message.getReplaceId()!==null)
+         {
+            this.element.hide();
+         }
+         else {
+            let replacement = this.chatWindow.getTranscript().getLatestReplaceMessageFromMessage(this.message);
+            if (replacement!==null&&replacement.getAttrId()!==this.message.getAttrId())
+            {
+               this.replaceBody($(await replacement.getProcessedBody()));
+               let newtimestampElement = $('<div class="jsxc-timestamp">');
+               newtimestampElement.insertBefore(timestampElement);
+               timestampElement.remove(); // to kill the timer
+               DateTime.stringify(this.message.getReplaceTime(),newtimestampElement);
+            }
+         }
+      }
+   }
+
+   private format(messages:IMessage[]) {
+      let text = '';
+      for (let i=0;i<messages.length;i++)
+      {
+         try {
+         if (messages[i]!==undefined&&(<any>messages[i]).uid!==undefined)
+         {
+            text+=messages[i].getPlaintextMessage()+' - ('+DateTime.stringifyToString(messages[i].getStamp().getTime())+')\n\n';
+         }
+         }catch (e){
+            console.error(messages,messages[i],i,e);
+         }
+      }
+      return text;
    }
 
    private addAttachmentToElement() {
@@ -233,7 +273,18 @@ export default class ChatWindowMessage {
          }
       });
 
-      this.message.registerHook('progress', progress => {
+      this.message.registerHook('replaceBody', (processBodyString) => {
+         if (processBodyString) {
+            this.replaceBody(processBodyString);         
+            let timestampElement = this.element.find('.jsxc-timestamp');
+            let newtimestampElement = $('<div class="jsxc-timestamp">');
+            newtimestampElement.insertBefore(timestampElement);
+            timestampElement.remove(); // to kill the timer
+            DateTime.stringify(this.message.getReplaceTime(),newtimestampElement);
+         }
+      });
+
+      this.message.registerHook('progress', (progress) => {
          this.element.find('.jsxc-attachment').attr('data-progress', Math.round(progress * 100) + '%');
       });
 
@@ -258,5 +309,53 @@ export default class ChatWindowMessage {
             this.element.find('.jsxc-error-content').empty();
          }
       });
+
+      this.element.off('mousedown').on( 'mousedown', ()=> {
+          this.longpress_start = new Date().getTime();
+      });
+
+      this.element.off('mouseleave').on( 'mouseleave', ()=> {
+          this.longpress_start = 0;
+      });
+
+      this.element.off('mouseup').on( 'mouseup', ()=> {
+          if ( new Date().getTime() >= ( this.longpress_start + LONGPRESS_TIME )) {
+             if (this.message.getDirection()===DIRECTION.OUT) //we can only edit outging messages
+             {
+                 this.chatWindow.selectEditMessage(this.message);
+             }
+          }
+          else
+          {
+             //SHORT PRESS... not needed now!
+          }
+      });
+   }
+
+   private replaceBody(processBodyString:any) {
+      let bodyElement :JQuery<HTMLElement> = $(processBodyString);
+      LinkHandlerGeo.get().detect(bodyElement);
+
+      let contentElement = this.element.find('.jsxc-content');
+      contentElement.html(processBodyString);
+
+      if (!this.element.find('.jsxc-replace').hasClass('jsxc-replace-icon'))
+      {
+            this.element.find('.jsxc-replace').addClass('jsxc-replace-icon');
+            this.element.find('.jsxc-replace').on('click',()=>{
+               let chain = this.chatWindow.getTranscript().getReplaceMessageChainFromMessage(this.message);
+               if (chain!==null)
+               {
+                  showLogDialog(this.chatWindow.getContact().getAccount().getContact(),this.chatWindow.getContact(),chain);
+               }
+            });
+      }
+
+      let chain = this.chatWindow.getTranscript().getReplaceMessageChainFromMessage(this.message);
+     
+      if (chain!==null)
+      {
+         this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title',this.format(chain));
+      }
    }
 }

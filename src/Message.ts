@@ -104,10 +104,13 @@ export default class Message implements IIdentifiable, IMessage {
                   type: ContactType.CHAT,
                   encryptedHtmlMessage: null,
                   encryptedPlaintextMessage: null,
+                  replaceId: null,
+                  occupantId:null
                },
                data
             )
          );
+
       } else if (!this.data.get('attrId')) {
          throw new Error(`Could not load message ${this.uid}`);
       }
@@ -324,6 +327,38 @@ export default class Message implements IIdentifiable, IMessage {
 
    public setDirection(direction: DIRECTION) {
       this.data.set('direction', direction);
+   }
+
+   public setReplaceBody(val: string) {//XEP - 0308
+      this.data.set('replaceBody', val);
+   }
+
+   public getReplaceBody() : string {//XEP - 0308
+      return this.data.get('replaceBody');
+   }
+
+   public setReplaceTime(val: number) {//XEP - 0308
+      return this.data.set('replacetime',val.toString());
+   }
+
+   public getReplaceTime() : number {//XEP - 0308
+      return this.data.get('replacetime')!==undefined?parseInt(this.data.get('replacetime')):this.getStamp().getTime();
+   }
+
+   public getReplaceId() : string{ //XEP - 0308
+      return this.data.get('replaceId');
+   }
+
+   public setReplaceId(id: string) { //XEP - 0308
+      this.data.set('replaceId',id);
+   }
+
+   public getOccupantId() : string{ //XEP - 0421
+      return this.data.get('occupantId');
+   }
+
+   public setOccupantId(id: string) { //XEP - 0421
+      this.data.set('occupantId',id);
    }
 
    public setPlaintextMessage(plaintextMessage: string) {

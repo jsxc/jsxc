@@ -2,7 +2,7 @@ import Log from '../util/Log';
 import Contact from '../Contact';
 import Menu from './util/Menu';
 import Message from '../Message';
-import { IMessage } from '../Message.interface';
+import { DIRECTION, IMessage } from '../Message.interface';
 import Client from '../Client';
 import Account from '../Account';
 import Emoticons from '../Emoticons';
@@ -26,6 +26,9 @@ let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
 const ENTER_KEY = 13;
 const ESC_KEY = 27;
+const BACKSPACE_KEY = 8;
+const DELETE_KEY = 46;
+const UP_KEY = 38;
 
 export enum State {
    Open,
@@ -55,6 +58,8 @@ export default class ChatWindow {
    private settingsMenu: Menu;
 
    private encryptionMenu: Menu;
+
+   private editMessage: IMessage;
 
    constructor(protected contact: Contact) {
       let template = chatWindowTemplate({
@@ -109,6 +114,26 @@ export default class ChatWindow {
       this.getAccount().triggerChatWindowInitializedHook(this, contact);
    }
 
+   private selectLatestVisibleMessageForEdit() : void {
+      
+      let messagearr : IMessage[]= this.getTranscript().convertToIndexArray(this.getTranscript().getMessages());
+      for (let i = messagearr.length-1;i>=0;i--){
+         if (messagearr[i].getReplaceId()===null&&(messagearr[i].getDirection()===DIRECTION.OUT||messagearr[i].getDirection()===DIRECTION.PROBABLY_OUT))
+         {
+            this.selectEditMessage(messagearr[i]);
+            break;
+         }
+      }
+   }
+
+   public selectEditMessage(message: IMessage)
+   {
+       let latestReplace = this.getTranscript().getLatestReplaceMessageFromMessage(message);
+       this.editMessage=latestReplace;
+
+       this.inputElement.val('> '+this.editMessage.getPlaintextMessage());
+   }
+
    public getTranscript(): Transcript {
       return this.contact.getTranscript();
    }
@@ -141,6 +166,7 @@ export default class ChatWindow {
 
    public close() {
       this.element.detach();
+      this.element.off('mousedown click');
    }
 
    public minimize() {
@@ -395,6 +421,12 @@ export default class ChatWindow {
       ev.stopPropagation();
       // let message = <string> $(ev.target).val();
 
+      if ((ev.which === BACKSPACE_KEY || ev.which === DELETE_KEY) && (this.inputElement.val()==='' || this.inputElement.val()==='>'))
+      {
+          this.editMessage=null;
+          this.inputElement.val('');
+      }
+
       if (ev.which === ENTER_KEY && !ev.shiftKey) {
          // message = '';
       } else {
@@ -402,7 +434,12 @@ export default class ChatWindow {
       }
 
       if (ev.which === ESC_KEY) {
+         this.editMessage=null;
          this.getController().close();
+      }
+
+      if (ev.which === UP_KEY && (this.inputElement.val()===null||this.inputElement.val().toString().trim().length===0)) {
+         this.selectLatestVisibleMessageForEdit();
       }
 
       let selectionStart = ev.target.selectionStart;
@@ -467,29 +504,34 @@ export default class ChatWindow {
    };
 
    private sendOutgoingMessage(messageString: string) {
+      let plainTextMessage = this.editMessage!=null?messageString.substring(1).trim():messageString;
       let message = new Message({
          peer: this.contact.getJid(),
          direction: Message.DIRECTION.OUT,
          type: this.contact.getType(),
-         plaintextMessage: messageString,
+         plaintextMessage: plainTextMessage,
          attachment: this.attachmentDeposition,
          unread: false,
       });
 
-      this.getTranscript().pushMessage(message);
+      message.setReplaceId(this.editMessage!=null?this.editMessage.getAttrId():null);
+
+      if (this.attachmentDeposition!==undefined||(plainTextMessage!==null&&plainTextMessage!==undefined&&plainTextMessage.trim().length>0))
+      {
+         this.getTranscript().pushMessage(message);
+
+         let pipe = this.getAccount().getPipe('preSendMessage');
+
+         pipe.run(this.contact, message).then(([contact, message]) => {
+            this.getAccount().getConnection().sendMessage(message);
+            this.editMessage=null;
+         }).catch(err => {
+            Log.warn('Error during preSendMessage pipe', err);
+            this.editMessage=null;
+         });
+      }
 
       this.clearAttachment();
-
-      let pipe = this.getAccount().getPipe('preSendMessage');
-
-      pipe
-         .run(this.contact, message)
-         .then(([contact, message]) => {
-            this.getAccount().getConnection().sendMessage(message);
-         })
-         .catch(err => {
-            Log.warn('Error during preSendMessage pipe', err);
-         });
 
       if (messageString === '?' && Client.getOption('theAnswerToAnything') !== false) {
          if (typeof Client.getOption('theAnswerToAnything') === 'undefined' || (Math.random() * 100) % 42 < 1) {

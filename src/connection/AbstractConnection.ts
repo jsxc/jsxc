@@ -59,6 +59,7 @@ abstract class AbstractConnection {
 
       NS.register('VCARD', 'vcard-temp');
       NS.register('FORWARD', 'urn:xmpp:forward:0');
+      NS.register('LMC', 'urn:xmpp:message-correct:0');
    }
 
    public getPubSubService = (): PubSubService => {
@@ -166,12 +167,18 @@ abstract class AbstractConnection {
          xmlMsg.c('body').t(plaintextMessage).up();
       }
 
-      xmlMsg
-         .c('origin-id', {
-            xmlns: 'urn:xmpp:sid:0',
-            id: message.getUid(),
-         })
-         .up();
+      if (message.getReplaceId()!=null)
+      {
+         xmlMsg.c('replace', {
+             xmlns: 'urn:xmpp:message-correct:0',
+             id: message.getReplaceId()
+          }).up();
+      }
+
+      xmlMsg.c('origin-id', {
+         xmlns: 'urn:xmpp:sid:0',
+         id: message.getUid()
+      }).up();
 
       let pipe = this.account.getPipe('preSendMessageStanza');
       pipe
@@ -307,6 +314,63 @@ abstract class AbstractConnection {
       if (typeof beforeResultId === 'string' || typeof beforeResultId === 'number') {
          iq.c('before').t(beforeResultId);
       }
+
+      iq.up();
+
+      return this.sendIQ(iq);
+   }
+
+   public queryArchiveSync(
+      startDate: Date,
+      archive: JID,
+      version: string,
+      queryId: string,
+      withJID: string
+   ): Promise<Element> {
+      let iq = $iq({
+         type: 'set',
+         to: archive.bare,
+      });
+
+      iq.c('query', {
+         xmlns: version,
+         queryid: queryId,
+      });
+
+      iq.c('x', {
+         xmlns: 'jabber:x:data',
+         type: 'submit',
+      });
+
+      iq.c('field', {
+         var: 'FORM_TYPE',
+         type: 'hidden',
+      })
+         .c('value')
+         .t(version)
+         .up()
+         .up();
+
+      iq.c('field', {
+         var: 'start',
+      })
+         .c('value')
+         .t(startDate.toISOString())
+         .up()
+         .up();
+
+      iq.c('field', {
+         var: 'with',
+      })
+         .c('value')
+         .t(withJID)
+         .up()
+         .up();
+
+      iq.up()
+         .c('set', {
+            xmlns: 'http://jabber.org/protocol/rsm',
+         });
 
       iq.up();
 

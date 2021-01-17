@@ -48,6 +48,9 @@ export default class extends AbstractHandler {
          mark: MessageMark.transferred,
       });
 
+      message.setReplaceId(messageElement.getReplaceId());
+      message.setOccupantId(messageElement.getOccupantId());
+
       let pipe = this.account.getPipe('afterReceiveMessage');
 
       pipe.run(peerContact, message, messageElement.get(0)).then(([contact, message]) => {
