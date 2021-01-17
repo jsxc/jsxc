@@ -6,6 +6,7 @@ import Log from '../util/Log';
 import LinkHandlerGeo from '@src/LinkHandlerGeo';
 import Color from '@util/Color';
 import Translation from '@util/Translation';
+import showLogDialog from './dialogs/xep308log';
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs')
 const LONGPRESS_TIME = 600; //how long is a long press in millis
@@ -15,8 +16,6 @@ export default class ChatWindowMessage {
 
    // holds the start time for long press
    private longpress_start;
-   // timeout reference of old message log
-   private oldDateTimeout;
 
    constructor(private message: IMessage, private chatWindow: ChatWindow) {
       this.generateElement();
@@ -66,14 +65,14 @@ export default class ChatWindowMessage {
 
       this.element = $(template);
 
-      let bodyElement=$(await this.message.getProcessedBody());
+      let bodyElement= $ (await this.message.getProcessedBody());
 
       LinkHandlerGeo.get().detect(bodyElement);
 
       this.element.find('.jsxc-content').html(bodyElement);
 
       let timestampElement = this.element.find('.jsxc-timestamp');
-      DateTime.stringify(this.message.getStamp().getTime(), timestampElement);
+      DateTime.stringify(this.message.getStamp().getTime(),timestampElement);
 
       if (this.message.getDirection() === DIRECTION.OUT || this.message.getDirection() === DIRECTION.PROBABLY_OUT) {
          this.element.attr('data-mark', MessageMark[this.message.getMark()]);
@@ -127,8 +126,10 @@ export default class ChatWindowMessage {
             if (replacement!==null&&replacement.getAttrId()!==this.message.getAttrId())
             {
                this.replaceBody($(await replacement.getProcessedBody()));
-               let timestampElement = this.element.find('.jsxc-timestamp');
-               DateTime.stringify(replacement.getStamp().getTime(), timestampElement);
+               let newtimestampElement = $('<div class="jsxc-timestamp">');
+               newtimestampElement.insertBefore(timestampElement);
+               timestampElement.remove(); // to kill the timer
+               DateTime.stringify(this.message.getReplaceTime(),newtimestampElement);
             }
          }
       }
@@ -138,22 +139,16 @@ export default class ChatWindowMessage {
       let text = '';
       for (let i=0;i<messages.length;i++)
       {
-         text+=messages[i].getPlaintextMessage()+' - ('+DateTime.stringifyToString(messages[i].getStamp().getTime())+')\n';
+         try {
+         if (messages[i]!==undefined&&(<any>messages[i]).uid!==undefined)
+         {
+            text+=messages[i].getPlaintextMessage()+' - ('+DateTime.stringifyToString(messages[i].getStamp().getTime())+')\n\n';
+         }
+         }catch (e){
+            console.error(messages,messages[i],i,e);
+         }
       }
       return text;
-   }
-
-   private addOriginalToTitel(messages:IMessage[]):void
-   {
-       if (this.oldDateTimeout)
-      {
-            clearInterval(this.oldDateTimeout);
-      }
-
-      this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title',this.format(messages));
-      this.oldDateTimeout = setInterval(()=>{
-         this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title',this.format(messages));
-      },1000*60);
    }
 
    private addAttachmentToElement() {
@@ -280,14 +275,12 @@ export default class ChatWindowMessage {
 
       this.message.registerHook('replaceBody', (processBodyString) => {
          if (processBodyString) {
-            this.replaceBody(processBodyString);
-         }
-      });
-
-      this.message.registerHook('replacestamp', (date:number) => {
-         if (date) {
+            this.replaceBody(processBodyString);         
             let timestampElement = this.element.find('.jsxc-timestamp');
-            DateTime.stringify(date, timestampElement);
+            let newtimestampElement = $('<div class="jsxc-timestamp">');
+            newtimestampElement.insertBefore(timestampElement);
+            timestampElement.remove(); // to kill the timer
+            DateTime.stringify(this.message.getReplaceTime(),newtimestampElement);
          }
       });
 
@@ -340,25 +333,32 @@ export default class ChatWindowMessage {
    }
 
    private replaceBody(processBodyString:any) {
-      let bodyElement = $(processBodyString);
+
+      let bodyElement :JQuery<HTMLElement> = $(processBodyString);
       LinkHandlerGeo.get().detect(bodyElement);
 
-      this.element.find('.jsxc-content').html(bodyElement);
-      let newtimestampElement = $('<div class="jsxc-timestamp">');
-      let timestampElement = this.element.find('.jsxc-timestamp');
-      newtimestampElement.insertBefore( timestampElement );
-      timestampElement.remove(); // remove the old to kill the timeout from DateTime.stringify
-      DateTime.stringify(new Date().getTime(), newtimestampElement);
+      let contentElement = this.element.find('.jsxc-content');
+      contentElement.html(processBodyString);
+
+      
+
       if (!this.element.find('.jsxc-replace').hasClass('jsxc-replace-icon'))
       {
             this.element.find('.jsxc-replace').addClass('jsxc-replace-icon');
+            this.element.find('.jsxc-replace').on('click',()=>{
+               let chain = this.chatWindow.getTranscript().getReplaceMessageChainFromMessage(this.message);
+               if (chain!==null)
+               {
+                  showLogDialog(this.chatWindow.getContact().getAccount().getContact(),this.chatWindow.getContact(),chain);
+               }
+            });
       }
 
-      let transcript = this.chatWindow.getContact().getTranscript();
-      let messages = transcript.getReplaceMessageChainFromMessage(this.message);
-      if (messages!==null)
+      let chain = this.chatWindow.getTranscript().getReplaceMessageChainFromMessage(this.message);
+     
+      if (chain!==null)
       {
-         this.addOriginalToTitel(messages);
+         this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title',this.format(chain));
       }
    }
 }

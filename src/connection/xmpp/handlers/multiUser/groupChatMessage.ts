@@ -123,11 +123,12 @@ export default class extends AbstractHandler {
          plaintextMessage: body,
          // htmlMessage: htmlBody.html(),
          stamp: sendDate.getTime(),
-         replaceId : replacetag.length>0 ? replacetag.attr('id') : null,
          sender,
          unread,
          mark: MessageMark.transferred,
       });
+
+      message.setReplaceId(replacetag.length>0 ? replacetag.attr('id') : null);
 
       if (direction === Message.DIRECTION.OUT) {
          message.received();

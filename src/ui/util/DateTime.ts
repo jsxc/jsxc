@@ -24,8 +24,6 @@ export default class DateTime {
       let momentObject = moment(stamp);
       var locale =  window.navigator.language;
       momentObject.locale(locale);
-      let fromNow = momentObject.fromNow();
-
-      return fromNow;
+      return momentObject.fromNow();
    }
 }

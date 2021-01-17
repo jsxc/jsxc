@@ -53,7 +53,7 @@ export class MessageElement {
          let carbonTagName = <string>carbonStanza.prop('tagName') || '';
 
          this.carbon = true;
-         this.direction = carbonTagName.toLowerCase() === 'sent' ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
+         this.direction = (carbonTagName.toLowerCase() === 'sent') ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
 
          return;
       }

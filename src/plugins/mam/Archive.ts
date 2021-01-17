@@ -191,8 +191,7 @@ export default class Archive {
          stamp: stamp.getTime(),
          mark: MessageMark.transferred,
          unread: false,
-         sender: undefined,
-         replaceId:replaceId
+         sender: undefined
       };
 
       if (this.contact.isGroupChat()) {
@@ -206,7 +205,9 @@ export default class Archive {
             contact.getNickname() === from.resource ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
       }
 
-      return new Message(messageProperties);
+      let result = new Message(messageProperties);
+      result.setReplaceId(replaceId);
+      return result;
    }
 
    public onComplete = async (stanza: Element) => {
@@ -258,12 +259,16 @@ export default class Archive {
          let arr : {[key: string]: IMessage} = {};
          for (let key of replaceMessagesKeys)
          {
-            arr[key]=transcript.getMessage(key);
+            let tmp = transcript.getMessage(key);
+            if (tmp!==undefined&&tmp!==null)
+            {
+               arr[key]=tmp;
+            }
          }
          let indexedArr = transcript.convertToIndexArray(arr);
          for (let i=0;i<indexedArr.length;i++)
          {
-            transcript.processReplace(indexedArr[i],true);
+            transcript.processReplace(indexedArr[i]);
          }
       }
 
@@ -304,12 +309,16 @@ export default class Archive {
          let arr : {[key: string]: IMessage} = {};
          for (let key of replaceMessagesKeys)
          {
-            arr[key]=transcript.getMessage(key);
+            let tmp = transcript.getMessage(key);
+            if (tmp!==undefined&&tmp!==null)
+            {
+               arr[key]=tmp;
+            }
          }
          let indexedArr = transcript.convertToIndexArray(arr);
          for (let i=0;i<indexedArr.length;i++)
          {
-            transcript.processReplace(indexedArr[i],true);
+            transcript.processReplace(indexedArr[i]);
          }
       }
 

@@ -102,13 +102,14 @@ export default class Message implements IIdentifiable, IMessage {
                   forwarded: false,
                   stamp: new Date().getTime(),
                   type: ContactType.CHAT,
-                  replaceId: null,
                   encryptedHtmlMessage: null,
                   encryptedPlaintextMessage: null,
+                  replaceId: null,
                },
                data
             )
          );
+
       } else if (!this.data.get('attrId')) {
          throw new Error(`Could not load message ${this.uid}`);
       }
@@ -171,10 +172,6 @@ export default class Message implements IIdentifiable, IMessage {
 
    public getStamp(): Date {
       return new Date(this.data.get('stamp'));
-   }
-
-   public setReplaceStamp(date : Date): void {
-      this.data.set('replacestamp',date.getTime());
    }
 
    public getDirection(): DIRECTION {
@@ -339,8 +336,20 @@ export default class Message implements IIdentifiable, IMessage {
       return this.data.get('replaceBody');
    }
 
+   public setReplaceTime(val: number) {//XEP - 0308
+      return this.data.set('replacetime',val.toString());
+   }
+
+   public getReplaceTime() : number {//XEP - 0308
+      return this.data.get('replacetime')!==undefined?parseInt(this.data.get('replacetime')):this.getStamp().getTime();
+   }
+
    public getReplaceId() : string{ //XEP - 0308
       return this.data.get('replaceId');
+   }
+
+   public setReplaceId(id: string) { //XEP - 0308
+      this.data.set('replaceId',id);
    }
 
    public setPlaintextMessage(plaintextMessage: string) {

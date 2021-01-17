@@ -85,7 +85,10 @@ export default class Transcript {
 
       for (let strId in messages)
       {
-         indexMessageArray.push(messages[strId]);
+         if(this.isValidMessage(messages[strId]))
+         {
+            indexMessageArray.push(messages[strId]);
+         }
       }
 
       indexMessageArray.sort(function compare(a:IMessage, b:IMessage) {
@@ -105,39 +108,36 @@ export default class Transcript {
       return indexMessageArray;
    }
 
-   public processReplace(message:IMessage,mam:boolean=false)
+   public processReplace(message:IMessage)
    {
+       if (message===undefined||message.getDirection()===DIRECTION.SYS)
+         return;
+
        let chain =  this.getReplaceMessageChainFromMessage(message);
-       let oldmessage = this.findMessageByAttrId(chain[0].getReplaceId());   
+       let oldmessage = chain[0];
        let latestMessage = chain[chain.length-1];   
-       if (oldmessage&&oldmessage.getReplaceId()===null)
+       if (oldmessage)
        {
-           //only allow corrections form same sender
-           if (latestMessage.getDirection()===DIRECTION.IN) //reset Marker to transfered on outgoing messages
+           //only allow corrections from same sender
+           if (latestMessage.getDirection()===DIRECTION.IN||latestMessage.getDirection()===DIRECTION.PROBABLY_IN) //reset Marker to transfered on outgoing messages
            {
                let oldsender = oldmessage.getSender().jid!==undefined?oldmessage.getSender().jid.full:oldmessage.getPeer().full;
                let replaceSender = latestMessage.getSender().jid!==undefined?latestMessage.getSender().jid.full:latestMessage.getPeer().full;
                if (oldsender===replaceSender)
                {
                    latestMessage.getProcessedBody().then((bodyString)=> {
-                      oldmessage.setReplaceBody(bodyString);
-                      if (mam)
-                      {
-                         oldmessage.setReplaceStamp(latestMessage.getStamp());
-                      }
+                     oldmessage.setReplaceTime(latestMessage.getStamp().getTime());
+                     oldmessage.setReplaceBody(bodyString);
                    }); 
                    latestMessage.received(); //reset Marker to received on incoming messages
                }
            }
            else
-           if (latestMessage.getDirection()===DIRECTION.OUT)
+           if (latestMessage.getDirection()===DIRECTION.OUT||latestMessage.getDirection()===DIRECTION.PROBABLY_OUT)
            {
                latestMessage.getProcessedBody().then((bodyString)=> {
+                  oldmessage.setReplaceTime(latestMessage.getStamp().getTime());
                   oldmessage.setReplaceBody(bodyString);
-                  if (mam)
-                  {
-                     oldmessage.setReplaceStamp(latestMessage.getStamp());
-                  }
                });
                latestMessage.transferred(); //reset Marker to transfered on outgoing messages               
            }
@@ -154,48 +154,43 @@ export default class Transcript {
          return null;
    }
 
+   private isValidMessage(message: any): boolean{
+      return message!==null&&message!==undefined&&message.uid!==undefined&&message.data!==undefined;
+   }
+
    public getReplaceMessageChainFromMessage(message : IMessage) : IMessage[] {
-      let resultChain = new Array();
-      resultChain.push(message);
 
-      let recursive = (message: IMessage) :IMessage => {
-         let replacemsg = null;
-         let messages = this.getMessages();
-         for (let key in messages)
+      let sortedArray = this.convertToIndexArray(this.messages);
+      for (let i=sortedArray.length-1;i>=0;i--)
+      {
+         if (sortedArray[i].getReplaceId()!==null)
          {
-            let tmpmessage = messages[key];
-            if (tmpmessage.getReplaceId()!==null&&tmpmessage.getReplaceId()===message.getAttrId())
+            let foundMessage = false;
+            let resultChain = new Array();
+
+            let replacedMsg = sortedArray[i];
+            do {
+
+               if (replacedMsg.getAttrId()===message.getAttrId())
+               {
+                  foundMessage=true;
+               }
+           
+               resultChain.push(replacedMsg);
+               replacedMsg = replacedMsg.getReplaceId()!==null?this.findMessageByAttrId(replacedMsg.getReplaceId()):null;
+            } while(replacedMsg!==null&&replacedMsg!==undefined);
+
+            if (foundMessage)
             {
-               replacemsg=tmpmessage;
-               break;
+               return resultChain.reverse();
             }
          }
-         
-         if (replacemsg!==null)
-         {
-            resultChain.push(replacemsg);
+      }
 
-            let deep = recursive(replacemsg);
-            if (deep!==null)
-            {               
-               replacemsg=deep;
-            }
-         }
-         
-         return replacemsg;
-      };
-
-      recursive(message);
-
-      return resultChain;
+      return [message];
    }
 
    public pushMessage(message: IMessage) {
-
-      if (message.getReplaceId()!==null)
-      {
-         this.processReplace(message);
-      }
 
       if (!message.getNextId() && this.firstMessage) {
          message.setNext(this.firstMessage);
@@ -384,6 +379,11 @@ export default class Transcript {
       let id = message.getUid();
 
       this.messages[id] = message;
+
+      if (message!==undefined&&message.getReplaceId()!==null)
+      {
+         this.processReplace(message);
+      }
 
       if (message.getDirection() !== DIRECTION.OUT && message.isUnread()) {
          let unreadMessageIds = this.properties.get('unreadMessageIds') || [];
