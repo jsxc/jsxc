@@ -228,6 +228,21 @@ export default class ChatWindowMessage {
          }
       });
 
+      this.message.registerHook('replaceBody', (processBodyString) => {
+         if (processBodyString) {
+            let bodyElement = $(processBodyString);
+            LinkHandlerGeo.get().detect(bodyElement);
+
+            this.element.find('.jsxc-content').html(bodyElement);
+            let timestampElement = this.element.find('.jsxc-timestamp');
+            DateTime.stringify(new Date().getTime(), timestampElement);
+            if (!this.element.find('.jsxc-replace').hasClass('jsxc-replace-icon'))
+            {
+                this.element.find('.jsxc-replace').addClass('jsxc-replace-icon');
+            }
+         }
+      });
+
       this.message.registerHook('progress', (progress) => {
          this.element.find('.jsxc-attachment').attr('data-progress', Math.round(progress * 100) + '%');
       })

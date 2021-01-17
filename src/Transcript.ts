@@ -37,7 +37,21 @@ export default class Transcript {
       this.lastMessage = message;
    }
 
+   private processReplace(message)
+   {
+       let oldmessage = this.findMessageByAttrId(message.getReplaceId());
+       oldmessage.setPlaintextMessage(message.getPlaintextMessage());
+       message.getProcessedBody().then((bodyString)=> {oldmessage.setReplaceBody(bodyString);});
+   }
+
    public pushMessage(message: IMessage) {
+
+      if (message.getReplaceId()!==null)
+      {
+         this.processReplace(message);
+         return;
+      }
+
       if (!message.getNextId() && this.firstMessage) {
          message.setNext(this.firstMessage);
       }

@@ -23,6 +23,7 @@ export interface IMessagePayload {
    plaintextMessage?: string,
    htmlMessage?: string,
    errorMessage?: string,
+   replaceId?: string,
    attachment?: Attachment,
    mark?: MessageMark,
    encrypted?: boolean,
@@ -142,4 +143,10 @@ export interface IMessage {
    getErrorMessage(): string
 
    updateProgress(transferred: number, complete: number)
+
+   setReplaceBody(val: string)//XEP - 0308
+
+   getReplaceBody(): string//XEP - 0308
+
+   getReplaceId(): string//XEP - 0308
 }

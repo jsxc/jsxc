@@ -93,6 +93,7 @@ export default class Message implements IIdentifiable, IMessage {
             forwarded: false,
             stamp: new Date().getTime(),
             type: ContactType.CHAT,
+            replaceId: null,
             encryptedHtmlMessage: null,
             encryptedPlaintextMessage: null
          }, data));
@@ -310,6 +311,18 @@ export default class Message implements IIdentifiable, IMessage {
 
    public setDirection(direction: DIRECTION) {
       this.data.set('direction', direction)
+   }
+
+   public setReplaceBody(val: string) {//XEP - 0308
+      this.data.set('replaceBody', val);
+   }
+
+   public getReplaceBody() : string {//XEP - 0308
+      return this.data.get('replaceBody');
+   }
+
+   public getReplaceId() : string{ //XEP - 0308
+      return this.data.get('replaceId');
    }
 
    public setPlaintextMessage(plaintextMessage: string) {
