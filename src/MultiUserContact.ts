@@ -88,6 +88,30 @@ export default class MultiUserContact extends Contact {
       throw new Error('No invitation method available');
    }
 
+   public changeTopic(topic: string) {
+      return this.getService().changeTopic(this.getJid(), topic);
+   }
+
+   public changeNickname(nickname: string) {
+      return this.getService().changeNickname(this.getJid(), nickname);
+   }
+
+   public kick(nickname: string, reason?:string) {
+      return this.getService().kickUser(this.getJid(), nickname,reason);
+   }
+
+   public ban(target: IJID, reason?:string) {
+      return this.getService().banUser(this.getJid(), target,reason);
+   }
+
+   public changeAffiliation(target: IJID, affiliation: string) {
+      return this.getService().changeAffiliation(this.getJid(), target, affiliation);
+   }
+
+   public changeRole(nickname: string, role: string) {
+      return this.getService().changeRole(this.getJid(), nickname, role);
+   }
+
    public join() {
       this.data.set('joinDate', new Date());
       this.data.set('memberListComplete', false);
@@ -169,7 +193,7 @@ export default class MultiUserContact extends Contact {
    }
 
    public getSubscription(): ContactSubscription {
-      return ContactSubscription.BOTH;
+      return ContactSubscription.BOTH;;
    }
 
    public setSubject(subject: string) {

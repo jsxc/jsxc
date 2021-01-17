@@ -2,6 +2,7 @@ import Dialog from '../Dialog'
 import { IContact } from '../../Contact.interface'
 import Translation from '@util/Translation';
 import { Presence } from '@connection/AbstractConnection';
+import Color from '@util/Color';
 
 let vcardTemplate = require('../../../template/vcard.hbs');
 let vcardBodyTemplate = require('../../../template/vcard-body.hbs');
@@ -29,6 +30,19 @@ export default function(contact: IContact) {
 
    dialog = new Dialog(content);
    dialog.open();
+
+   let groups = contact.getGroups();
+   dialog.getDom().find('.jsxc-vcard-tags').append(
+      groups.map(group => {
+         let element = $('<span>');
+
+         element.text(group);
+         element.addClass('jsxc-tag');
+         element.css('background-color', Color.generate(group));
+
+         return element;
+      })
+   );
 
    for (let resource of resources) {
       let clientElement = dialog.getDom().find(`[data-resource="${resource}"] .jsxc-client`);
@@ -105,17 +119,27 @@ function convertToTemplateData(vCardData): any[] {
 
    for (let name in vCardData) {
       let value = vCardData[name];
-      let childProperties;
+      let childProperties = [];
 
       if (typeof value === 'object' && value !== null) {
          childProperties = convertToTemplateData(value);
          value = undefined;
       }
 
+      let nameLabel: string;
+
+      if (Array.isArray(vCardData)) {
+         let firstChildProperty = childProperties.shift();
+
+         nameLabel = firstChildProperty?.name;
+      } else {
+         nameLabel = Translation.t(name);
+      }
+
       properties.push({
-         name: Translation.t(name),
+         name: nameLabel,
          value,
-         properties: childProperties
+         properties: childProperties.filter(property => property.value || property.properties.length > 0),
       });
    }
 

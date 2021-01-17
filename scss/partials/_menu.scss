@@ -3,8 +3,12 @@
   position: relative;
 
   &__button {
+    align-items: flex-start;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
     height: 100%;
+    justify-content: center;
     user-select: none;
     white-space: nowrap;
 
@@ -230,7 +234,6 @@
   &--pushup {
     @include presence-indicator("");
 
-    height: auto;
     position: static;
 
     li {
@@ -246,6 +249,7 @@
     }
 
     .jsxc-menu__content {
+      background-color: var(--jsxc-color-background-dark);
       bottom: 100%;
       box-shadow: 0 -5px 5px -5px var(--jsxc-color-box-shadow);
       left: 0;

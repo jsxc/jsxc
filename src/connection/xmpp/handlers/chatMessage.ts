@@ -32,8 +32,10 @@ export default class extends AbstractHandler {
          return this.PRESERVE_HANDLER;
       }
 
-      // If we now the full jid, we use it
-      peerContact.setResource(peerJid.resource);
+      if (!peerContact.isGroupChat()) {
+         // If we now the full jid, we use it
+         peerContact.setResource(peerJid.resource);
+      }
 
       let message = new Message({
          uid: messageElement.getStanzaId(),
@@ -51,7 +53,7 @@ export default class extends AbstractHandler {
       let pipe = this.account.getPipe('afterReceiveMessage');
 
       pipe.run(peerContact, message, messageElement.get(0)).then(([contact, message]) => {
-         if (message.getPlaintextMessage() || message.getHtmlMessage()) {
+         if (message.getPlaintextMessage() || message.getHtmlMessage() || message.hasAttachment()) {
             contact.getTranscript().pushMessage(message);
          } else {
             message.delete();

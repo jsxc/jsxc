@@ -1,3 +1,7 @@
+.jsxc-root-container * {
+  box-sizing: border-box;
+}
+
 .jsxc-right {
   text-align: right;
 }
@@ -201,4 +205,14 @@ ul.jsxc-vcard {
   height: 300px;
   overflow: auto;
   width: 500px;
+}
+
+.jsxc-tag {
+  border-radius: 0.7em;
+  color: var(--jsxc-color-primary-text);
+  font-size: 0.8em;
+  height: 1.4em;
+  line-height: 1.4em;
+  margin-right: 0.25em;
+  padding: 0.2em 0.5em;
 }

@@ -12,7 +12,7 @@ export let SOUNDS = {
    NOTICE: <string> (<any> noticeSoundFile)
 };
 export let REGEX = {
-   JID: new RegExp('\\b[^"&\'\\/:<>@\\s]+@[\\w-_.]+\\b', 'ig'),
+   JID: new RegExp('\\b[^"&\'\\/:<>@\\s]+@[\\w-_.]+\\b', 'i'),
    URL: new RegExp(/(aesgcm:\/\/|https?:\/\/|www\.)[^\s<>'"]+/gi),
    GEOURI: new RegExp(/geo:(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)(?:,-?\d+(?:\.\d+)?)?(?:;crs=[\w-]+)?(?:;u=(\d+(?:\.\d+)?))?(?:;[\w-]+=(?:[\w-_.!~*'()]|%[\da-f][\da-f])+)*/, 'g'),
 };

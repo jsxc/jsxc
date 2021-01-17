@@ -1,4 +1,5 @@
 import showContactDialog from './dialogs/contact'
+import showContactSearchDialog from './dialogs/contactsearch'
 import showAboutDialog from './dialogs/about'
 import showMultiUserJoinDialog from './dialogs/multiUserJoin'
 import showSettingsDialog from './dialogs/settings'
@@ -9,11 +10,14 @@ import { IContact } from '../Contact.interface'
 import WindowList from './ChatWindowList'
 import Client from '../Client'
 import Translation from '../util/Translation'
+import showSetExStatusDialog from './dialogs/exstatus'
 import { Notice, TYPE } from '../Notice'
 import { Presence } from '../connection/AbstractConnection'
 import { NoticeManager } from '../NoticeManager'
 import ClientAvatar from '../ClientAvatar'
 import confirmDialog from './dialogs/confirm'
+import Utils from '@util/Utils'
+import Emoticons from '@src/Emoticons'
 
 let rosterTemplate = require('../../template/roster.hbs')
 
@@ -26,6 +30,7 @@ export default class Roster {
 
    private element: JQuery;
    private contactList: JQuery;
+   private groupList: JQuery;
 
    private static instance: Roster;
 
@@ -53,6 +58,7 @@ export default class Roster {
       $('.jsxc-js-notice-menu .jsxc-menu__button').text('');
 
       this.contactList = this.element.find('.jsxc-contact-list');
+      this.groupList = this.element.find('.jsxc-group-list');
 
       this.addMainMenuEntries();
       this.registerPresenceHandler();
@@ -63,6 +69,7 @@ export default class Roster {
       ClientAvatar.get().addElement(this.element.find('.jsxc-bottom .jsxc-avatar'));
 
       this.initOptions();
+      this.initHandler();
    }
 
    public startProcessing(msg?: string) {
@@ -117,6 +124,7 @@ export default class Roster {
 
          this.insert(rosterItem);
       });
+
    }
 
    public remove(contact: IContact) {
@@ -144,19 +152,23 @@ export default class Roster {
    public setEmptyContactList() {
       let statusElement = $('<p>');
       statusElement.text(Translation.t('Your_roster_is_empty_add_'));
-      statusElement.find('a').click(<any> showContactDialog);
+      statusElement.find('a').click(<any>showContactDialog);
       statusElement.append('.');
 
       this.setStatus(statusElement);
    }
 
    public refreshOwnPresenceIndicator() {
+      let status = Client.getPresenceController().getStatus();
       let confirmedPresence = Client.getPresenceController().getCurrentPresence();
       let requestedPresence = Client.getPresenceController().getTargetPresence();
       let presence = typeof requestedPresence === 'number' ? requestedPresence : confirmedPresence;
 
+      let htmlStatus = Emoticons.toImage(Utils.escapeHTML(status));
+      this.element.find('.jsxc-js-presence-menu .jsxc-bar__caption__secondary').html(htmlStatus);
+
       let label = $('.jsxc-js-presence-menu .jsxc-' + Presence[presence]).text();
-      let labelElement = this.element.find('.jsxc-js-presence-menu .jsxc-menu__button');
+      let labelElement = this.element.find('.jsxc-js-presence-menu .jsxc-bar__caption__primary');
 
       labelElement.text(label);
       this.element.attr('data-presence', Presence[confirmedPresence]);
@@ -176,7 +188,7 @@ export default class Roster {
       let noticeListElement = $('.jsxc-js-notice-menu ul');
       let noticeElement = $('<li/>');
 
-      noticeElement.click(function(ev) {
+      noticeElement.click(function (ev) {
          ev.stopPropagation();
          ev.preventDefault();
 
@@ -191,7 +203,7 @@ export default class Roster {
       noticeElement.attr('title', notice.getDescription());
       noticeElement.attr('data-notice-id', notice.getId());
       noticeElement.attr('data-manager-id', manager.getId());
-      noticeListElement.append(noticeElement);
+      noticeListElement.prepend(noticeElement);
 
       let numberOfNotices = noticeListElement.find('li').not('.jsxc-js-delete-all').length;
       $('.jsxc-js-notice-menu .jsxc-menu__button').text(numberOfNotices);
@@ -200,7 +212,7 @@ export default class Roster {
          let deleteAllElement = $('<li>');
          deleteAllElement.addClass('jsxc-js-delete-all jsxc-menu__item--danger jsxc-icon--delete');
          deleteAllElement.text(Translation.t('Close_all'));
-         deleteAllElement.prependTo(noticeListElement);
+         deleteAllElement.appendTo(noticeListElement);
 
          deleteAllElement.click((ev) => {
             ev.stopPropagation();
@@ -209,14 +221,14 @@ export default class Roster {
             let dialog = confirmDialog(Translation.t('Do_you_really_want_to_dismiss_all_notices'));
             dialog.getPromise().then(() => {
                NoticeManager.removeAll();
-            }).catch(() => {});
+            }).catch(() => { });
          });
       }
    }
 
    public removeNotice(manager: NoticeManager, noticeId: string) {
       let managerId = manager.getId() || '';
-      let noticeElement = $('.jsxc-js-notice-menu li').filter(function() {
+      let noticeElement = $('.jsxc-js-notice-menu li').filter(function () {
          return $(this).attr('data-notice-id') === noticeId &&
             ($(this).attr('data-manager-id') || '') === managerId;
       });
@@ -231,7 +243,7 @@ export default class Roster {
       }
    }
 
-   public addMenuEntry(options: { id: string, handler: (ev) => void, label: string | JQuery<HTMLElement>, icon?: string, offlineAvailable?: boolean }) {
+   public addMenuEntry(options: { id: string, handler: (ev: JQuery.ClickEvent<HTMLElement>) => void, label: string | JQuery<HTMLElement>, icon?: string, offlineAvailable?: boolean }) {
       const { id, handler, label, icon, offlineAvailable } = options;
       let li = $('<li>');
 
@@ -269,15 +281,18 @@ export default class Roster {
       mainMenu.prepend(li);
    }
 
+   public setFilter(filter: string = '') {
+      this.element.find('.jsxc-filter-input').val(filter).trigger('keyup');
+   }
+
    private insert(rosterItem: RosterItem) {
-      let contactList = this.contactList;
       let contact = rosterItem.getContact();
+      let list = contact.isChat() ? this.contactList : this.groupList;
       let contactName = contact.getName();
 
       let lastMessageDate = contact.getLastMessageDate();
-
-      let pointer = lastMessageDate ? contactList.find('[data-date]') : contactList.children().first();
-      pointer = pointer.length > 0 ? pointer.first() : contactList.children().first();
+      let pointer = lastMessageDate ? list.find('[data-date]') : list.children().first();
+      pointer = pointer.length > 0 ? pointer.first() : list.children().first();
 
       while (pointer.length > 0) {
          let pointerDate = pointer.data('date') ? new Date(pointer.data('date')) : undefined;
@@ -295,7 +310,7 @@ export default class Roster {
          pointer = pointer.next();
       }
 
-      rosterItem.getDom().appendTo(contactList);
+      rosterItem.getDom().appendTo(list);
    }
 
    private addMainMenuEntries() {
@@ -312,17 +327,28 @@ export default class Roster {
          this.addMenuEntry({
             id: 'online-help',
             handler(ev) {
-               window.location = onlineHelpUrl;
+               ev.stopPropagation();
+
+               if (ev.currentTarget === ev.target) {
+                  $(ev.target).find('a').get(0).click();
+               }
             },
-            label: $(`<a href="${onlineHelpUrl}">${Translation.t('Online_help')}</a>`),
+            label: $(`<a href="${onlineHelpUrl}" target="_blank" rel="noopener noreferrer">${Translation.t('Online_help')}</a>`),
             offlineAvailable: true,
             icon: 'help',
          });
       }
 
       this.addMenuEntry({
+         id: 'search-contact',
+         handler: showContactSearchDialog,
+         label: Translation.t('contact_search'),
+         icon: 'search'
+      });
+
+      this.addMenuEntry({
          id: 'add-contact',
-         handler: showContactDialog,
+         handler: () => showContactDialog(),
          label: Translation.t('Add_buddy'),
          icon: 'contact'
       });
@@ -342,7 +368,7 @@ export default class Roster {
 
       this.addMenuEntry({
          id: 'join-muc',
-         handler: showMultiUserJoinDialog,
+         handler: () => showMultiUserJoinDialog(),
          label: Translation.t('Join_chat'),
          icon: 'groupcontact'
       });
@@ -357,8 +383,14 @@ export default class Roster {
    }
 
    private registerPresenceHandler() {
-      this.element.find('.jsxc-js-presence-menu li').click(function() {
-         let presenceString = <string> $(this).data('presence');
+      this.element.find('.jsxc-js-presence-menu li').click(function () {
+         let presenceString = <string>$(this).data('presence');
+
+         if (presenceString === 'extended-status') {
+            showSetExStatusDialog();
+            return;
+         }
+
          let oldPresence = Client.getPresenceController().getTargetPresence();
          let requestedPresence = Presence[presenceString];
 
@@ -460,6 +492,34 @@ export default class Roster {
       });
       Client.getPresenceController().registerCurrentPresenceHook(() => {
          this.refreshOwnPresenceIndicator();
+      });
+   }
+
+   private initHandler() {
+      this.element.find('.jsxc-filter-input').on('keyup', (ev) => {
+         let filterValue = $(ev.target).val().toString().trim().toLowerCase();
+         let listElements = this.element.find('.jsxc-contact-list-wrapper .jsxc-roster-item');
+
+         if (!filterValue) {
+            listElements.removeClass('jsxc-roster-item--filtered');
+
+            return;
+         }
+
+         listElements.not(`[data-jid*="${filterValue}"]`).not(`[data-name*="${filterValue}"]`).not(`[data-groups*="${filterValue}"]`).addClass('jsxc-roster-item--filtered');
+         listElements.filter(`[data-jid*="${filterValue}"]`).removeClass('jsxc-roster-item--filtered');
+         listElements.filter(`[data-name*="${filterValue}"]`).removeClass('jsxc-roster-item--filtered');
+         listElements.filter(`[data-groups*="${filterValue}"]`).removeClass('jsxc-roster-item--filtered');
+      });
+
+      this.element.find('.jsxc-filter-wrapper .jsxc-clear').on('mousedown', (ev) => {
+         ev.preventDefault();
+
+         this.setFilter('');
+      });
+
+      this.element.find('.jsxc-collapsible').on('click', function () {
+         $(this).toggleClass('jsxc-active');
       });
    }
 }

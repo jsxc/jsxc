@@ -46,6 +46,14 @@ class ClientSection extends Section {
          this.getLanguageSelectionElement()
       ));
 
+      contentElement.append(new ListItem(
+         Translation.t('trusted_domains'),
+         Translation.t('one_domain_per_line'),
+         undefined,
+         undefined,
+         this.getTrustedDomainsElement()
+      ));
+
       return contentElement.getDOM();
    }
 
@@ -72,6 +80,21 @@ class ClientSection extends Section {
       if (element.find('[selected]').length === 0) {
          element.find('option:eq(0)').attr('selected', 'selected');
       }
+
+      return element;
+   }
+
+   private getTrustedDomainsElement(): JQuery {
+
+      let element = $('<textarea style="margin-left:10px;">');
+
+      element.on('change', () => {
+         let value = element.val().toString().split('\n').map(line => line.trim());
+         Client.setOption('trustedDomains',value ? value : undefined);
+      });
+
+      let trustedDomains = Client.getOption('trustedDomains', []);
+      element.val(trustedDomains.join('\n'));
 
       return element;
    }
@@ -112,6 +135,7 @@ class AccountPage extends Page {
       let contentElement = $('<div>');
 
       contentElement.append(new ConnectionSection(this.navigation, this.account).getDOM());
+      contentElement.append(new MainAppSection(this.navigation).getDOM());
       contentElement.append(new PluginSection(this.navigation, this.account).getDOM());
 
       return contentElement;
@@ -241,9 +265,65 @@ class PasswordPage extends Page {
    }
 }
 
+class MainAppSection extends Section {
+   constructor(navigation: Navigation) {
+      super(navigation, Translation.t('General'), true);
+   }
+
+   protected generateContentElement(): JQuery {
+
+      let contentElement = new List();
+
+      contentElement.append(this.getListItemForData('RFC6120', 'XMPP Core', '', ''));
+      contentElement.append(this.getListItemForData('RFC6121', 'XMPP IM', '', ''));
+      contentElement.append(this.getListItemForData('', 'Off-the-Record Messaging', '', ''));
+      contentElement.append(this.getListItemForData('', 'Data Forms', '0030', ''));
+      contentElement.append(this.getListItemForData('', 'Service Discovery', '0163', '1.2.1'));
+      contentElement.append(this.getListItemForData('', 'vcard-temp', '0054', ''));
+      contentElement.append(this.getListItemForData('', 'Software Version', '0115', ''));
+      contentElement.append(this.getListItemForData('', 'Entity Capabilities', '0163', '1.2.1'));
+      contentElement.append(this.getListItemForData('', 'URI Scheme Query', '0147', ''));
+      contentElement.append(this.getListItemForData('', 'Jingle', '0166', ''));
+      contentElement.append(this.getListItemForData('', 'Jingle RTP Sessions', '0167', ''));
+      contentElement.append(this.getListItemForData('', 'Jingle File Transfer', '0234', ''));
+      contentElement.append(this.getListItemForData('', 'Delayed Delivery', '0203', ''));
+      contentElement.append(this.getListItemForData('', 'XMPP Over BOSH', '0206', ''));
+      contentElement.append(this.getListItemForData('', 'Bidirectional-streams Over Synchronous HTTP', '0124', ''));
+      contentElement.append(this.getListItemForData('', 'Stanza Forwarding', '0297', ''));
+      contentElement.append(this.getListItemForData('', 'Multi-User Chat', '0045', ''));
+      contentElement.append(this.getListItemForData('', 'Jabber Search', '0055', '1.3'));
+      contentElement.append(this.getListItemForData('', 'Publish-Subscribe', '0060', '1.2.1'));
+      contentElement.append(this.getListItemForData('', 'Personal Eventing Protocol', '0163', '1.2.1'));
+
+      return contentElement.getDOM();
+   }
+
+   private getListItemForData(description, xepname, xepid, xepversion) {
+      let checkboxElement = $('<input>');
+      checkboxElement.attr('type', 'checkbox');
+
+      checkboxElement.prop('checked', true);
+      checkboxElement.prop('disabled', true);
+
+      let listItem = new ListItem(xepname, description, undefined, undefined, checkboxElement);
+      let listItemElement = listItem.getDOM();
+
+      if (xepid && xepid.length) {
+         let xepElement = $('<a target="_blank" rel="noreferrer noopener">');
+         xepElement.addClass('jsxc-badge');
+         xepElement.text('XEP-' + xepid + (xepversion && xepversion.length > 0 ? ('@' + xepversion) : ''));
+         xepElement.attr('title', xepname);
+         xepElement.attr('href', 'https://xmpp.org/extensions/xep-' + xepid + '.html');
+         xepElement.appendTo(listItemElement.find('.jsxc-list__text__primary'));
+      }
+
+      return listItem;
+   }
+}
+
 class PluginSection extends Section {
    constructor(navigation: Navigation, private account: Account) {
-      super(navigation, Translation.t('Plugins'));
+      super(navigation, Translation.t('Plugins'), true);
    }
 
    protected generateContentElement(): JQuery {
@@ -263,6 +343,13 @@ class PluginSection extends Section {
          checkboxElement.attr('id', id);
          checkboxElement.attr('name', name);
          checkboxElement.prop('checked', disabledPlugins.indexOf(id) < 0);
+
+         //check if libsignal is available
+         if (id === 'omemo' && typeof (<any>window).libsignal === 'undefined') {
+            checkboxElement.prop('checked', false);
+            checkboxElement.prop('disabled', true);
+         }
+
          checkboxElement.on('change', (ev) => {
             let isEnabled = $(ev.target).prop('checked');
             let id = $(ev.target).attr('id');
@@ -282,11 +369,11 @@ class PluginSection extends Section {
 
          if (Array.isArray(metaData.xeps)) {
             metaData.xeps.forEach(xep => {
-               let xepElement = $('<a>');
+               let xepElement = $('<a target="_blank" rel="noreferrer noopener">');
                xepElement.addClass('jsxc-badge');
                xepElement.text(xep.id + '@' + xep.version);
                xepElement.attr('title', xep.name);
-               xepElement.attr('href', `https://xmpp.org/extensions/${xep.version.toLowerCase()}.html`);
+               xepElement.attr('href', `https://xmpp.org/extensions/${xep.id.toLowerCase()}.html`);
                xepElement.appendTo(listItemElement.find('.jsxc-list__text__primary'));
             });
          }

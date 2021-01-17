@@ -13,9 +13,11 @@ import MultiUserXMessageHandler from './handlers/multiUser/XMessage'
 import AbstractHandler from './AbstractHandler'
 import * as NS from './namespace'
 
+type StropheHandlerOptions = { matchBareFromJid?: boolean, ignoreNamespaceFragment?: boolean };
+
 interface IStropheConnection {
    jid: string,
-   addHandler(Handler, namespace?: string, tagName?: string, type?: string, id?: string, from?: string)
+   addHandler(Handler, namespace?: string, tagName?: string, type?: string, id?: string, from?: string, options?: StropheHandlerOptions): void
 }
 
 export default class XMPPHandler {
@@ -29,7 +31,7 @@ export default class XMPPHandler {
       this.addHandler(HeadlineMessageHandler, null, 'message', 'headline');
       this.addHandler(MultiUserXMessageHandler, 'http://jabber.org/protocol/muc#user', 'message');
       this.addHandler(PresenceHandler, null, 'presence');
-      this.addHandler(MultiUserPresenceHandler, 'http://jabber.org/protocol/muc#user', 'presence');
+      this.addHandler(MultiUserPresenceHandler, 'http://jabber.org/protocol/muc', 'presence', null, null, null, { ignoreNamespaceFragment: true });
       this.addHandler(JingleHandler, 'urn:xmpp:jingle:1', 'iq', 'set');
 
       this.addHandler(DiscoInfoHandler, NS.get('DISCO_INFO'), 'iq', 'get');
@@ -41,7 +43,7 @@ export default class XMPPHandler {
       // this.connection.conn.addHandler(this.onReceived, null, 'message');
    }
 
-   public addHandler(Handler, namespace?: string, tagName?: string, type?: string, id?: string, from?: string) {
+   public addHandler(Handler, namespace?: string, tagName?: string, type?: string, id?: string, from?: string, options?: StropheHandlerOptions) {
       let handler = new Handler(this.account);
 
       if (!(handler instanceof AbstractHandler)) {
@@ -49,6 +51,6 @@ export default class XMPPHandler {
          return;
       }
 
-      this.connection.addHandler(stanza => handler.processStanza(stanza), namespace, tagName, type, id, from);
+      this.connection.addHandler(stanza => handler.processStanza(stanza), namespace, tagName, type, id, from, options);
    }
 }

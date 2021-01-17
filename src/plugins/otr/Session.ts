@@ -6,11 +6,11 @@ import Translation from '../../util/Translation'
 import OTR from 'otr/lib/otr'
 import DSA from 'otr/lib/dsa'
 import { EncryptionState } from '../../plugin/AbstractPlugin'
-import Storage from '../../Storage'
 import PersistentMap from '../../util/PersistentMap'
 import OTRPlugin from './Plugin';
 import { IConnection } from '@connection/Connection.interface';
 import VerificationDialog from '@ui/dialogs/verification';
+import IStorage from '@src/Storage.interface';
 
 //@REVIEW
 interface IOTR {
@@ -41,7 +41,7 @@ export default class Session {
 
    private verificationDialog: VerificationDialog;
 
-   constructor(private peer: IContact, private key: DSA, private storage: Storage, private connection: IConnection) {
+   constructor(private peer: IContact, private key: DSA, private storage: IStorage, private connection: IConnection) {
 
       let options: any = {
          priv: key,

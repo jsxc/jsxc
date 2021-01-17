@@ -16,6 +16,7 @@ import { IJID } from '@src/JID.interface';
 import MultiUserContact from '@src/MultiUserContact';
 import ContactManager from '@src/ContactManager';
 import IStorage from '@src/Storage.interface';
+import CommandRepository, { CommandAction } from '@src/CommandRepository'
 
 export default class PluginAPI implements IPluginAPI {
    private storage: IStorage;
@@ -68,7 +69,7 @@ export default class PluginAPI implements IPluginAPI {
       this.getConnection().pluginOnlySend(stanzaElement);
    }
 
-   public sendIQ = (stanzaElement: Strophe.Builder): Promise<{}> => {
+   public sendIQ = (stanzaElement: Strophe.Builder): Promise<Element> => {
       return this.getConnection().pluginOnlySendIQ(stanzaElement);
    }
 
@@ -159,5 +160,17 @@ export default class PluginAPI implements IPluginAPI {
 
    public getAfterReceiveMessagePipe() {
       return this.account.getPipe('afterReceiveMessage');
+   }
+
+   public registerCommand(command: string, action: CommandAction, description: string, category?: string) {
+      return this.account.getCommandRepository().register(command, action, description, category);
+   }
+
+   public getCommandRepository(): CommandRepository {
+      return this.account.getCommandRepository();
+   }
+
+   public getAccountUid(): string {
+      return this.account.getUid();
    }
 }

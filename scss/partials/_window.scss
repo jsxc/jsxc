@@ -251,7 +251,7 @@
   background-color: transparent;
   border: 0;
   border-radius: 0;
-  box-sizing: content-box;
+  box-sizing: content-box !important;
   display: block;
   font-family: inherit;
   font-size: 1em;
@@ -443,6 +443,27 @@
     border-radius: 3px;
   }
 
+  &--loading {
+    position: relative;
+
+    &::after {
+      animation: jsxc-rotate 1s infinite;
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+      border-top-color: rgba(0, 0, 0, 0.5);
+      box-sizing: border-box;
+      content: "";
+      display: block;
+      height: 60px;
+      left: 50%;
+      margin-left: -30px;
+      margin-top: -30px;
+      position: absolute;
+      top: 50%;
+      width: 60px;
+    }
+  }
+
   &[data-progress]::after {
     content: attr(data-progress);
     display: block;
@@ -468,6 +489,14 @@
       display: inline-block;
       line-height: 0;
       padding: 0;
+    }
+
+    &.jsxc-no-thumbnail {
+      overflow: hidden;
+
+      img {
+        filter: blur(2px);
+      }
     }
   }
 

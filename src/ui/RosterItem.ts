@@ -8,6 +8,11 @@ import { IContact } from '../Contact.interface'
 import Translation from '../util/Translation'
 import Client from '@src/Client';
 import Log from '@util/Log'
+import Color from '../util/Color'
+import Roster from '@ui/Roster'
+import Emoticons from '@src/Emoticons'
+import Utils from '@util/Utils'
+import { IMessage } from '@src/Message.interface'
 
 let rosterItemTemplate = require('../../template/roster-item.hbs')
 
@@ -23,11 +28,17 @@ export default class RosterItem {
       });
 
       this.element = $(template);
+      this.element.attr('data-account-uid', this.contact.getAccount().getUid());
       this.element.attr('data-id', this.contact.getId());
+      this.element.attr('data-jid', this.contact.getJid().bare);
+      this.element.attr('data-name', this.contact.getName().toLowerCase());
       this.element.attr('data-type', this.contact.getType());
       this.element.attr('data-presence', Presence[this.contact.getPresence()]);
       this.element.attr('data-subscription', this.contact.getSubscription());
       this.element.attr('data-date', this.contact.getLastMessageDate()?.toISOString());
+      this.element.attr('data-groups', this.contact.getGroups().join(',').toLowerCase());
+
+      this.appendTags();
 
       this.element.on('dragstart', (ev) => {
          (<any> ev.originalEvent).dataTransfer.setData('text/plain', contact.getJid().full);
@@ -40,6 +51,10 @@ export default class RosterItem {
       });
 
       this.element.click(function() {
+         if ($(this).hasClass('jsxc-blocked')) {
+            return;
+         }
+
          let chatWindow = contact.getChatWindowController();
 
          if ($('body').hasClass('jsxc-fullscreen') || Client.isExtraSmallDevice()) {
@@ -85,6 +100,8 @@ export default class RosterItem {
       avatar.addElement(this.element.find('.jsxc-avatar'));
 
       this.contact.registerHook('name', (newName) => {
+         this.element.attr('data-name', newName?.toLowerCase());
+
          this.element.find('.jsxc-bar__caption__primary').text(newName);
       });
 
@@ -92,9 +109,37 @@ export default class RosterItem {
          this.element.attr('data-presence', Presence[this.contact.getPresence()]);
       });
 
-      this.contact.registerHook('status', (status) => {
-         this.element.find('.jsxc-bar__caption__secondary').text(status);
+      const updateLastMessage = (message: IMessage) => {
+         if (!message.getPlaintextMessage() && message.hasAttachment()) {
+            let attachment = message.getAttachment();
+
+            this.element.find('.jsxc-bar__caption__secondary').text(Emoticons.toUnicode(attachment.isImage() ? ':camera:' : ':paperclip:'));
+            this.element.find('.jsxc-bar__caption__secondary').attr('title', '');
+         } else {
+            this.element.find('.jsxc-bar__caption__secondary').text(Emoticons.toUnicode(':speech_balloon:') + ' ' + message.getPlaintextEmoticonMessage('unicode'));
+            this.element.find('.jsxc-bar__caption__secondary').attr('title', message.getPlaintextMessage());
+         }
+      }
+
+      const updateStatus = (status: string) => {
+         let parsedStatus = status && Emoticons.toUnicode(Utils.escapeHTML(status));
+
+         this.element.find('.jsxc-bar__caption__secondary').text(parsedStatus);
+      };
+
+      this.contact.registerHook('status', (status: string) => {
+         if (!status) {
+            let message = this.contact.getTranscript().getFirstChatMessage();
+
+            if (message) {
+               updateLastMessage(message);
+               return;
+            }
+         }
+
+         updateStatus(status);
       });
+      updateStatus(this.contact.getStatus());
 
       this.contact.registerHook('subscription', () => {
          this.element.attr('data-subscription', this.contact.getSubscription());
@@ -119,13 +164,12 @@ export default class RosterItem {
             return;
          }
 
-         this.element.find('.jsxc-bar__caption__secondary').html(message.getPlaintextEmoticonMessage());
-         this.element.find('.jsxc-bar__caption__secondary').attr('title', message.getPlaintextMessage());
+         updateLastMessage(message);
       });
 
       let message = this.contact.getTranscript().getFirstChatMessage();
-      if (message) {
-         this.element.find('.jsxc-bar__caption__secondary').html(message.getPlaintextEmoticonMessage());
+      if (message && !this.contact.getStatus()) {
+         updateLastMessage(message);
       }
 
       let updateUnreadMessage = () => {
@@ -139,6 +183,27 @@ export default class RosterItem {
 
       this.contact.getTranscript().registerHook('unreadMessageIds', updateUnreadMessage);
       updateUnreadMessage();
+   }
+
+   private appendTags() {
+      let groups = this.contact.getGroups();
+      let tagElements = groups.map(group => {
+         let element = $('<button>');
+
+         element.text(group);
+         element.addClass('jsxc-bar__tag');
+         element.css('background-color', Color.generate(group));
+         element.on('click', ev => {
+            ev.preventDefault();
+            ev.stopPropagation();
+
+            Roster.get().setFilter(group);
+         })
+
+         return element;
+      });
+
+      this.element.find('.jsxc-bar__tags').empty().append(tagElements);
    }
 
    public getDom() {

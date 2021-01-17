@@ -7,6 +7,7 @@ import Translation from '../../util/Translation'
 import Log from '../../util/Log'
 import Account from '@src/Account';
 import MultiUserContact from '@src/MultiUserContact';
+import Form from '@connection/Form'
 
 let multiUserJoinTemplate = require('../../../template/multiUserJoin.hbs');
 
@@ -67,6 +68,12 @@ class MultiUserJoinDialog {
       this.getMultiUserServices().then((services: JID[]) => {
          this.serverInputElement.val(services[0].full);
          this.serverInputElement.trigger('change');
+
+         $('#jsxc-serverlist select').empty();
+
+         services.forEach(service => {
+            $('#jsxc-serverlist select').append($('<option>').text(service.domain));
+         })
       });
    }
 
@@ -138,7 +145,23 @@ class MultiUserJoinDialog {
          });
 
          return Promise.all(promises).then((results) => {
-            return results.filter(jid => typeof jid !== 'undefined');
+            return results
+               .filter(jid => typeof jid !== 'undefined')
+               .sort(function compare(a, b) {
+                  if (!a.domain || !b.domain) {
+                     return 0;
+                  }
+
+                  if (a.domain.startsWith('conference') && !b.domain.startsWith('conference')) {
+                     return -1;
+                  }
+
+                  if (!a.domain.startsWith('conference') && b.domain.startsWith('conference')) {
+                     return +1;
+                  }
+
+                  return a.domain.localeCompare(b.domain);
+               });
          });
       })
    }
@@ -210,6 +233,7 @@ class MultiUserJoinDialog {
       this.dom.find('input, select').prop('disabled', true);
       this.testInputValues()
          .then(this.requestRoomInfo)
+         .then(this.requestMemberList)
          .then(() => {
             this.showJoinElements();
          }).catch((msg) => {
@@ -224,7 +248,7 @@ class MultiUserJoinDialog {
 
    private testInputValues(): Promise<JID | void> {
       let room = <string> this.roomInputElement.val();
-      let server = this.serverInputElement.val();
+      let server = this.serverInputElement.val()?this.serverInputElement.val():this.serverInputElement.attr('placeholder');
 
       if (!room || !room.match(/^[^"&\'\/:<>@\s]+$/i)) {
          this.roomInputElement.addClass('jsxc-invalid').keyup(function() {
@@ -287,7 +311,7 @@ class MultiUserJoinDialog {
          let feature = $(featureElement).attr('var');
 
          //@REVIEW true?
-         if (feature !== '' && true && feature !== 'http://jabber.org/protocol/muc') {
+         if (feature !== '' && true && feature.indexOf('muc_') === 0) {
             tableElement.appendRow(
                Translation.t(`${feature}.keyword`),
                Translation.t(`${feature}.description`)
@@ -304,6 +328,22 @@ class MultiUserJoinDialog {
       let name = $(stanza).find('identity').attr('name');
       let subject = $(stanza).find('field[var="muc#roominfo_subject"]').attr('label');
 
+      let form = Form.fromXML(stanza);
+      let fields = form.getFields();
+
+      fields.forEach(field => {
+         if (!field.getLabel()) {
+            return;
+         }
+
+         let value = field.getType() === 'boolean' ?
+            (field.getValues()[0] === '1' ? Translation.t('Yes') : Translation.t('No'))
+            :
+            field.getValues().join(', ');
+
+         tableElement.appendRow(field.getLabel(), value);
+      });
+
       tableElement.appendRow('Name', name);
       tableElement.appendRow('Subject', subject);
 
@@ -312,9 +352,19 @@ class MultiUserJoinDialog {
       roomInfoElement.append($('<input type="hidden" name="room-name">').val(name));
       roomInfoElement.append($('<input type="hidden" name="room-subject">').val(subject));
 
-      //@TODO display subject, number of occupants, etc.
-
       return roomInfoElement;
+   }
+
+   private requestMemberList = (room: JID) => {
+      return this.connection.getDiscoService().getDiscoItems(room).then((stanza) => {
+         let memberJids = $(stanza).find('item').map((index, element) => $(element).attr('jid')).get();
+
+         let row = $('<tr>');
+         row.append($('<td>').text(Translation.t('Occupants')));
+         row.append($('<td>').text(memberJids.length > 0 ? memberJids.join(', ') : Translation.t('Occupants_not_provided')));
+
+         this.dom.find('.jsxc-status-container table').append(row);
+      });
    }
 
    private joinHandler = (ev) => {

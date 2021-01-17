@@ -3,9 +3,11 @@ import Message from './../Message'
 import { Presence } from './AbstractConnection'
 import Form from './Form'
 import PEPService from './services/PEP'
+import SearchService from './services/Search'
 import PubSubService from './services/PubSub'
 import 'Strophe'
 import JingleHandler from './JingleHandler';
+import { MultiUserAffiliation } from './services/MUC'
 
 export interface IConnection {
    registerHandler(handler: (stanza: string) => boolean, ns?: string, name?: string, type?: string, id?: string, from?: string);
@@ -26,15 +28,19 @@ export interface IConnection {
 
    getVcardService(): IVcardService
 
+   getSearchService(): SearchService
+
    getDiscoService(): IDiscoService
 
    getJingleHandler(): JingleHandler
 
    getJID(): IJID
 
+   getServerJID(): IJID
+
    sendMessage(message: Message)
 
-   sendPresence(presence?: Presence)
+   sendPresence(presence?: Presence, statusText?: string)
 
    queryArchive(archive: IJID, version: string, queryId: string, contact?: IJID, beforeResultId?: string, end?: Date): Promise<Element>
 
@@ -54,11 +60,27 @@ export interface IMUCService {
 
    getRoomConfigurationForm(jid: IJID): Promise<Element>
 
+   getMemberList(jid: IJID): Promise<Element>
+
+   setMemberList(jid: IJID, items: { jid: IJID, affiliation: MultiUserAffiliation }[]): Promise<Element>
+
    submitRoomConfiguration(jid: IJID, form: Form): Promise<Element>
 
    cancelRoomConfiguration(jid: IJID): Promise<Element>
 
    sendMediatedMultiUserInvitation(receiverJid: IJID, roomJid: IJID, reason?: string)
+
+   changeTopic(roomJid: IJID, topic: string): void
+
+   changeNickname(roomJid: IJID, nickname: string): void
+
+   kickUser(jid: IJID, nickname: string,reason?:string): void
+
+   banUser(jid: IJID, targetjid: IJID,reason?:string): void
+
+   changeAffiliation(jid: IJID, targetjid: IJID, affiliation: string): void
+
+   changeRole(jid: IJID, nickname: string, rolestr: string, reason?:string): void
 
    declineMediatedMultiUserInvitation(receiverJid: IJID, roomJid: IJID, reason?: string)
 

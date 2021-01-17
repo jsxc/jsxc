@@ -78,7 +78,11 @@ export default class implements IDiscoInfoRepository {
 
          capabilitiesPromise = this.getCapabilities(jid)
       } else if (arguments[0] instanceof DiscoInfo) {
-         capabilitiesPromise = Promise.resolve(arguments[0])
+         capabilitiesPromise = Promise.resolve(arguments[0]);
+      } else if (typeof arguments[0] === 'undefined') {
+         let serverJid = this.account.getConnection().getServerJID();
+
+         capabilitiesPromise = this.getCapabilities(serverJid);
       } else {
          return Promise.reject('Wrong parameters');
       }

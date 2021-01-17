@@ -11,9 +11,12 @@ import { $iq } from '../../vendor/Strophe'
 import Translation from '../../util/Translation';
 import { IContact } from '@src/Contact.interface';
 import { IMessage } from '@src/Message.interface';
+import Client from '@src/Client';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
+
+const IMAGE_SUFFIXES = ['jpeg', 'jpg', 'png', 'svg', 'gif'];
 
 export default class HttpUploadPlugin extends AbstractPlugin {
    public static getId(): string {
@@ -248,13 +251,53 @@ export default class HttpUploadPlugin extends AbstractPlugin {
                let attachment = new Attachment(name, mimeType, url);
                attachment.setThumbnailData(thumbnailData);
                attachment.setData(url);
-
                message.setAttachment(attachment);
                message.setPlaintextMessage(bodyElement.text());
             }
          }
+      } else {
+         this.processLinks(message);
       }
 
       return Promise.resolve([contact, message, stanza]);
-   };
+   }
+
+   private processLinks(message: IMessage) {
+      let plaintext = message.getPlaintextMessage();
+
+      if (!plaintext) {
+         return;
+      }
+
+      let pattern = new RegExp(/^(https?:\/\/[^\s]+)/);
+      let match = plaintext.match(pattern);
+
+      if (match) {
+         let url = match[0];
+         let extension = this.getFileExtensionFromUrl(url);
+
+         if (IMAGE_SUFFIXES.includes(extension)) {
+            let fileName = this.getFileNameFromUrl(url) || 'image';
+            let attachment = new Attachment(decodeURIComponent(fileName), 'image/' + extension, url);
+            attachment.setData(url);
+
+            if (Client.isTrustedDomain(new URL(url))) {
+               attachment.generateThumbnail();
+            }
+
+            message.setAttachment(attachment);
+            message.setPlaintextMessage(plaintext.replace(url, ''));
+         }
+      }
+   }
+
+   private getFileExtensionFromUrl(url: string): string {
+      return url.split(/[#?]/)[0].split('.').pop().trim().toLowerCase();
+   }
+
+   private getFileNameFromUrl(url: string): string {
+      let parsedUrl = new URL(url);
+
+      return parsedUrl.pathname.substring(parsedUrl.pathname.lastIndexOf('/')+1);
+   }
 }

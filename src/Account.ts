@@ -21,6 +21,7 @@ import RosterContactProvider from './RosterContactProvider';
 import ContactManager from './ContactManager';
 import FallbackContactProvider from './FallbackContactProvider';
 import Log from '@util/Log'
+import CommandRepository from './CommandRepository'
 
 type ConnectionCallback = (status: number, condition?: string) => void;
 
@@ -50,6 +51,8 @@ export default class Account {
    private hookRepository = new HookRepository<any>();
 
    private contactManager: ContactManager;
+
+   private commandRepository: CommandRepository;
 
    private options: Options;
 
@@ -233,6 +236,14 @@ export default class Account {
       }
 
       return this.ownDiscoInfo;
+   }
+
+   public getCommandRepository(): CommandRepository {
+      if (!this.commandRepository) {
+         this.commandRepository = new CommandRepository();
+      }
+
+      return this.commandRepository;
    }
 
    public getContact(jid?: IJID): IContact {
