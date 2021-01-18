@@ -43,6 +43,7 @@ export default class extends AbstractHandler {
          peer: peerJid,
          direction: messageElement.getDirection(),
          plaintextMessage: messageElement.getPlaintextBody(),
+         replaceId: messageElement.getReplaceId(),
          htmlMessage: messageElement.getHtmlBody().html(),
          forwarded: messageElement.isForwarded(),
          stamp: messageElement.getTime().getTime(),
@@ -90,6 +91,7 @@ class MessageElement {
    private originalElement: JQuery<Element>;
    private forwarded = false;
    private carbon = false;
+   private replaceId = null;
    private direction = Message.DIRECTION.IN;
 
    constructor(stanza: Element) {
@@ -103,6 +105,11 @@ class MessageElement {
 
       let from = new JID($(stanza).attr('from'));
       let to = new JID($(stanza).attr('to'));
+
+      let replacetag = $(stanza).find('message > replace');
+      if (replacetag.length>0) {
+         this.replaceId = replacetag.attr('id');
+      }
 
       if (forwardedStanza.length === 0) {
          this.element = $(stanza);
@@ -141,6 +148,11 @@ class MessageElement {
 
    public isCarbon() {
       return this.carbon;
+   }
+
+   public getReplaceId()
+   {
+      return this.replaceId;
    }
 
    public isIncoming() {

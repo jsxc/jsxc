@@ -53,6 +53,7 @@ abstract class AbstractConnection {
 
       NS.register('VCARD', 'vcard-temp');
       NS.register('FORWARD', 'urn:xmpp:forward:0');
+      NS.register('LMC', 'urn:xmpp:message-correct:0');
    }
 
    public getPubSubService = (): PubSubService => {
@@ -143,6 +144,14 @@ abstract class AbstractConnection {
 
       if (plaintextMessage) {
          xmlMsg.c('body').t(plaintextMessage).up();
+      }
+
+      if (message.getReplaceId()!=null)
+      {
+         xmlMsg.c('replace', {
+             xmlns: 'urn:xmpp:message-correct:0',
+             id: message.getReplaceId()
+          }).up();
       }
 
       xmlMsg.c('origin-id', {

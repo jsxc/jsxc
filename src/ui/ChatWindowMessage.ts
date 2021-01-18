@@ -7,9 +7,15 @@ import LinkHandlerGeo from '@src/LinkHandlerGeo';
 import Color from '@util/Color';
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs')
+const LONGPRESS_TIME = 600; //how long is a long press in millis
 
 export default class ChatWindowMessage {
    private element;
+
+   // holds the start time for long press
+   private longpress_start;
+   // timeout reference of old message log
+   private oldDateTimeout;
 
    constructor(private message: IMessage, private chatWindow: ChatWindow) {
       this.generateElement();
@@ -108,6 +114,23 @@ export default class ChatWindowMessage {
       if (typeof sender.name === 'string') {
          this.addSenderToElement();
       }
+   }
+
+   private addOriginalToTitel(oldmessage)
+   {
+       let format = (oldmessage)=>{
+           this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title',oldmessage.getPlaintextMessage()+'\n('+DateTime.stringifyToString(oldmessage.getStamp().getTime())+')')
+       };
+
+       if (this.oldDateTimeout)
+       {
+            clearInterval(this.oldDateTimeout);
+       }
+
+       format(oldmessage);
+       this.oldDateTimeout = setInterval(()=>{
+           format(oldmessage);
+       },1000*60);
    }
 
    private addAttachmentToElement() {
@@ -228,6 +251,29 @@ export default class ChatWindowMessage {
          }
       });
 
+      this.message.registerHook('replaceBody', (processBodyString) => {
+         if (processBodyString) {
+
+            let bodyElement = $(processBodyString);
+            LinkHandlerGeo.get().detect(bodyElement);
+
+            this.element.find('.jsxc-content').html(bodyElement);
+            let newtimestampElement = $('<div class="jsxc-timestamp">');
+            let timestampElement = this.element.find('.jsxc-timestamp');
+            newtimestampElement.insertBefore( timestampElement );
+            timestampElement.remove(); // remove the old to kill the timeout from DateTime.stringify
+            DateTime.stringify(new Date().getTime(), newtimestampElement);
+            if (!this.element.find('.jsxc-replace').hasClass('jsxc-replace-icon'))
+            {
+                this.element.find('.jsxc-replace').addClass('jsxc-replace-icon');
+            }
+
+            let transcript = this.chatWindow.getContact().getTranscript();
+            let oldmessage = transcript.getReplacedMessage(this.message.getAttrId());
+            this.addOriginalToTitel(oldmessage);
+         }
+      });
+
       this.message.registerHook('progress', (progress) => {
          this.element.find('.jsxc-attachment').attr('data-progress', Math.round(progress * 100) + '%');
       })
@@ -252,6 +298,27 @@ export default class ChatWindowMessage {
             this.element.removeClass('jsxc-error');
             this.element.attr('title', null);
          }
-      })
+      });
+
+      this.element.off('mousedown').on( 'mousedown', ()=> {
+          this.longpress_start = new Date().getTime();
+      });
+
+      this.element.off('mouseleave').on( 'mouseleave', ()=> {
+          this.longpress_start = 0;
+      });
+
+      this.element.off('mouseup').on( 'mouseup', ()=> {
+          if ( new Date().getTime() >= ( this.longpress_start + LONGPRESS_TIME )) {
+             if (this.message.getDirection()===DIRECTION.OUT) //we can only edit outging messages
+             {
+                 this.chatWindow.selectEditMessage(this.message);
+             }
+          }
+          else
+          {
+             //SHORT PRESS... not needed now!
+          }
+      });
    }
 }

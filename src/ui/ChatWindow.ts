@@ -25,6 +25,8 @@ let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
 const ENTER_KEY = 13;
 const ESC_KEY = 27;
+const BACKSPACE_KEY = 8;
+const DELETE_KEY = 46;
 
 export enum State { Open, Minimized, Closed };
 
@@ -50,6 +52,8 @@ export default class ChatWindow {
    private settingsMenu: Menu;
 
    private encryptionMenu: Menu;
+
+   private editMessage: IMessage;
 
    constructor(protected contact: Contact) {
       let template = chatWindowTemplate({
@@ -86,6 +90,12 @@ export default class ChatWindow {
       this.element.attr('data-subscription', this.contact.getSubscription());
 
       this.getAccount().triggerChatWindowInitializedHook(this, contact);
+   }
+
+   public selectEditMessage(message: IMessage)
+   {
+       this.editMessage=message;
+       this.inputElement.val('> '+message.getPlaintextMessage());
    }
 
    public getTranscript(): Transcript {
@@ -385,6 +395,12 @@ export default class ChatWindow {
       ev.stopPropagation();
       // let message = <string> $(ev.target).val();
 
+      if ((ev.which === BACKSPACE_KEY || ev.which === DELETE_KEY) && (this.inputElement.val()==='' || this.inputElement.val()==='>'))
+      {
+          this.editMessage=null;
+          this.inputElement.val('');
+      }
+
       if (ev.which === ENTER_KEY && !ev.shiftKey) {
          // message = '';
       } else {
@@ -392,6 +408,7 @@ export default class ChatWindow {
       }
 
       if (ev.which === ESC_KEY) {
+         this.editMessage=null;
          this.getController().close();
       }
 
@@ -458,7 +475,8 @@ export default class ChatWindow {
          peer: this.contact.getJid(),
          direction: Message.DIRECTION.OUT,
          type: this.contact.getType(),
-         plaintextMessage: messageString,
+         replaceId: this.editMessage!=null?this.editMessage.getAttrId():null,
+         plaintextMessage: this.editMessage!=null?messageString.substring(1).trim():messageString,
          attachment: this.attachmentDeposition,
          unread: false,
       });
@@ -471,8 +489,10 @@ export default class ChatWindow {
 
       pipe.run(this.contact, message).then(([contact, message]) => {
          this.getAccount().getConnection().sendMessage(message);
+         this.editMessage=null;
       }).catch(err => {
          Log.warn('Error during preSendMessage pipe', err);
+         this.editMessage=null;
       });
 
       if (messageString === '?' && Client.getOption('theAnswerToAnything') !== false) {
