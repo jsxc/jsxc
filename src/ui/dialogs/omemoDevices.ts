@@ -7,8 +7,7 @@ import DateTime from '@ui/util/DateTime';
 import Translation from '@util/Translation';
 import Log from '@util/Log';
 import OMEMOPlugin from '@src/plugins/omemo/Plugin';
-import { QRCode } from 'qrcode-generator-ts/js';
-import { QRCODEHELPER as QRCodeHelper} from '@src/util/qrCodeUtils'
+import * as QRCode from 'qrcode'
 
 let omemoDeviceListTemplate = require('../../../template/dialogOmemoDeviceList.hbs');
 let omemoDeviceItemTemplate = require('../../../template/dialogOmemoDeviceItem.hbs');
@@ -50,38 +49,17 @@ class OmemoDeviceDialog {
       });
    }
 
-   private buildQRCode(jid:string, keys: string[])
+   private buildQRCode(jid:string, keys: string[]) : Promise<string>
    {
 
         let data = 'xmpp:'+jid+'?'+(keys.length===1?keys:keys.join(';'));
 
-        const qr = new QRCode();
-
-        //calculate the smallest QR-Code with best Errorcorrection
-        let initVals = (QRCodeHelper.calcQRCodeValsFromText(data,QRCodeHelper.QRCODE_MODE.BYTE));
-
-        //if data is to long cut last key
-        while(initVals==null)
-        {
-            data=data.substring(0,data.lastIndexOf(';'));
-            initVals = (QRCodeHelper.calcQRCodeValsFromText(data,QRCodeHelper.QRCODE_MODE.BYTE));
-        }
-
-        qr.setTypeNumber(initVals.type);
-        qr.setErrorCorrectLevel(initVals.errorcorrection);
-        qr.addData(data);
-
-        try
-        {
-            qr.make();
-        }
-        catch (err)
-        {
-            console.error(err);
-            return "";
-        }
-
-        return qr.toDataURL();
+        return QRCode.toDataURL(data, { errorCorrectionLevel: 'L' })
+        .then(url => {
+            return url;
+        }).catch(err => {
+            return null;
+        });
    }
 
    public getPromise() {
@@ -137,15 +115,16 @@ class OmemoDeviceDialog {
          listElement.append(element);
       }
 
-      let datauri = this.buildQRCode(devices[0].getAddress().getName(), fingerprints);
-      if (listElement.hasClass('jsxc-omemo-owndevices'))
-      {
-          $('.jsxc-own-device-qrcode-own').attr('src',datauri);
-      }
-      else
-      {
-          $('.jsxc-own-device-qrcode-peer').attr('src',datauri);
-      }
+      this.buildQRCode(devices[0].getAddress().getName(), fingerprints).then((datauri)=> {
+          if (listElement.hasClass('jsxc-omemo-owndevices'))
+          {
+              $('.jsxc-own-device-qrcode-own').attr('src',datauri);
+          }
+          else
+          {
+              $('.jsxc-own-device-qrcode-peer').attr('src',datauri);
+          }
+      });
    }
 
    private async getDeviceProperties(device: Device, identityManager: IdentityManager) {
