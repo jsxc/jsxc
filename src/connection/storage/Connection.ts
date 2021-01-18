@@ -84,7 +84,7 @@ export default class StorageConnection extends AbstractConnection implements ICo
 
    protected sendIQ(stanzaElement: Element): Promise<Element>;
    protected sendIQ(stanzaElement: Strophe.Builder): Promise<Element>;
-   protected sendIQ(): Promise<{}> {
+   protected sendIQ() {
       let storage = this.getStorage();
       let stanzaString = this.stanzaElementToString(arguments[0]);
       let key = storage.generateKey(
@@ -95,16 +95,18 @@ export default class StorageConnection extends AbstractConnection implements ICo
 
       storage.setItem(key, stanzaString);
 
-      return new Promise(function(resolve, reject) {
-         storage.registerHook(key, function(newValue) {
+      return new Promise<Element>(function(resolve, reject) {
+         storage.registerHook(key, function(newValue: {type: 'success'|'error', stanza: string}) {
             if (!newValue) {
                return;
             }
 
+            let stanzaElement = $.parseXML(newValue.stanza).documentElement;
+
             if (newValue.type === 'success') {
-               resolve(newValue.stanza);
+               resolve(stanzaElement);
             } else if (newValue.type === 'error') {
-               reject(newValue.stanza);
+               reject(stanzaElement);
             }
          });
       });

@@ -23,6 +23,10 @@ let ArrayBufferUtils = {
       return ByteBuffer.wrap(thing, 'binary').toArrayBuffer();
    },
 
+   fromHex: (thing: string): ArrayBuffer => {
+      return ByteBuffer.wrap(thing, 'hex').toArrayBuffer();
+   },
+
    toHex: (thing: ArrayBuffer | string): string => {
       if (typeof thing === 'undefined') {
          return '';

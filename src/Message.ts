@@ -333,11 +333,11 @@ export default class Message implements IIdentifiable, IMessage {
       return `<p dir="auto">${body}</p>`;
    }
 
-   public getPlaintextEmoticonMessage(): string {
+   public getPlaintextEmoticonMessage(emotions: 'unicode'|'image' = 'image'): string {
       let body = this.getPlaintextMessage();
 
       body = Utils.escapeHTML(body);
-      body = Emoticons.toImage(body);
+      body = emotions === 'unicode' ? Emoticons.toUnicode(body) : Emoticons.toImage(body);
 
       return body;
    }

@@ -39,7 +39,7 @@ export default class PluginRepository {
    constructor(private account: Account) {
       let accountDisabledPlugins = account.getOption('disabledPlugins');
 
-      this.getAllEnabledRegisteredPlugins().forEach((Plugin) => {
+      this.getAllRegisteredPlugins().forEach((Plugin) => {
          if (accountDisabledPlugins.indexOf(Plugin.getId()) > -1) {
             Log.debug(`${Plugin.getId()} was disabled by the user.`);
 
@@ -70,6 +70,16 @@ export default class PluginRepository {
 
    public getEncryptionPlugin(pluginId: string): EncryptionPlugin {
       for (let plugin of this.encryptionPlugins) {
+         if ((<IPlugin> plugin.constructor).getId() === pluginId) {
+            return plugin;
+         }
+      }
+
+      throw new Error(`Couldn't find ${pluginId}`);
+   }
+
+   public getPlugin(pluginId: string): AbstractPlugin {
+      for (let plugin of this.plugins) {
          if ((<IPlugin> plugin.constructor).getId() === pluginId) {
             return plugin;
          }

@@ -1,4 +1,5 @@
 import showContactDialog from './dialogs/contact'
+import showContactSearchDialog from './dialogs/contactsearch'
 import showAboutDialog from './dialogs/about'
 import showMultiUserJoinDialog from './dialogs/multiUserJoin'
 import showSettingsDialog from './dialogs/settings'
@@ -9,11 +10,14 @@ import { IContact } from '../Contact.interface'
 import WindowList from './ChatWindowList'
 import Client from '../Client'
 import Translation from '../util/Translation'
+import showSetExStatusDialog from './dialogs/exstatus'
 import { Notice, TYPE } from '../Notice'
 import { Presence } from '../connection/AbstractConnection'
 import { NoticeManager } from '../NoticeManager'
 import ClientAvatar from '../ClientAvatar'
 import confirmDialog from './dialogs/confirm'
+import Utils from '@util/Utils'
+import Emoticons from '@src/Emoticons'
 
 let rosterTemplate = require('../../template/roster.hbs')
 
@@ -155,12 +159,16 @@ export default class Roster {
    }
 
    public refreshOwnPresenceIndicator() {
+      let status = Client.getPresenceController().getStatus();
       let confirmedPresence = Client.getPresenceController().getCurrentPresence();
       let requestedPresence = Client.getPresenceController().getTargetPresence();
       let presence = typeof requestedPresence === 'number' ? requestedPresence : confirmedPresence;
 
+      let htmlStatus = Emoticons.toImage(Utils.escapeHTML(status));
+      this.element.find('.jsxc-js-presence-menu .jsxc-bar__caption__secondary').html(htmlStatus);
+
       let label = $('.jsxc-js-presence-menu .jsxc-' + Presence[presence]).text();
-      let labelElement = this.element.find('.jsxc-js-presence-menu .jsxc-menu__button');
+      let labelElement = this.element.find('.jsxc-js-presence-menu .jsxc-bar__caption__primary');
 
       labelElement.text(label);
       this.element.attr('data-presence', Presence[confirmedPresence]);
@@ -195,7 +203,7 @@ export default class Roster {
       noticeElement.attr('title', notice.getDescription());
       noticeElement.attr('data-notice-id', notice.getId());
       noticeElement.attr('data-manager-id', manager.getId());
-      noticeListElement.append(noticeElement);
+      noticeListElement.prepend(noticeElement);
 
       let numberOfNotices = noticeListElement.find('li').not('.jsxc-js-delete-all').length;
       $('.jsxc-js-notice-menu .jsxc-menu__button').text(numberOfNotices);
@@ -204,7 +212,7 @@ export default class Roster {
          let deleteAllElement = $('<li>');
          deleteAllElement.addClass('jsxc-js-delete-all jsxc-menu__item--danger jsxc-icon--delete');
          deleteAllElement.text(Translation.t('Close_all'));
-         deleteAllElement.prependTo(noticeListElement);
+         deleteAllElement.appendTo(noticeListElement);
 
          deleteAllElement.click((ev) => {
             ev.stopPropagation();
@@ -273,6 +281,10 @@ export default class Roster {
       mainMenu.prepend(li);
    }
 
+   public setFilter(filter: string = '') {
+      this.element.find('.jsxc-filter-input').val(filter).trigger('keyup');
+   }
+
    private insert(rosterItem: RosterItem) {
       let contact = rosterItem.getContact();
       let list = contact.isChat() ? this.contactList : this.groupList;
@@ -328,6 +340,13 @@ export default class Roster {
       }
 
       this.addMenuEntry({
+         id: 'search-contact',
+         handler: showContactSearchDialog,
+         label: Translation.t('contact_search'),
+         icon: 'search'
+      });
+
+      this.addMenuEntry({
          id: 'add-contact',
          handler: () => showContactDialog(),
          label: Translation.t('Add_buddy'),
@@ -366,6 +385,12 @@ export default class Roster {
    private registerPresenceHandler() {
       this.element.find('.jsxc-js-presence-menu li').click(function () {
          let presenceString = <string>$(this).data('presence');
+
+         if (presenceString === 'extended-status') {
+            showSetExStatusDialog();
+            return;
+         }
+
          let oldPresence = Client.getPresenceController().getTargetPresence();
          let requestedPresence = Presence[presenceString];
 
@@ -481,15 +506,16 @@ export default class Roster {
             return;
          }
 
-         listElements.not(`[data-jid*="${filterValue}"]`).not(`[data-name*="${filterValue}"]`).addClass('jsxc-roster-item--filtered');
+         listElements.not(`[data-jid*="${filterValue}"]`).not(`[data-name*="${filterValue}"]`).not(`[data-groups*="${filterValue}"]`).addClass('jsxc-roster-item--filtered');
          listElements.filter(`[data-jid*="${filterValue}"]`).removeClass('jsxc-roster-item--filtered');
          listElements.filter(`[data-name*="${filterValue}"]`).removeClass('jsxc-roster-item--filtered');
+         listElements.filter(`[data-groups*="${filterValue}"]`).removeClass('jsxc-roster-item--filtered');
       });
 
       this.element.find('.jsxc-filter-wrapper .jsxc-clear').on('mousedown', (ev) => {
          ev.preventDefault();
 
-         this.element.find('.jsxc-filter-input').val('').trigger('keyup');
+         this.setFilter('');
       });
 
       this.element.find('.jsxc-collapsible').on('click', function () {

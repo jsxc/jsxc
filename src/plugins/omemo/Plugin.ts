@@ -11,9 +11,14 @@ import { Trust } from './lib/Device';
 import Translation from '@util/Translation';
 import ArrayBufferUtils from './util/ArrayBuffer'
 import Attachment from '@src/Attachment'
+import attachmentHandler from './AttachmentHandler'
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
+
+const AESGCM_REGEX = /^aesgcm:\/\/([^#]+\/([^\/]+\.([a-z0-9]+)))#([a-z0-9]+)/i;
+
+Attachment.registerHandler(attachmentHandler.getId(), attachmentHandler.handler);
 
 export default class OMEMOPlugin extends EncryptionPlugin {
    private omemo: Omemo;
@@ -68,9 +73,10 @@ export default class OMEMOPlugin extends EncryptionPlugin {
    }
 
    private openDeviceDialog = async (chatWindow: ChatWindow) => {
-      await this.getOmemo().prepare();
-
       let peerContact = chatWindow.getContact();
+
+      await this.getOmemo().prepare();
+      await this.refreshDeviceList(peerContact);
 
       return OmemoDevicesDialog(peerContact, this.getOmemo());
    }
@@ -87,7 +93,9 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
       return this.getOmemo().prepare().then(async () => {
          if (!this.getOmemo().isSupported(contact)) {
-            throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
+            if (!(await this.refreshDeviceList(contact))) {
+               throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
+            }
          }
 
          if (!this.getOmemo().isTrusted(contact) && !await this.getOmemo().trustOnFirstUse(contact)) {
@@ -98,6 +106,15 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
          OMEMOPlugin.updateEncryptionState(contact, trust);
       });
+   }
+
+   private async refreshDeviceList(contact: IContact) {
+      let pepService = this.pluginAPI.getConnection().getPEPService();
+      let stanza = await pepService.retrieveItems(NS_DEVICELIST, contact.getJid().bare);
+
+      this.onDeviceListUpdate(stanza);
+
+      return this.getOmemo().isSupported(contact);
    }
 
    private onDeviceListUpdate = (stanza) => {
@@ -141,7 +158,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          }
 
          if (decrypted.plaintext.indexOf('aesgcm://') === 0) {
-            decrypted.plaintext = this.processEncryptedAttachment(decrypted.plaintext, message);
+            decrypted.plaintext = this.processEncryptedAttachment(decrypted.plaintext, message, contact);
          }
 
          message.setPlaintextMessage(decrypted.plaintext);
@@ -156,18 +173,21 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       });
    }
 
-   private processEncryptedAttachment(plaintext: string, message: IMessage) {
-      let lines = plaintext.split('\n');
-      let matches = lines[0].match(/^aesgcm:\/\/([^#]+\/([^\/]+\.([a-z0-9]+)))#([a-z0-9]+)/i);
+   private processEncryptedAttachment(plaintext: string, message: IMessage, contact: IContact) {
+      let lines = plaintext.split('\n'); //@REVIEW do we want to support attachments without a newline?
+      let matches = lines[0].match(AESGCM_REGEX);
 
       if (!matches) {
          return plaintext;
       }
 
+      lines[0] = undefined;
+
       let [match, , filename, extension] = matches;
-      let mime = /^(jpeg|jpg|gif|png|svg)$/.test(extension) ? `image/${extension}` : 'application/octet-stream';
-      let attachment = new Attachment(filename, mime, match);
+      let mime = /^(jpeg|jpg|gif|png|svg)$/i.test(extension) ? `image/${extension.toLowerCase()}` : 'application/octet-stream';
+      let attachment = new Attachment(decodeURIComponent(filename), mime, match);
       attachment.setData(match);
+      attachment.setHandler(attachmentHandler.getId());
 
       if (lines[1] && lines[1].indexOf('data:') === 0) {
          if (/^data:image\/(jpeg|jpg|gif|png|svg);base64,[/+=a-z0-9]+$/i.test(lines[1])) {
@@ -178,6 +198,11 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       }
 
       message.setAttachment(attachment);
+
+      try {
+         attachmentHandler.handler(attachment, false);
+      } catch(err) {
+      }
 
       return lines.filter(line => line !== undefined).join('\n');
    }

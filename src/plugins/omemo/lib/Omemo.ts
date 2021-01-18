@@ -150,13 +150,6 @@ export default class Omemo {
    public encrypt(contact: Contact, message: Message, xmlElement: Strophe.Builder) {
       let peer = this.getPeer(contact.getJid());
       let plaintextMessage = message.getPlaintextMessage();
-      let attachment = message.getAttachment();
-
-      if (plaintextMessage.indexOf('aesgcm://') === 0 && attachment && attachment.hasThumbnailData()) {
-         let thumbnailData = attachment.getThumbnailData().replace(/^[^,],+/, '');
-
-         plaintextMessage = plaintextMessage.replace(/^(aesgcm:[^\n]+)/, '$1\n' + thumbnailData);
-      }
 
       return peer.encrypt(this.localPeer, plaintextMessage).then((encryptedMessages) => {
          let stanza = Stanza.buildEncryptedStanza(encryptedMessages, this.store.getLocalDeviceId());

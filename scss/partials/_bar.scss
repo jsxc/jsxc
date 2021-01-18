@@ -47,6 +47,7 @@
 
     &__secondary {
       font-size: 12px;
+      max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -57,18 +58,57 @@
     }
   }
 
+  &__tags {
+    float: left;
+    line-height: 0;
+    padding-top: 2px;
+  }
+
+  &__tag {
+    background-color: #bbb;
+    border: 0;
+    color: var(--jsxc-color-primary-text);
+    display: inline-block;
+    font-size: 8px;
+    height: 12px;
+    line-height: 12px;
+    margin-right: 1px;
+    max-width: 12px;
+    overflow: hidden;
+    padding: 0 0.5em;
+    text-indent: 999px;
+    text-overflow: clip;
+    transition: max-width 0.5s;
+    white-space: nowrap;
+    width: 12px;
+
+    &:hover {
+      max-width: 999px;
+      text-indent: unset;
+      width: auto;
+    }
+  }
+
   &--has-unread-msg {
-    .jsxc-bar__caption__secondary::before {
-      background-color: $unread-bg;
-      border-radius: 50%;
-      color: $unread-color;
-      content: "";
-      display: inline-block;
-      height: 0.8em;
-      line-height: 100%;
-      margin-right: 0.2em;
-      text-align: center;
-      width: 0.8em;
+    .jsxc-bar__caption {
+      font-weight: bold;
+    }
+
+    .jsxc-bar__caption__secondary {
+      font-style: italic;
+
+      &::before {
+        background-color: $unread-bg;
+        border-radius: 50%;
+        color: $unread-color;
+        content: "";
+        display: inline-block;
+        height: 0.8em;
+        line-height: 100%;
+        margin-right: 0.2em;
+        text-align: center;
+        width: 0.8em;
+      }
     }
   }
 

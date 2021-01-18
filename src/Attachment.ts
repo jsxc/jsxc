@@ -4,7 +4,14 @@ import PersistentMap from './util/PersistentMap'
 import Client from './Client'
 import beautifyBytes from './ui/util/ByteBeautifier'
 
+export type AttachmentHandler = (attachment: Attachment, active: boolean) => Promise<void>;
+
 export default class Attachment {
+   private static handlers: {[key: string]: AttachmentHandler} = {}
+
+   public static registerHandler(key: string, handler: AttachmentHandler) {
+      Attachment.handlers[key] = handler;
+   }
 
    private data: string;
 
@@ -109,6 +116,16 @@ export default class Attachment {
       return this.properties.get('name');
    }
 
+   public getHandler() {
+      let handlerKey = this.properties.get('handler');
+
+      return handlerKey && Attachment.handlers[handlerKey];
+   }
+
+   public setHandler(key: string) {
+      this.properties.set('handler', key);
+   }
+
    public setFile(file: File) {
       this.file = file;
    }
@@ -165,6 +182,10 @@ export default class Attachment {
       }
    }
 
+   public registerThumbnailHook = (hook: (thumbnail?: string) => void) => {
+      this.properties.registerHook('thumbnail', hook);
+   }
+
    private getDataFromFile(): Promise<string> {
       return new Promise((resolve, reject) => {
          let reader = new FileReader();
@@ -179,16 +200,16 @@ export default class Attachment {
       });
    }
 
-   private generateThumbnail(): void {
+   public generateThumbnail(force: boolean = false): void {
       if (typeof Image === 'undefined') {
          return;
       }
 
-      if (/^image\/svg/i.test(this.getMimeType())) {
+      if (!this.isImage() || /^image\/svg/i.test(this.getMimeType())) {
          return;
       }
 
-      if (!this.hasData()) {
+      if (force || !this.hasData()) {
          if (this.file) {
             this.getDataFromFile().then((data) => {
                this.data = data;

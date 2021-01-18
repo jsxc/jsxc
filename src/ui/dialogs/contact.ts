@@ -8,7 +8,7 @@ let contactTemplate = require('../../../template/contact.hbs');
 
 let dialog: Dialog;
 
-export default function(username?: string) {
+export default function(username?: string, alias?: string) {
    username = (typeof username === 'string') ? username : undefined;
 
    let content = contactTemplate({
@@ -16,7 +16,8 @@ export default function(username?: string) {
          uid: account.getUid(),
          jid: account.getJID().bare,
       })),
-      username
+      username,
+      alias
    });
 
    dialog = new Dialog(content);
