@@ -69,7 +69,7 @@ class OmemoDeviceDialog {
    private addCleanUpAction() {
       let dom = this.dialog.getDom();
       let buttonElement = $('<button>');
-      buttonElement.addClass('jsxc-button jsxc-button--default');
+      buttonElement.addClass('jsxc-button jsxc-button--default')
       buttonElement.text(Translation.t('Clean_up_own_devices'));
       buttonElement.click((ev) => {
          ev.preventDefault();
@@ -116,14 +116,7 @@ class OmemoDeviceDialog {
       }
 
       this.buildQRCode(devices[0].getAddress().getName(), fingerprints).then((datauri)=> {
-          if (listElement.hasClass('jsxc-omemo-owndevices'))
-          {
-              $('.jsxc-own-device-qrcode-own').attr('src',datauri);
-          }
-          else
-          {
-              $('.jsxc-own-device-qrcode-peer').attr('src',datauri);
-          }
+          listElement.prev('.jsxc-qr-code').find('img').attr('src',datauri);
       });
    }
 
