@@ -313,9 +313,9 @@ export default class Account {
       return this.connector.getUrl();
    }
 
-   public getPipe(name: string): Pipe {
+   public getPipe<params extends any[] = any[]>(name: string): Pipe<params> {
       if (!this.pipes[name]) {
-         this.pipes[name] = new Pipe();
+         this.pipes[name] = new Pipe<params>();
       }
 
       return this.pipes[name];
