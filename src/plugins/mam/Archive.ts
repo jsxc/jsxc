@@ -11,9 +11,15 @@ import { IMessage, MessageMark } from '@src/Message.interface';
 import { IJID } from '@src/JID.interface';
 import MultiUserContact from '@src/MultiUserContact';
 
+class ResultMessage {
+    constructor(public element: JQuery<HTMLElement>, public resultid: string) {
+
+    }
+}
+
 export default class Archive {
    private archiveJid: IJID;
-   private messageCache: any[] = [];
+   private messageCache: ResultMessage[] = [];
 
    constructor(private plugin: MessageArchiveManagementPlugin, private contact: Contact) {
       let jid = contact.isGroupChat() ? contact.getJid() : plugin.getConnection().getJID();
@@ -96,9 +102,9 @@ export default class Archive {
          });
    }
 
-   public onForwardedMessage(forwardedElement: JQuery<HTMLElement>, messageid : string) {
-       let item = {'element': forwardedElement, 'id': messageid};
-       this.messageCache.push(item);
+   public onForwardedMessage(forwardedElement: JQuery<HTMLElement>, resultid : string) {
+       let resultMessage = new ResultMessage(forwardedElement, resultid);
+       this.messageCache.push(resultMessage);
    }
 
    public async parseForwardedMessage(forwardedElement: JQuery<HTMLElement>): Promise<IMessage> {
@@ -185,7 +191,7 @@ export default class Archive {
           let firstItem = this.messageCache[0];
           let lastItem = this.messageCache[this.messageCache.length-1];
 
-          if (firstItem.id===firstResultId&&lastItem.id===lastResultId)
+          if (firstItem.resultid===firstResultId&&lastItem.resultid===lastResultId)
           {
               let temp = firstResultId;
               firstResultId = lastResultId;
