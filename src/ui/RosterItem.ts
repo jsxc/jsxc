@@ -218,6 +218,10 @@ export default class RosterItem {
       return this.element.detach();
    }
 
+   public remove() {
+      return this.element.remove();
+   }
+
    private rename() {
       let self = this;
       let inputElement = $('<input type="text" name="name"/>');
