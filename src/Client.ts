@@ -164,4 +164,19 @@ export default class Client {
          $('.jsxc-droppable').removeClass('jsxc-dragactive jsxc-dragover');
       });
    }
+
+   public static isTrustedDomain(url: URL): boolean {
+      let trustedDomains = Client.getOption<string[]>('trustedDomains', []);
+
+      return trustedDomains.filter(domain => {
+         let result = url.hostname === (domain);
+
+         if (!result && domain.indexOf('*.') > -1) {
+            let wildcardtestdomain = domain.substring(domain.lastIndexOf('*.') + 2);
+            result = url.hostname.endsWith(wildcardtestdomain);
+         }
+
+         return result;
+      }).length > 0;
+   }
 }

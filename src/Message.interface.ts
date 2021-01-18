@@ -91,7 +91,7 @@ export interface IMessage {
 
    getEncryptedPlaintextMessage(): string
 
-   getPlaintextEmoticonMessage(): string
+   getPlaintextEmoticonMessage(emotions?: 'unicode'|'image'): string
 
    getSender(): { name: string, jid?: JID }
 

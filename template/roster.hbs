@@ -21,16 +21,26 @@
    <div class="jsxc-roster-status"></div>
    <div class="jsxc-bottom jsxc-presence jsxc-roster-item jsxc-bar" data-bid="own">
       <div class="jsxc-avatar jsxc-shrink--no"></div>
-      {{#> menu
-      classes="jsxc-menu--pushup jsxc-grow jsxc-js-presence-menu"
-      button-label=(t "Offline")}}
-         <li data-presence="online" class="jsxc-online jsxc-offline-available">{{t "Online"}}</li>
-         <li data-presence="chat" class="jsxc-chat">{{t "Chatty"}}</li>
-         <li data-presence="away" class="jsxc-away">{{t "Away"}}</li>
-         <li data-presence="xa" class="jsxc-xa">{{t "Extended_away"}}</li>
-         <li data-presence="dnd" class="jsxc-dnd">{{t "dnd"}}</li>
-         <li data-presence="offline" class="jsxc-offline">{{t "Offline"}}</li>
-      {{/menu}}
+
+      <div class="jsxc-bar__caption jsxc-grow">
+         <div class="jsxc-menu jsxc-menu--pushup jsxc-js-presence-menu">
+            <div class="jsxc-menu__button">
+               <div class="jsxc-bar__caption__primary">{{t "Offline"}}</div>
+               <div class="jsxc-bar__caption__secondary"></div>
+            </div>
+            <div class="jsxc-menu__content">
+               <ul>
+                  <li data-presence="extended-status" class="jsxc-extended-status jsxc-icon-edit">{{t "extended-status"}}</li>
+                  <li data-presence="online" class="jsxc-online jsxc-offline-available">{{t "Online"}}</li>
+                  <li data-presence="chat" class="jsxc-chat">{{t "Chatty"}}</li>
+                  <li data-presence="away" class="jsxc-away">{{t "Away"}}</li>
+                  <li data-presence="xa" class="jsxc-xa">{{t "Extended_away"}}</li>
+                  <li data-presence="dnd" class="jsxc-dnd">{{t "dnd"}}</li>
+                  <li data-presence="offline" class="jsxc-offline">{{t "Offline"}}</li>
+               </ul>
+            </div>
+         </div>
+      </div>
 
       {{> menu classes="jsxc-menu--pushup jsxc-js-notice-menu" button-classes="jsxc-bounce"}}
 

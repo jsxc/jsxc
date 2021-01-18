@@ -53,8 +53,9 @@ export default class ChatWindow {
 
    constructor(protected contact: Contact) {
       let template = chatWindowTemplate({
-         accountId: this.getAccount().getUid(),
+         accountUid: this.getAccount().getUid(),
          contactId: contact.getId(),
+         contactJid: contact.getJid().bare,
          name: contact.getName()
       });
       this.element = $(template);

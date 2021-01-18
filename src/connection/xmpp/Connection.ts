@@ -4,7 +4,7 @@ import * as NS from './namespace'
 import XMPPHandler from './handler'
 import Log from '../../util/Log'
 import Account from '../../Account'
-import { AbstractConnection, Presence, STANZA_IQ_KEY, STANZA_KEY } from '../AbstractConnection'
+import { AbstractConnection, ExtensivePresence, Presence, STANZA_IQ_KEY, STANZA_KEY } from '../AbstractConnection'
 import XMPPJingleHandler from './JingleHandler'
 import Client from '../../Client'
 
@@ -52,11 +52,11 @@ export default class XMPPConnection extends AbstractConnection implements IConne
       });
    }
 
-   private targetPresenceHandler = (presence: Presence) => {
+   private targetPresenceHandler = ({presence, status}: ExtensivePresence) => {
       if (presence === Presence.offline) {
          this.connection.disconnect('forced');
       } else {
-         this.account.getConnection().sendPresence(presence);
+         this.account.getConnection().sendPresence(presence, status);
       }
    }
 

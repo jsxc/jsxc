@@ -133,10 +133,15 @@ export let notification = {
 
 export let storage = window.localStorage;
 
-export let disabledPlugins: string[] = [];
+export let disabledPlugins: string[] = ['time'];
 
 export let connectionCallback: (jid: string, status: number, condition?: string) => void = null;
 
 export let onUserRequestsToGoOnline: () => void = loginDialog;
 
 export let automaticallyRestoreAccounts = true;
+
+/** Images are automatically loaded from trusted domains. To trust all subdomains, use a asterix as wildcard. */
+export let trustedDomains: string[] = [];
+
+export let includeOSInVersionResponse = false;
