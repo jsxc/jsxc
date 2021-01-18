@@ -301,7 +301,9 @@ export default class Roster {
          if ((lastMessageDate && pointerDate && lastMessageDate > pointerDate) ||
             (lastMessageDate && !pointerDate) ||
             (!lastMessageDate && !pointerDate && contactName.localeCompare(pointerName) === -1)) {
-
+            if (list.find('.jsxc-roster-item[data-id="' + contact.getId() + '"]').length > 0) {
+              list.find('.jsxc-roster-item[data-id="' + contact.getId() + '"]').detach();
+            }
             pointer.before(rosterItem.getDom().detach());
 
             return;
@@ -309,7 +311,9 @@ export default class Roster {
 
          pointer = pointer.next();
       }
-
+      if (list.find('.jsxc-roster-item[data-id="' + contact.getId() + '"]').length > 0) {
+          list.find('.jsxc-roster-item[data-id="' + contact.getId() + '"]').detach();
+      }
       rosterItem.getDom().appendTo(list);
    }
 
