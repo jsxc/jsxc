@@ -253,7 +253,7 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
 
       // @REVIEW spec is not clear if only markable message from the same resource should be marked
       while (!!msg) {
-         if (msg.getDirection() === direction && msg.isTransferred()) {
+         if (msg.getDirection() === direction && msg.isTransferred() && !msg.getErrorMessage()) {
             if (status === RECEIVED) {
                if (msg.isReceived()) {
                   // no need to traverse all messages
