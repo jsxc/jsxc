@@ -15,12 +15,18 @@ export default class Transcript {
 
    private messages: { [index: string]: IMessage } = {};
 
+   private replacedMessages: {} = [];
+
    constructor(storage: Storage, private contact: Contact) {
       this.properties = new PersistentMap(storage, 'transcript', contact.getId());
 
       this.properties.registerHook('firstMessageId', (firstMessageId) => {
          this.firstMessage = this.getMessage(firstMessageId);
       });
+   }
+
+   public getReplacedMessage(id: string): Message {
+      return (<Message>this.replacedMessages[id]);
    }
 
    public unshiftMessage(message: IMessage) {
@@ -37,19 +43,57 @@ export default class Transcript {
       this.lastMessage = message;
    }
 
-   private processReplace(message)
+   private processReplace(message): boolean
    {
        let oldmessage = this.findMessageByAttrId(message.getReplaceId());
-       oldmessage.setPlaintextMessage(message.getPlaintextMessage());
-       message.getProcessedBody().then((bodyString)=> {oldmessage.setReplaceBody(bodyString);});
+       if (oldmessage)
+       {
+
+           //only allow corrections form same sender
+           if (message.getDirection()===DIRECTION.IN) //reset Marker to transfered on outgoing messages
+           {
+               let oldsender = oldmessage.getSender().jid!==undefined?oldmessage.getSender().jid.full:oldmessage.getPeer().full;
+               let replaceSender = message.getSender().jid!==undefined?message.getSender().jid.full:message.getPeer().full;
+               if (oldsender===replaceSender)
+               {
+                   let replaceId = message.getReplaceId();
+                   let oldmessageSaved = this.replacedMessages[replaceId]; // save original
+                   if (!oldmessageSaved)
+                   {
+                       this.replacedMessages[replaceId]=oldmessage;
+                   }
+
+                   message.getProcessedBody().then((bodyString)=> {oldmessage.setReplaceBody(bodyString);});
+                   message.received(); //reset Marker to received on incoming messages
+
+                   return true;
+               }
+           }
+           else
+           if (message.getDirection()===DIRECTION.OUT) 
+           {
+               let replaceId = message.getReplaceId();
+               let oldmessageSaved = this.replacedMessages[replaceId]; // save original
+               if (!oldmessageSaved)
+               {
+                   this.replacedMessages[replaceId]=oldmessage;
+               }
+               message.getProcessedBody().then((bodyString)=> {oldmessage.setReplaceBody(bodyString);});
+               message.transferred(); //reset Marker to transfered on outgoing messages
+               return true;
+           }
+       }
+       return false;
    }
 
    public pushMessage(message: IMessage) {
 
       if (message.getReplaceId()!==null)
       {
-         this.processReplace(message);
-         return;
+         if (this.processReplace(message))
+         {
+            return;
+         }
       }
 
       if (!message.getNextId() && this.firstMessage) {
