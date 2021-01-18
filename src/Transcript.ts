@@ -70,7 +70,7 @@ export default class Transcript {
                }
            }
            else
-           if (message.getDirection()===DIRECTION.OUT) 
+           if (message.getDirection()===DIRECTION.OUT)
            {
                let replaceId = message.getReplaceId();
                let oldmessageSaved = this.replacedMessages[replaceId]; // save original

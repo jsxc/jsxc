@@ -118,10 +118,10 @@ export default class ChatWindowMessage {
 
    private addOriginalToTitel(oldmessage)
    {
-	   let format = (oldmessage)=>{
-		   this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title',oldmessage.getPlaintextMessage()+'\n('+DateTime.stringifyToString(oldmessage.getStamp().getTime())+')')
-	   };
-       
+       let format = (oldmessage)=>{
+           this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title',oldmessage.getPlaintextMessage()+'\n('+DateTime.stringifyToString(oldmessage.getStamp().getTime())+')')
+       };
+
        if (this.oldDateTimeout)
        {
             clearInterval(this.oldDateTimeout);
