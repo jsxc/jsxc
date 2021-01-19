@@ -120,7 +120,6 @@
     "otr": "github:sualko/otr#es6-modules",
     "precompile-handlebars": "^1.0.5",
     "qrcode": "^1.4.4",
-    "qrcode-generator-ts": "^0.0.4",
     "screenfull": "^5.0.2",
     "sha1": "^1.1.1",
     "strophe.js": "^1.4.0",

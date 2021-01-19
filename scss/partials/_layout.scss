@@ -255,10 +255,23 @@ body.jsxc-fullscreen.jsxc-two-columns {
 }
 
 .jsxc-qr-code {
+  label {
+    cursor: zoom-in;
+  }
+
+  input[type="checkbox"] {
+    display: none;
+
+    &:checked + img {
+      max-width: none;
+    }
+  }
+
   img {
+    border: 1px solid var(--jsxc-color-border-dark);
     color: var(--jsxc-color-error);
     font-size: 0.7em;
-    border: 1px solid var(--jsxc-color-border-dark);
+    max-width: 30px;
   }
 
   &-own,

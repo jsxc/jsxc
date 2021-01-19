@@ -49,17 +49,16 @@ class OmemoDeviceDialog {
       });
    }
 
-   private buildQRCode(jid:string, keys: string[]) : Promise<string>
-   {
+   private buildQRCode(jid: string, params: string[]): Promise<string> {
 
-        let data = 'xmpp:'+jid+'?'+(keys.length===1?keys:keys.join(';'));
+      let data = 'xmpp:' + jid + '?' + params.join(';');
 
-        return QRCode.toDataURL(data, { errorCorrectionLevel: 'L' })
-        .then(url => {
+      return QRCode.toDataURL(data, { errorCorrectionLevel: 'L' })
+         .then(url => {
             return url;
-        }).catch(err => {
+         }).catch(err => {
             return null;
-        });
+         });
    }
 
    public getPromise() {
@@ -93,15 +92,13 @@ class OmemoDeviceDialog {
          return;
       }
 
-      let fingerprints=[];
+      let qrCodeParams = [];
 
       for (let device of devices) {
          //@TODO show spinner
          let properties = await this.getDeviceProperties(device, identityManager);
 
-         fingerprints.push('omemo-sid-'+device.getId()+'='+properties.fingerprint.split(' ').join(''));
          let element = $(omemoDeviceItemTemplate(properties));
-
          let lastUsedElement = element.find('.jsxc-omemo-device-last-used');
 
          if (properties.lastUsed) {
@@ -110,13 +107,15 @@ class OmemoDeviceDialog {
             lastUsedElement.text(Translation.t('never'));
          }
 
+         qrCodeParams.push('omemo-sid-' + device.getId() + '=' + properties.fingerprint.split(' ').join(''));
+
          this.attachActionHandler(element, device);
 
          listElement.append(element);
       }
 
-      this.buildQRCode(devices[0].getAddress().getName(), fingerprints).then((datauri)=> {
-          listElement.prev('.jsxc-qr-code').find('img').attr('src',datauri);
+      this.buildQRCode(devices[0].getAddress().getName(), qrCodeParams).then((datauri) => {
+         listElement.prev('.jsxc-qr-code').find('img').attr('src', datauri);
       });
    }
 
