@@ -88,8 +88,6 @@ export default class Vcard extends AbstractService {
 
         //second send the new vCard with avatar to server
         return this.sendIQ(sendVcardIQ).then((result)=>{
-          if ($(result).attr('type')==='result')
-          {
             //load the vcard again, because there could be a resize method on the server and we would have another hash
             return this.sendIQ(getVcardIQ).then((stanza) => {
                 if ($(stanza).attr('type')==='result')
@@ -116,9 +114,6 @@ export default class Vcard extends AbstractService {
                 else
                     return false;
             });
-          }
-          else
-            return false;
       });
    }
 

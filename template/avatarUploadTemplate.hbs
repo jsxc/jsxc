@@ -11,17 +11,10 @@
    <canvas class="jsxc-canvas"></canvas>
 </div>
 <form class="form-horizontal jsxc-avatarupload">
-
-   <div class="form-group">
-      <label class="col-sm-2 control-label" for="jsxc-avataruploadinput">{{t "Avatar"}}</label>
-      <div >
-         <input type="file" name="jsxc-avataruploadinput" value="{{avatar}}" class="form-control jsxc-avataruploadinput" required="required" />
-      </div>
-   </div>
-
    <div class="form-group">
       <div >
          <button class="jsxc-button jsxc-button--default jsxc-js-close" type="button">{{t "Cancel"}}</button>
+         <button class="jsxc-button jsxc-avataruploadbutton" type="button" value="load" required="required" >{{t "select_avatar_file"}}</button>
          <button class="jsxc-button jsxc-button--primary jsxc-js-submit" type="submit" value="add">{{t "Save"}}</button>
          <button class="jsxc-button jsxc-button--primary jsxc-js-clear" type="button" value="remove">{{t "Remove"}}</button>
       </div>

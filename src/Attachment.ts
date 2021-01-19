@@ -186,7 +186,7 @@ export default class Attachment {
       this.properties.registerHook('thumbnail', hook);
    }
 
-   private getDataFromFile(): Promise<string> {
+   public getDataFromFile(): Promise<string> {
       return new Promise((resolve, reject) => {
          let reader = new FileReader();
 
@@ -221,40 +221,48 @@ export default class Attachment {
          return;
       }
 
-      let sHeight;
-      let sWidth;
-      let sx;
-      let sy;
-      let dHeight = 100;
-      let dWidth = 100;
-      let canvas = <HTMLCanvasElement> $('<canvas>').get(0);
+      this.scaleDown(this.data);
+   }
 
-      canvas.width = dWidth;
-      canvas.height = dHeight;
+   public scaleDown(data: string, quality: number = 0.3, size: number = 100): Promise<string> {
+       return new Promise((resolve, reject) => {
+          let sHeight;
+          let sWidth;
+          let sx;
+          let sy;
+          let dHeight = size;
+          let dWidth = size;
+          let canvas = <HTMLCanvasElement> $('<canvas>').get(0);
 
-      let ctx = canvas.getContext('2d');
-      let img = new Image();
+          canvas.width = dWidth;
+          canvas.height = dHeight;
 
-      img.onload = () => {
-         if (img.height > img.width) {
-            sHeight = img.width;
-            sWidth = img.width;
-            sx = 0;
-            sy = (img.height - img.width) / 2;
-         } else {
-            sHeight = img.height;
-            sWidth = img.height;
-            sx = (img.width - img.height) / 2;
-            sy = 0;
-         }
+          let ctx = canvas.getContext('2d');
+          let img = new Image();
 
-         ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
+          img.onload = () => {
+             if (img.height > img.width) {
+                sHeight = img.width;
+                sWidth = img.width;
+                sx = 0;
+                sy = (img.height - img.width) / 2;
+             } else {
+                sHeight = img.height;
+                sWidth = img.height;
+                sx = (img.width - img.height) / 2;
+                sy = 0;
+             }
 
-         let thumbnailData = canvas.toDataURL('image/jpeg', 0.3);
+             ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
 
-         this.properties.set('thumbnail', thumbnailData);
-      };
+             let thumbnailData = canvas.toDataURL('image/jpeg', quality);
 
-      img.src = this.data;
+             this.properties.set('thumbnail', thumbnailData);
+
+             resolve(thumbnailData);
+          };
+
+          img.src = data;
+      });
    }
 }

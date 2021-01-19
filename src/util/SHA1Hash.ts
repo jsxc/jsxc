@@ -1,6 +1,6 @@
 import * as sha1 from 'js-sha1'
 
-export default function calculateHash(data): string {
+export default function calculateHashFromBase64(data): string {
   let base64 = data.replace(/^.+;base64,/, '');
   let buffer = base64ToArrayBuffer(base64);
 

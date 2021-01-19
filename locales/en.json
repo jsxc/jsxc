@@ -437,7 +437,8 @@
     "Occupants": "Occupants",
     "Occupants_not_provided": "No occupants in the room or the list is kept private.",
     "no_avatar": "No avatar available",
-    "Add_Avatar": "Avatar Upload"
+    "Add_Avatar": "Avatar Upload",
+    "select_avatar_file": "Select avatar file"
   },
   "Notifications": "Notifications"
 }
