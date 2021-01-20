@@ -437,7 +437,9 @@
     "Occupants": "Occupants",
     "Occupants_not_provided": "No occupants in the room or the list is kept private.",
     "message_not_delivered": "Message not delivered",
-    "You_have_blocked_this_JID": "You have blocked this contact"
+    "You_have_blocked_this_JID": "You have blocked this contact",
+    "QRCode_description": "Scan with another app to verify keys",
+    "QRCode_noqrcode" : "No QRCode available"
   },
   "Notifications": "Notifications"
 }

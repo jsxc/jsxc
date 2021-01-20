@@ -253,3 +253,37 @@ body.jsxc-fullscreen.jsxc-two-columns {
     float: right;
   }
 }
+
+.jsxc-qr-code {
+  label {
+    cursor: zoom-in;
+  }
+
+  input[type="checkbox"] {
+    display: none;
+
+    &:checked + img {
+      max-width: none;
+    }
+  }
+
+  img {
+    border: 1px solid var(--jsxc-color-border-dark);
+    color: var(--jsxc-color-error);
+    font-size: 0.7em;
+    max-width: 30px;
+  }
+
+  &-own,
+  &-peer {
+    margin-bottom: 1em;
+  }
+
+  &-desc-own,
+  &-desc-peer {
+    display: inline-block;
+    font-size: 0.7em;
+    margin-left: 2em;
+    opacity: 0.7;
+  }
+}
