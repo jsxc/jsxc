@@ -32,6 +32,7 @@ export default class Roster {
    private element: JQuery;
    private contactList: JQuery;
    private groupList: JQuery;
+   private rosterItems: {[uid: string]: RosterItem} = {};
 
    private static instance: Roster;
 
@@ -107,35 +108,42 @@ export default class Roster {
    public add(contact: IContact) {
       this.clearStatus();
 
-      if (this.element.find('.jsxc-roster-item[data-id="' + contact.getId() + '"]').length > 0) {
+      if (this.rosterItems[contact.getUid()]) {
          return;
       }
 
       let rosterItem = new RosterItem(contact);
+
+      this.rosterItems[contact.getUid()] = rosterItem;
+
       this.insert(rosterItem);
 
-      contact.registerHook('name', () => {
-         rosterItem.getDom().detach();
+      const reinsert = () => {
+         let globalRosterItem = this.rosterItems[contact.getUid()];
+
+         if (!globalRosterItem || globalRosterItem !== rosterItem) {
+            return;
+         }
+
+         rosterItem.detach();
 
          this.insert(rosterItem);
-      });
+      };
 
-      contact.registerHook('lastMessage', () => {
-         rosterItem.getDom().detach();
-
-         this.insert(rosterItem);
-      });
-
+      contact.registerHook('name', reinsert);
+      contact.registerHook('lastMessage', reinsert);
    }
 
    public remove(contact: IContact) {
-      let rosterItemElement = this.element.find('.jsxc-roster-item[data-id="' + contact.getId() + '"]');
+      let rosterItem = this.rosterItems[contact.getUid()];
 
-      if (rosterItemElement.length === 0) {
+      if (!rosterItem) {
          return;
       }
 
-      rosterItemElement.remove();
+      delete this.rosterItems[contact.getUid()];
+
+      rosterItem.remove();
    }
 
    public clearStatus() {

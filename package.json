@@ -95,6 +95,7 @@
     "webpack-dev-server": "^3.7.2"
   },
   "dependencies": {
+    "@types/qrcode": "^1.3.5",
     "bootstrap-sass": "^3.4.1",
     "bytebuffer": "^5.0.1",
     "consistent-color-generation": "^0.4.0",
@@ -118,6 +119,7 @@
     "node-sass": "^5.0.0",
     "otr": "github:sualko/otr#es6-modules",
     "precompile-handlebars": "^1.0.5",
+    "qrcode": "^1.4.4",
     "screenfull": "^5.0.2",
     "sha1": "^1.1.1",
     "strophe.js": "^1.4.0",

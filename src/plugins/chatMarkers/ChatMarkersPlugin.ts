@@ -190,7 +190,11 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
       let idAttr = messageElement.attr(ID);
       let fromAttr = messageElement.attr(FROM);
       let toAttr = messageElement.attr('to');
-      let typeAttr = stanzaElement.attr('type');
+      let typeAttr = messageElement.attr('type');
+
+      if (typeAttr === Message.MSGTYPE.GROUPCHAT || typeAttr === 'error') {
+         return true;
+      }
 
       let markableMessageId = markerElement.attr(ID);
       let marker = markerElement.prop('tagName').toLowerCase() as string;
@@ -208,7 +212,7 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
             return true;
          }
 
-         if ($(stanza).attr('type') !== Message.MSGTYPE.GROUPCHAT && !isCarbon && !isMam) {
+         if (!isCarbon && !isMam) {
             let peer = new JID(fromAttr);
 
             this.sendReceived(idAttr, peer);
@@ -218,12 +222,10 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
             return true;
          }
 
-         if (typeAttr !== Message.MSGTYPE.GROUPCHAT) {
-            let peerJid = new JID(carbonSentElement.length > 0 ? toAttr : fromAttr);
-            let direction = carbonSentElement.length > 0 ? DIRECTION.IN : DIRECTION.OUT;
+         let peerJid = new JID(carbonSentElement.length > 0 ? toAttr : fromAttr);
+         let direction = carbonSentElement.length > 0 ? DIRECTION.IN : DIRECTION.OUT;
 
-            this.markMessages(markableMessageId, peerJid, marker, direction);
-         }
+         this.markMessages(markableMessageId, peerJid, marker, direction);
       }
 
       return true;
@@ -251,7 +253,7 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
 
       // @REVIEW spec is not clear if only markable message from the same resource should be marked
       while (!!msg) {
-         if (msg.getDirection() === direction && msg.isTransferred()) {
+         if (msg.getDirection() === direction && msg.isTransferred() && !msg.getErrorMessage()) {
             if (status === RECEIVED) {
                if (msg.isReceived()) {
                   // no need to traverse all messages

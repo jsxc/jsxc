@@ -436,6 +436,8 @@
     "setting-time": "Returns entity time on queries.",
     "Occupants": "Occupants",
     "Occupants_not_provided": "No occupants in the room or the list is kept private.",
+    "QRCode_description": "Scan with another app to verify keys",
+    "QRCode_noqrcode" : "No QRCode available",
     "no_avatar": "No avatar available",
     "Add_Avatar": "Avatar Upload",
     "select_avatar_file": "Select avatar file"
