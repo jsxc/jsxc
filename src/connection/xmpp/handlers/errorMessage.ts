@@ -1,4 +1,5 @@
 import { IContact } from '@src/Contact.interface';
+import Message from '@src/Message';
 import { IMessage } from '@src/Message.interface';
 import Log from '@util/Log';
 import Translation from '@util/Translation';
@@ -17,12 +18,28 @@ export default class extends AbstractHandler {
          return this.PRESERVE_HANDLER;
       }
 
-      if (!messageElement.getPeer()) {
-         return this.PRESERVE_HANDLER;
+      let peer = messageElement.getPeer();
+
+      // workaround for broken OpenFire implementation
+      if (!peer || peer === this.account.getJID().full) {
+         let attrId = messageElement.getId();
+
+         if (Message.exists(attrId)) {
+            let message = new Message(attrId);
+
+            peer = message.getPeer().bare;
+         } else {
+            peer = this.getPeerByMessageAttrId(attrId);
+         }
+
+         if (!peer) {
+            return  this.PRESERVE_HANDLER;
+         }
       }
 
-      let peerJid = new JID(messageElement.getPeer());
+      let peerJid = new JID(peer);
       let peerContact = this.account.getContact(peerJid);
+
       if (typeof peerContact === 'undefined') {
          return this.PRESERVE_HANDLER;
       }
@@ -42,5 +59,9 @@ export default class extends AbstractHandler {
       });
 
       return this.PRESERVE_HANDLER;
+   }
+
+   private getPeerByMessageAttrId(id: string) {
+      return $('.jsxc-chatmessage[id="' + id + '"]').closest('[data-jid]').attr('data-jid');
    }
 }
