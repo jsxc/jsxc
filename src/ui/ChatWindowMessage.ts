@@ -5,6 +5,7 @@ import AvatarSet from './AvatarSet'
 import Log from '../util/Log'
 import LinkHandlerGeo from '@src/LinkHandlerGeo';
 import Color from '@util/Color';
+import Translation from '@util/Translation'
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs')
 
@@ -86,7 +87,7 @@ export default class ChatWindowMessage {
 
       if (this.message.getErrorMessage()) {
          this.element.addClass('jsxc-error');
-         this.element.attr('title', this.message.getErrorMessage());
+         this.element.find('.jsxc-error-content').text(Translation.t(this.message.getErrorMessage()));
       }
 
       if (this.message.hasAttachment()) {
@@ -247,10 +248,10 @@ export default class ChatWindowMessage {
       this.message.registerHook('errorMessage', (errorMessage) => {
          if (errorMessage) {
             this.element.addClass('jsxc-error');
-            this.element.attr('title', errorMessage);
+            this.element.find('.jsxc-error-content').text(Translation.t(errorMessage));
          } else {
             this.element.removeClass('jsxc-error');
-            this.element.attr('title', null);
+            this.element.find('.jsxc-error-content').empty();
          }
       })
    }

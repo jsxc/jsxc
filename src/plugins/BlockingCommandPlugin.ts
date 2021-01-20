@@ -192,7 +192,7 @@ export default class BlockingCommandPlugin extends AbstractPlugin {
 
    private errorMessageProcessor = async (contact: IContact, message: IMessage, stanza: Element): Promise<[IContact, IMessage, Element]> => {
       if (message && $(stanza).find(`blocked[xmlns="${NAMESPACE_BLOCKING_COMMAND}:errors"]`).length === 1) {
-         message.setErrorMessage(Translation.t('You_have_blocked_this_JID.'));
+         message.setErrorMessage(Translation.t('You_have_blocked_this_JID'));
       }
 
       return [contact, message, stanza];
