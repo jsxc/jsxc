@@ -45,6 +45,8 @@ export interface IPluginAPI {
 
    addAfterReceiveGroupMessageProcessor(processor: (contact: Contact, message: IMessage, stanza: Element) => Promise<[Contact, IMessage, Element]>, position?: number)
 
+   addAfterReceiveErrorMessageProcessor(processor: (contact: Contact, message: IMessage, stanza: Element) => Promise<[Contact, IMessage, Element]>, position?: number)
+
    addPreSendMessageStanzaProcessor(processor: (message: IMessage, xmlMsg: Strophe.Builder) => Promise<any>, position?: number)
 
    addAvatarProcessor(processor: (contact: Contact, avatar: IAvatar) => Promise<[Contact, IAvatar]>, position?: number)

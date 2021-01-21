@@ -3,6 +3,7 @@ import Account from '../../Account'
 import PresenceHandler from './handlers/presence'
 import MultiUserPresenceHandler from './handlers/multiUser/Presence'
 import ChatMessageHandler from './handlers/chatMessage'
+import ErrorMessageHandler from './handlers/errorMessage'
 import MultiUserChatMessageHandler from './handlers/multiUser/groupChatMessage'
 import HeadlineMessageHandler from './handlers/headlineMessage'
 import JingleHandler from './handlers/jingle'
@@ -27,6 +28,7 @@ export default class XMPPHandler {
 
    public registerHandler() {
       this.addHandler(ChatMessageHandler, null, 'message', 'chat');
+      this.addHandler(ErrorMessageHandler, null, 'message', 'error');
       this.addHandler(MultiUserChatMessageHandler, null, 'message', 'groupchat');
       this.addHandler(HeadlineMessageHandler, null, 'message', 'headline');
       this.addHandler(MultiUserXMessageHandler, 'http://jabber.org/protocol/muc#user', 'message');

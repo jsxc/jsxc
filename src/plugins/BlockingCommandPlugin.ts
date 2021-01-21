@@ -4,7 +4,8 @@ import Translation from '@util/Translation';
 import { Status } from '../vendor/Strophe'
 import showContactBlockDialog from '../ui/dialogs/contactBlock'
 import Roster from '../ui/Roster'
-import JID from '@src/JID';
+import { IContact } from '@src/Contact.interface';
+import { IMessage } from '@src/Message.interface';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
@@ -42,9 +43,9 @@ export default class BlockingCommandPlugin extends AbstractPlugin {
       let connection = pluginAPI.getConnection();
 
       pluginAPI.addFeature(NAMESPACE_BLOCKING_COMMAND);
+      pluginAPI.addAfterReceiveErrorMessageProcessor(this.errorMessageProcessor);
 
       connection.registerHandler(this.onBlocklistUpdate, NAMESPACE_BLOCKING_COMMAND, 'iq', 'set');
-      connection.registerHandler(this.onMessageError, undefined, 'message', 'error');
 
       pluginAPI.registerConnectionHook((status) => {
          if (status === Status.ATTACHED) {
@@ -189,24 +190,11 @@ export default class BlockingCommandPlugin extends AbstractPlugin {
       return true;
    }
 
-   private onMessageError = (stanza: string) => {
-      if ($(stanza).find(`blocked[xmlns="${NAMESPACE_BLOCKING_COMMAND}:errors"]`).length === 0) {
-         return true;
+   private errorMessageProcessor = async (contact: IContact, message: IMessage, stanza: Element): Promise<[IContact, IMessage, Element]> => {
+      if (message && $(stanza).find(`blocked[xmlns="${NAMESPACE_BLOCKING_COMMAND}:errors"]`).length === 1) {
+         message.setErrorMessage(Translation.t('You_have_blocked_this_JID'));
       }
 
-      let from = new JID($(stanza).attr('from'));
-      let id = $(stanza).attr('id');
-      let contact = this.pluginAPI.getContact(from);
-
-      if (contact) {
-         let message = contact.getTranscript().getMessage(id);
-
-         if (message) {
-            message.setErrorMessage(Translation.t('You_have_blocked_this_JID.'))
-            contact.addSystemMessage(Translation.t('You_have_blocked_this_JID.'));
-         }
-      }
-
-      return true;
+      return [contact, message, stanza];
    }
 }
