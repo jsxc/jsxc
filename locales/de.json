@@ -432,7 +432,10 @@
     "trusted_domains": null,
     "one_domain_per_line": null,
     "setting-command-enable": null,
-    "setting-version": null
+    "setting-version": null,
+    "setting-time": null,
+    "Occupants": null,
+    "Occupants_not_provided": null
   },
   "Notifications": "Benachrichtigungen"
 }

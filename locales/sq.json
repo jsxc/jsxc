@@ -41,9 +41,9 @@
     "Authentication": "Mirëfilltësim",
     "Message": "Mesazh",
     "Add_buddy": "Shtoni kontakt",
-    "Blocking_users": null,
-    "setting-blocking-command-enable": null,
-    "blocking_cmd_not_supported": null,
+    "Blocking_users": "Bllokoni kontakte",
+    "setting-blocking-command-enable": "Ju bën të mundur të bllokoni kontakte.",
+    "blocking_cmd_not_supported": "Shërbyesi juaj nuk mbulon bllokimin e kontakteve.",
     "rename_buddy": "riemërtoni kontaktin",
     "delete_buddy": "fshije kontaktin",
     "Login": "Hyrje",
@@ -432,7 +432,10 @@
     "trusted_domains": "Përkatësi të besuara",
     "one_domain_per_line": "Këto janë përkatësi prej të cilave bashkëngjitjet do të ngarkohen vetvetiu. (Një përkatësi për rresht)",
     "setting-command-enable": "Lejon të kontrollohen rregullime të ndryshme përmes urdhrash tekst.",
-    "setting-version": null
+    "setting-version": "Jep të dhëna versioni rreth software-it që po xhiron ky Klient",
+    "setting-time": null,
+    "Occupants": "Pjesëmarrës",
+    "Occupants_not_provided": "S’ka pjesëmarrës te dhoma ose lista është mbajtur private."
   },
   "Notifications": "Njoftime"
 }
