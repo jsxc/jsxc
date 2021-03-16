@@ -303,3 +303,34 @@ button.jsxc-page__subheadline {
   height: 30px;
   margin-bottom: 2em;
 }
+
+.jsxc-account-choice {
+  height: 30px;
+}
+
+.jsxc-dialog .jsxc-avatarimage {
+  display: flex;
+  justify-content: center;
+  margin: 2em 0;
+
+  img {
+    height: 96px;
+    width: 96px;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  label {
+    cursor: pointer;
+    position: relative;
+
+    button {
+      padding: 0;
+      position: absolute;
+      right: -11px;
+      top: -11px;
+    }
+  }
+}

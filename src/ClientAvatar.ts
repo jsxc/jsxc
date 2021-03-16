@@ -119,4 +119,10 @@ export default class ClientAvatar {
          AvatarSet.get(this.contact).addElement(element);
       }
    }
+
+   public reload() {
+      if (this.contact) {
+         AvatarSet.get(this.contact).reload();
+      }
+   }
 }

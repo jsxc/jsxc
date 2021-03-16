@@ -25,7 +25,7 @@ enum Presence {
    offline
 }
 
-type ExtensivePresence = {presence: Presence, status: string};
+type ExtensivePresence = { presence: Presence, status: string };
 
 abstract class AbstractConnection {
    protected abstract connection;
@@ -88,9 +88,9 @@ abstract class AbstractConnection {
       if (!this.services[key]) {
          let self = this;
 
-         this.services[key] = new Service(function() {
+         this.services[key] = new Service(function () {
             return self.send.apply(self, arguments)
-         }, function() {
+         }, function () {
             return self.sendIQ.apply(self, arguments)
          }, this, this.account);
       }

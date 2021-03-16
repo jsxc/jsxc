@@ -5,7 +5,6 @@ import Contact from '../Contact'
 import Message from '../Message'
 import JID from '../JID'
 import DiscoInfoRepository from '../DiscoInfoRepository'
-import Avatar from '../Avatar'
 import { IMessagePayload, DIRECTION, IMessage } from '../Message.interface'
 import { IPluginAPI } from './PluginAPI.interface'
 import { Logger } from '../util/Log'
@@ -17,6 +16,7 @@ import MultiUserContact from '@src/MultiUserContact';
 import ContactManager from '@src/ContactManager';
 import IStorage from '@src/Storage.interface';
 import CommandRepository, { CommandAction } from '@src/CommandRepository'
+import { IAvatar } from '@src/Avatar.interface'
 
 export default class PluginAPI implements IPluginAPI {
    private storage: IStorage;
@@ -109,8 +109,12 @@ export default class PluginAPI implements IPluginAPI {
       this.account.getPipe('preSendMessageStanza').addProcessor(processor, position);
    }
 
-   public addAvatarProcessor(processor: (contact: IContact, avatar: Avatar) => Promise<[IContact, Avatar]>, position?: number) {
+   public addAvatarProcessor(processor: (contact: IContact, avatar: IAvatar) => Promise<[IContact, IAvatar]>, position?: number) {
       this.account.getPipe('avatar').addProcessor(processor, position);
+   }
+
+   public addPublishAvatarProcessor(processor: (avatar: IAvatar|null) => Promise<[IAvatar]>, position?: number) {
+      this.account.getPipe('publishAvatar').addProcessor(processor, position);
    }
 
    public addFeature(feature: string) {

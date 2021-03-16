@@ -18,6 +18,7 @@ import ClientAvatar from '../ClientAvatar'
 import confirmDialog from './dialogs/confirm'
 import Utils from '@util/Utils'
 import Emoticons from '@src/Emoticons'
+import showAddAvatarDialog from './dialogs/avatarupload'
 
 let rosterTemplate = require('../../template/roster.hbs')
 
@@ -388,6 +389,12 @@ export default class Roster {
          offlineAvailable: true,
          icon: 'gear'
       });
+
+       this.addMenuEntry({
+         id: 'add-avatar',
+         handler: showAddAvatarDialog,
+         label: Translation.t('Edit_avatar'),
+      });
    }
 
    private registerPresenceHandler() {
@@ -500,6 +507,12 @@ export default class Roster {
       });
       Client.getPresenceController().registerCurrentPresenceHook(() => {
          this.refreshOwnPresenceIndicator();
+      });
+
+      $('.jsxc-bottom > .jsxc-avatar').on('click', () => {
+         if (this.element.attr('data-presence') !== Presence[Presence.offline]) {
+            showAddAvatarDialog();
+         }
       });
    }
 

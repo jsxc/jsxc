@@ -101,6 +101,8 @@ export interface IRosterService {
 
 export interface IVcardService {
    loadVcard(jid: IJID)
+
+   setAvatar(jid: IJID, avatar: string, mimetype: string)
 }
 
 export interface IDiscoService {
