@@ -40,7 +40,7 @@ export interface IConnection {
 
    sendMessage(message: Message)
 
-   sendPresence(presence?: Presence, statusText?: string)
+   sendPresence(presence?: Presence, statusText?: string): Promise<void>
 
    queryArchive(archive: IJID, version: string, queryId: string, contact?: IJID, beforeResultId?: string, end?: Date): Promise<Element>
 
@@ -101,6 +101,8 @@ export interface IRosterService {
 
 export interface IVcardService {
    loadVcard(jid: IJID)
+
+   setAvatar(jid: IJID, avatar: string, mimetype: string)
 }
 
 export interface IDiscoService {

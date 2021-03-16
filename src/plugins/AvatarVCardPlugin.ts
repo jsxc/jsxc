@@ -1,12 +1,13 @@
 import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin'
 import PluginAPI from '../plugin/PluginAPI'
-import Contact from '../Contact'
 import Avatar from '../Avatar'
 import AvatarUI from '../ui/AvatarSet'
 import JID from '../JID'
-import Log from '../util/Log';
-import { ContactType } from '@src/Contact.interface';
+import { ContactType, IContact } from '@src/Contact.interface';
 import Translation from '@util/Translation';
+import { IAvatar } from '@src/Avatar.interface'
+import { IJID } from '@src/JID.interface'
+import Hash from '@util/Hash'
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
@@ -38,7 +39,8 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
 
       connection.registerHandler(this.onPresenceVCardUpdate, 'vcard-temp:x:update', 'presence');
 
-      pluginAPI.addAvatarProcessor(this.avatarProcessor, 50);
+      pluginAPI.addPublishAvatarProcessor(this.publishAvatarProcessor);
+      pluginAPI.addAvatarProcessor(this.avatarProcessor);
    }
 
    private getStorage() {
@@ -59,7 +61,7 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
                return true;
             }
 
-            let sha1OfAvatar = photo.text();
+            let sha1OfAvatar = photo.text()?.trim() || null;
 
             this.getStorage().setItem(from.bare, sha1OfAvatar); //@REVIEW use this as trigger for all tabs?
 
@@ -76,40 +78,91 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
       return true;
    }
 
-   private avatarProcessor = (contact: Contact, avatar: Avatar): Promise<any> => {
+   private publishAvatarProcessor = (avatar: IAvatar | null): Promise<[IAvatar]> => {
+      if (typeof avatar === 'undefined') {
+         return Promise.resolve([avatar]);
+      }
+
+      const vcardService = this.pluginAPI.getConnection().getVcardService();
+      const jid = this.pluginAPI.getConnection().getJID();
+
+      return vcardService.setAvatar(jid, avatar?.getData(), avatar?.getType()).then(() => {
+         this.getStorage().setItem(jid.bare, avatar?.getHash() || '');
+
+         return [undefined];
+      }).catch((err) => {
+         this.pluginAPI.Log.error('Could not publish avatar', err);
+
+         return [avatar];
+      });
+   }
+
+   private avatarProcessor = async (contact: IContact, avatar: IAvatar): Promise<[IContact, IAvatar]> => {
       let storage = this.getStorage();
       let hash = storage.getItem(contact.getJid().bare);
 
+      if (!hash && !avatar && this.shouldForceRetrieval(contact)) {
+         try {
+            const avatarObject = await this.getAvatar(contact.getJid());
+            const data = avatarObject.src.replace(/^.+;base64,/, '');
+
+            avatar = new Avatar(Hash.SHA1FromBase64(data), avatarObject.type, avatarObject.src);
+
+            this.getStorage().setItem(contact.getJid().bare, avatar.getHash() || '');
+
+            let avatarUI = AvatarUI.get(contact);
+            avatarUI.reload();
+         } catch (err) {
+            // we could not find any avatar
+         }
+      }
+
       if (!hash || avatar) {
-         return Promise.resolve([contact, avatar]);
+         return [contact, avatar];
       }
 
       try {
          avatar = new Avatar(hash);
       } catch (err) {
-         return this.getAvatar(contact.getJid()).then((avatarObject) => {
+         try {
+            const avatarObject = await this.getAvatar(contact.getJid());
+
             return [contact, new Avatar(hash, avatarObject.type, avatarObject.src)];
-         }).catch((err) => {
-            Log.warn('Error during avatar retrieval', err)
+         } catch (err) {
+            this.pluginAPI.Log.warn('Error during avatar retrieval', err)
 
             return [contact, avatar];
-         });
+         }
       }
 
-      return Promise.resolve([contact, avatar]);
+      return [contact, avatar];
    }
 
-   private getAvatar(jid: JID) {
+   private getAvatar(jid: IJID): Promise<{ src: string, type: string }> {
       let connection = this.pluginAPI.getConnection();
 
-      return connection.getVcardService().loadVcard(jid).then(function(vcard) {
-         return new Promise(function(resolve, reject) {
-            if (vcard.PHOTO && vcard.PHOTO.src) {
-               resolve(vcard.PHOTO);
-            } else {
-               reject();
-            }
-         });
+      return connection.getVcardService().loadVcard(jid).then(function (vcard) {
+         if (vcard.PHOTO && vcard.PHOTO.src) {
+            return vcard.PHOTO;
+         }
+
+         throw new Error('No photo available');
       });
+   }
+
+   private shouldForceRetrieval(contact: IContact): boolean {
+      if (contact.getJid().bare !== this.pluginAPI.getConnection().getJID().bare) {
+         return false;
+      }
+
+      const sessionStorage = this.pluginAPI.getSessionStorage();
+
+      if (sessionStorage.getItem('forced', contact.getJid().bare)) {
+         return false;
+      }
+
+      sessionStorage.setItem('forced', contact.getJid().bare, true);
+
+      return true;
    }
 }

@@ -25,7 +25,7 @@ enum Presence {
    offline
 }
 
-type ExtensivePresence = {presence: Presence, status: string};
+type ExtensivePresence = { presence: Presence, status: string };
 
 abstract class AbstractConnection {
    protected abstract connection;
@@ -88,9 +88,9 @@ abstract class AbstractConnection {
       if (!this.services[key]) {
          let self = this;
 
-         this.services[key] = new Service(function() {
+         this.services[key] = new Service(function () {
             return self.send.apply(self, arguments)
-         }, function() {
+         }, function () {
             return self.sendIQ.apply(self, arguments)
          }, this, this.account);
       }
@@ -188,7 +188,7 @@ abstract class AbstractConnection {
       }
    }
 
-   public sendPresence(presence?: Presence, statusText?: string) {
+   public async sendPresence(presence?: Presence, statusText?: string) {
       let presenceStanza = $pres();
 
       presenceStanza.c('c', this.generateCapsAttributes()).up();
@@ -201,10 +201,17 @@ abstract class AbstractConnection {
          presenceStanza.c('status').t(statusText).up();
       }
 
-      // var priority = Options.get('priority');
-      // if (priority && typeof priority[status] !== 'undefined' && parseInt(priority[status]) !== 0) {
-      //    presenceStanza.c('priority').t(priority[status]).up();
-      // }
+      let avatarHash = '';
+
+      try {
+         const avatar = await this.account.getContact().getAvatar();
+
+         avatarHash = avatar.getHash();
+      } catch (err) {
+         // we don't have an avatar
+      }
+
+      presenceStanza.c('x', { xmlns: 'vcard-temp:x:update' }).c('photo').t(avatarHash).up().up();
 
       Log.debug('Send presence', presenceStanza.toString());
 

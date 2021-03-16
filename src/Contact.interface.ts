@@ -4,11 +4,11 @@ import { Presence } from './connection/AbstractConnection'
 import { EncryptionState } from './plugin/AbstractPlugin'
 import ChatWindowController from './ChatWindowController'
 import Transcript from './Transcript'
-import Avatar from './Avatar'
 import ChatWindow from '@ui/ChatWindow';
 import ContactProvider from './ContactProvider';
 import Account from './Account';
 import DiscoInfo from './DiscoInfo';
+import { IAvatar } from './Avatar.interface'
 
 export enum ContactType {
    CHAT = 'chat',
@@ -75,7 +75,7 @@ export interface IContact {
 
    getProviderId(): string;
 
-   getAvatar(): Promise<Avatar>;
+   getAvatar(): Promise<IAvatar>;
 
    getSubscription(): ContactSubscription;
 

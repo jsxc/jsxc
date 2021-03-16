@@ -22,6 +22,8 @@ import ContactManager from './ContactManager';
 import FallbackContactProvider from './FallbackContactProvider';
 import Log from '@util/Log'
 import CommandRepository from './CommandRepository'
+import AvatarSet from '@ui/AvatarSet'
+import { IAvatar } from './Avatar.interface'
 
 type ConnectionCallback = (status: number, condition?: string) => void;
 
@@ -311,6 +313,23 @@ export default class Account {
 
    public getConnectionUrl(): string {
       return this.connector.getUrl();
+   }
+
+   public async updateAvatar(avatar: IAvatar | null) {
+      const pipe = this.getPipe<[IAvatar]>('publishAvatar');
+
+      const [processedAvatar] = await pipe.run(avatar);
+
+      if (processedAvatar && avatar !== null) {
+         Log.warn('Avatar could not be updated');
+
+         return;
+      }
+
+      let avatarUI = AvatarSet.get(this.getContact());
+      avatarUI.reload();
+
+      this.getConnection().sendPresence();
    }
 
    public getPipe<params extends any[] = any[]>(name: string): Pipe<params> {
