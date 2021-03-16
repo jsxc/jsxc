@@ -58,6 +58,10 @@ export default class AvatarSet {
       let color = Color.generate(text);
 
       $(elements).each(function() {
+         $(this).css({
+            'background-image': '',
+         });
+
          avatarPlaceholder($(this), text, color, jid);
       });
    }
