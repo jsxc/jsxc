@@ -7,6 +7,7 @@ import { ContactType, IContact } from '@src/Contact.interface';
 import Translation from '@util/Translation';
 import { IAvatar } from '@src/Avatar.interface'
 import { IJID } from '@src/JID.interface'
+import Hash from '@util/Hash'
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
@@ -100,6 +101,22 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
       let storage = this.getStorage();
       let hash = storage.getItem(contact.getJid().bare);
 
+      if (!hash && !avatar && this.shouldForceRetrieval(contact)) {
+         try {
+            const avatarObject = await this.getAvatar(contact.getJid());
+            const data = avatarObject.src.replace(/^.+;base64,/, '');
+
+            avatar = new Avatar(Hash.SHA1FromBase64(data), avatarObject.type, avatarObject.src);
+
+            this.getStorage().setItem(contact.getJid().bare, avatar.getHash() || '');
+
+            let avatarUI = AvatarUI.get(contact);
+            avatarUI.reload();
+         } catch (err) {
+            // we could not find any avatar
+         }
+      }
+
       if (!hash || avatar) {
          return [contact, avatar];
       }
@@ -131,5 +148,21 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
 
          throw new Error('No photo available');
       });
+   }
+
+   private shouldForceRetrieval(contact: IContact): boolean {
+      if (contact.getJid().bare !== this.pluginAPI.getConnection().getJID().bare) {
+         return false;
+      }
+
+      const sessionStorage = this.pluginAPI.getSessionStorage();
+
+      if (sessionStorage.getItem('forced', contact.getJid().bare)) {
+         return false;
+      }
+
+      sessionStorage.setItem('forced', contact.getJid().bare, true);
+
+      return true;
    }
 }
