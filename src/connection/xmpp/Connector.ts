@@ -15,6 +15,8 @@ export default class Connector {
 
    private connectionArgs: string[];
 
+   public static websocketStropheConnection;
+
    constructor(account: Account, url: string, jid: string, sid: string, rid: string);
    constructor(account: Account, url: string, jid: string, password: string);
    constructor(account: Account);
@@ -28,9 +30,9 @@ export default class Connector {
          let type = this.connectionParameters.get('type');
 
          if (type === TYPE.WEBSOCKET) {
-            throw new Error('Cannt attach to websocket connection.');
+            console.error('Can not attach to websocket connection.');
          }
-
+         else
          this.connectionArgs = [
             this.connectionParameters.get('url'),
             this.connectionParameters.get('jid'),
@@ -40,7 +42,7 @@ export default class Connector {
       } else if (connectionArgs.length === 3 || connectionArgs.length === 4) {
          this.connectionArgs = connectionArgs;
 
-         let type = /^wss?:/.test(connectionArgs[1]) ? TYPE.WEBSOCKET : TYPE.BOSH;
+         let type = this.isWebsocketUrl(connectionArgs[0]) ? TYPE.WEBSOCKET : TYPE.BOSH;
 
          this.connectionParameters.set('type', type);
          this.connectionParameters.remove('inactivity');
@@ -48,6 +50,16 @@ export default class Connector {
       } else {
          throw new BaseError('Unsupported number of arguments');
       }
+   }
+
+   public isWebsocketUrl(url?: string)
+   {
+        if (/^ws?:/.test(url)||/^wss?:/.test(url))
+        {
+            return true;
+        }
+        else
+            return false;
    }
 
    public connect() {
@@ -64,9 +76,30 @@ export default class Connector {
 
          throw new BaseError('Credentials expired');
       }
+      if (Connector.websocketStropheConnection)
+      {
+         return ConnectHelper.websocketConnectionInitHelper(Connector.websocketStropheConnection,this.getUrl())
+         .then(this.successfulConnectedWebsocket);
+      }
+      else
+      {
+          return ConnectHelper.login.apply(this, this.connectionArgs)
+             .then((data) =>{
+                 let url = data.connection.service;
 
-      return ConnectHelper.login.apply(this, this.connectionArgs)
-         .then(this.successfulConnected);
+                 if (this.isWebsocketUrl(url))
+                 {
+                    Connector.websocketStropheConnection = data.connection;
+                    data.wss=true;
+                 }
+                 else
+                 {
+                    Connector.websocketStropheConnection = null;
+                    data.wss=false;
+                 }
+                 return this.successfulConnected(data);
+             });
+      }
    }
 
    public getJID(): JID {
@@ -93,23 +126,35 @@ export default class Connector {
       let stropheConnection = data.connection;
       let status = data.status;
       let condition = data.condition;
+      let accountConnection = null;
+      if (data.wss)
+      {
+          Connector.websocketStropheConnection.flush();
+          Connector.websocketStropheConnection.pause();
+          Connector.websocketStropheConnection.resume();
+          Connector.websocketStropheConnection.flush();
+      }
 
       this.storeConnectionParameters(stropheConnection);
       this.replaceConnectionHandler(stropheConnection);
       this.addRidHandler(stropheConnection);
       this.addRidUnloadHandler(stropheConnection);
 
-      let accountConnection = this.replaceStorageConnectionWithXMPPConnection(stropheConnection);
+      accountConnection = this.replaceStorageConnectionWithXMPPConnection(stropheConnection);
 
       if (stropheConnection.features) {
          this.storeConnectionFeatures(stropheConnection);
       }
 
-      Log.debug('XMPP connection ready');
-
       this.account.triggerConnectionHook(status, condition);
 
+      Log.debug('XMPP connection ready');
       return [status, accountConnection];
+   }
+
+   private successfulConnectedWebsocket = (data) => {
+      this.account.triggerConnectionHook(5, null);
+      return this.successfulConnected(data);
    }
 
    private storeConnectionParameters(connection) {
@@ -130,6 +175,15 @@ export default class Connector {
 
    private replaceConnectionHandler(connection) {
       connection.connect_callback = (status, condition) => {
+
+         if (status === Strophe.Status.DISCONNECTING)
+         {
+             if (condition==='forced'&&status ===Strophe.Status.DISCONNECTING)
+             {
+                 Connector.websocketStropheConnection=null;
+             }
+         }
+
          this.account.triggerConnectionHook(status, condition);
 
          if (status === Strophe.Status.DISCONNECTED) {

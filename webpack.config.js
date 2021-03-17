@@ -206,6 +206,11 @@ let config = {
          "/libsignal": "http://localhost",
          "/xmpp-websocket": "ws://localhost:5280"
       },
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
+      },
       watchOptions: {
          aggregateTimeout: 1300,
          ignored: [

@@ -67,6 +67,23 @@ function armConnectionParameterForm() {
 
    // check initial bosh url
    $('#bosh-url').trigger('input');
+
+   $('#connectiontype_bosh').click((()=>{
+      let val = $('#bosh-url').val();
+      val=val.replace('wss://','https://');
+      val=val.replace('ws://','http://');
+      val=val.replace('/ws','/http-bind');
+      $('#bosh-url').val(val);
+      $('#bosh-url').trigger('input');
+   }));
+   $('#connectiontype_websocket').click((()=>{
+      let val = $('#bosh-url').val();
+      val=val.replace('https://','wss://');
+      val=val.replace('http://','ws://');
+      val=val.replace('/http-bind','/ws');
+      $('#bosh-url').val(val);
+      $('#bosh-url').trigger('input');
+   }));
 }
 
 function inputHandler() {
@@ -86,6 +103,17 @@ function inputHandler() {
    }
 
    localStorage.setItem('bosh-url', url);
+   if (url.startsWith('ws'))
+   {
+      $('#connectiontype_websocket').prop('checked',true);
+      $('#connectiontype_bosh').prop('checked',false);
+   }
+   else
+   {
+      $('#connectiontype_bosh').prop('checked',true);
+      $('#connectiontype_websocket').prop('checked',false);
+   }
+
    localStorage.setItem('xmpp-domain', domain);
 
    $('#server-flash').removeClass('success fail').text('Testing...');
@@ -97,11 +125,22 @@ function inputHandler() {
 
       $('#server-flash').removeClass('success fail');
 
-      jsxc.testBOSHServer(url, domain).then(function(message) {
-         $('#server-flash').addClass('success').html(message);
-      }).catch(function(error) {
-         $('#server-flash').addClass('fail').html(error.message);
-      });
+      if (url.startsWith('ws'))
+      {
+          jsxc.testWEBSOCKETServer(url, domain).then(function(message) {
+             $('#server-flash').addClass('success').html(message);
+          }).catch(function(error) {
+             $('#server-flash').addClass('fail').html(error.message);
+          });
+      }
+      else
+      {
+          jsxc.testBOSHServer(url, domain).then(function(message) {
+             $('#server-flash').addClass('success').html(message);
+          }).catch(function(error) {
+             $('#server-flash').addClass('fail').html(error.message);
+          });
+      }
    }, 2000);
 
    self.data('timeout', timeout);

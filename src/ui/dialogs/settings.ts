@@ -156,7 +156,8 @@ class ConnectionSection extends Section {
 
       contentElement.append(new ListItem('Jabber ID', jid.bare));
       contentElement.append(new ListItem(Translation.t('Resource'), jid.resource));
-      contentElement.append(new ListItem('BOSH url', this.account.getConnectionUrl()));
+      contentElement.append(new ListItem(Translation.t('Connectiontype'), (/^ws?:/.test(this.account.getConnectionUrl())||/^wss?:/.test(this.account.getConnectionUrl()))?'WEBSOCKET':'BOSH'));
+      contentElement.append(new ListItem('Url', this.account.getConnectionUrl()));
       contentElement.append(new ListItem(Translation.t('Change_password'), undefined, changePasswordActionHandler));
 
       return contentElement.getDOM();
