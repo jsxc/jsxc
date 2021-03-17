@@ -463,13 +463,12 @@ export default class ChatWindow {
          unread: false,
       });
 
-      this.getTranscript().pushMessage(message);
-
       this.clearAttachment();
 
       let pipe = this.getAccount().getPipe('preSendMessage');
 
       pipe.run(this.contact, message).then(([contact, message]) => {
+         this.getTranscript().pushMessage(message);
          this.getAccount().getConnection().sendMessage(message);
       }).catch(err => {
          Log.warn('Error during preSendMessage pipe', err);
