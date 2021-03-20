@@ -5,7 +5,6 @@ const webpack = require('webpack');
 const packageJson = require('./package.json');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const GitRevisionPlugin = new(require('git-revision-webpack-plugin'))();
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const TerserPlugin = require('terser-webpack-plugin');
@@ -62,7 +61,8 @@ let config = {
       path: OUTPUT_PATH,
       publicPath: 'dist/',
       libraryTarget: 'var',
-      library: 'JSXC'
+      library: 'JSXC',
+      clean: true,
    },
    optimization: {
       splitChunks: {
@@ -167,9 +167,6 @@ let config = {
       new MiniCssExtractPlugin({
          filename: 'styles/jsxc.bundle.css',
 
-      }),
-      new CleanWebpackPlugin({
-         cleanStaleWebpackAssets: false,
       }),
       new CopyWebpackPlugin({
          patterns: [{

@@ -67,7 +67,6 @@
     "archiver": "^5.1.0",
     "buffer": "^6.0.3",
     "chai": "^4.2.0",
-    "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^8.0.0",
     "css-loader": "^5.0.1",
     "dotenv": "^8.2.0",
