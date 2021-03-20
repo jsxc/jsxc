@@ -89,7 +89,8 @@ let config = {
       maxAssetSize: 1024 * 1000 * 1000 * 3,
    },
    module: {
-      rules: [{
+      rules: [
+         {
             test: /\.ts$/,
             loader: 'ts-loader',
             exclude: /node_modules/,
@@ -146,13 +147,13 @@ let config = {
          '@vendor': path.resolve(__dirname, 'src/vendor/'),
          '@src': path.resolve(__dirname, 'src/'),
       },
-      // prep for Webpack 5
-      // fallback: {
-      //    fs: false,
-      //    stream: false,
-      //    path: false,
-      //    crypto: false,
-      // }
+      fallback: {
+         fs: false,
+         stream: false,
+         path: false,
+         crypto: false,
+         process: false,
+      }
    },
    externals: {
       'child_process': 'child_process',
@@ -161,7 +162,7 @@ let config = {
    plugins: [
       new webpack.ProvidePlugin({
          $: 'jquery',
-         jQuery: 'jquery'
+         jQuery: 'jquery',
       }),
       new MiniCssExtractPlugin({
          filename: 'styles/jsxc.bundle.css',

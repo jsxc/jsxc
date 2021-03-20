@@ -1,8 +1,11 @@
 // jshint node:true
 
+const webpack = require('webpack');
 const webpackConfig = require('./webpack.config.js')({}, {});
 
-module.exports = function(config) {
+webpackConfig.resolve.fallback.stream = require.resolve('stream-browserify');
+
+module.exports = function (config) {
    config.set({
 
       // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -11,7 +14,7 @@ module.exports = function(config) {
 
       // frameworks to use
       // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-      frameworks: [ /*'karma-typescript',*/ 'mocha', 'chai'],
+      frameworks: [ /*'karma-typescript',*/ 'webpack', 'mocha', 'chai'],
 
 
       // list of files / patterns to load in the browser
@@ -32,13 +35,18 @@ module.exports = function(config) {
          module: webpackConfig.module,
          resolve: webpackConfig.resolve,
          plugins: [
-             webpackConfig.plugins[1],
-             webpackConfig.plugins[webpackConfig.plugins.length - 2],
+            new webpack.ProvidePlugin({
+               process: 'process/browser',
+               Buffer: ['buffer', 'Buffer'],
+            }),
+            webpackConfig.plugins[1],
+            webpackConfig.plugins[webpackConfig.plugins.length - 2],
          ],
+         stats: 'errors-only',
       },
 
       webpackMiddleware: {
-        stats: 'errors-only',
+         stats: 'errors-only',
       },
 
       mime: {
@@ -49,7 +57,7 @@ module.exports = function(config) {
       // preprocess matching files before serving them to the browser
       // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
       preprocessors: {
-         'test/**/*.spec.ts': ['webpack' /*'karma-typescript'*/ ]
+         'test/**/*.spec.ts': ['webpack' /*'karma-typescript'*/]
       },
 
       karmaTypescriptConfig: {
