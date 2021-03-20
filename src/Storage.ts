@@ -124,8 +124,8 @@ export default class Storage implements IStorage {
    public setItem(type: string, key: string, value: any): void;
    public setItem(key: string, value: any): void
    public setItem(): void {
-      let key;
-      let value;
+      let key: string;
+      let value: any;
 
       if (arguments.length === 2) {
          key = arguments[0];
@@ -198,8 +198,8 @@ export default class Storage implements IStorage {
       Storage.backend.removeItem(this.getPrefix() + key);
    }
 
-   public updateItem(type, key, variable, value): void;
-   public updateItem(key, variable, value): void;
+   public updateItem(type: string, key: string, variable: string, value: any): void;
+   public updateItem(key: string, variable: string, value: any): void;
    public updateItem(): void {
       let key;
       let variable;
@@ -221,7 +221,7 @@ export default class Storage implements IStorage {
 
          $.each(variable, function(key, val) {
             if (typeof (data[key]) === 'undefined') {
-               Log.debug('Variable ' + key.toString() + ' doesn\'t exist in ' + variable + '. It was created.');
+               Log.debug(`Variable ${key} doesn't exist in ${variable}. It was created.`);
             }
 
             data[key] = val;
