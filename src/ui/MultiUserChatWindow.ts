@@ -206,9 +206,9 @@ export default class MultiUserChatWindow extends ChatWindow {
          $('body').click();
          $('body').one('click', this.toggleMemberList);
 
-         ul.mouseleave(function() {
+         ul.mouseleave(() => {
             ul.data('timer', window.setTimeout(this.toggleMemberList, 2000));
-         }).mouseenter(function() {
+         }).mouseenter(() => {
             window.clearTimeout(ul.data('timer'));
          });
       } else {
