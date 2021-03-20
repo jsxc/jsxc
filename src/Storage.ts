@@ -201,9 +201,9 @@ export default class Storage implements IStorage {
    public updateItem(type: string, key: string, variable: string, value: any): void;
    public updateItem(key: string, variable: string, value: any): void;
    public updateItem(): void {
-      let key;
-      let variable;
-      let value;
+      let key: string;
+      let variable: string;
+      let value: any;
 
       if (arguments.length === 4 || (arguments.length === 3 && typeof variable === 'object')) {
          key = arguments[0] + SEP + arguments[1];
