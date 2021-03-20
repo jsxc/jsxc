@@ -1,25 +1,31 @@
-import Log from '../../util/Log'
-import Client from '../../Client'
-import Roster from '../../ui/Roster'
-import { IPlugin } from '../../plugin/AbstractPlugin'
-import FormWatcher, { SettingsCallback } from '../../FormWatcher'
+import Log from '../../util/Log';
+import Client from '../../Client';
+import Roster from '../../ui/Roster';
+import { IPlugin } from '../../plugin/AbstractPlugin';
+import FormWatcher, { SettingsCallback } from '../../FormWatcher';
 import { disconnect } from './disconnect';
 import Translation from '@util/Translation';
 import loginBox from '@ui/dialogs/loginBox';
 import Account from './Account';
-import LinkHandlerXMPP from '@src/LinkHandlerXMPP'
+import LinkHandlerXMPP from '@src/LinkHandlerXMPP';
 
 export { disconnect };
-export { start, startAndPause } from './start'
-export { register } from './register'
-export { enableDebugMode, disableDebugMode, deleteAllData } from './debug'
-export { testBOSHServer } from './testBOSHServer'
+export { start, startAndPause } from './start';
+export { register } from './register';
+export { enableDebugMode, disableDebugMode, deleteAllData } from './debug';
+export { testBOSHServer } from './testBOSHServer';
 
 export function addPlugin(Plugin: IPlugin) {
    Client.addPlugin(Plugin);
 }
 
-export function addMenuEntry(options: { id: string, handler: (ev) => void, label: string | JQuery<HTMLElement>, icon?: string, offlineAvailable?: boolean }) {
+export function addMenuEntry(options: {
+   id: string;
+   handler: (ev) => void;
+   label: string | JQuery<HTMLElement>;
+   icon?: string;
+   offlineAvailable?: boolean;
+}) {
    Roster.get().addMenuEntry(options);
 }
 
@@ -27,7 +33,12 @@ export function toggleRoster() {
    Roster.get().toggle();
 }
 
-export function watchForm(formElement: JQuery, usernameElement: JQuery, passwordElement: JQuery, settingsCallback?: SettingsCallback) {
+export function watchForm(
+   formElement: JQuery,
+   usernameElement: JQuery,
+   passwordElement: JQuery,
+   settingsCallback?: SettingsCallback
+) {
    new FormWatcher(formElement, usernameElement, passwordElement, settingsCallback);
 }
 
@@ -71,7 +82,7 @@ export function exportAllOptions() {
 
          return previous;
       }, {}),
-      [Client.getOptions().getId()]: Client.getOptions().export()
+      [Client.getOptions().getId()]: Client.getOptions().export(),
    };
 }
 

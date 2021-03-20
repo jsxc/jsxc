@@ -1,15 +1,13 @@
 import Address from '../vendor/Address';
 
 export interface ICiphertext {
-   type: number,
-   body: string,
-   registrationId: number,
+   type: number;
+   body: string;
+   registrationId: number;
 }
 
 export default class {
-   constructor(private address: Address, private ciphertext: ICiphertext) {
-
-   }
+   constructor(private address: Address, private ciphertext: ICiphertext) {}
 
    public getDeviceId(): number {
       return this.address.getDeviceId();

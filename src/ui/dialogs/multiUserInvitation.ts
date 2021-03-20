@@ -1,28 +1,35 @@
-import Dialog from '../Dialog'
-import MultiUserContact from '../../MultiUserContact'
-import JID from '../../JID'
-import Log from '../../util/Log'
-import Client from '../../Client'
+import Dialog from '../Dialog';
+import MultiUserContact from '../../MultiUserContact';
+import JID from '../../JID';
+import Log from '../../util/Log';
+import Client from '../../Client';
 
 let multiUserInvitation = require('../../../template/multiUserInvitation.hbs');
 
-export default function(type: 'direct' | 'mediated', from: string, room: string, reason: string, password: string, accountId: string) {
+export default function (
+   type: 'direct' | 'mediated',
+   from: string,
+   room: string,
+   reason: string,
+   password: string,
+   accountId: string
+) {
    let fromJid = new JID(from);
    let roomJid = new JID(room);
    let content = multiUserInvitation({
       from,
       room,
-      reason
+      reason,
    });
 
    let dialog = new Dialog(content);
    let dom = dialog.open();
    let account = Client.getAccountManager().getAccount(accountId);
 
-   dom.find('form').on('submit', (ev) => {
+   dom.find('form').on('submit', ev => {
       ev.preventDefault();
 
-      let multiUserContact = <MultiUserContact> account.getContact(roomJid);
+      let multiUserContact = <MultiUserContact>account.getContact(roomJid);
 
       if (!multiUserContact) {
          multiUserContact = new MultiUserContact(account, roomJid);
@@ -50,5 +57,5 @@ export default function(type: 'direct' | 'mediated', from: string, room: string,
       if (type === 'mediated') {
          account.getConnection().getMUCService().declineMediatedMultiUserInvitation(fromJid, roomJid);
       }
-   })
+   });
 }

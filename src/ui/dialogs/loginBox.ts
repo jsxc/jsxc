@@ -1,16 +1,17 @@
-import Dialog from '../Dialog'
-import Client from '../../Client'
-import { start } from '../../api/v1/index'
+import Dialog from '../Dialog';
+import Client from '../../Client';
+import { start } from '../../api/v1/index';
 import { usernameToJabberId } from '@src/FormWatcher';
 let loginTemplate = require('../../../template/loginBox.hbs');
 
-export default function(username?: string) {
+export default function (username?: string) {
    let boshUrl = Client.getOption('xmpp.url');
    let loadConnectionOptions = Client.getOption('loadConnectionOptions');
 
    let content = loginTemplate({
-      showBoshUrlField: (typeof boshUrl !== 'string' || boshUrl.length === 0) && typeof loadConnectionOptions !== 'function',
-      username
+      showBoshUrlField:
+         (typeof boshUrl !== 'string' || boshUrl.length === 0) && typeof loadConnectionOptions !== 'function',
+      username,
    });
 
    let dialog = new Dialog(content);
@@ -18,14 +19,16 @@ export default function(username?: string) {
 
    setTimeout(setFocus, 50);
 
-   dom.find('form').submit(function(ev) {
+   dom.find('form').submit(function (ev) {
       ev.preventDefault();
 
-      submitLoginForm($(this)).then(() => {
-         dialog.close();
-      }).catch((err) => {
-         onAuthFail(dom);
-      });
+      submitLoginForm($(this))
+         .then(() => {
+            dialog.close();
+         })
+         .catch(err => {
+            onAuthFail(dom);
+         });
    });
 }
 
@@ -60,7 +63,7 @@ async function submitLoginForm(form) {
          throw new Error('I found no connection url');
       }
 
-      url = (options.xmpp && options.xmpp.url) ? options.xmpp.url : url;
+      url = options.xmpp && options.xmpp.url ? options.xmpp.url : url;
       jid = usernameToJabberId(username, options);
 
       if (options.xmpp && options.xmpp.password) {
@@ -77,7 +80,7 @@ function onAuthFail(dom) {
 
    dom.find('button').trigger('btnfinished.jsxc');
 
-   dom.find('input').one('keypress', function() {
+   dom.find('input').one('keypress', function () {
       alert.hide();
    });
 }

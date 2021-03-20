@@ -1,17 +1,17 @@
-import { IPluginAPI } from '../../plugin/PluginAPI.interface'
-import { EncryptionPlugin } from '../../plugin/EncryptionPlugin'
-import { EncryptionState, IMetaData } from '../../plugin/AbstractPlugin'
-import { IMessage } from '../../Message.interface'
-import { IContact, ContactType } from '../../Contact.interface'
-import Omemo from './lib/Omemo'
-import ChatWindow from '../../ui/ChatWindow'
-import { NS_BASE, NS_DEVICELIST } from './util/Const'
-import OmemoDevicesDialog from '../../ui/dialogs/omemoDevices'
+import { IPluginAPI } from '../../plugin/PluginAPI.interface';
+import { EncryptionPlugin } from '../../plugin/EncryptionPlugin';
+import { EncryptionState, IMetaData } from '../../plugin/AbstractPlugin';
+import { IMessage } from '../../Message.interface';
+import { IContact, ContactType } from '../../Contact.interface';
+import Omemo from './lib/Omemo';
+import ChatWindow from '../../ui/ChatWindow';
+import { NS_BASE, NS_DEVICELIST } from './util/Const';
+import OmemoDevicesDialog from '../../ui/dialogs/omemoDevices';
 import { Trust } from './lib/Device';
 import Translation from '@util/Translation';
-import ArrayBufferUtils from './util/ArrayBuffer'
-import Attachment from '@src/Attachment'
-import attachmentHandler from './AttachmentHandler'
+import ArrayBufferUtils from './util/ArrayBuffer';
+import Attachment from '@src/Attachment';
+import attachmentHandler from './AttachmentHandler';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
@@ -34,12 +34,14 @@ export default class OMEMOPlugin extends EncryptionPlugin {
    public static getMetaData(): IMetaData {
       return {
          description: Translation.t('setting-omemo-enable'),
-         xeps: [{
-            id: 'XEP-0384',
-            name: 'OMEMO Encryption',
-            version: '0.3.0',
-         }]
-      }
+         xeps: [
+            {
+               id: 'XEP-0384',
+               name: 'OMEMO Encryption',
+               version: '0.3.0',
+            },
+         ],
+      };
    }
 
    public static updateEncryptionState(contact: IContact, trust: Trust) {
@@ -52,7 +54,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
       if (!this.isLibSignalAvailable()) {
-         throw new Error('LibSignal is not available')
+         throw new Error('LibSignal is not available');
       }
 
       pluginAPI.getConnection().getPEPService().subscribe(NS_DEVICELIST, this.onDeviceListUpdate);
@@ -79,7 +81,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       await this.refreshDeviceList(peerContact);
 
       return OmemoDevicesDialog(peerContact, this.getOmemo());
-   }
+   };
 
    public toggleTransfer(contact: IContact): Promise<void> {
       if (!this.isLibSignalAvailable()) {
@@ -91,21 +93,23 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          return;
       }
 
-      return this.getOmemo().prepare().then(async () => {
-         if (!this.getOmemo().isSupported(contact)) {
-            if (!(await this.refreshDeviceList(contact))) {
-               throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
+      return this.getOmemo()
+         .prepare()
+         .then(async () => {
+            if (!this.getOmemo().isSupported(contact)) {
+               if (!(await this.refreshDeviceList(contact))) {
+                  throw new Error(Translation.t('Your_contact_does_not_support_OMEMO'));
+               }
             }
-         }
 
-         if (!this.getOmemo().isTrusted(contact) && !await this.getOmemo().trustOnFirstUse(contact)) {
-            throw new Error(Translation.t('There_are_new_OMEMO_devices'));
-         }
+            if (!this.getOmemo().isTrusted(contact) && !(await this.getOmemo().trustOnFirstUse(contact))) {
+               throw new Error(Translation.t('There_are_new_OMEMO_devices'));
+            }
 
-         let trust = this.getOmemo().getTrust(contact);
+            let trust = this.getOmemo().getTrust(contact);
 
-         OMEMOPlugin.updateEncryptionState(contact, trust);
-      });
+            OMEMOPlugin.updateEncryptionState(contact, trust);
+         });
    }
 
    private async refreshDeviceList(contact: IContact) {
@@ -117,7 +121,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       return this.getOmemo().isSupported(contact);
    }
 
-   private onDeviceListUpdate = (stanza) => {
+   private onDeviceListUpdate = stanza => {
       let messageStanza = $(stanza);
       let itemsElement = messageStanza.find(`items[node="${NS_DEVICELIST}"]`);
       let listElement = messageStanza.find(`list[xmlns="${NS_BASE}"]`);
@@ -132,46 +136,51 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       }
 
       let fromJid = this.pluginAPI.createJID(fromString);
-      let deviceIds = listElement.find('device').get().map(function(deviceElement) {
-         return parseInt($(deviceElement).attr('id'), 10);
-      });
+      let deviceIds = listElement
+         .find('device')
+         .get()
+         .map(function (deviceElement) {
+            return parseInt($(deviceElement).attr('id'), 10);
+         });
 
       deviceIds = deviceIds.filter(id => typeof id === 'number' && !isNaN(id));
 
       this.getOmemo().storeDeviceList(fromJid.bare, deviceIds);
 
       return true;
-   }
+   };
 
    private afterReceiveMessageProcessor = (contact: IContact, message: IMessage, stanza: Element): Promise<{}> => {
       if ($(stanza).find(`>encrypted[xmlns="${NS_BASE}"]`).length === 0) {
          return Promise.resolve([contact, message, stanza]);
       }
 
-      return this.getOmemo().decrypt(stanza).then((decrypted) => {
-         if (!decrypted || !decrypted.plaintext) {
-            throw new Error('No decrypted message found');
-         }
+      return this.getOmemo()
+         .decrypt(stanza)
+         .then(decrypted => {
+            if (!decrypted || !decrypted.plaintext) {
+               throw new Error('No decrypted message found');
+            }
 
-         if (decrypted.trust !== Trust.recognized && decrypted.trust !== Trust.confirmed) {
-            message.setErrorMessage(Translation.t('Message_received_from_unknown_OMEMO_device'));
-         }
+            if (decrypted.trust !== Trust.recognized && decrypted.trust !== Trust.confirmed) {
+               message.setErrorMessage(Translation.t('Message_received_from_unknown_OMEMO_device'));
+            }
 
-         if (decrypted.plaintext.indexOf('aesgcm://') === 0) {
-            decrypted.plaintext = this.processEncryptedAttachment(decrypted.plaintext, message, contact);
-         }
+            if (decrypted.plaintext.indexOf('aesgcm://') === 0) {
+               decrypted.plaintext = this.processEncryptedAttachment(decrypted.plaintext, message, contact);
+            }
 
-         message.setPlaintextMessage(decrypted.plaintext);
-         message.setEncrypted(true);
+            message.setPlaintextMessage(decrypted.plaintext);
+            message.setEncrypted(true);
 
-         return [contact, message, stanza];
+            return [contact, message, stanza];
+         })
+         .catch(msg => {
+            this.pluginAPI.Log.warn(msg);
 
-      }).catch((msg) => {
-         this.pluginAPI.Log.warn(msg);
-
-         return [contact, message, stanza];
-      });
-   }
+            return [contact, message, stanza];
+         });
+   };
 
    private processEncryptedAttachment(plaintext: string, message: IMessage, contact: IContact) {
       let lines = plaintext.split('\n'); //@REVIEW do we want to support attachments without a newline?
@@ -184,7 +193,9 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       lines[0] = undefined;
 
       let [match, , filename, extension] = matches;
-      let mime = /^(jpeg|jpg|gif|png|svg)$/i.test(extension) ? `image/${extension.toLowerCase()}` : 'application/octet-stream';
+      let mime = /^(jpeg|jpg|gif|png|svg)$/i.test(extension)
+         ? `image/${extension.toLowerCase()}`
+         : 'application/octet-stream';
       let attachment = new Attachment(decodeURIComponent(filename), mime, match);
       attachment.setData(match);
       attachment.setHandler(attachmentHandler.getId());
@@ -201,8 +212,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
       try {
          attachmentHandler.handler(attachment, false);
-      } catch(err) {
-      }
+      } catch (err) {}
 
       return lines.filter(line => line !== undefined).join('\n');
    }
@@ -210,7 +220,11 @@ export default class OMEMOPlugin extends EncryptionPlugin {
    private preSendMessageProcessor = async (contact, message) => {
       let attachment = message.getAttachment();
 
-      if (!attachment || contact.getEncryptionPluginId() !== OMEMOPlugin.getId() || contact.getEncryptionState() === EncryptionState.Plaintext) {
+      if (
+         !attachment ||
+         contact.getEncryptionPluginId() !== OMEMOPlugin.getId() ||
+         contact.getEncryptionState() === EncryptionState.Plaintext
+      ) {
          return [contact, message];
       }
 
@@ -219,29 +233,37 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       attachment.setFile(encryptedFile);
 
       return [contact, message];
-   }
+   };
 
    private async encryptFile(file: File) {
       let iv = crypto.getRandomValues(new Uint8Array(12));
-      let key = await crypto.subtle.generateKey({
-         name: 'AES-GCM',
-         length: 256
-      }, true, ['encrypt', 'decrypt'])
-      let encrypted = await crypto.subtle.encrypt({
-         name: 'AES-GCM',
-         iv
-      }, key, await file.arrayBuffer());
+      let key = await crypto.subtle.generateKey(
+         {
+            name: 'AES-GCM',
+            length: 256,
+         },
+         true,
+         ['encrypt', 'decrypt']
+      );
+      let encrypted = await crypto.subtle.encrypt(
+         {
+            name: 'AES-GCM',
+            iv,
+         },
+         key,
+         await file.arrayBuffer()
+      );
 
-      let keydata = await window.crypto.subtle.exportKey('raw', <CryptoKey> key)
+      let keydata = await window.crypto.subtle.exportKey('raw', <CryptoKey>key);
 
       let encryptedFile = new File([encrypted], file.name, {
          type: file.type,
          lastModified: file.lastModified,
       });
 
-      (<any> encryptedFile).aesgcm = ArrayBufferUtils.toHex(iv) + ArrayBufferUtils.toHex(keydata);
+      (<any>encryptedFile).aesgcm = ArrayBufferUtils.toHex(iv) + ArrayBufferUtils.toHex(keydata);
 
-      return encryptedFile
+      return encryptedFile;
    }
 
    private preSendMessageStanzaProcessor = async (message: IMessage, xmlElement: Strophe.Builder) => {
@@ -262,7 +284,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
       }
 
       return this.getOmemo().encrypt(contact, message, xmlElement);
-   }
+   };
 
    private handleNewDevice(contact: IContact): Promise<void> {
       let chatWindow = contact.getChatWindow();
@@ -289,7 +311,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
             await this.openDeviceDialog(chatWindow);
 
             resolve();
-         })
+         });
 
          cancelButton.on('click', ev => {
             ev.preventDefault();
@@ -297,7 +319,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
             chatWindow.hideOverlay();
 
             resolve();
-         })
+         });
       });
    }
 
@@ -310,6 +332,6 @@ export default class OMEMOPlugin extends EncryptionPlugin {
    }
 
    private isLibSignalAvailable() {
-      return typeof (<any> window).libsignal !== 'undefined';
+      return typeof (<any>window).libsignal !== 'undefined';
    }
 }

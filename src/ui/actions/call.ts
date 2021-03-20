@@ -1,9 +1,9 @@
 import { IContact } from '@src/Contact.interface';
-import Log from '../../util/Log'
-import UserMedia from '../../UserMedia'
-import { VideoDialog } from '../VideoDialog'
-import Account from '../../Account'
-import Translation from '../../util/Translation'
+import Log from '../../util/Log';
+import UserMedia from '../../UserMedia';
+import { VideoDialog } from '../VideoDialog';
+import Account from '../../Account';
+import Translation from '../../util/Translation';
 import JID from '../../JID';
 import JingleCallSession from '@src/JingleCallSession';
 import JingleHandler from '@connection/JingleHandler';
@@ -20,7 +20,7 @@ export async function startCall(contact: IContact, account: Account, type: 'vide
       return;
    }
 
-   let reqMedia = type === 'audio' ? ['audio'] : (type === 'screen' ? ['screen', 'audio'] : ['audio', 'video']);
+   let reqMedia = type === 'audio' ? ['audio'] : type === 'screen' ? ['screen', 'audio'] : ['audio', 'video'];
 
    let stream: MediaStream;
 
@@ -66,7 +66,7 @@ export async function startCall(contact: IContact, account: Account, type: 'vide
          sessions = [];
       });
 
-      session.on('terminated', ({condition}) => {
+      session.on('terminated', ({ condition }) => {
          if (condition === 'decline') {
             cancelAllOtherSessions(sessions, session);
          }
@@ -82,16 +82,22 @@ function cancelAllOtherSessions(sessions: JingleCallSession[], exception: Jingle
    });
 }
 
-function CallFactory(jingleHandler: JingleHandler, stream: MediaStream, type, contact: IContact, videoDialog: VideoDialog) {
+function CallFactory(
+   jingleHandler: JingleHandler,
+   stream: MediaStream,
+   type,
+   contact: IContact,
+   videoDialog: VideoDialog
+) {
    let constraints = {
       offerToReceiveAudio: type === 'video' || type === 'audio' || type === 'screen',
       offerToReceiveVideo: type === 'video' || type === 'screen',
-   }
+   };
 
-   return async function(resource: string) {
+   return async function (resource: string) {
       let peerJID = new JID(contact.getJid().bare + '/' + resource);
 
-      let session = <JingleCallSession> await jingleHandler.initiate(peerJID, stream, constraints);
+      let session = <JingleCallSession>await jingleHandler.initiate(peerJID, stream, constraints);
       let contactOfflineTimeout = setTimeout(() => {
          session.cancel();
 
@@ -113,5 +119,5 @@ function CallFactory(jingleHandler: JingleHandler, stream: MediaStream, type, co
       videoDialog.addSession(session);
 
       return session;
-   }
+   };
 }

@@ -9,5 +9,5 @@ export default function format(byte: number) {
       byte /= 1024;
    }
 
-   return (Math.round(byte * 10) / 10) + s[i - 1];
+   return Math.round(byte * 10) / 10 + s[i - 1];
 }

@@ -1,7 +1,7 @@
 import Hash from '@util/Hash';
-import { IAvatar } from './Avatar.interface'
-import Client from './Client'
-import PersistentMap from './util/PersistentMap'
+import { IAvatar } from './Avatar.interface';
+import Client from './Client';
+import PersistentMap from './util/PersistentMap';
 
 export default class implements IAvatar {
    private properties: PersistentMap;

@@ -1,6 +1,6 @@
-import Storage from './Storage'
-import Client from './Client'
-import Log from './util/Log'
+import Storage from './Storage';
+import Client from './Client';
+import Log from './util/Log';
 
 const MASTER_KEY = 'master';
 const SLAVE_KEY = 'slave';
@@ -16,7 +16,12 @@ const TIMEOUT_CLAIM = 600;
 const TIMEOUT_MIN_OBSERVATION = 2000;
 const INTERVAL_KEEPALIVE = 1000;
 
-enum Role { Master, Slave, Master_Pending, Unknown };
+enum Role {
+   Master,
+   Slave,
+   Master_Pending,
+   Unknown,
+}
 
 export default class RoleAllocator {
    private storage: Storage;
@@ -67,7 +72,7 @@ export default class RoleAllocator {
    }
 
    public waitUntilMaster() {
-      return new Promise<void>((resolve) => {
+      return new Promise<void>(resolve => {
          if (this.role === Role.Master) {
             resolve();
          } else if (typeof this.storage.getItem(MASTER_KEY) === 'undefined') {
@@ -85,7 +90,7 @@ export default class RoleAllocator {
    }
 
    public waitUntilSlave() {
-      return new Promise<void>((resolve) => {
+      return new Promise<void>(resolve => {
          if (this.role === Role.Slave) {
             resolve();
          } else {
@@ -94,7 +99,7 @@ export default class RoleAllocator {
       });
    }
 
-   private onMaster = (value) => {
+   private onMaster = value => {
       if (this.masterValue === value) {
          return;
       }
@@ -118,7 +123,7 @@ export default class RoleAllocator {
 
          window.location.reload();
       }
-   }
+   };
 
    private thereIsAnotherPotentialMaster(value) {
       Log.debug('There is another potential master');
@@ -144,7 +149,7 @@ export default class RoleAllocator {
       $('body').addClass(SLAVE_CLASS).removeClass(MASTER_CLASS);
    }
 
-   private onSlave = (value) => {
+   private onSlave = value => {
       if (this.slaveValue === value) {
          return;
       }
@@ -152,7 +157,7 @@ export default class RoleAllocator {
       if (this.role === Role.Master) {
          this.stillAlive();
       }
-   }
+   };
 
    private queryMaster() {
       Log.debug('query master');
@@ -163,7 +168,7 @@ export default class RoleAllocator {
          }
       }, TIMEOUT_QUERY);
 
-      this.storage.setItem(SLAVE_KEY, this.slaveValue = Math.random());
+      this.storage.setItem(SLAVE_KEY, (this.slaveValue = Math.random()));
    }
 
    private claimMaster = () => {
@@ -178,13 +183,13 @@ export default class RoleAllocator {
       this.role = Role.Master_Pending;
       this.claim = Math.random();
 
-      this.storage.setItem(MASTER_KEY, this.masterValue = `${CLAIM_PREFIX}${CLAIM_SEP}${this.claim}`);
-   }
+      this.storage.setItem(MASTER_KEY, (this.masterValue = `${CLAIM_PREFIX}${CLAIM_SEP}${this.claim}`));
+   };
 
    private startMaster() {
       this.role = Role.Master;
 
-      Log.debug('I am master')
+      Log.debug('I am master');
 
       $('body').addClass(MASTER_CLASS).removeClass(SLAVE_CLASS);
 
@@ -198,13 +203,13 @@ export default class RoleAllocator {
 
       let randomTime = Math.random() * 500;
 
-      this.observationTimeout = setTimeout(this.masterProbablyDied, TIMEOUT_MIN_OBSERVATION + randomTime)
+      this.observationTimeout = setTimeout(this.masterProbablyDied, TIMEOUT_MIN_OBSERVATION + randomTime);
    }
 
    private masterProbablyDied = () => {
       this.role = Role.Unknown;
       this.queryMaster();
-   }
+   };
 
    private startKeepAliveSignal() {
       this.stillAlive();
@@ -233,6 +238,6 @@ export default class RoleAllocator {
    }
 
    private stillAlive = () => {
-      this.storage.setItem(MASTER_KEY, this.masterValue = Math.random());
-   }
+      this.storage.setItem(MASTER_KEY, (this.masterValue = Math.random()));
+   };
 }

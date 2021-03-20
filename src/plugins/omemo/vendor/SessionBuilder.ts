@@ -26,7 +26,7 @@ export class SessionBuilder {
             keyId: signedPreKey.getId(),
             publicKey: signedPreKey.getPublic(),
             signature: signedPreKey.getSignature(),
-         }
+         },
       };
 
       return this.signalSessionBuilder.processPreKey(signalBundle);

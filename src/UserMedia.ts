@@ -1,7 +1,7 @@
-import Log from './util/Log'
-import Translation from './util/Translation'
-import Overlay from './ui/Overlay'
-import * as getScreenMedia from 'getscreenmedia'
+import Log from './util/Log';
+import Translation from './util/Translation';
+import Overlay from './ui/Overlay';
+import * as getScreenMedia from 'getscreenmedia';
 
 export default class UserMedia {
    public static async request(um = ['video', 'audio']): Promise<MediaStream> {
@@ -19,10 +19,9 @@ export default class UserMedia {
       try {
          if (um.indexOf('screen') > -1) {
             stream = await UserMedia.getScreenMedia();
-            const userStream = await UserMedia
-               .filterUserMedia(um)
+            const userStream = await UserMedia.filterUserMedia(um)
                .then(UserMedia.getUserMedia)
-               .catch((err) => {
+               .catch(err => {
                   Log.info('Could not get other user streams.');
                });
 
@@ -35,9 +34,7 @@ export default class UserMedia {
                }
             }
          } else {
-            stream = await UserMedia
-               .filterUserMedia(um)
-               .then(UserMedia.getUserMedia);
+            stream = await UserMedia.filterUserMedia(um).then(UserMedia.getUserMedia);
          }
       } catch (err) {
          overlay.close();
@@ -51,13 +48,13 @@ export default class UserMedia {
    }
 
    private static async filterUserMedia(userMedia: string[]): Promise<string[]> {
-      let devices = await navigator.mediaDevices.enumerateDevices()
-      let availableDevices = devices.map(function(device) {
+      let devices = await navigator.mediaDevices.enumerateDevices();
+      let availableDevices = devices.map(function (device) {
          //@REVIEW MediaDeviceKind === string?
-         return <string> device.kind;
+         return <string>device.kind;
       });
 
-      userMedia = userMedia.filter(function(el) {
+      userMedia = userMedia.filter(function (el) {
          return availableDevices.indexOf(el) !== -1 || availableDevices.indexOf(el + 'input') !== -1;
       });
 
@@ -77,7 +74,7 @@ export default class UserMedia {
 
             reject(error);
          });
-      })
+      });
    }
 
    private static getUserMedia(um) {

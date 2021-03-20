@@ -1,7 +1,5 @@
 export default class BaseError {
-   constructor(private message: string, private errorCode?: string) {
-
-   }
+   constructor(private message: string, private errorCode?: string) {}
 
    public toString(): string {
       return this.message;

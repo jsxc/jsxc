@@ -1,10 +1,13 @@
-
 export default class ListItem {
    private element: JQuery;
 
-   constructor(private primaryText: string, private secondaryText?: string, private onClickHandler?, private avatar?: JQuery, private secondaryAction?: JQuery) {
-
-   }
+   constructor(
+      private primaryText: string,
+      private secondaryText?: string,
+      private onClickHandler?,
+      private avatar?: JQuery,
+      private secondaryAction?: JQuery
+   ) {}
 
    public getDOM(): JQuery {
       if (!this.element) {

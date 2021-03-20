@@ -1,4 +1,3 @@
-
 export default class Utils {
    public static removeHTML(text: string): string {
       return $('<span>').html(text).text();
@@ -9,14 +8,14 @@ export default class Utils {
       return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
    }
 
-   public static diffArray(newArray: any[], oldArray: any[]): { newValues: any[], deletedValues: any[] } {
+   public static diffArray(newArray: any[], oldArray: any[]): { newValues: any[]; deletedValues: any[] } {
       newArray = newArray || [];
       oldArray = oldArray || [];
 
       return {
-         newValues: newArray.filter(id => (oldArray).indexOf(id) < 0),
+         newValues: newArray.filter(id => oldArray.indexOf(id) < 0),
          deletedValues: oldArray.filter(id => newArray.indexOf(id) < 0),
-      }
+      };
    }
 
    public static isObject(candidate: any) {

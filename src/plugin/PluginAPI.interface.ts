@@ -1,79 +1,93 @@
-import { IConnection } from '../connection/Connection.interface'
-import { IContact as Contact } from '../Contact.interface'
-import { IMessage, IMessagePayload, DIRECTION } from '../Message.interface'
-import { IJID as JID } from '../JID.interface'
-import { IDiscoInfoRepository } from '../DiscoInfoRepository.interface'
-import { ILog } from '../util/Log.interface'
+import { IConnection } from '../connection/Connection.interface';
+import { IContact as Contact } from '../Contact.interface';
+import { IMessage, IMessagePayload, DIRECTION } from '../Message.interface';
+import { IJID as JID } from '../JID.interface';
+import { IDiscoInfoRepository } from '../DiscoInfoRepository.interface';
+import { ILog } from '../util/Log.interface';
 import ChatWindow from '@ui/ChatWindow';
 import ContactManager from '@src/ContactManager';
 import ContactProvider from '@src/ContactProvider';
 import { IAvatar } from '@src/Avatar.interface';
 import Pipe from '@util/Pipe';
-import CommandRepository, { CommandAction } from '@src/CommandRepository'
-import IStorage from '@src/Storage.interface'
+import CommandRepository, { CommandAction } from '@src/CommandRepository';
+import IStorage from '@src/Storage.interface';
 
 export interface IPluginAPI {
+   Log: ILog;
 
-   Log: ILog
+   createJID(node: string, domain: string, resource: string): JID;
+   createJID(bare: string, resource: string): JID;
+   createJID(full: string): JID;
 
-   createJID(node: string, domain: string, resource: string): JID
-   createJID(bare: string, resource: string): JID
-   createJID(full: string): JID
+   createMessage(uid: string): IMessage;
+   createMessage(data: IMessagePayload): IMessage;
 
-   createMessage(uid: string): IMessage
-   createMessage(data: IMessagePayload): IMessage
+   getStorage(): IStorage;
 
-   getStorage(): IStorage
+   getSessionStorage(): IStorage;
 
-   getSessionStorage(): IStorage
+   send(stanzaElement: Strophe.Builder);
 
-   send(stanzaElement: Strophe.Builder)
+   sendIQ(stanzaElement: Strophe.Builder): Promise<Element>;
 
-   sendIQ(stanzaElement: Strophe.Builder): Promise<Element>
+   getDiscoInfoRepository(): IDiscoInfoRepository;
 
-   getDiscoInfoRepository(): IDiscoInfoRepository
+   getConnection(): IConnection;
 
-   getConnection(): IConnection
+   getContact(jid: JID): Contact;
 
-   getContact(jid: JID): Contact
+   getVersion(): string;
 
-   getVersion(): string
+   addPreSendMessageProcessor(processor: (contact: Contact, message: IMessage) => Promise<{}>, position?: number);
 
-   addPreSendMessageProcessor(processor: (contact: Contact, message: IMessage) => Promise<{}>, position?: number)
+   addAfterReceiveMessageProcessor(
+      processor: (contact: Contact, message: IMessage, stanza: Element) => Promise<{}>,
+      position?: number
+   );
 
-   addAfterReceiveMessageProcessor(processor: (contact: Contact, message: IMessage, stanza: Element) => Promise<{}>, position?: number)
+   addAfterReceiveGroupMessageProcessor(
+      processor: (contact: Contact, message: IMessage, stanza: Element) => Promise<[Contact, IMessage, Element]>,
+      position?: number
+   );
 
-   addAfterReceiveGroupMessageProcessor(processor: (contact: Contact, message: IMessage, stanza: Element) => Promise<[Contact, IMessage, Element]>, position?: number)
+   addAfterReceiveErrorMessageProcessor(
+      processor: (contact: Contact, message: IMessage, stanza: Element) => Promise<[Contact, IMessage, Element]>,
+      position?: number
+   );
 
-   addAfterReceiveErrorMessageProcessor(processor: (contact: Contact, message: IMessage, stanza: Element) => Promise<[Contact, IMessage, Element]>, position?: number)
+   addPreSendMessageStanzaProcessor(
+      processor: (message: IMessage, xmlMsg: Strophe.Builder) => Promise<any>,
+      position?: number
+   );
 
-   addPreSendMessageStanzaProcessor(processor: (message: IMessage, xmlMsg: Strophe.Builder) => Promise<any>, position?: number)
+   addAvatarProcessor(processor: (contact: Contact, avatar: IAvatar) => Promise<[Contact, IAvatar]>, position?: number);
 
-   addAvatarProcessor(processor: (contact: Contact, avatar: IAvatar) => Promise<[Contact, IAvatar]>, position?: number)
+   addFeature(feature: string);
 
-   addFeature(feature: string)
+   registerConnectionHook(func: (status: number, condition?: string) => void);
 
-   registerConnectionHook(func: (status: number, condition?: string) => void)
+   registerPresenceHook(func);
 
-   registerPresenceHook(func)
+   getConnectionCreationDate(): Date;
 
-   getConnectionCreationDate(): Date
+   registerChatWindowInitializedHook(hook: (chatWindow: ChatWindow) => void);
 
-   registerChatWindowInitializedHook(hook: (chatWindow: ChatWindow) => void)
+   registerContactProvider(source: ContactProvider);
 
-   registerContactProvider(source: ContactProvider)
+   registerTextFormatter(
+      formatter: (text: string, direction: DIRECTION, contact: Contact) => Promise<string> | string,
+      priority?: number
+   );
 
-   registerTextFormatter(formatter: (text: string, direction: DIRECTION, contact: Contact) => Promise<string> | string, priority?: number)
+   getContactManager(): ContactManager;
 
-   getContactManager(): ContactManager
+   getAfterReceiveGroupMessagePipe(): Pipe;
 
-   getAfterReceiveGroupMessagePipe(): Pipe
+   getAfterReceiveMessagePipe(): Pipe;
 
-   getAfterReceiveMessagePipe(): Pipe
+   registerCommand(command: string, action: CommandAction, description: string, category?: string): void;
 
-   registerCommand(command: string, action: CommandAction, description: string, category?: string): void
+   getCommandRepository(): CommandRepository;
 
-   getCommandRepository(): CommandRepository
-
-   getAccountUid(): string
+   getAccountUid(): string;
 }

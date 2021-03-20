@@ -1,11 +1,11 @@
-import Contact from './Contact'
-import JID from './JID'
-import MultiUserChatWindow from './ui/MultiUserChatWindow'
-import PersistentMap from './util/PersistentMap'
-import { Presence } from './connection/AbstractConnection'
-import Form from './connection/Form'
-import Account from './Account'
-import { ContactSubscription } from './Contact.interface'
+import Contact from './Contact';
+import JID from './JID';
+import MultiUserChatWindow from './ui/MultiUserChatWindow';
+import PersistentMap from './util/PersistentMap';
+import { Presence } from './connection/AbstractConnection';
+import Form from './connection/Form';
+import Account from './Account';
+import { ContactSubscription } from './Contact.interface';
 import { IMUCService } from '@connection/Connection.interface';
 import { IJID } from './JID.interface';
 
@@ -14,14 +14,14 @@ export const enum AFFILIATION {
    MEMBER = 'member',
    OUTCAST = 'outcast',
    OWNER = 'owner',
-   NONE = 'none'
-};
+   NONE = 'none',
+}
 export const enum ROLE {
    MODERATOR = 'moderator',
    PARTICIPANT = 'participant',
    VISITOR = 'visitor',
-   NONE = 'none'
-};
+   NONE = 'none',
+}
 // const enum ROOMSTATE {
 //    INIT,
 //    ENTERED,
@@ -30,11 +30,10 @@ export const enum ROLE {
 //    DESTROYED,
 // };
 export const enum ROOMCONFIG {
-   INSTANT = 'instant'
-};
+   INSTANT = 'instant',
+}
 
 export default class MultiUserContact extends Contact {
-
    public static INSTANT_ROOMCONFIG = ROOMCONFIG.INSTANT;
 
    public static TYPE = 'groupchat';
@@ -54,7 +53,7 @@ export default class MultiUserContact extends Contact {
          this.members = new PersistentMap(this.account.getStorage(), 'members', this.getId());
       }
 
-      return this.members
+      return this.members;
    }
 
    private getService(): IMUCService {
@@ -96,12 +95,12 @@ export default class MultiUserContact extends Contact {
       return this.getService().changeNickname(this.getJid(), nickname);
    }
 
-   public kick(nickname: string, reason?:string) {
-      return this.getService().kickUser(this.getJid(), nickname,reason);
+   public kick(nickname: string, reason?: string) {
+      return this.getService().kickUser(this.getJid(), nickname, reason);
    }
 
-   public ban(target: IJID, reason?:string) {
-      return this.getService().banUser(this.getJid(), target,reason);
+   public ban(target: IJID, reason?: string) {
+      return this.getService().banUser(this.getJid(), target, reason);
    }
 
    public changeAffiliation(target: IJID, affiliation: string) {
@@ -160,7 +159,7 @@ export default class MultiUserContact extends Contact {
       return this.chatWindow;
    }
 
-   public getMember(nickname: string): {affiliation?: AFFILIATION, role?: ROLE, jid?: JID} {
+   public getMember(nickname: string): { affiliation?: AFFILIATION; role?: ROLE; jid?: JID } {
       let data = this.getMembers().get(nickname) || {};
 
       data.jid = data.jid ? new JID(data.jid) : undefined;
@@ -174,10 +173,10 @@ export default class MultiUserContact extends Contact {
       this.getMembers().set(nickname, {
          affiliation,
          role,
-         jid: jid ? jid.full : undefined
+         jid: jid ? jid.full : undefined,
       });
 
-      return isNewMember
+      return isNewMember;
    }
 
    public removeMember(nickname: string) {
@@ -193,7 +192,7 @@ export default class MultiUserContact extends Contact {
    }
 
    public getSubscription(): ContactSubscription {
-      return ContactSubscription.BOTH;;
+      return ContactSubscription.BOTH;
    }
 
    public setSubject(subject: string) {

@@ -1,13 +1,13 @@
-import AbstractService from './AbstractService'
-import { IJID } from '../../JID.interface'
-import * as NS from '../xmpp/namespace'
-import { $iq } from '../../vendor/Strophe'
+import AbstractService from './AbstractService';
+import { IJID } from '../../JID.interface';
+import * as NS from '../xmpp/namespace';
+import { $iq } from '../../vendor/Strophe';
 
 NS.register('VCARD', 'vcard-temp');
 
 type vCardData = {
-   [tagName: string]: string | vCardData | vCardData[]
-}
+   [tagName: string]: string | vCardData | vCardData[];
+};
 
 export default class Vcard extends AbstractService {
    public loadVcard(jid: IJID): Promise<vCardData> {
@@ -17,13 +17,12 @@ export default class Vcard extends AbstractService {
    public getVcard(jid: IJID): Promise<JQuery<XMLDocument>> {
       let iq = $iq({
          type: 'get',
-         to: jid.bare
+         to: jid.bare,
       }).c('vCard', {
-         xmlns: NS.get('VCARD')
+         xmlns: NS.get('VCARD'),
       });
 
       return this.sendIQ(iq).then(stanza => {
-
          (window as any).stanza = stanza;
          let vCard = $(stanza).find('vCard');
 
@@ -61,7 +60,7 @@ export default class Vcard extends AbstractService {
    private async sendVCard(jid: IJID, newVCard: JQuery<XMLDocument>): Promise<any> {
       let setVcardIQStanza = $iq({
          type: 'set',
-         to: jid.bare
+         to: jid.bare,
       }).cnode(newVCard.get(0));
 
       return this.sendIQ(setVcardIQStanza);
@@ -77,14 +76,14 @@ export default class Vcard extends AbstractService {
       data = this.parseVcardChildren(vCardElement);
 
       return data;
-   }
+   };
 
    private parseVcardChildren = (stanza: JQuery<XMLDocument>): vCardData => {
       let self = this;
       let data: vCardData = {};
       let children = stanza.children();
 
-      children.each(function() {
+      children.each(function () {
          let item = $(this);
          let children = item.children();
          let itemName = item.prop('tagName');
@@ -105,7 +104,7 @@ export default class Vcard extends AbstractService {
 
             value = {
                type,
-               src
+               src,
             };
          } else if (itemName === 'EMAIL') {
             value = item.find('USERID').text();
@@ -125,5 +124,5 @@ export default class Vcard extends AbstractService {
       });
 
       return data;
-   }
+   };
 }

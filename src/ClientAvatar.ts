@@ -1,13 +1,14 @@
-import { IContact } from './Contact.interface'
-import AvatarSet from './ui/AvatarSet'
-import Client from './Client'
-import Account from './Account'
-import Storage from './Storage'
-import { Strophe } from './vendor/Strophe'
+import { IContact } from './Contact.interface';
+import AvatarSet from './ui/AvatarSet';
+import Client from './Client';
+import Account from './Account';
+import Storage from './Storage';
+import { Strophe } from './vendor/Strophe';
 
 enum TYPE {
-   PLACEHOLDER, IMAGE
-};
+   PLACEHOLDER,
+   IMAGE,
+}
 
 const KEY_SOURCE_ACCOUNT = 'clientAvatar';
 const KEY_TYPE = 'clientAvatarType';
@@ -34,7 +35,7 @@ export default class ClientAvatar {
          this.reset();
       }
 
-      storage.registerHook('accounts', (newValue) => {
+      storage.registerHook('accounts', newValue => {
          if ((newValue || []).length === 0) {
             this.reset();
          }
@@ -73,15 +74,19 @@ export default class ClientAvatar {
 
       account.registerConnectionHook((status, condition) => {
          if (status === Strophe.Status.CONNECTED || status === Strophe.Status.ATTACHED) {
-            account.getContact().getAvatar().then(avatar => {
-               if (!this.getSourceAccountUid() || this.getCurrentType() === TYPE.PLACEHOLDER) {
-                  this.setSourceAccount(account, TYPE.IMAGE);
-               }
-            }).catch(() => {
-               if (!this.getSourceAccountUid()) {
-                  this.setSourceAccount(account);
-               }
-            })
+            account
+               .getContact()
+               .getAvatar()
+               .then(avatar => {
+                  if (!this.getSourceAccountUid() || this.getCurrentType() === TYPE.PLACEHOLDER) {
+                     this.setSourceAccount(account, TYPE.IMAGE);
+                  }
+               })
+               .catch(() => {
+                  if (!this.getSourceAccountUid()) {
+                     this.setSourceAccount(account);
+                  }
+               });
          }
          //@TODO [MA] update avatar if account goes offline
       });

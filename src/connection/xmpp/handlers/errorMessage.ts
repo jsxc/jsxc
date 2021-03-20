@@ -3,12 +3,11 @@ import Message from '@src/Message';
 import { IMessage } from '@src/Message.interface';
 import Log from '@util/Log';
 import Translation from '@util/Translation';
-import JID from '../../../JID'
-import AbstractHandler from '../AbstractHandler'
-import { MessageElement } from '../MessageElement'
+import JID from '../../../JID';
+import AbstractHandler from '../AbstractHandler';
+import { MessageElement } from '../MessageElement';
 
 export default class extends AbstractHandler {
-
    public processStanza(stanza: Element) {
       let messageElement: MessageElement;
 
@@ -33,7 +32,7 @@ export default class extends AbstractHandler {
          }
 
          if (!peer) {
-            return  this.PRESERVE_HANDLER;
+            return this.PRESERVE_HANDLER;
          }
       }
 
@@ -46,7 +45,10 @@ export default class extends AbstractHandler {
 
       let errorElement = messageElement.find('error');
 
-      Log.warn('Message error: ', errorElement.find('text[xmlns="urn:ietf:params:xml:ns:xmpp-stanzas"]').text() || 'no description provided');
+      Log.warn(
+         'Message error: ',
+         errorElement.find('text[xmlns="urn:ietf:params:xml:ns:xmpp-stanzas"]').text() || 'no description provided'
+      );
 
       let message = peerContact.getTranscript().findMessageByAttrId(messageElement.getId());
 
@@ -62,6 +64,8 @@ export default class extends AbstractHandler {
    }
 
    private getPeerByMessageAttrId(id: string) {
-      return $('.jsxc-chatmessage[id="' + id + '"]').closest('[data-jid]').attr('data-jid');
+      return $('.jsxc-chatmessage[id="' + id + '"]')
+         .closest('[data-jid]')
+         .attr('data-jid');
    }
 }

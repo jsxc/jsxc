@@ -1,14 +1,19 @@
 import { REGEX } from '@src/CONST';
 
 export default class Location {
-   public static getCurrentLocation(): Promise<{coords: {latitude: number, longitude: number, accuracy: number}}> {
+   public static getCurrentLocation(): Promise<{
+      coords: { latitude: number; longitude: number; accuracy: number };
+   }> {
       return new Promise((resolve, reject) => {
-         navigator.geolocation.getCurrentPosition(position => resolve(position), error => reject(error));
-      })
+         navigator.geolocation.getCurrentPosition(
+            position => resolve(position),
+            error => reject(error)
+         );
+      });
    }
 
    public static async getCurrentLocationAsGeoUri(): Promise<string> {
-      let {coords} = await Location.getCurrentLocation();
+      let { coords } = await Location.getCurrentLocation();
 
       return `geo:${coords.latitude},${coords.longitude};u=${coords.accuracy}`;
    }
@@ -20,7 +25,7 @@ export default class Location {
    }
 
    public static locationToLink(latitude: number, longitude: number, zoom: number = 16) {
-      return `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}&zoom=${zoom}`
+      return `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}&zoom=${zoom}`;
    }
 
    public static parseGeoUri(uri: string) {

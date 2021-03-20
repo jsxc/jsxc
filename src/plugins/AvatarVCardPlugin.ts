@@ -1,13 +1,13 @@
-import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin'
-import PluginAPI from '../plugin/PluginAPI'
-import Avatar from '../Avatar'
-import AvatarUI from '../ui/AvatarSet'
-import JID from '../JID'
+import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin';
+import PluginAPI from '../plugin/PluginAPI';
+import Avatar from '../Avatar';
+import AvatarUI from '../ui/AvatarSet';
+import JID from '../JID';
 import { ContactType, IContact } from '@src/Contact.interface';
 import Translation from '@util/Translation';
-import { IAvatar } from '@src/Avatar.interface'
-import { IJID } from '@src/JID.interface'
-import Hash from '@util/Hash'
+import { IAvatar } from '@src/Avatar.interface';
+import { IJID } from '@src/JID.interface';
+import Hash from '@util/Hash';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
@@ -24,12 +24,14 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
    public static getMetaData(): IMetaData {
       return {
          description: Translation.t('setting-vcard-avatar-enable'),
-         xeps: [{
-            id: 'XEP-0153',
-            name: 'vCard-Based Avatars',
-            version: '1.1',
-         }]
-      }
+         xeps: [
+            {
+               id: 'XEP-0153',
+               name: 'vCard-Based Avatars',
+               version: '1.1',
+            },
+         ],
+      };
    }
 
    constructor(pluginAPI: PluginAPI) {
@@ -47,7 +49,7 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
       return this.pluginAPI.getStorage();
    }
 
-   private onPresenceVCardUpdate = (stanza) => {
+   private onPresenceVCardUpdate = stanza => {
       let from = new JID($(stanza).attr('from'));
       let xVCard = $(stanza).find('x[xmlns="vcard-temp:x:update"]');
 
@@ -76,7 +78,7 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
       }
 
       return true;
-   }
+   };
 
    private publishAvatarProcessor = (avatar: IAvatar | null): Promise<[IAvatar]> => {
       if (typeof avatar === 'undefined') {
@@ -86,16 +88,19 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
       const vcardService = this.pluginAPI.getConnection().getVcardService();
       const jid = this.pluginAPI.getConnection().getJID();
 
-      return vcardService.setAvatar(jid, avatar?.getData(), avatar?.getType()).then(() => {
-         this.getStorage().setItem(jid.bare, avatar?.getHash() || '');
+      return vcardService
+         .setAvatar(jid, avatar?.getData(), avatar?.getType())
+         .then(() => {
+            this.getStorage().setItem(jid.bare, avatar?.getHash() || '');
 
-         return [undefined];
-      }).catch((err) => {
-         this.pluginAPI.Log.error('Could not publish avatar', err);
+            return [undefined];
+         })
+         .catch(err => {
+            this.pluginAPI.Log.error('Could not publish avatar', err);
 
-         return [avatar];
-      });
-   }
+            return [avatar];
+         });
+   };
 
    private avatarProcessor = async (contact: IContact, avatar: IAvatar): Promise<[IContact, IAvatar]> => {
       let storage = this.getStorage();
@@ -129,25 +134,28 @@ export default class AvatarVCardPlugin extends AbstractPlugin {
 
             return [contact, new Avatar(hash, avatarObject.type, avatarObject.src)];
          } catch (err) {
-            this.pluginAPI.Log.warn('Error during avatar retrieval', err)
+            this.pluginAPI.Log.warn('Error during avatar retrieval', err);
 
             return [contact, avatar];
          }
       }
 
       return [contact, avatar];
-   }
+   };
 
-   private getAvatar(jid: IJID): Promise<{ src: string, type: string }> {
+   private getAvatar(jid: IJID): Promise<{ src: string; type: string }> {
       let connection = this.pluginAPI.getConnection();
 
-      return connection.getVcardService().loadVcard(jid).then(function (vcard) {
-         if (vcard.PHOTO && vcard.PHOTO.src) {
-            return vcard.PHOTO;
-         }
+      return connection
+         .getVcardService()
+         .loadVcard(jid)
+         .then(function (vcard) {
+            if (vcard.PHOTO && vcard.PHOTO.src) {
+               return vcard.PHOTO;
+            }
 
-         throw new Error('No photo available');
-      });
+            throw new Error('No photo available');
+         });
    }
 
    private shouldForceRetrieval(contact: IContact): boolean {

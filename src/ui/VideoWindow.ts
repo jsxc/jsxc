@@ -1,6 +1,6 @@
-import Log from '../util/Log'
-import Translation from '../util/Translation'
-import { VideoDialog } from './VideoDialog'
+import Log from '../util/Log';
+import Translation from '../util/Translation';
+import { VideoDialog } from './VideoDialog';
 import JingleMediaSession from '@src/JingleMediaSession';
 
 export default class VideoWindow {
@@ -50,20 +50,20 @@ export default class VideoWindow {
       } else if (state === 'interrupted') {
          this.videoDialog.setStatus(Translation.t('Connection_interrupted'));
       }
-   }
+   };
 
    private callAccepted = () => {
       this.wrapperElement.removeClass('jsxc-ringing');
 
       this.videoDialog.clearStatus();
-   }
+   };
 
    private callRinging = () => {
       this.videoDialog.setStatus('ringing...', 0);
 
       this.wrapperElement.removeClass('jsxc-establishing');
       this.wrapperElement.addClass('jsxc-ringing');
-   }
+   };
 
    private addStream = (stream: MediaStream) => {
       if (this.videoElement) {
@@ -91,7 +91,7 @@ export default class VideoWindow {
       if (isAudioDevice) {
          this.wrapperElement.addClass('jsxc-audio-available');
       }
-   }
+   };
 
    private removeStream = () => {
       Log.debug('Remote stream for ' + this.session.getId() + ' removed.');
@@ -100,5 +100,5 @@ export default class VideoWindow {
 
       this.videoElement.remove();
       this.videoElement = undefined;
-   }
+   };
 }

@@ -1,20 +1,20 @@
-import Storage from './Storage'
-import SortedPersistentMap from './util/SortedPersistentMap'
-import Roster from './ui/Roster'
-import { INoticeData, Notice } from './Notice'
+import Storage from './Storage';
+import SortedPersistentMap from './util/SortedPersistentMap';
+import Roster from './ui/Roster';
+import { INoticeData, Notice } from './Notice';
 import Client from './Client';
 
-(<any> window).removeNotice = function(notice) {
+(<any>window).removeNotice = function (notice) {
    Client.getNoticeManager().removeNotice(notice);
 };
 
-(<any> window).addNotice = function(title, description, fnName) {
+(<any>window).addNotice = function (title, description, fnName) {
    return Client.getNoticeManager().addNotice({
       title,
       description,
       fnName,
    });
-}
+};
 
 export class NoticeManager {
    private notices: SortedPersistentMap;
@@ -22,19 +22,21 @@ export class NoticeManager {
    public static removeAll() {
       Client.getNoticeManager().removeAll();
 
-      Client.getAccountManager().getAccounts().forEach((account) => {
-         account.getNoticeManager().removeAll();
-      });
+      Client.getAccountManager()
+         .getAccounts()
+         .forEach(account => {
+            account.getNoticeManager().removeAll();
+         });
    }
 
    constructor(private storage: Storage) {
       this.notices = new SortedPersistentMap(this.storage, 'notices');
 
-      this.notices.setRemoveHook((id) => {
+      this.notices.setRemoveHook(id => {
          Roster.get().removeNotice(this, id);
       });
 
-      this.notices.setPushHook((id) => {
+      this.notices.setPushHook(id => {
          let notice = new Notice(this.storage, id);
 
          Roster.get().addNotice(this, notice);
@@ -66,7 +68,7 @@ export class NoticeManager {
    }
 
    public removeAll() {
-      this.notices.empty((id) => {
+      this.notices.empty(id => {
          Roster.get().removeNotice(this, id);
       });
    }

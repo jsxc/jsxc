@@ -1,13 +1,13 @@
-import Dialog from '../Dialog'
-import Device, { Trust } from '../../plugins/omemo/lib/Device'
-import { IContact } from '../../Contact.interface'
+import Dialog from '../Dialog';
+import Device, { Trust } from '../../plugins/omemo/lib/Device';
+import { IContact } from '../../Contact.interface';
 import Omemo from '../../plugins/omemo/lib/Omemo';
 import IdentityManager from 'plugins/omemo/lib/IdentityManager';
 import DateTime from '@ui/util/DateTime';
 import Translation from '@util/Translation';
 import Log from '@util/Log';
 import OMEMOPlugin from '@src/plugins/omemo/Plugin';
-import * as QRCode from 'qrcode'
+import * as QRCode from 'qrcode';
 
 let omemoDeviceListTemplate = require('../../../template/dialogOmemoDeviceList.hbs');
 let omemoDeviceItemTemplate = require('../../../template/dialogOmemoDeviceItem.hbs');
@@ -50,13 +50,13 @@ class OmemoDeviceDialog {
    }
 
    private buildQRCode(jid: string, params: string[]): Promise<string> {
-
       let data = 'xmpp:' + jid + '?' + params.join(';');
 
       return QRCode.toDataURL(data, { errorCorrectionLevel: 'L' })
          .then(url => {
             return url;
-         }).catch(err => {
+         })
+         .catch(err => {
             return null;
          });
    }
@@ -68,9 +68,9 @@ class OmemoDeviceDialog {
    private addCleanUpAction() {
       let dom = this.dialog.getDom();
       let buttonElement = $('<button>');
-      buttonElement.addClass('jsxc-button jsxc-button--default')
+      buttonElement.addClass('jsxc-button jsxc-button--default');
       buttonElement.text(Translation.t('Clean_up_own_devices'));
-      buttonElement.click((ev) => {
+      buttonElement.click(ev => {
          ev.preventDefault();
 
          this.omemo.cleanUpDeviceList().then(localDeviceId => {
@@ -114,7 +114,7 @@ class OmemoDeviceDialog {
          listElement.append(element);
       }
 
-      this.buildQRCode(devices[0].getAddress().getName(), qrCodeParams).then((datauri) => {
+      this.buildQRCode(devices[0].getAddress().getName(), qrCodeParams).then(datauri => {
          listElement.prev('.jsxc-qr-code').find('img').attr('src', datauri);
       });
    }
@@ -145,14 +145,14 @@ class OmemoDeviceDialog {
          fingerprint,
          trust: Trust[trust],
          lastUsed: device.getLastUsed(),
-         showControls
+         showControls,
       };
    }
 
    private attachActionHandler(deviceElement: JQuery<HTMLElement>, device: Device) {
       const self = this;
 
-      deviceElement.find('.jsxc-omemo-device-action a').click(function(ev) {
+      deviceElement.find('.jsxc-omemo-device-action a').click(function (ev) {
          ev.preventDefault();
 
          self.actionHandler(deviceElement, $(this), device);

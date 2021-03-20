@@ -1,10 +1,10 @@
-import Dialog from '../Dialog'
-import showDebugLog from './debugLog'
-import Client from '../../Client'
+import Dialog from '../Dialog';
+import showDebugLog from './debugLog';
+import Client from '../../Client';
 
 const aboutTemplate = require('../../../template/about.hbs');
 
-export default function() {
+export default function () {
    let content = aboutTemplate({
       version: __VERSION__,
       date: __BUILD_DATE__,

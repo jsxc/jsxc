@@ -1,11 +1,11 @@
-import { IPlugin } from './plugin/AbstractPlugin'
-import Storage from './Storage'
-import { NoticeManager } from './NoticeManager'
-import PluginRepository from './plugin/PluginRepository'
-import Log from './util/Log'
-import Options from './Options'
-import PresenceController from './PresenceController'
-import PageVisibility from './PageVisibility'
+import { IPlugin } from './plugin/AbstractPlugin';
+import Storage from './Storage';
+import { NoticeManager } from './NoticeManager';
+import PluginRepository from './plugin/PluginRepository';
+import Log from './util/Log';
+import Options from './Options';
+import PresenceController from './PresenceController';
+import PageVisibility from './PageVisibility';
 import ChatWindowList from './ui/ChatWindowList';
 import AccountManager from './AccountManager';
 import Translation from '@util/Translation';
@@ -49,8 +49,7 @@ export default class Client {
 
       Migration.run(Client.getVersion(), storage);
 
-      return Options.getDefault('automaticallyRestoreAccounts') ?
-          Client.accountManager.restoreAccounts() : 0;
+      return Options.getDefault('automaticallyRestoreAccounts') ? Client.accountManager.restoreAccounts() : 0;
    }
 
    public static getVersion(): string {
@@ -126,7 +125,7 @@ export default class Client {
    public static getOption<IOption = any>(key: string, defaultValue?: IOption): IOption {
       let value = Client.getOptions().get(key);
 
-      return <IOption> (typeof value !== 'undefined' ? value : defaultValue);
+      return <IOption>(typeof value !== 'undefined' ? value : defaultValue);
    }
 
    public static setOption(key: string, value) {
@@ -136,7 +135,7 @@ export default class Client {
    private static watchFileDrag() {
       let enterCounter = 0;
 
-      $(document).on('dragenter', (ev) => {
+      $(document).on('dragenter', ev => {
          enterCounter++;
 
          if (enterCounter === 1) {
@@ -144,7 +143,7 @@ export default class Client {
          }
       });
 
-      $(document).on('dragleave', (ev) => {
+      $(document).on('dragleave', ev => {
          enterCounter--;
 
          if (enterCounter === 0) {
@@ -152,10 +151,10 @@ export default class Client {
          }
       });
 
-      $(document).on('dragover', (ev) => {
+      $(document).on('dragover', ev => {
          ev.preventDefault();
 
-         (<any> ev.originalEvent).dataTransfer.dropEffect = 'copy';
+         (<any>ev.originalEvent).dataTransfer.dropEffect = 'copy';
       });
 
       $(document).on('drop', () => {
@@ -168,15 +167,17 @@ export default class Client {
    public static isTrustedDomain(url: URL): boolean {
       let trustedDomains = Client.getOption<string[]>('trustedDomains', []);
 
-      return trustedDomains.filter(domain => {
-         let result = url.hostname === (domain);
+      return (
+         trustedDomains.filter(domain => {
+            let result = url.hostname === domain;
 
-         if (!result && domain.indexOf('*.') > -1) {
-            let wildcardtestdomain = domain.substring(domain.lastIndexOf('*.') + 2);
-            result = url.hostname.endsWith(wildcardtestdomain);
-         }
+            if (!result && domain.indexOf('*.') > -1) {
+               let wildcardtestdomain = domain.substring(domain.lastIndexOf('*.') + 2);
+               result = url.hostname.endsWith(wildcardtestdomain);
+            }
 
-         return result;
-      }).length > 0;
+            return result;
+         }).length > 0
+      );
    }
 }

@@ -1,29 +1,29 @@
-import Storage from './Storage'
-import { IConnection } from './connection/Connection.interface'
-import Connector from './connection/xmpp/Connector'
-import StorageConnection from './connection/storage/Connection'
-import JID from './JID'
-import Contact from './Contact'
-import { Presence } from './connection/AbstractConnection'
-import Client from './Client'
-import { NoticeManager } from './NoticeManager'
-import PluginRepository from './plugin/PluginRepository'
-import DiscoInfoRepository from './DiscoInfoRepository'
-import DiscoInfoChangeable from './DiscoInfoChangeable'
-import HookRepository from './util/HookRepository'
-import Options from './Options'
-import UUID from './util/UUID'
-import Pipe from './util/Pipe'
+import Storage from './Storage';
+import { IConnection } from './connection/Connection.interface';
+import Connector from './connection/xmpp/Connector';
+import StorageConnection from './connection/storage/Connection';
+import JID from './JID';
+import Contact from './Contact';
+import { Presence } from './connection/AbstractConnection';
+import Client from './Client';
+import { NoticeManager } from './NoticeManager';
+import PluginRepository from './plugin/PluginRepository';
+import DiscoInfoRepository from './DiscoInfoRepository';
+import DiscoInfoChangeable from './DiscoInfoChangeable';
+import HookRepository from './util/HookRepository';
+import Options from './Options';
+import UUID from './util/UUID';
+import Pipe from './util/Pipe';
 import ChatWindow from '@ui/ChatWindow';
 import { IJID } from './JID.interface';
 import { IContact } from './Contact.interface';
 import RosterContactProvider from './RosterContactProvider';
 import ContactManager from './ContactManager';
 import FallbackContactProvider from './FallbackContactProvider';
-import Log from '@util/Log'
-import CommandRepository from './CommandRepository'
-import AvatarSet from '@ui/AvatarSet'
-import { IAvatar } from './Avatar.interface'
+import Log from '@util/Log';
+import CommandRepository from './CommandRepository';
+import AvatarSet from '@ui/AvatarSet';
+import { IAvatar } from './Avatar.interface';
 
 type ConnectionCallback = (status: number, condition?: string) => void;
 
@@ -132,38 +132,41 @@ export default class Account {
          Client.getPresenceController().setTargetPresence(Presence.online);
       }
 
-      return this.connector.connect().then(async ([status, connection]) => {
-         this.connection = connection;
+      return this.connector
+         .connect()
+         .then(async ([status, connection]) => {
+            this.connection = connection;
 
-         if (pause) {
-            connection.pause();
-         }
+            if (pause) {
+               connection.pause();
+            }
 
-         let storage = this.getSessionStorage();
+            let storage = this.getSessionStorage();
 
-         if (!storage.getItem('connection', 'created')) {
-            storage.setItem('connection', 'created', new Date());
-         }
+            if (!storage.getItem('connection', 'created')) {
+               storage.setItem('connection', 'created', new Date());
+            }
 
-         if (!storage.getItem('options', 'loaded')) {
-            let jid = this.connector.getJID();
-            await Options.load(jid.bare, this.connector.getPassword(), jid);
-            this.connector.clearPassword();
+            if (!storage.getItem('options', 'loaded')) {
+               let jid = this.connector.getJID();
+               await Options.load(jid.bare, this.connector.getPassword(), jid);
+               this.connector.clearPassword();
 
-            storage.setItem('options', 'loaded', true);
-         }
+               storage.setItem('options', 'loaded', true);
+            }
 
-         if (!pause) {
-            this.initConnection(status);
-         }
-      }).catch(err => {
-         if (Client.getAccountManager().getAccounts().length <= 1) {
-            Client.getPresenceController().setTargetPresence(Presence.offline)
-         }
+            if (!pause) {
+               this.initConnection(status);
+            }
+         })
+         .catch(err => {
+            if (Client.getAccountManager().getAccounts().length <= 1) {
+               Client.getPresenceController().setTargetPresence(Presence.offline);
+            }
 
-         throw err;
-      });
-   }
+            throw err;
+         });
+   };
 
    private async initConnection(status): Promise<void> {
       let storage = this.getSessionStorage();
@@ -182,35 +185,35 @@ export default class Account {
 
    public triggerPresenceHook = (contact: IContact, presence, oldPresence) => {
       this.hookRepository.trigger('presence', contact, presence, oldPresence);
-   }
+   };
 
-   public registerPresenceHook = (func) => {
+   public registerPresenceHook = func => {
       this.hookRepository.registerHook('presence', func);
-   }
+   };
 
    public triggerConnectionHook = (status: number, condition?: string) => {
       this.hookRepository.trigger('connection', status, condition);
-   }
+   };
 
    public registerConnectionHook = (func: ConnectionCallback) => {
       this.hookRepository.registerHook('connection', func);
-   }
+   };
 
    public triggerChatWindowInitializedHook = (chatWindow: ChatWindow, contact: Contact) => {
       this.hookRepository.trigger('chatWindowInitialized', chatWindow, contact);
-   }
+   };
 
    public registerChatWindowInitializedHook = (func: (chatWindow?: ChatWindow, contact?: Contact) => void) => {
       this.hookRepository.registerHook('chatWindowInitialized', func);
-   }
+   };
 
    public triggerChatWindowClearedHook = (chatWindow: ChatWindow, contact: Contact) => {
       this.hookRepository.trigger('chatWindowCleared', chatWindow, contact);
-   }
+   };
 
    public registerChatWindowClearedHook = (func: (chatWindow?: ChatWindow, contact?: Contact) => void) => {
       this.hookRepository.registerHook('chatWindowCleared', func);
-   }
+   };
 
    public getContactManager(): ContactManager {
       if (!this.contactManager) {

@@ -69,7 +69,7 @@ class AttachmentHandler {
          attachment.setFile(decryptedFile);
          attachment.generateThumbnail(true);
       }
-   }
+   };
 
    private downloadFile(url: string) {
       return new Promise<ArrayBuffer>((resolve, reject) => {
@@ -79,16 +79,22 @@ class AttachmentHandler {
             xhrFields: {
                responseType: 'arraybuffer',
             },
-            success: (data) => {
+            success: data => {
                resolve(data);
             },
-            error: (jqXHR) => {
+            error: jqXHR => {
                Log.warn('error while downloading file from ' + url);
 
-               reject(new Error(jqXHR && jqXHR.readyState === 0 ? 'Download was probably blocked by your browser' : 'Could not download file'));
-            }
+               reject(
+                  new Error(
+                     jqXHR && jqXHR.readyState === 0
+                        ? 'Download was probably blocked by your browser'
+                        : 'Could not download file'
+                  )
+               );
+            },
          });
-      })
+      });
    }
 
    private async decryptContent(ivKey: string, ciphertext: ArrayBuffer) {
@@ -96,10 +102,14 @@ class AttachmentHandler {
       let keyData = ArrayBufferUtils.fromHex(ivKey.slice(24));
       let key = await crypto.subtle.importKey('raw', keyData, 'AES-GCM', false, ['decrypt']);
 
-      let decrypted = await crypto.subtle.decrypt({
-         name: 'AES-GCM',
-         iv
-      }, key, ciphertext);
+      let decrypted = await crypto.subtle.decrypt(
+         {
+            name: 'AES-GCM',
+            iv,
+         },
+         key,
+         ciphertext
+      );
 
       return decrypted;
    }

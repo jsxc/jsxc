@@ -1,11 +1,11 @@
-import { AbstractPlugin, IMetaData } from '../../plugin/AbstractPlugin'
-import ChatWindow from '../../ui/ChatWindow'
-import Translation from '../../util/Translation'
-import PersistentMap from '../../util/PersistentMap'
-import JID from '../../JID'
-import { IJID } from '../../JID.interface'
-import * as Namespace from '../../connection/xmpp/namespace'
-import Archive from './Archive'
+import { AbstractPlugin, IMetaData } from '../../plugin/AbstractPlugin';
+import ChatWindow from '../../ui/ChatWindow';
+import Translation from '../../util/Translation';
+import PersistentMap from '../../util/PersistentMap';
+import JID from '../../JID';
+import { IJID } from '../../JID.interface';
+import * as Namespace from '../../connection/xmpp/namespace';
+import Archive from './Archive';
 import Contact from '@src/Contact';
 import PluginAPI from '@src/plugin/PluginAPI';
 import { IContact } from '@src/Contact.interface';
@@ -29,23 +29,25 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
    }
 
    public static getDescription(): string {
-      return ;
+      return;
    }
 
    public static getMetaData(): IMetaData {
       return {
          description: Translation.t('setting-mam-enable'),
-         xeps: [{
-            id: 'XEP-0313',
-            name: 'Message Archive Management',
-            version: '0.6.3',
-         }]
-      }
+         xeps: [
+            {
+               id: 'XEP-0313',
+               name: 'Message Archive Management',
+               version: '0.6.3',
+            },
+         ],
+      };
    }
 
-   private archives: {[key: string]: Archive} = {};
+   private archives: { [key: string]: Archive } = {};
    private queryContactRelation: PersistentMap;
-   private supportCache: {[archiveJid: string]: string | boolean} = {};
+   private supportCache: { [archiveJid: string]: string | boolean } = {};
 
    constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
@@ -123,7 +125,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
    private addLoadButtonIfEnabled(chatWindow: ChatWindow, contact: Contact) {
       let archivingJid = this.getArchiveJid(contact);
 
-      this.determineServerSupport(archivingJid).then((version) => {
+      this.determineServerSupport(archivingJid).then(version => {
          if (version) {
             this.addLoadButton(chatWindow.getDom(), contact);
          }
@@ -147,7 +149,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       });
       element.append(spanElement);
 
-      messageAreaElement.scroll(function() {
+      messageAreaElement.scroll(function () {
          if (this.scrollTop < 42 && !archive.isExhausted()) {
             element.addClass(classNameShow);
          } else {
@@ -161,7 +163,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
          chatWindowElement.addClass(classNameMamEnable);
       }
 
-      archive.registerExhaustedHook((isExhausted) => {
+      archive.registerExhaustedHook(isExhausted => {
          if (isExhausted) {
             chatWindowElement.removeClass(classNameMamEnable);
          } else {
@@ -197,7 +199,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       this.getArchive(jid).onForwardedMessage(forwardedElement);
 
       return true;
-   }
+   };
 
    public getArchive(jid: IJID) {
       if (!this.archives[jid.bare]) {

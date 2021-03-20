@@ -10,9 +10,7 @@ import Log from '@util/Log';
 export default class Session {
    private sessionCipher;
 
-   constructor(private address: Address, private store: Store, private bundleManager: BundleManager) {
-
-   }
+   constructor(private address: Address, private store: Store, private bundleManager: BundleManager) {}
 
    public async decrypt(ciphertext, preKey: boolean = false): Promise<ArrayBuffer> {
       let sessionCipher = this.getSessionCipher();
@@ -54,7 +52,7 @@ export default class Session {
       let builder = new SessionBuilder(this.address, this.store);
 
       return builder.processPreKey(bundle).then(() => undefined);
-   }
+   };
 
    private getSessionCipher(): SessionCipher {
       if (!this.sessionCipher) {

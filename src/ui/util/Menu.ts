@@ -10,7 +10,7 @@ export default class Menu {
          elements = $(elements);
       }
 
-      elements.each(function() {
+      elements.each(function () {
          new Menu($(this));
       });
    }
@@ -55,7 +55,7 @@ export default class Menu {
       return this.element.find('.jsxc-menu__button');
    }
 
-   private onClick = (ev) => {
+   private onClick = ev => {
       ev.stopPropagation();
       ev.preventDefault();
 
@@ -71,21 +71,21 @@ export default class Menu {
       if (this.element.hasClass(CLASSNAME_OPENED)) {
          $('body').on('click', this.closeMenu);
       }
-   }
+   };
 
    private onMouseLeave = () => {
       if (this.element.hasClass(CLASSNAME_OPENED)) {
          this.timer = window.setTimeout(this.closeMenu, 2000);
       }
-   }
+   };
 
    private onMouseEnter = () => {
       window.clearTimeout(this.timer);
-   }
+   };
 
    private closeMenu = () => {
       this.element.removeClass(CLASSNAME_OPENED);
 
       $('body').off('click', null, this.closeMenu);
-   }
+   };
 }

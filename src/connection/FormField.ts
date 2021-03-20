@@ -1,19 +1,19 @@
-import { $build } from '../vendor/Strophe'
+import { $build } from '../vendor/Strophe';
 
 export interface IFormFieldData {
-   label?: string,
-   type?: string,
-   name: string,
-   description?: string,
-   isRequired?: boolean,
-   values?: string[],
-   options?: Option2[]
+   label?: string;
+   type?: string;
+   name: string;
+   description?: string;
+   isRequired?: boolean;
+   values?: string[];
+   options?: Option2[];
 }
 
 export interface IFormFieldJSONData {
-   type?: string,
-   name: string,
-   values: string[]
+   type?: string;
+   name: string;
+   values: string[];
 }
 
 class Option2 {
@@ -24,9 +24,7 @@ class Option2 {
       return new Option2(label, value);
    }
 
-   private constructor(private label: string, private value: string) {
-
-   }
+   private constructor(private label: string, private value: string) {}
 
    public getValue(): string {
       return this.value;
@@ -43,7 +41,18 @@ class Option2 {
 }
 
 export default class FormField {
-   private ALLOWED_TYPES = ['boolean', 'fixed', 'hidden', 'jid-multi', 'jid-single', 'list-multi', 'list-single', 'text-multi', 'text-private', 'text-single'];
+   private ALLOWED_TYPES = [
+      'boolean',
+      'fixed',
+      'hidden',
+      'jid-multi',
+      'jid-single',
+      'list-multi',
+      'list-single',
+      'text-multi',
+      'text-private',
+      'text-single',
+   ];
 
    public static fromXML(fieldElement) {
       return new FormField({
@@ -52,9 +61,15 @@ export default class FormField {
          name: fieldElement.attr('var'), // MUST, if type != fixed. Unique, if form != result
          description: fieldElement.find('desc').text(), // MAY
          isRequired: fieldElement.find('required').length > 0, // MAY
-         values: fieldElement.find('>value').map((index, element) => $(element).text()).get(), // MAY
-         options: fieldElement.find('option').map((index, element) => Option2.fromXML($(element))).get() // MAY
-      })
+         values: fieldElement
+            .find('>value')
+            .map((index, element) => $(element).text())
+            .get(), // MAY
+         options: fieldElement
+            .find('option')
+            .map((index, element) => Option2.fromXML($(element)))
+            .get(), // MAY
+      });
    }
 
    public static fromHTML(formElement) {
@@ -92,7 +107,7 @@ export default class FormField {
          name,
          values,
       });
-   };
+   }
 
    public static fromJSON(data: IFormFieldJSONData) {
       return new FormField(data);
@@ -107,7 +122,10 @@ export default class FormField {
          this.data.values = [];
       }
 
-      if (this.data.values.length > 1 && ['jid-multi', 'list-multi', 'text-multi', 'hidden'].indexOf(this.data.type) < 0) {
+      if (
+         this.data.values.length > 1 &&
+         ['jid-multi', 'list-multi', 'text-multi', 'hidden'].indexOf(this.data.type) < 0
+      ) {
          throw new Error('Fields of type ' + data.type + ' are not allowed to have multiple value elements.');
       }
 
@@ -140,14 +158,14 @@ export default class FormField {
       return {
          type: this.data.type,
          name: this.data.name,
-         values: this.data.values
+         values: this.data.values,
       };
    }
 
    public toXML() {
       let xmlElement = $build('field', {
          type: this.data.type,
-         var: this.data.name
+         var: this.data.name,
       });
 
       for (let value of this.data.values) {
@@ -162,7 +180,13 @@ export default class FormField {
 
       switch (this.data.type) {
          case 'fixed':
-            element = $('<div>').append($(this.data.values).map((index, value) => $('<p>').text(<any> value).get()));
+            element = $('<div>').append(
+               $(this.data.values).map((index, value) =>
+                  $('<p>')
+                     .text(<any>value)
+                     .get()
+               )
+            );
             break;
          case 'boolean':
          case 'hidden':
@@ -278,7 +302,7 @@ export default class FormField {
          element.attr('multiple', 'multiple');
       }
 
-      let options = this.data.options.map((option) => {
+      let options = this.data.options.map(option => {
          let optionElement = option.toHTML();
 
          if (this.data.values.indexOf(option.getValue()) > -1) {

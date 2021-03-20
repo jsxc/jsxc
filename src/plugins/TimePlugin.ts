@@ -1,16 +1,15 @@
-import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin'
-import PluginAPI from '../plugin/PluginAPI'
+import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin';
+import PluginAPI from '../plugin/PluginAPI';
 import Translation from '@util/Translation';
 import * as moment from 'moment';
-import JID from '../JID'
+import JID from '../JID';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
 
-const NAMESPACE_TIME = 'urn:xmpp:time'
+const NAMESPACE_TIME = 'urn:xmpp:time';
 
 export default class TimePlugin extends AbstractPlugin {
-
    public static getId(): string {
       return 'time';
    }
@@ -22,12 +21,14 @@ export default class TimePlugin extends AbstractPlugin {
    public static getMetaData(): IMetaData {
       return {
          description: Translation.t('setting-time'),
-         xeps: [{
-            id: 'XEP-0202',
-            name: 'Entity Time',
-            version: '2.0',
-         }]
-      }
+         xeps: [
+            {
+               id: 'XEP-0202',
+               name: 'Entity Time',
+               version: '2.0',
+            },
+         ],
+      };
    }
 
    constructor(pluginAPI: PluginAPI) {
@@ -40,13 +41,13 @@ export default class TimePlugin extends AbstractPlugin {
       connection.registerHandler(this.onReceiveQuery, NAMESPACE_TIME, 'iq', 'get');
    }
 
-   public query(jid: JID): Promise<{ tzo?: string, utc?: string }> {
+   public query(jid: JID): Promise<{ tzo?: string; utc?: string }> {
       let iq = $iq({
          type: 'get',
          to: jid.full,
-         xmlns: 'jabber:client'
+         xmlns: 'jabber:client',
       }).c('time', {
-         'xmlns': NAMESPACE_TIME
+         xmlns: NAMESPACE_TIME,
       });
 
       return this.pluginAPI.sendIQ(iq).then(stanza => {
@@ -55,7 +56,7 @@ export default class TimePlugin extends AbstractPlugin {
          return {
             utc: timeElement.find('>utc').text(),
             tzo: timeElement.find('>tzo').text(),
-         }
+         };
       });
    }
 
@@ -68,16 +69,16 @@ export default class TimePlugin extends AbstractPlugin {
       }
 
       return true;
-   }
+   };
 
    private sendResponse(id: string, jid: string): Promise<Element> {
       let iq = $iq({
          type: 'result',
          to: jid,
          id,
-         xmlns: 'jabber:client'
+         xmlns: 'jabber:client',
       }).c('time', {
-         'xmlns': NAMESPACE_TIME
+         xmlns: NAMESPACE_TIME,
       });
 
       iq.c('tzo').t(moment().format('Z')).up();

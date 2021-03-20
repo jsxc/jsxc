@@ -1,4 +1,4 @@
-import ConnectionError from '../../errors/ConnectionError'
+import ConnectionError from '../../errors/ConnectionError';
 import InvalidParameterError from '../../errors/InvalidParameterError';
 
 export function testBOSHServer(url, domain): Promise<string> {
@@ -19,18 +19,20 @@ export function testBOSHServer(url, domain): Promise<string> {
          url,
          data: requestString,
          global: false,
-         dataType: 'xml'
-      }).done(stanza => {
-         try {
-            let result = processResponse(stanza);
+         dataType: 'xml',
+      })
+         .done(stanza => {
+            try {
+               let result = processResponse(stanza);
 
-            resolve(result);
-         } catch (err) {
-            reject(err);
-         }
-      }).fail((xhr, textStatus) => {
-         reject(processErrorResponse(xhr, textStatus, url));
-      });
+               resolve(result);
+            } catch (err) {
+               reject(err);
+            }
+         })
+         .fail((xhr, textStatus) => {
+            reject(processErrorResponse(xhr, textStatus, url));
+         });
    });
 }
 
@@ -41,8 +43,8 @@ function processResponse(stanza) {
    }
 
    let body = $(stanza).find('body[xmlns="http://jabber.org/protocol/httpbind"]');
-   let condition = (body) ? body.attr('condition') : null;
-   let type = (body) ? body.attr('type') : null;
+   let condition = body ? body.attr('condition') : null;
+   let type = body ? body.attr('type') : null;
 
    // we got a valid xml response, but we have to test for errors
 
@@ -77,14 +79,25 @@ function processErrorResponse(xhr, textStatus, url) {
 
    if (xhr.status === 0) {
       // cross-side
-      return new ConnectionError('Cross domain request was not possible. Either your BOSH server does not send any ' +
-         'Access-Control-Allow-Origin header or the content-security-policy (CSP) blocks your request. ' +
-         'The safest way is still to use Apache ProxyRequest or Nginx proxy_pass.', 'cross-domain');
+      return new ConnectionError(
+         'Cross domain request was not possible. Either your BOSH server does not send any ' +
+            'Access-Control-Allow-Origin header or the content-security-policy (CSP) blocks your request. ' +
+            'The safest way is still to use Apache ProxyRequest or Nginx proxy_pass.',
+         'cross-domain'
+      );
    } else if (xhr.status === 404) {
       // not found
-      return new ConnectionError('Your server responded with "404 Not Found". Please check if your BOSH server is running and reachable via ' + urlWithProtocol + '.', 'not-found');
+      return new ConnectionError(
+         'Your server responded with "404 Not Found". Please check if your BOSH server is running and reachable via ' +
+            urlWithProtocol +
+            '.',
+         'not-found'
+      );
    } else if (textStatus === 'parsererror') {
-      return new ConnectionError('Invalid XML received. Maybe ' + urlWithProtocol + ' was redirected. You should use an absolute url.', 'invalid-xml');
+      return new ConnectionError(
+         'Invalid XML received. Maybe ' + urlWithProtocol + ' was redirected. You should use an absolute url.',
+         'invalid-xml'
+      );
    } else {
       return new ConnectionError(xhr.status + ' ' + xhr.statusText, 'misc');
    }

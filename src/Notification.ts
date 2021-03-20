@@ -1,53 +1,57 @@
 import { IContact } from './Contact.interface';
-import Translation from './util/Translation'
-import Client from './Client'
-import * as CONST from './CONST'
-import { FUNCTION as NOTICEFUNCTION } from './Notice'
-import openConfirmDialog from './ui/dialogs/confirm'
-import Overlay from './ui/Overlay'
-import Hash from './util/Hash'
-import Log from './util/Log'
-import defaultIconFile = require('../images/XMPP_logo.png')
-import { Presence } from './connection/AbstractConnection'
+import Translation from './util/Translation';
+import Client from './Client';
+import * as CONST from './CONST';
+import { FUNCTION as NOTICEFUNCTION } from './Notice';
+import openConfirmDialog from './ui/dialogs/confirm';
+import Overlay from './ui/Overlay';
+import Hash from './util/Hash';
+import Log from './util/Log';
+import defaultIconFile = require('../images/XMPP_logo.png');
+import { Presence } from './connection/AbstractConnection';
 
 interface INotificationSettings {
-   title: string,
-   message: string,
-   duration?: number,
-   force?: boolean,
-   soundFile?: string,
-   loop?: boolean,
-   source?: IContact,
-   icon?: string
-};
+   title: string;
+   message: string;
+   duration?: number;
+   force?: boolean;
+   soundFile?: string;
+   loop?: boolean;
+   source?: IContact;
+   icon?: string;
+}
 
 enum NotificationState {
    DISABLED,
    ENABLED,
-   ASK
-};
+   ASK,
+}
 
-let NotificationAPI = (<any> window).Notification;
+let NotificationAPI = (<any>window).Notification;
 
 export default class Notification {
-
    private static popupDelay = 1000;
 
    private static audioObject;
 
    public static askForPermission() {
       let overlay = new Overlay();
-      openConfirmDialog(Translation.t('Should_we_notify_you_')).getPromise().then((a) => {
-         overlay.open();
+      openConfirmDialog(Translation.t('Should_we_notify_you_'))
+         .getPromise()
+         .then(a => {
+            overlay.open();
 
-         return Notification.requestPermission();
-      }).then(() => {
-         Client.getStorage().setItem('notificationState', NotificationState.ENABLED);
-      }).catch((err) => {
-         Client.getStorage().setItem('notificationState', NotificationState.DISABLED);
-      }).then(() => {
-         overlay.close();
-      });
+            return Notification.requestPermission();
+         })
+         .then(() => {
+            Client.getStorage().setItem('notificationState', NotificationState.ENABLED);
+         })
+         .catch(err => {
+            Client.getStorage().setItem('notificationState', NotificationState.DISABLED);
+         })
+         .then(() => {
+            overlay.close();
+         });
    }
 
    public static async notify(settings: INotificationSettings) {
@@ -58,13 +62,13 @@ export default class Notification {
       }
 
       let state = Client.getStorage().getItem('notificationState');
-      state = (typeof state === 'number') ? state : NotificationState.ASK;
+      state = typeof state === 'number' ? state : NotificationState.ASK;
 
       if (state === NotificationState.ASK && !Notification.hasPermission()) {
          Client.getNoticeManager().addNotice({
             title: Translation.t('Notifications') + '?',
             description: Translation.t('Should_we_notify_you_'),
-            fnName: NOTICEFUNCTION.notificationRequest
+            fnName: NOTICEFUNCTION.notificationRequest,
          });
       }
 
@@ -80,14 +84,14 @@ export default class Notification {
          return;
       }
 
-      settings.icon = settings.icon || <string> <any> defaultIconFile;
+      settings.icon = settings.icon || <string>(<any>defaultIconFile);
 
       if (settings.source) {
          let avatar;
 
          try {
             avatar = await settings.source.getAvatar();
-         } catch (err) { }
+         } catch (err) {}
 
          if (avatar && avatar.src) {
             settings.icon = avatar.src;
@@ -98,7 +102,7 @@ export default class Notification {
             let saturation = 90;
             let lightness = 65;
 
-            let canvas = <HTMLCanvasElement> $('<canvas>').get(0);
+            let canvas = <HTMLCanvasElement>$('<canvas>').get(0);
             canvas.height = 100;
             canvas.width = 100;
 
@@ -119,7 +123,7 @@ export default class Notification {
 
       settings.duration = settings.duration || Notification.getOption('popupDuration');
 
-      setTimeout(function() {
+      setTimeout(function () {
          Notification.showPopup(settings);
       }, Notification.popupDelay);
    }
@@ -131,11 +135,11 @@ export default class Notification {
 
       let popup = new NotificationAPI(settings.title, {
          body: settings.message,
-         icon: settings.icon
+         icon: settings.icon,
       });
 
       if (settings.duration > 0) {
-         setTimeout(function() {
+         setTimeout(function () {
             popup.close();
          }, settings.duration);
       }
@@ -143,7 +147,7 @@ export default class Notification {
 
    private static requestPermission() {
       return new Promise<void>((resolve, reject) => {
-         NotificationAPI.requestPermission(function(status) {
+         NotificationAPI.requestPermission(function (status) {
             if (NotificationAPI.permission !== status) {
                NotificationAPI.permission = status;
             }
@@ -176,11 +180,14 @@ export default class Notification {
 
       let audio = new Audio(soundFile);
       audio.loop = loop || false;
-      audio.play().then(() => {
-         Notification.audioObject = audio;
-      }).catch((err) => {
-         Log.debug('Audio error', err);
-      });
+      audio
+         .play()
+         .then(() => {
+            Notification.audioObject = audio;
+         })
+         .catch(err => {
+            Log.debug('Audio error', err);
+         });
    }
 
    public static stopSound() {

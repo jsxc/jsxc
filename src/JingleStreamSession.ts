@@ -6,7 +6,6 @@ import Translation from '@util/Translation';
 import { SOUNDS } from './CONST';
 
 export default class JingleStreamSession extends JingleMediaSession {
-
    public onOnceIncoming() {
       Notification.notify({
          title: Translation.t('Incoming_stream'),
@@ -37,22 +36,24 @@ export default class JingleStreamSession extends JingleMediaSession {
 
       let videoDialog = JingleHandler.getVideoDialog();
 
-      videoDialog.showCallDialog(this).then(() => {
-         videoDialog.addSession(this);
-         videoDialog.showVideoWindow();
+      videoDialog
+         .showCallDialog(this)
+         .then(() => {
+            videoDialog.addSession(this);
+            videoDialog.showVideoWindow();
 
-         this.session.accept();
-      }).catch((reason) => {
+            this.session.accept();
+         })
+         .catch(reason => {
+            //@TODO hide user media request overlay
 
-         //@TODO hide user media request overlay
+            //@TODO post reason to chat window
+            if (reason !== 'aborted') {
+               Log.warn('Decline call', reason);
 
-         //@TODO post reason to chat window
-         if (reason !== 'aborted') {
-            Log.warn('Decline call', reason)
-
-            this.session.decline();
-         }
-      });
+               this.session.decline();
+            }
+         });
    }
 
    public getMediaRequest() {

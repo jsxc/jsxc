@@ -1,4 +1,3 @@
-
 export default class ImageHelper {
    public static scaleDown(data: string, quality: number = 0.3, size: number = 100): Promise<string> {
       let sHeight: number;
@@ -38,7 +37,7 @@ export default class ImageHelper {
 
          img.onerror = () => {
             reject(new Error('Could not load image'));
-         }
+         };
 
          img.src = data;
       });

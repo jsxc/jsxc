@@ -1,4 +1,4 @@
-import ChatWindow from './ChatWindow'
+import ChatWindow from './ChatWindow';
 
 let chatWindowListTemplate = require('../../template/chatWindowList.hbs');
 
@@ -101,7 +101,7 @@ export default class ChatWindowList {
       let windowWidth = windowElement.outerWidth();
       let positionLeft = windowElement.position().left - padding;
 
-      let right = - offset - scrollWidth + positionLeft + windowWidth;
+      let right = -offset - scrollWidth + positionLeft + windowWidth;
       let left = scrollWidth - width + offset - positionLeft;
 
       if (left > 0) {

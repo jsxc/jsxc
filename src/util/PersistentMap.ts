@@ -1,9 +1,8 @@
-import IIdentifiable from '../Identifiable.interface'
+import IIdentifiable from '../Identifiable.interface';
 import InvalidParameterError from '../errors/InvalidParameterError';
 import IStorage from '@src/Storage.interface';
 
 export default class PersistentMap {
-
    public static getData(storage: IStorage, ...identifier: string[]) {
       let key = storage.generateKey.apply(storage, identifier);
 
@@ -19,7 +18,7 @@ export default class PersistentMap {
 
       this.map = this.storage.getItem(this.key) || {};
 
-      this.storage.registerHook(this.key, (newValue) => {
+      this.storage.registerHook(this.key, newValue => {
          this.map = newValue;
       });
    }
@@ -87,7 +86,7 @@ export default class PersistentMap {
          let id = arguments[0];
          let func = arguments[1];
 
-         this.storage.registerHook(this.key, function(newData, oldData) {
+         this.storage.registerHook(this.key, function (newData, oldData) {
             if (newData && !oldData) {
                func(newData[id]);
             } else if (newData[id] !== oldData[id]) {

@@ -1,15 +1,12 @@
-import Account from './Account'
-import JID from './JID'
+import Account from './Account';
+import JID from './JID';
 import { IContact } from 'Contact.interface';
 import ChatWindow from '@ui/ChatWindow';
 import IStorage from './Storage.interface';
 import { IOTalkJingleSession, OTalkEventNames, IEndReason } from '@vendor/Jingle.interface';
 
 export const JINGLE_FEATURES = {
-   screen: [
-      'urn:xmpp:jingle:transports:ice-udp:1',
-      'urn:xmpp:jingle:apps:dtls:0'
-   ],
+   screen: ['urn:xmpp:jingle:transports:ice-udp:1', 'urn:xmpp:jingle:apps:dtls:0'],
    audio: [],
    video: [],
 };
@@ -38,12 +35,12 @@ export default abstract class JingleAbstractSession {
       this.peerContact = this.account.getContact(this.peerJID);
       this.peerChatWindow = this.peerContact.getChatWindow();
 
-      this.storage.registerHook(this.session.sid, (newValue) => {
+      this.storage.registerHook(this.session.sid, newValue => {
          if (newValue === ADOPTED) {
             if (!this.adoptee) {
                session.emit('aborted');
             } else {
-               session.emit(<any> 'adopt');
+               session.emit(<any>'adopt');
             }
          }
       });
@@ -69,7 +66,7 @@ export default abstract class JingleAbstractSession {
    }
 
    public on(eventName: OTalkEventNames | 'adopt', handler: (data: any) => void) {
-      this.session.on(<any> eventName, (session, data) => handler(data));
+      this.session.on(<any>eventName, (session, data) => handler(data));
    }
 
    public cancel(): void {

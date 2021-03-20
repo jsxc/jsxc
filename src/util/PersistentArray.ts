@@ -1,7 +1,6 @@
-import Storage from '../Storage'
+import Storage from '../Storage';
 
 export default class PersistentArray {
-
    private array: any[];
 
    private key: string;
@@ -11,7 +10,7 @@ export default class PersistentArray {
 
       this.array = this.storage.getItem(this.key) || [];
 
-      this.storage.registerHook(this.key, (newValue) => {
+      this.storage.registerHook(this.key, newValue => {
          this.array = newValue;
       });
    }

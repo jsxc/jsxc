@@ -1,11 +1,11 @@
-import Message from '../Message'
-import { AbstractPlugin } from '../plugin/AbstractPlugin'
-import PluginAPI from '../plugin/PluginAPI'
-import Contact from '../Contact'
-import Translation from '../util/Translation'
-import Notification from '../Notification'
-import { Presence } from '../connection/AbstractConnection'
-import { SOUNDS } from '../CONST'
+import Message from '../Message';
+import { AbstractPlugin } from '../plugin/AbstractPlugin';
+import PluginAPI from '../plugin/PluginAPI';
+import Contact from '../Contact';
+import Translation from '../util/Translation';
+import Notification from '../Notification';
+import { Presence } from '../connection/AbstractConnection';
+import { SOUNDS } from '../CONST';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
@@ -40,12 +40,12 @@ export default class NotificationPlugin extends AbstractPlugin {
             }),
             message: message.getPlaintextMessage(),
             soundFile: SOUNDS.MSG,
-            source: contact
+            source: contact,
          });
       }
 
       return Promise.resolve([contact, message]);
-   }
+   };
 
    private onPresence = (contact: Contact, newPresence, oldPresence) => {
       if (oldPresence !== Presence.offline || newPresence === Presence.offline) {
@@ -55,14 +55,14 @@ export default class NotificationPlugin extends AbstractPlugin {
       let now = new Date();
       let created = this.pluginAPI.getConnectionCreationDate() || now;
 
-      if (!created || (now.valueOf() - created.valueOf()) < 2 * 60 * 1000) {
+      if (!created || now.valueOf() - created.valueOf() < 2 * 60 * 1000) {
          return;
       }
 
       Notification.notify({
          title: contact.getName(),
          message: Translation.t('has_come_online'),
-         source: contact
+         source: contact,
       });
-   }
+   };
 }

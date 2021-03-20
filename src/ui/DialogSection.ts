@@ -1,10 +1,9 @@
-import Navigation from './DialogNavigation'
+import Navigation from './DialogNavigation';
 
 export default abstract class Section {
    private element: JQuery;
 
-   constructor(protected navigation: Navigation, private title?: string, private isCollapsible: boolean = false) {
-   }
+   constructor(protected navigation: Navigation, private title?: string, private isCollapsible: boolean = false) {}
 
    public getDOM(): JQuery {
       if (!this.element) {
@@ -23,7 +22,7 @@ export default abstract class Section {
 
             button.text(this.title);
             button.addClass('jsxc-page__subheadline');
-            button.on('click', (ev) => {
+            button.on('click', ev => {
                $(ev.target).toggleClass('jsxc-show-sibling');
             });
 
@@ -43,5 +42,5 @@ export default abstract class Section {
       this.element.append(bodyElement);
    }
 
-   protected abstract generateContentElement(): JQuery
+   protected abstract generateContentElement(): JQuery;
 }

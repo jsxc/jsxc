@@ -1,20 +1,20 @@
-import { IContact, ContactType, ContactSubscription } from './Contact.interface'
-import Storage from './Storage'
-import JID from './JID'
-import Account from './Account'
-import PersistentMap from './util/PersistentMap'
-import IIdentifiable from './Identifiable.interface'
-import Log from './util/Log'
-import { Presence } from './connection/AbstractConnection'
-import { EncryptionState } from './plugin/AbstractPlugin'
-import Transcript from './Transcript'
-import ChatWindowController from './ChatWindowController'
-import Avatar from './Avatar'
-import Message from './Message'
+import { IContact, ContactType, ContactSubscription } from './Contact.interface';
+import Storage from './Storage';
+import JID from './JID';
+import Account from './Account';
+import PersistentMap from './util/PersistentMap';
+import IIdentifiable from './Identifiable.interface';
+import Log from './util/Log';
+import { Presence } from './connection/AbstractConnection';
+import { EncryptionState } from './plugin/AbstractPlugin';
+import Transcript from './Transcript';
+import ChatWindowController from './ChatWindowController';
+import Avatar from './Avatar';
+import Message from './Message';
 import ChatWindow from './ui/ChatWindow';
 import ContactProvider from './ContactProvider';
 import DiscoInfo from './DiscoInfo';
-import { IJID } from './JID.interface'
+import { IJID } from './JID.interface';
 
 export default class Contact implements IIdentifiable, IContact {
    protected storage: Storage;
@@ -79,8 +79,8 @@ export default class Contact implements IIdentifiable, IContact {
          groups: [],
          type: ContactType.CHAT,
          provider: 'fallback',
-         rnd: Math.random() // force storage event
-      }
+         rnd: Math.random(), // force storage event
+      };
 
       this.data = new PersistentMap(this.storage, 'contact', id);
 
@@ -128,7 +128,7 @@ export default class Contact implements IIdentifiable, IContact {
       this.jid = new JID(this.jid.bare + '/' + resource);
 
       this.data.set('jid', this.jid.full);
-   }
+   };
 
    public clearResources() {
       this.data.set('resources', {});
@@ -154,14 +154,14 @@ export default class Contact implements IIdentifiable, IContact {
       this.data.set('presence', presence);
    }
 
-   public getCapableResources(features: string[]): Promise<string[]>
-   public getCapableResources(features: string): Promise<string[]>
+   public getCapableResources(features: string[]): Promise<string[]>;
+   public getCapableResources(features: string): Promise<string[]>;
    public getCapableResources(features): Promise<string[]> {
       return this.account.getDiscoInfoRepository().getCapableResources(this, features);
    }
 
-   public hasFeatureByResource(resource: string, features: string[]): Promise<{}>
-   public hasFeatureByResource(resource: string, feature: string): Promise<{}>
+   public hasFeatureByResource(resource: string, features: string[]): Promise<{}>;
+   public hasFeatureByResource(resource: string, feature: string): Promise<{}>;
    public hasFeatureByResource(resource, feature) {
       if (!resource) {
          throw new Error('I can not lookup a feature without resource');
@@ -248,7 +248,9 @@ export default class Contact implements IIdentifiable, IContact {
    }
 
    public getAvatar(): Promise<Avatar> {
-      return this.account.getPipe('avatar').run(this, undefined)
+      return this.account
+         .getPipe('avatar')
+         .run(this, undefined)
          .then(([, avatar]) => {
             if (!avatar) {
                throw new Error('No avatar available for ' + this.getId());

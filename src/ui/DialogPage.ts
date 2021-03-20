@@ -1,11 +1,9 @@
-import Navigation from './DialogNavigation'
+import Navigation from './DialogNavigation';
 
 export default abstract class Page {
    private element: JQuery;
 
-   constructor(protected navigation: Navigation, private title: string) {
-
-   }
+   constructor(protected navigation: Navigation, private title: string) {}
 
    public getDOM(): JQuery {
       if (!this.element) {
@@ -20,7 +18,7 @@ export default abstract class Page {
       this.element.addClass('jsxc-page');
 
       let legendElement = $('<h1>');
-      legendElement.addClass('jsxc-page__headline')
+      legendElement.addClass('jsxc-page__headline');
       legendElement.text(this.title);
 
       if (this.navigation.canGoBack()) {
@@ -35,5 +33,5 @@ export default abstract class Page {
       this.element.append(this.generateContentElement());
    }
 
-   protected abstract generateContentElement(): JQuery | JQuery[]
+   protected abstract generateContentElement(): JQuery | JQuery[];
 }

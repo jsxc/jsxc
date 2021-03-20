@@ -1,7 +1,7 @@
-import Dialog from '../Dialog'
-import Translation from '../../util/Translation'
-import Client from '../../Client'
-import BlockingCommandPlugin from '../../plugins/BlockingCommandPlugin'
+import Dialog from '../Dialog';
+import Translation from '../../util/Translation';
+import Client from '../../Client';
+import BlockingCommandPlugin from '../../plugins/BlockingCommandPlugin';
 import Log from '@util/Log';
 
 let contactBlockList = require('../../../template/contactBlock.hbs');
@@ -19,26 +19,34 @@ export default function () {
    });
    //@TODO check support
 
-   dialog.getDom().find('select[name="account"]').on('change', (ev) => {
-      let uid = $(ev.target).val().toString();
-      let account = Client.getAccountManager().getAccount(uid);
-      let blockPlugin = account.getPluginRepository().getPlugin(BlockingCommandPlugin.getId()) as BlockingCommandPlugin;
+   dialog
+      .getDom()
+      .find('select[name="account"]')
+      .on('change', ev => {
+         let uid = $(ev.target).val().toString();
+         let account = Client.getAccountManager().getAccount(uid);
+         let blockPlugin = account
+            .getPluginRepository()
+            .getPlugin(BlockingCommandPlugin.getId()) as BlockingCommandPlugin;
 
-      removeWarnings();
-      dialog.getDom().find('textarea[name="jsxc-blocklist-textarea"]').val('');
+         removeWarnings();
+         dialog.getDom().find('textarea[name="jsxc-blocklist-textarea"]').val('');
 
-      blockPlugin.hasSupport().then(hasSupport => {
-         if (hasSupport) {
-            getBlockList(blockPlugin);
-         } else {
-            appendWarning(Translation.t('blocking_cmd_not_supported'));
-         }
-      }).catch(err => {
-         Log.warn('Can not check support for blocking command', err);
+         blockPlugin
+            .hasSupport()
+            .then(hasSupport => {
+               if (hasSupport) {
+                  getBlockList(blockPlugin);
+               } else {
+                  appendWarning(Translation.t('blocking_cmd_not_supported'));
+               }
+            })
+            .catch(err => {
+               Log.warn('Can not check support for blocking command', err);
 
-         appendWarning(Translation.t('UNKNOWN_ERROR'));
+               appendWarning(Translation.t('UNKNOWN_ERROR'));
+            });
       });
-   });
 
    dialog.getDom().find('select[name="account"]').trigger('change');
 }
@@ -47,49 +55,63 @@ function getBlockList(blockPlugin: BlockingCommandPlugin) {
    let dom = dialog.getDom();
    dom.find('.jsxc-warning').remove();
 
-   blockPlugin.getBlocklist()
+   blockPlugin
+      .getBlocklist()
       .then(function (blocklist) {
          let textfield = dialog.getDom().find('textarea[name="jsxc-blocklist-textarea"]');
          textfield.val(blocklist.join('\n'));
 
          initSubmit(dialog, blockPlugin, blocklist);
-      }).catch((err) => {
-         Log.warn('Can not get block list', err)
+      })
+      .catch(err => {
+         Log.warn('Can not get block list', err);
 
          appendWarning(Translation.t('UNKNOWN_ERROR'));
       });
 }
 
 function initSubmit(dialog: Dialog, blockPlugin: BlockingCommandPlugin, oldBlocklist: string[]) {
-   dialog.getDom().find('form').off('submit').on('submit', (ev) => {
-      ev.preventDefault();
+   dialog
+      .getDom()
+      .find('form')
+      .off('submit')
+      .on('submit', ev => {
+         ev.preventDefault();
 
-      dialog.getDom().find('input, button').prop('disabled', true);
+         dialog.getDom().find('input, button').prop('disabled', true);
 
-      let textarea = dialog.getDom().find('textarea[name="jsxc-blocklist-textarea"]');
-      let lines = textarea.val().toString().split('\n').map(item => item.trim())
+         let textarea = dialog.getDom().find('textarea[name="jsxc-blocklist-textarea"]');
+         let lines = textarea
+            .val()
+            .toString()
+            .split('\n')
+            .map(item => item.trim());
 
-      lines = lines.filter(item => item.length > 0 && /^(\w+([-+.']\w+)*@)?\w+([-.]\w+)*(\/[-.\w])?$/.test(item));
+         lines = lines.filter(item => item.length > 0 && /^(\w+([-+.']\w+)*@)?\w+([-.]\w+)*(\/[-.\w])?$/.test(item));
 
-      textarea.val(lines.join('\n'));
+         textarea.val(lines.join('\n'));
 
-      let unblockedJids: string[] = <any>$(oldBlocklist).not(lines as any).get();
-      let blockedJids: string[] = <any>$(lines).not(oldBlocklist as any).get();
+         let unblockedJids: string[] = <any>$(oldBlocklist)
+            .not(lines as any)
+            .get();
+         let blockedJids: string[] = <any>$(lines)
+            .not(oldBlocklist as any)
+            .get();
 
-      let promises = [];
+         let promises = [];
 
-      if (unblockedJids.length > 0 || lines.length === 0) {
-         promises.push(blockPlugin.unblock(unblockedJids));
-      }
+         if (unblockedJids.length > 0 || lines.length === 0) {
+            promises.push(blockPlugin.unblock(unblockedJids));
+         }
 
-      if (blockedJids.length > 0) {
-         promises.push(blockPlugin.block(blockedJids));
-      }
+         if (blockedJids.length > 0) {
+            promises.push(blockPlugin.block(blockedJids));
+         }
 
-      Promise.all(promises).then(() => {
-         dialog.close();
+         Promise.all(promises).then(() => {
+            dialog.close();
+         });
       });
-   });
 }
 
 function appendWarning(text: string) {

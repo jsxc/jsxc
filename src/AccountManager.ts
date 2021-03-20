@@ -11,9 +11,7 @@ import * as UI from './ui/web';
 export default class AccountManager {
    private accounts: { [id: string]: Account } = {};
 
-   constructor(private storage: IStorage) {
-
-   }
+   constructor(private storage: IStorage) {}
 
    public restoreAccounts(): number {
       let accountIds = this.getAccountIds();
@@ -38,22 +36,24 @@ export default class AccountManager {
          this.accounts[id].destroy();
       }
 
-      let account = this.accounts[id] = new Account(id);
+      let account = (this.accounts[id] = new Account(id));
 
       Client.getPresenceController().registerAccount(account);
       ClientAvatar.get().registerAccount(account);
       UI.init();
 
-      RoleAllocator.get().waitUntilMaster().then(function() {
-         return account.connect();
-      }).then(function() {
+      RoleAllocator.get()
+         .waitUntilMaster()
+         .then(function () {
+            return account.connect();
+         })
+         .then(function () {})
+         .catch(function (msg) {
+            account.connectionDisconnected();
 
-      }).catch(function(msg) {
-         account.connectionDisconnected();
-
-         Log.warn(msg)
-      });
-   }
+            Log.warn(msg);
+         });
+   };
 
    private accountsHook = (newValue, oldValue) => {
       let diff = Utils.diffArray(newValue, oldValue);
@@ -71,7 +71,7 @@ export default class AccountManager {
             account.remove();
          }
       });
-   }
+   };
 
    public createAccount(url: string, jid: string, sid: string, rid: string): Promise<Account>;
    public createAccount(url: string, jid: string, password: string): Promise<Account>;
@@ -146,7 +146,7 @@ export default class AccountManager {
    }
 
    private getPendingAccountIds(): string[] {
-      return this.storage.getItem('pendingAccounts') || []
+      return this.storage.getItem('pendingAccounts') || [];
    }
 
    public removeAccount(account: Account) {

@@ -1,4 +1,4 @@
-import Log from './Log'
+import Log from './Log';
 
 export default class Random {
    public static number(max: number, min: number = 0): number {

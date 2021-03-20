@@ -1,5 +1,5 @@
-import Account from './Account'
-import JingleCallSession from './JingleCallSession'
+import Account from './Account';
+import JingleCallSession from './JingleCallSession';
 import JingleStreamSession from './JingleStreamSession';
 import { IOTalkJingleSession } from '@vendor/Jingle.interface';
 
@@ -9,7 +9,6 @@ const FILE_TRANSFER_SESSION = 'FileTransferSession';
 const STREAM_SESSION = 'StreamSession';
 
 export default class JingleSession {
-
    public static create(account: Account, session: IOTalkJingleSession) {
       let sessionType = JingleSession.getSessionType(session);
 
@@ -25,7 +24,7 @@ export default class JingleSession {
    }
 
    private static getSessionType(session: IOTalkJingleSession) {
-      let sessionType = (session.constructor) ? session.constructor.name : null;
+      let sessionType = session.constructor ? session.constructor.name : null;
 
       if (sessionType === MEDIA_SESSION) {
          sessionType = JingleSession.determineMediaSessionType(session);
@@ -39,7 +38,8 @@ export default class JingleSession {
       let description = session.isInitiator ? session.pc.localDescription : session.pc.remoteDescription;
 
       description.contents.forEach(content => {
-         let audioOrVideoRequested = ['audio', 'video'].indexOf(content.name) > -1 || ['audio', 'video'].indexOf(content.application.media) > -1;
+         let audioOrVideoRequested =
+            ['audio', 'video'].indexOf(content.name) > -1 || ['audio', 'video'].indexOf(content.application.media) > -1;
 
          if (content.senders === 'both' && audioOrVideoRequested) {
             reqMedia = true;

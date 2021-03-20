@@ -24,20 +24,25 @@
     "watch": "webpack --progress --config webpack.config.js --mode development --watch",
     "dev": "webpack serve --progress --mode development",
     "test": "karma start --single-run",
-    "fix-typescript-format": "eslint \"src/**/*.ts\" --fix",
+    "fix": "run-p --continue-on-error --print-label fix-*",
+    "fix-typescript-format": "eslint \"src/**/*.ts\" --fix && prettier src/ --write",
     "fix-style-format": "stylelint \"scss/**/*.scss\" --fix",
-    "checking": "run-p --continue-on-error --print-label checking-*",
+    "checking": "run-p --continue-on-error --print-label checking-**",
     "checking-style-format": "stylelint --cache \"scss/**/*.scss\"",
-    "checking-typescript-format": "eslint \"src/**/*.ts\"",
+    "checking-typescript-format": "eslint \"src/**/*.ts\" && prettier src/ --check",
     "checking-typescript": "tsc --noEmit",
-    "checking-blacklist": "node scripts/search-blacklist.js"
+    "lint:staged": "lint-staged"
   },
   "husky": {
     "hooks": {
       "prepare-commit-msg": "node scripts/prepare-commit-msg.js HUSKY_GIT_PARAMS",
-      "pre-commit": "yarn checking",
+      "pre-commit": "run-s lint:staged checking-typescript",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
+  },
+  "lint-staged": {
+    "src/*": ["eslint", "prettier --check"],
+    "scss/*": ["stylelint --cache"]
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
@@ -83,6 +88,7 @@
     "karma-spec-reporter": "^0.0.32",
     "karma-typescript": "^5.2.0",
     "karma-webpack": "^4.0.2",
+    "lint-staged": "^10.5.3",
     "mocha": "^8.2.1",
     "npm-run-all": "^4.1.5",
     "sass-loader": "^10.1.0",
@@ -127,6 +133,7 @@
     "otr": "github:sualko/otr#es6-modules",
     "precompile-handlebars": "^1.0.5",
     "qrcode": "^1.4.4",
+    "prettier": "^2.2.1",
     "screenfull": "^5.0.2",
     "sha1": "^1.1.1",
     "strophe.js": "^1.4.0",

@@ -1,22 +1,19 @@
-import ISignalStore, { IIdentityKeyPair, IPreKeyPair, ISignedPreKeyPair } from '../vendor/SignalStore.interface'
-import ArrayBufferUtils from '../util/ArrayBuffer'
+import ISignalStore, { IIdentityKeyPair, IPreKeyPair, ISignedPreKeyPair } from '../vendor/SignalStore.interface';
+import ArrayBufferUtils from '../util/ArrayBuffer';
 import Store from '../lib/Store';
 import Address from './Address';
-import IdentityKey from '../model/IdentityKey'
+import IdentityKey from '../model/IdentityKey';
 import Log from '@util/Log';
 
 export const DIRECTION = {
    SENDING: 1,
-   RECEIVING: 2
+   RECEIVING: 2,
 };
 
 export default class implements ISignalStore {
-
    public Direction = DIRECTION;
 
-   constructor(private store: Store) {
-
-   }
+   constructor(private store: Store) {}
 
    public getIdentityKeyPair(): Promise<IIdentityKeyPair> {
       let identityKey = this.store.getLocalIdentityKey();

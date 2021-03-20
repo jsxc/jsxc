@@ -1,11 +1,11 @@
-import Dialog from '../Dialog'
-import Form from '../../connection/Form'
-import Log from '../../util/Log'
+import Dialog from '../Dialog';
+import Form from '../../connection/Form';
+import Log from '../../util/Log';
 import openContactDialog from './contact';
 import Translation from '@util/Translation';
-import Client from '../../Client'
-import Account from '../../Account'
-import JID from '../../JID'
+import Client from '../../Client';
+import Account from '../../Account';
+import JID from '../../JID';
 import { IJID } from '@src/JID.interface';
 import FormField from '@connection/FormField';
 
@@ -26,13 +26,16 @@ export default function () {
       let accountoption = $('<option>').text(account.getJID().bare).val(account.getUid());
 
       dialog.getDom().find('select[name="account"]').append(accountoption);
-   })
-
-   dialog.getDom().find('select[name="account"]').on('change', (ev) => {
-      let uid = $(ev.target).val().toString();
-
-      loadForm(Client.getAccountManager().getAccount(uid), dialog);
    });
+
+   dialog
+      .getDom()
+      .find('select[name="account"]')
+      .on('change', ev => {
+         let uid = $(ev.target).val().toString();
+
+         loadForm(Client.getAccountManager().getAccount(uid), dialog);
+      });
 
    loadForm(accounts[0], dialog);
 }
@@ -40,7 +43,7 @@ export default function () {
 function loadForm(account: Account, dialog: Dialog) {
    let searchService = account.getConnection().getSearchService();
 
-   getSearchService(account).then(async (services) => {
+   getSearchService(account).then(async services => {
       if (!services || services.length === 0) {
          dialog.getDom().find('.jsxc-content').text(Translation.t('not_available'));
 
@@ -56,7 +59,7 @@ function loadForm(account: Account, dialog: Dialog) {
 
       formElement.find('.jsxc-js-close').on('click', () => dialog.close());
 
-      formElement.on('submit', (ev) => {
+      formElement.on('submit', ev => {
          ev.preventDefault();
 
          formElement.find('input, button').prop('disabled', true);
@@ -73,13 +76,15 @@ function loadForm(account: Account, dialog: Dialog) {
             form = Form.fromHTML(formElement.get(0));
          }
 
-         searchService.executeSearchForm(services[0], form).then(resultStanza => {
-            appendSearchResults(resultStanza, dialog);
-         }).catch((err) => {
-
-         }).then(() => {
-            formElement.find('input, button').prop('disabled', false);
-         });
+         searchService
+            .executeSearchForm(services[0], form)
+            .then(resultStanza => {
+               appendSearchResults(resultStanza, dialog);
+            })
+            .catch(err => {})
+            .then(() => {
+               formElement.find('input, button').prop('disabled', false);
+            });
       });
    });
 }
@@ -90,33 +95,44 @@ async function getSearchService(account: Account): Promise<IJID[]> {
    let serverJid = new JID('', ownJid.domain, '');
    let discoInfoRepository = account.getDiscoInfoRepository();
 
-   return connection.getDiscoService().getDiscoItems(serverJid).then((stanza) => {
-      let promises = $(stanza).find('item').map((index, element) => {
-         let jid = new JID('', $(element).attr('jid'), '');
+   return connection
+      .getDiscoService()
+      .getDiscoItems(serverJid)
+      .then(stanza => {
+         let promises = $(stanza)
+            .find('item')
+            .map((index, element) => {
+               let jid = new JID('', $(element).attr('jid'), '');
 
-         return discoInfoRepository.requestDiscoInfo(jid).then((discoInfo) => {
-            let hasSearch = discoInfo.hasFeature('jabber:iq:search');
-            let isMUC = discoInfo.hasFeature('http://jabber.org/protocol/muc');
+               return discoInfoRepository
+                  .requestDiscoInfo(jid)
+                  .then(discoInfo => {
+                     let hasSearch = discoInfo.hasFeature('jabber:iq:search');
+                     let isMUC = discoInfo.hasFeature('http://jabber.org/protocol/muc');
 
-            return hasSearch && !isMUC ? jid : undefined;
-         }).catch((stanza) => {
-            const from = $(stanza).attr('from') || '';
+                     return hasSearch && !isMUC ? jid : undefined;
+                  })
+                  .catch(stanza => {
+                     const from = $(stanza).attr('from') || '';
 
-            Log.info(`Ignore ${from} as Search provider, because could not load disco info.`);
+                     Log.info(`Ignore ${from} as Search provider, because could not load disco info.`);
 
-            return undefined;
+                     return undefined;
+                  });
+            })
+            .get();
+
+         return Promise.all(promises).then(results => {
+            return results.filter(jid => typeof jid !== 'undefined');
          });
-      }).get();
-
-      return Promise.all(promises).then((results) => {
-         return results.filter(jid => typeof jid !== 'undefined');
       });
-   })
 }
 
-
 function generateForm(stanza: Element) {
-   let formElement = $(stanza).find('x[xmlns="jabber:x:data"]').length > 0 ? Form.fromXML(stanza).toHTML() : generateSimpleForm(stanza);
+   let formElement =
+      $(stanza).find('x[xmlns="jabber:x:data"]').length > 0
+         ? Form.fromXML(stanza).toHTML()
+         : generateSimpleForm(stanza);
 
    formElement.append(`<div class="form-group">
    <div class="col-sm-offset-4 col-sm-8">
@@ -198,7 +214,8 @@ function appendSearchResults(resultStanza: Element, dialog: Dialog) {
 
          if (extendedItem.length === 1) {
             bareJid = extendedItem.find('field[var="jid"]').text();
-            alias = extendedItem.find('field[var="first"]').text() + ' ' + extendedItem.find('field[var="last"]').text();
+            alias =
+               extendedItem.find('field[var="first"]').text() + ' ' + extendedItem.find('field[var="last"]').text();
          } else if (simpleItem.length === 1) {
             bareJid = simpleItem.attr('jid');
             alias = simpleItem.find('first').text() + ' ' + simpleItem.find('last').text();

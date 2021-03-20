@@ -1,4 +1,3 @@
-
 export interface IJID {
    readonly full: string;
 

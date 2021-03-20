@@ -1,18 +1,18 @@
-import IStorage from '../../../Storage.interface'
-import { IContact as Contact } from '../../../Contact.interface'
-import { IMessage as Message } from '../../../Message.interface'
-import { IConnection } from '../../../connection/Connection.interface'
-import Store from './Store'
-import Peer from './Peer'
-import Bootstrap from './Bootstrap'
-import JID from '../../../JID'
-import { IJID } from '../../../JID.interface'
-import Stanza from '../util/Stanza'
-import { NS_BASE } from '../util/Const'
-import ArrayBufferUtils from '../util/ArrayBuffer'
-import * as AES from '../util/AES'
-import Device, { Trust } from './Device'
-import { Strophe } from '../../../vendor/Strophe'
+import IStorage from '../../../Storage.interface';
+import { IContact as Contact } from '../../../Contact.interface';
+import { IMessage as Message } from '../../../Message.interface';
+import { IConnection } from '../../../connection/Connection.interface';
+import Store from './Store';
+import Peer from './Peer';
+import Bootstrap from './Bootstrap';
+import JID from '../../../JID';
+import { IJID } from '../../../JID.interface';
+import Stanza from '../util/Stanza';
+import { NS_BASE } from '../util/Const';
+import ArrayBufferUtils from '../util/ArrayBuffer';
+import * as AES from '../util/AES';
+import Device, { Trust } from './Device';
+import { Strophe } from '../../../vendor/Strophe';
 import BundleManager from './BundleManager';
 import IdentityManager from './IdentityManager';
 import Translation from '@util/Translation';
@@ -82,8 +82,12 @@ export default class Omemo {
    private makeSureOwnDeviceIdIsInList(deviceList: number[]) {
       let ownDeviceId = this.store.getLocalDeviceId();
 
-      if (this.store.isPublished() && typeof ownDeviceId === 'number'
-         && !isNaN(ownDeviceId) && deviceList.indexOf(ownDeviceId) < 0) {
+      if (
+         this.store.isPublished() &&
+         typeof ownDeviceId === 'number' &&
+         !isNaN(ownDeviceId) &&
+         deviceList.indexOf(ownDeviceId) < 0
+      ) {
          this.bundleManager.publishDeviceId(ownDeviceId);
       }
    }
@@ -114,7 +118,10 @@ export default class Omemo {
 
    public async trustOnFirstUse(contact: Contact): Promise<boolean> {
       let peer = this.getPeer(contact.getJid());
-      let [peerTrustedOnFirstUse, localPeerTrustedOnFirstUse] = await Promise.all([peer.trustOnFirstUse(), this.localPeer.trustOnFirstUse()]);
+      let [peerTrustedOnFirstUse, localPeerTrustedOnFirstUse] = await Promise.all([
+         peer.trustOnFirstUse(),
+         this.localPeer.trustOnFirstUse(),
+      ]);
 
       if (peerTrustedOnFirstUse) {
          contact.addSystemMessage(Translation.t('Blindly_trusted_peer_on_first_use'));
@@ -151,34 +158,43 @@ export default class Omemo {
       let peer = this.getPeer(contact.getJid());
       let plaintextMessage = message.getPlaintextMessage();
 
-      return peer.encrypt(this.localPeer, plaintextMessage).then((encryptedMessages) => {
-         let stanza = Stanza.buildEncryptedStanza(encryptedMessages, this.store.getLocalDeviceId());
+      return peer
+         .encrypt(this.localPeer, plaintextMessage)
+         .then(encryptedMessages => {
+            let stanza = Stanza.buildEncryptedStanza(encryptedMessages, this.store.getLocalDeviceId());
 
-         $(xmlElement.tree()).find(`html[xmlns="${Strophe.NS.XHTML_IM}"]`).remove();
-         $(xmlElement.tree()).find('>body').remove();
-         $(xmlElement.tree()).find('>data[xmlns="urn:xmpp:bob"]').remove();
+            $(xmlElement.tree()).find(`html[xmlns="${Strophe.NS.XHTML_IM}"]`).remove();
+            $(xmlElement.tree()).find('>body').remove();
+            $(xmlElement.tree()).find('>data[xmlns="urn:xmpp:bob"]').remove();
 
-         xmlElement.cnode(stanza.tree());
-         xmlElement.up().c('store', {
-            xmlns: 'urn:xmpp:hints'
-         }).up();
+            xmlElement.cnode(stanza.tree());
+            xmlElement
+               .up()
+               .c('store', {
+                  xmlns: 'urn:xmpp:hints',
+               })
+               .up();
 
-         xmlElement.c('body').t('***' + Translation.t('You_received_an_OMEMO_encrypted_message') + '***').up();
+            xmlElement
+               .c('body')
+               .t('***' + Translation.t('You_received_an_OMEMO_encrypted_message') + '***')
+               .up();
 
-         message.setEncrypted(true);
+            message.setEncrypted(true);
 
-         return [message, xmlElement];
-      }).catch((msg) => {
-         message.setErrorMessage(Translation.t('Message_was_not_sent'));
-         message.setEncrypted(false);
+            return [message, xmlElement];
+         })
+         .catch(msg => {
+            message.setErrorMessage(Translation.t('Message_was_not_sent'));
+            message.setEncrypted(false);
 
-         contact.addSystemMessage(typeof msg === 'string' ? msg : msg.toString());
+            contact.addSystemMessage(typeof msg === 'string' ? msg : msg.toString());
 
-         throw msg;
-      });
+            throw msg;
+         });
    }
 
-   public async decrypt(stanza): Promise<{ plaintext: string, trust: Trust } | void> {
+   public async decrypt(stanza): Promise<{ plaintext: string; trust: Trust } | void> {
       let messageElement = $(stanza);
 
       if (messageElement.prop('tagName') !== 'message') {
@@ -199,7 +215,7 @@ export default class Omemo {
       }
 
       let ownDeviceId = this.store.getLocalDeviceId();
-      let ownPreKeyFiltered = encryptedData.keys.filter(function(preKey) {
+      let ownPreKeyFiltered = encryptedData.keys.filter(function (preKey) {
          return ownDeviceId === preKey.deviceId;
       });
 
@@ -212,7 +228,11 @@ export default class Omemo {
       let deviceDecryptionResult;
 
       try {
-         deviceDecryptionResult = await peer.decrypt(encryptedData.sourceDeviceId, ownPreKey.ciphertext, ownPreKey.preKey);
+         deviceDecryptionResult = await peer.decrypt(
+            encryptedData.sourceDeviceId,
+            ownPreKey.ciphertext,
+            ownPreKey.preKey
+         );
       } catch (err) {
          throw new Error('Error during decryption: ' + err);
       }
@@ -239,7 +259,7 @@ export default class Omemo {
          });
       }
 
-      let iv = (<any> encryptedData).iv;
+      let iv = (<any>encryptedData).iv;
       let ciphertextAndAuthenticationTag = ArrayBufferUtils.concat(encryptedData.payload, authenticationTag);
 
       return {

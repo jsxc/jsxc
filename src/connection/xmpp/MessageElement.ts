@@ -47,7 +47,7 @@ export class MessageElement {
          let carbonTagName = <string>carbonStanza.prop('tagName') || '';
 
          this.carbon = true;
-         this.direction = (carbonTagName.toLowerCase() === 'sent') ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
+         this.direction = carbonTagName.toLowerCase() === 'sent' ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
 
          return;
       }
@@ -116,7 +116,7 @@ export class MessageElement {
 
    public getTime() {
       let delayElement = this.element.find('delay[xmlns="urn:xmpp:delay"]');
-      let stamp = (delayElement.length > 0) ? new Date(delayElement.attr('stamp')) : new Date();
+      let stamp = delayElement.length > 0 ? new Date(delayElement.attr('stamp')) : new Date();
 
       return stamp;
    }

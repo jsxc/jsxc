@@ -1,5 +1,5 @@
-import Dialog from '../Dialog'
-import { IContact } from '../../Contact.interface'
+import Dialog from '../Dialog';
+import { IContact } from '../../Contact.interface';
 import Translation from '@util/Translation';
 import { Presence } from '@connection/AbstractConnection';
 import Color from '@util/Color';
@@ -9,68 +9,74 @@ let vcardBodyTemplate = require('../../../template/vcard-body.hbs');
 
 let dialog: Dialog;
 
-export default function(contact: IContact) {
-
+export default function (contact: IContact) {
    let resources = contact.getResources();
-   let basicData = resources.map((resource) => {
+   let basicData = resources.map(resource => {
       let presence = Presence[contact.getPresence(resource)];
 
       return {
          resource,
          client: Translation.t('loading'),
          presence: Translation.t(presence),
-      }
+      };
    });
 
    let content = vcardTemplate({
       jid: contact.getJid().bare,
       name: contact.getName(),
-      basic: basicData
+      basic: basicData,
    });
 
    dialog = new Dialog(content);
    dialog.open();
 
    let groups = contact.getGroups();
-   dialog.getDom().find('.jsxc-vcard-tags').append(
-      groups.map(group => {
-         let element = $('<span>');
+   dialog
+      .getDom()
+      .find('.jsxc-vcard-tags')
+      .append(
+         groups.map(group => {
+            let element = $('<span>');
 
-         element.text(group);
-         element.addClass('jsxc-tag');
-         element.css('background-color', Color.generate(group));
+            element.text(group);
+            element.addClass('jsxc-tag');
+            element.css('background-color', Color.generate(group));
 
-         return element;
-      })
-   );
+            return element;
+         })
+      );
 
    for (let resource of resources) {
       let clientElement = dialog.getDom().find(`[data-resource="${resource}"] .jsxc-client`);
 
-      contact.getCapabilitiesByResource(resource).then(discoInfo => {
-         if (discoInfo) {
-            let identities = discoInfo.getIdentities();
+      contact
+         .getCapabilitiesByResource(resource)
+         .then(discoInfo => {
+            if (discoInfo) {
+               let identities = discoInfo.getIdentities();
 
-            for (let identity of identities) {
-               if (identity && identity.category === 'client') {
-                  clientElement.text(`${identity.name} (${identity.type})`);
+               for (let identity of identities) {
+                  if (identity && identity.category === 'client') {
+                     clientElement.text(`${identity.name} (${identity.type})`);
 
-                  return;
+                     return;
+                  }
                }
             }
-         }
 
-         return Promise.reject();
-      }).catch(() => {
-         clientElement.text(Translation.t('Not_available'));
-      });
+            return Promise.reject();
+         })
+         .catch(() => {
+            clientElement.text(Translation.t('Not_available'));
+         });
    }
 
-   contact.getVcard()
+   contact
+      .getVcard()
       .then(vcardSuccessCallback)
-      .then(function(vcardData) {
+      .then(function (vcardData) {
          let content = vcardBodyTemplate({
-            properties: vcardData
+            properties: vcardData,
          });
 
          dialog.getDom().append(content);

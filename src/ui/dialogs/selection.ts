@@ -1,22 +1,22 @@
-import Dialog from '../Dialog'
+import Dialog from '../Dialog';
 
 let selectionTemplate = require('../../../template/selection.hbs');
 
 interface ISelectionDialogOptions {
-   header?: string,
-   message?: string,
+   header?: string;
+   message?: string;
    primary?: {
-      label?: string,
-      cb: () => any
-   },
+      label?: string;
+      cb: () => any;
+   };
    option?: {
-      label?: string,
-      cb: () => any
-   },
-   id?: string
+      label?: string;
+      cb: () => any;
+   };
+   id?: string;
 }
 
-export default function(options: ISelectionDialogOptions) {
+export default function (options: ISelectionDialogOptions) {
    let content = selectionTemplate({
       ...options,
       hasPrimary: options.primary && typeof options.primary.cb === 'function',
@@ -30,12 +30,12 @@ export default function(options: ISelectionDialogOptions) {
       dom.attr('data-selection-id', options.id);
    }
 
-   dom.find('.jsxc-button--primary').click(function() {
+   dom.find('.jsxc-button--primary').click(function () {
       options.primary.cb.call(this, arguments);
 
       dialog.close();
    });
-   dom.find('.jsxc-button--default').click(function() {
+   dom.find('.jsxc-button--default').click(function () {
       options.option.cb.call(this, arguments);
 
       dialog.close();

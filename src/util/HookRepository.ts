@@ -1,4 +1,3 @@
-
 export default class HookRepository<T extends Function> {
    private hooks = {};
 
@@ -14,7 +13,7 @@ export default class HookRepository<T extends Function> {
       let eventNameList = this.hooks[eventName] || [];
 
       if (eventNameList.indexOf(func) > -1) {
-         eventNameList = $.grep(eventNameList, function(i) {
+         eventNameList = $.grep(eventNameList, function (i) {
             return func !== i;
          });
       }
@@ -26,10 +25,10 @@ export default class HookRepository<T extends Function> {
       let hooks = this.hooks;
 
       let eventNames = Object.keys(hooks);
-      eventNames.forEach(function(eventName) {
+      eventNames.forEach(function (eventName) {
          if (targetEventName === eventName || targetEventName.indexOf(eventName + ':') === 0) {
             let eventNameHooks = hooks[eventName] || [];
-            eventNameHooks.forEach(function(hook) {
+            eventNameHooks.forEach(function (hook) {
                hook.apply({}, args);
             });
          }

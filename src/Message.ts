@@ -1,22 +1,21 @@
-import Storage from './Storage'
-import Attachment from './Attachment'
-import JID from './JID'
-import * as CONST from './CONST'
-import Emoticons from './Emoticons'
-import IIdentifiable from './Identifiable.interface'
-import Client from './Client'
-import Utils from './util/Utils'
-import { IMessage, DIRECTION, IMessagePayload, MessageMark } from './Message.interface'
-import { ContactType } from './Contact.interface'
-import PersistentMap from './util/PersistentMap'
-import UUID from './util/UUID'
+import Storage from './Storage';
+import Attachment from './Attachment';
+import JID from './JID';
+import * as CONST from './CONST';
+import Emoticons from './Emoticons';
+import IIdentifiable from './Identifiable.interface';
+import Client from './Client';
+import Utils from './util/Utils';
+import { IMessage, DIRECTION, IMessagePayload, MessageMark } from './Message.interface';
+import { ContactType } from './Contact.interface';
+import PersistentMap from './util/PersistentMap';
+import UUID from './util/UUID';
 import Pipe from '@util/Pipe';
 import { IJID } from './JID.interface';
 
 const ATREGEX = new RegExp('(xmpp:)?(' + CONST.REGEX.JID.source + ')(\\?[^\\s]+\\b)?', 'i');
 
 export default class Message implements IIdentifiable, IMessage {
-
    public static exists(uid: string) {
       let data = PersistentMap.getData(Client.getStorage(), uid);
 
@@ -29,7 +28,15 @@ export default class Message implements IIdentifiable, IMessage {
       return Message.formattingPipe.run(text, direction, peer, senderName).then(args => args[0]);
    }
 
-   public static addFormatter(formatter: (text: string, direction: DIRECTION, peer?: IJID, senderName?: string) => Promise<[string, DIRECTION, IJID, string]> | string, priority?: number) {
+   public static addFormatter(
+      formatter: (
+         text: string,
+         direction: DIRECTION,
+         peer?: IJID,
+         senderName?: string
+      ) => Promise<[string, DIRECTION, IJID, string]> | string,
+      priority?: number
+   ) {
       Message.formattingPipe.addProcessor((text: string, direction: DIRECTION, peer: IJID, senderName: string) => {
          let returnValue = formatter(text, direction, peer, senderName);
 
@@ -86,16 +93,21 @@ export default class Message implements IIdentifiable, IMessage {
             data.attachment = data.attachment.getUid();
          }
 
-         this.data.set($.extend({
-            unread: true,
-            mark: MessageMark.pending,
-            encrypted: null,
-            forwarded: false,
-            stamp: new Date().getTime(),
-            type: ContactType.CHAT,
-            encryptedHtmlMessage: null,
-            encryptedPlaintextMessage: null
-         }, data));
+         this.data.set(
+            $.extend(
+               {
+                  unread: true,
+                  mark: MessageMark.pending,
+                  encrypted: null,
+                  forwarded: false,
+                  stamp: new Date().getTime(),
+                  type: ContactType.CHAT,
+                  encryptedHtmlMessage: null,
+                  encryptedPlaintextMessage: null,
+               },
+               data
+            )
+         );
       } else if (!this.data.get('attrId')) {
          throw new Error(`Could not load message ${this.uid}`);
       }
@@ -106,6 +118,7 @@ export default class Message implements IIdentifiable, IMessage {
    }
 
    public getId() {
+      // eslint-disable-next-line no-console
       console.trace('Deprecated Message.getId called');
       return this.getUid();
    }
@@ -140,6 +153,7 @@ export default class Message implements IIdentifiable, IMessage {
       let nextId = typeof message === 'string' || typeof message === 'undefined' ? message : message.getUid();
 
       if (this.getNextId() === this.uid) {
+         // eslint-disable-next-line no-console
          console.trace('Loop detected ' + this.uid);
       } else {
          this.data.set('next', nextId);
@@ -224,7 +238,7 @@ export default class Message implements IIdentifiable, IMessage {
       return this.data.get('encryptedPlaintextMessage');
    }
 
-   public getSender(): { name: string, jid?: JID } {
+   public getSender(): { name: string; jid?: JID } {
       let sender = this.data.get('sender');
 
       return {
@@ -309,7 +323,7 @@ export default class Message implements IIdentifiable, IMessage {
    }
 
    public setDirection(direction: DIRECTION) {
-      this.data.set('direction', direction)
+      this.data.set('direction', direction);
    }
 
    public setPlaintextMessage(plaintextMessage: string) {
@@ -333,7 +347,7 @@ export default class Message implements IIdentifiable, IMessage {
       return `<p dir="auto">${body}</p>`;
    }
 
-   public getPlaintextEmoticonMessage(emotions: 'unicode'|'image' = 'image'): string {
+   public getPlaintextEmoticonMessage(emotions: 'unicode' | 'image' = 'image'): string {
       let body = this.getPlaintextMessage();
 
       body = Utils.escapeHTML(body);
@@ -356,15 +370,15 @@ export default class Message implements IIdentifiable, IMessage {
 }
 
 function convertUrlToLink(text: string) {
-   return text.replace(CONST.REGEX.URL, function(url) {
-      let href = (url.match(/^https?:\/\//i)) ? url : 'http://' + url;
+   return text.replace(CONST.REGEX.URL, function (url) {
+      let href = url.match(/^https?:\/\//i) ? url : 'http://' + url;
 
       return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
    });
 }
 
 function convertEmailToLink(text: string) {
-   return text.replace(ATREGEX, function(str, protocol, jid, action) {
+   return text.replace(ATREGEX, function (str, protocol, jid, action) {
       if (protocol === 'xmpp:') {
          if (typeof action === 'string') {
             jid += action;
@@ -378,15 +392,20 @@ function convertEmailToLink(text: string) {
 }
 
 function convertGeoToLink(text: string) {
-   return text.replace(CONST.REGEX.GEOURI, (url) => {
+   return text.replace(CONST.REGEX.GEOURI, url => {
       return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-   })
+   });
 }
 
 function markQuotation(text: string) {
-   return text.split(/(?:\n|\r\n|\r)/).map(line => {
-      return line.indexOf('&gt;') === 0 ? '<span class="jsxc-quote">' + line.replace(/^&gt; ?/, '') + '</span>' : line;
-   }).join('\n');
+   return text
+      .split(/(?:\n|\r\n|\r)/)
+      .map(line => {
+         return line.indexOf('&gt;') === 0
+            ? '<span class="jsxc-quote">' + line.replace(/^&gt; ?/, '') + '</span>'
+            : line;
+      })
+      .join('\n');
 }
 
 function replaceLineBreaks(text: string) {

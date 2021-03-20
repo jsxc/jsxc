@@ -1,22 +1,21 @@
-
 export interface IIdentity {
-   category: string
-   type: string,
-   name?: string,
-   lang?: string
+   category: string;
+   type: string;
+   name?: string;
+   lang?: string;
 }
 
 export interface IDiscoInfo {
-   getIdentities(): IIdentity[]
+   getIdentities(): IIdentity[];
 
-   getFeatures(): string[]
+   getFeatures(): string[];
 
-   getForms()
+   getForms();
 
-   getFormByType(type: string)
+   getFormByType(type: string);
 
-   getCapsVersion(): String
+   getCapsVersion(): String;
 
-   hasFeature(features: string[]): boolean
-   hasFeature(feature: string): boolean
+   hasFeature(features: string[]): boolean;
+   hasFeature(feature: string): boolean;
 }

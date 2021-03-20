@@ -1,5 +1,5 @@
-import JingleHandler from '../JingleHandler'
-import JingleAbstractSession from '../../JingleAbstractSession'
+import JingleHandler from '../JingleHandler';
+import JingleAbstractSession from '../../JingleAbstractSession';
 
 export default class XMPPJingleHandler extends JingleHandler {
    protected onIncoming(session) {
@@ -7,6 +7,6 @@ export default class XMPPJingleHandler extends JingleHandler {
 
       jingleSession.onOnceIncoming();
 
-      return jingleSession
+      return jingleSession;
    }
 }

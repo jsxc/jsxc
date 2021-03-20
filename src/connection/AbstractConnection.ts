@@ -1,16 +1,16 @@
-import Message from '../Message'
-import JID from '../JID'
-import * as NS from './xmpp/namespace'
-import Log from '../util/Log'
-import { Strophe, $iq, $msg, $pres } from '../vendor/Strophe'
-import Account from '../Account'
-import PEPService from './services/PEP'
-import SearchService from './services/Search'
-import PubSubService from './services/PubSub'
-import MUCService from './services/MUC'
-import RosterService from './services/Roster'
-import VcardService from './services/Vcard'
-import DiscoService from './services/Disco'
+import Message from '../Message';
+import JID from '../JID';
+import * as NS from './xmpp/namespace';
+import Log from '../util/Log';
+import { Strophe, $iq, $msg, $pres } from '../vendor/Strophe';
+import Account from '../Account';
+import PEPService from './services/PEP';
+import SearchService from './services/Search';
+import PubSubService from './services/PubSub';
+import MUCService from './services/MUC';
+import RosterService from './services/Roster';
+import VcardService from './services/Vcard';
+import DiscoService from './services/Disco';
 
 export const STANZA_KEY = 'stanza';
 export const STANZA_IQ_KEY = 'stanzaIQ';
@@ -22,10 +22,10 @@ enum Presence {
    away,
    xa,
    dnd,
-   offline
+   offline,
 }
 
-type ExtensivePresence = { presence: Presence, status: string };
+type ExtensivePresence = { presence: Presence; status: string };
 
 abstract class AbstractConnection {
    protected abstract connection;
@@ -36,7 +36,14 @@ abstract class AbstractConnection {
    protected abstract sendIQ(stanzaElement: Element): Promise<Element>;
    protected abstract sendIQ(stanzaElement: Strophe.Builder): Promise<Element>;
 
-   public abstract registerHandler(handler: (stanza: string) => boolean, ns?: string, name?: string, type?: string, id?: string, from?: string);
+   public abstract registerHandler(
+      handler: (stanza: string) => boolean,
+      ns?: string,
+      name?: string,
+      type?: string,
+      id?: string,
+      from?: string
+   );
 
    protected jingleHandler;
    public abstract getJingleHandler();
@@ -46,7 +53,6 @@ abstract class AbstractConnection {
    protected services = { pubSub: null, pep: null };
 
    constructor(protected account: Account) {
-
       let discoInfo = this.account.getDiscoInfo();
 
       discoInfo.addIdentity('client', 'web', 'JSXC');
@@ -58,41 +64,46 @@ abstract class AbstractConnection {
    public getPubSubService = (): PubSubService => {
       //@TODO connect? supported?
       return this.getService('pubsub', PubSubService);
-   }
+   };
 
    public getPEPService = (): PEPService => {
       return this.getService('pep', PEPService);
-   }
+   };
 
    public getSearchService = (): SearchService => {
       return this.getService('search', SearchService);
-   }
+   };
 
    public getMUCService = (): MUCService => {
       return this.getService('muc', MUCService);
-   }
+   };
 
    public getRosterService = (): RosterService => {
       return this.getService('roster', RosterService);
-   }
+   };
 
    public getVcardService = (): VcardService => {
       return this.getService('vcard', VcardService);
-   }
+   };
 
    public getDiscoService = (): DiscoService => {
       return this.getService('disco', DiscoService);
-   }
+   };
 
    private getService(key: string, Service) {
       if (!this.services[key]) {
          let self = this;
 
-         this.services[key] = new Service(function () {
-            return self.send.apply(self, arguments)
-         }, function () {
-            return self.sendIQ.apply(self, arguments)
-         }, this, this.account);
+         this.services[key] = new Service(
+            function () {
+               return self.send.apply(self, arguments);
+            },
+            function () {
+               return self.sendIQ.apply(self, arguments);
+            },
+            this,
+            this.account
+         );
       }
 
       return this.services[key];
@@ -126,54 +137,69 @@ abstract class AbstractConnection {
       let xmlMsg = $msg({
          to: message.getPeer().full,
          type: message.getType(),
-         id: message.getAttrId()
+         id: message.getAttrId(),
       });
 
       let htmlMessage = this.getMessage(message, message.getEncryptedHtmlMessage, message.getHtmlMessage);
 
       if (htmlMessage) {
-         xmlMsg.c('html', {
-            xmlns: Strophe.NS.XHTML_IM
-         }).c('body', {
-            xmlns: Strophe.NS.XHTML
-         }).cnode($(htmlMessage).get(0)).up().up().up();
+         xmlMsg
+            .c('html', {
+               xmlns: Strophe.NS.XHTML_IM,
+            })
+            .c('body', {
+               xmlns: Strophe.NS.XHTML,
+            })
+            .cnode($(htmlMessage).get(0))
+            .up()
+            .up()
+            .up();
       }
 
-      let plaintextMessage = this.getMessage(message, message.getEncryptedPlaintextMessage, message.getPlaintextMessage);
+      let plaintextMessage = this.getMessage(
+         message,
+         message.getEncryptedPlaintextMessage,
+         message.getPlaintextMessage
+      );
 
       if (plaintextMessage) {
          xmlMsg.c('body').t(plaintextMessage).up();
       }
 
-      xmlMsg.c('origin-id', {
-         xmlns: 'urn:xmpp:sid:0',
-         id: message.getUid()
-      }).up();
+      xmlMsg
+         .c('origin-id', {
+            xmlns: 'urn:xmpp:sid:0',
+            id: message.getUid(),
+         })
+         .up();
 
       let pipe = this.account.getPipe('preSendMessageStanza');
-      pipe.run(message, xmlMsg).then(([message, xmlMsg]: [Message, Element]) => {
-         if (message.hasAttachment() && !message.getAttachment().isProcessed()) {
-            Log.warn('Attachment was not processed');
+      pipe
+         .run(message, xmlMsg)
+         .then(([message, xmlMsg]: [Message, Element]) => {
+            if (message.hasAttachment() && !message.getAttachment().isProcessed()) {
+               Log.warn('Attachment was not processed');
 
-            if (!message.getErrorMessage()) {
-               message.setErrorMessage('Attachment was not processed');
+               if (!message.getErrorMessage()) {
+                  message.setErrorMessage('Attachment was not processed');
+               }
+
+               if (!message.getPlaintextMessage()) {
+                  message.aborted();
+
+                  return;
+               }
             }
 
-            if (!message.getPlaintextMessage()) {
-               message.aborted();
+            this.send(xmlMsg);
 
-               return;
-            }
-         }
+            message.transferred();
+         })
+         .catch(err => {
+            message.aborted();
 
-         this.send(xmlMsg);
-
-         message.transferred();
-      }).catch(err => {
-         message.aborted();
-
-         Log.warn('Error during preSendMessageStanza pipe:', err);
-      });
+            Log.warn('Error during preSendMessageStanza pipe:', err);
+         });
    }
 
    private getMessage(message: Message, getEncryptedMessage: () => string, getMessage: () => string) {
@@ -218,7 +244,14 @@ abstract class AbstractConnection {
       this.send(presenceStanza);
    }
 
-   public queryArchive(archive: JID, version: string, queryId: string, contact?: JID, beforeResultId?: string, end?: Date): Promise<Element> {
+   public queryArchive(
+      archive: JID,
+      version: string,
+      queryId: string,
+      contact?: JID,
+      beforeResultId?: string,
+      end?: Date
+   ): Promise<Element> {
       let iq = $iq({
          type: 'set',
          to: archive.bare,
@@ -226,34 +259,50 @@ abstract class AbstractConnection {
 
       iq.c('query', {
          xmlns: version,
-         queryid: queryId
+         queryid: queryId,
       });
 
       iq.c('x', {
          xmlns: 'jabber:x:data',
-         type: 'submit'
+         type: 'submit',
       });
 
       iq.c('field', {
          var: 'FORM_TYPE',
-         type: 'hidden'
-      }).c('value').t(version).up().up();
+         type: 'hidden',
+      })
+         .c('value')
+         .t(version)
+         .up()
+         .up();
 
       if (contact) {
          iq.c('field', {
-            var: 'with'
-         }).c('value').t(contact.bare).up().up();
+            var: 'with',
+         })
+            .c('value')
+            .t(contact.bare)
+            .up()
+            .up();
       }
 
       if (end) {
          iq.c('field', {
-            var: 'end'
-         }).c('value').t(end.toISOString()).up().up();
+            var: 'end',
+         })
+            .c('value')
+            .t(end.toISOString())
+            .up()
+            .up();
       }
 
-      iq.up().c('set', {
-         xmlns: 'http://jabber.org/protocol/rsm'
-      }).c('max').t('20').up();
+      iq.up()
+         .c('set', {
+            xmlns: 'http://jabber.org/protocol/rsm',
+         })
+         .c('max')
+         .t('20')
+         .up();
 
       if (typeof beforeResultId === 'string' || typeof beforeResultId === 'number') {
          iq.c('before').t(beforeResultId);
@@ -266,11 +315,11 @@ abstract class AbstractConnection {
 
    public changePassword(newPassword: string): Promise<Element> {
       let iq = $iq({
-         type: 'set'
+         type: 'set',
       });
 
       iq.c('query', {
-         xmlns: 'jabber:iq:register'
+         xmlns: 'jabber:iq:register',
       });
 
       iq.c('username').t(this.getJID().node).up();
@@ -289,8 +338,8 @@ abstract class AbstractConnection {
          xmlns: NS.get('CAPS'),
          hash: 'sha-1',
          node: this.node,
-         ver: this.account.getDiscoInfo().getCapsVersion()
-      }
+         ver: this.account.getDiscoInfo().getCapsVersion(),
+      };
    }
 }
 

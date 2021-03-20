@@ -4,7 +4,7 @@ import Contact from '@src/Contact';
 import JID from '@src/JID';
 import Client from '@src/Client';
 
-export default function(accountId: string, header: string, description: string, fromString: string) {
+export default function (accountId: string, header: string, description: string, fromString: string) {
    SelectionDialog({
       header,
       message: description,
@@ -23,10 +23,10 @@ export default function(accountId: string, header: string, description: string, 
             account.getContactManager().addToCache(contact);
 
             contact.getChatWindowController().openProminently();
-         }
+         },
       },
       option: {
          cb: () => undefined,
-      }
+      },
    });
 }

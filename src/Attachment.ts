@@ -1,15 +1,15 @@
-import Log from './util/Log'
-import UUID from './util/UUID'
-import PersistentMap from './util/PersistentMap'
-import Client from './Client'
-import beautifyBytes from './ui/util/ByteBeautifier'
-import ImageHelper from '@util/ImageHelper'
-import FileHelper from '@util/FileHelper'
+import Log from './util/Log';
+import UUID from './util/UUID';
+import PersistentMap from './util/PersistentMap';
+import Client from './Client';
+import beautifyBytes from './ui/util/ByteBeautifier';
+import ImageHelper from '@util/ImageHelper';
+import FileHelper from '@util/FileHelper';
 
 export type AttachmentHandler = (attachment: Attachment, active: boolean) => Promise<void>;
 
 export default class Attachment {
-   private static handlers: {[key: string]: AttachmentHandler} = {}
+   private static handlers: { [key: string]: AttachmentHandler } = {};
 
    public static registerHandler(key: string, handler: AttachmentHandler) {
       Attachment.handlers[key] = handler;
@@ -40,12 +40,12 @@ export default class Attachment {
          this.properties.set({
             mimeType: this.file.type,
             name: this.file.name,
-            size: this.file.size
+            size: this.file.size,
          });
       } else if (arguments.length === 3) {
          this.properties.set({
             mimeType: arguments[1],
-            name: arguments[0]
+            name: arguments[0],
          });
 
          this.data = arguments[2];
@@ -174,7 +174,7 @@ export default class Attachment {
          img.attr('title', title);
          // img.attr('src', jsxc.options.get('root') + '/img/loading.gif');
 
-        FileHelper.getDataURLFromFile(this.file).then((src) => {
+         FileHelper.getDataURLFromFile(this.file).then(src => {
             img.attr('src', src);
          });
 
@@ -186,7 +186,7 @@ export default class Attachment {
 
    public registerThumbnailHook = (hook: (thumbnail?: string) => void) => {
       this.properties.registerHook('thumbnail', hook);
-   }
+   };
 
    public generateThumbnail(force: boolean = false): Promise<void> {
       if (typeof Image === 'undefined') {
@@ -199,7 +199,7 @@ export default class Attachment {
 
       if (force || !this.hasData()) {
          if (this.file) {
-            FileHelper.getDataURLFromFile(this.file).then((data) => {
+            FileHelper.getDataURLFromFile(this.file).then(data => {
                this.data = data;
 
                this.generateThumbnail();

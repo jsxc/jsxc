@@ -25,8 +25,8 @@ export default class FallbackContactProvider extends ContactProvider {
       return Promise.resolve(false);
    }
 
-   public createContact(jid: IJID, name?: string): IContact
-   public createContact(id: string): IContact
+   public createContact(jid: IJID, name?: string): IContact;
+   public createContact(id: string): IContact;
    public createContact() {
       if (typeof arguments[0] === 'string') {
          let contact = new Contact(this.account, arguments[0]);

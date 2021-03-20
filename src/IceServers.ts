@@ -1,16 +1,16 @@
-import Client from './Client'
-import Log from './util/Log'
+import Client from './Client';
+import Log from './util/Log';
 import { IRTCPeerConfig } from './OptionsDefault';
 
 export interface ICEServer {
-   urls: string|string[]
-   username?: string
-   password?: string
+   urls: string | string[];
+   username?: string;
+   password?: string;
 }
 
 export default class IceServers {
    public static isExpiring(): boolean {
-      let rtcPeerConfig = Client.getOption<IRTCPeerConfig>('RTCPeerConfig') || <IRTCPeerConfig> {};
+      let rtcPeerConfig = Client.getOption<IRTCPeerConfig>('RTCPeerConfig') || <IRTCPeerConfig>{};
 
       return !!rtcPeerConfig.url;
    }
@@ -22,11 +22,11 @@ export default class IceServers {
    }
 
    public static get(): Promise<ICEServer[]> {
-      let rtcPeerConfig = Client.getOption<IRTCPeerConfig>('RTCPeerConfig') || <IRTCPeerConfig> {};
+      let rtcPeerConfig = Client.getOption<IRTCPeerConfig>('RTCPeerConfig') || <IRTCPeerConfig>{};
       let storage = Client.getStorage();
       let url = rtcPeerConfig.url;
 
-      let ttl = (storage.getItem('iceValidity') || 0) - (new Date()).getTime();
+      let ttl = (storage.getItem('iceValidity') || 0) - new Date().getTime();
 
       if ((ttl > 0 || !rtcPeerConfig.url) && rtcPeerConfig.iceServers) {
          // credentials valid
@@ -47,38 +47,40 @@ export default class IceServers {
             async: true,
             dataType: 'json',
             xhrFields: {
-               withCredentials: Client.getOption('RTCPeerConfig').withCredentials
-            }
-         }).done((data: IRTCPeerConfig) => {
-            let peerConfig: IRTCPeerConfig = Client.getOption('RTCPeerConfig');
-            let ttl = data.ttl || peerConfig.ttl || 3600;
-            let iceServers = data.iceServers;
+               withCredentials: Client.getOption('RTCPeerConfig').withCredentials,
+            },
+         })
+            .done((data: IRTCPeerConfig) => {
+               let peerConfig: IRTCPeerConfig = Client.getOption('RTCPeerConfig');
+               let ttl = data.ttl || peerConfig.ttl || 3600;
+               let iceServers = data.iceServers;
 
-            if (iceServers && iceServers.length > 0) {
-               let urls = iceServers[0].urls && iceServers[0].urls.length > 0;
+               if (iceServers && iceServers.length > 0) {
+                  let urls = iceServers[0].urls && iceServers[0].urls.length > 0;
 
-               if (urls) {
-                  Log.debug('ice servers received');
+                  if (urls) {
+                     Log.debug('ice servers received');
 
-                  peerConfig.iceServers = iceServers;
-                  Client.setOption('RTCPeerConfig', peerConfig);
+                     peerConfig.iceServers = iceServers;
+                     Client.setOption('RTCPeerConfig', peerConfig);
 
-                  Client.getStorage().setItem('iceValidity', (new Date()).getTime() + 1000 * ttl);
+                     Client.getStorage().setItem('iceValidity', new Date().getTime() + 1000 * ttl);
 
-                  IceServers.startRenewalTimeout();
+                     IceServers.startRenewalTimeout();
 
-                  resolve(iceServers);
+                     resolve(iceServers);
+                  }
+               } else {
+                  Log.warn('Found no valid ICE server');
+
+                  reject('ice-servers-not-found');
                }
-            } else {
-               Log.warn('Found no valid ICE server');
+            })
+            .fail((xhr, textStatus, error) => {
+               Log.warn('RTC peer config request failed with status: ' + textStatus, error);
 
-               reject('ice-servers-not-found');
-            }
-         }).fail((xhr, textStatus, error) => {
-            Log.warn('RTC peer config request failed with status: ' + textStatus, error);
-
-            reject('request-not-possible');
-         });
+               reject('request-not-possible');
+            });
       });
    }
 
@@ -89,7 +91,7 @@ export default class IceServers {
          return;
       }
 
-      let ttl = validity - (new Date()).getTime();
+      let ttl = validity - new Date().getTime();
 
       setTimeout(() => {
          IceServers.get();

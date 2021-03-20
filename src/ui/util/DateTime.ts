@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+import * as moment from 'moment';
 
 export default class DateTime {
    public static stringify(stamp: number, elements?: JQuery) {
@@ -6,14 +6,14 @@ export default class DateTime {
       let fromNow = momentObject.fromNow();
 
       if (!elements) {
-         return fromNow
+         return fromNow;
       }
 
-      elements.each(function() {
+      elements.each(function () {
          $(this).text(fromNow);
       });
 
-      setTimeout(function() {
+      setTimeout(function () {
          DateTime.stringify(stamp, elements);
       }, 1000 * 60);
    }

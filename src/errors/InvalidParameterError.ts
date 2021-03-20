@@ -1,5 +1,3 @@
-import BaseError from './BaseError'
+import BaseError from './BaseError';
 
-export default class InvalidParameterError extends BaseError {
-
-}
+export default class InvalidParameterError extends BaseError {}

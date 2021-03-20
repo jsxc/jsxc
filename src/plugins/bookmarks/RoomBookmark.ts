@@ -1,9 +1,13 @@
 import { IJID } from '@src/JID.interface';
 
 export default class RoomBookmark {
-   constructor(private id: IJID, private alias?: string, private nickname?: string, private autoJoin: boolean = false, private password?: string) {
-
-   }
+   constructor(
+      private id: IJID,
+      private alias?: string,
+      private nickname?: string,
+      private autoJoin: boolean = false,
+      private password?: string
+   ) {}
 
    public getId(): string {
       return this.id.bare;

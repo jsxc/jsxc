@@ -1,6 +1,5 @@
-
 interface IIdentifiable {
-   getId(): string
+   getId(): string;
 }
 
 export default IIdentifiable;

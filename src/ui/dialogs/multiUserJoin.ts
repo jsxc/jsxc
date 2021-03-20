@@ -1,19 +1,19 @@
-import Dialog from '../Dialog'
-import Client from '../../Client'
-import JID from '../../JID'
-import { IConnection } from '../../connection/Connection.interface'
-import TableElement from '../util/TableElement'
-import Translation from '../../util/Translation'
-import Log from '../../util/Log'
+import Dialog from '../Dialog';
+import Client from '../../Client';
+import JID from '../../JID';
+import { IConnection } from '../../connection/Connection.interface';
+import TableElement from '../util/TableElement';
+import Translation from '../../util/Translation';
+import Log from '../../util/Log';
 import Account from '@src/Account';
 import MultiUserContact from '@src/MultiUserContact';
-import Form from '@connection/Form'
+import Form from '@connection/Form';
 
 let multiUserJoinTemplate = require('../../../template/multiUserJoin.hbs');
 
 const ENTER_KEY = 13;
 
-export default function(server?: string, room?: string) {
+export default function (server?: string, room?: string) {
    new MultiUserJoinDialog(server, room);
 }
 
@@ -32,14 +32,16 @@ class MultiUserJoinDialog {
 
    constructor(private server?: string, private room?: string) {
       let content = multiUserJoinTemplate({
-         accounts: Client.getAccountManager().getAccounts().map(account => ({
-            uid: account.getUid(),
-            jid: account.getJID().bare,
-         })),
+         accounts: Client.getAccountManager()
+            .getAccounts()
+            .map(account => ({
+               uid: account.getUid(),
+               jid: account.getJID().bare,
+            })),
       });
 
       this.dialog = new Dialog(content);
-      let dom = this.dom = this.dialog.open();
+      let dom = (this.dom = this.dialog.open());
 
       this.accountElement = dom.find('select[name="account"]');
       this.serverInputElement = dom.find('input[name="server"]');
@@ -73,7 +75,7 @@ class MultiUserJoinDialog {
 
          services.forEach(service => {
             $('#jsxc-serverlist select').append($('<option>').text(service.domain));
-         })
+         });
       });
    }
 
@@ -81,7 +83,7 @@ class MultiUserJoinDialog {
       this.showContinueElements();
 
       this.accountElement.on('change', () => {
-         let accountId = <string> this.accountElement.val();
+         let accountId = <string>this.accountElement.val();
 
          if (!this.server || !this.room) {
             this.updateAccount(accountId);
@@ -91,19 +93,22 @@ class MultiUserJoinDialog {
       this.serverInputElement.on('change', () => {
          this.dom.find('.jsxc-inputinfo.jsxc-server').text('').hide();
 
-         let jid = new JID(<string> this.serverInputElement.val(), '');
+         let jid = new JID(<string>this.serverInputElement.val(), '');
 
          this.getMultiUserRooms(jid);
-      })
-
-      this.dom.find('input[type="text"], input[type="password"]').keydown(() => {
-         this.emptyStatusElement();
-         this.showContinueElements();
-      }).keyup((ev) => {
-         if (ev.which === ENTER_KEY) {
-            this.continueHandler(ev);
-         }
       });
+
+      this.dom
+         .find('input[type="text"], input[type="password"]')
+         .keydown(() => {
+            this.emptyStatusElement();
+            this.showContinueElements();
+         })
+         .keyup(ev => {
+            if (ev.which === ENTER_KEY) {
+               this.continueHandler(ev);
+            }
+         });
 
       this.dom.find('.jsxc-continue').click(this.continueHandler);
       this.dom.find('.jsxc-join').click(this.joinHandler);
@@ -124,46 +129,55 @@ class MultiUserJoinDialog {
       let serverJid = new JID('', ownJid.domain, '');
       let discoInfoRepository = this.account.getDiscoInfoRepository();
 
-      return this.connection.getDiscoService().getDiscoItems(serverJid).then((stanza) => {
-         let promises = [];
+      return this.connection
+         .getDiscoService()
+         .getDiscoItems(serverJid)
+         .then(stanza => {
+            let promises = [];
 
-         $(stanza).find('item').each((index, element) => {
-            let jid = new JID('', $(element).attr('jid'), '');
+            $(stanza)
+               .find('item')
+               .each((index, element) => {
+                  let jid = new JID('', $(element).attr('jid'), '');
 
-            //@TODO cache
-            let promise = discoInfoRepository.requestDiscoInfo(jid).then((discoInfo) => {
-               return discoInfoRepository.hasFeature(discoInfo, 'http://jabber.org/protocol/muc');
-            }).then((hasFeature) => {
-               return hasFeature ? jid : undefined;
-            }).catch((stanza) => {
-               const from = $(stanza).attr('from') || '';
+                  //@TODO cache
+                  let promise = discoInfoRepository
+                     .requestDiscoInfo(jid)
+                     .then(discoInfo => {
+                        return discoInfoRepository.hasFeature(discoInfo, 'http://jabber.org/protocol/muc');
+                     })
+                     .then(hasFeature => {
+                        return hasFeature ? jid : undefined;
+                     })
+                     .catch(stanza => {
+                        const from = $(stanza).attr('from') || '';
 
-               Log.info(`Ignore ${from} as MUC provider, because could not load disco info.`);
-            });
+                        Log.info(`Ignore ${from} as MUC provider, because could not load disco info.`);
+                     });
 
-            promises.push(promise);
-         });
-
-         return Promise.all(promises).then((results) => {
-            return results
-               .filter(jid => typeof jid !== 'undefined')
-               .sort(function compare(a, b) {
-                  if (!a.domain || !b.domain) {
-                     return 0;
-                  }
-
-                  if (a.domain.startsWith('conference') && !b.domain.startsWith('conference')) {
-                     return -1;
-                  }
-
-                  if (!a.domain.startsWith('conference') && b.domain.startsWith('conference')) {
-                     return +1;
-                  }
-
-                  return a.domain.localeCompare(b.domain);
+                  promises.push(promise);
                });
+
+            return Promise.all(promises).then(results => {
+               return results
+                  .filter(jid => typeof jid !== 'undefined')
+                  .sort(function compare(a, b) {
+                     if (!a.domain || !b.domain) {
+                        return 0;
+                     }
+
+                     if (a.domain.startsWith('conference') && !b.domain.startsWith('conference')) {
+                        return -1;
+                     }
+
+                     if (!a.domain.startsWith('conference') && b.domain.startsWith('conference')) {
+                        return +1;
+                     }
+
+                     return a.domain.localeCompare(b.domain);
+                  });
+            });
          });
-      })
    }
 
    private getMultiUserRooms(server: JID) {
@@ -171,32 +185,36 @@ class MultiUserJoinDialog {
 
       let roomInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-room');
       roomInfoElement.show();
-      roomInfoElement.addClass('jsxc-waiting')
+      roomInfoElement.addClass('jsxc-waiting');
       roomInfoElement.text(Translation.t('Rooms_are_loaded'));
 
-      this.connection.getDiscoService().getDiscoItems(server)
+      this.connection
+         .getDiscoService()
+         .getDiscoItems(server)
          .then(this.parseRoomList)
          .catch(this.parseRoomListError)
          .then(() => {
             roomInfoElement.removeClass('jsxc-waiting');
-         })
+         });
    }
 
-   private parseRoomList = (stanza) => {
+   private parseRoomList = stanza => {
       // workaround: chrome does not display dropdown arrow for dynamically filled datalists
       $('#jsxc-roomlist select').empty();
 
-      $(stanza).find('item').each(function() {
-         let optionElement = $('<option>');
-         let jid = new JID($(this).attr('jid'));
-         let name = $(this).attr('name') || jid.node;
+      $(stanza)
+         .find('item')
+         .each(function () {
+            let optionElement = $('<option>');
+            let jid = new JID($(this).attr('jid'));
+            let name = $(this).attr('name') || jid.node;
 
-         optionElement.text(name);
-         optionElement.attr('data-jid', jid.full);
-         optionElement.attr('value', jid.node);
+            optionElement.text(name);
+            optionElement.attr('data-jid', jid.full);
+            optionElement.attr('value', jid.node);
 
-         $('#jsxc-roomlist select').append(optionElement);
-      });
+            $('#jsxc-roomlist select').append(optionElement);
+         });
 
       let set = $(stanza).find('set[xmlns="http://jabber.org/protocol/rsm"]');
       let roomInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-room');
@@ -204,15 +222,17 @@ class MultiUserJoinDialog {
       if (set.length > 0) {
          let count = set.find('count').text() || '?';
 
-         roomInfoElement.text(Translation.t('Could_load_only', {
-            count
-         }));
+         roomInfoElement.text(
+            Translation.t('Could_load_only', {
+               count,
+            })
+         );
       } else {
          roomInfoElement.text('').hide();
       }
-   }
+   };
 
-   private parseRoomListError = (stanza) => {
+   private parseRoomListError = stanza => {
       let serverInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-server');
       let roomInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-room');
       let errTextMsg = $(stanza).find('error text').text() || null;
@@ -225,9 +245,9 @@ class MultiUserJoinDialog {
 
       roomInfoElement.text('').hide();
       $('#jsxc-roomlist select').empty();
-   }
+   };
 
-   private continueHandler = (ev) => {
+   private continueHandler = ev => {
       ev.preventDefault();
 
       this.dom.find('input, select').prop('disabled', true);
@@ -236,22 +256,25 @@ class MultiUserJoinDialog {
          .then(this.requestMemberList)
          .then(() => {
             this.showJoinElements();
-         }).catch((msg) => {
+         })
+         .catch(msg => {
             this.dom.find('input, select').prop('disabled', false);
             this.setStatusMessage(msg, 'warning');
 
-            Log.warn(msg)
-         })
+            Log.warn(msg);
+         });
 
       return false;
-   }
+   };
 
    private testInputValues(): Promise<JID | void> {
-      let room = <string> this.roomInputElement.val();
-      let server = this.serverInputElement.val()?this.serverInputElement.val():this.serverInputElement.attr('placeholder');
+      let room = <string>this.roomInputElement.val();
+      let server = this.serverInputElement.val()
+         ? this.serverInputElement.val()
+         : this.serverInputElement.attr('placeholder');
 
       if (!room || !room.match(/^[^"&\'\/:<>@\s]+$/i)) {
-         this.roomInputElement.addClass('jsxc-invalid').keyup(function() {
+         this.roomInputElement.addClass('jsxc-invalid').keyup(function () {
             if ($(this).val()) {
                $(this).removeClass('jsxc-invalid');
             }
@@ -282,11 +305,14 @@ class MultiUserJoinDialog {
    private requestRoomInfo = (room: JID) => {
       this.setWaitingMessage('Loading_room_information');
 
-      return this.connection.getDiscoService().getDiscoInfo(room)
+      return this.connection
+         .getDiscoService()
+         .getDiscoInfo(room)
          .then(this.parseRoomInfo)
-         .then((roomInfoElement) => {
+         .then(roomInfoElement => {
             this.setStatusElement(roomInfoElement);
-         }).catch((stanza) => {
+         })
+         .catch(stanza => {
             if ($(stanza).find('item-not-found').length > 0) {
                this.setStatusMessage(Translation.t('Room_not_found_'));
 
@@ -294,12 +320,13 @@ class MultiUserJoinDialog {
             }
 
             return Promise.reject('I was not able to get any room information.');
-         }).then(() => {
+         })
+         .then(() => {
             return room;
          });
-   }
+   };
 
-   private parseRoomInfo = (stanza) => {
+   private parseRoomInfo = stanza => {
       let roomInfoElement = $('<div>');
       roomInfoElement.append(`<p>${Translation.t('This_room_is')}</p>`);
 
@@ -307,23 +334,22 @@ class MultiUserJoinDialog {
 
       let tableElement = new TableElement(2);
 
-      $(stanza).find('feature').each((index, featureElement) => {
-         let feature = $(featureElement).attr('var');
+      $(stanza)
+         .find('feature')
+         .each((index, featureElement) => {
+            let feature = $(featureElement).attr('var');
 
-         //@REVIEW true?
-         if (feature !== '' && true && feature.indexOf('muc_') === 0) {
-            tableElement.appendRow(
-               Translation.t(`${feature}.keyword`),
-               Translation.t(`${feature}.description`)
-            );
-         }
+            //@REVIEW true?
+            if (feature !== '' && true && feature.indexOf('muc_') === 0) {
+               tableElement.appendRow(Translation.t(`${feature}.keyword`), Translation.t(`${feature}.description`));
+            }
 
-         if (feature === 'muc_passwordprotected') {
-            this.passwordInputElement.parents('.form-group').removeClass('jsxc-hidden');
-            this.passwordInputElement.attr('required', 'required');
-            this.passwordInputElement.addClass('jsxc-invalid');
-         }
-      });
+            if (feature === 'muc_passwordprotected') {
+               this.passwordInputElement.parents('.form-group').removeClass('jsxc-hidden');
+               this.passwordInputElement.attr('required', 'required');
+               this.passwordInputElement.addClass('jsxc-invalid');
+            }
+         });
 
       let name = $(stanza).find('identity').attr('name');
       let subject = $(stanza).find('field[var="muc#roominfo_subject"]').attr('label');
@@ -336,10 +362,12 @@ class MultiUserJoinDialog {
             return;
          }
 
-         let value = field.getType() === 'boolean' ?
-            (field.getValues()[0] === '1' ? Translation.t('Yes') : Translation.t('No'))
-            :
-            field.getValues().join(', ');
+         let value =
+            field.getType() === 'boolean'
+               ? field.getValues()[0] === '1'
+                  ? Translation.t('Yes')
+                  : Translation.t('No')
+               : field.getValues().join(', ');
 
          tableElement.appendRow(field.getLabel(), value);
       });
@@ -353,30 +381,38 @@ class MultiUserJoinDialog {
       roomInfoElement.append($('<input type="hidden" name="room-subject">').val(subject));
 
       return roomInfoElement;
-   }
+   };
 
    private requestMemberList = (room: JID) => {
-      return this.connection.getDiscoService().getDiscoItems(room).then((stanza) => {
-         let memberJids = $(stanza).find('item').map((index, element) => $(element).attr('jid')).get();
+      return this.connection
+         .getDiscoService()
+         .getDiscoItems(room)
+         .then(stanza => {
+            let memberJids = $(stanza)
+               .find('item')
+               .map((index, element) => $(element).attr('jid'))
+               .get();
 
-         let row = $('<tr>');
-         row.append($('<td>').text(Translation.t('Occupants')));
-         row.append($('<td>').text(memberJids.length > 0 ? memberJids.join(', ') : Translation.t('Occupants_not_provided')));
+            let row = $('<tr>');
+            row.append($('<td>').text(Translation.t('Occupants')));
+            row.append(
+               $('<td>').text(memberJids.length > 0 ? memberJids.join(', ') : Translation.t('Occupants_not_provided'))
+            );
 
-         this.dom.find('.jsxc-status-container table').append(row);
-      });
-   }
+            this.dom.find('.jsxc-status-container table').append(row);
+         });
+   };
 
-   private joinHandler = (ev) => {
+   private joinHandler = ev => {
       ev.preventDefault();
 
       //@TODO disable handler, show spinner
 
-      let jid = new JID(<string> this.dom.find('input[name="room-jid"]').val());
-      let name = <string> this.dom.find('input[name="room-name"]').val() || undefined;
-      let nickname = <string> this.nicknameInputElement.val() || this.defaultNickname;
-      let password = <string> this.passwordInputElement.val() || undefined;
-      let subject = <string> this.dom.find('input[name="room-subject"]').val() || undefined;
+      let jid = new JID(<string>this.dom.find('input[name="room-jid"]').val());
+      let name = <string>this.dom.find('input[name="room-name"]').val() || undefined;
+      let nickname = <string>this.nicknameInputElement.val() || this.defaultNickname;
+      let password = <string>this.passwordInputElement.val() || undefined;
+      let subject = <string>this.dom.find('input[name="room-subject"]').val() || undefined;
 
       let multiUserContact = new MultiUserContact(this.account, jid, name);
       multiUserContact.setNickname(nickname);
@@ -393,14 +429,14 @@ class MultiUserJoinDialog {
       this.dialog.close();
 
       return false;
-   }
+   };
 
    private setWaitingMessage(msg: string) {
       this.setStatusMessage(msg, 'waiting');
    }
 
    private setStatusMessage(msg: string, level?: 'waiting' | 'warning') {
-      let textElement = $('<p>').text(msg)
+      let textElement = $('<p>').text(msg);
 
       if (level) {
          textElement.addClass('jsxc-' + level);

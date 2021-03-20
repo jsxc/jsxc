@@ -1,12 +1,13 @@
-import ArrayBufferUtils from '../util/ArrayBuffer'
+import ArrayBufferUtils from '../util/ArrayBuffer';
 import IExportable from './Exportable';
 
-interface IIdentityKeyObject { publicKey: ArrayBuffer, privateKey?: ArrayBuffer }
+interface IIdentityKeyObject {
+   publicKey: ArrayBuffer;
+   privateKey?: ArrayBuffer;
+}
 
 export default class IdentityKey implements IExportable {
-   constructor(private data: IIdentityKeyObject) {
-
-   }
+   constructor(private data: IIdentityKeyObject) {}
 
    public getFingerprint(): string {
       return this.data.publicKey ? ArrayBufferUtils.toPrettyHex(this.getPublicKeyWithoutVersionByte()) : '';

@@ -1,15 +1,14 @@
-import Log from '../../../util/Log'
-import JID from '../../../JID'
-import Message from '../../../Message'
-import Utils from '../../../util/Utils'
-import Translation from '../../../util/Translation'
-import AbstractHandler from '../AbstractHandler'
-import { FUNCTION } from '../../../Notice'
-import { MessageMark } from '@src/Message.interface'
-import { MessageElement } from '../MessageElement'
+import Log from '../../../util/Log';
+import JID from '../../../JID';
+import Message from '../../../Message';
+import Utils from '../../../util/Utils';
+import Translation from '../../../util/Translation';
+import AbstractHandler from '../AbstractHandler';
+import { FUNCTION } from '../../../Notice';
+import { MessageMark } from '@src/Message.interface';
+import { MessageElement } from '../MessageElement';
 
 export default class extends AbstractHandler {
-
    public processStanza(stanza: Element) {
       let messageElement: MessageElement;
 
@@ -83,5 +82,3 @@ export default class extends AbstractHandler {
       });
    }
 }
-
-

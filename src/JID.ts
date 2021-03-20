@@ -1,4 +1,4 @@
-import { IJID } from './JID.interface'
+import { IJID } from './JID.interface';
 
 export default class JID implements IJID {
    public readonly full: string;
@@ -11,9 +11,9 @@ export default class JID implements IJID {
 
    public readonly resource: string;
 
-   constructor(node: string, domain: string, resource: string)
-   constructor(bare: string, resource: string)
-   constructor(full: string)
+   constructor(node: string, domain: string, resource: string);
+   constructor(bare: string, resource: string);
+   constructor(full: string);
    constructor() {
       let matches = /([^@]+)@([^/]+)(?:\/(.+))?/.exec(arguments[0]);
 
@@ -31,8 +31,8 @@ export default class JID implements IJID {
          this.resource = '';
       }
 
-      this.bare = this.node + ((this.node) ? '@' : '') + this.domain;
-      this.full = this.bare + ((this.resource) ? '/' + this.resource : '');
+      this.bare = this.node + (this.node ? '@' : '') + this.domain;
+      this.full = this.bare + (this.resource ? '/' + this.resource : '');
    }
 
    public toString(): string {
@@ -42,7 +42,7 @@ export default class JID implements IJID {
    public toEscapedString(): string {
       let bare = this.escapeNode(this.node) + '@' + this.domain;
 
-      return bare + ((this.resource) ? '/' + this.resource : '');
+      return bare + (this.resource ? '/' + this.resource : '');
    }
 
    public isBare(): boolean {
@@ -54,7 +54,8 @@ export default class JID implements IJID {
    }
 
    private escapeNode(node: string) {
-      return node.replace(/^\s+|\s+$/g, '')
+      return node
+         .replace(/^\s+|\s+$/g, '')
          .replace(/\\/g, '\\5c')
          .replace(/ /g, '\\20')
          .replace(/\"/g, '\\22')
@@ -68,10 +69,11 @@ export default class JID implements IJID {
    }
 
    private unescapeNode(node: string) {
-      return node.replace(/\\20/g, ' ')
+      return node
+         .replace(/\\20/g, ' ')
          .replace(/\\22/g, '"')
          .replace(/\\26/g, '&')
-         .replace(/\\27/g, '\'')
+         .replace(/\\27/g, "'")
          .replace(/\\2f/g, '/')
          .replace(/\\3a/g, ':')
          .replace(/\\3c/g, '<')

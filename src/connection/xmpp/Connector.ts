@@ -1,14 +1,17 @@
-import Account from '../../Account'
-import PersistentMap from '../../util/PersistentMap'
-import Log from '../../util/Log'
-import JID from '../../JID'
-import * as ConnectHelper from './ConnectHelper'
-import StorageConnection from '../storage/Connection'
-import XMPPConnection from './Connection'
-import { Strophe } from '../../vendor/Strophe'
-import BaseError from '../../errors/BaseError'
+import Account from '../../Account';
+import PersistentMap from '../../util/PersistentMap';
+import Log from '../../util/Log';
+import JID from '../../JID';
+import * as ConnectHelper from './ConnectHelper';
+import StorageConnection from '../storage/Connection';
+import XMPPConnection from './Connection';
+import { Strophe } from '../../vendor/Strophe';
+import BaseError from '../../errors/BaseError';
 
-export enum TYPE { BOSH, WEBSOCKET };
+export enum TYPE {
+   BOSH,
+   WEBSOCKET,
+}
 
 export default class Connector {
    private connectionParameters;
@@ -35,7 +38,7 @@ export default class Connector {
             this.connectionParameters.get('url'),
             this.connectionParameters.get('jid'),
             this.connectionParameters.get('sid'),
-            this.connectionParameters.get('rid')
+            this.connectionParameters.get('rid'),
          ];
       } else if (connectionArgs.length === 3 || connectionArgs.length === 4) {
          this.connectionArgs = connectionArgs;
@@ -53,11 +56,13 @@ export default class Connector {
    public connect() {
       let inactivity = this.connectionParameters.get('inactivity');
       let timestamp = this.connectionParameters.get('timestamp');
-      let isConnectionExpired = inactivity && timestamp && (new Date()).getTime() - timestamp > inactivity;
+      let isConnectionExpired = inactivity && timestamp && new Date().getTime() - timestamp > inactivity;
 
       if (isConnectionExpired) {
-         Log.debug(`Inactivity: ${inactivity}, Last timestamp: ${timestamp}, Time diff: ${(new Date()).getTime() - timestamp}`);
-         Log.warn('Credentials expired')
+         Log.debug(
+            `Inactivity: ${inactivity}, Last timestamp: ${timestamp}, Time diff: ${new Date().getTime() - timestamp}`
+         );
+         Log.warn('Credentials expired');
 
          this.account.triggerConnectionHook(Strophe.Status.CONNTIMEOUT);
          this.account.triggerConnectionHook(Strophe.Status.DISCONNECTED, 'timeout');
@@ -65,8 +70,7 @@ export default class Connector {
          throw new BaseError('Credentials expired');
       }
 
-      return ConnectHelper.login.apply(this, this.connectionArgs)
-         .then(this.successfulConnected);
+      return ConnectHelper.login.apply(this, this.connectionArgs).then(this.successfulConnected);
    }
 
    public getJID(): JID {
@@ -89,7 +93,7 @@ export default class Connector {
       }
    }
 
-   private successfulConnected = (data) => {
+   private successfulConnected = data => {
       let stropheConnection = data.connection;
       let status = data.status;
       let condition = data.condition;
@@ -110,7 +114,7 @@ export default class Connector {
       this.account.triggerConnectionHook(status, condition);
 
       return [status, accountConnection];
-   }
+   };
 
    private storeConnectionParameters(connection) {
       this.connectionParameters.set({
@@ -118,7 +122,7 @@ export default class Connector {
          jid: connection.jid,
          sid: connection._proto.sid,
          rid: connection._proto.rid,
-         timestamp: (new Date()).getTime()
+         timestamp: new Date().getTime(),
       });
 
       if (connection._proto.inactivity) {
@@ -135,12 +139,12 @@ export default class Connector {
          if (status === Strophe.Status.DISCONNECTED) {
             this.account.connectionDisconnected();
          }
-      }
+      };
    }
 
    private addRidHandler(connection) {
-      connection.nextValidRid = (rid) => {
-         let timestamp = (new Date()).getTime();
+      connection.nextValidRid = rid => {
+         let timestamp = new Date().getTime();
 
          this.connectionParameters.set('timestamp', timestamp);
          this.connectionParameters.set('rid', rid);
@@ -155,7 +159,7 @@ export default class Connector {
 
    private replaceStorageConnectionWithXMPPConnection(stropheConnection) {
       let accountConnection = this.account.getConnection();
-      let handlers = (<StorageConnection> accountConnection).getHandlers();
+      let handlers = (<StorageConnection>accountConnection).getHandlers();
 
       accountConnection.close();
       accountConnection = new XMPPConnection(this.account, stropheConnection);

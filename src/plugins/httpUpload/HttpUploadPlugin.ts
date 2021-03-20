@@ -1,13 +1,13 @@
-import Contact from '../../Contact'
-import Message from '../../Message'
-import { AbstractPlugin, IMetaData } from '../../plugin/AbstractPlugin'
-import PluginAPI from '../../plugin/PluginAPI'
-import JID from '../../JID'
-import * as Namespace from '../../connection/xmpp/namespace'
-import Attachment from '../../Attachment'
-import HttpUploadService from './HttpUploadService'
-import { IConnection } from '../../connection/Connection.interface'
-import { $iq } from '../../vendor/Strophe'
+import Contact from '../../Contact';
+import Message from '../../Message';
+import { AbstractPlugin, IMetaData } from '../../plugin/AbstractPlugin';
+import PluginAPI from '../../plugin/PluginAPI';
+import JID from '../../JID';
+import * as Namespace from '../../connection/xmpp/namespace';
+import Attachment from '../../Attachment';
+import HttpUploadService from './HttpUploadService';
+import { IConnection } from '../../connection/Connection.interface';
+import { $iq } from '../../vendor/Strophe';
 import Translation from '../../util/Translation';
 import { IContact } from '@src/Contact.interface';
 import { IMessage } from '@src/Message.interface';
@@ -30,12 +30,14 @@ export default class HttpUploadPlugin extends AbstractPlugin {
    public static getMetaData(): IMetaData {
       return {
          description: Translation.t('setting-http-upload-enable'),
-         xeps: [{
-            id: 'XEP-0363',
-            name: 'HTTP File Upload',
-            version: '1.0.0',
-         }]
-      }
+         xeps: [
+            {
+               id: 'XEP-0363',
+               name: 'HTTP File Upload',
+               version: '1.0.0',
+            },
+         ],
+      };
    }
 
    private services: HttpUploadService[];
@@ -64,46 +66,53 @@ export default class HttpUploadPlugin extends AbstractPlugin {
 
       let attachment = message.getAttachment();
 
-      return this.getServices().then((services) => {
-         for (let service of services) {
-            if (service.isSuitable(attachment)) {
-               return service;
+      return this.getServices()
+         .then(services => {
+            for (let service of services) {
+               if (service.isSuitable(attachment)) {
+                  return service;
+               }
+
+               this.pluginAPI.Log.debug(
+                  `${service.getJid()} only supports files up to ${service.getMaxFileSize()} bytes`
+               );
             }
 
-            this.pluginAPI.Log.debug(`${service.getJid()} only supports files up to ${service.getMaxFileSize()} bytes`);
-         }
+            throw new Error('Found no suitable http upload service. File probably too large.');
+         })
+         .then(service => {
+            return service.sendFile(attachment.getFile(), (transferred, total) => {
+               message.updateProgress(transferred, total);
+            });
+         })
+         .then(downloadUrl => {
+            this.addUrlToMessage(downloadUrl, attachment, message);
+            attachment.setProcessed(true);
 
-         throw new Error('Found no suitable http upload service. File probably too large.');
-      }).then((service) => {
-         return service.sendFile(attachment.getFile(), (transferred, total) => {
-            message.updateProgress(transferred, total);
+            if (!attachment.setData(downloadUrl)) {
+               message.setErrorMessage(Translation.t('Attachment_too_large_to_store'));
+            }
+         })
+         .catch(err => {
+            this.pluginAPI.Log.debug(err);
+
+            if (err) {
+               setTimeout(() => {
+                  contact.addSystemMessage(err.toString());
+               }, 500);
+            }
+         })
+         .then(() => {
+            return [contact, message];
          });
-      }).then((downloadUrl) => {
-         this.addUrlToMessage(downloadUrl, attachment, message);
-         attachment.setProcessed(true);
-
-         if (!attachment.setData(downloadUrl)) {
-            message.setErrorMessage(Translation.t('Attachment_too_large_to_store'));
-         }
-      }).catch((err) => {
-         this.pluginAPI.Log.debug(err);
-
-         if (err) {
-            setTimeout(() => {
-               contact.addSystemMessage(err.toString());
-            }, 500);
-         }
-      }).then(() => {
-         return [contact, message];
-      });
-   }
+   };
 
    private getServices(): Promise<HttpUploadService[]> {
       if (this.services) {
          return Promise.resolve(this.services);
       }
 
-      return this.requestServices().then((services) => {
+      return this.requestServices().then(services => {
          this.services = services;
 
          return services;
@@ -116,38 +125,43 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       let serverJid = new JID('', ownJid.domain, '');
       let discoInfoRepository = this.pluginAPI.getDiscoInfoRepository();
 
-      return connection.getDiscoService().getDiscoItems(serverJid).then((stanza) => {
-         let promises = [];
+      return connection
+         .getDiscoService()
+         .getDiscoItems(serverJid)
+         .then(stanza => {
+            let promises = [];
 
-         $(stanza).find('item').each((index, element) => {
-            let jid = new JID('', $(element).attr('jid'), '');
+            $(stanza)
+               .find('item')
+               .each((index, element) => {
+                  let jid = new JID('', $(element).attr('jid'), '');
 
-            //@TODO cache
-            let promise = discoInfoRepository.requestDiscoInfo(jid).then((discoInfo) => {
-               let hasFeature = discoInfo.hasFeature(Namespace.get('HTTPUPLOAD'));
+                  //@TODO cache
+                  let promise = discoInfoRepository.requestDiscoInfo(jid).then(discoInfo => {
+                     let hasFeature = discoInfo.hasFeature(Namespace.get('HTTPUPLOAD'));
 
-               if (hasFeature) {
-                  let maxFileSize = 0;
-                  let form = discoInfo.getFormByType(Namespace.get('HTTPUPLOAD'));
+                     if (hasFeature) {
+                        let maxFileSize = 0;
+                        let form = discoInfo.getFormByType(Namespace.get('HTTPUPLOAD'));
 
-                  if (form) {
-                     let values = form.getValues('max-file-size') || [];
-                     if (values.length === 1) {
-                        maxFileSize = parseInt(values[0], 10);
+                        if (form) {
+                           let values = form.getValues('max-file-size') || [];
+                           if (values.length === 1) {
+                              maxFileSize = parseInt(values[0], 10);
+                           }
+                        }
+
+                        return new HttpUploadService(this.pluginAPI, jid, maxFileSize);
                      }
-                  }
+                  });
 
-                  return new HttpUploadService(this.pluginAPI, jid, maxFileSize);
-               }
+                  promises.push(promise);
+               });
+
+            return Promise.all(promises).then(results => {
+               return results.filter(service => typeof service !== 'undefined');
             });
-
-            promises.push(promise);
          });
-
-         return Promise.all(promises).then((results) => {
-            return results.filter(service => typeof service !== 'undefined');
-         });
-      });
    }
 
    private getConnection(): IConnection {
@@ -196,18 +210,20 @@ export default class HttpUploadPlugin extends AbstractPlugin {
          let iq = $iq({
             to: from.full,
             id,
-            type: 'result'
-         }).c('data', {
-            xmlns: 'urn:xmpp:bob',
-            cid: attachment.getUid(),
-            type: attachment.getMimeType()
-         }).t(attachment.getThumbnailData().replace(/^[^,],+/, ''));
+            type: 'result',
+         })
+            .c('data', {
+               xmlns: 'urn:xmpp:bob',
+               cid: attachment.getUid(),
+               type: attachment.getMimeType(),
+            })
+            .t(attachment.getThumbnailData().replace(/^[^,],+/, ''));
 
          this.pluginAPI.sendIQ(iq);
       }
 
       return true;
-   }
+   };
 
    private addBitsOfBinary = (message: Message, xmlStanza: Strophe.Builder): Promise<any> => {
       //@TODO check if element with cid exists
@@ -216,17 +232,24 @@ export default class HttpUploadPlugin extends AbstractPlugin {
          let attachment = message.getAttachment();
          let thumbnailData = attachment.getThumbnailData();
 
-         xmlStanza.c('data', {
-            xmlns: 'urn:xmpp:bob',
-            cid: attachment.getUid(),
-            type: thumbnailData.match(/data:(\w+\/[\w-+\d.]+)(?=;|,)/)[1],
-         }).t(thumbnailData.replace(/^[^,],+/, '')).up();
+         xmlStanza
+            .c('data', {
+               xmlns: 'urn:xmpp:bob',
+               cid: attachment.getUid(),
+               type: thumbnailData.match(/data:(\w+\/[\w-+\d.]+)(?=;|,)/)[1],
+            })
+            .t(thumbnailData.replace(/^[^,],+/, ''))
+            .up();
       }
 
       return Promise.resolve([message, xmlStanza]);
-   }
+   };
 
-   private extractAttachmentFromStanza = (contact: IContact, message: IMessage, stanza: Element): Promise<[IContact, IMessage, Element]> => {
+   private extractAttachmentFromStanza = (
+      contact: IContact,
+      message: IMessage,
+      stanza: Element
+   ): Promise<[IContact, IMessage, Element]> => {
       let element = $(stanza);
       let bodyElement = element.find('html body[xmlns="' + Strophe.NS.XHTML + '"]').first();
       let dataElement = element.find('data[xmlns="urn:xmpp:bob"]');
@@ -242,12 +265,15 @@ export default class HttpUploadPlugin extends AbstractPlugin {
          let linkElement = bodyElement.find('a');
          let imageElement = linkElement.find('img[src^="cid:"]');
 
-         if (imageElement.length === 1 && ('cid:' + cid) === imageElement.attr('src')) {
+         if (imageElement.length === 1 && 'cid:' + cid === imageElement.attr('src')) {
             let url = linkElement.attr('href');
             let name = imageElement.attr('alt');
             let thumbnailData = dataElement.text();
 
-            if (/^data:image\/(jpeg|jpg|gif|png|svg);base64,[/+=a-z0-9]+$/i.test(thumbnailData) && /^https?:\/\//.test(url)) {
+            if (
+               /^data:image\/(jpeg|jpg|gif|png|svg);base64,[/+=a-z0-9]+$/i.test(thumbnailData) &&
+               /^https?:\/\//.test(url)
+            ) {
                let attachment = new Attachment(name, mimeType, url);
                attachment.setThumbnailData(thumbnailData);
                attachment.setData(url);
@@ -260,7 +286,7 @@ export default class HttpUploadPlugin extends AbstractPlugin {
       }
 
       return Promise.resolve([contact, message, stanza]);
-   }
+   };
 
    private processLinks(message: IMessage) {
       let plaintext = message.getPlaintextMessage();
@@ -298,6 +324,6 @@ export default class HttpUploadPlugin extends AbstractPlugin {
    private getFileNameFromUrl(url: string): string {
       let parsedUrl = new URL(url);
 
-      return parsedUrl.pathname.substring(parsedUrl.pathname.lastIndexOf('/')+1);
+      return parsedUrl.pathname.substring(parsedUrl.pathname.lastIndexOf('/') + 1);
    }
 }

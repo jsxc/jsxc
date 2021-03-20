@@ -1,4 +1,4 @@
-import Dialog from '../Dialog'
+import Dialog from '../Dialog';
 import Log from '@util/Log';
 import Utils from '@util/Utils';
 import UserMedia from '@src/UserMedia';
@@ -6,9 +6,9 @@ import { VideoDialog } from '@ui/VideoDialog';
 
 let debugLogTemplate = require('../../../template/debugLog.hbs');
 
-export default function() {
+export default function () {
    let content = debugLogTemplate({
-      userInfo: getUserInformation()
+      userInfo: getUserInformation(),
    });
 
    let dialog = new Dialog(content);
@@ -19,22 +19,24 @@ export default function() {
 
    dom.find('.jsxc-log').append(`<p>${logs.map(log => Utils.escapeHTML(log)).join('<br>')}</p>`);
 
-   dom.find('.jsxc-webcam button').on('click', function() {
+   dom.find('.jsxc-webcam button').on('click', function () {
       $(this).remove();
 
       let videoElement = $('<video autoplay></video>');
       videoElement.css('width', '150px');
       videoElement.appendTo(dom.find('.jsxc-webcam'));
 
-      UserMedia.request(['video']).then(stream => {
-         VideoDialog.attachMediaStream(videoElement, stream);
-      }).catch(err => {
-         Log.warn('Video request failed.', err);
+      UserMedia.request(['video'])
+         .then(stream => {
+            VideoDialog.attachMediaStream(videoElement, stream);
+         })
+         .catch(err => {
+            Log.warn('Video request failed.', err);
 
-         videoElement.remove();
+            videoElement.remove();
 
-         dom.find('.jsxc-webcam').append(err.toString());
-      })
+            dom.find('.jsxc-webcam').append(err.toString());
+         });
    });
 
    dialog.registerOnClosedHook(() => {
@@ -43,7 +45,7 @@ export default function() {
       if (videoElement.length > 0) {
          VideoDialog.detachMediaStream(videoElement);
       }
-   })
+   });
 }
 
 function getUserInformation() {
@@ -54,7 +56,7 @@ function getUserInformation() {
          if (typeof navigator[key] === 'string' && navigator[key]) {
             userInfo.push({
                key,
-               value: navigator[key]
+               value: navigator[key],
             });
          }
       }
@@ -62,28 +64,28 @@ function getUserInformation() {
 
    userInfo.push({
       key: 'jQuery',
-      value: ($.fn && $.fn.jquery) ? $.fn.jquery : 'none'
+      value: $.fn && $.fn.jquery ? $.fn.jquery : 'none',
    });
 
    userInfo.push({
       key: 'jQuery UI',
-      value: ((<any> $).ui && (<any> $).ui.version) ? (<any> $).ui.version : 'none'
+      value: (<any>$).ui && (<any>$).ui.version ? (<any>$).ui.version : 'none',
    });
 
    if (window.screen) {
       userInfo.push({
          key: 'Height',
-         value: window.screen.height
+         value: window.screen.height,
       });
       userInfo.push({
          key: 'Width',
-         value: window.screen.width
+         value: window.screen.width,
       });
    }
 
    userInfo.push({
       key: 'JSXC',
-      value: __VERSION__
+      value: __VERSION__,
    });
 
    return userInfo;

@@ -1,6 +1,6 @@
 import ContactProvider from './ContactProvider';
 import Log from '@util/Log';
-import { ContactSubscription as SUBSCRIPTION, IContact, ContactType } from './Contact.interface'
+import { ContactSubscription as SUBSCRIPTION, IContact, ContactType } from './Contact.interface';
 import JID from './JID';
 import Account from './Account';
 import Contact from './Contact';
@@ -12,11 +12,16 @@ export default class RosterContactProvider extends ContactProvider {
    constructor(contactManager: ContactManager, private account: Account) {
       super(contactManager);
 
-      account.getConnection().registerHandler(stanza => {
-         this.processUpdateStanza(stanza);
+      account.getConnection().registerHandler(
+         stanza => {
+            this.processUpdateStanza(stanza);
 
-         return true;
-      }, 'jabber:iq:roster', 'iq', 'set');
+            return true;
+         },
+         'jabber:iq:roster',
+         'iq',
+         'set'
+      );
    }
 
    public getUid() {
@@ -50,8 +55,8 @@ export default class RosterContactProvider extends ContactProvider {
       return [];
    }
 
-   public createContact(jid: IJID, name?: string): IContact
-   public createContact(id: string): IContact
+   public createContact(jid: IJID, name?: string): IContact;
+   public createContact(id: string): IContact;
    public createContact() {
       let contact = new Contact(this.account, arguments[0], arguments[1]);
 
@@ -63,7 +68,7 @@ export default class RosterContactProvider extends ContactProvider {
    private registerContact(contact: IContact) {
       contact.setProvider(this);
 
-      contact.registerHook('name', (displayName) => {
+      contact.registerHook('name', displayName => {
          if (RoleAllocator.get().isMaster()) {
             this.renameContact(contact.getJid(), displayName, contact.getGroups());
          }
@@ -71,7 +76,9 @@ export default class RosterContactProvider extends ContactProvider {
    }
 
    public deleteContact(jid: IJID): Promise<void> {
-      return this.getService().removeContact(jid).then(() => undefined);
+      return this.getService()
+         .removeContact(jid)
+         .then(() => undefined);
    }
 
    private renameContact(jid: IJID, displayName: string, groups: string[]) {
@@ -106,15 +113,18 @@ export default class RosterContactProvider extends ContactProvider {
       let contacts: IContact[] = [];
       let self = this;
 
-      stanza.find('item').each(function() {
+      stanza.find('item').each(function () {
          let item = $(this);
          let jid = new JID(item.attr('jid'));
          let name = item.attr('name') || jid.bare;
          let subscription = item.attr('subscription');
-         let groups = item.find('>group').map((index, groupElement) => $(groupElement).text()).get();
+         let groups = item
+            .find('>group')
+            .map((index, groupElement) => $(groupElement).text())
+            .get();
 
          let contact = self.createContact(jid, name);
-         contact.setSubscription(<SUBSCRIPTION> subscription);
+         contact.setSubscription(<SUBSCRIPTION>subscription);
          contact.setGroups(groups);
 
          cache.push(contact.getId());
@@ -153,7 +163,11 @@ export default class RosterContactProvider extends ContactProvider {
       }
 
       if (failedContacts.length > 0) {
-         storage.setItem('roster', 'cache', cachedRoster.filter(id => failedContacts.indexOf(id) < 0));
+         storage.setItem(
+            'roster',
+            'cache',
+            cachedRoster.filter(id => failedContacts.indexOf(id) < 0)
+         );
       }
 
       return contacts;
@@ -188,7 +202,10 @@ export default class RosterContactProvider extends ContactProvider {
       let jid = new JID($(itemElement).attr('jid'));
       let name = $(itemElement).attr('name');
       let subscription = $(itemElement).attr('subscription') || 'none';
-      let groups = $(itemElement).find('>group').map((index, groupElement) => $(groupElement).text()).get();
+      let groups = $(itemElement)
+         .find('>group')
+         .map((index, groupElement) => $(groupElement).text())
+         .get();
 
       let contact = account.getContact(jid);
 
@@ -206,7 +223,7 @@ export default class RosterContactProvider extends ContactProvider {
          contact.delete();
       } else {
          contact.setName(name);
-         contact.setSubscription(<SUBSCRIPTION> subscription);
+         contact.setSubscription(<SUBSCRIPTION>subscription);
          contact.setGroups(groups);
 
          this.contactManager.addToCache(contact);

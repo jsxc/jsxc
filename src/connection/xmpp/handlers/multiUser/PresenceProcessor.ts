@@ -1,15 +1,18 @@
-import Translation from '../../../../util/Translation'
-import Log from '@util/Log'
-import MultiUserContact from '../../../../MultiUserContact'
-import MultiUserStatusCodeHandler from './StatusCodeHandler'
-import { Strophe } from '../../../../vendor/Strophe'
+import Translation from '../../../../util/Translation';
+import Log from '@util/Log';
+import MultiUserContact from '../../../../MultiUserContact';
+import MultiUserStatusCodeHandler from './StatusCodeHandler';
+import { Strophe } from '../../../../vendor/Strophe';
 import JID from '@src/JID';
 
 export default class MultiUserPresenceProcessor {
    private codes: string[];
 
    constructor(private multiUserContact: MultiUserContact, private xElement, private nickname, type) {
-      this.codes = xElement.find('status').map((index, element) => element.getAttribute('code')).get();
+      this.codes = xElement
+         .find('status')
+         .map((index, element) => element.getAttribute('code'))
+         .get();
 
       if (type === 'unavailable') {
          this.processUnavailable();
@@ -55,21 +58,26 @@ export default class MultiUserPresenceProcessor {
          this.multiUserContact.removeMember(this.nickname);
          this.multiUserContact.addMember(newNickname);
 
-         this.inform(Translation.t('is_now_known_as', {
-            oldNickname: this.nickname,
-            newNickname,
-            escapeInterpolation: true
-         }));
+         this.inform(
+            Translation.t('is_now_known_as', {
+               oldNickname: this.nickname,
+               newNickname,
+               escapeInterpolation: true,
+            })
+         );
       } else {
          this.multiUserContact.removeMember(this.nickname);
 
          if (this.codes.length === 1 && this.codes.indexOf('110') > -1) {
             this.inform(':door: ' + Translation.t('You_left_the_building'));
          } else if (this.codes.length === 0) {
-            this.inform(':door: ' + Translation.t('left_the_building', {
-               nickname: this.nickname,
-               escapeInterpolation: true
-            }));
+            this.inform(
+               ':door: ' +
+                  Translation.t('left_the_building', {
+                     nickname: this.nickname,
+                     escapeInterpolation: true,
+                  })
+            );
          }
       }
    }
@@ -85,10 +93,13 @@ export default class MultiUserPresenceProcessor {
       let isNew = this.multiUserContact.addMember(this.nickname, affiliation, role, jid);
 
       if (isNew && this.multiUserContact.isMemberListComplete()) {
-         this.inform(':footprints: ' + Translation.t('entered_the_room', {
-            nickname: this.nickname,
-            escapeInterpolation: true
-         }));
+         this.inform(
+            ':footprints: ' +
+               Translation.t('entered_the_room', {
+                  nickname: this.nickname,
+                  escapeInterpolation: true,
+               })
+         );
       }
    }
 
@@ -108,7 +119,7 @@ export default class MultiUserPresenceProcessor {
    private postReason() {
       let actor = {
          name: this.getXElement().find('actor').attr('nick'),
-         jid: this.getXElement().find('actor').attr('jid')
+         jid: this.getXElement().find('actor').attr('jid'),
       };
       let reason = this.getXElement().find('reason').text();
 

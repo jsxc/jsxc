@@ -1,30 +1,39 @@
-import Log from '../../util/Log'
-import Account from '../../Account'
-import PresenceHandler from './handlers/presence'
-import MultiUserPresenceHandler from './handlers/multiUser/Presence'
-import ChatMessageHandler from './handlers/chatMessage'
-import ErrorMessageHandler from './handlers/errorMessage'
-import MultiUserChatMessageHandler from './handlers/multiUser/groupChatMessage'
-import HeadlineMessageHandler from './handlers/headlineMessage'
-import JingleHandler from './handlers/jingle'
-import { DiscoInfoHandler, DiscoItemsHandler } from './handlers/disco'
-import CapsHandler from './handlers/caps'
-import MultiUserDirectInvitationHandler from './handlers/multiUser/DirectInvitation'
-import MultiUserXMessageHandler from './handlers/multiUser/XMessage'
-import AbstractHandler from './AbstractHandler'
-import * as NS from './namespace'
+import Log from '../../util/Log';
+import Account from '../../Account';
+import PresenceHandler from './handlers/presence';
+import MultiUserPresenceHandler from './handlers/multiUser/Presence';
+import ChatMessageHandler from './handlers/chatMessage';
+import ErrorMessageHandler from './handlers/errorMessage';
+import MultiUserChatMessageHandler from './handlers/multiUser/groupChatMessage';
+import HeadlineMessageHandler from './handlers/headlineMessage';
+import JingleHandler from './handlers/jingle';
+import { DiscoInfoHandler, DiscoItemsHandler } from './handlers/disco';
+import CapsHandler from './handlers/caps';
+import MultiUserDirectInvitationHandler from './handlers/multiUser/DirectInvitation';
+import MultiUserXMessageHandler from './handlers/multiUser/XMessage';
+import AbstractHandler from './AbstractHandler';
+import * as NS from './namespace';
 
-type StropheHandlerOptions = { matchBareFromJid?: boolean, ignoreNamespaceFragment?: boolean };
+type StropheHandlerOptions = {
+   matchBareFromJid?: boolean;
+   ignoreNamespaceFragment?: boolean;
+};
 
 interface IStropheConnection {
-   jid: string,
-   addHandler(Handler, namespace?: string, tagName?: string, type?: string, id?: string, from?: string, options?: StropheHandlerOptions): void
+   jid: string;
+   addHandler(
+      Handler,
+      namespace?: string,
+      tagName?: string,
+      type?: string,
+      id?: string,
+      from?: string,
+      options?: StropheHandlerOptions
+   ): void;
 }
 
 export default class XMPPHandler {
-   constructor(private account: Account, private connection: IStropheConnection) {
-
-   }
+   constructor(private account: Account, private connection: IStropheConnection) {}
 
    public registerHandler() {
       this.addHandler(ChatMessageHandler, null, 'message', 'chat');
@@ -33,7 +42,9 @@ export default class XMPPHandler {
       this.addHandler(HeadlineMessageHandler, null, 'message', 'headline');
       this.addHandler(MultiUserXMessageHandler, 'http://jabber.org/protocol/muc#user', 'message');
       this.addHandler(PresenceHandler, null, 'presence');
-      this.addHandler(MultiUserPresenceHandler, 'http://jabber.org/protocol/muc', 'presence', null, null, null, { ignoreNamespaceFragment: true });
+      this.addHandler(MultiUserPresenceHandler, 'http://jabber.org/protocol/muc', 'presence', null, null, null, {
+         ignoreNamespaceFragment: true,
+      });
       this.addHandler(JingleHandler, 'urn:xmpp:jingle:1', 'iq', 'set');
 
       this.addHandler(DiscoInfoHandler, NS.get('DISCO_INFO'), 'iq', 'get');
@@ -45,7 +56,15 @@ export default class XMPPHandler {
       // this.connection.conn.addHandler(this.onReceived, null, 'message');
    }
 
-   public addHandler(Handler, namespace?: string, tagName?: string, type?: string, id?: string, from?: string, options?: StropheHandlerOptions) {
+   public addHandler(
+      Handler,
+      namespace?: string,
+      tagName?: string,
+      type?: string,
+      id?: string,
+      from?: string,
+      options?: StropheHandlerOptions
+   ) {
       let handler = new Handler(this.account);
 
       if (!(handler instanceof AbstractHandler)) {

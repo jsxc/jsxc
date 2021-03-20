@@ -1,8 +1,8 @@
-import JID from '../../JID'
-import * as Namespace from '../../connection/xmpp/namespace'
-import { IPluginAPI } from '../../plugin/PluginAPI.interface'
-import Attachment from '../../Attachment'
-import { $iq } from '../../vendor/Strophe'
+import JID from '../../JID';
+import * as Namespace from '../../connection/xmpp/namespace';
+import { IPluginAPI } from '../../plugin/PluginAPI.interface';
+import Attachment from '../../Attachment';
+import { $iq } from '../../vendor/Strophe';
 
 const ALLOWED_HEADERS = ['Authorization', 'Cookie', 'Expires'];
 
@@ -27,12 +27,12 @@ export default class HttpUploadService {
    }
 
    public async sendFile(file: File, progress?: (loaded, total) => void): Promise<string> {
-      let urls = await this.requestSlot(file)
+      let urls = await this.requestSlot(file);
 
       await this.uploadFile(file, urls.put, urls.putHeaders, progress);
 
-      if ((<any> file).aesgcm) {
-         return urls.get.replace(/^https?:/, 'aesgcm:') + '#' + (<any> file).aesgcm;
+      if ((<any>file).aesgcm) {
+         return urls.get.replace(/^https?:/, 'aesgcm:') + '#' + (<any>file).aesgcm;
       }
 
       return urls.get;
@@ -41,20 +41,18 @@ export default class HttpUploadService {
    private requestSlot(file: File) {
       let iq = $iq({
          to: this.jid.full,
-         type: 'get'
+         type: 'get',
       }).c('request', {
-         'xmlns': this.namespace,
-         'filename': file.name,
-         'size': file.size,
+         xmlns: this.namespace,
+         filename: file.name,
+         size: file.size,
          'content-type': file.type,
       });
 
-      return this.pluginAPI.sendIQ(iq)
-         .then(this.parseSlotResponse)
-         .catch(this.parseSlotError);
+      return this.pluginAPI.sendIQ(iq).then(this.parseSlotResponse).catch(this.parseSlotError);
    }
 
-   private parseSlotResponse = (stanza) => {
+   private parseSlotResponse = stanza => {
       let slot = $(stanza).find(`slot[xmlns="${this.namespace}"]`);
 
       if (slot.length > 0) {
@@ -63,12 +61,18 @@ export default class HttpUploadService {
 
          let putHeaders = {};
 
-         slot.find('put').find('header').map((index, header) => {
-            return {
-               name: $(header).attr('name').replace(/\n/g, ''),
-               value: $(header).text().replace(/\n/g, ''),
-            }
-         }).get().filter(header => ALLOWED_HEADERS.indexOf(header.name) > -1).forEach(header => putHeaders[header.name] = header.value);
+         slot
+            .find('put')
+            .find('header')
+            .map((index, header) => {
+               return {
+                  name: $(header).attr('name').replace(/\n/g, ''),
+                  value: $(header).text().replace(/\n/g, ''),
+               };
+            })
+            .get()
+            .filter(header => ALLOWED_HEADERS.indexOf(header.name) > -1)
+            .forEach(header => (putHeaders[header.name] = header.value));
 
          return Promise.resolve({
             put,
@@ -78,13 +82,13 @@ export default class HttpUploadService {
       }
 
       return this.parseSlotError(stanza);
-   }
+   };
 
-   private parseSlotError = (stanza) => {
+   private parseSlotError = stanza => {
       let error = {
          type: $(stanza).find('error').attr('type') || 'unknown',
          text: $(stanza).find('error text').text() || 'response does not contain a slot element',
-         reason: null
+         reason: null,
       };
 
       if ($(stanza).find('error not-acceptable')) {
@@ -98,7 +102,7 @@ export default class HttpUploadService {
       }
 
       return Promise.reject(error);
-   }
+   };
 
    private uploadFile = (file: File, putUrl, headers, progress?: (loaded, total) => void) => {
       return new Promise<void>((resolve, reject) => {
@@ -110,10 +114,10 @@ export default class HttpUploadService {
             processData: false,
             headers,
             xhr() {
-               let xhr = (<any> $).ajaxSettings.xhr();
+               let xhr = (<any>$).ajaxSettings.xhr();
 
                // track upload progress
-               xhr.upload.onprogress = function(ev) {
+               xhr.upload.onprogress = function (ev) {
                   if (ev.lengthComputable && typeof progress === 'function') {
                      progress(ev.loaded, ev.total);
                   }
@@ -126,12 +130,18 @@ export default class HttpUploadService {
 
                resolve();
             },
-            error: (jqXHR) => {
+            error: jqXHR => {
                this.pluginAPI.Log.warn('error while uploading file to ' + putUrl);
 
-               reject(new Error(jqXHR && jqXHR.readyState === 0 ? 'Upload was probably blocked by your browser' : 'Could not upload file'));
-            }
+               reject(
+                  new Error(
+                     jqXHR && jqXHR.readyState === 0
+                        ? 'Upload was probably blocked by your browser'
+                        : 'Could not upload file'
+                  )
+               );
+            },
          });
       });
-   }
+   };
 }

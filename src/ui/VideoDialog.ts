@@ -1,8 +1,8 @@
-import ConfirmDialog from './dialogs/confirm'
-import Dialog from './Dialog'
-import Log from '../util/Log'
-import JingleHandler from '../connection/JingleHandler'
-import VideoWindow from './VideoWindow'
+import ConfirmDialog from './dialogs/confirm';
+import Dialog from './Dialog';
+import Log from '../util/Log';
+import JingleHandler from '../connection/JingleHandler';
+import VideoWindow from './VideoWindow';
 import JingleMediaSession from '../JingleMediaSession';
 import Translation from '@util/Translation';
 import JingleCallSession from '@src/JingleCallSession';
@@ -10,7 +10,7 @@ import * as screenfull from 'screenfull';
 
 const screen = screenfull as screenfull.Screenfull;
 
-const VideoDialogTemplate = require('../../template/videoDialog.hbs')
+const VideoDialogTemplate = require('../../template/videoDialog.hbs');
 
 export class VideoDialog {
    private dom: JQuery;
@@ -32,7 +32,7 @@ export class VideoDialog {
    }
 
    public addSession(session: JingleMediaSession) {
-      session.on('terminated', (reason) => {
+      session.on('terminated', reason => {
          this.removeContainer(session.getId());
 
          this.removeSession(session, reason);
@@ -81,16 +81,19 @@ export class VideoDialog {
          confirmDialog.close();
       });
 
-      return confirmDialog.getPromise().then((dialog: Dialog) => {
-         session.adopt();
+      return confirmDialog
+         .getPromise()
+         .then((dialog: Dialog) => {
+            session.adopt();
 
-         dialog.close();
-      }).catch(() => {
-         session.adopt();
+            dialog.close();
+         })
+         .catch(() => {
+            session.adopt();
 
-         // tslint:disable-next-line:no-string-throw
-         throw 'decline';
-      });
+            // tslint:disable-next-line:no-string-throw
+            throw 'decline';
+         });
    }
 
    public showVideoWindow(localStream?: MediaStream) {
@@ -100,9 +103,9 @@ export class VideoDialog {
       let localCameraControl = this.dom.find('.jsxc-video');
       let localMicrophoneControl = this.dom.find('.jsxc-microphone');
 
-      if (typeof (<any> localVideoElement).draggable === 'function') {
-         (<any> localVideoElement).draggable({
-            containment: 'parent'
+      if (typeof (<any>localVideoElement).draggable === 'function') {
+         (<any>localVideoElement).draggable({
+            containment: 'parent',
          });
       }
 
@@ -245,7 +248,7 @@ export class VideoDialog {
    }
 
    private removeSession = (session: JingleMediaSession, reason?) => {
-      let msg = (reason && reason.condition ? (': ' + Translation.t('jingle_reason_' + reason.condition)) : '') + '.';
+      let msg = (reason && reason.condition ? ': ' + Translation.t('jingle_reason_' + reason.condition) : '') + '.';
 
       if (session instanceof JingleCallSession) {
          msg = Translation.t('Call_terminated') + msg;
@@ -262,7 +265,7 @@ export class VideoDialog {
       if (Object.keys(this.videoWindows).length === 0) {
          this.close();
       }
-   }
+   };
 
    public close() {
       this.ready = false;
@@ -277,18 +280,18 @@ export class VideoDialog {
    private static changeStreamMediaState = (element: JQuery, tracks: MediaStreamTrack[]) => {
       element.toggleClass('jsxc-disabled');
       let streamEnabled = !element.hasClass('jsxc-disabled');
-      tracks.forEach((track: MediaStreamTrack) => track.enabled = streamEnabled);
-   }
+      tracks.forEach((track: MediaStreamTrack) => (track.enabled = streamEnabled));
+   };
 
-   public static attachMediaStream = (element: JQuery|HTMLMediaElement, stream: MediaStream) => {
-      let el = <HTMLMediaElement> ((element instanceof jQuery) ? (<JQuery> element).get(0) : element);
+   public static attachMediaStream = (element: JQuery | HTMLMediaElement, stream: MediaStream) => {
+      let el = <HTMLMediaElement>(element instanceof jQuery ? (<JQuery>element).get(0) : element);
       el.srcObject = stream;
 
       $(element).show();
-   }
+   };
 
-   public static detachMediaStream = (element: JQuery|HTMLMediaElement) => {
-      let el = <HTMLMediaElement> ((element instanceof jQuery) ? (<JQuery> element).get(0) : element);
+   public static detachMediaStream = (element: JQuery | HTMLMediaElement) => {
+      let el = <HTMLMediaElement>(element instanceof jQuery ? (<JQuery>element).get(0) : element);
 
       if (!el) {
          return;
@@ -298,10 +301,9 @@ export class VideoDialog {
       el.srcObject = null;
 
       $(el).removeClass('jsxc-device-available jsxc-video-available jsxc-audio-available');
-   }
+   };
 
    private static stopStream(stream) {
-
       if (!stream) {
          Log.warn('Could not stop stream. Stream is null.');
          return;
@@ -309,7 +311,7 @@ export class VideoDialog {
 
       if (typeof stream.getTracks === 'function') {
          let tracks = stream.getTracks();
-         tracks.forEach(function(track) {
+         tracks.forEach(function (track) {
             track.stop();
          });
       } else if (typeof stream.stop === 'function') {

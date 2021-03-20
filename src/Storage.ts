@@ -1,6 +1,6 @@
-import Log from './util/Log'
-import IStorage from './Storage.interface'
-import Options from './Options'
+import Log from './util/Log';
+import IStorage from './Storage.interface';
+import Options from './Options';
 
 const PREFIX = 'jsxc2';
 
@@ -69,13 +69,13 @@ export default class Storage implements IStorage {
    public generateKey(...args: string[]): string {
       let key = '';
 
-      args.forEach(function(arg) {
+      args.forEach(function (arg) {
          if (key !== '') {
             key += SEP;
          }
 
          key += arg;
-      })
+      });
 
       return key;
    }
@@ -85,7 +85,7 @@ export default class Storage implements IStorage {
       let key = this.getPrefix() + randomNumber;
       let timeout;
 
-      let listenerFunction = function(ev) {
+      let listenerFunction = function (ev) {
          if (ev.newValue === randomNumber) {
             clearTimeout(timeout);
             cleanup();
@@ -93,14 +93,14 @@ export default class Storage implements IStorage {
          }
       };
 
-      let cleanup = function() {
+      let cleanup = function () {
          window.removeEventListener('storage', listenerFunction, false);
-         Storage.backend.removeItem(key)
-      }
+         Storage.backend.removeItem(key);
+      };
 
       window.addEventListener('storage', listenerFunction, false);
 
-      timeout = setTimeout(function() {
+      timeout = setTimeout(function () {
          cleanup();
       }, 20);
 
@@ -122,7 +122,7 @@ export default class Storage implements IStorage {
    }
 
    public setItem(type: string, key: string, value: any): void;
-   public setItem(key: string, value: any): void
+   public setItem(key: string, value: any): void;
    public setItem(): void {
       let key: string;
       let value: any;
@@ -136,10 +136,10 @@ export default class Storage implements IStorage {
       }
 
       //@REVIEW why do we just stringify objects?
-      if (typeof (value) === 'object') {
+      if (typeof value === 'object') {
          // exclude jquery objects, because otherwise safari will fail
          try {
-            value = JSON.stringify(value, function(key, val) {
+            value = JSON.stringify(value, function (key, val) {
                if (!(val instanceof jQuery)) {
                   return val;
                }
@@ -157,7 +157,7 @@ export default class Storage implements IStorage {
          this.onStorageEvent({
             key: this.getPrefix() + key,
             oldValue,
-            newValue: value
+            newValue: value,
          });
       }
    }
@@ -217,10 +217,9 @@ export default class Storage implements IStorage {
 
       let data = this.getItem(key) || {};
 
-      if (typeof (variable) === 'object') {
-
-         $.each(variable, function(key, val) {
-            if (typeof (data[key]) === 'undefined') {
+      if (typeof variable === 'object') {
+         $.each(variable, function (key, val) {
+            if (typeof data[key] === 'undefined') {
                Log.debug(`Variable ${key} doesn't exist in ${variable}. It was created.`);
             }
 
@@ -228,7 +227,7 @@ export default class Storage implements IStorage {
          });
       } else {
          if (typeof data[variable] === 'undefined') {
-            Log.debug('Variable ' + variable + ' doesn\'t exist. It was created.');
+            Log.debug('Variable ' + variable + " doesn't exist. It was created.");
          }
 
          data[variable] = value;
@@ -260,10 +259,10 @@ export default class Storage implements IStorage {
       let item = this.getItem(key);
 
       if ($.isArray(item)) {
-         item = $.grep(item, function(e) {
+         item = $.grep(item, function (e) {
             return e !== name;
          });
-      } else if (typeof (item) === 'object' && item !== null) {
+      } else if (typeof item === 'object' && item !== null) {
          delete item[name];
       }
 
@@ -299,7 +298,7 @@ export default class Storage implements IStorage {
       if (typeof func === 'undefined') {
          eventNameList = [];
       } else if (eventNameList.indexOf(func) > -1) {
-         eventNameList = $.grep(eventNameList, function(i) {
+         eventNameList = $.grep(eventNameList, function (i) {
             return func !== i;
          });
       }
@@ -335,15 +334,15 @@ export default class Storage implements IStorage {
       let newValue = this.parseValue(ev.newValue);
 
       let eventNames = Object.keys(hooks);
-      eventNames.forEach(function(eventName) {
+      eventNames.forEach(function (eventName) {
          if (key === eventName || key.indexOf(eventName + ':') === 0) {
             let eventNameHooks = hooks[eventName] || [];
-            eventNameHooks.forEach(function(hook) {
+            eventNameHooks.forEach(function (hook) {
                hook(newValue, oldValue, key);
             });
          }
       });
-   }
+   };
 
    private parseValue(value: string) {
       if (value === 'undefined') {
