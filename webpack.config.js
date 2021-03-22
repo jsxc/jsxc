@@ -163,6 +163,7 @@ let config = {
       new webpack.ProvidePlugin({
          $: 'jquery',
          jQuery: 'jquery',
+         process: 'process/browser',
       }),
       new MiniCssExtractPlugin({
          filename: 'styles/jsxc.bundle.css',
