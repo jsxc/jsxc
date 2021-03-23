@@ -24,6 +24,7 @@ import Log from '@util/Log';
 import CommandRepository from './CommandRepository';
 import AvatarSet from '@ui/AvatarSet';
 import { IAvatar } from './Avatar.interface';
+import CallManager from './CallManager';
 
 type ConnectionCallback = (status: number, condition?: string) => void;
 
@@ -55,6 +56,8 @@ export default class Account {
    private contactManager: ContactManager;
 
    private commandRepository: CommandRepository;
+
+   private callManager: CallManager;
 
    private options: Options;
 
@@ -249,6 +252,14 @@ export default class Account {
       }
 
       return this.commandRepository;
+   }
+
+   public getCallManager() {
+      if (!this.callManager) {
+         this.callManager = new CallManager(this);
+      }
+
+      return this.callManager;
    }
 
    public getContact(jid?: IJID): IContact {

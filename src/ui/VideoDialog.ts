@@ -1,5 +1,3 @@
-import ConfirmDialog from './dialogs/confirm';
-import Dialog from './Dialog';
 import Log from '../util/Log';
 import JingleHandler from '../connection/JingleHandler';
 import VideoWindow from './VideoWindow';
@@ -51,49 +49,6 @@ export class VideoDialog {
       let videoWindow = new VideoWindow(this, session);
 
       this.videoWindows[session.getId()] = videoWindow;
-   }
-
-   public showCallDialog(session: JingleMediaSession) {
-      //@TODO use selection dialog, because button labels can be configured
-      //@TODO confirm dialog is special case of selection dialog
-
-      let mediaRequested = session.getMediaRequest();
-      let peerName = session.getPeer().getName();
-      let isVideoCall = mediaRequested.indexOf('video') > -1;
-      let isStream = mediaRequested.length === 0;
-      let infoText: string;
-
-      if (isStream) {
-         infoText = `${Translation.t('Incoming_stream')} ${Translation.t('from')} ${peerName}`;
-      } else if (isVideoCall) {
-         infoText = `${Translation.t('Incoming_video_call')} ${Translation.t('from')} ${peerName}`;
-      } else {
-         infoText = `${Translation.t('Incoming_call')} ${Translation.t('from')} ${peerName}`;
-      }
-
-      let confirmDialog = ConfirmDialog(infoText);
-
-      session.on('terminated', () => {
-         confirmDialog.close();
-      });
-
-      session.on('aborted', () => {
-         confirmDialog.close();
-      });
-
-      return confirmDialog
-         .getPromise()
-         .then((dialog: Dialog) => {
-            session.adopt();
-
-            dialog.close();
-         })
-         .catch(() => {
-            session.adopt();
-
-            // tslint:disable-next-line:no-string-throw
-            throw 'decline';
-         });
    }
 
    public showVideoWindow(localStream?: MediaStream) {

@@ -7,7 +7,7 @@ import UUID from '../util/UUID';
 import JID from '@src/JID';
 import { IJID } from '../JID.interface';
 import { VideoDialog } from '../ui/VideoDialog';
-import JingleSession from '../JingleSession';
+import JingleSessionFactory from '../JingleSessionFactory';
 import JingleAbstractSession from '../JingleAbstractSession';
 import JingleMediaSession from '@src/JingleMediaSession';
 import { IOTalkJingleMediaSession } from '@vendor/Jingle.interface';
@@ -75,16 +75,17 @@ export default class JingleHandler {
    public async initiate(
       peerJID: IJID,
       stream: MediaStream,
-      offerOptions?: IOfferOptions
+      offerOptions?: IOfferOptions,
+      sessionId?: string
    ): Promise<JingleMediaSession> {
       let iceServers = await IceServers.get();
       this.setICEServers(iceServers);
 
-      let session: IOTalkJingleMediaSession = this.manager.createMediaSession(peerJID.full, undefined, stream);
+      let session: IOTalkJingleMediaSession = this.manager.createMediaSession(peerJID.full, sessionId, stream);
 
       return new Promise<JingleMediaSession>(resolve => {
          session.start(offerOptions, () => {
-            let jingleSession = JingleSession.create(this.account, session);
+            let jingleSession = JingleSessionFactory.create(this.account, session);
 
             resolve(jingleSession);
          });
@@ -130,7 +131,7 @@ export default class JingleHandler {
    };
 
    protected onIncoming(session: IOTalkJingleMediaSession): JingleAbstractSession {
-      return JingleSession.create(this.account, session);
+      return JingleSessionFactory.create(this.account, session);
    }
 
    // private onIncomingFileTransfer(session: IOTalkJingleMediaSession) {

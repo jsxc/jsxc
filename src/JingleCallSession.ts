@@ -1,33 +1,11 @@
 import Log from './util/Log';
 import JingleHandler from './connection/JingleHandler';
 import UserMedia from './UserMedia';
-import Translation from './util/Translation';
-import Notification from './Notification';
 import JingleMediaSession from './JingleMediaSession';
-import { SOUNDS } from './CONST';
+import { CallState } from './CallManager';
 
 export default class JingleCallSession extends JingleMediaSession {
    public onOnceIncoming() {
-      Notification.notify({
-         title: Translation.t('Incoming_call'),
-         message: Translation.t('from_sender') + this.peerContact.getName(),
-         source: this.peerContact,
-      });
-
-      Notification.playSound(SOUNDS.CALL, true, true);
-
-      this.on('terminated', () => {
-         Notification.stopSound();
-      });
-
-      this.on('aborted', () => {
-         Notification.stopSound();
-      });
-
-      this.on('adopt', () => {
-         Notification.stopSound();
-      });
-
       // send signal to partner
       this.session.ring();
    }
@@ -38,20 +16,29 @@ export default class JingleCallSession extends JingleMediaSession {
       let videoDialog = JingleHandler.getVideoDialog();
       let mediaRequested = this.getMediaRequest();
 
-      Promise.race([
-         videoDialog.showCallDialog(this).then(() => {
-            return UserMedia.request(mediaRequested);
-         }),
-         new Promise((resolve, reject) => {
-            this.on('terminated', () => {
-               reject('aborted');
-            });
+      const callManager = this.account.getCallManager();
+      const callType = this.getCallType();
+      const peer = this.getPeer();
 
-            this.on('aborted', () => {
-               reject('aborted');
-            });
-         }),
-      ])
+      const call = callManager.onIncomingCall(callType, this.session.sid, peer);
+
+      this.on('terminated', () => {
+         call.abort();
+      });
+
+      this.on('aborted', () => {
+         call.abort();
+      });
+
+      call
+         .getState()
+         .then(state => {
+            if (state === CallState.Accepted) {
+               return UserMedia.request(mediaRequested);
+            }
+
+            throw state;
+         })
          .then((stream: MediaStream) => {
             videoDialog.addSession(this);
             videoDialog.showVideoWindow(stream);
@@ -63,8 +50,8 @@ export default class JingleCallSession extends JingleMediaSession {
             //@TODO hide user media request overlay
 
             //@TODO post reason to chat window
-            if (reason !== 'aborted') {
-               if (reason !== 'decline') {
+            if (reason !== CallState.Aborted && reason !== CallState.Ignored) {
+               if (reason !== CallState.Declined) {
                   Log.warn('Error on incoming call', reason);
                }
 

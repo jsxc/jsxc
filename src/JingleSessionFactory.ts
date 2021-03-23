@@ -8,9 +8,9 @@ const CALL_SESSION = 'CallSession';
 const FILE_TRANSFER_SESSION = 'FileTransferSession';
 const STREAM_SESSION = 'StreamSession';
 
-export default class JingleSession {
+export default class JingleSessionFactory {
    public static create(account: Account, session: IOTalkJingleSession) {
-      let sessionType = JingleSession.getSessionType(session);
+      let sessionType = JingleSessionFactory.getSessionType(session);
 
       if (sessionType === FILE_TRANSFER_SESSION) {
          throw new Error('We are currently not supporting file transfer sessions.');
@@ -27,7 +27,7 @@ export default class JingleSession {
       let sessionType = session.constructor ? session.constructor.name : null;
 
       if (sessionType === MEDIA_SESSION) {
-         sessionType = JingleSession.determineMediaSessionType(session);
+         sessionType = JingleSessionFactory.determineMediaSessionType(session);
       }
 
       return sessionType;
