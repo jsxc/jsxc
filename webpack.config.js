@@ -8,6 +8,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const GitRevisionPlugin = new(require('git-revision-webpack-plugin'))();
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const TerserPlugin = require('terser-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 let supportedLangs = fs.readdirSync('./locales/').filter(filename => {
    if (!/\.json$/.test(filename)) {
@@ -76,13 +77,6 @@ let config = {
             }
          }
       },
-      minimizer: [
-         new TerserPlugin({
-            terserOptions: {
-               keep_fnames: /Session$/,
-            },
-         }),
-      ],
    },
    performance: {
       maxEntrypointSize: 1024 * 1000 * 1000 * 3,
@@ -93,12 +87,15 @@ let config = {
          {
             test: /\.ts$/,
             loader: 'ts-loader',
-            exclude: /node_modules/,
+            include: path.resolve(__dirname, 'src'),
+            options: {
+               // transpileOnly: true,
+             },
          },
          {
             test: /\.hbs$/,
             loader: 'handlebars-loader',
-            exclude: /node_modules/,
+            include: path.resolve(__dirname, 'template'),
             options: {
                helperDirs: [
                   path.resolve(__dirname, 'template', 'helpers')
@@ -117,6 +114,7 @@ let config = {
          },
          {
             test: /\.(sass|scss)$/,
+            include: path.resolve(__dirname, 'scss'),
             use: [
                MiniCssExtractPlugin.loader, {
                   loader: 'css-loader',
@@ -191,6 +189,7 @@ let config = {
          }
       }),
       new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, new RegExp(MOMENTJS_LOCALES.join('|'))),
+      new ForkTsCheckerWebpackPlugin(),
    ],
    devServer: {
       // https://github.com/webpack/webpack-dev-server/issues/2484
@@ -226,6 +225,14 @@ module.exports = (env, argv) => {
 
    if (config.mode === 'development') {
       config.devtool = 'eval-source-map';
+   } else {
+      config.minimizer = [
+         new TerserPlugin({
+            terserOptions: {
+               keep_fnames: /Session$/,
+            },
+         }),
+      ];
    }
 
    if (argv.release) {
