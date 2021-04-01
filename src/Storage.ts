@@ -335,7 +335,7 @@ export default class Storage implements IStorage {
 
       let eventNames = Object.keys(hooks);
       eventNames.forEach(function (eventName) {
-         if (key === eventName || key.indexOf(eventName + ':') === 0) {
+         if (eventName === '*' || key === eventName || key.indexOf(eventName + ':') === 0) {
             let eventNameHooks = hooks[eventName] || [];
             eventNameHooks.forEach(function (hook) {
                hook(newValue, oldValue, key);
