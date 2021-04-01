@@ -58,8 +58,9 @@ export default class PluginAPI implements IPluginAPI {
 
    public getSessionStorage(): IStorage {
       if (typeof this.sessionStorage === 'undefined') {
-         //@REVIEW maybe also encapsulate session storage for every plugin
-         this.sessionStorage = this.account.getSessionStorage();
+         let name = this.account.getUid() + '@' + this.account.getSessionId() + '@' + this.name;
+
+         this.sessionStorage = new Storage(name);
       }
 
       return this.sessionStorage;
