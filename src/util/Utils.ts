@@ -51,4 +51,15 @@ export default class Utils {
    public static prettifyHex(hex: string) {
       return hex.replace(/(.{8})/g, '$1 ').replace(/ $/, '');
    }
+
+   public static base64ToArrayBuffer(base64String: string) {
+      let binaryString = window.atob(base64String);
+      let bytes = new Uint8Array(binaryString.length);
+
+      for (let i = 0; i < binaryString.length; i++) {
+         bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      return bytes.buffer;
+   }
 }
