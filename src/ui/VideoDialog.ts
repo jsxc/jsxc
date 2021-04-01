@@ -1,10 +1,10 @@
 import Log from '../util/Log';
-import JingleHandler from '../connection/JingleHandler';
 import VideoWindow from './VideoWindow';
 import JingleMediaSession from '../JingleMediaSession';
 import Translation from '@util/Translation';
 import JingleCallSession from '@src/JingleCallSession';
 import * as screenfull from 'screenfull';
+import Client from '@src/Client';
 
 const screen = screenfull as screenfull.Screenfull;
 
@@ -100,8 +100,14 @@ export class VideoDialog {
          VideoDialog.changeStreamMediaState(localCameraControl, localStream.getVideoTracks());
       });
 
-      this.dom.find('.jsxc-hang-up').click(() => {
-         JingleHandler.terminateAll('success');
+      this.dom.find('.jsxc-hang-up').on('click', () => {
+         Client.getAccountManager()
+            .getAccounts()
+            .forEach(account => {
+               account.getCallManager().terminateAll();
+            });
+
+         this.close();
       });
 
       this.dom.find('.jsxc-video-control.jsxc-minmax').click(() => {

@@ -1,5 +1,5 @@
 import { IConnection } from '../connection/Connection.interface';
-import { IContact as Contact } from '../Contact.interface';
+import { IContact as Contact, IContact } from '../Contact.interface';
 import { IMessage, IMessagePayload, DIRECTION } from '../Message.interface';
 import { IJID as JID } from '../JID.interface';
 import { IDiscoInfoRepository } from '../DiscoInfoRepository.interface';
@@ -11,6 +11,7 @@ import { IAvatar } from '@src/Avatar.interface';
 import Pipe from '@util/Pipe';
 import CommandRepository, { CommandAction } from '@src/CommandRepository';
 import IStorage from '@src/Storage.interface';
+import CallManager from '@src/CallManager';
 
 export interface IPluginAPI {
    Log: ILog;
@@ -62,6 +63,18 @@ export interface IPluginAPI {
 
    addAvatarProcessor(processor: (contact: Contact, avatar: IAvatar) => Promise<[Contact, IAvatar]>, position?: number);
 
+   addCallProcessor(
+      processor: (
+         contact: IContact,
+         type: 'video' | 'audio' | 'screen',
+         resources: string[],
+         sessionId: string
+      ) => Promise<[IContact, 'video' | 'audio' | 'screen', string[], string]>,
+      position?: number
+   ): void;
+
+   addTerminateCallProcessor(processor: (sessionId?: string) => Promise<[string]>): void;
+
    addFeature(feature: string);
 
    registerConnectionHook(func: (status: number, condition?: string) => void);
@@ -90,4 +103,6 @@ export interface IPluginAPI {
    getCommandRepository(): CommandRepository;
 
    getAccountUid(): string;
+
+   getCallManager(): CallManager;
 }

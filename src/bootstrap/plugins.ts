@@ -16,6 +16,7 @@ import PingPlugin from '@src/plugins/PingPlugin';
 import CommandPlugin from '@src/plugins/CommandPlugin';
 import VersionPlugin from '@src/plugins/VersionPlugin';
 import TimePlugin from '../plugins/TimePlugin';
+import JingleMessageInitiationPlugin from '../plugins/JingleMessageInitiationPlugin';
 
 Client.addPlugin(OTRPlugin);
 Client.addPlugin(OMEMOPlugin);
@@ -34,3 +35,4 @@ Client.addPlugin(PingPlugin);
 Client.addPlugin(CommandPlugin);
 Client.addPlugin(VersionPlugin);
 Client.addPlugin(TimePlugin);
+Client.addPlugin(JingleMessageInitiationPlugin);

@@ -17,6 +17,7 @@ import ContactManager from '@src/ContactManager';
 import IStorage from '@src/Storage.interface';
 import CommandRepository, { CommandAction } from '@src/CommandRepository';
 import { IAvatar } from '@src/Avatar.interface';
+import CallManager from '@src/CallManager';
 
 export default class PluginAPI implements IPluginAPI {
    private storage: IStorage;
@@ -136,6 +137,22 @@ export default class PluginAPI implements IPluginAPI {
       this.account.getPipe('publishAvatar').addProcessor(processor, position);
    }
 
+   public addCallProcessor(
+      processor: (
+         contact: IContact,
+         type: 'video' | 'audio' | 'screen',
+         resources: string[],
+         sessionId: string
+      ) => Promise<[IContact, 'video' | 'audio' | 'screen', string[], string]>,
+      position?: number
+   ) {
+      this.account.getPipe('call').addProcessor(processor, position);
+   }
+
+   public addTerminateCallProcessor(processor: (sessionId?: string) => Promise<[string]>) {
+      this.account.getPipe<[sessionId?: string]>('terminateCall').addProcessor(processor);
+   }
+
    public addFeature(feature: string) {
       this.account.getDiscoInfo().addFeature(feature);
    }
@@ -212,5 +229,9 @@ export default class PluginAPI implements IPluginAPI {
 
    public getAccountUid(): string {
       return this.account.getUid();
+   }
+
+   public getCallManager(): CallManager {
+      return this.account.getCallManager();
    }
 }
