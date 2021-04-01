@@ -1,34 +1,69 @@
 import Translation from '../../../../util/Translation';
 import MultiUserContact from '../../../../MultiUserContact';
-import MultiUserPresenceProcessor from './PresenceProcessor';
 import showSelectionDialog from '../../../../ui/dialogs/selection';
 import showRoomConfigurationDialog, { CANCELED } from '../../../../ui/dialogs/multiUserRoomConfiguration';
 
-//@TODO those status codes are partially transmitted through message stanzas
-// https://xmpp.org/extensions/xep-0045.html#registrar-statuscodes
-
 export default class MultiUserStatusCodeHandler {
-   constructor(private presenceHandler: MultiUserPresenceProcessor, private isSelfReferred: boolean) {}
+   public static processCodes(codes: string[], multiUserContact: MultiUserContact) {
+      let statusCodeHandler = new MultiUserStatusCodeHandler(multiUserContact, codes.indexOf('110') > -1);
 
-   public processCode(code): string | void {
+      for (let code of codes) {
+         let msg = statusCodeHandler.processCode(code);
+
+         if (typeof msg === 'string') {
+            multiUserContact.addSystemMessage(msg);
+         }
+      }
+   }
+
+   constructor(private multiUserContact: MultiUserContact, private isSelfReferred: boolean) {}
+
+   public processCode(code: number | string): string | void {
       if (typeof this[code] === 'function') {
-         return this[code as 110 | 170 | 171 | 172 | 173 | 201 | 301 | 307 | 321 | 322 | 332].call(this);
+         return this[
+            code as 100 | 101 | 102 | 103 | 104 | 110 | 170 | 171 | 172 | 173 | 201 | 301 | 307 | 321 | 322 | 332
+         ].call(this);
       }
    }
 
    private setNickname(nickname: string) {
-      this.presenceHandler.getMultiUserContact().setNickname(nickname);
+      this.multiUserContact.setNickname(nickname);
    }
 
    private getNickname(): string {
-      return this.presenceHandler.getNickname();
+      return this.multiUserContact.getNickname();
+   }
+
+   /** Inform user that any occupant is allowed to see the user's full JID */
+   private 100() {
+      return Translation.t('Every_member_can_see_your_full_JID');
+   }
+
+   /** Inform user that his or her affiliation changed while not in the room */
+   private 101() {
+      return Translation.t('Your_affiliation_has_changed');
+   }
+
+   /** Inform occupants that room now shows unavailable members */
+   private 102() {
+      return Translation.t('Room_shows_unavailable_members');
+   }
+
+   /** Inform occupants that room now does not show unavailable members */
+   private 103() {
+      return Translation.t('Room_does_not_show_unavailable_members');
+   }
+
+   /** Inform occupants that a non-privacy-related room configuration change has occurred */
+   private 104() {
+      return Translation.t('Room_configuration_has_changed');
    }
 
    /** Inform user that presence refers to itself */
    private 110() {
-      this.setNickname(this.presenceHandler.getNickname());
+      this.setNickname(this.multiUserContact.getNickname());
 
-      this.presenceHandler.getMultiUserContact().setMemberListComplete();
+      this.multiUserContact.setMemberListComplete();
    }
 
    /** Inform occupants that room logging is now enabled */
@@ -53,8 +88,8 @@ export default class MultiUserStatusCodeHandler {
 
    /** Inform user that a new room has been created */
    private 201() {
-      let multiUserContact = this.presenceHandler.getMultiUserContact();
-      let promise;
+      let multiUserContact = this.multiUserContact;
+      let promise: Promise<Element | unknown>;
 
       if (multiUserContact.isAutoJoin() && multiUserContact.isInstantRoom()) {
          promise = multiUserContact.createInstantRoom();
@@ -67,7 +102,7 @@ export default class MultiUserStatusCodeHandler {
       promise
          .then(stanza => {
             if (stanza === CANCELED) {
-               this.presenceHandler.inform(Translation.t('Configuration_canceled'));
+               multiUserContact.addSystemMessage(Translation.t('Configuration_canceled'));
             }
          })
          .catch(() => {});

@@ -5,6 +5,7 @@ import Translation from '../../../../util/Translation';
 import MultiUserContact from '../../../../MultiUserContact';
 import AbstractHandler from '../../AbstractHandler';
 import { MessageMark } from '@src/Message.interface';
+import MultiUserStatusCodeHandler from './StatusCodeHandler';
 
 // body.replace(/^\/me /, '<i title="/me">' + Utils.removeHTML(this.sender.getName()) + '</i> ');
 
@@ -51,6 +52,16 @@ export default class extends AbstractHandler {
          contact.addSystemMessage(':page_with_curl: ' + translatedMessage);
 
          return this.PRESERVE_HANDLER;
+      }
+
+      if (!nickname) {
+         const codes = $(stanza)
+            .find('x[xmlns="http://jabber.org/protocol/muc#user"]')
+            .find('status')
+            .map((index, element) => element.getAttribute('code'))
+            .get();
+
+         MultiUserStatusCodeHandler.processCodes(codes, contact);
       }
 
       if (body === '') {

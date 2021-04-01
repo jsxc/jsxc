@@ -20,7 +20,7 @@ export default class MultiUserPresenceProcessor {
          this.processNewMember();
       }
 
-      this.processCodes();
+      MultiUserStatusCodeHandler.processCodes(this.codes, this.multiUserContact);
 
       this.postReason();
    }
@@ -100,19 +100,6 @@ export default class MultiUserPresenceProcessor {
                   escapeInterpolation: true,
                })
          );
-      }
-   }
-
-   private processCodes() {
-      let msg;
-      let statusCodeHandler = new MultiUserStatusCodeHandler(this, this.codes.indexOf('110') > -1);
-
-      for (let code of this.codes) {
-         msg = statusCodeHandler.processCode(code);
-
-         if (msg) {
-            this.inform(msg);
-         }
       }
    }
 
