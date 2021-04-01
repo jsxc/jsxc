@@ -14,7 +14,6 @@ export default class AvatarSet {
       if (!avatar) {
          avatar = AvatarSet.avatars[contact.getUid()] = new AvatarSet(contact);
       }
-
       return avatar;
    }
 
