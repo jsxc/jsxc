@@ -87,7 +87,7 @@ let config = {
          {
             test: /\.ts$/,
             loader: 'ts-loader',
-            include: path.resolve(__dirname, 'src'),
+            include: [path.resolve(__dirname, 'src'), path.resolve(__dirname, 'test')],
             options: {
                // transpileOnly: true,
              },
