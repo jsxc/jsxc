@@ -149,15 +149,15 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       });
       element.append(spanElement);
 
-      messageAreaElement.scroll(function () {
-         if (this.scrollTop < 42 && !archive.isExhausted()) {
+      messageAreaElement.on('scroll', function () {
+         if (messageAreaElement.height() + this.scrollTop < 42 && !archive.isExhausted()) {
             element.addClass(classNameShow);
          } else {
             element.removeClass(classNameShow);
          }
       });
 
-      messageAreaElement.scroll();
+      messageAreaElement.trigger('scroll');
 
       if (!archive.isExhausted()) {
          chatWindowElement.addClass(classNameMamEnable);
