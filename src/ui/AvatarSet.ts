@@ -42,7 +42,12 @@ export default class AvatarSet {
             });
          })
          .catch(msg => {
-            AvatarSet.placeholder(this.elements, this.contact.getName(), this.contact.getJid());
+            AvatarSet.placeholder(
+               this.elements,
+               this.contact.getName(),
+               this.contact.getJid(),
+               this.contact.isGroupChat() ? '' : undefined
+            );
          })
          .then(() => {
             this.hideSpinner();
@@ -55,7 +60,7 @@ export default class AvatarSet {
       });
    }
 
-   private static placeholder(elements: JQuery | JQuery[], text: string, jid: IJID) {
+   private static placeholder(elements: JQuery | JQuery[], text: string, jid: IJID, label?: string) {
       let avatarPlaceholder = Client.getOption('avatarPlaceholder');
 
       let color = Color.generate(text);
@@ -65,7 +70,7 @@ export default class AvatarSet {
             'background-image': '',
          });
 
-         avatarPlaceholder($(this), text, color, jid);
+         avatarPlaceholder($(this), typeof label === 'string' ? label : text, color, jid);
       });
    }
 

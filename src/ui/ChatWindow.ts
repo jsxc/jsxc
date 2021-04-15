@@ -20,6 +20,7 @@ import { JINGLE_FEATURES } from '@src/JingleAbstractSession';
 import Location from '@util/Location';
 import interact from 'interactjs';
 import Translation from '../util/Translation';
+import MultiUserContact from '@src/MultiUserContact';
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -88,6 +89,22 @@ export default class ChatWindow {
 
       this.element.attr('data-presence', Presence[this.contact.getPresence()]);
       this.element.attr('data-subscription', this.contact.getSubscription());
+      this.element.attr('data-type', this.contact.getType());
+
+      if (this.contact.isGroupChat()) {
+         const setMembersOnly = () =>
+            this.element.attr('data-membersonly', (this.contact as MultiUserContact).isMembersOnly().toString());
+         const setNonAnonymous = () =>
+            this.element.attr('data-nonanonymous', (this.contact as MultiUserContact).isNonAnonymous().toString());
+
+         this.contact.registerHook('features', () => {
+            setMembersOnly();
+            setNonAnonymous();
+         });
+
+         setMembersOnly();
+         setNonAnonymous();
+      }
 
       this.getAccount().triggerChatWindowInitializedHook(this, contact);
    }

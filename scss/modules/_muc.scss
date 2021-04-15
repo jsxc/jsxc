@@ -1,5 +1,8 @@
 %muc-avatar-icon {
-  background-image: url("../images/group_white.svg");
-  background-size: 1em;
-  text-indent: 999px;
+  &::after {
+    content: map-get($jsxc-icons-map, "group");
+    font-family: jsxc-icons !important;
+    font-weight: normal;
+    text-indent: 0;
+  }
 }

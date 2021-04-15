@@ -13,6 +13,7 @@ import Roster from '@ui/Roster';
 import Emoticons from '@src/Emoticons';
 import Utils from '@util/Utils';
 import { IMessage } from '@src/Message.interface';
+import MultiUserContact from '@src/MultiUserContact';
 
 let rosterItemTemplate = require('../../template/roster-item.hbs');
 
@@ -111,6 +112,21 @@ export default class RosterItem {
       this.contact.registerHook('presence', () => {
          this.element.attr('data-presence', Presence[this.contact.getPresence()]);
       });
+
+      if (this.contact.isGroupChat()) {
+         const setMembersOnly = () =>
+            this.element.attr('data-membersonly', (this.contact as MultiUserContact).isMembersOnly().toString());
+         const setNonAnonymous = () =>
+            this.element.attr('data-nonanonymous', (this.contact as MultiUserContact).isNonAnonymous().toString());
+
+         this.contact.registerHook('features', () => {
+            setMembersOnly();
+            setNonAnonymous();
+         });
+
+         setMembersOnly();
+         setNonAnonymous();
+      }
 
       const updateLastMessage = (message: IMessage) => {
          if (!message.getPlaintextMessage() && message.hasAttachment()) {
