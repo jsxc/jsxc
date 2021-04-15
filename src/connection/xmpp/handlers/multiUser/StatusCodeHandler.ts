@@ -56,6 +56,8 @@ export default class MultiUserStatusCodeHandler {
 
    /** Inform occupants that a non-privacy-related room configuration change has occurred */
    private 104() {
+      this.multiUserContact.refreshFeatures();
+
       return Translation.t('Room_configuration_has_changed');
    }
 
@@ -78,11 +80,15 @@ export default class MultiUserStatusCodeHandler {
 
    /** Inform occupants that the room is now non-anonymous */
    private 172() {
+      this.multiUserContact.refreshFeatures();
+
       return Translation.t('Room_is_now_non-anoymous');
    }
 
    /** Inform occupants that the room is now semi-anonymous */
    private 173() {
+      this.multiUserContact.refreshFeatures();
+
       return Translation.t('Room_is_now_semi-anonymous');
    }
 

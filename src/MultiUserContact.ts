@@ -38,7 +38,7 @@ export default class MultiUserContact extends Contact {
 
    public static TYPE = 'groupchat';
 
-   private members: PersistentMap;
+   private members: PersistentMap<{ affiliation: AFFILIATION; role: ROLE; jid: string }>;
 
    constructor(account: Account, jid: IJID, name?: string);
    constructor(account: Account, id: string);
@@ -116,6 +116,8 @@ export default class MultiUserContact extends Contact {
       this.data.set('memberListComplete', false);
       this.removeAllMembers();
 
+      this.refreshFeatures();
+
       return this.getService().joinMultiUserRoom(new JID(this.jid.bare, this.getNickname()), this.data.get('password'));
    }
 
@@ -139,6 +141,69 @@ export default class MultiUserContact extends Contact {
       let form = Form.fromJSON(this.getRoomConfiguration());
 
       return this.getService().submitRoomConfiguration(this.getJid(), form);
+   }
+
+   public async refreshFeatures(): Promise<string[]> {
+      const stanza = await this.account.getConnection().getDiscoService().getDiscoInfo(new JID(this.jid.bare));
+
+      const features = $(stanza)
+         .find('feature')
+         .map((_, element) => $(element).attr('var'))
+         .get()
+         .filter(feature => feature && feature.startsWith('muc_'))
+         .map(feature => feature.replace(/^muc_/, ''));
+
+      this.data.set('features', features);
+
+      return features;
+   }
+
+   public getFeatures(): string[] {
+      return this.data.get('features') || [];
+   }
+
+   public isMembersOnly(): boolean {
+      return this.getFeatures().includes('membersonly');
+   }
+
+   public isModerated(): boolean {
+      return this.getFeatures().includes('moderated');
+   }
+
+   public isNonAnonymous(): boolean {
+      return this.getFeatures().includes('nonanonymous');
+   }
+
+   public isOpen(): boolean {
+      return this.getFeatures().includes('open');
+   }
+
+   public isPasswordProtected(): boolean {
+      return this.getFeatures().includes('passwordprotected');
+   }
+
+   public isPersistent(): boolean {
+      return this.getFeatures().includes('persistent');
+   }
+
+   public isPublic(): boolean {
+      return this.getFeatures().includes('public');
+   }
+
+   public isSemiAnonymous(): boolean {
+      return this.getFeatures().includes('semianonymous');
+   }
+
+   public isTemporary(): boolean {
+      return this.getFeatures().includes('temporary');
+   }
+
+   public isUnmoderated(): boolean {
+      return this.getFeatures().includes('unmoderated');
+   }
+
+   public isUnsecured(): boolean {
+      return this.getFeatures().includes('unsecured');
    }
 
    public setNickname(nickname: string) {
@@ -273,10 +338,6 @@ export default class MultiUserContact extends Contact {
 
    public registerRemoveMemberHook(func: (nickname: string) => void) {
       this.getMembers().registerRemoveHook(func);
-   }
-
-   public isPersistent() {
-      return this.isBookmarked();
    }
 
    public shutdown() {

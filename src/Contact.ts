@@ -338,10 +338,6 @@ export default class Contact implements IIdentifiable, IContact {
       this.data.registerHook(property, func);
    }
 
-   public isPersistent(): boolean {
-      return true;
-   }
-
    private getHighestPresence(): Presence {
       let maxPresence = Presence.offline;
       let resources = this.data.get('resources');
