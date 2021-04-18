@@ -65,11 +65,7 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
             .getPEPService()
             .publish(UANS_METADATA, item.tree(), UANS_METADATA)
             .then(function (result) {
-               if ($(result).attr('type') === 'result') {
-                  return [undefined];
-               } else {
-                  return [avatar];
-               }
+                return [undefined];
             });
       } else {
          let data = $build('data', { xmlns: UANS_DATA }).t(avatar.getData()).tree();
@@ -78,36 +74,25 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
             .getPEPService()
             .publish(UANS_DATA, data, UANS_DATA)
             .then((result: any) => {
-               if ($(result).attr('type') === 'result') {
-                  let metadata;
-                  let hash = Hash.SHA1FromBase64(avatar.getData());
-                  let i = new Image();
-                  let iheight = 0;
-                  let iwidth = 0;
-                  let size = FileHelper.getFileSizeFromBase64(avatar.getData());
 
-                  i.onload = function () {
-                     iheight = i.height;
-                     iwidth = i.width;
-                  };
-                  i.src = 'data:' + avatar.getType() + ';base64,' + avatar.getData();
-                  metadata = $build('metadata', { xmlns: UANS_METADATA })
-                     .c('info', { bytes: size, id: hash, height: iheight, width: iwidth, type: avatar.getType() })
-                     .tree();
+                let hash = Hash.SHA1FromBase64(avatar.getData());
+                let i = new Image();
+                let size = FileHelper.getFileSizeFromBase64(avatar.getData());
+                i.src = 'data:' + avatar.getType() + ';base64,' + avatar.getData();
+                let metadata = $build('metadata', { xmlns: UANS_METADATA })
+                    .c('info', { bytes: size, id: hash, type: avatar.getType() })
+                    .tree();
 
-                  return connection
-                     .getPEPService()
-                     .publish(UANS_METADATA, metadata, UANS_METADATA)
-                     .then(function (result) {
+                return connection
+                    .getPEPService()
+                    .publish(UANS_METADATA, metadata, UANS_METADATA)
+                    .then(function (result) {
                         if ($(result).attr('type') === 'result') {
-                           return [undefined];
+                            return [undefined];
                         } else {
-                           return [avatar];
+                            return [avatar];
                         }
                      });
-               } else {
-                  return [avatar];
-               }
             });
       }
    };
@@ -126,7 +111,7 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
          }
 
          if (info.length > 0) {
-            let hash = $(info).attr('id');
+            let hash = info.attr('id');
 
             let storedHash = this.getStorage().getItem(from.bare);
             if (storedHash === undefined || hash !== storedHash) {
@@ -185,14 +170,7 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
       } catch (err) {
          try {
             const avatarObject = await this.getAvatar(contact);
-
-            if (avatarObject) {
-               avatar = new Avatar(hash, avatarObject.type, avatarObject.src);
-               return [contact, avatar];
-            } else {
-               this.pluginAPI.Log.warn('No local cached avatar found');
-               return [contact, avatar];
-            }
+            avatar = new Avatar(hash, avatarObject.type, avatarObject.src);
          } catch (err) {
             this.pluginAPI.Log.warn('Error during avatar retrieval', err);
             return [contact, avatar];
@@ -214,12 +192,12 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
             if (metadata.length > 0) {
                let info = metadata.find('info');
 
-               if (info && info.length > 0) {
+               if (info && info.length === 1) {
                   let hash = $(info).attr('id');
                   if (hash && hash.length > 0) {
-                     let typeval = $(info).attr('type');
+                     let typeval = info.attr('type');
 
-                     let result = connection
+                     return connection
                         .getPEPService()
                         .retrieveItems(UANS_DATA, contact.getJid().bare)
                         .then(data => {
@@ -234,7 +212,6 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
                               throw new Error('No photo available');
                            }
                         });
-                     return result;
                   }
                }
             }
