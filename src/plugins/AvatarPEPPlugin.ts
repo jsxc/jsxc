@@ -70,6 +70,20 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
       } else {
          let data = $build('data', { xmlns: UANS_DATA }).t(avatar.getData()).tree();
 
+         const b64str = avatar.getData().replace(/^.+;base64,/, '');
+
+         if (b64str[0]!=='/' && //base64 mimeType for jpeg
+            b64str[0]!=='i') //base64 mimeType for png
+         {
+            throw new Error('Only jpeg and png files are supported.');
+         }
+
+         let regextypeval = new RegExp(/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/igm);
+         if (!regextypeval.test(b64str))
+         {
+            throw new Error('Data Source is not a valid base64 string!');
+         }
+
          return connection
             .getPEPService()
             .publish(UANS_DATA, data, UANS_DATA)
@@ -87,11 +101,7 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
                     .getPEPService()
                     .publish(UANS_METADATA, metadata, UANS_METADATA)
                     .then(function (result) {
-                        if ($(result).attr('type') === 'result') {
-                            return [undefined];
-                        } else {
-                            return [avatar];
-                        }
+                        return [avatar];
                      });
             });
       }
