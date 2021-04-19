@@ -196,16 +196,35 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
                   let hash = $(info).attr('id');
                   if (hash && hash.length > 0) {
                      let typeval = info.attr('type');
+                     
+                     let regextypeval = new RegExp(/image\/(\*|png|jpg|jpeg)/igm);
+                     if (!regextypeval.test(typeval))
+                     {
+                        throw new Error('Mimetype not allowed');
+                     }
 
                      return connection
                         .getPEPService()
                         .retrieveItems(UANS_DATA, contact.getJid().bare)
                         .then(data => {
                            if (data && $(data).text() && $(data).text().trim().length > 0) {
-                              let src = $(data)
+                              let src= $(data)
                                  .text()
-                                 .replace(/[\t\r\n\f]/gi, '');
+                                 .replace(/[\t\r\n\f]/gim, '');
                               const b64str = src.replace(/^.+;base64,/, '');
+
+                              if (b64str[0]!=='/' && //base64 mimeType for jpeg
+                                  b64str[0]!=='i') //base64 mimeType for png
+                              {
+                                 throw new Error('Only jpeg and png files are supported.');
+                              }
+
+                              let regextypeval = new RegExp(/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/igm);
+                              if (!regextypeval.test(b64str))
+                              {
+                                 throw new Error('Data Source is not a valid base64 string!');
+                              }
+
                               this.getStorage().setItem(contact.getJid().bare, Hash.SHA1FromBase64(b64str));
                               return { src: 'data:' + typeval + ';base64,' + src, type: typeval };
                            } else {
