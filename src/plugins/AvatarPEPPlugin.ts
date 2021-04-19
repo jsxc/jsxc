@@ -110,8 +110,7 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
    private onMessageAvatarUpdate = stanza => {
       let from = new JID($(stanza).attr('from'));
       let metadata = $(stanza).find('metadata[xmlns="urn:xmpp:avatar:metadata"]');
-      let data = $(stanza).find('data[xmlns="urn:xmpp:avatar:data"]');
-
+  
       if (metadata.length > 0) {
          let info = metadata.find('info');
          let contact = this.pluginAPI.getContact(from);
@@ -134,19 +133,6 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
             this.getStorage().setItem(contact.getJid().bare, '');
             avatarUI.reload();
          }
-      } else if (data.length > 0) {
-         let contact = this.pluginAPI.getContact(from);
-         if (!contact) {
-            this.pluginAPI.Log.warn('No contact found for', from);
-            return true;
-         }
-
-         let src = data.text().replace(/[\t\r\n\f]/gi, '');
-         const b64str = src.replace(/^.+;base64,/, '');
-         let hash = Hash.SHA1FromBase64(b64str);
-         let avatarUI = AvatarUI.get(contact);
-         this.getStorage().setItem(contact.getJid().bare, hash);
-         avatarUI.reload();
       }
 
       return true;
