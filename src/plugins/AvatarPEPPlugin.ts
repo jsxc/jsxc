@@ -110,7 +110,7 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
    private onMessageAvatarUpdate = stanza => {
       let from = new JID($(stanza).attr('from'));
       let metadata = $(stanza).find('metadata[xmlns="urn:xmpp:avatar:metadata"]');
-  
+
       if (metadata.length > 0) {
          let info = metadata.find('info');
          let contact = this.pluginAPI.getContact(from);
@@ -192,7 +192,7 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
                   let hash = $(info).attr('id');
                   if (hash && hash.length > 0) {
                      let typeval = info.attr('type');
-                     
+
                      let regextypeval = new RegExp(/image\/(\*|png|jpg|jpeg)/igm);
                      if (!regextypeval.test(typeval))
                      {
