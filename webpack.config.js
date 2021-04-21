@@ -226,7 +226,7 @@ module.exports = (env, argv) => {
    if (config.mode === 'development') {
       config.devtool = 'eval-source-map';
    } else {
-      config.minimizer = [
+      config.optimization.minimizer = [
          new TerserPlugin({
             terserOptions: {
                keep_fnames: /Session$/,
