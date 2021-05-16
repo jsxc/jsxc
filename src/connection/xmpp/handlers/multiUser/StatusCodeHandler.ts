@@ -4,8 +4,8 @@ import showSelectionDialog from '../../../../ui/dialogs/selection';
 import showRoomConfigurationDialog, { CANCELED } from '../../../../ui/dialogs/multiUserRoomConfiguration';
 
 export default class MultiUserStatusCodeHandler {
-   public static processCodes(codes: string[], multiUserContact: MultiUserContact) {
-      let statusCodeHandler = new MultiUserStatusCodeHandler(multiUserContact, codes.indexOf('110') > -1);
+   public static processCodes(codes: string[], multiUserContact: MultiUserContact, nickname?: string) {
+      let statusCodeHandler = new MultiUserStatusCodeHandler(multiUserContact, codes.indexOf('110') > -1, nickname);
 
       for (let code of codes) {
          let msg = statusCodeHandler.processCode(code);
@@ -16,7 +16,11 @@ export default class MultiUserStatusCodeHandler {
       }
    }
 
-   constructor(private multiUserContact: MultiUserContact, private isSelfReferred: boolean) {}
+   constructor(
+      private multiUserContact: MultiUserContact,
+      private isSelfReferred: boolean,
+      private nickname?: string
+   ) {}
 
    public processCode(code: number | string): string | void {
       if (typeof this[code] === 'function') {
@@ -24,14 +28,6 @@ export default class MultiUserStatusCodeHandler {
             code as 100 | 101 | 102 | 103 | 104 | 110 | 170 | 171 | 172 | 173 | 201 | 301 | 307 | 321 | 322 | 332
          ].call(this);
       }
-   }
-
-   private setNickname(nickname: string) {
-      this.multiUserContact.setNickname(nickname);
-   }
-
-   private getNickname(): string {
-      return this.multiUserContact.getNickname();
    }
 
    /** Inform user that any occupant is allowed to see the user's full JID */
@@ -63,8 +59,6 @@ export default class MultiUserStatusCodeHandler {
 
    /** Inform user that presence refers to itself */
    private 110() {
-      this.setNickname(this.multiUserContact.getNickname());
-
       this.multiUserContact.setMemberListComplete();
    }
 
@@ -121,31 +115,31 @@ export default class MultiUserStatusCodeHandler {
       }
 
       return Translation.t('muc_removed_info_banned', {
-         nickname: this.getNickname(),
+         nickname: this.nickname,
          escapeInterpolation: true,
       });
    }
 
    /** Inform user that he or she has been kicked */
-   private 307(room, nickname, data, xdata) {
+   private 307() {
       if (this.isSelfReferred) {
          return Translation.t('muc_removed_kicked');
       }
 
       return Translation.t('muc_removed_info_kicked', {
-         nickname: this.getNickname(),
+         nickname: this.nickname,
          escapeInterpolation: true,
       });
    }
 
    /** Inform user that he or she is beeing removed from the room because of an affiliation change */
-   private 321(room, nickname) {
+   private 321() {
       if (this.isSelfReferred) {
          return Translation.t('muc_removed_affiliation');
       }
 
       return Translation.t('muc_removed_info_affiliation', {
-         nickname: this.getNickname(),
+         nickname: this.nickname,
          escapeInterpolation: true,
       });
    }
@@ -154,13 +148,13 @@ export default class MultiUserStatusCodeHandler {
     * Inform user that he or she is beeing removed from the room because the room has been
     * changed to members-only and the user is not a member
     */
-   private 322(room, nickname) {
+   private 322() {
       if (this.isSelfReferred) {
          return Translation.t('muc_removed_membersonly');
       }
 
       return Translation.t('muc_removed_info_membersonly', {
-         nickname: this.getNickname(),
+         nickname: this.nickname,
          escapeInterpolation: true,
       });
    }
@@ -169,7 +163,7 @@ export default class MultiUserStatusCodeHandler {
     * Inform user that he or she is beeing removed from the room because the MUC service
     * is being shut down
     */
-   private 332(room) {
+   private 332() {
       return Translation.t('muc_removed_shutdown');
    }
 }

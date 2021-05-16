@@ -20,7 +20,7 @@ export default class MultiUserPresenceProcessor {
          this.processNewMember();
       }
 
-      MultiUserStatusCodeHandler.processCodes(this.codes, this.multiUserContact);
+      MultiUserStatusCodeHandler.processCodes(this.codes, this.multiUserContact, nickname);
 
       this.postReason();
    }
