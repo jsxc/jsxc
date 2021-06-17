@@ -1,0 +1,13 @@
+name: Update from WTI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.1
+        # bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - run: gem install web_translate_it
+    - run: wti pull --all
