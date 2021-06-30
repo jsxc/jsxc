@@ -1,0 +1,28 @@
+name: Update from WTI
+on:
+  schedule:
+    - cron: "55 5 * * *"
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7
+        # bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - run: gem install web_translate_it
+    - run: "echo foo: > .wti"
+    - name: Pull latest changes from WTI
+      env:
+        WTI_PROJECT_API_KEY: ${{ secrets.WTI_PROJECT_API_KEY }}
+      run: wti pull --all
+    - name: Check for modified files
+      id: git-check
+      run: echo ::set-output name=modified::$([ -z "`git status --porcelain locales/`" ] && echo "false" || echo "true")
+    - name: Commit updates
+      if: steps.git-check.outputs.modified == 'true'
+      run: |
+        git config user.name "JSXC bot"
+        git config user.email bot@jsxc.org
+        git add locales/ && git commit -m "chore: update locales" && git push
