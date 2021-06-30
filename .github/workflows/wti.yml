@@ -9,5 +9,8 @@ jobs:
       with:
         ruby-version: 2.1
         # bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-    - run: gem install web_translate_it
-    - run: wti pull --all
+    - run: gem install web_translate_it && wti --version
+    - name: Pull latest changes from WTI
+      env:
+        WTI_PROJECT_API_KEY: ${{ secrets.WTI_PROJECT_API_KEY }}
+      run: wti pull --all
