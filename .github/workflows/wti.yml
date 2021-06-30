@@ -1,7 +1,7 @@
 name: Update from WTI
 on: [push, pull_request]
 jobs:
-  test:
+  pull:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -9,7 +9,7 @@ jobs:
       with:
         ruby-version: 2.1
         # bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-    - run: gem install web_translate_it && wti --version
+    - run: gem install web_translate_it && wti --version && touch .wti
     - name: Pull latest changes from WTI
       env:
         WTI_PROJECT_API_KEY: ${{ secrets.WTI_PROJECT_API_KEY }}
