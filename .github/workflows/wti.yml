@@ -1,5 +1,7 @@
 name: Update from WTI
-on: [push, pull_request]
+on:
+  schedule:
+    - cron: "55 5 * * *"
 jobs:
   pull:
     runs-on: ubuntu-latest
