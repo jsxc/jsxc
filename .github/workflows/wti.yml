@@ -9,8 +9,14 @@ jobs:
       with:
         ruby-version: 2.7
         # bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-    - run: gem install web_translate_it && wti --version && touch .wti
+    - run: gem install web_translate_it
+    - run: "echo foo: > .wti"
     - name: Pull latest changes from WTI
       env:
         WTI_PROJECT_API_KEY: ${{ secrets.WTI_PROJECT_API_KEY }}
       run: wti pull --all
+    - name: Commit updates
+      run: |
+        git config user.name "JSXC bot"
+        git config user.email bot@jsxc.org
+        git add locales/ && git commit -m "chore: update locales" && git push
