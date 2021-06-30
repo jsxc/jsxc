@@ -15,7 +15,11 @@ jobs:
       env:
         WTI_PROJECT_API_KEY: ${{ secrets.WTI_PROJECT_API_KEY }}
       run: wti pull --all
+    - name: Check for modified files
+      id: git-check
+      run: echo ::set-output name=modified::$([ -z "`git status --porcelain locales/`" ] && echo "false" || echo "true")
     - name: Commit updates
+      if: steps.git-check.outputs.modified == 'true'
       run: |
         git config user.name "JSXC bot"
         git config user.email bot@jsxc.org
