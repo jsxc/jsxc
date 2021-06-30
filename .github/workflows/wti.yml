@@ -7,7 +7,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 2.1
+        ruby-version: 2.7
         # bundler-cache: true # runs 'bundle install' and caches installed gems automatically
     - run: gem install web_translate_it && wti --version && touch .wti
     - name: Pull latest changes from WTI
