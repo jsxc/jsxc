@@ -5,8 +5,11 @@ on:
 jobs:
   pull:
     runs-on: ubuntu-latest
+    environment: Cron
     steps:
     - uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.BOT_TOKEN }}
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: 2.7
