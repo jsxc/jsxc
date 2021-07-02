@@ -105,7 +105,7 @@
     "cmd_nick": "[nickname] Change own nickname",
     "cmd_subject": "[topic] Change topic of the group",
     "cmd_ban": "[JID] (reason) Kick and ban a user ",
-    "cmd_kick": "[nickname] (reason) Kick a userc",
+    "cmd_kick": "[nickname] (reason) Kick a user",
     "cmd_participant": "[nickname] Change role to participant ",
     "cmd_member": "[JID] Change affiliation to member",
     "cmd_moderator": "[nickname] Change role to moderator",
