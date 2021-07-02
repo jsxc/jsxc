@@ -227,7 +227,7 @@ export default class MultiUserContact extends Contact {
    public getMember(nickname: string): { affiliation?: AFFILIATION; role?: ROLE; jid?: JID } {
       let data = this.getMembers().get(nickname) || {};
 
-      data.jid = data.jid ? new JID(data.jid) : undefined;
+      data.jid = data.jid ? new JID(data.jid.full || data.jid) : undefined;
 
       return data;
    }
@@ -238,7 +238,7 @@ export default class MultiUserContact extends Contact {
       this.getMembers().set(nickname, {
          affiliation,
          role,
-         jid: jid ? jid.full : undefined,
+         jid: jid?.full,
       });
 
       return isNewMember;
