@@ -83,7 +83,7 @@ export default class MultiUserPresenceProcessor {
    }
 
    private processNewMember() {
-      let itemElement = this.xElement.find('item');
+      let itemElement = this.xElement.find('item').first();
       let jidString = itemElement.attr('jid');
       let affiliation = itemElement.attr('affiliation');
       let role = itemElement.attr('role');
