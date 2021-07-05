@@ -6440,9 +6440,9 @@ os-tmpdir@~1.0.2:
   resolved "https://registry.yarnpkg.com/os-tmpdir/-/os-tmpdir-1.0.2.tgz#bbe67406c79aa85c5cfec766fe5734555dfa1274"
   integrity sha1-u+Z0BseaqFxc/sdm/lc0VV36EnQ=
 
-"otr@github:sualko/otr#1ee459b4eda85d0a7d76d7da7b3a36861294346e":
+"otr@https://github.com/sualko/otr.git#1ee459b4eda85d0a7d76d7da7b3a36861294346e":
   version "0.3.0-sualko"
-  resolved "https://codeload.github.com/sualko/otr/tar.gz/1ee459b4eda85d0a7d76d7da7b3a36861294346e"
+  resolved "https://github.com/sualko/otr.git#1ee459b4eda85d0a7d76d7da7b3a36861294346e"
 
 p-finally@^1.0.0:
   version "1.0.0"
