@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## 4.3.0-beta.1 (2021-05-29)
+## 4.3.0 (2021-07-05)
 ### Added
 - show different icon for open rooms (muc)
 - make room features persistant
@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - use conference subdomain as default
 
 ### Fixed
+- presence update for members with multiple devices (muc)
+- try all user media before failing
+- member jid retrieval (muc)
 - [#1025](https://github.com/jsxc/jsxc/issues/1025) nickname in status code messages (mux)
 - webpack config error
 - toggle of archive button
@@ -75,7 +78,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - vcard parsing
 
 ### Misc
-- update lang
+- update locales
+- add wti workflow (#1038)
 - move to github actions
 - update dependencies
 - add config for fantasticon
