@@ -1,9 +1,11 @@
 button.jsxc-collapsible {
   background-color: var(--jsxc-color-background-darker);
   border: 0;
+  border-radius: 0;
   color: var(--jsxc-color-main-text);
   cursor: pointer;
   font-size: 12px;
+  font-weight: normal;
   outline: none;
   padding: 5px;
   text-align: left;
@@ -65,7 +67,7 @@ button.jsxc-collapsible {
   }
 }
 
-.jsxc-filter-input {
+input.jsxc-filter-input {
   background-color: $roster-input-bg;
   background-image: none;
   border: 0;
@@ -411,9 +413,9 @@ li.jsxc-hide-offline {
   @include presence-indicator(" .jsxc-avatar");
   list-style: none;
   margin: 0;
+  margin-bottom: 1em;
   overflow: hidden;
   padding: 0;
-  padding-bottom: 1em;
   width: 100%;
   z-index: 85;
 
