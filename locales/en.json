@@ -435,7 +435,8 @@
     "setting-version": "Returns version information about the software running this Client.",
     "setting-time": "Returns entity time on queries.",
     "Occupants": "Occupants",
-    "Occupants_not_provided": "No occupants in the room or the list is kept private."
+    "Occupants_not_provided": "No occupants in the room or the list is kept private.",
+    "Edit_avatar": "Edit avatar"
   },
   "Notifications": "Notifications"
 }

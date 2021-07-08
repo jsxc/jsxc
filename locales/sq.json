@@ -435,7 +435,8 @@
     "setting-version": "Jep të dhëna versioni rreth software-it që po xhiron ky Klient",
     "setting-time": null,
     "Occupants": "Pjesëmarrës",
-    "Occupants_not_provided": "S’ka pjesëmarrës te dhoma ose lista është mbajtur private."
+    "Occupants_not_provided": "S’ka pjesëmarrës te dhoma ose lista është mbajtur private.",
+    "Edit_avatar": null
   },
   "Notifications": "Njoftime"
 }
