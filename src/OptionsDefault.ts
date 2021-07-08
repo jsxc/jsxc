@@ -29,10 +29,8 @@ export let rosterVisibility = SHOWN;
 export let hideOfflineContacts = false;
 
 /** Returns permanent saved settings. */
-export let loadOptions: (
-   jid: string,
-   password: string
-) => Promise<{ [id: string]: { [key: string]: any } }> = undefined;
+export let loadOptions: (jid: string, password: string) => Promise<{ [id: string]: { [key: string]: any } }> =
+   undefined;
 
 /** This function is called after a watched form or the login box is submitted. */
 export let loadConnectionOptions: SettingsCallback = undefined;

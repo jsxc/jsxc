@@ -133,24 +133,22 @@ export default class CommandPlugin extends AbstractPlugin {
          'multiuser'
       );
 
-      const affiliationChangeActionFactory = (affiliation: 'admin' | 'member' | 'owner' | 'none') => async (
-         args: string[],
-         contact: MultiUserContact
-      ) => {
-         if (!contact.isGroupChat()) {
-            throw new OnlyGroupChatError();
-         }
+      const affiliationChangeActionFactory =
+         (affiliation: 'admin' | 'member' | 'owner' | 'none') => async (args: string[], contact: MultiUserContact) => {
+            if (!contact.isGroupChat()) {
+               throw new OnlyGroupChatError();
+            }
 
-         if (args.length !== 2) {
-            throw new ArgumentError();
-         }
+            if (args.length !== 2) {
+               throw new ArgumentError();
+            }
 
-         let jid = new JID(args[1]);
+            let jid = new JID(args[1]);
 
-         contact.changeAffiliation(jid, affiliation);
+            contact.changeAffiliation(jid, affiliation);
 
-         return true;
-      };
+            return true;
+         };
 
       this.pluginAPI.registerCommand('/admin', affiliationChangeActionFactory('admin'), 'cmd_admin', 'multiuser');
       this.pluginAPI.registerCommand('/member', affiliationChangeActionFactory('member'), 'cmd_member', 'multiuser');
@@ -191,24 +189,22 @@ export default class CommandPlugin extends AbstractPlugin {
          'multiuser'
       );
 
-      const roleChangeActionFactory = (role: 'moderator' | 'participant') => async (
-         args: string[],
-         contact: MultiUserContact
-      ) => {
-         if (!contact.isGroupChat()) {
-            throw new OnlyGroupChatError();
-         }
+      const roleChangeActionFactory =
+         (role: 'moderator' | 'participant') => async (args: string[], contact: MultiUserContact) => {
+            if (!contact.isGroupChat()) {
+               throw new OnlyGroupChatError();
+            }
 
-         if (args.length !== 2) {
-            throw new ArgumentError();
-         }
+            if (args.length !== 2) {
+               throw new ArgumentError();
+            }
 
-         let nickname = args[1];
+            let nickname = args[1];
 
-         contact.changeRole(nickname, role);
+            contact.changeRole(nickname, role);
 
-         return true;
-      };
+            return true;
+         };
 
       this.pluginAPI.registerCommand('/moderator', roleChangeActionFactory('moderator'), 'cmd_moderator', 'multiuser');
       this.pluginAPI.registerCommand(
