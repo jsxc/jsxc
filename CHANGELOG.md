@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## 4.3.1 (2021-07-08)
+### Fixed
+- types for client interface
+- fix conflicts with external styles
+
+### Misc
+- add env flag to build script
+- update locales
+- update dependencies
+- fix otr package version
+- update code style
+
 ## 4.3.0 (2021-07-05)
 ### Added
 - show different icon for open rooms (muc)
