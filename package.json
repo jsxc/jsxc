@@ -126,7 +126,7 @@
     "handlebars": "^4.7.6",
     "handlebars-loader": "^1.7.1",
     "handlebars-runtime": "^1.0.12",
-    "i18next": "^19.8.4",
+    "i18next": "^20.3.2",
     "i18next-browser-languagedetector": "^6.0.1",
     "interactjs": "^1.10.0",
     "jingle": "^3.0.3",
