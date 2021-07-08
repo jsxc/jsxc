@@ -1,23 +1,24 @@
+import Account from './Account';
 import { IJID } from './JID.interface';
 
 export interface IClient {
-   init();
+   init(): void;
 
-   addPreSendMessageHook(hook: (Message, Builder) => void, position?: number);
+   addPreSendMessageHook(hook: (Message, Builder) => void, position?: number): void;
 
-   hasFocus();
+   hasFocus(): void;
 
    isExtraSmallDevice(): boolean;
 
    isDebugMode(): boolean;
 
-   getStorage();
+   getStorage(): void;
 
    getAccount(jid: IJID): Account;
    getAccount(uid?: string): Account;
 
-   createAccount(boshUrl: string, jid: string, sid: string, rid: string);
-   createAccount(boshUrl: string, jid: string, password: string);
+   createAccount(boshUrl: string, jid: string, sid: string, rid: string): void;
+   createAccount(boshUrl: string, jid: string, password: string): void;
 
-   removeAccount(account: Account);
+   removeAccount(account: Account): void;
 }
