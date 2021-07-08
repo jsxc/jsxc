@@ -235,7 +235,7 @@ module.exports = (env, argv) => {
       ];
    }
 
-   if (argv.release) {
+   if (argv.release || process.env.BUILD === 'release') {
       version = packageJson.version;
    }
 
