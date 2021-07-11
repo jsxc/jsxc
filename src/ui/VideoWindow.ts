@@ -11,6 +11,15 @@ export default class VideoWindow {
    constructor(private videoDialog: VideoDialog, private session: JingleMediaSession) {
       this.registerHooks();
       this.initWrapper();
+
+      let remoteStreams = this.session.getRemoteStreams();
+
+      if (remoteStreams.length > 0) {
+         this.wrapperElement.removeClass('jsxc-establishing');
+         this.wrapperElement.addClass('jsxc-ice-connected');
+
+         this.addStream(remoteStreams[0]);
+      }
    }
 
    private registerHooks() {
