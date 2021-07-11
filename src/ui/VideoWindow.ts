@@ -107,7 +107,9 @@ export default class VideoWindow {
 
       VideoDialog.detachMediaStream(this.videoElement);
 
-      this.videoElement.remove();
-      this.videoElement = undefined;
+      if (this.videoElement) {
+         this.videoElement.remove();
+         this.videoElement = undefined;
+      }
    };
 }
