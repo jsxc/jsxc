@@ -199,7 +199,7 @@ input.jsxc-filter-input {
       background-color: $roster-bottom-bg-hover;
     }
 
-    >div {
+    >div:not(.jsxc-avatar) {
       height: 100%;
     }
   }
