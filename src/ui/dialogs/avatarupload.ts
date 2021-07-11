@@ -43,7 +43,7 @@ export default function () {
                   $('.jsxc-avatarimage img').attr('src', thumb);
 
                   const mimetype = file.type;
-                  const data = thumb.replace(/^.+;base64,/, '');
+                  const data = thumb.replace(/^.+;base64,/, '').replace(/[\t\r\n\f ]/gi, '');
                   const hash = Hash.SHA1FromBase64(data);
 
                   avatar = new Avatar(hash, mimetype, thumb);
