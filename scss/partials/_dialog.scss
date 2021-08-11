@@ -22,6 +22,8 @@
   min-width: 500px !important;
   padding: 5px !important;
   width: 100% !important;
+  background-color: var(--jsxc-color-background-main);
+  color: var(--jsxc-color-main-text);
 }
 
 .jsxc-dialog {
@@ -266,6 +268,8 @@ button.jsxc-page__subheadline {
 
   &__secondary-action {
     align-self: flex-start;
+    background-color: var(--jsxc-color-main-background);
+    color: var(--jsxc-color-main-text);
   }
 }
 
