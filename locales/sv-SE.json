@@ -436,7 +436,7 @@
     "setting-time": "Returnerar enhetstid på frågor.",
     "Occupants": "Personer",
     "Occupants_not_provided": "Inga personer i rummet eller listan hålls privata.",
-    "Edit_avatar": null
+    "Edit_avatar": "Uppdatera avatar"
   },
   "Notifications": "Notiser"
 }
