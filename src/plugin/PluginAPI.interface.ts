@@ -63,6 +63,17 @@ export interface IPluginAPI {
 
    addAvatarProcessor(processor: (contact: Contact, avatar: IAvatar) => Promise<[Contact, IAvatar]>, position?: number);
 
+   addGroupCallProcessor(
+      processor: (
+         contact: IContact,
+         type: 'video' | 'audio' | 'screen',
+         generator: AsyncGenerator<[peer: IContact, resource: string, sessionId: string]>
+      ) => Promise<
+         [IContact, 'video' | 'audio' | 'screen', AsyncGenerator<[peer: IContact, resource: string, sessionId: string]>]
+      >,
+      position?: number
+   ): void;
+
    addCallProcessor(
       processor: (
          contact: IContact,

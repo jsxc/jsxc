@@ -53,7 +53,7 @@ export class Call {
       this.abortResolve && this.abortResolve();
    }
 
-   private accept() {
+   public accept() {
       this.setState(CallState.Accepted);
    }
 

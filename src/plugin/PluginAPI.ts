@@ -137,6 +137,19 @@ export default class PluginAPI implements IPluginAPI {
       this.account.getPipe('publishAvatar').addProcessor(processor, position);
    }
 
+   public addGroupCallProcessor(
+      processor: (
+         contact: IContact,
+         type: 'video' | 'audio' | 'screen',
+         generator: AsyncGenerator<[peer: IContact, resource: string, sessionId: string]>
+      ) => Promise<
+         [IContact, 'video' | 'audio' | 'screen', AsyncGenerator<[peer: IContact, resource: string, sessionId: string]>]
+      >,
+      position?: number
+   ) {
+      this.account.getPipe('groupCall').addProcessor(processor, position);
+   }
+
    public addCallProcessor(
       processor: (
          contact: IContact,

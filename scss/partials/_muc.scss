@@ -23,8 +23,8 @@
     .jsxc-fingerprints,
     .jsxc-verification,
     .jsxc-transfer,
-    .jsxc-video,
-    .jsxc-audio,
+    &.jsxc-call-disabled .jsxc-video,
+    &.jsxc-call-disabled .jsxc-audio,
     .jsxc-share-screen,
     .jsxc-destroy,
     .jsxc-configure,
@@ -159,8 +159,4 @@ li[data-type="groupchat"] {
   //     content: map-get($jsxc-icons-map, "nonanonymous-group");
   //   }
   // }
-
-  .jsxc-video {
-    display: none;
-  }
 }

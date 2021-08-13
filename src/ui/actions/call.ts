@@ -1,11 +1,11 @@
 import { IContact } from '@src/Contact.interface';
 import Log from '../../util/Log';
 import UserMedia from '../../UserMedia';
-import { VideoDialog } from '../VideoDialog';
 import Account from '../../Account';
 import Translation from '../../util/Translation';
 import { JINGLE_FEATURES } from '@src/JingleAbstractSession';
 import { CallState } from '@src/CallManager';
+import JingleHandler from '@connection/JingleHandler';
 
 export async function startCall(contact: IContact, account: Account, type: 'video' | 'audio' | 'screen' = 'video') {
    let resources = await contact.getCapableResources(JINGLE_FEATURES[type]);
@@ -25,44 +25,47 @@ export async function startCall(contact: IContact, account: Account, type: 'vide
    try {
       stream = await UserMedia.request(reqMedia);
    } catch ([msg, err]) {
+      Log.debug('User media error while starting a call', err);
+
       contact.addSystemMessage(`${Translation.t('Media_failure')}: ${msg} (${err.name})`);
 
       return;
    }
 
-   let videoDialog = new VideoDialog();
+   let videoDialog = JingleHandler.getVideoDialog();
 
    videoDialog.showVideoWindow(stream);
    videoDialog.setStatus('Initiate call');
 
-   let callState = await account.getCallManager().call(contact, type, stream);
+   for await (const callState of account.getCallManager().call(contact, type, stream)) {
+      if (callState === false) {
+         contact.addSystemMessage(Translation.t('Couldnt_establish_connection'));
 
-   if (callState === false) {
-      contact.addSystemMessage(Translation.t('Couldnt_establish_connection'));
+         videoDialog.close();
+      } else if (callState !== null && typeof callState === 'object') {
+         videoDialog.addSession(callState);
 
-      videoDialog.close();
-   } else if (callState !== null && typeof callState === 'object') {
-      videoDialog.addSession(callState);
+         if (type === 'screen') {
+            videoDialog.minimize();
+         }
+      } else if (callState === CallState.Aborted) {
+         videoDialog.close();
 
-      if (type === 'screen') {
-         videoDialog.minimize();
+         contact.addSystemMessage(
+            ':checkered_flag: ' +
+               Translation.t(type === 'screen' ? 'Stream_terminated' : 'Call_terminated') +
+               Translation.t('Aborted')
+         );
+      } else if (callState === CallState.Declined) {
+         videoDialog.close();
+
+         contact.addSystemMessage(
+            ':checkered_flag: ' +
+               Translation.t(type === 'screen' ? 'Stream_terminated' : 'Call_terminated') +
+               Translation.t('Declined')
+         );
+      } else {
+         Log.warn('Unknown call state', callState);
       }
-   } else if (callState === CallState.Aborted) {
-      videoDialog.close();
-
-      contact.addSystemMessage(
-         ':checkered_flag: ' +
-            Translation.t(type === 'screen' ? 'Stream_terminated' : 'Call_terminated') +
-            Translation.t('Aborted')
-      );
-   } else if (callState === CallState.Declined) {
-      videoDialog.close();
-
-      contact.addSystemMessage(
-         ':checkered_flag: ' +
-            Translation.t(type === 'screen' ? 'Stream_terminated' : 'Call_terminated') +
-            Translation.t('Declined')
-      );
-   } else {
    }
 }

@@ -29,6 +29,10 @@ export class VideoDialog {
       return this.dom;
    }
 
+   public getLocalStream() {
+      return this.localStream;
+   }
+
    public addSession(session: JingleMediaSession) {
       session.on('terminated', reason => {
          this.removeContainer(session.getId());

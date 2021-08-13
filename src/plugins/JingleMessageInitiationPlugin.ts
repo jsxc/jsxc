@@ -100,8 +100,9 @@ export default class JingleMessageInitiationPlugin extends AbstractPlugin {
    private onJingleMessageInitiation = (stanza: string): boolean => {
       let stanzaElement = $(stanza);
       let element = stanzaElement.find(`[xmlns="${JMI}"]`);
+      const typeAttribute = stanzaElement.attr('type');
 
-      if (element.length !== 1) {
+      if (element.length !== 1 || typeAttribute === 'groupchat') {
          return true;
       }
 

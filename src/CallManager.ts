@@ -47,6 +47,16 @@ export default class CallManager {
                this.incomingCalls[sessionId].abort();
             }
          });
+
+         const [parentSessionId, childSessionId, ...rest] = sessionId.split(':');
+
+         if (parentSessionId && childSessionId && rest.length === 0) {
+            const parentCall = this.incomingCalls[parentSessionId];
+
+            if (parentCall && parentCall.getCurrentState() === CallState.Accepted) {
+               this.incomingCalls[sessionId].accept();
+            }
+         }
       } else if (this.incomingCalls[sessionId].getPeer().getUid() !== peer.getUid()) {
          throw new Error('Duplicated call session id');
       }
@@ -54,25 +64,53 @@ export default class CallManager {
       return this.incomingCalls[sessionId];
    }
 
-   public async call(
+   public async *call(
       contact: IContact,
       type: 'video' | 'audio' | 'screen',
       stream: MediaStream
-   ): Promise<JingleCallSession | CallState | false> {
+   ): AsyncGenerator<JingleCallSession | CallState | false, void, void> {
       let resources = await contact.getCapableResources(JINGLE_FEATURES[type]);
 
       if (resources.length === 0) {
-         return false;
+         yield false;
+
+         return;
       }
 
-      let sessionId: string;
-      const jingleHandler = this.account.getConnection().getJingleHandler();
-      const initiateCall = JingleCallFactory(jingleHandler, stream, type, contact);
+      if (contact.isChat()) {
+         let sessionId: string;
 
-      [, , resources, sessionId] = await this.account
-         .getPipe<[IContact, 'video' | 'audio' | 'screen', string[], string]>('call')
-         .run(contact, type, resources, undefined);
+         [contact, , resources, sessionId] = await this.account
+            .getPipe<[IContact, 'video' | 'audio' | 'screen', string[], string]>('call')
+            .run(contact, type, resources, undefined);
 
+         yield this.callSingleUser(contact, type, resources, sessionId, stream);
+
+         return;
+      }
+
+      let generator: AsyncGenerator<[peer: IContact, resource: string, sessionId: string]>;
+
+      [contact, type, generator] = await this.account
+         .getPipe<[IContact, 'video' | 'audio' | 'screen', typeof generator]>('groupCall')
+         .run(contact, type, undefined);
+
+      if (generator) {
+         for await (const [peer, resource, sessionId] of generator) {
+            yield this.callSingleUser(peer, type, [resource], sessionId, stream);
+         }
+      } else {
+         yield CallState.Aborted;
+      }
+   }
+
+   public async callSingleUser(
+      contact: IContact,
+      type: 'video' | 'audio' | 'screen',
+      resources: string[],
+      sessionId: string,
+      stream: MediaStream
+   ) {
       if (resources.length === 0) {
          if (sessionId) {
             return CallState.Declined;
@@ -81,6 +119,9 @@ export default class CallManager {
             return CallState.Aborted;
          }
       }
+
+      const jingleHandler = this.account.getConnection().getJingleHandler();
+      const initiateCall = JingleCallFactory(jingleHandler, stream, type, contact);
 
       const sessions: JingleCallSession[] = [];
 

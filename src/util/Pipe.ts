@@ -46,4 +46,8 @@ export default class Pipe<params extends Params = any[]> {
    public destroy() {
       this.pipe = [];
    }
+
+   public hasProcessors(): boolean {
+      return this.pipe.length > 0;
+   }
 }
