@@ -71,12 +71,12 @@ input.jsxc-filter-input {
   background-color: $roster-input-bg;
   background-image: none;
   border: 0;
+  color: var(--jsxc-color-main-text);
   height: 30px;
   outline: none;
   padding: 7px 28px 5px;
   transition: height 0.5s;
   width: 100%;
-  color: var(--jsxc-color-main-text);
 
   &:focus {
     height: 42px;
