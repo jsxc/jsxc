@@ -62,12 +62,14 @@ export default class JingleMUCMessageInitiationPlugin extends AbstractPlugin {
       this.pluginAPI.addTerminateCallProcessor(this.terminateCallProcessor);
 
       // plugin storage is namespaced, so we do not need to use another namespace
-      this.pluginAPI
-         .getSessionStorage()
-         .registerHook('*', this.onStorage);
+      this.pluginAPI.getSessionStorage().registerHook('*', this.onStorage);
    }
 
-   private onStorage = (value: { action: Actions; jid: string; peerJid: string; type: CallType }, _, sessionId: string) => {
+   private onStorage = (
+      value: { action: Actions; jid: string; peerJid: string; type: CallType },
+      _,
+      sessionId: string
+   ) => {
       if (!value || !value.action || !value.jid) {
          return;
       }
@@ -101,7 +103,7 @@ export default class JingleMUCMessageInitiationPlugin extends AbstractPlugin {
             this.calls[sessionId].abort();
          }
       }
-   }
+   };
 
    private onJingleMessageInitiation = (stanza: string): boolean => {
       let stanzaElement = $(stanza);
@@ -145,8 +147,8 @@ export default class JingleMUCMessageInitiationPlugin extends AbstractPlugin {
          requestedMedia.includes('video') && requestedMedia.includes('audio')
             ? 'video'
             : requestedMedia.includes('audio')
-               ? 'audio'
-               : 'stream';
+            ? 'audio'
+            : 'stream';
 
       if (contact.getNickname() !== fromJid.resource) {
          this.pluginAPI.getSessionStorage().setItem(sessionId, {
