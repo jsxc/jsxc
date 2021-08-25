@@ -19,7 +19,7 @@ import { IJID } from '@src/JID.interface';
 
 const JMI = 'urn:xmpp:jingle-message:0';
 
-type Actions = 'propose' | 'retract' | 'accept' | 'reject';
+type Actions = 'propose' | 'retract' | 'accept' | 'reject' | 'proceed';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
@@ -79,17 +79,23 @@ export default class JingleMessageInitiationPlugin extends AbstractPlugin {
                return;
             }
 
+            const ownJID = this.pluginAPI.getConnection().getJID();
+
             if (action === 'propose') {
                this.calls[sessionId] = this.pluginAPI.getCallManager().onIncomingCall(type, sessionId, peer);
 
                this.calls[sessionId].getState().then(state => {
                   if (state === CallState.Accepted) {
-                     this.sendMessage(jid, sessionId, 'accept');
+                     this.sendMessage(ownJID.toBareJID(), sessionId, 'accept');
+
+                     this.sendMessage(jid, sessionId, 'proceed');
                   } else if (state === CallState.Declined) {
+                     this.sendMessage(ownJID.toBareJID(), sessionId, 'reject');
+
                      this.sendMessage(jid, sessionId, 'reject');
                   }
                });
-            } else if (action === 'retract') {
+            } else if (action === 'retract' || (action === 'accept' && jid.full !== ownJID.full)) {
                if (this.calls[sessionId]) {
                   this.calls[sessionId].abort();
                }
@@ -107,7 +113,7 @@ export default class JingleMessageInitiationPlugin extends AbstractPlugin {
 
       const action = element.prop('tagName')?.toString().toLowerCase();
 
-      if (!['propose', 'retract', 'accept', 'reject'].includes(action)) {
+      if (!['propose', 'retract', 'accept', 'reject', 'proceed'].includes(action)) {
          return true;
       }
 
@@ -166,14 +172,14 @@ export default class JingleMessageInitiationPlugin extends AbstractPlugin {
 
       this.pendingOutgoingSessionIds.push(sessionId);
 
-      this.sendMessage(contact.getJid(), sessionId, 'propose', descriptions);
+      this.sendMessage(contact.getJid().toBareJID(), sessionId, 'propose', descriptions);
 
       return new Promise(resolve => {
          const storage = this.pluginAPI.getSessionStorage();
          const hook = (data: { action: Actions; jid: string }) => {
             if (data.action === 'retract') {
-               this.sendMessage(contact.getJid(), sessionId, 'retract');
-            } else if (data?.action === 'accept') {
+               this.sendMessage(contact.getJid().toBareJID(), sessionId, 'retract');
+            } else if (data?.action === 'proceed') {
                resolve([contact, type, [new JID(data.jid).resource], sessionId]);
             } else if (data?.action === 'reject') {
                resolve([contact, type, [], sessionId]);
@@ -208,10 +214,10 @@ export default class JingleMessageInitiationPlugin extends AbstractPlugin {
    };
 
    private sendMessage(jid: IJID, sessionId: string, action: 'propose', descriptions?: ('audio' | 'video')[]): void;
-   private sendMessage(jid: IJID, sessionId: string, action: 'retract' | 'accept' | 'reject'): void;
+   private sendMessage(jid: IJID, sessionId: string, action: 'retract' | 'accept' | 'proceed' | 'reject'): void;
    private sendMessage(jid: IJID, sessionId: string, action, descriptions = []) {
       let xmlMsg = $msg({
-         to: jid.bare,
+         to: jid.full,
       }).c(action, {
          xmlns: JMI,
          id: sessionId,
