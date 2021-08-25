@@ -53,6 +53,10 @@ export default class JID implements IJID {
       return !this.node && this.domain && !this.resource;
    }
 
+   public toBareJID(): IJID {
+      return new JID(this.bare);
+   }
+
    private escapeNode(node: string) {
       return node
          .replace(/^\s+|\s+$/g, '')
