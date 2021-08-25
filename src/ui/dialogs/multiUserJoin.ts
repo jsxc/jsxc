@@ -250,24 +250,33 @@ class MultiUserJoinDialog {
    private continueHandler = ev => {
       ev.preventDefault();
 
-      this.dom.find('input, select').prop('disabled', true);
-      this.testInputValues()
-         .then(this.requestRoomInfo)
-         .then(this.requestMemberList)
-         .then(() => {
-            this.showJoinElements();
-         })
-         .catch(msg => {
-            this.dom.find('input, select').prop('disabled', false);
-            this.setStatusMessage(msg, 'warning');
-
-            Log.warn(msg);
-         });
+      this.testAndLoadRoomInfo();
 
       return false;
    };
 
-   private testInputValues(): Promise<JID | void> {
+   private async testAndLoadRoomInfo() {
+      this.dom.find('input, select').prop('disabled', true);
+
+      try {
+         const jid = await this.testInputValues();
+         const hasRoomInfo = await this.requestRoomInfo(jid);
+
+         if (hasRoomInfo) {
+            await this.requestMemberList(jid);
+         }
+
+         this.showJoinElements();
+      } catch (msg) {
+         this.dom.find('input, select').prop('disabled', false);
+
+         this.setStatusMessage(typeof msg === 'string' ? msg : Translation.t('Can_not_probe_room'), 'warning');
+
+         Log.warn('Error while probing room', msg);
+      }
+   }
+
+   private testInputValues(): Promise<JID> {
       let room = <string>this.roomInputElement.val();
       let server = this.serverInputElement.val()
          ? this.serverInputElement.val()
@@ -302,28 +311,27 @@ class MultiUserJoinDialog {
       return Promise.resolve(roomJid);
    }
 
-   private requestRoomInfo = (room: JID) => {
+   private requestRoomInfo = async (room: JID) => {
       this.setWaitingMessage('Loading_room_information');
 
-      return this.connection
-         .getDiscoService()
-         .getDiscoInfo(room)
-         .then(this.parseRoomInfo)
-         .then(roomInfoElement => {
-            this.setStatusElement(roomInfoElement);
-         })
-         .catch(stanza => {
-            if ($(stanza).find('item-not-found').length > 0) {
-               this.setStatusMessage(Translation.t('Room_not_found_'));
+      const discoService = this.connection.getDiscoService();
 
-               return Promise.resolve();
-            }
+      try {
+         const stanza = await discoService.getDiscoInfo(room);
+         const roomInfoElement = this.parseRoomInfo(stanza);
 
-            return Promise.reject('I was not able to get any room information.');
-         })
-         .then(() => {
-            return room;
-         });
+         this.setStatusElement(roomInfoElement);
+      } catch (errorStanza) {
+         if ($(errorStanza).find('item-not-found').length > 0) {
+            this.setStatusMessage(Translation.t('Room_not_found_'));
+
+            return false;
+         }
+
+         await Promise.reject('I was not able to get any room information.');
+      }
+
+      return true;
    };
 
    private parseRoomInfo = stanza => {
