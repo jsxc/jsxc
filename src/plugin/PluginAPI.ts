@@ -18,6 +18,7 @@ import IStorage from '@src/Storage.interface';
 import CommandRepository, { CommandAction } from '@src/CommandRepository';
 import { IAvatar } from '@src/Avatar.interface';
 import CallManager from '@src/CallManager';
+import { IMediaSession } from '@src/MediaSession.interface';
 
 export default class PluginAPI implements IPluginAPI {
    private storage: IStorage;
@@ -141,9 +142,13 @@ export default class PluginAPI implements IPluginAPI {
       processor: (
          contact: IContact,
          type: 'video' | 'audio' | 'screen',
-         generator: AsyncGenerator<[peer: IContact, resource: string, sessionId: string]>
+         generator: AsyncGenerator<[peer: IContact, resource: string, sessionId: string] | [IMediaSession]>
       ) => Promise<
-         [IContact, 'video' | 'audio' | 'screen', AsyncGenerator<[peer: IContact, resource: string, sessionId: string]>]
+         [
+            IContact,
+            'video' | 'audio' | 'screen',
+            AsyncGenerator<[peer: IContact, resource: string, sessionId: string] | [IMediaSession]>
+         ]
       >,
       position?: number
    ) {

@@ -21,7 +21,7 @@ export default class IceServers {
       });
    }
 
-   public static get(): Promise<ICEServer[]> {
+   public static get(): Promise<RTCIceServer[]> {
       let rtcPeerConfig = Client.getOption<IRTCPeerConfig>('RTCPeerConfig') || <IRTCPeerConfig>{};
       let storage = Client.getStorage();
       let url = rtcPeerConfig.url;

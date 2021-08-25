@@ -6,6 +6,7 @@ import { IContact } from './Contact.interface';
 import { JINGLE_FEATURES } from './JingleAbstractSession';
 import { JingleCallFactory } from './JingleCallFactory';
 import JingleCallSession from './JingleCallSession';
+import { IMediaSession } from './MediaSession.interface';
 
 export enum CallState {
    Pending,
@@ -68,7 +69,7 @@ export default class CallManager {
       contact: IContact,
       type: 'video' | 'audio' | 'screen',
       stream: MediaStream
-   ): AsyncGenerator<JingleCallSession | CallState | false, void, void> {
+   ): AsyncGenerator<IMediaSession | CallState | false, void, void> {
       let resources = await contact.getCapableResources(JINGLE_FEATURES[type]);
 
       if (resources.length === 0) {
@@ -89,15 +90,21 @@ export default class CallManager {
          return;
       }
 
-      let generator: AsyncGenerator<[peer: IContact, resource: string, sessionId: string]>;
+      let generator: AsyncGenerator<[peer: IContact, resource: string, sessionId: string] | [IMediaSession]>;
 
       [contact, type, generator] = await this.account
          .getPipe<[IContact, 'video' | 'audio' | 'screen', typeof generator]>('groupCall')
          .run(contact, type, undefined);
 
       if (generator) {
-         for await (const [peer, resource, sessionId] of generator) {
-            yield this.callSingleUser(peer, type, [resource], sessionId, stream);
+         for await (const accepted of generator) {
+            if (accepted.length === 1) {
+               yield accepted[0];
+            } else {
+               const [peer, resource, sessionId] = accepted;
+
+               yield this.callSingleUser(peer, type, [resource], sessionId, stream);
+            }
          }
       } else {
          yield CallState.Aborted;

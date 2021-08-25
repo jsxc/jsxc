@@ -1,14 +1,14 @@
 import Log from '../util/Log';
 import Translation from '../util/Translation';
 import { VideoDialog } from './VideoDialog';
-import JingleMediaSession from '@src/JingleMediaSession';
+import { IMediaSession } from '@src/MediaSession.interface';
 
 export default class VideoWindow {
    private videoElement: JQuery;
 
    private wrapperElement: JQuery;
 
-   constructor(private videoDialog: VideoDialog, private session: JingleMediaSession) {
+   constructor(private videoDialog: VideoDialog, private session: IMediaSession) {
       this.registerHooks();
       this.initWrapper();
 

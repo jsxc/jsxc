@@ -1,10 +1,10 @@
 import Log from '../util/Log';
 import VideoWindow from './VideoWindow';
-import JingleMediaSession from '../JingleMediaSession';
 import Translation from '@util/Translation';
 import JingleCallSession from '@src/JingleCallSession';
 import * as screenfull from 'screenfull';
 import Client from '@src/Client';
+import { IMediaSession } from '@src/MediaSession.interface';
 
 const screen = screenfull as screenfull.Screenfull;
 
@@ -33,7 +33,7 @@ export class VideoDialog {
       return this.localStream;
    }
 
-   public addSession(session: JingleMediaSession) {
+   public addSession(session: IMediaSession) {
       session.on('terminated', reason => {
          this.removeContainer(session.getId());
 
@@ -212,7 +212,7 @@ export class VideoDialog {
       return this.ready;
    }
 
-   private removeSession = (session: JingleMediaSession, reason?) => {
+   private removeSession = (session: IMediaSession, reason?) => {
       let msg = (reason && reason.condition ? ': ' + Translation.t('jingle_reason_' + reason.condition) : '') + '.';
 
       if (session instanceof JingleCallSession) {

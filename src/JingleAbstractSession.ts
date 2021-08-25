@@ -20,9 +20,9 @@ export default abstract class JingleAbstractSession {
    protected peerContact: IContact;
    protected peerChatWindow: ChatWindow;
 
-   public abstract getMediaRequest(): string[];
-   public abstract onOnceIncoming();
-   protected abstract onIncoming();
+   public abstract getMediaRequest(): ('audio' | 'video')[];
+   public abstract onOnceIncoming(): void;
+   protected abstract onIncoming(): void;
 
    constructor(protected account: Account, protected session: IOTalkJingleSession) {
       this.storage = this.account.getStorage();

@@ -12,6 +12,7 @@ import Pipe from '@util/Pipe';
 import CommandRepository, { CommandAction } from '@src/CommandRepository';
 import IStorage from '@src/Storage.interface';
 import CallManager from '@src/CallManager';
+import { IMediaSession } from '@src/MediaSession.interface';
 
 export interface IPluginAPI {
    Log: ILog;
@@ -67,9 +68,13 @@ export interface IPluginAPI {
       processor: (
          contact: IContact,
          type: 'video' | 'audio' | 'screen',
-         generator: AsyncGenerator<[peer: IContact, resource: string, sessionId: string]>
+         generator: AsyncGenerator<[peer: IContact, resource: string, sessionId: string] | [IMediaSession]>
       ) => Promise<
-         [IContact, 'video' | 'audio' | 'screen', AsyncGenerator<[peer: IContact, resource: string, sessionId: string]>]
+         [
+            IContact,
+            'video' | 'audio' | 'screen',
+            AsyncGenerator<[peer: IContact, resource: string, sessionId: string] | [IMediaSession]>
+         ]
       >,
       position?: number
    ): void;
