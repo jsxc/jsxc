@@ -17,6 +17,8 @@
 
 .jsxc-memberlist-textarea,
 .jsxc-blocklist-textarea {
+  background-color: var(--jsxc-color-background-main);
+  color: var(--jsxc-color-main-text);
   margin-left: 15px;
   min-height: 300px !important;
   min-width: 500px !important;
@@ -266,6 +268,8 @@ button.jsxc-page__subheadline {
 
   &__secondary-action {
     align-self: flex-start;
+    background-color: var(--jsxc-color-main-background);
+    color: var(--jsxc-color-main-text);
   }
 }
 

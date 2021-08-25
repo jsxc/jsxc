@@ -7,6 +7,7 @@ import Form from '@connection/Form';
 import JID from '@src/JID';
 import Log from '@util/Log';
 import { $build } from '@vendor/Strophe';
+import UUID from '@util/UUID';
 
 NS.register('BOOKMARKS', 'storage:bookmarks');
 
@@ -54,7 +55,7 @@ export class PubSubService extends AbstractService {
       let jid = new JID(element.getAttribute('jid'));
       let alias = element.getAttribute('name');
       let nickElement = element.getElementsByTagName('nick');
-      let nickname = nickElement.length === 1 ? nickElement[0].textContent : undefined;
+      let nickname = nickElement.length === 1 ? nickElement[0].textContent : UUID.v4().split('-')[0];
       let passwordElement = element.getElementsByTagName('password');
       let password = passwordElement.length === 1 ? passwordElement[0].textContent : undefined;
       let autoJoin = element.getAttribute('autojoin') === 'true';
