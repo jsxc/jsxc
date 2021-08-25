@@ -18,6 +18,7 @@ import VersionPlugin from '@src/plugins/VersionPlugin';
 import TimePlugin from '../plugins/TimePlugin';
 import JingleMessageInitiationPlugin from '../plugins/JingleMessageInitiationPlugin';
 import JingleMUCMessageInitiationPlugin from '@src/plugins/JingleMUCMessageInitiationPlugin';
+import JingleMUCMediaSFUPlugin from '@src/plugins/JingleMUCMediaSFUPlugin';
 
 Client.addPlugin(OTRPlugin);
 Client.addPlugin(OMEMOPlugin);
@@ -38,3 +39,4 @@ Client.addPlugin(VersionPlugin);
 Client.addPlugin(TimePlugin);
 Client.addPlugin(JingleMessageInitiationPlugin);
 Client.addPlugin(JingleMUCMessageInitiationPlugin);
+Client.addPlugin(JingleMUCMediaSFUPlugin);

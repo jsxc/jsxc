@@ -140,7 +140,7 @@ export let notification = {
 
 export let storage = window.localStorage;
 
-export let disabledPlugins: string[] = ['time', 'jmucmi'];
+export let disabledPlugins: string[] = ['time', 'jmucmi', 'jmucmsfu'];
 
 export let connectionCallback: (jid: string, status: number, condition?: string) => void = null;
 
