@@ -107,7 +107,7 @@ export default class MultiUserChatWindow extends ChatWindow {
    }
 
    public removeMember(nickname: string) {
-      let m = this.memberlistElement.find('li[data-nickname="' + nickname + '"]');
+      let m = this.memberlistElement.find('li[data-nickname="' + nickname.replace(/"/g, '\\"') + '"]');
 
       if (m.length > 0) {
          m.remove();
@@ -205,7 +205,7 @@ export default class MultiUserChatWindow extends ChatWindow {
    };
 
    private getMemberElementByNickname(nickname: string) {
-      return this.memberlistElement.find('.li[data-nickname="' + nickname + '"]');
+      return this.memberlistElement.find('.li[data-nickname="' + nickname.replace(/"/g, '\\"') + '"]');
    }
 
    private enable() {
