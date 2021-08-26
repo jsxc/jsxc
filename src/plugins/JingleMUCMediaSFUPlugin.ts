@@ -147,7 +147,7 @@ class Room {
       return new Promise(resolve => {
          const socket = Room.getSocket();
 
-         socket.emit('join', { roomId: this.id, name: this.userId }, (participants) => {
+         socket.emit('join', { roomId: this.id, name: this.userId }, participants => {
             resolve(participants);
          });
       });
@@ -173,9 +173,7 @@ class Room {
 
       rtcPeer.setLocalDescription(offer);
 
-      rtcPeer.oniceconnectionstatechange = ev =>
-
-      this.rtcPeers[this.userId] = rtcPeer;
+      rtcPeer.oniceconnectionstatechange = ev => (this.rtcPeers[this.userId] = rtcPeer);
 
       return new Promise((resolve, reject) => {
          socket.emit(
@@ -186,7 +184,7 @@ class Room {
                src: this.userId,
                offer: offer.sdp,
             },
-            (sdpAnswer) => {
+            sdpAnswer => {
                if (!sdpAnswer) {
                   reject(new Error('invalid SDP answer'));
 
@@ -247,7 +245,7 @@ class Room {
                src: srcUserId,
                offer: offer.sdp,
             },
-            (sdpAnswer) => {
+            sdpAnswer => {
                const answer = new RTCSessionDescription({
                   type: 'answer',
                   sdp: sdpAnswer,
@@ -581,6 +579,8 @@ export default class JingleMUCMediaSFUPlugin extends AbstractPlugin {
                })
                .up();
          }
+
+         //@TODO add plaintext message (filter message on incoming side)
       }
 
       this.pluginAPI.send(xmlMsg);
