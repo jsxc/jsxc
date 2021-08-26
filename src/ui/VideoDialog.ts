@@ -216,9 +216,9 @@ export class VideoDialog {
       let msg = (reason && reason.condition ? ': ' + Translation.t('jingle_reason_' + reason.condition) : '') + '.';
 
       if (session instanceof JingleCallSession) {
-         msg = Translation.t('Call_terminated') + msg;
+         msg = Translation.t('Call_terminated') + ': ' + msg;
       } else {
-         msg = Translation.t('Stream_terminated') + msg;
+         msg = Translation.t('Stream_terminated') + ': ' + msg;
       }
 
       session.getPeer().addSystemMessage(':checkered_flag: ' + msg);
