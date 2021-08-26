@@ -114,9 +114,16 @@ export default class OMEMOPlugin extends EncryptionPlugin {
 
    private async refreshDeviceList(contact: IContact) {
       let pepService = this.pluginAPI.getConnection().getPEPService();
-      let stanza = await pepService.retrieveItems(NS_DEVICELIST, contact.getJid().bare);
 
-      this.onDeviceListUpdate(stanza);
+      try {
+         let stanza = await pepService.retrieveItems(NS_DEVICELIST, contact.getJid().bare);
+
+         this.onDeviceListUpdate(stanza);
+      } catch(err) {
+         this.pluginAPI.Log.debug('Can not retrieve device list', err);
+
+         return false;
+      }
 
       return this.getOmemo().isSupported(contact);
    }
