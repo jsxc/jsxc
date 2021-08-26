@@ -436,7 +436,8 @@
     "setting-time": null,
     "Occupants": "Pjesëmarrës",
     "Occupants_not_provided": "S’ka pjesëmarrës te dhoma ose lista është mbajtur private.",
-    "Edit_avatar": "Përpunoni avatar"
+    "Edit_avatar": "Përpunoni avatar",
+    "message_not_delivered": null
   },
   "Notifications": "Njoftime"
 }

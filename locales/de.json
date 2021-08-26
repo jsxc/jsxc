@@ -436,7 +436,8 @@
     "setting-time": "Erlaubt es deinen Kontakten deine aktuelle Zeitzone zu erfahren.",
     "Occupants": "Teilnehmer",
     "Occupants_not_provided": "Keine Teilnehmer in diesem Raum, oder die Teilnehmerliste ist privat.",
-    "Edit_avatar": "Bearbeite Profilfoto"
+    "Edit_avatar": "Bearbeite Profilfoto",
+    "message_not_delivered": "Nachricht nicht zugestellt"
   },
   "Notifications": "Benachrichtigungen"
 }

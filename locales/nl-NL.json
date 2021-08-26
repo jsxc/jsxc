@@ -436,7 +436,8 @@
     "setting-time": null,
     "Occupants": "Deelnemers",
     "Occupants_not_provided": "Er zijn geen deelnemers in de kamer of de lijst wordt privé gehouden.",
-    "Edit_avatar": null
+    "Edit_avatar": null,
+    "message_not_delivered": null
   },
   "Notifications": "Notificatie"
 }
