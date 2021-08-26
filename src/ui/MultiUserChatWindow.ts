@@ -18,9 +18,10 @@ export default class MultiUserChatWindow extends ChatWindow {
       this.disable();
       this.element.addClass('jsxc-groupchat');
 
-      if (!this.getAccount().getPipe('groupCall').hasProcessors()) {
-         this.disableCalls();
-      }
+      this.contact.registerHook('features', () => {
+         this.refreshCallFeature();
+      });
+      this.refreshCallFeature();
 
       this.addMucElementsToChatWindow();
 
@@ -130,6 +131,16 @@ export default class MultiUserChatWindow extends ChatWindow {
 
    public disableCalls() {
       this.element.addClass('jsxc-call-disabled');
+   }
+
+   private refreshCallFeature() {
+      const pluginAvailable = this.getAccount().getPipe('groupCall').hasProcessors();
+
+      if (pluginAvailable && this.contact.isMembersOnly() && this.contact.isNonAnonymous()) {
+         this.enableCalls();
+      } else {
+         this.disableCalls();
+      }
    }
 
    private refreshMemberCount() {
