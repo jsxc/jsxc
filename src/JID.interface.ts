@@ -16,4 +16,6 @@ export interface IJID {
    isBare(): boolean;
 
    isServer(): boolean;
+
+   toBareJID(): IJID;
 }
