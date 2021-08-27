@@ -437,7 +437,9 @@
     "Occupants": "Occupants",
     "Occupants_not_provided": "No occupants in the room or the list is kept private.",
     "Edit_avatar": "Edit avatar",
-    "message_not_delivered": "Message not delivered"
+    "Every_member_can_see_your_full_JID": "Every member can see your full JID",
+    "message_not_delivered": "Message not delivered",
+    "User_media_not_readable": "User media not readable. Is your device used by another application?"
   },
   "Notifications": "Notifications"
 }

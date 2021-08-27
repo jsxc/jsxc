@@ -437,7 +437,9 @@
     "Occupants": "Deelnemers",
     "Occupants_not_provided": "Er zijn geen deelnemers in de kamer of de lijst wordt privé gehouden.",
     "Edit_avatar": null,
-    "message_not_delivered": null
+    "Every_member_can_see_your_full_JID": null,
+    "message_not_delivered": null,
+    "User_media_not_readable": null
   },
   "Notifications": "Notificatie"
 }
