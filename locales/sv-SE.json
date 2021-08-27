@@ -437,7 +437,9 @@
     "Occupants": "Personer",
     "Occupants_not_provided": "Inga personer i rummet eller listan hålls privata.",
     "Edit_avatar": "Uppdatera avatar",
-    "message_not_delivered": null
+    "Every_member_can_see_your_full_JID": "Alla medlemmar kan se din JID",
+    "message_not_delivered": null,
+    "User_media_not_readable": "Media kan inte läsas. Används din enhet av ett annat program?"
   },
   "Notifications": "Notiser"
 }
