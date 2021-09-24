@@ -64,6 +64,8 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
          if (this.supportCache[archiveJid.bare]) {
             this.getArchive(contact.getJid()).clear();
          }
+
+         this.addLoadButtonIfEnabled(chatWindow, contact);
       });
 
       this.pluginAPI.getConnection().registerHandler(this.onMamMessage, null, 'message', null);
@@ -150,7 +152,13 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       element.append(spanElement);
 
       messageAreaElement.on('scroll', function () {
-         if (messageAreaElement.height() + this.scrollTop < 42 && !archive.isExhausted()) {
+         let scrollHeight: number   = messageAreaElement[0].scrollHeight;
+         let clientHeight : number  = messageAreaElement[0].clientHeight;
+         let scrollTop : number     = messageAreaElement[0].scrollTop;
+         if (scrollTop<0)
+            scrollTop=scrollTop*(-1);
+
+         if (((clientHeight + 42 > scrollHeight - scrollTop) && !archive.isExhausted())||messageAreaElement.text().trim().length===0) {
             element.addClass(classNameShow);
          } else {
             element.removeClass(classNameShow);
