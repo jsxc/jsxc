@@ -247,7 +247,7 @@ input.jsxc-filter-input {
   }
 
   &.jsxc-hide-offline {
-    .jsxc-roster-item[data-presence="offline"] {
+    .jsxc-roster-item[data-presence="offline"]:not(.jsxc-roster-item[data-type="groupchat"]) {
       display: none;
     }
 
