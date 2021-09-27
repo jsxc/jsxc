@@ -150,7 +150,11 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       element.append(spanElement);
 
       messageAreaElement.on('scroll', function () {
-         if (messageAreaElement.height() + this.scrollTop < 42 && !archive.isExhausted()) {
+         let scrollTop : number     = messageAreaElement[0].scrollTop;
+         if (scrollTop<0)
+            scrollTop=scrollTop*(-1);
+
+         if (((messageAreaElement[0].clientHeight + 42 > messageAreaElement[0].scrollHeight - scrollTop) && !archive.isExhausted())||messageAreaElement.text().trim().length===0) {
             element.addClass(classNameShow);
          } else {
             element.removeClass(classNameShow);
@@ -158,6 +162,12 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       });
 
       messageAreaElement.trigger('scroll');
+
+      messageAreaElement.on("DOMSubtreeModified",function(e){
+         if ($(this).text().trim().length===0){
+            $(this).parent().find('.jsxc-mam-load-more').addClass('jsxc-show');
+         }
+      });
 
       if (!archive.isExhausted()) {
          chatWindowElement.addClass(classNameMamEnable);
