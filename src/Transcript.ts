@@ -23,6 +23,65 @@ export default class Transcript {
       });
    }
 
+   public insertMessage(message: IMessage)
+   {
+
+      if (!this.messages||this.messages[message.getUid()])
+      {
+         return;
+      }
+
+      let indexMessageArray = [];
+
+      for (let strId in this.messages)
+      {
+         indexMessageArray.push(this.messages[strId]);
+      }
+
+      indexMessageArray.sort(function compare(a:IMessage, b:IMessage) {
+         if (a.getStamp().getTime() === b.getStamp().getTime()) {
+            return 0;
+         }
+
+         if (a.getStamp().getTime() < b.getStamp().getTime()) {
+            return -1;
+         }
+
+         if (a.getStamp().getTime() > b.getStamp().getTime()) {
+            return +1;
+         }
+      });
+
+      for (let i = indexMessageArray.length-1;i>=0;i--)
+      {
+         if (indexMessageArray[i].getStamp().getTime()<message.getStamp().getTime())
+         {
+            if (i-1>0)
+            {
+               message.setNext(indexMessageArray[i]);
+            }
+            else
+            {
+               message.setNext(undefined);
+            }
+
+            if (i+1<indexMessageArray.length)
+            {
+               indexMessageArray[i+1].setNext(message);
+            }
+            break;
+         }
+      }
+
+      this.firstMessage = indexMessageArray[indexMessageArray.length-1];
+
+      this.addMessage(message);
+
+      this.contact.setLastMessageDate(message.getStamp());
+
+      this.properties.set('firstMessageId', this.firstMessage.getUid());
+   }
+
    public unshiftMessage(message: IMessage) {
       let lastMessage = this.getLastMessage();
 

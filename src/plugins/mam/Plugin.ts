@@ -58,6 +58,25 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
          this.addLoadButtonIfEnabled(chatWindow, contact);
       });
 
+      pluginAPI.registerConnectionHook((status:number, condition: string)=>{
+
+         if (status===8)
+         {
+            let interval = setInterval(()=>{ //check for contacts. if contacts were found we dont need to synchronize a second time.
+               let contacts = pluginAPI.getContactManager().getContacts();
+               if (contacts)
+               {
+                  for (let strcontact in contacts)
+                  {
+                     let archive = this.getArchive(contacts[strcontact].getJid());
+                     archive.lastMessages();
+                  }
+                  clearInterval(interval);
+               }
+            },1000);
+         }
+      });
+
       pluginAPI.registerChatWindowClearedHook((chatWindow: ChatWindow, contact: Contact) => {
          let archiveJid = this.getArchiveJid(contact);
 
