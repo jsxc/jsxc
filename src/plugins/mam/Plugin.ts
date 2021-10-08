@@ -64,6 +64,8 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
          if (this.supportCache[archiveJid.bare]) {
             this.getArchive(contact.getJid()).clear();
          }
+
+         this.addLoadButtonIfEnabled(chatWindow, contact);
       });
 
       this.pluginAPI.getConnection().registerHandler(this.onMamMessage, null, 'message', null);
@@ -162,12 +164,6 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       });
 
       messageAreaElement.trigger('scroll');
-
-      messageAreaElement.on("DOMSubtreeModified",function(e){
-         if ($(this).text().trim().length===0){
-            $(this).parent().find('.jsxc-mam-load-more').addClass('jsxc-show');
-         }
-      });
 
       if (!archive.isExhausted()) {
          chatWindowElement.addClass(classNameMamEnable);
