@@ -53,6 +53,42 @@ export default class Archive {
       storage.registerHook(key, hook);
    }
 
+   public lastMessages() {
+
+      if (this.messageCache.length > 0) {
+         Log.debug('Ongoing message retrieval');
+         return false;
+      }
+
+      let queryId = UUID.v4();
+
+      this.plugin.addQueryContactRelation(queryId, this.contact);
+      let connection = this.plugin.getConnection();
+
+      let firstMessage = this.contact.getTranscript().getFirstMessage();
+      if (firstMessage)
+      {
+         let startDate = firstMessage.getStamp();
+         startDate.setSeconds(startDate.getSeconds() + 1);
+         this.plugin
+            .determineServerSupport(this.archiveJid)
+            .then(version => {
+               if (!version) {
+                  throw new Error(`Archive JID ${this.archiveJid.full} has no support for MAM.`);
+               }
+
+               return connection.queryArchiveSync(startDate, this.archiveJid, <string>version, queryId,this.contact.getJid().bare );
+            })
+            .then(this.onCompleteSync)
+            .catch(stanza => {
+               Log.warn('Error while requesting archive', stanza);
+            });
+      }
+      else {
+         this.nextMessages();
+      }
+   }
+
    public nextMessages() {
       if (this.isExhausted()) {
          Log.debug('No more archived messages.');
@@ -209,6 +245,32 @@ export default class Archive {
 
       this.setExhausted(isArchiveExhausted);
       this.setFirstResultId(firstResultId);
+      this.plugin.removeQueryContactRelation(queryId);
+   };
+
+   public onCompleteSync = async (stanza: Element) => {
+      let stanzaElement = $(stanza);
+      let finElement = stanzaElement.find(`fin[xmlns^="urn:xmpp:mam:"]`);
+
+      if (finElement.length !== 1) {
+         Log.warn('No fin element found');
+         return;
+      }
+
+      let transcript = this.contact.getTranscript();
+      while (this.messageCache.length > 0) {
+         let messageElement = this.messageCache.pop();
+
+         try {
+            let message = await this.parseForwardedMessage(messageElement);
+
+            transcript.insertMessage(message);
+         } catch (err) {
+            continue;
+         }
+      }
+
+      let queryId = finElement.attr('queryid');
       this.plugin.removeQueryContactRelation(queryId);
    };
 }
