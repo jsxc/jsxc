@@ -75,10 +75,11 @@ export default function (contact: IContact) {
       .getVcard()
       .then(vcardSuccessCallback)
       .then(function (vcardData) {
-         let content = vcardBodyTemplate({
+         let content = $(vcardBodyTemplate({
             properties: vcardData,
-         });
+         }));
 
+         content.addClass('jsxc-vcard-data')
          dialog.getDom().append(content);
 
          dialog.getDom().find('.jsxc-waiting').remove();
