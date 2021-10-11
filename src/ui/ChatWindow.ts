@@ -107,6 +107,103 @@ export default class ChatWindow {
       }
 
       this.getAccount().triggerChatWindowInitializedHook(this, contact);
+      this.element.on('contextmenu', '.jsxc-in, .jsxc-probably_in, .jsxc-out, .jsxc-probably_out', {ref:this},this.openContextMenu);
+
+      this.element.on('mousedown click', (ev) => {
+          if (!($(ev.target).parents('.jsxc-custom-menu').length > 0)) {
+            $('.jsxc-custom-menu').hide();
+          }
+      });
+   }
+
+   public openContextMenu(event)
+   {
+        event.preventDefault();
+
+        // Show contextmenu
+        let xoffset = 0;
+        let yoffset =  (event.pageY-$(event.target).closest('div.jsxc-message-area').offset().top+40);
+        let len = $(event.target).closest('div.jsxc-chatmessage').find('.jsxc-avatar').length;
+        xoffset =  len>0?event.offsetX+60:event.offsetX+20;
+
+        let contact = null;
+
+        if (!$(event.currentTarget).hasClass('jsxc-out'))
+        {
+           contact = $(event.target).closest('div.jsxc-chatmessage').attr('data-name');
+           if (!contact) {
+              contact = $(event.target).closest('li.jsxc-window-item').attr('data-contact-id');
+           }
+        }
+
+        if ($(event.target).closest('div.jsxc-chatmessage').hasClass('jsxc-in')||$(event.target).closest('div.jsxc-chatmessage').hasClass('jsxc-probably_in'))
+        {
+            $(this).closest('.jsxc-window').find('.jsxc-custom-menu').finish().toggle().
+            // In the right position (the mouse)
+            css({
+               top: yoffset + 'px',
+               left: xoffset  + 'px',
+               right: 'unset'
+            });
+        }
+        else
+        {
+
+            $(this).closest('.jsxc-window').find('.jsxc-custom-menu').finish().toggle().
+            // In the right position (the mouse)
+            css({
+               top:yoffset + 'px',
+               right: event.currentTarget.clientWidth-xoffset  + 'px',
+               left: 'unset'
+            });
+        }
+
+        let refmessage = $(event.target).closest('div.jsxc-chatmessage').attr('id');
+        $(this).closest('.jsxc-window').find('.jsxc-custom-menu').empty();
+        $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append('<div class="jsxc-context-menu-contact">'+(contact!==null?contact:Translation.t('Myself'))+'</div>');
+
+        let liQuote = $('<li data-action="jsxc-context-menu-quote" data-refmessage="'+refmessage+'">'+Translation.t('Quote')+'</li>');
+        $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append(liQuote);
+
+        let _self : ChatWindow = event.data.ref;
+        liQuote.on('click',{ref:event.data.ref},function(e)
+        {
+
+            $('.jsxc-custom-menu').hide(250);
+            let refmessage = $(e.target).attr('data-refmessage');
+            let msg : IMessage = _self.getTranscript().getMessage(refmessage);
+
+            let message = msg.getPlaintextMessage();
+            let msgarr = message.split('\n');
+            if (msgarr.join('').trim().length===0)
+            {
+               message = msg.getAttachment().getData();
+            }
+            else
+               message = msgarr.join('\n> ');
+
+            if (contact===null)
+            {
+               if (_self.contact.isGroupChat())
+               {
+                  contact = (<MultiUserContact>_self.getContact()).getNickname();
+               }
+               else
+               {
+                  contact =  _self.getAccount().getContact().getJid().bare;
+               }
+            }
+
+            setTimeout(() => e.data.ref.scrollMessageAreaToBottom(), 500);
+
+            $(e.target).closest('li.jsxc-window-item').find('.jsxc-message-input').empty().val('> '+contact+':\n> '+message+'\n');
+            $(e.target).closest('li.jsxc-window-item').find('.jsxc-message-input').focus();
+            let keyup = jQuery.Event('keyup');
+            keyup.ctrlKey = false;
+            keyup.shiftKey = true;
+            keyup.which = ENTER_KEY;
+            $(e.target).closest('li.jsxc-window-item').find('.jsxc-message-input').trigger(keyup);
+        });
    }
 
    public getTranscript(): Transcript {
@@ -141,6 +238,7 @@ export default class ChatWindow {
 
    public close() {
       this.element.detach();
+      this.element.off('mousedown click');
    }
 
    public minimize() {
